@@ -1,0 +1,89 @@
+"use client";
+
+import { UseFormReturn } from "react-hook-form";
+import { Home, DollarSign } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { InvestmentFormValues } from "@/lib/investcalc-schema";
+import { cn } from "@/lib/utils";
+
+interface PropertyDetailsSectionProps {
+  form: UseFormReturn<InvestmentFormValues>;
+}
+
+function FieldError({ message }: { message?: string }) {
+  if (!message) return null;
+  return <p className="text-xs text-destructive mt-1">{message}</p>;
+}
+
+export function PropertyDetailsSection({ form }: PropertyDetailsSectionProps) {
+  const {
+    register,
+    formState: { errors },
+  } = form;
+
+  return (
+    <div className="bg-card rounded-2xl border border-border shadow-sm p-6">
+      <div className="flex items-center gap-2 mb-5">
+        <Home className="w-4 h-4 text-primary" />
+        <span className="font-semibold text-sm text-foreground">Property Details</span>
+      </div>
+
+      <div className="space-y-4">
+        {/* Address */}
+        <div>
+          <Label className="text-sm font-medium text-foreground mb-1.5 block">
+            Property Address
+          </Label>
+          <Input
+            {...register("address")}
+            placeholder="123 Main Street, Austin, TX 78701"
+            className={cn(
+              "border-input bg-background",
+              errors.address && "border-destructive focus-visible:ring-destructive"
+            )}
+          />
+          <FieldError message={errors.address?.message} />
+        </div>
+
+        {/* Purchase Price + Year Built */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <Label className="text-sm font-medium text-foreground mb-1.5 block">
+              Purchase Price
+            </Label>
+            <div className="relative">
+              <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                {...register("purchasePrice", { valueAsNumber: true })}
+                type="number"
+                placeholder="385000"
+                className={cn(
+                  "pl-8 border-input bg-background",
+                  errors.purchasePrice && "border-destructive focus-visible:ring-destructive"
+                )}
+              />
+            </div>
+            <FieldError message={errors.purchasePrice?.message} />
+          </div>
+
+          <div>
+            <Label className="text-sm font-medium text-foreground mb-1.5 block">
+              Year Built
+            </Label>
+            <Input
+              {...register("yearBuilt", { valueAsNumber: true })}
+              type="number"
+              placeholder="2015"
+              className={cn(
+                "border-input bg-background",
+                errors.yearBuilt && "border-destructive focus-visible:ring-destructive"
+              )}
+            />
+            <FieldError message={errors.yearBuilt?.message} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
