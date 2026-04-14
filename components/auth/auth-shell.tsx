@@ -22,7 +22,6 @@ export function AuthShell({ title, description, children, footer }: AuthShellPro
             alt="TrueCap"
             width={100}
             height={30}
-            className="w-full h-full object-contain"
           />
         </div>
         <p className="hidden sm:block text-xs text-muted-foreground mt-0.5 truncate">

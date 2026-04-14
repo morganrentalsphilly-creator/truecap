@@ -28,6 +28,7 @@ import { useToast } from "@/hooks/use-toast";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import { signOutAction } from "@/app/actions/auth";
 import type { User } from "@supabase/supabase-js";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 type ProfileHeaderData = {
@@ -196,7 +197,7 @@ export function Header() {
             className="flex flex-col items-center justify-start  gap-0 sm:gap-0 min-w-0 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
              <div className="flex items-center justify-start w-full w-[100px] h-[30px] overflow-hidden">
-        <img src="/high-resolution-color-logo.png" alt="TrueCap" width={100} height={30} />
+        <Image src="/high-resolution-color-logo.png" alt="TrueCap" width={100} height={30} />
       </div>
             <div className="min-w-0">
               
