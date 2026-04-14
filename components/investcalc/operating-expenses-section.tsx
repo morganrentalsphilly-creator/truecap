@@ -44,7 +44,7 @@ export function OperatingExpensesSection({
         <div className="flex items-center gap-2">
           <Percent className="w-4 h-4 text-[var(--brand-orange)]" />
           <span className="font-semibold text-sm text-foreground">
-            % Operating Expenses
+            Operating Expenses
           </span>
         </div>
         <Button
