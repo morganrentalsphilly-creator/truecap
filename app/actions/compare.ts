@@ -1,0 +1,149 @@
+"use server";
+
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { getEntitlementsForUser } from "@/lib/entitlements";
+import { createServerSupabaseClient } from "@/lib/supabase/server";
+
+const COMPARE_COOKIE = "truecap_compare_ids";
+const MAX_COMPARE_ITEMS = 4;
+
+type CompareActionResult =
+  | { ok: true }
+  | { ok: false; code: "SIGN_IN_REQUIRED" | "LIMIT_EXCEEDED" | "INVALID_SELECTION" | "SERVER_ERROR"; message: string };
+
+function uniqueIds(ids: string[]): string[] {
+  return [...new Set(ids.map((id) => id.trim()).filter(Boolean))];
+}
+
+async function setCompareCookie(ids: string[]) {
+  const cookieStore = await cookies();
+  cookieStore.set(COMPARE_COOKIE, JSON.stringify(ids), {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: 60 * 60,
+  });
+}
+
+export async function getCompareIdsFromCookie(): Promise<string[]> {
+  const cookieStore = await cookies();
+  const raw = cookieStore.get(COMPARE_COOKIE)?.value;
+  if (!raw) return [];
+
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? uniqueIds(parsed).slice(0, MAX_COMPARE_ITEMS) : [];
+  } catch {
+    return [];
+  }
+}
+
+export async function startCompareAction(ids: string[]): Promise<CompareActionResult> {
+  const selectedIds = uniqueIds(ids);
+
+  if (selectedIds.length < 1) {
+    return {
+      ok: false,
+      code: "INVALID_SELECTION",
+      message: "Select at least 1 deal to compare.",
+    };
+  }
+
+  if (selectedIds.length > MAX_COMPARE_ITEMS) {
+    return {
+      ok: false,
+      code: "LIMIT_EXCEEDED",
+      message: "You can compare up to 4 deals at a time.",
+    };
+  }
+
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in to compare deals." };
+  }
+
+  const entitlements = await getEntitlementsForUser(supabase, user.id);
+  if (!entitlements.features.includes("save_deal")) {
+    return { ok: false, code: "SIGN_IN_REQUIRED", message: "Compare is available for Pro users." };
+  }
+
+  const { count, error } = await supabase
+    .from("saved_analyses")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", user.id)
+    .is("deleted_at", null)
+    .in("id", selectedIds);
+
+  if (error) {
+    return { ok: false, code: "SERVER_ERROR", message: "Could not prepare comparison." };
+  }
+
+  if ((count ?? 0) !== selectedIds.length) {
+    return { ok: false, code: "INVALID_SELECTION", message: "Some selected deals are no longer available." };
+  }
+
+  await setCompareCookie(selectedIds);
+  return { ok: true };
+}
+
+export async function addDealToCompareAction(id: string): Promise<CompareActionResult> {
+  const selectedId = id.trim();
+  if (!selectedId) {
+    return { ok: false, code: "INVALID_SELECTION", message: "Save this deal before adding it to compare." };
+  }
+
+  const existingIds = await getCompareIdsFromCookie();
+  const selectedIds = uniqueIds([...existingIds, selectedId]);
+
+  if (selectedIds.length > MAX_COMPARE_ITEMS) {
+    return {
+      ok: false,
+      code: "LIMIT_EXCEEDED",
+      message: "You can compare up to 4 deals at a time.",
+    };
+  }
+
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in to compare deals." };
+  }
+
+  const entitlements = await getEntitlementsForUser(supabase, user.id);
+  if (!entitlements.features.includes("save_deal")) {
+    return { ok: false, code: "SIGN_IN_REQUIRED", message: "Compare is available for Pro users." };
+  }
+
+  const { count, error } = await supabase
+    .from("saved_analyses")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", user.id)
+    .is("deleted_at", null)
+    .in("id", selectedIds);
+
+  if (error) {
+    return { ok: false, code: "SERVER_ERROR", message: "Could not prepare comparison." };
+  }
+
+  if ((count ?? 0) !== selectedIds.length) {
+    return { ok: false, code: "INVALID_SELECTION", message: "Some selected deals are no longer available." };
+  }
+
+  await setCompareCookie(selectedIds);
+  return { ok: true };
+}
+
+export async function removeCompareDealAction(id: string) {
+  const ids = (await getCompareIdsFromCookie()).filter((currentId) => currentId !== id);
+  await setCompareCookie(ids);
+  redirect("/compare");
+}

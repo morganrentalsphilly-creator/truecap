@@ -1,6 +1,6 @@
 "use client";
 
-import { UseFormReturn, useFieldArray } from "react-hook-form";
+import { UseFormReturn, useFieldArray, useFormState } from "react-hook-form";
 import { Building2, Plus, Trash2, DollarSign } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,19 +22,29 @@ export function MultiFamilyUnitsSection({
   form,
   isHouseHack = false,
 }: MultiFamilyUnitsSectionProps) {
-  const {
-    register,
-    control,
-    formState: { errors },
-  } = form;
+  const { register, control } = form;
+
+  // Subscribe to form errors explicitly so nested `units[i].field` updates re-render
+  // this list (reading `form.formState.errors` from a passed `UseFormReturn` alone
+  // can miss deep array field error updates in some cases).
+  const { errors } = useFormState({ control });
 
   const { fields, append, remove } = useFieldArray({
     control,
     name: "units",
   });
 
+  // `errors.units` is an array of per-index FieldErrors (see lib/investcalc-schema.ts).
+  const unitsErrorsArray = Array.isArray(errors.units) ? errors.units : undefined;
+  const hasAnyUnitFieldError = unitsErrorsArray?.some((entry) => entry && Object.keys(entry).length > 0) ?? false;
+  const unitsArrayErrorMessage = hasAnyUnitFieldError
+    ? isHouseHack
+      ? "Each unit row must be complete. The owner row and every rental row need bedrooms, bathrooms, sq ft, and monthly rent (0 is ok for the owner unit)."
+      : "Each unit row must be complete: bedrooms, bathrooms, sq ft, and monthly rent."
+    : undefined;
+
   const handleAddUnit = () => {
-    append({ bedrooms: 1, bathrooms: 1, sqft: 650, monthlyRent: 1200 });
+    append({ bedrooms: undefined, bathrooms: undefined, sqft: undefined, monthlyRent: undefined, isOwnerOccupied: false });
   };
 
   return (
@@ -160,6 +170,9 @@ export function MultiFamilyUnitsSection({
           );
         })}
       </div>
+      {typeof unitsArrayErrorMessage === "string" && (
+        <p className="mt-3 text-xs text-destructive">{unitsArrayErrorMessage}</p>
+      )}
     </div>
   );
 }

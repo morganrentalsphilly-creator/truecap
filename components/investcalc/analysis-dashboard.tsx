@@ -5,28 +5,38 @@ import {
   Lock,
   TrendingUp,
   CheckCircle2,
+  MinusCircle,
+  AlertTriangle,
   ArrowUpRight,
   Building2,
   Download,
-  Share2,
+  Save,
   Loader2,
+  Info,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AnalysisResult, getRecommendation } from "@/lib/calc-analysis";
+import { AnalysisResult } from "@/lib/calc-analysis";
 import { cn } from "@/lib/utils";
+import type { DealScoreActionResult } from "@/app/actions/deal-score";
 
 interface AnalysisDashboardProps {
   result: AnalysisResult | null;
   isLoading: boolean;
-  propertyType: "single-family" | "multi-family" | "house-hack";
+  dealScoreResult: DealScoreActionResult | null;
+  isLoadingDealScore: boolean;
+  propertyType: "single-family" | "multi-family" | "owner-occupant";
   onSaveDeal: () => void | Promise<void>;
+  onCompareDeals: () => void | Promise<void>;
   onExportPdf: () => void | Promise<void>;
   isSaving?: boolean;
+  isComparing?: boolean;
   isExporting?: boolean;
+  isSaved?: boolean;
 }
 
 type Tab = "cash-flow" | "projections" | "tax-strategy" | "exit-scenarios";
+type RecommendationVariant = "strong-buy" | "buy" | "neutral" | "risky" | "avoid";
 
 const TABS: { id: Tab; label: string; isPro: boolean }[] = [
   { id: "cash-flow", label: "Cash Flow", isPro: false },
@@ -37,6 +47,10 @@ const TABS: { id: Tab; label: string; isPro: boolean }[] = [
 
 function fmt(n: number) {
   return `$${Math.abs(n).toLocaleString()}`;
+}
+
+function fmtPct(n: number) {
+  return `${Number.isInteger(n) ? n.toFixed(0) : n.toFixed(2).replace(/0+$/, "").replace(/\.$/, "")}%`;
 }
 
 function MetricCard({
@@ -74,20 +88,25 @@ function MetricCard({
 export function AnalysisDashboard({
   result,
   isLoading,
+  dealScoreResult,
+  isLoadingDealScore,
   propertyType,
   onSaveDeal,
+  onCompareDeals,
   onExportPdf,
   isSaving = false,
+  isComparing = false,
   isExporting = false,
+  isSaved = false,
 }: AnalysisDashboardProps) {
   const [activeTab, setActiveTab] = useState<Tab>("cash-flow");
 
-  const recommendation = result ? getRecommendation(result) : null;
+  const recommendation = buildRecommendationModel(dealScoreResult);
 
   const labelMap: Record<string, string> = {
     "single-family": "Single Family",
     "multi-family": "Multi-Family",
-    "house-hack": "House Hack",
+    "owner-occupant": "Owner Occupant",
   };
 
   return (
@@ -111,7 +130,7 @@ export function AnalysisDashboard({
             {isSaving ? (
               <Loader2 className="w-3.5 h-3.5 mr-1 sm:mr-1.5 animate-spin" />
             ) : (
-              <Share2 className="w-3.5 h-3.5 mr-1 sm:mr-1.5" />
+              <Save className="w-3.5 h-3.5 mr-1 sm:mr-1.5" />
             )}
             <span className="hidden xs:inline">Sign In to </span>Save
           </Button>
@@ -119,10 +138,11 @@ export function AnalysisDashboard({
             variant="outline"
             size="sm"
             className="rounded-full text-xs sm:text-sm h-8 sm:h-9 px-3 sm:px-4 hidden sm:flex"
-            onClick={() => void onExportPdf()}
-            disabled={isExporting}
+            onClick={() => void onCompareDeals()}
+            disabled={!isSaved || isComparing}
+            title={!isSaved ? "Save this analysis before comparing it." : undefined}
           >
-            {isExporting ? (
+            {isComparing ? (
               <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
             ) : (
               <TrendingUp className="w-3.5 h-3.5 mr-1.5" />
@@ -133,7 +153,8 @@ export function AnalysisDashboard({
             size="sm"
             className="rounded-full bg-primary text-primary-foreground text-xs sm:text-sm font-semibold h-8 sm:h-9 px-3 sm:px-4"
             onClick={() => void onExportPdf()}
-            disabled={isExporting}
+            disabled={!isSaved || isExporting}
+            title={!isSaved ? "Save this analysis before exporting PDF." : undefined}
           >
             {isExporting ? (
               <Loader2 className="w-3.5 h-3.5 mr-1 sm:mr-1.5 animate-spin" />
@@ -147,36 +168,13 @@ export function AnalysisDashboard({
 
       {/* Recommendation + Pro Feature row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
-        {/* Pro Feature card */}
-        <div className="bg-card rounded-2xl border border-border p-4 sm:p-6 flex flex-col items-center justify-center text-center">
-          {isLoading ? (
-            <div className="space-y-3 w-full">
-              <Skeleton className="h-16 w-16 rounded-full mx-auto" />
-              <Skeleton className="h-4 w-32 mx-auto" />
-              <Skeleton className="h-4 w-24 mx-auto" />
-            </div>
-          ) : (
-            <>
-              <Lock className="w-10 h-10 text-muted-foreground mb-3" />
-              <p className="font-semibold text-foreground mb-1">Pro Feature</p>
-              <p className="text-xs text-muted-foreground mb-4">
-                Sign in to see Deal Score
-              </p>
-              <Button
-                size="sm"
-                className="bg-primary text-primary-foreground rounded-full font-semibold text-sm"
-                onClick={() => void onSaveDeal()}
-                disabled={isSaving}
-              >
-                {isSaving ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  "Sign In / Sign Up"
-                )}
-              </Button>
-            </>
-          )}
-        </div>
+        <DealScoreCard
+          isAnalysisLoading={isLoading}
+          isDealScoreLoading={isLoadingDealScore}
+          dealScoreResult={dealScoreResult}
+          isSaving={isSaving}
+          onSignIn={onSaveDeal}
+        />
 
         {/* Recommendation card */}
         <div
@@ -185,12 +183,13 @@ export function AnalysisDashboard({
             recommendation?.variant === "strong-buy" &&
               "bg-[var(--brand-green-light)] border-[var(--brand-green)]/25",
             recommendation?.variant === "buy" && "bg-[var(--brand-blue-light)] border-primary/20",
-            recommendation?.variant === "neutral" && "bg-muted border-border",
+            recommendation?.variant === "neutral" && "bg-amber-50 border-amber-200",
+            recommendation?.variant === "risky" && "bg-orange-50 border-orange-200",
             recommendation?.variant === "avoid" && "bg-red-50 border-red-200",
             !recommendation && "bg-muted border-border"
           )}
         >
-          {isLoading ? (
+          {isLoading || isLoadingDealScore ? (
             <div className="space-y-3">
               <Skeleton className="h-5 w-28" />
               <Skeleton className="h-8 w-48" />
@@ -203,8 +202,23 @@ export function AnalysisDashboard({
                 Recommendation
               </p>
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-12 h-12 bg-[var(--brand-green)] rounded-2xl flex items-center justify-center shrink-0">
-                  <CheckCircle2 className="w-6 h-6 text-white" />
+                <div
+                  className={cn(
+                    "w-12 h-12 rounded-2xl flex items-center justify-center shrink-0",
+                    recommendation.variant === "strong-buy" && "bg-[var(--brand-green)]",
+                    recommendation.variant === "buy" && "bg-primary",
+                    recommendation.variant === "neutral" && "bg-amber-500",
+                    recommendation.variant === "risky" && "bg-orange-500",
+                    recommendation.variant === "avoid" && "bg-red-600"
+                  )}
+                >
+                  {recommendation.variant === "strong-buy" || recommendation.variant === "buy" ? (
+                    <CheckCircle2 className="w-6 h-6 text-white" />
+                  ) : recommendation.variant === "neutral" ? (
+                    <MinusCircle className="w-6 h-6 text-white" />
+                  ) : (
+                    <AlertTriangle className="w-6 h-6 text-white" />
+                  )}
                 </div>
                 <h2 className="text-2xl sm:text-3xl font-black text-foreground">
                   {recommendation.label}
@@ -215,13 +229,35 @@ export function AnalysisDashboard({
               </p>
               {recommendation.tips.length > 0 && (
                 <>
-                  <p className="text-xs font-bold uppercase tracking-widest text-[var(--brand-green)] mb-2">
-                    Optimization Tips
+                  <p
+                    className={cn(
+                      "text-xs font-bold uppercase tracking-widest mb-2",
+                      recommendation.variant === "strong-buy" && "text-[var(--brand-green)]",
+                      recommendation.variant === "buy" && "text-primary",
+                      recommendation.variant === "neutral" && "text-amber-700",
+                      recommendation.variant === "risky" && "text-orange-700",
+                      recommendation.variant === "avoid" && "text-red-700"
+                    )}
+                  >
+                    {recommendation.variant === "strong-buy" || recommendation.variant === "buy"
+                      ? "Optimization Tips"
+                      : recommendation.variant === "neutral"
+                        ? "Next Steps"
+                        : "Risk Mitigation Steps"}
                   </p>
                   <ul className="space-y-1">
                     {recommendation.tips.map((tip, i) => (
                       <li key={i} className="flex items-start gap-2 text-sm text-foreground">
-                        <ArrowUpRight className="w-3.5 h-3.5 text-[var(--brand-green)] shrink-0 mt-0.5" />
+                        <ArrowUpRight
+                          className={cn(
+                            "w-3.5 h-3.5 shrink-0 mt-0.5",
+                            recommendation.variant === "strong-buy" && "text-[var(--brand-green)]",
+                            recommendation.variant === "buy" && "text-primary",
+                            recommendation.variant === "neutral" && "text-amber-700",
+                            recommendation.variant === "risky" && "text-orange-700",
+                            recommendation.variant === "avoid" && "text-red-700"
+                          )}
+                        />
                         {tip}
                       </li>
                     ))}
@@ -264,7 +300,7 @@ export function AnalysisDashboard({
           isLoading={isLoading}
         />
         <MetricCard
-          label="Tax Savings"
+          label="Estimated Tax Savings"
           value={result ? fmt(result.taxSavingsMonthly) : "—"}
           sub="/month"
           color="text-primary"
@@ -279,6 +315,7 @@ export function AnalysisDashboard({
         />
       </div>
 
+     
       {/* Analysis tabs */}
       <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
         {/* Tab bar */}
@@ -324,6 +361,255 @@ export function AnalysisDashboard({
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+function buildRecommendationModel(dealScoreResult: DealScoreActionResult | null): {
+  label: string;
+  description: string;
+  tips: string[];
+  variant: RecommendationVariant;
+} | null {
+  if (!dealScoreResult?.ok) return null;
+
+  const recommendation =
+    dealScoreResult.tier === "pro"
+      ? dealScoreResult.data.recommendation
+      : dealScoreResult.recommendation;
+
+  const descriptionFromScore =
+    dealScoreResult.tier === "pro" ? dealScoreResult.data.explanation : null;
+
+  const modelByRecommendation: Record<
+    string,
+    { variant: RecommendationVariant; description: string; tips: string[] }
+  > = {
+    "Strong Buy": {
+      variant: "strong-buy",
+      description:
+        descriptionFromScore ??
+        "Excellent deal quality across cash flow and coverage metrics.",
+      tips: [
+        "Lock in financing terms before market rates move.",
+        "Build a reserve plan to protect long-term performance.",
+        "Track rents quarterly to maintain momentum.",
+      ],
+    },
+    Buy: {
+      variant: "buy",
+      description:
+        descriptionFromScore ??
+        "Good fundamentals with healthy upside and manageable risk.",
+      tips: [
+        "Negotiate expenses to improve monthly margin.",
+        "Validate rent comps before final commitment.",
+        "Keep a 3-6 month reserve fund.",
+      ],
+    },
+    Neutral: {
+      variant: "neutral",
+      description:
+        descriptionFromScore ??
+        "The deal is workable but needs optimization for stronger returns.",
+      tips: [
+        "Revisit purchase price and financing assumptions.",
+        "Model a conservative vacancy scenario.",
+        "Improve operating efficiency before acquisition.",
+      ],
+    },
+    Risky: {
+      variant: "risky",
+      description:
+        descriptionFromScore ??
+        "The deal has meaningful downside risk under current assumptions.",
+      tips: [
+        "Reduce leverage or improve debt terms.",
+        "Stress-test rents and vacancy before proceeding.",
+        "Only move forward with a clear mitigation plan.",
+      ],
+    },
+    Avoid: {
+      variant: "avoid",
+      description:
+        descriptionFromScore ??
+        "Current numbers indicate negative risk-adjusted performance.",
+      tips: [
+        "Do not proceed unless assumptions materially improve.",
+        "Seek a lower purchase price or stronger rent profile.",
+        "Compare alternatives with better DSCR and cash flow.",
+      ],
+    },
+  };
+
+  return {
+    label: recommendation,
+    ...modelByRecommendation[recommendation],
+  };
+}
+
+function DealScoreCard({
+  isAnalysisLoading,
+  isDealScoreLoading,
+  dealScoreResult,
+  isSaving,
+  onSignIn,
+}: {
+  isAnalysisLoading: boolean;
+  isDealScoreLoading: boolean;
+  dealScoreResult: DealScoreActionResult | null;
+  isSaving: boolean;
+  onSignIn: () => void | Promise<void>;
+}) {
+  const isLoading = isAnalysisLoading || isDealScoreLoading;
+
+  if (isLoading) {
+    return (
+      <div className="bg-card rounded-2xl border border-border p-4 sm:p-6">
+        <div className="space-y-3 w-full">
+          <Skeleton className="h-16 w-16 rounded-full mx-auto" />
+          <Skeleton className="h-4 w-32 mx-auto" />
+          <Skeleton className="h-4 w-24 mx-auto" />
+          <Skeleton className="h-3 w-full" />
+          <Skeleton className="h-3 w-3/4" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!dealScoreResult || !dealScoreResult.ok || dealScoreResult.tier === "free") {
+    const recommendation =
+      dealScoreResult?.ok && dealScoreResult.tier === "free"
+        ? dealScoreResult.recommendation
+        : "Deal Score available with Pro";
+    return (
+      <div className="bg-card rounded-2xl border border-border p-4 sm:p-6 flex flex-col items-center justify-center text-center">
+        <Lock className="w-10 h-10 text-muted-foreground mb-3" />
+        <p className="font-semibold text-foreground mb-1">Deal Score (Pro)</p>
+        <p className="text-xs text-muted-foreground mb-4">
+          Free recommendation: {recommendation}
+        </p>
+        <Button
+          size="sm"
+          className="bg-primary text-primary-foreground rounded-full font-semibold text-sm"
+          onClick={() => void onSignIn()}
+          disabled={isSaving}
+        >
+          {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Sign In / Sign Up"}
+        </Button>
+      </div>
+    );
+  }
+
+  const { score, riskLevel, recommendation, explanation, breakdown } = dealScoreResult.data;
+  const recommendationVariant: RecommendationVariant =
+    recommendation === "Strong Buy"
+      ? "strong-buy"
+      : recommendation === "Buy"
+        ? "buy"
+        : recommendation === "Neutral"
+          ? "neutral"
+          : recommendation === "Risky"
+            ? "risky"
+            : "avoid";
+
+  const recommendationStyles: Record<
+    RecommendationVariant,
+    {
+      scoreRing: string;
+      scoreText: string;
+      recommendationChip: string;
+      riskChip: string;
+      metricCell: string;
+      descriptionText: string;
+    }
+  > = {
+    "strong-buy": {
+      scoreRing: "ring-[var(--brand-green)]/40 bg-[var(--brand-green-light)]",
+      scoreText: "text-[var(--brand-green)]",
+      recommendationChip: "bg-[var(--brand-green)] text-white border-[var(--brand-green)]/40",
+      riskChip: "bg-emerald-100 text-emerald-700 border-emerald-200",
+      metricCell: "bg-emerald-50 border border-emerald-100",
+      descriptionText: "text-emerald-800",
+    },
+    buy: {
+      scoreRing: "ring-primary/35 bg-[var(--brand-blue-light)]",
+      scoreText: "text-primary",
+      recommendationChip: "bg-primary text-primary-foreground border-primary/30",
+      riskChip: "bg-blue-100 text-blue-700 border-blue-200",
+      metricCell: "bg-blue-50 border border-blue-100",
+      descriptionText: "text-blue-800",
+    },
+    neutral: {
+      scoreRing: "ring-amber-300/50 bg-amber-50",
+      scoreText: "text-amber-700",
+      recommendationChip: "bg-amber-500 text-white border-amber-300",
+      riskChip: "bg-amber-100 text-amber-700 border-amber-200",
+      metricCell: "bg-amber-50 border border-amber-100",
+      descriptionText: "text-amber-800",
+    },
+    risky: {
+      scoreRing: "ring-orange-300/50 bg-orange-50",
+      scoreText: "text-orange-700",
+      recommendationChip: "bg-orange-500 text-white border-orange-300",
+      riskChip: "bg-orange-100 text-orange-700 border-orange-200",
+      metricCell: "bg-orange-50 border border-orange-100",
+      descriptionText: "text-orange-800",
+    },
+    avoid: {
+      scoreRing: "ring-red-300/50 bg-red-50",
+      scoreText: "text-red-700",
+      recommendationChip: "bg-red-600 text-white border-red-300",
+      riskChip: "bg-red-100 text-red-700 border-red-200",
+      metricCell: "bg-red-50 border border-red-100",
+      descriptionText: "text-red-800",
+    },
+  };
+  const activeStyle = recommendationStyles[recommendationVariant];
+
+  return (
+    <div className="bg-card rounded-2xl border border-border p-4 sm:p-6">
+      <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2">
+        Deal Score
+      </p>
+      <div className="flex items-center justify-between gap-3 mb-3">
+        <div
+          className={cn(
+            "w-20 h-20 rounded-2xl ring-2 flex flex-col items-center justify-center shadow-sm",
+            activeStyle.scoreRing
+          )}
+        >
+          <p className={cn("text-4xl leading-none font-black", activeStyle.scoreText)}>{score}</p>
+        </div>
+        <div className="flex flex-col items-end gap-1">
+          <span
+            className={cn(
+              "px-3 py-1 rounded-xl border text-sm font-bold",
+              activeStyle.recommendationChip
+            )}
+          >
+            {recommendation}
+          </span>
+          <span
+            className={cn(
+              "px-2.5 py-0.5 rounded-full border text-xs font-semibold",
+              activeStyle.riskChip
+            )}
+          >
+            {riskLevel}
+          </span>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-2 text-xs mb-3">
+        <div className={cn("rounded-lg p-2", activeStyle.metricCell)}>Cash Flow Score: {breakdown.cashFlowScore}</div>
+        <div className={cn("rounded-lg p-2", activeStyle.metricCell)}>CoC Score: {breakdown.cocScore}</div>
+        <div className={cn("rounded-lg p-2", activeStyle.metricCell)}>Cap Rate Score: {breakdown.capRateScore}</div>
+        <div className={cn("rounded-lg p-2", activeStyle.metricCell)}>DSCR Score: {breakdown.dscrScore}</div>
+        <div className={cn("rounded-lg p-2 col-span-2", activeStyle.metricCell)}>
+          Risk Penalty: {breakdown.riskPenalty}
+        </div>
+      </div>
+      <p className={cn("text-xs leading-relaxed", activeStyle.descriptionText)}>{explanation}</p>
     </div>
   );
 }
@@ -393,6 +679,32 @@ function CashFlowTab({
           <span className="text-xs font-bold uppercase tracking-widest text-foreground">
             Operating Expenses
           </span>
+
+          {!isLoading && result && (result.maintenanceAgeAdjusted || result.capexAgeAdjusted) && (
+        <div className="rounded-2xl border border-[var(--brand-orange)]/25 bg-[var(--brand-orange-light)] py-2 px-3 ">
+          <p className="text-xs font-bold uppercase tracking-widest text-[var(--brand-orange)]">
+            Age Impact on Expenses
+          </p>
+          <div className="mt-2 space-y-1 text-xs">
+            {result.maintenanceAgeAdjusted && (
+              <p className="text-foreground">
+                Maintenance: {fmtPct(result.maintenancePctInput)} &rarr;{" "}
+               <span className="text-foreground font-bold"> {fmtPct(result.maintenancePctEffective)}</span>
+              </p>
+            )}
+            {result.capexAgeAdjusted && (
+              <p className="text-foreground">
+                CapEx: {fmtPct(result.capexPctInput)} &rarr; <span className="text-foreground font-bold"> {fmtPct(result.capexPctEffective)}</span>
+              </p>
+            )}
+          </div>
+          <p className="mt-2 text-xs text-muted-foreground inline-flex items-center gap-1.5">
+            <Info className="w-3.5 h-3.5 text-[var(--brand-orange)]" />
+            Adjusted based on property age ({result.propertyAge} y)
+          </p>
+        </div>
+      )}
+
         </div>
         <div className="space-y-2">
           {[
@@ -465,7 +777,7 @@ function CashFlowTab({
           <div className="flex justify-between text-sm mb-1">
             <div>
               <p className="text-muted-foreground">Down Payment</p>
-              <p className="text-xs text-muted-foreground">20%</p>
+              <p className="text-xs text-muted-foreground">{fmtPct(result.downPaymentPct)}</p>
             </div>
             <span className="font-semibold text-foreground">
               ${result.downPayment.toLocaleString()}
@@ -474,7 +786,7 @@ function CashFlowTab({
           <div className="flex justify-between text-sm mb-3">
             <div>
               <p className="text-muted-foreground">Closing Costs</p>
-              <p className="text-xs text-muted-foreground">3%</p>
+              <p className="text-xs text-muted-foreground">{fmtPct(result.closingCostsPct)}</p>
             </div>
             <span className="font-semibold text-foreground">
               ${result.closingCosts.toLocaleString()}

@@ -30,7 +30,7 @@ export default async function ProfilePage() {
 
   return (
     <>
-      <Header />
+      <Header initialUser={user} />
       <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
         <ProfileForm
           userId={user.id}

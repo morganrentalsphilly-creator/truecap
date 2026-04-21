@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { FieldErrors, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   TrendingUp,
@@ -29,9 +30,40 @@ import { AnalysisDashboard } from "./analysis-dashboard";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { saveDealAction } from "@/app/actions/saved-analyses";
+import { addDealToCompareAction } from "@/app/actions/compare";
 import { requestPdfExportAction } from "@/app/actions/pdf-export";
+import { getDealScoreAction, type DealScoreActionResult } from "@/app/actions/deal-score";
 
 type InputTab = "cash-flow" | "projections" | "tax-strategy" | "deal-score";
+
+function createEmptyUnit(isOwnerOccupied = false) {
+  return {
+    bedrooms: undefined,
+    bathrooms: undefined,
+    sqft: undefined,
+    monthlyRent: undefined,
+    isOwnerOccupied,
+  };
+}
+
+function getUnitsForPropertyType(type: InvestmentFormValues["propertyType"]) {
+  if (type === "single-family") return [createEmptyUnit(false)];
+  if (type === "owner-occupant") return [createEmptyUnit(true), createEmptyUnit(false)];
+  return [createEmptyUnit(false), createEmptyUnit(false)];
+}
+
+function buildNewAnalysisDefaults(
+  propertyType: InvestmentFormValues["propertyType"]
+): Partial<InvestmentFormValues> {
+  return {
+    ...defaultValues,
+    propertyType,
+    templateId: undefined,
+    purchasePrice: undefined,
+    yearBuilt: undefined,
+    units: getUnitsForPropertyType(propertyType),
+  };
+}
 
 const INPUT_TABS: {
   id: InputTab;
@@ -46,43 +78,152 @@ const INPUT_TABS: {
 ];
 
 export function InvestCalcPage() {
+  const router = useRouter();
   const [activeInputTab] = useState<InputTab>("cash-flow");
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [isSavingDeal, setIsSavingDeal] = useState(false);
+  const [savedDealId, setSavedDealId] = useState<string | null>(null);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [isComparingDeals, setIsComparingDeals] = useState(false);
   const [isExportingPdf, setIsExportingPdf] = useState(false);
+  const [dealScoreResult, setDealScoreResult] = useState<DealScoreActionResult | null>(null);
+  const [isLoadingDealScore, setIsLoadingDealScore] = useState(false);
   const { toast } = useToast();
+  const prevPropertyTypeRef = useRef<InvestmentFormValues["propertyType"]>("single-family");
+  const isProgrammaticResetRef = useRef(false);
 
   const form = useForm<InvestmentFormValues>({
     resolver: zodResolver(investmentFormSchema),
-    defaultValues,
+    defaultValues: buildNewAnalysisDefaults("single-family"),
     mode: "onChange",
   });
 
   const propertyType = form.watch("propertyType");
-  const purchasePrice = form.watch("purchasePrice") ?? 385000;
+  const purchasePrice = form.watch("purchasePrice");
 
-  const onSubmit = async (values: InvestmentFormValues) => {
-    setIsCalculating(true);
-    setShowResults(false);
-    // Simulate analysis delay
-    await new Promise((r) => setTimeout(r, 1500));
-    const result = calculateAnalysis(values);
-    setAnalysisResult(result);
-    setIsCalculating(false);
-    setShowResults(true);
-    toast({
-      title: "Analysis Complete",
-      description: `Net cash flow: $${result.netCashFlow.toLocaleString()}/mo | CoC: ${result.cocReturn.toFixed(1)}%`,
+  useEffect(() => {
+    const subscription = form.watch((_value, { type }) => {
+      if (type === "change" && !isProgrammaticResetRef.current) {
+        setHasUnsavedChanges(true);
+      }
     });
-    window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+    return () => subscription.unsubscribe();
+  }, [form]);
+
+  useEffect(() => {
+    // Force clean "new analysis" defaults once on mount. Do not depend on `form`
+    // reference — in some setups it can churn and repeatedly reset user input.
+    isProgrammaticResetRef.current = true;
+    form.reset(buildNewAnalysisDefaults("single-family"));
+    setSavedDealId(null);
+    setAnalysisResult(null);
+    setDealScoreResult(null);
+    setShowResults(false);
+    setHasUnsavedChanges(false);
+    prevPropertyTypeRef.current = "single-family";
+    queueMicrotask(() => {
+      isProgrammaticResetRef.current = false;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional one-time mount reset
+  }, []);
+
+  useEffect(() => {
+    const prevType = prevPropertyTypeRef.current;
+    if (prevType === propertyType) return;
+    prevPropertyTypeRef.current = propertyType;
+    isProgrammaticResetRef.current = true;
+    // Clear single-family-only fields so stale NaN from unmounted inputs cannot fail
+    // validation while Multi-Family / Owner-Occupant sections are shown.
+    form.setValue("bedrooms", undefined, { shouldValidate: false, shouldDirty: false });
+    form.setValue("bathrooms", undefined, { shouldValidate: false, shouldDirty: false });
+    form.setValue("sqft", undefined, { shouldValidate: false, shouldDirty: false });
+    form.setValue("monthlyRent", undefined, { shouldValidate: false, shouldDirty: false });
+    form.setValue("units", getUnitsForPropertyType(propertyType), {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+    queueMicrotask(() => {
+      isProgrammaticResetRef.current = false;
+    });
+  }, [form, propertyType]);
+
+  const onSubmit = async (validated: InvestmentFormValues) => {
+    // Use a synchronous snapshot of the live form right after validation. This
+    // matches what the user sees (including fields that only exist while mounted)
+    // and avoids any mismatch between RHF state and resolver output.
+    const liveParse = investmentFormSchema.safeParse(form.getValues());
+    const values: InvestmentFormValues = liveParse.success ? liveParse.data : validated;
+
+    setIsCalculating(true);
+    setIsLoadingDealScore(true);
+    setShowResults(false);
+    setDealScoreResult(null);
+    setHasUnsavedChanges(true);
+    try {
+      // Simulate analysis delay
+      await new Promise((r) => setTimeout(r, 1500));
+      const result = calculateAnalysis(values);
+      setAnalysisResult(result);
+      setIsCalculating(false);
+      setShowResults(true);
+      const dealScore = await getDealScoreAction({
+        monthlyCashFlow: result.netCashFlow,
+        cashOnCashReturn: result.cocReturn,
+        capRate: result.capRate,
+        dscr: result.dscr,
+        vacancyRate: values.vacancyPct,
+        propertyAge: result.propertyAge,
+        capexPct: result.capexPctEffective,
+        maintenancePct: result.maintenancePctEffective,
+        monthlyPropertyTax: result.propertyTax,
+        monthlyRentIncome: result.monthlyRentalIncome,
+      });
+      setDealScoreResult(dealScore);
+      toast({
+        title: "Analysis Complete",
+        description: `Net cash flow: $${result.netCashFlow.toLocaleString()}/mo | CoC: ${result.cocReturn.toFixed(1)}%`,
+      });
+      window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+    } finally {
+      setIsCalculating(false);
+      setIsLoadingDealScore(false);
+    }
   };
 
-  const onError = () => {
+  const onError = (errors: FieldErrors<InvestmentFormValues>) => {
+    const unitsErrorMessage =
+      (errors.units as { message?: string; root?: { message?: string } } | undefined)?.message ??
+      (errors.units as { message?: string; root?: { message?: string } } | undefined)?.root?.message;
+    const hasUnitFieldErrors =
+      Array.isArray(errors.units) &&
+      errors.units.some(
+        (unitErr) =>
+          !!unitErr?.bedrooms ||
+          !!unitErr?.bathrooms ||
+          !!unitErr?.sqft ||
+          !!unitErr?.monthlyRent
+      );
+
+    if (hasUnitFieldErrors && Array.isArray(errors.units)) {
+      // Focus the first invalid unit input so the inline error message is visible.
+      for (let i = 0; i < errors.units.length; i += 1) {
+        const unitErr = errors.units[i];
+        if (!unitErr) continue;
+        const firstInvalidField = (
+          ["bedrooms", "bathrooms", "sqft", "monthlyRent"] as const
+        ).find((key) => !!unitErr[key]);
+        if (firstInvalidField) {
+          form.setFocus(`units.${i}.${firstInvalidField}` as const);
+          break;
+        }
+      }
+    }
+
     toast({
       title: "Validation Error",
-      description: "Please fix the highlighted fields before calculating.",
+      description: unitsErrorMessage ?? "Please fix the highlighted fields before calculating.",
       variant: "destructive",
     });
   };
@@ -90,11 +231,18 @@ export function InvestCalcPage() {
   const handleSaveDeal = async () => {
     setIsSavingDeal(true);
     try {
-      const result = await saveDealAction(form.getValues());
+      const result = await saveDealAction(form.getValues(), savedDealId);
       if (result.ok) {
+        setSavedDealId(result.id);
+        setHasUnsavedChanges(false);
+        window.dispatchEvent(new CustomEvent("saved-analyses-changed"));
         toast({
-          title: "Deal saved",
-          description: "Your analysis was saved to your account.",
+          title: result.mode === "updated" ? "Deal updated" : "Deal saved",
+          description:
+            result.mode === "updated"
+              ? "Your saved analysis was updated with the latest inputs."
+              : "Your analysis was saved to your account.",
+          variant: "success",
         });
         return;
       }
@@ -114,6 +262,16 @@ export function InvestCalcPage() {
         });
         return;
       }
+      if (result.code === "DUPLICATE_ADDRESS") {
+        toast({
+          title: "Already saved",
+          description:
+            result.message ??
+            "You already saved an analysis for this address. Open your saved deals or use a different address.",
+          variant: "destructive",
+        });
+        return;
+      }
       toast({
         title: "Could not save",
         description: result.message ?? "Something went wrong. Try again.",
@@ -125,6 +283,14 @@ export function InvestCalcPage() {
   };
 
   const handleExportPdf = async () => {
+    if (!savedDealId || hasUnsavedChanges) {
+      toast({
+        title: "Save required",
+        description: "Save the latest analysis before exporting a PDF.",
+        variant: "warning",
+      });
+      return;
+    }
     setIsExportingPdf(true);
     try {
       const gate = await requestPdfExportAction();
@@ -150,6 +316,37 @@ export function InvestCalcPage() {
       });
     } finally {
       setIsExportingPdf(false);
+    }
+  };
+
+  const handleCompareDeals = async () => {
+    if (!savedDealId || hasUnsavedChanges) {
+      toast({
+        title: "Save required",
+        description: "Save the latest analysis before adding it to compare.",
+        variant: "warning",
+      });
+      return;
+    }
+    setIsComparingDeals(true);
+    try {
+      const result = await addDealToCompareAction(savedDealId);
+      if (!result.ok) {
+        toast({
+          title: "Could not add to compare",
+          description: result.message,
+          variant: result.code === "LIMIT_EXCEEDED" ? "warning" : "destructive",
+        });
+        return;
+      }
+      toast({
+        title: "Added to compare",
+        description: "Your saved analysis was added to the compare workspace.",
+        variant: "success",
+      });
+      router.push("/compare");
+    } finally {
+      setIsComparingDeals(false);
     }
   };
 
@@ -215,10 +412,10 @@ export function InvestCalcPage() {
             {propertyType === "single-family" && (
               <SingleFamilyUnitSection form={form} />
             )}
-            {(propertyType === "multi-family" || propertyType === "house-hack") && (
+            {(propertyType === "multi-family" || propertyType === "owner-occupant") && (
               <MultiFamilyUnitsSection
                 form={form}
-                isHouseHack={propertyType === "house-hack"}
+                isHouseHack={propertyType === "owner-occupant"}
               />
             )}
 
@@ -257,11 +454,16 @@ export function InvestCalcPage() {
             <AnalysisDashboard
               result={analysisResult}
               isLoading={isCalculating}
+              dealScoreResult={dealScoreResult}
+              isLoadingDealScore={isLoadingDealScore}
               propertyType={propertyType}
               onSaveDeal={handleSaveDeal}
+              onCompareDeals={handleCompareDeals}
               onExportPdf={handleExportPdf}
               isSaving={isSavingDeal}
+              isComparing={isComparingDeals}
               isExporting={isExportingPdf}
+              isSaved={Boolean(savedDealId) && !hasUnsavedChanges}
             />
           </div>
         )}
