@@ -6,6 +6,7 @@ import {
   handleCheckoutSessionCompleted,
   markSubscriptionCanceled,
   upsertSubscriptionFromInvoice,
+  upsertSubscriptionFromInvoicePayment,
   upsertSubscriptionFromStripe,
 } from "@/lib/stripe/subscription-sync";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
@@ -80,6 +81,9 @@ export async function POST(req: Request) {
       case "invoice.payment_failed":
       case "invoice.payment_action_required":
         await upsertSubscriptionFromInvoice(admin, event.data.object as Stripe.Invoice);
+        break;
+      case "invoice_payment.paid":
+        await upsertSubscriptionFromInvoicePayment(admin, event.data.object as Stripe.InvoicePayment);
         break;
       default:
         break;

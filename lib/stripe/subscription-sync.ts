@@ -163,6 +163,23 @@ export async function upsertSubscriptionFromInvoice(
   await upsertSubscriptionFromStripe(admin, subscription);
 }
 
+export async function upsertSubscriptionFromInvoicePayment(
+  admin: SupabaseClient,
+  invoicePayment: Stripe.InvoicePayment
+): Promise<void> {
+  let invoice: Stripe.Invoice | null = null;
+
+  if (typeof invoicePayment.invoice === "string") {
+    invoice = await getStripe().invoices.retrieve(invoicePayment.invoice);
+  } else if (!("deleted" in invoicePayment.invoice)) {
+    invoice = invoicePayment.invoice;
+  }
+
+  if (!invoice) return;
+
+  await upsertSubscriptionFromInvoice(admin, invoice);
+}
+
 export async function linkStripeCustomerToProfile(
   admin: SupabaseClient,
   userId: string,
