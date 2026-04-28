@@ -24,6 +24,7 @@ import {
   type AnalysisTemplateInput,
   TEMPLATE_DESCRIPTION_MAX_LENGTH,
 } from "@/lib/analysis-template-schema";
+import { DEFAULT_APPRECIATION_RATE, DEFAULT_SELLING_COST_PCT } from "@/lib/exit-scenarios";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -48,6 +49,7 @@ import {
 
 type NumericTemplateField =
   | "propertyTaxPct"
+  | "insurancePct"
   | "insuranceMo"
   | "maintenancePct"
   | "vacancyPct"
@@ -58,6 +60,8 @@ type NumericTemplateField =
   | "downPaymentPct"
   | "expenseGrowthPct"
   | "rentGrowthPct"
+  | "appreciationRatePct"
+  | "sellingCostPct"
   | "buildingValuePct"
   | "taxRatePct";
 
@@ -124,7 +128,9 @@ export function TemplatesManagementPage({
       templateName: "",
       templateDescription: "",
       propertyTaxPct: 1.1,
-      insuranceMo: 0,
+      insuranceInputMode: "percent",
+      insurancePct: 0.5,
+      insuranceMo: undefined,
       maintenancePct: 10,
       vacancyPct: 5,
       managementPct: 8,
@@ -134,6 +140,8 @@ export function TemplatesManagementPage({
       downPaymentPct: 20,
       expenseGrowthPct: 3,
       rentGrowthPct: 3,
+      appreciationRatePct: undefined,
+      sellingCostPct: undefined,
       buildingValuePct: 85,
       depreciationYears: 27.5,
       includeInterestDeduction: true,
@@ -157,7 +165,9 @@ export function TemplatesManagementPage({
       templateName: "",
       templateDescription: "",
       propertyTaxPct: 1.1,
-      insuranceMo: 0,
+      insuranceInputMode: "percent",
+      insurancePct: 0.5,
+      insuranceMo: undefined,
       maintenancePct: 10,
       vacancyPct: 5,
       managementPct: 8,
@@ -167,6 +177,8 @@ export function TemplatesManagementPage({
       downPaymentPct: 20,
       expenseGrowthPct: 3,
       rentGrowthPct: 3,
+      appreciationRatePct: undefined,
+      sellingCostPct: undefined,
       buildingValuePct: 85,
       depreciationYears: 27.5,
       includeInterestDeduction: true,
@@ -182,7 +194,9 @@ export function TemplatesManagementPage({
       templateName: template.templateName,
       templateDescription: template.templateDescription ?? "",
       propertyTaxPct: template.propertyTaxPct,
-      insuranceMo: template.insuranceMo,
+      insuranceInputMode: template.insuranceInputMode,
+      insurancePct: template.insurancePct ?? undefined,
+      insuranceMo: template.insuranceMo ?? undefined,
       maintenancePct: template.maintenancePct,
       vacancyPct: template.vacancyPct,
       managementPct: template.managementPct,
@@ -192,6 +206,8 @@ export function TemplatesManagementPage({
       downPaymentPct: template.downPaymentPct,
       expenseGrowthPct: template.expenseGrowthPct,
       rentGrowthPct: template.rentGrowthPct,
+      appreciationRatePct: template.appreciationRatePct,
+      sellingCostPct: template.sellingCostPct,
       buildingValuePct: template.buildingValuePct,
       depreciationYears: template.depreciationYears,
       includeInterestDeduction: template.includeInterestDeduction,
@@ -418,12 +434,56 @@ export function TemplatesManagementPage({
                   label="Property Tax % (Annual)"
                   hint="Annual property tax rate used in calculations."
                 />
-                <NumberInputField
-                  form={templateForm}
-                  name="insuranceMo"
-                  label="Insurance (Monthly $)"
-                  hint="Fixed monthly insurance cost."
+                <FormField
+                  control={templateForm.control}
+                  name="insuranceInputMode"
+                  render={({ field }) => (
+                    <FormItem className="sm:col-span-2 lg:col-span-1">
+                      <FormLabel className="text-xs font-semibold uppercase tracking-wide">
+                        Insurance Input
+                      </FormLabel>
+                      <div className="flex rounded-lg border border-border bg-muted/40 p-1">
+                        {[
+                          { value: "percent", label: "Annual %" },
+                          { value: "monthly", label: "Monthly $" },
+                        ].map((option) => (
+                          <button
+                            key={option.value}
+                            type="button"
+                            onClick={() => field.onChange(option.value)}
+                            className={cn(
+                              "flex-1 rounded-md px-3 py-2 text-xs font-semibold transition-colors",
+                              field.value === option.value
+                                ? "bg-primary text-primary-foreground"
+                                : "text-muted-foreground hover:text-foreground"
+                            )}
+                          >
+                            {option.label}
+                          </button>
+                        ))}
+                      </div>
+                      <p className="text-[11px] text-muted-foreground">
+                        Save insurance as an annual percent or a flat monthly amount.
+                      </p>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
+                {templateForm.watch("insuranceInputMode") === "percent" ? (
+                  <NumberInputField
+                    form={templateForm}
+                    name="insurancePct"
+                    label="Insurance % (Annual)"
+                    hint="Applied to purchase price each year."
+                  />
+                ) : (
+                  <NumberInputField
+                    form={templateForm}
+                    name="insuranceMo"
+                    label="Insurance (Monthly $)"
+                    hint="Fixed monthly insurance cost."
+                  />
+                )}
                 <NumberInputField form={templateForm} name="maintenancePct" label="Maintenance %" />
                 <NumberInputField form={templateForm} name="vacancyPct" label="Vacancy %" />
                 <NumberInputField form={templateForm} name="managementPct" label="Management %" />
@@ -454,6 +514,20 @@ export function TemplatesManagementPage({
                   <NumberInputField form={templateForm} name="downPaymentPct" label="Down Payment %" />
                   <NumberInputField form={templateForm} name="expenseGrowthPct" label="Expense Growth %" />
                   <NumberInputField form={templateForm} name="rentGrowthPct" label="Rent Growth %" />
+                  <NumberInputField
+                    form={templateForm}
+                    name="appreciationRatePct"
+                    label="Annual Appreciation % (Optional)"
+                    hint={`Used for exit scenarios. Defaults to ${DEFAULT_APPRECIATION_RATE}% when omitted.`}
+                    allowEmpty
+                  />
+                  <NumberInputField
+                    form={templateForm}
+                    name="sellingCostPct"
+                    label="Selling Cost % (Optional)"
+                    hint={`Defaults to ${DEFAULT_SELLING_COST_PCT}% when omitted.`}
+                    allowEmpty
+                  />
                   <NumberInputField form={templateForm} name="buildingValuePct" label="Building Value %" />
                   <NumberInputField
                     form={templateForm}

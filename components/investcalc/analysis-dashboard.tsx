@@ -13,10 +13,18 @@ import {
   Save,
   Loader2,
   Info,
+  FileDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AnalysisResult } from "@/lib/calc-analysis";
+import { TenYearProjectionsPanel } from "@/components/investcalc/ten-year-projections-panel";
+import { TaxStrategyPanel } from "@/components/investcalc/tax-strategy-panel";
+import { ExitScenariosPanel } from "@/components/investcalc/exit-scenarios-panel";
+
+import type { ProjectionYear, TenYearProjectionInput } from "@/lib/ten-year-projections";
+import type { TaxStrategyInput, TaxStrategyYear } from "@/lib/tax-strategy";
+import type { ExitScenarioInput, ExitScenarioYear } from "@/lib/exit-scenarios";
 import { cn } from "@/lib/utils";
 import type { DealScoreActionResult } from "@/app/actions/deal-score";
 
@@ -26,6 +34,21 @@ interface AnalysisDashboardProps {
   dealScoreResult: DealScoreActionResult | null;
   isLoadingDealScore: boolean;
   propertyType: "single-family" | "multi-family" | "owner-occupant";
+  projectionSource: {
+    analysisId: string | null;
+    input: TenYearProjectionInput;
+    initialYears: ProjectionYear[];
+  } | null;
+  taxStrategySource: {
+    analysisId: string | null;
+    input: TaxStrategyInput;
+    initialYears: TaxStrategyYear[];
+  } | null;
+  exitScenarioSource: {
+    analysisId: string | null;
+    input: ExitScenarioInput;
+    initialYears: ExitScenarioYear[];
+  } | null;
   onSaveDeal: () => void | Promise<void>;
   onCompareDeals: () => void | Promise<void>;
   onExportPdf: () => void | Promise<void>;
@@ -33,6 +56,8 @@ interface AnalysisDashboardProps {
   isComparing?: boolean;
   isExporting?: boolean;
   isSaved?: boolean;
+  /** Shown when Compare / Export are disabled (e.g. unsaved edits). */
+  persistedActionsBlockHint?: string;
 }
 
 type Tab = "cash-flow" | "projections" | "tax-strategy" | "exit-scenarios";
@@ -91,6 +116,9 @@ export function AnalysisDashboard({
   dealScoreResult,
   isLoadingDealScore,
   propertyType,
+  projectionSource,
+  taxStrategySource,
+  exitScenarioSource,
   onSaveDeal,
   onCompareDeals,
   onExportPdf,
@@ -98,6 +126,7 @@ export function AnalysisDashboard({
   isComparing = false,
   isExporting = false,
   isSaved = false,
+  persistedActionsBlockHint,
 }: AnalysisDashboardProps) {
   const [activeTab, setActiveTab] = useState<Tab>("cash-flow");
 
@@ -117,6 +146,16 @@ export function AnalysisDashboard({
           <Building2 className="w-4 h-4 text-primary" />
           <span className="font-semibold text-foreground">
             {labelMap[propertyType]}
+          </span>
+          <span
+            className={cn(
+              "rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide",
+              isSaved
+                ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                : "border-amber-200 bg-amber-50 text-amber-700"
+            )}
+          >
+            {isSaved ? "Saved" : "Preview"}
           </span>
         </div>
         <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
@@ -140,7 +179,7 @@ export function AnalysisDashboard({
             className="rounded-full text-xs sm:text-sm h-8 sm:h-9 px-3 sm:px-4 hidden sm:flex"
             onClick={() => void onCompareDeals()}
             disabled={!isSaved || isComparing}
-            title={!isSaved ? "Save this analysis before comparing it." : undefined}
+            title={!isSaved ? persistedActionsBlockHint ?? "Save this analysis before comparing it." : undefined}
           >
             {isComparing ? (
               <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
@@ -154,7 +193,7 @@ export function AnalysisDashboard({
             className="rounded-full bg-primary text-primary-foreground text-xs sm:text-sm font-semibold h-8 sm:h-9 px-3 sm:px-4"
             onClick={() => void onExportPdf()}
             disabled={!isSaved || isExporting}
-            title={!isSaved ? "Save this analysis before exporting PDF." : undefined}
+            title={!isSaved ? persistedActionsBlockHint ?? "Save this analysis before exporting PDF." : undefined}
           >
             {isExporting ? (
               <Loader2 className="w-3.5 h-3.5 mr-1 sm:mr-1.5 animate-spin" />
@@ -347,7 +386,31 @@ export function AnalysisDashboard({
           {activeTab === "cash-flow" && (
             <CashFlowTab result={result} isLoading={isLoading} />
           )}
-          {activeTab !== "cash-flow" && (
+          {activeTab === "projections" && projectionSource && (
+            <TenYearProjectionsPanel source={projectionSource} />
+          )}
+          {activeTab === "projections" && !projectionSource && (
+            <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
+              Run the analysis to see the 10-year projection.
+            </div>
+          )}
+          {activeTab === "tax-strategy" && taxStrategySource && (
+            <TaxStrategyPanel source={taxStrategySource} />
+          )}
+          {activeTab === "tax-strategy" && !taxStrategySource && (
+            <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
+              Run the analysis to see the tax strategy view.
+            </div>
+          )}
+          {activeTab === "exit-scenarios" && exitScenarioSource && (
+            <ExitScenariosPanel source={exitScenarioSource} />
+          )}
+          {activeTab === "exit-scenarios" && !exitScenarioSource && (
+            <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
+              Run the analysis to see exit scenarios.
+            </div>
+          )}
+          {activeTab !== "cash-flow" && activeTab !== "projections" && activeTab !== "tax-strategy" && activeTab !== "exit-scenarios" && (
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <Lock className="w-10 h-10 text-muted-foreground mb-3" />
               <h3 className="font-semibold text-foreground mb-1">Pro Feature</h3>
@@ -748,10 +811,51 @@ function CashFlowTab({
             </p>
           </div>
           <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Monthly Payment</span>
+            <span className="text-muted-foreground">Loan Payment (Principal &amp; Interest)</span>
             <span className="font-medium text-foreground">
               ${result.monthlyPayment.toLocaleString()}
             </span>
+          </div>
+          <div className="rounded-xl border border-dashed border-border bg-muted/40 p-4 space-y-2">
+            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+              Monthly Cost Breakdown
+            </p>
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Loan Payment (P&amp;I)</span>
+              <span className="font-medium text-foreground">
+                ${result.loanPrincipalAndInterest.toLocaleString()}
+              </span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Property Tax (Monthly)</span>
+              <span className="font-medium text-foreground">
+                ${result.propertyTaxMonthly.toLocaleString()}
+              </span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Insurance (Monthly)</span>
+              <span className="font-medium text-foreground">
+                ${result.insuranceMonthly.toLocaleString()}
+              </span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">HOA (Monthly)</span>
+              <span className="font-medium text-foreground">
+                ${result.hoaMonthly.toLocaleString()}
+              </span>
+            </div>
+            <div className="flex justify-between text-sm border-t border-border pt-2">
+              <span className="font-semibold text-foreground">Total Monthly Cost</span>
+              <span className="font-bold text-foreground">
+                ${result.totalMonthlyPaymentDebug.toLocaleString()}
+              </span>
+            </div>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Loan payment is shown separately from operating expenses so it is clear that the
+              current engine uses <span className="font-medium text-foreground">monthlyPayment</span>{" "}
+              for principal and interest only. Property tax, insurance, and HOA are modeled
+              outside the loan payment.
+            </p>
           </div>
           <div className="flex justify-between text-sm border-t border-border pt-2">
             <span className="font-bold text-foreground">Net Cash Flow</span>

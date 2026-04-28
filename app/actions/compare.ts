@@ -78,6 +78,8 @@ export async function startCompareAction(ids: string[]): Promise<CompareActionRe
     .select("id", { count: "exact", head: true })
     .eq("user_id", user.id)
     .is("deleted_at", null)
+    .eq("is_completed", false)
+    .eq("is_archived", false)
     .in("id", selectedIds);
 
   if (error) {
@@ -128,6 +130,8 @@ export async function addDealToCompareAction(id: string): Promise<CompareActionR
     .select("id", { count: "exact", head: true })
     .eq("user_id", user.id)
     .is("deleted_at", null)
+    .eq("is_completed", false)
+    .eq("is_archived", false)
     .in("id", selectedIds);
 
   if (error) {
@@ -145,5 +149,5 @@ export async function addDealToCompareAction(id: string): Promise<CompareActionR
 export async function removeCompareDealAction(id: string) {
   const ids = (await getCompareIdsFromCookie()).filter((currentId) => currentId !== id);
   await setCompareCookie(ids);
-  redirect("/compare");
+  redirect("/dashboard/compare");
 }

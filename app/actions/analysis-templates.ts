@@ -3,6 +3,7 @@
 import { analysisTemplateSchema } from "@/lib/analysis-template-schema";
 import { getEntitlementsForUser } from "@/lib/entitlements";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { DEFAULT_APPRECIATION_RATE, DEFAULT_SELLING_COST_PCT } from "@/lib/exit-scenarios";
 
 /** Columns shared with `saved_analyses` / investment form (camelCase in app). */
 export type AnalysisTemplateOption = {
@@ -12,7 +13,9 @@ export type AnalysisTemplateOption = {
   templateType: "conservative" | "balanced" | "aggressive";
   isSystem: boolean;
   propertyTaxPct: number;
-  insuranceMo: number;
+  insuranceInputMode: "percent" | "monthly";
+  insurancePct: number | null;
+  insuranceMo: number | null;
   maintenancePct: number;
   vacancyPct: number;
   managementPct: number;
@@ -22,6 +25,8 @@ export type AnalysisTemplateOption = {
   downPaymentPct: number;
   expenseGrowthPct: number;
   rentGrowthPct: number;
+  appreciationRatePct: number;
+  sellingCostPct: number;
   buildingValuePct: number;
   depreciationYears: 27.5 | 39;
   includeInterestDeduction: boolean;
@@ -29,7 +34,7 @@ export type AnalysisTemplateOption = {
 };
 
 const TEMPLATE_ROW_FIELDS =
-  "id, template_name, template_description, template_type, is_system, property_tax_pct, insurance_mo, maintenance_pct, vacancy_pct, management_pct, capex_pct, closing_costs_pct, interest_rate_pct, down_payment_pct, expense_growth_pct, rent_growth_pct, building_value_pct, depreciation_years, include_interest_deduction, tax_rate_pct";
+  "id, template_name, template_description, template_type, is_system, property_tax_pct, insurance_input_mode, insurance_pct, insurance_mo, maintenance_pct, vacancy_pct, management_pct, capex_pct, closing_costs_pct, interest_rate_pct, down_payment_pct, expense_growth_pct, rent_growth_pct, appreciation_rate_pct, selling_cost_pct, building_value_pct, depreciation_years, include_interest_deduction, tax_rate_pct";
 
 function num(v: unknown, fallback: number): number {
   const n = typeof v === "number" ? v : Number(v);
@@ -46,7 +51,9 @@ function mapTemplateRow(row: Record<string, unknown>): AnalysisTemplateOption {
     templateType: (row.template_type as AnalysisTemplateOption["templateType"]) ?? "balanced",
     isSystem: !!row.is_system,
     propertyTaxPct: num(row.property_tax_pct, 1.1),
-    insuranceMo: num(row.insurance_mo, 0),
+    insuranceInputMode: row.insurance_input_mode === "monthly" ? "monthly" : "percent",
+    insurancePct: row.insurance_pct == null ? null : num(row.insurance_pct, 0),
+    insuranceMo: row.insurance_mo == null ? null : num(row.insurance_mo, 0),
     maintenancePct: num(row.maintenance_pct, 0),
     vacancyPct: num(row.vacancy_pct, 0),
     managementPct: num(row.management_pct, 0),
@@ -56,6 +63,8 @@ function mapTemplateRow(row: Record<string, unknown>): AnalysisTemplateOption {
     downPaymentPct: num(row.down_payment_pct, 0),
     expenseGrowthPct: num(row.expense_growth_pct, 0),
     rentGrowthPct: num(row.rent_growth_pct, 0),
+    appreciationRatePct: num(row.appreciation_rate_pct, DEFAULT_APPRECIATION_RATE),
+    sellingCostPct: num(row.selling_cost_pct, DEFAULT_SELLING_COST_PCT),
     buildingValuePct: num(row.building_value_pct, 85),
     depreciationYears,
     includeInterestDeduction: row.include_interest_deduction !== false,
@@ -245,7 +254,9 @@ export async function createAnalysisTemplateAction(input: unknown): Promise<Crea
       template_description: payload.templateDescription?.trim() || null,
       template_type: "balanced",
       property_tax_pct: payload.propertyTaxPct,
-      insurance_mo: payload.insuranceMo,
+      insurance_input_mode: payload.insuranceInputMode,
+      insurance_pct: payload.insuranceInputMode === "percent" ? payload.insurancePct ?? null : null,
+      insurance_mo: payload.insuranceInputMode === "monthly" ? payload.insuranceMo ?? null : null,
       maintenance_pct: payload.maintenancePct,
       vacancy_pct: payload.vacancyPct,
       management_pct: payload.managementPct,
@@ -255,6 +266,8 @@ export async function createAnalysisTemplateAction(input: unknown): Promise<Crea
       down_payment_pct: payload.downPaymentPct,
       expense_growth_pct: payload.expenseGrowthPct,
       rent_growth_pct: payload.rentGrowthPct,
+      appreciation_rate_pct: payload.appreciationRatePct ?? DEFAULT_APPRECIATION_RATE,
+      selling_cost_pct: payload.sellingCostPct ?? DEFAULT_SELLING_COST_PCT,
       building_value_pct: payload.buildingValuePct,
       depreciation_years: payload.depreciationYears,
       include_interest_deduction: payload.includeInterestDeduction ?? true,
@@ -368,7 +381,9 @@ export async function updateAnalysisTemplateAction(
       template_name: payload.templateName,
       template_description: payload.templateDescription?.trim() || null,
       property_tax_pct: payload.propertyTaxPct,
-      insurance_mo: payload.insuranceMo,
+      insurance_input_mode: payload.insuranceInputMode,
+      insurance_pct: payload.insuranceInputMode === "percent" ? payload.insurancePct ?? null : null,
+      insurance_mo: payload.insuranceInputMode === "monthly" ? payload.insuranceMo ?? null : null,
       maintenance_pct: payload.maintenancePct,
       vacancy_pct: payload.vacancyPct,
       management_pct: payload.managementPct,
@@ -378,6 +393,8 @@ export async function updateAnalysisTemplateAction(
       down_payment_pct: payload.downPaymentPct,
       expense_growth_pct: payload.expenseGrowthPct,
       rent_growth_pct: payload.rentGrowthPct,
+      appreciation_rate_pct: payload.appreciationRatePct ?? DEFAULT_APPRECIATION_RATE,
+      selling_cost_pct: payload.sellingCostPct ?? DEFAULT_SELLING_COST_PCT,
       building_value_pct: payload.buildingValuePct,
       depreciation_years: payload.depreciationYears,
       include_interest_deduction: payload.includeInterestDeduction ?? true,

@@ -5,6 +5,7 @@ import { Building2, Plus, Trash2, DollarSign } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { cn } from "@/lib/utils";
 
@@ -22,7 +23,7 @@ export function MultiFamilyUnitsSection({
   form,
   isHouseHack = false,
 }: MultiFamilyUnitsSectionProps) {
-  const { register, control } = form;
+  const { register, control, watch, setValue } = form;
 
   // Subscribe to form errors explicitly so nested `units[i].field` updates re-render
   // this list (reading `form.formState.errors` from a passed `UseFormReturn` alone
@@ -33,6 +34,7 @@ export function MultiFamilyUnitsSection({
     control,
     name: "units",
   });
+  const units = watch("units") ?? [];
 
   // `errors.units` is an array of per-index FieldErrors (see lib/investcalc-schema.ts).
   const unitsErrorsArray = Array.isArray(errors.units) ? errors.units : undefined;
@@ -45,6 +47,14 @@ export function MultiFamilyUnitsSection({
 
   const handleAddUnit = () => {
     append({ bedrooms: undefined, bathrooms: undefined, sqft: undefined, monthlyRent: undefined, isOwnerOccupied: false });
+  };
+
+  const setOwnerOccupiedUnit = (index: number, checked: boolean) => {
+    const nextUnits = (watch("units") ?? []).map((unit, unitIndex) => ({
+      ...unit,
+      isOwnerOccupied: checked ? unitIndex === index : unitIndex === index ? false : Boolean(unit?.isOwnerOccupied),
+    }));
+    setValue("units", nextUnits, { shouldDirty: true, shouldValidate: true });
   };
 
   return (
@@ -68,8 +78,13 @@ export function MultiFamilyUnitsSection({
       </div>
 
       <div className="space-y-4">
+        {isHouseHack && (
+          <p className="text-xs text-muted-foreground">
+            Choose exactly one unit as the owner-occupied unit. All other completed units are treated as rentals.
+          </p>
+        )}
         {fields.map((field, index) => {
-          const isOwner = isHouseHack && index === 0;
+          const isOwner = isHouseHack && Boolean(units[index]?.isOwnerOccupied);
           const unitErrors = errors.units?.[index];
 
           return (
@@ -97,6 +112,25 @@ export function MultiFamilyUnitsSection({
                   </button>
                 )}
               </div>
+
+              {isHouseHack && (
+                <div className="mb-4 flex items-center justify-between rounded-lg border border-border bg-muted/30 px-3 py-2.5">
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Owner occupied unit</p>
+                    <p className="text-[11px] text-muted-foreground">
+                      Turn this on for the unit you live in.
+                    </p>
+                  </div>
+                  <Switch
+                    checked={isOwner}
+                    onCheckedChange={(checked: boolean) => setOwnerOccupiedUnit(index, checked)}
+                    aria-label={`Mark unit ${index + 1} as owner occupied`}
+                  />
+                </div>
+              )}
+              {isHouseHack && unitErrors?.isOwnerOccupied?.message ? (
+                <FieldError message={unitErrors.isOwnerOccupied.message} />
+              ) : null}
 
               <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 <div>

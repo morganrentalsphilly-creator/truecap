@@ -1,13 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Controller, UseFormReturn } from "react-hook-form";
 import { Percent, ChevronDown, ChevronUp, Info, DollarSign } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { defaultValues, InvestmentFormValues } from "@/lib/investcalc-schema";
+import { InvestmentFormValues } from "@/lib/investcalc-schema";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
 interface OperatingExpensesSectionProps {
@@ -26,25 +27,38 @@ const moneySetValueAs = (v: unknown) => {
   return Number.isFinite(n) ? n : undefined;
 };
 
-function getAgeAdjustmentMultipliers(age: number): {
-  maintenanceMultiplier: number;
-  capexMultiplier: number;
-} {
-  if (age <= 5) {
-    return { maintenanceMultiplier: 0.8, capexMultiplier: 0.8 };
-  }
-  if (age <= 15) {
-    return { maintenanceMultiplier: 1, capexMultiplier: 1 };
-  }
-  if (age <= 30) {
-    return { maintenanceMultiplier: 1.2, capexMultiplier: 1.3 };
-  }
-  return { maintenanceMultiplier: 1.5, capexMultiplier: 1.6 };
-}
-
-function formatPct(value: number): string {
-  if (Number.isInteger(value)) return `${value}%`;
-  return `${value.toFixed(1).replace(/\.0$/, "")}%`;
+function FieldLabelWithTooltip({
+  label,
+  tooltip,
+}: {
+  label: string;
+  tooltip?: ReactNode;
+}) {
+  return (
+    <span className="inline-flex items-center gap-1.5">
+      <span>{label}</span>
+      {tooltip ? (
+        <Tooltip delayDuration={150}>
+          <TooltipTrigger asChild>
+            <button
+              type="button"
+              className="inline-flex h-4 w-4 items-center justify-center rounded-full text-muted-foreground hover:text-foreground"
+              aria-label={`${label} guidance`}
+            >
+              <Info className="h-3.5 w-3.5" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent
+            side="top"
+            sideOffset={6}
+            className="max-w-xs border border-border bg-popover px-3 py-2 text-popover-foreground shadow-md"
+          >
+            {tooltip}
+          </TooltipContent>
+        </Tooltip>
+      ) : null}
+    </span>
+  );
 }
 
 export function OperatingExpensesSection({
@@ -60,31 +74,18 @@ export function OperatingExpensesSection({
   } = form;
 
   const propertyTaxPct = watch("propertyTaxPct");
+  const insuranceInputMode = watch("insuranceInputMode");
+  const insurancePct = watch("insurancePct");
   const insuranceMonthly = watch("insuranceMonthly");
-  const yearBuilt = watch("yearBuilt");
-  const maintenancePct = watch("maintenancePct");
-  const capexPct = watch("capexPct");
   const purchasePriceForEstimate = Number.isFinite(purchasePrice) ? purchasePrice : 0;
   const propertyTaxPctEffective = propertyTaxPct ?? 1.1;
   const propertyTaxEst = Math.round((purchasePriceForEstimate * (propertyTaxPctEffective / 100)) / 12);
-  const insuranceDefault = Math.round((purchasePriceForEstimate * 0.005) / 12);
-  const insuranceEst = Math.round(insuranceMonthly ?? insuranceDefault);
-  const currentYear = new Date().getFullYear();
-  const hasValidYearBuilt = Number.isFinite(yearBuilt);
-  const propertyAge = hasValidYearBuilt ? Math.max(currentYear - yearBuilt, 0) : 0;
-  const ageMultipliers = hasValidYearBuilt ? getAgeAdjustmentMultipliers(propertyAge) : null;
-  const maintenancePctEffective =
-    ageMultipliers && maintenancePct === defaultValues.maintenancePct
-      ? maintenancePct * ageMultipliers.maintenanceMultiplier
-      : maintenancePct;
-  const capexPctEffective =
-    ageMultipliers && capexPct === defaultValues.capexPct
-      ? capexPct * ageMultipliers.capexMultiplier
-      : capexPct;
-  const showMaintenanceAgeAdjustment =
-    maintenancePct === defaultValues.maintenancePct &&
-    maintenancePctEffective !== maintenancePct;
-  const showCapexAgeAdjustment = capexPct === defaultValues.capexPct && capexPctEffective !== capexPct;
+  const insurancePctEffective = insurancePct ?? 0.5;
+  const insuranceDefault = Math.round((purchasePriceForEstimate * (insurancePctEffective / 100)) / 12);
+  const insuranceEst =
+    insuranceInputMode === "monthly"
+      ? Math.round(insuranceMonthly ?? insuranceDefault)
+      : insuranceDefault;
 
   return (
     <div className="bg-[var(--brand-orange-light)] rounded-2xl border border-[var(--brand-orange)]/20 shadow-sm p-4 sm:p-6">
@@ -176,26 +177,78 @@ export function OperatingExpensesSection({
 
             <div>
               <Label className="text-xs font-semibold text-[var(--brand-orange)] mb-1.5 block uppercase tracking-wide">
-                Insurance (Monthly $)
+                Insurance Input
+              </Label>
+              <Controller
+                name="insuranceInputMode"
+                control={control}
+                render={({ field }) => (
+                  <div className="flex rounded-lg border border-[var(--brand-orange)]/30 bg-background p-1">
+                    {[
+                      { value: "percent", label: "Annual %" },
+                      { value: "monthly", label: "Monthly $" },
+                    ].map((option) => (
+                      <button
+                        key={option.value}
+                        type="button"
+                        onClick={() => field.onChange(option.value)}
+                        className={cn(
+                          "flex-1 rounded-md px-3 py-2 text-xs font-semibold transition-colors",
+                          field.value === option.value
+                            ? "bg-[var(--brand-orange)] text-white"
+                            : "text-muted-foreground hover:text-foreground"
+                        )}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              />
+              <p className="text-[11px] text-muted-foreground mt-1">
+                Choose whether insurance is modeled from an annual percent or a flat monthly amount.
+              </p>
+            </div>
+
+            <div>
+              <Label className="text-xs font-semibold text-[var(--brand-orange)] mb-1.5 block uppercase tracking-wide">
+                {insuranceInputMode === "monthly" ? "Insurance (Monthly $)" : "Insurance % (Annual)"}
               </Label>
               <div className="relative">
-                <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                {insuranceInputMode === "monthly" ? (
+                  <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                ) : null}
                 <Input
-                  {...register("insuranceMonthly", { setValueAs: moneySetValueAs })}
+                  {...register(insuranceInputMode === "monthly" ? "insuranceMonthly" : "insurancePct", {
+                    setValueAs: moneySetValueAs,
+                  })}
                   type="number"
-                  step="1"
+                  step={insuranceInputMode === "monthly" ? "1" : "0.01"}
                   min={0}
-                  placeholder={String(insuranceEst)}
+                  placeholder={insuranceInputMode === "monthly" ? String(insuranceEst) : "0.50"}
                   className={cn(
-                    "pl-8 border-[var(--brand-orange)]/30 bg-background focus-visible:ring-[var(--brand-orange)]/30",
-                    errors.insuranceMonthly && "border-destructive"
+                    insuranceInputMode === "monthly" ? "pl-8" : "pr-8",
+                    "border-[var(--brand-orange)]/30 bg-background focus-visible:ring-[var(--brand-orange)]/30",
+                    (insuranceInputMode === "monthly" ? errors.insuranceMonthly : errors.insurancePct) &&
+                      "border-destructive"
                   )}
                 />
+                {insuranceInputMode === "percent" ? (
+                  <Percent className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                ) : null}
               </div>
               <p className="text-[11px] text-muted-foreground mt-1">
-                Fixed monthly insurance amount.
+                {insuranceInputMode === "monthly"
+                  ? "Flat monthly insurance cost. Leave blank to fall back to the current estimate."
+                  : "Annual insurance rate applied to purchase price. Leave blank to use the default 0.5% estimate."}
               </p>
-              <FieldError message={errors.insuranceMonthly?.message} />
+              <FieldError
+                message={
+                  insuranceInputMode === "monthly"
+                    ? errors.insuranceMonthly?.message
+                    : errors.insurancePct?.message
+                }
+              />
             </div>
 
             <div>
@@ -245,7 +298,17 @@ export function OperatingExpensesSection({
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div>
           <Label className="text-xs font-semibold text-[var(--brand-orange)] mb-1.5 block uppercase tracking-wide">
-            Maintenance %
+            <FieldLabelWithTooltip
+              label="Maintenance %"
+              tooltip={
+                <div className="space-y-1 text-xs leading-snug">
+                  <p className="font-semibold text-foreground">Typical benchmark ranges</p>
+                  <p>New property: 5–8%</p>
+                  <p>Older property: 10–15%</p>
+                  <p className="text-muted-foreground">Guidance only. Your input is used exactly as entered.</p>
+                </div>
+              }
+            />
           </Label>
           <div className="relative">
             <Input
@@ -260,12 +323,6 @@ export function OperatingExpensesSection({
             />
             <Percent className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
           </div>
-          {showMaintenanceAgeAdjustment && (
-            <p className="mt-1 text-[11px] text-muted-foreground">
-              {formatPct(maintenancePct)} &rarr; {formatPct(maintenancePctEffective)}{" "}
-              <span className="text-[var(--brand-orange)]">(age adjusted)</span>
-            </p>
-          )}
           <FieldError message={errors.maintenancePct?.message} />
         </div>
 
@@ -311,7 +368,17 @@ export function OperatingExpensesSection({
 
         <div>
           <Label className="text-xs font-semibold text-[var(--brand-orange)] mb-1.5 block uppercase tracking-wide">
-            CapEx %
+            <FieldLabelWithTooltip
+              label="CapEx %"
+              tooltip={
+                <div className="space-y-1 text-xs leading-snug">
+                  <p className="font-semibold text-foreground">Typical benchmark ranges</p>
+                  <p>New property: 5–8%</p>
+                  <p>Older property: 10–15%</p>
+                  <p className="text-muted-foreground">Guidance only. Your input is used exactly as entered.</p>
+                </div>
+              }
+            />
           </Label>
           <div className="relative">
             <Input
@@ -326,22 +393,9 @@ export function OperatingExpensesSection({
             />
             <Percent className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
           </div>
-          {showCapexAgeAdjustment && (
-            <p className="mt-1 text-[11px] text-muted-foreground">
-              {formatPct(capexPct)} &rarr; {formatPct(capexPctEffective)}{" "}
-              <span className="text-[var(--brand-orange)]">(age adjusted)</span>
-            </p>
-          )}
           <FieldError message={errors.capexPct?.message} />
         </div>
       </div>
-
-      {(showMaintenanceAgeAdjustment || showCapexAgeAdjustment) && (
-        <p className="mt-3 text-[11px] text-muted-foreground inline-flex items-center gap-1.5">
-          <Info className="w-3.5 h-3.5 text-[var(--brand-orange)]" />
-          Adjusted based on property age
-        </p>
-      )}
 
       {showAdvanced && (
         <>
@@ -428,6 +482,56 @@ export function OperatingExpensesSection({
                 <Percent className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
               </div>
               <FieldError message={errors.rentGrowthPct?.message} />
+            </div>
+
+            <div>
+              <Label className="text-xs font-semibold text-[var(--brand-orange)] mb-1.5 block uppercase tracking-wide">
+                Appreciation Rate % <span className="text-[10px] text-muted-foreground">(Exit scenarios)</span>
+              </Label>
+              <div className="relative">
+                <Input
+                  {...register("appreciationRatePct", { setValueAs: moneySetValueAs })}
+                  type="number"
+                  step="0.01"
+                  min={0}
+                  max={100}
+                  placeholder="3"
+                  className={cn(
+                    "pr-8 border-[var(--brand-orange)]/30 bg-background focus-visible:ring-[var(--brand-orange)]/30",
+                    errors.appreciationRatePct && "border-destructive"
+                  )}
+                />
+                <Percent className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+              </div>
+              <p className="text-[11px] text-muted-foreground mt-1">
+                Optional. Leave blank to use the default 3% annual appreciation.
+              </p>
+              <FieldError message={errors.appreciationRatePct?.message} />
+            </div>
+
+            <div>
+              <Label className="text-xs font-semibold text-[var(--brand-orange)] mb-1.5 block uppercase tracking-wide">
+                Selling Cost % <span className="text-[10px] text-muted-foreground">(Exit scenarios)</span>
+              </Label>
+              <div className="relative">
+                <Input
+                  {...register("sellingCostPct", { setValueAs: moneySetValueAs })}
+                  type="number"
+                  step="0.01"
+                  min={0}
+                  max={100}
+                  placeholder="6"
+                  className={cn(
+                    "pr-8 border-[var(--brand-orange)]/30 bg-background focus-visible:ring-[var(--brand-orange)]/30",
+                    errors.sellingCostPct && "border-destructive"
+                  )}
+                />
+                <Percent className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+              </div>
+              <p className="text-[11px] text-muted-foreground mt-1">
+                Optional. Leave blank to use the default 6% selling cost.
+              </p>
+              <FieldError message={errors.sellingCostPct?.message} />
             </div>
           </div>
 

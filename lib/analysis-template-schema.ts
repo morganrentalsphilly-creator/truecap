@@ -18,7 +18,9 @@ export const analysisTemplateSchema = z.object({
     )
     .optional(),
   propertyTaxPct: z.number().min(0, "Must be 0 or more").max(100, "Max 100%"),
-  insuranceMo: z.number().min(0, "Must be 0 or more").max(1_000_000, "Amount too large"),
+  insuranceInputMode: z.enum(["percent", "monthly"]),
+  insurancePct: z.number().min(0, "Must be 0 or more").max(100, "Max 100%").optional(),
+  insuranceMo: z.number().min(0, "Must be 0 or more").max(1_000_000, "Amount too large").optional(),
   maintenancePct: z.number().min(0, "Must be 0 or more").max(100, "Max 100%"),
   vacancyPct: z.number().min(0, "Must be 0 or more").max(100, "Max 100%"),
   managementPct: z.number().min(0, "Must be 0 or more").max(100, "Max 100%"),
@@ -28,10 +30,30 @@ export const analysisTemplateSchema = z.object({
   downPaymentPct: z.number().min(0, "Must be 0 or more").max(100, "Max 100%"),
   expenseGrowthPct: z.number().min(0, "Must be 0 or more").max(100, "Max 100%"),
   rentGrowthPct: z.number().min(0, "Must be 0 or more").max(100, "Max 100%"),
+  /** Optional; defaults to 3% annual appreciation when saving if omitted. */
+  appreciationRatePct: z.number().min(0, "Must be 0 or more").max(100, "Max 100%").optional(),
+  /** Optional; defaults to 6% selling cost when saving if omitted. */
+  sellingCostPct: z.number().min(0, "Must be 0 or more").max(100, "Max 100%").optional(),
   buildingValuePct: z.number().min(0, "Must be 0 or more").max(100, "Max 100%"),
   depreciationYears: z.union([z.literal(27.5), z.literal(39)]),
   includeInterestDeduction: z.boolean().optional(),
   taxRatePct: z.number().min(0, "Must be 0 or more").max(100, "Max 100%").optional(),
+}).superRefine((values, ctx) => {
+  if (values.insuranceInputMode === "percent" && values.insurancePct == null) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["insurancePct"],
+      message: "Enter annual insurance percent",
+    });
+  }
+
+  if (values.insuranceInputMode === "monthly" && values.insuranceMo == null) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["insuranceMo"],
+      message: "Enter monthly insurance cost",
+    });
+  }
 });
 
 export type AnalysisTemplateInput = z.infer<typeof analysisTemplateSchema>;

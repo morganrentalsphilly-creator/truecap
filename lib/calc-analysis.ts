@@ -1,14 +1,6 @@
-import { defaultValues, InvestmentFormValues, isValidRentalUnit } from "./investcalc-schema";
-
-export interface ProjectionYear {
-  year: number;
-  rentalIncomeAnnual: number;
-  operatingExpensesAnnual: number;
-  debtServiceAnnual: number;
-  netCashFlowAnnual: number;
-  taxSavingsAnnual: number;
-  afterTaxCashFlowAnnual: number;
-}
+import { InvestmentFormValues, isValidRentalUnit } from "./investcalc-schema";
+import { buildTaxStrategyProjection, type TaxStrategyYear } from "./tax-strategy";
+import { buildTenYearProjection, ProjectionYear } from "./ten-year-projections";
 
 export interface AnalysisResult {
   // income
@@ -16,6 +8,9 @@ export interface AnalysisResult {
   // expenses
   propertyTax: number;
   insurance: number;
+  insuranceInputMode: "percent" | "monthly";
+  insurancePctInput: number | null;
+  insurancePctEffective: number;
   hoa: number;
   utilities: number;
   maintenance: number;
@@ -32,6 +27,11 @@ export interface AnalysisResult {
   // debt service
   loanAmount: number;
   monthlyPayment: number;
+  loanPrincipalAndInterest: number;
+  propertyTaxMonthly: number;
+  insuranceMonthly: number;
+  hoaMonthly: number;
+  totalMonthlyPaymentDebug: number;
   // cash flow
   netCashFlow: number;
   annualCashFlow: number;
@@ -43,6 +43,8 @@ export interface AnalysisResult {
   taxSavingsMonthly: number;
   afterTaxCF: number;
   annualDepreciation: number;
+  yearlyInterestSchedule: number[];
+  effectiveTaxRate: number;
   // cash required
   downPaymentPct: number;
   closingCostsPct: number;
@@ -51,6 +53,8 @@ export interface AnalysisResult {
   totalCashRequired: number;
   propertyAge: number;
   tenYearProjection: ProjectionYear[];
+  /** Full 10-year tax strategy projection (same engine as the Tax Strategy panel). */
+  taxStrategyYears: TaxStrategyYear[];
 }
 
 function calcMonthlyPayment(principal: number, annualRate: number, years: number): number {
@@ -94,23 +98,6 @@ function calculateYearlyInterestSchedule(
   return yearlyInterest;
 }
 
-function getAgeAdjustments(age: number): {
-  maintenanceMultiplier: number;
-  capexMultiplier: number;
-  riskPenalty: number;
-} {
-  if (age <= 5) {
-    return { maintenanceMultiplier: 0.8, capexMultiplier: 0.8, riskPenalty: 0 };
-  }
-  if (age <= 15) {
-    return { maintenanceMultiplier: 1, capexMultiplier: 1, riskPenalty: 2 };
-  }
-  if (age <= 30) {
-    return { maintenanceMultiplier: 1.2, capexMultiplier: 1.3, riskPenalty: 5 };
-  }
-  return { maintenanceMultiplier: 1.5, capexMultiplier: 1.6, riskPenalty: 10 };
-}
-
 export function calculateAnalysis(values: InvestmentFormValues): AnalysisResult {
   const {
     purchasePrice,
@@ -133,11 +120,17 @@ export function calculateAnalysis(values: InvestmentFormValues): AnalysisResult 
     expenseGrowthPct,
     rentGrowthPct,
     propertyTaxPct,
+    insuranceInputMode,
+    insurancePct,
     insuranceMonthly,
     hoaMonthly,
     utilitiesMonthly,
   } = values;
-  const validUnits = (units ?? []).filter((unit) => isValidRentalUnit(unit));
+  const validUnits = (units ?? []).filter((unit) =>
+    isValidRentalUnit(unit, {
+      allowZeroRent: propertyType === "owner-occupant" && !!unit?.isOwnerOccupied,
+    })
+  );
 
   // Monthly income
   let monthlyRentalIncome = 0;
@@ -154,21 +147,21 @@ export function calculateAnalysis(values: InvestmentFormValues): AnalysisResult 
   const currentYear = new Date().getFullYear();
   const hasValidYearBuilt = Number.isFinite(yearBuilt);
   const propertyAge = hasValidYearBuilt ? Math.max(currentYear - (yearBuilt ?? currentYear), 0) : 0;
-  const ageAdjustments = hasValidYearBuilt ? getAgeAdjustments(propertyAge) : null;
-  const isDefaultMaintenance = maintenancePct === defaultValues.maintenancePct;
-  const isDefaultCapex = capexPct === defaultValues.capexPct;
-  const maintenancePctEffective =
-    ageAdjustments && isDefaultMaintenance ? maintenancePct * ageAdjustments.maintenanceMultiplier : maintenancePct;
-  const capexPctEffective = ageAdjustments && isDefaultCapex ? capexPct * ageAdjustments.capexMultiplier : capexPct;
-  const maintenanceAgeAdjusted = isDefaultMaintenance && maintenancePctEffective !== maintenancePct;
-  const capexAgeAdjusted = isDefaultCapex && capexPctEffective !== capexPct;
+  const maintenancePctEffective = maintenancePct;
+  const capexPctEffective = capexPct;
+  const maintenanceAgeAdjusted = false;
+  const capexAgeAdjusted = false;
 
   // Operating expenses (property tax is percentage based; insurance/others remain monthly overrides)
   const propertyTaxPctEffective = propertyTaxPct ?? 1.1;
   const propertyTaxDefault = Math.round((purchasePrice * (propertyTaxPctEffective / 100)) / 12);
-  const insuranceDefault = Math.round((purchasePrice * 0.005) / 12);
+  const insurancePctEffective = insurancePct ?? 0.5;
+  const insuranceDefault = Math.round((purchasePrice * (insurancePctEffective / 100)) / 12);
   const propertyTax = propertyTaxDefault;
-  const insurance = Math.round(insuranceMonthly ?? insuranceDefault);
+  const insurance =
+    insuranceInputMode === "monthly"
+      ? Math.round(insuranceMonthly ?? insuranceDefault)
+      : insuranceDefault;
   const hoa = Math.round(hoaMonthly ?? 0);
   const utilities = Math.round(utilitiesMonthly ?? 0);
   const maintenance = Math.round((annualRent * (maintenancePctEffective / 100)) / 12);
@@ -224,40 +217,38 @@ export function calculateAnalysis(values: InvestmentFormValues): AnalysisResult 
   const taxSavingsMonthly = Math.round(annualTaxSavings / 12);
   const afterTaxCF = netCashFlow + taxSavingsMonthly;
 
-  // 10-year projection with separate rent and expense growth assumptions.
-  const annualDebtService = monthlyPayment * 12;
-  const expenseGrowthFactor = 1 + expenseGrowthPct / 100;
-  const rentGrowthFactor = 1 + rentGrowthPct / 100;
-  const tenYearProjection: ProjectionYear[] = Array.from({ length: 10 }, (_, i) => {
-    const year = i + 1;
-    const rentGrowth = Math.pow(rentGrowthFactor, i);
-    const expenseGrowth = Math.pow(expenseGrowthFactor, i);
-    const rentalIncomeAnnual = Math.round(annualRent * rentGrowth);
-    const operatingExpensesAnnual = Math.round(totalOperatingExpenses * 12 * expenseGrowth);
-    const netCashFlowAnnual = rentalIncomeAnnual - operatingExpensesAnnual - annualDebtService;
-    const annualInterestForYear = yearlyInterestSchedule[i] ?? 0;
-    const taxableShieldBaseForYear =
-      includeInterestDeduction === false
-        ? annualDepreciation
-        : annualDepreciation + annualInterestForYear;
-    const taxSavingsAnnual = Math.round(taxableShieldBaseForYear * effectiveTaxRate);
-    const afterTaxCashFlowAnnual = netCashFlowAnnual + taxSavingsAnnual;
+  const tenYearProjection = buildTenYearProjection({
+    monthlyRentalIncome,
+    totalOperatingExpenses,
+    monthlyPayment,
+    taxSavingsMonthly,
+    annualDepreciation,
+    yearlyInterestSchedule,
+    rentGrowthPct,
+    expenseGrowthPct,
+    taxRate: effectiveTaxRate,
+    includeInterestDeduction: includeInterestDeduction !== false,
+  });
 
-    return {
-      year,
-      rentalIncomeAnnual,
-      operatingExpensesAnnual,
-      debtServiceAnnual: annualDebtService,
-      netCashFlowAnnual,
-      taxSavingsAnnual,
-      afterTaxCashFlowAnnual,
-    };
+  const annualDepreciationRounded = Math.round(annualDepreciation);
+  const taxStrategyYears = buildTaxStrategyProjection({
+    monthlyRentalIncome,
+    totalOperatingExpenses,
+    annualDepreciation: annualDepreciationRounded,
+    yearlyInterestSchedule,
+    rentGrowthPct,
+    expenseGrowthPct,
+    taxRate: effectiveTaxRate,
+    includeInterestDeduction: includeInterestDeduction !== false,
   });
 
   return {
     monthlyRentalIncome,
     propertyTax,
     insurance,
+    insuranceInputMode,
+    insurancePctInput: insurancePct ?? null,
+    insurancePctEffective,
     hoa,
     utilities,
     maintenance,
@@ -273,6 +264,11 @@ export function calculateAnalysis(values: InvestmentFormValues): AnalysisResult 
     totalOperatingExpenses,
     loanAmount,
     monthlyPayment,
+    loanPrincipalAndInterest: monthlyPayment,
+    propertyTaxMonthly: propertyTax,
+    insuranceMonthly: insurance,
+    hoaMonthly: hoa,
+    totalMonthlyPaymentDebug: monthlyPayment + propertyTax + insurance + hoa,
     netCashFlow,
     annualCashFlow,
     cocReturn,
@@ -280,7 +276,9 @@ export function calculateAnalysis(values: InvestmentFormValues): AnalysisResult 
     dscr,
     taxSavingsMonthly,
     afterTaxCF,
-    annualDepreciation: Math.round(annualDepreciation),
+    annualDepreciation: annualDepreciationRounded,
+    yearlyInterestSchedule,
+    effectiveTaxRate,
     downPaymentPct,
     closingCostsPct: closingCostsPctEffective,
     downPayment,
@@ -288,6 +286,7 @@ export function calculateAnalysis(values: InvestmentFormValues): AnalysisResult 
     totalCashRequired,
     propertyAge,
     tenYearProjection,
+    taxStrategyYears,
   };
 }
 

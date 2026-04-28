@@ -16,6 +16,8 @@ export type DealAssumptions = {
     maintenancePct: number | null;
     capexPct: number | null;
     propertyTaxPct: number | null;
+    insuranceInputMode: "percent" | "monthly" | null;
+    insurancePct: number | null;
     insuranceMonthly: number | null;
   };
 };
@@ -45,10 +47,10 @@ function coerceUnit(u: unknown) {
   const r = asRecord(u);
   if (!r) return null;
   return {
-    bedrooms: numFromUnknown(r.bedrooms),
-    bathrooms: numFromUnknown(r.bathrooms),
-    sqft: numFromUnknown(r.sqft),
-    monthlyRent: numFromUnknown(r.monthlyRent),
+    bedrooms: numFromUnknown(r.bedrooms) ?? undefined,
+    bathrooms: numFromUnknown(r.bathrooms) ?? undefined,
+    sqft: numFromUnknown(r.sqft) ?? undefined,
+    monthlyRent: numFromUnknown(r.monthlyRent) ?? undefined,
     isOwnerOccupied: Boolean(r.isOwnerOccupied),
   };
 }
@@ -61,7 +63,11 @@ function rentalIncomeFromSnapshot(snapshot: Record<string, unknown>): number | n
   const rawUnits = snapshot.units;
   if (!Array.isArray(rawUnits)) return null;
   const units = rawUnits.map(coerceUnit).filter(Boolean) as NonNullable<ReturnType<typeof coerceUnit>>[];
-  const valid = units.filter((u) => isValidRentalUnit(u));
+  const valid = units.filter((u) =>
+    isValidRentalUnit(u, {
+      allowZeroRent: pt === "owner-occupant" && !!u.isOwnerOccupied,
+    })
+  );
   if (valid.length === 0) return null;
   if (pt === "owner-occupant") {
     return valid
@@ -95,11 +101,19 @@ type RowFallback = {
   down_payment_pct?: number | string | null;
   management_pct?: number | string | null;
   monthly_rent?: number | string | null;
+  insurance_input_mode?: string | null;
+  insurance_pct?: number | string | null;
   insurance_mo?: number | string | null;
 };
 
 export function buildDealAssumptions(formSnapshot: unknown, row: RowFallback): DealAssumptions {
   const s = asRecord(formSnapshot) ?? {};
+  const insuranceInputMode: DealAssumptions["expenses"]["insuranceInputMode"] =
+    s.insuranceInputMode === "monthly" || s.insuranceInputMode === "percent"
+      ? s.insuranceInputMode
+      : row.insurance_input_mode === "monthly" || row.insurance_input_mode === "percent"
+        ? row.insurance_input_mode
+        : null;
 
   const financing = {
     interestRatePct: numFromUnknown(s.interestRate) ?? toNumber(row.interest_rate_pct),
@@ -118,6 +132,8 @@ export function buildDealAssumptions(formSnapshot: unknown, row: RowFallback): D
     maintenancePct: numFromUnknown(s.maintenancePct) ?? toNumber(row.maintenance_pct),
     capexPct: numFromUnknown(s.capexPct) ?? toNumber(row.capex_pct),
     propertyTaxPct: numFromUnknown(s.propertyTaxPct) ?? toNumber(row.property_tax_pct),
+    insuranceInputMode,
+    insurancePct: numFromUnknown(s.insurancePct) ?? toNumber(row.insurance_pct),
     insuranceMonthly: numFromUnknown(s.insuranceMonthly) ?? toNumber(row.insurance_mo),
   };
 

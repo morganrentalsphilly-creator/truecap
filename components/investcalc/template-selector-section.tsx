@@ -27,6 +27,7 @@ import {
   listAnalysisTemplatesAction,
   updateAnalysisTemplateAction,
 } from "@/app/actions/analysis-templates";
+import { DEFAULT_APPRECIATION_RATE, DEFAULT_SELLING_COST_PCT } from "@/lib/exit-scenarios";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -58,10 +59,16 @@ import { cn } from "@/lib/utils";
 
 interface TemplateSelectorSectionProps {
   form: UseFormReturn<InvestmentFormValues>;
+  savedTemplateFallback?: {
+    id: string;
+    templateName: string;
+    templateDescription: string | null;
+  } | null;
 }
 
 type NumericTemplateField =
   | "propertyTaxPct"
+  | "insurancePct"
   | "insuranceMo"
   | "maintenancePct"
   | "vacancyPct"
@@ -72,6 +79,8 @@ type NumericTemplateField =
   | "downPaymentPct"
   | "expenseGrowthPct"
   | "rentGrowthPct"
+  | "appreciationRatePct"
+  | "sellingCostPct"
   | "buildingValuePct"
   | "taxRatePct";
 
@@ -117,7 +126,10 @@ function NumberInputField({
   );
 }
 
-export function TemplateSelectorSection({ form }: TemplateSelectorSectionProps) {
+export function TemplateSelectorSection({
+  form,
+  savedTemplateFallback = null,
+}: TemplateSelectorSectionProps) {
   const { toast } = useToast();
   const [templates, setTemplates] = useState<AnalysisTemplateOption[]>([]);
   const [isLoadingTemplates, setIsLoadingTemplates] = useState(false);
@@ -134,6 +146,11 @@ export function TemplateSelectorSection({ form }: TemplateSelectorSectionProps) 
   const templateId = form.watch("templateId");
   const { errors: mainFormErrors } = useFormState({ control: form.control });
   const selectedTemplate = templates.find((t) => t.id === templateId);
+  const displayTemplate =
+    selectedTemplate ??
+    (savedTemplateFallback && savedTemplateFallback.id === templateId
+      ? savedTemplateFallback
+      : null);
   const isInteractionBlocked = isTemplateLocked || isLoadingTemplates;
 
   const templateForm = useForm<AnalysisTemplateInput>({
@@ -142,7 +159,9 @@ export function TemplateSelectorSection({ form }: TemplateSelectorSectionProps) 
       templateName: "",
       templateDescription: "",
       propertyTaxPct: form.getValues("propertyTaxPct") ?? 1.1,
-      insuranceMo: form.getValues("insuranceMonthly") ?? 0,
+      insuranceInputMode: form.getValues("insuranceInputMode"),
+      insurancePct: form.getValues("insurancePct"),
+      insuranceMo: form.getValues("insuranceMonthly"),
       maintenancePct: form.getValues("maintenancePct"),
       vacancyPct: form.getValues("vacancyPct"),
       managementPct: form.getValues("mgmtPct"),
@@ -152,6 +171,8 @@ export function TemplateSelectorSection({ form }: TemplateSelectorSectionProps) 
       downPaymentPct: form.getValues("downPaymentPct"),
       expenseGrowthPct: form.getValues("expenseGrowthPct"),
       rentGrowthPct: form.getValues("rentGrowthPct"),
+      appreciationRatePct: form.getValues("appreciationRatePct"),
+      sellingCostPct: form.getValues("sellingCostPct"),
       buildingValuePct: form.getValues("buildingValuePct"),
       depreciationYears: form.getValues("depreciationYears"),
       includeInterestDeduction: form.getValues("includeInterestDeduction"),
@@ -200,7 +221,9 @@ export function TemplateSelectorSection({ form }: TemplateSelectorSectionProps) 
 
   const applyTemplateToForm = (tpl: AnalysisTemplateOption) => {
     form.setValue("propertyTaxPct", tpl.propertyTaxPct, { shouldDirty: true, shouldValidate: true });
-    form.setValue("insuranceMonthly", tpl.insuranceMo, { shouldDirty: true });
+    form.setValue("insuranceInputMode", tpl.insuranceInputMode, { shouldDirty: true });
+    form.setValue("insurancePct", tpl.insurancePct ?? undefined, { shouldDirty: true });
+    form.setValue("insuranceMonthly", tpl.insuranceMo ?? undefined, { shouldDirty: true });
     form.setValue("maintenancePct", tpl.maintenancePct, { shouldDirty: true });
     form.setValue("vacancyPct", tpl.vacancyPct, { shouldDirty: true });
     form.setValue("mgmtPct", tpl.managementPct, { shouldDirty: true });
@@ -210,6 +233,8 @@ export function TemplateSelectorSection({ form }: TemplateSelectorSectionProps) 
     form.setValue("downPaymentPct", tpl.downPaymentPct, { shouldDirty: true });
     form.setValue("expenseGrowthPct", tpl.expenseGrowthPct, { shouldDirty: true });
     form.setValue("rentGrowthPct", tpl.rentGrowthPct, { shouldDirty: true });
+    form.setValue("appreciationRatePct", tpl.appreciationRatePct, { shouldDirty: true });
+    form.setValue("sellingCostPct", tpl.sellingCostPct, { shouldDirty: true });
     form.setValue("buildingValuePct", tpl.buildingValuePct, { shouldDirty: true });
     form.setValue("depreciationYears", tpl.depreciationYears, { shouldDirty: true });
     form.setValue("includeInterestDeduction", tpl.includeInterestDeduction, { shouldDirty: true });
@@ -240,7 +265,9 @@ export function TemplateSelectorSection({ form }: TemplateSelectorSectionProps) 
       templateName: "",
       templateDescription: "",
       propertyTaxPct: form.getValues("propertyTaxPct") ?? 1.1,
-      insuranceMo: form.getValues("insuranceMonthly") ?? 0,
+      insuranceInputMode: form.getValues("insuranceInputMode"),
+      insurancePct: form.getValues("insurancePct"),
+      insuranceMo: form.getValues("insuranceMonthly"),
       maintenancePct: form.getValues("maintenancePct"),
       vacancyPct: form.getValues("vacancyPct"),
       managementPct: form.getValues("mgmtPct"),
@@ -250,6 +277,8 @@ export function TemplateSelectorSection({ form }: TemplateSelectorSectionProps) 
       downPaymentPct: form.getValues("downPaymentPct"),
       expenseGrowthPct: form.getValues("expenseGrowthPct"),
       rentGrowthPct: form.getValues("rentGrowthPct"),
+      appreciationRatePct: form.getValues("appreciationRatePct"),
+      sellingCostPct: form.getValues("sellingCostPct"),
       buildingValuePct: form.getValues("buildingValuePct"),
       depreciationYears: form.getValues("depreciationYears"),
       includeInterestDeduction: form.getValues("includeInterestDeduction"),
@@ -265,7 +294,9 @@ export function TemplateSelectorSection({ form }: TemplateSelectorSectionProps) 
       templateName: template.templateName,
       templateDescription: template.templateDescription ?? "",
       propertyTaxPct: template.propertyTaxPct,
-      insuranceMo: template.insuranceMo,
+      insuranceInputMode: template.insuranceInputMode,
+      insurancePct: template.insurancePct ?? undefined,
+      insuranceMo: template.insuranceMo ?? undefined,
       maintenancePct: template.maintenancePct,
       vacancyPct: template.vacancyPct,
       managementPct: template.managementPct,
@@ -275,6 +306,8 @@ export function TemplateSelectorSection({ form }: TemplateSelectorSectionProps) 
       downPaymentPct: template.downPaymentPct,
       expenseGrowthPct: template.expenseGrowthPct,
       rentGrowthPct: template.rentGrowthPct,
+      appreciationRatePct: template.appreciationRatePct,
+      sellingCostPct: template.sellingCostPct,
       buildingValuePct: template.buildingValuePct,
       depreciationYears: template.depreciationYears,
       includeInterestDeduction: template.includeInterestDeduction,
@@ -361,12 +394,12 @@ export function TemplateSelectorSection({ form }: TemplateSelectorSectionProps) 
                 <p className="text-sm font-semibold text-primary truncate">
                   {isTemplateLocked
                     ? "Templates are locked"
-                    : selectedTemplate?.templateName ?? "No template"}
+                    : displayTemplate?.templateName ?? "No template"}
                 </p>
                 <p className="text-xs text-primary/70 truncate">
                   {isTemplateLocked
                     ? templateLockMessage
-                    : selectedTemplate?.templateDescription?.trim() || "Optional preset for assumptions"}
+                    : displayTemplate?.templateDescription?.trim() || "Optional preset for assumptions"}
                 </p>
               </div>
             </div>
@@ -549,12 +582,56 @@ export function TemplateSelectorSection({ form }: TemplateSelectorSectionProps) 
                   label="Property Tax % (Annual)"
                   hint="Annual property tax rate used in calculations."
                 />
-                <NumberInputField
-                  form={templateForm}
-                  name="insuranceMo"
-                  label="Insurance (Monthly $)"
-                  hint="Fixed monthly insurance cost."
+                <FormField
+                  control={templateForm.control}
+                  name="insuranceInputMode"
+                  render={({ field }) => (
+                    <FormItem className="sm:col-span-2 lg:col-span-1">
+                      <FormLabel className="text-xs font-semibold uppercase tracking-wide">
+                        Insurance Input
+                      </FormLabel>
+                      <div className="flex rounded-lg border border-border bg-muted/40 p-1">
+                        {[
+                          { value: "percent", label: "Annual %" },
+                          { value: "monthly", label: "Monthly $" },
+                        ].map((option) => (
+                          <button
+                            key={option.value}
+                            type="button"
+                            onClick={() => field.onChange(option.value)}
+                            className={cn(
+                              "flex-1 rounded-md px-3 py-2 text-xs font-semibold transition-colors",
+                              field.value === option.value
+                                ? "bg-primary text-primary-foreground"
+                                : "text-muted-foreground hover:text-foreground"
+                            )}
+                          >
+                            {option.label}
+                          </button>
+                        ))}
+                      </div>
+                      <p className="text-[11px] text-muted-foreground">
+                        Save insurance assumptions as an annual percent or a flat monthly cost.
+                      </p>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
+                {templateForm.watch("insuranceInputMode") === "percent" ? (
+                  <NumberInputField
+                    form={templateForm}
+                    name="insurancePct"
+                    label="Insurance % (Annual)"
+                    hint="Applied to purchase price each year."
+                  />
+                ) : (
+                  <NumberInputField
+                    form={templateForm}
+                    name="insuranceMo"
+                    label="Insurance (Monthly $)"
+                    hint="Fixed monthly insurance cost."
+                  />
+                )}
                 <NumberInputField form={templateForm} name="maintenancePct" label="Maintenance %" />
                 <NumberInputField form={templateForm} name="vacancyPct" label="Vacancy %" />
                 <NumberInputField form={templateForm} name="managementPct" label="Management %" />
@@ -595,6 +672,20 @@ export function TemplateSelectorSection({ form }: TemplateSelectorSectionProps) 
                   <NumberInputField form={templateForm} name="downPaymentPct" label="Down Payment %" />
                   <NumberInputField form={templateForm} name="expenseGrowthPct" label="Expense Growth %" />
                   <NumberInputField form={templateForm} name="rentGrowthPct" label="Rent Growth %" />
+                  <NumberInputField
+                    form={templateForm}
+                    name="appreciationRatePct"
+                    label="Annual Appreciation % (Optional)"
+                    hint={`Used for exit scenarios. Defaults to ${DEFAULT_APPRECIATION_RATE}% when omitted.`}
+                    allowEmpty
+                  />
+                  <NumberInputField
+                    form={templateForm}
+                    name="sellingCostPct"
+                    label="Selling Cost % (Optional)"
+                    hint={`Defaults to ${DEFAULT_SELLING_COST_PCT}% when omitted.`}
+                    allowEmpty
+                  />
                   <NumberInputField form={templateForm} name="buildingValuePct" label="Building Value %" />
                   <NumberInputField
                     form={templateForm}

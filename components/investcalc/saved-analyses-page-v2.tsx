@@ -10,14 +10,15 @@ import {
   ArrowUpDown,
   Building2,
   ChevronsUpDown,
+  Download,
+  ExternalLink,
   Home,
   KeyRound,
+  Loader2,
   Search,
   SlidersHorizontal,
   Sparkles,
-  TrendingDown,
   TrendingUp,
-  Trophy,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -28,17 +29,40 @@ import {
   PaginationItem,
 } from "@/components/ui/pagination";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { startCompareAction } from "@/app/actions/compare";
+import {
+  completeSavedAnalysisPdfExportAction,
+  getSavedAnalysisPdfExportAction,
+  getSavedDealForEditingAction,
+  updateSavedDealLifecycleStateAction,
+} from "@/app/actions/saved-analyses";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { FormField } from "../ui/form";
+import type { StoredRiskLevel } from "@/lib/compare-metrics";
 import { Switch } from "../ui/switch";
+import {
+  investmentFormSchema,
+  normalizeInvestmentFormSnapshot,
+  type InvestmentFormValues,
+} from "@/lib/investcalc-schema";
+import { calculateAnalysis, type AnalysisResult } from "@/lib/calc-analysis";
+import { generateInvestmentPDFBlob, type ReportData } from "@/lib/pdf-generator";
+import { createBrowserSupabaseClient } from "@/lib/supabase/client";
+import { ANALYSIS_PDF_BUCKET, PDF_SNAPSHOT_VERSION } from "@/lib/pdf-export-constants";
+import {
+  buildExitScenarios,
+  resolveExitScenarioRates,
+  type ExitScenarioYear,
+} from "@/lib/exit-scenarios";
 
 type SavedSignal = "strong-buy" | "buy" | "neutral" | "risky" | "avoid";
 type SavedPropertyType = "single-family" | "multi-family" | "owner-occupant";
 type SortField = "saved" | "cash-flow" | "coc" | "cap-rate" | "price";
 type SortDirection = "asc" | "desc";
+type DealStateFilter = "active" | "completed" | "archived" | "all";
 const PAGE_SIZE = 7;
+const SAVED_ANALYSIS_EDIT_DRAFT_KEY = "truecap_saved_analysis_edit_draft";
 
 export type SavedAnalysisListItem = {
   id: string;
@@ -51,8 +75,9 @@ export type SavedAnalysisListItem = {
   capRatePct: number | null;
   score: number | null;
   recommendation: "Strong Buy" | "Buy" | "Neutral" | "Risky" | "Avoid";
-  riskLevel: "Low Risk" | "Medium Risk" | "High Risk";
+  riskLevel: StoredRiskLevel;
   createdAt: string;
+  status: "active" | "completed" | "archived";
 };
 
 const SIGNAL_LABELS: Record<SavedSignal, string> = {
@@ -126,22 +151,198 @@ function getTypeIcon(type: SavedPropertyType | null) {
   return Home;
 }
 
+function getStatusBadge(item: SavedAnalysisListItem) {
+  if (item.status === "completed") {
+    return <Badge className="rounded-full border border-emerald-200 bg-emerald-100 text-emerald-700 text-[10px] font-semibold">Completed</Badge>;
+  }
+  if (item.status === "archived") {
+    return <Badge className="rounded-full border border-slate-200 bg-slate-100 text-slate-700 text-[10px] font-semibold">Archived</Badge>;
+  }
+  return null;
+}
+
+function numberFromSnapshot(value: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string" && value.trim() !== "") {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+  return null;
+}
+
+function stringFromSnapshot(value: unknown): string | null {
+  return typeof value === "string" && value.trim() ? value : null;
+}
+
+function buildReportDataFromSavedSnapshot(args: {
+  values: InvestmentFormValues;
+  result: AnalysisResult & Record<string, unknown>;
+  templateFallback: { templateName: string } | null;
+  exitYears: ExitScenarioYear[];
+}): ReportData {
+  const { values, result, templateFallback, exitYears } = args;
+  const projectionYears = Array.isArray(result.tenYearProjection) ? result.tenYearProjection : [];
+  const taxYears = Array.isArray(result.taxStrategyYears) ? result.taxStrategyYears : [];
+
+  const units =
+    values.propertyType === "single-family"
+      ? [
+          {
+            label: "Unit 1",
+            beds: Number(values.bedrooms ?? 0),
+            baths: Number(values.bathrooms ?? 0),
+            sqft: Number(values.sqft ?? 0),
+            rent: Number(values.monthlyRent ?? result.monthlyRentalIncome),
+          },
+        ]
+      : (values.units ?? []).map((unit, idx) => ({
+          label: `Unit ${idx + 1}`,
+          beds: Number(unit.bedrooms ?? 0),
+          baths: Number(unit.bathrooms ?? 0),
+          sqft: Number(unit.sqft ?? 0),
+          rent: Number(unit.monthlyRent ?? 0),
+        }));
+
+  const projectionRows = projectionYears.map((row) => ({
+    y: row.year,
+    rental: row.rentalIncomeAnnual,
+    opex: row.operatingExpensesAnnual,
+    debt: row.debtServiceAnnual,
+    net: row.netCashFlowAnnual,
+    tax: row.taxSavingsAnnual,
+    after: row.afterTaxCashFlowAnnual,
+    cum: row.cumulativeCashFlowAnnual,
+  }));
+
+  const year1Tax = taxYears.find((row) => row.year === 1);
+  const totalBenefit10y = taxYears.reduce((acc, row) => acc + row.netTaxBenefitAnnual, 0);
+  const taxRows = taxYears.map((row) => ({
+    y: row.year,
+    rental: row.rentalIncomeAnnual,
+    opex: row.operatingExpensesAnnual,
+    interest: row.mortgageInterestDeductionAnnual,
+    dep: row.depreciationDeductionAnnual,
+    total: row.totalDeductionsAnnual,
+    taxable: row.taxableRentalIncomeAnnual,
+    savings: row.taxSavingsAnnual,
+    benefit: row.netTaxBenefitAnnual,
+  }));
+
+  const bestExit = exitYears.reduce<ExitScenarioYear | null>(
+    (best, row) => (best === null || row.totalProfit > best.totalProfit ? row : best),
+    null
+  );
+  const year5Exit = exitYears.find((row) => row.year === 5);
+  const year10Exit = exitYears.find((row) => row.year === 10) ?? exitYears[exitYears.length - 1];
+  const score = numberFromSnapshot(result.score) ?? 0;
+  const recommendation = stringFromSnapshot(result.recommendation) ?? "Neutral";
+  const risk = stringFromSnapshot(result.riskLevel) ?? "Medium Risk";
+  const rationale =
+    stringFromSnapshot(result.explanation) ??
+    `Cash flow ${result.netCashFlow >= 0 ? "is positive" : "is negative"} at ${result.netCashFlow.toLocaleString("en-US")} per month with DSCR ${result.dscr.toFixed(2)}.`;
+
+  return {
+    generatedAt: new Date(),
+    property: {
+      address: values.address,
+      type: values.propertyType,
+      yearBuilt: Number(values.yearBuilt ?? new Date().getFullYear()),
+      purchasePrice: values.purchasePrice,
+      template: templateFallback?.templateName ?? (values.templateId ? "Template Applied" : "Custom"),
+    },
+    financing: {
+      downPaymentPct: values.downPaymentPct,
+      downPayment: result.downPayment,
+      interestRate: values.interestRate,
+      loanTerm: values.loanTermYears,
+      closingCostsPct: result.closingCostsPct,
+      closingCosts: result.closingCosts,
+    },
+    expenses: {
+      propertyTaxPct: Number(values.propertyTaxPct ?? 0),
+      insurancePct: Number(result.insurancePctEffective ?? 0),
+      maintenancePct: Number(result.maintenancePctEffective ?? 0),
+      vacancyPct: Number(values.vacancyPct),
+      managementPct: Number(values.mgmtPct),
+      capexPct: Number(result.capexPctEffective ?? 0),
+      hoaMonthly: Number(result.hoaMonthly),
+      utilitiesMonthly: Number(result.utilities),
+      rentGrowth: Number(values.rentGrowthPct),
+      expenseGrowth: Number(values.expenseGrowthPct),
+      appreciation: Number(values.appreciationRatePct ?? 3),
+      sellingCost: Number(values.sellingCostPct ?? 6),
+      taxRate: Number(values.taxRatePct ?? result.effectiveTaxRate * 100),
+    },
+    units,
+    performance: {
+      recommendation,
+      dealScore: score,
+      risk,
+      rationale,
+      monthlyCashFlow: result.netCashFlow,
+      cocReturn: result.cocReturn,
+      capRate: result.capRate,
+      dscr: result.dscr,
+      taxSavings: result.taxSavingsMonthly,
+      afterTaxCF: result.afterTaxCF,
+    },
+    projection10y: {
+      cumulativeCF: projectionRows[projectionRows.length - 1]?.cum ?? 0,
+      bestAnnualAfterTax: projectionRows.length
+        ? Math.max(...projectionRows.map((row) => row.after))
+        : 0,
+      totalAfterTax: projectionRows.reduce((acc, row) => acc + row.after, 0),
+      rows: projectionRows,
+    },
+    taxStrategy: {
+      year1Taxable: year1Tax?.taxableRentalIncomeAnnual ?? 0,
+      year1Savings: year1Tax?.taxSavingsAnnual ?? 0,
+      totalBenefit10y,
+      annualDepreciation: result.annualDepreciation,
+      rows: taxRows,
+    },
+    exitScenarios: {
+      bestYear: bestExit?.year ?? 1,
+      year5Profit: year5Exit?.totalProfit ?? 0,
+      year10Profit: year10Exit?.totalProfit ?? 0,
+      totalROI:
+        result.totalCashRequired > 0 && year10Exit
+          ? (year10Exit.totalProfit / result.totalCashRequired) * 100
+          : 0,
+      rows: exitYears.map((row) => ({
+        y: row.year,
+        value: row.propertyValue,
+        loan: row.remainingLoanBalance,
+        equity: row.equity,
+        netSale: row.netSaleProceeds,
+        profit: row.totalProfit,
+      })),
+    },
+  };
+}
+
 export function SavedAnalysesPage({
   initialItems,
   initialSelectedIds,
   activeSortField,
   activeSortDirection,
+  activeDealStateFilter,
 }: {
   initialItems: SavedAnalysisListItem[];
   initialSelectedIds?: string[];
   activeSortField: SortField | null;
   activeSortDirection: SortDirection | null;
+  activeDealStateFilter: DealStateFilter;
 }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { toast } = useToast();
   const [isStartingCompare, startCompareTransition] = useTransition();
+  const [isUpdatingStatus, startUpdateStatusTransition] = useTransition();
+  const [openingDealId, setOpeningDealId] = useState<string | null>(null);
+  const [exportingPdfDealId, setExportingPdfDealId] = useState<string | null>(null);
+  const [updatingDealStatusId, setUpdatingDealStatusId] = useState<string | null>(null);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [showcompare, setShowcompare] = useState(false);
@@ -217,18 +418,6 @@ export function SavedAnalysesPage({
     }
   }, [currentPage, pageCount]);
 
-  const summary = useMemo(() => {
-    const totalDeals = filteredItems.length;
-    const positiveCount = filteredItems.filter((item) => (item.netCashFlowMonthly ?? 0) > 0).length;
-    const monthlyCashFlow = filteredItems.reduce((sum, item) => sum + (item.netCashFlowMonthly ?? 0), 0);
-    const avgCoc =
-      filteredItems.length > 0
-        ? filteredItems.reduce((sum, item) => sum + (item.cocReturnPct ?? 0), 0) / filteredItems.length
-        : 0;
-    const totalInvested = filteredItems.reduce((sum, item) => sum + (item.purchasePrice ?? 0), 0);
-    return { totalDeals, positiveCount, monthlyCashFlow, avgCoc, totalInvested };
-  }, [filteredItems]);
-
   const handleSort = (field: SortField) => {
     const nextDirection: SortDirection =
       activeSortField !== field ? "asc" : activeSortDirection === "asc" ? "desc" : "asc";
@@ -236,6 +425,39 @@ export function SavedAnalysesPage({
     params.set("sort", field);
     params.set("dir", nextDirection);
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
+  };
+
+  const handleStateFilterChange = (state: DealStateFilter) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (state === "active") {
+      params.delete("state");
+    } else {
+      params.set("state", state);
+    }
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
+  };
+
+  const handleDealStatusChange = (id: string, state: SavedAnalysisListItem["status"]) => {
+    setUpdatingDealStatusId(id);
+    startUpdateStatusTransition(async () => {
+      const result = await updateSavedDealLifecycleStateAction(id, state);
+      if (!result.ok) {
+        toast({
+          title: "Could not update deal status",
+          description: result.message,
+          variant: "destructive",
+        });
+        setUpdatingDealStatusId(null);
+        return;
+      }
+      toast({
+        title: "Deal status updated",
+        description: "The deal lifecycle status was updated.",
+        variant: "success",
+      });
+      router.refresh();
+      setUpdatingDealStatusId(null);
+    });
   };
 
   const SortToggle = ({ field, label }: { field: SortField; label: string }) => {
@@ -317,8 +539,49 @@ export function SavedAnalysesPage({
         });
         return;
       }
-      router.push("/compare");
+      router.push("/dashboard/compare");
     });
+  };
+
+  const openSavedDealInAnalysisTab = async (id: string, targetWindow: Window | null) => {
+    const result = await getSavedDealForEditingAction(id);
+    if (!result.ok) {
+      targetWindow?.close();
+      toast({
+        title: "Could not open saved deal",
+        description: result.message,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const payload = JSON.stringify({
+      id: result.id,
+      schemaVersion: result.schemaVersion,
+      formSnapshot: result.formSnapshot,
+      templateFallback: result.templateFallback,
+      resultSnapshot: result.resultSnapshot,
+    });
+    window.localStorage.setItem(SAVED_ANALYSIS_EDIT_DRAFT_KEY, payload);
+    window.sessionStorage.setItem(SAVED_ANALYSIS_EDIT_DRAFT_KEY, payload);
+    if (targetWindow) {
+      targetWindow.location.href = "/";
+      return;
+    }
+    window.open("/", "_blank", "noopener,noreferrer");
+  };
+
+  const handleOpenSavedDeal = (id: string) => {
+    const targetWindow = window.open("about:blank", "_blank");
+    if (targetWindow) targetWindow.opener = null;
+    setOpeningDealId(id);
+    void (async () => {
+      try {
+        await openSavedDealInAnalysisTab(id, targetWindow);
+      } finally {
+        setOpeningDealId(null);
+      }
+    })();
   };
 
   const toggleOne = (id: string) => {
@@ -330,6 +593,151 @@ export function SavedAnalysesPage({
       }
       return [...prev, id];
     });
+  };
+
+  const handleOpenAnalysisClick = (id: string) => {
+    const targetWindow = window.open("about:blank", "_blank");
+    if (targetWindow) targetWindow.opener = null;
+    setOpeningDealId(id);
+    void (async () => {
+      try {
+        await openSavedDealInAnalysisTab(id, targetWindow);
+      } finally {
+        setOpeningDealId(null);
+      }
+    })();
+  };
+
+  const openPdfUrl = (pdfUrl: string) => {
+    const link = document.createElement("a");
+    link.href = pdfUrl;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  };
+
+  const handleExportPdfClick = (id: string) => {
+    setExportingPdfDealId(id);
+    void (async () => {
+      try {
+        const exportResult = await getSavedAnalysisPdfExportAction(id);
+        if (!exportResult.ok) {
+          toast({
+            title: "Could not export PDF",
+            description: exportResult.message,
+            variant: "destructive",
+          });
+          return;
+        }
+
+        if (exportResult.source === "cache") {
+          openPdfUrl(exportResult.pdfUrl);
+          return;
+        }
+
+        const normalized = normalizeInvestmentFormSnapshot(exportResult.formSnapshot);
+        if (!normalized) {
+          toast({
+            title: "Could not export PDF",
+            description: "The saved analysis data is not valid enough to generate a PDF.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        const parsed = investmentFormSchema.safeParse(normalized);
+        if (!parsed.success) {
+          toast({
+            title: "Could not export PDF",
+            description: "The saved analysis data no longer passes validation.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        const computedResult = calculateAnalysis(parsed.data);
+        const resultSnapshot = {
+          ...computedResult,
+          ...exportResult.resultSnapshot,
+        } as AnalysisResult & Record<string, unknown>;
+        const projectionYears = Array.isArray(resultSnapshot.tenYearProjection)
+          ? resultSnapshot.tenYearProjection
+          : computedResult.tenYearProjection;
+        const taxYears = Array.isArray(resultSnapshot.taxStrategyYears)
+          ? resultSnapshot.taxStrategyYears
+          : computedResult.taxStrategyYears;
+        const exitYears = buildExitScenarios({
+          purchasePrice: parsed.data.purchasePrice,
+          ...resolveExitScenarioRates(parsed.data),
+          loanAmount: resultSnapshot.loanAmount,
+          interestRate: parsed.data.interestRate,
+          loanTermYears: parsed.data.loanTermYears,
+          monthlyPayment: resultSnapshot.monthlyPayment,
+          downPayment: resultSnapshot.downPayment,
+          closingCosts: resultSnapshot.closingCosts,
+          cumulativeCashFlowByYear: projectionYears.map((row) => row.cumulativeCashFlowAnnual),
+          cumulativeTaxBenefitByYear: taxYears.map((row) => row.cumulativeTaxBenefitAnnual),
+        });
+        const reportData = buildReportDataFromSavedSnapshot({
+          values: parsed.data,
+          result: resultSnapshot,
+          templateFallback: exportResult.templateFallback,
+          exitYears,
+        });
+        const pdfBlob = await generateInvestmentPDFBlob(reportData);
+        const supabase = createBrowserSupabaseClient();
+        const {
+          data: { user },
+          error: userError,
+        } = await supabase.auth.getUser();
+        if (userError || !user) {
+          toast({
+            title: "Could not export PDF",
+            description: "Please sign in again to upload the generated PDF.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        const filePath = `${user.id}/${exportResult.id}/investment-analysis-v${PDF_SNAPSHOT_VERSION}.pdf`;
+        const { error: uploadError } = await supabase.storage
+          .from(ANALYSIS_PDF_BUCKET)
+          .upload(filePath, pdfBlob, {
+            contentType: "application/pdf",
+            upsert: true,
+          });
+
+        if (uploadError) {
+          toast({
+            title: "Could not export PDF",
+            description: uploadError.message,
+            variant: "destructive",
+          });
+          return;
+        }
+
+        const { data: publicData } = supabase.storage
+          .from(ANALYSIS_PDF_BUCKET)
+          .getPublicUrl(filePath);
+        const pdfUrl = publicData.publicUrl;
+        const completeResult = await completeSavedAnalysisPdfExportAction(exportResult.id, pdfUrl);
+        if (!completeResult.ok) {
+          toast({
+            title: "PDF generated, but cache was not saved",
+            description: completeResult.message,
+            variant: "warning",
+          });
+          openPdfUrl(pdfUrl);
+          return;
+        }
+
+        openPdfUrl(completeResult.pdfUrl);
+      } finally {
+        setExportingPdfDealId(null);
+      }
+    })();
   };
 
   const toggleAllVisible = () => {
@@ -366,10 +774,10 @@ export function SavedAnalysesPage({
 
   return (
     <main className="min-h-[calc(100vh-5rem)] bg-muted/30 pb-12">
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8 space-y-6">
+      <section className="w-full px-4 sm:px-6 pt-6 sm:pt-8 space-y-6">
       <div className="mb-6 flex flex-wrap items-center gap-3">
           <Button variant="ghost" size="sm" className="mt-1 px-1.5 text-muted-foreground" asChild>
-            <Link href="/">
+            <Link href="/dashboard">
               <ArrowLeft className="w-4 h-4 mr-1.5" />
               Back
             </Link>
@@ -377,62 +785,9 @@ export function SavedAnalysesPage({
           <div className="h-6 w-px bg-border" />
           <div className="space-y-1">
             <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-foreground">Saved Analyses</h1>
-            <p className="text-sm text-muted-foreground">{summary.totalDeals} deals in your portfolio</p>
+            <p className="text-sm text-muted-foreground">{filteredItems.length} deals in your portfolio</p>
           </div>
         </div>
-
-
-         {/* Portfolio summary strip */}
-         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {[
-            {
-              label: "Total Deals",
-              value: summary.totalDeals,
-              sub: `${summary.positiveCount} positive CF`,
-              icon: Building2,
-              color: "text-primary",
-              bg: "bg-primary/8",
-            },
-            {
-              label: "Monthly Cash Flow",
-              value: `${summary.monthlyCashFlow >= 0 ? "+" : ""}$${toCurrency(summary.monthlyCashFlow)}`,
-              sub: "across all deals",
-              icon: summary.monthlyCashFlow >= 0 ? TrendingUp : TrendingDown,
-              color: summary.monthlyCashFlow >= 0 ? "text-[var(--brand-green)]" : "text-destructive",
-              bg: summary.monthlyCashFlow >= 0 ? "bg-[var(--brand-green-light)]" : "bg-destructive/8",
-            },
-            {
-              label: "Avg CoC Return",
-              value: `${summary.avgCoc.toFixed(1)}%`,
-              sub: "cash-on-cash",
-              icon: TrendingUp,
-              color: "text-[oklch(0.52_0.18_220)]",
-              bg: "bg-[oklch(0.95_0.04_220)]",
-            },
-            {
-              label: "Total Invested",
-              value: toCurrency(summary.totalInvested),
-              sub: "total cash deployed",
-              icon: Trophy,
-              color: "text-[var(--brand-orange)]",
-              bg: "bg-[var(--brand-orange-light)]",
-            },
-          ].map((s) => (
-            <div key={s.label} className="bg-card rounded-2xl border border-border/70 p-4 flex items-start gap-3">
-              <div className={cn("w-8 h-8 rounded-xl flex items-center justify-center shrink-0", s.bg)}>
-                <s.icon className={cn("w-4 h-4", s.color)} />
-              </div>
-              <div className="min-w-0">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{s.label}</p>
-                <p className={cn("text-[18px] font-black leading-tight mt-0.5", s.color)}>{s.value}</p>
-                <p className="text-[11px] text-muted-foreground/60 mt-0.5">{s.sub}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-
-    
-
         <div className="rounded-2xl border border-border bg-card p-3 sm:p-4 space-y-3">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
             <div className="relative flex-1 max-w-xl">
@@ -478,6 +833,15 @@ export function SavedAnalysesPage({
               </TabsList>
             </Tabs>
 
+            <Tabs value={activeDealStateFilter} onValueChange={(value) => handleStateFilterChange(value as DealStateFilter)} className="gap-0">
+              <TabsList className="bg-muted/60 h-9 rounded-full p-1">
+                <TabsTrigger value="active" className="h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background">Active</TabsTrigger>
+                <TabsTrigger value="completed" className="h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background">Completed</TabsTrigger>
+                <TabsTrigger value="archived" className="h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background">Archived</TabsTrigger>
+                <TabsTrigger value="all" className="h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background">All</TabsTrigger>
+              </TabsList>
+            </Tabs>
+
            
            <div className="inline-flex items-center gap-1.5 ml-auto">
             <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground mr-1.5">Show Compare</span>
@@ -506,6 +870,8 @@ export function SavedAnalysesPage({
                   <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold"><SortToggle field="coc" label="CoC" /></th>
                   <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold"><SortToggle field="cap-rate" label="Cap Rate" /></th>
                   <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold"><SortToggle field="price" label="Price" /></th>
+                  <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold">Status</th>
+                  <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold">Actions</th>
                   <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold"><SortToggle field="saved" label="Saved" /></th>
                 </tr>
               </thead>
@@ -526,8 +892,20 @@ export function SavedAnalysesPage({
                             <PropertyTypeIcon className="w-3.5 h-3.5" />
                           </span>
                           <div className="min-w-0">
-                            <p className="font-semibold text-foreground truncate">{address.main}</p>
-                            <p className="text-xs text-muted-foreground truncate">{getTypeLabel(item.propertyType)}</p>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenSavedDeal(item.id)}
+                              className="flex max-w-full items-center gap-2 text-left font-semibold text-foreground hover:text-primary"
+                            >
+                              <span className="truncate">{address.main}</span>
+                              {openingDealId === item.id ? (
+                                <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin text-primary" />
+                              ) : null}
+                            </button>
+                            {getStatusBadge(item)}
+                            <p className="text-xs text-muted-foreground truncate">
+                              {getTypeLabel(item.propertyType)}
+                            </p>
                           </div>
                         </div>
                       </td>
@@ -538,6 +916,56 @@ export function SavedAnalysesPage({
                       <td className={cn("font-semibold", (item.cocReturnPct ?? 0) >= 0 ? "text-emerald-700" : "text-[var(--metric-negative)]")}>{toPercent(item.cocReturnPct)}</td>
                       <td className="font-medium">{toPercent(item.capRatePct)}</td>
                       <td className="font-semibold text-foreground">{toCurrency(item.purchasePrice)}</td>
+                      <td className="pr-2">
+                        <Select
+                          value={item.status}
+                          onValueChange={(value) => handleDealStatusChange(item.id, value as SavedAnalysisListItem["status"])}
+                          disabled={isUpdatingStatus && updatingDealStatusId === item.id}
+                        >
+                          <SelectTrigger className="h-8 w-[150px] rounded-md text-xs">
+                            <SelectValue placeholder="Status" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="active">Active</SelectItem>
+                            <SelectItem value="completed">Completed</SelectItem>
+                            <SelectItem value="archived">Archived</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </td>
+                      <td className="pr-2">
+                        <div className="flex items-center gap-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="h-8 rounded-md px-2.5 text-xs"
+                            onClick={() => handleOpenAnalysisClick(item.id)}
+                            disabled={openingDealId === item.id}
+                          >
+                            {openingDealId === item.id ? (
+                              <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" />
+                            ) : (
+                              <ExternalLink className="w-3.5 h-3.5 mr-1" />
+                            )}
+                            Open Analysis
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="h-8 rounded-md px-2.5 text-xs"
+                            onClick={() => handleExportPdfClick(item.id)}
+                            disabled={exportingPdfDealId === item.id}
+                          >
+                            {exportingPdfDealId === item.id ? (
+                              <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" />
+                            ) : (
+                              <Download className="w-3.5 h-3.5 mr-1" />
+                            )}
+                            Export PDF
+                          </Button>
+                        </div>
+                      </td>
                       <td className="text-muted-foreground">
                         {new Date(item.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                       </td>

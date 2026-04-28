@@ -26,6 +26,36 @@ async function resolveUserIdForSubscription(
   return data?.id ?? null;
 }
 
+function planSlugFromPriceId(priceId: string | null): "pro_monthly" | "pro_annual" | null {
+  if (!priceId) return null;
+  if (priceId === process.env.STRIPE_PRICE_PRO_MONTHLY) return "pro_monthly";
+  if (priceId === process.env.STRIPE_PRICE_PRO_ANNUAL) return "pro_annual";
+  return null;
+}
+
+async function resolvePlanIdForPrice(admin: SupabaseClient, priceId: string | null): Promise<string | null> {
+  if (!priceId) return null;
+
+  const { data: planByPrice } = await admin
+    .from("plans")
+    .select("id")
+    .eq("stripe_price_id", priceId)
+    .maybeSingle();
+
+  if (planByPrice?.id) return planByPrice.id;
+
+  const slug = planSlugFromPriceId(priceId);
+  if (!slug) return null;
+
+  const { data: planBySlug } = await admin
+    .from("plans")
+    .select("id")
+    .eq("slug", slug)
+    .maybeSingle();
+
+  return planBySlug?.id ?? null;
+}
+
 export async function upsertSubscriptionFromStripe(
   admin: SupabaseClient,
   subscription: Stripe.Subscription,
@@ -45,11 +75,7 @@ export async function upsertSubscriptionFromStripe(
         ? primaryItem.price
         : null;
 
-  let planId: string | null = null;
-  if (priceId) {
-    const { data: plan } = await admin.from("plans").select("id").eq("stripe_price_id", priceId).maybeSingle();
-    planId = plan?.id ?? null;
-  }
+  const planId = await resolvePlanIdForPrice(admin, priceId);
 
   const periodStartSec = primaryItem?.current_period_start ?? null;
   const periodEndSec = primaryItem?.current_period_end ?? null;

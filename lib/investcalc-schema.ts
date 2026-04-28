@@ -1,7 +1,8 @@
 import { z } from "zod";
+import { DEFAULT_APPRECIATION_RATE, DEFAULT_SELLING_COST_PCT } from "@/lib/exit-scenarios";
 
 /** Bump when `investmentFormSchema` shape changes; used for persisted snapshots. */
-export const INVESTCALC_SCHEMA_VERSION = 7;
+export const INVESTCALC_SCHEMA_VERSION = 9;
 
 const optionalMoneyMo = z.preprocess((val) => {
   if (val === undefined || val === null || val === "") return undefined;
@@ -25,6 +26,15 @@ const optionalUnitNumber = <T extends z.ZodNumber>(schema: T) =>
     return n;
   }, schema.optional());
 
+const optionalYearBuilt = z.preprocess((val) => {
+  if (val === undefined || val === null || val === "") return undefined;
+  const n = typeof val === "number" ? val : Number(val);
+  if (!Number.isFinite(n)) return undefined;
+  return n;
+}, z.number({ invalid_type_error: "Enter year built" }).min(1800, "Year must be after 1800").max(new Date().getFullYear() + 5, "Year too far in future").optional());
+
+export const insuranceInputModeSchema = z.enum(["percent", "monthly"]);
+
 export const unitSchema = z.object({
   bedrooms: optionalUnitNumber(
     z.number({ invalid_type_error: "Enter number of bedrooms" }).min(0, "Min 0").max(20, "Max 20")
@@ -41,8 +51,12 @@ export const unitSchema = z.object({
   isOwnerOccupied: z.boolean().optional(),
 });
 
-export function isValidRentalUnit(unit: z.infer<typeof unitSchema> | undefined | null): boolean {
+export function isValidRentalUnit(
+  unit: z.infer<typeof unitSchema> | undefined | null,
+  options?: { allowZeroRent?: boolean }
+): boolean {
   if (!unit) return false;
+  const minRent = options?.allowZeroRent ? 0 : Number.EPSILON;
   return (
     typeof unit.bedrooms === "number" &&
     unit.bedrooms >= 0 &&
@@ -53,7 +67,7 @@ export function isValidRentalUnit(unit: z.infer<typeof unitSchema> | undefined |
     typeof unit.sqft === "number" &&
     unit.sqft >= 50 &&
     typeof unit.monthlyRent === "number" &&
-    unit.monthlyRent >= 0
+    unit.monthlyRent >= minRent
   );
 }
 
@@ -69,10 +83,7 @@ export const investmentFormSchema = z.object({
     .number({ invalid_type_error: "Enter purchase price" })
     .min(10000, "Purchase price must be at least $10,000")
     .max(100_000_000, "Price too large"),
-  yearBuilt: z
-    .number({ invalid_type_error: "Enter year built" })
-    .min(1800, "Year must be after 1800")
-    .max(new Date().getFullYear() + 5, "Year too far in future"),
+  yearBuilt: optionalYearBuilt,
 
   // Single-family unit details (optional at parse; required in superRefine when propertyType is single-family).
   // Must tolerate NaN from react-hook-form valueAsNumber on hidden/unmounted inputs after switching property type.
@@ -144,9 +155,13 @@ export const investmentFormSchema = z.object({
     .number({ invalid_type_error: "Enter rent growth rate" })
     .min(0, "Min 0%")
     .max(20, "Max 20%"),
+  appreciationRatePct: optionalPercent,
+  sellingCostPct: optionalPercent,
 
   /** Monthly $ overrides when using advanced operating expenses; omitted = use auto estimates / zero. */
   propertyTaxPct: optionalPercent,
+  insuranceInputMode: insuranceInputModeSchema,
+  insurancePct: optionalPercent,
   insuranceMonthly: optionalMoneyMo,
   hoaMonthly: optionalMoneyMo,
   utilitiesMonthly: optionalMoneyMo,
@@ -180,12 +195,16 @@ export const investmentFormSchema = z.object({
     const r = values.monthlyRent;
     if (typeof r !== "number" || !Number.isFinite(r)) {
       ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["monthlyRent"], message: "Enter monthly rent" });
-    } else if (r < 0) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["monthlyRent"], message: "Rent must be 0 or more" });
+    } else if (r <= 0) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["monthlyRent"], message: "Rent must be greater than 0" });
     }
   };
 
-  const addUnitRowFieldIssues = (unit: z.infer<typeof unitSchema> | undefined, index: number) => {
+  const addUnitRowFieldIssues = (
+    unit: z.infer<typeof unitSchema> | undefined,
+    index: number,
+    options?: { allowZeroRent?: boolean }
+  ) => {
     const u = unit ?? {};
 
     if (typeof u.bedrooms !== "number" || !Number.isFinite(u.bedrooms)) {
@@ -248,11 +267,11 @@ export const investmentFormSchema = z.object({
         path: ["units", index, "monthlyRent"],
         message: "Enter monthly rent",
       });
-    } else if (u.monthlyRent < 0) {
+    } else if (options?.allowZeroRent ? u.monthlyRent < 0 : u.monthlyRent <= 0) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["units", index, "monthlyRent"],
-        message: "Rent must be 0 or more",
+        message: options?.allowZeroRent ? "Rent must be 0 or more" : "Rent must be greater than 0",
       });
     }
   };
@@ -268,14 +287,38 @@ export const investmentFormSchema = z.object({
   // Do not add a parent path ["units"] issue: @hookform/resolvers/zod would collapse
   // nested per-field errors into a single array-level error and hide inline messages.
   (values.units ?? []).forEach((unit, index) => {
-    if (!isValidRentalUnit(unit)) {
-      addUnitRowFieldIssues(unit, index);
+    const allowZeroRent = values.propertyType === "owner-occupant" && !!unit?.isOwnerOccupied;
+    if (!isValidRentalUnit(unit, { allowZeroRent })) {
+      addUnitRowFieldIssues(unit, index, { allowZeroRent });
     }
   });
 
   if (values.propertyType !== "owner-occupant") return;
 
   const units = values.units ?? [];
+  const ownerOccupiedIndexes = units.reduce<number[]>((indexes, unit, index) => {
+    if (unit?.isOwnerOccupied) indexes.push(index);
+    return indexes;
+  }, []);
+
+  if (ownerOccupiedIndexes.length === 0) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["units", 0, "isOwnerOccupied"],
+      message: "Choose which unit is owner occupied.",
+    });
+  }
+
+  if (ownerOccupiedIndexes.length > 1) {
+    ownerOccupiedIndexes.forEach((index) => {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["units", index, "isOwnerOccupied"],
+        message: "Only one unit can be owner occupied.",
+      });
+    });
+  }
+
   const hasValidRental = units.some((u) => isValidRentalUnit(u) && !u.isOwnerOccupied);
   if (hasValidRental) return;
 
@@ -342,8 +385,123 @@ export const defaultValues: Partial<InvestmentFormValues> = {
   taxRatePct: undefined,
   expenseGrowthPct: 2.5,
   rentGrowthPct: 2.5,
+  appreciationRatePct: undefined,
+  sellingCostPct: undefined,
   propertyTaxPct: undefined,
+  insuranceInputMode: "percent",
+  insurancePct: undefined,
   insuranceMonthly: undefined,
   hoaMonthly: undefined,
   utilitiesMonthly: undefined,
 };
+
+function asRecord(value: unknown): Record<string, unknown> | null {
+  if (value && typeof value === "object" && !Array.isArray(value)) return value as Record<string, unknown>;
+  return null;
+}
+
+function asNumber(value: unknown): number | undefined {
+  if (value === undefined || value === null || value === "") return undefined;
+  if (typeof value === "number") return Number.isFinite(value) ? value : undefined;
+  if (typeof value === "string") {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : undefined;
+  }
+  return undefined;
+}
+
+function asBoolean(value: unknown): boolean | undefined {
+  if (typeof value === "boolean") return value;
+  return undefined;
+}
+
+function normalizeUnit(raw: unknown): UnitValues {
+  const unit = asRecord(raw);
+  return {
+    bedrooms: asNumber(unit?.bedrooms),
+    bathrooms: asNumber(unit?.bathrooms),
+    sqft: asNumber(unit?.sqft),
+    monthlyRent: asNumber(unit?.monthlyRent),
+    isOwnerOccupied: asBoolean(unit?.isOwnerOccupied),
+  };
+}
+
+export function normalizeInvestmentFormSnapshot(raw: unknown): InvestmentFormValues | null {
+  const snapshot = asRecord(raw);
+  if (!snapshot) return null;
+
+  const propertyType =
+    snapshot.propertyType === "single-family" ||
+    snapshot.propertyType === "multi-family" ||
+    snapshot.propertyType === "owner-occupant"
+      ? snapshot.propertyType
+      : "single-family";
+
+  const units = Array.isArray(snapshot.units)
+    ? snapshot.units.map(normalizeUnit)
+    : getDefaultUnitsForPropertyType(propertyType);
+
+  const parsed = investmentFormSchema.safeParse({
+    ...defaultValues,
+    ...snapshot,
+    propertyType,
+    purchasePrice: asNumber(snapshot.purchasePrice),
+    yearBuilt: asNumber(snapshot.yearBuilt),
+    bedrooms: asNumber(snapshot.bedrooms),
+    bathrooms: asNumber(snapshot.bathrooms),
+    sqft: asNumber(snapshot.sqft),
+    monthlyRent: asNumber(snapshot.monthlyRent),
+    downPaymentPct: asNumber(snapshot.downPaymentPct),
+    interestRate: asNumber(snapshot.interestRate),
+    loanTermYears: asNumber(snapshot.loanTermYears),
+    closingCostsPct: asNumber(snapshot.closingCostsPct),
+    maintenancePct: asNumber(snapshot.maintenancePct),
+    vacancyPct: asNumber(snapshot.vacancyPct),
+    mgmtPct: asNumber(snapshot.mgmtPct),
+    capexPct: asNumber(snapshot.capexPct),
+    buildingValuePct: asNumber(snapshot.buildingValuePct),
+    depreciationYears: asNumber(snapshot.depreciationYears),
+    includeInterestDeduction: asBoolean(snapshot.includeInterestDeduction),
+    taxRatePct: asNumber(snapshot.taxRatePct),
+    expenseGrowthPct: asNumber(snapshot.expenseGrowthPct),
+    rentGrowthPct: asNumber(snapshot.rentGrowthPct),
+    appreciationRatePct: asNumber(snapshot.appreciationRatePct),
+    sellingCostPct: asNumber(snapshot.sellingCostPct),
+    propertyTaxPct: asNumber(snapshot.propertyTaxPct),
+    insuranceInputMode:
+      snapshot.insuranceInputMode === "monthly" || snapshot.insuranceInputMode === "percent"
+        ? snapshot.insuranceInputMode
+        : "percent",
+    insurancePct: asNumber(snapshot.insurancePct),
+    insuranceMonthly: asNumber(snapshot.insuranceMonthly),
+    hoaMonthly: asNumber(snapshot.hoaMonthly),
+    utilitiesMonthly: asNumber(snapshot.utilitiesMonthly),
+    units,
+    templateId: typeof snapshot.templateId === "string" ? snapshot.templateId : undefined,
+  });
+
+  if (!parsed.success) return null;
+
+  const data = parsed.data;
+  return {
+    ...data,
+    appreciationRatePct: data.appreciationRatePct ?? DEFAULT_APPRECIATION_RATE,
+    sellingCostPct: data.sellingCostPct ?? DEFAULT_SELLING_COST_PCT,
+  };
+}
+
+export function getDefaultUnitsForPropertyType(propertyType: InvestmentFormValues["propertyType"]): UnitValues[] {
+  if (propertyType === "single-family") {
+    return [{ bedrooms: undefined, bathrooms: undefined, sqft: undefined, monthlyRent: undefined, isOwnerOccupied: false }];
+  }
+  if (propertyType === "owner-occupant") {
+    return [
+      { bedrooms: undefined, bathrooms: undefined, sqft: undefined, monthlyRent: undefined, isOwnerOccupied: true },
+      { bedrooms: undefined, bathrooms: undefined, sqft: undefined, monthlyRent: undefined, isOwnerOccupied: false },
+    ];
+  }
+  return [
+    { bedrooms: undefined, bathrooms: undefined, sqft: undefined, monthlyRent: undefined, isOwnerOccupied: false },
+    { bedrooms: undefined, bathrooms: undefined, sqft: undefined, monthlyRent: undefined, isOwnerOccupied: false },
+  ];
+}

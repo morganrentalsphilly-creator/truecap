@@ -22,6 +22,12 @@ export function PropertyDetailsSection({ form }: PropertyDetailsSectionProps) {
     formState: { errors },
   } = form;
 
+  const optionalNumberValue = (value: unknown) => {
+    if (value === "" || value == null) return undefined;
+    const parsed = typeof value === "number" ? value : Number(value);
+    return Number.isFinite(parsed) ? parsed : undefined;
+  };
+
   return (
     <div className="bg-card rounded-2xl border border-border shadow-sm p-6">
       <div className="flex items-center gap-2 mb-5">
@@ -69,10 +75,10 @@ export function PropertyDetailsSection({ form }: PropertyDetailsSectionProps) {
 
           <div>
             <Label className="text-sm font-medium text-foreground mb-1.5 block">
-              Year Built
+              Year Built <span className="text-xs text-muted-foreground">(Optional)</span>
             </Label>
             <Input
-              {...register("yearBuilt", { valueAsNumber: true })}
+              {...register("yearBuilt", { setValueAs: optionalNumberValue })}
               type="number"
               placeholder="2015"
               className={cn(
@@ -80,6 +86,9 @@ export function PropertyDetailsSection({ form }: PropertyDetailsSectionProps) {
                 errors.yearBuilt && "border-destructive focus-visible:ring-destructive"
               )}
             />
+            <p className="mt-1 text-[11px] text-muted-foreground">
+              Used for reference only. It does not auto-adjust your expenses.
+            </p>
             <FieldError message={errors.yearBuilt?.message} />
           </div>
         </div>

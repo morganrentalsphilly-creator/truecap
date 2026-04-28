@@ -15,9 +15,17 @@ const ICONS = {
 
 interface PropertyTypeSectionProps {
   form: UseFormReturn<InvestmentFormValues>;
+  savedTemplateFallback?: {
+    id: string;
+    templateName: string;
+    templateDescription: string | null;
+  } | null;
 }
 
-export function PropertyTypeSection({ form }: PropertyTypeSectionProps) {
+export function PropertyTypeSection({
+  form,
+  savedTemplateFallback = null,
+}: PropertyTypeSectionProps) {
   const [isOpen, setIsOpen] = useState(false);
   const selected = form.watch("propertyType");
   const selectedType = PROPERTY_TYPES.find((t) => t.value === selected);
@@ -96,7 +104,7 @@ export function PropertyTypeSection({ form }: PropertyTypeSectionProps) {
         </div>
 
         <div>
-          <TemplateSelectorSection form={form} />
+          <TemplateSelectorSection form={form} savedTemplateFallback={savedTemplateFallback} />
         </div>
       </div>
     </div>

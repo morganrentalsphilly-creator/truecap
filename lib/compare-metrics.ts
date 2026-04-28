@@ -1,8 +1,10 @@
+import type { DealRiskLevel } from "./deal-score";
+import type { CompareSnapshotV1 } from "./compare-result-snapshot";
+
 export type PropertyType = "single-family" | "multi-family" | "owner-occupant";
 export type Signal = "strong-buy" | "buy" | "neutral" | "risky" | "avoid";
 export type StoredRecommendation = "Strong Buy" | "Buy" | "Neutral" | "Risky" | "Avoid";
-export type StoredRiskLevel = "Low Risk" | "Medium Risk" | "High Risk";
-export type StoredRiskLevel = "Low Risk" | "Medium Risk" | "High Risk";
+export type StoredRiskLevel = DealRiskLevel;
 export type MetricKind = "currency" | "percent" | "number";
 export type CompareDirection = "higher" | "lower";
 
@@ -26,7 +28,7 @@ export const METRIC_ROWS: MetricRow[] = [
   { key: "totalOperatingExpenses", label: "Operating Expenses / mo", group: "RISK", kind: "currency", direction: "lower" },
   { key: "purchasePrice", label: "Purchase Price", group: "DEAL", kind: "currency", direction: "lower" },
   { key: "totalCashRequired", label: "Total Cash Required", group: "DEAL", kind: "currency", direction: "lower" },
-  { key: "monthlyPayment", label: "Monthly Mortgage", group: "DEAL", kind: "currency", direction: "lower" },
+  { key: "monthlyPayment", label: "Loan Payment (P&I)", group: "DEAL", kind: "currency", direction: "lower" },
   { key: "taxSavingsMonthly", label: "Tax Savings / mo", group: "DEAL", kind: "currency", direction: "higher" },
 ];
 
@@ -91,36 +93,190 @@ export function getBestValue(row: MetricRow, deals: { metrics: Record<string, nu
   return row.direction === "higher" ? Math.max(...values) : Math.min(...values);
 }
 
-export function getWins(
-  deal: { id: string; metrics: Record<string, number | null> },
-  deals: { id: string; metrics: Record<string, number | null> }[]
+/** Inputs for head-to-head compare on short-term (saved metrics) and long-term (snapshot) separately. */
+export type CompareDealScoringInput = {
+  id: string;
+  metrics: Record<string, number | null>;
+  compareSnapshot: CompareSnapshotV1 | null;
+};
+
+type CompareCategoryMetric = {
+  direction: CompareDirection;
+  getValue: (d: CompareDealScoringInput) => number | null;
+};
+
+type CompareMetricGroup = {
+  category: "shortTerm" | "longTerm";
+  metrics: CompareCategoryMetric[];
+  disallowNegativeWinner?: boolean;
+  negativePenalty?: boolean;
+};
+
+const COMPARE_METRIC_GROUPS: CompareMetricGroup[] = [
+  {
+    category: "shortTerm",
+    metrics: [
+      { direction: "higher", getValue: (d) => d.metrics.netCashFlow ?? null },
+      { direction: "higher", getValue: (d) => d.metrics.annualCashFlow ?? null },
+    ],
+  },
+  {
+    category: "shortTerm",
+    metrics: [
+      { direction: "higher", getValue: (d) => d.metrics.cocReturn ?? null },
+      { direction: "higher", getValue: (d) => d.metrics.capRate ?? null },
+    ],
+  },
+  {
+    category: "shortTerm",
+    metrics: [{ direction: "higher", getValue: (d) => d.metrics.dscr ?? null }],
+  },
+  {
+    category: "longTerm",
+    metrics: [],
+  },
+];
+
+const LONG_TERM_SCORE_METRICS: CompareCategoryMetric[] = [
+  { direction: "higher", getValue: (d) => d.compareSnapshot?.longTermSummary.tenYearCashFlow ?? null },
+  { direction: "higher", getValue: (d) => d.compareSnapshot?.longTermSummary.tenYearAfterTax ?? null },
+  { direction: "higher", getValue: (d) => d.compareSnapshot?.taxStrategy.totalTaxBenefit ?? null },
+  { direction: "higher", getValue: (d) => d.compareSnapshot?.exitScenarios.summary.year10Profit ?? null },
+  { direction: "higher", getValue: (d) => d.compareSnapshot?.exitScenarios.summary.totalROI ?? null },
+];
+
+function getStrictMetricWinnerId(
+  deals: CompareDealScoringInput[],
+  metric: CompareCategoryMetric,
+  options?: { disallowNegativeWinner?: boolean }
+): string | null {
+  const candidates = deals
+    .map((candidate) => ({ id: candidate.id, value: metric.getValue(candidate) }))
+    .filter((candidate): candidate is { id: string; value: number } => candidate.value != null);
+  if (candidates.length === 0) return null;
+
+  const bestValue =
+    metric.direction === "higher"
+      ? Math.max(...candidates.map((c) => c.value))
+      : Math.min(...candidates.map((c) => c.value));
+  if (options?.disallowNegativeWinner && bestValue < 0) return null;
+
+  const atBest = candidates.filter((c) => c.value === bestValue);
+  return atBest.length === 1 ? atBest[0]!.id : null;
+}
+
+function getGroupWinnerId(
+  deals: CompareDealScoringInput[],
+  group: CompareMetricGroup
+): string | null {
+  const winnerIds = group.metrics
+    .map((metric) =>
+      getStrictMetricWinnerId(deals, metric, {
+        disallowNegativeWinner: group.disallowNegativeWinner,
+      })
+    )
+    .filter((id): id is string => Boolean(id));
+
+  if (winnerIds.length === 0) return null;
+  if (winnerIds.length !== group.metrics.length) return null;
+
+  const [firstWinnerId] = winnerIds;
+  return winnerIds.every((id) => id === firstWinnerId) ? firstWinnerId : null;
+}
+
+function countExclusiveMetricWins(
+  deal: CompareDealScoringInput,
+  deals: CompareDealScoringInput[],
+  metrics: CompareCategoryMetric[]
 ): number {
-  const winsMetricKeys = new Set([
-    "netCashFlow",
-    "cocReturn",
-    "capRate",
-    "afterTaxCF",
-    "annualCashFlow",
-    "dscr",
-    "monthlyRentalIncome",
-    "totalOperatingExpenses",
-  ]);
+  let score = 0;
+  for (const metric of metrics) {
+    if (getStrictMetricWinnerId(deals, metric) === deal.id) score += 1;
+  }
+  return score;
+}
 
-  return METRIC_ROWS.filter((row) => winsMetricKeys.has(row.key)).reduce((wins, row) => {
-    const candidates = deals
-      .map((candidate) => ({ id: candidate.id, value: candidate.metrics[row.key] }))
-      .filter((candidate): candidate is { id: string; value: number } => candidate.value != null);
+function getGroupedScore(
+  deal: CompareDealScoringInput,
+  deals: CompareDealScoringInput[],
+  category: "shortTerm" | "longTerm"
+): number {
+  if (category === "longTerm") {
+    return countExclusiveMetricWins(deal, deals, LONG_TERM_SCORE_METRICS);
+  }
 
-    if (candidates.length === 0) return wins;
+  let score = 0;
+  for (const group of COMPARE_METRIC_GROUPS.filter((g) => g.category === category)) {
+    const winnerId = getGroupWinnerId(deals, group);
+    if (winnerId === deal.id) score += 1;
+  }
+  return score;
+}
 
-    const bestValue =
-      row.direction === "higher"
-        ? Math.max(...candidates.map((candidate) => candidate.value))
-        : Math.min(...candidates.map((candidate) => candidate.value));
-    const bestCandidates = candidates.filter((candidate) => candidate.value === bestValue);
+export type CompareCategoryWinCounts = {
+  shortTerm: number;
+  longTerm: number;
+};
 
-    if (bestCandidates.length !== 1) return wins;
+/**
+ * Grouped compare scores: each metric group contributes at most one point.
+ * Correlated metrics must agree on a strict winner before the group awards a vote.
+ */
+export function getCompareCategoryWinCounts(
+  deals: CompareDealScoringInput[]
+): Map<string, CompareCategoryWinCounts> {
+  const map = new Map<string, CompareCategoryWinCounts>();
+  for (const deal of deals) {
+    map.set(deal.id, {
+      shortTerm: getGroupedScore(deal, deals, "shortTerm"),
+      longTerm: getGroupedScore(deal, deals, "longTerm"),
+    });
+  }
+  return map;
+}
 
-    return bestCandidates[0].id === deal.id ? wins + 1 : wins;
-  }, 0);
+/** Deal ids tied for the most wins in a category; empty if max ≤ 0 (e.g. all metrics tied or no long-term data). */
+export function getCategoryLeaderIds(
+  deals: CompareDealScoringInput[],
+  winCounts: Map<string, CompareCategoryWinCounts>,
+  category: "shortTerm" | "longTerm"
+): string[] {
+  if (deals.length === 0) return [];
+  let max = -Infinity;
+  for (const deal of deals) {
+    const v = winCounts.get(deal.id)?.[category] ?? 0;
+    if (v > max) max = v;
+  }
+  if (max <= 0) return [];
+  return deals.filter((deal) => (winCounts.get(deal.id)?.[category] ?? 0) === max).map((deal) => deal.id);
+}
+
+function getTopRankedIds(
+  deals: CompareDealScoringInput[],
+  winCounts: Map<string, CompareCategoryWinCounts>,
+  category: "shortTerm" | "longTerm",
+  limit: number
+): Set<string> {
+  return new Set(
+    deals
+      .map((deal) => ({
+        id: deal.id,
+        score: winCounts.get(deal.id)?.[category] ?? 0,
+      }))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, limit)
+      .filter((deal) => deal.score > 0)
+      .map((deal) => deal.id)
+  );
+}
+
+/** A balanced deal must be in the top 2 for both short- and long-term grouped scores. */
+export function getBalancedDealIds(
+  deals: CompareDealScoringInput[],
+  winCounts: Map<string, CompareCategoryWinCounts>
+): string[] {
+  if (deals.length === 0) return [];
+  const topShort = getTopRankedIds(deals, winCounts, "shortTerm", 2);
+  const topLong = getTopRankedIds(deals, winCounts, "longTerm", 2);
+  return deals.filter((deal) => topShort.has(deal.id) && topLong.has(deal.id)).map((deal) => deal.id);
 }
