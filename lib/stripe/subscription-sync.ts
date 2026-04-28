@@ -33,6 +33,14 @@ function planSlugFromPriceId(priceId: string | null): "pro_monthly" | "pro_annua
   return null;
 }
 
+function isSubscriptionScheduledToCancel(subscription: Stripe.Subscription): boolean {
+  const subscriptionWithCancelAt = subscription as Stripe.Subscription & {
+    cancel_at?: number | null;
+  };
+
+  return Boolean(subscription.cancel_at_period_end || subscriptionWithCancelAt.cancel_at);
+}
+
 async function resolvePlanIdForPrice(admin: SupabaseClient, priceId: string | null): Promise<string | null> {
   if (!priceId) return null;
 
@@ -101,9 +109,23 @@ export async function upsertSubscriptionFromStripe(
     current_period_start:
       periodStartSec != null ? new Date(periodStartSec * 1000).toISOString() : null,
     current_period_end: periodEndSec != null ? new Date(periodEndSec * 1000).toISOString() : null,
-    cancel_at_period_end: subscription.cancel_at_period_end,
+    cancel_at_period_end: isSubscriptionScheduledToCancel(subscription),
     updated_at: new Date().toISOString(),
   };
+
+  if (["active", "trialing", "past_due", "unpaid", "paused"].includes(subscription.status)) {
+    const { error: deactivateError } = await admin
+      .from("subscriptions")
+      .update({
+        status: "canceled",
+        cancel_at_period_end: false,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("user_id", userId)
+      .neq("stripe_subscription_id", subscription.id)
+      .in("status", ["active", "trialing", "past_due", "unpaid", "paused"]);
+    if (deactivateError) throw deactivateError;
+  }
 
   const { error } = await admin.from("subscriptions").upsert(row, { onConflict: "stripe_subscription_id" });
   if (error) throw error;
@@ -129,7 +151,7 @@ export async function markSubscriptionCanceled(
     .from("subscriptions")
     .update({
       status: "canceled",
-      cancel_at_period_end: subscription.cancel_at_period_end ?? false,
+      cancel_at_period_end: isSubscriptionScheduledToCancel(subscription),
       updated_at: new Date().toISOString(),
     })
     .eq("stripe_subscription_id", subscription.id);

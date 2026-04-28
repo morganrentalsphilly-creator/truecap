@@ -153,7 +153,7 @@ export function BillingPanel({ currentSubscription, plans }: BillingPanelProps) 
             <Badge className="rounded-full bg-primary/10 text-primary border border-primary/15">
               {currentPlanTitle}
             </Badge>
-            {currentSubscription ? (
+            {currentSubscription && currentSubscription?.cancelAtPeriodEnd === false ? (
               <Badge variant="outline" className="rounded-full capitalize">
                 {currentStatusLabel(currentSubscription)}
               </Badge>
@@ -173,7 +173,7 @@ export function BillingPanel({ currentSubscription, plans }: BillingPanelProps) 
               <div className="mt-2 space-y-1 text-sm text-muted-foreground">
                 <p>Status: {currentSubscription.cancelAtPeriodEnd ? "cancellation scheduled" : statusLabel(currentSubscription.status).toLowerCase()}</p>
                 <p>Valid until {formatDate(currentSubscription.currentPeriodEnd)}</p>
-                <p>Billing period start: {formatDate(currentSubscription.currentPeriodStart)}</p>
+                {/* <p>Billing period start: {formatDate(currentSubscription.currentPeriodStart)}</p> */}
               </div>
             ) : (
               <p className="mt-2 text-sm text-muted-foreground">Status: free</p>

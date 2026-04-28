@@ -131,6 +131,7 @@ async function getLiveStripeSubscriptionState(subscription: SubscriptionRow | nu
     const liveSubscriptionWithPeriods = liveSubscription as typeof liveSubscription & {
       current_period_start?: number | null;
       current_period_end?: number | null;
+      cancel_at?: number | null;
     };
     const periodStartSec =
       liveSubscriptionWithPeriods.current_period_start ?? primaryItem?.current_period_start ?? null;
@@ -142,7 +143,7 @@ async function getLiveStripeSubscriptionState(subscription: SubscriptionRow | nu
       currentPeriodStart:
         periodStartSec != null ? new Date(periodStartSec * 1000).toISOString() : null,
       currentPeriodEnd: periodEndSec != null ? new Date(periodEndSec * 1000).toISOString() : null,
-      cancelAtPeriodEnd: liveSubscription.cancel_at_period_end,
+      cancelAtPeriodEnd: Boolean(liveSubscription.cancel_at_period_end || liveSubscriptionWithPeriods.cancel_at),
     };
   } catch (error) {
     console.error(
@@ -236,7 +237,7 @@ export default async function ProfilePage({
   return (
     <>
       <Header initialUser={user} />
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-10 space-y-10">
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8  space-y-10">
         <ProfileForm
           userId={user.id}
           initialEmail={user.email ?? ""}
