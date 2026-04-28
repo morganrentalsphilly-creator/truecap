@@ -77,8 +77,20 @@ export async function upsertSubscriptionFromStripe(
 
   const planId = await resolvePlanIdForPrice(admin, priceId);
 
-  const periodStartSec = primaryItem?.current_period_start ?? null;
-  const periodEndSec = primaryItem?.current_period_end ?? null;
+  const subscriptionWithPeriods = subscription as Stripe.Subscription & {
+    current_period_start?: number | null;
+    current_period_end?: number | null;
+  };
+  const primaryItemWithPeriods = primaryItem as
+    | (Stripe.SubscriptionItem & {
+        current_period_start?: number | null;
+        current_period_end?: number | null;
+      })
+    | undefined;
+  const periodStartSec =
+    subscriptionWithPeriods.current_period_start ?? primaryItemWithPeriods?.current_period_start ?? null;
+  const periodEndSec =
+    subscriptionWithPeriods.current_period_end ?? primaryItemWithPeriods?.current_period_end ?? null;
 
   const row = {
     user_id: userId,
@@ -101,6 +113,18 @@ export async function markSubscriptionCanceled(
   admin: SupabaseClient,
   subscription: Stripe.Subscription
 ): Promise<void> {
+  const { data: existing, error: lookupError } = await admin
+    .from("subscriptions")
+    .select("id")
+    .eq("stripe_subscription_id", subscription.id)
+    .maybeSingle();
+  if (lookupError) throw lookupError;
+
+  if (!existing) {
+    await upsertSubscriptionFromStripe(admin, subscription);
+    return;
+  }
+
   const { error } = await admin
     .from("subscriptions")
     .update({
@@ -110,6 +134,33 @@ export async function markSubscriptionCanceled(
     })
     .eq("stripe_subscription_id", subscription.id);
   if (error) throw error;
+}
+
+function getInvoiceSubscriptionId(invoice: Stripe.Invoice): string | null {
+  const flexibleInvoice = invoice as Stripe.Invoice & {
+    subscription?: string | Stripe.Subscription | null;
+    parent?: {
+      subscription_details?: {
+        subscription?: string | Stripe.Subscription | null;
+      } | null;
+    } | null;
+  };
+  const subscription =
+    flexibleInvoice.subscription ?? flexibleInvoice.parent?.subscription_details?.subscription ?? null;
+  if (typeof subscription === "string") return subscription;
+  return subscription?.id ?? null;
+}
+
+export async function upsertSubscriptionFromInvoice(
+  admin: SupabaseClient,
+  invoice: Stripe.Invoice
+): Promise<void> {
+  const subscriptionId = getInvoiceSubscriptionId(invoice);
+  if (!subscriptionId) return;
+
+  const stripe = getStripe();
+  const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+  await upsertSubscriptionFromStripe(admin, subscription);
 }
 
 export async function linkStripeCustomerToProfile(

@@ -5,6 +5,7 @@ import { getStripe } from "@/lib/stripe/client";
 import {
   handleCheckoutSessionCompleted,
   markSubscriptionCanceled,
+  upsertSubscriptionFromInvoice,
   upsertSubscriptionFromStripe,
 } from "@/lib/stripe/subscription-sync";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
@@ -46,6 +47,7 @@ export async function POST(req: Request) {
       stripe_event_id: event.id,
       type: event.type,
     });
+
     if (insertErr?.code === "23505") {
       const { data: race } = await admin
         .from("stripe_webhook_events")
@@ -63,6 +65,7 @@ export async function POST(req: Request) {
   try {
     switch (event.type) {
       case "checkout.session.completed":
+      case "checkout.session.async_payment_succeeded":
         await handleCheckoutSessionCompleted(admin, event.data.object as Stripe.Checkout.Session);
         break;
       case "customer.subscription.created":
@@ -71,6 +74,12 @@ export async function POST(req: Request) {
         break;
       case "customer.subscription.deleted":
         await markSubscriptionCanceled(admin, event.data.object as Stripe.Subscription);
+        break;
+      case "invoice.paid":
+      case "invoice.payment_succeeded":
+      case "invoice.payment_failed":
+      case "invoice.payment_action_required":
+        await upsertSubscriptionFromInvoice(admin, event.data.object as Stripe.Invoice);
         break;
       default:
         break;
