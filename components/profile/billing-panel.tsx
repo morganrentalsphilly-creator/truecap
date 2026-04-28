@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
-import { Check, CreditCard, Loader2, ShieldCheck, Sparkles } from "lucide-react";
+import { Check, CreditCard, Loader2, ShieldCheck, Sparkles, XCircle } from "lucide-react";
 import {
   createBillingPortalSessionAction,
   createCancelSubscriptionPortalSessionAction,
@@ -33,6 +33,7 @@ type CurrentSubscription = {
   status: string;
   planSlug: string | null;
   planName: string;
+  currentPeriodStart: string | null;
   currentPeriodEnd: string | null;
   cancelAtPeriodEnd: boolean;
 } | null;
@@ -60,14 +61,10 @@ function formatDate(value?: string | null): string {
   }).format(new Date(value));
 }
 
-function currentPlanDescription(currentSubscription: CurrentSubscription): string {
-  if (!currentSubscription) return "No active Pro subscription.";
-  if (currentSubscription.cancelAtPeriodEnd) {
-    return `Your plan is canceled and will not renew. You can keep using Pro until ${formatDate(
-      currentSubscription.currentPeriodEnd
-    )}.`;
-  }
-  return `Renews or updates on ${formatDate(currentSubscription.currentPeriodEnd)}.`;
+function currentStatusLabel(currentSubscription: CurrentSubscription): string | null {
+  if (!currentSubscription) return null;
+  if (currentSubscription.cancelAtPeriodEnd) return "Cancellation scheduled";
+  return statusLabel(currentSubscription.status);
 }
 
 export function BillingPanel({ currentSubscription, plans }: BillingPanelProps) {
@@ -143,14 +140,14 @@ export function BillingPanel({ currentSubscription, plans }: BillingPanelProps) 
         </p>
       </div>
 
-      <Card className="rounded-2xl">
-        <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <Card className="rounded-2xl gap-3">
+        <CardHeader className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <CardTitle className="flex items-center gap-2">
               <ShieldCheck className="h-5 w-5 text-primary" />
-              Current plan
+              Subscription
             </CardTitle>
-            <CardDescription>{currentPlanDescription(currentSubscription)}</CardDescription>
+            {/* <CardDescription>Manage your active plan and billing access.</CardDescription> */}
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <Badge className="rounded-full bg-primary/10 text-primary border border-primary/15">
@@ -158,7 +155,7 @@ export function BillingPanel({ currentSubscription, plans }: BillingPanelProps) 
             </Badge>
             {currentSubscription ? (
               <Badge variant="outline" className="rounded-full capitalize">
-                {statusLabel(currentSubscription.status)}
+                {currentStatusLabel(currentSubscription)}
               </Badge>
             ) : null}
             {currentSubscription?.cancelAtPeriodEnd ? (
@@ -168,28 +165,56 @@ export function BillingPanel({ currentSubscription, plans }: BillingPanelProps) 
             ) : null}
           </div>
         </CardHeader>
-        <CardContent className="flex flex-wrap gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            className="rounded-xl"
-            onClick={handlePortal}
-            disabled={isPortalPending || isCancelPending || !currentSubscription}
-          >
-            {isPortalPending ? <Loader2 className="animate-spin" /> : <CreditCard />}
-            Manage billing
-          </Button>
-          {currentSubscription && !currentSubscription.cancelAtPeriodEnd ? (
+        <CardContent className="space-y-2">
+          <div className="rounded-2xl border border-border bg-card p-3">
+            <p className="text-sm text-muted-foreground">Current plan</p>
+            <p className="mt-1 text-xl font-bold text-foreground">{currentPlanTitle}</p>
+            {currentSubscription ? (
+              <div className="mt-2 space-y-1 text-sm text-muted-foreground">
+                <p>Status: {currentSubscription.cancelAtPeriodEnd ? "cancellation scheduled" : statusLabel(currentSubscription.status).toLowerCase()}</p>
+                <p>Valid until {formatDate(currentSubscription.currentPeriodEnd)}</p>
+                <p>Billing period start: {formatDate(currentSubscription.currentPeriodStart)}</p>
+              </div>
+            ) : (
+              <p className="mt-2 text-sm text-muted-foreground">Status: free</p>
+            )}
+          </div>
+
+          <div className="flex flex-wrap gap-2">
             <Button
               type="button"
               variant="outline"
-              className="rounded-xl text-destructive hover:text-destructive"
-              onClick={handleCancelPortal}
-              disabled={isPortalPending || isCancelPending}
+              className="rounded-xl"
+              onClick={handlePortal}
+              disabled={isPortalPending || isCancelPending || !currentSubscription}
             >
-              {isCancelPending ? <Loader2 className="animate-spin" /> : null}
-              Cancel plan
+              {isPortalPending ? <Loader2 className="animate-spin" /> : <CreditCard />}
+              Manage billing
             </Button>
+            {currentSubscription && !currentSubscription.cancelAtPeriodEnd ? (
+              <Button
+                type="button"
+                variant="outline"
+                className="rounded-xl text-destructive hover:text-destructive"
+                onClick={handleCancelPortal}
+                disabled={isPortalPending || isCancelPending}
+              >
+                {isCancelPending ? <Loader2 className="animate-spin" /> : <XCircle />}
+                Cancel plan
+              </Button>
+            ) : currentSubscription?.cancelAtPeriodEnd ? (
+              <Button type="button" variant="outline" className="rounded-xl" disabled>
+                Cancellation scheduled
+              </Button>
+            ) : null}
+          </div>
+
+          {currentSubscription ? (
+            <p className="text-sm text-muted-foreground">
+              {currentSubscription.cancelAtPeriodEnd
+                ? `Your subscription will end on ${formatDate(currentSubscription.currentPeriodEnd)}.`
+                : `Renew date: ${formatDate(currentSubscription.currentPeriodEnd)}`}
+            </p>
           ) : null}
         </CardContent>
       </Card>
@@ -219,7 +244,9 @@ export function BillingPanel({ currentSubscription, plans }: BillingPanelProps) 
                     </div>
                     <CardDescription className="mt-1">{plan.description}</CardDescription>
                   </div>
+                  {!isCurrent ?
                   <Sparkles className="h-5 w-5 text-primary" />
+                  : null}
                 </div>
                 <div className="pt-2">
                   <span className="text-4xl font-black tracking-tight">{plan.priceLabel}</span>

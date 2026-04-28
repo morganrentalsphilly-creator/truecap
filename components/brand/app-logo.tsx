@@ -37,7 +37,7 @@ export function AppLogo({
       {subtitle ? (
         <p
           className={cn(
-            "mt-0.5 max-w-[190px] whitespace-normal break-words text-xs leading-snug",
+            "mt-0.5  whitespace-normal  text-xs leading-snug",
             onDark ? "text-sidebar-foreground/65" : "text-muted-foreground",
             subtitleClassName
           )}

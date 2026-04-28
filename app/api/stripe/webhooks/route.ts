@@ -71,6 +71,11 @@ export async function POST(req: Request) {
         break;
       case "customer.subscription.created":
       case "customer.subscription.updated":
+      case "customer.subscription.paused":
+      case "customer.subscription.resumed":
+      case "customer.subscription.pending_update_applied":
+      case "customer.subscription.pending_update_expired":
+      case "customer.subscription.trial_will_end":
         await upsertSubscriptionFromStripe(admin, event.data.object as Stripe.Subscription);
         break;
       case "customer.subscription.deleted":
