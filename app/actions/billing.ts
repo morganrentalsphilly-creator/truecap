@@ -134,7 +134,7 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
       discounts: annualCoupon ? [{ coupon: annualCoupon }] : undefined,
       allow_promotion_codes: annualCoupon ? undefined : true,
       success_url: `${siteUrl}/profile?billing=success`,
-      cancel_url: `${siteUrl}/profile?billing=cancelled`,
+      cancel_url: `${siteUrl}/profile?billing=checkout_cancelled`,
       metadata: {
         user_id: user.id,
         plan_slug: parsed.data.planSlug,
@@ -201,6 +201,78 @@ export async function createBillingPortalSessionAction(): Promise<BillingActionR
       ok: false,
       code: "SERVER_ERROR",
       message: error instanceof Error ? error.message : "Could not open billing portal.",
+    };
+  }
+}
+
+export async function createCancelSubscriptionPortalSessionAction(): Promise<BillingActionResult> {
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in to manage billing." };
+  }
+
+  const [{ data: profile, error: profileError }, { data: subscription, error: subscriptionError }] =
+    await Promise.all([
+      supabase
+        .from("profiles")
+        .select("stripe_customer_id")
+        .eq("id", user.id)
+        .maybeSingle(),
+      supabase
+        .from("subscriptions")
+        .select("stripe_subscription_id")
+        .eq("user_id", user.id)
+        .in("status", ["active", "trialing", "past_due", "unpaid", "paused"])
+        .order("updated_at", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+    ]);
+
+  if (profileError || subscriptionError) {
+    return {
+      ok: false,
+      code: "SERVER_ERROR",
+      message: profileError?.message ?? subscriptionError?.message ?? "Could not load billing details.",
+    };
+  }
+
+  if (!profile?.stripe_customer_id || !subscription?.stripe_subscription_id) {
+    return {
+      ok: false,
+      code: "MISSING_PRICE",
+      message: "No active Stripe subscription exists yet.",
+    };
+  }
+
+  try {
+    const siteUrl = getSiteUrl();
+    const stripe = getStripe();
+    const portal = await stripe.billingPortal.sessions.create({
+      customer: profile.stripe_customer_id,
+      return_url: `${siteUrl}/profile`,
+      flow_data: {
+        type: "subscription_cancel",
+        subscription_cancel: {
+          subscription: subscription.stripe_subscription_id,
+        },
+        after_completion: {
+          type: "redirect",
+          redirect: {
+            return_url: `${siteUrl}/profile?billing=subscription_cancelled`,
+          },
+        },
+      },
+    });
+    return { ok: true, url: portal.url };
+  } catch (error) {
+    return {
+      ok: false,
+      code: "SERVER_ERROR",
+      message: error instanceof Error ? error.message : "Could not open cancellation flow.",
     };
   }
 }

@@ -97,7 +97,11 @@ function getPlanObject(sub: SubscriptionRow | null): { slug: string | null } | n
   return Array.isArray(sub.plans) ? sub.plans[0] ?? null : sub.plans;
 }
 
-export default async function ProfilePage() {
+export default async function ProfilePage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ billing?: string }>;
+}) {
   const supabase = await createServerSupabaseClient();
   const {
     data: { user },
@@ -139,6 +143,8 @@ export default async function ProfilePage() {
   const firstName = profile?.first_name ?? fallbackName.split(" ")[0] ?? "";
   const lastName = profile?.last_name ?? fallbackName.split(" ").slice(1).join(" ");
   const currentPlan = getPlanObject((subscription as SubscriptionRow | null) ?? null);
+  const resolvedSearchParams = (await searchParams) ?? {};
+  const isSubscriptionCancelReturn = resolvedSearchParams.billing === "subscription_cancelled";
   const availablePlanSlugs = new Set(
     ((planRows as PlanRow[] | null) ?? [])
       .map((plan) => plan.slug)
@@ -188,7 +194,7 @@ export default async function ProfilePage() {
                         ? "Pro Monthly"
                         : "Pro",
                   currentPeriodEnd: subscription.current_period_end,
-                  cancelAtPeriodEnd: Boolean(subscription.cancel_at_period_end),
+                  cancelAtPeriodEnd: Boolean(subscription.cancel_at_period_end) || isSubscriptionCancelReturn,
                 }
               : null
           }

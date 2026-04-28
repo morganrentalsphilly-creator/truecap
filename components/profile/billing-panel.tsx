@@ -4,6 +4,7 @@ import { useMemo, useState, useTransition } from "react";
 import { Check, CreditCard, Loader2, ShieldCheck, Sparkles } from "lucide-react";
 import {
   createBillingPortalSessionAction,
+  createCancelSubscriptionPortalSessionAction,
   createCheckoutSessionAction,
 } from "@/app/actions/billing";
 import { Badge } from "@/components/ui/badge";
@@ -59,10 +60,21 @@ function formatDate(value?: string | null): string {
   }).format(new Date(value));
 }
 
+function currentPlanDescription(currentSubscription: CurrentSubscription): string {
+  if (!currentSubscription) return "No active Pro subscription.";
+  if (currentSubscription.cancelAtPeriodEnd) {
+    return `Your plan is canceled and will not renew. You can keep using Pro until ${formatDate(
+      currentSubscription.currentPeriodEnd
+    )}.`;
+  }
+  return `Renews or updates on ${formatDate(currentSubscription.currentPeriodEnd)}.`;
+}
+
 export function BillingPanel({ currentSubscription, plans }: BillingPanelProps) {
   const { toast } = useToast();
   const [pendingPlan, setPendingPlan] = useState<string | null>(null);
   const [isPortalPending, startPortalTransition] = useTransition();
+  const [isCancelPending, startCancelTransition] = useTransition();
 
   const activePlanSlug =
     currentSubscription &&
@@ -107,6 +119,21 @@ export function BillingPanel({ currentSubscription, plans }: BillingPanelProps) 
     });
   };
 
+  const handleCancelPortal = () => {
+    startCancelTransition(async () => {
+      const result = await createCancelSubscriptionPortalSessionAction();
+      if (!result.ok) {
+        toast({
+          title: "Could not open cancellation flow",
+          description: result.message,
+          variant: "destructive",
+        });
+        return;
+      }
+      window.location.href = result.url;
+    });
+  };
+
   return (
     <section className="space-y-4">
       <div>
@@ -123,19 +150,17 @@ export function BillingPanel({ currentSubscription, plans }: BillingPanelProps) 
               <ShieldCheck className="h-5 w-5 text-primary" />
               Current plan
             </CardTitle>
-            <CardDescription>
-              {currentSubscription?.cancelAtPeriodEnd
-                ? `Access stays active until ${formatDate(currentSubscription.currentPeriodEnd)}.`
-                : `Renews or updates on ${formatDate(currentSubscription?.currentPeriodEnd)}.`}
-            </CardDescription>
+            <CardDescription>{currentPlanDescription(currentSubscription)}</CardDescription>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <Badge className="rounded-full bg-primary/10 text-primary border border-primary/15">
               {currentPlanTitle}
             </Badge>
-            <Badge variant="outline" className="rounded-full capitalize">
-              {statusLabel(currentSubscription?.status)}
-            </Badge>
+            {currentSubscription ? (
+              <Badge variant="outline" className="rounded-full capitalize">
+                {statusLabel(currentSubscription.status)}
+              </Badge>
+            ) : null}
             {currentSubscription?.cancelAtPeriodEnd ? (
               <Badge className="rounded-full border border-amber-200 bg-amber-100 text-amber-700">
                 Cancels at period end
@@ -143,17 +168,29 @@ export function BillingPanel({ currentSubscription, plans }: BillingPanelProps) 
             ) : null}
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="flex flex-wrap gap-2">
           <Button
             type="button"
             variant="outline"
             className="rounded-xl"
             onClick={handlePortal}
-            disabled={isPortalPending || !currentSubscription}
+            disabled={isPortalPending || isCancelPending || !currentSubscription}
           >
             {isPortalPending ? <Loader2 className="animate-spin" /> : <CreditCard />}
             Manage billing
           </Button>
+          {currentSubscription && !currentSubscription.cancelAtPeriodEnd ? (
+            <Button
+              type="button"
+              variant="outline"
+              className="rounded-xl text-destructive hover:text-destructive"
+              onClick={handleCancelPortal}
+              disabled={isPortalPending || isCancelPending}
+            >
+              {isCancelPending ? <Loader2 className="animate-spin" /> : null}
+              Cancel plan
+            </Button>
+          ) : null}
         </CardContent>
       </Card>
 
