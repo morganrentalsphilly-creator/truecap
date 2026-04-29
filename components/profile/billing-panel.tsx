@@ -132,7 +132,7 @@ export function BillingPanel({ currentSubscription, plans }: BillingPanelProps) 
   };
 
   return (
-    <section className="space-y-4">
+    <section id="billing" className="scroll-mt-24 space-y-4">
       <div>
         <h2 className="text-2xl font-bold tracking-tight text-foreground">Billing</h2>
         <p className="text-muted-foreground mt-1">

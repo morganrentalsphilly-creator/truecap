@@ -6,7 +6,7 @@ import {
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { Topbar } from "@/components/dashboard/Topbar";
 import { getCompareIdsFromCookie } from "@/app/actions/compare";
-import { getEntitlementsForUser } from "@/lib/entitlements";
+import { hasActivePremiumSubscription } from "@/lib/entitlements";
 import { getSavedAnalysesTotalCount } from "@/lib/saved-analyses-count";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import type { StoredRecommendation, StoredRiskLevel } from "@/lib/compare-metrics";
@@ -120,8 +120,8 @@ export default async function DashboardSavedAnalysesPage({
     redirect("/auth/login");
   }
 
-  const entitlements = await getEntitlementsForUser(supabase, user.id);
-  if (!entitlements.features.includes("save_deal")) {
+  const hasDashboardAccess = await hasActivePremiumSubscription(supabase, user.id);
+  if (!hasDashboardAccess) {
     redirect("/");
   }
 

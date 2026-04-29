@@ -63,6 +63,7 @@ export function PropertyDetailsSection({ form }: PropertyDetailsSectionProps) {
               <Input
                 {...register("purchasePrice", { valueAsNumber: true })}
                 type="number"
+                step="0.01"
                 placeholder="385000"
                 className={cn(
                   "pl-8 border-input bg-background",

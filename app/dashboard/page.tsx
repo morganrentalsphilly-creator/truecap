@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
-import { DashboardHome, type DashboardDeal, type DashboardHomeData } from "@/components/dashboard/DashboardHome";
+import { DashboardHome, type DashboardHomeData } from "@/components/dashboard/DashboardHome";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
-import { getEntitlementsForUser } from "@/lib/entitlements";
-import { getTypeLabel, type PropertyType, type StoredRecommendation, type StoredRiskLevel } from "@/lib/compare-metrics";
+import { hasActivePremiumSubscription } from "@/lib/entitlements";
+import { buildDashboardDeal, type SavedAnalysisDashboardRow } from "@/lib/dashboard-deal-mapping";
 import { getSavedAnalysesTotalCount } from "@/lib/saved-analyses-count";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
@@ -15,50 +15,6 @@ type ProfileRow = {
   avatar_url: string | null;
 };
 
-type ResultSnapshot = {
-  monthlyRentalIncome?: number | string | null;
-  totalOperatingExpenses?: number | string | null;
-  netCashFlow?: number | string | null;
-  annualCashFlow?: number | string | null;
-  cocReturn?: number | string | null;
-  capRate?: number | string | null;
-  totalCashRequired?: number | string | null;
-  score?: number | string | null;
-  recommendation?: StoredRecommendation | null;
-  riskLevel?: StoredRiskLevel | null;
-  risk_level?: StoredRiskLevel | null;
-  riskScore?: number | string | null;
-  tags?: string[] | null;
-  compareSnapshot?: {
-    longTermSummary?: {
-      totalROI?: number | string | null;
-    } | null;
-    exitScenarios?: {
-      summary?: {
-        totalROI?: number | string | null;
-      } | null;
-    } | null;
-  } | null;
-};
-
-type SavedAnalysisDashboardRow = {
-  id: string;
-  address: string | null;
-  title: string | null;
-  property_type: PropertyType | null;
-  purchase_price: number | string | null;
-  net_cash_flow_monthly: number | string | null;
-  coc_return_pct: number | string | null;
-  created_at: string;
-  result_snapshot: ResultSnapshot | null;
-};
-
-function toNumber(value: number | string | null | undefined): number | null {
-  if (value == null || value === "") return null;
-  const numeric = typeof value === "number" ? value : Number(value);
-  return Number.isFinite(numeric) ? numeric : null;
-}
-
 function getDisplayName(profile: ProfileRow | null, email?: string | null): string {
   const profileName =
     profile?.display_name?.trim() ||
@@ -66,38 +22,12 @@ function getDisplayName(profile: ProfileRow | null, email?: string | null): stri
   return profileName || email?.split("@")[0] || "Investor";
 }
 
-function getAddress(row: SavedAnalysisDashboardRow): string {
-  return row.address?.trim() || row.title?.trim() || "Untitled Property";
-}
-
-function buildDeal(row: SavedAnalysisDashboardRow): DashboardDeal {
-  const snapshot = row.result_snapshot ?? {};
-  return {
-    id: row.id,
-    address: getAddress(row),
-    propertyType: row.property_type,
-    propertyTypeLabel: getTypeLabel(row.property_type),
-    purchasePrice: toNumber(row.purchase_price),
-    cashFlowMonthly: toNumber(snapshot.netCashFlow) ?? toNumber(row.net_cash_flow_monthly),
-    cocReturnPct: toNumber(snapshot.cocReturn) ?? toNumber(row.coc_return_pct),
-    capRatePct: toNumber(snapshot.capRate),
-    roiPct:
-      toNumber(snapshot.compareSnapshot?.longTermSummary?.totalROI) ??
-      toNumber(snapshot.compareSnapshot?.exitScenarios?.summary?.totalROI),
-    score: toNumber(snapshot.score),
-    recommendation: snapshot.recommendation ?? null,
-    riskLevel: snapshot.riskLevel ?? snapshot.risk_level ?? null,
-    riskScore: toNumber(snapshot.riskScore),
-    tags: Array.isArray(snapshot.tags) ? snapshot.tags.filter((tag): tag is string => typeof tag === "string") : [],
-  };
-}
-
 function buildDashboardData(
   rows: SavedAnalysisDashboardRow[],
   profile: ProfileRow | null,
   email: string | null | undefined
 ): DashboardHomeData {
-  const deals = rows.map(buildDeal);
+  const deals = rows.map(buildDashboardDeal);
 
   return {
     user: {
@@ -108,6 +38,7 @@ function buildDashboardData(
     stats: {
       totalDeals: deals.length,
     },
+    allDeals: deals,
     topDeals: deals
       .sort((a, b) => (b.score ?? -1) - (a.score ?? -1) || (b.cashFlowMonthly ?? -Infinity) - (a.cashFlowMonthly ?? -Infinity))
       .slice(0, 6),
@@ -124,8 +55,8 @@ export default async function DashboardPage() {
     redirect("/auth/login");
   }
 
-  const entitlements = await getEntitlementsForUser(supabase, user.id);
-  if (!entitlements.features.includes("save_deal")) {
+  const hasDashboardAccess = await hasActivePremiumSubscription(supabase, user.id);
+  if (!hasDashboardAccess) {
     redirect("/");
   }
 

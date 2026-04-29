@@ -116,10 +116,7 @@ function toPdfReportData(args: {
         }));
 
   const proScore = dealScoreResult?.ok && dealScoreResult.tier === "pro" ? dealScoreResult.data : null;
-  const recommendation =
-    dealScoreResult?.ok && dealScoreResult.tier === "free"
-      ? dealScoreResult.recommendation
-      : proScore?.recommendation ?? "Neutral";
+  const recommendation = proScore?.recommendation ?? "Neutral";
   const risk = proScore?.riskLevel ?? "Medium Risk";
   const score = proScore?.score ?? Math.round(Math.max(0, Math.min(100, (result.cocReturn + result.capRate) * 4)));
   const rationale =
@@ -237,7 +234,13 @@ function toPdfReportData(args: {
   };
 }
 
-export function InvestCalcPage() {
+export function InvestCalcPage({
+  hasProAccess = false,
+  isAuthenticated = false,
+}: {
+  hasProAccess?: boolean;
+  isAuthenticated?: boolean;
+}) {
   const router = useRouter();
   const [activeInputTab] = useState<InputTab>("cash-flow");
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
@@ -340,8 +343,12 @@ export function InvestCalcPage() {
       !!lastPersistedFormJsonRef.current &&
       now === lastPersistedFormJsonRef.current;
     const sourceAnalysisId = shouldUseSavedSnapshots ? savedDealIdRef.current : null;
-    const builtProjectionSource = buildProjectionSource(sourceAnalysisId, values, result);
-    const builtTaxStrategySource = buildTaxStrategySource(sourceAnalysisId, values, result);
+    const builtProjectionSource = hasProAccess
+      ? buildProjectionSource(sourceAnalysisId, values, result)
+      : null;
+    const builtTaxStrategySource = hasProAccess
+      ? buildTaxStrategySource(sourceAnalysisId, values, result)
+      : null;
 
     lastComputedFormJsonRef.current = now;
     setAnalysisResult(result);
@@ -349,16 +356,18 @@ export function InvestCalcPage() {
     setProjectionSource(builtProjectionSource);
     setTaxStrategySource(builtTaxStrategySource);
     setExitScenarioSource(
-      buildExitScenarioSource(
-        sourceAnalysisId,
-        values,
-        result,
-        builtProjectionSource.initialYears,
-        builtTaxStrategySource.initialYears
-      )
+      hasProAccess && builtProjectionSource && builtTaxStrategySource
+        ? buildExitScenarioSource(
+            sourceAnalysisId,
+            values,
+            result,
+            builtProjectionSource.initialYears,
+            builtTaxStrategySource.initialYears
+          )
+        : null
     );
     setShowResults(true);
-  }, [form]);
+  }, [form, hasProAccess]);
 
   const propertyType = form.watch("propertyType");
   const purchasePrice = form.watch("purchasePrice");
@@ -518,19 +527,25 @@ export function InvestCalcPage() {
           setSavedTemplateFallback(parsedTemplateFallback);
           const computedResult = calculateAnalysis(hydratedValues);
           const result = mergeSavedResultSnapshot(parsed.resultSnapshot, computedResult);
-          const builtProjectionSource = buildProjectionSource(parsed.id, hydratedValues, result);
-          const builtTaxStrategySource = buildTaxStrategySource(parsed.id, hydratedValues, result);
+          const builtProjectionSource = hasProAccess
+            ? buildProjectionSource(parsed.id, hydratedValues, result)
+            : null;
+          const builtTaxStrategySource = hasProAccess
+            ? buildTaxStrategySource(parsed.id, hydratedValues, result)
+            : null;
           setAnalysisResult(result);
           setProjectionSource(builtProjectionSource);
           setTaxStrategySource(builtTaxStrategySource);
           setExitScenarioSource(
-            buildExitScenarioSource(
-              parsed.id,
-              hydratedValues,
-              result,
-              builtProjectionSource.initialYears,
-              builtTaxStrategySource.initialYears
-            )
+            hasProAccess && builtProjectionSource && builtTaxStrategySource
+              ? buildExitScenarioSource(
+                  parsed.id,
+                  hydratedValues,
+                  result,
+                  builtProjectionSource.initialYears,
+                  builtTaxStrategySource.initialYears
+                )
+              : null
           );
           setDealScoreResult(null);
           setShowResults(true);
@@ -621,19 +636,25 @@ export function InvestCalcPage() {
       // Simulate analysis delay
       await new Promise((r) => setTimeout(r, 1500));
       const result = calculateAnalysis(values);
-      const builtProjectionSource = buildProjectionSource(savedDealId, values, result);
-      const builtTaxStrategySource = buildTaxStrategySource(savedDealId, values, result);
+      const builtProjectionSource = hasProAccess
+        ? buildProjectionSource(savedDealId, values, result)
+        : null;
+      const builtTaxStrategySource = hasProAccess
+        ? buildTaxStrategySource(savedDealId, values, result)
+        : null;
       setAnalysisResult(result);
       setProjectionSource(builtProjectionSource);
       setTaxStrategySource(builtTaxStrategySource);
       setExitScenarioSource(
-        buildExitScenarioSource(
-          savedDealId,
-          values,
-          result,
-          builtProjectionSource.initialYears,
-          builtTaxStrategySource.initialYears
-        )
+        hasProAccess && builtProjectionSource && builtTaxStrategySource
+          ? buildExitScenarioSource(
+              savedDealId,
+              values,
+              result,
+              builtProjectionSource.initialYears,
+              builtTaxStrategySource.initialYears
+            )
+          : null
       );
       const computedFingerprint = formSnapshotForCompare(values);
       if (computedFingerprint) lastComputedFormJsonRef.current = computedFingerprint;
@@ -971,6 +992,8 @@ export function InvestCalcPage() {
               isComparing={isComparingDeals}
               isExporting={isExportingPdf}
               isSaved={Boolean(savedDealId) && !hasUnsavedChanges}
+              isAuthenticated={isAuthenticated}
+              hasProAccess={hasProAccess}
               persistedActionsBlockHint={
                 !savedDealId
                   ? "Save this analysis first to compare or export a PDF."

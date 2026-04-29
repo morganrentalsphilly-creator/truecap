@@ -1,6 +1,7 @@
 "use server";
 
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { getEntitlementsForUser } from "@/lib/entitlements";
 import {
   buildTaxStrategyInputHash,
   buildTaxStrategyProjection,
@@ -23,7 +24,7 @@ export type TaxStrategySnapshotResult =
     }
   | {
       ok: false;
-      code: "SIGN_IN_REQUIRED" | "NOT_FOUND" | "SERVER_ERROR";
+      code: "SIGN_IN_REQUIRED" | "ENTITLEMENT_REQUIRED" | "NOT_FOUND" | "SERVER_ERROR";
       message: string;
     };
 
@@ -58,6 +59,15 @@ export async function getTaxStrategySnapshotAction(
       ok: false,
       code: "SIGN_IN_REQUIRED",
       message: "Please sign in to load saved tax strategy projections.",
+    };
+  }
+
+  const entitlements = await getEntitlementsForUser(supabase, user.id);
+  if (!entitlements.features.includes("tax_strategy")) {
+    return {
+      ok: false,
+      code: "ENTITLEMENT_REQUIRED",
+      message: "Upgrade to Pro to load tax strategy projections.",
     };
   }
 

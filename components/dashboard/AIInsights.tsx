@@ -13,9 +13,21 @@ type AIInsight = {
   tone: keyof typeof toneMap;
 };
 
-export function AIInsights({ data = aiInsights }: { data?: AIInsight[] }) {
+type RiskReturnInsightData = {
+  bestRiskAdjusted: string;
+  highestReturn: string;
+  safest: string;
+};
+
+export function AIInsights({
+  data = aiInsights,
+  riskReturnInsights,
+}: {
+  data?: AIInsight[];
+  riskReturnInsights?: RiskReturnInsightData;
+}) {
   return (
-    <div className="rounded-2xl border border-border p-6 relative overflow-hidden" style={{ background: "linear-gradient(135deg, oklch(0.99 0.005 260), oklch(0.97 0.02 280))" }}>
+    <div className="rounded-2xl border border-border p-6 relative overflow-hidden h-full" style={{ background: "linear-gradient(135deg, oklch(0.99 0.005 260), oklch(0.97 0.02 280))" }}>
       <div className="absolute -top-12 -right-12 h-40 w-40 rounded-full opacity-30 blur-3xl" style={{ background: "var(--gradient-premium)" }} />
       <div className="relative flex items-center gap-2 mb-1">
         <div className="h-7 w-7 rounded-lg grid place-items-center" style={{ background: "var(--gradient-premium)" }}>
@@ -27,6 +39,26 @@ export function AIInsights({ data = aiInsights }: { data?: AIInsight[] }) {
       <p className="relative text-sm text-muted-foreground mb-4">Comparative signals from your saved deals</p>
 
       <div className="relative space-y-3">
+        {riskReturnInsights ? (
+          <div className="rounded-xl bg-card/80 backdrop-blur border border-border/60 p-3">
+            <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">Risk vs Return</div>
+            <div className="space-y-3">
+              <div>
+                <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Best risk-adjusted deal</div>
+                <div className="text-sm font-semibold text-foreground mt-0.5">{riskReturnInsights.bestRiskAdjusted || "-"}</div>
+              </div>
+              <div>
+                <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Highest return</div>
+                <div className="text-sm font-semibold text-foreground mt-0.5">{riskReturnInsights.highestReturn || "-"}</div>
+              </div>
+              <div>
+                <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Safest deal</div>
+                <div className="text-sm font-semibold text-foreground mt-0.5">{riskReturnInsights.safest || "-"}</div>
+              </div>
+            </div>
+          </div>
+        ) : null}
+
         {data.map((ins, i) => {
           const t = toneMap[ins.tone];
           const Icon = t.icon;

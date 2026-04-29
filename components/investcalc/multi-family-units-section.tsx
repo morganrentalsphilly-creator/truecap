@@ -190,6 +190,7 @@ export function MultiFamilyUnitsSection({
                     <Input
                       {...register(`units.${index}.monthlyRent`, { valueAsNumber: true })}
                       type="number"
+                      step="0.01"
                       placeholder="1800"
                       className={cn(
                         "pl-7 border-input bg-background text-sm h-9",

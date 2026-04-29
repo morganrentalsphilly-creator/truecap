@@ -2,7 +2,19 @@
 
 import { useState, type ReactNode } from "react";
 import { Controller, UseFormReturn } from "react-hook-form";
-import { Percent, ChevronDown, ChevronUp, Info, DollarSign } from "lucide-react";
+import {
+  BarChart3,
+  Building2,
+  ChevronDown,
+  ChevronUp,
+  DollarSign,
+  Home,
+  Info,
+  Percent,
+  Plug,
+  Settings2,
+  Wrench,
+} from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -16,10 +28,13 @@ interface OperatingExpensesSectionProps {
   purchasePrice: number;
 }
 
-function FieldError({ message }: { message?: string }) {
-  if (!message) return null;
-  return <p className="text-xs text-destructive mt-1">{message}</p>;
-}
+type FieldLabelWithTooltipProps = {
+  label: string;
+  tooltip?: ReactNode;
+};
+
+const inputClassName =
+  "h-10 rounded-lg border-[var(--brand-orange)]/15 bg-background shadow-sm focus-visible:ring-[var(--brand-orange)]/25";
 
 const moneySetValueAs = (v: unknown) => {
   if (v === "" || v == null) return undefined;
@@ -27,13 +42,12 @@ const moneySetValueAs = (v: unknown) => {
   return Number.isFinite(n) ? n : undefined;
 };
 
-function FieldLabelWithTooltip({
-  label,
-  tooltip,
-}: {
-  label: string;
-  tooltip?: ReactNode;
-}) {
+function FieldError({ message }: { message?: string }) {
+  if (!message) return null;
+  return <p className="mt-1 text-xs text-destructive">{message}</p>;
+}
+
+function FieldLabelWithTooltip({ label, tooltip }: FieldLabelWithTooltipProps) {
   return (
     <span className="inline-flex items-center gap-1.5">
       <span>{label}</span>
@@ -42,10 +56,10 @@ function FieldLabelWithTooltip({
           <TooltipTrigger asChild>
             <button
               type="button"
-              className="inline-flex h-4 w-4 items-center justify-center rounded-full text-muted-foreground hover:text-foreground"
+              className="inline-flex size-3.5 items-center justify-center rounded-full text-[var(--brand-orange)]/70 hover:text-[var(--brand-orange)]"
               aria-label={`${label} guidance`}
             >
-              <Info className="h-3.5 w-3.5" />
+              <Info className="size-3.5" />
             </button>
           </TooltipTrigger>
           <TooltipContent
@@ -58,6 +72,47 @@ function FieldLabelWithTooltip({
         </Tooltip>
       ) : null}
     </span>
+  );
+}
+
+function FieldLabel({
+  children,
+  icon,
+}: {
+  children: ReactNode;
+  icon?: ReactNode;
+}) {
+  return (
+    <Label className="mb-2 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-[var(--brand-orange)]">
+      {icon ? <span className="text-[var(--brand-orange)]/80">{icon}</span> : null}
+      {children}
+    </Label>
+  );
+}
+
+function FieldHint({ children }: { children: ReactNode }) {
+  return <p className="mt-2 min-h-[32px] text-[11px] leading-relaxed text-muted-foreground">{children}</p>;
+}
+
+function SectionField({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return <div className={cn("min-w-0 px-4 py-4", className)}>{children}</div>;
+}
+
+function PercentIcon() {
+  return (
+    <Percent className="pointer-events-none absolute right-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+  );
+}
+
+function DollarIcon() {
+  return (
+    <DollarSign className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
   );
 }
 
@@ -88,29 +143,34 @@ export function OperatingExpensesSection({
       : insuranceDefault;
 
   return (
-    <div className="bg-[var(--brand-orange-light)] rounded-2xl border border-[var(--brand-orange)]/20 shadow-sm p-4 sm:p-6">
-      <div className="flex items-center justify-between gap-3 mb-4 sm:mb-5 flex-wrap">
-        <div className="flex items-center gap-2">
-          <Percent className="w-4 h-4 text-[var(--brand-orange)]" />
-          <span className="font-semibold text-sm text-foreground">
-            Operating Expenses
+    <div className="rounded-2xl border border-[var(--brand-orange)]/20 bg-[var(--brand-orange-light)] p-4 shadow-sm sm:p-6">
+      <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
+        <div className="flex items-start gap-3">
+          <span className="mt-0.5 inline-flex size-5 items-center justify-center rounded-full text-[var(--brand-orange)]">
+            <Settings2 className="size-4" />
           </span>
+          <div>
+            <h3 className="text-sm font-bold text-foreground">Operating Expenses</h3>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Estimate and manage your ongoing property expenses.
+            </p>
+          </div>
         </div>
         <Button
           type="button"
           variant="outline"
           size="sm"
           onClick={() => setShowAdvanced((v) => !v)}
-          className="rounded-full text-xs border-[var(--brand-orange)]/30 text-foreground"
+          className="h-8 rounded-full border-[var(--brand-orange)]/20 bg-background px-4 text-xs font-medium text-foreground shadow-sm hover:bg-background"
         >
           {showAdvanced ? (
             <>
-              <ChevronUp className="w-3.5 h-3.5 mr-1" />
+              <ChevronUp className="mr-1.5 size-3.5" />
               Hide Advanced Options
             </>
           ) : (
             <>
-              <ChevronDown className="w-3.5 h-3.5 mr-1" />
+              <ChevronDown className="mr-1.5 size-3.5" />
               Show Advanced Options
             </>
           )}
@@ -118,14 +178,14 @@ export function OperatingExpensesSection({
       </div>
 
       {!showAdvanced && (
-        <div className="bg-card rounded-xl border border-[var(--brand-orange)]/15 p-4 mb-5">
-          <div className="flex items-center gap-1.5 mb-3">
-            <Info className="w-4 h-4 text-[var(--brand-orange)]" />
+        <div className="mb-4 rounded-xl border border-[var(--brand-orange)]/15 bg-card p-4">
+          <div className="mb-3 flex items-center gap-1.5">
+            <Info className="size-4 text-[var(--brand-orange)]" />
             <span className="text-sm font-semibold text-[var(--brand-orange)]">
               Auto-Calculated Estimates
             </span>
           </div>
-          <div className="flex flex-wrap gap-x-8 gap-y-1 mb-2">
+          <div className="mb-2 flex flex-wrap gap-x-8 gap-y-1">
             <div>
               <span className="text-sm text-muted-foreground">Property Tax:</span>{" "}
               <span className="text-sm font-semibold text-foreground">
@@ -146,14 +206,14 @@ export function OperatingExpensesSection({
         </div>
       )}
 
-      {/* Keep advanced inputs mounted so propertyTaxPct / insuranceMonthly / etc. stay
-          registered with RHF when the panel is collapsed (matches visible estimates). */}
-      <div className={cn("mb-5", !showAdvanced && "hidden")}>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div>
-              <Label className="text-xs font-semibold text-[var(--brand-orange)] mb-1.5 block uppercase tracking-wide">
-                Property Tax % (Annual)
-              </Label>
+      {/* Keep advanced inputs mounted so RHF values remain registered while the panel is collapsed. */}
+      <div className="space-y-4">
+        <div className={cn("overflow-hidden rounded-xl border border-[var(--brand-orange)]/10 bg-card/50", !showAdvanced && "hidden")}>
+          <div className="grid grid-cols-1 divide-y divide-[var(--brand-orange)]/10 md:grid-cols-2 md:divide-x md:divide-y-0 xl:grid-cols-4">
+            <SectionField>
+              <FieldLabel>
+                <FieldLabelWithTooltip label="Property Tax % (Annual)" tooltip="Annual tax rate on purchase price." />
+              </FieldLabel>
               <div className="relative">
                 <Input
                   {...register("propertyTaxPct", { setValueAs: moneySetValueAs })}
@@ -162,28 +222,21 @@ export function OperatingExpensesSection({
                   min={0}
                   max={100}
                   placeholder="1.1"
-                  className={cn(
-                    "pr-8 border-[var(--brand-orange)]/30 bg-background focus-visible:ring-[var(--brand-orange)]/30",
-                    errors.propertyTaxPct && "border-destructive"
-                  )}
+                  className={cn(inputClassName, "pr-8", errors.propertyTaxPct && "border-destructive")}
                 />
-                <Percent className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                <PercentIcon />
               </div>
-              <p className="text-[11px] text-muted-foreground mt-1">
-                Used as annual tax rate on purchase price.
-              </p>
+              <FieldHint>Used as annual tax rate on purchase price.</FieldHint>
               <FieldError message={errors.propertyTaxPct?.message} />
-            </div>
+            </SectionField>
 
-            <div>
-              <Label className="text-xs font-semibold text-[var(--brand-orange)] mb-1.5 block uppercase tracking-wide">
-                Insurance Input
-              </Label>
+            <SectionField>
+              <FieldLabel>Insurance Input</FieldLabel>
               <Controller
                 name="insuranceInputMode"
                 control={control}
                 render={({ field }) => (
-                  <div className="flex rounded-lg border border-[var(--brand-orange)]/30 bg-background p-1">
+                  <div className="flex rounded-lg border border-[var(--brand-orange)]/10 bg-background p-1 shadow-sm">
                     {[
                       { value: "percent", label: "Annual %" },
                       { value: "monthly", label: "Monthly $" },
@@ -193,7 +246,7 @@ export function OperatingExpensesSection({
                         type="button"
                         onClick={() => field.onChange(option.value)}
                         className={cn(
-                          "flex-1 rounded-md px-3 py-2 text-xs font-semibold transition-colors",
+                          "h-8 flex-1 rounded-md px-3 text-xs font-semibold transition-colors",
                           field.value === option.value
                             ? "bg-[var(--brand-orange)] text-white"
                             : "text-muted-foreground hover:text-foreground"
@@ -205,43 +258,42 @@ export function OperatingExpensesSection({
                   </div>
                 )}
               />
-              <p className="text-[11px] text-muted-foreground mt-1">
-                Choose whether insurance is modeled from an annual percent or a flat monthly amount.
-              </p>
-            </div>
+              <FieldHint>
+                Choose whether insurance is modeled as an annual percent or a flat monthly amount.
+              </FieldHint>
+            </SectionField>
 
-            <div>
-              <Label className="text-xs font-semibold text-[var(--brand-orange)] mb-1.5 block uppercase tracking-wide">
-                {insuranceInputMode === "monthly" ? "Insurance (Monthly $)" : "Insurance % (Annual)"}
-              </Label>
+            <SectionField>
+              <FieldLabel>
+                <FieldLabelWithTooltip
+                  label={insuranceInputMode === "monthly" ? "Insurance (Monthly $)" : "Insurance % (Annual)"}
+                  tooltip="Insurance assumption used for monthly operating expenses."
+                />
+              </FieldLabel>
               <div className="relative">
-                {insuranceInputMode === "monthly" ? (
-                  <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-                ) : null}
+                {insuranceInputMode === "monthly" ? <DollarIcon /> : null}
                 <Input
                   {...register(insuranceInputMode === "monthly" ? "insuranceMonthly" : "insurancePct", {
                     setValueAs: moneySetValueAs,
                   })}
                   type="number"
-                  step={insuranceInputMode === "monthly" ? "1" : "0.01"}
+                  step="0.01"
                   min={0}
                   placeholder={insuranceInputMode === "monthly" ? String(insuranceEst) : "0.50"}
                   className={cn(
+                    inputClassName,
                     insuranceInputMode === "monthly" ? "pl-8" : "pr-8",
-                    "border-[var(--brand-orange)]/30 bg-background focus-visible:ring-[var(--brand-orange)]/30",
                     (insuranceInputMode === "monthly" ? errors.insuranceMonthly : errors.insurancePct) &&
                       "border-destructive"
                   )}
                 />
-                {insuranceInputMode === "percent" ? (
-                  <Percent className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-                ) : null}
+                {insuranceInputMode === "percent" ? <PercentIcon /> : null}
               </div>
-              <p className="text-[11px] text-muted-foreground mt-1">
+              <FieldHint>
                 {insuranceInputMode === "monthly"
                   ? "Flat monthly insurance cost. Leave blank to fall back to the current estimate."
-                  : "Annual insurance rate applied to purchase price. Leave blank to use the default 0.5% estimate."}
-              </p>
+                  : "Annual insurance rate applied to purchase price. Leave blank to use the default 0.5%."}
+              </FieldHint>
               <FieldError
                 message={
                   insuranceInputMode === "monthly"
@@ -249,161 +301,151 @@ export function OperatingExpensesSection({
                     : errors.insurancePct?.message
                 }
               />
-            </div>
+            </SectionField>
 
-            <div>
-              <Label className="text-xs font-semibold text-[var(--brand-orange)] mb-1.5 block uppercase tracking-wide">
-                HOA (Monthly $)
-              </Label>
+            <SectionField>
+              <FieldLabel>
+                <FieldLabelWithTooltip label="HOA (Monthly $)" tooltip="Monthly homeowners association fees if applicable." />
+              </FieldLabel>
               <div className="relative">
-                <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                <DollarIcon />
                 <Input
                   {...register("hoaMonthly", { setValueAs: moneySetValueAs })}
                   type="number"
-                  step="1"
+                  step="0.01"
                   min={0}
                   placeholder="0"
-                  className={cn(
-                    "pl-8 border-[var(--brand-orange)]/30 bg-background focus-visible:ring-[var(--brand-orange)]/30",
-                    errors.hoaMonthly && "border-destructive"
-                  )}
+                  className={cn(inputClassName, "pl-8", errors.hoaMonthly && "border-destructive")}
                 />
               </div>
+              <FieldHint>Monthly homeowners association fees if applicable.</FieldHint>
               <FieldError message={errors.hoaMonthly?.message} />
-            </div>
+            </SectionField>
+          </div>
+        </div>
 
-            <div>
-              <Label className="text-xs font-semibold text-[var(--brand-orange)] mb-1.5 block uppercase tracking-wide">
-                Utilities (Monthly $)
-              </Label>
+        <div className={cn(showAdvanced && "rounded-xl border border-[var(--brand-orange)]/10 bg-card/50 p-2")}>
+          <p className={cn("px-2 pb-2 pt-1 text-[11px] font-bold uppercase tracking-wide text-[var(--brand-orange)]", !showAdvanced && "hidden")}>
+            Monthly Operating Expenses
+          </p>
+          <div className={cn("grid grid-cols-1 gap-3 sm:grid-cols-2", showAdvanced ? "lg:grid-cols-3 xl:grid-cols-5" : "lg:grid-cols-4")}>
+            <SectionField className={cn("rounded-lg border border-[var(--brand-orange)]/10 bg-card p-3", !showAdvanced && "hidden")}>
+              <FieldLabel icon={<Plug className="size-3" />}>
+                <FieldLabelWithTooltip label="Utilities" tooltip="Monthly utility expenses paid by owner." />
+              </FieldLabel>
               <div className="relative">
-                <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                <DollarIcon />
                 <Input
                   {...register("utilitiesMonthly", { setValueAs: moneySetValueAs })}
                   type="number"
-                  step="1"
+                  step="0.01"
                   min={0}
                   placeholder="0"
-                  className={cn(
-                    "pl-8 border-[var(--brand-orange)]/30 bg-background focus-visible:ring-[var(--brand-orange)]/30",
-                    errors.utilitiesMonthly && "border-destructive"
-                  )}
+                  className={cn(inputClassName, "pl-8", errors.utilitiesMonthly && "border-destructive")}
                 />
               </div>
               <FieldError message={errors.utilitiesMonthly?.message} />
-            </div>
-        </div>
-      </div>
+            </SectionField>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div>
-          <Label className="text-xs font-semibold text-[var(--brand-orange)] mb-1.5 block uppercase tracking-wide">
-            <FieldLabelWithTooltip
-              label="Maintenance %"
-              tooltip={
-                <div className="space-y-1 text-xs leading-snug">
-                  <p className="font-semibold text-foreground">Typical benchmark ranges</p>
-                  <p>New property: 5–8%</p>
-                  <p>Older property: 10–15%</p>
-                  <p className="text-muted-foreground">Guidance only. Your input is used exactly as entered.</p>
-                </div>
-              }
-            />
-          </Label>
-          <div className="relative">
-            <Input
-              {...register("maintenancePct", { valueAsNumber: true })}
-              type="number"
-              step="0.5"
-              placeholder="10"
-              className={cn(
-                "pr-8 border-[var(--brand-orange)]/30 bg-background focus-visible:ring-[var(--brand-orange)]/30",
-                errors.maintenancePct && "border-destructive"
-              )}
-            />
-            <Percent className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+            <SectionField className="rounded-lg border border-[var(--brand-orange)]/10 bg-card p-3">
+              <FieldLabel icon={<Wrench className="size-3" />}>
+                <FieldLabelWithTooltip
+                  label="Maintenance %"
+                  tooltip={
+                    <div className="space-y-1 text-xs leading-snug">
+                      <p className="font-semibold text-foreground">Typical benchmark ranges</p>
+                      <p>New property: 5-8%</p>
+                      <p>Older property: 10-15%</p>
+                      <p className="text-muted-foreground">Guidance only. Your input is used exactly as entered.</p>
+                    </div>
+                  }
+                />
+              </FieldLabel>
+              <div className="relative">
+                <Input
+                  {...register("maintenancePct", { valueAsNumber: true })}
+                  type="number"
+                  step="0.01"
+                  placeholder="10"
+                  className={cn(inputClassName, "pr-8", errors.maintenancePct && "border-destructive")}
+                />
+                <PercentIcon />
+              </div>
+              <FieldError message={errors.maintenancePct?.message} />
+            </SectionField>
+
+            <SectionField className="rounded-lg border border-[var(--brand-orange)]/10 bg-card p-3">
+              <FieldLabel icon={<Home className="size-3" />}>
+                <FieldLabelWithTooltip label="Vacancy %" tooltip="Expected vacancy allowance." />
+              </FieldLabel>
+              <div className="relative">
+                <Input
+                  {...register("vacancyPct", { valueAsNumber: true })}
+                  type="number"
+                  step="0.01"
+                  placeholder="5"
+                  className={cn(inputClassName, "pr-8", errors.vacancyPct && "border-destructive")}
+                />
+                <PercentIcon />
+              </div>
+              <FieldError message={errors.vacancyPct?.message} />
+            </SectionField>
+
+            <SectionField className="rounded-lg border border-[var(--brand-orange)]/10 bg-card p-3">
+              <FieldLabel icon={<Building2 className="size-3" />}>
+                <FieldLabelWithTooltip label="Management %" tooltip="Property management fee as a percentage of rent." />
+              </FieldLabel>
+              <div className="relative">
+                <Input
+                  {...register("mgmtPct", { valueAsNumber: true })}
+                  type="number"
+                  step="0.01"
+                  placeholder="8"
+                  className={cn(inputClassName, "pr-8", errors.mgmtPct && "border-destructive")}
+                />
+                <PercentIcon />
+              </div>
+              <FieldError message={errors.mgmtPct?.message} />
+            </SectionField>
+
+            <SectionField className="rounded-lg border border-[var(--brand-orange)]/10 bg-card p-3">
+              <FieldLabel icon={<BarChart3 className="size-3" />}>
+                <FieldLabelWithTooltip
+                  label="CapEx %"
+                  tooltip={
+                    <div className="space-y-1 text-xs leading-snug">
+                      <p className="font-semibold text-foreground">Typical benchmark ranges</p>
+                      <p>New property: 5-8%</p>
+                      <p>Older property: 10-15%</p>
+                      <p className="text-muted-foreground">Guidance only. Your input is used exactly as entered.</p>
+                    </div>
+                  }
+                />
+              </FieldLabel>
+              <div className="relative">
+                <Input
+                  {...register("capexPct", { valueAsNumber: true })}
+                  type="number"
+                  step="0.01"
+                  placeholder="5"
+                  className={cn(inputClassName, "pr-8", errors.capexPct && "border-destructive")}
+                />
+                <PercentIcon />
+              </div>
+              <FieldError message={errors.capexPct?.message} />
+            </SectionField>
           </div>
-          <FieldError message={errors.maintenancePct?.message} />
         </div>
 
-        <div>
-          <Label className="text-xs font-semibold text-[var(--brand-orange)] mb-1.5 block uppercase tracking-wide">
-            Vacancy %
-          </Label>
-          <div className="relative">
-            <Input
-              {...register("vacancyPct", { valueAsNumber: true })}
-              type="number"
-              step="0.5"
-              placeholder="5"
-              className={cn(
-                "pr-8 border-[var(--brand-orange)]/30 bg-background focus-visible:ring-[var(--brand-orange)]/30",
-                errors.vacancyPct && "border-destructive"
-              )}
-            />
-            <Percent className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-          </div>
-          <FieldError message={errors.vacancyPct?.message} />
-        </div>
-
-        <div>
-          <Label className="text-xs font-semibold text-[var(--brand-orange)] mb-1.5 block uppercase tracking-wide">
-            Management %
-          </Label>
-          <div className="relative">
-            <Input
-              {...register("mgmtPct", { valueAsNumber: true })}
-              type="number"
-              step="0.5"
-              placeholder="8"
-              className={cn(
-                "pr-8 border-[var(--brand-orange)]/30 bg-background focus-visible:ring-[var(--brand-orange)]/30",
-                errors.mgmtPct && "border-destructive"
-              )}
-            />
-            <Percent className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-          </div>
-          <FieldError message={errors.mgmtPct?.message} />
-        </div>
-
-        <div>
-          <Label className="text-xs font-semibold text-[var(--brand-orange)] mb-1.5 block uppercase tracking-wide">
-            <FieldLabelWithTooltip
-              label="CapEx %"
-              tooltip={
-                <div className="space-y-1 text-xs leading-snug">
-                  <p className="font-semibold text-foreground">Typical benchmark ranges</p>
-                  <p>New property: 5–8%</p>
-                  <p>Older property: 10–15%</p>
-                  <p className="text-muted-foreground">Guidance only. Your input is used exactly as entered.</p>
-                </div>
-              }
-            />
-          </Label>
-          <div className="relative">
-            <Input
-              {...register("capexPct", { valueAsNumber: true })}
-              type="number"
-              step="0.5"
-              placeholder="5"
-              className={cn(
-                "pr-8 border-[var(--brand-orange)]/30 bg-background focus-visible:ring-[var(--brand-orange)]/30",
-                errors.capexPct && "border-destructive"
-              )}
-            />
-            <Percent className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-          </div>
-          <FieldError message={errors.capexPct?.message} />
-        </div>
-      </div>
-
-      {showAdvanced && (
-        <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
+        <div className={cn("rounded-xl border border-[var(--brand-orange)]/10 bg-card/50 p-3", !showAdvanced && "hidden")}>
+          <p className="mb-3 text-[11px] font-bold uppercase tracking-wide text-[var(--brand-orange)]">
+            Advanced Options (Optional)
+          </p>
+          <div className="grid grid-cols-1 gap-x-6 gap-y-4 md:grid-cols-2 xl:grid-cols-4">
             <div>
-              <Label className="text-xs font-semibold text-[var(--brand-orange)] mb-1.5 block uppercase tracking-wide">
-                Building Value %
-              </Label>
+              <FieldLabel>
+                <FieldLabelWithTooltip label="Building Value %" tooltip="Portion of purchase price allocated to depreciable building value." />
+              </FieldLabel>
               <div className="relative">
                 <Input
                   {...register("buildingValuePct", { valueAsNumber: true })}
@@ -412,40 +454,36 @@ export function OperatingExpensesSection({
                   min={0}
                   max={100}
                   placeholder="85"
-                  className={cn(
-                    "pr-8 border-[var(--brand-orange)]/30 bg-background focus-visible:ring-[var(--brand-orange)]/30",
-                    errors.buildingValuePct && "border-destructive"
-                  )}
+                  className={cn(inputClassName, "pr-8", errors.buildingValuePct && "border-destructive")}
                 />
-                <Percent className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                <PercentIcon />
               </div>
-              <p className="text-[11px] text-muted-foreground mt-1">
-                Portion of purchase price allocated to depreciable building value.
-              </p>
+              <FieldHint>Portion of purchase price allocated to depreciable building value.</FieldHint>
               <FieldError message={errors.buildingValuePct?.message} />
             </div>
 
             <div>
-              <Label className="text-xs font-semibold text-[var(--brand-orange)] mb-1.5 block uppercase tracking-wide">
-                Depreciation Period
-              </Label>
+              <FieldLabel>
+                <FieldLabelWithTooltip label="Depreciation Period" tooltip="IRS standard recovery period for depreciation." />
+              </FieldLabel>
               <select
                 {...register("depreciationYears", { setValueAs: (v) => Number(v) })}
                 className={cn(
-                  "w-full h-10 rounded-md border px-3 text-sm bg-background border-[var(--brand-orange)]/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-orange)]/30",
+                  "h-10 w-full rounded-lg border border-[var(--brand-orange)]/15 bg-background px-3 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-orange)]/25",
                   errors.depreciationYears && "border-destructive"
                 )}
               >
                 <option value={27.5}>27.5 years (Residential)</option>
                 <option value={39}>39 years (Commercial)</option>
               </select>
+              <FieldHint>IRS standard recovery period for depreciation.</FieldHint>
               <FieldError message={errors.depreciationYears?.message} />
             </div>
 
             <div>
-              <Label className="text-xs font-semibold text-[var(--brand-orange)] mb-1.5 block uppercase tracking-wide">
-                Expense Growth %
-              </Label>
+              <FieldLabel>
+                <FieldLabelWithTooltip label="Expense Growth %" tooltip="Annual growth rate for operating expenses." />
+              </FieldLabel>
               <div className="relative">
                 <Input
                   {...register("expenseGrowthPct", { valueAsNumber: true })}
@@ -453,20 +491,18 @@ export function OperatingExpensesSection({
                   step="0.01"
                   min={0}
                   placeholder="2.5"
-                  className={cn(
-                    "pr-8 border-[var(--brand-orange)]/30 bg-background focus-visible:ring-[var(--brand-orange)]/30",
-                    errors.expenseGrowthPct && "border-destructive"
-                  )}
+                  className={cn(inputClassName, "pr-8", errors.expenseGrowthPct && "border-destructive")}
                 />
-                <Percent className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                <PercentIcon />
               </div>
+              <FieldHint>Annual growth rate for operating expenses.</FieldHint>
               <FieldError message={errors.expenseGrowthPct?.message} />
             </div>
 
             <div>
-              <Label className="text-xs font-semibold text-[var(--brand-orange)] mb-1.5 block uppercase tracking-wide">
-                Rent Growth %
-              </Label>
+              <FieldLabel>
+                <FieldLabelWithTooltip label="Rent Growth %" tooltip="Annual growth rate for rental income." />
+              </FieldLabel>
               <div className="relative">
                 <Input
                   {...register("rentGrowthPct", { valueAsNumber: true })}
@@ -474,20 +510,18 @@ export function OperatingExpensesSection({
                   step="0.01"
                   min={0}
                   placeholder="2.5"
-                  className={cn(
-                    "pr-8 border-[var(--brand-orange)]/30 bg-background focus-visible:ring-[var(--brand-orange)]/30",
-                    errors.rentGrowthPct && "border-destructive"
-                  )}
+                  className={cn(inputClassName, "pr-8", errors.rentGrowthPct && "border-destructive")}
                 />
-                <Percent className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                <PercentIcon />
               </div>
+              <FieldHint>Annual growth rate for rental income.</FieldHint>
               <FieldError message={errors.rentGrowthPct?.message} />
             </div>
 
             <div>
-              <Label className="text-xs font-semibold text-[var(--brand-orange)] mb-1.5 block uppercase tracking-wide">
-                Appreciation Rate % <span className="text-[10px] text-muted-foreground">(Exit scenarios)</span>
-              </Label>
+              <FieldLabel>
+                <FieldLabelWithTooltip label="Appreciation Rate % (Exit Scenarios)" tooltip="Expected annual property appreciation rate." />
+              </FieldLabel>
               <div className="relative">
                 <Input
                   {...register("appreciationRatePct", { setValueAs: moneySetValueAs })}
@@ -496,23 +530,18 @@ export function OperatingExpensesSection({
                   min={0}
                   max={100}
                   placeholder="3"
-                  className={cn(
-                    "pr-8 border-[var(--brand-orange)]/30 bg-background focus-visible:ring-[var(--brand-orange)]/30",
-                    errors.appreciationRatePct && "border-destructive"
-                  )}
+                  className={cn(inputClassName, "pr-8", errors.appreciationRatePct && "border-destructive")}
                 />
-                <Percent className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                <PercentIcon />
               </div>
-              <p className="text-[11px] text-muted-foreground mt-1">
-                Optional. Leave blank to use the default 3% annual appreciation.
-              </p>
+              <FieldHint>Expected annual property appreciation rate.</FieldHint>
               <FieldError message={errors.appreciationRatePct?.message} />
             </div>
 
             <div>
-              <Label className="text-xs font-semibold text-[var(--brand-orange)] mb-1.5 block uppercase tracking-wide">
-                Selling Cost % <span className="text-[10px] text-muted-foreground">(Exit scenarios)</span>
-              </Label>
+              <FieldLabel>
+                <FieldLabelWithTooltip label="Selling Cost % (Exit Scenarios)" tooltip="Total selling costs as a percentage of sale price." />
+              </FieldLabel>
               <div className="relative">
                 <Input
                   {...register("sellingCostPct", { setValueAs: moneySetValueAs })}
@@ -521,25 +550,18 @@ export function OperatingExpensesSection({
                   min={0}
                   max={100}
                   placeholder="6"
-                  className={cn(
-                    "pr-8 border-[var(--brand-orange)]/30 bg-background focus-visible:ring-[var(--brand-orange)]/30",
-                    errors.sellingCostPct && "border-destructive"
-                  )}
+                  className={cn(inputClassName, "pr-8", errors.sellingCostPct && "border-destructive")}
                 />
-                <Percent className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                <PercentIcon />
               </div>
-              <p className="text-[11px] text-muted-foreground mt-1">
-                Optional. Leave blank to use the default 6% selling cost.
-              </p>
+              <FieldHint>Total selling costs as a percentage of sale price.</FieldHint>
               <FieldError message={errors.sellingCostPct?.message} />
             </div>
-          </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
             <div>
-              <Label className="text-xs font-semibold text-[var(--brand-orange)] mb-1.5 block uppercase tracking-wide">
-                Tax Rate % <span className="text-[10px] text-muted-foreground">(Optional, Your personal income tax rate (used for tax savings calculation))</span>
-              </Label>
+              <FieldLabel>
+                <FieldLabelWithTooltip label="Tax Rate % (Optional)" tooltip="Your personal income tax rate for tax savings calculation." />
+              </FieldLabel>
               <div className="relative">
                 <Input
                   {...register("taxRatePct", { setValueAs: moneySetValueAs })}
@@ -548,20 +570,46 @@ export function OperatingExpensesSection({
                   min={0}
                   max={100}
                   placeholder="24"
-                  className={cn(
-                    "pr-8 border-[var(--brand-orange)]/30 bg-background focus-visible:ring-[var(--brand-orange)]/30",
-                    errors.taxRatePct && "border-destructive"
-                  )}
+                  className={cn(inputClassName, "pr-8", errors.taxRatePct && "border-destructive")}
                 />
-                <Percent className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                <PercentIcon />
               </div>
+              <FieldHint>Your personal income tax rate for tax savings calculation.</FieldHint>
               <FieldError message={errors.taxRatePct?.message} />
             </div>
 
-            <div className="flex items-center gap-1.5  px-3 py-2.5 sm:self-end">
-              <Label htmlFor="include-interest-deduction" className="text-sm font-medium text-foreground cursor-pointer">
-                Include Interest Deduction
-              </Label>
+            <div className="flex min-h-[94px] items-start justify-between gap-4 pt-1 xl:items-center">
+              <div>
+                <div className="mb-2 flex items-center gap-1.5">
+                  <Label
+                    htmlFor="include-interest-deduction"
+                    className="cursor-pointer text-[11px] font-bold uppercase tracking-wide text-[var(--brand-orange)]"
+                  >
+                    Include Interest Deduction
+                  </Label>
+                  <Tooltip delayDuration={150}>
+                    <TooltipTrigger asChild>
+                      <button
+                        type="button"
+                        className="inline-flex size-3.5 items-center justify-center rounded-full text-[var(--brand-orange)]/70 hover:text-[var(--brand-orange)]"
+                        aria-label="Include interest deduction guidance"
+                      >
+                        <Info className="size-3.5" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent
+                      side="top"
+                      sideOffset={6}
+                      className="max-w-xs border border-border bg-popover px-3 py-2 text-popover-foreground shadow-md"
+                    >
+                      Include mortgage interest deduction in cash flow and taxes.
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+                <p className="text-[11px] leading-relaxed text-muted-foreground">
+                  Include mortgage interest deduction in cash flow and taxes.
+                </p>
+              </div>
               <Controller
                 name="includeInterestDeduction"
                 control={control}
@@ -571,13 +619,14 @@ export function OperatingExpensesSection({
                     checked={field.value ?? true}
                     onCheckedChange={field.onChange}
                     aria-label="Include interest deduction in estimated tax savings"
+                    className="mt-0.5 data-[state=checked]:bg-[var(--brand-orange)]"
                   />
                 )}
               />
             </div>
           </div>
-        </>
-      )}
+        </div>
+      </div>
     </div>
   );
 }

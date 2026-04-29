@@ -44,7 +44,7 @@ export function FinancingSection({ form }: FinancingSectionProps) {
             <Input
               {...register("downPaymentPct", { valueAsNumber: true })}
               type="number"
-              step="0.5"
+              step="0.01"
               placeholder="20"
               className={cn(
                 "pr-8 border-[var(--brand-green)]/30 bg-background focus-visible:ring-[var(--brand-green)]/30",

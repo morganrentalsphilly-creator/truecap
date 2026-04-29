@@ -42,3 +42,28 @@ export async function getEntitlementsForUser(
 
   return parseEntitlements(free?.entitlements) ?? defaultFree;
 }
+
+export async function hasActivePremiumSubscription(
+  supabase: SupabaseClient,
+  userId: string
+): Promise<boolean> {
+  const { data: sub } = await supabase
+    .from("subscriptions")
+    .select("plans(slug, entitlements)")
+    .eq("user_id", userId)
+    .in("status", ["active", "trialing"])
+    .order("updated_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  const plansRow = sub?.plans as { slug?: unknown; entitlements?: unknown } | null | undefined;
+  const slug = typeof plansRow?.slug === "string" ? plansRow.slug : null;
+  const entitlements =
+    plansRow?.entitlements != null ? parseEntitlements(plansRow.entitlements) : null;
+
+  return Boolean(
+    slug?.startsWith("pro_") ||
+      entitlements?.features.includes("save_deal") ||
+      entitlements?.features.includes("deal_score")
+  );
+}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Lock,
   TrendingUp,
@@ -14,6 +15,7 @@ import {
   Loader2,
   Info,
   FileDown,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -56,6 +58,8 @@ interface AnalysisDashboardProps {
   isComparing?: boolean;
   isExporting?: boolean;
   isSaved?: boolean;
+  isAuthenticated?: boolean;
+  hasProAccess?: boolean;
   /** Shown when Compare / Export are disabled (e.g. unsaved edits). */
   persistedActionsBlockHint?: string;
 }
@@ -126,9 +130,14 @@ export function AnalysisDashboard({
   isComparing = false,
   isExporting = false,
   isSaved = false,
+  isAuthenticated = false,
+  hasProAccess = false,
   persistedActionsBlockHint,
 }: AnalysisDashboardProps) {
   const [activeTab, setActiveTab] = useState<Tab>("cash-flow");
+  const router = useRouter();
+  const goToLogin = () => router.push("/auth/login");
+  const goToBilling = () => router.push("/profile#billing");
 
   const recommendation = buildRecommendationModel(dealScoreResult);
 
@@ -162,7 +171,17 @@ export function AnalysisDashboard({
           <Button
             variant="outline"
             size="sm"
-            onClick={() => void onSaveDeal()}
+            onClick={() => {
+              if (!isAuthenticated) {
+                goToLogin();
+                return;
+              }
+              if (!hasProAccess) {
+                goToBilling();
+                return;
+              }
+              void onSaveDeal();
+            }}
             disabled={isSaving}
             className="rounded-full text-xs sm:text-sm h-8 sm:h-9 px-3 sm:px-4"
           >
@@ -171,7 +190,10 @@ export function AnalysisDashboard({
             ) : (
               <Save className="w-3.5 h-3.5 mr-1 sm:mr-1.5" />
             )}
-            <span className="hidden xs:inline">Sign In to </span>Save
+            Save
+            <span className="ml-1.5 rounded-full bg-[var(--brand-orange)] px-1.5 py-0.5 text-[9px] font-bold uppercase text-white">
+              PRO
+            </span>
           </Button>
           <Button
             variant="outline"
@@ -212,7 +234,8 @@ export function AnalysisDashboard({
           isDealScoreLoading={isLoadingDealScore}
           dealScoreResult={dealScoreResult}
           isSaving={isSaving}
-          onSignIn={onSaveDeal}
+          onUpgrade={goToBilling}
+          hasProAccess={hasProAccess}
         />
 
         {/* Recommendation card */}
@@ -386,26 +409,35 @@ export function AnalysisDashboard({
           {activeTab === "cash-flow" && (
             <CashFlowTab result={result} isLoading={isLoading} />
           )}
-          {activeTab === "projections" && projectionSource && (
+          {activeTab === "projections" && !hasProAccess && (
+            <ProFeaturePreview kind="projections" onUpgrade={goToBilling} />
+          )}
+          {activeTab === "projections" && hasProAccess && projectionSource && (
             <TenYearProjectionsPanel source={projectionSource} />
           )}
-          {activeTab === "projections" && !projectionSource && (
+          {activeTab === "projections" && hasProAccess && !projectionSource && (
             <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
               Run the analysis to see the 10-year projection.
             </div>
           )}
-          {activeTab === "tax-strategy" && taxStrategySource && (
+          {activeTab === "tax-strategy" && !hasProAccess && (
+            <ProFeaturePreview kind="tax-strategy" onUpgrade={goToBilling} />
+          )}
+          {activeTab === "tax-strategy" && hasProAccess && taxStrategySource && (
             <TaxStrategyPanel source={taxStrategySource} />
           )}
-          {activeTab === "tax-strategy" && !taxStrategySource && (
+          {activeTab === "tax-strategy" && hasProAccess && !taxStrategySource && (
             <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
               Run the analysis to see the tax strategy view.
             </div>
           )}
-          {activeTab === "exit-scenarios" && exitScenarioSource && (
+          {activeTab === "exit-scenarios" && !hasProAccess && (
+            <ProFeaturePreview kind="exit-scenarios" onUpgrade={goToBilling} />
+          )}
+          {activeTab === "exit-scenarios" && hasProAccess && exitScenarioSource && (
             <ExitScenariosPanel source={exitScenarioSource} />
           )}
-          {activeTab === "exit-scenarios" && !exitScenarioSource && (
+          {activeTab === "exit-scenarios" && hasProAccess && !exitScenarioSource && (
             <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
               Run the analysis to see exit scenarios.
             </div>
@@ -440,7 +472,6 @@ function buildRecommendationModel(dealScoreResult: DealScoreActionResult | null)
     dealScoreResult.tier === "pro"
       ? dealScoreResult.data.recommendation
       : dealScoreResult.recommendation;
-
   const descriptionFromScore =
     dealScoreResult.tier === "pro" ? dealScoreResult.data.explanation : null;
 
@@ -516,13 +547,15 @@ function DealScoreCard({
   isDealScoreLoading,
   dealScoreResult,
   isSaving,
-  onSignIn,
+  onUpgrade,
+  hasProAccess,
 }: {
   isAnalysisLoading: boolean;
   isDealScoreLoading: boolean;
   dealScoreResult: DealScoreActionResult | null;
   isSaving: boolean;
-  onSignIn: () => void | Promise<void>;
+  onUpgrade: () => void;
+  hasProAccess: boolean;
 }) {
   const isLoading = isAnalysisLoading || isDealScoreLoading;
 
@@ -540,26 +573,54 @@ function DealScoreCard({
     );
   }
 
-  if (!dealScoreResult || !dealScoreResult.ok || dealScoreResult.tier === "free") {
-    const recommendation =
-      dealScoreResult?.ok && dealScoreResult.tier === "free"
-        ? dealScoreResult.recommendation
-        : "Deal Score available with Pro";
+  if (!hasProAccess || !dealScoreResult || !dealScoreResult.ok || dealScoreResult.tier !== "pro") {
     return (
-      <div className="bg-card rounded-2xl border border-border p-4 sm:p-6 flex flex-col items-center justify-center text-center">
-        <Lock className="w-10 h-10 text-muted-foreground mb-3" />
-        <p className="font-semibold text-foreground mb-1">Deal Score (Pro)</p>
-        <p className="text-xs text-muted-foreground mb-4">
-          Free recommendation: {recommendation}
-        </p>
-        <Button
-          size="sm"
-          className="bg-primary text-primary-foreground rounded-full font-semibold text-sm"
-          onClick={() => void onSignIn()}
-          disabled={isSaving}
-        >
-          {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Sign In / Sign Up"}
-        </Button>
+      <div className="relative overflow-hidden bg-card rounded-2xl border border-border p-4 sm:p-6">
+        <div className="pointer-events-none select-none opacity-75 blur-[4.5px]">
+          <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2">
+            Deal Score
+          </p>
+          <div className="flex items-center justify-between gap-3 mb-3">
+            <div className="w-20 h-20 rounded-2xl ring-2 ring-primary/35 bg-[var(--brand-blue-light)] flex flex-col items-center justify-center shadow-sm">
+              <p className="text-4xl leading-none font-black text-primary">32</p>
+            </div>
+            <div className="flex flex-col items-end gap-1">
+              <span className="px-3 py-1 rounded-xl border border-primary/30 bg-primary text-primary-foreground text-sm font-bold">
+                Buy
+              </span>
+              <span className="px-2.5 py-0.5 rounded-full border border-blue-200 bg-blue-100 text-blue-700 text-xs font-semibold">
+                High Risk
+              </span>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-2 text-xs mb-3">
+            <div className="rounded-lg bg-blue-50 border border-blue-100 p-2">Cash Flow Score: 25</div>
+            <div className="rounded-lg bg-blue-50 border border-blue-100 p-2">CoC Score: 8</div>
+            <div className="rounded-lg bg-blue-50 border border-blue-100 p-2">Cap Rate Score: 10</div>
+            <div className="rounded-lg bg-blue-50 border border-blue-100 p-2">DSCR Score: 10</div>
+            <div className="rounded-lg bg-blue-50 border border-blue-100 p-2 col-span-2">
+              Risk Penalty: -13
+            </div>
+          </div>
+          <p className="text-xs leading-relaxed text-blue-800">
+            This sample score preview shows the type of breakdown Pro unlocks for each deal.
+          </p>
+        </div>
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/35 px-5 text-center backdrop-blur-[1px]">
+          <Lock className="w-10 h-10 text-muted-foreground mb-3" />
+          <p className="font-semibold text-foreground mb-1">Deal Score (Pro)</p>
+          <p className="max-w-xs text-xs text-muted-foreground mb-4">
+            Upgrade to Pro to unlock risk scoring, score breakdowns, and recommendation details.
+          </p>
+          <Button
+            size="sm"
+            className="bg-primary text-primary-foreground rounded-full font-semibold text-sm"
+            onClick={onUpgrade}
+            disabled={isSaving}
+          >
+            {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Upgrade to Pro"}
+          </Button>
+        </div>
       </div>
     );
   }
@@ -673,6 +734,114 @@ function DealScoreCard({
         </div>
       </div>
       <p className={cn("text-xs leading-relaxed", activeStyle.descriptionText)}>{explanation}</p>
+    </div>
+  );
+}
+
+type ProPreviewKind = "projections" | "tax-strategy" | "exit-scenarios";
+
+const proPreviewCopy: Record<ProPreviewKind, { title: string; description: string; metrics: string[] }> = {
+  projections: {
+    title: "10-Year Projections",
+    description: "Unlock long-term cash flow, after-tax projections, and income trends.",
+    metrics: ["Year 10 Cumulative CF", "Best Annual After-Tax CF", "10-Year After-Tax Cash Flow"],
+  },
+  "tax-strategy": {
+    title: "Tax Strategy",
+    description: "Unlock taxable income trends, depreciation, mortgage interest, and tax savings.",
+    metrics: ["Year 1 Taxable Income", "Year 1 Tax Savings", "10-Year Tax Benefit"],
+  },
+  "exit-scenarios": {
+    title: "Exit Scenarios",
+    description: "Unlock equity growth, sale timing, profit breakdowns, and ROI scenarios.",
+    metrics: ["Best Year to Sell", "Year 5 Profit", "Total ROI"],
+  },
+};
+
+function ProFeaturePreview({
+  kind,
+  onUpgrade,
+}: {
+  kind: ProPreviewKind;
+  onUpgrade: () => void;
+}) {
+  const copy = proPreviewCopy[kind];
+  const bars = [18, 28, 42, 55, 70, 88, 104, 122, 142, 164];
+
+  return (
+    <div className="relative overflow-hidden rounded-2xl">
+      <div className="pointer-events-none select-none space-y-5 blur-[3px] opacity-70">
+        <div className="grid gap-3 md:grid-cols-3">
+          {copy.metrics.map((metric, index) => (
+            <div key={metric} className="rounded-2xl border border-border bg-card p-4">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                {metric}
+              </p>
+              <p className="mt-2 text-2xl font-black text-[var(--metric-positive)]">
+                {index === 0 && kind === "exit-scenarios" ? "Year 10" : "$48,260"}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        <div className="rounded-2xl border border-border bg-card p-4">
+          <div className="flex items-center gap-2">
+            <TrendingUp className="w-4 h-4 text-primary" />
+            <div>
+              <p className="text-sm font-semibold text-foreground">{copy.title}</p>
+              <p className="text-xs text-muted-foreground">Preview snapshot</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid gap-4 xl:grid-cols-2">
+          <div className="rounded-2xl border border-border bg-card p-4">
+            <p className="mb-4 text-sm font-semibold text-foreground">
+              {kind === "tax-strategy" ? "Annual Tax Savings" : kind === "exit-scenarios" ? "Equity Growth" : "Annual Cash Flow"}
+            </p>
+            <div className="flex h-56 items-end gap-3 border-t border-border/60 pt-4">
+              {bars.map((height, index) => (
+                <div key={index} className="flex flex-1 flex-col items-center gap-2">
+                  <div
+                    className={cn(
+                      "w-full rounded-t-lg",
+                      kind === "tax-strategy" ? "bg-emerald-600" : "bg-primary"
+                    )}
+                    style={{ height }}
+                  />
+                  <span className="text-[10px] text-muted-foreground">{index + 1}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-border bg-card p-4">
+            <p className="mb-4 text-sm font-semibold text-foreground">
+              {kind === "tax-strategy" ? "Taxable Rental Income Trend" : kind === "exit-scenarios" ? "Property Value vs Loan Balance" : "Income vs Expenses"}
+            </p>
+            <div className="relative h-56 border-t border-border/60">
+              <svg viewBox="0 0 420 220" className="h-full w-full">
+                <path d="M20 165 C110 155 190 145 400 105" fill="none" stroke="var(--metric-positive)" strokeWidth="4" />
+                <path d="M20 185 C120 180 240 176 400 162" fill="none" stroke="rgb(219 39 119)" strokeWidth="4" />
+                <path d="M20 55 H400 M20 110 H400 M20 165 H400" stroke="hsl(var(--border))" strokeWidth="1" />
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="absolute inset-0 flex items-center justify-center bg-background/55 p-4 backdrop-blur-[1px]">
+        <div className="max-w-sm rounded-2xl border border-primary/20 bg-card p-5 text-center shadow-lg">
+          <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+            <Sparkles className="size-6" />
+          </div>
+          <h3 className="text-lg font-black text-foreground">{copy.title} is a Pro feature</h3>
+          <p className="mt-2 text-sm text-muted-foreground">{copy.description}</p>
+          <Button className="mt-4 rounded-full font-semibold" onClick={onUpgrade}>
+            Upgrade to Pro
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }

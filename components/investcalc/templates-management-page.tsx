@@ -1,17 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect, useMemo, useState } from "react";
 import {
   FileText,
   Loader2,
   Pencil,
   Plus,
-  Save,
   Search,
   Trash2,
-  X,
 } from "lucide-react";
 import type { AnalysisTemplateOption } from "@/app/actions/analysis-templates";
 import {
@@ -19,17 +15,18 @@ import {
   deleteAnalysisTemplateAction,
   updateAnalysisTemplateAction,
 } from "@/app/actions/analysis-templates";
-import {
-  analysisTemplateSchema,
-  type AnalysisTemplateInput,
-  TEMPLATE_DESCRIPTION_MAX_LENGTH,
-} from "@/lib/analysis-template-schema";
-import { DEFAULT_APPRECIATION_RATE, DEFAULT_SELLING_COST_PCT } from "@/lib/exit-scenarios";
+import type { AnalysisTemplateInput } from "@/lib/analysis-template-schema";
 import { useToast } from "@/hooks/use-toast";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import {
   Dialog,
   DialogContent,
@@ -38,73 +35,62 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { TemplateFormDialog } from "@/components/investcalc/template-form-dialog";
 
-type NumericTemplateField =
-  | "propertyTaxPct"
-  | "insurancePct"
-  | "insuranceMo"
-  | "maintenancePct"
-  | "vacancyPct"
-  | "managementPct"
-  | "capexPct"
-  | "closingCostsPct"
-  | "interestRatePct"
-  | "downPaymentPct"
-  | "expenseGrowthPct"
-  | "rentGrowthPct"
-  | "appreciationRatePct"
-  | "sellingCostPct"
-  | "buildingValuePct"
-  | "taxRatePct";
+const TEMPLATE_PAGE_SIZE = 10;
 
-function NumberInputField({
-  form,
-  name,
-  label,
-  hint,
-  step = "0.1",
-  allowEmpty = false,
-}: {
-  form: ReturnType<typeof useForm<AnalysisTemplateInput>>;
-  name: NumericTemplateField;
-  label: string;
-  hint?: string;
-  step?: string;
-  allowEmpty?: boolean;
-}) {
-  return (
-    <FormField
-      control={form.control}
-      name={name}
-      render={({ field }) => (
-        <FormItem>
-          <FormLabel className="text-xs font-semibold uppercase tracking-wide">{label}</FormLabel>
-          <FormControl>
-            <Input
-              type="number"
-              min={0}
-              step={step}
-              value={Number.isFinite(field.value) ? field.value : ""}
-              onChange={(e) => {
-                const next = e.target.value;
-                field.onChange(next === "" ? (allowEmpty ? undefined : 0) : Number(next));
-              }}
-            />
-          </FormControl>
-          {hint ? <p className="text-[11px] text-muted-foreground">{hint}</p> : null}
-          <FormMessage />
-        </FormItem>
-      )}
-    />
-  );
+function toPercentLabel(value: number): string {
+  return `${value.toFixed(1)}%`;
+}
+
+const DEFAULT_TEMPLATE_VALUES: AnalysisTemplateInput = {
+  templateName: "",
+  templateDescription: "",
+  propertyTaxPct: 1.1,
+  insuranceInputMode: "percent",
+  insurancePct: 0.5,
+  insuranceMo: undefined,
+  maintenancePct: 10,
+  vacancyPct: 5,
+  managementPct: 8,
+  capexPct: 5,
+  closingCostsPct: 3,
+  interestRatePct: 6.5,
+  downPaymentPct: 20,
+  expenseGrowthPct: 3,
+  rentGrowthPct: 3,
+  appreciationRatePct: undefined,
+  sellingCostPct: undefined,
+  buildingValuePct: 85,
+  depreciationYears: 27.5,
+  includeInterestDeduction: true,
+  taxRatePct: 24,
+};
+
+function getTemplateValues(template: AnalysisTemplateOption): AnalysisTemplateInput {
+  return {
+    templateName: template.templateName,
+    templateDescription: template.templateDescription ?? "",
+    propertyTaxPct: template.propertyTaxPct,
+    insuranceInputMode: template.insuranceInputMode,
+    insurancePct: template.insurancePct ?? undefined,
+    insuranceMo: template.insuranceMo ?? undefined,
+    maintenancePct: template.maintenancePct,
+    vacancyPct: template.vacancyPct,
+    managementPct: template.managementPct,
+    capexPct: template.capexPct,
+    closingCostsPct: template.closingCostsPct,
+    interestRatePct: template.interestRatePct,
+    downPaymentPct: template.downPaymentPct,
+    expenseGrowthPct: template.expenseGrowthPct,
+    rentGrowthPct: template.rentGrowthPct,
+    appreciationRatePct: template.appreciationRatePct,
+    sellingCostPct: template.sellingCostPct,
+    buildingValuePct: template.buildingValuePct,
+    depreciationYears: template.depreciationYears,
+    includeInterestDeduction: template.includeInterestDeduction,
+    taxRatePct: template.taxRatePct,
+  };
 }
 
 export function TemplatesManagementPage({
@@ -116,38 +102,13 @@ export function TemplatesManagementPage({
   const [templates, setTemplates] = useState(initialTemplates);
   const [searchQuery, setSearchQuery] = useState("");
   const [isFormDialogOpen, setIsFormDialogOpen] = useState(false);
-  const [showAdvanced, setShowAdvanced] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<AnalysisTemplateOption | null>(null);
+  const [dialogInitialValues, setDialogInitialValues] =
+    useState<AnalysisTemplateInput>(DEFAULT_TEMPLATE_VALUES);
   const [isSaving, setIsSaving] = useState(false);
   const [templateToDelete, setTemplateToDelete] = useState<AnalysisTemplateOption | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-
-  const templateForm = useForm<AnalysisTemplateInput>({
-    resolver: zodResolver(analysisTemplateSchema),
-    defaultValues: {
-      templateName: "",
-      templateDescription: "",
-      propertyTaxPct: 1.1,
-      insuranceInputMode: "percent",
-      insurancePct: 0.5,
-      insuranceMo: undefined,
-      maintenancePct: 10,
-      vacancyPct: 5,
-      managementPct: 8,
-      capexPct: 5,
-      closingCostsPct: 3,
-      interestRatePct: 6.5,
-      downPaymentPct: 20,
-      expenseGrowthPct: 3,
-      rentGrowthPct: 3,
-      appreciationRatePct: undefined,
-      sellingCostPct: undefined,
-      buildingValuePct: 85,
-      depreciationYears: 27.5,
-      includeInterestDeduction: true,
-      taxRatePct: 24,
-    },
-  });
+  const [currentPage, setCurrentPage] = useState(1);
 
   const filteredTemplates = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -158,61 +119,39 @@ export function TemplatesManagementPage({
     });
   }, [searchQuery, templates]);
 
+  const pageCount = Math.max(1, Math.ceil(filteredTemplates.length / TEMPLATE_PAGE_SIZE));
+  const safeCurrentPage = Math.min(currentPage, pageCount);
+  const pageStartIndex = filteredTemplates.length === 0 ? 0 : (safeCurrentPage - 1) * TEMPLATE_PAGE_SIZE;
+  const pageEndIndex = Math.min(pageStartIndex + TEMPLATE_PAGE_SIZE, filteredTemplates.length);
+  const pagedTemplates = useMemo(
+    () => filteredTemplates.slice(pageStartIndex, pageEndIndex),
+    [filteredTemplates, pageEndIndex, pageStartIndex]
+  );
+
+  const paginationPages = useMemo(() => {
+    const pages = new Set<number>([1, pageCount, safeCurrentPage - 1, safeCurrentPage, safeCurrentPage + 1]);
+    return [...pages].filter((page) => page >= 1 && page <= pageCount).sort((a, b) => a - b);
+  }, [pageCount, safeCurrentPage]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    if (currentPage > pageCount) {
+      setCurrentPage(pageCount);
+    }
+  }, [currentPage, pageCount]);
+
   const openCreateDialog = () => {
     setEditingTemplate(null);
-    setShowAdvanced(false);
-    templateForm.reset({
-      templateName: "",
-      templateDescription: "",
-      propertyTaxPct: 1.1,
-      insuranceInputMode: "percent",
-      insurancePct: 0.5,
-      insuranceMo: undefined,
-      maintenancePct: 10,
-      vacancyPct: 5,
-      managementPct: 8,
-      capexPct: 5,
-      closingCostsPct: 3,
-      interestRatePct: 6.5,
-      downPaymentPct: 20,
-      expenseGrowthPct: 3,
-      rentGrowthPct: 3,
-      appreciationRatePct: undefined,
-      sellingCostPct: undefined,
-      buildingValuePct: 85,
-      depreciationYears: 27.5,
-      includeInterestDeduction: true,
-      taxRatePct: 24,
-    });
+    setDialogInitialValues(DEFAULT_TEMPLATE_VALUES);
     setIsFormDialogOpen(true);
   };
 
   const openEditDialog = (template: AnalysisTemplateOption) => {
     setEditingTemplate(template);
-    setShowAdvanced(false);
-    templateForm.reset({
-      templateName: template.templateName,
-      templateDescription: template.templateDescription ?? "",
-      propertyTaxPct: template.propertyTaxPct,
-      insuranceInputMode: template.insuranceInputMode,
-      insurancePct: template.insurancePct ?? undefined,
-      insuranceMo: template.insuranceMo ?? undefined,
-      maintenancePct: template.maintenancePct,
-      vacancyPct: template.vacancyPct,
-      managementPct: template.managementPct,
-      capexPct: template.capexPct,
-      closingCostsPct: template.closingCostsPct,
-      interestRatePct: template.interestRatePct,
-      downPaymentPct: template.downPaymentPct,
-      expenseGrowthPct: template.expenseGrowthPct,
-      rentGrowthPct: template.rentGrowthPct,
-      appreciationRatePct: template.appreciationRatePct,
-      sellingCostPct: template.sellingCostPct,
-      buildingValuePct: template.buildingValuePct,
-      depreciationYears: template.depreciationYears,
-      includeInterestDeduction: template.includeInterestDeduction,
-      taxRatePct: template.taxRatePct,
-    });
+    setDialogInitialValues(getTemplateValues(template));
     setIsFormDialogOpen(true);
   };
 
@@ -272,8 +211,8 @@ export function TemplatesManagementPage({
   };
 
   return (
-    <main className="min-h-[calc(100vh-4rem)] bg-muted/30 pb-12">
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8 space-y-6">
+    <main className="min-h-full bg-muted/30 pb-12">
+      <section className="w-full px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 space-y-6">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div className="space-y-1">
             <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-foreground">
@@ -303,7 +242,7 @@ export function TemplatesManagementPage({
 
         <div className="rounded-2xl border border-border bg-card overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[760px] text-sm">
+            <table className="w-full min-w-[1040px] text-sm">
               <thead className="bg-muted/40 border-b border-border">
                 <tr className="h-12">
                   <th className="text-left px-4 text-xs uppercase tracking-wider text-muted-foreground font-bold">
@@ -313,12 +252,24 @@ export function TemplatesManagementPage({
                     Description
                   </th>
                   <th className="text-right px-4 text-xs uppercase tracking-wider text-muted-foreground font-bold">
+                    Down Payment
+                  </th>
+                  <th className="text-right px-4 text-xs uppercase tracking-wider text-muted-foreground font-bold">
+                    Interest Rate
+                  </th>
+                  <th className="text-right px-4 text-xs uppercase tracking-wider text-muted-foreground font-bold">
+                    Vacancy
+                  </th>
+                  <th className="text-right px-4 text-xs uppercase tracking-wider text-muted-foreground font-bold">
+                    Tax Rate
+                  </th>
+                  <th className="text-right px-4 text-xs uppercase tracking-wider text-muted-foreground font-bold">
                     Actions
                   </th>
                 </tr>
               </thead>
               <tbody>
-                {filteredTemplates.map((template) => (
+                {pagedTemplates.map((template) => (
                   <tr key={template.id} className="h-[68px] border-b border-border/80 hover:bg-muted/40">
                     <td className="px-4">
                       <div className="flex items-start gap-2">
@@ -328,9 +279,13 @@ export function TemplatesManagementPage({
                         <p className="font-semibold text-foreground">{template.templateName}</p>
                       </div>
                     </td>
-                    <td className="px-4 text-muted-foreground">
+                    <td className="px-4 text-muted-foreground max-w-[320px] truncate">
                       {template.templateDescription?.trim() || "No description"}
                     </td>
+                    <td className="px-4 text-right tabular-nums text-foreground">{toPercentLabel(template.downPaymentPct)}</td>
+                    <td className="px-4 text-right tabular-nums text-foreground">{toPercentLabel(template.interestRatePct)}</td>
+                    <td className="px-4 text-right tabular-nums text-foreground">{toPercentLabel(template.vacancyPct)}</td>
+                    <td className="px-4 text-right tabular-nums text-foreground">{toPercentLabel(template.taxRatePct)}</td>
                     <td className="px-4">
                       <div className="flex items-center justify-end gap-1.5">
                         <Button
@@ -361,6 +316,56 @@ export function TemplatesManagementPage({
             </table>
           </div>
 
+          {filteredTemplates.length > 0 ? (
+            <div className="flex flex-col gap-3 border-t border-border bg-muted/20 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-xs text-muted-foreground">
+                Showing {pageStartIndex + 1}-{pageEndIndex} of {filteredTemplates.length} templates
+              </p>
+              {pageCount > 1 ? (
+                <Pagination className="mx-0 w-auto justify-start sm:justify-end">
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setCurrentPage(Math.max(1, safeCurrentPage - 1));
+                        }}
+                        aria-disabled={safeCurrentPage <= 1}
+                        className={safeCurrentPage <= 1 ? "pointer-events-none opacity-50" : ""}
+                      />
+                    </PaginationItem>
+                    {paginationPages.map((page) => (
+                      <PaginationItem key={page}>
+                        <PaginationLink
+                          href="#"
+                          isActive={page === safeCurrentPage}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setCurrentPage(page);
+                          }}
+                        >
+                          {page}
+                        </PaginationLink>
+                      </PaginationItem>
+                    ))}
+                    <PaginationItem>
+                      <PaginationNext
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setCurrentPage(Math.min(pageCount, safeCurrentPage + 1));
+                        }}
+                        aria-disabled={safeCurrentPage >= pageCount}
+                        className={safeCurrentPage >= pageCount ? "pointer-events-none opacity-50" : ""}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              ) : null}
+            </div>
+          ) : null}
+
           {filteredTemplates.length === 0 && (
             <div className="py-16 px-6 text-center">
               <p className="text-sm font-semibold text-foreground">No templates found</p>
@@ -372,243 +377,19 @@ export function TemplatesManagementPage({
         </div>
       </section>
 
-      <Dialog
+      <TemplateFormDialog
         open={isFormDialogOpen}
         onOpenChange={(open) => {
-          if (!open && isSaving) return;
           if (!open) setEditingTemplate(null);
           setIsFormDialogOpen(open);
         }}
-      >
-        <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>
-              {editingTemplate ? "Edit Calculation Template" : "Create Calculation Template"}
-            </DialogTitle>
-            <DialogDescription>
-              {editingTemplate
-                ? "Update template assumptions."
-                : "Save reusable assumptions for future calculations."}
-            </DialogDescription>
-          </DialogHeader>
-
-          <Form {...templateForm}>
-            <form onSubmit={templateForm.handleSubmit(submitTemplate)} className="space-y-5">
-              <FormField
-                control={templateForm.control}
-                name="templateName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Template Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="My Rental Template" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={templateForm.control}
-                name="templateDescription"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Short Description</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Traditional rental property"
-                        maxLength={TEMPLATE_DESCRIPTION_MAX_LENGTH}
-                        {...field}
-                        value={field.value ?? ""}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                <NumberInputField
-                  form={templateForm}
-                  name="propertyTaxPct"
-                  label="Property Tax % (Annual)"
-                  hint="Annual property tax rate used in calculations."
-                />
-                <FormField
-                  control={templateForm.control}
-                  name="insuranceInputMode"
-                  render={({ field }) => (
-                    <FormItem className="sm:col-span-2 lg:col-span-1">
-                      <FormLabel className="text-xs font-semibold uppercase tracking-wide">
-                        Insurance Input
-                      </FormLabel>
-                      <div className="flex rounded-lg border border-border bg-muted/40 p-1">
-                        {[
-                          { value: "percent", label: "Annual %" },
-                          { value: "monthly", label: "Monthly $" },
-                        ].map((option) => (
-                          <button
-                            key={option.value}
-                            type="button"
-                            onClick={() => field.onChange(option.value)}
-                            className={cn(
-                              "flex-1 rounded-md px-3 py-2 text-xs font-semibold transition-colors",
-                              field.value === option.value
-                                ? "bg-primary text-primary-foreground"
-                                : "text-muted-foreground hover:text-foreground"
-                            )}
-                          >
-                            {option.label}
-                          </button>
-                        ))}
-                      </div>
-                      <p className="text-[11px] text-muted-foreground">
-                        Save insurance as an annual percent or a flat monthly amount.
-                      </p>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                {templateForm.watch("insuranceInputMode") === "percent" ? (
-                  <NumberInputField
-                    form={templateForm}
-                    name="insurancePct"
-                    label="Insurance % (Annual)"
-                    hint="Applied to purchase price each year."
-                  />
-                ) : (
-                  <NumberInputField
-                    form={templateForm}
-                    name="insuranceMo"
-                    label="Insurance (Monthly $)"
-                    hint="Fixed monthly insurance cost."
-                  />
-                )}
-                <NumberInputField form={templateForm} name="maintenancePct" label="Maintenance %" />
-                <NumberInputField form={templateForm} name="vacancyPct" label="Vacancy %" />
-                <NumberInputField form={templateForm} name="managementPct" label="Management %" />
-                <NumberInputField form={templateForm} name="capexPct" label="CapEx %" />
-                <NumberInputField
-                  form={templateForm}
-                  name="closingCostsPct"
-                  label="Closing Costs % (Optional)"
-                  hint="Defaults to 3% if left blank."
-                  allowEmpty
-                />
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setShowAdvanced((v) => !v)}
-                className={cn(
-                  "w-full flex items-center justify-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium",
-                  "hover:bg-muted transition-colors"
-                )}
-              >
-                {showAdvanced ? "Hide Advanced" : "Show Advanced"}
-              </button>
-
-              {showAdvanced && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <NumberInputField form={templateForm} name="interestRatePct" label="Interest Rate %" />
-                  <NumberInputField form={templateForm} name="downPaymentPct" label="Down Payment %" />
-                  <NumberInputField form={templateForm} name="expenseGrowthPct" label="Expense Growth %" />
-                  <NumberInputField form={templateForm} name="rentGrowthPct" label="Rent Growth %" />
-                  <NumberInputField
-                    form={templateForm}
-                    name="appreciationRatePct"
-                    label="Annual Appreciation % (Optional)"
-                    hint={`Used for exit scenarios. Defaults to ${DEFAULT_APPRECIATION_RATE}% when omitted.`}
-                    allowEmpty
-                  />
-                  <NumberInputField
-                    form={templateForm}
-                    name="sellingCostPct"
-                    label="Selling Cost % (Optional)"
-                    hint={`Defaults to ${DEFAULT_SELLING_COST_PCT}% when omitted.`}
-                    allowEmpty
-                  />
-                  <NumberInputField form={templateForm} name="buildingValuePct" label="Building Value %" />
-                  <NumberInputField
-                    form={templateForm}
-                    name="taxRatePct"
-                    label="Tax Rate % (Optional)"
-                    allowEmpty
-                  />
-                  <FormField
-                    control={templateForm.control}
-                    name="depreciationYears"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs font-semibold uppercase tracking-wide">
-                          Depreciation Period
-                        </FormLabel>
-                        <FormControl>
-                          <select
-                            className="w-full h-10 rounded-md border px-3 text-sm bg-background"
-                            value={field.value}
-                            onChange={(e) => field.onChange(Number(e.target.value))}
-                          >
-                            <option value={27.5}>27.5 years (Residential)</option>
-                            <option value={39}>39 years (Commercial)</option>
-                          </select>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={templateForm.control}
-                    name="includeInterestDeduction"
-                    render={({ field }) => (
-                      <FormItem className="rounded-md border px-3 py-2.5 flex items-center justify-between gap-3">
-                        <FormLabel
-                          htmlFor="template-include-interest-deduction-page"
-                          className="text-xs font-semibold uppercase tracking-wide cursor-pointer"
-                        >
-                          Include Interest Deduction
-                        </FormLabel>
-                        <FormControl>
-                          <Switch
-                            id="template-include-interest-deduction-page"
-                            checked={field.value ?? true}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              )}
-
-              <DialogFooter>
-                <Button
-                  type="button"
-                  variant="outline"
-                  disabled={isSaving}
-                  onClick={() => setIsFormDialogOpen(false)}
-                >
-                  <X className="w-4 h-4 mr-2" />
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={isSaving}>
-                  {isSaving ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      {editingTemplate ? "Updating Template..." : "Saving Template..."}
-                    </>
-                  ) : (
-                    <>
-                      <Save className="w-4 h-4 mr-2" />
-                      {editingTemplate ? "Update Template" : "Save Template"}
-                    </>
-                  )}
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
+        editingTemplate={editingTemplate}
+        initialValues={dialogInitialValues}
+        isSaving={isSaving}
+        onSubmit={submitTemplate}
+        formId="templates-management-dialog-form"
+        editDescription="Update template assumptions."
+      />
 
       <Dialog
         open={!!templateToDelete}

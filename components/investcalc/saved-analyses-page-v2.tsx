@@ -40,6 +40,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import type { StoredRiskLevel } from "@/lib/compare-metrics";
+import { consumePendingSavedListSearch } from "@/lib/dashboard-saved-search-bridge";
 import { Switch } from "../ui/switch";
 import {
   investmentFormSchema,
@@ -363,10 +364,18 @@ export function SavedAnalysesPage({
     [initialItems]
   );
 
+  useEffect(() => {
+    const pending = consumePendingSavedListSearch();
+    if (pending) setSearchQuery(pending);
+  }, []);
+
   const filteredItems = useMemo(
-    () =>
+      () =>
       enrichedItems.filter((item) => {
-        const text = `${item.address ?? ""} ${item.title ?? ""}`.toLowerCase();
+        const typeLabel = item.propertyType ? getTypeLabel(item.propertyType).toLowerCase() : "";
+        const typeSlug = (item.propertyType ?? "").toLowerCase();
+        const text =
+          `${item.address ?? ""} ${item.title ?? ""} ${item.id} ${typeLabel} ${typeSlug}`.toLowerCase();
         const matchesSearch = text.includes(searchQuery.toLowerCase().trim());
         const matchesSignal = selectedSignal === "all" ? true : item.signal === selectedSignal;
         const matchesType = selectedType === "all" ? true : item.propertyType === selectedType;
@@ -844,7 +853,7 @@ export function SavedAnalysesPage({
 
            
            <div className="inline-flex items-center gap-1.5 ml-auto">
-            <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground mr-1.5">Show Compare</span>
+            <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground mr-1.5">Show selected</span>
             <Switch
               id="template-include-interest-deduction"
               checked={showcompare ?? false}

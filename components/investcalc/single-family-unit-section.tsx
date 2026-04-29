@@ -87,6 +87,7 @@ export function SingleFamilyUnitSection({ form }: SingleFamilyUnitSectionProps) 
             <Input
               {...register("monthlyRent", { valueAsNumber: true })}
               type="number"
+              step="0.01"
               placeholder="2800"
               className={cn(
                 "pl-8 border-input bg-background",

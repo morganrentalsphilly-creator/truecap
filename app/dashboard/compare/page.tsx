@@ -12,7 +12,7 @@ import {
   type CompareSnapshotV1,
 } from "@/lib/compare-result-snapshot";
 import { recommendationToSignal, type PropertyType, type StoredRecommendation, type StoredRiskLevel } from "@/lib/compare-metrics";
-import { getEntitlementsForUser } from "@/lib/entitlements";
+import { hasActivePremiumSubscription } from "@/lib/entitlements";
 import { getSavedAnalysesTotalCount } from "@/lib/saved-analyses-count";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
@@ -152,8 +152,8 @@ export default async function DashboardComparePage() {
     redirect("/auth/login");
   }
 
-  const entitlements = await getEntitlementsForUser(supabase, user.id);
-  if (!entitlements.features.includes("save_deal")) {
+  const hasDashboardAccess = await hasActivePremiumSubscription(supabase, user.id);
+  if (!hasDashboardAccess) {
     redirect("/");
   }
 

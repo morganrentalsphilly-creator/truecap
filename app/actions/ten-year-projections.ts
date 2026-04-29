@@ -1,6 +1,7 @@
 "use server";
 
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { getEntitlementsForUser } from "@/lib/entitlements";
 import {
   buildTenYearProjection,
   buildTenYearProjectionInputHash,
@@ -23,7 +24,7 @@ export type ProjectionSnapshotResult =
     }
   | {
       ok: false;
-      code: "SIGN_IN_REQUIRED" | "NOT_FOUND" | "SERVER_ERROR";
+      code: "SIGN_IN_REQUIRED" | "ENTITLEMENT_REQUIRED" | "NOT_FOUND" | "SERVER_ERROR";
       message: string;
     };
 
@@ -58,6 +59,15 @@ export async function getTenYearProjectionSnapshotAction(
       ok: false,
       code: "SIGN_IN_REQUIRED",
       message: "Please sign in to load saved projections.",
+    };
+  }
+
+  const entitlements = await getEntitlementsForUser(supabase, user.id);
+  if (!entitlements.features.includes("projections")) {
+    return {
+      ok: false,
+      code: "ENTITLEMENT_REQUIRED",
+      message: "Upgrade to Pro to load 10-year projections.",
     };
   }
 

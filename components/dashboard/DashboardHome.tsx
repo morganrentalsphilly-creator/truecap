@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Award, DollarSign, ShieldCheck, Sparkles, TrendingUp } from "lucide-react";
+import { Award, DollarSign, ListTodo, ShieldCheck, Sparkles, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Topbar } from "@/components/dashboard/Topbar";
 import { StatCard } from "@/components/dashboard/StatCard";
@@ -9,23 +9,10 @@ import { PortfolioChart } from "@/components/dashboard/PortfolioChart";
 import { RiskReturn } from "@/components/dashboard/RiskReturn";
 import { TopDeals, type DashboardTopDeal } from "@/components/dashboard/TopDeals";
 import { AIInsights } from "@/components/dashboard/AIInsights";
+import type { DashboardDeal } from "@/lib/dashboard-deal-mapping";
+import { getChartInclusionReason, getTaggedDealRiskLabel, mapRiskLevelToRisk, resolveReturnMetric, resolveRiskMetric } from "@/lib/dashboard-risk-return";
 
-export type DashboardDeal = {
-  id: string;
-  address: string;
-  propertyType: "single-family" | "multi-family" | "owner-occupant" | null;
-  propertyTypeLabel: string;
-  purchasePrice: number | null;
-  cashFlowMonthly: number | null;
-  cocReturnPct: number | null;
-  capRatePct: number | null;
-  roiPct: number | null;
-  score: number | null;
-  recommendation: string | null;
-  riskLevel: string | null;
-  riskScore: number | null;
-  tags: string[];
-};
+export type { DashboardDeal } from "@/lib/dashboard-deal-mapping";
 
 export type DashboardMonthlyPoint = {
   month: string;
@@ -50,6 +37,7 @@ export type DashboardHomeData = {
   stats: {
     totalDeals: number;
   };
+  allDeals: DashboardDeal[];
   topDeals: DashboardDeal[];
 };
 
@@ -111,17 +99,96 @@ function getTopDeals(data: DashboardHomeData): DashboardTopDeal[] {
 }
 
 function getRiskReturn(data: DashboardHomeData) {
-  return data.topDeals
-    .filter((deal) => deal.riskScore != null && deal.roiPct != null)
+  const points = data.topDeals
+    .map((deal) => {
+      const chartStatus = getChartInclusionReason(deal);
+      if (!chartStatus.include) {
+        if (process.env.NODE_ENV !== "production") {
+          // Compact dev log to trace missing chart points.
+          console.log("[dashboard:risk-return]", {
+            dealId: deal.id,
+            include: false,
+            reason: chartStatus.reason,
+            returnSource: chartStatus.returnMetric.source,
+            returnValue: chartStatus.returnMetric.value,
+            riskSource: chartStatus.riskMetric.source,
+            riskValue: chartStatus.riskMetric.value,
+            tags: deal.tags,
+          });
+        }
+        return null;
+      }
+
+      const x = chartStatus.returnMetric.value ?? 0;
+      const y = chartStatus.riskMetric.value ?? 0;
+      if (process.env.NODE_ENV !== "production") {
+        console.log("[dashboard:risk-return]", {
+          dealId: deal.id,
+          include: true,
+          reason: chartStatus.reason,
+          returnSource: chartStatus.returnMetric.source,
+          returnValue: chartStatus.returnMetric.value,
+          riskSource: chartStatus.riskMetric.source,
+          riskValue: chartStatus.riskMetric.value,
+          x,
+          y,
+        });
+      }
+
+      return {
+        dealId: deal.id,
+        name: deal.address,
+        type: deal.propertyTypeLabel,
+        risk: y,
+        return: x,
+        returnKind: chartStatus.returnMetric.kind,
+        hasRiskMetric: chartStatus.riskMetric.value != null,
+        hasReturnMetric: chartStatus.returnMetric.value != null,
+        size: Math.max(80, Math.round((deal.purchasePrice ?? 0) / 1000)),
+        score: deal.score ?? undefined,
+        cashFlow: deal.cashFlowMonthly == null ? undefined : Math.round(deal.cashFlowMonthly),
+        annualCashFlow: deal.annualCashFlow == null ? undefined : Math.round(deal.annualCashFlow),
+        roi: deal.roiPct ?? undefined,
+        dscr: deal.dscr ?? undefined,
+      };
+    })
+    .filter((point): point is NonNullable<typeof point> => Boolean(point));
+
+  const riskAdjusted = data.topDeals
+    .map((deal) => {
+      const returnValue = resolveReturnMetric(deal).value;
+      const riskValue = resolveRiskMetric(deal).value;
+      if (returnValue == null || riskValue == null || riskValue === 0) return null;
+      return { deal, value: returnValue / riskValue };
+    })
+    .filter((item): item is NonNullable<typeof item> => Boolean(item))
+    .sort((a, b) => b.value - a.value)[0]?.deal;
+
+  const highestReturn = [...data.topDeals]
+    .map((deal) => ({ deal, value: resolveReturnMetric(deal).value }))
+    .filter((item): item is { deal: DashboardDeal; value: number } => item.value != null)
+    .sort((a, b) => b.value - a.value)[0]?.deal;
+
+  const safest = [...data.topDeals]
     .map((deal) => ({
-    name: deal.address,
-    risk: deal.riskScore as number,
-    return: deal.roiPct as number,
-    size: Math.max(80, Math.round((deal.purchasePrice ?? 0) / 1000)),
-    score: deal.score ?? undefined,
-    cashFlow: deal.cashFlowMonthly == null ? undefined : Math.round(deal.cashFlowMonthly),
-    roi: deal.roiPct ?? undefined,
-  }));
+      deal,
+      dscr: deal.dscr,
+      mappedRisk: mapRiskLevelToRisk(deal.riskLevel),
+    }))
+    .filter((item) => item.dscr != null || item.mappedRisk != null)
+    .sort((a, b) => {
+      if (a.dscr != null || b.dscr != null) return (b.dscr ?? -Infinity) - (a.dscr ?? -Infinity);
+      return (a.mappedRisk ?? Infinity) - (b.mappedRisk ?? Infinity);
+    })[0]?.deal;
+
+  return {
+    points,
+    insights: {
+      bestRiskAdjusted: riskAdjusted?.address ?? "-",
+      highestReturn: highestReturn?.address ?? "-",
+      safest: safest?.address ?? "-",
+    },
+  };
 }
 
 function getDealComparison(data: DashboardHomeData) {
@@ -146,12 +213,23 @@ function scrollToDeal(deal: DashboardDeal | undefined, index = 0) {
 
 function getDecisionHighlights(data: DashboardHomeData) {
   const deals = data.topDeals;
+  const taggedSource = data.allDeals;
   const byScore = [...deals].sort((a, b) => (b.score ?? -1) - (a.score ?? -1))[0];
   const byCashFlow = [...deals].sort((a, b) => (b.cashFlowMonthly ?? -Infinity) - (a.cashFlowMonthly ?? -Infinity))[0];
   const byRoi = [...deals].filter((deal) => deal.roiPct != null).sort((a, b) => (b.roiPct ?? -Infinity) - (a.roiPct ?? -Infinity))[0];
-  const tagged = deals.find((deal) => deal.tags.length > 0);
+  // Backend does not always persist explicit tags; prefer risk signals from backend scoring fields.
+  const tagged = taggedSource.find(
+    (deal) => deal.riskLevel != null || deal.riskScore != null || deal.dscr != null || deal.tags.length > 0
+  );
+  const taggedWithRisk = taggedSource.find(
+    (deal) =>
+      (deal.riskLevel != null || deal.riskScore != null || deal.dscr != null || deal.tags.length > 0) &&
+      resolveRiskMetric(deal).value != null
+  );
+  const taggedForCard = taggedWithRisk ?? tagged;
 
-  return { byScore, byCashFlow, byRoi, tagged };
+  const taggedChartStatus = taggedForCard ? getChartInclusionReason(taggedForCard) : null;
+  return { byScore, byCashFlow, byRoi, tagged: taggedForCard, taggedChartStatus };
 }
 
 function buildDecisionInsights(deals: DashboardDeal[]) {
@@ -197,6 +275,11 @@ export function DashboardHome({ data }: { data: DashboardHomeData }) {
   const roiSpark = getSparkFromValues(topDeals.map((deal) => deal.roi), sparks.flat);
   const capSpark = getSparkFromValues(topDeals.map((deal) => deal.capRate), sparks.flat);
 
+  const taggedRiskLabel = getTaggedDealRiskLabel(highlights.tagged);
+  const taggedChartHint = highlights.taggedChartStatus && !highlights.taggedChartStatus.include
+    ? "Tagged by backend, but missing both risk and return metrics for chart placement."
+    : null;
+
   return (
     <div className="flex-1 min-w-0 flex flex-col lg:h-screen lg:overflow-hidden">
       <Topbar
@@ -220,9 +303,9 @@ export function DashboardHome({ data }: { data: DashboardHomeData }) {
             className="inline-flex items-center gap-2 h-11 px-5 rounded-xl text-sm font-semibold text-white"
             style={{ background: "var(--gradient-premium)", boxShadow: "var(--shadow-glow)" }}
           >
-            <Link href="/" prefetch={false}>
-              <Sparkles className="h-4 w-4" />
-              Run new analysis
+            <Link href="/dashboard/compare" prefetch={false}>
+              <ListTodo className="h-4 w-4" />
+              Compare Deals
             </Link>
           </Button>
         </div>
@@ -268,7 +351,7 @@ export function DashboardHome({ data }: { data: DashboardHomeData }) {
             label="Backend Tagged Deal"
             value={highlights.tagged?.address ?? "-"}
             change={highlights.tagged?.score == null ? null : Math.round(highlights.tagged.score)}
-            changeLabel={`Risk: ${highlights.tagged?.riskLevel ?? "-"} · ${formatPercent(highlights.tagged?.roiPct)}`}
+            changeLabel={`Risk: ${taggedRiskLabel}`}
             icon={ShieldCheck}
             spark={capSpark}
             tone="gold"
@@ -277,14 +360,19 @@ export function DashboardHome({ data }: { data: DashboardHomeData }) {
             onClick={() => scrollToDeal(highlights.tagged)}
           />
         </div>
+        {taggedChartHint ? (
+          <p className="text-xs text-muted-foreground -mt-2">{taggedChartHint}</p>
+        ) : null}
 
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
           <div className="xl:col-span-2 space-y-6">
             <PortfolioChart data={dealComparison} />
-            <RiskReturn data={riskReturn} />
           </div>
-          <div className="space-y-6">
-            <AIInsights data={insights} />
+          <div className="space-y-6 xl:row-span-2">
+            <AIInsights data={insights} riskReturnInsights={riskReturn.insights} />
+          </div>
+          <div className="xl:col-span-2">
+            <RiskReturn data={riskReturn.points} />
           </div>
         </div>
 
