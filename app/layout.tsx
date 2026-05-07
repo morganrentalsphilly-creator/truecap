@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Plus_Jakarta_Sans, DM_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { Toaster } from '@/components/ui/toaster'
+import { getSiteUrl } from '@/lib/site-url'
 import './globals.css'
 
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -24,9 +25,54 @@ export const viewport = {
   themeColor: "#5248d4",
 };
 
+const siteUrl = getSiteUrl();
+
 export const metadata: Metadata = {
-  title: 'TrueCap - Real Estate Investment Calculator',
-  description: 'TrueCap is a professional real estate investment calculator with cash flow projections, tax benefits, and risk assessment.',
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "TrueCap | Real Estate Investment Calculator",
+    template: "%s | TrueCap",
+  },
+  description:
+    "Analyze rental properties with cash flow projections, ROI insights, tax strategy support, and risk-aware real estate metrics.",
+  keywords: [
+    "real estate investment calculator",
+    "rental property calculator",
+    "cash flow analysis",
+    "cap rate calculator",
+    "cash on cash return",
+    "real estate ROI",
+    "investment property analysis",
+    "deal analysis tool",
+    "rental property underwriting",
+    "real estate projections",
+  ],
+  applicationName: "TrueCap",
+  openGraph: {
+    type: "website",
+    title: "TrueCap | Real Estate Investment Calculator",
+    description:
+      "Analyze rental properties with cash flow projections, ROI insights, tax strategy support, and risk-aware real estate metrics.",
+    siteName: "TrueCap",
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "TrueCap | Real Estate Investment Calculator",
+    description:
+      "Analyze rental properties with cash flow projections, ROI insights, tax strategy support, and risk-aware real estate metrics.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
   icons: {
     icon: [
       {

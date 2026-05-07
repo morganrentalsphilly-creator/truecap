@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Header } from "@/components/investcalc/header";
 import { InvestCalcPage } from "@/components/investcalc/investcalc-page";
 import {
@@ -8,7 +9,53 @@ import {
 } from "@/lib/entitlements";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
+export const metadata: Metadata = {
+  title: "Rental Property Analysis",
+  description:
+    "Use TrueCap to analyze rental properties with cap rate, cash-on-cash return, monthly cash flow, and long-term investment projections.",
+  keywords: [
+    "rental property analysis",
+    "investment property calculator",
+    "cap rate",
+    "cash on cash return",
+    "real estate cash flow",
+    "rental property ROI",
+    "real estate deal analysis",
+  ],
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: "TrueCap Rental Property Analysis",
+    description:
+      "Analyze rental property deals with cap rate, cash flow, ROI, and projection tools in a single dashboard.",
+    url: "/",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "TrueCap Rental Property Analysis",
+    description:
+      "Analyze rental property deals with cap rate, cash flow, ROI, and projection tools in a single dashboard.",
+  },
+};
+
 export default async function Home() {
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "TrueCap",
+    applicationCategory: "FinanceApplication",
+    operatingSystem: "Web",
+    description:
+      "A real estate investment calculator for rental property analysis, cash flow forecasting, and ROI evaluation.",
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD",
+    },
+  };
+
   const supabase = await createServerSupabaseClient();
   const {
     data: { user },
@@ -33,6 +80,10 @@ export default async function Home() {
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
       <Header initialUser={user} initialEntitlements={entitlements} />
       <InvestCalcPage
         canSaveDeals={canSaveDeals}

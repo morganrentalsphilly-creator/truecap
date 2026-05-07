@@ -297,31 +297,34 @@ export function ProfileForm({
 
         <Form {...form}>
           <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)} noValidate>
-            <div className="flex flex-col sm:flex-row sm:items-center gap-6">
-              <button
-                type="button"
-                className="relative rounded-full group"
-                onClick={() => fileInputRef.current?.click()}
-                aria-label="Change profile photo"
-              >
-                <Avatar className="size-36 border border-border shadow-sm">
-                  <AvatarImage key={avatarUrl ?? "empty-avatar"} src={avatarUrl} alt="Profile photo" />
-                  <AvatarFallback className="text-4xl text-primary bg-primary/10">{initials}</AvatarFallback>
-                </Avatar>
-                <span className="absolute inset-0 rounded-full bg-black/45 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <Camera className="w-8 h-8 text-white" />
-                </span>
-              </button>
+            <div className="rounded-3xl border border-border bg-card/80 p-4 shadow-sm sm:p-5">
+              <div className="flex items-center gap-4 sm:gap-5">
+                <button
+                  type="button"
+                  className="group relative shrink-0 rounded-full"
+                  onClick={() => fileInputRef.current?.click()}
+                  aria-label="Change profile photo"
+                >
+                  <Avatar className="size-20 border border-border shadow-sm sm:size-24">
+                    <AvatarImage key={avatarUrl ?? "empty-avatar"} src={avatarUrl} alt="Profile photo" />
+                    <AvatarFallback className="bg-primary/10 text-xl font-bold text-primary sm:text-2xl">{initials}</AvatarFallback>
+                  </Avatar>
+                  <span className="absolute inset-0 flex items-center justify-center rounded-full bg-black/20 opacity-100 transition-opacity group-hover:bg-black/45 sm:opacity-0 sm:group-hover:opacity-100">
+                    <span className="flex size-9 items-center justify-center rounded-full bg-white/80 text-foreground/70 shadow-sm backdrop-blur sm:size-10">
+                      <Camera className="size-4 sm:size-5" />
+                    </span>
+                  </span>
+                </button>
 
-              <div className="space-y-1">
-                <p className="text-4xl font-semibold text-foreground">
-                  {`${form.watch("firstName")} ${form.watch("lastName") ?? ""}`.trim() || initialEmail}
-                </p>
-                <p className="text-2xl text-muted-foreground break-all">{initialEmail}</p>
-                <p className="text-muted-foreground max-w-xl">
-                  Click the photo above to change or add a profile picture. You can crop it in a
-                  circle.
-                </p>
+                <div className="min-w-0 flex-1 space-y-1">
+                  <p className="truncate text-xl font-bold tracking-tight text-foreground sm:text-2xl">
+                    {`${form.watch("firstName")} ${form.watch("lastName") ?? ""}`.trim() || initialEmail}
+                  </p>
+                  <p className="truncate text-sm text-muted-foreground sm:text-base">{initialEmail}</p>
+                  <p className="max-w-xl text-xs leading-relaxed text-muted-foreground sm:text-sm">
+                    Tap the photo to update your profile picture and crop it in a circle.
+                  </p>
+                </div>
               </div>
             </div>
 
@@ -336,7 +339,7 @@ export function ProfileForm({
               }}
             />
 
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
               <FormField
                 control={form.control}
                 name="firstName"
@@ -344,7 +347,7 @@ export function ProfileForm({
                   <FormItem>
                     <FormLabel>First name</FormLabel>
                     <FormControl>
-                      <Input placeholder="First name" disabled={isSaving} {...field} />
+                      <Input className="h-11 rounded-xl" placeholder="First name" disabled={isSaving} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -359,6 +362,7 @@ export function ProfileForm({
                     <FormLabel>Last name</FormLabel>
                     <FormControl>
                       <Input
+                        className="h-11 rounded-xl"
                         placeholder="Last name"
                         disabled={isSaving}
                         value={field.value ?? ""}
@@ -374,37 +378,39 @@ export function ProfileForm({
               />
             </div>
 
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email address</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      disabled
-                      className="bg-muted/40 text-muted-foreground cursor-not-allowed"
-                    />
-                  </FormControl>
-                  <p className="text-sm text-muted-foreground">Email cannot be changed here.</p>
-                </FormItem>
-              )}
-            />
+            <div className="space-y-4">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email address</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        disabled
+                        className="h-11 cursor-not-allowed rounded-xl bg-muted/40 text-muted-foreground"
+                      />
+                    </FormControl>
+                    <p className="text-sm text-muted-foreground">Email cannot be changed here.</p>
+                  </FormItem>
+                )}
+              />
 
-            <Button type="submit" disabled={isSaving} className="min-w-40">
-              {isSaving ? (
-                <>
-                  <Loader2 className="animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Check />
-                  Save changes
-                </>
-              )}
-            </Button>
+              <Button type="submit" disabled={isSaving} className="min-w-40 rounded-xl">
+                {isSaving ? (
+                  <>
+                    <Loader2 className="animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Check />
+                    Save changes
+                  </>
+                )}
+              </Button>
+            </div>
           </form>
         </Form>
       </div>

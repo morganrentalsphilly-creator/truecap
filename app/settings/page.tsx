@@ -20,7 +20,7 @@ export default async function SettingsPage() {
   return (
     <>
       <Header initialUser={user} initialEntitlements={entitlements} />
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-5">
         <Card className="border-border/70 shadow-md">
           <CardHeader>
             <div className="flex items-center justify-between gap-2">
