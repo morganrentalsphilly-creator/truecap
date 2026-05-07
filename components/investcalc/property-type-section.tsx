@@ -43,7 +43,7 @@ export function PropertyTypeSection({
         <span className="font-semibold text-sm text-foreground">Property Setup</span>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
         <div className="space-y-2">
           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
             Property Type

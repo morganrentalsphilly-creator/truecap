@@ -77,7 +77,7 @@ export async function getExitScenarioSnapshotAction(
   }
 
   const entitlements = await getEntitlementsForUser(supabase, user.id);
-  if (!entitlements.features.includes("projections")) {
+  if (!entitlements.features.includes("exit_scenarios")) {
     return {
       ok: false,
       code: "ENTITLEMENT_REQUIRED",

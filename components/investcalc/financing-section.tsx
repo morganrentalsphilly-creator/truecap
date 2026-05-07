@@ -6,21 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { cn } from "@/lib/utils";
+import { FieldError, optionalNumberSetValueAs } from "@/components/investcalc/form-field-helpers";
 
 interface FinancingSectionProps {
   form: UseFormReturn<InvestmentFormValues>;
 }
-
-function FieldError({ message }: { message?: string }) {
-  if (!message) return null;
-  return <p className="text-xs text-destructive mt-1">{message}</p>;
-}
-
-const optionalPercentSetValueAs = (v: unknown) => {
-  if (v === "" || v == null) return undefined;
-  const n = typeof v === "number" ? v : Number(v);
-  return Number.isFinite(n) ? n : undefined;
-};
 
 export function FinancingSection({ form }: FinancingSectionProps) {
   const {
@@ -35,7 +25,7 @@ export function FinancingSection({ form }: FinancingSectionProps) {
         <span className="font-semibold text-sm text-foreground">Financing</span>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <div>
           <Label className="text-xs font-semibold text-[var(--brand-green)] mb-1.5 block uppercase tracking-wide">
             Down Payment %
@@ -94,11 +84,11 @@ export function FinancingSection({ form }: FinancingSectionProps) {
 
         <div>
           <Label className="text-xs font-semibold text-[var(--brand-green)] mb-1.5 block uppercase tracking-wide">
-            Closing Costs % (Optional)
+            Closing Costs % <span className="text-[7px] sm:text-xs text-muted-foreground">(Optional)</span>
           </Label>
           <div className="relative">
             <Input
-              {...register("closingCostsPct", { setValueAs: optionalPercentSetValueAs })}
+              {...register("closingCostsPct", { setValueAs: optionalNumberSetValueAs })}
               type="number"
               step="0.01"
               min={0}

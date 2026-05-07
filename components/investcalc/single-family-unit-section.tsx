@@ -6,14 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { cn } from "@/lib/utils";
+import { FieldError } from "@/components/investcalc/form-field-helpers";
 
 interface SingleFamilyUnitSectionProps {
   form: UseFormReturn<InvestmentFormValues>;
-}
-
-function FieldError({ message }: { message?: string }) {
-  if (!message) return null;
-  return <p className="text-xs text-destructive mt-1">{message}</p>;
 }
 
 export function SingleFamilyUnitSection({ form }: SingleFamilyUnitSectionProps) {
@@ -29,7 +25,7 @@ export function SingleFamilyUnitSection({ form }: SingleFamilyUnitSectionProps) 
         <span className="font-semibold text-sm text-foreground">Unit Details</span>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <div>
           <Label className="text-xs font-semibold text-primary mb-1.5 block uppercase tracking-wide">
             Bedrooms

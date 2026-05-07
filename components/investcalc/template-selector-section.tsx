@@ -262,8 +262,8 @@ export function TemplateSelectorSection({
       <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
         Calculation Template
       </p>
-      <div className="flex items-center gap-2">
-        <div className="relative flex-1">
+      <div className="flex min-w-0 items-center gap-2">
+        <div className="relative min-w-0 flex-1">
           <button
             type="button"
             onClick={() => {

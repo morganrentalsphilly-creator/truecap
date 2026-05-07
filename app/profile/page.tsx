@@ -2,8 +2,7 @@ import { redirect } from "next/navigation";
 import { Header } from "@/components/investcalc/header";
 import { BillingPanel } from "@/components/profile/billing-panel";
 import { ProfileForm } from "@/components/profile/profile-form";
-import { upsertSubscriptionFromStripe } from "@/lib/stripe/subscription-sync";
-import { createAdminSupabaseClient } from "@/lib/supabase/admin";
+import { getEntitlementsForUser } from "@/lib/entitlements";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getStripe } from "@/lib/stripe/client";
 
@@ -101,64 +100,6 @@ function getPlanObject(sub: SubscriptionRow | null): { slug: string | null } | n
   return Array.isArray(sub.plans) ? sub.plans[0] ?? null : sub.plans;
 }
 
-async function getLiveStripeSubscriptionState(subscription: SubscriptionRow | null, fallbackUserId: string): Promise<{
-  status: string | null;
-  currentPeriodStart: string | null;
-  currentPeriodEnd: string | null;
-  cancelAtPeriodEnd: boolean | null;
-}> {
-  if (!subscription?.stripe_subscription_id || !process.env.STRIPE_SECRET_KEY) {
-    return {
-      status: null,
-      currentPeriodStart: null,
-      currentPeriodEnd: null,
-      cancelAtPeriodEnd: null,
-    };
-  }
-
-  try {
-    const stripe = getStripe();
-    const liveSubscription = await stripe.subscriptions.retrieve(subscription.stripe_subscription_id);
-    const admin = createAdminSupabaseClient();
-    await upsertSubscriptionFromStripe(admin, liveSubscription, fallbackUserId);
-
-    const primaryItem = liveSubscription.items.data[0] as
-      | (typeof liveSubscription.items.data[number] & {
-          current_period_start?: number | null;
-          current_period_end?: number | null;
-        })
-      | undefined;
-    const liveSubscriptionWithPeriods = liveSubscription as typeof liveSubscription & {
-      current_period_start?: number | null;
-      current_period_end?: number | null;
-      cancel_at?: number | null;
-    };
-    const periodStartSec =
-      liveSubscriptionWithPeriods.current_period_start ?? primaryItem?.current_period_start ?? null;
-    const periodEndSec =
-      liveSubscriptionWithPeriods.current_period_end ?? primaryItem?.current_period_end ?? null;
-
-    return {
-      status: liveSubscription.status,
-      currentPeriodStart:
-        periodStartSec != null ? new Date(periodStartSec * 1000).toISOString() : null,
-      currentPeriodEnd: periodEndSec != null ? new Date(periodEndSec * 1000).toISOString() : null,
-      cancelAtPeriodEnd: Boolean(liveSubscription.cancel_at_period_end || liveSubscriptionWithPeriods.cancel_at),
-    };
-  } catch (error) {
-    console.error(
-      "[billing] Could not refresh live Stripe subscription state:",
-      error instanceof Error ? error.message : error
-    );
-    return {
-      status: null,
-      currentPeriodStart: null,
-      currentPeriodEnd: null,
-      cancelAtPeriodEnd: null,
-    };
-  }
-}
-
 export default async function ProfilePage({
   searchParams,
 }: {
@@ -195,6 +136,7 @@ export default async function ProfilePage({
       .order("slug", { ascending: true }),
   ]);
   const stripePriceDisplays = await getStripePriceDisplays((planRows as PlanRow[] | null) ?? null);
+  const entitlements = await getEntitlementsForUser(supabase, user.id);
 
   const fallbackName =
     (user.user_metadata?.full_name as string | undefined)?.trim() ||
@@ -205,7 +147,6 @@ export default async function ProfilePage({
   const firstName = profile?.first_name ?? fallbackName.split(" ")[0] ?? "";
   const lastName = profile?.last_name ?? fallbackName.split(" ").slice(1).join(" ");
   const subscriptionRow = (subscription as SubscriptionRow | null) ?? null;
-  const liveSubscriptionState = await getLiveStripeSubscriptionState(subscriptionRow, user.id);
   const currentPlan = getPlanObject(subscriptionRow);
   const resolvedSearchParams = (await searchParams) ?? {};
   const isSubscriptionCancelReturn = resolvedSearchParams.billing === "subscription_cancelled";
@@ -236,7 +177,7 @@ export default async function ProfilePage({
 
   return (
     <>
-      <Header initialUser={user} />
+      <Header initialUser={user} initialEntitlements={entitlements} />
       <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8  space-y-10">
         <ProfileForm
           userId={user.id}
@@ -249,7 +190,7 @@ export default async function ProfilePage({
           currentSubscription={
             subscription
               ? {
-                  status: liveSubscriptionState.status ?? String(subscription.status),
+                  status: String(subscription.status),
                   planSlug: currentPlan?.slug ?? null,
                   planName:
                     currentPlan?.slug === "pro_annual"
@@ -257,12 +198,9 @@ export default async function ProfilePage({
                       : currentPlan?.slug === "pro_monthly"
                         ? "Pro Monthly"
                         : "Pro",
-                  currentPeriodStart:
-                    liveSubscriptionState.currentPeriodStart ?? subscription.current_period_start,
-                  currentPeriodEnd: liveSubscriptionState.currentPeriodEnd ?? subscription.current_period_end,
-                  cancelAtPeriodEnd:
-                    Boolean(liveSubscriptionState.cancelAtPeriodEnd ?? subscription.cancel_at_period_end) ||
-                    isSubscriptionCancelReturn,
+                  currentPeriodStart: subscription.current_period_start,
+                  currentPeriodEnd: subscription.current_period_end,
+                  cancelAtPeriodEnd: Boolean(subscription.cancel_at_period_end) || isSubscriptionCancelReturn,
                 }
               : null
           }

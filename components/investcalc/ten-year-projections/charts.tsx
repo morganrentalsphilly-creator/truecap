@@ -38,9 +38,9 @@ export function TenYearProjectionCharts({
   projectionYears: ProjectionYear[];
 }) {
   return (
-    <div className="grid gap-4 xl:grid-cols-2">
+    <div className="grid min-w-0 gap-3 sm:gap-4 xl:grid-cols-2">
       <ChartCard title="Annual Cash Flow">
-        <ChartContainer config={chartConfig} className="h-[260px] w-full">
+        <ChartContainer config={chartConfig} className="h-[240px] w-full sm:h-[260px]">
           <BarChart data={projectionYears}>
             <CartesianGrid vertical={false} />
             <XAxis dataKey="year" tickLine={false} axisLine={false} />
@@ -52,7 +52,7 @@ export function TenYearProjectionCharts({
       </ChartCard>
 
       <ChartCard title="Income vs Expenses">
-        <ChartContainer config={chartConfig} className="h-[260px] w-full">
+        <ChartContainer config={chartConfig} className="h-[240px] w-full sm:h-[260px]">
           <LineChart data={projectionYears}>
             <CartesianGrid vertical={false} />
             <XAxis dataKey="year" tickLine={false} axisLine={false} />
@@ -78,7 +78,7 @@ export function TenYearProjectionCharts({
       </ChartCard>
 
       <ChartCard title="Cumulative Cash Flow" className="xl:col-span-2">
-        <ChartContainer config={chartConfig} className="h-[280px] w-full">
+        <ChartContainer config={chartConfig} className="h-[240px] w-full sm:h-[280px]">
           <AreaChart data={projectionYears}>
             <CartesianGrid vertical={false} />
             <XAxis dataKey="year" tickLine={false} axisLine={false} />

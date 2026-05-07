@@ -29,7 +29,7 @@ import { SingleFamilyUnitSection } from "./single-family-unit-section";
 import { MultiFamilyUnitsSection } from "./multi-family-units-section";
 import { FinancingSection } from "./financing-section";
 import { OperatingExpensesSection } from "./operating-expenses-section";
-import { AnalysisDashboard } from "./analysis-dashboard";
+import { AnalysisDashboard, type AnalysisDashboardTab } from "./analysis-dashboard";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { saveDealAction } from "@/app/actions/saved-analyses";
@@ -76,13 +76,14 @@ function formSnapshotForCompare(values: InvestmentFormValues): string | null {
 const INPUT_TABS: {
   id: InputTab;
   label: string;
+  mobileLabel: string;
   isPro: boolean;
   isFree?: boolean;
 }[] = [
-  { id: "cash-flow", label: "Cash Flow Analysis", isPro: false, isFree: true },
-  { id: "projections", label: "10-Year Projections", isPro: true },
-  { id: "tax-strategy", label: "Tax Strategy", isPro: true },
-  { id: "deal-score", label: "Deal Score", isPro: true },
+  { id: "cash-flow", label: "Cash Flow Analysis", mobileLabel: "Cash Flow", isPro: false, isFree: true },
+  { id: "projections", label: "10-Year Projections", mobileLabel: "10-Year", isPro: true },
+  { id: "tax-strategy", label: "Tax Strategy", mobileLabel: "Tax", isPro: true },
+  { id: "deal-score", label: "Deal Score", mobileLabel: "Score", isPro: true },
 ];
 const SAVED_ANALYSIS_AUTO_EXPORT_PDF_KEY = "truecap_saved_analysis_auto_export_pdf";
 
@@ -235,19 +236,41 @@ function toPdfReportData(args: {
 }
 
 export function InvestCalcPage({
-  hasProAccess = false,
+  canSaveDeals = false,
+  canCompareDeals = false,
+  canExportPdf = false,
+  canUseProjections = false,
+  canUseTaxStrategy = false,
+  canUseExitScenarios = false,
+  canUseDealScore = false,
+  canUpdateSavedDeals = false,
+  saveDealLimitReached = false,
+  initialSavedDealCount = 0,
+  savedDealLimit = null,
   isAuthenticated = false,
 }: {
-  hasProAccess?: boolean;
+  canSaveDeals?: boolean;
+  canCompareDeals?: boolean;
+  canExportPdf?: boolean;
+  canUseProjections?: boolean;
+  canUseTaxStrategy?: boolean;
+  canUseExitScenarios?: boolean;
+  canUseDealScore?: boolean;
+  canUpdateSavedDeals?: boolean;
+  saveDealLimitReached?: boolean;
+  initialSavedDealCount?: number;
+  savedDealLimit?: number | null;
   isAuthenticated?: boolean;
 }) {
   const router = useRouter();
-  const [activeInputTab] = useState<InputTab>("cash-flow");
+  const [activeInputTab, setActiveInputTab] = useState<InputTab>("cash-flow");
+  const [activeDashboardTab, setActiveDashboardTab] = useState<AnalysisDashboardTab>("cash-flow");
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [isSavingDeal, setIsSavingDeal] = useState(false);
   const [savedDealId, setSavedDealId] = useState<string | null>(null);
+  const [savedDealCount, setSavedDealCount] = useState(initialSavedDealCount);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isComparingDeals, setIsComparingDeals] = useState(false);
   const [isExportingPdf, setIsExportingPdf] = useState(false);
@@ -277,12 +300,44 @@ export function InvestCalcPage({
   const prevPropertyTypeRef = useRef<InvestmentFormValues["propertyType"]>("single-family");
   const isProgrammaticResetRef = useRef(false);
   const pendingResultsScrollRef = useRef(false);
+  const formElementRef = useRef<HTMLFormElement | null>(null);
   const savedDealIdRef = useRef<string | null>(null);
   const lastPersistedFormJsonRef = useRef<string | null>(null);
   /** Form snapshot that produced the currently displayed analysis outputs (last Calculate or loaded saved deal). */
   const lastComputedFormJsonRef = useRef<string | null>(null);
   const isCalculatingRef = useRef(false);
   const autoExportPdfRef = useRef(false);
+  const currentSaveDealLimitReached =
+    saveDealLimitReached || (savedDealLimit !== null && savedDealCount >= savedDealLimit);
+  const areAnalysisTabsEnabled = Boolean(analysisResult) && !isCalculating;
+
+  const mapInputTabToDashboardTab = useCallback(
+    (tab: InputTab): AnalysisDashboardTab | null => {
+      if (tab === "cash-flow") return "cash-flow";
+      if (tab === "projections") return "projections";
+      if (tab === "tax-strategy") return "tax-strategy";
+      return null;
+    },
+    []
+  );
+
+  const scrollToAnalysisResults = useCallback(() => {
+    const resultsSection = document.querySelector("[data-analysis-results='true']");
+    resultsSection?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
+
+  const handleInputTabClick = useCallback(
+    (tab: InputTab) => {
+      if (!areAnalysisTabsEnabled) return;
+      setActiveInputTab(tab);
+      const mappedTab = mapInputTabToDashboardTab(tab);
+      if (mappedTab) setActiveDashboardTab(mappedTab);
+      setTimeout(() => {
+        scrollToAnalysisResults();
+      }, 50);
+    },
+    [areAnalysisTabsEnabled, mapInputTabToDashboardTab, scrollToAnalysisResults]
+  );
 
   const loadDealScore = async (values: InvestmentFormValues, result: AnalysisResult) => {
     setIsLoadingDealScore(true);
@@ -326,48 +381,74 @@ export function InvestCalcPage({
     setHasUnsavedChanges(json !== lastPersistedFormJsonRef.current);
   }, [form]);
 
-  const refreshPreviewOutputsIfFormDriftedFromLastRun = useCallback(() => {
+  const clearAnalysisOutputs = useCallback(() => {
+    setAnalysisResult(null);
+    setProjectionSource(null);
+    setTaxStrategySource(null);
+    setExitScenarioSource(null);
+    setDealScoreResult(null);
+    setShowResults(false);
+    setIsLoadingDealScore(false);
+  }, []);
+
+  const invalidateAnalysisOutputsIfFormDriftedFromLastRun = useCallback(() => {
     if (isProgrammaticResetRef.current || isCalculatingRef.current) return;
     const baseline = lastComputedFormJsonRef.current;
     if (baseline === null) return;
-    const currentValues = form.getValues();
-    const now = formSnapshotForCompare(currentValues);
+    const now = formSnapshotForCompare(form.getValues());
     if (now === null || now === baseline) return;
-    const parsed = investmentFormSchema.safeParse(currentValues);
-    if (!parsed.success) return;
 
-    const values = parsed.data;
-    const result = calculateAnalysis(values);
-    const shouldUseSavedSnapshots =
-      !!savedDealIdRef.current &&
-      !!lastPersistedFormJsonRef.current &&
-      now === lastPersistedFormJsonRef.current;
-    const sourceAnalysisId = shouldUseSavedSnapshots ? savedDealIdRef.current : null;
-    const builtProjectionSource = hasProAccess
-      ? buildProjectionSource(sourceAnalysisId, values, result)
-      : null;
-    const builtTaxStrategySource = hasProAccess
-      ? buildTaxStrategySource(sourceAnalysisId, values, result)
-      : null;
+    // Any edit after Calculate invalidates the currently shown outputs.
+    lastComputedFormJsonRef.current = null;
+    clearAnalysisOutputs();
+  }, [form, clearAnalysisOutputs]);
 
-    lastComputedFormJsonRef.current = now;
-    setAnalysisResult(result);
-    setDealScoreResult(null);
-    setProjectionSource(builtProjectionSource);
-    setTaxStrategySource(builtTaxStrategySource);
-    setExitScenarioSource(
-      hasProAccess && builtProjectionSource && builtTaxStrategySource
-        ? buildExitScenarioSource(
-            sourceAnalysisId,
-            values,
-            result,
-            builtProjectionSource.initialYears,
-            builtTaxStrategySource.initialYears
-          )
-        : null
-    );
-    setShowResults(true);
-  }, [form, hasProAccess]);
+  const resetToNewAnalysis = useCallback(
+    (nextPropertyType: InvestmentFormValues["propertyType"] = "single-family") => {
+      isProgrammaticResetRef.current = true;
+      const defaults = buildNewAnalysisDefaults(nextPropertyType);
+      // Clear any DOM-sticky values on uncontrolled inputs before syncing RHF state.
+      formElementRef.current?.reset();
+      form.reset(defaults, {
+        keepErrors: false,
+        keepDirty: false,
+        keepDirtyValues: false,
+        keepTouched: false,
+        keepIsSubmitted: false,
+        keepSubmitCount: false,
+      });
+      form.clearErrors();
+      setSavedDealId(null);
+      savedDealIdRef.current = null;
+      lastPersistedFormJsonRef.current = null;
+      lastComputedFormJsonRef.current = null;
+      clearAnalysisOutputs();
+      setHasUnsavedChanges(false);
+      setIsCalculating(false);
+      isCalculatingRef.current = false;
+      prevPropertyTypeRef.current = nextPropertyType;
+      // Re-assert critical blank fields explicitly to avoid stale values after reset
+      // in browser autofill/uncontrolled edge-cases.
+      form.setValue("address", "", { shouldDirty: false, shouldValidate: false });
+      form.setValue("purchasePrice", undefined as unknown as number, {
+        shouldDirty: false,
+        shouldValidate: false,
+      });
+      form.setValue("yearBuilt", undefined, { shouldDirty: false, shouldValidate: false });
+      form.setValue("bedrooms", undefined, { shouldDirty: false, shouldValidate: false });
+      form.setValue("bathrooms", undefined, { shouldDirty: false, shouldValidate: false });
+      form.setValue("sqft", undefined, { shouldDirty: false, shouldValidate: false });
+      form.setValue("monthlyRent", undefined, { shouldDirty: false, shouldValidate: false });
+      form.setValue("units", getDefaultUnitsForPropertyType(nextPropertyType), {
+        shouldDirty: false,
+        shouldValidate: false,
+      });
+      queueMicrotask(() => {
+        isProgrammaticResetRef.current = false;
+      });
+    },
+    [form, clearAnalysisOutputs]
+  );
 
   const propertyType = form.watch("propertyType");
   const purchasePrice = form.watch("purchasePrice");
@@ -467,10 +548,10 @@ export function InvestCalcPage({
     const subscription = form.watch(() => {
       if (isProgrammaticResetRef.current) return;
       syncFormDirtyVersusPersisted();
-      refreshPreviewOutputsIfFormDriftedFromLastRun();
+      invalidateAnalysisOutputsIfFormDriftedFromLastRun();
     });
     return () => subscription.unsubscribe();
-  }, [form, syncFormDirtyVersusPersisted, refreshPreviewOutputsIfFormDriftedFromLastRun]);
+  }, [form, syncFormDirtyVersusPersisted, invalidateAnalysisOutputsIfFormDriftedFromLastRun]);
 
   useEffect(() => {
     // Initialize from a one-time saved-analysis handoff when present; otherwise
@@ -527,23 +608,23 @@ export function InvestCalcPage({
           setSavedTemplateFallback(parsedTemplateFallback);
           const computedResult = calculateAnalysis(hydratedValues);
           const result = mergeSavedResultSnapshot(parsed.resultSnapshot, computedResult);
-          const builtProjectionSource = hasProAccess
+          const builtProjectionSource = canUseProjections
             ? buildProjectionSource(parsed.id, hydratedValues, result)
             : null;
-          const builtTaxStrategySource = hasProAccess
+          const builtTaxStrategySource = canUseTaxStrategy
             ? buildTaxStrategySource(parsed.id, hydratedValues, result)
             : null;
           setAnalysisResult(result);
           setProjectionSource(builtProjectionSource);
           setTaxStrategySource(builtTaxStrategySource);
           setExitScenarioSource(
-            hasProAccess && builtProjectionSource && builtTaxStrategySource
+            canUseExitScenarios
               ? buildExitScenarioSource(
                   parsed.id,
                   hydratedValues,
                   result,
-                  builtProjectionSource.initialYears,
-                  builtTaxStrategySource.initialYears
+                  result.tenYearProjection,
+                  result.taxStrategyYears
                 )
               : null
           );
@@ -566,23 +647,8 @@ export function InvestCalcPage({
       }
     }
 
-    form.reset(buildNewAnalysisDefaults("single-family"));
-    setSavedDealId(null);
-    savedDealIdRef.current = null;
-    lastPersistedFormJsonRef.current = null;
-    lastComputedFormJsonRef.current = null;
-    setAnalysisResult(null);
-    setProjectionSource(null);
-    setTaxStrategySource(null);
-    setExitScenarioSource(null);
+    resetToNewAnalysis("single-family");
     setSavedTemplateFallback(null);
-    setDealScoreResult(null);
-    setShowResults(false);
-    setHasUnsavedChanges(false);
-    prevPropertyTypeRef.current = "single-family";
-    queueMicrotask(() => {
-      isProgrammaticResetRef.current = false;
-    });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional one-time mount reset
   }, []);
 
@@ -636,23 +702,25 @@ export function InvestCalcPage({
       // Simulate analysis delay
       await new Promise((r) => setTimeout(r, 1500));
       const result = calculateAnalysis(values);
-      const builtProjectionSource = hasProAccess
+      const mappedTab = mapInputTabToDashboardTab(activeInputTab);
+      if (mappedTab) setActiveDashboardTab(mappedTab);
+      const builtProjectionSource = canUseProjections
         ? buildProjectionSource(savedDealId, values, result)
         : null;
-      const builtTaxStrategySource = hasProAccess
+      const builtTaxStrategySource = canUseTaxStrategy
         ? buildTaxStrategySource(savedDealId, values, result)
         : null;
       setAnalysisResult(result);
       setProjectionSource(builtProjectionSource);
       setTaxStrategySource(builtTaxStrategySource);
       setExitScenarioSource(
-        hasProAccess && builtProjectionSource && builtTaxStrategySource
+        canUseExitScenarios
           ? buildExitScenarioSource(
               savedDealId,
               values,
               result,
-              builtProjectionSource.initialYears,
-              builtTaxStrategySource.initialYears
+              result.tenYearProjection,
+              result.taxStrategyYears
             )
           : null
       );
@@ -675,6 +743,42 @@ export function InvestCalcPage({
   };
 
   const onError = (errors: FieldErrors<InvestmentFormValues>) => {
+    const findFirstFieldError = (
+      value: unknown,
+      currentPath = ""
+    ): { path: string; message?: string } | null => {
+      if (!value || typeof value !== "object") return null;
+
+      if (
+        currentPath &&
+        "message" in value &&
+        typeof (value as { message?: unknown }).message === "string"
+      ) {
+        return {
+          path: currentPath,
+          message: (value as { message: string }).message,
+        };
+      }
+
+      if (Array.isArray(value)) {
+        for (let i = 0; i < value.length; i += 1) {
+          const nested = findFirstFieldError(
+            value[i],
+            currentPath ? `${currentPath}.${i}` : `${i}`
+          );
+          if (nested) return nested;
+        }
+        return null;
+      }
+
+      for (const [key, nestedValue] of Object.entries(value as Record<string, unknown>)) {
+        const nestedPath = currentPath ? `${currentPath}.${key}` : key;
+        const nested = findFirstFieldError(nestedValue, nestedPath);
+        if (nested) return nested;
+      }
+      return null;
+    };
+
     const unitsErrorMessage =
       (errors.units as { message?: string; root?: { message?: string } } | undefined)?.message ??
       (errors.units as { message?: string; root?: { message?: string } } | undefined)?.root?.message;
@@ -702,15 +806,32 @@ export function InvestCalcPage({
         }
       }
     }
+    const firstFieldError = findFirstFieldError(errors);
+    if (!hasUnitFieldErrors && firstFieldError?.path) {
+      form.setFocus(firstFieldError.path as never);
+    }
 
     toast({
       title: "Validation Error",
-      description: unitsErrorMessage ?? "Please fix the highlighted fields before calculating.",
+      description:
+        unitsErrorMessage ??
+        firstFieldError?.message ??
+        "Please fix the highlighted fields before calculating.",
       variant: "destructive",
     });
   };
 
   const handleSaveDeal = async () => {
+    if (savedDealId && !canUpdateSavedDeals) {
+      toast({
+        title: "Upgrade required",
+        description: "Upgrade to update saved analyses.",
+        variant: "destructive",
+      });
+      router.push("/profile#billing");
+      return;
+    }
+
     setIsSavingDeal(true);
     try {
       const result = await saveDealAction(form.getValues(), savedDealId);
@@ -718,24 +839,33 @@ export function InvestCalcPage({
         const parsedValues = investmentFormSchema.safeParse(form.getValues());
         setSavedDealId(result.id);
         savedDealIdRef.current = result.id;
+        if (result.mode === "inserted") {
+          setSavedDealCount((count) => count + 1);
+        }
         const persistedJson = formSnapshotForCompare(form.getValues());
         if (persistedJson) lastPersistedFormJsonRef.current = persistedJson;
         if (parsedValues.success) {
           const values = parsedValues.data;
           const savedResult = calculateAnalysis(values);
-          const builtProjectionSource = buildProjectionSource(result.id, values, savedResult);
-          const builtTaxStrategySource = buildTaxStrategySource(result.id, values, savedResult);
+          const builtProjectionSource = canUseProjections
+            ? buildProjectionSource(result.id, values, savedResult)
+            : null;
+          const builtTaxStrategySource = canUseTaxStrategy
+            ? buildTaxStrategySource(result.id, values, savedResult)
+            : null;
           setAnalysisResult(savedResult);
           setProjectionSource(builtProjectionSource);
           setTaxStrategySource(builtTaxStrategySource);
           setExitScenarioSource(
-            buildExitScenarioSource(
-              result.id,
-              values,
-              savedResult,
-              builtProjectionSource.initialYears,
-              builtTaxStrategySource.initialYears
-            )
+            canUseExitScenarios
+              ? buildExitScenarioSource(
+                  result.id,
+                  values,
+                  savedResult,
+                  savedResult.tenYearProjection,
+                  savedResult.taxStrategyYears
+                )
+              : null
           );
           if (persistedJson) lastComputedFormJsonRef.current = persistedJson;
           void loadDealScore(values, savedResult);
@@ -794,6 +924,24 @@ export function InvestCalcPage({
 
   const handleExportPdf = async () => {
     if (!analysisResult) return;
+    if (!isAuthenticated) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in before exporting PDFs.",
+        variant: "destructive",
+      });
+      router.push("/auth/login");
+      return;
+    }
+    if (!canExportPdf) {
+      toast({
+        title: "Upgrade required",
+        description: "PDF export is not available for your current plan.",
+        variant: "destructive",
+      });
+      router.push("/profile#billing");
+      return;
+    }
     setIsExportingPdf(true);
     try {
       const values = form.getValues();
@@ -837,6 +985,11 @@ export function InvestCalcPage({
     }
   };
 
+  const handleNewAnalysis = () => {
+    resetToNewAnalysis("single-family");
+    setSavedTemplateFallback(null);
+  };
+
   useEffect(() => {
     if (!autoExportPdfRef.current) return;
     if (!analysisResult) return;
@@ -845,6 +998,24 @@ export function InvestCalcPage({
   }, [analysisResult]);
 
   const handleCompareDeals = async () => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in before comparing deals.",
+        variant: "destructive",
+      });
+      router.push("/auth/login");
+      return;
+    }
+    if (!canCompareDeals) {
+      toast({
+        title: "Upgrade required",
+        description: "Compare deals is not available for your current plan.",
+        variant: "destructive",
+      });
+      router.push("/profile#billing");
+      return;
+    }
     if (!savedDealId || hasUnsavedChanges) {
       toast({
         title: "Save required",
@@ -879,7 +1050,7 @@ export function InvestCalcPage({
     <div className="min-h-screen bg-background">
       {/* Hero section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 sm:pt-10 pb-4 sm:pb-6">
-        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-foreground mb-2 text-balance">
+        <h1 className="text-2xl sm:text-3xl xl:text-4xl font-black text-foreground mb-2 text-balance">
           Analyze Your Investment Property
         </h1>
         <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
@@ -888,18 +1059,24 @@ export function InvestCalcPage({
         </p>
 
         {/* Input tabs — horizontally scrollable on mobile */}
-        <div className="flex gap-2 sm:gap-3 mt-4 sm:mt-6 overflow-x-auto pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 lg:grid-cols-4 scrollbar-none">
+        <div className="flex gap-1.5 sm:gap-3 mt-4 sm:mt-6 overflow-x-auto pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 xl:grid-cols-4 scrollbar-none max-[380px]:mx-0 max-[380px]:grid max-[380px]:grid-cols-4 max-[380px]:gap-1 max-[380px]:overflow-visible max-[380px]:px-0">
           {INPUT_TABS.map((tab) => (
-            <div
+            <button
+              type="button"
               key={tab.id}
+              disabled={!areAnalysisTabsEnabled}
+              aria-disabled={!areAnalysisTabsEnabled}
+              title={!areAnalysisTabsEnabled ? "Calculate the analysis first." : undefined}
+              onClick={() => handleInputTabClick(tab.id)}
               className={cn(
-                "flex items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl border text-sm font-medium shrink-0 sm:shrink min-w-[160px] sm:min-w-0",
-                tab.id === activeInputTab
+                "flex items-center justify-between px-2.5 sm:px-4 py-2 sm:py-3 rounded-xl border text-[11px] sm:text-sm font-medium shrink-0 sm:shrink min-w-[82px] sm:min-w-0 transition-colors max-[380px]:min-w-0 max-[380px]:justify-center max-[380px]:px-1 max-[380px]:text-[10px]",
+                areAnalysisTabsEnabled && tab.id === activeInputTab
                   ? "bg-[var(--brand-green-light)] border-[var(--brand-green)]/30 text-[var(--brand-green)]"
-                  : "bg-card border-border text-muted-foreground"
+                  : "bg-card border-border text-muted-foreground hover:text-foreground hover:bg-muted",
+                !areAnalysisTabsEnabled && "cursor-not-allowed opacity-50 hover:bg-card hover:text-muted-foreground"
               )}
             >
-              <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+              <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 max-[380px]:gap-1">
                 {tab.id === "cash-flow" && (
                   <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
                 )}
@@ -912,24 +1089,30 @@ export function InvestCalcPage({
                 {tab.id === "deal-score" && (
                   <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
                 )}
-                <span className="text-xs sm:text-sm whitespace-nowrap">{tab.label}</span>
+                <span className="whitespace-nowrap">
+                  <span className="sm:hidden">{tab.mobileLabel}</span>
+                  <span className="hidden sm:inline">{tab.label}</span>
+                </span>
               </div>
-              {tab.isFree && (
-                <span className="text-[10px] font-bold bg-[var(--brand-green)] text-white px-1.5 sm:px-2 py-0.5 rounded-full uppercase shrink-0 ml-1.5">
+              {tab.isFree && !canUseProjections && (
+                <span className="hidden sm:inline-flex text-[10px] font-bold bg-[var(--brand-green)] text-white px-1.5 sm:px-2 py-0.5 rounded-full uppercase shrink-0 ml-1.5">
                   FREE
                 </span>
               )}
-              {tab.isPro && (
-                <Lock className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0 text-[var(--brand-orange)] ml-1.5" />
+              {tab.isPro &&
+                ((tab.id === "projections" && !canUseProjections) ||
+                  (tab.id === "tax-strategy" && !canUseTaxStrategy) ||
+                  (tab.id === "deal-score" && !canUseDealScore)) && (
+                <Lock className="hidden sm:block w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0 text-[var(--brand-orange)] ml-1.5" />
               )}
-            </div>
+            </button>
           ))}
         </div>
       </section>
 
       {/* Form */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 pb-20 sm:pb-16">
-        <form onSubmit={form.handleSubmit(onSubmit, onError)} noValidate>
+        <form ref={formElementRef} onSubmit={form.handleSubmit(onSubmit, onError)} noValidate>
           <div className="space-y-5">
             <PropertyTypeSection form={form} savedTemplateFallback={savedTemplateFallback} />
             <PropertyDetailsSection form={form} />
@@ -988,12 +1171,23 @@ export function InvestCalcPage({
               onSaveDeal={handleSaveDeal}
               onCompareDeals={handleCompareDeals}
               onExportPdf={handleExportPdf}
+              onNewAnalysis={handleNewAnalysis}
               isSaving={isSavingDeal}
               isComparing={isComparingDeals}
               isExporting={isExportingPdf}
               isSaved={Boolean(savedDealId) && !hasUnsavedChanges}
+              isExistingSavedDeal={Boolean(savedDealId)}
               isAuthenticated={isAuthenticated}
-              hasProAccess={hasProAccess}
+              canSaveDeals={canSaveDeals}
+              canUpdateSavedDeals={canUpdateSavedDeals}
+              canCompareDeals={canCompareDeals}
+              canExportPdf={canExportPdf}
+              canUseProjections={canUseProjections}
+              canUseTaxStrategy={canUseTaxStrategy}
+              canUseExitScenarios={canUseExitScenarios}
+              canUseDealScore={canUseDealScore}
+              activeTab={activeDashboardTab}
+              saveDealLimitReached={currentSaveDealLimitReached}
               persistedActionsBlockHint={
                 !savedDealId
                   ? "Save this analysis first to compare or export a PDF."

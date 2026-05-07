@@ -1,7 +1,14 @@
 import { redirect } from "next/navigation";
 import { DashboardHome, type DashboardHomeData } from "@/components/dashboard/DashboardHome";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
-import { hasActivePremiumSubscription } from "@/lib/entitlements";
+import {
+  getDashboardNavAccess,
+  getEntitlementsForUser,
+  hasDashboardAccess,
+  hasDashboardInsightsAccess,
+  hasPaidPlanSubscription,
+  hasPlanFeature,
+} from "@/lib/entitlements";
 import { buildDashboardDeal, type SavedAnalysisDashboardRow } from "@/lib/dashboard-deal-mapping";
 import { getSavedAnalysesTotalCount } from "@/lib/saved-analyses-count";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
@@ -25,7 +32,9 @@ function getDisplayName(profile: ProfileRow | null, email?: string | null): stri
 function buildDashboardData(
   rows: SavedAnalysisDashboardRow[],
   profile: ProfileRow | null,
-  email: string | null | undefined
+  email: string | null | undefined,
+  isPremium: boolean,
+  canAccessDashboard: boolean
 ): DashboardHomeData {
   const deals = rows.map(buildDashboardDeal);
 
@@ -34,6 +43,8 @@ function buildDashboardData(
       displayName: getDisplayName(profile, email),
       email: email ?? "",
       avatarSrc: profile?.avatar_url ?? undefined,
+      isPremium,
+      canAccessDashboard,
     },
     stats: {
       totalDeals: deals.length,
@@ -55,30 +66,40 @@ export default async function DashboardPage() {
     redirect("/auth/login");
   }
 
-  const hasDashboardAccess = await hasActivePremiumSubscription(supabase, user.id);
-  if (!hasDashboardAccess) {
+  const entitlements = await getEntitlementsForUser(supabase, user.id);
+  if (!hasDashboardAccess(entitlements)) {
     redirect("/");
   }
+  const navAccess = getDashboardNavAccess(entitlements);
+  const canViewDashboardInsights = hasDashboardInsightsAccess(entitlements);
 
-  const [{ data: profile }, savedDealTotalCount, { data: rows, error }] = await Promise.all([
+  if (!canViewDashboardInsights) {
+    redirect("/dashboard/saved-analyses");
+  }
+
+  const [{ data: profile }, savedDealTotalCount, isPremium] = await Promise.all([
     supabase
       .from("profiles")
       .select("first_name, last_name, display_name, avatar_url")
       .eq("id", user.id)
       .maybeSingle(),
     getSavedAnalysesTotalCount(supabase, user.id),
-    supabase
-      .from("saved_analyses")
-      .select(
-        "id, address, title, property_type, purchase_price, net_cash_flow_monthly, coc_return_pct, created_at, result_snapshot"
-      )
-      .eq("user_id", user.id)
-      .is("deleted_at", null)
-      .eq("is_completed", false)
-      .eq("is_archived", false)
-      .order("created_at", { ascending: false })
-      .limit(DASHBOARD_ACTIVE_DEALS_LIMIT),
+    hasPaidPlanSubscription(supabase, user.id),
   ]);
+
+  const profileRow = (profile as ProfileRow | null) ?? null;
+
+  const { data: rows, error } = await supabase
+    .from("saved_analyses")
+    .select(
+      "id, address, title, property_type, purchase_price, net_cash_flow_monthly, coc_return_pct, created_at, result_snapshot"
+    )
+    .eq("user_id", user.id)
+    .is("deleted_at", null)
+    .eq("is_completed", false)
+    .eq("is_archived", false)
+    .order("created_at", { ascending: false })
+    .limit(DASHBOARD_ACTIVE_DEALS_LIMIT);
 
   if (error) {
     return (
@@ -95,13 +116,15 @@ export default async function DashboardPage() {
 
   const dashboardData = buildDashboardData(
     ((rows ?? []) as SavedAnalysisDashboardRow[]),
-    (profile as ProfileRow | null) ?? null,
-    user.email
+    profileRow,
+    user.email,
+    isPremium,
+    navAccess.dashboard
   );
 
   return (
-    <DashboardShell savedDealCount={savedDealTotalCount}>
-      <DashboardHome data={dashboardData} />
+    <DashboardShell savedDealCount={savedDealTotalCount} navAccess={navAccess}>
+      <DashboardHome data={dashboardData} canCompareDeals={hasPlanFeature(entitlements, "compare_deals")} />
     </DashboardShell>
   );
 }

@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { Header } from "@/components/investcalc/header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { getEntitlementsForUser } from "@/lib/entitlements";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 export default async function SettingsPage() {
@@ -14,9 +15,11 @@ export default async function SettingsPage() {
     redirect("/auth/login");
   }
 
+  const entitlements = await getEntitlementsForUser(supabase, user.id);
+
   return (
     <>
-      <Header initialUser={user} />
+      <Header initialUser={user} initialEntitlements={entitlements} />
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
         <Card className="border-border/70 shadow-md">
           <CardHeader>

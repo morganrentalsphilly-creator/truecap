@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Lock,
@@ -10,19 +10,20 @@ import {
   AlertTriangle,
   ArrowUpRight,
   Building2,
-  Download,
+  FileText,
   Save,
   Loader2,
   Info,
   FileDown,
   Sparkles,
+  ListTodo,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AnalysisResult } from "@/lib/calc-analysis";
-import { TenYearProjectionsPanel } from "@/components/investcalc/ten-year-projections-panel";
-import { TaxStrategyPanel } from "@/components/investcalc/tax-strategy-panel";
-import { ExitScenariosPanel } from "@/components/investcalc/exit-scenarios-panel";
+import { TenYearProjectionsPanel } from "@/components/investcalc/ten-year-projections/panel";
+import { TaxStrategyPanel } from "@/components/investcalc/tax-strategy/panel";
+import { ExitScenariosPanel } from "@/components/investcalc/exit-scenarios/panel";
 
 import type { ProjectionYear, TenYearProjectionInput } from "@/lib/ten-year-projections";
 import type { TaxStrategyInput, TaxStrategyYear } from "@/lib/tax-strategy";
@@ -54,24 +55,35 @@ interface AnalysisDashboardProps {
   onSaveDeal: () => void | Promise<void>;
   onCompareDeals: () => void | Promise<void>;
   onExportPdf: () => void | Promise<void>;
+  onNewAnalysis: () => void | Promise<void>;
   isSaving?: boolean;
   isComparing?: boolean;
   isExporting?: boolean;
   isSaved?: boolean;
+  isExistingSavedDeal?: boolean;
   isAuthenticated?: boolean;
-  hasProAccess?: boolean;
+  canSaveDeals?: boolean;
+  canUpdateSavedDeals?: boolean;
+  canCompareDeals?: boolean;
+  canExportPdf?: boolean;
+  canUseProjections?: boolean;
+  canUseTaxStrategy?: boolean;
+  canUseExitScenarios?: boolean;
+  canUseDealScore?: boolean;
+  saveDealLimitReached?: boolean;
+  activeTab?: AnalysisDashboardTab;
   /** Shown when Compare / Export are disabled (e.g. unsaved edits). */
   persistedActionsBlockHint?: string;
 }
 
-type Tab = "cash-flow" | "projections" | "tax-strategy" | "exit-scenarios";
+export type AnalysisDashboardTab = "cash-flow" | "projections" | "tax-strategy" | "exit-scenarios";
 type RecommendationVariant = "strong-buy" | "buy" | "neutral" | "risky" | "avoid";
 
-const TABS: { id: Tab; label: string; isPro: boolean }[] = [
-  { id: "cash-flow", label: "Cash Flow", isPro: false },
-  { id: "projections", label: "10-Year Projections", isPro: true },
-  { id: "tax-strategy", label: "Tax Strategy", isPro: true },
-  { id: "exit-scenarios", label: "Exit Scenarios", isPro: true },
+const TABS: { id: AnalysisDashboardTab; label: string; mobileLabel: string; isPro: boolean }[] = [
+  { id: "cash-flow", label: "Cash Flow", mobileLabel: "Cash Flow", isPro: false },
+  { id: "projections", label: "10-Year Projections", mobileLabel: "10-Year", isPro: true },
+  { id: "tax-strategy", label: "Tax Strategy", mobileLabel: "Tax", isPro: true },
+  { id: "exit-scenarios", label: "Exit Scenarios", mobileLabel: "Exit", isPro: true },
 ];
 
 function fmt(n: number) {
@@ -126,18 +138,44 @@ export function AnalysisDashboard({
   onSaveDeal,
   onCompareDeals,
   onExportPdf,
+  onNewAnalysis,
   isSaving = false,
   isComparing = false,
   isExporting = false,
   isSaved = false,
+  isExistingSavedDeal = false,
   isAuthenticated = false,
-  hasProAccess = false,
+  canSaveDeals = false,
+  canUpdateSavedDeals = false,
+  canCompareDeals = false,
+  canExportPdf = false,
+  canUseProjections = false,
+  canUseTaxStrategy = false,
+  canUseExitScenarios = false,
+  canUseDealScore = false,
+  saveDealLimitReached = false,
+  activeTab: activeTabProp,
   persistedActionsBlockHint,
 }: AnalysisDashboardProps) {
-  const [activeTab, setActiveTab] = useState<Tab>("cash-flow");
+  const [activeTab, setActiveTab] = useState<AnalysisDashboardTab>(activeTabProp ?? "cash-flow");
   const router = useRouter();
   const goToLogin = () => router.push("/auth/login");
   const goToBilling = () => router.push("/profile#billing");
+  const tabEntitlements: Record<AnalysisDashboardTab, boolean> = {
+    "cash-flow": true,
+    projections: canUseProjections,
+    "tax-strategy": canUseTaxStrategy,
+    "exit-scenarios": canUseExitScenarios,
+  };
+  const isEditingLockedByPlan = isAuthenticated && isExistingSavedDeal && !canUpdateSavedDeals;
+  const isSaveLimitLockedByPlan = isAuthenticated && !isExistingSavedDeal && saveDealLimitReached;
+  const isSaveLockedByPlan =
+    isEditingLockedByPlan || isSaveLimitLockedByPlan || (isAuthenticated && !canSaveDeals);
+
+  useEffect(() => {
+    if (!activeTabProp) return;
+    setActiveTab(activeTabProp);
+  }, [activeTabProp]);
 
   const recommendation = buildRecommendationModel(dealScoreResult);
 
@@ -150,80 +188,119 @@ export function AnalysisDashboard({
   return (
     <div className="space-y-6">
       {/* Action bar */}
-      <div className="flex items-center justify-between flex-wrap gap-2 sm:gap-3">
-        <div className="flex items-center gap-2">
-          <Building2 className="w-4 h-4 text-primary" />
-          <span className="font-semibold text-foreground">
-            {labelMap[propertyType]}
-          </span>
-          <span
-            className={cn(
-              "rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide",
-              isSaved
-                ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                : "border-amber-200 bg-amber-50 text-amber-700"
-            )}
-          >
-            {isSaved ? "Saved" : "Preview"}
-          </span>
-        </div>
-        <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              if (!isAuthenticated) {
-                goToLogin();
-                return;
-              }
-              if (!hasProAccess) {
-                goToBilling();
-                return;
-              }
-              void onSaveDeal();
-            }}
-            disabled={isSaving}
-            className="rounded-full text-xs sm:text-sm h-8 sm:h-9 px-3 sm:px-4"
-          >
-            {isSaving ? (
-              <Loader2 className="w-3.5 h-3.5 mr-1 sm:mr-1.5 animate-spin" />
-            ) : (
-              <Save className="w-3.5 h-3.5 mr-1 sm:mr-1.5" />
-            )}
-            Save
-            <span className="ml-1.5 rounded-full bg-[var(--brand-orange)] px-1.5 py-0.5 text-[9px] font-bold uppercase text-white">
-              PRO
+      <div className="rounded-2xl border border-border bg-card p-3 shadow-sm sm:p-4">
+        <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+          <div className="flex items-center gap-2 rounded-xl   px-3 py-2 xl:border-0 xl:bg-transparent xl:px-0 xl:py-0">
+            <Building2 className="w-4 h-4 text-primary" />
+            <span className="font-semibold text-foreground">
+              {labelMap[propertyType]}
             </span>
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="rounded-full text-xs sm:text-sm h-8 sm:h-9 px-3 sm:px-4 hidden sm:flex"
-            onClick={() => void onCompareDeals()}
-            disabled={!isSaved || isComparing}
-            title={!isSaved ? persistedActionsBlockHint ?? "Save this analysis before comparing it." : undefined}
-          >
-            {isComparing ? (
-              <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
-            ) : (
-              <TrendingUp className="w-3.5 h-3.5 mr-1.5" />
-            )}
-            Compare Deals
-          </Button>
-          <Button
-            size="sm"
-            className="rounded-full bg-primary text-primary-foreground text-xs sm:text-sm font-semibold h-8 sm:h-9 px-3 sm:px-4"
-            onClick={() => void onExportPdf()}
-            disabled={!isSaved || isExporting}
-            title={!isSaved ? persistedActionsBlockHint ?? "Save this analysis before exporting PDF." : undefined}
-          >
-            {isExporting ? (
-              <Loader2 className="w-3.5 h-3.5 mr-1 sm:mr-1.5 animate-spin" />
-            ) : (
-              <Download className="w-3.5 h-3.5 mr-1 sm:mr-1.5" />
-            )}
-            Export PDF
-          </Button>
+            <span
+              className={cn(
+                "rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide",
+                isSaved
+                  ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                  : "border-amber-200 bg-amber-50 text-amber-700"
+              )}
+            >
+              {isSaved ? "Saved" : "Preview"}
+            </span>
+          </div>
+          <div className="relative rounded-2xl border border-border p-2 pt-3 shadow-sm xl:min-w-[560px] max-[380px]:p-1.5 max-[380px]:pt-3">
+            <span className="absolute -top-2 left-1/2 -translate-x-1/2 bg-card px-2 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+              Quick actions
+            </span>
+            <div className="grid grid-cols-4 gap-1.5 sm:gap-2 max-[380px]:gap-1">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  if (!isAuthenticated) {
+                    goToLogin();
+                    return;
+                  }
+                  void onSaveDeal();
+                }}
+                disabled={isSaving || isSaveLockedByPlan}
+                title={
+                  isEditingLockedByPlan
+                    ? "Upgrade to update saved analyses."
+                    : isSaveLimitLockedByPlan
+                      ? "Saved deal limit reached for your plan."
+                      : isAuthenticated && !canSaveDeals
+                        ? "Save is not available for your current plan."
+                        : undefined
+                }
+                className="h-9 gap-1 rounded-xl px-1.5 text-[11px] sm:h-10 sm:gap-0 sm:rounded-xl sm:px-4 sm:text-sm max-[380px]:h-8 max-[380px]:gap-0.5 max-[380px]:rounded-lg max-[380px]:px-0.5 max-[380px]:text-[9px]"
+              >
+                {isSaving ? (
+                  <Loader2 className="w-3.5 h-3.5 shrink-0 sm:mr-1.5 animate-spin max-[380px]:h-3 max-[380px]:w-3" />
+                ) : (
+                  <Save className="w-3.5 h-3.5 shrink-0 sm:mr-1.5 max-[380px]:h-3 max-[380px]:w-3" />
+                )}
+                <span>Save</span>
+                {isSaveLockedByPlan && (
+                  <span className="ml-0.1 sm:ml-1 rounded-full bg-[var(--brand-orange)] px-0.5 sm:px-1 py-0.5 text-[7px] sm:text-[8px] font-bold uppercase text-white sm:ml-1.5 sm:px-1.5 sm:text-[9px]">
+                    PRO
+                  </span>
+                )}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-9 gap-1 rounded-xl px-1.5 text-[11px] sm:h-10 sm:gap-0 sm:rounded-xl sm:px-4 sm:text-sm max-[380px]:h-8 max-[380px]:gap-0.5 max-[380px]:rounded-lg max-[380px]:px-0.5 max-[380px]:text-[9px]"
+                onClick={() => void onCompareDeals()}
+                disabled={!isSaved || !canCompareDeals || isComparing}
+                title={
+                  !isSaved
+                    ? persistedActionsBlockHint ?? "Save this analysis before comparing it."
+                    : !canCompareDeals
+                      ? "Compare is not available for your current plan."
+                      : undefined
+                }
+              >
+                {isComparing ? (
+                  <Loader2 className="w-3.5 h-3.5 shrink-0 sm:mr-1.5 animate-spin max-[380px]:h-3 max-[380px]:w-3" />
+                ) : (
+                  <ListTodo className="w-3.5 h-3.5 shrink-0 sm:mr-1.5 max-[380px]:h-3 max-[380px]:w-3" />
+                )}
+                <span className="hidden sm:inline">Compare Deals</span>
+                <span className="sm:hidden">Compare</span>
+              </Button>
+              <Button
+                size="sm"
+                className="h-9 gap-1 rounded-xl bg-primary px-1.5 text-[11px] font-semibold text-primary-foreground sm:h-10 sm:gap-0 sm:rounded-xl sm:px-4 sm:text-sm max-[380px]:h-8 max-[380px]:gap-0.5 max-[380px]:rounded-lg max-[380px]:px-0.5 max-[380px]:text-[9px]"
+                onClick={() => void onExportPdf()}
+                disabled={!isSaved || !canExportPdf || isExporting}
+                title={
+                  !isSaved
+                    ? persistedActionsBlockHint ?? "Save this analysis before exporting PDF."
+                    : !canExportPdf
+                      ? "PDF export is not available for your current plan."
+                      : undefined
+                }
+              >
+                {isExporting ? (
+                  <Loader2 className="w-3.5 h-3.5 shrink-0 sm:mr-1.5 animate-spin max-[380px]:h-3 max-[380px]:w-3" />
+                ) : (
+                  <FileDown className="w-3.5 h-3.5 shrink-0 sm:mr-1.5 max-[380px]:h-3 max-[380px]:w-3" />
+                )}
+                <span className="hidden sm:inline">Export PDF</span>
+                <span className="sm:hidden">PDF</span>
+              </Button>
+              <Button
+                size="sm"
+                className="h-9 gap-1 rounded-xl bg-primary px-1.5 text-[11px] font-semibold text-primary-foreground sm:h-10 sm:gap-0 sm:rounded-xl sm:px-4 sm:text-sm max-[380px]:h-8 max-[380px]:gap-0.5 max-[380px]:rounded-lg max-[380px]:px-0.5 max-[380px]:text-[9px]"
+                onClick={() => void onNewAnalysis()}
+                // style={{ background: "!var(--gradient-premium)", boxShadow: "var(--shadow-glow)"}}
+                title="Create a new analysis"
+              >
+                <Sparkles className="w-3.5 h-3.5 shrink-0 sm:mr-1.5 max-[380px]:h-3 max-[380px]:w-3" />
+                <span className="hidden sm:inline">New Analysis</span>
+                <span className="sm:hidden">New</span>
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -235,7 +312,7 @@ export function AnalysisDashboard({
           dealScoreResult={dealScoreResult}
           isSaving={isSaving}
           onUpgrade={goToBilling}
-          hasProAccess={hasProAccess}
+          canUseDealScore={canUseDealScore}
         />
 
         {/* Recommendation card */}
@@ -336,7 +413,7 @@ export function AnalysisDashboard({
       </div>
 
       {/* Metric cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-2 sm:gap-3">
         <MetricCard
           label="Monthly Cash Flow"
           value={result ? (result.netCashFlow >= 0 ? fmt(result.netCashFlow) : `-${fmt(result.netCashFlow)}`) : "—"}
@@ -381,22 +458,27 @@ export function AnalysisDashboard({
       {/* Analysis tabs */}
       <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
         {/* Tab bar */}
-        <div className="flex border-b border-border overflow-x-auto scrollbar-none">
+        <div className="flex gap-1.5 overflow-x-auto scrollbar-none p-2 sm:gap-0 sm:border-b sm:border-border sm:p-0 max-[380px]:grid max-[380px]:grid-cols-4 max-[380px]:gap-1 max-[380px]:overflow-visible">
           {TABS.map((tab) => (
             <button
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id)}
               className={cn(
-                "flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-3 sm:py-3.5 text-xs sm:text-sm font-medium whitespace-nowrap transition-colors shrink-0",
+                "flex items-center gap-1.5 sm:gap-2 rounded-full border px-3 py-2 text-[11px] font-medium whitespace-nowrap transition-colors shrink-0 sm:rounded-none sm:border-0 sm:px-5 sm:py-3.5 sm:text-sm max-[380px]:shrink max-[380px]:justify-center max-[380px]:gap-1 max-[380px]:px-1 max-[380px]:text-[10px]",
                 activeTab === tab.id
                   ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  : "border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted sm:bg-transparent"
               )}
             >
-              {tab.label}
-              {tab.isPro && (
-                <span className="text-[9px] sm:text-[10px] font-bold bg-[var(--brand-orange)] text-white px-1 sm:px-1.5 py-0.5 rounded-full uppercase">
+              {tab.id === "cash-flow" && <TrendingUp className="w-3.5 h-3.5 sm:hidden" />}
+              {tab.id === "projections" && <ArrowUpRight className="w-3.5 h-3.5 sm:hidden" />}
+              {tab.id === "tax-strategy" && <FileText className="w-3.5 h-3.5 sm:hidden" />}
+              {tab.id === "exit-scenarios" && <ArrowUpRight className="w-3.5 h-3.5 sm:hidden" />}
+              <span className="sm:hidden">{tab.mobileLabel}</span>
+              <span className="hidden sm:inline">{tab.label}</span>
+              {tab.isPro && !tabEntitlements[tab.id] && (
+                <span className="hidden sm:inline-flex text-[9px] sm:text-[10px] font-bold bg-[var(--brand-orange)] text-white px-1 sm:px-1.5 py-0.5 rounded-full uppercase">
                   PRO
                 </span>
               )}
@@ -405,39 +487,39 @@ export function AnalysisDashboard({
         </div>
 
         {/* Tab content */}
-        <div className="p-4 sm:p-6">
+        <div className="min-w-0 overflow-hidden p-2 sm:p-6">
           {activeTab === "cash-flow" && (
             <CashFlowTab result={result} isLoading={isLoading} />
           )}
-          {activeTab === "projections" && !hasProAccess && (
+          {activeTab === "projections" && !canUseProjections && (
             <ProFeaturePreview kind="projections" onUpgrade={goToBilling} />
           )}
-          {activeTab === "projections" && hasProAccess && projectionSource && (
+          {activeTab === "projections" && canUseProjections && projectionSource && (
             <TenYearProjectionsPanel source={projectionSource} />
           )}
-          {activeTab === "projections" && hasProAccess && !projectionSource && (
+          {activeTab === "projections" && canUseProjections && !projectionSource && (
             <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
               Run the analysis to see the 10-year projection.
             </div>
           )}
-          {activeTab === "tax-strategy" && !hasProAccess && (
+          {activeTab === "tax-strategy" && !canUseTaxStrategy && (
             <ProFeaturePreview kind="tax-strategy" onUpgrade={goToBilling} />
           )}
-          {activeTab === "tax-strategy" && hasProAccess && taxStrategySource && (
+          {activeTab === "tax-strategy" && canUseTaxStrategy && taxStrategySource && (
             <TaxStrategyPanel source={taxStrategySource} />
           )}
-          {activeTab === "tax-strategy" && hasProAccess && !taxStrategySource && (
+          {activeTab === "tax-strategy" && canUseTaxStrategy && !taxStrategySource && (
             <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
               Run the analysis to see the tax strategy view.
             </div>
           )}
-          {activeTab === "exit-scenarios" && !hasProAccess && (
+          {activeTab === "exit-scenarios" && !canUseExitScenarios && (
             <ProFeaturePreview kind="exit-scenarios" onUpgrade={goToBilling} />
           )}
-          {activeTab === "exit-scenarios" && hasProAccess && exitScenarioSource && (
+          {activeTab === "exit-scenarios" && canUseExitScenarios && exitScenarioSource && (
             <ExitScenariosPanel source={exitScenarioSource} />
           )}
-          {activeTab === "exit-scenarios" && hasProAccess && !exitScenarioSource && (
+          {activeTab === "exit-scenarios" && canUseExitScenarios && !exitScenarioSource && (
             <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
               Run the analysis to see exit scenarios.
             </div>
@@ -548,14 +630,14 @@ function DealScoreCard({
   dealScoreResult,
   isSaving,
   onUpgrade,
-  hasProAccess,
+  canUseDealScore,
 }: {
   isAnalysisLoading: boolean;
   isDealScoreLoading: boolean;
   dealScoreResult: DealScoreActionResult | null;
   isSaving: boolean;
   onUpgrade: () => void;
-  hasProAccess: boolean;
+  canUseDealScore: boolean;
 }) {
   const isLoading = isAnalysisLoading || isDealScoreLoading;
 
@@ -573,7 +655,7 @@ function DealScoreCard({
     );
   }
 
-  if (!hasProAccess || !dealScoreResult || !dealScoreResult.ok || dealScoreResult.tier !== "pro") {
+  if (!canUseDealScore) {
     return (
       <div className="relative overflow-hidden bg-card rounded-2xl border border-border p-4 sm:p-6">
         <div className="pointer-events-none select-none opacity-75 blur-[4.5px]">
@@ -620,6 +702,21 @@ function DealScoreCard({
           >
             {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Upgrade to Pro"}
           </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!dealScoreResult || !dealScoreResult.ok || dealScoreResult.tier !== "pro") {
+    return (
+      <div className="bg-card rounded-2xl border border-border p-4 sm:p-6">
+        <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2">
+          Deal Score
+        </p>
+        <div className="flex items-center justify-center min-h-40 rounded-xl border border-dashed border-border bg-muted/20 text-center px-4">
+          <p className="text-sm text-muted-foreground">
+            Run the analysis to view your live Deal Score and recommendation details.
+          </p>
         </div>
       </div>
     );

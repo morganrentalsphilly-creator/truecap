@@ -43,9 +43,24 @@ async function getOrCreateStripeCustomer(args: {
   name?: string;
   existingCustomerId?: string | null;
 }): Promise<string> {
-  if (args.existingCustomerId) return args.existingCustomerId;
-
   const stripe = getStripe();
+  if (args.existingCustomerId) {
+    const existingCustomer = await stripe.customers.retrieve(args.existingCustomerId);
+    if ("deleted" in existingCustomer && existingCustomer.deleted) {
+      throw new Error("Stored Stripe customer was deleted");
+    }
+    const metadataUserId = existingCustomer.metadata?.user_id;
+    if (metadataUserId && metadataUserId !== args.userId) {
+      throw new Error("Stored Stripe customer belongs to a different user");
+    }
+    if (!metadataUserId) {
+      await stripe.customers.update(existingCustomer.id, {
+        metadata: { ...(existingCustomer.metadata ?? {}), user_id: args.userId },
+      });
+    }
+    return existingCustomer.id;
+  }
+
   const customer = await stripe.customers.create({
     email: args.email ?? undefined,
     name: args.name,
@@ -94,7 +109,8 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
   ]);
 
   if (planError) {
-    return { ok: false, code: "SERVER_ERROR", message: planError.message };
+    console.error("[billing] Failed to load plan:", planError);
+    return { ok: false, code: "SERVER_ERROR", message: "Unable to start checkout. Please try again." };
   }
 
   if (!plan) {
@@ -103,10 +119,11 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
 
   const priceId = getPlanPriceId(parsed.data.planSlug, plan.stripe_price_id);
   if (!priceId) {
+    console.error(`[billing] Missing Stripe price id for plan ${parsed.data.planSlug}`);
     return {
       ok: false,
       code: "MISSING_PRICE",
-      message: "Stripe price id is missing for this plan. Add it to the plans table or env file.",
+      message: "This plan is temporarily unavailable. Please try again shortly.",
     };
   }
 
@@ -148,15 +165,17 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
     });
 
     if (!session.url) {
-      return { ok: false, code: "SERVER_ERROR", message: "Stripe did not return a checkout URL." };
+      console.error("[billing] Stripe checkout session missing URL");
+      return { ok: false, code: "SERVER_ERROR", message: "Unable to start checkout. Please try again." };
     }
 
     return { ok: true, url: session.url };
   } catch (error) {
+    console.error("[billing] createCheckoutSessionAction failed:", error);
     return {
       ok: false,
       code: "SERVER_ERROR",
-      message: error instanceof Error ? error.message : "Could not create checkout session.",
+      message: "Unable to start checkout. Please try again.",
     };
   }
 }
@@ -178,14 +197,15 @@ export async function createBillingPortalSessionAction(): Promise<BillingActionR
     .maybeSingle();
 
   if (error) {
-    return { ok: false, code: "SERVER_ERROR", message: error.message };
+    console.error("[billing] Failed to load profile for billing portal:", error);
+    return { ok: false, code: "SERVER_ERROR", message: "Unable to open billing portal right now." };
   }
 
   if (!profile?.stripe_customer_id) {
     return {
       ok: false,
       code: "MISSING_PRICE",
-      message: "No Stripe customer exists yet. Subscribe first to manage billing.",
+      message: "No billing account found yet. Start a subscription first.",
     };
   }
 
@@ -197,10 +217,11 @@ export async function createBillingPortalSessionAction(): Promise<BillingActionR
     });
     return { ok: true, url: portal.url };
   } catch (error) {
+    console.error("[billing] createBillingPortalSessionAction failed:", error);
     return {
       ok: false,
       code: "SERVER_ERROR",
-      message: error instanceof Error ? error.message : "Could not open billing portal.",
+      message: "Unable to open billing portal right now.",
     };
   }
 }
@@ -233,10 +254,11 @@ export async function createCancelSubscriptionPortalSessionAction(): Promise<Bil
     ]);
 
   if (profileError || subscriptionError) {
+    console.error("[billing] Failed to load cancellation prerequisites:", profileError ?? subscriptionError);
     return {
       ok: false,
       code: "SERVER_ERROR",
-      message: profileError?.message ?? subscriptionError?.message ?? "Could not load billing details.",
+      message: "Unable to load billing details right now.",
     };
   }
 
@@ -244,7 +266,7 @@ export async function createCancelSubscriptionPortalSessionAction(): Promise<Bil
     return {
       ok: false,
       code: "MISSING_PRICE",
-      message: "No active Stripe subscription exists yet.",
+      message: "No active subscription found.",
     };
   }
 
@@ -269,10 +291,11 @@ export async function createCancelSubscriptionPortalSessionAction(): Promise<Bil
     });
     return { ok: true, url: portal.url };
   } catch (error) {
+    console.error("[billing] createCancelSubscriptionPortalSessionAction failed:", error);
     return {
       ok: false,
       code: "SERVER_ERROR",
-      message: error instanceof Error ? error.message : "Could not open cancellation flow.",
+      message: "Unable to open cancellation flow right now.",
     };
   }
 }

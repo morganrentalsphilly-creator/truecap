@@ -4,8 +4,8 @@ import { UpdatePasswordForm } from "@/components/auth/update-password-form";
 export default function UpdatePasswordPage() {
   return (
     <AuthShell
-      title="Set new password"
-      description="Choose a strong password you have not used here before."
+      title="Create new password"
+      description="Choose a strong password to secure your Truecap account."
     >
       <UpdatePasswordForm />
     </AuthShell>

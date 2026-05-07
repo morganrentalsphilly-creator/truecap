@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Award, DollarSign, ListTodo, ShieldCheck, Sparkles, TrendingUp } from "lucide-react";
+import { Award, DollarSign, ListTodo, ShieldCheck, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Topbar } from "@/components/dashboard/Topbar";
 import { StatCard } from "@/components/dashboard/StatCard";
@@ -14,25 +14,13 @@ import { getChartInclusionReason, getTaggedDealRiskLabel, mapRiskLevelToRisk, re
 
 export type { DashboardDeal } from "@/lib/dashboard-deal-mapping";
 
-export type DashboardMonthlyPoint = {
-  month: string;
-  income: number;
-  expenses: number;
-  cashFlow: number;
-};
-
-export type DashboardDistributionPoint = {
-  name: string;
-  count: number;
-  percent: number;
-  color: string;
-};
-
 export type DashboardHomeData = {
   user: {
     displayName: string;
     email: string;
     avatarSrc?: string;
+    isPremium?: boolean;
+    canAccessDashboard?: boolean;
   };
   stats: {
     totalDeals: number;
@@ -45,7 +33,6 @@ const sparks = {
   up: [{ v: 4 }, { v: 6 }, { v: 5 }, { v: 8 }, { v: 7 }, { v: 11 }, { v: 14 }],
   flat: [{ v: 7 }, { v: 8 }, { v: 7 }, { v: 9 }, { v: 8 }, { v: 9 }, { v: 10 }],
   cash: [{ v: 12 }, { v: 14 }, { v: 13 }, { v: 16 }, { v: 18 }, { v: 20 }, { v: 22 }],
-  down: [{ v: 9 }, { v: 8 }, { v: 9 }, { v: 7 }, { v: 8 }, { v: 7 }, { v: 6 }],
 };
 
 function formatCurrency(value: number | null | undefined, compact = false): string {
@@ -103,37 +90,11 @@ function getRiskReturn(data: DashboardHomeData) {
     .map((deal) => {
       const chartStatus = getChartInclusionReason(deal);
       if (!chartStatus.include) {
-        if (process.env.NODE_ENV !== "production") {
-          // Compact dev log to trace missing chart points.
-          console.log("[dashboard:risk-return]", {
-            dealId: deal.id,
-            include: false,
-            reason: chartStatus.reason,
-            returnSource: chartStatus.returnMetric.source,
-            returnValue: chartStatus.returnMetric.value,
-            riskSource: chartStatus.riskMetric.source,
-            riskValue: chartStatus.riskMetric.value,
-            tags: deal.tags,
-          });
-        }
         return null;
       }
 
       const x = chartStatus.returnMetric.value ?? 0;
       const y = chartStatus.riskMetric.value ?? 0;
-      if (process.env.NODE_ENV !== "production") {
-        console.log("[dashboard:risk-return]", {
-          dealId: deal.id,
-          include: true,
-          reason: chartStatus.reason,
-          returnSource: chartStatus.returnMetric.source,
-          returnValue: chartStatus.returnMetric.value,
-          riskSource: chartStatus.riskMetric.source,
-          riskValue: chartStatus.riskMetric.value,
-          x,
-          y,
-        });
-      }
 
       return {
         dealId: deal.id,
@@ -263,7 +224,13 @@ function buildDecisionInsights(deals: DashboardDeal[]) {
   ].filter((item): item is NonNullable<typeof item> => Boolean(item));
 }
 
-export function DashboardHome({ data }: { data: DashboardHomeData }) {
+export function DashboardHome({
+  data,
+  canCompareDeals = false,
+}: {
+  data: DashboardHomeData;
+  canCompareDeals?: boolean;
+}) {
   const initials = getInitials(data.user.displayName, data.user.email);
   const topDeals = getTopDeals(data);
   const riskReturn = getRiskReturn(data);
@@ -287,11 +254,13 @@ export function DashboardHome({ data }: { data: DashboardHomeData }) {
         email={data.user.email}
         initials={initials}
         avatarSrc={data.user.avatarSrc}
+        isPremium={data.user.isPremium}
+        canAccessDashboard={data.user.canAccessDashboard}
       />
-      <main className="flex-1 min-h-0 px-6 lg:px-8 py-6 space-y-6 lg:overflow-y-auto">
+      <main className="flex-1 min-h-0 px-4 py-4 space-y-5 sm:px-6 sm:py-6 sm:space-y-6 lg:px-8 lg:overflow-y-auto">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h1 className="font-display text-3xl lg:text-4xl font-bold tracking-tight">
+            <h1 className="font-display text-2xl sm:text-3xl xl:text-4xl font-bold tracking-tight">
               Welcome back, {data.user.displayName}
             </h1>
             <p className="text-muted-foreground mt-1">
@@ -299,14 +268,22 @@ export function DashboardHome({ data }: { data: DashboardHomeData }) {
             </p>
           </div>
           <Button
-            asChild
-            className="inline-flex items-center gap-2 h-11 px-5 rounded-xl text-sm font-semibold text-white"
+            asChild={canCompareDeals}
+            disabled={!canCompareDeals}
+            className="inline-flex w-full items-center gap-2 h-11 px-5 rounded-xl text-sm font-semibold text-white sm:w-auto"
             style={{ background: "var(--gradient-premium)", boxShadow: "var(--shadow-glow)" }}
           >
-            <Link href="/dashboard/compare" prefetch={false}>
+            {canCompareDeals ? (
+              <Link href="/dashboard/compare" prefetch={false}>
+                <ListTodo className="h-4 w-4" />
+                Compare Deals
+              </Link>
+            ) : (
+              <span className="inline-flex items-center gap-2">
               <ListTodo className="h-4 w-4" />
               Compare Deals
-            </Link>
+              </span>
+            )}
           </Button>
         </div>
 

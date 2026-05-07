@@ -6,14 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { cn } from "@/lib/utils";
+import { FieldError, optionalNumberSetValueAs } from "@/components/investcalc/form-field-helpers";
 
 interface PropertyDetailsSectionProps {
   form: UseFormReturn<InvestmentFormValues>;
-}
-
-function FieldError({ message }: { message?: string }) {
-  if (!message) return null;
-  return <p className="text-xs text-destructive mt-1">{message}</p>;
 }
 
 export function PropertyDetailsSection({ form }: PropertyDetailsSectionProps) {
@@ -21,12 +17,6 @@ export function PropertyDetailsSection({ form }: PropertyDetailsSectionProps) {
     register,
     formState: { errors },
   } = form;
-
-  const optionalNumberValue = (value: unknown) => {
-    if (value === "" || value == null) return undefined;
-    const parsed = typeof value === "number" ? value : Number(value);
-    return Number.isFinite(parsed) ? parsed : undefined;
-  };
 
   return (
     <div className="bg-card rounded-2xl border border-border shadow-sm p-6">
@@ -53,7 +43,7 @@ export function PropertyDetailsSection({ form }: PropertyDetailsSectionProps) {
         </div>
 
         {/* Purchase Price + Year Built */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-2 gap-4">
           <div>
             <Label className="text-sm font-medium text-foreground mb-1.5 block">
               Purchase Price
@@ -79,7 +69,7 @@ export function PropertyDetailsSection({ form }: PropertyDetailsSectionProps) {
               Year Built <span className="text-xs text-muted-foreground">(Optional)</span>
             </Label>
             <Input
-              {...register("yearBuilt", { setValueAs: optionalNumberValue })}
+              {...register("yearBuilt", { setValueAs: optionalNumberSetValueAs })}
               type="number"
               placeholder="2015"
               className={cn(

@@ -39,9 +39,9 @@ export function ExitScenarioCharts({
   years: ExitScenarioYear[];
 }) {
   return (
-    <div className="grid gap-4 xl:grid-cols-2">
+    <div className="grid min-w-0 gap-3 sm:gap-4 xl:grid-cols-2">
       <ChartCard title="Equity Growth">
-        <ChartContainer config={chartConfig} className="h-[260px] w-full">
+        <ChartContainer config={chartConfig} className="h-[240px] w-full sm:h-[260px]">
           <LineChart data={years}>
             <CartesianGrid vertical={false} />
             <XAxis dataKey="year" tickLine={false} axisLine={false} />
@@ -59,7 +59,7 @@ export function ExitScenarioCharts({
       </ChartCard>
 
       <ChartCard title="Property Value vs Loan Balance">
-        <ChartContainer config={chartConfig} className="h-[260px] w-full">
+        <ChartContainer config={chartConfig} className="h-[240px] w-full sm:h-[260px]">
           <LineChart data={years}>
             <CartesianGrid vertical={false} />
             <XAxis dataKey="year" tickLine={false} axisLine={false} />
@@ -85,7 +85,7 @@ export function ExitScenarioCharts({
       </ChartCard>
 
       <ChartCard title="Total Profit Over Time">
-        <ChartContainer config={chartConfig} className="h-[260px] w-full">
+        <ChartContainer config={chartConfig} className="h-[240px] w-full sm:h-[260px]">
           <LineChart data={years}>
             <CartesianGrid vertical={false} />
             <XAxis dataKey="year" tickLine={false} axisLine={false} />
@@ -103,7 +103,7 @@ export function ExitScenarioCharts({
       </ChartCard>
 
       <ChartCard title="Profit Breakdown">
-        <ChartContainer config={chartConfig} className="h-[260px] w-full">
+        <ChartContainer config={chartConfig} className="h-[240px] w-full sm:h-[260px]">
           <BarChart data={years}>
             <CartesianGrid vertical={false} />
             <XAxis dataKey="year" tickLine={false} axisLine={false} />

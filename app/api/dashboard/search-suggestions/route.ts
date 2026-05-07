@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { getEntitlementsForUser, hasDashboardAccess } from "@/lib/entitlements";
 import { getTypeLabel, type PropertyType } from "@/lib/compare-metrics";
 
 export const runtime = "nodejs";
@@ -25,6 +26,11 @@ export async function GET(request: Request) {
 
   if (!user) {
     return NextResponse.json({ suggestions: [] }, { status: 401 });
+  }
+
+  const entitlements = await getEntitlementsForUser(supabase, user.id);
+  if (!hasDashboardAccess(entitlements)) {
+    return NextResponse.json({ suggestions: [] }, { status: 403 });
   }
 
   const like = `%${query.replaceAll("%", "\\%").replaceAll("_", "\\_")}%`;

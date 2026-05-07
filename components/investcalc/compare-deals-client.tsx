@@ -3,14 +3,17 @@
 import Link from "next/link";
 import {
   ArrowLeft,
+  BarChart3,
   Building2,
+  CalendarDays,
+  Download,
   Home,
   Info,
   KeyRound,
   ListTree,
   Table2,
   Plus,
-  TrendingDown,
+  Trophy,
   TrendingUp,
   X,
 } from "lucide-react";
@@ -34,11 +37,38 @@ import {
 } from "@/lib/compare-metrics";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
 const MAX_COMPARE_ITEMS = 4;
+const MOBILE_DEAL_COLORS = [
+  {
+    chip: "bg-emerald-500 text-white",
+    border: "border-emerald-300",
+    text: "text-emerald-700",
+    bg: "bg-emerald-50",
+  },
+  {
+    chip: "bg-blue-500 text-white",
+    border: "border-blue-300",
+    text: "text-blue-700",
+    bg: "bg-blue-50",
+  },
+  {
+    chip: "bg-violet-500 text-white",
+    border: "border-violet-300",
+    text: "text-violet-700",
+    bg: "bg-violet-50",
+  },
+  {
+    chip: "bg-amber-500 text-white",
+    border: "border-amber-300",
+    text: "text-amber-700",
+    bg: "bg-amber-50",
+  },
+] as const;
 
 export type CompareDealViewModel = {
   id: string;
@@ -65,6 +95,16 @@ function getTypeIcon(type: PropertyType | null) {
 
 function getTypeClasses(type: PropertyType | null): string {
   return "bg-card  border border-border/70 text-primary ring-border/70";
+}
+
+function getDesktopCardTopBorderClass(deal: CompareDealViewModel, isBestDeal: boolean) {
+  if (isBestDeal) return "";
+  if (deal.signal === "avoid") return "border-t-red-400 !border-t-2";
+  if (deal.signal === "risky") return "border-t-orange-400 !border-t-2";
+  if (deal.signal === "neutral") return "border-t-amber-400 !border-t-2 ";
+  if (deal.signal === "strong-buy") return "border-t-emerald-500 !border-t-2";
+  if (deal.signal === "buy") return "border-t-primary !border-t-2";
+  return "border-t-primary !border-t-2";
 }
 
 function fmtPct(v: number | null, decimals = 2): string {
@@ -486,6 +526,52 @@ function formatLongTermCell(row: LongTermMetricRow, value: number | null): strin
   return `Year ${value}`;
 }
 
+function formatCompactCurrency(value: number, signed = false): string {
+  const abs = Math.abs(value);
+  const formatted =
+    abs >= 1000
+      ? `$${(abs / 1000).toFixed(abs >= 10000 ? 0 : 1).replace(/\.0$/, "")}k`
+      : `$${abs.toFixed(0)}`;
+  if (!signed) return value < 0 ? `-${formatted}` : formatted;
+  if (value > 0) return `+${formatted}`;
+  if (value < 0) return `-${formatted}`;
+  return formatted;
+}
+
+function formatCompactMetric(value: number | null, row: MetricRow): string {
+  if (value == null) return "-";
+  if (row.kind === "currency") return formatCompactCurrency(value, row.direction === "higher");
+  if (row.kind === "percent") {
+    const decimals = row.decimals ?? 1;
+    return `${row.direction === "higher" && value > 0 ? "+" : ""}${value.toFixed(decimals)}%`;
+  }
+  return value.toFixed(row.decimals ?? 0);
+}
+
+function formatCompactLongTermMetric(row: LongTermMetricRow, value: number | null): string {
+  if (value == null) return "-";
+  if (row.kind === "currency") return formatCompactCurrency(value, row.direction === "higher");
+  if (row.kind === "percent") return fmtPct(value, 1);
+  return `Yr ${value}`;
+}
+
+function getShortAddress(address: string): string {
+  const words = address.trim().split(/\s+/).filter(Boolean);
+  if (words.length <= 3) return address;
+  return words.slice(0, 3).join(" ");
+}
+
+function getMobileDealColor(index: number) {
+  return MOBILE_DEAL_COLORS[index % MOBILE_DEAL_COLORS.length]!;
+}
+
+function getMetricGuidanceBody(deal: CompareDealViewModel, row: MetricRow) {
+  if (row.key === "monthlyPayment") return <MortgageTooltip deal={deal} />;
+  if (row.key === "netCashFlow") return <NetCashFlowTooltip deal={deal} />;
+  if (row.key === "dscr") return <DscrTooltip deal={deal} />;
+  return null;
+}
+
 function MetricValueWithTooltip({
   deal,
   row,
@@ -495,17 +581,8 @@ function MetricValueWithTooltip({
   row: MetricRow;
   children: React.ReactNode;
 }) {
-  const withTooltip = row.key === "monthlyPayment" || row.key === "netCashFlow" || row.key === "dscr";
-  if (!withTooltip) return <>{children}</>;
-
-  const body =
-    row.key === "monthlyPayment" ? (
-      <MortgageTooltip deal={deal} />
-    ) : row.key === "netCashFlow" ? (
-      <NetCashFlowTooltip deal={deal} />
-    ) : (
-      <DscrTooltip deal={deal} />
-    );
+  const body = getMetricGuidanceBody(deal, row);
+  if (!body) return <>{children}</>;
 
   return (
     <Tooltip delayDuration={200}>
@@ -525,6 +602,215 @@ function MetricValueWithTooltip({
   );
 }
 
+function MobileMetricValue({
+  deal,
+  row,
+  value,
+  className,
+}: {
+  deal: CompareDealViewModel;
+  row: MetricRow;
+  value: number | null;
+  className?: string;
+}) {
+  const body = getMetricGuidanceBody(deal, row);
+  const text = formatCompactMetric(value, row);
+  if (!body) return <p className={className}>{text}</p>;
+
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          className={cn("inline-flex max-w-full items-center justify-center gap-1 underline decoration-dotted underline-offset-2", className)}
+          aria-label={`View guidance for ${row.label} on ${deal.address}`}
+        >
+          <span className="truncate">{text}</span>
+          <Info className="size-3 shrink-0 opacity-70" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-80 max-h-[min(70vh,28rem)] overflow-y-auto" align="center">
+        {body}
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+function MobileLongTermLabel({ row }: { row: LongTermMetricRow }) {
+  if (!row.labelTooltip) {
+    return <p className="text-[11px] font-bold text-muted-foreground">{row.label}</p>;
+  }
+
+  return (
+    <div className="flex items-center gap-1.5">
+      <p className="text-[11px] font-bold text-muted-foreground">{row.label}</p>
+      <Popover>
+        <PopoverTrigger asChild>
+          <button
+            type="button"
+            className="inline-flex size-5 items-center justify-center rounded-full bg-muted text-muted-foreground"
+            aria-label={`View guidance for ${row.label}`}
+          >
+            <Info className="size-3" />
+          </button>
+        </PopoverTrigger>
+        <PopoverContent className="w-72 text-xs leading-snug" align="start">
+          {row.labelTooltip}
+        </PopoverContent>
+      </Popover>
+    </div>
+  );
+}
+
+function CompareMobileDealStrip({ deals }: { deals: CompareDealViewModel[] }) {
+  return (
+    <div className="grid grid-cols-4 gap-2">
+      {deals.map((deal, index) => {
+        const color = getMobileDealColor(index);
+        return (
+          <div key={deal.id} className={cn("flex min-h-28 flex-col rounded-2xl border bg-card p-2 shadow-sm", color.border)}>
+            <div className="flex items-start justify-between gap-1 max-[380px]:flex-wrap">
+              <span className={cn("inline-flex size-5 items-center justify-center rounded-full text-[11px] font-black", color.chip)}>
+                {index + 1}
+              </span>
+              <div className="flex items-center gap-0.5 max-[380px]:mt-1 max-[380px]:basis-full max-[380px]:justify-start">
+                {deal.compareSnapshot ? (
+                  <Popover>
+                    <Tooltip delayDuration={200}>
+                      <TooltipTrigger asChild>
+                        <PopoverTrigger asChild>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon-sm"
+                            className="size-6 rounded-full text-muted-foreground hover:bg-muted"
+                            aria-label={`View saved projection snapshot for ${deal.address}`}
+                          >
+                            <Table2 className="size-3.5" />
+                          </Button>
+                        </PopoverTrigger>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom" sideOffset={6} className="text-xs">
+                        Saved projections
+                      </TooltipContent>
+                    </Tooltip>
+                    <PopoverContent className="w-80 max-h-[min(70vh,28rem)] overflow-y-auto" align="start">
+                      <CompareSnapshotPanel snapshot={deal.compareSnapshot} />
+                    </PopoverContent>
+                  </Popover>
+                ) : null}
+                <Popover>
+                  <Tooltip delayDuration={200}>
+                    <TooltipTrigger asChild>
+                      <PopoverTrigger asChild>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon-sm"
+                          className="size-6 rounded-full text-muted-foreground hover:bg-muted"
+                          aria-label={`View inputs for ${deal.address}`}
+                        >
+                          <ListTree className="size-3.5" />
+                        </Button>
+                      </PopoverTrigger>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" sideOffset={6} className="text-xs">
+                      View inputs
+                    </TooltipContent>
+                  </Tooltip>
+                  <PopoverContent className="w-80 max-h-[min(70vh,28rem)] overflow-y-auto" align="start">
+                    <AssumptionsPanel assumptions={deal.assumptions} purchasePrice={deal.purchasePrice} />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+            <p className="mt-1.5 line-clamp-2 text-[11px] font-black leading-tight text-foreground">
+              {getShortAddress(deal.address)}
+            </p>
+            <p className="mt-auto pt-2 text-[10px] font-semibold text-muted-foreground">
+              {formatCurrency(deal.purchasePrice)}
+            </p>
+          </div>
+        );
+      })}
+      {deals.length < MAX_COMPARE_ITEMS ? (
+        <Link
+          href="/dashboard/saved-analyses"
+          className="flex min-h-28 flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card/60 p-2 text-muted-foreground shadow-sm transition-colors hover:border-primary/40 hover:text-primary"
+        >
+          <span className="mb-2 flex size-8 items-center justify-center rounded-full border border-border bg-background">
+            <Plus className="size-4" />
+          </span>
+          <span className="text-[11px] font-bold">Add</span>
+        </Link>
+      ) : null}
+    </div>
+  );
+}
+
+function CompareMobileHighlights({
+  bestDeal,
+  highestRoiDeal,
+  strongestDscrDeal,
+  shortTermHighlightedWinCounts,
+  longTermHighlightedWinCounts,
+}: {
+  bestDeal: CompareDealViewModel | null;
+  highestRoiDeal: CompareDealViewModel | null;
+  strongestDscrDeal: CompareDealViewModel | null;
+  shortTermHighlightedWinCounts: Map<string, number>;
+  longTermHighlightedWinCounts: Map<string, number>;
+}) {
+  return (
+    <>
+      <div className="grid grid-cols-3 gap-2">
+        <div className="rounded-2xl bg-card p-3 shadow-sm">
+          <p className="text-[10px] font-black text-emerald-600">Best Deal</p>
+          <p className="mt-1 line-clamp-2 text-xs font-black leading-tight text-foreground">
+            {bestDeal ? getShortAddress(bestDeal.address) : "-"}
+          </p>
+        </div>
+        <div className="rounded-2xl bg-card p-3 shadow-sm">
+          <p className="text-[10px] font-black text-blue-600">Highest ROI</p>
+          <p className="mt-1 text-xs font-black text-foreground">
+            {highestRoiDeal?.compareSnapshot?.longTermSummary.totalROI != null
+              ? fmtPct(highestRoiDeal.compareSnapshot.longTermSummary.totalROI, 1)
+              : fmtPct(highestRoiDeal?.metrics.cocReturn ?? null, 1)}
+          </p>
+        </div>
+        <div className="rounded-2xl bg-card p-3 shadow-sm">
+          <p className="text-[10px] font-black text-violet-600">Strongest DSCR</p>
+          <p className="mt-1 text-xs font-black text-foreground">
+            {strongestDscrDeal?.metrics.dscr == null ? "-" : strongestDscrDeal.metrics.dscr.toFixed(2)}
+          </p>
+        </div>
+      </div>
+
+      {bestDeal ? (
+        <div className="rounded-3xl border border-border bg-card p-4 shadow-sm">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground">Selected Winner</p>
+              <h2 className="mt-1 text-base font-black leading-tight text-foreground">{getShortAddress(bestDeal.address)}</h2>
+            </div>
+            <Badge className="rounded-full border border-emerald-200 bg-emerald-50 text-emerald-700">Best</Badge>
+          </div>
+          <div className="mt-4 grid grid-cols-2 gap-2">
+            <div className="rounded-2xl bg-muted/40 p-3">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Short Score</p>
+              <p className="mt-1 text-lg font-black text-foreground">{shortTermHighlightedWinCounts.get(bestDeal.id) ?? 0}</p>
+            </div>
+            <div className="rounded-2xl bg-muted/40 p-3">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Long Score</p>
+              <p className="mt-1 text-lg font-black text-foreground">{longTermHighlightedWinCounts.get(bestDeal.id) ?? 0}</p>
+            </div>
+          </div>
+        </div>
+      ) : null}
+    </>
+  );
+}
+
 export function CompareDealsClient({
   deals,
 }: {
@@ -540,26 +826,190 @@ export function CompareDealsClient({
     longTermHighlightedWinCounts
   );
   const bestDealId = getBestDealIdByWins(deals, shortTermHighlightedWinCounts, longTermHighlightedWinCounts);
+  const bestDeal = deals.find((deal) => deal.id === bestDealId) ?? deals[0] ?? null;
+  const highestRoiDeal = deals.reduce<CompareDealViewModel | null>((best, deal) => {
+    const value = deal.compareSnapshot?.longTermSummary.totalROI ?? deal.metrics.cocReturn ?? Number.NEGATIVE_INFINITY;
+    const bestValue = best?.compareSnapshot?.longTermSummary.totalROI ?? best?.metrics.cocReturn ?? Number.NEGATIVE_INFINITY;
+    return value > bestValue ? deal : best;
+  }, null);
+  const strongestDscrDeal = deals.reduce<CompareDealViewModel | null>((best, deal) => {
+    const value = deal.metrics.dscr ?? Number.NEGATIVE_INFINITY;
+    const bestValue = best?.metrics.dscr ?? Number.NEGATIVE_INFINITY;
+    return value > bestValue ? deal : best;
+  }, null);
+  const mobileSections = [
+    {
+      id: "returns",
+      title: "Returns",
+      icon: TrendingUp,
+      rows: METRIC_ROWS.filter((row) => row.group === "RETURNS"),
+      defaultOpen: true,
+    },
+    {
+      id: "risk",
+      title: "Risk",
+      icon: Info,
+      rows: METRIC_ROWS.filter((row) => row.group === "RISK"),
+      defaultOpen: false,
+    },
+    {
+      id: "deal",
+      title: "Deal",
+      icon: Building2,
+      rows: METRIC_ROWS.filter((row) => row.group === "DEAL"),
+      defaultOpen: false,
+    },
+  ];
+  const mobileLongTermSections = [
+    {
+      id: "ten-year",
+      title: "10-Year Performance",
+      icon: BarChart3,
+      rows: LONG_TERM_METRIC_ROWS.filter((row) => row.subsection === "FROM 10-YEAR PROJECTIONS"),
+    },
+    {
+      id: "tax",
+      title: "Tax Strategy",
+      icon: Table2,
+      rows: LONG_TERM_METRIC_ROWS.filter((row) => row.subsection === "FROM TAX STRATEGY"),
+    },
+    {
+      id: "exit",
+      title: "Exit Scenarios",
+      icon: CalendarDays,
+      rows: LONG_TERM_METRIC_ROWS.filter((row) => row.subsection === "FROM EXIT SCENARIOS"),
+    },
+  ];
+  const desktopSlots = Array.from({ length: MAX_COMPARE_ITEMS }, (_, index) => deals[index] ?? null);
 
   return (
-    <main className="min-h-[calc(100vh-5rem)] bg-muted/30 px-4 py-6 text-foreground sm:px-6 sm:py-8">
+    <main className="min-h-[calc(100vh-5rem)] bg-muted/30 px-4 py-6 text-foreground sm:px-6 sm:py-8 xl:bg-[radial-gradient(circle_at_top_right,rgba(37,99,235,0.08),transparent_32%),linear-gradient(180deg,#f8fbff,#eef4f8)]">
         <div className="w-full">
-          <div className="mb-6 flex flex-wrap items-center gap-3">
-            <Button variant="ghost" size="sm" className="px-1.5 text-muted-foreground hover:text-foreground" asChild>
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 xl:mb-7">
+          <div className="flex flex-wrap items-center gap-3">
+            <Button variant="ghost" size="sm" className="mt-1 px-1.5 text-muted-foreground bg-primary/10 sm:bg-transparent" asChild>
               <Link href="/dashboard">
-                <ArrowLeft className="size-4" />
-                Back
+                <ArrowLeft className="w-4 h-4 mr-1.5" />
+                <span className="hidden xl:inline">Back</span>
               </Link>
             </Button>
             <div className="h-6 w-px bg-border" />
             <div className="space-y-1">
-              <h1 className="text-3xl font-black tracking-tight text-foreground sm:text-4xl">Compare Deals</h1>
-              <p className="text-sm text-muted-foreground">Side-by-side investment analysis</p>
+              <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-foreground xl:text-3xl">Compare Deals</h1>
+              <p className="text-sm text-muted-foreground ">Side-by-side investment analysis</p>
             </div>
           </div>
 
-          <div className="mb-7 grid gap-3 lg:grid-cols-[12rem_repeat(4,minmax(0,1fr))]">
-            <div className="hidden lg:block" />
+        </div>
+          <div className="space-y-5 xl:hidden">
+            <CompareMobileDealStrip deals={deals} />
+            <CompareMobileHighlights
+              bestDeal={bestDeal}
+              highestRoiDeal={highestRoiDeal}
+              strongestDscrDeal={strongestDscrDeal}
+              shortTermHighlightedWinCounts={shortTermHighlightedWinCounts}
+              longTermHighlightedWinCounts={longTermHighlightedWinCounts}
+            />
+
+            <Accordion type="multiple" defaultValue={["returns"]} className="space-y-3">
+              {mobileSections.map((section) => {
+                const SectionIcon = section.icon;
+                return (
+                  <AccordionItem key={section.id} value={section.id} className="rounded-3xl border border-border bg-card px-4 shadow-sm">
+                    <AccordionTrigger className="items-center py-4 hover:no-underline">
+                      <span className="flex  items-center gap-3">
+                        <span className="grid size-8 place-items-center rounded-xl bg-primary/10 text-primary">
+                          <SectionIcon className="size-4" />
+                        </span>
+                        <span className="font-black">{section.title}</span>
+                      </span>
+                    </AccordionTrigger>
+                    <AccordionContent className="space-y-4 pb-4">
+                      {section.rows.map((row) => {
+                        const best = getBestValue(row, deals);
+                        return (
+                          <div key={row.key} className="space-y-2 border-t border-border/70 pt-3 first:border-t-0 first:pt-0">
+                            <p className="text-[11px] font-bold text-muted-foreground">{row.label}</p>
+                            <div className="grid grid-cols-4 gap-2">
+                              {deals.map((deal, index) => {
+                                const value = deal.metrics[row.key];
+                                const isBest = value != null && best != null && value === best;
+                                const color = getMobileDealColor(index);
+                                return (
+                                  <div key={`${deal.id}-${row.key}`} className={cn("rounded-xl p-2 text-center flex flex-col items-center justify-center", isBest ? color.bg : "bg-muted/35")}>
+                                    <span className="mb-1 inline-flex items-center justify-center gap-1">
+                                      <span className={cn("inline-flex size-5 items-center justify-center rounded-full text-[10px] font-black", color.chip)}>
+                                        {index + 1}
+                                      </span>
+                                      {isBest ? <Trophy className="size-3 text-emerald-600" aria-hidden="true" /> : null}
+                                    </span>
+                                    <MobileMetricValue
+                                      deal={deal}
+                                      row={row}
+                                      value={value}
+                                      className={cn("truncate text-[11px] font-black", color.text)}
+                                    />
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </AccordionContent>
+                  </AccordionItem>
+                );
+              })}
+
+              {mobileLongTermSections.map((section) => {
+                const SectionIcon = section.icon;
+                return (
+                  <AccordionItem key={section.id} value={section.id} className="rounded-3xl border border-border bg-card px-4 shadow-sm">
+                    <AccordionTrigger className="items-center py-4 hover:no-underline">
+                      <span className="flex items-center gap-3">
+                        <span className="grid size-8 place-items-center rounded-xl bg-primary/10 text-primary">
+                          <SectionIcon className="size-4" />
+                        </span>
+                        <span className="font-black">{section.title}</span>
+                      </span>
+                    </AccordionTrigger>
+                    <AccordionContent className="space-y-4 pb-4">
+                      {section.rows.map((row) => {
+                        const strictBestDealId = getStrictBestLongTermDealId(row, deals);
+                        return (
+                          <div key={row.key} className="space-y-2 border-t border-border/70 pt-3 first:border-t-0 first:pt-0">
+                            <MobileLongTermLabel row={row} />
+                            <div className="grid grid-cols-4 gap-2">
+                              {deals.map((deal, index) => {
+                                const value = row.getValue(deal);
+                                const isBest = strictBestDealId === deal.id;
+                                const color = getMobileDealColor(index);
+                                return (
+                                  <div key={`${deal.id}-${row.key}`} className={cn("rounded-xl p-2 text-center", isBest ? color.bg : "bg-muted/35")}>
+                                    <span className="mx-auto mb-1 inline-flex items-center justify-center gap-1">
+                                      <span className={cn("inline-flex size-5 items-center justify-center rounded-full text-[10px] font-black", color.chip)}>
+                                        {index + 1}
+                                      </span>
+                                      {isBest ? <Trophy className="size-3 text-emerald-600" aria-hidden="true" /> : null}
+                                    </span>
+                                    <p className={cn("truncate text-[11px] font-black", color.text)}>
+                                      {formatCompactLongTermMetric(row, value)}
+                                    </p>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </AccordionContent>
+                  </AccordionItem>
+                );
+              })}
+            </Accordion>
+          </div>
+
+          <div className="mb-7 hidden gap-5 xl:grid xl:grid-cols-4">
             {deals.map((deal) => {
               const TypeIcon = getTypeIcon(deal.propertyType);
               const typeClasses = getTypeClasses(deal.propertyType);
@@ -575,9 +1025,10 @@ export function CompareDealsClient({
                 <div
                   key={deal.id}
                   className={cn(
-                    "relative flex min-h-[17.5rem] flex-col rounded-2xl border p-5 ring-2 ring-transparent",
+                    "relative flex min-h-[17.5rem] flex-col rounded-2xl border border-t-[3px] border-border/80 bg-card/95 p-5 shadow-[0_16px_48px_rgba(15,23,42,0.07)] ring-2 ring-transparent",
                     typeClasses,
-                    isBestDeal && "ring-emerald-300"
+                    getDesktopCardTopBorderClass(deal, isBestDeal),
+                    isBestDeal && "border-emerald-200 ring-emerald-300"
                   )}
                 >
                   {isBestDeal && (
@@ -596,16 +1047,16 @@ export function CompareDealsClient({
                       <X className="size-4" />
                     </Button>
                   </form>
-                  <div className="mb-3 flex items-center gap-2.5">
-                    <span className="flex size-9 items-center justify-center rounded-full bg-white/75">
-                      <TypeIcon className="size-4" />
+                  <div className="mb-3 flex items-center gap-2.5 pt-1">
+                    <span className="flex size-7 items-center justify-center rounded-full bg-primary/10 text-primary">
+                      <TypeIcon className="size-3.5" />
                     </span>
-                    <p className="text-[11px] font-bold uppercase tracking-[0.16em]">{getTypeLabel(deal.propertyType)}</p>
+                    <p className="text-[11px] font-black uppercase tracking-[0.18em] text-primary">{getTypeLabel(deal.propertyType)}</p>
                   </div>
-                  <h2 className="line-clamp-3 h-[66px] overflow-hidden pr-8 text-base font-black leading-snug text-foreground">
+                  <h2 className="line-clamp-2 min-h-10 overflow-hidden pr-8 text-lg font-black leading-snug text-foreground">
                     {deal.address}
                   </h2>
-                  <p className="mt-1.5 text-sm font-medium text-muted-foreground">{formatCurrency(deal.purchasePrice)}</p>
+                  <p className="mt-6 text-sm font-semibold text-muted-foreground">{formatCurrency(deal.purchasePrice)}</p>
                   <div className="mt-4 flex flex-wrap items-center gap-2">
                     {deal.scoringComplete && deal.signal ? (
                       <Badge
@@ -623,69 +1074,9 @@ export function CompareDealsClient({
                         Balanced
                       </Badge>
                     )}
-                  </div>
 
-                  <div className="mt-4 grid grid-cols-2 gap-2">
-                    <div
-                      className={cn(
-                        "rounded-xl border bg-muted/25 p-2.5",
-                        isShortTermWinner && "border-emerald-200 bg-emerald-50"
-                      )}
-                    >
-                      <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">
-                        Short-Term
-                      </p>
-                      <p
-                        className={cn(
-                          "mt-1 text-sm font-black text-foreground",
-                          isShortTermWinner && "text-emerald-700"
-                        )}
-                      >
-                        {shortTermScore} win{shortTermScore === 1 ? "" : "s"}
-                      </p>
-                      {isShortTermWinner && (
-                        <p className="mt-0.5 text-[10px] font-semibold text-emerald-700">
-                          Winner
-                        </p>
-                      )}
-                    </div>
-                    <div
-                      className={cn(
-                        "rounded-xl border bg-muted/25 p-2.5",
-                        isLongTermWinner && "border-emerald-200 bg-emerald-50"
-                      )}
-                    >
-                      <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">
-                        Long-Term
-                      </p>
-                      <p
-                        className={cn(
-                          "mt-1 text-sm font-black text-foreground",
-                          isLongTermWinner && "text-emerald-700"
-                        )}
-                      >
-                        {longTermScore} win{longTermScore === 1 ? "" : "s"}
-                      </p>
-                      {isLongTermWinner && (
-                        <p className="mt-0.5 text-[10px] font-semibold text-emerald-700">
-                          Winner
-                        </p>
-                      )}
-                    </div>
-                  </div>
 
-                  {isBalancedDeal && !isBestDeal && (
-                    <p className="mt-2 rounded-lg bg-emerald-50 px-2.5 py-1.5 text-[11px] font-medium leading-snug text-emerald-800">
-                      Top 2 in both short-term and long-term scoring.
-                    </p>
-                  )}
-                  {isBestDeal && (
-                    <p className="mt-2 rounded-lg bg-emerald-50 px-2.5 py-1.5 text-[11px] font-medium leading-snug text-emerald-800">
-                      Top performer across most metrics with {totalWins} total win{totalWins === 1 ? "" : "s"}.
-                    </p>
-                  )}
-
-                  <div className="mt-auto flex justify-end gap-1 pt-4">
+<div className="ml-auto flex justify-center gap-1 ">
                     {deal.compareSnapshot ? (
                       <Popover>
                         <Tooltip delayDuration={200}>
@@ -735,6 +1126,69 @@ export function CompareDealsClient({
                       </PopoverContent>
                     </Popover>
                   </div>
+                  </div>
+
+                  <div className="mt-4 grid grid-cols-2 gap-0 border-t border-border/80 pt-3">
+                    <div
+                      className={cn(
+                        "border-r border-border/80 py-1 pr-4",
+                        isShortTermWinner && "text-emerald-700"
+                      )}
+                    >
+                      <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">
+                        Short-Term
+                      </p>
+                      <p
+                        className={cn(
+                          "mt-1 text-sm font-black text-foreground",
+                          isShortTermWinner && "text-emerald-700"
+                        )}
+                      >
+                        {shortTermScore} win{shortTermScore === 1 ? "" : "s"}
+                      </p>
+                      {isShortTermWinner && (
+                        <p className="mt-0.5 text-[10px] font-semibold text-emerald-700">
+                          Winner
+                        </p>
+                      )}
+                    </div>
+                    <div
+                      className={cn(
+                        "py-1 pl-4",
+                        isLongTermWinner && "text-emerald-700"
+                      )}
+                    >
+                      <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">
+                        Long-Term
+                      </p>
+                      <p
+                        className={cn(
+                          "mt-1 text-sm font-black text-foreground",
+                          isLongTermWinner && "text-emerald-700"
+                        )}
+                      >
+                        {longTermScore} win{longTermScore === 1 ? "" : "s"}
+                      </p>
+                      {isLongTermWinner && (
+                        <p className="mt-0.5 text-[10px] font-semibold text-emerald-700">
+                          Winner
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {isBalancedDeal && !isBestDeal && (
+                    <p className="mt-3 rounded-lg bg-emerald-50 px-2.5 py-1.5 text-[11px] font-medium leading-snug text-emerald-800">
+                      Top 2 in both short-term and long-term scoring.
+                    </p>
+                  )}
+                  {isBestDeal && (
+                    <p className="mt-3 rounded-lg bg-emerald-50 px-2.5 py-1.5 text-[11px] font-medium leading-snug text-emerald-800">
+                      Top performer across most metrics with {totalWins} total win{totalWins === 1 ? "" : "s"}.
+                    </p>
+                  )}
+
+
                  
                 </div>
               );
@@ -742,62 +1196,56 @@ export function CompareDealsClient({
             {deals.length < MAX_COMPARE_ITEMS && (
               <Link
                 href="/dashboard/saved-analyses"
-                className="flex min-h-36 flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border bg-card/50 text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
+                className="flex min-h-[17.5rem] flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card/45 text-muted-foreground shadow-[0_16px_48px_rgba(15,23,42,0.04)] transition-colors hover:border-primary/40 hover:text-primary"
               >
-                <span className="mb-3 flex size-10 items-center justify-center rounded-full border border-border bg-background">
+                <span className="mb-3 flex size-12 items-center justify-center rounded-full border border-border bg-background">
                   <Plus className="size-5" />
                 </span>
                 <span className="text-sm font-semibold">Add</span>
+                <span className="mt-1 text-xs text-muted-foreground">Up to 4 deals</span>
               </Link>
             )}
           </div>
 
-          <p className="mb-4 flex items-center gap-2 text-[11px] text-muted-foreground">
-            <Info className="size-3.5 shrink-0" />
-            <span>
-              Hover dotted values (Net cash flow, Loan payment, DSCR) for a quick breakdown. Use each deal&apos;s{" "}
-              <span className="font-medium text-foreground"><ListTree className="size-3.5 inline-block ml-1 mr-1" /></span> button to open saved assumptions.
-            </span>
-          </p>
-
-          <div className="space-y-8">
+          <div className="hidden space-y-4 xl:block">
             {(["RETURNS", "RISK", "DEAL"] as const).map((group) => (
-              <section key={group} className="space-y-2">
-                <div className="grid gap-3 lg:grid-cols-[12rem_repeat(4,minmax(0,1fr))]">
-                  <h3 className="px-1 text-xs font-black tracking-[0.24em] text-muted-foreground">{group}</h3>
+              <section key={group} className="space-y-1.5">
+                <div className="grid grid-cols-4">
+                  <h3 className="col-span-4 px-1 text-xs font-black tracking-[0.24em] text-muted-foreground">{group}</h3>
                 </div>
                 {METRIC_ROWS.filter((row) => row.group === group).map((row) => {
                   const best = getBestValue(row, deals);
                   return (
-                    <div key={row.key} className="grid gap-3 lg:grid-cols-[12rem_repeat(4,minmax(0,1fr))]">
-                      <div className="flex min-h-12 items-center rounded-xl bg-card px-4 text-sm font-medium text-muted-foreground">
-                        {row.label}
-                      </div>
-                      {deals.map((deal) => {
-                        const value = deal.metrics[row.key];
+                    <div key={row.key} className="grid grid-cols-4 gap-x-1">
+                      {desktopSlots.map((deal, index) => {
+                        const value = deal?.metrics[row.key] ?? null;
                         const isBest = value != null && best != null && value === best;
-                        const TrendIcon = row.direction === "higher" ? TrendingUp : TrendingDown;
                         return (
                           <div
-                            key={`${deal.id}-${row.key}`}
+                            key={`${deal?.id ?? "empty"}-${row.key}-${index}`}
                             className={cn(
-                              "flex min-h-12 items-center justify-center rounded-xl px-3 text-sm font-black sm:text-base",
-                              isBest
-                                ? "border border-emerald-200 bg-emerald-100/65 text-emerald-700"
-                                : "bg-muted/25 text-foreground",
-                              value == null && "text-muted-foreground"
+                              "flex min-h-8 items-center gap-3 rounded-full bg-white/45 px-4 text-sm",
+                              index > 0 && "justify-center",
+                              index === 0 && "justify-between",
+                              isBest ? "text-emerald-700" : "text-foreground",
+                              !deal && "text-muted-foreground"
                             )}
                           >
-                            <MetricValueWithTooltip deal={deal} row={row}>
-                              <span className="inline-flex items-center gap-1.5">
-                                {value != null && (
-                                  <TrendIcon
-                                    className={cn("size-4", isBest ? "text-emerald-700" : "text-muted-foreground/50")}
-                                  />
-                                )}
-                                {formatMetric(value, row)}
+                            {index === 0 ? (
+                              <span className="min-w-0 flex-1 truncate pr-3 font-medium leading-tight text-muted-foreground">
+                                {row.label}
                               </span>
-                            </MetricValueWithTooltip>
+                            ) : null}
+                            {deal ? (
+                              <MetricValueWithTooltip deal={deal} row={row}>
+                                <span className="inline-flex shrink-0 items-center gap-2 font-black tabular-nums">
+                                  {formatMetric(value, row)}
+                                  {isBest ? <Trophy className="size-3.5 text-emerald-600" /> : null}
+                                </span>
+                              </MetricValueWithTooltip>
+                            ) : (
+                              <span className="shrink-0 font-semibold text-muted-foreground/70">—</span>
+                            )}
                           </div>
                         );
                       })}
@@ -807,9 +1255,9 @@ export function CompareDealsClient({
               </section>
             ))}
 
-            <section className="space-y-2">
-              <div className="grid gap-3 lg:grid-cols-[12rem_repeat(4,minmax(0,1fr))]">
-                <h3 className="px-1 text-xs font-black tracking-[0.24em] text-muted-foreground">LONG-TERM PERFORMANCE</h3>
+            <section className="space-y-1.5 pt-2">
+              <div className="grid grid-cols-4">
+                <h3 className="col-span-4 px-1 text-xs font-black tracking-[0.24em] text-muted-foreground">LONG-TERM PERFORMANCE <span className="tracking-[0.18em] text-muted-foreground/70">(10-YEAR VIEW)</span></h3>
               </div>
               {LONG_TERM_METRIC_ROWS.map((row, rowIndex) => {
                 const prevSubsection = rowIndex > 0 ? LONG_TERM_METRIC_ROWS[rowIndex - 1]!.subsection : null;
@@ -818,57 +1266,57 @@ export function CompareDealsClient({
                 return (
                   <div key={row.key} className="space-y-2">
                     {showSubsection ? (
-                      <div className="grid gap-3 lg:grid-cols-[12rem_repeat(4,minmax(0,1fr))]">
-                        <p className="px-1 pt-1 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/90">
+                      <div className="grid grid-cols-4">
+                        <p className="col-span-4 px-1 pt-1 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/90">
                           {row.subsection}
                         </p>
                       </div>
                     ) : null}
-                    <div className="grid gap-3 lg:grid-cols-[12rem_repeat(4,minmax(0,1fr))]">
-                      <div className="flex min-h-12 items-center rounded-xl bg-card px-4 text-left text-sm font-medium leading-snug text-muted-foreground">
-                        {row.labelTooltip ? (
-                          <Tooltip delayDuration={200}>
-                            <TooltipTrigger asChild>
-                              <span className="cursor-help underline decoration-dotted decoration-muted-foreground/50 underline-offset-2">
-                                {row.label}
-                              </span>
-                            </TooltipTrigger>
-                            <TooltipContent
-                              side="top"
-                              sideOffset={6}
-                              className="max-w-xs border border-border bg-popover px-3 py-2 text-xs leading-snug text-popover-foreground shadow-md"
-                            >
-                              {row.labelTooltip}
-                            </TooltipContent>
-                          </Tooltip>
-                        ) : (
-                          row.label
-                        )}
-                      </div>
-                      {deals.map((deal) => {
-                        const value = row.getValue(deal);
-                        const isBest = strictBestDealId === deal.id;
-                        const TrendIcon = row.direction === "lower" ? TrendingDown : TrendingUp;
-                        const showTrend = row.direction !== "none" && value != null;
+                    <div className="grid grid-cols-4 gap-x-1">
+                      {desktopSlots.map((deal, index) => {
+                        const value = deal ? row.getValue(deal) : null;
+                        const isBest = deal ? strictBestDealId === deal.id : false;
                         return (
                           <div
-                            key={`${deal.id}-${row.key}`}
+                            key={`${deal?.id ?? "empty"}-${row.key}-${index}`}
                             className={cn(
-                              "flex min-h-12 items-center justify-center rounded-xl px-3 text-sm font-black sm:text-base",
-                              isBest
-                                ? "border border-emerald-200 bg-emerald-100/65 text-emerald-700"
-                                : "bg-muted/25 text-foreground",
-                              value == null && "text-muted-foreground"
+                              "flex min-h-8 items-center gap-3 rounded-full bg-white/45 px-4 text-sm",
+                              index > 0 && "justify-center",
+                              index === 0 && "justify-between",
+                              isBest ? "text-emerald-700" : "text-foreground",
+                              !deal && "text-muted-foreground"
                             )}
                           >
-                            <span className="inline-flex items-center gap-1.5">
-                              {showTrend && (
-                                <TrendIcon
-                                  className={cn("size-4", isBest ? "text-emerald-700" : "text-muted-foreground/50")}
-                                />
-                              )}
-                              {formatLongTermCell(row, value)}
-                            </span>
+                            {index === 0 ? (
+                              <span className="min-w-0 flex-1 truncate pr-3 font-medium leading-tight text-muted-foreground">
+                                {row.labelTooltip ? (
+                                  <Tooltip delayDuration={200}>
+                                    <TooltipTrigger asChild>
+                                      <span className="cursor-help underline decoration-dotted decoration-muted-foreground/50 underline-offset-2">
+                                        {row.label}
+                                      </span>
+                                    </TooltipTrigger>
+                                    <TooltipContent
+                                      side="top"
+                                      sideOffset={6}
+                                      className="max-w-xs border border-border bg-popover px-3 py-2 text-xs leading-snug text-popover-foreground shadow-md"
+                                    >
+                                      {row.labelTooltip}
+                                    </TooltipContent>
+                                  </Tooltip>
+                                ) : (
+                                  row.label
+                                )}
+                              </span>
+                            ) : null}
+                            {deal ? (
+                              <span className="inline-flex shrink-0 items-center gap-2 font-black tabular-nums">
+                                {formatLongTermCell(row, value)}
+                                {isBest ? <Trophy className="size-3.5 text-emerald-600" /> : null}
+                              </span>
+                            ) : (
+                              <span className="shrink-0 font-semibold text-muted-foreground/70">—</span>
+                            )}
                           </div>
                         );
                       })}

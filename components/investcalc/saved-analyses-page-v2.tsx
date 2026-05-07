@@ -9,16 +9,16 @@ import {
   ArrowUp,
   ArrowUpDown,
   Building2,
+  CalendarClock,
   ChevronsUpDown,
-  Download,
   ExternalLink,
+  FileDown,
   Home,
   KeyRound,
   Loader2,
   Search,
   SlidersHorizontal,
   Sparkles,
-  TrendingUp,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -328,12 +328,16 @@ export function SavedAnalysesPage({
   activeSortField,
   activeSortDirection,
   activeDealStateFilter,
+  canCompareDeals = false,
+  canExportPdf = false,
 }: {
   initialItems: SavedAnalysisListItem[];
   initialSelectedIds?: string[];
   activeSortField: SortField | null;
   activeSortDirection: SortDirection | null;
   activeDealStateFilter: DealStateFilter;
+  canCompareDeals?: boolean;
+  canExportPdf?: boolean;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -352,7 +356,7 @@ export function SavedAnalysesPage({
   const [currentPage, setCurrentPage] = useState(1);
   const initialItemIds = useMemo(() => new Set(initialItems.map((item) => item.id)), [initialItems]);
   const [selectedIds, setSelectedIds] = useState<string[]>(() =>
-    (initialSelectedIds ?? []).filter((id) => initialItemIds.has(id)).slice(0, 4)
+    canCompareDeals ? (initialSelectedIds ?? []).filter((id) => initialItemIds.has(id)).slice(0, 4) : []
   );
 
   const enrichedItems = useMemo(
@@ -368,6 +372,13 @@ export function SavedAnalysesPage({
     const pending = consumePendingSavedListSearch();
     if (pending) setSearchQuery(pending);
   }, []);
+
+  useEffect(() => {
+    if (!canCompareDeals) {
+      setSelectedIds([]);
+      setShowcompare(false);
+    }
+  }, [canCompareDeals]);
 
   const filteredItems = useMemo(
       () =>
@@ -526,6 +537,79 @@ export function SavedAnalysesPage({
     );
   };
 
+  const MobileFilterButton = ({
+    label,
+    active,
+    onClick,
+  }: {
+    label: string;
+    active: boolean;
+    onClick: () => void;
+  }) => (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "h-8 rounded-full px-3 text-xs font-bold transition-colors",
+        active
+          ? "bg-foreground text-background shadow-sm"
+          : "bg-muted/70 text-muted-foreground hover:bg-muted hover:text-foreground"
+      )}
+    >
+      {label}
+    </button>
+  );
+
+  const SavedMobileFilters = () => (
+    <div className="space-y-3 xl:hidden">
+      <div>
+        <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Signal</p>
+        <div className="flex flex-wrap gap-1.5">
+          <MobileFilterButton label="All" active={selectedSignal === "all"} onClick={() => setSelectedSignal("all")} />
+          {(Object.keys(SIGNAL_LABELS) as SavedSignal[]).map((signal) => (
+            <MobileFilterButton
+              key={signal}
+              label={SIGNAL_LABELS[signal]}
+              active={selectedSignal === signal}
+              onClick={() => setSelectedSignal(signal)}
+            />
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Property Type</p>
+        <div className="flex flex-wrap gap-1.5">
+          <MobileFilterButton label="All Types" active={selectedType === "all"} onClick={() => setSelectedType("all")} />
+          <MobileFilterButton label="Single Family" active={selectedType === "single-family"} onClick={() => setSelectedType("single-family")} />
+          <MobileFilterButton label="Multi-Family" active={selectedType === "multi-family"} onClick={() => setSelectedType("multi-family")} />
+          <MobileFilterButton label="Owner Occupant" active={selectedType === "owner-occupant"} onClick={() => setSelectedType("owner-occupant")} />
+        </div>
+      </div>
+
+      <div>
+        <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Status</p>
+        <div className="flex flex-wrap gap-1.5">
+          <MobileFilterButton label="Active" active={activeDealStateFilter === "active"} onClick={() => handleStateFilterChange("active")} />
+          <MobileFilterButton label="Completed" active={activeDealStateFilter === "completed"} onClick={() => handleStateFilterChange("completed")} />
+          <MobileFilterButton label="Archived" active={activeDealStateFilter === "archived"} onClick={() => handleStateFilterChange("archived")} />
+          <MobileFilterButton label="All" active={activeDealStateFilter === "all"} onClick={() => handleStateFilterChange("all")} />
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between rounded-2xl bg-muted/40 px-3 py-2">
+        <span className="text-xs font-semibold text-muted-foreground">Show selected</span>
+        <Switch
+          id="template-include-interest-deduction-mobile"
+          checked={showcompare ?? false}
+          disabled={!canCompareDeals}
+          onCheckedChange={(value) => canCompareDeals && setShowcompare(value ?? false)}
+          aria-label="Show selected analyses only"
+        />
+      </div>
+    </div>
+  );
+
   const allVisibleSelected =
     pagedItems.length > 0 && pagedItems.every((item) => selectedIds.includes(item.id));
 
@@ -538,6 +622,15 @@ export function SavedAnalysesPage({
   };
 
   const handleCompareSelected = () => {
+    if (!canCompareDeals) {
+      toast({
+        title: "Upgrade required",
+        description: "Compare deals is not available for your current plan.",
+        variant: "destructive",
+      });
+      router.push("/profile#billing");
+      return;
+    }
     startCompareTransition(async () => {
       const result = await startCompareAction(selectedIds);
       if (!result.ok) {
@@ -594,6 +687,14 @@ export function SavedAnalysesPage({
   };
 
   const toggleOne = (id: string) => {
+    if (!canCompareDeals) {
+      toast({
+        title: "Upgrade required",
+        description: "Compare deals is not available for your current plan.",
+        variant: "destructive",
+      });
+      return;
+    }
     setSelectedIds((prev) => {
       if (prev.includes(id)) return prev.filter((current) => current !== id);
       if (prev.length >= 4) {
@@ -628,6 +729,15 @@ export function SavedAnalysesPage({
   };
 
   const handleExportPdfClick = (id: string) => {
+    if (!canExportPdf) {
+      toast({
+        title: "Upgrade required",
+        description: "PDF export is not available for your current plan.",
+        variant: "destructive",
+      });
+      router.push("/profile#billing");
+      return;
+    }
     setExportingPdfDealId(id);
     void (async () => {
       try {
@@ -750,6 +860,14 @@ export function SavedAnalysesPage({
   };
 
   const toggleAllVisible = () => {
+    if (!canCompareDeals) {
+      toast({
+        title: "Upgrade required",
+        description: "Compare deals is not available for your current plan.",
+        variant: "destructive",
+      });
+      return;
+    }
     if (allVisibleSelected) {
       setSelectedIds((prev) => prev.filter((id) => !pagedItems.some((item) => item.id === id)));
       return;
@@ -785,10 +903,10 @@ export function SavedAnalysesPage({
     <main className="min-h-[calc(100vh-5rem)] bg-muted/30 pb-12">
       <section className="w-full px-4 sm:px-6 pt-6 sm:pt-8 space-y-6">
       <div className="mb-6 flex flex-wrap items-center gap-3">
-          <Button variant="ghost" size="sm" className="mt-1 px-1.5 text-muted-foreground" asChild>
+          <Button variant="ghost" size="sm" className="mt-1 px-1.5 text-muted-foreground bg-primary/10 sm:bg-transparent" asChild>
             <Link href="/dashboard">
               <ArrowLeft className="w-4 h-4 mr-1.5" />
-              Back
+              <span className="hidden xl:inline">Back</span>
             </Link>
           </Button>
           <div className="h-6 w-px bg-border" />
@@ -797,8 +915,8 @@ export function SavedAnalysesPage({
             <p className="text-sm text-muted-foreground">{filteredItems.length} deals in your portfolio</p>
           </div>
         </div>
-        <div className="rounded-2xl border border-border bg-card p-3 sm:p-4 space-y-3">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+        <div className="rounded-2xl border border-border bg-card p-3 sm:p-4 space-y-4">
+          <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
             <div className="relative flex-1 max-w-xl">
               <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
               <Input
@@ -808,8 +926,8 @@ export function SavedAnalysesPage({
                 className="pl-9 h-10 rounded-xl bg-muted/60 border-border"
               />
             </div>
-            <div className="flex items-center flex-wrap gap-1.5">
-              <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground mr-1.5">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="inline-flex w-full items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground sm:w-auto sm:mr-1.5">
                 <SlidersHorizontal className="w-3.5 h-3.5" />
                 Sort by
               </span>
@@ -821,7 +939,9 @@ export function SavedAnalysesPage({
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
+          <SavedMobileFilters />
+
+          <div className="hidden flex-wrap items-center gap-2 xl:flex">
             <Tabs value={selectedSignal} onValueChange={(value) => setSelectedSignal(value as "all" | SavedSignal)} className="gap-0">
               <TabsList className="bg-muted/60 h-9 rounded-full p-1">
                 <TabsTrigger value="all" className="h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background">All</TabsTrigger>
@@ -857,8 +977,9 @@ export function SavedAnalysesPage({
             <Switch
               id="template-include-interest-deduction"
               checked={showcompare ?? false}
-              onCheckedChange={(value)=> setShowcompare(value ?? false)}
-              aria-label="Include interest deduction in template tax assumptions"
+              disabled={!canCompareDeals}
+              onCheckedChange={(value)=> canCompareDeals && setShowcompare(value ?? false)}
+              aria-label="Show selected analyses only"
             />
           </div>
 
@@ -866,12 +987,146 @@ export function SavedAnalysesPage({
         </div>
 
         <div className="rounded-2xl border border-border bg-card overflow-hidden">
-          <div className="overflow-x-auto">
+          <div className="space-y-3 p-3 xl:hidden">
+            {pagedItems.map((item) => {
+              const address = getAddressParts(item);
+              const isSelected = selectedIds.includes(item.id);
+              const signal = item.signal;
+              const PropertyTypeIcon = getTypeIcon(item.propertyType);
+              return (
+                <article
+                  key={item.id}
+                  className={cn(
+                    "rounded-2xl border border-border bg-background p-4 shadow-sm transition-colors",
+                    isSelected && "border-primary/40 bg-primary/5"
+                  )}
+                >
+                  <div className="flex items-start gap-3 ">
+                    <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                      <PropertyTypeIcon className="w-4 h-4" />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <button
+                        type="button"
+                        onClick={() => handleOpenSavedDeal(item.id)}
+                        className="flex max-w-full items-center gap-2 text-left text-base font-bold leading-tight text-foreground hover:text-primary"
+                      >
+                        <span className="truncate">{address.main}</span>
+                        {openingDealId === item.id ? (
+                          <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin text-primary" />
+                        ) : null}
+                      </button>
+                      <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                        {getStatusBadge(item)}
+                        <Badge className={cn("rounded-full border text-xs font-semibold", getSignalClasses(signal))}>{SIGNAL_LABELS[signal]}</Badge>
+                      </div>
+                      <p className="mt-1 text-xs text-muted-foreground">{getTypeLabel(item.propertyType)}</p>
+                    </div>
+                    <input
+                      type="checkbox"
+                      checked={canCompareDeals && isSelected}
+                      onChange={() => toggleOne(item.id)}
+                      disabled={!canCompareDeals}
+                      aria-label={`Select analysis ${address.main}`}
+                      className="mt-1 h-4 w-4 shrink-0 rounded border-border disabled:cursor-not-allowed disabled:opacity-40"
+                    />
+                  </div>
+
+                  <div className="mt-4 grid grid-cols-2 gap-2">
+                    <div className="rounded-xl bg-muted/40 p-3">
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Cash Flow</p>
+                      <p className={cn("mt-1 text-sm font-black", (item.netCashFlowMonthly ?? 0) >= 0 ? "text-emerald-700" : "text-[var(--metric-negative)]")}>
+                        {toMonthCashFlow(item.netCashFlowMonthly)}
+                      </p>
+                    </div>
+                    <div className="rounded-xl bg-muted/40 p-3">
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">CoC</p>
+                      <p className={cn("mt-1 text-sm font-black", (item.cocReturnPct ?? 0) >= 0 ? "text-emerald-700" : "text-[var(--metric-negative)]")}>
+                        {toPercent(item.cocReturnPct)}
+                      </p>
+                    </div>
+                    <div className="rounded-xl bg-muted/40 p-3">
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Cap Rate</p>
+                      <p className="mt-1 text-sm font-black text-foreground">{toPercent(item.capRatePct)}</p>
+                    </div>
+                    <div className="rounded-xl bg-muted/40 p-3">
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Price</p>
+                      <p className="mt-1 text-sm font-black text-foreground">{toCurrency(item.purchasePrice)}</p>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 grid gap-3">
+                    <Select
+                      value={item.status}
+                      onValueChange={(value) => handleDealStatusChange(item.id, value as SavedAnalysisListItem["status"])}
+                      disabled={isUpdatingStatus && updatingDealStatusId === item.id}
+                    >
+                      <SelectTrigger className="h-10 w-full rounded-xl text-xs">
+                        <SelectValue placeholder="Status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="active">Active</SelectItem>
+                        <SelectItem value="completed">Completed</SelectItem>
+                        <SelectItem value="archived">Archived</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <div className="grid grid-cols-2 gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-10 rounded-xl px-2.5 text-xs"
+                        onClick={() => handleOpenAnalysisClick(item.id)}
+                        disabled={openingDealId === item.id}
+                      >
+                        {openingDealId === item.id ? (
+                          <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" />
+                        ) : (
+                          <ExternalLink className="w-3.5 h-3.5 mr-1" />
+                        )}
+                        Open
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-10 rounded-xl px-2.5 text-xs"
+                        onClick={() => handleExportPdfClick(item.id)}
+                        disabled={exportingPdfDealId === item.id}
+                        title={!canExportPdf ? "PDF export is not available for your current plan." : undefined}
+                      >
+                        {exportingPdfDealId === item.id ? (
+                          <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" />
+                        ) : (
+                          <FileDown className="w-3.5 h-3.5 mr-1" />
+                        )}
+                        PDF
+                      </Button>
+                    </div>
+                  </div>
+
+                  <p className="mt-3 inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <CalendarClock className="h-3.5 w-3.5" />
+                    <span>Saved {new Date(item.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
+                  </p>
+                </article>
+              );
+            })}
+          </div>
+
+          <div className="hidden overflow-x-auto xl:block">
             <table className="w-full min-w-[980px] text-sm">
               <thead className="bg-muted/40 border-b border-border">
                 <tr className="h-12">
                   <th className="w-10 px-3">
-                    <input type="checkbox" checked={allVisibleSelected} onChange={toggleAllVisible} aria-label="Select all visible analyses" className="h-4 w-4 rounded border-border" />
+                    <input
+                      type="checkbox"
+                      checked={canCompareDeals && allVisibleSelected}
+                      onChange={toggleAllVisible}
+                      disabled={!canCompareDeals}
+                      aria-label="Select all visible analyses"
+                      className="h-4 w-4 rounded border-border disabled:cursor-not-allowed disabled:opacity-40"
+                    />
                   </th>
                   <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold">Property</th>
                   <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold">Signal</th>
@@ -893,7 +1148,14 @@ export function SavedAnalysesPage({
                   return (
                     <tr key={item.id} className={cn("h-[72px] border-b border-border/80 transition-colors", isSelected ? "bg-primary/5" : "hover:bg-muted/40")}>
                       <td className="px-3 align-middle">
-                        <input type="checkbox" checked={isSelected} onChange={() => toggleOne(item.id)} aria-label={`Select analysis ${address.main}`} className="h-4 w-4 rounded border-border" />
+                        <input
+                          type="checkbox"
+                          checked={canCompareDeals && isSelected}
+                          onChange={() => toggleOne(item.id)}
+                          disabled={!canCompareDeals}
+                          aria-label={`Select analysis ${address.main}`}
+                          className="h-4 w-4 rounded border-border disabled:cursor-not-allowed disabled:opacity-40"
+                        />
                       </td>
                       <td className="pr-2">
                         <div className="flex items-start gap-2">
@@ -965,18 +1227,22 @@ export function SavedAnalysesPage({
                             className="h-8 rounded-md px-2.5 text-xs"
                             onClick={() => handleExportPdfClick(item.id)}
                             disabled={exportingPdfDealId === item.id}
+                            title={!canExportPdf ? "PDF export is not available for your current plan." : undefined}
                           >
                             {exportingPdfDealId === item.id ? (
                               <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" />
                             ) : (
-                              <Download className="w-3.5 h-3.5 mr-1" />
+                              <FileDown className="w-3.5 h-3.5 mr-1" />
                             )}
                             Export PDF
                           </Button>
                         </div>
                       </td>
                       <td className="text-muted-foreground">
-                        {new Date(item.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                        <span className="inline-flex items-center gap-1.5">
+                          <CalendarClock className="h-3.5 w-3.5" />
+                          <span>{new Date(item.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
+                        </span>
                       </td>
                     </tr>
                   );
@@ -1067,8 +1333,9 @@ export function SavedAnalysesPage({
               type="button"
               variant="outline"
               className="rounded-full"
-              disabled={selectedIds.length < 1 || isStartingCompare}
+              disabled={!canCompareDeals || selectedIds.length < 1 || isStartingCompare}
               onClick={handleCompareSelected}
+              title={!canCompareDeals ? "Compare is not available for your current plan." : undefined}
             >
               <ArrowUpDown className="w-4 h-4 mr-1.5" />
               {isStartingCompare ? "Preparing..." : "Compare Selected"}

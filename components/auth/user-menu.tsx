@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Crown, LayoutDashboard, Loader2, LogOut, UserCircle } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -14,8 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { signOutAction } from "@/app/actions/auth";
-import { useToast } from "@/hooks/use-toast";
+import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
 type UserMenuProps = {
@@ -24,6 +22,7 @@ type UserMenuProps = {
   initials: string;
   avatarSrc?: string;
   isPremium?: boolean;
+  canAccessDashboard?: boolean;
   triggerClassName?: string;
   align?: "start" | "center" | "end";
 };
@@ -34,21 +33,18 @@ export function UserMenu({
   initials,
   avatarSrc,
   isPremium = false,
+  canAccessDashboard = isPremium,
   triggerClassName,
   align = "end",
 }: UserMenuProps) {
-  const router = useRouter();
-  const { toast } = useToast();
   const [isSigningOut, setIsSigningOut] = useState(false);
 
   const handleSignOut = async () => {
     if (isSigningOut) return;
     setIsSigningOut(true);
-    await signOutAction();
-    setIsSigningOut(false);
-    toast({ title: "Signed out", description: "See you next time." });
-    router.push("/");
-    router.refresh();
+    const supabase = createBrowserSupabaseClient();
+    void supabase.auth.signOut({ scope: "local" }).catch(() => undefined);
+    window.location.replace("/auth/sign-out");
   };
 
   return (
@@ -104,7 +100,7 @@ export function UserMenu({
 
         <DropdownMenuSeparator />
 
-        {isPremium && (
+        {canAccessDashboard && (
           <>
             <DropdownMenuItem asChild>
               <Link href="/dashboard" prefetch={false} className="cursor-pointer">

@@ -38,9 +38,9 @@ export function TaxStrategyCharts({
   years: TaxStrategyYear[];
 }) {
   return (
-    <div className="grid gap-4 xl:grid-cols-2">
+    <div className="grid min-w-0 gap-3 sm:gap-4 xl:grid-cols-2">
       <ChartCard title="Annual Tax Savings">
-        <ChartContainer config={chartConfig} className="h-[260px] w-full">
+        <ChartContainer config={chartConfig} className="h-[240px] w-full sm:h-[260px]">
           <BarChart data={years}>
             <CartesianGrid vertical={false} />
             <XAxis dataKey="year" tickLine={false} axisLine={false} />
@@ -52,7 +52,7 @@ export function TaxStrategyCharts({
       </ChartCard>
 
       <ChartCard title="Taxable Rental Income Trend">
-        <ChartContainer config={chartConfig} className="h-[260px] w-full">
+        <ChartContainer config={chartConfig} className="h-[240px] w-full sm:h-[260px]">
           <LineChart data={years}>
             <CartesianGrid vertical={false} />
             <XAxis dataKey="year" tickLine={false} axisLine={false} />
@@ -70,7 +70,7 @@ export function TaxStrategyCharts({
       </ChartCard>
 
       <ChartCard title="Interest vs Depreciation Deduction">
-        <ChartContainer config={chartConfig} className="h-[280px] w-full">
+        <ChartContainer config={chartConfig} className="h-[240px] w-full sm:h-[280px]">
           <LineChart data={years}>
             <CartesianGrid vertical={false} />
             <XAxis dataKey="year" tickLine={false} axisLine={false} />
@@ -96,7 +96,7 @@ export function TaxStrategyCharts({
       </ChartCard>
 
       <ChartCard title="Deductions Breakdown">
-        <ChartContainer config={chartConfig} className="h-[280px] w-full">
+        <ChartContainer config={chartConfig} className="h-[240px] w-full sm:h-[280px]">
           <BarChart data={years}>
             <CartesianGrid vertical={false} />
             <XAxis dataKey="year" tickLine={false} axisLine={false} />

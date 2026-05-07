@@ -1,8 +1,19 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
 
+const unlimitedSavedDealsValues = new Set(["unlimited", "none", "null"]);
+
 export const planEntitlementsSchema = z.object({
-  max_saved_deals: z.number(),
+  max_saved_deals: z.preprocess((value) => {
+    if (value === null) return null;
+    if (typeof value === "string") {
+      const normalized = value.trim().toLowerCase();
+      if (unlimitedSavedDealsValues.has(normalized)) return null;
+      if (normalized === "") return undefined;
+      return Number(normalized);
+    }
+    return value;
+  }, z.number().int().nonnegative().nullable()),
   features: z.array(z.string()),
 });
 
@@ -43,27 +54,53 @@ export async function getEntitlementsForUser(
   return parseEntitlements(free?.entitlements) ?? defaultFree;
 }
 
-export async function hasActivePremiumSubscription(
+export function hasPlanFeature(entitlements: Pick<PlanEntitlements, "features">, feature: string): boolean {
+  return entitlements.features.includes(feature);
+}
+
+export function hasSavedDealCapacity(
+  entitlements: Pick<PlanEntitlements, "max_saved_deals">,
+  currentSavedDealCount: number
+): boolean {
+  return entitlements.max_saved_deals === null || currentSavedDealCount < entitlements.max_saved_deals;
+}
+
+export function getSavedDealLimitLabel(entitlements: Pick<PlanEntitlements, "max_saved_deals">): string {
+  return entitlements.max_saved_deals === null ? "unlimited" : String(entitlements.max_saved_deals);
+}
+
+export function hasDashboardAccess(entitlements: Pick<PlanEntitlements, "features">): boolean {
+  return hasPlanFeature(entitlements, "dashboard_access") && hasPlanFeature(entitlements, "save_deal");
+}
+
+export function hasDashboardInsightsAccess(entitlements: Pick<PlanEntitlements, "features">): boolean {
+  return hasDashboardAccess(entitlements) && hasPlanFeature(entitlements, "dashboard_insights");
+}
+
+export function getDashboardNavAccess(entitlements: Pick<PlanEntitlements, "features">) {
+  return {
+    dashboard: hasDashboardAccess(entitlements),
+    myDeals: hasPlanFeature(entitlements, "save_deal"),
+    compareDeals: hasPlanFeature(entitlements, "compare_deals"),
+    templates: hasPlanFeature(entitlements, "template_manage"),
+  };
+}
+
+export async function hasPaidPlanSubscription(
   supabase: SupabaseClient,
   userId: string
 ): Promise<boolean> {
   const { data: sub } = await supabase
     .from("subscriptions")
-    .select("plans(slug, entitlements)")
+    .select("plans(slug)")
     .eq("user_id", userId)
-    .in("status", ["active", "trialing"])
+    .in("status", ["active", "trialing", "past_due"])
     .order("updated_at", { ascending: false })
     .limit(1)
     .maybeSingle();
 
-  const plansRow = sub?.plans as { slug?: unknown; entitlements?: unknown } | null | undefined;
+  const plansRow = sub?.plans as { slug?: unknown } | null | undefined;
   const slug = typeof plansRow?.slug === "string" ? plansRow.slug : null;
-  const entitlements =
-    plansRow?.entitlements != null ? parseEntitlements(plansRow.entitlements) : null;
-
-  return Boolean(
-    slug?.startsWith("pro_") ||
-      entitlements?.features.includes("save_deal") ||
-      entitlements?.features.includes("deal_score")
-  );
+  return Boolean(slug && slug !== "free");
 }
+

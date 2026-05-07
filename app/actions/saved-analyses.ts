@@ -2,7 +2,13 @@
 
 import { calculateAnalysis } from "@/lib/calc-analysis";
 import { computeDealScore } from "@/lib/deal-score";
-import { getEntitlementsForUser } from "@/lib/entitlements";
+import {
+  getEntitlementsForUser,
+  getSavedDealLimitLabel,
+  hasPaidPlanSubscription,
+  hasPlanFeature,
+  hasSavedDealCapacity,
+} from "@/lib/entitlements";
 import {
   INVESTCALC_SCHEMA_VERSION,
   investmentFormSchema,
@@ -42,7 +48,7 @@ export type GetSavedDealForEditingResult =
     }
   | {
       ok: false;
-      code: "SIGN_IN_REQUIRED" | "NOT_FOUND" | "SERVER_ERROR";
+      code: "SIGN_IN_REQUIRED" | "ENTITLEMENT_REQUIRED" | "NOT_FOUND" | "SERVER_ERROR";
       message: string;
     };
 
@@ -50,7 +56,7 @@ export type UpdateSavedDealLifecycleResult =
   | { ok: true }
   | {
       ok: false;
-      code: "SIGN_IN_REQUIRED" | "NOT_FOUND" | "VALIDATION_ERROR" | "SERVER_ERROR";
+      code: "SIGN_IN_REQUIRED" | "ENTITLEMENT_REQUIRED" | "NOT_FOUND" | "VALIDATION_ERROR" | "SERVER_ERROR";
       message: string;
     };
 
@@ -67,7 +73,7 @@ export type GetSavedAnalysisPdfExportResult =
     }
   | {
       ok: false;
-      code: "SIGN_IN_REQUIRED" | "NOT_FOUND" | "SERVER_ERROR";
+      code: "SIGN_IN_REQUIRED" | "ENTITLEMENT_REQUIRED" | "NOT_FOUND" | "SERVER_ERROR";
       message: string;
     };
 
@@ -75,7 +81,7 @@ export type CompleteSavedAnalysisPdfExportResult =
   | { ok: true; pdfUrl: string }
   | {
       ok: false;
-      code: "SIGN_IN_REQUIRED" | "NOT_FOUND" | "VALIDATION_ERROR" | "SERVER_ERROR";
+      code: "SIGN_IN_REQUIRED" | "ENTITLEMENT_REQUIRED" | "NOT_FOUND" | "VALIDATION_ERROR" | "SERVER_ERROR";
       message: string;
     };
 
@@ -178,7 +184,7 @@ export async function saveDealAction(input: unknown, existingId?: string | null)
   }
 
   const entitlements = await getEntitlementsForUser(supabase, user.id);
-  if (!entitlements.features.includes("save_deal")) {
+  if (!hasPlanFeature(entitlements, "save_deal")) {
     return {
       ok: false,
       code: "ENTITLEMENT_SAVE",
@@ -295,6 +301,15 @@ export async function saveDealAction(input: unknown, existingId?: string | null)
     }
 
     if (existing) {
+      const canUpdateSavedDeal = await hasPaidPlanSubscription(supabase, user.id);
+      if (!canUpdateSavedDeal) {
+        return {
+          ok: false,
+          code: "ENTITLEMENT_SAVE",
+          message: "Upgrade required to update saved analyses.",
+        };
+      }
+
       if ((existing.address ?? "").trim().toLowerCase() !== addressTrimmed.toLowerCase()) {
         return {
           ok: false,
@@ -345,11 +360,11 @@ export async function saveDealAction(input: unknown, existingId?: string | null)
     return { ok: false, code: "SERVER_ERROR", message: countErr.message };
   }
 
-  if ((count ?? 0) >= entitlements.max_saved_deals) {
+  if (!hasSavedDealCapacity(entitlements, count ?? 0)) {
     return {
       ok: false,
       code: "ENTITLEMENT_SAVE",
-      message: "Saved deal limit reached for your plan",
+      message: `Saved deal limit reached for your plan (${getSavedDealLimitLabel(entitlements)}).`,
     };
   }
 
@@ -485,6 +500,15 @@ export async function getSavedAnalysisPdfExportAction(
     };
   }
 
+  const entitlements = await getEntitlementsForUser(supabase, user.id);
+  if (!hasPlanFeature(entitlements, "pdf_export")) {
+    return {
+      ok: false,
+      code: "ENTITLEMENT_REQUIRED",
+      message: "PDF export is not available for your current plan.",
+    };
+  }
+
   const savedDealId = id.trim();
   const { data, error } = await supabase
     .from("saved_analyses")
@@ -547,6 +571,11 @@ export async function completeSavedAnalysisPdfExportAction(
 
   if (!user) {
     return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in to save PDF exports." };
+  }
+
+  const entitlements = await getEntitlementsForUser(supabase, user.id);
+  if (!hasPlanFeature(entitlements, "pdf_export")) {
+    return { ok: false, code: "ENTITLEMENT_REQUIRED", message: "PDF export is not available for your current plan." };
   }
 
   const savedDealId = id.trim();

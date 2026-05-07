@@ -2,7 +2,7 @@
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { getEntitlementsForUser } from "@/lib/entitlements";
+import { getEntitlementsForUser, hasPlanFeature } from "@/lib/entitlements";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 const COMPARE_COOKIE = "truecap_compare_ids";
@@ -10,7 +10,7 @@ const MAX_COMPARE_ITEMS = 4;
 
 type CompareActionResult =
   | { ok: true }
-  | { ok: false; code: "SIGN_IN_REQUIRED" | "LIMIT_EXCEEDED" | "INVALID_SELECTION" | "SERVER_ERROR"; message: string };
+  | { ok: false; code: "SIGN_IN_REQUIRED" | "ENTITLEMENT_REQUIRED" | "LIMIT_EXCEEDED" | "INVALID_SELECTION" | "SERVER_ERROR"; message: string };
 
 function uniqueIds(ids: string[]): string[] {
   return [...new Set(ids.map((id) => id.trim()).filter(Boolean))];
@@ -69,8 +69,8 @@ export async function startCompareAction(ids: string[]): Promise<CompareActionRe
   }
 
   const entitlements = await getEntitlementsForUser(supabase, user.id);
-  if (!entitlements.features.includes("save_deal")) {
-    return { ok: false, code: "SIGN_IN_REQUIRED", message: "Compare is available for Pro users." };
+  if (!hasPlanFeature(entitlements, "compare_deals")) {
+    return { ok: false, code: "ENTITLEMENT_REQUIRED", message: "Compare is not available for your current plan." };
   }
 
   const { count, error } = await supabase
@@ -121,8 +121,8 @@ export async function addDealToCompareAction(id: string): Promise<CompareActionR
   }
 
   const entitlements = await getEntitlementsForUser(supabase, user.id);
-  if (!entitlements.features.includes("save_deal")) {
-    return { ok: false, code: "SIGN_IN_REQUIRED", message: "Compare is available for Pro users." };
+  if (!hasPlanFeature(entitlements, "compare_deals")) {
+    return { ok: false, code: "ENTITLEMENT_REQUIRED", message: "Compare is not available for your current plan." };
   }
 
   const { count, error } = await supabase

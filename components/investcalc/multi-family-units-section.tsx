@@ -8,15 +8,11 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { cn } from "@/lib/utils";
+import { FieldError } from "@/components/investcalc/form-field-helpers";
 
 interface MultiFamilyUnitsSectionProps {
   form: UseFormReturn<InvestmentFormValues>;
   isHouseHack?: boolean;
-}
-
-function FieldError({ message }: { message?: string }) {
-  if (!message) return null;
-  return <p className="text-xs text-destructive mt-1">{message}</p>;
 }
 
 export function MultiFamilyUnitsSection({
@@ -132,7 +128,7 @@ export function MultiFamilyUnitsSection({
                 <FieldError message={unitErrors.isOwnerOccupied.message} />
               ) : null}
 
-              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-4 gap-3">
                 <div>
                   <Label className="text-xs font-semibold text-primary mb-1 block uppercase tracking-wide">
                     Bedrooms

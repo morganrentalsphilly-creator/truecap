@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Building2, Home, Warehouse, ArrowUpRight } from "lucide-react";
+import { Building2, Home, KeyRound } from "lucide-react";
 
 export type DashboardTopDeal = {
   id?: string;
@@ -22,7 +22,8 @@ export type DashboardTopDeal = {
 const typeIcon: Record<string, React.ComponentType<{ className?: string }>> = {
   "Multi-Family": Building2,
   "Single Family": Home,
-  Commercial: Warehouse,
+  "House Hack": KeyRound,
+  "Owner Occupant": KeyRound,
 };
 
 const signalStyle: Record<string, string> = {
@@ -58,23 +59,35 @@ const sortOptions = [
   { id: "cashFlow", label: "CF" },
 ] as const;
 
-function getDealId(deal: DashboardTopDeal, index: number) {
-  return deal.id ?? `${deal.name}-${index}`.replace(/[^a-zA-Z0-9_-]/g, "-");
+type SortMetric = (typeof sortOptions)[number]["id"];
+
+function getDealId(deal: DashboardTopDeal) {
+  return (deal.id ?? `${deal.name}-${deal.address}`).replace(/[^a-zA-Z0-9_-]/g, "-");
+}
+
+function getSortValue(deal: DashboardTopDeal, sortBy: SortMetric) {
+  if (sortBy === "roi") return deal.roi;
+  if (sortBy === "cashFlow") return deal.cashFlow;
+  return deal.score;
 }
 
 export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
-  const [sortBy, setSortBy] = useState<(typeof sortOptions)[number]["id"]>("score");
+  const [sortBy, setSortBy] = useState<SortMetric>("score");
   const sortedData = useMemo(() => {
-    return [...data].sort((a, b) => {
-      if (sortBy === "roi") return (b.roi ?? -Infinity) - (a.roi ?? -Infinity);
-      if (sortBy === "cashFlow") return (b.cashFlow ?? -Infinity) - (a.cashFlow ?? -Infinity);
-      return (b.score ?? -Infinity) - (a.score ?? -Infinity);
-    });
+    return data
+      .map((deal, index) => ({ deal, index }))
+      .sort((a, b) => {
+        const aValue = getSortValue(a.deal, sortBy) ?? Number.NEGATIVE_INFINITY;
+        const bValue = getSortValue(b.deal, sortBy) ?? Number.NEGATIVE_INFINITY;
+        if (aValue !== bValue) return bValue - aValue;
+        return a.index - b.index;
+      })
+      .map(({ deal }) => deal);
   }, [data, sortBy]);
 
   return (
     <div className="rounded-2xl bg-card border border-border overflow-hidden">
-      <div className="flex items-start justify-between p-6 pb-4">
+      <div className="flex flex-col gap-4 p-4 pb-3 sm:flex-row sm:items-start sm:justify-between sm:p-6 sm:pb-4">
         <div>
           <h3 className="font-display text-lg font-semibold">Deal Decision List</h3>
           <p className="text-sm text-muted-foreground mt-0.5">Sort saved deals by the metric that matters for the next purchase.</p>
@@ -94,13 +107,80 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
               </button>
             ))}
           </div>
-          <button className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline">
-            View all <ArrowUpRight className="h-3.5 w-3.5" />
-          </button>
         </div>
       </div>
 
-      <div className="overflow-x-auto">
+      <div className="space-y-3 p-4 pt-0 md:hidden">
+        {sortedData.map((d) => {
+          const Icon = typeIcon[d.type] ?? Building2;
+          const dealId = getDealId(d);
+          return (
+            <article id={`deal-${dealId}`} key={dealId} className="scroll-mt-24 rounded-2xl border border-border bg-background p-4 shadow-sm">
+              <div className="flex items-start gap-3">
+                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
+                  <Icon className="h-4 w-4" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h4 className="text-base font-bold leading-tight text-foreground">{d.name}</h4>
+                  <p className="mt-1 text-xs text-muted-foreground">{d.address}</p>
+                </div>
+                <div className="relative h-11 w-11 shrink-0">
+                  <svg className="h-11 w-11 -rotate-90" viewBox="0 0 36 36">
+                    <circle cx="18" cy="18" r="15" fill="none" stroke="oklch(0.92 0.012 255)" strokeWidth="3" />
+                    {d.score != null ? (
+                      <circle
+                        cx="18"
+                        cy="18"
+                        r="15"
+                        fill="none"
+                        stroke={d.riskLevel ? scoreRingStrokeByRisk[d.riskLevel] ?? "oklch(0.92 0.012 255)" : "oklch(0.92 0.012 255)"}
+                        strokeWidth="3"
+                        strokeDasharray={`${(d.score / 100) * 94.2} 94.2`}
+                        strokeLinecap="round"
+                      />
+                    ) : null}
+                  </svg>
+                  <div className="absolute inset-0 grid place-items-center text-xs font-bold">{d.score ?? "-"}</div>
+                </div>
+              </div>
+
+              <div className="mt-4 grid grid-cols-2 gap-2">
+                <div className="rounded-xl bg-muted/40 p-3">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Cash Flow</p>
+                  <p className={`mt-1 text-sm font-black tabular-nums ${d.cashFlow == null ? "" : d.cashFlow >= 0 ? "text-success" : "text-destructive"}`}>
+                    {d.cashFlow == null ? "-" : `${d.cashFlow >= 0 ? "+" : ""}$${d.cashFlow.toLocaleString()}/mo`}
+                  </p>
+                </div>
+                <div className="rounded-xl bg-muted/40 p-3">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">ROI</p>
+                  <p className="mt-1 text-sm font-black tabular-nums text-foreground">{d.roi == null ? "-" : `${d.roi.toFixed(1)}%`}</p>
+                </div>
+                <div className="rounded-xl bg-muted/40 p-3">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Cap Rate</p>
+                  <p className="mt-1 text-sm font-black tabular-nums text-foreground">{d.capRate == null ? "-" : `${d.capRate}%`}</p>
+                </div>
+                <div className="rounded-xl bg-muted/40 p-3">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Risk</p>
+                  <p className="mt-1 text-sm font-black text-foreground">{d.riskLevel ?? "-"}</p>
+                </div>
+              </div>
+
+              <div className="mt-4 flex flex-wrap items-center gap-2">
+                {d.signal ? (
+                  <span className={`text-[11px] font-semibold px-2 py-1 rounded-md ring-1 ${signalStyle[d.signal] ?? "bg-muted text-muted-foreground ring-border"}`}>{d.signal}</span>
+                ) : null}
+                {d.tags?.map((tag) => (
+                  <span key={tag} className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </article>
+          );
+        })}
+      </div>
+
+      <div className="hidden overflow-x-auto md:block">
         <table className="w-full text-sm">
           <thead>
             <tr className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground border-y border-border bg-muted/40">
@@ -109,19 +189,20 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
               <th className="text-right px-3 py-3 hidden md:table-cell">ROI</th>
               <th className="text-right px-3 py-3 hidden md:table-cell">Cap Rate</th>
               <th className="text-right px-3 py-3">Cash Flow</th>
-              <th className="text-right px-3 py-3 hidden lg:table-cell">Risk</th>
+              <th className="text-right px-3 py-3 hidden xl:table-cell">Risk</th>
               <th className="text-right px-6 py-3">Recommendation</th>
             </tr>
           </thead>
           <tbody>
-            {sortedData.map((d, i) => {
+            {sortedData.map((d) => {
               const Icon = typeIcon[d.type] ?? Building2;
+              const dealId = getDealId(d);
               return (
-                <tr id={`deal-${getDealId(d, i)}`} key={getDealId(d, i)} className="border-b border-border last:border-0 hover:bg-muted/30 transition scroll-mt-24">
+                <tr id={`deal-${dealId}`} key={dealId} className="border-b border-border last:border-0 hover:bg-muted/30 transition scroll-mt-24">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="h-9 w-9 rounded-lg bg-muted grid place-items-center">
-                        <Icon className="h-4 w-4 text-muted-foreground" />
+                      <div className="grid h-9 w-9 place-items-center rounded-full bg-primary/10 text-primary">
+                        <Icon className="h-4 w-4" />
                       </div>
                       <div>
                         <div className="font-semibold">{d.name}</div>
@@ -157,7 +238,7 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
                   <td className={`px-3 py-4 text-right tabular-nums font-semibold ${d.cashFlow == null ? "" : d.cashFlow >= 0 ? "text-success" : "text-destructive"}`}>
                     {d.cashFlow == null ? "-" : `${d.cashFlow >= 0 ? "+" : ""}$${d.cashFlow.toLocaleString()}/mo`}
                   </td>
-                  <td className="px-3 py-4 text-right hidden lg:table-cell">
+                  <td className="px-3 py-4 text-right hidden xl:table-cell">
                     {d.riskLevel ? (
                       <span className={`text-[11px] font-semibold px-2 py-1 rounded-md ring-1 ${riskStyle[d.riskLevel] ?? "bg-muted text-muted-foreground ring-border"}`}>{d.riskLevel}</span>
                     ) : (

@@ -3,7 +3,13 @@ import { TemplatesManagementPage } from "@/components/investcalc/templates-manag
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { Topbar } from "@/components/dashboard/Topbar";
 import { listAnalysisTemplatesAction } from "@/app/actions/analysis-templates";
-import { getEntitlementsForUser, hasActivePremiumSubscription } from "@/lib/entitlements";
+import {
+  getDashboardNavAccess,
+  getEntitlementsForUser,
+  hasDashboardAccess,
+  hasPaidPlanSubscription,
+  hasPlanFeature,
+} from "@/lib/entitlements";
 import { getSavedAnalysesTotalCount } from "@/lib/saved-analyses-count";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
@@ -37,16 +43,13 @@ export default async function DashboardTemplatesPage() {
     redirect("/auth/login");
   }
 
-  const hasDashboardAccess = await hasActivePremiumSubscription(supabase, user.id);
-  if (!hasDashboardAccess) {
-    redirect("/");
-  }
   const entitlements = await getEntitlementsForUser(supabase, user.id);
-  if (!entitlements.features.includes("template_manage")) {
+  if (!hasDashboardAccess(entitlements) || !hasPlanFeature(entitlements, "template_manage")) {
     redirect("/");
   }
+  const navAccess = getDashboardNavAccess(entitlements);
 
-  const [{ data: profile }, result, savedDealTotalCount] = await Promise.all([
+  const [{ data: profile }, result, savedDealTotalCount, isPremium] = await Promise.all([
     supabase
       .from("profiles")
       .select("first_name, last_name, display_name, avatar_url")
@@ -54,6 +57,7 @@ export default async function DashboardTemplatesPage() {
       .maybeSingle(),
     listAnalysisTemplatesAction(),
     getSavedAnalysesTotalCount(supabase, user.id),
+    hasPaidPlanSubscription(supabase, user.id),
   ]);
 
   const displayName = getDisplayName((profile as ProfileRow | null) ?? null, user.email);
@@ -61,13 +65,15 @@ export default async function DashboardTemplatesPage() {
 
   if (!result.ok) {
     return (
-      <DashboardShell savedDealCount={savedDealTotalCount}>
+      <DashboardShell savedDealCount={savedDealTotalCount} navAccess={navAccess}>
         <div className="flex-1 min-w-0 flex flex-col lg:h-screen lg:overflow-hidden">
           <Topbar
             displayName={displayName}
             email={user.email ?? ""}
             initials={initials}
             avatarSrc={(profile as ProfileRow | null)?.avatar_url ?? undefined}
+            isPremium={isPremium}
+            canAccessDashboard={navAccess.dashboard}
           />
           <main className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
             <div className="rounded-2xl border border-destructive/25 bg-destructive/5 p-6">
@@ -81,13 +87,15 @@ export default async function DashboardTemplatesPage() {
   }
 
   return (
-    <DashboardShell savedDealCount={savedDealTotalCount}>
+    <DashboardShell savedDealCount={savedDealTotalCount} navAccess={navAccess}>
       <div className="flex-1 min-w-0 flex flex-col lg:h-screen lg:overflow-hidden">
         <Topbar
           displayName={displayName}
           email={user.email ?? ""}
           initials={initials}
           avatarSrc={(profile as ProfileRow | null)?.avatar_url ?? undefined}
+          isPremium={isPremium}
+          canAccessDashboard={navAccess.dashboard}
         />
         <div className="flex-1 min-h-0 lg:overflow-y-auto">
           <TemplatesManagementPage initialTemplates={result.templates} />

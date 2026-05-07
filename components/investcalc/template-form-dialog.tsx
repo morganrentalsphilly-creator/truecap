@@ -241,7 +241,7 @@ export function TemplateFormDialog({
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                   <NumberInputField
                     form={templateForm}
                     name="propertyTaxPct"
@@ -252,7 +252,7 @@ export function TemplateFormDialog({
                     control={templateForm.control}
                     name="insuranceInputMode"
                     render={({ field }) => (
-                      <FormItem className="sm:col-span-2 lg:col-span-1 rounded-lg border border-border bg-card px-3 py-2.5">
+                      <FormItem className="sm:col-span-2 xl:col-span-1 rounded-lg border border-border bg-card px-3 py-2.5">
                         <FormLabel className="text-xs font-semibold text-foreground">Insurance Input</FormLabel>
                         <div className="mt-1.5 flex rounded-lg border border-border bg-muted/40 p-1">
                           {[
@@ -333,7 +333,7 @@ export function TemplateFormDialog({
                 </button>
 
                 {showAdvanced && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                     <NumberInputField form={templateForm} name="interestRatePct" label="Interest Rate %" />
                     <NumberInputField form={templateForm} name="downPaymentPct" label="Down Payment %" />
                     <NumberInputField form={templateForm} name="expenseGrowthPct" label="Expense Growth %" />

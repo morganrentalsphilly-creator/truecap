@@ -32,35 +32,16 @@ export async function POST(req: Request) {
   }
 
   const admin = createAdminSupabaseClient();
+  const { error: claimError } = await admin.from("stripe_webhook_events").insert({
+    stripe_event_id: event.id,
+    type: event.type,
+  });
 
-  const { data: existing } = await admin
-    .from("stripe_webhook_events")
-    .select("processed_at")
-    .eq("stripe_event_id", event.id)
-    .maybeSingle();
-
-  if (existing?.processed_at) {
+  if (claimError?.code === "23505") {
     return NextResponse.json({ received: true, duplicate: true });
   }
-
-  if (!existing) {
-    const { error: insertErr } = await admin.from("stripe_webhook_events").insert({
-      stripe_event_id: event.id,
-      type: event.type,
-    });
-
-    if (insertErr?.code === "23505") {
-      const { data: race } = await admin
-        .from("stripe_webhook_events")
-        .select("processed_at")
-        .eq("stripe_event_id", event.id)
-        .maybeSingle();
-      if (race?.processed_at) {
-        return NextResponse.json({ received: true, duplicate: true });
-      }
-    } else if (insertErr) {
-      return NextResponse.json({ error: "Failed to record event" }, { status: 500 });
-    }
+  if (claimError) {
+    return NextResponse.json({ error: "Failed to record event" }, { status: 500 });
   }
 
   try {

@@ -6,7 +6,13 @@ import {
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { Topbar } from "@/components/dashboard/Topbar";
 import { getCompareIdsFromCookie } from "@/app/actions/compare";
-import { hasActivePremiumSubscription } from "@/lib/entitlements";
+import {
+  getDashboardNavAccess,
+  getEntitlementsForUser,
+  hasDashboardAccess,
+  hasPaidPlanSubscription,
+  hasPlanFeature,
+} from "@/lib/entitlements";
 import { getSavedAnalysesTotalCount } from "@/lib/saved-analyses-count";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import type { StoredRecommendation, StoredRiskLevel } from "@/lib/compare-metrics";
@@ -120,12 +126,13 @@ export default async function DashboardSavedAnalysesPage({
     redirect("/auth/login");
   }
 
-  const hasDashboardAccess = await hasActivePremiumSubscription(supabase, user.id);
-  if (!hasDashboardAccess) {
+  const entitlements = await getEntitlementsForUser(supabase, user.id);
+  if (!hasDashboardAccess(entitlements) || !hasPlanFeature(entitlements, "save_deal")) {
     redirect("/");
   }
+  const navAccess = getDashboardNavAccess(entitlements);
 
-  const [{ data: profile }, compareIds, savedDealTotalCount] = await Promise.all([
+  const [{ data: profile }, compareIds, savedDealTotalCount, isPremium] = await Promise.all([
     supabase
       .from("profiles")
       .select("first_name, last_name, display_name, avatar_url")
@@ -133,11 +140,12 @@ export default async function DashboardSavedAnalysesPage({
       .maybeSingle(),
     getCompareIdsFromCookie(),
     getSavedAnalysesTotalCount(supabase, user.id),
+    hasPaidPlanSubscription(supabase, user.id),
   ]);
 
   const resolvedSearchParams = (await searchParams) ?? {};
-  const sortField = normalizeSortField(resolvedSearchParams.sort);
-  const sortDirection = sortField ? normalizeDirection(resolvedSearchParams.dir) : null;
+  const sortField = normalizeSortField(resolvedSearchParams.sort) ?? "saved";
+  const sortDirection = normalizeDirection(resolvedSearchParams.dir ?? "desc");
   const activeDealStateFilter = normalizeDealStateFilter(resolvedSearchParams.state);
 
   let query = supabase
@@ -185,13 +193,15 @@ export default async function DashboardSavedAnalysesPage({
 
   if (error) {
     return (
-      <DashboardShell savedDealCount={savedDealTotalCount}>
+      <DashboardShell savedDealCount={savedDealTotalCount} navAccess={navAccess}>
         <div className="flex-1 min-w-0 flex flex-col lg:h-screen lg:overflow-hidden">
           <Topbar
             displayName={displayName}
             email={user.email ?? ""}
             initials={initials}
             avatarSrc={(profile as ProfileRow | null)?.avatar_url ?? undefined}
+            isPremium={isPremium}
+            canAccessDashboard={navAccess.dashboard}
           />
           <main className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
             <div className="rounded-2xl border border-destructive/25 bg-destructive/5 p-6">
@@ -207,13 +217,15 @@ export default async function DashboardSavedAnalysesPage({
   }
 
   return (
-    <DashboardShell savedDealCount={savedDealTotalCount}>
+    <DashboardShell savedDealCount={savedDealTotalCount} navAccess={navAccess}>
       <div className="flex-1 min-w-0 flex flex-col">
         <Topbar
           displayName={displayName}
           email={user.email ?? ""}
           initials={initials}
           avatarSrc={(profile as ProfileRow | null)?.avatar_url ?? undefined}
+          isPremium={isPremium}
+          canAccessDashboard={navAccess.dashboard}
         />
         <div className="flex-1">
           <SavedAnalysesPage
@@ -222,6 +234,8 @@ export default async function DashboardSavedAnalysesPage({
             activeSortField={sortField}
             activeSortDirection={sortDirection}
             activeDealStateFilter={activeDealStateFilter}
+            canCompareDeals={hasPlanFeature(entitlements, "compare_deals")}
+            canExportPdf={hasPlanFeature(entitlements, "pdf_export")}
           />
         </div>
       </div>

@@ -73,12 +73,3 @@ export const analysisTemplateSchema = z.object({
 });
 
 export type AnalysisTemplateInput = z.infer<typeof analysisTemplateSchema>;
-
-export const TEMPLATE_TYPE_META: Record<
-  z.infer<typeof templateTypeSchema>,
-  { label: string; description: string }
-> = {
-  conservative: { label: "Conservative", description: "Lower risk profile" },
-  balanced: { label: "Balanced", description: "Normal profile" },
-  aggressive: { label: "Aggressive", description: "Higher risk and return profile" },
-};

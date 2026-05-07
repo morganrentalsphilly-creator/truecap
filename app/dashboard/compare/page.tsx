@@ -12,7 +12,13 @@ import {
   type CompareSnapshotV1,
 } from "@/lib/compare-result-snapshot";
 import { recommendationToSignal, type PropertyType, type StoredRecommendation, type StoredRiskLevel } from "@/lib/compare-metrics";
-import { hasActivePremiumSubscription } from "@/lib/entitlements";
+import {
+  getDashboardNavAccess,
+  getEntitlementsForUser,
+  hasDashboardAccess,
+  hasPaidPlanSubscription,
+  hasPlanFeature,
+} from "@/lib/entitlements";
 import { getSavedAnalysesTotalCount } from "@/lib/saved-analyses-count";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
@@ -152,12 +158,13 @@ export default async function DashboardComparePage() {
     redirect("/auth/login");
   }
 
-  const hasDashboardAccess = await hasActivePremiumSubscription(supabase, user.id);
-  if (!hasDashboardAccess) {
+  const entitlements = await getEntitlementsForUser(supabase, user.id);
+  if (!hasDashboardAccess(entitlements) || !hasPlanFeature(entitlements, "compare_deals")) {
     redirect("/");
   }
+  const navAccess = getDashboardNavAccess(entitlements);
 
-  const [{ data: profile }, ids, savedDealTotalCount] = await Promise.all([
+  const [{ data: profile }, ids, savedDealTotalCount, isPremium] = await Promise.all([
     supabase
       .from("profiles")
       .select("first_name, last_name, display_name, avatar_url")
@@ -165,19 +172,22 @@ export default async function DashboardComparePage() {
       .maybeSingle(),
     getCompareIdsFromCookie(),
     getSavedAnalysesTotalCount(supabase, user.id),
+    hasPaidPlanSubscription(supabase, user.id),
   ]);
   const displayName = getDisplayName((profile as ProfileRow | null) ?? null, user.email);
   const initials = getInitials(displayName, user.email ?? "");
 
   if (ids.length < 1) {
     return (
-      <DashboardShell savedDealCount={savedDealTotalCount}>
+      <DashboardShell savedDealCount={savedDealTotalCount} navAccess={navAccess}>
         <div className="flex-1 min-w-0 flex flex-col lg:h-screen lg:overflow-hidden">
           <Topbar
             displayName={displayName}
             email={user.email ?? ""}
             initials={initials}
             avatarSrc={(profile as ProfileRow | null)?.avatar_url ?? undefined}
+            isPremium={isPremium}
+            canAccessDashboard={navAccess.dashboard}
           />
           <main className="min-h-[calc(100vh-4rem)] bg-muted/30 px-4 py-8 sm:px-6">
             <div className="mx-auto max-w-3xl rounded-2xl border border-border bg-card p-6 text-center shadow-sm sm:p-8">
@@ -211,13 +221,15 @@ export default async function DashboardComparePage() {
 
   if (error) {
     return (
-      <DashboardShell savedDealCount={savedDealTotalCount}>
+      <DashboardShell savedDealCount={savedDealTotalCount} navAccess={navAccess}>
         <div className="flex-1 min-w-0 flex flex-col lg:h-screen lg:overflow-hidden">
           <Topbar
             displayName={displayName}
             email={user.email ?? ""}
             initials={initials}
             avatarSrc={(profile as ProfileRow | null)?.avatar_url ?? undefined}
+            isPremium={isPremium}
+            canAccessDashboard={navAccess.dashboard}
           />
           <main className="min-h-[calc(100vh-4rem)] bg-muted/30 px-4 py-8 sm:px-6">
             <div className="mx-auto max-w-3xl rounded-2xl border border-destructive/25 bg-destructive/5 p-6">
@@ -245,13 +257,15 @@ export default async function DashboardComparePage() {
   }
 
   return (
-    <DashboardShell savedDealCount={savedDealTotalCount}>
+    <DashboardShell savedDealCount={savedDealTotalCount} navAccess={navAccess}>
       <div className="flex-1 min-w-0 flex flex-col lg:h-screen lg:overflow-hidden">
         <Topbar
           displayName={displayName}
           email={user.email ?? ""}
           initials={initials}
           avatarSrc={(profile as ProfileRow | null)?.avatar_url ?? undefined}
+          isPremium={isPremium}
+          canAccessDashboard={navAccess.dashboard}
         />
         <div className="flex-1 min-h-0 lg:overflow-y-auto">
           <CompareDealsClient deals={deals.slice(0, MAX_COMPARE_ITEMS)} />

@@ -14,8 +14,8 @@ function LoginFallback() {
 export default function LoginPage() {
   return (
     <AuthShell
-      title="Sign in"
-      description="Use your email and password to access your saved deals and Pro features."
+      title="Welcome back"
+      description="Sign in to access your saved deals, Pro tools, and personalized insights."
     >
       <Suspense fallback={<LoginFallback />}>
         <LoginForm />

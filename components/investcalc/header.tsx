@@ -24,9 +24,9 @@ type ProfileHeaderData = {
   avatar_url: string | null;
 };
 
-type SubscriptionPlanRow = {
-  slug?: string | null;
-  entitlements?: { features?: string[] } | null;
+type HeaderEntitlements = {
+  features?: string[];
+  max_saved_deals?: number | null;
 };
 
 type ProfileUpdatedDetail = {
@@ -62,10 +62,33 @@ function getAvatarUrl(user: HeaderUser): string | undefined {
   return avatarFromMetadata || undefined;
 }
 
-export function Header({ initialUser = null }: { initialUser?: HeaderUser | null }) {
+function deriveAccessState(features: string[]) {
+  const hasPremiumFeatures =
+    features.includes("deal_score") ||
+    features.includes("pdf_export") ||
+    features.includes("template_manage") ||
+    features.includes("tax_strategy") ||
+    features.includes("projections") ||
+    features.includes("exit_scenarios");
+  return {
+    isPremium: hasPremiumFeatures,
+    hasDashboardAccess: features.includes("dashboard_access") && features.includes("save_deal"),
+  };
+}
+
+export function Header({
+  initialUser = null,
+  initialEntitlements = null,
+}: {
+  initialUser?: HeaderUser | null;
+  initialEntitlements?: HeaderEntitlements | null;
+}) {
   const [user, setUser] = useState<HeaderUser | null>(initialUser);
   const [authLoaded, setAuthLoaded] = useState(Boolean(initialUser));
-  const [isPremium, setIsPremium] = useState(false);
+  const initialFeatures = initialEntitlements?.features ?? [];
+  const initialAccess = deriveAccessState(initialFeatures);
+  const [isPremium, setIsPremium] = useState(initialAccess.isPremium);
+  const [hasDashboardAccess, setHasDashboardAccess] = useState(initialAccess.hasDashboardAccess);
   /** Avoid showing free-tier upsell UI until subscription check finishes for signed-in users. */
   const [isPremiumStatusReady, setIsPremiumStatusReady] = useState(false);
   const [profileData, setProfileData] = useState<ProfileHeaderData | null>(null);
@@ -92,35 +115,6 @@ export function Header({ initialUser = null }: { initialUser?: HeaderUser | null
         .eq("id", uid)
         .maybeSingle();
       setProfileData((data as ProfileHeaderData | null) ?? null);
-    };
-    const loadPremiumStatusById = async (uid?: string) => {
-      if (!uid) {
-        setIsPremium(false);
-        setIsPremiumStatusReady(true);
-        return;
-      }
-      setIsPremiumStatusReady(false);
-      try {
-        const { data } = await supabase
-          .from("subscriptions")
-          .select("status, plans(slug, entitlements)")
-          .eq("user_id", uid)
-          .in("status", ["active", "trialing", "past_due"])
-          .order("updated_at", { ascending: false })
-          .limit(1)
-          .maybeSingle();
-
-        const plan = (data?.plans as SubscriptionPlanRow | null | undefined) ?? null;
-        const features = plan?.entitlements?.features ?? [];
-        const hasProSlug = !!plan?.slug && plan.slug !== "free";
-        const hasPremiumFeatures =
-          features.includes("save_deal") ||
-          features.includes("pdf_export") ||
-          features.includes("template_manage");
-        setIsPremium(hasProSlug || hasPremiumFeatures);
-      } finally {
-        setIsPremiumStatusReady(true);
-      }
     };
     const loadSavedCountById = async (uid?: string) => {
       if (!uid) {
@@ -166,9 +160,9 @@ export function Header({ initialUser = null }: { initialUser?: HeaderUser | null
     const bootstrapUserId = currentUserIdRef.current;
     if (bootstrapUserId) {
       void loadProfileById(bootstrapUserId);
-      void loadPremiumStatusById(bootstrapUserId);
       void loadSavedCountById(bootstrapUserId);
       subscribeSavedAnalysesCount(bootstrapUserId);
+      setIsPremiumStatusReady(true);
     }
 
     supabase.auth.getUser().then(({ data: { user: currentUser } }) => {
@@ -176,13 +170,14 @@ export function Header({ initialUser = null }: { initialUser?: HeaderUser | null
         currentUserIdRef.current = currentUser.id;
         setUser(currentUser);
         void loadProfileById(currentUser.id);
-        void loadPremiumStatusById(currentUser.id);
         void loadSavedCountById(currentUser.id);
         subscribeSavedAnalysesCount(currentUser.id);
       } else if (!currentUserIdRef.current) {
         setUser(null);
+        setIsPremium(false);
+        setHasDashboardAccess(false);
+        setIsPremiumStatusReady(true);
         void loadProfileById(undefined);
-        void loadPremiumStatusById(undefined);
         void loadSavedCountById(undefined);
         subscribeSavedAnalysesCount(undefined);
       }
@@ -199,9 +194,13 @@ export function Header({ initialUser = null }: { initialUser?: HeaderUser | null
       }
       currentUserIdRef.current = nextUser?.id;
       setUser(nextUser);
+      if (!nextUser) {
+        setIsPremium(false);
+        setHasDashboardAccess(false);
+      }
+      setIsPremiumStatusReady(true);
       setAuthLoaded(true);
       void loadProfileById(nextUser?.id);
-      void loadPremiumStatusById(nextUser?.id);
       void loadSavedCountById(nextUser?.id);
       subscribeSavedAnalysesCount(nextUser?.id);
     });
@@ -295,7 +294,7 @@ export function Header({ initialUser = null }: { initialUser?: HeaderUser | null
           {isPremiumStatusReady && !isPremium && (
              <Link href={isPremiumStatusReady && !isPremium ? "/profile" : "/auth/sign-up"}
             >
-            <div className="hidden lg:flex items-center gap-2 bg-muted/60 border border-border/70 rounded-full px-3.5 py-1.5">
+            <div className="hidden xl:flex items-center gap-2 bg-muted/60 border border-border/70 rounded-full px-3.5 py-1.5">
               <span className="inline-flex items-center gap-1 bg-[var(--brand-orange)] text-white text-[10px] font-bold px-2 py-[3px] rounded-full uppercase tracking-wider">
                 <Crown className="w-2.5 h-2.5" />
                 Pro
@@ -322,13 +321,13 @@ export function Header({ initialUser = null }: { initialUser?: HeaderUser | null
           {/* Right — Nav actions + user */}
           <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
          
-            {user && isPremium && (
-              <div className="hidden sm:flex items-center gap-2 mr-1">
+            {user && hasDashboardAccess && (
+              <div className="flex items-center gap-2 sm:mr-1">
                 <Link href="/dashboard" prefetch={false}>
               <Button
                 variant="ghost"
-                size="sm"
-                className="h-8 sm:h-9 px-2.5 sm:px-3.5 rounded-full text-[12px] sm:text-[13px] font-semibold text-muted-foreground hover:text-foreground hover:bg-muted gap-1.5 transition-all"
+                size="icon"
+                className="h-8 w-8 sm:w-auto sm:h-9 sm:px-3.5 rounded-full text-[12px] sm:text-[13px] font-semibold text-muted-foreground hover:text-foreground hover:bg-muted gap-1.5 transition-all"
               >
                 <LayoutDashboard className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Dashboard</span>
@@ -350,6 +349,7 @@ export function Header({ initialUser = null }: { initialUser?: HeaderUser | null
               initials={initials}
               avatarSrc={avatarSrc}
               isPremium={isPremium}
+              canAccessDashboard={hasDashboardAccess}
             />
           ) : (
             <>

@@ -1,10 +1,12 @@
 "use client";
 
-import { Search, Sparkles } from "lucide-react";
+import { Menu, Search, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { UserMenu } from "@/components/auth/user-menu";
+import { Button } from "@/components/ui/button";
+import { SheetTrigger } from "@/components/ui/sheet";
 import { setPendingSavedListSearch } from "@/lib/dashboard-saved-search-bridge";
 
 type TopbarProps = {
@@ -12,9 +14,18 @@ type TopbarProps = {
   email: string;
   initials: string;
   avatarSrc?: string;
+  isPremium?: boolean;
+  canAccessDashboard?: boolean;
 };
 
-export function Topbar({ displayName, email, initials, avatarSrc }: TopbarProps) {
+export function Topbar({
+  displayName,
+  email,
+  initials,
+  avatarSrc,
+  isPremium = false,
+  canAccessDashboard = true,
+}: TopbarProps) {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
@@ -49,7 +60,6 @@ export function Topbar({ displayName, email, initials, avatarSrc }: TopbarProps)
         return Array.isArray(payload.suggestions) ? payload.suggestions : [];
       })
       .then((items) => {
-        console.log("Suggestions:", items);
         setSuggestions(items);
       })
       .catch((error: unknown) => {
@@ -69,7 +79,6 @@ export function Topbar({ displayName, email, initials, avatarSrc }: TopbarProps)
   const handleSearchSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const trimmed = query.trim();
-    console.log("Search submit:", trimmed);
     if (!trimmed) return;
     setPendingSavedListSearch(trimmed);
     setSuggestions([]);
@@ -77,8 +86,19 @@ export function Topbar({ displayName, email, initials, avatarSrc }: TopbarProps)
   };
 
   return (
-    <header className="sticky top-0 z-20 flex h-16 shrink-0 items-center gap-4 px-6 lg:px-8 bg-background/80 backdrop-blur-xl border-b border-border">
-      <form className="relative flex-1 max-w-xl" onSubmit={handleSearchSubmit}>
+    <>
+      <header className="fixed inset-x-0 top-0 z-20 flex h-16 shrink-0 items-center gap-3 px-4 sm:px-6 lg:sticky lg:inset-auto lg:top-0 lg:gap-4 lg:px-8 bg-background/80 backdrop-blur-xl border-b border-border">
+        <SheetTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-10 w-10 shrink-0 rounded-xl border border-border bg-background/70 backdrop-blur lg:hidden"
+            aria-label="Open navigation menu"
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
+        </SheetTrigger>
+        <form className="relative flex-1 max-w-xl" onSubmit={handleSearchSubmit}>
         <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
         <input
           name="dashboard-saved-search"
@@ -112,9 +132,9 @@ export function Topbar({ displayName, email, initials, avatarSrc }: TopbarProps)
             Searching...
           </div>
         ) : null}
-      </form>
+        </form>
 
-      <div className="flex items-center gap-2 ml-auto">
+        <div className="flex items-center gap-2 ml-auto">
         
 
         <Link
@@ -129,17 +149,20 @@ export function Topbar({ displayName, email, initials, avatarSrc }: TopbarProps)
 
        
 
-        <div className="pl-3 ml-1 border-l border-border">
-          <UserMenu
-            displayName={displayName}
-            email={email}
-            initials={initials}
-            avatarSrc={avatarSrc}
-            isPremium
-            triggerClassName="hover:bg-muted"
-          />
+          <div className="pl-3 ml-1 border-l border-border">
+            <UserMenu
+              displayName={displayName}
+              email={email}
+              initials={initials}
+              avatarSrc={avatarSrc}
+              isPremium={isPremium}
+              canAccessDashboard={canAccessDashboard}
+              triggerClassName="hover:bg-muted"
+            />
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
+      <div className="h-16 lg:hidden" aria-hidden="true" />
+    </>
   );
 }

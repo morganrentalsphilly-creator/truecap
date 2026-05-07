@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import {
+  ArrowLeft,
   FileText,
   Loader2,
   Pencil,
@@ -36,6 +37,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { TemplateFormDialog } from "@/components/investcalc/template-form-dialog";
+import Link from "next/link";
 
 const TEMPLATE_PAGE_SIZE = 10;
 
@@ -212,21 +214,26 @@ export function TemplatesManagementPage({
 
   return (
     <main className="min-h-full bg-muted/30 pb-12">
-      <section className="w-full px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 space-y-6">
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <div className="space-y-1">
-            <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-foreground">
-              Calculation Templates
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              Manage reusable assumptions for your analyses.
-            </p>
-          </div>
-          <Button className="rounded-full" onClick={openCreateDialog}>
+      <section className="w-full px-4 sm:px-6 xl:px-8 pt-6 sm:pt-8 space-y-4 sm:space-y-6">
+      <div className="grid gap-3 sm:flex sm:flex-wrap sm:items-center">
+            <div className="flex min-w-0 items-center gap-3">
+            <Button variant="ghost" size="sm" className="mt-1 px-1.5 text-muted-foreground bg-primary/10 sm:bg-transparent" asChild>
+              <Link href="/dashboard">
+                <ArrowLeft className="w-4 h-4 mr-1.5" />
+                <span className="hidden xl:inline">Back</span>
+              </Link>
+            </Button>
+            <div className="h-6 w-px bg-border" />
+            <div className="space-y-1">
+              <h1 className="text-3xl md:text-4xl font-black tracking-tight text-foreground xl:text-3xl">Calculation Templates</h1>
+              <p className="text-xs md:text-sm text-muted-foreground ">Manage reusable assumptions for your analyses.</p>
+            </div>
+            </div>
+            <Button className="w-full rounded-full sm:ml-auto sm:w-auto" onClick={openCreateDialog}>
             <Plus className="w-4 h-4 mr-1.5" />
             New Template
           </Button>
-        </div>
+          </div>
 
         <div className="rounded-2xl border border-border bg-card p-3 sm:p-4">
           <div className="relative max-w-md">
@@ -241,7 +248,67 @@ export function TemplatesManagementPage({
         </div>
 
         <div className="rounded-2xl border border-border bg-card overflow-hidden">
-          <div className="overflow-x-auto">
+          <div className="space-y-3 p-3 xl:hidden">
+            {pagedTemplates.map((template) => (
+              <article key={template.id} className="rounded-2xl border border-border bg-background p-4 shadow-sm">
+                <div className="flex items-start gap-3">
+                  <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                    <FileText className="w-4 h-4" />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <h2 className="text-base font-bold leading-tight text-foreground">{template.templateName}</h2>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {template.templateDescription?.trim() || "No description"}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-4 grid grid-cols-2 gap-2">
+                  <div className="rounded-xl bg-muted/40 p-3">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Down Payment</p>
+                    <p className="mt-1 text-sm font-black text-foreground">{toPercentLabel(template.downPaymentPct)}</p>
+                  </div>
+                  <div className="rounded-xl bg-muted/40 p-3">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Interest Rate</p>
+                    <p className="mt-1 text-sm font-black text-foreground">{toPercentLabel(template.interestRatePct)}</p>
+                  </div>
+                  <div className="rounded-xl bg-muted/40 p-3">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Vacancy</p>
+                    <p className="mt-1 text-sm font-black text-foreground">{toPercentLabel(template.vacancyPct)}</p>
+                  </div>
+                  <div className="rounded-xl bg-muted/40 p-3">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Tax Rate</p>
+                    <p className="mt-1 text-sm font-black text-foreground">{toPercentLabel(template.taxRatePct)}</p>
+                  </div>
+                </div>
+
+                <div className="mt-4 grid grid-cols-2 gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-10 rounded-xl"
+                    onClick={() => openEditDialog(template)}
+                  >
+                    <Pencil className="w-4 h-4 mr-1.5" />
+                    Edit
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-10 rounded-xl text-destructive hover:text-destructive"
+                    onClick={() => setTemplateToDelete(template)}
+                  >
+                    <Trash2 className="w-4 h-4 mr-1.5" />
+                    Delete
+                  </Button>
+                </div>
+              </article>
+            ))}
+          </div>
+
+          <div className="hidden overflow-x-auto xl:block">
             <table className="w-full min-w-[1040px] text-sm">
               <thead className="bg-muted/40 border-b border-border">
                 <tr className="h-12">
@@ -272,7 +339,7 @@ export function TemplatesManagementPage({
                 {pagedTemplates.map((template) => (
                   <tr key={template.id} className="h-[68px] border-b border-border/80 hover:bg-muted/40">
                     <td className="px-4">
-                      <div className="flex items-start gap-2">
+                      <div className="flex items-center gap-2">
                         <span className="mt-0.5 inline-flex size-7 rounded-full bg-primary/10 text-primary items-center justify-center shrink-0">
                           <FileText className="w-3.5 h-3.5" />
                         </span>

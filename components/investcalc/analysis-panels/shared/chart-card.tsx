@@ -13,8 +13,8 @@ export function ChartCard({
   children: ReactNode;
 }) {
   return (
-    <div className={cn("rounded-2xl border border-border bg-card p-4", className)}>
-      <p className="mb-4 text-sm font-semibold text-foreground">{title}</p>
+    <div className={cn("min-w-0 overflow-hidden rounded-2xl border border-border bg-card p-3 sm:p-4", className)}>
+      <p className="mb-3 text-sm font-semibold text-foreground sm:mb-4">{title}</p>
       {children}
     </div>
   );

@@ -17,12 +17,6 @@ type RiskReturnPoint = {
   dscr?: number;
 };
 
-type RiskReturnInsightData = {
-  bestRiskAdjusted: string;
-  highestReturn: string;
-  safest: string;
-};
-
 function formatCurrency(value: number): string {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -95,29 +89,6 @@ export function RiskReturn({ data = [] }: { data?: RiskReturnPoint[] }) {
             <Scatter data={data} fill="oklch(0.55 0.22 265)" fillOpacity={0.7} />
           </ScatterChart>
         </ResponsiveContainer>
-      </div>
-    </div>
-  );
-}
-
-export function RiskReturnInsights({ data }: { data: RiskReturnInsightData }) {
-  return (
-    <div className="rounded-2xl bg-card border border-border p-6">
-      <h3 className="font-display text-lg font-semibold">Insights</h3>
-      <p className="text-sm text-muted-foreground mt-0.5 mb-4">Risk and return signals from saved deals</p>
-      <div className="space-y-3">
-        <div className="rounded-xl bg-muted/40 border border-border/60 p-3">
-          <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Best risk-adjusted deal</div>
-          <div className="mt-1 text-sm font-semibold text-foreground">{data.bestRiskAdjusted || "-"}</div>
-        </div>
-        <div className="rounded-xl bg-muted/40 border border-border/60 p-3">
-          <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Highest return</div>
-          <div className="mt-1 text-sm font-semibold text-foreground">{data.highestReturn || "-"}</div>
-        </div>
-        <div className="rounded-xl bg-muted/40 border border-border/60 p-3">
-          <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Safest deal</div>
-          <div className="mt-1 text-sm font-semibold text-foreground">{data.safest || "-"}</div>
-        </div>
       </div>
     </div>
   );

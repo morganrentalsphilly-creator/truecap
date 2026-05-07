@@ -22,6 +22,7 @@ import { Switch } from "@/components/ui/switch";
 import { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { FieldError, optionalNumberSetValueAs } from "@/components/investcalc/form-field-helpers";
 
 interface OperatingExpensesSectionProps {
   form: UseFormReturn<InvestmentFormValues>;
@@ -35,17 +36,6 @@ type FieldLabelWithTooltipProps = {
 
 const inputClassName =
   "h-10 rounded-lg border-[var(--brand-orange)]/15 bg-background shadow-sm focus-visible:ring-[var(--brand-orange)]/25";
-
-const moneySetValueAs = (v: unknown) => {
-  if (v === "" || v == null) return undefined;
-  const n = typeof v === "number" ? v : Number(v);
-  return Number.isFinite(n) ? n : undefined;
-};
-
-function FieldError({ message }: { message?: string }) {
-  if (!message) return null;
-  return <p className="mt-1 text-xs text-destructive">{message}</p>;
-}
 
 function FieldLabelWithTooltip({ label, tooltip }: FieldLabelWithTooltipProps) {
   return (
@@ -216,7 +206,7 @@ export function OperatingExpensesSection({
               </FieldLabel>
               <div className="relative">
                 <Input
-                  {...register("propertyTaxPct", { setValueAs: moneySetValueAs })}
+                  {...register("propertyTaxPct", { setValueAs: optionalNumberSetValueAs })}
                   type="number"
                   step="0.01"
                   min={0}
@@ -274,7 +264,7 @@ export function OperatingExpensesSection({
                 {insuranceInputMode === "monthly" ? <DollarIcon /> : null}
                 <Input
                   {...register(insuranceInputMode === "monthly" ? "insuranceMonthly" : "insurancePct", {
-                    setValueAs: moneySetValueAs,
+                    setValueAs: optionalNumberSetValueAs,
                   })}
                   type="number"
                   step="0.01"
@@ -310,7 +300,7 @@ export function OperatingExpensesSection({
               <div className="relative">
                 <DollarIcon />
                 <Input
-                  {...register("hoaMonthly", { setValueAs: moneySetValueAs })}
+                  {...register("hoaMonthly", { setValueAs: optionalNumberSetValueAs })}
                   type="number"
                   step="0.01"
                   min={0}
@@ -328,7 +318,7 @@ export function OperatingExpensesSection({
           <p className={cn("px-2 pb-2 pt-1 text-[11px] font-bold uppercase tracking-wide text-[var(--brand-orange)]", !showAdvanced && "hidden")}>
             Monthly Operating Expenses
           </p>
-          <div className={cn("grid grid-cols-1 gap-3 sm:grid-cols-2", showAdvanced ? "lg:grid-cols-3 xl:grid-cols-5" : "lg:grid-cols-4")}>
+          <div className={cn("grid grid-cols-1 gap-3 sm:grid-cols-2", showAdvanced ? "xl:grid-cols-3 2xl:grid-cols-5" : "xl:grid-cols-4")}>
             <SectionField className={cn("rounded-lg border border-[var(--brand-orange)]/10 bg-card p-3", !showAdvanced && "hidden")}>
               <FieldLabel icon={<Plug className="size-3" />}>
                 <FieldLabelWithTooltip label="Utilities" tooltip="Monthly utility expenses paid by owner." />
@@ -336,7 +326,7 @@ export function OperatingExpensesSection({
               <div className="relative">
                 <DollarIcon />
                 <Input
-                  {...register("utilitiesMonthly", { setValueAs: moneySetValueAs })}
+                  {...register("utilitiesMonthly", { setValueAs: optionalNumberSetValueAs })}
                   type="number"
                   step="0.01"
                   min={0}
@@ -524,7 +514,7 @@ export function OperatingExpensesSection({
               </FieldLabel>
               <div className="relative">
                 <Input
-                  {...register("appreciationRatePct", { setValueAs: moneySetValueAs })}
+                  {...register("appreciationRatePct", { setValueAs: optionalNumberSetValueAs })}
                   type="number"
                   step="0.01"
                   min={0}
@@ -544,7 +534,7 @@ export function OperatingExpensesSection({
               </FieldLabel>
               <div className="relative">
                 <Input
-                  {...register("sellingCostPct", { setValueAs: moneySetValueAs })}
+                  {...register("sellingCostPct", { setValueAs: optionalNumberSetValueAs })}
                   type="number"
                   step="0.01"
                   min={0}
@@ -564,7 +554,7 @@ export function OperatingExpensesSection({
               </FieldLabel>
               <div className="relative">
                 <Input
-                  {...register("taxRatePct", { setValueAs: moneySetValueAs })}
+                  {...register("taxRatePct", { setValueAs: optionalNumberSetValueAs })}
                   type="number"
                   step="0.01"
                   min={0}
