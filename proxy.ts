@@ -1,5 +1,6 @@
 /**
- * Next.js 16+ request boundary (replaces middleware.ts). Keep session cookies in sync for Supabase SSR.
+ * Next.js 16+ request boundary (replaces middleware.ts). Refreshes Supabase session cookies for SSR.
+ * Production builds use webpack via package.json (`next build --webpack`).
  */
 import type { NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
