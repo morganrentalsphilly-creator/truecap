@@ -53,6 +53,10 @@ pnpm-debug.log*
 agent-transcripts/
 terminals/
 mcps/
+/.cursor
+/.pdf_review
+/scripts
+
 
 # lock files (optional - depends on your team)
 /package-lock.json
