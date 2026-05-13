@@ -13,6 +13,11 @@
  *   3. OG/meta tag fallback.
  */
 
+// Override Vercel's default 15s serverless function timeout. ScrapingBee
+// stealth proxy can take 10–25s for Zillow, so we need more headroom.
+// Pro tier supports up to 300s; 45s is plenty without abusing the budget.
+export const maxDuration = 45;
+
 const SCRAPINGBEE_ENDPOINT = "https://app.scrapingbee.com/api/v1/";
 
 const ALLOWED_HOSTS = [
@@ -85,9 +90,11 @@ export async function importListingAction(rawUrl: unknown): Promise<ImportListin
     params.set("premium_proxy", "true");
   }
 
-  // 20s hard timeout — keeps the UX from hanging if ScrapingBee is slow.
+  // 35s hard timeout — gives ScrapingBee's stealth proxy room to finish
+  // (Zillow scrapes typically take 8–25s) while still failing fast if
+  // the upstream is genuinely stuck.
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 20_000);
+  const timer = setTimeout(() => controller.abort(), 35_000);
 
   let html: string;
   try {

@@ -58,6 +58,7 @@ export function ListingImport({ form }: ListingImportProps) {
       </div>
       <p className="text-xs text-muted-foreground mb-4">
         Paste a Zillow, Redfin, or Realtor.com URL and we'll auto-fill the property details.
+        Zillow listings can take 15–25 seconds because of their anti-bot protection.
       </p>
       <div className="flex flex-col sm:flex-row gap-2">
         <Input
