@@ -1,12 +1,9 @@
 import type { Metadata } from 'next'
 import { Plus_Jakarta_Sans, DM_Mono } from 'next/font/google'
-import Script from 'next/script'
 import { Analytics } from '@vercel/analytics/next'
 import { Toaster } from '@/components/ui/toaster'
 import { getSiteUrl } from '@/lib/site-url'
 import './globals.css'
-
-const GOOGLE_ADS_ID = 'AW-18159235338'
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -105,25 +102,7 @@ export default function RootLayout({
       <body className="font-sans antialiased bg-background text-foreground">
         {children}
         <Toaster />
-        {process.env.NODE_ENV === 'production' && (
-          <>
-            <Analytics />
-            {/* Google Ads tag (gtag.js) — fires on every page via the root layout */}
-            <Script
-              id="google-ads-loader"
-              src={`https://www.googletagmanager.com/gtag/js?id=${GOOGLE_ADS_ID}`}
-              strategy="afterInteractive"
-            />
-            <Script id="google-ads-init" strategy="afterInteractive">
-              {`
-                window.dataLayer = window.dataLayer || [];
-                function gtag(){dataLayer.push(arguments);}
-                gtag('js', new Date());
-                gtag('config', '${GOOGLE_ADS_ID}');
-              `}
-            </Script>
-          </>
-        )}
+        {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>
   )

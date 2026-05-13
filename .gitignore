@@ -47,9 +47,6 @@ pnpm-debug.log*
 .vscode
 .idea
 
-# Marketing assets (not part of the deployed app)
-instagram-posts/
-
 # Cursor / AI local metadata
 .cursor/
 /supabase/.temp
