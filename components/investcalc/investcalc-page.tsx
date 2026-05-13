@@ -24,7 +24,6 @@ import {
 } from "@/lib/investcalc-schema";
 import { calculateAnalysis, AnalysisResult } from "@/lib/calc-analysis";
 import { PropertyTypeSection } from "./property-type-section";
-import { ListingImport } from "./listing-import";
 import { PropertyDetailsSection } from "./property-details-section";
 import { SingleFamilyUnitSection } from "./single-family-unit-section";
 import { MultiFamilyUnitsSection } from "./multi-family-units-section";
@@ -1116,7 +1115,6 @@ export function InvestCalcPage({
         <form ref={formElementRef} onSubmit={form.handleSubmit(onSubmit, onError)} noValidate>
           <div className="space-y-5">
             <PropertyTypeSection form={form} savedTemplateFallback={savedTemplateFallback} />
-            <ListingImport form={form} />
             <PropertyDetailsSection form={form} />
 
             {propertyType === "single-family" && (
