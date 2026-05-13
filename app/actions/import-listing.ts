@@ -68,35 +68,54 @@ export async function importListingAction(rawUrl: unknown): Promise<ImportListin
     };
   }
 
-  // ScrapingBee request
+  // ScrapingBee request.
+  // - render_js=false: huge speed win. Zillow ships __NEXT_DATA__ in the
+  //   server-rendered HTML so we don't need a headless browser.
+  // - For Zillow, stealth_proxy=true (residential IPs) bypasses bot
+  //   detection more reliably than premium_proxy.
   const params = new URLSearchParams({
     api_key: apiKey,
     url: parsed.toString(),
-    render_js: "true",
-    premium_proxy: "true", // Zillow needs this; ok elsewhere
+    render_js: "false",
     country_code: "us",
-    block_resources: "false",
+    block_resources: "true",
   });
+  if (matchedHost === "zillow.com") {
+    params.set("stealth_proxy", "true");
+  } else {
+    params.set("premium_proxy", "true");
+  }
+
+  // 20s hard timeout — keeps the UX from hanging if ScrapingBee is slow.
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 20_000);
 
   let html: string;
   try {
     const res = await fetch(`${SCRAPINGBEE_ENDPOINT}?${params.toString()}`, {
       cache: "no-store",
+      signal: controller.signal,
     });
     if (!res.ok) {
+      const detail = await safeReadShortBody(res);
       return {
         ok: false,
         code: "FETCH_FAILED",
-        message: `Couldn't fetch the listing (HTTP ${res.status}). Try again in a minute or fill in details manually.`,
+        message: explainScrapingBeeError(res.status, detail),
       };
     }
     html = await res.text();
-  } catch {
+  } catch (err) {
+    const aborted = err instanceof Error && err.name === "AbortError";
     return {
       ok: false,
       code: "FETCH_FAILED",
-      message: "Network error reaching the listing. Try again.",
+      message: aborted
+        ? "Fetching took too long. Try again or paste the details manually."
+        : "Network error reaching the listing. Try again.",
     };
+  } finally {
+    clearTimeout(timer);
   }
 
   const extracted = extractListing(html, matchedHost);
@@ -336,5 +355,40 @@ function escapeRegex(s: string) {
 
 function isObject(v: unknown): v is Record<string, unknown> {
   return typeof v === "object" && v !== null && !Array.isArray(v);
+}
+
+async function safeReadShortBody(res: Response): Promise<string> {
+  try {
+    const text = await res.text();
+    return text.slice(0, 200);
+  } catch {
+    return "";
+  }
+}
+
+function explainScrapingBeeError(status: number, _detail: string): string {
+  // ScrapingBee status reference:
+  // 401: bad API key. 402: out of credits. 403/404: blocked/not found.
+  // 422: render failed. 429: rate-limited. 5xx: gateway/server issue.
+  switch (status) {
+    case 401:
+      return "ScrapingBee API key is invalid. Double-check the value in Vercel settings.";
+    case 402:
+      return "ScrapingBee account is out of credits.";
+    case 403:
+    case 404:
+      return "The listing site blocked the request or the page no longer exists. Try a different URL or paste details manually.";
+    case 422:
+      return "ScrapingBee couldn't render the page. Try again — Zillow sometimes throws a one-time challenge.";
+    case 429:
+      return "Hitting ScrapingBee's rate limit. Wait a minute and try again.";
+    case 500:
+    case 502:
+    case 503:
+    case 504:
+      return "ScrapingBee couldn't reach the listing right now. Try again in a few seconds.";
+    default:
+      return `Couldn't fetch the listing (HTTP ${status}). Try again or paste details manually.`;
+  }
 }
 
