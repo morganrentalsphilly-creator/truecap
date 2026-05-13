@@ -26,7 +26,6 @@ const ALLOWED_HOSTS = [
 export type ImportedListing = {
   address?: string;
   purchasePrice?: number;
-  yearBuilt?: number;
   bedrooms?: number;
   bathrooms?: number;
   sqft?: number;
@@ -240,12 +239,6 @@ function fromJsonLd(item: unknown): Partial<ImportedListing> {
     out.sqft = item.floorSize;
   }
 
-  // Year built
-  if (typeof item.yearBuilt === "number" || (typeof item.yearBuilt === "string" && item.yearBuilt)) {
-    const n = Number(item.yearBuilt);
-    if (!isNaN(n) && n > 1700 && n < 2100) out.yearBuilt = n;
-  }
-
   // Price (Product/Offer pattern, or direct)
   const price = pickPrice(item.offers) ?? pickPrice(item);
   if (price !== undefined) out.purchasePrice = price;
@@ -305,7 +298,6 @@ function zillowPropertyFields(o: Record<string, unknown>): Partial<ImportedListi
   if (typeof o.bedrooms === "number" && o.bedrooms > 0) out.bedrooms = o.bedrooms;
   if (typeof o.bathrooms === "number" && o.bathrooms > 0) out.bathrooms = o.bathrooms;
   if (typeof o.livingArea === "number" && o.livingArea > 0) out.sqft = o.livingArea;
-  if (typeof o.yearBuilt === "number" && o.yearBuilt > 1700) out.yearBuilt = o.yearBuilt;
   if (typeof o.rentZestimate === "number" && o.rentZestimate > 0) out.monthlyRent = o.rentZestimate;
 
   if (isObject(o.address)) {

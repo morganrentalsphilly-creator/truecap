@@ -98,9 +98,6 @@ function applyToForm(data: ImportedListing, form: UseFormReturn<InvestmentFormVa
   if (data.purchasePrice !== undefined) {
     form.setValue("purchasePrice", data.purchasePrice, setOpts);
   }
-  if (data.yearBuilt !== undefined) {
-    form.setValue("yearBuilt", data.yearBuilt, setOpts);
-  }
 
   // Unit-level fields land in units[0] (single family / first unit of multi).
   const currentUnits = form.getValues("units") ?? [];
