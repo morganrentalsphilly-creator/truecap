@@ -5,6 +5,8 @@ import { Toaster } from '@/components/ui/toaster'
 import { getSiteUrl } from '@/lib/site-url'
 import './globals.css'
 
+const GOOGLE_ADS_ID = 'AW-18159235338'
+
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
   variable: "--font-sans-variable",
@@ -99,6 +101,24 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${plusJakartaSans.variable} ${dmMono.variable} font-sans`}>
+      {process.env.NODE_ENV === 'production' && (
+        <head>
+          {/* Google Ads gtag — emitted as raw script tags so it shows up
+              in the server-rendered HTML for Google's tag verifier. */}
+          <script
+            async
+            src={`https://www.googletagmanager.com/gtag/js?id=${GOOGLE_ADS_ID}`}
+          />
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', '${GOOGLE_ADS_ID}');`,
+            }}
+          />
+        </head>
+      )}
       <body className="font-sans antialiased bg-background text-foreground">
         {children}
         <Toaster />
