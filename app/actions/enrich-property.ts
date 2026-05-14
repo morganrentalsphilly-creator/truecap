@@ -86,7 +86,10 @@ const RATE_CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24h
 
 async function fetchCurrentMortgageRate(): Promise<{ rate: number; asOf: string } | null> {
   const apiKey = process.env.FRED_API_KEY;
-  if (!apiKey) return null;
+  if (!apiKey) {
+    console.warn("[enrichProperty] FRED_API_KEY not set in environment");
+    return null;
+  }
 
   if (mortgageRateCache && Date.now() - mortgageRateCache.fetchedAt < RATE_CACHE_TTL_MS) {
     return { rate: mortgageRateCache.rate, asOf: mortgageRateCache.asOf };
@@ -101,16 +104,27 @@ async function fetchCurrentMortgageRate(): Promise<{ rate: number; asOf: string 
 
   try {
     const res = await fetch(url.toString(), { cache: "no-store" });
-    if (!res.ok) return null;
+    if (!res.ok) {
+      const body = await res.text().catch(() => "");
+      console.warn(
+        `[enrichProperty] FRED request failed: HTTP ${res.status} ${res.statusText}. Body: ${body.slice(0, 200)}`
+      );
+      return null;
+    }
     const json = (await res.json()) as {
       observations?: Array<{ value: string; date: string }>;
     };
     const latest = json.observations?.[0];
-    if (!latest || latest.value === "." || isNaN(Number(latest.value))) return null;
+    if (!latest || latest.value === "." || isNaN(Number(latest.value))) {
+      console.warn("[enrichProperty] FRED returned no valid observation", json);
+      return null;
+    }
     const rate = Number(latest.value);
+    console.log(`[enrichProperty] FRED rate: ${rate}% as of ${latest.date}`);
     mortgageRateCache = { rate, asOf: latest.date, fetchedAt: Date.now() };
     return { rate, asOf: latest.date };
-  } catch {
+  } catch (err) {
+    console.warn("[enrichProperty] FRED fetch threw:", err);
     return null;
   }
 }
@@ -152,12 +166,24 @@ async function maybeFetchHudRent(
 ): Promise<{ amount: number; county: string; year: number } | null> {
   // Skip for multi-family and owner-occupant: HUD FMR is a single-unit
   // per-bedroom estimate that doesn't reflect duplex/triplex economics.
-  if (input.propertyType !== "single-family") return null;
+  if (input.propertyType !== "single-family") {
+    console.log(`[enrichProperty] HUD skipped: propertyType=${input.propertyType}`);
+    return null;
+  }
 
   const apiKey = process.env.HUD_API_KEY;
-  if (!apiKey) return null;
-  if (!input.state) return null;
-  if (input.bedrooms === undefined || input.bedrooms === null) return null;
+  if (!apiKey) {
+    console.warn("[enrichProperty] HUD_API_KEY not set in environment");
+    return null;
+  }
+  if (!input.state) {
+    console.warn("[enrichProperty] HUD skipped: no state parsed from address");
+    return null;
+  }
+  if (input.bedrooms === undefined || input.bedrooms === null) {
+    console.log("[enrichProperty] HUD skipped: bedrooms not yet entered");
+    return null;
+  }
 
   // Clamp 5+ BR to the 4-BR figure.
   const bedsKey = Math.min(Math.max(Math.round(input.bedrooms), 0), 4);
@@ -177,7 +203,13 @@ async function maybeFetchHudRent(
         headers: { Authorization: `Bearer ${apiKey}` },
         cache: "no-store",
       });
-      if (!res.ok) continue;
+      if (!res.ok) {
+        const body = await res.text().catch(() => "");
+        console.warn(
+          `[enrichProperty] HUD ${year} request failed: HTTP ${res.status}. Body: ${body.slice(0, 200)}`
+        );
+        continue;
+      }
 
       const json = (await res.json()) as HudStateDataResponse;
       const counties = json.data?.counties ?? [];
