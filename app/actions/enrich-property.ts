@@ -196,10 +196,12 @@ async function maybeFetchHudRent(
 
   for (const year of yearsToTry) {
     try {
-      // HUD User API: /fmr/statedata/{state_code}?year={year}
-      // Year is a query param, not a path segment.
+      // HUD User API: /fmr/data/{entityid}?year={year}
+      // entityid is either a state code, a 10-digit county FMR area code,
+      // or a CBSA code. State code returns county-level + metroarea-level
+      // breakdowns for that state.
       const url =
-        `https://www.huduser.gov/hudapi/public/fmr/statedata/${encodeURIComponent(input.state)}` +
+        `https://www.huduser.gov/hudapi/public/fmr/data/${encodeURIComponent(input.state)}` +
         `?year=${year}`;
       const res = await fetch(url, {
         headers: { Authorization: `Bearer ${apiKey}` },
@@ -213,21 +215,29 @@ async function maybeFetchHudRent(
         continue;
       }
 
-      const json = (await res.json()) as HudStateDataResponse;
+      const json = (await res.json()) as HudStateDataResponse & {
+        data?: { metroareas?: HudCounty[] };
+      };
       const counties = json.data?.counties ?? [];
+      const metroareas = json.data?.metroareas ?? [];
       const respYear = json.data?.year ?? year;
+      console.log(
+        `[enrichProperty] HUD ${year} OK: ${counties.length} counties, ${metroareas.length} metro areas`
+      );
+
+      const haystack = [...counties, ...metroareas];
 
       let match: HudCounty | undefined;
       if (input.county) {
         const target = normalizeCounty(input.county);
-        match = counties.find(
+        match = haystack.find(
           (c) => c.county_name && normalizeCounty(c.county_name) === target
         );
       }
-      // No county match → fall back to state average across all counties
+      // No county/metro match → fall back to state average across all areas
       // for that bedroom count. Less accurate but defensible.
-      if (!match && counties.length > 0) {
-        const values = counties
+      if (!match && haystack.length > 0) {
+        const values = haystack
           .map((c) => (c[fmrField as keyof HudCounty] as number | undefined) ?? 0)
           .filter((v) => v > 0);
         if (values.length === 0) continue;
