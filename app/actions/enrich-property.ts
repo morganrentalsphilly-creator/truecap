@@ -260,18 +260,32 @@ async function maybeFetchHudRent(
       const values = haystack
         .map((c) => Number(c[fmrField] ?? 0))
         .filter((v) => v > 0);
-      if (values.length === 0) return null;
+      if (values.length === 0) {
+        console.log(
+          `[enrichProperty] HUD: no values >0 in state response for ${fmrField}`
+        );
+        return null;
+      }
       const avg = Math.round(values.reduce((a, b) => a + b, 0) / values.length);
+      console.log(
+        `[enrichProperty] HUD: no county match for "${input.county}", returning state avg ${fmrField}=$${avg}`
+      );
       return { amount: avg, county: `${input.state} avg`, year: respYear };
     }
 
     if (match) {
       const v = Number(match[fmrField] ?? 0);
+      const label = match.county_name ?? match.name ?? input.county ?? "";
+      console.log(
+        `[enrichProperty] HUD matched "${label}" — ${fmrField}=$${v}`
+      );
       if (v > 0) {
-        const label = match.county_name ?? match.name ?? input.county ?? "";
         return { amount: v, county: label, year: respYear };
       }
     }
+    console.log(
+      `[enrichProperty] HUD: no county match for "${input.county}" and no state-avg fallback used`
+    );
     return null;
   } catch (err) {
     console.warn("[enrichProperty] HUD fetch threw:", err);

@@ -474,9 +474,15 @@ export function InvestCalcPage({
     async (place: SelectedAddress, opts?: { silent?: boolean }) => {
       const currentPropertyType = form.getValues("propertyType");
       const isSingleFamily = currentPropertyType === "single-family";
-      const bedrooms = isSingleFamily
-        ? (form.getValues("bedrooms") as number | undefined)
-        : undefined;
+      const rawBedrooms = isSingleFamily ? form.getValues("bedrooms") : undefined;
+      const bedrooms =
+        typeof rawBedrooms === "number"
+          ? rawBedrooms
+          : rawBedrooms != null
+          ? Number(rawBedrooms)
+          : undefined;
+
+      console.log("[enrich] firing", { state: place.state, county: place.county, propertyType: currentPropertyType, bedrooms });
 
       const enrichment = await enrichPropertyAction({
         state: place.state,
@@ -485,6 +491,8 @@ export function InvestCalcPage({
         propertyType: currentPropertyType,
         bedrooms,
       });
+
+      console.log("[enrich] result", enrichment);
 
       const setOpts = {
         shouldDirty: false,
@@ -520,8 +528,13 @@ export function InvestCalcPage({
       // a user-entered rent number).
       if (isSingleFamily && enrichment.monthlyRent !== undefined) {
         const current = form.getValues("monthlyRent") as number | undefined;
-        if (current === undefined || current === null) {
-          form.setValue("monthlyRent", enrichment.monthlyRent, setOpts);
+        console.log("[enrich] monthlyRent decision", { incoming: enrichment.monthlyRent, current });
+        if (current === undefined || current === null || (typeof current === "number" && current === 0)) {
+          form.setValue("monthlyRent", enrichment.monthlyRent, {
+            shouldDirty: false,
+            shouldTouch: false,
+            shouldValidate: false,
+          });
           filled.push(
             `Rent ~$${enrichment.monthlyRent.toLocaleString()}/mo (HUD FMR)`
           );
@@ -556,9 +569,14 @@ export function InvestCalcPage({
     const place = lastSelectedAddressRef.current;
     if (!place) return;
     if (form.getValues("propertyType") !== "single-family") return;
-    if (typeof watchedBedrooms !== "number" || watchedBedrooms <= 0) return;
+    // Accept any value that parses to a positive number (RHF may yield
+    // strings transiently before valueAsNumber kicks in).
+    const beds = Number(watchedBedrooms);
+    if (!Number.isFinite(beds) || beds <= 0) return;
     if (form.getValues("monthlyRent")) return;
-    runPropertyEnrichment(place, { silent: true });
+    // Non-silent so the user gets explicit confirmation that the rent
+    // estimate populated.
+    runPropertyEnrichment(place, { silent: false });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [watchedBedrooms]);
 
