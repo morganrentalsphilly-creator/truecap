@@ -1,29 +1,48 @@
 "use client";
 
 /**
- * Google Places address autocomplete bound to react-hook-form's "address" field.
+ * Address autocomplete that keeps the existing TrueCap <Input> styling and
+ * powers a custom dropdown with Google's new Places API (the legacy
+ * Autocomplete widget is unavailable to Cloud accounts created after
+ * March 1, 2025, and the new PlaceAutocompleteElement web component
+ * can't be styled to match the rest of the form).
  *
- * Uses the new `google.maps.places.PlaceAutocompleteElement` web component
- * (the legacy `Autocomplete` class is unavailable to Google Cloud customers
- * who signed up after March 1, 2025).
+ * Uses google.maps.places.AutocompleteSuggestion.fetchAutocompleteSuggestions
+ * with a session token (cost-efficient: autocomplete sessions are free until
+ * the matching fetchFields call resolves the picked place).
  *
- * Loads the Maps JS library with `loading=async` and uses `importLibrary`
- * to grab Places. On selection, fetches `formattedAddress` and writes it
- * back into the form via setValue.
- *
- * Falls back to a plain text Input when the API key is missing or the
- * script fails to load — the address field stays fully usable, the user
- * just types the address manually.
+ * Falls back to a plain Input when the key is missing or Maps fails to load.
  */
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { cn } from "@/lib/utils";
 
+type FormattableText = { toString: () => string };
+type PlacePrediction = {
+  text: FormattableText;
+  toPlace: () => Place;
+};
+type AutocompleteSuggestionResult = {
+  placePrediction: PlacePrediction | null;
+};
+type Place = {
+  fetchFields: (opts: { fields: string[]; sessionToken?: SessionToken }) => Promise<unknown>;
+  formattedAddress?: string;
+};
+type SessionToken = unknown;
 type PlacesLibrary = {
-  PlaceAutocompleteElement?: new (opts?: Record<string, unknown>) => HTMLElement;
+  AutocompleteSuggestion?: {
+    fetchAutocompleteSuggestions: (request: {
+      input: string;
+      sessionToken?: SessionToken;
+      includedRegionCodes?: string[];
+      includedPrimaryTypes?: string[];
+    }) => Promise<{ suggestions: AutocompleteSuggestionResult[] }>;
+  };
+  AutocompleteSessionToken?: new () => SessionToken;
 };
 
 declare global {
@@ -39,8 +58,7 @@ declare global {
 
 function loadGoogleMapsScript(apiKey: string): Promise<void> {
   if (typeof window === "undefined") return Promise.reject(new Error("No window"));
-  // Places already loaded via libraries=places — we're done.
-  if (window.google?.maps?.places?.PlaceAutocompleteElement) return Promise.resolve();
+  if (window.google?.maps?.places?.AutocompleteSuggestion) return Promise.resolve();
   if (window.__googleMapsPlacesLoading) return window.__googleMapsPlacesLoading;
 
   window.__googleMapsPlacesLoading = new Promise<void>((resolve, reject) => {
@@ -52,10 +70,6 @@ function loadGoogleMapsScript(apiKey: string): Promise<void> {
     }
     const script = document.createElement("script");
     script.id = "google-maps-places-script";
-    // Use the simple `libraries=places` form: Google pre-loads the Places
-    // library so we can access google.maps.places.* directly on script load.
-    // (The async-bootstrap pattern would require Google's loader snippet to
-    // set up google.maps.importLibrary before the script tag fires.)
     script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&libraries=places&v=weekly`;
     script.async = true;
     script.defer = true;
@@ -80,121 +94,202 @@ export function AddressAutocomplete({
 }: AddressAutocompleteProps) {
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY;
   const containerRef = useRef<HTMLDivElement>(null);
-  const [autocompleteEl, setAutocompleteEl] = useState<HTMLElement | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const sessionTokenRef = useRef<SessionToken | null>(null);
+  const debounceRef = useRef<number | null>(null);
+  const [predictions, setPredictions] = useState<PlacePrediction[]>([]);
+  const [open, setOpen] = useState(false);
+  const [highlight, setHighlight] = useState(0);
+  const [scriptReady, setScriptReady] = useState(false);
 
-  // Fallback input <-> react-hook-form binding. When Google's element
-  // takes over, react-hook-form is updated imperatively via form.setValue.
-  const { ref: rhfRef, ...registerRest } = form.register("address");
+  // react-hook-form binding
+  const { ref: rhfRef, onChange: rhfOnChange, ...registerRest } = form.register("address");
+  const setInputRef = useCallback(
+    (el: HTMLInputElement | null) => {
+      inputRef.current = el;
+      rhfRef(el);
+    },
+    [rhfRef]
+  );
 
-  // Step 1 — load Google Maps + create the autocomplete element.
+  // Load Google Maps Places on mount
   useEffect(() => {
     if (!apiKey) return;
     let cancelled = false;
-
     loadGoogleMapsScript(apiKey)
       .then(() => {
         if (cancelled) return;
-        const places = window.google?.maps?.places;
-        if (!places?.PlaceAutocompleteElement) {
+        if (!window.google?.maps?.places?.AutocompleteSuggestion) {
           console.warn(
-            "[AddressAutocomplete] PlaceAutocompleteElement not available — make sure 'Places API (New)' is enabled on your API key."
+            "[AddressAutocomplete] AutocompleteSuggestion not in Places library — enable 'Places API (New)' in Google Cloud Console."
           );
           return;
         }
-
-        const element = new places.PlaceAutocompleteElement({
-          // New API uses includedRegionCodes (lowercase ISO 3166-1 alpha-2).
-          includedRegionCodes: ["us"],
-        });
-
-        // Pre-populate from form's current value if we're editing.
-        const currentValue = form.getValues("address");
-        if (currentValue && "value" in element) {
-          try {
-            (element as unknown as { value: string }).value = currentValue;
-          } catch {
-            // Ignore — some element versions don't expose value as a setter.
-          }
-        }
-
-        // Make sure the web component spans full width and inherits our look.
-        element.style.width = "100%";
-
-        // Selection handler — gmp-select is the v3 event name.
-        element.addEventListener("gmp-select", async (event: Event) => {
-          // The event has a `placePrediction` property in the new API.
-          const ev = event as Event & {
-            placePrediction?: { toPlace: () => unknown };
-          };
-          const prediction = ev.placePrediction;
-          if (!prediction) return;
-          try {
-            const place = prediction.toPlace() as {
-              fetchFields: (opts: { fields: string[] }) => Promise<unknown>;
-              formattedAddress?: string;
-            };
-            await place.fetchFields({ fields: ["formattedAddress"] });
-            if (place.formattedAddress) {
-              form.setValue("address", place.formattedAddress, {
-                shouldDirty: true,
-                shouldTouch: true,
-                shouldValidate: true,
-              });
-            }
-          } catch (err) {
-            console.warn("[AddressAutocomplete] failed to resolve place:", err);
-          }
-        });
-
-        if (cancelled) return;
-        setAutocompleteEl(element);
+        setScriptReady(true);
       })
       .catch((err) => {
         console.warn("[AddressAutocomplete] script load failed:", err);
       });
-
     return () => {
       cancelled = true;
     };
-    // Only run once on mount; the form prop is stable.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [apiKey]);
 
-  // Step 2 — mount the element into our container once both are ready.
+  // Close dropdown when clicking outside
   useEffect(() => {
-    if (!autocompleteEl || !containerRef.current) return;
-    const target = containerRef.current;
-    target.appendChild(autocompleteEl);
-    return () => {
-      try {
-        target.removeChild(autocompleteEl);
-      } catch {
-        /* element may have already been detached */
+    const handler = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false);
       }
     };
-  }, [autocompleteEl]);
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const ensureSessionToken = (): SessionToken | undefined => {
+    const TokenCtor = window.google?.maps?.places?.AutocompleteSessionToken;
+    if (!TokenCtor) return undefined;
+    if (!sessionTokenRef.current) {
+      sessionTokenRef.current = new TokenCtor();
+    }
+    return sessionTokenRef.current;
+  };
+
+  const fetchPredictions = async (input: string) => {
+    if (!scriptReady) return;
+    const api = window.google?.maps?.places?.AutocompleteSuggestion;
+    if (!api) return;
+    try {
+      const { suggestions } = await api.fetchAutocompleteSuggestions({
+        input,
+        sessionToken: ensureSessionToken(),
+        includedRegionCodes: ["us"],
+      });
+      const preds = suggestions
+        .map((s) => s.placePrediction)
+        .filter((p): p is PlacePrediction => p !== null)
+        .slice(0, 5);
+      setPredictions(preds);
+      setOpen(preds.length > 0);
+      setHighlight(0);
+    } catch (err) {
+      console.warn("[AddressAutocomplete] fetchAutocompleteSuggestions failed:", err);
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Pass through to react-hook-form
+    rhfOnChange(e);
+
+    const value = e.target.value;
+    if (debounceRef.current) {
+      window.clearTimeout(debounceRef.current);
+    }
+    if (!value || value.length < 3) {
+      setPredictions([]);
+      setOpen(false);
+      return;
+    }
+    debounceRef.current = window.setTimeout(() => fetchPredictions(value), 220);
+  };
+
+  const handleSelect = async (prediction: PlacePrediction) => {
+    setOpen(false);
+    setPredictions([]);
+    try {
+      const place = prediction.toPlace();
+      await place.fetchFields({
+        fields: ["formattedAddress"],
+        sessionToken: sessionTokenRef.current ?? undefined,
+      });
+      sessionTokenRef.current = null; // Reset for next selection cycle
+      if (place.formattedAddress) {
+        form.setValue("address", place.formattedAddress, {
+          shouldDirty: true,
+          shouldTouch: true,
+          shouldValidate: true,
+        });
+      }
+    } catch (err) {
+      console.warn("[AddressAutocomplete] failed to resolve place:", err);
+      // Fall back to the prediction text
+      const text = prediction.text?.toString();
+      if (text) {
+        form.setValue("address", text, {
+          shouldDirty: true,
+          shouldTouch: true,
+          shouldValidate: true,
+        });
+      }
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!open || predictions.length === 0) return;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setHighlight((h) => (h + 1) % predictions.length);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setHighlight((h) => (h - 1 + predictions.length) % predictions.length);
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      const picked = predictions[highlight];
+      if (picked) handleSelect(picked);
+    } else if (e.key === "Escape") {
+      setOpen(false);
+    }
+  };
 
   return (
-    <div
-      ref={containerRef}
-      className={cn(
-        "relative w-full",
-        // Style the embedded web component to fit our form look.
-        "[&_gmp-place-autocomplete]:block [&_gmp-place-autocomplete]:w-full",
-        hasError && "[&_gmp-place-autocomplete]:!border-destructive"
-      )}
-    >
-      {!autocompleteEl && (
-        <Input
-          {...registerRest}
-          ref={rhfRef}
-          placeholder={placeholder}
-          autoComplete="off"
-          className={cn(
-            "border-input bg-background",
-            hasError && "border-destructive focus-visible:ring-destructive"
-          )}
-        />
+    <div ref={containerRef} className="relative w-full">
+      <Input
+        {...registerRest}
+        ref={setInputRef}
+        placeholder={placeholder}
+        autoComplete="off"
+        onChange={handleInputChange}
+        onFocus={() => {
+          if (predictions.length > 0) setOpen(true);
+        }}
+        onKeyDown={handleKeyDown}
+        className={cn(
+          "border-input bg-background",
+          hasError && "border-destructive focus-visible:ring-destructive"
+        )}
+      />
+      {open && predictions.length > 0 && (
+        <div className="absolute left-0 right-0 top-full z-50 mt-1 overflow-hidden rounded-md border border-border bg-popover text-popover-foreground shadow-md">
+          <ul role="listbox" aria-label="Address suggestions">
+            {predictions.map((p, i) => {
+              const text = p.text?.toString() ?? "";
+              const isActive = i === highlight;
+              return (
+                <li
+                  key={`${text}-${i}`}
+                  role="option"
+                  aria-selected={isActive}
+                >
+                  <button
+                    type="button"
+                    onMouseDown={(e) => {
+                      // mousedown fires before input blur — keeps focus and avoids race
+                      e.preventDefault();
+                    }}
+                    onClick={() => handleSelect(p)}
+                    onMouseEnter={() => setHighlight(i)}
+                    className={cn(
+                      "block w-full px-3 py-2 text-left text-sm transition-colors",
+                      isActive ? "bg-accent text-accent-foreground" : "hover:bg-accent/60"
+                    )}
+                  >
+                    {text}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
       )}
     </div>
   );
