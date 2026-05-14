@@ -454,21 +454,26 @@ export function InvestCalcPage({
 
   const propertyType = form.watch("propertyType");
   const purchasePrice = form.watch("purchasePrice");
+  const watchedBedrooms = form.watch("bedrooms");
 
   /**
-   * Fired when the user picks an address suggestion. Looks up state-level
-   * property tax, the current 30-year mortgage rate (FRED), and (for
-   * single-family only) a HUD Fair Market Rent estimate, then pre-fills
-   * any of those form fields that the user hasn't already filled in.
-   * Existing values are never overwritten.
+   * Holds the address components from the most recent autocomplete
+   * selection. We keep this around so we can re-fire the HUD rent lookup
+   * once the user fills in the bedroom count (selection order is
+   * typically address first, then beds/baths).
    */
-  const handleAddressSelected = useCallback(
-    async (place: SelectedAddress) => {
+  const lastSelectedAddressRef = useRef<SelectedAddress | null>(null);
+
+  /**
+   * Run the enrichment lookups (state property tax, FRED mortgage rate,
+   * HUD Fair Market Rent) and pre-fill the form. Idempotent: callers can
+   * invoke it whenever address or bedroom count changes; existing user
+   * input on monthly rent is preserved.
+   */
+  const runPropertyEnrichment = useCallback(
+    async (place: SelectedAddress, opts?: { silent?: boolean }) => {
       const currentPropertyType = form.getValues("propertyType");
       const isSingleFamily = currentPropertyType === "single-family";
-
-      // Only ask HUD for rent when single-family; per-bedroom FMR doesn't
-      // reflect duplex/triplex or owner-occupant economics.
       const bedrooms = isSingleFamily
         ? (form.getValues("bedrooms") as number | undefined)
         : undefined;
@@ -481,36 +486,81 @@ export function InvestCalcPage({
         bedrooms,
       });
 
-      const setOpts = { shouldDirty: false, shouldTouch: false, shouldValidate: false };
+      const setOpts = {
+        shouldDirty: false,
+        shouldTouch: false,
+        shouldValidate: false,
+      };
+      const filled: string[] = [];
 
-      // Property tax % — fill only if empty.
-      if (
-        enrichment.propertyTaxPct !== undefined &&
-        (form.getValues("propertyTaxPct") === undefined ||
-          form.getValues("propertyTaxPct") === null)
-      ) {
+      // Property tax — always overwrite with the state-level rate.
+      // Defaults baked into the form schema aren't location-aware, so the
+      // state rate is strictly more informative.
+      if (enrichment.propertyTaxPct !== undefined) {
         form.setValue("propertyTaxPct", enrichment.propertyTaxPct, setOpts);
+        filled.push(
+          `Property tax ${enrichment.propertyTaxPct.toFixed(2)}% (${enrichment.meta.propertyTax?.state})`
+        );
       }
 
-      // Interest rate — fill only if empty / matches the default sentinel.
-      // We treat any value <= 0 as "unset" since interest rate must be > 0.
+      // Interest rate — overwrite unless the user has manually edited it.
+      // dirtyFields.interestRate is true only after a manual change, so
+      // saved-analysis edits (which use form.reset) are also covered.
       if (enrichment.interestRate !== undefined) {
-        const current = form.getValues("interestRate");
-        if (current === undefined || current === null || (current as number) <= 0) {
+        const isDirty = form.formState.dirtyFields.interestRate;
+        if (!isDirty) {
           form.setValue("interestRate", enrichment.interestRate, setOpts);
+          filled.push(
+            `Interest rate ${enrichment.interestRate.toFixed(2)}% (current avg)`
+          );
         }
       }
 
-      // Monthly rent — fill only if empty, single-family only.
+      // Monthly rent — single-family only, only if empty (don't clobber
+      // a user-entered rent number).
       if (isSingleFamily && enrichment.monthlyRent !== undefined) {
         const current = form.getValues("monthlyRent") as number | undefined;
         if (current === undefined || current === null) {
           form.setValue("monthlyRent", enrichment.monthlyRent, setOpts);
+          filled.push(
+            `Rent ~$${enrichment.monthlyRent.toLocaleString()}/mo (HUD FMR)`
+          );
         }
       }
+
+      if (filled.length > 0 && !opts?.silent) {
+        toast({
+          title: "Auto-filled from address",
+          description: filled.join("  ·  "),
+        });
+      }
     },
-    [form]
+    [form, toast]
   );
+
+  /** Address-selected entry point (passed to PropertyDetailsSection). */
+  const handleAddressSelected = useCallback(
+    async (place: SelectedAddress) => {
+      lastSelectedAddressRef.current = place;
+      await runPropertyEnrichment(place);
+    },
+    [runPropertyEnrichment]
+  );
+
+  /**
+   * After an address has been picked, if the user later fills in the
+   * bedroom count, re-fire the lookup so the HUD rent estimate has the
+   * data it needs. Skipped silently if monthly rent is already filled.
+   */
+  useEffect(() => {
+    const place = lastSelectedAddressRef.current;
+    if (!place) return;
+    if (form.getValues("propertyType") !== "single-family") return;
+    if (typeof watchedBedrooms !== "number" || watchedBedrooms <= 0) return;
+    if (form.getValues("monthlyRent")) return;
+    runPropertyEnrichment(place, { silent: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [watchedBedrooms]);
 
   const buildTaxStrategySource = (
     analysisId: string | null,
