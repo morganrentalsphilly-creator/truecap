@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { cn } from "@/lib/utils";
 import { FieldError, optionalNumberSetValueAs } from "@/components/investcalc/form-field-helpers";
+import { AddressAutocomplete } from "@/components/investcalc/address-autocomplete";
 
 interface PropertyDetailsSectionProps {
   form: UseFormReturn<InvestmentFormValues>;
@@ -26,19 +27,12 @@ export function PropertyDetailsSection({ form }: PropertyDetailsSectionProps) {
       </div>
 
       <div className="space-y-4">
-        {/* Address */}
+        {/* Address — Google Places autocomplete attached when key is set */}
         <div>
           <Label className="text-sm font-medium text-foreground mb-1.5 block">
             Property Address
           </Label>
-          <Input
-            {...register("address")}
-            placeholder="123 Main Street, Austin, TX 78701"
-            className={cn(
-              "border-input bg-background",
-              errors.address && "border-destructive focus-visible:ring-destructive"
-            )}
-          />
+          <AddressAutocomplete form={form} hasError={!!errors.address} />
           <FieldError message={errors.address?.message} />
         </div>
 
