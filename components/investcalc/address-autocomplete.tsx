@@ -28,9 +28,22 @@ type PlacePrediction = {
 type AutocompleteSuggestionResult = {
   placePrediction: PlacePrediction | null;
 };
+type AddressComponent = {
+  types: string[];
+  longText?: string;
+  shortText?: string;
+};
 type Place = {
   fetchFields: (opts: { fields: string[]; sessionToken?: SessionToken }) => Promise<unknown>;
   formattedAddress?: string;
+  addressComponents?: AddressComponent[];
+};
+
+export type SelectedAddress = {
+  formattedAddress: string;
+  state?: string;   // 2-letter, e.g. "PA"
+  county?: string;  // e.g. "Philadelphia"
+  zip?: string;     // e.g. "19140"
 };
 type SessionToken = unknown;
 type PlacesLibrary = {
@@ -85,12 +98,17 @@ interface AddressAutocompleteProps {
   form: UseFormReturn<InvestmentFormValues>;
   hasError?: boolean;
   placeholder?: string;
+  /** Fired when the user picks a suggestion. Parsed state/county/zip
+   * are best-effort — missing on rare cases where Google doesn't return
+   * the corresponding addressComponent. */
+  onPlaceSelected?: (place: SelectedAddress) => void;
 }
 
 export function AddressAutocomplete({
   form,
   hasError,
   placeholder = "123 Main Street, Austin, TX 78701",
+  onPlaceSelected,
 }: AddressAutocompleteProps) {
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY;
   const containerRef = useRef<HTMLDivElement>(null);
@@ -199,16 +217,24 @@ export function AddressAutocomplete({
     try {
       const place = prediction.toPlace();
       await place.fetchFields({
-        fields: ["formattedAddress"],
+        fields: ["formattedAddress", "addressComponents"],
         sessionToken: sessionTokenRef.current ?? undefined,
       });
       sessionTokenRef.current = null; // Reset for next selection cycle
+
       if (place.formattedAddress) {
         form.setValue("address", place.formattedAddress, {
           shouldDirty: true,
           shouldTouch: true,
           shouldValidate: true,
         });
+
+        if (onPlaceSelected) {
+          onPlaceSelected({
+            formattedAddress: place.formattedAddress,
+            ...parseComponents(place.addressComponents),
+          });
+        }
       }
     } catch (err) {
       console.warn("[AddressAutocomplete] failed to resolve place:", err);
@@ -220,8 +246,29 @@ export function AddressAutocomplete({
           shouldTouch: true,
           shouldValidate: true,
         });
+        if (onPlaceSelected) onPlaceSelected({ formattedAddress: text });
       }
     }
+  };
+
+  /** Pick the state/county/zip out of Google's addressComponents array. */
+  const parseComponents = (
+    components: AddressComponent[] | undefined
+  ): { state?: string; county?: string; zip?: string } => {
+    if (!components) return {};
+    const out: { state?: string; county?: string; zip?: string } = {};
+    for (const c of components) {
+      if (!c.types) continue;
+      if (c.types.includes("administrative_area_level_1")) {
+        out.state = c.shortText ?? c.longText;
+      } else if (c.types.includes("administrative_area_level_2")) {
+        // longText is "Philadelphia County", we want "Philadelphia"
+        out.county = (c.longText ?? c.shortText)?.replace(/\s+County$/i, "");
+      } else if (c.types.includes("postal_code")) {
+        out.zip = c.longText ?? c.shortText;
+      }
+    }
+    return out;
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {

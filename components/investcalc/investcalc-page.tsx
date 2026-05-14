@@ -35,6 +35,8 @@ import { cn } from "@/lib/utils";
 import { saveDealAction } from "@/app/actions/saved-analyses";
 import { addDealToCompareAction } from "@/app/actions/compare";
 import { getDealScoreAction, type DealScoreActionResult } from "@/app/actions/deal-score";
+import { enrichPropertyAction } from "@/app/actions/enrich-property";
+import type { SelectedAddress } from "./address-autocomplete";
 import type { TenYearProjectionInput, ProjectionYear } from "@/lib/ten-year-projections";
 import type { TaxStrategyInput, TaxStrategyYear } from "@/lib/tax-strategy";
 import { generateInvestmentPDF, type ReportData } from "@/lib/pdf-generator";
@@ -452,6 +454,63 @@ export function InvestCalcPage({
 
   const propertyType = form.watch("propertyType");
   const purchasePrice = form.watch("purchasePrice");
+
+  /**
+   * Fired when the user picks an address suggestion. Looks up state-level
+   * property tax, the current 30-year mortgage rate (FRED), and (for
+   * single-family only) a HUD Fair Market Rent estimate, then pre-fills
+   * any of those form fields that the user hasn't already filled in.
+   * Existing values are never overwritten.
+   */
+  const handleAddressSelected = useCallback(
+    async (place: SelectedAddress) => {
+      const currentPropertyType = form.getValues("propertyType");
+      const isSingleFamily = currentPropertyType === "single-family";
+
+      // Only ask HUD for rent when single-family; per-bedroom FMR doesn't
+      // reflect duplex/triplex or owner-occupant economics.
+      const bedrooms = isSingleFamily
+        ? (form.getValues("bedrooms") as number | undefined)
+        : undefined;
+
+      const enrichment = await enrichPropertyAction({
+        state: place.state,
+        county: place.county,
+        zip: place.zip,
+        propertyType: currentPropertyType,
+        bedrooms,
+      });
+
+      const setOpts = { shouldDirty: false, shouldTouch: false, shouldValidate: false };
+
+      // Property tax % — fill only if empty.
+      if (
+        enrichment.propertyTaxPct !== undefined &&
+        (form.getValues("propertyTaxPct") === undefined ||
+          form.getValues("propertyTaxPct") === null)
+      ) {
+        form.setValue("propertyTaxPct", enrichment.propertyTaxPct, setOpts);
+      }
+
+      // Interest rate — fill only if empty / matches the default sentinel.
+      // We treat any value <= 0 as "unset" since interest rate must be > 0.
+      if (enrichment.interestRate !== undefined) {
+        const current = form.getValues("interestRate");
+        if (current === undefined || current === null || (current as number) <= 0) {
+          form.setValue("interestRate", enrichment.interestRate, setOpts);
+        }
+      }
+
+      // Monthly rent — fill only if empty, single-family only.
+      if (isSingleFamily && enrichment.monthlyRent !== undefined) {
+        const current = form.getValues("monthlyRent") as number | undefined;
+        if (current === undefined || current === null) {
+          form.setValue("monthlyRent", enrichment.monthlyRent, setOpts);
+        }
+      }
+    },
+    [form]
+  );
 
   const buildTaxStrategySource = (
     analysisId: string | null,
@@ -1115,7 +1174,7 @@ export function InvestCalcPage({
         <form ref={formElementRef} onSubmit={form.handleSubmit(onSubmit, onError)} noValidate>
           <div className="space-y-5">
             <PropertyTypeSection form={form} savedTemplateFallback={savedTemplateFallback} />
-            <PropertyDetailsSection form={form} />
+            <PropertyDetailsSection form={form} onAddressSelected={handleAddressSelected} />
 
             {propertyType === "single-family" && (
               <SingleFamilyUnitSection form={form} />

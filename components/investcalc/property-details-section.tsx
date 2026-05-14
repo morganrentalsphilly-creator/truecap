@@ -7,13 +7,14 @@ import { Label } from "@/components/ui/label";
 import { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { cn } from "@/lib/utils";
 import { FieldError, optionalNumberSetValueAs } from "@/components/investcalc/form-field-helpers";
-import { AddressAutocomplete } from "@/components/investcalc/address-autocomplete";
+import { AddressAutocomplete, type SelectedAddress } from "@/components/investcalc/address-autocomplete";
 
 interface PropertyDetailsSectionProps {
   form: UseFormReturn<InvestmentFormValues>;
+  onAddressSelected?: (place: SelectedAddress) => void;
 }
 
-export function PropertyDetailsSection({ form }: PropertyDetailsSectionProps) {
+export function PropertyDetailsSection({ form, onAddressSelected }: PropertyDetailsSectionProps) {
   const {
     register,
     formState: { errors },
@@ -32,7 +33,11 @@ export function PropertyDetailsSection({ form }: PropertyDetailsSectionProps) {
           <Label className="text-sm font-medium text-foreground mb-1.5 block">
             Property Address
           </Label>
-          <AddressAutocomplete form={form} hasError={!!errors.address} />
+          <AddressAutocomplete
+            form={form}
+            hasError={!!errors.address}
+            onPlaceSelected={onAddressSelected}
+          />
           <FieldError message={errors.address?.message} />
         </div>
 
