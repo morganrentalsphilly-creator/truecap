@@ -215,6 +215,9 @@ async function maybeFetchHudRent(
     type HudArea = {
       county_name?: string;
       name?: string; // metroareas use "name"
+      metro_name?: string; // counties[] rows sometimes carry metro_name
+      counties_msa?: string; // HUD metro rows list all MSA counties here
+      town_name?: string; // counties[] is row-per-town in NE states
       fips_code?: string;
       code?: string;
     } & Record<string, unknown>;
@@ -235,56 +238,77 @@ async function maybeFetchHudRent(
       `[enrichProperty] HUD OK for ${input.state}: ${counties.length} counties, ${metroareas.length} metros, year=${respYear}`
     );
 
-    // Try to match by county name first (most precise)
+    // 1. Try a specific county / metro match first (most accurate).
     let match: HudArea | undefined;
     if (input.county) {
       const target = normalizeCounty(input.county);
       match = counties.find(
         (c) => c.county_name && normalizeCounty(c.county_name) === target
       );
-      // Metros use "name" instead of "county_name"; partial-match by county
-      // ("Montgomery County" within "Washington-Arlington-... HUD Metro FMR Area"
-      // wouldn't match, but "Philadelphia" within "Philadelphia-Camden-..." would).
+      // Metros use "name" or "metro_name"; partial-match by county name so
+      // "Delaware" hits "Philadelphia-Camden-Wilmington, PA-NJ-DE-MD HUD
+      // Metro FMR Area" via "DE" — but we want a more deliberate match,
+      // so we look across name, metro_name, county_name, and counties_msa.
       if (!match) {
         match = metroareas.find((m) => {
-          const label = (m.name ?? "") + " " + (m.county_name ?? "");
+          const haystackText = [
+            m.name,
+            m.metro_name,
+            m.county_name,
+            m.counties_msa,
+          ]
+            .filter(Boolean)
+            .join(" ");
+          return (
+            haystackText && normalizeCounty(haystackText).includes(target)
+          );
+        });
+      }
+      // As a last attempt, also try the counties array with a partial
+      // match (HUD sometimes lists counties under a town record like
+      // "Aston township" with county_name "Delaware County").
+      if (!match) {
+        match = counties.find((c) => {
+          const label = (c.county_name ?? "") + " " + (c.town_name ?? "");
           return label && normalizeCounty(label).includes(target);
         });
       }
     }
 
-    const haystack = [...counties, ...metroareas];
-
-    // No specific area match — fall back to a state average for that bedroom.
-    if (!match && haystack.length > 0) {
-      const values = haystack
-        .map((c) => Number(c[fmrField] ?? 0))
-        .filter((v) => v > 0);
-      if (values.length === 0) {
-        console.log(
-          `[enrichProperty] HUD: no values >0 in state response for ${fmrField}`
-        );
-        return null;
-      }
-      const avg = Math.round(values.reduce((a, b) => a + b, 0) / values.length);
-      console.log(
-        `[enrichProperty] HUD: no county match for "${input.county}", returning state avg ${fmrField}=$${avg}`
-      );
-      return { amount: avg, county: `${input.state} avg`, year: respYear };
-    }
-
+    // 2. If we matched and the matched record has a real value, use it.
     if (match) {
       const v = Number(match[fmrField] ?? 0);
       const label = match.county_name ?? match.name ?? input.county ?? "";
-      console.log(
-        `[enrichProperty] HUD matched "${label}" — ${fmrField}=$${v}`
-      );
       if (v > 0) {
+        console.log(
+          `[enrichProperty] HUD matched "${label}" — ${fmrField}=$${v}`
+        );
         return { amount: v, county: label, year: respYear };
       }
+      console.log(
+        `[enrichProperty] HUD matched "${label}" but ${fmrField}=${v} (falling through to state-avg)`
+      );
     }
+
+    // 3. Always fall back to a state-average across counties + metros.
+    const haystack = [...counties, ...metroareas];
+    if (haystack.length > 0) {
+      const values = haystack
+        .map((c) => Number(c[fmrField] ?? 0))
+        .filter((v) => v > 0);
+      if (values.length > 0) {
+        const avg = Math.round(
+          values.reduce((a, b) => a + b, 0) / values.length
+        );
+        console.log(
+          `[enrichProperty] HUD: no precise match for "${input.county}", returning state-avg ${fmrField}=$${avg} across ${values.length} areas`
+        );
+        return { amount: avg, county: `${input.state} avg`, year: respYear };
+      }
+    }
+
     console.log(
-      `[enrichProperty] HUD: no county match for "${input.county}" and no state-avg fallback used`
+      `[enrichProperty] HUD: no usable data — haystack=${haystack.length}, county="${input.county}", state="${input.state}", field=${fmrField}`
     );
     return null;
   } catch (err) {
