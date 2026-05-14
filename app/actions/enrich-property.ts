@@ -189,74 +189,94 @@ async function maybeFetchHudRent(
   const bedsKey = Math.min(Math.max(Math.round(input.bedrooms), 0), 4);
   const fmrField = FMR_FIELD_BY_BEDS[bedsKey];
 
-  // Try the current calendar year's data first; fall back to the previous
-  // year if HUD hasn't published the next FY yet.
-  const thisYear = new Date().getFullYear();
-  const yearsToTry = [thisYear, thisYear - 1];
+  // HUD User API state endpoint. Per the official docs the path is
+  //   /fmr/statedata/{state_code}
+  // Year is optional; omitting it returns the latest published FY data.
+  const url = `https://www.huduser.gov/hudapi/public/fmr/statedata/${encodeURIComponent(
+    input.state.toUpperCase()
+  )}`;
 
-  for (const year of yearsToTry) {
-    try {
-      // HUD User API: /fmr/data/{entityid}?year={year}
-      // entityid is either a state code, a 10-digit county FMR area code,
-      // or a CBSA code. State code returns county-level + metroarea-level
-      // breakdowns for that state.
-      const url =
-        `https://www.huduser.gov/hudapi/public/fmr/data/${encodeURIComponent(input.state)}` +
-        `?year=${year}`;
-      const res = await fetch(url, {
-        headers: { Authorization: `Bearer ${apiKey}` },
-        cache: "no-store",
-      });
-      if (!res.ok) {
-        const body = await res.text().catch(() => "");
-        console.warn(
-          `[enrichProperty] HUD ${year} request failed: HTTP ${res.status}. Body: ${body.slice(0, 200)}`
-        );
-        continue;
-      }
-
-      const json = (await res.json()) as HudStateDataResponse & {
-        data?: { metroareas?: HudCounty[] };
-      };
-      const counties = json.data?.counties ?? [];
-      const metroareas = json.data?.metroareas ?? [];
-      const respYear = json.data?.year ?? year;
-      console.log(
-        `[enrichProperty] HUD ${year} OK: ${counties.length} counties, ${metroareas.length} metro areas`
+  try {
+    const res = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        Accept: "application/json",
+      },
+      cache: "no-store",
+    });
+    if (!res.ok) {
+      const body = await res.text().catch(() => "");
+      console.warn(
+        `[enrichProperty] HUD request failed: HTTP ${res.status} ${res.statusText}. URL=${url}. Body=${body.slice(0, 200)}`
       );
-
-      const haystack = [...counties, ...metroareas];
-
-      let match: HudCounty | undefined;
-      if (input.county) {
-        const target = normalizeCounty(input.county);
-        match = haystack.find(
-          (c) => c.county_name && normalizeCounty(c.county_name) === target
-        );
-      }
-      // No county/metro match → fall back to state average across all areas
-      // for that bedroom count. Less accurate but defensible.
-      if (!match && haystack.length > 0) {
-        const values = haystack
-          .map((c) => (c[fmrField as keyof HudCounty] as number | undefined) ?? 0)
-          .filter((v) => v > 0);
-        if (values.length === 0) continue;
-        const avg = Math.round(values.reduce((a, b) => a + b, 0) / values.length);
-        return { amount: avg, county: `${input.state} avg`, year: respYear };
-      }
-
-      if (match) {
-        const v = match[fmrField as keyof HudCounty] as number | undefined;
-        if (typeof v === "number" && v > 0) {
-          return { amount: v, county: match.county_name ?? input.county ?? "", year: respYear };
-        }
-      }
-    } catch {
-      // Try next year
+      return null;
     }
-  }
 
-  return null;
+    type HudArea = {
+      county_name?: string;
+      name?: string; // metroareas use "name"
+      fips_code?: string;
+      code?: string;
+    } & Record<string, unknown>;
+
+    const json = (await res.json()) as {
+      data?: {
+        year?: string | number;
+        counties?: HudArea[];
+        metroareas?: HudArea[];
+      };
+    };
+
+    const counties: HudArea[] = json.data?.counties ?? [];
+    const metroareas: HudArea[] = json.data?.metroareas ?? [];
+    const respYear = Number(json.data?.year ?? new Date().getFullYear());
+
+    console.log(
+      `[enrichProperty] HUD OK for ${input.state}: ${counties.length} counties, ${metroareas.length} metros, year=${respYear}`
+    );
+
+    // Try to match by county name first (most precise)
+    let match: HudArea | undefined;
+    if (input.county) {
+      const target = normalizeCounty(input.county);
+      match = counties.find(
+        (c) => c.county_name && normalizeCounty(c.county_name) === target
+      );
+      // Metros use "name" instead of "county_name"; partial-match by county
+      // ("Montgomery County" within "Washington-Arlington-... HUD Metro FMR Area"
+      // wouldn't match, but "Philadelphia" within "Philadelphia-Camden-..." would).
+      if (!match) {
+        match = metroareas.find((m) => {
+          const label = (m.name ?? "") + " " + (m.county_name ?? "");
+          return label && normalizeCounty(label).includes(target);
+        });
+      }
+    }
+
+    const haystack = [...counties, ...metroareas];
+
+    // No specific area match — fall back to a state average for that bedroom.
+    if (!match && haystack.length > 0) {
+      const values = haystack
+        .map((c) => Number(c[fmrField] ?? 0))
+        .filter((v) => v > 0);
+      if (values.length === 0) return null;
+      const avg = Math.round(values.reduce((a, b) => a + b, 0) / values.length);
+      return { amount: avg, county: `${input.state} avg`, year: respYear };
+    }
+
+    if (match) {
+      const v = Number(match[fmrField] ?? 0);
+      if (v > 0) {
+        const label = match.county_name ?? match.name ?? input.county ?? "";
+        return { amount: v, county: label, year: respYear };
+      }
+    }
+    return null;
+  } catch (err) {
+    console.warn("[enrichProperty] HUD fetch threw:", err);
+    return null;
+  }
 }
 
 function normalizeCounty(name: string): string {
