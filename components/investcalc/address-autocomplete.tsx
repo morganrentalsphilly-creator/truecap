@@ -22,13 +22,16 @@ import { Input } from "@/components/ui/input";
 import { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { cn } from "@/lib/utils";
 
+type PlacesLibrary = {
+  PlaceAutocompleteElement?: new (opts?: Record<string, unknown>) => HTMLElement;
+};
+
 declare global {
   interface Window {
     __googleMapsPlacesLoading?: Promise<void>;
     google?: {
       maps?: {
-        importLibrary?: (name: string) => Promise<unknown>;
-        places?: unknown;
+        places?: PlacesLibrary;
       };
     };
   }
@@ -36,7 +39,8 @@ declare global {
 
 function loadGoogleMapsScript(apiKey: string): Promise<void> {
   if (typeof window === "undefined") return Promise.reject(new Error("No window"));
-  if (window.google?.maps?.importLibrary) return Promise.resolve();
+  // Places already loaded via libraries=places — we're done.
+  if (window.google?.maps?.places?.PlaceAutocompleteElement) return Promise.resolve();
   if (window.__googleMapsPlacesLoading) return window.__googleMapsPlacesLoading;
 
   window.__googleMapsPlacesLoading = new Promise<void>((resolve, reject) => {
@@ -48,7 +52,11 @@ function loadGoogleMapsScript(apiKey: string): Promise<void> {
     }
     const script = document.createElement("script");
     script.id = "google-maps-places-script";
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&loading=async&v=weekly`;
+    // Use the simple `libraries=places` form: Google pre-loads the Places
+    // library so we can access google.maps.places.* directly on script load.
+    // (The async-bootstrap pattern would require Google's loader snippet to
+    // set up google.maps.importLibrary before the script tag fires.)
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&libraries=places&v=weekly`;
     script.async = true;
     script.defer = true;
     script.onload = () => resolve();
@@ -84,19 +92,13 @@ export function AddressAutocomplete({
     let cancelled = false;
 
     loadGoogleMapsScript(apiKey)
-      .then(async () => {
+      .then(() => {
         if (cancelled) return;
-        const importLibrary = window.google?.maps?.importLibrary;
-        if (!importLibrary) {
-          console.warn("[AddressAutocomplete] importLibrary not available on google.maps");
-          return;
-        }
-
-        const places = (await importLibrary("places")) as {
-          PlaceAutocompleteElement?: new (opts?: Record<string, unknown>) => HTMLElement;
-        };
-        if (!places.PlaceAutocompleteElement) {
-          console.warn("[AddressAutocomplete] PlaceAutocompleteElement not in Places library");
+        const places = window.google?.maps?.places;
+        if (!places?.PlaceAutocompleteElement) {
+          console.warn(
+            "[AddressAutocomplete] PlaceAutocompleteElement not available — make sure 'Places API (New)' is enabled on your API key."
+          );
           return;
         }
 
