@@ -196,9 +196,11 @@ async function maybeFetchHudRent(
 
   for (const year of yearsToTry) {
     try {
-      const url = `https://www.huduser.gov/hudapi/public/fmr/statedata/${encodeURIComponent(
-        input.state
-      )}/${year}`;
+      // HUD User API: /fmr/statedata/{state_code}?year={year}
+      // Year is a query param, not a path segment.
+      const url =
+        `https://www.huduser.gov/hudapi/public/fmr/statedata/${encodeURIComponent(input.state)}` +
+        `?year=${year}`;
       const res = await fetch(url, {
         headers: { Authorization: `Bearer ${apiKey}` },
         cache: "no-store",
