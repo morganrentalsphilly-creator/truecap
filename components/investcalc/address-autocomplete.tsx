@@ -3,58 +3,52 @@
 /**
  * Google Places address autocomplete bound to react-hook-form's "address" field.
  *
- * Loads the Google Maps JS Places library lazily on first mount, attaches an
- * Autocomplete instance to the input, and writes the selected place's
- * formatted_address back into the form via setValue.
+ * Uses the new `google.maps.places.PlaceAutocompleteElement` web component
+ * (the legacy `Autocomplete` class is unavailable to Google Cloud customers
+ * who signed up after March 1, 2025).
  *
- * Falls back to a plain text input when the API key is missing or the script
- * fails to load — the field stays fully usable, the user just types manually.
+ * Loads the Maps JS library with `loading=async` and uses `importLibrary`
+ * to grab Places. On selection, fetches `formattedAddress` and writes it
+ * back into the form via setValue.
+ *
+ * Falls back to a plain text Input when the API key is missing or the
+ * script fails to load — the address field stays fully usable, the user
+ * just types the address manually.
  */
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { cn } from "@/lib/utils";
 
-// Augment window with a loading promise so we don't load the script twice.
 declare global {
   interface Window {
     __googleMapsPlacesLoading?: Promise<void>;
     google?: {
       maps?: {
-        places?: {
-          Autocomplete: new (
-            input: HTMLInputElement,
-            opts?: Record<string, unknown>
-          ) => GoogleAutocomplete;
-        };
+        importLibrary?: (name: string) => Promise<unknown>;
+        places?: unknown;
       };
     };
   }
 }
 
-interface GoogleAutocomplete {
-  addListener: (event: string, cb: () => void) => { remove: () => void };
-  getPlace: () => { formatted_address?: string };
-}
-
-function loadGoogleMapsPlaces(apiKey: string): Promise<void> {
+function loadGoogleMapsScript(apiKey: string): Promise<void> {
   if (typeof window === "undefined") return Promise.reject(new Error("No window"));
-  if (window.google?.maps?.places) return Promise.resolve();
+  if (window.google?.maps?.importLibrary) return Promise.resolve();
   if (window.__googleMapsPlacesLoading) return window.__googleMapsPlacesLoading;
 
   window.__googleMapsPlacesLoading = new Promise<void>((resolve, reject) => {
     const existing = document.getElementById("google-maps-places-script") as HTMLScriptElement | null;
     if (existing) {
-      // Wait for it to load
       existing.addEventListener("load", () => resolve(), { once: true });
       existing.addEventListener("error", () => reject(new Error("Script load error")), { once: true });
       return;
     }
     const script = document.createElement("script");
     script.id = "google-maps-places-script";
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&libraries=places&loading=async&v=weekly`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&loading=async&v=weekly`;
     script.async = true;
     script.defer = true;
     script.onload = () => resolve();
@@ -77,81 +71,129 @@ export function AddressAutocomplete({
   placeholder = "123 Main Street, Austin, TX 78701",
 }: AddressAutocompleteProps) {
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY;
-  const inputRef = useRef<HTMLInputElement | null>(null);
-  const autocompleteRef = useRef<GoogleAutocomplete | null>(null);
-  const [_isReady, setIsReady] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [autocompleteEl, setAutocompleteEl] = useState<HTMLElement | null>(null);
 
-  // react-hook-form's register returns its own ref callback; we merge it with
-  // our inputRef so both the form library and the Google widget see the same
-  // DOM node.
+  // Fallback input <-> react-hook-form binding. When Google's element
+  // takes over, react-hook-form is updated imperatively via form.setValue.
   const { ref: rhfRef, ...registerRest } = form.register("address");
 
-  const setInputRef = useCallback(
-    (el: HTMLInputElement | null) => {
-      inputRef.current = el;
-      rhfRef(el);
-    },
-    [rhfRef]
-  );
-
+  // Step 1 — load Google Maps + create the autocomplete element.
   useEffect(() => {
-    if (!apiKey || !inputRef.current) return;
+    if (!apiKey) return;
     let cancelled = false;
-    let listener: { remove: () => void } | null = null;
 
-    loadGoogleMapsPlaces(apiKey)
-      .then(() => {
-        if (cancelled || !inputRef.current) return;
-        const places = window.google?.maps?.places;
-        if (!places) return;
+    loadGoogleMapsScript(apiKey)
+      .then(async () => {
+        if (cancelled) return;
+        const importLibrary = window.google?.maps?.importLibrary;
+        if (!importLibrary) {
+          console.warn("[AddressAutocomplete] importLibrary not available on google.maps");
+          return;
+        }
 
-        const ac = new places.Autocomplete(inputRef.current, {
-          types: ["address"],
-          componentRestrictions: { country: "us" },
-          fields: ["formatted_address"],
+        const places = (await importLibrary("places")) as {
+          PlaceAutocompleteElement?: new (opts?: Record<string, unknown>) => HTMLElement;
+        };
+        if (!places.PlaceAutocompleteElement) {
+          console.warn("[AddressAutocomplete] PlaceAutocompleteElement not in Places library");
+          return;
+        }
+
+        const element = new places.PlaceAutocompleteElement({
+          // New API uses includedRegionCodes (lowercase ISO 3166-1 alpha-2).
+          includedRegionCodes: ["us"],
         });
-        autocompleteRef.current = ac;
 
-        listener = ac.addListener("place_changed", () => {
-          const place = ac.getPlace();
-          if (place?.formatted_address) {
-            form.setValue("address", place.formatted_address, {
-              shouldDirty: true,
-              shouldTouch: true,
-            });
+        // Pre-populate from form's current value if we're editing.
+        const currentValue = form.getValues("address");
+        if (currentValue && "value" in element) {
+          try {
+            (element as unknown as { value: string }).value = currentValue;
+          } catch {
+            // Ignore — some element versions don't expose value as a setter.
+          }
+        }
+
+        // Make sure the web component spans full width and inherits our look.
+        element.style.width = "100%";
+
+        // Selection handler — gmp-select is the v3 event name.
+        element.addEventListener("gmp-select", async (event: Event) => {
+          // The event has a `placePrediction` property in the new API.
+          const ev = event as Event & {
+            placePrediction?: { toPlace: () => unknown };
+          };
+          const prediction = ev.placePrediction;
+          if (!prediction) return;
+          try {
+            const place = prediction.toPlace() as {
+              fetchFields: (opts: { fields: string[] }) => Promise<unknown>;
+              formattedAddress?: string;
+            };
+            await place.fetchFields({ fields: ["formattedAddress"] });
+            if (place.formattedAddress) {
+              form.setValue("address", place.formattedAddress, {
+                shouldDirty: true,
+                shouldTouch: true,
+                shouldValidate: true,
+              });
+            }
+          } catch (err) {
+            console.warn("[AddressAutocomplete] failed to resolve place:", err);
           }
         });
 
-        setIsReady(true);
+        if (cancelled) return;
+        setAutocompleteEl(element);
       })
-      .catch(() => {
-        // Silent fallback — input still works as a plain text field
+      .catch((err) => {
+        console.warn("[AddressAutocomplete] script load failed:", err);
       });
 
     return () => {
       cancelled = true;
-      listener?.remove();
-      autocompleteRef.current = null;
-      // Google injects a .pac-container div in <body> for the dropdown.
-      // Leaving them around isn't harmful, but clean up to avoid stragglers.
-      document.querySelectorAll(".pac-container").forEach((el) => {
-        if (!document.body.contains(el)) return;
-        // Only remove if our input is being unmounted — safe because we ran cancel
-        el.remove();
-      });
     };
-  }, [apiKey, form]);
+    // Only run once on mount; the form prop is stable.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [apiKey]);
+
+  // Step 2 — mount the element into our container once both are ready.
+  useEffect(() => {
+    if (!autocompleteEl || !containerRef.current) return;
+    const target = containerRef.current;
+    target.appendChild(autocompleteEl);
+    return () => {
+      try {
+        target.removeChild(autocompleteEl);
+      } catch {
+        /* element may have already been detached */
+      }
+    };
+  }, [autocompleteEl]);
 
   return (
-    <Input
-      {...registerRest}
-      ref={setInputRef}
-      placeholder={placeholder}
-      autoComplete="off"
+    <div
+      ref={containerRef}
       className={cn(
-        "border-input bg-background",
-        hasError && "border-destructive focus-visible:ring-destructive"
+        "relative w-full",
+        // Style the embedded web component to fit our form look.
+        "[&_gmp-place-autocomplete]:block [&_gmp-place-autocomplete]:w-full",
+        hasError && "[&_gmp-place-autocomplete]:!border-destructive"
       )}
-    />
+    >
+      {!autocompleteEl && (
+        <Input
+          {...registerRest}
+          ref={rhfRef}
+          placeholder={placeholder}
+          autoComplete="off"
+          className={cn(
+            "border-input bg-background",
+            hasError && "border-destructive focus-visible:ring-destructive"
+          )}
+        />
+      )}
+    </div>
   );
 }
