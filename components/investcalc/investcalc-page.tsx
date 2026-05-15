@@ -457,6 +457,21 @@ export function InvestCalcPage({
   const watchedBedrooms = form.watch("bedrooms");
 
   /**
+   * "Is this form value functionally empty?" — handles all the ways
+   * react-hook-form can yield no value:
+   *   - undefined / null  (default)
+   *   - NaN               (valueAsNumber on an empty input)
+   *   - 0                 (numeric placeholder)
+   *   - ""                (string before valueAsNumber kicks in)
+   */
+  const isEmptyNumber = (v: unknown): boolean => {
+    if (v === undefined || v === null) return true;
+    if (typeof v === "string" && v.trim() === "") return true;
+    if (typeof v === "number") return !Number.isFinite(v) || v === 0;
+    return false;
+  };
+
+  /**
    * Holds the address components from the most recent autocomplete
    * selection. We keep this around so we can re-fire the HUD rent lookup
    * once the user fills in the bedroom count (selection order is
@@ -525,11 +540,20 @@ export function InvestCalcPage({
       }
 
       // Monthly rent — single-family only, only if empty (don't clobber
-      // a user-entered rent number).
+      // a user-entered rent number). `valueAsNumber: true` on the input
+      // means an untouched empty field reads as NaN, so we must treat
+      // NaN as empty too.
       if (isSingleFamily && enrichment.monthlyRent !== undefined) {
-        const current = form.getValues("monthlyRent") as number | undefined;
-        console.log("[enrich] monthlyRent decision", { incoming: enrichment.monthlyRent, current });
-        if (current === undefined || current === null || (typeof current === "number" && current === 0)) {
+        const current = form.getValues("monthlyRent") as number | undefined | null;
+        const isEmpty = isEmptyNumber(current);
+        console.log("[enrich] monthlyRent decision", {
+          incoming: enrichment.monthlyRent,
+          current,
+          currentType: typeof current,
+          isNaN: typeof current === "number" && Number.isNaN(current),
+          isEmpty,
+        });
+        if (isEmpty) {
           form.setValue("monthlyRent", enrichment.monthlyRent, {
             shouldDirty: false,
             shouldTouch: false,
@@ -567,13 +591,21 @@ export function InvestCalcPage({
    */
   useEffect(() => {
     const place = lastSelectedAddressRef.current;
+    console.log("[bedrooms watcher]", {
+      watchedBedrooms,
+      type: typeof watchedBedrooms,
+      hasPlace: !!place,
+      propertyType: form.getValues("propertyType"),
+      currentRent: form.getValues("monthlyRent"),
+    });
     if (!place) return;
     if (form.getValues("propertyType") !== "single-family") return;
     // Accept any value that parses to a positive number (RHF may yield
     // strings transiently before valueAsNumber kicks in).
     const beds = Number(watchedBedrooms);
     if (!Number.isFinite(beds) || beds <= 0) return;
-    if (form.getValues("monthlyRent")) return;
+    // Treat NaN / 0 / empty string the same as "field has no value".
+    if (!isEmptyNumber(form.getValues("monthlyRent"))) return;
     // Non-silent so the user gets explicit confirmation that the rent
     // estimate populated.
     runPropertyEnrichment(place, { silent: false });
