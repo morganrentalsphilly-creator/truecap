@@ -144,33 +144,76 @@ const FMR_FIELD_BY_BEDS: Record<number, string> = {
   4: "Four-Bedroom",
 };
 
-type HudCounty = {
+// In-memory cache for HUD state responses. The client may call this server
+// action multiple times for a single property (once per unit in a duplex,
+// etc.), and we don't want to hit HUD's API every time. Keyed by state.
+type CachedHudState = {
+  counties: HudArea[];
+  metroareas: HudArea[];
+  year: number;
+  fetchedAt: number;
+};
+type HudArea = {
   county_name?: string;
-  FIPS_code?: string;
-  Efficiency?: number;
-  "One-Bedroom"?: number;
-  "Two-Bedroom"?: number;
-  "Three-Bedroom"?: number;
-  "Four-Bedroom"?: number;
-};
+  name?: string;
+  metro_name?: string;
+  counties_msa?: string;
+  town_name?: string;
+  fips_code?: string;
+  code?: string;
+} & Record<string, unknown>;
 
-type HudStateDataResponse = {
-  data?: {
-    year?: number;
-    counties?: HudCounty[];
+const hudCache = new Map<string, CachedHudState>();
+const HUD_CACHE_TTL_MS = 30 * 60 * 1000; // 30 min
+
+async function fetchHudStateData(
+  apiKey: string,
+  state: string
+): Promise<CachedHudState | null> {
+  const key = state.toUpperCase();
+  const cached = hudCache.get(key);
+  if (cached && Date.now() - cached.fetchedAt < HUD_CACHE_TTL_MS) {
+    return cached;
+  }
+
+  const url = `https://www.huduser.gov/hudapi/public/fmr/statedata/${encodeURIComponent(key)}`;
+  const res = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      Accept: "application/json",
+    },
+    cache: "no-store",
+  });
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    console.warn(
+      `[enrichProperty] HUD request failed: HTTP ${res.status} ${res.statusText}. URL=${url}. Body=${body.slice(0, 200)}`
+    );
+    return null;
+  }
+  const json = (await res.json()) as {
+    data?: {
+      year?: string | number;
+      counties?: HudArea[];
+      metroareas?: HudArea[];
+    };
   };
-};
+  const value: CachedHudState = {
+    counties: json.data?.counties ?? [],
+    metroareas: json.data?.metroareas ?? [],
+    year: Number(json.data?.year ?? new Date().getFullYear()),
+    fetchedAt: Date.now(),
+  };
+  console.log(
+    `[enrichProperty] HUD fetched ${key}: ${value.counties.length} counties, ${value.metroareas.length} metros, year=${value.year} (cached for ${HUD_CACHE_TTL_MS / 60000}m)`
+  );
+  hudCache.set(key, value);
+  return value;
+}
 
 async function maybeFetchHudRent(
   input: EnrichPropertyInput
 ): Promise<{ amount: number; county: string; year: number } | null> {
-  // Skip for multi-family and owner-occupant: HUD FMR is a single-unit
-  // per-bedroom estimate that doesn't reflect duplex/triplex economics.
-  if (input.propertyType !== "single-family") {
-    console.log(`[enrichProperty] HUD skipped: propertyType=${input.propertyType}`);
-    return null;
-  }
-
   const apiKey = process.env.HUD_API_KEY;
   if (!apiKey) {
     console.warn("[enrichProperty] HUD_API_KEY not set in environment");
@@ -189,54 +232,12 @@ async function maybeFetchHudRent(
   const bedsKey = Math.min(Math.max(Math.round(input.bedrooms), 0), 4);
   const fmrField = FMR_FIELD_BY_BEDS[bedsKey];
 
-  // HUD User API state endpoint. Per the official docs the path is
-  //   /fmr/statedata/{state_code}
-  // Year is optional; omitting it returns the latest published FY data.
-  const url = `https://www.huduser.gov/hudapi/public/fmr/statedata/${encodeURIComponent(
-    input.state.toUpperCase()
-  )}`;
-
   try {
-    const res = await fetch(url, {
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        Accept: "application/json",
-      },
-      cache: "no-store",
-    });
-    if (!res.ok) {
-      const body = await res.text().catch(() => "");
-      console.warn(
-        `[enrichProperty] HUD request failed: HTTP ${res.status} ${res.statusText}. URL=${url}. Body=${body.slice(0, 200)}`
-      );
-      return null;
-    }
-
-    type HudArea = {
-      county_name?: string;
-      name?: string; // metroareas use "name"
-      metro_name?: string; // counties[] rows sometimes carry metro_name
-      counties_msa?: string; // HUD metro rows list all MSA counties here
-      town_name?: string; // counties[] is row-per-town in NE states
-      fips_code?: string;
-      code?: string;
-    } & Record<string, unknown>;
-
-    const json = (await res.json()) as {
-      data?: {
-        year?: string | number;
-        counties?: HudArea[];
-        metroareas?: HudArea[];
-      };
-    };
-
-    const counties: HudArea[] = json.data?.counties ?? [];
-    const metroareas: HudArea[] = json.data?.metroareas ?? [];
-    const respYear = Number(json.data?.year ?? new Date().getFullYear());
-
-    console.log(
-      `[enrichProperty] HUD OK for ${input.state}: ${counties.length} counties, ${metroareas.length} metros, year=${respYear}`
-    );
+    const cached = await fetchHudStateData(apiKey, input.state);
+    if (!cached) return null;
+    const counties = cached.counties;
+    const metroareas = cached.metroareas;
+    const respYear = cached.year;
 
     // 1. Try a specific county / metro match first (most accurate).
     let match: HudArea | undefined;

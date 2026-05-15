@@ -539,18 +539,17 @@ export function InvestCalcPage({
         }
       }
 
-      // Monthly rent — single-family only, only if empty (don't clobber
-      // a user-entered rent number). `valueAsNumber: true` on the input
-      // means an untouched empty field reads as NaN, so we must treat
-      // NaN as empty too.
+      // Monthly rent — single-family only at this entry point. Multi-family
+      // rents are filled per-unit by a separate effect below. `valueAsNumber:
+      // true` means an empty input reads as NaN, so we must treat NaN as
+      // empty too.
+      let rentFilledFromHud = false;
       if (isSingleFamily && enrichment.monthlyRent !== undefined) {
         const current = form.getValues("monthlyRent") as number | undefined | null;
         const isEmpty = isEmptyNumber(current);
         console.log("[enrich] monthlyRent decision", {
           incoming: enrichment.monthlyRent,
           current,
-          currentType: typeof current,
-          isNaN: typeof current === "number" && Number.isNaN(current),
           isEmpty,
         });
         if (isEmpty) {
@@ -562,13 +561,16 @@ export function InvestCalcPage({
           filled.push(
             `Rent ~$${enrichment.monthlyRent.toLocaleString()}/mo (HUD FMR)`
           );
+          rentFilledFromHud = true;
         }
       }
 
       if (filled.length > 0 && !opts?.silent) {
         toast({
           title: "Auto-filled from address",
-          description: filled.join("  ·  "),
+          description: rentFilledFromHud
+            ? `${filled.join("  ·  ")} — HUD FMR is an area average; adjust to local comps.`
+            : filled.join("  ·  "),
         });
       }
     },
@@ -611,6 +613,89 @@ export function InvestCalcPage({
     runPropertyEnrichment(place, { silent: false });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [watchedBedrooms]);
+
+  /**
+   * Multi-family / house-hack: when the user fills in bedroom counts for
+   * each unit, look up the HUD rent estimate per unit (skipping any
+   * owner-occupied unit — that one doesn't generate rent). Each
+   * (unitIndex, bedrooms) combo is fetched at most once per session;
+   * the server caches HUD data so multiple per-unit calls don't actually
+   * hit HUD multiple times.
+   */
+  const watchedUnits = form.watch("units");
+  const enrichedUnitsRef = useRef<Set<string>>(new Set());
+  // Build a stable dep string that changes only when a unit's
+  // bedrooms or owner-occupied flag changes.
+  const unitsEnrichmentKey = (watchedUnits ?? [])
+    .map(
+      (u, i) =>
+        `${i}:${u?.bedrooms ?? ""}:${u?.isOwnerOccupied ? "1" : "0"}`
+    )
+    .join(",");
+
+  useEffect(() => {
+    const place = lastSelectedAddressRef.current;
+    if (!place) return;
+    const propType = form.getValues("propertyType");
+    if (propType !== "multi-family" && propType !== "owner-occupant") return;
+    const units = form.getValues("units") ?? [];
+
+    type Pending = { idx: number; beds: number };
+    const pending: Pending[] = [];
+    for (let idx = 0; idx < units.length; idx++) {
+      const unit = units[idx];
+      if (!unit) continue;
+      if (unit.isOwnerOccupied) continue;
+      const beds = Number(unit.bedrooms);
+      if (!Number.isFinite(beds) || beds <= 0) continue;
+      if (!isEmptyNumber(unit.monthlyRent)) continue;
+      const cacheKey = `${idx}:${beds}`;
+      if (enrichedUnitsRef.current.has(cacheKey)) continue;
+      enrichedUnitsRef.current.add(cacheKey);
+      pending.push({ idx, beds });
+    }
+    if (pending.length === 0) return;
+
+    (async () => {
+      const results = await Promise.all(
+        pending.map(({ beds }) =>
+          enrichPropertyAction({
+            state: place.state,
+            county: place.county,
+            zip: place.zip,
+            propertyType: propType,
+            bedrooms: beds,
+          })
+        )
+      );
+
+      const filledLines: string[] = [];
+      for (let i = 0; i < pending.length; i++) {
+        const { idx } = pending[i];
+        const result = results[i];
+        if (
+          result.monthlyRent !== undefined &&
+          isEmptyNumber(form.getValues(`units.${idx}.monthlyRent`))
+        ) {
+          form.setValue(
+            `units.${idx}.monthlyRent`,
+            result.monthlyRent,
+            { shouldDirty: false, shouldTouch: false, shouldValidate: false }
+          );
+          filledLines.push(
+            `Unit ${idx + 1}: $${result.monthlyRent.toLocaleString()}/mo`
+          );
+        }
+      }
+      if (filledLines.length > 0) {
+        toast({
+          title: "Auto-filled per-unit rent",
+          description: `${filledLines.join("  ·  ")} — HUD FMR is an area average; adjust to local comps.`,
+        });
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [unitsEnrichmentKey]);
 
   const buildTaxStrategySource = (
     analysisId: string | null,
