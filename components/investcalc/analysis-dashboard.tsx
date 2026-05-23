@@ -26,6 +26,7 @@ import { TaxStrategyPanel } from "@/components/investcalc/tax-strategy/panel";
 import { ExitScenariosPanel } from "@/components/investcalc/exit-scenarios/panel";
 import { MaxOfferCard } from "@/components/investcalc/max-offer-card";
 import { SensitivityGrid } from "@/components/investcalc/sensitivity-grid";
+import { StrategiesPanel } from "@/components/investcalc/strategies-panel";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 
 import type { ProjectionYear, TenYearProjectionInput } from "@/lib/ten-year-projections";
@@ -81,7 +82,7 @@ interface AnalysisDashboardProps {
   persistedActionsBlockHint?: string;
 }
 
-export type AnalysisDashboardTab = "cash-flow" | "projections" | "tax-strategy" | "exit-scenarios";
+export type AnalysisDashboardTab = "cash-flow" | "projections" | "tax-strategy" | "exit-scenarios" | "strategies";
 type RecommendationVariant = "strong-buy" | "buy" | "neutral" | "risky" | "avoid";
 
 const TABS: { id: AnalysisDashboardTab; label: string; mobileLabel: string; isPro: boolean }[] = [
@@ -89,6 +90,7 @@ const TABS: { id: AnalysisDashboardTab; label: string; mobileLabel: string; isPr
   { id: "projections", label: "10-Year Projections", mobileLabel: "10-Year", isPro: true },
   { id: "tax-strategy", label: "Tax Strategy", mobileLabel: "Tax", isPro: true },
   { id: "exit-scenarios", label: "Exit Scenarios", mobileLabel: "Exit", isPro: true },
+  { id: "strategies", label: "Strategies", mobileLabel: "Strategy", isPro: false },
 ];
 
 function fmt(n: number) {
@@ -546,7 +548,10 @@ export function AnalysisDashboard({
               Run the analysis to see exit scenarios.
             </div>
           )}
-          {activeTab !== "cash-flow" && activeTab !== "projections" && activeTab !== "tax-strategy" && activeTab !== "exit-scenarios" && (
+          {activeTab === "strategies" && (
+            <StrategiesPanel values={values} result={result} />
+          )}
+          {activeTab !== "cash-flow" && activeTab !== "projections" && activeTab !== "tax-strategy" && activeTab !== "exit-scenarios" && activeTab !== "strategies" && (
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <Lock className="w-10 h-10 text-muted-foreground mb-3" />
               <h3 className="font-semibold text-foreground mb-1">Pro Feature</h3>
