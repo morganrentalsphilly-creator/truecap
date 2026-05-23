@@ -25,6 +25,7 @@ import { TenYearProjectionsPanel } from "@/components/investcalc/ten-year-projec
 import { TaxStrategyPanel } from "@/components/investcalc/tax-strategy/panel";
 import { ExitScenariosPanel } from "@/components/investcalc/exit-scenarios/panel";
 import { MaxOfferCard } from "@/components/investcalc/max-offer-card";
+import { SensitivityGrid } from "@/components/investcalc/sensitivity-grid";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 
 import type { ProjectionYear, TenYearProjectionInput } from "@/lib/ten-year-projections";
@@ -471,6 +472,10 @@ export function AnalysisDashboard({
       {/* Max Allowable Offer — reverse-solves for the highest price that hits
           the user's target return thresholds. Self-contained, additive. */}
       <MaxOfferCard values={values} />
+
+      {/* Sensitivity grid — stress-tests the deal against rent / vacancy /
+          interest-rate moves. Additive; reuses calculateAnalysis. */}
+      <SensitivityGrid values={values} />
 
       {/* Analysis tabs */}
       <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
