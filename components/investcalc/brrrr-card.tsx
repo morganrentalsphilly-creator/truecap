@@ -31,24 +31,12 @@ const fmt = (n: number) =>
 const fmtPct = (n: number) =>
   n === Infinity ? "∞" : `${n.toFixed(1)}%`;
 
-/** Derive monthly operating expenses from an AnalysisResult.
- *  AnalysisResult exposes rent, netCashFlow, mortgage payment via downpayment
- *  + price + rate; opEx = rent - netCashFlow - monthlyMortgage. To avoid
- *  recomputing the mortgage, we use a simpler fallback when data is partial. */
-function deriveOpEx(values: InvestmentFormValues | null, result: AnalysisResult | null): number {
-  if (!values || !result) return 0;
-  const rent = result.monthlyRentalIncome ?? 0;
-  // mortgage payment = (loanAmount * monthlyRate) / (1 - (1+monthlyRate)^-N)
-  const price = Number(values.purchasePrice) || 0;
-  const dpPct = Number(values.downPaymentPct) || 0;
-  const ratePct = Number(values.interestRate) || 0;
-  const term = Number(values.loanTermYears) || 30;
-  const loan = price * (1 - dpPct / 100);
-  const r = ratePct / 100 / 12;
-  const n = term * 12;
-  const monthlyMortgage =
-    loan > 0 && r > 0 ? (loan * r) / (1 - Math.pow(1 + r, -n)) : 0;
-  return Math.max(0, rent - result.netCashFlow - monthlyMortgage);
+/** AnalysisResult exposes totalOperatingExpenses directly (sum of tax,
+ *  insurance, HOA, utilities, maintenance, vacancy, management, capex).
+ *  No need to back-derive from rent / mortgage / cash flow. */
+function deriveOpEx(result: AnalysisResult | null): number {
+  if (!result) return 0;
+  return Math.max(0, Number(result.totalOperatingExpenses) || 0);
 }
 
 export function BrrrrCard({ values, result, defaultRehab }: BrrrrCardProps) {
@@ -84,7 +72,7 @@ export function BrrrrCard({ values, result, defaultRehab }: BrrrrCardProps) {
     const arv = Number(arvInput);
     if (!arv || arv <= 0) return null;
     const rent = result?.monthlyRentalIncome ?? 0;
-    const opEx = deriveOpEx(values, result);
+    const opEx = deriveOpEx(result);
 
     return analyzeBrrrr({
       purchasePrice,

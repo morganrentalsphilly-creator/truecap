@@ -10,8 +10,6 @@
  * cash flow, and the infinite-return scenario (cash left ≤ 0).
  */
 
-import { AnalysisResult } from "@/lib/calc-analysis";
-
 export type BrrrrInputs = {
   purchasePrice: number;
   rehabBudget: number;
@@ -136,47 +134,3 @@ export function analyzeBrrrr(inputs: BrrrrInputs): BrrrrResult {
   };
 }
 
-/** Convenience: pull the inputs we can derive from the standard AnalysisResult + form. */
-export function brrrrInputsFromContext(args: {
-  purchasePrice: number;
-  downPaymentPct: number;
-  closingCostsPctAcq: number;
-  baseResult: AnalysisResult | null;
-  rehabBudget: number;
-  arv: number;
-  refiLtvPct: number;
-  refiRatePct: number;
-  refiTermYears: number;
-  closingCostsRefiPct: number;
-  holdMonths: number;
-  /** If unknown, estimate as (property tax + insurance + utilities) — no rent during rehab. */
-  monthlyCarryingCostOverride?: number;
-}): BrrrrInputs {
-  const rent = args.baseResult?.monthlyRentalIncome ?? 0;
-  const opEx = args.baseResult
-    ? Math.max(0, rent - (args.baseResult.netCashFlow + (args.baseResult.netCashFlow >= 0 ? 0 : 0)) - (args.baseResult.netCashFlow >= 0 ? args.baseResult.netCashFlow : -args.baseResult.netCashFlow))
-    : 0;
-  // The above is messy — better: derive opEx directly from AnalysisResult fields.
-  // We approximate: opEx = rent - netCashFlow - currentMortgagePayment. But we
-  // don't have a clean handle on currentMortgagePayment from AnalysisResult.
-  // Safe fallback: 40 % of rent (typical for SFR).
-  const opExFallback = rent * 0.4;
-  const postRefiOpEx = args.monthlyCarryingCostOverride ?? opEx > 0 ? opEx : opExFallback;
-  const carryingFallback = rent > 0 ? rent * 0.25 : 800;
-
-  return {
-    purchasePrice: args.purchasePrice,
-    rehabBudget: args.rehabBudget,
-    arv: args.arv,
-    refiLtvPct: args.refiLtvPct,
-    refiRatePct: args.refiRatePct,
-    refiTermYears: args.refiTermYears,
-    closingCostsPctAcq: args.closingCostsPctAcq,
-    closingCostsRefiPct: args.closingCostsRefiPct,
-    downPaymentPct: args.downPaymentPct,
-    holdMonths: args.holdMonths,
-    monthlyCarryingCost: args.monthlyCarryingCostOverride ?? carryingFallback,
-    postRefiMonthlyOpEx: postRefiOpEx,
-    postRefiMonthlyRent: rent,
-  };
-}

@@ -28,25 +28,19 @@ interface StrategiesPanelProps {
 function deriveDefaultSqft(values: InvestmentFormValues | null): number | null {
   if (!values) return null;
   // Single-family stores sqft at the top level; multi-family inside units[].
-  const top = Number((values as unknown as { sqft?: number }).sqft);
+  const top = Number(values.sqft);
   if (Number.isFinite(top) && top > 0) return top;
   const units = values.units ?? [];
-  const sum = units.reduce(
-    (s, u) => s + (Number(u?.sqft) || 0),
-    0
-  );
+  const sum = units.reduce((s, u) => s + (Number(u?.sqft) || 0), 0);
   return sum > 0 ? sum : null;
 }
 
 function deriveDefaultBaths(values: InvestmentFormValues | null): number | null {
   if (!values) return null;
-  const top = Number((values as unknown as { bathrooms?: number }).bathrooms);
+  const top = Number(values.bathrooms);
   if (Number.isFinite(top) && top > 0) return top;
   const units = values.units ?? [];
-  const sum = units.reduce(
-    (s, u) => s + (Number(u?.bathrooms) || 0),
-    0
-  );
+  const sum = units.reduce((s, u) => s + (Number(u?.bathrooms) || 0), 0);
   return sum > 0 ? sum : null;
 }
 
