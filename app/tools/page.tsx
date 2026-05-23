@@ -24,12 +24,33 @@ const TOOLS: { href: string; title: string; description: string; available: bool
       "Capitalization rate from price, rent, and operating expenses. Plus what counts as a good cap rate.",
     available: true,
   },
-  // Forthcoming — listed as 'coming soon' so the page hints at depth without
-  // broken links.
-  { href: "#", title: "Cash-on-cash return calculator", description: "Return on the cash you actually invested.", available: false },
-  { href: "#", title: "BRRRR calculator", description: "Buy, rehab, rent, refinance — cash-out math.", available: false },
-  { href: "#", title: "1% rule calculator", description: "Quick screening filter for rental deals.", available: false },
-  { href: "#", title: "Rehab cost estimator", description: "Sq-ft-based defaults for cosmetic, kitchen, bath, systems.", available: false },
+  {
+    href: "/tools/cash-on-cash-calculator",
+    title: "Cash-on-cash return calculator",
+    description:
+      "Return on the cash you actually invested. Includes mortgage and operating expense math.",
+    available: true,
+  },
+  {
+    href: "/tools/brrrr-calculator",
+    title: "BRRRR calculator",
+    description:
+      "Buy, rehab, rent, refinance. Models the cash-out and post-refi cash flow.",
+    available: true,
+  },
+  {
+    href: "/tools/1-percent-rule-calculator",
+    title: "1% rule calculator",
+    description:
+      "Quick screening filter for rental deals. Pass / fail in 5 seconds.",
+    available: true,
+  },
+  {
+    href: "#",
+    title: "Rehab cost estimator",
+    description: "Sq-ft-based defaults for cosmetic, kitchen, bath, systems.",
+    available: false,
+  },
 ];
 
 export default function ToolsLandingPage() {
