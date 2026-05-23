@@ -27,6 +27,7 @@ import { ExitScenariosPanel } from "@/components/investcalc/exit-scenarios/panel
 import { MaxOfferCard } from "@/components/investcalc/max-offer-card";
 import { SensitivityGrid } from "@/components/investcalc/sensitivity-grid";
 import { StrategiesPanel } from "@/components/investcalc/strategies-panel";
+import { ShareLinkButton } from "@/components/investcalc/share-link-button";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 
 import type { ProjectionYear, TenYearProjectionInput } from "@/lib/ten-year-projections";
@@ -307,6 +308,9 @@ export function AnalysisDashboard({
                 <span className="hidden sm:inline">New Analysis</span>
                 <span className="sm:hidden">New</span>
               </Button>
+              {/* Share link — stateless URL-encoded snapshot of the analysis.
+                  Sits next to the existing actions; no auth required to use. */}
+              <ShareLinkButton values={values} />
             </div>
           </div>
         </div>
