@@ -1405,6 +1405,7 @@ export function InvestCalcPage({
           <div className="mt-8" data-analysis-results="true">
             <AnalysisDashboard
               result={analysisResult}
+              values={form.getValues()}
               isLoading={isCalculating}
               dealScoreResult={dealScoreResult}
               isLoadingDealScore={isLoadingDealScore}

@@ -24,6 +24,8 @@ import { AnalysisResult } from "@/lib/calc-analysis";
 import { TenYearProjectionsPanel } from "@/components/investcalc/ten-year-projections/panel";
 import { TaxStrategyPanel } from "@/components/investcalc/tax-strategy/panel";
 import { ExitScenariosPanel } from "@/components/investcalc/exit-scenarios/panel";
+import { MaxOfferCard } from "@/components/investcalc/max-offer-card";
+import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 
 import type { ProjectionYear, TenYearProjectionInput } from "@/lib/ten-year-projections";
 import type { TaxStrategyInput, TaxStrategyYear } from "@/lib/tax-strategy";
@@ -33,6 +35,8 @@ import type { DealScoreActionResult } from "@/app/actions/deal-score";
 
 interface AnalysisDashboardProps {
   result: AnalysisResult | null;
+  /** Current form values — needed by MaxOfferCard to re-solve at varied prices. */
+  values?: InvestmentFormValues | null;
   isLoading: boolean;
   dealScoreResult: DealScoreActionResult | null;
   isLoadingDealScore: boolean;
@@ -128,6 +132,7 @@ function MetricCard({
 
 export function AnalysisDashboard({
   result,
+  values = null,
   isLoading,
   dealScoreResult,
   isLoadingDealScore,
@@ -435,6 +440,15 @@ export function AnalysisDashboard({
         <MetricCard
           label="DSCR"
           value={result ? result.dscr.toFixed(2) : "—"}
+          sub={
+            result
+              ? result.dscr >= 1.25
+                ? "Bankable (≥1.25)"
+                : result.dscr >= 1.0
+                ? "Tight (≥1.0)"
+                : "Underwater"
+              : undefined
+          }
           color={result ? (result.dscr >= 1.25 ? "text-[var(--metric-positive)]" : "text-[var(--metric-negative)]") : undefined}
           isLoading={isLoading}
         />
@@ -454,7 +468,10 @@ export function AnalysisDashboard({
         />
       </div>
 
-     
+      {/* Max Allowable Offer — reverse-solves for the highest price that hits
+          the user's target return thresholds. Self-contained, additive. */}
+      <MaxOfferCard values={values} />
+
       {/* Analysis tabs */}
       <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
         {/* Tab bar */}
