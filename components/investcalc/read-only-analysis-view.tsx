@@ -85,16 +85,21 @@ export function ReadOnlyAnalysisView({ values, result }: ReadOnlyAnalysisViewPro
         />
         <MetricTile
           label="DSCR"
-          value={result.dscr.toFixed(2)}
+          // Cash purchases have no debt service so DSCR is undefined.
+          // calc-analysis returns 0 in that case — surface a clear sub
+          // rather than a misleading "Underwater" badge.
+          value={result.monthlyPayment <= 0 ? "—" : result.dscr.toFixed(2)}
           sub={
-            result.dscr >= 1.25
+            result.monthlyPayment <= 0
+              ? "Cash purchase"
+              : result.dscr >= 1.25
               ? "Bankable (≥1.25)"
               : result.dscr >= 1.0
               ? "Tight (≥1.0)"
               : "Underwater"
           }
-          positive={result.dscr >= 1.25}
-          negative={result.dscr < 1.25}
+          positive={result.monthlyPayment > 0 && result.dscr >= 1.25}
+          negative={result.monthlyPayment > 0 && result.dscr < 1.25}
         />
         <MetricTile
           label="Est. Tax Savings"
