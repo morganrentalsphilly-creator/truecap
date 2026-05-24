@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowUpRight, Check } from "lucide-react";
 import { getSiteUrl } from "@/lib/site-url";
 import { BrrrrCalculatorWidget } from "@/components/tools/brrrr-calculator-widget";
+import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta";
 
 export const metadata: Metadata = {
   title: "BRRRR Calculator | Buy Rehab Rent Refinance Repeat | TrueCap",
@@ -234,6 +235,8 @@ export default function BrrrrCalculatorPage() {
               <ArrowUpRight className="w-4 h-4" />
             </Link>
           </section>
+
+          <ToolsConversionCta calculatorName="BRRRR calculator" hook="In TrueCap, the BRRRR analyzer plugs into your real numbers (rent, op-ex, financing) and shows post-refi cash flow + cash-left-in-deal + infinite-return alerts. Save and share." />
 
           <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">
             Built with{" "}

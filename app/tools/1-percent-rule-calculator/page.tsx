@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowUpRight, Check } from "lucide-react";
 import { getSiteUrl } from "@/lib/site-url";
 import { OnePercentRuleWidget } from "@/components/tools/one-percent-rule-widget";
+import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta";
 
 export const metadata: Metadata = {
   title: "1% Rule Calculator | Free Rental Property Screener | TrueCap",
@@ -238,6 +239,8 @@ export default function OnePercentRulePage() {
               <ArrowUpRight className="w-4 h-4" />
             </Link>
           </section>
+
+          <ToolsConversionCta calculatorName="1% rule calculator" hook="The 1% rule is a 5-second screener. When you want a real underwrite — DSCR, cap rate, projections, tax — open the full TrueCap analyzer. It's free." />
 
           <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">
             Built with{" "}

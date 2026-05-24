@@ -13,6 +13,7 @@ import Link from "next/link";
 import { ArrowUpRight, Check } from "lucide-react";
 import { getSiteUrl } from "@/lib/site-url";
 import { CapRateCalculatorWidget } from "@/components/tools/cap-rate-calculator-widget";
+import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta";
 
 export const metadata: Metadata = {
   title: "Cap Rate Calculator | Free Rental Property Calculator | TrueCap",
@@ -357,6 +358,8 @@ export default function CapRateCalculatorPage() {
           </section>
 
           {/* Footer */}
+          <ToolsConversionCta calculatorName="Cap rate calculator" hook="TrueCap's full analyzer runs cap rate plus cash-on-cash, DSCR, 10-year projection, tax savings, and exit scenarios — all on the same deal. Save your work, compare deals, share a link." />
+
           <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">
             Built with{" "}
             <Link href="/" className="font-bold text-foreground hover:underline">

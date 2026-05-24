@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowUpRight, Check } from "lucide-react";
 import { getSiteUrl } from "@/lib/site-url";
 import { CocCalculatorWidget } from "@/components/tools/coc-calculator-widget";
+import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta";
 
 export const metadata: Metadata = {
   title: "Cash-on-Cash Return Calculator | Free Rental Property Tool | TrueCap",
@@ -268,6 +269,8 @@ export default function CoCCalculatorPage() {
               <ArrowUpRight className="w-4 h-4" />
             </Link>
           </section>
+
+          <ToolsConversionCta calculatorName="Cash-on-cash calculator" hook="The TrueCap analyzer adds 10-year cash flow projection, tax savings, and exit scenarios on top of cash-on-cash — so you can see whether the modest year-1 return becomes a great long-term play." />
 
           <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">
             Built with{" "}

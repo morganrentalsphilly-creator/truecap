@@ -249,6 +249,8 @@ export default function RehabEstimatorPage() {
             </Link>
           </section>
 
+          <ToolsConversionCta calculatorName="Rehab estimator" hook="TrueCap connects rehab budget straight into the BRRRR + fix-and-flip analyzers — so you can see whether the rehab pays for itself after refi or sale." />
+
           <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">
             Built with{" "}
             <Link href="/" className="font-bold text-foreground hover:underline">TrueCap</Link>{" "}

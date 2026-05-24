@@ -265,7 +265,7 @@ export function Header({
             Unlock Deal Score, 10-Year Projections and Tax Strategy with
           </span>
           <span className="sm:hidden">Upgrade to</span>
-          <Link href={isPremiumStatusReady && !isPremium ? "/profile" : "/auth/sign-up"}>
+          <Link href="/pricing">
           <span className="font-bold underline underline-offset-2 cursor-pointer hover:opacity-80 transition-opacity">
             Pro
           </span>
@@ -292,7 +292,7 @@ export function Header({
 
           {/* Center — Pro upsell pill (free / non-premium only, desktop) */}
           {isPremiumStatusReady && !isPremium && (
-             <Link href={isPremiumStatusReady && !isPremium ? "/profile" : "/auth/sign-up"}
+             <Link href="/pricing"
             >
             <div className="hidden xl:flex items-center gap-2 bg-muted/60 border border-border/70 rounded-full px-3.5 py-1.5">
               <span className="inline-flex items-center gap-1 bg-[var(--brand-orange)] text-white text-[10px] font-bold px-2 py-[3px] rounded-full uppercase tracking-wider">

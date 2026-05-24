@@ -27,6 +27,7 @@ import { ExitScenariosPanel } from "@/components/investcalc/exit-scenarios/panel
 import { MaxOfferCard } from "@/components/investcalc/max-offer-card";
 import { SensitivityGrid } from "@/components/investcalc/sensitivity-grid";
 import { StrategiesPanel } from "@/components/investcalc/strategies-panel";
+import { MomentOfValueUpsell } from "@/components/marketing/moment-of-value-upsell";
 // ShareLinkButton import temporarily removed — Share button was pulled from
 // the Quick Actions row because it wrapped onto a second line. Component
 // + share-link.ts + /d/[encoded] route all remain in the codebase ready
@@ -522,6 +523,18 @@ export function AnalysisDashboard({
           isLoading={isLoading}
         />
       </div>
+
+      {/* Moment-of-value Pro upsell — fires for free users only, using this
+          specific deal's numbers so the pitch is relevant, not generic. */}
+      {result && !isLoading && !canUseProjections && (
+        <MomentOfValueUpsell
+          netCashFlow={result.netCashFlow}
+          capRate={result.capRate}
+          cocReturn={result.cocReturn}
+          estimatedAnnualTaxSavings={Math.round((result.taxSavingsMonthly ?? 0) * 12)}
+          isPaid={canUseProjections}
+        />
+      )}
 
       {/* Max Allowable Offer — reverse-solves for the highest price that hits
           the user's target return thresholds. Self-contained, additive. */}

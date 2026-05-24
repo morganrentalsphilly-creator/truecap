@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Header } from "@/components/investcalc/header";
 import { InvestCalcPage } from "@/components/investcalc/investcalc-page";
+import { MarketingHero } from "@/components/marketing/marketing-hero";
 import {
   getEntitlementsForUser,
   hasPaidPlanSubscription,
@@ -97,6 +98,9 @@ export default async function Home() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
       <Header initialUser={user} initialEntitlements={entitlements} />
+      {/* Marketing hero ONLY for cold visitors. Authenticated users
+          have already seen the pitch — they want the calculator. */}
+      {!user && <MarketingHero />}
       <InvestCalcPage
         canSaveDeals={canSaveDeals}
         canCompareDeals={canCompareDeals}
