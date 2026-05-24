@@ -33,7 +33,20 @@ export async function GET(request: Request) {
     return NextResponse.json({ suggestions: [] }, { status: 403 });
   }
 
-  const like = `%${query.replaceAll("%", "\\%").replaceAll("_", "\\_")}%`;
+  // Sanitize before building the filter string:
+  //   - escape the LIKE wildcards (% _) so they aren't user-controlled
+  //   - strip PostgREST filter syntax chars (, ( ) *) which would break
+  //     the .or() parser or, worse, splice in extra conditions
+  //   - cap length so a 2KB query string can't blow up the DB plan
+  const safeQuery = query
+    .replaceAll("%", "\\%")
+    .replaceAll("_", "\\_")
+    .replaceAll(",", " ")
+    .replaceAll("(", " ")
+    .replaceAll(")", " ")
+    .replaceAll("*", " ")
+    .slice(0, 100);
+  const like = `%${safeQuery}%`;
   const { data, error } = await supabase
     .from("saved_analyses")
     .select("id, address, title, property_type")
