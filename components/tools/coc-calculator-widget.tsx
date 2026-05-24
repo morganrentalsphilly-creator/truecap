@@ -32,7 +32,12 @@ function classify(coc: number): { label: string; color: string; note: string } {
 }
 
 function calcMonthlyPayment(principal: number, annualRatePct: number, years: number): number {
-  if (principal <= 0) return 0;
+  // Match the defensive guards used by lib/calc-analysis.ts so an empty
+  // "Loan Term" field can't produce Infinity (which would render as "∞"
+  // and break the live readout).
+  if (!Number.isFinite(principal) || principal <= 0) return 0;
+  if (!Number.isFinite(years) || years <= 0) return 0;
+  if (!Number.isFinite(annualRatePct) || annualRatePct < 0) return 0;
   const r = annualRatePct / 100 / 12;
   const n = years * 12;
   if (r === 0) return principal / n;
