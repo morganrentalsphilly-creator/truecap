@@ -18,6 +18,7 @@ import {
   hasPlanFeature,
   hasSavedDealCapacity,
 } from "@/lib/entitlements";
+import { getSiteUrl } from "@/lib/site-url";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
@@ -64,19 +65,76 @@ export const metadata: Metadata = {
 };
 
 export default async function Home() {
+  const siteUrl = getSiteUrl();
+  // Schema.org @graph — three connected entities Google uses to build
+  // the brand knowledge panel for "TrueCap" queries and the sitelinks
+  // search box for branded organic results.
+  //   1. Organization — the legal/brand entity. Drives the right-rail
+  //      brand panel and powers logo display in SERPs.
+  //   2. WebSite — the canonical site, with a SearchAction declaration
+  //      so Google can render a sitelinks search box under TrueCap
+  //      brand searches. Wired to a /search?q= URL even though we
+  //      don't have a search page yet — when we add one, this already
+  //      points to it.
+  //   3. SoftwareApplication — the product itself. Existing entity,
+  //      now @id-linked to the Organization so they're a single graph.
   const structuredData = {
     "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    name: "TrueCap",
-    applicationCategory: "FinanceApplication",
-    operatingSystem: "Web",
-    description:
-      "A real estate investment calculator for rental property analysis, cash flow forecasting, and ROI evaluation.",
-    offers: {
-      "@type": "Offer",
-      price: "0",
-      priceCurrency: "USD",
-    },
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": `${siteUrl}/#organization`,
+        name: "TrueCap",
+        url: siteUrl,
+        logo: `${siteUrl}/icon-light-32x32.png`,
+        sameAs: [
+          // Add real social profiles here as TrueCap gets accounts.
+          // Leaving the array present (even if empty) tells Google
+          // "we don't have public social yet" rather than "we forgot
+          // this field" — explicit absence > silent absence.
+        ],
+        contactPoint: {
+          "@type": "ContactPoint",
+          contactType: "customer support",
+          email: "hello@usetruecap.com",
+          availableLanguage: "English",
+        },
+      },
+      {
+        "@type": "WebSite",
+        "@id": `${siteUrl}/#website`,
+        url: siteUrl,
+        name: "TrueCap",
+        publisher: { "@id": `${siteUrl}/#organization` },
+        // Sitelinks search box. The /search?q= URL doesn't have to
+        // exist yet — Google validates the structure, not the route.
+        // When we ship a search page, this already points there.
+        potentialAction: {
+          "@type": "SearchAction",
+          target: {
+            "@type": "EntryPoint",
+            urlTemplate: `${siteUrl}/search?q={search_term_string}`,
+          },
+          "query-input": "required name=search_term_string",
+        },
+      },
+      {
+        "@type": "SoftwareApplication",
+        "@id": `${siteUrl}/#software`,
+        name: "TrueCap",
+        applicationCategory: "FinanceApplication",
+        operatingSystem: "Web",
+        url: siteUrl,
+        description:
+          "A real estate investment calculator for rental property analysis, cash flow forecasting, and ROI evaluation.",
+        offers: {
+          "@type": "Offer",
+          price: "0",
+          priceCurrency: "USD",
+        },
+        publisher: { "@id": `${siteUrl}/#organization` },
+      },
+    ],
   };
 
   const supabase = await createServerSupabaseClient();

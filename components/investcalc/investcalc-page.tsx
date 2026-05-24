@@ -1241,6 +1241,11 @@ export function InvestCalcPage({
         clearCalcDraftRaw();
         if (result.mode === "inserted") {
           setSavedDealCount((count) => count + 1);
+          // Only fire the conversion event on a true first-save, not
+          // on subsequent updates of an existing deal. Otherwise a
+          // power-user editing a saved deal 5 times would emit 5
+          // 'deal_saved' events and skew the optimizer.
+          trackConversion("deal_saved");
         }
         const persistedJson = formSnapshotForCompare(form.getValues());
         if (persistedJson) lastPersistedFormJsonRef.current = persistedJson;
@@ -1375,6 +1380,13 @@ export function InvestCalcPage({
       });
 
       await generateInvestmentPDF(reportData);
+      // Fire the Google Ads conversion event. PDF export = high-intent
+      // signal (user is sharing the analysis with a lender / partner).
+      // Even though it's not a revenue event, surfacing it to the Ads
+      // optimizer gives the bidding algo extra positive signal beyond
+      // the rare 'paid_subscribed' event — critical for new accounts
+      // where conversion data is sparse.
+      trackConversion("pdf_exported");
       toast({
         title: "PDF generated",
         description: "Your report was exported from the latest live analysis data.",
