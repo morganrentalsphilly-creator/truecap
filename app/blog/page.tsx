@@ -48,6 +48,15 @@ export type BlogPost = {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: "what-is-a-good-cap-rate",
+    title: "What's a good cap rate for rental property in 2026?",
+    excerpt:
+      "Benchmarks by market type, the framework professionals actually use to evaluate cap rate, and why pre-2022 intuition is silently buying investors into negative leverage.",
+    readingTimeMinutes: 9,
+    publishedAt: "2026-05-24",
+    available: true,
+  },
+  {
     slug: "dscr-loans-explained",
     title: "DSCR loans explained: what they are, when they make sense, what they cost in 2026",
     excerpt:
