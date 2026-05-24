@@ -526,11 +526,18 @@ function pageInputs(doc: jsPDF, d: ReportData) {
   const cw = (SAFE.w - 24) / 3;
   const ch = 60;
   const gap = 10;
+  // Cash purchase => no debt service => DSCR isn't applicable. Detect via
+  // downPaymentPct >= 100 (the canonical signal in the report payload).
+  const isCashPurchase = d.financing.downPaymentPct >= 100;
+  const dscrValue = isCashPurchase ? "N/A" : d.performance.dscr.toFixed(2);
+  const dscrTone: "primary" | "success" | "danger" | "neutral" | "violet" | "warn" =
+    isCashPurchase ? "neutral" : d.performance.dscr >= 1.2 ? "success" : "warn";
+  const dscrSub = isCashPurchase ? "cash purchase" : "debt cover";
   const cards: Array<[string, string, "primary" | "success" | "danger" | "neutral" | "violet" | "warn", string?]> = [
     ["Monthly Cash Flow", fmtCurrency(d.performance.monthlyCashFlow), d.performance.monthlyCashFlow >= 0 ? "success" : "danger", "/month"],
     ["CoC Return", fmtPct(d.performance.cocReturn, true), "primary", "year 1"],
     ["Cap Rate", fmtPct(d.performance.capRate, true), "violet", "gross"],
-    ["DSCR", d.performance.dscr.toFixed(2), d.performance.dscr >= 1.2 ? "success" : "warn", "debt cover"],
+    ["DSCR", dscrValue, dscrTone, dscrSub],
     ["Tax Savings", fmtCurrency(d.performance.taxSavings), "success", "/month est."],
     ["After-Tax CF", fmtCurrency(d.performance.afterTaxCF), "primary", "/month"],
   ];
