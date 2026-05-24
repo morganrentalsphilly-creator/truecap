@@ -89,7 +89,7 @@ export function FinancingSection({ form }: FinancingSectionProps) {
         <div>
           <Label className="text-xs font-semibold text-[var(--brand-green)] mb-1.5 block uppercase tracking-wide">
             <GlossaryTip term="closingCosts" showIcon={false}>Closing Costs %</GlossaryTip>
-            {" "}<span className="text-[7px] sm:text-xs text-muted-foreground">(Optional)</span>
+            {" "}<span className="text-[10px] sm:text-xs text-muted-foreground">(Optional)</span>
           </Label>
           <div className="relative">
             <Input

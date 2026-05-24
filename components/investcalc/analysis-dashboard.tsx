@@ -284,7 +284,7 @@ export function AnalysisDashboard({
                 )}
                 <span>Save</span>
                 {isSaveLockedByPlan && (
-                  <span className="ml-0.1 sm:ml-1 rounded-full bg-[var(--brand-orange)] px-0.5 sm:px-1 py-0.5 text-[7px] sm:text-[8px] font-bold uppercase text-white sm:ml-1.5 sm:px-1.5 sm:text-[9px]">
+                  <span className="ml-0.5 sm:ml-1 rounded-full bg-[var(--brand-orange)] px-1 sm:px-1 py-0.5 text-[9px] sm:text-[9px] font-bold uppercase text-white sm:ml-1.5 sm:px-1.5">
                     PRO
                   </span>
                 )}
