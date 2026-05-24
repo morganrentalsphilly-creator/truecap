@@ -19,7 +19,7 @@
  */
 
 import Link from "next/link";
-import { ArrowRight, Calculator, ChevronDown, Clock, FileDown, Gauge, Lock, Shield, ShieldCheck, Sparkles, TrendingUp, Zap } from "lucide-react";
+import { ArrowRight, Calculator, ChevronDown, FileDown, Lock, Shield, ShieldCheck, Sparkles, TrendingUp, Zap } from "lucide-react";
 
 const TRUST_STATS = [
   { label: "To first analysis",  value: "60s",    sub: "no setup" },

@@ -10,12 +10,22 @@ import Link from "next/link";
 import { ArrowUpRight, Calculator } from "lucide-react";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { getSiteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
   title: "Free Real Estate Calculators | TrueCap",
   description:
     "Free, no-signup rental property calculators. Cap rate, cash-on-cash, BRRRR, 1% rule, and more — backed by the same math that powers the TrueCap full analyzer.",
   alternates: { canonical: "/tools" },
+  openGraph: {
+    title: "Free Real Estate Calculators | TrueCap",
+    description:
+      "Nine free rental property calculators — cap rate, cash-on-cash, BRRRR, DSCR, NOI, mortgage, GRM, rehab, 1% rule. No signup.",
+    url: "/tools",
+    type: "website",
+    images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap free real estate calculators" }],
+  },
+  twitter: { card: "summary_large_image", images: ["/home.jpg"] },
 };
 
 const TOOLS: { href: string; title: string; description: string; available: boolean }[] = [
@@ -85,8 +95,43 @@ const TOOLS: { href: string; title: string; description: string; available: bool
 ];
 
 export default function ToolsLandingPage() {
+  const siteUrl = getSiteUrl();
+  // CollectionPage + ItemList schema. Tells Google "this page is a
+  // curated list of related tools" so it can render richer SERP
+  // results (occasional carousel of items, clearer page-intent
+  // signals). Each tool gets a position so the list isn't an
+  // unordered bag of links. Only available tools land in the schema
+  // — coming-soon entries are excluded so we don't surface dead links.
+  const collectionLd = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "@id": `${siteUrl}/tools#collection`,
+    name: "Free Real Estate Calculators",
+    description:
+      "Nine free, no-signup rental property calculators — cap rate, cash-on-cash, BRRRR, DSCR, NOI, mortgage payment, GRM, rehab cost, 1% rule.",
+    url: `${siteUrl}/tools`,
+    isPartOf: { "@id": `${siteUrl}/#website` },
+    mainEntity: {
+      "@type": "ItemList",
+      name: "TrueCap free calculators",
+      itemListOrder: "https://schema.org/ItemListOrderAscending",
+      numberOfItems: TOOLS.filter((t) => t.available).length,
+      itemListElement: TOOLS.filter((t) => t.available).map((tool, idx) => ({
+        "@type": "ListItem",
+        position: idx + 1,
+        url: `${siteUrl}${tool.href}`,
+        name: tool.title,
+        description: tool.description,
+      })),
+    },
+  };
+
   return (
     <div className="min-h-screen bg-background">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionLd) }}
+      />
       <main id="main" className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <header className="mb-8">
           <Link
