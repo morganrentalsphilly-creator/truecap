@@ -67,6 +67,20 @@ const TOOLS: { href: string; title: string; description: string; available: bool
       "Net Operating Income with every common operating expense + vacancy + operating-expense ratio.",
     available: true,
   },
+  {
+    href: "/tools/mortgage-payment-calculator",
+    title: "Mortgage payment calculator",
+    description:
+      "PITI breakdown — principal, interest, taxes, insurance. Investment-property rates and amortization.",
+    available: true,
+  },
+  {
+    href: "/tools/gross-rent-multiplier-calculator",
+    title: "GRM calculator",
+    description:
+      "Gross Rent Multiplier — the 10-second screening ratio for triaging deals before underwriting.",
+    available: true,
+  },
 ];
 
 export default function ToolsLandingPage() {
