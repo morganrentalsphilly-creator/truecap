@@ -37,9 +37,21 @@ export function LoginForm() {
 
   useEffect(() => {
     if (searchParams.get("error") === "auth") {
+      // Differentiate the common failure modes so users know whether to
+      // request a new email vs. retry signing in. The callback route
+      // surfaces a specific `reason` query param when it can.
+      const reason = searchParams.get("reason") ?? "";
+      const isMissing = reason === "missing_token";
+      const isExpired = /expire|otp|token/i.test(reason);
       toast({
-        title: "Link invalid or expired",
-        description: "Try signing in again or request a new reset email.",
+        title: isMissing
+          ? "Link is missing required info"
+          : isExpired
+            ? "Link expired or already used"
+            : "Link invalid or expired",
+        description: isMissing
+          ? "Open the link directly from the email, or request a new one."
+          : "Reset and confirmation links work once and expire after a short time. Request a new email below.",
         variant: "destructive",
       });
       return;
