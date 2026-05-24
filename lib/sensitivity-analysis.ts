@@ -89,7 +89,12 @@ export function buildSensitivityReport(
     const rentBase = safeMonthlyRent(values);
     const rentDeltaPct = (pct: number) => `${pct > 0 ? "+" : ""}${(pct * 100).toFixed(0)}%`;
 
-    return [
+    // Cash purchases have no loan, so the interest-rate axis would show
+    // identical numbers across Stress/Base/Upside — confusing noise. Skip
+    // the row entirely for cash deals.
+    const isCashPurchase = Number(values.downPaymentPct) >= 100;
+
+    const rows: SensitivityReport = [
       {
         axis: "rent",
         label: "Rent",
@@ -108,7 +113,10 @@ export function buildSensitivityReport(
           { name: "Upside", deltaLabel: `${(deltas.vacancy.upside * 100).toFixed(0)}pp`, result: vacancyScenario(values, deltas.vacancy.upside) },
         ],
       },
-      {
+    ];
+
+    if (!isCashPurchase) {
+      rows.push({
         axis: "interestRate",
         label: "Interest Rate",
         scenarios: [
@@ -116,8 +124,10 @@ export function buildSensitivityReport(
           { name: "Base", deltaLabel: `${(Number(values.interestRate) || 0).toFixed(2)}%`, result: base },
           { name: "Upside", deltaLabel: `${(deltas.interestRate.upside * 100).toFixed(0)}pp`, result: rateScenario(values, deltas.interestRate.upside) },
         ],
-      },
-    ];
+      });
+    }
+
+    return rows;
   } catch {
     return null;
   }

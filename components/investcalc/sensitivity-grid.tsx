@@ -45,6 +45,9 @@ function ScenarioCell({
   baseResult: AnalysisResult;
   scenarioName: string;
 }) {
+  // Cash purchases have no debt service — DSCR is N/A. Show "no debt"
+  // rather than a misleading "DSCR 0.00" in every cell.
+  const isCashPurchase = result.monthlyPayment <= 0;
   return (
     <div className="space-y-0.5">
       <div className={cn("text-sm font-semibold tabular-nums", pickColor(scenarioName, baseResult.netCashFlow, result.netCashFlow))}>
@@ -59,9 +62,13 @@ function ScenarioCell({
           {fmtPct(result.cocReturn)} CoC
         </span>{" "}
         ·{" "}
-        <span className={cn(pickColor(scenarioName, baseResult.dscr, result.dscr))}>
-          DSCR {result.dscr.toFixed(2)}
-        </span>
+        {isCashPurchase ? (
+          <span className="text-muted-foreground/70">cash</span>
+        ) : (
+          <span className={cn(pickColor(scenarioName, baseResult.dscr, result.dscr))}>
+            DSCR {result.dscr.toFixed(2)}
+          </span>
+        )}
       </div>
     </div>
   );
