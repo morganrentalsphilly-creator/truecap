@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowUpRight, Check } from "lucide-react";
 import { getSiteUrl } from "@/lib/site-url";
 import { RehabEstimatorCard } from "@/components/investcalc/rehab-estimator-card";
+import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta";
 
 export const metadata: Metadata = {
   title: "Rehab Cost Estimator | Free Rental Property Calculator | TrueCap",
