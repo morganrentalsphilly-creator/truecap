@@ -48,6 +48,15 @@ export type BlogPost = {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: "cash-flow-vs-appreciation",
+    title: "Cash flow vs appreciation: which rental strategy actually wins in 2026?",
+    excerpt:
+      "A 10-year side-by-side across three market types with 2026 borrowing costs — and the two return components most comparisons silently forget.",
+    readingTimeMinutes: 9,
+    publishedAt: "2026-05-24",
+    available: true,
+  },
+  {
     slug: "what-is-a-good-cap-rate",
     title: "What's a good cap rate for rental property in 2026?",
     excerpt:

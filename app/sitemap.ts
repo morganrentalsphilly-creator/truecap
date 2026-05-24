@@ -120,6 +120,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
     },
     {
+      url: `${siteUrl}/blog/cash-flow-vs-appreciation`,
+      lastModified: new Date("2026-05-24"),
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
       url: `${siteUrl}/changelog`,
       lastModified: new Date(),
       changeFrequency: "weekly",
