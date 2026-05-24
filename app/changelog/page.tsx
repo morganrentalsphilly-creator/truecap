@@ -56,6 +56,34 @@ const CATEGORY_STYLES: Record<Category, { icon: typeof Sparkles; color: string; 
 const ENTRIES: Entry[] = [
   {
     date: "2026-05-24",
+    category: "Feature",
+    title: "Persona landing pages — /for-agents + /for-flippers",
+    description:
+      "Tightly-targeted landing pages with persona-specific value props and use cases. Designed as paid-ad landing surfaces where ad copy and LP messaging align ('Underwrite for your investor clients' → agents, 'Model your next flip in 60 seconds' → flippers).",
+  },
+  {
+    date: "2026-05-24",
+    category: "Content",
+    title: "/markets/philadelphia — first local-SEO landing",
+    description:
+      "Substantive Philly-specific page: cap rate benchmarks by neighborhood, PA property tax mechanics, BRRRR-in-Philly notes, rental licensing requirements, and 6 city-specific FAQs. Prototype for additional markets if this performs.",
+  },
+  {
+    date: "2026-05-24",
+    category: "Feature",
+    title: "Onboarding tour for new signups",
+    description:
+      "Floating 3-step card walks first-signup users through Try Sample → Save your first deal → See what Pro unlocks. Only fires for authenticated users with zero saved deals; persists dismiss to localStorage.",
+  },
+  {
+    date: "2026-05-24",
+    category: "Feature",
+    title: "Real 'deals analyzed this week' trust ticker",
+    description:
+      "Aggregate count from Supabase rendered as a small badge in the hero. Threshold-gated so low numbers don't anti-prove — only shows when count exceeds 25. Cached server-side, refreshes every 5 minutes.",
+  },
+  {
+    date: "2026-05-24",
     category: "Content",
     title: "/methodology page — every formula and data source",
     description:

@@ -163,7 +163,7 @@ export function OnboardingTour({ isAuthenticated, savedDealCount }: Props) {
         {/* Step body */}
         <div className="mt-3 flex items-start gap-3">
           <div className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl bg-[var(--brand-blue-light)] text-primary">
-            <Icon className="size-4.5" />
+            <Icon className="size-4" />
           </div>
           <div className="min-w-0">
             <h3 className="text-sm font-black text-foreground sm:text-base">
