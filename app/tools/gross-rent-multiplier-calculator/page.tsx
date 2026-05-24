@@ -13,6 +13,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { GrmCalculatorWidget } from "@/components/tools/grm-calculator-widget";
 import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 
 export const metadata: Metadata = {
   title: "GRM Calculator | Free Gross Rent Multiplier Tool | TrueCap",
@@ -92,6 +93,7 @@ export default function GrmCalculatorPage() {
 
   return (
     <>
+      <ToolBreadcrumbSchema toolPath="/tools/gross-rent-multiplier-calculator" toolName="GRM calculator" />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
 

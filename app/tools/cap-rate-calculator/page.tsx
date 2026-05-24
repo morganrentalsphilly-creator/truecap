@@ -16,6 +16,7 @@ import { CapRateCalculatorWidget } from "@/components/tools/cap-rate-calculator-
 import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta";
 
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 export const metadata: Metadata = {
   title: "Cap Rate Calculator | Free Rental Property Calculator | TrueCap",
   description:
@@ -102,6 +103,7 @@ export default function CapRateCalculatorPage() {
 
   return (
     <>
+      <ToolBreadcrumbSchema toolPath="/tools/cap-rate-calculator" toolName="Cap rate calculator" />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppLd) }}

@@ -10,6 +10,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { MortgagePaymentWidget } from "@/components/tools/mortgage-payment-widget";
 import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 
 export const metadata: Metadata = {
   title: "Mortgage Payment Calculator | Free PITI Tool | TrueCap",
@@ -86,6 +87,7 @@ export default function MortgagePaymentPage() {
 
   return (
     <>
+      <ToolBreadcrumbSchema toolPath="/tools/mortgage-payment-calculator" toolName="Mortgage payment calculator" />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
 

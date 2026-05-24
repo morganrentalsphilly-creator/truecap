@@ -6,6 +6,7 @@ import { RehabEstimatorCard } from "@/components/investcalc/rehab-estimator-card
 import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta";
 
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 export const metadata: Metadata = {
   title: "Rehab Cost Estimator | Free Rental Property Calculator | TrueCap",
   description:
@@ -83,6 +84,7 @@ export default function RehabEstimatorPage() {
 
   return (
     <>
+      <ToolBreadcrumbSchema toolPath="/tools/rehab-cost-estimator" toolName="Rehab cost estimator" />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
 

@@ -6,6 +6,7 @@ import { BrrrrCalculatorWidget } from "@/components/tools/brrrr-calculator-widge
 import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta";
 
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 export const metadata: Metadata = {
   title: "BRRRR Calculator | Buy Rehab Rent Refinance Repeat | TrueCap",
   description:
@@ -83,6 +84,7 @@ export default function BrrrrCalculatorPage() {
 
   return (
     <>
+      <ToolBreadcrumbSchema toolPath="/tools/brrrr-calculator" toolName="BRRRR calculator" />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
 

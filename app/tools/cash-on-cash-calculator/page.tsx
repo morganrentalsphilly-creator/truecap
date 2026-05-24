@@ -6,6 +6,7 @@ import { CocCalculatorWidget } from "@/components/tools/coc-calculator-widget";
 import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta";
 
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 export const metadata: Metadata = {
   title: "Cash-on-Cash Return Calculator | Free Rental Property Tool | TrueCap",
   description:
@@ -86,6 +87,7 @@ export default function CoCCalculatorPage() {
 
   return (
     <>
+      <ToolBreadcrumbSchema toolPath="/tools/cash-on-cash-calculator" toolName="Cash-on-cash return calculator" />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
 

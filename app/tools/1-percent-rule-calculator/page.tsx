@@ -6,6 +6,7 @@ import { OnePercentRuleWidget } from "@/components/tools/one-percent-rule-widget
 import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta";
 
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 export const metadata: Metadata = {
   title: "1% Rule Calculator | Free Rental Property Screener | TrueCap",
   description:
@@ -82,6 +83,7 @@ export default function OnePercentRulePage() {
 
   return (
     <>
+      <ToolBreadcrumbSchema toolPath="/tools/1-percent-rule-calculator" toolName="1% rule calculator" />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
 

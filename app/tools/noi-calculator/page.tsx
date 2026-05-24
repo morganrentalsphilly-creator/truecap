@@ -13,6 +13,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { NoiCalculatorWidget } from "@/components/tools/noi-calculator-widget";
 import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 
 export const metadata: Metadata = {
   title: "NOI Calculator | Free Net Operating Income Tool | TrueCap",
@@ -92,6 +93,7 @@ export default function NoiCalculatorPage() {
 
   return (
     <>
+      <ToolBreadcrumbSchema toolPath="/tools/noi-calculator" toolName="NOI calculator" />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
 
