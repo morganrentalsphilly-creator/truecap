@@ -6,7 +6,7 @@ import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react";
-import { signInAction } from "@/app/actions/auth";
+import { resendConfirmationAction, signInAction } from "@/app/actions/auth";
 import { loginSchema, type LoginInput } from "@/lib/auth-schema";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -28,6 +28,11 @@ export function LoginForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
+  // When a sign-in fails because the email isn't confirmed, surface a
+  // one-click "Resend confirmation" affordance. We stash the email
+  // they tried so the resend goes to the right address.
+  const [unconfirmedEmail, setUnconfirmedEmail] = useState<string | null>(null);
+  const [isResending, setIsResending] = useState(false);
 
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
@@ -71,6 +76,14 @@ export function LoginForm() {
     setIsSubmitting(false);
 
     if (!result.ok) {
+      // Auth action maps the Supabase "email not confirmed" code to a
+      // specific message — detect that and offer to resend.
+      const isUnconfirmed = /confirm your email/i.test(result.message);
+      if (isUnconfirmed) {
+        setUnconfirmedEmail(values.email.trim());
+      } else {
+        setUnconfirmedEmail(null);
+      }
       toast({
         title: "Sign in failed",
         description: result.message,
@@ -79,12 +92,32 @@ export function LoginForm() {
       return;
     }
 
+    setUnconfirmedEmail(null);
     toast({
       title: "Welcome back",
       description: rememberMe ? "You are signed in." : "You are signed in for this session.",
     });
     router.push("/");
     router.refresh();
+  }
+
+  async function handleResendConfirmation() {
+    if (!unconfirmedEmail || isResending) return;
+    setIsResending(true);
+    const result = await resendConfirmationAction({ email: unconfirmedEmail });
+    setIsResending(false);
+    if (!result.ok) {
+      toast({
+        title: "Couldn't resend",
+        description: result.message,
+        variant: "destructive",
+      });
+      return;
+    }
+    toast({
+      title: "Confirmation email sent",
+      description: `Check the inbox for ${unconfirmedEmail} (and your spam folder).`,
+    });
   }
 
   return (
@@ -153,6 +186,32 @@ export function LoginForm() {
             </FormItem>
           )}
         />
+
+        {unconfirmedEmail ? (
+          <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
+            <p className="font-semibold">
+              Your email <span className="font-mono">{unconfirmedEmail}</span> isn&apos;t confirmed yet.
+            </p>
+            <p className="mt-0.5 leading-relaxed text-amber-800">
+              Check your inbox + spam folder, or resend the confirmation link.
+            </p>
+            <button
+              type="button"
+              onClick={handleResendConfirmation}
+              disabled={isResending}
+              className="mt-2 inline-flex items-center gap-1.5 rounded-md bg-amber-200 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-amber-900 hover:bg-amber-300 disabled:opacity-50"
+            >
+              {isResending ? (
+                <>
+                  <Loader2 className="size-3 animate-spin" />
+                  Sending…
+                </>
+              ) : (
+                "Resend confirmation"
+              )}
+            </button>
+          </div>
+        ) : null}
 
         <label className="flex items-center gap-2 text-xs text-muted-foreground">
           <Checkbox checked={rememberMe} onCheckedChange={(checked) => setRememberMe(checked === true)} />

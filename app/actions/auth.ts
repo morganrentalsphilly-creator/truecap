@@ -145,3 +145,40 @@ export async function signOutAction(): Promise<void> {
   const supabase = await createServerSupabaseClient();
   await supabase.auth.signOut();
 }
+
+/**
+ * Resend the signup-confirmation email. Used by the login form when a
+ * user tries to sign in with an unconfirmed account, or when they lose
+ * the original email (spam folder, typo'd address that auto-corrected).
+ *
+ * Always returns ok=true to avoid leaking which emails are registered —
+ * Supabase no-ops silently on unknown / already-confirmed addresses.
+ */
+export async function resendConfirmationAction(input: unknown): Promise<AuthActionResult> {
+  const parsed = forgotPasswordSchema.safeParse(input);
+  if (!parsed.success) {
+    const msg = parsed.error.flatten().fieldErrors.email?.[0] ?? "Enter a valid email.";
+    return { ok: false, message: msg };
+  }
+
+  const siteUrl = getSiteUrl();
+  const supabase = await createServerSupabaseClient();
+  const { error } = await supabase.auth.resend({
+    type: "signup",
+    email: parsed.data.email.trim(),
+    options: {
+      emailRedirectTo: `${siteUrl}/auth/callback?next=/`,
+    },
+  });
+
+  // Supabase rate-limits resends; surface that case clearly. All other
+  // errors are intentionally swallowed (don't leak account existence).
+  if (error && /rate ?limit|too many/i.test(error.message)) {
+    return {
+      ok: false,
+      message: "You've requested a few of these in a row. Wait a minute and try again.",
+    };
+  }
+
+  return { ok: true };
+}
