@@ -113,6 +113,13 @@ export default function RootLayout({
     <html lang="en" className={`${plusJakartaSans.variable} ${dmMono.variable} font-sans`}>
       {process.env.NODE_ENV === 'production' && (
         <head>
+          {/* Preconnect to the slowest third-party we load — saves
+              ~80-200ms on first paint by warming DNS + TLS to gtag's
+              CDN before the actual <script src> evaluation starts.
+              Materially improves LCP, which is a direct Google
+              Quality Score input for paid traffic. */}
+          <link rel="preconnect" href="https://www.googletagmanager.com" crossOrigin="" />
+          <link rel="dns-prefetch" href="https://www.google-analytics.com" />
           {/* Google Ads gtag — emitted as raw script tags so it shows up
               in the server-rendered HTML for Google's tag verifier. */}
           <script

@@ -1,0 +1,209 @@
+/**
+ * Public SEO landing page for the NOI calculator. NOI is the most
+ * searched commercial-real-estate metric, and a critical mid-funnel
+ * concept ("NOI" → "cap rate" → "DSCR" → "full underwrite").
+ *
+ * Ranks for: "noi calculator", "net operating income calculator",
+ * "rental property noi", "how to calculate noi", "noi vs cash flow".
+ */
+
+import type { Metadata } from "next";
+import Link from "next/link";
+import { getSiteUrl } from "@/lib/site-url";
+import { NoiCalculatorWidget } from "@/components/tools/noi-calculator-widget";
+import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta";
+import { SiteFooter } from "@/components/marketing/site-footer";
+
+export const metadata: Metadata = {
+  title: "NOI Calculator | Free Net Operating Income Tool | TrueCap",
+  description:
+    "Free NOI (Net Operating Income) calculator for rental property. Includes vacancy, every common operating expense, and the operating-expense ratio. Plus what's a good NOI margin.",
+  keywords: [
+    "noi calculator",
+    "net operating income calculator",
+    "rental property noi",
+    "how to calculate noi",
+    "noi formula",
+    "noi vs cash flow",
+    "operating expense ratio",
+  ],
+  alternates: { canonical: "/tools/noi-calculator" },
+  openGraph: {
+    title: "NOI Calculator — Free",
+    description:
+      "Compute Net Operating Income in seconds. Vacancy, every operating expense, plus the operating-expense ratio.",
+    url: "/tools/noi-calculator",
+    type: "website",
+    images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap NOI calculator" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: ["/home.jpg"],
+  },
+};
+
+const FAQS: { q: string; a: string }[] = [
+  {
+    q: "What is NOI?",
+    a: "Net Operating Income is gross rental income minus vacancy and all operating expenses, before debt service and income tax. NOI is the property's operating performance as if you owned it free and clear — it isolates the asset from how you financed it.",
+  },
+  {
+    q: "What's a good NOI margin?",
+    a: "Operating-expense ratio (the inverse) is the more standard way to look at it. Residential rentals typically run 35-50% operating-expense ratio, leaving 50-65% as NOI. Older properties, smaller buildings, and self-managed deals trend toward the higher OER (lower NOI). Newer / professionally-managed / multifamily trends toward lower OER (higher NOI).",
+  },
+  {
+    q: "Does NOI include mortgage payments?",
+    a: "No. NOI is calculated before mortgage P&I, by design. The whole point is to measure the property's standalone earning power. Mortgage P&I is debt service, which you subtract from NOI to get cash flow.",
+  },
+  {
+    q: "Does NOI include CapEx?",
+    a: "Conventionally, no — true GAAP NOI excludes capital expenditures (treats them as below-the-line investments). But for rental property underwriting most investors treat CapEx as an operating expense reserve because it smooths the lumpy reality of needing a new roof every 20 years. Either approach is fine as long as you're consistent.",
+  },
+  {
+    q: "What's the difference between NOI and EBITDA?",
+    a: "NOI is the real estate version of EBITDA (Earnings Before Interest, Taxes, Depreciation, Amortization). Same concept — the asset's standalone earning power, before financing structure and tax position. You'll sometimes see commercial brokers use 'NOI' and underwriters use 'EBITDA' for the same number on a deal.",
+  },
+  {
+    q: "How is NOI used to value a property?",
+    a: "Cap rate equation: Value = NOI ÷ Cap rate. A property with $28,000 NOI in a 7% cap rate market is worth ≈$400,000. This is why NOI matters so much — it directly determines what an institutional buyer will pay. Improving NOI by $1,000/yr in a 7% cap market increases the property's value by roughly $14,000.",
+  },
+];
+
+export default function NoiCalculatorPage() {
+  const siteUrl = getSiteUrl();
+  const webAppLd = {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    name: "TrueCap NOI Calculator",
+    applicationCategory: "FinanceApplication",
+    operatingSystem: "Web",
+    url: `${siteUrl}/tools/noi-calculator`,
+    offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+  };
+  const faqLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: FAQS.map((f) => ({
+      "@type": "Question",
+      name: f.q,
+      acceptedAnswer: { "@type": "Answer", text: f.a },
+    })),
+  };
+
+  return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
+
+      <div className="min-h-screen bg-background">
+        <main id="main" className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+          <header className="mb-6 sm:mb-8">
+            <Link href="/tools" className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground">
+              ← TrueCap free tools
+            </Link>
+            <h1 className="text-3xl sm:text-4xl font-black text-foreground mt-2 leading-tight">
+              NOI Calculator
+            </h1>
+            <p className="text-base sm:text-lg text-muted-foreground mt-2 leading-relaxed">
+              Net Operating Income — the property&apos;s standalone earning power
+              before debt and taxes. The number every cap rate and DSCR calculation
+              starts from.
+            </p>
+          </header>
+
+          <NoiCalculatorWidget />
+
+          <article className="prose prose-slate max-w-none mt-10 sm:mt-12 [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-black [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground">
+            <h2 className="text-2xl sm:text-3xl">Why NOI is the most important real-estate number</h2>
+            <p>
+              Cap rate uses NOI. DSCR uses NOI. The income approach to
+              valuation uses NOI. Improving operations by $1,000/yr in a
+              7% cap-rate market adds about $14,000 to the property&apos;s
+              market value. Get NOI right, and every other underwriting
+              number falls into place. Get it wrong, and your cap rate,
+              DSCR, and valuation are all built on sand.
+            </p>
+
+            <h3>The formula</h3>
+            <div className="bg-card border border-border rounded-xl p-5 sm:p-6 my-4 text-center">
+              <div className="text-base sm:text-lg font-mono">
+                <span className="font-bold">NOI</span> = Effective Gross Rent − Operating Expenses
+              </div>
+              <div className="text-sm text-muted-foreground mt-2">
+                where Effective Gross Rent = Gross Rent × (1 − Vacancy)
+              </div>
+            </div>
+
+            <h2 className="text-2xl sm:text-3xl">What counts as an operating expense</h2>
+            <ul>
+              <li>Property tax</li>
+              <li>Insurance</li>
+              <li>Maintenance &amp; repairs (the recurring stuff)</li>
+              <li>Property management fees</li>
+              <li>HOA dues</li>
+              <li>Owner-paid utilities (water, sewer, trash, sometimes gas)</li>
+              <li>Vacancy &amp; credit loss (subtracted from gross rent, not added as opex)</li>
+              <li>CapEx reserves (some investors include, some don&apos;t — be consistent)</li>
+              <li>Make-ready / leasing fees (annualized)</li>
+            </ul>
+            <p>
+              What does <em>not</em> belong in operating expenses:
+              mortgage P&amp;I, depreciation, owner income tax, your
+              personal time, or one-time capital improvements that
+              increase asset value (those go on the balance sheet, not
+              the operating P&amp;L).
+            </p>
+
+            <h2 className="text-2xl sm:text-3xl">Operating expense ratio</h2>
+            <p>
+              The flip side of NOI margin. OER = operating expenses ÷
+              effective gross rent. A 40% OER means 40 cents of every
+              dollar of rent goes to running the property; the remaining
+              60 cents is NOI. Residential rentals typically land
+              between 35% (newer, professionally managed) and 50%
+              (older, self-managed, deferred maintenance).
+            </p>
+
+            <h2 className="text-2xl sm:text-3xl">Common NOI mistakes</h2>
+            <h3>1. Using gross rent instead of effective rent</h3>
+            <p>
+              Asking rent is fiction until a tenant pays it. Always
+              subtract vacancy + credit loss to get effective gross rent
+              before computing NOI. Most investors should use 5-8%
+              vacancy as the floor; turnover-heavy markets need more.
+            </p>
+            <h3>2. Forgetting CapEx reserves</h3>
+            <p>
+              The roof, HVAC, water heater, and flooring all wear out.
+              Setting aside 5-10% of rent monthly as a CapEx reserve
+              keeps NOI honest — otherwise you&apos;re showing a great NOI
+              this year and getting hit with $15k of replacements in year 7.
+            </p>
+            <h3>3. Excluding management fees on self-managed properties</h3>
+            <p>
+              If you self-manage, your time is still a real cost. Most
+              underwriters include 8-10% of rent as management fee even
+              if you&apos;re doing the work yourself — because the day you
+              hand it off to a PM, the NOI shouldn&apos;t suddenly drop.
+              Be honest about the true cost of operating the property.
+            </p>
+          </article>
+
+          <ToolsConversionCta
+            calculatorName="NOI calculator"
+            hook="TrueCap's full analyzer takes NOI further: cap rate, CoC, DSCR, 10-year projection, tax savings, exit scenarios — all derived from the NOI you just calculated. Free to use, save deals, share with your lender."
+          />
+
+          <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">
+            Built with{" "}
+            <Link href="/" className="font-bold text-foreground hover:underline">
+              TrueCap
+            </Link>{" "}
+            — institutional-grade rental analysis, free to start.
+          </footer>
+        </main>
+        <SiteFooter />
+      </div>
+    </>
+  );
+}

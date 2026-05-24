@@ -53,6 +53,20 @@ const TOOLS: { href: string; title: string; description: string; available: bool
       "Sq-ft-based defaults for cosmetic, kitchen, bath, and systems work. Mid-market 2024-25 contractor pricing.",
     available: true,
   },
+  {
+    href: "/tools/dscr-calculator",
+    title: "DSCR calculator",
+    description:
+      "Debt Service Coverage Ratio — the metric every lender wants. Plus what counts as bankable.",
+    available: true,
+  },
+  {
+    href: "/tools/noi-calculator",
+    title: "NOI calculator",
+    description:
+      "Net Operating Income with every common operating expense + vacancy + operating-expense ratio.",
+    available: true,
+  },
 ];
 
 export default function ToolsLandingPage() {

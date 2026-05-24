@@ -967,8 +967,12 @@ export function InvestCalcPage({
     setShowResults(false);
     setDealScoreResult(null);
     try {
-      // Simulate analysis delay
-      await new Promise((r) => setTimeout(r, 1500));
+      // Brief artificial delay so the loading state registers — the
+      // analysis is actually instant. 400ms is enough to feel
+      // intentional without burning user time. 1500ms was too long
+      // for paid traffic (every second of perceived wait reduces
+      // conversion measurably) — cut it ~73%.
+      await new Promise((r) => setTimeout(r, 400));
       const result = calculateAnalysis(values);
       const mappedTab = mapInputTabToDashboardTab(activeInputTab);
       if (mappedTab) setActiveDashboardTab(mappedTab);
