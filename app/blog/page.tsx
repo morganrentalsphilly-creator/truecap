@@ -48,6 +48,15 @@ export type BlogPost = {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: "dscr-loans-explained",
+    title: "DSCR loans explained: what they are, when they make sense, what they cost in 2026",
+    excerpt:
+      "DSCR loans approve based on the property's economics, not your personal income. Who they're for, what rates and ratios look like in 2026, and the trade-offs vs. conventional financing.",
+    readingTimeMinutes: 10,
+    publishedAt: "2026-05-24",
+    available: true,
+  },
+  {
     slug: "cap-rate-vs-cash-on-cash-vs-dscr",
     title: "Cap rate vs cash-on-cash vs DSCR: which one actually matters?",
     excerpt:
