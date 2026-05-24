@@ -57,12 +57,22 @@ export const metadata: Metadata = {
       "Analyze rental properties with cash flow projections, ROI insights, tax strategy support, and risk-aware real estate metrics.",
     siteName: "TrueCap",
     locale: "en_US",
+    url: siteUrl,
+    images: [
+      {
+        url: "/home.jpg",
+        width: 1200,
+        height: 630,
+        alt: "TrueCap — real estate investment analyzer",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "TrueCap | Real Estate Investment Calculator",
     description:
       "Analyze rental properties with cash flow projections, ROI insights, tax strategy support, and risk-aware real estate metrics.",
+    images: ["/home.jpg"],
   },
   robots: {
     index: true,

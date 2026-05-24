@@ -31,6 +31,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     openGraph: {
       title: `${title} — Rental property analysis`,
       description: "Shared via TrueCap.",
+      // Inherits the OG image from app/layout.tsx (home.jpg) so share
+      // cards in Slack / iMessage / Twitter have a hero preview.
+      images: [
+        {
+          url: "/home.jpg",
+          width: 1200,
+          height: 630,
+          alt: "Rental property analysis shared via TrueCap",
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${title} — Rental property analysis`,
+      description: "Shared via TrueCap.",
+      images: ["/home.jpg"],
     },
   };
 }
