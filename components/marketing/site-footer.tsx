@@ -29,6 +29,7 @@ const FOOTER_COLS: Array<{
       { label: "All free tools", href: "/tools" },
       { label: "Blog", href: "/blog" },
       { label: "Glossary", href: "/glossary" },
+      { label: "Methodology", href: "/methodology" },
       { label: "Changelog", href: "/changelog" },
     ],
   },
