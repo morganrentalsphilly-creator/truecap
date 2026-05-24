@@ -38,9 +38,24 @@ export async function POST(req: Request) {
   });
 
   if (claimError?.code === "23505") {
-    return NextResponse.json({ received: true, duplicate: true });
-  }
-  if (claimError) {
+    // The event row already exists. This can mean either:
+    //   (a) we processed it successfully before (processed_at IS NOT NULL)
+    //   (b) a previous attempt failed and Stripe is retrying
+    //       (processed_at IS NULL, usually error_message IS NOT NULL)
+    // Without checking, every Stripe retry of a previously-failed event
+    // would short-circuit here and the failure would be permanent — the
+    // user's subscription state would silently drift. Re-attempt
+    // processing when processed_at is null.
+    const { data: existing } = await admin
+      .from("stripe_webhook_events")
+      .select("processed_at")
+      .eq("stripe_event_id", event.id)
+      .maybeSingle();
+    if (existing?.processed_at) {
+      return NextResponse.json({ received: true, duplicate: true });
+    }
+    // Fall through to retry processing for events with processed_at=null.
+  } else if (claimError) {
     return NextResponse.json({ error: "Failed to record event" }, { status: 500 });
   }
 
