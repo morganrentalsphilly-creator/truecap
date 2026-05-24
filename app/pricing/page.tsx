@@ -33,7 +33,7 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", images: ["/home.jpg"] },
 };
 
-type StripePrice = { amountLabel: string; period: string } | null;
+type StripePrice = { amountLabel: string; period: string; unitAmount: number } | null;
 
 async function loadStripePrice(slug: "pro_monthly" | "pro_annual"): Promise<StripePrice> {
   const envKey = slug === "pro_monthly" ? "STRIPE_PRICE_PRO_MONTHLY" : "STRIPE_PRICE_PRO_ANNUAL";
@@ -49,7 +49,10 @@ async function loadStripePrice(slug: "pro_monthly" | "pro_annual"): Promise<Stri
       maximumFractionDigits: price.unit_amount % 100 === 0 ? 0 : 2,
     }).format(price.unit_amount / 100);
     const period = price.recurring?.interval ?? (slug === "pro_annual" ? "year" : "month");
-    return { amountLabel, period };
+    // unitAmount returned in dollars (not cents) so downstream consumers
+    // like the ROI calculator can use it for breakeven math without
+    // dividing themselves.
+    return { amountLabel, period, unitAmount: price.unit_amount / 100 };
   } catch {
     return null;
   }
@@ -137,9 +140,11 @@ export default async function PricingPage() {
           />
 
           {/* Interactive ROI calculator — defangs the 'is it worth $X/mo'
-              objection by turning it into the visitor's own math. */}
+              objection by turning it into the visitor's own math. Real
+              Stripe-loaded price passed in so the breakeven math matches
+              what the user sees in the plan card right above. */}
           <div className="mx-auto mt-8 max-w-2xl">
-            <RoiCalculatorWidget />
+            <RoiCalculatorWidget proMonthlyPrice={monthly?.unitAmount} />
           </div>
 
           {/* Trust strip */}

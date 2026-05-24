@@ -320,7 +320,17 @@ export function Header({
           {/* Right — Auth buttons */}
           {/* Right — Nav actions + user */}
           <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
-         
+
+            {/* Blog link — desktop only. Footer covers mobile discovery;
+                avoiding it in the mobile header keeps the auth CTAs prominent
+                without crowding the bar. */}
+            <Link
+              href="/blog"
+              className="hidden md:inline-flex h-9 items-center rounded-full px-3.5 text-[13px] font-semibold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            >
+              Blog
+            </Link>
+
             {user && hasDashboardAccess && (
               <div className="flex items-center gap-2 sm:mr-1">
                 <Link href="/dashboard" prefetch={false}>

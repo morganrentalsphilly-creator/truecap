@@ -50,11 +50,19 @@ const MINUTES_SAVED_PER_DEAL = 90;
 const PRO_MONTHLY_PRICE = 29;
 
 type Props = {
-  /** Override the Pro monthly price if /pricing already has it loaded. */
+  /**
+   * Pro monthly price loaded server-side from Stripe. Falls back to
+   * the hardcoded placeholder if undefined (Stripe key missing in dev,
+   * or Stripe API hiccup). Always passed in dollars, never cents.
+   */
   proMonthlyPrice?: number;
 };
 
-export function RoiCalculatorWidget({ proMonthlyPrice = PRO_MONTHLY_PRICE }: Props) {
+export function RoiCalculatorWidget({ proMonthlyPrice }: Props) {
+  // Coalesce: prefer the real Stripe price, fall back to the hardcoded
+  // placeholder so the widget never displays "$0" or NaN math when the
+  // Stripe load returned null for any reason.
+  const effectivePrice = proMonthlyPrice && proMonthlyPrice > 0 ? proMonthlyPrice : PRO_MONTHLY_PRICE;
   const [dealsInput, setDealsInput] = useState(DEFAULT_DEALS_PER_MONTH);
   const [rateInput, setRateInput] = useState(DEFAULT_HOURLY_RATE);
 
@@ -63,10 +71,10 @@ export function RoiCalculatorWidget({ proMonthlyPrice = PRO_MONTHLY_PRICE }: Pro
     const rate = num(rateInput);
     const hoursSaved = (deals * MINUTES_SAVED_PER_DEAL) / 60;
     const dollarValue = hoursSaved * rate;
-    const breakevenDeals = dollarValue > 0 ? proMonthlyPrice / (rate * (MINUTES_SAVED_PER_DEAL / 60)) : Infinity;
-    const roiMultiplier = proMonthlyPrice > 0 ? dollarValue / proMonthlyPrice : 0;
+    const breakevenDeals = dollarValue > 0 ? effectivePrice / (rate * (MINUTES_SAVED_PER_DEAL / 60)) : Infinity;
+    const roiMultiplier = effectivePrice > 0 ? dollarValue / effectivePrice : 0;
     return { deals, rate, hoursSaved, dollarValue, breakevenDeals, roiMultiplier };
-  }, [dealsInput, rateInput, proMonthlyPrice]);
+  }, [dealsInput, rateInput, effectivePrice]);
 
   return (
     <div className="rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-6">
@@ -142,7 +150,7 @@ export function RoiCalculatorWidget({ proMonthlyPrice = PRO_MONTHLY_PRICE }: Pro
       {/* Verdict line — only renders meaningfully when inputs are non-zero */}
       {result.deals > 0 && result.rate > 0 ? (
         <div className="mt-5 rounded-xl border border-[var(--brand-green)]/25 bg-[var(--brand-green-light)] p-4 text-sm text-foreground">
-          {result.dollarValue >= proMonthlyPrice ? (
+          {result.dollarValue >= effectivePrice ? (
             <p className="leading-relaxed">
               At {result.deals} deal{result.deals === 1 ? "" : "s"} per month, TrueCap Pro pays for
               itself <strong>after {result.breakevenDeals < 1 ? "less than 1" : Math.ceil(result.breakevenDeals)} deal{Math.ceil(result.breakevenDeals) === 1 ? "" : "s"}</strong>.
@@ -150,7 +158,7 @@ export function RoiCalculatorWidget({ proMonthlyPrice = PRO_MONTHLY_PRICE }: Pro
             </p>
           ) : (
             <p className="leading-relaxed">
-              Pro costs ${proMonthlyPrice}/mo. At your inputs that&apos;s break-even territory —
+              Pro costs ${effectivePrice}/mo. At your inputs that&apos;s break-even territory —
               the bigger win for low-volume investors is avoiding a single bad deal, which TrueCap&apos;s
               red-flag detection helps with even before time savings.
             </p>
