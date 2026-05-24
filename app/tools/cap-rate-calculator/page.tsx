@@ -34,6 +34,11 @@ export const metadata: Metadata = {
       "Calculate cap rate in seconds. Includes plain-English guidance on what counts as a good cap rate, how to compute NOI, and common investor mistakes.",
     url: "/tools/cap-rate-calculator",
     type: "website",
+    images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap cap rate calculator" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: ["/home.jpg"],
   },
 };
 

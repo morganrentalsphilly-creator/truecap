@@ -23,6 +23,11 @@ export const metadata: Metadata = {
       "Model the buy-rehab-rent-refinance cycle in seconds. See cash left in deal and post-refi cash flow before you commit.",
     url: "/tools/brrrr-calculator",
     type: "website",
+    images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap BRRRR calculator" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: ["/home.jpg"],
   },
 };
 

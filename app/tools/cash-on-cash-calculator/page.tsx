@@ -23,6 +23,11 @@ export const metadata: Metadata = {
       "Compute cash-on-cash return in seconds. Walks through purchase, financing, rent, and expenses — no spreadsheet needed.",
     url: "/tools/cash-on-cash-calculator",
     type: "website",
+    images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap cash-on-cash calculator" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: ["/home.jpg"],
   },
 };
 

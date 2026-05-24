@@ -22,6 +22,11 @@ export const metadata: Metadata = {
       "Pass / fail the 1% rule in 5 seconds. Plus plain-English guidance on when the rule applies and when it doesn't.",
     url: "/tools/1-percent-rule-calculator",
     type: "website",
+    images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap 1% rule calculator" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: ["/home.jpg"],
   },
 };
 

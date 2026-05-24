@@ -31,12 +31,24 @@ export const metadata: Metadata = {
       "Analyze rental property deals with cap rate, cash flow, ROI, and projection tools in a single dashboard.",
     url: "/",
     type: "website",
+    // Re-declare images because page-level openGraph fully replaces the
+    // layout's (Next metadata isn't a deep merge). Without this, every
+    // social share of the homepage would render without a preview card.
+    images: [
+      {
+        url: "/home.jpg",
+        width: 1200,
+        height: 630,
+        alt: "TrueCap — real estate investment analyzer",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "TrueCap Rental Property Analysis",
     description:
       "Analyze rental property deals with cap rate, cash flow, ROI, and projection tools in a single dashboard.",
+    images: ["/home.jpg"],
   },
 };
 

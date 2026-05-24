@@ -23,6 +23,11 @@ export const metadata: Metadata = {
       "Estimate rehab cost in seconds with sq-ft-based defaults for every common work item. Plus a how-to on building a defensible budget.",
     url: "/tools/rehab-cost-estimator",
     type: "website",
+    images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap rehab cost estimator" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: ["/home.jpg"],
   },
 };
 
