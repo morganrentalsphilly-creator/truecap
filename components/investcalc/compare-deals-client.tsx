@@ -284,12 +284,41 @@ function NetCashFlowTooltip({ deal }: { deal: CompareDealViewModel }) {
   );
 }
 
+/**
+ * Cash-purchase detection for compared deals. The saved snapshot stores
+ * monthlyPayment — 0 (or absent) signals an all-cash deal where DSCR is
+ * mathematically undefined.
+ */
+function isCashPurchaseDeal(deal: CompareDealViewModel): boolean {
+  const pmt = deal.metrics.monthlyPayment;
+  return pmt == null || pmt <= 0;
+}
+
+/**
+ * Render a metric cell value, overriding DSCR for cash purchases. All
+ * other metrics fall through to formatMetric unchanged.
+ */
+function formatCellValue(deal: CompareDealViewModel, row: MetricRow): string {
+  if (row.key === "dscr" && isCashPurchaseDeal(deal)) return "Cash";
+  return formatMetric(deal.metrics[row.key] ?? null, row);
+}
+
 function DscrTooltip({ deal }: { deal: CompareDealViewModel }) {
   const rent = deal.metrics.monthlyRentalIncome;
   const opex = deal.metrics.totalOperatingExpenses;
   const pmt = deal.metrics.monthlyPayment;
   const dscr = deal.metrics.dscr;
   const noi = rent != null && opex != null ? rent - opex : null;
+  if (isCashPurchaseDeal(deal)) {
+    return (
+      <div className="max-w-xs space-y-1.5 text-left text-xs font-normal leading-snug">
+        <p className="font-semibold text-foreground">DSCR (debt service coverage)</p>
+        <p className="text-muted-foreground">
+          This deal has no loan, so DSCR is not applicable. The cash flow column already reflects the all-cash purchase.
+        </p>
+      </div>
+    );
+  }
   return (
     <div className="max-w-xs space-y-1.5 text-left text-xs font-normal leading-snug">
       <p className="font-semibold text-foreground">DSCR (debt service coverage)</p>
@@ -437,9 +466,13 @@ function getLongTermHighlightedWinCounts(deals: CompareDealViewModel[]): Map<str
 function getShortTermHighlightedWinCounts(deals: CompareDealViewModel[]): Map<string, number> {
   const counts = new Map<string, number>(deals.map((deal) => [deal.id, 0]));
   for (const row of METRIC_ROWS) {
-    const best = getBestValue(row, deals);
+    // For DSCR, only rank financed deals against each other — a cash
+    // purchase's stored dscr=0 isn't comparable to a real ratio.
+    const eligibleDeals =
+      row.key === "dscr" ? deals.filter((deal) => !isCashPurchaseDeal(deal)) : deals;
+    const best = getBestValue(row, eligibleDeals);
     if (best == null) continue;
-    for (const deal of deals) {
+    for (const deal of eligibleDeals) {
       const value = deal.metrics[row.key];
       if (value != null && value === best) {
         counts.set(deal.id, (counts.get(deal.id) ?? 0) + 1);
@@ -614,7 +647,11 @@ function MobileMetricValue({
   className?: string;
 }) {
   const body = getMetricGuidanceBody(deal, row);
-  const text = formatCompactMetric(value, row);
+  // DSCR is N/A for cash purchases — override the compact display.
+  const text =
+    row.key === "dscr" && isCashPurchaseDeal(deal)
+      ? "Cash"
+      : formatCompactMetric(value, row);
   if (!body) return <p className={className}>{text}</p>;
 
   return (
@@ -832,11 +869,16 @@ export function CompareDealsClient({
     const bestValue = best?.compareSnapshot?.longTermSummary.totalROI ?? best?.metrics.cocReturn ?? Number.NEGATIVE_INFINITY;
     return value > bestValue ? deal : best;
   }, null);
-  const strongestDscrDeal = deals.reduce<CompareDealViewModel | null>((best, deal) => {
-    const value = deal.metrics.dscr ?? Number.NEGATIVE_INFINITY;
-    const bestValue = best?.metrics.dscr ?? Number.NEGATIVE_INFINITY;
-    return value > bestValue ? deal : best;
-  }, null);
+  // Skip cash-purchase deals when ranking strongest DSCR — they have
+  // no loan, so DSCR is N/A and a stored 0 isn't comparable to a real
+  // ratio. If every compared deal is cash, the tile will read "—".
+  const strongestDscrDeal = deals
+    .filter((deal) => !isCashPurchaseDeal(deal))
+    .reduce<CompareDealViewModel | null>((best, deal) => {
+      const value = deal.metrics.dscr ?? Number.NEGATIVE_INFINITY;
+      const bestValue = best?.metrics.dscr ?? Number.NEGATIVE_INFINITY;
+      return value > bestValue ? deal : best;
+    }, null);
   const mobileSections = [
     {
       id: "returns",
@@ -1239,7 +1281,7 @@ export function CompareDealsClient({
                             {deal ? (
                               <MetricValueWithTooltip deal={deal} row={row}>
                                 <span className="inline-flex shrink-0 items-center gap-2 font-black tabular-nums">
-                                  {formatMetric(value, row)}
+                                  {formatCellValue(deal, row)}
                                   {isBest ? <Trophy className="size-3.5 text-emerald-600" /> : null}
                                 </span>
                               </MetricValueWithTooltip>
