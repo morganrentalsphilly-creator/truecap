@@ -5,6 +5,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { RehabEstimatorCard } from "@/components/investcalc/rehab-estimator-card";
 import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta";
 
+import { SiteFooter } from "@/components/marketing/site-footer";
 export const metadata: Metadata = {
   title: "Rehab Cost Estimator | Free Rental Property Calculator | TrueCap",
   description:
@@ -258,6 +259,7 @@ export default function RehabEstimatorPage() {
             — institutional-grade rental analysis, free to start.
           </footer>
         </main>
+        <SiteFooter />
       </div>
     </>
   );

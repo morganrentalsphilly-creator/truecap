@@ -16,6 +16,7 @@ import { ArrowRight, Calculator, X } from "lucide-react";
 const STORAGE_KEY = "truecap_home_sticky_dismissed";
 
 function scrollToForm() {
+  if (typeof window === "undefined") return;
   const el = document.getElementById("main");
   if (el) window.scrollTo({ top: el.offsetTop - 64, behavior: "smooth" });
 }
@@ -25,7 +26,13 @@ export function StickyConversionBar() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    setDismissed(window.localStorage.getItem(STORAGE_KEY) === "1");
+    // Wrapped — localStorage throws on Safari Private Mode / strict CSP;
+    // a thrown effect would otherwise leave the bar permanently hidden.
+    try {
+      setDismissed(window.localStorage.getItem(STORAGE_KEY) === "1");
+    } catch {
+      setDismissed(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -59,8 +66,8 @@ export function StickyConversionBar() {
           className="inline-flex h-9 shrink-0 items-center gap-1 rounded-lg bg-primary px-3 text-xs font-bold text-primary-foreground hover:bg-primary/95 sm:h-10 sm:px-4 sm:text-sm"
         >
           <Calculator className="size-3.5 sm:size-4" />
-          <span className="hidden xs:inline">Run a free deal</span>
-          <span className="xs:hidden">Try it</span>
+          <span className="hidden min-[380px]:inline">Run a free deal</span>
+          <span className="min-[380px]:hidden">Try it</span>
           <ArrowRight className="size-3.5 sm:size-4" />
         </button>
         <button

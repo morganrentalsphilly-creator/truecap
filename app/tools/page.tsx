@@ -8,6 +8,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowUpRight, Calculator } from "lucide-react";
+import { SiteFooter } from "@/components/marketing/site-footer";
 
 export const metadata: Metadata = {
   title: "Free Real Estate Calculators | TrueCap",
@@ -127,6 +128,7 @@ export default function ToolsLandingPage() {
           </Link>
         </section>
       </main>
+      <SiteFooter />
     </div>
   );
 }

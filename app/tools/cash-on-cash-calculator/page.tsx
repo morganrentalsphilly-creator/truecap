@@ -5,6 +5,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { CocCalculatorWidget } from "@/components/tools/coc-calculator-widget";
 import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta";
 
+import { SiteFooter } from "@/components/marketing/site-footer";
 export const metadata: Metadata = {
   title: "Cash-on-Cash Return Calculator | Free Rental Property Tool | TrueCap",
   description:
@@ -278,6 +279,7 @@ export default function CoCCalculatorPage() {
             — institutional-grade rental analysis, free to start.
           </footer>
         </main>
+        <SiteFooter />
       </div>
     </>
   );

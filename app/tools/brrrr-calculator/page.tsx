@@ -5,6 +5,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { BrrrrCalculatorWidget } from "@/components/tools/brrrr-calculator-widget";
 import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta";
 
+import { SiteFooter } from "@/components/marketing/site-footer";
 export const metadata: Metadata = {
   title: "BRRRR Calculator | Buy Rehab Rent Refinance Repeat | TrueCap",
   description:
@@ -244,6 +245,7 @@ export default function BrrrrCalculatorPage() {
             — institutional-grade rental analysis, free to start.
           </footer>
         </main>
+        <SiteFooter />
       </div>
     </>
   );

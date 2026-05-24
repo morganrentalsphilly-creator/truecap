@@ -5,6 +5,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { OnePercentRuleWidget } from "@/components/tools/one-percent-rule-widget";
 import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta";
 
+import { SiteFooter } from "@/components/marketing/site-footer";
 export const metadata: Metadata = {
   title: "1% Rule Calculator | Free Rental Property Screener | TrueCap",
   description:
@@ -248,6 +249,7 @@ export default function OnePercentRulePage() {
             — institutional-grade rental analysis, free to start.
           </footer>
         </main>
+        <SiteFooter />
       </div>
     </>
   );

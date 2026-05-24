@@ -15,6 +15,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { CapRateCalculatorWidget } from "@/components/tools/cap-rate-calculator-widget";
 import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta";
 
+import { SiteFooter } from "@/components/marketing/site-footer";
 export const metadata: Metadata = {
   title: "Cap Rate Calculator | Free Rental Property Calculator | TrueCap",
   description:
@@ -368,6 +369,7 @@ export default function CapRateCalculatorPage() {
             — institutional-grade rental analysis, free to start.
           </footer>
         </main>
+        <SiteFooter />
       </div>
     </>
   );

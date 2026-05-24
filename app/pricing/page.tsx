@@ -15,6 +15,7 @@ import { getEntitlementsForUser, hasPaidPlanSubscription } from "@/lib/entitleme
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getStripe } from "@/lib/stripe/client";
 
+import { SiteFooter } from "@/components/marketing/site-footer";
 export const metadata: Metadata = {
   title: "Pricing — Free + Pro plans for rental property analysis",
   description:
@@ -323,6 +324,7 @@ export default async function PricingPage() {
           }}
         />
       </main>
+      <SiteFooter />
     </>
   );
 }

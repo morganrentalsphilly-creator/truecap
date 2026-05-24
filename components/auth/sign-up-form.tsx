@@ -56,12 +56,29 @@ export function SignUpForm() {
     // to call from anywhere; no-ops if gtag isn't loaded or the
     // conversion label hasn't been wired up in lib/analytics yet.
     trackConversion("signup");
-    toast({
-      title: "Registration successful",
-      description: "A confirmation email has been sent. Please verify your email and sign in.",
-    });
+    // Conversion-friendly post-signup flow:
+    //  - If Supabase auto-signed the user in (email confirmation OFF):
+    //    send them straight to the calculator so they get to value
+    //    in 0 extra clicks.
+    //  - Otherwise (the typical case — email confirmation ON): still
+    //    send them to / so they can use the free calculator while they
+    //    confirm their email. The toast handles the "check your email"
+    //    messaging. Old flow pushed to /auth/login which forced 3+
+    //    extra clicks before any value.
+    if (result.needsEmailConfirmation) {
+      toast({
+        title: "Account created — confirm your email",
+        description:
+          "We sent a confirmation link. You can start using the free calculator right now while you wait.",
+      });
+    } else {
+      toast({
+        title: "Welcome to TrueCap",
+        description: "You're signed in. Run your first deal below.",
+      });
+    }
     form.reset();
-    router.push("/auth/login?registered=1");
+    router.push("/");
     router.refresh();
   }
 

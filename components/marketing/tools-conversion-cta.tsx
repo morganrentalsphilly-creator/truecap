@@ -33,7 +33,13 @@ export function ToolsConversionCta({ calculatorName, hook }: ToolsConversionCtaP
   const [stickyVisible, setStickyVisible] = useState(false);
 
   useEffect(() => {
-    setDismissed(window.localStorage.getItem(STORAGE_KEY) === "1");
+    // Safari Private Mode + strict CSPs throw on localStorage access;
+    // crashing the effect would leave dismissed=true and hide the CTA forever.
+    try {
+      setDismissed(window.localStorage.getItem(STORAGE_KEY) === "1");
+    } catch {
+      setDismissed(false);
+    }
   }, []);
 
   // Show the sticky bar after the user scrolls 30%+ down the page

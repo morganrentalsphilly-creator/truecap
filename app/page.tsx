@@ -9,6 +9,7 @@ import {
   WhyNotSpreadsheet,
 } from "@/components/marketing/landing-sections";
 import { StickyConversionBar } from "@/components/marketing/sticky-conversion-bar";
+import { SiteFooter } from "@/components/marketing/site-footer";
 import {
   getEntitlementsForUser,
   hasPaidPlanSubscription,
@@ -135,6 +136,9 @@ export default async function Home() {
       {/* Sticky scroll-activated CTA bar for cold visitors only. Renders
           nothing for auth'd users. */}
       {!user && <StickyConversionBar />}
+      {/* Site footer — trust + sitemap + brand. Shown to everyone; helps
+          with Quality Score and dwell time. */}
+      <SiteFooter />
     </>
   );
 }
