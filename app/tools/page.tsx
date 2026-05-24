@@ -46,10 +46,11 @@ const TOOLS: { href: string; title: string; description: string; available: bool
     available: true,
   },
   {
-    href: "#",
+    href: "/tools/rehab-cost-estimator",
     title: "Rehab cost estimator",
-    description: "Sq-ft-based defaults for cosmetic, kitchen, bath, systems.",
-    available: false,
+    description:
+      "Sq-ft-based defaults for cosmetic, kitchen, bath, and systems work. Mid-market 2024-25 contractor pricing.",
+    available: true,
   },
 ];
 
