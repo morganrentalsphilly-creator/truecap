@@ -120,6 +120,7 @@ export function FixFlipCard({ values, defaultRehab }: FixFlipCardProps) {
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">$</span>
               <Input
                 type="number"
+                inputMode="decimal"
                 value={rehabInput}
                 onChange={(e) => setRehabInput(e.target.value)}
                 placeholder={defaultRehab && defaultRehab > 0 ? String(defaultRehab) : "30000"}
@@ -138,6 +139,7 @@ export function FixFlipCard({ values, defaultRehab }: FixFlipCardProps) {
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">$</span>
               <Input
                 type="number"
+                inputMode="decimal"
                 value={arvInput}
                 onChange={(e) => setArvInput(e.target.value)}
                 placeholder="450000"
@@ -152,6 +154,7 @@ export function FixFlipCard({ values, defaultRehab }: FixFlipCardProps) {
             <div className="relative">
               <Input
                 type="number"
+                inputMode="decimal"
                 value={holdInput}
                 onChange={(e) => setHoldInput(e.target.value)}
                 className="pr-10 border-input bg-background"
@@ -166,6 +169,7 @@ export function FixFlipCard({ values, defaultRehab }: FixFlipCardProps) {
             <div className="relative">
               <Input
                 type="number"
+                inputMode="decimal"
                 step="0.5"
                 value={sellPctInput}
                 onChange={(e) => setSellPctInput(e.target.value)}
@@ -181,6 +185,7 @@ export function FixFlipCard({ values, defaultRehab }: FixFlipCardProps) {
             <div className="relative">
               <Input
                 type="number"
+                inputMode="decimal"
                 value={dpInput}
                 onChange={(e) => setDpInput(e.target.value)}
                 className="pr-8 border-input bg-background"
@@ -197,6 +202,7 @@ export function FixFlipCard({ values, defaultRehab }: FixFlipCardProps) {
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">$</span>
               <Input
                 type="number"
+                inputMode="decimal"
                 value={carryOverride}
                 onChange={(e) => setCarryOverride(e.target.value)}
                 placeholder={

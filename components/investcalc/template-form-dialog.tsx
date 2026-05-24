@@ -101,6 +101,7 @@ function NumberInputField({
             <FormControl>
               <Input
                 type="number"
+                inputMode="decimal"
                 min={0}
                 step={step}
                 value={Number.isFinite(field.value) ? field.value : ""}

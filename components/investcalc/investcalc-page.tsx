@@ -1617,15 +1617,20 @@ export function InvestCalcPage({
               type="button"
               onClick={() => setRestoredFromDraft(false)}
               aria-label="Dismiss welcome-back banner"
-              className="self-end rounded-md px-2 py-1 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground hover:bg-card hover:text-foreground sm:self-auto"
+              className="self-end rounded-md px-3 py-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground hover:bg-card hover:text-foreground sm:self-auto sm:py-1.5"
             >
               Dismiss
             </button>
           </div>
         )}
 
-        {/* Input tabs — horizontally scrollable on mobile */}
-        <div className="flex gap-1.5 sm:gap-3 mt-4 sm:mt-6 overflow-x-auto pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 xl:grid-cols-4 scrollbar-none max-[380px]:mx-0 max-[380px]:grid max-[380px]:grid-cols-4 max-[380px]:gap-1 max-[380px]:overflow-visible max-[380px]:px-0">
+        {/* Input tabs — horizontally scrollable on mobile (any width),
+            2/4-col grid on sm/xl. Previously forced a cramped 4-col grid
+            at <=380px which packed text down to 10px and made tap-targets
+            tiny — exactly when phones can least afford it. Horizontal
+            scroll is the better mobile pattern: full-size tap-targets,
+            readable text, no layout fighting. */}
+        <div className="flex gap-1.5 sm:gap-3 mt-4 sm:mt-6 overflow-x-auto pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 xl:grid-cols-4 scrollbar-none">
           {INPUT_TABS.map((tab) => (
             <button
               type="button"
@@ -1635,14 +1640,14 @@ export function InvestCalcPage({
               title={!areAnalysisTabsEnabled ? "Calculate the analysis first." : undefined}
               onClick={() => handleInputTabClick(tab.id)}
               className={cn(
-                "flex items-center justify-between px-2.5 sm:px-4 py-2 sm:py-3 rounded-xl border text-[11px] sm:text-sm font-medium shrink-0 sm:shrink min-w-[82px] sm:min-w-0 transition-colors max-[380px]:min-w-0 max-[380px]:justify-center max-[380px]:px-1 max-[380px]:text-[10px]",
+                "flex items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl border text-[12px] sm:text-sm font-medium shrink-0 sm:shrink min-w-[88px] sm:min-w-0 transition-colors",
                 areAnalysisTabsEnabled && tab.id === activeInputTab
                   ? "bg-[var(--brand-green-light)] border-[var(--brand-green)]/30 text-[var(--brand-green)]"
                   : "bg-card border-border text-muted-foreground hover:text-foreground hover:bg-muted",
                 !areAnalysisTabsEnabled && "cursor-not-allowed opacity-50 hover:bg-card hover:text-muted-foreground"
               )}
             >
-              <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 max-[380px]:gap-1">
+              <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
                 {tab.id === "cash-flow" && (
                   <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
                 )}

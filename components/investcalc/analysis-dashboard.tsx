@@ -275,7 +275,7 @@ export function AnalysisDashboard({
                         ? "Save is not available for your current plan."
                         : undefined
                 }
-                className="h-9 gap-1 rounded-xl px-1.5 text-[11px] sm:h-10 sm:gap-0 sm:rounded-xl sm:px-4 sm:text-sm max-[380px]:h-8 max-[380px]:gap-0.5 max-[380px]:rounded-lg max-[380px]:px-0.5 max-[380px]:text-[9px]"
+                className="h-9 gap-1 rounded-xl px-1.5 text-[11px] sm:h-10 sm:gap-0 sm:rounded-xl sm:px-4 sm:text-sm max-[380px]:h-9 max-[380px]:gap-0.5 max-[380px]:rounded-lg max-[380px]:px-1 max-[380px]:text-[10px]"
               >
                 {isSaving ? (
                   <Loader2 className="w-3.5 h-3.5 shrink-0 sm:mr-1.5 animate-spin max-[380px]:h-3 max-[380px]:w-3" />
@@ -292,7 +292,7 @@ export function AnalysisDashboard({
               <Button
                 variant="outline"
                 size="sm"
-                className="h-9 gap-1 rounded-xl px-1.5 text-[11px] sm:h-10 sm:gap-0 sm:rounded-xl sm:px-4 sm:text-sm max-[380px]:h-8 max-[380px]:gap-0.5 max-[380px]:rounded-lg max-[380px]:px-0.5 max-[380px]:text-[9px]"
+                className="h-9 gap-1 rounded-xl px-1.5 text-[11px] sm:h-10 sm:gap-0 sm:rounded-xl sm:px-4 sm:text-sm max-[380px]:h-9 max-[380px]:gap-0.5 max-[380px]:rounded-lg max-[380px]:px-1 max-[380px]:text-[10px]"
                 onClick={() => void onCompareDeals()}
                 disabled={!isSaved || !canCompareDeals || isComparing}
                 title={
@@ -313,7 +313,7 @@ export function AnalysisDashboard({
               </Button>
               <Button
                 size="sm"
-                className="h-9 gap-1 rounded-xl bg-primary px-1.5 text-[11px] font-semibold text-primary-foreground sm:h-10 sm:gap-0 sm:rounded-xl sm:px-4 sm:text-sm max-[380px]:h-8 max-[380px]:gap-0.5 max-[380px]:rounded-lg max-[380px]:px-0.5 max-[380px]:text-[9px]"
+                className="h-9 gap-1 rounded-xl bg-primary px-1.5 text-[11px] font-semibold text-primary-foreground sm:h-10 sm:gap-0 sm:rounded-xl sm:px-4 sm:text-sm max-[380px]:h-9 max-[380px]:gap-0.5 max-[380px]:rounded-lg max-[380px]:px-1 max-[380px]:text-[10px]"
                 onClick={() => void onExportPdf()}
                 disabled={!isSaved || !canExportPdf || isExporting}
                 title={
@@ -334,7 +334,7 @@ export function AnalysisDashboard({
               </Button>
               <Button
                 size="sm"
-                className="h-9 gap-1 rounded-xl bg-primary px-1.5 text-[11px] font-semibold text-primary-foreground sm:h-10 sm:gap-0 sm:rounded-xl sm:px-4 sm:text-sm max-[380px]:h-8 max-[380px]:gap-0.5 max-[380px]:rounded-lg max-[380px]:px-0.5 max-[380px]:text-[9px]"
+                className="h-9 gap-1 rounded-xl bg-primary px-1.5 text-[11px] font-semibold text-primary-foreground sm:h-10 sm:gap-0 sm:rounded-xl sm:px-4 sm:text-sm max-[380px]:h-9 max-[380px]:gap-0.5 max-[380px]:rounded-lg max-[380px]:px-1 max-[380px]:text-[10px]"
                 onClick={() => void onNewAnalysis()}
                 // style={{ background: "!var(--gradient-premium)", boxShadow: "var(--shadow-glow)"}}
                 title="Create a new analysis"
@@ -586,14 +586,18 @@ export function AnalysisDashboard({
       {/* Analysis tabs */}
       <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
         {/* Tab bar */}
-        <div className="flex gap-1.5 overflow-x-auto scrollbar-none p-2 sm:gap-0 sm:border-b sm:border-border sm:p-0 max-[380px]:grid max-[380px]:grid-cols-4 max-[380px]:gap-1 max-[380px]:overflow-visible">
+        {/* Tab bar — horizontal scroll on all phone widths. Was forcing
+            a cramped 4-col grid at <=380px which collapsed tap-targets
+            to 60-70px wide; scrollable gives full-size targets and
+            readable labels. */}
+        <div className="flex gap-1.5 overflow-x-auto scrollbar-none p-2 sm:gap-0 sm:border-b sm:border-border sm:p-0">
           {TABS.map((tab) => (
             <button
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id)}
               className={cn(
-                "flex items-center gap-1.5 sm:gap-2 rounded-full border px-3 py-2 text-[11px] font-medium whitespace-nowrap transition-colors shrink-0 sm:rounded-none sm:border-0 sm:px-5 sm:py-3.5 sm:text-sm max-[380px]:shrink max-[380px]:justify-center max-[380px]:gap-1 max-[380px]:px-1 max-[380px]:text-[10px]",
+                "flex items-center gap-1.5 sm:gap-2 rounded-full border px-3 py-2 text-[12px] font-medium whitespace-nowrap transition-colors shrink-0 sm:rounded-none sm:border-0 sm:px-5 sm:py-3.5 sm:text-sm",
                 activeTab === tab.id
                   ? "bg-primary text-primary-foreground"
                   : "border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted sm:bg-transparent"

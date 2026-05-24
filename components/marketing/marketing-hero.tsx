@@ -112,10 +112,10 @@ export function MarketingHero() {
               className="rounded-2xl border border-border bg-card/60 p-3 text-center backdrop-blur sm:p-4"
             >
               <div className="text-xl font-black text-foreground sm:text-2xl">{stat.value}</div>
-              <div className="mt-0.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground sm:text-[11px]">
+              <div className="mt-0.5 text-[11px] font-bold uppercase tracking-widest text-muted-foreground sm:text-[11px]">
                 {stat.label}
               </div>
-              <div className="mt-1 text-[11px] text-muted-foreground/80 sm:text-xs">{stat.sub}</div>
+              <div className="mt-1 text-xs text-muted-foreground/80 sm:text-xs">{stat.sub}</div>
             </div>
           ))}
         </div>

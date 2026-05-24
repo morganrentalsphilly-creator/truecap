@@ -136,6 +136,7 @@ export function MultiFamilyUnitsSection({
                   <Input
                     {...register(`units.${index}.bedrooms`, { valueAsNumber: true })}
                     type="number"
+                    inputMode="decimal"
                     placeholder="2"
                     className={cn(
                       "border-input bg-background text-sm h-9",
@@ -152,6 +153,7 @@ export function MultiFamilyUnitsSection({
                   <Input
                     {...register(`units.${index}.bathrooms`, { valueAsNumber: true })}
                     type="number"
+                    inputMode="decimal"
                     placeholder="1"
                     className={cn(
                       "border-input bg-background text-sm h-9",
@@ -168,6 +170,7 @@ export function MultiFamilyUnitsSection({
                   <Input
                     {...register(`units.${index}.sqft`, { valueAsNumber: true })}
                     type="number"
+                    inputMode="decimal"
                     placeholder="850"
                     className={cn(
                       "border-input bg-background text-sm h-9",
@@ -186,6 +189,7 @@ export function MultiFamilyUnitsSection({
                     <Input
                       {...register(`units.${index}.monthlyRent`, { valueAsNumber: true })}
                       type="number"
+                      inputMode="decimal"
                       step="0.01"
                       placeholder="1800"
                       className={cn(

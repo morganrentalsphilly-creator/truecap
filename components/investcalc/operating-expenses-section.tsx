@@ -231,6 +231,7 @@ export function OperatingExpensesSection({
                 <Input
                   {...register("propertyTaxPct", { setValueAs: optionalNumberSetValueAs })}
                   type="number"
+                  inputMode="decimal"
                   step="0.01"
                   min={0}
                   max={100}
@@ -290,6 +291,7 @@ export function OperatingExpensesSection({
                     setValueAs: optionalNumberSetValueAs,
                   })}
                   type="number"
+                  inputMode="decimal"
                   step="0.01"
                   min={0}
                   placeholder={insuranceInputMode === "monthly" ? String(insuranceEst) : "0.50"}
@@ -325,6 +327,7 @@ export function OperatingExpensesSection({
                 <Input
                   {...register("hoaMonthly", { setValueAs: optionalNumberSetValueAs })}
                   type="number"
+                  inputMode="decimal"
                   step="0.01"
                   min={0}
                   placeholder="0"
@@ -351,6 +354,7 @@ export function OperatingExpensesSection({
                 <Input
                   {...register("utilitiesMonthly", { setValueAs: optionalNumberSetValueAs })}
                   type="number"
+                  inputMode="decimal"
                   step="0.01"
                   min={0}
                   placeholder="0"
@@ -368,6 +372,7 @@ export function OperatingExpensesSection({
                 <Input
                   {...register("maintenancePct", { valueAsNumber: true })}
                   type="number"
+                  inputMode="decimal"
                   step="0.01"
                   placeholder="10"
                   className={cn(inputClassName, "pr-8", errors.maintenancePct && "border-destructive")}
@@ -385,6 +390,7 @@ export function OperatingExpensesSection({
                 <Input
                   {...register("vacancyPct", { valueAsNumber: true })}
                   type="number"
+                  inputMode="decimal"
                   step="0.01"
                   placeholder="5"
                   className={cn(inputClassName, "pr-8", errors.vacancyPct && "border-destructive")}
@@ -402,6 +408,7 @@ export function OperatingExpensesSection({
                 <Input
                   {...register("mgmtPct", { valueAsNumber: true })}
                   type="number"
+                  inputMode="decimal"
                   step="0.01"
                   placeholder="8"
                   className={cn(inputClassName, "pr-8", errors.mgmtPct && "border-destructive")}
@@ -419,6 +426,7 @@ export function OperatingExpensesSection({
                 <Input
                   {...register("capexPct", { valueAsNumber: true })}
                   type="number"
+                  inputMode="decimal"
                   step="0.01"
                   placeholder="5"
                   className={cn(inputClassName, "pr-8", errors.capexPct && "border-destructive")}
@@ -443,6 +451,7 @@ export function OperatingExpensesSection({
                 <Input
                   {...register("buildingValuePct", { valueAsNumber: true })}
                   type="number"
+                  inputMode="decimal"
                   step="0.01"
                   min={0}
                   max={100}
@@ -481,6 +490,7 @@ export function OperatingExpensesSection({
                 <Input
                   {...register("expenseGrowthPct", { valueAsNumber: true })}
                   type="number"
+                  inputMode="decimal"
                   step="0.01"
                   min={0}
                   placeholder="2.5"
@@ -500,6 +510,7 @@ export function OperatingExpensesSection({
                 <Input
                   {...register("rentGrowthPct", { valueAsNumber: true })}
                   type="number"
+                  inputMode="decimal"
                   step="0.01"
                   min={0}
                   placeholder="2.5"
@@ -519,6 +530,7 @@ export function OperatingExpensesSection({
                 <Input
                   {...register("appreciationRatePct", { setValueAs: optionalNumberSetValueAs })}
                   type="number"
+                  inputMode="decimal"
                   step="0.01"
                   min={0}
                   max={100}
@@ -539,6 +551,7 @@ export function OperatingExpensesSection({
                 <Input
                   {...register("sellingCostPct", { setValueAs: optionalNumberSetValueAs })}
                   type="number"
+                  inputMode="decimal"
                   step="0.01"
                   min={0}
                   max={100}
@@ -559,6 +572,7 @@ export function OperatingExpensesSection({
                 <Input
                   {...register("taxRatePct", { setValueAs: optionalNumberSetValueAs })}
                   type="number"
+                  inputMode="decimal"
                   step="0.01"
                   min={0}
                   max={100}

@@ -156,8 +156,12 @@ export default async function PricingPage() {
           <p className="mx-auto mt-2 max-w-xl text-center text-sm text-muted-foreground sm:text-base">
             Free is generous on purpose. Pro is for when you want the full picture.
           </p>
-          <div className="mt-8 overflow-hidden rounded-2xl border border-border bg-card">
-            <table className="w-full text-sm">
+          {/* overflow-x-auto so narrow viewports scroll horizontally
+              instead of clipping columns. The inner min-w-[520px] keeps
+              the column widths legible at the smallest phones — without
+              it, three columns squeezed into 320px is unreadable. */}
+          <div className="mt-8 overflow-x-auto rounded-2xl border border-border bg-card">
+            <table className="w-full min-w-[520px] text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/30">
                   <th className="px-4 py-3 text-left font-bold text-foreground sm:px-6">Feature</th>

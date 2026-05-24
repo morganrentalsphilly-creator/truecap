@@ -349,8 +349,8 @@ export default function BlogPost() {
           </p>
 
           <h2 className="text-2xl sm:text-3xl">Side-by-side comparison</h2>
-          <div className="not-prose overflow-hidden rounded-xl border border-border bg-card my-6">
-            <table className="w-full text-sm">
+          <div className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
+            <table className="w-full min-w-[560px] text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/40">
                   <th className="text-left p-3 font-bold text-foreground">What it measures</th>

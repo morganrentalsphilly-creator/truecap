@@ -33,6 +33,7 @@ export function SingleFamilyUnitSection({ form }: SingleFamilyUnitSectionProps) 
           <Input
             {...register("bedrooms", { valueAsNumber: true })}
             type="number"
+            inputMode="decimal"
             placeholder="3"
             className={cn(
               "border-input bg-background",
@@ -49,6 +50,7 @@ export function SingleFamilyUnitSection({ form }: SingleFamilyUnitSectionProps) 
           <Input
             {...register("bathrooms", { valueAsNumber: true })}
             type="number"
+            inputMode="decimal"
             placeholder="2"
             className={cn(
               "border-input bg-background",
@@ -65,6 +67,7 @@ export function SingleFamilyUnitSection({ form }: SingleFamilyUnitSectionProps) 
           <Input
             {...register("sqft", { valueAsNumber: true })}
             type="number"
+            inputMode="decimal"
             placeholder="1850"
             className={cn(
               "border-input bg-background",
@@ -83,6 +86,7 @@ export function SingleFamilyUnitSection({ form }: SingleFamilyUnitSectionProps) 
             <Input
               {...register("monthlyRent", { valueAsNumber: true })}
               type="number"
+              inputMode="decimal"
               step="0.01"
               placeholder="2800"
               className={cn(

@@ -52,6 +52,7 @@ export function PropertyDetailsSection({ form, onAddressSelected }: PropertyDeta
               <Input
                 {...register("purchasePrice", { valueAsNumber: true })}
                 type="number"
+                inputMode="decimal"
                 step="0.01"
                 placeholder="385000"
                 className={cn(
@@ -70,6 +71,7 @@ export function PropertyDetailsSection({ form, onAddressSelected }: PropertyDeta
             <Input
               {...register("yearBuilt", { setValueAs: optionalNumberSetValueAs })}
               type="number"
+              inputMode="decimal"
               placeholder="2015"
               className={cn(
                 "border-input bg-background",

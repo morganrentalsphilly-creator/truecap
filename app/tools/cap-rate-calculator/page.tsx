@@ -305,7 +305,7 @@ export default function CapRateCalculatorPage() {
             </p>
 
             <h2 className="text-2xl sm:text-3xl">Frequently asked questions</h2>
-            <div className="space-y-4">
+            <div className="not-prose space-y-4">
               {FAQS.map((f) => (
                 <details
                   key={f.q}

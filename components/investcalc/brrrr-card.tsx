@@ -128,6 +128,7 @@ export function BrrrrCard({ values, result, defaultRehab }: BrrrrCardProps) {
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">$</span>
               <Input
                 type="number"
+                inputMode="decimal"
                 value={rehabInput}
                 onChange={(e) => setRehabInput(e.target.value)}
                 placeholder={rehabPlaceholder}
@@ -148,6 +149,7 @@ export function BrrrrCard({ values, result, defaultRehab }: BrrrrCardProps) {
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">$</span>
               <Input
                 type="number"
+                inputMode="decimal"
                 value={arvInput}
                 onChange={(e) => setArvInput(e.target.value)}
                 placeholder="425000"
@@ -162,6 +164,7 @@ export function BrrrrCard({ values, result, defaultRehab }: BrrrrCardProps) {
             <div className="relative">
               <Input
                 type="number"
+                inputMode="decimal"
                 step="1"
                 value={refiLtvInput}
                 onChange={(e) => setRefiLtvInput(e.target.value)}
@@ -177,6 +180,7 @@ export function BrrrrCard({ values, result, defaultRehab }: BrrrrCardProps) {
             <div className="relative">
               <Input
                 type="number"
+                inputMode="decimal"
                 step="0.125"
                 value={refiRateInput}
                 onChange={(e) => setRefiRateInput(e.target.value)}
@@ -192,6 +196,7 @@ export function BrrrrCard({ values, result, defaultRehab }: BrrrrCardProps) {
             <div className="relative">
               <Input
                 type="number"
+                inputMode="decimal"
                 step="1"
                 value={refiTermInput}
                 onChange={(e) => setRefiTermInput(e.target.value)}
@@ -207,6 +212,7 @@ export function BrrrrCard({ values, result, defaultRehab }: BrrrrCardProps) {
             <div className="relative">
               <Input
                 type="number"
+                inputMode="decimal"
                 step="1"
                 value={holdMonthsInput}
                 onChange={(e) => setHoldMonthsInput(e.target.value)}

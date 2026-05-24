@@ -35,6 +35,7 @@ export function FinancingSection({ form }: FinancingSectionProps) {
             <Input
               {...register("downPaymentPct", { valueAsNumber: true })}
               type="number"
+              inputMode="decimal"
               step="0.01"
               placeholder="20"
               className={cn(
@@ -55,6 +56,7 @@ export function FinancingSection({ form }: FinancingSectionProps) {
             <Input
               {...register("interestRate", { valueAsNumber: true })}
               type="number"
+              inputMode="decimal"
               step="0.01"
               placeholder="6.75"
               className={cn(
@@ -74,6 +76,7 @@ export function FinancingSection({ form }: FinancingSectionProps) {
           <Input
             {...register("loanTermYears", { valueAsNumber: true })}
             type="number"
+            inputMode="decimal"
             placeholder="30"
             className={cn(
               "border-[var(--brand-green)]/30 bg-background focus-visible:ring-[var(--brand-green)]/30",
@@ -92,6 +95,7 @@ export function FinancingSection({ form }: FinancingSectionProps) {
             <Input
               {...register("closingCostsPct", { setValueAs: optionalNumberSetValueAs })}
               type="number"
+              inputMode="decimal"
               step="0.01"
               min={0}
               max={100}
