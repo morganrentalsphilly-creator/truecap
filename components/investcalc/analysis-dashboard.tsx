@@ -27,6 +27,8 @@ import { ExitScenariosPanel } from "@/components/investcalc/exit-scenarios/panel
 import { MaxOfferCard } from "@/components/investcalc/max-offer-card";
 import { SensitivityGrid } from "@/components/investcalc/sensitivity-grid";
 import { StrategiesPanel } from "@/components/investcalc/strategies-panel";
+import { ProInlineGate } from "@/components/investcalc/pro-inline-gate";
+import { Activity, Target } from "lucide-react";
 import { MomentOfValueUpsell } from "@/components/marketing/moment-of-value-upsell";
 // ShareLinkButton import temporarily removed — Share button was pulled from
 // the Quick Actions row because it wrapped onto a second line. Component
@@ -83,6 +85,14 @@ interface AnalysisDashboardProps {
   canUseTaxStrategy?: boolean;
   canUseExitScenarios?: boolean;
   canUseDealScore?: boolean;
+  /** Pro: max-allowable-offer solver. False = render upsell teaser. */
+  canUseMaxOffer?: boolean;
+  /** Pro: sensitivity grid. False = render upsell teaser. */
+  canUseSensitivity?: boolean;
+  /** Pro: Strategies tab. False = tab shown locked with upgrade prompt. */
+  canUseStrategies?: boolean;
+  /** Pro: shareable read-only deal links. False = share button hidden / locked. */
+  canUseShareLinks?: boolean;
   saveDealLimitReached?: boolean;
   activeTab?: AnalysisDashboardTab;
   /** Shown when Compare / Export are disabled (e.g. unsaved edits). */
@@ -97,7 +107,7 @@ const TABS: { id: AnalysisDashboardTab; label: string; mobileLabel: string; isPr
   { id: "projections", label: "10-Year Projections", mobileLabel: "10-Year", isPro: true },
   { id: "tax-strategy", label: "Tax Strategy", mobileLabel: "Tax", isPro: true },
   { id: "exit-scenarios", label: "Exit Scenarios", mobileLabel: "Exit", isPro: true },
-  { id: "strategies", label: "Strategies", mobileLabel: "Strategy", isPro: false },
+  { id: "strategies", label: "Strategies", mobileLabel: "Strategy", isPro: true },
 ];
 
 function fmt(n: number) {
@@ -179,6 +189,10 @@ export function AnalysisDashboard({
   canUseTaxStrategy = false,
   canUseExitScenarios = false,
   canUseDealScore = false,
+  canUseMaxOffer = false,
+  canUseSensitivity = false,
+  canUseStrategies = false,
+  canUseShareLinks = false,
   saveDealLimitReached = false,
   activeTab: activeTabProp,
   persistedActionsBlockHint,
@@ -192,10 +206,10 @@ export function AnalysisDashboard({
     projections: canUseProjections,
     "tax-strategy": canUseTaxStrategy,
     "exit-scenarios": canUseExitScenarios,
-    // Strategies tab (BRRRR + Fix-and-Flip + rehab estimator) is free.
-    // The flag is consulted only when a tab's isPro=true, but Record<T,B>
-    // requires every key — so set it true to satisfy the type.
-    strategies: true,
+    // Strategies tab (BRRRR + Fix-and-Flip + rehab estimator) is now a
+    // Pro feature — gated by canUseStrategies. Free users see the tab
+    // with a lock icon and the ProFeaturePreview placeholder on click.
+    strategies: canUseStrategies,
   };
   const isEditingLockedByPlan = isAuthenticated && isExistingSavedDeal && !canUpdateSavedDeals;
   const isSaveLimitLockedByPlan = isAuthenticated && !isExistingSavedDeal && saveDealLimitReached;
@@ -536,13 +550,38 @@ export function AnalysisDashboard({
         />
       )}
 
-      {/* Max Allowable Offer — reverse-solves for the highest price that hits
-          the user's target return thresholds. Self-contained, additive. */}
-      <MaxOfferCard values={values} />
+      {/* Max Allowable Offer — Pro feature. Free users see a teaser that
+          routes them to /pricing; paid users get the actual solver. */}
+      {canUseMaxOffer ? (
+        <MaxOfferCard values={values} />
+      ) : (
+        <ProInlineGate
+          icon={Target}
+          title="Max Allowable Offer"
+          description="Reverse-solve the highest price that still hits your return thresholds."
+          previewBullets={[
+            "Set targets for cap rate, CoC, or cash flow",
+            "Binary-search solver runs in <1s",
+            "'At this price you'd get…' readout",
+          ]}
+        />
+      )}
 
-      {/* Sensitivity grid — stress-tests the deal against rent / vacancy /
-          interest-rate moves. Additive; reuses calculateAnalysis. */}
-      <SensitivityGrid values={values} />
+      {/* Sensitivity grid — Pro feature. Free users see a teaser. */}
+      {canUseSensitivity ? (
+        <SensitivityGrid values={values} />
+      ) : (
+        <ProInlineGate
+          icon={Activity}
+          title="Sensitivity analysis"
+          description="Stress-test the deal if rent comes in lower, vacancy spikes, or rates rise."
+          previewBullets={[
+            "Rent ±10% scenarios",
+            "Vacancy ±5pp scenarios",
+            "Interest rate ±1pp scenarios",
+          ]}
+        />
+      )}
 
       {/* Analysis tabs */}
       <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
@@ -613,7 +652,10 @@ export function AnalysisDashboard({
               Run the analysis to see exit scenarios.
             </div>
           )}
-          {activeTab === "strategies" && (
+          {activeTab === "strategies" && !canUseStrategies && (
+            <ProFeaturePreview kind="strategies" onUpgrade={goToBilling} />
+          )}
+          {activeTab === "strategies" && canUseStrategies && (
             <StrategiesPanel values={values} result={result} />
           )}
           {activeTab !== "cash-flow" && activeTab !== "projections" && activeTab !== "tax-strategy" && activeTab !== "exit-scenarios" && activeTab !== "strategies" && (
@@ -927,7 +969,7 @@ function DealScoreCard({
   );
 }
 
-type ProPreviewKind = "projections" | "tax-strategy" | "exit-scenarios";
+type ProPreviewKind = "projections" | "tax-strategy" | "exit-scenarios" | "strategies";
 
 const proPreviewCopy: Record<ProPreviewKind, { title: string; description: string; metrics: string[] }> = {
   projections: {
@@ -944,6 +986,11 @@ const proPreviewCopy: Record<ProPreviewKind, { title: string; description: strin
     title: "Exit Scenarios",
     description: "Unlock equity growth, sale timing, profit breakdowns, and ROI scenarios.",
     metrics: ["Best Year to Sell", "Year 5 Profit", "Total ROI"],
+  },
+  strategies: {
+    title: "Strategies",
+    description: "Unlock the BRRRR analyzer, fix-and-flip math, and the rehab cost estimator.",
+    metrics: ["Cash left in deal", "Post-refi cash flow", "Flip annualized ROI"],
   },
 };
 

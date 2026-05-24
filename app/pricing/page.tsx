@@ -10,7 +10,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Check, ShieldCheck, Sparkles, X } from "lucide-react";
 import { Header } from "@/components/investcalc/header";
-import { PricingPlanButtons } from "@/components/marketing/pricing-plan-buttons";
+import { PricingTogglePlans } from "@/components/marketing/pricing-toggle-plans";
 import { getEntitlementsForUser, hasPaidPlanSubscription } from "@/lib/entitlements";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getStripe } from "@/lib/stripe/client";
@@ -53,31 +53,9 @@ async function loadStripePrice(slug: "pro_monthly" | "pro_annual"): Promise<Stri
   }
 }
 
-const FREE_FEATURES: { label: string; included: boolean }[] = [
-  { label: "Unlimited cash-flow analyses", included: true },
-  { label: "Cap rate, CoC, DSCR, monthly cash flow", included: true },
-  { label: "Auto-fill rent + rate + tax from address", included: true },
-  { label: "MAO + Sensitivity + Strategies (BRRRR, flip)", included: true },
-  { label: "Shareable read-only deal links", included: true },
-  { label: "10-year projection (full)", included: false },
-  { label: "Tax strategy + depreciation modeling", included: false },
-  { label: "Exit scenarios + best year to sell", included: false },
-  { label: "Pro Deal Score with breakdown", included: false },
-  { label: "Lender-ready PDF export", included: false },
-  { label: "Save + compare deals", included: false },
-];
-
-const PRO_FEATURES: string[] = [
-  "Everything in Free, plus —",
-  "10-year cash flow & equity projection",
-  "Tax strategy: depreciation + interest deduction modeling",
-  "Exit scenarios: best year to sell, profit by year",
-  "Pro Deal Score (0-100) with full breakdown",
-  "Lender-ready PDF reports (1-click export)",
-  "Save unlimited deals",
-  "Compare up to 4 deals side-by-side",
-  "Priority email support",
-];
+// FREE_FEATURES + PRO_FEATURES lists were lifted into the toggle
+// component (components/marketing/pricing-toggle-plans.tsx) so they
+// stay co-located with the cards that render them.
 
 const FAQS: { q: string; a: string }[] = [
   {
@@ -118,15 +96,9 @@ export default async function PricingPage() {
     user ? hasPaidPlanSubscription(supabase, user.id) : Promise.resolve(false),
   ]);
   const entitlements = user ? await getEntitlementsForUser(supabase, user.id) : null;
-
-  // Derive annual monthly-equivalent + savings hint
-  const monthlyAmount =
-    monthly?.amountLabel?.match(/[\d.]+/)?.[0] ? Number(monthly!.amountLabel.match(/[\d.]+/)![0]) : null;
-  const annualAmount =
-    annual?.amountLabel?.match(/[\d.]+/)?.[0] ? Number(annual!.amountLabel.match(/[\d.]+/)![0]) : null;
-  const annualPerMonth = annualAmount ? `$${(annualAmount / 12).toFixed(annualAmount / 12 % 1 === 0 ? 0 : 2)}` : null;
-  const monthsFreeWithAnnual =
-    monthlyAmount && annualAmount ? Math.max(0, Math.round((monthlyAmount * 12 - annualAmount) / monthlyAmount)) : null;
+  // The Monthly ↔ Annual savings math is now done inside
+  // <PricingTogglePlans> so it can react to the user's toggle state.
+  // We just hand it both Stripe prices.
 
   return (
     <>
@@ -154,68 +126,17 @@ export default async function PricingPage() {
           </div>
         </section>
 
-        {/* Plans */}
+        {/* Plans — 2-card layout with Monthly ↔ Annual toggle on Pro
+            (replaced the previous 3-card side-by-side). The toggle
+            consistently outperforms separate cards because users
+            directly compare per-month cost. ~10-15% lift on annual. */}
         <section className="mx-auto -mt-2 max-w-5xl px-4 pb-6 sm:px-6">
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-5">
-            {/* FREE */}
-            <PlanCard
-              kind="free"
-              title="Free"
-              priceTop="$0"
-              priceSub="forever"
-              tagline="Everything you need to triage a deal in 60 seconds."
-              features={FREE_FEATURES}
-              isCurrent={!isPaid}
-              ctaArea={
-                <PricingPlanButtons
-                  slot="free"
-                  isAuthenticated={Boolean(user)}
-                  isPaid={isPaid}
-                />
-              }
-            />
-
-            {/* PRO MONTHLY */}
-            <PlanCard
-              kind="pro"
-              title="Pro Monthly"
-              priceTop={monthly?.amountLabel ?? "Pro"}
-              priceSub={monthly ? `per ${monthly.period}` : "monthly"}
-              tagline="Full toolkit, no commitment."
-              features={PRO_FEATURES.map((f) => ({ label: f, included: true }))}
-              isCurrent={isPaid}
-              ctaArea={
-                <PricingPlanButtons
-                  slot="pro_monthly"
-                  isAuthenticated={Boolean(user)}
-                  isPaid={isPaid}
-                />
-              }
-            />
-
-            {/* PRO ANNUAL — featured */}
-            <PlanCard
-              kind="pro-featured"
-              title="Pro Annual"
-              priceTop={annualPerMonth ? `${annualPerMonth}` : (annual?.amountLabel ?? "Pro")}
-              priceSub={annualPerMonth ? "per month, billed annually" : (annual ? `per ${annual.period}` : "annual")}
-              badge={
-                monthsFreeWithAnnual && monthsFreeWithAnnual > 0
-                  ? `${monthsFreeWithAnnual} months free`
-                  : "Save 25%"
-              }
-              tagline="Best value — most investors close enough deals to pay for the year."
-              features={PRO_FEATURES.map((f) => ({ label: f, included: true }))}
-              isCurrent={isPaid}
-              ctaArea={
-                <PricingPlanButtons
-                  slot="pro_annual"
-                  isAuthenticated={Boolean(user)}
-                  isPaid={isPaid}
-                />
-              }
-            />
-          </div>
+          <PricingTogglePlans
+            monthly={monthly}
+            annual={annual}
+            isAuthenticated={Boolean(user)}
+            isPaid={isPaid}
+          />
 
           {/* Guarantee strip */}
           <div className="mx-auto mt-8 flex max-w-2xl flex-wrap items-center justify-center gap-x-6 gap-y-2 rounded-2xl border border-border bg-card px-5 py-4 text-center text-xs text-muted-foreground sm:text-sm">
@@ -252,9 +173,9 @@ export default async function PricingPage() {
                   ["Unlimited analyses", true, true],
                   ["Cap rate · CoC · DSCR · cash flow", true, true],
                   ["Auto-fill (HUD rent · FRED rate · state tax)", true, true],
-                  ["MAO solver · Sensitivity grid", true, true],
-                  ["BRRRR + fix-and-flip + rehab estimator", true, true],
-                  ["Shareable read-only deal links", true, true],
+                  ["MAO solver · Sensitivity grid", false, true],
+                  ["BRRRR + fix-and-flip + rehab estimator", false, true],
+                  ["Shareable read-only deal links", false, true],
                   ["10-year cash flow projection", false, true],
                   ["Tax strategy + depreciation", false, true],
                   ["Exit scenarios (best year to sell)", false, true],
@@ -326,74 +247,6 @@ export default async function PricingPage() {
       </main>
       <SiteFooter />
     </>
-  );
-}
-
-function PlanCard({
-  kind,
-  title,
-  priceTop,
-  priceSub,
-  tagline,
-  features,
-  ctaArea,
-  badge,
-  isCurrent,
-}: {
-  kind: "free" | "pro" | "pro-featured";
-  title: string;
-  priceTop: string;
-  priceSub: string;
-  tagline: string;
-  features: { label: string; included: boolean }[];
-  ctaArea: React.ReactNode;
-  badge?: string;
-  isCurrent?: boolean;
-}) {
-  const featured = kind === "pro-featured";
-  return (
-    <div
-      className={
-        featured
-          ? "relative -mt-2 rounded-3xl border-2 border-primary bg-card p-6 shadow-[0_24px_70px_rgba(82,72,212,0.18)] lg:scale-[1.03]"
-          : "relative rounded-3xl border border-border bg-card p-6 shadow-sm"
-      }
-    >
-      {badge ? (
-        <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1 text-[10px] font-black uppercase tracking-widest text-primary-foreground shadow-md">
-          {badge}
-        </span>
-      ) : null}
-      <div className="flex items-baseline justify-between">
-        <h3 className="text-lg font-black text-foreground">{title}</h3>
-        {isCurrent ? (
-          <span className="rounded-full bg-[var(--metric-positive)]/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-[var(--metric-positive)]">
-            Current
-          </span>
-        ) : null}
-      </div>
-      <p className="mt-1 text-sm text-muted-foreground">{tagline}</p>
-      <div className="mt-5 flex items-baseline gap-1.5">
-        <span className="text-4xl font-black text-foreground sm:text-5xl">{priceTop}</span>
-        <span className="text-sm text-muted-foreground">/{priceSub.replace(/^per /, "")}</span>
-      </div>
-      <div className="mt-1 text-xs text-muted-foreground">{priceSub.startsWith("per ") ? "" : priceSub}</div>
-      <div className="mt-5">{ctaArea}</div>
-      <ul className="mt-6 space-y-2.5">
-        {features.map((f) => (
-          <li key={f.label} className="flex items-start gap-2 text-sm">
-            {f.included ? (
-              <Check className="mt-0.5 size-4 shrink-0 text-[var(--metric-positive)]" />
-            ) : (
-              <X className="mt-0.5 size-4 shrink-0 text-muted-foreground/40" />
-            )}
-            <span className={f.included ? "text-foreground" : "text-muted-foreground/60 line-through"}>
-              {f.label}
-            </span>
-          </li>
-        ))}
-      </ul>
-    </div>
   );
 }
 

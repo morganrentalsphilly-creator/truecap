@@ -98,6 +98,15 @@ export default async function Home() {
   const canUseTaxStrategy = entitlements ? hasPlanFeature(entitlements, "tax_strategy") : false;
   const canUseExitScenarios = entitlements ? hasPlanFeature(entitlements, "exit_scenarios") : false;
   const canUseDealScore = entitlements ? hasPlanFeature(entitlements, "deal_score") : false;
+  // Pro-gated features that weren't previously gated. Derived from
+  // hasPaidPlanSubscription (any paid plan = unlocked) so we don't need
+  // a DB migration to add new feature keys per plan. If you later split
+  // these by plan tier, replace with hasPlanFeature checks.
+  const isPaidPlan = canUpdateSavedDeals; // already derived from hasPaidPlanSubscription
+  const canUseMaxOffer = isPaidPlan;
+  const canUseSensitivity = isPaidPlan;
+  const canUseStrategies = isPaidPlan;
+  const canUseShareLinks = isPaidPlan;
 
   return (
     <>
@@ -127,6 +136,10 @@ export default async function Home() {
         canUseTaxStrategy={canUseTaxStrategy}
         canUseExitScenarios={canUseExitScenarios}
         canUseDealScore={canUseDealScore}
+        canUseMaxOffer={canUseMaxOffer}
+        canUseSensitivity={canUseSensitivity}
+        canUseStrategies={canUseStrategies}
+        canUseShareLinks={canUseShareLinks}
         canUpdateSavedDeals={canUpdateSavedDeals}
         saveDealLimitReached={saveDealLimitReached}
         initialSavedDealCount={savedDealCount ?? 0}

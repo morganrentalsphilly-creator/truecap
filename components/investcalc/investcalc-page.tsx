@@ -255,6 +255,10 @@ export function InvestCalcPage({
   canUseTaxStrategy = false,
   canUseExitScenarios = false,
   canUseDealScore = false,
+  canUseMaxOffer = false,
+  canUseSensitivity = false,
+  canUseStrategies = false,
+  canUseShareLinks = false,
   canUpdateSavedDeals = false,
   saveDealLimitReached = false,
   initialSavedDealCount = 0,
@@ -268,6 +272,14 @@ export function InvestCalcPage({
   canUseTaxStrategy?: boolean;
   canUseExitScenarios?: boolean;
   canUseDealScore?: boolean;
+  /** Pro: max-allowable-offer solver card */
+  canUseMaxOffer?: boolean;
+  /** Pro: sensitivity analysis card */
+  canUseSensitivity?: boolean;
+  /** Pro: Strategies tab (BRRRR + fix-flip + rehab estimator) */
+  canUseStrategies?: boolean;
+  /** Pro: generate shareable read-only deal links */
+  canUseShareLinks?: boolean;
   canUpdateSavedDeals?: boolean;
   saveDealLimitReached?: boolean;
   initialSavedDealCount?: number;
@@ -1459,6 +1471,10 @@ export function InvestCalcPage({
               canUseTaxStrategy={canUseTaxStrategy}
               canUseExitScenarios={canUseExitScenarios}
               canUseDealScore={canUseDealScore}
+              canUseMaxOffer={canUseMaxOffer}
+              canUseSensitivity={canUseSensitivity}
+              canUseStrategies={canUseStrategies}
+              canUseShareLinks={canUseShareLinks}
               activeTab={activeDashboardTab}
               saveDealLimitReached={currentSaveDealLimitReached}
               persistedActionsBlockHint={
