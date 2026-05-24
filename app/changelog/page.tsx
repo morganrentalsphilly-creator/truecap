@@ -57,6 +57,13 @@ const ENTRIES: Entry[] = [
   {
     date: "2026-05-24",
     category: "Content",
+    title: "/methodology page — every formula and data source",
+    description:
+      "Comprehensive transparency page explaining exactly how TrueCap computes cap rate, CoC, DSCR, projections, tax savings, and exit scenarios. Plus where the auto-fill data comes from (HUD FMR, FRED, state property tax) and the conventions we chose.",
+  },
+  {
+    date: "2026-05-24",
+    category: "Content",
     title: "5th blog post + Real Estate Glossary",
     description:
       "Strategy deep-dive: 'Cash flow vs appreciation — which actually wins in 2026?'. Plus a new /glossary page with 23 plain-English term definitions, each cross-linked to the matching calculator and deeper-dive blog post.",
