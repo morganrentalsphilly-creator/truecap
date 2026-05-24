@@ -191,6 +191,10 @@ export function AnalysisDashboard({
     projections: canUseProjections,
     "tax-strategy": canUseTaxStrategy,
     "exit-scenarios": canUseExitScenarios,
+    // Strategies tab (BRRRR + Fix-and-Flip + rehab estimator) is free.
+    // The flag is consulted only when a tab's isPro=true, but Record<T,B>
+    // requires every key — so set it true to satisfy the type.
+    strategies: true,
   };
   const isEditingLockedByPlan = isAuthenticated && isExistingSavedDeal && !canUpdateSavedDeals;
   const isSaveLimitLockedByPlan = isAuthenticated && !isExistingSavedDeal && saveDealLimitReached;
