@@ -15,6 +15,7 @@ import { getEntitlementsForUser, hasPaidPlanSubscription } from "@/lib/entitleme
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getStripe } from "@/lib/stripe/client";
 
+import { RoiCalculatorWidget } from "@/components/marketing/roi-calculator-widget";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 export const metadata: Metadata = {
@@ -135,8 +136,14 @@ export default async function PricingPage() {
             isPaid={isPaid}
           />
 
+          {/* Interactive ROI calculator — defangs the 'is it worth $X/mo'
+              objection by turning it into the visitor's own math. */}
+          <div className="mx-auto mt-8 max-w-2xl">
+            <RoiCalculatorWidget />
+          </div>
+
           {/* Trust strip */}
-          <div className="mx-auto mt-8 flex max-w-2xl flex-wrap items-center justify-center gap-x-6 gap-y-2 rounded-2xl border border-border bg-card px-5 py-4 text-center text-xs text-muted-foreground sm:text-sm">
+          <div className="mx-auto mt-6 flex max-w-2xl flex-wrap items-center justify-center gap-x-6 gap-y-2 rounded-2xl border border-border bg-card px-5 py-4 text-center text-xs text-muted-foreground sm:text-sm">
             <span className="inline-flex items-center gap-1.5">
               <ShieldCheck className="size-4 text-[var(--metric-positive)]" />
               <strong className="text-foreground">Free to start — no card</strong>
