@@ -28,6 +28,8 @@ import { MaxOfferCard } from "@/components/investcalc/max-offer-card";
 import { SensitivityGrid } from "@/components/investcalc/sensitivity-grid";
 import { StrategiesPanel } from "@/components/investcalc/strategies-panel";
 import { ShareLinkButton } from "@/components/investcalc/share-link-button";
+import { GlossaryTip } from "@/components/investcalc/glossary-tip";
+import type { GLOSSARY } from "@/lib/glossary";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 
 import type { ProjectionYear, TenYearProjectionInput } from "@/lib/ten-year-projections";
@@ -108,18 +110,29 @@ function MetricCard({
   sub,
   color,
   isLoading,
+  glossaryTerm,
 }: {
   label: string;
   value: string;
   sub?: string;
   color?: string;
   isLoading: boolean;
+  glossaryTerm?: keyof typeof GLOSSARY;
 }) {
+  const labelEl = (
+    <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-muted-foreground leading-tight">
+      {label}
+    </span>
+  );
   return (
     <div className="bg-card rounded-2xl border border-border p-3 sm:p-5 flex flex-col gap-1">
-      <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-muted-foreground leading-tight">
-        {label}
-      </span>
+      {glossaryTerm ? (
+        <GlossaryTip term={glossaryTerm} showIcon={false} className="!no-underline">
+          {labelEl}
+        </GlossaryTip>
+      ) : (
+        labelEl
+      )}
       {isLoading ? (
         <Skeleton className="h-7 sm:h-8 w-20 sm:w-24 mt-1" />
       ) : (
@@ -428,24 +441,28 @@ export function AnalysisDashboard({
       <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-2 sm:gap-3">
         <MetricCard
           label="Monthly Cash Flow"
+          glossaryTerm="cashFlow"
           value={result ? (result.netCashFlow >= 0 ? fmt(result.netCashFlow) : `-${fmt(result.netCashFlow)}`) : "—"}
           color={result ? (result.netCashFlow >= 0 ? "text-[var(--metric-positive)]" : "text-[var(--metric-negative)]") : undefined}
           isLoading={isLoading}
         />
         <MetricCard
           label="CoC Return"
+          glossaryTerm="coc"
           value={result ? `${result.cocReturn >= 0 ? "+" : ""}${result.cocReturn.toFixed(1)}%` : "—"}
           color={result ? (result.cocReturn >= 0 ? "text-[var(--metric-positive)]" : "text-[var(--metric-negative)]") : undefined}
           isLoading={isLoading}
         />
         <MetricCard
           label="Cap Rate"
+          glossaryTerm="capRate"
           value={result ? `+${result.capRate.toFixed(1)}%` : "—"}
           color="text-[var(--metric-positive)]"
           isLoading={isLoading}
         />
         <MetricCard
           label="DSCR"
+          glossaryTerm="dscr"
           value={result ? result.dscr.toFixed(2) : "—"}
           sub={
             result
@@ -461,6 +478,7 @@ export function AnalysisDashboard({
         />
         <MetricCard
           label="Estimated Tax Savings"
+          glossaryTerm="taxSavings"
           value={result ? fmt(result.taxSavingsMonthly) : "—"}
           sub="/month"
           color="text-primary"
@@ -468,6 +486,7 @@ export function AnalysisDashboard({
         />
         <MetricCard
           label="After-Tax CF"
+          glossaryTerm="afterTaxCF"
           value={result ? fmt(result.afterTaxCF) : "—"}
           sub="/month"
           color="text-primary"
