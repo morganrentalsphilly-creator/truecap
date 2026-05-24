@@ -338,6 +338,14 @@ export function InvestCalcPage({
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
   const [showResults, setShowResults] = useState(false);
+  /**
+   * Flipped true on mount when we restore the form from the anonymous
+   * auto-save draft. Drives a small "Welcome back — picked up where
+   * you left off" banner so the user understands why the form is
+   * pre-filled (and can one-click "start fresh" if it's not theirs,
+   * e.g. shared device).
+   */
+  const [restoredFromDraft, setRestoredFromDraft] = useState(false);
   const [isSavingDeal, setIsSavingDeal] = useState(false);
   const [savedDealId, setSavedDealId] = useState<string | null>(null);
   const [savedDealCount, setSavedDealCount] = useState(initialSavedDealCount);
@@ -1006,6 +1014,9 @@ export function InvestCalcPage({
         if (normalized) {
           prevPropertyTypeRef.current = normalized.propertyType;
           form.reset(normalized);
+          // Surface the restore visibly. Without this the user just
+          // sees a pre-filled form and wonders what happened.
+          setRestoredFromDraft(true);
           // Don't auto-calculate — restoring inputs is the contract,
           // running the analysis is the user's intent click. Auto-
           // calculating would race with the loading-spinner UI and
@@ -1538,6 +1549,44 @@ export function InvestCalcPage({
             </button>
           )}
         </div>
+
+        {/* "Welcome back" banner — only shown when the form was just
+            restored from a localStorage auto-save draft. Without this
+            the user sees a pre-filled form and wonders what happened.
+            "Start fresh" wipes the draft and resets to defaults, which
+            also matters for shared-device cases (cafe laptop, etc). */}
+        {restoredFromDraft && analysisResult === null && (
+          <div className="mt-4 flex flex-col gap-2 rounded-xl border border-primary/30 bg-[var(--brand-blue-light)] px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-2.5 sm:items-center">
+              <Sparkles className="mt-0.5 size-4 shrink-0 text-primary sm:mt-0" />
+              <p className="leading-relaxed text-foreground">
+                <strong className="font-bold">Welcome back —</strong>{" "}
+                <span className="text-muted-foreground">
+                  picked up where you left off. Edit anything below or
+                </span>{" "}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setRestoredFromDraft(false);
+                    resetToNewAnalysis("single-family");
+                  }}
+                  className="font-semibold text-primary underline-offset-2 hover:underline"
+                >
+                  start fresh
+                </button>
+                <span className="text-muted-foreground">.</span>
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setRestoredFromDraft(false)}
+              aria-label="Dismiss welcome-back banner"
+              className="self-end rounded-md px-2 py-1 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground hover:bg-card hover:text-foreground sm:self-auto"
+            >
+              Dismiss
+            </button>
+          </div>
+        )}
 
         {/* Input tabs — horizontally scrollable on mobile */}
         <div className="flex gap-1.5 sm:gap-3 mt-4 sm:mt-6 overflow-x-auto pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 xl:grid-cols-4 scrollbar-none max-[380px]:mx-0 max-[380px]:grid max-[380px]:grid-cols-4 max-[380px]:gap-1 max-[380px]:overflow-visible max-[380px]:px-0">
