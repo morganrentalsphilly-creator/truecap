@@ -30,6 +30,7 @@ import { StrategiesPanel } from "@/components/investcalc/strategies-panel";
 import { ProInlineGate } from "@/components/investcalc/pro-inline-gate";
 import { Activity, Target } from "lucide-react";
 import { MomentOfValueUpsell } from "@/components/marketing/moment-of-value-upsell";
+import { SignupPromptCard } from "@/components/marketing/signup-prompt-card";
 // ShareLinkButton import temporarily removed — Share button was pulled from
 // the Quick Actions row because it wrapped onto a second line. Component
 // + share-link.ts + /d/[encoded] route all remain in the codebase ready
@@ -537,6 +538,19 @@ export function AnalysisDashboard({
           isLoading={isLoading}
         />
       </div>
+
+      {/* Anonymous signup prompt — fires AFTER a free analysis for
+          unauthenticated users. Soft conversion ask ("save this for
+          later") with Google one-tap. Sits above the Pro upsell
+          because signup is the cheaper conversion — users who won't
+          commit to Pro today will often sign up to save their work,
+          which makes the Pro pitch possible later. */}
+      {result && !isLoading && !isAuthenticated && (
+        <SignupPromptCard
+          address={values?.address}
+          isAuthenticated={isAuthenticated}
+        />
+      )}
 
       {/* Moment-of-value Pro upsell — fires for free users only, using this
           specific deal's numbers so the pitch is relevant, not generic. */}
