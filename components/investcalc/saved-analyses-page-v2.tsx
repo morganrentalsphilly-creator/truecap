@@ -56,6 +56,7 @@ import {
   resolveExitScenarioRates,
   type ExitScenarioYear,
 } from "@/lib/exit-scenarios";
+import { buildAutoVerdict } from "@/lib/verdict";
 
 type SavedSignal = "strong-buy" | "buy" | "neutral" | "risky" | "avoid";
 type SavedPropertyType = "single-family" | "multi-family" | "owner-occupant";
@@ -238,9 +239,16 @@ function buildReportDataFromSavedSnapshot(args: {
   const score = numberFromSnapshot(result.score) ?? 0;
   const recommendation = stringFromSnapshot(result.recommendation) ?? "Neutral";
   const risk = stringFromSnapshot(result.riskLevel) ?? "Medium Risk";
+  // Prefer the stored Pro Deal Score explanation; otherwise use the
+  // shared auto-verdict generator so cash purchases (no debt service)
+  // and other edge cases render the same as everywhere else in the app.
   const rationale =
     stringFromSnapshot(result.explanation) ??
-    `Cash flow ${result.netCashFlow >= 0 ? "is positive" : "is negative"} at ${result.netCashFlow.toLocaleString("en-US")} per month with DSCR ${result.dscr.toFixed(2)}.`;
+    buildAutoVerdict({
+      result,
+      address: values.address,
+      purchasePrice: values.purchasePrice,
+    });
 
   return {
     generatedAt: new Date(),
