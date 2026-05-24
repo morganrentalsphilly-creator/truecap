@@ -10,6 +10,7 @@ import {
   VsCompetitors,
   WhyNotSpreadsheet,
 } from "@/components/marketing/landing-sections";
+import { OnboardingTour } from "@/components/marketing/onboarding-tour";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { StickyConversionBar } from "@/components/marketing/sticky-conversion-bar";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -212,6 +213,16 @@ export default async function Home() {
       {/* Sticky scroll-activated CTA bar for cold visitors only. Renders
           nothing for auth'd users. */}
       {!user && <StickyConversionBar />}
+      {/* Onboarding tour — only fires for signed-in users with zero
+          saved deals (the clear first-time-signup signal). 3-step
+          floating card that walks them through Try Sample → Save →
+          See Pro. Dismissible, persisted to localStorage. */}
+      {user && (
+        <OnboardingTour
+          isAuthenticated={true}
+          savedDealCount={savedDealCount ?? 0}
+        />
+      )}
       {/* Engagement signal pump for Google Ads — fires dataLayer scroll
           depth events so the bidding algorithm has something to
           optimize against beyond rare conversions. */}
