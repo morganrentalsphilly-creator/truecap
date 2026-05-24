@@ -78,6 +78,36 @@ function lookupPropertyTax(state?: string): { rate: number; state: string } | nu
 
 // -------- Mortgage rate (FRED) --------
 
+// Cap remote-API time per fetch. Enrichment runs synchronously inside
+// the user's address-pick interaction — a 5s ceiling keeps it snappy
+// and Vercel's 10s function timeout from ever firing.
+const REMOTE_TIMEOUT_MS = 5_000;
+
+/**
+ * fetch wrapper that aborts after `timeoutMs`. Resolves null on timeout
+ * so callers can fall through to the no-data graceful-degradation path
+ * (the form just doesn't get auto-fill — user can still type values).
+ */
+async function fetchWithTimeout(
+  input: string | URL,
+  init: RequestInit = {},
+  timeoutMs = REMOTE_TIMEOUT_MS
+): Promise<Response | null> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(input, { ...init, signal: controller.signal });
+  } catch (err) {
+    if ((err as Error | undefined)?.name === "AbortError") {
+      console.warn(`[enrichProperty] Remote fetch timed out after ${timeoutMs}ms: ${input}`);
+      return null;
+    }
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 // In-memory cache: serverless instances stay warm for a while, so even
 // a simple module-level cache cuts FRED traffic by 100x.
 type CachedRate = { rate: number; asOf: string; fetchedAt: number };
@@ -103,7 +133,8 @@ async function fetchCurrentMortgageRate(): Promise<{ rate: number; asOf: string 
   url.searchParams.set("limit", "1");
 
   try {
-    const res = await fetch(url.toString(), { cache: "no-store" });
+    const res = await fetchWithTimeout(url.toString(), { cache: "no-store" });
+    if (!res) return null; // timed out
     if (!res.ok) {
       const body = await res.text().catch(() => "");
       console.warn(
@@ -177,13 +208,14 @@ async function fetchHudStateData(
   }
 
   const url = `https://www.huduser.gov/hudapi/public/fmr/statedata/${encodeURIComponent(key)}`;
-  const res = await fetch(url, {
+  const res = await fetchWithTimeout(url, {
     headers: {
       Authorization: `Bearer ${apiKey}`,
       Accept: "application/json",
     },
     cache: "no-store",
   });
+  if (!res) return null; // timed out
   if (!res.ok) {
     const body = await res.text().catch(() => "");
     console.warn(
