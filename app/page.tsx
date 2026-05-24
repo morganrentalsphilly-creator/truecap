@@ -10,6 +10,7 @@ import {
   VsCompetitors,
   WhyNotSpreadsheet,
 } from "@/components/marketing/landing-sections";
+import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { StickyConversionBar } from "@/components/marketing/sticky-conversion-bar";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import {
@@ -211,6 +212,10 @@ export default async function Home() {
       {/* Sticky scroll-activated CTA bar for cold visitors only. Renders
           nothing for auth'd users. */}
       {!user && <StickyConversionBar />}
+      {/* Engagement signal pump for Google Ads — fires dataLayer scroll
+          depth events so the bidding algorithm has something to
+          optimize against beyond rare conversions. */}
+      <ScrollDepthTracker />
       {/* Site footer — trust + sitemap + brand. Shown to everyone; helps
           with Quality Score and dwell time. */}
       <SiteFooter />

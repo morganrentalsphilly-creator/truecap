@@ -8,6 +8,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowUpRight, Calculator } from "lucide-react";
+import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 
 export const metadata: Metadata = {
@@ -157,6 +158,7 @@ export default function ToolsLandingPage() {
         </section>
       </main>
       <SiteFooter />
+      <ScrollDepthTracker />
     </div>
   );
 }
