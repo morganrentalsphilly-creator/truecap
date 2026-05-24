@@ -6,9 +6,10 @@ import Cropper from "react-easy-crop";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Camera, Check, Loader2, Upload, X } from "lucide-react";
+import { Camera, Check, KeyRound, Loader2, Mail, Upload, X } from "lucide-react";
 import "react-easy-crop/react-easy-crop.css";
 import { updateProfileAction } from "@/app/actions/profile";
+import { requestPasswordResetAction } from "@/app/actions/auth";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -139,6 +140,12 @@ export function ProfileForm({
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<AreaPixels | null>(null);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  // "Send password reset link" — reuses the existing forgot-password
+  // flow so we don't have to add a separate "change password" page.
+  // The reset email funnels through the same hardened /auth/callback
+  // route + branded template.
+  const [isSendingReset, setIsSendingReset] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
@@ -242,6 +249,26 @@ export function ProfileForm({
     } finally {
       setIsUploadingAvatar(false);
     }
+  };
+
+  const handleSendPasswordReset = async () => {
+    if (!initialEmail || isSendingReset) return;
+    setIsSendingReset(true);
+    const result = await requestPasswordResetAction({ email: initialEmail });
+    setIsSendingReset(false);
+    if (!result.ok) {
+      toast({
+        title: "Couldn't send reset link",
+        description: result.message,
+        variant: "destructive",
+      });
+      return;
+    }
+    setResetSent(true);
+    toast({
+      title: "Reset link sent",
+      description: `Check ${initialEmail} for the link to set a new password.`,
+    });
   };
 
   const onSubmit = async (values: ProfileFormValues) => {
@@ -413,6 +440,51 @@ export function ProfileForm({
             </div>
           </form>
         </Form>
+
+        {/* Security — change password via emailed reset link. Keeps the
+            flow simple and secure (proves email access) while avoiding a
+            separate in-app "current password / new password" form. */}
+        <div className="rounded-3xl border border-border bg-card/80 p-4 shadow-sm sm:p-5">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-3 min-w-0">
+              <span className="mt-0.5 inline-flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <KeyRound className="size-4" />
+              </span>
+              <div className="min-w-0">
+                <h2 className="text-sm font-bold text-foreground sm:text-base">Password</h2>
+                <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground sm:text-sm">
+                  Send yourself a one-time link to set a new password. The link is
+                  emailed to <span className="font-medium text-foreground">{initialEmail}</span>{" "}
+                  and expires in 1 hour.
+                </p>
+              </div>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              className="rounded-xl shrink-0"
+              onClick={() => void handleSendPasswordReset()}
+              disabled={isSendingReset || resetSent}
+            >
+              {isSendingReset ? (
+                <>
+                  <Loader2 className="size-4 animate-spin" />
+                  Sending…
+                </>
+              ) : resetSent ? (
+                <>
+                  <Check className="size-4" />
+                  Link sent
+                </>
+              ) : (
+                <>
+                  <Mail className="size-4" />
+                  Send reset link
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
       </div>
 
       <Dialog open={cropOpen} onOpenChange={setCropOpen}>
