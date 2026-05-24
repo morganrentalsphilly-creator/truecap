@@ -56,6 +56,34 @@ const CATEGORY_STYLES: Record<Category, { icon: typeof Sparkles; color: string; 
 const ENTRIES: Entry[] = [
   {
     date: "2026-05-24",
+    category: "Content",
+    title: "5th blog post + Real Estate Glossary",
+    description:
+      "Strategy deep-dive: 'Cash flow vs appreciation — which actually wins in 2026?'. Plus a new /glossary page with 23 plain-English term definitions, each cross-linked to the matching calculator and deeper-dive blog post.",
+  },
+  {
+    date: "2026-05-24",
+    category: "Improvement",
+    title: "Cookie consent (Google Consent Mode v2)",
+    description:
+      "GDPR/CCPA-compliant banner. Tracking cookies stay denied until the user explicitly accepts. Google Ads + Analytics still receive anonymous pings so we get bounce signal without setting personal-data cookies before consent.",
+  },
+  {
+    date: "2026-05-24",
+    category: "Improvement",
+    title: "Homepage hero now ships zero JS",
+    description:
+      "Converted the marketing hero from a client component to a server component. The single click handler that needed client behavior is now a tiny isolated island. Real LCP improvement on the page every paid-traffic visitor lands on first.",
+  },
+  {
+    date: "2026-05-24",
+    category: "Improvement",
+    title: "Blog posts get a sticky CTA",
+    description:
+      "Long-form readers now see a persistent 'Open analyzer' bar after scrolling past the article hero. Catches high-intent readers mid-engagement so they don't have to scroll to the bottom to find a conversion path.",
+  },
+  {
+    date: "2026-05-24",
     category: "Feature",
     title: "Interactive ROI calculator on /pricing",
     description:
