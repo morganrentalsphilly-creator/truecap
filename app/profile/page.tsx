@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { Header } from "@/components/investcalc/header";
+import { BillingConversionTracker } from "@/components/marketing/billing-conversion-tracker";
 import { BillingPanel } from "@/components/profile/billing-panel";
 import { ProfileForm } from "@/components/profile/profile-form";
 import { getEntitlementsForUser } from "@/lib/entitlements";
@@ -175,9 +176,30 @@ export default async function ProfilePage({
       ],
     }));
 
+  // Pull the matching plan price so the Google Ads conversion event
+  // carries a meaningful value for value-based bidding strategies.
+  const justSubscribedSlug = (subscriptionRow?.status === "active" || subscriptionRow?.status === "trialing")
+    ? (currentPlan?.slug as "pro_monthly" | "pro_annual" | undefined)
+    : undefined;
+  const subscriptionValue = justSubscribedSlug
+    ? (() => {
+        const display = stripePriceDisplays[justSubscribedSlug];
+        if (!display) return undefined;
+        const parsed = parseFloat(display.priceLabel.replace(/[^0-9.]/g, ""));
+        return Number.isFinite(parsed) ? parsed : undefined;
+      })()
+    : undefined;
+
   return (
     <>
       <Header initialUser={user} initialEntitlements={entitlements} />
+      {/* Fires the Google Ads paid-subscription conversion event when the
+          user lands here from a Stripe checkout success redirect. */}
+      <BillingConversionTracker
+        billingStatus={resolvedSearchParams.billing}
+        value={subscriptionValue}
+        transactionId={subscriptionRow?.stripe_subscription_id ?? undefined}
+      />
       <main id="main" className="max-w-5xl mx-auto px-4 sm:px-6 py-5  space-y-10">
         <ProfileForm
           userId={user.id}

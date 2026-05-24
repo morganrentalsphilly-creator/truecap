@@ -3,6 +3,13 @@ import { Header } from "@/components/investcalc/header";
 import { InvestCalcPage } from "@/components/investcalc/investcalc-page";
 import { MarketingHero } from "@/components/marketing/marketing-hero";
 import {
+  HowItWorks,
+  PreCalculatorCta,
+  SocialProof,
+  WhyNotSpreadsheet,
+} from "@/components/marketing/landing-sections";
+import { StickyConversionBar } from "@/components/marketing/sticky-conversion-bar";
+import {
   getEntitlementsForUser,
   hasPaidPlanSubscription,
   hasPlanFeature,
@@ -98,9 +105,19 @@ export default async function Home() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
       <Header initialUser={user} initialEntitlements={entitlements} />
-      {/* Marketing hero ONLY for cold visitors. Authenticated users
-          have already seen the pitch — they want the calculator. */}
-      {!user && <MarketingHero />}
+      {/* Full landing page experience ONLY for cold visitors. Authenticated
+          users skip ALL of it — the calculator is their workspace. Order
+          mirrors the buying journey: hero → how it works → why us vs
+          spreadsheet → social proof → final-push CTA → the calculator. */}
+      {!user && (
+        <>
+          <MarketingHero />
+          <HowItWorks />
+          <WhyNotSpreadsheet />
+          <SocialProof />
+          <PreCalculatorCta />
+        </>
+      )}
       <InvestCalcPage
         canSaveDeals={canSaveDeals}
         canCompareDeals={canCompareDeals}
@@ -115,6 +132,9 @@ export default async function Home() {
         savedDealLimit={entitlements?.max_saved_deals ?? null}
         isAuthenticated={Boolean(user)}
       />
+      {/* Sticky scroll-activated CTA bar for cold visitors only. Renders
+          nothing for auth'd users. */}
+      {!user && <StickyConversionBar />}
     </>
   );
 }

@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react";
 import { signUpAction } from "@/app/actions/auth";
+import { trackConversion } from "@/lib/analytics/track-conversion";
 import { signUpSchema, type SignUpInput } from "@/lib/auth-schema";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,6 +52,10 @@ export function SignUpForm() {
       return;
     }
 
+    // Fire the Google Ads conversion event before navigating away. Safe
+    // to call from anywhere; no-ops if gtag isn't loaded or the
+    // conversion label hasn't been wired up in lib/analytics yet.
+    trackConversion("signup");
     toast({
       title: "Registration successful",
       description: "A confirmation email has been sent. Please verify your email and sign in.",

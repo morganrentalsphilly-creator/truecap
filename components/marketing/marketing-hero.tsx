@@ -19,30 +19,30 @@
  */
 
 import Link from "next/link";
-import { ArrowRight, Calculator, ChevronDown, FileDown, Gauge, Shield, Sparkles, TrendingUp } from "lucide-react";
+import { ArrowRight, Calculator, ChevronDown, Clock, FileDown, Gauge, Lock, Shield, ShieldCheck, Sparkles, TrendingUp, Zap } from "lucide-react";
 
 const TRUST_STATS = [
-  { label: "Free to start",      value: "100%",   sub: "no card" },
-  { label: "Setup time",         value: "60s",    sub: "to first analysis" },
-  { label: "Live data",          value: "HUD",    sub: "rent · FRED rate" },
-  { label: "PDF reports",        value: "1-click", sub: "lender-ready" },
+  { label: "To first analysis",  value: "60s",    sub: "no setup" },
+  { label: "Free to use",        value: "100%",   sub: "no card required" },
+  { label: "Live data",          value: "HUD+FRED", sub: "rent · rate · tax" },
+  { label: "Money-back",         value: "14 days", sub: "on any plan" },
 ];
 
 const FEATURES = [
   {
-    icon: Gauge,
-    title: "Institutional-grade math",
-    body: "Cap rate, CoC, DSCR, cash flow, 10-yr projection, tax savings, exit scenarios — the same formulas funds use, in one screen.",
+    icon: Zap,
+    title: "Save 2+ hours per deal",
+    body: "Stop rebuilding the same spreadsheet. Address auto-fill, 10+ metrics, projections, tax math — all live as you type.",
   },
   {
-    icon: Sparkles,
-    title: "Auto-fill from the address",
-    body: "Type the address. HUD pulls rent. FRED pulls the current mortgage rate. State tables fill property tax. Nothing to look up.",
+    icon: ShieldCheck,
+    title: "Catch the bad assumptions",
+    body: "Sensitivity grid stress-tests rent ±10%, vacancy ±5pp, rates ±1pp. See if the deal still pencils before you offer.",
   },
   {
     icon: FileDown,
-    title: "Lender-ready PDF",
-    body: "Multi-page report with verdict, projections, tax strategy, exit scenarios — branded and ready to send to your lender or partner.",
+    title: "Send lender-ready PDFs",
+    body: "One-click multi-page report with verdict, 10-yr projection, tax strategy, exit scenarios — branded and ready for your lender.",
   },
 ];
 
@@ -71,13 +71,13 @@ export function MarketingHero() {
         </div>
 
         {/* headline + sub */}
-        <h1 className="mx-auto max-w-3xl text-balance text-center text-3xl font-black leading-[1.08] tracking-tight text-foreground sm:text-5xl">
-          Underwrite a rental deal in <span className="text-primary">60 seconds.</span>
+        <h1 className="mx-auto max-w-3xl text-balance text-center text-3xl font-black leading-[1.05] tracking-tight text-foreground sm:text-[58px]">
+          Stop losing deals to <span className="text-primary">bad math.</span>
         </h1>
         <p className="mx-auto mt-4 max-w-2xl text-balance text-center text-[15px] leading-relaxed text-muted-foreground sm:text-lg">
-          Cap rate, cash-on-cash, DSCR, 10-year projection, tax savings, exit
-          scenarios — every number you need to make a defensible offer. Free
-          to start. No card. No spreadsheet.
+          Underwrite a rental deal in <strong className="text-foreground">60 seconds</strong> — cap rate, cash-on-cash,
+          DSCR, 10-year projection, tax savings, exit scenarios. Every number you need to make a
+          defensible offer, without the spreadsheet.
         </p>
 
         {/* CTAs */}
@@ -88,7 +88,7 @@ export function MarketingHero() {
             className="group inline-flex h-12 items-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(82,72,212,0.28)] transition-transform hover:-translate-y-0.5"
           >
             <Calculator className="size-4" />
-            Run a free deal now
+            Run a free deal — no signup
             <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
           </button>
           <Link
@@ -98,6 +98,11 @@ export function MarketingHero() {
             See pricing
           </Link>
         </div>
+        {/* Risk-reversal microcopy directly under the CTAs */}
+        <p className="mt-3 flex items-center justify-center gap-1.5 text-center text-xs text-muted-foreground">
+          <Lock className="size-3" />
+          No credit card · No signup needed to use the calculator · Pro is 14-day money-back
+        </p>
 
         {/* trust stats row */}
         <div className="mx-auto mt-10 grid max-w-3xl grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">

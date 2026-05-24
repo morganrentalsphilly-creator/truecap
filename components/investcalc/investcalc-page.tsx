@@ -47,6 +47,7 @@ import {
   type ExitScenarioYear,
 } from "@/lib/exit-scenarios";
 import { buildAutoVerdict } from "@/lib/verdict";
+import { trackConversion } from "@/lib/analytics/track-conversion";
 
 type InputTab = "cash-flow" | "projections" | "tax-strategy" | "deal-score";
 const SAVED_ANALYSIS_EDIT_DRAFT_KEY = "truecap_saved_analysis_edit_draft";
@@ -965,6 +966,10 @@ export function InvestCalcPage({
         ? buildTaxStrategySource(savedDealId, values, result)
         : null;
       setAnalysisResult(result);
+      // Fire Google Ads conversion event — primary intent signal we can
+      // optimize spend against (analyze-an-actual-deal is the
+      // micro-conversion that precedes signup).
+      trackConversion("calc_completed");
       setProjectionSource(builtProjectionSource);
       setTaxStrategySource(builtTaxStrategySource);
       setExitScenarioSource(
