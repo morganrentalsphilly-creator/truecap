@@ -35,10 +35,27 @@ function classifyDeal(result: AnalysisResult): {
   const cap = result.capRate;
   const coc = result.cocReturn;
   const dscr = result.dscr;
+  // Cash purchases have no debt service, so DSCR is undefined.
+  // calc-analysis returns 0 in that case — treat it as "not applicable"
+  // so we don't misclassify an all-cash deal as Marginal/Negative purely
+  // on a DSCR value that doesn't apply.
+  const isCashPurchase = result.monthlyPayment <= 0;
 
   // Headline classification — weights cash flow + DSCR most heavily.
+  // For cash purchases, DSCR drops out and we lean entirely on cash
+  // flow + cap rate + cash-on-cash to gauge the deal.
   let headline: "Strong" | "Solid" | "Mixed" | "Marginal" | "Negative";
-  if (cf < 0 || dscr < 1.0) {
+  if (isCashPurchase) {
+    if (cf < 0) {
+      headline = cf < -200 ? "Negative" : "Marginal";
+    } else if (cf >= 400 && cap >= 7 && coc >= 8) {
+      headline = "Strong";
+    } else if (cf >= 100 && cap >= 5 && coc >= 5) {
+      headline = "Solid";
+    } else {
+      headline = "Mixed";
+    }
+  } else if (cf < 0 || dscr < 1.0) {
     headline = cf < -200 || dscr < 0.9 ? "Negative" : "Marginal";
   } else if (cf >= 400 && dscr >= 1.25 && coc >= 10) {
     headline = "Strong";
@@ -50,7 +67,7 @@ function classifyDeal(result: AnalysisResult): {
 
   const cashFlowSentence =
     cf >= 0
-      ? `Monthly cash flow of $${Math.round(cf).toLocaleString("en-US")} after all expenses and debt service.`
+      ? `Monthly cash flow of $${Math.round(cf).toLocaleString("en-US")} after all expenses${isCashPurchase ? "" : " and debt service"}.`
       : `Negative monthly cash flow of -$${Math.abs(Math.round(cf)).toLocaleString("en-US")} — the property loses money operationally each month.`;
 
   const capRateSentence =
@@ -62,12 +79,13 @@ function classifyDeal(result: AnalysisResult): {
       ? `Cap rate of ${cap.toFixed(1)}% is on the low end — common in coastal / Tier-1 markets where appreciation is the dominant return.`
       : `Cap rate of ${cap.toFixed(1)}% is well below market norms; verify the rent assumption and operating expense estimates.`;
 
-  const dscrSentence =
-    dscr >= 1.25
-      ? `DSCR of ${dscr.toFixed(2)} clears the typical ≥1.25 lender threshold — the property comfortably covers debt service.`
-      : dscr >= 1.0
-      ? `DSCR of ${dscr.toFixed(2)} is in tight territory (above breakeven but below the ≥1.25 most lenders require for investment loans).`
-      : `DSCR of ${dscr.toFixed(2)} is below 1.0 — operating income doesn't cover debt service, so the owner subsidizes the property each month.`;
+  const dscrSentence = isCashPurchase
+    ? `DSCR isn't applicable for an all-cash purchase — no lender debt service to cover.`
+    : dscr >= 1.25
+    ? `DSCR of ${dscr.toFixed(2)} clears the typical ≥1.25 lender threshold — the property comfortably covers debt service.`
+    : dscr >= 1.0
+    ? `DSCR of ${dscr.toFixed(2)} is in tight territory (above breakeven but below the ≥1.25 most lenders require for investment loans).`
+    : `DSCR of ${dscr.toFixed(2)} is below 1.0 — operating income doesn't cover debt service, so the owner subsidizes the property each month.`;
 
   const cocSentence =
     coc >= 12

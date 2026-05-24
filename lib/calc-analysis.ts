@@ -58,6 +58,12 @@ export interface AnalysisResult {
 }
 
 function calcMonthlyPayment(principal: number, annualRate: number, years: number): number {
+  // Defensive guards — schema enforces years >= 1 and principal >= 0, but
+  // legacy saved-deal payloads or share-link decodes could deliver garbage.
+  // Returning 0 instead of NaN/Infinity keeps every downstream metric stable.
+  if (!Number.isFinite(principal) || principal <= 0) return 0;
+  if (!Number.isFinite(years) || years <= 0) return 0;
+  if (!Number.isFinite(annualRate) || annualRate < 0) return 0;
   if (annualRate === 0) return principal / (years * 12);
   const r = annualRate / 100 / 12;
   const n = years * 12;

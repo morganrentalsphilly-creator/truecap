@@ -469,17 +469,36 @@ export function AnalysisDashboard({
         <MetricCard
           label="DSCR"
           glossaryTerm="dscr"
-          value={result ? result.dscr.toFixed(2) : "—"}
+          // Cash purchases have no debt service, so DSCR is undefined. We
+          // surface "—" + a clear sub-label rather than a misleading 0.00 /
+          // "Underwater" badge.
+          value={
+            result
+              ? result.monthlyPayment <= 0
+                ? "—"
+                : result.dscr.toFixed(2)
+              : "—"
+          }
           sub={
             result
-              ? result.dscr >= 1.25
+              ? result.monthlyPayment <= 0
+                ? "Cash purchase"
+                : result.dscr >= 1.25
                 ? "Bankable (≥1.25)"
                 : result.dscr >= 1.0
                 ? "Tight (≥1.0)"
                 : "Underwater"
               : undefined
           }
-          color={result ? (result.dscr >= 1.25 ? "text-[var(--metric-positive)]" : "text-[var(--metric-negative)]") : undefined}
+          color={
+            result
+              ? result.monthlyPayment <= 0
+                ? undefined
+                : result.dscr >= 1.25
+                ? "text-[var(--metric-positive)]"
+                : "text-[var(--metric-negative)]"
+              : undefined
+          }
           isLoading={isLoading}
         />
         <MetricCard
