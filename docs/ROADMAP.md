@@ -121,65 +121,53 @@ real hardware beats any audit agent. Specifically check:
 In rough priority order. Each is genuinely high-leverage but real
 ROI ranking depends on what the paid-traffic data shows after 5-7 days.
 
-### 2.1. Real Supabase trust ticker — "X deals analyzed this week"
-**Effort:** 1 hour
-**Impact:** Medium-high. Social proof.
+### ✅ 2.1. Real Supabase trust ticker — SHIPPED
+Server helper `lib/stats/deals-analyzed-count.ts` + new
+`<DealsAnalyzedTicker />` server component mounted in the hero,
+wrapped in `<Suspense>`. Threshold-gated at 25 so low numbers
+don't anti-prove. Cached 5 min via `unstable_cache`. Uses admin
+Supabase client to bypass RLS for the count-only query (safe —
+returns only an aggregate integer, never row data).
 
-Server-side query `count(*)` from `saved_analyses` where
-`created_at > now() - interval '7 days'`. Cache 60 seconds. Render in
-the hero trust strip when the count exceeds a threshold (say 25)
-so we never show "3 deals this week" which would be anti-social-proof.
+### 2.2. Welcome email on signup — DEFERRED (needs your Supabase config)
+Supabase Auth has a built-in welcome email template; we have
+branded email templates already in the repo from earlier. Wire
+them through Supabase's email-template settings when you're at
+your computer. ~30 min total.
 
-### 2.2. Welcome email on signup
-**Effort:** 30 min code + 30 min Supabase setup
-**Impact:** Medium. Activation lift.
+### ✅ 2.3. Onboarding tour for first-time signups — SHIPPED
+`<OnboardingTour />` floating 3-step card. Only fires for signed-
+in users with zero saved deals. Walks them through Try Sample →
+Save → See Pro. Dismiss persists to localStorage.
 
-Supabase Auth has a built-in welcome email template. Customize it
-with a 1-paragraph "here's what to do next" message. We already have
-branded email templates from earlier work — just need to wire the
-welcome email through Supabase's email-template settings.
+### 2.4. "Recently analyzed" surface on /dashboard — SKIPPED for now
+The existing saved-analyses page already serves the "resume
+editing" use case. A separate dashboard widget would be redundant
+unless we see signal that users are losing track of where they
+left off. Park this until we have engagement data.
 
-### 2.3. Onboarding tour for first-time signups
-**Effort:** 2-3 hours
-**Impact:** Medium. Activation lift.
+### ✅ 2.5. Local SEO landing pages — SHIPPED (Philadelphia prototype)
+`/markets/philadelphia` shipped as the prototype — substantive
+~1,800 word page with neighborhood cap-rate benchmarks, PA
+property tax mechanics, BRRRR-in-Philly notes, and 6 city-
+specific FAQs. If Search Console shows traction over 30-60 days,
+replicate the template for Cleveland, Atlanta, Charlotte,
+Houston, Indianapolis, etc.
 
-After Google OAuth signup, detect first-visit-post-signup and show
-a 3-step "Try a sample → Run the analysis → Save it to your dashboard"
-floating tour. Builds activation rate.
+### ✅ 2.6. /for-agents + /for-flippers landing pages — SHIPPED
+Both persona pages live with tailored hero copy, use cases,
+workflows, and CTAs. Designed as paid-ad landing surfaces where
+ad copy + LP messaging align. Linked from the new "Who it's for"
+footer column.
 
-### 2.4. "Recently analyzed" surface on /dashboard for active users
-**Effort:** 1-2 hours
-**Impact:** Medium. Retention.
-
-Show last-5 deals with a "resume editing" button on the dashboard.
-Pairs with the form auto-save we shipped — closes the loop on
-"return → easily continue".
-
-### 2.5. Local SEO landing pages (/markets/philadelphia, /markets/cleveland, etc.)
-**Effort:** 30 min per market for a basic shell, hours for substantive content
-**Impact:** High organic potential, but only if content is actually
-useful.
-
-Each city gets a market-specific page with cap rate benchmarks,
-property tax rate, common ARV/rent ranges, and a TrueCap calculator
-embed. Big SEO play but real work to do well. Start with Philadelphia
-(your market) as the prototype.
-
-### 2.6. A /for-agents and /for-flippers positioning landing pages
-**Effort:** 1 hour each
-**Impact:** Medium for paid traffic targeting.
-
-Segment-specific value props. Useful as paid-ad landing pages — you can
-run different ad copy to different audiences and land them on a page
-tailored to their use case.
-
-### 2.7. A 6th-Nth blog post on specific high-volume topics
-**Effort:** 1-2 hours each
-**Impact:** Diminishing returns now (you already have 5 posts forming
-a tight cluster). High-volume candidate topics:
+### 2.7. 6th-Nth blog post — diminishing returns; ship only if data warrants
+You have 5 anchor posts forming a tight cluster. The marginal
+6th post adds less than the marginal 1st post did. Worth doing
+if Search Console shows specific high-traffic queries you don't
+already rank for. Candidates parked for that scenario:
 - "How to find rental properties in 2026 (5 sources beyond MLS)"
 - "1031 exchange explained"
-- "Section 8 rentals — pros, cons, and the real numbers"
+- "Section 8 rentals — pros, cons, the real numbers"
 - "Short-term rental vs long-term — when each wins"
 
 ---
