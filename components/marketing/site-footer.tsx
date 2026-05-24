@@ -114,7 +114,9 @@ export function SiteFooter() {
           <p className="flex flex-wrap items-center justify-center gap-2 sm:justify-end">
             <Link href="/pricing" className="hover:text-foreground hover:underline">Pricing</Link>
             <span aria-hidden className="text-muted-foreground/40">·</span>
-            <Link href="/auth/sign-up" className="hover:text-foreground hover:underline">Sign up free</Link>
+            <Link href="/privacy" className="hover:text-foreground hover:underline">Privacy</Link>
+            <span aria-hidden className="text-muted-foreground/40">·</span>
+            <Link href="/terms" className="hover:text-foreground hover:underline">Terms</Link>
             <span aria-hidden className="text-muted-foreground/40">·</span>
             <a
               href="mailto:hello@usetruecap.com"

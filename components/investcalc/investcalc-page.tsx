@@ -52,6 +52,51 @@ import { trackConversion } from "@/lib/analytics/track-conversion";
 
 type InputTab = "cash-flow" | "projections" | "tax-strategy" | "deal-score";
 const SAVED_ANALYSIS_EDIT_DRAFT_KEY = "truecap_saved_analysis_edit_draft";
+/**
+ * Auto-save key for anonymous / walk-in form drafts. Mobile paid traffic
+ * gets distracted constantly (phone rings, tab swap to text), and an
+ * empty form on return is a guaranteed bounce. This key persists the
+ * in-progress form across reloads / tab swaps so users can pick up
+ * where they left off.
+ *
+ * Version-suffixed so future schema changes can bump the key and
+ * gracefully ignore stale drafts instead of crashing on parse.
+ */
+const CALC_FORM_DRAFT_KEY = "truecap_calc_form_draft_v1";
+/**
+ * Debounce window for the draft write — long enough that we don't hit
+ * localStorage on every keystroke, short enough that a phone interruption
+ * after typing a few fields will still have persisted them. 400ms is the
+ * sweet spot: imperceptible to humans, kind to mobile CPUs.
+ */
+const CALC_FORM_DRAFT_DEBOUNCE_MS = 400;
+
+/** Safely read the draft string without throwing in Safari private mode / disabled storage. */
+function readCalcDraftRaw(): string | null {
+  try {
+    return typeof window === "undefined" ? null : window.localStorage.getItem(CALC_FORM_DRAFT_KEY);
+  } catch {
+    return null;
+  }
+}
+
+/** Safely write the draft. No-op if storage is unavailable / quota exceeded. */
+function writeCalcDraftRaw(json: string): void {
+  try {
+    if (typeof window !== "undefined") window.localStorage.setItem(CALC_FORM_DRAFT_KEY, json);
+  } catch {
+    /* private-mode Safari, quota exceeded, etc. — drafts are best-effort */
+  }
+}
+
+/** Safely remove the draft. */
+function clearCalcDraftRaw(): void {
+  try {
+    if (typeof window !== "undefined") window.localStorage.removeItem(CALC_FORM_DRAFT_KEY);
+  } catch {
+    /* no-op */
+  }
+}
 
 function buildNewAnalysisDefaults(
   propertyType: InvestmentFormValues["propertyType"]
@@ -448,6 +493,10 @@ export function InvestCalcPage({
       savedDealIdRef.current = null;
       lastPersistedFormJsonRef.current = null;
       lastComputedFormJsonRef.current = null;
+      // Wipe the anonymous auto-save draft — the user is explicitly
+      // asking for a fresh start. Without this they'd reset, then on
+      // next page load the old draft would silently come back.
+      clearCalcDraftRaw();
       clearAnalysisOutputs();
       setHasUnsavedChanges(false);
       setIsCalculating(false);
@@ -821,6 +870,36 @@ export function InvestCalcPage({
     return () => subscription.unsubscribe();
   }, [form, syncFormDirtyVersusPersisted, invalidateAnalysisOutputsIfFormDriftedFromLastRun]);
 
+  /**
+   * Auto-save draft for anonymous / walk-in users.
+   *
+   * Subscribes to form changes and debounces a localStorage write so we
+   * persist the in-progress inputs without thrashing on every keystroke.
+   * Skipped while we're loading a saved deal (savedDealId is set) —
+   * that flow already has its own dirty-tracking and we don't want two
+   * persistence systems fighting each other.
+   */
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const subscription = form.watch((values) => {
+      if (isProgrammaticResetRef.current) return;
+      // Loaded-saved-deal flow owns its own persistence; don't shadow it.
+      if (savedDealIdRef.current) return;
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => {
+        try {
+          writeCalcDraftRaw(JSON.stringify(values));
+        } catch {
+          /* JSON.stringify rarely throws (only on circular refs) but we never want a localStorage write to surface as an unhandled error */
+        }
+      }, CALC_FORM_DRAFT_DEBOUNCE_MS);
+    });
+    return () => {
+      if (timer) clearTimeout(timer);
+      subscription.unsubscribe();
+    };
+  }, [form]);
+
   useEffect(() => {
     // Initialize from a one-time saved-analysis handoff when present; otherwise
     // start with a clean new-analysis state.
@@ -912,6 +991,35 @@ export function InvestCalcPage({
         window.sessionStorage.removeItem(SAVED_ANALYSIS_EDIT_DRAFT_KEY);
         window.localStorage.removeItem(SAVED_ANALYSIS_EDIT_DRAFT_KEY);
         // Fall through to a clean reset when the handoff payload is invalid.
+      }
+    }
+
+    // No edit-handoff payload. Before falling back to a clean reset,
+    // see if there's an anonymous auto-save draft from a prior visit.
+    // Mobile paid traffic is the main beneficiary: phone rings mid-
+    // session → returns → form is still populated → no bounce.
+    const autoDraftRaw = readCalcDraftRaw();
+    if (autoDraftRaw) {
+      try {
+        const parsedDraft = JSON.parse(autoDraftRaw) as unknown;
+        const normalized = normalizeInvestmentFormSnapshot(parsedDraft);
+        if (normalized) {
+          prevPropertyTypeRef.current = normalized.propertyType;
+          form.reset(normalized);
+          // Don't auto-calculate — restoring inputs is the contract,
+          // running the analysis is the user's intent click. Auto-
+          // calculating would race with the loading-spinner UI and
+          // ambush the user with results they didn't ask for.
+          queueMicrotask(() => {
+            isProgrammaticResetRef.current = false;
+          });
+          return;
+        }
+        // Draft parsed but failed schema validation — wipe it so the
+        // user isn't stuck with a permanently-rejected blob.
+        clearCalcDraftRaw();
+      } catch {
+        clearCalcDraftRaw();
       }
     }
 
@@ -1115,6 +1223,11 @@ export function InvestCalcPage({
         const parsedValues = investmentFormSchema.safeParse(form.getValues());
         setSavedDealId(result.id);
         savedDealIdRef.current = result.id;
+        // Deal is now persisted server-side — the local anonymous
+        // auto-save draft is no longer needed. If we leave it, the
+        // next anonymous visitor on this device would see this deal's
+        // inputs, which is both confusing and a minor privacy concern.
+        clearCalcDraftRaw();
         if (result.mode === "inserted") {
           setSavedDealCount((count) => count + 1);
         }
