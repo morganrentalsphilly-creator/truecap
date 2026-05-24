@@ -189,7 +189,7 @@ export default async function DashboardComparePage() {
             isPremium={isPremium}
             canAccessDashboard={navAccess.dashboard}
           />
-          <main className="min-h-[calc(100vh-4rem)] bg-muted/30 px-4 py-8 sm:px-6">
+          <main id="main" className="min-h-[calc(100vh-4rem)] bg-muted/30 px-4 py-8 sm:px-6">
             <div className="mx-auto max-w-3xl rounded-2xl border border-border bg-card p-6 text-center shadow-sm sm:p-8">
               <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <Plus className="size-5" />
@@ -231,7 +231,7 @@ export default async function DashboardComparePage() {
             isPremium={isPremium}
             canAccessDashboard={navAccess.dashboard}
           />
-          <main className="min-h-[calc(100vh-4rem)] bg-muted/30 px-4 py-8 sm:px-6">
+          <main id="main" className="min-h-[calc(100vh-4rem)] bg-muted/30 px-4 py-8 sm:px-6">
             <div className="mx-auto max-w-3xl rounded-2xl border border-destructive/25 bg-destructive/5 p-6">
               <h1 className="text-xl font-bold text-foreground">Could not load comparison</h1>
               <p className="mt-2 text-sm text-muted-foreground">Please try again in a few moments.</p>

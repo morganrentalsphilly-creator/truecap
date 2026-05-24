@@ -57,7 +57,7 @@ const TOOLS: { href: string; title: string; description: string; available: bool
 export default function ToolsLandingPage() {
   return (
     <div className="min-h-screen bg-background">
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <main id="main" className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <header className="mb-8">
           <Link
             href="/"

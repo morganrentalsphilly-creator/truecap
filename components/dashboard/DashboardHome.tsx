@@ -264,7 +264,7 @@ export function DashboardHome({
         isPremium={data.user.isPremium}
         canAccessDashboard={data.user.canAccessDashboard}
       />
-      <main className="flex-1 min-h-0 px-4 py-4 space-y-5 sm:px-6 sm:py-6 sm:space-y-6 lg:px-8 lg:overflow-y-auto">
+      <main id="main" className="flex-1 min-h-0 px-4 py-4 space-y-5 sm:px-6 sm:py-6 sm:space-y-6 lg:px-8 lg:overflow-y-auto">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <h1 className="font-display text-2xl sm:text-3xl xl:text-4xl font-bold tracking-tight">

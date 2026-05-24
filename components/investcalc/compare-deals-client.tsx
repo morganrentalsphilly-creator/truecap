@@ -925,7 +925,7 @@ export function CompareDealsClient({
   const desktopSlots = Array.from({ length: MAX_COMPARE_ITEMS }, (_, index) => deals[index] ?? null);
 
   return (
-    <main className="min-h-[calc(100vh-5rem)] bg-muted/30 px-4 py-6 text-foreground sm:px-6 sm:py-8 xl:bg-[radial-gradient(circle_at_top_right,rgba(37,99,235,0.08),transparent_32%),linear-gradient(180deg,#f8fbff,#eef4f8)]">
+    <main id="main" className="min-h-[calc(100vh-5rem)] bg-muted/30 px-4 py-6 text-foreground sm:px-6 sm:py-8 xl:bg-[radial-gradient(circle_at_top_right,rgba(37,99,235,0.08),transparent_32%),linear-gradient(180deg,#f8fbff,#eef4f8)]">
         <div className="w-full">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3 xl:mb-7">
           <div className="flex flex-wrap items-center gap-3">

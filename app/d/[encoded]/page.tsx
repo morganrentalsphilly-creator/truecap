@@ -31,22 +31,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     openGraph: {
       title: `${title} — Rental property analysis`,
       description: "Shared via TrueCap.",
-      // Inherits the OG image from app/layout.tsx (home.jpg) so share
-      // cards in Slack / iMessage / Twitter have a hero preview.
-      images: [
-        {
-          url: "/home.jpg",
-          width: 1200,
-          height: 630,
-          alt: "Rental property analysis shared via TrueCap",
-        },
-      ],
+      // No images: [] here — the sibling opengraph-image.tsx file is
+      // auto-detected by Next.js and generates a per-deal preview card
+      // showing the address + key metrics + recommendation badge. That
+      // dynamic image wins over any static URL declared here.
     },
     twitter: {
       card: "summary_large_image",
       title: `${title} — Rental property analysis`,
       description: "Shared via TrueCap.",
-      images: ["/home.jpg"],
     },
   };
 }
@@ -89,7 +82,7 @@ export default async function PublicDealPage({ params }: Props) {
         .
       </div>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+      <main id="main" className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
         <header className="mb-6 sm:mb-8">
           <div className="text-xs uppercase tracking-widest text-muted-foreground font-bold mb-1">
             Shared analysis

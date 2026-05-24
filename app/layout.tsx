@@ -130,6 +130,17 @@ gtag('config', '${GOOGLE_ADS_ID}');`,
         </head>
       )}
       <body className="font-sans antialiased bg-background text-foreground">
+        {/* Skip-to-content link — invisible until focused, then jumps
+            keyboard / screen-reader users straight to <main> so they
+            don't have to tab through the nav on every page. Standard
+            a11y pattern; works as long as page content lives in <main
+            id="main"> (which our pages already do). */}
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[100] focus:rounded-lg focus:bg-primary focus:px-3 focus:py-2 focus:text-sm focus:font-semibold focus:text-primary-foreground focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary/40"
+        >
+          Skip to main content
+        </a>
         {children}
         <Toaster />
         {process.env.NODE_ENV === 'production' && <Analytics />}

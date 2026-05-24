@@ -908,7 +908,7 @@ export function SavedAnalysesPage({
   }, [pageCount, safeCurrentPage]);
 
   return (
-    <main className="min-h-[calc(100vh-5rem)] bg-muted/30 pb-12">
+    <main id="main" className="min-h-[calc(100vh-5rem)] bg-muted/30 pb-12">
       <section className="w-full px-4 sm:px-6 pt-6 sm:pt-8 space-y-6">
       <div className="mb-6 flex flex-wrap items-center gap-3">
           <Button variant="ghost" size="sm" className="mt-1 px-1.5 text-muted-foreground bg-primary/10 sm:bg-transparent" asChild>

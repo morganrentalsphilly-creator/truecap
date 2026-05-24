@@ -40,7 +40,7 @@ export function AuthShell({
   className,
 }: AuthShellProps) {
   return (
-    <main className="min-h-[100dvh] bg-white px-4 py-8 text-foreground sm:px-6 lg:bg-[#eef4f8] lg:px-8">
+    <main id="main" className="min-h-[100dvh] bg-white px-4 py-8 text-foreground sm:px-6 lg:bg-[#eef4f8] lg:px-8">
       <div className="mx-auto flex min-h-[calc(100dvh-4rem)] w-full max-w-6xl flex-col items-center justify-center">
         <div className="mb-8 flex flex-col items-center text-center sm:mb-12">
           <AppLogo

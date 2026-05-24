@@ -178,7 +178,7 @@ export default async function ProfilePage({
   return (
     <>
       <Header initialUser={user} initialEntitlements={entitlements} />
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-5  space-y-10">
+      <main id="main" className="max-w-5xl mx-auto px-4 sm:px-6 py-5  space-y-10">
         <ProfileForm
           userId={user.id}
           initialEmail={user.email ?? ""}

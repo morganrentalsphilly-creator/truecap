@@ -84,7 +84,7 @@ export default function OnePercentRulePage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
 
       <div className="min-h-screen bg-background">
-        <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+        <main id="main" className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
           <header className="mb-6 sm:mb-8">
             <Link href="/tools" className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground">
               ← TrueCap free tools

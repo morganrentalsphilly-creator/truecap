@@ -1378,7 +1378,7 @@ export function InvestCalcPage({
       </section>
 
       {/* Form */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 pb-20 sm:pb-16">
+      <main id="main" className="max-w-7xl mx-auto px-4 sm:px-6 pb-20 sm:pb-16">
         <form ref={formElementRef} onSubmit={form.handleSubmit(onSubmit, onError)} noValidate>
           <div className="space-y-5">
             <PropertyTypeSection form={form} savedTemplateFallback={savedTemplateFallback} />

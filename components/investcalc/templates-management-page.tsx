@@ -213,7 +213,7 @@ export function TemplatesManagementPage({
   };
 
   return (
-    <main className="min-h-full bg-muted/30 pb-12">
+    <main id="main" className="min-h-full bg-muted/30 pb-12">
       <section className="w-full px-4 sm:px-6 xl:px-8 pt-6 sm:pt-8 space-y-4 sm:space-y-6">
       <div className="grid gap-3 sm:flex sm:flex-wrap sm:items-center">
             <div className="flex min-w-0 items-center gap-3">
