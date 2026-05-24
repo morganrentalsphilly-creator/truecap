@@ -107,5 +107,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 0.8,
     },
+    {
+      url: `${siteUrl}/changelog`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.4,
+    },
   ];
 }
