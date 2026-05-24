@@ -346,6 +346,13 @@ export function InvestCalcPage({
    * e.g. shared device).
    */
   const [restoredFromDraft, setRestoredFromDraft] = useState(false);
+  /**
+   * Snapshot of the address from the restored draft so the welcome
+   * banner can show it ("Welcome back — your draft for 1700 W Erie
+   * Ave is ready"). Captured at restore time so it doesn't update if
+   * the user edits the field afterwards.
+   */
+  const [restoredAddress, setRestoredAddress] = useState<string | null>(null);
   const [isSavingDeal, setIsSavingDeal] = useState(false);
   const [savedDealId, setSavedDealId] = useState<string | null>(null);
   const [savedDealCount, setSavedDealCount] = useState(initialSavedDealCount);
@@ -1017,6 +1024,12 @@ export function InvestCalcPage({
           // Surface the restore visibly. Without this the user just
           // sees a pre-filled form and wonders what happened.
           setRestoredFromDraft(true);
+          // Capture the address so the banner can name the deal
+          // specifically ("Welcome back — your draft for 1700 W Erie
+          // Ave is ready"). Trim + cap to a sane length so a
+          // pathologically long address can't blow out the layout.
+          const addr = (normalized.address ?? "").trim();
+          setRestoredAddress(addr ? addr.slice(0, 60) : null);
           // Don't auto-calculate — restoring inputs is the contract,
           // running the analysis is the user's intent click. Auto-
           // calculating would race with the loading-spinner UI and
@@ -1573,13 +1586,24 @@ export function InvestCalcPage({
               <Sparkles className="mt-0.5 size-4 shrink-0 text-primary sm:mt-0" />
               <p className="leading-relaxed text-foreground">
                 <strong className="font-bold">Welcome back —</strong>{" "}
-                <span className="text-muted-foreground">
-                  picked up where you left off. Edit anything below or
-                </span>{" "}
+                {restoredAddress ? (
+                  <span className="text-muted-foreground">
+                    your draft for{" "}
+                    <span className="font-semibold text-foreground">
+                      {restoredAddress}
+                    </span>{" "}
+                    is ready. Edit anything below or
+                  </span>
+                ) : (
+                  <span className="text-muted-foreground">
+                    picked up where you left off. Edit anything below or
+                  </span>
+                )}{" "}
                 <button
                   type="button"
                   onClick={() => {
                     setRestoredFromDraft(false);
+                    setRestoredAddress(null);
                     resetToNewAnalysis("single-family");
                   }}
                   className="font-semibold text-primary underline-offset-2 hover:underline"
