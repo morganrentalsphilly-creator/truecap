@@ -1,5 +1,3 @@
-"use client";
-
 /**
  * Marketing hero that renders ABOVE the calculator for cold (unauth)
  * visitors. Authenticated users skip this entirely — they already know
@@ -16,10 +14,17 @@
  *
  * No images that need an external CDN — everything is rendered in the
  * browser via CSS/SVG so it stays fast on first paint.
+ *
+ * SERVER COMPONENT. The single client-only behavior — scrolling to the
+ * calculator form — is isolated into the tiny <ScrollToFormButton />
+ * client island below so the rest of this big tree ships zero JS to
+ * the browser. That's a real LCP win on the homepage (every paid-
+ * traffic visitor lands here first).
  */
 
 import Link from "next/link";
 import { ArrowRight, Calculator, ChevronDown, FileDown, Lock, Shield, ShieldCheck, Sparkles, TrendingUp, Zap } from "lucide-react";
+import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
 
 const TRUST_STATS = [
   { label: "To first analysis",  value: "60s",    sub: "no setup" },
@@ -47,14 +52,6 @@ const FEATURES = [
 ];
 
 export function MarketingHero() {
-  const scrollToForm = () => {
-    const el = document.getElementById("main");
-    if (el) {
-      // Scroll past the hero so the form sits under the sticky nav.
-      window.scrollTo({ top: el.offsetTop - 64, behavior: "smooth" });
-    }
-  };
-
   return (
     <section className="relative overflow-hidden border-b border-border bg-gradient-to-b from-[var(--brand-blue-light)] via-background to-background">
       {/* subtle radial glow */}
@@ -87,16 +84,14 @@ export function MarketingHero() {
         {/* CTAs — primary stretches full-width on mobile (better tap-
             target, no chance of being cut off), inline-sized on sm+. */}
         <div className="mx-auto mt-7 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-          <button
-            type="button"
-            onClick={scrollToForm}
+          <ScrollToFormButton
             className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(82,72,212,0.28)] transition-transform hover:-translate-y-0.5"
           >
             <Calculator className="size-4" />
             <span className="sm:hidden">Run a free analysis</span>
             <span className="hidden sm:inline">Run a free deal — no signup</span>
             <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-          </button>
+          </ScrollToFormButton>
           <Link
             href="/pricing"
             className="inline-flex h-12 items-center justify-center gap-1.5 rounded-xl border border-border bg-card px-5 text-sm font-semibold text-foreground hover:bg-muted"
@@ -170,15 +165,13 @@ export function MarketingHero() {
 
         {/* scroll arrow to form */}
         <div className="mt-10 flex justify-center">
-          <button
-            type="button"
-            onClick={scrollToForm}
+          <ScrollToFormButton
             className="group flex flex-col items-center gap-1 text-xs font-semibold text-muted-foreground hover:text-foreground"
             aria-label="Scroll to the calculator"
           >
             <span>Or jump straight to the calculator</span>
             <ChevronDown className="size-4 animate-bounce transition-colors group-hover:text-primary" />
-          </button>
+          </ScrollToFormButton>
         </div>
       </div>
     </section>
