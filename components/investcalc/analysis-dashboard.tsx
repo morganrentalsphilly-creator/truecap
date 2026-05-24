@@ -27,7 +27,10 @@ import { ExitScenariosPanel } from "@/components/investcalc/exit-scenarios/panel
 import { MaxOfferCard } from "@/components/investcalc/max-offer-card";
 import { SensitivityGrid } from "@/components/investcalc/sensitivity-grid";
 import { StrategiesPanel } from "@/components/investcalc/strategies-panel";
-import { ShareLinkButton } from "@/components/investcalc/share-link-button";
+// ShareLinkButton import temporarily removed — Share button was pulled from
+// the Quick Actions row because it wrapped onto a second line. Component
+// + share-link.ts + /d/[encoded] route all remain in the codebase ready
+// for re-introduction in a less prominent UI spot.
 import { GlossaryTip } from "@/components/investcalc/glossary-tip";
 import type { GLOSSARY } from "@/lib/glossary";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
@@ -321,9 +324,12 @@ export function AnalysisDashboard({
                 <span className="hidden sm:inline">New Analysis</span>
                 <span className="sm:hidden">New</span>
               </Button>
-              {/* Share link — stateless URL-encoded snapshot of the analysis.
-                  Sits next to the existing actions; no auth required to use. */}
-              <ShareLinkButton values={values} />
+              {/* Share link button moved out of Quick Actions — it wrapped
+                  to a second row and broke the action-row alignment. The
+                  share link can be re-surfaced in a more deliberate spot
+                  later (e.g. as part of the export menu or near saved-deal
+                  list-items). Underlying ShareLinkButton component is still
+                  imported but unused; keeping it ready for re-introduction. */}
             </div>
           </div>
         </div>

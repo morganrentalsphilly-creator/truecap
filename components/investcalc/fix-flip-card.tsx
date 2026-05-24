@@ -111,7 +111,7 @@ export function FixFlipCard({ values, defaultRehab }: FixFlipCardProps) {
       </p>
 
       {expanded && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 mb-4">
+        <div className="grid grid-cols-1 min-[400px]:grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 mb-4">
           <div>
             <Label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
               Rehab Budget

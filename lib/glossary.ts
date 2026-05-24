@@ -100,4 +100,78 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     definition:
       "Rule of thumb: monthly rent should equal at least 1% of purchase price. A 5-second screening filter, not a verdict.",
   },
+
+  // Financing fields
+  downPayment: {
+    term: "Down Payment %",
+    definition:
+      "Share of the purchase price you pay in cash. Investment-property lenders typically require 20-25% down for conventional loans.",
+  },
+  interestRate: {
+    term: "Interest Rate",
+    definition:
+      "Annual mortgage rate. Investment-property rates run ~0.5-1% above primary-residence rates because lenders price the higher default risk.",
+  },
+  loanTerm: {
+    term: "Loan Term",
+    definition:
+      "Years over which the loan amortizes. 30-year fixed is the default; 15-year fixed reduces total interest paid but spikes the monthly payment.",
+  },
+  closingCosts: {
+    term: "Closing Costs",
+    definition:
+      "Lender fees, title, escrow, insurance prepay, etc. Typically 2-4% of purchase price for investment properties.",
+  },
+
+  // Operating expense fields
+  propertyTax: {
+    term: "Property Tax",
+    definition:
+      "Annual property tax as a percent of value. Defaults to your state's effective rate (1.49% PA, 1.68% TX, etc.) — adjust for your county.",
+  },
+  insurance: {
+    term: "Insurance",
+    definition:
+      "Annual landlord insurance. Typically 0.3-0.7% of property value for SFR; higher in coastal/storm zones.",
+  },
+  maintenance: {
+    term: "Maintenance Reserve",
+    definition:
+      "Monthly reserve for routine repairs. Typical: 5-8% of rent for newer properties, 10-15% for older.",
+  },
+  management: {
+    term: "Management Fee",
+    definition:
+      "Property management cost as % of collected rent. Typical PM fees: 8-10%. Set to 0 if you self-manage.",
+  },
+  buildingValue: {
+    term: "Building Value %",
+    definition:
+      "Portion of purchase price allocated to depreciable building (not land). Defaults to 80% for SFR; land value varies by market.",
+  },
+  depreciationYears: {
+    term: "Depreciation Period",
+    definition:
+      "27.5 years for residential rentals (IRS standard); 39 years for commercial. Determines annual non-cash depreciation deduction.",
+  },
+  rentGrowth: {
+    term: "Rent Growth %",
+    definition:
+      "Annual rent increase assumption. National average ~3%; high-growth markets 4-6%. Used in 10-year projection.",
+  },
+  expenseGrowth: {
+    term: "Expense Growth %",
+    definition:
+      "Annual operating-expense inflation. National average ~2-3%; tracks CPI more closely than rent.",
+  },
+  appreciation: {
+    term: "Appreciation Rate",
+    definition:
+      "Annual property value increase. Historical US average ~3.5%; varies dramatically by market.",
+  },
+  sellingCost: {
+    term: "Selling Cost %",
+    definition:
+      "Realtor commissions + transfer tax + title fees on sale. Typically 6-9% of sale price.",
+  },
 };

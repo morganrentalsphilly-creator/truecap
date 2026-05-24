@@ -46,6 +46,7 @@ import {
   type ExitScenarioInput,
   type ExitScenarioYear,
 } from "@/lib/exit-scenarios";
+import { buildAutoVerdict } from "@/lib/verdict";
 
 type InputTab = "cash-flow" | "projections" | "tax-strategy" | "deal-score";
 const SAVED_ANALYSIS_EDIT_DRAFT_KEY = "truecap_saved_analysis_edit_draft";
@@ -122,9 +123,17 @@ function toPdfReportData(args: {
   const recommendation = proScore?.recommendation ?? "Neutral";
   const risk = proScore?.riskLevel ?? "Medium Risk";
   const score = proScore?.score ?? Math.round(Math.max(0, Math.min(100, (result.cocReturn + result.capRate) * 4)));
+  // Use the Pro Deal Score explanation when available (it's tuned by the
+  // same engine that computes the score). For free users, fall back to
+  // the auto-verdict generator — a richer 5-6 sentence plain-English
+  // summary derived from the observable metrics.
   const rationale =
     proScore?.explanation ??
-    `Cash flow ${result.netCashFlow >= 0 ? "is positive" : "is negative"} at ${result.netCashFlow.toLocaleString("en-US")} per month with DSCR ${result.dscr.toFixed(2)}.`;
+    buildAutoVerdict({
+      result,
+      address: values.address,
+      purchasePrice: values.purchasePrice,
+    });
 
   const projectionRows = projectionYears.map((row) => ({
     y: row.year,

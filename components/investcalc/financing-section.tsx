@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { cn } from "@/lib/utils";
 import { FieldError, optionalNumberSetValueAs } from "@/components/investcalc/form-field-helpers";
+import { GlossaryTip } from "@/components/investcalc/glossary-tip";
 
 interface FinancingSectionProps {
   form: UseFormReturn<InvestmentFormValues>;
@@ -28,7 +29,7 @@ export function FinancingSection({ form }: FinancingSectionProps) {
       <div className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <div>
           <Label className="text-xs font-semibold text-[var(--brand-green)] mb-1.5 block uppercase tracking-wide">
-            Down Payment %
+            <GlossaryTip term="downPayment" showIcon={false}>Down Payment %</GlossaryTip>
           </Label>
           <div className="relative">
             <Input
@@ -48,7 +49,7 @@ export function FinancingSection({ form }: FinancingSectionProps) {
 
         <div>
           <Label className="text-xs font-semibold text-[var(--brand-green)] mb-1.5 block uppercase tracking-wide">
-            Interest Rate %
+            <GlossaryTip term="interestRate" showIcon={false}>Interest Rate %</GlossaryTip>
           </Label>
           <div className="relative">
             <Input
@@ -68,7 +69,7 @@ export function FinancingSection({ form }: FinancingSectionProps) {
 
         <div>
           <Label className="text-xs font-semibold text-[var(--brand-green)] mb-1.5 block uppercase tracking-wide">
-            Loan Term (Years)
+            <GlossaryTip term="loanTerm" showIcon={false}>Loan Term (Years)</GlossaryTip>
           </Label>
           <Input
             {...register("loanTermYears", { valueAsNumber: true })}
@@ -84,7 +85,8 @@ export function FinancingSection({ form }: FinancingSectionProps) {
 
         <div>
           <Label className="text-xs font-semibold text-[var(--brand-green)] mb-1.5 block uppercase tracking-wide">
-            Closing Costs % <span className="text-[7px] sm:text-xs text-muted-foreground">(Optional)</span>
+            <GlossaryTip term="closingCosts" showIcon={false}>Closing Costs %</GlossaryTip>
+            {" "}<span className="text-[7px] sm:text-xs text-muted-foreground">(Optional)</span>
           </Label>
           <div className="relative">
             <Input

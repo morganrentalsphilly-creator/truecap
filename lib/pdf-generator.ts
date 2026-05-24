@@ -541,10 +541,13 @@ function pageInputs(doc: jsPDF, d: ReportData) {
   });
   y += (ch + gap) * 2 + 6;
 
-  // Recommendation card (full width)
-  card(doc, M.left, y, SAFE.w, 70);
+  // Recommendation / verdict card (full width). Bumped from 70pt to 130pt
+  // tall so the richer auto-generated verdict paragraph (5-6 sentences)
+  // fits without being truncated. Tighter line height (11pt) keeps it
+  // readable without ballooning the section.
+  card(doc, M.left, y, SAFE.w, 130);
   setFill(doc, COLOR.success);
-  doc.roundedRect(M.left, y, 4, 70, 2, 2, "F");
+  doc.roundedRect(M.left, y, 4, 130, 2, 2, "F");
   setText(doc, COLOR.success);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8);
@@ -556,8 +559,10 @@ function pageInputs(doc: jsPDF, d: ReportData) {
   setText(doc, COLOR.text);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
-  const lines = doc.splitTextToSize(d.performance.rationale, SAFE.w - 32).slice(0, 2);
-  doc.text(lines, M.left + 16, y + 50);
+  // Up to 7 lines now (was 2). At 9pt with ~11pt leading, 7 lines fits
+  // comfortably in the 130pt-tall card with breathing room.
+  const lines = doc.splitTextToSize(d.performance.rationale, SAFE.w - 32).slice(0, 7);
+  doc.text(lines, M.left + 16, y + 50, { lineHeightFactor: 1.35 });
 }
 
 function drawInputBlock(
