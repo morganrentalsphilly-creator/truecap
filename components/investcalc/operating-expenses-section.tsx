@@ -23,6 +23,7 @@ import { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { FieldError, optionalNumberSetValueAs } from "@/components/investcalc/form-field-helpers";
+import { GLOSSARY } from "@/lib/glossary";
 
 interface OperatingExpensesSectionProps {
   form: UseFormReturn<InvestmentFormValues>;
@@ -31,17 +32,39 @@ interface OperatingExpensesSectionProps {
 
 type FieldLabelWithTooltipProps = {
   label: string;
+  /**
+   * Glossary key. When provided, definition + benchmark are pulled from
+   * lib/glossary.ts so all tooltips stay in sync. Falls back to `tooltip`
+   * for one-off custom content.
+   */
+  term?: keyof typeof GLOSSARY;
   tooltip?: ReactNode;
 };
 
 const inputClassName =
   "h-10 rounded-lg border-[var(--brand-orange)]/15 bg-background shadow-sm focus-visible:ring-[var(--brand-orange)]/25";
 
-function FieldLabelWithTooltip({ label, tooltip }: FieldLabelWithTooltipProps) {
+function FieldLabelWithTooltip({ label, term, tooltip }: FieldLabelWithTooltipProps) {
+  // If a glossary term is provided, build the tooltip content from the
+  // shared glossary so updates flow to one source of truth. Custom
+  // `tooltip` prop still wins when explicitly provided.
+  const glossaryEntry = term ? GLOSSARY[term] : undefined;
+  const content =
+    tooltip ??
+    (glossaryEntry ? (
+      <div className="space-y-1 text-xs leading-snug">
+        <p className="font-semibold text-foreground">{glossaryEntry.term}</p>
+        <p className="text-muted-foreground">{glossaryEntry.definition}</p>
+        {glossaryEntry.benchmark ? (
+          <p className="text-muted-foreground italic">{glossaryEntry.benchmark}</p>
+        ) : null}
+      </div>
+    ) : null);
+
   return (
     <span className="inline-flex items-center gap-1.5">
       <span>{label}</span>
-      {tooltip ? (
+      {content ? (
         <Tooltip delayDuration={150}>
           <TooltipTrigger asChild>
             <button
@@ -57,7 +80,7 @@ function FieldLabelWithTooltip({ label, tooltip }: FieldLabelWithTooltipProps) {
             sideOffset={6}
             className="max-w-xs border border-border bg-popover px-3 py-2 text-popover-foreground shadow-md"
           >
-            {tooltip}
+            {content}
           </TooltipContent>
         </Tooltip>
       ) : null}
@@ -202,7 +225,7 @@ export function OperatingExpensesSection({
           <div className="grid grid-cols-1 divide-y divide-[var(--brand-orange)]/10 md:grid-cols-2 md:divide-x md:divide-y-0 xl:grid-cols-4">
             <SectionField>
               <FieldLabel>
-                <FieldLabelWithTooltip label="Property Tax % (Annual)" tooltip="Annual tax rate on purchase price." />
+                <FieldLabelWithTooltip label="Property Tax % (Annual)" term="propertyTax" />
               </FieldLabel>
               <div className="relative">
                 <Input
@@ -257,7 +280,7 @@ export function OperatingExpensesSection({
               <FieldLabel>
                 <FieldLabelWithTooltip
                   label={insuranceInputMode === "monthly" ? "Insurance (Monthly $)" : "Insurance % (Annual)"}
-                  tooltip="Insurance assumption used for monthly operating expenses."
+                  term="insurance"
                 />
               </FieldLabel>
               <div className="relative">
@@ -295,7 +318,7 @@ export function OperatingExpensesSection({
 
             <SectionField>
               <FieldLabel>
-                <FieldLabelWithTooltip label="HOA (Monthly $)" tooltip="Monthly homeowners association fees if applicable." />
+                <FieldLabelWithTooltip label="HOA (Monthly $)" term="hoa" />
               </FieldLabel>
               <div className="relative">
                 <DollarIcon />
@@ -321,7 +344,7 @@ export function OperatingExpensesSection({
           <div className={cn("grid grid-cols-1 gap-3 sm:grid-cols-2", showAdvanced ? "xl:grid-cols-3 2xl:grid-cols-5" : "xl:grid-cols-4")}>
             <SectionField className={cn("rounded-lg border border-[var(--brand-orange)]/10 bg-card p-3", !showAdvanced && "hidden")}>
               <FieldLabel icon={<Plug className="size-3" />}>
-                <FieldLabelWithTooltip label="Utilities" tooltip="Monthly utility expenses paid by owner." />
+                <FieldLabelWithTooltip label="Utilities" term="utilities" />
               </FieldLabel>
               <div className="relative">
                 <DollarIcon />
@@ -339,17 +362,7 @@ export function OperatingExpensesSection({
 
             <SectionField className="rounded-lg border border-[var(--brand-orange)]/10 bg-card p-3">
               <FieldLabel icon={<Wrench className="size-3" />}>
-                <FieldLabelWithTooltip
-                  label="Maintenance %"
-                  tooltip={
-                    <div className="space-y-1 text-xs leading-snug">
-                      <p className="font-semibold text-foreground">Typical benchmark ranges</p>
-                      <p>New property: 5-8%</p>
-                      <p>Older property: 10-15%</p>
-                      <p className="text-muted-foreground">Guidance only. Your input is used exactly as entered.</p>
-                    </div>
-                  }
-                />
+                <FieldLabelWithTooltip label="Maintenance %" term="maintenance" />
               </FieldLabel>
               <div className="relative">
                 <Input
@@ -366,7 +379,7 @@ export function OperatingExpensesSection({
 
             <SectionField className="rounded-lg border border-[var(--brand-orange)]/10 bg-card p-3">
               <FieldLabel icon={<Home className="size-3" />}>
-                <FieldLabelWithTooltip label="Vacancy %" tooltip="Expected vacancy allowance." />
+                <FieldLabelWithTooltip label="Vacancy %" term="vacancy" />
               </FieldLabel>
               <div className="relative">
                 <Input
@@ -383,7 +396,7 @@ export function OperatingExpensesSection({
 
             <SectionField className="rounded-lg border border-[var(--brand-orange)]/10 bg-card p-3">
               <FieldLabel icon={<Building2 className="size-3" />}>
-                <FieldLabelWithTooltip label="Management %" tooltip="Property management fee as a percentage of rent." />
+                <FieldLabelWithTooltip label="Management %" term="management" />
               </FieldLabel>
               <div className="relative">
                 <Input
@@ -400,17 +413,7 @@ export function OperatingExpensesSection({
 
             <SectionField className="rounded-lg border border-[var(--brand-orange)]/10 bg-card p-3">
               <FieldLabel icon={<BarChart3 className="size-3" />}>
-                <FieldLabelWithTooltip
-                  label="CapEx %"
-                  tooltip={
-                    <div className="space-y-1 text-xs leading-snug">
-                      <p className="font-semibold text-foreground">Typical benchmark ranges</p>
-                      <p>New property: 5-8%</p>
-                      <p>Older property: 10-15%</p>
-                      <p className="text-muted-foreground">Guidance only. Your input is used exactly as entered.</p>
-                    </div>
-                  }
-                />
+                <FieldLabelWithTooltip label="CapEx %" term="capex" />
               </FieldLabel>
               <div className="relative">
                 <Input
@@ -434,7 +437,7 @@ export function OperatingExpensesSection({
           <div className="grid grid-cols-1 gap-x-6 gap-y-4 md:grid-cols-2 xl:grid-cols-4">
             <div>
               <FieldLabel>
-                <FieldLabelWithTooltip label="Building Value %" tooltip="Portion of purchase price allocated to depreciable building value." />
+                <FieldLabelWithTooltip label="Building Value %" term="buildingValue" />
               </FieldLabel>
               <div className="relative">
                 <Input
@@ -454,7 +457,7 @@ export function OperatingExpensesSection({
 
             <div>
               <FieldLabel>
-                <FieldLabelWithTooltip label="Depreciation Period" tooltip="IRS standard recovery period for depreciation." />
+                <FieldLabelWithTooltip label="Depreciation Period" term="depreciationYears" />
               </FieldLabel>
               <select
                 {...register("depreciationYears", { setValueAs: (v) => Number(v) })}
@@ -472,7 +475,7 @@ export function OperatingExpensesSection({
 
             <div>
               <FieldLabel>
-                <FieldLabelWithTooltip label="Expense Growth %" tooltip="Annual growth rate for operating expenses." />
+                <FieldLabelWithTooltip label="Expense Growth %" term="expenseGrowth" />
               </FieldLabel>
               <div className="relative">
                 <Input
@@ -491,7 +494,7 @@ export function OperatingExpensesSection({
 
             <div>
               <FieldLabel>
-                <FieldLabelWithTooltip label="Rent Growth %" tooltip="Annual growth rate for rental income." />
+                <FieldLabelWithTooltip label="Rent Growth %" term="rentGrowth" />
               </FieldLabel>
               <div className="relative">
                 <Input
@@ -510,7 +513,7 @@ export function OperatingExpensesSection({
 
             <div>
               <FieldLabel>
-                <FieldLabelWithTooltip label="Appreciation Rate % (Exit Scenarios)" tooltip="Expected annual property appreciation rate." />
+                <FieldLabelWithTooltip label="Appreciation Rate % (Exit Scenarios)" term="appreciation" />
               </FieldLabel>
               <div className="relative">
                 <Input
@@ -530,7 +533,7 @@ export function OperatingExpensesSection({
 
             <div>
               <FieldLabel>
-                <FieldLabelWithTooltip label="Selling Cost % (Exit Scenarios)" tooltip="Total selling costs as a percentage of sale price." />
+                <FieldLabelWithTooltip label="Selling Cost % (Exit Scenarios)" term="sellingCost" />
               </FieldLabel>
               <div className="relative">
                 <Input
@@ -550,7 +553,7 @@ export function OperatingExpensesSection({
 
             <div>
               <FieldLabel>
-                <FieldLabelWithTooltip label="Tax Rate % (Optional)" tooltip="Your personal income tax rate for tax savings calculation." />
+                <FieldLabelWithTooltip label="Tax Rate % (Optional)" term="taxSavings" />
               </FieldLabel>
               <div className="relative">
                 <Input

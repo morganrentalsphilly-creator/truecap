@@ -174,4 +174,14 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     definition:
       "Realtor commissions + transfer tax + title fees on sale. Typically 6-9% of sale price.",
   },
+  hoa: {
+    term: "HOA Fees",
+    definition:
+      "Monthly homeowners association dues, if applicable. Often covers exterior maintenance, common-area landscaping, and shared amenities.",
+  },
+  utilities: {
+    term: "Owner-Paid Utilities",
+    definition:
+      "Monthly utilities the owner covers — water/sewer, trash, sometimes gas. Most SFRs put utilities on the tenant; multi-family deals often split them.",
+  },
 };
