@@ -101,5 +101,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 0.8,
     },
+    {
+      url: `${siteUrl}/blog/cap-rate-vs-cash-on-cash-vs-dscr`,
+      lastModified: new Date("2026-05-24"),
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
   ];
 }

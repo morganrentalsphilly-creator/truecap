@@ -48,6 +48,15 @@ export type BlogPost = {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: "cap-rate-vs-cash-on-cash-vs-dscr",
+    title: "Cap rate vs cash-on-cash vs DSCR: which one actually matters?",
+    excerpt:
+      "Three different metrics, three different jobs. A plain-English guide to when each one matters and the 2026 negative-leverage trap most investors miss.",
+    readingTimeMinutes: 8,
+    publishedAt: "2026-05-24",
+    available: true,
+  },
+  {
     slug: "how-to-underwrite-a-rental-property-in-60-seconds",
     title: "How to underwrite a rental property in 60 seconds",
     excerpt:
