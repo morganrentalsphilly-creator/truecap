@@ -26,6 +26,20 @@ const optionalUnitNumber = <T extends z.ZodNumber>(schema: T) =>
     return n;
   }, schema.optional());
 
+/**
+ * Coerce an operating-expense % input to a finite number. Empty, null,
+ * undefined, and NaN (which RHF emits from an empty number input when
+ * valueAsNumber is on) all become 0 — meaning "I'm not setting aside
+ * anything for this expense category." Used for mgmtPct / vacancyPct /
+ * maintenancePct / capexPct so self-managers (mgmt 0%) and similar
+ * cases just-work.
+ */
+const coerceExpensePct = (val: unknown): number => {
+  if (val === undefined || val === null || val === "") return 0;
+  const n = typeof val === "number" ? val : Number(val);
+  return Number.isFinite(n) ? n : 0;
+};
+
 const optionalYearBuilt = z.preprocess((val) => {
   if (val === undefined || val === null || val === "") return undefined;
   const n = typeof val === "number" ? val : Number(val);
@@ -117,23 +131,27 @@ export const investmentFormSchema = z.object({
   /** Optional; omitted uses default closing cost % (see defaultValues / calc). */
   closingCostsPct: optionalPercent,
 
-  // Operating expenses
-  maintenancePct: z
-    .number({ invalid_type_error: "Enter maintenance %" })
-    .min(0)
-    .max(50),
-  vacancyPct: z
-    .number({ invalid_type_error: "Enter vacancy %" })
-    .min(0)
-    .max(50),
-  mgmtPct: z
-    .number({ invalid_type_error: "Enter mgmt %" })
-    .min(0)
-    .max(50),
-  capexPct: z
-    .number({ invalid_type_error: "Enter CapEx %" })
-    .min(0)
-    .max(50),
+  // Operating expenses. Preprocess: empty / NaN / null -> 0. This lets
+  // self-managers (mgmt 0%), full-occupancy assumptions, etc. simply
+  // clear the field to mean 0 % instead of typing "0". It also stops
+  // the validation flash that fires between deleting the prior value
+  // and re-typing.
+  maintenancePct: z.preprocess(
+    (val) => coerceExpensePct(val),
+    z.number().min(0, "Min 0%").max(50, "Max 50%")
+  ),
+  vacancyPct: z.preprocess(
+    (val) => coerceExpensePct(val),
+    z.number().min(0, "Min 0%").max(50, "Max 50%")
+  ),
+  mgmtPct: z.preprocess(
+    (val) => coerceExpensePct(val),
+    z.number().min(0, "Min 0%").max(50, "Max 50%")
+  ),
+  capexPct: z.preprocess(
+    (val) => coerceExpensePct(val),
+    z.number().min(0, "Min 0%").max(50, "Max 50%")
+  ),
   templateId: z.preprocess(
     (val) => (val === "" || val === null ? undefined : val),
     z.string().uuid("Invalid template").optional()

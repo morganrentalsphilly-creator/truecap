@@ -1,4 +1,7 @@
-import { jsPDF } from "jspdf/dist/jspdf.es.min.js";
+// Use the package's default entry point. The deep "/dist/jspdf.es.min.js"
+// path was specific to jspdf v2 and broke in v3/v4 where the bundle layout
+// changed — silently failing PDF export.
+import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import {
   Chart,

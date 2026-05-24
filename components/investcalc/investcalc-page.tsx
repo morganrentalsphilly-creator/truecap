@@ -1224,6 +1224,19 @@ export function InvestCalcPage({
         description: "Your report was exported from the latest live analysis data.",
         variant: "success",
       });
+    } catch (err) {
+      // Surface PDF errors so we don't fail silently — was silently
+      // swallowed before because the original 'jspdf/dist/...' import
+      // broke on some jspdf versions.
+      console.error("[handleExportPdf] PDF generation failed:", err);
+      toast({
+        title: "PDF export failed",
+        description:
+          err instanceof Error
+            ? err.message
+            : "Something went wrong generating the PDF. Try again, and if it persists let us know.",
+        variant: "destructive",
+      });
     } finally {
       setIsExportingPdf(false);
     }
