@@ -9,6 +9,7 @@ import { Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react";
 import { signUpAction } from "@/app/actions/auth";
 import { trackConversion } from "@/lib/analytics/track-conversion";
 import { signUpSchema, type SignUpInput } from "@/lib/auth-schema";
+import { GoogleAuthButton } from "@/components/auth/google-auth-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -83,8 +84,25 @@ export function SignUpForm() {
   }
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5" noValidate>
+    <div className="space-y-5">
+      {/* Google OAuth — the highest-leverage friction-reducer for cold
+          paid traffic. One tap, no password to invent, no confirmation
+          email round-trip. Email/password stays below as the fallback. */}
+      <GoogleAuthButton disabled={isSubmitting} label="Sign up with Google" />
+
+      <div className="relative" role="separator" aria-label="or sign up with email">
+        <div aria-hidden className="absolute inset-0 flex items-center">
+          <span className="w-full border-t border-border" />
+        </div>
+        <div className="relative flex justify-center">
+          <span className="bg-card px-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+            or
+          </span>
+        </div>
+      </div>
+
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5" noValidate>
         <FormField
           control={form.control}
           name="email"
@@ -194,7 +212,8 @@ export function SignUpForm() {
             Sign in
           </Link>
         </p>
-      </form>
-    </Form>
+        </form>
+      </Form>
+    </div>
   );
 }

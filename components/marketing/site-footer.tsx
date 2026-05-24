@@ -4,7 +4,7 @@
  *
  *   1. Trust + credibility — the visitor (especially paid traffic) reads
  *      the footer as a signal that this isn't a hobby project. Stripe
- *      badge, money-back, SSL, real-feeling copyright + links.
+ *      badge, SSL, "cancel anytime", real-feeling copyright + links.
  *
  *   2. Sitemap — every conversion-relevant page is linked, which helps
  *      Google index and improves the dwell-time signal that contributes
@@ -70,7 +70,7 @@ export function SiteFooter() {
                 <Lock className="size-3" /> SSL
               </span>
               <span className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-2 py-1 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-                <ShieldCheck className="size-3" /> 14-day money-back
+                <ShieldCheck className="size-3" /> Cancel anytime
               </span>
               <span className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-2 py-1 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
                 Powered by Stripe

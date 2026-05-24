@@ -25,7 +25,7 @@ const TRUST_STATS = [
   { label: "To first analysis",  value: "60s",    sub: "no setup" },
   { label: "Free to use",        value: "100%",   sub: "no card required" },
   { label: "Live data",          value: "HUD+FRED", sub: "rent · rate · tax" },
-  { label: "Money-back",         value: "14 days", sub: "on any plan" },
+  { label: "Cancel",             value: "Anytime", sub: "monthly or annual" },
 ];
 
 const FEATURES = [
@@ -101,7 +101,7 @@ export function MarketingHero() {
         {/* Risk-reversal microcopy directly under the CTAs */}
         <p className="mt-3 flex items-center justify-center gap-1.5 text-center text-xs text-muted-foreground">
           <Lock className="size-3" />
-          No credit card · No signup needed to use the calculator · Pro is 14-day money-back
+          No credit card · No signup needed to use the calculator · Cancel anytime
         </p>
 
         {/* trust stats row */}

@@ -57,7 +57,7 @@ export function StickyConversionBar() {
             Ready to underwrite a deal? It&apos;s free.
           </p>
           <p className="hidden truncate text-[11px] text-muted-foreground sm:block">
-            No card · no signup · 60 seconds to first answer · 14-day money-back on Pro
+            No card · no signup · 60 seconds to first answer · Cancel anytime on Pro
           </p>
         </div>
         <button

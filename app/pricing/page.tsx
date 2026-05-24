@@ -1,5 +1,5 @@
 /**
- * Public /pricing page. Two plans + free, FAQ, money-back guarantee,
+ * Public /pricing page. Two plans + free, FAQ, trust strip,
  * conversion-focused. For unauthenticated visitors the CTA routes to
  * /auth/sign-up?next=/pricing (so they come back here to subscribe);
  * for authenticated free users the CTA triggers Stripe checkout
@@ -75,10 +75,6 @@ const FAQS: { q: string; a: string }[] = [
     a: "Rent is pulled from HUD Fair Market Rent for your county. Mortgage rate comes from the FRED 30-year fixed series. Property tax uses your state's effective rate. All editable — these are sensible defaults, not absolutes.",
   },
   {
-    q: "Do you offer refunds?",
-    a: "Yes — 14-day money-back on the first charge of any plan. Just email us and we'll refund you, no questions.",
-  },
-  {
     q: "Is this for agents, investors, or both?",
     a: "Both. Investors use TrueCap to underwrite their own deals. Agents use it to send a defensible analysis to a client at the showing. The shared-link feature was built for exactly that hand-off.",
   },
@@ -138,11 +134,11 @@ export default async function PricingPage() {
             isPaid={isPaid}
           />
 
-          {/* Guarantee strip */}
+          {/* Trust strip */}
           <div className="mx-auto mt-8 flex max-w-2xl flex-wrap items-center justify-center gap-x-6 gap-y-2 rounded-2xl border border-border bg-card px-5 py-4 text-center text-xs text-muted-foreground sm:text-sm">
             <span className="inline-flex items-center gap-1.5">
               <ShieldCheck className="size-4 text-[var(--metric-positive)]" />
-              <strong className="text-foreground">14-day money-back</strong>
+              <strong className="text-foreground">Free to start — no card</strong>
             </span>
             <span aria-hidden className="text-muted-foreground/40">·</span>
             <span><strong className="text-foreground">Cancel anytime</strong> from your profile</span>

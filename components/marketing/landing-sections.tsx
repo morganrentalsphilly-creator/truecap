@@ -375,7 +375,7 @@ const HOMEPAGE_FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Do I need a credit card to try it?",
-    a: "No. The free analyzer needs zero signup and zero card. Sign up only if you want to save deals and access Pro features. Pro itself has a 14-day money-back guarantee.",
+    a: "No. The free analyzer needs zero signup and zero card. Sign up only if you want to save deals and access Pro features. Pro is month-to-month — cancel anytime.",
   },
   {
     q: "Does this work for BRRRR or fix-and-flip deals?",
@@ -493,7 +493,7 @@ export function PreCalculatorCta() {
           <div className="mt-8 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
             <span className="inline-flex items-center gap-1.5">
               <ShieldCheck className="size-4 text-[var(--metric-positive)]" />
-              <strong className="text-foreground">14-day money-back</strong>
+              <strong className="text-foreground">Secured by Stripe</strong>
             </span>
             <span aria-hidden className="text-muted-foreground/40">·</span>
             <span className="inline-flex items-center gap-1.5">

@@ -107,7 +107,7 @@ export function MomentOfValueUpsell({
           <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
         </Link>
         <span className="text-xs text-muted-foreground">
-          14-day money-back · cancel anytime
+          Cancel anytime · monthly or annual
         </span>
       </div>
 

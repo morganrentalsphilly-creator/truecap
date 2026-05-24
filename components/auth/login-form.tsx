@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form";
 import { Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react";
 import { resendConfirmationAction, signInAction } from "@/app/actions/auth";
 import { loginSchema, type LoginInput } from "@/lib/auth-schema";
+import { GoogleAuthButton } from "@/components/auth/google-auth-button";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -121,8 +122,26 @@ export function LoginForm() {
   }
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5" noValidate>
+    <div className="space-y-5">
+      {/* Google OAuth — appears above the email form because (a) it's
+          the lowest-friction option (zero typing on mobile), and (b)
+          users with a Google account who arrive via paid traffic will
+          recognize and trust this faster than entering credentials. */}
+      <GoogleAuthButton disabled={isSubmitting} />
+
+      <div className="relative" role="separator" aria-label="or sign in with email">
+        <div aria-hidden className="absolute inset-0 flex items-center">
+          <span className="w-full border-t border-border" />
+        </div>
+        <div className="relative flex justify-center">
+          <span className="bg-card px-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+            or
+          </span>
+        </div>
+      </div>
+
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5" noValidate>
         <FormField
           control={form.control}
           name="email"
@@ -239,7 +258,8 @@ export function LoginForm() {
             Sign up
           </Link>
         </p>
-      </form>
-    </Form>
+        </form>
+      </Form>
+    </div>
   );
 }
