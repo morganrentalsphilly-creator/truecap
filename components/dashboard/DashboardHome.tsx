@@ -130,12 +130,19 @@ function getRiskReturn(data: DashboardHomeData) {
     .filter((item): item is { deal: DashboardDeal; value: number } => item.value != null)
     .sort((a, b) => b.value - a.value)[0]?.deal;
 
+  // For "Safest deal" ranking, treat cash purchases (monthlyPayment <= 0)
+  // as effectively the safest possible debt structure — they have no debt
+  // service to cover. Their stored dscr=0 is N/A, not "underwater". We map
+  // them to Infinity in the comparator so they win over any financed deal.
   const safest = [...data.topDeals]
-    .map((deal) => ({
-      deal,
-      dscr: deal.dscr,
-      mappedRisk: mapRiskLevelToRisk(deal.riskLevel),
-    }))
+    .map((deal) => {
+      const isCashPurchase = deal.monthlyPayment != null && deal.monthlyPayment <= 0;
+      return {
+        deal,
+        dscr: isCashPurchase ? Infinity : deal.dscr,
+        mappedRisk: mapRiskLevelToRisk(deal.riskLevel),
+      };
+    })
     .filter((item) => item.dscr != null || item.mappedRisk != null)
     .sort((a, b) => {
       if (a.dscr != null || b.dscr != null) return (b.dscr ?? -Infinity) - (a.dscr ?? -Infinity);

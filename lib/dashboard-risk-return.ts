@@ -27,7 +27,12 @@ export function resolveReturnMetric(deal: DashboardDeal): ReturnMetric {
 }
 
 export function resolveRiskMetric(deal: DashboardDeal): RiskMetric {
-  if (deal.dscr != null) return { value: deal.dscr, source: "dscr" };
+  // For cash purchases (monthlyPayment <= 0), DSCR is mathematically
+  // undefined — calc-analysis returns 0, but that's not "underwater". Skip
+  // DSCR for cash deals and fall through to the riskLevel mapping or
+  // riskScore, which were derived without the DSCR penalty post-fix.
+  const isCashPurchase = deal.monthlyPayment != null && deal.monthlyPayment <= 0;
+  if (!isCashPurchase && deal.dscr != null) return { value: deal.dscr, source: "dscr" };
   if (deal.riskScore != null) return { value: deal.riskScore, source: "riskScore" };
   const mappedRisk = mapRiskLevelToRisk(deal.riskLevel);
   if (mappedRisk != null) return { value: mappedRisk, source: "riskLevel" };
@@ -53,7 +58,9 @@ export function getChartInclusionReason(deal: DashboardDeal): {
 
 export function getTaggedDealRiskLabel(deal: DashboardDeal | undefined): string {
   if (!deal) return "-";
+  const isCashPurchase = deal.monthlyPayment != null && deal.monthlyPayment <= 0;
   if (deal.riskLevel) return deal.riskLevel;
+  if (isCashPurchase) return "Cash purchase";
   if (deal.dscr != null) return `DSCR ${deal.dscr.toFixed(2)}`;
   if (deal.riskScore != null) return `Risk score ${deal.riskScore.toFixed(1)}`;
   return "No backend risk metric";

@@ -30,6 +30,8 @@ export type ResultSnapshot = {
   capRate?: NumericLike;
   dscr?: NumericLike;
   dscrRatio?: NumericLike;
+  monthlyPayment?: NumericLike;
+  monthly_payment?: NumericLike;
   score?: NumericLike;
   recommendation?: StoredRecommendation | null;
   riskLevel?: StoredRiskLevel | null;
@@ -69,6 +71,12 @@ export type DashboardDeal = {
   cocReturnPct: number | null;
   capRatePct: number | null;
   dscr: number | null;
+  /**
+   * Monthly debt-service payment from the saved snapshot. 0 / null signals
+   * an all-cash purchase, in which case DSCR is mathematically undefined
+   * and the dashboard should not penalize the deal for it.
+   */
+  monthlyPayment: number | null;
   roiPct: number | null;
   score: number | null;
   recommendation: string | null;
@@ -123,6 +131,10 @@ function getDscr(snapshot: ResultSnapshot): number | null {
   return firstNumber(snapshot?.dscr, snapshot?.dscrRatio);
 }
 
+function getMonthlyPayment(snapshot: ResultSnapshot): number | null {
+  return firstNumber(snapshot?.monthlyPayment, snapshot?.monthly_payment);
+}
+
 function getRiskScore(snapshot: ResultSnapshot): number | null {
   return firstNumber(snapshot?.riskScore, snapshot?.risk_score);
 }
@@ -140,6 +152,7 @@ export function buildDashboardDeal(row: SavedAnalysisDashboardRow): DashboardDea
     cocReturnPct: firstNumber(snapshot.cocReturn, row.coc_return_pct),
     capRatePct: toNumber(snapshot.capRate),
     dscr: getDscr(snapshot),
+    monthlyPayment: getMonthlyPayment(snapshot),
     roiPct: getRoiPct(snapshot),
     score: toNumber(snapshot.score),
     recommendation: snapshot.recommendation ?? null,
