@@ -20,6 +20,7 @@ import {
   Check,
   Clock,
   FileSpreadsheet,
+  HelpCircle,
   MapPin,
   Quote,
   ShieldCheck,
@@ -239,6 +240,219 @@ export function SocialProof() {
         </div>
       </div>
     </section>
+  );
+}
+
+// ───────────────────────────────────────── Vs competitors
+/**
+ * Side-by-side vs DealCheck and BiggerPockets — the two products
+ * paid traffic is most likely to have already tried. Directly handles
+ * the "why not the one I already use" objection without naming them
+ * in a hostile way.
+ */
+const COMPETITORS_HEADERS = ["", "TrueCap", "DealCheck", "BiggerPockets"];
+const COMPETITORS_ROWS: Array<{ label: string; values: (string | boolean)[]; highlight?: boolean }> = [
+  { label: "Free tier", values: [true, "Limited", true] },
+  { label: "Address auto-fill (HUD + FRED)", values: [true, false, false], highlight: true },
+  { label: "Cap rate · CoC · DSCR · cash flow", values: [true, true, true] },
+  { label: "10-year projection", values: ["Pro", "Pro ($35/mo)", false] },
+  { label: "Tax strategy + depreciation", values: ["Pro", "Pro", false] },
+  { label: "Sensitivity grid + MAO solver", values: ["Pro", false, false], highlight: true },
+  { label: "BRRRR + fix-and-flip + rehab estimator", values: ["Pro", "Partial", "Separate calc"] },
+  { label: "Shareable read-only deal link", values: ["Pro", true, false] },
+  { label: "Lender-ready PDF", values: ["Pro", true, false] },
+  { label: "Mobile-first", values: [true, "Desktop-leaning", "Desktop-leaning"], highlight: true },
+  { label: "Starting Pro price", values: ["See pricing", "$35/mo", "—"] },
+];
+
+export function VsCompetitors() {
+  return (
+    <section className="border-t border-border bg-background">
+      <div className="mx-auto max-w-5xl px-4 py-14 sm:px-6 sm:py-20">
+        <div className="mb-10 text-center sm:mb-12">
+          <p className="text-[11px] font-bold uppercase tracking-widest text-primary">
+            Already use DealCheck or BiggerPockets?
+          </p>
+          <h2 className="mt-2 text-balance text-2xl font-black tracking-tight text-foreground sm:text-4xl">
+            Here&apos;s how TrueCap is different.
+          </h2>
+          <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+            Honest comparison. We&apos;re building for investors who hate looking up rent comps,
+            re-typing the same address into 4 tools, and waiting 10 minutes for a PDF.
+          </p>
+        </div>
+        <div className="overflow-x-auto rounded-2xl border border-border bg-card shadow-sm">
+          <table className="w-full min-w-[640px] text-sm">
+            <thead>
+              <tr className="border-b border-border bg-muted/30">
+                {COMPETITORS_HEADERS.map((h, i) => (
+                  <th
+                    key={h || `col-${i}`}
+                    className={
+                      i === 1
+                        ? "px-4 py-3 text-center font-black text-primary sm:px-6"
+                        : "px-4 py-3 text-center font-bold text-muted-foreground sm:px-6"
+                    }
+                  >
+                    {h || <span className="sr-only">Feature</span>}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {COMPETITORS_ROWS.map((row, ri) => (
+                <tr
+                  key={row.label}
+                  className={ri % 2 === 0 ? "bg-card" : "bg-muted/20"}
+                >
+                  <td className="px-4 py-3 font-medium text-foreground sm:px-6">{row.label}</td>
+                  {row.values.map((v, ci) => (
+                    <td
+                      key={`${row.label}-${ci}`}
+                      className={
+                        ci === 0
+                          ? "px-4 py-3 text-center sm:px-6"
+                          : "px-4 py-3 text-center text-muted-foreground sm:px-6"
+                      }
+                    >
+                      {v === true ? (
+                        <Check
+                          className={
+                            ci === 0
+                              ? "mx-auto size-4 text-[var(--metric-positive)]"
+                              : "mx-auto size-4 text-muted-foreground/60"
+                          }
+                        />
+                      ) : v === false ? (
+                        <X className="mx-auto size-4 text-muted-foreground/40" />
+                      ) : (
+                        <span
+                          className={
+                            ci === 0
+                              ? row.highlight
+                                ? "font-bold text-primary"
+                                : "font-semibold text-foreground"
+                              : "italic"
+                          }
+                        >
+                          {String(v)}
+                        </span>
+                      )}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p className="mt-4 text-center text-[11px] text-muted-foreground">
+          Pricing comparisons accurate as of publication; check each vendor&apos;s site for current numbers.
+        </p>
+      </div>
+    </section>
+  );
+}
+
+// ───────────────────────────────────────── FAQ
+/**
+ * Homepage FAQ — handles the 8 most common cold-paid-traffic objections
+ * and outputs FAQPage JSON-LD for Google rich results (the expandable
+ * Q&A snippets that show under the listing). Materially boosts CTR
+ * from organic AND paid for the keywords we rank for.
+ */
+const HOMEPAGE_FAQS: { q: string; a: string }[] = [
+  {
+    q: "Is TrueCap really free?",
+    a: "Yes. The cash-flow analyzer — cap rate, CoC, DSCR, monthly cash flow, address auto-fill, plain-English verdict — is free forever and unlimited. No card required to start. Pro adds the MAO solver, Sensitivity grid, Strategies (BRRRR + fix-flip + rehab), 10-year projection, tax strategy, exit scenarios, Deal Score, lender-ready PDFs, save / compare deals.",
+  },
+  {
+    q: "How is this different from a spreadsheet?",
+    a: "Spreadsheets break the first time you change a formula. TrueCap auto-fills rent from HUD, rate from FRED, and tax from your state's effective rate — you don't look anything up. The math is pressure-tested. You get a defensible answer in 60 seconds instead of two hours.",
+  },
+  {
+    q: "How accurate is the auto-fill?",
+    a: "Rent is pulled from HUD Fair Market Rent for the county. Mortgage rate is the current FRED 30-year fixed series. Property tax uses your state's effective rate. All editable — these are sensible market defaults, not absolutes. Override anything with your own numbers.",
+  },
+  {
+    q: "Do I need a credit card to try it?",
+    a: "No. The free analyzer needs zero signup and zero card. Sign up only if you want to save deals and access Pro features. Pro itself has a 14-day money-back guarantee.",
+  },
+  {
+    q: "Does this work for BRRRR or fix-and-flip deals?",
+    a: "Yes. Pro includes the BRRRR analyzer (cash-out refi math, post-refi cash flow, infinite-return alerts), the Fix-and-Flip analyzer (net profit, ROI, annualized ROI, break-even ARV), and the Rehab Cost Estimator (sq-ft-based defaults for every common work item).",
+  },
+  {
+    q: "Can I share an analysis with my lender or partner?",
+    a: "Yes. Pro generates a one-click lender-ready PDF (verdict, projections, tax strategy, exit scenarios) and a shareable read-only link your partner can open without an account. The shared link's preview card auto-renders the property address + key metrics + recommendation badge.",
+  },
+  {
+    q: "Will TrueCap work on my phone at the showing?",
+    a: "Yes — mobile-first by design. The full analyzer fits in your pocket and works offline once loaded. Many users underwrite deals while walking through the property.",
+  },
+  {
+    q: "Can I cancel anytime?",
+    a: "Yes. Cancel from your profile in one click. Pro features stay active until the end of the period you've paid for, then auto-downgrade to Free. Your saved deals never leave your account — you'll just lose the ability to create / update them on Free.",
+  },
+];
+
+export function HomepageFaq() {
+  return (
+    <>
+      <section className="border-t border-border bg-background">
+        <div className="mx-auto max-w-3xl px-4 py-14 sm:px-6 sm:py-20">
+          <div className="mb-10 text-center sm:mb-12">
+            <p className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-primary">
+              <HelpCircle className="size-3" />
+              Common questions
+            </p>
+            <h2 className="mt-2 text-balance text-2xl font-black tracking-tight text-foreground sm:text-4xl">
+              Everything you&apos;re wondering, answered.
+            </h2>
+          </div>
+          <div className="divide-y divide-border rounded-2xl border border-border bg-card shadow-sm">
+            {HOMEPAGE_FAQS.map((faq) => (
+              <details key={faq.q} className="group px-5 py-4 sm:px-6 sm:py-5">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-3">
+                  <span className="text-left font-semibold text-foreground">{faq.q}</span>
+                  <span
+                    aria-hidden
+                    className="text-2xl font-light text-muted-foreground transition-transform group-open:rotate-45"
+                  >
+                    +
+                  </span>
+                </summary>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{faq.a}</p>
+              </details>
+            ))}
+          </div>
+          <p className="mt-6 text-center text-sm text-muted-foreground">
+            Still have a question?{" "}
+            <a
+              href="mailto:hello@usetruecap.com"
+              className="font-semibold text-primary hover:underline"
+            >
+              Email us
+            </a>
+            .
+          </p>
+        </div>
+      </section>
+      {/* JSON-LD for rich-result FAQ snippets in Google. */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: HOMEPAGE_FAQS.map((f) => ({
+              "@type": "Question",
+              name: f.q,
+              acceptedAnswer: { "@type": "Answer", text: f.a },
+            })),
+          }),
+        }}
+      />
+    </>
   );
 }
 

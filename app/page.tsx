@@ -3,9 +3,11 @@ import { Header } from "@/components/investcalc/header";
 import { InvestCalcPage } from "@/components/investcalc/investcalc-page";
 import { MarketingHero } from "@/components/marketing/marketing-hero";
 import {
+  HomepageFaq,
   HowItWorks,
   PreCalculatorCta,
   SocialProof,
+  VsCompetitors,
   WhyNotSpreadsheet,
 } from "@/components/marketing/landing-sections";
 import { StickyConversionBar } from "@/components/marketing/sticky-conversion-bar";
@@ -124,7 +126,9 @@ export default async function Home() {
           <MarketingHero />
           <HowItWorks />
           <WhyNotSpreadsheet />
+          <VsCompetitors />
           <SocialProof />
+          <HomepageFaq />
           <PreCalculatorCta />
         </>
       )}

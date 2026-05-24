@@ -12,6 +12,7 @@ import {
   Calculator,
   ArrowUpRight,
   Loader2,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -1330,17 +1331,96 @@ export function InvestCalcPage({
     }
   };
 
+  /**
+   * "Try a sample deal" — pre-fills the form with a realistic
+   * Philadelphia rental and triggers calculate. The single biggest
+   * friction-killer for cold paid traffic: visitor lands on the
+   * calculator, sees a wall of empty fields, bounces. This button
+   * gives them a fully-populated working demo in one click.
+   */
+  const handleTrySampleDeal = () => {
+    const sample: Partial<InvestmentFormValues> = {
+      propertyType: "single-family",
+      address: "1700 W Erie Ave, Philadelphia, PA 19140",
+      purchasePrice: 295000,
+      yearBuilt: 1942,
+      bedrooms: 3,
+      bathrooms: 1,
+      sqft: 1450,
+      monthlyRent: 2950,
+      downPaymentPct: 20,
+      interestRate: 6.75,
+      loanTermYears: 30,
+      closingCostsPct: 3,
+      propertyTaxPct: 1.49,
+      insuranceInputMode: "percent",
+      insurancePct: 0.5,
+      hoaMonthly: 0,
+      utilitiesMonthly: 0,
+      maintenancePct: 8,
+      vacancyPct: 5,
+      mgmtPct: 8,
+      capexPct: 5,
+      buildingValuePct: 85,
+      depreciationYears: 27.5,
+      includeInterestDeduction: true,
+      taxRatePct: 24,
+      rentGrowthPct: 2.5,
+      expenseGrowthPct: 2.5,
+      appreciationRatePct: 3,
+      sellingCostPct: 6,
+      units: [],
+    };
+    // Apply each field via setValue so RHF dirties and the form's
+    // controlled inputs re-render with the new values immediately.
+    Object.entries(sample).forEach(([key, value]) => {
+      form.setValue(key as keyof InvestmentFormValues, value as never, {
+        shouldDirty: true,
+        shouldValidate: false,
+        shouldTouch: false,
+      });
+    });
+    // Trigger the same submit path the user would hit, so analytics
+    // events fire and the dashboard renders identically to a normal run.
+    void form.handleSubmit(onSubmit, onError)();
+    toast({
+      title: "Sample deal loaded",
+      description: "Running the analysis on a real Philadelphia rental.",
+    });
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Hero section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 sm:pt-10 pb-4 sm:pb-6">
-        <h1 className="text-2xl sm:text-3xl xl:text-4xl font-black text-foreground mb-2 text-balance">
-          Analyze Your Investment Property
-        </h1>
-        <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
-          Get institutional-grade analysis with cash flow projections, tax benefits, and risk
-          assessment in seconds.
-        </p>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
+          <div className="min-w-0">
+            <h1 className="text-2xl sm:text-3xl xl:text-4xl font-black text-foreground mb-2 text-balance">
+              Analyze Your Investment Property
+            </h1>
+            <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
+              Get institutional-grade analysis with cash flow projections, tax benefits, and risk
+              assessment in seconds.
+            </p>
+          </div>
+          {/* Sample-deal button — only when no analysis has run yet.
+              Removes the "empty form" friction for paid traffic by
+              giving them a fully-populated working analysis in 1 click. */}
+          {analysisResult === null && !isCalculating && (
+            <button
+              type="button"
+              onClick={handleTrySampleDeal}
+              className="group inline-flex shrink-0 items-center gap-1.5 self-start rounded-xl border border-primary/30 bg-[var(--brand-blue-light)] px-4 py-2.5 text-sm font-bold text-primary shadow-sm transition-transform hover:-translate-y-0.5 hover:bg-primary/10 sm:self-end"
+              aria-label="Try a sample deal — pre-fill the form with a real Philadelphia rental"
+            >
+              <Sparkles className="size-4" />
+              Try a sample deal
+              <span className="hidden text-xs font-medium text-primary/70 sm:inline">
+                · skip the typing
+              </span>
+            </button>
+          )}
+        </div>
 
         {/* Input tabs — horizontally scrollable on mobile */}
         <div className="flex gap-1.5 sm:gap-3 mt-4 sm:mt-6 overflow-x-auto pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 xl:grid-cols-4 scrollbar-none max-[380px]:mx-0 max-[380px]:grid max-[380px]:grid-cols-4 max-[380px]:gap-1 max-[380px]:overflow-visible max-[380px]:px-0">
