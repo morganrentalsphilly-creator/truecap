@@ -64,10 +64,14 @@ export function MarketingHero() {
       />
 
       <div className="mx-auto max-w-6xl px-4 pb-10 pt-10 sm:px-6 sm:pb-14 sm:pt-16">
-        {/* eyebrow chip */}
-        <div className="mx-auto mb-5 flex w-fit items-center gap-2 rounded-full border border-primary/20 bg-card/70 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-primary shadow-sm backdrop-blur">
-          <Sparkles className="size-3" />
-          New — auto-fill rent + rate from any address
+        {/* Eyebrow chip — shorter copy on mobile so the full text fits
+            in a 375px viewport without wrapping or pushing layout. The
+            uppercase + tracking-widest combo eats horizontal space fast;
+            keep the long, value-rich copy for desktop where there's room. */}
+        <div className="mx-auto mb-5 flex w-fit max-w-full items-center gap-1.5 rounded-full border border-primary/20 bg-card/70 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-primary shadow-sm backdrop-blur sm:gap-2 sm:px-3.5 sm:text-[11px] sm:tracking-widest">
+          <Sparkles className="size-3 shrink-0" />
+          <span className="sm:hidden">New · Address auto-fill</span>
+          <span className="hidden sm:inline">New — auto-fill rent + rate from any address</span>
         </div>
 
         {/* headline + sub */}
@@ -80,28 +84,34 @@ export function MarketingHero() {
           defensible offer, without the spreadsheet.
         </p>
 
-        {/* CTAs */}
-        <div className="mx-auto mt-7 flex flex-wrap items-center justify-center gap-3">
+        {/* CTAs — primary stretches full-width on mobile (better tap-
+            target, no chance of being cut off), inline-sized on sm+. */}
+        <div className="mx-auto mt-7 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:flex-wrap sm:items-center">
           <button
             type="button"
             onClick={scrollToForm}
-            className="group inline-flex h-12 items-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(82,72,212,0.28)] transition-transform hover:-translate-y-0.5"
+            className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(82,72,212,0.28)] transition-transform hover:-translate-y-0.5"
           >
             <Calculator className="size-4" />
-            Run a free deal — no signup
+            <span className="sm:hidden">Run a free analysis</span>
+            <span className="hidden sm:inline">Run a free deal — no signup</span>
             <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
           </button>
           <Link
             href="/pricing"
-            className="inline-flex h-12 items-center gap-1.5 rounded-xl border border-border bg-card px-5 text-sm font-semibold text-foreground hover:bg-muted"
+            className="inline-flex h-12 items-center justify-center gap-1.5 rounded-xl border border-border bg-card px-5 text-sm font-semibold text-foreground hover:bg-muted"
           >
             See pricing
           </Link>
         </div>
-        {/* Risk-reversal microcopy directly under the CTAs */}
-        <p className="mt-3 flex items-center justify-center gap-1.5 text-center text-xs text-muted-foreground">
-          <Lock className="size-3" />
-          No credit card · No signup needed to use the calculator · Cancel anytime
+        {/* Risk-reversal microcopy — shorter on mobile so it stays on
+            one or two lines instead of wrapping into a paragraph block. */}
+        <p className="mt-3 flex items-center justify-center gap-1.5 text-balance px-2 text-center text-xs text-muted-foreground">
+          <Lock className="size-3 shrink-0" />
+          <span className="sm:hidden">No card · No signup · Cancel anytime</span>
+          <span className="hidden sm:inline">
+            No credit card · No signup needed to use the calculator · Cancel anytime
+          </span>
         </p>
 
         {/* trust stats row */}
@@ -185,13 +195,15 @@ function HeroProductMock() {
     <div className="relative mx-auto mt-10 max-w-3xl">
       {/* card */}
       <div className="rounded-2xl border border-border bg-card p-4 shadow-[0_24px_70px_rgba(15,23,42,0.10)] sm:p-6">
-        {/* browser chrome */}
+        {/* browser chrome — shorter URL pill on mobile so the full
+            string fits without truncation, full URL on sm+. */}
         <div className="mb-4 flex items-center gap-1.5">
           <span className="size-2.5 rounded-full bg-red-400/80" />
           <span className="size-2.5 rounded-full bg-amber-400/80" />
           <span className="size-2.5 rounded-full bg-emerald-400/80" />
-          <span className="ml-3 truncate rounded-full bg-muted px-3 py-0.5 text-[10px] font-medium text-muted-foreground">
-            usetruecap.com — 1700 W Erie · Philadelphia
+          <span className="ml-3 min-w-0 truncate rounded-full bg-muted px-3 py-0.5 text-[10px] font-medium text-muted-foreground">
+            <span className="sm:hidden">usetruecap.com</span>
+            <span className="hidden sm:inline">usetruecap.com — 1700 W Erie · Philadelphia</span>
           </span>
         </div>
 
@@ -286,7 +298,9 @@ function MockTile({
     tone === "success" ? "text-[var(--metric-positive)]" : "text-primary";
   return (
     <div className="rounded-xl border border-border bg-background p-3">
-      <div className={`text-[9px] font-bold uppercase tracking-widest text-muted-foreground ${small ? "" : "sm:text-[10px]"}`}>
+      {/* Label bumped from text-[9px] to text-[10px] — 9px is below
+          readable mobile minimum even for ALL-CAPS labels. */}
+      <div className={`text-[10px] font-bold uppercase tracking-widest text-muted-foreground ${small ? "" : "sm:text-[10px]"}`}>
         {label}
       </div>
       <div className={`mt-1 font-black tabular-nums ${color} ${small ? "text-lg" : "text-lg sm:text-xl"}`}>
