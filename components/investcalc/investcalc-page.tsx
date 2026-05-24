@@ -365,6 +365,7 @@ export function InvestCalcPage({
         maintenancePct: result.maintenancePctEffective,
         monthlyPropertyTax: result.propertyTax,
         monthlyRentIncome: result.monthlyRentalIncome,
+        isCashPurchase: result.monthlyPayment <= 0,
       });
       setDealScoreResult(dealScore);
     } finally {

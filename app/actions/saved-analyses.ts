@@ -216,6 +216,7 @@ export async function saveDealAction(input: unknown, existingId?: string | null)
     maintenancePct: result.maintenancePctEffective,
     monthlyPropertyTax: result.propertyTax,
     monthlyRentIncome: result.monthlyRentalIncome,
+    isCashPurchase: result.monthlyPayment <= 0,
   });
   const { snapshotVersion, compareSnapshot } = buildCompareSnapshotPayload(result, sanitizedValues);
   const resultSnapshotWithScore = {

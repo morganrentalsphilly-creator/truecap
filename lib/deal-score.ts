@@ -12,6 +12,13 @@ export const dealScoreInputSchema = z.object({
   maintenancePct: z.number().min(0),
   monthlyPropertyTax: z.number().min(0),
   monthlyRentIncome: z.number().min(0),
+  /**
+   * True when the deal has no debt service (100% down). DSCR is then
+   * mathematically undefined, so the engine should award full DSCR credit
+   * and avoid the "limited debt-service cushion" weakness phrasing.
+   * Optional + default false to keep existing callers backward-compatible.
+   */
+  isCashPurchase: z.boolean().optional().default(false),
 });
 
 export type DealScoreInput = z.infer<typeof dealScoreInputSchema>;
@@ -55,7 +62,8 @@ function isOwnerOccupantDeal(input: DealScoreInput): boolean {
 /** Owner-occupant, near break-even cash flow, and debt service covered — not comparable to investment "high risk". */
 function isOwnerOccupantNearBreakEvenForRiskLabel(input: DealScoreInput): boolean {
   if (!isOwnerOccupantDeal(input)) return false;
-  if (input.dscr < 1) return false;
+  // Cash purchases have no debt service to cover; skip the DSCR check.
+  if (!input.isCashPurchase && input.dscr < 1) return false;
   return (
     input.monthlyCashFlow >= OWNER_OCCUPANT_RISK_LABEL_CF_MIN &&
     input.monthlyCashFlow <= OWNER_OCCUPANT_RISK_LABEL_CF_MAX
@@ -146,9 +154,20 @@ function buildExplanation(
     weaknesses.push("moderate maintenance and CapEx risk from property age");
   }
   if (breakdown.cocScore === 0) weaknesses.push("weak cash-on-cash performance");
-  if (breakdown.dscrScore === 0) weaknesses.push("limited debt-service cushion");
+  // Only call out limited debt-service cushion when there's actually debt
+  // service to cover. For cash purchases this isn't a meaningful weakness.
+  if (!input.isCashPurchase && breakdown.dscrScore === 0) {
+    weaknesses.push("limited debt-service cushion");
+  }
+  if (input.isCashPurchase) strengths.push("no debt service (all-cash purchase)");
 
-  if (!isOwnerOccupantDeal(input) && input.monthlyCashFlow < 0 && input.dscr < 1) {
+  // Investment deals with negative cash flow AND debt service that doesn't
+  // cover. Cash purchases skip the DSCR check since DSCR is N/A.
+  if (
+    !isOwnerOccupantDeal(input) &&
+    input.monthlyCashFlow < 0 &&
+    (input.isCashPurchase || input.dscr < 1)
+  ) {
     return "This deal has weak fundamentals and negative cash flow.";
   }
 
@@ -199,7 +218,16 @@ export function computeDealScore(input: DealScoreInput): DealScoreResult {
           : 0;
 
   const capRateScore = input.capRate > 8 ? 20 : input.capRate > 5 ? 10 : 0;
-  const dscrScore = input.dscr > 1.25 ? 20 : input.dscr > 1 ? 10 : 0;
+  // Cash purchases have no debt service, so DSCR is mathematically undefined.
+  // Award full DSCR credit rather than penalizing the deal — a 100% down
+  // payment is the safest possible debt structure (no debt).
+  const dscrScore = input.isCashPurchase
+    ? 20
+    : input.dscr > 1.25
+      ? 20
+      : input.dscr > 1
+        ? 10
+        : 0;
 
   let riskPenalty = 0;
   if (input.vacancyRate > 8) riskPenalty -= 10;
