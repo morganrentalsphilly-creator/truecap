@@ -15,10 +15,13 @@ import { calculateAnalysis } from "@/lib/calc-analysis";
 import { investmentFormSchema } from "@/lib/investcalc-schema";
 import { ReadOnlyAnalysisView } from "@/components/investcalc/read-only-analysis-view";
 
-type Props = { params: { encoded: string } };
+// Next.js 15+ makes `params` async (Promise). Without awaiting it, accessing
+// .encoded synchronously throws in dev and silently breaks in prod.
+type Props = { params: Promise<{ encoded: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const payload = decodeShareLink(params.encoded);
+  const { encoded } = await params;
+  const payload = decodeShareLink(encoded);
   const title = payload?.meta?.title || payload?.values?.address || "Shared deal";
   return {
     title: `${title} | TrueCap`,
@@ -32,8 +35,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default function PublicDealPage({ params }: Props) {
-  const payload = decodeShareLink(params.encoded);
+export default async function PublicDealPage({ params }: Props) {
+  const { encoded } = await params;
+  const payload = decodeShareLink(encoded);
 
   if (!payload) {
     return <InvalidLink />;
