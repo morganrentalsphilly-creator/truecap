@@ -22,9 +22,11 @@
  * traffic visitor lands here first).
  */
 
+import { Suspense } from "react";
 import Link from "next/link";
 import { ArrowRight, Calculator, ChevronDown, FileDown, Lock, Shield, ShieldCheck, Sparkles, TrendingUp, Zap } from "lucide-react";
 import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
+import { DealsAnalyzedTicker } from "@/components/marketing/deals-analyzed-ticker";
 
 const TRUST_STATS = [
   { label: "To first analysis",  value: "60s",    sub: "no setup" },
@@ -123,6 +125,17 @@ export function MarketingHero() {
               <div className="mt-1 text-xs text-muted-foreground/80 sm:text-xs">{stat.sub}</div>
             </div>
           ))}
+        </div>
+
+        {/* Real-data trust ticker — pulls aggregate saved-analyses
+            count from Supabase. Self-hides below the threshold so we
+            never show anti-social-proof low numbers. Wrapped in
+            Suspense so a slow DB query doesn't block the rest of the
+            hero from streaming in. */}
+        <div className="text-center">
+          <Suspense fallback={null}>
+            <DealsAnalyzedTicker />
+          </Suspense>
         </div>
 
         {/* mock-up screenshot — pure CSS, lightweight */}
