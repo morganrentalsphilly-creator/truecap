@@ -17,6 +17,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowUpRight, Calculator } from "lucide-react";
+import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
@@ -452,6 +453,7 @@ export default function BlogPost() {
       </main>
       <SiteFooter />
       <ScrollDepthTracker />
+      <BlogStickyCta />
     </div>
   );
 }
