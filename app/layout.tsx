@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Plus_Jakarta_Sans, DM_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { Toaster } from '@/components/ui/toaster'
+import { CookieConsentBanner } from '@/components/marketing/cookie-consent-banner'
 import { getSiteUrl } from '@/lib/site-url'
 import './globals.css'
 
@@ -120,6 +121,27 @@ export default function RootLayout({
               Quality Score input for paid traffic. */}
           <link rel="preconnect" href="https://www.googletagmanager.com" crossOrigin="" />
           <link rel="dns-prefetch" href="https://www.google-analytics.com" />
+          {/* Google Consent Mode v2 defaults — MUST run before gtag.js
+              loads, so the bidding/measurement pixels boot in a privacy-
+              safe state (no tracking cookies set until user consents).
+              The CookieConsentBanner client component calls
+              gtag('consent', 'update', ...) once the user makes a choice.
+              Wait_for_update gives Google 500ms to receive the update
+              before sending the first pageview, so an immediate Accept
+              click doesn't lose attribution. */}
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('consent', 'default', {
+  ad_storage: 'denied',
+  analytics_storage: 'denied',
+  ad_user_data: 'denied',
+  ad_personalization: 'denied',
+  wait_for_update: 500
+});`,
+            }}
+          />
           {/* Google Ads gtag — emitted as raw script tags so it shows up
               in the server-rendered HTML for Google's tag verifier. */}
           <script
@@ -128,9 +150,7 @@ export default function RootLayout({
           />
           <script
             dangerouslySetInnerHTML={{
-              __html: `window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}
-gtag('js', new Date());
+              __html: `gtag('js', new Date());
 gtag('config', '${GOOGLE_ADS_ID}');`,
             }}
           />
@@ -150,6 +170,12 @@ gtag('config', '${GOOGLE_ADS_ID}');`,
         </a>
         {children}
         <Toaster />
+        {/* Cookie consent banner — pairs with the Consent Mode v2
+            defaults declared in <head>. Shows once on first visit, then
+            persists the choice to localStorage. Mounted at the bottom
+            of <body> so it overlays everything but doesn't intercept
+            React hydration ordering. */}
+        <CookieConsentBanner />
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>
