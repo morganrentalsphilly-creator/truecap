@@ -1,0 +1,23 @@
+/**
+ * Dynamic OG image for /tools/dscr-calculator. Auto-detected by Next.js
+ * App Router convention; overrides any images: [...] declared in
+ * the route's metadata.
+ *
+ * Implementation lives in the shared template at
+ * lib/og/tool-og-template.tsx — this file is just the per-tool
+ * config wrapper so all 9 tool OG images stay visually consistent.
+ */
+
+import { renderToolOgImage, OG_SIZE } from "@/lib/og/tool-og-template";
+
+export const runtime = "edge";
+export const alt = "DSCR calculator — TrueCap";
+export const size = OG_SIZE;
+export const contentType = "image/png";
+
+export default function Image() {
+  return renderToolOgImage({
+    name: "DSCR calculator",
+    tagline: "NOI ÷ debt service. The metric every lender pulls before approving a mortgage. 1.25+ is bankable.",
+  });
+}
