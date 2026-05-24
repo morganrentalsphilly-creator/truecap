@@ -56,10 +56,38 @@ const CATEGORY_STYLES: Record<Category, { icon: typeof Sparkles; color: string; 
 const ENTRIES: Entry[] = [
   {
     date: "2026-05-24",
-    category: "Content",
-    title: "Two new blog posts on rental underwriting",
+    category: "Feature",
+    title: "Interactive ROI calculator on /pricing",
     description:
-      "A 60-second underwriting walkthrough and a deep comparison of cap rate vs cash-on-cash vs DSCR — including the 2026 negative-leverage trap most investors are walking into.",
+      "Plug in your deals-per-month and hourly rate; the pricing page shows time saved, dollar value, and how many deals Pro pays for itself after. Uses your real Stripe-loaded price for live accuracy.",
+  },
+  {
+    date: "2026-05-24",
+    category: "Improvement",
+    title: "Post-analysis signup prompt for anonymous users",
+    description:
+      "After a free analysis, anonymous visitors now see a 'Save [your address] for later' card with one-tap Google signup. Soft conversion ask — even users not ready for Pro can save their work and come back.",
+  },
+  {
+    date: "2026-05-24",
+    category: "Improvement",
+    title: "Welcome-back banner shows your saved address",
+    description:
+      "The auto-save banner now reads 'Welcome back — your draft for [1700 W Erie Ave] is ready' so returning users instantly recognize their work. One-click 'start fresh' for shared-device cases.",
+  },
+  {
+    date: "2026-05-24",
+    category: "Improvement",
+    title: "Comprehensive mobile UX pass",
+    description:
+      "Calculator number fields now use the numeric keypad on iOS/Android (no more QWERTY hell). All tap targets meet the 44pt standard. Tables overflow-x scroll on narrow viewports. Hero copy adapts at 375px. Password show/hide buttons 5x larger tap area.",
+  },
+  {
+    date: "2026-05-24",
+    category: "Content",
+    title: "4 anchor blog posts on rental underwriting",
+    description:
+      "60-second underwriting walkthrough. Cap rate vs cash-on-cash vs DSCR comparison. DSCR loans explained. What's a good cap rate in 2026. Each post deep-links to the matching calculator and funnels into the full analyzer.",
   },
   {
     date: "2026-05-24",
