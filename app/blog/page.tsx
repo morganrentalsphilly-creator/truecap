@@ -48,6 +48,33 @@ export type BlogPost = {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: "best-states-for-rental-investors-2026",
+    title: "Best states for rental property investors in 2026",
+    excerpt:
+      "An honest ranking of the top 10 US states for rental investors — cap rates, property tax, income tax, landlord laws, and the trade-offs that decide which state actually fits your strategy.",
+    readingTimeMinutes: 12,
+    publishedAt: "2026-05-25",
+    available: true,
+  },
+  {
+    slug: "1031-exchange-basics",
+    title: "1031 exchange basics for individual rental investors",
+    excerpt:
+      "How a 1031 exchange actually works in 2026 — the 45-day and 180-day windows, qualified intermediary requirement, like-kind rules, boot, reverse exchanges, and when it's worth the complexity.",
+    readingTimeMinutes: 11,
+    publishedAt: "2026-05-25",
+    available: true,
+  },
+  {
+    slug: "50-percent-rule-rentals",
+    title: "The 50% rule for rentals — is it still useful in 2026?",
+    excerpt:
+      "The classic 50% rule says operating expenses run ~half of gross rent. Honest take on when it works as a triage tool, when it lies, and what to use instead.",
+    readingTimeMinutes: 6,
+    publishedAt: "2026-05-25",
+    available: true,
+  },
+  {
     slug: "house-hacking-explained",
     title: "House hacking explained: how to (almost) live for free in a 2-4 unit",
     excerpt:

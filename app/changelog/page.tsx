@@ -57,6 +57,13 @@ const ENTRIES: Entry[] = [
   {
     date: "2026-05-25",
     category: "Feature",
+    title: "Three new blog posts — best states, 1031, 50% rule",
+    description:
+      "'Best states for rental property investors in 2026' is a hub piece that cross-links every existing market page; ranks for broad state-level queries and distributes link equity to the city-level guides. '1031 exchange basics' walks individual investors through the 45/180-day windows, QI requirement, like-kind, boot, and reverse-exchange mechanics. 'The 50% rule for rentals' is a tactical post on when the classic triage heuristic actually works and when it lies (TX, FL, pre-1940 stock, STR, high-HOA). Blog catalog now at 12 posts.",
+  },
+  {
+    date: "2026-05-25",
+    category: "Feature",
     title: "Three more local-SEO market pages — Detroit, Memphis, Phoenix",
     description:
       "Detroit (legendary cash flow + BRRRR with honest warnings about out-of-state risk), Memphis (turnkey rental capital + TN tax math), Phoenix (high-growth Sun Belt + HOA + STR notes). Same depth as the existing 9 markets. Brings the local-SEO surface to 12 covered metros.",

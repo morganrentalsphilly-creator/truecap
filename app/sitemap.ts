@@ -270,6 +270,24 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
     },
     {
+      url: `${siteUrl}/blog/best-states-for-rental-investors-2026`,
+      lastModified: new Date("2026-05-25"),
+      changeFrequency: "monthly",
+      priority: 0.9,
+    },
+    {
+      url: `${siteUrl}/blog/1031-exchange-basics`,
+      lastModified: new Date("2026-05-25"),
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
+      url: `${siteUrl}/blog/50-percent-rule-rentals`,
+      lastModified: new Date("2026-05-25"),
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
       url: `${siteUrl}/blog/property-management-yes-or-no`,
       lastModified: new Date("2026-05-25"),
       changeFrequency: "monthly",
