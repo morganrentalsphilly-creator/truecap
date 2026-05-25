@@ -57,6 +57,20 @@ const ENTRIES: Entry[] = [
   {
     date: "2026-05-24",
     category: "Improvement",
+    title: "Save status now distinguishes 'Unsaved changes' from 'Preview'",
+    description:
+      "The status pill on the analysis header now reads 'Saved' (green) when everything is persisted, 'Unsaved changes' (orange) when you've edited a saved deal but haven't re-saved, and 'Preview' (amber) for brand-new analyses. Hover for the full explanation.",
+  },
+  {
+    date: "2026-05-24",
+    category: "Improvement",
+    title: "Browser prompt if you try to leave with unsaved edits",
+    description:
+      "If you've edited a saved deal and try to close the tab or navigate away, the browser now warns you so you don't accidentally lose work. Only fires on saved deals with pending edits — never spams for fresh previews or anonymous sessions.",
+  },
+  {
+    date: "2026-05-24",
+    category: "Improvement",
     title: "Footer streamlined",
     description:
       "Pruned the Markets column and the Glossary/Methodology/Changelog links from the Product column. Reduces footer noise on every page — pages still exist and remain reachable from search engines + internal links.",

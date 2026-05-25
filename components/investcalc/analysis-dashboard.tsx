@@ -280,10 +280,23 @@ export function AnalysisDashboard({
                 "rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide",
                 isSaved
                   ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                  : "border-amber-200 bg-amber-50 text-amber-700"
+                  : isExistingSavedDeal
+                    ? "border-orange-200 bg-orange-50 text-orange-700"
+                    : "border-amber-200 bg-amber-50 text-amber-700"
               )}
+              title={
+                isSaved
+                  ? "All changes saved"
+                  : isExistingSavedDeal
+                    ? "You've edited this deal since the last save. Click Save to persist."
+                    : "This is a preview — click Save to persist this deal."
+              }
             >
-              {isSaved ? "Saved" : "Preview"}
+              {isSaved
+                ? "Saved"
+                : isExistingSavedDeal
+                  ? "Unsaved changes"
+                  : "Preview"}
             </span>
           </div>
           <div className="relative rounded-2xl border border-border p-2 pt-3 shadow-sm xl:min-w-[560px] max-[380px]:p-1.5 max-[380px]:pt-3">

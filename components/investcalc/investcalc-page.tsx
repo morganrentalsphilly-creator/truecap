@@ -1453,6 +1453,28 @@ export function InvestCalcPage({
     void handleExportPdf();
   }, [analysisResult]);
 
+  /**
+   * Workflow protection — warn before unloading the page when the
+   * user has unsaved edits to an existing saved deal. We deliberately
+   * skip this for anonymous users (no save path) and brand-new
+   * previews (localStorage auto-save catches them on next visit).
+   * Browser policy ignores custom messages now, but the prompt itself
+   * still fires — that's enough to prevent the accidental close.
+   */
+  useEffect(() => {
+    const shouldWarn = isAuthenticated && Boolean(savedDealId) && hasUnsavedChanges;
+    if (!shouldWarn) return;
+    const handler = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      // Required for older browsers — modern browsers show a generic
+      // "Reload site? Changes you made may not be saved." regardless
+      // of returnValue text.
+      event.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [isAuthenticated, savedDealId, hasUnsavedChanges]);
+
   const handleCompareDeals = async () => {
     if (!isAuthenticated) {
       toast({
