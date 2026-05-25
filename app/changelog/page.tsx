@@ -57,6 +57,55 @@ const ENTRIES: Entry[] = [
   {
     date: "2026-05-24",
     category: "Feature",
+    title: "Portfolio rollup on saved-analyses dashboard",
+    description:
+      "Sticky header strip across saved deals: total monthly cash flow, total deal value, weighted cap rate, weighted CoC. Turns the saved-deals list into a portfolio command center. Self-hides for <2 deals.",
+  },
+  {
+    date: "2026-05-24",
+    category: "Feature",
+    title: "Cash flow waterfall — where every rent dollar goes",
+    description:
+      "Single-glance horizontal bar showing gross rent decomposed into vacancy, every OpEx line, debt service, and net cash flow (or shortfall). Sits above the existing detailed breakdown. Mobile-friendly legend layout.",
+  },
+  {
+    date: "2026-05-24",
+    category: "Feature",
+    title: "Mortgage scenario A/B comparison (Pro)",
+    description:
+      "Click-to-open side-by-side: current financing vs +5pp down, 15-year term, DSCR loan at +1.5%. Compares monthly P&I, cash flow, DSCR, CoC, and cash required. Free users see a one-line teaser pointing at /pricing.",
+  },
+  {
+    date: "2026-05-24",
+    category: "Feature",
+    title: "Deal verdict explanation — 'Why this score?'",
+    description:
+      "Each subscore tile now has a plain-English subline ('Above 1.25 — clears lender threshold'), and a collapsible block explains how the score was computed and what would move it. Default surface stays clean — disclosure is opt-in.",
+  },
+  {
+    date: "2026-05-24",
+    category: "Feature",
+    title: "Inline benchmarks under key metrics",
+    description:
+      "Cap rate, CoC, and Monthly Cash Flow tiles now show a market-context subline ('Above 8% — top quartile') alongside the number. Matches DSCR's existing inline benchmark pattern.",
+  },
+  {
+    date: "2026-05-24",
+    category: "Feature",
+    title: "Quick-start strategy templates",
+    description:
+      "Three one-click presets on the empty calculator: Long-term rental, House hack, FHA 3.5% down. Each seeds strategy-correct defaults (down %, vacancy, mgmt) so you don't have to remember 'for FHA I need...'",
+  },
+  {
+    date: "2026-05-24",
+    category: "Improvement",
+    title: "Homepage hero cleanup — less crowded, same conversion intent",
+    description:
+      "Removed the standalone deals-ticker (trust tiles already cover this), hid the product mockup on mobile (~500px scroll saved), tightened the persona row to 2 clickable links, removed duplicate SSL line and the scroll arrow. Hero is faster to scan on first paint.",
+  },
+  {
+    date: "2026-05-24",
+    category: "Feature",
     title: "Persona landing pages — /for-agents + /for-flippers",
     description:
       "Tightly-targeted landing pages with persona-specific value props and use cases. Designed as paid-ad landing surfaces where ad copy and LP messaging align ('Underwrite for your investor clients' → agents, 'Model your next flip in 60 seconds' → flippers).",

@@ -31,6 +31,8 @@ import { ProInlineGate } from "@/components/investcalc/pro-inline-gate";
 import { Activity, Target } from "lucide-react";
 import { MomentOfValueUpsell } from "@/components/marketing/moment-of-value-upsell";
 import { SignupPromptCard } from "@/components/marketing/signup-prompt-card";
+import { CashFlowWaterfall } from "@/components/investcalc/cash-flow-waterfall";
+import { MortgageScenarioCompare } from "@/components/investcalc/mortgage-scenario-compare";
 // ShareLinkButton import temporarily removed — Share button was pulled from
 // the Quick Actions row because it wrapped onto a second line. Component
 // + share-link.ts + /d/[encoded] route all remain in the codebase ready
@@ -110,6 +112,38 @@ const TABS: { id: AnalysisDashboardTab; label: string; mobileLabel: string; isPr
   { id: "exit-scenarios", label: "Exit Scenarios", mobileLabel: "Exit", isPro: true },
   { id: "strategies", label: "Strategies", mobileLabel: "Strategy", isPro: true },
 ];
+
+/**
+ * Inline market-context labels surfaced under each metric tile.
+ *
+ * Phase 1: hard-coded national-average bands. The thresholds match
+ * the scoring engine's thresholds in lib/deal-score.ts so the metric
+ * subline and the score subline tell the same story.
+ *
+ * Phase 2 (when we add per-market data): switch these to lookups
+ * against lib/market-benchmarks by state/MSA so the subline reads
+ * "Philadelphia median: 6.1%" instead of a national band.
+ */
+function capRateBenchmarkLabel(capRatePct: number): string {
+  if (capRatePct > 8) return "Above 8% — top quartile";
+  if (capRatePct > 5) return "5–8% — fair for market";
+  return "Below 5% — appreciation-dependent";
+}
+
+function cocBenchmarkLabel(cocPct: number): string {
+  if (cocPct > 12) return "Above 12% — strong";
+  if (cocPct > 8) return "8–12% — healthy";
+  if (cocPct > 5) return "5–8% — modest";
+  if (cocPct >= 0) return "Below 5% — weak";
+  return "Negative — losing money";
+}
+
+function cashFlowBenchmarkLabel(monthlyCashFlow: number): string {
+  if (monthlyCashFlow > 1000) return "Above $1,000/mo target";
+  if (monthlyCashFlow > 0) return "Positive but modest";
+  if (monthlyCashFlow > -100) return "~Break-even";
+  return "Losing money monthly";
+}
 
 function fmt(n: number) {
   return `$${Math.abs(n).toLocaleString()}`;
@@ -469,6 +503,7 @@ export function AnalysisDashboard({
           label="Monthly Cash Flow"
           glossaryTerm="cashFlow"
           value={result ? (result.netCashFlow >= 0 ? fmt(result.netCashFlow) : `-${fmt(result.netCashFlow)}`) : "—"}
+          sub={result ? cashFlowBenchmarkLabel(result.netCashFlow) : undefined}
           color={result ? (result.netCashFlow >= 0 ? "text-[var(--metric-positive)]" : "text-[var(--metric-negative)]") : undefined}
           isLoading={isLoading}
         />
@@ -476,6 +511,7 @@ export function AnalysisDashboard({
           label="CoC Return"
           glossaryTerm="coc"
           value={result ? `${result.cocReturn >= 0 ? "+" : ""}${result.cocReturn.toFixed(1)}%` : "—"}
+          sub={result ? cocBenchmarkLabel(result.cocReturn) : undefined}
           color={result ? (result.cocReturn >= 0 ? "text-[var(--metric-positive)]" : "text-[var(--metric-negative)]") : undefined}
           isLoading={isLoading}
         />
@@ -483,6 +519,7 @@ export function AnalysisDashboard({
           label="Cap Rate"
           glossaryTerm="capRate"
           value={result ? `+${result.capRate.toFixed(1)}%` : "—"}
+          sub={result ? capRateBenchmarkLabel(result.capRate) : undefined}
           color="text-[var(--metric-positive)]"
           isLoading={isLoading}
         />
@@ -635,7 +672,12 @@ export function AnalysisDashboard({
         {/* Tab content */}
         <div className="min-w-0 overflow-hidden p-2 sm:p-6">
           {activeTab === "cash-flow" && (
-            <CashFlowTab result={result} isLoading={isLoading} />
+            <CashFlowTab
+              result={result}
+              isLoading={isLoading}
+              values={values}
+              isPro={canUseStrategies || canUseSensitivity || canUseProjections}
+            />
           )}
           {activeTab === "projections" && !canUseProjections && (
             <ProFeaturePreview kind="projections" onUpgrade={goToBilling} />
@@ -875,6 +917,46 @@ function DealScoreCard({
   }
 
   const { score, riskLevel, recommendation, explanation, breakdown } = dealScoreResult.data;
+  // Plain-English subline for each subscore — turns "Cash Flow Score: 25"
+  // into "Cash Flow: 25/25 — Above $1,000/mo target". Computed from the
+  // subscore value alone (the engine's thresholds are encoded here as
+  // labels). Pure display — does not touch the scoring engine.
+  const breakdownExplanations = {
+    cashFlow:
+      breakdown.cashFlowScore >= 25
+        ? "Above $1,000/mo — strong"
+        : breakdown.cashFlowScore >= 15
+          ? "Positive but modest ($0–$1,000/mo)"
+          : "Negative — eats into your return",
+    coc:
+      breakdown.cocScore >= 25
+        ? "Above 12% — strong"
+        : breakdown.cocScore >= 15
+          ? "8–12% — healthy"
+          : breakdown.cocScore >= 8
+            ? "5–8% — modest"
+            : "Below 5% — weak",
+    capRate:
+      breakdown.capRateScore >= 20
+        ? "Above 8% — strong"
+        : breakdown.capRateScore >= 10
+          ? "5–8% — fair for the market"
+          : "Below 5% — appreciation-dependent",
+    dscr:
+      breakdown.dscrScore >= 20
+        ? "Above 1.25 — clears lender threshold"
+        : breakdown.dscrScore >= 10
+          ? "1.00–1.25 — thin coverage cushion"
+          : "Below 1.00 — does not cover debt",
+    risk:
+      breakdown.riskPenalty === 0
+        ? "No penalty — risk profile is clean"
+        : breakdown.riskPenalty > -10
+          ? "Mild penalty for elevated risk factors"
+          : breakdown.riskPenalty > -20
+            ? "Moderate penalty — review CapEx, age, vacancy"
+            : "Heavy penalty — multiple risk factors stacking",
+  } as const;
   const recommendationVariant: RecommendationVariant =
     recommendation === "Strong Buy"
       ? "strong-buy"
@@ -974,15 +1056,106 @@ function DealScoreCard({
         </div>
       </div>
       <div className="grid grid-cols-2 gap-2 text-xs mb-3">
-        <div className={cn("rounded-lg p-2", activeStyle.metricCell)}>Cash Flow Score: {breakdown.cashFlowScore}</div>
-        <div className={cn("rounded-lg p-2", activeStyle.metricCell)}>CoC Score: {breakdown.cocScore}</div>
-        <div className={cn("rounded-lg p-2", activeStyle.metricCell)}>Cap Rate Score: {breakdown.capRateScore}</div>
-        <div className={cn("rounded-lg p-2", activeStyle.metricCell)}>DSCR Score: {breakdown.dscrScore}</div>
-        <div className={cn("rounded-lg p-2 col-span-2", activeStyle.metricCell)}>
-          Risk Penalty: {breakdown.riskPenalty}
-        </div>
+        <ScoreBreakdownTile
+          label="Cash flow"
+          value={breakdown.cashFlowScore}
+          max={isOwnerOccupantBreakdown(breakdown) ? 30 : 25}
+          explanation={breakdownExplanations.cashFlow}
+          cellClass={activeStyle.metricCell}
+        />
+        <ScoreBreakdownTile
+          label="Cash-on-cash"
+          value={breakdown.cocScore}
+          max={25}
+          explanation={breakdownExplanations.coc}
+          cellClass={activeStyle.metricCell}
+        />
+        <ScoreBreakdownTile
+          label="Cap rate"
+          value={breakdown.capRateScore}
+          max={20}
+          explanation={breakdownExplanations.capRate}
+          cellClass={activeStyle.metricCell}
+        />
+        <ScoreBreakdownTile
+          label="DSCR"
+          value={breakdown.dscrScore}
+          max={20}
+          explanation={breakdownExplanations.dscr}
+          cellClass={activeStyle.metricCell}
+        />
+        <ScoreBreakdownTile
+          label="Risk penalty"
+          value={breakdown.riskPenalty}
+          max={0}
+          explanation={breakdownExplanations.risk}
+          cellClass={activeStyle.metricCell}
+          spanFull
+        />
       </div>
       <p className={cn("text-xs leading-relaxed", activeStyle.descriptionText)}>{explanation}</p>
+      {/* Collapsible deep-detail breakdown. Hidden by default so the
+          score card stays scannable; click-to-reveal for the analyst
+          who wants the receipts behind each number. Native <details>
+          keeps it zero-JS and accessible. */}
+      <details className="group mt-3">
+        <summary className="cursor-pointer text-[11px] font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground select-none list-none flex items-center gap-1.5">
+          <span className="transition-transform group-open:rotate-90" aria-hidden>▸</span>
+          Why this score?
+        </summary>
+        <div className="mt-2 rounded-xl border border-border bg-muted/30 p-3 text-xs leading-relaxed text-foreground/80">
+          <p>
+            Score is the sum of cash flow ({breakdown.cashFlowScore}), CoC ({breakdown.cocScore}),
+            cap rate ({breakdown.capRateScore}), and DSCR ({breakdown.dscrScore}),
+            {breakdown.riskPenalty < 0 ? <> minus a risk penalty of {Math.abs(breakdown.riskPenalty)}</> : null}
+            {" "}={" "}
+            <span className="font-bold text-foreground">{score} / 100</span>.
+            {" "}Bands: <strong>80+</strong> Strong Buy, <strong>60–79</strong> Buy,
+            {" "}<strong>40–59</strong> Neutral, <strong>20–39</strong> Risky,
+            {" "}<strong>&lt;20</strong> Avoid.
+          </p>
+          <p className="mt-2 text-muted-foreground">
+            Looking to improve the score? The largest movers are typically (1) a lower
+            purchase price (lifts cap rate and CoC together), (2) better financing terms
+            (lifts DSCR + monthly cash flow), or (3) reducing CapEx/maintenance assumptions
+            for a younger building.
+          </p>
+        </div>
+      </details>
+    </div>
+  );
+}
+
+/** Heuristic — owner-occupant cash-flow tier uses 30 as the max instead
+ *  of 25. The breakdown doesn't carry propertyType so we infer: a score
+ *  of 30 only appears in the owner-occupant tier. */
+function isOwnerOccupantBreakdown(breakdown: { cashFlowScore: number }): boolean {
+  return breakdown.cashFlowScore === 30;
+}
+
+function ScoreBreakdownTile({
+  label,
+  value,
+  max,
+  explanation,
+  cellClass,
+  spanFull,
+}: {
+  label: string;
+  value: number;
+  max: number;
+  explanation: string;
+  cellClass: string;
+  spanFull?: boolean;
+}) {
+  const valueDisplay = max > 0 ? `${value} / ${max}` : value > 0 ? `+${value}` : `${value}`;
+  return (
+    <div className={cn("rounded-lg p-2", cellClass, spanFull && "col-span-2")}>
+      <div className="flex items-baseline justify-between gap-2">
+        <span className="font-semibold">{label}</span>
+        <span className="tabular-nums text-foreground/80">{valueDisplay}</span>
+      </div>
+      <p className="mt-0.5 text-[11px] leading-snug text-muted-foreground">{explanation}</p>
     </div>
   );
 }
@@ -1103,9 +1276,13 @@ function ProFeaturePreview({
 function CashFlowTab({
   result,
   isLoading,
+  values,
+  isPro,
 }: {
   result: AnalysisResult | null;
   isLoading: boolean;
+  values: InvestmentFormValues | null;
+  isPro: boolean;
 }) {
   if (isLoading) {
     return (
@@ -1134,7 +1311,12 @@ function CashFlowTab({
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+    <div className="space-y-6 sm:space-y-8">
+      {/* Where the rent goes — single-glance waterfall. Sits above
+          the detailed 3-column breakdown so users see the SHAPE of
+          the deal before they read the line items. */}
+      <CashFlowWaterfall result={result} />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
       {/* Monthly income */}
       <div>
         <div className="flex items-center gap-2 mb-4">
@@ -1329,6 +1511,10 @@ function CashFlowTab({
           </div>
         </div>
       </div>
+      </div>
+      {/* Compare financing scenarios — Pro feature. Self-hides on
+          cash purchases. Click-to-open keeps default surface clean. */}
+      <MortgageScenarioCompare result={result} values={values} isPro={isPro} />
     </div>
   );
 }

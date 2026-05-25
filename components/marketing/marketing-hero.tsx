@@ -22,11 +22,9 @@
  * traffic visitor lands here first).
  */
 
-import { Suspense } from "react";
 import Link from "next/link";
-import { ArrowRight, Calculator, ChevronDown, FileDown, Lock, Shield, ShieldCheck, Sparkles, TrendingUp, Zap } from "lucide-react";
+import { ArrowRight, Calculator, FileDown, Lock, ShieldCheck, Sparkles, TrendingUp, Zap } from "lucide-react";
 import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
-import { DealsAnalyzedTicker } from "@/components/marketing/deals-analyzed-ticker";
 
 const TRUST_STATS = [
   { label: "To first analysis",  value: "60s",    sub: "no setup" },
@@ -127,19 +125,13 @@ export function MarketingHero() {
           ))}
         </div>
 
-        {/* Real-data trust ticker — pulls aggregate saved-analyses
-            count from Supabase. Self-hides below the threshold so we
-            never show anti-social-proof low numbers. Wrapped in
-            Suspense so a slow DB query doesn't block the rest of the
-            hero from streaming in. */}
-        <div className="text-center">
-          <Suspense fallback={null}>
-            <DealsAnalyzedTicker />
-          </Suspense>
+        {/* Mock-up screenshot — pure CSS, lightweight. Hidden on
+            mobile (it adds ~500px of scroll before the value props
+            without earning the space on a narrow viewport — desktop
+            keeps it because the screenshot does sell the product). */}
+        <div className="hidden sm:block">
+          <HeroProductMock />
         </div>
-
-        {/* mock-up screenshot — pure CSS, lightweight */}
-        <HeroProductMock />
 
         {/* 3-up features */}
         <div className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-5">
@@ -154,37 +146,28 @@ export function MarketingHero() {
           ))}
         </div>
 
-        {/* social proof / "made for" row */}
-        <div className="mt-12 flex flex-col items-center gap-3 text-center">
-          <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+        {/* "Built for" — tight 2-link row pointing to the two persona
+            landing pages. Replaces the 5-item dot-separated list that
+            looked dense without providing a clickable destination. */}
+        <div className="mt-12 flex flex-wrap items-center justify-center gap-x-2 gap-y-2 text-sm text-muted-foreground">
+          <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
             Built for
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm font-semibold text-foreground/70">
-            <span>Buy-and-hold investors</span>
-            <span aria-hidden className="text-muted-foreground/40">·</span>
-            <span>BRRRR operators</span>
-            <span aria-hidden className="text-muted-foreground/40">·</span>
-            <span>Fix-and-flippers</span>
-            <span aria-hidden className="text-muted-foreground/40">·</span>
-            <span>House hackers</span>
-            <span aria-hidden className="text-muted-foreground/40">·</span>
-            <span>Agents underwriting for clients</span>
-          </div>
-          <div className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Shield className="size-3.5" />
-            <span>SSL · your data is never sold · no card required to start</span>
-          </div>
-        </div>
-
-        {/* scroll arrow to form */}
-        <div className="mt-10 flex justify-center">
-          <ScrollToFormButton
-            className="group flex flex-col items-center gap-1 text-xs font-semibold text-muted-foreground hover:text-foreground"
-            aria-label="Scroll to the calculator"
+          </span>
+          <Link
+            href="/for-agents"
+            className="font-semibold text-foreground/80 hover:text-primary hover:underline"
           >
-            <span>Or jump straight to the calculator</span>
-            <ChevronDown className="size-4 animate-bounce transition-colors group-hover:text-primary" />
-          </ScrollToFormButton>
+            real estate agents
+          </Link>
+          <span aria-hidden className="text-muted-foreground/40">·</span>
+          <Link
+            href="/for-flippers"
+            className="font-semibold text-foreground/80 hover:text-primary hover:underline"
+          >
+            fix &amp; flippers
+          </Link>
+          <span aria-hidden className="text-muted-foreground/40">·</span>
+          <span className="font-medium text-foreground/70">buy-and-hold investors</span>
         </div>
       </div>
     </section>

@@ -4,6 +4,7 @@ import {
   type SavedAnalysisListItem,
 } from "@/components/investcalc/saved-analyses-page-v2";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
+import { PortfolioRollupStrip } from "@/components/dashboard/portfolio-rollup-strip";
 import { Topbar } from "@/components/dashboard/Topbar";
 import { getCompareIdsFromCookie } from "@/app/actions/compare";
 import {
@@ -228,6 +229,10 @@ export default async function DashboardSavedAnalysesPage({
           canAccessDashboard={navAccess.dashboard}
         />
         <div className="flex-1">
+          {/* Portfolio rollup — one-glance summary across the filtered
+              set. Self-hides when fewer than 2 deals are in scope, so
+              it never competes with empty-state UX. */}
+          <PortfolioRollupStrip items={mappedItems} scope={activeDealStateFilter} />
           <SavedAnalysesPage
             initialItems={mappedItems}
             initialSelectedIds={compareIds}
