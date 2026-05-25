@@ -1810,6 +1810,7 @@ export function InvestCalcPage({
               isExporting={isExportingPdf}
               isSaved={Boolean(savedDealId) && !hasUnsavedChanges}
               isExistingSavedDeal={Boolean(savedDealId)}
+              savedDealId={savedDealId}
               isAuthenticated={isAuthenticated}
               canSaveDeals={canSaveDeals}
               canUpdateSavedDeals={canUpdateSavedDeals}

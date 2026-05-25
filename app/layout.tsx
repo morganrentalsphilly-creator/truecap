@@ -3,6 +3,7 @@ import { Plus_Jakarta_Sans, DM_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { Toaster } from '@/components/ui/toaster'
 import { CookieConsentBanner } from '@/components/marketing/cookie-consent-banner'
+import { AnnualPromoBanner } from '@/components/marketing/annual-promo-banner'
 import { getSiteUrl } from '@/lib/site-url'
 import './globals.css'
 
@@ -168,6 +169,10 @@ gtag('config', '${GOOGLE_ADS_ID}');`,
         >
           Skip to main content
         </a>
+        {/* Annual plan promo banner — thin, dismissible, hidden on
+            /pricing and /auth/*. Sits ABOVE all page content so it
+            doesn't reshuffle individual pages' layouts. */}
+        <AnnualPromoBanner />
         {children}
         <Toaster />
         {/* Cookie consent banner — pairs with the Consent Mode v2

@@ -610,6 +610,87 @@ export async function completeSavedAnalysisPdfExportAction(
   return { ok: true, pdfUrl: cleanPdfUrl };
 }
 
+/**
+ * Update a saved deal's user-authored notes. Free-text markdown, no
+ * length cap (DB column is unbounded text). Soft-capped at 10k chars
+ * here to prevent accidental enormous pastes.
+ *
+ * Defensive: graceful failure when the `notes` column doesn't exist
+ * yet (i.e. migration 20260524120000_saved_analyses_notes hasn't been
+ * applied). Postgres error code 42703 = "undefined column".
+ */
+export async function updateSavedDealNotesAction(
+  id: string,
+  notes: string
+): Promise<{ ok: true } | { ok: false; code: "SIGN_IN_REQUIRED" | "MIGRATION_PENDING" | "NOT_FOUND" | "SERVER_ERROR" | "VALIDATION_ERROR"; message: string }> {
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in." };
+  }
+  const trimmed = (notes ?? "").slice(0, 10_000);
+  const savedId = id.trim();
+  if (!savedId) {
+    return { ok: false, code: "VALIDATION_ERROR", message: "Invalid deal id." };
+  }
+  const { data, error } = await supabase
+    .from("saved_analyses")
+    .update({ notes: trimmed })
+    .eq("id", savedId)
+    .eq("user_id", user.id)
+    .is("deleted_at", null)
+    .select("id")
+    .maybeSingle();
+  if (error) {
+    // 42703 = undefined_column — migration not yet applied.
+    if (error.code === "42703" || /column .* does not exist/i.test(error.message)) {
+      return {
+        ok: false,
+        code: "MIGRATION_PENDING",
+        message:
+          "Notes are temporarily disabled — the schema migration hasn't been applied yet. Ask the site admin to apply 20260524120000_saved_analyses_notes.sql.",
+      };
+    }
+    return { ok: false, code: "SERVER_ERROR", message: error.message };
+  }
+  if (!data) {
+    return { ok: false, code: "NOT_FOUND", message: "Deal not found." };
+  }
+  return { ok: true };
+}
+
+/**
+ * Fetch the notes for a single saved deal. Returns null if the deal
+ * has no notes yet, or if the migration isn't applied (defensive).
+ */
+export async function getSavedDealNotesAction(
+  id: string
+): Promise<{ ok: true; notes: string | null } | { ok: false; code: "SIGN_IN_REQUIRED" | "MIGRATION_PENDING" | "SERVER_ERROR"; message: string }> {
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in." };
+  }
+  const { data, error } = await supabase
+    .from("saved_analyses")
+    .select("notes")
+    .eq("id", id.trim())
+    .eq("user_id", user.id)
+    .is("deleted_at", null)
+    .maybeSingle();
+  if (error) {
+    if (error.code === "42703" || /column .* does not exist/i.test(error.message)) {
+      return { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." };
+    }
+    return { ok: false, code: "SERVER_ERROR", message: error.message };
+  }
+  return { ok: true, notes: (data as { notes: string | null } | null)?.notes ?? null };
+}
+
 export async function updateSavedDealLifecycleStateAction(
   id: string,
   state: "active" | "completed" | "archived"

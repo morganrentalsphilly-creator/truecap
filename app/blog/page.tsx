@@ -48,6 +48,24 @@ export type BlogPost = {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: "spot-bad-rental-in-60-seconds",
+    title: "How to spot a bad rental deal in 60 seconds — 7 red flags",
+    excerpt:
+      "Seven red flags that tell you a rental doesn't pencil — before you waste hours running the full underwrite. The triage every experienced investor does in their head.",
+    readingTimeMinutes: 8,
+    publishedAt: "2026-05-24",
+    available: true,
+  },
+  {
+    slug: "cash-on-cash-vs-irr",
+    title: "Cash-on-cash vs IRR: which one tells the truth?",
+    excerpt:
+      "Cash-on-cash and IRR are both return metrics, but they answer completely different questions. When each one is right, when each one lies, and which to trust.",
+    readingTimeMinutes: 7,
+    publishedAt: "2026-05-24",
+    available: true,
+  },
+  {
     slug: "cash-flow-vs-appreciation",
     title: "Cash flow vs appreciation: which rental strategy actually wins in 2026?",
     excerpt:

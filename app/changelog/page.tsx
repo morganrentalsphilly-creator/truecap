@@ -56,6 +56,55 @@ const CATEGORY_STYLES: Record<Category, { icon: typeof Sparkles; color: string; 
 const ENTRIES: Entry[] = [
   {
     date: "2026-05-24",
+    category: "Feature",
+    title: "Deal notes on every saved deal",
+    description:
+      "Free-text notes per saved deal — seller context, agent commentary, inspector findings, your offer reasoning. Saves automatically on blur. Lives at the top of the analysis dashboard when you re-open a saved deal.",
+  },
+  {
+    date: "2026-05-24",
+    category: "Feature",
+    title: "Your analysis defaults on /settings",
+    description:
+      "Set your preferred vacancy %, management %, maintenance %, CapEx %, financing assumptions, growth rates once on the Settings page — new analyses will pre-fill from these instead of the generic engine defaults. Every field optional.",
+  },
+  {
+    date: "2026-05-24",
+    category: "Feature",
+    title: "Three competitor comparison pages",
+    description:
+      "/vs/dealcheck, /vs/stessa, /vs/mashvisor — honest side-by-side feature matrices with TL;DR pick-which guidance. High commercial-intent SEO targets for investors comparison-shopping.",
+  },
+  {
+    date: "2026-05-24",
+    category: "Feature",
+    title: "Five new market pages — Tampa, Charlotte, Indianapolis, Kansas City, Dallas",
+    description:
+      "Substantive city-specific guides: neighborhood cap-rate maps, local property-tax math, market-specific risks (Tampa insurance, KC reassessment, DFW MUDs, IN property-tax cap). Each ~1,200 words with FAQs and FAQPage schema.org markup for rich-result eligibility.",
+  },
+  {
+    date: "2026-05-24",
+    category: "Feature",
+    title: "Two new blog posts",
+    description:
+      "'How to spot a bad rental deal in 60 seconds — 7 red flags' and 'Cash-on-cash vs IRR: which one tells the truth?' Both hit high-intent investor queries. Bumps the blog catalog to 7 posts.",
+  },
+  {
+    date: "2026-05-24",
+    category: "Feature",
+    title: "Annual plan promo banner",
+    description:
+      "Thin dismissible banner above the site promoting annual Pro savings. Hides on /pricing and /auth/*; dismiss persists in localStorage so we never re-nag someone who said no.",
+  },
+  {
+    date: "2026-05-24",
+    category: "Feature",
+    title: "Team plan + one-time PDF tiles on /pricing",
+    description:
+      "Added 'Other options' section under the feature matrix: a Team Pro tile for brokerages with 3+ seats and a one-time single-deal PDF report tile for non-subscribers who just need one lender package. Both link to hello@usetruecap.com for hand-processing until Stripe prices are wired.",
+  },
+  {
+    date: "2026-05-24",
     category: "Improvement",
     title: "Footer rebalanced — compact brand block, badges in bottom strip",
     description:

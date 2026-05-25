@@ -34,6 +34,7 @@ import { SignupPromptCard } from "@/components/marketing/signup-prompt-card";
 import { CashFlowWaterfall } from "@/components/investcalc/cash-flow-waterfall";
 import { MortgageScenarioCompare } from "@/components/investcalc/mortgage-scenario-compare";
 import { LoanAmortizationView } from "@/components/investcalc/loan-amortization-view";
+import { DealNotesPanel } from "@/components/investcalc/deal-notes-panel";
 // ShareLinkButton import temporarily removed — Share button was pulled from
 // the Quick Actions row because it wrapped onto a second line. Component
 // + share-link.ts + /d/[encoded] route all remain in the codebase ready
@@ -80,6 +81,9 @@ interface AnalysisDashboardProps {
   isExporting?: boolean;
   isSaved?: boolean;
   isExistingSavedDeal?: boolean;
+  /** The persisted deal id, when this is a saved-and-loaded deal.
+   *  Used by the Deal Notes panel to fetch + persist notes. */
+  savedDealId?: string | null;
   isAuthenticated?: boolean;
   canSaveDeals?: boolean;
   canUpdateSavedDeals?: boolean;
@@ -216,6 +220,7 @@ export function AnalysisDashboard({
   isExporting = false,
   isSaved = false,
   isExistingSavedDeal = false,
+  savedDealId = null,
   isAuthenticated = false,
   canSaveDeals = false,
   canUpdateSavedDeals = false,
@@ -512,6 +517,13 @@ export function AnalysisDashboard({
           )}
         </div>
       </div>
+
+      {/* Deal notes — only rendered when this is an actual saved
+          deal that's been re-opened. Lazy-fetches its own data so it
+          doesn't add latency to the page render. */}
+      {isExistingSavedDeal && savedDealId ? (
+        <DealNotesPanel savedDealId={savedDealId} />
+      ) : null}
 
       {/* Metric cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-2 sm:gap-3">
