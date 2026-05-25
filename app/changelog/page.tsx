@@ -56,6 +56,34 @@ const CATEGORY_STYLES: Record<Category, { icon: typeof Sparkles; color: string; 
 const ENTRIES: Entry[] = [
   {
     date: "2026-05-24",
+    category: "Improvement",
+    title: "Cmd+Enter (Ctrl+Enter) to calculate",
+    description:
+      "Power-user keyboard shortcut: anywhere inside the calculator form, press Cmd+Enter on Mac or Ctrl+Enter on Windows/Linux to fire the analysis. No more reaching for the mouse to re-run a deal.",
+  },
+  {
+    date: "2026-05-24",
+    category: "Fix",
+    title: "Mortgage compare: cleaner edge-case behavior",
+    description:
+      "DSCR now shows 'N/A' on cash purchases and 'Negative NOI' (red) when the property is operating at a loss — instead of a confusing negative DSCR number. The '+5pp down' alternative scenario is suppressed when you're already at 95%+ down so the comparison grid stays informative.",
+  },
+  {
+    date: "2026-05-24",
+    category: "Fix",
+    title: "Portfolio rollup + waterfall polish",
+    description:
+      "Portfolio rollup no longer tints exactly-zero cash flow green (now neutral). Cash flow waterfall ARIA label correctly describes outflow vs gross rent on shortfall deals for screen readers.",
+  },
+  {
+    date: "2026-05-24",
+    category: "Improvement",
+    title: "Analysis dashboard wrapped in error boundary",
+    description:
+      "If any visualization component (waterfall, mortgage compare, score breakdown, projections) ever throws on a weird input, the dashboard falls back to a 'your numbers are safe' card showing the four headline metrics — the user never sees a blank page mid-analysis.",
+  },
+  {
+    date: "2026-05-24",
     category: "Feature",
     title: "Starter strategy templates on /dashboard/templates",
     description:

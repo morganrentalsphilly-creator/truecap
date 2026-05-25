@@ -89,9 +89,21 @@ function buildScenarios(values: InvestmentFormValues, result: AnalysisResult): S
 
   const variants: ScenarioInput[] = [
     { key: "current",   label: "Current",          downPct: baseDownPct, termYears: baseTerm, rate: baseRate },
-    // Build the alternatives off the current as the baseline
-    { key: "more-down", label: `${Math.min(100, baseDownPct + 5)}% down`,
-      downPct: Math.min(100, baseDownPct + 5), termYears: baseTerm,  rate: baseRate },
+    // Build the alternatives off the current as the baseline. Skip the
+    // "+5pp down" scenario when the user is already at 95%+ down — it
+    // would collapse to an effectively-cash purchase and clutter the
+    // grid with a near-duplicate of the current column.
+    ...(baseDownPct < 95
+      ? [
+          {
+            key: "more-down",
+            label: `${Math.min(100, baseDownPct + 5)}% down`,
+            downPct: Math.min(100, baseDownPct + 5),
+            termYears: baseTerm,
+            rate: baseRate,
+          } satisfies ScenarioInput,
+        ]
+      : []),
     { key: "shorter",   label: "15-year term",
       downPct: baseDownPct, termYears: 15, rate: baseRate },
     { key: "dscr-loan", label: "DSCR loan +1.5%",
@@ -105,9 +117,16 @@ function buildScenarios(values: InvestmentFormValues, result: AnalysisResult): S
     const loanAmount = Math.max(0, purchasePrice * (1 - downPct / 100));
     const monthlyPI = calcMonthlyPI(loanAmount, rate, termYears);
     const monthlyCashFlow = rentMinusOpEx - monthlyPI;
-    // DSCR = NOI / annual debt service; NOI ~= (rent - opEx_ex_debt) * 12
+    // DSCR = NOI / annual debt service; NOI ~= (rent - opEx_ex_debt) * 12.
+    // Null when there's no debt service (cash purchase) OR when NOI is
+    // negative (a "negative DSCR" is mathematically valid but
+    // misleading-to-look-at — the right signal is "operating loss
+    // before debt", which the negative monthlyCashFlow already
+    // communicates via its red color).
     const dscr =
-      monthlyPI > 0 ? (rentMinusOpEx * 12) / (monthlyPI * 12) : null;
+      monthlyPI > 0 && rentMinusOpEx > 0
+        ? (rentMinusOpEx * 12) / (monthlyPI * 12)
+        : null;
     const downPayment = purchasePrice * (downPct / 100);
     const totalCashRequired = downPayment + closingCosts;
     const cocAnnualPct =
@@ -261,7 +280,20 @@ export function MortgageScenarioCompare({
               />
               <ScenarioRow
                 label="DSCR"
-                cells={scenarios.map((s) => (s.dscr != null ? s.dscr.toFixed(2) : "—"))}
+                cells={scenarios.map((s) =>
+                  s.dscr != null
+                    ? s.dscr.toFixed(2)
+                    : s.monthlyPI <= 0
+                      ? "N/A"
+                      : "Negative NOI"
+                )}
+                tone={(i) => {
+                  const s = scenarios[i]!;
+                  if (s.dscr == null) {
+                    return s.monthlyPI <= 0 ? "neutral" : "negative";
+                  }
+                  return s.dscr >= 1.25 ? "positive" : s.dscr < 1 ? "negative" : "neutral";
+                }}
               />
               <ScenarioRow
                 label="Cash-on-cash"
@@ -312,7 +344,27 @@ export function MortgageScenarioCompare({
                 value={fmtMonthlyCashFlow(Math.round(s.monthlyCashFlow))}
                 tone={s.monthlyCashFlow >= 0 ? "positive" : "negative"}
               />
-              <MobileMetric label="DSCR" value={s.dscr != null ? s.dscr.toFixed(2) : "—"} />
+              <MobileMetric
+                label="DSCR"
+                value={
+                  s.dscr != null
+                    ? s.dscr.toFixed(2)
+                    : s.monthlyPI <= 0
+                      ? "N/A"
+                      : "Neg. NOI"
+                }
+                tone={
+                  s.dscr == null
+                    ? s.monthlyPI <= 0
+                      ? undefined
+                      : "negative"
+                    : s.dscr >= 1.25
+                      ? "positive"
+                      : s.dscr < 1
+                        ? "negative"
+                        : undefined
+                }
+              />
               <MobileMetric
                 label="CoC"
                 value={s.cocAnnualPct != null ? `${s.cocAnnualPct.toFixed(1)}%` : "—"}

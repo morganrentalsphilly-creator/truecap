@@ -127,9 +127,11 @@ export function PortfolioRollupStrip({
             tone={
               cashFlowSampleCount === 0
                 ? "neutral"
-                : totalMonthlyCashFlow >= 0
+                : totalMonthlyCashFlow > 0
                   ? "positive"
-                  : "negative"
+                  : totalMonthlyCashFlow < 0
+                    ? "negative"
+                    : "neutral"
             }
           />
           <RollupTile

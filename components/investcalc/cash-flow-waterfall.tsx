@@ -134,7 +134,11 @@ export function CashFlowWaterfall({ result }: { result: AnalysisResult }) {
       <div
         className="mt-4 flex h-8 w-full overflow-hidden rounded-lg ring-1 ring-border"
         role="img"
-        aria-label={`Gross rent ${fmtUsd(gross)} split into ${allSegments.length} segments`}
+        aria-label={
+          ncfPositive
+            ? `Gross rent ${fmtUsd(gross)} split into ${allSegments.length} segments`
+            : `Monthly outflow ${fmtUsd(totalOutflow)} exceeds gross rent ${fmtUsd(gross)} by ${fmtUsd(Math.abs(ncf))}`
+        }
       >
         {allSegments.map((seg) => {
           const widthPct = (seg.value / scaleBase) * 100;

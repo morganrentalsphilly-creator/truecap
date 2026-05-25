@@ -31,6 +31,7 @@ import { MultiFamilyUnitsSection } from "./multi-family-units-section";
 import { FinancingSection } from "./financing-section";
 import { OperatingExpensesSection } from "./operating-expenses-section";
 import { AnalysisDashboard, type AnalysisDashboardTab } from "./analysis-dashboard";
+import { AnalysisErrorBoundary } from "@/components/investcalc/analysis-error-boundary";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { saveDealAction } from "@/app/actions/saved-analyses";
@@ -1684,7 +1685,22 @@ export function InvestCalcPage({
 
       {/* Form */}
       <main id="main" className="max-w-7xl mx-auto px-4 sm:px-6 pb-20 sm:pb-16">
-        <form ref={formElementRef} onSubmit={form.handleSubmit(onSubmit, onError)} noValidate>
+        <form
+          ref={formElementRef}
+          onSubmit={form.handleSubmit(onSubmit, onError)}
+          // Cmd+Enter (Mac) / Ctrl+Enter (Win/Linux) anywhere inside
+          // the form fires the calculate submit. Power-user shortcut
+          // that doesn't conflict with normal field editing (plain
+          // Enter still works as the textarea/Tab behavior the user
+          // expects).
+          onKeyDown={(event) => {
+            if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
+              event.preventDefault();
+              void form.handleSubmit(onSubmit, onError)();
+            }
+          }}
+          noValidate
+        >
           <div className="space-y-5">
             <PropertyTypeSection form={form} savedTemplateFallback={savedTemplateFallback} />
             <PropertyDetailsSection form={form} onAddressSelected={handleAddressSelected} />
@@ -1728,9 +1744,14 @@ export function InvestCalcPage({
           </div>
         </form>
 
-        {/* Results */}
+        {/* Results — wrapped in an error boundary so a render bug in
+            any child (waterfall, mortgage compare, projections, etc.)
+            cannot blank the whole post-calc surface. The fallback
+            surfaces the headline metrics directly from analysisResult
+            so the user's numbers are never lost. */}
         {(showResults || isCalculating || analysisResult !== null) && (
           <div className="mt-8" data-analysis-results="true">
+            <AnalysisErrorBoundary result={analysisResult}>
             <AnalysisDashboard
               result={analysisResult}
               values={form.getValues()}
@@ -1773,6 +1794,7 @@ export function InvestCalcPage({
                     : undefined
               }
             />
+            </AnalysisErrorBoundary>
           </div>
         )}
       </main>
