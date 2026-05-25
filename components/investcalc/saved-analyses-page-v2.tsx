@@ -398,7 +398,7 @@ export function SavedAnalysesPage({
         const matchesSearch = text.includes(searchQuery.toLowerCase().trim());
         const matchesSignal = selectedSignal === "all" ? true : item.signal === selectedSignal;
         const matchesType = selectedType === "all" ? true : item.propertyType === selectedType;
-        const matchshowcompare = showcompare ? selectedIds.includes(item.id) : true || false;
+        const matchshowcompare = showcompare ? selectedIds.includes(item.id) : true;
         return matchesSearch && matchesSignal && matchesType && matchshowcompare;
       }),
     [enrichedItems, searchQuery, selectedSignal, selectedType, selectedIds, showcompare]

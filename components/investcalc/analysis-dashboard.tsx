@@ -398,6 +398,8 @@ export function AnalysisDashboard({
           isSaving={isSaving}
           onUpgrade={goToBilling}
           canUseDealScore={canUseDealScore}
+          propertyType={propertyType}
+          isCashPurchase={Boolean(result && result.monthlyPayment <= 0)}
         />
 
         {/* Recommendation card */}
@@ -825,6 +827,8 @@ function DealScoreCard({
   isSaving,
   onUpgrade,
   canUseDealScore,
+  propertyType,
+  isCashPurchase,
 }: {
   isAnalysisLoading: boolean;
   isDealScoreLoading: boolean;
@@ -832,6 +836,13 @@ function DealScoreCard({
   isSaving: boolean;
   onUpgrade: () => void;
   canUseDealScore: boolean;
+  /** Property type — passed through so the cash-flow tier max + label
+   *  can branch correctly for owner-occupant deals (different bands). */
+  propertyType?: AnalysisDashboardProps["propertyType"];
+  /** True if the deal has no debt service (100% down). Used to
+   *  relabel the DSCR breakdown tile, which otherwise reads
+   *  "Above 1.25" — confusing alongside the MetricCard's "Cash purchase". */
+  isCashPurchase?: boolean;
 }) {
   const isLoading = isAnalysisLoading || isDealScoreLoading;
 
@@ -917,13 +928,23 @@ function DealScoreCard({
   }
 
   const { score, riskLevel, recommendation, explanation, breakdown } = dealScoreResult.data;
+  // Owner-occupant deals use different cash-flow bands and a 30-point
+  // max (vs investor 25). Branch the explanation labels accordingly so
+  // the breakdown matches the engine's actual scoring tiers.
+  const isOwnerOccupant = propertyType === "owner-occupant";
   // Plain-English subline for each subscore — turns "Cash Flow Score: 25"
   // into "Cash Flow: 25/25 — Above $1,000/mo target". Computed from the
-  // subscore value alone (the engine's thresholds are encoded here as
-  // labels). Pure display — does not touch the scoring engine.
+  // subscore value + property context alone (the engine's thresholds
+  // are encoded here as labels). Pure display — does not touch the
+  // scoring engine.
   const breakdownExplanations = {
-    cashFlow:
-      breakdown.cashFlowScore >= 25
+    cashFlow: isOwnerOccupant
+      ? breakdown.cashFlowScore >= 30
+        ? "Above $300/mo — strong for house-hack"
+        : breakdown.cashFlowScore >= 25
+          ? "Within $300/mo of break-even — typical for house-hack"
+          : "Owner cost meaningfully above break-even"
+      : breakdown.cashFlowScore >= 25
         ? "Above $1,000/mo — strong"
         : breakdown.cashFlowScore >= 15
           ? "Positive but modest ($0–$1,000/mo)"
@@ -942,8 +963,9 @@ function DealScoreCard({
         : breakdown.capRateScore >= 10
           ? "5–8% — fair for the market"
           : "Below 5% — appreciation-dependent",
-    dscr:
-      breakdown.dscrScore >= 20
+    dscr: isCashPurchase
+      ? "N/A — all-cash purchase (no debt to cover)"
+      : breakdown.dscrScore >= 20
         ? "Above 1.25 — clears lender threshold"
         : breakdown.dscrScore >= 10
           ? "1.00–1.25 — thin coverage cushion"
@@ -1059,7 +1081,7 @@ function DealScoreCard({
         <ScoreBreakdownTile
           label="Cash flow"
           value={breakdown.cashFlowScore}
-          max={isOwnerOccupantBreakdown(breakdown) ? 30 : 25}
+          max={isOwnerOccupant ? 30 : 25}
           explanation={breakdownExplanations.cashFlow}
           cellClass={activeStyle.metricCell}
         />
@@ -1124,13 +1146,6 @@ function DealScoreCard({
       </details>
     </div>
   );
-}
-
-/** Heuristic — owner-occupant cash-flow tier uses 30 as the max instead
- *  of 25. The breakdown doesn't carry propertyType so we infer: a score
- *  of 30 only appears in the owner-occupant tier. */
-function isOwnerOccupantBreakdown(breakdown: { cashFlowScore: number }): boolean {
-  return breakdown.cashFlowScore === 30;
 }
 
 function ScoreBreakdownTile({

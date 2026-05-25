@@ -56,6 +56,34 @@ const CATEGORY_STYLES: Record<Category, { icon: typeof Sparkles; color: string; 
 const ENTRIES: Entry[] = [
   {
     date: "2026-05-24",
+    category: "Fix",
+    title: "Templates no longer wipe form data",
+    description:
+      "Clicking a strategy template (Long-term rental / House hack / FHA) used to clear the address, purchase price, rent, and beds you'd already typed — making the calculator appear broken. Templates now only update the financing & expense defaults; your property data is preserved.",
+  },
+  {
+    date: "2026-05-24",
+    category: "Fix",
+    title: "Compare deals no longer locks up",
+    description:
+      "The compare page used to AWAIT a Supabase write on every render — on slow connections this hung the whole page. The write is now fire-and-forget. Also: double-click guard on Compare Selected button, plus stale-cookie recovery if the cookie holds deals that no longer exist.",
+  },
+  {
+    date: "2026-05-24",
+    category: "Improvement",
+    title: "Owner-occupant scoring labels — corrected",
+    description:
+      "Score breakdown now uses the right thresholds and max-points for owner-occupant deals (30-point cash-flow tier with $300/mo bands, not the investor 25-point / $1,000 band). DSCR breakdown also reads 'N/A — all-cash purchase' on cash deals instead of the misleading 'Above 1.25'.",
+  },
+  {
+    date: "2026-05-24",
+    category: "Improvement",
+    title: "Blog moved out of top header",
+    description:
+      "Blog link no longer crowds the auth'd-user header next to Dashboard. Still linked from the footer Product column and from every blog post's related-posts footer — discoverability intact.",
+  },
+  {
+    date: "2026-05-24",
     category: "Feature",
     title: "Portfolio rollup on saved-analyses dashboard",
     description:

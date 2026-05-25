@@ -245,6 +245,15 @@ export default async function DashboardComparePage() {
   const rowById = new Map((rows ?? []).map((row) => [row.id, row as SavedAnalysisRow]));
   const deals = ids.map((id) => rowById.get(id)).filter((row): row is SavedAnalysisRow => Boolean(row)).map(mapDeal);
 
+  // Stale-cookie recovery: cookie has IDs but none match a current
+  // active deal (deleted, archived, or marked completed since the
+  // user picked them). Send them back to saved-analyses where the
+  // selection UI can be rebuilt — otherwise they land on a confusing
+  // half-empty compare grid with no clear next action.
+  if (ids.length > 0 && deals.length === 0) {
+    redirect("/dashboard/saved-analyses");
+  }
+
   // Touch last_activity_at on the compared deals — fire-and-forget so
   // a slow Supabase round-trip never blocks the page render. Awaiting
   // this caused intermittent compare-page hangs ("system locks up" per
