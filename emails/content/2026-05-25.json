@@ -9,7 +9,7 @@
     "stats": [
       { "label": "Avg time to underwrite", "value": "60 sec" },
       { "label": "Free analyses", "value": "Unlimited" },
-      { "label": "Pro starts at", "value": "$X/mo" }
+      { "label": "Pro starts at", "value": "$16.67/mo" }
     ]
   },
   "dealSpotter": [
