@@ -1,0 +1,52 @@
+{
+  "subject": "TrueCap #6 — cash flow or appreciation? The frame that ends the debate",
+  "preheader": "Why most investors pick the wrong one · 3 deals on opposite sides · The Pro sensitivity grid for both",
+  "publishedAt": "2026-07-07",
+  "weekLabel": "Issue 6",
+  "marketSnapshot": {
+    "headline": "Job market softening, rate cut odds rising",
+    "body": "June jobs came in 30k below expectations and the unemployment rate ticked up to 4.3%. Fed funds futures now price 70% odds of a September cut vs 40% a month ago. For rental underwriting this means: assume mortgage rates 25-40bp lower by Q4 in your 12-month projections. If you've been on the sidelines waiting for the refi-side of BRRRR math to work, this is when you start scoping deals seriously. The window doesn't open and stay open forever.",
+    "stats": [
+      { "label": "30Y fixed", "value": "6.71%", "delta": "-10bp WoW", "deltaTone": "positive" },
+      { "label": "Unemployment", "value": "4.3%", "delta": "+0.1pp", "deltaTone": "negative" },
+      { "label": "Fed-cut odds Sep", "value": "70%", "delta": "+30pp", "deltaTone": "positive" }
+    ]
+  },
+  "dealSpotter": [
+    {
+      "address": "Charlotte, NC — Plaza Midwood SFR",
+      "headlineNumber": "5.7% cap · BUT 10-yr appreciation IRR 14.2%",
+      "verdict": "Decent",
+      "body": "$435k 3/2 at $2,575 rent. Cap rate looks weak — but Plaza Midwood is up 38% over 3 years and demographic / job-growth tailwinds suggest another 5-7%/yr is plausible. This is the appreciation play disguised as a cash-flow disappointment. Run it in TrueCap's 10-year projection (Pro): year-1 NCF is $180, year-5 NCF is $850 once you've raised rents to market and the equity build accelerates. Different number, different deal."
+    },
+    {
+      "address": "Pittsburgh, PA — Lawrenceville duplex",
+      "headlineNumber": "7.8% cap · 10-yr IRR 11.6% · balanced",
+      "verdict": "Strong",
+      "body": "$315k for a 2-unit at $1,475 + $1,425 = $2,900. The both-and deal — solid cash flow today AND a gentrifying neighborhood pulling 4-6%/yr appreciation. The kind of property where you don't have to bet on one outcome. Run sensitivity (Pro) to see how it holds up if rents stay flat for 3 years."
+    },
+    {
+      "address": "Memphis, TN — Cooper-Young SFR",
+      "headlineNumber": "9.8% cap · 10-yr IRR 9.1%",
+      "verdict": "Strong",
+      "body": "$165k 3/2 at $1,575 rent. Pure cash-flow play — Memphis appreciation has been flat-to-1% for 5 years and there's no strong reason to expect that to change. But the yield is real and the area is stable. If you want monthly checks and don't care about exit price 10 years out, this is the play."
+    }
+  ],
+  "blogFeature": {
+    "title": "Cash flow vs appreciation — how to actually decide",
+    "url": "https://usetruecap.com/blog/cash-flow-vs-appreciation",
+    "excerpt": "The honest frame: cash flow funds your life, appreciation builds your wealth. Most investors should pick a primary lever based on income vs. net-worth gaps, then build the second one in over time."
+  },
+  "qa": {
+    "question": "How do I know if I'm an appreciation investor or a cash-flow investor?",
+    "answer": "Two questions. (1) Do you need rental income to cover bills or supplement your W-2? If yes — cash flow. (2) Is your net worth more than 10x your annual living expenses already? If yes — appreciation. Most investors are in between: they're building wealth but also like the monthly distribution. The answer for them is a portfolio mix — 2-3 cash-flow properties to fund the holding costs of 1-2 appreciation plays. TrueCap Pro's portfolio rollup shows you the blended yield + projected wealth-build of your saved deals so you can balance the mix consciously instead of guessing."
+  },
+  "shipNote": {
+    "title": "What shipped in TrueCap this week",
+    "items": [
+      "Portfolio rollup: now shows weighted-average cap rate + total monthly NCF across all saved deals",
+      "Sensitivity grid (Pro): added 'rate -50bp' column to model post-Fed-cut scenarios",
+      "Mortgage A/B compare (Pro) added inline DSCR difference highlight"
+    ]
+  }
+}

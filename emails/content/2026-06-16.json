@@ -1,0 +1,52 @@
+{
+  "subject": "TrueCap #3 — BRRRR math actually works when these 4 things are true",
+  "preheader": "30Y -8bp to 6.77% · 3 BRRRR-friendly deals · The refi assumption that kills 80% of plans",
+  "publishedAt": "2026-06-16",
+  "weekLabel": "Issue 3",
+  "marketSnapshot": {
+    "headline": "Rates ticked down, refi window cracking open",
+    "body": "30Y dropped 8bp to 6.77%, lowest read since February. Bond market is pricing in 2 cuts before EOY — not certain, but the path is there. For BRRRR investors who've been waiting for the refi side of the math to start working again, this is the first real signal in 14 months. Watch the next 3 jobs prints; if any come in soft, expect another 15-25bp leg lower.",
+    "stats": [
+      { "label": "30Y fixed", "value": "6.77%", "delta": "-8bp WoW", "deltaTone": "positive" },
+      { "label": "DSCR refi rates", "value": "8.4-9.1%", "delta": "-20bp", "deltaTone": "positive" },
+      { "label": "Cash-out LTV typical", "value": "75%", "delta": "unchanged" }
+    ]
+  },
+  "dealSpotter": [
+    {
+      "address": "Detroit, MI — East English Village SFR",
+      "headlineNumber": "BRRRR pencils — ARV $145k vs $98k all-in",
+      "verdict": "Strong",
+      "body": "$58k purchase + $32k rehab + $8k holding/financing = $98k all-in. Comparable rehabbed properties trading $140-150k. Rents at $1,300. The post-refi number works only if you can actually get appraisal to $145k+, and Detroit appraisals have been pulling 3-7% under-market in 2025. Build that into the model — assume $135k appraisal, not $145k."
+    },
+    {
+      "address": "Pittsburgh, PA — Carrick duplex",
+      "headlineNumber": "BRRRR marginal · post-refi NCF $180/mo",
+      "verdict": "Marginal",
+      "body": "$135k + $48k rehab = $183k all-in, ARV ~$220k. Rents $1,100 each unit = $2,200. At 75% LTV refi ($165k pulled out, $18k locked in), DSCR is only 1.12 at current rates. Works if rates drop another 50bp. Today's rates, you're stuck with capital locked + thin cash flow."
+    },
+    {
+      "address": "Kansas City, MO — Brookside SFR",
+      "headlineNumber": "Traditional buy · 8.1% cap · $920 NCF/mo",
+      "verdict": "Strong",
+      "body": "Not a BRRRR — including this because it's a reminder that in some markets, traditional buy-and-hold beats BRRRR friction. $215k for a turn-key 3/2 at $1,825 rent. No rehab, no holding costs, no appraisal risk. Sometimes the boring path is the better path."
+    }
+  ],
+  "blogFeature": {
+    "title": "How to spot a bad rental deal in 60 seconds — 7 red flags",
+    "url": "https://usetruecap.com/blog/spot-bad-rental-in-60-seconds",
+    "excerpt": "The seven red flags every experienced investor checks before opening the full underwrite — rent-to-price ratio, tax-to-value, photo gaps, HOA red zones, age-of-building tells, motivated-seller signals, and rough DSCR at your actual rate."
+  },
+  "qa": {
+    "question": "I have $120k saved. Should I do one BRRRR or two traditional buys?",
+    "answer": "Two traditional buys, usually. One BRRRR consumes most or all of $120k tied up for 6-12 months while you rehab + refi + season, with appraisal risk that can leave you holding $20-40k of trapped capital if comps disappoint. Two traditional buys put $60k each into two cash-flowing properties immediately. The BRRRR math only beats two-buys when you can find a property that pencils at <70% ARV-after-rehab AND you have a contractor track record. If this is deal #1 or #2 for you, traditional is the safer compounding path. Save the BRRRR play for after you've done 3-4 traditional buys."
+  },
+  "shipNote": {
+    "title": "What shipped in TrueCap this week",
+    "items": [
+      "BRRRR analyzer: now flags appraisal risk in Detroit, Memphis, Cleveland where pull-out values lag comps by 3-7%",
+      "Refi rate field defaults updated to reflect Q2 2026 DSCR loan pricing",
+      "New blog post: 'Best states for rental property investors in 2026'"
+    ]
+  }
+}

@@ -22,13 +22,21 @@ import WeeklyDigestEmail, {
 
 const CONTENT_DIR = path.join(process.cwd(), "emails", "content");
 
-/** Return the ISO date string (YYYY-MM-DD) for the Monday of the given week. */
+/**
+ * Return the ISO date string (YYYY-MM-DD) the cron is looking for.
+ * Convention: filename = the UTC date the cron fires. The cron's
+ * schedule (vercel.json) determines what day of the week this is.
+ *
+ * So if the cron is scheduled for Tuesdays, content files are named
+ * `YYYY-MM-DD.json` for the Tuesday they should send.
+ */
+export function currentSendDate(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+/** Legacy alias — kept for compatibility, returns same as currentSendDate. */
 export function mondayOf(date: Date): string {
-  const d = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
-  const day = d.getUTCDay(); // 0 = Sun, 1 = Mon, ..., 6 = Sat
-  const diff = day === 0 ? -6 : 1 - day; // back to Monday
-  d.setUTCDate(d.getUTCDate() + diff);
-  return d.toISOString().slice(0, 10);
+  return date.toISOString().slice(0, 10);
 }
 
 /** Load and validate a content file by date. Returns null if missing. */

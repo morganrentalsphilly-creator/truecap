@@ -1,0 +1,52 @@
+{
+  "subject": "TrueCap Weekly #1 — rates eased, 3 deals worth a second look",
+  "preheader": "30Y at 6.84% (-12bp) · PHL duplex, IND ranch, MEM triplex · New: house hacking math",
+  "publishedAt": "2026-06-02",
+  "weekLabel": "Issue 1",
+  "marketSnapshot": {
+    "headline": "Rates eased on softer jobs print, summer rents firming",
+    "body": "Welcome to the first issue of TrueCap Weekly. Every Tuesday morning you'll get the same thing: what moved in rates and rents this week, three deals I underwrote, one blog feature, and a reader question. Quick read, no fluff. This week — the 30-year fixed dropped 12bp after a softer-than-expected May jobs print, and asking rents in our 13 covered markets ticked up 0.4% MoM (third straight month positive — first time since 2024).",
+    "stats": [
+      { "label": "30Y fixed", "value": "6.84%", "delta": "-12bp WoW", "deltaTone": "positive" },
+      { "label": "Median asking rent", "value": "$2,180", "delta": "+0.4% MoM", "deltaTone": "positive" },
+      { "label": "DSCR loan spreads", "value": "+185bp", "delta": "flat" }
+    ]
+  },
+  "dealSpotter": [
+    {
+      "address": "Philadelphia, PA — Fishtown duplex",
+      "headlineNumber": "8.2% cap · $1,650 NCF/mo",
+      "verdict": "Strong",
+      "body": "$420k ask, both units already rented at $1,950 each. Taxes reasonable for Philly (~$5.8k), no HOA, recent roof. Pencils at 8.2% cap and $1,650/mo net cash flow with 25% down. Watch the 1925 build year — budget $4-5k year-one capex on top of the standard maintenance reserve."
+    },
+    {
+      "address": "Indianapolis, IN — Mars Hill SFR",
+      "headlineNumber": "7.4% cap · $480 NCF/mo",
+      "verdict": "Decent",
+      "body": "$185k 3/1.5 ranch, rents at $1,475 per the local manager. Working-class neighborhood, school rating C+. Numbers are clean but the appreciation tailwind has slowed since 2023. Better as a yield play than an appreciation bet."
+    },
+    {
+      "address": "Memphis, TN — Berclair triplex",
+      "headlineNumber": "9.1% cap on paper · DSCR 1.04",
+      "verdict": "Marginal",
+      "body": "Listing screams cash-flow gold ($1,300 + $1,150 + $1,150 / $245k) but DSCR drops to 1.04 at current investor-loan rates with realistic vacancy + capex. Land it 8-10% under ask AND verify all three tenants are paying = becomes Decent. As-is, walk."
+    }
+  ],
+  "blogFeature": {
+    "title": "House hacking explained: how to (almost) live for free in a 2-4 unit",
+    "url": "https://usetruecap.com/blog/house-hacking-explained",
+    "excerpt": "The full math behind FHA 3.5% down vs conventional 5%, the year-2 transition where break-even flips to real cash flow, and what to look for in a property that pencils as both a primary residence and an eventual pure rental."
+  },
+  "qa": {
+    "question": "Should I refi out of my 7.5% rate now if rates drop to 6.5%?",
+    "answer": "Run break-even on closing costs ÷ monthly savings. On a $300k loan, a 100bp drop saves ~$200/mo at typical 30Y terms; closing costs of $5-7k means break-even in 25-35 months. If you plan to hold past break-even, refi. If you're selling in 18 months, don't. The other variable: do you have other debt that's higher? If a credit card balance is sitting at 22% APR, the refi might unlock a cash-out that saves you more than the rate drop alone."
+  },
+  "shipNote": {
+    "title": "What shipped in TrueCap this week",
+    "items": [
+      "TrueCap Weekly itself — the email you're reading is the first issue",
+      "Owner-occupant scoring fix — house-hack deals are now scored against break-even bands, not investor cash-flow bands",
+      "New market page: /markets/memphis with neighborhood cap-rate table"
+    ]
+  }
+}

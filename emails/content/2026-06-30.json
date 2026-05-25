@@ -1,0 +1,52 @@
+{
+  "subject": "TrueCap #5 — mid-year check: where the math has shifted",
+  "preheader": "H1 2026 wrap · 2 markets up, 1 down · CLE, KC, PHX deals · A reader's $24k mistake",
+  "publishedAt": "2026-06-30",
+  "weekLabel": "Issue 5",
+  "marketSnapshot": {
+    "headline": "Half-year review: rates flat, rents firming, insurance reshaped the map",
+    "body": "Six months into 2026: 30Y started the year at 6.95%, currently 6.79%. Rents are now positive YoY in 9 of 13 markets we cover. The biggest structural shift hasn't been rates — it's insurance. Coastal FL, LA, parts of TX have repriced 25-40% which makes deals that worked in 2023 not work in 2026. Cash-flow returns have rotated decisively to the Midwest. If you bought a Sun Belt property in 2022-2023, run the model again with current insurance numbers before you make any decisions about that property.",
+    "stats": [
+      { "label": "30Y change YTD", "value": "-16bp", "delta": "from 6.95%", "deltaTone": "positive" },
+      { "label": "Median rent YTD", "value": "+1.9%", "delta": "vs +0.4% in H1 2025", "deltaTone": "positive" },
+      { "label": "Insurance YoY", "value": "+18%", "delta": "weighted avg", "deltaTone": "negative" }
+    ]
+  },
+  "dealSpotter": [
+    {
+      "address": "Cleveland, OH — Slavic Village 2-fam",
+      "headlineNumber": "10.4% cap · $890 NCF/mo",
+      "verdict": "Strong",
+      "body": "$98k for a 2-family at $850 + $825 = $1,675/mo. Taxes $1,400, insurance $920. C-class neighborhood (verify it for yourself — Slavic Village has block-by-block variation that data doesn't show). This is what 10% cap looks like in mid-2026 — only in select Midwest pockets, never in the Sun Belt at this scale anymore."
+    },
+    {
+      "address": "Kansas City, MO — Waldo SFR",
+      "headlineNumber": "7.9% cap · $735 NCF/mo",
+      "verdict": "Strong",
+      "body": "$245k 3/2 at $1,950 rent. B+ neighborhood, school rating B, mid-tier suburb. The kind of deal that pencils every year regardless of cycle — boring, not exciting, compounds reliably. KC is currently my top recommendation for first-deal investors who want yield + slow appreciation."
+    },
+    {
+      "address": "Phoenix, AZ — Maryvale SFR",
+      "headlineNumber": "6.2% cap · $190 NCF/mo",
+      "verdict": "Marginal",
+      "body": "$298k 3/2 at $1,975. Phoenix overbuilt 2022-2024, rents now negative YoY. Insurance manageable here vs FL/LA but still moving up. The math used to work at this price; today it's tight. Phoenix is a 'wait 6-12 months' market unless you can negotiate 8-12% under ask."
+    }
+  ],
+  "blogFeature": {
+    "title": "What's a good cap rate in 2026?",
+    "url": "https://usetruecap.com/blog/what-is-a-good-cap-rate",
+    "excerpt": "Cap rate bands by market type — A-tier coastal vs B-tier suburb vs C-tier cash-flow — updated for 2026 financing reality. Why 'good' is contextual and why blind chasing of 10%+ caps often signals more risk than reward."
+  },
+  "qa": {
+    "question": "I bought a Tampa SFR in 2023 at 7.4% cap. My insurance renewal just came in and pushed the deal to 5.1%. Should I sell?",
+    "answer": "Don't sell on insurance alone — sell only if (a) your actual cash flow has gone negative AND you don't have the runway to wait, or (b) you can deploy the equity into a 7%+ deal elsewhere AND the 1031 friction is worth it. For most investors in your situation, the right move is: refi if rates have dropped since you bought, shop insurance hard (get 3+ quotes — they vary 20-30% in FL right now), and consider raising rent at the next renewal. Tampa rents are firming again. Selling at 5% cap into a buyer's market = leaving 10-15% on the table. Hold the asset, fix the friction."
+  },
+  "shipNote": {
+    "title": "What shipped in TrueCap this week",
+    "items": [
+      "Mid-year benchmarking update: 2026 cap rate bands by tier now reflected in deal-score thresholds",
+      "Insurance renewal projection in 10-year forecast (Pro)",
+      "New 'Compare to a deal you saved' shortcut on saved-analyses page"
+    ]
+  }
+}

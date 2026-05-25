@@ -1,0 +1,52 @@
+{
+  "subject": "TrueCap #2 — the 1031 exchange trap most investors don't see",
+  "preheader": "30Y holding 6.85% · TPA, DAL, CLE deals · Why most 1031s leak 18-22% in friction",
+  "publishedAt": "2026-06-09",
+  "weekLabel": "Issue 2",
+  "marketSnapshot": {
+    "headline": "Rates flat-ish, summer rents holding gains",
+    "body": "Rates didn't move much — 30Y holding at 6.85%, DSCR loan spreads still wide at +185bp over Fannie pricing. Asking rents in our markets are now showing positive YoY for the first time since Q3 2024 in 9 of 13 markets. The 4 still negative on YoY rents: Austin, Phoenix, Boise, and Las Vegas — all overbuilt during the 2021-2023 boom. Worth watching whether those soften further or stabilize.",
+    "stats": [
+      { "label": "30Y fixed", "value": "6.85%", "delta": "+1bp WoW", "deltaTone": "neutral" },
+      { "label": "Markets YoY rent positive", "value": "9 / 13", "delta": "+2 from Q1", "deltaTone": "positive" },
+      { "label": "Median DOM", "value": "42 days", "delta": "-3 days", "deltaTone": "positive" }
+    ]
+  },
+  "dealSpotter": [
+    {
+      "address": "Tampa, FL — Seminole Heights duplex",
+      "headlineNumber": "6.4% cap · $280 NCF/mo",
+      "verdict": "Decent",
+      "body": "$520k for two 2/1 units, both at $2,100. Insurance is the killer in FL right now ($4,800/yr quoted), which drops cap from 7.1% to 6.4%. Pencils if you can lock in pre-renewal insurance pricing and the city doesn't add hurricane assessments mid-hold. Watch the 1948 build year — older Tampa stock has roof + plumbing issues that show up in year 2-3."
+    },
+    {
+      "address": "Dallas, TX — Oak Cliff SFR",
+      "headlineNumber": "7.6% cap · $640 NCF/mo · MUD tax 2.8%",
+      "verdict": "Marginal",
+      "body": "$245k 4/2 ranch, rents $1,950. Looks like a strong cash-flow play until you pull the actual MUD tax bill — 2.84% effective rate in this zone, not the 1.8% Zillow shows. Recalculate: cap drops to 6.4%, NCF drops to $320. Still possible at the right price, but only if you negotiate 5-7% below ask."
+    },
+    {
+      "address": "Cleveland, OH — Old Brooklyn 3/1.5",
+      "headlineNumber": "10.2% cap · $720 NCF/mo",
+      "verdict": "Strong",
+      "body": "$118k for a 3/1.5 brick at $1,425 rent. Taxes low (~$1,800), maintenance reasonable, neighborhood B-. The Midwest cash-flow markets are where the math just works in 2026 if you can stomach lower appreciation. Cleveland's been quietly outperforming Indy/Memphis on yield for 18 months."
+    }
+  ],
+  "blogFeature": {
+    "title": "1031 exchange basics: how to defer capital gains on rental property",
+    "url": "https://usetruecap.com/blog/1031-exchange-basics",
+    "excerpt": "The 45-day / 180-day rule, qualified intermediary requirements, like-kind property definitions, and the friction costs most investors don't price in. If you're up 30%+ on a property you've held 5+ years, this is a real lever."
+  },
+  "qa": {
+    "question": "Is it worth doing a 1031 if I'd save $40k in capital gains but a 'replacement' costs me $15k in fees + 6 months of stress?",
+    "answer": "Run the after-friction math. $40k saved minus $15k friction = $25k net win, but only if the replacement property is genuinely as good or better than what you'd buy in cash. The trap: investors stuck on the 45-day clock end up buying mediocre properties to hit the deadline, and they overpay 5-10% in the rush. If you can't find something solid in your target market quickly, just take the gain, pay the tax, and buy the right deal later. The tax tail shouldn't wag the underwriting dog."
+  },
+  "shipNote": {
+    "title": "What shipped in TrueCap this week",
+    "items": [
+      "MUD tax warning in property enrichment — flags zones where effective tax rate diverges from county headline rate (TX, parts of FL/GA)",
+      "Compare Deals: now defaults to side-by-side 3-column view on tablets",
+      "PDF report cover page redesigned with deal score + verdict on first page"
+    ]
+  }
+}

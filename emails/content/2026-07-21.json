@@ -1,0 +1,47 @@
+{
+  "subject": "TrueCap #8 — your questions, my answers (the reader mailbag)",
+  "preheader": "5 reader Q's: refi timing, LLC vs personal, partnership splits, PM firing, first deal regrets",
+  "publishedAt": "2026-07-21",
+  "weekLabel": "Issue 8",
+  "marketSnapshot": {
+    "headline": "Quiet week on rates, busy week in the mailbag",
+    "body": "Rates held steady at 6.65% — Fed meeting Wednesday and the bond market is in wait-and-see mode. Few deals worth highlighting this week, but the inbox was busier than usual with reader questions. Six issues in, that's the strongest signal so far that the format is working. This week is mailbag-heavy — five reader Q's get full answers, plus the usual three deal spotter notes. Reply to this email if you have one for next week.",
+    "stats": [
+      { "label": "30Y fixed", "value": "6.65%", "delta": "unchanged", "deltaTone": "neutral" },
+      { "label": "Fed meeting", "value": "Wed", "delta": "75% hold odds" },
+      { "label": "Reader Q's this week", "value": "27", "delta": "+9 WoW", "deltaTone": "positive" }
+    ]
+  },
+  "dealSpotter": [
+    {
+      "address": "Birmingham, AL — Crestwood SFR",
+      "headlineNumber": "8.6% cap · $580 NCF/mo",
+      "verdict": "Strong",
+      "body": "$162k 3/2 at $1,475. Birmingham is the under-discussed cash-flow market that's been quietly outperforming Memphis on yield+stability for 2 years. Lower insurance than FL, lower taxes than TX MUD zones, decent A-/B+ neighborhoods. Worth a market scan if you've been stuck on the Midwest-only mental model."
+    },
+    {
+      "address": "Minneapolis, MN — Northeast SFR",
+      "headlineNumber": "6.9% cap · $410 NCF/mo · gentrifying",
+      "verdict": "Decent",
+      "body": "$298k 3/2 at $2,150. Northeast Minneapolis is gentrifying actively — bars, restaurants, young professional inflow. Cap rate is decent today; the bet is on appreciation pulling another 5-8%/yr for the next 3-5 years. MN is also one of the lowest-insurance-volatility states right now."
+    },
+    {
+      "address": "Boise, ID — North End townhouse",
+      "headlineNumber": "5.4% cap · $80 NCF/mo · negative YoY rents",
+      "verdict": "Skip",
+      "body": "$465k. Boise still working through 2021-2023 overbuild. Rents negative YoY, cap rate weak even before insurance creep. The 'wait 6-12 months' rule applies — there will be better Boise entry points in 2027 once supply absorbs."
+    }
+  ],
+  "qa": {
+    "question": "Five questions in one week — I'm posting them all here. Highlights below.",
+    "answer": "Q1 (refi timing): \"Should I refi at 6.65% or wait for 6%?\" — Refi at 6.65 if your current rate is 7.5+ and you'll hold past 30-month break-even. Don't wait for 6% — could take 2 years, could not happen. Q2 (LLC vs personal): \"Buy in LLC or personal name?\" — Personal for owner-occupants (FHA/conventional). LLC for pure investments, ideally 1 LLC per 2-4 properties for liability isolation. Q3 (partnership splits): \"60/40 split on a deal — who pays for capex surprises?\" — Per ownership %, document it before closing, not after. Q4 (firing PM): \"PM hasn't placed tenant in 3 months — when do I fire?\" — At 45 days with no qualified applicant if the market average DOM is under 30. Document everything; pre-pay yourself out. Q5 (first deal regret): \"Knowing what you know, would you change your first deal?\" — Almost everyone's first deal is overpaid by 5-10% and underestimates capex by 30-50%. The lesson is to not let perfect be the enemy of started — you learn 10x more on a mediocre deal than waiting for a perfect one. TrueCap Pro's saved-analyses + portfolio rollup lets you re-run your historical deals against today's assumptions; useful for seeing whether your underwriting has actually improved."
+  },
+  "shipNote": {
+    "title": "What shipped in TrueCap this week",
+    "items": [
+      "Reader Q&A archive — saved Q&A's from past issues now searchable at /blog (tagged 'mailbag')",
+      "Saved-analyses re-run: click any saved deal → 'Re-run with today's rates' to see how it pencils now (Pro)",
+      "New market page: /markets/birmingham"
+    ]
+  }
+}

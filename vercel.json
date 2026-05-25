@@ -6,7 +6,7 @@
   "crons": [
     {
       "path": "/api/cron/send-weekly-digest",
-      "schedule": "0 13 * * 1"
+      "schedule": "0 11 * * 2"
     }
   ]
 }

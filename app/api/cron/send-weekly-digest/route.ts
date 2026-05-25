@@ -25,7 +25,7 @@
  */
 
 import { NextResponse } from "next/server";
-import { loadContent, mondayOf, renderWeeklyDigest } from "@/lib/email/render-weekly";
+import { currentSendDate, loadContent, renderWeeklyDigest } from "@/lib/email/render-weekly";
 
 const FROM_ADDRESS = process.env.EMAIL_FROM ?? "TrueCap <hello@usetruecap.com>";
 
@@ -64,7 +64,7 @@ export async function GET(request: Request) {
   // ─────────────────────────────────────────────────────────
   // 3. Look up this Monday's content
   // ─────────────────────────────────────────────────────────
-  const today = mondayOf(new Date());
+  const today = currentSendDate();
   const content = await loadContent(today);
   if (!content) {
     console.info("[cron/weekly-digest] No content for %s — skipping send.", today);

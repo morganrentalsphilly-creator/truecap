@@ -1,0 +1,53 @@
+{
+  "subject": "It's Morgan from Morgan Rentals — quick intro to my new project",
+  "preheader": "If you've followed my real estate work, this is what I've been building. Free to try, opt-out anytime.",
+  "publishedAt": "2026-05-25",
+  "weekLabel": "Launch",
+  "marketSnapshot": {
+    "headline": "Hey — Morgan here. New project, quick intro.",
+    "body": "You're getting this because you and I have crossed paths through Morgan Rentals Philly, a past real estate transaction, or because you opted in to my real estate emails. After years of underwriting rental deals on spreadsheets, I built the tool I always wished I had — TrueCap. It runs a full rental property underwrite (cap rate, cash-on-cash, DSCR, 10-year projection, sensitivity grid, MAO) in under 60 seconds. Paste an address, get real numbers. Going forward, I'll send a weekly Tuesday digest with three deals I underwrote that week + what's moving in rates / rents. If that sounds useful, stay subscribed — nothing more to do. If not, unsubscribe link is at the bottom and you'll never hear from me on this list again.",
+    "stats": [
+      { "label": "Free analyses", "value": "Unlimited" },
+      { "label": "Pro tools", "value": "$X/mo" },
+      { "label": "Cancel", "value": "Anytime" }
+    ]
+  },
+  "dealSpotter": [
+    {
+      "address": "Philadelphia, PA — Fishtown duplex (real deal I ran last week)",
+      "headlineNumber": "8.2% cap · $1,650 NCF/mo",
+      "verdict": "Strong",
+      "body": "$420k ask, both units rented at $1,950 each. Taxes ~$5.8k. This is exactly the kind of deal TrueCap helps you decide on in 60 seconds: cap rate, cash flow, DSCR, year-1 vs year-10 projections, all the friction costs you forget on a spreadsheet. The full underwrite for this one is at usetruecap.com — try it on one of YOUR own deals."
+    },
+    {
+      "address": "Indianapolis, IN — Mars Hill SFR",
+      "headlineNumber": "7.4% cap · $480 NCF/mo",
+      "verdict": "Decent",
+      "body": "$185k 3/1.5 ranch at $1,475 rent. Working-class neighborhood. A workable yield deal but not a generational one — exactly the kind of nuance TrueCap surfaces in the verdict. Not every deal is a 'walk' or 'buy' — most are 'understand the trade-offs.'"
+    },
+    {
+      "address": "Memphis, TN — Berclair triplex",
+      "headlineNumber": "9.1% cap on paper · DSCR 1.04",
+      "verdict": "Marginal",
+      "body": "$245k 3-unit at $1,300+$1,150+$1,150. The headline cap rate looks like cash-flow heaven. Run it through DSCR at today's investor-loan rates with realistic capex/vacancy and the ratio drops to 1.04 — most lenders won't fund it. This is the gap between listing-page math and real underwriting that costs investors money. TrueCap closes it."
+    }
+  ],
+  "blogFeature": {
+    "title": "How to underwrite a rental property in 60 seconds",
+    "url": "https://usetruecap.com/blog/how-to-underwrite-a-rental-property-in-60-seconds",
+    "excerpt": "The five numbers that decide whether a rental deal pencils — cap rate, cash-on-cash, DSCR, monthly net cash flow, and 10-year IRR — and how to compute all five from a single listing in under a minute. The triage framework every serious investor uses before opening the full underwrite."
+  },
+  "qa": {
+    "question": "Why am I getting this email if I never signed up at usetruecap.com?",
+    "answer": "Fair question — straight answer: you've previously consented to email from me or one of my real estate businesses (most commonly Morgan Rentals Philly). I'm using that prior permission to introduce you to TrueCap, my new project, ONE time. If you stay subscribed, you'll get the weekly investor digest (deals + rates + Q&A) every Tuesday morning. If this isn't what you signed up for, hit the unsubscribe link at the bottom — I'll remove you from this list and you'll never hear from me here again. I respect your inbox; I don't want you on the list if it's not useful."
+  },
+  "shipNote": {
+    "title": "What you get if you stay subscribed",
+    "items": [
+      "Every Tuesday 7am ET: 3 deals I underwrote that week (with real numbers + verdict)",
+      "What moved in rates / rents / insurance — the stuff that actually changes your math",
+      "One reader question answered in detail — reply to any issue to get yours featured",
+      "Pro tools: sensitivity grids, 10-year projections, MAO calculator — free trial at usetruecap.com/pricing"
+    ]
+  }
+}

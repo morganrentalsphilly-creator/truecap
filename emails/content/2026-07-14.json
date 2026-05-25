@@ -1,0 +1,52 @@
+{
+  "subject": "TrueCap #7 — DSCR loans: when to use them, when to walk",
+  "preheader": "DSCR rates +185bp over conventional · why · 3 deals where DSCR is the only path",
+  "publishedAt": "2026-07-14",
+  "weekLabel": "Issue 7",
+  "marketSnapshot": {
+    "headline": "Rates broke 6.7%, DSCR spreads narrowing",
+    "body": "30Y fixed cracked 6.7% to the downside this week — first read in the 6.6s since March. DSCR loan spreads narrowed 15bp as conventional lenders started competing harder for investor business. Translation: if you've been pricing DSCR at 8.5-9% for the last 18 months, the new pricing band is 8.0-8.6%. Worth a re-quote from your DSCR lender on any deal you're underwriting this month.",
+    "stats": [
+      { "label": "30Y fixed", "value": "6.68%", "delta": "-3bp WoW", "deltaTone": "positive" },
+      { "label": "DSCR loan typical", "value": "8.3%", "delta": "-15bp", "deltaTone": "positive" },
+      { "label": "DSCR cash-out LTV", "value": "75%", "delta": "unchanged" }
+    ]
+  },
+  "dealSpotter": [
+    {
+      "address": "Tampa, FL — Hyde Park triplex",
+      "headlineNumber": "DSCR-only · 1.23 ratio at 8.4%",
+      "verdict": "Decent",
+      "body": "$685k 3-unit. DTI doesn't pencil conventional at typical W-2 income — DSCR is the only way in. At 8.4% rate, 25% down, DSCR comes out to 1.23 which clears most DSCR lenders' 1.20 floor. Cash flow $890/mo. The Tampa insurance issue still applies — quote that $5,800/yr line item before signing anything."
+    },
+    {
+      "address": "Atlanta, GA — Kirkwood SFR",
+      "headlineNumber": "DSCR 1.35 · conventional ALSO works",
+      "verdict": "Strong",
+      "body": "$285k 3/2 at $2,150 rent. DSCR clears comfortably at 1.35 but you could also qualify conventional at most W-2 incomes. Pricing comparison: DSCR 8.3% vs conventional 6.95% = 135bp spread = ~$320/mo difference on this loan. Take conventional if you can clear DTI. Otherwise DSCR works."
+    },
+    {
+      "address": "Austin, TX — East Austin SFR",
+      "headlineNumber": "DSCR 1.04 · WALK",
+      "verdict": "Skip",
+      "body": "$575k 3/2 at $2,650 rent. DSCR clears the 1.0 floor but barely. Most DSCR lenders require 1.20 minimum, and the ones who'll do 1.05 charge 9.5%+ which makes the deal cash-flow negative. Austin rents are still drifting down YoY — this gets worse before it gets better. Walk."
+    }
+  ],
+  "blogFeature": {
+    "title": "DSCR loans explained: rates, requirements, and when they make sense",
+    "url": "https://usetruecap.com/blog/dscr-loans-explained",
+    "excerpt": "DSCR loans qualify the property, not you — but the trade-off is +100-200bp over conventional rates and a 1.20-1.25 ratio floor. The cases where DSCR is the only path forward + the cases where it's a trap."
+  },
+  "qa": {
+    "question": "Should I take a DSCR loan at 8.4% or wait for conventional to qualify after I show another year of rental income?",
+    "answer": "Math this out in TrueCap before deciding. The DSCR at 8.4% costs ~$300-400/mo more on a typical $300k loan vs conventional at 6.95%. If you wait 12 months to qualify conventional, you're paying that delta = $3,600-4,800. BUT during that 12 months you're also: (a) not earning the rental income, (b) not building equity, (c) at risk of rates moving against you. If the deal is solid and you're confident the property pencils, take the DSCR now. The 18-24 month break-even is offset by the gain from getting started. TrueCap Pro's A/B mortgage compare lets you put both scenarios side-by-side with year-by-year cash flow + equity build."
+  },
+  "shipNote": {
+    "title": "What shipped in TrueCap this week",
+    "items": [
+      "DSCR ratio warning when below 1.20 — flags 'most lenders won't fund' explicitly",
+      "Mortgage A/B compare (Pro) now defaults to DSCR vs conventional scenarios for non-OO deals",
+      "New /tools/dscr-calculator standalone page (free)"
+    ]
+  }
+}

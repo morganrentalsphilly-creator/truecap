@@ -1,0 +1,52 @@
+{
+  "subject": "TrueCap #4 — the $850/mo mistake hiding in your insurance line",
+  "preheader": "Sun Belt insurance up 28% YoY · 3 markets where premiums make or break · CLE, IND, SAC deals",
+  "publishedAt": "2026-06-23",
+  "weekLabel": "Issue 4",
+  "marketSnapshot": {
+    "headline": "Insurance is the new property tax — the silent margin killer",
+    "body": "Property insurance is the biggest line-item change in rental underwriting since rate spike. Sun Belt premiums up 28% YoY in 2025 (FL +42%, LA +35%, TX coastal +29%), Northeast up 8-12%, Midwest flat-to-up-5%. The biggest underwriting mistake I see: investors using the seller's last-year insurance number. Always quote fresh — the gap between 'what they paid' and 'what you'll pay' is often $80-150/mo on a single-family, $200-400/mo on a 2-4 unit.",
+    "stats": [
+      { "label": "FL insurance YoY", "value": "+42%", "delta": "5-yr peak", "deltaTone": "negative" },
+      { "label": "Midwest insurance YoY", "value": "+3%", "delta": "stable", "deltaTone": "positive" },
+      { "label": "30Y fixed", "value": "6.81%", "delta": "+4bp WoW", "deltaTone": "neutral" }
+    ]
+  },
+  "dealSpotter": [
+    {
+      "address": "Sacramento, CA — Tahoe Park bungalow",
+      "headlineNumber": "5.9% cap · house hack pencils at 5% down",
+      "verdict": "Decent",
+      "body": "$485k for a 2/1 + ADU. Owner-occupant FHA gets you in at ~$24k down. ADU rents $1,650; you live in the main house. True out-of-pocket ~$1,100/mo for housing in a market where comparable 2/1 rents go for $2,200. Net: you're paying half-rent to build $9-12k/yr of principal. CA insurance is the wildcard — Tahoe Park is far enough from fire zone that premiums are still in the $1,400-1,800/yr band, not the $4,000+ you'd see closer to fire-zone neighborhoods."
+    },
+    {
+      "address": "Cleveland, OH — Detroit-Shoreway 3/1",
+      "headlineNumber": "9.7% cap · $610 NCF/mo",
+      "verdict": "Strong",
+      "body": "$95k purchase, $1,250 rent. Taxes $1,650, insurance $820/yr (Midwest pricing — under $70/mo). The same property in Tampa would carry $400-450/mo of insurance, completely changing the deal economics. Cleveland's not where you make appreciation money, but it IS where cash flow math is least disrupted by 2024-2026 insurance shocks."
+    },
+    {
+      "address": "Indianapolis, IN — Fountain Square SFR",
+      "headlineNumber": "8.1% cap · $560 NCF/mo · gentrifying",
+      "verdict": "Strong",
+      "body": "$172k for a renovated 3/2 at $1,675 rent. Neighborhood is in active gentrification (3-year price growth 22%), so this is one of the rare deals where decent cash flow AND appreciation tailwind coexist. Insurance ~$900/yr. Walk the neighborhood at night before pulling the trigger — gentrifying = uneven blocks."
+    }
+  ],
+  "blogFeature": {
+    "title": "Property management yes or no — the actual math",
+    "url": "https://usetruecap.com/blog/property-management-yes-or-no",
+    "excerpt": "8-10% of rent + lease-up fees + maintenance markup — the all-in cost of property management is usually 13-18% of gross rent, not the 8-10% headline. The honest math on when self-management beats PM and vice-versa."
+  },
+  "qa": {
+    "question": "I underwrote a Tampa deal at 8.2% cap, but the insurance quote came back $7,200/yr instead of the $3,800 I assumed. Now it's 6.1%. Do I walk?",
+    "answer": "Probably. The bigger issue isn't this specific deal — it's that insurance is going to keep moving against you in coastal FL for at least 2-3 more years. Even if you accept the 6.1% today, your year-3 cap rate may be 5.4% as insurance renews up another 20-30%. Run a sensitivity: at insurance +50% from today's quote, does this deal still pencil? If no, the right move is either (a) walk, (b) negotiate price down 10-12% to absorb the future premium hikes, or (c) skip the Sun Belt entirely until insurance markets normalize. Plenty of investors are quietly rotating out of FL/LA to MN/OH/IN for this exact reason."
+  },
+  "shipNote": {
+    "title": "What shipped in TrueCap this week",
+    "items": [
+      "Insurance auto-fill: estimates pull from state-level data (FL/LA flagged as 'volatile')",
+      "Sensitivity analysis: now lets you toggle a 'insurance +50%' scenario",
+      "New /markets/sacramento page with neighborhood-level data"
+    ]
+  }
+}

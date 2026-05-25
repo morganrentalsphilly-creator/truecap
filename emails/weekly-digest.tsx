@@ -462,14 +462,39 @@ export function WeeklyDigestEmail({
             </Section>
           )}
 
-          {/* CTA — back to TrueCap */}
+          {/* CTA — back to TrueCap. Conversion-focused copy: leads
+              with the specific Pro benefit ($X/mo replaces "free" since
+              not all plans are free) rather than a generic open-app CTA. */}
           <Section style={{ ...styles.card, textAlign: "center" as const }}>
-            <Text style={{ ...styles.paragraphMuted, marginBottom: "12px" }}>
-              Got a property to underwrite?
+            <Heading
+              as="h3"
+              style={{ ...styles.h2, marginBottom: "8px", fontSize: "17px" }}
+            >
+              Run these deals — and yours — in 60 seconds.
+            </Heading>
+            <Text
+              style={{
+                ...styles.paragraphMuted,
+                marginBottom: "16px",
+                fontSize: "13px",
+              }}
+            >
+              TrueCap Pro: sensitivity grids, 10-year projections, MAO calculator,
+              PDF reports. Underwrite a property in less time than it takes to
+              open Excel.
             </Text>
-            <Link href={SITE_URL} style={styles.ctaButton}>
-              Open TrueCap →
+            <Link href={`${SITE_URL}/pricing`} style={styles.ctaButton}>
+              Start with TrueCap Pro →
             </Link>
+            <Text style={{ ...styles.smallMuted, marginTop: "10px" }}>
+              Or run a free analysis at{" "}
+              <Link
+                href={SITE_URL}
+                style={{ color: COLORS.brand, textDecoration: "none" }}
+              >
+                usetruecap.com
+              </Link>
+            </Text>
           </Section>
 
           <Hr style={styles.divider} />
