@@ -8,8 +8,10 @@ import {
   Pencil,
   Plus,
   Search,
+  Sparkles,
   Trash2,
 } from "lucide-react";
+import { STARTER_TEMPLATES, type StarterTemplate } from "@/lib/starter-templates";
 import type { AnalysisTemplateOption } from "@/app/actions/analysis-templates";
 import {
   createAnalysisTemplateAction,
@@ -151,6 +153,26 @@ export function TemplatesManagementPage({
     setIsFormDialogOpen(true);
   };
 
+  /**
+   * Clone a starter template into the user's library. Open the form
+   * dialog pre-populated with the starter's values so the user can
+   * tweak before saving — gives them a starting point AND immediate
+   * agency over the defaults. The save itself happens through the
+   * normal create flow so all validation + name-uniqueness rules
+   * still apply.
+   */
+  const cloneStarterTemplate = (starter: StarterTemplate) => {
+    setEditingTemplate(null);
+    // Append " — Mine" so it doesn't collide with another starter copy
+    // they may have saved earlier (unique-name constraint).
+    const baseName = starter.template.templateName.replace(/^Starter — /, "");
+    setDialogInitialValues({
+      ...starter.template,
+      templateName: `${baseName} — Mine`,
+    });
+    setIsFormDialogOpen(true);
+  };
+
   const openEditDialog = (template: AnalysisTemplateOption) => {
     setEditingTemplate(template);
     setDialogInitialValues(getTemplateValues(template));
@@ -234,6 +256,66 @@ export function TemplatesManagementPage({
             New Template
           </Button>
           </div>
+
+        {/* Starter templates — prebuilt strategies (Long-term, House
+            hack, FHA, BRRRR, STR). Each opens the create dialog
+            pre-populated with the starter's values so the user can
+            tweak before saving — perfect for new users who don't yet
+            know what every percent field means. */}
+        <section className="rounded-2xl border border-border bg-gradient-to-br from-primary/5 via-card to-card p-4 sm:p-5">
+          <div className="flex items-baseline gap-2">
+            <Sparkles className="size-4 text-primary" />
+            <h2 className="text-sm font-bold uppercase tracking-widest text-foreground">
+              Start from a strategy template
+            </h2>
+          </div>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Each one opens with editable defaults — make it yours, save it once, reuse it forever.
+          </p>
+          <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {STARTER_TEMPLATES.map((starter) => (
+              <article
+                key={starter.key}
+                className="flex flex-col gap-2 rounded-xl border border-border bg-background p-3 shadow-sm"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <h3 className="text-sm font-bold leading-tight text-foreground">
+                    {starter.template.templateName.replace(/^Starter — /, "")}
+                  </h3>
+                  <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-primary">
+                    {starter.tag}
+                  </span>
+                </div>
+                <p className="flex-1 text-xs leading-snug text-muted-foreground">
+                  {starter.cardDescription}
+                </p>
+                <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
+                  <span>
+                    <strong className="text-foreground">{starter.template.downPaymentPct}%</strong> down
+                  </span>
+                  <span>
+                    <strong className="text-foreground">{starter.template.interestRatePct}%</strong> rate
+                  </span>
+                  <span>
+                    <strong className="text-foreground">{starter.template.vacancyPct}%</strong> vacancy
+                  </span>
+                  <span>
+                    <strong className="text-foreground">{starter.template.managementPct}%</strong> mgmt
+                  </span>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="mt-1 w-full rounded-full"
+                  onClick={() => cloneStarterTemplate(starter)}
+                >
+                  Customize &amp; save
+                </Button>
+              </article>
+            ))}
+          </div>
+        </section>
 
         <div className="rounded-2xl border border-border bg-card p-3 sm:p-4">
           <div className="relative max-w-md">

@@ -1288,6 +1288,83 @@ function ProFeaturePreview({
   );
 }
 
+/**
+ * Net Cash Flow headline card.
+ *
+ * The bottom-line "is this deal worth it?" answer in a single
+ * dedicated card — monthly NCF prominent, annual NCF + after-tax CF
+ * as supporting numbers. Sits at the top of the Cash Flow tab so
+ * users see THE answer before they see the breakdown.
+ *
+ * Pure display — derived from AnalysisResult fields that already
+ * exist. Color tone branches on positive vs negative vs near-zero.
+ */
+function NetCashFlowCard({ result }: { result: AnalysisResult }) {
+  const monthly = result.netCashFlow;
+  const annual = result.annualCashFlow;
+  const afterTaxMonthly = result.afterTaxCF;
+  const tone = monthly > 25 ? "positive" : monthly < -25 ? "negative" : "neutral";
+  const numberColor =
+    tone === "positive"
+      ? "text-[var(--metric-positive,#16a34a)]"
+      : tone === "negative"
+        ? "text-[var(--metric-negative,#dc2626)]"
+        : "text-foreground";
+  const borderTint =
+    tone === "positive"
+      ? "border-[var(--metric-positive,#16a34a)]/30 bg-[var(--metric-positive,#16a34a)]/[0.04]"
+      : tone === "negative"
+        ? "border-[var(--metric-negative,#dc2626)]/30 bg-[var(--metric-negative,#dc2626)]/[0.04]"
+        : "border-border bg-card";
+  const signPrefix = monthly > 0 ? "+" : monthly < 0 ? "-" : "";
+  return (
+    <section
+      aria-label="Net cash flow summary"
+      className={cn("rounded-2xl border p-4 sm:p-6", borderTint)}
+    >
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        {/* Monthly NCF — the headline */}
+        <div>
+          <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+            Net Cash Flow
+          </p>
+          <p className={cn("mt-1 text-4xl font-black tabular-nums sm:text-5xl", numberColor)}>
+            {signPrefix}${Math.abs(monthly).toLocaleString()}
+            <span className="ml-1 text-base font-bold tracking-tight text-muted-foreground sm:text-lg">
+              /mo
+            </span>
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            After rent, all operating expenses, and debt service
+          </p>
+        </div>
+        {/* Annual + after-tax — supporting context */}
+        <div className="grid grid-cols-2 gap-3 sm:gap-5">
+          <div className="rounded-xl border border-border bg-background p-3 sm:p-4">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              Annual
+            </p>
+            <p className={cn("mt-1 text-xl font-black tabular-nums sm:text-2xl", numberColor)}>
+              {annual >= 0 ? "+" : "-"}${Math.abs(annual).toLocaleString()}
+            </p>
+          </div>
+          <div className="rounded-xl border border-border bg-background p-3 sm:p-4">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              After tax
+            </p>
+            <p className="mt-1 text-xl font-black tabular-nums text-primary sm:text-2xl">
+              ${Math.round(afterTaxMonthly).toLocaleString()}
+              <span className="ml-1 text-[11px] font-bold tracking-tight text-muted-foreground">
+                /mo
+              </span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function CashFlowTab({
   result,
   isLoading,
@@ -1327,9 +1404,15 @@ function CashFlowTab({
 
   return (
     <div className="space-y-6 sm:space-y-8">
-      {/* Where the rent goes — single-glance waterfall. Sits above
-          the detailed 3-column breakdown so users see the SHAPE of
-          the deal before they read the line items. */}
+      {/* Net Cash Flow headline card — the bottom-line answer in big
+          numbers (monthly + annual + after-tax). Sits above the
+          waterfall so it's the first thing the user sees in the
+          Cash Flow tab. Restored as its own card per user feedback
+          (the waterfall on its own buried the headline). */}
+      <NetCashFlowCard result={result} />
+      {/* Where the rent goes — single-glance waterfall. Sits below
+          the headline card and above the detailed 3-column breakdown
+          so the reading order is: answer → visual explanation → line items. */}
       <CashFlowWaterfall result={result} />
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
       {/* Monthly income */}

@@ -56,6 +56,20 @@ const CATEGORY_STYLES: Record<Category, { icon: typeof Sparkles; color: string; 
 const ENTRIES: Entry[] = [
   {
     date: "2026-05-24",
+    category: "Feature",
+    title: "Starter strategy templates on /dashboard/templates",
+    description:
+      "Five prebuilt starting points — Long-term rental, House hack, FHA 3.5% owner-occupant, BRRRR, Short-term rental — each opens the template editor pre-populated with strategy-correct defaults (down %, rate, vacancy, mgmt fee, depreciation years, etc.). Customize once, save, reuse on every deal. Eliminates the blank-page problem on the templates surface.",
+  },
+  {
+    date: "2026-05-24",
+    category: "Improvement",
+    title: "Dedicated Net Cash Flow card on Cash Flow tab",
+    description:
+      "Bottom-line monthly + annual + after-tax cash flow is now a prominent standalone card at the top of the Cash Flow tab — big numbers, color-coded green/red — restored from the older layout. Sits above the waterfall so the answer comes before the explanation.",
+  },
+  {
+    date: "2026-05-24",
     category: "Improvement",
     title: "Net cash flow back-to-prominent in cash flow waterfall",
     description:
