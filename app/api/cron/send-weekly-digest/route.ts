@@ -25,9 +25,23 @@
  */
 
 import { NextResponse } from "next/server";
+import * as Sentry from "@sentry/nextjs";
 import { currentSendDate, loadContent, renderWeeklyDigest } from "@/lib/email/render-weekly";
 
 const FROM_ADDRESS = process.env.EMAIL_FROM ?? "TrueCap <hello@usetruecap.com>";
+
+/**
+ * Centralized error-reporting for cron failures. Goes to Sentry so
+ * a failed Tuesday send produces an alert instead of silently missing
+ * a week. Tags help filter cron-specific errors from other noise.
+ */
+function reportCronFailure(message: string, context: Record<string, unknown> = {}) {
+  Sentry.captureMessage(`[cron/weekly-digest] ${message}`, {
+    level: "error",
+    tags: { feature: "newsletter-cron", endpoint: "send-weekly-digest" },
+    extra: context,
+  });
+}
 
 export async function GET(request: Request) {
   // ─────────────────────────────────────────────────────────
@@ -39,12 +53,14 @@ export async function GET(request: Request) {
   const auth = request.headers.get("authorization");
   if (!cronSecret) {
     console.error("[cron/weekly-digest] CRON_SECRET is not set — rejecting.");
+    reportCronFailure("CRON_SECRET env var not set", { hasAuth: Boolean(auth) });
     return NextResponse.json(
       { ok: false, message: "CRON_SECRET not configured." },
       { status: 500 }
     );
   }
   if (auth !== `Bearer ${cronSecret}`) {
+    // Don't alert on 401s — could be probing traffic. Only logged.
     return NextResponse.json({ ok: false, message: "Unauthorized" }, { status: 401 });
   }
 
@@ -55,6 +71,10 @@ export async function GET(request: Request) {
   const audienceId = process.env.RESEND_AUDIENCE_ID;
   if (!apiKey || !audienceId) {
     console.error("[cron/weekly-digest] Missing Resend env vars.");
+    reportCronFailure("Missing Resend env vars", {
+      hasApiKey: Boolean(apiKey),
+      hasAudienceId: Boolean(audienceId),
+    });
     return NextResponse.json(
       { ok: false, message: "Resend not configured." },
       { status: 500 }
@@ -113,6 +133,12 @@ export async function GET(request: Request) {
     };
     if (!createRes.ok || !createBody.id) {
       console.error("[cron/weekly-digest] Create broadcast failed:", createRes.status, createBody);
+      reportCronFailure("Resend create broadcast failed", {
+        date: today,
+        subject,
+        resendStatus: createRes.status,
+        resendMessage: createBody.message,
+      });
       return NextResponse.json(
         {
           ok: false,
@@ -143,6 +169,13 @@ export async function GET(request: Request) {
     };
     if (!sendRes.ok) {
       console.error("[cron/weekly-digest] Send broadcast failed:", sendRes.status, sendBody);
+      reportCronFailure("Resend send broadcast failed", {
+        date: today,
+        subject,
+        broadcastId: createBody.id,
+        resendStatus: sendRes.status,
+        resendMessage: sendBody.message,
+      });
       return NextResponse.json(
         {
           ok: false,
@@ -167,6 +200,10 @@ export async function GET(request: Request) {
     });
   } catch (error) {
     console.error("[cron/weekly-digest] Network error:", error);
+    Sentry.captureException(error, {
+      tags: { feature: "newsletter-cron", endpoint: "send-weekly-digest" },
+      extra: { date: today, subject },
+    });
     return NextResponse.json(
       {
         ok: false,
