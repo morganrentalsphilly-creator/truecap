@@ -1,52 +1,52 @@
 {
-  "subject": "TrueCap #7 — DSCR loans: when to use them, when to walk",
-  "preheader": "DSCR rates +185bp over conventional · why · 3 deals where DSCR is the only path",
+  "subject": "Cash purchase vs leveraged — when each one actually wins",
+  "preheader": "No-debt cash flow vs leveraged compounding · The 'one good deal' problem with all-cash",
   "publishedAt": "2026-07-14",
-  "weekLabel": "Issue 7",
+  "weekLabel": "Topic: Cash vs leverage",
   "marketSnapshot": {
-    "headline": "Rates broke 6.7%, DSCR spreads narrowing",
-    "body": "30Y fixed cracked 6.7% to the downside this week — first read in the 6.6s since March. DSCR loan spreads narrowed 15bp as conventional lenders started competing harder for investor business. Translation: if you've been pricing DSCR at 8.5-9% for the last 18 months, the new pricing band is 8.0-8.6%. Worth a re-quote from your DSCR lender on any deal you're underwriting this month.",
+    "headline": "Cash buy vs financed: different math, different answer",
+    "body": "Some investors buy rental properties in cash. Most use leverage. There's no universal right answer — they optimize for different things. Cash buying maximizes monthly cash flow per property and minimizes risk; leverage maximizes returns on capital and lets you control more property with the same dollars. The decision depends on your capital base, risk tolerance, and what you're optimizing for. The math is more interesting than people think.",
     "stats": [
-      { "label": "30Y fixed", "value": "6.68%", "delta": "-3bp WoW", "deltaTone": "positive" },
-      { "label": "DSCR loan typical", "value": "8.3%", "delta": "-15bp", "deltaTone": "positive" },
-      { "label": "DSCR cash-out LTV", "value": "75%", "delta": "unchanged" }
+      { "label": "Typical cash CoC return", "value": "5-8%" },
+      { "label": "Typical leveraged CoC return", "value": "9-14%" },
+      { "label": "Capital deployed gap", "value": "4x" }
     ]
   },
   "dealSpotter": [
     {
-      "address": "Tampa, FL — Hyde Park triplex",
-      "headlineNumber": "DSCR-only · 1.23 ratio at 8.4%",
-      "verdict": "Decent",
-      "body": "$685k 3-unit. DTI doesn't pencil conventional at typical W-2 income — DSCR is the only way in. At 8.4% rate, 25% down, DSCR comes out to 1.23 which clears most DSCR lenders' 1.20 floor. Cash flow $890/mo. The Tampa insurance issue still applies — quote that $5,800/yr line item before signing anything."
+      "address": "Example: cash buy of a single property",
+      "headlineNumber": "$200k all cash · $1,400 NCF/mo · CoC 8.4%",
+      "verdict": "Strong (for risk-off)",
+      "body": "Single SFR purchased cash. Annual NCF $16,800. CoC 8.4% on the $200k deployed. Zero mortgage risk, no DSCR constraint, no foreclosure risk if vacancy hits. The downside: $200k is all in one property in one zip code. Diversification = zero. If that one property faces a major issue (foundation, fire, prolonged vacancy), you have no other income from that capital."
     },
     {
-      "address": "Atlanta, GA — Kirkwood SFR",
-      "headlineNumber": "DSCR 1.35 · conventional ALSO works",
-      "verdict": "Strong",
-      "body": "$285k 3/2 at $2,150 rent. DSCR clears comfortably at 1.35 but you could also qualify conventional at most W-2 incomes. Pricing comparison: DSCR 8.3% vs conventional 6.95% = 135bp spread = ~$320/mo difference on this loan. Take conventional if you can clear DTI. Otherwise DSCR works."
+      "address": "Example: same $200k leveraged across 4 properties",
+      "headlineNumber": "4 SFRs at 25% down · $2,200 NCF/mo combined · CoC 13.2%",
+      "verdict": "Strong (for compounding)",
+      "body": "Same $200k as down payments on 4 separate $200k properties (25% down each). Total combined NCF $2,200/mo. CoC 13.2% on the same capital. Plus: 4 properties of principal paydown, 4 properties of appreciation exposure, geographic diversification. Downside: 4 mortgages, 4 DSCR constraints, 4 risks of rate-driven margin compression."
     },
     {
-      "address": "Austin, TX — East Austin SFR",
-      "headlineNumber": "DSCR 1.04 · WALK",
-      "verdict": "Skip",
-      "body": "$575k 3/2 at $2,650 rent. DSCR clears the 1.0 floor but barely. Most DSCR lenders require 1.20 minimum, and the ones who'll do 1.05 charge 9.5%+ which makes the deal cash-flow negative. Austin rents are still drifting down YoY — this gets worse before it gets better. Walk."
+      "address": "Example: mixed approach (the realistic middle)",
+      "headlineNumber": "1 cash property + 1 leveraged · balanced risk + return",
+      "verdict": "Strong (for most investors)",
+      "body": "$200k = one $200k cash property + $100k down on a $400k leveraged property. Combined NCF $2,100/mo. The cash property provides anchor stability (no mortgage, no rate risk). The leveraged property provides growth + compounding. Most thoughtful investors end up here over time — a mix that hedges different risks."
     }
   ],
   "blogFeature": {
-    "title": "DSCR loans explained: rates, requirements, and when they make sense",
-    "url": "https://usetruecap.com/blog/dscr-loans-explained",
-    "excerpt": "DSCR loans qualify the property, not you — but the trade-off is +100-200bp over conventional rates and a 1.20-1.25 ratio floor. The cases where DSCR is the only path forward + the cases where it's a trap."
+    "title": "Cash-on-cash vs IRR — what each tells you about a deal",
+    "url": "https://usetruecap.com/blog/cash-on-cash-vs-irr",
+    "excerpt": "Cash-on-cash is the metric cash buyers love. IRR is what leveraged investors should optimize for. Two different metrics that answer two different questions about the same deal."
   },
   "qa": {
-    "question": "Should I take a DSCR loan at 8.4% or wait for conventional to qualify after I show another year of rental income?",
-    "answer": "Math this out in TrueCap before deciding. The DSCR at 8.4% costs ~$300-400/mo more on a typical $300k loan vs conventional at 6.95%. If you wait 12 months to qualify conventional, you're paying that delta = $3,600-4,800. BUT during that 12 months you're also: (a) not earning the rental income, (b) not building equity, (c) at risk of rates moving against you. If the deal is solid and you're confident the property pencils, take the DSCR now. The 18-24 month break-even is offset by the gain from getting started. TrueCap Pro's A/B mortgage compare lets you put both scenarios side-by-side with year-by-year cash flow + equity build."
+    "question": "I have $300k available. Should I buy one property cash or three properties leveraged?",
+    "answer": "Depends on your goals and risk tolerance. The all-cash play gives you $300k in one property generating ~$2,000-2,500/mo of stable rental income with zero financing risk. The 3-property leveraged play gives you ~$3,500-5,000/mo of combined rental income across three properties with three mortgages, three sets of tenant risk, but also three properties of equity build. The math favor leverage when interest rates are below your cap rates (positive leverage), and unwinds when rates are above your cap rates (negative leverage). At today's rates (mortgages roughly 6-7%, cap rates 6-8% in solid markets), leverage is marginally positive — not the obvious win it was in 2018-2021. The risk-adjusted answer for most investors with $300k: 2 properties leveraged at moderate LTV (60-70%, not maxed at 75-80%). This captures most of the leverage upside while keeping each property cash-flow-strong enough to weather setbacks."
   },
   "shipNote": {
-    "title": "What shipped in TrueCap this week",
+    "title": "TrueCap handles cash purchases natively",
     "items": [
-      "DSCR ratio warning when below 1.20 — flags 'most lenders won't fund' explicitly",
-      "Mortgage A/B compare (Pro) now defaults to DSCR vs conventional scenarios for non-OO deals",
-      "New /tools/dscr-calculator standalone page (free)"
+      "Set financing to 'cash' — TrueCap removes DSCR constraint and focuses on cap rate + cash-on-cash",
+      "Pro: A/B compare cash vs leveraged for the same property side-by-side",
+      "Pro: 10-year IRR projection captures the leveraged compounding effect"
     ]
   }
 }

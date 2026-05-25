@@ -1,52 +1,52 @@
 {
-  "subject": "TrueCap #9 — Section 8 rentals: the honest math",
-  "preheader": "Voucher rents +12% above market in some zones · The screening trade-off · 3 deals",
+  "subject": "Section 8 rentals: the math most investors get wrong (and the bias they don't)",
+  "preheader": "FMR often pays above market in B/C zones · The screening trade-off · Why the data doesn't match the stereotypes",
   "publishedAt": "2026-07-28",
-  "weekLabel": "Issue 9",
+  "weekLabel": "Topic: Section 8",
   "marketSnapshot": {
-    "headline": "Quiet summer week — but voucher market is moving",
-    "body": "Rates flat at 6.64%. The interesting movement this week isn't in rates — it's in HUD Fair Market Rent updates published last Thursday for federal fiscal year 2027. FMRs are up 4-9% in most of our covered Midwest markets, which means Section 8 voucher rents in those zones are now meaningfully above market rent on B/C-class properties. If you've avoided Section 8 because of stereotypes about tenant quality or paperwork, the new FMR makes the math harder to ignore.",
+    "headline": "Section 8 — the honest math under the stereotypes",
+    "body": "Section 8 housing vouchers pay a 'Fair Market Rent' (FMR) set annually by HUD per metro zone. In many B and C-tier neighborhoods, FMR is meaningfully above the open-market rent — sometimes 10-20% above. Investors who avoid Section 8 due to perception are often leaving real return on the table. The trade-off is real (annual HQS inspections, longer placement, more paperwork) but the rent premium absorbs most of the friction in voucher-favorable zones.",
     "stats": [
-      { "label": "30Y fixed", "value": "6.64%", "delta": "-1bp WoW", "deltaTone": "neutral" },
-      { "label": "FMR update YoY", "value": "+6.4%", "delta": "weighted", "deltaTone": "positive" },
-      { "label": "Markets where FMR > market rent", "value": "7 / 13" }
+      { "label": "Typical FMR premium in qualifying zones", "value": "+10-18%" },
+      { "label": "Voucher portion paid by HUD", "value": "Direct deposit" },
+      { "label": "HQS inspection cadence", "value": "Annual" }
     ]
   },
   "dealSpotter": [
     {
-      "address": "Cleveland, OH — Lee-Harvard 3/1.5",
-      "headlineNumber": "Market rent $1,275 · FMR pays $1,485",
+      "address": "Example: market rent $1,275 · FMR pays $1,485",
+      "headlineNumber": "16% premium absorbs the friction · Strong",
       "verdict": "Strong",
-      "body": "$105k purchase, comparable rental at $1,275. Section 8 FMR for a 3-bedroom in this zone is $1,485 (16% premium). Even after accounting for the inspection requirements, the longer screening process, and the occasional damaged-unit headaches you hear about, that 16% rent premium absorbs a lot of friction. The math also benefits from guaranteed payment from the housing authority (the voucher portion arrives like clockwork; you only collect a small tenant portion privately)."
+      "body": "B-tier Midwest property. Market rent $1,275. Section 8 FMR for a 3-bedroom: $1,485. The 16% premium covers the inspection prep cost, the placement delay, and even pads in some tolerance for damaged-unit repair on turnover. The HUD-paid portion arrives like clockwork. The tenant portion (the rent above what the voucher covers, if any) is the only piece you collect privately."
     },
     {
-      "address": "Indianapolis, IN — Mars Hill duplex",
-      "headlineNumber": "Both units voucher-eligible · 8.9% cap blended",
-      "verdict": "Strong",
-      "body": "$165k 2-unit. Both units would qualify for the local FMR which pays $985 and $1,095. Market rents in the neighborhood are $850-$925. The compounding effect over a 10-year hold of that ~$200/month rent gap is roughly $24k of additional NOI per unit, which gets capitalized into the exit value — not a small effect."
+      "address": "Example: market rent $1,650 · FMR pays $1,680",
+      "headlineNumber": "1.8% premium · friction not worth it · Decent (skip voucher)",
+      "verdict": "Decent (regular)",
+      "body": "In zones where market rents have caught up to FMR, the voucher premium evaporates and the friction stops being worth it. Don't accept voucher just because you can — calculate the premium first. If it's <5%, market-rate rentals win on net economics."
     },
     {
-      "address": "Atlanta, GA — Lakewood Heights SFR",
-      "headlineNumber": "Market rent close to FMR · regular rental wins",
-      "verdict": "Decent",
-      "body": "$185k 3/1.5. Market rent here is $1,650, voucher FMR is $1,680 — barely a premium. In zones where the market has caught up to FMR, the friction of accepting vouchers (annual inspection, longer turnover, the political risk that voucher programs face) probably isn't worth a 1-2% rent bump. Run the screening cost-benefit per zone, not on aspirational averages."
+      "address": "Example: market rent $1,400 · FMR pays $1,150",
+      "headlineNumber": "FMR BELOW market · skip voucher",
+      "verdict": "Skip (the voucher path)",
+      "body": "Some A-tier neighborhoods have FMRs that lag market rents — common in fast-appreciating zones. If FMR pays less than market, voucher tenants take a discount. The economics for landlords work in the opposite direction. Don't accept vouchers in these zones; you're leaving money on the table."
     }
   ],
   "blogFeature": {
     "title": "The 50% rule for rentals — still useful in 2026?",
     "url": "https://usetruecap.com/blog/50-percent-rule-rentals",
-    "excerpt": "The old rule says expenses run 50% of gross rent. It's a rough triage tool — useful for the back of a napkin, dangerous if you use it instead of a real underwrite. The cases where it's accurate, the cases where it's off by 15+ points, and how to know which you're in."
+    "excerpt": "The 50% rule says expenses run 50% of gross rent. For Section 8 properties, the expense ratio is usually higher (inspection prep, slightly more turnover work). Useful for triage; dangerous as a substitute for a real underwrite."
   },
   "qa": {
-    "question": "Section 8 keeps coming up in conversations. Am I avoiding it for good reasons or just lazy bias?",
-    "answer": "Probably some of both. The 'good reasons' to be cautious: tenant screening on a Section 8 lease is more constrained (you can't reject for some of the same reasons you'd reject a market-rate tenant), the unit must pass annual housing-quality inspections (which can require small remediation work each year), and there's a longer initial lease-up period because the housing authority processes paperwork. The 'lazy bias' to set aside: voucher tenants are not statistically worse renters than the bottom 30% of market-rate tenants in the same price band. The screening + payment-guarantee combo often produces better outcomes than chasing the cheapest market-rate applicant. If you've never tried it on one unit, it's worth running the experiment with a single property before forming a permanent opinion."
+    "question": "Are voucher tenants statistically worse renters than market-rate tenants?",
+    "answer": "No — controlling for the comparable price band. The bias is comparing voucher tenants to A-tier market-rate tenants, which isn't the right comparison. Compare voucher tenants to the bottom 30% of market-rate tenants in the same neighborhood and the data shows voucher tenants do equal or better on payment reliability (because the housing authority pays the bulk, not the tenant) and similar on property care. Where voucher tenants underperform: turnover frequency tends to be slightly higher (life-stage instability) and inspection prep costs you a few hundred dollars a year per unit. Where they outperform: payment reliability, longer-than-expected tenancies in good cases (5-10 year voucher tenancies are common), and lower vacancy-driven income variability. The 'lazy bias' worth setting aside is treating voucher status as a proxy for tenant quality. Screening matters; the voucher itself is mostly orthogonal to outcome."
   },
   "shipNote": {
-    "title": "What shipped in TrueCap this week",
+    "title": "TrueCap's Section 8 handling",
     "items": [
-      "FMR (Section 8) rent lookup — pulled directly from HUD's published 2027 FFY data for the property's zip code",
-      "Disclosure tooltip on rent fields explains the FMR vs market-rent difference",
-      "Bug fix: vacancy field now correctly accepts 0% (was forcing a 1% minimum on some forms)"
+      "FMR rent lookup by zip code — pulls from HUD's published data",
+      "Voucher-premium indicator: shows whether FMR is above or below the area's market rent",
+      "Modeling: enter voucher rent + tenant-portion separately for clear cash-flow tracking"
     ]
   }
 }

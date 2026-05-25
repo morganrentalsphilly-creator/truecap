@@ -1,51 +1,52 @@
 {
-  "subject": "TrueCap #20 — mortgage points: when paying for the rate makes sense",
-  "preheader": "$8k buy-down vs $8k invested · The 4-year break-even rule · Why most points buyers regret it",
+  "subject": "Mortgage points: when paying for the rate beats keeping the cash",
+  "preheader": "Break-even math · The 4-year rule · Why most points buyers regret it",
   "publishedAt": "2026-10-13",
-  "weekLabel": "Issue 20",
+  "weekLabel": "Topic: Mortgage points",
   "marketSnapshot": {
-    "headline": "Q4 cycle update: rates settled, time to price-shop lenders",
-    "body": "30Y fixed at 6.04%, lowest read in 18 months. The rate-cut narrative has played out — futures price flat-to-mild-cuts through 2027. Lenders are now competing on origination volume rather than waiting for the next leg lower. The practical result: lender quotes vary more this month than they have in a year. On a $300k rental loan, I've seen quote-to-quote spreads of 30-45bp from the SAME borrower applying to 3 different lenders in the same week. Take the time to get 3+ quotes on any deal you're closing. The pricing variance is real money.",
+    "headline": "Mortgage points — three-factor decision",
+    "body": "Mortgage points (also called 'discount points') let you pay an upfront fee to lower the loan's interest rate. Each point typically costs 1% of the loan amount and reduces rate by 0.25-0.375%. Sounds straightforward; the right answer depends on three factors most investors don't model: how long you'll hold, your view on future rates, and what else you could do with that capital. Get those three right and points are a powerful long-term wealth-build. Get them wrong and you've paid for a benefit you never received.",
     "stats": [
-      { "label": "30Y fixed", "value": "6.04%", "delta": "-4bp WoW", "deltaTone": "positive" },
-      { "label": "Quote-to-quote spread", "value": "30-45bp", "delta": "shop hard", "deltaTone": "positive" },
-      { "label": "Year-end pipeline", "value": "60-75 days" }
+      { "label": "1 point typically buys", "value": "0.25-0.375% off rate" },
+      { "label": "Typical break-even", "value": "30-48 months" },
+      { "label": "Hold-period threshold to buy", "value": "4+ years" }
     ]
   },
   "dealSpotter": [
     {
-      "address": "Cincinnati, OH — Westwood SFR",
-      "headlineNumber": "Points decision: $7,500 buys 0.75% rate cut",
-      "verdict": "Math the buy-down",
-      "body": "$285k 3/2. Lender quote: 6.04% with no points, OR 5.29% with 2.5 points ($7,125). Monthly P&I difference: $182. Break-even on the $7,125 cost: 39 months (3.25 years). If you'll hold longer than 4 years, points win. If you're planning to refi when rates drop another 50bp+ (possible in 2027 if cuts continue), points lose because you give up the buy-down on refi. The right answer depends on your exit timeline AND your view on rates."
-    },
-    {
-      "address": "Kansas City, MO — Volker neighborhood SFR",
-      "headlineNumber": "Skip points · take the rate · keep capital",
-      "verdict": "Don't buy points",
-      "body": "$225k 3/2. Lender offers same buy-down: $6,500 for 75bp off rate. For this investor profile — likely to refi if rates drop another 30-50bp, building portfolio, capital constrained — taking the higher rate and keeping the $6,500 deployed elsewhere is the better move. The $6,500 invested as down payment on another property generates more cash flow than the $115/mo of P&I savings."
-    },
-    {
-      "address": "Philadelphia, PA — Frankford SFR",
-      "headlineNumber": "Long-hold + appreciation play · points win",
+      "address": "Example: long-hold + appreciation play",
+      "headlineNumber": "Points win at 28-month break-even, 10+ year hold",
       "verdict": "Buy points",
-      "body": "$165k 3/2. Investor plans to hold this 10-15 years as the neighborhood gentrifies. Lender quote: 5.79% with 1.5 points ($2,475). Break-even: 28 months. Holding period: 10+ years. The locked-in rate also acts as a hedge — if Frankford's economy outpaces inflation and rents grow strongly, the fixed 5.79% gets cheaper in real terms every year. Long-hold + appreciation = points are insurance worth paying for."
+      "body": "$165k rental in a gentrifying neighborhood. 1.5 points ($2,475) buys 25bp off rate. Break-even: 28 months. Holding period: 10+ years. The locked-in rate also acts as a hedge — if the neighborhood's economy outpaces inflation and rents grow strongly, the fixed lower rate gets cheaper in real terms every year. Long-hold + appreciation = points are insurance worth paying for."
+    },
+    {
+      "address": "Example: portfolio-building, capital-constrained",
+      "headlineNumber": "Skip points · take the rate · deploy capital elsewhere",
+      "verdict": "Don't buy points",
+      "body": "$225k rental, investor profile: likely to refi if rates drop another 30-50bp, building portfolio, capital constrained. Taking the higher rate and keeping the $6,500 deployed elsewhere is the better move. That $6,500 invested as down payment on another property generates more cash flow than the $115/mo of P&I savings."
+    },
+    {
+      "address": "Example: marginal deal made workable by points",
+      "headlineNumber": "Deal only pencils WITH points · fragile · SKIP",
+      "verdict": "Skip",
+      "body": "Deal that produces negative cash flow at the no-points rate but breaks-even with 2 points. Tempting to buy points to 'make it work.' Don't. A deal that only pencils after paid-down rates is fragile — when you refi in 5-7 years to a different rate, the underlying weakness re-surfaces. Buy deals that pencil without rate engineering. Use points to optimize good deals, not rescue bad ones."
     }
   ],
   "blogFeature": {
-    "title": "How to underwrite a rental property in 60 seconds",
-    "url": "https://usetruecap.com/blog/how-to-underwrite-a-rental-property-in-60-seconds",
-    "excerpt": "The five numbers that decide whether a rental deal pencils. Once you know the framework, the buy-points-or-not decision becomes obvious — it's whether the points improve or worsen those five numbers over your holding period."
+    "title": "Cap rate vs cash-on-cash vs DSCR — which metric actually matters?",
+    "url": "https://usetruecap.com/blog/cap-rate-vs-cash-on-cash-vs-dscr",
+    "excerpt": "Mortgage points improve cash-on-cash return (lower monthly payment, same equity deployed). They don't change cap rate. They affect DSCR slightly. Understanding which metric you're optimizing for tells you whether points are the right move."
   },
   "qa": {
     "question": "Simple rule for when to buy mortgage points and when to skip them?",
-    "answer": "Three-factor decision. (1) Hold period: if you'll own the property longer than the break-even (typically 30-48 months), points win. If you'll sell or refi sooner, points lose. (2) Rate outlook: if you believe rates will be 50bp+ lower in the next 2-3 years AND you'd refi at that point, skip points (the refi cancels the buy-down). If you believe rates will be flat-to-higher, lock in the buy-down. (3) Capital allocation: every dollar in points is a dollar not in another investment. If you have $30k available and the choice is 'buy 3 points on this deal' or 'use it as down payment on a second property,' the second property almost always wins because it produces both cash flow AND principal pay-down AND appreciation, while points only reduce one line item. Default rule: buy points only when you'll hold 4+ years AND you've already deployed the capital you have available elsewhere. The most common mistake is buying points to make a marginal deal pencil — the deal that only works with paid-down rates is a fragile deal."
+    "answer": "Three-factor decision. (1) Hold period: longer than the break-even (typically 30-48 months), points win. Sooner sale or refi, points lose. (2) Rate outlook: if you believe rates will be 50bp+ lower in 2-3 years AND you'd refi at that point, skip points (the refi cancels the buy-down). If you believe rates will be flat-to-higher, lock in the buy-down. (3) Capital allocation: every dollar in points is a dollar not in another investment. If you have $30k available and the choice is 'buy 3 points on this deal' or 'use it as down payment on a second property,' the second property almost always wins because it produces cash flow AND principal pay-down AND appreciation, while points only reduce one line item. Default rule: buy points only when you'll hold 4+ years AND you've already deployed the capital you have available elsewhere. The most common mistake: buying points to make a marginal deal pencil. The deal that only works with paid-down rates is a fragile deal."
   },
   "shipNote": {
-    "title": "What shipped in TrueCap this week",
+    "title": "TrueCap models points scenarios (Pro)",
     "items": [
       "Mortgage points scenario: enter points cost, see break-even period and hold-aware verdict",
-      "Lender comparison view: enter 3 quotes, see side-by-side cash flow and total interest paid"
+      "Lender compare: enter 3 quotes (with and without points), see side-by-side cash flow and total interest paid",
+      "A/B mortgage compare: model with-points vs no-points scenarios side-by-side"
     ]
   }
 }

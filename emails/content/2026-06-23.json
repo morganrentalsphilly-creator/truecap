@@ -1,52 +1,52 @@
 {
-  "subject": "TrueCap #4 — the $850/mo mistake hiding in your insurance line",
-  "preheader": "Sun Belt insurance up 28% YoY · 3 markets where premiums make or break · CLE, IND, SAC deals",
+  "subject": "Insurance is the silent margin killer — quote it BEFORE you offer",
+  "preheader": "Coastal premiums up 25-40% over 5 yrs · Midwest still stable · The $80-400/mo gap most investors miss",
   "publishedAt": "2026-06-23",
-  "weekLabel": "Issue 4",
+  "weekLabel": "Topic: Property insurance",
   "marketSnapshot": {
-    "headline": "Insurance is the new property tax — the silent margin killer",
-    "body": "Property insurance is the biggest line-item change in rental underwriting since rate spike. Sun Belt premiums up 28% YoY in 2025 (FL +42%, LA +35%, TX coastal +29%), Northeast up 8-12%, Midwest flat-to-up-5%. The biggest underwriting mistake I see: investors using the seller's last-year insurance number. Always quote fresh — the gap between 'what they paid' and 'what you'll pay' is often $80-150/mo on a single-family, $200-400/mo on a 2-4 unit.",
+    "headline": "Property insurance has reshaped which markets pencil",
+    "body": "Property insurance is the rental-underwriting line item that's moved most in the last 5 years. Coastal markets (FL, LA, Texas coastal, parts of CA fire zones) have repriced 25-40% over that window. Midwest, Northeast, and non-coastal Southeast are mostly stable or up only modestly. The biggest underwriting mistake: using the seller's last-year insurance figure instead of getting a fresh quote in your name. The gap is often $80-150/mo on a single-family rental, $200-400/mo on a 2-4 unit — and that gap can flip a deal from Strong to Marginal.",
     "stats": [
-      { "label": "FL insurance YoY", "value": "+42%", "delta": "5-yr peak", "deltaTone": "negative" },
-      { "label": "Midwest insurance YoY", "value": "+3%", "delta": "stable", "deltaTone": "positive" },
-      { "label": "30Y fixed", "value": "6.81%", "delta": "+4bp WoW", "deltaTone": "neutral" }
+      { "label": "Coastal FL premium 5-yr change", "value": "+38%" },
+      { "label": "Midwest 5-yr change", "value": "+8%" },
+      { "label": "Typical SFR insurance/yr", "value": "$1,200-3,500" }
     ]
   },
   "dealSpotter": [
     {
-      "address": "Sacramento, CA — Tahoe Park bungalow",
-      "headlineNumber": "5.9% cap · house hack pencils at 5% down",
-      "verdict": "Decent",
-      "body": "$485k for a 2/1 + ADU. Owner-occupant FHA gets you in at ~$24k down. ADU rents $1,650; you live in the main house. True out-of-pocket ~$1,100/mo for housing in a market where comparable 2/1 rents go for $2,200. Net: you're paying half-rent to build $9-12k/yr of principal. CA insurance is the wildcard — Tahoe Park is far enough from fire zone that premiums are still in the $1,400-1,800/yr band, not the $4,000+ you'd see closer to fire-zone neighborhoods."
+      "address": "Example: coastal FL property",
+      "headlineNumber": "Seller's insurance $3,800/yr · your quote $7,200/yr",
+      "verdict": "Re-pencil",
+      "body": "The classic Florida insurance gotcha. Seller has a legacy policy from a carrier that's no longer writing new policies in the zone. Your new-buyer quote comes back at $7,200/yr — nearly double. A deal that looked like an 8.2% cap re-pencils to 6.1% cap once the real insurance is plugged in. The fix: ALWAYS quote insurance yourself before signing the contract. Don't accept the seller's number."
     },
     {
-      "address": "Cleveland, OH — Detroit-Shoreway 3/1",
-      "headlineNumber": "9.7% cap · $610 NCF/mo",
-      "verdict": "Strong",
-      "body": "$95k purchase, $1,250 rent. Taxes $1,650, insurance $820/yr (Midwest pricing — under $70/mo). The same property in Tampa would carry $400-450/mo of insurance, completely changing the deal economics. Cleveland's not where you make appreciation money, but it IS where cash flow math is least disrupted by 2024-2026 insurance shocks."
+      "address": "Example: stable Midwest property",
+      "headlineNumber": "Insurance $820/yr · 5-yr historical change <10%",
+      "verdict": "Strong (insurance non-issue)",
+      "body": "Cleveland, Indianapolis, Cincinnati, parts of MO/PA — insurance pricing has been mostly stable. A property quoted at $800/yr today is likely to be $850-900/yr in 5 years. The 5-year planning horizon is predictable. This is part of why Midwest cash-flow markets have outperformed coastal markets on underwriting reliability through the 2024-2026 insurance shock."
     },
     {
-      "address": "Indianapolis, IN — Fountain Square SFR",
-      "headlineNumber": "8.1% cap · $560 NCF/mo · gentrifying",
-      "verdict": "Strong",
-      "body": "$172k for a renovated 3/2 at $1,675 rent. Neighborhood is in active gentrification (3-year price growth 22%), so this is one of the rare deals where decent cash flow AND appreciation tailwind coexist. Insurance ~$900/yr. Walk the neighborhood at night before pulling the trigger — gentrifying = uneven blocks."
+      "address": "Example: CA fire-zone property",
+      "headlineNumber": "FAIR Plan only · $5,400/yr · WALK",
+      "verdict": "Skip",
+      "body": "California has a tier of properties where private carriers have entirely exited and only the state's FAIR Plan will write coverage. FAIR is bare-bones, expensive, and the only option for owners. If the only insurance available for a property is FAIR Plan and the premium runs $4-7k/yr on a single-family, the deal almost never pencils. Run insurance availability as a first-pass filter in CA, not as a final-step check."
     }
   ],
   "blogFeature": {
-    "title": "Property management yes or no — the actual math",
-    "url": "https://usetruecap.com/blog/property-management-yes-or-no",
-    "excerpt": "8-10% of rent + lease-up fees + maintenance markup — the all-in cost of property management is usually 13-18% of gross rent, not the 8-10% headline. The honest math on when self-management beats PM and vice-versa."
+    "title": "How to spot a bad rental deal in 60 seconds — 7 red flags",
+    "url": "https://usetruecap.com/blog/spot-bad-rental-in-60-seconds",
+    "excerpt": "Property insurance volatility is one of the 7 red flags. The flag isn't 'high premium' — it's 'premium has been moving fast in the wrong direction and likely to continue.'"
   },
   "qa": {
-    "question": "I underwrote a Tampa deal at 8.2% cap, but the insurance quote came back $7,200/yr instead of the $3,800 I assumed. Now it's 6.1%. Do I walk?",
-    "answer": "Probably. The bigger issue isn't this specific deal — it's that insurance is going to keep moving against you in coastal FL for at least 2-3 more years. Even if you accept the 6.1% today, your year-3 cap rate may be 5.4% as insurance renews up another 20-30%. Run a sensitivity: at insurance +50% from today's quote, does this deal still pencil? If no, the right move is either (a) walk, (b) negotiate price down 10-12% to absorb the future premium hikes, or (c) skip the Sun Belt entirely until insurance markets normalize. Plenty of investors are quietly rotating out of FL/LA to MN/OH/IN for this exact reason."
+    "question": "How do I get a real insurance quote BEFORE I've made an offer on a property?",
+    "answer": "Two paths. (1) Most insurance brokers will quote a 'prospective' policy if you give them the property address, year built, square footage, roof age, and your intent to use as an investment property. Tell them you're considering an offer and need to know the premium. They'll either quote in a day or two, or tell you they can't write the policy at all (which is also useful information). (2) Use online quote engines (Lemonade, Hippo, State Farm online) for fast directional numbers, but verify with a broker before closing — online quotes for investment properties are often quoted at owner-occupant rates and adjusted later. Always get the quote in writing. Always include 'investment property' / 'tenant occupied' in the application — premiums for tenant-occupied are higher than owner-occupied by 15-30%. If the quote comes back materially different from what the seller represented, that's a price-negotiation lever."
   },
   "shipNote": {
-    "title": "What shipped in TrueCap this week",
+    "title": "TrueCap's insurance handling",
     "items": [
-      "Insurance auto-fill: estimates pull from state-level data (FL/LA flagged as 'volatile')",
-      "Sensitivity analysis: now lets you toggle a 'insurance +50%' scenario",
-      "New /markets/sacramento page with neighborhood-level data"
+      "Auto-fill insurance estimates based on state + property characteristics",
+      "Flags 'volatile market' for FL/LA/TX coastal/CA fire-zone properties — recommends getting a hard quote",
+      "Sensitivity grid (Pro): toggle 'insurance +50%' to see how the deal holds up under continued premium pressure"
     ]
   }
 }

@@ -1,52 +1,52 @@
 {
-  "subject": "TrueCap #3 — BRRRR math actually works when these 4 things are true",
-  "preheader": "30Y -8bp to 6.77% · 3 BRRRR-friendly deals · The refi assumption that kills 80% of plans",
+  "subject": "BRRRR math: the 4 conditions that have to be true (most deals fail at #2)",
+  "preheader": "Purchase + rehab + holding ≤ 75% ARV · The appraisal risk most investors don't price in",
   "publishedAt": "2026-06-16",
-  "weekLabel": "Issue 3",
+  "weekLabel": "Topic: BRRRR strategy",
   "marketSnapshot": {
-    "headline": "Rates ticked down, refi window cracking open",
-    "body": "30Y dropped 8bp to 6.77%, lowest read since February. Bond market is pricing in 2 cuts before EOY — not certain, but the path is there. For BRRRR investors who've been waiting for the refi side of the math to start working again, this is the first real signal in 14 months. Watch the next 3 jobs prints; if any come in soft, expect another 15-25bp leg lower.",
+    "headline": "BRRRR pencils only when 4 specific conditions hold",
+    "body": "Buy, Rehab, Rent, Refinance, Repeat — the BRRRR cycle works powerfully when conditions are aligned and breaks when they're not. The four conditions: (1) Purchase + rehab + holding costs sum to ≤75% of post-rehab ARV. (2) Appraisal supports the ARV (this is where most plans fail). (3) Cash flow positive at refi rates. (4) You can execute the rehab on time and on budget. Miss any one, and capital gets trapped instead of recycled.",
     "stats": [
-      { "label": "30Y fixed", "value": "6.77%", "delta": "-8bp WoW", "deltaTone": "positive" },
-      { "label": "DSCR refi rates", "value": "8.4-9.1%", "delta": "-20bp", "deltaTone": "positive" },
-      { "label": "Cash-out LTV typical", "value": "75%", "delta": "unchanged" }
+      { "label": "Target all-in / ARV", "value": "≤ 75%" },
+      { "label": "Typical refi LTV", "value": "75-80%" },
+      { "label": "Appraisal haircut to plan for", "value": "3-7%" }
     ]
   },
   "dealSpotter": [
     {
-      "address": "Detroit, MI — East English Village SFR",
-      "headlineNumber": "BRRRR pencils — ARV $145k vs $98k all-in",
+      "address": "Example: BRRRR pencils — all 4 conditions clear",
+      "headlineNumber": "All-in $98k vs ARV $145k · refi pulls 75% LTV",
       "verdict": "Strong",
-      "body": "$58k purchase + $32k rehab + $8k holding/financing = $98k all-in. Comparable rehabbed properties trading $140-150k. Rents at $1,300. The post-refi number works only if you can actually get appraisal to $145k+, and Detroit appraisals have been pulling 3-7% under-market in 2025. Build that into the model — assume $135k appraisal, not $145k."
+      "body": "$58k purchase + $32k rehab + $8k holding/financing = $98k all-in. Comparable rehabbed properties trading $140-150k. At 75% LTV refi on a $140k appraisal: $105k pulled out (most of your capital recycled), $35k locked in. Cash flow positive at refi rate. The deal works because all four conditions hold — and because the investor used conservative ARV ($140k assumed, $145k hoped-for)."
     },
     {
-      "address": "Pittsburgh, PA — Carrick duplex",
-      "headlineNumber": "BRRRR marginal · post-refi NCF $180/mo",
+      "address": "Example: BRRRR marginal — appraisal risk dominates",
+      "headlineNumber": "Same math, riskier market — appraisals run 5-8% under-comp",
       "verdict": "Marginal",
-      "body": "$135k + $48k rehab = $183k all-in, ARV ~$220k. Rents $1,100 each unit = $2,200. At 75% LTV refi ($165k pulled out, $18k locked in), DSCR is only 1.12 at current rates. Works if rates drop another 50bp. Today's rates, you're stuck with capital locked + thin cash flow."
+      "body": "Same all-in cost ($98k), same ARV plan ($145k). But the market is one where appraisals consistently come in 5-8% under recent comps. Adjusted ARV = $134k. At 75% LTV refi = $100k pulled out. Only the original capital recycles, no extra capital generated, AND DSCR tightens because the refi loan is smaller. The deal still works on cash flow, but the 'recycle capital and repeat' premise breaks."
     },
     {
-      "address": "Kansas City, MO — Brookside SFR",
-      "headlineNumber": "Traditional buy · 8.1% cap · $920 NCF/mo",
-      "verdict": "Strong",
-      "body": "Not a BRRRR — including this because it's a reminder that in some markets, traditional buy-and-hold beats BRRRR friction. $215k for a turn-key 3/2 at $1,825 rent. No rehab, no holding costs, no appraisal risk. Sometimes the boring path is the better path."
+      "address": "Example: BRRRR fails — over-rehab",
+      "headlineNumber": "All-in $128k vs ARV $145k · capital trapped",
+      "verdict": "Skip",
+      "body": "$58k purchase + $58k rehab (scope crept) + $12k holding = $128k all-in. ARV $145k. At 75% LTV refi = $108k pulled out. $20k locked in permanently. The rehab over-spend killed the cycle. The lesson: tight rehab scope discipline is the single biggest predictor of whether BRRRR works. Better to do a less-fancy rehab and stay within budget than to over-rehab and trap capital."
     }
   ],
   "blogFeature": {
     "title": "How to spot a bad rental deal in 60 seconds — 7 red flags",
     "url": "https://usetruecap.com/blog/spot-bad-rental-in-60-seconds",
-    "excerpt": "The seven red flags every experienced investor checks before opening the full underwrite — rent-to-price ratio, tax-to-value, photo gaps, HOA red zones, age-of-building tells, motivated-seller signals, and rough DSCR at your actual rate."
+    "excerpt": "The seven red flags every experienced investor checks before opening the full underwrite — including the rehab-scope-creep signals that turn a BRRRR plan into a capital trap."
   },
   "qa": {
-    "question": "I have $120k saved. Should I do one BRRRR or two traditional buys?",
-    "answer": "Two traditional buys, usually. One BRRRR consumes most or all of $120k tied up for 6-12 months while you rehab + refi + season, with appraisal risk that can leave you holding $20-40k of trapped capital if comps disappoint. Two traditional buys put $60k each into two cash-flowing properties immediately. The BRRRR math only beats two-buys when you can find a property that pencils at <70% ARV-after-rehab AND you have a contractor track record. If this is deal #1 or #2 for you, traditional is the safer compounding path. Save the BRRRR play for after you've done 3-4 traditional buys."
+    "question": "How do I know if a market is appraisal-friendly or appraisal-hostile for BRRRR?",
+    "answer": "Pull recent appraisal-vs-sale data from your lender or PM, OR look at the relationship between listing prices and final closing prices in the area. Markets where appraisals consistently match sale prices (final closing within 1-2% of contract price): appraisal-friendly. Markets where 8-15% of deals fall through due to low appraisals or sellers reduce price to match appraisal: appraisal-hostile. Generally appraisal-friendly: stable suburban markets, B-tier neighborhoods with active comparable sales. Generally appraisal-hostile: rapidly gentrifying neighborhoods where rehabbed properties are setting new comps faster than appraisers can absorb, very-low-volume areas where comps are thin, and parts of Detroit/Cleveland/Memphis where the appraisal-vs-sale gap has been 5-10% for years. The practical rule: budget a 5% appraisal haircut on your ARV in unknown markets, and only go below 5% haircut after you have local data."
   },
   "shipNote": {
-    "title": "What shipped in TrueCap this week",
+    "title": "TrueCap's BRRRR analyzer (Pro)",
     "items": [
-      "BRRRR analyzer: now flags appraisal risk in Detroit, Memphis, Cleveland where pull-out values lag comps by 3-7%",
-      "Refi rate field defaults updated to reflect Q2 2026 DSCR loan pricing",
-      "New blog post: 'Best states for rental property investors in 2026'"
+      "Models purchase + rehab + holding + refi in one workflow",
+      "Sensitivity grid on ARV — shows what happens if appraisal comes in 5%, 8%, or 12% under plan",
+      "Capital-recycled output — see exactly how much you pull out at refi"
     ]
   }
 }

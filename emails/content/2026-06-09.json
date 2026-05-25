@@ -1,52 +1,52 @@
 {
-  "subject": "TrueCap #2 — the 1031 exchange trap most investors don't see",
-  "preheader": "30Y holding 6.85% · TPA, DAL, CLE deals · Why most 1031s leak 18-22% in friction",
+  "subject": "The 1031 exchange — when it's a power move, when it's a tax tail wagging a dog",
+  "preheader": "45/180-day rules · QI fees · The 'replacement-property panic' that costs more than the deferred tax",
   "publishedAt": "2026-06-09",
-  "weekLabel": "Issue 2",
+  "weekLabel": "Topic: 1031 exchanges",
   "marketSnapshot": {
-    "headline": "Rates flat-ish, summer rents holding gains",
-    "body": "Rates didn't move much — 30Y holding at 6.85%, DSCR loan spreads still wide at +185bp over Fannie pricing. Asking rents in our markets are now showing positive YoY for the first time since Q3 2024 in 9 of 13 markets. The 4 still negative on YoY rents: Austin, Phoenix, Boise, and Las Vegas — all overbuilt during the 2021-2023 boom. Worth watching whether those soften further or stabilize.",
+    "headline": "The 1031 exchange: when it works, when it doesn't",
+    "body": "1031 exchanges let you defer capital gains tax by rolling proceeds from a sold rental into a like-kind replacement property. It's one of the most powerful long-term wealth-building moves in real estate — and one of the most over-rushed. The 45-day identification window and 180-day close window create artificial deadlines that can trap investors into accepting mediocre replacement properties. The math: 1031 only wins if your replacement is a real deal, not a forced one.",
     "stats": [
-      { "label": "30Y fixed", "value": "6.85%", "delta": "+1bp WoW", "deltaTone": "neutral" },
-      { "label": "Markets YoY rent positive", "value": "9 / 13", "delta": "+2 from Q1", "deltaTone": "positive" },
-      { "label": "Median DOM", "value": "42 days", "delta": "-3 days", "deltaTone": "positive" }
+      { "label": "Identification deadline", "value": "45 days" },
+      { "label": "Close deadline", "value": "180 days" },
+      { "label": "Typical QI fee", "value": "$1,200-2,500" }
     ]
   },
   "dealSpotter": [
     {
-      "address": "Tampa, FL — Seminole Heights duplex",
-      "headlineNumber": "6.4% cap · $280 NCF/mo",
-      "verdict": "Decent",
-      "body": "$520k for two 2/1 units, both at $2,100. Insurance is the killer in FL right now ($4,800/yr quoted), which drops cap from 7.1% to 6.4%. Pencils if you can lock in pre-renewal insurance pricing and the city doesn't add hurricane assessments mid-hold. Watch the 1948 build year — older Tampa stock has roof + plumbing issues that show up in year 2-3."
+      "address": "Example: 5-year hold, $80k unrealized gain",
+      "headlineNumber": "1031 saves $19k · replacement deal must clear that bar",
+      "verdict": "Strong (if replacement is real)",
+      "body": "Sold a property held 5 years, $80k of long-term capital gains + depreciation recapture. Taxable bill at 24% effective ~$19k. The 1031 defers all of it IF you can find a replacement property in 45 days that's worth pursuing on its own merits. Quality of replacement is the whole game. A 'mediocre' replacement that earns 1.5% less per year erases the $19k savings within 3-5 years."
     },
     {
-      "address": "Dallas, TX — Oak Cliff SFR",
-      "headlineNumber": "7.6% cap · $640 NCF/mo · MUD tax 2.8%",
-      "verdict": "Marginal",
-      "body": "$245k 4/2 ranch, rents $1,950. Looks like a strong cash-flow play until you pull the actual MUD tax bill — 2.84% effective rate in this zone, not the 1.8% Zillow shows. Recalculate: cap drops to 6.4%, NCF drops to $320. Still possible at the right price, but only if you negotiate 5-7% below ask."
+      "address": "Example: rush to identify a property",
+      "headlineNumber": "Identified deal in week 6 · overpaid 8% · lost the deferral",
+      "verdict": "Skip (the rush)",
+      "body": "Common failure mode: investor sells, the 45-day clock starts, they're scrambling. They identify a deal in week 6 at full ask in a competitive market, pay 8% over what the property is worth, and the deferred-tax savings are eaten by the over-pay. The lesson: identify replacement candidates BEFORE you list the property you're selling. If you can't find good replacements in advance, don't sell."
     },
     {
-      "address": "Cleveland, OH — Old Brooklyn 3/1.5",
-      "headlineNumber": "10.2% cap · $720 NCF/mo",
-      "verdict": "Strong",
-      "body": "$118k for a 3/1.5 brick at $1,425 rent. Taxes low (~$1,800), maintenance reasonable, neighborhood B-. The Midwest cash-flow markets are where the math just works in 2026 if you can stomach lower appreciation. Cleveland's been quietly outperforming Indy/Memphis on yield for 18 months."
+      "address": "Example: small-gain property",
+      "headlineNumber": "$12k unrealized gain · QI fees + complexity eat it · pay tax",
+      "verdict": "Skip (the 1031)",
+      "body": "Held a small property 3 years, $12k of capital gains. Taxable bill ~$2,400. QI fees + 1031 friction = $1,500-2,500. The math barely works even when you find a clean replacement, and you've added a 45-day deadline to your life. Below ~$25k of unrealized gain, just pay the tax and buy the next deal cleanly."
     }
   ],
   "blogFeature": {
     "title": "1031 exchange basics: how to defer capital gains on rental property",
     "url": "https://usetruecap.com/blog/1031-exchange-basics",
-    "excerpt": "The 45-day / 180-day rule, qualified intermediary requirements, like-kind property definitions, and the friction costs most investors don't price in. If you're up 30%+ on a property you've held 5+ years, this is a real lever."
+    "excerpt": "The 45-day / 180-day rules, qualified intermediary requirements, like-kind property definitions, and the friction costs most investors don't price in. If you're up 30%+ on a property you've held 5+ years, this is a real lever."
   },
   "qa": {
-    "question": "Is it worth doing a 1031 if I'd save $40k in capital gains but a 'replacement' costs me $15k in fees + 6 months of stress?",
-    "answer": "Run the after-friction math. $40k saved minus $15k friction = $25k net win, but only if the replacement property is genuinely as good or better than what you'd buy in cash. The trap: investors stuck on the 45-day clock end up buying mediocre properties to hit the deadline, and they overpay 5-10% in the rush. If you can't find something solid in your target market quickly, just take the gain, pay the tax, and buy the right deal later. The tax tail shouldn't wag the underwriting dog."
+    "question": "When should I do a 1031, and when should I just take the tax hit?",
+    "answer": "Three conditions all need to be true for a 1031 to be the right move. (1) The unrealized gain is large enough to justify the friction — typically $25k+ of deferred tax. (2) You have real replacement candidates identified BEFORE you sell, not 'I'll find something in the 45-day window.' (3) The replacement property is genuinely as good or better than what you'd buy if you weren't on a deadline. If any of those three is false, pay the tax and move on. The most common mistake: investors so attached to 'defer the tax!' that they buy a mediocre replacement in week 6 of the 45-day window, overpay 5-10%, and end up worse off than if they'd just paid the original tax bill."
   },
   "shipNote": {
-    "title": "What shipped in TrueCap this week",
+    "title": "TrueCap helps you stress-test 1031 candidates",
     "items": [
-      "MUD tax warning in property enrichment — flags zones where effective tax rate diverges from county headline rate (TX, parts of FL/GA)",
-      "Compare Deals: now defaults to side-by-side 3-column view on tablets",
-      "PDF report cover page redesigned with deal score + verdict on first page"
+      "Save the property you're selling AND your top 3 replacement candidates to compare them side-by-side",
+      "Pro: 10-year IRR projection lets you compare the FUTURE returns of the kept property vs the candidates, not just the today numbers",
+      "Sensitivity grid shows how the replacement holds up if rents stay flat or rates rise"
     ]
   }
 }

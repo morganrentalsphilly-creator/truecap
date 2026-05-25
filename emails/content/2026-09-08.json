@@ -1,51 +1,52 @@
 {
-  "subject": "TrueCap #15 — cost segregation: the tax move most investors miss",
-  "preheader": "Front-load 25-35% of depreciation · When the $4-7k study pays for itself · Honest limits",
+  "subject": "Cost segregation: the tax move worth understanding (when it actually works)",
+  "preheader": "Front-load 25-35% of depreciation · The $4-7k study · Why it backfires on short holds",
   "publishedAt": "2026-09-08",
-  "weekLabel": "Issue 15",
+  "weekLabel": "Topic: Cost segregation",
   "marketSnapshot": {
-    "headline": "Fed cut 50bp, mortgage rates broke 6.2%",
-    "body": "Fed cut 50bp on Wednesday — the larger of the two scenarios. Mortgage rates dropped immediately, 30Y now at 6.18%. DSCR loans at 7.65%. This is the lowest rate environment in 14 months and the strongest setup for new acquisitions since early 2024. Three things investors are doing this week: (1) accelerating closings on deals that were in pending — locking the new lower rate. (2) running re-underwrites on saved deals from earlier in the year to see which ones now pencil at the lower rate. (3) considering refinancing existing 7-8% loans. Break-even on refi at this rate level is typically 18-28 months depending on closing costs.",
+    "headline": "Cost segregation — front-load depreciation, but know the trade",
+    "body": "Cost segregation studies break a building into components — land improvements, personal property, systems — that depreciate over 5, 7, or 15 years instead of the standard 27.5 years for residential rental. The result: 20-30% of building value gets reclassified to faster schedules, front-loading meaningful depreciation deductions into years 1-5 of ownership. Real benefit for buy-and-hold investors with W-2 income to offset. Less benefit (and sometimes negative) for short-hold strategies.",
     "stats": [
-      { "label": "30Y fixed", "value": "6.18%", "delta": "-27bp WoW", "deltaTone": "positive" },
-      { "label": "DSCR avg", "value": "7.65%", "delta": "-45bp", "deltaTone": "positive" },
-      { "label": "Fed funds", "value": "4.50%", "delta": "-50bp", "deltaTone": "positive" }
+      { "label": "% typically reclassified", "value": "20-30%" },
+      { "label": "Engineering study cost", "value": "$4-7k" },
+      { "label": "Best fit hold period", "value": "7+ years" }
     ]
   },
   "dealSpotter": [
     {
-      "address": "Phoenix, AZ — Garfield neighborhood SFR",
-      "headlineNumber": "Re-pencils at 6.18% · was Marginal at 6.85%",
-      "verdict": "Strong (at new rate)",
-      "body": "$315k 3/2 at $2,100 rent. I underwrote this in June at 6.85% and called it Marginal — cash flow was $80/mo, DSCR 1.18. At today's 6.18%, cash flow is $245/mo, DSCR 1.31. Same property, same rents, same underwriting — just the rate change took it from 'skip' to 'go.' This is happening across dozens of deals — worth re-running anything you walked from earlier in the year."
+      "address": "Example: $400k rental held 10+ years",
+      "headlineNumber": "~$50-65k accelerated · $16-21k tax savings",
+      "verdict": "Strong (do the study)",
+      "body": "$400k rental property, 10+ year planned hold. Assume $80k gets reclassified to 5-15 year schedules. You front-load ~$50-65k of depreciation deductions into the first 5 years vs spreading across 27.5. At a 32% effective tax bracket, that's $16-21k of accelerated tax savings in those first 5 years. Cost of the engineering study: $4-7k. Net: $12-16k benefit plus meaningful time-value-of-money on the front-loaded deductions."
     },
     {
-      "address": "Tampa, FL — Seminole Heights duplex",
-      "headlineNumber": "Refi savings: $385/mo on existing portfolio",
-      "verdict": "Refinance candidate",
-      "body": "Including this not as a new deal but as a refi callout. If you closed this property in 2024 at 7.5%, today's 6.18% is a 132bp drop. On a $400k loan, that's ~$385/mo of savings. Closing costs typically $5-7k. Break-even = 13-18 months. If you plan to hold past then, refinance. Get 3 quotes — rate variance between lenders is wider than usual right now."
+      "address": "Example: $200k rental held 7 years",
+      "headlineNumber": "Math gets tight at lower property values · marginal",
+      "verdict": "Marginal",
+      "body": "$200k rental property, 7-year planned hold. The study cost ($4-7k) is a higher percentage of the deal, and the deductions reclassified are smaller in absolute terms. Net benefit might be $3-7k over the hold — real money but not a slam-dunk. The break-even is roughly $250k+ property value for cost seg to clearly win."
     },
     {
-      "address": "Kansas City, MO — Waldo SFR",
-      "headlineNumber": "8.4% cap at new rates · clean play",
-      "verdict": "Strong",
-      "body": "$215k 3/2 at $1,950 rent. Already a strong deal at 6.85%. At 6.18%, cash flow improves another $115/mo, taking total monthly NCF to $850. Cap rate unchanged at 8.4% (cap rate is rate-agnostic), but the financed return is meaningfully better."
+      "address": "Example: rental sold in year 3",
+      "headlineNumber": "Depreciation recapture eats most of the savings",
+      "verdict": "Skip (the cost seg)",
+      "body": "$300k rental sold after 3 years. The front-loaded depreciation gets 'recaptured' at ordinary income rates when you sell (vs the favored 25% rate on standard depreciation recapture). Short holds + cost seg often produce a net wash or slight loss. Cost seg pairs poorly with flipping. Pairs WELL with 1031 (defers the recapture too)."
     }
   ],
   "blogFeature": {
     "title": "1031 exchange basics: how to defer capital gains on rental property",
     "url": "https://usetruecap.com/blog/1031-exchange-basics",
-    "excerpt": "1031 + cost segregation pair well — defer the gain on the sold property, accelerate depreciation on the replacement. The two-step tax strategy that materially improves IRR for tax-aware investors."
+    "excerpt": "Cost segregation + 1031 exchange is the tax-savvy investor's combo. Front-load deductions now, defer the recapture by rolling into the next property. The two-step tax strategy that materially improves IRR for tax-aware investors."
   },
   "qa": {
-    "question": "Cost segregation: my CPA says it's worth doing on my $400k rental. How does it actually work?",
-    "answer": "Cost seg breaks your building into components — land improvements, personal property, systems — that depreciate over 5, 7, or 15 years instead of the standard 27.5 years for residential rental property. On a typical SFR, 20-30% of the building value gets reclassified to faster depreciation schedules. The result: in years 1-5 of ownership, your depreciation deduction is 2-3x what it would be without the study. The math on your $400k rental: assume $80k is reclassified to 5-15 year schedules. You front-load ~$50-65k of depreciation deductions into the first 5 years vs spreading it across 27.5. At a 32% effective tax bracket, that's $16-21k of accelerated tax savings in those first 5 years. Cost of the engineering study: typically $4-7k. So you'd save ~$12-16k net over the first 5 years, plus a meaningful time-value-of-money benefit on the front-loaded deductions. The catch: when you sell, the front-loaded depreciation gets 'recaptured' at ordinary income rates (vs the 25% rate on standard depreciation recapture). So cost seg is best for properties you'll hold 7+ years or 1031-exchange. If you're flipping or selling in 2-3 years, the math doesn't usually work."
+    "question": "Should I do cost seg on every rental I buy?",
+    "answer": "No — three conditions all need to be true for cost seg to clearly win. (1) Property value is high enough to support the study cost: typically $250k+ purchase price. Below that, the $4-7k study eats too much of the benefit. (2) Planned hold period is 7+ years. Shorter holds + depreciation recapture often wash out the savings. (3) You have W-2 or active income to offset the deductions against, OR your spouse qualifies as a real-estate professional and can use the losses fully. If you're in a 22% bracket with only passive rental income to offset, cost seg's benefit is much smaller than if you're in a 35-37% bracket with active income. Default rule: cost seg makes sense on rentals in the $300k+ range that you plan to hold long-term in your active-income years. Talk to a CPA — they'll model your specific numbers in 30 minutes."
   },
   "shipNote": {
-    "title": "What shipped in TrueCap this week",
+    "title": "TrueCap tracks tax-aware metrics",
     "items": [
-      "Re-underwrite from saved analysis: one-click to refresh a saved deal with today's rate, see the delta",
-      "Refi calculator: enter your current rate + balance, see savings, break-even, and lifetime interest reduction"
+      "Depreciation line items in the cash-flow waterfall (default to 27.5 year straight-line)",
+      "Pro: 10-year projection shows the impact of accelerated depreciation if you've done cost seg",
+      "PDF reports include tax-impact summary for sharing with your CPA"
     ]
   }
 }

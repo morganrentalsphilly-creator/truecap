@@ -1,51 +1,52 @@
 {
-  "subject": "TrueCap #16 — Q3 market check: what's working, what's not",
-  "preheader": "9 months in · Where deals pencil in Q4 · The 3 markets I've quietly stopped underwriting",
+  "subject": "House hacking: live (almost) for free in a 2-4 unit",
+  "preheader": "3.5% down FHA · The year-2 transition where break-even flips to real cash flow · True out-of-pocket math",
   "publishedAt": "2026-09-15",
-  "weekLabel": "Issue 16",
+  "weekLabel": "Topic: House hacking",
   "marketSnapshot": {
-    "headline": "9 months into 2026: the map looks different than January",
-    "body": "Time for a quarterly stocktake. The market in September 2026 has three big differences from January. (1) Rates broke through 6.2% after the September cut — better than most forecasts. (2) Insurance has continued reshaping the geographic deal map: FL/LA/coastal TX harder to make work, Midwest + select non-coastal Southeast much more attractive. (3) Rents are firmly positive YoY in 10 of 13 covered markets — a real reversal from the 2024-early 2025 stagnation. Net effect: deals are easier to find than at any point in the last 18 months, IF you're willing to look in the right markets and skip the Sun Belt darling list.",
+    "headline": "House hacking — the highest-leverage path into rental investing",
+    "body": "House hacking means buying a 2-4 unit property with owner-occupant financing (FHA 3.5%, conventional 5%), living in one unit, and renting the others. After year 1 you can move out and the property converts to a pure investment. The leverage advantage is enormous — you control a $300-400k property with $10-20k down instead of $75-100k for a pure investment. The year-2 math is where the strategy really compounds.",
     "stats": [
-      { "label": "30Y fixed", "value": "6.15%", "delta": "-3bp WoW", "deltaTone": "positive" },
-      { "label": "Markets I'm bullish on", "value": "7 / 13", "delta": "+2 since Q2", "deltaTone": "positive" },
-      { "label": "Markets I'm avoiding", "value": "3 / 13" }
+      { "label": "FHA min down payment", "value": "3.5%" },
+      { "label": "Conventional min down (HomeReady)", "value": "5%" },
+      { "label": "Owner-occupant residency", "value": "1 year min" }
     ]
   },
   "dealSpotter": [
     {
-      "address": "Cincinnati, OH — College Hill SFR",
-      "headlineNumber": "8.6% cap · stable B-neighborhood",
-      "verdict": "Strong",
-      "body": "$152k 3/1.5 at $1,400 rent. Cincinnati's been one of the quiet outperformers — boring, stable, low insurance volatility, decent job market with two healthcare anchors (Mercy + UC Health). Not a market that shows up in BiggerPockets threads, which is part of why the deals still pencil. The cap rate is real, the neighborhood is stable, the math works."
+      "address": "Example: exceptional house hack",
+      "headlineNumber": "True out-of-pocket: $0 · all units cover your costs",
+      "verdict": "Strong (rare)",
+      "body": "A $300k triplex with two units renting at $1,400 each = $2,800/mo of incoming rent. Total monthly cost of property (mortgage + tax + insurance + utilities for your unit + reserves) ~$2,750/mo. True out-of-pocket: roughly zero. You live in unit 1 for free while building equity in property you own. Exceptional and rare — finding deals like this requires hunting in undersupplied 2-4 unit markets like Philadelphia, Pittsburgh, Indianapolis, parts of the Midwest."
     },
     {
-      "address": "Greensboro, NC — Sunset Hills SFR",
-      "headlineNumber": "7.4% cap · steady appreciation tailwind",
+      "address": "Example: strong house hack",
+      "headlineNumber": "True out-of-pocket: $300-600/mo · paying half-rent",
       "verdict": "Strong",
-      "body": "$245k 3/2 at $1,925 rent. North Carolina's been adding population steadily (Tesla coming, defense + textile reshoring, biotech expansion in RTP). The Piedmont Triad markets (Greensboro, Winston-Salem, High Point) are cheaper than Raleigh-Durham and Charlotte but get spillover demand. Boring deals here compound well — modest cash flow today, 3-5%/yr appreciation, low insurance volatility."
+      "body": "A $400k duplex in a livable city neighborhood. Other unit rents for $1,800; you live in the equivalent unit. True out-of-pocket housing cost ~$500/mo when comparable 2-bedroom rents go for $1,500-1,900 in the area. Paying a fraction of market rent for your unit AND building principal each month. Year-2 transition: you move out, rent your unit for $1,800. Property now has $3,600/mo gross — solid cash flow."
     },
     {
-      "address": "Sarasota, FL — Bee Ridge condo",
-      "headlineNumber": "5.1% cap · HOA up 22% YoY · WALK",
+      "address": "Example: house hack that doesn't pencil",
+      "headlineNumber": "True out-of-pocket: $1,600/mo · close to market rent",
       "verdict": "Skip",
-      "body": "$325k 2/2 condo at $2,150 rent. The condo's HOA jumped from $385/mo to $470/mo on the latest renewal, with a $1,800 special assessment for facade work. Florida condo associations are still working through the post-Surfside reserve-study mandates, and many older buildings will face 30-60% HOA hikes in the next 2-3 years. Sarasota also faces the broader FL insurance issue. The 5.1% cap doesn't survive the friction. Florida condos specifically are a 'wait 18-24 months' market until the HOA shock fully prices in."
+      "body": "A $550k 2-unit in an expensive market. Other unit rents for $2,200. True out-of-pocket $1,650/mo — close to what a comparable 1-bed rents for in the area. You're not getting meaningful housing-cost reduction AND you're carrying the operational complexity of being a landlord while living in the building. Skip — buy a regular primary residence or wait for a different deal."
     }
   ],
   "blogFeature": {
-    "title": "What's a good cap rate in 2026?",
-    "url": "https://usetruecap.com/blog/what-is-a-good-cap-rate",
-    "excerpt": "Cap rate bands updated for the current rate environment. Why a 'good' cap rate depends on market type and financing reality, and why blind chasing of 10%+ caps often signals more risk than reward."
+    "title": "House hacking explained: how to (almost) live for free in a 2-4 unit",
+    "url": "https://usetruecap.com/blog/house-hacking-explained",
+    "excerpt": "Full math behind FHA 3.5% vs conventional 5% owner-occupant loans, the year-2 transition where break-even flips to real cash flow, and the property characteristics that make a 2-4 unit work for this strategy."
   },
   "qa": {
-    "question": "You mentioned three markets you've quietly stopped underwriting. Which three?",
-    "answer": "Honest answer: (1) Florida coastal — Naples, Sarasota, Cape Coral, parts of Tampa Bay. Insurance + HOA + post-hurricane construction costs make the math actively painful unless you bought 5+ years ago. (2) Boise, ID — overbuilt 2022-2024, rents still negative YoY, supply absorption is at least 12-18 months from done. (3) Austin, TX — rents down 8-12% from 2023 peak, MUD tax exposure varies wildly by zone, the tech-employment narrative isn't supporting rent growth the way it did in 2018-2021. These aren't permanent stay-aways — all three will be attractive again, probably in 2027-2028 once the structural issues work through. But underwriting time spent in those markets in Q4 2026 produces less ROI than time spent on the Midwest, Piedmont NC, or select non-coastal SE markets like Charlotte/Charleston/Birmingham."
+    "question": "FHA 3.5% down or conventional 5% down for the house hack?",
+    "answer": "Conventional 5% usually wins long-term, FHA 3.5% wins short-term. FHA's lower down payment is offset by MIP (Mortgage Insurance Premium) that lasts the LIFE of the loan (or 11 years if you put 10%+ down) at typically 0.55-0.85% of the loan annually. On a $300k loan that's $1,650-2,550/year of MIP recurring forever. Conventional 5% owner-occupant loans (Fannie Mae HomeReady, Freddie Mac Home Possible) have PMI that falls off automatically at 80% LTV — typically 5-7 years in. Run both scenarios through a calculator (TrueCap supports both) and you'll usually see conventional 5% has better long-term economics IF you can come up with the extra $4-5k of down payment. FHA wins when capital is genuinely the constraint or your DTI is tight."
   },
   "shipNote": {
-    "title": "What shipped in TrueCap this week",
+    "title": "TrueCap supports owner-occupant analysis",
     "items": [
-      "Quarterly markets dashboard: per-market cap rate trends, insurance volatility flag, deal-flow scoring",
-      "New market page: /markets/cincinnati (the under-discussed cash-flow market)"
+      "Property type = Owner-occupant: scoring uses break-even bands ($300/mo near-zero) not investor cash-flow bands ($1,000/mo)",
+      "Year-1 vs year-2 cash flow projection: see the transition math",
+      "Free House-hack starter template at /dashboard/templates"
     ]
   }
 }

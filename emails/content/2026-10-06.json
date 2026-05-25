@@ -1,51 +1,52 @@
 {
-  "subject": "TrueCap #19 — tenant screening: the call that makes or breaks the year",
-  "preheader": "5 criteria that actually predict outcomes · 3 that don't · The reference call no one makes",
+  "subject": "Tenant screening — the 5 criteria that actually predict outcomes",
+  "preheader": "Rent-to-income · prior-landlord reference · credit · employment · eviction history · 3 you can skip",
   "publishedAt": "2026-10-06",
-  "weekLabel": "Issue 19",
+  "weekLabel": "Topic: Tenant screening",
   "marketSnapshot": {
-    "headline": "October pace strong, year-end closings in sight",
-    "body": "Inventory peaked late September and is now drifting down as expected. Closings-by-year-end pipeline is still in play — under contract by mid-October gives most lenders enough runway to close by December 30. Rate-wise, 30Y at 6.08%, holding tight. The acquisition story for Q4: this is the cleanest rate + inventory + motivated-seller setup in 18 months. If you've been on the sidelines all year, the conditions you've been waiting for are here. Not getting better than this without something breaking.",
+    "headline": "Tenant screening — the 5 criteria that predict outcomes",
+    "body": "The single decision that has the biggest impact on whether a rental property performs to plan: who you put in it. Five screening criteria actually predict outcomes statistically. Three commonly-used criteria don't (and screening on them is a fair-housing violation). New landlords usually under-invest in screening and end up with the loudest, most-aggressive applicant. Experienced ones use a consistent process and end up with measurably better tenants.",
     "stats": [
-      { "label": "30Y fixed", "value": "6.08%", "delta": "-4bp WoW", "deltaTone": "positive" },
-      { "label": "% under-ask closings", "value": "57%", "delta": "+11pp YoY", "deltaTone": "positive" },
-      { "label": "Median days to close", "value": "38", "delta": "-7 days YoY", "deltaTone": "positive" }
+      { "label": "Rent-to-income floor", "value": "≤ 33%" },
+      { "label": "FICO threshold most use", "value": "670+" },
+      { "label": "Avg cost of one bad tenant", "value": "$5-15k" }
     ]
   },
   "dealSpotter": [
     {
-      "address": "Charlotte, NC — Plaza Midwood SFR",
-      "headlineNumber": "6.4% cap · solid B+ neighborhood · ready to rent",
+      "address": "Example: A-class property · high screening volume",
+      "headlineNumber": "80-120 applications · screen first qualified, not first applied",
       "verdict": "Strong",
-      "body": "$385k 3/2 at $2,650 rent. Already vacant, freshly painted, new appliances. The screening test starts immediately on close — Plaza Midwood gets 80-120 applications per listed unit. The wrong screening process means you end up with the loudest, most aggressive applicant rather than the best one. The right process: list at market, require online application + credit + verification documents within 72 hours, screen in the order received. Aim for 30%+ rent-to-income, 670+ FICO minimum, no eviction history."
+      "body": "A-class property in a desirable city neighborhood. The wrong screening process here means you end up with the loudest, most aggressive applicant rather than the best one. The right process: list at market, require online application + credit + verification documents within 72 hours, screen in the order received. Aim for 30%+ rent-to-income, 670+ FICO minimum, no eviction history. Disqualify quickly so you don't burn time on weak candidates."
     },
     {
-      "address": "Pittsburgh, PA — Lawrenceville duplex",
-      "headlineNumber": "Existing tenants · vet the inheritance",
+      "address": "Example: B-class property · vet inherited tenants carefully",
+      "headlineNumber": "Existing tenants · ALL their history matters",
       "verdict": "Decent (with caveats)",
-      "body": "$305k 2-unit, both currently occupied. The under-asked-about due diligence: get the rent rolls for the LAST 24 months (not just current), the security deposit ledger, and any communication-with-tenant log. Tenant who's been there 8 years paying $1,150 when market is $1,400 isn't 'great long-term tenant' — they're locked-in below market with no path to market without disruption. The math on assuming below-market tenants vs vacating to relist is real and worth modeling before bidding."
+      "body": "Property currently occupied. The under-asked-about due diligence: get the rent rolls for the LAST 24 months (not just current), the security deposit ledger, and any communication-with-tenant log. Tenant who's been there 8 years paying significantly below market isn't 'great long-term tenant' — they're locked-in below market with no path to market without disruption. The math on assuming below-market tenants vs vacating to relist is real and worth modeling before bidding."
     },
     {
-      "address": "Atlanta, GA — Kirkwood SFR",
-      "headlineNumber": "7.1% cap · 75 days to first qualified applicant",
+      "address": "Example: C-class property · screening market is soft",
+      "headlineNumber": "60-90 day lease-up timeline · budget the vacancy honestly",
       "verdict": "Decent",
-      "body": "$278k. Including this as a cautionary note. Atlanta's screening market is currently soft for B-class properties — applicants are slower, qualification rates lower than 12 months ago. Budget 60-90 day lease-up timeline for first-rental properties unless you're at A-class. That's $3,500-5,500 of vacancy that doesn't show up in the listing's pro-forma 5% vacancy assumption. Pencil it in honestly."
+      "body": "C-class property in a market with softer rental demand. Budget 60-90 day lease-up timeline for first-rental properties unless you're at A-class. That's $3,500-5,500 of vacancy that doesn't show up in the listing's pro-forma 5% vacancy assumption. Pencil it in honestly. The biggest source of 'this deal didn't pencil like I thought' is unrealistic vacancy assumptions at the C-class level."
     }
   ],
   "blogFeature": {
     "title": "Property management yes or no — the actual math",
     "url": "https://usetruecap.com/blog/property-management-yes-or-no",
-    "excerpt": "PMs charge for their screening process — and on a single-tenant placement, their screening alone often justifies the fee. The honest math on what good screening actually saves you in avoided bad-tenant costs."
+    "excerpt": "Good PMs run rigorous screening that catches issues a single landlord wouldn't spot. The fee they charge often pays for itself on screening alone — bad tenants cost 3-12 months of lost rent plus damages."
   },
   "qa": {
     "question": "What 5 things actually predict whether a tenant will be a good tenant?",
-    "answer": "(1) Rent-to-income ratio. Solid threshold: monthly rent should be ≤33% of verified gross monthly income. Below 30% is great; above 40% predicts late payments and stress. Verify via 2 most-recent pay stubs OR employer letter (not just self-reported). (2) Prior-landlord references — specifically the second-to-last landlord, not the current one (current ones often give glowing reviews to get the tenant out). Ask: did they pay on time, did they take care of the property, would you re-rent to them? (3) Credit score. 670+ is the typical investor threshold. Below 620 has 2-3x the eviction risk. Above 720 is great. (4) Employment stability — at the current employer for 12+ months is a positive signal. Frequent job changes correlate with payment risk. (5) Eviction history — any prior eviction filing (even if dismissed) raises future-eviction risk substantially. Three things that DON'T meaningfully predict outcomes: presence of pets, marital status, having children. Screening on those is also a fair-housing violation. Stay disciplined on the five that matter."
+    "answer": "(1) Rent-to-income ratio. Solid threshold: rent should be ≤33% of verified gross monthly income. Below 30% is great; above 40% predicts late payments and stress. Verify via 2 most-recent pay stubs OR employer letter (not just self-reported). (2) Prior-landlord references — specifically the second-to-last landlord, not the current one (current ones often give glowing reviews to get the tenant out). Ask: did they pay on time, did they take care of the property, would you re-rent to them? (3) Credit score. 670+ is the typical investor threshold. Below 620 has 2-3x the eviction risk. Above 720 is great. (4) Employment stability — at the current employer for 12+ months is a positive signal. Frequent job changes correlate with payment risk. (5) Eviction history — any prior eviction filing (even dismissed) raises future-eviction risk substantially. Three things that DON'T meaningfully predict outcomes: presence of pets, marital status, having children. Screening on those is also a fair-housing violation. Stay disciplined on the five that matter."
   },
   "shipNote": {
-    "title": "What shipped in TrueCap this week",
+    "title": "TrueCap models the vacancy realistically",
     "items": [
-      "Lease-up timeline awareness: vacancy assumption auto-adjusts by metro based on current absorption rates",
-      "Existing-tenant inheritance flag in property details: warns when assumed rents are below market by 10%+"
+      "Vacancy assumption auto-adjusts by metro based on current absorption rates",
+      "Existing-tenant inheritance flag: warns when assumed rents are below market by 10%+",
+      "Pro: sensitivity grid lets you toggle higher vacancy scenarios to stress-test deals"
     ]
   }
 }

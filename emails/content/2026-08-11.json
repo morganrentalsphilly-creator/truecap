@@ -1,51 +1,52 @@
 {
-  "subject": "TrueCap #11 — reading an inspection report (don't skim the boring parts)",
-  "preheader": "The 6 lines that tell you whether to walk · How to price what you find · 3 inspection-stage deals",
+  "subject": "Reading an inspection report — the 6 lines that matter",
+  "preheader": "Roof, electrical, plumbing, foundation, HVAC, mold · How to negotiate vs walk · 3 inspection scenarios",
   "publishedAt": "2026-08-11",
-  "weekLabel": "Issue 11",
+  "weekLabel": "Topic: Inspections",
   "marketSnapshot": {
-    "headline": "Late-summer market slowing as expected",
-    "body": "Asking rents flat MoM across our covered markets — the seasonal late-summer plateau that hits every August. Days-on-market crept up to 47 from 43 last week, also seasonal. Nothing alarming, just the regular August lull before the September pickup. If you're shopping deals in August, you have meaningfully more negotiating leverage than you'd have in May or October — sellers who've been on-market all summer are getting impatient and will entertain reasonable offers below ask.",
+    "headline": "Six lines on the inspection report decide everything",
+    "body": "Inspection reports run 30-60 pages. Most of it is documentation and photos. Six specific findings actually decide whether to proceed: roof, electrical, plumbing main lines, foundation, HVAC, and mold/moisture. Everything else (minor caulk gaps, GFCI upgrades, paint chips) is small money. The discipline: skim past the small stuff on first read, focus negotiation on the six that matter.",
     "stats": [
-      { "label": "30Y fixed", "value": "6.58%", "delta": "-1bp WoW", "deltaTone": "positive" },
-      { "label": "Median DOM", "value": "47 days", "delta": "+4 days seasonal", "deltaTone": "neutral" },
-      { "label": "% asking-reductions", "value": "31%", "delta": "+6pp from June", "deltaTone": "positive" }
+      { "label": "Roof replacement typical cost", "value": "$8-15k" },
+      { "label": "Foundation repair typical range", "value": "$5-25k" },
+      { "label": "Knob-and-tube remediation", "value": "$4-12k" }
     ]
   },
   "dealSpotter": [
     {
-      "address": "Philadelphia, PA — South Philly rowhouse",
-      "headlineNumber": "Listed $245k · inspection found $18k of work",
-      "verdict": "Strong (with negotiation)",
-      "body": "Inspector flagged: knob-and-tube wiring in attic (~$4,500 to remediate), roof at end-of-life (~$8,000), and minor foundation settling (cosmetic, $1,500 monitoring + minor fix). Most buyers walk. The smart move: come back with $228k offer citing the inspection report. Seller has been on market 65 days — high probability they accept. The deal at $228k all-in with the work scoped is an 8.6% cap; at $245k with the same work it's only 7.2%. Same property, different deal, depending on how you negotiate."
+      "address": "Example: inspection found $18k of work",
+      "headlineNumber": "Negotiate $17k off ask · deal still strong",
+      "verdict": "Strong (after negotiation)",
+      "body": "Inspector flagged: knob-and-tube wiring in attic (~$4,500 remediation), roof at end-of-life (~$8,000), minor foundation settling (cosmetic, $1,500 monitoring + minor fix). Most buyers walk. The smart move: come back with an offer that absorbs $17,000 of the findings into the price. Sellers with property on market past 45-60 days often accept this. Same property, different deal — depends on how you negotiate."
     },
     {
-      "address": "Indianapolis, IN — Speedway 3/2",
-      "headlineNumber": "Inspection clean except radon · $1,200 fix",
+      "address": "Example: $1,200 fix · easy seller concession",
+      "headlineNumber": "Radon mitigation · sound scarier than it is",
       "verdict": "Strong",
-      "body": "$152k. Inspector found radon at 6.2 pCi/L (EPA action level is 4.0). Mitigation cost: $1,200-1,500. This is one of those 'sounds scary, costs little' findings — easy to negotiate into the contract. Seller usually pays for radon mitigation when it's flagged at inspection. If they refuse, you absorb the $1,200 and still have a great deal."
+      "body": "Inspection found radon at 6.2 pCi/L (EPA action level is 4.0). Mitigation cost: $1,200-1,500. This is one of those 'sounds scary, costs little' findings — easy to negotiate into the contract. Sellers usually pay for radon mitigation when flagged. If they refuse, you absorb the $1,200 and still have a great deal. Don't let scary-sounding-but-cheap items kill a deal."
     },
     {
-      "address": "Memphis, TN — Hickory Hill SFR",
-      "headlineNumber": "Inspection found foundation problem · WALK",
+      "address": "Example: structural finding · WALK",
+      "headlineNumber": "Settlement crack with vertical displacement · $12-22k of structural work",
       "verdict": "Skip",
-      "body": "$118k 3/2. Looked great on paper. Inspector found settlement crack with vertical displacement >1\" — structural engineer review pegged the repair at $12-22k including drainage work. The seller refused to absorb any of it. On a $118k house, that's 10-19% of purchase price. Not the kind of work an absentee landlord should take on for a first or second property. The headline cap rate evaporated in the inspection."
+      "body": "Structural engineer review revealed foundation work needed. On a small property, structural fixes can be 10-19% of purchase price. The seller refused to absorb any of it. For an absentee or first-time landlord, this isn't the right project to take on. The headline cap rate evaporated in the inspection. Walk."
     }
   ],
   "blogFeature": {
     "title": "Property management yes or no — the actual math",
     "url": "https://usetruecap.com/blog/property-management-yes-or-no",
-    "excerpt": "PM fees + lease-up + maintenance markup add up to 13-18% of gross rent, not the 8-10% the headline number suggests. When self-management beats PM and vice-versa."
+    "excerpt": "Good property managers coordinate the inspection-stage rehab work. Self-managers do it themselves. The inspection-stage capex math is where this difference matters most."
   },
   "qa": {
-    "question": "I got my inspection report — 40 pages, half of them photos. What do I actually need to focus on?",
-    "answer": "Six lines decide whether to proceed. Skim past everything else on a first pass. (1) Roof — age, condition, life remaining. A roof needing replacement in the next 2-3 years is $8-15k that needs to be in your offer math. (2) Electrical — panel age and amp service, presence of knob-and-tube or aluminum branch wiring. Knob-and-tube remediation is a $4-12k surprise. (3) Plumbing — main sewer line condition (camera scope is worth it, $300), galvanized vs copper supply lines, water heater age. A failed sewer line is $5-15k. (4) Foundation — any 'structural concerns' note triggers a follow-up structural engineer call. Don't proceed without that second opinion. (5) HVAC — age and condition of furnace and AC. A 20-year-old system is end-of-life. (6) Mold / moisture — any active moisture in basements or attics signals systemic issues, not point-fixes. Everything else (paint chipping, minor caulk gaps, GFCI outlets needing upgrade) is small money. Your offer-revision negotiation should focus on the six above."
+    "question": "Six lines decide it — what are they exactly?",
+    "answer": "(1) Roof — age, condition, life remaining. A roof needing replacement in the next 2-3 years is $8-15k that needs to be in your offer math. (2) Electrical — panel age and amp service, presence of knob-and-tube or aluminum branch wiring. Remediation is a $4-12k surprise. (3) Plumbing — main sewer line condition (camera scope is worth the $300), galvanized vs copper supply lines, water heater age. A failed sewer line is $5-15k. (4) Foundation — any 'structural concerns' note triggers a follow-up structural engineer call ($400-800). Don't proceed without that second opinion. (5) HVAC — age and condition of furnace and AC. A 20-year-old system is end-of-life. (6) Mold/moisture — any active moisture in basements or attics signals systemic issues, not point-fixes. Negotiate offer revisions on the six above. Everything else is small money."
   },
   "shipNote": {
-    "title": "What shipped in TrueCap this week",
+    "title": "TrueCap's inspection-stage rehab estimator",
     "items": [
-      "Inspection-stage rehab estimator: add quick line items from your inspector's findings, get an updated cap rate / cash flow",
-      "Compare Deals view now flags age-of-systems differences between deals (helpful for capex-aware comparisons)"
+      "Add quick line items from the inspector's findings — roof, electrical, plumbing, HVAC",
+      "See updated cap rate / cash flow after adding the rehab cost",
+      "Pro: Compare Deals view flags age-of-systems differences for capex-aware comparisons"
     ]
   }
 }

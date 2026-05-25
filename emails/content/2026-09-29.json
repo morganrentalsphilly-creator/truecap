@@ -1,35 +1,35 @@
 {
-  "subject": "TrueCap #18 — first-year capex: what no one tells new landlords",
-  "preheader": "The 6 surprises that hit 70% of new investors · How to budget defensively · 3 deals",
+  "subject": "Year-1 capex: what no one tells new landlords",
+  "preheader": "The 3-tier reserve framework · Why 1925 rowhouses and 2018 tract homes need different budgets · 6 common surprises",
   "publishedAt": "2026-09-29",
-  "weekLabel": "Issue 18",
+  "weekLabel": "Topic: First-year capex",
   "marketSnapshot": {
-    "headline": "Acquisition window remains favorable, year-end approaching",
-    "body": "Six weeks to year-end. Rates are stable, inventory is healthy, sellers motivated to close before December 31 for tax reasons. From the buyer side, two reasons to be active in October: (1) inventory will tighten in mid-December as listings withdraw for the holidays. (2) lenders' year-end processing pipelines get backed up after Thanksgiving — close-by-year-end deals need to be under contract by mid-October to be safe. If you're looking for deals, the next 2-3 weeks are the highest-leverage window of the year.",
+    "headline": "Year-1 capex — the surprise that hits 70% of new investors",
+    "body": "The biggest underwriting mistake new landlords make: using 'national average' capex assumptions (8-10% of rent annually) without adjusting for building age. A 1925 rowhouse and a 2018 tract home need different reserve budgets by an order of magnitude. The discipline: pick a capex tier based on the property's age + recent renovation history, and reserve accordingly. The hidden first-year capex bill is the cause of more 'this deal didn't work like I thought' regret than any other factor.",
     "stats": [
-      { "label": "30Y fixed", "value": "6.12%", "delta": "-2bp WoW", "deltaTone": "positive" },
-      { "label": "Months to year-end", "value": "3", "delta": "close-by-Dec deadline" },
-      { "label": "Avg pre-close timeline", "value": "45 days" }
+      { "label": "Tier 1: turnkey/recently renovated", "value": "$800-2,000" },
+      { "label": "Tier 2: 10-30 yr old, no renovation", "value": "$3,500-6,000" },
+      { "label": "Tier 3: 40+ yr or deferred maintenance", "value": "$6,500-12,000" }
     ]
   },
   "dealSpotter": [
     {
-      "address": "Indianapolis, IN — Garfield Park SFR",
-      "headlineNumber": "Year-1 surprise capex: ~$6,500",
+      "address": "Example: Tier 2 property · honest capex makes it real",
+      "headlineNumber": "$1,575 rent · capex reserve $5k/yr · still 7.6% cap",
       "verdict": "Strong (with capex reserve)",
-      "body": "$175k 3/2 at $1,575 rent. Looks like a clean turnkey deal. But the property is 1958, last full roof in 2009, water heater is original equipment from when the seller bought in 2018. Honest year-1 budget: water heater replacement ($1,800), roof repairs or full replacement ($4,000-7,500 depending on condition), HVAC service + likely AC capacitor ($400-800). Don't 'hope' these don't fail. Budget them. The deal still pencils at 7.6% cap when you include this reserve in year-1, but it's a different feeling than the 8.4% the seller's listing math implies."
+      "body": "$175k 3/2 from 1958. Looks like a clean turnkey deal on the surface. The honest year-1 budget: water heater replacement (~$1,800), roof repairs or full replacement ($4,000-7,500 depending on condition), HVAC service + likely AC capacitor ($400-800). Don't 'hope' these don't fail. Budget them. The deal still pencils at 7.6% cap when you include this reserve — it's a different feeling than the 8.4% the seller's listing math implies."
     },
     {
-      "address": "Cleveland, OH — Tremont 3/1.5",
-      "headlineNumber": "Old house tax: budget $5-7k for first 18 months",
+      "address": "Example: Tier 3 pre-WW2 property",
+      "headlineNumber": "Strong cap rate but $5-7k year-1 capex is the cost of admission",
       "verdict": "Strong (with capex reserve)",
-      "body": "$118k 1924 build. Pre-WW2 housing stock is durable but it ALWAYS has deferred maintenance. Common year-1 surprises: cast-iron drain line failure ($2,500-6,000), original windows (not always replaceable, but storm windows ~$200/window), galvanized supply lines causing low pressure ($1,500-4,000 to replace with copper or PEX). Cleveland's cap rates are real but the year-1 reality check on older stock is part of the cost of admission."
+      "body": "$118k 1924 build. Pre-WW2 housing stock is durable but ALWAYS has deferred maintenance. Common year-1 surprises: cast-iron drain line failure ($2,500-6,000), original windows (storm windows ~$200/window), galvanized supply lines causing low pressure ($1,500-4,000 to replace). Strong cap rates are real but the year-1 reality check on older stock is part of the cost of admission."
     },
     {
-      "address": "Kansas City, MO — Brookside SFR (recently renovated)",
-      "headlineNumber": "Year-1 capex: ~$1,200 (the easy version)",
+      "address": "Example: Tier 1 recently renovated property",
+      "headlineNumber": "Premium price · year-1 capex ~$1,200 · pencils cleanly",
       "verdict": "Strong",
-      "body": "$245k 3/2, 2024 full renovation (new HVAC, roof, kitchen, electrical, plumbing). When the seller has done the work in the last 1-2 years, your year-1 capex drops dramatically — typically just minor punch-list ($500-1,500). The premium for a recently renovated property: typically $15-25k more than the un-renovated equivalent. Often worth it for first or second deal where capex variance can blow your operating budget."
+      "body": "$245k 3/2, full renovation 1-2 years ago (new HVAC, roof, kitchen, electrical, plumbing). When the seller has done the work in the last 1-2 years, year-1 capex drops dramatically — typically just minor punch-list ($500-1,500). The premium for a recently renovated property: typically $15-25k more than the un-renovated equivalent. Often worth it for first or second deal where capex variance can blow your operating budget."
     }
   ],
   "blogFeature": {
@@ -39,13 +39,14 @@
   },
   "qa": {
     "question": "What's the actual year-1 capex budget I should hold on a single-family rental I'm buying?",
-    "answer": "Three honest tiers based on building age and recent capex history. Tier 1 — turnkey or recently renovated (2-3 years): budget $800-2,000 for year 1. Punch-list items, minor service calls, maybe a single appliance replacement. Tier 2 — solid building 10-30 years old, no recent renovation: budget $3,500-6,000. Reasonable likelihood of one major system needing attention (HVAC service or partial replacement, water heater, roof patching). Tier 3 — older building (40+ years) or visible deferred maintenance: budget $6,500-12,000. High likelihood of multiple system issues surfacing in the first year. As a percentage of purchase price: roughly 1% in tier 1, 2-3% in tier 2, 4-6% in tier 3. The biggest underwriting mistake new landlords make is using 'national average' capex assumptions (8-10% of rent annually) without adjusting for building age. A 1925 Philly rowhouse and a 2018 Texas tract home have different reserve needs by an order of magnitude."
+    "answer": "Three honest tiers based on building age and recent capex history. Tier 1 — turnkey or recently renovated (2-3 years): budget $800-2,000 for year 1. Punch-list items, minor service calls, maybe a single appliance replacement. Tier 2 — solid building 10-30 years old, no recent renovation: budget $3,500-6,000. Reasonable likelihood of one major system needing attention (HVAC service or partial replacement, water heater, roof patching). Tier 3 — older building (40+ years) or visible deferred maintenance: budget $6,500-12,000. High likelihood of multiple system issues surfacing. As percentage of purchase price: roughly 1% tier 1, 2-3% tier 2, 4-6% tier 3. The biggest underwriting mistake new landlords make is using 'national average' capex (8-10% of rent annually) without adjusting for building age. A 1925 rowhouse and a 2018 tract home need different reserve budgets by an order of magnitude."
   },
   "shipNote": {
-    "title": "What shipped in TrueCap this week",
+    "title": "TrueCap auto-adjusts capex by building age",
     "items": [
-      "Building-age-aware capex defaults: capex % auto-adjusts based on the property's year built",
-      "Year-1 capex callout: surfaces likely first-year surprises based on building age + last-renovation data"
+      "Capex % defaults to the appropriate tier based on the property's year built",
+      "Year-1 capex callout: surfaces likely first-year surprises based on building age + last-renovation data",
+      "Sensitivity grid (Pro): see how the deal holds up if year-1 capex hits high end vs low end of the tier"
     ]
   }
 }

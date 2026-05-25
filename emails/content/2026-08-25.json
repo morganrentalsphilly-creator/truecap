@@ -1,51 +1,52 @@
 {
-  "subject": "TrueCap #13 — out-of-state investing: what to actually outsource",
-  "preheader": "The 4 jobs you can't skip · The 3 you should · Why most OOS investors fail at #2 · 3 deals",
+  "subject": "Out-of-state investing — what to outsource, what you can't",
+  "preheader": "4 jobs you keep · 3 you delegate · The #1 OOS-investor failure mode (it's not the PM)",
   "publishedAt": "2026-08-25",
-  "weekLabel": "Issue 13",
+  "weekLabel": "Topic: Out-of-state investing",
   "marketSnapshot": {
-    "headline": "Rate-cut anticipation continues, market positioning ahead of Fed",
-    "body": "Two weeks out from the Fed meeting and the market is positioned for a cut — 30Y mortgage at 6.47%, DSCR loans at 8.1%, even hard-money rates softening from 11.5% to 11.0% for top-tier borrowers. Anecdotally hearing from contacts at three different lenders that loan-application volume is up 30-40% MoM as investors rush to lock in before October. Worth pausing on the FOMO question — locking rate at 6.47% is good if you're closing in the next 30-45 days; bad if your deal is still 60-90 days out. Most lenders' 60-day rate locks add 25-50bp.",
+    "headline": "Out-of-state investing — the jobs that can't be outsourced",
+    "body": "Investing remotely is how investors in expensive coastal markets access affordable cash-flowing properties in the Midwest and Southeast. Done well it works. Done casually it loses money. The discipline: certain jobs MUST stay with you (the investor) even when you're 2000 miles away. Outsourcing those is the single biggest predictor of OOS-investor failure.",
     "stats": [
-      { "label": "30Y fixed", "value": "6.47%", "delta": "-4bp WoW", "deltaTone": "positive" },
-      { "label": "DSCR avg", "value": "8.10%", "delta": "-20bp", "deltaTone": "positive" },
-      { "label": "Lender app volume", "value": "+35% MoM", "deltaTone": "positive" }
+      { "label": "Jobs you keep", "value": "4" },
+      { "label": "Jobs you delegate", "value": "3" },
+      { "label": "Top OOS failure mode", "value": "Outsourced underwriting" }
     ]
   },
   "dealSpotter": [
     {
-      "address": "Indianapolis, IN — Brookside SFR (OOS-friendly)",
-      "headlineNumber": "7.8% cap · turnkey · local PM established",
+      "address": "Example: turnkey OOS-friendly property",
+      "headlineNumber": "Rehabbed · existing PM · ready to rent",
       "verdict": "Strong",
-      "body": "$165k 3/2 at $1,525. Property is in a B-tier neighborhood with an established local PM (5+ years), recently rehabbed (2023), and inspected. Sellable to an out-of-state investor because all the hard work is done. The premium for turnkey: you're paying maybe $8-12k more than you would for a comparable distressed property, but you skip the rehab risk, contractor-finding, and 4-month vacancy that would otherwise eat that delta. Worth it for OOS investor #1 or #2."
+      "body": "Property in a B-tier neighborhood with an established local PM (5+ years), recently rehabbed, inspected. Sellable to an out-of-state investor because all the hard work is done. The premium for turnkey: maybe $8-12k more than the comparable distressed property, but you skip the rehab risk, contractor-finding, and 4-month vacancy that would otherwise eat that delta. Worth it for OOS investor #1 or #2."
     },
     {
-      "address": "Memphis, TN — High Point Terrace duplex",
-      "headlineNumber": "9.2% cap · BUT needs local oversight",
+      "address": "Example: needs local oversight · C-tier",
+      "headlineNumber": "Strong yield · but tenant-management intensive",
       "verdict": "Decent (with caveats)",
-      "body": "$185k 2-unit. The cap rate is real but the property is C-tier — older systems, tenants who'll need active management, neighborhood with block-by-block variation. For an in-state investor with a property manager, this works. For an out-of-state investor doing this their first or second deal, the gap between paper cap rate and real return is wide enough to be painful. Local relationships matter more here than they do for the Brookside deal above."
+      "body": "Higher-yield C-tier property in an older urban neighborhood. The paper cap rate is real, but the property requires active management — block-by-block variation in neighborhood quality, older systems, tenant base needing more hand-holding. For an in-state investor with a property manager, this works. For an OOS investor first or second deal, the gap between paper cap and real return is wide enough to be painful."
     },
     {
-      "address": "Cleveland, OH — Detroit-Shoreway 3-fam",
-      "headlineNumber": "10.6% cap on paper · OOS warning",
+      "address": "Example: 'great cap on paper' OOS-skip",
+      "headlineNumber": "10%+ paper cap · vacancy + bad-debt eat 4pp",
       "verdict": "Skip (for OOS)",
-      "body": "$148k 3-unit. Detroit-Shoreway is gentrifying but unevenly. The asking-side numbers look great. The reality I keep hearing from local investors: vacancy here runs 18-24% (not the 8% you'd assume), bad-debt is 4-7% of GR, and capex on these older multi-family buildings averages 18-22% rather than the 8-10% reserve you'd budget. The 10.6% paper cap drops to 6.4% real for an absentee owner. Only worth pursuing if you have boots-on-the-ground."
+      "body": "Property with paper cap of 10.6%. The reality from local investors: real-world vacancy 18-24% (not 8%), bad-debt 4-7%, capex 18-22% rather than the typical 8-10% reserve. The 10.6% paper cap drops to 6.4% real for an absentee owner. Only worth pursuing if you have boots-on-the-ground."
     }
   ],
   "blogFeature": {
     "title": "Best states for rental property investors in 2026",
     "url": "https://usetruecap.com/blog/best-states-for-rental-investors-2026",
-    "excerpt": "State-by-state landscape for rental investors in 2026 — landlord-friendliness, eviction timelines, insurance reality, tax structures, and which markets have the math working right now."
+    "excerpt": "State-by-state landscape for rental investors — landlord-friendliness, eviction timelines, insurance reality, tax structures, and which markets have the math working right now."
   },
   "qa": {
     "question": "I live in CA. The math doesn't work locally. How do I OOS-invest without losing my shirt?",
-    "answer": "Four jobs you cannot outsource: (1) Underwriting — you do the math, not a sales agent or 'turnkey provider.' Their incentives are wrong. (2) Picking the metro — research the state landlord laws, eviction timelines, and 5-year demographic trends. Don't take an agent's word for 'this is a hot market.' (3) Hiring the PM — interview at least 3 before signing. Ask for references AND specifically the addresses of properties they currently manage so you can drive-by (or have a friend drive-by) to verify condition. (4) Setting the operating budget — you decide what reserves are reasonable, not your PM (who'd often prefer lower reserves so they look better). Three jobs you SHOULD outsource: (1) Boots-on-the-ground tasks — showings, maintenance coordination, tenant placement. (2) Legal compliance — state-specific lease forms, security deposit handling, fair housing process. (3) Bookkeeping — your PM should produce Schedule-E-ready statements monthly. The #1 OOS-investor failure mode: outsourcing item 1 from the first list (underwriting). The turnkey provider's deal is rarely the math you'd accept if you'd run it yourself."
+    "answer": "Four jobs you cannot outsource. (1) Underwriting — you do the math, not a sales agent or turnkey provider. Their incentives are wrong. (2) Picking the metro — research the state landlord laws, eviction timelines, and 5-year demographic trends. Don't take an agent's word for 'this is a hot market.' (3) Hiring the PM — interview at least 3 before signing. Ask for references AND specifically the addresses of properties they currently manage so you can drive-by (or have a friend drive-by) to verify condition. (4) Setting the operating budget — you decide what reserves are reasonable. Three jobs you SHOULD outsource: (1) Boots-on-the-ground tasks (showings, maintenance coordination, tenant placement). (2) Legal compliance (state-specific lease forms, security deposit handling, fair housing process). (3) Bookkeeping (Schedule-E-ready statements monthly). The #1 OOS-investor failure mode is outsourcing underwriting to the turnkey provider's pre-built model. That model is rarely the math you'd accept if you'd run it yourself."
   },
   "shipNote": {
-    "title": "What shipped in TrueCap this week",
+    "title": "TrueCap is designed for OOS underwriting",
     "items": [
-      "OOS investor mode: flags markets where local oversight materially changes the underwrite (Detroit, Cleveland, parts of Memphis)",
-      "Comparative vacancy and capex assumptions table by metro — replaces single-default with metro-aware defaults"
+      "Auto-fill from address: property tax, year built, square footage, neighborhood data — no driving needed",
+      "Metro-aware vacancy + capex defaults (Pro): different assumptions for Detroit vs Indianapolis vs Cincinnati",
+      "PDF reports (Pro): document your underwriting decisions to share with partners or lenders"
     ]
   }
 }

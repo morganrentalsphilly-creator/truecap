@@ -1,52 +1,52 @@
 {
-  "subject": "TrueCap Weekly #1 — rates eased, 3 deals worth a second look",
-  "preheader": "30Y at 6.84% (-12bp) · PHL duplex, IND ranch, MEM triplex · New: house hacking math",
+  "subject": "The 5-number rental triage every serious investor runs",
+  "preheader": "Cap rate, CoC, DSCR, monthly NCF, 10-yr IRR — why each one matters and when to weight which",
   "publishedAt": "2026-06-02",
-  "weekLabel": "Issue 1",
+  "weekLabel": "Topic: The 5-number triage",
   "marketSnapshot": {
-    "headline": "Rates eased on softer jobs print, summer rents firming",
-    "body": "Welcome to the first issue of TrueCap Weekly. Every Tuesday morning you'll get the same thing: what moved in rates and rents this week, three deals I underwrote, one blog feature, and a reader question. Quick read, no fluff. This week — the 30-year fixed dropped 12bp after a softer-than-expected May jobs print, and asking rents in our 13 covered markets ticked up 0.4% MoM (third straight month positive — first time since 2024).",
+    "headline": "Five numbers decide whether a rental deal pencils",
+    "body": "Every serious investor I know runs the same 5-number triage on every deal before deciding to invest real time. Cap rate, cash-on-cash return, DSCR, monthly net cash flow, and projected 10-year IRR. Each one answers a different question, and the deals that pencil on all five are rare and worth pursuing fast. The deals that pencil on 3-4 are usually salvageable with negotiation. The deals that fail on 4+ are walk-aways.",
     "stats": [
-      { "label": "30Y fixed", "value": "6.84%", "delta": "-12bp WoW", "deltaTone": "positive" },
-      { "label": "Median asking rent", "value": "$2,180", "delta": "+0.4% MoM", "deltaTone": "positive" },
-      { "label": "DSCR loan spreads", "value": "+185bp", "delta": "flat" }
+      { "label": "Solid cap rate (B-tier suburb)", "value": "6.5-8.5%" },
+      { "label": "Lender DSCR floor", "value": "1.20-1.25" },
+      { "label": "Hold to compound", "value": "5-10 yrs" }
     ]
   },
   "dealSpotter": [
     {
-      "address": "Philadelphia, PA — Fishtown duplex",
-      "headlineNumber": "8.2% cap · $1,650 NCF/mo",
+      "address": "Example: B-tier suburb SFR",
+      "headlineNumber": "All 5 numbers green — Strong buy",
       "verdict": "Strong",
-      "body": "$420k ask, both units already rented at $1,950 each. Taxes reasonable for Philly (~$5.8k), no HOA, recent roof. Pencils at 8.2% cap and $1,650/mo net cash flow with 25% down. Watch the 1925 build year — budget $4-5k year-one capex on top of the standard maintenance reserve."
+      "body": "$245k 3/2 at $1,950 rent. Cap rate 7.9%, cash-on-cash 11.4% with 25% down, DSCR 1.31, monthly net cash flow $735, projected 10-yr IRR 13.8%. Every metric clears the threshold for its class. This is the kind of deal that compounds reliably — boring, not exciting, and worth pursuing fast when you find one."
     },
     {
-      "address": "Indianapolis, IN — Mars Hill SFR",
-      "headlineNumber": "7.4% cap · $480 NCF/mo",
+      "address": "Example: A-tier urban duplex",
+      "headlineNumber": "Cap weak, IRR strong — appreciation play",
       "verdict": "Decent",
-      "body": "$185k 3/1.5 ranch, rents at $1,475 per the local manager. Working-class neighborhood, school rating C+. Numbers are clean but the appreciation tailwind has slowed since 2023. Better as a yield play than an appreciation bet."
+      "body": "$485k 2-unit at $4,300/mo gross. Cap rate 5.6% (weak by yield standards), cash-on-cash 6.2%, DSCR 1.18 (tight). But projected 10-yr IRR is 14%+ once you factor neighborhood appreciation tailwind. The 5-number triage flags this as a deliberate bet — you're trading current yield for future appreciation. Valid choice IF you can hold long enough and have the cash flow elsewhere to fund the tight current month."
     },
     {
-      "address": "Memphis, TN — Berclair triplex",
-      "headlineNumber": "9.1% cap on paper · DSCR 1.04",
-      "verdict": "Marginal",
-      "body": "Listing screams cash-flow gold ($1,300 + $1,150 + $1,150 / $245k) but DSCR drops to 1.04 at current investor-loan rates with realistic vacancy + capex. Land it 8-10% under ask AND verify all three tenants are paying = becomes Decent. As-is, walk."
+      "address": "Example: high-yield C-tier triplex",
+      "headlineNumber": "10%+ paper cap · DSCR fails · Walk",
+      "verdict": "Skip",
+      "body": "$245k 3-unit at $3,600/mo gross. Cap rate 9.5% on paper. The trap: at investor-loan rates with realistic vacancy + capex, DSCR drops to 1.04 — below most lender funding thresholds. Cash-on-cash actually negative once you put down enough to clear the lender's DSCR. The 5-number triage caught what the listing's headline cap rate hid."
     }
   ],
   "blogFeature": {
-    "title": "House hacking explained: how to (almost) live for free in a 2-4 unit",
-    "url": "https://usetruecap.com/blog/house-hacking-explained",
-    "excerpt": "The full math behind FHA 3.5% down vs conventional 5%, the year-2 transition where break-even flips to real cash flow, and what to look for in a property that pencils as both a primary residence and an eventual pure rental."
+    "title": "Cap rate vs cash-on-cash vs DSCR — which metric actually matters?",
+    "url": "https://usetruecap.com/blog/cap-rate-vs-cash-on-cash-vs-dscr",
+    "excerpt": "Three different metrics, three different questions they answer. Why most investors quote cap rate when they should be looking at cash-on-cash, and why your lender cares only about DSCR."
   },
   "qa": {
-    "question": "Should I refi out of my 7.5% rate now if rates drop to 6.5%?",
-    "answer": "Run break-even on closing costs ÷ monthly savings. On a $300k loan, a 100bp drop saves ~$200/mo at typical 30Y terms; closing costs of $5-7k means break-even in 25-35 months. If you plan to hold past break-even, refi. If you're selling in 18 months, don't. The other variable: do you have other debt that's higher? If a credit card balance is sitting at 22% APR, the refi might unlock a cash-out that saves you more than the rate drop alone."
+    "question": "Which of the 5 numbers should I weight most heavily?",
+    "answer": "Depends on your goal. If you need cash flow to supplement income, weight monthly net cash flow and cash-on-cash — those answer 'will this property pay me reliably each month?' If you're building wealth and don't need the rental income, weight projected 10-year IRR — that answers 'will my equity compound efficiently?' DSCR is the constraint metric, not the goal metric — it just has to clear your lender's floor (typically 1.20-1.25) for the deal to be financeable. Cap rate is mainly useful for comparing across deals in the same market, not as a hard threshold. The best mental model: cash-on-cash and monthly NCF for income investors, IRR for wealth-builders, DSCR for everyone as a constraint."
   },
   "shipNote": {
-    "title": "What shipped in TrueCap this week",
+    "title": "TrueCap shows all 5 numbers on every analysis",
     "items": [
-      "TrueCap Weekly itself — the email you're reading is the first issue",
-      "Owner-occupant scoring fix — house-hack deals are now scored against break-even bands, not investor cash-flow bands",
-      "New market page: /markets/memphis with neighborhood cap-rate table"
+      "Paste an address — cap rate, cash-on-cash, DSCR, monthly net cash flow auto-calculated",
+      "Pro: 10-year IRR projection, sensitivity grid, max allowable offer calculator",
+      "Verdict explanation: which of the 5 numbers drove the score"
     ]
   }
 }

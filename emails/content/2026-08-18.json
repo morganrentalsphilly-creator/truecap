@@ -1,51 +1,52 @@
 {
-  "subject": "TrueCap #12 — seller financing, when it actually wins",
-  "preheader": "When to ask · How to structure · Why most investors avoid it (and shouldn't) · 3 deals",
+  "subject": "Seller financing — when to ask, how to structure",
+  "preheader": "When sellers say yes · The 4 deal-types where it works · Why creative structures save deals",
   "publishedAt": "2026-08-18",
-  "weekLabel": "Issue 12",
+  "weekLabel": "Topic: Seller financing",
   "marketSnapshot": {
-    "headline": "Bond market pricing in a September cut",
-    "body": "10-year Treasury dropped 18bp this week on softer CPI, and the 30Y mortgage followed — currently 6.51%. Fed funds futures now price 85% odds of a September cut, with 60% probability of a 50bp cut (not just 25). If that happens, expect another 25-40bp leg lower on mortgage rates through October. For investors negotiating offers in August, this is great timing — you can underwrite at today's rates and likely refi in 12-18 months at meaningfully better terms.",
+    "headline": "Seller financing — when creative structures save the deal",
+    "body": "Seller financing is when the seller acts as the lender, holding a note on the property. It's not rare; it's just under-asked-for. Works particularly well for long-time owners with significant equity who want to spread their capital-gains tax liability across multiple years, OR for properties that have sat on market and the seller is feeling holding costs. Done right, it can let you close deals you couldn't get conventional financing for, AND structure rate/terms better than market.",
     "stats": [
-      { "label": "30Y fixed", "value": "6.51%", "delta": "-7bp WoW", "deltaTone": "positive" },
-      { "label": "10Y Treasury", "value": "3.92%", "delta": "-18bp", "deltaTone": "positive" },
-      { "label": "Sep-cut probability", "value": "85%", "delta": "+15pp WoW", "deltaTone": "positive" }
+      { "label": "When sellers most likely to agree", "value": "60+ DOM" },
+      { "label": "Typical down payment", "value": "5-20%" },
+      { "label": "Typical seller rate vs market", "value": "± 50-100bp" }
     ]
   },
   "dealSpotter": [
     {
-      "address": "Kansas City, MO — Brookside SFR (seller financing)",
+      "address": "Example: long-time owner, seller carry at favorable rate",
       "headlineNumber": "5% down · 6.0% seller rate · 7-yr balloon",
       "verdict": "Strong",
-      "body": "$245k 3/2 at $1,975 rent. Seller is a retired owner who's been managing the property for 18 years and wants out, but doesn't want the tax hit of an outright sale this year. Structured: $12,250 down (5%), $232,750 seller-financed at 6.0%, 7-year balloon. Compared to a conventional 25% down at 6.8%: you keep $48,750 of capital that's deploying elsewhere, and you save 80bp on rate. The balloon is the only risk — you need a refinance path in year 6-7. Plan for it from day one."
+      "body": "Property purchased originally 18+ years ago, owner wants out but doesn't want the tax hit of an outright sale this year. Structured: 5% down, 95% seller-financed at 6.0%, 7-year balloon. Compared to conventional 25% down at 6.8%: you keep ~20% of capital deployable elsewhere AND save 80bp on rate. The balloon is the only risk — plan a refinance path in years 5-7 from day one."
     },
     {
-      "address": "Philadelphia, PA — Northern Liberties duplex",
-      "headlineNumber": "Owner offered carry · cap improves 60bp",
+      "address": "Example: combined first + seller-carry second",
+      "headlineNumber": "10% down · seller-carry second improves CoC",
       "verdict": "Strong",
-      "body": "$485k 2-unit. Original ask was full conventional. After 75 days on market, the seller's agent floated 'we'd entertain seller-carry' to break the stalemate. Negotiated 10% down with seller carrying 15% second, conventional first for the rest. The second is interest-only for 5 years. Net effect: cap rate on cash invested jumps from 7.1% to 7.7% because the principal payments on the second are paused for 5 years."
+      "body": "Conventional first mortgage covers 75% of purchase, seller carries a 15% second at interest-only for 5 years. You put down 10%. The second's payments don't include principal in years 1-5, which materially improves cash flow during the early hold. The seller benefits by spreading their tax exposure. Win-win structures like this are why being open to creativity expands your buy box."
     },
     {
-      "address": "Cleveland, OH — Hough SFR",
-      "headlineNumber": "Owner offered 100% financing · too good to be true · WALK",
+      "address": "Example: 100% seller-financed deal · WALK",
+      "headlineNumber": "Why are they offering 100% financing? · usually red flag",
       "verdict": "Skip",
-      "body": "$72k 3/1 listed. Seller (a wholesaler holding it as a rental) offered 100% seller financing at 7.5%. The math looks amazing — zero capital deployed, immediate positive cash flow. The catch: the property has a Section 8 tenant with two missed payments and a pending eviction filing. The seller is using 100% financing to offload a problem property onto someone who'll do less due diligence. Always ask 'why does this seller want this structure?' If you can't get a clear answer, walk."
+      "body": "Property listed by a wholesaler/operator offering 100% seller financing. The math looks amazing — zero capital deployed, immediate positive cash flow. The catch is usually one of: hidden tenant problems (non-paying tenant, eviction in progress), undisclosed deferred maintenance, or pricing 10-15% above market. Always ask 'why does the seller want this structure?' If you can't get a clear, plausible answer, the answer is bad. Walk."
     }
   ],
   "blogFeature": {
     "title": "Cap rate vs cash-on-cash vs DSCR — which metric actually matters?",
     "url": "https://usetruecap.com/blog/cap-rate-vs-cash-on-cash-vs-dscr",
-    "excerpt": "Three different metrics, three different questions they answer. Why most investors quote cap rate when they should be looking at cash-on-cash, and why your lender cares only about DSCR."
+    "excerpt": "Seller-financed deals often optimize cash-on-cash dramatically by reducing capital deployed. The cap rate doesn't change, but the return on YOUR equity does."
   },
   "qa": {
-    "question": "When does it make sense to ASK a seller for financing vs go conventional?",
-    "answer": "Four scenarios where asking is reasonable. (1) The property has been on market 60+ days — the seller is feeling the carrying cost and is open to creative solutions. (2) The seller is a long-time owner (5+ years) with significant equity and known tax exposure — seller financing spreads their capital gains across multiple years. (3) You have strong negotiating cards (cash buyer, fast close, no inspection contingency) you can trade for favorable terms. (4) You'd otherwise not be able to qualify or want to preserve conventional credit slots for other deals. The wrong scenarios: when the seller has a mortgage they need to pay off at sale (most do — they can't seller-finance), when the property is brand-new on market (the seller hasn't felt pain yet), or when the structure introduces a balloon you don't have a credible refinance plan for."
+    "question": "When does it make sense to ASK a seller for financing vs default to conventional?",
+    "answer": "Four scenarios where asking is reasonable. (1) The property has been on market 60+ days — the seller is feeling carrying costs and is open to creative solutions. (2) Long-time owner (5+ years) with significant equity AND known tax exposure — seller financing spreads their capital gains across multiple years. (3) You have strong negotiating cards (cash buyer, fast close, no inspection contingency) you can trade for favorable terms. (4) You'd otherwise not qualify or want to preserve conventional credit slots for other deals. The wrong scenarios: seller has a mortgage they need to pay off at sale (most do — they can't seller-finance), property is brand-new on market (seller hasn't felt pain), or structure introduces a balloon without a credible refinance plan."
   },
   "shipNote": {
-    "title": "What shipped in TrueCap this week",
+    "title": "TrueCap models seller-financed scenarios",
     "items": [
-      "Seller-financing scenario in the financing section: enter custom rate, term, and down payment to model creative deal structures",
-      "Compare Deals: can now compare seller-financing vs conventional side-by-side"
+      "Custom financing inputs: down payment %, rate, term, balloon — model any creative structure",
+      "Pro: A/B compare seller-financing vs conventional side-by-side",
+      "Cash-on-cash and DSCR auto-recalculate for the alternative structure"
     ]
   }
 }

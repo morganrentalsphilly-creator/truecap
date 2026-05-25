@@ -1,52 +1,52 @@
 {
-  "subject": "TrueCap #5 — mid-year check: where the math has shifted",
-  "preheader": "H1 2026 wrap · 2 markets up, 1 down · CLE, KC, PHX deals · A reader's $24k mistake",
+  "subject": "Cash flow vs appreciation — pick your lever consciously",
+  "preheader": "Different markets do different things · Why the mixed portfolio usually beats either pure strategy",
   "publishedAt": "2026-06-30",
-  "weekLabel": "Issue 5",
+  "weekLabel": "Topic: Strategy framing",
   "marketSnapshot": {
-    "headline": "Half-year review: rates flat, rents firming, insurance reshaped the map",
-    "body": "Six months into 2026: 30Y started the year at 6.95%, currently 6.79%. Rents are now positive YoY in 9 of 13 markets we cover. The biggest structural shift hasn't been rates — it's insurance. Coastal FL, LA, parts of TX have repriced 25-40% which makes deals that worked in 2023 not work in 2026. Cash-flow returns have rotated decisively to the Midwest. If you bought a Sun Belt property in 2022-2023, run the model again with current insurance numbers before you make any decisions about that property.",
+    "headline": "Rental investing has two main levers — they live in different markets",
+    "body": "Every rental property generates a mix of two returns: cash flow (monthly distributions) and appreciation (equity build + market value growth). Most investors weight one heavily without realizing they've made a choice. Cash-flow-heavy markets: Midwest, parts of the Southeast, older-building urban — high yields, slow appreciation. Appreciation-heavy markets: coastal metros, growth-job cities — low yields, fast equity build. The right answer for you depends on whether you need income today or wealth in 10 years.",
     "stats": [
-      { "label": "30Y change YTD", "value": "-16bp", "delta": "from 6.95%", "deltaTone": "positive" },
-      { "label": "Median rent YTD", "value": "+1.9%", "delta": "vs +0.4% in H1 2025", "deltaTone": "positive" },
-      { "label": "Insurance YoY", "value": "+18%", "delta": "weighted avg", "deltaTone": "negative" }
+      { "label": "Cash-flow markets cap range", "value": "7-10%+" },
+      { "label": "Appreciation markets cap range", "value": "4-6%" },
+      { "label": "Long-run appreciation gap", "value": "~3-5%/yr" }
     ]
   },
   "dealSpotter": [
     {
-      "address": "Cleveland, OH — Slavic Village 2-fam",
-      "headlineNumber": "10.4% cap · $890 NCF/mo",
-      "verdict": "Strong",
-      "body": "$98k for a 2-family at $850 + $825 = $1,675/mo. Taxes $1,400, insurance $920. C-class neighborhood (verify it for yourself — Slavic Village has block-by-block variation that data doesn't show). This is what 10% cap looks like in mid-2026 — only in select Midwest pockets, never in the Sun Belt at this scale anymore."
+      "address": "Example: pure cash-flow Midwest SFR",
+      "headlineNumber": "8.4% cap · $735 NCF/mo · 10-yr IRR 9.1%",
+      "verdict": "Strong (for income)",
+      "body": "$215k 3/2 at $1,950 rent in a stable B-tier Midwest market. Strong monthly cash flow. Modest appreciation tailwind (~1-2%/yr typical). 10-year IRR is good but not great because most of the return comes from cash flow, which doesn't compound. This is the income investor's bread-and-butter: predictable, dependable, repeatable."
     },
     {
-      "address": "Kansas City, MO — Waldo SFR",
-      "headlineNumber": "7.9% cap · $735 NCF/mo",
-      "verdict": "Strong",
-      "body": "$245k 3/2 at $1,950 rent. B+ neighborhood, school rating B, mid-tier suburb. The kind of deal that pencils every year regardless of cycle — boring, not exciting, compounds reliably. KC is currently my top recommendation for first-deal investors who want yield + slow appreciation."
+      "address": "Example: pure appreciation coastal SFR",
+      "headlineNumber": "5.7% cap · $180 NCF/mo · 10-yr IRR 14.2%",
+      "verdict": "Strong (for wealth-build)",
+      "body": "$435k 3/2 at $2,575 rent in a gentrifying coastal-metro neighborhood. Weak monthly cash flow. Strong appreciation tailwind (~5-7%/yr typical for the area). Most of the 10-year IRR comes from market appreciation and rent growth, both of which compound. This is the wealth-builder's lane: tight today, big in 10 years."
     },
     {
-      "address": "Phoenix, AZ — Maryvale SFR",
-      "headlineNumber": "6.2% cap · $190 NCF/mo",
-      "verdict": "Marginal",
-      "body": "$298k 3/2 at $1,975. Phoenix overbuilt 2022-2024, rents now negative YoY. Insurance manageable here vs FL/LA but still moving up. The math used to work at this price; today it's tight. Phoenix is a 'wait 6-12 months' market unless you can negotiate 8-12% under ask."
+      "address": "Example: balanced gentrifying-but-yield-positive",
+      "headlineNumber": "7.8% cap · $480 NCF/mo · 10-yr IRR 12.5%",
+      "verdict": "Strong (rare)",
+      "body": "$315k 2-unit at $2,900/mo gross in a market that has BOTH a decent cap rate AND credible appreciation tailwind. These are rare but exist — gentrifying neighborhoods in mid-tier cities (Pittsburgh, Indianapolis, parts of Cleveland, Birmingham). Worth pursuing when you find them because they don't force the choice between income and growth."
     }
   ],
   "blogFeature": {
-    "title": "What's a good cap rate in 2026?",
-    "url": "https://usetruecap.com/blog/what-is-a-good-cap-rate",
-    "excerpt": "Cap rate bands by market type — A-tier coastal vs B-tier suburb vs C-tier cash-flow — updated for 2026 financing reality. Why 'good' is contextual and why blind chasing of 10%+ caps often signals more risk than reward."
+    "title": "Cash flow vs appreciation — how to actually decide",
+    "url": "https://usetruecap.com/blog/cash-flow-vs-appreciation",
+    "excerpt": "The honest frame: cash flow funds your life, appreciation builds your wealth. Most investors should pick a primary lever based on income vs. net-worth gaps, then build the second one in over time."
   },
   "qa": {
-    "question": "I bought a Tampa SFR in 2023 at 7.4% cap. My insurance renewal just came in and pushed the deal to 5.1%. Should I sell?",
-    "answer": "Don't sell on insurance alone — sell only if (a) your actual cash flow has gone negative AND you don't have the runway to wait, or (b) you can deploy the equity into a 7%+ deal elsewhere AND the 1031 friction is worth it. For most investors in your situation, the right move is: refi if rates have dropped since you bought, shop insurance hard (get 3+ quotes — they vary 20-30% in FL right now), and consider raising rent at the next renewal. Tampa rents are firming again. Selling at 5% cap into a buyer's market = leaving 10-15% on the table. Hold the asset, fix the friction."
+    "question": "If I'm building a 5-property portfolio, should I go all cash flow, all appreciation, or mix?",
+    "answer": "Mix — almost always, but the ratio depends on you. Two questions to answer. (1) Do I need the rental income to cover bills, supplement my W-2, or fund my lifestyle? If yes, weight the portfolio toward cash flow (3-4 of 5 properties in cash-flow markets). (2) Is my net worth more than 10x my annual living expenses already? If yes, weight toward appreciation. Most investors in the middle (need some income, also building wealth) should target a 60/40 mix — 3 cash-flow properties to fund holding costs + provide income, 2 appreciation plays to compound the wealth-build. The pure-cash-flow portfolio risk: stagnant total returns over time. The pure-appreciation portfolio risk: cash crunch in down years when rents flatten and you have negative-leverage properties to feed. Diversifying across both lever types is a real risk-management move, not just a 'have your cake' play."
   },
   "shipNote": {
-    "title": "What shipped in TrueCap this week",
+    "title": "TrueCap's portfolio view (Pro)",
     "items": [
-      "Mid-year benchmarking update: 2026 cap rate bands by tier now reflected in deal-score thresholds",
-      "Insurance renewal projection in 10-year forecast (Pro)",
-      "New 'Compare to a deal you saved' shortcut on saved-analyses page"
+      "Save deals from multiple markets and see weighted portfolio cap rate + monthly cash flow",
+      "Blended 10-year IRR across the portfolio — shows whether you're skewed toward cash flow or appreciation",
+      "Per-deal verdict explanation shows which lever each property is pulling"
     ]
   }
 }
