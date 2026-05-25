@@ -209,66 +209,32 @@ export default async function PricingPage() {
           </div>
         </section>
 
-        {/* Team plan + one-time PDF — adjacent plan options for
-            brokerages and one-deal users respectively. UI-only for
-            now (Stripe prices not wired); clicking opens an email so
-            we can hand-process the small early-stage volume. */}
-        <section className="mx-auto max-w-5xl px-4 pb-12 sm:px-6 sm:pb-16">
-          <h2 className="text-center text-2xl font-black tracking-tight text-foreground sm:text-3xl mb-2">
-            Other options
-          </h2>
-          <p className="mx-auto max-w-xl text-center text-sm text-muted-foreground sm:text-base mb-8">
-            For brokerages and one-deal use cases that don&apos;t fit the standard Pro plan.
-          </p>
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-            {/* Team plan */}
-            <div className="rounded-2xl border border-border bg-card p-6">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-primary">
-                  Team
-                </span>
-                <span className="text-[11px] text-muted-foreground">For brokerages + investor groups</span>
+        {/* One-time PDF — alternative for non-subscribers who just
+            want one lender package without committing to a plan.
+            mailto for now (Stripe one-time price not wired); easy to
+            hand-process at current volume. */}
+        <section className="mx-auto max-w-3xl px-4 pb-12 sm:px-6 sm:pb-16">
+          <div className="rounded-2xl border border-border bg-card p-6 sm:p-7">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-6">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="rounded-full bg-[var(--brand-green)]/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-[var(--brand-green)]">
+                    One-time
+                  </span>
+                  <span className="text-[11px] text-muted-foreground">No subscription</span>
+                </div>
+                <h3 className="text-xl font-black text-foreground">Just need one lender PDF?</h3>
+                <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                  Pay once for a single multi-page PDF report — verdict, 10-year projection,
+                  tax strategy, exit scenarios — same as Pro. No subscription, no commitment.
+                  Email delivery within minutes.
+                </p>
               </div>
-              <h3 className="text-xl font-black text-foreground">Team Pro</h3>
-              <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                Pro features for 3+ seats under one account. Shared template library, centralized billing, optional co-branded deal links. Built for brokerages where multiple agents underwrite the same investor clients.
-              </p>
-              <ul className="mt-4 space-y-1.5 text-sm text-foreground">
-                <li>✓ Everything in Pro, per seat</li>
-                <li>✓ Shared analysis templates</li>
-                <li>✓ One invoice, multiple users</li>
-                <li>✓ Volume discount on 5+ seats</li>
-              </ul>
-              <a
-                href="mailto:hello@usetruecap.com?subject=Team plan inquiry"
-                className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 text-sm font-bold text-foreground hover:bg-muted"
-              >
-                Talk to us about Team
-              </a>
-            </div>
-            {/* One-time PDF */}
-            <div className="rounded-2xl border border-border bg-card p-6">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="rounded-full bg-[var(--brand-green)]/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-[var(--brand-green)]">
-                  One-time
-                </span>
-                <span className="text-[11px] text-muted-foreground">No subscription</span>
-              </div>
-              <h3 className="text-xl font-black text-foreground">Single-deal PDF report</h3>
-              <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                Just need one lender-ready PDF for one deal? Pay once per report instead of subscribing. Multi-page report with verdict, projections, tax strategy, and exit scenarios — same as the Pro PDF.
-              </p>
-              <ul className="mt-4 space-y-1.5 text-sm text-foreground">
-                <li>✓ Same multi-page PDF as Pro</li>
-                <li>✓ One deal, one report, no subscription</li>
-                <li>✓ Email delivery within minutes</li>
-                <li>✓ Includes verdict, 10-yr projection, tax, exit</li>
-              </ul>
               <a
                 href="mailto:hello@usetruecap.com?subject=Single-deal PDF report request"
-                className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 text-sm font-bold text-foreground hover:bg-muted"
+                className="shrink-0 inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 text-sm font-bold text-foreground hover:bg-muted"
               >
-                Request a one-time PDF
+                Request a PDF
               </a>
             </div>
           </div>

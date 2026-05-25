@@ -23,7 +23,7 @@
  */
 import { useState } from "react";
 import Link from "next/link";
-import { Lock, SlidersHorizontal, X } from "lucide-react";
+import { ChevronRight, Lock, SlidersHorizontal, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { AnalysisResult } from "@/lib/calc-analysis";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
@@ -186,20 +186,41 @@ export function MortgageScenarioCompare({
     );
   }
 
+  // Collapsed state styled to MATCH the LoanAmortizationView card —
+  // both are "advanced views" that live at the bottom of the Cash Flow
+  // tab, and they should feel like siblings, not unrelated UI scraps.
   if (!open) {
     return (
-      <div className="flex justify-center sm:justify-start">
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => setOpen(true)}
-          className="gap-2"
-        >
-          <SlidersHorizontal className="size-4" />
-          Compare financing scenarios
-        </Button>
-      </div>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        aria-label="Open the compare financing scenarios panel"
+        className="group flex min-h-[60px] w-full items-center justify-between gap-3 rounded-2xl border border-border bg-card p-4 text-left transition-colors hover:border-primary/40 hover:bg-muted/30 sm:p-5"
+      >
+        <span className="flex min-w-0 items-center gap-2.5">
+          <ChevronRight
+            aria-hidden
+            className="size-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5"
+          />
+          <span className="min-w-0">
+            <span className="flex items-center gap-2">
+              <span className="text-xs font-bold uppercase tracking-widest text-foreground">
+                Compare financing scenarios
+              </span>
+              <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-primary">
+                Pro
+              </span>
+            </span>
+            <span className="mt-0.5 block text-[11px] text-muted-foreground">
+              +5pp down, 15-yr term, DSCR loan — side-by-side
+            </span>
+          </span>
+        </span>
+        <SlidersHorizontal
+          aria-hidden
+          className="size-4 shrink-0 text-muted-foreground"
+        />
+      </button>
     );
   }
 

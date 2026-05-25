@@ -56,6 +56,34 @@ const CATEGORY_STYLES: Record<Category, { icon: typeof Sparkles; color: string; 
 const ENTRIES: Entry[] = [
   {
     date: "2026-05-24",
+    category: "Fix",
+    title: "Calculate now scrolls to top of results, not page bottom",
+    description:
+      "Clicking Calculate used to scroll all the way to the footer, which buried the headline metrics + recommendation card under the entire dashboard. Now scrolls to the top of the results dashboard with a small breathing-room offset.",
+  },
+  {
+    date: "2026-05-24",
+    category: "Improvement",
+    title: "Pricing simplified — removed Team Pro tile",
+    description:
+      "Team Pro requires real multi-user data model work to do properly. Removed the tile and kept only the one-time PDF report option, which is genuinely useful for non-subscribers and easy to hand-process at current volume. Team can come back when real demand validates the build.",
+  },
+  {
+    date: "2026-05-24",
+    category: "Fix",
+    title: "Cap Rate metric tile shows correct sign + color",
+    description:
+      "The Cap Rate tile was hardcoded to always show a + sign and always render green — even when cap rate was negative (loss-making property). Now: + sign and green only when cap rate ≥ 5%, neutral foreground color between 0-5%, red - sign when negative. Matches the existing CoC and Cash Flow tile behavior.",
+  },
+  {
+    date: "2026-05-24",
+    category: "Improvement",
+    title: "Dashboard bottom section visually unified",
+    description:
+      "Loan Amortization and Compare Financing Scenarios now look like sibling cards at the bottom of the Cash Flow tab — same border, padding, chevron icon, and typography. Previously the Compare Financing was a small outline button floating after the Amortization card, which looked sloppy. The ▸ unicode glyph (which rotated unevenly across fonts) was replaced with proper ChevronRight icons.",
+  },
+  {
+    date: "2026-05-24",
     category: "Feature",
     title: "Deal notes on every saved deal",
     description:

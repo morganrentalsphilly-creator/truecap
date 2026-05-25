@@ -16,6 +16,7 @@
  * the monthly P&I. We compute principal-per-year + remaining balance
  * locally so we don't touch lib/calc-analysis.
  */
+import { ChevronRight } from "lucide-react";
 import type { AnalysisResult } from "@/lib/calc-analysis";
 
 type YearRow = {
@@ -79,24 +80,22 @@ export function LoanAmortizationView({ result }: { result: AnalysisResult }) {
 
   return (
     <details className="group rounded-2xl border border-border bg-card p-4 sm:p-5">
-      <summary className="min-h-11 -my-1 flex cursor-pointer items-center justify-between gap-3 py-2 select-none list-none">
-        <span className="flex items-center gap-2">
-          <span
+      <summary className="min-h-11 flex cursor-pointer items-center justify-between gap-3 select-none list-none">
+        <span className="flex min-w-0 items-center gap-2.5">
+          <ChevronRight
             aria-hidden
-            className="text-muted-foreground transition-transform group-open:rotate-90"
-          >
-            ▸
-          </span>
-          <span>
-            <span className="text-xs font-bold uppercase tracking-widest text-foreground">
+            className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-90"
+          />
+          <span className="min-w-0">
+            <span className="block text-xs font-bold uppercase tracking-widest text-foreground sm:inline">
               Loan amortization
             </span>
-            <span className="ml-2 text-[11px] text-muted-foreground">
+            <span className="block text-[11px] text-muted-foreground sm:ml-2 sm:inline">
               Year-by-year interest, principal, balance
             </span>
           </span>
         </span>
-        <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+        <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
           {rows.length} yr
         </span>
       </summary>

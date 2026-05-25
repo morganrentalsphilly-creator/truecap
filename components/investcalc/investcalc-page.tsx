@@ -1142,7 +1142,23 @@ export function InvestCalcPage({
         title: "Analysis Complete",
         description: `Net cash flow: $${result.netCashFlow.toLocaleString()}/mo | CoC: ${result.cocReturn.toFixed(1)}%`,
       });
-      window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+      // Scroll to the TOP of the results dashboard, not the bottom of
+      // the page. The previous behavior dumped users at the footer past
+      // the entire dashboard, which felt jarring + made the headline
+      // metrics + recommendation card invisible until they scrolled
+      // back up. We use the data-attribute marker so we're not coupled
+      // to a fragile DOM structure. requestAnimationFrame waits one
+      // frame for the dashboard to mount after setShowResults(true).
+      requestAnimationFrame(() => {
+        const target = document.querySelector('[data-analysis-results="true"]');
+        if (target && typeof (target as HTMLElement).getBoundingClientRect === "function") {
+          const rect = (target as HTMLElement).getBoundingClientRect();
+          // Subtract a small offset so the results card isn't flush
+          // with the top edge — gives the eye some breathing room.
+          const y = window.scrollY + rect.top - 16;
+          window.scrollTo({ top: y, behavior: "smooth" });
+        }
+      });
     } finally {
       isCalculatingRef.current = false;
       setIsCalculating(false);

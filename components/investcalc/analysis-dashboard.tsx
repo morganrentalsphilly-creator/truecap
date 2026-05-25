@@ -10,6 +10,7 @@ import {
   AlertTriangle,
   ArrowUpRight,
   Building2,
+  ChevronRight,
   FileText,
   Save,
   Loader2,
@@ -546,9 +547,21 @@ export function AnalysisDashboard({
         <MetricCard
           label="Cap Rate"
           glossaryTerm="capRate"
-          value={result ? `+${result.capRate.toFixed(1)}%` : "—"}
+          value={
+            result
+              ? `${result.capRate >= 0 ? "+" : ""}${result.capRate.toFixed(1)}%`
+              : "—"
+          }
           sub={result ? capRateBenchmarkLabel(result.capRate) : undefined}
-          color="text-[var(--metric-positive)]"
+          color={
+            result
+              ? result.capRate >= 5
+                ? "text-[var(--metric-positive)]"
+                : result.capRate >= 0
+                  ? "text-foreground"
+                  : "text-[var(--metric-negative)]"
+              : undefined
+          }
           isLoading={isLoading}
         />
         <MetricCard
@@ -1148,7 +1161,7 @@ function DealScoreCard({
           keeps it zero-JS and accessible. */}
       <details className="group mt-3">
         <summary className="min-h-11 py-2 -my-1 cursor-pointer text-[11px] font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground select-none list-none flex items-center gap-1.5">
-          <span className="transition-transform group-open:rotate-90" aria-hidden>▸</span>
+          <ChevronRight aria-hidden className="size-3.5 shrink-0 transition-transform group-open:rotate-90" />
           Why this score?
         </summary>
         <div className="mt-2 rounded-xl border border-border bg-muted/30 p-3 text-xs leading-relaxed text-foreground/80">
