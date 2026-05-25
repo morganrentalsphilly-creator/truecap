@@ -630,6 +630,12 @@ export function SavedAnalysesPage({
   };
 
   const handleCompareSelected = () => {
+    // Hard guard against rapid double-clicks. The button's disabled
+    // attribute alone isn't sufficient — React 19's useTransition
+    // doesn't synchronously flip isStartingCompare, so a fast second
+    // click can fire startCompareAction twice and race two
+    // router.push() calls, manifesting as a "stuck" compare flow.
+    if (isStartingCompare) return;
     if (!canCompareDeals) {
       toast({
         title: "Upgrade required",

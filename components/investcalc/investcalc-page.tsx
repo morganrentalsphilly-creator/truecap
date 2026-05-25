@@ -1543,27 +1543,30 @@ export function InvestCalcPage({
   };
 
   /**
-   * "Use a template" — seeds the form with strategy-shaped defaults
-   * for the chosen analysis type and scrolls to the top so the user
-   * can fill in the property specifics. Does NOT pre-fill a sample
-   * property like handleTrySampleDeal — only adjusts the financing /
-   * underwriting defaults that differ between strategies.
+   * "Use a template" — seeds strategy-shaped DEFAULTS into the form
+   * (down %, vacancy assumption, mgmt %) without disturbing anything
+   * the user has already typed (address, price, beds, rent, etc.).
+   *
+   * CRITICAL: never call resetToNewAnalysis here — that wipes the
+   * address, purchase price, monthlyRent, bedrooms, sqft, etc. and
+   * makes it feel like "the calculator broke" if the user has any
+   * data entered. This handler is strictly additive: it only writes
+   * the strategy-shaped fields the user almost certainly doesn't
+   * want to set manually.
    *
    * Why this exists: investors mentally model "I'm analyzing this as
    * a long-term rental vs a house-hack vs an FHA owner-occupant" and
    * each has different default assumptions. One-click seeding removes
    * the friction of remembering "for FHA I need to drop the down to
-   * 3.5%, increase MIP, mark it owner-occupant ..."
+   * 3.5%, mark it owner-occupant ..."
    */
   const handleApplyTemplate = (
     template: "long-term" | "house-hack" | "fha-owner-occupant"
   ) => {
-    let propertyType: InvestmentFormValues["propertyType"] = "single-family";
     let overrides: Partial<InvestmentFormValues> = {};
     let label = "Long-term rental";
 
     if (template === "long-term") {
-      propertyType = "single-family";
       overrides = {
         propertyType: "single-family",
         downPaymentPct: 20,
@@ -1578,7 +1581,6 @@ export function InvestCalcPage({
       // House-hack: 2-4 unit owner-occupant. FHA-eligible, low down,
       // user lives in one unit, rents the rest. Vacancy lower because
       // they're on-site landlord; mgmt 0 because self-managed.
-      propertyType = "owner-occupant";
       overrides = {
         propertyType: "owner-occupant",
         downPaymentPct: 5,
@@ -1590,9 +1592,7 @@ export function InvestCalcPage({
       };
       label = "House hack";
     } else if (template === "fha-owner-occupant") {
-      // FHA 3.5% owner-occupant. Lowest down payment, requires MIP
-      // (modeled inside insurancePct uptick), single-family.
-      propertyType = "owner-occupant";
+      // FHA 3.5% owner-occupant. Lowest down payment, primary residence.
       overrides = {
         propertyType: "owner-occupant",
         downPaymentPct: 3.5,
@@ -1605,23 +1605,19 @@ export function InvestCalcPage({
       label = "FHA 3.5% owner-occupant";
     }
 
-    // Start from a clean slate for the chosen propertyType so we don't
-    // leave stale fields from a different strategy in the form.
-    resetToNewAnalysis(propertyType);
-    // Then layer the strategy-specific overrides on top. queueMicrotask
-    // so the reset's form state lands first.
-    queueMicrotask(() => {
-      Object.entries(overrides).forEach(([key, value]) => {
-        form.setValue(key as keyof InvestmentFormValues, value as never, {
-          shouldDirty: false,
-          shouldValidate: false,
-          shouldTouch: false,
-        });
+    // Apply each override individually via setValue so RHF re-renders
+    // the matching controlled inputs in place. Property data the user
+    // has already entered is preserved (the whole point of the fix).
+    Object.entries(overrides).forEach(([key, value]) => {
+      form.setValue(key as keyof InvestmentFormValues, value as never, {
+        shouldDirty: true,
+        shouldValidate: false,
+        shouldTouch: false,
       });
     });
     toast({
       title: `Template applied: ${label}`,
-      description: "Defaults are seeded. Fill in your property details and Calculate.",
+      description: "Financing & expense defaults updated. Your property details are preserved.",
     });
   };
 

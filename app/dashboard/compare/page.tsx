@@ -245,15 +245,24 @@ export default async function DashboardComparePage() {
   const rowById = new Map((rows ?? []).map((row) => [row.id, row as SavedAnalysisRow]));
   const deals = ids.map((id) => rowById.get(id)).filter((row): row is SavedAnalysisRow => Boolean(row)).map(mapDeal);
 
+  // Touch last_activity_at on the compared deals — fire-and-forget so
+  // a slow Supabase round-trip never blocks the page render. Awaiting
+  // this caused intermittent compare-page hangs ("system locks up" per
+  // user report). The activity timestamp is a nice-to-have signal for
+  // the stale-archive job, not load-bearing for the comparison UI.
   if (deals.length > 0) {
-    await supabase
+    const dealIdsToTouch = deals.map((deal) => deal.id);
+    void supabase
       .from("saved_analyses")
       .update({ last_activity_at: new Date().toISOString() })
       .eq("user_id", user.id)
-      .in(
-        "id",
-        deals.map((deal) => deal.id)
-      );
+      .in("id", dealIdsToTouch)
+      .then(({ error: touchError }) => {
+        if (touchError) {
+          // Silent — failing to bump activity_at is non-critical.
+          console.warn("[compare] failed to bump last_activity_at:", touchError.message);
+        }
+      });
   }
 
   return (
