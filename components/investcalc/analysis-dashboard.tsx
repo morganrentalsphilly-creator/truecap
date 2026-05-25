@@ -196,7 +196,9 @@ function MetricCard({
         </span>
       )}
       {sub && !isLoading && (
-        <span className="text-xs text-muted-foreground">{sub}</span>
+        <span className="text-[10px] leading-tight text-muted-foreground/80 sm:text-[11px]">
+          {sub}
+        </span>
       )}
     </div>
   );
@@ -1442,7 +1444,7 @@ function CashFlowTab({
   }
 
   return (
-    <div className="space-y-6 sm:space-y-8">
+    <div className="space-y-5 sm:space-y-6">
       {/* Net Cash Flow headline card — the bottom-line answer in big
           numbers (monthly + annual + after-tax). Sits above the
           waterfall so it's the first thing the user sees in the
@@ -1453,7 +1455,7 @@ function CashFlowTab({
           the headline card and above the detailed 3-column breakdown
           so the reading order is: answer → visual explanation → line items. */}
       <CashFlowWaterfall result={result} />
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
       {/* Monthly income */}
       <div>
         <div className="flex items-center gap-2 mb-4">

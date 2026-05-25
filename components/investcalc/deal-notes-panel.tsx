@@ -60,8 +60,21 @@ export function DealNotesPanel({ savedDealId }: { savedDealId: string }) {
   const persistOnBlur = () => {
     if (migrationPending) return;
     if (notes === lastSavedNotes) return;
+    // Capture the deal id + notes snapshot AT submit time. If the user
+    // switches to a different saved deal mid-save (e.g. clicks another
+    // saved deal in the list before the server action returns), we
+    // must not update lastSavedNotes for the new deal with values from
+    // the previous deal — that would mark the new deal's textarea as
+    // "saved" when it actually hasn't been touched yet.
+    const dealIdAtSubmit = savedDealId;
+    const notesAtSubmit = notes;
     startTransition(async () => {
-      const result = await updateSavedDealNotesAction(savedDealId, notes);
+      const result = await updateSavedDealNotesAction(dealIdAtSubmit, notesAtSubmit);
+      if (dealIdAtSubmit !== savedDealId) {
+        // User switched deals while this save was in flight — its
+        // result is no longer relevant. Discard silently.
+        return;
+      }
       if (!result.ok) {
         if (result.code === "MIGRATION_PENDING") {
           setMigrationPending(true);
@@ -74,7 +87,7 @@ export function DealNotesPanel({ savedDealId }: { savedDealId: string }) {
         });
         return;
       }
-      setLastSavedNotes(notes);
+      setLastSavedNotes(notesAtSubmit);
       setSavedTick(Date.now());
     });
   };

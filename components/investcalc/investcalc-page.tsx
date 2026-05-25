@@ -1147,8 +1147,10 @@ export function InvestCalcPage({
       // the entire dashboard, which felt jarring + made the headline
       // metrics + recommendation card invisible until they scrolled
       // back up. We use the data-attribute marker so we're not coupled
-      // to a fragile DOM structure. requestAnimationFrame waits one
-      // frame for the dashboard to mount after setShowResults(true).
+      // to a fragile DOM structure. By this point the dashboard has
+      // already mounted (setShowResults(true) ran upstream and
+      // loadDealScore awaited a server roundtrip), so the RAF is
+      // belt-and-suspenders for layout-paint settle.
       requestAnimationFrame(() => {
         const target = document.querySelector('[data-analysis-results="true"]');
         if (target && typeof (target as HTMLElement).getBoundingClientRect === "function") {

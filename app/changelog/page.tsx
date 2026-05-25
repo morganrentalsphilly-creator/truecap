@@ -56,6 +56,20 @@ const CATEGORY_STYLES: Record<Category, { icon: typeof Sparkles; color: string; 
 const ENTRIES: Entry[] = [
   {
     date: "2026-05-24",
+    category: "Improvement",
+    title: "Analysis dashboard density pass",
+    description:
+      "Tighter sublines under each metric tile (smaller text, lower contrast — supporting context, not headline copy). Reduced vertical spacing between sections of the Cash Flow tab and the gap within the 3-column breakdown so the analysis output reads cleaner top-to-bottom without losing any data.",
+  },
+  {
+    date: "2026-05-24",
+    category: "Fix",
+    title: "Deal notes save-after-switch race",
+    description:
+      "If you blurred the notes textarea then switched to a different saved deal before the save finished, the old deal's content could be marked as the new deal's saved state. Now the save action checks the deal id before persisting, so cross-deal saves discard silently.",
+  },
+  {
+    date: "2026-05-24",
     category: "Fix",
     title: "Calculate now scrolls to top of results, not page bottom",
     description:
