@@ -186,7 +186,11 @@ gtag('config', '${GOOGLE_ADS_ID}');`,
             of <body> so it overlays everything but doesn't intercept
             React hydration ordering. */}
         <CookieConsentBanner />
-        {process.env.NODE_ENV === 'production' && <Analytics />}
+        {/* Vercel Analytics — handles production-only logic internally,
+            so we don't gate on NODE_ENV. The earlier gate was preventing
+            events from being sent on Vercel deploys where NODE_ENV
+            wasn't being read as expected. */}
+        <Analytics />
       </body>
     </html>
   )
