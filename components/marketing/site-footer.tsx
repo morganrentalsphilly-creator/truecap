@@ -44,6 +44,9 @@ const FOOTER_COLS: Array<{
     title: "Markets",
     links: [
       { label: "Philadelphia", href: "/markets/philadelphia" },
+      { label: "Cleveland", href: "/markets/cleveland" },
+      { label: "Atlanta", href: "/markets/atlanta" },
+      { label: "Houston", href: "/markets/houston" },
     ],
   },
   {
