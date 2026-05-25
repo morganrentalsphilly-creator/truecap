@@ -23,7 +23,7 @@ import {
   type NewsletterSubscribeInput,
 } from "@/app/actions/newsletter";
 
-type Variant = "compact" | "expanded";
+type Variant = "compact" | "expanded" | "footer-band";
 
 export function NewsletterSignup({
   variant = "compact",
@@ -53,13 +53,15 @@ export function NewsletterSignup({
   };
 
   if (successMessage) {
+    const successPadding =
+      variant === "compact"
+        ? "p-4"
+        : variant === "footer-band"
+          ? "p-4 sm:p-5"
+          : "p-5 sm:p-6";
     return (
       <div
-        className={
-          variant === "compact"
-            ? "rounded-2xl border border-[var(--brand-green)]/30 bg-[var(--brand-green-light)] p-4 text-sm"
-            : "rounded-2xl border border-[var(--brand-green)]/30 bg-[var(--brand-green-light)] p-5 sm:p-6 text-sm"
-        }
+        className={`rounded-2xl border border-[var(--brand-green)]/30 bg-[var(--brand-green-light)] ${successPadding} text-sm`}
         role="status"
         aria-live="polite"
       >
@@ -68,6 +70,72 @@ export function NewsletterSignup({
           <span>{successMessage}</span>
         </p>
       </div>
+    );
+  }
+
+  // Footer band — full-width horizontal layout. Heading + microcopy on
+  // the left, email input + button on the right. Fills the footer width
+  // cleanly so the brand + sitemap row below can stay short and balanced.
+  if (variant === "footer-band") {
+    return (
+      <section
+        aria-labelledby="newsletter-footer-band-heading"
+        className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between md:gap-8"
+      >
+        <div className="md:max-w-md">
+          <div className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-primary">
+            <Mail className="size-3" />
+            Monthly investor digest
+          </div>
+          <h3
+            id="newsletter-footer-band-heading"
+            className="mt-1 text-base sm:text-lg font-black text-foreground leading-tight"
+          >
+            Market notes + new analysis, once a month.
+          </h3>
+          <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+            No fluff. Unsubscribe anytime.
+          </p>
+        </div>
+        <div className="w-full md:w-auto md:flex-1 md:max-w-md">
+          <form
+            onSubmit={onSubmit}
+            noValidate
+            className="flex w-full flex-col gap-2 sm:flex-row"
+          >
+            <label htmlFor="newsletter-email-footer-band" className="sr-only">
+              Email
+            </label>
+            <input
+              id="newsletter-email-footer-band"
+              type="email"
+              required
+              inputMode="email"
+              autoComplete="email"
+              placeholder="you@example.com"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              className="flex-1 rounded-xl border border-border bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-primary/40"
+            />
+            <button
+              type="submit"
+              disabled={isPending || !email}
+              className="inline-flex h-10 items-center justify-center gap-1.5 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isPending ? <Loader2 className="size-4 animate-spin" /> : <Mail className="size-4" />}
+              Subscribe
+            </button>
+          </form>
+          {error ? (
+            <p
+              className="mt-2 text-[11px] text-[var(--metric-negative,#dc2626)]"
+              role="alert"
+            >
+              {error}
+            </p>
+          ) : null}
+        </div>
+      </section>
     );
   }
 

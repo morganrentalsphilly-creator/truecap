@@ -66,16 +66,23 @@ export function SiteFooter() {
   return (
     <footer className="mt-12 border-t border-border bg-card/40">
       <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-12">
+        {/* Newsletter band — full-width hero at the top of the footer.
+            Lives in its own row above the brand+sitemap grid so it
+            doesn't stretch the brand column taller than the sitemap
+            cols next to it. Email infrastructure powered by Resend
+            (env vars required: see docs/NEWSLETTER-SETUP.md). */}
+        <div className="mb-10 pb-10 border-b border-border">
+          <NewsletterSignup variant="footer-band" source="footer" />
+        </div>
+
         {/* Brand + sitemap row.
             Grid: 5 cols at lg so brand takes 1 wide column + 4 sitemap
             cols. Each column is the same height because the brand block
             is now intentionally compact (logo + one-line tagline only —
-            trust badges moved to the bottom strip). */}
+            newsletter moved to its own band above, badges to the bottom
+            strip below). */}
         <div className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-3 lg:grid-cols-5">
-          {/* Brand block — intentionally short. Logo + one-line tagline.
-              Trust badges have moved to the bottom strip so they don't
-              push this column taller than the sitemap columns next to
-              it. Spans the full row on small viewports. */}
+          {/* Brand block — intentionally short. Logo + one-line tagline. */}
           <div className="col-span-2 sm:col-span-3 lg:col-span-1">
             <Link
               href="/"
@@ -86,13 +93,6 @@ export function SiteFooter() {
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
               Underwrite rentals in 60 seconds.
             </p>
-            {/* Newsletter signup — compact variant. Lives in the
-                brand column so it's the first thing readers see when
-                scanning the footer. Email infrastructure powered by
-                Resend (env vars required: see docs/NEWSLETTER-SETUP.md). */}
-            <div className="mt-5">
-              <NewsletterSignup variant="compact" source="footer" />
-            </div>
           </div>
 
           {/* Sitemap columns */}
