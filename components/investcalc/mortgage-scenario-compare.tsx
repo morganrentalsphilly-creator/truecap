@@ -225,7 +225,7 @@ export function MortgageScenarioCompare({
           size="sm"
           onClick={() => setOpen(false)}
           aria-label="Close comparison"
-          className="size-8 p-0"
+          className="size-10 p-0"
         >
           <X className="size-4" />
         </Button>

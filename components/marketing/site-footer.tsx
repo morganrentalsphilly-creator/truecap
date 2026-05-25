@@ -28,9 +28,6 @@ const FOOTER_COLS: Array<{
       { label: "Pricing", href: "/pricing" },
       { label: "All free tools", href: "/tools" },
       { label: "Blog", href: "/blog" },
-      { label: "Glossary", href: "/glossary" },
-      { label: "Methodology", href: "/methodology" },
-      { label: "Changelog", href: "/changelog" },
     ],
   },
   {
@@ -38,15 +35,6 @@ const FOOTER_COLS: Array<{
     links: [
       { label: "For real estate agents", href: "/for-agents" },
       { label: "For fix & flippers", href: "/for-flippers" },
-    ],
-  },
-  {
-    title: "Markets",
-    links: [
-      { label: "Philadelphia", href: "/markets/philadelphia" },
-      { label: "Cleveland", href: "/markets/cleveland" },
-      { label: "Atlanta", href: "/markets/atlanta" },
-      { label: "Houston", href: "/markets/houston" },
     ],
   },
   {
@@ -75,9 +63,9 @@ export function SiteFooter() {
     <footer className="mt-12 border-t border-border bg-card/40">
       <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
         {/* Brand + sitemap row */}
-        <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:grid-cols-6 sm:gap-10">
+        <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:grid-cols-4 sm:gap-10">
           {/* Brand block */}
-          <div className="col-span-2 sm:col-span-1">
+          <div className="col-span-2 sm:col-span-3 lg:col-span-1">
             <Link href="/" className="inline-flex items-center text-xl font-black tracking-tight text-foreground">
               Truecap<span className="text-primary">.</span>
             </Link>

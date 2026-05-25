@@ -1425,6 +1425,23 @@ export function InvestCalcPage({
   };
 
   const handleNewAnalysis = () => {
+    // Workflow protection: if the user has unsaved work in the form
+    // (analysis run + un-persisted, OR a saved deal edited but not
+    // re-saved), confirm before nuking the form. resetToNewAnalysis
+    // wipes address/price/rent and clears the localStorage draft, so
+    // a misclick here is irrecoverable. A native confirm() is the
+    // lightest possible guard — no modal infrastructure needed.
+    const shouldConfirm =
+      Boolean(analysisResult) || hasUnsavedChanges || Boolean(savedDealId);
+    if (shouldConfirm) {
+      const ok =
+        typeof window === "undefined"
+          ? true
+          : window.confirm(
+              "Start a new analysis? Your current work will be cleared.\n\nIf you want to keep this deal, cancel and save it first."
+            );
+      if (!ok) return;
+    }
     resetToNewAnalysis("single-family");
     setSavedTemplateFallback(null);
   };

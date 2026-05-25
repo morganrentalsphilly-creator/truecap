@@ -33,6 +33,7 @@ import { MomentOfValueUpsell } from "@/components/marketing/moment-of-value-upse
 import { SignupPromptCard } from "@/components/marketing/signup-prompt-card";
 import { CashFlowWaterfall } from "@/components/investcalc/cash-flow-waterfall";
 import { MortgageScenarioCompare } from "@/components/investcalc/mortgage-scenario-compare";
+import { LoanAmortizationView } from "@/components/investcalc/loan-amortization-view";
 // ShareLinkButton import temporarily removed — Share button was pulled from
 // the Quick Actions row because it wrapped onto a second line. Component
 // + share-link.ts + /d/[encoded] route all remain in the codebase ready
@@ -1121,7 +1122,7 @@ function DealScoreCard({
           who wants the receipts behind each number. Native <details>
           keeps it zero-JS and accessible. */}
       <details className="group mt-3">
-        <summary className="cursor-pointer text-[11px] font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground select-none list-none flex items-center gap-1.5">
+        <summary className="min-h-11 py-2 -my-1 cursor-pointer text-[11px] font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground select-none list-none flex items-center gap-1.5">
           <span className="transition-transform group-open:rotate-90" aria-hidden>▸</span>
           Why this score?
         </summary>
@@ -1610,6 +1611,10 @@ function CashFlowTab({
         </div>
       </div>
       </div>
+      {/* Loan amortization — collapsible year-by-year view. Free
+          feature, opt-in (click-to-expand). Self-hides on cash
+          purchases since there's no debt to amortize. */}
+      <LoanAmortizationView result={result} />
       {/* Compare financing scenarios — Pro feature. Self-hides on
           cash purchases. Click-to-open keeps default surface clean. */}
       <MortgageScenarioCompare result={result} values={values} isPro={isPro} />

@@ -99,7 +99,7 @@ export function CashFlowWaterfall({ result }: { result: AnalysisResult }) {
             Monthly — every dollar in, every dollar out
           </p>
         </div>
-        <div className="flex items-center gap-4 sm:gap-6">
+        <div className="flex flex-wrap items-center gap-4 sm:gap-6">
           <div className="text-left sm:text-right">
             <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
               Gross rent

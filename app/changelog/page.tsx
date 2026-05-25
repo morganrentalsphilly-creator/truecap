@@ -57,6 +57,34 @@ const ENTRIES: Entry[] = [
   {
     date: "2026-05-24",
     category: "Improvement",
+    title: "Footer streamlined",
+    description:
+      "Pruned the Markets column and the Glossary/Methodology/Changelog links from the Product column. Reduces footer noise on every page — pages still exist and remain reachable from search engines + internal links.",
+  },
+  {
+    date: "2026-05-24",
+    category: "Feature",
+    title: "Loan amortization mini-view",
+    description:
+      "Click 'Loan amortization' inside the Cash Flow tab to see a year-by-year breakdown of interest paid, principal paid, and ending loan balance. Collapsed by default so the dashboard stays clean. Self-hides on cash purchases.",
+  },
+  {
+    date: "2026-05-24",
+    category: "Improvement",
+    title: "Confirm before 'New Analysis' wipes your work",
+    description:
+      "Clicking New Analysis used to silently nuke the form. Now it asks for confirmation if you have un-saved work, so a misclick can't destroy what you're underwriting.",
+  },
+  {
+    date: "2026-05-24",
+    category: "Improvement",
+    title: "Mobile polish on new dashboard components",
+    description:
+      "Waterfall headline tiles now wrap properly on narrow screens. Mortgage compare close button + 'Why this score?' disclosure both hit 44px tap-target standard.",
+  },
+  {
+    date: "2026-05-24",
+    category: "Improvement",
     title: "Cmd+Enter (Ctrl+Enter) to calculate",
     description:
       "Power-user keyboard shortcut: anywhere inside the calculator form, press Cmd+Enter on Mac or Ctrl+Enter on Windows/Linux to fire the analysis. No more reaching for the mouse to re-run a deal.",
