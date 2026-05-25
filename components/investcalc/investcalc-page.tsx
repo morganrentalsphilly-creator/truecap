@@ -1542,84 +1542,6 @@ export function InvestCalcPage({
     });
   };
 
-  /**
-   * "Use a template" — seeds strategy-shaped DEFAULTS into the form
-   * (down %, vacancy assumption, mgmt %) without disturbing anything
-   * the user has already typed (address, price, beds, rent, etc.).
-   *
-   * CRITICAL: never call resetToNewAnalysis here — that wipes the
-   * address, purchase price, monthlyRent, bedrooms, sqft, etc. and
-   * makes it feel like "the calculator broke" if the user has any
-   * data entered. This handler is strictly additive: it only writes
-   * the strategy-shaped fields the user almost certainly doesn't
-   * want to set manually.
-   *
-   * Why this exists: investors mentally model "I'm analyzing this as
-   * a long-term rental vs a house-hack vs an FHA owner-occupant" and
-   * each has different default assumptions. One-click seeding removes
-   * the friction of remembering "for FHA I need to drop the down to
-   * 3.5%, mark it owner-occupant ..."
-   */
-  const handleApplyTemplate = (
-    template: "long-term" | "house-hack" | "fha-owner-occupant"
-  ) => {
-    let overrides: Partial<InvestmentFormValues> = {};
-    let label = "Long-term rental";
-
-    if (template === "long-term") {
-      overrides = {
-        propertyType: "single-family",
-        downPaymentPct: 20,
-        loanTermYears: 30,
-        vacancyPct: 5,
-        mgmtPct: 8,
-        maintenancePct: 8,
-        capexPct: 5,
-      };
-      label = "Long-term rental";
-    } else if (template === "house-hack") {
-      // House-hack: 2-4 unit owner-occupant. FHA-eligible, low down,
-      // user lives in one unit, rents the rest. Vacancy lower because
-      // they're on-site landlord; mgmt 0 because self-managed.
-      overrides = {
-        propertyType: "owner-occupant",
-        downPaymentPct: 5,
-        loanTermYears: 30,
-        vacancyPct: 4,
-        mgmtPct: 0,
-        maintenancePct: 7,
-        capexPct: 5,
-      };
-      label = "House hack";
-    } else if (template === "fha-owner-occupant") {
-      // FHA 3.5% owner-occupant. Lowest down payment, primary residence.
-      overrides = {
-        propertyType: "owner-occupant",
-        downPaymentPct: 3.5,
-        loanTermYears: 30,
-        vacancyPct: 0,
-        mgmtPct: 0,
-        maintenancePct: 8,
-        capexPct: 5,
-      };
-      label = "FHA 3.5% owner-occupant";
-    }
-
-    // Apply each override individually via setValue so RHF re-renders
-    // the matching controlled inputs in place. Property data the user
-    // has already entered is preserved (the whole point of the fix).
-    Object.entries(overrides).forEach(([key, value]) => {
-      form.setValue(key as keyof InvestmentFormValues, value as never, {
-        shouldDirty: true,
-        shouldValidate: false,
-        shouldTouch: false,
-      });
-    });
-    toast({
-      title: `Template applied: ${label}`,
-      description: "Financing & expense defaults updated. Your property details are preserved.",
-    });
-  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -1639,51 +1561,18 @@ export function InvestCalcPage({
               Removes the "empty form" friction for paid traffic by
               giving them a fully-populated working analysis in 1 click. */}
           {analysisResult === null && !isCalculating && (
-            <div className="flex flex-col items-stretch gap-2 sm:items-end">
-              <button
-                type="button"
-                onClick={handleTrySampleDeal}
-                className="group inline-flex shrink-0 items-center gap-1.5 self-start rounded-xl border border-primary/30 bg-[var(--brand-blue-light)] px-4 py-2.5 text-sm font-bold text-primary shadow-sm transition-transform hover:-translate-y-0.5 hover:bg-primary/10 sm:self-end"
-                aria-label="Try a sample deal — pre-fill the form with a real Philadelphia rental"
-              >
-                <Sparkles className="size-4" />
-                Try a sample deal
-                <span className="hidden text-xs font-medium text-primary/70 sm:inline">
-                  · skip the typing
-                </span>
-              </button>
-              {/* Quick-start strategy templates. Seed the form with
-                  the right defaults for a given strategy (down %,
-                  vacancy assumption, mgmt %, etc.) so users don't
-                  have to remember "for FHA I need 3.5% down...".
-                  Defers fill of property specifics to the user. */}
-              <div className="flex flex-wrap items-center gap-1.5 text-[11px] sm:justify-end">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                  Or start from
-                </span>
-                <button
-                  type="button"
-                  onClick={() => handleApplyTemplate("long-term")}
-                  className="rounded-full border border-border bg-card px-2.5 py-1 font-semibold text-foreground/80 transition-colors hover:border-primary hover:text-primary"
-                >
-                  Long-term rental
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleApplyTemplate("house-hack")}
-                  className="rounded-full border border-border bg-card px-2.5 py-1 font-semibold text-foreground/80 transition-colors hover:border-primary hover:text-primary"
-                >
-                  House hack
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleApplyTemplate("fha-owner-occupant")}
-                  className="rounded-full border border-border bg-card px-2.5 py-1 font-semibold text-foreground/80 transition-colors hover:border-primary hover:text-primary"
-                >
-                  FHA 3.5% down
-                </button>
-              </div>
-            </div>
+            <button
+              type="button"
+              onClick={handleTrySampleDeal}
+              className="group inline-flex shrink-0 items-center gap-1.5 self-start rounded-xl border border-primary/30 bg-[var(--brand-blue-light)] px-4 py-2.5 text-sm font-bold text-primary shadow-sm transition-transform hover:-translate-y-0.5 hover:bg-primary/10 sm:self-end"
+              aria-label="Try a sample deal — pre-fill the form with a real Philadelphia rental"
+            >
+              <Sparkles className="size-4" />
+              Try a sample deal
+              <span className="hidden text-xs font-medium text-primary/70 sm:inline">
+                · skip the typing
+              </span>
+            </button>
           )}
         </div>
 

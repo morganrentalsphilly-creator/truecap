@@ -56,6 +56,20 @@ const CATEGORY_STYLES: Record<Category, { icon: typeof Sparkles; color: string; 
 const ENTRIES: Entry[] = [
   {
     date: "2026-05-24",
+    category: "Improvement",
+    title: "Net cash flow back-to-prominent in cash flow waterfall",
+    description:
+      "The waterfall card now shows Gross Rent and Net Cash Flow side-by-side at the top of the card in big numbers — green when positive, red on shortfall — so the bottom-line answer is the first thing you see. Per-segment breakdown stays below as supporting detail.",
+  },
+  {
+    date: "2026-05-24",
+    category: "Fix",
+    title: "Removed glitchy 'Start from' templates row",
+    description:
+      "The 3 strategy template chips (Long-term rental / House hack / FHA 3.5% down) were causing more confusion than value. Cut. The 'Try a sample deal' button stays — it's the primary friction-killer.",
+  },
+  {
+    date: "2026-05-24",
     category: "Fix",
     title: "Templates no longer wipe form data",
     description:

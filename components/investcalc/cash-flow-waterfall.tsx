@@ -86,7 +86,11 @@ export function CashFlowWaterfall({ result }: { result: AnalysisResult }) {
       aria-label="Cash flow waterfall"
       className="rounded-2xl border border-border bg-card p-4 sm:p-5"
     >
-      <div className="flex items-baseline justify-between gap-3">
+      {/* Header — title left, the two headline numbers (Gross rent IN,
+          Net cash flow OUT) prominently displayed on the right so the
+          punchline conclusion is the FIRST thing the eye lands on, not
+          buried at the bottom of the legend. */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="text-xs font-bold uppercase tracking-widest text-foreground">
             Where the rent goes
@@ -95,13 +99,32 @@ export function CashFlowWaterfall({ result }: { result: AnalysisResult }) {
             Monthly — every dollar in, every dollar out
           </p>
         </div>
-        <div className="text-right">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-            Gross rent
-          </p>
-          <p className="text-lg font-black tabular-nums text-foreground sm:text-xl">
-            {fmtUsd(gross)}
-          </p>
+        <div className="flex items-center gap-4 sm:gap-6">
+          <div className="text-left sm:text-right">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              Gross rent
+            </p>
+            <p className="text-lg font-black tabular-nums text-foreground sm:text-xl">
+              {fmtUsd(gross)}
+            </p>
+          </div>
+          <div className="text-left sm:text-right">
+            <p
+              className={`text-[10px] font-bold uppercase tracking-widest ${
+                ncfPositive ? "text-[var(--metric-positive,#16a34a)]" : "text-[var(--metric-negative,#dc2626)]"
+              }`}
+            >
+              {ncfPositive ? "Net cash flow" : "Monthly shortfall"}
+            </p>
+            <p
+              className={`text-xl font-black tabular-nums sm:text-2xl ${
+                ncfPositive ? "text-[var(--metric-positive,#16a34a)]" : "text-[var(--metric-negative,#dc2626)]"
+              }`}
+            >
+              {ncfPositive ? "+" : "-"}
+              {fmtUsd(Math.abs(ncf))}
+            </p>
+          </div>
         </div>
       </div>
 
@@ -127,7 +150,10 @@ export function CashFlowWaterfall({ result }: { result: AnalysisResult }) {
         })}
       </div>
 
-      {/* Legend — also serves as the mobile readout. */}
+      {/* Legend — the per-segment readout. NCF is no longer duplicated
+          here because it's already the headline in the card header
+          (top-right). Keeping the legend focused on the outflow lines
+          makes the waterfall less noisy. */}
       <ul className="mt-4 grid grid-cols-1 gap-1.5 sm:grid-cols-2">
         {segments.map((seg) => (
           <li key={seg.key} className="flex items-center justify-between gap-3 text-sm">
@@ -145,39 +171,6 @@ export function CashFlowWaterfall({ result }: { result: AnalysisResult }) {
             </span>
           </li>
         ))}
-
-        {/* NCF / shortfall as the headline row */}
-        <li
-          className={`col-span-1 mt-2 flex items-center justify-between gap-3 rounded-lg border px-3 py-2 text-sm sm:col-span-2 ${
-            ncfPositive
-              ? "border-[var(--metric-positive,#16a34a)]/30 bg-[var(--metric-positive,#16a34a)]/5"
-              : "border-[var(--metric-negative,#dc2626)]/30 bg-[var(--metric-negative,#dc2626)]/5"
-          }`}
-        >
-          <span className="flex items-center gap-2 font-bold text-foreground">
-            <span
-              aria-hidden
-              className="inline-block size-3 rounded-sm"
-              style={{ backgroundColor: ncfSegment.color }}
-            />
-            {ncfPositive ? "Net cash flow" : "Monthly shortfall"}
-          </span>
-          <span className="tabular-nums">
-            <span
-              className={`text-base font-black ${
-                ncfPositive
-                  ? "text-[var(--metric-positive,#16a34a)]"
-                  : "text-[var(--metric-negative,#dc2626)]"
-              }`}
-            >
-              {ncfPositive ? "+" : "-"}
-              {fmtUsd(Math.abs(ncf))}
-            </span>
-            <span className="ml-1.5 text-[11px] text-muted-foreground">
-              ({fmtPct(Math.abs(ncf), gross)})
-            </span>
-          </span>
-        </li>
       </ul>
     </section>
   );
