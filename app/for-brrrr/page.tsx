@@ -1,73 +1,80 @@
 /**
- * /for-agents — persona-specific landing page for real estate agents.
+ * /for-brrrr — persona page for BRRRR operators (Buy, Rehab, Rent,
+ * Refinance, Repeat).
  *
- * Useful as a paid-ad landing page: ad copy targeting agents
- * ("underwrite investor deals in 60 seconds") matches the page
- * messaging better than the generic homepage. Higher Quality Score
- * on Google Ads + higher conversion than generic-LP traffic.
- *
- * Agents are a high-LTV segment: each agent analyzes dozens of deals
- * per year for buyer clients, recommends tools to other agents, and
- * is naturally drawn to the share-deal-link Pro feature.
+ * BRRRR is a multi-stage strategy: hard-money or cash purchase at
+ * acquisition, value-add rehab, lease-up, then refinance at the new
+ * ARV to recover capital and roll into the next deal. Standard
+ * rental analyzers don't model the cash recycle properly — TrueCap's
+ * dedicated BRRRR analyzer does.
  */
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight, Calculator, FileDown, Share2, ShieldCheck, Sparkles, Zap } from "lucide-react";
+import {
+  ArrowRight,
+  ArrowUpRight,
+  Calculator,
+  Hammer,
+  RefreshCw,
+  Sparkles,
+  TrendingUp,
+  Wallet,
+  Zap,
+} from "lucide-react";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
 
 export const metadata: Metadata = {
-  title: "For Real Estate Agents | TrueCap",
+  title: "For BRRRR Operators | TrueCap",
   description:
-    "Underwrite investor-client deals in 60 seconds. Share a branded analysis link instead of a spreadsheet. Free to start — no signup needed.",
+    "Model the full BRRRR loop: hard-money buy, rehab cost, ARV, lease-up, refi at the new appraisal. See how much cash you actually recover.",
   keywords: [
-    "real estate agent calculator",
-    "rental analysis for agents",
-    "investor client tool",
-    "real estate agent deal analyzer",
+    "brrrr calculator",
+    "brrrr analyzer",
+    "buy rehab rent refinance repeat",
+    "value-add rental analysis",
   ],
-  alternates: { canonical: "/for-agents" },
+  alternates: { canonical: "/for-brrrr" },
   openGraph: {
-    title: "For Real Estate Agents — TrueCap",
+    title: "For BRRRR Operators — TrueCap",
     description:
-      "Underwrite investor-client deals in 60 seconds. Share a branded analysis link instead of a spreadsheet.",
-    url: "/for-agents",
+      "Buy, Rehab, Rent, Refinance, Repeat. Model every stage and see your real cash recovered at refi.",
+    url: "/for-brrrr",
     type: "website",
-    images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap for real estate agents" }],
+    images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap for BRRRR operators" }],
   },
   twitter: { card: "summary_large_image", images: ["/home.jpg"] },
 };
 
 const USE_CASES: { icon: typeof Calculator; title: string; body: string }[] = [
   {
-    icon: Calculator,
-    title: "Underwrite a buyer client's target in 60 seconds",
-    body: "Paste the address, see cap rate, cash-on-cash, DSCR, and 10-year cash flow live. No spreadsheet. No formulas. No 'I'll get back to you.'",
+    icon: Hammer,
+    title: "Realistic rehab budgets, not back-of-napkin",
+    body: "Use the standalone rehab cost estimator at /tools/rehab-cost-estimator (cosmetic / mid / gut tiers by sqft) to ground your rehab number before feeding it into the BRRRR loop.",
   },
   {
-    icon: Share2,
-    title: "Share a read-only analysis link instead of a PDF email",
-    body: "Pro generates a clean public link with the deal's metrics + your branding. Send it in a text. Clients can open on their phone, no signup.",
+    icon: TrendingUp,
+    title: "ARV-driven refinance math",
+    body: "Set the post-rehab ARV. The BRRRR analyzer (Pro) computes the refi loan amount at your LTV, the cash returned, and your stabilized cash flow against the new debt service.",
   },
   {
-    icon: FileDown,
-    title: "Send lender-ready PDFs in one click",
-    body: "Multi-page report with verdict, projections, tax strategy, exit scenarios. Drop it into your buyer's loan officer email; the lender already knows what to do with it.",
+    icon: RefreshCw,
+    title: "Capital recycle is the whole point",
+    body: "See exactly how much of your original cash comes back at refi. The deal that 'doesn't pencil' as a buy-and-hold can look great when you recover 95% of capital and roll it into the next one.",
   },
   {
-    icon: ShieldCheck,
-    title: "Stop being wrong about cash flow at the showing",
-    body: "Auto-fill from address (HUD rent, FRED rate, state tax). When the buyer asks 'does this cash flow?' you have the right answer in 60 seconds — not 'let me run the numbers tonight'.",
+    icon: Wallet,
+    title: "Hard-money initial rate, refi rate after",
+    body: "The 'BRRRR' starter template (/dashboard/templates) seeds 9.5% hard-money rate, 15% down, higher CapEx + maint for the value-add property. Re-run at your refi rate after stabilization to see the long-term picture.",
   },
 ];
 
-export default function ForAgentsPage() {
+export default function ForBrrrrPage() {
   return (
     <div className="min-h-screen bg-background">
       <main id="main" className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-        {/* Eyebrow + back link */}
         <div className="mb-2">
           <Link
             href="/"
@@ -77,26 +84,24 @@ export default function ForAgentsPage() {
           </Link>
         </div>
 
-        {/* Hero */}
         <section className="mb-12 sm:mb-16">
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-primary mb-4">
             <Sparkles className="size-3" />
-            For real estate agents
+            For BRRRR operators
           </div>
           <h1 className="text-3xl sm:text-5xl font-black text-foreground leading-[1.05] tracking-tight text-balance">
-            Underwrite your investor client&apos;s deal{" "}
-            <span className="text-primary">at the showing.</span>
+            Buy, Rehab, Rent, Refinance —{" "}
+            <span className="text-primary">see how much capital comes back.</span>
           </h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
-            TrueCap turns the &ldquo;does this cash flow?&rdquo; question
-            into a 60-second answer with a defensible, branded analysis
-            link you can share before you leave the parking lot.
+            BRRRR isn&apos;t buy-and-hold. The whole game is the cash
+            recycle at refi. TrueCap models the full loop: acquisition,
+            rehab, ARV-based refi, and your stabilized cash flow against
+            the new debt.
           </p>
 
-          {/* CTAs */}
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
             <ScrollToFormButton
-              targetId="use-cases"
               className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(82,72,212,0.28)] transition-transform hover:-translate-y-0.5"
             >
               <Calculator className="size-4" />
@@ -104,10 +109,10 @@ export default function ForAgentsPage() {
               <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
             </ScrollToFormButton>
             <Link
-              href="/pricing"
+              href="/tools/brrrr-calculator"
               className="inline-flex h-12 items-center justify-center gap-1.5 rounded-xl border border-border bg-card px-5 text-sm font-semibold text-foreground hover:bg-muted"
             >
-              See Pro pricing
+              Open the BRRRR calculator
             </Link>
           </div>
           <p className="mt-3 text-xs text-muted-foreground">
@@ -115,14 +120,13 @@ export default function ForAgentsPage() {
           </p>
         </section>
 
-        {/* Use cases */}
         <section id="use-cases" className="mb-12 sm:mb-16">
           <h2 className="text-2xl sm:text-3xl font-black text-foreground mb-2">
-            How agents use TrueCap
+            Built for value-add capital recyclers
           </h2>
           <p className="text-base text-muted-foreground mb-6 leading-relaxed">
-            Four moments where the right answer in 60 seconds changes
-            the deal.
+            Four jobs every BRRRR operator does — modeled correctly so
+            the deal you commit to on paper is the deal you close in real life.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
             {USE_CASES.map(({ icon: Icon, title, body }) => (
@@ -144,18 +148,17 @@ export default function ForAgentsPage() {
           </div>
         </section>
 
-        {/* Workflow */}
         <section className="mb-12 sm:mb-16">
           <h2 className="text-2xl sm:text-3xl font-black text-foreground mb-2">
-            The agent workflow
+            The full BRRRR loop in TrueCap
           </h2>
           <ol className="mt-4 space-y-3">
             {[
-              "Open TrueCap on your phone or laptop at the showing.",
-              "Paste the listing address. Rent, mortgage rate, and property tax auto-fill from HUD, FRED, and state data.",
-              "Adjust the financing for your specific client (different down payment, DSCR-loan rate, etc).",
-              "Hit Calculate. Cap rate, cash-on-cash, DSCR, and 10-year cash flow appear in 1 second.",
-              "Pro: hit Share to generate a branded read-only link. Text it to your client before you leave the property.",
+              "Estimate the rehab. Open /tools/rehab-cost-estimator and ground your number against per-sqft cosmetic / mid / gut tiers.",
+              "Underwrite the buy. Use the calculator with the 'BRRRR' starter template (hard-money rate, 15% down, higher reserves).",
+              "Open the BRRRR analyzer tab (Pro): plug in purchase + rehab + ARV. See your projected refi loan amount, cash recovered, and stabilized cash flow.",
+              "Stress-test the ARV. If ARV comes in 10% under expectation, does the deal still work? The sensitivity grid will tell you.",
+              "Save the deal. Compare BRRRR vs straight buy-and-hold in /dashboard/compare to see which strategy returns more capital on this property.",
             ].map((step, i) => (
               <li key={i} className="flex items-start gap-3">
                 <span className="inline-flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-black tabular-nums">
@@ -169,30 +172,28 @@ export default function ForAgentsPage() {
           </ol>
         </section>
 
-        {/* Why agents specifically */}
         <section className="mb-12 sm:mb-16 rounded-2xl border border-[var(--brand-green)]/25 bg-[var(--brand-green-light)] p-6 sm:p-8">
           <div className="flex items-center gap-2 mb-3">
             <Zap className="size-5 text-[var(--brand-green)]" />
             <h2 className="text-sm font-black uppercase tracking-widest text-[var(--brand-green)]">
-              Why agents pick TrueCap over a spreadsheet
+              Why BRRRR operators pick TrueCap
             </h2>
           </div>
           <ul className="space-y-2 text-sm sm:text-base text-foreground">
-            <li><strong>Speed.</strong> 60 seconds vs 1-2 hours per deal.</li>
-            <li><strong>Defensibility.</strong> Auto-filled from public data sources (HUD, FRED, state assessors). When the buyer questions a number, you can point at the source.</li>
-            <li><strong>Sharing.</strong> A clean read-only link is more professional than emailing a spreadsheet that someone might break.</li>
-            <li><strong>Brand presence.</strong> Shared deal links carry your TrueCap-powered analysis with the property address — clients remember where they got the analysis.</li>
-            <li><strong>Mobile-first.</strong> Works on the phone at the showing. Spreadsheets don&apos;t.</li>
+            <li><strong>Capital recovered is the headline metric.</strong> Standard analyzers focus on cash flow; BRRRR analyzer focuses on how much of your initial cash comes back at refi. That&apos;s what determines whether you can do another deal.</li>
+            <li><strong>Two-stage rate modeling.</strong> Hard-money rate at acquisition, conventional refi rate after stabilization — different math at each stage.</li>
+            <li><strong>Rehab cost estimator built in.</strong> Don&apos;t guess. Open the rehab tool, get a per-sqft anchor, feed it into the deal.</li>
+            <li><strong>ARV stress-test.</strong> ARV comes in low more often than high. Run the sensitivity grid to see how a 5-10% ARV miss affects your refi recovery.</li>
+            <li><strong>Compare strategies.</strong> Same property, BRRRR vs hold — which returns more capital in 3 years?</li>
           </ul>
         </section>
 
-        {/* Pricing */}
         <section className="mb-12 sm:mb-16 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
           <h2 className="text-2xl sm:text-3xl font-black mb-2">
-            Free to start. Pro pays for itself on the first deal you don&apos;t lose.
+            Free covers the buy. Pro covers the refi.
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
-            Free covers cash-flow analysis (cap rate, CoC, DSCR, monthly cash flow) — enough to underwrite at the showing. Pro unlocks share links, PDF export, 10-year projections, tax strategy, deal score, and the strategy analyzers. Cancel anytime.
+            Free analyzer + the standalone BRRRR + rehab tools at /tools/* give you the acquisition math. Pro unlocks the full BRRRR analyzer (post-rehab refi modeling, ARV-driven cash recovery), 10-year projection, tax strategy, and compare-deals across strategies. Built for value-add operators doing multiple deals a year.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link
@@ -222,12 +223,12 @@ export default function ForAgentsPage() {
             house hackers
           </Link>
           ,{" "}
-          <Link href="/for-brrrr" className="font-bold text-foreground hover:underline">
-            BRRRR operators
-          </Link>
-          , and{" "}
           <Link href="/for-flippers" className="font-bold text-foreground hover:underline">
             fix-and-flippers
+          </Link>
+          , and{" "}
+          <Link href="/for-agents" className="font-bold text-foreground hover:underline">
+            agents
           </Link>
           .
         </footer>

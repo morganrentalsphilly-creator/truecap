@@ -1,41 +1,49 @@
 /**
- * /for-agents — persona-specific landing page for real estate agents.
+ * /for-buy-and-hold — persona page for long-term rental investors.
  *
- * Useful as a paid-ad landing page: ad copy targeting agents
- * ("underwrite investor deals in 60 seconds") matches the page
- * messaging better than the generic homepage. Higher Quality Score
- * on Google Ads + higher conversion than generic-LP traffic.
- *
- * Agents are a high-LTV segment: each agent analyzes dozens of deals
- * per year for buyer clients, recommends tools to other agents, and
- * is naturally drawn to the share-deal-link Pro feature.
+ * This is the largest user segment for TrueCap. Buy-and-hold investors
+ * are evaluating dozens of properties per year, often comparing
+ * markets and financing structures. Pro features (Sensitivity, Tax
+ * Strategy, 10-year projections, Exit Scenarios) map directly to the
+ * questions they ask: "what's my real IRR including tax?", "what if
+ * vacancy ticks up?", "year 7 sell vs hold?"
  */
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight, Calculator, FileDown, Share2, ShieldCheck, Sparkles, Zap } from "lucide-react";
+import {
+  ArrowRight,
+  ArrowUpRight,
+  Calculator,
+  Building2,
+  LineChart,
+  PiggyBank,
+  Sparkles,
+  Target,
+  Zap,
+} from "lucide-react";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
 
 export const metadata: Metadata = {
-  title: "For Real Estate Agents | TrueCap",
+  title: "For Buy-and-Hold Investors | TrueCap",
   description:
-    "Underwrite investor-client deals in 60 seconds. Share a branded analysis link instead of a spreadsheet. Free to start — no signup needed.",
+    "Underwrite rental properties for long-term cash flow + appreciation. Cap rate, CoC, DSCR, 10-year projections, tax strategy — every number that matters for a hold strategy.",
   keywords: [
-    "real estate agent calculator",
-    "rental analysis for agents",
-    "investor client tool",
-    "real estate agent deal analyzer",
+    "buy and hold calculator",
+    "rental property analyzer",
+    "long-term rental analysis",
+    "cash flow + appreciation",
   ],
-  alternates: { canonical: "/for-agents" },
+  alternates: { canonical: "/for-buy-and-hold" },
   openGraph: {
-    title: "For Real Estate Agents — TrueCap",
+    title: "For Buy-and-Hold Investors — TrueCap",
     description:
-      "Underwrite investor-client deals in 60 seconds. Share a branded analysis link instead of a spreadsheet.",
-    url: "/for-agents",
+      "The numbers a long-term rental investor actually needs — cap rate, CoC, DSCR, 10-year projection, tax strategy, exit modeling.",
+    url: "/for-buy-and-hold",
     type: "website",
-    images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap for real estate agents" }],
+    images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap for buy-and-hold investors" }],
   },
   twitter: { card: "summary_large_image", images: ["/home.jpg"] },
 };
@@ -43,27 +51,27 @@ export const metadata: Metadata = {
 const USE_CASES: { icon: typeof Calculator; title: string; body: string }[] = [
   {
     icon: Calculator,
-    title: "Underwrite a buyer client's target in 60 seconds",
-    body: "Paste the address, see cap rate, cash-on-cash, DSCR, and 10-year cash flow live. No spreadsheet. No formulas. No 'I'll get back to you.'",
+    title: "Triage 20 listings in an hour, not a weekend",
+    body: "Paste address, see cap rate + cash-on-cash + DSCR in 60 seconds. The 1% rule misses half the math; TrueCap surfaces what actually pencils.",
   },
   {
-    icon: Share2,
-    title: "Share a read-only analysis link instead of a PDF email",
-    body: "Pro generates a clean public link with the deal's metrics + your branding. Send it in a text. Clients can open on their phone, no signup.",
+    icon: LineChart,
+    title: "See year-1 vs year-10 in one view",
+    body: "10-year projection (Pro) shows how rent growth, expense growth, and appreciation actually compound. The deal that looks marginal in year 1 might be the winner by year 5.",
   },
   {
-    icon: FileDown,
-    title: "Send lender-ready PDFs in one click",
-    body: "Multi-page report with verdict, projections, tax strategy, exit scenarios. Drop it into your buyer's loan officer email; the lender already knows what to do with it.",
+    icon: PiggyBank,
+    title: "Model the depreciation deduction — properly",
+    body: "Tax Strategy tab (Pro) computes depreciation, interest deduction, and after-tax cash flow with your bracket. Most investors underestimate this by 15-25%.",
   },
   {
-    icon: ShieldCheck,
-    title: "Stop being wrong about cash flow at the showing",
-    body: "Auto-fill from address (HUD rent, FRED rate, state tax). When the buyer asks 'does this cash flow?' you have the right answer in 60 seconds — not 'let me run the numbers tonight'.",
+    icon: Target,
+    title: "Stress-test before you offer",
+    body: "Sensitivity grid (Pro) shows what happens to your return when rent moves ±10%, vacancy moves ±5pp, rates move ±1pp. If the deal still pencils across the grid, the offer is defensible.",
   },
 ];
 
-export default function ForAgentsPage() {
+export default function ForBuyAndHoldPage() {
   return (
     <div className="min-h-screen bg-background">
       <main id="main" className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
@@ -81,22 +89,21 @@ export default function ForAgentsPage() {
         <section className="mb-12 sm:mb-16">
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-primary mb-4">
             <Sparkles className="size-3" />
-            For real estate agents
+            For buy-and-hold investors
           </div>
           <h1 className="text-3xl sm:text-5xl font-black text-foreground leading-[1.05] tracking-tight text-balance">
-            Underwrite your investor client&apos;s deal{" "}
-            <span className="text-primary">at the showing.</span>
+            The numbers that decide whether to hold —{" "}
+            <span className="text-primary">in one screen.</span>
           </h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
-            TrueCap turns the &ldquo;does this cash flow?&rdquo; question
-            into a 60-second answer with a defensible, branded analysis
-            link you can share before you leave the parking lot.
+            Cap rate, cash-on-cash, DSCR, 10-year cash flow, depreciation,
+            exit scenarios. Every metric a long-term rental investor uses
+            — already wired to live HUD rent + FRED rate + state tax data.
           </p>
 
           {/* CTAs */}
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
             <ScrollToFormButton
-              targetId="use-cases"
               className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(82,72,212,0.28)] transition-transform hover:-translate-y-0.5"
             >
               <Calculator className="size-4" />
@@ -118,11 +125,11 @@ export default function ForAgentsPage() {
         {/* Use cases */}
         <section id="use-cases" className="mb-12 sm:mb-16">
           <h2 className="text-2xl sm:text-3xl font-black text-foreground mb-2">
-            How agents use TrueCap
+            Built for the hold strategy
           </h2>
           <p className="text-base text-muted-foreground mb-6 leading-relaxed">
-            Four moments where the right answer in 60 seconds changes
-            the deal.
+            Four jobs serious rental investors do over and over —
+            faster, more accurate, more defensible.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
             {USE_CASES.map(({ icon: Icon, title, body }) => (
@@ -147,15 +154,16 @@ export default function ForAgentsPage() {
         {/* Workflow */}
         <section className="mb-12 sm:mb-16">
           <h2 className="text-2xl sm:text-3xl font-black text-foreground mb-2">
-            The agent workflow
+            How a buy-and-hold investor uses TrueCap
           </h2>
           <ol className="mt-4 space-y-3">
             {[
-              "Open TrueCap on your phone or laptop at the showing.",
-              "Paste the listing address. Rent, mortgage rate, and property tax auto-fill from HUD, FRED, and state data.",
-              "Adjust the financing for your specific client (different down payment, DSCR-loan rate, etc).",
-              "Hit Calculate. Cap rate, cash-on-cash, DSCR, and 10-year cash flow appear in 1 second.",
-              "Pro: hit Share to generate a branded read-only link. Text it to your client before you leave the property.",
+              "Paste the listing address. Rent, mortgage rate, and property tax auto-fill from public data sources.",
+              "Adjust the financing (down %, term, rate) to match the offer you're considering.",
+              "Hit Calculate — cap rate, CoC, DSCR, monthly cash flow appear in 1 second.",
+              "Pro: open the 10-year projection to see how cash flow grows. Open Tax Strategy for after-tax CF.",
+              "Pro: stress-test in the Sensitivity grid before you write the offer.",
+              "Save the deal. The portfolio rollup on /dashboard/saved-analyses shows your aggregate cash flow across everything you're considering.",
             ].map((step, i) => (
               <li key={i} className="flex items-start gap-3">
                 <span className="inline-flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-black tabular-nums">
@@ -169,30 +177,30 @@ export default function ForAgentsPage() {
           </ol>
         </section>
 
-        {/* Why agents specifically */}
+        {/* Why this persona specifically */}
         <section className="mb-12 sm:mb-16 rounded-2xl border border-[var(--brand-green)]/25 bg-[var(--brand-green-light)] p-6 sm:p-8">
           <div className="flex items-center gap-2 mb-3">
             <Zap className="size-5 text-[var(--brand-green)]" />
             <h2 className="text-sm font-black uppercase tracking-widest text-[var(--brand-green)]">
-              Why agents pick TrueCap over a spreadsheet
+              Why long-term investors pick TrueCap over a spreadsheet
             </h2>
           </div>
           <ul className="space-y-2 text-sm sm:text-base text-foreground">
-            <li><strong>Speed.</strong> 60 seconds vs 1-2 hours per deal.</li>
-            <li><strong>Defensibility.</strong> Auto-filled from public data sources (HUD, FRED, state assessors). When the buyer questions a number, you can point at the source.</li>
-            <li><strong>Sharing.</strong> A clean read-only link is more professional than emailing a spreadsheet that someone might break.</li>
-            <li><strong>Brand presence.</strong> Shared deal links carry your TrueCap-powered analysis with the property address — clients remember where they got the analysis.</li>
-            <li><strong>Mobile-first.</strong> Works on the phone at the showing. Spreadsheets don&apos;t.</li>
+            <li><strong>Multi-year math is correct out of the box.</strong> Depreciation, interest deduction declining over time, rent + expense compounding — most spreadsheets get one of these wrong.</li>
+            <li><strong>Exit modeling matters.</strong> Year-7 sell vs hold is a 7-figure decision; the engine projects equity, cash-on-cash IRR, and after-tax proceeds at every year.</li>
+            <li><strong>Sensitivity is built in.</strong> Hard to do thoroughly in a spreadsheet — trivial here.</li>
+            <li><strong>Portfolio view.</strong> Save 10 deals, see total cash flow + weighted cap rate across the book.</li>
+            <li><strong>Defensible.</strong> Live HUD/FRED/state data — when the seller pushes back on your rent assumption, you can point at the source.</li>
           </ul>
         </section>
 
         {/* Pricing */}
         <section className="mb-12 sm:mb-16 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
           <h2 className="text-2xl sm:text-3xl font-black mb-2">
-            Free to start. Pro pays for itself on the first deal you don&apos;t lose.
+            Free covers the offer. Pro covers the hold.
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
-            Free covers cash-flow analysis (cap rate, CoC, DSCR, monthly cash flow) — enough to underwrite at the showing. Pro unlocks share links, PDF export, 10-year projections, tax strategy, deal score, and the strategy analyzers. Cancel anytime.
+            Free analyzer gives you cap rate, CoC, DSCR, monthly cash flow — enough to underwrite the buy. Pro unlocks the 10-year projection, tax strategy, exit scenarios, sensitivity grid, deal score, max-allowable-offer calculator, PDF exports, and share links. Built for serious buy-and-hold operators.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link
@@ -212,12 +220,10 @@ export default function ForAgentsPage() {
           </div>
         </section>
 
+        {/* Cross-link to other persona pages */}
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
+          <Building2 className="inline-block mr-2 size-4 align-text-bottom" />
           Different strategy? See pages for{" "}
-          <Link href="/for-buy-and-hold" className="font-bold text-foreground hover:underline">
-            buy-and-hold
-          </Link>
-          ,{" "}
           <Link href="/for-house-hackers" className="font-bold text-foreground hover:underline">
             house hackers
           </Link>
@@ -225,9 +231,13 @@ export default function ForAgentsPage() {
           <Link href="/for-brrrr" className="font-bold text-foreground hover:underline">
             BRRRR operators
           </Link>
-          , and{" "}
+          ,{" "}
           <Link href="/for-flippers" className="font-bold text-foreground hover:underline">
             fix-and-flippers
+          </Link>
+          , and{" "}
+          <Link href="/for-agents" className="font-bold text-foreground hover:underline">
+            agents
           </Link>
           .
         </footer>

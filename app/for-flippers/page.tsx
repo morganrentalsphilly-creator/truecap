@@ -211,10 +211,23 @@ export default function ForFlippersPage() {
         </section>
 
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
-          Also for{" "}
-          <Link href="/for-agents" className="font-bold text-foreground hover:underline">
-            real estate agents →
+          Different strategy? See pages for{" "}
+          <Link href="/for-buy-and-hold" className="font-bold text-foreground hover:underline">
+            buy-and-hold
           </Link>
+          ,{" "}
+          <Link href="/for-house-hackers" className="font-bold text-foreground hover:underline">
+            house hackers
+          </Link>
+          ,{" "}
+          <Link href="/for-brrrr" className="font-bold text-foreground hover:underline">
+            BRRRR operators
+          </Link>
+          , and{" "}
+          <Link href="/for-agents" className="font-bold text-foreground hover:underline">
+            agents
+          </Link>
+          .
         </footer>
       </main>
       <SiteFooter />

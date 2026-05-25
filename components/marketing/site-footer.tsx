@@ -15,7 +15,7 @@
  */
 
 import Link from "next/link";
-import { Lock, ShieldCheck } from "lucide-react";
+import { Lock, ShieldCheck, CreditCard } from "lucide-react";
 
 const FOOTER_COLS: Array<{
   title: string;
@@ -33,8 +33,11 @@ const FOOTER_COLS: Array<{
   {
     title: "Who it's for",
     links: [
-      { label: "For real estate agents", href: "/for-agents" },
-      { label: "For fix & flippers", href: "/for-flippers" },
+      { label: "Buy-and-hold investors", href: "/for-buy-and-hold" },
+      { label: "House hackers", href: "/for-house-hackers" },
+      { label: "BRRRR operators", href: "/for-brrrr" },
+      { label: "Fix & flippers", href: "/for-flippers" },
+      { label: "Real estate agents", href: "/for-agents" },
     ],
   },
   {
@@ -62,28 +65,38 @@ export function SiteFooter() {
   return (
     <footer className="mt-12 border-t border-border bg-card/40">
       <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
-        {/* Brand + sitemap row */}
-        <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:grid-cols-4 sm:gap-10">
-          {/* Brand block */}
-          <div className="col-span-2 sm:col-span-3 lg:col-span-1">
+        {/* Brand + sitemap row.
+            Grid: 6 cols at lg so brand can take 2 + four sitemap cols
+            each take 1. Avoids the cramped look of trying to fit a
+            wide brand block into a single narrow column. */}
+        <div className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-3 lg:grid-cols-6 sm:gap-y-12">
+          {/* Brand block — takes 2 cols at lg so the description + trust
+              badges have room to breathe. Spans the full row on smaller
+              viewports. */}
+          <div className="col-span-2 sm:col-span-3 lg:col-span-2">
             <Link href="/" className="inline-flex items-center text-xl font-black tracking-tight text-foreground">
               Truecap<span className="text-primary">.</span>
             </Link>
-            <p className="mt-3 max-w-xs text-sm leading-relaxed text-muted-foreground">
-              Real estate investment analyzer. Cap rate, CoC, DSCR, projections, tax, and exit —
-              in seconds.
+            <p className="mt-3 max-w-sm text-sm leading-relaxed text-muted-foreground">
+              Real estate investment analyzer. Cap rate, CoC, DSCR, projections,
+              tax, and exit — in seconds.
             </p>
-            <div className="mt-4 flex flex-wrap gap-2">
-              <span className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-2 py-1 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-                <Lock className="size-3" /> SSL
-              </span>
-              <span className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-2 py-1 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-                <ShieldCheck className="size-3" /> Cancel anytime
-              </span>
-              <span className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-2 py-1 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-                Powered by Stripe
-              </span>
-            </div>
+            {/* Trust badges — pill-style with subtle icon tinting so they
+                feel like part of the brand rather than visual clutter. */}
+            <ul className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px] font-semibold text-muted-foreground">
+              <li className="inline-flex items-center gap-1.5">
+                <Lock className="size-3.5 text-primary/70" />
+                <span>SSL encrypted</span>
+              </li>
+              <li className="inline-flex items-center gap-1.5">
+                <ShieldCheck className="size-3.5 text-primary/70" />
+                <span>Cancel anytime</span>
+              </li>
+              <li className="inline-flex items-center gap-1.5">
+                <CreditCard className="size-3.5 text-primary/70" />
+                <span>Stripe billing</span>
+              </li>
+            </ul>
           </div>
 
           {/* Sitemap columns */}
@@ -97,7 +110,7 @@ export function SiteFooter() {
                   <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="text-sm text-foreground/80 hover:text-primary hover:underline"
+                      className="text-sm text-foreground/80 transition-colors hover:text-primary"
                     >
                       {link.label}
                     </Link>
@@ -108,27 +121,29 @@ export function SiteFooter() {
           ))}
         </div>
 
-        {/* Honest sub-promise */}
-        <div className="mt-10 rounded-2xl border border-border bg-background p-4 text-center text-xs text-muted-foreground sm:p-5">
-          <strong className="text-foreground">TrueCap is not a financial advisor.</strong>{" "}
-          The analyzer surfaces the math you'd compute yourself with a spreadsheet — accurate
-          formulas, market-data defaults — but every assumption is editable and the underwriting
-          decision is yours.
-        </div>
+        {/* Honest sub-promise — toned down to a soft inline footnote
+            instead of a heavy bordered card. Same content, less visual
+            weight, doesn't compete with the sitemap. */}
+        <p className="mt-12 text-center text-[11px] leading-relaxed text-muted-foreground sm:text-xs">
+          <strong className="text-foreground/90">TrueCap is not a financial advisor.</strong>{" "}
+          The analyzer surfaces the math you&apos;d compute yourself in a spreadsheet — accurate
+          formulas, market-data defaults — but every assumption is editable and the
+          underwriting decision is yours.
+        </p>
 
         {/* Bottom strip */}
-        <div className="mt-8 flex flex-col items-center justify-between gap-3 border-t border-border pt-6 text-xs text-muted-foreground sm:flex-row">
+        <div className="mt-6 flex flex-col items-center justify-between gap-3 border-t border-border pt-6 text-xs text-muted-foreground sm:flex-row">
           <p>© {year} TrueCap. All rights reserved.</p>
-          <p className="flex flex-wrap items-center justify-center gap-2 sm:justify-end">
-            <Link href="/pricing" className="hover:text-foreground hover:underline">Pricing</Link>
-            <span aria-hidden className="text-muted-foreground/40">·</span>
-            <Link href="/privacy" className="hover:text-foreground hover:underline">Privacy</Link>
-            <span aria-hidden className="text-muted-foreground/40">·</span>
-            <Link href="/terms" className="hover:text-foreground hover:underline">Terms</Link>
-            <span aria-hidden className="text-muted-foreground/40">·</span>
+          <p className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 sm:justify-end">
+            <Link href="/pricing" className="transition-colors hover:text-foreground">Pricing</Link>
+            <span aria-hidden className="text-muted-foreground/30">·</span>
+            <Link href="/privacy" className="transition-colors hover:text-foreground">Privacy</Link>
+            <span aria-hidden className="text-muted-foreground/30">·</span>
+            <Link href="/terms" className="transition-colors hover:text-foreground">Terms</Link>
+            <span aria-hidden className="text-muted-foreground/30">·</span>
             <a
               href="mailto:hello@usetruecap.com"
-              className="hover:text-foreground hover:underline"
+              className="transition-colors hover:text-foreground"
             >
               hello@usetruecap.com
             </a>

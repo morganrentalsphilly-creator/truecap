@@ -56,6 +56,20 @@ const CATEGORY_STYLES: Record<Category, { icon: typeof Sparkles; color: string; 
 const ENTRIES: Entry[] = [
   {
     date: "2026-05-24",
+    category: "Feature",
+    title: "Three new persona landing pages",
+    description:
+      "Added /for-buy-and-hold (largest segment), /for-house-hackers (FHA + multi-unit owner-occupants), and /for-brrrr (value-add capital recyclers). Each one explains the specific math TrueCap does for that strategy and the matching Pro features. Plus cross-links between all 5 persona pages so a visitor can find their strategy in one click.",
+  },
+  {
+    date: "2026-05-24",
+    category: "Improvement",
+    title: "Footer polish + 'Who it's for' expansion",
+    description:
+      "Five persona links now in the 'Who it's for' column: buy-and-hold, house hackers, BRRRR, fix-and-flippers, real estate agents. Brand block has more breathing room, trust badges tightened to a cleaner inline strip (SSL / Cancel anytime / Stripe billing), and the financial-advisor disclaimer was toned down from a heavy bordered card to a soft footnote so the sitemap reads first.",
+  },
+  {
+    date: "2026-05-24",
     category: "Improvement",
     title: "Save status now distinguishes 'Unsaved changes' from 'Preview'",
     description:
