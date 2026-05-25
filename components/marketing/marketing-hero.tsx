@@ -167,7 +167,12 @@ export function MarketingHero() {
             fix &amp; flippers
           </Link>
           <span aria-hidden className="text-muted-foreground/40">·</span>
-          <span className="font-medium text-foreground/70">buy-and-hold investors</span>
+          <Link
+            href="/for-buy-and-hold"
+            className="font-semibold text-foreground/80 hover:text-primary hover:underline"
+          >
+            buy-and-hold investors
+          </Link>
         </div>
       </div>
     </section>

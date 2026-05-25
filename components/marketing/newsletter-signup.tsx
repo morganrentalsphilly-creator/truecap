@@ -238,7 +238,7 @@ export function NewsletterSignup({
         </p>
       ) : null}
       <p className="mt-3 text-[11px] text-muted-foreground">
-        We respect your inbox. One email a month, no resold lists, easy
+        We respect your inbox. One email a week, no resold lists, easy
         unsubscribe.
       </p>
     </section>

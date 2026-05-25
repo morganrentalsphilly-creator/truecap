@@ -227,7 +227,7 @@ export default async function PricingPage() {
                 <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
                   Pay once for a single multi-page PDF report — verdict, 10-year projection,
                   tax strategy, exit scenarios — same as Pro. No subscription, no commitment.
-                  Email delivery within minutes.
+                  Email delivery within 1 business day.
                 </p>
               </div>
               <a
