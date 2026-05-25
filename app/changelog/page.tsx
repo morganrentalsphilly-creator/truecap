@@ -55,6 +55,27 @@ const CATEGORY_STYLES: Record<Category, { icon: typeof Sparkles; color: string; 
 
 const ENTRIES: Entry[] = [
   {
+    date: "2026-05-25",
+    category: "Feature",
+    title: "Three more local-SEO market pages — Detroit, Memphis, Phoenix",
+    description:
+      "Detroit (legendary cash flow + BRRRR with honest warnings about out-of-state risk), Memphis (turnkey rental capital + TN tax math), Phoenix (high-growth Sun Belt + HOA + STR notes). Same depth as the existing 9 markets. Brings the local-SEO surface to 12 covered metros.",
+  },
+  {
+    date: "2026-05-25",
+    category: "Feature",
+    title: "Two more blog posts — house hacking + property management decision",
+    description:
+      "'House hacking explained' walks first-time buyers through FHA 3.5% down, owner-occupant rules, year-2 transition math. 'Should I use a property management company?' lays out the honest break-even math on PM fees vs. self-management. Both target bottom-funnel high-intent queries. Blog catalog now at 9 posts.",
+  },
+  {
+    date: "2026-05-25",
+    category: "Doc",
+    title: "Solo-executable marketing playbook (docs/MARKETING-PLAYBOOK.md)",
+    description:
+      "Weekly 5-6 hour playbook Morgan can run alone — three loops (community, content, newsletter), 90-day check-in metrics, what NOT to do, minimum viable weekly schedule. The content queue at the bottom is 8 blog topics ranked by search volume, ready to commission one at a time.",
+  },
+  {
     date: "2026-05-24",
     category: "Feature",
     title: "New analyses pre-fill from your saved defaults",

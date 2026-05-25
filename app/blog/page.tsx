@@ -48,6 +48,24 @@ export type BlogPost = {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: "house-hacking-explained",
+    title: "House hacking explained: how to (almost) live for free in a 2-4 unit",
+    excerpt:
+      "The actual math behind house hacking — FHA 3.5% down, owner-occupant rules, year-2 transition planning, and the deal types that make this strategy work in 2026.",
+    readingTimeMinutes: 9,
+    publishedAt: "2026-05-25",
+    available: true,
+  },
+  {
+    slug: "property-management-yes-or-no",
+    title: "Should I use a property management company? The actual math.",
+    excerpt:
+      "8-10% of rent + lease-up fees + maintenance markup — does paying a PM still beat managing yourself? The honest break-even math, plus when to switch each direction.",
+    readingTimeMinutes: 8,
+    publishedAt: "2026-05-25",
+    available: true,
+  },
+  {
     slug: "spot-bad-rental-in-60-seconds",
     title: "How to spot a bad rental deal in 60 seconds — 7 red flags",
     excerpt:

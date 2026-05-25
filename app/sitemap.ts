@@ -246,6 +246,36 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.7,
     },
     {
+      url: `${siteUrl}/markets/detroit`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
+    {
+      url: `${siteUrl}/markets/memphis`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
+    {
+      url: `${siteUrl}/markets/phoenix`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
+    {
+      url: `${siteUrl}/blog/house-hacking-explained`,
+      lastModified: new Date("2026-05-25"),
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
+      url: `${siteUrl}/blog/property-management-yes-or-no`,
+      lastModified: new Date("2026-05-25"),
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
       url: `${siteUrl}/blog/spot-bad-rental-in-60-seconds`,
       lastModified: new Date("2026-05-24"),
       changeFrequency: "monthly",
