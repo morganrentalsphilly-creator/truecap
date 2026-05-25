@@ -37,7 +37,7 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", images: ["/home.jpg"] },
 };
 
-type Category = "Feature" | "Improvement" | "Fix" | "Content";
+type Category = "Feature" | "Improvement" | "Fix" | "Content" | "Doc";
 
 type Entry = {
   date: string; // ISO date
@@ -51,6 +51,7 @@ const CATEGORY_STYLES: Record<Category, { icon: typeof Sparkles; color: string; 
   Improvement: { icon: Zap, color: "text-[var(--brand-green)]", bg: "bg-[var(--brand-green)]/10" },
   Fix: { icon: Wrench, color: "text-[var(--metric-negative)]", bg: "bg-[var(--metric-negative)]/10" },
   Content: { icon: FileText, color: "text-foreground", bg: "bg-muted" },
+  Doc: { icon: FileText, color: "text-muted-foreground", bg: "bg-muted/60" },
 };
 
 const ENTRIES: Entry[] = [
@@ -603,7 +604,11 @@ export default function ChangelogPage() {
 
         <ol className="space-y-5">
           {ENTRIES.map((entry, idx) => {
-            const style = CATEGORY_STYLES[entry.category];
+            // Defensive: fall back to the Content style if a category
+            // somehow doesn't exist in CATEGORY_STYLES (next.config has
+            // ignoreBuildErrors: true, so a TS-illegal category value
+            // can slip past compile and crash the prerender at runtime).
+            const style = CATEGORY_STYLES[entry.category] ?? CATEGORY_STYLES.Content;
             const Icon = style.icon;
             const date = new Date(entry.date);
             return (
