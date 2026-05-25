@@ -1267,14 +1267,34 @@ export function SavedAnalysesPage({
 
           {displayItems.length === 0 && (
             <div className="py-16 px-6 text-center">
-              <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-2xl bg-muted">
-                <Search className="w-5 h-5 text-muted-foreground" />
-              </div>
-              <p className="text-sm font-semibold text-foreground">No saved analyses found</p>
-              <p className="text-xs text-muted-foreground mt-1">Adjust your filters or save a new deal from the calculator.</p>
-              <Button asChild className="rounded-full mt-4">
-                <Link href="/">Back to calculator</Link>
-              </Button>
+              {initialItems.length === 0 ? (
+                /* Brand-new user — never saved a deal. Welcome them
+                   instead of showing a search-y "no results" state. */
+                <>
+                  <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                    <Sparkles className="w-5 h-5" />
+                  </div>
+                  <p className="text-base font-bold text-foreground">Save your first deal</p>
+                  <p className="mx-auto mt-1 max-w-sm text-sm leading-relaxed text-muted-foreground">
+                    Run a property through the analyzer and click <strong className="text-foreground">Save</strong> on the dashboard. Saved deals show up here with a portfolio rollup, so you can compare, edit, and revisit any deal you&apos;re considering.
+                  </p>
+                  <Button asChild className="rounded-full mt-5">
+                    <Link href="/">Open the analyzer</Link>
+                  </Button>
+                </>
+              ) : (
+                /* Has deals, but filters/search hide them all. */
+                <>
+                  <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-2xl bg-muted">
+                    <Search className="w-5 h-5 text-muted-foreground" />
+                  </div>
+                  <p className="text-sm font-semibold text-foreground">No deals match your filters</p>
+                  <p className="text-xs text-muted-foreground mt-1">Try clearing the search or switching the deal-state tab.</p>
+                  <Button asChild variant="outline" className="rounded-full mt-4">
+                    <Link href="/dashboard/saved-analyses">Reset filters</Link>
+                  </Button>
+                </>
+              )}
             </div>
           )}
 

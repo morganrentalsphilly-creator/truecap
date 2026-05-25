@@ -56,6 +56,34 @@ const CATEGORY_STYLES: Record<Category, { icon: typeof Sparkles; color: string; 
 const ENTRIES: Entry[] = [
   {
     date: "2026-05-24",
+    category: "Feature",
+    title: "New analyses pre-fill from your saved defaults",
+    description:
+      "If you've set personal defaults on /settings (vacancy %, mgmt %, maintenance %, financing, growth rates), every new analysis now opens pre-filled with those values instead of the generic engine defaults. Server-side fetch on the homepage means no flash of generic values before yours overlay. Applies to fresh analyses and to 'New Analysis' resets.",
+  },
+  {
+    date: "2026-05-24",
+    category: "Improvement",
+    title: "Proactive accessibility + performance fixes",
+    description:
+      "Pre-applied common Lighthouse + WCAG AA wins before the official audits: aria-labels on icon-only Dashboard/share/template-dialog buttons, label on dashboard search + share URL inputs, removed low-contrast muted-foreground/80 + opacity-70 combinations on body text and toast close buttons, added preconnect for maps.googleapis.com, and a global prefers-reduced-motion CSS rule that respects the OS-level motion preference across all animations.",
+  },
+  {
+    date: "2026-05-24",
+    category: "Improvement",
+    title: "First-deal welcome on saved-analyses",
+    description:
+      "Brand-new users with zero saved deals now see a welcoming 'Save your first deal' message with a clear explanation of what the saved-analyses page is for — instead of the search-y 'No saved analyses found' message that assumed they were filtering. Filtered-empty case keeps its own message.",
+  },
+  {
+    date: "2026-05-24",
+    category: "Improvement",
+    title: "Bottom dashboard affordances calmed",
+    description:
+      "Loan Amortization and Compare Financing Scenarios are now perfect siblings — same skeleton, sentence-case titles, no jagged right-side metadata (was a '30 YR' pill on one, slider icon on the other). They read as 'quiet additional views' instead of two more cards demanding attention.",
+  },
+  {
+    date: "2026-05-24",
     category: "Improvement",
     title: "Analysis dashboard density pass",
     description:

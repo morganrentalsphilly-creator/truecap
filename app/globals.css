@@ -169,3 +169,17 @@ textarea,
     touch-action: manipulation;
   }
 }
+
+/* Honor the user's prefers-reduced-motion OS preference (WCAG 2.3.3).
+   Sets all animations + transitions to near-zero so spinners still
+   complete a single iteration but visible motion is removed. !important
+   is intentional — third-party libs (Radix, lucide transitions, etc.)
+   all respect this when set globally with high specificity. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

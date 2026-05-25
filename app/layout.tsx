@@ -122,6 +122,11 @@ export default function RootLayout({
               Quality Score input for paid traffic. */}
           <link rel="preconnect" href="https://www.googletagmanager.com" crossOrigin="" />
           <link rel="dns-prefetch" href="https://www.google-analytics.com" />
+          {/* Google Places address autocomplete uses maps.googleapis.com
+              — preconnect saves ~50-150ms when the user reaches the
+              address field, which is on the calculator's first paint. */}
+          <link rel="preconnect" href="https://maps.googleapis.com" crossOrigin="" />
+          <link rel="dns-prefetch" href="https://maps.gstatic.com" />
           {/* Google Consent Mode v2 defaults — MUST run before gtag.js
               loads, so the bidding/measurement pixels boot in a privacy-
               safe state (no tracking cookies set until user consents).

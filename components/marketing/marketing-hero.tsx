@@ -120,7 +120,7 @@ export function MarketingHero() {
               <div className="mt-0.5 text-[11px] font-bold uppercase tracking-widest text-muted-foreground sm:text-[11px]">
                 {stat.label}
               </div>
-              <div className="mt-1 text-xs text-muted-foreground/80 sm:text-xs">{stat.sub}</div>
+              <div className="mt-1 text-xs text-muted-foreground sm:text-xs">{stat.sub}</div>
             </div>
           ))}
         </div>

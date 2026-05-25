@@ -144,6 +144,27 @@ export default async function Home() {
     data: { user },
   } = await supabase.auth.getUser();
   const entitlements = user ? await getEntitlementsForUser(supabase, user.id) : null;
+  // Fetch the user's analysis defaults so the form pre-fills with
+  // their preferred vacancy/mgmt/financing values instead of the
+  // generic engine defaults. Done server-side so there's no flash
+  // of generic values before user defaults overlay. Tolerant of
+  // missing migration (returns null on the 42P01 path).
+  let userAnalysisDefaults: Record<string, number> | null = null;
+  if (user) {
+    const { data: defaultsRow } = await supabase
+      .from("user_analysis_defaults")
+      .select("preferences")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    const prefs = (defaultsRow as { preferences?: unknown } | null)?.preferences;
+    if (prefs && typeof prefs === "object" && !Array.isArray(prefs)) {
+      const sanitized: Record<string, number> = {};
+      for (const [k, v] of Object.entries(prefs as Record<string, unknown>)) {
+        if (typeof v === "number" && Number.isFinite(v)) sanitized[k] = v;
+      }
+      if (Object.keys(sanitized).length > 0) userAnalysisDefaults = sanitized;
+    }
+  }
   const canUpdateSavedDeals = user ? await hasPaidPlanSubscription(supabase, user.id) : false;
   const { count: savedDealCount } = user
     ? await supabase
@@ -209,6 +230,7 @@ export default async function Home() {
         initialSavedDealCount={savedDealCount ?? 0}
         savedDealLimit={entitlements?.max_saved_deals ?? null}
         isAuthenticated={Boolean(user)}
+        userAnalysisDefaults={userAnalysisDefaults}
       />
       {/* Sticky scroll-activated CTA bar for cold visitors only. Renders
           nothing for auth'd users. */}

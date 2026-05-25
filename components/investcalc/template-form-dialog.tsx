@@ -176,6 +176,7 @@ export function TemplateFormDialog({
               type="button"
               variant="outline"
               size="icon"
+              aria-label="Close template dialog"
               className="absolute right-4 top-4 h-9 w-9 rounded-full border-input bg-white/90 dark:bg-[#111827]/90"
               onClick={() => onOpenChange(false)}
             >

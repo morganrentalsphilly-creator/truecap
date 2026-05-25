@@ -89,6 +89,7 @@ export function ShareLinkButton({ values, className }: ShareLinkButtonProps) {
               <button
                 type="button"
                 onClick={() => setOpen(false)}
+                aria-label="Close share dialog"
                 className="text-muted-foreground hover:text-foreground"
               >
                 <X className="w-5 h-5" />
@@ -101,6 +102,7 @@ export function ShareLinkButton({ values, className }: ShareLinkButtonProps) {
                 readOnly
                 value={shareUrl}
                 onFocus={(e) => e.currentTarget.select()}
+                aria-label="Shareable URL"
                 className="flex-1 rounded-md border border-input bg-background px-3 py-2 text-xs text-foreground font-mono truncate"
               />
               <Button

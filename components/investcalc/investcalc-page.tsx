@@ -99,8 +99,52 @@ function clearCalcDraftRaw(): void {
   }
 }
 
+/**
+ * Map a user-defaults payload (from user_analysis_defaults.preferences)
+ * onto the form's field shape. The user-defaults schema uses
+ * `interestRatePct` while the form schema uses `interestRate` — handle
+ * that here so callers don't have to know about the mismatch. Returns
+ * a sparse object; only keys with finite numeric values are written.
+ */
+function mapUserDefaultsToForm(
+  userDefaults: Record<string, number> | null | undefined
+): Partial<InvestmentFormValues> {
+  if (!userDefaults) return {};
+  const out: Record<string, number> = {};
+  const passThrough: Array<keyof InvestmentFormValues> = [
+    "downPaymentPct",
+    "loanTermYears",
+    "closingCostsPct",
+    "vacancyPct",
+    "mgmtPct",
+    "maintenancePct",
+    "capexPct",
+    "taxRatePct",
+    "rentGrowthPct",
+    "expenseGrowthPct",
+    "appreciationRatePct",
+    "sellingCostPct",
+  ];
+  for (const key of passThrough) {
+    const v = userDefaults[key as string];
+    if (typeof v === "number" && Number.isFinite(v)) {
+      out[key as string] = v;
+    }
+  }
+  // The one shape mismatch — defaults schema uses interestRatePct,
+  // form schema uses interestRate.
+  if (
+    typeof userDefaults.interestRatePct === "number" &&
+    Number.isFinite(userDefaults.interestRatePct)
+  ) {
+    out.interestRate = userDefaults.interestRatePct;
+  }
+  return out as Partial<InvestmentFormValues>;
+}
+
 function buildNewAnalysisDefaults(
-  propertyType: InvestmentFormValues["propertyType"]
+  propertyType: InvestmentFormValues["propertyType"],
+  userDefaults?: Record<string, number> | null
 ): Partial<InvestmentFormValues> {
   return {
     ...defaultValues,
@@ -109,6 +153,10 @@ function buildNewAnalysisDefaults(
     purchasePrice: undefined,
     yearBuilt: undefined,
     units: getDefaultUnitsForPropertyType(propertyType),
+    // User defaults overlay last so they win against the engine's
+    // built-ins. Property-specific fields (price, year, units) are
+    // already nulled above and aren't part of the user-defaults schema.
+    ...mapUserDefaultsToForm(userDefaults),
   };
 }
 
@@ -311,6 +359,7 @@ export function InvestCalcPage({
   initialSavedDealCount = 0,
   savedDealLimit = null,
   isAuthenticated = false,
+  userAnalysisDefaults = null,
 }: {
   canSaveDeals?: boolean;
   canCompareDeals?: boolean;
@@ -332,6 +381,12 @@ export function InvestCalcPage({
   initialSavedDealCount?: number;
   savedDealLimit?: number | null;
   isAuthenticated?: boolean;
+  /** User's saved analysis defaults (vacancy %, mgmt %, financing,
+   *  growth rates, etc.). Fetched server-side on /; null for anon
+   *  users or users who haven't set defaults. Overlaid on top of the
+   *  engine's built-in defaults at form initialization + on every
+   *  resetToNewAnalysis. */
+  userAnalysisDefaults?: Record<string, number> | null;
 }) {
   const router = useRouter();
   const [activeInputTab, setActiveInputTab] = useState<InputTab>("cash-flow");
@@ -450,7 +505,7 @@ export function InvestCalcPage({
 
   const form = useForm<InvestmentFormValues>({
     resolver: zodResolver(investmentFormSchema),
-    defaultValues: buildNewAnalysisDefaults("single-family"),
+    defaultValues: buildNewAnalysisDefaults("single-family", userAnalysisDefaults),
     mode: "onChange",
   });
 
@@ -493,7 +548,9 @@ export function InvestCalcPage({
   const resetToNewAnalysis = useCallback(
     (nextPropertyType: InvestmentFormValues["propertyType"] = "single-family") => {
       isProgrammaticResetRef.current = true;
-      const defaults = buildNewAnalysisDefaults(nextPropertyType);
+      // Re-apply user defaults on every reset so a "New Analysis" still
+      // pre-fills the user's preferred vacancy/mgmt/financing values.
+      const defaults = buildNewAnalysisDefaults(nextPropertyType, userAnalysisDefaults);
       // Clear any DOM-sticky values on uncontrolled inputs before syncing RHF state.
       formElementRef.current?.reset();
       form.reset(defaults, {
@@ -538,7 +595,7 @@ export function InvestCalcPage({
         isProgrammaticResetRef.current = false;
       });
     },
-    [form, clearAnalysisOutputs]
+    [form, clearAnalysisOutputs, userAnalysisDefaults]
   );
 
   const propertyType = form.watch("propertyType");

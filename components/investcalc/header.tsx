@@ -333,6 +333,7 @@ export function Header({
               <Button
                 variant="ghost"
                 size="icon"
+                aria-label="Dashboard"
                 className="h-8 w-8 sm:w-auto sm:h-9 sm:px-3.5 rounded-full text-[12px] sm:text-[13px] font-semibold text-muted-foreground hover:text-foreground hover:bg-muted gap-1.5 transition-all"
               >
                 <LayoutDashboard className="w-3.5 h-3.5" />
