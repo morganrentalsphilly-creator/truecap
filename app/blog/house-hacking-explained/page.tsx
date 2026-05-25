@@ -10,6 +10,7 @@ import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
+import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 
 const SLUG = "house-hacking-explained";
@@ -171,6 +172,7 @@ export default function HouseHackingPost() {
         </div>
       </article>
       <RelatedBlogPosts currentSlug={SLUG} />
+      <div className="max-w-3xl mx-auto px-4 sm:px-6"><NewsletterSignup variant="expanded" source="blog" /></div>
       <BlogStickyCta />
       <SiteFooter />
       <ScrollDepthTracker />

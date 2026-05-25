@@ -16,6 +16,7 @@
 
 import Link from "next/link";
 import { Lock, ShieldCheck, CreditCard } from "lucide-react";
+import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 
 const FOOTER_COLS: Array<{
   title: string;
@@ -85,6 +86,13 @@ export function SiteFooter() {
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
               Underwrite rentals in 60 seconds.
             </p>
+            {/* Newsletter signup — compact variant. Lives in the
+                brand column so it's the first thing readers see when
+                scanning the footer. Email infrastructure powered by
+                Resend (env vars required: see docs/NEWSLETTER-SETUP.md). */}
+            <div className="mt-5">
+              <NewsletterSignup variant="compact" source="footer" />
+            </div>
           </div>
 
           {/* Sitemap columns */}
