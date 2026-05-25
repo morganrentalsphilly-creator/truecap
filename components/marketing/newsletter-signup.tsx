@@ -85,13 +85,13 @@ export function NewsletterSignup({
         <div className="md:max-w-md">
           <div className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-primary">
             <Mail className="size-3" />
-            Monthly investor digest
+            Weekly investor digest
           </div>
           <h3
             id="newsletter-footer-band-heading"
             className="mt-1 text-base sm:text-lg font-black text-foreground leading-tight"
           >
-            Market notes + new analysis, once a month.
+            Market notes + 3 deals every Monday.
           </h3>
           <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
             No fluff. Unsubscribe anytime.
@@ -149,10 +149,10 @@ export function NewsletterSignup({
           id="newsletter-compact-heading"
           className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground"
         >
-          Monthly investor digest
+          Weekly investor digest
         </h3>
         <p className="mt-1.5 text-sm leading-snug text-muted-foreground">
-          Market notes + new analysis. One email a month. Unsubscribe anytime.
+          Market notes + 3 deals a week. Unsubscribe anytime.
         </p>
         <form onSubmit={onSubmit} noValidate className="mt-3 flex flex-col gap-2 sm:flex-row">
           <label htmlFor="newsletter-email-compact" className="sr-only">
@@ -195,7 +195,7 @@ export function NewsletterSignup({
     >
       <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-primary mb-3">
         <Mail className="size-3" />
-        Monthly digest
+        Weekly digest
       </div>
       <h3
         id="newsletter-expanded-heading"
@@ -204,10 +204,9 @@ export function NewsletterSignup({
         Want this kind of analysis in your inbox?
       </h3>
       <p className="mt-2 max-w-xl text-sm sm:text-base leading-relaxed text-muted-foreground">
-        One email a month. The chart that actually moved, new long-form
-        posts like this one, and the rate / rent / market notes for the
-        cities TrueCap covers. No fluff, no daily spam. Unsubscribe
-        anytime.
+        One email every Monday. Three deals I underwrote that week,
+        what moved in rates + rents, plus the new long-form post.
+        No fluff, no daily spam. Unsubscribe anytime.
       </p>
       <form onSubmit={onSubmit} noValidate className="mt-5 flex flex-col gap-2 sm:flex-row">
         <label htmlFor="newsletter-email-expanded" className="sr-only">
