@@ -26,6 +26,28 @@ Sentry.init({
   // Enable sending user PII (Personally Identifiable Information)
   // https://docs.sentry.io/platforms/javascript/guides/nextjs/configuration/options/#sendDefaultPii
   sendDefaultPii: true,
+
+  // Filter out benign noise errors that don't represent real bugs.
+  // These get captured because Supabase/libraries throw them as
+  // unhandled rejections, but they're expected behavior.
+  ignoreErrors: [
+    // Supabase Auth uses Web Locks API to coordinate token refreshes
+    // across browser tabs. When a user has the site open in multiple
+    // tabs, the second tab's lock acquisition "immediately fails" by
+    // design — the first tab holds the lock. The failing tab retries
+    // on the next tick. No real bug, just multi-tab coordination.
+    /Acquiring an exclusive Navigator LockManager lock/,
+    /lock:sb-.*-auth-token/,
+    // Network errors that aren't actionable (user is offline, etc.)
+    /NetworkError when attempting to fetch resource/,
+    /Failed to fetch/,
+    // ResizeObserver loop noise — fired by browsers when ResizeObserver
+    // can't deliver all observations in a single frame. Benign and
+    // common, especially on iOS Safari.
+    /ResizeObserver loop/,
+    // Browser extension noise — not our code, can't fix it.
+    /Non-Error promise rejection captured with value:/,
+  ],
 });
 
 export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
