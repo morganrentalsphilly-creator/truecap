@@ -282,8 +282,11 @@ export function Header({
       </div>
     )}
 
-    {/* Main nav */}
-    <header className="bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80 border-b border-border sticky top-0 z-50 shadow-sm">
+    {/* Main nav — sticky handled by the outer wrapper above. Don't re-apply
+        `sticky top-0` here or the white header background overlays the
+        primary-colored announcement bar (visible on mobile as a white box
+        blocking the top banner). */}
+    <header className="bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80 border-b border-border shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 sm:h-16 flex items-center justify-between gap-3">
         <div className="flex items-center justify-start gap-0 sm:gap-3 min-w-0">
           <AppLogo priority subtitleClassName="hidden sm:block" />
