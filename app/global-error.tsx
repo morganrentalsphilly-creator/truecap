@@ -7,8 +7,13 @@
  *
  * Keep this minimal: no fonts, no styled-system, no global CSS imports
  * other than what's strictly required for it to be legible.
+ *
+ * Sentry integration: forwards the error to Sentry.captureException so
+ * the root-layout crashes (which are the most catastrophic class) get
+ * proper stack-trace logging in production.
  */
 
+import * as Sentry from "@sentry/nextjs";
 import { useEffect } from "react";
 
 export default function GlobalError({
@@ -19,6 +24,7 @@ export default function GlobalError({
   reset: () => void;
 }) {
   useEffect(() => {
+    Sentry.captureException(error);
     console.error("[app/global-error]", error);
   }, [error]);
 

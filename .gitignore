@@ -62,3 +62,5 @@ mcps/
 /package-lock.json
 /yarn.lock
 /pnpm-lock.yaml
+# Sentry Config File
+.env.sentry-build-plugin
