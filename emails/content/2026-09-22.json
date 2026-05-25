@@ -1,0 +1,51 @@
+{
+  "subject": "TrueCap #17 — short-term vs long-term: the honest math",
+  "preheader": "When STR beats LTR by 3x · When it underperforms · The 4 markets where regulation killed the model",
+  "publishedAt": "2026-09-22",
+  "weekLabel": "Issue 17",
+  "marketSnapshot": {
+    "headline": "Rates holding the new lower band, fall inventory rising",
+    "body": "30Y holding the 6.10-6.20% band post-cut, no more big moves expected until the October Fed meeting. The autumn pickup hit on schedule — listings up 8% MoM nationally as sellers who waited out the summer come on market. Combined with the rate drop, this is the strongest acquisition environment of 2026. Worth pointing out: the strongest months for closing rental purchases are typically late September through mid-November (sellers motivated to close before year-end, buyer competition still subdued before the spring rush).",
+    "stats": [
+      { "label": "30Y fixed", "value": "6.14%", "delta": "-1bp WoW", "deltaTone": "neutral" },
+      { "label": "Listings MoM", "value": "+8%", "delta": "fall pickup", "deltaTone": "positive" },
+      { "label": "Avg discount-to-ask", "value": "3.2%", "delta": "favorable" }
+    ]
+  },
+  "dealSpotter": [
+    {
+      "address": "Gatlinburg, TN — Smoky Mountain cabin (STR)",
+      "headlineNumber": "STR: 18% cap rate · LTR equivalent: 7.1%",
+      "verdict": "Strong (as STR)",
+      "body": "$385k 3-bed cabin in a vacation-rental zone. STR projections: $84k/yr gross at 68% occupancy, $42k net after cleaning + management + maintenance. Annual cap rate as STR: ~11%. Same property as long-term rental: $2,650/mo = $31,800/yr gross, $19k net after expenses. STR wins by 2.2x in this case. But the trade-off: cleaning fees, guest-management software, dynamic pricing, regulatory uncertainty (Gatlinburg has so far been STR-friendly but that can change). For investors with the bandwidth or a willing co-host, vacation markets like this are where STR economics still meaningfully beat LTR."
+    },
+    {
+      "address": "Asheville, NC — downtown 2-bed condo",
+      "headlineNumber": "STR regulation kills the model · WALK",
+      "verdict": "Skip",
+      "body": "$295k condo that USED to do $52k/yr as STR. Asheville passed restrictive STR ordinance in 2024 — owner-occupant-only for new permits in most zones. Existing permits got grandfathered but are non-transferable. So either you buy a property with the grandfathered permit (premium price for the permit), or you buy a property and can only operate it as LTR ($1,850/mo = $22k/yr). The math difference is brutal. Asheville is one of 4 markets I won't underwrite as STR anymore."
+    },
+    {
+      "address": "Memphis, TN — Cooper-Young SFR (LTR-only)",
+      "headlineNumber": "8.4% cap as LTR · skip the STR temptation",
+      "verdict": "Strong",
+      "body": "$155k 3/2. Some investors will look at this in a walkable Memphis neighborhood and think 'this would crush as STR.' Memphis has the regulatory complexity (specific zones permitted, business license required) and the demand profile is mid-week business travel + weekend leisure mixed. The LTR economics here are strong AND boring AND require zero operational complexity. Sometimes the answer is 'don't overcomplicate it.'"
+    }
+  ],
+  "blogFeature": {
+    "title": "Cash-on-cash vs IRR — what each tells you about a deal",
+    "url": "https://usetruecap.com/blog/cash-on-cash-vs-irr",
+    "excerpt": "STR investors love IRR (it captures the full picture); LTR investors lean on cash-on-cash (immediate return on equity deployed). The two metrics tell different stories — knowing which one to optimize for is the first decision."
+  },
+  "qa": {
+    "question": "Is STR investing still viable in 2026 or did the regulatory wave kill it?",
+    "answer": "Both, depending on the market. The regulatory wave killed pure-investor STR in dense urban markets — NYC, LA, San Francisco, Seattle, Asheville, Charleston, parts of Nashville, parts of New Orleans, all of Maui. In those markets, STR requires owner-occupancy or is outright banned for non-owner-occupants. STR is still viable in: (a) destination vacation markets where the local economy IS tourism (Smoky Mountains, Lake Tahoe, Outer Banks, Florida Panhandle beaches, ski towns, Joshua Tree, Sedona) — these markets actively welcome STR because it's their economic base. (b) Mid-tier urban markets that still allow it but with permit limits (Austin, Atlanta, Phoenix outside Scottsdale — varies block by block). (c) Some rural college towns with predictable event-week demand. The right mental model isn't 'STR vs LTR' but 'this specific zip code in 2026.' Always check current regulation BEFORE running the STR underwrite — a 5-minute Google search saves you 5 hours of building a model on a deal that can't legally operate the way you assumed."
+  },
+  "shipNote": {
+    "title": "What shipped in TrueCap this week",
+    "items": [
+      "STR mode: enter projected ADR + occupancy, get STR-specific cash flow with seasonality assumptions",
+      "STR regulation flag: warns when a market has restricted, banned, or permit-limited STR operation"
+    ]
+  }
+}

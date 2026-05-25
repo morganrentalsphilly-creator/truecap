@@ -1,0 +1,51 @@
+{
+  "subject": "TrueCap #15 — cost segregation: the tax move most investors miss",
+  "preheader": "Front-load 25-35% of depreciation · When the $4-7k study pays for itself · Honest limits",
+  "publishedAt": "2026-09-08",
+  "weekLabel": "Issue 15",
+  "marketSnapshot": {
+    "headline": "Fed cut 50bp, mortgage rates broke 6.2%",
+    "body": "Fed cut 50bp on Wednesday — the larger of the two scenarios. Mortgage rates dropped immediately, 30Y now at 6.18%. DSCR loans at 7.65%. This is the lowest rate environment in 14 months and the strongest setup for new acquisitions since early 2024. Three things investors are doing this week: (1) accelerating closings on deals that were in pending — locking the new lower rate. (2) running re-underwrites on saved deals from earlier in the year to see which ones now pencil at the lower rate. (3) considering refinancing existing 7-8% loans. Break-even on refi at this rate level is typically 18-28 months depending on closing costs.",
+    "stats": [
+      { "label": "30Y fixed", "value": "6.18%", "delta": "-27bp WoW", "deltaTone": "positive" },
+      { "label": "DSCR avg", "value": "7.65%", "delta": "-45bp", "deltaTone": "positive" },
+      { "label": "Fed funds", "value": "4.50%", "delta": "-50bp", "deltaTone": "positive" }
+    ]
+  },
+  "dealSpotter": [
+    {
+      "address": "Phoenix, AZ — Garfield neighborhood SFR",
+      "headlineNumber": "Re-pencils at 6.18% · was Marginal at 6.85%",
+      "verdict": "Strong (at new rate)",
+      "body": "$315k 3/2 at $2,100 rent. I underwrote this in June at 6.85% and called it Marginal — cash flow was $80/mo, DSCR 1.18. At today's 6.18%, cash flow is $245/mo, DSCR 1.31. Same property, same rents, same underwriting — just the rate change took it from 'skip' to 'go.' This is happening across dozens of deals — worth re-running anything you walked from earlier in the year."
+    },
+    {
+      "address": "Tampa, FL — Seminole Heights duplex",
+      "headlineNumber": "Refi savings: $385/mo on existing portfolio",
+      "verdict": "Refinance candidate",
+      "body": "Including this not as a new deal but as a refi callout. If you closed this property in 2024 at 7.5%, today's 6.18% is a 132bp drop. On a $400k loan, that's ~$385/mo of savings. Closing costs typically $5-7k. Break-even = 13-18 months. If you plan to hold past then, refinance. Get 3 quotes — rate variance between lenders is wider than usual right now."
+    },
+    {
+      "address": "Kansas City, MO — Waldo SFR",
+      "headlineNumber": "8.4% cap at new rates · clean play",
+      "verdict": "Strong",
+      "body": "$215k 3/2 at $1,950 rent. Already a strong deal at 6.85%. At 6.18%, cash flow improves another $115/mo, taking total monthly NCF to $850. Cap rate unchanged at 8.4% (cap rate is rate-agnostic), but the financed return is meaningfully better."
+    }
+  ],
+  "blogFeature": {
+    "title": "1031 exchange basics: how to defer capital gains on rental property",
+    "url": "https://usetruecap.com/blog/1031-exchange-basics",
+    "excerpt": "1031 + cost segregation pair well — defer the gain on the sold property, accelerate depreciation on the replacement. The two-step tax strategy that materially improves IRR for tax-aware investors."
+  },
+  "qa": {
+    "question": "Cost segregation: my CPA says it's worth doing on my $400k rental. How does it actually work?",
+    "answer": "Cost seg breaks your building into components — land improvements, personal property, systems — that depreciate over 5, 7, or 15 years instead of the standard 27.5 years for residential rental property. On a typical SFR, 20-30% of the building value gets reclassified to faster depreciation schedules. The result: in years 1-5 of ownership, your depreciation deduction is 2-3x what it would be without the study. The math on your $400k rental: assume $80k is reclassified to 5-15 year schedules. You front-load ~$50-65k of depreciation deductions into the first 5 years vs spreading it across 27.5. At a 32% effective tax bracket, that's $16-21k of accelerated tax savings in those first 5 years. Cost of the engineering study: typically $4-7k. So you'd save ~$12-16k net over the first 5 years, plus a meaningful time-value-of-money benefit on the front-loaded deductions. The catch: when you sell, the front-loaded depreciation gets 'recaptured' at ordinary income rates (vs the 25% rate on standard depreciation recapture). So cost seg is best for properties you'll hold 7+ years or 1031-exchange. If you're flipping or selling in 2-3 years, the math doesn't usually work."
+  },
+  "shipNote": {
+    "title": "What shipped in TrueCap this week",
+    "items": [
+      "Re-underwrite from saved analysis: one-click to refresh a saved deal with today's rate, see the delta",
+      "Refi calculator: enter your current rate + balance, see savings, break-even, and lifetime interest reduction"
+    ]
+  }
+}

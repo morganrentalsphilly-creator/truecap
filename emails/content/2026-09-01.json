@@ -1,0 +1,51 @@
+{
+  "subject": "TrueCap #14 — small multi-family (5-12 units): different math",
+  "preheader": "Commercial pricing kicks in · Cap-rate vs DSCR drives everything · The under-$1M sweet spot",
+  "publishedAt": "2026-09-01",
+  "weekLabel": "Issue 14",
+  "marketSnapshot": {
+    "headline": "Fed week: rate cut likely Wednesday, what it means",
+    "body": "Fed meets Wednesday — futures pricing in 90% odds of at least a 25bp cut, with 55% probability of 50bp. Either way, the actual cut has been substantially priced in over the last month (30Y already down to 6.45%) so don't expect another big leg lower on the announcement itself. The real signal will be the press conference language about pace of cuts through year-end. If Powell hints at more cuts in October/December, expect rates to break into the 6.20s. If he signals 'one and done,' rates stick around 6.4-6.5%.",
+    "stats": [
+      { "label": "30Y fixed", "value": "6.45%", "delta": "-2bp WoW", "deltaTone": "positive" },
+      { "label": "Fed decision Wed", "value": "75%", "delta": "25bp odds" },
+      { "label": "50bp odds", "value": "55%", "delta": "+5pp WoW", "deltaTone": "positive" }
+    ]
+  },
+  "dealSpotter": [
+    {
+      "address": "Cincinnati, OH — Northside 6-unit",
+      "headlineNumber": "8.2% cap · $725k · commercial loan territory",
+      "verdict": "Strong",
+      "body": "$725,000 for a 6-unit at $7,150/mo gross. 5+ units = commercial financing (different from residential 1-4). DSCR-style pricing typically 25-30% down at 7.5-8.0% rates. The math advantage: commercial buyers price these on cap rate compression, which means strong NOI improvement (raise rents 5%, upgrade laundry, sub-meter utilities) directly compounds the exit value. A 100bp cap-rate compression on an 8% cap property is roughly $90k of value creation on this deal."
+    },
+    {
+      "address": "Pittsburgh, PA — Bloomfield 8-unit",
+      "headlineNumber": "7.6% cap · gentrifying neighborhood",
+      "verdict": "Strong",
+      "body": "$1.05M for an 8-unit at $10,200/mo gross. Below the $1M loan amount where pricing gets slightly worse, so use a community/regional bank that does sub-$1.5M commercial. Bloomfield rents have been moving +4-6%/yr; the under-management opportunity (current owner is 78 and has under-rented vs market for years) is real."
+    },
+    {
+      "address": "Memphis, TN — Cooper-Young 5-unit",
+      "headlineNumber": "9.1% cap · BUT one unit is tenant-from-hell",
+      "verdict": "Marginal",
+      "body": "$485k 5-unit. Four units are well-tenanted at market rents. The 5th has a long-term tenant who's been there 9 years, paying $400/mo when market is $1,150. Owner has been afraid to evict. Honest assessment: that unit's tenant is the deal. If you can get them out via cash-for-keys ($3-5k) or wait out the lease, you unlock $750/mo upside which is worth ~$100k of value. If they won't move, you've inherited the problem."
+    }
+  ],
+  "blogFeature": {
+    "title": "DSCR loans explained: rates, requirements, and when they make sense",
+    "url": "https://usetruecap.com/blog/dscr-loans-explained",
+    "excerpt": "DSCR loans qualify the property, not you. For small multi-family deals where DTI doesn't pencil conventional, DSCR is often the path forward — but the trade-off is rate and ratio requirements that need to factor into your offer math."
+  },
+  "qa": {
+    "question": "Is 5-12 units actually a better entry point than building up from single-family?",
+    "answer": "Depends on your starting point. The case for going straight to small multi-family: economies of scale on management (one PM relationship for 8 units vs eight relationships for 8 SFRs), value-add upside on under-managed properties (most 5-12 unit owners are not professional operators), and commercial pricing on cap-rate compression. The case against: bigger capital requirement (typically $200-400k down on a $1M deal), commercial financing is harder for first-timers without W-2 income or property-management track record, and the asset class has different operational rhythms (commercial lenders want you to have a property-management background or hire a credentialed PM). Practical answer: most investors should do 1-3 SFRs first to learn the operational side, then jump to small multi-family for property #4-6. The smaller-scale learning curve on a $200k SFR is much less painful than on a $1M 6-unit."
+  },
+  "shipNote": {
+    "title": "What shipped in TrueCap this week",
+    "items": [
+      "Small multi-family support (5-12 unit): commercial-loan defaults, per-unit rent input, expense ratios by unit count",
+      "DSCR threshold awareness: flags when proposed DSCR falls below commercial lender minimums (typically 1.20-1.25 for small multi)"
+    ]
+  }
+}

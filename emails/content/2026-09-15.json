@@ -1,0 +1,51 @@
+{
+  "subject": "TrueCap #16 — Q3 market check: what's working, what's not",
+  "preheader": "9 months in · Where deals pencil in Q4 · The 3 markets I've quietly stopped underwriting",
+  "publishedAt": "2026-09-15",
+  "weekLabel": "Issue 16",
+  "marketSnapshot": {
+    "headline": "9 months into 2026: the map looks different than January",
+    "body": "Time for a quarterly stocktake. The market in September 2026 has three big differences from January. (1) Rates broke through 6.2% after the September cut — better than most forecasts. (2) Insurance has continued reshaping the geographic deal map: FL/LA/coastal TX harder to make work, Midwest + select non-coastal Southeast much more attractive. (3) Rents are firmly positive YoY in 10 of 13 covered markets — a real reversal from the 2024-early 2025 stagnation. Net effect: deals are easier to find than at any point in the last 18 months, IF you're willing to look in the right markets and skip the Sun Belt darling list.",
+    "stats": [
+      { "label": "30Y fixed", "value": "6.15%", "delta": "-3bp WoW", "deltaTone": "positive" },
+      { "label": "Markets I'm bullish on", "value": "7 / 13", "delta": "+2 since Q2", "deltaTone": "positive" },
+      { "label": "Markets I'm avoiding", "value": "3 / 13" }
+    ]
+  },
+  "dealSpotter": [
+    {
+      "address": "Cincinnati, OH — College Hill SFR",
+      "headlineNumber": "8.6% cap · stable B-neighborhood",
+      "verdict": "Strong",
+      "body": "$152k 3/1.5 at $1,400 rent. Cincinnati's been one of the quiet outperformers — boring, stable, low insurance volatility, decent job market with two healthcare anchors (Mercy + UC Health). Not a market that shows up in BiggerPockets threads, which is part of why the deals still pencil. The cap rate is real, the neighborhood is stable, the math works."
+    },
+    {
+      "address": "Greensboro, NC — Sunset Hills SFR",
+      "headlineNumber": "7.4% cap · steady appreciation tailwind",
+      "verdict": "Strong",
+      "body": "$245k 3/2 at $1,925 rent. North Carolina's been adding population steadily (Tesla coming, defense + textile reshoring, biotech expansion in RTP). The Piedmont Triad markets (Greensboro, Winston-Salem, High Point) are cheaper than Raleigh-Durham and Charlotte but get spillover demand. Boring deals here compound well — modest cash flow today, 3-5%/yr appreciation, low insurance volatility."
+    },
+    {
+      "address": "Sarasota, FL — Bee Ridge condo",
+      "headlineNumber": "5.1% cap · HOA up 22% YoY · WALK",
+      "verdict": "Skip",
+      "body": "$325k 2/2 condo at $2,150 rent. The condo's HOA jumped from $385/mo to $470/mo on the latest renewal, with a $1,800 special assessment for facade work. Florida condo associations are still working through the post-Surfside reserve-study mandates, and many older buildings will face 30-60% HOA hikes in the next 2-3 years. Sarasota also faces the broader FL insurance issue. The 5.1% cap doesn't survive the friction. Florida condos specifically are a 'wait 18-24 months' market until the HOA shock fully prices in."
+    }
+  ],
+  "blogFeature": {
+    "title": "What's a good cap rate in 2026?",
+    "url": "https://usetruecap.com/blog/what-is-a-good-cap-rate",
+    "excerpt": "Cap rate bands updated for the current rate environment. Why a 'good' cap rate depends on market type and financing reality, and why blind chasing of 10%+ caps often signals more risk than reward."
+  },
+  "qa": {
+    "question": "You mentioned three markets you've quietly stopped underwriting. Which three?",
+    "answer": "Honest answer: (1) Florida coastal — Naples, Sarasota, Cape Coral, parts of Tampa Bay. Insurance + HOA + post-hurricane construction costs make the math actively painful unless you bought 5+ years ago. (2) Boise, ID — overbuilt 2022-2024, rents still negative YoY, supply absorption is at least 12-18 months from done. (3) Austin, TX — rents down 8-12% from 2023 peak, MUD tax exposure varies wildly by zone, the tech-employment narrative isn't supporting rent growth the way it did in 2018-2021. These aren't permanent stay-aways — all three will be attractive again, probably in 2027-2028 once the structural issues work through. But underwriting time spent in those markets in Q4 2026 produces less ROI than time spent on the Midwest, Piedmont NC, or select non-coastal SE markets like Charlotte/Charleston/Birmingham."
+  },
+  "shipNote": {
+    "title": "What shipped in TrueCap this week",
+    "items": [
+      "Quarterly markets dashboard: per-market cap rate trends, insurance volatility flag, deal-flow scoring",
+      "New market page: /markets/cincinnati (the under-discussed cash-flow market)"
+    ]
+  }
+}

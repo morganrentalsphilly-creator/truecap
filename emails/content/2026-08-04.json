@@ -1,0 +1,51 @@
+{
+  "subject": "TrueCap #10 — your property tax bill is wrong (probably)",
+  "preheader": "How to read your assessment · The 30-min appeal that saves $400-1,800/yr · 3 deals",
+  "publishedAt": "2026-08-04",
+  "weekLabel": "Issue 10",
+  "marketSnapshot": {
+    "headline": "Assessment notices hit mailboxes — the under-used profit lever",
+    "body": "Property tax assessment notices for the 2026 tax year are landing in mailboxes across most US counties this month. Most investors glance at the number, file it, and move on. That's a mistake — counties over-assess about 30-40% of rental properties relative to actual sale-comp values, and the appeal process exists specifically to correct that. Average successful appeal saves $400-1,800/year, in perpetuity. On a 5-property portfolio, that's $2-9k/year of free NOI for ~30 minutes per property of paperwork.",
+    "stats": [
+      { "label": "30Y fixed", "value": "6.59%", "delta": "-5bp WoW", "deltaTone": "positive" },
+      { "label": "Avg over-assessment rate", "value": "33%", "delta": "of rental properties" },
+      { "label": "Avg appeal success rate", "value": "62%", "delta": "when filed correctly" }
+    ]
+  },
+  "dealSpotter": [
+    {
+      "address": "Philadelphia, PA — Point Breeze SFR",
+      "headlineNumber": "Tax bill $4,200 · should be $2,950 based on comps",
+      "verdict": "Strong (after appeal)",
+      "body": "$285k purchase. Current assessed value $268k = $4,200 tax bill. Actual sales of comparable Point Breeze 3/2's in the last 6 months: $245-$262k. Filing a formal appeal with the recent comps as evidence has a 65-75% success rate in Philly. If granted, the tax bill drops to ~$2,950, which adds $1,250/yr to NOI. Cap rate moves from 7.4% to 7.8% on that single piece of paperwork."
+    },
+    {
+      "address": "Nashville, TN — East Nashville duplex",
+      "headlineNumber": "Tax $5,800 · comp-supported value 11% lower",
+      "verdict": "Strong (after appeal)",
+      "body": "$485k 2-unit. Davidson County's assessment came in at $510k. Actual comps support $452-462k. The 11% over-assessment is worth ~$650/year in unnecessary tax. The appeal process in Davidson County requires a formal hearing — slightly more work than a paper-only appeal — but the success rate when armed with three recent comparable sales is 70%+."
+    },
+    {
+      "address": "Indianapolis, IN — Holy Cross 3/2",
+      "headlineNumber": "Tax $1,950 — assessed FAIRLY, skip appeal",
+      "verdict": "Skip (the appeal)",
+      "body": "Including this as a counterexample. Marion County's assessment came in $4k under the recent comps. Don't appeal a fair assessment — the county can reassess upward and you'll cost yourself money. Only appeal when comps clearly support a LOWER value. Default to 'assess your assessment' before deciding."
+    }
+  ],
+  "blogFeature": {
+    "title": "How to spot a bad rental deal in 60 seconds — 7 red flags",
+    "url": "https://usetruecap.com/blog/spot-bad-rental-in-60-seconds",
+    "excerpt": "Seven red flags that tell you a rental property doesn't pencil — before you waste hours running the full underwrite. Tax-to-value ratio is one of them, and one of the most under-checked."
+  },
+  "qa": {
+    "question": "Step by step — how do I actually appeal a property tax assessment?",
+    "answer": "Three steps that work in 90% of counties. (1) Pull 3-5 sales comparables of similar properties (same bedroom count, similar age, within 1 mile, sold in the last 12 months). Most county assessor sites have a comparable-sales lookup tool; if not, your realtor can pull this in 5 minutes. (2) Calculate the median price per square foot from those comps. Multiply by your property's square footage to get a comp-supported value. (3) File the appeal through your county's online portal (look for 'tax assessment appeal' on the assessor's site). Attach the comp list and your calculation. Most counties charge $25-100 to file. Hearings are usually in writing; some require a 10-minute call. Decisions come back in 60-120 days. If you win, the savings start immediately and recur every year you own the property."
+  },
+  "shipNote": {
+    "title": "What shipped in TrueCap this week",
+    "items": [
+      "Property tax assessment-vs-comps display in the property details panel (shows whether you're potentially over-assessed)",
+      "New blog post in draft: 'How to appeal your property tax assessment' — publishing later this week"
+    ]
+  }
+}

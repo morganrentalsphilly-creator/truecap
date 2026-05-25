@@ -1,0 +1,51 @@
+{
+  "subject": "TrueCap #18 — first-year capex: what no one tells new landlords",
+  "preheader": "The 6 surprises that hit 70% of new investors · How to budget defensively · 3 deals",
+  "publishedAt": "2026-09-29",
+  "weekLabel": "Issue 18",
+  "marketSnapshot": {
+    "headline": "Acquisition window remains favorable, year-end approaching",
+    "body": "Six weeks to year-end. Rates are stable, inventory is healthy, sellers motivated to close before December 31 for tax reasons. From the buyer side, two reasons to be active in October: (1) inventory will tighten in mid-December as listings withdraw for the holidays. (2) lenders' year-end processing pipelines get backed up after Thanksgiving — close-by-year-end deals need to be under contract by mid-October to be safe. If you're looking for deals, the next 2-3 weeks are the highest-leverage window of the year.",
+    "stats": [
+      { "label": "30Y fixed", "value": "6.12%", "delta": "-2bp WoW", "deltaTone": "positive" },
+      { "label": "Months to year-end", "value": "3", "delta": "close-by-Dec deadline" },
+      { "label": "Avg pre-close timeline", "value": "45 days" }
+    ]
+  },
+  "dealSpotter": [
+    {
+      "address": "Indianapolis, IN — Garfield Park SFR",
+      "headlineNumber": "Year-1 surprise capex: ~$6,500",
+      "verdict": "Strong (with capex reserve)",
+      "body": "$175k 3/2 at $1,575 rent. Looks like a clean turnkey deal. But the property is 1958, last full roof in 2009, water heater is original equipment from when the seller bought in 2018. Honest year-1 budget: water heater replacement ($1,800), roof repairs or full replacement ($4,000-7,500 depending on condition), HVAC service + likely AC capacitor ($400-800). Don't 'hope' these don't fail. Budget them. The deal still pencils at 7.6% cap when you include this reserve in year-1, but it's a different feeling than the 8.4% the seller's listing math implies."
+    },
+    {
+      "address": "Cleveland, OH — Tremont 3/1.5",
+      "headlineNumber": "Old house tax: budget $5-7k for first 18 months",
+      "verdict": "Strong (with capex reserve)",
+      "body": "$118k 1924 build. Pre-WW2 housing stock is durable but it ALWAYS has deferred maintenance. Common year-1 surprises: cast-iron drain line failure ($2,500-6,000), original windows (not always replaceable, but storm windows ~$200/window), galvanized supply lines causing low pressure ($1,500-4,000 to replace with copper or PEX). Cleveland's cap rates are real but the year-1 reality check on older stock is part of the cost of admission."
+    },
+    {
+      "address": "Kansas City, MO — Brookside SFR (recently renovated)",
+      "headlineNumber": "Year-1 capex: ~$1,200 (the easy version)",
+      "verdict": "Strong",
+      "body": "$245k 3/2, 2024 full renovation (new HVAC, roof, kitchen, electrical, plumbing). When the seller has done the work in the last 1-2 years, your year-1 capex drops dramatically — typically just minor punch-list ($500-1,500). The premium for a recently renovated property: typically $15-25k more than the un-renovated equivalent. Often worth it for first or second deal where capex variance can blow your operating budget."
+    }
+  ],
+  "blogFeature": {
+    "title": "How to underwrite a rental property in 60 seconds",
+    "url": "https://usetruecap.com/blog/how-to-underwrite-a-rental-property-in-60-seconds",
+    "excerpt": "The five numbers — and the 30-second capex reality check — that decide whether a rental deal pencils. The honest triage every experienced investor runs before opening the full underwrite."
+  },
+  "qa": {
+    "question": "What's the actual year-1 capex budget I should hold on a single-family rental I'm buying?",
+    "answer": "Three honest tiers based on building age and recent capex history. Tier 1 — turnkey or recently renovated (2-3 years): budget $800-2,000 for year 1. Punch-list items, minor service calls, maybe a single appliance replacement. Tier 2 — solid building 10-30 years old, no recent renovation: budget $3,500-6,000. Reasonable likelihood of one major system needing attention (HVAC service or partial replacement, water heater, roof patching). Tier 3 — older building (40+ years) or visible deferred maintenance: budget $6,500-12,000. High likelihood of multiple system issues surfacing in the first year. As a percentage of purchase price: roughly 1% in tier 1, 2-3% in tier 2, 4-6% in tier 3. The biggest underwriting mistake new landlords make is using 'national average' capex assumptions (8-10% of rent annually) without adjusting for building age. A 1925 Philly rowhouse and a 2018 Texas tract home have different reserve needs by an order of magnitude."
+  },
+  "shipNote": {
+    "title": "What shipped in TrueCap this week",
+    "items": [
+      "Building-age-aware capex defaults: capex % auto-adjusts based on the property's year built",
+      "Year-1 capex callout: surfaces likely first-year surprises based on building age + last-renovation data"
+    ]
+  }
+}
