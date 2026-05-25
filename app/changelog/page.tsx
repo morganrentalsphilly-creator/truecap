@@ -56,6 +56,13 @@ const CATEGORY_STYLES: Record<Category, { icon: typeof Sparkles; color: string; 
 const ENTRIES: Entry[] = [
   {
     date: "2026-05-24",
+    category: "Improvement",
+    title: "Footer rebalanced — compact brand block, badges in bottom strip",
+    description:
+      "Brand column was making the footer feel lopsided because it ran taller than the sitemap columns next to it. Brand description trimmed to a single tagline, trust badges relocated to the bottom strip alongside the copyright. All 5 footer columns are now the same height and the footer ends with one clean horizontal band instead of trailing whitespace.",
+  },
+  {
+    date: "2026-05-24",
     category: "Feature",
     title: "Three new persona landing pages",
     description:

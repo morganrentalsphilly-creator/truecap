@@ -64,39 +64,27 @@ export function SiteFooter() {
   const year = new Date().getFullYear();
   return (
     <footer className="mt-12 border-t border-border bg-card/40">
-      <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
+      <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-12">
         {/* Brand + sitemap row.
-            Grid: 6 cols at lg so brand can take 2 + four sitemap cols
-            each take 1. Avoids the cramped look of trying to fit a
-            wide brand block into a single narrow column. */}
-        <div className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-3 lg:grid-cols-6 sm:gap-y-12">
-          {/* Brand block — takes 2 cols at lg so the description + trust
-              badges have room to breathe. Spans the full row on smaller
-              viewports. */}
-          <div className="col-span-2 sm:col-span-3 lg:col-span-2">
-            <Link href="/" className="inline-flex items-center text-xl font-black tracking-tight text-foreground">
+            Grid: 5 cols at lg so brand takes 1 wide column + 4 sitemap
+            cols. Each column is the same height because the brand block
+            is now intentionally compact (logo + one-line tagline only —
+            trust badges moved to the bottom strip). */}
+        <div className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-3 lg:grid-cols-5">
+          {/* Brand block — intentionally short. Logo + one-line tagline.
+              Trust badges have moved to the bottom strip so they don't
+              push this column taller than the sitemap columns next to
+              it. Spans the full row on small viewports. */}
+          <div className="col-span-2 sm:col-span-3 lg:col-span-1">
+            <Link
+              href="/"
+              className="inline-flex items-center text-xl font-black tracking-tight text-foreground"
+            >
               Truecap<span className="text-primary">.</span>
             </Link>
-            <p className="mt-3 max-w-sm text-sm leading-relaxed text-muted-foreground">
-              Real estate investment analyzer. Cap rate, CoC, DSCR, projections,
-              tax, and exit — in seconds.
+            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+              Underwrite rentals in 60 seconds.
             </p>
-            {/* Trust badges — pill-style with subtle icon tinting so they
-                feel like part of the brand rather than visual clutter. */}
-            <ul className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px] font-semibold text-muted-foreground">
-              <li className="inline-flex items-center gap-1.5">
-                <Lock className="size-3.5 text-primary/70" />
-                <span>SSL encrypted</span>
-              </li>
-              <li className="inline-flex items-center gap-1.5">
-                <ShieldCheck className="size-3.5 text-primary/70" />
-                <span>Cancel anytime</span>
-              </li>
-              <li className="inline-flex items-center gap-1.5">
-                <CreditCard className="size-3.5 text-primary/70" />
-                <span>Stripe billing</span>
-              </li>
-            </ul>
           </div>
 
           {/* Sitemap columns */}
@@ -121,26 +109,49 @@ export function SiteFooter() {
           ))}
         </div>
 
-        {/* Honest sub-promise — toned down to a soft inline footnote
-            instead of a heavy bordered card. Same content, less visual
-            weight, doesn't compete with the sitemap. */}
-        <p className="mt-12 text-center text-[11px] leading-relaxed text-muted-foreground sm:text-xs">
+        {/* Honest sub-promise — quiet footnote, doesn't compete with
+            the sitemap above or the bottom strip below. */}
+        <p className="mt-10 text-center text-[11px] leading-relaxed text-muted-foreground sm:text-xs">
           <strong className="text-foreground/90">TrueCap is not a financial advisor.</strong>{" "}
-          The analyzer surfaces the math you&apos;d compute yourself in a spreadsheet — accurate
-          formulas, market-data defaults — but every assumption is editable and the
-          underwriting decision is yours.
+          The analyzer surfaces the math you&apos;d compute yourself in a spreadsheet —
+          accurate formulas, market-data defaults — but every assumption is editable and
+          the underwriting decision is yours.
         </p>
 
-        {/* Bottom strip */}
-        <div className="mt-6 flex flex-col items-center justify-between gap-3 border-t border-border pt-6 text-xs text-muted-foreground sm:flex-row">
-          <p>© {year} TrueCap. All rights reserved.</p>
-          <p className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 sm:justify-end">
-            <Link href="/pricing" className="transition-colors hover:text-foreground">Pricing</Link>
-            <span aria-hidden className="text-muted-foreground/30">·</span>
-            <Link href="/privacy" className="transition-colors hover:text-foreground">Privacy</Link>
-            <span aria-hidden className="text-muted-foreground/30">·</span>
-            <Link href="/terms" className="transition-colors hover:text-foreground">Terms</Link>
-            <span aria-hidden className="text-muted-foreground/30">·</span>
+        {/* Bottom strip — copyright, trust badges, legal links + email,
+            all on the same horizontal band so the footer ends with a
+            single visually-balanced row instead of trailing dead space. */}
+        <div className="mt-6 flex flex-col items-center justify-between gap-4 border-t border-border pt-6 text-xs text-muted-foreground sm:flex-row">
+          <p className="order-2 sm:order-1">© {year} TrueCap. All rights reserved.</p>
+          {/* Trust badges — moved here so the brand column stays compact
+              and the badges are still visible on every page. */}
+          <ul className="order-1 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-[11px] font-semibold sm:order-2">
+            <li className="inline-flex items-center gap-1.5">
+              <Lock className="size-3.5 text-primary/70" />
+              <span>SSL encrypted</span>
+            </li>
+            <li className="inline-flex items-center gap-1.5">
+              <ShieldCheck className="size-3.5 text-primary/70" />
+              <span>Cancel anytime</span>
+            </li>
+            <li className="inline-flex items-center gap-1.5">
+              <CreditCard className="size-3.5 text-primary/70" />
+              <span>Stripe billing</span>
+            </li>
+          </ul>
+          <p className="order-3 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 sm:justify-end">
+            <Link href="/privacy" className="transition-colors hover:text-foreground">
+              Privacy
+            </Link>
+            <span aria-hidden className="text-muted-foreground/30">
+              ·
+            </span>
+            <Link href="/terms" className="transition-colors hover:text-foreground">
+              Terms
+            </Link>
+            <span aria-hidden className="text-muted-foreground/30">
+              ·
+            </span>
             <a
               href="mailto:hello@usetruecap.com"
               className="transition-colors hover:text-foreground"
