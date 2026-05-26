@@ -256,8 +256,13 @@ export function Header({
 
   return (
     <div className="sticky top-0 z-50">
-    {/* Announcement bar — Pro upgrade prompt (free / non-premium only) */}
-    {isPremiumStatusReady && !isPremium && !bannerDismissed && (
+    {/* Announcement bar — Pro upgrade prompt. Only shown to AUTHENTICATED
+        free users (who can actually 'upgrade'). Suppressed for cold
+        visitors because (a) 'upgrade' doesn't apply when they don't have
+        an account yet, and (b) the AnnualPromoBanner above already
+        carries the upsell more appropriately. Reduces the 3-bar mobile
+        stack to 2 bars for the visitor's first impression. */}
+    {user && isPremiumStatusReady && !isPremium && !bannerDismissed && (
       <div className="bg-primary text-primary-foreground h-9 flex items-center justify-center px-4 relative">
         <div className="flex items-center gap-2 text-[12px] sm:text-[13px] font-medium">
           <Zap className="w-3.5 h-3.5 fill-current opacity-90 shrink-0" />
