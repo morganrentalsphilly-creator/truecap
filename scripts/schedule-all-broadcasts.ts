@@ -90,6 +90,7 @@ const SEND_MINUTE_UTC = 0;
 type Args = {
   dryRun: boolean;
   fromDate: string | null;
+  listAudiences: boolean;
 };
 
 function parseArgs(): Args {
@@ -98,7 +99,48 @@ function parseArgs(): Args {
   return {
     dryRun: args.includes("--dry-run"),
     fromDate: fromArg ? fromArg.slice("--from=".length) : null,
+    listAudiences: args.includes("--list-audiences"),
   };
+}
+
+/**
+ * Hit Resend's /audiences endpoint and print each audience's ID +
+ * name. Used to find RESEND_AUDIENCE_ID for the .env.local file.
+ */
+async function listAudiences(apiKey: string) {
+  const res = await fetch("https://api.resend.com/audiences", {
+    headers: { Authorization: `Bearer ${apiKey}` },
+  });
+  const body = (await res.json().catch(() => ({}))) as {
+    data?: Array<{ id: string; name: string; created_at?: string }>;
+    message?: string;
+  };
+  if (!res.ok) {
+    console.error(
+      `Failed to list audiences (${res.status}): ${body.message ?? "unknown error"}`
+    );
+    console.error("");
+    console.error("Most likely cause: your RESEND_API_KEY is wrong or doesn't");
+    console.error("have Full Access permission. Verify at:");
+    console.error("  https://resend.com/api-keys");
+    process.exit(1);
+  }
+  const audiences = body.data ?? [];
+  if (audiences.length === 0) {
+    console.log("No audiences found in this Resend account.");
+    return;
+  }
+  console.log("");
+  console.log("Your Resend audiences");
+  console.log("─────────────────────");
+  for (const a of audiences) {
+    console.log(`  Name: ${a.name}`);
+    console.log(`  ID:   ${a.id}`);
+    if (a.created_at) console.log(`  Created: ${a.created_at}`);
+    console.log("");
+  }
+  console.log("Paste the ID of the one you want into .env.local:");
+  console.log("  RESEND_AUDIENCE_ID=<paste here>");
 }
 
 async function listContentFiles(): Promise<string[]> {
@@ -209,10 +251,20 @@ async function createAndScheduleBroadcast(opts: {
 }
 
 async function main() {
-  const { dryRun, fromDate } = parseArgs();
+  const { dryRun, fromDate, listAudiences: shouldListAudiences } = parseArgs();
 
   const apiKey = process.env.RESEND_API_KEY;
   const audienceId = process.env.RESEND_AUDIENCE_ID;
+
+  // --list-audiences short-circuits everything else.
+  if (shouldListAudiences) {
+    if (!apiKey) {
+      console.error("Missing RESEND_API_KEY in .env.local. Aborting.");
+      process.exit(1);
+    }
+    await listAudiences(apiKey);
+    return;
+  }
 
   if (!dryRun) {
     if (!apiKey) {
