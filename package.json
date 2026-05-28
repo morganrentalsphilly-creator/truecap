@@ -11,7 +11,9 @@
     "start": "next start",
     "lint": "eslint .",
     "test": "vitest run",
-    "reset-passwords": "node lib/reset-passwords.mjs"
+    "reset-passwords": "node lib/reset-passwords.mjs",
+    "schedule-broadcasts": "npx -y tsx scripts/schedule-all-broadcasts.ts",
+    "schedule-broadcasts:dry": "npx -y tsx scripts/schedule-all-broadcasts.ts --dry-run"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
