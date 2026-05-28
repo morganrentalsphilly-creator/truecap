@@ -630,6 +630,270 @@ export const CITY_STRATEGY_COMBOS: CombinedCityStrategy[] = [
     ],
     relatedPosts: ["cash-flow-vs-appreciation"],
   },
+
+  // ─── CLEVELAND (house-hack) ───
+  {
+    citySlug: "cleveland",
+    cityName: "Cleveland",
+    state: "Ohio",
+    strategy: "house-hack",
+    strategyLabel: "house hacking",
+    pitch:
+      "Cleveland is one of the most accessible house-hacking markets in the country — duplexes and triplexes at $150-260k FHA-eligible entry prices, with rental demand from CWRU + Cleveland Clinic + university students.",
+    whyHereWhyNow:
+      "Cleveland's 2-4 unit inventory in walkable neighborhoods like Detroit-Shoreway, Tremont, and Ohio City clears at FHA-friendly prices. Combined with strong rental demand from Cleveland Clinic + CWRU + university students, year-1 true out-of-pocket housing cost often runs $0-300/mo. Year-2 conversion to pure rental produces some of the strongest cash-flow yields in the country.",
+    typicalNumbers: {
+      purchasePrice: "$150-260k for 2-3 unit",
+      monthlyRent: "$900-1,300 per unit",
+      capRate: "True out-of-pocket: $0-300/mo for your unit",
+      notes: "FHA 3.5% ($5.25-9.1k down) or conventional 5% ($7.5-13k). Year 2 conversion: pure rental yields $500-900/mo NCF.",
+    },
+    neighborhoods: [
+      { name: "Tremont", why: "Walkable, gentrified, premium house-hack neighborhood" },
+      { name: "Ohio City", why: "Walkable to West Side Market, strong young-professional demand" },
+      { name: "Detroit-Shoreway", why: "Gentrifying, lake-adjacent, balanced cash flow + appreciation" },
+      { name: "Old Brooklyn", why: "Lower entry, family-renter demand, less walkable but cheaper" },
+    ],
+    pitfalls: [
+      "Pre-WW2 housing stock means real year-1 capex even on owner-occupant deals",
+      "Lead paint disclosure required on pre-1978 properties",
+      "FHA self-sufficiency rule on 3-4 unit properties: rental income must independently cover mortgage",
+      "Some Cleveland neighborhoods have block-by-block variation — walk before buying",
+      "Living next to tenants requires temperament — noise, maintenance calls, awkward moments",
+    ],
+    relatedPosts: ["house-hacking-explained"],
+  },
+
+  // ─── MEMPHIS (BRRRR) ───
+  {
+    citySlug: "memphis",
+    cityName: "Memphis",
+    state: "Tennessee",
+    strategy: "brrrr",
+    strategyLabel: "BRRRR",
+    pitch:
+      "Memphis BRRRR works when you partner with the right local team and avoid the turnkey-operator markup. Distressed inventory + no state income tax + landlord-friendly law produce some of the strongest BRRRR economics in the country — for investors with boots on the ground.",
+    whyHereWhyNow:
+      "Memphis has the deepest distressed inventory in the Southeast and a mature contractor + PM ecosystem. The BRRRR challenge here is sourcing: most Memphis investors buy turnkey-priced (already-rehabbed) properties at 10-15% above true ARV. Direct distressed acquisition + your own rehab management produces the real BRRRR math — but requires either local presence or a trusted partner.",
+    typicalNumbers: {
+      purchasePrice: "$40-85k distressed acquisition",
+      monthlyRent: "$1,000-1,400 post-rehab",
+      capRate: "9-12% post-rehab",
+      notes: "Rehab $25-50k. All-in $75-130k. ARV $115-160k. Refi at 75% LTV pulls $86-120k — recycles 80-95% of capital on clean executions.",
+    },
+    neighborhoods: [
+      { name: "Berclair", why: "Working-class, voucher-friendly, distressed inventory available" },
+      { name: "Cooper-Young", why: "Gentrifying — ARV upside, lower BRRRR haircut" },
+      { name: "Binghampton", why: "Earlier gentrification cycle, lower entry, higher execution risk" },
+      { name: "Frayser", why: "Deep distress, lowest entry, requires experienced PM" },
+    ],
+    pitfalls: [
+      "Memphis appraisals lag comps by 5-8% on rehabbed properties — build into ARV planning",
+      "Block-by-block variation extreme — drive every street before committing",
+      "Some Memphis zip codes have insurance-disqualifying vacancy/arson history",
+      "Foundation issues common in pre-1960 Memphis homes — get structural opinion",
+      "PM selection is the entire game in Memphis — vet 3+ operators before signing",
+    ],
+    relatedPosts: ["spot-bad-rental-in-60-seconds", "property-management-yes-or-no"],
+  },
+
+  // ─── ATLANTA (cash-flow) ───
+  {
+    citySlug: "atlanta",
+    cityName: "Atlanta",
+    state: "Georgia",
+    strategy: "cash-flow",
+    strategyLabel: "cash flow",
+    pitch:
+      "Atlanta cash flow has gotten harder as intown prices ran 50-70% since 2018, but suburban submarkets (South Fulton, Clayton County, parts of Gwinnett) still produce 7-9% cap rates on SFRs with reliable rental demand from corporate-relocation tailwind.",
+    whyHereWhyNow:
+      "Atlanta's population growth + corporate relocations (Microsoft, Visa, NCR, BlackRock) drive consistent rental demand. Intown gentrification has compressed cap rates to 4-5%, but suburban submarkets within 30 minutes of the perimeter still pencil. GA's landlord-friendly law + fast eviction (30-60 days) reduces operational risk vs the Northeast.",
+    typicalNumbers: {
+      purchasePrice: "$210-310k typical suburban SFR",
+      monthlyRent: "$1,750-2,300",
+      capRate: "7-9% in suburban submarkets",
+      notes: "Property tax $200-300/mo. Insurance $80-120/mo. Monthly NCF $300-600 common. Modest 3-4%/yr appreciation in suburban zones.",
+    },
+    neighborhoods: [
+      { name: "South Fulton", why: "Suburban cash flow with appreciation tailwind from intown overflow" },
+      { name: "Clayton County (Riverdale)", why: "Lowest entry in metro Atlanta, voucher-friendly, real cash flow" },
+      { name: "Gwinnett County (Lawrenceville)", why: "Diverse demographics, family-renter demand, school-district premium" },
+      { name: "Stone Mountain", why: "Suburban-feeling, accessible entry, stable rental demand" },
+    ],
+    pitfalls: [
+      "Suburban Atlanta cap rates lower than they look — verify property taxes (some zones over 1.4%)",
+      "School district matters more in suburbs than urban core — verify before family-renter targeting",
+      "Sun Belt overbuilding flattening some suburban submarkets — verify rent comps current",
+      "GA's 2025 STR restrictions affect short-term rental conversion plans",
+      "Property crime varies by Atlanta suburban submarket — verify on walks",
+    ],
+    relatedPosts: ["what-is-a-good-cap-rate", "50-percent-rule-rentals"],
+  },
+
+  // ─── PHOENIX (BRRRR) ───
+  {
+    citySlug: "phoenix",
+    cityName: "Phoenix",
+    state: "Arizona",
+    strategy: "brrrr",
+    strategyLabel: "BRRRR",
+    pitch:
+      "Phoenix BRRRR works in older neighborhoods (Maryvale, parts of Glendale, South Phoenix) where 1950s-1970s ranch homes can be acquired distressed + rehabbed for solid ARVs. The challenge: insurance + cooling system replacement costs higher than most BRRRR markets.",
+    whyHereWhyNow:
+      "Phoenix's population growth has been steady and the older housing stock (1950s-1970s ranches) provides continuous distressed inventory. Rehab + cosmetic updates produce strong ARVs in gentrifying neighborhoods. The Phoenix-specific challenges: HVAC + insulation upgrades are non-optional (summers brutal), insurance costs creeping up, and water/heat-stress on older properties requires capex reserves.",
+    typicalNumbers: {
+      purchasePrice: "$200-285k distressed acquisition",
+      monthlyRent: "$1,650-2,200 post-rehab",
+      capRate: "6-8% post-rehab",
+      notes: "Rehab $40-70k (HVAC + insulation critical). All-in $250-360k. ARV $315-440k in gentrifying zones. Refi at 75% pulls $236-330k.",
+    },
+    neighborhoods: [
+      { name: "Maryvale", why: "Older ranch inventory, gentrifying, BRRRR-friendly entry prices" },
+      { name: "South Phoenix", why: "Earlier gentrification cycle, lower entry, higher upside" },
+      { name: "Glendale (older zones)", why: "1960s-70s ranch stock, working-class demand" },
+      { name: "Coronado Historic District", why: "Already gentrified, premium ARV but tighter acquisition" },
+    ],
+    pitfalls: [
+      "HVAC replacement non-negotiable in Phoenix — budget $8-15k in rehab even on 'functional' systems",
+      "Insurance up 20-30% over 5 years and some carriers exiting — quote yourself",
+      "Water-stress + monsoon damage on older properties — verify roof + foundation",
+      "Phoenix appraisals lag comps by 3-5% in fast-gentrifying neighborhoods",
+      "AZ tax rates modest but insurance + utilities offset the savings",
+    ],
+    relatedPosts: ["spot-bad-rental-in-60-seconds"],
+  },
+
+  // ─── DALLAS (cash-flow) ───
+  {
+    citySlug: "dallas",
+    cityName: "Dallas",
+    state: "Texas",
+    strategy: "cash-flow",
+    strategyLabel: "cash flow",
+    pitch:
+      "Pure cash-flow plays in Dallas are tighter than they used to be, but mid-tier suburbs (Mesquite, Garland, parts of Arlington) still produce 6.5-8% cap rates on SFRs — with the Texas no-income-tax advantage offsetting some of the cap rate compression.",
+    whyHereWhyNow:
+      "Dallas-Fort Worth's population inflow keeps rental demand strong. While intown cap rates compressed to 4-5%, mid-tier suburbs 20-30 minutes from city centers still pencil. TX no state income tax + landlord-friendly law improve after-tax math. The persistent challenge: 2-2.8% effective property tax requires careful underwriting, never trust Zillow's estimate.",
+    typicalNumbers: {
+      purchasePrice: "$245-325k typical suburban SFR",
+      monthlyRent: "$1,950-2,500",
+      capRate: "6.5-8% in mid-tier suburbs after honest tax modeling",
+      notes: "Property tax $5-8k/yr. Insurance $90-140/mo. Monthly NCF $250-500 common. Modest 3-5%/yr appreciation in growth corridors.",
+    },
+    neighborhoods: [
+      { name: "Mesquite", why: "Lower entry than Dallas proper, strong rental demand, family-renter base" },
+      { name: "Garland", why: "Diverse demographics, school-district options, stable demand" },
+      { name: "Arlington (TCU side)", why: "University-anchor demand, lower entry than Fort Worth proper" },
+      { name: "Grand Prairie", why: "Mid-suburb, balanced cash flow + slow appreciation" },
+    ],
+    pitfalls: [
+      "MUD (Municipal Utility District) zones push effective property tax to 2.8-3.2% — always pull the actual bill",
+      "Insurance up 20-30% in DFW hail belt — quote yourself, never trust seller's number",
+      "Sun Belt overbuilding flattening some suburban submarkets — verify rent comps current",
+      "Property tax appeals essentially required annually in TX — budget the time",
+      "School district variation within Dallas suburbs significant — affects family-renter pricing",
+    ],
+    relatedPosts: ["what-is-a-good-cap-rate", "50-percent-rule-rentals"],
+  },
+
+  // ─── HOUSTON (cash-flow) ───
+  {
+    citySlug: "houston",
+    cityName: "Houston",
+    state: "Texas",
+    strategy: "cash-flow",
+    strategyLabel: "cash flow",
+    pitch:
+      "Houston is the largest Texas cash-flow market by inventory — 4th largest US city, no state income tax, and diverse energy + medical + port-logistics employers. Cap rates of 7-9% in mid-tier neighborhoods are achievable with disciplined underwriting.",
+    whyHereWhyNow:
+      "Houston's diverse economy (energy, Texas Medical Center, port logistics, Johnson Space Center) keeps rental demand stable through energy-price cycles. Mid-tier neighborhoods (Spring Branch, parts of Pasadena, Sunnyside transition zones) offer real cash flow at $190-280k entry prices. The Houston-specific challenges: flood zones (verify on every deal), insurance costs, and 2-2.5% effective property tax.",
+    typicalNumbers: {
+      purchasePrice: "$190-285k typical SFR",
+      monthlyRent: "$1,750-2,300",
+      capRate: "7-9% in mid-tier neighborhoods",
+      notes: "Property tax $400-600/mo (2-2.5% effective). Insurance $90-160/mo (higher in flood zones). Monthly NCF $300-600 common.",
+    },
+    neighborhoods: [
+      { name: "Spring Branch", why: "Diverse demographics, family-renter demand, stable cash flow" },
+      { name: "Pasadena", why: "Working-class, port + petrochem worker demand, lower entry" },
+      { name: "Acres Homes", why: "Earlier gentrification cycle, higher cap rates, more execution risk" },
+      { name: "Independence Heights", why: "Gentrifying inside-the-loop, balanced cash flow + appreciation" },
+    ],
+    pitfalls: [
+      "Flood zone designation matters — pull the FEMA map for EVERY Houston property, even outside Harvey-affected zones",
+      "Insurance + flood insurance combined can run $200-300/mo in marginal zones",
+      "Property tax appeals essentially required annually — budget the time",
+      "Harris County reassessments can swing tax bills 8-15% year-over-year — model conservatively",
+      "Foundation issues common in clay-soil zones — get structural review on every deal",
+    ],
+    relatedPosts: ["what-is-a-good-cap-rate", "50-percent-rule-rentals"],
+  },
+
+  // ─── ST. LOUIS (cash-flow) ───
+  {
+    citySlug: "st-louis",
+    cityName: "St. Louis",
+    state: "Missouri",
+    strategy: "cash-flow",
+    strategyLabel: "cash flow",
+    pitch:
+      "St. Louis is one of the most undersupplied investor markets in the Midwest — entry prices of $80-140k with rents of $1,000-1,400 produce cap rates of 8-11% in B+ neighborhoods. Operational nuances less than Cleveland or Detroit.",
+    whyHereWhyNow:
+      "St. Louis has Washington University + Barnes-Jewish + Boeing as employment anchors, producing stable rental demand. Housing costs never recovered to coastal levels, leaving entry prices accessible. Missouri's modest 4.95% state income tax + reasonable property taxes + landlord-friendly law combine to produce reliable cash flow returns. The market is undersupplied with serious out-of-state investors — meaning less PM competition + more available inventory.",
+    typicalNumbers: {
+      purchasePrice: "$85-145k typical",
+      monthlyRent: "$1,000-1,400",
+      capRate: "8-11% in B+ neighborhoods",
+      notes: "Monthly NCF $350-650 common. Property tax ~$120-180/mo. Insurance ~$70-100/mo. Modest 2-3%/yr appreciation.",
+    },
+    neighborhoods: [
+      { name: "Tower Grove South", why: "Walkable, gentrifying, premium for the area; balanced cash flow + appreciation" },
+      { name: "Bevo Mill", why: "Working-class, family-renter demand, strong cash flow" },
+      { name: "Dutchtown", why: "Earlier gentrification cycle, lower entry, higher upside" },
+      { name: "Maplewood", why: "Suburban-feeling, school-district premium, lower turnover" },
+    ],
+    pitfalls: [
+      "St. Louis appraisals run 3-6% under-comp on rehabbed properties — affects BRRRR and resale",
+      "Block-by-block variation pronounced in some neighborhoods — walk before buying",
+      "Older housing stock means year-1 capex real — budget 4-6% of purchase price",
+      "Tornado risk modest but real — insurance accounts for it",
+      "Property tax appeals available in St. Louis County — worth filing on most purchases",
+    ],
+    relatedPosts: ["what-is-a-good-cap-rate", "50-percent-rule-rentals"],
+  },
+
+  // ─── GREENVILLE ───
+  {
+    citySlug: "greenville",
+    cityName: "Greenville",
+    state: "South Carolina",
+    strategy: "appreciation",
+    strategyLabel: "appreciation",
+    pitch:
+      "Greenville is the quietly outperforming small-metro appreciation market in the Southeast — BMW + Michelin + GE anchored manufacturing, downtown revitalization, and consistent population inflow have produced 6-9%/yr appreciation through 2019-2025.",
+    whyHereWhyNow:
+      "Greenville's transformation from textile-town to corporate-relocation magnet has been one of the cleaner small-metro stories of the past decade. BMW Spartanburg + Michelin US headquarters + GE Power anchor a diversified manufacturing economy. Combined with SC's landlord-friendly law, fast eviction process, and downtown walkable revitalization, Greenville produces strong long-hold appreciation math with reasonable cash flow.",
+    typicalNumbers: {
+      purchasePrice: "$245-355k typical SFR",
+      monthlyRent: "$1,700-2,200",
+      capRate: "5.5-7% after honest underwriting",
+      notes: "Year-1 cash flow modest ($150-400/mo). 10-year IRR typically 12-15% on leveraged deals with appreciation assumption. SC's 0.55% property tax helps.",
+    },
+    neighborhoods: [
+      { name: "West End", why: "Walkable to downtown, gentrified, premium appreciation upside" },
+      { name: "Augusta Road", why: "Established neighborhood, school-district premium, low turnover" },
+      { name: "Overbrook", why: "Walkable, gentrifying, balanced cash flow + appreciation" },
+      { name: "Sans Souci", why: "Earlier gentrification cycle, lower entry, higher upside" },
+    ],
+    pitfalls: [
+      "Greenville is small — single-employer announcements (BMW expansion, Michelin layoffs) move the market more than larger metros",
+      "Cap rate compression means cash flow tight — small underwriting errors swing deals negative",
+      "Some Greenville zip codes have undergone rapid gentrification — buying at top of cycle real risk",
+      "Limited PM ecosystem vs larger metros — vet carefully before out-of-state purchase",
+      "Storm risk modest but real (hurricane remnants, hail) — insurance accounts for it",
+    ],
+    relatedPosts: ["cash-flow-vs-appreciation"],
+  },
 ];
 
 /** Find a combo by city slug + strategy. */

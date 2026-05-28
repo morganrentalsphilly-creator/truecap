@@ -48,6 +48,24 @@ export type BlogPost = {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: "single-family-vs-multi-family-rental",
+    title: "Single-family vs multi-family rental property — which actually wins?",
+    excerpt:
+      "The honest comparison: cash flow, cap rate, financing, tenant quality, exit liquidity, capex risk, and which property type fits your specific stage. Side-by-side numbers with 2026 financing.",
+    readingTimeMinutes: 11,
+    publishedAt: "2026-05-27",
+    available: true,
+  },
+  {
+    slug: "how-to-estimate-rehab-costs",
+    title: "How to estimate rehab costs on a rental property — the honest framework",
+    excerpt:
+      "The framework experienced investors use: sq-ft pricing for cosmetic, kitchen, bath, systems work. Plus the 25% contingency rule and on-site walkthrough checklist.",
+    readingTimeMinutes: 12,
+    publishedAt: "2026-05-27",
+    available: true,
+  },
+  {
     slug: "how-to-refinance-a-rental-property",
     title: "How to refinance a rental property — rate-and-term, cash-out, and DSCR options",
     excerpt:

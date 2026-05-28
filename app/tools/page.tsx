@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Free Real Estate Calculators | TrueCap",
     description:
-      "Twelve free rental property calculators — cap rate, cash-on-cash, BRRRR, DSCR, NOI, mortgage, GRM, rehab, 1% rule, break-even, ROI, closing cost. No signup.",
+      "Fourteen free rental property calculators — cap rate, cash-on-cash, BRRRR, DSCR, NOI, mortgage, GRM, rehab, 1% rule, break-even, ROI, closing cost, vacancy rate, rental property tax. No signup.",
     url: "/tools",
     type: "website",
     images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap free real estate calculators" }],
@@ -113,6 +113,20 @@ const TOOLS: { href: string; title: string; description: string; available: bool
       "Line-item breakdown of closing costs on a rental purchase — origination, title, transfer tax, escrow, prepaids.",
     available: true,
   },
+  {
+    href: "/tools/vacancy-rate-calculator",
+    title: "Vacancy rate calculator",
+    description:
+      "Convert vacant days + turnover cost into the true effective vacancy rate. Honest underwriting, not seller pro formas.",
+    available: true,
+  },
+  {
+    href: "/tools/rental-property-tax-calculator",
+    title: "Rental property tax calculator",
+    description:
+      "Schedule E + depreciation math. Models after-tax cash flow and the depreciation tax shield value.",
+    available: true,
+  },
 ];
 
 export default function ToolsLandingPage() {
@@ -129,7 +143,7 @@ export default function ToolsLandingPage() {
     "@id": `${siteUrl}/tools#collection`,
     name: "Free Real Estate Calculators",
     description:
-      "Twelve free, no-signup rental property calculators — cap rate, cash-on-cash, BRRRR, DSCR, NOI, mortgage payment, GRM, rehab cost, 1% rule, break-even, ROI, closing cost.",
+      "Fourteen free, no-signup rental property calculators — cap rate, cash-on-cash, BRRRR, DSCR, NOI, mortgage payment, GRM, rehab cost, 1% rule, break-even, ROI, closing cost, vacancy rate, rental property tax.",
     url: `${siteUrl}/tools`,
     isPartOf: { "@id": `${siteUrl}/#website` },
     mainEntity: {

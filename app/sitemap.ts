@@ -140,6 +140,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.7,
     },
     {
+      url: `${siteUrl}/tools/vacancy-rate-calculator`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
+    {
+      url: `${siteUrl}/tools/rental-property-tax-calculator`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
       url: `${siteUrl}/privacy`,
       lastModified: new Date(),
       changeFrequency: "yearly",
@@ -298,6 +310,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
     {
       url: `${siteUrl}/blog/how-to-refinance-a-rental-property`,
       lastModified: new Date("2026-05-26"),
+      changeFrequency: "monthly",
+      priority: 0.9,
+    },
+    {
+      url: `${siteUrl}/blog/single-family-vs-multi-family-rental`,
+      lastModified: new Date("2026-05-27"),
+      changeFrequency: "monthly",
+      priority: 0.9,
+    },
+    {
+      url: `${siteUrl}/blog/how-to-estimate-rehab-costs`,
+      lastModified: new Date("2026-05-27"),
       changeFrequency: "monthly",
       priority: 0.9,
     },
