@@ -97,7 +97,57 @@ export async function GET(request: Request) {
   }
 
   // ─────────────────────────────────────────────────────────
-  // 4. Render the email. Use Resend's substitution placeholder so the
+  // 4. Idempotency — skip if a broadcast for this date already
+  //    exists in Resend. Prevents duplicate sends when a date was
+  //    pre-scheduled via `npm run schedule-broadcasts` (Resend's 28-day
+  //    pre-scheduling window can overlap with the weekly cron's fire
+  //    schedule on the same Tuesday).
+  //
+  //    We match on the broadcast name we use everywhere else:
+  //    `Weekly digest · ${today}`. If any broadcast with that exact
+  //    name exists (any status: draft, scheduled, sent), skip.
+  // ─────────────────────────────────────────────────────────
+  const expectedName = `Weekly digest · ${today}`;
+  try {
+    const listRes = await fetch("https://api.resend.com/broadcasts", {
+      headers: { Authorization: `Bearer ${apiKey}` },
+      signal: AbortSignal.timeout(10_000),
+    });
+    if (listRes.ok) {
+      const listBody = (await listRes.json().catch(() => ({}))) as {
+        data?: Array<{ id: string; name: string; status: string }>;
+      };
+      const existing = (listBody.data ?? []).find((b) => b.name === expectedName);
+      if (existing) {
+        console.info(
+          "[cron/weekly-digest] Broadcast already exists for %s (id=%s, status=%s) — skipping to avoid duplicate.",
+          today,
+          existing.id,
+          existing.status
+        );
+        return NextResponse.json({
+          ok: true,
+          skipped: true,
+          reason: "already_exists",
+          date: today,
+          broadcast_id: existing.id,
+          existing_status: existing.status,
+        });
+      }
+    } else {
+      // Non-fatal: if we can't verify, log and proceed. Worst case
+      // is a manual duplicate cleanup. Better than silently missing a send.
+      console.warn(
+        "[cron/weekly-digest] Could not list existing broadcasts (%s) — proceeding without idempotency check.",
+        listRes.status
+      );
+    }
+  } catch (error) {
+    console.warn("[cron/weekly-digest] Idempotency check failed (proceeding):", error);
+  }
+
+  // ─────────────────────────────────────────────────────────
+  // 5. Render the email. Use Resend's substitution placeholder so the
   //    per-recipient unsubscribe link gets dropped in by Resend.
   // ─────────────────────────────────────────────────────────
   const { html, text, subject } = await renderWeeklyDigest(content, {
@@ -105,7 +155,7 @@ export async function GET(request: Request) {
   });
 
   // ─────────────────────────────────────────────────────────
-  // 5. Create the broadcast in Resend
+  // 6. Create the broadcast in Resend
   // ─────────────────────────────────────────────────────────
   try {
     const createRes = await fetch("https://api.resend.com/broadcasts", {
@@ -149,7 +199,7 @@ export async function GET(request: Request) {
     }
 
     // ─────────────────────────────────────────────────────────
-    // 6. Send the broadcast we just created.
+    // 7. Send the broadcast we just created.
     // ─────────────────────────────────────────────────────────
     const sendRes = await fetch(
       `https://api.resend.com/broadcasts/${encodeURIComponent(createBody.id)}/send`,
