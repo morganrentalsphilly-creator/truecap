@@ -1,5 +1,5 @@
 {
-  "subject": "Your property tax bill is probably wrong — the 30-min appeal",
+  "subject": "Your property tax bill is probably wrong — here's the 30-min fix",
   "preheader": "30-40% of rental properties over-assessed · $400-1,800/yr saved per property · 62% appeal success rate",
   "publishedAt": "2026-08-04",
   "weekLabel": "Topic: Property tax appeals",
@@ -7,9 +7,18 @@
     "headline": "Property tax appeals — the under-used profit lever",
     "body": "Counties over-assess about 30-40% of rental properties relative to actual sale-comp values. Most investors glance at the assessment notice, file it, and move on — that's a mistake. The appeal process exists specifically to correct over-assessments and the average successful appeal saves $400-1,800 per year, in perpetuity. On a 5-property portfolio, that's $2,000-9,000/yr of free NOI for ~30 minutes per property of paperwork.",
     "stats": [
-      { "label": "Avg over-assessment rate", "value": "33%" },
-      { "label": "Avg appeal success rate", "value": "62%" },
-      { "label": "Time to file appeal", "value": "~30 min" }
+      {
+        "label": "Avg over-assessment rate",
+        "value": "33%"
+      },
+      {
+        "label": "Avg appeal success rate",
+        "value": "62%"
+      },
+      {
+        "label": "Time to file appeal",
+        "value": "~30 min"
+      }
     ]
   },
   "dealSpotter": [
@@ -42,11 +51,11 @@
     "answer": "Three steps that work in 90% of counties. (1) Pull 3-5 sales comparables of similar properties (same bedroom count, similar age, within 1 mile, sold in the last 12 months). Most county assessor sites have a comparable-sales lookup tool; if not, your realtor can pull this in 5 minutes. (2) Calculate the median price per square foot from those comps. Multiply by your property's square footage to get a comp-supported value. (3) File the appeal through your county's online portal (look for 'tax assessment appeal' on the assessor's site). Attach the comp list and your calculation. Most counties charge $25-100 to file. Hearings are usually in writing; some require a 10-minute call. Decisions come back in 60-120 days. If you win, the savings start immediately and recur every year you own the property. Set a calendar reminder for next year's assessment notice — the savings only persist if you defend them again when assessments roll forward."
   },
   "shipNote": {
-    "title": "TrueCap shows tax-vs-comp warnings",
+    "title": "TrueCap flags likely over-assessments",
     "items": [
-      "Property details panel: displays assessed value vs comp-supported value when divergent",
-      "Tax line item flags 'possibly over-assessed' when the spread is significant",
-      "Pro: portfolio rollup shows total annual tax savings across all your saved properties if you successfully appealed each one"
+      "Free: property details panel shows assessed value vs comp-supported value",
+      "Pro: portfolio rollup shows total annual tax savings across your saved properties if you appeal each",
+      "Check your portfolio in TrueCap →"
     ]
   }
 }

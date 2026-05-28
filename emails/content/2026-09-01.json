@@ -1,15 +1,24 @@
 {
-  "subject": "Small multi-family (5-12 units) — different math, different game",
-  "preheader": "Commercial pricing kicks in at 5+ · Cap-rate compression upside · The under-management opportunity",
+  "subject": "5+ unit small multi-family: the under-priced sweet spot",
+  "preheader": "Commercial pricing kicks in at 5+ · cap-rate compression upside · the under-management opportunity",
   "publishedAt": "2026-09-01",
   "weekLabel": "Topic: Small multi-family",
   "marketSnapshot": {
     "headline": "5-12 units sits in a different math zone",
     "body": "Single-family and 2-4 unit properties are 'residential' for financing purposes. At 5+ units the property becomes 'commercial' — different loan products, different appraisal methodology, different exit dynamics. Small multi-family in the 5-12 unit range is an interesting sweet spot: still affordable enough for individual investors ($500k-1.5M), big enough to have economies of scale on management, and priced primarily on NOI which means operational improvements directly compound the property value.",
     "stats": [
-      { "label": "Commercial financing kicks in", "value": "5+ units" },
-      { "label": "Typical down payment", "value": "25-30%" },
-      { "label": "Cap-rate compression value", "value": "$10k+ per bp" }
+      {
+        "label": "Commercial financing kicks in",
+        "value": "5+ units"
+      },
+      {
+        "label": "Typical down payment",
+        "value": "25-30%"
+      },
+      {
+        "label": "Cap-rate compression value",
+        "value": "$10k+ per bp"
+      }
     ]
   },
   "dealSpotter": [
@@ -42,11 +51,11 @@
     "answer": "Depends on starting point. The case for going straight to small multi-family: economies of scale on management (one PM relationship for 8 units vs eight relationships for 8 SFRs), value-add upside on under-managed properties, and commercial pricing on cap-rate compression. The case against: bigger capital requirement ($200-400k down on a $1M deal), commercial financing is harder for first-timers without W-2 income or property-management track record, and the asset class has different operational rhythms (commercial lenders want a property-management background or hire a credentialed PM). Practical answer: most investors should do 1-3 SFRs first to learn the operational side, then jump to small multi-family. The smaller-scale learning curve on a $200k SFR is less painful than on a $1M 6-unit."
   },
   "shipNote": {
-    "title": "TrueCap supports small multi-family",
+    "title": "Multi-family math, simplified",
     "items": [
-      "Multi-unit input: per-unit rents, occupancy, configurations",
-      "Pro: NOI sensitivity grid — model the value-creation upside of rent increases on commercial-priced properties",
-      "DSCR threshold awareness: flags when the proposed DSCR is below typical commercial lender floors"
+      "Free: per-unit rent + expense modeling for 2-12 unit properties",
+      "Pro: portfolio rollup across multiple multi-family deals, A/B compare two acquisitions",
+      "Run a small multi-family deal →"
     ]
   }
 }

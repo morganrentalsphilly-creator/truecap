@@ -1,15 +1,24 @@
 {
-  "subject": "The 5-number rental triage every serious investor runs",
-  "preheader": "Cap rate, CoC, DSCR, monthly NCF, 10-yr IRR — why each one matters and when to weight which",
+  "subject": "The 5 numbers that decide every rental deal (in 60 seconds)",
+  "preheader": "Cap rate, cash-on-cash, DSCR, monthly NCF, 10-yr IRR — and which to weight when",
   "publishedAt": "2026-06-02",
   "weekLabel": "Topic: The 5-number triage",
   "marketSnapshot": {
     "headline": "Five numbers decide whether a rental deal pencils",
     "body": "Serious investors run the same 5-number triage on every deal before committing real time. Cap rate, cash-on-cash return, DSCR, monthly net cash flow, and projected 10-year IRR. Each answers a different question, and the deals that pencil on all five are rare — worth pursuing fast. Deals that pencil on 3-4 are usually salvageable with negotiation. Deals that fail on 4+ are walk-aways.",
     "stats": [
-      { "label": "Solid cap rate (B-tier suburb)", "value": "6.5-8.5%" },
-      { "label": "Lender DSCR floor", "value": "1.20-1.25" },
-      { "label": "Hold to compound", "value": "5-10 yrs" }
+      {
+        "label": "Solid cap rate (B-tier suburb)",
+        "value": "6.5-8.5%"
+      },
+      {
+        "label": "Lender DSCR floor",
+        "value": "1.20-1.25"
+      },
+      {
+        "label": "Hold to compound",
+        "value": "5-10 yrs"
+      }
     ]
   },
   "dealSpotter": [
@@ -42,11 +51,11 @@
     "answer": "Depends on your goal. If you need cash flow to supplement income, weight monthly net cash flow and cash-on-cash — those answer 'will this property pay me reliably each month?' If you're building wealth and don't need the rental income, weight projected 10-year IRR — that answers 'will my equity compound efficiently?' DSCR is the constraint metric, not the goal metric — it just has to clear your lender's floor (typically 1.20-1.25) for the deal to be financeable. Cap rate is mainly useful for comparing across deals in the same market, not as a hard threshold. The best mental model: cash-on-cash and monthly NCF for income investors, IRR for wealth-builders, DSCR for everyone as a constraint."
   },
   "shipNote": {
-    "title": "TrueCap shows all 5 numbers on every analysis",
+    "title": "All 5 numbers, every analysis — free",
     "items": [
-      "Paste an address — cap rate, cash-on-cash, DSCR, monthly net cash flow auto-calculated",
-      "Pro: 10-year IRR projection, sensitivity grid, max allowable offer calculator",
-      "Verdict explanation: which of the 5 numbers drove the score"
+      "Paste an address — cap rate, cash-on-cash, DSCR, monthly net cash flow auto-calculated in 60 seconds",
+      "Pro: 10-year IRR projection, sensitivity grid, max-allowable-offer calculator",
+      "Run your next deal through TrueCap →"
     ]
   }
 }

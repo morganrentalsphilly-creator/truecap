@@ -1,15 +1,24 @@
 {
-  "subject": "Cost segregation: the tax move worth understanding (when it actually works)",
-  "preheader": "Front-load 25-35% of depreciation · The $4-7k study · Why it backfires on short holds",
+  "subject": "Cost seg can save $20-50k in tax — when it actually works",
+  "preheader": "Front-load 25-35% of depreciation · the $4-7k study · why it backfires on short holds",
   "publishedAt": "2026-09-08",
   "weekLabel": "Topic: Cost segregation",
   "marketSnapshot": {
     "headline": "Cost segregation — front-load depreciation, but know the trade",
     "body": "Cost segregation studies break a building into components — land improvements, personal property, systems — that depreciate over 5, 7, or 15 years instead of the standard 27.5 years for residential rental. The result: 20-30% of building value gets reclassified to faster schedules, front-loading meaningful depreciation deductions into years 1-5 of ownership. Real benefit for buy-and-hold investors with W-2 income to offset. Less benefit (and sometimes negative) for short-hold strategies.",
     "stats": [
-      { "label": "% typically reclassified", "value": "20-30%" },
-      { "label": "Engineering study cost", "value": "$4-7k" },
-      { "label": "Best fit hold period", "value": "7+ years" }
+      {
+        "label": "% typically reclassified",
+        "value": "20-30%"
+      },
+      {
+        "label": "Engineering study cost",
+        "value": "$4-7k"
+      },
+      {
+        "label": "Best fit hold period",
+        "value": "7+ years"
+      }
     ]
   },
   "dealSpotter": [
@@ -42,11 +51,11 @@
     "answer": "No — three conditions all need to be true for cost seg to clearly win. (1) Property value is high enough to support the study cost: typically $250k+ purchase price. Below that, the $4-7k study eats too much of the benefit. (2) Planned hold period is 7+ years. Shorter holds + depreciation recapture often wash out the savings. (3) You have W-2 or active income to offset the deductions against, OR your spouse qualifies as a real-estate professional and can use the losses fully. If you're in a 22% bracket with only passive rental income to offset, cost seg's benefit is much smaller than if you're in a 35-37% bracket with active income. Default rule: cost seg makes sense on rentals in the $300k+ range that you plan to hold long-term in your active-income years. Talk to a CPA — they'll model your specific numbers in 30 minutes."
   },
   "shipNote": {
-    "title": "TrueCap tracks tax-aware metrics",
+    "title": "Decide before you pay for the study",
     "items": [
-      "Depreciation line items in the cash-flow waterfall (default to 27.5 year straight-line)",
-      "Pro: 10-year projection shows the impact of accelerated depreciation if you've done cost seg",
-      "PDF reports include tax-impact summary for sharing with your CPA"
+      "Free: 10-year projection shows your taxable income trajectory — when cost-seg helps most",
+      "Pro: sensitivity grid — model how cost-seg recapture changes a 5-year vs 10-year hold",
+      "See if cost-seg pencils for your deal →"
     ]
   }
 }

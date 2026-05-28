@@ -1,15 +1,24 @@
 {
-  "subject": "Underwrite any rental property in 60 seconds (try it free)",
-  "preheader": "Cap rate, cash flow, DSCR, 10-year projection — paste an address, get real numbers. No spreadsheet.",
+  "subject": "Underwrite any rental in 60 seconds — without the spreadsheet",
+  "preheader": "Paste an address. Get cap rate, cash flow, DSCR, 10-year projection. Free, no signup.",
   "publishedAt": "2026-05-25",
   "weekLabel": "Launch",
   "marketSnapshot": {
     "headline": "Underwrite any rental in 60 seconds — without the spreadsheet.",
     "body": "TrueCap was built to replace the 30-minute spreadsheet underwrite with something that takes a minute. Paste an address, get real numbers: cap rate, cash-on-cash, DSCR, 10-year projection, sensitivity grid, max allowable offer. Below are three deal examples that took 60 seconds each to analyze — then a quick walk-through of what you get if you try it.",
     "stats": [
-      { "label": "Avg time to underwrite", "value": "60 sec" },
-      { "label": "Free analyses", "value": "Unlimited" },
-      { "label": "Pro starts at", "value": "$16.67/mo" }
+      {
+        "label": "Avg time to underwrite",
+        "value": "60 sec"
+      },
+      {
+        "label": "Free analyses",
+        "value": "Unlimited"
+      },
+      {
+        "label": "Pro starts at",
+        "value": "$16.67/mo"
+      }
     ]
   },
   "dealSpotter": [
@@ -42,11 +51,11 @@
     "answer": "Three reasons. (1) Speed. Pasting an address auto-fills property taxes, rent estimates from HUD, year-built, building age, square footage. You start with 60-70% of the underwrite done before you type a single number. The competition makes you enter everything manually. (2) Honest math. TrueCap shows you cap rate, cash-on-cash, AND DSCR — not just one. It flags when the headline numbers diverge from the financed reality. Most calculators show you the answer you want; TrueCap shows you the answer that's true. (3) Pro tools (sensitivity grids, 10-year projections, MAO calculator, PDF reports, portfolio rollup) that actually help you DECIDE — not just calculate. You'll know whether to buy, walk, or negotiate within 60 seconds, every time. The free tier is enough to run unlimited basic analyses. Try it on a deal you're considering and see how it compares to what you'd do in Excel."
   },
   "shipNote": {
-    "title": "What you get with TrueCap",
+    "title": "Start with the free TrueCap analyzer",
     "items": [
-      "Free: unlimited cap rate, cash-on-cash, DSCR, monthly cash flow analyses with auto-filled property tax + rent",
-      "Pro: 10-year projection, sensitivity grid, MAO calculator, A/B mortgage compare, PDF reports, saved deals with portfolio rollup",
-      "Weekly newsletter every Tuesday — 3 deal examples + one practical topic (no fluff, unsubscribe anytime)"
+      "Free: unlimited cap rate, cash-on-cash, DSCR, monthly cash flow — auto-filled with property tax + rent",
+      "Pro at $16.67/mo: 10-year projection, sensitivity grid, MAO calculator, A/B mortgage compare, PDF reports, saved-deals portfolio",
+      "Open the analyzer →"
     ]
   }
 }

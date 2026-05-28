@@ -1,15 +1,24 @@
 {
-  "subject": "Cash purchase vs leveraged — when each one actually wins",
-  "preheader": "No-debt cash flow vs leveraged compounding · The 'one good deal' problem with all-cash",
+  "subject": "All cash or leveraged? The math at $300k vs $900k",
+  "preheader": "No-debt cash flow vs leveraged compounding · the 'one good deal' problem with paying cash",
   "publishedAt": "2026-07-14",
   "weekLabel": "Topic: Cash vs leverage",
   "marketSnapshot": {
     "headline": "Cash buy vs financed: different math, different answer",
     "body": "Some investors buy rental properties in cash. Most use leverage. There's no universal right answer — they optimize for different things. Cash buying maximizes monthly cash flow per property and minimizes risk; leverage maximizes returns on capital and lets you control more property with the same dollars. The decision depends on your capital base, risk tolerance, and what you're optimizing for. The math is more interesting than people think.",
     "stats": [
-      { "label": "Typical cash CoC return", "value": "5-8%" },
-      { "label": "Typical leveraged CoC return", "value": "9-14%" },
-      { "label": "Capital deployed gap", "value": "4x" }
+      {
+        "label": "Typical cash CoC return",
+        "value": "5-8%"
+      },
+      {
+        "label": "Typical leveraged CoC return",
+        "value": "9-14%"
+      },
+      {
+        "label": "Capital deployed gap",
+        "value": "4x"
+      }
     ]
   },
   "dealSpotter": [
@@ -42,11 +51,11 @@
     "answer": "Depends on your goals and risk tolerance. The all-cash play gives you $300k in one property generating ~$2,000-2,500/mo of stable rental income with zero financing risk. The 3-property leveraged play gives you ~$3,500-5,000/mo of combined rental income across three properties with three mortgages, three sets of tenant risk, but also three properties of equity build. The math favor leverage when interest rates are below your cap rates (positive leverage), and unwinds when rates are above your cap rates (negative leverage). At today's rates (mortgages roughly 6-7%, cap rates 6-8% in solid markets), leverage is marginally positive — not the obvious win it was in 2018-2021. The risk-adjusted answer for most investors with $300k: 2 properties leveraged at moderate LTV (60-70%, not maxed at 75-80%). This captures most of the leverage upside while keeping each property cash-flow-strong enough to weather setbacks."
   },
   "shipNote": {
-    "title": "TrueCap handles cash purchases natively",
+    "title": "Model the leverage decision in TrueCap",
     "items": [
-      "Set financing to 'cash' — TrueCap removes DSCR constraint and focuses on cap rate + cash-on-cash",
-      "Pro: A/B compare cash vs leveraged for the same property side-by-side",
-      "Pro: 10-year IRR projection captures the leveraged compounding effect"
+      "Free: switch between cash purchase and financed in one click — see DSCR and cash-on-cash both ways",
+      "Pro: 10-year IRR comparison — when leverage compounds, when it underperforms",
+      "Stop guessing — run both scenarios →"
     ]
   }
 }

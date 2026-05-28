@@ -1,15 +1,24 @@
 {
-  "subject": "Insurance is the silent margin killer — quote it BEFORE you offer",
-  "preheader": "Coastal premiums up 25-40% over 5 yrs · Midwest still stable · The $80-400/mo gap most investors miss",
+  "subject": "Insurance just quietly killed your cap rate",
+  "preheader": "Coastal premiums up 25-40% in 5 years · the $80-400/mo gap most investors don't price in",
   "publishedAt": "2026-06-23",
   "weekLabel": "Topic: Property insurance",
   "marketSnapshot": {
     "headline": "Property insurance has reshaped which markets pencil",
     "body": "Property insurance is the rental-underwriting line item that's moved most in the last 5 years. Coastal markets (FL, LA, Texas coastal, parts of CA fire zones) have repriced 25-40% over that window. Midwest, Northeast, and non-coastal Southeast are mostly stable or up only modestly. The biggest underwriting mistake: using the seller's last-year insurance figure instead of getting a fresh quote in your name. The gap is often $80-150/mo on a single-family rental, $200-400/mo on a 2-4 unit — and that gap can flip a deal from Strong to Marginal.",
     "stats": [
-      { "label": "Coastal FL premium 5-yr change", "value": "+38%" },
-      { "label": "Midwest 5-yr change", "value": "+8%" },
-      { "label": "Typical SFR insurance/yr", "value": "$1,200-3,500" }
+      {
+        "label": "Coastal FL premium 5-yr change",
+        "value": "+38%"
+      },
+      {
+        "label": "Midwest 5-yr change",
+        "value": "+8%"
+      },
+      {
+        "label": "Typical SFR insurance/yr",
+        "value": "$1,200-3,500"
+      }
     ]
   },
   "dealSpotter": [
@@ -42,11 +51,11 @@
     "answer": "Two paths. (1) Most insurance brokers will quote a 'prospective' policy if you give them the property address, year built, square footage, roof age, and your intent to use as an investment property. Tell them you're considering an offer and need to know the premium. They'll either quote in a day or two, or tell you they can't write the policy at all (which is also useful information). (2) Use online quote engines (Lemonade, Hippo, State Farm online) for fast directional numbers, but verify with a broker before closing — online quotes for investment properties are often quoted at owner-occupant rates and adjusted later. Always get the quote in writing. Always include 'investment property' / 'tenant occupied' in the application — premiums for tenant-occupied are higher than owner-occupied by 15-30%. If the quote comes back materially different from what the seller represented, that's a price-negotiation lever."
   },
   "shipNote": {
-    "title": "TrueCap's insurance handling",
+    "title": "Re-underwrite with real insurance numbers",
     "items": [
-      "Auto-fill insurance estimates based on state + property characteristics",
-      "Flags 'volatile market' for FL/LA/TX coastal/CA fire-zone properties — recommends getting a hard quote",
-      "Sensitivity grid (Pro): toggle 'insurance +50%' to see how the deal holds up under continued premium pressure"
+      "Free: TrueCap pulls a baseline insurance estimate based on property type + location",
+      "Pro: sensitivity grid — see exactly how a $1,500/yr insurance hike moves your cap rate and cash flow",
+      "Quote insurance first, then run the deal →"
     ]
   }
 }

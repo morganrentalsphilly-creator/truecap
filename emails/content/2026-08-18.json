@@ -1,15 +1,24 @@
 {
-  "subject": "Seller financing — when to ask, how to structure",
-  "preheader": "When sellers say yes · The 4 deal-types where it works · Why creative structures save deals",
+  "subject": "Seller financing: how to get a 5% rate when banks want 8%",
+  "preheader": "When sellers say yes · the 4 deal-types where it works · why creative structures save deals",
   "publishedAt": "2026-08-18",
   "weekLabel": "Topic: Seller financing",
   "marketSnapshot": {
     "headline": "Seller financing — when creative structures save the deal",
     "body": "Seller financing is when the seller acts as the lender, holding a note on the property. It's not rare; it's just under-asked-for. Works particularly well for long-time owners with significant equity who want to spread their capital-gains tax liability across multiple years, OR for properties that have sat on market and the seller is feeling holding costs. Done right, it can let you close deals you couldn't get conventional financing for, AND structure rate/terms better than market.",
     "stats": [
-      { "label": "When sellers most likely to agree", "value": "60+ DOM" },
-      { "label": "Typical down payment", "value": "5-20%" },
-      { "label": "Typical seller rate vs market", "value": "± 50-100bp" }
+      {
+        "label": "When sellers most likely to agree",
+        "value": "60+ DOM"
+      },
+      {
+        "label": "Typical down payment",
+        "value": "5-20%"
+      },
+      {
+        "label": "Typical seller rate vs market",
+        "value": "± 50-100bp"
+      }
     ]
   },
   "dealSpotter": [
@@ -42,11 +51,11 @@
     "answer": "Four scenarios where asking is reasonable. (1) The property has been on market 60+ days — the seller is feeling carrying costs and is open to creative solutions. (2) Long-time owner (5+ years) with significant equity AND known tax exposure — seller financing spreads their capital gains across multiple years. (3) You have strong negotiating cards (cash buyer, fast close, no inspection contingency) you can trade for favorable terms. (4) You'd otherwise not qualify or want to preserve conventional credit slots for other deals. The wrong scenarios: seller has a mortgage they need to pay off at sale (most do — they can't seller-finance), property is brand-new on market (seller hasn't felt pain), or structure introduces a balloon without a credible refinance plan."
   },
   "shipNote": {
-    "title": "TrueCap models seller-financed scenarios",
+    "title": "Model seller terms in TrueCap",
     "items": [
-      "Custom financing inputs: down payment %, rate, term, balloon — model any creative structure",
-      "Pro: A/B compare seller-financing vs conventional side-by-side",
-      "Cash-on-cash and DSCR auto-recalculate for the alternative structure"
+      "Free: enter custom interest rate + term — see how seller-financing terms change DSCR and cash flow",
+      "Pro: A/B mortgage compare — show the seller a side-by-side of conventional vs their offer",
+      "Bring real numbers to the negotiation →"
     ]
   }
 }

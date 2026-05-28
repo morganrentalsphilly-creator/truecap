@@ -1,15 +1,24 @@
 {
-  "subject": "The 1031 exchange — when it's a power move, when it's a tax tail wagging a dog",
-  "preheader": "45/180-day rules · QI fees · The 'replacement-property panic' that costs more than the deferred tax",
+  "subject": "1031 exchanges: when they save $50k, when they cost you more",
+  "preheader": "45/180-day windows · QI fees · the replacement-property panic that costs more than the deferred tax",
   "publishedAt": "2026-06-09",
   "weekLabel": "Topic: 1031 exchanges",
   "marketSnapshot": {
     "headline": "The 1031 exchange: when it works, when it doesn't",
     "body": "1031 exchanges let you defer capital gains tax by rolling proceeds from a sold rental into a like-kind replacement property. It's one of the most powerful long-term wealth-building moves in real estate — and one of the most over-rushed. The 45-day identification window and 180-day close window create artificial deadlines that can trap investors into accepting mediocre replacement properties. The math: 1031 only wins if your replacement is a real deal, not a forced one.",
     "stats": [
-      { "label": "Identification deadline", "value": "45 days" },
-      { "label": "Close deadline", "value": "180 days" },
-      { "label": "Typical QI fee", "value": "$1,200-2,500" }
+      {
+        "label": "Identification deadline",
+        "value": "45 days"
+      },
+      {
+        "label": "Close deadline",
+        "value": "180 days"
+      },
+      {
+        "label": "Typical QI fee",
+        "value": "$1,200-2,500"
+      }
     ]
   },
   "dealSpotter": [
@@ -42,11 +51,11 @@
     "answer": "Three conditions all need to be true for a 1031 to be the right move. (1) The unrealized gain is large enough to justify the friction — typically $25k+ of deferred tax. (2) You have real replacement candidates identified BEFORE you sell, not 'I'll find something in the 45-day window.' (3) The replacement property is genuinely as good or better than what you'd buy if you weren't on a deadline. If any of those three is false, pay the tax and move on. The most common mistake: investors so attached to 'defer the tax!' that they buy a mediocre replacement in week 6 of the 45-day window, overpay 5-10%, and end up worse off than if they'd just paid the original tax bill."
   },
   "shipNote": {
-    "title": "TrueCap helps you stress-test 1031 candidates",
+    "title": "Model the 1031 trade-off in TrueCap",
     "items": [
-      "Save the property you're selling AND your top 3 replacement candidates to compare them side-by-side",
-      "Pro: 10-year IRR projection lets you compare the FUTURE returns of the kept property vs the candidates, not just the today numbers",
-      "Sensitivity grid shows how the replacement holds up if rents stay flat or rates rise"
+      "Free analyzer: estimate the capital gains tax bill you'd defer",
+      "Pro: side-by-side compare 'pay tax + reinvest' vs '1031 into replacement' on a 10-year basis",
+      "Decide before you sell — open TrueCap →"
     ]
   }
 }

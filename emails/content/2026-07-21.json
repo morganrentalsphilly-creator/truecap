@@ -1,5 +1,5 @@
 {
-  "subject": "Reader mailbag: 5 questions investors actually ask",
+  "subject": "5 questions investors are actually asking right now",
   "preheader": "LLC structure · partnership splits · firing your PM · first-deal regrets · refi timing math",
   "publishedAt": "2026-07-21",
   "weekLabel": "Topic: Reader mailbag",
@@ -7,9 +7,18 @@
     "headline": "The 5 questions every investor eventually asks",
     "body": "Some weeks the deal-spotter and the topic essay aren't the highlight — the inbox is. Five recurring questions investors ask after the first 1-3 deals. Each one is worth answering in detail because the answers compound over a portfolio. Reply to this email any time with a question and it might end up here in a future edition.",
     "stats": [
-      { "label": "Questions answered this issue", "value": "5" },
-      { "label": "Topics every investor faces", "value": "10-12" },
-      { "label": "Avg portfolio at 'now what'", "value": "3-4 props" }
+      {
+        "label": "Questions answered this issue",
+        "value": "5"
+      },
+      {
+        "label": "Topics every investor faces",
+        "value": "10-12"
+      },
+      {
+        "label": "Avg portfolio at 'now what'",
+        "value": "3-4 props"
+      }
     ]
   },
   "dealSpotter": [
@@ -42,11 +51,11 @@
     "answer": "Q4: Almost every first-time investor over-pays by 5-10% and under-budgets capex by 30-50%. The lesson isn't to wait for a perfect first deal — it's to accept that the first deal will be your most-expensive education and not let perfect be the enemy of started. Run the deal in TrueCap with conservative assumptions (8% capex, 8% vacancy, 9% PM, 25% over-budget rehab). If it still pencils, buy. The deal that needs aggressive assumptions to pencil is the one that breaks you. Q5: Refi math has two parts. The savings: monthly P&I difference between current rate and refi rate, times months held post-refi. The cost: closing costs (typically $4-8k on a single-family) plus the time-value of the equity you don't extract. Break-even = closing costs ÷ monthly savings. If you'll hold past the break-even (typically 24-36 months), refi. If you'll sell or refi-again before break-even, skip. The other angle: cash-out refi while you're at it can fund the next deal — that compounds the math meaningfully and is often the real reason to refi at the borderline case."
   },
   "shipNote": {
-    "title": "TrueCap helps with all 5 questions",
+    "title": "Use TrueCap to answer your next 'should I' question",
     "items": [
-      "Custom expense defaults (Pro) — save your conservative-assumption set as defaults for all new deals",
-      "Mortgage A/B compare (Pro) — model refi scenarios with closing costs + break-even",
-      "Saved deals + portfolio rollup (Pro) — see how your historical underwriting has performed"
+      "Free: paste an address, get every key metric in 60 seconds — no spreadsheet wrangling",
+      "Pro: refi A/B compare, sensitivity grid, MAO calculator for offer math",
+      "Stop building Excel models for one-off questions →"
     ]
   }
 }

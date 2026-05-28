@@ -1,15 +1,24 @@
 {
-  "subject": "Year-1 capex: what no one tells new landlords",
-  "preheader": "The 3-tier reserve framework · Why 1925 rowhouses and 2018 tract homes need different budgets · 6 common surprises",
+  "subject": "Year-1 capex: the budget no one prepares you for",
+  "preheader": "The 3-tier reserve framework · 1925 rowhouses vs 2018 tract homes · the 6 most common first-year surprises",
   "publishedAt": "2026-09-29",
   "weekLabel": "Topic: First-year capex",
   "marketSnapshot": {
     "headline": "Year-1 capex — the surprise that hits 70% of new investors",
     "body": "The biggest underwriting mistake new landlords make: using 'national average' capex assumptions (8-10% of rent annually) without adjusting for building age. A 1925 rowhouse and a 2018 tract home need different reserve budgets by an order of magnitude. The discipline: pick a capex tier based on the property's age + recent renovation history, and reserve accordingly. The hidden first-year capex bill is the cause of more 'this deal didn't work like I thought' regret than any other factor.",
     "stats": [
-      { "label": "Tier 1: turnkey/recently renovated", "value": "$800-2,000" },
-      { "label": "Tier 2: 10-30 yr old, no renovation", "value": "$3,500-6,000" },
-      { "label": "Tier 3: 40+ yr or deferred maintenance", "value": "$6,500-12,000" }
+      {
+        "label": "Tier 1: turnkey/recently renovated",
+        "value": "$800-2,000"
+      },
+      {
+        "label": "Tier 2: 10-30 yr old, no renovation",
+        "value": "$3,500-6,000"
+      },
+      {
+        "label": "Tier 3: 40+ yr or deferred maintenance",
+        "value": "$6,500-12,000"
+      }
     ]
   },
   "dealSpotter": [
@@ -42,11 +51,11 @@
     "answer": "Three honest tiers based on building age and recent capex history. Tier 1 — turnkey or recently renovated (2-3 years): budget $800-2,000 for year 1. Punch-list items, minor service calls, maybe a single appliance replacement. Tier 2 — solid building 10-30 years old, no recent renovation: budget $3,500-6,000. Reasonable likelihood of one major system needing attention (HVAC service or partial replacement, water heater, roof patching). Tier 3 — older building (40+ years) or visible deferred maintenance: budget $6,500-12,000. High likelihood of multiple system issues surfacing. As percentage of purchase price: roughly 1% tier 1, 2-3% tier 2, 4-6% tier 3. The biggest underwriting mistake new landlords make is using 'national average' capex (8-10% of rent annually) without adjusting for building age. A 1925 rowhouse and a 2018 tract home need different reserve budgets by an order of magnitude."
   },
   "shipNote": {
-    "title": "TrueCap auto-adjusts capex by building age",
+    "title": "Build year-1 capex into every deal",
     "items": [
-      "Capex % defaults to the appropriate tier based on the property's year built",
-      "Year-1 capex callout: surfaces likely first-year surprises based on building age + last-renovation data",
-      "Sensitivity grid (Pro): see how the deal holds up if year-1 capex hits high end vs low end of the tier"
+      "Free: customize capex reserve by % of rent or fixed annual — see how the right reserve changes your cash flow",
+      "Pro: 10-year projection layers year-1 vs steady-state capex separately",
+      "Stop under-budgeting capex →"
     ]
   }
 }

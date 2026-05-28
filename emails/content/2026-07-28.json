@@ -1,15 +1,24 @@
 {
-  "subject": "Section 8 rentals: the math most investors get wrong (and the bias they don't)",
-  "preheader": "FMR often pays above market in B/C zones · The screening trade-off · Why the data doesn't match the stereotypes",
+  "subject": "Section 8 pays 10-18% above market in some zip codes",
+  "preheader": "FMR often beats market rent in B/C zones · the screening trade-off · why the data doesn't match the stereotypes",
   "publishedAt": "2026-07-28",
   "weekLabel": "Topic: Section 8",
   "marketSnapshot": {
     "headline": "Section 8 — the honest math under the stereotypes",
     "body": "Section 8 housing vouchers pay a 'Fair Market Rent' (FMR) set annually by HUD per metro zone. In many B and C-tier neighborhoods, FMR is meaningfully above the open-market rent — sometimes 10-20% above. Investors who avoid Section 8 due to perception are often leaving real return on the table. The trade-off is real (annual HQS inspections, longer placement, more paperwork) but the rent premium absorbs most of the friction in voucher-favorable zones.",
     "stats": [
-      { "label": "Typical FMR premium in qualifying zones", "value": "+10-18%" },
-      { "label": "Voucher portion paid by HUD", "value": "Direct deposit" },
-      { "label": "HQS inspection cadence", "value": "Annual" }
+      {
+        "label": "Typical FMR premium in qualifying zones",
+        "value": "+10-18%"
+      },
+      {
+        "label": "Voucher portion paid by HUD",
+        "value": "Direct deposit"
+      },
+      {
+        "label": "HQS inspection cadence",
+        "value": "Annual"
+      }
     ]
   },
   "dealSpotter": [
@@ -42,11 +51,11 @@
     "answer": "No — controlling for the comparable price band. The bias is comparing voucher tenants to A-tier market-rate tenants, which isn't the right comparison. Compare voucher tenants to the bottom 30% of market-rate tenants in the same neighborhood and the data shows voucher tenants do equal or better on payment reliability (because the housing authority pays the bulk, not the tenant) and similar on property care. Where voucher tenants underperform: turnover frequency tends to be slightly higher (life-stage instability) and inspection prep costs you a few hundred dollars a year per unit. Where they outperform: payment reliability, longer-than-expected tenancies in good cases (5-10 year voucher tenancies are common), and lower vacancy-driven income variability. The 'lazy bias' worth setting aside is treating voucher status as a proxy for tenant quality. Screening matters; the voucher itself is mostly orthogonal to outcome."
   },
   "shipNote": {
-    "title": "TrueCap's Section 8 handling",
+    "title": "Stress-test voucher math in TrueCap",
     "items": [
-      "FMR rent lookup by zip code — pulls from HUD's published data",
-      "Voucher-premium indicator: shows whether FMR is above or below the area's market rent",
-      "Modeling: enter voucher rent + tenant-portion separately for clear cash-flow tracking"
+      "Free: model the rent as FMR vs market and see the cap rate spread",
+      "Pro: sensitivity grid — what happens if voucher tenants turn over annually vs every 3 years",
+      "Underwrite a voucher deal honestly →"
     ]
   }
 }

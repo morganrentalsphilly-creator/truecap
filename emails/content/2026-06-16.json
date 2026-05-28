@@ -1,15 +1,24 @@
 {
-  "subject": "BRRRR math: the 4 conditions that have to be true (most deals fail at #2)",
-  "preheader": "Purchase + rehab + holding ≤ 75% ARV · The appraisal risk most investors don't price in",
+  "subject": "BRRRR: 4 conditions have to be true (most deals fail at #2)",
+  "preheader": "Purchase + rehab + holding ≤ 75% ARV · the appraisal risk most investors don't price in",
   "publishedAt": "2026-06-16",
   "weekLabel": "Topic: BRRRR strategy",
   "marketSnapshot": {
     "headline": "BRRRR pencils only when 4 specific conditions hold",
     "body": "Buy, Rehab, Rent, Refinance, Repeat — the BRRRR cycle works powerfully when conditions are aligned and breaks when they're not. The four conditions: (1) Purchase + rehab + holding costs sum to ≤75% of post-rehab ARV. (2) Appraisal supports the ARV (this is where most plans fail). (3) Cash flow positive at refi rates. (4) You can execute the rehab on time and on budget. Miss any one, and capital gets trapped instead of recycled.",
     "stats": [
-      { "label": "Target all-in / ARV", "value": "≤ 75%" },
-      { "label": "Typical refi LTV", "value": "75-80%" },
-      { "label": "Appraisal haircut to plan for", "value": "3-7%" }
+      {
+        "label": "Target all-in / ARV",
+        "value": "≤ 75%"
+      },
+      {
+        "label": "Typical refi LTV",
+        "value": "75-80%"
+      },
+      {
+        "label": "Appraisal haircut to plan for",
+        "value": "3-7%"
+      }
     ]
   },
   "dealSpotter": [
@@ -42,11 +51,11 @@
     "answer": "Pull recent appraisal-vs-sale data from your lender or PM, OR look at the relationship between listing prices and final closing prices in the area. Markets where appraisals consistently match sale prices (final closing within 1-2% of contract price): appraisal-friendly. Markets where 8-15% of deals fall through due to low appraisals or sellers reduce price to match appraisal: appraisal-hostile. Generally appraisal-friendly: stable suburban markets, B-tier neighborhoods with active comparable sales. Generally appraisal-hostile: rapidly gentrifying neighborhoods where rehabbed properties are setting new comps faster than appraisers can absorb, very-low-volume areas where comps are thin, and parts of Detroit/Cleveland/Memphis where the appraisal-vs-sale gap has been 5-10% for years. The practical rule: budget a 5% appraisal haircut on your ARV in unknown markets, and only go below 5% haircut after you have local data."
   },
   "shipNote": {
-    "title": "TrueCap's BRRRR analyzer (Pro)",
+    "title": "Run BRRRR math before you offer",
     "items": [
-      "Models purchase + rehab + holding + refi in one workflow",
-      "Sensitivity grid on ARV — shows what happens if appraisal comes in 5%, 8%, or 12% under plan",
-      "Capital-recycled output — see exactly how much you pull out at refi"
+      "TrueCap BRRRR analyzer: model purchase + rehab + ARV + refi cash-out in one view",
+      "Pro: sensitivity grid shows what happens if your ARV comes in 5-10% under expectation",
+      "Stress-test your next BRRRR →"
     ]
   }
 }

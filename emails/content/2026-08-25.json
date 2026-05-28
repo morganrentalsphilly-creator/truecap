@@ -1,15 +1,24 @@
 {
-  "subject": "Out-of-state investing — what to outsource, what you can't",
-  "preheader": "4 jobs you keep · 3 you delegate · The #1 OOS-investor failure mode (it's not the PM)",
+  "subject": "Out-of-state investing: 4 jobs you keep, 3 you delegate",
+  "preheader": "The #1 OOS-investor failure mode (hint: it's not the PM) · how to underwrite from 2,000 miles away",
   "publishedAt": "2026-08-25",
   "weekLabel": "Topic: Out-of-state investing",
   "marketSnapshot": {
     "headline": "Out-of-state investing — the jobs that can't be outsourced",
     "body": "Investing remotely is how investors in expensive coastal markets access affordable cash-flowing properties in the Midwest and Southeast. Done well it works. Done casually it loses money. The discipline: certain jobs MUST stay with you (the investor) even when you're 2000 miles away. Outsourcing those is the single biggest predictor of OOS-investor failure.",
     "stats": [
-      { "label": "Jobs you keep", "value": "4" },
-      { "label": "Jobs you delegate", "value": "3" },
-      { "label": "Top OOS failure mode", "value": "Outsourced underwriting" }
+      {
+        "label": "Jobs you keep",
+        "value": "4"
+      },
+      {
+        "label": "Jobs you delegate",
+        "value": "3"
+      },
+      {
+        "label": "Top OOS failure mode",
+        "value": "Outsourced underwriting"
+      }
     ]
   },
   "dealSpotter": [
@@ -42,11 +51,11 @@
     "answer": "Four jobs you cannot outsource. (1) Underwriting — you do the math, not a sales agent or turnkey provider. Their incentives are wrong. (2) Picking the metro — research the state landlord laws, eviction timelines, and 5-year demographic trends. Don't take an agent's word for 'this is a hot market.' (3) Hiring the PM — interview at least 3 before signing. Ask for references AND specifically the addresses of properties they currently manage so you can drive-by (or have a friend drive-by) to verify condition. (4) Setting the operating budget — you decide what reserves are reasonable. Three jobs you SHOULD outsource: (1) Boots-on-the-ground tasks (showings, maintenance coordination, tenant placement). (2) Legal compliance (state-specific lease forms, security deposit handling, fair housing process). (3) Bookkeeping (Schedule-E-ready statements monthly). The #1 OOS-investor failure mode is outsourcing underwriting to the turnkey provider's pre-built model. That model is rarely the math you'd accept if you'd run it yourself."
   },
   "shipNote": {
-    "title": "TrueCap is designed for OOS underwriting",
+    "title": "Underwrite any market from your couch",
     "items": [
-      "Auto-fill from address: property tax, year built, square footage, neighborhood data — no driving needed",
-      "Metro-aware vacancy + capex defaults (Pro): different assumptions for Detroit vs Indianapolis vs Cincinnati",
-      "PDF reports (Pro): document your underwriting decisions to share with partners or lenders"
+      "Free: TrueCap pulls property tax + rent estimates for any US address — no local knowledge required",
+      "Pro: save your top markets, run side-by-side comparisons, surface the best cap rates",
+      "Compare markets without travel →"
     ]
   }
 }

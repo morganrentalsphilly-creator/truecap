@@ -1,15 +1,24 @@
 {
-  "subject": "Reading an inspection report — the 6 lines that matter",
-  "preheader": "Roof, electrical, plumbing, foundation, HVAC, mold · How to negotiate vs walk · 3 inspection scenarios",
+  "subject": "The 6 lines on your inspection report that actually matter",
+  "preheader": "Roof, electrical, plumbing, foundation, HVAC, mold · how to negotiate vs walk · 3 inspection scenarios",
   "publishedAt": "2026-08-11",
   "weekLabel": "Topic: Inspections",
   "marketSnapshot": {
     "headline": "Six lines on the inspection report decide everything",
     "body": "Inspection reports run 30-60 pages. Most of it is documentation and photos. Six specific findings actually decide whether to proceed: roof, electrical, plumbing main lines, foundation, HVAC, and mold/moisture. Everything else (minor caulk gaps, GFCI upgrades, paint chips) is small money. The discipline: skim past the small stuff on first read, focus negotiation on the six that matter.",
     "stats": [
-      { "label": "Roof replacement typical cost", "value": "$8-15k" },
-      { "label": "Foundation repair typical range", "value": "$5-25k" },
-      { "label": "Knob-and-tube remediation", "value": "$4-12k" }
+      {
+        "label": "Roof replacement typical cost",
+        "value": "$8-15k"
+      },
+      {
+        "label": "Foundation repair typical range",
+        "value": "$5-25k"
+      },
+      {
+        "label": "Knob-and-tube remediation",
+        "value": "$4-12k"
+      }
     ]
   },
   "dealSpotter": [
@@ -42,11 +51,11 @@
     "answer": "(1) Roof — age, condition, life remaining. A roof needing replacement in the next 2-3 years is $8-15k that needs to be in your offer math. (2) Electrical — panel age and amp service, presence of knob-and-tube or aluminum branch wiring. Remediation is a $4-12k surprise. (3) Plumbing — main sewer line condition (camera scope is worth the $300), galvanized vs copper supply lines, water heater age. A failed sewer line is $5-15k. (4) Foundation — any 'structural concerns' note triggers a follow-up structural engineer call ($400-800). Don't proceed without that second opinion. (5) HVAC — age and condition of furnace and AC. A 20-year-old system is end-of-life. (6) Mold/moisture — any active moisture in basements or attics signals systemic issues, not point-fixes. Negotiate offer revisions on the six above. Everything else is small money."
   },
   "shipNote": {
-    "title": "TrueCap's inspection-stage rehab estimator",
+    "title": "Price the inspection findings before re-negotiating",
     "items": [
-      "Add quick line items from the inspector's findings — roof, electrical, plumbing, HVAC",
-      "See updated cap rate / cash flow after adding the rehab cost",
-      "Pro: Compare Deals view flags age-of-systems differences for capex-aware comparisons"
+      "Free: rehab cost estimator built in — model how a $15k roof or $8k electrical changes the deal",
+      "Pro: sensitivity grid — see exact cap rate impact of accepting vs walking",
+      "Re-underwrite after inspection in 60 seconds →"
     ]
   }
 }

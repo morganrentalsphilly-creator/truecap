@@ -1,15 +1,24 @@
 {
   "subject": "DSCR loans: when they save the deal, when they're a trap",
-  "preheader": "When DTI doesn't pencil · 8-9% typical rate band · The 1.20 floor that decides everything",
+  "preheader": "When DTI doesn't pencil · 8-9% typical rate band · the 1.20 floor that decides everything",
   "publishedAt": "2026-07-07",
   "weekLabel": "Topic: DSCR financing",
   "marketSnapshot": {
     "headline": "DSCR loans qualify the property, not you",
     "body": "DSCR (Debt Service Coverage Ratio) loans are investor-targeted mortgages that qualify based on the property's rental income, not your personal DTI or tax returns. Useful when you're scaling and conventional financing slots run out, or when your W-2 income doesn't support more conventional deals. The tradeoff: rates run 100-200bp higher than conventional, and most DSCR lenders require a 1.20-1.25 DSCR floor. Worth understanding before you assume DSCR is the answer to every financing problem.",
     "stats": [
-      { "label": "DSCR rate vs conventional", "value": "+100-200bp" },
-      { "label": "Typical DSCR floor", "value": "1.20-1.25" },
-      { "label": "Typical cash-out LTV", "value": "70-75%" }
+      {
+        "label": "DSCR rate vs conventional",
+        "value": "+100-200bp"
+      },
+      {
+        "label": "Typical DSCR floor",
+        "value": "1.20-1.25"
+      },
+      {
+        "label": "Typical cash-out LTV",
+        "value": "70-75%"
+      }
     ]
   },
   "dealSpotter": [
@@ -42,11 +51,11 @@
     "answer": "Probably yes, but understand the trade-off. The +100-200bp rate premium compounds over the holding period — on a $300k loan over 10 years, ~$300/mo of extra interest is $36k of lifetime cost vs. conventional. Math that against the alternative (don't buy at all, wait until you can clear conventional DTI). If you'd otherwise sit on the sidelines for 12-24 months, the DSCR premium is the cost of continuing to deploy capital. Practical tactics that reduce friction: shop multiple DSCR lenders (rate spread across DSCR lenders is wider than conventional — 30-50bp variance is normal), put down 25-30% instead of the minimum (improves DSCR ratio AND lowers rate), and structure for a 5-year interest-only period if available (lower payment = better DSCR + more cash flow during hold)."
   },
   "shipNote": {
-    "title": "TrueCap's DSCR handling",
+    "title": "DSCR ratio shown on every analysis",
     "items": [
-      "DSCR ratio shown on every analysis — flags when ratio is below typical lender floors",
-      "Pro: A/B mortgage compare lets you put DSCR and conventional scenarios side-by-side",
-      "Free standalone DSCR calculator at usetruecap.com/tools/dscr-calculator"
+      "Free: TrueCap calculates DSCR alongside cap rate + cash-on-cash on every deal",
+      "Pro: A/B mortgage compare — model the same deal at conventional vs DSCR rates side-by-side",
+      "Know if your deal pencils before you call a lender →"
     ]
   }
 }

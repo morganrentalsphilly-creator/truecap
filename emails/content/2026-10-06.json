@@ -1,15 +1,24 @@
 {
-  "subject": "Tenant screening — the 5 criteria that actually predict outcomes",
-  "preheader": "Rent-to-income · prior-landlord reference · credit · employment · eviction history · 3 you can skip",
+  "subject": "The 5 tenant screening criteria that actually predict outcomes",
+  "preheader": "Rent-to-income · prior-landlord reference · credit · employment · eviction history · 3 you can safely skip",
   "publishedAt": "2026-10-06",
   "weekLabel": "Topic: Tenant screening",
   "marketSnapshot": {
     "headline": "Tenant screening — the 5 criteria that predict outcomes",
     "body": "The single decision that has the biggest impact on whether a rental property performs to plan: who you put in it. Five screening criteria actually predict outcomes statistically. Three commonly-used criteria don't (and screening on them is a fair-housing violation). New landlords usually under-invest in screening and end up with the loudest, most-aggressive applicant. Experienced ones use a consistent process and end up with measurably better tenants.",
     "stats": [
-      { "label": "Rent-to-income floor", "value": "≤ 33%" },
-      { "label": "FICO threshold most use", "value": "670+" },
-      { "label": "Avg cost of one bad tenant", "value": "$5-15k" }
+      {
+        "label": "Rent-to-income floor",
+        "value": "≤ 33%"
+      },
+      {
+        "label": "FICO threshold most use",
+        "value": "670+"
+      },
+      {
+        "label": "Avg cost of one bad tenant",
+        "value": "$5-15k"
+      }
     ]
   },
   "dealSpotter": [
@@ -42,11 +51,11 @@
     "answer": "(1) Rent-to-income ratio. Solid threshold: rent should be ≤33% of verified gross monthly income. Below 30% is great; above 40% predicts late payments and stress. Verify via 2 most-recent pay stubs OR employer letter (not just self-reported). (2) Prior-landlord references — specifically the second-to-last landlord, not the current one (current ones often give glowing reviews to get the tenant out). Ask: did they pay on time, did they take care of the property, would you re-rent to them? (3) Credit score. 670+ is the typical investor threshold. Below 620 has 2-3x the eviction risk. Above 720 is great. (4) Employment stability — at the current employer for 12+ months is a positive signal. Frequent job changes correlate with payment risk. (5) Eviction history — any prior eviction filing (even dismissed) raises future-eviction risk substantially. Three things that DON'T meaningfully predict outcomes: presence of pets, marital status, having children. Screening on those is also a fair-housing violation. Stay disciplined on the five that matter."
   },
   "shipNote": {
-    "title": "TrueCap models the vacancy realistically",
+    "title": "Build vacancy reality into your underwrite",
     "items": [
-      "Vacancy assumption auto-adjusts by metro based on current absorption rates",
-      "Existing-tenant inheritance flag: warns when assumed rents are below market by 10%+",
-      "Pro: sensitivity grid lets you toggle higher vacancy scenarios to stress-test deals"
+      "Free: vacancy rate input on every analysis — model 5% vs 8% vs 12% scenarios",
+      "Pro: sensitivity grid shows exact cap-rate impact of each vacancy assumption",
+      "Underwrite vacancy honestly →"
     ]
   }
 }

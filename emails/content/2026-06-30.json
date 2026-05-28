@@ -1,15 +1,24 @@
 {
-  "subject": "Cash flow vs appreciation — pick your lever consciously",
-  "preheader": "Different markets do different things · Why the mixed portfolio usually beats either pure strategy",
+  "subject": "Cash flow or appreciation? The honest answer most investors dodge",
+  "preheader": "Different markets do different things · why the mixed portfolio usually beats either pure strategy",
   "publishedAt": "2026-06-30",
   "weekLabel": "Topic: Strategy framing",
   "marketSnapshot": {
     "headline": "Rental investing has two main levers — they live in different markets",
     "body": "Every rental property generates a mix of two returns: cash flow (monthly distributions) and appreciation (equity build + market value growth). Most investors weight one heavily without realizing they've made a choice. Cash-flow-heavy markets: Midwest, parts of the Southeast, older-building urban — high yields, slow appreciation. Appreciation-heavy markets: coastal metros, growth-job cities — low yields, fast equity build. The right answer for you depends on whether you need income today or wealth in 10 years.",
     "stats": [
-      { "label": "Cash-flow markets cap range", "value": "7-10%+" },
-      { "label": "Appreciation markets cap range", "value": "4-6%" },
-      { "label": "Long-run appreciation gap", "value": "~3-5%/yr" }
+      {
+        "label": "Cash-flow markets cap range",
+        "value": "7-10%+"
+      },
+      {
+        "label": "Appreciation markets cap range",
+        "value": "4-6%"
+      },
+      {
+        "label": "Long-run appreciation gap",
+        "value": "~3-5%/yr"
+      }
     ]
   },
   "dealSpotter": [
@@ -42,11 +51,11 @@
     "answer": "Mix — almost always, but the ratio depends on you. Two questions to answer. (1) Do I need the rental income to cover bills, supplement my W-2, or fund my lifestyle? If yes, weight the portfolio toward cash flow (3-4 of 5 properties in cash-flow markets). (2) Is my net worth more than 10x my annual living expenses already? If yes, weight toward appreciation. Most investors in the middle (need some income, also building wealth) should target a 60/40 mix — 3 cash-flow properties to fund holding costs + provide income, 2 appreciation plays to compound the wealth-build. The pure-cash-flow portfolio risk: stagnant total returns over time. The pure-appreciation portfolio risk: cash crunch in down years when rents flatten and you have negative-leverage properties to feed. Diversifying across both lever types is a real risk-management move, not just a 'have your cake' play."
   },
   "shipNote": {
-    "title": "TrueCap's portfolio view (Pro)",
+    "title": "Compare both strategies on the same deal",
     "items": [
-      "Save deals from multiple markets and see weighted portfolio cap rate + monthly cash flow",
-      "Blended 10-year IRR across the portfolio — shows whether you're skewed toward cash flow or appreciation",
-      "Per-deal verdict explanation shows which lever each property is pulling"
+      "Free: cap rate + cash flow + DSCR for any property in 60 seconds",
+      "Pro: 10-year IRR projection — see whether cash flow or appreciation actually drives this deal's return",
+      "Run both scenarios in TrueCap →"
     ]
   }
 }

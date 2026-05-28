@@ -1,15 +1,24 @@
 {
-  "subject": "Short-term vs long-term rentals — the honest math",
-  "preheader": "STR can be 2-3x LTR returns · The regulatory wave that killed it in dense urban · 4 markets to skip",
+  "subject": "STRs claim 2-3x the cash flow — here's when that's actually true",
+  "preheader": "The regulatory wave that killed STRs in dense urban · 4 markets to skip · the operational tax most don't price in",
   "publishedAt": "2026-09-22",
   "weekLabel": "Topic: STR vs LTR",
   "marketSnapshot": {
     "headline": "STR vs LTR — economics that work in some markets, dead in others",
     "body": "Short-term rental investing (Airbnb / VRBO model) can produce 2-3x the gross revenue of long-term rentals in destination vacation markets. It also requires operational complexity, regulatory awareness, and risk tolerance that most LTR investors aren't prepared for. The math works in vacation-economy markets. It's killed by regulation in dense urban markets. Knowing which one your specific zip code is in before underwriting is more important than the underwrite itself.",
     "stats": [
-      { "label": "Typical STR vs LTR gross ratio", "value": "1.8-3x" },
-      { "label": "Markets with STR bans/limits", "value": "Growing" },
-      { "label": "Check regulation FIRST", "value": "Always" }
+      {
+        "label": "Typical STR vs LTR gross ratio",
+        "value": "1.8-3x"
+      },
+      {
+        "label": "Markets with STR bans/limits",
+        "value": "Growing"
+      },
+      {
+        "label": "Check regulation FIRST",
+        "value": "Always"
+      }
     ]
   },
   "dealSpotter": [
@@ -42,11 +51,11 @@
     "answer": "Both, depending on the market. Regulation killed pure-investor STR in dense urban markets — NYC, LA, San Francisco, Seattle, Asheville, Charleston, parts of Nashville, parts of New Orleans, Maui. In those markets, STR requires owner-occupancy or is banned for non-OO investors. STR is still viable in three categories: (a) destination vacation markets where the local economy IS tourism (Smoky Mountains, Lake Tahoe, Outer Banks, Florida Panhandle beaches, ski towns, Joshua Tree, Sedona) — these markets actively welcome STR. (b) Mid-tier urban markets that still allow it with permit limits (Austin, Atlanta, Phoenix outside Scottsdale — varies block by block). (c) Rural college towns with predictable event-week demand. The right mental model isn't 'STR vs LTR' as a strategy — it's 'this specific zip code right now.' Always check current regulation BEFORE running the STR underwrite. A 5-minute Google search saves you 5 hours of building a model on a deal that can't legally operate the way you assumed."
   },
   "shipNote": {
-    "title": "TrueCap's STR support",
+    "title": "Underwrite STR + LTR side-by-side",
     "items": [
-      "STR mode: enter projected ADR + occupancy, get STR-specific cash flow with seasonality assumptions",
-      "STR regulation flag: warns when a market has restricted, banned, or permit-limited STR operation",
-      "Pro: A/B compare STR vs LTR for the same property side-by-side"
+      "Free: cap rate + cash flow with long-term rental assumptions in 60 seconds",
+      "Pro: customize rent + vacancy + management to model STR scenarios — see if the upside is real after operational cost",
+      "Compare both strategies on the same property →"
     ]
   }
 }

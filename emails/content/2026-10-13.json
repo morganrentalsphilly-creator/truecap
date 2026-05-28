@@ -1,15 +1,24 @@
 {
-  "subject": "Mortgage points: when paying for the rate beats keeping the cash",
-  "preheader": "Break-even math · The 4-year rule · Why most points buyers regret it",
+  "subject": "Mortgage points: when they pay back in 4 years, when never",
+  "preheader": "Break-even math · the 4-year rule · why most points buyers regret it",
   "publishedAt": "2026-10-13",
   "weekLabel": "Topic: Mortgage points",
   "marketSnapshot": {
     "headline": "Mortgage points — three-factor decision",
     "body": "Mortgage points (also called 'discount points') let you pay an upfront fee to lower the loan's interest rate. Each point typically costs 1% of the loan amount and reduces rate by 0.25-0.375%. Sounds straightforward; the right answer depends on three factors most investors don't model: how long you'll hold, your view on future rates, and what else you could do with that capital. Get those three right and points are a powerful long-term wealth-build. Get them wrong and you've paid for a benefit you never received.",
     "stats": [
-      { "label": "1 point typically buys", "value": "0.25-0.375% off rate" },
-      { "label": "Typical break-even", "value": "30-48 months" },
-      { "label": "Hold-period threshold to buy", "value": "4+ years" }
+      {
+        "label": "1 point typically buys",
+        "value": "0.25-0.375% off rate"
+      },
+      {
+        "label": "Typical break-even",
+        "value": "30-48 months"
+      },
+      {
+        "label": "Hold-period threshold to buy",
+        "value": "4+ years"
+      }
     ]
   },
   "dealSpotter": [
@@ -42,11 +51,11 @@
     "answer": "Three-factor decision. (1) Hold period: longer than the break-even (typically 30-48 months), points win. Sooner sale or refi, points lose. (2) Rate outlook: if you believe rates will be 50bp+ lower in 2-3 years AND you'd refi at that point, skip points (the refi cancels the buy-down). If you believe rates will be flat-to-higher, lock in the buy-down. (3) Capital allocation: every dollar in points is a dollar not in another investment. If you have $30k available and the choice is 'buy 3 points on this deal' or 'use it as down payment on a second property,' the second property almost always wins because it produces cash flow AND principal pay-down AND appreciation, while points only reduce one line item. Default rule: buy points only when you'll hold 4+ years AND you've already deployed the capital you have available elsewhere. The most common mistake: buying points to make a marginal deal pencil. The deal that only works with paid-down rates is a fragile deal."
   },
   "shipNote": {
-    "title": "TrueCap models points scenarios (Pro)",
+    "title": "Run the points-vs-cash trade-off",
     "items": [
-      "Mortgage points scenario: enter points cost, see break-even period and hold-aware verdict",
-      "Lender compare: enter 3 quotes (with and without points), see side-by-side cash flow and total interest paid",
-      "A/B mortgage compare: model with-points vs no-points scenarios side-by-side"
+      "Free: enter custom interest rate — see how a 25bp lower rate changes monthly cash flow",
+      "Pro: A/B mortgage compare — points vs no-points side-by-side with break-even highlighted",
+      "Decide before you write the check at closing →"
     ]
   }
 }
