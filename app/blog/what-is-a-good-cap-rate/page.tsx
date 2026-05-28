@@ -158,8 +158,11 @@ export default function BlogPost() {
             internet number.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">The 60-second answer</h2>
-          <p>In 2026, treat these as your rough benchmarks:</p>
+          <h2 className="text-2xl sm:text-3xl">What&apos;s a good cap rate? The short answer</h2>
+          <p>
+            A good cap rate for rental property in 2026 is <strong>6-10%</strong> in cash-flow markets (Cleveland, Indianapolis, Memphis), <strong>5-7%</strong> in balanced markets (Atlanta, Phoenix, Charlotte), and <strong>3-5%</strong> in appreciation markets (Boston, Bay Area, Manhattan). Anything below the prevailing 10-year Treasury yield (~4-5%) requires strong appreciation thesis to justify.
+          </p>
+          <p>By tier:</p>
           <ul>
             <li>
               <strong>Cash-flow markets</strong> (Cleveland, Indianapolis,

@@ -173,9 +173,12 @@ export default function BlogPost() {
             every first-time investor in 2026&apos;s rate environment.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">The 60-second version</h2>
+          <h2 className="text-2xl sm:text-3xl">Cap rate vs cash-on-cash vs DSCR — the short answer</h2>
           <p>
-            Skip to the bottom for nuance, but here&apos;s the short answer:
+            <strong>Cap rate</strong> measures the property&apos;s unleveraged return (use it to compare properties). <strong>Cash-on-cash return</strong> measures the return on YOUR specific cash invested after financing (use it to make personal investment decisions). <strong>DSCR</strong> measures the property&apos;s ability to cover its mortgage payment from rent (lenders use it to decide whether to fund the loan).
+          </p>
+          <p>
+            Three metrics, three completely different jobs:
           </p>
           <ul>
             <li>

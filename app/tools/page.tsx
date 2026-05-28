@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Free Real Estate Calculators | TrueCap",
     description:
-      "Nine free rental property calculators — cap rate, cash-on-cash, BRRRR, DSCR, NOI, mortgage, GRM, rehab, 1% rule. No signup.",
+      "Twelve free rental property calculators — cap rate, cash-on-cash, BRRRR, DSCR, NOI, mortgage, GRM, rehab, 1% rule, break-even, ROI, closing cost. No signup.",
     url: "/tools",
     type: "website",
     images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap free real estate calculators" }],
@@ -92,6 +92,27 @@ const TOOLS: { href: string; title: string; description: string; available: bool
       "Gross Rent Multiplier — the 10-second screening ratio for triaging deals before underwriting.",
     available: true,
   },
+  {
+    href: "/tools/break-even-calculator",
+    title: "Break-even calculator",
+    description:
+      "How many months until rental cash flow returns your initial investment. Fast way to compare deals on payback speed.",
+    available: true,
+  },
+  {
+    href: "/tools/roi-calculator",
+    title: "ROI calculator",
+    description:
+      "Total return on a rental — cash flow + principal paydown + appreciation in one composite number.",
+    available: true,
+  },
+  {
+    href: "/tools/closing-cost-calculator",
+    title: "Closing cost calculator",
+    description:
+      "Line-item breakdown of closing costs on a rental purchase — origination, title, transfer tax, escrow, prepaids.",
+    available: true,
+  },
 ];
 
 export default function ToolsLandingPage() {
@@ -108,7 +129,7 @@ export default function ToolsLandingPage() {
     "@id": `${siteUrl}/tools#collection`,
     name: "Free Real Estate Calculators",
     description:
-      "Nine free, no-signup rental property calculators — cap rate, cash-on-cash, BRRRR, DSCR, NOI, mortgage payment, GRM, rehab cost, 1% rule.",
+      "Twelve free, no-signup rental property calculators — cap rate, cash-on-cash, BRRRR, DSCR, NOI, mortgage payment, GRM, rehab cost, 1% rule, break-even, ROI, closing cost.",
     url: `${siteUrl}/tools`,
     isPartOf: { "@id": `${siteUrl}/#website` },
     mainEntity: {
