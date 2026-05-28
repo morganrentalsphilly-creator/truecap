@@ -1,0 +1,275 @@
+/**
+ * scripts/schedule-all-broadcasts.ts
+ *
+ * One-time script: reads every content file in /emails/content/, creates
+ * a Resend broadcast for each, and schedules it to send on the date in
+ * its filename at 13:00 UTC (9am ET).
+ *
+ * Why this exists: Vercel cron + filesystem read + Resend API at the
+ * moment of fire = three failure points every Tuesday. Pre-scheduling
+ * everything in Resend right now = zero failure points going forward.
+ * Resend handles delivery on the dates. We walk away.
+ *
+ * Run once, locally:
+ *
+ *   npx tsx scripts/schedule-all-broadcasts.ts
+ *
+ * Required env vars (load with dotenv or paste inline):
+ *
+ *   RESEND_API_KEY=re_...
+ *   RESEND_AUDIENCE_ID=2ea9dd69-...
+ *   EMAIL_FROM="TrueCap <hello@usetruecap.com>"   (optional)
+ *   EMAIL_REPLY_TO=hello@usetruecap.com           (optional)
+ *
+ * Flags:
+ *
+ *   --dry-run    Print what would be scheduled. No API calls.
+ *   --from=DATE  Only schedule broadcasts on/after DATE (YYYY-MM-DD).
+ *                Useful if you've already manually sent earlier ones.
+ *
+ * Idempotency: this script does NOT track which broadcasts it has
+ * already scheduled. If you run it twice with the same content files,
+ * you'll create duplicate scheduled broadcasts. Use --from to skip
+ * already-scheduled dates, or delete duplicates in the Resend UI.
+ */
+
+import { promises as fs } from "node:fs";
+import path from "node:path";
+import { render } from "@react-email/render";
+import WeeklyDigestEmail, {
+  type WeeklyDigestContent,
+} from "../emails/weekly-digest";
+
+const CONTENT_DIR = path.join(process.cwd(), "emails", "content");
+const FROM_ADDRESS = process.env.EMAIL_FROM ?? "TrueCap <hello@usetruecap.com>";
+const REPLY_TO = process.env.EMAIL_REPLY_TO ?? "hello@usetruecap.com";
+
+// 13:00 UTC = 9am ET (8am ET during EST). Matches the cron schedule
+// (0 11 * * 2) was previously 11:00 UTC — bumping to 13:00 UTC puts
+// the send at 9am ET year-round (close enough; DST shift is one hour).
+// Adjust here if you want a different send time.
+const SEND_HOUR_UTC = 13;
+const SEND_MINUTE_UTC = 0;
+
+type Args = {
+  dryRun: boolean;
+  fromDate: string | null;
+};
+
+function parseArgs(): Args {
+  const args = process.argv.slice(2);
+  const fromArg = args.find((a) => a.startsWith("--from="));
+  return {
+    dryRun: args.includes("--dry-run"),
+    fromDate: fromArg ? fromArg.slice("--from=".length) : null,
+  };
+}
+
+async function listContentFiles(): Promise<string[]> {
+  const files = await fs.readdir(CONTENT_DIR);
+  return files
+    .filter((f) => /^\d{4}-\d{2}-\d{2}\.json$/.test(f))
+    .map((f) => f.replace(/\.json$/, ""))
+    .sort();
+}
+
+async function loadContent(date: string): Promise<WeeklyDigestContent> {
+  const raw = await fs.readFile(path.join(CONTENT_DIR, `${date}.json`), "utf8");
+  return JSON.parse(raw) as WeeklyDigestContent;
+}
+
+/**
+ * Build the scheduled_at ISO string for a content date.
+ * Example: "2026-06-02" → "2026-06-02T13:00:00Z"
+ */
+function scheduledAtFor(date: string): string {
+  return `${date}T${String(SEND_HOUR_UTC).padStart(2, "0")}:${String(
+    SEND_MINUTE_UTC
+  ).padStart(2, "0")}:00Z`;
+}
+
+async function renderForBroadcast(content: WeeklyDigestContent) {
+  // {{{RESEND_UNSUBSCRIBE_URL}}} is Resend's per-recipient substitution
+  // — Resend auto-replaces this with each contact's unique unsubscribe
+  // link when the broadcast fires.
+  const element = WeeklyDigestEmail({
+    content,
+    unsubscribeUrl: "{{{RESEND_UNSUBSCRIBE_URL}}}",
+    senderAddress: process.env.EMAIL_SENDER_ADDRESS,
+  });
+  const html = await render(element);
+  const text = await render(element, { plainText: true });
+  return { html, text };
+}
+
+type ResendBroadcastCreate = {
+  id?: string;
+  message?: string;
+};
+
+async function createAndScheduleBroadcast(opts: {
+  apiKey: string;
+  audienceId: string;
+  date: string;
+  subject: string;
+  html: string;
+  text: string;
+  scheduledAt: string;
+}): Promise<{ ok: boolean; broadcastId?: string; error?: string }> {
+  const { apiKey, audienceId, date, subject, html, text, scheduledAt } = opts;
+
+  // Step 1: create the broadcast
+  const createRes = await fetch("https://api.resend.com/broadcasts", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      audience_id: audienceId,
+      from: FROM_ADDRESS,
+      subject,
+      html,
+      text,
+      name: `Weekly digest · ${date}`,
+      reply_to: REPLY_TO,
+    }),
+  });
+  const createBody = (await createRes
+    .json()
+    .catch(() => ({}))) as ResendBroadcastCreate;
+  if (!createRes.ok || !createBody.id) {
+    return {
+      ok: false,
+      error: `Create failed (${createRes.status}): ${createBody.message ?? "unknown"}`,
+    };
+  }
+
+  // Step 2: schedule the send with scheduled_at
+  const sendRes = await fetch(
+    `https://api.resend.com/broadcasts/${encodeURIComponent(createBody.id)}/send`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ scheduled_at: scheduledAt }),
+    }
+  );
+  const sendBody = (await sendRes.json().catch(() => ({}))) as {
+    id?: string;
+    message?: string;
+  };
+  if (!sendRes.ok) {
+    return {
+      ok: false,
+      broadcastId: createBody.id,
+      error: `Schedule failed (${sendRes.status}): ${sendBody.message ?? "unknown"}`,
+    };
+  }
+
+  return { ok: true, broadcastId: createBody.id };
+}
+
+async function main() {
+  const { dryRun, fromDate } = parseArgs();
+
+  const apiKey = process.env.RESEND_API_KEY;
+  const audienceId = process.env.RESEND_AUDIENCE_ID;
+
+  if (!dryRun) {
+    if (!apiKey) {
+      console.error("Missing RESEND_API_KEY env var. Aborting.");
+      process.exit(1);
+    }
+    if (!audienceId) {
+      console.error("Missing RESEND_AUDIENCE_ID env var. Aborting.");
+      process.exit(1);
+    }
+  }
+
+  const dates = await listContentFiles();
+  const filtered = fromDate ? dates.filter((d) => d >= fromDate) : dates;
+
+  // Drop any dates in the past — Resend rejects scheduled_at in the
+  // past. If you want to send those, send them manually via the UI.
+  const now = new Date();
+  const future = filtered.filter((d) => {
+    const scheduled = new Date(scheduledAtFor(d));
+    return scheduled.getTime() > now.getTime();
+  });
+
+  const skippedPast = filtered.length - future.length;
+
+  console.log(`\nSchedule plan`);
+  console.log(`─────────────`);
+  console.log(`Content files found:      ${dates.length}`);
+  console.log(`After --from filter:      ${filtered.length}`);
+  console.log(`Future-dated (will send): ${future.length}`);
+  console.log(`Past-dated (skipped):     ${skippedPast}`);
+  console.log(`Mode:                     ${dryRun ? "DRY RUN" : "LIVE"}`);
+  console.log("");
+
+  if (future.length === 0) {
+    console.log("Nothing to schedule. Exiting.");
+    return;
+  }
+
+  let succeeded = 0;
+  let failed = 0;
+
+  for (const date of future) {
+    const scheduledAt = scheduledAtFor(date);
+    try {
+      const content = await loadContent(date);
+      const subject = content.subject;
+
+      if (dryRun) {
+        console.log(`[dry] ${date}  scheduled_at=${scheduledAt}  subj="${subject}"`);
+        succeeded += 1;
+        continue;
+      }
+
+      const { html, text } = await renderForBroadcast(content);
+      const result = await createAndScheduleBroadcast({
+        apiKey: apiKey!,
+        audienceId: audienceId!,
+        date,
+        subject,
+        html,
+        text,
+        scheduledAt,
+      });
+
+      if (result.ok) {
+        console.log(
+          `[ok] ${date}  id=${result.broadcastId}  scheduled_at=${scheduledAt}`
+        );
+        succeeded += 1;
+      } else {
+        console.error(`[err] ${date}  ${result.error}`);
+        failed += 1;
+      }
+    } catch (error) {
+      console.error(
+        `[err] ${date}  ${error instanceof Error ? error.message : String(error)}`
+      );
+      failed += 1;
+    }
+
+    // Small delay between API calls to be polite to Resend.
+    await new Promise((r) => setTimeout(r, 250));
+  }
+
+  console.log("");
+  console.log(`Done. Succeeded: ${succeeded}. Failed: ${failed}.`);
+  if (failed > 0) {
+    process.exit(1);
+  }
+}
+
+main().catch((error) => {
+  console.error("Fatal:", error);
+  process.exit(1);
+});
