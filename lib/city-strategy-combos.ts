@@ -402,6 +402,202 @@ export const CITY_STRATEGY_COMBOS: CombinedCityStrategy[] = [
     relatedPosts: ["50-percent-rule-rentals"],
   },
 
+  // ─── CINCINNATI ───
+  {
+    citySlug: "cincinnati",
+    cityName: "Cincinnati",
+    state: "Ohio",
+    strategy: "cash-flow",
+    strategyLabel: "cash flow",
+    pitch:
+      "Cincinnati is the quietly outperforming Ohio cash-flow market — more stable than Cleveland, less overhead than Detroit, and consistently undersupplied for investor inventory. Cap rates 7-9% in B+ neighborhoods are reliably available.",
+    whyHereWhyNow:
+      "Cincinnati's two healthcare anchors (Mercy + UC Health) plus diverse manufacturing + finance employers keep rental demand stable. Insurance is among the most predictable in the country. Property taxes are reasonable. Compared to Cleveland, Cincinnati has fewer block-by-block neighborhood variation issues and the housing stock is somewhat newer on average, lowering year-1 capex risk.",
+    typicalNumbers: {
+      purchasePrice: "$130-200k typical",
+      monthlyRent: "$1,300-1,700",
+      capRate: "7-9% in B+ neighborhoods",
+      notes: "Monthly NCF $400-700 common. Insurance ~$70-100/mo. Taxes ~$150-220/mo. Modest 2-3%/yr appreciation. Fewer operational surprises than Cleveland.",
+    },
+    neighborhoods: [
+      { name: "College Hill", why: "B+ stable neighborhood with strong owner-occupant + tenant mix" },
+      { name: "Pleasant Ridge", why: "Walkable, gentrifying, family demand" },
+      { name: "Northside", why: "Gentrifying, balanced cash flow + appreciation upside" },
+      { name: "Westwood", why: "Best cash-flow neighborhood in Cincinnati; family-renter demand" },
+    ],
+    pitfalls: [
+      "Older housing stock (pre-WW2) carries year-1 capex risk — budget 4-6% of purchase price for the first year",
+      "Some Cincinnati neighborhoods have block-by-block quality variation — walk before you buy",
+      "Hamilton County property tax appeals available — budget time for the process",
+      "Cincinnati appraisals modestly under-comp on rehabbed properties (3-5% haircut)",
+      "Out-of-state investors should ALWAYS use a vetted local PM — Cincinnati's nuances aren't Florida's",
+    ],
+    relatedPosts: ["what-is-a-good-cap-rate", "50-percent-rule-rentals"],
+  },
+
+  // ─── PITTSBURGH ───
+  {
+    citySlug: "pittsburgh",
+    cityName: "Pittsburgh",
+    state: "Pennsylvania",
+    strategy: "brrrr",
+    strategyLabel: "BRRRR",
+    pitch:
+      "Pittsburgh BRRRR works in the gentrifying neighborhoods — Lawrenceville, Garfield, parts of Northside. Distressed inventory + ARV-supporting comps + reasonable refi appraisals make this one of the cleaner BRRRR markets in the Northeast.",
+    whyHereWhyNow:
+      "Pittsburgh's gentrification has been steady through 2018-2025, anchored by Carnegie Mellon + UPMC + a growing tech ecosystem (Duolingo, Aurora, autonomous vehicle startups). Distressed inventory remains available at $60-120k in gentrifying zones, rehab budgets $30-55k produce ARVs of $160-220k. Unlike Cleveland or Detroit, Pittsburgh appraisals on rehabbed properties tend to match comps more closely — better refi math.",
+    typicalNumbers: {
+      purchasePrice: "$55-110k distressed acquisition",
+      monthlyRent: "$1,300-1,700 post-rehab",
+      capRate: "7.5-9.5% post-rehab",
+      notes: "Rehab $30-55k. All-in $90-170k. ARV $170-225k in gentrifying zones. Refi at 75% pulls $128-170k. Capital recycled 85-100% on clean executions.",
+    },
+    neighborhoods: [
+      { name: "Lawrenceville", why: "Gentrified core — strong ARV upside, premium acquisition prices" },
+      { name: "Garfield", why: "Earlier gentrification cycle, better entry prices, higher upside" },
+      { name: "Bloomfield", why: "Walkable, gentrifying, strong demographic tailwind" },
+      { name: "Allentown / Beltzhoover", why: "Lower entry, more execution risk, higher long-term upside" },
+    ],
+    pitfalls: [
+      "Steep terrain in Pittsburgh means foundation + drainage issues common — get structural review",
+      "Older housing stock (pre-1940) carries asbestos + knob-and-tube electrical risk",
+      "PA eviction process slower than landlord-friendly states (45-75 days)",
+      "Some Pittsburgh neighborhoods have steep hills affecting parking + access — walk before buying",
+      "Allegheny County tax appeals worth filing on most purchases",
+    ],
+    relatedPosts: ["spot-bad-rental-in-60-seconds"],
+  },
+  {
+    citySlug: "pittsburgh",
+    cityName: "Pittsburgh",
+    state: "Pennsylvania",
+    strategy: "house-hack",
+    strategyLabel: "house hacking",
+    pitch:
+      "Pittsburgh house hacking economics are among the best in the country — duplexes and triplexes in walkable neighborhoods at $200-350k entry prices, with rental demand from CMU + Pitt + UPMC students and young professionals.",
+    whyHereWhyNow:
+      "Pittsburgh's combination of moderate housing prices + walkable urban neighborhoods + young-professional and student rental demand makes it ideal for FHA 3.5% / conventional 5% house-hacks. Year-1 true out-of-pocket is often $200-500/mo (vs $1,200-1,600 market rent for comparable housing). Year-2 conversion to pure rental yields meaningful cash flow.",
+    typicalNumbers: {
+      purchasePrice: "$200-350k for 2-3 unit",
+      monthlyRent: "$1,000-1,500 per unit",
+      capRate: "True out-of-pocket: $200-500/mo for your unit",
+      notes: "FHA 3.5% ($7-12.25k down) or conventional 5% ($10-17.5k). Year 2: move out, full rental conversion yields $400-700/mo NCF.",
+    },
+    neighborhoods: [
+      { name: "Lawrenceville", why: "Walkable, young-professional demand, premium house-hack neighborhood" },
+      { name: "Bloomfield", why: "Walkable, ethnic-food anchor, strong rental demand" },
+      { name: "Squirrel Hill", why: "Family + grad-student demand, premium for school district" },
+      { name: "Mt. Washington", why: "Iconic views, lower entry, walkable to downtown via incline" },
+    ],
+    pitfalls: [
+      "Steep Pittsburgh terrain creates parking challenges + foundation issues",
+      "Older housing stock = real year-1 capex even on owner-occupant FHA financing",
+      "PA's flat 3.07% state income tax modest but still affects after-tax math",
+      "Allegheny County reassessments affect tax bills periodically",
+      "Living next to college-aged tenants requires temperament — noise, turnover, awkward moments",
+    ],
+    relatedPosts: ["house-hacking-explained"],
+  },
+
+  // ─── BIRMINGHAM ───
+  {
+    citySlug: "birmingham",
+    cityName: "Birmingham",
+    state: "Alabama",
+    strategy: "cash-flow",
+    strategyLabel: "cash flow",
+    pitch:
+      "Birmingham is the most underrated cash-flow market in the Southeast. Property tax of just 0.42% (among lowest in US), fast 7-21 day eviction process, and B-class neighborhood inventory at $130-200k make this a steady buy-and-hold market.",
+    whyHereWhyNow:
+      "Birmingham's combination of UAB Medicine, manufacturing, and banking employers supports steady rental demand. Alabama's landlord-friendly law and fast eviction process reduce operational risk. Property tax of 0.42% is the lowest of any major US metro. Cap rates of 8-10% in B+ neighborhoods are reliably available, with less operational overhead than Memphis or Detroit.",
+    typicalNumbers: {
+      purchasePrice: "$130-200k typical",
+      monthlyRent: "$1,250-1,650",
+      capRate: "8-10% in B+ neighborhoods",
+      notes: "Property tax ~$50-80/mo (the AL advantage). Insurance ~$80-110/mo. Monthly NCF $450-750 common.",
+    },
+    neighborhoods: [
+      { name: "Crestwood", why: "B+ stable neighborhood with strong family demand" },
+      { name: "Forest Park", why: "Walkable, gentrifying, premium for the area" },
+      { name: "Bluff Park", why: "Suburban-feeling, school district premium" },
+      { name: "Avondale", why: "Gentrifying urban core, walkable, BRRRR upside" },
+    ],
+    pitfalls: [
+      "Tornado risk modest but real — insurance accounts for it; storm damage occasional",
+      "Some Birmingham neighborhoods have crime concentration in specific zones — walk before buying",
+      "Older urban core stock may need year-1 capex (older HVAC, plumbing)",
+      "Property tax appeals available but rarely needed at such low rates",
+      "5% AL state income tax modestly higher than peer cash-flow states (TN, FL)",
+    ],
+    relatedPosts: ["what-is-a-good-cap-rate", "50-percent-rule-rentals"],
+  },
+
+  // ─── SACRAMENTO ───
+  {
+    citySlug: "sacramento",
+    cityName: "Sacramento",
+    state: "California",
+    strategy: "house-hack",
+    strategyLabel: "house hacking",
+    pitch:
+      "Sacramento is the most workable major-California market for house-hacking. Entry prices are 30-40% lower than the Bay Area, ADU laws are permissive, and FHA owner-occupant financing works on duplexes and ADU-equipped SFRs.",
+    whyHereWhyNow:
+      "California's ADU laws (SB 9, SB 10) plus Sacramento's relatively reasonable entry prices ($400-550k for SFR with ADU potential, $500-700k for duplexes) create unusual house-hacking opportunities for CA investors who'd be priced out of Bay Area or LA. FHA 3.5% on the right deal makes year-1 true out-of-pocket comparable to renting a single unit elsewhere.",
+    typicalNumbers: {
+      purchasePrice: "$450-650k for SFR + ADU or 2-unit",
+      monthlyRent: "$1,400-2,000 per unit",
+      capRate: "True out-of-pocket: $800-1,500/mo for your unit (vs $2,200+ market rent)",
+      notes: "FHA 3.5% ($15.75-22.75k down) or conventional 5% ($22.5-32.5k). High insurance + CA tax requires careful underwriting.",
+    },
+    neighborhoods: [
+      { name: "Tahoe Park", why: "Walkable, university-adjacent, ADU-friendly, family-renter demand" },
+      { name: "Curtis Park", why: "Established neighborhood, premium for the area, stable demand" },
+      { name: "Oak Park", why: "Gentrifying, more accessible entry, balanced cash flow + appreciation" },
+      { name: "South Land Park", why: "Family demand, school-district premium, larger lots" },
+    ],
+    pitfalls: [
+      "California insurance volatility — Tahoe Park is reasonable but verify carrier availability",
+      "13.3% top CA state income tax compresses after-tax returns severely",
+      "Tenant-leaning law: 60-120 day eviction process",
+      "Statewide AB 1482 rent caps limit pricing flexibility on renewals",
+      "ADU construction can take 6-12 months with permits — factor into year-1 plans",
+    ],
+    relatedPosts: ["house-hacking-explained"],
+  },
+
+  // ─── CHARLOTTE ───
+  {
+    citySlug: "charlotte",
+    cityName: "Charlotte",
+    state: "North Carolina",
+    strategy: "appreciation",
+    strategyLabel: "appreciation",
+    pitch:
+      "Charlotte is one of the most consistent appreciation markets in the Southeast — banking (Bank of America, Wells Fargo, Truist) + healthcare (Atrium, Novant) + tech growth drive consistent rent + price growth. Cap rates are compressed but 10-year IRR math is strong.",
+    whyHereWhyNow:
+      "Charlotte's population growth has been among the fastest in the US for 15+ years. Banking + tech + healthcare anchors create reliable rental demand from young professionals. The trade-off: cap rates are 4.5-6% on most SFRs, monthly cash flow modest. Long-hold appreciation strategy is the dominant play. Strong landlord law + fast eviction (14-30 days) reduces operational risk.",
+    typicalNumbers: {
+      purchasePrice: "$325-475k typical SFR",
+      monthlyRent: "$2,100-2,800",
+      capRate: "4.5-6% after honest underwriting",
+      notes: "Year-1 cash flow modest ($100-400/mo). 10-year IRR typically 12-16% on leveraged deals with strong appreciation. NC's low 0.77% property tax helps the math.",
+    },
+    neighborhoods: [
+      { name: "Plaza Midwood", why: "Walkable, gentrified, premium appreciation upside" },
+      { name: "NoDa", why: "Arts district, strong young-professional demand" },
+      { name: "Cherry", why: "Adjacent to South End growth, slightly more accessible" },
+      { name: "South End", why: "Light-rail corridor, walkable, premium for that lifestyle" },
+    ],
+    pitfalls: [
+      "Cap rate compression means cash flow is tight — small underwriting errors swing deals to negative",
+      "Charlotte rapid gentrification means buying at top of cycle is real risk",
+      "Banking-sector employment concentration risk in downturns",
+      "STR restricted in most Charlotte neighborhoods",
+      "Property crime higher in some target neighborhoods — verify on walks",
+    ],
+    relatedPosts: ["cash-flow-vs-appreciation"],
+  },
+
   // ─── DALLAS ───
   {
     citySlug: "dallas",
