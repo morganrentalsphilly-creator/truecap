@@ -1,0 +1,212 @@
+/**
+ * /vs/excel — TrueCap vs Excel/Google Sheets for rental analysis.
+ *
+ * Target queries: "rental property excel template", "rental analysis
+ * spreadsheet", "excel vs calculator", "best rental spreadsheet". Massive
+ * search volume — Excel is the default tool most new investors start with.
+ */
+
+import type { Metadata } from "next";
+import Link from "next/link";
+import {
+  ArrowRight,
+  ArrowUpRight,
+  Calculator,
+  Check,
+  Minus,
+  Sparkles,
+  X,
+} from "lucide-react";
+import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
+import { SiteFooter } from "@/components/marketing/site-footer";
+import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
+import { getSiteUrl } from "@/lib/site-url";
+
+export const metadata: Metadata = {
+  title: "TrueCap vs Excel for rental property analysis | TrueCap",
+  description:
+    "Honest comparison of TrueCap vs Excel/Google Sheets for rental property analysis. Speed, accuracy, mobile, sharing — and when a spreadsheet still wins.",
+  keywords: [
+    "rental property excel template",
+    "rental analysis spreadsheet",
+    "excel vs rental calculator",
+    "best rental property spreadsheet",
+    "google sheets rental analysis",
+    "rental property excel vs calculator",
+  ],
+  alternates: { canonical: "/vs/excel" },
+  openGraph: {
+    title: "TrueCap vs Excel for rental property analysis",
+    description: "Side-by-side: speed, accuracy, mobile, sharing, what each does best.",
+    url: "/vs/excel",
+    type: "website",
+    images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap vs Excel" }],
+  },
+  twitter: { card: "summary_large_image", images: ["/home.jpg"] },
+};
+
+type Verdict = "truecap" | "excel" | "tie";
+type Row = { feature: string; truecap: string; excel: string; winner: Verdict };
+
+const MATRIX: Row[] = [
+  { feature: "Time to first underwrite",          truecap: "60 seconds — paste address, auto-fills everything",                      excel: "30-60 minutes — gather data, type formulas, debug",                       winner: "truecap" },
+  { feature: "Auto-fill from address",            truecap: "HUD rent + FRED rate + county property tax populate live",                excel: "Manual entry — copy/paste from Zillow/county sites",                      winner: "truecap" },
+  { feature: "Formula error risk",                truecap: "Engine validated; same math runs across all sessions",                    excel: "High — one cell break + you trust the wrong number",                      winner: "truecap" },
+  { feature: "Mobile usable",                     truecap: "Mobile-first responsive — works at the showing on your phone",            excel: "Spreadsheet on mobile = pinch-zoom misery",                                winner: "truecap" },
+  { feature: "Shareable with team / client",      truecap: "Pro — clean public URL with branded report",                              excel: "Email a .xlsx file + hope they open it correctly",                          winner: "truecap" },
+  { feature: "Live updates as you change inputs", truecap: "Instant recalc, visual indicators of impact",                             excel: "Recalc works but you have to track which cells you changed",              winner: "truecap" },
+  { feature: "10-year projection visualization",  truecap: "Built-in chart, side-by-side scenarios",                                  excel: "Possible with chart wizard but takes 20+ min of setup",                    winner: "truecap" },
+  { feature: "Sensitivity analysis (stress test)",truecap: "Pro — rent ±10%, vacancy ±5pp, rates ±1pp in one view",                   excel: "Possible with Data Table feature but most users don't",                    winner: "truecap" },
+  { feature: "Customization to weird scenarios",  truecap: "Standard inputs cover 95%; one-off scenarios harder to model",            excel: "Fully customizable — you can model anything you can think of",            winner: "excel" },
+  { feature: "Free to start",                     truecap: "Yes — unlimited free analyses, no signup",                                 excel: "Yes if you have Excel/Sheets",                                            winner: "tie" },
+  { feature: "Offline use",                       truecap: "Requires internet",                                                        excel: "Works offline once file is open",                                          winner: "excel" },
+  { feature: "Audit trail / version history",     truecap: "Pro saves history of saved deals",                                         excel: "Manual file naming or Google Sheets version history",                     winner: "tie" },
+  { feature: "Glossary / explanation of metrics", truecap: "Inline tooltips + /glossary/ with full definitions per term",              excel: "Whatever you remember from your last research session",                    winner: "truecap" },
+  { feature: "PDF export for lenders / partners", truecap: "Pro — branded multi-page report",                                          excel: "Print → PDF, manual formatting",                                          winner: "truecap" },
+  { feature: "Tax strategy modeling",             truecap: "Pro — bracket-aware depreciation + after-tax CF",                          excel: "Possible if you build the formulas",                                       winner: "truecap" },
+  { feature: "BRRRR / fix-and-flip analyzers",    truecap: "Built-in dedicated workflows",                                             excel: "Custom build per deal type",                                              winner: "truecap" },
+  { feature: "Cost",                              truecap: "Free or $16.67/mo annual Pro",                                            excel: "$0 (if you have Office or Google Workspace)",                              winner: "tie" },
+];
+
+export default function VsExcelPage() {
+  const siteUrl = getSiteUrl();
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: "TrueCap vs Excel for rental property analysis",
+    url: `${siteUrl}/vs/excel`,
+    description: "Side-by-side comparison of TrueCap and Excel/Google Sheets for rental analysis.",
+    publisher: { "@id": `${siteUrl}/#organization` },
+  };
+
+  return (
+    <div className="min-h-screen bg-background">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
+      <main id="main" className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+        <div className="mb-2">
+          <Link href="/" className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground">← TrueCap</Link>
+        </div>
+
+        <section className="mb-12 sm:mb-16">
+          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-primary mb-4">
+            <Sparkles className="size-3" />
+            Honest comparison
+          </div>
+          <h1 className="text-3xl sm:text-5xl font-black text-foreground leading-[1.05] tracking-tight text-balance">
+            TrueCap vs Excel: <span className="text-primary">when is a spreadsheet still the right tool?</span>
+          </h1>
+          <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
+            Most investors start with an Excel template — usually a BiggerPockets template, sometimes one they built themselves. We built TrueCap because spreadsheets break, take forever, and don&apos;t survive contact with a real deal at a showing. But Excel still wins in certain cases.
+          </p>
+          <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
+            <ScrollToFormButton className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(82,72,212,0.28)] transition-transform hover:-translate-y-0.5">
+              <Calculator className="size-4" />
+              Try TrueCap free
+              <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+            </ScrollToFormButton>
+            <Link href="/pricing" className="inline-flex h-12 items-center justify-center gap-1.5 rounded-xl border border-border bg-card px-5 text-sm font-semibold text-foreground hover:bg-muted">
+              See pricing
+            </Link>
+          </div>
+          <p className="mt-3 text-xs text-muted-foreground">No card · No signup · Cancel anytime</p>
+        </section>
+
+        <section className="mb-12 sm:mb-16 rounded-2xl border border-border bg-card p-6 sm:p-8">
+          <h2 className="text-xl sm:text-2xl font-black text-foreground mb-3">TL;DR</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-widest text-primary mb-2">Pick TrueCap if</p>
+              <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
+                <li>You want to underwrite 5+ deals/week without losing your evening to spreadsheet maintenance.</li>
+                <li>You need a tool that works on your phone at a showing.</li>
+                <li>You share analyses with partners / lenders / clients.</li>
+                <li>You don&apos;t want to debug formulas — you want validated math.</li>
+                <li>You want auto-fill from address (HUD rent, FRED rate, county tax).</li>
+                <li>You want PDF reports without manual print-to-PDF formatting.</li>
+              </ul>
+            </div>
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-2">Stick with Excel if</p>
+              <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
+                <li>You analyze fewer than 5 deals/year and have a working template.</li>
+                <li>You have a highly customized model (waterfalls, complex partnership splits, exotic financing).</li>
+                <li>You need offline use.</li>
+                <li>You&apos;re a financial analyst by training — Excel is muscle memory.</li>
+                <li>You require complete data privacy (everything stays on your machine).</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section className="mb-12 sm:mb-16">
+          <h2 className="text-2xl sm:text-3xl font-black text-foreground mb-2">Feature-by-feature</h2>
+          <p className="text-base text-muted-foreground mb-6 leading-relaxed">Where each wins, where it&apos;s a wash.</p>
+          <div className="overflow-x-auto rounded-2xl border border-border bg-card">
+            <table className="w-full text-sm">
+              <thead className="bg-muted/40">
+                <tr className="text-left">
+                  <th className="py-3 px-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Feature</th>
+                  <th className="py-3 px-3 text-[10px] font-bold uppercase tracking-widest text-primary">TrueCap</th>
+                  <th className="py-3 px-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Excel / Sheets</th>
+                </tr>
+              </thead>
+              <tbody>
+                {MATRIX.map((row) => (
+                  <tr key={row.feature} className="border-t border-border align-top">
+                    <td className="py-3 px-3 text-sm font-semibold text-foreground">{row.feature}</td>
+                    <td className="py-3 px-3 text-xs leading-relaxed text-foreground/85">
+                      <div className="flex items-start gap-2"><WinnerBadge winner={row.winner} side="truecap" /><span>{row.truecap}</span></div>
+                    </td>
+                    <td className="py-3 px-3 text-xs leading-relaxed text-foreground/85">
+                      <div className="flex items-start gap-2"><WinnerBadge winner={row.winner} side="excel" /><span>{row.excel}</span></div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section className="mb-12 sm:mb-16 rounded-2xl border border-[var(--brand-green)]/25 bg-[var(--brand-green-light)] p-6 sm:p-8">
+          <h2 className="text-xl sm:text-2xl font-black text-[var(--brand-green)] mb-3">When investors actually switch from Excel</h2>
+          <ul className="space-y-2 text-sm sm:text-base leading-relaxed text-foreground">
+            <li><strong>&quot;I&apos;m analyzing 3+ deals per week.&quot;</strong> At that pace, the per-deal time savings from TrueCap (29 min/deal vs 60 sec) saves you 12+ hours a month. Pro pays for itself in week one.</li>
+            <li><strong>&quot;I shared my spreadsheet with a partner and they broke it.&quot;</strong> Classic. Spreadsheets are fragile. TrueCap saved deals get a clean shareable URL — partners see the analysis, can&apos;t accidentally break the formula.</li>
+            <li><strong>&quot;I lost a deal because I couldn&apos;t pull up numbers at the showing.&quot;</strong> Mobile is where deals are made now. Excel on mobile is unusable; TrueCap works in your pocket.</li>
+            <li><strong>&quot;I realized I&apos;d been using the wrong cap rate formula for 6 months.&quot;</strong> This happens. Engine-based tools validate the math once; spreadsheet errors compound across every deal until you find them.</li>
+          </ul>
+        </section>
+
+        <section className="mb-12 sm:mb-16 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
+          <h2 className="text-2xl sm:text-3xl font-black mb-2">Try TrueCap free.</h2>
+          <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
+            Underwrite your next deal in 60 seconds. If you still prefer Excel after that, no harm done — keep your spreadsheet. But most investors who try TrueCap once stop opening their template.
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <Link href="/" className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity">
+              <Calculator className="w-4 h-4" />Run a deal now
+            </Link>
+            <Link href="/pricing" className="inline-flex items-center gap-2 border border-primary-foreground/40 bg-primary-foreground/10 text-primary-foreground px-4 py-2.5 rounded-xl font-bold hover:bg-primary-foreground/20 transition-colors">
+              See pricing<ArrowUpRight className="w-4 h-4" />
+            </Link>
+          </div>
+        </section>
+
+        <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
+          Other comparisons:{" "}
+          <Link href="/vs/dealcheck" className="font-bold text-foreground hover:underline">vs DealCheck</Link>{" · "}
+          <Link href="/vs/biggerpockets-calculator" className="font-bold text-foreground hover:underline">vs BiggerPockets</Link>{" · "}
+          <Link href="/vs/stessa" className="font-bold text-foreground hover:underline">vs Stessa</Link>
+        </footer>
+      </main>
+      <SiteFooter />
+      <ScrollDepthTracker />
+    </div>
+  );
+}
+
+function WinnerBadge({ winner, side }: { winner: Verdict; side: "truecap" | "excel" }) {
+  if (winner === "tie") return <Minus className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/60" />;
+  if (winner === side) return <Check className="mt-0.5 size-3.5 shrink-0 text-[var(--brand-green)]" />;
+  return <X className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/50" />;
+}

@@ -1,0 +1,243 @@
+/**
+ * Dynamic city + strategy combo page at /markets/[city]/[strategy].
+ *
+ * Each entry in CITY_STRATEGY_COMBOS becomes a dedicated long-tail SEO
+ * page. Targets queries like:
+ *   - "BRRRR Philadelphia"
+ *   - "cash flow Cleveland"
+ *   - "house hacking Indianapolis"
+ *   - "Section 8 Memphis"
+ *   - "turnkey Memphis"
+ *
+ * Each combo gets a unique ranking URL with sharply-focused intent.
+ */
+
+import type { Metadata } from "next";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { ArrowRight, Check, X } from "lucide-react";
+import { Header } from "@/components/investcalc/header";
+import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
+import { SiteFooter } from "@/components/marketing/site-footer";
+import {
+  CITY_STRATEGY_COMBOS,
+  getCityStrategyCombo,
+} from "@/lib/city-strategy-combos";
+import { getSiteUrl } from "@/lib/site-url";
+
+export async function generateStaticParams() {
+  return CITY_STRATEGY_COMBOS.map((c) => ({
+    city: c.citySlug,
+    strategy: c.strategy,
+  }));
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ city: string; strategy: string }>;
+}): Promise<Metadata> {
+  const { city, strategy } = await params;
+  const combo = getCityStrategyCombo(city, strategy);
+  if (!combo) return { title: "Combo not found | TrueCap" };
+  const title = `${combo.strategyLabel} investing in ${combo.cityName} — the honest playbook | TrueCap`;
+  return {
+    title,
+    description: combo.pitch.slice(0, 158),
+    keywords: [
+      `${combo.strategy} ${combo.cityName.toLowerCase()}`,
+      `${combo.strategyLabel.toLowerCase()} ${combo.cityName.toLowerCase()}`,
+      `${combo.cityName.toLowerCase()} ${combo.strategy}`,
+      `${combo.strategyLabel.toLowerCase()} investing in ${combo.cityName.toLowerCase()}`,
+      `${combo.cityName.toLowerCase()} rental property ${combo.strategyLabel.toLowerCase()}`,
+      `${combo.strategyLabel.toLowerCase()} in ${combo.state.toLowerCase()}`,
+    ],
+    alternates: { canonical: `/markets/${combo.citySlug}/${combo.strategy}` },
+    openGraph: {
+      title,
+      description: combo.pitch,
+      url: `/markets/${combo.citySlug}/${combo.strategy}`,
+      type: "article",
+      images: [{ url: "/home.jpg", width: 1200, height: 630, alt: title }],
+    },
+    twitter: { card: "summary_large_image", images: ["/home.jpg"] },
+  };
+}
+
+export default async function CityStrategyPage({
+  params,
+}: {
+  params: Promise<{ city: string; strategy: string }>;
+}) {
+  const { city, strategy } = await params;
+  const combo = getCityStrategyCombo(city, strategy);
+  if (!combo) notFound();
+
+  const siteUrl = getSiteUrl();
+  const canonicalUrl = `${siteUrl}/markets/${combo.citySlug}/${combo.strategy}`;
+
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: siteUrl },
+      { "@type": "ListItem", position: 2, name: "Markets", item: `${siteUrl}/markets` },
+      { "@type": "ListItem", position: 3, name: combo.cityName, item: `${siteUrl}/markets/${combo.citySlug}` },
+      { "@type": "ListItem", position: 4, name: combo.strategyLabel, item: canonicalUrl },
+    ],
+  };
+
+  const faqLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: [
+      {
+        "@type": "Question",
+        name: `Does ${combo.strategyLabel} work in ${combo.cityName}?`,
+        acceptedAnswer: { "@type": "Answer", text: combo.pitch },
+      },
+      {
+        "@type": "Question",
+        name: `What neighborhoods in ${combo.cityName} are best for ${combo.strategyLabel}?`,
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: `Top neighborhoods for ${combo.strategyLabel} in ${combo.cityName}: ${combo.neighborhoods.map((n) => n.name).join(", ")}.`,
+        },
+      },
+      {
+        "@type": "Question",
+        name: `What's a typical ${combo.strategyLabel} deal in ${combo.cityName} look like?`,
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: `Purchase: ${combo.typicalNumbers.purchasePrice}. Monthly rent: ${combo.typicalNumbers.monthlyRent}. Cap rate: ${combo.typicalNumbers.capRate}. ${combo.typicalNumbers.notes}`,
+        },
+      },
+    ],
+  };
+
+  return (
+    <div className="min-h-screen bg-background">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
+      <Header />
+
+      <main className="mx-auto max-w-4xl px-4 sm:px-6 py-8 sm:py-12">
+        {/* Breadcrumb */}
+        <nav aria-label="Breadcrumb" className="mb-6 text-xs">
+          <ol className="flex flex-wrap items-center gap-2 text-muted-foreground">
+            <li><Link href="/" className="hover:text-foreground">Home</Link></li>
+            <li aria-hidden="true">›</li>
+            <li><Link href={`/markets/${combo.citySlug}`} className="hover:text-foreground">{combo.cityName}</Link></li>
+            <li aria-hidden="true">›</li>
+            <li className="font-semibold text-foreground">{combo.strategyLabel}</li>
+          </ol>
+        </nav>
+
+        <p className="text-[11px] uppercase tracking-widest text-primary font-bold">
+          {combo.cityName}, {combo.state} · {combo.strategyLabel}
+        </p>
+        <h1 className="mt-2 text-3xl sm:text-5xl font-black text-foreground leading-[1.05] tracking-tight">
+          {combo.strategyLabel.charAt(0).toUpperCase() + combo.strategyLabel.slice(1)} investing in {combo.cityName}
+        </h1>
+        <p className="mt-5 text-lg leading-relaxed text-muted-foreground">{combo.pitch}</p>
+
+        {/* Why here, why now */}
+        <section className="mt-12">
+          <h2 className="text-2xl font-black text-foreground mb-3">Why {combo.strategyLabel} works in {combo.cityName} right now</h2>
+          <p className="text-base leading-relaxed text-foreground">{combo.whyHereWhyNow}</p>
+        </section>
+
+        {/* Typical numbers */}
+        <section className="mt-10 rounded-2xl border border-border bg-card p-6">
+          <p className="text-[11px] uppercase tracking-widest text-primary font-bold mb-3">Typical {combo.strategyLabel} deal in {combo.cityName}</p>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Purchase price</p>
+              <p className="mt-1 text-lg font-black text-foreground">{combo.typicalNumbers.purchasePrice}</p>
+            </div>
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Monthly rent</p>
+              <p className="mt-1 text-lg font-black text-foreground">{combo.typicalNumbers.monthlyRent}</p>
+            </div>
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Cap rate</p>
+              <p className="mt-1 text-lg font-black text-foreground">{combo.typicalNumbers.capRate}</p>
+            </div>
+          </div>
+          <p className="mt-4 text-sm leading-relaxed text-muted-foreground">{combo.typicalNumbers.notes}</p>
+        </section>
+
+        {/* Neighborhoods */}
+        <section className="mt-12">
+          <h2 className="text-2xl font-black text-foreground mb-4">Best neighborhoods for {combo.strategyLabel} in {combo.cityName}</h2>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {combo.neighborhoods.map((n) => (
+              <article key={n.name} className="rounded-xl border border-border bg-card p-5">
+                <p className="text-base font-bold text-foreground">{n.name}</p>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{n.why}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        {/* Pitfalls */}
+        <section className="mt-12 rounded-2xl border border-amber-500/30 bg-amber-50/40 p-6">
+          <h2 className="text-xl font-black text-foreground mb-3">Common pitfalls to avoid</h2>
+          <ul className="space-y-2">
+            {combo.pitfalls.map((p) => (
+              <li key={p} className="flex items-start gap-2 text-sm leading-relaxed text-foreground">
+                <X className="mt-0.5 size-4 shrink-0 text-amber-600" />
+                <span>{p}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        {/* Tool CTA */}
+        <section className="mt-12 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
+          <h2 className="text-xl sm:text-2xl font-black mb-2">Run a {combo.cityName} {combo.strategyLabel} deal in 60 seconds</h2>
+          <p className="text-sm sm:text-base opacity-90 mb-5">
+            Paste an address into TrueCap and get cap rate, cash-on-cash, DSCR, and 10-year projection — pre-loaded with {combo.cityName}-area defaults so you start with the right assumptions.
+          </p>
+          <Link href="/" className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity">
+            Try TrueCap free <ArrowRight className="size-4" />
+          </Link>
+        </section>
+
+        {/* Related posts */}
+        {combo.relatedPosts && combo.relatedPosts.length > 0 ? (
+          <section className="mt-12 border-t border-border pt-6">
+            <p className="text-xs uppercase tracking-widest text-muted-foreground font-bold mb-3">Related reading</p>
+            <ul className="space-y-1.5 text-sm">
+              {combo.relatedPosts.map((slug) => (
+                <li key={slug}>
+                  <Link href={`/blog/${slug}`} className="text-primary font-semibold hover:underline">
+                    /blog/{slug.replaceAll("-", " ")} →
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
+
+        {/* Other strategies in this city */}
+        <section className="mt-12 border-t border-border pt-6">
+          <p className="text-xs uppercase tracking-widest text-muted-foreground font-bold mb-3">Other {combo.cityName} guides</p>
+          <div className="flex flex-wrap gap-2 text-sm">
+            <Link href={`/markets/${combo.citySlug}`} className="rounded-full border border-border bg-card px-3 py-1.5 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary">
+              {combo.cityName} market overview
+            </Link>
+            {CITY_STRATEGY_COMBOS.filter((c) => c.citySlug === combo.citySlug && c.strategy !== combo.strategy).map((c) => (
+              <Link key={c.strategy} href={`/markets/${c.citySlug}/${c.strategy}`} className="rounded-full border border-border bg-card px-3 py-1.5 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary">
+                {c.strategyLabel} in {c.cityName}
+              </Link>
+            ))}
+          </div>
+        </section>
+      </main>
+
+      <SiteFooter />
+      <ScrollDepthTracker />
+    </div>
+  );
+}

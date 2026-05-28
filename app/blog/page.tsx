@@ -48,6 +48,33 @@ export type BlogPost = {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: "how-to-refinance-a-rental-property",
+    title: "How to refinance a rental property — rate-and-term, cash-out, and DSCR options",
+    excerpt:
+      "Step-by-step on refinancing a rental property: when refi makes sense, rate-and-term vs cash-out, LTV limits, DSCR loans, the break-even math, and the 5 mistakes most investors make.",
+    readingTimeMinutes: 10,
+    publishedAt: "2026-05-26",
+    available: true,
+  },
+  {
+    slug: "rental-property-pro-forma-explained",
+    title: "How to read a rental property pro forma (and the 7 lies inside most of them)",
+    excerpt:
+      "A pro forma is a seller's projection of how a rental property will perform — and it's almost always optimistic. Here's how to translate seller pro formas into real numbers, and the 7 line items most pro formas understate.",
+    readingTimeMinutes: 9,
+    publishedAt: "2026-05-26",
+    available: true,
+  },
+  {
+    slug: "how-to-find-off-market-rental-properties",
+    title: "How to find off-market rental properties — 8 sources that actually work",
+    excerpt:
+      "The 8 sources serious rental investors use to find off-market deals — driving for dollars, direct mail, wholesalers, networking, public records, and the underrated channels most investors skip.",
+    readingTimeMinutes: 10,
+    publishedAt: "2026-05-26",
+    available: true,
+  },
+  {
     slug: "rental-property-tax-deductions",
     title: "Rental property tax deductions — the 14 every investor should know",
     excerpt:

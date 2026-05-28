@@ -1,13 +1,14 @@
 import type { MetadataRoute } from "next";
+import { CITY_STRATEGY_COMBOS } from "@/lib/city-strategy-combos";
 import { GLOSSARY } from "@/lib/glossary";
+import { STATES } from "@/lib/states";
 import { getSiteUrl } from "@/lib/site-url";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const siteUrl = getSiteUrl();
 
   // Per-glossary-term pages — one URL per term in lib/glossary.ts.
-  // 30+ pages that rank for "what is X" / "X definition" / "X formula"
-  // long-tail queries. Each one a small but recurring traffic stream.
+  // 30+ pages ranking for "what is X" / "X definition" long-tail queries.
   const glossaryUrls: MetadataRoute.Sitemap = Object.values(GLOSSARY).map(
     (entry) => ({
       url: `${siteUrl}/glossary/${entry.slug}`,
@@ -17,8 +18,37 @@ export default function sitemap(): MetadataRoute.Sitemap {
     })
   );
 
+  // Per-state investing pages — 15 URLs ranking for "investing in [state]"
+  // and related state-level queries.
+  const stateUrls: MetadataRoute.Sitemap = Object.values(STATES).map((s) => ({
+    url: `${siteUrl}/states/${s.slug}`,
+    lastModified: new Date(),
+    changeFrequency: "monthly" as const,
+    priority: 0.7,
+  }));
+
+  // City + strategy combo pages — 12+ long-tail URLs ranking for
+  // "BRRRR Philadelphia" / "cash flow Cleveland" / "Section 8 Memphis"
+  // and similar high-intent niche queries.
+  const cityStrategyUrls: MetadataRoute.Sitemap = CITY_STRATEGY_COMBOS.map(
+    (c) => ({
+      url: `${siteUrl}/markets/${c.citySlug}/${c.strategy}`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.7,
+    })
+  );
+
   return [
     ...glossaryUrls,
+    ...stateUrls,
+    ...cityStrategyUrls,
+    {
+      url: `${siteUrl}/states`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.7,
+    },
     {
       url: `${siteUrl}/`,
       lastModified: new Date(),
@@ -212,7 +242,43 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
     },
     {
+      url: `${siteUrl}/vs/excel`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
+      url: `${siteUrl}/vs/rentometer`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
+    {
+      url: `${siteUrl}/vs/zillow-rent-estimate`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
       url: `${siteUrl}/blog/rental-property-tax-deductions`,
+      lastModified: new Date("2026-05-26"),
+      changeFrequency: "monthly",
+      priority: 0.9,
+    },
+    {
+      url: `${siteUrl}/blog/how-to-find-off-market-rental-properties`,
+      lastModified: new Date("2026-05-26"),
+      changeFrequency: "monthly",
+      priority: 0.9,
+    },
+    {
+      url: `${siteUrl}/blog/rental-property-pro-forma-explained`,
+      lastModified: new Date("2026-05-26"),
+      changeFrequency: "monthly",
+      priority: 0.9,
+    },
+    {
+      url: `${siteUrl}/blog/how-to-refinance-a-rental-property`,
       lastModified: new Date("2026-05-26"),
       changeFrequency: "monthly",
       priority: 0.9,
