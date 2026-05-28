@@ -70,7 +70,7 @@ export default function PropertyManagementPost() {
             A typical residential PM in the US charges:
           </p>
           <ul>
-            <li><strong>8-10% of collected rent</strong> (lower in cash-flow markets like the Midwest, higher in coastal markets)</li>
+            <li><strong>8-10% of collected rent</strong> (lower in cash-flow markets like the Midwest, higher in coastal markets) — this is the line you&apos;ll see as the <Link href="/glossary/management-fee" className="text-primary font-semibold hover:underline">management fee</Link> on your operating statement</li>
             <li><strong>Lease-up fee of 50-100% of one month&apos;s rent</strong> whenever they place a new tenant — typically every 1-3 years</li>
             <li><strong>Maintenance markup of 10-20%</strong> on coordinated repairs (they manage the contractor; you pay PM&apos;s rate, not direct contractor rate)</li>
             <li><strong>Occasional fees:</strong> renewal fee ($100-300), eviction processing fee, sometimes a setup fee at onboarding</li>
@@ -158,7 +158,7 @@ export default function PropertyManagementPost() {
 
           <h2 className="text-2xl font-black text-foreground mt-10 mb-3">Modeling PM in your underwriting</h2>
           <p>
-            Set the <strong>Management %</strong> field in <Link href="/" className="text-primary font-semibold hover:underline">TrueCap</Link> to <strong>9% by default</strong> for any property you don&apos;t plan to self-manage, plus add 1-2pp to the maintenance % to cover the markup. If you&apos;re going to self-manage initially but expect to switch later (after the property is in your book and you stop having time), still underwrite at 9% — it&apos;s the more conservative truth and you don&apos;t want a deal that only works when you&apos;re donating your evenings.
+            Set the <strong>Management %</strong> field in <Link href="/" className="text-primary font-semibold hover:underline">TrueCap</Link> to <strong>9% by default</strong> for any property you don&apos;t plan to self-manage, plus add 1-2pp to the <Link href="/glossary/maintenance-reserve" className="text-primary font-semibold hover:underline">maintenance</Link> % to cover the markup. If you&apos;re going to self-manage initially but expect to switch later (after the property is in your book and you stop having time), still underwrite at 9% — it&apos;s the more conservative truth and you don&apos;t want a deal that only works when you&apos;re donating your evenings. For the full operating-expense framework, see our <Link href="/blog/rental-property-pro-forma-explained" className="text-primary font-semibold hover:underline">rental property pro forma walkthrough</Link>.
           </p>
           <p>
             A deal that pencils at 9% management can absorb a switch to PM if your life situation changes. A deal that only pencils at 0% management is fragile — you&apos;re effectively forced to never get sick, never travel, never have a baby, never have a demanding job.

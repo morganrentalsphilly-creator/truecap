@@ -73,7 +73,7 @@ export default function HouseHackingPost() {
             The leverage advantage is enormous. Compare:
           </p>
           <ul>
-            <li><strong>Investment property:</strong> 20-25% down ($60-75k on a $300k purchase), DSCR-loan rates, no living-cost offset</li>
+            <li><strong>Investment property:</strong> 20-25% <Link href="/glossary/down-payment" className="text-primary font-semibold hover:underline">down payment</Link> ($60-75k on a $300k purchase), DSCR-loan rates, no living-cost offset</li>
             <li><strong>House hack:</strong> 3.5% FHA ($10.5k on the same $300k purchase), owner-occupant rates (lower), your tenants partially pay your housing cost</li>
           </ul>
           <p>
@@ -130,7 +130,7 @@ export default function HouseHackingPost() {
             The full power of house hacking shows up in year 2. You&apos;ve satisfied the owner-occupant residency requirement; you move out, rent your unit at market rate, and the property converts from break-even owner-occupied to cash-flowing pure rental.
           </p>
           <p>
-            Example: A Philadelphia triplex you bought at $400k with 5% down ($20k). Year 1: you live in unit 1, units 2 + 3 rent for $1,400 each. You pay ~$300/mo true out-of-pocket. Year 2: you move out, rent unit 1 at $1,500. Now you collect $4,300/mo, pay maybe $3,400/mo all-in. <strong>+$900/mo cash flow on a $20k investment — that&apos;s 54% cash-on-cash.</strong>
+            Example: A Philadelphia triplex you bought at $400k with 5% down ($20k). Year 1: you live in unit 1, units 2 + 3 rent for $1,400 each. You pay ~$300/mo true out-of-pocket. Year 2: you move out, rent unit 1 at $1,500. Now you collect $4,300/mo, pay maybe $3,400/mo all-in. <strong>+$900/mo cash flow on a $20k investment — that&apos;s 54% <Link href="/glossary/cash-on-cash-return" className="text-primary font-semibold hover:underline">cash-on-cash</Link>.</strong>
           </p>
           <p>
             Pro tip: model both years before you commit. TrueCap&apos;s 10-year projection (Pro) shows year-1 break-even followed by year-2+ cash flow. The post-transition numbers are usually what justifies the strategy on paper; year-1 is the cost of admission.
@@ -167,7 +167,7 @@ export default function HouseHackingPost() {
           <p>
             The deals that pencil are out there in most US markets — Philadelphia, Cleveland, Indianapolis, Memphis, Pittsburgh, and the Midwest in general have the highest hit rate. Coastal markets are harder but not impossible (Sacramento, Oakland, parts of Boston). Run any specific property through{" "}
             <Link href="/" className="text-primary font-semibold hover:underline">TrueCap with property type = owner-occupant</Link> to see whether the math works before you commit. The starter template &quot;Starter — House hack&quot; on{" "}
-            <Link href="/dashboard/templates" className="text-primary font-semibold hover:underline">/dashboard/templates</Link> pre-seeds the right defaults.
+            <Link href="/dashboard/templates" className="text-primary font-semibold hover:underline">/dashboard/templates</Link> pre-seeds the right defaults. To find the kinds of motivated-seller 2-4 unit deals that make house hacking work, read <Link href="/blog/how-to-find-off-market-rental-properties" className="text-primary font-semibold hover:underline">how to find off-market rental properties</Link>.
           </p>
         </div>
       </article>

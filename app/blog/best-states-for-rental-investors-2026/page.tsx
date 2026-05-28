@@ -76,9 +76,9 @@ export default function BestStatesPost() {
             Five axes that matter:
           </p>
           <ul>
-            <li><strong>Cap rate / cash flow</strong> — how much current yield per dollar invested</li>
-            <li><strong>Appreciation potential</strong> — long-term value growth, usually tied to net in-migration + job growth</li>
-            <li><strong>After-tax yield</strong> — affected by state income tax (or absence of it) + property tax + insurance</li>
+            <li><strong><Link href="/glossary/cap-rate" className="text-primary font-semibold hover:underline">Cap rate</Link> / cash flow</strong> — how much current yield per dollar invested</li>
+            <li><strong><Link href="/glossary/appreciation-rate" className="text-primary font-semibold hover:underline">Appreciation</Link> potential</strong> — long-term value growth, usually tied to net in-migration + job growth</li>
+            <li><strong>After-tax yield</strong> — affected by state income tax (or absence of it) + <Link href="/glossary/property-tax" className="text-primary font-semibold hover:underline">property tax</Link> + <Link href="/glossary/insurance" className="text-primary font-semibold hover:underline">insurance</Link></li>
             <li><strong>Landlord legal climate</strong> — eviction speed, security deposit limits, rent control exposure</li>
             <li><strong>Insurance + climate risk</strong> — hurricane, flood, wildfire, water-shortage exposure</li>
           </ul>

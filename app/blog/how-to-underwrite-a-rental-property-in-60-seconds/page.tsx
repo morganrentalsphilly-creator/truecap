@@ -248,11 +248,11 @@ export default function BlogPost() {
               the seller&apos;s number alone.
             </li>
             <li>
-              <strong>Operating expenses (annualized).</strong> Property tax,
-              insurance, maintenance, management, vacancy reserve, HOA, owner-
-              paid utilities, CapEx reserve. As a rule of thumb when you have no
+              <strong>Operating expenses (annualized).</strong> <Link href="/glossary/property-tax" className="text-primary font-semibold hover:underline">Property tax</Link>,
+              <Link href="/glossary/insurance" className="text-primary font-semibold hover:underline"> insurance</Link>, <Link href="/glossary/maintenance-reserve" className="text-primary font-semibold hover:underline">maintenance</Link>, management, <Link href="/glossary/vacancy" className="text-primary font-semibold hover:underline">vacancy reserve</Link>, HOA, owner-
+              paid utilities, <Link href="/glossary/capex" className="text-primary font-semibold hover:underline">CapEx reserve</Link>. As a rule of thumb when you have no
               other data: 40-50% of gross rent for a residential rental.
-              Underwriting against the &ldquo;50% rule&rdquo; is a fine starting
+              Underwriting against the <Link href="/blog/50-percent-rule-rentals" className="text-primary font-semibold hover:underline">&ldquo;50% rule&rdquo;</Link> is a fine starting
               point on a 60-second screen.
             </li>
             <li>
@@ -276,7 +276,7 @@ export default function BlogPost() {
 
           <h2 className="text-2xl sm:text-3xl">Metric 1: The 1% rule (5 seconds)</h2>
           <p>
-            The 1% rule is the fastest possible screen. Divide monthly gross
+            The <Link href="/glossary/1-percent-rule" className="text-primary font-semibold hover:underline">1% rule</Link> is the fastest possible screen. Divide monthly gross
             rent by the purchase price; if it&apos;s 1% or higher, the deal
             <em> probably</em> cash-flows; if it&apos;s well below 1%, the deal
             <em> probably</em> doesn&apos;t.

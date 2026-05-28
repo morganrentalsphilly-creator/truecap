@@ -148,7 +148,7 @@ export default function BlogPost() {
 
         <article className="prose prose-slate max-w-none [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-black [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground [&_li]:leading-relaxed [&_strong]:text-foreground">
           <p>
-            &ldquo;Is a 7% cap rate good?&rdquo; is one of the most-Googled
+            &ldquo;Is a 7% <Link href="/glossary/cap-rate" className="text-primary font-semibold hover:underline">cap rate</Link> good?&rdquo; is one of the most-Googled
             questions in real estate investing — and one of the worst-answered.
             The honest answer is: <em>it depends</em>. On the market. On the
             rate environment. On the property type. On what alternative
@@ -286,11 +286,11 @@ export default function BlogPost() {
 
           <h3>Cap rate that doesn&apos;t include CapEx reserves</h3>
           <p>
-            Many cap-rate quotes leave out capital expenditure reserves (the
+            Many cap-rate quotes leave out <Link href="/glossary/capex" className="text-primary font-semibold hover:underline">capital expenditure reserves</Link> (the
             5-10% of rent you&apos;ll need for roof, HVAC, water heater
-            replacements over time). Honest NOI includes a CapEx reserve. If
+            replacements over time). Honest <Link href="/glossary/noi" className="text-primary font-semibold hover:underline">NOI</Link> includes a CapEx reserve. If
             yours doesn&apos;t, you&apos;re overstating cap rate by 50-100
-            basis points.
+            basis points. (Full breakdown in our <Link href="/blog/rental-property-pro-forma-explained" className="text-primary font-semibold hover:underline">rental property pro forma guide</Link>.)
           </p>
 
           <h2 className="text-2xl sm:text-3xl">The simplest way to check</h2>

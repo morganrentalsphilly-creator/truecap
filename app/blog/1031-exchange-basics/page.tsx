@@ -72,7 +72,7 @@ export default function ExchangePost() {
         <div className="prose prose-neutral max-w-none text-foreground space-y-6 leading-relaxed">
           <h2 className="text-2xl font-black text-foreground mt-10 mb-3">The 30-second version</h2>
           <p>
-            You sell rental property A. Instead of taking the cash and paying capital gains tax (federal long-term capital gains: 15-20%, plus depreciation recapture at up to 25%, plus state tax in non-zero-tax states), you roll the proceeds into rental property B through a qualified intermediary. Federal taxes are deferred until you eventually sell B without exchanging — which, for serious investors, can mean &quot;forever, because I never stop exchanging until I die and my heirs inherit at stepped-up basis.&quot;
+            You sell rental property A. Instead of taking the cash and paying capital gains tax (federal long-term capital gains: 15-20%, plus <Link href="/glossary/depreciation-period" className="text-primary font-semibold hover:underline">depreciation</Link> recapture at up to 25%, plus state tax in non-zero-tax states), you roll the proceeds into rental property B through a qualified intermediary. Federal taxes are deferred until you eventually sell B without exchanging — which, for serious investors, can mean &quot;forever, because I never stop exchanging until I die and my heirs inherit at stepped-up basis.&quot;
           </p>
           <p>
             The catch: a clock starts the moment property A closes, and you have very tight deadlines to identify + close property B. Miss them and the whole tax shelter collapses.
@@ -172,7 +172,7 @@ export default function ExchangePost() {
             Run the math: how much federal tax would you owe if you sold without exchanging? If it&apos;s &lt; $15k, 1031 is probably not worth the QI cost + the constrained timeline + the risk of being forced into a worse property B than you&apos;d otherwise pick.
           </p>
           <p>
-            If federal tax due would be $25k+, 1031 starts being a no-brainer for investors who plan to roll into another deal anyway.
+            If federal tax due would be $25k+, 1031 starts being a no-brainer for investors who plan to roll into another deal anyway. (If you&apos;re considering the alternative — pulling equity out without selling — read our guide on <Link href="/blog/how-to-refinance-a-rental-property" className="text-primary font-semibold hover:underline">how to refinance a rental property</Link>.)
           </p>
           <p>
             Strategic note: many serious long-term investors chain 1031 exchanges for decades, then die without selling. Heirs inherit at stepped-up basis (current fair market value, not the original cost basis you&apos;ve been carrying), which permanently wipes out the deferred gain. That&apos;s the &quot;buy, refi, hold, exchange, die&quot; meme — it&apos;s not a joke, it&apos;s a real and durable tax strategy at scale.
@@ -197,7 +197,7 @@ export default function ExchangePost() {
             <li>Have your CPA model the tax cost of NOT exchanging vs. the constraint cost of identifying within 45 days.</li>
             <li>Start screening replacement properties through{" "}
               <Link href="/" className="text-primary font-semibold hover:underline">TrueCap</Link> before you close the sale. Use the{" "}
-              <Link href="/dashboard/saved-analyses" className="text-primary font-semibold hover:underline">saved-deals dashboard</Link> + portfolio rollup to track candidates against your replacement criteria.</li>
+              <Link href="/dashboard/saved-analyses" className="text-primary font-semibold hover:underline">saved-deals dashboard</Link> + portfolio rollup to track candidates against your replacement criteria. Pair this with our broader guide on <Link href="/blog/rental-property-tax-deductions" className="text-primary font-semibold hover:underline">rental property tax deductions</Link> to coordinate the depreciation reset with your overall tax strategy.</li>
             <li>Identify at day 30-35, not day 44. Give yourself buffer in case identified properties fall through during diligence.</li>
             <li>Close as early as possible inside the 180-day window — don&apos;t let it run to day 179 unless you&apos;ve already pre-cleared inspection + appraisal + financing.</li>
           </ol>

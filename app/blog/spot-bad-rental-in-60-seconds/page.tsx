@@ -77,7 +77,7 @@ export default function SpotBadRentalPost() {
 
           <h2 className="text-2xl font-black text-foreground mt-10 mb-3">1. Gross rent is below 0.7% of price (the &quot;reverse 1% rule&quot;)</h2>
           <p>
-            The classic 1% rule says monthly rent should be at least 1% of purchase price. That&apos;s gotten harder to hit since 2020 — many growing markets are 0.5-0.7% now. But under 0.7% in a typical conventional-financing market is a red flag worth pausing on.
+            The classic <Link href="/glossary/1-percent-rule" className="text-primary font-semibold hover:underline">1% rule</Link> says monthly rent should be at least 1% of purchase price. That&apos;s gotten harder to hit since 2020 — many growing markets are 0.5-0.7% now. But under 0.7% in a typical conventional-financing market is a red flag worth pausing on.
           </p>
           <p>
             The math: a $300k house renting for $1,800/mo (0.6%) is going to have negative cash flow at almost any conventional financing in a normal rate environment. If you&apos;re still interested, you&apos;re betting on appreciation, not yield. That&apos;s a valid bet — but it&apos;s a different bet, and you should know you&apos;re making it.
@@ -85,7 +85,7 @@ export default function SpotBadRentalPost() {
 
           <h2 className="text-2xl font-black text-foreground mt-10 mb-3">2. Property taxes are above 2% of value</h2>
           <p>
-            Property tax is a fixed, recurring drag on cash flow that you can&apos;t negotiate. In Texas (1.6-2.5%+ effective), Illinois (2.3%+), or new-construction Sun Belt MUDs (2.8-3.2%+), a deal that looks great on rent-to-price can lose half its cash flow to the tax bill.
+            <Link href="/glossary/property-tax" className="text-primary font-semibold hover:underline">Property tax</Link> is a fixed, recurring drag on cash flow that you can&apos;t negotiate. In Texas (1.6-2.5%+ effective), Illinois (2.3%+), or new-construction Sun Belt MUDs (2.8-3.2%+), a deal that looks great on rent-to-price can lose half its cash flow to the tax bill.
           </p>
           <p>
             Always pull the actual current tax bill from the County Appraisal District for the specific parcel. The seller&apos;s last bill may not reflect post-reassessment reality (especially in Jackson County MO, parts of Florida, and Texas MUDs).
@@ -125,7 +125,7 @@ export default function SpotBadRentalPost() {
 
           <h2 className="text-2xl font-black text-foreground mt-10 mb-3">7. The DSCR is below 1.0 at your actual financing</h2>
           <p>
-            DSCR (debt service coverage ratio) is NOI divided by annual debt service. Below 1.0 means the property doesn&apos;t cover its mortgage from rent — you&apos;re feeding it. Below 1.25 is below the typical lender threshold for an investment-property loan, which limits your financing options to higher-rate DSCR lenders, hard money, or more cash down.
+            <Link href="/glossary/dscr" className="text-primary font-semibold hover:underline">DSCR</Link> (debt service coverage ratio) is NOI divided by annual debt service. Below 1.0 means the property doesn&apos;t cover its mortgage from rent — you&apos;re feeding it. Below 1.25 is below the typical lender threshold for an investment-property loan, which limits your financing options to higher-rate DSCR lenders, hard money, or more cash down. (Deeper dive: <Link href="/blog/dscr-loans-explained" className="text-primary font-semibold hover:underline">DSCR loans explained</Link>.)
           </p>
           <p>
             Critical: this needs to be calculated at the rate and term YOU can actually get, not the seller&apos;s assumed rate. A deal that&apos;s 1.4 DSCR at 5% rate becomes 1.05 DSCR at 8% rate. The 60-second triage version: gross rent × 0.6 (approximate NOI) compared to annual P&amp;I. If it&apos;s less than 1.0× annual P&amp;I, walk unless you&apos;re bringing a lot of cash.

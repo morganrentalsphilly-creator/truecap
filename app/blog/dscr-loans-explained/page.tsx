@@ -173,10 +173,10 @@ export default function BlogPost() {
 
           <h2 className="text-2xl sm:text-3xl">What a DSCR loan is</h2>
           <p>
-            DSCR stands for <strong>Debt Service Coverage Ratio</strong> —
+            <Link href="/glossary/dscr" className="text-primary font-semibold hover:underline">DSCR</Link> stands for <strong>Debt Service Coverage Ratio</strong> —
             the property&apos;s annual net operating income divided by its
             annual debt service. A DSCR of 1.25 means the property earns
-            $1.25 of NOI for every $1.00 of mortgage payment.
+            $1.25 of <Link href="/glossary/noi" className="text-primary font-semibold hover:underline">NOI</Link> for every $1.00 of mortgage payment.
           </p>
           <div className="bg-card border border-border rounded-xl p-5 sm:p-6 my-4 text-center">
             <div className="text-sm sm:text-base font-mono">
@@ -260,7 +260,7 @@ export default function BlogPost() {
               minimum on most products.
             </li>
             <li>
-              <strong>LTV.</strong> 75% LTV gets better rates than 80% LTV.
+              <strong><Link href="/glossary/ltv" className="text-primary font-semibold hover:underline">LTV</Link>.</strong> 75% LTV gets better rates than 80% LTV.
               Cash-out refis at 70-75% LTV.
             </li>
             <li>
@@ -311,7 +311,7 @@ export default function BlogPost() {
             rent figure they&apos;re using. If it&apos;s materially below
             your number, pull rental comps from Rentometer, Zillow, and the
             local property management companies. A second appraisal or rent
-            comp letter can sometimes move the needle 5-10%.
+            comp letter can sometimes move the needle 5-10%. If you&apos;re using a DSCR cash-out to pull equity, our guide on <Link href="/blog/how-to-refinance-a-rental-property" className="text-primary font-semibold hover:underline">refinancing a rental property</Link> walks through the post-refi DSCR math.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">Stress-testing your DSCR</h2>

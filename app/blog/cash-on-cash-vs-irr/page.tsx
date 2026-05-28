@@ -68,7 +68,7 @@ export default function CashOnCashVsIrrPost() {
         <div className="prose prose-neutral max-w-none text-foreground space-y-6 leading-relaxed">
           <h2 className="text-2xl font-black text-foreground mt-10 mb-3">Cash-on-cash: this year&apos;s return on this year&apos;s cash</h2>
           <p>
-            Cash-on-cash (CoC) is annual cash flow divided by total cash invested at acquisition. If you put $80k into a deal and it produces $7,200/yr of cash flow, your CoC is 9%.
+            <Link href="/glossary/cash-on-cash-return" className="text-primary font-semibold hover:underline">Cash-on-cash (CoC)</Link> is annual cash flow divided by total cash invested at acquisition. If you put $80k into a deal and it produces $7,200/yr of cash flow, your CoC is 9%.
           </p>
           <p>
             CoC tells you: <strong>what return am I getting on the cash sitting in this deal, right now, this year?</strong>
@@ -79,7 +79,7 @@ export default function CashOnCashVsIrrPost() {
 
           <h2 className="text-2xl font-black text-foreground mt-10 mb-3">IRR: the time-weighted truth across the whole hold</h2>
           <p>
-            Internal Rate of Return (IRR) is the discount rate that makes the net present value of all the deal&apos;s cash flows (initial investment, every year&apos;s operating cash flow, sale proceeds at exit) equal to zero. Said more simply: it&apos;s the time-adjusted average return you actually earned over the whole hold.
+            <Link href="/glossary/irr" className="text-primary font-semibold hover:underline">Internal Rate of Return (IRR)</Link> is the discount rate that makes the net present value of all the deal&apos;s cash flows (initial investment, every year&apos;s operating cash flow, sale proceeds at exit) equal to zero. Said more simply: it&apos;s the time-adjusted average return you actually earned over the whole hold.
           </p>
           <p>
             IRR captures everything CoC misses: rent growth, expense growth, principal paydown, appreciation, the eventual sale (or refi cash-out), and the time value of money. A deal with 6% year-1 CoC that compounds rent + appreciation over 7 years can easily show a 15-20% IRR.
@@ -104,7 +104,7 @@ export default function CashOnCashVsIrrPost() {
             <strong>Appreciation-leaning deals</strong> (Sun Belt growth, coastal Tier-1, gentrifying inner-city): trust IRR — but only if you&apos;ve stress-tested the appreciation assumption. Don&apos;t commit to a deal whose entire return story is &quot;rent appreciates 4% and price appreciates 5% for 10 years.&quot; Both could happen. Neither is guaranteed.
           </p>
           <p>
-            <strong>BRRRR / value-add deals</strong>: neither metric handles BRRRR well in isolation. The whole point is capital recycled at refi — look at &quot;cash recovered as % of initial investment&quot; first, then year-1 CoC against the post-refi cash position, then long-term IRR. CoC alone misses the recycle; IRR alone smears it across the hold.
+            <strong><Link href="/glossary/brrrr" className="text-primary font-semibold hover:underline">BRRRR</Link> / value-add deals</strong>: neither metric handles BRRRR well in isolation. The whole point is capital recycled at refi — look at &quot;cash recovered as % of initial investment&quot; first, then year-1 CoC against the post-refi cash position, then long-term IRR. CoC alone misses the recycle; IRR alone smears it across the hold. (See <Link href="/blog/how-to-refinance-a-rental-property" className="text-primary font-semibold hover:underline">how to refinance a rental property</Link> for the cash-out workflow.)
           </p>
 
           <h2 className="text-2xl font-black text-foreground mt-10 mb-3">The practical workflow</h2>

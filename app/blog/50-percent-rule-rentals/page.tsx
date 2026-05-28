@@ -68,13 +68,13 @@ export default function FiftyPercentRulePost() {
         <div className="prose prose-neutral max-w-none text-foreground space-y-6 leading-relaxed">
           <h2 className="text-2xl font-black text-foreground mt-10 mb-3">What the rule actually says</h2>
           <p>
-            The 50% rule, popularized in BiggerPockets-era investor communities, is a shorthand for estimating Net Operating Income (NOI) without itemizing every expense. The math:
+            The 50% rule, popularized in BiggerPockets-era investor communities, is a shorthand for estimating <Link href="/glossary/noi" className="text-primary font-semibold hover:underline">Net Operating Income (NOI)</Link> without itemizing every expense. The math:
           </p>
           <p>
             <strong>Estimated NOI = Gross Annual Rent × 50%</strong>
           </p>
           <p>
-            Operating expenses are everything OTHER than your mortgage P&amp;I: property tax, insurance, maintenance, vacancy reserve, management fee, CapEx reserve, HOA, utilities (if landlord-paid), trash, lawn care, snow removal, etc.
+            Operating expenses are everything OTHER than your mortgage P&amp;I: <Link href="/glossary/property-tax" className="text-primary font-semibold hover:underline">property tax</Link>, insurance, <Link href="/glossary/maintenance-reserve" className="text-primary font-semibold hover:underline">maintenance</Link>, <Link href="/glossary/vacancy" className="text-primary font-semibold hover:underline">vacancy reserve</Link>, <Link href="/glossary/management-fee" className="text-primary font-semibold hover:underline">management fee</Link>, <Link href="/glossary/capex" className="text-primary font-semibold hover:underline">CapEx reserve</Link>, HOA, utilities (if landlord-paid), trash, lawn care, snow removal, etc.
           </p>
           <p>
             Once you have NOI, you subtract annual debt service (mortgage P&amp;I × 12) to get cash flow. The whole calculation takes ~10 seconds.
@@ -164,7 +164,7 @@ export default function FiftyPercentRulePost() {
             <strong>For high-insurance states (FL, parts of LA + coastal NC/SC):</strong> Pull a binding insurance quote BEFORE you do any other math. That single number is more diagnostic than any rule of thumb.
           </p>
           <p>
-            <strong>For Midwest workforce SFR:</strong> The 50% rule is genuinely accurate. Trust it for triage.
+            <strong>For Midwest workforce SFR:</strong> The 50% rule is genuinely accurate. Trust it for triage. For a faster gut-check, see our walkthrough of <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="text-primary font-semibold hover:underline">underwriting a rental in 60 seconds</Link>.
           </p>
           <p>
             <strong>For appreciation-leaning coastal Tier-1 (CA, parts of WA, NYC):</strong> No rule of thumb works because expense ratios are dominated by individual property quirks (rent control, parking, parking, parking, special assessments). Always do the full underwrite.

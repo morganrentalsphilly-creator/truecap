@@ -167,8 +167,8 @@ export default function BlogPost() {
           <h2 className="text-2xl sm:text-3xl">Defining the terms</h2>
           <p>
             <strong>Cash-flow investing</strong>: buy in markets where the
-            property generates positive monthly cash flow after every
-            expense + the mortgage. Optimize for cap rate and DSCR.
+            property generates positive <Link href="/glossary/monthly-cash-flow" className="text-primary font-semibold hover:underline">monthly cash flow</Link> after every
+            expense + the mortgage. Optimize for <Link href="/glossary/cap-rate" className="text-primary font-semibold hover:underline">cap rate</Link> and <Link href="/glossary/dscr" className="text-primary font-semibold hover:underline">DSCR</Link>.
             Typical markets: Midwest cash-flow cities, older Sun Belt
             multifamily, blue-collar suburbs.
           </p>
@@ -204,7 +204,7 @@ export default function BlogPost() {
               <strong>Appreciation</strong> — property value growth. Unrealized until you sell or refinance.
             </li>
             <li>
-              <strong>Tax savings</strong> — depreciation shields cash flow + interest deducts at your marginal rate. 1-3% effective annual return for most investors.
+              <strong><Link href="/glossary/tax-savings" className="text-primary font-semibold hover:underline">Tax savings</Link></strong> — depreciation shields cash flow + interest deducts at your marginal rate. 1-3% effective annual return for most investors. (See <Link href="/blog/rental-property-tax-deductions" className="text-primary font-semibold hover:underline">rental property tax deductions</Link> for the full list.)
             </li>
           </ol>
           <p>

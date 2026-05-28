@@ -179,17 +179,17 @@ export default function BlogPost() {
           </p>
           <ul>
             <li>
-              <strong>Cap rate</strong> — the property&apos;s unleveraged annual
+              <strong><Link href="/glossary/cap-rate" className="text-primary font-semibold hover:underline">Cap rate</Link></strong> — the property&apos;s unleveraged annual
               return. Use it to <em>compare properties</em> against each other
               and against alternatives like bonds.
             </li>
             <li>
-              <strong>Cash-on-cash return</strong> — the return on the cash YOU
+              <strong><Link href="/glossary/cash-on-cash-return" className="text-primary font-semibold hover:underline">Cash-on-cash return</Link></strong> — the return on the cash YOU
               specifically invest. Use it to <em>make your personal investment
               decision</em>: is this worth my capital?
             </li>
             <li>
-              <strong>DSCR</strong> — the property&apos;s ability to cover its
+              <strong><Link href="/glossary/dscr" className="text-primary font-semibold hover:underline">DSCR</Link></strong> — the property&apos;s ability to cover its
               mortgage from operating income. Use it to <em>get financed</em>:
               will a lender say yes?
             </li>
@@ -211,7 +211,8 @@ export default function BlogPost() {
           <p>
             Cap rate is the property&apos;s earning power as if you owned it
             free-and-clear. No mortgage, no financing, no leverage. Just rent
-            in, expenses out, divided by what you paid.
+            in, expenses out, divided by what you paid. The numerator,{" "}
+            <Link href="/glossary/noi" className="text-primary font-semibold hover:underline">NOI</Link>, is the single most-disputed line in residential underwriting.
           </p>
           <p>
             <strong>Why it matters:</strong> cap rate is the only metric that
