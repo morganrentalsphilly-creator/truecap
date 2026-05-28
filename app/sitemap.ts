@@ -1,10 +1,24 @@
 import type { MetadataRoute } from "next";
+import { GLOSSARY } from "@/lib/glossary";
 import { getSiteUrl } from "@/lib/site-url";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const siteUrl = getSiteUrl();
 
+  // Per-glossary-term pages — one URL per term in lib/glossary.ts.
+  // 30+ pages that rank for "what is X" / "X definition" / "X formula"
+  // long-tail queries. Each one a small but recurring traffic stream.
+  const glossaryUrls: MetadataRoute.Sitemap = Object.values(GLOSSARY).map(
+    (entry) => ({
+      url: `${siteUrl}/glossary/${entry.slug}`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
+    })
+  );
+
   return [
+    ...glossaryUrls,
     {
       url: `${siteUrl}/`,
       lastModified: new Date(),

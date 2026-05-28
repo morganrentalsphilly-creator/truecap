@@ -321,13 +321,13 @@ export default function GlossaryPage() {
                     </p>
                   ) : null}
                 </div>
-                <a
-                  href={`#${t.slug}`}
-                  aria-label={`Permalink to ${t.term}`}
+                <Link
+                  href={`/glossary/${t.slug}`}
+                  aria-label={`Full definition for ${t.term}`}
                   className="shrink-0 text-[11px] font-bold uppercase tracking-widest text-muted-foreground/60 hover:text-primary"
                 >
-                  #
-                </a>
+                  PERMALINK →
+                </Link>
               </div>
 
               <p className="mt-3 text-sm leading-relaxed text-foreground sm:text-base">
@@ -340,29 +340,33 @@ export default function GlossaryPage() {
                 </div>
               ) : null}
 
-              {/* Cross-links — calculator + deeper read */}
-              {(t.toolPath || t.postPath) ? (
-                <div className="mt-3 flex flex-wrap items-center gap-3 text-sm font-semibold">
-                  {t.toolPath ? (
-                    <Link
-                      href={t.toolPath}
-                      className="inline-flex items-center gap-1 text-primary hover:underline"
-                    >
-                      Compute {t.term.toLowerCase()}
-                      <ArrowUpRight className="size-3.5" />
-                    </Link>
-                  ) : null}
-                  {t.postPath ? (
-                    <Link
-                      href={t.postPath}
-                      className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground hover:underline"
-                    >
-                      <BookOpen className="size-3.5" />
-                      Read the deep dive
-                    </Link>
-                  ) : null}
-                </div>
-              ) : null}
+              {/* Cross-links — full definition page + calculator + deeper read */}
+              <div className="mt-3 flex flex-wrap items-center gap-3 text-sm font-semibold">
+                <Link
+                  href={`/glossary/${t.slug}`}
+                  className="inline-flex items-center gap-1 text-primary hover:underline"
+                >
+                  Full definition, formula, example
+                  <ArrowUpRight className="size-3.5" />
+                </Link>
+                {t.toolPath ? (
+                  <Link
+                    href={t.toolPath}
+                    className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground hover:underline"
+                  >
+                    Calculator
+                  </Link>
+                ) : null}
+                {t.postPath ? (
+                  <Link
+                    href={t.postPath}
+                    className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground hover:underline"
+                  >
+                    <BookOpen className="size-3.5" />
+                    Deep dive
+                  </Link>
+                ) : null}
+              </div>
             </article>
           ))}
         </div>
