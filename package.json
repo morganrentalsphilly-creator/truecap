@@ -14,7 +14,8 @@
     "reset-passwords": "node lib/reset-passwords.mjs",
     "schedule-broadcasts": "npx -y tsx scripts/schedule-all-broadcasts.ts",
     "schedule-broadcasts:dry": "npx -y tsx scripts/schedule-all-broadcasts.ts --dry-run",
-    "list-audiences": "npx -y tsx scripts/schedule-all-broadcasts.ts --list-audiences"
+    "list-audiences": "npx -y tsx scripts/schedule-all-broadcasts.ts --list-audiences",
+    "cleanup-drafts": "npx -y tsx scripts/schedule-all-broadcasts.ts --cleanup-drafts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",

@@ -87,10 +87,18 @@ const REPLY_TO = process.env.EMAIL_REPLY_TO ?? "hello@usetruecap.com";
 const SEND_HOUR_UTC = 13;
 const SEND_MINUTE_UTC = 0;
 
+/**
+ * Resend's Broadcasts API rejects scheduled_at beyond this window. As
+ * of 2026, the limit is 30 days. We use 28 to leave a safety buffer
+ * for timezone math + clock drift.
+ */
+const MAX_SCHEDULE_DAYS_OUT = 28;
+
 type Args = {
   dryRun: boolean;
   fromDate: string | null;
   listAudiences: boolean;
+  cleanupDrafts: boolean;
 };
 
 function parseArgs(): Args {
@@ -100,7 +108,70 @@ function parseArgs(): Args {
     dryRun: args.includes("--dry-run"),
     fromDate: fromArg ? fromArg.slice("--from=".length) : null,
     listAudiences: args.includes("--list-audiences"),
+    cleanupDrafts: args.includes("--cleanup-drafts"),
   };
+}
+
+/**
+ * Delete any unscheduled broadcasts whose name starts with "Weekly
+ * digest · ". Used to clean up orphan drafts created when the schedule
+ * step failed (typically due to the 30-day limit).
+ *
+ * Defensive: only deletes broadcasts in `draft` status. Never touches
+ * scheduled or sent broadcasts. Safe to re-run.
+ */
+async function cleanupOrphanDrafts(apiKey: string) {
+  const listRes = await fetch("https://api.resend.com/broadcasts", {
+    headers: { Authorization: `Bearer ${apiKey}` },
+  });
+  const listBody = (await listRes.json().catch(() => ({}))) as {
+    data?: Array<{ id: string; name: string; status: string }>;
+    message?: string;
+  };
+  if (!listRes.ok) {
+    console.error(
+      `Failed to list broadcasts (${listRes.status}): ${listBody.message ?? "unknown"}`
+    );
+    process.exit(1);
+  }
+  const drafts = (listBody.data ?? []).filter(
+    (b) =>
+      b.status === "draft" &&
+      typeof b.name === "string" &&
+      b.name.startsWith("Weekly digest · ")
+  );
+  if (drafts.length === 0) {
+    console.log("No orphan drafts found. Nothing to clean up.");
+    return;
+  }
+  console.log(`Found ${drafts.length} orphan weekly-digest drafts:`);
+  for (const d of drafts) {
+    console.log(`  - ${d.name} (${d.id})`);
+  }
+  console.log("");
+  console.log("Deleting...");
+  let deleted = 0;
+  let failed = 0;
+  for (const d of drafts) {
+    const delRes = await fetch(
+      `https://api.resend.com/broadcasts/${encodeURIComponent(d.id)}`,
+      {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${apiKey}` },
+      }
+    );
+    if (delRes.ok) {
+      console.log(`  [ok] deleted ${d.name}`);
+      deleted += 1;
+    } else {
+      const body = (await delRes.json().catch(() => ({}))) as { message?: string };
+      console.error(`  [err] ${d.name}: ${body.message ?? delRes.status}`);
+      failed += 1;
+    }
+    await new Promise((r) => setTimeout(r, 200));
+  }
+  console.log("");
+  console.log(`Done. Deleted: ${deleted}. Failed: ${failed}.`);
 }
 
 /**
@@ -251,7 +322,12 @@ async function createAndScheduleBroadcast(opts: {
 }
 
 async function main() {
-  const { dryRun, fromDate, listAudiences: shouldListAudiences } = parseArgs();
+  const {
+    dryRun,
+    fromDate,
+    listAudiences: shouldListAudiences,
+    cleanupDrafts: shouldCleanupDrafts,
+  } = parseArgs();
 
   const apiKey = process.env.RESEND_API_KEY;
   const audienceId = process.env.RESEND_AUDIENCE_ID;
@@ -263,6 +339,16 @@ async function main() {
       process.exit(1);
     }
     await listAudiences(apiKey);
+    return;
+  }
+
+  // --cleanup-drafts also short-circuits.
+  if (shouldCleanupDrafts) {
+    if (!apiKey) {
+      console.error("Missing RESEND_API_KEY in .env.local. Aborting.");
+      process.exit(1);
+    }
+    await cleanupOrphanDrafts(apiKey);
     return;
   }
 
@@ -288,26 +374,54 @@ async function main() {
     return scheduled.getTime() > now.getTime();
   });
 
+  // Resend's Broadcasts API rejects scheduled_at beyond MAX_SCHEDULE_DAYS_OUT
+  // (currently 28 days). Split future-dated content into "schedulable now"
+  // and "too far out" so we don't create orphan drafts.
+  const cutoffMs = now.getTime() + MAX_SCHEDULE_DAYS_OUT * 24 * 60 * 60 * 1000;
+  const schedulable: string[] = [];
+  const tooFarOut: string[] = [];
+  for (const d of future) {
+    const scheduled = new Date(scheduledAtFor(d));
+    if (scheduled.getTime() <= cutoffMs) {
+      schedulable.push(d);
+    } else {
+      tooFarOut.push(d);
+    }
+  }
+
   const skippedPast = filtered.length - future.length;
 
   console.log(`\nSchedule plan`);
   console.log(`─────────────`);
   console.log(`Content files found:      ${dates.length}`);
   console.log(`After --from filter:      ${filtered.length}`);
-  console.log(`Future-dated (will send): ${future.length}`);
+  console.log(`Future-dated:             ${future.length}`);
   console.log(`Past-dated (skipped):     ${skippedPast}`);
+  console.log(`Within ${MAX_SCHEDULE_DAYS_OUT}-day Resend window:  ${schedulable.length}`);
+  console.log(`Beyond ${MAX_SCHEDULE_DAYS_OUT}-day window (skip): ${tooFarOut.length}`);
   console.log(`Mode:                     ${dryRun ? "DRY RUN" : "LIVE"}`);
+  if (tooFarOut.length > 0) {
+    console.log("");
+    console.log(`Resend blocks scheduled_at beyond ${MAX_SCHEDULE_DAYS_OUT} days.`);
+    console.log(`Re-run this script periodically (or via Vercel cron) to`);
+    console.log(`top up as more content dates come into the window.`);
+    console.log(`Beyond-window dates that will be skipped:`);
+    for (const d of tooFarOut) console.log(`  - ${d}`);
+  }
   console.log("");
 
-  if (future.length === 0) {
-    console.log("Nothing to schedule. Exiting.");
+  if (schedulable.length === 0) {
+    console.log("Nothing to schedule right now. Exiting.");
     return;
   }
+
+  // Re-bind the variable name used below so existing logic continues.
+  const future_ = schedulable;
 
   let succeeded = 0;
   let failed = 0;
 
-  for (const date of future) {
+  for (const date of future_) {
     const scheduledAt = scheduledAtFor(date);
     try {
       const content = await loadContent(date);
