@@ -48,6 +48,15 @@ export type BlogPost = {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: "rental-property-tax-deductions",
+    title: "Rental property tax deductions — the 14 every investor should know",
+    excerpt:
+      "Every deductible expense on a rental property, organized by Schedule E line. Worked examples, common-mistake callouts, and the depreciation move that often saves more than all other deductions combined.",
+    readingTimeMinutes: 11,
+    publishedAt: "2026-05-26",
+    available: true,
+  },
+  {
     slug: "best-states-for-rental-investors-2026",
     title: "Best states for rental property investors in 2026",
     excerpt:

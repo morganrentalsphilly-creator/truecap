@@ -206,6 +206,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.7,
     },
     {
+      url: `${siteUrl}/vs/biggerpockets-calculator`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
+      url: `${siteUrl}/blog/rental-property-tax-deductions`,
+      lastModified: new Date("2026-05-26"),
+      changeFrequency: "monthly",
+      priority: 0.9,
+    },
+    {
       url: `${siteUrl}/markets/philadelphia`,
       lastModified: new Date(),
       changeFrequency: "monthly",

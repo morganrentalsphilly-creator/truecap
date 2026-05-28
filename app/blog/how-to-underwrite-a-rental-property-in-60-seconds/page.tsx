@@ -128,12 +128,65 @@ export default function BlogPost() {
       acceptedAnswer: { "@type": "Answer", text: f.a },
     })),
   };
+  // HowTo schema — Google can render step-by-step cards directly in
+  // SERPs for "how to underwrite a rental property" queries. Massive
+  // CTR boost when it wins the rich result.
+  const howToLd = {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    name: "How to underwrite a rental property in 60 seconds",
+    description:
+      "A 60-second triage that tells you whether a rental property deal is worth a full underwrite — covering rent, expenses, financing, and the four return metrics.",
+    totalTime: "PT1M",
+    estimatedCost: { "@type": "MonetaryAmount", currency: "USD", value: "0" },
+    tool: [
+      { "@type": "HowToTool", name: "TrueCap rental property analyzer (free)" },
+    ],
+    step: [
+      {
+        "@type": "HowToStep",
+        position: 1,
+        name: "Get the gross monthly rent",
+        text: "Pull the listing's stated rent OR HUD Fair Market Rent for the zip code. If the listing's number is more than 10% above HUD's FMR, treat it as aspirational and use FMR instead.",
+        url: `${canonicalUrl}#step-1`,
+      },
+      {
+        "@type": "HowToStep",
+        position: 2,
+        name: "Estimate operating expenses",
+        text: "Add property tax (from county assessor), insurance (quote-able in 60 seconds at most carriers), and a 30-40% reserve for vacancy + maintenance + capex + management. Don't trust the seller's last-year operating expense number — quote fresh.",
+        url: `${canonicalUrl}#step-2`,
+      },
+      {
+        "@type": "HowToStep",
+        position: 3,
+        name: "Estimate the mortgage payment",
+        text: "Plug purchase price, 25% down, and current investor-loan rate (~1% above primary-residence rates) into a mortgage calculator. Add property tax and insurance for the PITI total.",
+        url: `${canonicalUrl}#step-3`,
+      },
+      {
+        "@type": "HowToStep",
+        position: 4,
+        name: "Compute the four return metrics",
+        text: "Cap rate = NOI ÷ purchase price. Cash-on-cash = annual cash flow ÷ total cash invested. DSCR = NOI ÷ annual debt service. Monthly cash flow = rent minus all expenses minus mortgage. All four should clear their respective thresholds (cap rate 6%+ in cash-flow markets, CoC 8%+, DSCR 1.25+, cash flow positive).",
+        url: `${canonicalUrl}#step-4`,
+      },
+      {
+        "@type": "HowToStep",
+        position: 5,
+        name: "Run the sanity checks",
+        text: "Two quick gut checks: (1) Does the 1% rule clear (monthly rent ≥ 1% of price)? (2) Is the property well-located in a market you've researched? If both pass and the four metrics clear, this deal is worth a full underwrite.",
+        url: `${canonicalUrl}#step-5`,
+      },
+    ],
+  };
 
   return (
     <div className="min-h-screen bg-background">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howToLd) }} />
 
       <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <header className="mb-8 sm:mb-10">
