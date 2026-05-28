@@ -4,8 +4,8 @@
   "publishedAt": "2026-05-25",
   "weekLabel": "Launch",
   "marketSnapshot": {
-    "headline": "I built the rental analyzer I always wished I had.",
-    "body": "After years of underwriting rental deals on spreadsheets that took 30 minutes each, TrueCap was built to run a full rental property underwrite in under 60 seconds. Paste an address, get real numbers: cap rate, cash-on-cash, DSCR, 10-year projection, sensitivity grid, max allowable offer. Below are three deal examples that took 60 seconds each to analyze. Then a quick walk-through of what you get if you try it.",
+    "headline": "Underwrite any rental in 60 seconds — without the spreadsheet.",
+    "body": "TrueCap was built to replace the 30-minute spreadsheet underwrite with something that takes a minute. Paste an address, get real numbers: cap rate, cash-on-cash, DSCR, 10-year projection, sensitivity grid, max allowable offer. Below are three deal examples that took 60 seconds each to analyze — then a quick walk-through of what you get if you try it.",
     "stats": [
       { "label": "Avg time to underwrite", "value": "60 sec" },
       { "label": "Free analyses", "value": "Unlimited" },

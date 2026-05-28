@@ -33,12 +33,48 @@
  * already-scheduled dates, or delete duplicates in the Resend UI.
  */
 
-import { promises as fs } from "node:fs";
+import { promises as fs, readFileSync, existsSync } from "node:fs";
 import path from "node:path";
 import { render } from "@react-email/render";
 import WeeklyDigestEmail, {
   type WeeklyDigestContent,
 } from "../emails/weekly-digest";
+
+/**
+ * Tiny inline .env loader — no dotenv dependency required.
+ * Reads .env.local then .env (in that priority order, matching Next.js
+ * behavior). Only sets vars that aren't already in process.env so
+ * command-line overrides still win.
+ *
+ * Why this exists: running the script with `RESEND_API_KEY=... npm run`
+ * is error-prone (zsh swallows quoted-string accidents, restricted keys
+ * get pasted by mistake, etc). Loading from .env.local — the same file
+ * your app already uses — means the script works with no inline env vars.
+ */
+function loadEnvFile(filePath: string) {
+  if (!existsSync(filePath)) return;
+  const text = readFileSync(filePath, "utf8");
+  for (const rawLine of text.split("\n")) {
+    const line = rawLine.trim();
+    if (!line || line.startsWith("#")) continue;
+    const eq = line.indexOf("=");
+    if (eq < 0) continue;
+    const key = line.slice(0, eq).trim();
+    let value = line.slice(eq + 1).trim();
+    // Strip surrounding quotes if present.
+    if (
+      (value.startsWith('"') && value.endsWith('"')) ||
+      (value.startsWith("'") && value.endsWith("'"))
+    ) {
+      value = value.slice(1, -1);
+    }
+    if (!(key in process.env)) {
+      process.env[key] = value;
+    }
+  }
+}
+loadEnvFile(path.join(process.cwd(), ".env.local"));
+loadEnvFile(path.join(process.cwd(), ".env"));
 
 const CONTENT_DIR = path.join(process.cwd(), "emails", "content");
 const FROM_ADDRESS = process.env.EMAIL_FROM ?? "TrueCap <hello@usetruecap.com>";
