@@ -219,7 +219,15 @@ export default async function DashboardSavedAnalysesPage({
 
   return (
     <DashboardShell savedDealCount={savedDealTotalCount} navAccess={navAccess}>
-      <div className="flex-1 min-w-0 flex flex-col">
+      {/*
+        Layout pattern matches /dashboard/compare and /dashboard/templates:
+        outer wrapper participates in the shell's fixed-viewport flex
+        column; inner div has min-h-0 + lg:overflow-y-auto so it owns
+        the scroll inside the constrained shell. Without this pattern
+        content past the fold is clipped at lg+ breakpoint because the
+        DashboardShell sets lg:h-screen lg:overflow-hidden.
+      */}
+      <div className="flex-1 min-w-0 flex flex-col lg:h-screen lg:overflow-hidden">
         <Topbar
           displayName={displayName}
           email={user.email ?? ""}
@@ -228,7 +236,7 @@ export default async function DashboardSavedAnalysesPage({
           isPremium={isPremium}
           canAccessDashboard={navAccess.dashboard}
         />
-        <div className="flex-1">
+        <div className="flex-1 min-h-0 lg:overflow-y-auto">
           {/* Portfolio rollup — one-glance summary across the filtered
               set. Self-hides when fewer than 2 deals are in scope, so
               it never competes with empty-state UX. */}
