@@ -52,6 +52,16 @@ export const metadata: Metadata = {
     "real estate projections",
   ],
   applicationName: "TrueCap",
+  // RSS feed discovery — Feedly, Inoreader, NetNewsWire, and most
+  // browsers' "subscribe" feature use this <link rel="alternate"> to
+  // auto-discover the feed. Also enables Zapier/n8n RSS triggers to
+  // pick up new posts without manual URL configuration.
+  alternates: {
+    canonical: siteUrl,
+    types: {
+      "application/rss+xml": `${siteUrl}/feed.xml`,
+    },
+  },
   openGraph: {
     type: "website",
     title: "TrueCap | Real Estate Investment Calculator",

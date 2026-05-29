@@ -1,0 +1,21 @@
+# Security contact for TrueCap (usetruecap.com)
+# Spec: https://securitytxt.org / RFC 9116
+#
+# If you've found a security vulnerability, please report it via the
+# contact below. We take all reports seriously and respond within 48
+# hours during business days.
+
+Contact: mailto:hello@usetruecap.com
+Preferred-Languages: en
+Canonical: https://usetruecap.com/.well-known/security.txt
+Expires: 2027-12-31T23:59:59.000Z
+
+# Scope: usetruecap.com and all subdomains. We do not currently run
+# a paid bug-bounty program but credit researchers in the
+# /changelog when fixes ship.
+#
+# Out-of-scope:
+#   - Reports from automated scanners with no proof of impact
+#   - Self-XSS or social-engineering of TrueCap staff
+#   - Issues in third-party services (Vercel, Supabase, Stripe, Resend) —
+#     please report those directly to the respective vendors
