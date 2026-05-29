@@ -15,6 +15,7 @@ function makeDeal(overrides: Partial<DashboardDeal> = {}): DashboardDeal {
     capRatePct: 6,
     dscr: null,
     roiPct: null,
+    monthlyPayment: null,
     score: 80,
     recommendation: "Buy",
     riskLevel: null,
