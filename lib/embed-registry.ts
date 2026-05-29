@@ -64,7 +64,7 @@ export const EMBED_REGISTRY: Record<EmbedSlug, EmbedEntry> = {
         import("@/components/tools/cap-rate-calculator-widget").then(
           (m) => m.CapRateCalculatorWidget
         ),
-      { ssr: false, loading: EmbedLoading }
+      { loading: EmbedLoading }
     ),
     defaultHeight: 680,
   },
@@ -79,7 +79,7 @@ export const EMBED_REGISTRY: Record<EmbedSlug, EmbedEntry> = {
         import("@/components/tools/coc-calculator-widget").then(
           (m) => m.CocCalculatorWidget
         ),
-      { ssr: false, loading: EmbedLoading }
+      { loading: EmbedLoading }
     ),
     defaultHeight: 760,
   },
@@ -95,7 +95,7 @@ export const EMBED_REGISTRY: Record<EmbedSlug, EmbedEntry> = {
         import("@/components/tools/dscr-calculator-widget").then(
           (m) => m.DscrCalculatorWidget
         ),
-      { ssr: false, loading: EmbedLoading }
+      { loading: EmbedLoading }
     ),
     defaultHeight: 700,
   },
@@ -111,7 +111,7 @@ export const EMBED_REGISTRY: Record<EmbedSlug, EmbedEntry> = {
         import("@/components/tools/noi-calculator-widget").then(
           (m) => m.NoiCalculatorWidget
         ),
-      { ssr: false, loading: EmbedLoading }
+      { loading: EmbedLoading }
     ),
     defaultHeight: 820,
   },
@@ -127,7 +127,7 @@ export const EMBED_REGISTRY: Record<EmbedSlug, EmbedEntry> = {
         import("@/components/tools/mortgage-payment-widget").then(
           (m) => m.MortgagePaymentWidget
         ),
-      { ssr: false, loading: EmbedLoading }
+      { loading: EmbedLoading }
     ),
     defaultHeight: 700,
   },
@@ -142,7 +142,7 @@ export const EMBED_REGISTRY: Record<EmbedSlug, EmbedEntry> = {
         import("@/components/tools/grm-calculator-widget").then(
           (m) => m.GrmCalculatorWidget
         ),
-      { ssr: false, loading: EmbedLoading }
+      { loading: EmbedLoading }
     ),
     defaultHeight: 560,
   },
@@ -157,7 +157,7 @@ export const EMBED_REGISTRY: Record<EmbedSlug, EmbedEntry> = {
         import("@/components/tools/one-percent-rule-widget").then(
           (m) => m.OnePercentRuleWidget
         ),
-      { ssr: false, loading: EmbedLoading }
+      { loading: EmbedLoading }
     ),
     defaultHeight: 480,
   },
@@ -173,7 +173,7 @@ export const EMBED_REGISTRY: Record<EmbedSlug, EmbedEntry> = {
         import("@/components/tools/brrrr-calculator-widget").then(
           (m) => m.BrrrrCalculatorWidget
         ),
-      { ssr: false, loading: EmbedLoading }
+      { loading: EmbedLoading }
     ),
     defaultHeight: 880,
   },
@@ -189,7 +189,7 @@ export const EMBED_REGISTRY: Record<EmbedSlug, EmbedEntry> = {
         import("@/components/tools/break-even-calculator-widget").then(
           (m) => m.BreakEvenCalculatorWidget
         ),
-      { ssr: false, loading: EmbedLoading }
+      { loading: EmbedLoading }
     ),
     defaultHeight: 640,
   },
@@ -205,7 +205,7 @@ export const EMBED_REGISTRY: Record<EmbedSlug, EmbedEntry> = {
         import("@/components/tools/roi-calculator-widget").then(
           (m) => m.RoiCalculatorWidget
         ),
-      { ssr: false, loading: EmbedLoading }
+      { loading: EmbedLoading }
     ),
     defaultHeight: 760,
   },
@@ -221,7 +221,7 @@ export const EMBED_REGISTRY: Record<EmbedSlug, EmbedEntry> = {
         import("@/components/tools/closing-cost-calculator-widget").then(
           (m) => m.ClosingCostCalculatorWidget
         ),
-      { ssr: false, loading: EmbedLoading }
+      { loading: EmbedLoading }
     ),
     defaultHeight: 880,
   },
@@ -237,7 +237,7 @@ export const EMBED_REGISTRY: Record<EmbedSlug, EmbedEntry> = {
         import("@/components/tools/vacancy-rate-calculator-widget").then(
           (m) => m.VacancyRateCalculatorWidget
         ),
-      { ssr: false, loading: EmbedLoading }
+      { loading: EmbedLoading }
     ),
     defaultHeight: 700,
   },
@@ -253,7 +253,7 @@ export const EMBED_REGISTRY: Record<EmbedSlug, EmbedEntry> = {
         import("@/components/tools/rental-property-tax-calculator-widget").then(
           (m) => m.RentalPropertyTaxCalculatorWidget
         ),
-      { ssr: false, loading: EmbedLoading }
+      { loading: EmbedLoading }
     ),
     defaultHeight: 1100,
   },
