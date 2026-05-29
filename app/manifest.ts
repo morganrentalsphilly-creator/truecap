@@ -35,11 +35,23 @@ export default function manifest(): MetadataRoute.Manifest {
         type: "image/png",
         purpose: "any",
       },
+      // Split into two entries — Next.js' MetadataRoute.Manifest type
+      // expects a single value for `purpose` ("any" | "maskable" |
+      // "monochrome"), not the space-separated W3C form. Splitting
+      // preserves the dual-purpose behavior (browsers treat repeated
+      // src with different purposes as alternates) while satisfying
+      // the type system.
       {
         src: "/Logo-png.png",
         sizes: "512x512",
         type: "image/png",
-        purpose: "any maskable",
+        purpose: "any",
+      },
+      {
+        src: "/Logo-png.png",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "maskable",
       },
     ],
   };
