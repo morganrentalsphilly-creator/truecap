@@ -27,7 +27,16 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Cookie, X } from "lucide-react";
+
+/**
+ * Paths where the cookie banner must be suppressed entirely. These
+ * are surfaces where the banner would either be inappropriate
+ * (embedded iframe on a third-party site — the partner owns their
+ * own consent UX) or visually disruptive.
+ */
+const HIDE_ON_PATHS = ["/embed"];
 
 const STORAGE_KEY = "truecap_cookie_consent_v1";
 
@@ -78,6 +87,8 @@ function pushGtagConsent(value: ConsentValue): void {
 }
 
 export function CookieConsentBanner() {
+  const pathname = usePathname() ?? "/";
+
   // Render nothing until we've checked storage — prevents banner flash
   // for users who already decided previously.
   const [decision, setDecision] = useState<ConsentValue | "pending" | null>(null);
@@ -97,6 +108,10 @@ export function CookieConsentBanner() {
     pushGtagConsent("denied");
     setDecision("denied");
   };
+
+  // Suppress entirely on opt-out paths (e.g. /embed/* — partner site
+  // owns its own consent UX; we don't want to show ours inside their iframe).
+  if (HIDE_ON_PATHS.some((p) => pathname.startsWith(p))) return null;
 
   // Hide after a decision is made (or before storage is checked).
   if (decision === null || decision === "granted" || decision === "denied") return null;

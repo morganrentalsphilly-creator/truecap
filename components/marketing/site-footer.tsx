@@ -29,6 +29,10 @@ const FOOTER_COLS: Array<{
       { label: "Pricing", href: "/pricing" },
       { label: "All free tools", href: "/tools" },
       { label: "Blog", href: "/blog" },
+      // Embed hub — quiet link. Bloggers/agents who care will find it;
+      // casual visitors won't notice. Each embed adoption = a permanent
+      // backlink, so even one or two clicks per month compound nicely.
+      { label: "Embed our calculators", href: "/embed" },
     ],
   },
   {

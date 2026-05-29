@@ -23,7 +23,7 @@ import { X } from "lucide-react";
 
 const DISMISS_KEY = "truecap_annual_promo_dismissed_v1";
 
-const HIDE_ON_PATHS = ["/pricing", "/auth"];
+const HIDE_ON_PATHS = ["/pricing", "/auth", "/embed"];
 
 export function AnnualPromoBanner() {
   const pathname = usePathname() ?? "/";
