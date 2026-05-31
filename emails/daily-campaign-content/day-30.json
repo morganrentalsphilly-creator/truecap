@@ -1,0 +1,19 @@
+{
+  "day": 30,
+  "send_date": "2026-06-30",
+  "subject": "5 deal-killers we catch the most",
+  "preheader": "the patterns that show up in bad deals over and over.",
+  "headline": "Five things TrueCap flags in bad deals — and most amateur underwriting misses.",
+  "body": [
+    "After thousands of address analyses, the same five problems show up over and over in deals investors were about to buy. Watch for these on the next property you run.",
+    "One: reassessed property tax. Seller's tax bill reflects the old assessment. When you buy at today's price, the county resets your assessment and your tax bill jumps 20-40%. Texas and Florida are the worst for this. Always model the post-sale tax bill, not the seller's bill.",
+    "Two: insurance set at last year's rate. Premiums are rising 10-15% per year nationally, 25-50% in coastal Florida and parts of Texas. Underwriting with a stale quote means year-two NOI evaporates. Get a fresh quote before you close.",
+    "Three: rent comps using listed rents instead of leased rents. Listed rents on Zillow and Apartments.com run 8-12% above what units actually rent for after concessions. Use the lower end of the range, not the median asking price.",
+    "Four: PM fees modeled at 8% with no leasing fee. The real all-in PM cost is closer to 11-13% once you add lease-up, renewals, maintenance markups, and admin. Underestimating PM is a $1,000+/yr NOI mistake on a typical property.",
+    "Five: DSCR that only works at base-case rent. The lender's floor is 1.20-1.25. If your deal is at 1.22 and rents drop 5% in a soft market, you've blown the covenant. Build a buffer or pass.",
+    "Run any property through TrueCap and these five get checked automatically. Free tier. Sixty seconds. The pricing page is there if you want the full sensitivity grid and PDF reports."
+  ],
+  "cta_text": "Catch the deal-killers",
+  "cta_url": "https://usetruecap.com/",
+  "signature_note": "PS — reply if you want the spreadsheet I used to keep doing this manually before I built TrueCap. I'll send it."
+}

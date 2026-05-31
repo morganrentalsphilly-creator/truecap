@@ -15,7 +15,11 @@
     "schedule-broadcasts": "npx -y tsx scripts/schedule-all-broadcasts.ts",
     "schedule-broadcasts:dry": "npx -y tsx scripts/schedule-all-broadcasts.ts --dry-run",
     "list-audiences": "npx -y tsx scripts/schedule-all-broadcasts.ts --list-audiences",
-    "cleanup-drafts": "npx -y tsx scripts/schedule-all-broadcasts.ts --cleanup-drafts"
+    "cleanup-drafts": "npx -y tsx scripts/schedule-all-broadcasts.ts --cleanup-drafts",
+    "schedule-daily-campaign": "npx -y tsx scripts/schedule-daily-campaign.ts",
+    "schedule-daily-campaign:dry": "npx -y tsx scripts/schedule-daily-campaign.ts --dry-run",
+    "preview-daily-campaign": "npx -y tsx scripts/preview-daily-campaign.ts",
+    "count-audiences": "npx -y tsx scripts/count-audience-contacts.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",

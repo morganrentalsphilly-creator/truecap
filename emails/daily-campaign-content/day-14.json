@@ -1,0 +1,17 @@
+{
+  "day": 14,
+  "send_date": "2026-06-14",
+  "subject": "rent comps and how to read them",
+  "preheader": "median is a lie. here's what to actually look at.",
+  "headline": "Rent comps are the single biggest source of bad underwriting.",
+  "body": [
+    "Rentometer, Zillow Rent Zestimate, RentCast, Apartments.com — every source gives a slightly different number, and the spread can be huge. I've seen a single property where the four major sources ranged from $1,750 to $2,400. That's 37%.",
+    "Median can lie. If a Rentometer report shows median rent of $2,000 with a range of $1,400-$2,800, the variance is doing you no favors. You need to understand WHY the range is that wide. Different neighborhood blocks? Different bedroom counts in the sample? Newer vs older stock?",
+    "What I do: pull two automated sources, then check actual active listings within a half-mile for the same beds/baths/size. The active listings are the real signal. Sold rentals (if you can find them through an agent friend) are even better. Zestimate alone is a starting point, never the answer.",
+    "Underwrite conservative. If the range is $1,700-$2,100 with median $1,900, model $1,750 unless you have specific reason to go higher. The downside of being conservative is mild — you miss a deal. The downside of being optimistic is a property that doesn't cover its mortgage.",
+    "TrueCap pulls multiple comp sources and shows the spread so you can see the disagreement before you trust any single number."
+  ],
+  "cta_text": "Check rent comps",
+  "cta_url": "https://usetruecap.com/",
+  "signature_note": null
+}

@@ -1,0 +1,17 @@
+{
+  "day": 18,
+  "send_date": "2026-06-18",
+  "subject": "pm fees are bigger than you think",
+  "preheader": "8 percent is just the headline. then come the extras.",
+  "headline": "The 8% PM fee everyone quotes is the marketing number. The real load is closer to 12%.",
+  "body": [
+    "Property management quotes 8-10% of gross rent. That's the monthly fee. It is not the total cost.",
+    "Add a leasing fee — typically one full month's rent every time you turn a tenant. If your tenant stays one year, that's another 8% annualized. If they stay two years, 4%. Renewal fees on top — usually $150-400 when the same tenant re-signs.",
+    "Then the misc stuff. Maintenance markups (10-15% on top of contractor invoices). Inspection fees. Lease-up advertising costs. Eviction handling. The 'full-load' PM cost in most markets is 11-14% of gross rent, not 8%.",
+    "On a $2,000/mo rental, the difference between modeling 8% and 12% is $80/mo or $960/yr. That can be the entire margin between an 8% cash-on-cash and a 6% one.",
+    "When you underwrite, use 10% as the floor, 12% as the realistic figure unless you have a specific PM contract in hand. TrueCap defaults to 10% and lets you bump it. Most pros bump it."
+  ],
+  "cta_text": "Model PM honestly",
+  "cta_url": "https://usetruecap.com/",
+  "signature_note": null
+}

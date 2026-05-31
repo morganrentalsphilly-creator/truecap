@@ -1,0 +1,17 @@
+{
+  "day": 23,
+  "send_date": "2026-06-23",
+  "subject": "markets where the math is broken",
+  "preheader": "la, san diego, seattle, nyc — don't fight the numbers.",
+  "headline": "Four markets where rent-to-price simply doesn't work for buy-and-hold.",
+  "body": [
+    "Los Angeles: median single-family is around $950k. Median rent for the equivalent property is around $3,800/mo. That's a 0.40% rent-to-price ratio. Cap rates after honest expenses are often sub-3%. Even with 80% leverage at 6.5%, the cash flow is deeply negative. Appreciation has to do all the work, and it's been doing less of it lately.",
+    "San Diego: very similar story. Median $880k, equivalent rent $3,600, 0.41% ratio. The math is the same. You're paying for lifestyle and a bet on appreciation, not for rental income.",
+    "Seattle: better than LA on the ratios (closer to 0.50%) but property taxes and insurance and the assumption that big tech will keep funding rent growth — that bet was easier in 2018. Now it's a coin flip.",
+    "NYC (outer boroughs): condo and co-op rules eat any spread that exists. Some Bronx and Staten Island multifamilies still work, but it's hand-to-hand combat with operating costs and rent stabilization rules.",
+    "These markets aren't 'bad investments' — they're a different game. Appreciation play, second home, lifestyle, generational hold. If you came here for cash flow rental investing, do the math and walk to a market where the math is still legal. TrueCap will tell you the same thing in 60 seconds."
+  ],
+  "cta_text": "Check your market",
+  "cta_url": "https://usetruecap.com/",
+  "signature_note": null
+}

@@ -1,0 +1,17 @@
+{
+  "day": 28,
+  "send_date": "2026-06-28",
+  "subject": "cash flow vs net cash flow",
+  "preheader": "the line item that separates spreadsheet investors from real ones.",
+  "headline": "Most 'cash flow' numbers I see online aren't actually cash flow.",
+  "body": [
+    "When new investors say 'this property cash flows $400/mo,' they almost always mean: rent minus PITI. That's not cash flow. That's gross spread.",
+    "Real cash flow — call it net cash flow — is rent minus PITI minus every other operating cost. Vacancy reserve. Property management. Repairs and maintenance. CapEx reserve. Lawn, utilities you cover, lease-up costs, the random pest and HOA stuff. On a typical single-family rental, those line items eat 25-35% of gross rent before debt service is even in the conversation.",
+    "Run it on a real number. A $2,000/mo rental with a $1,200 mortgage payment looks like $800/mo of cash flow. Subtract 8% vacancy ($160), 10% PM ($200), 5% maintenance ($100), 5% CapEx ($100), and you're at $240/mo net cash flow. Same property. Same rent. A third of what the napkin math said.",
+    "This is why honest underwriting matters. The bank's underwriter is doing net cash flow math against debt service. Their DSCR uses your real NOI, not your fantasy NOI. If you bought the deal on gross-spread math, you bought a property the bank wouldn't have lent on if you'd shown them the real numbers.",
+    "TrueCap calculates net cash flow by default — every operating line is included, vacancy is pre-filled, PM is in the model. You can override anything. The defaults are honest."
+  ],
+  "cta_text": "See real cash flow",
+  "cta_url": "https://usetruecap.com/",
+  "signature_note": null
+}

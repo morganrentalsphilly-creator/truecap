@@ -1,0 +1,17 @@
+{
+  "day": 16,
+  "send_date": "2026-06-16",
+  "subject": "property tax by state is wild",
+  "preheader": "tx and nj will eat you alive. tn and co won't.",
+  "headline": "Property tax can be the difference between an 8% cap and a 5% cap.",
+  "body": [
+    "Effective property tax rates vary 4x or more across states. Texas averages 1.6-1.9% of value. New Jersey is 2.2-2.5%. Illinois is 2.1%. Florida is around 0.9% but climbing with assessments. Tennessee is 0.7%. Colorado is 0.5%. Hawaii is 0.3%.",
+    "On a $300,000 property, that's the difference between paying $900/year (Hawaii) and $7,500/year (NJ). On NOI, that's $6,600/yr of swing. On a 6% cap target, that's about $110,000 of value difference. Same property, different state, completely different deal.",
+    "Worse: in some states (TX especially), the assessment resets to your purchase price on sale. So the seller's $3,800 tax bill from a $200,000 assessment becomes your $6,400 tax bill on a $340,000 purchase. New investors miss this constantly and their first-year numbers blow up.",
+    "Always pull the rate by county, not state. And always check whether reassessment happens at sale. Two facts. Five minutes. Saves you a deal-killing surprise.",
+    "TrueCap pre-fills property tax estimates from a state and county dataset, including the reassessment behavior where we know it. You can override it. The default is usually within a few hundred dollars of reality."
+  ],
+  "cta_text": "Check tax assumptions",
+  "cta_url": "https://usetruecap.com/",
+  "signature_note": null
+}

@@ -1,0 +1,17 @@
+{
+  "day": 5,
+  "send_date": "2026-06-05",
+  "subject": "cap rate vs cash-on-cash",
+  "preheader": "one tells you the asset. the other tells you what you'll actually earn.",
+  "headline": "Cap rate is the property's grade. Cash-on-cash is your grade.",
+  "body": [
+    "Cap rate ignores your loan. It assumes you paid all cash. Useful for comparing properties apples to apples — but it doesn't tell you what you'll actually pocket.",
+    "Cash-on-cash is the real cash question for leveraged buyers. It's annual pre-tax cash flow divided by total cash invested (down payment + closing costs + rehab). If you put $70,000 into a deal and it cash flows $7,000/yr, that's a 10% cash-on-cash return.",
+    "Here's why it matters: a 6% cap deal in Nashville with 75% leverage at a decent rate can deliver an 11-12% cash-on-cash. An 8% cap deal in a high-tax state at 7.5% interest might only deliver 6% cash-on-cash because debt service eats the spread.",
+    "Cap rate ranks the property. Cash-on-cash ranks the deal. If you're using leverage (most people are), cash-on-cash is the number you live on.",
+    "TrueCap returns both numbers (and DSCR) from a single address paste. Free tier, no card. The cash-on-cash figure is the one you'll quote your spouse when they ask why you're buying another rental."
+  ],
+  "cta_text": "Run your numbers",
+  "cta_url": "https://usetruecap.com/",
+  "signature_note": null
+}

@@ -1,0 +1,17 @@
+{
+  "day": 7,
+  "send_date": "2026-06-07",
+  "subject": "noi mistakes that kill deals",
+  "preheader": "four ways investors overstate noi and regret it later.",
+  "headline": "Most NOI numbers I see are wrong in the same four ways.",
+  "body": [
+    "Mistake 1: forgetting vacancy. Pro formas show 100% occupancy. The real world is 5-10%. On a $1,800/mo rental, an honest 8% vacancy assumption costs you $1,728/year. Skip it and your NOI is inflated by that amount.",
+    "Mistake 2: forgetting property management. Even if you self-manage today, your NOI should reflect a market PM rate (8-10% of gross rent). Otherwise the property's NOI depends on you working for free, and your cap rate is a fiction.",
+    "Mistake 3: using gross rent instead of effective gross income. Effective gross = gross rent minus vacancy and credit loss. Skipping this step is the single most common reason a deal looks 9% on paper and lives at 7% in reality.",
+    "Mistake 4: ignoring CapEx. Roof, HVAC, water heater, appliances — these aren't optional, they're amortized over 15-20 years. Budget 5-10% of gross rent for CapEx or you'll be surprised twice: once when the roof fails, twice when you realize NOI was wrong all along.",
+    "Free NOI calculator below — it forces all four inputs so you can't skip them."
+  ],
+  "cta_text": "Run NOI right",
+  "cta_url": "https://usetruecap.com/tools/noi-calculator",
+  "signature_note": null
+}

@@ -1,0 +1,17 @@
+{
+  "day": 3,
+  "send_date": "2026-06-03",
+  "subject": "I almost bought the wrong rental",
+  "preheader": "the deal looked great. the lender disagreed.",
+  "headline": "A story about ignoring DSCR and almost paying 8% over cap.",
+  "body": [
+    "Back in 2019 I found a duplex in a market I won't name. Brick. Updated. Tenants in place. $1,650 each side, $325k asking. I ran the cap rate in my head — felt like a 7-something — and decided I loved it.",
+    "I didn't run DSCR. I figured the lender would tell me if there was a problem. Big mistake. I drove to the property twice. Walked the units. Sent the LOI. Got verbal acceptance. Then went to my bank.",
+    "DSCR came back at 1.09. Their floor was 1.25. The loan I'd been modeling in my head (75% LTV, 30-year, 6.5%) didn't exist for this property. The only option was 65% LTV with a rate bump. My cash-on-cash collapsed from a daydream 11% to a real 4.2%.",
+    "I walked away. The lesson wasn't 'lenders are picky.' The lesson was that I'd let myself fall in love with a deal before I'd run the numbers a lender would actually use. Eight percent over a defensible cap rate because I felt good walking the units.",
+    "Run the numbers first. Walk the property second. TrueCap exists so the version of me from 2019 spends 60 seconds checking before he drives four hours."
+  ],
+  "cta_text": "Run the numbers first",
+  "cta_url": "https://usetruecap.com/",
+  "signature_note": null
+}

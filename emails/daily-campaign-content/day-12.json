@@ -1,0 +1,17 @@
+{
+  "day": 12,
+  "send_date": "2026-06-12",
+  "subject": "the mao formula for flippers",
+  "preheader": "why pros never pay more than 70 percent minus rehab.",
+  "headline": "Max Allowable Offer: ARV times 0.70, minus rehab. Don't pay a dollar more.",
+  "body": [
+    "Fix-and-flip pros use one formula. Maximum Allowable Offer = ARV × 0.70 - rehab cost. The 30% spread covers your profit margin, financing costs, holding costs, agent commissions, and risk buffer.",
+    "Example. House will sell for $400,000 after rehab. Rehab costs you $60,000. MAO = $400,000 × 0.70 - $60,000 = $280,000 - $60,000 = $220,000. That's the most you can pay and still hit a reasonable flip margin.",
+    "Why 0.70? It's not a magic number — it's what the math demands. Roughly 8% goes to selling costs (commissions, concessions), 4-6% to financing and holding for 6 months, and 14-18% to your gross profit. Lower than 0.70 and you're working for free. Higher and you bleed.",
+    "In hotter markets some flippers stretch to 0.75 because comps are appreciating fast enough to cover the thinner margin. In choppy markets, smart flippers pull back to 0.65. The 0.70 figure is the long-run sane default.",
+    "TrueCap Pro includes an MAO calculator that auto-pulls ARV comps and rehab estimates. The free tier doesn't do flip analysis yet, but it'll show you the rental fallback in case the flip stalls."
+  ],
+  "cta_text": "Unlock the MAO calculator",
+  "cta_url": "https://usetruecap.com/pricing",
+  "signature_note": null
+}
