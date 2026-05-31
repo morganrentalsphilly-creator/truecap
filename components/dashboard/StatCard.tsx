@@ -61,19 +61,25 @@ export function StatCard({ label, value, change, changeLabel, icon: Icon, spark,
         </span>
         <span className="text-xs text-muted-foreground">{changeLabel}</span>
       </div>
-      <div className="relative h-12 -mx-1 -mb-1 mt-3">
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={spark}>
-            <defs>
-              <linearGradient id={`sp-${label}`} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={t.color} stopOpacity={0.4} />
-                <stop offset="100%" stopColor={t.color} stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <Area type="monotone" dataKey="v" stroke={t.color} strokeWidth={2} fill={`url(#sp-${label})`} />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
+      {/* Sparkline — only renders when at least 2 real data points exist.
+          Previously fell back to hardcoded "fake" series, which is a
+          credibility killer on a financial product (charts that mean
+          nothing). Empty array → no chart, cleaner card. */}
+      {spark.length >= 2 ? (
+        <div className="relative h-12 -mx-1 -mb-1 mt-3">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={spark}>
+              <defs>
+                <linearGradient id={`sp-${label}`} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={t.color} stopOpacity={0.4} />
+                  <stop offset="100%" stopColor={t.color} stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <Area type="monotone" dataKey="v" stroke={t.color} strokeWidth={2} fill={`url(#sp-${label})`} />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      ) : null}
     </div>
   );
 }

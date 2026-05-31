@@ -1,7 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { Award, DollarSign, ListTodo, ShieldCheck, TrendingUp } from "lucide-react";
+import {
+  ArrowUpDown,
+  Award,
+  Briefcase,
+  DollarSign,
+  Layers,
+  ListTodo,
+  Percent,
+  Plus,
+  TrendingUp,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Topbar } from "@/components/dashboard/Topbar";
 import { StatCard } from "@/components/dashboard/StatCard";
@@ -10,7 +20,7 @@ import { RiskReturn } from "@/components/dashboard/RiskReturn";
 import { TopDeals, type DashboardTopDeal } from "@/components/dashboard/TopDeals";
 import { AIInsights } from "@/components/dashboard/AIInsights";
 import type { DashboardDeal } from "@/lib/dashboard-deal-mapping";
-import { getChartInclusionReason, getTaggedDealRiskLabel, mapRiskLevelToRisk, resolveReturnMetric, resolveRiskMetric } from "@/lib/dashboard-risk-return";
+import { getChartInclusionReason, mapRiskLevelToRisk, resolveReturnMetric, resolveRiskMetric } from "@/lib/dashboard-risk-return";
 
 export type { DashboardDeal } from "@/lib/dashboard-deal-mapping";
 
@@ -27,12 +37,6 @@ export type DashboardHomeData = {
   };
   allDeals: DashboardDeal[];
   topDeals: DashboardDeal[];
-};
-
-const sparks = {
-  up: [{ v: 4 }, { v: 6 }, { v: 5 }, { v: 8 }, { v: 7 }, { v: 11 }, { v: 14 }],
-  flat: [{ v: 7 }, { v: 8 }, { v: 7 }, { v: 9 }, { v: 8 }, { v: 9 }, { v: 10 }],
-  cash: [{ v: 12 }, { v: 14 }, { v: 13 }, { v: 16 }, { v: 18 }, { v: 20 }, { v: 22 }],
 };
 
 function formatCurrency(value: number | null | undefined, compact = false): string {
@@ -59,12 +63,6 @@ function getInitials(displayName: string, email: string): string {
   const parts = displayName.trim().split(/\s+/).filter(Boolean);
   if (parts.length >= 2) return `${parts[0]![0]}${parts[1]![0]}`.toUpperCase();
   return (displayName || email || "U").slice(0, 2).toUpperCase();
-}
-
-function getSparkFromValues(values: Array<number | null | undefined>, fallback: { v: number }[]): { v: number }[] {
-  const normalized = values.filter((value) => Number.isFinite(value));
-  if (normalized.length < 2 || normalized.every((value) => value === 0)) return fallback;
-  return normalized.map((value) => ({ v: value as number }));
 }
 
 function getTopDeals(data: DashboardHomeData): DashboardTopDeal[] {
@@ -181,23 +179,47 @@ function scrollToDeal(deal: DashboardDeal | undefined, index = 0) {
 
 function getDecisionHighlights(data: DashboardHomeData) {
   const deals = data.topDeals;
-  const taggedSource = data.allDeals;
   const byScore = [...deals].sort((a, b) => (b.score ?? -1) - (a.score ?? -1))[0];
   const byCashFlow = [...deals].sort((a, b) => (b.cashFlowMonthly ?? -Infinity) - (a.cashFlowMonthly ?? -Infinity))[0];
   const byRoi = [...deals].filter((deal) => deal.roiPct != null).sort((a, b) => (b.roiPct ?? -Infinity) - (a.roiPct ?? -Infinity))[0];
-  // Backend does not always persist explicit tags; prefer risk signals from backend scoring fields.
-  const tagged = taggedSource.find(
-    (deal) => deal.riskLevel != null || deal.riskScore != null || deal.dscr != null || deal.tags.length > 0
-  );
-  const taggedWithRisk = taggedSource.find(
-    (deal) =>
-      (deal.riskLevel != null || deal.riskScore != null || deal.dscr != null || deal.tags.length > 0) &&
-      resolveRiskMetric(deal).value != null
-  );
-  const taggedForCard = taggedWithRisk ?? tagged;
+  return { byScore, byCashFlow, byRoi };
+}
 
-  const taggedChartStatus = taggedForCard ? getChartInclusionReason(taggedForCard) : null;
-  return { byScore, byCashFlow, byRoi, tagged: taggedForCard, taggedChartStatus };
+/**
+ * Portfolio-level totals — answers the question every investor asks
+ * each morning: "what does my book look like right now?" Computed
+ * over allDeals (not topDeals) so it reflects the full saved set.
+ *
+ * - Total Pipeline Value: sum of purchase prices
+ * - Monthly Cash Flow: sum (with signed display)
+ * - Weighted Cap Rate: purchase-price-weighted average so a $1M deal
+ *   doesn't get the same weight as a $100k one
+ * - Active Deals: count of deals with a non-null purchase price
+ */
+function getPortfolioTotals(data: DashboardHomeData) {
+  const valid = data.allDeals.filter((d) => d.purchasePrice != null);
+  const totalValue = valid.reduce((s, d) => s + (d.purchasePrice ?? 0), 0);
+  const totalCashFlow = data.allDeals.reduce(
+    (s, d) => s + (d.cashFlowMonthly ?? 0),
+    0
+  );
+  const capWeighted = valid.reduce(
+    (acc, d) => {
+      const price = d.purchasePrice ?? 0;
+      const cap = d.capRatePct;
+      if (cap == null || price <= 0) return acc;
+      return { num: acc.num + cap * price, den: acc.den + price };
+    },
+    { num: 0, den: 0 }
+  );
+  const weightedCap = capWeighted.den > 0 ? capWeighted.num / capWeighted.den : null;
+  return {
+    totalValue,
+    totalCashFlow,
+    weightedCap,
+    activeCount: valid.length,
+    totalCount: data.allDeals.length,
+  };
 }
 
 function buildDecisionInsights(deals: DashboardDeal[]) {
@@ -244,15 +266,24 @@ export function DashboardHome({
   const dealComparison = getDealComparison(data);
   const highlights = getDecisionHighlights(data);
   const insights = buildDecisionInsights(data.topDeals);
-  const scoreSpark = getSparkFromValues(topDeals.map((deal) => deal.score), sparks.up);
-  const cashSpark = getSparkFromValues(topDeals.map((deal) => deal.cashFlow), sparks.cash);
-  const roiSpark = getSparkFromValues(topDeals.map((deal) => deal.roi), sparks.flat);
-  const capSpark = getSparkFromValues(topDeals.map((deal) => deal.capRate), sparks.flat);
+  const portfolio = getPortfolioTotals(data);
 
-  const taggedRiskLabel = getTaggedDealRiskLabel(highlights.tagged);
-  const taggedChartHint = highlights.taggedChartStatus && !highlights.taggedChartStatus.include
-    ? "Tagged by backend, but missing both risk and return metrics for chart placement."
-    : null;
+  // Sparklines only render when 2+ real data points exist. No fake
+  // fallbacks — a financial product should never show invented charts.
+  const realScoreSpark = topDeals
+    .map((d) => d.score)
+    .filter((v): v is number => v != null)
+    .map((v) => ({ v }));
+  const realCashSpark = topDeals
+    .map((d) => d.cashFlow)
+    .filter((v): v is number => v != null)
+    .map((v) => ({ v }));
+  const realRoiSpark = topDeals
+    .map((d) => d.roi)
+    .filter((v): v is number => v != null)
+    .map((v) => ({ v }));
+
+  const hasAnyDeals = data.allDeals.length > 0;
 
   return (
     <div className="flex-1 min-w-0 flex flex-col lg:h-screen lg:overflow-hidden">
@@ -264,107 +295,201 @@ export function DashboardHome({
         isPremium={data.user.isPremium}
         canAccessDashboard={data.user.canAccessDashboard}
       />
-      <main id="main" className="flex-1 min-h-0 px-4 py-4 space-y-5 sm:px-6 sm:py-6 sm:space-y-6 lg:px-8 lg:overflow-y-auto">
-        <div className="flex flex-wrap items-end justify-between gap-4">
+      <main id="main" className="flex-1 min-h-0 px-4 py-4 space-y-6 sm:px-6 sm:py-6 sm:space-y-8 lg:px-8 lg:overflow-y-auto">
+        {/* ── Header + quick actions ──────────────────────────────── */}
+        <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <h1 className="font-display text-2xl sm:text-3xl xl:text-4xl font-bold tracking-tight">
-              Welcome back, {data.user.displayName}
+              Welcome back, {data.user.displayName.split(" ")[0]}
             </h1>
-            <p className="text-muted-foreground mt-1">
-              Compare saved deals by score, cash flow, ROI, and risk before you commit.
+            <p className="text-muted-foreground mt-1.5 text-sm sm:text-base">
+              {hasAnyDeals
+                ? `Your book at a glance — ${portfolio.totalCount} saved ${portfolio.totalCount === 1 ? "deal" : "deals"}.`
+                : "No saved deals yet. Run your first analysis to see it appear here."}
             </p>
           </div>
-          <Button
-            asChild={canCompareDeals}
-            disabled={!canCompareDeals}
-            className="inline-flex w-full items-center gap-2 h-11 px-5 rounded-xl text-sm font-semibold text-white sm:w-auto"
-            style={{ background: "var(--gradient-premium)", boxShadow: "var(--shadow-glow)" }}
-          >
-            {canCompareDeals ? (
-              <Link href="/dashboard/compare" prefetch={false}>
-                <ListTodo className="h-4 w-4" />
-                Compare Deals
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              asChild
+              className="h-10 rounded-xl px-4 text-sm font-semibold"
+              style={{ background: "var(--gradient-premium)", boxShadow: "var(--shadow-glow)" }}
+            >
+              <Link href="/" prefetch={false}>
+                <Plus className="h-4 w-4" />
+                Analyze Property
               </Link>
-            ) : (
-              <span className="inline-flex items-center gap-2">
-              <ListTodo className="h-4 w-4" />
-              Compare Deals
-              </span>
-            )}
-          </Button>
+            </Button>
+            <Button asChild variant="outline" className="h-10 rounded-xl px-4 text-sm">
+              <Link href="/dashboard/saved-analyses" prefetch={false}>
+                <Briefcase className="h-4 w-4" />
+                My Deals
+              </Link>
+            </Button>
+            <Button
+              asChild={canCompareDeals}
+              disabled={!canCompareDeals}
+              variant="outline"
+              className="h-10 rounded-xl px-4 text-sm"
+              title={!canCompareDeals ? "Compare is a Pro feature" : undefined}
+            >
+              {canCompareDeals ? (
+                <Link href="/dashboard/compare" prefetch={false}>
+                  <ArrowUpDown className="h-4 w-4" />
+                  Compare
+                </Link>
+              ) : (
+                <span className="inline-flex items-center gap-2">
+                  <ArrowUpDown className="h-4 w-4" />
+                  Compare
+                </span>
+              )}
+            </Button>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-          <StatCard
-            label="Best Deal"
-            value={highlights.byScore?.address ?? "-"}
-            change={highlights.byScore?.score == null ? null : Math.round(highlights.byScore.score)}
-            changeLabel={`${formatSignedCurrency(highlights.byScore?.cashFlowMonthly)} CF · ${formatPercent(highlights.byScore?.roiPct)}`}
-            icon={Award}
-            spark={scoreSpark}
-            tone="primary"
-            badge={highlights.byScore?.tags[0]}
-            changeSuffix=""
-            onClick={() => scrollToDeal(highlights.byScore)}
-          />
-          <StatCard
-            label="Highest Cash Flow"
-            value={formatSignedCurrency(highlights.byCashFlow?.cashFlowMonthly)}
-            change={highlights.byCashFlow?.score == null ? null : Math.round(highlights.byCashFlow.score)}
-            changeLabel={highlights.byCashFlow?.address ?? "-"}
-            icon={DollarSign}
-            spark={cashSpark}
-            tone="success"
-            badge={highlights.byCashFlow?.tags[0]}
-            changeSuffix=""
-            onClick={() => scrollToDeal(highlights.byCashFlow)}
-          />
-          <StatCard
-            label="Highest ROI"
-            value={formatPercent(highlights.byRoi?.roiPct)}
-            change={highlights.byRoi?.score == null ? null : Math.round(highlights.byRoi.score)}
-            changeLabel={highlights.byRoi?.address ?? "-"}
-            icon={TrendingUp}
-            spark={roiSpark}
-            tone="violet"
-            badge={highlights.byRoi?.tags[0]}
-            changeSuffix=""
-            onClick={() => scrollToDeal(highlights.byRoi)}
-          />
-          <StatCard
-            label="Backend Tagged Deal"
-            value={highlights.tagged?.address ?? "-"}
-            change={highlights.tagged?.score == null ? null : Math.round(highlights.tagged.score)}
-            changeLabel={`Risk: ${taggedRiskLabel}`}
-            icon={ShieldCheck}
-            spark={capSpark}
-            tone="gold"
-            badge={highlights.tagged?.tags[0]}
-            changeSuffix=""
-            onClick={() => scrollToDeal(highlights.tagged)}
-          />
-        </div>
-        {taggedChartHint ? (
-          <p className="text-xs text-muted-foreground -mt-2">{taggedChartHint}</p>
+        {/* ── Portfolio overview — answers "what's my book worth?" ── */}
+        {hasAnyDeals ? (
+          <section>
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                Portfolio overview
+              </h2>
+            </div>
+            <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
+              <StatCard
+                label="Pipeline Value"
+                value={formatCurrency(portfolio.totalValue, true)}
+                change={portfolio.activeCount}
+                changeLabel={`across ${portfolio.activeCount} ${portfolio.activeCount === 1 ? "deal" : "deals"}`}
+                icon={Briefcase}
+                spark={[]}
+                tone="primary"
+                changeSuffix=""
+              />
+              <StatCard
+                label="Monthly Cash Flow"
+                value={formatSignedCurrency(portfolio.totalCashFlow)}
+                change={Math.round(portfolio.totalCashFlow * 12)}
+                changeLabel="annualized"
+                icon={DollarSign}
+                spark={[]}
+                tone="success"
+                changeSuffix=""
+              />
+              <StatCard
+                label="Weighted Cap Rate"
+                value={portfolio.weightedCap == null ? "-" : `${portfolio.weightedCap.toFixed(2)}%`}
+                change={null}
+                changeLabel="weighted by purchase price"
+                icon={Percent}
+                spark={[]}
+                tone="violet"
+                changeSuffix=""
+              />
+              <StatCard
+                label="Saved Deals"
+                value={String(portfolio.totalCount)}
+                change={null}
+                changeLabel={`${portfolio.activeCount} with price data`}
+                icon={Layers}
+                spark={[]}
+                tone="gold"
+                changeSuffix=""
+              />
+            </div>
+          </section>
         ) : null}
 
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-          <div className="xl:col-span-2 space-y-6">
-            <PortfolioChart data={dealComparison} />
-          </div>
-          <div className="space-y-6 xl:row-span-2">
-            <AIInsights data={insights} riskReturnInsights={riskReturn.insights} />
-          </div>
-          <div className="xl:col-span-2">
-            <RiskReturn data={riskReturn.points} />
-          </div>
-        </div>
+        {/* ── Spotlight cards — best of the book by 3 lenses ──────── */}
+        {hasAnyDeals && data.topDeals.length > 0 ? (
+          <section>
+            <div className="mb-3">
+              <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                Top performers
+              </h2>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+              <StatCard
+                label="Best Score"
+                value={highlights.byScore?.address ?? "-"}
+                change={highlights.byScore?.score == null ? null : Math.round(highlights.byScore.score)}
+                changeLabel={`${formatSignedCurrency(highlights.byScore?.cashFlowMonthly)} CF · ${formatPercent(highlights.byScore?.roiPct)}`}
+                icon={Award}
+                spark={realScoreSpark}
+                tone="primary"
+                badge={highlights.byScore?.tags[0]}
+                changeSuffix=""
+                onClick={() => scrollToDeal(highlights.byScore)}
+              />
+              <StatCard
+                label="Highest Cash Flow"
+                value={formatSignedCurrency(highlights.byCashFlow?.cashFlowMonthly)}
+                change={highlights.byCashFlow?.score == null ? null : Math.round(highlights.byCashFlow.score)}
+                changeLabel={highlights.byCashFlow?.address ?? "-"}
+                icon={DollarSign}
+                spark={realCashSpark}
+                tone="success"
+                badge={highlights.byCashFlow?.tags[0]}
+                changeSuffix=""
+                onClick={() => scrollToDeal(highlights.byCashFlow)}
+              />
+              <StatCard
+                label="Highest ROI"
+                value={formatPercent(highlights.byRoi?.roiPct)}
+                change={highlights.byRoi?.score == null ? null : Math.round(highlights.byRoi.score)}
+                changeLabel={highlights.byRoi?.address ?? "-"}
+                icon={TrendingUp}
+                spark={realRoiSpark}
+                tone="violet"
+                badge={highlights.byRoi?.tags[0]}
+                changeSuffix=""
+                onClick={() => scrollToDeal(highlights.byRoi)}
+              />
+            </div>
+          </section>
+        ) : null}
 
-        <TopDeals data={topDeals} />
+        {/* ── Empty-state hero — when 0 saved deals ───────────────── */}
+        {!hasAnyDeals ? (
+          <div className="rounded-2xl border border-dashed border-border bg-card p-10 text-center">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+              <Briefcase className="h-7 w-7" />
+            </div>
+            <h2 className="text-xl font-bold text-foreground">Your dashboard is ready</h2>
+            <p className="mt-2 text-sm text-muted-foreground max-w-md mx-auto leading-relaxed">
+              Run your first rental property through the analyzer and save it. You&apos;ll see portfolio totals, top performers, and risk/return analysis here.
+            </p>
+            <Button
+              asChild
+              className="mt-5 rounded-xl px-5"
+              style={{ background: "var(--gradient-premium)", boxShadow: "var(--shadow-glow)" }}
+            >
+              <Link href="/">
+                <Plus className="h-4 w-4" />
+                Analyze your first property
+              </Link>
+            </Button>
+          </div>
+        ) : null}
 
-        <div className="text-center text-xs text-muted-foreground py-4">
-          Truecap Premium · Powered by Truecap Deal Score™ AI
-        </div>
+        {/* ── Charts + insights — only if we have data to show ────── */}
+        {hasAnyDeals && data.topDeals.length > 0 ? (
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+            <div className="xl:col-span-2 space-y-6">
+              <PortfolioChart data={dealComparison} />
+            </div>
+            <div className="space-y-6 xl:row-span-2">
+              <AIInsights data={insights} riskReturnInsights={riskReturn.insights} />
+            </div>
+            <div className="xl:col-span-2">
+              <RiskReturn data={riskReturn.points} />
+            </div>
+          </div>
+        ) : null}
+
+        {hasAnyDeals && data.topDeals.length > 0 ? (
+          <TopDeals data={topDeals} />
+        ) : null}
       </main>
     </div>
   );
