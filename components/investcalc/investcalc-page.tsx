@@ -756,7 +756,15 @@ export function InvestCalcPage({
     if (!isEmptyNumber(form.getValues("monthlyRent"))) return;
     // Non-silent so the user gets explicit confirmation that the rent
     // estimate populated.
-    runPropertyEnrichment(place, { silent: false });
+    //
+    // .catch is mandatory — this useEffect can't await, so a thrown
+    // error inside runPropertyEnrichment would otherwise surface as
+    // an unhandled promise rejection in the browser (which fires
+    // Sentry's "Load failed" / "Failed to fetch" alerts on mobile).
+    // Enrichment is best-effort by design; failure is silent.
+    runPropertyEnrichment(place, { silent: false }).catch((err) => {
+      console.warn("[bedrooms watcher] enrichment failed:", err);
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [watchedBedrooms]);
 
@@ -802,42 +810,56 @@ export function InvestCalcPage({
     }
     if (pending.length === 0) return;
 
+    // Wrapped in try/catch because Promise.all rejects on the first
+    // failed action — without this, a single HUD blip would surface as
+    // an unhandled rejection in the user's browser. Enrichment is
+    // best-effort: if it fails, the user still types rents manually.
     (async () => {
-      const results = await Promise.all(
-        pending.map(({ beds }) =>
-          enrichPropertyAction({
-            state: place.state,
-            county: place.county,
-            zip: place.zip,
-            propertyType: propType,
-            bedrooms: beds,
-          })
-        )
-      );
+      try {
+        const results = await Promise.all(
+          pending.map(({ beds }) =>
+            enrichPropertyAction({
+              state: place.state,
+              county: place.county,
+              zip: place.zip,
+              propertyType: propType,
+              bedrooms: beds,
+            })
+          )
+        );
 
-      const filledLines: string[] = [];
-      for (let i = 0; i < pending.length; i++) {
-        const { idx } = pending[i];
-        const result = results[i];
-        if (
-          result.monthlyRent !== undefined &&
-          isEmptyNumber(form.getValues(`units.${idx}.monthlyRent`))
-        ) {
-          form.setValue(
-            `units.${idx}.monthlyRent`,
-            result.monthlyRent,
-            { shouldDirty: false, shouldTouch: false, shouldValidate: false }
-          );
-          filledLines.push(
-            `Unit ${idx + 1}: $${result.monthlyRent.toLocaleString()}/mo`
-          );
+        const filledLines: string[] = [];
+        for (let i = 0; i < pending.length; i++) {
+          const { idx } = pending[i];
+          const result = results[i];
+          if (
+            result.monthlyRent !== undefined &&
+            isEmptyNumber(form.getValues(`units.${idx}.monthlyRent`))
+          ) {
+            form.setValue(
+              `units.${idx}.monthlyRent`,
+              result.monthlyRent,
+              { shouldDirty: false, shouldTouch: false, shouldValidate: false }
+            );
+            filledLines.push(
+              `Unit ${idx + 1}: $${result.monthlyRent.toLocaleString()}/mo`
+            );
+          }
         }
-      }
-      if (filledLines.length > 0) {
-        toast({
-          title: "Auto-filled per-unit rent",
-          description: `${filledLines.join("  ·  ")} — HUD FMR is an area average; adjust to local comps.`,
-        });
+        if (filledLines.length > 0) {
+          toast({
+            title: "Auto-filled per-unit rent",
+            description: `${filledLines.join("  ·  ")} — HUD FMR is an area average; adjust to local comps.`,
+          });
+        }
+      } catch (err) {
+        // Releasing the in-flight cache entries so the next interaction
+        // can retry — otherwise the user is stuck waiting for a fill
+        // that will never come.
+        for (const { idx, beds } of pending) {
+          enrichedUnitsRef.current.delete(`${idx}:${beds}`);
+        }
+        console.warn("[multi-unit enrichment] failed:", err);
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps

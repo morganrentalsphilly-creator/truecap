@@ -230,9 +230,18 @@ export function AddressAutocomplete({
         });
 
         if (onPlaceSelected) {
-          onPlaceSelected({
-            formattedAddress: place.formattedAddress,
-            ...parseComponents(place.addressComponents),
+          // Consumer's handler is typed as `void`-returning but is
+          // usually an async function — its returned promise can reject
+          // (enrichment failures, Supabase errors, etc.). Coerce to a
+          // promise so we can attach a .catch and prevent that from
+          // becoming an unhandled rejection in the browser.
+          void Promise.resolve(
+            onPlaceSelected({
+              formattedAddress: place.formattedAddress,
+              ...parseComponents(place.addressComponents),
+            })
+          ).catch((err) => {
+            console.warn("[AddressAutocomplete] onPlaceSelected failed:", err);
           });
         }
       }
@@ -246,7 +255,15 @@ export function AddressAutocomplete({
           shouldTouch: true,
           shouldValidate: true,
         });
-        if (onPlaceSelected) onPlaceSelected({ formattedAddress: text });
+        if (onPlaceSelected) {
+          // Same coercion as above — handler may be async even though
+          // the prop type doesn't say so.
+          void Promise.resolve(onPlaceSelected({ formattedAddress: text })).catch(
+            (err2) => {
+              console.warn("[AddressAutocomplete] onPlaceSelected (fallback) failed:", err2);
+            }
+          );
+        }
       }
     }
   };

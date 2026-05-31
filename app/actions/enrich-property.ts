@@ -84,9 +84,20 @@ function lookupPropertyTax(state?: string): { rate: number; state: string } | nu
 const REMOTE_TIMEOUT_MS = 5_000;
 
 /**
- * fetch wrapper that aborts after `timeoutMs`. Resolves null on timeout
- * so callers can fall through to the no-data graceful-degradation path
- * (the form just doesn't get auto-fill — user can still type values).
+ * fetch wrapper that aborts after `timeoutMs`. Resolves null on ANY
+ * failure — timeout, DNS / network error, ECONNRESET, TLS failure, etc.
+ * Every caller already handles null (see HUD + FRED call sites below),
+ * so a null return collapses to the same graceful-degradation path the
+ * timeout case already used.
+ *
+ * Why this NEVER throws (was previously re-throwing non-Abort errors):
+ *   Enrichment runs inside fire-and-forget client effects (bedrooms
+ *   watcher, multi-unit rent fill, address-selected handler). Throwing
+ *   here propagated unhandled promise rejections to the browser's
+ *   global handler, which Sentry then captured as "Load failed" /
+ *   "Failed to fetch" / "NetworkError" depending on the browser.
+ *   Returning null lets the form gracefully degrade to "user types
+ *   the value themselves" — same UX as a timeout — with no Sentry noise.
  */
 async function fetchWithTimeout(
   input: string | URL,
@@ -98,11 +109,16 @@ async function fetchWithTimeout(
   try {
     return await fetch(input, { ...init, signal: controller.signal });
   } catch (err) {
-    if ((err as Error | undefined)?.name === "AbortError") {
+    const name = (err as Error | undefined)?.name;
+    const message = (err as Error | undefined)?.message;
+    if (name === "AbortError") {
       console.warn(`[enrichProperty] Remote fetch timed out after ${timeoutMs}ms: ${input}`);
-      return null;
+    } else {
+      // Network/DNS/TLS failure. Log so we can spot persistent outages,
+      // but don't rethrow — the caller has a null path.
+      console.warn(`[enrichProperty] Remote fetch failed (${name ?? "Error"}): ${message ?? "unknown"} — ${input}`);
     }
-    throw err;
+    return null;
   } finally {
     clearTimeout(timer);
   }
