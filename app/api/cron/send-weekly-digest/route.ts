@@ -65,6 +65,28 @@ export async function GET(request: Request) {
   }
 
   // ─────────────────────────────────────────────────────────
+  // 1b. Manual kill switch — set NEWSLETTER_PAUSED=1 in Vercel env vars
+  //     to pause sends without a redeploy. To resume: unset (or set to
+  //     "0"/"false"). Logs every paused invocation so you can see the
+  //     cron is firing but intentionally bailing out — much safer than
+  //     deleting the cron from vercel.json (which is easy to forget to
+  //     re-add). Note: this does NOT cancel broadcasts already
+  //     pre-scheduled at Resend via `npm run schedule-broadcasts` —
+  //     cancel those manually in the Resend dashboard.
+  // ─────────────────────────────────────────────────────────
+  const pausedRaw = (process.env.NEWSLETTER_PAUSED ?? "").trim().toLowerCase();
+  const isPaused = pausedRaw === "1" || pausedRaw === "true" || pausedRaw === "yes";
+  if (isPaused) {
+    console.info("[cron/weekly-digest] NEWSLETTER_PAUSED=%s — skipping send.", pausedRaw);
+    return NextResponse.json({
+      ok: true,
+      skipped: true,
+      reason: "paused",
+      message: "Newsletter sends are paused (NEWSLETTER_PAUSED env var). Unset to resume.",
+    });
+  }
+
+  // ─────────────────────────────────────────────────────────
   // 2. Required Resend env vars
   // ─────────────────────────────────────────────────────────
   const apiKey = process.env.RESEND_API_KEY;
