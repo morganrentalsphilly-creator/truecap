@@ -38,9 +38,22 @@ Sentry.init({
     // on the next tick. No real bug, just multi-tab coordination.
     /Acquiring an exclusive Navigator LockManager lock/,
     /lock:sb-.*-auth-token/,
-    // Network errors that aren't actionable (user is offline, etc.)
+    // Network errors that aren't actionable (user is offline, etc.).
+    // Each browser uses different language for the same underlying
+    // condition — Chrome says "Failed to fetch", Firefox says
+    // "NetworkError when attempting to fetch resource", and Safari
+    // (desktop + iOS) says "Load failed". All three mean the request
+    // didn't complete due to network, abort, or content blocker —
+    // never a code bug. Filter all three.
     /NetworkError when attempting to fetch resource/,
     /Failed to fetch/,
+    /Load failed/,
+    // Aborted requests — fires when the user navigates away or
+    // backgrounds the app mid-fetch. Mobile Safari does this aggressively.
+    /AbortError/,
+    /The user aborted a request/,
+    /The operation was aborted/,
+    /signal is aborted without reason/,
     // ResizeObserver loop noise — fired by browsers when ResizeObserver
     // can't deliver all observations in a single frame. Benign and
     // common, especially on iOS Safari.
