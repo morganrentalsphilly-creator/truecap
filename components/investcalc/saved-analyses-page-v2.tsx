@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
+  Archive,
   ArrowDown,
   ArrowLeft,
   ArrowUp,
@@ -19,6 +20,8 @@ import {
   Search,
   SlidersHorizontal,
   Sparkles,
+  Trash2,
+  X,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -32,6 +35,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { startCompareAction } from "@/app/actions/compare";
 import {
+  bulkUpdateSavedDealsAction,
   completeSavedAnalysisPdfExportAction,
   getSavedAnalysisPdfExportAction,
   getSavedDealForEditingAction,
@@ -485,6 +489,65 @@ export function SavedAnalysesPage({
       });
       router.refresh();
       setUpdatingDealStatusId(null);
+    });
+  };
+
+  // ─── Bulk actions ─────────────────────────────────────────────────
+  // When the user has 1+ deals checkbox-selected, they can archive or
+  // delete them all in a single click via the bar at the bottom of
+  // the page. Both actions hit the same bulkUpdateSavedDealsAction
+  // server action which validates ownership at the DB layer.
+  const [isBulkArchiving, startBulkArchiveTransition] = useTransition();
+  const [isBulkDeleting, startBulkDeleteTransition] = useTransition();
+  const bulkRunning = isBulkArchiving || isBulkDeleting;
+
+  const handleBulkArchive = () => {
+    if (selectedIds.length === 0 || bulkRunning) return;
+    startBulkArchiveTransition(async () => {
+      const result = await bulkUpdateSavedDealsAction(selectedIds, "archive");
+      if (!result.ok) {
+        toast({
+          title: "Could not archive selected deals",
+          description: result.message,
+          variant: "destructive",
+        });
+        return;
+      }
+      toast({
+        title: `Archived ${result.affectedCount} deal${result.affectedCount === 1 ? "" : "s"}`,
+        description: "Find them under the Archived filter.",
+        variant: "success",
+      });
+      setSelectedIds([]);
+      router.refresh();
+    });
+  };
+
+  const handleBulkDelete = () => {
+    if (selectedIds.length === 0 || bulkRunning) return;
+    // Defensive confirm — deletion is irreversible from the UI even
+    // though the DB row stays around with deleted_at set.
+    const confirmed = window.confirm(
+      `Delete ${selectedIds.length} deal${selectedIds.length === 1 ? "" : "s"}? This cannot be undone from the UI.`
+    );
+    if (!confirmed) return;
+    startBulkDeleteTransition(async () => {
+      const result = await bulkUpdateSavedDealsAction(selectedIds, "delete");
+      if (!result.ok) {
+        toast({
+          title: "Could not delete selected deals",
+          description: result.message,
+          variant: "destructive",
+        });
+        return;
+      }
+      toast({
+        title: `Deleted ${result.affectedCount} deal${result.affectedCount === 1 ? "" : "s"}`,
+        description: "Removed from your saved analyses.",
+        variant: "success",
+      });
+      setSelectedIds([]);
+      router.refresh();
     });
   };
 
@@ -1150,7 +1213,7 @@ export function SavedAnalysesPage({
                   <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold"><SortToggle field="price" label="Price" /></th>
                   <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold">Status</th>
                   <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold">Actions</th>
-                  <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold"><SortToggle field="saved" label="Saved" /></th>
+                  <th className="whitespace-nowrap pr-4 text-left text-xs uppercase tracking-wider text-muted-foreground font-bold"><SortToggle field="saved" label="Saved" /></th>
                 </tr>
               </thead>
               <tbody>
@@ -1252,7 +1315,7 @@ export function SavedAnalysesPage({
                           </Button>
                         </div>
                       </td>
-                      <td className="text-muted-foreground">
+                      <td className="whitespace-nowrap pr-4 text-muted-foreground">
                         <span className="inline-flex items-center gap-1.5">
                           <CalendarClock className="h-3.5 w-3.5" />
                           <span>{new Date(item.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
@@ -1383,6 +1446,75 @@ export function SavedAnalysesPage({
           </div>
         </div>
       </section>
+
+      {/*
+        Floating bulk-action bar — visible only when at least one deal
+        is checkbox-selected. Sticky to the bottom of the viewport so
+        users can scroll through long lists without losing access to
+        the actions. Centered + max-width so it doesn't span the whole
+        screen on desktop.
+
+        The Compare button up in the section bar is the "primary"
+        action (Pro feature, high intent). This bar provides the
+        management actions (archive, delete) that apply regardless of
+        plan. Free users can still organize their list.
+      */}
+      {selectedIds.length > 0 ? (
+        <div
+          role="region"
+          aria-label="Bulk actions"
+          className="fixed inset-x-0 bottom-4 z-40 mx-auto flex w-[min(680px,calc(100vw-32px))] items-center justify-between gap-3 rounded-2xl border border-border bg-card/95 px-4 py-3 shadow-2xl backdrop-blur"
+        >
+          <div className="flex items-center gap-3">
+            <span className="inline-flex h-7 min-w-[28px] items-center justify-center rounded-full bg-primary px-2 text-xs font-bold text-primary-foreground">
+              {selectedIds.length}
+            </span>
+            <p className="text-sm font-semibold text-foreground">
+              {selectedIds.length === 1 ? "deal" : "deals"} selected
+            </p>
+            <button
+              type="button"
+              onClick={() => setSelectedIds([])}
+              className="hidden text-xs font-semibold text-muted-foreground hover:text-foreground sm:inline-flex sm:items-center sm:gap-1"
+            >
+              <X className="h-3.5 w-3.5" />
+              Clear
+            </button>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-9 rounded-full px-3 text-xs"
+              onClick={handleBulkArchive}
+              disabled={bulkRunning}
+            >
+              {isBulkArchiving ? (
+                <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Archive className="mr-1.5 h-3.5 w-3.5" />
+              )}
+              Archive
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-9 rounded-full border-[var(--metric-negative)]/40 px-3 text-xs text-[var(--metric-negative)] hover:bg-[var(--metric-negative)]/10 hover:text-[var(--metric-negative)]"
+              onClick={handleBulkDelete}
+              disabled={bulkRunning}
+            >
+              {isBulkDeleting ? (
+                <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Trash2 className="mr-1.5 h-3.5 w-3.5" />
+              )}
+              Delete
+            </Button>
+          </div>
+        </div>
+      ) : null}
     </main>
   );
 }

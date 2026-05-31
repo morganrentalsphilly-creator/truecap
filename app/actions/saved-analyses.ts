@@ -735,3 +735,84 @@ export async function updateSavedDealLifecycleStateAction(
 
   return { ok: true };
 }
+
+/**
+ * Bulk archive or delete saved analyses.
+ *
+ * Why a separate action vs N calls to updateSavedDealLifecycleStateAction:
+ *   - Single DB round trip instead of N
+ *   - Atomic from the user's perspective (either all succeed or none)
+ *   - Soft-delete (deleted_at = now) for "delete" — preserves history
+ *     and lets us restore by clearing deleted_at if a user complains
+ *
+ * Caller responsibility: pass only IDs owned by the current user. The
+ * action double-checks via .eq("user_id", user.id) so cross-user
+ * tampering is blocked at the DB layer.
+ *
+ * Max 100 IDs per call as a safety cap — bulk ops larger than that
+ * indicate a UI bug or a scraping attempt.
+ */
+export type BulkSavedDealActionResult =
+  | { ok: true; affectedCount: number }
+  | { ok: false; code: "SIGN_IN_REQUIRED" | "VALIDATION_ERROR" | "SERVER_ERROR"; message: string };
+
+export async function bulkUpdateSavedDealsAction(
+  ids: string[],
+  action: "archive" | "delete" | "activate"
+): Promise<BulkSavedDealActionResult> {
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in." };
+  }
+
+  const cleanedIds = Array.from(
+    new Set(
+      (ids ?? [])
+        .map((id) => (typeof id === "string" ? id.trim() : ""))
+        .filter(Boolean)
+    )
+  );
+
+  if (cleanedIds.length === 0) {
+    return { ok: false, code: "VALIDATION_ERROR", message: "No deals selected." };
+  }
+  if (cleanedIds.length > 100) {
+    return {
+      ok: false,
+      code: "VALIDATION_ERROR",
+      message: "Too many deals selected at once (max 100).",
+    };
+  }
+
+  const nowIso = new Date().toISOString();
+  const updatePayload =
+    action === "delete"
+      ? { deleted_at: nowIso }
+      : action === "archive"
+        ? { is_archived: true, is_completed: false, last_activity_at: nowIso }
+        : { is_archived: false, is_completed: false, last_activity_at: nowIso };
+
+  let query = supabase
+    .from("saved_analyses")
+    .update(updatePayload)
+    .in("id", cleanedIds)
+    .eq("user_id", user.id);
+
+  // For non-delete actions, only touch rows not already soft-deleted.
+  // For delete, allow re-deleting already-soft-deleted rows (idempotent).
+  if (action !== "delete") {
+    query = query.is("deleted_at", null);
+  }
+
+  const { data, error } = await query.select("id");
+
+  if (error) {
+    return { ok: false, code: "SERVER_ERROR", message: error.message };
+  }
+
+  return { ok: true, affectedCount: data?.length ?? 0 };
+}
