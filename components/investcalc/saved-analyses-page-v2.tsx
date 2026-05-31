@@ -1170,7 +1170,7 @@ export function SavedAnalysesPage({
                         className="h-10 rounded-xl px-2.5 text-xs"
                         onClick={() => handleExportPdfClick(item.id)}
                         disabled={exportingPdfDealId === item.id}
-                        title={!canExportPdf ? "PDF export is not available for your current plan." : undefined}
+                        title={!canExportPdf ? "PDF export — Pro feature" : undefined}
                       >
                         {exportingPdfDealId === item.id ? (
                           <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" />
@@ -1178,6 +1178,11 @@ export function SavedAnalysesPage({
                           <FileDown className="w-3.5 h-3.5 mr-1" />
                         )}
                         PDF
+                        {!canExportPdf ? (
+                          <span className="ml-1.5 rounded-full bg-primary/10 px-1.5 py-0 text-[9px] font-bold text-primary">
+                            PRO
+                          </span>
+                        ) : null}
                       </Button>
                     </div>
                   </div>
@@ -1304,7 +1309,7 @@ export function SavedAnalysesPage({
                             className="h-8 rounded-md px-2.5 text-xs"
                             onClick={() => handleExportPdfClick(item.id)}
                             disabled={exportingPdfDealId === item.id}
-                            title={!canExportPdf ? "PDF export is not available for your current plan." : undefined}
+                            title={!canExportPdf ? "PDF export — Pro feature" : undefined}
                           >
                             {exportingPdfDealId === item.id ? (
                               <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" />
@@ -1312,6 +1317,11 @@ export function SavedAnalysesPage({
                               <FileDown className="w-3.5 h-3.5 mr-1" />
                             )}
                             Export PDF
+                            {!canExportPdf ? (
+                              <span className="ml-1.5 rounded-full bg-primary/10 px-1.5 py-0 text-[9px] font-bold text-primary">
+                                PRO
+                              </span>
+                            ) : null}
                           </Button>
                         </div>
                       </td>

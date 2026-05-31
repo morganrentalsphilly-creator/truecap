@@ -104,13 +104,13 @@ export function Topbar({
           name="dashboard-saved-search"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          placeholder="Search deals, properties, markets…"
+          placeholder="Search your saved deals by address…"
           aria-label="Search saved deals"
           className="w-full h-10 pl-10 pr-4 rounded-lg bg-muted/60 border border-transparent focus:border-primary focus:bg-background outline-none text-sm transition"
         />
         
         {suggestions.length > 0 ? (
-          <div className="absolute top-[calc(100%+0.4rem)] left-0 right-0 rounded-lg border border-border bg-card shadow-lg overflow-hidden z-30">
+          <div className="absolute top-[calc(100%+0.4rem)] left-0 right-0 max-h-[60vh] overflow-y-auto rounded-lg border border-border bg-card shadow-lg z-30">
             {suggestions.map((item) => (
               <button
                 key={item.id}

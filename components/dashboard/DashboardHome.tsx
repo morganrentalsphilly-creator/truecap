@@ -325,25 +325,36 @@ export function DashboardHome({
                 My Deals
               </Link>
             </Button>
-            <Button
-              asChild={canCompareDeals}
-              disabled={!canCompareDeals}
-              variant="outline"
-              className="h-10 rounded-xl px-4 text-sm"
-              title={!canCompareDeals ? "Compare is a Pro feature" : undefined}
-            >
-              {canCompareDeals ? (
+            {canCompareDeals ? (
+              <Button
+                asChild
+                variant="outline"
+                className="h-10 rounded-xl px-4 text-sm"
+              >
                 <Link href="/dashboard/compare" prefetch={false}>
                   <ArrowUpDown className="h-4 w-4" />
                   Compare
                 </Link>
-              ) : (
-                <span className="inline-flex items-center gap-2">
+              </Button>
+            ) : (
+              // Free users see Compare as a Pro upsell — clickable,
+              // links to /pricing, with a small lock+price hint so the
+              // upgrade path is obvious (was silently disabled before).
+              <Button
+                asChild
+                variant="outline"
+                className="h-10 rounded-xl px-4 text-sm"
+                title="Compare 2-4 deals side-by-side — Pro feature"
+              >
+                <Link href="/pricing" prefetch={false}>
                   <ArrowUpDown className="h-4 w-4" />
                   Compare
-                </span>
-              )}
-            </Button>
+                  <span className="ml-1 rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-bold text-primary">
+                    PRO
+                  </span>
+                </Link>
+              </Button>
+            )}
           </div>
         </div>
 
