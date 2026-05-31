@@ -38,6 +38,17 @@ Sentry.init({
     // on the next tick. No real bug, just multi-tab coordination.
     /Acquiring an exclusive Navigator LockManager lock/,
     /lock:sb-.*-auth-token/,
+    // Catches the whole class of Supabase Auth instrumentation errors
+    // in Safari. GoTrueClient attaches diagnostic properties to caught
+    // errors — `isAcquireTimeout` on lock timeouts, `__isAuthError` on
+    // AuthError subclass discrimination. Safari sometimes returns these
+    // error objects frozen, so the property assignment throws
+    // "Cannot add property X, object is not extensible". This is an
+    // instrumentation pattern, never a real logic bug — the underlying
+    // operation already failed; only the failure-reporting fails. One
+    // broad pattern catches all current + future variants without
+    // playing whack-a-mole on each new property name.
+    /Cannot add property .+, object is not extensible/,
     // Network errors that aren't actionable (user is offline, etc.).
     // Each browser uses different language for the same underlying
     // condition — Chrome says "Failed to fetch", Firefox says
