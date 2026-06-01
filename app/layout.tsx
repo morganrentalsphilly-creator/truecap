@@ -18,11 +18,28 @@ const plusJakartaSans = Plus_Jakarta_Sans({
   // to match the font's real max weight. Don't add "900" here — it's
   // not a valid weight for this font and TypeScript will reject it.
   weight: ["300", "400", "500", "600", "700", "800"],
+  // Explicit display: "swap" — text renders immediately with the system
+  // fallback (set by adjustFontFallback's font-metric matching), then
+  // swaps to Plus Jakarta when it arrives. Prevents FOIT (Flash of
+  // Invisible Text) which kills LCP on slow connections.
+  display: "swap",
+  // Generate the system-font-metric fallback so the layout doesn't shift
+  // when the real font loads (cumulative layout shift / CLS).
+  adjustFontFallback: true,
+  // next/font auto-injects <link rel="preload"> for fonts declared at
+  // this scope. Explicit `preload: true` documents the intent.
+  preload: true,
 });
 const dmMono = DM_Mono({
   subsets: ["latin"],
   variable: "--font-mono-variable",
   weight: ["400", "500"],
+  // Mono is non-critical (used for numeric output in tables/cards, never
+  // for above-the-fold hero text). Skip the preload to save a request
+  // on first paint — it loads on-demand when text using `font-mono`
+  // first renders.
+  display: "swap",
+  preload: false,
 });
 
 export const viewport = {

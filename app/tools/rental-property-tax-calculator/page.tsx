@@ -93,6 +93,35 @@ export default function RentalPropertyTaxCalculatorPage() {
     })),
   };
 
+  const softwareAppLd = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "Rental Property Tax Calculator",
+    applicationCategory: "BusinessApplication",
+    applicationSubCategory: "Real Estate Calculator",
+    operatingSystem: "Web",
+    description:
+      "Free rental property tax calculator. Models Schedule E taxable income, depreciation (27.5-year), mortgage interest deduction, and after-tax cash flow. Plus the depreciation tax shield value.",
+    url: `${siteUrl}/tools/rental-property-tax-calculator`,
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD",
+      availability: "https://schema.org/InStock",
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "TrueCap",
+      url: "https://usetruecap.com",
+    },
+    featureList: [
+      "Schedule E taxable income modeling",
+      "27.5-year depreciation tax shield",
+      "Mortgage interest deduction included",
+      "After-tax cash flow",
+    ],
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <script
@@ -102,6 +131,10 @@ export default function RentalPropertyTaxCalculatorPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareAppLd) }}
       />
       <ToolBreadcrumbSchema
         toolName="Rental Property Tax Calculator"

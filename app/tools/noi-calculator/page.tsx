@@ -92,11 +92,40 @@ export default function NoiCalculatorPage() {
     })),
   };
 
+  const softwareAppLd = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "NOI Calculator",
+    applicationCategory: "BusinessApplication",
+    applicationSubCategory: "Real Estate Calculator",
+    operatingSystem: "Web",
+    description:
+      "Free NOI (Net Operating Income) calculator for rental property. Includes vacancy, every common operating expense, and the operating-expense ratio. Plus what's a good NOI margin.",
+    url: `${siteUrl}/tools/noi-calculator`,
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD",
+      availability: "https://schema.org/InStock",
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "TrueCap",
+      url: "https://usetruecap.com",
+    },
+    featureList: [
+      "Net Operating Income from gross income - expenses",
+      "Standard 4-category expense model",
+      "Vacancy + management included",
+    ],
+  };
+
   return (
     <>
       <ToolBreadcrumbSchema toolPath="/tools/noi-calculator" toolName="NOI calculator" />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareAppLd) }} />
 
       <div className="min-h-screen bg-background">
         <main id="main" className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">

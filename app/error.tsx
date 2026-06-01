@@ -12,6 +12,7 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
+import * as Sentry from "@sentry/nextjs";
 import { ArrowUpRight, AlertTriangle, RefreshCw } from "lucide-react";
 
 export default function GlobalAppError({
@@ -22,8 +23,13 @@ export default function GlobalAppError({
   reset: () => void;
 }) {
   useEffect(() => {
-    // Surface to the browser console so users / support can correlate.
-    // In production, the digest is what shows up server-side.
+    // Forward to Sentry so production errors get proper stack-trace
+    // logging — without this, route-level errors caught here would only
+    // show up in the browser console, never in our error inbox.
+    // (global-error.tsx already does this for root-layout crashes; we
+    // need the same coverage for route-segment crashes.)
+    Sentry.captureException(error);
+    // Also keep the console line for local dev debugging.
     console.error("[app/error]", error);
   }, [error]);
 

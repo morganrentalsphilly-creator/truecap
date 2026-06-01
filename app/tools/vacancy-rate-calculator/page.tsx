@@ -88,6 +88,34 @@ export default function VacancyRateCalculatorPage() {
     })),
   };
 
+  const softwareAppLd = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "Vacancy Rate Calculator",
+    applicationCategory: "BusinessApplication",
+    applicationSubCategory: "Real Estate Calculator",
+    operatingSystem: "Web",
+    description:
+      "Free vacancy rate calculator for rental properties. Convert vacant days + turnover cost into a true effective vacancy rate. Plus what a realistic vacancy assumption looks like — most sellers under-quote it.",
+    url: `${siteUrl}/tools/vacancy-rate-calculator`,
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD",
+      availability: "https://schema.org/InStock",
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "TrueCap",
+      url: "https://usetruecap.com",
+    },
+    featureList: [
+      "Convert vacant days into effective vacancy rate",
+      "Include turnover costs in the calculation",
+      "Benchmark against market vacancy data",
+    ],
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <script
@@ -97,6 +125,10 @@ export default function VacancyRateCalculatorPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareAppLd) }}
       />
       <ToolBreadcrumbSchema
         toolName="Vacancy Rate Calculator"

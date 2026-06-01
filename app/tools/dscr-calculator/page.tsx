@@ -94,11 +94,40 @@ export default function DscrCalculatorPage() {
     })),
   };
 
+  const softwareAppLd = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "DSCR Calculator",
+    applicationCategory: "BusinessApplication",
+    applicationSubCategory: "Real Estate Calculator",
+    operatingSystem: "Web",
+    description:
+      "Free DSCR calculator for rental property and DSCR loans. Computes Debt Service Coverage Ratio in seconds. Plus what counts as a good DSCR and what lenders require.",
+    url: `${siteUrl}/tools/dscr-calculator`,
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD",
+      availability: "https://schema.org/InStock",
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "TrueCap",
+      url: "https://usetruecap.com",
+    },
+    featureList: [
+      "Compute DSCR from NOI + debt service",
+      "1.20/1.25 lender threshold check",
+      "Single + multi-family support",
+    ],
+  };
+
   return (
     <>
       <ToolBreadcrumbSchema toolPath="/tools/dscr-calculator" toolName="DSCR calculator" />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareAppLd) }} />
 
       <div className="min-h-screen bg-background">
         <main id="main" className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">

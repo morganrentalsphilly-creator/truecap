@@ -86,11 +86,40 @@ export default function CoCCalculatorPage() {
     })),
   };
 
+  const softwareAppLd = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "Cash-on-Cash Return Calculator",
+    applicationCategory: "BusinessApplication",
+    applicationSubCategory: "Real Estate Calculator",
+    operatingSystem: "Web",
+    description:
+      "Free cash-on-cash return calculator for rental property. Computes annual cash flow ÷ cash invested with built-in mortgage math. Plus what counts as a good CoC return.",
+    url: `${siteUrl}/tools/cash-on-cash-calculator`,
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD",
+      availability: "https://schema.org/InStock",
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "TrueCap",
+      url: "https://usetruecap.com",
+    },
+    featureList: [
+      "Compute cash-on-cash from cash invested + annual cash flow",
+      "Include closing costs + reserves",
+      "Compare to alternative investments",
+    ],
+  };
+
   return (
     <>
       <ToolBreadcrumbSchema toolPath="/tools/cash-on-cash-calculator" toolName="Cash-on-cash return calculator" />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareAppLd) }} />
 
       <div className="min-h-screen bg-background">
         <main id="main" className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">

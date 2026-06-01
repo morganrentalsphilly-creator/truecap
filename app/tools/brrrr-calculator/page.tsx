@@ -83,11 +83,40 @@ export default function BrrrrCalculatorPage() {
     })),
   };
 
+  const softwareAppLd = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "BRRRR Calculator",
+    applicationCategory: "BusinessApplication",
+    applicationSubCategory: "Real Estate Calculator",
+    operatingSystem: "Web",
+    description:
+      "Free BRRRR calculator. Models purchase, rehab, ARV, refi LTV, and post-refi cash flow. Shows cash left in deal + infinite-return scenarios.",
+    url: `${siteUrl}/tools/brrrr-calculator`,
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD",
+      availability: "https://schema.org/InStock",
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "TrueCap",
+      url: "https://usetruecap.com",
+    },
+    featureList: [
+      "Buy-Rehab-Rent-Refinance-Repeat math",
+      "All-in cost vs ARV refi",
+      "Cash-out + remaining capital",
+    ],
+  };
+
   return (
     <>
       <ToolBreadcrumbSchema toolPath="/tools/brrrr-calculator" toolName="BRRRR calculator" />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareAppLd) }} />
 
       <div className="min-h-screen bg-background">
         <main id="main" className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">

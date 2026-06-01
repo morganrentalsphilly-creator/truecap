@@ -92,11 +92,40 @@ export default function GrmCalculatorPage() {
     })),
   };
 
+  const softwareAppLd = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "Gross Rent Multiplier Calculator",
+    applicationCategory: "BusinessApplication",
+    applicationSubCategory: "Real Estate Calculator",
+    operatingSystem: "Web",
+    description:
+      "Free Gross Rent Multiplier (GRM) calculator. The fastest screening metric in real estate — compare deals in seconds without operating expenses. Plus what counts as a good GRM.",
+    url: `${siteUrl}/tools/gross-rent-multiplier-calculator`,
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD",
+      availability: "https://schema.org/InStock",
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "TrueCap",
+      url: "https://usetruecap.com",
+    },
+    featureList: [
+      "GRM from price ÷ annual gross rent",
+      "Compare to market averages",
+      "Fast deal screening without operating expenses",
+    ],
+  };
+
   return (
     <>
       <ToolBreadcrumbSchema toolPath="/tools/gross-rent-multiplier-calculator" toolName="GRM calculator" />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareAppLd) }} />
 
       <div className="min-h-screen bg-background">
         <main id="main" className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">

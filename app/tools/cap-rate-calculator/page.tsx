@@ -102,6 +102,35 @@ export default function CapRateCalculatorPage() {
     })),
   };
 
+  const softwareAppLd = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "Cap Rate Calculator",
+    applicationCategory: "BusinessApplication",
+    applicationSubCategory: "Real Estate Calculator",
+    operatingSystem: "Web",
+    description:
+      "Free cap rate calculator for rental property analysis. Calculate capitalization rate in seconds, plus learn what counts as a good cap rate by market type.",
+    url: `${siteUrl}/tools/cap-rate-calculator`,
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD",
+      availability: "https://schema.org/InStock",
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "TrueCap",
+      url: "https://usetruecap.com",
+    },
+    featureList: [
+      "Calculate cap rate from purchase price + NOI",
+      "Adjust for vacancy + operating expenses",
+      "Compare to market benchmarks",
+      "Free, no signup",
+    ],
+  };
+
   return (
     <>
       <ToolBreadcrumbSchema toolPath="/tools/cap-rate-calculator" toolName="Cap rate calculator" />
@@ -112,6 +141,10 @@ export default function CapRateCalculatorPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareAppLd) }}
       />
 
       <div className="min-h-screen bg-background">

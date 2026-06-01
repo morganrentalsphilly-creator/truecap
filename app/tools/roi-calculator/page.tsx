@@ -80,10 +80,39 @@ export default function RoiCalculatorPage() {
     })),
   };
 
+  const softwareAppLd = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "Rental Property ROI Calculator",
+    applicationCategory: "BusinessApplication",
+    applicationSubCategory: "Real Estate Calculator",
+    operatingSystem: "Web",
+    description:
+      "Free total ROI calculator for rental properties. Combines cash flow + principal paydown + appreciation into one number — the real return on your investment, not just one piece of it.",
+    url: `${siteUrl}/tools/roi-calculator`,
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD",
+      availability: "https://schema.org/InStock",
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "TrueCap",
+      url: "https://usetruecap.com",
+    },
+    featureList: [
+      "Combine cash flow, principal paydown, appreciation",
+      "Full annualized return across hold period",
+      "Compare against alternative investments",
+    ],
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareAppLd) }} />
       <ToolBreadcrumbSchema toolName="ROI Calculator" toolPath="/tools/roi-calculator" />
 
       <main className="mx-auto max-w-3xl px-4 sm:px-6 py-8 sm:py-12">

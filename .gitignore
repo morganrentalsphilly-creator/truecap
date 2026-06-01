@@ -17,7 +17,6 @@ pnpm-debug.log*
 
 
 # environment variables
-.env*
 !.env.example
 
 # vercel
@@ -41,7 +40,6 @@ pnpm-debug.log*
 *.md
 *.ps1
 # local env files
-.env.local
 .env.development.local
 .env.test.local
 .env.production.local
@@ -67,3 +65,4 @@ mcps/
 /pnpm-lock.yaml
 # Sentry Config File
 .env.sentry-build-plugin
+config.bat

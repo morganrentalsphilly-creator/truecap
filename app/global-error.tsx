@@ -50,10 +50,21 @@ export default function GlobalError({
           <button
             type="button"
             onClick={() => reset()}
-            style={{ marginTop: "1.5rem", background: "#2563eb", color: "#fff", border: "none", padding: "0.625rem 1rem", borderRadius: "0.75rem", fontWeight: 700, cursor: "pointer" }}
+            // Brand primary (#5248D4), not the default blue, so this
+            // last-resort page still feels like TrueCap. Inline styles
+            // only — globals.css isn't loaded by global-error.tsx.
+            style={{ marginTop: "1.5rem", background: "#5248D4", color: "#fff", border: "none", padding: "0.625rem 1rem", borderRadius: "0.75rem", fontWeight: 700, cursor: "pointer" }}
           >
             Try again
           </button>
+          <div style={{ marginTop: "1rem" }}>
+            <a
+              href="/"
+              style={{ fontSize: "0.8125rem", color: "#475569", textDecoration: "underline" }}
+            >
+              or go to the homepage
+            </a>
+          </div>
         </div>
       </body>
     </html>
