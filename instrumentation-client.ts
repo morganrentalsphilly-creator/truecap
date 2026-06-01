@@ -7,8 +7,16 @@ import * as Sentry from "@sentry/nextjs";
 Sentry.init({
   dsn: "https://273531778de80e317ca3e8cc6e1bf4ba@o4511448368480257.ingest.us.sentry.io/4511448369528832",
 
-  // Add optional integrations for additional features
-  integrations: [Sentry.replayIntegration()],
+  // Replay integration is loaded lazily — the Replay package adds
+  // ~45-55 KB gzipped to every page even at 10% session sampling
+  // (the integration JS has to ship before it can decide whether to
+  // record). Deferring to the next idle callback shaves that off the
+  // initial bundle without losing replay-on-error data: errors caught
+  // before Replay loads still report normally, they just don't include
+  // a session recording. By the time a real user encounters one of the
+  // rare errors that does warrant a replay, the integration has long
+  // since loaded in the background.
+  integrations: [],
 
   // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
   tracesSampleRate: 1,
@@ -76,5 +84,37 @@ Sentry.init({
     /Non-Error promise rejection captured with value:/,
   ],
 });
+
+// Lazy-load Sentry Replay after first paint so it doesn't compete with
+// LCP / hydration. requestIdleCallback fires once the main thread is
+// quiet (typically <500ms after the page becomes interactive on a
+// fast connection, 1-3s on slow mobile). When `addIntegration` runs,
+// Sentry attaches Replay to the existing client — sampling rules from
+// `Sentry.init` above (10% session, 100% on error) are honored.
+//
+// Safari doesn't support `requestIdleCallback`, so we fall back to a
+// 2-second setTimeout — far less precise but still well after first
+// paint and hydration on any reasonable connection.
+if (typeof window !== "undefined") {
+  const loadReplay = () => {
+    void import("@sentry/nextjs").then(({ replayIntegration }) => {
+      Sentry.addIntegration(replayIntegration());
+    });
+  };
+  // `requestIdleCallback` isn't in TS's lib.dom.d.ts (still considered
+  // experimental even though every modern browser except Safari ships
+  // it), so we resolve it through `globalThis` with a structural cast
+  // and fall back to setTimeout otherwise.
+  const ric = (
+    globalThis as typeof globalThis & {
+      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => void;
+    }
+  ).requestIdleCallback;
+  if (typeof ric === "function") {
+    ric(loadReplay, { timeout: 4000 });
+  } else {
+    setTimeout(loadReplay, 2000);
+  }
+}
 
 export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;

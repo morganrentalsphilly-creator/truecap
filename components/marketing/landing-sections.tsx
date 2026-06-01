@@ -12,8 +12,14 @@
  * CTA, so the visitor never has to hunt for where to convert.
  */
 
-"use client";
-
+// NOTE: this module is intentionally a SERVER component (no "use client").
+// It's 500+ lines of mostly-static marketing prose (objection-killers, the
+// HowItWorks 3-step, social proof, pre-calc CTA). The only interactive
+// behavior is the 3 "scroll to the calculator" buttons, which have been
+// extracted into the <ScrollToFormButton> client island so we don't pay
+// the hydration cost for all the static markup. Keep it that way — any
+// new interactive piece should be its own small island, not a reason to
+// flip this whole file back to client.
 import Link from "next/link";
 import {
   ArrowRight,
@@ -31,12 +37,7 @@ import {
   X,
   Zap,
 } from "lucide-react";
-
-function scrollToForm() {
-  if (typeof window === "undefined") return;
-  const el = document.getElementById("main");
-  if (el) window.scrollTo({ top: el.offsetTop - 64, behavior: "smooth" });
-}
+import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
 
 // ─────────────────────────────────────────────────────── How It Works
 const HOW_STEPS = [
@@ -88,14 +89,10 @@ export function HowItWorks() {
           ))}
         </div>
         <div className="mt-10 text-center">
-          <button
-            type="button"
-            onClick={scrollToForm}
-            className="group inline-flex h-11 items-center gap-1.5 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-[0_10px_24px_rgba(82,72,212,0.28)] hover:-translate-y-0.5 transition-transform"
-          >
+          <ScrollToFormButton className="group inline-flex h-11 items-center gap-1.5 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-[0_10px_24px_rgba(82,72,212,0.28)] hover:-translate-y-0.5 transition-transform">
             Try it now — free
             <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-          </button>
+          </ScrollToFormButton>
         </div>
       </div>
     </section>
@@ -173,14 +170,10 @@ export function WhyNotSpreadsheet() {
           </table>
         </div>
         <div className="mt-8 text-center">
-          <button
-            type="button"
-            onClick={scrollToForm}
-            className="group inline-flex h-11 items-center gap-1.5 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-[0_10px_24px_rgba(82,72,212,0.28)] hover:-translate-y-0.5 transition-transform"
-          >
+          <ScrollToFormButton className="group inline-flex h-11 items-center gap-1.5 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-[0_10px_24px_rgba(82,72,212,0.28)] hover:-translate-y-0.5 transition-transform">
             Run a deal in 60 seconds
             <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-          </button>
+          </ScrollToFormButton>
         </div>
       </div>
     </section>
@@ -472,15 +465,11 @@ export function PreCalculatorCta() {
           </p>
 
           <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
-            <button
-              type="button"
-              onClick={scrollToForm}
-              className="group inline-flex h-12 items-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_14px_32px_rgba(82,72,212,0.32)] hover:-translate-y-0.5 transition-transform sm:h-14 sm:text-base"
-            >
+            <ScrollToFormButton className="group inline-flex h-12 items-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_14px_32px_rgba(82,72,212,0.32)] hover:-translate-y-0.5 transition-transform sm:h-14 sm:text-base">
               <Zap className="size-4 sm:size-5" />
               Run a free deal now
               <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5 sm:size-5" />
-            </button>
+            </ScrollToFormButton>
             <Link
               href="/pricing"
               className="inline-flex h-12 items-center gap-1.5 rounded-xl border border-border bg-card px-5 text-sm font-semibold text-foreground hover:bg-muted sm:h-14 sm:text-base"

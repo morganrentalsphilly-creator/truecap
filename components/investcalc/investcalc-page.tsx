@@ -41,7 +41,13 @@ import { enrichPropertyAction } from "@/app/actions/enrich-property";
 import type { SelectedAddress } from "./address-autocomplete";
 import type { TenYearProjectionInput, ProjectionYear } from "@/lib/ten-year-projections";
 import type { TaxStrategyInput, TaxStrategyYear } from "@/lib/tax-strategy";
-import { generateInvestmentPDF, type ReportData } from "@/lib/pdf-generator";
+// `generateInvestmentPDF` is dynamic-imported inside the Export PDF
+// handler — it pulls in jspdf + jspdf-autotable + chart.js (~130-150 KB
+// gzipped). Static-importing here would ship all of that to every
+// cold homepage visitor even though only ~1-2% click Export PDF.
+// We still need the value-type `ReportData` at compile time, so import
+// it as `import type` which is erased entirely at runtime.
+import type { ReportData } from "@/lib/pdf-generator";
 import {
   buildExitScenarios,
   resolveExitScenarioRates,
@@ -1474,6 +1480,11 @@ export function InvestCalcPage({
         exitYears,
       });
 
+      // Lazy-load the PDF generator on first Export click. This keeps
+      // jspdf + chart.js (~130-150 KB gzipped) out of the homepage's
+      // initial JS bundle. First click triggers a ~150-300ms fetch on a
+      // slow 4G connection; subsequent clicks are instant (cached).
+      const { generateInvestmentPDF } = await import("@/lib/pdf-generator");
       await generateInvestmentPDF(reportData);
       // Fire the Google Ads conversion event. PDF export = high-intent
       // signal (user is sharing the analysis with a lender / partner).

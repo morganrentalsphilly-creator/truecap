@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 import {
   Lock,
   TrendingUp,
@@ -22,9 +23,44 @@ import {
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AnalysisResult } from "@/lib/calc-analysis";
-import { TenYearProjectionsPanel } from "@/components/investcalc/ten-year-projections/panel";
-import { TaxStrategyPanel } from "@/components/investcalc/tax-strategy/panel";
-import { ExitScenariosPanel } from "@/components/investcalc/exit-scenarios/panel";
+
+// The three Pro snapshot panels each pull in recharts (~90 KB gzipped
+// combined). They're tab-gated AND Pro-gated — most homepage visitors
+// (and all free-tier users on the default tab) never render them. Lazy-
+// loading via next/dynamic keeps recharts out of the initial bundle.
+// Each panel shows a small skeleton during the brief load (typically
+// 100-300 ms on first tab click, instant on subsequent clicks).
+// `ssr: false` because charts only render in the browser anyway.
+const TenYearProjectionsPanel = dynamic(
+  () =>
+    import("@/components/investcalc/ten-year-projections/panel").then(
+      (m) => m.TenYearProjectionsPanel
+    ),
+  {
+    ssr: false,
+    loading: () => <Skeleton className="h-[420px] w-full rounded-2xl" />,
+  }
+);
+const TaxStrategyPanel = dynamic(
+  () =>
+    import("@/components/investcalc/tax-strategy/panel").then(
+      (m) => m.TaxStrategyPanel
+    ),
+  {
+    ssr: false,
+    loading: () => <Skeleton className="h-[420px] w-full rounded-2xl" />,
+  }
+);
+const ExitScenariosPanel = dynamic(
+  () =>
+    import("@/components/investcalc/exit-scenarios/panel").then(
+      (m) => m.ExitScenariosPanel
+    ),
+  {
+    ssr: false,
+    loading: () => <Skeleton className="h-[420px] w-full rounded-2xl" />,
+  }
+);
 import { MaxOfferCard } from "@/components/investcalc/max-offer-card";
 import { SensitivityGrid } from "@/components/investcalc/sensitivity-grid";
 import { StrategiesPanel } from "@/components/investcalc/strategies-panel";
