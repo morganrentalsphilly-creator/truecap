@@ -72,7 +72,18 @@ function isOwnerOccupantNearBreakEvenForRiskLabel(input: DealScoreInput): boolea
 
 function getCashFlowScore(input: DealScoreInput): number {
   if (!isOwnerOccupantDeal(input)) {
-    return input.monthlyCashFlow > 1000 ? 25 : input.monthlyCashFlow > 0 ? 15 : 0;
+    // Six-tier scoring (was 2-tier 0/15/25). The old cliff treated $1/mo
+    // and $999/mo identically — both got the same 15 pts. In 2026's
+    // 7-8% rate environment, $200-500/mo is the realistic "good deal"
+    // band; $1000+/mo is rare without a strong cash-down or low-cost
+    // market. Smooth tiers reflect the actual distribution.
+    const cf = input.monthlyCashFlow;
+    if (cf > 1000) return 25;
+    if (cf > 500) return 21;
+    if (cf > 200) return 16;
+    if (cf > 0) return 10;
+    if (cf > -200) return 4;
+    return 0;
   }
 
   if (input.monthlyCashFlow > OWNER_OCCUPANT_NEAR_ZERO_THRESHOLD) return 30;
@@ -82,26 +93,31 @@ function getCashFlowScore(input: DealScoreInput): number {
 
 function getRecommendation(score: number, input: DealScoreInput): DealRecommendation {
   if (isOwnerOccupantDeal(input) && input.monthlyCashFlow >= -OWNER_OCCUPANT_NEAR_ZERO_THRESHOLD) {
-    if (score >= 80) return "Strong Buy";
+    if (score >= 75) return "Strong Buy";
     return "Buy";
   }
-  if (score >= 80) return "Strong Buy";
-  if (score >= 60) return "Buy";
-  if (score >= 40) return "Neutral";
-  if (score >= 20) return "Risky";
+  // Recommendation thresholds lowered to match the more granular tier
+  // scoring below. Strong Buy 80→75 (still exclusive — requires top
+  // tiers on most metrics). Buy 60→55 (catches realistic 2026 deals
+  // with 6-8% cap, 5-7% CoC, positive cash flow, DSCR ≥ 1.20).
+  // Neutral 40→35 (catches "mixed signals" deals). Risky/Avoid
+  // unchanged — those still mark genuinely bad fundamentals.
+  if (score >= 75) return "Strong Buy";
+  if (score >= 55) return "Buy";
+  if (score >= 35) return "Neutral";
+  if (score >= 18) return "Risky";
   return "Avoid";
 }
 
 function getRiskLevelBase(score: number): DealRiskLevel {
-  // Thresholds calibrated for 2026's higher-rate environment. The
-  // Medium / High floor was previously 40 — that bucket reflected
-  // "borderline" deals in the 2018-2022 era when 3-4% rates left
-  // generous cash-flow margins. With 7-8.5% investment loans in 2026,
-  // a score of 40 typically reflects negative cash flow + thin returns
-  // — that's High Risk by any reasonable definition, not Medium. The
-  // 50-floor better matches the current cost-of-capital reality.
-  if (score >= 70) return "Low Risk";
-  if (score >= 50) return "Medium Risk";
+  // Risk thresholds shifted with the granular tier rework. Low Risk
+  // floor 70→65 (now achievable by solid all-around deals, not just
+  // exceptional ones). Medium Risk floor 50→40 (catches "neutral but
+  // not bad" — was previously labeled High Risk under the coarse
+  // tiers because 40 was the absolute max a borderline-decent deal
+  // could reach).
+  if (score >= 65) return "Low Risk";
+  if (score >= 40) return "Medium Risk";
   return "High Risk";
 }
 
@@ -134,13 +150,18 @@ function buildExplanation(
   const strengths: string[] = [];
   const weaknesses: string[] = [];
 
-  if (breakdown.cashFlowScore >= 15) strengths.push("positive monthly cash flow");
+  // Threshold values adjusted to match the new granular tier scoring.
+  // Cash flow strength surfaces at the 16-pt tier ($200+/mo positive).
+  // CoC strength at 16-pt tier (5%+ — realistic 2026 healthy threshold).
+  // Cap rate strength at 11-pt tier (5%+ — same lower bound as before).
+  // DSCR strength at 8-pt tier (≥1.10 — close to lender floor).
+  if (breakdown.cashFlowScore >= 16) strengths.push("positive monthly cash flow");
   if (isOwnerOccupantDeal(input) && input.monthlyCashFlow >= -OWNER_OCCUPANT_NEAR_ZERO_THRESHOLD) {
     strengths.push("housing cost is kept near break-even");
   }
-  if (breakdown.cocScore >= 15) strengths.push("healthy cash-on-cash return");
-  if (breakdown.capRateScore >= 10) strengths.push("solid cap rate");
-  if (breakdown.dscrScore >= 10) strengths.push("strong debt-service coverage");
+  if (breakdown.cocScore >= 16) strengths.push("healthy cash-on-cash return");
+  if (breakdown.capRateScore >= 11) strengths.push("solid cap rate");
+  if (breakdown.dscrScore >= 8) strengths.push("strong debt-service coverage");
 
   if (input.vacancyRate > 8) weaknesses.push("elevated vacancy risk");
   if (!isOwnerOccupantDeal(input) && input.monthlyCashFlow < 0) weaknesses.push("negative cash flow");
@@ -215,33 +236,47 @@ function buildExplanation(
 export function computeDealScore(input: DealScoreInput): DealScoreResult {
   const cashFlowScore = getCashFlowScore(input);
 
+  // Cash-on-cash — 6-tier granular scoring (was coarse 0/8/15/25).
+  // The old "12% = excellent" threshold was set when 4% mortgage
+  // rates left generous CoC headroom. In 2026 with 7-8% rates, even
+  // healthy deals top out at 7-10% CoC. New tiers reflect that:
+  // 10%+ is exceptional, 7-9% is strong (was previously only middling
+  // at 15 pts), 5-7% is healthy for 2026 (was scored at 0-8).
+  const coc = input.cashOnCashReturn;
   const cocScore =
-    input.cashOnCashReturn > 12
-      ? 25
-      : input.cashOnCashReturn > 8
-        ? 15
-        : input.cashOnCashReturn > 5
-          ? 8
-          : 0;
+    coc > 10 ? 25
+    : coc > 7 ? 21
+    : coc > 5 ? 16
+    : coc > 3 ? 10
+    : coc > 1 ? 4
+    : 0;
 
-  const capRateScore = input.capRate > 8 ? 20 : input.capRate > 5 ? 10 : 0;
-  // Cash purchases have no debt service, so DSCR is mathematically undefined.
-  // Award full DSCR credit rather than penalizing the deal — a 100% down
-  // payment is the safest possible debt structure (no debt).
-  //
-  // The 10-pt middle bucket floor was previously 1.0 — meaning a deal
-  // with DSCR 1.05 still scored partial credit. But 2026-era DSCR
-  // lenders require a 1.20-1.25 minimum, so a 1.05 deal isn't actually
-  // loanable. Tightening the floor to 1.15 reflects market reality:
-  // the deal needs to be at least close to loanable to deserve any
-  // DSCR credit. Anything below 1.15 = no loan = 0 points.
+  // Cap rate — 5-tier granular (was 0/10/20). 7% cap rate is a
+  // realistic 2026 "good deal" benchmark — the old binary scoring
+  // treated 7.5% the same as 5.1% (both 10 pts). New tiers credit
+  // strong cap rates more meaningfully without inflating the top.
+  const capRateScore =
+    input.capRate > 8 ? 20
+    : input.capRate > 6.5 ? 16
+    : input.capRate > 5 ? 11
+    : input.capRate > 4 ? 5
+    : 0;
+
+  // DSCR — 5-tier (was 3-tier). Cash purchases get full credit (no
+  // debt). >1.30 is "loaned without question" — bumped to top tier
+  // since 1.25 lender floors mean 1.25-1.30 isn't actually exceptional.
+  // 1.20 is "above floor, fundable" — meaningful credit (15 pts) up
+  // from 10 in the previous version. 1.15 (last revision) was tight
+  // territory; now in the 8-pt tier. 1.0+ gets minimum credit (3 pts)
+  // because operating income covers debt, even if not at lender
+  // standards — the deal isn't underwater operationally.
   const dscrScore = input.isCashPurchase
     ? 20
-    : input.dscr > 1.25
-      ? 20
-      : input.dscr >= 1.15
-        ? 10
-        : 0;
+    : input.dscr > 1.30 ? 20
+    : input.dscr > 1.20 ? 15
+    : input.dscr >= 1.10 ? 8
+    : input.dscr >= 1.0 ? 3
+    : 0;
 
   let riskPenalty = 0;
   if (input.vacancyRate > 8) riskPenalty -= 10;
