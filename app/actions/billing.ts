@@ -4,6 +4,7 @@ import { z } from "zod";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getStripe } from "@/lib/stripe/client";
+import { captureServerEvent } from "@/lib/posthog-server";
 
 const checkoutSchema = z.object({
   planSlug: z.enum(["pro_monthly", "pro_annual"]),
@@ -168,6 +169,20 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
       console.error("[billing] Stripe checkout session missing URL");
       return { ok: false, code: "SERVER_ERROR", message: "Unable to start checkout. Please try again." };
     }
+
+    // PostHog funnel event — fires just before we return the Stripe
+    // redirect URL. Captures conversion INTENT even if the user later
+    // bounces on Stripe's checkout page (the corresponding
+    // `pro_subscribed` event will only fire on actual successful
+    // payment, so the gap between these two = checkout drop-off rate).
+    await captureServerEvent({
+      distinctId: user.id,
+      event: "pro_checkout_started",
+      properties: {
+        plan_slug: parsed.data.planSlug,
+        stripe_session_id: session.id,
+      },
+    });
 
     return { ok: true, url: session.url };
   } catch (error) {

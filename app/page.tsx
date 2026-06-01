@@ -12,6 +12,7 @@ import {
 } from "@/components/marketing/landing-sections";
 import { OnboardingTour } from "@/components/marketing/onboarding-tour";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
+import { TrackLandingView } from "@/components/analytics/track-landing-view";
 import { StickyConversionBar } from "@/components/marketing/sticky-conversion-bar";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import {
@@ -249,6 +250,11 @@ export default async function Home() {
           depth events so the bidding algorithm has something to
           optimize against beyond rare conversions. */}
       <ScrollDepthTracker />
+      {/* Fires PostHog `landing_view` once on mount — top of the
+          conversion funnel. Pairs with `analyzer_started`,
+          `analysis_completed`, `pro_checkout_started`, `pro_subscribed`
+          to build a 5-step funnel chart in the PostHog dashboard. */}
+      <TrackLandingView />
       {/* Site footer — trust + sitemap + brand. Shown to everyone; helps
           with Quality Score and dwell time. */}
       <SiteFooter />

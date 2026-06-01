@@ -29,6 +29,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Cookie, X } from "lucide-react";
+import { setAnalyticsConsent } from "@/lib/analytics";
 
 /**
  * Paths where the cookie banner must be suppressed entirely. These
@@ -100,12 +101,18 @@ export function CookieConsentBanner() {
   const handleAccept = () => {
     writeStoredConsent("granted");
     pushGtagConsent("granted");
+    // Also flip PostHog from opt-out (its default) to opt-in. Without
+    // this, gtag tracks but PostHog stays dark even though the user
+    // just gave consent. setAnalyticsConsent is a safe no-op if
+    // PostHog isn't loaded (missing env var, ad-block, etc.).
+    setAnalyticsConsent(true);
     setDecision("granted");
   };
 
   const handleReject = () => {
     writeStoredConsent("denied");
     pushGtagConsent("denied");
+    setAnalyticsConsent(false);
     setDecision("denied");
   };
 

@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { encodeShareLink, buildShareUrl } from "@/lib/share-link";
+import { trackEvent } from "@/lib/analytics";
 
 interface ShareLinkButtonProps {
   values: InvestmentFormValues | null;
@@ -50,6 +51,7 @@ export function ShareLinkButton({ values, className }: ShareLinkButtonProps) {
       await navigator.clipboard.writeText(shareUrl);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+      trackEvent("share_link_copied", { has_address: Boolean(values?.address) });
     } catch {
       // Fallback for browsers without clipboard API: select the input.
       const el = document.getElementById("share-link-url") as HTMLInputElement | null;

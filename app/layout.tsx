@@ -4,6 +4,7 @@ import { Analytics } from '@vercel/analytics/next'
 import { Toaster } from '@/components/ui/toaster'
 import { CookieConsentBanner } from '@/components/marketing/cookie-consent-banner'
 import { AnnualPromoBanner } from '@/components/marketing/annual-promo-banner'
+import { PostHogProvider } from '@/components/analytics/posthog-provider'
 import { getSiteUrl } from '@/lib/site-url'
 import './globals.css'
 
@@ -210,6 +211,13 @@ gtag('config', '${GOOGLE_ADS_ID}');`,
             /pricing and /auth/*. Sits ABOVE all page content so it
             doesn't reshuffle individual pages' layouts. */}
         <AnnualPromoBanner />
+        {/* PostHog provider — initializes posthog-js with cookie-consent
+            respect, identifies authenticated Supabase users, and fires
+            $pageview on App Router transitions. The wizard set up env
+            vars + MCP server but didn't ship a provider, so this is the
+            actual init call that makes all client-side trackEvent() in
+            lib/analytics.ts work. */}
+        <PostHogProvider />
         {children}
         <Toaster />
         {/* Cookie consent banner — pairs with the Consent Mode v2

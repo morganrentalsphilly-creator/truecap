@@ -56,6 +56,7 @@ import {
 } from "@/lib/exit-scenarios";
 import { buildAutoVerdict } from "@/lib/verdict";
 import { trackConversion } from "@/lib/analytics/track-conversion";
+import { trackEvent } from "@/lib/analytics";
 
 type InputTab = "cash-flow" | "projections" | "tax-strategy" | "deal-score";
 const SAVED_ANALYSIS_EDIT_DRAFT_KEY = "truecap_saved_analysis_edit_draft";
@@ -1168,6 +1169,19 @@ export function InvestCalcPage({
     setIsLoadingDealScore(true);
     setShowResults(false);
     setDealScoreResult(null);
+
+    // PostHog funnel event — fires the moment the user commits to
+    // analyzing a deal (form passed validation, calculation started).
+    // This is the top of the in-product funnel above analysis_completed.
+    // Properties capture the deal shape so we can later segment funnels
+    // by property type / cash purchase / etc. — no PII (no address).
+    trackEvent("analyzer_started", {
+      property_type: values.propertyType,
+      purchase_price: values.purchasePrice,
+      is_cash_purchase: !values.downPaymentPct || values.downPaymentPct >= 100,
+      input_tab: activeInputTab,
+    });
+
     try {
       // Brief artificial delay so the loading state registers — the
       // analysis is actually instant. 400ms is enough to feel
@@ -1189,6 +1203,19 @@ export function InvestCalcPage({
       // optimize spend against (analyze-an-actual-deal is the
       // micro-conversion that precedes signup).
       trackConversion("calc_completed");
+      // PostHog funnel event — fires once the analysis is rendered.
+      // Properties include the headline metrics so PostHog dashboards
+      // can segment "users who saw a STRONG BUY verdict" vs "users who
+      // saw AVOID" and compare downstream conversion to Pro.
+      trackEvent("analysis_completed", {
+        property_type: values.propertyType,
+        cap_rate: result.capRate,
+        coc_return: result.cocReturn,
+        dscr: result.dscr,
+        monthly_cash_flow: Math.round(result.netCashFlow),
+        is_cash_purchase: result.monthlyPayment <= 0,
+        input_tab: activeInputTab,
+      });
       setProjectionSource(builtProjectionSource);
       setTaxStrategySource(builtTaxStrategySource);
       setExitScenarioSource(
@@ -1347,6 +1374,12 @@ export function InvestCalcPage({
           // power-user editing a saved deal 5 times would emit 5
           // 'deal_saved' events and skew the optimizer.
           trackConversion("deal_saved");
+          trackEvent("deal_saved", {
+            property_type: form.getValues().propertyType,
+            purchase_price: form.getValues().purchasePrice,
+            cap_rate: analysisResult?.capRate,
+            monthly_cash_flow: analysisResult ? Math.round(analysisResult.netCashFlow) : undefined,
+          });
         }
         const persistedJson = formSnapshotForCompare(form.getValues());
         if (persistedJson) lastPersistedFormJsonRef.current = persistedJson;
@@ -1493,6 +1526,11 @@ export function InvestCalcPage({
       // the rare 'paid_subscribed' event — critical for new accounts
       // where conversion data is sparse.
       trackConversion("pdf_exported");
+      trackEvent("pdf_exported", {
+        property_type: values.propertyType,
+        purchase_price: values.purchasePrice,
+        has_deal_score: Boolean(dealScoreResult?.ok && dealScoreResult.tier === "pro"),
+      });
       toast({
         title: "PDF generated",
         description: "Your report was exported from the latest live analysis data.",

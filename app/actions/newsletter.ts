@@ -1,5 +1,7 @@
 "use server";
 
+import { captureServerEvent } from "@/lib/posthog-server";
+
 /**
  * Newsletter subscription server action.
  *
@@ -108,6 +110,11 @@ export async function subscribeToNewsletterAction(
     // 200/201 = created. Resend returns 200 even on "already exists"
     // in some cases (treats POST as upsert).
     if (response.ok) {
+      await captureServerEvent({
+        distinctId: parsed.data.email,
+        event: "newsletter_subscribed",
+        properties: { source: parsed.data.source ?? "other" },
+      });
       return {
         ok: true,
         message: "You're in. Check your inbox for a welcome.",
