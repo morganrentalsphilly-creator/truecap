@@ -16,7 +16,11 @@ yarn-error.log*
 pnpm-debug.log*
 
 
-# environment variables
+# environment variables — ignore every .env file by default, then
+# explicitly un-ignore the example template so the repo ships with a
+# documented env shape but never with real secrets.
+.env
+.env.*
 !.env.example
 
 # vercel
@@ -35,10 +39,12 @@ pnpm-debug.log*
 .DS_Store
 *.pem
 
-# debug
+# debug — `*.log` is fine. `*.md` and `*.ps1` removed: blocking every
+# markdown file silently hides README/CLAUDE/changelog edits from git.
+# Tracked docs (docs/*.md, CLAUDE.md, README) are unaffected since
+# they're already in the index, but NEW markdown files were getting
+# dropped without warning. Restored to log-only.
 *.log
-*.md
-*.ps1
 # local env files
 .env.development.local
 .env.test.local
@@ -55,8 +61,16 @@ agent-transcripts/
 terminals/
 mcps/
 /.cursor
+# Editor + tooling metadata (PostHog wizard, Claude session artifacts).
+# Not source — local-only tooling state. Treat like .vscode / .idea.
+.claude/
 /.pdf_review
-/scripts
+# `/scripts` removed: that directory holds tracked utility scripts
+# (schedule-all-broadcasts, schedule-daily-campaign, preview-daily-campaign,
+# count-audience-contacts, polish-emails). Ignoring the whole directory
+# silently blocked new scripts from being added to the deploy. If a
+# specific script in there needs to stay local, ignore it by exact
+# filename instead of the parent folder.
 
 
 # lock files (optional - depends on your team)
