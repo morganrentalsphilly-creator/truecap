@@ -49,18 +49,20 @@ export default withSentryConfig(nextConfig, {
   // side errors will fail.
   tunnelRoute: "/monitoring",
 
-  // Auto-instrument Vercel Cron Monitors so a failed weekly newsletter
-  // send shows up as a Sentry alert without needing manual capture.
-  // PREVIOUSLY this was nested under `webpack: {...}` where Sentry's
-  // schema does not look — it was silently ignored. Cron monitoring
-  // therefore wasn't actually attached. Top-level placement fixes that.
-  automaticVercelMonitors: true,
-
-  // Tree-shake Sentry's debug-logging statements out of the production
-  // client bundle. Same reason for moving out from under `webpack: {}`:
-  // the option lives at the top level of the second withSentryConfig
-  // argument, not inside webpack.
-  reactComponentAnnotation: {
-    enabled: false,
+  // Webpack-plugin-scoped Sentry options. @sentry/nextjs 10.x moved
+  // these into a nested `webpack: {...}` block; the previous top-level
+  // placement now emits a deprecation warning on every build. The
+  // behavior is identical, only the location of the keys changed in
+  // the SDK's typings.
+  webpack: {
+    // Auto-instrument Vercel Cron Monitors so a failed weekly newsletter
+    // send shows up as a Sentry alert without needing manual capture.
+    automaticVercelMonitors: true,
+    // Disable React Server Component / component-tree annotation. It
+    // adds DevTools-friendly metadata but ships extra bytes we don't
+    // need in production.
+    reactComponentAnnotation: {
+      enabled: false,
+    },
   },
 });
