@@ -21,6 +21,7 @@ const TITLE = "How to spot a bad rental deal in 60 seconds — 7 red flags";
 const DESCRIPTION =
   "Seven red flags that tell you a rental property doesn't pencil — before you waste hours running the full underwrite. The triage every experienced investor does in their head.";
 const PUBLISHED_AT = "2026-05-24";
+const MODIFIED_AT = "2026-06-01";
 const READING_TIME = 8;
 
 export const metadata: Metadata = {
@@ -46,7 +47,7 @@ export default function SpotBadRentalPost() {
     headline: TITLE,
     description: DESCRIPTION,
     datePublished: PUBLISHED_AT,
-    dateModified: PUBLISHED_AT,
+    dateModified: MODIFIED_AT,
     url: `${siteUrl}/blog/${SLUG}`,
     publisher: { "@id": `${siteUrl}/#organization` },
     isPartOf: { "@id": `${siteUrl}/blog#blog` },

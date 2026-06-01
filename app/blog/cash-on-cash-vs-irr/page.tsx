@@ -20,6 +20,7 @@ const TITLE = "Cash-on-cash vs IRR: which one tells the truth?";
 const DESCRIPTION =
   "Cash-on-cash and IRR are both return metrics, but they answer completely different questions. When each one is right, when each one lies, and which to trust on which type of deal.";
 const PUBLISHED_AT = "2026-05-24";
+const MODIFIED_AT = "2026-06-01";
 const READING_TIME = 7;
 
 export const metadata: Metadata = {
@@ -44,7 +45,7 @@ export default function CashOnCashVsIrrPost() {
     headline: TITLE,
     description: DESCRIPTION,
     datePublished: PUBLISHED_AT,
-    dateModified: PUBLISHED_AT,
+    dateModified: MODIFIED_AT,
     url: `${siteUrl}/blog/${SLUG}`,
     publisher: { "@id": `${siteUrl}/#organization` },
     isPartOf: { "@id": `${siteUrl}/blog#blog` },

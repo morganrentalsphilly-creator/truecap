@@ -27,6 +27,7 @@ const TITLE = "Rental property tax deductions — the 14 every investor should k
 const DESCRIPTION =
   "Every deductible expense on a rental property, organized by Schedule E line. Worked examples, common-mistake callouts, and the depreciation move that often saves more than all other deductions combined.";
 const PUBLISHED_AT = "2026-05-26";
+const MODIFIED_AT = "2026-06-01";
 const READING_TIME = 11;
 
 export const metadata: Metadata = {
@@ -91,7 +92,7 @@ export default function TaxDeductionsPost() {
     headline: TITLE,
     description: DESCRIPTION,
     datePublished: PUBLISHED_AT,
-    dateModified: PUBLISHED_AT,
+    dateModified: MODIFIED_AT,
     url: canonicalUrl,
     publisher: { "@id": `${siteUrl}/#organization` },
     isPartOf: { "@id": `${siteUrl}/blog#blog` },
@@ -145,7 +146,7 @@ export default function TaxDeductionsPost() {
             The interest portion of your mortgage payment is fully deductible. NOT the principal — principal is building equity, not an expense.
           </p>
           <p>
-            <strong>Worked example:</strong> $300k loan at 7% interest, 30-year fixed. Year-1 interest paid: ~$20,800. That&apos;s a $20,800 deduction on Schedule E line 12. Your lender sends a 1098 form each January showing the exact deductible amount.
+            <strong>Worked example:</strong> $300k loan at 7% interest, 30-year fixed. Year-1 interest paid: ~$20,800. That&apos;s a $20,800 deduction on Schedule E line 12. Your lender sends a 1098 form each January showing the exact deductible amount. (Remember: deductible interest reduces taxable income — it doesn&apos;t affect the property&apos;s <Link href="/glossary/noi" className="text-primary font-semibold hover:underline">NOI</Link>, which is computed before debt service.)
           </p>
 
           <h2 className="text-2xl font-black text-foreground mt-10 mb-3">2. Depreciation (Schedule E line 18)</h2>
@@ -153,7 +154,7 @@ export default function TaxDeductionsPost() {
             The biggest deduction in rental investing, and the one most commonly under-used. Residential rental property depreciates over 27.5 years; commercial over 39 years. You depreciate the BUILDING value only (not land).
           </p>
           <p>
-            <strong>Worked example:</strong> $500k purchase, 80% allocated to building = $400k depreciable basis. $400k ÷ 27.5 = $14,545/year of depreciation deduction. At a 32% effective tax bracket, that&apos;s ~$4,650/year of tax savings — without you spending a dollar.
+            <strong>Worked example:</strong> $500k purchase, 80% allocated to building = $400k depreciable basis. $400k ÷ 27.5 = $14,545/year of depreciation deduction. At a 32% effective tax bracket, that&apos;s ~$4,650/year of tax savings — without you spending a dollar. To estimate the impact on your specific deal in one shot, use the <Link href="/tools/rental-property-tax-calculator" className="text-primary font-semibold hover:underline">rental property tax calculator</Link>.
           </p>
           <p>
             <strong>Power-up: cost segregation.</strong> A cost segregation study reclassifies portions of the building (appliances, carpeting, landscaping, electrical fixtures) to 5, 7, or 15-year schedules instead of 27.5. Front-loads 25-35% of depreciation into the first 5 years. Worth doing on properties over ~$250k that you&apos;ll hold 7+ years. See our <Link href="/blog/cap-rate-vs-cash-on-cash-vs-dscr" className="text-primary font-semibold hover:underline">return metrics deep-dive</Link> for how this impacts IRR.

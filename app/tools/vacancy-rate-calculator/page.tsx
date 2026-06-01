@@ -75,6 +75,7 @@ export default function VacancyRateCalculatorPage() {
     name: "Vacancy Rate Calculator — TrueCap",
     description: "Free rental property vacancy rate calculator.",
     url: `${siteUrl}/tools/vacancy-rate-calculator`,
+    dateModified: "2026-06-01",
     publisher: { "@id": `${siteUrl}/#organization` },
   };
   const faqLd = {

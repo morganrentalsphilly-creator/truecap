@@ -182,6 +182,32 @@ export default function ForFlippersPage() {
           </ul>
         </section>
 
+        <section className="mb-12 sm:mb-16 rounded-2xl border border-border bg-card p-6 sm:p-8">
+          <h2 className="text-lg sm:text-xl font-black text-foreground mb-3">
+            Tools and guides flippers reach for first
+          </h2>
+          <p className="text-sm leading-relaxed text-foreground">
+            Pre-offer, anchor your rehab budget with the{" "}
+            <Link href="/blog/how-to-estimate-rehab-costs" className="text-primary font-semibold hover:underline">
+              how-to-estimate-rehab-costs guide
+            </Link>{" "}
+            and stress-test the buy with the{" "}
+            <Link href="/tools/brrrr-calculator" className="text-primary font-semibold hover:underline">
+              BRRRR calculator
+            </Link>{" "}
+            as a hold-instead alternative. If you&apos;re hunting deeper
+            discounts, the playbook on{" "}
+            <Link href="/blog/how-to-find-off-market-rental-properties" className="text-primary font-semibold hover:underline">
+              finding off-market properties
+            </Link>{" "}
+            transfers directly. Post-rehab, the{" "}
+            <Link href="/tools/cap-rate-calculator" className="text-primary font-semibold hover:underline">
+              cap rate calculator
+            </Link>{" "}
+            confirms the comps you&apos;re pricing into.
+          </p>
+        </section>
+
         {/* CTA */}
         <section className="mb-12 sm:mb-16 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
           <h2 className="text-2xl sm:text-3xl font-black mb-2">

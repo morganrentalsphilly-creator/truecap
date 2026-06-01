@@ -20,6 +20,7 @@ const TITLE = "The 50% rule for rentals — is it still useful in 2026?";
 const DESCRIPTION =
   "The classic 50% rule says operating expenses run ~half of gross rent. Honest take on when it actually works as a triage tool, when it lies, and what to do instead for the deals it can't handle.";
 const PUBLISHED_AT = "2026-05-25";
+const MODIFIED_AT = "2026-06-01";
 const READING_TIME = 6;
 
 export const metadata: Metadata = {
@@ -44,7 +45,7 @@ export default function FiftyPercentRulePost() {
     headline: TITLE,
     description: DESCRIPTION,
     datePublished: PUBLISHED_AT,
-    dateModified: PUBLISHED_AT,
+    dateModified: MODIFIED_AT,
     url: `${siteUrl}/blog/${SLUG}`,
     publisher: { "@id": `${siteUrl}/#organization` },
     isPartOf: { "@id": `${siteUrl}/blog#blog` },

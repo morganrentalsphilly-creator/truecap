@@ -20,6 +20,7 @@ const TITLE = "1031 exchange basics for individual rental investors";
 const DESCRIPTION =
   "How a 1031 exchange actually works in 2026 — the 45-day and 180-day windows, qualified intermediary requirement, like-kind rules, boot, reverse exchanges, and when it's worth the complexity.";
 const PUBLISHED_AT = "2026-05-25";
+const MODIFIED_AT = "2026-06-01";
 const READING_TIME = 11;
 
 export const metadata: Metadata = {
@@ -45,7 +46,7 @@ export default function ExchangePost() {
     headline: TITLE,
     description: DESCRIPTION,
     datePublished: PUBLISHED_AT,
-    dateModified: PUBLISHED_AT,
+    dateModified: MODIFIED_AT,
     url: `${siteUrl}/blog/${SLUG}`,
     publisher: { "@id": `${siteUrl}/#organization` },
     isPartOf: { "@id": `${siteUrl}/blog#blog` },

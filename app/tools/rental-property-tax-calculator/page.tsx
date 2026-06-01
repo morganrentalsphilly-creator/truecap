@@ -80,6 +80,7 @@ export default function RentalPropertyTaxCalculatorPage() {
     name: "Rental Property Tax Calculator — TrueCap",
     description: "Free Schedule E + depreciation calculator for rental property investors.",
     url: `${siteUrl}/tools/rental-property-tax-calculator`,
+    dateModified: "2026-06-01",
     publisher: { "@id": `${siteUrl}/#organization` },
   };
   const faqLd = {

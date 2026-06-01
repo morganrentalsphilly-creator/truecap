@@ -189,6 +189,37 @@ export default function ForHouseHackersPage() {
           </ul>
         </section>
 
+        <section className="mb-12 sm:mb-16 rounded-2xl border border-border bg-card p-6 sm:p-8">
+          <h2 className="text-lg sm:text-xl font-black text-foreground mb-3">
+            Recommended reading and tools
+          </h2>
+          <p className="text-sm leading-relaxed text-foreground">
+            Start with the deep-dive on{" "}
+            <Link href="/blog/house-hacking-explained" className="text-primary font-semibold hover:underline">
+              house hacking explained
+            </Link>{" "}
+            and the comparison of{" "}
+            <Link href="/blog/single-family-vs-multi-family-rental" className="text-primary font-semibold hover:underline">
+              single-family vs multi-family
+            </Link>{" "}
+            properties. Once you&apos;ve picked a property, ground the
+            numbers with the{" "}
+            <Link href="/tools/cap-rate-calculator" className="text-primary font-semibold hover:underline">
+              cap rate
+            </Link>{" "}
+            and{" "}
+            <Link href="/tools/dscr-calculator" className="text-primary font-semibold hover:underline">
+              DSCR
+            </Link>{" "}
+            calculators for the rented portion, then run the year-1 screen
+            with the{" "}
+            <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="text-primary font-semibold hover:underline">
+              60-second underwriting workflow
+            </Link>
+            .
+          </p>
+        </section>
+
         <section className="mb-12 sm:mb-16 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
           <h2 className="text-2xl sm:text-3xl font-black mb-2">
             Free analyzer is enough to pick the property.

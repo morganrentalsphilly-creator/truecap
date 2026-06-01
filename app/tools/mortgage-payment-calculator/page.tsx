@@ -72,6 +72,7 @@ export default function MortgagePaymentPage() {
     name: "TrueCap Mortgage Payment Calculator",
     applicationCategory: "FinanceApplication",
     operatingSystem: "Web",
+    dateModified: "2026-06-01",
     url: `${siteUrl}/tools/mortgage-payment-calculator`,
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
   };

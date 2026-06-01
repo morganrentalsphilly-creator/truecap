@@ -76,6 +76,7 @@ export default function VsExcelPage() {
     name: "TrueCap vs Excel for rental property analysis",
     url: `${siteUrl}/vs/excel`,
     description: "Side-by-side comparison of TrueCap and Excel/Google Sheets for rental analysis.",
+    dateModified: "2026-06-01",
     publisher: { "@id": `${siteUrl}/#organization` },
   };
 

@@ -38,20 +38,29 @@ export function TaxStrategyPanel({
     let cancelled = false;
     setIsLoadingSnapshot(true);
 
+    // Try/catch contains action rejections from becoming unhandled
+    // browser promise rejections. Snapshot load failure is a no-op for
+    // the user — live calc from input still renders.
     void (async () => {
-      const result = await getTaxStrategySnapshotAction({
-        analysisId,
-        input: source.input,
-      });
+      try {
+        const result = await getTaxStrategySnapshotAction({
+          analysisId,
+          input: source.input,
+        });
 
-      if (cancelled) return;
+        if (cancelled) return;
 
-      if (result.ok) {
-        setYears(result.snapshot.taxStrategyYears);
-        setSnapshotSource(result.source);
+        if (result.ok) {
+          setYears(result.snapshot.taxStrategyYears);
+          setSnapshotSource(result.source);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          console.warn("[tax-strategy] snapshot load failed:", err);
+        }
+      } finally {
+        if (!cancelled) setIsLoadingSnapshot(false);
       }
-
-      setIsLoadingSnapshot(false);
     })();
 
     return () => {

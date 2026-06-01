@@ -69,6 +69,7 @@ export default function BrrrrCalculatorPage() {
     name: "TrueCap BRRRR Calculator",
     applicationCategory: "FinanceApplication",
     operatingSystem: "Web",
+    dateModified: "2026-06-01",
     url: `${siteUrl}/tools/brrrr-calculator`,
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
   };
@@ -115,7 +116,9 @@ export default function BrrrrCalculatorPage() {
               recycle the same capital across multiple properties by buying
               under market, forcing appreciation through rehab, refinancing
               based on the new value, and pulling most of the original
-              capital back out.
+              capital back out. See the dedicated workflow for{" "}
+              <Link href="/for-brrrr" className="text-primary font-semibold hover:underline">BRRRR operators</Link>{" "}
+              for the full pipeline view.
             </p>
 
             <h2 className="text-2xl sm:text-3xl">Each letter in detail</h2>
@@ -136,9 +139,11 @@ export default function BrrrrCalculatorPage() {
             <h3>Rent</h3>
             <p>
               The post-rehab rent matters in two ways: it has to support
-              the new mortgage payment after refi (DSCR ≥ 1.0 minimum,
-              1.25+ for most lenders), and it determines whether the
-              property is worth holding long-term once your capital is out.
+              the new mortgage payment after refi ({" "}
+              <Link href="/tools/dscr-calculator" className="text-primary font-semibold hover:underline">DSCR</Link>{" "}
+              ≥ 1.0 minimum, 1.25+ for most lenders), and it determines
+              whether the property is worth holding long-term once your
+              capital is out.
             </p>
             <h3>Refinance</h3>
             <p>
@@ -181,7 +186,10 @@ export default function BrrrrCalculatorPage() {
               Every renovation has surprises. Walls hide rot, electrical
               isn&apos;t to code, plumbing needs replacement. Carry 10-20%
               contingency above your contractor bid. If the contractor says
-              $45k, plan for $52k.
+              $45k, plan for $52k. Our guide on{" "}
+              <Link href="/blog/how-to-estimate-rehab-costs" className="text-primary font-semibold hover:underline">how to estimate rehab costs</Link>{" "}
+              walks through per-sq-ft benchmarks and the line items that
+              most often blow budgets.
             </p>
             <h3>Ignoring carrying costs</h3>
             <p>
@@ -194,7 +202,9 @@ export default function BrrrrCalculatorPage() {
             <p>
               Rates change. The 6.5% you underwrote for the refi might be
               7.5% when you actually close. Stress-test your post-refi cash
-              flow at a 1pp higher rate.
+              flow at a 1pp higher rate. For the deeper refi math
+              (DSCR, LTV, cash-out timing), see our walkthrough on{" "}
+              <Link href="/blog/how-to-refinance-a-rental-property" className="text-primary font-semibold hover:underline">how to refinance a rental property</Link>.
             </p>
 
             <h2 className="text-2xl sm:text-3xl">Frequently asked questions</h2>

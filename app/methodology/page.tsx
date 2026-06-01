@@ -58,7 +58,7 @@ export default function MethodologyPage() {
       "How TrueCap computes cap rate, cash-on-cash, DSCR, 10-year projections, tax savings, exit scenarios. Plus data sources and conventions.",
     url: `${siteUrl}/methodology`,
     datePublished: "2026-05-24",
-    dateModified: "2026-05-24",
+    dateModified: "2026-06-01",
     author: { "@type": "Organization", name: "TrueCap", url: siteUrl },
     publisher: { "@id": `${siteUrl}/#organization` },
     inLanguage: "en-US",

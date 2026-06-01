@@ -27,6 +27,7 @@ const TITLE = "Cleveland rental property analysis — calculator + 2026 cap-rate
 const DESCRIPTION =
   "Run a Cleveland rental deal in 60 seconds. Auto-fills OH effective property tax (~1.4%), HUD rent by Cuyahoga / surrounding counties, and current mortgage rates. Plus neighborhood cap-rate ranges + why Cleveland is a top US BRRRR market in 2026.";
 const PUBLISHED_AT = "2026-05-24";
+const MODIFIED_AT = "2026-06-01";
 
 export const metadata: Metadata = {
   title: `${TITLE} | TrueCap`,
@@ -100,7 +101,7 @@ export default function ClevelandMarketPage() {
     description: DESCRIPTION,
     url: canonicalUrl,
     datePublished: PUBLISHED_AT,
-    dateModified: PUBLISHED_AT,
+    dateModified: MODIFIED_AT,
     inLanguage: "en-US",
     isPartOf: { "@id": `${siteUrl}/#website` },
     about: {

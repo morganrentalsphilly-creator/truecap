@@ -18,6 +18,7 @@ const TITLE = "Should I use a property management company? The actual math.";
 const DESCRIPTION =
   "8-10% of rent + lease-up fees + maintenance markup — does paying a PM still beat managing yourself? The honest break-even math, plus when to switch each direction.";
 const PUBLISHED_AT = "2026-05-24";
+const MODIFIED_AT = "2026-06-01";
 const READING_TIME = 8;
 
 export const metadata: Metadata = {
@@ -43,7 +44,7 @@ export default function PropertyManagementPost() {
     headline: TITLE,
     description: DESCRIPTION,
     datePublished: PUBLISHED_AT,
-    dateModified: PUBLISHED_AT,
+    dateModified: MODIFIED_AT,
     url: `${siteUrl}/blog/${SLUG}`,
     publisher: { "@id": `${siteUrl}/#organization` },
     isPartOf: { "@id": `${siteUrl}/blog#blog` },

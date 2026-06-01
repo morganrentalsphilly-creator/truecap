@@ -20,6 +20,7 @@ const TITLE = "How to read a rental property pro forma (and the 7 lies inside mo
 const DESCRIPTION =
   "A pro forma is a seller's projection of how a rental property will perform — and it's almost always optimistic. Here's how to translate seller pro formas into real numbers, and the 7 line items most pro formas understate.";
 const PUBLISHED_AT = "2026-05-26";
+const MODIFIED_AT = "2026-06-01";
 const READING_TIME = 9;
 
 export const metadata: Metadata = {
@@ -79,7 +80,7 @@ export default function ProFormaPost() {
     headline: TITLE,
     description: DESCRIPTION,
     datePublished: PUBLISHED_AT,
-    dateModified: PUBLISHED_AT,
+    dateModified: MODIFIED_AT,
     url: canonicalUrl,
     publisher: { "@id": `${siteUrl}/#organization` },
     mainEntityOfPage: canonicalUrl,

@@ -85,6 +85,7 @@ export default function CapRateCalculatorPage() {
     name: "TrueCap Cap Rate Calculator",
     applicationCategory: "FinanceApplication",
     operatingSystem: "Web",
+    dateModified: "2026-06-01",
     url: `${siteUrl}/tools/cap-rate-calculator`,
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
     description:
@@ -184,6 +185,12 @@ export default function CapRateCalculatorPage() {
               They <strong>do not</strong> include mortgage principal or
               interest, depreciation, or income taxes — those affect your
               personal returns, not the property&apos;s operating economics.
+              If you want to walk through NOI on its own, the{" "}
+              <Link href="/tools/noi-calculator" className="text-primary font-semibold hover:underline">NOI calculator</Link>{" "}
+              breaks every expense line out step by step, and the{" "}
+              <Link href="/glossary/noi" className="text-primary font-semibold hover:underline">NOI glossary entry</Link>{" "}
+              covers the edge cases (CapEx, vacancy, management) most newer
+              investors miss.
             </p>
 
             <h2 className="text-2xl sm:text-3xl">What&apos;s a good cap rate?</h2>
@@ -229,7 +236,8 @@ export default function CapRateCalculatorPage() {
               A great cap rate in San Francisco might be 5%. A great cap rate
               in Memphis might be 9%. Use the metric for{" "}
               <em>comparison</em> within a market, not as a universal scoring
-              system.
+              system. For the full benchmark walk-through, see our guide on{" "}
+              <Link href="/blog/what-is-a-good-cap-rate" className="text-primary font-semibold hover:underline">what counts as a good cap rate in 2026</Link>.
             </p>
 
             <h2 className="text-2xl sm:text-3xl">
@@ -258,7 +266,13 @@ export default function CapRateCalculatorPage() {
               Cap rate is the only one of the three that&apos;s independent
               of <em>you</em> as the buyer. Two buyers can produce wildly
               different cash-on-cash returns on the same property by changing
-              the down payment, but the cap rate stays the same.
+              the down payment, but the cap rate stays the same. The{" "}
+              <Link href="/blog/cap-rate-vs-cash-on-cash-vs-dscr" className="text-primary font-semibold hover:underline">cap rate vs cash-on-cash vs DSCR deep-dive</Link>{" "}
+              shows how all three numbers move together on a real deal — and
+              you can run the leveraged side with the{" "}
+              <Link href="/tools/cash-on-cash-calculator" className="text-primary font-semibold hover:underline">cash-on-cash calculator</Link>{" "}
+              or the{" "}
+              <Link href="/tools/dscr-calculator" className="text-primary font-semibold hover:underline">DSCR calculator</Link>.
             </p>
 
             <h2 className="text-2xl sm:text-3xl">

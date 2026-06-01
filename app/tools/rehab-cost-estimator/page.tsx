@@ -69,6 +69,7 @@ export default function RehabEstimatorPage() {
     name: "TrueCap Rehab Cost Estimator",
     applicationCategory: "FinanceApplication",
     operatingSystem: "Web",
+    dateModified: "2026-06-01",
     url: `${siteUrl}/tools/rehab-cost-estimator`,
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
   };

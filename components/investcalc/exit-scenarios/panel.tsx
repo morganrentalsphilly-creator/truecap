@@ -43,20 +43,31 @@ export function ExitScenariosPanel({
     let cancelled = false;
     setIsLoadingSnapshot(true);
 
+    // Wrapped in try/catch so a transient Supabase / network failure
+    // inside the action doesn't escape as an unhandled promise
+    // rejection (which Sentry would otherwise capture as a fake bug).
+    // Snapshot load failure is a no-op for the user — they fall back
+    // to live calculation from the in-memory input.
     void (async () => {
-      const result = await getExitScenarioSnapshotAction({
-        analysisId,
-        input: source.input,
-      });
+      try {
+        const result = await getExitScenarioSnapshotAction({
+          analysisId,
+          input: source.input,
+        });
 
-      if (cancelled) return;
+        if (cancelled) return;
 
-      if (result.ok) {
-        setYears(result.snapshot.exitScenarioYears);
-        setSnapshotSource(result.source);
+        if (result.ok) {
+          setYears(result.snapshot.exitScenarioYears);
+          setSnapshotSource(result.source);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          console.warn("[exit-scenarios] snapshot load failed:", err);
+        }
+      } finally {
+        if (!cancelled) setIsLoadingSnapshot(false);
       }
-
-      setIsLoadingSnapshot(false);
     })();
 
     return () => {

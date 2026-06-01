@@ -68,6 +68,7 @@ export default function OnePercentRulePage() {
     name: "TrueCap 1% Rule Calculator",
     applicationCategory: "FinanceApplication",
     operatingSystem: "Web",
+    dateModified: "2026-06-01",
     url: `${siteUrl}/tools/1-percent-rule-calculator`,
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
   };
@@ -122,7 +123,9 @@ export default function OnePercentRulePage() {
             </div>
             <p>
               That&apos;s it. No expenses, no financing, no projection — just
-              a 5-second sanity check.
+              a 5-second sanity check. For the full deal screen, the{" "}
+              <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="text-primary font-semibold hover:underline">60-second underwriting workflow</Link>{" "}
+              shows what to do next once a property clears this filter.
             </p>
 
             <h2 className="text-2xl sm:text-3xl">Why investors use it</h2>
@@ -137,7 +140,11 @@ export default function OnePercentRulePage() {
               Veteran investors who know their market well often skip the
               rule entirely — they can eyeball whether a property &ldquo;feels
               right.&rdquo; New investors and out-of-market buyers benefit
-              from the discipline.
+              from the discipline. For the formal definition (and how it
+              relates to the{" "}
+              <Link href="/glossary/cap-rate" className="text-primary font-semibold hover:underline">cap rate</Link>{" "}
+              metric), see the{" "}
+              <Link href="/glossary/1-percent-rule" className="text-primary font-semibold hover:underline">1% rule glossary entry</Link>.
             </p>
 
             <h2 className="text-2xl sm:text-3xl">When the 1% rule works</h2>
@@ -193,7 +200,12 @@ export default function OnePercentRulePage() {
               <li>Get an insurance quote from a real broker</li>
               <li>Walk the comps — what do similar units actually rent for?</li>
               <li>Get a rough rehab estimate if the property needs work</li>
-              <li>Run the full underwrite — cap rate, CoC, DSCR, cash flow</li>
+              <li>
+                Run the full underwrite —{" "}
+                <Link href="/tools/cap-rate-calculator" className="text-primary font-semibold hover:underline">cap rate</Link>,{" "}
+                <Link href="/tools/cash-on-cash-calculator" className="text-primary font-semibold hover:underline">CoC</Link>,{" "}
+                <Link href="/tools/dscr-calculator" className="text-primary font-semibold hover:underline">DSCR</Link>, cash flow
+              </li>
             </ol>
             <p>
               TrueCap handles steps 4 and 5 in about four minutes once you

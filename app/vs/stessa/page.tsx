@@ -75,6 +75,7 @@ export default function VsStessaPage() {
     name: "TrueCap vs Stessa — honest comparison",
     url: `${siteUrl}/vs/stessa`,
     description: "Side-by-side comparison of TrueCap and Stessa for rental investors.",
+    dateModified: "2026-06-01",
     publisher: { "@id": `${siteUrl}/#organization` },
   };
 
@@ -211,6 +212,26 @@ export default function VsStessaPage() {
           </p>
           <p className="mt-3 text-sm sm:text-base leading-relaxed text-foreground">
             If you do both: use both. They don&apos;t step on each other.
+          </p>
+          <p className="mt-4 text-sm leading-relaxed text-foreground">
+            For acquisition specifically, the highest-leverage TrueCap pages
+            are the{" "}
+            <Link href="/tools/cap-rate-calculator" className="font-semibold text-primary hover:underline">
+              cap rate calculator
+            </Link>
+            , the{" "}
+            <Link href="/tools/dscr-calculator" className="font-semibold text-primary hover:underline">
+              DSCR calculator
+            </Link>
+            , and the longer-form guides on{" "}
+            <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="font-semibold text-primary hover:underline">
+              60-second underwriting
+            </Link>{" "}
+            and{" "}
+            <Link href="/blog/rental-property-tax-deductions" className="font-semibold text-primary hover:underline">
+              rental property tax deductions
+            </Link>{" "}
+            (the operations side that overlaps with what Stessa tracks).
           </p>
         </section>
 

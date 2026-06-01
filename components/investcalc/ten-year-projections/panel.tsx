@@ -40,20 +40,29 @@ export function TenYearProjectionsPanel({
     let cancelled = false;
     setIsLoadingSnapshot(true);
 
+    // Try/catch contains action rejections from becoming unhandled
+    // browser promise rejections. Snapshot load failure is a no-op for
+    // the user — live calc from input still renders.
     void (async () => {
-      const result = await getTenYearProjectionSnapshotAction({
-        analysisId,
-        input: source.input,
-      });
+      try {
+        const result = await getTenYearProjectionSnapshotAction({
+          analysisId,
+          input: source.input,
+        });
 
-      if (cancelled) return;
+        if (cancelled) return;
 
-      if (result.ok) {
-        setProjectionYears(normalizeProjectionYears(result.snapshot.projectionYears));
-        setSnapshotSource(result.source);
+        if (result.ok) {
+          setProjectionYears(normalizeProjectionYears(result.snapshot.projectionYears));
+          setSnapshotSource(result.source);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          console.warn("[ten-year-projections] snapshot load failed:", err);
+        }
+      } finally {
+        if (!cancelled) setIsLoadingSnapshot(false);
       }
-
-      setIsLoadingSnapshot(false);
     })();
 
     return () => {

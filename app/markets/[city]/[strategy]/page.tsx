@@ -87,6 +87,18 @@ export default async function CityStrategyPage({
     ],
   };
 
+  const webPageLd = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "@id": `${canonicalUrl}#page`,
+    name: `${combo.strategyLabel} investing in ${combo.cityName}`,
+    description: combo.pitch,
+    url: canonicalUrl,
+    dateModified: "2026-06-01",
+    inLanguage: "en-US",
+    isPartOf: { "@id": `${siteUrl}/#website` },
+  };
+
   const faqLd = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
@@ -117,6 +129,7 @@ export default async function CityStrategyPage({
 
   return (
     <div className="min-h-screen bg-background">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
       <Header />

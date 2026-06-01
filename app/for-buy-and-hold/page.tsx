@@ -194,6 +194,37 @@ export default function ForBuyAndHoldPage() {
           </ul>
         </section>
 
+        {/* Recommended reading + tools */}
+        <section className="mb-12 sm:mb-16 rounded-2xl border border-border bg-card p-6 sm:p-8">
+          <h2 className="text-lg sm:text-xl font-black text-foreground mb-3">
+            Recommended reading for buy-and-hold investors
+          </h2>
+          <p className="text-sm leading-relaxed text-foreground">
+            The handful of guides and calculators long-term investors return
+            to most often: the{" "}
+            <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="text-primary font-semibold hover:underline">
+              60-second underwriting workflow
+            </Link>
+            , the deep-dive on{" "}
+            <Link href="/blog/cap-rate-vs-cash-on-cash-vs-dscr" className="text-primary font-semibold hover:underline">
+              cap rate vs cash-on-cash vs DSCR
+            </Link>
+            , the breakdown of{" "}
+            <Link href="/blog/rental-property-tax-deductions" className="text-primary font-semibold hover:underline">
+              every deductible expense
+            </Link>
+            , and the standalone{" "}
+            <Link href="/tools/cap-rate-calculator" className="text-primary font-semibold hover:underline">
+              cap rate
+            </Link>{" "}
+            and{" "}
+            <Link href="/tools/dscr-calculator" className="text-primary font-semibold hover:underline">
+              DSCR
+            </Link>{" "}
+            calculators for quick listing triage.
+          </p>
+        </section>
+
         {/* Pricing */}
         <section className="mb-12 sm:mb-16 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
           <h2 className="text-2xl sm:text-3xl font-black mb-2">

@@ -83,6 +83,7 @@ export default function VsBiggerPocketsCalculatorPage() {
     url: `${siteUrl}/vs/biggerpockets-calculator`,
     description:
       "Side-by-side comparison of TrueCap and the BiggerPockets Rental Property Calculator for rental underwriting.",
+    dateModified: "2026-06-01",
     publisher: { "@id": `${siteUrl}/#organization` },
   };
 
@@ -259,6 +260,26 @@ export default function VsBiggerPocketsCalculatorPage() {
             <li>You need an established brand-name for credibility (if you&apos;re using output in client presentations to investors).</li>
             <li>You already have all your historical deals in BP and don&apos;t want to migrate.</li>
           </ul>
+          <p className="mt-4 text-sm leading-relaxed text-foreground">
+            If you only need a specific metric — not a full calculator suite
+            — TrueCap also ships standalone tools: the{" "}
+            <Link href="/tools/cap-rate-calculator" className="font-semibold text-primary hover:underline">
+              cap rate calculator
+            </Link>
+            , the{" "}
+            <Link href="/tools/dscr-calculator" className="font-semibold text-primary hover:underline">
+              DSCR calculator
+            </Link>
+            , the{" "}
+            <Link href="/tools/brrrr-calculator" className="font-semibold text-primary hover:underline">
+              BRRRR calculator
+            </Link>
+            , and the{" "}
+            <Link href="/tools/1-percent-rule-calculator" className="font-semibold text-primary hover:underline">
+              1% rule calculator
+            </Link>
+            . All free, all unlimited.
+          </p>
         </section>
 
         {/* Pricing CTA */}

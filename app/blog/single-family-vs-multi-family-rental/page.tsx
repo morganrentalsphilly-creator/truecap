@@ -22,6 +22,7 @@ const TITLE =
 const DESCRIPTION =
   "The honest comparison: cash flow, cap rate, financing, tenant quality, exit liquidity, capex risk, and which property type fits your specific stage. Side-by-side numbers with 2026 financing.";
 const PUBLISHED_AT = "2026-05-27";
+const MODIFIED_AT = "2026-06-01";
 const READING_TIME = 11;
 
 export const metadata: Metadata = {
@@ -81,7 +82,7 @@ export default function SfrVsMfrPost() {
     headline: TITLE,
     description: DESCRIPTION,
     datePublished: PUBLISHED_AT,
-    dateModified: PUBLISHED_AT,
+    dateModified: MODIFIED_AT,
     url: canonicalUrl,
     publisher: { "@id": `${siteUrl}/#organization` },
     mainEntityOfPage: canonicalUrl,

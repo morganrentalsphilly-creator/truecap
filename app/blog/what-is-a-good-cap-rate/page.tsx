@@ -28,6 +28,7 @@ const TITLE = "What's a good cap rate for rental property in 2026?";
 const DESCRIPTION =
   "There's no single answer — cap rate benchmarks shift by market, property type, and the prevailing risk-free rate. Plain-English guide to what's good in cash-flow markets, appreciation markets, and the negative-leverage rate environment of 2026.";
 const PUBLISHED_AT = "2026-05-24";
+const MODIFIED_AT = "2026-06-01";
 const READING_TIME_MIN = 9;
 
 export const metadata: Metadata = {
@@ -97,7 +98,7 @@ export default function BlogPost() {
     headline: TITLE,
     description: DESCRIPTION,
     datePublished: PUBLISHED_AT,
-    dateModified: PUBLISHED_AT,
+    dateModified: MODIFIED_AT,
     author: { "@type": "Organization", name: "TrueCap", url: siteUrl },
     publisher: { "@id": `${siteUrl}/#organization` },
     mainEntityOfPage: canonicalUrl,

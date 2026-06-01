@@ -66,6 +66,7 @@ export default function VsZillowRentPage() {
     name: "TrueCap vs Zillow Rent Estimate — honest comparison",
     url: `${siteUrl}/vs/zillow-rent-estimate`,
     description: "Side-by-side comparison of TrueCap and Zillow's Rent Estimate.",
+    dateModified: "2026-06-01",
     publisher: { "@id": `${siteUrl}/#organization` },
   };
 

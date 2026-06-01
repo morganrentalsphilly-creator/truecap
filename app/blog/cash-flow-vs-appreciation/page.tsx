@@ -29,6 +29,7 @@ const TITLE = "Cash flow vs appreciation: which rental strategy actually wins in
 const DESCRIPTION =
   "Cash-flow investors and appreciation investors both think they're right. Both can be. A 10-year side-by-side that quantifies when each strategy wins — and the specific 2026 conditions that have flipped the historical math.";
 const PUBLISHED_AT = "2026-05-24";
+const MODIFIED_AT = "2026-06-01";
 const READING_TIME_MIN = 9;
 
 export const metadata: Metadata = {
@@ -98,7 +99,7 @@ export default function BlogPost() {
     headline: TITLE,
     description: DESCRIPTION,
     datePublished: PUBLISHED_AT,
-    dateModified: PUBLISHED_AT,
+    dateModified: MODIFIED_AT,
     author: { "@type": "Organization", name: "TrueCap", url: siteUrl },
     publisher: { "@id": `${siteUrl}/#organization` },
     mainEntityOfPage: canonicalUrl,

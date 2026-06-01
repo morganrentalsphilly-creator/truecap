@@ -42,16 +42,27 @@ export function DealNotesPanel({ savedDealId }: { savedDealId: string }) {
     let cancelled = false;
     setInitialLoaded(false);
     setMigrationPending(false);
-    void getSavedDealNotesAction(savedDealId).then((result) => {
-      if (cancelled) return;
-      if (result.ok) {
-        setNotes(result.notes ?? "");
-        setLastSavedNotes(result.notes ?? "");
-      } else if (result.code === "MIGRATION_PENDING") {
-        setMigrationPending(true);
-      }
-      setInitialLoaded(true);
-    });
+    // .catch contains action rejections from becoming unhandled
+    // browser promise rejections. If the action throws (transient
+    // Supabase outage, etc.), the panel just stays in its loading
+    // state — no Sentry false-positive.
+    void getSavedDealNotesAction(savedDealId)
+      .then((result) => {
+        if (cancelled) return;
+        if (result.ok) {
+          setNotes(result.notes ?? "");
+          setLastSavedNotes(result.notes ?? "");
+        } else if (result.code === "MIGRATION_PENDING") {
+          setMigrationPending(true);
+        }
+        setInitialLoaded(true);
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          console.warn("[deal-notes] load failed:", err);
+          setInitialLoaded(true);
+        }
+      });
     return () => {
       cancelled = true;
     };

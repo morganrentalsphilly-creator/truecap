@@ -78,6 +78,7 @@ export default function GrmCalculatorPage() {
     name: "TrueCap GRM Calculator",
     applicationCategory: "FinanceApplication",
     operatingSystem: "Web",
+    dateModified: "2026-06-01",
     url: `${siteUrl}/tools/gross-rent-multiplier-calculator`,
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
   };

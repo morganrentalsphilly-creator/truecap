@@ -643,8 +643,6 @@ export function InvestCalcPage({
           ? Number(rawBedrooms)
           : undefined;
 
-      console.log("[enrich] firing", { state: place.state, county: place.county, propertyType: currentPropertyType, bedrooms });
-
       const enrichment = await enrichPropertyAction({
         state: place.state,
         county: place.county,
@@ -652,8 +650,6 @@ export function InvestCalcPage({
         propertyType: currentPropertyType,
         bedrooms,
       });
-
-      console.log("[enrich] result", enrichment);
 
       const setOpts = {
         shouldDirty: false,
@@ -693,11 +689,6 @@ export function InvestCalcPage({
       if (isSingleFamily && enrichment.monthlyRent !== undefined) {
         const current = form.getValues("monthlyRent") as number | undefined | null;
         const isEmpty = isEmptyNumber(current);
-        console.log("[enrich] monthlyRent decision", {
-          incoming: enrichment.monthlyRent,
-          current,
-          isEmpty,
-        });
         if (isEmpty) {
           form.setValue("monthlyRent", enrichment.monthlyRent, {
             shouldDirty: false,
@@ -739,13 +730,6 @@ export function InvestCalcPage({
    */
   useEffect(() => {
     const place = lastSelectedAddressRef.current;
-    console.log("[bedrooms watcher]", {
-      watchedBedrooms,
-      type: typeof watchedBedrooms,
-      hasPlace: !!place,
-      propertyType: form.getValues("propertyType"),
-      currentRent: form.getValues("monthlyRent"),
-    });
     if (!place) return;
     if (form.getValues("propertyType") !== "single-family") return;
     // Accept any value that parses to a positive number (RHF may yield

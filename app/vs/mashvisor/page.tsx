@@ -75,6 +75,7 @@ export default function VsMashvisorPage() {
     name: "TrueCap vs Mashvisor — honest comparison",
     url: `${siteUrl}/vs/mashvisor`,
     description: "Side-by-side comparison of TrueCap and Mashvisor for rental investors.",
+    dateModified: "2026-06-01",
     publisher: { "@id": `${siteUrl}/#organization` },
   };
 

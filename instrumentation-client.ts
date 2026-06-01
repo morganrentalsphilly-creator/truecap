@@ -12,8 +12,11 @@ Sentry.init({
 
   // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
   tracesSampleRate: 1,
-  // Enable logs to be sent to Sentry
-  enableLogs: true,
+  // Enable Sentry log forwarding only in development. In production
+  // every console.warn / console.info would otherwise ship as a Sentry
+  // event, burning quota and burying real errors. Dev-only keeps the
+  // signal high while preserving the local-debugging value.
+  enableLogs: process.env.NODE_ENV !== "production",
 
   // Define how likely Replay events are sampled.
   // This sets the sample rate to be 10%. You may want this to be 100% while

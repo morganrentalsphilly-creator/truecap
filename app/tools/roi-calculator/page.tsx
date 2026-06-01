@@ -67,6 +67,7 @@ export default function RoiCalculatorPage() {
     name: "Rental Property ROI Calculator — TrueCap",
     description: "Free rental property ROI calculator.",
     url: `${siteUrl}/tools/roi-calculator`,
+    dateModified: "2026-06-01",
     publisher: { "@id": `${siteUrl}/#organization` },
   };
   const faqLd = {

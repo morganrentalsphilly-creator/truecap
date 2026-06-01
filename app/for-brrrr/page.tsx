@@ -188,6 +188,36 @@ export default function ForBrrrrPage() {
           </ul>
         </section>
 
+        <section className="mb-12 sm:mb-16 rounded-2xl border border-border bg-card p-6 sm:p-8">
+          <h2 className="text-lg sm:text-xl font-black text-foreground mb-3">
+            BRRRR-specific tools and reading
+          </h2>
+          <p className="text-sm leading-relaxed text-foreground">
+            The fastest standalone tool for screening a BRRRR is the{" "}
+            <Link href="/tools/brrrr-calculator" className="text-primary font-semibold hover:underline">
+              BRRRR calculator
+            </Link>
+            . When estimating the rehab, the{" "}
+            <Link href="/blog/how-to-estimate-rehab-costs" className="text-primary font-semibold hover:underline">
+              rehab cost guide
+            </Link>{" "}
+            keeps your number defensible, and the{" "}
+            <Link href="/blog/how-to-refinance-a-rental-property" className="text-primary font-semibold hover:underline">
+              cash-out refinance walkthrough
+            </Link>{" "}
+            covers the LTV +{" "}
+            <Link href="/tools/dscr-calculator" className="text-primary font-semibold hover:underline">
+              DSCR
+            </Link>{" "}
+            math that determines how much capital you actually recover. For
+            sourcing the kind of deal that pencils, see{" "}
+            <Link href="/blog/how-to-find-off-market-rental-properties" className="text-primary font-semibold hover:underline">
+              how to find off-market rental properties
+            </Link>
+            .
+          </p>
+        </section>
+
         <section className="mb-12 sm:mb-16 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
           <h2 className="text-2xl sm:text-3xl font-black mb-2">
             Free covers the buy. Pro covers the refi.

@@ -70,7 +70,7 @@ export default async function StatePage({
   const siteUrl = getSiteUrl();
   const canonicalUrl = `${siteUrl}/states/${state.slug}`;
 
-  // Schema: Place + BreadcrumbList + FAQPage
+  // Schema: Place + BreadcrumbList + FAQPage + WebPage (for freshness signals)
   const placeLd = {
     "@context": "https://schema.org",
     "@type": "Place",
@@ -78,6 +78,17 @@ export default async function StatePage({
     description: state.pitch,
     url: canonicalUrl,
     address: { "@type": "PostalAddress", addressRegion: state.abbr, addressCountry: "US" },
+  };
+  const webPageLd = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "@id": `${canonicalUrl}#page`,
+    name: `Investing in ${state.name} rental property in 2026`,
+    description: state.pitch,
+    url: canonicalUrl,
+    dateModified: "2026-06-01",
+    inLanguage: "en-US",
+    isPartOf: { "@id": `${siteUrl}/#website` },
   };
   const breadcrumbLd = {
     "@context": "https://schema.org",
@@ -134,6 +145,7 @@ export default async function StatePage({
   return (
     <div className="min-h-screen bg-background">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(placeLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
       <Header />
@@ -158,6 +170,13 @@ export default async function StatePage({
           Investing in {state.name} rental property
         </h1>
         <p className="mt-5 text-lg leading-relaxed text-muted-foreground">{state.pitch}</p>
+        <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+          For the broader landscape, see our roundup of the{" "}
+          <Link href="/blog/best-states-for-rental-investors-2026" className="text-primary font-semibold hover:underline">
+            best states for rental investors in 2026
+          </Link>
+          .
+        </p>
 
         {/* Key metrics row */}
         <section className="mt-10 grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -248,6 +267,44 @@ export default async function StatePage({
           <Link href="/" className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity">
             Try TrueCap free <ArrowRight className="size-4" />
           </Link>
+        </section>
+
+        {/* Companion resources */}
+        <section className="mt-10 rounded-2xl border border-border bg-card p-6 sm:p-8">
+          <h2 className="text-base font-black text-foreground mb-3">
+            Underwrite a {state.name} deal in three steps
+          </h2>
+          <ul className="space-y-2 text-sm leading-relaxed text-foreground">
+            <li>
+              1. Screen the listing with the{" "}
+              <Link href="/tools/1-percent-rule-calculator" className="text-primary font-semibold hover:underline">
+                1% rule calculator
+              </Link>{" "}
+              — if it&apos;s in the ballpark for {state.name}, move on.
+            </li>
+            <li>
+              2. Compute returns with the{" "}
+              <Link href="/tools/cap-rate-calculator" className="text-primary font-semibold hover:underline">
+                cap rate calculator
+              </Link>{" "}
+              and the{" "}
+              <Link href="/tools/dscr-calculator" className="text-primary font-semibold hover:underline">
+                DSCR calculator
+              </Link>{" "}
+              using local property tax + insurance figures.
+            </li>
+            <li>
+              3. Match the deal to your strategy — see the playbooks for{" "}
+              <Link href="/for-buy-and-hold" className="text-primary font-semibold hover:underline">
+                buy-and-hold investors
+              </Link>{" "}
+              and{" "}
+              <Link href="/for-brrrr" className="text-primary font-semibold hover:underline">
+                BRRRR operators
+              </Link>
+              .
+            </li>
+          </ul>
         </section>
 
         {/* Other states */}

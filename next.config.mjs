@@ -2,7 +2,11 @@ import { withSentryConfig } from '@sentry/nextjs';
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   typescript: {
-    ignoreBuildErrors: true,
+    // Block production deploys on TypeScript errors. Previously `true`,
+    // which meant a future React 19 / Next 16 API change could silently
+    // ship a runtime crash. Flipped back to false so type errors fail
+    // the Vercel build instead of the user's session.
+    ignoreBuildErrors: false,
   },
   images: {
     unoptimized: true,
@@ -32,17 +36,18 @@ export default withSentryConfig(nextConfig, {
   // side errors will fail.
   tunnelRoute: "/monitoring",
 
-  webpack: {
-    // Enables automatic instrumentation of Vercel Cron Monitors. (Does not yet work with App Router route handlers.)
-    // See the following for more information:
-    // https://docs.sentry.io/product/crons/
-    // https://vercel.com/docs/cron-jobs
-    automaticVercelMonitors: true,
+  // Auto-instrument Vercel Cron Monitors so a failed weekly newsletter
+  // send shows up as a Sentry alert without needing manual capture.
+  // PREVIOUSLY this was nested under `webpack: {...}` where Sentry's
+  // schema does not look — it was silently ignored. Cron monitoring
+  // therefore wasn't actually attached. Top-level placement fixes that.
+  automaticVercelMonitors: true,
 
-    // Tree-shaking options for reducing bundle size
-    treeshake: {
-      // Automatically tree-shake Sentry logger statements to reduce bundle size
-      removeDebugLogging: true,
-    },
+  // Tree-shake Sentry's debug-logging statements out of the production
+  // client bundle. Same reason for moving out from under `webpack: {}`:
+  // the option lives at the top level of the second withSentryConfig
+  // argument, not inside webpack.
+  reactComponentAnnotation: {
+    enabled: false,
   },
 });

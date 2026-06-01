@@ -29,6 +29,7 @@ const TITLE = "Cap rate vs cash-on-cash vs DSCR: which one actually matters?";
 const DESCRIPTION =
   "Three different metrics, three different jobs. A plain-English guide to when each one matters, when to ignore each one, and why most investors get this wrong.";
 const PUBLISHED_AT = "2026-05-24";
+const MODIFIED_AT = "2026-06-01";
 const READING_TIME_MIN = 8;
 
 export const metadata: Metadata = {
@@ -98,7 +99,7 @@ export default function BlogPost() {
     headline: TITLE,
     description: DESCRIPTION,
     datePublished: PUBLISHED_AT,
-    dateModified: PUBLISHED_AT,
+    dateModified: MODIFIED_AT,
     author: {
       "@type": "Organization",
       name: "TrueCap",

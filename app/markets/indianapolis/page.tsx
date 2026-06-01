@@ -21,6 +21,7 @@ const TITLE = "Indianapolis rental property analysis — calculator + 2026 cap-r
 const DESCRIPTION =
   "Run an Indianapolis rental deal in 60 seconds. Auto-fills IN property tax (2% gross-assessed cap), HUD rent for Marion County, current mortgage rates. Plus neighborhood cap-rate ranges + why Indy stays a top cash-flow market.";
 const PUBLISHED_AT = "2026-05-24";
+const MODIFIED_AT = "2026-06-01";
 
 export const metadata: Metadata = {
   title: `${TITLE} | TrueCap`,
@@ -63,7 +64,7 @@ const FAQS: { q: string; a: string }[] = [
 export default function IndianapolisMarketPage() {
   const siteUrl = getSiteUrl();
   const canonicalUrl = `${siteUrl}/markets/${SLUG}`;
-  const ld = { "@context": "https://schema.org", "@type": "WebPage", "@id": `${canonicalUrl}#page`, name: TITLE, description: DESCRIPTION, url: canonicalUrl, datePublished: PUBLISHED_AT, dateModified: PUBLISHED_AT, inLanguage: "en-US", isPartOf: { "@id": `${siteUrl}/#website` }, about: { "@type": "Place", name: `${CITY}, ${STATE}`, address: { "@type": "PostalAddress", addressLocality: CITY, addressRegion: STATE, addressCountry: "US" } } };
+  const ld = { "@context": "https://schema.org", "@type": "WebPage", "@id": `${canonicalUrl}#page`, name: TITLE, description: DESCRIPTION, url: canonicalUrl, datePublished: PUBLISHED_AT, dateModified: MODIFIED_AT, inLanguage: "en-US", isPartOf: { "@id": `${siteUrl}/#website` }, about: { "@type": "Place", name: `${CITY}, ${STATE}`, address: { "@type": "PostalAddress", addressLocality: CITY, addressRegion: STATE, addressCountry: "US" } } };
   const faqLd = { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: FAQS.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })) };
 
   return (

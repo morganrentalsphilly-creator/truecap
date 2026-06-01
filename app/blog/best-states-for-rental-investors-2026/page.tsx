@@ -21,6 +21,7 @@ const TITLE = "Best states for rental property investors in 2026";
 const DESCRIPTION =
   "An honest ranking of the top 10 US states for rental property investors in 2026 — cap rates, property tax, income tax, landlord laws, and the trade-offs that decide which state actually fits your strategy.";
 const PUBLISHED_AT = "2026-05-25";
+const MODIFIED_AT = "2026-06-01";
 const READING_TIME = 12;
 
 export const metadata: Metadata = {
@@ -46,7 +47,7 @@ export default function BestStatesPost() {
     headline: TITLE,
     description: DESCRIPTION,
     datePublished: PUBLISHED_AT,
-    dateModified: PUBLISHED_AT,
+    dateModified: MODIFIED_AT,
     url: `${siteUrl}/blog/${SLUG}`,
     publisher: { "@id": `${siteUrl}/#organization` },
     isPartOf: { "@id": `${siteUrl}/blog#blog` },

@@ -18,6 +18,7 @@ const TITLE = "House hacking explained: how to (almost) live for free in a 2-4 u
 const DESCRIPTION =
   "The actual math behind house hacking: FHA 3.5% down, owner-occupant rules, year-2 transition planning, and the deal types that make this strategy work in 2026.";
 const PUBLISHED_AT = "2026-05-24";
+const MODIFIED_AT = "2026-06-01";
 const READING_TIME = 9;
 
 export const metadata: Metadata = {
@@ -43,7 +44,7 @@ export default function HouseHackingPost() {
     headline: TITLE,
     description: DESCRIPTION,
     datePublished: PUBLISHED_AT,
-    dateModified: PUBLISHED_AT,
+    dateModified: MODIFIED_AT,
     url: `${siteUrl}/blog/${SLUG}`,
     publisher: { "@id": `${siteUrl}/#organization` },
     isPartOf: { "@id": `${siteUrl}/blog#blog` },

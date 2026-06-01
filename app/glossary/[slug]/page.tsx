@@ -101,6 +101,7 @@ export default async function GlossaryTermPage({
     name: entry.term,
     description: entry.definition,
     url: `${siteUrl}/glossary/${entry.slug}`,
+    dateModified: "2026-06-01",
     inDefinedTermSet: {
       "@type": "DefinedTermSet",
       name: "TrueCap Real Estate Investing Glossary",

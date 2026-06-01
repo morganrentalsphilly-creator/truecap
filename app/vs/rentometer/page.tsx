@@ -65,6 +65,7 @@ export default function VsRentometerPage() {
     name: "TrueCap vs Rentometer — honest comparison",
     url: `${siteUrl}/vs/rentometer`,
     description: "Side-by-side comparison of TrueCap and Rentometer.",
+    dateModified: "2026-06-01",
     publisher: { "@id": `${siteUrl}/#organization` },
   };
 

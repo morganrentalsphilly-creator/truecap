@@ -78,6 +78,7 @@ export default function NoiCalculatorPage() {
     name: "TrueCap NOI Calculator",
     applicationCategory: "FinanceApplication",
     operatingSystem: "Web",
+    dateModified: "2026-06-01",
     url: `${siteUrl}/tools/noi-calculator`,
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
   };
@@ -118,12 +119,15 @@ export default function NoiCalculatorPage() {
           <article className="prose prose-slate max-w-none mt-10 sm:mt-12 [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-black [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground">
             <h2 className="text-2xl sm:text-3xl">Why NOI is the most important real-estate number</h2>
             <p>
-              Cap rate uses NOI. DSCR uses NOI. The income approach to
-              valuation uses NOI. Improving operations by $1,000/yr in a
-              7% cap-rate market adds about $14,000 to the property&apos;s
-              market value. Get NOI right, and every other underwriting
-              number falls into place. Get it wrong, and your cap rate,
-              DSCR, and valuation are all built on sand.
+              <Link href="/tools/cap-rate-calculator" className="text-primary font-semibold hover:underline">Cap rate</Link>{" "}
+              uses NOI.{" "}
+              <Link href="/tools/dscr-calculator" className="text-primary font-semibold hover:underline">DSCR</Link>{" "}
+              uses NOI. The income approach to valuation uses NOI. Improving
+              operations by $1,000/yr in a 7% cap-rate market adds about
+              $14,000 to the property&apos;s market value. Get NOI right,
+              and every other underwriting number falls into place. Get it
+              wrong, and your cap rate, DSCR, and valuation are all built
+              on sand.
             </p>
 
             <h3>The formula</h3>
@@ -153,7 +157,10 @@ export default function NoiCalculatorPage() {
               mortgage P&amp;I, depreciation, owner income tax, your
               personal time, or one-time capital improvements that
               increase asset value (those go on the balance sheet, not
-              the operating P&amp;L).
+              the operating P&amp;L). For the full plain-English
+              definition (and edge cases like CapEx vs. operating
+              repairs), see the{" "}
+              <Link href="/glossary/noi" className="text-primary font-semibold hover:underline">NOI glossary entry</Link>.
             </p>
 
             <h2 className="text-2xl sm:text-3xl">Operating expense ratio</h2>
@@ -188,6 +195,11 @@ export default function NoiCalculatorPage() {
               if you&apos;re doing the work yourself — because the day you
               hand it off to a PM, the NOI shouldn&apos;t suddenly drop.
               Be honest about the true cost of operating the property.
+              The{" "}
+              <Link href="/blog/50-percent-rule-rentals" className="text-primary font-semibold hover:underline">50% rule for rentals</Link>{" "}
+              is a useful sanity check — if your assumed operating
+              expenses are far below 50% of rent on a small residential
+              property, you&apos;re almost certainly missing something.
             </p>
           </article>
 

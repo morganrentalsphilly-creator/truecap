@@ -186,6 +186,33 @@ export default function ForAgentsPage() {
           </ul>
         </section>
 
+        <section className="mb-12 sm:mb-16 rounded-2xl border border-border bg-card p-6 sm:p-8">
+          <h2 className="text-lg sm:text-xl font-black text-foreground mb-3">
+            Share-ready resources for investor clients
+          </h2>
+          <p className="text-sm leading-relaxed text-foreground">
+            When a client asks &ldquo;is this a good deal?&rdquo; the
+            cleanest answer cites the math: send them the{" "}
+            <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="text-primary font-semibold hover:underline">
+              60-second underwriting workflow
+            </Link>
+            , the explainer on{" "}
+            <Link href="/blog/what-is-a-good-cap-rate" className="text-primary font-semibold hover:underline">
+              what counts as a good cap rate in 2026
+            </Link>
+            , or the standalone{" "}
+            <Link href="/tools/cap-rate-calculator" className="text-primary font-semibold hover:underline">
+              cap rate
+            </Link>{" "}
+            and{" "}
+            <Link href="/tools/dscr-calculator" className="text-primary font-semibold hover:underline">
+              DSCR
+            </Link>{" "}
+            calculators. They land on a single, well-cited page — better
+            than a long email reply.
+          </p>
+        </section>
+
         {/* Pricing */}
         <section className="mb-12 sm:mb-16 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
           <h2 className="text-2xl sm:text-3xl font-black mb-2">

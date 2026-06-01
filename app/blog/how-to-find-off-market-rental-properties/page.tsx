@@ -20,6 +20,7 @@ const TITLE = "How to find off-market rental properties — 8 sources that actua
 const DESCRIPTION =
   "The 8 sources serious rental investors use to find off-market deals — driving for dollars, direct mail, wholesalers, networking, public records, and the underrated channels most investors skip.";
 const PUBLISHED_AT = "2026-05-26";
+const MODIFIED_AT = "2026-06-01";
 const READING_TIME = 10;
 
 export const metadata: Metadata = {
@@ -80,7 +81,7 @@ export default function OffMarketPost() {
     headline: TITLE,
     description: DESCRIPTION,
     datePublished: PUBLISHED_AT,
-    dateModified: PUBLISHED_AT,
+    dateModified: MODIFIED_AT,
     url: canonicalUrl,
     publisher: { "@id": `${siteUrl}/#organization` },
     isPartOf: { "@id": `${siteUrl}/blog#blog` },

@@ -21,6 +21,7 @@ const TITLE = "Tampa rental property analysis — calculator + 2026 cap-rate ben
 const DESCRIPTION =
   "Run a Tampa rental deal in 60 seconds. Auto-fills FL effective property tax, HUD rent by Hillsborough / Pinellas counties, and current mortgage rates. Plus neighborhood cap-rate ranges + the Tampa insurance picture for 2026.";
 const PUBLISHED_AT = "2026-05-24";
+const MODIFIED_AT = "2026-06-01";
 
 export const metadata: Metadata = {
   title: `${TITLE} | TrueCap`,
@@ -93,7 +94,7 @@ export default function TampaMarketPage() {
     description: DESCRIPTION,
     url: canonicalUrl,
     datePublished: PUBLISHED_AT,
-    dateModified: PUBLISHED_AT,
+    dateModified: MODIFIED_AT,
     inLanguage: "en-US",
     isPartOf: { "@id": `${siteUrl}/#website` },
     about: {

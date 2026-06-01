@@ -21,6 +21,7 @@ const TITLE =
 const DESCRIPTION =
   "Walking through a property with a budget number in your head — the framework experienced investors use. Sq-ft pricing for cosmetic, kitchen, bath, and systems. Plus the 25% contingency rule most beginners skip.";
 const PUBLISHED_AT = "2026-05-27";
+const MODIFIED_AT = "2026-06-01";
 const READING_TIME = 12;
 
 export const metadata: Metadata = {
@@ -80,7 +81,7 @@ export default function RehabEstimatePost() {
     headline: TITLE,
     description: DESCRIPTION,
     datePublished: PUBLISHED_AT,
-    dateModified: PUBLISHED_AT,
+    dateModified: MODIFIED_AT,
     url: canonicalUrl,
     publisher: { "@id": `${siteUrl}/#organization` },
     mainEntityOfPage: canonicalUrl,

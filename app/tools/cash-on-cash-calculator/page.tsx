@@ -70,6 +70,7 @@ export default function CoCCalculatorPage() {
     name: "TrueCap Cash-on-Cash Return Calculator",
     applicationCategory: "FinanceApplication",
     operatingSystem: "Web",
+    dateModified: "2026-06-01",
     url: `${siteUrl}/tools/cash-on-cash-calculator`,
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
     description:

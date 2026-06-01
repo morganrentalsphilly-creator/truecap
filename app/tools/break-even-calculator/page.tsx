@@ -67,6 +67,7 @@ export default function BreakEvenCalculatorPage() {
     name: "Rental Property Break-Even Calculator — TrueCap",
     description: "Free rental property break-even calculator.",
     url: `${siteUrl}/tools/break-even-calculator`,
+    dateModified: "2026-06-01",
     publisher: { "@id": `${siteUrl}/#organization` },
   };
   const faqLd = {

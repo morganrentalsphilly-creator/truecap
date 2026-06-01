@@ -31,6 +31,7 @@ const TITLE = "Philadelphia rental property analysis — calculator + 2026 bench
 const DESCRIPTION =
   "Run a Philadelphia rental deal in 60 seconds. Auto-fills city-specific property tax (1.49%), HUD rent estimates by county, and current mortgage rates. Plus 2026 cap-rate benchmarks by Philly neighborhood.";
 const PUBLISHED_AT = "2026-05-24";
+const MODIFIED_AT = "2026-06-01";
 
 export const metadata: Metadata = {
   title: `${TITLE} | TrueCap`,
@@ -106,7 +107,7 @@ export default function PhiladelphiaMarketPage() {
     description: DESCRIPTION,
     url: canonicalUrl,
     datePublished: PUBLISHED_AT,
-    dateModified: PUBLISHED_AT,
+    dateModified: MODIFIED_AT,
     inLanguage: "en-US",
     isPartOf: { "@id": `${siteUrl}/#website` },
     about: {

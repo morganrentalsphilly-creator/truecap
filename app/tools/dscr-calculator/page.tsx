@@ -80,6 +80,7 @@ export default function DscrCalculatorPage() {
     name: "TrueCap DSCR Calculator",
     applicationCategory: "FinanceApplication",
     operatingSystem: "Web",
+    dateModified: "2026-06-01",
     url: `${siteUrl}/tools/dscr-calculator`,
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
   };
@@ -124,9 +125,10 @@ export default function DscrCalculatorPage() {
               others: <em>if the property runs the way you say it will,
               can it cover the mortgage?</em> A DSCR of 1.0 means
               break-even. A DSCR of 1.25 means the property generates
-              25% more in NOI than the mortgage needs — a comfortable
-              cushion that covers a bad month, a brief vacancy, or a
-              surprise expense.
+              25% more in{" "}
+              <Link href="/glossary/noi" className="text-primary font-semibold hover:underline">NOI</Link>{" "}
+              than the mortgage needs — a comfortable cushion that covers
+              a bad month, a brief vacancy, or a surprise expense.
             </p>
 
             <h3>The formula</h3>
@@ -151,7 +153,10 @@ export default function DscrCalculatorPage() {
               calculation that mixes the property&apos;s DSCR with your
               personal income. DSCR-only loan products skip the personal
               side — your tax returns, W-2, and DTI don&apos;t matter as
-              long as the property covers itself.
+              long as the property covers itself. For a full walkthrough
+              of how these loans price, qualify, and close, see our{" "}
+              <Link href="/blog/dscr-loans-explained" className="text-primary font-semibold hover:underline">DSCR loans explained</Link>{" "}
+              guide.
             </p>
 
             <h2 className="text-2xl sm:text-3xl">Common mistakes</h2>
@@ -161,7 +166,10 @@ export default function DscrCalculatorPage() {
               vacancy reserve, maintenance, management, CapEx reserve, HOA,
               utilities — everything except mortgage P&amp;I. New investors
               often calculate &ldquo;NOI&rdquo; as just gross rent, which
-              inflates DSCR by 40-60%.
+              inflates DSCR by 40-60%. The dedicated{" "}
+              <Link href="/tools/noi-calculator" className="text-primary font-semibold hover:underline">NOI calculator</Link>{" "}
+              walks through every line so the DSCR you get back is the one
+              a lender will compute, not an optimistic version of it.
             </p>
             <h3>2. Using nominal rent instead of effective rent</h3>
             <p>
@@ -183,12 +191,14 @@ export default function DscrCalculatorPage() {
             <p>
               DSCR is a debt-coverage measure. It tells you whether the
               bank gets paid. It doesn&apos;t tell you whether the deal
-              is good for <em>you</em>. For that you also need cap rate
-              (the unleveraged return), cash-on-cash (the leveraged
-              return on your money), cash flow (the dollars per month),
-              and projection (the 10-year picture). TrueCap&apos;s full
-              analyzer runs all of those at once on the same deal — free
-              to start.
+              is good for <em>you</em>. For that you also need{" "}
+              <Link href="/tools/cap-rate-calculator" className="text-primary font-semibold hover:underline">cap rate</Link>{" "}
+              (the unleveraged return),{" "}
+              <Link href="/glossary/cash-on-cash-return" className="text-primary font-semibold hover:underline">cash-on-cash</Link>{" "}
+              (the leveraged return on your money), cash flow (the dollars
+              per month), and projection (the 10-year picture). TrueCap&apos;s
+              full analyzer runs all of those at once on the same deal —
+              free to start.
             </p>
           </article>
 

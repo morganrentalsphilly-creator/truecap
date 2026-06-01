@@ -28,6 +28,7 @@ const TITLE = "How to underwrite a rental property in 60 seconds";
 const DESCRIPTION =
   "The five numbers, four metrics, and two sanity checks every real estate investor uses to triage a rental deal in under a minute — no spreadsheet required.";
 const PUBLISHED_AT = "2026-05-24";
+const MODIFIED_AT = "2026-06-01";
 const READING_TIME_MIN = 9;
 
 export const metadata: Metadata = {
@@ -99,7 +100,7 @@ export default function BlogPost() {
     headline: TITLE,
     description: DESCRIPTION,
     datePublished: PUBLISHED_AT,
-    dateModified: PUBLISHED_AT,
+    dateModified: MODIFIED_AT,
     author: {
       "@type": "Organization",
       name: "TrueCap",

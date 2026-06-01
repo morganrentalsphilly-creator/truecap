@@ -20,6 +20,7 @@ const TITLE = "Kansas City rental property analysis — calculator + 2026 cap-ra
 const DESCRIPTION =
   "Run a Kansas City rental deal in 60 seconds. Auto-fills MO property tax (~1.0%), HUD rent for Jackson / Clay / Cass counties, current mortgage rates. Plus neighborhood cap-rate ranges + the KC cash-flow thesis for 2026.";
 const PUBLISHED_AT = "2026-05-24";
+const MODIFIED_AT = "2026-06-01";
 
 export const metadata: Metadata = {
   title: `${TITLE} | TrueCap`,
@@ -59,7 +60,7 @@ const FAQS: { q: string; a: string }[] = [
 export default function KansasCityMarketPage() {
   const siteUrl = getSiteUrl();
   const canonicalUrl = `${siteUrl}/markets/${SLUG}`;
-  const ld = { "@context": "https://schema.org", "@type": "WebPage", "@id": `${canonicalUrl}#page`, name: TITLE, description: DESCRIPTION, url: canonicalUrl, datePublished: PUBLISHED_AT, dateModified: PUBLISHED_AT, inLanguage: "en-US", isPartOf: { "@id": `${siteUrl}/#website` }, about: { "@type": "Place", name: `${CITY}, ${STATE}`, address: { "@type": "PostalAddress", addressLocality: CITY, addressRegion: STATE, addressCountry: "US" } } };
+  const ld = { "@context": "https://schema.org", "@type": "WebPage", "@id": `${canonicalUrl}#page`, name: TITLE, description: DESCRIPTION, url: canonicalUrl, datePublished: PUBLISHED_AT, dateModified: MODIFIED_AT, inLanguage: "en-US", isPartOf: { "@id": `${siteUrl}/#website` }, about: { "@type": "Place", name: `${CITY}, ${STATE}`, address: { "@type": "PostalAddress", addressLocality: CITY, addressRegion: STATE, addressCountry: "US" } } };
   const faqLd = { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: FAQS.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })) };
 
   return (

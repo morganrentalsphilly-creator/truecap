@@ -79,6 +79,7 @@ export default function VsDealCheckPage() {
     url: `${siteUrl}/vs/dealcheck`,
     description:
       "Side-by-side comparison of TrueCap and DealCheck for rental property underwriting.",
+    dateModified: "2026-06-01",
     publisher: { "@id": `${siteUrl}/#organization` },
   };
 
@@ -236,6 +237,27 @@ export default function VsDealCheckPage() {
             <li><strong>"I run a portfolio."</strong> Saved deals get a rollup header (total cash flow / weighted cap rate / weighted CoC) — feels like running a book, not a notebook.</li>
             <li><strong>"I want to understand the score, not just trust it."</strong> Click "Why this score?" on any analysis and see the contribution from each subscore plus what would move the number.</li>
           </ul>
+          <p className="mt-4 text-sm leading-relaxed text-foreground">
+            Prefer to kick the tires on a single metric first? Try the
+            standalone{" "}
+            <Link href="/tools/cap-rate-calculator" className="font-semibold text-primary hover:underline">
+              cap rate calculator
+            </Link>
+            ,{" "}
+            <Link href="/tools/dscr-calculator" className="font-semibold text-primary hover:underline">
+              DSCR calculator
+            </Link>
+            , or{" "}
+            <Link href="/tools/brrrr-calculator" className="font-semibold text-primary hover:underline">
+              BRRRR calculator
+            </Link>{" "}
+            — same engine as the full analyzer, narrower scope. For the
+            workflow itself, our guide on{" "}
+            <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="font-semibold text-primary hover:underline">
+              60-second underwriting
+            </Link>{" "}
+            shows exactly how a TrueCap user moves from listing to verdict.
+          </p>
         </section>
 
         {/* Pricing CTA */}

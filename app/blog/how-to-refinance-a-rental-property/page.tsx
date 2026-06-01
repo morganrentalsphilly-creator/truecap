@@ -20,6 +20,7 @@ const TITLE = "How to refinance a rental property — rate-and-term, cash-out, a
 const DESCRIPTION =
   "Step-by-step on refinancing a rental property: when refi makes sense, rate-and-term vs cash-out, LTV limits, DSCR loans, the break-even math, and the 5 mistakes most investors make.";
 const PUBLISHED_AT = "2026-05-26";
+const MODIFIED_AT = "2026-06-01";
 const READING_TIME = 10;
 
 export const metadata: Metadata = {
@@ -79,7 +80,7 @@ export default function RefinancePost() {
     headline: TITLE,
     description: DESCRIPTION,
     datePublished: PUBLISHED_AT,
-    dateModified: PUBLISHED_AT,
+    dateModified: MODIFIED_AT,
     url: canonicalUrl,
     publisher: { "@id": `${siteUrl}/#organization` },
     mainEntityOfPage: canonicalUrl,

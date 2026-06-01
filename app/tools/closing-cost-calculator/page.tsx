@@ -67,6 +67,7 @@ export default function ClosingCostCalculatorPage() {
     name: "Closing Cost Calculator — TrueCap",
     description: "Free rental property closing cost calculator.",
     url: `${siteUrl}/tools/closing-cost-calculator`,
+    dateModified: "2026-06-01",
     publisher: { "@id": `${siteUrl}/#organization` },
   };
   const faqLd = {

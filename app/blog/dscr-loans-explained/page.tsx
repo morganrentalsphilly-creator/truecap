@@ -30,6 +30,7 @@ const TITLE = "DSCR loans explained: what they are, when they make sense, what t
 const DESCRIPTION =
   "DSCR loans approve based on the property's economics, not your personal income. Here's how they work, who they're for, what rates and DSCR ratios look like in 2026, and the trade-offs vs. conventional financing.";
 const PUBLISHED_AT = "2026-05-24";
+const MODIFIED_AT = "2026-06-01";
 const READING_TIME_MIN = 10;
 
 export const metadata: Metadata = {
@@ -104,7 +105,7 @@ export default function BlogPost() {
     headline: TITLE,
     description: DESCRIPTION,
     datePublished: PUBLISHED_AT,
-    dateModified: PUBLISHED_AT,
+    dateModified: MODIFIED_AT,
     author: { "@type": "Organization", name: "TrueCap", url: siteUrl },
     publisher: { "@id": `${siteUrl}/#organization` },
     mainEntityOfPage: canonicalUrl,
