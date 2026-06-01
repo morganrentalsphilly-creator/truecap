@@ -1,6 +1,14 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { DashboardHome, type DashboardHomeData } from "@/components/dashboard/DashboardHome";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
+
+export const metadata: Metadata = {
+  title: "Dashboard",
+  description: "Your TrueCap investor dashboard — saved deals, portfolio insights, and Pro tools.",
+  alternates: { canonical: "/dashboard" },
+  robots: { index: false, follow: false },
+};
 import {
   getDashboardNavAccess,
   getEntitlementsForUser,

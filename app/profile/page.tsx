@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { Header } from "@/components/investcalc/header";
 import { BillingConversionTracker } from "@/components/marketing/billing-conversion-tracker";
@@ -6,6 +7,13 @@ import { ProfileForm } from "@/components/profile/profile-form";
 import { getEntitlementsForUser } from "@/lib/entitlements";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getStripe } from "@/lib/stripe/client";
+
+export const metadata: Metadata = {
+  title: "Profile & Billing",
+  description: "Manage your TrueCap profile, subscription, and billing details.",
+  alternates: { canonical: "/profile" },
+  robots: { index: false, follow: false },
+};
 
 type PlanRow = {
   slug: string;

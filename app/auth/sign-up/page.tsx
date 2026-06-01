@@ -1,7 +1,15 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Loader2 } from "lucide-react";
 import { AuthShell } from "@/components/auth/auth-shell";
 import { SignUpForm } from "@/components/auth/sign-up-form";
+
+export const metadata: Metadata = {
+  title: "Create account",
+  description: "Sign up for TrueCap to save deals and unlock Pro when you subscribe.",
+  alternates: { canonical: "/auth/sign-up" },
+  robots: { index: false, follow: false },
+};
 
 function SignUpFallback() {
   return (

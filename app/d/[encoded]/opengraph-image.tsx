@@ -98,7 +98,24 @@ export default async function Image({ params }: { params: Promise<Params> }) {
     return Fallback({ headline: "Shared deal" });
   }
 
-  const address = (parsed.data.address || "Shared deal").slice(0, 80);
+  // Truncate long addresses on a word boundary with an ellipsis instead
+  // of a raw .slice(0, 80) which can cut mid-word (e.g. "...Magnolia Ave-
+  // nue Sou" looks broken in social previews). Anything ≤ 80 chars
+  // renders as-is. Anything longer truncates at the last whole word that
+  // fits within ~76 chars (leaves room for the ellipsis without pushing
+  // the visible string past 80).
+  const truncateAddress = (raw: string): string => {
+    if (raw.length <= 80) return raw;
+    const limit = 76;
+    const sliced = raw.slice(0, limit);
+    const lastSpace = sliced.lastIndexOf(" ");
+    // If there's a sensible word boundary at least halfway through, cut
+    // there; otherwise fall back to the hard limit (handles addresses
+    // with no spaces, e.g. a single very long token).
+    const cutAt = lastSpace > limit / 2 ? lastSpace : limit;
+    return `${sliced.slice(0, cutAt).trimEnd()}…`;
+  };
+  const address = truncateAddress(parsed.data.address || "Shared deal");
   const purchasePrice = parsed.data.purchasePrice ?? 0;
   const isCash = result.monthlyPayment <= 0;
   const cf = result.netCashFlow;
@@ -159,12 +176,22 @@ export default async function Image({ params }: { params: Promise<Params> }) {
         >
           <div
             style={{
-              fontSize: 52,
+              // Scale headline font down for long addresses so they
+              // never overflow the 1088px content box. Short (≤ 40 char)
+              // addresses get the full 52px treatment; longer ones step
+              // down to 44 / 38 to stay on one or two lines and avoid
+              // pushing the verdict pill below the social-preview fold.
+              fontSize: address.length <= 40 ? 52 : address.length <= 60 ? 44 : 38,
               fontWeight: 800,
-              lineHeight: 1.1,
+              // Slight bump for the smaller sizes so 2-line addresses
+              // still breathe visually.
+              lineHeight: address.length <= 40 ? 1.1 : 1.15,
               letterSpacing: "-0.02em",
               maxWidth: 1088,
               display: "flex",
+              // Allow wrapping so 2-line addresses render correctly
+              // instead of overflowing horizontally past the safe area.
+              flexWrap: "wrap",
             }}
           >
             {address}

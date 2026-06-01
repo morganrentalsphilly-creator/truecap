@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { Header } from "@/components/investcalc/header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -5,6 +6,13 @@ import { Badge } from "@/components/ui/badge";
 import { UserDefaultsCard } from "@/components/settings/user-defaults-card";
 import { getEntitlementsForUser } from "@/lib/entitlements";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+
+export const metadata: Metadata = {
+  title: "Settings",
+  description: "Manage your TrueCap account preferences and analysis defaults.",
+  alternates: { canonical: "/settings" },
+  robots: { index: false, follow: false },
+};
 
 export default async function SettingsPage() {
   const supabase = await createServerSupabaseClient();

@@ -94,6 +94,7 @@ export default function TaxDeductionsPost() {
     datePublished: PUBLISHED_AT,
     dateModified: MODIFIED_AT,
     url: canonicalUrl,
+    author: { "@type": "Person", name: "Morgan Page", url: siteUrl },
     publisher: { "@id": `${siteUrl}/#organization` },
     isPartOf: { "@id": `${siteUrl}/blog#blog` },
     mainEntityOfPage: canonicalUrl,

@@ -47,6 +47,7 @@ export async function generateMetadata({
   return {
     title: `${entry.title} — Embed`,
     description: entry.description,
+    alternates: { canonical: `/embed/${slug}` },
     robots: { index: false, follow: false },
   };
 }

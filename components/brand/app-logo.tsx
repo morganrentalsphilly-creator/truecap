@@ -26,7 +26,7 @@ export function AppLogo({
       <div className="relative h-[30px] w-[112px] overflow-hidden">
         <Image
           src="/Logo-png-w.png"
-          alt="Truecap"
+          alt="TrueCap logo"
           fill
           priority={priority}
           sizes="112px"

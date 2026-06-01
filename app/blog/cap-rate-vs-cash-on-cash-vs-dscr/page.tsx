@@ -101,8 +101,8 @@ export default function BlogPost() {
     datePublished: PUBLISHED_AT,
     dateModified: MODIFIED_AT,
     author: {
-      "@type": "Organization",
-      name: "TrueCap",
+      "@type": "Person",
+      name: "Morgan Page",
       url: siteUrl,
     },
     publisher: { "@id": `${siteUrl}/#organization` },

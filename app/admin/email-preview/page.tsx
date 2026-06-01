@@ -21,6 +21,7 @@ import { EmailPreviewControls } from "./preview-controls";
 
 export const metadata = {
   title: "Email Preview · TrueCap Admin",
+  alternates: { canonical: "/admin/email-preview" },
   robots: { index: false, follow: false },
 };
 

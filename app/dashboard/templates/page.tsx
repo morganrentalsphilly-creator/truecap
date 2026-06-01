@@ -1,6 +1,14 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { TemplatesManagementPage } from "@/components/investcalc/templates-management-page";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
+
+export const metadata: Metadata = {
+  title: "Analysis Templates",
+  description: "Manage your saved rental analysis templates in TrueCap.",
+  alternates: { canonical: "/dashboard/templates" },
+  robots: { index: false, follow: false },
+};
 import { Topbar } from "@/components/dashboard/Topbar";
 import { listAnalysisTemplatesAction } from "@/app/actions/analysis-templates";
 import {

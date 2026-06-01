@@ -27,6 +27,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: `${title} | TrueCap`,
     description:
       "A rental property analysis shared with you via TrueCap — institutional-grade math, no spreadsheet required.",
+    alternates: { canonical: `/d/${encoded}` },
     robots: { index: false, follow: false }, // share links shouldn't be indexed
     openGraph: {
       title: `${title} — Rental property analysis`,

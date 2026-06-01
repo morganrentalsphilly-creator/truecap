@@ -1,8 +1,16 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import {
   SavedAnalysesPage,
   type SavedAnalysisListItem,
 } from "@/components/investcalc/saved-analyses-page-v2";
+
+export const metadata: Metadata = {
+  title: "Saved Analyses",
+  description: "Your saved rental property analyses in TrueCap.",
+  alternates: { canonical: "/dashboard/saved-analyses" },
+  robots: { index: false, follow: false },
+};
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { PortfolioRollupStrip } from "@/components/dashboard/portfolio-rollup-strip";
 import { Topbar } from "@/components/dashboard/Topbar";

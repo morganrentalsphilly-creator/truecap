@@ -1,6 +1,14 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Plus } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "Compare Deals",
+  description: "Compare 2-4 saved rental analyses side by side in your TrueCap dashboard.",
+  alternates: { canonical: "/dashboard/compare" },
+  robots: { index: false, follow: false },
+};
 import { getCompareIdsFromCookie } from "@/app/actions/compare";
 import { Button } from "@/components/ui/button";
 import { CompareDealsClient, type CompareDealViewModel } from "@/components/investcalc/compare-deals-client";

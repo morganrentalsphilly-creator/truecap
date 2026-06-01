@@ -1,7 +1,15 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Loader2 } from "lucide-react";
 import { AuthShell } from "@/components/auth/auth-shell";
 import { LoginForm } from "@/components/auth/login-form";
+
+export const metadata: Metadata = {
+  title: "Sign in",
+  description: "Sign in to TrueCap to access your saved deals, Pro tools, and personalized insights.",
+  alternates: { canonical: "/auth/login" },
+  robots: { index: false, follow: false },
+};
 
 function LoginFallback() {
   return (
