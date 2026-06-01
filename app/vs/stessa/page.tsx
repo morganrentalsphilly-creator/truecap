@@ -97,7 +97,7 @@ export default function VsStessaPage() {
             <Sparkles className="size-3" />
             Honest comparison
           </div>
-          <h1 className="text-3xl sm:text-5xl font-black text-foreground leading-[1.05] tracking-tight text-balance">
+          <h1 className="text-3xl sm:text-5xl font-extrabold text-foreground leading-[1.05] tracking-tight text-balance">
             TrueCap vs Stessa:{" "}
             <span className="text-primary">underwriting vs bookkeeping.</span>
           </h1>
@@ -123,7 +123,7 @@ export default function VsStessaPage() {
         </section>
 
         <section className="mb-12 sm:mb-16 rounded-2xl border border-border bg-card p-6 sm:p-8">
-          <h2 className="text-xl sm:text-2xl font-black text-foreground mb-3">TL;DR</h2>
+          <h2 className="text-xl sm:text-2xl font-extrabold text-foreground mb-3">TL;DR</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             <div>
               <p className="text-[11px] font-bold uppercase tracking-widest text-primary mb-2">Pick TrueCap if</p>
@@ -155,7 +155,7 @@ export default function VsStessaPage() {
         </section>
 
         <section className="mb-12 sm:mb-16">
-          <h2 className="text-2xl sm:text-3xl font-black text-foreground mb-2">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground mb-2">
             Feature-by-feature
           </h2>
           <p className="text-base text-muted-foreground mb-6 leading-relaxed">
@@ -199,7 +199,7 @@ export default function VsStessaPage() {
         </section>
 
         <section className="mb-12 sm:mb-16 rounded-2xl border border-[var(--brand-green)]/25 bg-[var(--brand-green-light)] p-6 sm:p-8">
-          <h2 className="text-xl sm:text-2xl font-black text-[var(--brand-green)] mb-3">
+          <h2 className="text-xl sm:text-2xl font-extrabold text-[var(--brand-green)] mb-3">
             The actual recommendation
           </h2>
           <p className="text-sm sm:text-base leading-relaxed text-foreground">
@@ -236,7 +236,7 @@ export default function VsStessaPage() {
         </section>
 
         <section className="mb-12 sm:mb-16 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
-          <h2 className="text-2xl sm:text-3xl font-black mb-2">
+          <h2 className="text-2xl sm:text-3xl font-extrabold mb-2">
             Underwriting the next deal? Start free.
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">

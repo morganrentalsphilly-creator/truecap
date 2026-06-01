@@ -249,7 +249,7 @@ export function BillingPanel({ currentSubscription, plans }: BillingPanelProps) 
                   : null}
                 </div>
                 <div className="pt-2">
-                  <span className="text-4xl font-black tracking-tight">{plan.priceLabel}</span>
+                  <span className="text-4xl font-extrabold tracking-tight">{plan.priceLabel}</span>
                   <span className="text-muted-foreground"> / {plan.intervalLabel}</span>
                 </div>
               </CardHeader>

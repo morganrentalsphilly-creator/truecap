@@ -247,7 +247,7 @@ export function TemplatesManagementPage({
             </Button>
             <div className="h-6 w-px bg-border" />
             <div className="space-y-1">
-              <h1 className="text-3xl md:text-4xl font-black tracking-tight text-foreground xl:text-3xl">Calculation Templates</h1>
+              <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-foreground xl:text-3xl">Calculation Templates</h1>
               <p className="text-xs md:text-sm text-muted-foreground ">Manage reusable assumptions for your analyses.</p>
             </div>
             </div>
@@ -348,19 +348,19 @@ export function TemplatesManagementPage({
                 <div className="mt-4 grid grid-cols-2 gap-2">
                   <div className="rounded-xl bg-muted/40 p-3">
                     <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Down Payment</p>
-                    <p className="mt-1 text-sm font-black text-foreground">{toPercentLabel(template.downPaymentPct)}</p>
+                    <p className="mt-1 text-sm font-extrabold text-foreground">{toPercentLabel(template.downPaymentPct)}</p>
                   </div>
                   <div className="rounded-xl bg-muted/40 p-3">
                     <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Interest Rate</p>
-                    <p className="mt-1 text-sm font-black text-foreground">{toPercentLabel(template.interestRatePct)}</p>
+                    <p className="mt-1 text-sm font-extrabold text-foreground">{toPercentLabel(template.interestRatePct)}</p>
                   </div>
                   <div className="rounded-xl bg-muted/40 p-3">
                     <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Vacancy</p>
-                    <p className="mt-1 text-sm font-black text-foreground">{toPercentLabel(template.vacancyPct)}</p>
+                    <p className="mt-1 text-sm font-extrabold text-foreground">{toPercentLabel(template.vacancyPct)}</p>
                   </div>
                   <div className="rounded-xl bg-muted/40 p-3">
                     <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Tax Rate</p>
-                    <p className="mt-1 text-sm font-black text-foreground">{toPercentLabel(template.taxRatePct)}</p>
+                    <p className="mt-1 text-sm font-extrabold text-foreground">{toPercentLabel(template.taxRatePct)}</p>
                   </div>
                 </div>
 

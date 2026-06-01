@@ -166,7 +166,7 @@ export default async function StatePage({
         <p className="text-[11px] uppercase tracking-widest text-primary font-bold">
           {state.tier} market · {state.abbr}
         </p>
-        <h1 className="mt-2 text-3xl sm:text-5xl font-black text-foreground leading-[1.05] tracking-tight">
+        <h1 className="mt-2 text-3xl sm:text-5xl font-extrabold text-foreground leading-[1.05] tracking-tight">
           Investing in {state.name} rental property
         </h1>
         <p className="mt-5 text-lg leading-relaxed text-muted-foreground">{state.pitch}</p>
@@ -188,7 +188,7 @@ export default async function StatePage({
           ].map((m) => (
             <div key={m.label} className="rounded-xl border border-border bg-card p-4">
               <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{m.label}</p>
-              <p className={`mt-2 text-xl font-black ${m.label === "Landlord friendliness" ? landlordToneClass : "text-foreground"}`}>{m.value}</p>
+              <p className={`mt-2 text-xl font-extrabold ${m.label === "Landlord friendliness" ? landlordToneClass : "text-foreground"}`}>{m.value}</p>
               <p className="text-[11px] text-muted-foreground">{m.sub}</p>
             </div>
           ))}
@@ -197,7 +197,7 @@ export default async function StatePage({
         {/* Pros + Cons */}
         <section className="mt-12 grid gap-6 lg:grid-cols-2">
           <div className="rounded-2xl border border-[color:var(--brand-green,#0f9d58)]/30 bg-[color:var(--brand-green-light,#dcfce7)]/40 p-6">
-            <h2 className="text-xl font-black text-foreground mb-3">Why investors choose {state.name}</h2>
+            <h2 className="text-xl font-extrabold text-foreground mb-3">Why investors choose {state.name}</h2>
             <ul className="space-y-2">
               {state.pros.map((p) => (
                 <li key={p} className="flex items-start gap-2 text-sm leading-relaxed text-foreground">
@@ -208,7 +208,7 @@ export default async function StatePage({
             </ul>
           </div>
           <div className="rounded-2xl border border-border bg-card p-6">
-            <h2 className="text-xl font-black text-foreground mb-3">The honest caveats</h2>
+            <h2 className="text-xl font-extrabold text-foreground mb-3">The honest caveats</h2>
             <ul className="space-y-2">
               {state.cons.map((c) => (
                 <li key={c} className="flex items-start gap-2 text-sm leading-relaxed text-foreground">
@@ -222,7 +222,7 @@ export default async function StatePage({
 
         {/* Top cities */}
         <section className="mt-12">
-          <h2 className="text-2xl font-black text-foreground mb-4">Best cities for rental investing in {state.name}</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mb-4">Best cities for rental investing in {state.name}</h2>
           <div className="grid gap-3 sm:grid-cols-2">
             {state.topCities.map((c) => (
               <article key={c.name} className="rounded-xl border border-border bg-card p-5">
@@ -241,7 +241,7 @@ export default async function StatePage({
 
         {/* Strategy fit */}
         <section className="mt-12 rounded-2xl border border-primary/20 bg-gradient-to-br from-[var(--brand-blue-light)] via-card to-card p-6 sm:p-8">
-          <h2 className="text-xl font-black text-foreground mb-3">Best strategies for {state.name}</h2>
+          <h2 className="text-xl font-extrabold text-foreground mb-3">Best strategies for {state.name}</h2>
           <ul className="space-y-2">
             {state.bestStrategies.map((s) => (
               <li key={s} className="flex items-start gap-2 text-sm leading-relaxed text-foreground">
@@ -254,13 +254,13 @@ export default async function StatePage({
 
         {/* Insurance note */}
         <section className="mt-8 rounded-2xl border border-border bg-muted/30 p-6">
-          <h2 className="text-base font-black text-foreground mb-2">Insurance note for {state.name}</h2>
+          <h2 className="text-base font-extrabold text-foreground mb-2">Insurance note for {state.name}</h2>
           <p className="text-sm leading-relaxed text-muted-foreground">{state.insuranceNote}</p>
         </section>
 
         {/* Tool CTA */}
         <section className="mt-12 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
-          <h2 className="text-xl sm:text-2xl font-black mb-2">Run the math on a {state.name} deal</h2>
+          <h2 className="text-xl sm:text-2xl font-extrabold mb-2">Run the math on a {state.name} deal</h2>
           <p className="text-sm sm:text-base opacity-90 mb-5">
             Paste an address into TrueCap and get cap rate, cash-on-cash, DSCR, and 10-year projection in 60 seconds. State-specific property tax + insurance estimates included.
           </p>
@@ -271,7 +271,7 @@ export default async function StatePage({
 
         {/* Companion resources */}
         <section className="mt-10 rounded-2xl border border-border bg-card p-6 sm:p-8">
-          <h2 className="text-base font-black text-foreground mb-3">
+          <h2 className="text-base font-extrabold text-foreground mb-3">
             Underwrite a {state.name} deal in three steps
           </h2>
           <ul className="space-y-2 text-sm leading-relaxed text-foreground">

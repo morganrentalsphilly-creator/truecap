@@ -56,7 +56,7 @@ export default function PropertyManagementPost() {
       <article className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <div className="mb-2"><Link href="/blog" className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground">← Blog</Link></div>
         <header className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-black text-foreground leading-tight tracking-tight text-balance">{TITLE}</h1>
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight text-balance">{TITLE}</h1>
           <p className="mt-3 text-[11px] uppercase tracking-widest text-muted-foreground font-bold">
             {new Date(PUBLISHED_AT).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })} · {READING_TIME} min read
           </p>
@@ -66,7 +66,7 @@ export default function PropertyManagementPost() {
         </header>
 
         <div className="prose prose-neutral max-w-none text-foreground space-y-6 leading-relaxed">
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">The PM cost structure (honest version)</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">The PM cost structure (honest version)</h2>
           <p>
             A typical residential PM in the US charges:
           </p>
@@ -80,7 +80,7 @@ export default function PropertyManagementPost() {
             On a $1,500/mo rental in a typical Midwest market: $135/mo (9%) + amortized lease-up of $50-100/mo + ~$30/mo of repair markup = <strong>~$200-275/mo all-in</strong>. That&apos;s 13-18% of gross rent, not the 8-10% the headline number suggests.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">What you actually get for that</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">What you actually get for that</h2>
           <p>
             The PM&apos;s job is much more than &quot;collect rent.&quot; What they actually do:
           </p>
@@ -96,7 +96,7 @@ export default function PropertyManagementPost() {
             The value isn&apos;t the rent collection (anyone can do that). It&apos;s the systemic risk reduction — the bad-tenant problem and the legal-compliance problem are where unmanaged landlords lose real money.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">The actual self-management math</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">The actual self-management math</h2>
           <p>
             Self-management isn&apos;t free. The hidden costs:
           </p>
@@ -113,7 +113,7 @@ export default function PropertyManagementPost() {
             PM management makes sense at: 4+ properties (the time math flips), or out-of-state properties (you can&apos;t physically show or maintain remotely), or a primary career that doesn&apos;t leave evenings free, or properties in high-turnover student/transient markets.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">The break-even calculation</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">The break-even calculation</h2>
           <p>
             Quick framework:
           </p>
@@ -134,7 +134,7 @@ export default function PropertyManagementPost() {
             Self-management wins by ~$1,000/year here. BUT the standard deviation on self-management is much higher: one really bad tenant adds $5-15k to that "worse screening loss" number and self flips to a clear loss. PM is the lower-variance choice.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">The cases where PM is non-negotiable</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">The cases where PM is non-negotiable</h2>
           <ul>
             <li><strong>Out-of-state properties.</strong> Even &quot;I&apos;ll fly out for showings&quot; investors stop doing this by deal #2. Bad PMs lose you money; the answer is to vet harder, not skip PM entirely.</li>
             <li><strong>You have a full-time career you don&apos;t want to interrupt.</strong> Software engineers making $200k+ shouldn&apos;t be doing $50/hr tasks on weekends. The math doesn&apos;t work; your time is worth too much.</li>
@@ -142,7 +142,7 @@ export default function PropertyManagementPost() {
             <li><strong>Multi-family 5+ units.</strong> The compliance + turnover math at scale strongly favors PM, even for local landlords.</li>
           </ul>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">When to fire your PM</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">When to fire your PM</h2>
           <p>
             Switch back to self-management or change PMs when:
           </p>
@@ -157,7 +157,7 @@ export default function PropertyManagementPost() {
             The right PM is invisible — rent shows up monthly, statements arrive on time, problems get solved before you hear about them. If you&apos;re hearing about problems, switch.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">Modeling PM in your underwriting</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">Modeling PM in your underwriting</h2>
           <p>
             Set the <strong>Management %</strong> field in <Link href="/" className="text-primary font-semibold hover:underline">TrueCap</Link> to <strong>9% by default</strong> for any property you don&apos;t plan to self-manage, plus add 1-2pp to the <Link href="/glossary/maintenance-reserve" className="text-primary font-semibold hover:underline">maintenance</Link> % to cover the markup. If you&apos;re going to self-manage initially but expect to switch later (after the property is in your book and you stop having time), still underwrite at 9% — it&apos;s the more conservative truth and you don&apos;t want a deal that only works when you&apos;re donating your evenings. For the full operating-expense framework, see our <Link href="/blog/rental-property-pro-forma-explained" className="text-primary font-semibold hover:underline">rental property pro forma walkthrough</Link>.
           </p>

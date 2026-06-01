@@ -209,7 +209,7 @@ export default async function GlossaryTermPage({
         </p>
 
         {/* H1 */}
-        <h1 className="mt-2 text-3xl sm:text-4xl font-black text-foreground leading-tight tracking-tight">
+        <h1 className="mt-2 text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight">
           {entry.term}
         </h1>
 
@@ -224,7 +224,7 @@ export default async function GlossaryTermPage({
         {/* Formula */}
         {entry.formula ? (
           <section className="mt-10">
-            <h2 className="text-xl font-black text-foreground mb-3">How it's calculated</h2>
+            <h2 className="text-xl font-extrabold text-foreground mb-3">How it's calculated</h2>
             <div className="rounded-xl border border-border bg-muted/30 p-5">
               <code className="text-base text-foreground font-mono">{entry.formula}</code>
             </div>
@@ -234,7 +234,7 @@ export default async function GlossaryTermPage({
         {/* Example */}
         {entry.example ? (
           <section className="mt-10">
-            <h2 className="text-xl font-black text-foreground mb-3">Example</h2>
+            <h2 className="text-xl font-extrabold text-foreground mb-3">Example</h2>
             <p className="text-foreground leading-relaxed">{entry.example}</p>
           </section>
         ) : null}
@@ -242,7 +242,7 @@ export default async function GlossaryTermPage({
         {/* Why it matters */}
         {entry.whyItMatters ? (
           <section className="mt-10">
-            <h2 className="text-xl font-black text-foreground mb-3">
+            <h2 className="text-xl font-extrabold text-foreground mb-3">
               Why {entry.term} matters
             </h2>
             <p className="text-foreground leading-relaxed">{entry.whyItMatters}</p>
@@ -252,7 +252,7 @@ export default async function GlossaryTermPage({
         {/* Tool CTA */}
         {entry.toolUrl ? (
           <section className="mt-10 rounded-2xl border border-primary/20 bg-gradient-to-br from-[var(--brand-blue-light)] via-card to-card p-6 sm:p-8">
-            <h2 className="text-xl font-black text-foreground mb-2">
+            <h2 className="text-xl font-extrabold text-foreground mb-2">
               Run the math on a real deal
             </h2>
             <p className="text-foreground leading-relaxed mb-5">
@@ -272,7 +272,7 @@ export default async function GlossaryTermPage({
         {/* Related terms */}
         {relatedEntries.length > 0 ? (
           <section className="mt-10">
-            <h2 className="text-xl font-black text-foreground mb-4">Related terms</h2>
+            <h2 className="text-xl font-extrabold text-foreground mb-4">Related terms</h2>
             <ul className="grid gap-3 sm:grid-cols-2">
               {relatedEntries.map((r) => (
                 <li key={r.slug}>

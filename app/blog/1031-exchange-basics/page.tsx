@@ -58,7 +58,7 @@ export default function ExchangePost() {
       <article className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <div className="mb-2"><Link href="/blog" className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground">← Blog</Link></div>
         <header className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-black text-foreground leading-tight tracking-tight text-balance">{TITLE}</h1>
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight text-balance">{TITLE}</h1>
           <p className="mt-3 text-[11px] uppercase tracking-widest text-muted-foreground font-bold">
             {new Date(PUBLISHED_AT).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })} · {READING_TIME} min read
           </p>
@@ -71,7 +71,7 @@ export default function ExchangePost() {
         </header>
 
         <div className="prose prose-neutral max-w-none text-foreground space-y-6 leading-relaxed">
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">The 30-second version</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">The 30-second version</h2>
           <p>
             You sell rental property A. Instead of taking the cash and paying capital gains tax (federal long-term capital gains: 15-20%, plus <Link href="/glossary/depreciation-period" className="text-primary font-semibold hover:underline">depreciation</Link> recapture at up to 25%, plus state tax in non-zero-tax states), you roll the proceeds into rental property B through a qualified intermediary. Federal taxes are deferred until you eventually sell B without exchanging — which, for serious investors, can mean &quot;forever, because I never stop exchanging until I die and my heirs inherit at stepped-up basis.&quot;
           </p>
@@ -79,7 +79,7 @@ export default function ExchangePost() {
             The catch: a clock starts the moment property A closes, and you have very tight deadlines to identify + close property B. Miss them and the whole tax shelter collapses.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">The two clocks</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">The two clocks</h2>
           <p>
             Both clocks start the day property A closes (the calendar day the sale records, not 24 hours from the moment).
           </p>
@@ -91,7 +91,7 @@ export default function ExchangePost() {
             Both deadlines are calendar days, not business days. Weekends and holidays count. There are NO extensions for any reason (illness, market conditions, contract delays) except in rare presidentially-declared disaster scenarios.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">The qualified intermediary (QI) — non-negotiable</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">The qualified intermediary (QI) — non-negotiable</h2>
           <p>
             You CANNOT take possession of the sale proceeds at any point. Not for a day, not for a minute. The moment the buyer&apos;s funds touch your bank account, you&apos;ve received "constructive receipt" and the 1031 exchange is dead.
           </p>
@@ -107,7 +107,7 @@ export default function ExchangePost() {
             QIs are not banks and are not federally regulated as such — pick one with at least a decade of track record, written bonding, and segregated escrow accounts. Cost is typically $750-$1,500 per exchange. Cheap relative to the tax savings; never cheap out on the QI.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">What "like-kind" actually means</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">What "like-kind" actually means</h2>
           <p>
             Like-kind is broader than most investors realize. Any investment-purpose US real estate exchanges for any other investment-purpose US real estate. You can exchange:
           </p>
@@ -127,7 +127,7 @@ export default function ExchangePost() {
             <li><strong>Personal property</strong> — since the 2017 Tax Cuts and Jobs Act, 1031 only covers real property. Equipment, vehicles, etc. no longer qualify.</li>
           </ul>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">The full-deferral rules</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">The full-deferral rules</h2>
           <p>
             To defer ALL the gain, two rules apply at the replacement-property closing:
           </p>
@@ -143,7 +143,7 @@ export default function ExchangePost() {
             <li><strong>Mortgage boot</strong> — the replacement property has less debt than the relinquished property, and you didn&apos;t make up the difference in cash</li>
           </ul>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">A concrete example</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">A concrete example</h2>
           <p>
             You sell a duplex you&apos;ve owned for 8 years.
           </p>
@@ -160,7 +160,7 @@ export default function ExchangePost() {
             With a 1031 exchange into a property purchased for $600,000 with at least $180k in new debt (or that much fresh cash to cover the mortgage gap): you defer the entire $52k of federal tax. Your new property has a carried-over basis: $213k original adjusted basis + $100k of cash you brought to close = $313k, with depreciation continuing on the carried-over $213k portion at the original schedule, and the new $100k starting a fresh 27.5-year clock.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">Reverse exchanges — when you find the new property first</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">Reverse exchanges — when you find the new property first</h2>
           <p>
             A standard 1031 sells property A first, then buys property B. But what if you find the perfect property B before you&apos;ve sold A? The reverse exchange (formally called a &quot;parking arrangement&quot; under Rev. Proc. 2000-37) lets you do it backwards.
           </p>
@@ -168,7 +168,7 @@ export default function ExchangePost() {
             Mechanics: a QI affiliate (an Exchange Accommodation Titleholder, EAT) buys and parks property B in their name while you find a buyer for property A. You have the same 45/180-day clocks but counted from when property B was acquired. Costs are higher ($3-5k+ vs $750-1500 for standard) because the EAT carries real estate temporarily. Worth it for rare deals you can&apos;t replace.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">When 1031 is worth the complexity</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">When 1031 is worth the complexity</h2>
           <p>
             Run the math: how much federal tax would you owe if you sold without exchanging? If it&apos;s &lt; $15k, 1031 is probably not worth the QI cost + the constrained timeline + the risk of being forced into a worse property B than you&apos;d otherwise pick.
           </p>
@@ -179,7 +179,7 @@ export default function ExchangePost() {
             Strategic note: many serious long-term investors chain 1031 exchanges for decades, then die without selling. Heirs inherit at stepped-up basis (current fair market value, not the original cost basis you&apos;ve been carrying), which permanently wipes out the deferred gain. That&apos;s the &quot;buy, refi, hold, exchange, die&quot; meme — it&apos;s not a joke, it&apos;s a real and durable tax strategy at scale.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">Common mistakes that kill exchanges</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">Common mistakes that kill exchanges</h2>
           <ul>
             <li><strong>Taking cash at closing.</strong> Even &quot;just $5k to cover closing costs.&quot; You&apos;ve received constructive receipt; exchange dead.</li>
             <li><strong>Identifying replacement property by phone, text, or verbal.</strong> Must be in writing, signed, delivered to the QI by day 45.</li>
@@ -189,7 +189,7 @@ export default function ExchangePost() {
             <li><strong>Letting day 45 pass without formally identifying.</strong> No extensions. Ever.</li>
           </ul>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">The practical next steps</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">The practical next steps</h2>
           <p>
             If you&apos;re considering a 1031 on a property you&apos;re about to sell:
           </p>

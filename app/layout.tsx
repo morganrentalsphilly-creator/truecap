@@ -12,6 +12,11 @@ const GOOGLE_ADS_ID = 'AW-18159235338'
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
   variable: "--font-sans-variable",
+  // Plus Jakarta Sans tops out at weight 800. Any `font-extrabold` (900)
+  // usage gets faux-bolded by the browser, which causes a visible
+  // restitch on LCP. We've migrated those to `font-extrabold` (800)
+  // to match the font's real max weight. Don't add "900" here — it's
+  // not a valid weight for this font and TypeScript will reject it.
   weight: ["300", "400", "500", "600", "700", "800"],
 });
 const dmMono = DM_Mono({

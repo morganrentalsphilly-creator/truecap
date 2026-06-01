@@ -707,7 +707,7 @@ function CompareMobileDealStrip({ deals }: { deals: CompareDealViewModel[] }) {
         return (
           <div key={deal.id} className={cn("flex min-h-28 flex-col rounded-2xl border bg-card p-2 shadow-sm", color.border)}>
             <div className="flex items-start justify-between gap-1 max-[380px]:flex-wrap">
-              <span className={cn("inline-flex size-5 items-center justify-center rounded-full text-[11px] font-black", color.chip)}>
+              <span className={cn("inline-flex size-5 items-center justify-center rounded-full text-[11px] font-extrabold", color.chip)}>
                 {index + 1}
               </span>
               <div className="flex items-center gap-0.5 max-[380px]:mt-1 max-[380px]:basis-full max-[380px]:justify-start">
@@ -761,7 +761,7 @@ function CompareMobileDealStrip({ deals }: { deals: CompareDealViewModel[] }) {
                 </Popover>
               </div>
             </div>
-            <p className="mt-1.5 line-clamp-2 text-[11px] font-black leading-tight text-foreground">
+            <p className="mt-1.5 line-clamp-2 text-[11px] font-extrabold leading-tight text-foreground">
               {getShortAddress(deal.address)}
             </p>
             <p className="mt-auto pt-2 text-[10px] font-semibold text-muted-foreground">
@@ -802,22 +802,22 @@ function CompareMobileHighlights({
     <>
       <div className="grid grid-cols-3 gap-2">
         <div className="rounded-2xl bg-card p-3 shadow-sm">
-          <p className="text-[10px] font-black text-emerald-600">Best Deal</p>
-          <p className="mt-1 line-clamp-2 text-xs font-black leading-tight text-foreground">
+          <p className="text-[10px] font-extrabold text-emerald-600">Best Deal</p>
+          <p className="mt-1 line-clamp-2 text-xs font-extrabold leading-tight text-foreground">
             {bestDeal ? getShortAddress(bestDeal.address) : "-"}
           </p>
         </div>
         <div className="rounded-2xl bg-card p-3 shadow-sm">
-          <p className="text-[10px] font-black text-blue-600">Highest ROI</p>
-          <p className="mt-1 text-xs font-black text-foreground">
+          <p className="text-[10px] font-extrabold text-blue-600">Highest ROI</p>
+          <p className="mt-1 text-xs font-extrabold text-foreground">
             {highestRoiDeal?.compareSnapshot?.longTermSummary.totalROI != null
               ? fmtPct(highestRoiDeal.compareSnapshot.longTermSummary.totalROI, 1)
               : fmtPct(highestRoiDeal?.metrics.cocReturn ?? null, 1)}
           </p>
         </div>
         <div className="rounded-2xl bg-card p-3 shadow-sm">
-          <p className="text-[10px] font-black text-violet-600">Strongest DSCR</p>
-          <p className="mt-1 text-xs font-black text-foreground">
+          <p className="text-[10px] font-extrabold text-violet-600">Strongest DSCR</p>
+          <p className="mt-1 text-xs font-extrabold text-foreground">
             {strongestDscrDeal?.metrics.dscr == null ? "-" : strongestDscrDeal.metrics.dscr.toFixed(2)}
           </p>
         </div>
@@ -827,19 +827,19 @@ function CompareMobileHighlights({
         <div className="rounded-3xl border border-border bg-card p-4 shadow-sm">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground">Selected Winner</p>
-              <h2 className="mt-1 text-base font-black leading-tight text-foreground">{getShortAddress(bestDeal.address)}</h2>
+              <p className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-muted-foreground">Selected Winner</p>
+              <h2 className="mt-1 text-base font-extrabold leading-tight text-foreground">{getShortAddress(bestDeal.address)}</h2>
             </div>
             <Badge className="rounded-full border border-emerald-200 bg-emerald-50 text-emerald-700">Best</Badge>
           </div>
           <div className="mt-4 grid grid-cols-2 gap-2">
             <div className="rounded-2xl bg-muted/40 p-3">
               <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Short Score</p>
-              <p className="mt-1 text-lg font-black text-foreground">{shortTermHighlightedWinCounts.get(bestDeal.id) ?? 0}</p>
+              <p className="mt-1 text-lg font-extrabold text-foreground">{shortTermHighlightedWinCounts.get(bestDeal.id) ?? 0}</p>
             </div>
             <div className="rounded-2xl bg-muted/40 p-3">
               <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Long Score</p>
-              <p className="mt-1 text-lg font-black text-foreground">{longTermHighlightedWinCounts.get(bestDeal.id) ?? 0}</p>
+              <p className="mt-1 text-lg font-extrabold text-foreground">{longTermHighlightedWinCounts.get(bestDeal.id) ?? 0}</p>
             </div>
           </div>
         </div>
@@ -937,7 +937,7 @@ export function CompareDealsClient({
             </Button>
             <div className="h-6 w-px bg-border" />
             <div className="space-y-1">
-              <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-foreground xl:text-3xl">Compare Deals</h1>
+              <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground xl:text-3xl">Compare Deals</h1>
               <p className="text-sm text-muted-foreground ">Side-by-side investment analysis</p>
             </div>
           </div>
@@ -963,7 +963,7 @@ export function CompareDealsClient({
                         <span className="grid size-8 place-items-center rounded-xl bg-primary/10 text-primary">
                           <SectionIcon className="size-4" />
                         </span>
-                        <span className="font-black">{section.title}</span>
+                        <span className="font-extrabold">{section.title}</span>
                       </span>
                     </AccordionTrigger>
                     <AccordionContent className="space-y-4 pb-4">
@@ -980,7 +980,7 @@ export function CompareDealsClient({
                                 return (
                                   <div key={`${deal.id}-${row.key}`} className={cn("rounded-xl p-2 text-center flex flex-col items-center justify-center", isBest ? color.bg : "bg-muted/35")}>
                                     <span className="mb-1 inline-flex items-center justify-center gap-1">
-                                      <span className={cn("inline-flex size-5 items-center justify-center rounded-full text-[10px] font-black", color.chip)}>
+                                      <span className={cn("inline-flex size-5 items-center justify-center rounded-full text-[10px] font-extrabold", color.chip)}>
                                         {index + 1}
                                       </span>
                                       {isBest ? <Trophy className="size-3 text-emerald-600" aria-hidden="true" /> : null}
@@ -989,7 +989,7 @@ export function CompareDealsClient({
                                       deal={deal}
                                       row={row}
                                       value={value}
-                                      className={cn("truncate text-[11px] font-black", color.text)}
+                                      className={cn("truncate text-[11px] font-extrabold", color.text)}
                                     />
                                   </div>
                                 );
@@ -1012,7 +1012,7 @@ export function CompareDealsClient({
                         <span className="grid size-8 place-items-center rounded-xl bg-primary/10 text-primary">
                           <SectionIcon className="size-4" />
                         </span>
-                        <span className="font-black">{section.title}</span>
+                        <span className="font-extrabold">{section.title}</span>
                       </span>
                     </AccordionTrigger>
                     <AccordionContent className="space-y-4 pb-4">
@@ -1029,12 +1029,12 @@ export function CompareDealsClient({
                                 return (
                                   <div key={`${deal.id}-${row.key}`} className={cn("rounded-xl p-2 text-center", isBest ? color.bg : "bg-muted/35")}>
                                     <span className="mx-auto mb-1 inline-flex items-center justify-center gap-1">
-                                      <span className={cn("inline-flex size-5 items-center justify-center rounded-full text-[10px] font-black", color.chip)}>
+                                      <span className={cn("inline-flex size-5 items-center justify-center rounded-full text-[10px] font-extrabold", color.chip)}>
                                         {index + 1}
                                       </span>
                                       {isBest ? <Trophy className="size-3 text-emerald-600" aria-hidden="true" /> : null}
                                     </span>
-                                    <p className={cn("truncate text-[11px] font-black", color.text)}>
+                                    <p className={cn("truncate text-[11px] font-extrabold", color.text)}>
                                       {formatCompactLongTermMetric(row, value)}
                                     </p>
                                   </div>
@@ -1093,9 +1093,9 @@ export function CompareDealsClient({
                     <span className="flex size-7 items-center justify-center rounded-full bg-primary/10 text-primary">
                       <TypeIcon className="size-3.5" />
                     </span>
-                    <p className="text-[11px] font-black uppercase tracking-[0.18em] text-primary">{getTypeLabel(deal.propertyType)}</p>
+                    <p className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-primary">{getTypeLabel(deal.propertyType)}</p>
                   </div>
-                  <h2 className="line-clamp-2 min-h-10 overflow-hidden pr-8 text-lg font-black leading-snug text-foreground">
+                  <h2 className="line-clamp-2 min-h-10 overflow-hidden pr-8 text-lg font-extrabold leading-snug text-foreground">
                     {deal.address}
                   </h2>
                   <p className="mt-6 text-sm font-semibold text-muted-foreground">{formatCurrency(deal.purchasePrice)}</p>
@@ -1182,7 +1182,7 @@ export function CompareDealsClient({
                       </p>
                       <p
                         className={cn(
-                          "mt-1 text-sm font-black text-foreground",
+                          "mt-1 text-sm font-extrabold text-foreground",
                           isShortTermWinner && "text-emerald-700"
                         )}
                       >
@@ -1205,7 +1205,7 @@ export function CompareDealsClient({
                       </p>
                       <p
                         className={cn(
-                          "mt-1 text-sm font-black text-foreground",
+                          "mt-1 text-sm font-extrabold text-foreground",
                           isLongTermWinner && "text-emerald-700"
                         )}
                       >
@@ -1253,7 +1253,7 @@ export function CompareDealsClient({
             {(["RETURNS", "RISK", "DEAL"] as const).map((group) => (
               <section key={group} className="space-y-1.5">
                 <div className="grid grid-cols-4">
-                  <h3 className="col-span-4 px-1 text-xs font-black tracking-[0.24em] text-muted-foreground">{group}</h3>
+                  <h3 className="col-span-4 px-1 text-xs font-extrabold tracking-[0.24em] text-muted-foreground">{group}</h3>
                 </div>
                 {METRIC_ROWS.filter((row) => row.group === group).map((row) => {
                   const best = getBestValue(row, deals);
@@ -1280,7 +1280,7 @@ export function CompareDealsClient({
                             ) : null}
                             {deal ? (
                               <MetricValueWithTooltip deal={deal} row={row}>
-                                <span className="inline-flex shrink-0 items-center gap-2 font-black tabular-nums">
+                                <span className="inline-flex shrink-0 items-center gap-2 font-extrabold tabular-nums">
                                   {formatCellValue(deal, row)}
                                   {isBest ? <Trophy className="size-3.5 text-emerald-600" /> : null}
                                 </span>
@@ -1299,7 +1299,7 @@ export function CompareDealsClient({
 
             <section className="space-y-1.5 pt-2">
               <div className="grid grid-cols-4">
-                <h3 className="col-span-4 px-1 text-xs font-black tracking-[0.24em] text-muted-foreground">LONG-TERM PERFORMANCE <span className="tracking-[0.18em] text-muted-foreground/70">(10-YEAR VIEW)</span></h3>
+                <h3 className="col-span-4 px-1 text-xs font-extrabold tracking-[0.24em] text-muted-foreground">LONG-TERM PERFORMANCE <span className="tracking-[0.18em] text-muted-foreground/70">(10-YEAR VIEW)</span></h3>
               </div>
               {LONG_TERM_METRIC_ROWS.map((row, rowIndex) => {
                 const prevSubsection = rowIndex > 0 ? LONG_TERM_METRIC_ROWS[rowIndex - 1]!.subsection : null;
@@ -1352,7 +1352,7 @@ export function CompareDealsClient({
                               </span>
                             ) : null}
                             {deal ? (
-                              <span className="inline-flex shrink-0 items-center gap-2 font-black tabular-nums">
+                              <span className="inline-flex shrink-0 items-center gap-2 font-extrabold tabular-nums">
                                 {formatLongTermCell(row, value)}
                                 {isBest ? <Trophy className="size-3.5 text-emerald-600" /> : null}
                               </span>

@@ -104,7 +104,7 @@ export function CashFlowWaterfall({ result }: { result: AnalysisResult }) {
             <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
               Gross rent
             </p>
-            <p className="text-lg font-black tabular-nums text-foreground sm:text-xl">
+            <p className="text-lg font-extrabold tabular-nums text-foreground sm:text-xl">
               {fmtUsd(gross)}
             </p>
           </div>
@@ -117,7 +117,7 @@ export function CashFlowWaterfall({ result }: { result: AnalysisResult }) {
               {ncfPositive ? "Net cash flow" : "Monthly shortfall"}
             </p>
             <p
-              className={`text-xl font-black tabular-nums sm:text-2xl ${
+              className={`text-xl font-extrabold tabular-nums sm:text-2xl ${
                 ncfPositive ? "text-[var(--metric-positive,#16a34a)]" : "text-[var(--metric-negative,#dc2626)]"
               }`}
             >

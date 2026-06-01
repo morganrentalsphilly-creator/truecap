@@ -75,13 +75,13 @@ export default function IndianapolisMarketPage() {
         <div className="mb-2"><Link href="/" className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground">← TrueCap</Link></div>
         <header className="mb-10">
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-primary mb-3"><MapPin className="size-3" />{CITY}, {STATE}</div>
-          <h1 className="text-3xl sm:text-4xl font-black text-foreground leading-tight tracking-tight">{CITY} rental property analysis — calculator + 2026 cap-rate benchmarks</h1>
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight">{CITY} rental property analysis — calculator + 2026 cap-rate benchmarks</h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">Run an Indianapolis rental deal in 60 seconds with TrueCap. Address auto-fills Indiana property tax (2% gross-assessed cap; ~1.0-1.5% effective in Marion County), HUD rent by county, and current FRED mortgage rates. Below: neighborhood-by-neighborhood cap rates plus the Indy cash-flow thesis.</p>
           <div className="mt-6 flex flex-wrap gap-3"><Link href="/" className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground hover:opacity-90"><Calculator className="size-4" />Underwrite an Indy deal — free</Link></div>
         </header>
 
         <section className="mb-10">
-          <h2 className="text-2xl font-black text-foreground mb-3">Indianapolis neighborhood cap-rate map (2026)</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mb-3">Indianapolis neighborhood cap-rate map (2026)</h2>
           <p className="text-sm text-muted-foreground mb-4 leading-relaxed">Ranges below reflect typical conventional-financing single-family + small-multi deals in each submarket. Indy still routinely produces 1% rule deals in workforce neighborhoods — pure cash-flow without the operational complexity of higher-cap Cleveland or Detroit blocks.</p>
           <div className="overflow-x-auto rounded-2xl border border-border bg-card">
             <table className="w-full text-sm">
@@ -92,17 +92,17 @@ export default function IndianapolisMarketPage() {
         </section>
 
         <section className="mb-10 rounded-2xl border border-[var(--brand-green)]/25 bg-[var(--brand-green-light)] p-5 sm:p-6">
-          <h2 className="text-base font-black uppercase tracking-widest text-[var(--brand-green)] mb-2">Why Indianapolis stays on the cash-flow list</h2>
+          <h2 className="text-base font-extrabold uppercase tracking-widest text-[var(--brand-green)] mb-2">Why Indianapolis stays on the cash-flow list</h2>
           <p className="text-sm leading-relaxed text-foreground">Indianapolis is one of the only major US markets where the 1% rule still routinely works in 2026. Combine sub-$100k entry prices in workforce neighborhoods with Indiana&apos;s 2% gross-assessed property tax cap, and you get genuine cash-flow math without the operational complexity of higher-cap northern industrial markets. Just don&apos;t expect coastal-style appreciation — Indy MSA appreciates 2-4%/yr.</p>
         </section>
 
         <section className="mb-10">
-          <h2 className="text-2xl font-black text-foreground mb-4">Frequently asked — Indianapolis investing</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mb-4">Frequently asked — Indianapolis investing</h2>
           <div className="space-y-4">{FAQS.map((f) => (<details key={f.q} className="group rounded-2xl border border-border bg-card p-4"><summary className="cursor-pointer text-sm font-bold text-foreground select-none list-none flex items-center justify-between gap-3"><span>{f.q}</span><span aria-hidden className="text-muted-foreground transition-transform group-open:rotate-90">▸</span></summary><p className="mt-3 text-sm leading-relaxed text-muted-foreground">{f.a}</p></details>))}</div>
         </section>
 
         <section className="mb-10 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
-          <h2 className="text-xl sm:text-2xl font-black mb-2">Run your next Indianapolis deal in 60 seconds</h2>
+          <h2 className="text-xl sm:text-2xl font-extrabold mb-2">Run your next Indianapolis deal in 60 seconds</h2>
           <p className="text-sm sm:text-base opacity-90 mb-4 max-w-2xl">Paste the address. Indiana tax cap, HUD rent for Marion County, and current rate auto-fill. Cap rate, CoC, DSCR, and monthly cash flow in 1 second. Free to start. No card required.</p>
           <Link href="/" className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity">Open the analyzer<ArrowUpRight className="w-4 h-4" /></Link>
         </section>

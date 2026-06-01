@@ -11,6 +11,19 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  experimental: {
+    // Next.js 16+ tree-shaking hint. Rewrites barrel-style imports of
+    // listed packages into per-symbol deep paths automatically, so a
+    // `import { Icon1, Icon2 } from "lucide-react"` ships only those
+    // two icons even if a future contributor accidentally writes a
+    // wider import. Defensive — current code already uses named
+    // imports, but this prevents regressions without code review work.
+    optimizePackageImports: [
+      "lucide-react",
+      "recharts",
+      "@radix-ui/react-icons",
+    ],
+  },
 }
 
 export default withSentryConfig(nextConfig, {

@@ -117,7 +117,7 @@ export default async function PricingPage() {
               <Sparkles className="size-3" />
               Free to start · No card
             </div>
-            <h1 className="text-balance text-3xl font-black leading-[1.1] tracking-tight text-foreground sm:text-5xl">
+            <h1 className="text-balance text-3xl font-extrabold leading-[1.1] tracking-tight text-foreground sm:text-5xl">
               Pricing that pays for itself <span className="text-primary">on the first deal.</span>
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-balance text-[15px] leading-relaxed text-muted-foreground sm:text-lg">
@@ -162,7 +162,7 @@ export default async function PricingPage() {
 
         {/* Feature comparison */}
         <section className="mx-auto max-w-5xl px-4 py-12 sm:px-6 sm:py-16">
-          <h2 className="text-center text-2xl font-black tracking-tight text-foreground sm:text-3xl">
+          <h2 className="text-center text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
             What you get
           </h2>
           <p className="mx-auto mt-2 max-w-xl text-center text-sm text-muted-foreground sm:text-base">
@@ -223,7 +223,7 @@ export default async function PricingPage() {
                   </span>
                   <span className="text-[11px] text-muted-foreground">No subscription</span>
                 </div>
-                <h3 className="text-xl font-black text-foreground">Just need one lender PDF?</h3>
+                <h3 className="text-xl font-extrabold text-foreground">Just need one lender PDF?</h3>
                 <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
                   Pay once for a single multi-page PDF report — verdict, 10-year projection,
                   tax strategy, exit scenarios — same as Pro. No subscription, no commitment.
@@ -242,7 +242,7 @@ export default async function PricingPage() {
 
         {/* FAQ */}
         <section className="mx-auto max-w-3xl px-4 pb-16 sm:px-6 sm:pb-24">
-          <h2 className="text-center text-2xl font-black tracking-tight text-foreground sm:text-3xl">
+          <h2 className="text-center text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
             Frequently asked
           </h2>
           <div className="mt-8 divide-y divide-border rounded-2xl border border-border bg-card">

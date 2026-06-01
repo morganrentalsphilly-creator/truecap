@@ -57,7 +57,7 @@ export default function FiftyPercentRulePost() {
       <article className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <div className="mb-2"><Link href="/blog" className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground">← Blog</Link></div>
         <header className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-black text-foreground leading-tight tracking-tight text-balance">{TITLE}</h1>
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight text-balance">{TITLE}</h1>
           <p className="mt-3 text-[11px] uppercase tracking-widest text-muted-foreground font-bold">
             {new Date(PUBLISHED_AT).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })} · {READING_TIME} min read
           </p>
@@ -67,7 +67,7 @@ export default function FiftyPercentRulePost() {
         </header>
 
         <div className="prose prose-neutral max-w-none text-foreground space-y-6 leading-relaxed">
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">What the rule actually says</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">What the rule actually says</h2>
           <p>
             The 50% rule, popularized in BiggerPockets-era investor communities, is a shorthand for estimating <Link href="/glossary/noi" className="text-primary font-semibold hover:underline">Net Operating Income (NOI)</Link> without itemizing every expense. The math:
           </p>
@@ -81,7 +81,7 @@ export default function FiftyPercentRulePost() {
             Once you have NOI, you subtract annual debt service (mortgage P&amp;I × 12) to get cash flow. The whole calculation takes ~10 seconds.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">Where it works well</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">Where it works well</h2>
           <p>
             The 50% rule is genuinely accurate for a specific kind of property:
           </p>
@@ -96,9 +96,9 @@ export default function FiftyPercentRulePost() {
             Across a portfolio of properties matching that profile, 50% is shockingly accurate over multi-year averages. Vacancy + maintenance + CapEx + PM + tax + insurance + everything else really does converge near half of gross rent.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">Where it lies (loudly)</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">Where it lies (loudly)</h2>
 
-          <h3 className="text-xl font-black text-foreground mt-8 mb-2">Texas / Illinois — high property tax</h3>
+          <h3 className="text-xl font-extrabold text-foreground mt-8 mb-2">Texas / Illinois — high property tax</h3>
           <p>
             Texas effective property tax can hit 2.5-3.2% in new-construction MUD suburbs. On a $300k property renting for $2,400/mo, the property tax alone is $7,500-9,600/year — already 25-33% of gross rent. Add insurance + maintenance + vacancy + CapEx + management and you&apos;re at 60-65% expenses, not 50%. The 50% rule UNDERESTIMATES expenses by 20-30% in Texas. Deals that look great by the 50% rule actually break even or lose money.
           </p>
@@ -108,7 +108,7 @@ export default function FiftyPercentRulePost() {
             <Link href="/markets/houston" className="text-primary font-semibold hover:underline">Houston market guide</Link> for the parcel-level tax math.
           </p>
 
-          <h3 className="text-xl font-black text-foreground mt-8 mb-2">Florida — insurance</h3>
+          <h3 className="text-xl font-extrabold text-foreground mt-8 mb-2">Florida — insurance</h3>
           <p>
             Post-2022 Florida insurance crisis: typical inland Tampa single-family insurance runs $2,500-4,500/yr, coastal can be $6-12k+. On a $1,900/mo rental, insurance alone hits 11-25% of gross rent. The 50% rule was calibrated for $1-2k annual insurance; FL routinely 3-5x that.
           </p>
@@ -117,27 +117,27 @@ export default function FiftyPercentRulePost() {
             <Link href="/markets/tampa" className="text-primary font-semibold hover:underline">Tampa market guide</Link> for the binding-quote workflow.
           </p>
 
-          <h3 className="text-xl font-black text-foreground mt-8 mb-2">Pre-1940 housing stock — CapEx</h3>
+          <h3 className="text-xl font-extrabold text-foreground mt-8 mb-2">Pre-1940 housing stock — CapEx</h3>
           <p>
             The 50% rule assumes ~5-8% CapEx reserve. Pre-1940 housing (much of Cleveland, Philadelphia, Detroit, Pittsburgh, parts of Baltimore) routinely consumes 10-15% in real-world CapEx — roof, electrical service upgrades, plumbing replacement, foundation work, lead paint. A property that pencils at the 50% rule may grind to break-even once the actual CapEx hits. Underwrite older buildings at 55-60% expense ratio.
           </p>
 
-          <h3 className="text-xl font-black text-foreground mt-8 mb-2">Short-term rentals (Airbnb / VRBO)</h3>
+          <h3 className="text-xl font-extrabold text-foreground mt-8 mb-2">Short-term rentals (Airbnb / VRBO)</h3>
           <p>
             STRs run materially higher than 50% — typical operating expenses (cleaning fees per turnover, higher insurance, mgmt at 15-25%, higher maintenance from frequent turnover) hit 60-75% of gross revenue. The 50% rule doesn&apos;t apply at all to STR; use STR-specific underwriting.
           </p>
 
-          <h3 className="text-xl font-black text-foreground mt-8 mb-2">High HOA condos</h3>
+          <h3 className="text-xl font-extrabold text-foreground mt-8 mb-2">High HOA condos</h3>
           <p>
             An HOA of $400/mo on a $1,800/mo rental is already 22% of gross rent before any other expense. Add tax, insurance, maintenance, vacancy, CapEx and you&apos;re well above 50%. Many newer condos in growth markets (Charlotte, Phoenix, Atlanta) fit this profile.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">Where it lies (quietly)</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">Where it lies (quietly)</h2>
           <p>
             Owner-occupant house hacks, BRRRR mid-stabilization, properties with utilities included, properties with significant vacancy risk (college towns, transient neighborhoods), and properties in states with rent-control regimes (CA, OR, parts of NY) all have expense profiles that diverge from 50%. Don&apos;t use the rule on these without explicit adjustment.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">How to actually use it</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">How to actually use it</h2>
           <p>
             The 50% rule is a <strong>triage tool, not a final-decision tool</strong>. Use it in 5 seconds to decide whether a property is worth opening the full underwrite:
           </p>
@@ -154,7 +154,7 @@ export default function FiftyPercentRulePost() {
             <Link href="/" className="text-primary font-semibold hover:underline">TrueCap</Link> with the address — the analyzer auto-fills the state property tax, HUD rent benchmark, current rate, and pulls every operating expense into a real calculation. Five seconds with the 50% rule, two minutes for the real number.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">A better triage filter</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">A better triage filter</h2>
           <p>
             If you want a faster + more accurate triage than the 50% rule:
           </p>
@@ -171,7 +171,7 @@ export default function FiftyPercentRulePost() {
             <strong>For appreciation-leaning coastal Tier-1 (CA, parts of WA, NYC):</strong> No rule of thumb works because expense ratios are dominated by individual property quirks (rent control, parking, parking, parking, special assessments). Always do the full underwrite.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">The bottom line</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">The bottom line</h2>
           <p>
             The 50% rule was calibrated for a specific era + property type — pre-2010, Midwest SFR, mid-tax states, conventional financing, long-term tenants. It still works for that exact archetype. For everything else, use it as a directional sanity check, not a verdict.
           </p>

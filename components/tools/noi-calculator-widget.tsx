@@ -90,7 +90,7 @@ export function NoiCalculatorWidget() {
               Annual NOI
             </div>
             <div className={cn(
-              "text-5xl sm:text-6xl font-black mt-1 tabular-nums",
+              "text-5xl sm:text-6xl font-extrabold mt-1 tabular-nums",
               result.annualNoi >= 0 ? "text-[var(--metric-positive)]" : "text-[var(--metric-negative)]"
             )}>
               {fmtMoney(result.annualNoi)}

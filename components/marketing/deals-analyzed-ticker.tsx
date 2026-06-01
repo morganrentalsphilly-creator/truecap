@@ -58,7 +58,7 @@ export async function DealsAnalyzedTicker({
     >
       <CheckCircle2 className="size-3.5 shrink-0 text-[var(--brand-green)]" />
       <span>
-        <strong className="font-black tabular-nums">{formatted}</strong>{" "}
+        <strong className="font-extrabold tabular-nums">{formatted}</strong>{" "}
         <span className="text-muted-foreground">{suffix}</span>
       </span>
     </div>

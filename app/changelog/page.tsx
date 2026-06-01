@@ -593,7 +593,7 @@ export default function ChangelogPage() {
           >
             ← TrueCap
           </Link>
-          <h1 className="text-3xl sm:text-4xl font-black text-foreground mt-2 leading-tight">
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight">
             Changelog
           </h1>
           <p className="text-base text-muted-foreground mt-2 leading-relaxed">
@@ -638,7 +638,7 @@ export default function ChangelogPage() {
                     })}
                   </time>
                 </div>
-                <h2 className="text-lg sm:text-xl font-black text-foreground leading-snug">
+                <h2 className="text-lg sm:text-xl font-extrabold text-foreground leading-snug">
                   {entry.title}
                 </h2>
                 <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
@@ -650,7 +650,7 @@ export default function ChangelogPage() {
         </ol>
 
         <section className="mt-10 rounded-2xl bg-primary text-primary-foreground p-6 sm:p-8 text-center">
-          <h2 className="text-xl sm:text-2xl font-black mb-2">
+          <h2 className="text-xl sm:text-2xl font-extrabold mb-2">
             Want to be first to see what&apos;s new?
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-4">

@@ -308,7 +308,7 @@ function Metric({
       </div>
       <div
         className={cn(
-          "text-base sm:text-lg font-black mt-0.5 tabular-nums",
+          "text-base sm:text-lg font-extrabold mt-0.5 tabular-nums",
           positive && "text-[var(--metric-positive)]",
           negative && "text-[var(--metric-negative)]",
           !positive && !negative && "text-foreground"

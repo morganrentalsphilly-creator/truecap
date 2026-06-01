@@ -149,14 +149,14 @@ export default async function CityStrategyPage({
         <p className="text-[11px] uppercase tracking-widest text-primary font-bold">
           {combo.cityName}, {combo.state} · {combo.strategyLabel}
         </p>
-        <h1 className="mt-2 text-3xl sm:text-5xl font-black text-foreground leading-[1.05] tracking-tight">
+        <h1 className="mt-2 text-3xl sm:text-5xl font-extrabold text-foreground leading-[1.05] tracking-tight">
           {combo.strategyLabel.charAt(0).toUpperCase() + combo.strategyLabel.slice(1)} investing in {combo.cityName}
         </h1>
         <p className="mt-5 text-lg leading-relaxed text-muted-foreground">{combo.pitch}</p>
 
         {/* Why here, why now */}
         <section className="mt-12">
-          <h2 className="text-2xl font-black text-foreground mb-3">Why {combo.strategyLabel} works in {combo.cityName} right now</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mb-3">Why {combo.strategyLabel} works in {combo.cityName} right now</h2>
           <p className="text-base leading-relaxed text-foreground">{combo.whyHereWhyNow}</p>
         </section>
 
@@ -166,15 +166,15 @@ export default async function CityStrategyPage({
           <div className="grid gap-4 sm:grid-cols-3">
             <div>
               <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Purchase price</p>
-              <p className="mt-1 text-lg font-black text-foreground">{combo.typicalNumbers.purchasePrice}</p>
+              <p className="mt-1 text-lg font-extrabold text-foreground">{combo.typicalNumbers.purchasePrice}</p>
             </div>
             <div>
               <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Monthly rent</p>
-              <p className="mt-1 text-lg font-black text-foreground">{combo.typicalNumbers.monthlyRent}</p>
+              <p className="mt-1 text-lg font-extrabold text-foreground">{combo.typicalNumbers.monthlyRent}</p>
             </div>
             <div>
               <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Cap rate</p>
-              <p className="mt-1 text-lg font-black text-foreground">{combo.typicalNumbers.capRate}</p>
+              <p className="mt-1 text-lg font-extrabold text-foreground">{combo.typicalNumbers.capRate}</p>
             </div>
           </div>
           <p className="mt-4 text-sm leading-relaxed text-muted-foreground">{combo.typicalNumbers.notes}</p>
@@ -182,7 +182,7 @@ export default async function CityStrategyPage({
 
         {/* Neighborhoods */}
         <section className="mt-12">
-          <h2 className="text-2xl font-black text-foreground mb-4">Best neighborhoods for {combo.strategyLabel} in {combo.cityName}</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mb-4">Best neighborhoods for {combo.strategyLabel} in {combo.cityName}</h2>
           <div className="grid gap-3 sm:grid-cols-2">
             {combo.neighborhoods.map((n) => (
               <article key={n.name} className="rounded-xl border border-border bg-card p-5">
@@ -195,7 +195,7 @@ export default async function CityStrategyPage({
 
         {/* Pitfalls */}
         <section className="mt-12 rounded-2xl border border-amber-500/30 bg-amber-50/40 p-6">
-          <h2 className="text-xl font-black text-foreground mb-3">Common pitfalls to avoid</h2>
+          <h2 className="text-xl font-extrabold text-foreground mb-3">Common pitfalls to avoid</h2>
           <ul className="space-y-2">
             {combo.pitfalls.map((p) => (
               <li key={p} className="flex items-start gap-2 text-sm leading-relaxed text-foreground">
@@ -208,7 +208,7 @@ export default async function CityStrategyPage({
 
         {/* Tool CTA */}
         <section className="mt-12 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
-          <h2 className="text-xl sm:text-2xl font-black mb-2">Run a {combo.cityName} {combo.strategyLabel} deal in 60 seconds</h2>
+          <h2 className="text-xl sm:text-2xl font-extrabold mb-2">Run a {combo.cityName} {combo.strategyLabel} deal in 60 seconds</h2>
           <p className="text-sm sm:text-base opacity-90 mb-5">
             Paste an address into TrueCap and get cap rate, cash-on-cash, DSCR, and 10-year projection — pre-loaded with {combo.cityName}-area defaults so you start with the right assumptions.
           </p>

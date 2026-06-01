@@ -89,7 +89,7 @@ export default function ForHouseHackersPage() {
             <Sparkles className="size-3" />
             For house hackers
           </div>
-          <h1 className="text-3xl sm:text-5xl font-black text-foreground leading-[1.05] tracking-tight text-balance">
+          <h1 className="text-3xl sm:text-5xl font-extrabold text-foreground leading-[1.05] tracking-tight text-balance">
             Live in one, rent the others.{" "}
             <span className="text-primary">Do the math first.</span>
           </h1>
@@ -120,7 +120,7 @@ export default function ForHouseHackersPage() {
         </section>
 
         <section id="use-cases" className="mb-12 sm:mb-16">
-          <h2 className="text-2xl sm:text-3xl font-black text-foreground mb-2">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground mb-2">
             Why house hacks need a different analyzer
           </h2>
           <p className="text-base text-muted-foreground mb-6 leading-relaxed">
@@ -137,7 +137,7 @@ export default function ForHouseHackersPage() {
                 <div className="mb-3 flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
                   <Icon className="size-5" />
                 </div>
-                <h3 className="text-base sm:text-lg font-black text-foreground">
+                <h3 className="text-base sm:text-lg font-extrabold text-foreground">
                   {title}
                 </h3>
                 <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
@@ -149,7 +149,7 @@ export default function ForHouseHackersPage() {
         </section>
 
         <section className="mb-12 sm:mb-16">
-          <h2 className="text-2xl sm:text-3xl font-black text-foreground mb-2">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground mb-2">
             The house-hack workflow
           </h2>
           <ol className="mt-4 space-y-3">
@@ -162,7 +162,7 @@ export default function ForHouseHackersPage() {
               "Save the deal. When you move out in 12-18 months, re-open and toggle propertyType to multi-family to see the post-transition numbers.",
             ].map((step, i) => (
               <li key={i} className="flex items-start gap-3">
-                <span className="inline-flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-black tabular-nums">
+                <span className="inline-flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-extrabold tabular-nums">
                   {i + 1}
                 </span>
                 <span className="text-sm sm:text-base leading-relaxed text-foreground">
@@ -176,7 +176,7 @@ export default function ForHouseHackersPage() {
         <section className="mb-12 sm:mb-16 rounded-2xl border border-[var(--brand-green)]/25 bg-[var(--brand-green-light)] p-6 sm:p-8">
           <div className="flex items-center gap-2 mb-3">
             <Zap className="size-5 text-[var(--brand-green)]" />
-            <h2 className="text-sm font-black uppercase tracking-widest text-[var(--brand-green)]">
+            <h2 className="text-sm font-extrabold uppercase tracking-widest text-[var(--brand-green)]">
               Why house hackers pick TrueCap
             </h2>
           </div>
@@ -190,7 +190,7 @@ export default function ForHouseHackersPage() {
         </section>
 
         <section className="mb-12 sm:mb-16 rounded-2xl border border-border bg-card p-6 sm:p-8">
-          <h2 className="text-lg sm:text-xl font-black text-foreground mb-3">
+          <h2 className="text-lg sm:text-xl font-extrabold text-foreground mb-3">
             Recommended reading and tools
           </h2>
           <p className="text-sm leading-relaxed text-foreground">
@@ -221,7 +221,7 @@ export default function ForHouseHackersPage() {
         </section>
 
         <section className="mb-12 sm:mb-16 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
-          <h2 className="text-2xl sm:text-3xl font-black mb-2">
+          <h2 className="text-2xl sm:text-3xl font-extrabold mb-2">
             Free analyzer is enough to pick the property.
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">

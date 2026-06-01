@@ -142,7 +142,7 @@ export default function BlogPost() {
           <Link href="/blog" className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground">
             ← TrueCap Blog
           </Link>
-          <h1 className="text-3xl sm:text-4xl font-black text-foreground mt-2 leading-tight text-balance">
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight text-balance">
             {TITLE}
           </h1>
           <p className="text-[11px] uppercase tracking-widest text-muted-foreground font-bold mt-3">
@@ -154,7 +154,7 @@ export default function BlogPost() {
           </p>
         </header>
 
-        <article className="prose prose-slate max-w-none [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-black [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground [&_li]:leading-relaxed [&_strong]:text-foreground">
+        <article className="prose prose-slate max-w-none [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground [&_li]:leading-relaxed [&_strong]:text-foreground">
           <p>
             For a decade, &ldquo;getting a mortgage&rdquo; meant proving your
             personal income — tax returns, W-2s, debt-to-income ratios, the

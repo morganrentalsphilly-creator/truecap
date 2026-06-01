@@ -76,7 +76,7 @@ export default async function EmbedPage({
         {/* Compact header with title — keeps embed self-explanatory
             when there's no surrounding TrueCap chrome. */}
         <header className="mb-3">
-          <h1 className="text-lg font-black tracking-tight text-foreground sm:text-xl">
+          <h1 className="text-lg font-extrabold tracking-tight text-foreground sm:text-xl">
             {entry.title}
           </h1>
         </header>

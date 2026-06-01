@@ -89,7 +89,7 @@ export function NewsletterSignup({
           </div>
           <h3
             id="newsletter-footer-band-heading"
-            className="mt-1 text-base sm:text-lg font-black text-foreground leading-tight"
+            className="mt-1 text-base sm:text-lg font-extrabold text-foreground leading-tight"
           >
             Market notes + 3 deals every Monday.
           </h3>
@@ -199,7 +199,7 @@ export function NewsletterSignup({
       </div>
       <h3
         id="newsletter-expanded-heading"
-        className="text-xl sm:text-2xl font-black text-foreground leading-tight"
+        className="text-xl sm:text-2xl font-extrabold text-foreground leading-tight"
       >
         Want this kind of analysis in your inbox?
       </h3>

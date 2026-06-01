@@ -113,7 +113,7 @@ export function ClosingCostCalculatorWidget() {
 
       <div className="mt-6 rounded-xl border border-border bg-muted/30 p-5">
         <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Total closing costs</p>
-        <p className={cn("mt-1 text-4xl font-black tabular-nums", verdictColor)}>{fmtMoney(result.total)}</p>
+        <p className={cn("mt-1 text-4xl font-extrabold tabular-nums", verdictColor)}>{fmtMoney(result.total)}</p>
         <p className="mt-1 text-sm text-muted-foreground tabular-nums">{fmtPct(result.pctOfPrice)} of purchase price · <span className={cn("font-semibold", verdictColor)}>{verdict}</span></p>
         <details className="mt-3 group">
           <summary className="cursor-pointer text-xs font-semibold text-muted-foreground hover:text-foreground">Breakdown</summary>

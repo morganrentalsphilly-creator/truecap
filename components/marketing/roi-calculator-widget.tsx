@@ -79,7 +79,7 @@ export function RoiCalculatorWidget({ proMonthlyPrice }: Props) {
   return (
     <div className="rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-6">
       <div className="flex items-center justify-between gap-3">
-        <h3 className="text-base font-black uppercase tracking-widest text-muted-foreground sm:text-sm">
+        <h3 className="text-base font-extrabold uppercase tracking-widest text-muted-foreground sm:text-sm">
           What you save with TrueCap Pro
         </h3>
         <span className="hidden rounded-full bg-[var(--brand-green-light)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-[var(--brand-green)] sm:inline-flex">
@@ -197,7 +197,7 @@ function ResultTile({
           {label}
         </span>
       </div>
-      <div className={cn("mt-2 text-2xl font-black tabular-nums sm:text-3xl", valueColor)}>
+      <div className={cn("mt-2 text-2xl font-extrabold tabular-nums sm:text-3xl", valueColor)}>
         {value}
       </div>
     </div>

@@ -127,7 +127,7 @@ export function GrmCalculatorWidget() {
             <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
               GRM
             </div>
-            <div className={cn("text-5xl sm:text-6xl font-black mt-1 tabular-nums", c.color)}>
+            <div className={cn("text-5xl sm:text-6xl font-extrabold mt-1 tabular-nums", c.color)}>
               {result.grm.toFixed(1)}
             </div>
             <div className={cn("text-sm font-semibold mt-1", c.color)}>{c.label}</div>

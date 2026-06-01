@@ -80,7 +80,7 @@ export function OnePercentRuleWidget() {
           <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
             Rent / Price
           </div>
-          <div className={cn("text-5xl sm:text-6xl font-black mt-2 tabular-nums",
+          <div className={cn("text-5xl sm:text-6xl font-extrabold mt-2 tabular-nums",
             passes ? "text-[var(--metric-positive)]" : "text-[var(--metric-negative)]")}
           >
             {ratio.toFixed(2)}%

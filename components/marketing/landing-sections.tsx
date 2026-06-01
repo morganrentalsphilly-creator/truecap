@@ -66,7 +66,7 @@ export function HowItWorks() {
       <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
         <div className="mb-10 text-center sm:mb-12">
           <p className="text-[11px] font-bold uppercase tracking-widest text-primary">How it works</p>
-          <h2 className="mt-2 text-balance text-2xl font-black tracking-tight text-foreground sm:text-4xl">
+          <h2 className="mt-2 text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">
             From the listing to a defensible answer in <span className="text-primary">three steps.</span>
           </h2>
         </div>
@@ -76,7 +76,7 @@ export function HowItWorks() {
               key={step.step}
               className="relative rounded-2xl border border-border bg-card p-6 shadow-sm"
             >
-              <div className="absolute right-5 top-5 text-[42px] font-black leading-none text-primary/10">
+              <div className="absolute right-5 top-5 text-[42px] font-extrabold leading-none text-primary/10">
                 {step.step}
               </div>
               <div className="mb-4 flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
@@ -121,7 +121,7 @@ export function WhyNotSpreadsheet() {
       <div className="mx-auto max-w-5xl px-4 py-14 sm:px-6 sm:py-20">
         <div className="mb-10 text-center sm:mb-12">
           <p className="text-[11px] font-bold uppercase tracking-widest text-primary">Already use a spreadsheet?</p>
-          <h2 className="mt-2 text-balance text-2xl font-black tracking-tight text-foreground sm:text-4xl">
+          <h2 className="mt-2 text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">
             TrueCap is your spreadsheet — <span className="text-primary">automated, mobile, and shareable.</span>
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
@@ -218,7 +218,7 @@ export function SocialProof() {
       <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
         <div className="mb-10 text-center sm:mb-12">
           <p className="text-[11px] font-bold uppercase tracking-widest text-primary">Used by real investors</p>
-          <h2 className="mt-2 text-balance text-2xl font-black tracking-tight text-foreground sm:text-4xl">
+          <h2 className="mt-2 text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">
             Built for people who actually close deals.
           </h2>
         </div>
@@ -273,7 +273,7 @@ export function VsCompetitors() {
           <p className="text-[11px] font-bold uppercase tracking-widest text-primary">
             Already use DealCheck or BiggerPockets?
           </p>
-          <h2 className="mt-2 text-balance text-2xl font-black tracking-tight text-foreground sm:text-4xl">
+          <h2 className="mt-2 text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">
             Here&apos;s how TrueCap is different.
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
@@ -290,7 +290,7 @@ export function VsCompetitors() {
                     key={h || `col-${i}`}
                     className={
                       i === 1
-                        ? "px-4 py-3 text-center font-black text-primary sm:px-6"
+                        ? "px-4 py-3 text-center font-extrabold text-primary sm:px-6"
                         : "px-4 py-3 text-center font-bold text-muted-foreground sm:px-6"
                     }
                   >
@@ -405,7 +405,7 @@ export function HomepageFaq() {
               <HelpCircle className="size-3" />
               Common questions
             </p>
-            <h2 className="mt-2 text-balance text-2xl font-black tracking-tight text-foreground sm:text-4xl">
+            <h2 className="mt-2 text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">
               Everything you&apos;re wondering, answered.
             </h2>
           </div>
@@ -463,7 +463,7 @@ export function PreCalculatorCta() {
       <div className="mx-auto max-w-4xl px-4 py-14 sm:px-6 sm:py-20">
         <div className="rounded-3xl border-2 border-primary/25 bg-card p-7 text-center shadow-[0_24px_70px_rgba(82,72,212,0.12)] sm:p-10">
           <p className="text-[11px] font-bold uppercase tracking-widest text-primary">Your move</p>
-          <h2 className="mt-2 text-balance text-3xl font-black tracking-tight text-foreground sm:text-5xl">
+          <h2 className="mt-2 text-balance text-3xl font-extrabold tracking-tight text-foreground sm:text-5xl">
             Run a deal right now. <span className="text-primary">Free.</span>
           </h2>
           <p className="mx-auto mt-3 max-w-xl text-balance text-sm leading-relaxed text-muted-foreground sm:text-base">

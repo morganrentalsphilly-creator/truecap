@@ -90,7 +90,7 @@ export function SiteFooter() {
           <div className="col-span-2 sm:col-span-3 lg:col-span-1">
             <Link
               href="/"
-              className="inline-flex items-center text-xl font-black tracking-tight text-foreground"
+              className="inline-flex items-center text-xl font-extrabold tracking-tight text-foreground"
             >
               Truecap<span className="text-primary">.</span>
             </Link>

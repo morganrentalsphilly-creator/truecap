@@ -180,7 +180,7 @@ function RollupTile({
       <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
         {label}
       </div>
-      <div className={`mt-1 text-xl font-black tabular-nums sm:text-2xl ${valueColor}`}>
+      <div className={`mt-1 text-xl font-extrabold tabular-nums sm:text-2xl ${valueColor}`}>
         {value}
       </div>
       <div className="mt-0.5 text-[11px] text-muted-foreground">{sub}</div>

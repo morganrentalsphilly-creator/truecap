@@ -113,7 +113,7 @@ export default function RefinancePost() {
       <article className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <div className="mb-2"><Link href="/blog" className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground">← Blog</Link></div>
         <header className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-black text-foreground leading-tight tracking-tight text-balance">{TITLE}</h1>
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight text-balance">{TITLE}</h1>
           <p className="mt-3 text-[11px] uppercase tracking-widest text-muted-foreground font-bold">
             {new Date(PUBLISHED_AT).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })} · {READING_TIME} min read
           </p>
@@ -123,7 +123,7 @@ export default function RefinancePost() {
         </header>
 
         <div className="prose prose-neutral max-w-none text-foreground space-y-6 leading-relaxed">
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">The three reasons to refinance</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">The three reasons to refinance</h2>
           <p>
             Refi exists for three core jobs. Be honest about which one applies to your situation — they have different math.
           </p>
@@ -167,7 +167,7 @@ export default function RefinancePost() {
             <li><strong>Changing entity</strong> — moving the loan into an LLC structure for asset protection</li>
           </ul>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">The loan types available</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">The loan types available</h2>
           <h3 className="text-xl font-bold text-foreground mt-6 mb-2">Conventional (Fannie Mae / Freddie Mac)</h3>
           <p>
             The default. Best rates (typically 50-100bp lower than DSCR), strongest terms, but stricter qualification (DTI, income docs, asset reserves). Investment property cash-out cap: typically 75% LTV. Individual borrowers limited to 10 financed properties total.
@@ -183,7 +183,7 @@ export default function RefinancePost() {
             For 5+ unit properties or investors with portfolios above conventional limits. Rates typically 50-150bp above conventional. Terms vary widely (5/1 ARM with 25-year amortization is common). LTV often 70-75%. Faster underwriting than conventional but more expensive long-term.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">The refi process — typical timeline</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">The refi process — typical timeline</h2>
           <ol>
             <li><strong>Day 1-7:</strong> shop 3-5 lenders (the spread is wider than you think — often 30-50bp from worst to best quote)</li>
             <li><strong>Day 7-14:</strong> formally apply with chosen lender; submit income docs, asset statements, current mortgage statement, insurance declarations, rent rolls (for multi-unit)</li>
@@ -196,7 +196,7 @@ export default function RefinancePost() {
             Total: 45-65 days from application to close on most rate-and-term refis. Cash-out refis sometimes faster (45-50 days) because lenders process them frequently.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">The 5 most common mistakes</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">The 5 most common mistakes</h2>
           <h3 className="text-xl font-bold text-foreground mt-6 mb-2">1. Refi-ing too early (before break-even works)</h3>
           <p>
             If you&apos;ll sell or refi again before the break-even, the math doesn&apos;t work. The closing costs eat the savings. Always run break-even before committing.
@@ -222,7 +222,7 @@ export default function RefinancePost() {
             On a $400k loan held 10 years, a 50bp rate difference is ~$120/mo and ~$36k of lifetime interest. Even with $6k of closing costs, the break-even is 50 months and you keep collecting savings for 5+ years after. &quot;Only&quot; 50bp is often worth doing.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">Run the math before you commit</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">Run the math before you commit</h2>
           <p>
             Refi decisions hinge on rate, term, closing costs, and hold period. Run the scenarios in <Link href="/" className="text-primary font-semibold hover:underline">TrueCap</Link> — it&apos;ll show you current-rate vs refi-rate cash flow + break-even + total interest paid side-by-side. Pro&apos;s A/B mortgage compare puts both scenarios in one view so you can decide in 60 seconds whether the refi is worth doing.
           </p>

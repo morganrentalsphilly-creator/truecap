@@ -124,7 +124,7 @@ export default function CapRateCalculatorPage() {
             >
               ← TrueCap free tools
             </Link>
-            <h1 className="text-3xl sm:text-4xl font-black text-foreground mt-2 leading-tight">
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight">
               Cap Rate Calculator
             </h1>
             <p className="text-base sm:text-lg text-muted-foreground mt-2 leading-relaxed">
@@ -139,7 +139,7 @@ export default function CapRateCalculatorPage() {
           <CapRateCalculatorWidget />
 
           {/* Long-form content */}
-          <article className="prose prose-slate max-w-none mt-10 sm:mt-12 [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-black [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground">
+          <article className="prose prose-slate max-w-none mt-10 sm:mt-12 [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground">
             <h2 className="text-2xl sm:text-3xl">What is cap rate?</h2>
             <p>
               Cap rate (short for <em>capitalization rate</em>) is the
@@ -341,7 +341,7 @@ export default function CapRateCalculatorPage() {
 
           {/* CTA */}
           <section className="mt-10 sm:mt-12 rounded-2xl bg-primary text-primary-foreground p-6 sm:p-8">
-            <h2 className="text-xl sm:text-2xl font-black mb-2">
+            <h2 className="text-xl sm:text-2xl font-extrabold mb-2">
               Run the full analysis — free
             </h2>
             <p className="text-sm sm:text-base opacity-90 mb-4">

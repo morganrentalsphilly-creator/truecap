@@ -242,7 +242,7 @@ export default function BlogIndexPage() {
           >
             ← TrueCap
           </Link>
-          <h1 className="text-3xl sm:text-4xl font-black text-foreground mt-2 leading-tight">
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight">
             Blog
           </h1>
           <p className="text-base text-muted-foreground mt-2 leading-relaxed">
@@ -262,7 +262,7 @@ export default function BlogIndexPage() {
                   <BookOpen className="size-5 text-primary" />
                   <ArrowUpRight className="size-4 text-muted-foreground group-hover:text-primary transition-colors" />
                 </div>
-                <h2 className="text-xl sm:text-2xl font-black text-foreground leading-tight">
+                <h2 className="text-xl sm:text-2xl font-extrabold text-foreground leading-tight">
                   {post.title}
                 </h2>
                 <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
@@ -282,7 +282,7 @@ export default function BlogIndexPage() {
         </ul>
 
         <section className="mt-10 rounded-2xl bg-primary text-primary-foreground p-6 sm:p-8">
-          <h2 className="text-xl sm:text-2xl font-black mb-2">
+          <h2 className="text-xl sm:text-2xl font-extrabold mb-2">
             Want the calculator that powers these guides?
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-4">

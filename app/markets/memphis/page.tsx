@@ -73,13 +73,13 @@ export default function MemphisMarketPage() {
         <div className="mb-2"><Link href="/" className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground">← TrueCap</Link></div>
         <header className="mb-10">
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-primary mb-3"><MapPin className="size-3" />{CITY}, {STATE}</div>
-          <h1 className="text-3xl sm:text-4xl font-black text-foreground leading-tight tracking-tight">{CITY} rental property analysis — calculator + 2026 cap-rate benchmarks</h1>
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight">{CITY} rental property analysis — calculator + 2026 cap-rate benchmarks</h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">Run a Memphis rental deal in 60 seconds with TrueCap. Address auto-fills Tennessee property tax (~0.7-1.1% in Shelby County), HUD rent by county, and current FRED mortgage rates. Below: neighborhood cap-rate map plus the turnkey vs. direct trade-off most Memphis investors face.</p>
           <div className="mt-6 flex flex-wrap gap-3"><Link href="/" className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground hover:opacity-90"><Calculator className="size-4" />Underwrite a Memphis deal — free</Link></div>
         </header>
 
         <section className="mb-10">
-          <h2 className="text-2xl font-black text-foreground mb-3">Memphis neighborhood cap-rate map (2026)</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mb-3">Memphis neighborhood cap-rate map (2026)</h2>
           <p className="text-sm text-muted-foreground mb-4 leading-relaxed">Ranges reflect typical conventional-financing single-family + small-multi deals. Memphis is one of the top US markets for out-of-state investors thanks to a mature PM ecosystem; the trade-off is turnkey-pricing premium on the cleanest deals.</p>
           <div className="overflow-x-auto rounded-2xl border border-border bg-card">
             <table className="w-full text-sm">
@@ -90,17 +90,17 @@ export default function MemphisMarketPage() {
         </section>
 
         <section className="mb-10 rounded-2xl border border-[var(--brand-green)]/25 bg-[var(--brand-green-light)] p-5 sm:p-6">
-          <h2 className="text-base font-black uppercase tracking-widest text-[var(--brand-green)] mb-2">Why Memphis keeps drawing out-of-state capital</h2>
+          <h2 className="text-base font-extrabold uppercase tracking-widest text-[var(--brand-green)] mb-2">Why Memphis keeps drawing out-of-state capital</h2>
           <p className="text-sm leading-relaxed text-foreground">Memphis has three things together that few markets match: low property tax (~0.7-1.1%), no state income tax, and the deepest turnkey ecosystem in the country (15+ established PM/turnkey firms competing for your business). For passive out-of-state investors, this means lower friction at every step — buy, manage, sell — than almost any other cash-flow market. The trade-off is turnkey premium pricing and the ongoing PM fee that comes with it.</p>
         </section>
 
         <section className="mb-10">
-          <h2 className="text-2xl font-black text-foreground mb-4">Frequently asked — Memphis investing</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mb-4">Frequently asked — Memphis investing</h2>
           <div className="space-y-4">{FAQS.map((f) => (<details key={f.q} className="group rounded-2xl border border-border bg-card p-4"><summary className="cursor-pointer text-sm font-bold text-foreground select-none list-none flex items-center justify-between gap-3"><span>{f.q}</span><span aria-hidden className="text-muted-foreground transition-transform group-open:rotate-90">▸</span></summary><p className="mt-3 text-sm leading-relaxed text-muted-foreground">{f.a}</p></details>))}</div>
         </section>
 
         <section className="mb-10 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
-          <h2 className="text-xl sm:text-2xl font-black mb-2">Run your next Memphis deal in 60 seconds</h2>
+          <h2 className="text-xl sm:text-2xl font-extrabold mb-2">Run your next Memphis deal in 60 seconds</h2>
           <p className="text-sm sm:text-base opacity-90 mb-4 max-w-2xl">Paste the address. Tennessee tax, HUD rent for Shelby County, and current rate auto-fill. Cap rate, CoC, DSCR, and monthly cash flow in 1 second. Free to start. No card required.</p>
           <Link href="/" className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity">Open the analyzer<ArrowUpRight className="w-4 h-4" /></Link>
         </section>

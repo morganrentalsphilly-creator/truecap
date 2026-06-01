@@ -91,7 +91,7 @@ export default function ForBuyAndHoldPage() {
             <Sparkles className="size-3" />
             For buy-and-hold investors
           </div>
-          <h1 className="text-3xl sm:text-5xl font-black text-foreground leading-[1.05] tracking-tight text-balance">
+          <h1 className="text-3xl sm:text-5xl font-extrabold text-foreground leading-[1.05] tracking-tight text-balance">
             The numbers that decide whether to hold —{" "}
             <span className="text-primary">in one screen.</span>
           </h1>
@@ -124,7 +124,7 @@ export default function ForBuyAndHoldPage() {
 
         {/* Use cases */}
         <section id="use-cases" className="mb-12 sm:mb-16">
-          <h2 className="text-2xl sm:text-3xl font-black text-foreground mb-2">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground mb-2">
             Built for the hold strategy
           </h2>
           <p className="text-base text-muted-foreground mb-6 leading-relaxed">
@@ -140,7 +140,7 @@ export default function ForBuyAndHoldPage() {
                 <div className="mb-3 flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
                   <Icon className="size-5" />
                 </div>
-                <h3 className="text-base sm:text-lg font-black text-foreground">
+                <h3 className="text-base sm:text-lg font-extrabold text-foreground">
                   {title}
                 </h3>
                 <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
@@ -153,7 +153,7 @@ export default function ForBuyAndHoldPage() {
 
         {/* Workflow */}
         <section className="mb-12 sm:mb-16">
-          <h2 className="text-2xl sm:text-3xl font-black text-foreground mb-2">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground mb-2">
             How a buy-and-hold investor uses TrueCap
           </h2>
           <ol className="mt-4 space-y-3">
@@ -166,7 +166,7 @@ export default function ForBuyAndHoldPage() {
               "Save the deal. The portfolio rollup on /dashboard/saved-analyses shows your aggregate cash flow across everything you're considering.",
             ].map((step, i) => (
               <li key={i} className="flex items-start gap-3">
-                <span className="inline-flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-black tabular-nums">
+                <span className="inline-flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-extrabold tabular-nums">
                   {i + 1}
                 </span>
                 <span className="text-sm sm:text-base leading-relaxed text-foreground">
@@ -181,7 +181,7 @@ export default function ForBuyAndHoldPage() {
         <section className="mb-12 sm:mb-16 rounded-2xl border border-[var(--brand-green)]/25 bg-[var(--brand-green-light)] p-6 sm:p-8">
           <div className="flex items-center gap-2 mb-3">
             <Zap className="size-5 text-[var(--brand-green)]" />
-            <h2 className="text-sm font-black uppercase tracking-widest text-[var(--brand-green)]">
+            <h2 className="text-sm font-extrabold uppercase tracking-widest text-[var(--brand-green)]">
               Why long-term investors pick TrueCap over a spreadsheet
             </h2>
           </div>
@@ -196,7 +196,7 @@ export default function ForBuyAndHoldPage() {
 
         {/* Recommended reading + tools */}
         <section className="mb-12 sm:mb-16 rounded-2xl border border-border bg-card p-6 sm:p-8">
-          <h2 className="text-lg sm:text-xl font-black text-foreground mb-3">
+          <h2 className="text-lg sm:text-xl font-extrabold text-foreground mb-3">
             Recommended reading for buy-and-hold investors
           </h2>
           <p className="text-sm leading-relaxed text-foreground">
@@ -227,7 +227,7 @@ export default function ForBuyAndHoldPage() {
 
         {/* Pricing */}
         <section className="mb-12 sm:mb-16 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
-          <h2 className="text-2xl sm:text-3xl font-black mb-2">
+          <h2 className="text-2xl sm:text-3xl font-extrabold mb-2">
             Free covers the offer. Pro covers the hold.
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">

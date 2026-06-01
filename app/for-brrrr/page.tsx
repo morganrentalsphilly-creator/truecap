@@ -89,7 +89,7 @@ export default function ForBrrrrPage() {
             <Sparkles className="size-3" />
             For BRRRR operators
           </div>
-          <h1 className="text-3xl sm:text-5xl font-black text-foreground leading-[1.05] tracking-tight text-balance">
+          <h1 className="text-3xl sm:text-5xl font-extrabold text-foreground leading-[1.05] tracking-tight text-balance">
             Buy, Rehab, Rent, Refinance —{" "}
             <span className="text-primary">see how much capital comes back.</span>
           </h1>
@@ -121,7 +121,7 @@ export default function ForBrrrrPage() {
         </section>
 
         <section id="use-cases" className="mb-12 sm:mb-16">
-          <h2 className="text-2xl sm:text-3xl font-black text-foreground mb-2">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground mb-2">
             Built for value-add capital recyclers
           </h2>
           <p className="text-base text-muted-foreground mb-6 leading-relaxed">
@@ -137,7 +137,7 @@ export default function ForBrrrrPage() {
                 <div className="mb-3 flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
                   <Icon className="size-5" />
                 </div>
-                <h3 className="text-base sm:text-lg font-black text-foreground">
+                <h3 className="text-base sm:text-lg font-extrabold text-foreground">
                   {title}
                 </h3>
                 <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
@@ -149,7 +149,7 @@ export default function ForBrrrrPage() {
         </section>
 
         <section className="mb-12 sm:mb-16">
-          <h2 className="text-2xl sm:text-3xl font-black text-foreground mb-2">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground mb-2">
             The full BRRRR loop in TrueCap
           </h2>
           <ol className="mt-4 space-y-3">
@@ -161,7 +161,7 @@ export default function ForBrrrrPage() {
               "Save the deal. Compare BRRRR vs straight buy-and-hold in /dashboard/compare to see which strategy returns more capital on this property.",
             ].map((step, i) => (
               <li key={i} className="flex items-start gap-3">
-                <span className="inline-flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-black tabular-nums">
+                <span className="inline-flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-extrabold tabular-nums">
                   {i + 1}
                 </span>
                 <span className="text-sm sm:text-base leading-relaxed text-foreground">
@@ -175,7 +175,7 @@ export default function ForBrrrrPage() {
         <section className="mb-12 sm:mb-16 rounded-2xl border border-[var(--brand-green)]/25 bg-[var(--brand-green-light)] p-6 sm:p-8">
           <div className="flex items-center gap-2 mb-3">
             <Zap className="size-5 text-[var(--brand-green)]" />
-            <h2 className="text-sm font-black uppercase tracking-widest text-[var(--brand-green)]">
+            <h2 className="text-sm font-extrabold uppercase tracking-widest text-[var(--brand-green)]">
               Why BRRRR operators pick TrueCap
             </h2>
           </div>
@@ -189,7 +189,7 @@ export default function ForBrrrrPage() {
         </section>
 
         <section className="mb-12 sm:mb-16 rounded-2xl border border-border bg-card p-6 sm:p-8">
-          <h2 className="text-lg sm:text-xl font-black text-foreground mb-3">
+          <h2 className="text-lg sm:text-xl font-extrabold text-foreground mb-3">
             BRRRR-specific tools and reading
           </h2>
           <p className="text-sm leading-relaxed text-foreground">
@@ -219,7 +219,7 @@ export default function ForBrrrrPage() {
         </section>
 
         <section className="mb-12 sm:mb-16 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
-          <h2 className="text-2xl sm:text-3xl font-black mb-2">
+          <h2 className="text-2xl sm:text-3xl font-extrabold mb-2">
             Free covers the buy. Pro covers the refi.
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">

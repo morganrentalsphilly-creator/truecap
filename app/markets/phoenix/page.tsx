@@ -72,13 +72,13 @@ export default function PhoenixMarketPage() {
         <div className="mb-2"><Link href="/" className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground">← TrueCap</Link></div>
         <header className="mb-10">
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-primary mb-3"><MapPin className="size-3" />{CITY}, {STATE}</div>
-          <h1 className="text-3xl sm:text-4xl font-black text-foreground leading-tight tracking-tight">{CITY} rental property analysis — calculator + 2026 cap-rate benchmarks</h1>
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight">{CITY} rental property analysis — calculator + 2026 cap-rate benchmarks</h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">Run a Phoenix rental deal in 60 seconds with TrueCap. Address auto-fills Arizona property tax (~0.55-0.7% in Maricopa), HUD rent by county, and current FRED mortgage rates. Below: neighborhood cap-rate map plus Phoenix-specific notes on STR rules and HOA risk.</p>
           <div className="mt-6 flex flex-wrap gap-3"><Link href="/" className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground hover:opacity-90"><Calculator className="size-4" />Underwrite a Phoenix deal — free</Link></div>
         </header>
 
         <section className="mb-10">
-          <h2 className="text-2xl font-black text-foreground mb-3">Phoenix neighborhood cap-rate map (2026)</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mb-3">Phoenix neighborhood cap-rate map (2026)</h2>
           <p className="text-sm text-muted-foreground mb-4 leading-relaxed">Ranges reflect typical conventional-financing single-family + small-multi deals. Phoenix appreciation tailwind (500k+ residents added in 5 years) keeps cap rates compressed in core/premium neighborhoods.</p>
           <div className="overflow-x-auto rounded-2xl border border-border bg-card">
             <table className="w-full text-sm">
@@ -89,17 +89,17 @@ export default function PhoenixMarketPage() {
         </section>
 
         <section className="mb-10 rounded-2xl border border-[var(--brand-green)]/25 bg-[var(--brand-green-light)] p-5 sm:p-6">
-          <h2 className="text-base font-black uppercase tracking-widest text-[var(--brand-green)] mb-2">Why Phoenix keeps drawing investor capital</h2>
+          <h2 className="text-base font-extrabold uppercase tracking-widest text-[var(--brand-green)] mb-2">Why Phoenix keeps drawing investor capital</h2>
           <p className="text-sm leading-relaxed text-foreground">Phoenix combines three favorable signals: massive net in-migration (500k+ residents in 5 years, with no end in sight), low effective property tax (~0.6% — among the lowest in the US), and a low-state-income-tax structure (2.5% flat). Trade-offs: appreciation-driven cap-rate compression in core areas, real long-term water risk for very far suburbs, and HOA-related rental restrictions on a meaningful share of post-2000 construction. For balanced cash + appreciation in a high-growth metro, Phoenix sits near the top of the US list.</p>
         </section>
 
         <section className="mb-10">
-          <h2 className="text-2xl font-black text-foreground mb-4">Frequently asked — Phoenix investing</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mb-4">Frequently asked — Phoenix investing</h2>
           <div className="space-y-4">{FAQS.map((f) => (<details key={f.q} className="group rounded-2xl border border-border bg-card p-4"><summary className="cursor-pointer text-sm font-bold text-foreground select-none list-none flex items-center justify-between gap-3"><span>{f.q}</span><span aria-hidden className="text-muted-foreground transition-transform group-open:rotate-90">▸</span></summary><p className="mt-3 text-sm leading-relaxed text-muted-foreground">{f.a}</p></details>))}</div>
         </section>
 
         <section className="mb-10 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
-          <h2 className="text-xl sm:text-2xl font-black mb-2">Run your next Phoenix deal in 60 seconds</h2>
+          <h2 className="text-xl sm:text-2xl font-extrabold mb-2">Run your next Phoenix deal in 60 seconds</h2>
           <p className="text-sm sm:text-base opacity-90 mb-4 max-w-2xl">Paste the address. Arizona tax, HUD rent for Maricopa, and current rate auto-fill. Cap rate, CoC, DSCR, and monthly cash flow in 1 second. Free to start. No card required.</p>
           <Link href="/" className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity">Open the analyzer<ArrowUpRight className="w-4 h-4" /></Link>
         </section>

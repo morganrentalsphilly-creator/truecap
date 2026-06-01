@@ -52,7 +52,7 @@ export default function EmbedHubPage() {
           >
             ← TrueCap
           </Link>
-          <h1 className="text-3xl sm:text-4xl font-black text-foreground mt-2 leading-tight tracking-tight">
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight tracking-tight">
             Embed our calculators on your site
           </h1>
           <p className="text-base text-muted-foreground mt-3 leading-relaxed max-w-2xl">
@@ -129,7 +129,7 @@ export default function EmbedHubPage() {
         {/* Calculator grid */}
         <section className="space-y-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-black text-foreground">
+            <h2 className="text-xl font-extrabold text-foreground">
               Pick a calculator
             </h2>
             <p className="text-xs text-muted-foreground">
@@ -146,7 +146,7 @@ export default function EmbedHubPage() {
                 <div className="flex items-start justify-between gap-3 mb-2">
                   <div className="flex items-center gap-2">
                     <Code className="w-4 h-4 text-primary" />
-                    <h3 className="font-black text-foreground text-base">
+                    <h3 className="font-extrabold text-foreground text-base">
                       {entry.title}
                     </h3>
                   </div>
@@ -173,7 +173,7 @@ export default function EmbedHubPage() {
 
         {/* Tips / FAQ */}
         <section className="mt-12">
-          <h2 className="text-xl font-black text-foreground mb-4">
+          <h2 className="text-xl font-extrabold text-foreground mb-4">
             Questions
           </h2>
           <div className="divide-y divide-border rounded-2xl border border-border bg-card">
@@ -212,7 +212,7 @@ export default function EmbedHubPage() {
         </section>
 
         <section className="mt-12 rounded-2xl bg-primary text-primary-foreground p-6 sm:p-8">
-          <h2 className="text-xl sm:text-2xl font-black mb-2">
+          <h2 className="text-xl sm:text-2xl font-extrabold mb-2">
             Have a real estate audience?
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-4">

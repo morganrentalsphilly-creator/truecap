@@ -131,7 +131,7 @@ export default function RehabEstimatePost() {
           </Link>
         </div>
         <header className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-black text-foreground leading-tight tracking-tight text-balance">
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight text-balance">
             {TITLE}
           </h1>
           <p className="mt-3 text-[11px] uppercase tracking-widest text-muted-foreground font-bold">
@@ -148,7 +148,7 @@ export default function RehabEstimatePost() {
         </header>
 
         <div className="prose prose-neutral max-w-none text-foreground space-y-6 leading-relaxed">
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
             The three-bucket framework
           </h2>
           <p>
@@ -169,7 +169,7 @@ export default function RehabEstimatePost() {
             The bucket order is also the risk order. Cosmetic costs are predictable. Functional costs have some variability. Systems costs can swing your entire deal — and they&apos;re the hardest to see during a walkthrough.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
             Bucket 1: Cosmetic — $5-12/sqft
           </h2>
           <p>
@@ -187,7 +187,7 @@ export default function RehabEstimatePost() {
             Cosmetic-only refreshes are the lowest-risk rehab type. If you can keep the kitchen and bath functional and just paint + floor + clean, you can produce a rent-ready property for under $10k in many markets.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
             Bucket 2: Functional — the big-ticket items
           </h2>
 
@@ -246,7 +246,7 @@ export default function RehabEstimatePost() {
             Standard 40-50 gallon tank: $1,200-1,800 installed. Tankless: $2,500-4,500. Water heaters fail without much warning; if it&apos;s over 8-10 years old, budget replacement.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
             Bucket 3: Systems / structural
           </h2>
 
@@ -296,7 +296,7 @@ export default function RehabEstimatePost() {
             Wide range because foundation issues vary enormously. Small crack repairs $500-2,000. Pier installation $5-15k. Major underpinning $20-50k+. Always get a structural engineer&apos;s opinion if any visible cracks. Don&apos;t guess foundation costs from photos.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
             The 25% contingency rule
           </h2>
           <p>
@@ -317,7 +317,7 @@ export default function RehabEstimatePost() {
             The honest reason: every rehab has surprises. The 25% buffer is the difference between a deal that pencils and a deal where you&apos;re writing checks from your savings to finish the work.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
             On-site walkthrough checklist
           </h2>
           <p>
@@ -336,7 +336,7 @@ export default function RehabEstimatePost() {
             For larger rehabs, walk the property with a contractor — even at $200-400 for the walk, it&apos;s the cheapest insurance you can buy against a bad estimate.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
             Use the calculator before you bid
           </h2>
           <p>

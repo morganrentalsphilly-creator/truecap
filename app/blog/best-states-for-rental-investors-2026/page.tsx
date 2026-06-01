@@ -59,7 +59,7 @@ export default function BestStatesPost() {
       <article className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <div className="mb-2"><Link href="/blog" className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground">← Blog</Link></div>
         <header className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-black text-foreground leading-tight tracking-tight text-balance">{TITLE}</h1>
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight text-balance">{TITLE}</h1>
           <p className="mt-3 text-[11px] uppercase tracking-widest text-muted-foreground font-bold">
             {new Date(PUBLISHED_AT).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })} · {READING_TIME} min read
           </p>
@@ -69,7 +69,7 @@ export default function BestStatesPost() {
         </header>
 
         <div className="prose prose-neutral max-w-none text-foreground space-y-6 leading-relaxed">
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">The framework — pick your axis first</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">The framework — pick your axis first</h2>
           <p>
             Before picking a state, pick what you&apos;re optimizing for. The states that produce the highest cash flow are mostly NOT the states that produce the highest appreciation, and the states that are most landlord-friendly are not always the highest-yielding. Trying to optimize all dimensions simultaneously produces a mediocre choice on every axis.
           </p>
@@ -84,12 +84,12 @@ export default function BestStatesPost() {
             <li><strong>Insurance + climate risk</strong> — hurricane, flood, wildfire, water-shortage exposure</li>
           </ul>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">Tier 1 — Cash flow leaders</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">Tier 1 — Cash flow leaders</h2>
           <p>
             States where the 1% rule (gross monthly rent ≥ 1% of price) still routinely works in 2026:
           </p>
 
-          <h3 className="text-xl font-black text-foreground mt-8 mb-2">1. Indiana (Indianapolis + smaller cities)</h3>
+          <h3 className="text-xl font-extrabold text-foreground mt-8 mb-2">1. Indiana (Indianapolis + smaller cities)</h3>
           <p>
             Indianapolis remains one of the few major US metros where workforce neighborhoods consistently produce 7-9% cap rates and the 1% rule works. Indiana&apos;s 2% property tax cap (Indiana Constitution Article 10) is structural — you can&apos;t get a property-tax-reassessment surprise the way you can in Texas or Florida. Mature out-of-state PM market. Limited appreciation tailwind (2-4%/yr).
           </p>
@@ -98,7 +98,7 @@ export default function BestStatesPost() {
             <Link href="/markets/indianapolis" className="text-primary font-semibold hover:underline">/markets/indianapolis</Link>
           </p>
 
-          <h3 className="text-xl font-black text-foreground mt-8 mb-2">2. Ohio (Cleveland + Cincinnati + Columbus)</h3>
+          <h3 className="text-xl font-extrabold text-foreground mt-8 mb-2">2. Ohio (Cleveland + Cincinnati + Columbus)</h3>
           <p>
             Cleveland produces the widest cap-rate range of any major US market — 5-7% in gentrified Tremont to 12%+ in Slavic Village. Real BRRRR market with abundant distressed inventory at $40-90k entry prices. The tradeoff: older housing stock means significant capex risk on properties that haven&apos;t been recently rehabbed. Ohio property tax effective rate is ~1.4-1.8% — higher than Indiana but lower than Texas.
           </p>
@@ -107,7 +107,7 @@ export default function BestStatesPost() {
             <Link href="/markets/cleveland" className="text-primary font-semibold hover:underline">/markets/cleveland</Link>
           </p>
 
-          <h3 className="text-xl font-black text-foreground mt-8 mb-2">3. Missouri (Kansas City + St. Louis)</h3>
+          <h3 className="text-xl font-extrabold text-foreground mt-8 mb-2">3. Missouri (Kansas City + St. Louis)</h3>
           <p>
             Kansas City is the most-reliable Missouri play. Eastern Jackson County (Raytown, Independence, Grandview) produces 7-9% cap rates in working-class suburbs with manageable due diligence. Caveat: Jackson County went through significant tax reassessments 2023-2024 — always pull current tax records, not seller&apos;s prior bill.
           </p>
@@ -116,7 +116,7 @@ export default function BestStatesPost() {
             <Link href="/markets/kansas-city" className="text-primary font-semibold hover:underline">/markets/kansas-city</Link>
           </p>
 
-          <h3 className="text-xl font-black text-foreground mt-8 mb-2">4. Michigan (Detroit metro)</h3>
+          <h3 className="text-xl font-extrabold text-foreground mt-8 mb-2">4. Michigan (Detroit metro)</h3>
           <p>
             Detroit produces the highest headline cap rates of any major US market (15%+ in distressed neighborhoods) but the operational risk to capture them is also the highest. Northwest Detroit (Bagley, Rosedale) and East English Village are the safer entry points at 6-9% caps. Save the 15%+ Brightmoor / Far East deals until you have local relationships.
           </p>
@@ -125,7 +125,7 @@ export default function BestStatesPost() {
             <Link href="/markets/detroit" className="text-primary font-semibold hover:underline">/markets/detroit</Link>
           </p>
 
-          <h3 className="text-xl font-black text-foreground mt-8 mb-2">5. Tennessee (Memphis + Nashville)</h3>
+          <h3 className="text-xl font-extrabold text-foreground mt-8 mb-2">5. Tennessee (Memphis + Nashville)</h3>
           <p>
             Tennessee is uniquely good for two reasons: no state income tax (a real after-tax-yield boost) + property tax is among the lowest in the US (~0.6-0.7%). Memphis is the de facto US turnkey-rental capital — deepest ecosystem of PM + acquisition services for out-of-state investors. Nashville is the appreciation-leaning Tennessee play with strong job growth.
           </p>
@@ -134,9 +134,9 @@ export default function BestStatesPost() {
             <Link href="/markets/memphis" className="text-primary font-semibold hover:underline">/markets/memphis</Link>
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">Tier 2 — Balanced cash + appreciation</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">Tier 2 — Balanced cash + appreciation</h2>
 
-          <h3 className="text-xl font-black text-foreground mt-8 mb-2">6. North Carolina (Charlotte + Raleigh)</h3>
+          <h3 className="text-xl font-extrabold text-foreground mt-8 mb-2">6. North Carolina (Charlotte + Raleigh)</h3>
           <p>
             Charlotte is the best example of a market where you can still get conventional cash flow (5-7% caps in suburbs) AND ride a real appreciation tailwind (50k+ residents/yr added to the MSA, fintech + banking hub). NC effective property tax is low (~0.85-0.95% in Mecklenburg). Reassessments happen on a 4-8 year cycle, so expect step-changes rather than annual creep.
           </p>
@@ -145,7 +145,7 @@ export default function BestStatesPost() {
             <Link href="/markets/charlotte" className="text-primary font-semibold hover:underline">/markets/charlotte</Link>
           </p>
 
-          <h3 className="text-xl font-black text-foreground mt-8 mb-2">7. Georgia (Atlanta + secondary cities)</h3>
+          <h3 className="text-xl font-extrabold text-foreground mt-8 mb-2">7. Georgia (Atlanta + secondary cities)</h3>
           <p>
             Atlanta is a balanced cash + appreciation play with a meaningful additional advantage: Georgia is one of the most landlord-friendly states in the US for evictions (typical timeline is 30-45 days vs 90+ in CA or NY). Combined with reasonable property tax (~1.0-1.2%) and strong job growth (BeltLine area is one of the highest-appreciation submarkets in the US since 2015).
           </p>
@@ -154,9 +154,9 @@ export default function BestStatesPost() {
             <Link href="/markets/atlanta" className="text-primary font-semibold hover:underline">/markets/atlanta</Link>
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">Tier 3 — Appreciation leaders (low cap, growth bet)</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">Tier 3 — Appreciation leaders (low cap, growth bet)</h2>
 
-          <h3 className="text-xl font-black text-foreground mt-8 mb-2">8. Arizona (Phoenix)</h3>
+          <h3 className="text-xl font-extrabold text-foreground mt-8 mb-2">8. Arizona (Phoenix)</h3>
           <p>
             Phoenix combines very low property tax (~0.55-0.7%), low state income tax (2.5% flat), and massive net in-migration (500k+ residents in 5 years). Cap rates compress to 3-5% in core neighborhoods, 5-7% in inner suburbs. Long-term water risk for far suburbs is real but unlikely to materially affect a 5-10 year hold. STR-permissive at state level (cities can permit + tax but not ban).
           </p>
@@ -165,7 +165,7 @@ export default function BestStatesPost() {
             <Link href="/markets/phoenix" className="text-primary font-semibold hover:underline">/markets/phoenix</Link>
           </p>
 
-          <h3 className="text-xl font-black text-foreground mt-8 mb-2">9. Florida (Tampa + Orlando + Jacksonville)</h3>
+          <h3 className="text-xl font-extrabold text-foreground mt-8 mb-2">9. Florida (Tampa + Orlando + Jacksonville)</h3>
           <p>
             Florida is the textbook no-income-tax appreciation play. The catch in 2026 is insurance — post-Ian + ongoing carrier exits have made property insurance the biggest single underwriting variable in FL. A 7% headline cap easily becomes 5% net after a binding insurance quote. Always pull the binding quote BEFORE you commit; the seller&apos;s prior policy is not what you&apos;ll pay.
           </p>
@@ -174,7 +174,7 @@ export default function BestStatesPost() {
             <Link href="/markets/tampa" className="text-primary font-semibold hover:underline">/markets/tampa</Link>
           </p>
 
-          <h3 className="text-xl font-black text-foreground mt-8 mb-2">10. Texas (Dallas-Fort Worth + Houston)</h3>
+          <h3 className="text-xl font-extrabold text-foreground mt-8 mb-2">10. Texas (Dallas-Fort Worth + Houston)</h3>
           <p>
             Texas is the trickiest top-10 entry. No state income tax + massive growth = the obvious appreciation thesis. The catch: Texas has the HIGHEST effective property tax rates in the US — 1.6-2.5%+ in most counties, 2.8-3.2% in new-construction MUDs. The income-tax savings often get clawed back through property tax. Always pull the parcel-specific tax record from the County Appraisal District (Dallas CAD, Tarrant CAD, Collin CAD, Harris CAD).
           </p>
@@ -184,7 +184,7 @@ export default function BestStatesPost() {
             <Link href="/markets/houston" className="text-primary font-semibold hover:underline">/markets/houston</Link>
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">Honorable mentions</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">Honorable mentions</h2>
           <p>
             <strong>Pennsylvania (Philadelphia + Pittsburgh)</strong> — Philly has uniquely strong neighborhood-by-neighborhood variation; the BRRRR + buy-and-hold math works in working-class North Philly while South Philly is appreciation-leaning. See the{" "}
             <Link href="/markets/philadelphia" className="text-primary font-semibold hover:underline">Philadelphia breakdown</Link>.
@@ -196,7 +196,7 @@ export default function BestStatesPost() {
             <strong>Oklahoma (Oklahoma City + Tulsa)</strong> — quietly one of the most consistent cash-flow markets in the US. Low entry prices, low property tax, stable rental demand from oil/gas + healthcare employment.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">States to be cautious about</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">States to be cautious about</h2>
           <p>
             <strong>California</strong> — appreciation has been historic but cap rates compress to 2-4% in most metros, statewide rent control caps annual increases, eviction process is notoriously long (90+ days typical, often 120+). Works if you have decades to hold and don&apos;t need cash flow. Doesn&apos;t work for active cash-flow investors.
           </p>
@@ -210,7 +210,7 @@ export default function BestStatesPost() {
             <strong>New Jersey</strong> — among the highest effective property tax rates in the US (~2.2-2.5%) and a tenant-favorable legal climate.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">How to actually pick</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">How to actually pick</h2>
           <p>
             Don&apos;t pick a state in the abstract. Pick a strategy first, then pick the state. Three common matches:
           </p>

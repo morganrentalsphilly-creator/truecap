@@ -988,7 +988,7 @@ export function SavedAnalysesPage({
           </Button>
           <div className="h-6 w-px bg-border" />
           <div className="space-y-1">
-            <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-foreground">Saved Analyses</h1>
+            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground">Saved Analyses</h1>
             <p className="text-sm text-muted-foreground">{filteredItems.length} deals in your portfolio</p>
           </div>
         </div>
@@ -1112,23 +1112,23 @@ export function SavedAnalysesPage({
                   <div className="mt-4 grid grid-cols-2 gap-2">
                     <div className="rounded-xl bg-muted/40 p-3">
                       <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Cash Flow</p>
-                      <p className={cn("mt-1 text-sm font-black", (item.netCashFlowMonthly ?? 0) >= 0 ? "text-emerald-700" : "text-[var(--metric-negative)]")}>
+                      <p className={cn("mt-1 text-sm font-extrabold", (item.netCashFlowMonthly ?? 0) >= 0 ? "text-emerald-700" : "text-[var(--metric-negative)]")}>
                         {toMonthCashFlow(item.netCashFlowMonthly)}
                       </p>
                     </div>
                     <div className="rounded-xl bg-muted/40 p-3">
                       <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">CoC</p>
-                      <p className={cn("mt-1 text-sm font-black", (item.cocReturnPct ?? 0) >= 0 ? "text-emerald-700" : "text-[var(--metric-negative)]")}>
+                      <p className={cn("mt-1 text-sm font-extrabold", (item.cocReturnPct ?? 0) >= 0 ? "text-emerald-700" : "text-[var(--metric-negative)]")}>
                         {toPercent(item.cocReturnPct)}
                       </p>
                     </div>
                     <div className="rounded-xl bg-muted/40 p-3">
                       <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Cap Rate</p>
-                      <p className="mt-1 text-sm font-black text-foreground">{toPercent(item.capRatePct)}</p>
+                      <p className="mt-1 text-sm font-extrabold text-foreground">{toPercent(item.capRatePct)}</p>
                     </div>
                     <div className="rounded-xl bg-muted/40 p-3">
                       <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Price</p>
-                      <p className="mt-1 text-sm font-black text-foreground">{toCurrency(item.purchasePrice)}</p>
+                      <p className="mt-1 text-sm font-extrabold text-foreground">{toCurrency(item.purchasePrice)}</p>
                     </div>
                   </div>
 

@@ -124,7 +124,7 @@ export function BreakEvenCalculatorWidget() {
 
       <div className="mt-6 rounded-xl border border-border bg-muted/30 p-5">
         <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Break-even</p>
-        <p className={cn("mt-1 text-4xl font-black tabular-nums", verdict.color)}>
+        <p className={cn("mt-1 text-4xl font-extrabold tabular-nums", verdict.color)}>
           {isInvalid ? "—" : `${Math.round(result.months)} months`}
         </p>
         <p className="mt-1 text-sm text-muted-foreground tabular-nums">

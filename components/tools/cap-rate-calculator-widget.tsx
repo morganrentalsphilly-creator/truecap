@@ -119,7 +119,7 @@ export function CapRateCalculatorWidget() {
             <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
               Cap rate
             </div>
-            <div className={cn("text-5xl sm:text-6xl font-black mt-1 tabular-nums", classification.color)}>
+            <div className={cn("text-5xl sm:text-6xl font-extrabold mt-1 tabular-nums", classification.color)}>
               {capRate.toFixed(2)}%
             </div>
             <div className={cn("text-sm font-semibold mt-1", classification.color)}>

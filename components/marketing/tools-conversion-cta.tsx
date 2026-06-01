@@ -69,7 +69,7 @@ export function ToolsConversionCta({ calculatorName, hook }: ToolsConversionCtaP
       {/* Inline card — always rendered, below the long-form content */}
       <section className="mx-auto mt-12 max-w-3xl rounded-3xl border-2 border-primary/25 bg-gradient-to-br from-[var(--brand-blue-light)] via-card to-card p-6 shadow-[0_12px_36px_rgba(82,72,212,0.10)] sm:p-8">
         <div className="flex items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-primary px-2.5 py-1 text-[10px] font-black uppercase tracking-widest text-primary-foreground">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-primary px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-widest text-primary-foreground">
             <Sparkles className="size-3" />
             Free upgrade
           </span>
@@ -77,7 +77,7 @@ export function ToolsConversionCta({ calculatorName, hook }: ToolsConversionCtaP
             no card required
           </span>
         </div>
-        <h2 className="mt-3 text-xl font-black leading-tight tracking-tight text-foreground sm:text-3xl">
+        <h2 className="mt-3 text-xl font-extrabold leading-tight tracking-tight text-foreground sm:text-3xl">
           Like the {calculatorName.toLowerCase()}? Save it to your free TrueCap account.
         </h2>
         <p className="mt-2 text-sm leading-relaxed text-muted-foreground sm:text-base">

@@ -132,7 +132,7 @@ export function MaxOfferCard({ values }: MaxOfferCardProps) {
             </div>
             <div
               className={cn(
-                "text-3xl sm:text-4xl font-black mt-1",
+                "text-3xl sm:text-4xl font-extrabold mt-1",
                 mao ? "text-primary" : "text-muted-foreground"
               )}
             >

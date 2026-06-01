@@ -248,7 +248,7 @@ export function RehabEstimatorCard({
             <div className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
               Estimated rehab cost
             </div>
-            <div className="text-2xl sm:text-3xl font-black text-primary mt-1 tabular-nums">
+            <div className="text-2xl sm:text-3xl font-extrabold text-primary mt-1 tabular-nums">
               {fmt(result.total)}
             </div>
           </div>

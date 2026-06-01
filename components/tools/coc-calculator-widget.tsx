@@ -97,7 +97,7 @@ export function CocCalculatorWidget() {
             <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
               Cash-on-cash return
             </div>
-            <div className={cn("text-5xl sm:text-6xl font-black mt-1 tabular-nums", c.color)}>
+            <div className={cn("text-5xl sm:text-6xl font-extrabold mt-1 tabular-nums", c.color)}>
               {result.coc.toFixed(2)}%
             </div>
             <div className={cn("text-sm font-semibold mt-1", c.color)}>{c.label}</div>

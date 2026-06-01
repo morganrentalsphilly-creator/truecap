@@ -171,7 +171,7 @@ function FallbackMetric({
       <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
         {label}
       </p>
-      <p className={`mt-0.5 text-base font-black tabular-nums ${color}`}>{value}</p>
+      <p className={`mt-0.5 text-base font-extrabold tabular-nums ${color}`}>{value}</p>
     </div>
   );
 }

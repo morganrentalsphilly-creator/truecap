@@ -87,7 +87,7 @@ export default async function PublicDealPage({ params }: Props) {
           <div className="text-xs uppercase tracking-widest text-muted-foreground font-bold mb-1">
             Shared analysis
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-foreground">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground">
             {parsed.data.address}
           </h1>
           {parsed.data.purchasePrice && (

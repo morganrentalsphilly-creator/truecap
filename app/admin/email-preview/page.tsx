@@ -49,7 +49,7 @@ export default async function EmailPreviewPage({
     return (
       <div className="min-h-screen bg-background px-6 py-12">
         <div className="mx-auto max-w-3xl">
-          <h1 className="text-2xl font-black text-foreground">Email Preview</h1>
+          <h1 className="text-2xl font-extrabold text-foreground">Email Preview</h1>
           <p className="mt-4 text-sm text-muted-foreground">
             No content files found in <code className="rounded bg-muted px-1.5 py-0.5">/emails/content/</code>.
             Create a file named <code className="rounded bg-muted px-1.5 py-0.5">YYYY-MM-DD.json</code>{" "}
@@ -65,7 +65,7 @@ export default async function EmailPreviewPage({
     return (
       <div className="min-h-screen bg-background px-6 py-12">
         <div className="mx-auto max-w-3xl">
-          <h1 className="text-2xl font-black text-foreground">Email Preview</h1>
+          <h1 className="text-2xl font-extrabold text-foreground">Email Preview</h1>
           <p className="mt-4 text-sm text-[var(--metric-negative,#dc2626)]">
             Failed to load content for {selectedDate}. Check that the file exists at{" "}
             <code className="rounded bg-muted px-1.5 py-0.5">/emails/content/{selectedDate}.json</code>{" "}
@@ -90,7 +90,7 @@ export default async function EmailPreviewPage({
             <p className="text-[11px] uppercase tracking-widest text-muted-foreground font-bold">
               Admin · Email Preview
             </p>
-            <h1 className="mt-1 text-2xl font-black text-foreground">{subject}</h1>
+            <h1 className="mt-1 text-2xl font-extrabold text-foreground">{subject}</h1>
             <p className="mt-1 text-sm text-muted-foreground">
               Content file: <code className="rounded bg-muted px-1.5 py-0.5 text-xs">{selectedDate}.json</code>
             </p>

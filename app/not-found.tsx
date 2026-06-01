@@ -22,7 +22,7 @@ export default function NotFound() {
       <div className="text-xs uppercase tracking-widest text-muted-foreground font-bold mb-2">
         TrueCap
       </div>
-      <h1 className="text-2xl sm:text-3xl font-black text-foreground">
+      <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground">
         404 — page not found
       </h1>
       <p className="text-sm text-muted-foreground mt-2 max-w-md">

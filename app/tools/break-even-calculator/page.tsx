@@ -98,7 +98,7 @@ export default function BreakEvenCalculatorPage() {
         </nav>
 
         <p className="text-[11px] uppercase tracking-widest text-primary font-bold">Free calculator</p>
-        <h1 className="mt-2 text-3xl sm:text-4xl font-black text-foreground leading-tight tracking-tight">
+        <h1 className="mt-2 text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight">
           Rental Property Break-Even Calculator
         </h1>
         <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
@@ -110,7 +110,7 @@ export default function BreakEvenCalculatorPage() {
         </div>
 
         <section className="mt-12">
-          <h2 className="text-xl sm:text-2xl font-black text-foreground mb-3">How break-even is calculated</h2>
+          <h2 className="text-xl sm:text-2xl font-extrabold text-foreground mb-3">How break-even is calculated</h2>
           <div className="rounded-xl border border-border bg-muted/30 p-5">
             <code className="text-sm sm:text-base text-foreground font-mono">
               Break-even months = Total cash invested ÷ Monthly net cash flow
@@ -125,7 +125,7 @@ export default function BreakEvenCalculatorPage() {
         </section>
 
         <section className="mt-12">
-          <h2 className="text-xl sm:text-2xl font-black text-foreground mb-4">Frequently asked questions</h2>
+          <h2 className="text-xl sm:text-2xl font-extrabold text-foreground mb-4">Frequently asked questions</h2>
           <div className="divide-y divide-border rounded-2xl border border-border bg-card">
             {FAQS.map((f) => (
               <details key={f.q} className="group p-5">
@@ -137,7 +137,7 @@ export default function BreakEvenCalculatorPage() {
         </section>
 
         <section className="mt-12 border-t border-border pt-8">
-          <h2 className="text-xl sm:text-2xl font-black text-foreground mb-3">Related metrics</h2>
+          <h2 className="text-xl sm:text-2xl font-extrabold text-foreground mb-3">Related metrics</h2>
           <div className="flex flex-wrap gap-2 text-sm">
             <Link href="/glossary/cash-on-cash-return" className="rounded-full border border-border bg-card px-3 py-1.5 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary">Cash-on-cash return</Link>
             <Link href="/glossary/cap-rate" className="rounded-full border border-border bg-card px-3 py-1.5 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary">Cap rate</Link>

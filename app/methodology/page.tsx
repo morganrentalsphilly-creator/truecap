@@ -79,7 +79,7 @@ export default function MethodologyPage() {
           >
             ← TrueCap
           </Link>
-          <h1 className="text-3xl sm:text-4xl font-black text-foreground mt-2 leading-tight">
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight">
             Methodology
           </h1>
           <p className="text-base sm:text-lg text-muted-foreground mt-2 leading-relaxed">
@@ -93,7 +93,7 @@ export default function MethodologyPage() {
         <div className="mb-8 rounded-2xl border-2 border-primary/20 bg-[var(--brand-blue-light)] p-5 sm:p-6">
           <div className="flex items-center gap-2 mb-3">
             <ShieldCheck className="size-5 text-primary" />
-            <h2 className="text-sm font-black uppercase tracking-widest text-primary">
+            <h2 className="text-sm font-extrabold uppercase tracking-widest text-primary">
               The short version
             </h2>
           </div>
@@ -122,7 +122,7 @@ export default function MethodologyPage() {
           </ul>
         </div>
 
-        <article className="prose prose-slate max-w-none [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-black [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground [&_li]:leading-relaxed [&_strong]:text-foreground">
+        <article className="prose prose-slate max-w-none [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground [&_li]:leading-relaxed [&_strong]:text-foreground">
 
           <h2 className="text-2xl sm:text-3xl">The core formulas</h2>
 

@@ -53,7 +53,7 @@ export function MomentOfValueUpsell({
     <div className="rounded-2xl border-2 border-primary/30 bg-gradient-to-br from-[var(--brand-blue-light)] via-card to-card p-5 shadow-[0_12px_36px_rgba(82,72,212,0.10)] sm:p-6">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-primary px-2.5 py-1 text-[10px] font-black uppercase tracking-widest text-primary-foreground">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-primary px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-widest text-primary-foreground">
             <Lock className="size-3" />
             Pro unlocks
           </span>
@@ -71,7 +71,7 @@ export function MomentOfValueUpsell({
         </button>
       </div>
 
-      <h3 className="mt-3 text-lg font-black leading-tight tracking-tight text-foreground sm:text-2xl">
+      <h3 className="mt-3 text-lg font-extrabold leading-tight tracking-tight text-foreground sm:text-2xl">
         {headline}
       </h3>
 
@@ -139,7 +139,7 @@ function FeatureChip({
           {label}
         </span>
       </div>
-      <div className="mt-1 text-base font-black tabular-nums text-foreground">{value}</div>
+      <div className="mt-1 text-base font-extrabold tabular-nums text-foreground">{value}</div>
       <div className="text-[11px] text-muted-foreground">{sub}</div>
     </div>
   );

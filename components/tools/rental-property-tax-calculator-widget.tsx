@@ -246,7 +246,7 @@ export function RentalPropertyTaxCalculatorWidget() {
         </p>
         <p
           className={cn(
-            "mt-1 text-4xl font-black tabular-nums",
+            "mt-1 text-4xl font-extrabold tabular-nums",
             verdictColor
           )}
         >
@@ -262,7 +262,7 @@ export function RentalPropertyTaxCalculatorWidget() {
             <p className="font-bold uppercase tracking-widest text-[10px] text-muted-foreground">
               Pre-tax cash flow
             </p>
-            <p className="mt-1 text-lg font-black tabular-nums text-foreground">
+            <p className="mt-1 text-lg font-extrabold tabular-nums text-foreground">
               {fmtMoney(result.preTaxCashFlow)}
             </p>
           </div>
@@ -270,7 +270,7 @@ export function RentalPropertyTaxCalculatorWidget() {
             <p className="font-bold uppercase tracking-widest text-[10px] text-muted-foreground">
               After-tax cash flow
             </p>
-            <p className="mt-1 text-lg font-black tabular-nums text-foreground">
+            <p className="mt-1 text-lg font-extrabold tabular-nums text-foreground">
               {fmtMoney(result.afterTaxCashFlow)}
             </p>
           </div>

@@ -82,7 +82,7 @@ export default function ForFlippersPage() {
             <Sparkles className="size-3" />
             For fix &amp; flippers
           </div>
-          <h1 className="text-3xl sm:text-5xl font-black text-foreground leading-[1.05] tracking-tight text-balance">
+          <h1 className="text-3xl sm:text-5xl font-extrabold text-foreground leading-[1.05] tracking-tight text-balance">
             Underwrite a flip in <span className="text-primary">60 seconds.</span>
           </h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
@@ -114,7 +114,7 @@ export default function ForFlippersPage() {
 
         {/* Use cases */}
         <section id="use-cases" className="mb-12 sm:mb-16">
-          <h2 className="text-2xl sm:text-3xl font-black text-foreground mb-2">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground mb-2">
             What flippers actually use TrueCap for
           </h2>
           <p className="text-base text-muted-foreground mb-6 leading-relaxed">
@@ -130,7 +130,7 @@ export default function ForFlippersPage() {
                 <div className="mb-3 flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
                   <Icon className="size-5" />
                 </div>
-                <h3 className="text-base sm:text-lg font-black text-foreground">
+                <h3 className="text-base sm:text-lg font-extrabold text-foreground">
                   {title}
                 </h3>
                 <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
@@ -143,7 +143,7 @@ export default function ForFlippersPage() {
 
         {/* Numbers we model */}
         <section className="mb-12 sm:mb-16">
-          <h2 className="text-2xl sm:text-3xl font-black text-foreground mb-2">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground mb-2">
             Every number a flip pivots on
           </h2>
           <div className="not-prose mt-4 overflow-x-auto rounded-2xl border border-border bg-card">
@@ -171,7 +171,7 @@ export default function ForFlippersPage() {
 
         {/* Why flippers specifically */}
         <section className="mb-12 sm:mb-16 rounded-2xl border border-[var(--brand-orange)]/25 bg-[var(--brand-orange)]/10 p-6 sm:p-8">
-          <h2 className="text-sm font-black uppercase tracking-widest text-[var(--brand-orange)] mb-3">
+          <h2 className="text-sm font-extrabold uppercase tracking-widest text-[var(--brand-orange)] mb-3">
             Why flippers pick TrueCap
           </h2>
           <ul className="space-y-2 text-sm sm:text-base text-foreground">
@@ -183,7 +183,7 @@ export default function ForFlippersPage() {
         </section>
 
         <section className="mb-12 sm:mb-16 rounded-2xl border border-border bg-card p-6 sm:p-8">
-          <h2 className="text-lg sm:text-xl font-black text-foreground mb-3">
+          <h2 className="text-lg sm:text-xl font-extrabold text-foreground mb-3">
             Tools and guides flippers reach for first
           </h2>
           <p className="text-sm leading-relaxed text-foreground">
@@ -210,7 +210,7 @@ export default function ForFlippersPage() {
 
         {/* CTA */}
         <section className="mb-12 sm:mb-16 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
-          <h2 className="text-2xl sm:text-3xl font-black mb-2">
+          <h2 className="text-2xl sm:text-3xl font-extrabold mb-2">
             Try it on your next deal. Free, no signup.
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">

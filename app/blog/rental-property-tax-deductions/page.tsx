@@ -127,7 +127,7 @@ export default function TaxDeductionsPost() {
       <article className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <div className="mb-2"><Link href="/blog" className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground">← Blog</Link></div>
         <header className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-black text-foreground leading-tight tracking-tight text-balance">{TITLE}</h1>
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight text-balance">{TITLE}</h1>
           <p className="mt-3 text-[11px] uppercase tracking-widest text-muted-foreground font-bold">
             {new Date(PUBLISHED_AT).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })} · {READING_TIME} min read
           </p>
@@ -141,7 +141,7 @@ export default function TaxDeductionsPost() {
             A note before we start: this is general education, not tax advice. Your situation has nuance that requires a CPA who specializes in real estate. Use this as a checklist for the conversation, not a substitute for one.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">1. Mortgage interest (Schedule E line 12)</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">1. Mortgage interest (Schedule E line 12)</h2>
           <p>
             The interest portion of your mortgage payment is fully deductible. NOT the principal — principal is building equity, not an expense.
           </p>
@@ -149,7 +149,7 @@ export default function TaxDeductionsPost() {
             <strong>Worked example:</strong> $300k loan at 7% interest, 30-year fixed. Year-1 interest paid: ~$20,800. That&apos;s a $20,800 deduction on Schedule E line 12. Your lender sends a 1098 form each January showing the exact deductible amount. (Remember: deductible interest reduces taxable income — it doesn&apos;t affect the property&apos;s <Link href="/glossary/noi" className="text-primary font-semibold hover:underline">NOI</Link>, which is computed before debt service.)
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">2. Depreciation (Schedule E line 18)</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">2. Depreciation (Schedule E line 18)</h2>
           <p>
             The biggest deduction in rental investing, and the one most commonly under-used. Residential rental property depreciates over 27.5 years; commercial over 39 years. You depreciate the BUILDING value only (not land).
           </p>
@@ -160,7 +160,7 @@ export default function TaxDeductionsPost() {
             <strong>Power-up: cost segregation.</strong> A cost segregation study reclassifies portions of the building (appliances, carpeting, landscaping, electrical fixtures) to 5, 7, or 15-year schedules instead of 27.5. Front-loads 25-35% of depreciation into the first 5 years. Worth doing on properties over ~$250k that you&apos;ll hold 7+ years. See our <Link href="/blog/cap-rate-vs-cash-on-cash-vs-dscr" className="text-primary font-semibold hover:underline">return metrics deep-dive</Link> for how this impacts IRR.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">3. Property tax (Schedule E line 16)</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">3. Property tax (Schedule E line 16)</h2>
           <p>
             Annual real estate tax paid to the county. Pull it from the county appraisal district website — do NOT rely on the seller&apos;s last-year number, which may have changed with reassessment.
           </p>
@@ -168,7 +168,7 @@ export default function TaxDeductionsPost() {
             <Link href="/blog/50-percent-rule-rentals" className="text-primary font-semibold hover:underline">Pro move</Link>: file a property tax appeal if your assessed value diverges from comparable sales. Average successful appeal saves $400-1,800/year, and the savings are deductible the year you pay them.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">4. Insurance (Schedule E line 9)</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">4. Insurance (Schedule E line 9)</h2>
           <p>
             Landlord insurance premiums. Note: this is landlord insurance specifically, not homeowner&apos;s insurance — the policies are different and one won&apos;t protect the other use case.
           </p>
@@ -176,7 +176,7 @@ export default function TaxDeductionsPost() {
             Mortgage insurance (PMI) is also deductible on rental property, with limits based on adjusted gross income. Confirm with your CPA if you have PMI on a rental.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">5. Repairs (Schedule E line 14)</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">5. Repairs (Schedule E line 14)</h2>
           <p>
             Fully deductible the year you pay them. The IRS distinguishes repairs from improvements by intent: repairs RESTORE a property to its working condition; improvements ADD value or extend useful life.
           </p>
@@ -190,7 +190,7 @@ export default function TaxDeductionsPost() {
             The line gets fuzzy. Spend an extra hour with your CPA on year-1 capex categorization — getting this right vs wrong can shift $5-10k of deductions.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">6. Property management fees (Schedule E line 11)</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">6. Property management fees (Schedule E line 11)</h2>
           <p>
             All fees paid to a property manager — the monthly percentage (typically 8-10% of rent), placement fees, renewal fees, eviction processing, maintenance markup. All deductible the year paid.
           </p>
@@ -198,12 +198,12 @@ export default function TaxDeductionsPost() {
             If you self-manage, you can&apos;t deduct your own labor — but you CAN deduct the cost of tools, software (think TenantCloud, Buildium, even <Link href="/" className="text-primary font-semibold hover:underline">TrueCap Pro</Link>), and mileage related to management.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">7. Utilities (Schedule E line 17)</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">7. Utilities (Schedule E line 17)</h2>
           <p>
             Any utility you pay as the landlord — water, sewer, trash, sometimes gas or electric in multi-family — is deductible. Most SFR investors put utilities on the tenant; multi-family often has owner-paid utilities.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">8. Cleaning + maintenance (Schedule E line 7)</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">8. Cleaning + maintenance (Schedule E line 7)</h2>
           <p>
             Turnover cleaning, lawn service, pest control, snow removal, gutter cleaning, HVAC servicing, carpet cleaning. All deductible the year paid.
           </p>
@@ -211,7 +211,7 @@ export default function TaxDeductionsPost() {
             Don&apos;t confuse with capital improvements — a deep clean between tenants is a maintenance expense. Replacing all the carpeting because it&apos;s worn out is an improvement (capitalized).
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">9. Travel (Schedule E line 6)</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">9. Travel (Schedule E line 6)</h2>
           <p>
             Travel to manage or maintain your rental property is deductible. 2026 IRS rate: 67 cents/mile.
           </p>
@@ -225,7 +225,7 @@ export default function TaxDeductionsPost() {
             Keep a mileage log. The simplest tool: a free mileage-tracker app like MileIQ or Stride. Without a log, the IRS won&apos;t accept the deduction in an audit.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">10. Professional services (Schedule E line 11)</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">10. Professional services (Schedule E line 11)</h2>
           <p>
             CPA fees, attorney fees, real estate agent commissions (when buying or selling), bookkeeper costs. Note: the seller-side commission paid at sale gets ADDED to the cost basis (reducing capital gains) rather than being a current-year deduction.
           </p>
@@ -233,17 +233,17 @@ export default function TaxDeductionsPost() {
             Your annual CPA fee for filing Schedule E is straightforward — fully deductible in the year paid.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">11. HOA fees (Schedule E line 14)</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">11. HOA fees (Schedule E line 14)</h2>
           <p>
             Monthly HOA dues on a condo or townhouse rental are deductible. Special assessments paid into the HOA&apos;s reserves are also deductible.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">12. Advertising (Schedule E line 4)</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">12. Advertising (Schedule E line 4)</h2>
           <p>
             Costs to advertise vacant units — Zillow listings, Craigslist, Apartments.com fees, MLS listing fees, photography for the listing. All deductible the year paid.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">13. Loan-origination costs (amortized)</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">13. Loan-origination costs (amortized)</h2>
           <p>
             Closing costs related to the loan itself (origination fees, discount points, appraisal fees) are amortized over the life of the loan rather than deducted in the year paid. On a 30-year loan with $6,000 of origination costs, that&apos;s a $200/year deduction for 30 years.
           </p>
@@ -251,7 +251,7 @@ export default function TaxDeductionsPost() {
             Other closing costs (title insurance, recording fees) get added to the cost basis, reducing capital gains at sale.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">14. Home office (if you qualify)</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">14. Home office (if you qualify)</h2>
           <p>
             If you have a dedicated space in your primary residence used exclusively and regularly for rental property management, you can deduct a portion of your home expenses (mortgage interest, utilities, depreciation) proportional to the office&apos;s square footage. Typical savings: $500-2,000/year.
           </p>
@@ -259,7 +259,7 @@ export default function TaxDeductionsPost() {
             The exclusive-and-regular-use test is strict. The IRS doesn&apos;t accept "I sometimes work from the kitchen table." Use a dedicated home office only.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">The passive activity loss rules — why your losses might not deduct</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">The passive activity loss rules — why your losses might not deduct</h2>
           <p>
             Here&apos;s the catch most investors hit. Rental property losses are classified as &quot;passive&quot; under IRS rules. Passive losses can only offset passive income (other rental properties, limited partnerships) — NOT your W-2 or active business income.
           </p>
@@ -273,7 +273,7 @@ export default function TaxDeductionsPost() {
             <strong>Real estate professional status.</strong> If you or your spouse qualifies as a real-estate professional (750+ hours/year in real estate, more than half of working time in real estate, materially participating), all rental losses become non-passive and fully deductible against any income. This is the secret weapon for two-earner couples where one spouse handles real estate full-time.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">When you sell — depreciation recapture</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">When you sell — depreciation recapture</h2>
           <p>
             Every dollar of depreciation you took during ownership gets "recaptured" when you sell. The IRS taxes recaptured depreciation at a max of 25%, separately from capital gains.
           </p>
@@ -284,7 +284,7 @@ export default function TaxDeductionsPost() {
             The fix: use a <Link href="/blog/1031-exchange-basics" className="text-primary font-semibold hover:underline">1031 exchange</Link> to roll the sale proceeds into a new property. 1031 defers both the capital gains AND the depreciation recapture — and you keep depreciating into the next property indefinitely.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">The action plan</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">The action plan</h2>
           <p>
             (1) Pull last year&apos;s Schedule E and check whether you claimed each of the 14 categories above. The ones you missed are this year&apos;s found money.
           </p>

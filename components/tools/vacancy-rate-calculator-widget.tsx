@@ -137,7 +137,7 @@ export function VacancyRateCalculatorWidget() {
         </p>
         <p
           className={cn(
-            "mt-1 text-4xl font-black tabular-nums",
+            "mt-1 text-4xl font-extrabold tabular-nums",
             verdictColor
           )}
         >

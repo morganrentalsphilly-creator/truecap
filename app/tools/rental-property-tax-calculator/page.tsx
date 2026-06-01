@@ -132,7 +132,7 @@ export default function RentalPropertyTaxCalculatorPage() {
         <p className="text-[11px] uppercase tracking-widest text-primary font-bold">
           Free calculator
         </p>
-        <h1 className="mt-2 text-3xl sm:text-4xl font-black text-foreground leading-tight tracking-tight">
+        <h1 className="mt-2 text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight">
           Rental Property Tax Calculator
         </h1>
         <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
@@ -147,7 +147,7 @@ export default function RentalPropertyTaxCalculatorPage() {
         </div>
 
         <section className="mt-12">
-          <h2 className="text-xl sm:text-2xl font-black text-foreground mb-3">
+          <h2 className="text-xl sm:text-2xl font-extrabold text-foreground mb-3">
             The four big rental tax deductions
           </h2>
           <ul className="mt-3 space-y-2 text-base leading-relaxed text-foreground">
@@ -187,7 +187,7 @@ export default function RentalPropertyTaxCalculatorPage() {
         </section>
 
         <section className="mt-12">
-          <h2 className="text-xl sm:text-2xl font-black text-foreground mb-3">
+          <h2 className="text-xl sm:text-2xl font-extrabold text-foreground mb-3">
             Why your cash flow and your taxable income disagree
           </h2>
           <p className="text-base leading-relaxed text-foreground">
@@ -237,7 +237,7 @@ export default function RentalPropertyTaxCalculatorPage() {
         </section>
 
         <section className="mt-12">
-          <h2 className="text-xl sm:text-2xl font-black text-foreground mb-4">
+          <h2 className="text-xl sm:text-2xl font-extrabold text-foreground mb-4">
             Frequently asked questions
           </h2>
           <div className="divide-y divide-border rounded-2xl border border-border bg-card">
@@ -255,7 +255,7 @@ export default function RentalPropertyTaxCalculatorPage() {
         </section>
 
         <section className="mt-12 border-t border-border pt-8">
-          <h2 className="text-xl sm:text-2xl font-black text-foreground mb-3">
+          <h2 className="text-xl sm:text-2xl font-extrabold text-foreground mb-3">
             Related calculators
           </h2>
           <div className="flex flex-wrap gap-2 text-sm">

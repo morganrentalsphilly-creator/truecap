@@ -93,7 +93,7 @@ export default function VsExcelPage() {
             <Sparkles className="size-3" />
             Honest comparison
           </div>
-          <h1 className="text-3xl sm:text-5xl font-black text-foreground leading-[1.05] tracking-tight text-balance">
+          <h1 className="text-3xl sm:text-5xl font-extrabold text-foreground leading-[1.05] tracking-tight text-balance">
             TrueCap vs Excel: <span className="text-primary">when is a spreadsheet still the right tool?</span>
           </h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
@@ -113,7 +113,7 @@ export default function VsExcelPage() {
         </section>
 
         <section className="mb-12 sm:mb-16 rounded-2xl border border-border bg-card p-6 sm:p-8">
-          <h2 className="text-xl sm:text-2xl font-black text-foreground mb-3">TL;DR</h2>
+          <h2 className="text-xl sm:text-2xl font-extrabold text-foreground mb-3">TL;DR</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             <div>
               <p className="text-[11px] font-bold uppercase tracking-widest text-primary mb-2">Pick TrueCap if</p>
@@ -140,7 +140,7 @@ export default function VsExcelPage() {
         </section>
 
         <section className="mb-12 sm:mb-16">
-          <h2 className="text-2xl sm:text-3xl font-black text-foreground mb-2">Feature-by-feature</h2>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground mb-2">Feature-by-feature</h2>
           <p className="text-base text-muted-foreground mb-6 leading-relaxed">Where each wins, where it&apos;s a wash.</p>
           <div className="overflow-x-auto rounded-2xl border border-border bg-card">
             <table className="w-full text-sm">
@@ -169,7 +169,7 @@ export default function VsExcelPage() {
         </section>
 
         <section className="mb-12 sm:mb-16 rounded-2xl border border-[var(--brand-green)]/25 bg-[var(--brand-green-light)] p-6 sm:p-8">
-          <h2 className="text-xl sm:text-2xl font-black text-[var(--brand-green)] mb-3">When investors actually switch from Excel</h2>
+          <h2 className="text-xl sm:text-2xl font-extrabold text-[var(--brand-green)] mb-3">When investors actually switch from Excel</h2>
           <ul className="space-y-2 text-sm sm:text-base leading-relaxed text-foreground">
             <li><strong>&quot;I&apos;m analyzing 3+ deals per week.&quot;</strong> At that pace, the per-deal time savings from TrueCap (29 min/deal vs 60 sec) saves you 12+ hours a month. Pro pays for itself in week one.</li>
             <li><strong>&quot;I shared my spreadsheet with a partner and they broke it.&quot;</strong> Classic. Spreadsheets are fragile. TrueCap saved deals get a clean shareable URL — partners see the analysis, can&apos;t accidentally break the formula.</li>
@@ -179,7 +179,7 @@ export default function VsExcelPage() {
         </section>
 
         <section className="mb-12 sm:mb-16 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
-          <h2 className="text-2xl sm:text-3xl font-black mb-2">Try TrueCap free.</h2>
+          <h2 className="text-2xl sm:text-3xl font-extrabold mb-2">Try TrueCap free.</h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             Underwrite your next deal in 60 seconds. If you still prefer Excel after that, no harm done — keep your spreadsheet. But most investors who try TrueCap once stop opening their template.
           </p>

@@ -115,7 +115,7 @@ export default function OffMarketPost() {
       <article className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <div className="mb-2"><Link href="/blog" className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground">← Blog</Link></div>
         <header className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-black text-foreground leading-tight tracking-tight text-balance">{TITLE}</h1>
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight text-balance">{TITLE}</h1>
           <p className="mt-3 text-[11px] uppercase tracking-widest text-muted-foreground font-bold">
             {new Date(PUBLISHED_AT).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })} · {READING_TIME} min read
           </p>
@@ -129,7 +129,7 @@ export default function OffMarketPost() {
             One framing note before we start: <strong>off-market deal flow is a long-game effort</strong>. Most channels take 3-12 months of consistent work before producing a deal. The compounding ones (PM networking, wholesaler relationships, direct mail) are the most reliable. The fast ones (driving for dollars, cold calling) require sustained energy. Pick 2-3 channels that fit your temperament and run them for 12 months before changing strategy.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">1. Property manager networking — the highest-ROI source</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">1. Property manager networking — the highest-ROI source</h2>
           <p>
             Most investors never think to pitch property managers as a deal-sourcing channel. They should. Property managers know which of their owners are tired, dealing with rising capex bills, behind on rent collection, or thinking about retirement. PMs hear about future sales 6-12 months before the property hits MLS.
           </p>
@@ -140,7 +140,7 @@ export default function OffMarketPost() {
             Timeline: 3-6 months to build the relationships. Cost: ~$200/mo in coffees + lunches. Deal flow: 1-3 deals/year from a well-built PM network, indefinitely.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">2. Direct mail to targeted owner lists</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">2. Direct mail to targeted owner lists</h2>
           <p>
             The classic off-market source. Buy a list (PropStream, ListSource, DataTree are common providers), filter to your target criteria (absentee owners, equity-rich owners, tax-delinquent, pre-foreclosure, code violations), and mail postcards or letters.
           </p>
@@ -160,7 +160,7 @@ export default function OffMarketPost() {
             Budget: $0.45-0.90 per piece all-in (postcard + postage + list cost). $2-5k/month sustainable budget produces 1-3 deals/year for an investor who answers calls within 4 hours and runs the math fast (use <Link href="/" className="text-primary font-semibold hover:underline">TrueCap</Link> to underwrite leads in 60 seconds instead of 30 minutes).
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">3. Driving for dollars</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">3. Driving for dollars</h2>
           <p>
             Old-school: drive target neighborhoods looking for properties with signs of distress (overgrown lawn, deferred maintenance, mail piling up, broken windows, vacant). Record the addresses. Look up the owners via county appraisal district records or services like DealMachine. Cold call or mail.
           </p>
@@ -171,7 +171,7 @@ export default function OffMarketPost() {
             Timeline: First deal in 2-4 months for an aggressive driver who actually calls owners. Most investors quit before the 4-month mark because the rejection rate is high.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">4. Wholesaler relationships</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">4. Wholesaler relationships</h2>
           <p>
             Wholesalers source distressed properties + assign the contract to investors for a markup of $5-15k. Done right, they're a real source of pre-MLS deals. Done wrong, they're a way to overpay on a property dressed up as a deal.
           </p>
@@ -182,7 +182,7 @@ export default function OffMarketPost() {
             Verification matters. Run your OWN underwriting on every wholesale deal. Verify ARV from comps (not the wholesaler's number). Pull tax bills yourself. Read the full inspection report. <Link href="/blog/spot-bad-rental-in-60-seconds" className="text-primary font-semibold hover:underline">The red flags</Link> matter even more on wholesale deals because the wholesaler is incentivized to hide them.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">5. Networking with local agents (the right way)</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">5. Networking with local agents (the right way)</h2>
           <p>
             Most agents work the MLS. A subset specializes in investor clients and hears about pocket listings (deals an owner wants to sell but hasn't listed yet). These investor-focused agents are gold.
           </p>
@@ -193,7 +193,7 @@ export default function OffMarketPost() {
             The deal flow from a single well-positioned investor agent can be 5-15 properties per year. Worth the time investment.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">6. Public records — auctions and tax-lien sales</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">6. Public records — auctions and tax-lien sales</h2>
           <p>
             County websites publish foreclosure auction lists, tax-lien certificate sales, and sheriff sale schedules. These are public, free to access, and meaningfully under-shopped by individual investors (most attendees are professional flippers).
           </p>
@@ -204,7 +204,7 @@ export default function OffMarketPost() {
             What doesn't: showing up to a foreclosure auction unprepared. Most properties at auction need cash purchase (no financing contingency), have unknown condition (often you can't see inside), and have title issues (junior liens, occupancy disputes). Don't bid until you've gone to 3-5 auctions to observe.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">7. Facebook + Nextdoor + local FB investor groups</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">7. Facebook + Nextdoor + local FB investor groups</h2>
           <p>
             Underrated. Sellers often post "considering selling" in local Facebook groups before going to an agent. Investors who participate in these groups for months — answering questions, being helpful, not pitching — get first call when posts go up.
           </p>
@@ -215,7 +215,7 @@ export default function OffMarketPost() {
             Timeline: 6-12 months of presence before the deal flow starts. Pays off indefinitely once it does.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">8. Bandit signs (with caveats)</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">8. Bandit signs (with caveats)</h2>
           <p>
             "We Buy Houses" signs at intersections. They work — measurably. They're also illegal in many municipalities and create brand-perception issues if you ever want to do other things in real estate.
           </p>
@@ -226,7 +226,7 @@ export default function OffMarketPost() {
             The bigger investors mostly use this as a brand-building tactic combined with direct mail and digital. Solo investors should weigh the legal + reputational tradeoffs.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">The honest meta-advice</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">The honest meta-advice</h2>
           <p>
             Off-market deal sourcing is a marathon, not a sprint. The investors who succeed pick 2-3 channels that match their temperament, run them consistently for 12 months, and only evaluate results after that point.
           </p>

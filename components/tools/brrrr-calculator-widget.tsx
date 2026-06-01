@@ -159,7 +159,7 @@ function Metric({ label, value, positive, negative }: { label: string; value: st
   return (
     <div>
       <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">{label}</div>
-      <div className={cn("text-base sm:text-lg font-black mt-0.5 tabular-nums",
+      <div className={cn("text-base sm:text-lg font-extrabold mt-0.5 tabular-nums",
         positive && "text-[var(--metric-positive)]",
         negative && "text-[var(--metric-negative)]",
         !positive && !negative && "text-foreground")}>

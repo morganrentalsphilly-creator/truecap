@@ -111,7 +111,7 @@ export function RoiCalculatorWidget() {
 
       <div className="mt-6 rounded-xl border border-border bg-muted/30 p-5">
         <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Total ROI</p>
-        <p className={cn("mt-1 text-4xl font-black tabular-nums", verdict.color)}>{Number.isFinite(result.roi) ? fmtPct(result.roi) : "—"}</p>
+        <p className={cn("mt-1 text-4xl font-extrabold tabular-nums", verdict.color)}>{Number.isFinite(result.roi) ? fmtPct(result.roi) : "—"}</p>
         <p className="mt-1 text-sm text-muted-foreground tabular-nums">{fmtMoney(result.totalReturn)} annual return on cash invested</p>
         <div className="mt-4 grid grid-cols-3 gap-3 text-[11px]">
           <div>

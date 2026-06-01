@@ -78,7 +78,7 @@ export function MortgagePaymentWidget() {
             <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
               Monthly Payment (PITI)
             </div>
-            <div className={cn("text-5xl sm:text-6xl font-black mt-1 tabular-nums text-foreground")}>
+            <div className={cn("text-5xl sm:text-6xl font-extrabold mt-1 tabular-nums text-foreground")}>
               {fmtMoney(result.monthlyPITI)}
             </div>
             <p className="text-xs text-muted-foreground mt-1">

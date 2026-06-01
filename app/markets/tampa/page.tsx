@@ -135,7 +135,7 @@ export default function TampaMarketPage() {
             <MapPin className="size-3" />
             {CITY}, {STATE}
           </div>
-          <h1 className="text-3xl sm:text-4xl font-black text-foreground leading-tight tracking-tight">
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight">
             {CITY} rental property analysis — calculator + 2026 cap-rate benchmarks
           </h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
@@ -157,7 +157,7 @@ export default function TampaMarketPage() {
         </header>
 
         <section className="mb-10">
-          <h2 className="text-2xl font-black text-foreground mb-3">
+          <h2 className="text-2xl font-extrabold text-foreground mb-3">
             Tampa neighborhood cap-rate map (2026)
           </h2>
           <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
@@ -191,7 +191,7 @@ export default function TampaMarketPage() {
         </section>
 
         <section className="mb-10 rounded-2xl border border-[var(--brand-orange)]/25 bg-[var(--brand-orange-light)] p-5 sm:p-6">
-          <h2 className="text-base font-black uppercase tracking-widest text-[var(--brand-orange)] mb-2">
+          <h2 className="text-base font-extrabold uppercase tracking-widest text-[var(--brand-orange)] mb-2">
             The Tampa insurance reality check
           </h2>
           <p className="text-sm leading-relaxed text-foreground">
@@ -206,7 +206,7 @@ export default function TampaMarketPage() {
         </section>
 
         <section className="mb-10">
-          <h2 className="text-2xl font-black text-foreground mb-4">
+          <h2 className="text-2xl font-extrabold text-foreground mb-4">
             Frequently asked — Tampa investing
           </h2>
           <div className="space-y-4">
@@ -223,7 +223,7 @@ export default function TampaMarketPage() {
         </section>
 
         <section className="mb-10 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
-          <h2 className="text-xl sm:text-2xl font-black mb-2">
+          <h2 className="text-xl sm:text-2xl font-extrabold mb-2">
             Run your next Tampa deal in 60 seconds
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-4 max-w-2xl">

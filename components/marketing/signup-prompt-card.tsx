@@ -44,7 +44,7 @@ export function SignupPromptCard({ address, isAuthenticated }: SignupPromptCardP
     <div className="rounded-2xl border border-[var(--brand-green)]/25 bg-gradient-to-br from-[var(--brand-green-light)] via-card to-card p-5 shadow-[0_12px_36px_rgba(22,163,74,0.10)] sm:p-6">
       {/* Header — pill + dismiss */}
       <div className="flex items-start justify-between gap-3">
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--brand-green)] px-2.5 py-1 text-[10px] font-black uppercase tracking-widest text-white">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--brand-green)] px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-widest text-white">
           <Bookmark className="size-3" />
           Free forever
         </span>
@@ -59,7 +59,7 @@ export function SignupPromptCard({ address, isAuthenticated }: SignupPromptCardP
       </div>
 
       {/* Headline */}
-      <h3 className="mt-3 text-lg font-black leading-tight tracking-tight text-foreground sm:text-2xl">
+      <h3 className="mt-3 text-lg font-extrabold leading-tight tracking-tight text-foreground sm:text-2xl">
         {headlineSuffix} for later
       </h3>
       <p className="mt-2 text-sm leading-relaxed text-muted-foreground">

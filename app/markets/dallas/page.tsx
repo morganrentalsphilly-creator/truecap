@@ -72,13 +72,13 @@ export default function DallasMarketPage() {
         <div className="mb-2"><Link href="/" className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground">← TrueCap</Link></div>
         <header className="mb-10">
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-primary mb-3"><MapPin className="size-3" />{CITY}-Fort Worth, {STATE}</div>
-          <h1 className="text-3xl sm:text-4xl font-black text-foreground leading-tight tracking-tight">{CITY}-Fort Worth rental property analysis — calculator + 2026 cap-rate benchmarks</h1>
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight">{CITY}-Fort Worth rental property analysis — calculator + 2026 cap-rate benchmarks</h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">Run a DFW rental deal in 60 seconds with TrueCap. Address auto-fills Texas property tax (1.6-2.5%+ effective depending on MUD), HUD rent by county, and current FRED mortgage rates. Below: neighborhood cap rates plus the high-tax / no-income-tax trade-off that defines TX underwriting.</p>
           <div className="mt-6 flex flex-wrap gap-3"><Link href="/" className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground hover:opacity-90"><Calculator className="size-4" />Underwrite a DFW deal — free</Link></div>
         </header>
 
         <section className="mb-10">
-          <h2 className="text-2xl font-black text-foreground mb-3">DFW neighborhood cap-rate map (2026)</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mb-3">DFW neighborhood cap-rate map (2026)</h2>
           <p className="text-sm text-muted-foreground mb-4 leading-relaxed">Ranges reflect typical conventional-financing single-family + small-multi deals. DFW caps are heavily affected by property tax — verify the parcel-specific tax bill before trusting cap-rate ranges, especially in MUD suburbs.</p>
           <div className="overflow-x-auto rounded-2xl border border-border bg-card">
             <table className="w-full text-sm">
@@ -89,17 +89,17 @@ export default function DallasMarketPage() {
         </section>
 
         <section className="mb-10 rounded-2xl border border-[var(--brand-orange)]/25 bg-[var(--brand-orange-light)] p-5 sm:p-6">
-          <h2 className="text-base font-black uppercase tracking-widest text-[var(--brand-orange)] mb-2">The Texas property tax reality check</h2>
+          <h2 className="text-base font-extrabold uppercase tracking-widest text-[var(--brand-orange)] mb-2">The Texas property tax reality check</h2>
           <p className="text-sm leading-relaxed text-foreground">Texas has the highest effective property tax rates in the US — typically 1.6-2.5%+, with new-construction MUD suburbs hitting 2.8-3.2% effective. This is the single biggest variable in TX underwriting. A 6% headline cap can shrink to 3.5% net after the tax bill. Always pull the actual current tax record from the County Appraisal District (Dallas CAD, Tarrant CAD, Collin CAD) before committing. Don&apos;t trust generic state averages.</p>
         </section>
 
         <section className="mb-10">
-          <h2 className="text-2xl font-black text-foreground mb-4">Frequently asked — Dallas-Fort Worth investing</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mb-4">Frequently asked — Dallas-Fort Worth investing</h2>
           <div className="space-y-4">{FAQS.map((f) => (<details key={f.q} className="group rounded-2xl border border-border bg-card p-4"><summary className="cursor-pointer text-sm font-bold text-foreground select-none list-none flex items-center justify-between gap-3"><span>{f.q}</span><span aria-hidden className="text-muted-foreground transition-transform group-open:rotate-90">▸</span></summary><p className="mt-3 text-sm leading-relaxed text-muted-foreground">{f.a}</p></details>))}</div>
         </section>
 
         <section className="mb-10 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
-          <h2 className="text-xl sm:text-2xl font-black mb-2">Run your next DFW deal in 60 seconds</h2>
+          <h2 className="text-xl sm:text-2xl font-extrabold mb-2">Run your next DFW deal in 60 seconds</h2>
           <p className="text-sm sm:text-base opacity-90 mb-4 max-w-2xl">Paste the address. Texas tax baseline, HUD rent for the right county, and current rate auto-fill. Cap rate, CoC, DSCR, and monthly cash flow in 1 second. Free to start. No card required.</p>
           <Link href="/" className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity">Open the analyzer<ArrowUpRight className="w-4 h-4" /></Link>
         </section>

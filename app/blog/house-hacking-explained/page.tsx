@@ -56,7 +56,7 @@ export default function HouseHackingPost() {
       <article className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <div className="mb-2"><Link href="/blog" className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground">← Blog</Link></div>
         <header className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-black text-foreground leading-tight tracking-tight text-balance">{TITLE}</h1>
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight text-balance">{TITLE}</h1>
           <p className="mt-3 text-[11px] uppercase tracking-widest text-muted-foreground font-bold">
             {new Date(PUBLISHED_AT).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })} · {READING_TIME} min read
           </p>
@@ -66,7 +66,7 @@ export default function HouseHackingPost() {
         </header>
 
         <div className="prose prose-neutral max-w-none text-foreground space-y-6 leading-relaxed">
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">What house hacking actually is</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">What house hacking actually is</h2>
           <p>
             House hacking = you buy a 2-4 unit property using owner-occupant financing (FHA, conventional 5% down, or VA if eligible), live in one unit yourself, and rent the others to cover most or all of your housing cost. After a year (the FHA + conventional owner-occupant residency minimum), you can move out and the property converts to a full investment rental.
           </p>
@@ -81,7 +81,7 @@ export default function HouseHackingPost() {
             $10.5k vs $60-75k to control the same property. That capital efficiency is why house hacking is the most-recommended first step in serious investor communities.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">The rules — what counts as a "house hack"</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">The rules — what counts as a "house hack"</h2>
           <p>
             FHA + Fannie/Freddie owner-occupant loans require:
           </p>
@@ -95,7 +95,7 @@ export default function HouseHackingPost() {
             Conventional 5% owner-occupant loans (Fannie Mae HomeReady, Freddie Mac Home Possible) don&apos;t have the self-sufficiency rule and can be easier to qualify in expensive markets. Worth running both loan options against the same property.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">The actual math — does it pencil?</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">The actual math — does it pencil?</h2>
           <p>
             The trap most first-timers fall into: they look at &quot;total rent collected vs. total mortgage&quot; and think they&apos;re living free. The honest math:
           </p>
@@ -118,7 +118,7 @@ export default function HouseHackingPost() {
             On TrueCap, set <strong>Property type = Owner-occupant</strong>, then enter per-unit rents (zero for your unit). The score uses owner-occupant break-even bands ($300/mo near-zero), not investor cash-flow bands ($1,000/mo).
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">FHA MIP — the catch nobody mentions</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">FHA MIP — the catch nobody mentions</h2>
           <p>
             FHA loans require Mortgage Insurance Premium (MIP) for the life of the loan (or 11 years if you put 10%+ down). MIP runs ~0.55-0.85% of the loan annually. On a $300k loan that&apos;s $1,650-2,550/year ($138-213/month). It&apos;s a real recurring cost that conventional 5% down doesn&apos;t have (conventional has PMI which falls off at 80% LTV, typically 5-7 years in).
           </p>
@@ -126,7 +126,7 @@ export default function HouseHackingPost() {
             Translation: FHA is the lowest-down-payment path but you pay for it forever. Running both FHA 3.5% AND conventional 5% scenarios through the calculator usually shows that 5% conventional has better long-term economics — if you can come up with the extra $4-5k down.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">The year-2 transition — when you move out</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">The year-2 transition — when you move out</h2>
           <p>
             The full power of house hacking shows up in year 2. You&apos;ve satisfied the owner-occupant residency requirement; you move out, rent your unit at market rate, and the property converts from break-even owner-occupied to cash-flowing pure rental.
           </p>
@@ -137,7 +137,7 @@ export default function HouseHackingPost() {
             Pro tip: model both years before you commit. TrueCap&apos;s 10-year projection (Pro) shows year-1 break-even followed by year-2+ cash flow. The post-transition numbers are usually what justifies the strategy on paper; year-1 is the cost of admission.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">What to look for in a house-hack property</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">What to look for in a house-hack property</h2>
           <p>
             Best house-hack targets share traits:
           </p>
@@ -150,7 +150,7 @@ export default function HouseHackingPost() {
             <li><strong>Reasonable school district</strong> for the next owner-occupant who buys it from you in 5-10 years</li>
           </ul>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">The honest downsides</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">The honest downsides</h2>
           <p>
             House hacking isn&apos;t magic:
           </p>
@@ -161,7 +161,7 @@ export default function HouseHackingPost() {
             <li><strong>Tenant turnover during your residency hurts more</strong> — you can&apos;t easily move other units while you&apos;re living there to do rehab during turnover.</li>
           </ul>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">The bottom line</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">The bottom line</h2>
           <p>
             House hacking is the highest-leverage strategy in real estate that&apos;s actually accessible to a normal-income buyer. $10-20k down for a $300-400k 2-4 unit, year of living break-even, then year 2 onward producing real cash flow on what was originally your housing.
           </p>

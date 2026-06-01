@@ -93,8 +93,15 @@ function getRecommendation(score: number, input: DealScoreInput): DealRecommenda
 }
 
 function getRiskLevelBase(score: number): DealRiskLevel {
+  // Thresholds calibrated for 2026's higher-rate environment. The
+  // Medium / High floor was previously 40 — that bucket reflected
+  // "borderline" deals in the 2018-2022 era when 3-4% rates left
+  // generous cash-flow margins. With 7-8.5% investment loans in 2026,
+  // a score of 40 typically reflects negative cash flow + thin returns
+  // — that's High Risk by any reasonable definition, not Medium. The
+  // 50-floor better matches the current cost-of-capital reality.
   if (score >= 70) return "Low Risk";
-  if (score >= 40) return "Medium Risk";
+  if (score >= 50) return "Medium Risk";
   return "High Risk";
 }
 
@@ -221,11 +228,18 @@ export function computeDealScore(input: DealScoreInput): DealScoreResult {
   // Cash purchases have no debt service, so DSCR is mathematically undefined.
   // Award full DSCR credit rather than penalizing the deal — a 100% down
   // payment is the safest possible debt structure (no debt).
+  //
+  // The 10-pt middle bucket floor was previously 1.0 — meaning a deal
+  // with DSCR 1.05 still scored partial credit. But 2026-era DSCR
+  // lenders require a 1.20-1.25 minimum, so a 1.05 deal isn't actually
+  // loanable. Tightening the floor to 1.15 reflects market reality:
+  // the deal needs to be at least close to loanable to deserve any
+  // DSCR credit. Anything below 1.15 = no loan = 0 points.
   const dscrScore = input.isCashPurchase
     ? 20
     : input.dscr > 1.25
       ? 20
-      : input.dscr > 1
+      : input.dscr >= 1.15
         ? 10
         : 0;
 

@@ -38,7 +38,7 @@ export function ProInlineGate({ icon: Icon, title, description, previewBullets }
             <p className="text-xs text-muted-foreground">{description}</p>
           </div>
         </div>
-        <span className="inline-flex items-center gap-1 rounded-full bg-primary px-2 py-1 text-[10px] font-black uppercase tracking-widest text-primary-foreground">
+        <span className="inline-flex items-center gap-1 rounded-full bg-primary px-2 py-1 text-[10px] font-extrabold uppercase tracking-widest text-primary-foreground">
           <Lock className="size-2.5" />
           Pro
         </span>

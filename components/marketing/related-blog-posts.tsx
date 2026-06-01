@@ -36,7 +36,7 @@ export function RelatedBlogPosts({ currentSlug, limit = 3 }: Props) {
     >
       <div className="flex items-center gap-2 mb-4">
         <BookOpen className="size-4 text-primary" />
-        <h2 className="text-xs font-black uppercase tracking-widest text-muted-foreground">
+        <h2 className="text-xs font-extrabold uppercase tracking-widest text-muted-foreground">
           Keep reading
         </h2>
       </div>
@@ -54,7 +54,7 @@ export function RelatedBlogPosts({ currentSlug, limit = 3 }: Props) {
                 </span>
                 <ArrowUpRight className="size-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
               </div>
-              <h3 className="text-sm font-black leading-snug text-foreground sm:text-base">
+              <h3 className="text-sm font-extrabold leading-snug text-foreground sm:text-base">
                 {post.title}
               </h3>
               <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground sm:text-sm">

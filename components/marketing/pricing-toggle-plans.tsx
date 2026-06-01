@@ -117,7 +117,7 @@ export function PricingTogglePlans({
         {/* FREE */}
         <div className="relative rounded-3xl border border-border bg-card p-6 shadow-sm">
           <div className="flex items-baseline justify-between">
-            <h3 className="text-lg font-black text-foreground">Free</h3>
+            <h3 className="text-lg font-extrabold text-foreground">Free</h3>
             {!isPaid && (
               <span className="rounded-full bg-[var(--metric-positive)]/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-[var(--metric-positive)]">
                 Current
@@ -128,7 +128,7 @@ export function PricingTogglePlans({
             Everything you need to triage a deal in 60 seconds.
           </p>
           <div className="mt-5 flex items-baseline gap-1.5">
-            <span className="text-4xl font-black text-foreground sm:text-5xl">$0</span>
+            <span className="text-4xl font-extrabold text-foreground sm:text-5xl">$0</span>
             <span className="text-sm text-muted-foreground">forever</span>
           </div>
           <div className="mt-5">
@@ -160,7 +160,7 @@ export function PricingTogglePlans({
         <div className="relative -mt-2 rounded-3xl border-2 border-primary bg-card p-6 shadow-[0_24px_70px_rgba(82,72,212,0.18)] lg:scale-[1.03]">
           {/* Savings badge */}
           {period === "annual" && (annualSavingsPct ?? 0) > 0 ? (
-            <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1 text-[10px] font-black uppercase tracking-widest text-primary-foreground shadow-md">
+            <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1 text-[10px] font-extrabold uppercase tracking-widest text-primary-foreground shadow-md">
               {monthsFreeWithAnnual && monthsFreeWithAnnual > 0
                 ? `${monthsFreeWithAnnual} months free`
                 : `Save ${annualSavingsPct}%`}
@@ -168,7 +168,7 @@ export function PricingTogglePlans({
           ) : null}
 
           <div className="flex items-baseline justify-between">
-            <h3 className="text-lg font-black text-foreground">Pro</h3>
+            <h3 className="text-lg font-extrabold text-foreground">Pro</h3>
             {isPaid ? (
               <span className="rounded-full bg-[var(--metric-positive)]/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-[var(--metric-positive)]">
                 Current
@@ -211,7 +211,7 @@ export function PricingTogglePlans({
             >
               Annual
               {annualSavingsPct && annualSavingsPct > 0 ? (
-                <span className="rounded-full bg-primary px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-primary-foreground">
+                <span className="rounded-full bg-primary px-1.5 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-primary-foreground">
                   −{annualSavingsPct}%
                 </span>
               ) : null}
@@ -219,7 +219,7 @@ export function PricingTogglePlans({
           </div>
 
           <div className="mt-5 flex items-baseline gap-1.5">
-            <span className="text-4xl font-black text-foreground sm:text-5xl">
+            <span className="text-4xl font-extrabold text-foreground sm:text-5xl">
               {proCard.priceTop}
             </span>
             <span className="text-sm text-muted-foreground">{proCard.priceSub}</span>

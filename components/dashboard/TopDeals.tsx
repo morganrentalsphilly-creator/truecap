@@ -147,21 +147,21 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
               <div className="mt-4 grid grid-cols-2 gap-2">
                 <div className="rounded-xl bg-muted/40 p-3">
                   <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Cash Flow</p>
-                  <p className={`mt-1 text-sm font-black tabular-nums ${d.cashFlow == null ? "" : d.cashFlow >= 0 ? "text-success" : "text-destructive"}`}>
+                  <p className={`mt-1 text-sm font-extrabold tabular-nums ${d.cashFlow == null ? "" : d.cashFlow >= 0 ? "text-success" : "text-destructive"}`}>
                     {d.cashFlow == null ? "-" : `${d.cashFlow >= 0 ? "+" : ""}$${d.cashFlow.toLocaleString()}/mo`}
                   </p>
                 </div>
                 <div className="rounded-xl bg-muted/40 p-3">
                   <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">ROI</p>
-                  <p className="mt-1 text-sm font-black tabular-nums text-foreground">{d.roi == null ? "-" : `${d.roi.toFixed(1)}%`}</p>
+                  <p className="mt-1 text-sm font-extrabold tabular-nums text-foreground">{d.roi == null ? "-" : `${d.roi.toFixed(1)}%`}</p>
                 </div>
                 <div className="rounded-xl bg-muted/40 p-3">
                   <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Cap Rate</p>
-                  <p className="mt-1 text-sm font-black tabular-nums text-foreground">{d.capRate == null ? "-" : `${d.capRate}%`}</p>
+                  <p className="mt-1 text-sm font-extrabold tabular-nums text-foreground">{d.capRate == null ? "-" : `${d.capRate}%`}</p>
                 </div>
                 <div className="rounded-xl bg-muted/40 p-3">
                   <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Risk</p>
-                  <p className="mt-1 text-sm font-black text-foreground">{d.riskLevel ?? "-"}</p>
+                  <p className="mt-1 text-sm font-extrabold text-foreground">{d.riskLevel ?? "-"}</p>
                 </div>
               </div>
 

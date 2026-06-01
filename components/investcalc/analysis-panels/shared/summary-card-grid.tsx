@@ -42,7 +42,7 @@ export function SummaryCardGrid({
           )}
           <p
             className={cn(
-              "mt-2 text-2xl font-black",
+              "mt-2 text-2xl font-extrabold",
               item.tone === "positive" && "text-[var(--metric-positive)]",
               item.tone === "negative" && "text-[var(--metric-negative)]",
               (!item.tone || item.tone === "neutral") && "text-foreground"

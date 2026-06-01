@@ -142,7 +142,7 @@ export default function ClevelandMarketPage() {
             <MapPin className="size-3" />
             Markets · {CITY}, {STATE}
           </div>
-          <h1 className="text-3xl sm:text-4xl font-black text-foreground leading-tight tracking-tight text-balance">
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight text-balance">
             {CITY} rental property analysis — calculator + 2026 cap-rate benchmarks
           </h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
@@ -170,7 +170,7 @@ export default function ClevelandMarketPage() {
           </div>
         </header>
 
-        <article className="prose prose-slate max-w-none [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-black [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground [&_li]:leading-relaxed [&_strong]:text-foreground">
+        <article className="prose prose-slate max-w-none [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground [&_li]:leading-relaxed [&_strong]:text-foreground">
 
           <h2 className="text-2xl sm:text-3xl">Cleveland cap rate benchmarks by neighborhood</h2>
           <p>
@@ -287,7 +287,7 @@ export default function ClevelandMarketPage() {
         </article>
 
         <section className="mt-10 rounded-2xl bg-primary text-primary-foreground p-6 sm:p-8 text-center">
-          <h2 className="text-xl sm:text-2xl font-black mb-2">
+          <h2 className="text-xl sm:text-2xl font-extrabold mb-2">
             Run your Cleveland deal in 60 seconds.
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-4">

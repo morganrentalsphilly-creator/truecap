@@ -194,7 +194,7 @@ export default async function DashboardComparePage() {
               <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <Plus className="size-5" />
               </div>
-              <h1 className="text-2xl font-black text-foreground">Compare Deals</h1>
+              <h1 className="text-2xl font-extrabold text-foreground">Compare Deals</h1>
               <p className="mt-2 text-sm text-muted-foreground">
                 Save a deal or select 2-4 saved analyses to compare side by side.
               </p>

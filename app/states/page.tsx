@@ -57,7 +57,7 @@ export default function StatesIndexPage() {
 
       <main className="mx-auto max-w-5xl px-4 sm:px-6 py-8 sm:py-12">
         <p className="text-[11px] uppercase tracking-widest text-primary font-bold">By state</p>
-        <h1 className="mt-2 text-3xl sm:text-5xl font-black text-foreground leading-[1.05] tracking-tight">
+        <h1 className="mt-2 text-3xl sm:text-5xl font-extrabold text-foreground leading-[1.05] tracking-tight">
           Rental property investing by state
         </h1>
         <p className="mt-5 text-lg leading-relaxed text-muted-foreground max-w-2xl">
@@ -74,7 +74,7 @@ export default function StatesIndexPage() {
                 className="block rounded-2xl border border-border bg-card p-5 transition-colors hover:border-primary/40"
               >
                 <p className="text-[11px] uppercase tracking-widest text-primary font-bold">{s.tier}</p>
-                <p className="mt-1 text-lg font-black text-foreground">{s.name}</p>
+                <p className="mt-1 text-lg font-extrabold text-foreground">{s.name}</p>
                 <p className="mt-2 text-xs text-muted-foreground leading-relaxed line-clamp-3">{s.pitch.slice(0, 130)}…</p>
                 <p className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
                   <span>Tax {s.propertyTaxRatePct}%</span>

@@ -468,7 +468,7 @@ export function AnalysisDashboard({
                     <AlertTriangle className="w-6 h-6 text-white" />
                   )}
                 </div>
-                <h2 className="text-2xl sm:text-3xl font-black text-foreground">
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground">
                   {recommendation.label}
                 </h2>
               </div>
@@ -910,7 +910,7 @@ function DealScoreCard({
           </p>
           <div className="flex items-center justify-between gap-3 mb-3">
             <div className="w-20 h-20 rounded-2xl ring-2 ring-primary/35 bg-[var(--brand-blue-light)] flex flex-col items-center justify-center shadow-sm">
-              <p className="text-4xl leading-none font-black text-primary">32</p>
+              <p className="text-4xl leading-none font-extrabold text-primary">32</p>
             </div>
             <div className="flex flex-col items-end gap-1">
               <span className="px-3 py-1 rounded-xl border border-primary/30 bg-primary text-primary-foreground text-sm font-bold">
@@ -1097,7 +1097,7 @@ function DealScoreCard({
             activeStyle.scoreRing
           )}
         >
-          <p className={cn("text-4xl leading-none font-black", activeStyle.scoreText)}>{score}</p>
+          <p className={cn("text-4xl leading-none font-extrabold", activeStyle.scoreText)}>{score}</p>
         </div>
         <div className="flex flex-col items-end gap-1">
           <span
@@ -1260,7 +1260,7 @@ function ProFeaturePreview({
               <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                 {metric}
               </p>
-              <p className="mt-2 text-2xl font-black text-[var(--metric-positive)]">
+              <p className="mt-2 text-2xl font-extrabold text-[var(--metric-positive)]">
                 {index === 0 && kind === "exit-scenarios" ? "Year 10" : "$48,260"}
               </p>
             </div>
@@ -1318,7 +1318,7 @@ function ProFeaturePreview({
           <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
             <Sparkles className="size-6" />
           </div>
-          <h3 className="text-lg font-black text-foreground">{copy.title} is a Pro feature</h3>
+          <h3 className="text-lg font-extrabold text-foreground">{copy.title} is a Pro feature</h3>
           <p className="mt-2 text-sm text-muted-foreground">{copy.description}</p>
           <Button className="mt-4 rounded-full font-semibold" onClick={onUpgrade}>
             Upgrade to Pro
@@ -1369,7 +1369,7 @@ function NetCashFlowCard({ result }: { result: AnalysisResult }) {
           <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
             Net Cash Flow
           </p>
-          <p className={cn("mt-1 text-4xl font-black tabular-nums sm:text-5xl", numberColor)}>
+          <p className={cn("mt-1 text-4xl font-extrabold tabular-nums sm:text-5xl", numberColor)}>
             {signPrefix}${Math.abs(monthly).toLocaleString()}
             <span className="ml-1 text-base font-bold tracking-tight text-muted-foreground sm:text-lg">
               /mo
@@ -1385,7 +1385,7 @@ function NetCashFlowCard({ result }: { result: AnalysisResult }) {
             <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
               Annual
             </p>
-            <p className={cn("mt-1 text-xl font-black tabular-nums sm:text-2xl", numberColor)}>
+            <p className={cn("mt-1 text-xl font-extrabold tabular-nums sm:text-2xl", numberColor)}>
               {annual >= 0 ? "+" : "-"}${Math.abs(annual).toLocaleString()}
             </p>
           </div>
@@ -1393,7 +1393,7 @@ function NetCashFlowCard({ result }: { result: AnalysisResult }) {
             <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
               After tax
             </p>
-            <p className="mt-1 text-xl font-black tabular-nums text-primary sm:text-2xl">
+            <p className="mt-1 text-xl font-extrabold tabular-nums text-primary sm:text-2xl">
               ${Math.round(afterTaxMonthly).toLocaleString()}
               <span className="ml-1 text-[11px] font-bold tracking-tight text-muted-foreground">
                 /mo
@@ -1644,7 +1644,7 @@ function CashFlowTab({
             <p className="text-sm font-semibold text-primary-foreground">
               Total Investment
             </p>
-            <p className="text-xl font-black text-primary-foreground">
+            <p className="text-xl font-extrabold text-primary-foreground">
               ${result.totalCashRequired.toLocaleString()}
             </p>
           </div>

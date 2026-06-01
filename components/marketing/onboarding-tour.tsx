@@ -166,7 +166,7 @@ export function OnboardingTour({ isAuthenticated, savedDealCount }: Props) {
             <Icon className="size-4" />
           </div>
           <div className="min-w-0">
-            <h3 className="text-sm font-black text-foreground sm:text-base">
+            <h3 className="text-sm font-extrabold text-foreground sm:text-base">
               {step.title}
             </h3>
             <p className="mt-1 text-xs leading-relaxed text-muted-foreground sm:text-sm">

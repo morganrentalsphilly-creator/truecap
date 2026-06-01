@@ -132,7 +132,7 @@ export default function SfrVsMfrPost() {
           </Link>
         </div>
         <header className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-black text-foreground leading-tight tracking-tight text-balance">
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight text-balance">
             {TITLE}
           </h1>
           <p className="mt-3 text-[11px] uppercase tracking-widest text-muted-foreground font-bold">
@@ -149,7 +149,7 @@ export default function SfrVsMfrPost() {
         </header>
 
         <div className="prose prose-neutral max-w-none text-foreground space-y-6 leading-relaxed">
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
             The short answer
           </h2>
           <p>
@@ -162,7 +162,7 @@ export default function SfrVsMfrPost() {
             Small multi-family (5-20 units): best cap rates in the housing investment world, but commercial financing + larger capex events + harder liquidity. Only after you&apos;ve mastered the residential rhythm.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
             The honest side-by-side
           </h2>
           <p>
@@ -193,7 +193,7 @@ export default function SfrVsMfrPost() {
             Multi-family cap rates beat SFR by 1-3 points per dollar invested. But the absolute monthly cash flow per unit is similar — multi-family wins on aggregate, not per-unit. The real difference shows up in scale: a fourplex is one closing, one PM relationship, one tax bill instead of four.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
             What single-family wins on
           </h2>
           <p>
@@ -212,7 +212,7 @@ export default function SfrVsMfrPost() {
             <strong>Exit optionality.</strong> Need to sell? You can list to a homeowner couple in a week. Multi-family takes 60-180 days to find the right investor buyer.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
             What multi-family wins on
           </h2>
           <p>
@@ -238,7 +238,7 @@ export default function SfrVsMfrPost() {
             <strong>Forced appreciation on commercial.</strong> On 5+ unit properties, value is determined by NOI ÷ cap rate. Increase NOI by $5,000/yr (raise rents, cut expenses), and at a 7% cap the property gains $71k of value. Commercial multi-family is the only residential strategy where you can directly engineer value the way commercial real estate has done for decades.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
             Where the cliff lives: 4 units vs 5 units
           </h2>
           <p>
@@ -256,7 +256,7 @@ export default function SfrVsMfrPost() {
             This cliff is real and significant. Many investors deliberately cap their portfolio at 4-unit per property specifically to keep residential financing. Others step up to 5-20 unit specifically because the cap rate premium offsets the financing penalty. There&apos;s no right answer — but you need to choose deliberately, not by accident.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
             Which fits your stage?
           </h2>
           <h3 className="text-xl font-bold text-foreground mt-6 mb-2">
@@ -287,7 +287,7 @@ export default function SfrVsMfrPost() {
             Either continue with DSCR financing on residential properties past the conventional cap, OR step up to 5-20 unit commercial multi-family for the cap rate premium and forced-appreciation optionality. This decision typically comes down to whether you want to be a portfolio operator or an asset manager — they&apos;re different jobs.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
             The framework, not the formula
           </h2>
           <p>

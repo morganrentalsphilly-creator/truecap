@@ -276,7 +276,7 @@ export default function GlossaryPage() {
           >
             ← TrueCap
           </Link>
-          <h1 className="text-3xl sm:text-4xl font-black text-foreground mt-2 leading-tight">
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight">
             Real Estate Glossary
           </h1>
           <p className="text-base text-muted-foreground mt-2 leading-relaxed">
@@ -312,7 +312,7 @@ export default function GlossaryPage() {
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <h2 className="text-xl font-black text-foreground sm:text-2xl">
+                  <h2 className="text-xl font-extrabold text-foreground sm:text-2xl">
                     {t.term}
                   </h2>
                   {t.also && t.also.length > 0 ? (
@@ -372,7 +372,7 @@ export default function GlossaryPage() {
         </div>
 
         <section className="mt-10 rounded-2xl bg-primary text-primary-foreground p-6 sm:p-8 text-center">
-          <h2 className="text-xl sm:text-2xl font-black mb-2">
+          <h2 className="text-xl sm:text-2xl font-extrabold mb-2">
             Stop looking these up. Use the analyzer.
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-4">

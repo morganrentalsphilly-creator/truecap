@@ -113,7 +113,7 @@ export default function ProFormaPost() {
       <article className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <div className="mb-2"><Link href="/blog" className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground">← Blog</Link></div>
         <header className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-black text-foreground leading-tight tracking-tight text-balance">{TITLE}</h1>
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight text-balance">{TITLE}</h1>
           <p className="mt-3 text-[11px] uppercase tracking-widest text-muted-foreground font-bold">
             {new Date(PUBLISHED_AT).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })} · {READING_TIME} min read
           </p>
@@ -123,7 +123,7 @@ export default function ProFormaPost() {
         </header>
 
         <div className="prose prose-neutral max-w-none text-foreground space-y-6 leading-relaxed">
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">What a pro forma actually is</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">What a pro forma actually is</h2>
           <p>
             A pro forma is a one-page (sometimes multi-page) projection of expected income and expenses for a rental property. Sellers use them to justify asking price by showing a strong projected cap rate. They&apos;re marketing documents, not financial statements.
           </p>
@@ -134,7 +134,7 @@ export default function ProFormaPost() {
             Your job as a buyer: translate the pro forma into reality, which usually means lowering rent assumptions, raising expense assumptions, adding line items the seller skipped, and recomputing the cap rate.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">Lie #1: Pro forma rent is &quot;market rent,&quot; not current rent</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">Lie #1: Pro forma rent is &quot;market rent,&quot; not current rent</h2>
           <p>
             Many pro formas show &quot;projected market rent&quot; — what the seller thinks units could rent for after you raise them. Current actuals are often $200-400/mo less per unit.
           </p>
@@ -142,7 +142,7 @@ export default function ProFormaPost() {
             <strong>The translation:</strong> ask for the actual rent roll. Compare unit-by-unit to pro forma. If current rents are below pro forma, factor in 1-3 years of turnover before you reach pro forma rents — which means lower year-1 and year-2 cash flow than the pro forma shows.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">Lie #2: Vacancy at 3-5% (real is 6-10%)</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">Lie #2: Vacancy at 3-5% (real is 6-10%)</h2>
           <p>
             Most pro formas use 3-5% vacancy. In reality, a single 30-day turnover = 8.3% vacancy for that year. Two turnovers per year on a 4-unit property = 4-8% blended.
           </p>
@@ -150,7 +150,7 @@ export default function ProFormaPost() {
             <strong>The translation:</strong> use 6-8% for B-class, 9-12% for C-class properties. Only use 5% if you have multiple years of actuals showing it.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">Lie #3: Insurance at last year&apos;s rate</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">Lie #3: Insurance at last year&apos;s rate</h2>
           <p>
             The seller&apos;s pro forma insurance number is from their last bill. In hardening markets (FL, LA, TX coastal, CA fire zones), your new-buyer quote can be 40-80% higher than the seller&apos;s current premium.
           </p>
@@ -158,7 +158,7 @@ export default function ProFormaPost() {
             <strong>The translation:</strong> ALWAYS quote insurance yourself before closing. Use the higher of (a) your fresh quote and (b) the seller&apos;s number times 1.20.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">Lie #4: Property tax at current assessment (post-sale reassessment coming)</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">Lie #4: Property tax at current assessment (post-sale reassessment coming)</h2>
           <p>
             Many states reassess property tax based on sale price. Some counties have caps; others don&apos;t. If the seller bought 10 years ago and the property tax has been frozen, your post-sale tax bill might be 30-100% higher than the pro forma.
           </p>
@@ -166,7 +166,7 @@ export default function ProFormaPost() {
             <strong>The translation:</strong> ask your local title rep what the post-sale tax bill will be. Or check the county assessor&apos;s rules. Use the post-sale number in your underwriting.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">Lie #5: Zero capex reserve</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">Lie #5: Zero capex reserve</h2>
           <p>
             Pro formas almost never include capex reserves — the savings you set aside each month for big-ticket replacements like roof, HVAC, and water heaters. This makes NOI (and therefore cap rate) look better than it actually is.
           </p>
@@ -174,7 +174,7 @@ export default function ProFormaPost() {
             <strong>The translation:</strong> add 5-10% of gross rent as <Link href="/glossary/capex" className="text-primary font-semibold hover:underline">capex reserve</Link>. For older properties (40+ years), use 8-12%. The cap rate drops accordingly — typically by 1-2 percentage points.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">Lie #6: Maintenance at 5% (real is 8-15%)</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">Lie #6: Maintenance at 5% (real is 8-15%)</h2>
           <p>
             Maintenance differs from capex — these are the smaller, more frequent fixes (HVAC service, plumbing calls, appliance repairs, paint touch-ups, landscaping). Pro formas often show 3-5%; real numbers run 8-15% depending on age and class.
           </p>
@@ -182,7 +182,7 @@ export default function ProFormaPost() {
             <strong>The translation:</strong> 6-8% of rent for newer (post-2000) properties. 10-15% for pre-1980. Older Philadelphia rowhouses or Cleveland pre-WW2 stock can hit 15-20% in capex-heavy years.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">Lie #7: Management at $0 (because the owner self-manages)</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">Lie #7: Management at $0 (because the owner self-manages)</h2>
           <p>
             Sellers who self-manage often show $0 management on the pro forma. This makes NOI look ~10% higher than it would be for a buyer who hires a property manager.
           </p>
@@ -190,7 +190,7 @@ export default function ProFormaPost() {
             <strong>The translation:</strong> always model 8-10% <Link href="/glossary/management-fee" className="text-primary font-semibold hover:underline">management</Link>, even if you plan to self-manage. Why? Your time has cost. AND if you ever sell or hand off the property, the next owner will need PM. A deal that only works at 0% management is a fragile deal.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">Lie #8 (bonus): Legal + bad debt at $0</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">Lie #8 (bonus): Legal + bad debt at $0</h2>
           <p>
             Pro formas rarely include legal expenses (eviction processing, lease enforcement, attorney consultations) or bad debt (rent that&apos;s owed but never collected). Both are real costs.
           </p>
@@ -198,7 +198,7 @@ export default function ProFormaPost() {
             <strong>The translation:</strong> budget 1-2% of gross rent for combined legal + bad debt. Lower in landlord-friendly states (TX, FL, GA) with fast eviction processes; higher in tenant-leaning states (NY, NJ, CA, IL) where evictions take 60-180 days.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">The real-cap-rate worksheet</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">The real-cap-rate worksheet</h2>
           <p>
             Take the seller&apos;s pro forma. For each line, apply the translation above:
           </p>
@@ -219,7 +219,7 @@ export default function ProFormaPost() {
             In my experience, the realistic cap rate runs 1.5-3 percentage points BELOW the pro forma cap rate on most deals. An 8.5% pro forma cap often translates to a real 6-7% — still good in many markets, just not 8.5%.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">When to walk based on the gap</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">When to walk based on the gap</h2>
           <p>
             If the real cap is within 1 point of the pro forma cap, you&apos;re looking at an honest pro forma. Worth pursuing.
           </p>
@@ -230,7 +230,7 @@ export default function ProFormaPost() {
             If the gap is 2+ points, the seller either doesn&apos;t understand their own property or is actively misleading buyers. Walk OR negotiate hard.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">The TrueCap shortcut</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">The TrueCap shortcut</h2>
           <p>
             You don&apos;t have to do this translation by hand on every deal. <Link href="/" className="text-primary font-semibold hover:underline">TrueCap</Link> takes the listing data, applies realistic expense assumptions for your property&apos;s age and market, and shows you the real cap rate next to the pro forma cap rate in 60 seconds. The number it shows is what you&apos;d actually achieve — not what the seller wants you to believe.
           </p>

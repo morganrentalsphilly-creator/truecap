@@ -72,7 +72,7 @@ export function MarketingHero() {
         </div>
 
         {/* headline + sub */}
-        <h1 className="mx-auto max-w-3xl text-balance text-center text-3xl font-black leading-[1.05] tracking-tight text-foreground sm:text-[58px]">
+        <h1 className="mx-auto max-w-3xl text-balance text-center text-3xl font-extrabold leading-[1.05] tracking-tight text-foreground sm:text-[58px]">
           Stop losing deals to <span className="text-primary">bad math.</span>
         </h1>
         <p className="mx-auto mt-4 max-w-2xl text-balance text-center text-[15px] leading-relaxed text-muted-foreground sm:text-lg">
@@ -116,7 +116,7 @@ export function MarketingHero() {
               key={stat.label}
               className="rounded-2xl border border-border bg-card/60 p-3 text-center backdrop-blur sm:p-4"
             >
-              <div className="text-xl font-black text-foreground sm:text-2xl">{stat.value}</div>
+              <div className="text-xl font-extrabold text-foreground sm:text-2xl">{stat.value}</div>
               <div className="mt-0.5 text-[11px] font-bold uppercase tracking-widest text-muted-foreground sm:text-[11px]">
                 {stat.label}
               </div>
@@ -204,17 +204,17 @@ function HeroProductMock() {
         {/* address + verdict row */}
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-4">
           <div>
-            <div className="text-base font-black text-foreground sm:text-lg">1700 W Erie · Philadelphia</div>
+            <div className="text-base font-extrabold text-foreground sm:text-lg">1700 W Erie · Philadelphia</div>
             <div className="text-xs text-muted-foreground">Single Family · $295,000 · Built 1942</div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-full bg-[var(--brand-green)] px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-white">
+            <span className="rounded-full bg-[var(--brand-green)] px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-white">
               Strong Buy
             </span>
-            <span className="rounded-full bg-primary px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-white">
+            <span className="rounded-full bg-primary px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-white">
               Score 84
             </span>
-            <span className="rounded-full bg-[var(--brand-green)] px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-white">
+            <span className="rounded-full bg-[var(--brand-green)] px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-white">
               Low Risk
             </span>
           </div>
@@ -233,7 +233,7 @@ function HeroProductMock() {
           <div className="rounded-xl border border-border bg-background p-3">
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">10-Year cash flow</span>
-              <span className="text-xs font-black text-[var(--brand-green)]">+$14,200</span>
+              <span className="text-xs font-extrabold text-[var(--brand-green)]">+$14,200</span>
             </div>
             <svg viewBox="0 0 200 60" className="mt-2 h-12 w-full">
               <defs>
@@ -297,7 +297,7 @@ function MockTile({
       <div className={`text-[10px] font-bold uppercase tracking-widest text-muted-foreground ${small ? "" : "sm:text-[10px]"}`}>
         {label}
       </div>
-      <div className={`mt-1 font-black tabular-nums ${color} ${small ? "text-lg" : "text-lg sm:text-xl"}`}>
+      <div className={`mt-1 font-extrabold tabular-nums ${color} ${small ? "text-lg" : "text-lg sm:text-xl"}`}>
         {value}
       </div>
       {sub ? <div className="text-[10px] text-muted-foreground">{sub}</div> : null}

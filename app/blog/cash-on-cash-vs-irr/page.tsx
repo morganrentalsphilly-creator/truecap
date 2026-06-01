@@ -57,7 +57,7 @@ export default function CashOnCashVsIrrPost() {
       <article className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <div className="mb-2"><Link href="/blog" className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground">← Blog</Link></div>
         <header className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-black text-foreground leading-tight tracking-tight text-balance">{TITLE}</h1>
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight text-balance">{TITLE}</h1>
           <p className="mt-3 text-[11px] uppercase tracking-widest text-muted-foreground font-bold">
             {new Date(PUBLISHED_AT).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })} · {READING_TIME} min read
           </p>
@@ -67,7 +67,7 @@ export default function CashOnCashVsIrrPost() {
         </header>
 
         <div className="prose prose-neutral max-w-none text-foreground space-y-6 leading-relaxed">
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">Cash-on-cash: this year&apos;s return on this year&apos;s cash</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">Cash-on-cash: this year&apos;s return on this year&apos;s cash</h2>
           <p>
             <Link href="/glossary/cash-on-cash-return" className="text-primary font-semibold hover:underline">Cash-on-cash (CoC)</Link> is annual cash flow divided by total cash invested at acquisition. If you put $80k into a deal and it produces $7,200/yr of cash flow, your CoC is 9%.
           </p>
@@ -78,7 +78,7 @@ export default function CashOnCashVsIrrPost() {
             What it does NOT include: appreciation, principal paydown (you&apos;re building equity every month as the loan amortizes), tax benefits (depreciation alone often adds 3-7% to your real return), or any change in rent / expenses / value over time. It&apos;s a snapshot of year 1.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">IRR: the time-weighted truth across the whole hold</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">IRR: the time-weighted truth across the whole hold</h2>
           <p>
             <Link href="/glossary/irr" className="text-primary font-semibold hover:underline">Internal Rate of Return (IRR)</Link> is the discount rate that makes the net present value of all the deal&apos;s cash flows (initial investment, every year&apos;s operating cash flow, sale proceeds at exit) equal to zero. Said more simply: it&apos;s the time-adjusted average return you actually earned over the whole hold.
           </p>
@@ -86,7 +86,7 @@ export default function CashOnCashVsIrrPost() {
             IRR captures everything CoC misses: rent growth, expense growth, principal paydown, appreciation, the eventual sale (or refi cash-out), and the time value of money. A deal with 6% year-1 CoC that compounds rent + appreciation over 7 years can easily show a 15-20% IRR.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">When each one lies</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">When each one lies</h2>
           <p>
             <strong>CoC lies when</strong> you compare deals across different appreciation profiles. A 9% CoC in Cleveland (low appreciation) and a 6% CoC in Charlotte (high appreciation) can produce identical 10-year IRR. If you optimize only on CoC, you systematically over-invest in pure cash-flow markets and miss the deals where compounding appreciation does the heavy lifting.
           </p>
@@ -97,7 +97,7 @@ export default function CashOnCashVsIrrPost() {
             <strong>Both lie when</strong> you don&apos;t include taxes. After-tax CoC and after-tax IRR are the real numbers — the 24-32% federal bracket plus state income tax (in non-NV/TX/FL/WA/TN states) takes a meaningful bite. Depreciation pulls some of that back; the net effect is deal-specific.
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">Which metric to trust on which deal</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">Which metric to trust on which deal</h2>
           <p>
             <strong>Pure cash-flow deals</strong> (Midwest workforce neighborhoods, working-class East Coast blocks): trust CoC. Appreciation is small enough that the long-term IRR isn&apos;t materially different from the year-1 CoC compounded. If the deal cash-flows now, it cash-flows long-term.
           </p>
@@ -108,7 +108,7 @@ export default function CashOnCashVsIrrPost() {
             <strong><Link href="/glossary/brrrr" className="text-primary font-semibold hover:underline">BRRRR</Link> / value-add deals</strong>: neither metric handles BRRRR well in isolation. The whole point is capital recycled at refi — look at &quot;cash recovered as % of initial investment&quot; first, then year-1 CoC against the post-refi cash position, then long-term IRR. CoC alone misses the recycle; IRR alone smears it across the hold. (See <Link href="/blog/how-to-refinance-a-rental-property" className="text-primary font-semibold hover:underline">how to refinance a rental property</Link> for the cash-out workflow.)
           </p>
 
-          <h2 className="text-2xl font-black text-foreground mt-10 mb-3">The practical workflow</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">The practical workflow</h2>
           <p>
             On every deal: look at CoC first (is this returning enough on the cash I&apos;m putting in right now to justify the risk?). Then look at IRR (over the realistic hold period, does this compound to something I&apos;m happy with?). Then stress-test the IRR (does it still work if appreciation is 1pp lower than I assumed?).
           </p>

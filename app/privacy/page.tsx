@@ -39,12 +39,12 @@ export default function PrivacyPage() {
         >
           ← TrueCap
         </Link>
-        <h1 className="mt-2 text-3xl font-black leading-tight text-foreground sm:text-4xl">
+        <h1 className="mt-2 text-3xl font-extrabold leading-tight text-foreground sm:text-4xl">
           Privacy Policy
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">Last updated: {LAST_UPDATED}</p>
 
-        <article className="prose prose-slate mt-8 max-w-none [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-black [&_h2]:text-foreground [&_h2]:mt-8 [&_h2]:mb-2 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-5 [&_h3]:mb-2 [&_li]:text-foreground [&_li]:leading-relaxed">
+        <article className="prose prose-slate mt-8 max-w-none [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-8 [&_h2]:mb-2 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-5 [&_h3]:mb-2 [&_li]:text-foreground [&_li]:leading-relaxed">
           <p>
             TrueCap (&ldquo;TrueCap,&rdquo; &ldquo;we,&rdquo; &ldquo;us&rdquo;) operates the
             website at <strong>usetruecap.com</strong> and the related rental property analysis

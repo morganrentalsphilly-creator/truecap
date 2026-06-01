@@ -106,7 +106,7 @@ export default function DscrCalculatorPage() {
             <Link href="/tools" className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground">
               ← TrueCap free tools
             </Link>
-            <h1 className="text-3xl sm:text-4xl font-black text-foreground mt-2 leading-tight">
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight">
               DSCR Calculator
             </h1>
             <p className="text-base sm:text-lg text-muted-foreground mt-2 leading-relaxed">
@@ -118,7 +118,7 @@ export default function DscrCalculatorPage() {
 
           <DscrCalculatorWidget />
 
-          <article className="prose prose-slate max-w-none mt-10 sm:mt-12 [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-black [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground">
+          <article className="prose prose-slate max-w-none mt-10 sm:mt-12 [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground">
             <h2 className="text-2xl sm:text-3xl">What DSCR actually measures</h2>
             <p>
               DSCR answers one question lenders care about above all
