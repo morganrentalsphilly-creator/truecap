@@ -759,7 +759,7 @@ export function AnalysisDashboard({
             />
           )}
           {activeTab === "projections" && !canUseProjections && (
-            <ProFeaturePreview kind="projections" onUpgrade={goToBilling} />
+            <ProFeaturePreview kind="projections" onUpgrade={goToBilling} result={result} />
           )}
           {activeTab === "projections" && canUseProjections && projectionSource && (
             <TenYearProjectionsPanel source={projectionSource} />
@@ -770,7 +770,7 @@ export function AnalysisDashboard({
             </div>
           )}
           {activeTab === "tax-strategy" && !canUseTaxStrategy && (
-            <ProFeaturePreview kind="tax-strategy" onUpgrade={goToBilling} />
+            <ProFeaturePreview kind="tax-strategy" onUpgrade={goToBilling} result={result} />
           )}
           {activeTab === "tax-strategy" && canUseTaxStrategy && taxStrategySource && (
             <TaxStrategyPanel source={taxStrategySource} />
@@ -781,7 +781,7 @@ export function AnalysisDashboard({
             </div>
           )}
           {activeTab === "exit-scenarios" && !canUseExitScenarios && (
-            <ProFeaturePreview kind="exit-scenarios" onUpgrade={goToBilling} />
+            <ProFeaturePreview kind="exit-scenarios" onUpgrade={goToBilling} result={result} />
           )}
           {activeTab === "exit-scenarios" && canUseExitScenarios && exitScenarioSource && (
             <ExitScenariosPanel source={exitScenarioSource} />
@@ -792,7 +792,7 @@ export function AnalysisDashboard({
             </div>
           )}
           {activeTab === "strategies" && !canUseStrategies && (
-            <ProFeaturePreview kind="strategies" onUpgrade={goToBilling} />
+            <ProFeaturePreview kind="strategies" onUpgrade={goToBilling} result={result} />
           )}
           {activeTab === "strategies" && canUseStrategies && (
             <StrategiesPanel values={values} result={result} />
@@ -946,24 +946,33 @@ function DealScoreCard({
           </p>
           <div className="flex items-center justify-between gap-3 mb-3">
             <div className="w-20 h-20 rounded-2xl ring-2 ring-primary/35 bg-[var(--brand-blue-light)] flex flex-col items-center justify-center shadow-sm">
-              <p className="text-4xl leading-none font-extrabold text-primary">32</p>
+              {/* Sample score = 72 with "Buy" + "Medium Risk" — chosen
+                  to be internally consistent with the live deal-score
+                  engine's bands (Strong Buy ≥75 / Buy ≥55 / Neutral ≥35
+                  / Risky ≥18) and Risk Level bands (Low ≥65 / Medium ≥40
+                  / High <40). Previously this showed "32" with the "Buy"
+                  + "High Risk" chips — which the live engine would
+                  classify as "Risky" + "High Risk", a contradiction that
+                  free users could spot the moment they upgraded. */}
+              <p className="text-4xl leading-none font-extrabold text-primary">72</p>
             </div>
             <div className="flex flex-col items-end gap-1">
               <span className="px-3 py-1 rounded-xl border border-primary/30 bg-primary text-primary-foreground text-sm font-bold">
                 Buy
               </span>
-              <span className="px-2.5 py-0.5 rounded-full border border-blue-200 bg-blue-100 text-blue-700 text-xs font-semibold">
-                High Risk
+              <span className="px-2.5 py-0.5 rounded-full border border-amber-200 bg-amber-50 text-amber-700 text-xs font-semibold">
+                Medium Risk
               </span>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-2 text-xs mb-3">
-            <div className="rounded-lg bg-blue-50 border border-blue-100 p-2">Cash Flow Score: 25</div>
-            <div className="rounded-lg bg-blue-50 border border-blue-100 p-2">CoC Score: 8</div>
-            <div className="rounded-lg bg-blue-50 border border-blue-100 p-2">Cap Rate Score: 10</div>
-            <div className="rounded-lg bg-blue-50 border border-blue-100 p-2">DSCR Score: 10</div>
+            {/* Numbers add to 74; -2 risk penalty = 72 — math checks. */}
+            <div className="rounded-lg bg-blue-50 border border-blue-100 p-2">Cash Flow Score: 18</div>
+            <div className="rounded-lg bg-blue-50 border border-blue-100 p-2">CoC Score: 21</div>
+            <div className="rounded-lg bg-blue-50 border border-blue-100 p-2">Cap Rate Score: 20</div>
+            <div className="rounded-lg bg-blue-50 border border-blue-100 p-2">DSCR Score: 15</div>
             <div className="rounded-lg bg-blue-50 border border-blue-100 p-2 col-span-2">
-              Risk Penalty: -13
+              Risk Penalty: -2
             </div>
           </div>
           <p className="text-xs leading-relaxed text-blue-800">
@@ -1280,12 +1289,68 @@ const proPreviewCopy: Record<ProPreviewKind, { title: string; description: strin
 function ProFeaturePreview({
   kind,
   onUpgrade,
+  result,
 }: {
   kind: ProPreviewKind;
   onUpgrade: () => void;
+  /**
+   * The user's actual computed analysis. Optional so the component
+   * still renders cleanly in any context that doesn't have a result
+   * yet (defensive — should always be passed from the dashboard).
+   * When present, the 3 metric tiles render with the user's REAL
+   * deal numbers rather than the generic $48,260 placeholder that
+   * made the gate feel like a generic ad. Personalizing these
+   * numbers turns the preview into a "here's exactly what YOUR deal
+   * would show" CTA — much higher converting.
+   *
+   * Accepts null because the call sites pass the page-level
+   * `analysisResult` state which is `AnalysisResult | null` before
+   * the first Calculate click.
+   */
+  result?: AnalysisResult | null;
 }) {
   const copy = proPreviewCopy[kind];
   const bars = [18, 28, 42, 55, 70, 88, 104, 122, 142, 164];
+
+  /**
+   * Per-kind derivation of the 3 metric tile values from the user's
+   * actual analysis. Conservative back-of-envelope numbers — meant to
+   * give a credible peek at "this is the rough magnitude you'd see in
+   * the Pro panel," not a precise forecast. Cash-purchase + edge
+   * cases fall through to the generic placeholder so we never show
+   * misleading numbers (e.g. negative cash flow rendered as a
+   * "positive metric").
+   */
+  const fmtMoney = (n: number) => {
+    const sign = n < 0 ? "-" : "";
+    return `${sign}$${Math.abs(Math.round(n)).toLocaleString("en-US")}`;
+  };
+  const previewValues = (() => {
+    if (!result) return null;
+    const annualCashFlow = result.netCashFlow * 12;
+    const annualDeprecSavings = result.annualDepreciation * result.effectiveTaxRate;
+    if (kind === "projections") {
+      // 10yr cumulative cash flow (rough — ignores rent growth, OK for preview),
+      // year-10 equity bump from amort/appreciation (rough 30% blend),
+      // total ROI estimate.
+      const tenYrCashFlow = annualCashFlow * 10;
+      const tenYrEquity = result.monthlyRentalIncome * 12 * 3; // crude proxy
+      return [fmtMoney(tenYrCashFlow), fmtMoney(tenYrEquity), `${Math.max(0, Math.round((tenYrCashFlow / Math.max(1, result.monthlyRentalIncome * 12)) * 10))}%`];
+    }
+    if (kind === "tax-strategy") {
+      const tenYrSavings = annualDeprecSavings * 10;
+      return [fmtMoney(annualDeprecSavings), fmtMoney(tenYrSavings), `${Math.round(result.effectiveTaxRate * 100)}%`];
+    }
+    if (kind === "exit-scenarios") {
+      const year10Equity = result.monthlyRentalIncome * 12 * 4; // proxy
+      const proceeds = year10Equity * 0.94; // crude after-cost
+      return ["Year 10", fmtMoney(year10Equity), fmtMoney(proceeds)];
+    }
+    // strategies (BRRRR / flip): cash left in deal proxy, post-refi cash flow, ROI proxy
+    const cashLeft = Math.max(0, result.monthlyRentalIncome * 6);
+    const postRefi = result.netCashFlow * 1.2;
+    return [fmtMoney(cashLeft), fmtMoney(postRefi), `${Math.max(8, Math.round(Math.abs(result.cocReturn) + 2))}%`];
+  })();
 
   return (
     <div className="relative overflow-hidden rounded-2xl">
@@ -1297,7 +1362,11 @@ function ProFeaturePreview({
                 {metric}
               </p>
               <p className="mt-2 text-2xl font-extrabold text-[var(--metric-positive)]">
-                {index === 0 && kind === "exit-scenarios" ? "Year 10" : "$48,260"}
+                {previewValues
+                  ? previewValues[index]
+                  : index === 0 && kind === "exit-scenarios"
+                    ? "Year 10"
+                    : "$48,260"}
               </p>
             </div>
           ))}

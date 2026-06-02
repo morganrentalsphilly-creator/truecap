@@ -82,7 +82,10 @@ export function Topbar({
     if (!trimmed) return;
     setPendingSavedListSearch(trimmed);
     setSuggestions([]);
-    router.push("/saved-analyses");
+    // Route to the dashboard-shell variant so the sidebar + topbar stay
+    // mounted. The bare `/saved-analyses` route uses the marketing
+    // layout and would visually kick the user out of the dashboard.
+    router.push("/dashboard/saved-analyses");
   };
 
   return (
@@ -119,7 +122,8 @@ export function Topbar({
                 onClick={() => {
                   setPendingSavedListSearch(item.address);
                   setSuggestions([]);
-                  router.push("/saved-analyses");
+                  // Same dashboard-shell route as the form submit above.
+                  router.push("/dashboard/saved-analyses");
                 }}
               >
                 <div className="text-sm font-medium text-foreground truncate">{item.address}</div>

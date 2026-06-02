@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   PlusCircle,
@@ -17,13 +20,28 @@ type SidebarProps = {
 };
 
 export function Sidebar({ savedDealCount, navAccess, mobile = false }: SidebarProps) {
+  // Live route — drives the `active` highlight on whichever nav item
+  // matches. Previously `Dashboard` was hardcoded `active: true`, which
+  // left the sidebar lying about the current route on every other page
+  // under /dashboard/*. Using pathname matching keeps the indicator
+  // honest as the user navigates.
+  const pathname = usePathname() ?? "";
+
+  // `/dashboard` should only match the exact path so it doesn't also
+  // light up for /dashboard/saved-analyses. Sub-routes match on prefix.
+  const isActive = (href: string): boolean => {
+    if (href === "/dashboard") return pathname === "/dashboard";
+    if (href === "/") return false; // New Analysis link to "/" — never lit from inside the dashboard.
+    return pathname === href || pathname.startsWith(`${href}/`);
+  };
+
   const nav = [
-    { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard", active: true, enabled: navAccess.dashboard },
+    { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard", enabled: navAccess.dashboard },
     { icon: PlusCircle, label: "New Analysis", href: "/", enabled: true },
     { icon: Briefcase, label: "My Deals", href: "/dashboard/saved-analyses", badge: String(savedDealCount), enabled: navAccess.myDeals },
     { icon: ListTodo, label: "Compare Deals", href: "/dashboard/compare", enabled: navAccess.compareDeals },
     { icon: FileBarChart, label: "Manage Templates", href: "/dashboard/templates", enabled: navAccess.templates },
-  ];
+  ].map((item) => ({ ...item, active: isActive(item.href) }));
 
   return (
     <aside

@@ -1703,12 +1703,26 @@ export function InvestCalcPage({
         shouldTouch: false,
       });
     });
-    // Trigger the same submit path the user would hit, so analytics
-    // events fire and the dashboard renders identically to a normal run.
-    void form.handleSubmit(onSubmit, onError)();
+
+    // Show the toast right away so the user sees confirmation that
+    // the demo loaded — important because the submit fires async and
+    // we want a UI signal that *something* happened on click.
     toast({
       title: "Sample deal loaded",
       description: "Running the analysis on a real Philadelphia rental.",
+    });
+
+    // Defer the submit to the next paint frame. RHF's setValue calls
+    // above schedule re-renders asynchronously — submitting in the same
+    // tick can race the field updates and, more importantly, the user
+    // never sees the prefilled form before being teleported to results.
+    // Two requestAnimationFrames = one to flush the setValue renders,
+    // one to let the prefilled state actually paint, then submit.
+    // Net delay ~32ms, imperceptible.
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        void form.handleSubmit(onSubmit, onError)();
+      });
     });
   };
 
@@ -1795,12 +1809,19 @@ export function InvestCalcPage({
           </div>
         )}
 
-        {/* Input tabs — horizontally scrollable on mobile (any width),
-            2/4-col grid on sm/xl. Previously forced a cramped 4-col grid
-            at <=380px which packed text down to 10px and made tap-targets
-            tiny — exactly when phones can least afford it. Horizontal
-            scroll is the better mobile pattern: full-size tap-targets,
-            readable text, no layout fighting. */}
+        {/* Input tabs — only rendered AFTER the first Calculate run.
+            Previously these were always visible but disabled with a
+            tooltip ("Calculate the analysis first") — which inverted
+            the UX: new users saw a disabled tab strip above the form
+            and misread it as "I need to pick a tab to start." Hiding
+            them until results exist removes the confusion entirely;
+            once analysisResult is set, the tabs appear AND are
+            functional, exactly when the user needs them.
+
+            The tabs scroll horizontally on mobile (any width) and grid
+            on sm/xl. The 4-col mobile grid was previously too cramped
+            and would force 10px text with tiny tap targets. */}
+        {areAnalysisTabsEnabled ? (
         <div className="flex gap-1.5 sm:gap-3 mt-4 sm:mt-6 overflow-x-auto pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 xl:grid-cols-4 scrollbar-none">
           {INPUT_TABS.map((tab) => (
             <button
@@ -1850,6 +1871,7 @@ export function InvestCalcPage({
             </button>
           ))}
         </div>
+        ) : null}
       </section>
 
       {/* Form */}

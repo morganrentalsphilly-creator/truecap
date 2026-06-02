@@ -53,6 +53,25 @@ export function MultiFamilyUnitsSection({
     setValue("units", nextUnits, { shouldDirty: true, shouldValidate: true });
   };
 
+  // Inline validation derived from current form state — surfaces issues
+  // BEFORE the user hits Calculate. Two checks: (a) at least one unit
+  // exists at all (otherwise the calc has nothing to score), (b) for
+  // house-hack property type, exactly one unit must be flagged
+  // owner-occupied. Previously these failures only surfaced on submit
+  // via a toast, which felt punishing — the user had filled in
+  // everything else and only then learned the form was incomplete.
+  const ownerOccupiedCount = units.filter((u) => u?.isOwnerOccupied).length;
+  const validationMessage = (() => {
+    if (fields.length === 0) return "Add at least one unit to score this deal.";
+    if (isHouseHack && ownerOccupiedCount === 0) {
+      return "Pick exactly one unit you'll live in.";
+    }
+    if (isHouseHack && ownerOccupiedCount > 1) {
+      return "Only one unit can be marked owner-occupied.";
+    }
+    return null;
+  })();
+
   return (
     <div className="bg-[var(--brand-blue-light)] rounded-2xl border border-primary/15 shadow-sm p-4 sm:p-6">
       <div className="flex items-center justify-between mb-5">
@@ -61,6 +80,21 @@ export function MultiFamilyUnitsSection({
           <span className="font-semibold text-sm text-foreground">
             Units ({fields.length} total)
           </span>
+          {/* Inline validation badge. Shows ONLY when there's an
+              actionable issue — once the user resolves it, the badge
+              quietly disappears. Color tracks severity: amber for
+              "needs attention" (not red, since the form isn't yet
+              submitted). */}
+          {validationMessage ? (
+            <span
+              role="status"
+              aria-live="polite"
+              className="ml-1 inline-flex items-center gap-1 rounded-full bg-amber-50 border border-amber-200 px-2 py-0.5 text-[10px] font-semibold text-amber-700"
+            >
+              <span aria-hidden="true">●</span>
+              {validationMessage}
+            </span>
+          ) : null}
         </div>
         <Button
           type="button"
