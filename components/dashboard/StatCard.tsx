@@ -54,11 +54,18 @@ export function StatCard({ label, value, change, changeLabel, icon: Icon, spark,
         </div>
       </div>
       <div className="relative font-display text-3xl font-bold tracking-tight">{value}</div>
+      {/* Trend pill renders ONLY when there's an actual numeric change to
+          show. Previously we'd render "↗ -" for null changes, which read
+          as a (broken) trend indicator. The green ↑ arrow visually
+          implies "% change vs prior period" — only render it when the
+          caller has a real number that justifies that semantic. */}
       <div className="relative flex items-center gap-2 mt-2">
-        <span className={`inline-flex items-center gap-0.5 text-xs font-semibold px-1.5 py-0.5 rounded ${positive ? "text-success bg-success/10" : "text-destructive bg-destructive/10"}`}>
-          {positive ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
-          {change == null || Number.isNaN(change) ? "-" : `${Math.abs(change)}${changeSuffix}`}
-        </span>
+        {change != null && !Number.isNaN(change) ? (
+          <span className={`inline-flex items-center gap-0.5 text-xs font-semibold px-1.5 py-0.5 rounded ${positive ? "text-success bg-success/10" : "text-destructive bg-destructive/10"}`}>
+            {positive ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+            {`${Math.abs(change)}${changeSuffix}`}
+          </span>
+        ) : null}
         <span className="text-xs text-muted-foreground">{changeLabel}</span>
       </div>
       {/* Sparkline — only renders when at least 2 real data points exist.

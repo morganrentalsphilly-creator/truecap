@@ -367,10 +367,16 @@ export function DashboardHome({
               </h2>
             </div>
             <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
+              {/* Portfolio Overview row: no trend pills. The headline
+                  number IS the answer ($573K of value, +$749/mo). Stuffing
+                  deal count or annualized dollars into a green ↗ pill
+                  reads as "+2% / +8988%" — a fake trend indicator over
+                  a baseline we don't actually have. Subline carries the
+                  context instead. */}
               <StatCard
                 label="Pipeline Value"
                 value={formatCurrency(portfolio.totalValue, true)}
-                change={portfolio.activeCount}
+                change={null}
                 changeLabel={`across ${portfolio.activeCount} ${portfolio.activeCount === 1 ? "deal" : "deals"}`}
                 icon={Briefcase}
                 spark={[]}
@@ -380,8 +386,8 @@ export function DashboardHome({
               <StatCard
                 label="Monthly Cash Flow"
                 value={formatSignedCurrency(portfolio.totalCashFlow)}
-                change={Math.round(portfolio.totalCashFlow * 12)}
-                changeLabel="annualized"
+                change={null}
+                changeLabel={`~${formatCurrency(portfolio.totalCashFlow * 12)} annualized`}
                 icon={DollarSign}
                 spark={[]}
                 tone="success"
@@ -432,10 +438,15 @@ export function DashboardHome({
                 changeSuffix=""
                 onClick={() => scrollToDeal(highlights.byScore)}
               />
+              {/* Highest Cash Flow / Highest ROI: pill suppressed. The
+                  headline number IS the metric being highlighted — the
+                  deal's score in the pill was duplicated info from the
+                  Best Score card and just added visual noise. Address in
+                  the subline below already identifies which deal won. */}
               <StatCard
                 label="Highest Cash Flow"
                 value={formatSignedCurrency(highlights.byCashFlow?.cashFlowMonthly)}
-                change={highlights.byCashFlow?.score == null ? null : Math.round(highlights.byCashFlow.score)}
+                change={null}
                 changeLabel={highlights.byCashFlow?.address ?? "-"}
                 icon={DollarSign}
                 spark={realCashSpark}
@@ -444,11 +455,18 @@ export function DashboardHome({
                 changeSuffix=""
                 onClick={() => scrollToDeal(highlights.byCashFlow)}
               />
+              {/* Relabeled from "Highest ROI" → "Highest 10-yr ROI"
+                  because the value comes from
+                  exitScenarios.summary.totalROI — cumulative return at
+                  exit (cash flow + appreciation + equity build over the
+                  hold period). Without the time-frame in the label, a
+                  number like 992.6% reads as nonsense next to the 8.78%
+                  annual cap rate on the row above. */}
               <StatCard
-                label="Highest ROI"
+                label="Highest 10-yr ROI"
                 value={formatPercent(highlights.byRoi?.roiPct)}
-                change={highlights.byRoi?.score == null ? null : Math.round(highlights.byRoi.score)}
-                changeLabel={highlights.byRoi?.address ?? "-"}
+                change={null}
+                changeLabel={`${highlights.byRoi?.address ?? "-"} (at exit)`}
                 icon={TrendingUp}
                 spark={realRoiSpark}
                 tone="violet"
