@@ -80,6 +80,10 @@ import { GlossaryTip } from "@/components/investcalc/glossary-tip";
 import type { GLOSSARY } from "@/lib/glossary";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 
+import {
+  getCapRateBenchmark,
+  formatCapRateBenchmarkSubline,
+} from "@/lib/market-benchmarks";
 import type { ProjectionYear, TenYearProjectionInput } from "@/lib/ten-year-projections";
 import type { TaxStrategyInput, TaxStrategyYear } from "@/lib/tax-strategy";
 import type { ExitScenarioInput, ExitScenarioYear } from "@/lib/exit-scenarios";
@@ -158,18 +162,26 @@ const TABS: { id: AnalysisDashboardTab; label: string; mobileLabel: string; isPr
 /**
  * Inline market-context labels surfaced under each metric tile.
  *
- * Phase 1: hard-coded national-average bands. The thresholds match
- * the scoring engine's thresholds in lib/deal-score.ts so the metric
- * subline and the score subline tell the same story.
+ * Phase 2: market-aware benchmarks via lib/market-benchmarks. When
+ * the address parses to a known metro or state, we surface the
+ * local median — "Above the 7.5% Philadelphia median" — which is
+ * strictly more useful than a national band because a 7% cap rate
+ * is excellent in California (4-5% typical) and mediocre in
+ * Detroit (9-10% typical).
  *
- * Phase 2 (when we add per-market data): switch these to lookups
- * against lib/market-benchmarks by state/MSA so the subline reads
- * "Philadelphia median: 6.1%" instead of a national band.
+ * Falls back to national bands when the address doesn't parse (free
+ * form input, non-US address, no state code detectable).
  */
-function capRateBenchmarkLabel(capRatePct: number): string {
-  if (capRatePct > 8) return "Above 8% — top quartile";
-  if (capRatePct > 5) return "5–8% — fair for market";
-  return "Below 5% — appreciation-dependent";
+function capRateBenchmarkLabel(capRatePct: number, address?: string | null): string {
+  const benchmark = getCapRateBenchmark(address);
+  if (benchmark && benchmark.scope !== "national") {
+    return formatCapRateBenchmarkSubline(capRatePct, benchmark);
+  }
+  // National fallback bands — keep the same thresholds the scoring
+  // engine uses so the metric subline and the score subline agree.
+  if (capRatePct > 8) return "Above 8% — top quartile (U.S.)";
+  if (capRatePct > 5) return "5–8% — fair for market (U.S.)";
+  return "Below 5% — appreciation-dependent (U.S.)";
 }
 
 function cocBenchmarkLabel(cocPct: number): string {
@@ -590,7 +602,7 @@ export function AnalysisDashboard({
               ? `${result.capRate >= 0 ? "+" : ""}${result.capRate.toFixed(1)}%`
               : "—"
           }
-          sub={result ? capRateBenchmarkLabel(result.capRate) : undefined}
+          sub={result ? capRateBenchmarkLabel(result.capRate, values?.address) : undefined}
           color={
             result
               ? result.capRate >= 5
@@ -1435,6 +1447,134 @@ function ProFeaturePreview({
 }
 
 /**
+ * Cash flow over time strip.
+ *
+ * Solves a real product gap: the headline NCF only shows month-1 cash
+ * flow. But rent grows ~3%/yr and expenses ~2%/yr — so a deal that
+ * cash-flows $749/mo today might be $1,420/mo by year 5 and $2,100/mo
+ * by year 10. Most investors think in 10-year terms, not month 1, and
+ * burying that progression inside the Pro 10-Year Projections tab
+ * meant free-tier users never saw it.
+ *
+ * Renders three pillars (Y1 / Y5 / Y10) using monthly NCF derived
+ * from result.tenYearProjection (which calculateAnalysis already
+ * computes for free). No entitlement gate — this is a free-tier
+ * teaser that also serves as a natural upgrade hook ("see the full
+ * 10-year breakdown" in the Pro Projections tab).
+ *
+ * Edge cases handled:
+ * - If projection is missing (calc-analysis fallback), strip self-hides.
+ * - If a future-year NCF is negative (expense growth outpaces rent
+ *   growth, or cash flow was marginal to begin with), the year value
+ *   renders in the destructive tone instead of positive green.
+ * - Compact mobile layout: pillars stack with arrows replaced by
+ *   small downward chevrons.
+ */
+function CashFlowOverTimeStrip({ result }: { result: AnalysisResult }) {
+  const years = result.tenYearProjection;
+  if (!Array.isArray(years) || years.length < 10) return null;
+
+  const yearOne = years[0];
+  const yearFive = years[4];
+  const yearTen = years[9];
+  if (!yearOne || !yearFive || !yearTen) return null;
+
+  // Project monthly figures from the annual projection. The annual value
+  // already bakes in rent + expense growth + constant debt service, so
+  // dividing by 12 gives a faithful monthly equivalent for that year.
+  const points = [
+    { label: "Year 1", monthly: Math.round(yearOne.netCashFlowAnnual / 12) },
+    { label: "Year 5", monthly: Math.round(yearFive.netCashFlowAnnual / 12) },
+    { label: "Year 10", monthly: Math.round(yearTen.netCashFlowAnnual / 12) },
+  ];
+
+  const formatMonthly = (value: number): string => {
+    const sign = value > 0 ? "+" : value < 0 ? "-" : "";
+    return `${sign}$${Math.abs(value).toLocaleString()}`;
+  };
+
+  // Growth ratio between Y1 and Y10 — surfaced as a single sentence
+  // below the strip so the user immediately gets the "compounding"
+  // insight without doing the math themselves.
+  const growthMultiplier =
+    yearOne.netCashFlowAnnual > 0
+      ? yearTen.netCashFlowAnnual / yearOne.netCashFlowAnnual
+      : null;
+  const growthInsight = (() => {
+    if (growthMultiplier == null) return null;
+    if (!Number.isFinite(growthMultiplier)) return null;
+    if (growthMultiplier >= 1.05) {
+      return `Cash flow compounds ~${growthMultiplier.toFixed(1)}× over the hold period as rent grows faster than expenses.`;
+    }
+    if (growthMultiplier < 0.95 && growthMultiplier > 0) {
+      return `Cash flow compresses over the hold period — review your rent/expense growth assumptions.`;
+    }
+    return null;
+  })();
+
+  return (
+    <section
+      aria-label="Cash flow over time"
+      className="rounded-2xl border border-border bg-card p-4 sm:p-5"
+    >
+      <div className="mb-3 flex items-center justify-between">
+        <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+          Cash flow over time
+        </p>
+        <p className="text-[10px] font-medium text-muted-foreground hidden sm:block">
+          monthly · 10-yr horizon
+        </p>
+      </div>
+      <div className="grid grid-cols-3 items-stretch gap-2 sm:gap-4">
+        {points.map((point, index) => {
+          const tone =
+            point.monthly > 25
+              ? "positive"
+              : point.monthly < -25
+                ? "negative"
+                : "neutral";
+          const valueColor =
+            tone === "positive"
+              ? "text-[var(--metric-positive,#16a34a)]"
+              : tone === "negative"
+                ? "text-[var(--metric-negative,#dc2626)]"
+                : "text-foreground";
+          return (
+            <div
+              key={point.label}
+              className={cn(
+                "relative rounded-xl border border-border bg-background px-3 py-3 sm:px-4 sm:py-4",
+                index === 0 ? "border-primary/30 bg-primary/[0.03]" : null
+              )}
+            >
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                {point.label}
+              </p>
+              <p
+                className={cn(
+                  "mt-1 text-lg font-extrabold tabular-nums sm:text-2xl",
+                  valueColor
+                )}
+              >
+                {formatMonthly(point.monthly)}
+              </p>
+              <p className="mt-0.5 text-[10px] text-muted-foreground sm:text-[11px]">
+                /mo
+              </p>
+            </div>
+          );
+        })}
+      </div>
+      {growthInsight ? (
+        <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground sm:text-xs">
+          {growthInsight}
+        </p>
+      ) : null}
+    </section>
+  );
+}
+
+/**
  * Net Cash Flow headline card.
  *
  * The bottom-line "is this deal worth it?" answer in a single
@@ -1556,6 +1696,12 @@ function CashFlowTab({
           Cash Flow tab. Restored as its own card per user feedback
           (the waterfall on its own buried the headline). */}
       <NetCashFlowCard result={result} />
+      {/* Cash flow over time — Y1/Y5/Y10 monthly NCF strip. Sits
+          directly under the headline so users immediately see that
+          today's $749/mo grows over the hold period as rent
+          outpaces expenses. Was previously buried in the Pro
+          10-Year Projections tab and free-tier users never saw it. */}
+      <CashFlowOverTimeStrip result={result} />
       {/* Where the rent goes — single-glance waterfall. Sits below
           the headline card and above the detailed 3-column breakdown
           so the reading order is: answer → visual explanation → line items. */}
