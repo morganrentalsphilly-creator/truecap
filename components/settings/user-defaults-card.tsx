@@ -60,21 +60,33 @@ export function UserDefaultsCard() {
 
   useEffect(() => {
     let cancelled = false;
-    void getUserAnalysisDefaultsAction().then((result) => {
-      if (cancelled) return;
-      if (result.ok) {
-        const stringified: Partial<Record<keyof UserAnalysisDefaults, string>> = {};
-        for (const [k, v] of Object.entries(result.preferences)) {
-          if (typeof v === "number" && Number.isFinite(v)) {
-            stringified[k as keyof UserAnalysisDefaults] = String(v);
+    // .catch shields the unhandled promise rejection that would
+    // otherwise leak to Sentry as "Non-Error promise rejection captured"
+    // noise if the action throws (transient Supabase outage, network
+    // blip, server crash). Settings load failing is non-critical — we
+    // just leave the card in its loading state.
+    void getUserAnalysisDefaultsAction()
+      .then((result) => {
+        if (cancelled) return;
+        if (result.ok) {
+          const stringified: Partial<Record<keyof UserAnalysisDefaults, string>> = {};
+          for (const [k, v] of Object.entries(result.preferences)) {
+            if (typeof v === "number" && Number.isFinite(v)) {
+              stringified[k as keyof UserAnalysisDefaults] = String(v);
+            }
           }
+          setValues(stringified);
+        } else if (result.code === "MIGRATION_PENDING") {
+          setMigrationPending(true);
         }
-        setValues(stringified);
-      } else if (result.code === "MIGRATION_PENDING") {
-        setMigrationPending(true);
-      }
-      setLoaded(true);
-    });
+        setLoaded(true);
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          console.warn("[user-defaults] load failed:", err);
+          setLoaded(true);
+        }
+      });
     return () => {
       cancelled = true;
     };

@@ -505,6 +505,15 @@ export function InvestCalcPage({
         isCashPurchase: result.monthlyPayment <= 0,
       });
       setDealScoreResult(dealScore);
+    } catch (err) {
+      // Swallow + log instead of throwing — there are 4+ call sites,
+      // two of which are fire-and-forget (`void loadDealScore(...)`).
+      // Without this, a transient server error becomes an unhandled
+      // promise rejection in Sentry with no useful context. Failing
+      // the score load silently is the right user-visible behavior:
+      // the deal still computes, the score card just stays empty.
+      console.warn("[deal-score] load failed:", err);
+      setDealScoreResult(null);
     } finally {
       setIsLoadingDealScore(false);
     }

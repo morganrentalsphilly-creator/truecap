@@ -149,7 +149,18 @@ export function TemplateSelectorSection({
       setIsLoadingTemplates(false);
     };
 
-    void load();
+    // .catch shields the outer effect from unhandled rejections if
+    // either of the inner `await` calls throws (network blip, server
+    // crash, transient outage). Without this, a throw becomes a
+    // "Non-Error promise rejection captured" Sentry alert with no
+    // useful context. Leaving templates empty + clearing the loading
+    // state is the user-visible fallback.
+    void load().catch((err) => {
+      if (cancelled) return;
+      console.warn("[templates] load failed:", err);
+      setTemplates([]);
+      setIsLoadingTemplates(false);
+    });
     return () => {
       cancelled = true;
     };
