@@ -552,14 +552,25 @@ function pageInputs(doc: jsPDF, d: ReportData) {
   // tall so the richer auto-generated verdict paragraph (5-6 sentences)
   // fits without being truncated. Tighter line height (11pt) keeps it
   // readable without ballooning the section.
+  //
+  // The left stripe + the "AI RECOMMENDATION" kicker text both pick up
+  // the verdict tier color (green for Strong Buy / Buy, orange for
+  // Neutral / Risky, red for Avoid) so they match the headline text.
+  // Previously both were hardcoded to COLOR.success, which made a
+  // "Neutral — Medium Risk" deal show a green stripe + green kicker
+  // alongside orange headline text — a confusing color contradiction.
+  const tierColor = getRecommendationRiskTextColor(
+    d.performance.recommendation,
+    d.performance.risk
+  );
   card(doc, M.left, y, SAFE.w, 130);
-  setFill(doc, COLOR.success);
+  setFill(doc, tierColor);
   doc.roundedRect(M.left, y, 4, 130, 2, 2, "F");
-  setText(doc, COLOR.success);
+  setText(doc, tierColor);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8);
   doc.text("AI RECOMMENDATION", M.left + 16, y + 16);
-  setText(doc, getRecommendationRiskTextColor(d.performance.recommendation, d.performance.risk));
+  setText(doc, tierColor);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(13);
   doc.text(`${d.performance.recommendation} — ${d.performance.risk}`, M.left + 16, y + 34);
