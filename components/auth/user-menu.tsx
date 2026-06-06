@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Crown, LayoutDashboard, Loader2, LogOut, UserCircle } from "lucide-react";
+import { Crown, LayoutDashboard, Loader2, LogOut, Settings, UserCircle } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -116,6 +116,13 @@ export function UserMenu({
           <Link href="/profile" prefetch={false} className="cursor-pointer">
             <UserCircle className="w-4 h-4" />
             Profile
+          </Link>
+        </DropdownMenuItem>
+
+        <DropdownMenuItem asChild>
+          <Link href="/settings" prefetch={false} className="cursor-pointer">
+            <Settings className="w-4 h-4" />
+            Settings
           </Link>
         </DropdownMenuItem>
 

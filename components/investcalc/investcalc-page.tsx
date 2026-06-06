@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FieldErrors, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -1560,9 +1561,27 @@ export function InvestCalcPage({
         purchase_price: values.purchasePrice,
         has_deal_score: Boolean(dealScoreResult?.ok && dealScoreResult.tier === "pro"),
       });
+      // If the user hasn't configured branding yet, the toast nudges
+      // them to do so. The link routes to /settings/branding, which
+      // gates by entitlement: Pro users see the form, free users see
+      // the upsell. So this nudge serves both as a discovery hint for
+      // Pro users and a soft conversion prompt for free users.
+      const brandingHint = !brandingConfig ? (
+        <Link
+          href="/settings/branding"
+          className="mt-1 inline-block text-xs font-semibold underline-offset-2 hover:underline"
+        >
+          Customize how your PDFs look →
+        </Link>
+      ) : null;
       toast({
         title: "PDF generated",
-        description: "Your report was exported from the latest live analysis data.",
+        description: (
+          <span>
+            Your report was exported from the latest live analysis data.
+            {brandingHint}
+          </span>
+        ),
         variant: "success",
       });
     } catch (err) {
