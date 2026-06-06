@@ -22,6 +22,7 @@
 import { useEffect, useRef, useState } from "react";
 import { CheckCircle2, X } from "lucide-react";
 import { capturePostAnalysisEmail } from "@/app/actions/post-analysis-email-capture";
+import { trackEvent } from "@/lib/analytics";
 
 const DISMISSED_KEY = "truecap_post_analysis_email_dismissed_v1";
 const CAPTURED_KEY = "truecap_post_analysis_email_captured_v1";
@@ -54,14 +55,23 @@ export function PostAnalysisEmailPrompt({ hasCompletedAnalysis, propertyAddress 
     } catch {
       return;
     }
-    timerRef.current = window.setTimeout(() => setOpen(true), DELAY_MS);
+    timerRef.current = window.setTimeout(() => {
+      setOpen(true);
+      // Track exposure — the funnel needs to know how many anonymous
+      // users actually SAW the prompt (not just how many submitted).
+      // Submission rate = submits / shown is the meaningful metric.
+      trackEvent("email_capture_shown", {
+        address_present: Boolean(propertyAddress?.trim()),
+      });
+    }, DELAY_MS);
     return () => {
       if (timerRef.current != null) window.clearTimeout(timerRef.current);
     };
-  }, [hasCompletedAnalysis]);
+  }, [hasCompletedAnalysis, propertyAddress]);
 
   const dismiss = () => {
     setOpen(false);
+    trackEvent("email_capture_dismissed");
     try {
       window.localStorage.setItem(DISMISSED_KEY, "1");
     } catch {
@@ -80,6 +90,10 @@ export function PostAnalysisEmailPrompt({ hasCompletedAnalysis, propertyAddress 
     });
     if (result.ok) {
       setStatus("success");
+      trackEvent("email_capture_submitted", {
+        address_present: Boolean(propertyAddress?.trim()),
+        scheduled_count: result.scheduledCount,
+      });
       try {
         window.localStorage.setItem(CAPTURED_KEY, "1");
       } catch {

@@ -39,6 +39,16 @@ export type FunnelEvent =
   | "deal_saved"        // properties: property_type, purchase_price, cap_rate, monthly_cash_flow
   | "pdf_exported"      // properties: property_type, purchase_price, has_deal_score
   | "share_link_copied" // properties: has_address
+  // ── Conversion-improvement events ──────────────────────────────
+  // Fired by the 5 free-tier conversion improvements shipped after
+  // the math audit. Each gives the funnel one more measurable step
+  // so we can spot which improvement is actually moving the needle.
+  | "email_capture_shown"     // properties: address_present
+  | "email_capture_submitted" // properties: address_present, scheduled_count
+  | "email_capture_dismissed"
+  | "exit_intent_shown"
+  | "exit_intent_clicked"     // properties: variant (always "50_off_annual" for now)
+  | "exit_intent_dismissed"
 
 /**
  * Safe capture. Use this everywhere instead of `posthog.capture(...)`

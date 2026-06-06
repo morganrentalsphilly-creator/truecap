@@ -24,6 +24,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { X } from "lucide-react";
+import { trackEvent } from "@/lib/analytics";
 
 const SESSION_KEY = "truecap_exit_intent_shown_v1";
 const MOBILE_DELAY_MS = 22_000;
@@ -48,6 +49,9 @@ export function ExitIntentOffer() {
       if (!armedRef.current) return;
       armedRef.current = false;
       setOpen(true);
+      // Track exposure — funnel needs to know how many pricing visitors
+      // were actually shown the offer so we can compute click rate.
+      trackEvent("exit_intent_shown");
       try {
         window.sessionStorage.setItem(SESSION_KEY, "1");
       } catch {
@@ -101,7 +105,10 @@ export function ExitIntentOffer() {
         <button
           type="button"
           aria-label="Close"
-          onClick={() => setOpen(false)}
+          onClick={() => {
+            trackEvent("exit_intent_dismissed");
+            setOpen(false);
+          }}
           className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-foreground"
         >
           <X className="h-4 w-4" />
@@ -123,14 +130,20 @@ export function ExitIntentOffer() {
         <div className="mt-5 flex flex-col gap-2.5 sm:flex-row">
           <Link
             href="/pricing#plans?coupon=EXIT50"
-            onClick={() => setOpen(false)}
+            onClick={() => {
+              trackEvent("exit_intent_clicked", { variant: "50_off_annual" });
+              setOpen(false);
+            }}
             className="inline-flex flex-1 items-center justify-center rounded-xl bg-primary px-4 py-3 text-sm font-bold text-primary-foreground shadow-sm transition hover:bg-primary/90"
           >
             Claim 50% off
           </Link>
           <button
             type="button"
-            onClick={() => setOpen(false)}
+            onClick={() => {
+              trackEvent("exit_intent_dismissed");
+              setOpen(false);
+            }}
             className="inline-flex flex-1 items-center justify-center rounded-xl border border-border bg-card px-4 py-3 text-sm font-semibold text-muted-foreground transition hover:text-foreground"
           >
             No thanks
