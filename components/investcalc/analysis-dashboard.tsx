@@ -721,7 +721,7 @@ export function AnalysisDashboard({
                 <>
                   <span
                     className={cn(
-                      "text-base sm:text-lg font-bold tabular-nums",
+                      "text-sm sm:text-base font-bold tabular-nums",
                       result
                         ? result.annualCashFlow >= 0
                           ? "text-[var(--metric-positive)]"
@@ -733,7 +733,7 @@ export function AnalysisDashboard({
                       ? `${result.annualCashFlow >= 0 ? "" : "-"}${fmt(result.annualCashFlow)}`
                       : "—"}
                   </span>
-                  <span className="text-[11px] text-muted-foreground">/yr</span>
+                  <span className="text-[10px] sm:text-[11px] text-muted-foreground">/yr</span>
                 </>
               )}
             </div>
@@ -749,10 +749,10 @@ export function AnalysisDashboard({
                 <Skeleton className="h-5 w-16" />
               ) : (
                 <>
-                  <span className="text-base sm:text-lg font-bold text-primary">
+                  <span className="text-sm sm:text-base font-bold text-primary">
                     {result ? fmt(result.afterTaxCF) : "—"}
                   </span>
-                  <span className="text-[11px] text-muted-foreground">/mo</span>
+                  <span className="text-[10px] sm:text-[11px] text-muted-foreground">/mo</span>
                 </>
               )}
             </div>
@@ -768,10 +768,10 @@ export function AnalysisDashboard({
                 <Skeleton className="h-5 w-16" />
               ) : (
                 <>
-                  <span className="text-base sm:text-lg font-bold text-primary">
+                  <span className="text-sm sm:text-base font-bold text-primary">
                     {result ? fmt(result.taxSavingsMonthly) : "—"}
                   </span>
-                  <span className="text-[11px] text-muted-foreground">/mo</span>
+                  <span className="text-[10px] sm:text-[11px] text-muted-foreground">/mo</span>
                 </>
               )}
             </div>
