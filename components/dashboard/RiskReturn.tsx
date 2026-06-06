@@ -77,8 +77,12 @@ export function RiskReturn({ data = [] }: { data?: RiskReturnPoint[] }) {
             <CartesianGrid strokeDasharray="3 6" stroke="oklch(0.92 0.012 255)" />
             <XAxis type="number" dataKey="return" name="Return" stroke="oklch(0.52 0.03 256)" fontSize={12} tickLine={false} axisLine={false}
               label={{ value: "Return →", position: "insideBottom", offset: -2, fontSize: 11, fill: "oklch(0.52 0.03 256)" }} />
-            <YAxis type="number" dataKey="risk" name="Risk" stroke="oklch(0.52 0.03 256)" fontSize={12} tickLine={false} axisLine={false}
-              label={{ value: "Risk / DSCR ↑", angle: -90, position: "insideLeft", fontSize: 11, fill: "oklch(0.52 0.03 256)" }} />
+            {/* DSCR is the y-axis data, and higher DSCR means SAFER —
+                not riskier. The old label ("Risk / DSCR ↑") had the
+                arrow pointing the wrong way for what the data means.
+                Relabeled to read: higher = safer. */}
+            <YAxis type="number" dataKey="risk" name="DSCR (safer ↑)" stroke="oklch(0.52 0.03 256)" fontSize={12} tickLine={false} axisLine={false}
+              label={{ value: "DSCR (safer ↑)", angle: -90, position: "insideLeft", fontSize: 11, fill: "oklch(0.52 0.03 256)" }} />
             <ZAxis type="number" dataKey="size" range={[80, 400]} />
             <ReferenceLine x={10} stroke="oklch(0.92 0.012 255)" strokeDasharray="3 3" />
             <ReferenceLine y={1} stroke="oklch(0.92 0.012 255)" strokeDasharray="3 3" />

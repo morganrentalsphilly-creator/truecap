@@ -119,6 +119,12 @@ export function AddressAutocomplete({
   const [open, setOpen] = useState(false);
   const [highlight, setHighlight] = useState(0);
   const [scriptReady, setScriptReady] = useState(false);
+  // Search progress signal — drives the "Searching…" indicator. Without
+  // it, slow networks or blocked Google Places (ad blockers, restricted
+  // regions, API key issues) make the dropdown appear "broken" — the
+  // user types but nothing happens. Surfacing the search state makes
+  // the silence visible.
+  const [isSearching, setIsSearching] = useState(false);
 
   // react-hook-form binding
   const { ref: rhfRef, onChange: rhfOnChange, ...registerRest } = form.register("address");
@@ -177,6 +183,10 @@ export function AddressAutocomplete({
     if (!scriptReady) return;
     const api = window.google?.maps?.places?.AutocompleteSuggestion;
     if (!api) return;
+    setIsSearching(true);
+    // Show the "Searching…" hint immediately so the user knows the
+    // request is in flight, even before any predictions come back.
+    setOpen(true);
     try {
       const { suggestions } = await api.fetchAutocompleteSuggestions({
         input,
@@ -192,6 +202,8 @@ export function AddressAutocomplete({
       setHighlight(0);
     } catch (err) {
       console.warn("[AddressAutocomplete] fetchAutocompleteSuggestions failed:", err);
+    } finally {
+      setIsSearching(false);
     }
   };
 
@@ -322,6 +334,20 @@ export function AddressAutocomplete({
           hasError && "border-destructive focus-visible:ring-destructive"
         )}
       />
+      {/* In-flight indicator — shows BEFORE predictions land. Without
+          this, slow networks or blocked Google Places make the dropdown
+          stay closed silently and the user thinks autocomplete is
+          broken. Surfacing the "Searching…" line makes the request
+          visible. Self-hides as soon as predictions arrive or fail. */}
+      {open && isSearching && predictions.length === 0 ? (
+        <div
+          role="status"
+          aria-live="polite"
+          className="absolute left-0 right-0 top-full z-50 mt-1 overflow-hidden rounded-md border border-border bg-popover px-3 py-2 text-xs text-muted-foreground shadow-md"
+        >
+          Searching addresses…
+        </div>
+      ) : null}
       {open && predictions.length > 0 && (
         <div className="absolute left-0 right-0 top-full z-50 mt-1 overflow-hidden rounded-md border border-border bg-popover text-popover-foreground shadow-md">
           <ul role="listbox" aria-label="Address suggestions">
