@@ -9,16 +9,14 @@ export default defineConfig({
   },
   test: {
     environment: "node",
-    // Run each test file in its own forked process. Without this,
-    // long-lived handles (Supabase auth's session-refresh interval,
-    // any global timer set up at import time) keep the parent vitest
-    // process alive after `Tests closed successfully` and trip the
-    // 10s teardown timeout. Forking guarantees a clean exit per file.
+    // Run all test files in a single forked subprocess. The fork
+    // dies cleanly when tests finish, even if any module has a
+    // long-lived handle (e.g. Supabase auth's session-refresh
+    // interval). Vitest 4 promoted `forks` to a top-level option
+    // — the old `poolOptions.forks` was removed in v4.
     pool: "forks",
-    poolOptions: {
-      forks: {
-        singleFork: true,
-      },
+    forks: {
+      singleFork: true,
     },
   },
 });
