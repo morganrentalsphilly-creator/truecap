@@ -148,7 +148,13 @@ interface AnalysisDashboardProps {
   persistedActionsBlockHint?: string;
 }
 
-export type AnalysisDashboardTab = "cash-flow" | "projections" | "tax-strategy" | "exit-scenarios" | "strategies";
+export type AnalysisDashboardTab =
+  | "cash-flow"
+  | "projections"
+  | "tax-strategy"
+  | "exit-scenarios"
+  | "strategies"
+  | "stress-test";
 type RecommendationVariant = "strong-buy" | "buy" | "neutral" | "risky" | "avoid";
 
 const TABS: { id: AnalysisDashboardTab; label: string; mobileLabel: string; isPro: boolean }[] = [
@@ -157,6 +163,11 @@ const TABS: { id: AnalysisDashboardTab; label: string; mobileLabel: string; isPr
   { id: "tax-strategy", label: "Tax Strategy", mobileLabel: "Tax", isPro: true },
   { id: "exit-scenarios", label: "Exit Scenarios", mobileLabel: "Exit", isPro: true },
   { id: "strategies", label: "Strategies", mobileLabel: "Strategy", isPro: true },
+  // Stress Test consolidates Max Allowable Offer + Sensitivity Grid —
+  // both Pro features that previously rendered as always-visible cards
+  // between the metrics row and the tab bar. Moving them into a tab
+  // keeps the headline scroll calmer without losing the features.
+  { id: "stress-test", label: "Stress Test", mobileLabel: "Stress", isPro: true },
 ];
 
 /**
@@ -302,6 +313,11 @@ export function AnalysisDashboard({
     // Pro feature — gated by canUseStrategies. Free users see the tab
     // with a lock icon and the ProFeaturePreview placeholder on click.
     strategies: canUseStrategies,
+    // Stress Test tab houses Max Allowable Offer + Sensitivity Grid.
+    // It unlocks if EITHER underlying entitlement is granted, since the
+    // tab itself shows both cards (with a per-card Pro gate if only one
+    // is unlocked).
+    "stress-test": canUseMaxOffer || canUseSensitivity,
   };
   const isEditingLockedByPlan = isAuthenticated && isExistingSavedDeal && !canUpdateSavedDeals;
   const isSaveLimitLockedByPlan = isAuthenticated && !isExistingSavedDeal && saveDealLimitReached;
@@ -576,95 +592,136 @@ export function AnalysisDashboard({
         <DealNotesPanel savedDealId={savedDealId} />
       ) : null}
 
-      {/* Metric cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-2 sm:gap-3">
-        <MetricCard
-          label="Monthly Cash Flow"
-          glossaryTerm="cashFlow"
-          value={result ? (result.netCashFlow >= 0 ? fmt(result.netCashFlow) : `-${fmt(result.netCashFlow)}`) : "—"}
-          sub={result ? cashFlowBenchmarkLabel(result.netCashFlow) : undefined}
-          color={result ? (result.netCashFlow >= 0 ? "text-[var(--metric-positive)]" : "text-[var(--metric-negative)]") : undefined}
-          isLoading={isLoading}
-        />
-        <MetricCard
-          label="CoC Return"
-          glossaryTerm="coc"
-          value={result ? `${result.cocReturn >= 0 ? "+" : ""}${result.cocReturn.toFixed(1)}%` : "—"}
-          sub={result ? cocBenchmarkLabel(result.cocReturn) : undefined}
-          color={result ? (result.cocReturn >= 0 ? "text-[var(--metric-positive)]" : "text-[var(--metric-negative)]") : undefined}
-          isLoading={isLoading}
-        />
-        <MetricCard
-          label="Cap Rate"
-          glossaryTerm="capRate"
-          value={
-            result
-              ? `${result.capRate >= 0 ? "+" : ""}${result.capRate.toFixed(1)}%`
-              : "—"
-          }
-          sub={result ? capRateBenchmarkLabel(result.capRate, values?.address) : undefined}
-          color={
-            result
-              ? result.capRate >= 5
-                ? "text-[var(--metric-positive)]"
-                : result.capRate >= 0
-                  ? "text-foreground"
+      {/* Metric cards — split into two tiers for visual hierarchy.
+          Tier 1 (4 prominent cards): Cash Flow, CoC, Cap Rate, DSCR —
+            the "is this a good deal?" answer at a glance.
+          Tier 2 (2 smaller chips): Tax Savings, After-Tax CF — still
+            visible, but visually demoted because tax math is downstream
+            of the core deal economics. */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-2 px-1">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+            Overview
+          </span>
+          <span className="h-px flex-1 bg-border" />
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-4 gap-2 sm:gap-3">
+          <MetricCard
+            label="Monthly Cash Flow"
+            glossaryTerm="cashFlow"
+            value={result ? (result.netCashFlow >= 0 ? fmt(result.netCashFlow) : `-${fmt(result.netCashFlow)}`) : "—"}
+            sub={result ? cashFlowBenchmarkLabel(result.netCashFlow) : undefined}
+            color={result ? (result.netCashFlow >= 0 ? "text-[var(--metric-positive)]" : "text-[var(--metric-negative)]") : undefined}
+            isLoading={isLoading}
+          />
+          <MetricCard
+            label="CoC Return"
+            glossaryTerm="coc"
+            value={result ? `${result.cocReturn >= 0 ? "+" : ""}${result.cocReturn.toFixed(1)}%` : "—"}
+            sub={result ? cocBenchmarkLabel(result.cocReturn) : undefined}
+            color={result ? (result.cocReturn >= 0 ? "text-[var(--metric-positive)]" : "text-[var(--metric-negative)]") : undefined}
+            isLoading={isLoading}
+          />
+          <MetricCard
+            label="Cap Rate"
+            glossaryTerm="capRate"
+            value={
+              result
+                ? `${result.capRate >= 0 ? "+" : ""}${result.capRate.toFixed(1)}%`
+                : "—"
+            }
+            sub={result ? capRateBenchmarkLabel(result.capRate, values?.address) : undefined}
+            color={
+              result
+                ? result.capRate >= 5
+                  ? "text-[var(--metric-positive)]"
+                  : result.capRate >= 0
+                    ? "text-foreground"
+                    : "text-[var(--metric-negative)]"
+                : undefined
+            }
+            isLoading={isLoading}
+          />
+          <MetricCard
+            label="DSCR"
+            glossaryTerm="dscr"
+            // Cash purchases have no debt service, so DSCR is undefined. We
+            // surface "—" + a clear sub-label rather than a misleading 0.00 /
+            // "Underwater" badge.
+            value={
+              result
+                ? result.monthlyPayment <= 0
+                  ? "—"
+                  : result.dscr.toFixed(2)
+                : "—"
+            }
+            sub={
+              result
+                ? result.monthlyPayment <= 0
+                  ? "Cash purchase"
+                  : result.dscr >= 1.25
+                  ? "Bankable (≥1.25)"
+                  : result.dscr >= 1.0
+                  ? "Tight (≥1.0)"
+                  : "Underwater"
+                : undefined
+            }
+            color={
+              result
+                ? result.monthlyPayment <= 0
+                  ? undefined
+                  : result.dscr >= 1.25
+                  ? "text-[var(--metric-positive)]"
                   : "text-[var(--metric-negative)]"
-              : undefined
-          }
-          isLoading={isLoading}
-        />
-        <MetricCard
-          label="DSCR"
-          glossaryTerm="dscr"
-          // Cash purchases have no debt service, so DSCR is undefined. We
-          // surface "—" + a clear sub-label rather than a misleading 0.00 /
-          // "Underwater" badge.
-          value={
-            result
-              ? result.monthlyPayment <= 0
-                ? "—"
-                : result.dscr.toFixed(2)
-              : "—"
-          }
-          sub={
-            result
-              ? result.monthlyPayment <= 0
-                ? "Cash purchase"
-                : result.dscr >= 1.25
-                ? "Bankable (≥1.25)"
-                : result.dscr >= 1.0
-                ? "Tight (≥1.0)"
-                : "Underwater"
-              : undefined
-          }
-          color={
-            result
-              ? result.monthlyPayment <= 0
-                ? undefined
-                : result.dscr >= 1.25
-                ? "text-[var(--metric-positive)]"
-                : "text-[var(--metric-negative)]"
-              : undefined
-          }
-          isLoading={isLoading}
-        />
-        <MetricCard
-          label="Estimated Tax Savings"
-          glossaryTerm="taxSavings"
-          value={result ? fmt(result.taxSavingsMonthly) : "—"}
-          sub="/month"
-          color="text-primary"
-          isLoading={isLoading}
-        />
-        <MetricCard
-          label="After-Tax CF"
-          glossaryTerm="afterTaxCF"
-          value={result ? fmt(result.afterTaxCF) : "—"}
-          sub="/month"
-          color="text-primary"
-          isLoading={isLoading}
-        />
+                : undefined
+            }
+            isLoading={isLoading}
+          />
+        </div>
+
+        {/* Tier 2: secondary tax metrics. Smaller, paired side-by-side,
+            with muted styling so they read as "supporting info" rather
+            than "co-equal with cash flow / cap rate." */}
+        <div className="grid grid-cols-2 gap-2 sm:gap-3">
+          <div className="rounded-xl border border-border bg-card/60 px-3 py-2 sm:px-4 sm:py-2.5">
+            <div className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+              <GlossaryTip term="taxSavings" showIcon={false}>
+                Est. tax savings
+              </GlossaryTip>
+            </div>
+            <div className="mt-0.5 flex items-baseline gap-1">
+              {isLoading ? (
+                <Skeleton className="h-5 w-16" />
+              ) : (
+                <>
+                  <span className="text-base sm:text-lg font-bold text-primary">
+                    {result ? fmt(result.taxSavingsMonthly) : "—"}
+                  </span>
+                  <span className="text-[11px] text-muted-foreground">/mo</span>
+                </>
+              )}
+            </div>
+          </div>
+          <div className="rounded-xl border border-border bg-card/60 px-3 py-2 sm:px-4 sm:py-2.5">
+            <div className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+              <GlossaryTip term="afterTaxCF" showIcon={false}>
+                After-tax CF
+              </GlossaryTip>
+            </div>
+            <div className="mt-0.5 flex items-baseline gap-1">
+              {isLoading ? (
+                <Skeleton className="h-5 w-16" />
+              ) : (
+                <>
+                  <span className="text-base sm:text-lg font-bold text-primary">
+                    {result ? fmt(result.afterTaxCF) : "—"}
+                  </span>
+                  <span className="text-[11px] text-muted-foreground">/mo</span>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Anonymous signup prompt — fires AFTER a free analysis for
@@ -692,38 +749,21 @@ export function AnalysisDashboard({
         />
       )}
 
-      {/* Max Allowable Offer — Pro feature. Free users see a teaser that
-          routes them to /pricing; paid users get the actual solver. */}
-      {canUseMaxOffer ? (
-        <MaxOfferCard values={values} />
-      ) : (
-        <ProInlineGate
-          icon={Target}
-          title="Max Allowable Offer"
-          description="Reverse-solve the highest price that still hits your return thresholds."
-          previewBullets={[
-            "Set targets for cap rate, CoC, or cash flow",
-            "Binary-search solver runs in <1s",
-            "'At this price you'd get…' readout",
-          ]}
-        />
-      )}
+      {/* MAO + Sensitivity were previously rendered here as two
+          always-visible cards (Pro for paid users, ProInlineGate teasers
+          for free users). They now live inside the "Stress Test" tab
+          below to keep the headline scroll calmer. See the
+          activeTab === "stress-test" block in tab content. */}
 
-      {/* Sensitivity grid — Pro feature. Free users see a teaser. */}
-      {canUseSensitivity ? (
-        <SensitivityGrid values={values} />
-      ) : (
-        <ProInlineGate
-          icon={Activity}
-          title="Sensitivity analysis"
-          description="Stress-test the deal if rent comes in lower, vacancy spikes, or rates rise."
-          previewBullets={[
-            "Rent ±10% scenarios",
-            "Vacancy ±5pp scenarios",
-            "Interest rate ±1pp scenarios",
-          ]}
-        />
-      )}
+      {/* "Details" landmark — pairs with the "Overview" landmark above
+          the metric grid. Gives the eye a clear "here's where the
+          deeper analysis starts" cue without adding clutter. */}
+      <div className="flex items-center gap-2 px-1 pt-1">
+        <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+          Details
+        </span>
+        <span className="h-px flex-1 bg-border" />
+      </div>
 
       {/* Analysis tabs */}
       <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
@@ -749,6 +789,7 @@ export function AnalysisDashboard({
               {tab.id === "projections" && <ArrowUpRight className="w-3.5 h-3.5 sm:hidden" />}
               {tab.id === "tax-strategy" && <FileText className="w-3.5 h-3.5 sm:hidden" />}
               {tab.id === "exit-scenarios" && <ArrowUpRight className="w-3.5 h-3.5 sm:hidden" />}
+              {tab.id === "stress-test" && <Activity className="w-3.5 h-3.5 sm:hidden" />}
               <span className="sm:hidden">{tab.mobileLabel}</span>
               <span className="hidden sm:inline">{tab.label}</span>
               {tab.isPro && !tabEntitlements[tab.id] && (
@@ -809,7 +850,44 @@ export function AnalysisDashboard({
           {activeTab === "strategies" && canUseStrategies && (
             <StrategiesPanel values={values} result={result} />
           )}
-          {activeTab !== "cash-flow" && activeTab !== "projections" && activeTab !== "tax-strategy" && activeTab !== "exit-scenarios" && activeTab !== "strategies" && (
+          {/* Stress Test tab — Max Allowable Offer + Sensitivity Grid.
+              Each card independently respects its own entitlement: a
+              user could have unlocked one without the other (rare, but
+              possible if entitlements drift). Cards render as full
+              tools when entitled, or as ProInlineGate teasers when not. */}
+          {activeTab === "stress-test" && (
+            <div className="space-y-4">
+              {canUseMaxOffer ? (
+                <MaxOfferCard values={values} />
+              ) : (
+                <ProInlineGate
+                  icon={Target}
+                  title="Max Allowable Offer"
+                  description="Reverse-solve the highest price that still hits your return thresholds."
+                  previewBullets={[
+                    "Set targets for cap rate, CoC, or cash flow",
+                    "Binary-search solver runs in <1s",
+                    "'At this price you'd get…' readout",
+                  ]}
+                />
+              )}
+              {canUseSensitivity ? (
+                <SensitivityGrid values={values} />
+              ) : (
+                <ProInlineGate
+                  icon={Activity}
+                  title="Sensitivity analysis"
+                  description="Stress-test the deal if rent comes in lower, vacancy spikes, or rates rise."
+                  previewBullets={[
+                    "Rent ±10% scenarios",
+                    "Vacancy ±5pp scenarios",
+                    "Interest rate ±1pp scenarios",
+                  ]}
+                />
+              )}
+            </div>
+          )}
+          {activeTab !== "cash-flow" && activeTab !== "projections" && activeTab !== "tax-strategy" && activeTab !== "exit-scenarios" && activeTab !== "strategies" && activeTab !== "stress-test" && (
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <Lock className="w-10 h-10 text-muted-foreground mb-3" />
               <h3 className="font-semibold text-foreground mb-1">Pro Feature</h3>
