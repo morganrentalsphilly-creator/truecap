@@ -214,9 +214,38 @@ function getRiskPillColor(risk: string): { bg: string; fg: string } {
   return { bg: COLOR.warn, fg: "#FFFFFF" };
 }
 
-async function loadPublicLogoDataUrl(): Promise<{ dataUrl: string; width: number; height: number } | null> {
+/**
+ * Pro-tier branding config applied to PDF exports.
+ *
+ * All fields optional — missing fields fall back to TrueCap defaults.
+ * The PDF generator threads this through to:
+ *   - drawHeader (logo + accent bar color + tagline)
+ *   - pageInputs (contact block under the recommendation card on page 1)
+ *
+ * Verdict color semantics (Strong Buy = green, Avoid = red, etc.) are
+ * NOT replaced — those carry meaning and shouldn't shift with the user's
+ * brand color. Only structural/chrome colors swap.
+ */
+export type BrandingConfig = {
+  logoUrl?: string | null;
+  primaryColorHex?: string | null;
+  companyName?: string | null;
+  tagline?: string | null;
+  contactName?: string | null;
+  contactEmail?: string | null;
+  contactPhone?: string | null;
+  contactWebsite?: string | null;
+};
+
+function isValidHex(hex: string | null | undefined): hex is string {
+  return typeof hex === "string" && /^#[0-9A-Fa-f]{6}$/.test(hex);
+}
+
+async function loadLogoDataUrl(
+  src: string = "/Logo-png-w.png"
+): Promise<{ dataUrl: string; width: number; height: number } | null> {
   try {
-    const response = await fetch("/Logo-png-w.png");
+    const response = await fetch(src);
     if (!response.ok) return null;
     const blob = await response.blob();
     const rawDataUrl = await new Promise<string | null>((resolve) => {
@@ -300,28 +329,60 @@ function drawHeader(
   pageNum: number,
   totalPages: number,
   generatedAt: Date,
-  logoData: { dataUrl: string; width: number; height: number } | null
+  logoData: { dataUrl: string; width: number; height: number } | null,
+  branding?: BrandingConfig | null
 ) {
+  // Theme color — brand color if branded, else TrueCap blue.
+  const themeColor = isValidHex(branding?.primaryColorHex ?? null)
+    ? (branding?.primaryColorHex as string)
+    : COLOR.primary;
+
   // Top accent bar
-  setFill(doc, COLOR.primary);
+  setFill(doc, themeColor);
   doc.rect(0, 0, PAGE.w, 4, "F");
 
-  // Logo mark (public logo only)
+  // Logo mark. Custom logos can be PNG or JPEG; jsPDF auto-detects from
+  // the dataURL prefix so we pass "PNG" as a hint but it tolerates JPEG.
+  // We auto-fit within 600 × 200 (the upload UI's same constraint).
   if (logoData) {
     try {
-      const targetHeight = 37;
-      const targetWidth = 102;
-      doc.addImage(logoData.dataUrl, "PNG", M.left, 20, targetWidth, targetHeight, undefined, "FAST");
+      const maxW = 102;
+      const maxH = 37;
+      // Preserve aspect ratio inside the max box.
+      const aspect =
+        logoData.width > 0 && logoData.height > 0
+          ? logoData.width / logoData.height
+          : maxW / maxH;
+      let targetWidth = maxW;
+      let targetHeight = maxW / aspect;
+      if (targetHeight > maxH) {
+        targetHeight = maxH;
+        targetWidth = maxH * aspect;
+      }
+      doc.addImage(
+        logoData.dataUrl,
+        "PNG",
+        M.left,
+        20,
+        targetWidth,
+        targetHeight,
+        undefined,
+        "FAST"
+      );
     } catch {
       // keep header clean even if logo cannot be drawn
     }
   }
 
-  // Subtitle below logo (matches website top bar copy)
+  // Subtitle below logo. Uses the user's tagline if set, otherwise the
+  // TrueCap default. Keeps the company-name tone on every page.
+  const subtitle =
+    (branding?.tagline && branding.tagline.trim()) ||
+    "Professional real estate investment calculator";
   setText(doc, COLOR.sub);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
-  doc.text("Professional real estate investment calculator", M.left, 62);
+  doc.text(subtitle, M.left, 62);
 
   // Right side title
   setText(doc, COLOR.ink);
@@ -432,7 +493,11 @@ function pill(doc: jsPDF, x: number, y: number, text: string, bg: string, fg: st
 }
 
 // ===================== Pages =====================
-function pageInputs(doc: jsPDF, d: ReportData) {
+function pageInputs(
+  doc: jsPDF,
+  d: ReportData,
+  branding?: BrandingConfig | null
+) {
   let y = M.top;
 
   // Hero panel
@@ -599,6 +664,41 @@ function pageInputs(doc: jsPDF, d: ReportData) {
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   doc.text(rationaleLines, M.left + 16, y + 50, { lineHeightFactor: 1.35 });
+
+  // Move y past the recommendation card so the contact block (if any)
+  // sits below it with consistent spacing.
+  y += cardHeight + 18;
+
+  // Contact block — only rendered if branding has any contact info AND
+  // there's enough vertical space left on page 1 before the footer.
+  // Lays out as a small "Prepared by" attribution row with up to 4
+  // lines (name / email / phone / website). Sits flush with the page's
+  // safe area so it never overlaps the footer.
+  const contactLines: string[] = [];
+  if (branding?.contactName) contactLines.push(branding.contactName);
+  if (branding?.contactEmail) contactLines.push(branding.contactEmail);
+  if (branding?.contactPhone) contactLines.push(branding.contactPhone);
+  if (branding?.contactWebsite) contactLines.push(branding.contactWebsite);
+
+  if (contactLines.length > 0) {
+    const contactBlockHeight = 18 + contactLines.length * 12 + 10;
+    // Reserve ~70pt at the bottom for the footer area before falling off.
+    const footerReserve = 70;
+    const maxY = PAGE.h - footerReserve - contactBlockHeight;
+    if (y <= maxY) {
+      card(doc, M.left, y, SAFE.w, contactBlockHeight);
+      setText(doc, COLOR.sub);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(7.5);
+      doc.text("PREPARED BY", M.left + 16, y + 14);
+      setText(doc, COLOR.ink);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      contactLines.forEach((line, i) => {
+        doc.text(line, M.left + 16, y + 28 + i * 12);
+      });
+    }
+  }
 }
 
 function drawInputBlock(
@@ -934,12 +1034,27 @@ async function pageExit(doc: jsPDF, d: ReportData) {
 }
 
 // ===================== Public API =====================
-async function buildInvestmentPDFDocument(data: ReportData) {
+async function buildInvestmentPDFDocument(
+  data: ReportData,
+  branding?: BrandingConfig | null
+) {
   const doc = new jsPDF({ unit: "pt", format: "a4", compress: true });
   const d = data;
-  const logoData = await loadPublicLogoDataUrl();
 
-  pageInputs(doc, d);
+  // Logo source — branded URL if present and valid, else the TrueCap
+  // default. The custom URL is the public Supabase Storage URL; if the
+  // fetch fails for any reason (bucket misconfig, network), we fall
+  // back to the TrueCap logo so the PDF never renders with a blank
+  // header.
+  let logoData = null as Awaited<ReturnType<typeof loadLogoDataUrl>>;
+  if (branding?.logoUrl) {
+    logoData = await loadLogoDataUrl(branding.logoUrl);
+  }
+  if (!logoData) {
+    logoData = await loadLogoDataUrl(); // TrueCap default
+  }
+
+  pageInputs(doc, d, branding ?? null);
   doc.addPage();
   await pageProjection(doc, d);
   doc.addPage();
@@ -951,18 +1066,29 @@ async function buildInvestmentPDFDocument(data: ReportData) {
   const total = doc.getNumberOfPages();
   for (let i = 1; i <= total; i++) {
     doc.setPage(i);
-    drawHeader(doc, i, total, d.generatedAt, logoData);
+    drawHeader(doc, i, total, d.generatedAt, logoData, branding ?? null);
   }
 
   return doc;
 }
 
-export async function generateInvestmentPDFBlob(data: ReportData): Promise<Blob> {
-  const doc = await buildInvestmentPDFDocument(data);
+export async function generateInvestmentPDFBlob(
+  data: ReportData,
+  branding?: BrandingConfig | null
+): Promise<Blob> {
+  const doc = await buildInvestmentPDFDocument(data, branding);
   return doc.output("blob");
 }
 
-export async function generateInvestmentPDF(data: ReportData) {
-  const doc = await buildInvestmentPDFDocument(data);
-  doc.save(`TrueCap-Investment-Report-${Date.now()}.pdf`);
+export async function generateInvestmentPDF(
+  data: ReportData,
+  branding?: BrandingConfig | null
+) {
+  const doc = await buildInvestmentPDFDocument(data, branding);
+  // Use the user's company name as a filename prefix if set, otherwise
+  // the TrueCap default. Sanitize to filesystem-safe characters.
+  const prefix =
+    branding?.companyName?.trim().replace(/[^A-Za-z0-9_-]+/g, "-") ||
+    "TrueCap";
+  doc.save(`${prefix}-Investment-Report-${Date.now()}.pdf`);
 }

@@ -1528,7 +1528,26 @@ export function InvestCalcPage({
       // initial JS bundle. First click triggers a ~150-300ms fetch on a
       // slow 4G connection; subsequent clicks are instant (cached).
       const { generateInvestmentPDF } = await import("@/lib/pdf-generator");
-      await generateInvestmentPDF(reportData);
+      // Fetch Pro-tier branding (logo, color, contact info) in parallel
+      // with the PDF generator dynamic import. getBranding is cheap and
+      // gracefully returns null branding for unentitled or unconfigured
+      // users, in which case the PDF falls back to TrueCap defaults.
+      const { getBranding } = await import("@/app/actions/branding");
+      const brandingResult = await getBranding();
+      const brandingConfig =
+        brandingResult.ok && brandingResult.branding
+          ? {
+              logoUrl: brandingResult.branding.logo_url,
+              primaryColorHex: brandingResult.branding.primary_color_hex,
+              companyName: brandingResult.branding.company_name,
+              tagline: brandingResult.branding.tagline,
+              contactName: brandingResult.branding.contact_name,
+              contactEmail: brandingResult.branding.contact_email,
+              contactPhone: brandingResult.branding.contact_phone,
+              contactWebsite: brandingResult.branding.contact_website,
+            }
+          : null;
+      await generateInvestmentPDF(reportData, brandingConfig);
       // Fire the Google Ads conversion event. PDF export = high-intent
       // signal (user is sharing the analysis with a lender / partner).
       // Even though it's not a revenue event, surfacing it to the Ads

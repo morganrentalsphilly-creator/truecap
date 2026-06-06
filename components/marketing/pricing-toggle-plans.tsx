@@ -41,6 +41,7 @@ const FREE_FEATURES: { label: string; included: boolean }[] = [
   { label: "Exit scenarios", included: false },
   { label: "Pro Deal Score", included: false },
   { label: "Lender-ready PDF export", included: false },
+  { label: "Custom PDF branding (logo, color, contact)", included: false },
   { label: "Save + compare deals", included: false },
 ];
 
@@ -55,6 +56,7 @@ const PRO_FEATURES = [
   "Exit scenarios: best year to sell",
   "Pro Deal Score (0-100) with breakdown",
   "Lender-ready PDF reports",
+  "Custom PDF branding — your logo, color, and contact on every export",
   "Save unlimited deals · compare up to 4",
   "Priority email support",
 ];

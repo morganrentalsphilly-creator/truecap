@@ -882,7 +882,25 @@ export function SavedAnalysesPage({
           templateFallback: exportResult.templateFallback,
           exitYears,
         });
-        const pdfBlob = await generateInvestmentPDFBlob(reportData);
+        // Pull Pro-tier branding (logo, color, contact info) so the
+        // exported PDF reflects the user's brand. Falls back to TrueCap
+        // defaults if the user is unentitled or hasn't configured anything.
+        const { getBranding } = await import("@/app/actions/branding");
+        const brandingResult = await getBranding();
+        const brandingConfig =
+          brandingResult.ok && brandingResult.branding
+            ? {
+                logoUrl: brandingResult.branding.logo_url,
+                primaryColorHex: brandingResult.branding.primary_color_hex,
+                companyName: brandingResult.branding.company_name,
+                tagline: brandingResult.branding.tagline,
+                contactName: brandingResult.branding.contact_name,
+                contactEmail: brandingResult.branding.contact_email,
+                contactPhone: brandingResult.branding.contact_phone,
+                contactWebsite: brandingResult.branding.contact_website,
+              }
+            : null;
+        const pdfBlob = await generateInvestmentPDFBlob(reportData, brandingConfig);
         const supabase = createBrowserSupabaseClient();
         const {
           data: { user },
