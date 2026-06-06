@@ -242,6 +242,19 @@ function isValidHex(hex: string | null | undefined): hex is string {
 }
 
 /**
+ * Resolve the user's effective theme color from branding config.
+ * Returns the user's primary brand color if set + valid, else COLOR.primary
+ * (TrueCap blue). Used throughout the PDF generator to color the kicker
+ * labels, "primary"-tone stat card stripes, and other accent chrome.
+ */
+function resolveThemeColor(branding?: BrandingConfig | null): string {
+  if (branding?.primaryColorHex && isValidHex(branding.primaryColorHex)) {
+    return branding.primaryColorHex;
+  }
+  return COLOR.primary;
+}
+
+/**
  * Relative luminance of a hex color, 0 (black) → 1 (white).
  * Uses the sRGB luminance formula. Used to decide whether a brand
  * color is dark enough to safely use as the hero panel background
@@ -477,9 +490,21 @@ function drawHeader(
   doc.text(`Page ${pageNum} of ${totalPages}`, PAGE.w - M.right, footerTextY, { align: "right" });
 }
 
-function sectionTitle(doc: jsPDF, text: string, y: number, kicker?: string) {
+function sectionTitle(
+  doc: jsPDF,
+  text: string,
+  y: number,
+  kicker?: string,
+  themeColor?: string
+) {
+  // The kicker label color picks up the brand color when set so the
+  // section divider chrome reads as part of the user's identity, not
+  // TrueCap's. Falls back to COLOR.primary (TrueCap blue) when no
+  // theme color is provided.
+  const kickerColor =
+    themeColor && isValidHex(themeColor) ? themeColor : COLOR.primary;
   if (kicker) {
-    setText(doc, COLOR.primary);
+    setText(doc, kickerColor);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(8);
     doc.text(kicker.toUpperCase(), M.left, y);
@@ -508,13 +533,27 @@ function statCard(
   h: number,
   label: string,
   value: string,
-  opts: { tone?: "primary" | "success" | "danger" | "neutral" | "violet" | "warn"; sub?: string } = {},
+  opts: {
+    tone?: "primary" | "success" | "danger" | "neutral" | "violet" | "warn";
+    sub?: string;
+    // When the caller passes a themeColor, it overrides the "primary"
+    // tone mapping so branded reports get the user's brand color on the
+    // CoC Return / After-Tax CF stat cards instead of TrueCap blue.
+    // Other tones (success/danger/warn/violet/neutral) stay constant —
+    // they carry semantic meaning (green = good, red = bad) that
+    // shouldn't shift with branding.
+    themeColor?: string;
+  } = {},
 ) {
   card(doc, x, y, w, h);
   // accent bar left
   const tone = opts.tone ?? "neutral";
+  const primaryColor =
+    opts.themeColor && isValidHex(opts.themeColor)
+      ? opts.themeColor
+      : COLOR.primary;
   const toneMap = {
-    primary: COLOR.primary,
+    primary: primaryColor,
     success: COLOR.success,
     danger: COLOR.danger,
     neutral: COLOR.muted,
@@ -587,34 +626,34 @@ function pageInputs(
   } else {
     heroPanelColor = COLOR.navy;
   }
+  // Shortened from 80pt to 56pt — the 3 verdict pills (RECOMMENDATION,
+  // DEAL SCORE, RISK) that used to live inside the panel were removed
+  // because they duplicated the AI Recommendation card lower on the
+  // page. Without the pills, the address + property details fit
+  // comfortably in 56pt and the panel reads as a clean "Subject
+  // Property" header instead of a dominant verdict billboard.
+  const heroHeight = 56;
   setFill(doc, heroPanelColor);
-  doc.roundedRect(M.left, y, SAFE.w, 80, 10, 10, "F");
+  doc.roundedRect(M.left, y, SAFE.w, heroHeight, 10, 10, "F");
   setText(doc, "#FFFFFF");
   doc.setFont("helvetica", "bold");
   doc.setFontSize(20);
-  doc.text(d.property.address, M.left + 18, y + 30);
+  doc.text(d.property.address, M.left + 18, y + 26);
   setText(doc, "#CBD5E1");
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
   doc.text(
     `${d.property.type}  ·  Built ${d.property.yearBuilt}  ·  ${d.units.length} units  ·  Purchase ${fmtCurrency(d.property.purchasePrice)}`,
     M.left + 18,
-    y + 48,
+    y + 44,
   );
-  // recommendation pill
-  const pillGap = 18;
-  let pillX = M.left + 18;
-  const recommendationPillColor = getRecommendationPillColor(d.performance.recommendation);
-  const scorePillColor = getScorePillColor(d.performance.dealScore);
-  const riskPillColor = getRiskPillColor(d.performance.risk);
-  pillX += pill(doc, pillX, y + 68, `RECOMMENDATION: ${d.performance.recommendation.toUpperCase()}`, recommendationPillColor.bg, recommendationPillColor.fg) + pillGap;
-  pillX += pill(doc, pillX, y + 68, `DEAL SCORE ${d.performance.dealScore}`, scorePillColor.bg, scorePillColor.fg) + pillGap;
-  pill(doc, pillX, y + 68, d.performance.risk.toUpperCase(), riskPillColor.bg, riskPillColor.fg);
 
-  y += 80 + 22;
+  y += heroHeight + 22;
+
+  const themeColor = resolveThemeColor(branding);
 
   // Inputs grid (4 cards)
-  y = sectionTitle(doc, "Property & Inputs", y, "Section 1");
+  y = sectionTitle(doc, "Property & Inputs", y, "Section 1", themeColor);
   const colW = (SAFE.w - 12) / 2;
   const rowH = 92;
 
@@ -646,7 +685,7 @@ function pageInputs(
   y += rowH + 22;
 
   // Units
-  y = sectionTitle(doc, "Units", y);
+  y = sectionTitle(doc, "Units", y, undefined, themeColor);
   const uW = (SAFE.w - 12) / 2;
   d.units.forEach((u, i) => {
     const x = M.left + i * (uW + 12);
@@ -673,7 +712,7 @@ function pageInputs(
   y += 60 + 22;
 
   // Performance Summary - card grid 3 columns
-  y = sectionTitle(doc, "Performance Summary", y, "Section 2");
+  y = sectionTitle(doc, "Performance Summary", y, "Section 2", themeColor);
   const cw = (SAFE.w - 24) / 3;
   const ch = 60;
   const gap = 10;
@@ -695,7 +734,7 @@ function pageInputs(
   cards.forEach((c, i) => {
     const col = i % 3;
     const row = Math.floor(i / 3);
-    statCard(doc, M.left + col * (cw + gap), y + row * (ch + gap), cw, ch, c[0], c[1], { tone: c[2], sub: c[3] });
+    statCard(doc, M.left + col * (cw + gap), y + row * (ch + gap), cw, ch, c[0], c[1], { tone: c[2], sub: c[3], themeColor });
   });
   y += (ch + gap) * 2 + 6;
 
@@ -746,6 +785,20 @@ function pageInputs(
   doc.setFont("helvetica", "bold");
   doc.setFontSize(13);
   doc.text(`${d.performance.recommendation} — ${d.performance.risk}`, M.left + 16, y + 34);
+
+  // Deal Score pill — right-anchored to the card. Replaces the score
+  // pill that used to live in the hero panel (which was removed). Color
+  // mirrors the score tier (green ≥70, orange 40-69, red <40) so a
+  // glance tells you both the score and how it ranks.
+  const scoreText = `DEAL SCORE ${d.performance.dealScore}`;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8);
+  const scoreTextWidth = doc.getTextWidth(scoreText);
+  const scorePillWidth = scoreTextWidth + 14;
+  const scorePillX = PAGE.w - M.right - 16 - scorePillWidth;
+  const scoreColor = getScorePillColor(d.performance.dealScore);
+  pill(doc, scorePillX, y + 28, scoreText, scoreColor.bg, scoreColor.fg);
+
   setText(doc, COLOR.text);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
@@ -830,9 +883,14 @@ function drawInputBlock(
   });
 }
 
-async function pageProjection(doc: jsPDF, d: ReportData) {
+async function pageProjection(
+  doc: jsPDF,
+  d: ReportData,
+  branding?: BrandingConfig | null
+) {
   let y = M.top + 12;
-  y = sectionTitle(doc, "10-Year Projection", y);
+  const themeColor = resolveThemeColor(branding);
+  y = sectionTitle(doc, "10-Year Projection", y, undefined, themeColor);
   setText(doc, COLOR.sub);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9.5);
@@ -845,9 +903,9 @@ async function pageProjection(doc: jsPDF, d: ReportData) {
 
   // 3 summary cards
   const cw = (SAFE.w - 24) / 3;
-  statCard(doc, M.left, y, cw, 64, "Year 10 Cumulative CF", fmtCurrency(d.projection10y.cumulativeCF), { tone: "success" });
-  statCard(doc, M.left + cw + 12, y, cw, 64, "Best Annual After-Tax CF", fmtCurrency(d.projection10y.bestAnnualAfterTax), { tone: "primary" });
-  statCard(doc, M.left + 2 * (cw + 12), y, cw, 64, "10-Year After-Tax Total", fmtCurrency(d.projection10y.totalAfterTax), { tone: "violet" });
+  statCard(doc, M.left, y, cw, 64, "Year 10 Cumulative CF", fmtCurrency(d.projection10y.cumulativeCF), { tone: "success", themeColor });
+  statCard(doc, M.left + cw + 12, y, cw, 64, "Best Annual After-Tax CF", fmtCurrency(d.projection10y.bestAnnualAfterTax), { tone: "primary", themeColor });
+  statCard(doc, M.left + 2 * (cw + 12), y, cw, 64, "10-Year After-Tax Total", fmtCurrency(d.projection10y.totalAfterTax), { tone: "violet", themeColor });
   y += 64 + 20;
 
   // 2x2 charts
@@ -945,9 +1003,14 @@ function drawChartCard(doc: jsPDF, x: number, y: number, w: number, h: number, t
   doc.addImage(dataUrl, "PNG", x + padX, y + padTop, w - padX * 2, h - padTop - padBottom, undefined, "FAST");
 }
 
-async function pageTax(doc: jsPDF, d: ReportData) {
+async function pageTax(
+  doc: jsPDF,
+  d: ReportData,
+  branding?: BrandingConfig | null
+) {
   let y = M.top + 12;
-  y = sectionTitle(doc, "Tax Strategy", y);
+  const themeColor = resolveThemeColor(branding);
+  y = sectionTitle(doc, "Tax Strategy", y, undefined, themeColor);
   setText(doc, COLOR.sub);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9.5);
@@ -957,11 +1020,11 @@ async function pageTax(doc: jsPDF, d: ReportData) {
   // 2x2 summary cards
   const cw = (SAFE.w - 12) / 2;
   const ch = 60;
-  statCard(doc, M.left, y, cw, ch, "Year 1 Taxable Rental Income", fmtCurrency(d.taxStrategy.year1Taxable), { tone: d.taxStrategy.year1Taxable < 0 ? "success" : "warn" });
-  statCard(doc, M.left + cw + 12, y, cw, ch, "Year 1 Estimated Tax Savings", fmtCurrency(d.taxStrategy.year1Savings), { tone: "success" });
+  statCard(doc, M.left, y, cw, ch, "Year 1 Taxable Rental Income", fmtCurrency(d.taxStrategy.year1Taxable), { tone: d.taxStrategy.year1Taxable < 0 ? "success" : "warn", themeColor });
+  statCard(doc, M.left + cw + 12, y, cw, ch, "Year 1 Estimated Tax Savings", fmtCurrency(d.taxStrategy.year1Savings), { tone: "success", themeColor });
   y += ch + 12;
-  statCard(doc, M.left, y, cw, ch, "10-Year Total Tax Benefit", fmtCurrency(d.taxStrategy.totalBenefit10y), { tone: "primary" });
-  statCard(doc, M.left + cw + 12, y, cw, ch, "Annual Depreciation", fmtCurrency(d.taxStrategy.annualDepreciation), { tone: "violet" });
+  statCard(doc, M.left, y, cw, ch, "10-Year Total Tax Benefit", fmtCurrency(d.taxStrategy.totalBenefit10y), { tone: "primary", themeColor });
+  statCard(doc, M.left + cw + 12, y, cw, ch, "Annual Depreciation", fmtCurrency(d.taxStrategy.annualDepreciation), { tone: "violet", themeColor });
   y += ch + 20;
 
   const labels = d.taxStrategy.rows.map((r) => `Y${r.y}`);
@@ -1041,9 +1104,14 @@ async function pageTax(doc: jsPDF, d: ReportData) {
   });
 }
 
-async function pageExit(doc: jsPDF, d: ReportData) {
+async function pageExit(
+  doc: jsPDF,
+  d: ReportData,
+  branding?: BrandingConfig | null
+) {
   let y = M.top + 12;
-  y = sectionTitle(doc, "Exit Scenarios", y);
+  const themeColor = resolveThemeColor(branding);
+  y = sectionTitle(doc, "Exit Scenarios", y, undefined, themeColor);
   setText(doc, COLOR.sub);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9.5);
@@ -1052,11 +1120,11 @@ async function pageExit(doc: jsPDF, d: ReportData) {
 
   const cw = (SAFE.w - 12) / 2;
   const ch = 60;
-  statCard(doc, M.left, y, cw, ch, "Best Year to Sell", `Year ${d.exitScenarios.bestYear}`, { tone: "success" });
-  statCard(doc, M.left + cw + 12, y, cw, ch, "Year 5 Profit", fmtCurrency(d.exitScenarios.year5Profit), { tone: "primary" });
+  statCard(doc, M.left, y, cw, ch, "Best Year to Sell", `Year ${d.exitScenarios.bestYear}`, { tone: "success", themeColor });
+  statCard(doc, M.left + cw + 12, y, cw, ch, "Year 5 Profit", fmtCurrency(d.exitScenarios.year5Profit), { tone: "primary", themeColor });
   y += ch + 12;
-  statCard(doc, M.left, y, cw, ch, "Year 10 Profit", fmtCurrency(d.exitScenarios.year10Profit), { tone: "success" });
-  statCard(doc, M.left + cw + 12, y, cw, ch, "Total ROI", fmtPct(d.exitScenarios.totalROI, true), { tone: "violet" });
+  statCard(doc, M.left, y, cw, ch, "Year 10 Profit", fmtCurrency(d.exitScenarios.year10Profit), { tone: "success", themeColor });
+  statCard(doc, M.left + cw + 12, y, cw, ch, "Total ROI", fmtPct(d.exitScenarios.totalROI, true), { tone: "violet", themeColor });
   y += ch + 20;
 
   const labels = d.exitScenarios.rows.map((r) => `Y${r.y}`);
@@ -1155,11 +1223,11 @@ async function buildInvestmentPDFDocument(
 
   pageInputs(doc, d, branding ?? null);
   doc.addPage();
-  await pageProjection(doc, d);
+  await pageProjection(doc, d, branding ?? null);
   doc.addPage();
-  await pageTax(doc, d);
+  await pageTax(doc, d, branding ?? null);
   doc.addPage();
-  await pageExit(doc, d);
+  await pageExit(doc, d, branding ?? null);
 
   // Add headers/footers AFTER all pages exist
   const total = doc.getNumberOfPages();
