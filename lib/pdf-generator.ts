@@ -241,6 +241,26 @@ function isValidHex(hex: string | null | undefined): hex is string {
   return typeof hex === "string" && /^#[0-9A-Fa-f]{6}$/.test(hex);
 }
 
+/**
+ * Relative luminance of a hex color, 0 (black) → 1 (white).
+ * Uses the sRGB luminance formula. Used to decide whether a brand
+ * color is dark enough to safely use as the hero panel background
+ * with white text overlaid. Threshold: luminance < 0.45 → dark enough.
+ */
+function colorLuminance(hex: string): number {
+  if (!isValidHex(hex)) return 1;
+  const r = parseInt(hex.slice(1, 3), 16) / 255;
+  const g = parseInt(hex.slice(3, 5), 16) / 255;
+  const b = parseInt(hex.slice(5, 7), 16) / 255;
+  const toLinear = (c: number) =>
+    c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  return (
+    0.2126 * toLinear(r) +
+    0.7152 * toLinear(g) +
+    0.0722 * toLinear(b)
+  );
+}
+
 async function loadLogoDataUrl(
   src: string = "/Logo-png-w.png"
 ): Promise<{ dataUrl: string; width: number; height: number } | null> {
@@ -374,15 +394,35 @@ function drawHeader(
     }
   }
 
-  // Subtitle below logo. Uses the user's tagline if set, otherwise the
-  // TrueCap default. Keeps the company-name tone on every page.
+  // Subtitle below logo. Fallback chain so branded reports never show
+  // TrueCap's calculator tagline (which clashes with a non-calculator
+  // company's brand — e.g. a real-estate firm with a logo but no
+  // custom tagline shouldn't read "Professional real estate investment
+  // calculator" under their logo):
+  //   1) the user's tagline if set
+  //   2) the user's company name if branding is configured (any field)
+  //   3) the TrueCap default ONLY when no branding is configured at all
+  const hasAnyBranding =
+    Boolean(
+      branding?.logoUrl ||
+        branding?.companyName ||
+        branding?.tagline ||
+        branding?.primaryColorHex
+    );
   const subtitle =
     (branding?.tagline && branding.tagline.trim()) ||
-    "Professional real estate investment calculator";
-  setText(doc, COLOR.sub);
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(10);
-  doc.text(subtitle, M.left, 62);
+    (hasAnyBranding && branding?.companyName?.trim()
+      ? branding.companyName.trim()
+      : "") ||
+    (hasAnyBranding
+      ? "" // suppress TrueCap copy for branded reports
+      : "Professional real estate investment calculator");
+  if (subtitle) {
+    setText(doc, COLOR.sub);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.text(subtitle, M.left, 62);
+  }
 
   // Right side title
   setText(doc, COLOR.ink);
@@ -500,8 +540,19 @@ function pageInputs(
 ) {
   let y = M.top;
 
-  // Hero panel
-  setFill(doc, COLOR.navy);
+  // Hero panel background. For branded reports we want the panel to
+  // match the user's brand color — but only when the color is dark
+  // enough for white overlay text to remain legible. A light brand
+  // color (yellow, mint, etc.) would make the white address text
+  // unreadable, so we fall back to COLOR.navy in that case.
+  // Threshold (luminance < 0.45) keeps medium-dark colors like
+  // forest green or maroon working while excluding pastels.
+  const heroPanelColor =
+    isValidHex(branding?.primaryColorHex ?? null) &&
+    colorLuminance(branding?.primaryColorHex as string) < 0.45
+      ? (branding?.primaryColorHex as string)
+      : COLOR.navy;
+  setFill(doc, heroPanelColor);
   doc.roundedRect(M.left, y, SAFE.w, 80, 10, 10, "F");
   setText(doc, "#FFFFFF");
   doc.setFont("helvetica", "bold");
