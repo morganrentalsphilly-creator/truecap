@@ -11,6 +11,7 @@ import {
   AlertTriangle,
   ArrowUpRight,
   Building2,
+  ChevronDown,
   ChevronRight,
   FileText,
   Save,
@@ -301,6 +302,12 @@ export function AnalysisDashboard({
   persistedActionsBlockHint,
 }: AnalysisDashboardProps) {
   const [activeTab, setActiveTab] = useState<AnalysisDashboardTab>(activeTabProp ?? "cash-flow");
+  // Show only the first 3 recommendation tips by default — beyond that
+  // the Recommendation card starts feeling busy. User can expand to see
+  // the rest. Resets implicitly when the parent component re-mounts on
+  // a new analysis; we don't reset on each recommendation change because
+  // most users keep this collapsed anyway.
+  const [showAllTips, setShowAllTips] = useState(false);
   const router = useRouter();
   const goToLogin = () => router.push("/auth/login");
   const goToBilling = () => router.push("/profile#billing");
@@ -339,39 +346,48 @@ export function AnalysisDashboard({
 
   return (
     <div className="space-y-6">
-      {/* Action bar */}
-      <div className="rounded-2xl border border-border bg-card p-3 shadow-sm sm:p-4">
-        <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
-          <div className="flex items-center gap-2 rounded-xl   px-3 py-2 xl:border-0 xl:bg-transparent xl:px-0 xl:py-0">
-            <Building2 className="w-4 h-4 text-primary" />
-            <span className="font-semibold text-foreground">
-              {labelMap[propertyType]}
-            </span>
-            <span
-              className={cn(
-                "rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide",
-                isSaved
-                  ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                  : isExistingSavedDeal
-                    ? "border-orange-200 bg-orange-50 text-orange-700"
-                    : "border-amber-200 bg-amber-50 text-amber-700"
-              )}
-              title={
-                isSaved
-                  ? "All changes saved"
-                  : isExistingSavedDeal
-                    ? "You've edited this deal since the last save. Click Save to persist."
-                    : "This is a preview — click Save to persist this deal."
-              }
-            >
-              {isSaved
-                ? "Saved"
+      {/* Action bar — split into two visually distinct elements:
+          a lightweight identity strip ("what is this?") and a
+          chunkier Quick Actions panel ("what can I do with it?").
+          Previously these were nested inside the same rounded card,
+          which gave the area a busy double-border feel. */}
+      <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+        {/* Identity strip — property type + saved-status badge.
+            Inline, no card chrome. Reads as a header rather than
+            a UI element. */}
+        <div className="flex items-center gap-2 px-1">
+          <Building2 className="w-4 h-4 text-primary" />
+          <span className="font-semibold text-foreground">
+            {labelMap[propertyType]}
+          </span>
+          <span
+            className={cn(
+              "rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide",
+              isSaved
+                ? "border-emerald-200 bg-emerald-50 text-emerald-700"
                 : isExistingSavedDeal
-                  ? "Unsaved changes"
-                  : "Preview"}
-            </span>
-          </div>
-          <div className="relative rounded-2xl border border-border p-2 pt-3 shadow-sm xl:min-w-[560px] max-[380px]:p-1.5 max-[380px]:pt-3">
+                  ? "border-orange-200 bg-orange-50 text-orange-700"
+                  : "border-amber-200 bg-amber-50 text-amber-700"
+            )}
+            title={
+              isSaved
+                ? "All changes saved"
+                : isExistingSavedDeal
+                  ? "You've edited this deal since the last save. Click Save to persist."
+                  : "This is a preview — click Save to persist this deal."
+            }
+          >
+            {isSaved
+              ? "Saved"
+              : isExistingSavedDeal
+                ? "Unsaved changes"
+                : "Preview"}
+          </span>
+        </div>
+        {/* Quick Actions panel — the one card on the action row.
+            Keeps its own border + floating label so it reads as a
+            self-contained toolbar, separate from the identity strip. */}
+        <div className="relative rounded-2xl border border-border bg-card p-2 pt-3 shadow-sm xl:min-w-[560px] max-[380px]:p-1.5 max-[380px]:pt-3">
             <span className="absolute -top-2 left-1/2 -translate-x-1/2 bg-card px-2 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
               Quick actions
             </span>
@@ -473,7 +489,6 @@ export function AnalysisDashboard({
             </div>
           </div>
         </div>
-      </div>
 
       {/* Recommendation + Pro Feature row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
@@ -558,7 +573,7 @@ export function AnalysisDashboard({
                         : "Risk Mitigation Steps"}
                   </p>
                   <ul className="space-y-1">
-                    {recommendation.tips.map((tip, i) => (
+                    {(showAllTips ? recommendation.tips : recommendation.tips.slice(0, 3)).map((tip, i) => (
                       <li key={i} className="flex items-start gap-2 text-sm text-foreground">
                         <ArrowUpRight
                           className={cn(
@@ -574,6 +589,17 @@ export function AnalysisDashboard({
                       </li>
                     ))}
                   </ul>
+                  {recommendation.tips.length > 3 && (
+                    <button
+                      type="button"
+                      onClick={() => setShowAllTips((prev) => !prev)}
+                      className="mt-2 text-xs font-semibold text-muted-foreground underline-offset-2 hover:underline"
+                    >
+                      {showAllTips
+                        ? "Show fewer"
+                        : `Show all ${recommendation.tips.length}`}
+                    </button>
+                  )}
                 </>
               )}
             </>
@@ -724,22 +750,24 @@ export function AnalysisDashboard({
         </div>
       </div>
 
-      {/* Anonymous signup prompt — fires AFTER a free analysis for
-          unauthenticated users. Soft conversion ask ("save this for
-          later") with Google one-tap. Sits above the Pro upsell
-          because signup is the cheaper conversion — users who won't
-          commit to Pro today will often sign up to save their work,
-          which makes the Pro pitch possible later. */}
+      {/* Free-tier prompt — shows ONE card, not two stacked.
+          Decision tree:
+            - Anonymous user → SignupPromptCard (cheap "save this" ask).
+              Signing up is the lower-friction win; we don't double-up
+              with a Pro pitch on top of it.
+            - Signed-in free user → MomentOfValueUpsell (deal-specific
+              Pro pitch — they've already cleared signup, so it's time
+              to monetize).
+            - Pro user → nothing renders here.
+          Previously both rendered for anonymous users, which buried
+          the Pro pitch under the signup ask. */}
       {result && !isLoading && !isAuthenticated && (
         <SignupPromptCard
           address={values?.address}
           isAuthenticated={isAuthenticated}
         />
       )}
-
-      {/* Moment-of-value Pro upsell — fires for free users only, using this
-          specific deal's numbers so the pitch is relevant, not generic. */}
-      {result && !isLoading && !canUseProjections && (
+      {result && !isLoading && isAuthenticated && !canUseProjections && (
         <MomentOfValueUpsell
           netCashFlow={result.netCashFlow}
           capRate={result.capRate}
@@ -1740,6 +1768,13 @@ function CashFlowTab({
   values: InvestmentFormValues | null;
   isPro: boolean;
 }) {
+  // Default OPEN — users explicitly said they "love all the information"
+  // and don't want it hidden. But the line-item 3-column grid duplicates
+  // what the waterfall above already visualizes, so we let users
+  // collapse it for a calmer view if they want. Acts as escape valve,
+  // not a default-hide.
+  const [showBreakdown, setShowBreakdown] = useState(true);
+
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
@@ -1784,6 +1819,31 @@ function CashFlowTab({
           the headline card and above the detailed 3-column breakdown
           so the reading order is: answer → visual explanation → line items. */}
       <CashFlowWaterfall result={result} />
+      {/* Collapsible line-item breakdown — Monthly Income, Operating
+          Expenses, Debt Service / Total Cash Required. The waterfall
+          above visualizes the same dollar flows; this 3-column grid
+          gives the exact line items for users who want them. Default
+          open; clickable header toggles. */}
+      <div>
+        <button
+          type="button"
+          onClick={() => setShowBreakdown((prev) => !prev)}
+          aria-expanded={showBreakdown}
+          className="group flex w-full items-center justify-between gap-2 rounded-xl px-1 py-1.5 text-left hover:bg-muted/50"
+        >
+          <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+            {showBreakdown ? "Full breakdown" : "Show full breakdown"}
+          </span>
+          <ChevronDown
+            className={cn(
+              "h-4 w-4 text-muted-foreground transition-transform",
+              showBreakdown ? "rotate-180" : "rotate-0"
+            )}
+            aria-hidden
+          />
+        </button>
+      </div>
+      {showBreakdown && (
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
       {/* Monthly income */}
       <div>
@@ -1937,6 +1997,7 @@ function CashFlowTab({
         </div>
       </div>
       </div>
+      )}
       {/* Loan amortization — collapsible year-by-year view. Free
           feature, opt-in (click-to-expand). Self-hides on cash
           purchases since there's no debt to amortize. */}
