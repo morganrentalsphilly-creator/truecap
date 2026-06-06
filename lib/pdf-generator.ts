@@ -548,24 +548,45 @@ function pageInputs(doc: jsPDF, d: ReportData) {
   });
   y += (ch + gap) * 2 + 6;
 
-  // Recommendation / verdict card (full width). Bumped from 70pt to 130pt
-  // tall so the richer auto-generated verdict paragraph (5-6 sentences)
-  // fits without being truncated. Tighter line height (11pt) keeps it
-  // readable without ballooning the section.
+  // Recommendation / verdict card (full width). Auto-sizes to its
+  // content so short Neutral/Risky rationales don't leave a giant
+  // empty white box, and long Strong Buy explanations don't get
+  // truncated. Previously hardcoded at 130pt — which was right for
+  // 5-6 sentences but left ~70pt of empty space inside the card on
+  // 1-sentence rationales.
   //
   // The left stripe + the "AI RECOMMENDATION" kicker text both pick up
   // the verdict tier color (green for Strong Buy / Buy, orange for
   // Neutral / Risky, red for Avoid) so they match the headline text.
-  // Previously both were hardcoded to COLOR.success, which made a
-  // "Neutral — Medium Risk" deal show a green stripe + green kicker
-  // alongside orange headline text — a confusing color contradiction.
   const tierColor = getRecommendationRiskTextColor(
     d.performance.recommendation,
     d.performance.risk
   );
-  card(doc, M.left, y, SAFE.w, 130);
+  // Compute the rationale lines first so we can size the card to fit.
+  // splitTextToSize needs the font already set, so set the body font
+  // before measuring.
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  const rationaleLines = doc.splitTextToSize(
+    d.performance.rationale,
+    SAFE.w - 32
+  ).slice(0, 7); // hard cap at 7 lines to prevent absurdly long rationales
+  // Vertical accounting inside the card:
+  //   y + 16  → "AI RECOMMENDATION" kicker (8pt)
+  //   y + 34  → headline (13pt)
+  //   y + 50  → first rationale line
+  //   each line ≈ 9pt × 1.35 leading ≈ 12.15pt
+  //   + 16pt bottom padding
+  // Floor at 78pt (1 line) so very short rationales still look like a
+  // proper card, not a stripe.
+  const lineHeight = 9 * 1.35;
+  const cardHeight = Math.max(
+    78,
+    Math.round(50 + rationaleLines.length * lineHeight + 16)
+  );
+  card(doc, M.left, y, SAFE.w, cardHeight);
   setFill(doc, tierColor);
-  doc.roundedRect(M.left, y, 4, 130, 2, 2, "F");
+  doc.roundedRect(M.left, y, 4, cardHeight, 2, 2, "F");
   setText(doc, tierColor);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8);
@@ -577,10 +598,7 @@ function pageInputs(doc: jsPDF, d: ReportData) {
   setText(doc, COLOR.text);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
-  // Up to 7 lines now (was 2). At 9pt with ~11pt leading, 7 lines fits
-  // comfortably in the 130pt-tall card with breathing room.
-  const lines = doc.splitTextToSize(d.performance.rationale, SAFE.w - 32).slice(0, 7);
-  doc.text(lines, M.left + 16, y + 50, { lineHeightFactor: 1.35 });
+  doc.text(rationaleLines, M.left + 16, y + 50, { lineHeightFactor: 1.35 });
 }
 
 function drawInputBlock(
