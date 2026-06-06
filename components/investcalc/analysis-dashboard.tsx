@@ -384,14 +384,13 @@ export function AnalysisDashboard({
                 : "Preview"}
           </span>
         </div>
-        {/* Quick Actions panel — the one card on the action row.
-            Keeps its own border + floating label so it reads as a
-            self-contained toolbar, separate from the identity strip. */}
-        <div className="relative rounded-2xl border border-border bg-card p-2 pt-3 shadow-sm xl:min-w-[560px] max-[380px]:p-1.5 max-[380px]:pt-3">
-            <span className="absolute -top-2 left-1/2 -translate-x-1/2 bg-card px-2 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
-              Quick actions
-            </span>
-            <div className="grid grid-cols-4 gap-1.5 sm:gap-2 max-[380px]:gap-1">
+        {/* Quick Actions — naked button row, no panel chrome.
+            Previously wrapped in a bordered card with a floating
+            "Quick actions" label, which added visual weight without
+            adding meaning — the 4 buttons themselves are clearly a
+            toolbar. Removing the chrome lets the row read as inline
+            with the identity strip. */}
+        <div className="grid grid-cols-4 gap-1.5 sm:gap-2 xl:min-w-[560px] max-[380px]:gap-1">
               <Button
                 variant="outline"
                 size="sm"
@@ -486,9 +485,8 @@ export function AnalysisDashboard({
                   later (e.g. as part of the export menu or near saved-deal
                   list-items). Underlying ShareLinkButton component is still
                   imported but unused; keeping it ready for re-introduction. */}
-            </div>
-          </div>
         </div>
+      </div>
 
       {/* Recommendation + Pro Feature row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
@@ -705,25 +703,37 @@ export function AnalysisDashboard({
           />
         </div>
 
-        {/* Tier 2: secondary tax metrics. Smaller, paired side-by-side,
-            with muted styling so they read as "supporting info" rather
-            than "co-equal with cash flow / cap rate." */}
-        <div className="grid grid-cols-2 gap-2 sm:gap-3">
+        {/* Tier 2: secondary cash-flow + tax metrics in a 3-up grid.
+            Annual CF was previously shown only inside the Cash Flow tab
+            (NetCashFlowCard). Surfacing it here consolidates every
+            cash-flow readout in OVERVIEW, which lets us delete the
+            now-redundant tab hero. Muted card chrome signals "supporting
+            info" rather than "co-equal with the 4 prominent tiles." */}
+        <div className="grid grid-cols-3 gap-2 sm:gap-3">
           <div className="rounded-xl border border-border bg-card/60 px-3 py-2 sm:px-4 sm:py-2.5">
             <div className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-              <GlossaryTip term="taxSavings" showIcon={false}>
-                Est. tax savings
-              </GlossaryTip>
+              Annual CF
             </div>
             <div className="mt-0.5 flex items-baseline gap-1">
               {isLoading ? (
                 <Skeleton className="h-5 w-16" />
               ) : (
                 <>
-                  <span className="text-base sm:text-lg font-bold text-primary">
-                    {result ? fmt(result.taxSavingsMonthly) : "—"}
+                  <span
+                    className={cn(
+                      "text-base sm:text-lg font-bold tabular-nums",
+                      result
+                        ? result.annualCashFlow >= 0
+                          ? "text-[var(--metric-positive)]"
+                          : "text-[var(--metric-negative)]"
+                        : "text-foreground"
+                    )}
+                  >
+                    {result
+                      ? `${result.annualCashFlow >= 0 ? "" : "-"}${fmt(result.annualCashFlow)}`
+                      : "—"}
                   </span>
-                  <span className="text-[11px] text-muted-foreground">/mo</span>
+                  <span className="text-[11px] text-muted-foreground">/yr</span>
                 </>
               )}
             </div>
@@ -741,6 +751,25 @@ export function AnalysisDashboard({
                 <>
                   <span className="text-base sm:text-lg font-bold text-primary">
                     {result ? fmt(result.afterTaxCF) : "—"}
+                  </span>
+                  <span className="text-[11px] text-muted-foreground">/mo</span>
+                </>
+              )}
+            </div>
+          </div>
+          <div className="rounded-xl border border-border bg-card/60 px-3 py-2 sm:px-4 sm:py-2.5">
+            <div className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+              <GlossaryTip term="taxSavings" showIcon={false}>
+                Tax savings
+              </GlossaryTip>
+            </div>
+            <div className="mt-0.5 flex items-baseline gap-1">
+              {isLoading ? (
+                <Skeleton className="h-5 w-16" />
+              ) : (
+                <>
+                  <span className="text-base sm:text-lg font-bold text-primary">
+                    {result ? fmt(result.taxSavingsMonthly) : "—"}
                   </span>
                   <span className="text-[11px] text-muted-foreground">/mo</span>
                 </>
@@ -1680,82 +1709,11 @@ function CashFlowOverTimeStrip({ result }: { result: AnalysisResult }) {
   );
 }
 
-/**
- * Net Cash Flow headline card.
- *
- * The bottom-line "is this deal worth it?" answer in a single
- * dedicated card — monthly NCF prominent, annual NCF + after-tax CF
- * as supporting numbers. Sits at the top of the Cash Flow tab so
- * users see THE answer before they see the breakdown.
- *
- * Pure display — derived from AnalysisResult fields that already
- * exist. Color tone branches on positive vs negative vs near-zero.
- */
-function NetCashFlowCard({ result }: { result: AnalysisResult }) {
-  const monthly = result.netCashFlow;
-  const annual = result.annualCashFlow;
-  const afterTaxMonthly = result.afterTaxCF;
-  const tone = monthly > 25 ? "positive" : monthly < -25 ? "negative" : "neutral";
-  const numberColor =
-    tone === "positive"
-      ? "text-[var(--metric-positive,#16a34a)]"
-      : tone === "negative"
-        ? "text-[var(--metric-negative,#dc2626)]"
-        : "text-foreground";
-  const borderTint =
-    tone === "positive"
-      ? "border-[var(--metric-positive,#16a34a)]/30 bg-[var(--metric-positive,#16a34a)]/[0.04]"
-      : tone === "negative"
-        ? "border-[var(--metric-negative,#dc2626)]/30 bg-[var(--metric-negative,#dc2626)]/[0.04]"
-        : "border-border bg-card";
-  const signPrefix = monthly > 0 ? "+" : monthly < 0 ? "-" : "";
-  return (
-    <section
-      aria-label="Net cash flow summary"
-      className={cn("rounded-2xl border p-4 sm:p-6", borderTint)}
-    >
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        {/* Monthly NCF — the headline */}
-        <div>
-          <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
-            Net Cash Flow
-          </p>
-          <p className={cn("mt-1 text-4xl font-extrabold tabular-nums sm:text-5xl", numberColor)}>
-            {signPrefix}${Math.abs(monthly).toLocaleString()}
-            <span className="ml-1 text-base font-bold tracking-tight text-muted-foreground sm:text-lg">
-              /mo
-            </span>
-          </p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            After rent, all operating expenses, and debt service
-          </p>
-        </div>
-        {/* Annual + after-tax — supporting context */}
-        <div className="grid grid-cols-2 gap-3 sm:gap-5">
-          <div className="rounded-xl border border-border bg-background p-3 sm:p-4">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-              Annual
-            </p>
-            <p className={cn("mt-1 text-xl font-extrabold tabular-nums sm:text-2xl", numberColor)}>
-              {annual >= 0 ? "+" : "-"}${Math.abs(annual).toLocaleString()}
-            </p>
-          </div>
-          <div className="rounded-xl border border-border bg-background p-3 sm:p-4">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-              After tax
-            </p>
-            <p className="mt-1 text-xl font-extrabold tabular-nums text-primary sm:text-2xl">
-              ${Math.round(afterTaxMonthly).toLocaleString()}
-              <span className="ml-1 text-[11px] font-bold tracking-tight text-muted-foreground">
-                /mo
-              </span>
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
+// NetCashFlowCard was deleted — its monthly/annual/after-tax readouts
+// are now surfaced upstairs in the OVERVIEW section (4 metric tiles +
+// 3-up secondary chip row). Having a giant 4xl/5xl hero of the same
+// number inside the Cash Flow tab was duplication. See the OVERVIEW
+// grid in AnalysisDashboard for the canonical surface.
 
 function CashFlowTab({
   result,
@@ -1776,19 +1734,15 @@ function CashFlowTab({
   const [showBreakdown, setShowBreakdown] = useState(true);
 
   if (isLoading) {
+    // Skeleton matches what actually renders: time strip (short, wide),
+    // waterfall (medium height), then a thin toggle row. Used to be a
+    // 3-column line-item stub that didn't resemble the real content at
+    // all, which made the loading state feel like a glitch.
     return (
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-        {[0, 1, 2].map((i) => (
-          <div key={i} className="space-y-3">
-            <Skeleton className="h-4 w-32" />
-            {[0, 1, 2, 3].map((j) => (
-              <div key={j} className="flex justify-between">
-                <Skeleton className="h-3 w-24" />
-                <Skeleton className="h-3 w-16" />
-              </div>
-            ))}
-          </div>
-        ))}
+      <div className="space-y-5 sm:space-y-6">
+        <Skeleton className="h-20 w-full rounded-2xl sm:h-24" />
+        <Skeleton className="h-40 w-full rounded-2xl sm:h-48" />
+        <Skeleton className="h-6 w-40" />
       </div>
     );
   }
@@ -1803,21 +1757,20 @@ function CashFlowTab({
 
   return (
     <div className="space-y-5 sm:space-y-6">
-      {/* Net Cash Flow headline card — the bottom-line answer in big
-          numbers (monthly + annual + after-tax). Sits above the
-          waterfall so it's the first thing the user sees in the
-          Cash Flow tab. Restored as its own card per user feedback
-          (the waterfall on its own buried the headline). */}
-      <NetCashFlowCard result={result} />
-      {/* Cash flow over time — Y1/Y5/Y10 monthly NCF strip. Sits
-          directly under the headline so users immediately see that
-          today's $749/mo grows over the hold period as rent
-          outpaces expenses. Was previously buried in the Pro
-          10-Year Projections tab and free-tier users never saw it. */}
+      {/* NetCashFlowCard (big 4xl/5xl monthly/annual/after-tax hero)
+          was removed from this tab. Monthly + Annual + After-tax are
+          all surfaced upstairs in the OVERVIEW section (the 4 metric
+          tiles + the 3-up secondary chip row), so this duplicated the
+          same numbers in a larger format. The Cash Flow tab now leads
+          with the time strip (which is unique to this view), giving
+          the user something new to look at instead of re-stating the
+          headline they just read. */}
+      {/* Cash flow over time — Y1/Y5/Y10 monthly NCF strip. */}
       <CashFlowOverTimeStrip result={result} />
       {/* Where the rent goes — single-glance waterfall. Sits below
-          the headline card and above the detailed 3-column breakdown
-          so the reading order is: answer → visual explanation → line items. */}
+          the time strip and above the optional 3-col breakdown so
+          the reading order is: how it grows → where it goes → line
+          items (collapsible). */}
       <CashFlowWaterfall result={result} />
       {/* Collapsible line-item breakdown — Monthly Income, Operating
           Expenses, Debt Service / Total Cash Required. The waterfall
