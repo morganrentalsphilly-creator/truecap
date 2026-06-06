@@ -87,6 +87,13 @@ export function PricingTogglePlans({
     monthlyAmount && annualAmount
       ? Math.max(0, Math.round((1 - annualAmount / (monthlyAmount * 12)) * 100))
       : null;
+  // Dollar-amount annual savings — concrete numbers convert better
+  // than percentages. "Save $48/yr" beats "Save 20%" in every A/B
+  // test I've seen on SaaS pricing pages.
+  const annualSavingsDollars =
+    monthlyAmount && annualAmount
+      ? Math.max(0, Math.round(monthlyAmount * 12 - annualAmount))
+      : null;
 
   const proCard =
     period === "monthly"
@@ -158,12 +165,25 @@ export function PricingTogglePlans({
 
         {/* PRO (with toggle) */}
         <div className="relative -mt-2 rounded-3xl border-2 border-primary bg-card p-6 shadow-[0_24px_70px_rgba(82,72,212,0.18)] lg:scale-[1.03]">
-          {/* Savings badge */}
+          {/* Savings badge — prefer the dollar-amount savings when
+              available because concrete numbers convert better than
+              percentages. Falls back to "X months free" or % savings. */}
           {period === "annual" && (annualSavingsPct ?? 0) > 0 ? (
             <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1 text-[10px] font-extrabold uppercase tracking-widest text-primary-foreground shadow-md">
-              {monthsFreeWithAnnual && monthsFreeWithAnnual > 0
-                ? `${monthsFreeWithAnnual} months free`
-                : `Save ${annualSavingsPct}%`}
+              {annualSavingsDollars && annualSavingsDollars > 0
+                ? `Save $${annualSavingsDollars}/yr`
+                : monthsFreeWithAnnual && monthsFreeWithAnnual > 0
+                  ? `${monthsFreeWithAnnual} months free`
+                  : `Save ${annualSavingsPct}%`}
+            </span>
+          ) : null}
+          {/* "BEST VALUE" — secondary ribbon on annual to make the
+              recommended option visually obvious. The default-selected
+              annual + this ribbon together do the work of telling the
+              user which to pick. */}
+          {period === "annual" ? (
+            <span className="absolute right-4 top-4 rounded-full bg-[var(--brand-green,#16a34a)]/10 px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-widest text-[var(--brand-green,#16a34a)]">
+              ★ Best value
             </span>
           ) : null}
 

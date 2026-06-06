@@ -133,6 +133,49 @@ export async function POST(req: Request) {
       case "invoice_payment.paid":
         await upsertSubscriptionFromInvoicePayment(admin, event.data.object as Stripe.InvoicePayment);
         break;
+      case "checkout.session.expired": {
+        // User started checkout but didn't complete it within Stripe's
+        // 24-hour expiration window. Send a recovery email with a
+        // discount code. Industry data: ~15-25% of abandoned checkouts
+        // can be recovered with a same-day email + small discount.
+        //
+        // No-ops gracefully on any missing data: if the session has no
+        // captured email (rare but possible if the user closed the tab
+        // before entering one), or if RESEND_API_KEY isn't set, we just
+        // log a warning and move on. Webhook still returns 200.
+        const session = event.data.object as Stripe.Checkout.Session;
+        const email =
+          session.customer_details?.email ??
+          session.customer_email ??
+          null;
+        if (email) {
+          try {
+            await sendAbandonedCheckoutEmail(email, session);
+          } catch (err) {
+            console.warn(
+              "[stripe-webhook] abandoned-checkout email failed:",
+              err instanceof Error ? err.message : String(err)
+            );
+            // Don't throw — failing to send the recovery email is non-critical.
+          }
+        }
+        // PostHog event so the funnel shows the drop-off.
+        const abandonDistinctId =
+          session.client_reference_id ||
+          session.metadata?.user_id ||
+          (typeof session.customer === "string" ? session.customer : null);
+        if (abandonDistinctId) {
+          await captureServerEvent({
+            distinctId: abandonDistinctId,
+            event: "checkout_abandoned",
+            properties: {
+              stripe_session_id: session.id,
+              had_email: email != null,
+            },
+          });
+        }
+        break;
+      }
       default:
         break;
     }
@@ -148,4 +191,79 @@ export async function POST(req: Request) {
   }
 
   return NextResponse.json({ received: true });
+}
+
+/**
+ * Abandoned-checkout recovery email. Sent via Resend transactional API
+ * when Stripe fires a `checkout.session.expired` webhook. Uses inline
+ * HTML rather than a React Email template so this file has no React
+ * dependency in the Node runtime path.
+ *
+ * The discount code (default: EXIT50) must exist in your Stripe
+ * Dashboard. Override via env var ABANDONED_CART_COUPON_CODE.
+ */
+async function sendAbandonedCheckoutEmail(
+  toEmail: string,
+  _session: Stripe.Checkout.Session
+): Promise<void> {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    console.warn("[stripe-webhook] RESEND_API_KEY missing — skipping abandoned-cart email");
+    return;
+  }
+  const from = process.env.EMAIL_FROM || "TrueCap <hello@usetruecap.com>";
+  const couponCode = process.env.ABANDONED_CART_COUPON_CODE || "EXIT50";
+  const pricingUrl = `${process.env.NEXT_PUBLIC_SITE_URL || "https://usetruecap.com"}/pricing?coupon=${couponCode}`;
+
+  const subject = "You almost upgraded — here's 50% off";
+  const html = `<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>${subject}</title></head>
+<body style="margin:0;padding:0;background:#f6f7fb;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#111827;">
+  <div style="max-width:560px;margin:0 auto;padding:32px 24px;background:#ffffff;border-radius:16px;margin-top:32px;border:1px solid #e5e7eb;">
+    <h1 style="margin:0 0 12px 0;font-size:24px;font-weight:800;color:#111827;line-height:1.2;">
+      You almost upgraded.
+    </h1>
+    <p style="margin:0 0 16px 0;color:#374151;line-height:1.6;font-size:15px;">
+      You started checkout for TrueCap Pro but didn't quite get there. No worries — life happens.
+    </p>
+    <p style="margin:0 0 24px 0;color:#374151;line-height:1.6;font-size:15px;">
+      We saved your spot. Here's <strong style="color:#5248D4;">50% off your first year</strong> to make finishing easier:
+    </p>
+    <div style="text-align:center;margin:24px 0;">
+      <a href="${pricingUrl}" style="display:inline-block;background:#5248D4;color:#ffffff;text-decoration:none;padding:14px 28px;border-radius:12px;font-weight:700;font-size:15px;">
+        Finish upgrading — 50% off
+      </a>
+    </div>
+    <p style="margin:24px 0 0 0;color:#6b7280;font-size:13px;text-align:center;">
+      Code <strong style="color:#111827;">${couponCode}</strong> auto-applies. Cancel anytime.
+    </p>
+    <hr style="border:none;border-top:1px solid #e5e7eb;margin:32px 0 16px 0;">
+    <p style="margin:0;color:#9ca3af;font-size:12px;line-height:1.5;text-align:center;">
+      Got questions? Just reply to this email — I read every one.<br>
+      — Morgan, founder, TrueCap
+    </p>
+  </div>
+  <p style="text-align:center;color:#9ca3af;font-size:11px;margin:24px 0;">
+    <a href="${process.env.NEXT_PUBLIC_SITE_URL || "https://usetruecap.com"}" style="color:#9ca3af;">usetruecap.com</a>
+  </p>
+</body></html>`;
+
+  const res = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      from,
+      to: [toEmail],
+      subject,
+      html,
+      reply_to: process.env.EMAIL_REPLY_TO || "hello@usetruecap.com",
+    }),
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`Resend ${res.status}: ${text}`);
+  }
 }

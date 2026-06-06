@@ -18,6 +18,8 @@ import { getStripe } from "@/lib/stripe/client";
 import { RoiCalculatorWidget } from "@/components/marketing/roi-calculator-widget";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { DealsAnalyzedTicker } from "@/components/marketing/deals-analyzed-ticker";
+import { ExitIntentOffer } from "@/components/marketing/exit-intent-offer";
 export const metadata: Metadata = {
   title: "Pricing — Free + Pro plans for rental property analysis",
   description:
@@ -101,9 +103,14 @@ export default async function PricingPage() {
   // <PricingTogglePlans> so it can react to the user's toggle state.
   // We just hand it both Stripe prices.
 
+  // Free users (no paid subscription) get the exit-intent offer.
+  // Already-paid users would see an awkward "50% off" prompt; skip.
+  const showExitOffer = !isPaid;
+
   return (
     <>
       <Header initialUser={user} initialEntitlements={entitlements} />
+      {showExitOffer ? <ExitIntentOffer /> : null}
 
       <main id="main" className="min-h-screen bg-background">
         {/* Hero */}
@@ -124,6 +131,12 @@ export default async function PricingPage() {
               Start free — unlimited analyses, every core metric, auto-fill from the address. Upgrade to Pro
               when you need projections, tax modeling, and lender-ready PDFs.
             </p>
+            {/* Real-data social proof — investors arriving at /pricing
+                are evaluating credibility. A live count of recent
+                analyses converts skepticism faster than testimonials. */}
+            <div className="mt-5 flex justify-center">
+              <DealsAnalyzedTicker window="7d" />
+            </div>
           </div>
         </section>
 

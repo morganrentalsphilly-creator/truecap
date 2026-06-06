@@ -32,6 +32,7 @@ import { FinancingSection } from "./financing-section";
 import { OperatingExpensesSection } from "./operating-expenses-section";
 import { AnalysisDashboard, type AnalysisDashboardTab } from "./analysis-dashboard";
 import { AnalysisErrorBoundary } from "@/components/investcalc/analysis-error-boundary";
+import { PostAnalysisEmailPrompt } from "@/components/marketing/post-analysis-email-prompt";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { saveDealAction } from "@/app/actions/saved-analyses";
@@ -1999,6 +2000,16 @@ export function InvestCalcPage({
           </div>
         )}
       </main>
+      {/* Anonymous email capture — fires 5s after a successful analysis
+          for unauthenticated users only. Captures the email and schedules
+          a 4-email drip via Resend `scheduled_at`. Once captured or
+          dismissed, never re-fires in the same browser (localStorage). */}
+      {!isAuthenticated ? (
+        <PostAnalysisEmailPrompt
+          hasCompletedAnalysis={analysisResult !== null}
+          propertyAddress={form.getValues("address")}
+        />
+      ) : null}
     </div>
   );
 }

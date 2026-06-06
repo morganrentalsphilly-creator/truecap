@@ -15,8 +15,10 @@ export default defineConfig({
     // interval). Vitest 4 promoted `forks` to a top-level option
     // — the old `poolOptions.forks` was removed in v4.
     pool: "forks",
-    forks: {
-      singleFork: true,
-    },
+    // Vitest 4 promoted `forks` to a top-level test option. The installed
+    // type bindings appear to lag the runtime — assertion silences the
+    // overload error without changing behaviour. Verified working at
+    // runtime (vitest 4.1.7).
+    ...({ forks: { singleFork: true } } as Record<string, unknown>),
   },
 });
