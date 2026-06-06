@@ -451,7 +451,28 @@ function drawHeader(
   setText(doc, COLOR.sub);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
-  doc.text("Investment Report", M.left, footerTextY);
+
+  // Footer-left text — shows preparer attribution when branding is
+  // configured so the report carries the user's name on every page,
+  // not just buried in a card on page 1.
+  // Priority:
+  //   1) "Prepared by [contact_name] · [company_name]" if both set
+  //   2) "Prepared by [contact_name]" if only the name is set
+  //   3) "[company_name]" alone if only company is set
+  //   4) "Investment Report" default for unbranded reports
+  let footerLeft = "Investment Report";
+  if (branding?.contactName?.trim() && branding?.companyName?.trim()) {
+    footerLeft = `Prepared by ${branding.contactName.trim()} · ${branding.companyName.trim()}`;
+  } else if (branding?.contactName?.trim()) {
+    footerLeft = `Prepared by ${branding.contactName.trim()}`;
+  } else if (branding?.companyName?.trim()) {
+    footerLeft = branding.companyName.trim();
+  }
+  // Truncate hard at 80 chars so a long company name + person name
+  // can't push into the centered "Confidential" line.
+  if (footerLeft.length > 80) footerLeft = footerLeft.slice(0, 77) + "…";
+
+  doc.text(footerLeft, M.left, footerTextY);
   doc.text("Confidential — for the named recipient only", PAGE.w / 2, footerTextY, { align: "center" });
   doc.text(`Page ${pageNum} of ${totalPages}`, PAGE.w - M.right, footerTextY, { align: "right" });
 }
@@ -540,18 +561,32 @@ function pageInputs(
 ) {
   let y = M.top;
 
-  // Hero panel background. For branded reports we want the panel to
-  // match the user's brand color — but only when the color is dark
-  // enough for white overlay text to remain legible. A light brand
-  // color (yellow, mint, etc.) would make the white address text
-  // unreadable, so we fall back to COLOR.navy in that case.
-  // Threshold (luminance < 0.45) keeps medium-dark colors like
-  // forest green or maroon working while excluding pastels.
-  const heroPanelColor =
+  // Hero panel background. Three-way decision:
+  //   1) Dark brand color set → use it (custom feel)
+  //   2) Branded but light/no brand color → neutral charcoal (avoids
+  //      having TrueCap's navy show through a Skale-branded report)
+  //   3) No branding at all → COLOR.navy (TrueCap default)
+  // Luminance threshold (0.45) protects against light brand colors
+  // making the white address text unreadable.
+  const hasAnyBrandingForPanel = Boolean(
+    branding?.logoUrl ||
+      branding?.companyName ||
+      branding?.tagline ||
+      branding?.primaryColorHex
+  );
+  let heroPanelColor: string;
+  if (
     isValidHex(branding?.primaryColorHex ?? null) &&
     colorLuminance(branding?.primaryColorHex as string) < 0.45
-      ? (branding?.primaryColorHex as string)
-      : COLOR.navy;
+  ) {
+    heroPanelColor = branding?.primaryColorHex as string;
+  } else if (hasAnyBrandingForPanel) {
+    // Neutral dark slate — reads as "professional report" without
+    // borrowing TrueCap's signature navy.
+    heroPanelColor = "#1F2937";
+  } else {
+    heroPanelColor = COLOR.navy;
+  }
   setFill(doc, heroPanelColor);
   doc.roundedRect(M.left, y, SAFE.w, 80, 10, 10, "F");
   setText(doc, "#FFFFFF");
@@ -737,8 +772,18 @@ function pageInputs(
     const footerReserve = 70;
     const maxY = PAGE.h - footerReserve - contactBlockHeight;
     if (y <= maxY) {
+      // Card with a brand-tinted left stripe (mirrors the AI
+      // Recommendation card above for visual consistency). Stripe color
+      // uses the user's primary brand color when set, else a neutral
+      // muted accent so the card still looks intentional on unbranded
+      // exports.
+      const accentColor = isValidHex(branding?.primaryColorHex ?? null)
+        ? (branding?.primaryColorHex as string)
+        : COLOR.sub;
       card(doc, M.left, y, SAFE.w, contactBlockHeight);
-      setText(doc, COLOR.sub);
+      setFill(doc, accentColor);
+      doc.roundedRect(M.left, y, 4, contactBlockHeight, 2, 2, "F");
+      setText(doc, accentColor);
       doc.setFont("helvetica", "bold");
       doc.setFontSize(7.5);
       doc.text("PREPARED BY", M.left + 16, y + 14);
@@ -746,6 +791,9 @@ function pageInputs(
       doc.setFont("helvetica", "normal");
       doc.setFontSize(9);
       contactLines.forEach((line, i) => {
+        // First line (typically the name) gets bold weight so the
+        // preparer's name reads as the heading of this block.
+        doc.setFont("helvetica", i === 0 ? "bold" : "normal");
         doc.text(line, M.left + 16, y + 28 + i * 12);
       });
     }
