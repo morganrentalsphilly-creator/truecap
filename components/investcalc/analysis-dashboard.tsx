@@ -1884,66 +1884,23 @@ function CashFlowTab({
             </p>
           </div>
           <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Loan Payment (Principal &amp; Interest)</span>
+            <span className="text-muted-foreground">Loan Payment (P&amp;I)</span>
             <span className="font-medium text-foreground">
               ${result.monthlyPayment.toLocaleString()}
             </span>
           </div>
-          <div className="rounded-xl border border-dashed border-border bg-muted/40 p-4 space-y-2">
-            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-              Monthly Cost Breakdown
-            </p>
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Loan Payment (P&amp;I)</span>
-              <span className="font-medium text-foreground">
-                ${result.loanPrincipalAndInterest.toLocaleString()}
-              </span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Property Tax (Monthly)</span>
-              <span className="font-medium text-foreground">
-                ${result.propertyTaxMonthly.toLocaleString()}
-              </span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Insurance (Monthly)</span>
-              <span className="font-medium text-foreground">
-                ${result.insuranceMonthly.toLocaleString()}
-              </span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">HOA (Monthly)</span>
-              <span className="font-medium text-foreground">
-                ${result.hoaMonthly.toLocaleString()}
-              </span>
-            </div>
-            <div className="flex justify-between text-sm border-t border-border pt-2">
-              <span className="font-semibold text-foreground">Total Monthly Cost</span>
-              <span className="font-bold text-foreground">
-                ${result.totalMonthlyPaymentDebug.toLocaleString()}
-              </span>
-            </div>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Loan payment is shown separately from operating expenses so it is clear that the
-              current engine uses <span className="font-medium text-foreground">monthlyPayment</span>{" "}
-              for principal and interest only. Property tax, insurance, and HOA are modeled
-              outside the loan payment.
-            </p>
-          </div>
-          <div className="flex justify-between text-sm border-t border-border pt-2">
-            <span className="font-bold text-foreground">Net Cash Flow</span>
-            <span
-              className={cn(
-                "font-bold text-lg",
-                result.netCashFlow >= 0
-                  ? "text-[var(--metric-positive)]"
-                  : "text-[var(--metric-negative)]"
-              )}
-            >
-              {result.netCashFlow >= 0 ? "" : "-"}$
-              {Math.abs(result.netCashFlow).toLocaleString()}
-            </span>
-          </div>
+          {/* Removed three blocks that were creating noise:
+              (1) "Monthly Cost Breakdown" dashed-border inner panel —
+                  re-stated P&I + tax/insurance/HOA monthly amounts that
+                  are already itemized in the Operating Expenses column.
+              (2) A leaked developer-debug paragraph that read like a
+                  code comment ("the current engine uses monthlyPayment
+                  for principal and interest only…") — internal context,
+                  not end-user content.
+              (3) A second Net Cash Flow line at the bottom of this
+                  column. NCF is already the headline at the very top of
+                  the Cash Flow tab (NetCashFlowCard). Showing it again
+                  here just creates visual duplication. */}
         </div>
 
         {/* Total cash required */}
