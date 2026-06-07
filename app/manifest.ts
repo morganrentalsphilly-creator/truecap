@@ -35,20 +35,36 @@ export default function manifest(): MetadataRoute.Manifest {
         type: "image/png",
         purpose: "any",
       },
-      // Split into two entries — Next.js' MetadataRoute.Manifest type
-      // expects a single value for `purpose` ("any" | "maskable" |
-      // "monochrome"), not the space-separated W3C form. Splitting
-      // preserves the dual-purpose behavior (browsers treat repeated
-      // src with different purposes as alternates) while satisfying
-      // the type system.
+      // Properly-sized PWA icons. Previously these all pointed at
+      // /Logo-png.png — a 1.3MB source file served as both the 192×192
+      // and 512×512 slot, which downloaded ~1.3MB to every device that
+      // installed the PWA. Now we have purpose-built optimized PNG
+      // files: 4.5KB for 192, 19.2KB for 512. ~50× reduction.
+      //
+      // Split into separate purpose entries — Next.js'
+      // MetadataRoute.Manifest type expects a single value per icon,
+      // not the W3C space-separated form. Browsers treat repeated src
+      // entries with different purposes as alternates.
       {
-        src: "/Logo-png.png",
+        src: "/icon-192x192.png",
+        sizes: "192x192",
+        type: "image/png",
+        purpose: "any",
+      },
+      {
+        src: "/icon-192x192.png",
+        sizes: "192x192",
+        type: "image/png",
+        purpose: "maskable",
+      },
+      {
+        src: "/icon-512x512.png",
         sizes: "512x512",
         type: "image/png",
         purpose: "any",
       },
       {
-        src: "/Logo-png.png",
+        src: "/icon-512x512.png",
         sizes: "512x512",
         type: "image/png",
         purpose: "maskable",

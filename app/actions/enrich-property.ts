@@ -18,6 +18,7 @@
  * other defaults still come back.
  */
 
+import { z } from "zod";
 import { getStatePropertyTaxPct } from "@/lib/property-enrichment/state-property-tax";
 
 export type EnrichPropertyInput = {
@@ -27,6 +28,26 @@ export type EnrichPropertyInput = {
   propertyType?: "single-family" | "multi-family" | "owner-occupant";
   bedrooms?: number;    // unit[0].bedrooms — only used for HUD lookup
 };
+
+// Runtime validation for the input. All fields optional (matches the
+// type), but each one is bounded so a malformed client payload can't
+// flow into FRED/HUD/state-tax lookups with surprising shapes. State
+// is uppercased + capped at 2 chars; county is trimmed + capped at 80;
+// zip must be 5 digits; bedrooms 0-20.
+const enrichInputSchema = z.object({
+  state: z
+    .string()
+    .trim()
+    .transform((s) => s.toUpperCase())
+    .pipe(z.string().regex(/^[A-Z]{2}$/, "state must be a 2-letter code"))
+    .optional(),
+  county: z.string().trim().max(80).optional(),
+  zip: z.string().trim().regex(/^\d{5}$/, "zip must be 5 digits").optional(),
+  propertyType: z
+    .enum(["single-family", "multi-family", "owner-occupant"])
+    .optional(),
+  bedrooms: z.number().int().min(0).max(20).optional(),
+});
 
 export type EnrichPropertyResult = {
   propertyTaxPct?: number;
@@ -45,10 +66,17 @@ export async function enrichPropertyAction(
 ): Promise<EnrichPropertyResult> {
   const out: EnrichPropertyResult = { meta: {} };
 
+  // Validate input at runtime. If invalid, return empty defaults rather
+  // than throwing — the form will simply not pre-fill. This action is
+  // best-effort enrichment, not critical path.
+  const parsed = enrichInputSchema.safeParse(input);
+  if (!parsed.success) return out;
+  const validated = parsed.data;
+
   const [tax, rate, rent] = await Promise.all([
-    lookupPropertyTax(input.state),
+    lookupPropertyTax(validated.state),
     fetchCurrentMortgageRate(),
-    maybeFetchHudRent(input),
+    maybeFetchHudRent(validated),
   ]);
 
   if (tax) {

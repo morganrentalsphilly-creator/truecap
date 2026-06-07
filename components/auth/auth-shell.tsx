@@ -58,7 +58,7 @@ export function AuthShell({
             className
           )}
         >
-          <aside className="relative hidden min-h-[610px] overflow-hidden bg-[#07162d] bg-[url('/home2.png')] bg-cover bg-center p-9 text-white lg:block">
+          <aside className="relative hidden min-h-[610px] overflow-hidden bg-[#07162d] bg-[url('/home2.jpg')] bg-cover bg-center p-9 text-white lg:block">
             <div className="absolute inset-0 bg-[linear-gradient(160deg,rgba(5,15,32,0.94),rgba(9,26,52,0.84)_48%,rgba(11,29,58,0.64)),radial-gradient(circle_at_85%_20%,rgba(46,97,255,0.22),transparent_32%)]" />
             <div className="absolute inset-x-0 bottom-0 h-72 bg-[linear-gradient(180deg,transparent,rgba(4,14,31,0.96))]" />
             <div className="relative z-10 flex h-full flex-col">

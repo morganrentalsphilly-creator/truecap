@@ -1,5 +1,6 @@
 "use server";
 
+import { z } from "zod";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getEntitlementsForUser } from "@/lib/entitlements";
 import {
@@ -85,7 +86,15 @@ export async function getExitScenarioSnapshotAction(
     };
   }
 
-  const analysisId = request.analysisId.trim();
+  // Defense-in-depth: validate analysisId is a UUID at runtime. TypeScript
+  // erases the `string` type at runtime, so without this check a hostile
+  // client could send arbitrary values and surface a confusing crash
+  // instead of a clean validation error.
+  const idParse = z.string().uuid().safeParse(request?.analysisId);
+  if (!idParse.success) {
+    return { ok: false, code: "NOT_FOUND", message: "Invalid analysis ID." };
+  }
+  const analysisId = idParse.data;
   const { data: savedAnalysis, error: savedAnalysisError } = await supabase
     .from("saved_analyses")
     .select("id, appreciation_rate_pct, selling_cost_pct, form_snapshot")

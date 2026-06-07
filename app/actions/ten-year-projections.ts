@@ -1,5 +1,6 @@
 "use server";
 
+import { z } from "zod";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getEntitlementsForUser } from "@/lib/entitlements";
 import {
@@ -71,7 +72,12 @@ export async function getTenYearProjectionSnapshotAction(
     };
   }
 
-  const analysisId = request.analysisId.trim();
+  // Defense-in-depth UUID validation (TS types erased at runtime).
+  const idParse = z.string().uuid().safeParse(request?.analysisId);
+  if (!idParse.success) {
+    return { ok: false, code: "NOT_FOUND", message: "Invalid analysis ID." };
+  }
+  const analysisId = idParse.data;
   const { data: savedAnalysis, error: savedAnalysisError } = await supabase
     .from("saved_analyses")
     .select("id")
