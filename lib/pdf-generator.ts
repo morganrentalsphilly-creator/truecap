@@ -489,17 +489,16 @@ function drawHeader(
     { align: "right" },
   );
 
-  // Header underline — split into two segments for designed feel.
-  // A short brand-color accent (36pt) on the left sits above a
-  // continuous neutral hairline for the rest of the width. Tiny
-  // detail; cumulative effect with the other refinements lifts the
-  // whole header from "report export" to "designed document."
-  setStroke(doc, themeColor);
-  doc.setLineWidth(1.5);
-  doc.line(M.left, 70, M.left + 36, 70);
+  // Header divider — a single calm hairline across the full width.
+  // Previously this had a brand-color accent segment on the left,
+  // which visually read as an "underline" beneath "Prepared by
+  // [Name]" (because the accent sat directly below that text) and
+  // made the left side feel like a designed block while the right
+  // side felt like loose text. A continuous neutral hairline closes
+  // the header as one unit without privileging either side.
   setStroke(doc, COLOR.line);
   doc.setLineWidth(0.5);
-  doc.line(M.left + 40, 70, PAGE.w - M.right, 70);
+  doc.line(M.left, 72, PAGE.w - M.right, 72);
 
   // Footer area — brand-color accent line sits 4pt above the
   // standard divider line. Subtle but present brand mark on every
