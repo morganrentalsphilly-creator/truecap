@@ -413,33 +413,52 @@ function drawHeader(
     }
   }
 
-  // Subtitle below logo. Fallback chain so branded reports never show
-  // TrueCap's calculator tagline (which clashes with a non-calculator
-  // company's brand — e.g. a real-estate firm with a logo but no
-  // custom tagline shouldn't read "Professional real estate investment
-  // calculator" under their logo):
-  //   1) the user's tagline if set
-  //   2) the user's company name if branding is configured (any field)
-  //   3) the TrueCap default ONLY when no branding is configured at all
+  // Subtitle below logo. Re-ordered fallback chain so the most
+  // prominent spot in the document (right next to the logo) carries
+  // the most useful attribution rather than redundant info:
+  //   1) tagline if set (user explicit choice always wins)
+  //   2) "Prepared by [contact_name]" if contact name set — the
+  //      logo already shows the company name, so re-displaying it
+  //      here is redundant; the preparer's name is the missing
+  //      attribution that users actually want visible.
+  //   3) company name only when there's a contact gap (rare)
+  //   4) TrueCap default ONLY when no branding at all
   const hasAnyBranding =
     Boolean(
       branding?.logoUrl ||
         branding?.companyName ||
         branding?.tagline ||
-        branding?.primaryColorHex
+        branding?.primaryColorHex ||
+        branding?.contactName
     );
-  const subtitle =
-    (branding?.tagline && branding.tagline.trim()) ||
-    (hasAnyBranding && branding?.companyName?.trim()
-      ? branding.companyName.trim()
-      : "") ||
-    (hasAnyBranding
-      ? "" // suppress TrueCap copy for branded reports
-      : "Professional real estate investment calculator");
+  let subtitle: string;
+  if (branding?.tagline && branding.tagline.trim()) {
+    subtitle = branding.tagline.trim();
+  } else if (branding?.contactName && branding.contactName.trim()) {
+    subtitle = `Prepared by ${branding.contactName.trim()}`;
+  } else if (hasAnyBranding && branding?.companyName?.trim()) {
+    subtitle = branding.companyName.trim();
+  } else if (hasAnyBranding) {
+    subtitle = ""; // suppress TrueCap copy for branded reports
+  } else {
+    subtitle = "Professional real estate investment calculator";
+  }
   if (subtitle) {
-    setText(doc, COLOR.sub);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(10);
+    // When the subtitle is the "Prepared by [Name]" attribution, render
+    // it bolder and in COLOR.ink so it actually reads as the document's
+    // authorship line instead of mumbled gray copy. Other subtitle
+    // variants (tagline, company name, default TrueCap copy) stay in
+    // the lighter subtitle treatment.
+    const isPreparedBy = subtitle.startsWith("Prepared by ");
+    if (isPreparedBy) {
+      setText(doc, COLOR.ink);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(11);
+    } else {
+      setText(doc, COLOR.sub);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+    }
     doc.text(subtitle, M.left, 62);
   }
 
@@ -698,26 +717,26 @@ function pageInputs(
     ["Year built", String(d.property.yearBuilt)],
     ["Purchase price", fmtCurrency(d.property.purchasePrice)],
     ["Template", d.property.template],
-  ]);
+  ], themeColor);
   drawInputBlock(doc, M.left + colW + 12, y, colW, rowH, "Financing", [
     ["Down payment", `${d.financing.downPaymentPct}% (${fmtCurrency(d.financing.downPayment)})`],
     ["Interest rate", `${d.financing.interestRate}%`],
     ["Loan term", `${d.financing.loanTerm} yrs`],
     ["Closing costs", `${d.financing.closingCostsPct}% (${fmtCurrency(d.financing.closingCosts)})`],
-  ]);
+  ], themeColor);
   y += rowH + 10;
   drawInputBlock(doc, M.left, y, colW, rowH, "Operating Expenses", [
     ["Property tax / Insurance", `${d.expenses.propertyTaxPct}% / ${d.expenses.insurancePct}%`],
     ["Maintenance / Vacancy", `${d.expenses.maintenancePct}% / ${d.expenses.vacancyPct}%`],
     ["Management / CapEx", `${d.expenses.managementPct}% / ${d.expenses.capexPct}%`],
     ["HOA / Utilities", `${fmtCurrency(d.expenses.hoaMonthly)}/mo  ·  ${fmtCurrency(d.expenses.utilitiesMonthly)}/mo`],
-  ]);
+  ], themeColor);
   drawInputBlock(doc, M.left + colW + 12, y, colW, rowH, "Assumptions", [
     ["Rent growth / Expense growth", `${d.expenses.rentGrowth}% / ${d.expenses.expenseGrowth}%`],
     ["Appreciation", `${d.expenses.appreciation}%/yr`],
     ["Selling cost", `${d.expenses.sellingCost}%`],
     ["Tax rate", `${d.expenses.taxRate}%`],
-  ]);
+  ], themeColor);
   y += rowH + 22;
 
   // Units
@@ -897,9 +916,15 @@ function drawInputBlock(
   h: number,
   title: string,
   rows: Array<[string, string]>,
+  themeColor?: string,
 ) {
   card(doc, x, y, w, h);
-  setText(doc, COLOR.primary);
+  // Kicker color uses the brand color when set so PROPERTY / FINANCING /
+  // OPERATING EXPENSES / ASSUMPTIONS read in the user's brand on
+  // branded reports instead of TrueCap blue.
+  const kickerColor =
+    themeColor && isValidHex(themeColor) ? themeColor : COLOR.primary;
+  setText(doc, kickerColor);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8);
   doc.text(title.toUpperCase(), x + 12, y + 16);
