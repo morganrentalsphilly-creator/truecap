@@ -31,48 +31,12 @@ export default async function BrandingSettingsPage() {
   // saved row (so re-upgrade is friction-free). We just disable the
   // form in the UI when not entitled.
   const result = await getBranding();
-  let initialBranding = result.ok ? result.branding : null;
+  const initialBranding = result.ok ? result.branding : null;
 
-  // Pre-fill contact_name + contact_email from the user's profile when
-  // they haven't saved any branding yet. This is the single most common
-  // "why isn't 'Prepared by [me]' showing on my PDF?" failure mode —
-  // users assume the contact block auto-pulls from their profile. With
-  // these defaults, the contact attribution shows up the moment they
-  // save branding (even if they touch nothing else).
-  if (!initialBranding) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("first_name, last_name")
-      .eq("id", user.id)
-      .maybeSingle();
-    const fallbackName =
-      (user.user_metadata?.full_name as string | undefined)?.trim() ||
-      (user.user_metadata?.name as string | undefined)?.trim() ||
-      "";
-    const first = profile?.first_name ?? fallbackName.split(" ")[0] ?? "";
-    const last =
-      profile?.last_name ?? fallbackName.split(" ").slice(1).join(" ") ?? "";
-    const combinedName = [first, last].filter(Boolean).join(" ").trim();
-    if (combinedName || user.email) {
-      // Synthesize a "draft" branding row with just the contact defaults
-      // pre-filled. The form treats it as initial form state; nothing
-      // is written to the DB until the user clicks Save.
-      initialBranding = {
-        id: "",
-        user_id: user.id,
-        logo_url: null,
-        company_name: null,
-        tagline: null,
-        primary_color_hex: null,
-        contact_name: combinedName || null,
-        contact_email: user.email ?? null,
-        contact_phone: null,
-        contact_website: null,
-        created_at: "",
-        updated_at: "",
-      };
-    }
-  }
+  // Profile pre-fill for contact fields was removed — the Contact
+  // block (name/email/phone/website) is no longer part of the
+  // branding UI now that "Prepared by [Name]" was removed from the
+  // PDF entirely.
 
   return (
     <>

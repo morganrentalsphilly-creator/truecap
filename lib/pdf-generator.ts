@@ -178,6 +178,40 @@ function hexToRgba(hex: string, alpha: number): string {
   const [r, g, b] = hexToRgb(hex);
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
+
+/**
+ * Maps internal property-type slugs to professionally-formatted labels.
+ * The DB stores "single-family" but PDF readers expect "Single Family."
+ */
+const PROPERTY_TYPE_LABELS: Record<string, string> = {
+  "single-family": "Single Family",
+  "multi-family": "Multi-Family",
+  "owner-occupant": "Owner Occupant",
+};
+function formatPropertyType(type: string): string {
+  return PROPERTY_TYPE_LABELS[type] ?? type;
+}
+
+/**
+ * Splits an address into "primary" (street) and "secondary" (city, state,
+ * zip, country) on the first comma. Used to render the hero panel with
+ * a large street headline and a smaller city/state subtitle line.
+ *   "538 Turner St, Philadelphia, PA 19122, USA" →
+ *     { primary: "538 Turner St",
+ *       secondary: "Philadelphia, PA 19122, USA" }
+ */
+function splitAddress(address: string): {
+  primary: string;
+  secondary: string;
+} {
+  const trimmed = address.trim();
+  const firstComma = trimmed.indexOf(",");
+  if (firstComma < 0) return { primary: trimmed, secondary: "" };
+  return {
+    primary: trimmed.slice(0, firstComma).trim(),
+    secondary: trimmed.slice(firstComma + 1).trim(),
+  };
+}
 const setFill = (doc: jsPDF, hex: string) => doc.setFillColor(...hexToRgb(hex));
 const setStroke = (doc: jsPDF, hex: string) => doc.setDrawColor(...hexToRgb(hex));
 const setText = (doc: jsPDF, hex: string) => doc.setTextColor(...hexToRgb(hex));
@@ -413,80 +447,42 @@ function drawHeader(
     }
   }
 
-  // Subtitle below logo. Re-ordered fallback chain so the most
-  // prominent spot in the document (right next to the logo) carries
-  // the most useful attribution rather than redundant info:
-  //   1) tagline if set (user explicit choice always wins)
-  //   2) "Prepared by [contact_name]" if contact name set — the
-  //      logo already shows the company name, so re-displaying it
-  //      here is redundant; the preparer's name is the missing
-  //      attribution that users actually want visible.
-  //   3) company name only when there's a contact gap (rare)
-  //   4) TrueCap default ONLY when no branding at all
-  const hasAnyBranding =
-    Boolean(
-      branding?.logoUrl ||
-        branding?.companyName ||
-        branding?.tagline ||
-        branding?.primaryColorHex ||
-        branding?.contactName
-    );
-  let subtitle: string;
-  if (branding?.tagline && branding.tagline.trim()) {
-    subtitle = branding.tagline.trim();
-  } else if (branding?.contactName && branding.contactName.trim()) {
-    subtitle = `Prepared by ${branding.contactName.trim()}`;
-  } else if (hasAnyBranding && branding?.companyName?.trim()) {
-    subtitle = branding.companyName.trim();
-  } else if (hasAnyBranding) {
-    subtitle = ""; // suppress TrueCap copy for branded reports
-  } else {
-    subtitle = "Professional real estate investment calculator";
-  }
-  if (subtitle) {
-    // When the subtitle is the "Prepared by [Name]" attribution, render
-    // it bolder and in COLOR.ink so it actually reads as the document's
-    // authorship line instead of mumbled gray copy. Other subtitle
-    // variants (tagline, company name, default TrueCap copy) stay in
-    // the lighter subtitle treatment.
-    const isPreparedBy = subtitle.startsWith("Prepared by ");
-    if (isPreparedBy) {
-      setText(doc, COLOR.ink);
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(11);
-    } else {
-      setText(doc, COLOR.sub);
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(10);
-    }
-    doc.text(subtitle, M.left, 62);
-  }
+  // Header subtitle ("Prepared by [Name]") was removed per design
+  // direction — header now shows the logo alone on the left, with the
+  // document title block on the right. No attribution text in the
+  // header.
 
-  // Right side title block — aligned to share a baseline grid with
-  // the left side (logo + "Prepared by" subtitle). Both sides span
-  // the same vertical range so the header reads as one cohesive
-  // designed unit rather than two floating columns:
-  //   y ≈ 22  → ANALYSIS REPORT kicker  (aligned ~with logo top y=18)
-  //   y ≈ 44  → Investment Analysis     (large 15pt bold)
-  //   y ≈ 62  → Generated [date]        (aligned with subtitle baseline)
+  // Right side title block. All three lines share the SAME left x so
+  // their left edges align cleanly:
+  //   ANALYSIS REPORT     (small brand-color kicker)
+  //   Investment Analysis (15pt bold — the dominant element)
+  //   Generated [date]    (small muted date)
+  // We measure "Investment Analysis" first, then position all three
+  // lines so their right edges land at PAGE.w - M.right while their
+  // left edges share a common anchor.
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(15);
+  const titleText = "Investment Analysis";
+  const titleWidth = doc.getTextWidth(titleText);
+  const titleLeftX = PAGE.w - M.right - titleWidth;
+
   setText(doc, themeColor);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7);
   doc.setCharSpace(1.2);
-  doc.text("ANALYSIS REPORT", PAGE.w - M.right, 26, { align: "right" });
+  doc.text("ANALYSIS REPORT", titleLeftX, 26);
   doc.setCharSpace(0);
   setText(doc, COLOR.ink);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(15);
-  doc.text("Investment Analysis", PAGE.w - M.right, 46, { align: "right" });
+  doc.text(titleText, titleLeftX, 46);
   setText(doc, COLOR.sub);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
   doc.text(
     `Generated ${generatedAt.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`,
-    PAGE.w - M.right,
-    62, // baseline alignment with "Prepared by" subtitle at y=62
-    { align: "right" },
+    titleLeftX,
+    62,
   );
 
   // Header divider — a single calm hairline across the full width.
@@ -518,24 +514,14 @@ function drawHeader(
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
 
-  // Footer-left text — shows preparer attribution when branding is
-  // configured so the report carries the user's name on every page,
-  // not just buried in a card on page 1.
-  // Priority:
-  //   1) "Prepared by [contact_name] · [company_name]" if both set
-  //   2) "Prepared by [contact_name]" if only the name is set
-  //   3) "[company_name]" alone if only company is set
-  //   4) "Investment Report" default for unbranded reports
+  // Footer-left text. Priority:
+  //   1) Company name when branded
+  //   2) "Investment Report" default when unbranded
+  // The "Prepared by [Name]" attribution was removed per design.
   let footerLeft = "Investment Report";
-  if (branding?.contactName?.trim() && branding?.companyName?.trim()) {
-    footerLeft = `Prepared by ${branding.contactName.trim()} · ${branding.companyName.trim()}`;
-  } else if (branding?.contactName?.trim()) {
-    footerLeft = `Prepared by ${branding.contactName.trim()}`;
-  } else if (branding?.companyName?.trim()) {
+  if (branding?.companyName?.trim()) {
     footerLeft = branding.companyName.trim();
   }
-  // Truncate hard at 80 chars so a long company name + person name
-  // can't push into the centered "Confidential" line.
   if (footerLeft.length > 80) footerLeft = footerLeft.slice(0, 77) + "…";
 
   doc.text(footerLeft, M.left, footerTextY);
@@ -702,47 +688,49 @@ function pageInputs(
   // that swaps to the user's brand color.
   const themeColor = resolveThemeColor(branding);
 
-  // Subject Property kicker — small brand-color label above the
-  // address panel. Matches the typeset character-spacing treatment
-  // of the ANALYSIS REPORT kicker in the header for visual rhyme.
-  setText(doc, themeColor);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(7.5);
-  doc.setCharSpace(1.2);
-  doc.text("SUBJECT PROPERTY", M.left, y);
-  doc.setCharSpace(0);
-  y += 14;
-
-  // Hero panel — refined for elegance. 64pt tall, 22pt address font
-  // (down from 24pt — 24pt was too aggressive, 22pt reads as confident
-  // but not loud). Thin white inner accent line between the address
-  // and property details adds editorial polish. Slightly smaller
-  // corner radius (10pt) for sharper modern feel.
-  const heroHeight = 64;
+  // Hero panel — taller (78pt) to fit a two-line address treatment:
+  // the street headline + a city/state/zip subtitle line beneath it.
+  // SUBJECT PROPERTY kicker removed per design direction. Larger
+  // breathing room makes the address panel read as the editorial
+  // centerpiece of page 1.
+  const heroHeight = 78;
   setFill(doc, heroPanelColor);
   doc.roundedRect(M.left, y, SAFE.w, heroHeight, 10, 10, "F");
+
+  // Split "538 Turner St, Philadelphia, PA 19122, USA" into a big
+  // street headline + a smaller city/state subtitle so the address
+  // reads as a proper two-tier typographic hierarchy.
+  const addressParts = splitAddress(d.property.address);
+
   setText(doc, "#FFFFFF");
   doc.setFont("helvetica", "bold");
   doc.setFontSize(22);
-  doc.text(d.property.address, M.left + 22, y + 30);
+  doc.text(addressParts.primary, M.left + 22, y + 30);
 
-  // Thin white inner accent line between address and property details.
-  // Subtle structural element that signals "designed" — like a
-  // magazine title page divider.
+  if (addressParts.secondary) {
+    setText(doc, "#CBD5E1");
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(11);
+    doc.text(addressParts.secondary, M.left + 22, y + 46);
+  }
+
+  // Thin white inner accent line between address subtitle and property
+  // details row. Editorial divider treatment.
   setStroke(doc, "#FFFFFF");
   doc.setLineWidth(0.6);
-  doc.line(M.left + 22, y + 39, M.left + 22 + 28, y + 39);
+  doc.line(M.left + 22, y + 54, M.left + 22 + 28, y + 54);
 
   setText(doc, "#CBD5E1");
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
   // Singular/plural fix on "unit/units" so a single-family deal doesn't
-  // read as "1 units."
+  // read as "1 units." Property type formatted to a proper label
+  // ("single-family" → "Single Family").
   const unitsLabel = d.units.length === 1 ? "1 unit" : `${d.units.length} units`;
   doc.text(
-    `${d.property.type}  ·  Built ${d.property.yearBuilt}  ·  ${unitsLabel}  ·  Purchase ${fmtCurrency(d.property.purchasePrice)}`,
+    `${formatPropertyType(d.property.type)}  ·  Built ${d.property.yearBuilt}  ·  ${unitsLabel}  ·  Purchase ${fmtCurrency(d.property.purchasePrice)}`,
     M.left + 22,
-    y + 52,
+    y + 68,
   );
 
   // Restore stroke defaults for downstream draws
@@ -761,7 +749,7 @@ function pageInputs(
   const rowH = 92;
 
   drawInputBlock(doc, M.left, y, colW, rowH, "Property", [
-    ["Type", d.property.type],
+    ["Type", formatPropertyType(d.property.type)],
     ["Year built", String(d.property.yearBuilt)],
     ["Purchase price", fmtCurrency(d.property.purchasePrice)],
     ["Template", d.property.template],

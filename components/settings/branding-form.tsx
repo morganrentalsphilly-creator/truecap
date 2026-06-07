@@ -38,12 +38,8 @@ export function BrandingForm({ initial }: { initial: BrandingRow | null }) {
   const [primaryColor, setPrimaryColor] = useState(
     initial?.primary_color_hex ?? ""
   );
-  const [contactName, setContactName] = useState(initial?.contact_name ?? "");
-  const [contactEmail, setContactEmail] = useState(initial?.contact_email ?? "");
-  const [contactPhone, setContactPhone] = useState(initial?.contact_phone ?? "");
-  const [contactWebsite, setContactWebsite] = useState(
-    initial?.contact_website ?? ""
-  );
+  // Contact state vars removed — the UI no longer exposes a Contact
+  // block (no "Prepared by" rendering anywhere in the PDF anymore).
   const [logoUrl, setLogoUrl] = useState<string | null>(initial?.logo_url ?? null);
 
   const [isPending, startTransition] = useTransition();
@@ -88,10 +84,12 @@ export function BrandingForm({ initial }: { initial: BrandingRow | null }) {
       company_name: companyName || null,
       tagline: tagline || null,
       primary_color_hex: primaryColor || null,
-      contact_name: contactName || null,
-      contact_email: contactEmail || null,
-      contact_phone: contactPhone || null,
-      contact_website: contactWebsite || null,
+      // Contact fields removed from the UI — saved as null to clear
+      // any previously-set values on existing branding rows.
+      contact_name: null,
+      contact_email: null,
+      contact_phone: null,
+      contact_website: null,
       logo_url: logoUrl,
     };
     startTransition(async () => {
@@ -231,51 +229,11 @@ export function BrandingForm({ initial }: { initial: BrandingRow | null }) {
           </Field>
         </section>
 
-        {/* Contact block */}
-        <section className="rounded-2xl border border-border bg-card p-5 sm:p-6 space-y-4">
-          <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
-            Contact block
-          </h2>
-          <p className="text-xs text-muted-foreground">
-            Shown on the cover page so recipients know who to contact about
-            the analysis.
-          </p>
-
-          <Field label="Name">
-            <TextInput
-              value={contactName}
-              onChange={setContactName}
-              placeholder="e.g. Morgan Page"
-              maxLength={120}
-            />
-          </Field>
-          <Field label="Email">
-            <TextInput
-              type="email"
-              value={contactEmail}
-              onChange={setContactEmail}
-              placeholder="e.g. morgan@pagerealty.com"
-              maxLength={180}
-            />
-          </Field>
-          <Field label="Phone">
-            <TextInput
-              value={contactPhone}
-              onChange={setContactPhone}
-              placeholder="e.g. (215) 555-0123"
-              maxLength={40}
-            />
-          </Field>
-          <Field label="Website">
-            <TextInput
-              type="url"
-              value={contactWebsite}
-              onChange={setContactWebsite}
-              placeholder="e.g. https://pagerealty.com"
-              maxLength={240}
-            />
-          </Field>
-        </section>
+        {/* Contact block section removed per design direction. The PDF
+            no longer renders "Prepared by [Name]" anywhere (header,
+            footer, or page-1 card), so collecting contact fields here
+            served no purpose. The DB columns remain so existing saved
+            data isn't lost, but they're no longer exposed in the UI. */}
 
         {/* Save bar */}
         <div className="sticky bottom-0 -mx-4 flex items-center justify-end gap-3 border-t border-border bg-background/95 px-4 py-3 backdrop-blur sm:mx-0 sm:rounded-2xl sm:border">
@@ -343,27 +301,8 @@ export function BrandingForm({ initial }: { initial: BrandingRow | null }) {
               <p>123 Sample Street, Philadelphia PA</p>
               <p className="mt-1 text-[10px]">Prepared {todayShort()}</p>
             </div>
-            {(contactName || contactEmail || contactPhone || contactWebsite) && (
-              <div className="border-t border-border pt-3 text-xs">
-                <p className="font-bold uppercase tracking-wide text-muted-foreground">
-                  Prepared by
-                </p>
-                {contactName && (
-                  <p className="font-semibold text-foreground">{contactName}</p>
-                )}
-                {contactEmail && (
-                  <p className="text-muted-foreground">{contactEmail}</p>
-                )}
-                {contactPhone && (
-                  <p className="text-muted-foreground">{contactPhone}</p>
-                )}
-                {contactWebsite && (
-                  <p className="text-muted-foreground break-all">
-                    {contactWebsite}
-                  </p>
-                )}
-              </div>
-            )}
+            {/* Contact / "Prepared by" preview block removed — the
+                actual PDF no longer renders this. */}
           </div>
         </div>
         <p className="mt-3 text-xs text-muted-foreground">
