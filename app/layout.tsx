@@ -196,6 +196,48 @@ gtag('config', '${GOOGLE_ADS_ID}');`,
         </head>
       )}
       <body className="font-sans antialiased bg-background text-foreground">
+        {/* Site-wide structured data — Organization + WebSite. Many child
+            pages (especially /vs/* and blog posts) reference the
+            Organization by @id (publisher.@id = `${siteUrl}/#organization`).
+            Without this block defining the entity, those references were
+            dangling — Google's Rich Results Test would flag them. The
+            WebSite schema also wires the /search SearchAction so Google
+            can render a sitelinks search box on brand SERPs. */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@graph": [
+                {
+                  "@type": "Organization",
+                  "@id": `${siteUrl}/#organization`,
+                  name: "TrueCap",
+                  url: siteUrl,
+                  logo: `${siteUrl}/icon-512x512.png`,
+                  description:
+                    "Rental property investment analyzer — cash flow, cap rate, DSCR, deal score, plain-English verdict in 60 seconds.",
+                  sameAs: [],
+                },
+                {
+                  "@type": "WebSite",
+                  "@id": `${siteUrl}/#website`,
+                  url: siteUrl,
+                  name: "TrueCap",
+                  publisher: { "@id": `${siteUrl}/#organization` },
+                  potentialAction: {
+                    "@type": "SearchAction",
+                    target: {
+                      "@type": "EntryPoint",
+                      urlTemplate: `${siteUrl}/search?q={search_term_string}`,
+                    },
+                    "query-input": "required name=search_term_string",
+                  },
+                },
+              ],
+            }),
+          }}
+        />
         {/* Skip-to-content link — invisible until focused, then jumps
             keyboard / screen-reader users straight to <main> so they
             don't have to tab through the nav on every page. Standard
