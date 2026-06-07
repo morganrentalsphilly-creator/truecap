@@ -544,7 +544,38 @@ export async function getSavedAnalysisPdfExportAction(
     .eq("user_id", user.id)
     .is("deleted_at", null);
 
-  if (cachedPdfUrl && cachedVersion === PDF_SNAPSHOT_VERSION) {
+  // Cache check — only serve cached PDF if:
+  //   1) it exists,
+  //   2) its snapshot version matches the current template version, AND
+  //   3) the user has NO branding configured.
+  //
+  // The third condition exists because cached PDFs don't track the
+  // branding state they were generated with. If a user updates their
+  // logo, brand color, or "Prepared by" name, the cached PDF would
+  // still show the old branding indefinitely (until PDF_SNAPSHOT_VERSION
+  // bumped). Bypassing cache for branded users means their changes
+  // always reflect on the next export, at the cost of regenerating
+  // (~3-5s + an upload). Acceptable tradeoff — branded users care
+  // more about accuracy than speed.
+  let hasUserBranding = false;
+  try {
+    const { data: brandingRow } = await supabase
+      .from("branding")
+      .select("id")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    hasUserBranding = Boolean(brandingRow);
+  } catch {
+    // If the branding lookup fails for any reason, fall through to the
+    // normal cache logic. Better to occasionally serve a stale-branded
+    // PDF than to error out the whole export flow.
+  }
+
+  if (
+    cachedPdfUrl &&
+    cachedVersion === PDF_SNAPSHOT_VERSION &&
+    !hasUserBranding
+  ) {
     return { ok: true, source: "cache", pdfUrl: cachedPdfUrl };
   }
 
