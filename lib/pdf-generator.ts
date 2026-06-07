@@ -462,31 +462,30 @@ function drawHeader(
     doc.text(subtitle, M.left, 62);
   }
 
-  // Right side title block — refined editorial treatment.
-  // Three-tier hierarchy with slightly tighter spacing for a more
-  // polished, magazine-cover feel:
-  //   ANALYSIS REPORT     (small brand-color kicker with tracking)
-  //   Investment Analysis (15pt bold — confident but not shouting)
-  //   Generated [date]    (small muted date)
-  // The kicker uses character spacing (charSpace) to feel typeset
-  // rather than slapped on.
+  // Right side title block — aligned to share a baseline grid with
+  // the left side (logo + "Prepared by" subtitle). Both sides span
+  // the same vertical range so the header reads as one cohesive
+  // designed unit rather than two floating columns:
+  //   y ≈ 22  → ANALYSIS REPORT kicker  (aligned ~with logo top y=18)
+  //   y ≈ 44  → Investment Analysis     (large 15pt bold)
+  //   y ≈ 62  → Generated [date]        (aligned with subtitle baseline)
   setText(doc, themeColor);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7);
   doc.setCharSpace(1.2);
-  doc.text("ANALYSIS REPORT", PAGE.w - M.right, 30, { align: "right" });
+  doc.text("ANALYSIS REPORT", PAGE.w - M.right, 26, { align: "right" });
   doc.setCharSpace(0);
   setText(doc, COLOR.ink);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(15);
-  doc.text("Investment Analysis", PAGE.w - M.right, 49, { align: "right" });
+  doc.text("Investment Analysis", PAGE.w - M.right, 46, { align: "right" });
   setText(doc, COLOR.sub);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
   doc.text(
     `Generated ${generatedAt.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`,
     PAGE.w - M.right,
-    61,
+    62, // baseline alignment with "Prepared by" subtitle at y=62
     { align: "right" },
   );
 
@@ -896,10 +895,11 @@ function pageInputs(
   doc.setFontSize(14);
   doc.text(`${d.performance.recommendation} — ${d.performance.risk}`, M.left + 16, y + 34);
 
-  // Deal Score badge — refined right-aligned typography (not a pill).
-  // Reads as "Deal Score 45 / 100" with the score number prominent and
-  // the "/100" denominator smaller for context. Cleaner than a colored
-  // pill — feels editorial rather than promotional.
+  // Deal Score badge — refined right-aligned typography.
+  // Reads as "52 / 100" with the score number prominent on the LEFT
+  // and the "/100" denominator smaller on the RIGHT (standard
+  // numerator-then-denominator reading order). Cleaner than a colored
+  // pill — editorial rather than promotional.
   const scoreColor = getScorePillColor(d.performance.dealScore);
   setText(doc, COLOR.sub);
   doc.setFont("helvetica", "bold");
@@ -907,22 +907,34 @@ function pageInputs(
   doc.setCharSpace(0.8);
   doc.text("DEAL SCORE", PAGE.w - M.right - 16, y + 16, { align: "right" });
   doc.setCharSpace(0);
+
+  // Render "/ 100" first (rightmost), measure its width, then render
+  // the big score number left of it. This way the visual order is
+  // "52 / 100", not "/ 100 52" (which was the previous bug).
+  setText(doc, COLOR.sub);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  const denominatorText = " / 100";
+  const denominatorWidth = doc.getTextWidth(denominatorText);
+  doc.text(denominatorText, PAGE.w - M.right - 16, y + 36, { align: "right" });
+
   setText(doc, scoreColor.bg);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(20);
   const scoreStr = String(d.performance.dealScore);
-  const scoreNumberWidth = doc.getTextWidth(scoreStr);
-  doc.text(scoreStr, PAGE.w - M.right - 16, y + 36, { align: "right" });
-  setText(doc, COLOR.sub);
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
   doc.text(
-    " / 100",
-    PAGE.w - M.right - 16 - scoreNumberWidth,
+    scoreStr,
+    PAGE.w - M.right - 16 - denominatorWidth,
     y + 36,
     { align: "right" }
   );
 
+  // Rationale body — explicitly reset character spacing AND re-set
+  // the font right before rendering. jsPDF's text state is sticky;
+  // if anything upstream set charSpace and forgot to reset, the
+  // body paragraph would render with letter-spacing leaks. Defensive
+  // reset here guarantees the body always reads cleanly.
+  doc.setCharSpace(0);
   setText(doc, COLOR.text);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
