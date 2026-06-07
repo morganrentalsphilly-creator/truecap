@@ -14,9 +14,9 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "Closing Cost Calculator | Free Rental Property Tool | TrueCap",
+  title: "Closing Cost Calculator | Free Rental Property Tool",
   description:
-    "Free closing cost calculator for rental property purchases. Origination, title, transfer tax, escrow, prepaid items — all line items broken out. Plus what a typical total looks like.",
+    "Free closing cost calculator for rental purchases. Origination, title, transfer tax, escrow, prepaids — every line item, plus a typical total.",
   keywords: [
     "closing cost calculator",
     "rental property closing costs",
@@ -88,7 +88,7 @@ export default function ClosingCostCalculatorPage() {
     applicationSubCategory: "Real Estate Calculator",
     operatingSystem: "Web",
     description:
-      "Free closing cost calculator for rental property purchases. Origination, title, transfer tax, escrow, prepaid items — all line items broken out. Plus what a typical total looks like.",
+      "Free closing cost calculator for rental purchases. Origination, title, transfer tax, escrow, prepaids — every line item, plus a typical total.",
     url: `${siteUrl}/tools/closing-cost-calculator`,
     offers: {
       "@type": "Offer",

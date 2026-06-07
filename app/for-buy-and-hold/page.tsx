@@ -27,9 +27,9 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
 
 export const metadata: Metadata = {
-  title: "For Buy-and-Hold Investors | TrueCap",
+  title: "For Buy-and-Hold Investors",
   description:
-    "Underwrite rental properties for long-term cash flow + appreciation. Cap rate, CoC, DSCR, 10-year projections, tax strategy — every number that matters for a hold strategy.",
+    "Underwrite rentals for long-term cash flow + appreciation. Cap rate, CoC, DSCR, 10-year projections, tax strategy — every number that matters.",
   keywords: [
     "buy and hold calculator",
     "rental property analyzer",

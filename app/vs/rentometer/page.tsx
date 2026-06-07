@@ -17,9 +17,9 @@ import { ComparisonFaq, type FaqItem } from "@/components/marketing/comparison-f
 import { getSiteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
-  title: "TrueCap vs Rentometer — honest comparison | TrueCap",
+  title: "TrueCap vs Rentometer — honest comparison",
   description:
-    "Rentometer is a rent estimator. TrueCap is a full rental property underwriter that also estimates rent. Honest comparison of the two, when to use each, and what TrueCap adds.",
+    "Rentometer estimates rent. TrueCap underwrites the full deal — including the rent. Honest comparison: when each tool fits, and what TrueCap adds.",
   keywords: [
     "rentometer alternative",
     "rentometer vs truecap",

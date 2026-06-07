@@ -15,9 +15,9 @@ import { STATES } from "@/lib/states";
 import { getSiteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
-  title: "Rental property investing by state — 15-state comparison | TrueCap",
+  title: "Rental property investing by state — 2026",
   description:
-    "Side-by-side comparison of the 15 best states for rental property investing in 2026. Property tax, landlord laws, eviction timelines, top cities, and which strategies fit each state.",
+    "The 15 best states for rental investing in 2026, side-by-side. Property tax, landlord laws, eviction timelines, top cities, strategies that fit each.",
   keywords: [
     "best states for rental property investors",
     "rental property by state",

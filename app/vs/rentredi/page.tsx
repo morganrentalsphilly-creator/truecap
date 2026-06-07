@@ -29,7 +29,7 @@ import { ComparisonFaq, type FaqItem } from "@/components/marketing/comparison-f
 import { getSiteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
-  title: "TrueCap vs RentRedi — honest comparison | TrueCap",
+  title: "TrueCap vs RentRedi — honest comparison",
   description:
     "RentRedi collects rent. TrueCap decides if the deal cash-flows. Honest comparison of when each tool fits — and why most landlords end up using both.",
   keywords: [

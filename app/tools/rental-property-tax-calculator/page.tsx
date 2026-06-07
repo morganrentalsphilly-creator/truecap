@@ -14,9 +14,9 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "Rental Property Tax Calculator | Schedule E + Depreciation | TrueCap",
+  title: "Rental Property Tax Calculator — Schedule E",
   description:
-    "Free rental property tax calculator. Models Schedule E taxable income, depreciation (27.5-year), mortgage interest deduction, and after-tax cash flow. Plus the depreciation tax shield value.",
+    "Free rental property tax calculator. Models Schedule E taxable income, 27.5-year depreciation, mortgage interest, and after-tax cash flow.",
   keywords: [
     "rental property tax calculator",
     "schedule E calculator",
@@ -101,7 +101,7 @@ export default function RentalPropertyTaxCalculatorPage() {
     applicationSubCategory: "Real Estate Calculator",
     operatingSystem: "Web",
     description:
-      "Free rental property tax calculator. Models Schedule E taxable income, depreciation (27.5-year), mortgage interest deduction, and after-tax cash flow. Plus the depreciation tax shield value.",
+      "Free rental property tax calculator. Models Schedule E taxable income, 27.5-year depreciation, mortgage interest, and after-tax cash flow.",
     url: `${siteUrl}/tools/rental-property-tax-calculator`,
     offers: {
       "@type": "Offer",

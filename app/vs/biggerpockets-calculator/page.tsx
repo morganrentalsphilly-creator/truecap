@@ -25,9 +25,9 @@ import { ComparisonFaq, type FaqItem } from "@/components/marketing/comparison-f
 import { getSiteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
-  title: "TrueCap vs BiggerPockets Calculator — honest comparison | TrueCap",
+  title: "TrueCap vs BiggerPockets Calculator",
   description:
-    "An honest side-by-side of TrueCap vs the BiggerPockets rental property calculator. Free tier depth, modern UX, address auto-fill, sharing — what each tool does best and when to pick which.",
+    "Honest TrueCap vs BiggerPockets calculator: free tier depth, modern UX, address auto-fill, sharing — what each does best and when to pick which.",
   keywords: [
     "biggerpockets calculator alternative",
     "biggerpockets calculator vs truecap",
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/vs/biggerpockets-calculator" },
   openGraph: {
-    title: "TrueCap vs BiggerPockets Calculator — honest comparison",
+    title: "TrueCap vs BiggerPockets Calculator",
     description:
       "Free-tier depth, modern UX, address auto-fill, mobile, sharing — what each tool is built for.",
     url: "/vs/biggerpockets-calculator",

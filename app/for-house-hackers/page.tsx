@@ -27,7 +27,7 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
 
 export const metadata: Metadata = {
-  title: "For House Hackers | TrueCap",
+  title: "For House Hackers",
   description:
     "Analyze 2-4 unit owner-occupant deals with TrueCap. FHA 3.5% down, your-unit math, rent from other units — the calculator that gets house-hack math right.",
   keywords: [

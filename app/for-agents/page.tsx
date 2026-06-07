@@ -19,7 +19,7 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
 
 export const metadata: Metadata = {
-  title: "For Real Estate Agents | TrueCap",
+  title: "For Real Estate Agents",
   description:
     "Underwrite investor-client deals in 60 seconds. Share a branded analysis link instead of a spreadsheet. Free to start — no signup needed.",
   keywords: [

@@ -28,7 +28,7 @@ import { ComparisonFaq, type FaqItem } from "@/components/marketing/comparison-f
 import { getSiteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
-  title: "TrueCap vs Avail — honest comparison | TrueCap",
+  title: "TrueCap vs Avail — honest comparison",
   description:
     "Avail manages your rentals after closing. TrueCap underwrites them before. Honest side-by-side of when each fits, plus how DIY landlords use both together.",
   keywords: [

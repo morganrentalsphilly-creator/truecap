@@ -20,11 +20,22 @@ import Link from "next/link";
 import { SiteFooter } from "@/components/marketing/site-footer";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy | TrueCap",
+  title: "Privacy Policy",
   description:
     "How TrueCap collects, uses, and protects your information. We don't sell your data. Plain-English privacy policy for the TrueCap rental property analyzer.",
   alternates: { canonical: "/privacy" },
   robots: { index: true, follow: true },
+  // OG block for completeness — these pages aren't typically shared on
+  // social, but absence flags as a gap in any SEO crawler and a sane
+  // social card if someone does post the link is cheap to provide.
+  openGraph: {
+    title: "TrueCap Privacy Policy",
+    description: "How TrueCap collects, uses, and protects your data. We don't sell it.",
+    url: "/privacy",
+    type: "article",
+    images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap Privacy Policy" }],
+  },
+  twitter: { card: "summary_large_image", images: ["/home.jpg"] },
 };
 
 const LAST_UPDATED = "May 24, 2026";

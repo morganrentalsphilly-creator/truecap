@@ -8,9 +8,9 @@ import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 export const metadata: Metadata = {
-  title: "Rehab Cost Estimator | Free Rental Property Calculator | TrueCap",
+  title: "Rehab Cost Estimator | Free Rental Property Calculator",
   description:
-    "Free rehab cost estimator for flips, BRRRRs, and value-add rentals. Sq-ft-based defaults for cosmetic, kitchen, bath, and systems work. Plus how to build an accurate rehab budget.",
+    "Free rehab cost estimator for flips, BRRRRs, and value-add rentals. Sq-ft defaults for cosmetic, kitchen, bath, and systems. Plus how to budget accurately.",
   keywords: [
     "rehab cost estimator",
     "rehab calculator",
@@ -91,7 +91,7 @@ export default function RehabEstimatorPage() {
     applicationSubCategory: "Real Estate Calculator",
     operatingSystem: "Web",
     description:
-      "Free rehab cost estimator for flips, BRRRRs, and value-add rentals. Sq-ft-based defaults for cosmetic, kitchen, bath, and systems work. Plus how to build an accurate rehab budget.",
+      "Free rehab cost estimator for flips, BRRRRs, and value-add rentals. Sq-ft defaults for cosmetic, kitchen, bath, and systems. Plus how to budget accurately.",
     url: `${siteUrl}/tools/rehab-cost-estimator`,
     offers: {
       "@type": "Offer",

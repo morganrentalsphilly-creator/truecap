@@ -23,7 +23,7 @@ import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker"
 import { SiteFooter } from "@/components/marketing/site-footer";
 
 export const metadata: Metadata = {
-  title: "Changelog | TrueCap",
+  title: "Changelog",
   description:
     "What's new in TrueCap — features, improvements, fixes, and content. Updated as we ship.",
   alternates: { canonical: "/changelog" },

@@ -19,9 +19,9 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
-  title: "Real Estate Glossary | TrueCap",
+  title: "Real Estate Glossary",
   description:
-    "Plain-English definitions of every rental-property analysis term — cap rate, cash-on-cash, DSCR, NOI, GRM, BRRRR, depreciation, and 20+ more. Cross-linked to the calculators.",
+    "Plain-English definitions for rental-property analysis — cap rate, CoC, DSCR, NOI, GRM, BRRRR, depreciation, and 20+ more. Linked to the calculators.",
   keywords: [
     "real estate glossary",
     "rental property terms",
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/glossary" },
   openGraph: {
-    title: "Real Estate Glossary | TrueCap",
+    title: "Real Estate Glossary",
     description:
       "Plain-English definitions of every rental-property analysis term. Cross-linked to the calculators.",
     url: "/glossary",

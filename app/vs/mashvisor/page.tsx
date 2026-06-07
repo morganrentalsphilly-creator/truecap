@@ -25,7 +25,7 @@ import { ComparisonFaq, type FaqItem } from "@/components/marketing/comparison-f
 import { getSiteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
-  title: "TrueCap vs Mashvisor — honest comparison | TrueCap",
+  title: "TrueCap vs Mashvisor — honest comparison",
   description:
     "TrueCap vs Mashvisor for rental investors. Per-deal underwriting (TrueCap) vs market heatmaps + STR data (Mashvisor). Feature matrix + when each wins.",
   keywords: [

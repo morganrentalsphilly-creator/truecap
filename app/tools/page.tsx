@@ -13,12 +13,12 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
-  title: "Free Real Estate Calculators | TrueCap",
+  title: "Free Real Estate Calculators",
   description:
     "Free, no-signup rental property calculators. Cap rate, cash-on-cash, BRRRR, 1% rule, and more — backed by the same math that powers the TrueCap full analyzer.",
   alternates: { canonical: "/tools" },
   openGraph: {
-    title: "Free Real Estate Calculators | TrueCap",
+    title: "Free Real Estate Calculators",
     description:
       "Fourteen free rental property calculators — cap rate, cash-on-cash, BRRRR, DSCR, NOI, mortgage, GRM, rehab, 1% rule, break-even, ROI, closing cost, vacancy rate, rental property tax. No signup.",
     url: "/tools",

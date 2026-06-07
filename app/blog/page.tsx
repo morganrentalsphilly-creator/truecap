@@ -22,7 +22,7 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
-  title: "Blog | TrueCap",
+  title: "Blog",
   description:
     "Deep dives on rental property analysis, real estate math, and underwriting best practices from the team behind TrueCap.",
   alternates: { canonical: "/blog" },

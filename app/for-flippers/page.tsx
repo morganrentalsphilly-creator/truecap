@@ -18,7 +18,7 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
 
 export const metadata: Metadata = {
-  title: "For Fix & Flippers | TrueCap",
+  title: "For Fix & Flippers",
   description:
     "Underwrite a flip in 60 seconds. Model ARV, rehab cost, holding cost, net profit, break-even, and annualized ROI. Free to start.",
   keywords: [

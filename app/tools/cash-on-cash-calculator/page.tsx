@@ -8,9 +8,9 @@ import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 export const metadata: Metadata = {
-  title: "Cash-on-Cash Return Calculator | Free Rental Property Tool | TrueCap",
+  title: "Cash-on-Cash Return Calculator — Free",
   description:
-    "Free cash-on-cash return calculator for rental property. Computes annual cash flow ÷ cash invested with built-in mortgage math. Plus what counts as a good CoC return.",
+    "Free cash-on-cash return calculator. Annual cash flow ÷ cash invested with built-in mortgage math. Plus what counts as a good CoC return.",
   keywords: [
     "cash on cash calculator",
     "cash on cash return calculator",
@@ -94,7 +94,7 @@ export default function CoCCalculatorPage() {
     applicationSubCategory: "Real Estate Calculator",
     operatingSystem: "Web",
     description:
-      "Free cash-on-cash return calculator for rental property. Computes annual cash flow ÷ cash invested with built-in mortgage math. Plus what counts as a good CoC return.",
+      "Free cash-on-cash return calculator. Annual cash flow ÷ cash invested with built-in mortgage math. Plus what counts as a good CoC return.",
     url: `${siteUrl}/tools/cash-on-cash-calculator`,
     offers: {
       "@type": "Offer",

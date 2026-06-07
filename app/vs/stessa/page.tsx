@@ -26,7 +26,7 @@ import { ComparisonFaq, type FaqItem } from "@/components/marketing/comparison-f
 import { getSiteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
-  title: "TrueCap vs Stessa — honest comparison | TrueCap",
+  title: "TrueCap vs Stessa — honest comparison",
   description:
     "TrueCap vs Stessa for rental investors. Underwriting math (TrueCap) vs portfolio bookkeeping (Stessa). Honest feature matrix + when to pick each.",
   keywords: [

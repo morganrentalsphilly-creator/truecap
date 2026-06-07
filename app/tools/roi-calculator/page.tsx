@@ -14,9 +14,9 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "Rental Property ROI Calculator | Free | TrueCap",
+  title: "Rental Property ROI Calculator | Free",
   description:
-    "Free total ROI calculator for rental properties. Combines cash flow + principal paydown + appreciation into one number — the real return on your investment, not just one piece of it.",
+    "Free total ROI calculator. Combines cash flow + principal paydown + appreciation — the real return on a rental, not just one piece of it.",
   keywords: [
     "rental property roi calculator",
     "real estate roi calculator",
@@ -88,7 +88,7 @@ export default function RoiCalculatorPage() {
     applicationSubCategory: "Real Estate Calculator",
     operatingSystem: "Web",
     description:
-      "Free total ROI calculator for rental properties. Combines cash flow + principal paydown + appreciation into one number — the real return on your investment, not just one piece of it.",
+      "Free total ROI calculator. Combines cash flow + principal paydown + appreciation — the real return on a rental, not just one piece of it.",
     url: `${siteUrl}/tools/roi-calculator`,
     offers: {
       "@type": "Offer",

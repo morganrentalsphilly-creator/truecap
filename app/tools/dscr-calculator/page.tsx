@@ -18,9 +18,9 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "DSCR Calculator | Free Debt Service Coverage Ratio Tool | TrueCap",
+  title: "DSCR Calculator — Debt Service Coverage Ratio",
   description:
-    "Free DSCR calculator for rental property and DSCR loans. Computes Debt Service Coverage Ratio in seconds. Plus what counts as a good DSCR and what lenders require.",
+    "Free DSCR calculator for rental property and DSCR loans. Compute Debt Service Coverage Ratio in seconds, plus a good-DSCR benchmark for lenders.",
   keywords: [
     "dscr calculator",
     "debt service coverage ratio calculator",
@@ -102,7 +102,7 @@ export default function DscrCalculatorPage() {
     applicationSubCategory: "Real Estate Calculator",
     operatingSystem: "Web",
     description:
-      "Free DSCR calculator for rental property and DSCR loans. Computes Debt Service Coverage Ratio in seconds. Plus what counts as a good DSCR and what lenders require.",
+      "Free DSCR calculator for rental property and DSCR loans. Compute Debt Service Coverage Ratio in seconds, plus a good-DSCR benchmark for lenders.",
     url: `${siteUrl}/tools/dscr-calculator`,
     offers: {
       "@type": "Offer",

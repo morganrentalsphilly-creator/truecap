@@ -13,9 +13,9 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "Mortgage Payment Calculator | Free PITI Tool | TrueCap",
+  title: "Mortgage Payment Calculator | Free PITI Tool",
   description:
-    "Free mortgage payment calculator including PITI (Principal + Interest + Tax + Insurance). Built for rental property investors — shows total interest, monthly breakdown, and amortization. No signup.",
+    "Free PITI mortgage payment calculator for rental investors. Total interest, monthly breakdown, full amortization schedule. No signup.",
   keywords: [
     "mortgage payment calculator",
     "mortgage calculator",
@@ -94,7 +94,7 @@ export default function MortgagePaymentPage() {
     applicationSubCategory: "Real Estate Calculator",
     operatingSystem: "Web",
     description:
-      "Free mortgage payment calculator including PITI (Principal + Interest + Tax + Insurance). Built for rental property investors — shows total interest, monthly breakdown, and amortization. No signup.",
+      "Free PITI mortgage payment calculator for rental investors. Total interest, monthly breakdown, full amortization schedule. No signup.",
     url: `${siteUrl}/tools/mortgage-payment-calculator`,
     offers: {
       "@type": "Offer",

@@ -8,7 +8,7 @@ import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 export const metadata: Metadata = {
-  title: "BRRRR Calculator | Buy Rehab Rent Refinance Repeat | TrueCap",
+  title: "BRRRR Calculator | Buy Rehab Rent Refinance Repeat",
   description:
     "Free BRRRR calculator. Models purchase, rehab, ARV, refi LTV, and post-refi cash flow. Shows cash left in deal + infinite-return scenarios.",
   keywords: [

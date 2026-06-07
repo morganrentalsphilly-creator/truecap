@@ -16,9 +16,9 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "GRM Calculator | Free Gross Rent Multiplier Tool | TrueCap",
+  title: "GRM Calculator | Free Gross Rent Multiplier Tool",
   description:
-    "Free Gross Rent Multiplier (GRM) calculator. The fastest screening metric in real estate — compare deals in seconds without operating expenses. Plus what counts as a good GRM.",
+    "Free Gross Rent Multiplier (GRM) calculator. The fastest real-estate screen — compare deals in seconds, no operating expenses needed. Plus a good GRM range.",
   keywords: [
     "grm calculator",
     "gross rent multiplier",
@@ -100,7 +100,7 @@ export default function GrmCalculatorPage() {
     applicationSubCategory: "Real Estate Calculator",
     operatingSystem: "Web",
     description:
-      "Free Gross Rent Multiplier (GRM) calculator. The fastest screening metric in real estate — compare deals in seconds without operating expenses. Plus what counts as a good GRM.",
+      "Free Gross Rent Multiplier (GRM) calculator. The fastest real-estate screen — compare deals in seconds, no operating expenses needed. Plus a good GRM range.",
     url: `${siteUrl}/tools/gross-rent-multiplier-calculator`,
     offers: {
       "@type": "Offer",

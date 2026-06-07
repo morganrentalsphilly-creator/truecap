@@ -27,7 +27,7 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
 
 export const metadata: Metadata = {
-  title: "For BRRRR Operators | TrueCap",
+  title: "For BRRRR Operators",
   description:
     "Model the full BRRRR loop: hard-money buy, rehab cost, ARV, lease-up, refi at the new appraisal. See how much cash you actually recover.",
   keywords: [

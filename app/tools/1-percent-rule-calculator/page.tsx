@@ -8,9 +8,9 @@ import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 export const metadata: Metadata = {
-  title: "1% Rule Calculator | Free Rental Property Screener | TrueCap",
+  title: "1% Rule Calculator | Free Rental Property Screener",
   description:
-    "Free 1% rule calculator for rental property. Instantly screen any deal as Pass / Fail. Plus when the 1% rule applies, when it doesn't, and what to do if a deal fails.",
+    "Free 1% rule calculator. Instantly screen any rental deal Pass / Fail. Plus when the rule applies, when it doesn't, and what to do on a fail.",
   keywords: [
     "1 percent rule calculator",
     "one percent rule real estate",
@@ -90,7 +90,7 @@ export default function OnePercentRulePage() {
     applicationSubCategory: "Real Estate Calculator",
     operatingSystem: "Web",
     description:
-      "Free 1% rule calculator for rental property. Instantly screen any deal as Pass / Fail. Plus when the 1% rule applies, when it doesn't, and what to do if a deal fails.",
+      "Free 1% rule calculator. Instantly screen any rental deal Pass / Fail. Plus when the rule applies, when it doesn't, and what to do on a fail.",
     url: `${siteUrl}/tools/1-percent-rule-calculator`,
     offers: {
       "@type": "Offer",

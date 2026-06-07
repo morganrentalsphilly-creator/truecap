@@ -18,7 +18,7 @@ import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 export const metadata: Metadata = {
-  title: "Cap Rate Calculator | Free Rental Property Calculator | TrueCap",
+  title: "Cap Rate Calculator | Free Rental Property Calculator",
   description:
     "Free cap rate calculator for rental property analysis. Calculate capitalization rate in seconds, plus learn what counts as a good cap rate by market type.",
   keywords: [

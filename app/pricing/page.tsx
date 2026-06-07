@@ -21,9 +21,9 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { DealsAnalyzedTicker } from "@/components/marketing/deals-analyzed-ticker";
 import { ExitIntentOffer } from "@/components/marketing/exit-intent-offer";
 export const metadata: Metadata = {
-  title: "Pricing — Free + Pro plans for rental property analysis",
+  title: "Pricing — Free + Pro plans for rental analysis",
   description:
-    "TrueCap is free to start — no card required. Upgrade to Pro for 10-year projections, tax strategy, exit scenarios, Deal Score, PDF export, and unlimited saved deals.",
+    "TrueCap is free to start — no card required. Pro adds 10-year projections, tax strategy, exit scenarios, Deal Score, PDF export, and unlimited saved deals.",
   alternates: { canonical: "/pricing" },
   openGraph: {
     title: "TrueCap pricing — free + Pro",

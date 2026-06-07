@@ -14,9 +14,9 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "Vacancy Rate Calculator | Free Rental Property Tool | TrueCap",
+  title: "Vacancy Rate Calculator — Free Rental Property Tool",
   description:
-    "Free vacancy rate calculator for rental properties. Convert vacant days + turnover cost into a true effective vacancy rate. Plus what a realistic vacancy assumption looks like — most sellers under-quote it.",
+    "Free vacancy rate calculator. Convert vacant days + turnover cost into an effective rate, with realistic benchmarks sellers often under-quote.",
   keywords: [
     "vacancy rate calculator",
     "rental vacancy rate",

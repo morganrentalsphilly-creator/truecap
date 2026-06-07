@@ -17,9 +17,9 @@ import { ComparisonFaq, type FaqItem } from "@/components/marketing/comparison-f
 import { getSiteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
-  title: "TrueCap vs Zillow Rent Estimate — honest comparison | TrueCap",
+  title: "TrueCap vs Zillow Rent Estimate — honest comparison",
   description:
-    "Zillow's Rent Zestimate is fast and free but often 10-25% off market. TrueCap uses HUD Fair Market Rent for grounded estimates plus full underwriting. Honest comparison.",
+    "Zillow's Rent Zestimate is fast but often 10-25% off market. TrueCap uses HUD Fair Market Rent plus full underwriting. Honest comparison of both.",
   keywords: [
     "zillow rent estimate accuracy",
     "zillow rent vs market",

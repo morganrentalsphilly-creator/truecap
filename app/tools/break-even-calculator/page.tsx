@@ -14,9 +14,9 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "Break-Even Calculator | Free Rental Property Tool | TrueCap",
+  title: "Break-Even Calculator | Free Rental Property Tool",
   description:
-    "Free rental property break-even calculator. Compute how many months until rent cash flow returns your initial investment. Plus what a healthy break-even period looks like by strategy.",
+    "Free rental break-even calculator. How many months until cash flow returns your initial investment. Plus healthy break-even benchmarks by strategy.",
   keywords: [
     "rental property break-even calculator",
     "break-even calculator rental",
@@ -88,7 +88,7 @@ export default function BreakEvenCalculatorPage() {
     applicationSubCategory: "Real Estate Calculator",
     operatingSystem: "Web",
     description:
-      "Free rental property break-even calculator. Compute how many months until rent cash flow returns your initial investment. Plus what a healthy break-even period looks like by strategy.",
+      "Free rental break-even calculator. How many months until cash flow returns your initial investment. Plus healthy break-even benchmarks by strategy.",
     url: `${siteUrl}/tools/break-even-calculator`,
     offers: {
       "@type": "Offer",

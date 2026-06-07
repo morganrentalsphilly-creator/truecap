@@ -25,9 +25,9 @@ import { ComparisonFaq, type FaqItem } from "@/components/marketing/comparison-f
 import { getSiteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
-  title: "TrueCap vs DealCheck — honest comparison | TrueCap",
+  title: "TrueCap vs DealCheck — honest comparison",
   description:
-    "An honest side-by-side of TrueCap vs DealCheck for rental property analysis. Pricing, features, free tier, mobile, sharing — what each tool does best and when to pick which.",
+    "Honest TrueCap vs DealCheck for rental analysis: pricing, free tier depth, features, mobile, sharing — what each does best and when to pick which.",
   keywords: [
     "dealcheck alternative",
     "dealcheck vs truecap",

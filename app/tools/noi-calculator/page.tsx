@@ -16,9 +16,9 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "NOI Calculator | Free Net Operating Income Tool | TrueCap",
+  title: "NOI Calculator | Free Net Operating Income Tool",
   description:
-    "Free NOI (Net Operating Income) calculator for rental property. Includes vacancy, every common operating expense, and the operating-expense ratio. Plus what's a good NOI margin.",
+    "Free NOI (Net Operating Income) calculator. Includes vacancy, common operating expenses, and the operating-expense ratio. Plus a good NOI margin benchmark.",
   keywords: [
     "noi calculator",
     "net operating income calculator",
@@ -100,7 +100,7 @@ export default function NoiCalculatorPage() {
     applicationSubCategory: "Real Estate Calculator",
     operatingSystem: "Web",
     description:
-      "Free NOI (Net Operating Income) calculator for rental property. Includes vacancy, every common operating expense, and the operating-expense ratio. Plus what's a good NOI margin.",
+      "Free NOI (Net Operating Income) calculator. Includes vacancy, common operating expenses, and the operating-expense ratio. Plus a good NOI margin benchmark.",
     url: `${siteUrl}/tools/noi-calculator`,
     offers: {
       "@type": "Offer",

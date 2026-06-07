@@ -21,9 +21,9 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
-  title: "Methodology | TrueCap",
+  title: "Methodology",
   description:
-    "Exactly how TrueCap computes cap rate, cash-on-cash, DSCR, 10-year projections, tax savings, and exit scenarios. Plus where our auto-fill data comes from (HUD, FRED, state property tax) and the conventions we chose.",
+    "How TrueCap computes cap rate, CoC, DSCR, 10-year projections, tax savings, and exit scenarios. Plus the data sources behind auto-fill (HUD, FRED, state tax).",
   keywords: [
     "truecap methodology",
     "how is cap rate calculated",

@@ -14,11 +14,22 @@ import Link from "next/link";
 import { SiteFooter } from "@/components/marketing/site-footer";
 
 export const metadata: Metadata = {
-  title: "Terms of Service | TrueCap",
+  title: "Terms of Service",
   description:
     "TrueCap Terms of Service — the rules that govern your use of usetruecap.com and the TrueCap rental property analyzer.",
   alternates: { canonical: "/terms" },
   robots: { index: true, follow: true },
+  // OG block for completeness — these pages aren't typically shared on
+  // social, but absence flags as a gap in any SEO crawler and a sane
+  // social card if someone does post the link is cheap to provide.
+  openGraph: {
+    title: "TrueCap Terms of Service",
+    description: "The rules that govern your use of TrueCap and usetruecap.com.",
+    url: "/terms",
+    type: "article",
+    images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap Terms of Service" }],
+  },
+  twitter: { card: "summary_large_image", images: ["/home.jpg"] },
 };
 
 const LAST_UPDATED = "May 24, 2026";

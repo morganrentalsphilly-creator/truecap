@@ -31,9 +31,9 @@ import { ComparisonFaq, type FaqItem } from "@/components/marketing/comparison-f
 import { getSiteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
-  title: "TrueCap vs Roofstock — honest comparison | TrueCap",
+  title: "TrueCap vs Roofstock — honest comparison",
   description:
-    "TrueCap is the independent underwrite for any Roofstock listing — cap rate, cash flow, DSCR, projection, all from one address. Honest side-by-side of when to use each tool.",
+    "TrueCap is the independent underwrite for any Roofstock listing — cap rate, cash flow, DSCR, projection from one address. When to use each tool.",
   keywords: [
     "roofstock alternative",
     "roofstock vs truecap",
