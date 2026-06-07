@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import type Stripe from "stripe";
+import * as Sentry from "@sentry/nextjs";
 import { getStripe } from "@/lib/stripe/client";
 import {
   handleCheckoutSessionCompleted,
@@ -152,11 +153,19 @@ export async function POST(req: Request) {
           try {
             await sendAbandonedCheckoutEmail(email, session);
           } catch (err) {
+            // Recovery email failure — non-critical (we keep returning
+            // 200 so Stripe doesn't retry the whole webhook), but worth
+            // surfacing to Sentry so systemic failures (Resend down,
+            // template breakage) are visible. Previously console.warn
+            // only, which meant silent failure in production logs.
             console.warn(
               "[stripe-webhook] abandoned-checkout email failed:",
               err instanceof Error ? err.message : String(err)
             );
-            // Don't throw — failing to send the recovery email is non-critical.
+            Sentry.captureException(err, {
+              tags: { feature: "abandoned-checkout-email" },
+              extra: { stripe_session_id: session.id, has_email: true },
+            });
           }
         }
         // PostHog event so the funnel shows the drop-off.
@@ -185,7 +194,22 @@ export async function POST(req: Request) {
       .update({ processed_at: new Date().toISOString(), error_message: null })
       .eq("stripe_event_id", event.id);
   } catch (e) {
+    // Webhook handler failure — a real risk for subscription state
+    // drift. Previously the only record was the error_message stored in
+    // stripe_webhook_events; you'd only find out by querying that table
+    // or noticing a user complaint about their subscription being wrong.
+    // Sentry capture with tags + event metadata makes this visible at a
+    // glance, and the existing error_message + processed_at retry path
+    // still works (Stripe sees 500, retries, and the next attempt
+    // re-runs the handler via the "processed_at IS NULL" branch above).
     const message = e instanceof Error ? e.message : String(e);
+    Sentry.captureException(e, {
+      tags: { feature: "stripe-webhook", endpoint: "webhooks" },
+      extra: {
+        stripe_event_id: event.id,
+        stripe_event_type: event.type,
+      },
+    });
     await admin.from("stripe_webhook_events").update({ error_message: message }).eq("stripe_event_id", event.id);
     return NextResponse.json({ error: "Webhook handler failed" }, { status: 500 });
   }
@@ -261,6 +285,11 @@ async function sendAbandonedCheckoutEmail(
       html,
       reply_to: process.env.EMAIL_REPLY_TO || "hello@usetruecap.com",
     }),
+    // 10s timeout — Stripe gives webhook handlers ~30s before it
+    // declares failure and retries, so we want to fail fast on a
+    // hanging Resend connection rather than risk the whole webhook
+    // timing out and being retried unnecessarily.
+    signal: AbortSignal.timeout(10_000),
   });
   if (!res.ok) {
     const text = await res.text().catch(() => "");
