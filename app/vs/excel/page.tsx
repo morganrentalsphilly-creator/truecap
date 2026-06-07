@@ -20,6 +20,7 @@ import {
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
+import { ComparisonFaq, type FaqItem } from "@/components/marketing/comparison-faq";
 import { getSiteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
@@ -178,6 +179,8 @@ export default function VsExcelPage() {
           </ul>
         </section>
 
+        <ComparisonFaq competitorName="Excel" items={EXCEL_FAQ} />
+
         <section className="mb-12 sm:mb-16 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
           <h2 className="text-2xl sm:text-3xl font-extrabold mb-2">Try TrueCap free.</h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
@@ -205,6 +208,88 @@ export default function VsExcelPage() {
     </div>
   );
 }
+
+const EXCEL_FAQ: FaqItem[] = [
+  {
+    question: "Is TrueCap better than an Excel rental analysis template?",
+    answer: (
+      <>
+        For most investors, yes — TrueCap removes the three big risks
+        spreadsheets carry: formula errors, broken sharing, and bad
+        mobile UX. A calc engine validates the math once and reuses it
+        on every deal. Spreadsheets compound errors silently across
+        deals until you find them. That said, if you have a specific
+        workflow Excel handles better (heavy custom acquisition
+        modeling, joint-venture splits), keep your sheet for that and
+        use TrueCap for the standard underwrite.
+      </>
+    ),
+    plainTextAnswer:
+      "Yes — TrueCap removes Excel's three big risks: formula errors, broken sharing, and bad mobile UX. The calc engine is validated once and reused on every deal. Spreadsheets compound errors silently. Keep Excel for heavy custom modeling; use TrueCap for the standard underwrite.",
+  },
+  {
+    question: "Why is a spreadsheet risky for underwriting rental deals?",
+    answer: (
+      <>
+        Three reasons. First, formula errors — a wrong cap rate
+        formula compounds across every deal you analyze with that
+        sheet, sometimes for months. Second, version drift — partners,
+        agents, and lenders all get slightly different copies and
+        accidentally overwrite formulas. Third, mobile is unusable —
+        the moment you&apos;re at a showing trying to run numbers on
+        your phone, the spreadsheet is dead weight.
+      </>
+    ),
+    plainTextAnswer:
+      "Three reasons: formula errors that compound silently across deals; version drift when partners/agents/lenders overwrite formulas in shared copies; and mobile is unusable for live underwriting at showings.",
+  },
+  {
+    question: "Can I import my Excel rental template into TrueCap?",
+    answer: (
+      <>
+        Not directly — TrueCap uses a structured form so the inputs
+        match the engine. But the metrics that matter (price, rent,
+        rate, term, vacancy, mgmt %, tax, insurance) take about 60
+        seconds to type in, and the address auto-fill via HUD + FRED +
+        state property tax handles the &quot;what number do I use?&quot;
+        problem for you. Most spreadsheet users end up faster on
+        TrueCap after the first 3–4 deals.
+      </>
+    ),
+    plainTextAnswer:
+      "Not directly — TrueCap uses a structured form. Inputs take about 60 seconds to type in, and address auto-fill (HUD rent, FRED rate, state property tax) handles the 'what number do I use?' problem. Most spreadsheet users are faster on TrueCap after 3–4 deals.",
+  },
+  {
+    question: "Does TrueCap handle BRRRR and fix-and-flip like my spreadsheet does?",
+    answer: (
+      <>
+        Yes — TrueCap has dedicated BRRRR and fix-and-flip analyzers
+        with their own input forms, ARV-driven refi math, holding cost
+        modeling, and profit/cash-out summaries. The Pro tier also
+        includes a sensitivity grid (rent ±10%, vacancy ±5pp, rate
+        ±1pp) and a max allowable offer solver — both extremely
+        annoying to maintain in a spreadsheet.
+      </>
+    ),
+    plainTextAnswer:
+      "Yes — TrueCap has dedicated BRRRR and fix-and-flip analyzers with ARV-driven refi math, holding cost modeling, and profit/cash-out summaries. Pro also includes a sensitivity grid and max allowable offer solver — both annoying to maintain in Excel.",
+  },
+  {
+    question: "What if I still want to use Excel after trying TrueCap?",
+    answer: (
+      <>
+        Totally fine. Most TrueCap users keep one Excel template for
+        edge cases — partnership splits, syndication waterfalls, custom
+        debt structures the underwriting engine doesn&apos;t model. You
+        can also export TrueCap analyses as PDF if you need a polished
+        summary to share with a lender or partner while keeping the
+        spreadsheet as your back-of-house model.
+      </>
+    ),
+    plainTextAnswer:
+      "Fine. Most TrueCap users keep one Excel template for edge cases like partnership splits, syndication waterfalls, or custom debt structures. TrueCap analyses also export to PDF for sharing with lenders or partners.",
+  },
+];
 
 function WinnerBadge({ winner, side }: { winner: Verdict; side: "truecap" | "excel" }) {
   if (winner === "tie") return <Minus className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/60" />;

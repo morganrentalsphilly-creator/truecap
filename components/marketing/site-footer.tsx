@@ -164,6 +164,20 @@ export function SiteFooter() {
             <span aria-hidden className="text-muted-foreground/30">
               ·
             </span>
+            {/* llms.txt link — the llmstxt.org convention for AI ingestion.
+                Footer link makes the URL discoverable by crawlers that
+                don't independently probe /llms.txt, and signals to humans
+                that we expose a machine-readable index. */}
+            <a
+              href="/llms.txt"
+              className="transition-colors hover:text-foreground"
+              title="Machine-readable site index for AI training crawlers (llmstxt.org)"
+            >
+              llms.txt
+            </a>
+            <span aria-hidden className="text-muted-foreground/30">
+              ·
+            </span>
             <a
               href="mailto:hello@usetruecap.com"
               className="transition-colors hover:text-foreground"

@@ -21,6 +21,7 @@ import {
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
+import { ComparisonFaq, type FaqItem } from "@/components/marketing/comparison-faq";
 import { getSiteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
@@ -260,6 +261,8 @@ export default function VsDealCheckPage() {
           </p>
         </section>
 
+        <ComparisonFaq competitorName="DealCheck" items={DEALCHECK_FAQ} />
+
         {/* Pricing CTA */}
         <section className="mb-12 sm:mb-16 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
           <h2 className="text-2xl sm:text-3xl font-extrabold mb-2">
@@ -302,6 +305,107 @@ export default function VsDealCheckPage() {
     </div>
   );
 }
+
+const DEALCHECK_FAQ: FaqItem[] = [
+  {
+    question: "Is TrueCap a free alternative to DealCheck?",
+    answer: (
+      <>
+        Yes. TrueCap&apos;s free tier gives you a complete underwrite — cap
+        rate, cash-on-cash, DSCR, monthly cash flow, NOI — with no signup
+        required and no monthly limit on analyses. DealCheck&apos;s free
+        tier limits the number of saved analyses and gates most outputs
+        behind a paid plan. If you only need to run numbers on individual
+        listings, the free tier of TrueCap covers the same job DealCheck
+        Plus would.
+      </>
+    ),
+    plainTextAnswer:
+      "Yes. TrueCap's free tier covers cap rate, cash-on-cash, DSCR, monthly cash flow, and NOI with no signup and no monthly limit. DealCheck's free tier caps saved analyses and gates most outputs behind a paid plan.",
+  },
+  {
+    question: "How much does TrueCap cost compared to DealCheck?",
+    answer: (
+      <>
+        TrueCap Pro is $19/month or about $190/year on the annual plan.
+        DealCheck&apos;s comparable Plus tier is around $15/month and
+        Premium is around $30/month (as of 2026). TrueCap sits in the
+        middle on price, but includes share links, PDF export, tax
+        strategy, exit scenarios, sensitivity, MAO, and deal score in a
+        single tier — no &quot;upgrade to Premium for X&quot; gating.
+      </>
+    ),
+    plainTextAnswer:
+      "TrueCap Pro is $19/month (or about $190/year annual). DealCheck Plus is around $15/month and Premium around $30/month. TrueCap includes share links, PDF export, tax strategy, exit scenarios, sensitivity, MAO, and deal score in one tier.",
+  },
+  {
+    question: "Which tool is better for new investors?",
+    answer: (
+      <>
+        TrueCap. The 60-second underwrite flow plus a plain-English
+        verdict (Strong / Solid / Mixed / Marginal / Negative) is built
+        for someone learning to read a deal, not someone already fluent
+        in commercial real-estate math. DealCheck is more powerful once
+        you know what every input means, but new investors often spend
+        their first session staring at a form trying to figure out which
+        fields matter. TrueCap pre-fills HUD rent + FRED rate + state
+        property tax from the address, so a first-time user can get a
+        real underwrite without knowing the right numbers to type.
+      </>
+    ),
+    plainTextAnswer:
+      "TrueCap. The 60-second underwrite flow with a plain-English verdict (Strong/Solid/Mixed/Marginal/Negative) is designed for someone learning to read a deal. TrueCap also pre-fills HUD rent, FRED rate, and state property tax from the address so first-time users get a real underwrite without knowing what to type.",
+  },
+  {
+    question: "Does TrueCap have a mobile app like DealCheck?",
+    answer: (
+      <>
+        TrueCap is a Progressive Web App (PWA) — you install it from the
+        browser to your home screen and it works offline-ish, like a
+        native app, without going through the App Store. DealCheck has
+        true native iOS and Android apps, which is the right call if
+        you&apos;re heavy on mobile-first workflows like walking
+        properties and analyzing on the spot. Both work on phones; the
+        difference is delivery mechanism.
+      </>
+    ),
+    plainTextAnswer:
+      "TrueCap is a PWA — install from the browser to your home screen, works like a native app without the App Store. DealCheck has true native iOS and Android apps. Both work on phones; the difference is delivery mechanism.",
+  },
+  {
+    question: "Can I import properties from Zillow or Redfin with TrueCap?",
+    answer: (
+      <>
+        Not directly via a listing scrape — TrueCap uses authoritative
+        data sources (HUD Fair Market Rent, FRED 30-year mortgage rate,
+        state-level property tax rates) to pre-fill your form when you
+        paste an address. DealCheck&apos;s property-import-from-listing
+        is faster for adjusting comparable rent, but TrueCap&apos;s
+        approach gives you defensible numbers when a lender asks where
+        the rent estimate came from.
+      </>
+    ),
+    plainTextAnswer:
+      "Not via listing scrape. TrueCap pre-fills the form from authoritative sources (HUD Fair Market Rent, FRED 30-year mortgage rate, state property tax). DealCheck imports directly from listing sites. TrueCap's approach gives defensible numbers for lenders.",
+  },
+  {
+    question: "When should I pick DealCheck over TrueCap?",
+    answer: (
+      <>
+        Pick DealCheck if you&apos;re primarily mobile-first walking
+        many properties a day, you want a native app, and listing-site
+        property import is your top workflow. Pick TrueCap if you want
+        the deepest free tier on the market, plain-English verdicts,
+        tax-strategy modeling, sensitivity analysis, MAO, deal score,
+        portfolio rollup across saved deals, and shareable read-only
+        deal links — all in a single Pro tier without per-feature
+        upcharges.
+      </>
+    ),
+    plainTextAnswer:
+      "Pick DealCheck if you're mobile-first, want a native app, and listing-import is your top workflow. Pick TrueCap if you want the deepest free tier, plain-English verdicts, tax modeling, sensitivity, MAO, deal score, portfolio rollup, and share links — all in one Pro tier.",
+  },
+];
 
 function WinnerBadge({
   winner,

@@ -13,6 +13,7 @@ import { ArrowRight, ArrowUpRight, Calculator, Check, Minus, Sparkles, X } from 
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
+import { ComparisonFaq, type FaqItem } from "@/components/marketing/comparison-faq";
 import { getSiteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
@@ -157,6 +158,8 @@ export default function VsRentometerPage() {
           </div>
         </section>
 
+        <ComparisonFaq competitorName="Rentometer" items={RENTOMETER_FAQ} />
+
         <section className="mb-12 sm:mb-16 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
           <h2 className="text-2xl sm:text-3xl font-extrabold mb-2">Get the full underwrite, free.</h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
@@ -184,6 +187,86 @@ export default function VsRentometerPage() {
     </div>
   );
 }
+
+const RENTOMETER_FAQ: FaqItem[] = [
+  {
+    question: "Is TrueCap an alternative to Rentometer?",
+    answer: (
+      <>
+        Not exactly — they solve different problems. Rentometer
+        specializes in rent estimates pulled from rental-listing comps.
+        TrueCap is a full underwriting calculator that uses HUD Fair
+        Market Rent as a rent baseline and runs all the downstream
+        math (cap rate, CoC, DSCR, cash flow). If you want a tight
+        rent estimate from active listings, Rentometer is still
+        useful. If you want a complete underwrite from one address,
+        TrueCap is enough on its own.
+      </>
+    ),
+    plainTextAnswer:
+      "They solve different problems. Rentometer specializes in rent estimates from rental-listing comps. TrueCap is a full underwriting calculator using HUD Fair Market Rent as the rent baseline plus all downstream math (cap rate, CoC, DSCR, cash flow).",
+  },
+  {
+    question: "Does TrueCap give me a rent estimate like Rentometer?",
+    answer: (
+      <>
+        Yes — TrueCap pre-fills rent using HUD&apos;s Fair Market Rent
+        (county-level, broken down by bedroom count). It&apos;s an
+        authoritative baseline rather than a comp-driven estimate, so
+        you get something defensible to show a lender. For tight
+        neighborhood-level comps in hot markets, Rentometer is still
+        the more granular tool.
+      </>
+    ),
+    plainTextAnswer:
+      "Yes — TrueCap pre-fills rent using HUD Fair Market Rent (county-level by bedroom count). It's an authoritative baseline rather than a comp-driven estimate. For tight neighborhood-level comps, Rentometer is still more granular.",
+  },
+  {
+    question: "What's the difference between HUD FMR and Rentometer?",
+    answer: (
+      <>
+        HUD Fair Market Rent is a government-published 40th-percentile
+        rent for every county in the US, refreshed annually. It&apos;s
+        what Section 8 vouchers use. Rentometer aggregates current
+        rental listings and shows you a comp range. HUD is more
+        conservative and defensible; Rentometer is more current and
+        granular. Many investors use both: HUD for the underwrite,
+        Rentometer for the listing-price decision.
+      </>
+    ),
+    plainTextAnswer:
+      "HUD Fair Market Rent is a government-published 40th-percentile rent per county, refreshed annually — what Section 8 vouchers use. Rentometer aggregates current rental listings. HUD is more conservative and defensible; Rentometer is more current and granular.",
+  },
+  {
+    question: "Can I use Rentometer's rent in TrueCap?",
+    answer: (
+      <>
+        Yes — every input in TrueCap is editable. If you trust
+        Rentometer&apos;s comp for a specific neighborhood, type that
+        number into the rent field and the rest of the analysis
+        updates instantly. TrueCap pre-fills the HUD figure as a
+        starting point, not a hard requirement.
+      </>
+    ),
+    plainTextAnswer:
+      "Yes — every input in TrueCap is editable. If you trust Rentometer's comp, type that number into the rent field and the analysis updates instantly. TrueCap pre-fills HUD FMR as a starting point, not a requirement.",
+  },
+  {
+    question: "Do I need both Rentometer and TrueCap?",
+    answer: (
+      <>
+        Most investors don&apos;t. TrueCap&apos;s HUD baseline is
+        accurate enough for the underwriting decision in most markets.
+        Where Rentometer earns its keep: hot markets where current
+        listings significantly exceed FMR (you want the upside in your
+        projection) or sub-market neighborhoods where county-level FMR
+        is too coarse. Otherwise TrueCap alone covers the full job.
+      </>
+    ),
+    plainTextAnswer:
+      "Most don't. TrueCap's HUD baseline is accurate enough in most markets. Rentometer earns its keep in hot markets where listings exceed FMR or sub-markets where county-level FMR is too coarse. Otherwise TrueCap covers the full job.",
+  },
+];
 
 function WinnerBadge({ winner, side }: { winner: Verdict; side: "truecap" | "rentometer" }) {
   if (winner === "tie") return <Minus className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/60" />;

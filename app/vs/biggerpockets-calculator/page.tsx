@@ -21,6 +21,7 @@ import {
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
+import { ComparisonFaq, type FaqItem } from "@/components/marketing/comparison-faq";
 import { getSiteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
@@ -282,6 +283,8 @@ export default function VsBiggerPocketsCalculatorPage() {
           </p>
         </section>
 
+        <ComparisonFaq competitorName="BiggerPockets Calculator" items={BP_FAQ} />
+
         {/* Pricing CTA */}
         <section className="mb-12 sm:mb-16 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
           <h2 className="text-2xl sm:text-3xl font-extrabold mb-2">
@@ -332,6 +335,101 @@ export default function VsBiggerPocketsCalculatorPage() {
     </div>
   );
 }
+
+const BP_FAQ: FaqItem[] = [
+  {
+    question: "Is the BiggerPockets calculator free?",
+    answer: (
+      <>
+        The BiggerPockets rental property calculator gives you a few
+        free reports, then gates the full version behind a BiggerPockets
+        Pro subscription (~$390/year). TrueCap&apos;s calculator is free
+        with no monthly limit — cap rate, cash-on-cash, DSCR, and
+        monthly cash flow on every analysis, no signup required.
+      </>
+    ),
+    plainTextAnswer:
+      "The BiggerPockets calculator gives a few free reports then gates the rest behind BiggerPockets Pro (~$390/year). TrueCap is free with no monthly limit — cap rate, cash-on-cash, DSCR, and monthly cash flow on every analysis, no signup.",
+  },
+  {
+    question: "What's the best alternative to the BiggerPockets rental calculator?",
+    answer: (
+      <>
+        TrueCap is the modern alternative — it&apos;s designed
+        mobile-first, pre-fills HUD rent + FRED mortgage rate + state
+        property tax from the property address, and outputs a
+        plain-English verdict (Strong / Solid / Mixed / Marginal /
+        Negative) on top of the standard metrics. BiggerPockets&apos;
+        calculator is the most well-known but the UX hasn&apos;t evolved
+        much in years and there&apos;s no portfolio view across saved
+        deals.
+      </>
+    ),
+    plainTextAnswer:
+      "TrueCap is the modern alternative — mobile-first, pre-fills HUD rent, FRED mortgage rate, and state property tax from the address, and outputs a plain-English verdict (Strong/Solid/Mixed/Marginal/Negative) alongside standard metrics.",
+  },
+  {
+    question: "How much is TrueCap vs BiggerPockets Pro?",
+    answer: (
+      <>
+        TrueCap Pro is $19/month (or ~$16.67/month billed annually).
+        BiggerPockets Pro is ~$390/year (~$32.50/month). For the
+        calculator alone, TrueCap is roughly half the price. BiggerPockets
+        Pro of course bundles forums, courses, and other community
+        access — if that&apos;s what you&apos;re buying, the calculator
+        is a bonus. If you want the calculator itself, TrueCap is the
+        cheaper and more capable choice.
+      </>
+    ),
+    plainTextAnswer:
+      "TrueCap Pro is $19/month or ~$16.67/month annual. BiggerPockets Pro is ~$390/year (~$32.50/month). For the calculator alone, TrueCap is roughly half the price.",
+  },
+  {
+    question: "Does TrueCap have a 10-year projection like BiggerPockets?",
+    answer: (
+      <>
+        Yes — TrueCap Pro&apos;s 10-year projection includes rent
+        growth, expense growth, appreciation, and amortization
+        compounding into per-year cash flow + equity. The output is
+        cached as a snapshot so it&apos;s fast to revisit, and it
+        renders cleanly to PDF.
+      </>
+    ),
+    plainTextAnswer:
+      "Yes — TrueCap Pro's 10-year projection includes rent growth, expense growth, appreciation, and amortization compounding into per-year cash flow + equity. Snapshot-cached and PDF-exportable.",
+  },
+  {
+    question: "Can I share a TrueCap analysis without making the viewer sign up?",
+    answer: (
+      <>
+        Yes — TrueCap Pro generates a public read-only share link for
+        any saved deal. The full analysis is encoded into the URL, no
+        login required for the recipient, and it includes your custom
+        branding (logo, color, company name) if you&apos;ve configured
+        it. BiggerPockets PDF reports are downloadable but the
+        free-form share-link workflow is a TrueCap-specific feature.
+      </>
+    ),
+    plainTextAnswer:
+      "Yes — TrueCap Pro generates a public read-only share link for any saved deal. No login required for the recipient, branded with your logo/color/company name if configured.",
+  },
+  {
+    question: "When should I stick with BiggerPockets?",
+    answer: (
+      <>
+        Stick with BiggerPockets if you&apos;re already paying for Pro
+        for the community access (forums, courses, books, podcasts),
+        you trust the brand, and the calculator&apos;s output format is
+        the one your private-money lender or partners already accept.
+        Switch to TrueCap if you want a calculator-first experience,
+        sharper UX, address auto-fill, a verdict engine, a portfolio
+        rollup, and a Pro tier that costs about half as much.
+      </>
+    ),
+    plainTextAnswer:
+      "Stick with BiggerPockets if you're already paying Pro for community access. Switch to TrueCap if you want a calculator-first experience, sharper UX, address auto-fill, a verdict engine, a portfolio rollup, and a Pro tier that costs about half as much.",
+  },
+];
 
 function WinnerBadge({
   winner,

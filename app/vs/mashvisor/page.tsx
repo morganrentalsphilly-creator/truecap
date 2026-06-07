@@ -21,6 +21,7 @@ import {
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
+import { ComparisonFaq, type FaqItem } from "@/components/marketing/comparison-faq";
 import { getSiteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
@@ -206,6 +207,8 @@ export default function VsMashvisorPage() {
           </p>
         </section>
 
+        <ComparisonFaq competitorName="Mashvisor" items={MASHVISOR_FAQ} />
+
         <section className="mb-12 sm:mb-16 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
           <h2 className="text-2xl sm:text-3xl font-extrabold mb-2">
             Underwriting the next deal? Start free.
@@ -236,6 +239,82 @@ export default function VsMashvisorPage() {
     </div>
   );
 }
+
+const MASHVISOR_FAQ: FaqItem[] = [
+  {
+    question: "Is TrueCap a Mashvisor alternative?",
+    answer: (
+      <>
+        Yes, but they solve different problems. Mashvisor is built for
+        market discovery — heatmaps, neighborhood scoring, Airbnb
+        comps. TrueCap is built for per-property underwriting — once
+        you have an address, decide if the deal works. Many investors
+        use both: Mashvisor to find a neighborhood, TrueCap to
+        underwrite the specific listing.
+      </>
+    ),
+    plainTextAnswer:
+      "Yes, but they solve different problems. Mashvisor is built for market discovery (heatmaps, neighborhood scoring, Airbnb comps). TrueCap is built for per-property underwriting. Many investors use both: Mashvisor to find a neighborhood, TrueCap to underwrite the listing.",
+  },
+  {
+    question: "How does TrueCap compare to Mashvisor for short-term rentals?",
+    answer: (
+      <>
+        Mashvisor is stronger for short-term rental comparable
+        research — they have Airbnb occupancy and ADR data baked in.
+        TrueCap is stronger for the long-term rental underwrite. If
+        STR is your primary strategy, Mashvisor + TrueCap together
+        cover both halves of the job. If you&apos;re long-term buy and
+        hold, TrueCap alone is enough.
+      </>
+    ),
+    plainTextAnswer:
+      "Mashvisor is stronger for short-term rental comp research (Airbnb occupancy + ADR data). TrueCap is stronger for the long-term underwrite. For STR-focused investors, use both. For long-term buy and hold, TrueCap alone is enough.",
+  },
+  {
+    question: "Is Mashvisor or TrueCap cheaper?",
+    answer: (
+      <>
+        TrueCap is cheaper. TrueCap Pro is $19/month. Mashvisor&apos;s
+        plans range from ~$70/month to ~$300/month depending on
+        feature access and market data depth (as of 2026). TrueCap
+        doesn&apos;t carry market-data subscription costs because the
+        product scope is narrower (per-deal underwriting, not
+        nationwide neighborhood data).
+      </>
+    ),
+    plainTextAnswer:
+      "TrueCap is cheaper. TrueCap Pro is $19/month. Mashvisor's plans range from ~$70/month to ~$300/month depending on feature access (as of 2026). TrueCap's scope is narrower (per-deal underwriting, not nationwide neighborhood data).",
+  },
+  {
+    question: "Does TrueCap have neighborhood heatmaps like Mashvisor?",
+    answer: (
+      <>
+        No. TrueCap is explicitly not a market-discovery tool — we
+        don&apos;t do heatmaps, neighborhood scoring, or
+        nationwide-comparables. If you need that, use Mashvisor or
+        AirDNA. TrueCap&apos;s job is to take an address you&apos;ve
+        already chosen and underwrite the specific property.
+      </>
+    ),
+    plainTextAnswer:
+      "No. TrueCap is not a market-discovery tool — no heatmaps, neighborhood scoring, or nationwide comparables. Use Mashvisor or AirDNA for that. TrueCap's job is to underwrite a specific property once you have the address.",
+  },
+  {
+    question: "Can I use TrueCap to analyze deals in any US market?",
+    answer: (
+      <>
+        Yes. TrueCap pulls HUD Fair Market Rent (county-level), FRED
+        30-year mortgage rate (national), and state-level effective
+        property tax rate from authoritative public sources, so the
+        address auto-fill works for any address in the US. The
+        per-deal underwriting math is market-agnostic.
+      </>
+    ),
+    plainTextAnswer:
+      "Yes. TrueCap pulls HUD Fair Market Rent (county-level), FRED 30-year mortgage rate (national), and state-level effective property tax from authoritative public sources. The address auto-fill works for any US address.",
+  },
+];
 
 function WinnerBadge({ winner, side }: { winner: Verdict; side: "truecap" | "mashvisor" }) {
   if (winner === "tie") return <Minus className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/60" />;

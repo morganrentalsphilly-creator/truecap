@@ -22,6 +22,7 @@ import {
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
+import { ComparisonFaq, type FaqItem } from "@/components/marketing/comparison-faq";
 import { getSiteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
@@ -235,6 +236,8 @@ export default function VsStessaPage() {
           </p>
         </section>
 
+        <ComparisonFaq competitorName="Stessa" items={STESSA_FAQ} />
+
         <section className="mb-12 sm:mb-16 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
           <h2 className="text-2xl sm:text-3xl font-extrabold mb-2">
             Underwriting the next deal? Start free.
@@ -265,6 +268,85 @@ export default function VsStessaPage() {
     </div>
   );
 }
+
+const STESSA_FAQ: FaqItem[] = [
+  {
+    question: "Is Stessa the same kind of tool as TrueCap?",
+    answer: (
+      <>
+        No. Stessa is a rental-property accounting + operations
+        platform — bank-feed reconciliation, expense categorization,
+        tax-ready P&amp;L, document storage for leases. TrueCap is a
+        pre-purchase underwriting calculator — should I buy this deal?
+        Most serious investors end up using both: TrueCap to decide
+        whether to buy, Stessa to operate the property after closing.
+      </>
+    ),
+    plainTextAnswer:
+      "No. Stessa is a rental-property accounting + operations platform (bank feeds, expense categorization, tax-ready P&L, document storage). TrueCap is a pre-purchase underwriting calculator. Most serious investors use both — TrueCap to decide, Stessa to operate.",
+  },
+  {
+    question: "Should I use Stessa or TrueCap?",
+    answer: (
+      <>
+        Use TrueCap before you buy the property — to underwrite the
+        deal, model 10-year returns, run sensitivity, and decide if
+        the numbers work. Use Stessa after closing — to track actual
+        income and expenses, reconcile bank feeds, store leases, and
+        generate Schedule E reports at tax time. They&apos;re
+        complementary, not competing.
+      </>
+    ),
+    plainTextAnswer:
+      "Use TrueCap before you buy — underwrite, model 10-year returns, run sensitivity. Use Stessa after closing — track income/expenses, reconcile bank feeds, store leases, generate Schedule E. Complementary, not competing.",
+  },
+  {
+    question: "Is Stessa free?",
+    answer: (
+      <>
+        Stessa&apos;s base tier is free for accounting + bank-feed
+        tracking on unlimited properties. Their paid tier (Stessa Pro,
+        ~$12/month) adds advanced reporting, document organization,
+        and rent collection features. TrueCap free covers the
+        underwriting math; TrueCap Pro ($19/month) adds projections,
+        tax strategy, sensitivity, MAO, and deal score. So free Stessa
+        + free TrueCap covers a lot of the workflow already.
+      </>
+    ),
+    plainTextAnswer:
+      "Stessa's base tier is free for accounting + bank feeds on unlimited properties. Stessa Pro is ~$12/month. TrueCap free covers underwriting math; TrueCap Pro is $19/month for projections, tax, sensitivity, MAO, deal score.",
+  },
+  {
+    question: "Does TrueCap track expenses like Stessa?",
+    answer: (
+      <>
+        No, and intentionally so. TrueCap models projected expenses
+        for underwriting (taxes, insurance, vacancy, mgmt %,
+        maintenance, capex reserves) but doesn&apos;t connect to your
+        bank to track actuals. That&apos;s Stessa&apos;s job. Building
+        a second accounting product into TrueCap would dilute the
+        underwriting focus.
+      </>
+    ),
+    plainTextAnswer:
+      "No — by design. TrueCap models projected expenses for underwriting (taxes, insurance, vacancy, mgmt, maintenance, capex) but doesn't connect to your bank to track actuals. That's Stessa's job.",
+  },
+  {
+    question: "Can I share a TrueCap analysis with my accountant?",
+    answer: (
+      <>
+        Yes — TrueCap Pro lets you export a full multi-page PDF report
+        and generate a public read-only share link with optional
+        custom branding. Both formats include the projection, tax
+        strategy view, and deal score, which gives your accountant
+        what they need to validate the after-tax cash flow assumptions
+        before you buy.
+      </>
+    ),
+    plainTextAnswer:
+      "Yes — TrueCap Pro exports a multi-page PDF and generates a public read-only share link with optional branding. Both include the projection, tax strategy view, and deal score so your accountant can validate after-tax cash flow assumptions.",
+  },
+];
 
 function WinnerBadge({ winner, side }: { winner: Verdict; side: "truecap" | "stessa" }) {
   if (winner === "tie") {
