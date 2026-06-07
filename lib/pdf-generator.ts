@@ -172,6 +172,12 @@ function hexToRgb(hex: string): [number, number, number] {
   const h = hex.replace("#", "");
   return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)];
 }
+
+/** "#1A4FBA" + 0.12 → "rgba(26, 79, 186, 0.12)". For chart fills/backgrounds. */
+function hexToRgba(hex: string, alpha: number): string {
+  const [r, g, b] = hexToRgb(hex);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
 const setFill = (doc: jsPDF, hex: string) => doc.setFillColor(...hexToRgb(hex));
 const setStroke = (doc: jsPDF, hex: string) => doc.setDrawColor(...hexToRgb(hex));
 const setText = (doc: jsPDF, hex: string) => doc.setTextColor(...hexToRgb(hex));
@@ -437,18 +443,25 @@ function drawHeader(
     doc.text(subtitle, M.left, 62);
   }
 
-  // Right side title
+  // Right side title — refined typographic treatment.
+  // Brand-color kicker ("ANALYSIS REPORT") above a slightly larger,
+  // refined title ("Investment Analysis"). Reads more like a
+  // designer-built document than a generic export.
+  setText(doc, themeColor);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(7.5);
+  doc.text("ANALYSIS REPORT", PAGE.w - M.right, 32, { align: "right" });
   setText(doc, COLOR.ink);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(11);
-  doc.text("Investment Analysis Report", PAGE.w - M.right, 42, { align: "right" });
+  doc.setFontSize(13);
+  doc.text("Investment Analysis", PAGE.w - M.right, 47, { align: "right" });
   setText(doc, COLOR.sub);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
   doc.text(
     `Generated ${generatedAt.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`,
     PAGE.w - M.right,
-    53,
+    58,
     { align: "right" },
   );
 
@@ -457,9 +470,19 @@ function drawHeader(
   doc.setLineWidth(0.5);
   doc.line(M.left, 66, PAGE.w - M.right, 66);
 
-  // Footer line
+  // Footer area — brand-color accent line sits 4pt above the
+  // standard divider line. Subtle but present brand mark on every
+  // page; falls back to the neutral COLOR.line on unbranded reports
+  // so the accent doesn't appear at all.
   const footerLineY = PAGE.h - M.bottom + (pageNum === 1 ? 30 : 20);
   const footerTextY = PAGE.h - M.bottom + (pageNum === 1 ? 44 : 34);
+  if (isValidHex(branding?.primaryColorHex ?? null)) {
+    setStroke(doc, branding!.primaryColorHex as string);
+    doc.setLineWidth(1.5);
+    doc.line(M.left, footerLineY - 4, M.left + 36, footerLineY - 4);
+    setStroke(doc, COLOR.line);
+    doc.setLineWidth(0.5);
+  }
   doc.line(M.left, footerLineY, PAGE.w - M.right, footerLineY);
   setText(doc, COLOR.sub);
   doc.setFont("helvetica", "normal");
@@ -626,6 +649,21 @@ function pageInputs(
   } else {
     heroPanelColor = COLOR.navy;
   }
+  // Resolve theme color ONCE for this page — reused by the Subject
+  // Property kicker, section kickers, stat cards, and any other chrome
+  // that swaps to the user's brand color.
+  const themeColor = resolveThemeColor(branding);
+
+  // Subject Property kicker — small brand-color label above the
+  // address panel. Makes the hero read as part of a deliberate
+  // structure ("subject property → analysis → recommendation") rather
+  // than a floating address card.
+  setText(doc, themeColor);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8);
+  doc.text("SUBJECT PROPERTY", M.left, y);
+  y += 14;
+
   // Shortened from 80pt to 56pt — the 3 verdict pills (RECOMMENDATION,
   // DEAL SCORE, RISK) that used to live inside the panel were removed
   // because they duplicated the AI Recommendation card lower on the
@@ -649,8 +687,6 @@ function pageInputs(
   );
 
   y += heroHeight + 22;
-
-  const themeColor = resolveThemeColor(branding);
 
   // Inputs grid (4 cards)
   y = sectionTitle(doc, "Property & Inputs", y, "Section 1", themeColor);
@@ -921,7 +957,7 @@ async function pageProjection(
         {
           label: "Net Cash Flow",
           data: d.projection10y.rows.map((r) => r.net),
-          backgroundColor: COLOR.primary,
+          backgroundColor: themeColor,
           borderRadius: 4,
         },
       ],
@@ -984,7 +1020,7 @@ async function pageProjection(
     ]),
     theme: "plain",
     styles: { font: "helvetica", fontSize: 8.2, cellPadding: 4, lineColor: hexToRgb(COLOR.line), lineWidth: 0.3 },
-    headStyles: { fillColor: hexToRgb(COLOR.cardSoft), textColor: hexToRgb(COLOR.sub), fontStyle: "bold", fontSize: 7.5, halign: "left", lineWidth: { bottom: 0.6, top: 0, left: 0, right: 0 } },
+    headStyles: { fillColor: hexToRgb(COLOR.cardSoft), textColor: hexToRgb(themeColor), fontStyle: "bold", fontSize: 7.5, halign: "left", lineWidth: { bottom: 0.6, top: 0, left: 0, right: 0 }, lineColor: hexToRgb(themeColor) },
     columnStyles: { 0: { fontStyle: "bold", textColor: hexToRgb(COLOR.ink) } },
     alternateRowStyles: { fillColor: [252, 253, 255] },
   });
@@ -1043,7 +1079,7 @@ async function pageTax(
     type: "line",
     data: {
       labels,
-      datasets: [{ label: "Taxable Income", data: d.taxStrategy.rows.map((r) => r.taxable), borderColor: COLOR.primary, backgroundColor: "rgba(37,99,235,0.12)", fill: true, tension: 0.35, pointRadius: 0, borderWidth: 2 }],
+      datasets: [{ label: "Taxable Income", data: d.taxStrategy.rows.map((r) => r.taxable), borderColor: themeColor, backgroundColor: hexToRgba(themeColor, 0.12), fill: true, tension: 0.35, pointRadius: 0, borderWidth: 2 }],
     },
     options: { plugins: { legend: { display: false } }, scales: baseScales },
   });
@@ -1098,7 +1134,7 @@ async function pageTax(
     ]),
     theme: "plain",
     styles: { font: "helvetica", fontSize: 7.8, cellPadding: 3.5, lineColor: hexToRgb(COLOR.line), lineWidth: 0.3 },
-    headStyles: { fillColor: hexToRgb(COLOR.cardSoft), textColor: hexToRgb(COLOR.sub), fontStyle: "bold", fontSize: 7.2, halign: "left", lineWidth: { bottom: 0.6, top: 0, left: 0, right: 0 } },
+    headStyles: { fillColor: hexToRgb(COLOR.cardSoft), textColor: hexToRgb(themeColor), fontStyle: "bold", fontSize: 7.2, halign: "left", lineWidth: { bottom: 0.6, top: 0, left: 0, right: 0 }, lineColor: hexToRgb(themeColor) },
     columnStyles: { 0: { fontStyle: "bold", textColor: hexToRgb(COLOR.ink) } },
     alternateRowStyles: { fillColor: [252, 253, 255] },
   });
@@ -1136,7 +1172,7 @@ async function pageExit(
     data: {
       labels,
       datasets: [
-        { label: "Property Value", data: d.exitScenarios.rows.map((r) => r.value), borderColor: COLOR.primary, backgroundColor: "transparent", borderWidth: 2, pointRadius: 0, tension: 0.3 },
+        { label: "Property Value", data: d.exitScenarios.rows.map((r) => r.value), borderColor: themeColor, backgroundColor: "transparent", borderWidth: 2, pointRadius: 0, tension: 0.3 },
         { label: "Loan Balance", data: d.exitScenarios.rows.map((r) => r.loan), borderColor: COLOR.danger, backgroundColor: "transparent", borderWidth: 2, pointRadius: 0, tension: 0.3 },
       ],
     },
@@ -1163,7 +1199,7 @@ async function pageExit(
     data: {
       labels,
       datasets: [
-        { label: "Net Sale Proceeds", data: d.exitScenarios.rows.map((r) => r.netSale), backgroundColor: COLOR.primary, stack: "p" },
+        { label: "Net Sale Proceeds", data: d.exitScenarios.rows.map((r) => r.netSale), backgroundColor: themeColor, stack: "p" },
         { label: "Total Profit", data: d.exitScenarios.rows.map((r) => Math.max(r.profit, 0)), backgroundColor: COLOR.success, stack: "p" },
       ],
     },
@@ -1194,7 +1230,7 @@ async function pageExit(
     ]),
     theme: "plain",
     styles: { font: "helvetica", fontSize: 8.5, cellPadding: 4.5, lineColor: hexToRgb(COLOR.line), lineWidth: 0.3 },
-    headStyles: { fillColor: hexToRgb(COLOR.cardSoft), textColor: hexToRgb(COLOR.sub), fontStyle: "bold", fontSize: 7.5, halign: "left", lineWidth: { bottom: 0.6, top: 0, left: 0, right: 0 } },
+    headStyles: { fillColor: hexToRgb(COLOR.cardSoft), textColor: hexToRgb(themeColor), fontStyle: "bold", fontSize: 7.5, halign: "left", lineWidth: { bottom: 0.6, top: 0, left: 0, right: 0 }, lineColor: hexToRgb(themeColor) },
     columnStyles: { 0: { fontStyle: "bold", textColor: hexToRgb(COLOR.ink) } },
     alternateRowStyles: { fillColor: [252, 253, 255] },
   });
