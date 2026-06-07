@@ -231,27 +231,14 @@ function getRecommendationRiskTextColor(recommendation: string, risk: string): s
   return COLOR.success;
 }
 
-function getRecommendationPillColor(recommendation: string): { bg: string; fg: string } {
-  const normalizedRecommendation = recommendation.trim().toLowerCase();
-  if (normalizedRecommendation === "avoid") return { bg: COLOR.danger, fg: "#FFFFFF" };
-  if (normalizedRecommendation === "risky" || normalizedRecommendation === "neutral") {
-    return { bg: COLOR.warn, fg: "#FFFFFF" };
-  }
-  if (normalizedRecommendation === "buy") return { bg: COLOR.primary, fg: "#FFFFFF" };
-  return { bg: COLOR.success, fg: "#FFFFFF" };
-}
-
+// getRecommendationPillColor + getRiskPillColor were removed when the
+// 3 verdict pills inside the hero panel were cut. getScorePillColor
+// is kept because the AI Recommendation card's Deal Score readout
+// still uses it for tier-coloring the score number.
 function getScorePillColor(score: number): { bg: string; fg: string } {
   if (score >= 70) return { bg: COLOR.success, fg: "#FFFFFF" };
   if (score >= 40) return { bg: COLOR.warn, fg: "#FFFFFF" };
   return { bg: COLOR.danger, fg: "#FFFFFF" };
-}
-
-function getRiskPillColor(risk: string): { bg: string; fg: string } {
-  const normalizedRisk = risk.trim().toLowerCase();
-  if (normalizedRisk === "low risk") return { bg: COLOR.success, fg: "#FFFFFF" };
-  if (normalizedRisk === "high risk") return { bg: COLOR.danger, fg: "#FFFFFF" };
-  return { bg: COLOR.warn, fg: "#FFFFFF" };
 }
 
 /**
@@ -639,16 +626,9 @@ function statCard(
   }
 }
 
-function pill(doc: jsPDF, x: number, y: number, text: string, bg: string, fg: string) {
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(8);
-  const tw = doc.getTextWidth(text) + 14;
-  setFill(doc, bg);
-  doc.roundedRect(x, y - 9, tw, 14, 7, 7, "F");
-  setText(doc, fg);
-  doc.text(text, x + 7, y);
-  return tw;
-}
+// pill() helper was removed when the verdict pills were cut from the
+// hero panel and the Deal Score was refactored to refined typography
+// rather than a colored pill.
 
 // ===================== Pages =====================
 function pageInputs(
