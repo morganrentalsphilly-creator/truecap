@@ -314,6 +314,24 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
     },
     {
+      url: `${siteUrl}/vs/roofstock`,
+      lastModified: new Date("2026-06-07"),
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
+      url: `${siteUrl}/vs/rentredi`,
+      lastModified: new Date("2026-06-07"),
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
+    {
+      url: `${siteUrl}/vs/avail`,
+      lastModified: new Date("2026-06-07"),
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
+    {
       url: `${siteUrl}/blog/rental-property-tax-deductions`,
       lastModified: new Date("2026-05-26"),
       changeFrequency: "monthly",
@@ -460,6 +478,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
     {
       url: `${siteUrl}/blog/cash-on-cash-vs-irr`,
       lastModified: new Date("2026-05-24"),
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
+      url: `${siteUrl}/blog/dealcheck-vs-stessa-vs-truecap`,
+      lastModified: new Date("2026-06-07"),
+      changeFrequency: "monthly",
+      priority: 0.9,
+    },
+    {
+      url: `${siteUrl}/blog/how-truecap-verdict-engine-works`,
+      lastModified: new Date("2026-06-07"),
       changeFrequency: "monthly",
       priority: 0.8,
     },
