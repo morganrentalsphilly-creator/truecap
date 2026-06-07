@@ -553,17 +553,18 @@ function sectionTitle(
   }
   setText(doc, COLOR.ink);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(16);
+  doc.setFontSize(15);
   doc.text(text, M.left, y);
   // Elegant divider beneath the title — short brand-color accent stroke
   // mirrors the header divider treatment for visual consistency across
   // the document. Gives each section a clear designed beginning.
+  // Tighter positioning (y+6 vs y+8) reads as more integrated.
   setStroke(doc, kickerColor);
   doc.setLineWidth(1.5);
-  doc.line(M.left, y + 8, M.left + 28, y + 8);
+  doc.line(M.left, y + 6, M.left + 28, y + 6);
   setStroke(doc, COLOR.line);
   doc.setLineWidth(0.5);
-  return y + 24;
+  return y + 22;
 }
 
 // ===================== Card primitives =====================
@@ -688,12 +689,10 @@ function pageInputs(
   // that swaps to the user's brand color.
   const themeColor = resolveThemeColor(branding);
 
-  // Hero panel — taller (78pt) to fit a two-line address treatment:
-  // the street headline + a city/state/zip subtitle line beneath it.
-  // SUBJECT PROPERTY kicker removed per design direction. Larger
-  // breathing room makes the address panel read as the editorial
-  // centerpiece of page 1.
-  const heroHeight = 78;
+  // Hero panel — 72pt fits the two-line address treatment (street
+  // headline + city/state subtitle + property details row) without
+  // wasted vertical space. Internal positions tightened proportionally.
+  const heroHeight = 72;
   setFill(doc, heroPanelColor);
   doc.roundedRect(M.left, y, SAFE.w, heroHeight, 10, 10, "F");
 
@@ -705,20 +704,20 @@ function pageInputs(
   setText(doc, "#FFFFFF");
   doc.setFont("helvetica", "bold");
   doc.setFontSize(22);
-  doc.text(addressParts.primary, M.left + 22, y + 30);
+  doc.text(addressParts.primary, M.left + 22, y + 28);
 
   if (addressParts.secondary) {
     setText(doc, "#CBD5E1");
     doc.setFont("helvetica", "normal");
     doc.setFontSize(11);
-    doc.text(addressParts.secondary, M.left + 22, y + 46);
+    doc.text(addressParts.secondary, M.left + 22, y + 43);
   }
 
   // Thin white inner accent line between address subtitle and property
   // details row. Editorial divider treatment.
   setStroke(doc, "#FFFFFF");
   doc.setLineWidth(0.6);
-  doc.line(M.left + 22, y + 54, M.left + 22 + 28, y + 54);
+  doc.line(M.left + 22, y + 50, M.left + 22 + 28, y + 50);
 
   setText(doc, "#CBD5E1");
   doc.setFont("helvetica", "normal");
@@ -730,7 +729,7 @@ function pageInputs(
   doc.text(
     `${formatPropertyType(d.property.type)}  ·  Built ${d.property.yearBuilt}  ·  ${unitsLabel}  ·  Purchase ${fmtCurrency(d.property.purchasePrice)}`,
     M.left + 22,
-    y + 68,
+    y + 63,
   );
 
   // Restore stroke defaults for downstream draws
@@ -768,7 +767,10 @@ function pageInputs(
     const row = Math.floor(i / 3);
     statCard(doc, M.left + col * (cw + gap), y + row * (ch + gap), cw, ch, c[0], c[1], { tone: c[2], sub: c[3], themeColor });
   });
-  y += (ch + gap) * 2 + 6;
+  // Section spacing rationalized to a consistent +22pt across all
+  // page-1 transitions (was +6 here previously, which visibly cramped
+  // Property & Inputs immediately below).
+  y += (ch + gap) * 2 + 22;
 
   // Property & Inputs — moved to second position. Reader has already
   // seen the headline metrics above; now sees the assumptions that
@@ -951,12 +953,17 @@ function drawInputBlock(
   // Kicker color uses the brand color when set so PROPERTY / FINANCING /
   // OPERATING EXPENSES / ASSUMPTIONS read in the user's brand on
   // branded reports instead of TrueCap blue.
+  // Character spacing (charSpace 0.8) matches the typeset treatment
+  // applied to all other uppercase kickers throughout the document
+  // (ANALYSIS REPORT, stat card labels, section title kickers, etc.).
   const kickerColor =
     themeColor && isValidHex(themeColor) ? themeColor : COLOR.primary;
   setText(doc, kickerColor);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(8);
+  doc.setFontSize(7.5);
+  doc.setCharSpace(0.8);
   doc.text(title.toUpperCase(), x + 12, y + 16);
+  doc.setCharSpace(0);
   setStroke(doc, COLOR.line);
   doc.setLineWidth(0.4);
   doc.line(x + 12, y + 22, x + w - 12, y + 22);
