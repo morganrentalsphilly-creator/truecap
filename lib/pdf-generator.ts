@@ -376,18 +376,18 @@ function drawHeader(
     ? (branding?.primaryColorHex as string)
     : COLOR.primary;
 
-  // Top accent bar
+  // Top accent bar — 6pt for more visual presence. Thicker bar feels
+  // like a designed cover header rather than a thin tab strip.
   setFill(doc, themeColor);
-  doc.rect(0, 0, PAGE.w, 4, "F");
+  doc.rect(0, 0, PAGE.w, 6, "F");
 
   // Logo mark. Custom logos can be PNG or JPEG; jsPDF auto-detects from
   // the dataURL prefix so we pass "PNG" as a hint but it tolerates JPEG.
-  // We auto-fit within 600 × 200 (the upload UI's same constraint).
+  // Auto-fit within max bounds while preserving aspect ratio.
   if (logoData) {
     try {
-      const maxW = 102;
-      const maxH = 37;
-      // Preserve aspect ratio inside the max box.
+      const maxW = 110;
+      const maxH = 40;
       const aspect =
         logoData.width > 0 && logoData.height > 0
           ? logoData.width / logoData.height
@@ -402,7 +402,7 @@ function drawHeader(
         logoData.dataUrl,
         "PNG",
         M.left,
-        20,
+        18,
         targetWidth,
         targetHeight,
         undefined,
@@ -462,32 +462,41 @@ function drawHeader(
     doc.text(subtitle, M.left, 62);
   }
 
-  // Right side title — refined typographic treatment.
-  // Brand-color kicker ("ANALYSIS REPORT") above a slightly larger,
-  // refined title ("Investment Analysis"). Reads more like a
-  // designer-built document than a generic export.
+  // Right side title block — designer-built cover treatment.
+  // Three-tier hierarchy:
+  //   ANALYSIS REPORT     (small brand-color kicker)
+  //   Investment Analysis (larger 16pt bold title — confident statement)
+  //   Generated [date]    (small muted date)
+  // Reads as a deliberate document title block, not a generic header.
   setText(doc, themeColor);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7.5);
-  doc.text("ANALYSIS REPORT", PAGE.w - M.right, 32, { align: "right" });
+  doc.text("ANALYSIS REPORT", PAGE.w - M.right, 30, { align: "right" });
   setText(doc, COLOR.ink);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(13);
-  doc.text("Investment Analysis", PAGE.w - M.right, 47, { align: "right" });
+  doc.setFontSize(16);
+  doc.text("Investment Analysis", PAGE.w - M.right, 50, { align: "right" });
   setText(doc, COLOR.sub);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
   doc.text(
     `Generated ${generatedAt.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`,
     PAGE.w - M.right,
-    58,
+    62,
     { align: "right" },
   );
 
-  // Header underline
+  // Header underline — split into two segments for designed feel.
+  // A short brand-color accent (36pt) on the left sits above a
+  // continuous neutral hairline for the rest of the width. Tiny
+  // detail; cumulative effect with the other refinements lifts the
+  // whole header from "report export" to "designed document."
+  setStroke(doc, themeColor);
+  doc.setLineWidth(1.5);
+  doc.line(M.left, 70, M.left + 36, 70);
   setStroke(doc, COLOR.line);
   doc.setLineWidth(0.5);
-  doc.line(M.left, 66, PAGE.w - M.right, 66);
+  doc.line(M.left + 40, 70, PAGE.w - M.right, 70);
 
   // Footer area — brand-color accent line sits 4pt above the
   // standard divider line. Subtle but present brand mark on every
@@ -683,27 +692,38 @@ function pageInputs(
   doc.text("SUBJECT PROPERTY", M.left, y);
   y += 14;
 
-  // Shortened from 80pt to 56pt — the 3 verdict pills (RECOMMENDATION,
-  // DEAL SCORE, RISK) that used to live inside the panel were removed
-  // because they duplicated the AI Recommendation card lower on the
-  // page. Without the pills, the address + property details fit
-  // comfortably in 56pt and the panel reads as a clean "Subject
-  // Property" header instead of a dominant verdict billboard.
-  const heroHeight = 56;
+  // Hero panel — refined for elegance. Taller (68pt) so the address
+  // breathes properly, with a larger 24pt address font for impact, and
+  // a thin white inner accent line between the address and the property
+  // details row. The inner accent adds editorial polish — what
+  // separates a "report" from a "designed document."
+  const heroHeight = 68;
   setFill(doc, heroPanelColor);
-  doc.roundedRect(M.left, y, SAFE.w, heroHeight, 10, 10, "F");
+  doc.roundedRect(M.left, y, SAFE.w, heroHeight, 12, 12, "F");
   setText(doc, "#FFFFFF");
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(20);
-  doc.text(d.property.address, M.left + 18, y + 26);
+  doc.setFontSize(24);
+  doc.text(d.property.address, M.left + 20, y + 32);
+
+  // Thin white inner accent line between address and property details.
+  // Subtle structural element that signals "designed" — like a
+  // magazine title page divider.
+  setStroke(doc, "#FFFFFF");
+  doc.setLineWidth(0.6);
+  doc.line(M.left + 20, y + 42, M.left + 20 + 32, y + 42);
+
   setText(doc, "#CBD5E1");
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
   doc.text(
     `${d.property.type}  ·  Built ${d.property.yearBuilt}  ·  ${d.units.length} units  ·  Purchase ${fmtCurrency(d.property.purchasePrice)}`,
-    M.left + 18,
-    y + 44,
+    M.left + 20,
+    y + 56,
   );
+
+  // Restore stroke defaults for downstream draws
+  setStroke(doc, COLOR.line);
+  doc.setLineWidth(0.5);
 
   y += heroHeight + 22;
 
