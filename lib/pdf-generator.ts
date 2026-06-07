@@ -561,14 +561,24 @@ function sectionTitle(
   if (kicker) {
     setText(doc, kickerColor);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(8);
+    doc.setFontSize(7.5);
+    doc.setCharSpace(0.8);
     doc.text(kicker.toUpperCase(), M.left, y);
+    doc.setCharSpace(0);
     y += 18;
   }
   setText(doc, COLOR.ink);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(16);
   doc.text(text, M.left, y);
+  // Elegant divider beneath the title — short brand-color accent stroke
+  // mirrors the header divider treatment for visual consistency across
+  // the document. Gives each section a clear designed beginning.
+  setStroke(doc, kickerColor);
+  doc.setLineWidth(1.5);
+  doc.line(M.left, y + 8, M.left + 28, y + 8);
+  setStroke(doc, COLOR.line);
+  doc.setLineWidth(0.5);
   return y + 24;
 }
 
@@ -601,7 +611,9 @@ function statCard(
   } = {},
 ) {
   card(doc, x, y, w, h);
-  // accent bar left
+  // accent bar left — thinner 2pt for a more refined feel (was 3pt).
+  // The bar is subtle enough not to compete with the typography but
+  // present enough to carry the semantic tone meaning.
   const tone = opts.tone ?? "neutral";
   const primaryColor =
     opts.themeColor && isValidHex(opts.themeColor)
@@ -616,23 +628,29 @@ function statCard(
     warn: COLOR.warn,
   } as const;
   setFill(doc, toneMap[tone]);
-  doc.roundedRect(x, y, 3, h, 1.5, 1.5, "F");
+  doc.roundedRect(x, y, 2, h, 1, 1, "F");
 
+  // Label — uppercase microcopy with character spacing for a typeset
+  // editorial feel. Slightly smaller (7pt) but with more breathing room.
   setText(doc, COLOR.sub);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(7.5);
+  doc.setFontSize(7);
+  doc.setCharSpace(0.8);
   doc.text(label.toUpperCase(), x + 14, y + 18);
+  doc.setCharSpace(0);
 
+  // Value — sized 18pt for confident presence (was 17pt). The color
+  // stays semantic when there's a tone, ink otherwise.
   setText(doc, tone === "neutral" ? COLOR.ink : toneMap[tone]);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(17);
-  doc.text(value, x + 14, y + 40);
+  doc.setFontSize(18);
+  doc.text(value, x + 14, y + 41);
 
   if (opts.sub) {
     setText(doc, COLOR.sub);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8);
-    doc.text(opts.sub, x + 14, y + 54);
+    doc.text(opts.sub, x + 14, y + 56);
   }
 }
 
@@ -862,82 +880,60 @@ function pageInputs(
     Math.round(50 + rationaleLines.length * lineHeight + 16)
   );
   card(doc, M.left, y, SAFE.w, cardHeight);
+  // Thinner left stripe (3pt vs 4pt) for a more refined feel.
   setFill(doc, tierColor);
-  doc.roundedRect(M.left, y, 4, cardHeight, 2, 2, "F");
+  doc.roundedRect(M.left, y, 3, cardHeight, 1.5, 1.5, "F");
+  // Kicker — typeset character spacing for editorial polish.
   setText(doc, tierColor);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(8);
+  doc.setFontSize(7);
+  doc.setCharSpace(0.8);
   doc.text("AI RECOMMENDATION", M.left + 16, y + 16);
+  doc.setCharSpace(0);
+  // Headline — slightly tighter (14pt vs 13pt) for confident statement.
   setText(doc, tierColor);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(13);
+  doc.setFontSize(14);
   doc.text(`${d.performance.recommendation} — ${d.performance.risk}`, M.left + 16, y + 34);
 
-  // Deal Score pill — right-anchored to the card. Replaces the score
-  // pill that used to live in the hero panel (which was removed). Color
-  // mirrors the score tier (green ≥70, orange 40-69, red <40) so a
-  // glance tells you both the score and how it ranks.
-  const scoreText = `DEAL SCORE ${d.performance.dealScore}`;
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(8);
-  const scoreTextWidth = doc.getTextWidth(scoreText);
-  const scorePillWidth = scoreTextWidth + 14;
-  const scorePillX = PAGE.w - M.right - 16 - scorePillWidth;
+  // Deal Score badge — refined right-aligned typography (not a pill).
+  // Reads as "Deal Score 45 / 100" with the score number prominent and
+  // the "/100" denominator smaller for context. Cleaner than a colored
+  // pill — feels editorial rather than promotional.
   const scoreColor = getScorePillColor(d.performance.dealScore);
-  pill(doc, scorePillX, y + 28, scoreText, scoreColor.bg, scoreColor.fg);
+  setText(doc, COLOR.sub);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(7);
+  doc.setCharSpace(0.8);
+  doc.text("DEAL SCORE", PAGE.w - M.right - 16, y + 16, { align: "right" });
+  doc.setCharSpace(0);
+  setText(doc, scoreColor.bg);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(20);
+  const scoreStr = String(d.performance.dealScore);
+  const scoreNumberWidth = doc.getTextWidth(scoreStr);
+  doc.text(scoreStr, PAGE.w - M.right - 16, y + 36, { align: "right" });
+  setText(doc, COLOR.sub);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.text(
+    " / 100",
+    PAGE.w - M.right - 16 - scoreNumberWidth,
+    y + 36,
+    { align: "right" }
+  );
 
   setText(doc, COLOR.text);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   doc.text(rationaleLines, M.left + 16, y + 50, { lineHeightFactor: 1.35 });
 
-  // Move y past the recommendation card so the contact block (if any)
-  // sits below it with consistent spacing.
-  y += cardHeight + 18;
-
-  // Contact block — only rendered if branding has any contact info AND
-  // there's enough vertical space left on page 1 before the footer.
-  // Lays out as a small "Prepared by" attribution row with up to 4
-  // lines (name / email / phone / website). Sits flush with the page's
-  // safe area so it never overlaps the footer.
-  const contactLines: string[] = [];
-  if (branding?.contactName) contactLines.push(branding.contactName);
-  if (branding?.contactEmail) contactLines.push(branding.contactEmail);
-  if (branding?.contactPhone) contactLines.push(branding.contactPhone);
-  if (branding?.contactWebsite) contactLines.push(branding.contactWebsite);
-
-  if (contactLines.length > 0) {
-    const contactBlockHeight = 18 + contactLines.length * 12 + 10;
-    // Reserve ~70pt at the bottom for the footer area before falling off.
-    const footerReserve = 70;
-    const maxY = PAGE.h - footerReserve - contactBlockHeight;
-    if (y <= maxY) {
-      // Card with a brand-tinted left stripe (mirrors the AI
-      // Recommendation card above for visual consistency). Stripe color
-      // uses the user's primary brand color when set, else a neutral
-      // muted accent so the card still looks intentional on unbranded
-      // exports.
-      const accentColor = isValidHex(branding?.primaryColorHex ?? null)
-        ? (branding?.primaryColorHex as string)
-        : COLOR.sub;
-      card(doc, M.left, y, SAFE.w, contactBlockHeight);
-      setFill(doc, accentColor);
-      doc.roundedRect(M.left, y, 4, contactBlockHeight, 2, 2, "F");
-      setText(doc, accentColor);
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(7.5);
-      doc.text("PREPARED BY", M.left + 16, y + 14);
-      setText(doc, COLOR.ink);
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(9);
-      contactLines.forEach((line, i) => {
-        // First line (typically the name) gets bold weight so the
-        // preparer's name reads as the heading of this block.
-        doc.setFont("helvetica", i === 0 ? "bold" : "normal");
-        doc.text(line, M.left + 16, y + 28 + i * 12);
-      });
-    }
-  }
+  // PREPARED BY card was removed — the header subtitle now renders
+  // "Prepared by [Name]" bold under the logo, and the footer of every
+  // page shows the full "Prepared by [Name] · [Company]" attribution.
+  // A third card on page 1 was redundant chrome. Page 1 now ends with
+  // the AI Recommendation card; the attribution lives in the header
+  // and footer where it belongs.
 }
 
 function drawInputBlock(
