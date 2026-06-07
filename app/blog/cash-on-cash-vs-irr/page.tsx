@@ -56,7 +56,8 @@ export default function CashOnCashVsIrrPost() {
   return (
     <div className="min-h-screen bg-background">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
-      <article className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+        <article>
         <div className="mb-2"><Link href="/blog" className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground">← Blog</Link></div>
         <header className="mb-8">
           <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight text-balance">{TITLE}</h1>
@@ -121,7 +122,8 @@ export default function CashOnCashVsIrrPost() {
             The <Link href="/" className="text-primary font-semibold hover:underline">TrueCap analyzer</Link> shows both numbers prominently, plus the Pro 10-year projection and sensitivity grid so you can stress-test before you commit.
           </p>
         </div>
-      </article>
+        </article>
+      </main>
       <RelatedBlogPosts currentSlug={SLUG} />
       <div className="max-w-3xl mx-auto px-4 sm:px-6"><NewsletterSignup variant="expanded" source="blog" /></div>
       <BlogStickyCta />

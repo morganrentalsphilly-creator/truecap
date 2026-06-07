@@ -57,7 +57,8 @@ export default function ExchangePost() {
   return (
     <div className="min-h-screen bg-background">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
-      <article className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+        <article>
         <div className="mb-2"><Link href="/blog" className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground">← Blog</Link></div>
         <header className="mb-8">
           <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight text-balance">{TITLE}</h1>
@@ -208,7 +209,8 @@ export default function ExchangePost() {
             The tax savings on a typical 1031 ($20-50k+ deferred) easily justify the QI cost and operational tension. The deal that makes the strategy expensive isn&apos;t the QI — it&apos;s being forced into a mediocre replacement property by a poorly-managed timeline. Plan the search before you sell.
           </p>
         </div>
-      </article>
+        </article>
+      </main>
       <RelatedBlogPosts currentSlug={SLUG} />
       <div className="max-w-3xl mx-auto px-4 sm:px-6"><NewsletterSignup variant="expanded" source="blog" /></div>
       <BlogStickyCta />

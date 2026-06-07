@@ -8,6 +8,12 @@ const nextConfig = {
     // the Vercel build instead of the user's session.
     ignoreBuildErrors: false,
   },
+  // Explicit trailing-slash policy. Next.js's default is false (no
+  // trailing slash), but stating it documents the intent and prevents a
+  // future contributor from flipping it to `true` — which would change
+  // every canonical URL on the site and trigger massive recrawls. All
+  // our canonicals are no-trailing-slash; keep them that way.
+  trailingSlash: false,
   images: {
     unoptimized: true,
   },

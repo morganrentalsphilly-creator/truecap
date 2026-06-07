@@ -122,7 +122,8 @@ export default function RehabEstimatePost() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }}
       />
 
-      <article className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+        <article>
         <div className="mb-2">
           <Link
             href="/blog"
@@ -369,7 +370,8 @@ export default function RehabEstimatePost() {
             .
           </p>
         </div>
-      </article>
+        </article>
+      </main>
       <RelatedBlogPosts currentSlug={SLUG} />
       <div className="max-w-3xl mx-auto px-4 sm:px-6">
         <NewsletterSignup variant="expanded" source="blog" />

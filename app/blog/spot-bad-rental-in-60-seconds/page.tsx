@@ -58,7 +58,8 @@ export default function SpotBadRentalPost() {
   return (
     <div className="min-h-screen bg-background">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
-      <article className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+        <article>
         <div className="mb-2"><Link href="/blog" className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground">← Blog</Link></div>
         <header className="mb-8">
           <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight text-balance">{TITLE}</h1>
@@ -145,7 +146,8 @@ export default function SpotBadRentalPost() {
             The best investors I know aren&apos;t running magic — they&apos;re running this filter, fast, on everything. The discipline isn&apos;t in the spreadsheet. It&apos;s in saying no to the 90% of listings that don&apos;t pass, so the underwriting hours go to the 10% that might.
           </p>
         </div>
-      </article>
+        </article>
+      </main>
       <RelatedBlogPosts currentSlug={SLUG} />
       <div className="max-w-3xl mx-auto px-4 sm:px-6"><NewsletterSignup variant="expanded" source="blog" /></div>
       <BlogStickyCta />
