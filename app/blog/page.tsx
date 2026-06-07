@@ -48,6 +48,16 @@ export type BlogPost = {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: "vacancy-rate-rental-property",
+    title:
+      "Vacancy rate for rentals: what to assume in 2026 (and why 5% is usually a guess)",
+    excerpt:
+      "Physical vs economic vacancy, the turnover math that derives the number instead of guessing it, what 5 points does to cash flow and DSCR, and why your DSCR lender ignores vacancy entirely.",
+    readingTimeMinutes: 10,
+    publishedAt: "2026-06-07",
+    available: true,
+  },
+  {
     slug: "brrrr-method-explained",
     title: "The BRRRR method in 2026: the complete numbers walkthrough",
     excerpt:
