@@ -739,11 +739,40 @@ function pageInputs(
 
   y += heroHeight + 22;
 
-  // Inputs grid (4 cards)
-  // Section kicker ("Section 1") removed per design feedback — the
-  // section title itself is self-explanatory; the kicker just made
-  // the page feel templated. Same change applied at every section
-  // title across the document.
+  // Performance Summary — section reordering: the headline metrics now
+  // appear FIRST after the hero panel, before the inputs that produced
+  // them. Numbers before assumptions reads as a proper investment
+  // report — the reader sees "what does this deal do?" before "how was
+  // it calculated?"
+  y = sectionTitle(doc, "Performance Summary", y, undefined, themeColor);
+  const cw = (SAFE.w - 24) / 3;
+  const ch = 60;
+  const gap = 10;
+  // Cash purchase => no debt service => DSCR isn't applicable. Detect via
+  // downPaymentPct >= 100 (the canonical signal in the report payload).
+  const isCashPurchase = d.financing.downPaymentPct >= 100;
+  const dscrValue = isCashPurchase ? "N/A" : d.performance.dscr.toFixed(2);
+  const dscrTone: "primary" | "success" | "danger" | "neutral" | "violet" | "warn" =
+    isCashPurchase ? "neutral" : d.performance.dscr >= 1.2 ? "success" : "warn";
+  const dscrSub = isCashPurchase ? "cash purchase" : "debt cover";
+  const cards: Array<[string, string, "primary" | "success" | "danger" | "neutral" | "violet" | "warn", string?]> = [
+    ["Monthly Cash Flow", fmtCurrency(d.performance.monthlyCashFlow), d.performance.monthlyCashFlow >= 0 ? "success" : "danger", "/month"],
+    ["CoC Return", fmtPct(d.performance.cocReturn, true), "primary", "year 1"],
+    ["Cap Rate", fmtPct(d.performance.capRate, true), "violet", "gross"],
+    ["DSCR", dscrValue, dscrTone, dscrSub],
+    ["Tax Savings", fmtCurrency(d.performance.taxSavings), "success", "/month est."],
+    ["After-Tax CF", fmtCurrency(d.performance.afterTaxCF), "primary", "/month"],
+  ];
+  cards.forEach((c, i) => {
+    const col = i % 3;
+    const row = Math.floor(i / 3);
+    statCard(doc, M.left + col * (cw + gap), y + row * (ch + gap), cw, ch, c[0], c[1], { tone: c[2], sub: c[3], themeColor });
+  });
+  y += (ch + gap) * 2 + 6;
+
+  // Property & Inputs — moved to second position. Reader has already
+  // seen the headline metrics above; now sees the assumptions that
+  // produced them.
   y = sectionTitle(doc, "Property & Inputs", y, undefined, themeColor);
   const colW = (SAFE.w - 12) / 2;
   const rowH = 92;
@@ -801,33 +830,6 @@ function pageInputs(
     });
   });
   y += 60 + 22;
-
-  // Performance Summary - card grid 3 columns
-  y = sectionTitle(doc, "Performance Summary", y, undefined, themeColor);
-  const cw = (SAFE.w - 24) / 3;
-  const ch = 60;
-  const gap = 10;
-  // Cash purchase => no debt service => DSCR isn't applicable. Detect via
-  // downPaymentPct >= 100 (the canonical signal in the report payload).
-  const isCashPurchase = d.financing.downPaymentPct >= 100;
-  const dscrValue = isCashPurchase ? "N/A" : d.performance.dscr.toFixed(2);
-  const dscrTone: "primary" | "success" | "danger" | "neutral" | "violet" | "warn" =
-    isCashPurchase ? "neutral" : d.performance.dscr >= 1.2 ? "success" : "warn";
-  const dscrSub = isCashPurchase ? "cash purchase" : "debt cover";
-  const cards: Array<[string, string, "primary" | "success" | "danger" | "neutral" | "violet" | "warn", string?]> = [
-    ["Monthly Cash Flow", fmtCurrency(d.performance.monthlyCashFlow), d.performance.monthlyCashFlow >= 0 ? "success" : "danger", "/month"],
-    ["CoC Return", fmtPct(d.performance.cocReturn, true), "primary", "year 1"],
-    ["Cap Rate", fmtPct(d.performance.capRate, true), "violet", "gross"],
-    ["DSCR", dscrValue, dscrTone, dscrSub],
-    ["Tax Savings", fmtCurrency(d.performance.taxSavings), "success", "/month est."],
-    ["After-Tax CF", fmtCurrency(d.performance.afterTaxCF), "primary", "/month"],
-  ];
-  cards.forEach((c, i) => {
-    const col = i % 3;
-    const row = Math.floor(i / 3);
-    statCard(doc, M.left + col * (cw + gap), y + row * (ch + gap), cw, ch, c[0], c[1], { tone: c[2], sub: c[3], themeColor });
-  });
-  y += (ch + gap) * 2 + 6;
 
   // Recommendation / verdict card (full width). Auto-sizes to its
   // content so short Neutral/Risky rationales don't leave a giant
