@@ -38,6 +38,41 @@ Sentry.init({
   // https://docs.sentry.io/platforms/javascript/guides/nextjs/configuration/options/#sendDefaultPii
   sendDefaultPii: true,
 
+  // PII scrubbing — sendDefaultPii includes cookies in event payloads,
+  // which means the Supabase session cookie (`sb-*-auth-token`) would
+  // be sent to Sentry on every event. If a Sentry data export were
+  // ever compromised, those tokens could be used for account
+  // impersonation. beforeSend hooks the event right before transport
+  // and strips the auth cookie + any Authorization header.
+  beforeSend(event) {
+    // Cookies arrive as the raw `cookie` header string in
+    // event.request.cookies. Scrub anything that looks like a
+    // Supabase auth token.
+    const reqCookies = event.request?.cookies as
+      | Record<string, string>
+      | undefined;
+    if (reqCookies) {
+      for (const key of Object.keys(reqCookies)) {
+        if (/^sb-.*-auth-token/i.test(key)) {
+          reqCookies[key] = "[scrubbed]";
+        }
+      }
+    }
+    // Authorization headers can also carry tokens (CRON_SECRET on
+    // server-side cron requests, etc.). Scrub.
+    const reqHeaders = event.request?.headers as
+      | Record<string, string>
+      | undefined;
+    if (reqHeaders) {
+      for (const key of Object.keys(reqHeaders)) {
+        if (/^authorization$/i.test(key)) {
+          reqHeaders[key] = "[scrubbed]";
+        }
+      }
+    }
+    return event;
+  },
+
   // Filter out benign noise errors that don't represent real bugs.
   // These get captured because Supabase/libraries throw them as
   // unhandled rejections, but they're expected behavior.

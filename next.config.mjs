@@ -24,6 +24,59 @@ const nextConfig = {
       "@radix-ui/react-icons",
     ],
   },
+  // Security headers applied to every response. These are the conservative
+  // set — they don't break any third-party integrations (gtag, Sentry tunnel,
+  // PostHog, Stripe, Google Maps Places) because they don't enforce CSP.
+  // Adding CSP would require careful nonce handling for the inline scripts in
+  // app/layout.tsx — defer until you have time to test thoroughly.
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          // Clickjacking protection — refuse to be loaded in an iframe.
+          // SAMEORIGIN allows our own iframes (none currently) while
+          // blocking third-party embedding. Critical because the auth
+          // flow accepts credentials.
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+          // MIME-sniffing protection. Without this, an attacker who could
+          // upload a "PDF" that's actually HTML could get it served with
+          // text/html — XSS. The branding-logos bucket accepts user
+          // uploads, so this is a real concern.
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          // Force HTTPS for 2 years across the apex domain + subdomains.
+          // includeSubDomains is important so a misconfigured subdomain
+          // can't be used to set a cookie that escapes back to the apex.
+          // preload signals our intent to be preloaded into browser HSTS
+          // lists (you can submit at hstspreload.org once this is live).
+          {
+            key: "Strict-Transport-Security",
+            value: "max-age=63072000; includeSubDomains; preload",
+          },
+          // Disable unused powerful APIs by default. Specifically disables
+          // camera, microphone, geolocation, payment (we use Stripe-hosted
+          // checkout, not Payment Request API), and FLoC/Topics. If you
+          // ever add a feature that needs one of these, allow it inline.
+          {
+            key: "Permissions-Policy",
+            value: [
+              "camera=()",
+              "microphone=()",
+              "geolocation=()",
+              "payment=()",
+              "interest-cohort=()",
+              "browsing-topics=()",
+            ].join(", "),
+          },
+          // Referrer-Policy — send the origin only on cross-origin requests
+          // so we don't leak deep URLs (with query params like analysis
+          // IDs) to third-party trackers. strict-origin-when-cross-origin
+          // is the safest default that doesn't break analytics.
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+        ],
+      },
+    ];
+  },
 }
 
 export default withSentryConfig(nextConfig, {
