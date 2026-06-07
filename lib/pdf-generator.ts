@@ -1336,10 +1336,20 @@ export async function generateInvestmentPDFBlob(
   return doc.output("blob");
 }
 
+/**
+ * Generate the PDF AND trigger an immediate download, then return the
+ * blob for any downstream uses (e.g. caching it to Supabase Storage in
+ * the background).
+ *
+ * The download uses jsPDF's doc.save() which works regardless of user
+ * gesture timing — unlike a popup window or a new-tab link click,
+ * which browsers silently block after async operations because the
+ * user gesture context is lost.
+ */
 export async function generateInvestmentPDF(
   data: ReportData,
   branding?: BrandingConfig | null
-) {
+): Promise<Blob> {
   const doc = await buildInvestmentPDFDocument(data, branding);
   // Use the user's company name as a filename prefix if set, otherwise
   // the TrueCap default. Sanitize to filesystem-safe characters.
@@ -1347,4 +1357,5 @@ export async function generateInvestmentPDF(
     branding?.companyName?.trim().replace(/[^A-Za-z0-9_-]+/g, "-") ||
     "TrueCap";
   doc.save(`${prefix}-Investment-Report-${Date.now()}.pdf`);
+  return doc.output("blob");
 }

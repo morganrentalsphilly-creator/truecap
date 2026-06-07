@@ -52,7 +52,7 @@ import {
   type InvestmentFormValues,
 } from "@/lib/investcalc-schema";
 import { calculateAnalysis, type AnalysisResult } from "@/lib/calc-analysis";
-import { generateInvestmentPDFBlob, type ReportData } from "@/lib/pdf-generator";
+import type { ReportData } from "@/lib/pdf-generator";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import { ANALYSIS_PDF_BUCKET, PDF_SNAPSHOT_VERSION } from "@/lib/pdf-export-constants";
 import {
@@ -829,7 +829,31 @@ export function SavedAnalysesPage({
         }
 
         if (exportResult.source === "cache") {
-          openPdfUrl(exportResult.pdfUrl);
+          // Cache hit — fetch the cached PDF and trigger a download
+          // (instead of opening in a new tab via a link click, which
+          // gets popup-blocked after async work). Falls back to opening
+          // the URL directly if the fetch fails.
+          try {
+            const cacheResp = await fetch(exportResult.pdfUrl);
+            if (!cacheResp.ok) throw new Error("Fetch failed");
+            const cacheBlob = await cacheResp.blob();
+            const blobUrl = URL.createObjectURL(cacheBlob);
+            const a = document.createElement("a");
+            a.href = blobUrl;
+            a.download = "Investment-Analysis-Report.pdf";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(blobUrl);
+            toast({
+              title: "PDF downloaded",
+              description: "Your saved report was downloaded.",
+              variant: "success",
+            });
+          } catch {
+            // Fallback — try the original popup approach.
+            openPdfUrl(exportResult.pdfUrl);
+          }
           return;
         }
 
@@ -900,54 +924,56 @@ export function SavedAnalysesPage({
                 contactWebsite: brandingResult.branding.contact_website,
               }
             : null;
-        const pdfBlob = await generateInvestmentPDFBlob(reportData, brandingConfig);
-        const supabase = createBrowserSupabaseClient();
-        const {
-          data: { user },
-          error: userError,
-        } = await supabase.auth.getUser();
-        if (userError || !user) {
-          toast({
-            title: "Could not export PDF",
-            description: "Please sign in again to upload the generated PDF.",
-            variant: "destructive",
-          });
-          return;
-        }
 
-        const filePath = `${user.id}/${exportResult.id}/investment-analysis-v${PDF_SNAPSHOT_VERSION}.pdf`;
-        const { error: uploadError } = await supabase.storage
-          .from(ANALYSIS_PDF_BUCKET)
-          .upload(filePath, pdfBlob, {
-            contentType: "application/pdf",
-            upsert: true,
-          });
+        // Use generateInvestmentPDF (not …Blob) — it triggers a direct
+        // doc.save() download AND returns the blob for caching. This is
+        // the critical bug fix: the previous flow generated a blob,
+        // uploaded to Supabase, then tried to open the public URL in a
+        // new tab via link.click(). By the time the link.click() fired,
+        // the browser had lost the user gesture context and silently
+        // blocked the popup. Users saw "nothing happens" when clicking
+        // Export PDF. doc.save() is a download, not a popup, so it
+        // works regardless of timing.
+        const { generateInvestmentPDF } = await import("@/lib/pdf-generator");
+        const pdfBlob = await generateInvestmentPDF(reportData, brandingConfig);
 
-        if (uploadError) {
-          toast({
-            title: "Could not export PDF",
-            description: uploadError.message,
-            variant: "destructive",
-          });
-          return;
-        }
+        // Show a quick success toast so the user knows the export
+        // worked even if their browser silently downloaded the file.
+        toast({
+          title: "PDF generated",
+          description: "Your report was downloaded to your computer.",
+          variant: "success",
+        });
 
-        const { data: publicData } = supabase.storage
-          .from(ANALYSIS_PDF_BUCKET)
-          .getPublicUrl(filePath);
-        const pdfUrl = publicData.publicUrl;
-        const completeResult = await completeSavedAnalysisPdfExportAction(exportResult.id, pdfUrl);
-        if (!completeResult.ok) {
-          toast({
-            title: "PDF generated, but cache was not saved",
-            description: completeResult.message,
-            variant: "warning",
-          });
-          openPdfUrl(pdfUrl);
-          return;
-        }
-
-        openPdfUrl(completeResult.pdfUrl);
+        // Cache the PDF to Supabase Storage in the background — this is
+        // a best-effort cache for future exports. If it fails, the user
+        // already has their PDF, so we don't surface the error.
+        void (async () => {
+          try {
+            const supabase = createBrowserSupabaseClient();
+            const {
+              data: { user },
+            } = await supabase.auth.getUser();
+            if (!user) return;
+            const filePath = `${user.id}/${exportResult.id}/investment-analysis-v${PDF_SNAPSHOT_VERSION}.pdf`;
+            const { error: uploadError } = await supabase.storage
+              .from(ANALYSIS_PDF_BUCKET)
+              .upload(filePath, pdfBlob, {
+                contentType: "application/pdf",
+                upsert: true,
+              });
+            if (uploadError) return;
+            const { data: publicData } = supabase.storage
+              .from(ANALYSIS_PDF_BUCKET)
+              .getPublicUrl(filePath);
+            await completeSavedAnalysisPdfExportAction(
+              exportResult.id,
+              publicData.publicUrl
+            );
+          } catch {
+            // Cache write is best-effort — silent on failure.
+          }
+        })();
       } finally {
         setExportingPdfDealId(null);
       }
