@@ -22,6 +22,7 @@ import {
   HelpCircle,
   MapPin,
 } from "lucide-react";
+import { NotFoundTracker } from "@/components/marketing/not-found-tracker";
 
 export const metadata: Metadata = {
   title: "Page not found",
@@ -40,6 +41,10 @@ const POPULAR_PAGES = [
 export default function NotFound() {
   return (
     <div className="min-h-screen bg-background flex flex-col items-center px-4 pt-16 pb-12 sm:pt-24">
+      {/* Client-only tracker — captures the requested pathname to Sentry
+          so we can triage broken inbound links in operational dashboards
+          instead of discovering them weeks later via analytics. */}
+      <NotFoundTracker />
       <div className="w-full max-w-2xl text-center">
         <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-2xl bg-[var(--brand-blue-light)] text-primary">
           <Compass className="size-6" />

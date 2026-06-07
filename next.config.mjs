@@ -24,6 +24,26 @@ const nextConfig = {
       "@radix-ui/react-icons",
     ],
   },
+  // Permanent redirects for known-broken historical URLs.
+  // Add new entries here when 404 instrumentation surfaces real
+  // traffic hitting a malformed URL.
+  async redirects() {
+    return [
+      // Discovered via Sentry/analytics: a malformed external link
+      // (likely a tracker that truncated a base64 fragment) was
+      // pointing 48+ people/day at /tools/Y2FwLXJhdG. The slug
+      // decodes to 'cap-rat' (missing the final 'U' that would have
+      // made it 'cap-rate'). Redirect to the actual cap rate
+      // calculator so existing traffic + bookmarks + Google index
+      // entries land on a real page.
+      {
+        source: "/tools/Y2FwLXJhdG",
+        destination: "/tools/cap-rate-calculator",
+        permanent: true,
+      },
+    ];
+  },
+
   // Security headers applied to every response. These are the conservative
   // set — they don't break any third-party integrations (gtag, Sentry tunnel,
   // PostHog, Stripe, Google Maps Places) because they don't enforce CSP.
