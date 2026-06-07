@@ -216,6 +216,13 @@ export default async function ProfilePage({
           initialLastName={lastName}
           initialAvatarUrl={profile?.avatar_url}
         />
+        {/* id="billing" — anchor target for /profile#billing deep links
+            from the analyzer's upgrade CTA, dashboard subscription manager,
+            saved-analyses paywall, and pricing-plan-buttons. Without this
+            anchor the fragment was a no-op — users landed at the top of
+            profile instead of the billing card. scroll-mt-24 keeps the
+            target below the sticky header. */}
+        <div id="billing" className="scroll-mt-24" />
         <BillingPanel
           currentSubscription={
             subscription

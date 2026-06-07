@@ -129,7 +129,11 @@ export function ExitIntentOffer() {
 
         <div className="mt-5 flex flex-col gap-2.5 sm:flex-row">
           <Link
-            href="/pricing#plans?coupon=EXIT50"
+            // NOTE: URL fragments must come AFTER the query string per RFC 3986.
+            // Previously this was "/pricing#plans?coupon=EXIT50" which made the
+            // browser parse the fragment as "plans?coupon=EXIT50" (a non-existent
+            // anchor) and dropped the coupon entirely on the server side.
+            href="/pricing?coupon=EXIT50#plans"
             onClick={() => {
               trackEvent("exit_intent_clicked", { variant: "50_off_annual" });
               setOpen(false);

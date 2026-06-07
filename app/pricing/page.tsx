@@ -144,7 +144,9 @@ export default async function PricingPage() {
             (replaced the previous 3-card side-by-side). The toggle
             consistently outperforms separate cards because users
             directly compare per-month cost. ~10-15% lift on annual. */}
-        <section className="mx-auto -mt-2 max-w-5xl px-4 pb-6 sm:px-6">
+        {/* id="plans" — scroll target for exit-intent CTAs and any other
+            deep link that needs to land directly on the plan toggle. */}
+        <section id="plans" className="mx-auto -mt-2 max-w-5xl px-4 pb-6 sm:px-6">
           <PricingTogglePlans
             monthly={monthly}
             annual={annual}
