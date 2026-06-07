@@ -48,6 +48,15 @@ export type BlogPost = {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: "brrrr-method-explained",
+    title: "The BRRRR method in 2026: the complete numbers walkthrough",
+    excerpt:
+      "Buy, rehab, rent, refinance, repeat — with real 2026 numbers. One full deal start to finish: refinance LTV limits, seasoning rules, DSCR qualification, and the two constraints on your cash-out most guides skip.",
+    readingTimeMinutes: 11,
+    publishedAt: "2026-06-07",
+    available: true,
+  },
+  {
     slug: "single-family-vs-multi-family-rental",
     title: "Single-family vs multi-family rental property — which actually wins?",
     excerpt:
