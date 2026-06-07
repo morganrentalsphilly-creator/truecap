@@ -17,7 +17,14 @@
 import { z } from "zod";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
-export const userDefaultsSchema = z
+// NOTE: schema must NOT be exported — Next.js requires "use server"
+// files to export only async functions. A runtime object export
+// (z.object()...) throws the obscure "found object" error at request
+// time. The type below uses z.infer so callers still get the right
+// shape via the type export, just without the schema as a runtime
+// value. If a non-server module needs the schema, move it to its
+// own file and re-import here.
+const userDefaultsSchema = z
   .object({
     downPaymentPct: z.number().min(0).max(100).optional(),
     loanTermYears: z.number().min(1).max(50).optional(),
