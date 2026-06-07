@@ -1,5 +1,6 @@
 "use server";
 
+import * as Sentry from "@sentry/nextjs";
 import { calculateAnalysis } from "@/lib/calc-analysis";
 import { computeDealScore } from "@/lib/deal-score";
 import {
@@ -559,16 +560,30 @@ export async function getSavedAnalysisPdfExportAction(
   // more about accuracy than speed.
   let hasUserBranding = false;
   try {
-    const { data: brandingRow } = await supabase
+    const { data: brandingRow, error: brandingError } = await supabase
       .from("branding")
       .select("id")
       .eq("user_id", user.id)
       .maybeSingle();
-    hasUserBranding = Boolean(brandingRow);
-  } catch {
-    // If the branding lookup fails for any reason, fall through to the
-    // normal cache logic. Better to occasionally serve a stale-branded
-    // PDF than to error out the whole export flow.
+    if (brandingError) {
+      // Surface query errors to Sentry but don't fail the export.
+      // Falling through to normal cache logic means branded users get
+      // a possibly-stale cached PDF, which is better UX than blocking
+      // the export entirely. The Sentry capture makes systemic
+      // failures (RLS misconfig, table missing, network) visible.
+      Sentry.captureMessage("branding-lookup query error", {
+        level: "warning",
+        tags: { feature: "pdf-cache-branding-lookup" },
+        extra: { message: brandingError.message, code: brandingError.code },
+      });
+    } else {
+      hasUserBranding = Boolean(brandingRow);
+    }
+  } catch (err) {
+    Sentry.captureException(err, {
+      tags: { feature: "pdf-cache-branding-lookup" },
+    });
+    // Fall through to the normal cache logic on unexpected failures.
   }
 
   if (

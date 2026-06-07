@@ -10,11 +10,13 @@
 
 import { useState } from "react";
 import { Share2, Copy, Check, X } from "lucide-react";
+import * as Sentry from "@sentry/nextjs";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { encodeShareLink, buildShareUrl } from "@/lib/share-link";
 import { trackEvent } from "@/lib/analytics";
+import { useToast } from "@/hooks/use-toast";
 
 interface ShareLinkButtonProps {
   values: InvestmentFormValues | null;
@@ -25,6 +27,7 @@ export function ShareLinkButton({ values, className }: ShareLinkButtonProps) {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [shareUrl, setShareUrl] = useState<string>("");
+  const { toast } = useToast();
 
   const openShare = () => {
     if (!values) return;
@@ -40,8 +43,18 @@ export function ShareLinkButton({ values, className }: ShareLinkButtonProps) {
       setShareUrl(buildShareUrl(encoded));
       setOpen(true);
       setCopied(false);
-    } catch {
-      // Encoding failed for some reason — no-op rather than crash.
+    } catch (err) {
+      // Encoding failure used to be a silent no-op — user clicked Share
+      // and nothing happened. Surface a toast so they know to try again,
+      // and capture to Sentry so we know when this is happening.
+      Sentry.captureException(err, {
+        tags: { feature: "share-link-encode" },
+      });
+      toast({
+        title: "Couldn't generate share link",
+        description: "Try again — if it persists let us know.",
+        variant: "destructive",
+      });
     }
   };
 

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import * as Sentry from "@sentry/nextjs";
 import {
   Archive,
   ArrowDown,
@@ -946,8 +947,12 @@ export function SavedAnalysesPage({
         });
 
         // Cache the PDF to Supabase Storage in the background — this is
-        // a best-effort cache for future exports. If it fails, the user
-        // already has their PDF, so we don't surface the error.
+        // a best-effort cache for future exports. The user already has
+        // their PDF; failures here only mean the next dashboard export
+        // for this deal will regenerate. We capture to Sentry with a
+        // dedicated tag so systemic failures (RLS regression, quota,
+        // bucket misconfig) are visible in the dashboard without
+        // surfacing as errors to the user.
         void (async () => {
           try {
             const supabase = createBrowserSupabaseClient();
@@ -962,18 +967,53 @@ export function SavedAnalysesPage({
                 contentType: "application/pdf",
                 upsert: true,
               });
-            if (uploadError) return;
+            if (uploadError) {
+              Sentry.captureMessage("pdf-cache-write upload failed", {
+                level: "warning",
+                tags: { feature: "pdf-cache-write" },
+                extra: { message: uploadError.message },
+              });
+              return;
+            }
             const { data: publicData } = supabase.storage
               .from(ANALYSIS_PDF_BUCKET)
               .getPublicUrl(filePath);
-            await completeSavedAnalysisPdfExportAction(
+            const completeResult = await completeSavedAnalysisPdfExportAction(
               exportResult.id,
               publicData.publicUrl
             );
-          } catch {
-            // Cache write is best-effort — silent on failure.
+            if (!completeResult.ok) {
+              Sentry.captureMessage("pdf-cache-write complete action failed", {
+                level: "warning",
+                tags: { feature: "pdf-cache-write" },
+                extra: { code: completeResult.code, message: completeResult.message },
+              });
+            }
+          } catch (err) {
+            Sentry.captureException(err, {
+              tags: { feature: "pdf-cache-write" },
+            });
           }
         })();
+      } catch (err) {
+        // Top-level catch — any error in the regenerate path (parsing,
+        // generation, etc.) surfaces a toast AND captures to Sentry so
+        // failures are findable rather than silent. Previously this had
+        // try/finally with no catch, so unhandled errors bubbled up
+        // silently and users saw the loading state reset by finally
+        // with no feedback.
+        Sentry.captureException(err, {
+          tags: { feature: "dashboard-pdf-export" },
+          extra: { dealId: id },
+        });
+        toast({
+          title: "PDF export failed",
+          description:
+            err instanceof Error
+              ? err.message
+              : "Something went wrong generating the PDF. Try again, and if it persists let us know.",
+          variant: "destructive",
+        });
       } finally {
         setExportingPdfDealId(null);
       }
