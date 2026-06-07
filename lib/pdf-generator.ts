@@ -462,27 +462,31 @@ function drawHeader(
     doc.text(subtitle, M.left, 62);
   }
 
-  // Right side title block — designer-built cover treatment.
-  // Three-tier hierarchy:
-  //   ANALYSIS REPORT     (small brand-color kicker)
-  //   Investment Analysis (larger 16pt bold title — confident statement)
+  // Right side title block — refined editorial treatment.
+  // Three-tier hierarchy with slightly tighter spacing for a more
+  // polished, magazine-cover feel:
+  //   ANALYSIS REPORT     (small brand-color kicker with tracking)
+  //   Investment Analysis (15pt bold — confident but not shouting)
   //   Generated [date]    (small muted date)
-  // Reads as a deliberate document title block, not a generic header.
+  // The kicker uses character spacing (charSpace) to feel typeset
+  // rather than slapped on.
   setText(doc, themeColor);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(7.5);
+  doc.setFontSize(7);
+  doc.setCharSpace(1.2);
   doc.text("ANALYSIS REPORT", PAGE.w - M.right, 30, { align: "right" });
+  doc.setCharSpace(0);
   setText(doc, COLOR.ink);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(16);
-  doc.text("Investment Analysis", PAGE.w - M.right, 50, { align: "right" });
+  doc.setFontSize(15);
+  doc.text("Investment Analysis", PAGE.w - M.right, 49, { align: "right" });
   setText(doc, COLOR.sub);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
   doc.text(
     `Generated ${generatedAt.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`,
     PAGE.w - M.right,
-    62,
+    61,
     { align: "right" },
   );
 
@@ -683,42 +687,46 @@ function pageInputs(
   const themeColor = resolveThemeColor(branding);
 
   // Subject Property kicker — small brand-color label above the
-  // address panel. Makes the hero read as part of a deliberate
-  // structure ("subject property → analysis → recommendation") rather
-  // than a floating address card.
+  // address panel. Matches the typeset character-spacing treatment
+  // of the ANALYSIS REPORT kicker in the header for visual rhyme.
   setText(doc, themeColor);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(8);
+  doc.setFontSize(7.5);
+  doc.setCharSpace(1.2);
   doc.text("SUBJECT PROPERTY", M.left, y);
+  doc.setCharSpace(0);
   y += 14;
 
-  // Hero panel — refined for elegance. Taller (68pt) so the address
-  // breathes properly, with a larger 24pt address font for impact, and
-  // a thin white inner accent line between the address and the property
-  // details row. The inner accent adds editorial polish — what
-  // separates a "report" from a "designed document."
-  const heroHeight = 68;
+  // Hero panel — refined for elegance. 64pt tall, 22pt address font
+  // (down from 24pt — 24pt was too aggressive, 22pt reads as confident
+  // but not loud). Thin white inner accent line between the address
+  // and property details adds editorial polish. Slightly smaller
+  // corner radius (10pt) for sharper modern feel.
+  const heroHeight = 64;
   setFill(doc, heroPanelColor);
-  doc.roundedRect(M.left, y, SAFE.w, heroHeight, 12, 12, "F");
+  doc.roundedRect(M.left, y, SAFE.w, heroHeight, 10, 10, "F");
   setText(doc, "#FFFFFF");
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(24);
-  doc.text(d.property.address, M.left + 20, y + 32);
+  doc.setFontSize(22);
+  doc.text(d.property.address, M.left + 22, y + 30);
 
   // Thin white inner accent line between address and property details.
   // Subtle structural element that signals "designed" — like a
   // magazine title page divider.
   setStroke(doc, "#FFFFFF");
   doc.setLineWidth(0.6);
-  doc.line(M.left + 20, y + 42, M.left + 20 + 32, y + 42);
+  doc.line(M.left + 22, y + 39, M.left + 22 + 28, y + 39);
 
   setText(doc, "#CBD5E1");
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
+  // Singular/plural fix on "unit/units" so a single-family deal doesn't
+  // read as "1 units."
+  const unitsLabel = d.units.length === 1 ? "1 unit" : `${d.units.length} units`;
   doc.text(
-    `${d.property.type}  ·  Built ${d.property.yearBuilt}  ·  ${d.units.length} units  ·  Purchase ${fmtCurrency(d.property.purchasePrice)}`,
-    M.left + 20,
-    y + 56,
+    `${d.property.type}  ·  Built ${d.property.yearBuilt}  ·  ${unitsLabel}  ·  Purchase ${fmtCurrency(d.property.purchasePrice)}`,
+    M.left + 22,
+    y + 52,
   );
 
   // Restore stroke defaults for downstream draws
@@ -728,7 +736,11 @@ function pageInputs(
   y += heroHeight + 22;
 
   // Inputs grid (4 cards)
-  y = sectionTitle(doc, "Property & Inputs", y, "Section 1", themeColor);
+  // Section kicker ("Section 1") removed per design feedback — the
+  // section title itself is self-explanatory; the kicker just made
+  // the page feel templated. Same change applied at every section
+  // title across the document.
+  y = sectionTitle(doc, "Property & Inputs", y, undefined, themeColor);
   const colW = (SAFE.w - 12) / 2;
   const rowH = 92;
 
@@ -787,7 +799,7 @@ function pageInputs(
   y += 60 + 22;
 
   // Performance Summary - card grid 3 columns
-  y = sectionTitle(doc, "Performance Summary", y, "Section 2", themeColor);
+  y = sectionTitle(doc, "Performance Summary", y, undefined, themeColor);
   const cw = (SAFE.w - 24) / 3;
   const ch = 60;
   const gap = 10;
