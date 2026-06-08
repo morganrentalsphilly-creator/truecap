@@ -272,6 +272,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.7,
     },
     {
+      url: `${siteUrl}/vs`,
+      lastModified: new Date("2026-06-07"),
+      changeFrequency: "weekly",
+      priority: 0.8,
+    },
+    {
       url: `${siteUrl}/vs/dealcheck`,
       lastModified: new Date(),
       changeFrequency: "monthly",
