@@ -18,6 +18,7 @@
  */
 
 import { z } from "zod";
+import * as Sentry from "@sentry/nextjs";
 
 export type CaptureResult =
   | { ok: true; scheduledCount: number }
@@ -152,6 +153,13 @@ export async function capturePostAnalysisEmail(input: {
 
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
+    // CONFIG_MISSING is a Sentry-level alert — if the env var ever
+    // drops out in production we want to see it immediately because
+    // every email-capture submit silently fails until it's restored.
+    Sentry.captureMessage("RESEND_API_KEY missing — email capture disabled", {
+      level: "error",
+      tags: { feature: "post-analysis-email-capture" },
+    });
     return {
       ok: false,
       code: "CONFIG_MISSING",
@@ -167,7 +175,8 @@ export async function capturePostAnalysisEmail(input: {
   // Schedule each email. Resend's `scheduled_at` accepts ISO 8601;
   // day 0 sends immediately (we just don't pass scheduled_at).
   let scheduledCount = 0;
-  const failures: string[] = [];
+  let day0Sent = false;
+  const failures: Array<{ delayDays: number; status: number | "thrown"; body: string }> = [];
 
   for (const item of SEQUENCE) {
     const payload: Record<string, unknown> = {
@@ -182,6 +191,9 @@ export async function capturePostAnalysisEmail(input: {
       payload.scheduled_at = future.toISOString();
     }
     try {
+      // 10s timeout — Resend usually returns in <1s; >10s is almost
+      // certainly a network issue, not a slow API response. Without
+      // this the server action can hang and the user sees nothing.
       const res = await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: {
@@ -189,25 +201,71 @@ export async function capturePostAnalysisEmail(input: {
           Authorization: `Bearer ${apiKey}`,
         },
         body: JSON.stringify(payload),
+        signal: AbortSignal.timeout(10_000),
       });
       if (!res.ok) {
         const text = await res.text().catch(() => "");
-        failures.push(`day-${item.delayDays} ${res.status}: ${text.slice(0, 200)}`);
+        failures.push({ delayDays: item.delayDays, status: res.status, body: text.slice(0, 500) });
         continue;
       }
       scheduledCount += 1;
+      if (item.delayDays === 0) day0Sent = true;
     } catch (err) {
-      failures.push(
-        `day-${item.delayDays} threw: ${err instanceof Error ? err.message : String(err)}`
-      );
+      failures.push({
+        delayDays: item.delayDays,
+        status: "thrown",
+        body: err instanceof Error ? err.message : String(err),
+      });
     }
+  }
+
+  // Telemetry: log any failure pattern to Sentry so we can see them in
+  // production. Without this, the user gets a friendly toast and we
+  // have zero visibility into what Resend actually rejected.
+  if (failures.length > 0) {
+    Sentry.captureMessage(
+      `post-analysis-email-capture: ${failures.length}/${SEQUENCE.length} email(s) failed`,
+      {
+        level: scheduledCount === 0 ? "error" : "warning",
+        tags: {
+          feature: "post-analysis-email-capture",
+          all_failed: String(scheduledCount === 0),
+          day0_failed: String(!day0Sent),
+        },
+        extra: {
+          failures,
+          scheduledCount,
+          totalAttempts: SEQUENCE.length,
+          fromAddress: from,
+          // Email + address intentionally omitted to keep PII out of
+          // Sentry; the failure pattern (status code + body) is what
+          // we need to debug.
+        },
+      }
+    );
   }
 
   if (scheduledCount === 0) {
     return {
       ok: false,
       code: "SEND_FAILED",
-      message: failures[0] ?? "Could not schedule any emails. Try again later.",
+      // User-facing message — friendly, no raw status codes. The real
+      // detail is in Sentry per the captureMessage above.
+      message: "We couldn't send your analysis right now. Please try again in a minute.",
+    };
+  }
+
+  // Edge case: at least one email scheduled but day-0 (the instant
+  // "Here's your analysis") was NOT sent. The user thinks they got the
+  // email immediately but actually only the day-2/5/12 sequence is
+  // queued. Surface this so the user knows to expect it later (and
+  // the Sentry warning above tells us to investigate the day-0 path).
+  if (!day0Sent) {
+    return {
+      ok: false,
+      code: "SEND_FAILED",
+      message:
+        "Your follow-up emails are queued, but we couldn't send today's instant copy. Please try again in a minute.",
     };
   }
 
