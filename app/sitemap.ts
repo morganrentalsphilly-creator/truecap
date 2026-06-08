@@ -337,6 +337,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 0.7,
     },
+    // 11 new /vs library expansions (Jun 2026 batch).
+    { url: `${siteUrl}/vs/propstream`,       lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.8 },
+    { url: `${siteUrl}/vs/rentcast`,         lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.7 },
+    { url: `${siteUrl}/vs/turbotenant`,      lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.8 },
+    { url: `${siteUrl}/vs/baselane`,         lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.7 },
+    { url: `${siteUrl}/vs/buildium`,         lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.7 },
+    { url: `${siteUrl}/vs/appfolio`,         lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.7 },
+    { url: `${siteUrl}/vs/rentec-direct`,    lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.6 },
+    { url: `${siteUrl}/vs/landlord-studio`,  lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.6 },
+    { url: `${siteUrl}/vs/rentspree`,        lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.6 },
+    { url: `${siteUrl}/vs/hostfully`,        lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.6 },
+    { url: `${siteUrl}/vs/cozy`,             lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.5 },
     {
       url: `${siteUrl}/blog/rental-property-tax-deductions`,
       lastModified: new Date("2026-05-26"),
