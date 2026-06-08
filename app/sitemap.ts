@@ -271,12 +271,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 0.7,
     },
-    {
-      url: `${siteUrl}/vs`,
-      lastModified: new Date("2026-06-07"),
-      changeFrequency: "weekly",
-      priority: 0.8,
-    },
+    // /vs hub intentionally omitted — noindex (per user request to
+    // hide the comparison hub from internal nav). Individual
+    // /vs/<competitor> pages remain in the sitemap below.
     {
       url: `${siteUrl}/vs/dealcheck`,
       lastModified: new Date(),
@@ -507,6 +504,25 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${siteUrl}/blog/how-truecap-verdict-engine-works`,
+      lastModified: new Date("2026-06-07"),
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    // 3 three-way comparison blog posts (Jun 2026 batch).
+    {
+      url: `${siteUrl}/blog/dealcheck-vs-biggerpockets-vs-truecap`,
+      lastModified: new Date("2026-06-07"),
+      changeFrequency: "monthly",
+      priority: 0.9,
+    },
+    {
+      url: `${siteUrl}/blog/stessa-vs-avail-vs-baselane`,
+      lastModified: new Date("2026-06-07"),
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
+      url: `${siteUrl}/blog/roofstock-vs-mashvisor-vs-propstream`,
       lastModified: new Date("2026-06-07"),
       changeFrequency: "monthly",
       priority: 0.8,

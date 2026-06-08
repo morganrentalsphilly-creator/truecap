@@ -300,37 +300,12 @@ export default function BlogIndexPage() {
           ))}
         </ul>
 
-        {/* Side-panel card linking out to the /vs hub. Surfaces the 10
-            competitor comparison pages from inside the blog directory,
-            which previously had zero entry point from anywhere on the
-            site. Visitors comparison-shopping rental tools end up
-            here naturally from blog reading; this gives them a
-            one-click path to the comparisons. */}
-        <section className="mt-10 rounded-2xl border-2 border-dashed border-primary/30 bg-card p-6 sm:p-8">
-          <div className="flex items-start justify-between gap-4">
-            <div className="min-w-0 flex-1">
-              <p className="text-[11px] font-bold uppercase tracking-widest text-primary mb-2">
-                Comparing rental tools?
-              </p>
-              <h2 className="text-xl sm:text-2xl font-extrabold mb-2 text-foreground">
-                See how TrueCap stacks up against 10 alternatives.
-              </h2>
-              <p className="text-sm sm:text-base text-muted-foreground mb-4 leading-relaxed">
-                Honest side-by-side comparisons of TrueCap vs DealCheck,
-                BiggerPockets, Stessa, Mashvisor, Roofstock, and more.
-              </p>
-              <Link
-                href="/vs"
-                className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
-              >
-                Browse all comparisons
-                <ArrowUpRight className="w-4 h-4" />
-              </Link>
-            </div>
-          </div>
-        </section>
+        {/* NOTE: /vs hub card removed at user request. The individual
+            /vs/<competitor> pages still exist as SEO landing surfaces
+            (visitors arrive direct from Google) but the hub is hidden
+            from internal navigation. */}
 
-        <section className="mt-6 rounded-2xl bg-primary text-primary-foreground p-6 sm:p-8">
+        <section className="mt-10 rounded-2xl bg-primary text-primary-foreground p-6 sm:p-8">
           <h2 className="text-xl sm:text-2xl font-extrabold mb-2">
             Want the calculator that powers these guides?
           </h2>

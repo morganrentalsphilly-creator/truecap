@@ -38,6 +38,12 @@ export const metadata: Metadata = {
     "rental software comparison",
   ],
   alternates: { canonical: "/vs" },
+  // Noindex — the hub page is no longer surfaced from internal
+  // navigation (footer link + blog card removed at user request).
+  // Individual /vs/<competitor> pages stay indexable as SEO landing
+  // surfaces. The hub URL still resolves for anyone who types it
+  // directly or arrives from a stale internal link.
+  robots: { index: false, follow: true },
   openGraph: {
     title: "TrueCap vs every rental tool — honest comparisons",
     description:

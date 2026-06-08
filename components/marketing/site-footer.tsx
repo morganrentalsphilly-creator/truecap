@@ -29,12 +29,12 @@ const FOOTER_COLS: Array<{
       { label: "Pricing", href: "/pricing" },
       { label: "All free tools", href: "/tools" },
       { label: "Blog", href: "/blog" },
-      // /vs hub — links to the 10 competitor comparison pages
-      // (DealCheck, Stessa, BiggerPockets, etc). These were SEO-only
-      // landing pages with zero internal discoverability before this
-      // entry; comparison-shopping visitors browsing the site can now
-      // find them.
-      { label: "Compare TrueCap", href: "/vs" },
+      // NOTE: "Compare TrueCap" link to /vs hub intentionally removed.
+      // The 20+ /vs/<competitor> pages still exist as SEO landing
+      // surfaces (visitors arrive directly from Google), but the
+      // hub itself is not surfaced in nav. Comparison-shopping users
+      // can still find the individual /vs pages via Google or the
+      // cross-references between them.
       // Embed hub — quiet link. Bloggers/agents who care will find it;
       // casual visitors won't notice. Each embed adoption = a permanent
       // backlink, so even one or two clicks per month compound nicely.
