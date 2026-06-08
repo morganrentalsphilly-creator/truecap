@@ -353,6 +353,17 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${siteUrl}/vs/hostaway`,         lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.7 },
     { url: `${siteUrl}/vs/airdna`,           lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.8 },
     { url: `${siteUrl}/vs/arrived`,          lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.7 },
+    // Round-4 /vs library expansion (Jun 2026).
+    { url: `${siteUrl}/vs/fundrise`,          lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.7 },
+    { url: `${siteUrl}/vs/lodgify`,           lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.6 },
+    { url: `${siteUrl}/vs/guesty`,            lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.6 },
+    { url: `${siteUrl}/vs/crexi`,             lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.6 },
+    { url: `${siteUrl}/vs/reonomy`,           lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.5 },
+    { url: `${siteUrl}/vs/privy`,             lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.6 },
+    { url: `${siteUrl}/vs/quickbooks-rental`, lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.6 },
+    // Niche use-case /vs pages (long-tail audience slicing).
+    { url: `${siteUrl}/vs/dealcheck-for-brrrr`,              lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.7 },
+    { url: `${siteUrl}/vs/biggerpockets-for-house-hacking`,  lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.7 },
     {
       url: `${siteUrl}/blog/rental-property-tax-deductions`,
       lastModified: new Date("2026-05-26"),
