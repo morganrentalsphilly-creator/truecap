@@ -186,6 +186,25 @@ export default withSentryConfig(nextConfig, {
   // Only print logs for uploading source maps in CI
   silent: !process.env.CI,
 
+  // Sentry auth token controls source-map upload at build time. Without
+  // an auth token, the upload step throws "No auth token provided"
+  // warnings on every build. In newer @sentry/nextjs versions Vercel
+  // can treat that as a hard build failure during `onBuildComplete`.
+  // Explicitly skip the upload step when the token isn't set so the
+  // build cleanly succeeds either way:
+  //   - locally / preview: no SENTRY_AUTH_TOKEN, sourceMaps skipped, no warnings
+  //   - production: set SENTRY_AUTH_TOKEN in Vercel env vars → sourceMaps upload, prettier stack traces in Sentry
+  sourcemaps: {
+    disable: !process.env.SENTRY_AUTH_TOKEN,
+  },
+  // Suppress the release-creation step too when there's no token —
+  // creating a release without an auth token also produces the
+  // "Will not create release" warning that some Vercel versions
+  // surface as a build failure.
+  release: {
+    create: Boolean(process.env.SENTRY_AUTH_TOKEN),
+  },
+
   // For all available options, see:
   // https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/
 
