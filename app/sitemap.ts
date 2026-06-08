@@ -585,5 +585,30 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 0.8,
     },
+    // Batch B — 4 strategy / long-form educational posts (Jun 2026).
+    {
+      url: `${siteUrl}/blog/short-term-rental-underwriting-playbook`,
+      lastModified: new Date("2026-06-07"),
+      changeFrequency: "monthly",
+      priority: 0.9,
+    },
+    {
+      url: `${siteUrl}/blog/hard-money-vs-dscr-loan`,
+      lastModified: new Date("2026-06-07"),
+      changeFrequency: "monthly",
+      priority: 0.9,
+    },
+    {
+      url: `${siteUrl}/blog/bonus-depreciation-rental-property-2026`,
+      lastModified: new Date("2026-06-07"),
+      changeFrequency: "monthly",
+      priority: 0.9,
+    },
+    {
+      url: `${siteUrl}/blog/house-hack-underwriting-guide`,
+      lastModified: new Date("2026-06-07"),
+      changeFrequency: "monthly",
+      priority: 0.9,
+    },
   ];
 }
