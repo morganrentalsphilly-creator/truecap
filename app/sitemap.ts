@@ -364,6 +364,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // Niche use-case /vs pages (long-tail audience slicing).
     { url: `${siteUrl}/vs/dealcheck-for-brrrr`,              lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.7 },
     { url: `${siteUrl}/vs/biggerpockets-for-house-hacking`,  lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.7 },
+    { url: `${siteUrl}/vs/dealcheck-for-fix-and-flip`,         lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.7 },
+    { url: `${siteUrl}/vs/dealcheck-for-short-term-rentals`,   lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.7 },
+    { url: `${siteUrl}/vs/mashvisor-for-short-term-rentals`,   lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.7 },
     {
       url: `${siteUrl}/blog/rental-property-tax-deductions`,
       lastModified: new Date("2026-05-26"),
@@ -550,6 +553,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: new Date("2026-06-07"),
       changeFrequency: "monthly",
       priority: 0.8,
+    },
+    {
+      url: `${siteUrl}/blog/best-rental-property-calculator-2026`,
+      lastModified: new Date("2026-06-07"),
+      changeFrequency: "monthly",
+      priority: 0.9,
     },
   ];
 }
