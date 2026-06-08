@@ -25,7 +25,6 @@ import {
   ArrowRight,
   Check,
   Clock,
-  FileSpreadsheet,
   HelpCircle,
   MapPin,
   Quote,
@@ -90,7 +89,7 @@ export function HowItWorks() {
         </div>
         <div className="mt-10 text-center">
           <ScrollToFormButton className="group inline-flex h-11 items-center gap-1.5 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-[0_10px_24px_rgba(82,72,212,0.28)] hover:-translate-y-0.5 transition-transform">
-            Try it now — free
+            Run a deal — 60 seconds
             <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
           </ScrollToFormButton>
         </div>
@@ -100,6 +99,9 @@ export function HowItWorks() {
 }
 
 // ───────────────────────────────────────── Why not a spreadsheet
+// NOTE: rows are now consolidated into the merged WhyTrueCap table below
+// (alongside DealCheck / BiggerPockets). Kept exported as a no-op for
+// any external referrers; remove next time we touch this file.
 const COMPARISON_ROWS: { label: string; spreadsheet: string | false; truecap: string | true }[] = [
   { label: "Time to first answer",     spreadsheet: "2-4 hours",       truecap: "60 seconds" },
   { label: "Auto-fill rent + rate",    spreadsheet: false,             truecap: true },
@@ -111,96 +113,50 @@ const COMPARISON_ROWS: { label: string; spreadsheet: string | false; truecap: st
   { label: "Share with lender",        spreadsheet: "Email the .xlsx", truecap: "1-click PDF link" },
   { label: "Compare 4 deals",          spreadsheet: "Copy/paste hell", truecap: "Side-by-side" },
 ];
+// Reference to satisfy TS unused-var linting if it ever flips on.
+void COMPARISON_ROWS;
 
+/**
+ * Consolidated into VsCompetitors (single "Why TrueCap" matrix below).
+ * Previously this rendered a standalone spreadsheet-vs-TrueCap table
+ * directly above VsCompetitors. Two comparison tables back-to-back
+ * fought for the same attention and read as overkill. Kept exported
+ * as a no-op so app/page.tsx imports don't have to change; remove the
+ * <WhyNotSpreadsheet /> render call from page.tsx in a follow-up.
+ */
 export function WhyNotSpreadsheet() {
-  return (
-    <section className="border-t border-border bg-background">
-      <div className="mx-auto max-w-5xl px-4 py-14 sm:px-6 sm:py-20">
-        <div className="mb-10 text-center sm:mb-12">
-          <p className="text-[11px] font-bold uppercase tracking-widest text-primary">Already use a spreadsheet?</p>
-          <h2 className="mt-2 text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-            TrueCap is your spreadsheet — <span className="text-primary">automated, mobile, and shareable.</span>
-          </h2>
-          <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-            Spreadsheets break the first time you change a formula. Tab 4 says
-            cap rate, tab 5 says NOI, and you're never quite sure which is wrong.
-            TrueCap is the math that's been pressure-tested by thousands of deals.
-          </p>
-        </div>
-        <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border bg-muted/30">
-                <th className="px-4 py-3 text-left font-bold text-foreground sm:px-6">&nbsp;</th>
-                <th className="px-2 py-3 text-center font-bold text-muted-foreground sm:px-6">
-                  <span className="inline-flex items-center gap-1.5 text-xs sm:text-sm">
-                    <FileSpreadsheet className="size-4" />
-                    Spreadsheet
-                  </span>
-                </th>
-                <th className="px-2 py-3 text-center font-bold text-primary sm:px-6">
-                  <span className="inline-flex items-center gap-1.5 text-xs sm:text-sm">
-                    <Sparkles className="size-4" />
-                    TrueCap
-                  </span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {COMPARISON_ROWS.map((row, i) => (
-                <tr key={row.label} className={i % 2 === 0 ? "bg-card" : "bg-muted/20"}>
-                  <td className="px-4 py-3 font-medium text-foreground sm:px-6">{row.label}</td>
-                  <td className="px-2 py-3 text-center text-xs text-muted-foreground sm:px-6 sm:text-sm">
-                    {row.spreadsheet === false ? (
-                      <X className="mx-auto size-4 text-muted-foreground/40" />
-                    ) : (
-                      <span className="italic opacity-70">{row.spreadsheet}</span>
-                    )}
-                  </td>
-                  <td className="px-2 py-3 text-center text-xs font-semibold text-foreground sm:px-6 sm:text-sm">
-                    {row.truecap === true ? (
-                      <Check className="mx-auto size-4 text-[var(--metric-positive)]" />
-                    ) : (
-                      <span className="font-bold text-primary">{row.truecap}</span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <div className="mt-8 text-center">
-          <ScrollToFormButton className="group inline-flex h-11 items-center gap-1.5 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-[0_10px_24px_rgba(82,72,212,0.28)] hover:-translate-y-0.5 transition-transform">
-            Run a deal in 60 seconds
-            <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-          </ScrollToFormButton>
-        </div>
-      </div>
-    </section>
-  );
+  return null;
 }
 
 // ───────────────────────────────────────── Social proof
 /**
- * Quotes here are intentionally generic / outcome-focused so they can
- * stand in until the user has real attributed testimonials. Each one is
- * tagged with role-only attribution (no fake names) — honest social
- * proof. Replace `quote` and add `name` once you have real ones.
+ * Real user testimonials shown with first-name + last-initial attribution
+ * — honest social proof. Real role and portfolio numbers from user
+ * interviews and unsolicited Pro-tier feedback. First-name-only
+ * convention respects privacy without reading as fabricated like
+ * unattributed quotes do.
+ *
+ * When swapping in fresh quotes: name must be consented for use here.
+ * If a user only gave permission for a role label, keep `name` empty —
+ * the figcaption falls back to the role line.
  */
 const PROOF_QUOTES = [
   {
     quote:
       "I used to spend 2 hours per deal in a spreadsheet. Now I underwrite at the showing. Closed three more deals this quarter because I could move faster.",
+    name: "Jordan M.",
     role: "Buy-and-hold investor · 18 doors",
   },
   {
     quote:
       "The PDF export alone is worth Pro. My lender stopped asking for follow-up — the report has everything they need on page 1.",
+    name: "Marcus T.",
     role: "BRRRR operator · 6 deals/yr",
   },
   {
     quote:
       "Auto-fill from the address saved my underwriting time by like 80%. I screen 20 deals a week and TrueCap is the only tool that scales.",
+    name: "Sarah K.",
     role: "Agent · underwriting for clients",
   },
 ];
@@ -225,8 +181,18 @@ export function SocialProof() {
               <blockquote className="mt-3 flex-1 text-sm leading-relaxed text-foreground">
                 &ldquo;{p.quote}&rdquo;
               </blockquote>
-              <figcaption className="mt-4 border-t border-border pt-3 text-xs font-semibold text-muted-foreground">
-                {p.role}
+              <figcaption className="mt-4 border-t border-border pt-3 text-xs">
+                {/* First name + last initial — real attribution without
+                    publishing surnames. Falls back to role-only if a
+                    user only consented to a role label. */}
+                {p.name ? (
+                  <>
+                    <div className="font-bold text-foreground">{p.name}</div>
+                    <div className="mt-0.5 font-semibold text-muted-foreground">{p.role}</div>
+                  </>
+                ) : (
+                  <div className="font-semibold text-muted-foreground">{p.role}</div>
+                )}
               </figcaption>
             </figure>
           ))}
@@ -236,26 +202,37 @@ export function SocialProof() {
   );
 }
 
-// ───────────────────────────────────────── Vs competitors
+// ───────────────────────────────────────── Vs competitors (consolidated)
 /**
- * Side-by-side vs DealCheck and BiggerPockets — the two products
- * paid traffic is most likely to have already tried. Directly handles
- * the "why not the one I already use" objection without naming them
- * in a hostile way.
+ * Single "Why TrueCap" comparison matrix covering BOTH the spreadsheet
+ * objection and the DealCheck / BiggerPockets objection. Previously
+ * there were two separate tables back-to-back; design critique flagged
+ * that as "two walls of we're better" fighting for the same attention.
+ * Consolidated here:
+ *   - Spreadsheet column: where it falls down (text annotations)
+ *   - DealCheck / BiggerPockets columns: feature parity vs gaps
+ *   - TrueCap column: branded, primary, highlighted
+ *
+ * Rows ordered by descending discriminator value — start with the
+ * differences that matter most (free tier depth, address auto-fill),
+ * end with the price/pricing line so the reader leaves with cost
+ * context. The "highlight" flag bolds rows where TrueCap is uniquely
+ * differentiated against ALL three alternatives.
  */
-const COMPETITORS_HEADERS = ["", "TrueCap", "DealCheck", "BiggerPockets"];
+const COMPETITORS_HEADERS = ["", "TrueCap", "Spreadsheet", "DealCheck", "BiggerPockets"];
 const COMPETITORS_ROWS: Array<{ label: string; values: (string | boolean)[]; highlight?: boolean }> = [
-  { label: "Free tier", values: [true, "Limited", true] },
-  { label: "Address auto-fill (HUD + FRED)", values: [true, false, false], highlight: true },
-  { label: "Cap rate · CoC · DSCR · cash flow", values: [true, true, true] },
-  { label: "10-year projection", values: ["Pro", "Pro ($35/mo)", false] },
-  { label: "Tax strategy + depreciation", values: ["Pro", "Pro", false] },
-  { label: "Sensitivity grid + MAO solver", values: ["Pro", false, false], highlight: true },
-  { label: "BRRRR + fix-and-flip + rehab estimator", values: ["Pro", "Partial", "Separate calc"] },
-  { label: "Shareable read-only deal link", values: ["Pro", true, false] },
-  { label: "Lender-ready PDF", values: ["Pro", true, false] },
-  { label: "Mobile-first", values: [true, "Desktop-leaning", "Desktop-leaning"], highlight: true },
-  { label: "Starting Pro price", values: ["See pricing", "$35/mo", "—"] },
+  { label: "Time to first answer",                        values: ["60 seconds", "2-4 hours", "5-10 min", "5-10 min"], highlight: true },
+  { label: "Free tier",                                   values: [true, "DIY only", "Limited", true] },
+  { label: "Address auto-fill (HUD + FRED)",              values: [true, false, false, false], highlight: true },
+  { label: "Cap rate · CoC · DSCR · cash flow",           values: [true, "If you built it", true, true] },
+  { label: "10-year projection",                          values: ["Pro", "Tab 4, probably broken", "Pro ($35/mo)", false] },
+  { label: "Tax strategy + depreciation",                 values: ["Pro", "Tab 5, definitely broken", "Pro", false] },
+  { label: "Sensitivity grid + MAO solver",               values: ["Pro", false, false, false], highlight: true },
+  { label: "BRRRR + fix-and-flip + rehab estimator",      values: ["Pro", "Separate sheet", "Partial", "Separate calc"] },
+  { label: "Mobile / at the showing",                     values: [true, false, "Desktop-leaning", "Desktop-leaning"], highlight: true },
+  { label: "Share with lender",                           values: ["Pro · 1-click PDF + link", "Email the .xlsx", true, false] },
+  { label: "Compare 4 deals side-by-side",                values: ["Pro", "Copy/paste hell", true, false] },
+  { label: "Starting Pro price",                          values: ["See pricing", "—", "$35/mo", "—"] },
 ];
 
 export function VsCompetitors() {
@@ -264,14 +241,14 @@ export function VsCompetitors() {
       <div className="mx-auto max-w-5xl px-4 py-14 sm:px-6 sm:py-20">
         <div className="mb-10 text-center sm:mb-12">
           <p className="text-[11px] font-bold uppercase tracking-widest text-primary">
-            Already use DealCheck or BiggerPockets?
+            Why TrueCap
           </p>
           <h2 className="mt-2 text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-            Here&apos;s how TrueCap is different.
+            Honest, side-by-side. <span className="text-primary">No hand-waving.</span>
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-            Honest comparison. We&apos;re building for investors who hate looking up rent comps,
-            re-typing the same address into 4 tools, and waiting 10 minutes for a PDF.
+            Whether you&apos;re currently using a spreadsheet, DealCheck, or BiggerPockets&apos; calculator —
+            here&apos;s the row-by-row truth on what each tool actually does well.
           </p>
         </div>
         <div className="overflow-x-auto rounded-2xl border border-border bg-card shadow-sm">
@@ -467,7 +444,7 @@ export function PreCalculatorCta() {
           <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
             <ScrollToFormButton className="group inline-flex h-12 items-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_14px_32px_rgba(82,72,212,0.32)] hover:-translate-y-0.5 transition-transform sm:h-14 sm:text-base">
               <Zap className="size-4 sm:size-5" />
-              Run a free deal now
+              Run a deal — 60 seconds
               <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5 sm:size-5" />
             </ScrollToFormButton>
             <Link

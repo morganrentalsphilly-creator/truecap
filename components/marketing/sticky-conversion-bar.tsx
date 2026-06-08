@@ -66,7 +66,10 @@ export function StickyConversionBar() {
           className="inline-flex h-9 shrink-0 items-center gap-1 rounded-lg bg-primary px-3 text-xs font-bold text-primary-foreground hover:bg-primary/95 sm:h-10 sm:px-4 sm:text-sm"
         >
           <Calculator className="size-3.5 sm:size-4" />
-          <span className="hidden min-[380px]:inline">Run a free deal</span>
+          {/* Standardized to "Run a deal — 60s" to match the homepage's
+              primary CTA. Sub-380px tiny phones fall back to "Try it"
+              because the full label wraps. */}
+          <span className="hidden min-[380px]:inline">Run a deal — 60s</span>
           <span className="min-[380px]:hidden">Try it</span>
           <ArrowRight className="size-3.5 sm:size-4" />
         </button>

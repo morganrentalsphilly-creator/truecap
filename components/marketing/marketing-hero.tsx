@@ -88,8 +88,11 @@ export function MarketingHero() {
             className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(82,72,212,0.28)] transition-transform hover:-translate-y-0.5"
           >
             <Calculator className="size-4" />
-            <span className="sm:hidden">Run a free analysis</span>
-            <span className="hidden sm:inline">Run a free deal — no signup</span>
+            {/* Standardized CTA copy used across every primary surface on
+                the homepage. Consistency matters for A/B test signal and
+                brand recall — previous mix of 6 phrasings ("Run a free
+                analysis", "Try it now — free", etc.) split funnel data. */}
+            Run a deal — 60 seconds
             <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
           </ScrollToFormButton>
           <Link
@@ -146,33 +149,34 @@ export function MarketingHero() {
           ))}
         </div>
 
-        {/* "Built for" — tight 2-link row pointing to the two persona
-            landing pages. Replaces the 5-item dot-separated list that
-            looked dense without providing a clickable destination. */}
-        <div className="mt-12 flex flex-wrap items-center justify-center gap-x-2 gap-y-2 text-sm text-muted-foreground">
-          <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+        {/* "Built for" — promoted from inline body text to a proper
+            5-button row. These are audience self-selection links and
+            high-converting destinations for paid traffic; burying them as
+            inline links was undervaluing their role. Expanded from 3 to
+            5 to surface house-hackers and BRRRR operators (both already
+            had persona landing pages but were hidden in the footer
+            nav). */}
+        <div className="mt-12 text-center">
+          <p className="mb-3 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
             Built for
-          </span>
-          <Link
-            href="/for-agents"
-            className="font-semibold text-foreground/80 hover:text-primary hover:underline"
-          >
-            real estate agents
-          </Link>
-          <span aria-hidden className="text-muted-foreground/40">·</span>
-          <Link
-            href="/for-flippers"
-            className="font-semibold text-foreground/80 hover:text-primary hover:underline"
-          >
-            fix &amp; flippers
-          </Link>
-          <span aria-hidden className="text-muted-foreground/40">·</span>
-          <Link
-            href="/for-buy-and-hold"
-            className="font-semibold text-foreground/80 hover:text-primary hover:underline"
-          >
-            buy-and-hold investors
-          </Link>
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+            {[
+              { href: "/for-buy-and-hold", label: "Buy-and-hold" },
+              { href: "/for-house-hackers", label: "House hackers" },
+              { href: "/for-brrrr", label: "BRRRR operators" },
+              { href: "/for-flippers", label: "Fix & flippers" },
+              { href: "/for-agents", label: "Agents" },
+            ].map((persona) => (
+              <Link
+                key={persona.href}
+                href={persona.href}
+                className="inline-flex h-10 items-center gap-1.5 rounded-xl border border-border bg-card px-3.5 text-sm font-semibold text-foreground/85 transition hover:border-primary/40 hover:bg-primary/5 hover:text-primary sm:h-11 sm:px-4"
+              >
+                {persona.label}
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
     </section>
@@ -220,44 +224,19 @@ function HeroProductMock() {
           </div>
         </div>
 
-        {/* metric tiles */}
-        <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
+        {/* Metric tiles — trimmed from 7 metrics (4 main + 3 secondary +
+            sparkline) to 3 cleanest. Previously the card showed cash flow,
+            cap rate, CoC, DSCR, 10-yr CF + sparkline, tax save/yr, and
+            year-7 exit — that's the calculator's full output, doing the
+            tool's job before the visitor types anything. Now: the verdict
+            badge does the headline work, and three tiles answer the three
+            questions every investor asks first — "does it cash flow?",
+            "what's the unleveraged return?", and "will the lender like
+            this?". */}
+        <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-3">
           <MockTile label="Cash flow / mo" value="+$640" tone="success" />
-          <MockTile label="Cap rate" value="+8.2%" tone="success" />
-          <MockTile label="CoC return" value="+13.1%" tone="primary" />
+          <MockTile label="Cap rate" value="8.2%" tone="success" />
           <MockTile label="DSCR" value="1.34" tone="success" sub="Bankable" />
-        </div>
-
-        {/* tiny sparkline + label */}
-        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-[1.5fr_1fr]">
-          <div className="rounded-xl border border-border bg-background p-3">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">10-Year cash flow</span>
-              <span className="text-xs font-extrabold text-[var(--brand-green)]">+$14,200</span>
-            </div>
-            <svg viewBox="0 0 200 60" className="mt-2 h-12 w-full">
-              <defs>
-                <linearGradient id="hero-spark" x1="0" x2="0" y1="0" y2="1">
-                  <stop offset="0%" stopColor="rgb(82, 72, 212)" stopOpacity="0.35" />
-                  <stop offset="100%" stopColor="rgb(82, 72, 212)" stopOpacity="0" />
-                </linearGradient>
-              </defs>
-              <path
-                d="M 0 55 L 22 50 L 44 44 L 66 38 L 88 32 L 110 27 L 132 22 L 154 17 L 176 12 L 200 6"
-                stroke="rgb(82, 72, 212)"
-                strokeWidth="2"
-                fill="none"
-              />
-              <path
-                d="M 0 55 L 22 50 L 44 44 L 66 38 L 88 32 L 110 27 L 132 22 L 154 17 L 176 12 L 200 6 L 200 60 L 0 60 Z"
-                fill="url(#hero-spark)"
-              />
-            </svg>
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            <MockTile label="Tax save / yr" value="$8,420" tone="success" small />
-            <MockTile label="Year 7 exit" value="$144k" tone="primary" small />
-          </div>
         </div>
 
         {/* verdict line */}
