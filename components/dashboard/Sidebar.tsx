@@ -41,6 +41,11 @@ export function Sidebar({ savedDealCount, navAccess, mobile = false }: SidebarPr
     { icon: Briefcase, label: "My Deals", href: "/dashboard/saved-analyses", badge: String(savedDealCount), enabled: navAccess.myDeals },
     { icon: ListTodo, label: "Compare Deals", href: "/dashboard/compare", enabled: navAccess.compareDeals },
     { icon: FileBarChart, label: "Manage Templates", href: "/dashboard/templates", enabled: navAccess.templates },
+    // Settings promoted from the avatar dropdown into the main sidebar.
+    // Pro users pay for Branding (configured at /settings/branding); it
+    // shouldn't be 3 clicks deep in a Topbar dropdown. /settings is the
+    // hub that links to Branding, Defaults, and Billing sub-pages.
+    { icon: Settings, label: "Settings", href: "/settings", enabled: true },
   ].map((item) => ({ ...item, active: isActive(item.href) }));
 
   return (
@@ -94,13 +99,15 @@ export function Sidebar({ savedDealCount, navAccess, mobile = false }: SidebarPr
       </div>
 
       <div className="mt-auto p-4 space-y-3">
+        {/* Profile (avatar / display name / email) — distinct from
+            Settings, which now lives in the main sidebar nav. */}
         <Link
           href="/profile"
           prefetch={false}
           className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-sidebar-foreground/70 hover:text-white hover:bg-sidebar-accent/50 transition"
         >
-          <Settings className="h-[18px] w-[18px]" />
-          <span>Manage Account</span>
+          <Briefcase className="h-[18px] w-[18px]" />
+          <span>Profile &amp; Billing</span>
         </Link>
       </div>
     </aside>

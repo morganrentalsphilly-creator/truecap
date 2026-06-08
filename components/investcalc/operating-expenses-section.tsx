@@ -195,10 +195,12 @@ export function OperatingExpensesSection({
           <div className="mb-3 flex items-center gap-1.5">
             <Info className="size-4 text-[var(--brand-orange)]" />
             <span className="text-sm font-semibold text-[var(--brand-orange)]">
-              Auto-Calculated Estimates
+              Using sensible defaults
             </span>
           </div>
-          <div className="mb-2 flex flex-wrap gap-x-8 gap-y-1">
+          {/* Auto-calculated dollar estimates (computed from purchase
+              price × default %). */}
+          <div className="mb-2.5 flex flex-wrap gap-x-8 gap-y-1">
             <div>
               <span className="text-sm text-muted-foreground">Property Tax:</span>{" "}
               <span className="text-sm font-semibold text-foreground">
@@ -212,9 +214,32 @@ export function OperatingExpensesSection({
               </span>
             </div>
           </div>
+          {/* Default percentages summary — the four operating-cost
+              assumptions that used to show as four full Input fields
+              even on the empty form. Surfacing them as a compact
+              one-line summary cuts ~120px of visible form height and
+              keeps the "60 seconds" promise credible. User clicks
+              "Show Advanced Options" to override any of them. */}
+          <div className="mb-2.5 flex flex-wrap gap-x-4 gap-y-1 text-sm">
+            <span className="text-muted-foreground">
+              Vacancy <span className="font-semibold text-foreground">5%</span>
+            </span>
+            <span aria-hidden className="text-muted-foreground/40">·</span>
+            <span className="text-muted-foreground">
+              Management <span className="font-semibold text-foreground">8%</span>
+            </span>
+            <span aria-hidden className="text-muted-foreground/40">·</span>
+            <span className="text-muted-foreground">
+              Maintenance <span className="font-semibold text-foreground">10%</span>
+            </span>
+            <span aria-hidden className="text-muted-foreground/40">·</span>
+            <span className="text-muted-foreground">
+              CapEx <span className="font-semibold text-foreground">5%</span>
+            </span>
+          </div>
           <p className="text-xs text-[var(--brand-orange)]">
-            Estimates use the current form values. Click &quot;Show Advanced Options&quot; to
-            customize tax, insurance, HOA, utilities and tax strategy assumptions.
+            Click &quot;Show Advanced Options&quot; to override any of these or
+            customize tax, insurance, HOA, utilities, and tax strategy.
           </p>
         </div>
       )}
@@ -364,7 +389,13 @@ export function OperatingExpensesSection({
               <FieldError message={errors.utilitiesMonthly?.message} />
             </SectionField>
 
-            <SectionField className="rounded-lg border border-[var(--brand-orange)]/10 bg-card p-3">
+            {/* Maintenance / Vacancy / Management / CapEx — previously
+                visible on the empty form. Now hidden by default in the
+                same way Utilities / Property Tax already are; surfaced
+                as a one-line default summary in the "Using sensible
+                defaults" block above. User clicks "Show Advanced
+                Options" to override any of these inputs. */}
+            <SectionField className={cn("rounded-lg border border-[var(--brand-orange)]/10 bg-card p-3", !showAdvanced && "hidden")}>
               <FieldLabel icon={<Wrench className="size-3" />}>
                 <FieldLabelWithTooltip label="Maintenance %" term="maintenance" />
               </FieldLabel>
@@ -382,7 +413,7 @@ export function OperatingExpensesSection({
               <FieldError message={errors.maintenancePct?.message} />
             </SectionField>
 
-            <SectionField className="rounded-lg border border-[var(--brand-orange)]/10 bg-card p-3">
+            <SectionField className={cn("rounded-lg border border-[var(--brand-orange)]/10 bg-card p-3", !showAdvanced && "hidden")}>
               <FieldLabel icon={<Home className="size-3" />}>
                 <FieldLabelWithTooltip label="Vacancy %" term="vacancy" />
               </FieldLabel>
@@ -400,7 +431,7 @@ export function OperatingExpensesSection({
               <FieldError message={errors.vacancyPct?.message} />
             </SectionField>
 
-            <SectionField className="rounded-lg border border-[var(--brand-orange)]/10 bg-card p-3">
+            <SectionField className={cn("rounded-lg border border-[var(--brand-orange)]/10 bg-card p-3", !showAdvanced && "hidden")}>
               <FieldLabel icon={<Building2 className="size-3" />}>
                 <FieldLabelWithTooltip label="Management %" term="management" />
               </FieldLabel>
@@ -418,7 +449,7 @@ export function OperatingExpensesSection({
               <FieldError message={errors.mgmtPct?.message} />
             </SectionField>
 
-            <SectionField className="rounded-lg border border-[var(--brand-orange)]/10 bg-card p-3">
+            <SectionField className={cn("rounded-lg border border-[var(--brand-orange)]/10 bg-card p-3", !showAdvanced && "hidden")}>
               <FieldLabel icon={<BarChart3 className="size-3" />}>
                 <FieldLabelWithTooltip label="CapEx %" term="capex" />
               </FieldLabel>

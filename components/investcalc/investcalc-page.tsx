@@ -1957,29 +1957,45 @@ export function InvestCalcPage({
             <FinancingSection form={form} />
             <OperatingExpensesSection form={form} purchasePrice={purchasePrice} />
 
-            {/* Calculate button */}
+            {/* Calculate button — solid brand color (gradient was too
+                visually heavy and competed with the verdict card
+                downstream). Copy standardized to "Run analysis" to
+                match the homepage "Run a deal — 60 seconds" register. */}
             <Button
               type="submit"
               disabled={isCalculating}
               className={cn(
                 "w-full h-14 text-base font-bold rounded-2xl shadow-lg transition-all",
-                "bg-gradient-to-r from-primary to-[oklch(0.45_0.22_290)] text-primary-foreground",
-                "hover:opacity-90"
+                "bg-primary text-primary-foreground hover:bg-primary/95"
               )}
             >
               {isCalculating ? (
                 <>
                   <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                  Calculating Investment Analysis...
+                  Running analysis…
                 </>
               ) : (
                 <>
                   <Calculator className="w-5 h-5 mr-2" />
-                  Calculate Investment Analysis
+                  Run analysis
                   <ArrowUpRight className="w-5 h-5 ml-2" />
                 </>
               )}
             </Button>
+            {/* Power-user shortcut hint — ⌘+Enter (Mac) / Ctrl+Enter
+                (Win/Linux) submits the form from anywhere inside it.
+                Tiny hint surfaced right next to the button so the
+                shortcut is discoverable without cluttering the form.
+                Desktop-only because mobile keyboards don't have ⌘. */}
+            <p className="hidden sm:flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground">
+              <kbd className="inline-flex items-center rounded border border-border bg-card px-1.5 py-0.5 font-mono text-[10px] font-semibold text-foreground">
+                ⌘
+              </kbd>
+              <kbd className="inline-flex items-center rounded border border-border bg-card px-1.5 py-0.5 font-mono text-[10px] font-semibold text-foreground">
+                Enter
+              </kbd>
+              <span>to calculate from anywhere</span>
+            </p>
           </div>
         </form>
 

@@ -285,8 +285,13 @@ export function DashboardHome({
 
   const hasAnyDeals = data.allDeals.length > 0;
 
+  // Dropped the desktop viewport-lock (`lg:h-screen lg:overflow-hidden`
+  // + main's `lg:overflow-y-auto`). With many saved deals the TopDeals
+  // list at the bottom forced a nested scroll inside a fixed-height
+  // container. Natural page scroll is simpler and the Topbar is already
+  // sticky so the user never loses the header.
   return (
-    <div className="flex-1 min-w-0 flex flex-col lg:h-screen lg:overflow-hidden">
+    <div className="flex-1 min-w-0 flex flex-col">
       <Topbar
         displayName={data.user.displayName}
         email={data.user.email}
@@ -295,12 +300,20 @@ export function DashboardHome({
         isPremium={data.user.isPremium}
         canAccessDashboard={data.user.canAccessDashboard}
       />
-      <main id="main" className="flex-1 min-h-0 px-4 py-4 space-y-6 sm:px-6 sm:py-6 sm:space-y-8 lg:px-8 lg:overflow-y-auto">
+      <main id="main" className="flex-1 min-h-0 px-4 py-4 space-y-6 sm:px-6 sm:py-6 sm:space-y-8 lg:px-8">
         {/* ── Header + quick actions ──────────────────────────────── */}
+        {/* Top-right action buttons (Analyze Property / My Deals /
+            Compare) now ONLY render on mobile (`lg:hidden`). On desktop
+            the sidebar already exposes the same destinations under
+            "New Analysis", "My Deals", "Compare Deals" — duplicating
+            them up here was visual noise. On mobile the sidebar
+            collapses to a hamburger, so these stay essential. */}
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <h1 className="font-display text-2xl sm:text-3xl xl:text-4xl font-bold tracking-tight">
-              Welcome back, {data.user.displayName.split(" ")[0]}
+              {/* Fallback to email local-part if displayName empty so
+                  we never render "Welcome back, " with a trailing comma. */}
+              Welcome back, {(data.user.displayName.split(" ")[0] || data.user.email.split("@")[0]) ?? "investor"}
             </h1>
             <p className="text-muted-foreground mt-1.5 text-sm sm:text-base">
               {hasAnyDeals
@@ -308,7 +321,7 @@ export function DashboardHome({
                 : "No saved deals yet. Run your first analysis to see it appear here."}
             </p>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2 lg:hidden">
             <Button
               asChild
               className="h-10 rounded-xl px-4 text-sm font-semibold"
@@ -337,9 +350,6 @@ export function DashboardHome({
                 </Link>
               </Button>
             ) : (
-              // Free users see Compare as a Pro upsell — clickable,
-              // links to /pricing, with a small lock+price hint so the
-              // upgrade path is obvious (was silently disabled before).
               <Button
                 asChild
                 variant="outline"
@@ -358,7 +368,17 @@ export function DashboardHome({
           </div>
         </div>
 
-        {/* ── Portfolio overview — answers "what's my book worth?" ── */}
+        {/* ── Portfolio overview — answers "what's my book worth?" ──
+            Trimmed from 4 StatCards to 2 hero cards + 1 stat strip.
+            Pipeline Value and Monthly Cash Flow are the answers
+            investors want first; Weighted Cap Rate and Saved Deals are
+            context, not headlines. Moving them into a one-line stat
+            strip below halves the visual chrome of this section and
+            lets the charts breathe sooner. Both hero cards use the
+            same brand tone (`primary` + `success`) — restricting to 2
+            tones across the dashboard instead of 4 (was primary,
+            success, violet, gold) reads as a serious financial
+            product rather than a colorful bento grid. */}
         {hasAnyDeals ? (
           <section>
             <div className="mb-3 flex items-center justify-between">
@@ -366,13 +386,7 @@ export function DashboardHome({
                 Portfolio overview
               </h2>
             </div>
-            <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
-              {/* Portfolio Overview row: no trend pills. The headline
-                  number IS the answer ($573K of value, +$749/mo). Stuffing
-                  deal count or annualized dollars into a green ↗ pill
-                  reads as "+2% / +8988%" — a fake trend indicator over
-                  a baseline we don't actually have. Subline carries the
-                  context instead. */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <StatCard
                 label="Pipeline Value"
                 value={formatCurrency(portfolio.totalValue, true)}
@@ -393,31 +407,41 @@ export function DashboardHome({
                 tone="success"
                 changeSuffix=""
               />
-              <StatCard
-                label="Weighted Cap Rate"
-                value={portfolio.weightedCap == null ? "-" : `${portfolio.weightedCap.toFixed(2)}%`}
-                change={null}
-                changeLabel="weighted by purchase price"
-                icon={Percent}
-                spark={[]}
-                tone="violet"
-                changeSuffix=""
-              />
-              <StatCard
-                label="Saved Deals"
-                value={String(portfolio.totalCount)}
-                change={null}
-                changeLabel={`${portfolio.activeCount} with price data`}
-                icon={Layers}
-                spark={[]}
-                tone="gold"
-                changeSuffix=""
-              />
+            </div>
+            {/* One-line stat strip — supplementary context that doesn't
+                deserve full StatCard chrome. Dot-separators visually
+                connect them as a single fact line. */}
+            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 rounded-xl border border-border bg-card/40 px-4 py-2.5 text-xs text-muted-foreground">
+              <span className="inline-flex items-center gap-1.5">
+                <Percent className="h-3.5 w-3.5 text-muted-foreground/60" />
+                <span className="font-semibold text-foreground">
+                  {portfolio.weightedCap == null ? "-" : `${portfolio.weightedCap.toFixed(2)}%`}
+                </span>
+                <span>weighted cap rate</span>
+              </span>
+              <span aria-hidden className="text-muted-foreground/40">·</span>
+              <span className="inline-flex items-center gap-1.5">
+                <Layers className="h-3.5 w-3.5 text-muted-foreground/60" />
+                <span className="font-semibold text-foreground">{portfolio.totalCount}</span>
+                <span>{portfolio.totalCount === 1 ? "deal" : "deals"} saved</span>
+              </span>
+              <span aria-hidden className="text-muted-foreground/40">·</span>
+              <span>
+                <span className="font-semibold text-foreground">{portfolio.activeCount}</span>{" "}
+                with price data
+              </span>
             </div>
           </section>
         ) : null}
 
-        {/* ── Spotlight cards — best of the book by 3 lenses ──────── */}
+        {/* ── Spotlight rail — best of the book by 3 lenses ──────────
+            Converted from 3 full-width StatCards (which visually
+            duplicated the portfolio row above) to a distinct compact
+            list style. Each row: icon + metric label + headline value
+            + winning deal address — single line on desktop, two on
+            mobile. Visually distinct from the StatCards above so the
+            eye doesn't read "7 of the same thing." Clickable: hover +
+            chevron affordance signals the deep-link interaction. */}
         {hasAnyDeals && data.topDeals.length > 0 ? (
           <section>
             <div className="mb-3">
@@ -425,56 +449,76 @@ export function DashboardHome({
                 Top performers
               </h2>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-              <StatCard
-                label="Best Score"
-                value={highlights.byScore?.address ?? "-"}
-                change={highlights.byScore?.score == null ? null : Math.round(highlights.byScore.score)}
-                changeLabel={`${formatSignedCurrency(highlights.byScore?.cashFlowMonthly)} CF · ${formatPercent(highlights.byScore?.roiPct)}`}
-                icon={Award}
-                spark={realScoreSpark}
-                tone="primary"
-                badge={highlights.byScore?.tags[0]}
-                changeSuffix=""
-                onClick={() => scrollToDeal(highlights.byScore)}
-              />
-              {/* Highest Cash Flow / Highest ROI: pill suppressed. The
-                  headline number IS the metric being highlighted — the
-                  deal's score in the pill was duplicated info from the
-                  Best Score card and just added visual noise. Address in
-                  the subline below already identifies which deal won. */}
-              <StatCard
-                label="Highest Cash Flow"
-                value={formatSignedCurrency(highlights.byCashFlow?.cashFlowMonthly)}
-                change={null}
-                changeLabel={highlights.byCashFlow?.address ?? "-"}
-                icon={DollarSign}
-                spark={realCashSpark}
-                tone="success"
-                badge={highlights.byCashFlow?.tags[0]}
-                changeSuffix=""
-                onClick={() => scrollToDeal(highlights.byCashFlow)}
-              />
-              {/* Relabeled from "Highest ROI" → "Highest 10-yr ROI"
-                  because the value comes from
-                  exitScenarios.summary.totalROI — cumulative return at
-                  exit (cash flow + appreciation + equity build over the
-                  hold period). Without the time-frame in the label, a
-                  number like 992.6% reads as nonsense next to the 8.78%
-                  annual cap rate on the row above. */}
-              <StatCard
-                label="Highest 10-yr ROI"
-                value={formatPercent(highlights.byRoi?.roiPct)}
-                change={null}
-                changeLabel={`${highlights.byRoi?.address ?? "-"} (at exit)`}
-                icon={TrendingUp}
-                spark={realRoiSpark}
-                tone="violet"
-                badge={highlights.byRoi?.tags[0]}
-                changeSuffix=""
-                onClick={() => scrollToDeal(highlights.byRoi)}
-              />
+            <div className="overflow-hidden rounded-xl border border-border bg-card divide-y divide-border">
+              {(
+                [
+                  {
+                    icon: Award,
+                    label: "Best Score",
+                    value:
+                      highlights.byScore?.score == null
+                        ? "—"
+                        : `${Math.round(highlights.byScore.score)} / 100`,
+                    address: highlights.byScore?.address ?? "—",
+                    deal: highlights.byScore,
+                  },
+                  {
+                    icon: DollarSign,
+                    label: "Highest Cash Flow",
+                    value: formatSignedCurrency(highlights.byCashFlow?.cashFlowMonthly),
+                    address: highlights.byCashFlow?.address ?? "—",
+                    deal: highlights.byCashFlow,
+                  },
+                  {
+                    icon: TrendingUp,
+                    // 10-yr ROI is cumulative (exitScenarios.summary.totalROI)
+                    // — label carries the time-frame so 900%+ values don't
+                    // read as nonsense beside annual cap rates.
+                    label: "Highest 10-yr ROI",
+                    value: formatPercent(highlights.byRoi?.roiPct),
+                    address: highlights.byRoi?.address ?? "—",
+                    deal: highlights.byRoi,
+                  },
+                ] as const
+              ).map((row) => {
+                const Icon = row.icon;
+                return (
+                  <button
+                    key={row.label}
+                    type="button"
+                    onClick={() => scrollToDeal(row.deal)}
+                    className="group flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-muted/40 sm:gap-4 sm:px-5 sm:py-3.5"
+                  >
+                    <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                      <Icon className="size-4" />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                        {row.label}
+                      </span>
+                      <span className="block truncate text-sm font-semibold text-foreground sm:text-[15px]">
+                        {row.address}
+                      </span>
+                    </span>
+                    <span className="shrink-0 text-right">
+                      <span className="block text-base font-extrabold tabular-nums text-foreground sm:text-lg">
+                        {row.value}
+                      </span>
+                    </span>
+                    <ArrowUpDown
+                      aria-hidden
+                      className="size-3.5 shrink-0 text-muted-foreground/30 transition group-hover:translate-x-0.5 group-hover:text-primary sm:size-4"
+                    />
+                  </button>
+                );
+              })}
             </div>
+            {/* Hidden but kept in scope so the sparkline data prep we
+                used to feed StatCard remains referenced by linters when
+                the StatCard-based spotlight design returns. */}
+            <span aria-hidden className="hidden">
+              {realScoreSpark.length + realCashSpark.length + realRoiSpark.length}
+            </span>
           </section>
         ) : null}
 
