@@ -20,7 +20,12 @@ export function FinancingSection({ form }: FinancingSectionProps) {
   } = form;
 
   return (
-    <div className="bg-[var(--brand-green-light)] rounded-2xl border border-[var(--brand-green)]/20 shadow-sm p-4 sm:p-6">
+    // Card chrome unified with the other input sections (PropertyType /
+    // PropertyDetails / SingleFamily — all `bg-card` + neutral border).
+    // Previously the green tint made the form read as three glued-together
+    // products. Green stays on the icon and the per-field accent borders
+    // to preserve the "this is the financing section" cue.
+    <div className="bg-card rounded-2xl border border-border shadow-sm p-4 sm:p-6">
       <div className="flex items-center gap-2 mb-5">
         <DollarSign className="w-4 h-4 text-[var(--brand-green)]" />
         <span className="font-semibold text-sm text-foreground">Financing</span>

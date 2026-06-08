@@ -156,7 +156,12 @@ export function OperatingExpensesSection({
       : insuranceDefault;
 
   return (
-    <div className="rounded-2xl border border-[var(--brand-orange)]/20 bg-[var(--brand-orange-light)] p-4 shadow-sm sm:p-6">
+    // Card chrome unified with the other input sections — `bg-card` +
+    // neutral border. Previously the orange tint made the form read as
+    // three glued-together products. Orange stays on the icon and the
+    // per-field accent borders to preserve the "this is operating
+    // expenses" cue.
+    <div className="rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-6">
       <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-start gap-3">
           <span className="mt-0.5 inline-flex size-5 items-center justify-center rounded-full text-[var(--brand-orange)]">

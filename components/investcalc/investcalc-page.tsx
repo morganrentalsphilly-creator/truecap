@@ -31,6 +31,8 @@ import { SingleFamilyUnitSection } from "./single-family-unit-section";
 import { MultiFamilyUnitsSection } from "./multi-family-units-section";
 import { FinancingSection } from "./financing-section";
 import { OperatingExpensesSection } from "./operating-expenses-section";
+import { StickyCalculateBar } from "./sticky-calculate-bar";
+import { AutosaveIndicator } from "./autosave-indicator";
 import { AnalysisDashboard, type AnalysisDashboardTab } from "./analysis-dashboard";
 import { AnalysisErrorBoundary } from "@/components/investcalc/analysis-error-boundary";
 import { PostAnalysisEmailPrompt } from "@/components/marketing/post-analysis-email-prompt";
@@ -1982,21 +1984,29 @@ export function InvestCalcPage({
                 </>
               )}
             </Button>
-            {/* Power-user shortcut hint — ⌘+Enter (Mac) / Ctrl+Enter
-                (Win/Linux) submits the form from anywhere inside it.
-                Tiny hint surfaced right next to the button so the
-                shortcut is discoverable without cluttering the form.
-                Desktop-only because mobile keyboards don't have ⌘. */}
-            <p className="hidden sm:flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground">
-              <kbd className="inline-flex items-center rounded border border-border bg-card px-1.5 py-0.5 font-mono text-[10px] font-semibold text-foreground">
-                ⌘
-              </kbd>
-              <kbd className="inline-flex items-center rounded border border-border bg-card px-1.5 py-0.5 font-mono text-[10px] font-semibold text-foreground">
-                Enter
-              </kbd>
-              <span>to calculate from anywhere</span>
-            </p>
+            {/* Bottom row: keyboard hint (left) + autosave indicator
+                (right). Both desktop-only — mobile users get the
+                sticky bottom Calculate bar instead, and the autosave
+                indicator there would compete with iOS keyboard chrome. */}
+            <div className="hidden sm:flex items-center justify-between gap-3 text-[11px] text-muted-foreground">
+              <p className="flex items-center gap-1.5">
+                <kbd className="inline-flex items-center rounded border border-border bg-card px-1.5 py-0.5 font-mono text-[10px] font-semibold text-foreground">
+                  ⌘
+                </kbd>
+                <kbd className="inline-flex items-center rounded border border-border bg-card px-1.5 py-0.5 font-mono text-[10px] font-semibold text-foreground">
+                  Enter
+                </kbd>
+                <span>to calculate from anywhere</span>
+              </p>
+              <AutosaveIndicator form={form} />
+            </div>
           </div>
+          {/* Mobile sticky bottom Calculate bar. Inside the form so its
+              type="submit" triggers the same onSubmit handler the
+              in-form button does. Appears once the user scrolls past
+              ~600px so we never double up on the visible Calculate
+              button. */}
+          <StickyCalculateBar isCalculating={isCalculating} />
         </form>
 
         {/* Results — wrapped in an error boundary so a render bug in
