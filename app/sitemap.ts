@@ -346,6 +346,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${siteUrl}/vs/rentspree`,        lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.6 },
     { url: `${siteUrl}/vs/hostfully`,        lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.6 },
     { url: `${siteUrl}/vs/cozy`,             lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.5 },
+    // Round-3 /vs library expansion (Jun 2026).
+    { url: `${siteUrl}/vs/dealmachine`,      lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.8 },
+    { url: `${siteUrl}/vs/batchleads`,       lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.7 },
+    { url: `${siteUrl}/vs/yardi-breeze`,     lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.6 },
+    { url: `${siteUrl}/vs/hostaway`,         lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.7 },
+    { url: `${siteUrl}/vs/airdna`,           lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.8 },
+    { url: `${siteUrl}/vs/arrived`,          lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.7 },
     {
       url: `${siteUrl}/blog/rental-property-tax-deductions`,
       lastModified: new Date("2026-05-26"),
@@ -523,6 +530,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${siteUrl}/blog/roofstock-vs-mashvisor-vs-propstream`,
+      lastModified: new Date("2026-06-07"),
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
+      url: `${siteUrl}/blog/hostfully-vs-hostaway-vs-guesty`,
       lastModified: new Date("2026-06-07"),
       changeFrequency: "monthly",
       priority: 0.8,
