@@ -46,8 +46,13 @@ const dmMono = DM_Mono({
 export const viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  // Allow pinch-zoom up to 5x. WCAG 2.1 Success Criterion 1.4.4
+  // (Resize text) requires that text can be resized up to 200% without
+  // loss of content/functionality. Blocking user-scaling with
+  // maximumScale: 1 + userScalable: false fails that criterion and gets
+  // flagged by Lighthouse a11y. 5x is the platform-recommended ceiling.
+  maximumScale: 5,
+  userScalable: true,
   viewportFit: "cover",
   themeColor: "#5248d4",
 };

@@ -15,7 +15,20 @@ const nextConfig = {
   // our canonicals are no-trailing-slash; keep them that way.
   trailingSlash: false,
   images: {
-    unoptimized: true,
+    // Vercel's image optimization pipeline serves AVIF + WebP with
+    // responsive srcsets per device width. Enabled because the LCP /
+    // mobile bandwidth win outweighs the per-transform cost at our
+    // volume. The transform-count quota on the free tier is 1000/mo;
+    // we're well under that. If we ever blow through it, set
+    // `unoptimized: true` again as the emergency escape hatch.
+    //
+    // AVIF first because it's ~30% smaller than WebP at equivalent
+    // quality; Next.js falls back to WebP for browsers that don't
+    // support AVIF.
+    formats: ["image/avif", "image/webp"],
+    // Match next/image device-width breakpoints to our Tailwind
+    // breakpoints so we don't generate sizes we'll never serve.
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
   },
   experimental: {
     // Next.js 16+ tree-shaking hint. Rewrites barrel-style imports of
@@ -99,6 +112,63 @@ const nextConfig = {
           // IDs) to third-party trackers. strict-origin-when-cross-origin
           // is the safest default that doesn't break analytics.
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+        ],
+      },
+      // Long-cache Cache-Control for static-ish marketing pages. These
+      // routes are statically generated at build time and change only
+      // when content is updated + redeployed, so we let Vercel's edge
+      // CDN hold them for a day before re-validating. SWR of 7 days
+      // means a stale page is still served instantly while the next
+      // request triggers a background re-fetch — visitors never see a
+      // cache miss.
+      //
+      // Skipped: dynamic routes (/, /pricing — Stripe + auth context),
+      // /tools/* (already revalidates per the embed widget data
+      // patterns), /d/* (per-deal share links), /dashboard/* + /auth/*
+      // (private user state).
+      {
+        source: "/blog/:slug*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, s-maxage=86400, stale-while-revalidate=604800",
+          },
+        ],
+      },
+      {
+        source: "/vs/:slug*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, s-maxage=86400, stale-while-revalidate=604800",
+          },
+        ],
+      },
+      {
+        source: "/markets/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, s-maxage=86400, stale-while-revalidate=604800",
+          },
+        ],
+      },
+      {
+        source: "/states/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, s-maxage=86400, stale-while-revalidate=604800",
+          },
+        ],
+      },
+      {
+        source: "/glossary/:slug*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, s-maxage=86400, stale-while-revalidate=604800",
+          },
         ],
       },
     ];
