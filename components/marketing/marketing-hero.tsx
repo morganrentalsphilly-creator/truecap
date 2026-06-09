@@ -27,12 +27,11 @@ import { ArrowRight, Calculator, FileDown, Lock, ShieldCheck, Sparkles, Trending
 import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
 import { DealsAnalyzedTicker } from "@/components/marketing/deals-analyzed-ticker";
 
-const TRUST_STATS = [
-  { label: "To first analysis",  value: "60s",    sub: "no setup" },
-  { label: "Free to use",        value: "100%",   sub: "no card required" },
-  { label: "Live data",          value: "HUD+FRED", sub: "rent · rate · tax" },
-  { label: "Cancel",             value: "Anytime", sub: "monthly or annual" },
-];
+// TRUST_STATS row removed (Jun 2026) — redundant with risk-reversal
+// microcopy ("No card · No signup · Cancel anytime"), the eyebrow chip
+// ("HUD+FRED auto-fill"), the live DealsAnalyzedTicker, and the
+// animated mock card. Four trust signals competing for the same
+// real estate stacked the hero too tall and one of them had to go.
 
 const FEATURES = [
   {
@@ -119,22 +118,6 @@ export function MarketingHero() {
             in a separate stripe below the hero. */}
         <div className="mt-5 text-center">
           <DealsAnalyzedTicker window="7d" />
-        </div>
-
-        {/* trust stats row */}
-        <div className="mx-auto mt-10 grid max-w-3xl grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
-          {TRUST_STATS.map((stat) => (
-            <div
-              key={stat.label}
-              className="rounded-2xl border border-border bg-card/60 p-3 text-center backdrop-blur sm:p-4"
-            >
-              <div className="text-xl font-extrabold text-foreground sm:text-2xl">{stat.value}</div>
-              <div className="mt-0.5 text-[11px] font-bold uppercase tracking-widest text-muted-foreground sm:text-[11px]">
-                {stat.label}
-              </div>
-              <div className="mt-1 text-xs text-muted-foreground sm:text-xs">{stat.sub}</div>
-            </div>
-          ))}
         </div>
 
         {/* Mock-up screenshot — pure CSS, lightweight.
