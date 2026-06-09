@@ -223,13 +223,18 @@ function HeroProductMock() {
           </span>
         </div>
 
-        {/* address + verdict row */}
+        {/* address + verdict row.
+            Sequential reveal: the address is step 1 (appears first
+            after the rebuild), the verdict-pill cluster is step 5
+            (appears after the 3 metric tiles have populated). The
+            `flex-1 min-w-0` on the address wrapper keeps the pills
+            from collapsing to the left when the address is mid-fade. */}
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-4">
-          <div>
+          <div className="tc-hero-step-1 min-w-0 flex-1">
             <div className="text-base font-extrabold text-foreground sm:text-lg">1700 W Erie · Philadelphia</div>
             <div className="text-xs text-muted-foreground">Single Family · $295,000 · Built 1942</div>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="tc-hero-step-5 flex flex-wrap items-center gap-2">
             <span className="rounded-full bg-[var(--brand-green)] px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-white">
               Strong Buy
             </span>
@@ -251,20 +256,17 @@ function HeroProductMock() {
             questions every investor asks first — "does it cash flow?",
             "what's the unleveraged return?", and "will the lender like
             this?". */}
-        {/* Tiles pulse once per 7-second cycle. Staggered animation
-            delays make them ripple left-to-right like a ticker
-            re-quote, instead of blinking in unison (which reads as
-            "broken page" rather than "live data"). Honors
-            prefers-reduced-motion via globals.css media query. */}
+        {/* Metric tiles — sequential reveal steps 2 → 3 → 4 (cash flow,
+            cap rate, DSCR). Each tile carries its own step class so
+            the 3 tiles populate left-to-right after the address. */}
         <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-3">
-          <MockTile label="Cash flow / mo" value="+$640" tone="success" pulseDelay="0s" />
-          <MockTile label="Cap rate" value="8.2%" tone="success" pulseDelay="0.6s" />
-          <MockTile label="DSCR" value="1.34" tone="success" sub="Bankable" pulseDelay="1.2s" />
+          <MockTile label="Cash flow / mo" value="+$640" tone="success" stepClass="tc-hero-step-2" />
+          <MockTile label="Cap rate" value="8.2%" tone="success" stepClass="tc-hero-step-3" />
+          <MockTile label="DSCR" value="1.34" tone="success" sub="Bankable" stepClass="tc-hero-step-4" />
         </div>
 
-        {/* verdict line — subtle shimmer halo every 4s reinforces
-            that this is *the* moment the product delivers. */}
-        <div className="tc-hero-verdict-shimmer mt-4 flex items-start gap-2 rounded-xl border border-[var(--brand-green)]/25 bg-[var(--brand-green-light)] p-3 text-xs text-foreground">
+        {/* Verdict line — final step 6, reveals last after tiles + pills. */}
+        <div className="tc-hero-step-6 mt-4 flex items-start gap-2 rounded-xl border border-[var(--brand-green)]/25 bg-[var(--brand-green-light)] p-3 text-xs text-foreground">
           <TrendingUp className="mt-0.5 size-4 shrink-0 text-[var(--brand-green)]" />
           <span>
             <strong>1700 W Erie: solid fundamentals.</strong> Cash flow $640/mo, cap 8.2%, DSCR 1.34
@@ -284,7 +286,7 @@ function MockTile({
   tone,
   sub,
   small,
-  pulseDelay,
+  stepClass,
 }: {
   label: string;
   value: string;
@@ -292,20 +294,18 @@ function MockTile({
   sub?: string;
   small?: boolean;
   /**
-   * If provided, applies the looping "ticker pulse" animation with this
-   * delay. Used in the hero mock to ripple the three tiles left-to-right.
-   * Animation class is no-op when prefers-reduced-motion is set.
+   * Optional sequential-reveal animation class (`tc-hero-step-N`).
+   * Used by the marketing hero mock card so the three tiles populate
+   * left-to-right after the address. No-op when prefers-reduced-motion
+   * is set (handled in globals.css media query).
    */
-  pulseDelay?: string;
+  stepClass?: string;
 }) {
   const color =
     tone === "success" ? "text-[var(--metric-positive)]" : "text-primary";
-  const pulseClass = pulseDelay ? "tc-hero-tile-pulse" : "";
-  const pulseStyle = pulseDelay ? { animationDelay: pulseDelay } : undefined;
   return (
     <div
-      className={`rounded-xl border border-border bg-background p-3 ${pulseClass}`}
-      style={pulseStyle}
+      className={`rounded-xl border border-border bg-background p-3 ${stepClass ?? ""}`}
     >
       {/* Label bumped from text-[9px] to text-[10px] — 9px is below
           readable mobile minimum even for ALL-CAPS labels. */}

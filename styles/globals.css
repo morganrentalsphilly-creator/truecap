@@ -127,72 +127,94 @@
 /* ─────────────────────────────────────────────────────────────────────
  * Hero product-mock animations.
  *
- * The marketing hero shows a sample analysis card to demonstrate the
- * verdict moment. To make it feel alive (instead of a static screenshot
- * that visitors register as marketing fluff), we apply two subtle
- * looping animations on the card:
+ * The marketing hero shows a sample analysis card and loops a
+ * sequential reveal:  address → 3 metric tiles → verdict pills →
+ * verdict line.  Each cycle:
  *
- *   1. `tc-hero-pulse-dot` — a small "LIVE" indicator dot in the
- *      browser-chrome row that pulses 1.5s on/off. Communicates that
- *      the analyzer is *running* without distracting.
+ *   0-4s   (0-50%):  fully-rendered card on screen (the "result is
+ *                    ready" state — what visitors see on first paint).
+ *   4-4.4s (50-55%): everything fades out together.
+ *   4.4-4.8s        : ADDRESS reappears.
+ *   4.8-5.2s        : TILE 1 (cash flow) reappears.
+ *   5.2-5.6s        : TILE 2 (cap rate) reappears.
+ *   5.6-6.0s        : TILE 3 (DSCR) reappears.
+ *   6.0-6.4s        : VERDICT PILLS reappear.
+ *   6.4-6.8s        : VERDICT LINE reappears.
+ *   6.8-8s          : fully-rendered hold; loop.
  *
- *   2. `tc-hero-tile-pulse` — a 7s cycle where each metric tile briefly
- *      glows with brand color, like a market ticker just re-quoted.
- *      Three tiles share the same keyframes; staggered via animation-
- *      delay so they ripple left-to-right rather than blinking in
- *      unison.
+ * Six keyframes share the same first-half hold (0-50%) and final
+ * resting state (last-reveal-frame → 100%) so the card never looks
+ * partial during the "result is ready" window — only during the
+ * brief 2.4s rebuild does the staggered reveal play.
  *
- * Both keyframes use `@media (prefers-reduced-motion: reduce)` to
- * disable animation for users who've requested less motion — WCAG 2.3.3.
+ * `tc-hero-pulse-dot` is a separate, always-on 1.5s pulse for the
+ * LIVE indicator dot in the browser-chrome row — it doesn't share
+ * the 8s reveal cycle.
+ *
+ * All keyframes are disabled under `prefers-reduced-motion: reduce`
+ * for WCAG 2.3.3.
  * ────────────────────────────────────────────────────────────────── */
 
 @keyframes tc-hero-pulse-dot {
-  0%, 100% {
-    opacity: 0.4;
-    transform: scale(0.85);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1);
-  }
+  0%, 100% { opacity: 0.4; transform: scale(0.85); }
+  50%      { opacity: 1;   transform: scale(1);    }
 }
 
-@keyframes tc-hero-tile-pulse {
-  0%, 8%, 100% {
-    box-shadow: 0 0 0 0 transparent;
-    transform: scale(1);
-  }
-  4% {
-    box-shadow: 0 0 0 4px rgba(82, 72, 212, 0.18);
-    transform: scale(1.025);
-  }
+/* Step 1: address. Reveals first at 55→60%. */
+@keyframes tc-hero-step-1 {
+  0%, 50%   { opacity: 1; transform: translateY(0); }
+  55%       { opacity: 0; transform: translateY(6px); }
+  60%, 100% { opacity: 1; transform: translateY(0); }
 }
-
-@keyframes tc-hero-verdict-shimmer {
-  0%, 100% {
-    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
-  }
-  50% {
-    box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.10);
-  }
+/* Step 2: tile 1 (cash flow). Reveals at 60→65%. */
+@keyframes tc-hero-step-2 {
+  0%, 50%   { opacity: 1; transform: translateY(0); }
+  55%, 60%  { opacity: 0; transform: translateY(6px); }
+  65%, 100% { opacity: 1; transform: translateY(0); }
+}
+/* Step 3: tile 2 (cap rate). Reveals at 65→70%. */
+@keyframes tc-hero-step-3 {
+  0%, 50%   { opacity: 1; transform: translateY(0); }
+  55%, 65%  { opacity: 0; transform: translateY(6px); }
+  70%, 100% { opacity: 1; transform: translateY(0); }
+}
+/* Step 4: tile 3 (DSCR). Reveals at 70→75%. */
+@keyframes tc-hero-step-4 {
+  0%, 50%   { opacity: 1; transform: translateY(0); }
+  55%, 70%  { opacity: 0; transform: translateY(6px); }
+  75%, 100% { opacity: 1; transform: translateY(0); }
+}
+/* Step 5: verdict pills. Reveals at 75→80%. */
+@keyframes tc-hero-step-5 {
+  0%, 50%   { opacity: 1; transform: translateY(0); }
+  55%, 75%  { opacity: 0; transform: translateY(6px); }
+  80%, 100% { opacity: 1; transform: translateY(0); }
+}
+/* Step 6: verdict line. Reveals last at 80→85%. */
+@keyframes tc-hero-step-6 {
+  0%, 50%   { opacity: 1; transform: translateY(0); }
+  55%, 80%  { opacity: 0; transform: translateY(6px); }
+  85%, 100% { opacity: 1; transform: translateY(0); }
 }
 
 .tc-hero-pulse-dot {
   animation: tc-hero-pulse-dot 1.5s ease-in-out infinite;
 }
-
-.tc-hero-tile-pulse {
-  animation: tc-hero-tile-pulse 7s ease-in-out infinite;
-}
-
-.tc-hero-verdict-shimmer {
-  animation: tc-hero-verdict-shimmer 4s ease-in-out infinite;
-}
+.tc-hero-step-1 { animation: tc-hero-step-1 8s ease-in-out infinite; }
+.tc-hero-step-2 { animation: tc-hero-step-2 8s ease-in-out infinite; }
+.tc-hero-step-3 { animation: tc-hero-step-3 8s ease-in-out infinite; }
+.tc-hero-step-4 { animation: tc-hero-step-4 8s ease-in-out infinite; }
+.tc-hero-step-5 { animation: tc-hero-step-5 8s ease-in-out infinite; }
+.tc-hero-step-6 { animation: tc-hero-step-6 8s ease-in-out infinite; }
 
 @media (prefers-reduced-motion: reduce) {
   .tc-hero-pulse-dot,
-  .tc-hero-tile-pulse,
-  .tc-hero-verdict-shimmer {
+  .tc-hero-step-1,
+  .tc-hero-step-2,
+  .tc-hero-step-3,
+  .tc-hero-step-4,
+  .tc-hero-step-5,
+  .tc-hero-step-6 {
     animation: none;
   }
 }

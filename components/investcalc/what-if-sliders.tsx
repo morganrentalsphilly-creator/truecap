@@ -4,9 +4,15 @@
  * WhatIfSliders — two-knob live sensitivity for the Overview metric tier.
  *
  * The single most powerful thing TrueCap can do that competitors don't:
- * let you DRAG rent and rate, and watch the verdict + headline KPIs
- * re-evaluate in real time. Turns a static calculator screen into a
- * decision tool ("what's the rent breakpoint? what if rates jump 50bps?").
+ * let you DRAG rent and purchase price, and watch the verdict +
+ * headline KPIs re-evaluate in real time. Turns a static calculator
+ * screen into a decision tool ("what's the rent breakpoint? how much
+ * can I negotiate the seller down?").
+ *
+ * Rent and price are deliberately chosen over rent + rate: rate is
+ * largely out of the buyer's control, but rent and price are the two
+ * variables every investor negotiates. The sliders map directly to
+ * the two real-world levers a buyer can pull.
  *
  * Scope: deliberately ONLY affects the 4 Overview tier metric cards
  * (Monthly Cash Flow, CoC, Cap Rate, DSCR) + a live tier-headline pill.
@@ -17,10 +23,11 @@
  *
  * Math:
  *   - Rent slider in [-15%, +15%], 1% increments.
- *   - Rate slider in [-1pp, +1pp], 0.25pp increments.
- *   - We clone `values`, multiply every rent input by (1 + rentPct/100),
- *     add ratePct to `interestRate`, then call `calculateAnalysis` to
- *     get the adjusted result. Pure compute, no IO, sub-millisecond.
+ *   - Price slider in [-15%, +15%], 1% increments.
+ *   - We clone `values`, multiply every rent input by (1 + rentPct/100)
+ *     and the purchase price by (1 + pricePct/100), then call
+ *     `calculateAnalysis` to get the adjusted result. Pure compute,
+ *     no IO, sub-millisecond.
  *
  * Accessibility:
  *   - Sliders are native <input type="range"> for keyboard a11y.
@@ -41,9 +48,9 @@ export interface WhatIfState {
   isAdjusted: boolean;
   /** Tier headline for the adjusted (or base) result. Used by the live tier pill. */
   tier: DealTier;
-  /** Current adjustments — exposed for the breakpoint solver to consume. */
+  /** Current adjustments — exposed for downstream consumers. */
   rentPct: number;
-  ratePp: number;
+  pricePct: number;
 }
 
 interface Props {
@@ -54,24 +61,28 @@ interface Props {
 }
 
 /**
- * Apply rent and rate adjustments to an InvestmentFormValues object,
+ * Apply rent and price adjustments to an InvestmentFormValues object,
  * producing a derived copy suitable for passing to calculateAnalysis.
  *
- * Exported so the breakpoint solver in lib/breakpoint-solver.ts can
- * reuse the same input-mutation logic without duplicating field
- * walks across property types.
+ * Exported so the breakpoint solver and any future consumer can reuse
+ * the same input-mutation logic without duplicating field walks
+ * across property types.
  */
 export function applyWhatIfAdjustments(
   values: InvestmentFormValues,
   rentPct: number,
-  ratePp: number
+  pricePct: number
 ): InvestmentFormValues {
   const rentMul = 1 + rentPct / 100;
+  const priceMul = 1 + pricePct / 100;
   // Clone shallowly + walk rent fields. We don't deep-clone the entire
   // object because calculateAnalysis only reads — never mutates.
   const next: InvestmentFormValues = {
     ...values,
-    interestRate: (values.interestRate ?? 0) + ratePp,
+    purchasePrice:
+      typeof values.purchasePrice === "number"
+        ? Math.round(values.purchasePrice * priceMul)
+        : values.purchasePrice,
   };
   if (next.propertyType === "single-family") {
     if (typeof next.monthlyRent === "number") {
@@ -91,20 +102,14 @@ export function applyWhatIfAdjustments(
 
 export function WhatIfSliders({ values, baseResult, onStateChange }: Props) {
   const [rentPct, setRentPct] = useState(0);
-  const [ratePp, setRatePpRaw] = useState(0);
-  // Round ratePp to nearest 0.25 to match slider step. Native range
-  // input with step=0.25 already does this but a defensive round
-  // keeps the displayed value clean (no 0.7500000000001).
-  const setRatePp = useCallback((v: number) => {
-    setRatePpRaw(Math.round(v * 4) / 4);
-  }, []);
+  const [pricePct, setPricePct] = useState(0);
 
-  const isAdjusted = rentPct !== 0 || ratePp !== 0;
+  const isAdjusted = rentPct !== 0 || pricePct !== 0;
 
   const adjustedResult = useMemo<AnalysisResult>(() => {
     if (!isAdjusted) return baseResult;
     try {
-      const adjusted = applyWhatIfAdjustments(values, rentPct, ratePp);
+      const adjusted = applyWhatIfAdjustments(values, rentPct, pricePct);
       return calculateAnalysis(adjusted);
     } catch {
       // calculateAnalysis throws if rent is mis-shaped (e.g. zod-cleaned
@@ -112,7 +117,7 @@ export function WhatIfSliders({ values, baseResult, onStateChange }: Props) {
       // UI never breaks; reset clears the bad state.
       return baseResult;
     }
-  }, [values, baseResult, rentPct, ratePp, isAdjusted]);
+  }, [values, baseResult, rentPct, pricePct, isAdjusted]);
 
   const tier = useMemo(() => getDealTier(adjustedResult), [adjustedResult]);
 
@@ -123,13 +128,13 @@ export function WhatIfSliders({ values, baseResult, onStateChange }: Props) {
       isAdjusted,
       tier,
       rentPct,
-      ratePp,
+      pricePct,
     });
-  }, [adjustedResult, isAdjusted, tier, rentPct, ratePp, onStateChange]);
+  }, [adjustedResult, isAdjusted, tier, rentPct, pricePct, onStateChange]);
 
   const reset = useCallback(() => {
     setRentPct(0);
-    setRatePpRaw(0);
+    setPricePct(0);
   }, []);
 
   const tierToneClass = TIER_TONE[tier];
@@ -153,7 +158,7 @@ export function WhatIfSliders({ values, baseResult, onStateChange }: Props) {
         </span>
         {isAdjusted ? (
           <span className="ml-1 inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
-            {formatAdjustmentLabel(rentPct, ratePp)}
+            {formatAdjustmentLabel(rentPct, pricePct)}
           </span>
         ) : null}
         <span className="flex-1" />
@@ -183,16 +188,15 @@ export function WhatIfSliders({ values, baseResult, onStateChange }: Props) {
           ariaText={`Rent adjusted by ${rentPct >= 0 ? "+" : ""}${rentPct} percent`}
         />
         <SliderRow
-          label="Mortgage rate"
-          value={ratePp}
-          unit="pp"
-          min={-1}
-          max={1}
-          step={0.25}
-          decimals={2}
+          label="Purchase price"
+          value={pricePct}
+          unit="%"
+          min={-15}
+          max={15}
+          step={1}
           showSign
-          onChange={setRatePp}
-          ariaText={`Rate adjusted by ${ratePp >= 0 ? "+" : ""}${ratePp} percentage points`}
+          onChange={setPricePct}
+          ariaText={`Purchase price adjusted by ${pricePct >= 0 ? "+" : ""}${pricePct} percent`}
         />
       </div>
 
@@ -212,10 +216,10 @@ const TIER_TONE: Record<DealTier, string> = {
   Negative: "bg-rose-600 text-white",
 };
 
-function formatAdjustmentLabel(rentPct: number, ratePp: number): string {
+function formatAdjustmentLabel(rentPct: number, pricePct: number): string {
   const parts: string[] = [];
   if (rentPct !== 0) parts.push(`rent ${rentPct > 0 ? "+" : ""}${rentPct}%`);
-  if (ratePp !== 0) parts.push(`rate ${ratePp > 0 ? "+" : ""}${ratePp}pp`);
+  if (pricePct !== 0) parts.push(`price ${pricePct > 0 ? "+" : ""}${pricePct}%`);
   return parts.join(" · ");
 }
 

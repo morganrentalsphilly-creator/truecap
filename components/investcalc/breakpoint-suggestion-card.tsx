@@ -1,14 +1,15 @@
 "use client";
 
 /**
- * BreakpointSuggestionCard — surfaces "what would make this Strong/Solid?"
+ * BreakpointSuggestionCard — surfaces "what would make it [Solid/Strong]?"
  * inline next to the verdict for deals that come back Mixed / Marginal /
  * Negative.
  *
  * Turns a rejected deal into negotiating ammunition:
  *
- *   "This becomes Solid at $285K purchase price (currently $300K) or
- *    $2,650/mo rent (currently $2,400)."
+ *   What would make it Solid
+ *   Drop the price to $285,000 (currently $300,000, −5%) or push rent
+ *   to $2,640/mo (currently $2,400/mo, +10%).
  *
  * Pure presentation; the math lives in lib/breakpoint-solver.ts.
  *
@@ -45,49 +46,72 @@ export function BreakpointSuggestionCard({ values, result }: Props) {
   // negotiable, and surfacing a 50% rent jump would just look silly.
   if (priceBreakpoint == null && rentBreakpointMonthly == null) return null;
 
+  const hasPrice = priceBreakpoint != null && currentPrice != null;
+  const hasRent =
+    rentBreakpointMonthly != null && currentRentMonthly != null;
+  const hasMultiUnitRent =
+    rentBreakpointMonthly != null && currentRentMonthly == null;
+
   return (
     <div
       className="rounded-2xl border border-primary/25 bg-primary/5 p-3 sm:p-4"
-      aria-label={`Path to ${targetTier} tier`}
+      aria-label={`What would make it ${targetTier}`}
     >
-      <div className="mb-1.5 flex items-center gap-1.5">
+      <div className="mb-2 flex items-center gap-1.5">
         <Target className="size-3.5 text-primary" />
         <span className="text-[10px] font-bold uppercase tracking-widest text-primary">
-          Path to {targetTier}
+          What would make it {targetTier}
+        </span>
+        <span className="text-[10px] text-muted-foreground">
+          · currently {currentTier}
         </span>
       </div>
       <p className="text-sm leading-relaxed text-foreground">
-        <span className="text-muted-foreground">
-          Currently {currentTier}.
-        </span>{" "}
-        This becomes{" "}
-        <strong className="text-foreground">{targetTier}</strong> at{" "}
-        {priceBreakpoint != null && currentPrice != null ? (
-          <PriceBreakpoint
-            price={priceBreakpoint}
-            current={currentPrice}
-            deltaPct={priceDeltaPct ?? 0}
-          />
-        ) : null}
-        {priceBreakpoint != null && rentBreakpointMonthly != null ? (
-          <span className="text-muted-foreground"> or </span>
-        ) : null}
-        {rentBreakpointMonthly != null && currentRentMonthly != null ? (
-          <RentBreakpoint
-            rent={rentBreakpointMonthly}
-            current={currentRentMonthly}
-            deltaPct={rentDeltaPct ?? 0}
-          />
-        ) : rentBreakpointMonthly != null && currentRentMonthly == null ? (
-          // Multi-unit case: we can't show a per-unit number cleanly,
-          // so just communicate the percentage lift.
-          <span>
+        {hasPrice && hasRent ? (
+          <>
+            Drop the price to{" "}
+            <PriceBreakpoint
+              price={priceBreakpoint!}
+              current={currentPrice!}
+              deltaPct={priceDeltaPct ?? 0}
+            />{" "}
+            <span className="text-muted-foreground">or</span> push rent to{" "}
+            <RentBreakpoint
+              rent={rentBreakpointMonthly!}
+              current={currentRentMonthly!}
+              deltaPct={rentDeltaPct ?? 0}
+            />
+            .
+          </>
+        ) : hasPrice ? (
+          <>
+            Drop the price to{" "}
+            <PriceBreakpoint
+              price={priceBreakpoint!}
+              current={currentPrice!}
+              deltaPct={priceDeltaPct ?? 0}
+            />
+            .
+          </>
+        ) : hasRent ? (
+          <>
+            Push rent to{" "}
+            <RentBreakpoint
+              rent={rentBreakpointMonthly!}
+              current={currentRentMonthly!}
+              deltaPct={rentDeltaPct ?? 0}
+            />
+            .
+          </>
+        ) : hasMultiUnitRent ? (
+          <>
+            Push rents across units{" "}
             <strong className="text-foreground">
-              +{rentDeltaPct ?? 0}% rents across units
+              +{rentDeltaPct ?? 0}%
             </strong>
-          </span>
+            .
+          </>
         ) : null}
-        .
       </p>
       <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">
         Use this in negotiation: ask for a price cut, verify market rents,
@@ -111,8 +135,8 @@ function PriceBreakpoint({
     <span>
       <strong className="text-foreground">${price.toLocaleString("en-US")}</strong>
       <span className="text-muted-foreground">
-        {" "}purchase price (currently ${current.toLocaleString("en-US")}, save $
-        {savings.toLocaleString("en-US")} / −{deltaPct}%)
+        {" "}(currently ${current.toLocaleString("en-US")} — save $
+        {savings.toLocaleString("en-US")}, −{deltaPct}%)
       </span>
     </span>
   );
@@ -132,8 +156,8 @@ function RentBreakpoint({
     <span>
       <strong className="text-foreground">${rent.toLocaleString("en-US")}/mo</strong>
       <span className="text-muted-foreground">
-        {" "}rent (currently ${current.toLocaleString("en-US")}/mo, +$
-        {gain.toLocaleString("en-US")} / +{deltaPct}%)
+        {" "}(currently ${current.toLocaleString("en-US")}/mo — add $
+        {gain.toLocaleString("en-US")}, +{deltaPct}%)
       </span>
     </span>
   );
