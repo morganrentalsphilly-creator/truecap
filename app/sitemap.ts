@@ -610,5 +610,24 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 0.9,
     },
+    // Batch C — 3 calculator how-to posts (Jun 2026).
+    {
+      url: `${siteUrl}/blog/how-to-calculate-cap-rate`,
+      lastModified: new Date("2026-06-07"),
+      changeFrequency: "monthly",
+      priority: 0.85,
+    },
+    {
+      url: `${siteUrl}/blog/how-to-calculate-cash-on-cash-return`,
+      lastModified: new Date("2026-06-07"),
+      changeFrequency: "monthly",
+      priority: 0.85,
+    },
+    {
+      url: `${siteUrl}/blog/how-to-calculate-dscr`,
+      lastModified: new Date("2026-06-07"),
+      changeFrequency: "monthly",
+      priority: 0.85,
+    },
   ];
 }
