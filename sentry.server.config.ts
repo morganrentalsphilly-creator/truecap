@@ -44,6 +44,15 @@ Sentry.init({
         }
       }
     }
+    // sendDefaultPii also attaches the signed-in user's email + IP to
+    // every event. Keep the opaque Supabase user id (needed to count
+    // affected users / dedupe) but strip direct identifiers — error
+    // triage never needs the actual email address.
+    if (event.user) {
+      delete event.user.email;
+      delete event.user.username;
+      delete event.user.ip_address;
+    }
     return event;
   },
 });

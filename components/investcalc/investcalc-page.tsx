@@ -576,7 +576,15 @@ export function InvestCalcPage({
       return;
     }
     const json = formSnapshotForCompare(form.getValues());
-    if (!json || !lastPersistedFormJsonRef.current) {
+    // A null snapshot means the form is mid-restore (e.g. a multi-family
+    // saved deal whose units array is partially populated while RHF
+    // resets) and the schema parse failed transiently. Don't flip the
+    // dirty flag on that intermediate state — the next watch tick after
+    // the restore completes will compute the real answer. Previously
+    // this branch set hasUnsavedChanges(true) and users saw a false
+    // "Unsaved changes" badge right after loading a saved deal.
+    if (!json) return;
+    if (!lastPersistedFormJsonRef.current) {
       setHasUnsavedChanges(true);
       return;
     }
@@ -1004,12 +1012,26 @@ export function InvestCalcPage({
   }, [savedDealId]);
 
   useEffect(() => {
+    // Debounced (100ms): both callbacks JSON.stringify the entire form
+    // for comparison, and form.watch fires on EVERY keystroke in every
+    // field. Without coalescing, fast typing on a low-end phone burns
+    // main-thread time per character (visible as input latency / TBT).
+    // The programmatic-reset check stays SYNCHRONOUS at event time —
+    // checking it inside the deferred callback would race the reset
+    // flag being cleared.
+    let debounceTimer: ReturnType<typeof setTimeout> | null = null;
     const subscription = form.watch(() => {
       if (isProgrammaticResetRef.current) return;
-      syncFormDirtyVersusPersisted();
-      invalidateAnalysisOutputsIfFormDriftedFromLastRun();
+      if (debounceTimer) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        syncFormDirtyVersusPersisted();
+        invalidateAnalysisOutputsIfFormDriftedFromLastRun();
+      }, 100);
     });
-    return () => subscription.unsubscribe();
+    return () => {
+      if (debounceTimer) clearTimeout(debounceTimer);
+      subscription.unsubscribe();
+    };
   }, [form, syncFormDirtyVersusPersisted, invalidateAnalysisOutputsIfFormDriftedFromLastRun]);
 
   /**

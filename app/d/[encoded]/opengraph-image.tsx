@@ -16,6 +16,7 @@
 import { ImageResponse } from "next/og";
 import { decodeShareLink } from "@/lib/share-link";
 import { calculateAnalysis } from "@/lib/calc-analysis";
+import { getDealTier, type DealTier } from "@/lib/verdict";
 import { investmentFormSchema } from "@/lib/investcalc-schema";
 
 export const runtime = "edge";
@@ -36,21 +37,23 @@ const fmtMoney = (n: number) => {
 };
 const fmtPct = (n: number) => `${n >= 0 ? "+" : ""}${n.toFixed(1)}%`;
 
-/** Headline classifier — mirrors verdict.ts at a glance. */
-function classify(cf: number, cap: number, coc: number, dscr: number, isCash: boolean) {
-  if (cf < 0 || (!isCash && dscr < 1.0)) {
-    return cf < -200 || (!isCash && dscr < 0.9)
-      ? { label: "Avoid", color: DANGER }
-      : { label: "Risky", color: WARN };
-  }
-  if (cf >= 400 && (isCash || dscr >= 1.25) && coc >= 10) {
-    return { label: "Strong Buy", color: SUCCESS };
-  }
-  if (cf >= 100 && (isCash || dscr >= 1.15) && coc >= 6) {
-    return { label: "Buy", color: SUCCESS };
-  }
-  return { label: "Neutral", color: WARN };
-}
+/**
+ * Tier → OG badge. The tier itself comes from getDealTier in
+ * lib/verdict.ts (pure, edge-safe), so the social card can NEVER
+ * disagree with the on-page verdict again. A previous hand-rolled
+ * classifier here drifted from verdict.ts on cash purchases (it
+ * skipped the cap-rate test and used a different CoC threshold),
+ * which made the share card say "Strong Buy" while the page said
+ * "Mixed" — exactly the kind of math inconsistency the product
+ * exists to prevent. Don't reintroduce a local classifier.
+ */
+const TIER_BADGE: Record<DealTier, { label: string; color: string }> = {
+  Strong: { label: "Strong Buy", color: SUCCESS },
+  Solid: { label: "Buy", color: SUCCESS },
+  Mixed: { label: "Neutral", color: WARN },
+  Marginal: { label: "Risky", color: WARN },
+  Negative: { label: "Avoid", color: DANGER },
+};
 
 function Fallback({ headline }: { headline: string }) {
   return new ImageResponse(
@@ -122,7 +125,7 @@ export default async function Image({ params }: { params: Promise<Params> }) {
   const cap = result.capRate;
   const coc = result.cocReturn;
   const dscr = result.dscr;
-  const verdict = classify(cf, cap, coc, dscr, isCash);
+  const verdict = TIER_BADGE[getDealTier(result)];
 
   return new ImageResponse(
     (
