@@ -1,3 +1,27 @@
+/**
+ * Public homepage — STATIC (ISR, revalidated hourly).
+ *
+ * This page deliberately reads NO cookies and NO per-user data, so
+ * Next prerenders it and Vercel serves cached HTML from the edge —
+ * every paid-ad click gets ~instant TTFB instead of waiting on a
+ * serverless function + Supabase round-trips. That auth-aware version
+ * of the homepage lives at app/home-authed/page.tsx; proxy.ts rewrites
+ * "/" → "/home-authed" when a Supabase auth cookie is present, so
+ * signed-in users still get their personalized calculator at the same
+ * URL and never see the marketing sections.
+ *
+ * RULES for this file:
+ *  - Never import lib/supabase/server.ts or anything that calls
+ *    cookies()/headers() — that silently flips the route back to
+ *    dynamic and undoes the entire optimization.
+ *  - All entitlement props below are the anonymous-visitor values.
+ *    If you add a prop to InvestCalcPage, set it here to exactly what
+ *    app/home-authed/page.tsx computes for user == null.
+ *  - DealsAnalyzedTicker (inside MarketingHero) uses the admin client
+ *    at render time; under ISR that runs at build/revalidate — the
+ *    count refreshes hourly, which is fine for a trust badge.
+ */
+
 import type { Metadata } from "next";
 import { Header } from "@/components/investcalc/header";
 import { InvestCalcPage } from "@/components/investcalc/investcalc-page";
@@ -10,19 +34,16 @@ import {
   VsCompetitors,
   WhyNotSpreadsheet,
 } from "@/components/marketing/landing-sections";
-import { OnboardingTour } from "@/components/marketing/onboarding-tour";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { TrackLandingView } from "@/components/analytics/track-landing-view";
 import { StickyConversionBar } from "@/components/marketing/sticky-conversion-bar";
 import { SiteFooter } from "@/components/marketing/site-footer";
-import {
-  getEntitlementsForUser,
-  hasPaidPlanSubscription,
-  hasPlanFeature,
-  hasSavedDealCapacity,
-} from "@/lib/entitlements";
 import { getSiteUrl } from "@/lib/site-url";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+
+// ISR: prerendered at build, regenerated in the background at most
+// hourly. Keeps the DealsAnalyzedTicker count and any content edits
+// fresh without giving up edge caching.
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   // Keyword-rich, benefit-led title. The layout template appends
@@ -71,7 +92,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function Home() {
+export default function Home() {
   const siteUrl = getSiteUrl();
   // Schema.org @graph — three connected entities Google uses to build
   // the brand knowledge panel for "TrueCap" queries and the sitelinks
@@ -80,11 +101,9 @@ export default async function Home() {
   //      brand panel and powers logo display in SERPs.
   //   2. WebSite — the canonical site, with a SearchAction declaration
   //      so Google can render a sitelinks search box under TrueCap
-  //      brand searches. Wired to a /search?q= URL even though we
-  //      don't have a search page yet — when we add one, this already
-  //      points to it.
-  //   3. SoftwareApplication — the product itself. Existing entity,
-  //      now @id-linked to the Organization so they're a single graph.
+  //      brand searches.
+  //   3. SoftwareApplication — the product itself, @id-linked to the
+  //      Organization so they're a single graph.
   const structuredData = {
     "@context": "https://schema.org",
     "@graph": [
@@ -113,9 +132,7 @@ export default async function Home() {
         url: siteUrl,
         name: "TrueCap",
         publisher: { "@id": `${siteUrl}/#organization` },
-        // Sitelinks search box. The /search?q= URL doesn't have to
-        // exist yet — Google validates the structure, not the route.
-        // When we ship a search page, this already points there.
+        // Sitelinks search box — points at the (noindex) /search page.
         potentialAction: {
           "@type": "SearchAction",
           target: {
@@ -144,123 +161,60 @@ export default async function Home() {
     ],
   };
 
-  const supabase = await createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const entitlements = user ? await getEntitlementsForUser(supabase, user.id) : null;
-  // Fetch the user's analysis defaults so the form pre-fills with
-  // their preferred vacancy/mgmt/financing values instead of the
-  // generic engine defaults. Done server-side so there's no flash
-  // of generic values before user defaults overlay. Tolerant of
-  // missing migration (returns null on the 42P01 path).
-  let userAnalysisDefaults: Record<string, number> | null = null;
-  if (user) {
-    const { data: defaultsRow } = await supabase
-      .from("user_analysis_defaults")
-      .select("preferences")
-      .eq("user_id", user.id)
-      .maybeSingle();
-    const prefs = (defaultsRow as { preferences?: unknown } | null)?.preferences;
-    if (prefs && typeof prefs === "object" && !Array.isArray(prefs)) {
-      const sanitized: Record<string, number> = {};
-      for (const [k, v] of Object.entries(prefs as Record<string, unknown>)) {
-        if (typeof v === "number" && Number.isFinite(v)) sanitized[k] = v;
-      }
-      if (Object.keys(sanitized).length > 0) userAnalysisDefaults = sanitized;
-    }
-  }
-  const canUpdateSavedDeals = user ? await hasPaidPlanSubscription(supabase, user.id) : false;
-  const { count: savedDealCount } = user
-    ? await supabase
-        .from("saved_analyses")
-        .select("*", { count: "exact", head: true })
-        .eq("user_id", user.id)
-        .is("deleted_at", null)
-    : { count: 0 };
-  const canSaveDeals = entitlements ? hasPlanFeature(entitlements, "save_deal") : false;
-  const saveDealLimitReached = entitlements ? !hasSavedDealCapacity(entitlements, savedDealCount ?? 0) : false;
-  const canCompareDeals = entitlements ? hasPlanFeature(entitlements, "compare_deals") : false;
-  const canExportPdf = entitlements ? hasPlanFeature(entitlements, "pdf_export") : false;
-  const canUseProjections = entitlements ? hasPlanFeature(entitlements, "projections") : false;
-  const canUseTaxStrategy = entitlements ? hasPlanFeature(entitlements, "tax_strategy") : false;
-  const canUseExitScenarios = entitlements ? hasPlanFeature(entitlements, "exit_scenarios") : false;
-  const canUseDealScore = entitlements ? hasPlanFeature(entitlements, "deal_score") : false;
-  // Pro-gated features that weren't previously gated. Derived from
-  // hasPaidPlanSubscription (any paid plan = unlocked) so we don't need
-  // a DB migration to add new feature keys per plan. If you later split
-  // these by plan tier, replace with hasPlanFeature checks.
-  const isPaidPlan = canUpdateSavedDeals; // already derived from hasPaidPlanSubscription
-  const canUseMaxOffer = isPaidPlan;
-  const canUseSensitivity = isPaidPlan;
-  const canUseStrategies = isPaidPlan;
-  const canUseShareLinks = isPaidPlan;
-
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
-      <Header initialUser={user} initialEntitlements={entitlements} />
-      {/* Full landing page experience ONLY for cold visitors. Authenticated
-          users skip ALL of it — the calculator is their workspace. Order
-          mirrors the buying journey: hero → how it works → why us vs
-          spreadsheet → social proof → final-push CTA → the calculator. */}
-      {!user && (
-        <>
-          <MarketingHero />
-          <HowItWorks />
-          <WhyNotSpreadsheet />
-          <VsCompetitors />
-          <SocialProof />
-          <HomepageFaq />
-          <PreCalculatorCta />
-        </>
-      )}
+      {/* Header hydrates client-side and self-corrects via the browser
+          Supabase session in the rare case a signed-in user reaches the
+          static page (e.g. the proxy cookie check missed). */}
+      <Header initialUser={null} initialEntitlements={null} />
+      {/* Full landing page experience — this page only serves cold
+          visitors (signed-in users are rewritten to /home-authed before
+          rendering). Order mirrors the buying journey: hero → how it
+          works → why us vs spreadsheet → social proof → final-push CTA
+          → the calculator. */}
+      <MarketingHero />
+      <HowItWorks />
+      <WhyNotSpreadsheet />
+      <VsCompetitors />
+      <SocialProof />
+      <HomepageFaq />
+      <PreCalculatorCta />
+      {/* Anonymous-visitor entitlement props — keep in lockstep with
+          the user == null branch in app/home-authed/page.tsx. */}
       <InvestCalcPage
-        canSaveDeals={canSaveDeals}
-        canCompareDeals={canCompareDeals}
-        canExportPdf={canExportPdf}
-        canUseProjections={canUseProjections}
-        canUseTaxStrategy={canUseTaxStrategy}
-        canUseExitScenarios={canUseExitScenarios}
-        canUseDealScore={canUseDealScore}
-        canUseMaxOffer={canUseMaxOffer}
-        canUseSensitivity={canUseSensitivity}
-        canUseStrategies={canUseStrategies}
-        canUseShareLinks={canUseShareLinks}
-        canUpdateSavedDeals={canUpdateSavedDeals}
-        saveDealLimitReached={saveDealLimitReached}
-        initialSavedDealCount={savedDealCount ?? 0}
-        savedDealLimit={entitlements?.max_saved_deals ?? null}
-        isAuthenticated={Boolean(user)}
-        userAnalysisDefaults={userAnalysisDefaults}
+        canSaveDeals={false}
+        canCompareDeals={false}
+        canExportPdf={false}
+        canUseProjections={false}
+        canUseTaxStrategy={false}
+        canUseExitScenarios={false}
+        canUseDealScore={false}
+        canUseMaxOffer={false}
+        canUseSensitivity={false}
+        canUseStrategies={false}
+        canUseShareLinks={false}
+        canUpdateSavedDeals={false}
+        saveDealLimitReached={false}
+        initialSavedDealCount={0}
+        savedDealLimit={null}
+        isAuthenticated={false}
+        userAnalysisDefaults={null}
       />
-      {/* Sticky scroll-activated CTA bar for cold visitors only. Renders
-          nothing for auth'd users. */}
-      {!user && <StickyConversionBar />}
-      {/* Onboarding tour — only fires for signed-in users with zero
-          saved deals (the clear first-time-signup signal). 3-step
-          floating card that walks them through Try Sample → Save →
-          See Pro. Dismissible, persisted to localStorage. */}
-      {user && (
-        <OnboardingTour
-          isAuthenticated={true}
-          savedDealCount={savedDealCount ?? 0}
-        />
-      )}
+      {/* Sticky scroll-activated CTA bar — cold visitors only, and this
+          page only serves cold visitors. */}
+      <StickyConversionBar />
       {/* Engagement signal pump for Google Ads — fires dataLayer scroll
           depth events so the bidding algorithm has something to
           optimize against beyond rare conversions. */}
       <ScrollDepthTracker />
       {/* Fires PostHog `landing_view` once on mount — top of the
-          conversion funnel. Pairs with `analyzer_started`,
-          `analysis_completed`, `pro_checkout_started`, `pro_subscribed`
-          to build a 5-step funnel chart in the PostHog dashboard. */}
+          conversion funnel. */}
       <TrackLandingView />
-      {/* Site footer — trust + sitemap + brand. Shown to everyone; helps
-          with Quality Score and dwell time. */}
+      {/* Site footer — trust + sitemap + brand. */}
       <SiteFooter />
     </>
   );

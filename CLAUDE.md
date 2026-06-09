@@ -82,7 +82,10 @@ final_source_code/
 │   ├── robots.ts
 │   ├── manifest.ts
 │   ├── layout.tsx
-│   ├── page.tsx                  # Landing
+│   ├── page.tsx                  # Landing — STATIC (ISR hourly), anon only
+│   ├── home-authed/              # Dynamic homepage for signed-in users;
+│   │                             # proxy.ts rewrites "/" here when a
+│   │                             # Supabase auth cookie is present. noindex.
 │   ├── error.tsx                 # Route-level error boundary
 │   └── global-error.tsx          # Root error boundary (wraps html/body)
 ├── components/
@@ -213,7 +216,15 @@ export function createAdminSupabaseClient() { /* service-role */ }
   set themselves (subscription state, plan changes, webhook bookkeeping).
 - `proxy.ts` (Next 16's replacement for `middleware.ts`) calls
   `updateSession` from `lib/supabase/middleware.ts` to refresh cookies on
-  every request — don't add auth logic in there.
+  every request — don't add auth logic in there. The ONE routing rule it
+  carries: requests for `/` with a Supabase auth cookie are REWRITTEN to
+  `/home-authed` (the dynamic homepage) so the public `/` can stay
+  statically generated and edge-cached for ad traffic. That's a cache
+  hint, not auth enforcement — the dynamic page re-verifies the session.
+  Corollary: `app/page.tsx` must never import anything that reads
+  cookies()/headers(), and any new InvestCalcPage prop must be added to
+  BOTH homepages (static anon values in page.tsx, computed values in
+  home-authed/page.tsx).
 
 ### 3.2 Server action return shape — discriminated union, never throw
 

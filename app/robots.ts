@@ -29,6 +29,10 @@ export default function robots(): MetadataRoute.Robots {
     "/profile/",
     "/settings/",
     "/d/",
+    // Internal rewrite target for the signed-in homepage (see proxy.ts).
+    // Duplicate of "/" — noindex'd in its own metadata too; belt and
+    // suspenders here.
+    "/home-authed",
   ];
 
   return {
