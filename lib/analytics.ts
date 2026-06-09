@@ -54,6 +54,11 @@ export type FunnelEvent =
   // Compare pro_checkout_started rates for sessions with vs without
   // this event to measure whether tasting Pro sells Pro.
   | "sample_pro_preview_viewed" // properties: property_type
+  // One-time $5 lender PDF (Stripe Checkout `payment` mode).
+  // started → user left for Stripe; purchased → verified paid on return.
+  // The gap between the two = one-time checkout drop-off.
+  | "one_time_pdf_checkout_started" // properties: property_type
+  | "one_time_pdf_purchased"
 
 /**
  * Safe capture. Use this everywhere instead of `posthog.capture(...)`

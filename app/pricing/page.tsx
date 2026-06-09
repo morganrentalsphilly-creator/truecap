@@ -232,31 +232,34 @@ export default async function PricingPage() {
 
         {/* One-time PDF — alternative for non-subscribers who just
             want one lender package without committing to a plan.
-            mailto for now (Stripe one-time price not wired); easy to
-            hand-process at current volume. */}
+            Fully automated since Jun 2026: run a free analysis, click
+            Export PDF, pay $5 via Stripe Checkout, and the full report
+            downloads instantly (see app/actions/one-time-pdf.ts +
+            PdfPurchaseDialog). Replaced the old mailto + "1 business
+            day" manual flow. */}
         <section className="mx-auto max-w-3xl px-4 pb-12 sm:px-6 sm:pb-16">
           <div className="rounded-2xl border border-border bg-card p-6 sm:p-7">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-6">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
                   <span className="rounded-full bg-[var(--brand-green)]/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-[var(--brand-green)]">
-                    One-time
+                    One-time · $5
                   </span>
-                  <span className="text-[11px] text-muted-foreground">No subscription</span>
+                  <span className="text-[11px] text-muted-foreground">No subscription · No account</span>
                 </div>
                 <h3 className="text-xl font-extrabold text-foreground">Just need one lender PDF?</h3>
                 <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                  Pay once for a single multi-page PDF report — verdict, 10-year projection,
-                  tax strategy, exit scenarios — same as Pro. No subscription, no commitment.
-                  Email delivery within 1 business day.
+                  Run your analysis free, then click Export PDF and pay $5 once. The full
+                  multi-page report — verdict, 10-year projection, tax strategy, exit
+                  scenarios, deal score — downloads instantly. No subscription, no commitment.
                 </p>
               </div>
-              <a
-                href="mailto:hello@usetruecap.com?subject=Single-deal PDF report request"
+              <Link
+                href="/#main"
                 className="shrink-0 inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 text-sm font-bold text-foreground hover:bg-muted"
               >
-                Request a PDF
-              </a>
+                Run a deal → get the PDF
+              </Link>
             </div>
           </div>
         </section>

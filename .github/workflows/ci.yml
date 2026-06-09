@@ -1,0 +1,65 @@
+# Continuous integration — runs on every push and PR to main.
+#
+# Three gates, cheapest first:
+#   1. tsc --noEmit   — type errors (fast, catches most AI/human slips)
+#   2. vitest         — the lib/ math tests (calc-analysis, templates, …)
+#   3. next build     — full production build, same as Vercel runs
+#
+# The build step uses dummy env values: every page that needs real
+# secrets reads them at REQUEST time (Supabase/Stripe clients are
+# created per-request, the cron checks env when hit), so the build
+# only needs the vars to exist. If a future change starts reading a
+# secret at build time, this job will catch it — that's a feature.
+#
+# No deploy step here — Vercel's Git integration still owns deploys.
+# This workflow is the safety net that emails you when a push breaks
+# types, tests, or the build, instead of finding out from prod.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      # Dummy values — see note above. NEXT_PUBLIC_* get inlined into
+      # the client bundle at build, so use obviously-fake placeholders.
+      NEXT_PUBLIC_SITE_URL: https://ci.invalid
+      NEXT_PUBLIC_SUPABASE_URL: https://ci-placeholder.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder-anon-key
+      SUPABASE_SERVICE_ROLE_KEY: ci-placeholder-service-role
+      STRIPE_SECRET_KEY: sk_test_ci_placeholder
+      STRIPE_WEBHOOK_SECRET: whsec_ci_placeholder
+      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_test_ci_placeholder
+      STRIPE_PRICE_PRO_MONTHLY: price_ci_placeholder_monthly
+      STRIPE_PRICE_PRO_ANNUAL: price_ci_placeholder_annual
+      RESEND_API_KEY: re_ci_placeholder
+      RESEND_AUDIENCE_ID: ci-placeholder-audience
+      CRON_SECRET: ci-placeholder-cron-secret
+      # Sentry: no SENTRY_AUTH_TOKEN on purpose — withSentryConfig
+      # skips source-map upload and warns instead of failing.
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Production build
+        run: npm run build

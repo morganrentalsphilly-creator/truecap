@@ -42,6 +42,19 @@ import { saveDealAction } from "@/app/actions/saved-analyses";
 import { addDealToCompareAction } from "@/app/actions/compare";
 import { getDealScoreAction, type DealScoreActionResult } from "@/app/actions/deal-score";
 import { computeDealScore } from "@/lib/deal-score";
+import {
+  createOneTimePdfCheckoutAction,
+  verifyOneTimePdfPaymentAction,
+} from "@/app/actions/one-time-pdf";
+import { PdfPurchaseDialog } from "@/components/investcalc/pdf-purchase-dialog";
+
+/**
+ * localStorage key for the deal stashed right before redirecting to the
+ * one-time-PDF Stripe Checkout. Restored (and removed) when the user
+ * returns with ?pdf_purchase=<session_id>. Same-browser assumption is
+ * fine — Stripe redirects back in the same tab.
+ */
+const ONE_TIME_PDF_DRAFT_KEY = "truecap:one-time-pdf-draft";
 import { enrichPropertyAction } from "@/app/actions/enrich-property";
 import type { SelectedAddress } from "./address-autocomplete";
 import type { TenYearProjectionInput, ProjectionYear } from "@/lib/ten-year-projections";
@@ -441,6 +454,14 @@ export function InvestCalcPage({
   // loading a saved deal) or a normal non-sample run happens.
   const [isSampleProPreview, setIsSampleProPreview] = useState(false);
   const pendingSamplePreviewRef = useRef(false);
+  // ── One-time PDF purchase ($5, Stripe Checkout) ────────────────────
+  // Dialog state + an unlock ref set after a verified payment. The
+  // unlock lets the next Export PDF run bypass the entitlement gate and
+  // is consumed on successful generation. Form values survive the
+  // Stripe redirect via localStorage (see ONE_TIME_PDF_DRAFT_KEY).
+  const [isPdfPurchaseDialogOpen, setIsPdfPurchaseDialogOpen] = useState(false);
+  const [isStartingPdfCheckout, setIsStartingPdfCheckout] = useState(false);
+  const oneTimePdfUnlockedRef = useRef(false);
   const [projectionSource, setProjectionSource] = useState<{
     analysisId: string | null;
     input: TenYearProjectionInput;
@@ -1539,22 +1560,12 @@ export function InvestCalcPage({
 
   const handleExportPdf = async () => {
     if (!analysisResult) return;
-    if (!isAuthenticated) {
-      toast({
-        title: "Sign in required",
-        description: "Please sign in before exporting PDFs.",
-        variant: "destructive",
-      });
-      router.push("/auth/login");
-      return;
-    }
-    if (!canExportPdf) {
-      toast({
-        title: "Upgrade required",
-        description: "PDF export is not available for your current plan.",
-        variant: "destructive",
-      });
-      router.push("/profile#billing");
+    const oneTimeUnlocked = oneTimePdfUnlockedRef.current;
+    // Without entitlement (or auth), offer the two purchase paths
+    // instead of the old dead-end toast: Pro, or the $5 one-time PDF.
+    // A verified one-time payment bypasses this gate exactly once.
+    if (!oneTimeUnlocked && (!isAuthenticated || !canExportPdf)) {
+      setIsPdfPurchaseDialogOpen(true);
       return;
     }
     setIsExportingPdf(true);
@@ -1580,10 +1591,22 @@ export function InvestCalcPage({
           cumulativeTaxBenefitByYear: taxYears.map((year) => year.cumulativeTaxBenefitAnnual),
         });
 
+      // One-time buyers paid for the FULL report. If their (free-tier)
+      // deal score lacks the Pro breakdown, compute it client-side via
+      // the same pure function the server action wraps.
+      const effectiveDealScoreResult: DealScoreActionResult | null =
+        oneTimeUnlocked && !(dealScoreResult?.ok && dealScoreResult.tier === "pro")
+          ? {
+              ok: true,
+              tier: "pro",
+              data: computeDealScore(buildDealScoreInput(values, analysisResult)),
+            }
+          : dealScoreResult;
+
       const reportData = toPdfReportData({
         values,
         result: analysisResult,
-        dealScoreResult,
+        dealScoreResult: effectiveDealScoreResult,
         projectionYears,
         taxYears,
         exitYears,
@@ -1614,6 +1637,9 @@ export function InvestCalcPage({
             }
           : null;
       await generateInvestmentPDF(reportData, brandingConfig);
+      // Consume the one-time unlock only after a successful generation
+      // so a transient failure doesn't burn the purchase.
+      if (oneTimeUnlocked) oneTimePdfUnlockedRef.current = false;
       // Fire the Google Ads conversion event. PDF export = high-intent
       // signal (user is sharing the analysis with a lender / partner).
       // Even though it's not a revenue event, surfacing it to the Ads
@@ -1666,6 +1692,135 @@ export function InvestCalcPage({
       setIsExportingPdf(false);
     }
   };
+
+  /**
+   * Start the $5 one-time PDF checkout. Stashes the current form values
+   * in localStorage first so the deal survives the Stripe redirect.
+   */
+  const handleBuyOneTimePdf = async () => {
+    setIsStartingPdfCheckout(true);
+    try {
+      try {
+        window.localStorage.setItem(
+          ONE_TIME_PDF_DRAFT_KEY,
+          JSON.stringify({ v: 1, values: form.getValues(), savedAt: Date.now() })
+        );
+      } catch {
+        // Storage unavailable (private mode quota etc.) — checkout still
+        // works; worst case the user re-enters values after returning
+        // and exports with the unlock.
+      }
+      trackEvent("one_time_pdf_checkout_started", {
+        property_type: form.getValues().propertyType,
+      });
+      const result = await createOneTimePdfCheckoutAction();
+      if (result.ok) {
+        window.location.assign(result.url);
+        return; // navigating away; leave the spinner on
+      }
+      toast({
+        title: "Checkout unavailable",
+        description: result.message,
+        variant: "destructive",
+      });
+    } catch (err) {
+      console.warn("[one-time-pdf] checkout start failed:", err);
+      toast({
+        title: "Checkout unavailable",
+        description: "Something went wrong starting checkout. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsStartingPdfCheckout(false);
+    }
+  };
+
+  /**
+   * Return-from-Stripe handler for the one-time PDF purchase. Runs once
+   * on mount: verifies payment server-side, restores the stashed deal,
+   * re-runs the analysis, and auto-exports the full PDF.
+   */
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const sessionId = params.get("pdf_purchase");
+    if (!sessionId) return;
+
+    // Strip the param immediately so refresh / back-nav doesn't re-run.
+    params.delete("pdf_purchase");
+    const rest = params.toString();
+    window.history.replaceState({}, "", window.location.pathname + (rest ? `?${rest}` : ""));
+
+    if (sessionId === "cancelled") {
+      toast({
+        title: "Checkout cancelled",
+        description: "No charge was made. Your deal is still in the form below.",
+      });
+      return;
+    }
+
+    void (async () => {
+      const verified = await verifyOneTimePdfPaymentAction({ sessionId });
+      if (!verified.ok) {
+        toast({
+          title: "Payment not confirmed",
+          description: verified.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      oneTimePdfUnlockedRef.current = true;
+      trackEvent("one_time_pdf_purchased", {});
+
+      // Restore the stashed deal and auto-run analysis → auto-export.
+      let restoredValues: InvestmentFormValues | null = null;
+      try {
+        const raw = window.localStorage.getItem(ONE_TIME_PDF_DRAFT_KEY);
+        if (raw) {
+          const parsedDraft = JSON.parse(raw) as { values?: unknown };
+          const parsedValues = investmentFormSchema.safeParse(parsedDraft?.values);
+          if (parsedValues.success) restoredValues = parsedValues.data;
+        }
+      } catch {
+        // Corrupt/missing draft — fall through to the manual path below.
+      }
+      window.localStorage.removeItem(ONE_TIME_PDF_DRAFT_KEY);
+
+      if (!restoredValues) {
+        toast({
+          title: "Payment received — PDF unlocked",
+          description:
+            "Re-enter your deal and click Export PDF. Your one-time report is unlocked.",
+          variant: "success",
+        });
+        return;
+      }
+
+      toast({
+        title: "Payment received",
+        description: "Rebuilding your analysis and generating the report…",
+        variant: "success",
+      });
+      Object.entries(restoredValues).forEach(([key, value]) => {
+        form.setValue(key as keyof InvestmentFormValues, value as never, {
+          shouldDirty: true,
+          shouldValidate: false,
+          shouldTouch: false,
+        });
+      });
+      // Auto-export once the analysis result lands (existing effect
+      // watches autoExportPdfRef). Same double-RAF as the sample deal:
+      // let RHF flush before submitting.
+      autoExportPdfRef.current = true;
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          void form.handleSubmit(onSubmit, onError)();
+        });
+      });
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleNewAnalysis = () => {
     // Workflow protection: if the user has unsaved work in the form
@@ -2162,6 +2317,14 @@ export function InvestCalcPage({
           propertyAddress={form.getValues("address")}
         />
       ) : null}
+      {/* Pro vs $5 one-time chooser — opens when a user without PDF
+          entitlement clicks Export PDF. */}
+      <PdfPurchaseDialog
+        open={isPdfPurchaseDialogOpen}
+        onOpenChange={setIsPdfPurchaseDialogOpen}
+        onBuyOneTime={handleBuyOneTimePdf}
+        isStartingCheckout={isStartingPdfCheckout}
+      />
     </div>
   );
 }

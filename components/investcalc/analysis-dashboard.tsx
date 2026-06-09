@@ -504,12 +504,17 @@ export function AnalysisDashboard({
                 size="sm"
                 className="h-9 gap-1 rounded-xl bg-primary px-1.5 text-[11px] font-semibold text-primary-foreground sm:h-10 sm:gap-0 sm:rounded-xl sm:px-4 sm:text-sm max-[380px]:h-9 max-[380px]:gap-0.5 max-[380px]:rounded-lg max-[380px]:px-1 max-[380px]:text-[10px]"
                 onClick={() => void onExportPdf()}
-                disabled={!isSaved || !canExportPdf || isExporting}
+                // Clickable for users WITHOUT the entitlement on purpose:
+                // the click opens the Pro-vs-$5-one-time purchase dialog
+                // (see PdfPurchaseDialog in investcalc-page). The isSaved
+                // requirement only applies to entitled users — one-time
+                // buyers are often anonymous and can't save at all.
+                disabled={isExporting || (canExportPdf && !isSaved)}
                 title={
-                  !isSaved
+                  canExportPdf && !isSaved
                     ? persistedActionsBlockHint ?? "Save this analysis before exporting PDF."
                     : !canExportPdf
-                      ? "PDF export is not available for your current plan."
+                      ? "Get the lender-ready PDF — included with Pro, or $5 one-time."
                       : undefined
                 }
               >
