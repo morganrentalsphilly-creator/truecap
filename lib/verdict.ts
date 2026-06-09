@@ -19,12 +19,30 @@ export interface VerdictInputs {
 }
 
 /**
+ * Deal tier — a single-word classification of the deal's overall
+ * fundamentals. Exposed independently from the full verdict paragraph
+ * so UI surfaces (the Overview tier pill, the what-if sliders, the
+ * breakpoint solver) can render just the headline.
+ */
+export type DealTier = "Strong" | "Solid" | "Mixed" | "Marginal" | "Negative";
+
+/**
+ * Public API: return just the tier headline for a given result. Useful
+ * for live re-classification when the user is dragging what-if sliders,
+ * where we want the tier label to update in real time without re-running
+ * the full paragraph generator.
+ */
+export function getDealTier(result: AnalysisResult): DealTier {
+  return classifyDeal(result).headline;
+}
+
+/**
  * Bucket the deal into a high-level recommendation based on observable
  * metrics. This is intentionally simpler than the Pro Deal Score — it
  * keeps the verdict honest about being a rule-of-thumb.
  */
 function classifyDeal(result: AnalysisResult): {
-  headline: "Strong" | "Solid" | "Mixed" | "Marginal" | "Negative";
+  headline: DealTier;
   cashFlowSentence: string;
   capRateSentence: string;
   dscrSentence: string;
@@ -44,7 +62,7 @@ function classifyDeal(result: AnalysisResult): {
   // Headline classification — weights cash flow + DSCR most heavily.
   // For cash purchases, DSCR drops out and we lean entirely on cash
   // flow + cap rate + cash-on-cash to gauge the deal.
-  let headline: "Strong" | "Solid" | "Mixed" | "Marginal" | "Negative";
+  let headline: DealTier;
   if (isCashPurchase) {
     if (cf < 0) {
       headline = cf < -200 ? "Negative" : "Marginal";

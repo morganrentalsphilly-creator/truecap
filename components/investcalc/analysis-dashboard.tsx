@@ -24,6 +24,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AnalysisResult } from "@/lib/calc-analysis";
+import { WhatIfSliders, type WhatIfState } from "@/components/investcalc/what-if-sliders";
 
 // The three Pro snapshot panels each pull in recharts (~90 KB gzipped
 // combined). They're tab-gated AND Pro-gated — most homepage visitors
@@ -308,6 +309,16 @@ export function AnalysisDashboard({
   // a new analysis; we don't reset on each recommendation change because
   // most users keep this collapsed anyway.
   const [showAllTips, setShowAllTips] = useState(false);
+
+  // What-if slider state. When the user drags rent / rate, this holds
+  // the adjusted result; otherwise null and we render the base `result`
+  // unchanged. SCOPED: only the 4 Overview tier metric cards consume
+  // this — projections, tax strategy, exit scenarios, deal score, and
+  // every Pro panel stay anchored to the saved/base analysis. Sliders
+  // are a "what-if peek" on headline numbers, not a full reanalysis.
+  const [whatIfState, setWhatIfState] = useState<WhatIfState | null>(null);
+  const displayResult: AnalysisResult | null =
+    whatIfState?.result ?? result;
   const router = useRouter();
   const goToLogin = () => router.push("/auth/login");
   const goToBilling = () => router.push("/profile#billing");
@@ -621,7 +632,12 @@ export function AnalysisDashboard({
             the "is this a good deal?" answer at a glance.
           Tier 2 (2 smaller chips): Tax Savings, After-Tax CF — still
             visible, but visually demoted because tax math is downstream
-            of the core deal economics. */}
+            of the core deal economics.
+
+          Tier 1 cards consume `displayResult` (= whatIfState.result if
+          sliders are non-zero, else base result). Tier 2 + everything
+          below this section continues to use base `result` so Pro
+          panels and projections don't thrash on slider drags. */}
       <div className="space-y-3">
         <div className="flex items-center gap-2 px-1">
           <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
@@ -629,37 +645,48 @@ export function AnalysisDashboard({
           </span>
           <span className="h-px flex-1 bg-border" />
         </div>
+
+        {/* What-if sliders — only render when we have BOTH a result and
+            the input values. Pure client-side compute, no IO, sub-ms. */}
+        {result && values ? (
+          <WhatIfSliders
+            values={values}
+            baseResult={result}
+            onStateChange={setWhatIfState}
+          />
+        ) : null}
+
         <div className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-4 gap-2 sm:gap-3">
           <MetricCard
             label="Monthly Cash Flow"
             glossaryTerm="cashFlow"
-            value={result ? (result.netCashFlow >= 0 ? fmt(result.netCashFlow) : `-${fmt(result.netCashFlow)}`) : "—"}
-            sub={result ? cashFlowBenchmarkLabel(result.netCashFlow) : undefined}
-            color={result ? (result.netCashFlow >= 0 ? "text-[var(--metric-positive)]" : "text-[var(--metric-negative)]") : undefined}
+            value={displayResult ? (displayResult.netCashFlow >= 0 ? fmt(displayResult.netCashFlow) : `-${fmt(displayResult.netCashFlow)}`) : "—"}
+            sub={displayResult ? cashFlowBenchmarkLabel(displayResult.netCashFlow) : undefined}
+            color={displayResult ? (displayResult.netCashFlow >= 0 ? "text-[var(--metric-positive)]" : "text-[var(--metric-negative)]") : undefined}
             isLoading={isLoading}
           />
           <MetricCard
             label="CoC Return"
             glossaryTerm="coc"
-            value={result ? `${result.cocReturn >= 0 ? "+" : ""}${result.cocReturn.toFixed(1)}%` : "—"}
-            sub={result ? cocBenchmarkLabel(result.cocReturn) : undefined}
-            color={result ? (result.cocReturn >= 0 ? "text-[var(--metric-positive)]" : "text-[var(--metric-negative)]") : undefined}
+            value={displayResult ? `${displayResult.cocReturn >= 0 ? "+" : ""}${displayResult.cocReturn.toFixed(1)}%` : "—"}
+            sub={displayResult ? cocBenchmarkLabel(displayResult.cocReturn) : undefined}
+            color={displayResult ? (displayResult.cocReturn >= 0 ? "text-[var(--metric-positive)]" : "text-[var(--metric-negative)]") : undefined}
             isLoading={isLoading}
           />
           <MetricCard
             label="Cap Rate"
             glossaryTerm="capRate"
             value={
-              result
-                ? `${result.capRate >= 0 ? "+" : ""}${result.capRate.toFixed(1)}%`
+              displayResult
+                ? `${displayResult.capRate >= 0 ? "+" : ""}${displayResult.capRate.toFixed(1)}%`
                 : "—"
             }
-            sub={result ? capRateBenchmarkLabel(result.capRate, values?.address) : undefined}
+            sub={displayResult ? capRateBenchmarkLabel(displayResult.capRate, values?.address) : undefined}
             color={
-              result
-                ? result.capRate >= 5
+              displayResult
+                ? displayResult.capRate >= 5
                   ? "text-[var(--metric-positive)]"
-                  : result.capRate >= 0
+                  : displayResult.capRate >= 0
                     ? "text-foreground"
                     : "text-[var(--metric-negative)]"
                 : undefined
@@ -673,28 +700,28 @@ export function AnalysisDashboard({
             // surface "—" + a clear sub-label rather than a misleading 0.00 /
             // "Underwater" badge.
             value={
-              result
-                ? result.monthlyPayment <= 0
+              displayResult
+                ? displayResult.monthlyPayment <= 0
                   ? "—"
-                  : result.dscr.toFixed(2)
+                  : displayResult.dscr.toFixed(2)
                 : "—"
             }
             sub={
-              result
-                ? result.monthlyPayment <= 0
+              displayResult
+                ? displayResult.monthlyPayment <= 0
                   ? "Cash purchase"
-                  : result.dscr >= 1.25
+                  : displayResult.dscr >= 1.25
                   ? "Bankable (≥1.25)"
-                  : result.dscr >= 1.0
+                  : displayResult.dscr >= 1.0
                   ? "Tight (≥1.0)"
                   : "Underwater"
                 : undefined
             }
             color={
-              result
-                ? result.monthlyPayment <= 0
+              displayResult
+                ? displayResult.monthlyPayment <= 0
                   ? undefined
-                  : result.dscr >= 1.25
+                  : displayResult.dscr >= 1.25
                   ? "text-[var(--metric-positive)]"
                   : "text-[var(--metric-negative)]"
                 : undefined
