@@ -25,6 +25,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AnalysisResult } from "@/lib/calc-analysis";
 import { WhatIfSliders, type WhatIfState } from "@/components/investcalc/what-if-sliders";
+import { BreakpointSuggestionCard } from "@/components/investcalc/breakpoint-suggestion-card";
 
 // The three Pro snapshot panels each pull in recharts (~90 KB gzipped
 // combined). They're tab-gated AND Pro-gated — most homepage visitors
@@ -729,6 +730,15 @@ export function AnalysisDashboard({
             isLoading={isLoading}
           />
         </div>
+
+        {/* Breakpoint suggestion — only renders for deals below Strong
+            tier, and only when there's a reachable price/rent within ±30%.
+            Uses base result (not whatIfState) so the suggestion stays
+            anchored to the actual deal — moving sliders shouldn't reframe
+            "what would make this Solid?" relative to a what-if state. */}
+        {result && values ? (
+          <BreakpointSuggestionCard values={values} result={result} />
+        ) : null}
 
         {/* Tier 2: secondary cash-flow + tax metrics in a 3-up grid.
             Annual CF was previously shown only inside the Cash Flow tab
