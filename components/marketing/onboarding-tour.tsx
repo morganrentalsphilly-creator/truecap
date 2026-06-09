@@ -29,7 +29,7 @@ import Link from "next/link";
 const STORAGE_KEY = "truecap_onboarding_dismissed_v1";
 
 type Step = {
-  id: "try-sample" | "save-deal" | "explore-pro";
+  id: "run-deal" | "save-deal" | "explore-pro";
   icon: typeof Calculator;
   title: string;
   body: string;
@@ -37,12 +37,16 @@ type Step = {
   ctaHref: string;
 };
 
+// NOTE: the old step 1 pointed at the "Try a sample deal" button, which
+// is now shown to anonymous visitors only (signed-in users have already
+// seen the product — Jun 2026 decision). Step 1 now walks them through
+// running their own first deal instead.
 const STEPS: Step[] = [
   {
-    id: "try-sample",
+    id: "run-deal",
     icon: Calculator,
-    title: "1. Try the sample deal",
-    body: "Click the blue 'Try a sample deal' button above the calculator. Pre-fills a real Philadelphia rental and runs the full analysis in one tap.",
+    title: "1. Run your first deal",
+    body: "Type a property address in the calculator below — rent, rate, and taxes auto-fill. Hit Run analysis and the full underwrite appears in seconds.",
     ctaLabel: "Take me there",
     ctaHref: "/",
   },

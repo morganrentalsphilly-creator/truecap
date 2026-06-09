@@ -33,21 +33,24 @@ import { DealsAnalyzedTicker } from "@/components/marketing/deals-analyzed-ticke
 // animated mock card. Four trust signals competing for the same
 // real estate stacked the hero too tall and one of them had to go.
 
+// Title-only feature row (Jun 2026): the body subtexts were removed —
+// three paragraphs of supporting copy under the hero competed with the
+// animated mock card and slowed the scroll to the calculator. Each
+// title now carries the full claim on its own. The old "Save 2+ hours
+// per deal" framing undersold it; "2 hours → 60 seconds" is the same
+// honest comparison (spreadsheet vs TrueCap) framed as the ~100x it is.
 const FEATURES = [
   {
     icon: Zap,
-    title: "Save 2+ hours per deal",
-    body: "Stop rebuilding the same spreadsheet. Address auto-fill, 10+ metrics, projections, tax math — all live as you type.",
+    title: "2 hours of spreadsheets → 60 seconds",
   },
   {
     icon: ShieldCheck,
-    title: "Catch the bad assumptions",
-    body: "Sensitivity grid stress-tests rent ±10%, vacancy ±5pp, rates ±1pp. See if the deal still pencils before you offer.",
+    title: "Catch bad assumptions before you offer",
   },
   {
     icon: FileDown,
-    title: "Send lender-ready PDFs",
-    body: "One-click multi-page report with verdict, 10-yr projection, tax strategy, exit scenarios — branded and ready for your lender.",
+    title: "Lender-ready PDFs in one click",
   },
 ];
 
@@ -129,15 +132,19 @@ export function MarketingHero() {
             it. The card auto-shrinks fine on narrow viewports. */}
         <HeroProductMock />
 
-        {/* 3-up features */}
+        {/* 3-up features — title-only cards, icon inline with the text
+            so the row reads as three quick claims rather than three
+            content blocks (bodies removed, see FEATURES note above). */}
         <div className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-5">
           {FEATURES.map((f) => (
-            <div key={f.title} className="rounded-2xl border border-border bg-card p-5 shadow-sm">
-              <div className="mb-3 flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+            <div
+              key={f.title}
+              className="flex items-center gap-3 rounded-2xl border border-border bg-card p-5 shadow-sm"
+            >
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <f.icon className="size-5" />
               </div>
-              <div className="text-base font-bold text-foreground">{f.title}</div>
-              <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{f.body}</p>
+              <div className="text-base font-bold leading-snug text-foreground">{f.title}</div>
             </div>
           ))}
         </div>

@@ -2025,20 +2025,26 @@ export function InvestCalcPage({
               assessment in seconds.
             </p>
           </div>
-          {/* Sample-deal button — only when no analysis has run yet.
-              Removes the "empty form" friction for paid traffic by
-              giving them a fully-populated working analysis in 1 click. */}
-          {analysisResult === null && !isCalculating && (
+          {/* Sample-deal button — anonymous visitors only, before any
+              analysis has run. Signed-in users already know the product
+              (and their onboarding tour now starts with their own first
+              deal), so the demo button is pure noise for them — removed
+              Jun 2026. For cold traffic it's promoted from a quiet chip
+              to a filled primary button: it's the single highest-value
+              click on the page now that it unlocks the full Pro report. */}
+          {!isAuthenticated && analysisResult === null && !isCalculating && (
             <button
               type="button"
               onClick={handleTrySampleDeal}
-              className="group inline-flex shrink-0 items-center gap-1.5 self-start rounded-xl border border-primary/30 bg-[var(--brand-blue-light)] px-4 py-2.5 text-sm font-bold text-primary shadow-sm transition-transform hover:-translate-y-0.5 hover:bg-primary/10 sm:self-end"
-              aria-label="Try a sample deal — pre-fill the form with a real Philadelphia rental"
+              className="group inline-flex shrink-0 flex-col items-start gap-0.5 self-start rounded-xl bg-primary px-5 py-3 text-left shadow-[0_10px_24px_rgba(82,72,212,0.28)] transition-transform hover:-translate-y-0.5 sm:self-end"
+              aria-label="Try a sample deal — see the full Pro report on a real Philadelphia rental"
             >
-              <Sparkles className="size-4" />
-              Try a sample deal
-              <span className="hidden text-xs font-medium text-primary/70 sm:inline">
-                · skip the typing
+              <span className="inline-flex items-center gap-1.5 text-sm font-bold text-primary-foreground">
+                <Sparkles className="size-4" />
+                Try a sample deal
+              </span>
+              <span className="text-[11px] font-medium text-primary-foreground/80">
+                See the full Pro report — free
               </span>
             </button>
           )}
