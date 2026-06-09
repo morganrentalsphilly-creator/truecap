@@ -68,7 +68,7 @@ export function MarketingHero() {
         <div className="mx-auto mb-5 flex w-fit max-w-full items-center gap-1.5 rounded-full border border-primary/20 bg-card/70 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-primary shadow-sm backdrop-blur sm:gap-2 sm:px-3.5 sm:text-[11px] sm:tracking-widest">
           <Sparkles className="size-3 shrink-0" />
           <span className="sm:hidden">New · Address auto-fill</span>
-          <span className="hidden sm:inline">New — auto-fill rent + rate from any address</span>
+          <span className="hidden sm:inline">New · Auto-fill rent + rate from any address</span>
         </div>
 
         {/* headline + sub */}
@@ -76,9 +76,8 @@ export function MarketingHero() {
           Stop losing deals to <span className="text-primary">bad math.</span>
         </h1>
         <p className="mx-auto mt-4 max-w-2xl text-balance text-center text-[15px] leading-relaxed text-muted-foreground sm:text-lg">
-          Underwrite a rental deal in <strong className="text-foreground">60 seconds</strong> — cap rate, cash-on-cash,
-          DSCR, 10-year projection, tax savings, exit scenarios. Every number you need to make a
-          defensible offer, without the spreadsheet.
+          Type the address. Get cap rate, cash flow, DSCR, and a plain-English
+          verdict in <strong className="text-foreground">60 seconds</strong>. No spreadsheet, no signup.
         </p>
 
         {/* CTAs — primary stretches full-width on mobile (better tap-
@@ -106,10 +105,12 @@ export function MarketingHero() {
             one or two lines instead of wrapping into a paragraph block. */}
         <p className="mt-3 flex items-center justify-center gap-1.5 text-balance px-2 text-center text-xs text-muted-foreground">
           <Lock className="size-3 shrink-0" />
-          <span className="sm:hidden">No card · No signup · Cancel anytime</span>
-          <span className="hidden sm:inline">
-            No credit card · No signup needed to use the calculator · Cancel anytime
-          </span>
+          {/* Single canonical microcopy for both viewports. Previously
+              the desktop variant ('No credit card · No signup needed
+              to use the calculator · Cancel anytime') was 20% longer
+              for no added clarity — the mobile version says the same
+              thing in 8 words instead of 13. */}
+          <span>No card · No signup · Cancel anytime</span>
         </p>
 
         {/* Real-data social proof — hides itself if count < 25 so we

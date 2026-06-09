@@ -44,7 +44,7 @@ const HOW_STEPS = [
     icon: MapPin,
     step: "01",
     title: "Type the address",
-    body: "Google Places autocomplete kicks in at the third character. Pick it, we know exactly where the property is.",
+    body: "Google Places suggests the property as you start typing. Pick it, and TrueCap knows exactly where it is.",
   },
   {
     icon: Wand2,
@@ -333,7 +333,7 @@ export function VsCompetitors() {
 const HOMEPAGE_FAQS: { q: string; a: string }[] = [
   {
     q: "Is TrueCap really free?",
-    a: "Yes. The cash-flow analyzer — cap rate, CoC, DSCR, monthly cash flow, address auto-fill, plain-English verdict — is free forever and unlimited. No card required to start. Pro adds the MAO solver, Sensitivity grid, Strategies (BRRRR + fix-flip + rehab), 10-year projection, tax strategy, exit scenarios, Deal Score, lender-ready PDFs, save / compare deals.",
+    a: "Yes. The cash-flow analyzer — cap rate, CoC, DSCR, monthly cash flow, address auto-fill, plain-English verdict — is free forever and unlimited. No card required. Pro adds save/compare deals, lender-ready PDFs, and the advanced modules (BRRRR + Fix-and-Flip, Sensitivity, 10-year projections, tax strategy, exit scenarios, Deal Score).",
   },
   {
     q: "How is this different from a spreadsheet?",
@@ -376,7 +376,7 @@ export function HomepageFaq() {
               Common questions
             </p>
             <h2 className="mt-2 text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-              Everything you&apos;re wondering, answered.
+              The questions every investor asks first.
             </h2>
           </div>
           <div className="divide-y divide-border rounded-2xl border border-border bg-card shadow-sm">
@@ -437,7 +437,7 @@ export function PreCalculatorCta() {
             Run a deal right now. <span className="text-primary">Free.</span>
           </h2>
           <p className="mx-auto mt-3 max-w-xl text-balance text-sm leading-relaxed text-muted-foreground sm:text-base">
-            No card. No signup. Type the address, get the answer, decide if you want Pro. The
+            No card. No signup. Type the address, see if it cash-flows. The
             calculator is right below — give it 60 seconds.
           </p>
 
@@ -469,7 +469,7 @@ export function PreCalculatorCta() {
             <span aria-hidden className="text-muted-foreground/40">·</span>
             <span className="inline-flex items-center gap-1.5">
               <Type className="size-4 text-muted-foreground" />
-              No card to use the calculator
+              Free to try
             </span>
           </div>
         </div>
