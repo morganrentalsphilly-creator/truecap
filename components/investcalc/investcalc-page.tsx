@@ -41,6 +41,7 @@ import { cn } from "@/lib/utils";
 import { saveDealAction } from "@/app/actions/saved-analyses";
 import { addDealToCompareAction } from "@/app/actions/compare";
 import { getDealScoreAction, type DealScoreActionResult } from "@/app/actions/deal-score";
+import { computeDealScore } from "@/lib/deal-score";
 import { enrichPropertyAction } from "@/app/actions/enrich-property";
 import type { SelectedAddress } from "./address-autocomplete";
 import type { TenYearProjectionInput, ProjectionYear } from "@/lib/ten-year-projections";
@@ -427,6 +428,19 @@ export function InvestCalcPage({
   const [isComparingDeals, setIsComparingDeals] = useState(false);
   const [isExportingPdf, setIsExportingPdf] = useState(false);
   const [dealScoreResult, setDealScoreResult] = useState<DealScoreActionResult | null>(null);
+  // ── Sample-deal Pro preview ────────────────────────────────────────
+  // When the analysis was triggered from the "Try a sample deal" button
+  // AND the user lacks the Pro entitlements, we unlock the full Pro
+  // report (projections, tax, exit, deal score, stress-test, strategies)
+  // for that one demo run. This shows prospects what Pro actually looks
+  // like instead of a locked teaser. It's a pure UI unlock: the sample
+  // is never saved (no analysisId), so the snapshot server actions are
+  // never called and real entitlement gating is untouched. Save / PDF /
+  // share / compare stay gated — those hit server actions.
+  // The flag clears whenever outputs are invalidated (form drift, reset,
+  // loading a saved deal) or a normal non-sample run happens.
+  const [isSampleProPreview, setIsSampleProPreview] = useState(false);
+  const pendingSamplePreviewRef = useRef(false);
   const [projectionSource, setProjectionSource] = useState<{
     analysisId: string | null;
     input: TenYearProjectionInput;
@@ -491,23 +505,28 @@ export function InvestCalcPage({
     [areAnalysisTabsEnabled, mapInputTabToDashboardTab, scrollToAnalysisResults]
   );
 
+  // Shared between the server-action path (loadDealScore) and the
+  // sample-deal Pro preview path, which computes the score client-side
+  // via the same pure lib function the action wraps.
+  const buildDealScoreInput = (values: InvestmentFormValues, result: AnalysisResult) => ({
+    propertyType: values.propertyType,
+    monthlyCashFlow: result.netCashFlow,
+    cashOnCashReturn: result.cocReturn,
+    capRate: result.capRate,
+    dscr: result.dscr,
+    vacancyRate: values.vacancyPct,
+    propertyAge: result.propertyAge,
+    capexPct: result.capexPctEffective,
+    maintenancePct: result.maintenancePctEffective,
+    monthlyPropertyTax: result.propertyTax,
+    monthlyRentIncome: result.monthlyRentalIncome,
+    isCashPurchase: result.monthlyPayment <= 0,
+  });
+
   const loadDealScore = async (values: InvestmentFormValues, result: AnalysisResult) => {
     setIsLoadingDealScore(true);
     try {
-      const dealScore = await getDealScoreAction({
-        propertyType: values.propertyType,
-        monthlyCashFlow: result.netCashFlow,
-        cashOnCashReturn: result.cocReturn,
-        capRate: result.capRate,
-        dscr: result.dscr,
-        vacancyRate: values.vacancyPct,
-        propertyAge: result.propertyAge,
-        capexPct: result.capexPctEffective,
-        maintenancePct: result.maintenancePctEffective,
-        monthlyPropertyTax: result.propertyTax,
-        monthlyRentIncome: result.monthlyRentalIncome,
-        isCashPurchase: result.monthlyPayment <= 0,
-      });
+      const dealScore = await getDealScoreAction(buildDealScoreInput(values, result));
       setDealScoreResult(dealScore);
     } catch (err) {
       // Swallow + log instead of throwing — there are 4+ call sites,
@@ -551,6 +570,9 @@ export function InvestCalcPage({
     setDealScoreResult(null);
     setShowResults(false);
     setIsLoadingDealScore(false);
+    // Editing away from the sample deal ends the Pro preview — the
+    // unlock is for the demo numbers only, not the user's own deal.
+    setIsSampleProPreview(false);
   }, []);
 
   const invalidateAnalysisOutputsIfFormDriftedFromLastRun = useCallback(() => {
@@ -1183,6 +1205,14 @@ export function InvestCalcPage({
     setShowResults(false);
     setDealScoreResult(null);
 
+    // Consume the sample-deal Pro preview arm flag FIRST so it can never
+    // leak onto a later run if anything below throws. One sample click =
+    // at most one preview run.
+    const sampleProPreview =
+      pendingSamplePreviewRef.current &&
+      !(canUseProjections && canUseTaxStrategy && canUseExitScenarios && canUseDealScore);
+    pendingSamplePreviewRef.current = false;
+
     // PostHog funnel event — fires the moment the user commits to
     // analyzing a deal (form passed validation, calculation started).
     // This is the top of the in-product funnel above analysis_completed.
@@ -1205,11 +1235,28 @@ export function InvestCalcPage({
       const result = calculateAnalysis(values);
       const mappedTab = mapInputTabToDashboardTab(activeInputTab);
       if (mappedTab) setActiveDashboardTab(mappedTab);
-      const builtProjectionSource = canUseProjections
-        ? buildProjectionSource(savedDealId, values, result)
+      // Sample-deal Pro preview: this run came from "Try a sample deal"
+      // and the user isn't fully Pro → unlock the full report for the
+      // demo (flag consumed at the top of onSubmit). Any normal run
+      // exits preview mode — the state below is set unconditionally.
+      setIsSampleProPreview(sampleProPreview);
+      if (sampleProPreview) {
+        // Funnel event — lets PostHog compare pro_checkout_started rates
+        // for sessions that saw the full sample Pro report vs not.
+        trackEvent("sample_pro_preview_viewed", {
+          property_type: values.propertyType,
+        });
+      }
+      // Preview runs always use a null analysisId so the trio panels
+      // never call the snapshot server actions — even if a previously
+      // loaded saved deal left savedDealId populated. The demo renders
+      // entirely from the locally computed initialYears.
+      const sourceAnalysisId = sampleProPreview ? null : savedDealId;
+      const builtProjectionSource = canUseProjections || sampleProPreview
+        ? buildProjectionSource(sourceAnalysisId, values, result)
         : null;
-      const builtTaxStrategySource = canUseTaxStrategy
-        ? buildTaxStrategySource(savedDealId, values, result)
+      const builtTaxStrategySource = canUseTaxStrategy || sampleProPreview
+        ? buildTaxStrategySource(sourceAnalysisId, values, result)
         : null;
       setAnalysisResult(result);
       // Fire Google Ads conversion event — primary intent signal we can
@@ -1232,9 +1279,9 @@ export function InvestCalcPage({
       setProjectionSource(builtProjectionSource);
       setTaxStrategySource(builtTaxStrategySource);
       setExitScenarioSource(
-        canUseExitScenarios
+        canUseExitScenarios || sampleProPreview
           ? buildExitScenarioSource(
-              savedDealId,
+              sourceAnalysisId,
               values,
               result,
               result.tenYearProjection,
@@ -1246,7 +1293,19 @@ export function InvestCalcPage({
       if (computedFingerprint) lastComputedFormJsonRef.current = computedFingerprint;
       setIsCalculating(false);
       setShowResults(true);
-      await loadDealScore(values, result);
+      if (sampleProPreview && !canUseDealScore) {
+        // Compute the full Deal Score client-side for the demo using
+        // the same pure function the server action wraps. No server
+        // call, no entitlement bypass — the sample can't be saved.
+        setDealScoreResult({
+          ok: true,
+          tier: "pro",
+          data: computeDealScore(buildDealScoreInput(values, result)),
+        });
+        setIsLoadingDealScore(false);
+      } else {
+        await loadDealScore(values, result);
+      }
       toast({
         title: "Analysis Complete",
         description: `Net cash flow: $${result.netCashFlow.toLocaleString()}/mo | CoC: ${result.cocReturn.toFixed(1)}%`,
@@ -1279,6 +1338,10 @@ export function InvestCalcPage({
   };
 
   const onError = (errors: FieldErrors<InvestmentFormValues>) => {
+    // Disarm the sample Pro preview if the sample submit somehow failed
+    // validation — otherwise the armed flag would leak onto the user's
+    // next manual Calculate and unlock Pro on their own deal.
+    pendingSamplePreviewRef.current = false;
     const findFirstFieldError = (
       value: unknown,
       currentPath = ""
@@ -1754,12 +1817,16 @@ export function InvestCalcPage({
       });
     });
 
+    // Arm the one-shot Pro preview for this run — consumed in onSubmit.
+    pendingSamplePreviewRef.current = true;
+
     // Show the toast right away so the user sees confirmation that
     // the demo loaded — important because the submit fires async and
     // we want a UI signal that *something* happened on click.
     toast({
       title: "Sample deal loaded",
-      description: "Running the analysis on a real Philadelphia rental.",
+      description:
+        "Running the analysis on a real Philadelphia rental — with the full Pro report unlocked for this demo.",
     });
 
     // Defer the submit to the next paint frame. RHF's setValue calls
@@ -2058,14 +2125,19 @@ export function InvestCalcPage({
               canUpdateSavedDeals={canUpdateSavedDeals}
               canCompareDeals={canCompareDeals}
               canExportPdf={canExportPdf}
-              canUseProjections={canUseProjections}
-              canUseTaxStrategy={canUseTaxStrategy}
-              canUseExitScenarios={canUseExitScenarios}
-              canUseDealScore={canUseDealScore}
-              canUseMaxOffer={canUseMaxOffer}
-              canUseSensitivity={canUseSensitivity}
-              canUseStrategies={canUseStrategies}
+              // During the sample-deal Pro preview the analysis flags
+              // are OR'd open so the demo shows the real Pro report.
+              // Save / PDF / share / compare keep their true gating —
+              // they hit server actions which enforce entitlements.
+              canUseProjections={canUseProjections || isSampleProPreview}
+              canUseTaxStrategy={canUseTaxStrategy || isSampleProPreview}
+              canUseExitScenarios={canUseExitScenarios || isSampleProPreview}
+              canUseDealScore={canUseDealScore || isSampleProPreview}
+              canUseMaxOffer={canUseMaxOffer || isSampleProPreview}
+              canUseSensitivity={canUseSensitivity || isSampleProPreview}
+              canUseStrategies={canUseStrategies || isSampleProPreview}
               canUseShareLinks={canUseShareLinks}
+              isSampleProPreview={isSampleProPreview}
               activeTab={activeDashboardTab}
               saveDealLimitReached={currentSaveDealLimitReached}
               persistedActionsBlockHint={

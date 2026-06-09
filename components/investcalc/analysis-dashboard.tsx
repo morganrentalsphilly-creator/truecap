@@ -145,6 +145,14 @@ interface AnalysisDashboardProps {
   canUseStrategies?: boolean;
   /** Pro: shareable read-only deal links. False = share button hidden / locked. */
   canUseShareLinks?: boolean;
+  /**
+   * Sample-deal Pro preview mode: the analysis came from "Try a sample
+   * deal" and the can-use flags above were OR'd open by the caller so
+   * the visitor sees the full Pro report on the demo numbers. Renders
+   * an explainer banner with the upgrade CTA. Save / PDF / share /
+   * compare gating is unaffected.
+   */
+  isSampleProPreview?: boolean;
   saveDealLimitReached?: boolean;
   activeTab?: AnalysisDashboardTab;
   /** Shown when Compare / Export are disabled (e.g. unsaved edits). */
@@ -299,6 +307,7 @@ export function AnalysisDashboard({
   canUseSensitivity = false,
   canUseStrategies = false,
   canUseShareLinks = false,
+  isSampleProPreview = false,
   saveDealLimitReached = false,
   activeTab: activeTabProp,
   persistedActionsBlockHint,
@@ -358,6 +367,38 @@ export function AnalysisDashboard({
 
   return (
     <div className="space-y-6">
+      {/* Sample-deal Pro preview banner — explains why every Pro tab is
+          open on the demo and converts the "wow" into a pricing visit.
+          Gradient + border language matches ProInlineGate so the brand
+          reads consistent between "locked" and "unlocked for demo". */}
+      {isSampleProPreview && (
+        <div className="flex flex-col gap-3 rounded-2xl border-2 border-primary/25 bg-gradient-to-br from-[var(--brand-blue-light)] via-card to-card p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+          <div className="flex items-start gap-3">
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary">
+              <Sparkles className="size-4" />
+            </span>
+            <div>
+              <p className="text-sm font-bold text-foreground">
+                You&apos;re seeing the full Pro report on this sample deal.
+              </p>
+              <p className="text-xs leading-relaxed text-muted-foreground">
+                10-year projections, tax strategy, exit scenarios, Deal Score, and
+                stress-testing — every tab is unlocked for the demo. Run your own
+                deal to see the free analysis, or go Pro to get all of this on
+                every deal.
+              </p>
+            </div>
+          </div>
+          <Button
+            size="sm"
+            className="h-9 shrink-0 gap-1.5 self-start rounded-xl bg-primary px-4 text-xs font-bold text-primary-foreground sm:self-center"
+            onClick={goToBilling}
+          >
+            <Sparkles className="size-3.5" />
+            Get Pro
+          </Button>
+        </div>
+      )}
       {/* Action bar — split into two visually distinct elements:
           a lightweight identity strip ("what is this?") and a
           chunkier Quick Actions panel ("what can I do with it?").

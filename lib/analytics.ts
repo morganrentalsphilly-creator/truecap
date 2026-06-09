@@ -49,6 +49,11 @@ export type FunnelEvent =
   | "exit_intent_shown"
   | "exit_intent_clicked"     // properties: variant (always "50_off_annual" for now)
   | "exit_intent_dismissed"
+  // Sample-deal Pro preview — fires when a non-Pro visitor runs the
+  // sample deal and the full Pro report is unlocked for the demo.
+  // Compare pro_checkout_started rates for sessions with vs without
+  // this event to measure whether tasting Pro sells Pro.
+  | "sample_pro_preview_viewed" // properties: property_type
 
 /**
  * Safe capture. Use this everywhere instead of `posthog.capture(...)`
