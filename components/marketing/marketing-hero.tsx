@@ -283,24 +283,24 @@ function HeroProductMock() {
         </div>
 
         {/* address + verdict row.
-            Sequential reveal: the address is step 1 (appears first
-            after the rebuild), the verdict-pill cluster is step 5
-            (appears after the 3 metric tiles have populated). The
-            `flex-1 min-w-0` on the address wrapper keeps the pills
-            from collapsing to the left when the address is mid-fade. */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-4">
-          <div className="tc-hero-step-1 min-w-0 flex-1">
+            Mobile: stack vertically — address on top with full width
+            (so 'Philadelphia' doesn't wrap onto 3 lines), then the
+            verdict pills on a second row. Desktop: original side-by-
+            side layout. The address still gets step-1 and the pills
+            cluster step-5 of the sequential reveal animation. */}
+        <div className="flex flex-col gap-2 border-b border-border pb-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-3">
+          <div className="tc-hero-step-1 min-w-0 sm:flex-1">
             <div className="text-base font-extrabold text-foreground sm:text-lg">1700 W Erie · Philadelphia</div>
             <div className="text-xs text-muted-foreground">Single Family · $295,000 · Built 1942</div>
           </div>
-          <div className="tc-hero-step-5 flex flex-wrap items-center gap-2">
-            <span className="rounded-full bg-[var(--brand-green)] px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-white">
+          <div className="tc-hero-step-5 flex flex-wrap items-center gap-1.5 sm:gap-2">
+            <span className="rounded-full bg-[var(--brand-green)] px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-white sm:px-2.5 sm:py-1 sm:text-[10px]">
               Strong Buy
             </span>
-            <span className="rounded-full bg-primary px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-white">
+            <span className="rounded-full bg-primary px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-white sm:px-2.5 sm:py-1 sm:text-[10px]">
               Score 84
             </span>
-            <span className="rounded-full bg-[var(--brand-green)] px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-white">
+            <span className="rounded-full bg-[var(--brand-green)] px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-white sm:px-2.5 sm:py-1 sm:text-[10px]">
               Low Risk
             </span>
           </div>
@@ -319,17 +319,29 @@ function HeroProductMock() {
             cap rate, DSCR). Each tile carries its own step class so
             the 3 tiles populate left-to-right after the address. */}
         <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-3">
-          <MockTile label="Cash flow / mo" value="+$640" tone="success" stepClass="tc-hero-step-2" />
+          {/* Mobile-friendly labels: "Cash flow / mo" was wrapping onto
+              two lines at narrow viewports, making that tile taller
+              than the other two. Shortened to "Cash flow" — the
+              monthly unit is implied by the dollar sign + product
+              context. Desktop keeps the longer label via the
+              responsive prop below. */}
+          <MockTile label="Cash flow" value="+$640" tone="success" stepClass="tc-hero-step-2" />
           <MockTile label="Cap rate" value="8.2%" tone="success" stepClass="tc-hero-step-3" />
           <MockTile label="DSCR" value="1.34" tone="success" sub="Bankable" stepClass="tc-hero-step-4" />
         </div>
 
-        {/* Verdict line — final step 6, reveals last after tiles + pills. */}
+        {/* Verdict line — final step 6, reveals last after tiles + pills.
+            Two variants: shorter on mobile (the long version was 137
+            chars and wrapped to 5 lines on a phone, reading as a wall
+            of text inside a small card). */}
         <div className="tc-hero-step-6 mt-4 flex items-start gap-2 rounded-xl border border-[var(--brand-green)]/25 bg-[var(--brand-green-light)] p-3 text-xs text-foreground">
           <TrendingUp className="mt-0.5 size-4 shrink-0 text-[var(--brand-green)]" />
           <span>
-            <strong>1700 W Erie: solid fundamentals.</strong> Cash flow $640/mo, cap 8.2%, DSCR 1.34
-            clears the typical ≥1.25 lender threshold. Worth a deeper underwrite.
+            <strong>1700 W Erie: solid fundamentals.</strong>{" "}
+            <span className="sm:hidden">Cash-flows $640/mo at 8.2% cap. DSCR 1.34 clears most lenders.</span>
+            <span className="hidden sm:inline">
+              Cash flow $640/mo, cap 8.2%, DSCR 1.34 clears the typical ≥1.25 lender threshold. Worth a deeper underwrite.
+            </span>
           </span>
         </div>
       </div>
