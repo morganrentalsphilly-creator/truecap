@@ -124,93 +124,9 @@
   }
 }
 
-/* ─────────────────────────────────────────────────────────────────────
- * Hero product-mock animations.
- *
- * 5-second loop:  rebuild → hold → loop.  Designed so the animation
- * is visible IMMEDIATELY on first paint (no 4-second hold before
- * anything happens — which was the bug in the first round).
- *
- * Timeline (each step is a separate keyframe so they ripple in order):
- *   0     - 0.2s : everything faded out (skeleton).
- *   0.2   - 0.6s : ADDRESS fades in.
- *   0.6   - 1.0s : TILE 1 (cash flow) fades in.
- *   1.0   - 1.4s : TILE 2 (cap rate) fades in.
- *   1.4   - 1.8s : TILE 3 (DSCR) fades in.
- *   1.8   - 2.2s : VERDICT PILLS fade in.
- *   2.2   - 2.6s : VERDICT LINE fades in.
- *   2.6   - 4.7s : fully-rendered hold (2.1s).
- *   4.7   - 5.0s : everything fades back out.
- *   loop.
- *
- * Each step keyframe has its own offset window for the fade-in but
- * SHARES the final fade-out (94-100%) so the card disappears together
- * and the loop restarts cleanly.
- *
- * All keyframes are disabled under `prefers-reduced-motion: reduce`
- * for WCAG 2.3.3.
- * ────────────────────────────────────────────────────────────────── */
-
-@keyframes tc-hero-pulse-dot {
-  0%, 100% { opacity: 0.4; transform: scale(0.85); }
-  50%      { opacity: 1;   transform: scale(1);    }
-}
-
-/* Step 1: address. Fade in at 4-12% (0.2-0.6s of a 5s cycle). */
-@keyframes tc-hero-step-1 {
-  0%, 4%    { opacity: 0; transform: translateY(6px); }
-  12%, 94%  { opacity: 1; transform: translateY(0); }
-  100%      { opacity: 0; transform: translateY(6px); }
-}
-/* Step 2: tile 1 (cash flow). Fade in at 12-20%. */
-@keyframes tc-hero-step-2 {
-  0%, 12%   { opacity: 0; transform: translateY(6px); }
-  20%, 94%  { opacity: 1; transform: translateY(0); }
-  100%      { opacity: 0; transform: translateY(6px); }
-}
-/* Step 3: tile 2 (cap rate). Fade in at 20-28%. */
-@keyframes tc-hero-step-3 {
-  0%, 20%   { opacity: 0; transform: translateY(6px); }
-  28%, 94%  { opacity: 1; transform: translateY(0); }
-  100%      { opacity: 0; transform: translateY(6px); }
-}
-/* Step 4: tile 3 (DSCR). Fade in at 28-36%. */
-@keyframes tc-hero-step-4 {
-  0%, 28%   { opacity: 0; transform: translateY(6px); }
-  36%, 94%  { opacity: 1; transform: translateY(0); }
-  100%      { opacity: 0; transform: translateY(6px); }
-}
-/* Step 5: verdict pills. Fade in at 36-44%. */
-@keyframes tc-hero-step-5 {
-  0%, 36%   { opacity: 0; transform: translateY(6px); }
-  44%, 94%  { opacity: 1; transform: translateY(0); }
-  100%      { opacity: 0; transform: translateY(6px); }
-}
-/* Step 6: verdict line. Fade in at 44-52%. */
-@keyframes tc-hero-step-6 {
-  0%, 44%   { opacity: 0; transform: translateY(6px); }
-  52%, 94%  { opacity: 1; transform: translateY(0); }
-  100%      { opacity: 0; transform: translateY(6px); }
-}
-
-.tc-hero-pulse-dot {
-  animation: tc-hero-pulse-dot 1.5s ease-in-out infinite;
-}
-.tc-hero-step-1 { animation: tc-hero-step-1 5s ease-in-out infinite; }
-.tc-hero-step-2 { animation: tc-hero-step-2 5s ease-in-out infinite; }
-.tc-hero-step-3 { animation: tc-hero-step-3 5s ease-in-out infinite; }
-.tc-hero-step-4 { animation: tc-hero-step-4 5s ease-in-out infinite; }
-.tc-hero-step-5 { animation: tc-hero-step-5 5s ease-in-out infinite; }
-.tc-hero-step-6 { animation: tc-hero-step-6 5s ease-in-out infinite; }
-
-@media (prefers-reduced-motion: reduce) {
-  .tc-hero-pulse-dot,
-  .tc-hero-step-1,
-  .tc-hero-step-2,
-  .tc-hero-step-3,
-  .tc-hero-step-4,
-  .tc-hero-step-5,
-  .tc-hero-step-6 {
-    animation: none;
-  }
-}
+/* Hero product-mock animations were previously defined here but
+ * weren't surviving the Tailwind v4 build for unclear reasons —
+ * Morgan reported nothing animating at all. Moved inline to a
+ * <style> tag rendered directly by the hero component
+ * (components/marketing/marketing-hero.tsx) so the keyframes ship
+ * verbatim to the browser regardless of CSS pipeline behavior. */

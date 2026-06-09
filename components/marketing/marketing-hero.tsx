@@ -197,15 +197,90 @@ export function MarketingHero() {
  * deal. Mirrors the per-deal OG card aesthetic so the brand looks
  * coherent across surfaces.
  */
+/**
+ * Animation styles inlined into the component because the same
+ * keyframes defined in globals.css weren't reaching the browser in
+ * production (Morgan reported nothing animating at all, including
+ * the LIVE dot). Inlining via a server-rendered <style> tag bypasses
+ * the entire Tailwind v4 / PostCSS pipeline — the rules ship in the
+ * HTML payload verbatim.
+ *
+ * Defines:
+ *   - .tc-hero-pulse-dot — 1.5s blink for the LIVE indicator.
+ *   - .tc-hero-step-1 .. .tc-hero-step-6 — 5s sequential reveal loop
+ *     (address → tile 1 → tile 2 → tile 3 → pills → verdict line),
+ *     each on the same 5s clock with a different fade-in offset.
+ *
+ * Honors prefers-reduced-motion to disable for a11y compliance.
+ */
+const HERO_ANIM_CSS = `
+@keyframes tc-hero-pulse-dot {
+  0%, 100% { opacity: 0.4; transform: scale(0.85); }
+  50%      { opacity: 1;   transform: scale(1);    }
+}
+@keyframes tc-hero-step-1 {
+  0%, 4%    { opacity: 0; transform: translateY(6px); }
+  12%, 94%  { opacity: 1; transform: translateY(0); }
+  100%      { opacity: 0; transform: translateY(6px); }
+}
+@keyframes tc-hero-step-2 {
+  0%, 12%   { opacity: 0; transform: translateY(6px); }
+  20%, 94%  { opacity: 1; transform: translateY(0); }
+  100%      { opacity: 0; transform: translateY(6px); }
+}
+@keyframes tc-hero-step-3 {
+  0%, 20%   { opacity: 0; transform: translateY(6px); }
+  28%, 94%  { opacity: 1; transform: translateY(0); }
+  100%      { opacity: 0; transform: translateY(6px); }
+}
+@keyframes tc-hero-step-4 {
+  0%, 28%   { opacity: 0; transform: translateY(6px); }
+  36%, 94%  { opacity: 1; transform: translateY(0); }
+  100%      { opacity: 0; transform: translateY(6px); }
+}
+@keyframes tc-hero-step-5 {
+  0%, 36%   { opacity: 0; transform: translateY(6px); }
+  44%, 94%  { opacity: 1; transform: translateY(0); }
+  100%      { opacity: 0; transform: translateY(6px); }
+}
+@keyframes tc-hero-step-6 {
+  0%, 44%   { opacity: 0; transform: translateY(6px); }
+  52%, 94%  { opacity: 1; transform: translateY(0); }
+  100%      { opacity: 0; transform: translateY(6px); }
+}
+.tc-hero-pulse-dot { animation: tc-hero-pulse-dot 1.5s ease-in-out infinite; }
+.tc-hero-step-1 { animation: tc-hero-step-1 5s ease-in-out infinite; }
+.tc-hero-step-2 { animation: tc-hero-step-2 5s ease-in-out infinite; }
+.tc-hero-step-3 { animation: tc-hero-step-3 5s ease-in-out infinite; }
+.tc-hero-step-4 { animation: tc-hero-step-4 5s ease-in-out infinite; }
+.tc-hero-step-5 { animation: tc-hero-step-5 5s ease-in-out infinite; }
+.tc-hero-step-6 { animation: tc-hero-step-6 5s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .tc-hero-pulse-dot,
+  .tc-hero-step-1, .tc-hero-step-2, .tc-hero-step-3,
+  .tc-hero-step-4, .tc-hero-step-5, .tc-hero-step-6 {
+    animation: none;
+  }
+}
+`;
+
 function HeroProductMock() {
   return (
     <div className="relative mx-auto mt-10 max-w-3xl">
+      {/* Inline keyframes — see HERO_ANIM_CSS comment above. */}
+      <style dangerouslySetInnerHTML={{ __html: HERO_ANIM_CSS }} />
+
       {/* card */}
       <div className="rounded-2xl border border-border bg-card p-4 shadow-[0_24px_70px_rgba(15,23,42,0.10)] sm:p-6">
         {/* browser chrome — shorter URL pill on mobile so the full
             string fits without truncation, full URL on sm+. A small
             LIVE indicator on the right communicates that the analyzer
-            is *running*, not a static screenshot. */}
+            is *running*, not a static screenshot.
+
+            The LIVE dot uses BOTH our custom tc-hero-pulse-dot AND
+            Tailwind's built-in animate-pulse as a belt-and-suspenders
+            fallback: if our inlined keyframes ever break, animate-pulse
+            still gives the user some movement. */}
         <div className="mb-4 flex items-center gap-1.5">
           <span className="size-2.5 rounded-full bg-red-400/80" />
           <span className="size-2.5 rounded-full bg-amber-400/80" />
@@ -218,7 +293,7 @@ function HeroProductMock() {
             aria-label="Live demo"
             className="ml-1 inline-flex shrink-0 items-center gap-1 rounded-full border border-[var(--brand-green)]/30 bg-[var(--brand-green-light)] px-1.5 py-0.5 text-[9px] font-extrabold uppercase tracking-widest text-[var(--brand-green)]"
           >
-            <span className="tc-hero-pulse-dot size-1.5 rounded-full bg-[var(--brand-green)]" />
+            <span className="tc-hero-pulse-dot animate-pulse size-1.5 rounded-full bg-[var(--brand-green)]" />
             Live
           </span>
         </div>
