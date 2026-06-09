@@ -12,9 +12,6 @@ import {
 } from "@/components/marketing/landing-sections";
 import { OnboardingTour } from "@/components/marketing/onboarding-tour";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
-// DealsAnalyzedTicker moved into MarketingHero — import retained as a
-// breadcrumb in case we want to surface volume again elsewhere on this
-// page; otherwise harmless because it's tree-shaken.
 import { TrackLandingView } from "@/components/analytics/track-landing-view";
 import { StickyConversionBar } from "@/components/marketing/sticky-conversion-bar";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -209,9 +206,6 @@ export default async function Home() {
       {!user && (
         <>
           <MarketingHero />
-          {/* DealsAnalyzedTicker now rendered inside MarketingHero (right
-              under the CTAs) so it lands in the "is this real?" decision
-              moment, vs. the previous separated stripe below. */}
           <HowItWorks />
           <WhyNotSpreadsheet />
           <VsCompetitors />

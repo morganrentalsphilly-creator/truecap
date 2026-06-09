@@ -391,6 +391,19 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 0.9,
     },
+    // Backfill — two older posts that never made it into the sitemap.
+    {
+      url: `${siteUrl}/blog/brrrr-method-explained`,
+      lastModified: new Date("2026-05-26"),
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
+      url: `${siteUrl}/blog/vacancy-rate-rental-property`,
+      lastModified: new Date("2026-05-26"),
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
     {
       url: `${siteUrl}/blog/single-family-vs-multi-family-rental`,
       lastModified: new Date("2026-05-27"),
