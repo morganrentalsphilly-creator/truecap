@@ -48,7 +48,10 @@ const MATRIX: Row[] = [
   { feature: "Sensitivity on ARV (what if it's 10% lower?)", truecap: "Pro — sensitivity grid", dealcheck: "Manual re-runs", winner: "truecap" },
   { feature: "Hard money loan modeling", truecap: "Yes — short-term loan inputs (rate + months + points)", dealcheck: "Yes", winner: "tie" },
   { feature: "Mobile UX at showings", truecap: "PWA installable", dealcheck: "Native iOS + Android", winner: "dealcheck" },
-  { feature: "Free tier covers flip math", truecap: "No — Pro feature ($19/mo)", dealcheck: "Flip mode gated to Plus+ ($25/mo+)", winner: "truecap" },
+  // DealCheck's house-flipping calculator is included on every plan
+  // (verified dealcheck.io/pricing June 2026) — tiers gate saved-
+  // property caps, not the calculators.
+  { feature: "Free tier covers flip math", truecap: "No — Pro feature ($19/mo)", dealcheck: "Yes — included on all plans (free tier caps saved deals)", winner: "dealcheck" },
   { feature: "Shareable flip analysis", truecap: "Pro — public read-only link + branding", dealcheck: "Pro — PDF export", winner: "truecap" },
 ];
 
@@ -182,7 +185,7 @@ export default function VsDealcheckForFixAndFlipPage() {
               </p>
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
                 <li>You flip on mobile at properties all day and need a native app.</li>
-                <li>You already have a DealCheck Plus or Premium subscription.</li>
+                <li>You already have a DealCheck Plus or Pro subscription.</li>
                 <li>You want listing-import-from-Zillow as part of the workflow.</li>
               </ul>
             </div>

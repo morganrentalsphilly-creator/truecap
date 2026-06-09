@@ -225,14 +225,18 @@ const COMPETITORS_ROWS: Array<{ label: string; values: (string | boolean)[]; hig
   { label: "Free tier",                                   values: [true, "DIY only", "Limited", true] },
   { label: "Address auto-fill (HUD + FRED)",              values: [true, false, false, false], highlight: true },
   { label: "Cap rate · CoC · DSCR · cash flow",           values: [true, "If you built it", true, true] },
-  { label: "10-year projection",                          values: ["Pro", "Tab 4, probably broken", "Pro ($35/mo)", false] },
+  { label: "10-year projection",                          values: ["Pro", "Tab 4, probably broken", true, false] },
   { label: "Tax strategy + depreciation",                 values: ["Pro", "Tab 5, definitely broken", "Pro", false] },
   { label: "Sensitivity grid + MAO solver",               values: ["Pro", false, false, false], highlight: true },
   { label: "BRRRR + fix-and-flip + rehab estimator",      values: ["Pro", "Separate sheet", "Partial", "Separate calc"] },
   { label: "Mobile / at the showing",                     values: [true, false, "Desktop-leaning", "Desktop-leaning"], highlight: true },
   { label: "Share with lender",                           values: ["Pro · 1-click PDF + link", "Email the .xlsx", true, false] },
   { label: "Compare 4 deals side-by-side",                values: ["Pro", "Copy/paste hell", true, false] },
-  { label: "Starting Pro price",                          values: ["See pricing", "—", "$35/mo", "—"] },
+  // DealCheck pricing verified against dealcheck.io/pricing June 2026:
+  // Starter $0, Plus $10/mo, Pro $20/mo. A previous version claimed
+  // $35/mo — inflating a competitor's price in a table titled "honest,
+  // side-by-side" is exactly the credibility hit we can't afford.
+  { label: "Starting Pro price",                          values: ["See pricing", "—", "$20/mo", "—"] },
 ];
 
 export function VsCompetitors() {
@@ -285,16 +289,29 @@ export function VsCompetitors() {
                           : "px-4 py-3 text-center text-muted-foreground sm:px-6"
                       }
                     >
+                      {/* Icon cells carry sr-only text so the table is
+                          readable by screen readers AND by crawlers /
+                          AI assistants. Without it, every check/cross
+                          cell reads as empty — Google and LLMs answering
+                          "best rental calculator" couldn't tell which
+                          features each tool includes. */}
                       {v === true ? (
-                        <Check
-                          className={
-                            ci === 0
-                              ? "mx-auto size-4 text-[var(--metric-positive)]"
-                              : "mx-auto size-4 text-muted-foreground/60"
-                          }
-                        />
+                        <>
+                          <Check
+                            aria-hidden
+                            className={
+                              ci === 0
+                                ? "mx-auto size-4 text-[var(--metric-positive)]"
+                                : "mx-auto size-4 text-muted-foreground/60"
+                            }
+                          />
+                          <span className="sr-only">Included</span>
+                        </>
                       ) : v === false ? (
-                        <X className="mx-auto size-4 text-muted-foreground/40" />
+                        <>
+                          <X aria-hidden className="mx-auto size-4 text-muted-foreground/40" />
+                          <span className="sr-only">Not included</span>
+                        </>
                       ) : (
                         <span
                           className={
@@ -316,7 +333,7 @@ export function VsCompetitors() {
           </table>
         </div>
         <p className="mt-4 text-center text-[11px] text-muted-foreground">
-          Pricing comparisons accurate as of publication; check each vendor&apos;s site for current numbers.
+          Competitor pricing verified June 2026; check each vendor&apos;s site for current numbers.
         </p>
       </div>
     </section>
@@ -357,7 +374,9 @@ const HOMEPAGE_FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Will TrueCap work on my phone at the showing?",
-    a: "Yes — mobile-first by design. The full analyzer fits in your pocket and works offline once loaded. Many users underwrite deals while walking through the property.",
+    // NOTE: do not claim offline support here — there's no service
+    // worker in this app, so "works offline once loaded" was false.
+    a: "Yes — mobile-first by design. The full analyzer fits in your pocket, and you can install it to your home screen like an app. Many users underwrite deals while walking through the property.",
   },
   {
     q: "Can I cancel anytime?",

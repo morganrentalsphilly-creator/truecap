@@ -25,7 +25,11 @@ import { getSiteUrl } from "@/lib/site-url";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
-  title: "Rental Property Analysis",
+  // Keyword-rich, benefit-led title. The layout template appends
+  // " | TrueCap" — don't add the brand here or it doubles up.
+  // Previous title ("Rental Property Analysis") had no calculator
+  // keyword and no differentiator for the SERP.
+  title: "Rental Property Calculator — Cap Rate, Cash Flow & DSCR",
   description:
     "Use TrueCap to analyze rental properties with cap rate, cash-on-cash return, monthly cash flow, and long-term investment projections.",
   keywords: [

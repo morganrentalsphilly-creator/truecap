@@ -67,7 +67,13 @@ async function loadStripePrice(slug: "pro_monthly" | "pro_annual"): Promise<Stri
 const FAQS: { q: string; a: string }[] = [
   {
     q: "Is TrueCap really free?",
-    a: "Yes. The cash-flow analyzer — cap rate, CoC, DSCR, monthly cash flow, address auto-fill, MAO, sensitivity, BRRRR, fix-and-flip — is free forever and unlimited. No card required to start. Pro adds the longer-horizon and reporting features.",
+    // Keep this answer in lockstep with the homepage FAQ
+    // (components/marketing/landing-sections.tsx), the plan cards
+    // (pricing-toggle-plans.tsx), and the actual gating in
+    // app/page.tsx. MAO, sensitivity, BRRRR/fix-and-flip, and share
+    // links are PRO features — a previous version of this answer
+    // claimed they were free, contradicting every other surface.
+    a: "Yes. The cash-flow analyzer — cap rate, CoC, DSCR, monthly cash flow, address auto-fill, plain-English verdict — is free forever and unlimited. No card required to start. Pro adds MAO solver, sensitivity grid, BRRRR + fix-and-flip, 10-year projections, tax strategy, exit scenarios, Deal Score, shareable links, and lender-ready PDFs.",
   },
   {
     q: "Can I cancel anytime?",
@@ -283,7 +289,7 @@ export default async function PricingPage() {
               href="/"
               className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
             >
-              Try the calculator first — it's free →
+              Try the calculator first — it&apos;s free →
             </Link>
           </div>
         </section>
@@ -311,12 +317,21 @@ export default async function PricingPage() {
 }
 
 function Cell({ value, pro }: { value: boolean | string; pro?: boolean }) {
+  // sr-only text keeps the icon cells legible for screen readers and
+  // for crawlers/AI assistants — icon-only cells read as empty in
+  // both, which made the whole Free-vs-Pro table invisible to them.
   return (
     <td className="px-4 py-3 text-center sm:px-6">
       {value === true ? (
-        <Check className={`mx-auto size-4 ${pro ? "text-primary" : "text-[var(--metric-positive)]"}`} />
+        <>
+          <Check aria-hidden className={`mx-auto size-4 ${pro ? "text-primary" : "text-[var(--metric-positive)]"}`} />
+          <span className="sr-only">Included</span>
+        </>
       ) : value === false ? (
-        <X className="mx-auto size-4 text-muted-foreground/30" />
+        <>
+          <X aria-hidden className="mx-auto size-4 text-muted-foreground/30" />
+          <span className="sr-only">Not included</span>
+        </>
       ) : (
         <span className={`text-sm font-semibold ${pro ? "text-primary" : "text-foreground"}`}>{value}</span>
       )}

@@ -252,16 +252,16 @@ export default function DealCheckVsStessaVsTrueCapPost() {
             <h3>Pricing</h3>
             <p>
               <strong>TrueCap Pro</strong> is a single $19/month tier
-              (or about $190/year annually). Everything is included —
+              (or $200/year annually). Everything is included —
               share links, PDF exports, 10-year projections, tax
               strategy, sensitivity, deal score, MAO, BRRRR, and
               fix-and-flip analyzers.
             </p>
             <p>
               <strong>DealCheck</strong> uses a three-tier ladder
-              (Starter ~$15/mo, Plus ~$25/mo, Premium ~$30/mo as of
-              2026). Some features that TrueCap puts in the single Pro
-              tier are split across DealCheck&apos;s Plus and Premium.
+              (free Starter, Plus $10/mo, Pro $20/mo as of June 2026).
+              Its calculators are included on every plan — the paid
+              tiers mostly raise saved-property, photo, and comp caps.
             </p>
 
             <h3>What each does better</h3>
@@ -381,10 +381,9 @@ export default function DealCheckVsStessaVsTrueCapPost() {
               stack.
             </p>
             <p>
-              By comparison, DealCheck&apos;s comparable feature
-              coverage sits in their Plus or Premium tier
-              (~$25-$30/month), and you&apos;d still want Stessa
-              alongside it.
+              By comparison, DealCheck&apos;s Plus or Pro tier runs
+              $10-$20/month (mostly lifting saved-property caps), and
+              you&apos;d still want Stessa alongside it.
             </p>
 
             <h2>Quick decision matrix</h2>

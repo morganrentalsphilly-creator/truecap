@@ -146,10 +146,20 @@ export function PricingTogglePlans({
           <ul className="mt-6 space-y-2.5">
             {FREE_FEATURES.map((f) => (
               <li key={f.label} className="flex items-start gap-2 text-sm">
+                {/* sr-only prefix: without it, screen readers and
+                    crawlers read the struck-through Pro items as if
+                    they were included in Free — the icons + line-
+                    through are visual-only signals. */}
                 {f.included ? (
-                  <Check className="mt-0.5 size-4 shrink-0 text-[var(--metric-positive)]" />
+                  <>
+                    <Check aria-hidden className="mt-0.5 size-4 shrink-0 text-[var(--metric-positive)]" />
+                    <span className="sr-only">Included:</span>
+                  </>
                 ) : (
-                  <X className="mt-0.5 size-4 shrink-0 text-muted-foreground/40" />
+                  <>
+                    <X aria-hidden className="mt-0.5 size-4 shrink-0 text-muted-foreground/40" />
+                    <span className="sr-only">Not included (Pro only):</span>
+                  </>
                 )}
                 <span
                   className={

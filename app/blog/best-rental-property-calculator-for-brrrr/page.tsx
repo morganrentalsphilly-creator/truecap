@@ -65,10 +65,10 @@ const TOOLS = [
   },
   {
     rank: 2,
-    name: "DealCheck (Plus or Premium)",
+    name: "DealCheck (Plus or Pro)",
     bestFor: "Longest BRRRR track record + native mobile",
     url: "/vs/dealcheck",
-    pricing: "Plus ~$25/mo, Premium ~$35/mo (BRRRR mode in Plus+)",
+    pricing: "Free Starter, Plus $10/mo, Pro $20/mo (as of June 2026)",
     freeCovers: [
       "Solid BRRRR-friendly underwriting",
       "Listing-import from Zillow / Redfin",

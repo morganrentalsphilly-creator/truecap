@@ -64,7 +64,10 @@ const MATRIX: Row[] = [
   { feature: "Hold-period decision modeling",        truecap: "Pro — exit scenarios with year-by-year sell vs hold",                    dealcheck: "Pro — exit modeling available",                       winner: "tie" },
   { feature: "BRRRR-specific deal score",            truecap: "Pro — Deal Score considers BRRRR cash-recovered subscore",               dealcheck: "Standard cap rate / CoC scoring",                     winner: "truecap" },
   { feature: "Refi rate vs purchase rate handling",  "truecap": "Yes — separate refi rate input",                                       dealcheck: "Yes",                                                 winner: "tie" },
-  { feature: "Free tier covers BRRRR analyzer",      truecap: "No — Pro feature ($19/mo) but full underwriting math is free",          dealcheck: "BRRRR mode gated to Plus+ ($25/mo+)",                 winner: "truecap" },
+  // DealCheck includes its rental/BRRRR calculators on every plan
+  // (verified dealcheck.io/pricing June 2026) — its tiers gate saved-
+  // property caps, not the calculators. Don't claim otherwise.
+  { feature: "Free tier covers BRRRR analyzer",      truecap: "No — Pro feature ($19/mo) but full underwriting math is free",          dealcheck: "Yes — included on all plans (free tier caps saved deals)", winner: "dealcheck" },
   { feature: "Shareable BRRRR analysis link",        truecap: "Pro — public read-only link with branding",                              dealcheck: "Pro — PDF export",                                    winner: "truecap" },
   { feature: "PDF export of BRRRR analysis",         truecap: "Pro — multi-page lender-ready report",                                   dealcheck: "Pro",                                                 winner: "tie" },
 ];
@@ -78,8 +81,8 @@ const DEALCHECK_BRRRR_FAQ: FaqItem[] = [
         explicit &quot;capital recovered&quot; headline metric (so you instantly see
         if it&apos;s an infinite-return deal), a sensitivity grid that
         stress-tests ARV (the single biggest BRRRR risk), and a Pro tier
-        that bundles everything for $19/month vs DealCheck&apos;s
-        $25-35/month tier ladder. DealCheck has native iOS/Android apps
+        that bundles everything for $19/month — DealCheck&apos;s $10-20/month
+        tiers mostly raise saved-deal caps. DealCheck has native iOS/Android apps
         and a longer track record in the BRRRR community — if mobile is
         your primary workflow, that matters.
       </>
@@ -126,13 +129,14 @@ const DEALCHECK_BRRRR_FAQ: FaqItem[] = [
         highlights when your capital recovered hits 100%, so you don&apos;t
         have to mentally compute it; (2) sensitivity on ARV — DealCheck
         requires manual re-runs, TrueCap&apos;s Pro grid varies ARV ±10%
-        in one view; (3) all-in pricing — TrueCap Pro is $19/mo with
-        BRRRR included, vs DealCheck Plus at $25/mo or Premium at
-        $35/mo. The fundamental BRRRR math is the same on both.
+        in one view; (3) bundling — TrueCap Pro is $19/mo with BRRRR,
+        sensitivity, tax strategy, and exit scenarios all included,
+        while DealCheck&apos;s plans ($10-20/mo) mostly raise saved-property
+        caps. The fundamental BRRRR math is the same on both.
       </>
     ),
     plainTextAnswer:
-      "Three things: (1) explicit infinite-return flagging when capital recovered hits 100%; (2) ARV sensitivity in one view vs manual re-runs; (3) all-in $19/mo Pro vs DealCheck $25-35/mo. Fundamental BRRRR math is identical.",
+      "Three things: (1) explicit infinite-return flagging when capital recovered hits 100%; (2) ARV sensitivity in one view vs manual re-runs; (3) TrueCap Pro at $19/mo bundles BRRRR + sensitivity + tax strategy + exit scenarios, while DealCheck's $10-20/mo plans mostly raise saved-property caps. Fundamental BRRRR math is identical.",
   },
   {
     question: "Can I use TrueCap free for BRRRR?",

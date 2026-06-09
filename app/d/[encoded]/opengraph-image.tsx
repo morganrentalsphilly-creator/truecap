@@ -69,7 +69,7 @@ function Fallback({ headline }: { headline: string }) {
         }}
       >
         <div style={{ fontSize: 28, fontWeight: 700, opacity: 0.75, letterSpacing: "0.04em" }}>
-          Truecap<span style={{ color: BRAND_BLUE }}>.</span>
+          TrueCap<span style={{ color: BRAND_BLUE }}>.</span>
         </div>
         <div style={{ fontSize: 48, fontWeight: 800, marginTop: 16 }}>{headline}</div>
         <div style={{ fontSize: 22, marginTop: 12, opacity: 0.72 }}>
@@ -150,7 +150,7 @@ export default async function Image({ params }: { params: Promise<Params> }) {
           }}
         >
           <div style={{ fontSize: 28, fontWeight: 800, letterSpacing: "-0.01em", display: "flex" }}>
-            Truecap<span style={{ color: BRAND_BLUE }}>.</span>
+            TrueCap<span style={{ color: BRAND_BLUE }}>.</span>
           </div>
           <div
             style={{

@@ -58,11 +58,11 @@ export const metadata: Metadata = {
 const FAQ_ITEMS = [
   {
     q: `Which is cheapest — DealCheck, BiggerPockets, or TrueCap?`,
-    a: `For the calculator alone, TrueCap at \$19/month is the cheapest. DealCheck Plus is ~\$25/month. BiggerPockets Pro is ~\$32.50/month (annual, \$390/year), but that bundles forums, courses, and other community access. If you want only the calculator, TrueCap is roughly half the price of the others.`,
+    a: `For headline price, DealCheck Plus is cheapest at \$10/month, with DealCheck Pro at \$20/month and TrueCap Pro at \$19/month (as of June 2026) — but DealCheck's tiers mostly raise saved-property caps, while TrueCap's \$19 bundles the deep analysis (projections, tax strategy, sensitivity, exit scenarios, deal score). BiggerPockets Pro is ~\$32.50/month (annual, \$390/year), bundled with forums, courses, and community access.`,
   },
   {
     q: `Which has the best free tier?`,
-    a: `TrueCap, hands down. TrueCap free covers cap rate, cash-on-cash, DSCR, NCF, monthly cash flow, and address auto-fill on unlimited analyses with no signup. DealCheck free caps the number of analyses per month and gates most outputs. BiggerPockets free gives a few reports per month before gating to the \$390/year Pro tier.`,
+    a: `TrueCap, hands down. TrueCap free covers cap rate, cash-on-cash, DSCR, NCF, monthly cash flow, and address auto-fill on unlimited analyses with no signup. DealCheck free requires signup and caps you at 15 saved properties at a time. BiggerPockets free gives a few reports per month before gating to the \$390/year Pro tier.`,
   },
   {
     q: `Does TrueCap have native iOS and Android apps like DealCheck?`,
@@ -70,7 +70,7 @@ const FAQ_ITEMS = [
   },
   {
     q: `Should I keep paying for BiggerPockets just for the calculator?`,
-    a: `Probably not. BiggerPockets Pro is ~\$390/year and bundles forums, courses, books, podcasts, and community. If you actively use the community, it's worth it. If you're paying for the calculator specifically, TrueCap (~\$190/year on annual) is half the price and has a more capable calculator.`,
+    a: `Probably not. BiggerPockets Pro is ~\$390/year and bundles forums, courses, books, podcasts, and community. If you actively use the community, it's worth it. If you're paying for the calculator specifically, TrueCap (\$200/year on annual) is half the price and has a more capable calculator.`,
   },
   {
     q: `Is BiggerPockets calculator more accurate than DealCheck or TrueCap?`,
@@ -161,7 +161,7 @@ export default function ThreeWayComparisonPost() {
           <div className="prose prose-neutral max-w-none prose-headings:font-extrabold prose-headings:text-foreground prose-p:text-foreground prose-p:leading-relaxed prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-li:text-foreground prose-li:leading-relaxed">
             <h2>The three calculators in one sentence each</h2>
             <div dangerouslySetInnerHTML={{ __html: `<ul>
-              <li><strong>DealCheck</strong> — per-deal rental underwriting calculator with a 3-tier plan ladder (Starter ~\$15/mo, Plus ~\$25/mo, Premium ~\$35/mo as of 2026). Native iOS and Android apps. Strong listing-import workflow that pulls property details from Zillow / Redfin.</li>
+              <li><strong>DealCheck</strong> — per-deal rental underwriting calculator with a 3-tier plan ladder (free Starter, Plus \$10/mo, Pro \$20/mo as of June 2026). Native iOS and Android apps. Strong listing-import workflow that pulls property details from Zillow / Redfin.</li>
               <li><strong>BiggerPockets Calculator</strong> — bundled with a BiggerPockets Pro subscription (~\$390/year ≈ \$32.50/mo). Big brand, decade+ of trust. Calculator UX hasn&apos;t evolved much in years; no portfolio rollup.</li>
               <li><strong>TrueCap</strong> — newer calculator with a deeper free tier (full cap rate, CoC, DSCR, NCF, monthly cash flow with no monthly cap). Pro is a single \$19/mo tier bundling everything. PWA installable to home screen (no native apps). Address auto-fill via HUD Fair Market Rent + FRED 30-year rate + state property tax — none of the others do this.</li>
             </ul>` }} />
@@ -170,19 +170,19 @@ export default function ThreeWayComparisonPost() {
             <div dangerouslySetInnerHTML={{ __html: `<p>This is where they diverge most. The free tier sets expectations for the paid one — if free feels gated, you&apos;re skeptical of Pro.</p>
             <ul>
               <li><strong>TrueCap free</strong> — unlimited analyses, cap rate, CoC, DSCR, NCF, monthly cash flow, plain-English verdict, address auto-fill. No signup required to use the calculator.</li>
-              <li><strong>DealCheck free</strong> — limited analyses per month, signup required, most outputs gated to paid tiers. Listing-import works on free.</li>
+              <li><strong>DealCheck free</strong> — signup required, capped at 15 saved properties at a time (plus limits on photos, comps, and templates). The core calculators are included. Listing-import works on free.</li>
               <li><strong>BiggerPockets calculator free</strong> — a few free reports per month, then gated behind BiggerPockets Pro (\$390/year).</li>
             </ul>
             <p>If you want to underwrite a deal right now without paying or signing up, TrueCap is the only one of the three that lets you. That&apos;s the wedge.</p>` }} />
 
             <h2>Pricing (paid tier comparison)</h2>
             <div dangerouslySetInnerHTML={{ __html: `<ul>
-              <li><strong>TrueCap Pro</strong> — \$19/month (or about \$190/year on the annual plan, ~\$16/mo). Single tier. Everything included: 10-year projections, tax strategy, sensitivity grid, exit scenarios, Deal Score, MAO solver, BRRRR + fix-and-flip analyzers, share links, PDF exports, branded reports, save / compare / template deals.</li>
-              <li><strong>DealCheck Plus</strong> — ~\$25/month. Adds 10-year projections, tax view, save deals, PDF export.</li>
-              <li><strong>DealCheck Premium</strong> — ~\$35/month. Adds more advanced analysis features, integrations, and higher analysis caps.</li>
+              <li><strong>TrueCap Pro</strong> — \$19/month (or \$200/year on the annual plan, ~\$16.67/mo). Single tier. Everything included: 10-year projections, tax strategy, sensitivity grid, exit scenarios, Deal Score, MAO solver, BRRRR + fix-and-flip analyzers, share links, PDF exports, branded reports, save / compare / template deals.</li>
+              <li><strong>DealCheck Plus</strong> — \$10/month. Raises caps: 50 saved properties, more photos, comps, and templates.</li>
+              <li><strong>DealCheck Pro</strong> — \$20/month. Unlimited saved properties, photos, comps, and templates.</li>
               <li><strong>BiggerPockets Pro</strong> — ~\$32.50/month (annual). Bundles the calculator with community, courses, forums, podcasts, books. Calculator alone isn&apos;t cheaper.</li>
             </ul>
-            <p>For the calculator alone, TrueCap is roughly half the price of the others. If you&apos;re paying BiggerPockets for the community, the calculator is effectively free — but if you&apos;re paying for the calculator itself, you&apos;re overpaying.</p>` }} />
+            <p>TrueCap Pro and DealCheck Pro land within a dollar of each other (\$19 vs \$20/mo) — the difference is what the dollar buys. DealCheck&apos;s paid tiers mostly raise saved-property caps; TrueCap&apos;s single tier bundles the analysis depth (projections, tax strategy, sensitivity, exit scenarios, deal score). Versus BiggerPockets, the calculator alone costs ~40% less — if you&apos;re paying BiggerPockets for the community, the calculator is effectively free, but if you&apos;re paying for the calculator itself, you&apos;re overpaying.</p>` }} />
 
             <h2>Mobile + at the showing</h2>
             <div dangerouslySetInnerHTML={{ __html: `<p>The honest one. TrueCap is a Progressive Web App — install it from the browser to your home screen and it works like a native app without going through the App Store. DealCheck has true native iOS and Android apps with offline support and better camera-tied workflows. BiggerPockets has a mobile-optimized web view and a separate forum app, but the calculator is mostly desktop-leaning.</p>

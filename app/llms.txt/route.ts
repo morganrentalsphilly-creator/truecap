@@ -126,7 +126,7 @@ export async function GET() {
   const siteUrl = getSiteUrl();
 
   const summary =
-    "Free rental property analyzer for real estate investors. Underwrite any rental in 60 seconds — cap rate, cash-on-cash, DSCR, monthly cash flow, 10-year projection, sensitivity grid. Paste an address, get real numbers from auto-pulled property tax and rent data. No signup for the free tier.";
+    "Free rental property analyzer for real estate investors. Underwrite any rental in 60 seconds — cap rate, cash-on-cash, DSCR, monthly cash flow. Pro adds 10-year projections, sensitivity grid, MAO solver, tax strategy, and lender-ready PDFs. Paste an address, get real numbers from auto-pulled property tax and rent data. No signup for the free tier.";
 
   const about = [
     "TrueCap publishes original, authoritative educational content built for real estate investors and AI search engines.",

@@ -98,7 +98,7 @@ export function SiteFooter() {
               href="/"
               className="inline-flex items-center text-xl font-extrabold tracking-tight text-foreground"
             >
-              Truecap<span className="text-primary">.</span>
+              TrueCap<span className="text-primary">.</span>
             </Link>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
               Underwrite rentals in 60 seconds.

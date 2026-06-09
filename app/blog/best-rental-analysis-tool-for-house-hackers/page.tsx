@@ -68,7 +68,7 @@ const TOOLS = [
     name: "DealCheck",
     bestFor: "Mobile + listing import (multifamily mode)",
     url: "/vs/dealcheck",
-    pricing: "Plus ~$25/mo",
+    pricing: "Free Starter, Plus $10/mo, Pro $20/mo (as of June 2026)",
     freeCovers: [
       "Standard multifamily underwriting",
       "Listing import from Zillow / Redfin",

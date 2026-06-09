@@ -67,7 +67,7 @@ const MATRIX: Row[] = [
   { feature: "Cash flow waterfall visualization", truecap: "Yes — see where every rent dollar goes",                                            dealcheck: "Standard line-item breakdown",                                         winner: "truecap" },
   { feature: "Deal score + plain-English verdict", truecap: "Pro — 0-100 score with subscore breakdown + explanation",                          dealcheck: "Color-coded indicators",                                               winner: "truecap" },
   { feature: "Open data sources cited",           truecap: "HUD FMR + FRED + state tax — every assumption traceable",                           dealcheck: "Listing-import + custom data",                                         winner: "truecap" },
-  { feature: "Pricing transparency",              truecap: "Free + monthly Pro on /pricing, no card to start",                                  dealcheck: "Tiered plans (Starter / Plus / Premium)",                              winner: "tie" },
+  { feature: "Pricing transparency",              truecap: "Free + monthly Pro on /pricing, no card to start",                                  dealcheck: "Tiered plans (free Starter / Plus $10 / Pro $20)",                              winner: "tie" },
   { feature: "Native iOS/Android apps",           truecap: "PWA — installable to home screen, no app-store delay",                              dealcheck: "Native apps",                                                          winner: "dealcheck" },
 ];
 
@@ -314,29 +314,30 @@ const DEALCHECK_FAQ: FaqItem[] = [
         Yes. TrueCap&apos;s free tier gives you a complete underwrite — cap
         rate, cash-on-cash, DSCR, monthly cash flow, NOI — with no signup
         required and no monthly limit on analyses. DealCheck&apos;s free
-        tier limits the number of saved analyses and gates most outputs
-        behind a paid plan. If you only need to run numbers on individual
-        listings, the free tier of TrueCap covers the same job DealCheck
-        Plus would.
+        tier requires signup and caps you at 15 saved properties at a
+        time. If you only need to run numbers on individual listings,
+        the free tier of TrueCap covers the same job DealCheck Plus
+        would.
       </>
     ),
     plainTextAnswer:
-      "Yes. TrueCap's free tier covers cap rate, cash-on-cash, DSCR, monthly cash flow, and NOI with no signup and no monthly limit. DealCheck's free tier caps saved analyses and gates most outputs behind a paid plan.",
+      "Yes. TrueCap's free tier covers cap rate, cash-on-cash, DSCR, monthly cash flow, and NOI with no signup and no monthly limit. DealCheck's free tier requires signup and caps saved properties at 15 at a time.",
   },
   {
     question: "How much does TrueCap cost compared to DealCheck?",
     answer: (
       <>
-        TrueCap Pro is $19/month or about $190/year on the annual plan.
-        DealCheck&apos;s comparable Plus tier is around $15/month and
-        Premium is around $30/month (as of 2026). TrueCap sits in the
-        middle on price, but includes share links, PDF export, tax
-        strategy, exit scenarios, sensitivity, MAO, and deal score in a
-        single tier — no &quot;upgrade to Premium for X&quot; gating.
+        TrueCap Pro is $19/month or $200/year on the annual plan
+        (~$16.67/mo). DealCheck&apos;s Plus tier is $10/month and Pro is
+        $20/month (as of June 2026) — but those tiers mostly raise
+        saved-property caps. TrueCap&apos;s single tier is about analysis
+        depth: share links, PDF export, tax strategy, exit scenarios,
+        sensitivity, MAO, and deal score all included — no
+        &quot;upgrade for X&quot; gating.
       </>
     ),
     plainTextAnswer:
-      "TrueCap Pro is $19/month (or about $190/year annual). DealCheck Plus is around $15/month and Premium around $30/month. TrueCap includes share links, PDF export, tax strategy, exit scenarios, sensitivity, MAO, and deal score in one tier.",
+      "TrueCap Pro is $19/month (or $200/year annual, ~$16.67/mo). DealCheck Plus is $10/month and Pro $20/month (as of June 2026), but those tiers mostly raise saved-property caps. TrueCap's single tier includes share links, PDF export, tax strategy, exit scenarios, sensitivity, MAO, and deal score.",
   },
   {
     question: "Which tool is better for new investors?",

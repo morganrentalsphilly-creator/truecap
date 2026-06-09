@@ -99,7 +99,7 @@ const TOOLS = [
     name: "DealCheck (alternative underwriting)",
     bestFor: "Mobile + listing import for STR-curious buyers",
     url: "/vs/dealcheck-for-short-term-rentals",
-    pricing: "Plus ~$25/mo",
+    pricing: "Free Starter, Plus $10/mo, Pro $20/mo (as of June 2026)",
     freeCovers: [
       "Standard rental underwriting, override rent with STR projection",
       "Listing import from Zillow / Redfin",

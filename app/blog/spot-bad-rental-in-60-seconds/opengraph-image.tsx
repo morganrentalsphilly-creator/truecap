@@ -39,7 +39,7 @@ export default function Image() {
           }}
         >
           <div style={{ fontSize: 32, fontWeight: 800, letterSpacing: "-0.01em", display: "flex" }}>
-            Truecap<span style={{ color: BRAND_BLUE }}>.</span>
+            TrueCap<span style={{ color: BRAND_BLUE }}>.</span>
           </div>
           <div
             style={{

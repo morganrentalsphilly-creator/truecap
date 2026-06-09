@@ -182,7 +182,7 @@ export default function VsDealcheckForShortTermRentalsPage() {
               </p>
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
                 <li>You manage many STRs on mobile at properties.</li>
-                <li>You&apos;re already a DealCheck Plus or Premium subscriber.</li>
+                <li>You&apos;re already a DealCheck Plus or Pro subscriber.</li>
                 <li>You prefer DealCheck&apos;s listing-import workflow for STR sourcing.</li>
               </ul>
             </div>

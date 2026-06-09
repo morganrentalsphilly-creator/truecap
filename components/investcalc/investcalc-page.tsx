@@ -1783,9 +1783,21 @@ export function InvestCalcPage({
       <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 sm:pt-10 pb-4 sm:pb-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
           <div className="min-w-0">
-            <h1 className="text-2xl sm:text-3xl xl:text-4xl font-extrabold text-foreground mb-2 text-balance">
-              Analyze Your Investment Property
-            </h1>
+            {/* Heading level is auth-aware: for cold visitors the
+                marketing hero above already renders the page's single
+                <h1> ("Stop losing deals to bad math.") — two H1s on
+                one page dilutes the SEO signal and confuses screen-
+                reader document outlines. For signed-in users the hero
+                is skipped entirely, so this becomes the page's H1. */}
+            {isAuthenticated ? (
+              <h1 className="text-2xl sm:text-3xl xl:text-4xl font-extrabold text-foreground mb-2 text-balance">
+                Analyze Your Investment Property
+              </h1>
+            ) : (
+              <h2 className="text-2xl sm:text-3xl xl:text-4xl font-extrabold text-foreground mb-2 text-balance">
+                Analyze Your Investment Property
+              </h2>
+            )}
             <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
               Get institutional-grade analysis with cash flow projections, tax benefits, and risk
               assessment in seconds.

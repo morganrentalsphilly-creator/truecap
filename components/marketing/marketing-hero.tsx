@@ -325,7 +325,15 @@ function HeroProductMock() {
               monthly unit is implied by the dollar sign + product
               context. Desktop keeps the longer label via the
               responsive prop below. */}
-          <MockTile label="Cash flow" value="+$640" tone="success" stepClass="tc-hero-step-2" />
+          {/* These three numbers MUST reconcile — the product's whole
+              pitch is "stop losing deals to bad math", so an underwriter
+              who checks the hero card has to get a consistent answer.
+              Assumptions: $295,000 price, 20% down ($236,000 loan),
+              6.6% / 30-yr → P&I ≈ $1,507/mo. NOI at an 8.2% cap =
+              $295,000 × 0.082 / 12 ≈ $2,016/mo. DSCR = 2,016 / 1,507 ≈
+              1.34. Cash flow = 2,016 − 1,507 ≈ $510/mo. If you change
+              one number, recompute the other two. */}
+          <MockTile label="Cash flow" value="+$510" tone="success" stepClass="tc-hero-step-2" />
           <MockTile label="Cap rate" value="8.2%" tone="success" stepClass="tc-hero-step-3" />
           <MockTile label="DSCR" value="1.34" tone="success" sub="Bankable" stepClass="tc-hero-step-4" />
         </div>
@@ -338,9 +346,9 @@ function HeroProductMock() {
           <TrendingUp className="mt-0.5 size-4 shrink-0 text-[var(--brand-green)]" />
           <span>
             <strong>1700 W Erie: solid fundamentals.</strong>{" "}
-            <span className="sm:hidden">Cash-flows $640/mo at 8.2% cap. DSCR 1.34 clears most lenders.</span>
+            <span className="sm:hidden">Cash-flows $510/mo at 8.2% cap. DSCR 1.34 clears most lenders.</span>
             <span className="hidden sm:inline">
-              Cash flow $640/mo, cap 8.2%, DSCR 1.34 clears the typical ≥1.25 lender threshold. Worth a deeper underwrite.
+              Cash flow $510/mo, cap 8.2%, DSCR 1.34 clears the typical ≥1.25 lender threshold. Worth a deeper underwrite.
             </span>
           </span>
         </div>
