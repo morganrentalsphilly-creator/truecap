@@ -48,6 +48,16 @@ export type BlogPost = {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: "closing-costs-investment-property",
+    title:
+      "Closing costs on an investment property — the full breakdown (2026)",
+    excerpt:
+      "Every line item in investment-property closing costs, with real 2026 dollar figures on a $250k rental. Lender fees, title, transfer taxes, prepaids — what's negotiable, what isn't, and how to fold it into your cash-to-close.",
+    readingTimeMinutes: 11,
+    publishedAt: "2026-06-09",
+    available: true,
+  },
+  {
     slug: "vacancy-rate-rental-property",
     title:
       "Vacancy rate for rentals: what to assume in 2026 (and why 5% is usually a guess)",
