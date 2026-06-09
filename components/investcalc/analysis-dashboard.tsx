@@ -887,7 +887,12 @@ export function AnalysisDashboard({
               <span className="sm:hidden">{tab.mobileLabel}</span>
               <span className="hidden sm:inline">{tab.label}</span>
               {tab.isPro && !tabEntitlements[tab.id] && (
-                <span className="hidden sm:inline-flex text-[9px] sm:text-[10px] font-bold bg-[var(--brand-orange)] text-white px-1 sm:px-1.5 py-0.5 rounded-full uppercase">
+                // PRO badge now visible on mobile too — previously
+                // hidden via 'hidden sm:inline-flex', which meant
+                // mobile users tapped Pro tabs without warning and
+                // hit a paywall. Surfacing the badge upfront prevents
+                // the bait-and-switch UX.
+                <span className="inline-flex text-[9px] sm:text-[10px] font-bold bg-[var(--brand-orange)] text-white px-1 sm:px-1.5 py-0.5 rounded-full uppercase">
                   PRO
                 </span>
               )}

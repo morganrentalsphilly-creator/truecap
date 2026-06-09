@@ -1105,9 +1105,9 @@ export function SavedAnalysesPage({
           <div className="hidden flex-wrap items-center gap-2 xl:flex">
             <Tabs value={selectedSignal} onValueChange={(value) => setSelectedSignal(value as "all" | SavedSignal)} className="gap-0">
               <TabsList className="bg-muted/60 h-9 rounded-full p-1">
-                <TabsTrigger value="all" className="h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background">All</TabsTrigger>
+                <TabsTrigger value="all" className="h-9 sm:h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background">All</TabsTrigger>
                 {(Object.keys(SIGNAL_LABELS) as SavedSignal[]).map((signal) => (
-                  <TabsTrigger key={signal} value={signal} className="h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background">
+                  <TabsTrigger key={signal} value={signal} className="h-9 sm:h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background">
                     {SIGNAL_LABELS[signal]}
                   </TabsTrigger>
                 ))}
@@ -1116,19 +1116,19 @@ export function SavedAnalysesPage({
 
             <Tabs value={selectedType} onValueChange={(value) => setSelectedType(value as "all" | SavedPropertyType)} className="gap-0">
               <TabsList className="bg-muted/60 h-9 rounded-full p-1">
-                <TabsTrigger value="all" className="h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background">All Types</TabsTrigger>
-                <TabsTrigger value="single-family" className="h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background">Single Family</TabsTrigger>
-                <TabsTrigger value="multi-family" className="h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background">Multi-Family</TabsTrigger>
-                <TabsTrigger value="owner-occupant" className="h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background">Owner Occupant</TabsTrigger>
+                <TabsTrigger value="all" className="h-9 sm:h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background">All Types</TabsTrigger>
+                <TabsTrigger value="single-family" className="h-9 sm:h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background">Single Family</TabsTrigger>
+                <TabsTrigger value="multi-family" className="h-9 sm:h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background">Multi-Family</TabsTrigger>
+                <TabsTrigger value="owner-occupant" className="h-9 sm:h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background">Owner Occupant</TabsTrigger>
               </TabsList>
             </Tabs>
 
             <Tabs value={activeDealStateFilter} onValueChange={(value) => handleStateFilterChange(value as DealStateFilter)} className="gap-0">
               <TabsList className="bg-muted/60 h-9 rounded-full p-1">
-                <TabsTrigger value="active" className="h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background">Active</TabsTrigger>
-                <TabsTrigger value="completed" className="h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background">Completed</TabsTrigger>
-                <TabsTrigger value="archived" className="h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background">Archived</TabsTrigger>
-                <TabsTrigger value="all" className="h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background">All</TabsTrigger>
+                <TabsTrigger value="active" className="h-9 sm:h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background">Active</TabsTrigger>
+                <TabsTrigger value="completed" className="h-9 sm:h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background">Completed</TabsTrigger>
+                <TabsTrigger value="archived" className="h-9 sm:h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background">Archived</TabsTrigger>
+                <TabsTrigger value="all" className="h-9 sm:h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background">All</TabsTrigger>
               </TabsList>
             </Tabs>
 

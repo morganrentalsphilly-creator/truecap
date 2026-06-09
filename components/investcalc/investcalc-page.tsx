@@ -1908,7 +1908,7 @@ export function InvestCalcPage({
                 </span>
               </div>
               {tab.isFree && !canUseProjections && (
-                <span className="hidden sm:inline-flex text-[10px] font-bold bg-[var(--brand-green)] text-white px-1.5 sm:px-2 py-0.5 rounded-full uppercase shrink-0 ml-1.5">
+                <span className="inline-flex text-[9px] sm:text-[10px] font-bold bg-[var(--brand-green)] text-white px-1.5 sm:px-2 py-0.5 rounded-full uppercase shrink-0 ml-1 sm:ml-1.5">
                   FREE
                 </span>
               )}
@@ -1916,7 +1916,11 @@ export function InvestCalcPage({
                 ((tab.id === "projections" && !canUseProjections) ||
                   (tab.id === "tax-strategy" && !canUseTaxStrategy) ||
                   (tab.id === "deal-score" && !canUseDealScore)) && (
-                <Lock className="hidden sm:block w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0 text-[var(--brand-orange)] ml-1.5" />
+                // Lock icon now shows on mobile too — mobile users
+                // previously couldn't tell a tab was Pro-gated until
+                // they tapped and hit a paywall. Surfacing the lock
+                // upfront prevents the bait-and-switch UX.
+                <Lock className="block w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0 text-[var(--brand-orange)] ml-1 sm:ml-1.5" />
               )}
             </button>
           ))}

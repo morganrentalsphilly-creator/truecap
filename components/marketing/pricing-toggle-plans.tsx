@@ -207,6 +207,9 @@ export function PricingTogglePlans({
             aria-label="Billing period"
             className="mt-4 inline-flex rounded-full border border-border bg-muted/40 p-1"
           >
+            {/* Tap-target sized for mobile: py-2.5 + text-sm = ~40pt
+                total height. Was py-1.5 text-xs (~24pt) which was
+                undersized for a key conversion CTA. */}
             <button
               role="tab"
               type="button"
@@ -214,8 +217,8 @@ export function PricingTogglePlans({
               onClick={() => setPeriod("monthly")}
               className={
                 period === "monthly"
-                  ? "rounded-full bg-card px-4 py-1.5 text-xs font-bold text-foreground shadow-sm"
-                  : "rounded-full px-4 py-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground"
+                  ? "rounded-full bg-card px-4 py-2.5 text-sm font-bold text-foreground shadow-sm"
+                  : "rounded-full px-4 py-2.5 text-sm font-semibold text-muted-foreground hover:text-foreground"
               }
             >
               Monthly
@@ -227,8 +230,8 @@ export function PricingTogglePlans({
               onClick={() => setPeriod("annual")}
               className={
                 period === "annual"
-                  ? "inline-flex items-center gap-1.5 rounded-full bg-card px-4 py-1.5 text-xs font-bold text-foreground shadow-sm"
-                  : "inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground"
+                  ? "inline-flex items-center gap-1.5 rounded-full bg-card px-4 py-2.5 text-sm font-bold text-foreground shadow-sm"
+                  : "inline-flex items-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-semibold text-muted-foreground hover:text-foreground"
               }
             >
               Annual
