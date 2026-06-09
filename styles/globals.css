@@ -127,29 +127,25 @@
 /* ─────────────────────────────────────────────────────────────────────
  * Hero product-mock animations.
  *
- * The marketing hero shows a sample analysis card and loops a
- * sequential reveal:  address → 3 metric tiles → verdict pills →
- * verdict line.  Each cycle:
+ * 5-second loop:  rebuild → hold → loop.  Designed so the animation
+ * is visible IMMEDIATELY on first paint (no 4-second hold before
+ * anything happens — which was the bug in the first round).
  *
- *   0-4s   (0-50%):  fully-rendered card on screen (the "result is
- *                    ready" state — what visitors see on first paint).
- *   4-4.4s (50-55%): everything fades out together.
- *   4.4-4.8s        : ADDRESS reappears.
- *   4.8-5.2s        : TILE 1 (cash flow) reappears.
- *   5.2-5.6s        : TILE 2 (cap rate) reappears.
- *   5.6-6.0s        : TILE 3 (DSCR) reappears.
- *   6.0-6.4s        : VERDICT PILLS reappear.
- *   6.4-6.8s        : VERDICT LINE reappears.
- *   6.8-8s          : fully-rendered hold; loop.
+ * Timeline (each step is a separate keyframe so they ripple in order):
+ *   0     - 0.2s : everything faded out (skeleton).
+ *   0.2   - 0.6s : ADDRESS fades in.
+ *   0.6   - 1.0s : TILE 1 (cash flow) fades in.
+ *   1.0   - 1.4s : TILE 2 (cap rate) fades in.
+ *   1.4   - 1.8s : TILE 3 (DSCR) fades in.
+ *   1.8   - 2.2s : VERDICT PILLS fade in.
+ *   2.2   - 2.6s : VERDICT LINE fades in.
+ *   2.6   - 4.7s : fully-rendered hold (2.1s).
+ *   4.7   - 5.0s : everything fades back out.
+ *   loop.
  *
- * Six keyframes share the same first-half hold (0-50%) and final
- * resting state (last-reveal-frame → 100%) so the card never looks
- * partial during the "result is ready" window — only during the
- * brief 2.4s rebuild does the staggered reveal play.
- *
- * `tc-hero-pulse-dot` is a separate, always-on 1.5s pulse for the
- * LIVE indicator dot in the browser-chrome row — it doesn't share
- * the 8s reveal cycle.
+ * Each step keyframe has its own offset window for the fade-in but
+ * SHARES the final fade-out (94-100%) so the card disappears together
+ * and the loop restarts cleanly.
  *
  * All keyframes are disabled under `prefers-reduced-motion: reduce`
  * for WCAG 2.3.3.
@@ -160,52 +156,52 @@
   50%      { opacity: 1;   transform: scale(1);    }
 }
 
-/* Step 1: address. Reveals first at 55→60%. */
+/* Step 1: address. Fade in at 4-12% (0.2-0.6s of a 5s cycle). */
 @keyframes tc-hero-step-1 {
-  0%, 50%   { opacity: 1; transform: translateY(0); }
-  55%       { opacity: 0; transform: translateY(6px); }
-  60%, 100% { opacity: 1; transform: translateY(0); }
+  0%, 4%    { opacity: 0; transform: translateY(6px); }
+  12%, 94%  { opacity: 1; transform: translateY(0); }
+  100%      { opacity: 0; transform: translateY(6px); }
 }
-/* Step 2: tile 1 (cash flow). Reveals at 60→65%. */
+/* Step 2: tile 1 (cash flow). Fade in at 12-20%. */
 @keyframes tc-hero-step-2 {
-  0%, 50%   { opacity: 1; transform: translateY(0); }
-  55%, 60%  { opacity: 0; transform: translateY(6px); }
-  65%, 100% { opacity: 1; transform: translateY(0); }
+  0%, 12%   { opacity: 0; transform: translateY(6px); }
+  20%, 94%  { opacity: 1; transform: translateY(0); }
+  100%      { opacity: 0; transform: translateY(6px); }
 }
-/* Step 3: tile 2 (cap rate). Reveals at 65→70%. */
+/* Step 3: tile 2 (cap rate). Fade in at 20-28%. */
 @keyframes tc-hero-step-3 {
-  0%, 50%   { opacity: 1; transform: translateY(0); }
-  55%, 65%  { opacity: 0; transform: translateY(6px); }
-  70%, 100% { opacity: 1; transform: translateY(0); }
+  0%, 20%   { opacity: 0; transform: translateY(6px); }
+  28%, 94%  { opacity: 1; transform: translateY(0); }
+  100%      { opacity: 0; transform: translateY(6px); }
 }
-/* Step 4: tile 3 (DSCR). Reveals at 70→75%. */
+/* Step 4: tile 3 (DSCR). Fade in at 28-36%. */
 @keyframes tc-hero-step-4 {
-  0%, 50%   { opacity: 1; transform: translateY(0); }
-  55%, 70%  { opacity: 0; transform: translateY(6px); }
-  75%, 100% { opacity: 1; transform: translateY(0); }
+  0%, 28%   { opacity: 0; transform: translateY(6px); }
+  36%, 94%  { opacity: 1; transform: translateY(0); }
+  100%      { opacity: 0; transform: translateY(6px); }
 }
-/* Step 5: verdict pills. Reveals at 75→80%. */
+/* Step 5: verdict pills. Fade in at 36-44%. */
 @keyframes tc-hero-step-5 {
-  0%, 50%   { opacity: 1; transform: translateY(0); }
-  55%, 75%  { opacity: 0; transform: translateY(6px); }
-  80%, 100% { opacity: 1; transform: translateY(0); }
+  0%, 36%   { opacity: 0; transform: translateY(6px); }
+  44%, 94%  { opacity: 1; transform: translateY(0); }
+  100%      { opacity: 0; transform: translateY(6px); }
 }
-/* Step 6: verdict line. Reveals last at 80→85%. */
+/* Step 6: verdict line. Fade in at 44-52%. */
 @keyframes tc-hero-step-6 {
-  0%, 50%   { opacity: 1; transform: translateY(0); }
-  55%, 80%  { opacity: 0; transform: translateY(6px); }
-  85%, 100% { opacity: 1; transform: translateY(0); }
+  0%, 44%   { opacity: 0; transform: translateY(6px); }
+  52%, 94%  { opacity: 1; transform: translateY(0); }
+  100%      { opacity: 0; transform: translateY(6px); }
 }
 
 .tc-hero-pulse-dot {
   animation: tc-hero-pulse-dot 1.5s ease-in-out infinite;
 }
-.tc-hero-step-1 { animation: tc-hero-step-1 8s ease-in-out infinite; }
-.tc-hero-step-2 { animation: tc-hero-step-2 8s ease-in-out infinite; }
-.tc-hero-step-3 { animation: tc-hero-step-3 8s ease-in-out infinite; }
-.tc-hero-step-4 { animation: tc-hero-step-4 8s ease-in-out infinite; }
-.tc-hero-step-5 { animation: tc-hero-step-5 8s ease-in-out infinite; }
-.tc-hero-step-6 { animation: tc-hero-step-6 8s ease-in-out infinite; }
+.tc-hero-step-1 { animation: tc-hero-step-1 5s ease-in-out infinite; }
+.tc-hero-step-2 { animation: tc-hero-step-2 5s ease-in-out infinite; }
+.tc-hero-step-3 { animation: tc-hero-step-3 5s ease-in-out infinite; }
+.tc-hero-step-4 { animation: tc-hero-step-4 5s ease-in-out infinite; }
+.tc-hero-step-5 { animation: tc-hero-step-5 5s ease-in-out infinite; }
+.tc-hero-step-6 { animation: tc-hero-step-6 5s ease-in-out infinite; }
 
 @media (prefers-reduced-motion: reduce) {
   .tc-hero-pulse-dot,

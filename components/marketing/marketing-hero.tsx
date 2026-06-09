@@ -137,13 +137,13 @@ export function MarketingHero() {
           ))}
         </div>
 
-        {/* Mock-up screenshot — pure CSS, lightweight. Hidden on
-            mobile (it adds ~500px of scroll before the value props
-            without earning the space on a narrow viewport — desktop
-            keeps it because the screenshot does sell the product). */}
-        <div className="hidden sm:block">
-          <HeroProductMock />
-        </div>
+        {/* Mock-up screenshot — pure CSS, lightweight.
+            Previously hidden on mobile to save scroll; now shown
+            everywhere because the sequential reveal loop is THE
+            single best thing we communicate on the home page and
+            hiding it on phones (~60% of traffic) was undervaluing
+            it. The card auto-shrinks fine on narrow viewports. */}
+        <HeroProductMock />
 
         {/* 3-up features */}
         <div className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-5">
