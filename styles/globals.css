@@ -123,3 +123,76 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* ─────────────────────────────────────────────────────────────────────
+ * Hero product-mock animations.
+ *
+ * The marketing hero shows a sample analysis card to demonstrate the
+ * verdict moment. To make it feel alive (instead of a static screenshot
+ * that visitors register as marketing fluff), we apply two subtle
+ * looping animations on the card:
+ *
+ *   1. `tc-hero-pulse-dot` — a small "LIVE" indicator dot in the
+ *      browser-chrome row that pulses 1.5s on/off. Communicates that
+ *      the analyzer is *running* without distracting.
+ *
+ *   2. `tc-hero-tile-pulse` — a 7s cycle where each metric tile briefly
+ *      glows with brand color, like a market ticker just re-quoted.
+ *      Three tiles share the same keyframes; staggered via animation-
+ *      delay so they ripple left-to-right rather than blinking in
+ *      unison.
+ *
+ * Both keyframes use `@media (prefers-reduced-motion: reduce)` to
+ * disable animation for users who've requested less motion — WCAG 2.3.3.
+ * ────────────────────────────────────────────────────────────────── */
+
+@keyframes tc-hero-pulse-dot {
+  0%, 100% {
+    opacity: 0.4;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes tc-hero-tile-pulse {
+  0%, 8%, 100% {
+    box-shadow: 0 0 0 0 transparent;
+    transform: scale(1);
+  }
+  4% {
+    box-shadow: 0 0 0 4px rgba(82, 72, 212, 0.18);
+    transform: scale(1.025);
+  }
+}
+
+@keyframes tc-hero-verdict-shimmer {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.10);
+  }
+}
+
+.tc-hero-pulse-dot {
+  animation: tc-hero-pulse-dot 1.5s ease-in-out infinite;
+}
+
+.tc-hero-tile-pulse {
+  animation: tc-hero-tile-pulse 7s ease-in-out infinite;
+}
+
+.tc-hero-verdict-shimmer {
+  animation: tc-hero-verdict-shimmer 4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tc-hero-pulse-dot,
+  .tc-hero-tile-pulse,
+  .tc-hero-verdict-shimmer {
+    animation: none;
+  }
+}

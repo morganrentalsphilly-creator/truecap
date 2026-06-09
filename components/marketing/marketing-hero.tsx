@@ -25,6 +25,7 @@
 import Link from "next/link";
 import { ArrowRight, Calculator, FileDown, Lock, ShieldCheck, Sparkles, TrendingUp, Zap } from "lucide-react";
 import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
+import { DealsAnalyzedTicker } from "@/components/marketing/deals-analyzed-ticker";
 
 const TRUST_STATS = [
   { label: "To first analysis",  value: "60s",    sub: "no setup" },
@@ -112,6 +113,14 @@ export function MarketingHero() {
           </span>
         </p>
 
+        {/* Real-data social proof — hides itself if count < 25 so we
+            never advertise low volume. Sits right under the CTA so it
+            lands in the "is this real?" decision moment instead of being
+            in a separate stripe below the hero. */}
+        <div className="mt-5 text-center">
+          <DealsAnalyzedTicker window="7d" />
+        </div>
+
         {/* trust stats row */}
         <div className="mx-auto mt-10 grid max-w-3xl grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
           {TRUST_STATS.map((stat) => (
@@ -194,14 +203,23 @@ function HeroProductMock() {
       {/* card */}
       <div className="rounded-2xl border border-border bg-card p-4 shadow-[0_24px_70px_rgba(15,23,42,0.10)] sm:p-6">
         {/* browser chrome — shorter URL pill on mobile so the full
-            string fits without truncation, full URL on sm+. */}
+            string fits without truncation, full URL on sm+. A small
+            LIVE indicator on the right communicates that the analyzer
+            is *running*, not a static screenshot. */}
         <div className="mb-4 flex items-center gap-1.5">
           <span className="size-2.5 rounded-full bg-red-400/80" />
           <span className="size-2.5 rounded-full bg-amber-400/80" />
           <span className="size-2.5 rounded-full bg-emerald-400/80" />
-          <span className="ml-3 min-w-0 truncate rounded-full bg-muted px-3 py-0.5 text-[10px] font-medium text-muted-foreground">
+          <span className="ml-3 min-w-0 flex-1 truncate rounded-full bg-muted px-3 py-0.5 text-[10px] font-medium text-muted-foreground">
             <span className="sm:hidden">usetruecap.com</span>
             <span className="hidden sm:inline">usetruecap.com — 1700 W Erie · Philadelphia</span>
+          </span>
+          <span
+            aria-label="Live demo"
+            className="ml-1 inline-flex shrink-0 items-center gap-1 rounded-full border border-[var(--brand-green)]/30 bg-[var(--brand-green-light)] px-1.5 py-0.5 text-[9px] font-extrabold uppercase tracking-widest text-[var(--brand-green)]"
+          >
+            <span className="tc-hero-pulse-dot size-1.5 rounded-full bg-[var(--brand-green)]" />
+            Live
           </span>
         </div>
 
@@ -233,14 +251,20 @@ function HeroProductMock() {
             questions every investor asks first — "does it cash flow?",
             "what's the unleveraged return?", and "will the lender like
             this?". */}
+        {/* Tiles pulse once per 7-second cycle. Staggered animation
+            delays make them ripple left-to-right like a ticker
+            re-quote, instead of blinking in unison (which reads as
+            "broken page" rather than "live data"). Honors
+            prefers-reduced-motion via globals.css media query. */}
         <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-3">
-          <MockTile label="Cash flow / mo" value="+$640" tone="success" />
-          <MockTile label="Cap rate" value="8.2%" tone="success" />
-          <MockTile label="DSCR" value="1.34" tone="success" sub="Bankable" />
+          <MockTile label="Cash flow / mo" value="+$640" tone="success" pulseDelay="0s" />
+          <MockTile label="Cap rate" value="8.2%" tone="success" pulseDelay="0.6s" />
+          <MockTile label="DSCR" value="1.34" tone="success" sub="Bankable" pulseDelay="1.2s" />
         </div>
 
-        {/* verdict line */}
-        <div className="mt-4 flex items-start gap-2 rounded-xl border border-[var(--brand-green)]/25 bg-[var(--brand-green-light)] p-3 text-xs text-foreground">
+        {/* verdict line — subtle shimmer halo every 4s reinforces
+            that this is *the* moment the product delivers. */}
+        <div className="tc-hero-verdict-shimmer mt-4 flex items-start gap-2 rounded-xl border border-[var(--brand-green)]/25 bg-[var(--brand-green-light)] p-3 text-xs text-foreground">
           <TrendingUp className="mt-0.5 size-4 shrink-0 text-[var(--brand-green)]" />
           <span>
             <strong>1700 W Erie: solid fundamentals.</strong> Cash flow $640/mo, cap 8.2%, DSCR 1.34
@@ -260,17 +284,29 @@ function MockTile({
   tone,
   sub,
   small,
+  pulseDelay,
 }: {
   label: string;
   value: string;
   tone: "success" | "primary";
   sub?: string;
   small?: boolean;
+  /**
+   * If provided, applies the looping "ticker pulse" animation with this
+   * delay. Used in the hero mock to ripple the three tiles left-to-right.
+   * Animation class is no-op when prefers-reduced-motion is set.
+   */
+  pulseDelay?: string;
 }) {
   const color =
     tone === "success" ? "text-[var(--metric-positive)]" : "text-primary";
+  const pulseClass = pulseDelay ? "tc-hero-tile-pulse" : "";
+  const pulseStyle = pulseDelay ? { animationDelay: pulseDelay } : undefined;
   return (
-    <div className="rounded-xl border border-border bg-background p-3">
+    <div
+      className={`rounded-xl border border-border bg-background p-3 ${pulseClass}`}
+      style={pulseStyle}
+    >
       {/* Label bumped from text-[9px] to text-[10px] — 9px is below
           readable mobile minimum even for ALL-CAPS labels. */}
       <div className={`text-[10px] font-bold uppercase tracking-widest text-muted-foreground ${small ? "" : "sm:text-[10px]"}`}>
