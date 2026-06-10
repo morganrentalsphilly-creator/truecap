@@ -11,7 +11,11 @@
  * Sources:
  *   - Property tax: static state-level dataset (Tax Foundation).
  *   - Mortgage rate: FRED API (MORTGAGE30US series, cached 24h).
- *   - Monthly rent: HUD Fair Market Rent API, single-family only.
+ *   - Monthly rent: HUD Fair Market Rent API. ZIP-level Small Area FMR
+ *     when the matched county/metro is a SAFMR region (most large
+ *     metros), falling back to the county/metro figure otherwise —
+ *     ZIP-level is dramatically more accurate (county-wide Philadelphia
+ *     vs a specific ZIP can differ 30-40%+).
  *
  * All three lookups are independent and null-safe: if any one fails
  * (missing API key, network error, no data for the county/state), the
@@ -20,6 +24,7 @@
 
 import { z } from "zod";
 import { getStatePropertyTaxPct } from "@/lib/property-enrichment/state-property-tax";
+import { isSmallAreaEntity, pickZipSafmrRent } from "@/lib/property-enrichment/hud-safmr";
 
 export type EnrichPropertyInput = {
   state?: string;       // e.g., "PA"
@@ -57,7 +62,14 @@ export type EnrichPropertyResult = {
   meta: {
     propertyTax?: { source: "state-static"; state: string };
     mortgageRate?: { source: "fred"; asOf: string };
-    rent?: { source: "hud-fmr"; county: string; year: number };
+    rent?: {
+      /** hud-safmr = ZIP-level Small Area FMR; hud-fmr = county/metro. */
+      source: "hud-fmr" | "hud-safmr";
+      county: string;
+      year: number;
+      /** Present when source is hud-safmr. */
+      zip?: string;
+    };
   };
 };
 
@@ -89,7 +101,12 @@ export async function enrichPropertyAction(
   }
   if (rent) {
     out.monthlyRent = rent.amount;
-    out.meta.rent = { source: "hud-fmr", county: rent.county, year: rent.year };
+    out.meta.rent = {
+      source: rent.zip ? "hud-safmr" : "hud-fmr",
+      county: rent.county,
+      year: rent.year,
+      ...(rent.zip ? { zip: rent.zip } : {}),
+    };
   }
 
   return out;
@@ -236,10 +253,72 @@ type HudArea = {
   town_name?: string;
   fips_code?: string;
   code?: string;
+  /** "1" (or 1) when the entity uses ZIP-level Small Area FMRs. */
+  smallarea_status?: string | number;
 } & Record<string, unknown>;
 
 const hudCache = new Map<string, CachedHudState>();
 const HUD_CACHE_TTL_MS = 30 * 60 * 1000; // 30 min
+
+// Separate cache for per-entity SAFMR (ZIP-level) responses from
+// /fmr/data/{entityid}. Keyed by entity id; one metro's response covers
+// every ZIP in it, so a handful of entries serve entire metro areas.
+type CachedSafmrEntity = {
+  rows: unknown; // basicdata array (validated lazily by pickZipSafmrRent)
+  year: number;
+  fetchedAt: number;
+};
+const safmrCache = new Map<string, CachedSafmrEntity>();
+
+/**
+ * Fetch ZIP-level SAFMR rows for a county/metro entity. Returns null on
+ * any failure or when the entity turns out not to be SAFMR-shaped —
+ * callers fall back to the county-level figure they already computed.
+ */
+async function fetchSafmrRows(
+  apiKey: string,
+  entityId: string
+): Promise<CachedSafmrEntity | null> {
+  const cached = safmrCache.get(entityId);
+  if (cached && Date.now() - cached.fetchedAt < HUD_CACHE_TTL_MS) {
+    return cached;
+  }
+
+  const url = `https://www.huduser.gov/hudapi/public/fmr/data/${encodeURIComponent(entityId)}`;
+  const res = await fetchWithTimeout(url, {
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      Accept: "application/json",
+    },
+    cache: "no-store",
+  });
+  if (!res) return null;
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    console.warn(
+      `[enrichProperty] HUD SAFMR request failed: HTTP ${res.status}. URL=${url}. Body=${body.slice(0, 200)}`
+    );
+    return null;
+  }
+  const json = (await res.json().catch(() => null)) as {
+    data?: { year?: string | number; basicdata?: unknown };
+  } | null;
+  if (!json?.data || !Array.isArray(json.data.basicdata)) {
+    // Non-SAFMR entity (basicdata is a single object) or unexpected
+    // shape — nothing to cache, caller uses the county figure.
+    return null;
+  }
+  const value: CachedSafmrEntity = {
+    rows: json.data.basicdata,
+    year: Number(json.data.year ?? new Date().getFullYear()),
+    fetchedAt: Date.now(),
+  };
+  console.log(
+    `[enrichProperty] HUD SAFMR fetched entity ${entityId}: ${(json.data.basicdata as unknown[]).length} ZIP rows`
+  );
+  safmrCache.set(entityId, value);
+  return value;
+}
 
 async function fetchHudStateData(
   apiKey: string,
@@ -289,7 +368,7 @@ async function fetchHudStateData(
 
 async function maybeFetchHudRent(
   input: EnrichPropertyInput
-): Promise<{ amount: number; county: string; year: number } | null> {
+): Promise<{ amount: number; county: string; year: number; zip?: string } | null> {
   const apiKey = process.env.HUD_API_KEY;
   if (!apiKey) {
     console.warn("[enrichProperty] HUD_API_KEY not set in environment");
@@ -352,10 +431,40 @@ async function maybeFetchHudRent(
       }
     }
 
-    // 2. If we matched and the matched record has a real value, use it.
+    // 2. If we matched and the matched record has a real value, use it —
+    //    but first try to refine to ZIP-level Small Area FMR. County or
+    //    metro-wide rent can be 30-40%+ off for a specific ZIP; when the
+    //    matched entity is a SAFMR region and we know the property's
+    //    ZIP, one extra (cached) HUD call gets the precise number.
     if (match) {
       const v = Number(match[fmrField] ?? 0);
       const label = match.county_name ?? match.name ?? input.county ?? "";
+
+      if (input.zip && isSmallAreaEntity(match)) {
+        // Counties carry `fips_code`, metros carry `code` — either works
+        // as the /fmr/data/{entityid} id.
+        const entityId = match.fips_code ?? match.code;
+        if (entityId) {
+          const safmr = await fetchSafmrRows(apiKey, entityId);
+          const zipRent = safmr
+            ? pickZipSafmrRent(safmr.rows, input.zip, fmrField)
+            : null;
+          if (zipRent !== null) {
+            console.log(
+              `[enrichProperty] HUD SAFMR matched ZIP ${input.zip} in "${label}" — ${fmrField}=$${zipRent} (county-wide was $${v})`
+            );
+            return {
+              amount: zipRent,
+              county: label,
+              year: safmr?.year ?? respYear,
+              zip: input.zip,
+            };
+          }
+          // ZIP not listed / fetch failed — fall through to the
+          // county/metro figure below, same behavior as before.
+        }
+      }
+
       if (v > 0) {
         console.log(
           `[enrichProperty] HUD matched "${label}" — ${fmrField}=$${v}`
