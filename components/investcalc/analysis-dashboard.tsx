@@ -180,7 +180,10 @@ const TABS: { id: AnalysisDashboardTab; label: string; mobileLabel: string; isPr
   { id: "projections", label: "10-Year Projections", mobileLabel: "10-Year", isPro: true },
   { id: "tax-strategy", label: "Tax Strategy", mobileLabel: "Tax", isPro: true },
   { id: "exit-scenarios", label: "Exit Scenarios", mobileLabel: "Exit", isPro: true },
-  { id: "strategies", label: "Strategies", mobileLabel: "Strategy", isPro: true },
+  // Renamed from "Strategies" (Jun 2026 UX pass) — vague label for the
+  // not-Excel-power-user audience; the tab IS the BRRRR + fix-and-flip
+  // + rehab analyzers, so say that.
+  { id: "strategies", label: "BRRRR & Flip", mobileLabel: "BRRRR", isPro: true },
   // Stress Test consolidates Max Allowable Offer + Sensitivity Grid —
   // both Pro features that previously rendered as always-visible cards
   // between the metrics row and the tab bar. Moving them into a tab
@@ -675,15 +678,6 @@ export function AnalysisDashboard({
         </div>
       </div>
 
-      {/* Deal Q&A — grounded AI explainer for this analysis. Renders
-          only when the page says the feature is configured (Anthropic
-          key present) and we have a computed result. Sits directly
-          under the recommendation so "what does this mean?" has an
-          answer box right where the question occurs. Free users get a
-          few questions/day (server-enforced); the panel upsells Pro
-          when the limit hits. */}
-      {dealQaEnabled && result && values && !isLoading ? <DealQaPanel values={values} /> : null}
-
       {/* Deal notes — only rendered when this is an actual saved
           deal that's been re-opened. Lazy-fetches its own data so it
           doesn't add latency to the page render. */}
@@ -710,16 +704,11 @@ export function AnalysisDashboard({
           <span className="h-px flex-1 bg-border" />
         </div>
 
-        {/* What-if sliders — only render when we have BOTH a result and
-            the input values. Pure client-side compute, no IO, sub-ms. */}
-        {result && values ? (
-          <WhatIfSliders
-            values={values}
-            baseResult={result}
-            onStateChange={setWhatIfState}
-          />
-        ) : null}
-
+        {/* Reading order (Jun 2026 UX pass): ANSWER FIRST. The four
+            headline metric cards lead the Overview; the what-if sliders
+            (which modify them) moved BELOW the grid — on phones the
+            always-open slider card was pushing the numbers people came
+            for under the fold. Controls after content. */}
         <div className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-4 gap-2 sm:gap-3">
           <MetricCard
             label="Monthly Cash Flow"
@@ -793,6 +782,16 @@ export function AnalysisDashboard({
             isLoading={isLoading}
           />
         </div>
+
+        {/* What-if sliders — below the metrics they modify (see reading-
+            order note above). Pure client-side compute, no IO, sub-ms. */}
+        {result && values ? (
+          <WhatIfSliders
+            values={values}
+            baseResult={result}
+            onStateChange={setWhatIfState}
+          />
+        ) : null}
 
         {/* Breakpoint suggestion — only renders for deals below Strong
             tier, and only when there's a reachable price/rent within ±30%.
@@ -912,6 +911,15 @@ export function AnalysisDashboard({
           below to keep the headline scroll calmer. See the
           activeTab === "stress-test" block in tab content. */}
 
+      {/* Deal Q&A — grounded AI explainer. Placed at the END of the
+          Overview (after the numbers, before the Details tabs): the
+          natural moment for "what does this mean?" is after seeing the
+          metrics, and putting it earlier pushed the headline numbers
+          below the fold on phones. Renders only when the page says the
+          feature is configured (Anthropic key present). Free users get
+          a few questions/day (server-enforced). */}
+      {dealQaEnabled && result && values && !isLoading ? <DealQaPanel values={values} /> : null}
+
       {/* "Details" landmark — pairs with the "Overview" landmark above
           the metric grid. Gives the eye a clear "here's where the
           deeper analysis starts" cue without adding clutter. */}
@@ -945,7 +953,11 @@ export function AnalysisDashboard({
               {tab.id === "cash-flow" && <TrendingUp className="w-3.5 h-3.5 sm:hidden" />}
               {tab.id === "projections" && <ArrowUpRight className="w-3.5 h-3.5 sm:hidden" />}
               {tab.id === "tax-strategy" && <FileText className="w-3.5 h-3.5 sm:hidden" />}
-              {tab.id === "exit-scenarios" && <ArrowUpRight className="w-3.5 h-3.5 sm:hidden" />}
+              {/* Exit previously reused the projections arrow and
+                  Strategies had NO icon — every mobile tab now has a
+                  distinct glyph. */}
+              {tab.id === "exit-scenarios" && <Building2 className="w-3.5 h-3.5 sm:hidden" />}
+              {tab.id === "strategies" && <Target className="w-3.5 h-3.5 sm:hidden" />}
               {tab.id === "stress-test" && <Activity className="w-3.5 h-3.5 sm:hidden" />}
               <span className="sm:hidden">{tab.mobileLabel}</span>
               <span className="hidden sm:inline">{tab.label}</span>
