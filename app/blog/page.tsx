@@ -48,6 +48,16 @@ export type BlogPost = {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: "section-8-rental-property-investing",
+    title:
+      "Section 8 rentals: how the math actually works in 2026 (pros, cons, underwriting)",
+    excerpt:
+      "How the voucher program actually pays — payment standards, FMR math, the two ceilings on your rent, NSPIRE inspection costs, and the five underwriting adjustments that decide whether Section 8 makes a deal better or worse.",
+    readingTimeMinutes: 11,
+    publishedAt: "2026-06-10",
+    available: true,
+  },
+  {
     slug: "closing-costs-investment-property",
     title:
       "Closing costs on an investment property — the full breakdown (2026)",
