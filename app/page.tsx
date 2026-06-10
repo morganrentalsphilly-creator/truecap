@@ -203,6 +203,9 @@ export default function Home() {
         savedDealLimit={null}
         isAuthenticated={false}
         userAnalysisDefaults={null}
+        // Presence-only env check — safe on a static page (baked at
+        // build; the key VALUE never reaches the client).
+        dealQaEnabled={Boolean(process.env.ANTHROPIC_API_KEY)}
       />
       {/* Sticky scroll-activated CTA bar — cold visitors only, and this
           page only serves cold visitors. */}

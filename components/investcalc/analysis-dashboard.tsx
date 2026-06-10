@@ -68,6 +68,7 @@ import { MaxOfferCard } from "@/components/investcalc/max-offer-card";
 import { SensitivityGrid } from "@/components/investcalc/sensitivity-grid";
 import { StrategiesPanel } from "@/components/investcalc/strategies-panel";
 import { ProInlineGate } from "@/components/investcalc/pro-inline-gate";
+import { DealQaPanel } from "@/components/investcalc/deal-qa-panel";
 import { Activity, Target } from "lucide-react";
 import { MomentOfValueUpsell } from "@/components/marketing/moment-of-value-upsell";
 import { SignupPromptCard } from "@/components/marketing/signup-prompt-card";
@@ -153,6 +154,12 @@ interface AnalysisDashboardProps {
    * compare gating is unaffected.
    */
   isSampleProPreview?: boolean;
+  /**
+   * True when ANTHROPIC_API_KEY is configured (passed down from the
+   * page). Controls whether the Deal Q&A panel renders at all — the
+   * per-user limits are enforced server-side in the action.
+   */
+  dealQaEnabled?: boolean;
   saveDealLimitReached?: boolean;
   activeTab?: AnalysisDashboardTab;
   /** Shown when Compare / Export are disabled (e.g. unsaved edits). */
@@ -308,6 +315,7 @@ export function AnalysisDashboard({
   canUseStrategies = false,
   canUseShareLinks = false,
   isSampleProPreview = false,
+  dealQaEnabled = false,
   saveDealLimitReached = false,
   activeTab: activeTabProp,
   persistedActionsBlockHint,
@@ -666,6 +674,15 @@ export function AnalysisDashboard({
           )}
         </div>
       </div>
+
+      {/* Deal Q&A — grounded AI explainer for this analysis. Renders
+          only when the page says the feature is configured (Anthropic
+          key present) and we have a computed result. Sits directly
+          under the recommendation so "what does this mean?" has an
+          answer box right where the question occurs. Free users get a
+          few questions/day (server-enforced); the panel upsells Pro
+          when the limit hits. */}
+      {dealQaEnabled && result && values && !isLoading ? <DealQaPanel values={values} /> : null}
 
       {/* Deal notes — only rendered when this is an actual saved
           deal that's been re-opened. Lazy-fetches its own data so it

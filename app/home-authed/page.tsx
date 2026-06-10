@@ -148,6 +148,7 @@ export default async function AuthedHome() {
         savedDealLimit={entitlements?.max_saved_deals ?? null}
         isAuthenticated={Boolean(user)}
         userAnalysisDefaults={userAnalysisDefaults}
+        dealQaEnabled={Boolean(process.env.ANTHROPIC_API_KEY)}
       />
       {/* Sticky scroll-activated CTA bar for cold visitors only. Renders
           nothing for auth'd users. */}

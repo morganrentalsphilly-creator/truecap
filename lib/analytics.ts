@@ -59,6 +59,8 @@ export type FunnelEvent =
   // The gap between the two = one-time checkout drop-off.
   | "one_time_pdf_checkout_started" // properties: property_type
   | "one_time_pdf_purchased"
+  // Deal Q&A (AI panel under the recommendation card).
+  | "deal_qa_asked" // properties: question_length
 
 /**
  * Safe capture. Use this everywhere instead of `posthog.capture(...)`

@@ -385,6 +385,7 @@ export function InvestCalcPage({
   savedDealLimit = null,
   isAuthenticated = false,
   userAnalysisDefaults = null,
+  dealQaEnabled = false,
 }: {
   canSaveDeals?: boolean;
   canCompareDeals?: boolean;
@@ -412,6 +413,9 @@ export function InvestCalcPage({
    *  engine's built-in defaults at form initialization + on every
    *  resetToNewAnalysis. */
   userAnalysisDefaults?: Record<string, number> | null;
+  /** True when ANTHROPIC_API_KEY is configured — shows the Deal Q&A
+   *  panel. Per-user limits enforced server-side in the action. */
+  dealQaEnabled?: boolean;
 }) {
   const router = useRouter();
   const [activeInputTab, setActiveInputTab] = useState<InputTab>("cash-flow");
@@ -2321,6 +2325,7 @@ export function InvestCalcPage({
               canUseStrategies={canUseStrategies || isSampleProPreview}
               canUseShareLinks={canUseShareLinks}
               isSampleProPreview={isSampleProPreview}
+              dealQaEnabled={dealQaEnabled}
               activeTab={activeDashboardTab}
               saveDealLimitReached={currentSaveDealLimitReached}
               persistedActionsBlockHint={
