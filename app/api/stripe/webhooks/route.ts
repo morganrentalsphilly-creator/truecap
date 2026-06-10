@@ -66,6 +66,16 @@ export async function POST(req: Request) {
       case "checkout.session.completed":
       case "checkout.session.async_payment_succeeded": {
         const session = event.data.object as Stripe.Checkout.Session;
+        // One-time PDF purchases (anonymous `payment`-mode sessions, see
+        // app/actions/one-time-pdf.ts) have no user/customer binding and
+        // nothing to sync — the client verifies payment directly via
+        // verifyOneTimePdfPaymentAction. Without this skip, every $5
+        // sale logged a spurious "[billing] checkout.session.completed
+        // missing customer id" ERROR from the subscription handler.
+        if (session.metadata?.purpose === "one_time_pdf") {
+          console.log(`[billing] one-time PDF session ${session.id} completed — no subscription sync needed`);
+          break;
+        }
         await handleCheckoutSessionCompleted(admin, session);
         // PostHog funnel event — fires once per successful checkout.
         // `pro_subscribed` is the bottom of the conversion funnel.

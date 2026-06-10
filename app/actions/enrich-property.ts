@@ -442,8 +442,11 @@ async function maybeFetchHudRent(
 
       if (input.zip && isSmallAreaEntity(match)) {
         // Counties carry `fips_code`, metros carry `code` — either works
-        // as the /fmr/data/{entityid} id.
-        const entityId = match.fips_code ?? match.code;
+        // as the /fmr/data/{entityid} id. Coerce to string: HUD mixes
+        // string/number types across endpoints, and a numeric id would
+        // create a duplicate safmrCache entry alongside its string twin.
+        const entityIdRaw = match.fips_code ?? match.code;
+        const entityId = entityIdRaw != null ? String(entityIdRaw) : null;
         if (entityId) {
           const safmr = await fetchSafmrRows(apiKey, entityId);
           const zipRent = safmr
