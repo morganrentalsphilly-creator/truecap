@@ -13,7 +13,37 @@ supabase/
 └── invite-user.html      ← admin-invited accounts
 ```
 
-## Install (5 minutes)
+## Install
+
+### 0. Custom SMTP — make auth emails send from hello@usetruecap.com (5 min)
+
+Without this step the templates render branded but still arrive from
+Supabase's shared sender (`noreply@mail.app.supabase.io`) with weak
+deliverability and a tiny hourly send cap. Route them through Resend
+instead — the domain is already verified there (the newsletter sends
+from it).
+
+1. Resend dashboard → **API Keys** → Create API key, name it
+   `supabase-auth-smtp`, permission **Sending access** only (don't reuse
+   the Full Access broadcast key — separate keys rotate independently).
+2. Supabase Dashboard → your project → **Project Settings →
+   Authentication** → **SMTP Settings** → enable **Custom SMTP**:
+
+   | Field           | Value                      |
+   |-----------------|----------------------------|
+   | Host            | `smtp.resend.com`          |
+   | Port            | `465`                      |
+   | Username        | `resend`                   |
+   | Password        | the new Resend API key     |
+   | Sender email    | `hello@usetruecap.com`     |
+   | Sender name     | `TrueCap`                  |
+
+3. Save. Supabase raises the hourly auth-email limit once custom SMTP
+   is on — set the rate limit field to something sane like 100/hour.
+
+Every auth email then leaves through Resend as `TrueCap
+<hello@usetruecap.com>` — same sender, SPF/DKIM, and reputation as the
+rest of TrueCap's mail.
 
 ### 1. Paste the templates into Supabase
 
