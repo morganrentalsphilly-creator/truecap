@@ -27,6 +27,27 @@ shareable read-only link.
   ~6 months of intensive work, ~320 completed tasks. Conventions are
   consistent but mostly tribal — that's what this doc is for.
 
+### Product principle: stay easy to use (Morgan's standing directive)
+
+Every new feature must preserve the core flow: type an address →
+get a verdict. Concretely:
+
+1. **No new required inputs.** Features consume what the form already
+   collects. If a feature "needs" a new field, it's optional, defaulted,
+   and lives behind Show Advanced Options.
+2. **No new top-level navigation.** New capabilities land as a card in
+   the existing analysis dashboard (like Deal Q&A under the
+   recommendation row) or inside an existing tab — not as new tabs,
+   pages, or menus.
+3. **Invisible until useful.** Features that need configuration
+   (API keys) or data (saved deals) render nothing until their
+   prerequisites exist — never an empty state that needs explaining.
+4. **Upsells appear at the moment of need,** not as ambient chrome
+   (e.g. the PDF dialog opens on Export click; the Q&A upsell appears
+   only when the free limit hits).
+5. When a feature idea can't satisfy these, propose it to Morgan with
+   the trade-off spelled out instead of building it.
+
 ---
 
 ## 2. Architecture
