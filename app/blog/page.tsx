@@ -48,6 +48,16 @@ export type BlogPost = {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: "capex-maintenance-reserves-rental-property",
+    title:
+      "CapEx and maintenance reserves: how much to actually budget for a rental (2026)",
+    excerpt:
+      "Percent-of-rent defaults understate capex on exactly the properties that can least afford it. The component-lifespan method with 2026 prices, an age-weighted reserve formula, and what honest reserves do to NOI, DSCR, and cash flow on a $220K rental.",
+    readingTimeMinutes: 10,
+    publishedAt: "2026-06-11",
+    available: true,
+  },
+  {
     slug: "section-8-rental-property-investing",
     title:
       "Section 8 rentals: how the math actually works in 2026 (pros, cons, underwriting)",
