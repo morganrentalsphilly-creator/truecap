@@ -85,11 +85,34 @@ export function BillingPanel({ currentSubscription, plans }: BillingPanelProps) 
   }, [activePlanSlug, currentSubscription]);
 
   const handleCheckout = (planSlug: BillingPlan["slug"]) => {
+    // Subscribers clicking the OTHER plan are switching, not buying —
+    // a fresh checkout would create a second parallel subscription
+    // (double billing). Stripe's billing portal handles the switch
+    // with correct proration, so route there. The server action has a
+    // matching ALREADY_SUBSCRIBED guard as the enforcement layer; this
+    // branch just makes the happy path one redirect instead of an error.
+    if (activePlanSlug && activePlanSlug !== planSlug) {
+      toast({
+        title: "Switching plans via Stripe",
+        description:
+          "Opening the billing portal — pick your new plan there and Stripe prorates automatically.",
+      });
+      handlePortal();
+      return;
+    }
     setPendingPlan(planSlug);
     void (async () => {
       const result = await createCheckoutSessionAction({ planSlug });
       setPendingPlan(null);
       if (!result.ok) {
+        // Server-side guard tripped (e.g. subscription exists but this
+        // component's props were stale) — route to the portal rather
+        // than dead-ending with an error toast.
+        if (result.code === "ALREADY_SUBSCRIBED") {
+          toast({ title: "You already have a plan", description: result.message });
+          handlePortal();
+          return;
+        }
         toast({
           title: "Could not start checkout",
           description: result.message,
@@ -266,11 +289,15 @@ export function BillingPanel({ currentSubscription, plans }: BillingPanelProps) 
                   type="button"
                   className="w-full rounded-xl"
                   variant={isCurrent ? "outline" : "default"}
-                  disabled={isCurrent || isPending}
+                  disabled={isCurrent || isPending || isPortalPending}
                   onClick={() => handleCheckout(plan.slug)}
                 >
                   {isPending ? <Loader2 className="animate-spin" /> : null}
-                  {isCurrent ? "Current plan" : "Subscribe"}
+                  {isCurrent
+                    ? "Current plan"
+                    : activePlanSlug
+                      ? "Switch to this plan"
+                      : "Subscribe"}
                 </Button>
               </CardContent>
             </Card>

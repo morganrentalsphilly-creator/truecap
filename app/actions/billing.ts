@@ -14,7 +14,12 @@ export type BillingActionResult =
   | { ok: true; url: string }
   | {
       ok: false;
-      code: "SIGN_IN_REQUIRED" | "PLAN_NOT_FOUND" | "MISSING_PRICE" | "SERVER_ERROR";
+      code:
+        | "SIGN_IN_REQUIRED"
+        | "PLAN_NOT_FOUND"
+        | "MISSING_PRICE"
+        | "ALREADY_SUBSCRIBED"
+        | "SERVER_ERROR";
       message: string;
     };
 
@@ -46,20 +51,39 @@ async function getOrCreateStripeCustomer(args: {
 }): Promise<string> {
   const stripe = getStripe();
   if (args.existingCustomerId) {
-    const existingCustomer = await stripe.customers.retrieve(args.existingCustomerId);
-    if ("deleted" in existingCustomer && existingCustomer.deleted) {
-      throw new Error("Stored Stripe customer was deleted");
+    // Self-healing (Jun 2026): a stored customer id pointing at a
+    // deleted/missing Stripe customer previously THREW here — which
+    // made checkout fail permanently for that user on every retry
+    // (the stale id never got replaced). Now we fall through and mint
+    // a replacement customer instead. The cross-user binding check
+    // below remains a hard failure — that one is a safety property.
+    try {
+      const existingCustomer = await stripe.customers.retrieve(args.existingCustomerId);
+      if (!("deleted" in existingCustomer && existingCustomer.deleted)) {
+        const metadataUserId = existingCustomer.metadata?.user_id;
+        if (metadataUserId && metadataUserId !== args.userId) {
+          throw new Error("Stored Stripe customer belongs to a different user");
+        }
+        if (!metadataUserId) {
+          await stripe.customers.update(existingCustomer.id, {
+            metadata: { ...(existingCustomer.metadata ?? {}), user_id: args.userId },
+          });
+        }
+        return existingCustomer.id;
+      }
+      console.warn(
+        `[billing] stored Stripe customer ${args.existingCustomerId} was deleted — creating a replacement`
+      );
+    } catch (err) {
+      if (err instanceof Error && err.message.includes("belongs to a different user")) {
+        throw err;
+      }
+      const stripeCode = (err as { code?: string } | null)?.code;
+      if (stripeCode !== "resource_missing") throw err;
+      console.warn(
+        `[billing] stored Stripe customer ${args.existingCustomerId} missing in Stripe — creating a replacement`
+      );
     }
-    const metadataUserId = existingCustomer.metadata?.user_id;
-    if (metadataUserId && metadataUserId !== args.userId) {
-      throw new Error("Stored Stripe customer belongs to a different user");
-    }
-    if (!metadataUserId) {
-      await stripe.customers.update(existingCustomer.id, {
-        metadata: { ...(existingCustomer.metadata ?? {}), user_id: args.userId },
-      });
-    }
-    return existingCustomer.id;
   }
 
   const customer = await stripe.customers.create({
@@ -93,6 +117,27 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
 
   if (!user) {
     return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in to subscribe." };
+  }
+
+  // GUARD: never start a NEW subscription checkout for a user who
+  // already has one — Stripe would happily create a second, parallel
+  // subscription and double-bill them. Plan changes (monthly ↔ annual)
+  // go through the billing portal, which prorates correctly. Callers
+  // route ALREADY_SUBSCRIBED to the portal.
+  const { data: existingSubscription } = await supabase
+    .from("subscriptions")
+    .select("id")
+    .eq("user_id", user.id)
+    .in("status", ["active", "trialing", "past_due"])
+    .limit(1)
+    .maybeSingle();
+  if (existingSubscription) {
+    return {
+      ok: false,
+      code: "ALREADY_SUBSCRIBED",
+      message:
+        "You already have an active TrueCap plan. Use Manage billing to switch between monthly and annual — Stripe prorates automatically.",
+    };
   }
 
   const [{ data: profile }, { data: plan, error: planError }] = await Promise.all([
