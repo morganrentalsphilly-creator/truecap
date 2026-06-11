@@ -26,6 +26,11 @@ updates:
       # Major versions stay manual — framework majors ripple everywhere.
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
+      # Stripe SDK: even MINOR releases retype the pinned apiVersion
+      # literal in lib/stripe/client.ts, and CLAUDE.md requires reading
+      # the Stripe changelog before any API-version bump. Proven by
+      # Dependabot PR #3 going red on exactly this. Manual only.
+      - dependency-name: "stripe"
 
   - package-ecosystem: "github-actions"
     directory: "/"
