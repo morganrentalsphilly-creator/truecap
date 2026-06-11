@@ -37,7 +37,10 @@ export function PdfPurchaseDialog({
 }: PdfPurchaseDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      {/* max-h + scroll: belt-and-suspenders for short viewports
+          (landscape phones, split-screen) so the $5 option can never
+          render below the fold unreachable. */}
+      <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Get the lender-ready PDF</DialogTitle>
           <DialogDescription>

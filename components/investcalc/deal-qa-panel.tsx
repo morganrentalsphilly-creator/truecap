@@ -103,7 +103,9 @@ export function DealQaPanel({ values }: { values: InvestmentFormValues }) {
               type="button"
               disabled={isAsking}
               onClick={() => void ask(q)}
-              className="rounded-full border border-border bg-background px-3 py-1.5 text-xs font-medium text-foreground/80 transition hover:border-primary/40 hover:text-primary disabled:opacity-50"
+              // py-2 on mobile lifts the chip to a ~40px tap target;
+              // tightens to py-1.5 on desktop where pointers are precise.
+              className="rounded-full border border-border bg-background px-3 py-2 text-xs font-medium text-foreground/80 transition hover:border-primary/40 hover:text-primary disabled:opacity-50 sm:py-1.5"
             >
               {q}
             </button>
