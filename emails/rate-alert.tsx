@@ -123,7 +123,7 @@ export default function RateAlertEmail({
                 Open your saved deals
               </Link>
               <Text style={{ color: SUB, fontSize: 11, lineHeight: "17px", margin: "18px 0 0" }}>
-                You get rate alerts because you're a TrueCap Pro member with saved
+                You get rate alerts because you&apos;re a TrueCap Pro member with saved
                 deals. Numbers are recomputed from your own saved assumptions with
                 only the interest rate updated — not financial advice. Reply to
                 this email to stop receiving rate alerts.
