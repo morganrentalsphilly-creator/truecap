@@ -50,6 +50,7 @@ export const metadata: Metadata = {
     url: `/blog/${SLUG}`,
     type: "article",
     publishedTime: PUBLISHED_AT,
+    modifiedTime: MODIFIED_AT,
     images: [{ url: "/home.jpg", width: 1200, height: 630, alt: TITLE }],
   },
   twitter: {

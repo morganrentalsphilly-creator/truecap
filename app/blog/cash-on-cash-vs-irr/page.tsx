@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     "real estate return comparison",
   ],
   alternates: { canonical: `/blog/${SLUG}` },
-  openGraph: { title: TITLE, description: DESCRIPTION, url: `/blog/${SLUG}`, type: "article", publishedTime: PUBLISHED_AT, images: [{ url: "/home.jpg", width: 1200, height: 630, alt: TITLE }] },
+  openGraph: { title: TITLE, description: DESCRIPTION, url: `/blog/${SLUG}`, type: "article", publishedTime: PUBLISHED_AT, modifiedTime: MODIFIED_AT, images: [{ url: "/home.jpg", width: 1200, height: 630, alt: TITLE }] },
   twitter: { card: "summary_large_image", images: ["/home.jpg"] },
 };
 
