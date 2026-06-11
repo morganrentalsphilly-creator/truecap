@@ -45,7 +45,7 @@ jobs:
       # Sentry: no SENTRY_AUTH_TOKEN on purpose — withSentryConfig
       # skips source-map upload and warns instead of failing.
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: actions/setup-node@v4
         with:
