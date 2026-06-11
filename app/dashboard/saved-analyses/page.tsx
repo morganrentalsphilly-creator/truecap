@@ -83,11 +83,15 @@ function mapSavedRow(row: SavedAnalysisRow): SavedAnalysisListItem | null {
       : typeof row.result_snapshot?.score === "string"
         ? Number(row.result_snapshot.score)
         : null;
-  const recommendation = row.result_snapshot?.recommendation ?? null;
-  const riskLevel = row.result_snapshot?.riskLevel ?? null;
-  if (!Number.isFinite(parsedScore) || !recommendation || !riskLevel) {
-    return null;
-  }
+  // Deals saved before the Deal Score feature (or whose snapshot is
+  // partial) previously made this function return null — and the
+  // caller filters nulls, so those deals SILENTLY VANISHED from the
+  // list. A paying user's old deals looked deleted. Default the
+  // missing display fields instead, matching the convention the
+  // saved-analyses detail view already uses (Neutral / Medium Risk /
+  // null score → renders as a neutral row, data intact and clickable).
+  const recommendation = row.result_snapshot?.recommendation ?? "Neutral";
+  const riskLevel = row.result_snapshot?.riskLevel ?? "Medium Risk";
 
   return {
     id: row.id,
@@ -98,7 +102,7 @@ function mapSavedRow(row: SavedAnalysisRow): SavedAnalysisListItem | null {
     netCashFlowMonthly: row.net_cash_flow_monthly,
     cocReturnPct: row.coc_return_pct,
     capRatePct: Number.isFinite(parsedCapRate) ? parsedCapRate : null,
-    score: parsedScore,
+    score: Number.isFinite(parsedScore) ? parsedScore : null,
     recommendation,
     riskLevel,
     createdAt: row.created_at,
