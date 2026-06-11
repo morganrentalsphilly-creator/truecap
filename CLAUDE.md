@@ -520,6 +520,7 @@ When adding a fourth such feature, replicate this layout. Shared shells
 ### Routes
 - `app/api/stripe/webhooks/route.ts` — Stripe webhook (nodejs runtime). Idempotent via `stripe_webhook_events`.
 - `app/api/cron/send-weekly-digest/route.ts` — Vercel cron. Auth + kill switch + Resend Broadcasts.
+- `app/api/cron/send-rate-alerts/route.ts` — Thursday cron (18:00 UTC). Re-underwrites paid users' saved deals when the FRED 30-yr rate moves ≥0.125pp week-over-week; emails state changes (tier / DSCR band / cash-flow sign) via Resend single sends. Gated by `RATE_ALERTS_MODE` env: off (default) / dry (JSON preview, no sends) / live. Pure logic in `lib/rate-alerts.ts` (unit-tested); template `emails/rate-alert.tsx`.
 - `app/api/email/send-test/route.ts` — internal "send me a preview" endpoint.
 - `app/api/dashboard/search-suggestions/route.ts` — dashboard search autocomplete.
 - `app/auth/callback/route.ts` — Supabase OAuth callback.
@@ -631,6 +632,7 @@ When adding a fourth such feature, replicate this layout. Shared shells
 - `HUD_API_KEY` — Fair Market Rent by county for single-family rent pre-fill (free key).
 - `EMAIL_FROM` (default `TrueCap <hello@usetruecap.com>`), `EMAIL_REPLY_TO` (default `hello@usetruecap.com`).
 - `NEWSLETTER_PAUSED` — `1` / `true` / `yes` to pause weekly cron sends without a redeploy.
+- `RATE_ALERTS_MODE` — `off` (default) / `dry` / `live` for the Thursday rate-alert cron. The feature ships dormant; flip to `dry`, review the JSON preview, then `live`.
 
 A missing required var fails closed (the relevant action / cron returns
 500 + Sentry alert rather than silently doing nothing). Don't add
