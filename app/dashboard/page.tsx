@@ -87,7 +87,7 @@ export default async function DashboardPage() {
   // have passed — run them in ONE round-trip wave instead of two
   // sequential awaits (the deals query previously waited for the
   // profile/count/premium wave to finish for no reason).
-  const [{ data: profile }, isPremium, dealsResult] = await Promise.all([
+  const [{ data: profile }, isPremium, dealsResult, aggregateResult] = await Promise.all([
     supabase
       .from("profiles")
       .select("first_name, last_name, display_name, avatar_url")
@@ -105,10 +105,60 @@ export default async function DashboardPage() {
       .eq("is_archived", false)
       .order("created_at", { ascending: false })
       .limit(DASHBOARD_ACTIVE_DEALS_LIMIT),
+    // Lightweight UNBOUNDED aggregate query — the detailed query above
+    // is capped at DASHBOARD_ACTIVE_DEALS_LIMIT for the card/chart UI,
+    // which previously made Portfolio Overview totals silently wrong
+    // for users with 21+ active deals (sums computed over a recency
+    // sample). This fetches only three scalar fields per deal (the
+    // capRate is plucked from the snapshot JSON server-side), so even
+    // hundreds of deals cost almost nothing.
+    supabase
+      .from("saved_analyses")
+      .select("purchase_price, net_cash_flow_monthly, cap_rate_raw:result_snapshot->>capRate")
+      .eq("user_id", user.id)
+      .is("deleted_at", null)
+      .eq("is_completed", false)
+      .eq("is_archived", false),
   ]);
 
   const profileRow = (profile as ProfileRow | null) ?? null;
   const { data: rows, error } = dealsResult;
+
+  // Full-portfolio aggregates (see query note above). Null on error —
+  // getPortfolioTotals falls back to the 20-deal sample, same as before.
+  type AggregateRow = {
+    purchase_price: number | null;
+    net_cash_flow_monthly: number | null;
+    cap_rate_raw: string | null;
+  };
+  let portfolioAggregates: DashboardHomeData["portfolioAggregates"] = null;
+  if (!aggregateResult.error) {
+    const aggRows = (aggregateResult.data ?? []) as AggregateRow[];
+    let totalValue = 0;
+    let totalCashFlow = 0;
+    let capNum = 0;
+    let capDen = 0;
+    let activeCount = 0;
+    for (const r of aggRows) {
+      if (r.purchase_price != null) {
+        totalValue += r.purchase_price;
+        activeCount += 1;
+        const cap = Number(r.cap_rate_raw);
+        if (r.cap_rate_raw != null && Number.isFinite(cap) && r.purchase_price > 0) {
+          capNum += cap * r.purchase_price;
+          capDen += r.purchase_price;
+        }
+      }
+      totalCashFlow += r.net_cash_flow_monthly ?? 0;
+    }
+    portfolioAggregates = {
+      totalValue,
+      totalCashFlow,
+      weightedCap: capDen > 0 ? capNum / capDen : null,
+      activeCount,
+      totalCount: aggRows.length,
+    };
+  }
 
   if (error) {
     return (
@@ -130,6 +180,7 @@ export default async function DashboardPage() {
     isPremium,
     navAccess.dashboard
   );
+  dashboardData.portfolioAggregates = portfolioAggregates;
 
   return (
     <>

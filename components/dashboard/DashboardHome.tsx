@@ -53,6 +53,19 @@ export type DashboardHomeData = {
   };
   allDeals: DashboardDeal[];
   topDeals: DashboardDeal[];
+  /**
+   * Full-portfolio totals computed server-side over EVERY active deal
+   * (allDeals is capped at the 20 most recent for the cards/charts).
+   * Null when the aggregate query failed — getPortfolioTotals then
+   * falls back to computing over the sample.
+   */
+  portfolioAggregates?: {
+    totalValue: number;
+    totalCashFlow: number;
+    weightedCap: number | null;
+    activeCount: number;
+    totalCount: number;
+  } | null;
 };
 
 function formatCurrency(value: number | null | undefined, compact = false): string {
@@ -213,6 +226,10 @@ function getDecisionHighlights(data: DashboardHomeData) {
  * - Active Deals: count of deals with a non-null purchase price
  */
 function getPortfolioTotals(data: DashboardHomeData) {
+  // Prefer the server-computed full-portfolio aggregates — allDeals is
+  // a 20-most-recent sample, and summing a sample silently understated
+  // Pipeline Value / Monthly Cash Flow for users with 21+ deals.
+  if (data.portfolioAggregates) return data.portfolioAggregates;
   const valid = data.allDeals.filter((d) => d.purchasePrice != null);
   const totalValue = valid.reduce((s, d) => s + (d.purchasePrice ?? 0), 0);
   const totalCashFlow = data.allDeals.reduce(
