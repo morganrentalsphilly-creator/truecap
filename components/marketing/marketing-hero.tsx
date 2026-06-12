@@ -26,6 +26,9 @@ import Link from "next/link";
 import { ArrowRight, Calculator, FileDown, Lock, ShieldCheck, Sparkles, TrendingUp, Zap } from "lucide-react";
 import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
 import { DealsAnalyzedTicker } from "@/components/marketing/deals-analyzed-ticker";
+import { calculateAnalysis } from "@/lib/calc-analysis";
+import { buildDealScoreInputFromAnalysis, computeDealScore } from "@/lib/deal-score";
+import { SAMPLE_DEAL_DISPLAY, SAMPLE_DEAL_VALUES } from "@/lib/sample-deal";
 
 // TRUST_STATS row removed (Jun 2026) — redundant with risk-reversal
 // microcopy ("No card · No signup · Cancel anytime"), the eyebrow chip
@@ -256,6 +259,22 @@ const HERO_ANIM_CSS = `
 `;
 
 function HeroProductMock() {
+  // COMPUTED, not hard-coded (Jun 2026 mobile audit): the card renders
+  // the REAL engine output for the REAL sample deal the "Try a sample
+  // deal" button loads. A previous version hard-coded numbers that the
+  // engine contradicted the moment a visitor clicked the demo —
+  // "Strong Buy · Score 84" on the card, "Risky · Score 20" in the
+  // analysis. Sharing lib/sample-deal.ts + computing here makes that
+  // divergence impossible. This is a server component, so this math
+  // runs at build/ISR time — zero client cost.
+  const result = calculateAnalysis(SAMPLE_DEAL_VALUES);
+  const score = computeDealScore(buildDealScoreInputFromAnalysis(SAMPLE_DEAL_VALUES, result));
+  const cf = Math.round(result.netCashFlow);
+  const cfLabel = `${cf >= 0 ? "+" : "-"}$${Math.abs(cf).toLocaleString("en-US")}`;
+  const capLabel = `${result.capRate.toFixed(1)}%`;
+  const dscrLabel = result.dscr.toFixed(2);
+  const dscrClears = result.dscr >= 1.25;
+
   return (
     <div className="relative mx-auto mt-10 max-w-3xl">
       {/* Inline keyframes — see HERO_ANIM_CSS comment above. */}
@@ -278,7 +297,7 @@ function HeroProductMock() {
           <span className="size-2.5 rounded-full bg-emerald-400/80" />
           <span className="ml-3 min-w-0 flex-1 truncate rounded-full bg-muted px-3 py-0.5 text-[10px] font-medium text-muted-foreground">
             <span className="sm:hidden">usetruecap.com</span>
-            <span className="hidden sm:inline">usetruecap.com — 1700 W Erie · Philadelphia</span>
+            <span className="hidden sm:inline">usetruecap.com — {SAMPLE_DEAL_DISPLAY.shortAddress}</span>
           </span>
           <span
             aria-label="Live demo"
@@ -297,18 +316,18 @@ function HeroProductMock() {
             cluster step-5 of the sequential reveal animation. */}
         <div className="flex flex-col gap-2 border-b border-border pb-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-3">
           <div className="tc-hero-step-1 min-w-0 sm:flex-1">
-            <div className="text-base font-extrabold text-foreground sm:text-lg">1700 W Erie · Philadelphia</div>
-            <div className="text-xs text-muted-foreground">Single Family · $295,000 · Built 1942</div>
+            <div className="text-base font-extrabold text-foreground sm:text-lg">{SAMPLE_DEAL_DISPLAY.shortAddress}</div>
+            <div className="text-xs text-muted-foreground">{SAMPLE_DEAL_DISPLAY.subtitle}</div>
           </div>
           <div className="tc-hero-step-5 flex flex-wrap items-center gap-1.5 sm:gap-2">
             <span className="rounded-full bg-[var(--brand-green)] px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-white sm:px-2.5 sm:py-1 sm:text-[10px]">
-              Strong Buy
+              {score.recommendation}
             </span>
             <span className="rounded-full bg-primary px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-white sm:px-2.5 sm:py-1 sm:text-[10px]">
-              Score 84
+              Score {Math.round(score.score)}
             </span>
             <span className="rounded-full bg-[var(--brand-green)] px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-white sm:px-2.5 sm:py-1 sm:text-[10px]">
-              Low Risk
+              {score.riskLevel}
             </span>
           </div>
         </div>
@@ -332,17 +351,12 @@ function HeroProductMock() {
               monthly unit is implied by the dollar sign + product
               context. Desktop keeps the longer label via the
               responsive prop below. */}
-          {/* These three numbers MUST reconcile — the product's whole
-              pitch is "stop losing deals to bad math", so an underwriter
-              who checks the hero card has to get a consistent answer.
-              Assumptions: $295,000 price, 20% down ($236,000 loan),
-              6.6% / 30-yr → P&I ≈ $1,507/mo. NOI at an 8.2% cap =
-              $295,000 × 0.082 / 12 ≈ $2,016/mo. DSCR = 2,016 / 1,507 ≈
-              1.34. Cash flow = 2,016 − 1,507 ≈ $510/mo. If you change
-              one number, recompute the other two. */}
-          <MockTile label="Cash flow" value="+$510" tone="success" stepClass="tc-hero-step-2" />
-          <MockTile label="Cap rate" value="8.2%" tone="success" stepClass="tc-hero-step-3" />
-          <MockTile label="DSCR" value="1.34" tone="success" sub="Bankable" stepClass="tc-hero-step-4" />
+          {/* Live engine output — see the computed values at the top of
+              HeroProductMock. These can never disagree with what the
+              "Try a sample deal" button produces. */}
+          <MockTile label="Cash flow" value={cfLabel} tone="success" stepClass="tc-hero-step-2" />
+          <MockTile label="Cap rate" value={capLabel} tone="success" stepClass="tc-hero-step-3" />
+          <MockTile label="DSCR" value={dscrLabel} tone="success" sub={dscrClears ? "Bankable" : "Tight"} stepClass="tc-hero-step-4" />
         </div>
 
         {/* Verdict line — final step 6, reveals last after tiles + pills.
@@ -352,10 +366,15 @@ function HeroProductMock() {
         <div className="tc-hero-step-6 mt-4 flex items-start gap-2 rounded-xl border border-[var(--brand-green)]/25 bg-[var(--brand-green-light)] p-3 text-xs text-foreground">
           <TrendingUp className="mt-0.5 size-4 shrink-0 text-[var(--brand-green)]" />
           <span>
-            <strong>1700 W Erie: solid fundamentals.</strong>{" "}
-            <span className="sm:hidden">Cash-flows $510/mo at 8.2% cap. DSCR 1.34 clears most lenders.</span>
+            <strong>1700 W Erie: strong fundamentals.</strong>{" "}
+            <span className="sm:hidden">
+              Cash-flows {cfLabel}/mo at {capLabel} cap. DSCR {dscrLabel} {dscrClears ? "clears most lenders" : "is below the 1.25 most lenders want"}.
+            </span>
             <span className="hidden sm:inline">
-              Cash flow $510/mo, cap 8.2%, DSCR 1.34 clears the typical ≥1.25 lender threshold. Worth a deeper underwrite.
+              Cash flow {cfLabel}/mo, cap {capLabel}, DSCR {dscrLabel}{" "}
+              {dscrClears
+                ? "clears the typical ≥1.25 lender threshold. Worth a deeper underwrite."
+                : "sits below the typical ≥1.25 lender threshold — stress-test before offering."}
             </span>
           </span>
         </div>

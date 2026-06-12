@@ -144,7 +144,11 @@ export function PostAnalysisEmailPrompt({ hasCompletedAnalysis, propertyAddress 
             <h3 className="mt-1 text-lg font-extrabold leading-tight text-foreground">
               Want this saved to your inbox?
             </h3>
-            <p className="mt-2 text-[13px] leading-relaxed text-muted-foreground">
+            {/* Body copy desktop-only (Jun 2026 mobile audit): on a
+                390px phone the full card covered ~45% of the viewport
+                on top of the analysis the user was reading. Headline +
+                input carries the pitch on mobile. */}
+            <p className="mt-2 hidden text-[13px] leading-relaxed text-muted-foreground sm:block">
               Drop your email — I'll send you the full analysis plus 3 short notes on the metrics most investors miss.
             </p>
             <form onSubmit={onSubmit} className="mt-4 flex flex-col gap-2">

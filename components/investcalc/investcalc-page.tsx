@@ -41,12 +41,13 @@ import { cn } from "@/lib/utils";
 import { saveDealAction } from "@/app/actions/saved-analyses";
 import { addDealToCompareAction } from "@/app/actions/compare";
 import { getDealScoreAction, type DealScoreActionResult } from "@/app/actions/deal-score";
-import { computeDealScore } from "@/lib/deal-score";
+import { buildDealScoreInputFromAnalysis, computeDealScore } from "@/lib/deal-score";
 import {
   createOneTimePdfCheckoutAction,
   verifyOneTimePdfPaymentAction,
 } from "@/app/actions/one-time-pdf";
 import { PdfPurchaseDialog } from "@/components/investcalc/pdf-purchase-dialog";
+import { SAMPLE_DEAL_VALUES } from "@/lib/sample-deal";
 
 /**
  * localStorage key for the deal stashed right before redirecting to the
@@ -533,25 +534,11 @@ export function InvestCalcPage({
   // Shared between the server-action path (loadDealScore) and the
   // sample-deal Pro preview path, which computes the score client-side
   // via the same pure lib function the action wraps.
-  const buildDealScoreInput = (values: InvestmentFormValues, result: AnalysisResult) => ({
-    propertyType: values.propertyType,
-    monthlyCashFlow: result.netCashFlow,
-    cashOnCashReturn: result.cocReturn,
-    capRate: result.capRate,
-    dscr: result.dscr,
-    vacancyRate: values.vacancyPct,
-    propertyAge: result.propertyAge,
-    capexPct: result.capexPctEffective,
-    maintenancePct: result.maintenancePctEffective,
-    monthlyPropertyTax: result.propertyTax,
-    monthlyRentIncome: result.monthlyRentalIncome,
-    isCashPurchase: result.monthlyPayment <= 0,
-  });
 
   const loadDealScore = async (values: InvestmentFormValues, result: AnalysisResult) => {
     setIsLoadingDealScore(true);
     try {
-      const dealScore = await getDealScoreAction(buildDealScoreInput(values, result));
+      const dealScore = await getDealScoreAction(buildDealScoreInputFromAnalysis(values, result));
       setDealScoreResult(dealScore);
     } catch (err) {
       // Swallow + log instead of throwing — there are 4+ call sites,
@@ -1347,7 +1334,7 @@ export function InvestCalcPage({
         setDealScoreResult({
           ok: true,
           tier: "pro",
-          data: computeDealScore(buildDealScoreInput(values, result)),
+          data: computeDealScore(buildDealScoreInputFromAnalysis(values, result)),
         });
         setIsLoadingDealScore(false);
       } else {
@@ -1625,7 +1612,7 @@ export function InvestCalcPage({
           ? {
               ok: true,
               tier: "pro",
-              data: computeDealScore(buildDealScoreInput(values, analysisResult)),
+              data: computeDealScore(buildDealScoreInputFromAnalysis(values, analysisResult)),
             }
           : dealScoreResult;
 
@@ -1956,38 +1943,12 @@ export function InvestCalcPage({
    * gives them a fully-populated working demo in one click.
    */
   const handleTrySampleDeal = () => {
-    const sample: Partial<InvestmentFormValues> = {
-      propertyType: "single-family",
-      address: "1700 W Erie Ave, Philadelphia, PA 19140",
-      purchasePrice: 295000,
-      yearBuilt: 1942,
-      bedrooms: 3,
-      bathrooms: 1,
-      sqft: 1450,
-      monthlyRent: 2950,
-      downPaymentPct: 20,
-      interestRate: 6.75,
-      loanTermYears: 30,
-      closingCostsPct: 3,
-      propertyTaxPct: 1.49,
-      insuranceInputMode: "percent",
-      insurancePct: 0.5,
-      hoaMonthly: 0,
-      utilitiesMonthly: 0,
-      maintenancePct: 8,
-      vacancyPct: 5,
-      mgmtPct: 8,
-      capexPct: 5,
-      buildingValuePct: 85,
-      depreciationYears: 27.5,
-      includeInterestDeduction: true,
-      taxRatePct: 24,
-      rentGrowthPct: 2.5,
-      expenseGrowthPct: 2.5,
-      appreciationRatePct: 3,
-      sellingCostPct: 6,
-      units: [],
-    };
+    // Shared single source of truth (lib/sample-deal.ts) — the homepage
+    // hero mock card COMPUTES its displayed numbers from these same
+    // values, so the demo can never contradict the marketing card
+    // again (it did once: 'Strong Buy · 84' on the card, 'Risky · 20'
+    // in the actual analysis).
+    const sample: Partial<InvestmentFormValues> = SAMPLE_DEAL_VALUES;
     // Apply each field via setValue so RHF dirties and the form's
     // controlled inputs re-render with the new values immediately.
     Object.entries(sample).forEach(([key, value]) => {

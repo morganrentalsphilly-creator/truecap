@@ -23,6 +23,43 @@ export const dealScoreInputSchema = z.object({
 
 export type DealScoreInput = z.infer<typeof dealScoreInputSchema>;
 
+/**
+ * Build a DealScoreInput from form values + a computed AnalysisResult.
+ * Shared by investcalc-page's score flow, the sample-deal Pro preview,
+ * and the homepage hero (which renders the sample deal's REAL score).
+ * Kept here so every caller maps the fields identically.
+ */
+export function buildDealScoreInputFromAnalysis(
+  values: { propertyType: DealScoreInput["propertyType"]; vacancyPct?: number },
+  result: {
+    netCashFlow: number;
+    cocReturn: number;
+    capRate: number;
+    dscr: number;
+    propertyAge: number;
+    capexPctEffective: number;
+    maintenancePctEffective: number;
+    propertyTax: number;
+    monthlyRentalIncome: number;
+    monthlyPayment: number;
+  }
+): DealScoreInput {
+  return dealScoreInputSchema.parse({
+    propertyType: values.propertyType,
+    monthlyCashFlow: result.netCashFlow,
+    cashOnCashReturn: result.cocReturn,
+    capRate: result.capRate,
+    dscr: result.dscr,
+    vacancyRate: values.vacancyPct ?? 5,
+    propertyAge: result.propertyAge,
+    capexPct: result.capexPctEffective,
+    maintenancePct: result.maintenancePctEffective,
+    monthlyPropertyTax: result.propertyTax,
+    monthlyRentIncome: result.monthlyRentalIncome,
+    isCashPurchase: result.monthlyPayment <= 0,
+  });
+}
+
 export type DealRecommendation = "Strong Buy" | "Buy" | "Neutral" | "Risky" | "Avoid";
 /** Investment deals use Low/Medium/High. Owner-occupant near break-even may use softer labels instead of High Risk. */
 export type DealRiskLevel =
