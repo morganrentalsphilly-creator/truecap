@@ -281,6 +281,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.7,
     },
     {
+      url: `${siteUrl}/vs/bricked`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
+    {
       url: `${siteUrl}/vs/stessa`,
       lastModified: new Date(),
       changeFrequency: "monthly",

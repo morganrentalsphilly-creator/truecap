@@ -80,6 +80,9 @@ const COMPARISONS: ComparisonCard[] = [
     group: "Direct alternative" },
 
   // Complementary tools — post-purchase ops, accounting, banking
+  { slug: "bricked", competitor: "Bricked AI",
+    tagline: "Bricked tells flippers what a house is worth — AI comps, ARV, repairs. TrueCap tells investors what a rental will earn.",
+    group: "Complementary tool" },
   { slug: "stessa", competitor: "Stessa",
     tagline: "Stessa is rental accounting for properties you own. TrueCap underwrites the ones you're considering buying.",
     group: "Complementary tool" },
