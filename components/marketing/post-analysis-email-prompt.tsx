@@ -149,7 +149,7 @@ export function PostAnalysisEmailPrompt({ hasCompletedAnalysis, propertyAddress 
                 on top of the analysis the user was reading. Headline +
                 input carries the pitch on mobile. */}
             <p className="mt-2 hidden text-[13px] leading-relaxed text-muted-foreground sm:block">
-              Drop your email — I'll send you the full analysis plus 3 short notes on the metrics most investors miss.
+              Drop your email — I&apos;ll send you the full analysis plus 3 short notes on the metrics most investors miss.
             </p>
             <form onSubmit={onSubmit} className="mt-4 flex flex-col gap-2">
               <input
