@@ -316,11 +316,16 @@ export function DashboardHome({
 
   const hasAnyDeals = data.allDeals.length > 0;
 
-  // Dropped the desktop viewport-lock (`lg:h-screen lg:overflow-hidden`
-  // + main's `lg:overflow-y-auto`). With many saved deals the TopDeals
-  // list at the bottom forced a nested scroll inside a fixed-height
-  // container. Natural page scroll is simpler and the Topbar is already
-  // sticky so the user never loses the header.
+  // SCROLL CONTRACT (fixed Jun 2026): DashboardShell holds a desktop
+  // viewport lock (`lg:h-screen lg:overflow-hidden`), so every page
+  // inside it MUST own its scrolling via `flex-1 min-h-0
+  // lg:overflow-y-auto` — exactly what saved-analyses, compare, and
+  // templates do. A previous edit removed main's overflow here aiming
+  // for "natural page scroll" but left the shell lock in place, which
+  // made the dashboard home UNSCROLLABLE on desktop (content below the
+  // first viewport unreachable). If natural page scroll is ever wanted,
+  // the shell lock and ALL four pages' inner scrolls must change
+  // together — never one side alone.
   return (
     <div className="flex-1 min-w-0 flex flex-col">
       <Topbar
@@ -331,7 +336,7 @@ export function DashboardHome({
         isPremium={data.user.isPremium}
         canAccessDashboard={data.user.canAccessDashboard}
       />
-      <main id="main" className="flex-1 min-h-0 px-4 py-4 space-y-6 sm:px-6 sm:py-6 sm:space-y-8 lg:px-8">
+      <main id="main" className="flex-1 min-h-0 lg:overflow-y-auto px-4 py-4 space-y-6 sm:px-6 sm:py-6 sm:space-y-8 lg:px-8">
         {/* ── Header + quick actions ──────────────────────────────── */}
         {/* Top-right action buttons (Analyze Property / My Deals /
             Compare) now ONLY render on mobile (`lg:hidden`). On desktop
