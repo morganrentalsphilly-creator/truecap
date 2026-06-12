@@ -48,6 +48,16 @@ export type BlogPost = {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: "schedule-e-rental-property",
+    title:
+      "Schedule E for rental property: a line-by-line walkthrough (2026)",
+    excerpt:
+      "Every Schedule E line that matters, a full worked example on a $250K rental, and the exact bridge between +$139/month of cash flow and a $3,703 paper loss — plus the $25K passive loss allowance, its MAGI phase-out, and the four mistakes that cost real money.",
+    readingTimeMinutes: 10,
+    publishedAt: "2026-06-12",
+    available: true,
+  },
+  {
     slug: "capex-maintenance-reserves-rental-property",
     title:
       "CapEx and maintenance reserves: how much to actually budget for a rental (2026)",
