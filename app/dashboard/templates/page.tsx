@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { TemplatesManagementPage } from "@/components/investcalc/templates-management-page";
-import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 
 export const metadata: Metadata = {
   title: "Analysis Templates",
@@ -18,7 +17,6 @@ import {
   hasPaidPlanSubscription,
   hasPlanFeature,
 } from "@/lib/entitlements";
-import { getSavedAnalysesTotalCount } from "@/lib/saved-analyses-count";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 type ProfileRow = {
@@ -57,14 +55,13 @@ export default async function DashboardTemplatesPage() {
   }
   const navAccess = getDashboardNavAccess(entitlements);
 
-  const [{ data: profile }, result, savedDealTotalCount, isPremium] = await Promise.all([
+  const [{ data: profile }, result, isPremium] = await Promise.all([
     supabase
       .from("profiles")
       .select("first_name, last_name, display_name, avatar_url")
       .eq("id", user.id)
       .maybeSingle(),
     listAnalysisTemplatesAction(),
-    getSavedAnalysesTotalCount(supabase, user.id),
     hasPaidPlanSubscription(supabase, user.id),
   ]);
 
@@ -73,7 +70,7 @@ export default async function DashboardTemplatesPage() {
 
   if (!result.ok) {
     return (
-      <DashboardShell savedDealCount={savedDealTotalCount} navAccess={navAccess}>
+      <>
         <div className="flex-1 min-w-0 flex flex-col lg:h-screen lg:overflow-hidden">
           <Topbar
             displayName={displayName}
@@ -90,12 +87,12 @@ export default async function DashboardTemplatesPage() {
             </div>
           </main>
         </div>
-      </DashboardShell>
+      </>
     );
   }
 
   return (
-    <DashboardShell savedDealCount={savedDealTotalCount} navAccess={navAccess}>
+    <>
       <div className="flex-1 min-w-0 flex flex-col lg:h-screen lg:overflow-hidden">
         <Topbar
           displayName={displayName}
@@ -109,6 +106,6 @@ export default async function DashboardTemplatesPage() {
           <TemplatesManagementPage initialTemplates={result.templates} />
         </div>
       </div>
-    </DashboardShell>
+    </>
   );
 }

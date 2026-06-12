@@ -11,7 +11,6 @@ export const metadata: Metadata = {
   alternates: { canonical: "/dashboard/saved-analyses" },
   robots: { index: false, follow: false },
 };
-import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { PortfolioRollupStrip } from "@/components/dashboard/portfolio-rollup-strip";
 import { Topbar } from "@/components/dashboard/Topbar";
 import { getCompareIdsFromCookie } from "@/app/actions/compare";
@@ -22,7 +21,6 @@ import {
   hasPaidPlanSubscription,
   hasPlanFeature,
 } from "@/lib/entitlements";
-import { getSavedAnalysesTotalCount } from "@/lib/saved-analyses-count";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import type { StoredRecommendation, StoredRiskLevel } from "@/lib/compare-metrics";
 
@@ -145,14 +143,13 @@ export default async function DashboardSavedAnalysesPage({
   }
   const navAccess = getDashboardNavAccess(entitlements);
 
-  const [{ data: profile }, compareIds, savedDealTotalCount, isPremium] = await Promise.all([
+  const [{ data: profile }, compareIds, isPremium] = await Promise.all([
     supabase
       .from("profiles")
       .select("first_name, last_name, display_name, avatar_url")
       .eq("id", user.id)
       .maybeSingle(),
     getCompareIdsFromCookie(),
-    getSavedAnalysesTotalCount(supabase, user.id),
     hasPaidPlanSubscription(supabase, user.id),
   ]);
 
@@ -206,7 +203,7 @@ export default async function DashboardSavedAnalysesPage({
 
   if (error) {
     return (
-      <DashboardShell savedDealCount={savedDealTotalCount} navAccess={navAccess}>
+      <>
         <div className="flex-1 min-w-0 flex flex-col lg:h-screen lg:overflow-hidden">
           <Topbar
             displayName={displayName}
@@ -225,12 +222,12 @@ export default async function DashboardSavedAnalysesPage({
             </div>
           </main>
         </div>
-      </DashboardShell>
+      </>
     );
   }
 
   return (
-    <DashboardShell savedDealCount={savedDealTotalCount} navAccess={navAccess}>
+    <>
       {/*
         Layout pattern matches /dashboard/compare and /dashboard/templates:
         outer wrapper participates in the shell's fixed-viewport flex
@@ -264,6 +261,6 @@ export default async function DashboardSavedAnalysesPage({
           />
         </div>
       </div>
-    </DashboardShell>
+    </>
   );
 }

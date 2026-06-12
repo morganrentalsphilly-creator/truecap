@@ -12,7 +12,6 @@ export const metadata: Metadata = {
 import { getCompareIdsFromCookie } from "@/app/actions/compare";
 import { Button } from "@/components/ui/button";
 import { CompareDealsClient, type CompareDealViewModel } from "@/components/investcalc/compare-deals-client";
-import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { Topbar } from "@/components/dashboard/Topbar";
 import { buildDealAssumptions } from "@/lib/compare-assumptions";
 import {
@@ -27,7 +26,6 @@ import {
   hasPaidPlanSubscription,
   hasPlanFeature,
 } from "@/lib/entitlements";
-import { getSavedAnalysesTotalCount } from "@/lib/saved-analyses-count";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 const MAX_COMPARE_ITEMS = 4;
@@ -172,14 +170,13 @@ export default async function DashboardComparePage() {
   }
   const navAccess = getDashboardNavAccess(entitlements);
 
-  const [{ data: profile }, ids, savedDealTotalCount, isPremium] = await Promise.all([
+  const [{ data: profile }, ids, isPremium] = await Promise.all([
     supabase
       .from("profiles")
       .select("first_name, last_name, display_name, avatar_url")
       .eq("id", user.id)
       .maybeSingle(),
     getCompareIdsFromCookie(),
-    getSavedAnalysesTotalCount(supabase, user.id),
     hasPaidPlanSubscription(supabase, user.id),
   ]);
   const displayName = getDisplayName((profile as ProfileRow | null) ?? null, user.email);
@@ -187,7 +184,7 @@ export default async function DashboardComparePage() {
 
   if (ids.length < 1) {
     return (
-      <DashboardShell savedDealCount={savedDealTotalCount} navAccess={navAccess}>
+      <>
         <div className="flex-1 min-w-0 flex flex-col lg:h-screen lg:overflow-hidden">
           <Topbar
             displayName={displayName}
@@ -212,7 +209,7 @@ export default async function DashboardComparePage() {
             </div>
           </main>
         </div>
-      </DashboardShell>
+      </>
     );
   }
 
@@ -229,7 +226,7 @@ export default async function DashboardComparePage() {
 
   if (error) {
     return (
-      <DashboardShell savedDealCount={savedDealTotalCount} navAccess={navAccess}>
+      <>
         <div className="flex-1 min-w-0 flex flex-col lg:h-screen lg:overflow-hidden">
           <Topbar
             displayName={displayName}
@@ -246,7 +243,7 @@ export default async function DashboardComparePage() {
             </div>
           </main>
         </div>
-      </DashboardShell>
+      </>
     );
   }
 
@@ -283,7 +280,7 @@ export default async function DashboardComparePage() {
   }
 
   return (
-    <DashboardShell savedDealCount={savedDealTotalCount} navAccess={navAccess}>
+    <>
       <div className="flex-1 min-w-0 flex flex-col lg:h-screen lg:overflow-hidden">
         <Topbar
           displayName={displayName}
@@ -297,6 +294,6 @@ export default async function DashboardComparePage() {
           <CompareDealsClient deals={deals.slice(0, MAX_COMPARE_ITEMS)} />
         </div>
       </div>
-    </DashboardShell>
+    </>
   );
 }

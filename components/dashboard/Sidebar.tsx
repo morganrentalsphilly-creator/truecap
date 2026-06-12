@@ -75,7 +75,13 @@ export function Sidebar({ savedDealCount, navAccess, mobile = false }: SidebarPr
               <Link
                 key={item.label}
                 href={item.enabled ? item.href : "#"}
-                prefetch={false}
+                // Prefetch ON for in-app dashboard nav (Jun 2026): these
+                // are the tabs a signed-in user bounces between; fetching
+                // the RSC payload on hover makes switches feel instant
+                // and pairs with the segment layout that keeps the shell
+                // mounted. The prefetch={false} convention elsewhere is
+                // for marketing surfaces, not the app shell.
+                prefetch={item.enabled}
                 aria-disabled={!item.enabled}
                 tabIndex={item.enabled ? undefined : -1}
                 className={`group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${

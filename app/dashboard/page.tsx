@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { DashboardHome, type DashboardHomeData } from "@/components/dashboard/DashboardHome";
-import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -18,7 +17,6 @@ import {
   hasPlanFeature,
 } from "@/lib/entitlements";
 import { buildDashboardDeal, type SavedAnalysisDashboardRow } from "@/lib/dashboard-deal-mapping";
-import { getSavedAnalysesTotalCount } from "@/lib/saved-analyses-count";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 const DASHBOARD_ACTIVE_DEALS_LIMIT = 20;
@@ -89,13 +87,12 @@ export default async function DashboardPage() {
   // have passed — run them in ONE round-trip wave instead of two
   // sequential awaits (the deals query previously waited for the
   // profile/count/premium wave to finish for no reason).
-  const [{ data: profile }, savedDealTotalCount, isPremium, dealsResult] = await Promise.all([
+  const [{ data: profile }, isPremium, dealsResult] = await Promise.all([
     supabase
       .from("profiles")
       .select("first_name, last_name, display_name, avatar_url")
       .eq("id", user.id)
       .maybeSingle(),
-    getSavedAnalysesTotalCount(supabase, user.id),
     hasPaidPlanSubscription(supabase, user.id),
     supabase
       .from("saved_analyses")
@@ -115,7 +112,7 @@ export default async function DashboardPage() {
 
   if (error) {
     return (
-      <div className="dashboard-shell">
+      <div className="flex-1 min-w-0">
         <main id="main" className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
           <div className="rounded-2xl border border-destructive/25 bg-destructive/5 p-6">
             <h1 className="text-xl font-bold text-foreground">Could not load dashboard</h1>
@@ -135,8 +132,8 @@ export default async function DashboardPage() {
   );
 
   return (
-    <DashboardShell savedDealCount={savedDealTotalCount} navAccess={navAccess}>
+    <>
       <DashboardHome data={dashboardData} canCompareDeals={hasPlanFeature(entitlements, "compare_deals")} />
-    </DashboardShell>
+    </>
   );
 }
