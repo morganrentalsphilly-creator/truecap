@@ -1,9 +1,13 @@
 import { ArrowUpRight, ArrowDownRight, type LucideIcon } from "lucide-react";
-import {
-  Area,
-  AreaChart,
-  ResponsiveContainer,
-} from "recharts";
+import dynamic from "next/dynamic";
+
+// Recharts lives in a lazily-loaded chunk (see stat-card-sparkline.tsx)
+// so cards without sparklines — currently ALL dashboard call sites —
+// never download the charting library.
+const StatCardSparkline = dynamic(
+  () => import("@/components/dashboard/stat-card-sparkline"),
+  { ssr: false, loading: () => null }
+);
 
 interface Props {
   label: string;
@@ -74,17 +78,7 @@ export function StatCard({ label, value, change, changeLabel, icon: Icon, spark,
           nothing). Empty array → no chart, cleaner card. */}
       {spark.length >= 2 ? (
         <div className="relative h-12 -mx-1 -mb-1 mt-3">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={spark}>
-              <defs>
-                <linearGradient id={`sp-${label}`} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={t.color} stopOpacity={0.4} />
-                  <stop offset="100%" stopColor={t.color} stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <Area type="monotone" dataKey="v" stroke={t.color} strokeWidth={2} fill={`url(#sp-${label})`} />
-            </AreaChart>
-          </ResponsiveContainer>
+          <StatCardSparkline spark={spark} color={t.color} gradientId={`sp-${label}`} />
         </div>
       ) : null}
     </div>

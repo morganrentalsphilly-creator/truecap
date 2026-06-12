@@ -85,7 +85,11 @@ export default async function DashboardPage() {
     redirect("/dashboard/saved-analyses");
   }
 
-  const [{ data: profile }, savedDealTotalCount, isPremium] = await Promise.all([
+  // All four reads are independent once the entitlement guards above
+  // have passed — run them in ONE round-trip wave instead of two
+  // sequential awaits (the deals query previously waited for the
+  // profile/count/premium wave to finish for no reason).
+  const [{ data: profile }, savedDealTotalCount, isPremium, dealsResult] = await Promise.all([
     supabase
       .from("profiles")
       .select("first_name, last_name, display_name, avatar_url")
@@ -93,21 +97,21 @@ export default async function DashboardPage() {
       .maybeSingle(),
     getSavedAnalysesTotalCount(supabase, user.id),
     hasPaidPlanSubscription(supabase, user.id),
+    supabase
+      .from("saved_analyses")
+      .select(
+        "id, address, title, property_type, purchase_price, net_cash_flow_monthly, coc_return_pct, created_at, result_snapshot"
+      )
+      .eq("user_id", user.id)
+      .is("deleted_at", null)
+      .eq("is_completed", false)
+      .eq("is_archived", false)
+      .order("created_at", { ascending: false })
+      .limit(DASHBOARD_ACTIVE_DEALS_LIMIT),
   ]);
 
   const profileRow = (profile as ProfileRow | null) ?? null;
-
-  const { data: rows, error } = await supabase
-    .from("saved_analyses")
-    .select(
-      "id, address, title, property_type, purchase_price, net_cash_flow_monthly, coc_return_pct, created_at, result_snapshot"
-    )
-    .eq("user_id", user.id)
-    .is("deleted_at", null)
-    .eq("is_completed", false)
-    .eq("is_archived", false)
-    .order("created_at", { ascending: false })
-    .limit(DASHBOARD_ACTIVE_DEALS_LIMIT);
+  const { data: rows, error } = dealsResult;
 
   if (error) {
     return (

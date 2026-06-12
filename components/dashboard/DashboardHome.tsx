@@ -1,6 +1,8 @@
 "use client";
 
+import { useMemo } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import {
   ArrowUpDown,
   Award,
@@ -15,10 +17,24 @@ import {
 import { Button } from "@/components/ui/button";
 import { Topbar } from "@/components/dashboard/Topbar";
 import { StatCard } from "@/components/dashboard/StatCard";
-import { PortfolioChart } from "@/components/dashboard/PortfolioChart";
-import { RiskReturn } from "@/components/dashboard/RiskReturn";
 import { TopDeals, type DashboardTopDeal } from "@/components/dashboard/TopDeals";
 import { AIInsights } from "@/components/dashboard/AIInsights";
+
+// The two recharts-heavy panels load as their own chunks so the
+// dashboard's initial JS ships without the ~100KB charting library —
+// empty-portfolio users never download it at all, and everyone else
+// gets the headline numbers painted before the charts hydrate.
+const ChartSkeleton = ({ heightClass }: { heightClass: string }) => (
+  <div className={`${heightClass} animate-pulse rounded-2xl border border-border bg-card`} />
+);
+const PortfolioChart = dynamic(
+  () => import("@/components/dashboard/PortfolioChart").then((m) => m.PortfolioChart),
+  { ssr: false, loading: () => <ChartSkeleton heightClass="h-[320px]" /> }
+);
+const RiskReturn = dynamic(
+  () => import("@/components/dashboard/RiskReturn").then((m) => m.RiskReturn),
+  { ssr: false, loading: () => <ChartSkeleton heightClass="h-[320px]" /> }
+);
 import type { DashboardDeal } from "@/lib/dashboard-deal-mapping";
 import { getChartInclusionReason, mapRiskLevelToRisk, resolveReturnMetric, resolveRiskMetric } from "@/lib/dashboard-risk-return";
 
@@ -261,27 +277,42 @@ export function DashboardHome({
   canCompareDeals?: boolean;
 }) {
   const initials = getInitials(data.user.displayName, data.user.email);
-  const topDeals = getTopDeals(data);
-  const riskReturn = getRiskReturn(data);
-  const dealComparison = getDealComparison(data);
-  const highlights = getDecisionHighlights(data);
-  const insights = buildDecisionInsights(data.topDeals);
-  const portfolio = getPortfolioTotals(data);
+
+  // All derived views memoized on `data` — these walk the deal list
+  // several times each, and re-running them on every re-render (Topbar
+  // interactions etc.) is pure waste. `data` comes from the server
+  // component and is referentially stable per page load.
+  const { topDeals, riskReturn, dealComparison, highlights, insights, portfolio } = useMemo(
+    () => ({
+      topDeals: getTopDeals(data),
+      riskReturn: getRiskReturn(data),
+      dealComparison: getDealComparison(data),
+      highlights: getDecisionHighlights(data),
+      insights: buildDecisionInsights(data.topDeals),
+      portfolio: getPortfolioTotals(data),
+    }),
+    [data]
+  );
 
   // Sparklines only render when 2+ real data points exist. No fake
   // fallbacks — a financial product should never show invented charts.
-  const realScoreSpark = topDeals
-    .map((d) => d.score)
-    .filter((v): v is number => v != null)
-    .map((v) => ({ v }));
-  const realCashSpark = topDeals
-    .map((d) => d.cashFlow)
-    .filter((v): v is number => v != null)
-    .map((v) => ({ v }));
-  const realRoiSpark = topDeals
-    .map((d) => d.roi)
-    .filter((v): v is number => v != null)
-    .map((v) => ({ v }));
+  const { realScoreSpark, realCashSpark, realRoiSpark } = useMemo(
+    () => ({
+      realScoreSpark: topDeals
+        .map((d) => d.score)
+        .filter((v): v is number => v != null)
+        .map((v) => ({ v })),
+      realCashSpark: topDeals
+        .map((d) => d.cashFlow)
+        .filter((v): v is number => v != null)
+        .map((v) => ({ v })),
+      realRoiSpark: topDeals
+        .map((d) => d.roi)
+        .filter((v): v is number => v != null)
+        .map((v) => ({ v })),
+    }),
+    [topDeals]
+  );
 
   const hasAnyDeals = data.allDeals.length > 0;
 

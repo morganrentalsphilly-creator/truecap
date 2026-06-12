@@ -1,5 +1,4 @@
 import { Sparkles, Lightbulb, AlertTriangle, TrendingUp } from "lucide-react";
-import { aiInsights } from "@/lib/dashboard-data";
 
 const toneMap = {
   opportunity: { icon: TrendingUp, color: "text-success", bg: "bg-success/10" },
@@ -19,8 +18,14 @@ type RiskReturnInsightData = {
   safest: string;
 };
 
+// NOTE: the old default for `data` was the hardcoded marketing
+// placeholder list from lib/dashboard-data (fake "Tampa market"
+// insights). DashboardHome always passes REAL derived insights, so the
+// fake default never rendered in the live path — but it was a footgun
+// for any future call site. Default is now an empty list; this
+// component must never show invented analysis on a financial product.
 export function AIInsights({
-  data = aiInsights,
+  data = [],
   riskReturnInsights,
 }: {
   data?: AIInsight[];
