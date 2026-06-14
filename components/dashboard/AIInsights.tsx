@@ -18,12 +18,12 @@ type RiskReturnInsightData = {
   safest: string;
 };
 
-// NOTE: the old default for `data` was the hardcoded marketing
-// placeholder list from lib/dashboard-data (fake "Tampa market"
-// insights). DashboardHome always passes REAL derived insights, so the
-// fake default never rendered in the live path — but it was a footgun
-// for any future call site. Default is now an empty list; this
-// component must never show invented analysis on a financial product.
+// NOTE: the old default for `data` was a hardcoded marketing placeholder
+// list (fake "Tampa market" insights). DashboardHome always passes REAL
+// derived insights, so the fake default never rendered in the live path —
+// but it was a footgun for any future call site. Default is now an empty
+// list; this component must never show invented analysis on a financial
+// product.
 export function AIInsights({
   data = [],
   riskReturnInsights,
@@ -32,7 +32,7 @@ export function AIInsights({
   riskReturnInsights?: RiskReturnInsightData;
 }) {
   return (
-    <div className="rounded-2xl border border-border p-6 relative overflow-hidden h-full" style={{ background: "linear-gradient(135deg, oklch(0.99 0.005 260), oklch(0.97 0.02 280))" }}>
+    <div className="rounded-2xl border border-border p-6 relative overflow-hidden h-full" style={{ background: "var(--ai-insights-bg)" }}>
       <div className="absolute -top-12 -right-12 h-40 w-40 rounded-full opacity-30 blur-3xl" style={{ background: "var(--gradient-premium)" }} />
       <div className="relative flex items-center gap-2 mb-1">
         <div className="h-7 w-7 rounded-lg grid place-items-center" style={{ background: "var(--gradient-premium)" }}>

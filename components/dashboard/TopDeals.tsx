@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Building2, Home, KeyRound } from "lucide-react";
+import { usePrefersDark } from "@/hooks/use-prefers-dark";
 
 export type DashboardTopDeal = {
   id?: string;
@@ -73,6 +74,9 @@ function getSortValue(deal: DashboardTopDeal, sortBy: SortMetric) {
 
 export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
   const [sortBy, setSortBy] = useState<SortMetric>("score");
+  const prefersDark = usePrefersDark();
+  // Score-ring track + no-risk arc color, themed (SVG strokes can't use var()).
+  const ringTrack = prefersDark ? "oklch(0.34 0.02 262)" : "oklch(0.92 0.012 255)";
   const sortedData = useMemo(() => {
     return data
       .map((deal, index) => ({ deal, index }))
@@ -126,14 +130,14 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
                 </div>
                 <div className="relative h-11 w-11 shrink-0">
                   <svg className="h-11 w-11 -rotate-90" viewBox="0 0 36 36">
-                    <circle cx="18" cy="18" r="15" fill="none" stroke="oklch(0.92 0.012 255)" strokeWidth="3" />
+                    <circle cx="18" cy="18" r="15" fill="none" stroke={ringTrack} strokeWidth="3" />
                     {d.score != null ? (
                       <circle
                         cx="18"
                         cy="18"
                         r="15"
                         fill="none"
-                        stroke={d.riskLevel ? scoreRingStrokeByRisk[d.riskLevel] ?? "oklch(0.92 0.012 255)" : "oklch(0.92 0.012 255)"}
+                        stroke={d.riskLevel ? scoreRingStrokeByRisk[d.riskLevel] ?? ringTrack : ringTrack}
                         strokeWidth="3"
                         strokeDasharray={`${(d.score / 100) * 94.2} 94.2`}
                         strokeLinecap="round"
@@ -223,9 +227,9 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
                     <div className="flex items-center gap-2">
                       <div className="relative h-9 w-9">
                         <svg className="h-9 w-9 -rotate-90" viewBox="0 0 36 36">
-                          <circle cx="18" cy="18" r="15" fill="none" stroke="oklch(0.92 0.012 255)" strokeWidth="3" />
+                          <circle cx="18" cy="18" r="15" fill="none" stroke={ringTrack} strokeWidth="3" />
                           {d.score != null ? (
-                            <circle cx="18" cy="18" r="15" fill="none" stroke={d.riskLevel ? scoreRingStrokeByRisk[d.riskLevel] ?? "oklch(0.92 0.012 255)" : "oklch(0.92 0.012 255)"} strokeWidth="3"
+                            <circle cx="18" cy="18" r="15" fill="none" stroke={d.riskLevel ? scoreRingStrokeByRisk[d.riskLevel] ?? ringTrack : ringTrack} strokeWidth="3"
                               strokeDasharray={`${(d.score / 100) * 94.2} 94.2`} strokeLinecap="round" />
                           ) : null}
                         </svg>

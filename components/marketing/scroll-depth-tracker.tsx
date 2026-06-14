@@ -30,12 +30,6 @@ import { useEffect } from "react";
 type Threshold = 25 | 50 | 75 | 100;
 const THRESHOLDS: Threshold[] = [25, 50, 75, 100];
 
-declare global {
-  interface Window {
-    /* dataLayer is already declared in track-conversion.ts */
-  }
-}
-
 export function ScrollDepthTracker() {
   useEffect(() => {
     // Set of thresholds we've already fired so we don't double-count

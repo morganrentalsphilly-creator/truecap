@@ -127,11 +127,11 @@ function recommendationToSavedSignal(
 }
 
 function getSignalClasses(signal: SavedSignal): string {
-  if (signal === "strong-buy") return "bg-emerald-100 text-emerald-700 border-emerald-200";
-  if (signal === "buy") return "bg-blue-100 text-blue-700 border-blue-200";
-  if (signal === "neutral") return "bg-amber-100 text-amber-700 border-amber-200";
-  if (signal === "risky") return "bg-orange-100 text-orange-700 border-orange-200";
-  return "bg-red-100 text-red-700 border-red-200";
+  if (signal === "strong-buy") return "bg-success/10 text-success border-success/30";
+  if (signal === "buy") return "bg-primary/10 text-primary border-primary/30";
+  if (signal === "neutral") return "bg-warning/15 text-warning-foreground border-warning/30";
+  if (signal === "risky") return "bg-warning/15 text-warning-foreground border-warning/30";
+  return "bg-destructive/10 text-destructive border-destructive/20";
 }
 
 function getAddressParts(item: SavedAnalysisListItem): { main: string; secondary: string } {
@@ -160,10 +160,10 @@ function getTypeIcon(type: SavedPropertyType | null) {
 
 function getStatusBadge(item: SavedAnalysisListItem) {
   if (item.status === "completed") {
-    return <Badge className="rounded-full border border-emerald-200 bg-emerald-100 text-emerald-700 text-[10px] font-semibold">Completed</Badge>;
+    return <Badge className="rounded-full border border-success/30 bg-success/10 text-success text-[10px] font-semibold">Completed</Badge>;
   }
   if (item.status === "archived") {
-    return <Badge className="rounded-full border border-slate-200 bg-slate-100 text-slate-700 text-[10px] font-semibold">Archived</Badge>;
+    return <Badge className="rounded-full border border-border bg-muted text-muted-foreground text-[10px] font-semibold">Archived</Badge>;
   }
   return null;
 }
@@ -1196,13 +1196,13 @@ export function SavedAnalysesPage({
                   <div className="mt-4 grid grid-cols-2 gap-2">
                     <div className="rounded-xl bg-muted/40 p-3">
                       <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Cash Flow</p>
-                      <p className={cn("mt-1 text-sm font-extrabold", (item.netCashFlowMonthly ?? 0) >= 0 ? "text-emerald-700" : "text-[var(--metric-negative)]")}>
+                      <p className={cn("mt-1 text-sm font-extrabold", (item.netCashFlowMonthly ?? 0) >= 0 ? "text-success" : "text-[var(--metric-negative)]")}>
                         {toMonthCashFlow(item.netCashFlowMonthly)}
                       </p>
                     </div>
                     <div className="rounded-xl bg-muted/40 p-3">
                       <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">CoC</p>
-                      <p className={cn("mt-1 text-sm font-extrabold", (item.cocReturnPct ?? 0) >= 0 ? "text-emerald-700" : "text-[var(--metric-negative)]")}>
+                      <p className={cn("mt-1 text-sm font-extrabold", (item.cocReturnPct ?? 0) >= 0 ? "text-success" : "text-[var(--metric-negative)]")}>
                         {toPercent(item.cocReturnPct)}
                       </p>
                     </div>
@@ -1349,8 +1349,8 @@ export function SavedAnalysesPage({
                       <td className="pr-2">
                         <Badge className={cn("rounded-full border text-xs font-semibold", getSignalClasses(signal))}>{SIGNAL_LABELS[signal]}</Badge>
                       </td>
-                      <td className={cn("font-semibold", (item.netCashFlowMonthly ?? 0) >= 0 ? "text-emerald-700" : "text-[var(--metric-negative)]")}>{toMonthCashFlow(item.netCashFlowMonthly)}</td>
-                      <td className={cn("font-semibold", (item.cocReturnPct ?? 0) >= 0 ? "text-emerald-700" : "text-[var(--metric-negative)]")}>{toPercent(item.cocReturnPct)}</td>
+                      <td className={cn("font-semibold", (item.netCashFlowMonthly ?? 0) >= 0 ? "text-success" : "text-[var(--metric-negative)]")}>{toMonthCashFlow(item.netCashFlowMonthly)}</td>
+                      <td className={cn("font-semibold", (item.cocReturnPct ?? 0) >= 0 ? "text-success" : "text-[var(--metric-negative)]")}>{toPercent(item.cocReturnPct)}</td>
                       <td className="font-medium">{toPercent(item.capRatePct)}</td>
                       <td className="font-semibold text-foreground">{toCurrency(item.purchasePrice)}</td>
                       <td className="pr-2">

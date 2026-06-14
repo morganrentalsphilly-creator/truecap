@@ -134,7 +134,7 @@ export default function PropertyManagementPost() {
             <li><strong>Self cost:</strong> ~30 hours/year × $50 = $1,500, plus ~2% higher expected loss from worse screening (~$360/year) = <strong>~$1,860/year</strong></li>
           </ul>
           <p>
-            Self-management wins by ~$1,000/year here. BUT the standard deviation on self-management is much higher: one really bad tenant adds $5-15k to that "worse screening loss" number and self flips to a clear loss. PM is the lower-variance choice.
+            Self-management wins by ~$1,000/year here. BUT the standard deviation on self-management is much higher: one really bad tenant adds $5-15k to that &quot;worse screening loss&quot; number and self flips to a clear loss. PM is the lower-variance choice.
           </p>
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">The cases where PM is non-negotiable</h2>

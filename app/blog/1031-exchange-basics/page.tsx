@@ -87,7 +87,7 @@ export default function ExchangePost() {
             Both clocks start the day property A closes (the calendar day the sale records, not 24 hours from the moment).
           </p>
           <ul>
-            <li><strong>Day 1-45: Identification period.</strong> You have 45 calendar days to formally identify in writing the replacement property (or properties) you intend to acquire. Identification is done in writing through your qualified intermediary — it&apos;s NOT just "I&apos;m looking at this place." There are strict identification rules (most investors use the &quot;3-property rule&quot; — identify up to 3 candidates, then close on one or more).</li>
+            <li><strong>Day 1-45: Identification period.</strong> You have 45 calendar days to formally identify in writing the replacement property (or properties) you intend to acquire. Identification is done in writing through your qualified intermediary — it&apos;s NOT just &quot;I&apos;m looking at this place.&quot; There are strict identification rules (most investors use the &quot;3-property rule&quot; — identify up to 3 candidates, then close on one or more).</li>
             <li><strong>Day 1-180: Closing period.</strong> You must close on at least one identified property within 180 days of the day property A sold. This includes the 45-day identification window — so once you blow past day 45 without identifying, you&apos;re out, even though you&apos;d still have 135 more days to theoretically close.</li>
           </ul>
           <p>
@@ -96,7 +96,7 @@ export default function ExchangePost() {
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">The qualified intermediary (QI) — non-negotiable</h2>
           <p>
-            You CANNOT take possession of the sale proceeds at any point. Not for a day, not for a minute. The moment the buyer&apos;s funds touch your bank account, you&apos;ve received "constructive receipt" and the 1031 exchange is dead.
+            You CANNOT take possession of the sale proceeds at any point. Not for a day, not for a minute. The moment the buyer&apos;s funds touch your bank account, you&apos;ve received &quot;constructive receipt&quot; and the 1031 exchange is dead.
           </p>
           <p>
             That&apos;s why a Qualified Intermediary (QI) is required by IRS regulation. The QI is a third-party entity that:
@@ -110,7 +110,7 @@ export default function ExchangePost() {
             QIs are not banks and are not federally regulated as such — pick one with at least a decade of track record, written bonding, and segregated escrow accounts. Cost is typically $750-$1,500 per exchange. Cheap relative to the tax savings; never cheap out on the QI.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">What "like-kind" actually means</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">What &quot;like-kind&quot; actually means</h2>
           <p>
             Like-kind is broader than most investors realize. Any investment-purpose US real estate exchanges for any other investment-purpose US real estate. You can exchange:
           </p>

@@ -46,27 +46,27 @@ const MAX_COMPARE_ITEMS = 4;
 const MOBILE_DEAL_COLORS = [
   {
     chip: "bg-emerald-500 text-white",
-    border: "border-emerald-300",
-    text: "text-emerald-700",
-    bg: "bg-emerald-50",
+    border: "border-success/30",
+    text: "text-success",
+    bg: "bg-success/10",
   },
   {
     chip: "bg-blue-500 text-white",
-    border: "border-blue-300",
-    text: "text-blue-700",
-    bg: "bg-blue-50",
+    border: "border-primary/30",
+    text: "text-primary",
+    bg: "bg-primary/10",
   },
   {
     chip: "bg-violet-500 text-white",
-    border: "border-violet-300",
-    text: "text-violet-700",
-    bg: "bg-violet-50",
+    border: "border-primary/30",
+    text: "text-primary",
+    bg: "bg-primary/10",
   },
   {
     chip: "bg-amber-500 text-white",
-    border: "border-amber-300",
-    text: "text-amber-700",
-    bg: "bg-amber-50",
+    border: "border-warning/30",
+    text: "text-warning-foreground",
+    bg: "bg-warning/15",
   },
 ] as const;
 
@@ -802,13 +802,13 @@ function CompareMobileHighlights({
     <>
       <div className="grid grid-cols-3 gap-2">
         <div className="rounded-2xl bg-card p-3 shadow-sm">
-          <p className="text-[10px] font-extrabold text-emerald-600">Best Deal</p>
+          <p className="text-[10px] font-extrabold text-success">Best Deal</p>
           <p className="mt-1 line-clamp-2 text-xs font-extrabold leading-tight text-foreground">
             {bestDeal ? getShortAddress(bestDeal.address) : "-"}
           </p>
         </div>
         <div className="rounded-2xl bg-card p-3 shadow-sm">
-          <p className="text-[10px] font-extrabold text-blue-600">Highest ROI</p>
+          <p className="text-[10px] font-extrabold text-primary">Highest ROI</p>
           <p className="mt-1 text-xs font-extrabold text-foreground">
             {highestRoiDeal?.compareSnapshot?.longTermSummary.totalROI != null
               ? fmtPct(highestRoiDeal.compareSnapshot.longTermSummary.totalROI, 1)
@@ -816,7 +816,7 @@ function CompareMobileHighlights({
           </p>
         </div>
         <div className="rounded-2xl bg-card p-3 shadow-sm">
-          <p className="text-[10px] font-extrabold text-violet-600">Strongest DSCR</p>
+          <p className="text-[10px] font-extrabold text-primary">Strongest DSCR</p>
           <p className="mt-1 text-xs font-extrabold text-foreground">
             {strongestDscrDeal?.metrics.dscr == null ? "-" : strongestDscrDeal.metrics.dscr.toFixed(2)}
           </p>
@@ -830,7 +830,7 @@ function CompareMobileHighlights({
               <p className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-muted-foreground">Selected Winner</p>
               <h2 className="mt-1 text-base font-extrabold leading-tight text-foreground">{getShortAddress(bestDeal.address)}</h2>
             </div>
-            <Badge className="rounded-full border border-emerald-200 bg-emerald-50 text-emerald-700">Best</Badge>
+            <Badge className="rounded-full border border-success/30 bg-success/10 text-success">Best</Badge>
           </div>
           <div className="mt-4 grid grid-cols-2 gap-2">
             <div className="rounded-2xl bg-muted/40 p-3">
@@ -925,7 +925,7 @@ export function CompareDealsClient({
   const desktopSlots = Array.from({ length: MAX_COMPARE_ITEMS }, (_, index) => deals[index] ?? null);
 
   return (
-    <main id="main" className="min-h-[calc(100vh-5rem)] bg-muted/30 px-4 py-6 text-foreground sm:px-6 sm:py-8 xl:bg-[radial-gradient(circle_at_top_right,rgba(37,99,235,0.08),transparent_32%),linear-gradient(180deg,#f8fbff,#eef4f8)]">
+    <main id="main" className="min-h-[calc(100vh-5rem)] bg-muted/30 px-4 py-6 text-foreground sm:px-6 sm:py-8 xl:bg-[image:var(--compare-surface)]">
         <div className="w-full">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3 xl:mb-7">
           <div className="flex flex-wrap items-center gap-3">
@@ -983,7 +983,7 @@ export function CompareDealsClient({
                                       <span className={cn("inline-flex size-5 items-center justify-center rounded-full text-[10px] font-extrabold", color.chip)}>
                                         {index + 1}
                                       </span>
-                                      {isBest ? <Trophy className="size-3 text-emerald-600" aria-hidden="true" /> : null}
+                                      {isBest ? <Trophy className="size-3 text-success" aria-hidden="true" /> : null}
                                     </span>
                                     <MobileMetricValue
                                       deal={deal}
@@ -1032,7 +1032,7 @@ export function CompareDealsClient({
                                       <span className={cn("inline-flex size-5 items-center justify-center rounded-full text-[10px] font-extrabold", color.chip)}>
                                         {index + 1}
                                       </span>
-                                      {isBest ? <Trophy className="size-3 text-emerald-600" aria-hidden="true" /> : null}
+                                      {isBest ? <Trophy className="size-3 text-success" aria-hidden="true" /> : null}
                                     </span>
                                     <p className={cn("truncate text-[11px] font-extrabold", color.text)}>
                                       {formatCompactLongTermMetric(row, value)}
@@ -1070,7 +1070,7 @@ export function CompareDealsClient({
                     "relative flex min-h-[17.5rem] flex-col rounded-2xl border border-t-[3px] border-border/80 bg-card/95 p-5 shadow-[0_16px_48px_rgba(15,23,42,0.07)] ring-2 ring-transparent",
                     typeClasses,
                     getDesktopCardTopBorderClass(deal, isBestDeal),
-                    isBestDeal && "border-emerald-200 ring-emerald-300"
+                    isBestDeal && "border-success/30 ring-success/40"
                   )}
                 >
                   {isBestDeal && (
@@ -1112,7 +1112,7 @@ export function CompareDealsClient({
                       </Badge>
                     )}
                     {isBalancedDeal && (
-                      <Badge className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700">
+                      <Badge className="rounded-full border border-success/30 bg-success/10 px-2.5 py-1 text-xs font-bold text-success">
                         Balanced
                       </Badge>
                     )}
@@ -1174,7 +1174,7 @@ export function CompareDealsClient({
                     <div
                       className={cn(
                         "border-r border-border/80 py-1 pr-4",
-                        isShortTermWinner && "text-emerald-700"
+                        isShortTermWinner && "text-success"
                       )}
                     >
                       <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">
@@ -1183,13 +1183,13 @@ export function CompareDealsClient({
                       <p
                         className={cn(
                           "mt-1 text-sm font-extrabold text-foreground",
-                          isShortTermWinner && "text-emerald-700"
+                          isShortTermWinner && "text-success"
                         )}
                       >
                         {shortTermScore} win{shortTermScore === 1 ? "" : "s"}
                       </p>
                       {isShortTermWinner && (
-                        <p className="mt-0.5 text-[10px] font-semibold text-emerald-700">
+                        <p className="mt-0.5 text-[10px] font-semibold text-success">
                           Winner
                         </p>
                       )}
@@ -1197,7 +1197,7 @@ export function CompareDealsClient({
                     <div
                       className={cn(
                         "py-1 pl-4",
-                        isLongTermWinner && "text-emerald-700"
+                        isLongTermWinner && "text-success"
                       )}
                     >
                       <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">
@@ -1206,13 +1206,13 @@ export function CompareDealsClient({
                       <p
                         className={cn(
                           "mt-1 text-sm font-extrabold text-foreground",
-                          isLongTermWinner && "text-emerald-700"
+                          isLongTermWinner && "text-success"
                         )}
                       >
                         {longTermScore} win{longTermScore === 1 ? "" : "s"}
                       </p>
                       {isLongTermWinner && (
-                        <p className="mt-0.5 text-[10px] font-semibold text-emerald-700">
+                        <p className="mt-0.5 text-[10px] font-semibold text-success">
                           Winner
                         </p>
                       )}
@@ -1220,12 +1220,12 @@ export function CompareDealsClient({
                   </div>
 
                   {isBalancedDeal && !isBestDeal && (
-                    <p className="mt-3 rounded-lg bg-emerald-50 px-2.5 py-1.5 text-[11px] font-medium leading-snug text-emerald-800">
+                    <p className="mt-3 rounded-lg bg-success/10 px-2.5 py-1.5 text-[11px] font-medium leading-snug text-success">
                       Top 2 in both short-term and long-term scoring.
                     </p>
                   )}
                   {isBestDeal && (
-                    <p className="mt-3 rounded-lg bg-emerald-50 px-2.5 py-1.5 text-[11px] font-medium leading-snug text-emerald-800">
+                    <p className="mt-3 rounded-lg bg-success/10 px-2.5 py-1.5 text-[11px] font-medium leading-snug text-success">
                       Top performer across most metrics with {totalWins} total win{totalWins === 1 ? "" : "s"}.
                     </p>
                   )}
@@ -1266,10 +1266,10 @@ export function CompareDealsClient({
                           <div
                             key={`${deal?.id ?? "empty"}-${row.key}-${index}`}
                             className={cn(
-                              "flex min-h-8 items-center gap-3 rounded-full bg-white/45 px-4 text-sm",
+                              "flex min-h-8 items-center gap-3 rounded-full bg-card/45 px-4 text-sm",
                               index > 0 && "justify-center",
                               index === 0 && "justify-between",
-                              isBest ? "text-emerald-700" : "text-foreground",
+                              isBest ? "text-success" : "text-foreground",
                               !deal && "text-muted-foreground"
                             )}
                           >
@@ -1282,7 +1282,7 @@ export function CompareDealsClient({
                               <MetricValueWithTooltip deal={deal} row={row}>
                                 <span className="inline-flex shrink-0 items-center gap-2 font-extrabold tabular-nums">
                                   {formatCellValue(deal, row)}
-                                  {isBest ? <Trophy className="size-3.5 text-emerald-600" /> : null}
+                                  {isBest ? <Trophy className="size-3.5 text-success" /> : null}
                                 </span>
                               </MetricValueWithTooltip>
                             ) : (
@@ -1322,10 +1322,10 @@ export function CompareDealsClient({
                           <div
                             key={`${deal?.id ?? "empty"}-${row.key}-${index}`}
                             className={cn(
-                              "flex min-h-8 items-center gap-3 rounded-full bg-white/45 px-4 text-sm",
+                              "flex min-h-8 items-center gap-3 rounded-full bg-card/45 px-4 text-sm",
                               index > 0 && "justify-center",
                               index === 0 && "justify-between",
-                              isBest ? "text-emerald-700" : "text-foreground",
+                              isBest ? "text-success" : "text-foreground",
                               !deal && "text-muted-foreground"
                             )}
                           >
@@ -1354,7 +1354,7 @@ export function CompareDealsClient({
                             {deal ? (
                               <span className="inline-flex shrink-0 items-center gap-2 font-extrabold tabular-nums">
                                 {formatLongTermCell(row, value)}
-                                {isBest ? <Trophy className="size-3.5 text-emerald-600" /> : null}
+                                {isBest ? <Trophy className="size-3.5 text-success" /> : null}
                               </span>
                             ) : (
                               <span className="shrink-0 font-semibold text-muted-foreground/70">—</span>

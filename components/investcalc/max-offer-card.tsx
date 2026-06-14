@@ -147,7 +147,7 @@ export function MaxOfferCard({ values }: MaxOfferCardProps) {
           </div>
           {mao && (
             <div className="text-xs text-muted-foreground sm:text-right space-y-0.5">
-              <div>At this price you'd get:</div>
+              <div>At this price you&apos;d get:</div>
               <div>
                 <span className="font-semibold text-foreground">
                   {mao.achieved.capRate.toFixed(1)}%
@@ -167,7 +167,7 @@ export function MaxOfferCard({ values }: MaxOfferCardProps) {
         </div>
         {!mao && !noneSet && values && (
           <p className="text-xs text-muted-foreground mt-2">
-            Try loosening one of your targets — these returns aren't reachable
+            Try loosening one of your targets — these returns aren&apos;t reachable
             at any reasonable price given the rent and expenses entered.
           </p>
         )}

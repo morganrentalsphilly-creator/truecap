@@ -259,7 +259,7 @@ export default function TaxDeductionsPost() {
             If you have a dedicated space in your primary residence used exclusively and regularly for rental property management, you can deduct a portion of your home expenses (mortgage interest, utilities, depreciation) proportional to the office&apos;s square footage. Typical savings: $500-2,000/year.
           </p>
           <p>
-            The exclusive-and-regular-use test is strict. The IRS doesn&apos;t accept "I sometimes work from the kitchen table." Use a dedicated home office only.
+            The exclusive-and-regular-use test is strict. The IRS doesn&apos;t accept &quot;I sometimes work from the kitchen table.&quot; Use a dedicated home office only.
           </p>
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">The passive activity loss rules — why your losses might not deduct</h2>
@@ -270,7 +270,7 @@ export default function TaxDeductionsPost() {
             Two important exceptions:
           </p>
           <p>
-            <strong>$25,000 active-participation allowance.</strong> If your modified adjusted gross income (MAGI) is under $100,000, you can deduct up to $25,000 of rental losses against your W-2 income each year. The allowance phases out between $100k and $150k MAGI; above $150k, it&apos;s zero. This is why high-W-2 earners often see depreciation deductions "trapped" as passive losses that carry forward but don&apos;t reduce current-year taxes.
+            <strong>$25,000 active-participation allowance.</strong> If your modified adjusted gross income (MAGI) is under $100,000, you can deduct up to $25,000 of rental losses against your W-2 income each year. The allowance phases out between $100k and $150k MAGI; above $150k, it&apos;s zero. This is why high-W-2 earners often see depreciation deductions &quot;trapped&quot; as passive losses that carry forward but don&apos;t reduce current-year taxes.
           </p>
           <p>
             <strong>Real estate professional status.</strong> If you or your spouse qualifies as a real-estate professional (750+ hours/year in real estate, more than half of working time in real estate, materially participating), all rental losses become non-passive and fully deductible against any income. This is the secret weapon for two-earner couples where one spouse handles real estate full-time.
@@ -278,7 +278,7 @@ export default function TaxDeductionsPost() {
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">When you sell — depreciation recapture</h2>
           <p>
-            Every dollar of depreciation you took during ownership gets "recaptured" when you sell. The IRS taxes recaptured depreciation at a max of 25%, separately from capital gains.
+            Every dollar of depreciation you took during ownership gets &quot;recaptured&quot; when you sell. The IRS taxes recaptured depreciation at a max of 25%, separately from capital gains.
           </p>
           <p>
             Example: $400k property depreciated $50k over 5 years. Sold for $500k. The $50k of depreciation gets taxed at up to 25% ($12,500 in additional tax). The remaining $50k of appreciation gets long-term capital gains treatment (0%, 15%, or 20% depending on your bracket).

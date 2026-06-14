@@ -101,7 +101,7 @@ export default function VsCozyPage() {
           </div>
           <h1 className="text-3xl sm:text-5xl font-extrabold text-foreground leading-[1.05] tracking-tight text-balance">
             TrueCap vs Cozy:{" "}
-            <span className="text-primary">Cozy shut down. Here's what replaces it.</span>
+            <span className="text-primary">Cozy shut down. Here&apos;s what replaces it.</span>
           </h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
             Cozy.co was a free landlord ops platform — listings, online applications, rent collection — until Apartments.com acquired and shut it down in 2022. If you landed here looking for an alternative, the honest answer is: no single tool replaced it. TrueCap covers pre-purchase underwriting (a Cozy didn&apos;t do that), and you&apos;d pair it with TurboTenant, Avail, or RentRedi for the operations Cozy used to handle. Here&apos;s the breakdown.

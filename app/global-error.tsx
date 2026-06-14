@@ -58,6 +58,7 @@ export default function GlobalError({
             Try again
           </button>
           <div style={{ marginTop: "1rem" }}>
+            {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- global-error renders its own <html>/<body> outside the App Router, so next/link has no router context here; a plain <a> is required. */}
             <a
               href="/"
               style={{ fontSize: "0.8125rem", color: "#475569", textDecoration: "underline" }}

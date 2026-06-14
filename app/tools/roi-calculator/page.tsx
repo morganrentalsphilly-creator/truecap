@@ -151,7 +151,7 @@ export default function RoiCalculatorPage() {
           <ul className="mt-3 space-y-2 text-base leading-relaxed text-foreground">
             <li><strong>Cash flow:</strong> rent minus all operating expenses minus mortgage. This is the money in your pocket each month, annualized.</li>
             <li><strong>Principal paydown:</strong> the portion of each mortgage payment going to loan balance (not interest). This is equity build — invisible until you sell or refi.</li>
-            <li><strong>Appreciation:</strong> the property's market value increase. The most-volatile component, market-dependent.</li>
+            <li><strong>Appreciation:</strong> the property&apos;s market value increase. The most-volatile component, market-dependent.</li>
           </ul>
           <p className="mt-3 text-base leading-relaxed text-foreground">
             Sum the three, divide by cash invested (down payment + closing + initial rehab), and you have the actual annual return on YOUR capital.

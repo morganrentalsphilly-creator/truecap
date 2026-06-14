@@ -36,7 +36,7 @@ const RiskReturn = dynamic(
   { ssr: false, loading: () => <ChartSkeleton heightClass="h-[320px]" /> }
 );
 import type { DashboardDeal } from "@/lib/dashboard-deal-mapping";
-import { getChartInclusionReason, mapRiskLevelToRisk, resolveReturnMetric, resolveRiskMetric } from "@/lib/dashboard-risk-return";
+import { mapRiskLevelToRisk, resolveReturnMetric, resolveRiskMetric } from "@/lib/dashboard-risk-return";
 
 export type { DashboardDeal } from "@/lib/dashboard-deal-mapping";
 
@@ -113,34 +113,24 @@ function getTopDeals(data: DashboardHomeData): DashboardTopDeal[] {
 }
 
 function getRiskReturn(data: DashboardHomeData) {
-  const points = data.topDeals
-    .map((deal) => {
-      const chartStatus = getChartInclusionReason(deal);
-      if (!chartStatus.include) {
-        return null;
-      }
-
-      const x = chartStatus.returnMetric.value ?? 0;
-      const y = chartStatus.riskMetric.value ?? 0;
-
-      return {
-        dealId: deal.id,
-        name: deal.address,
-        type: deal.propertyTypeLabel,
-        risk: y,
-        return: x,
-        returnKind: chartStatus.returnMetric.kind,
-        hasRiskMetric: chartStatus.riskMetric.value != null,
-        hasReturnMetric: chartStatus.returnMetric.value != null,
-        size: Math.max(80, Math.round((deal.purchasePrice ?? 0) / 1000)),
-        score: deal.score ?? undefined,
-        cashFlow: deal.cashFlowMonthly == null ? undefined : Math.round(deal.cashFlowMonthly),
-        annualCashFlow: deal.annualCashFlow == null ? undefined : Math.round(deal.annualCashFlow),
-        roi: deal.roiPct ?? undefined,
-        dscr: deal.dscr ?? undefined,
-      };
-    })
-    .filter((point): point is NonNullable<typeof point> => Boolean(point));
+  // Each deal carries BOTH return metrics (CoC + 10-yr ROI) and its DSCR so
+  // the chart can toggle the X axis client-side. Cash purchases have no DSCR
+  // (N/A, not 0) — null keeps them off the DSCR axis; the chart notes them.
+  const chartDeals = data.topDeals.map((deal) => {
+    const isCashPurchase = deal.monthlyPayment != null && deal.monthlyPayment <= 0;
+    return {
+      dealId: deal.id,
+      name: deal.address,
+      type: deal.propertyTypeLabel,
+      coc: deal.cocReturnPct,
+      roi: deal.roiPct,
+      dscr: isCashPurchase ? null : deal.dscr,
+      isCashPurchase,
+      size: Math.max(80, Math.round((deal.purchasePrice ?? 0) / 1000)),
+      score: deal.score ?? undefined,
+      cashFlow: deal.cashFlowMonthly == null ? undefined : Math.round(deal.cashFlowMonthly),
+    };
+  });
 
   const riskAdjusted = data.topDeals
     .map((deal) => {
@@ -177,7 +167,7 @@ function getRiskReturn(data: DashboardHomeData) {
     })[0]?.deal;
 
   return {
-    points,
+    chartDeals,
     insights: {
       bestRiskAdjusted: riskAdjusted?.address ?? "-",
       highestReturn: highestReturn?.address ?? "-",
@@ -309,26 +299,6 @@ export function DashboardHome({
       portfolio: getPortfolioTotals(data),
     }),
     [data]
-  );
-
-  // Sparklines only render when 2+ real data points exist. No fake
-  // fallbacks — a financial product should never show invented charts.
-  const { realScoreSpark, realCashSpark, realRoiSpark } = useMemo(
-    () => ({
-      realScoreSpark: topDeals
-        .map((d) => d.score)
-        .filter((v): v is number => v != null)
-        .map((v) => ({ v })),
-      realCashSpark: topDeals
-        .map((d) => d.cashFlow)
-        .filter((v): v is number => v != null)
-        .map((v) => ({ v })),
-      realRoiSpark: topDeals
-        .map((d) => d.roi)
-        .filter((v): v is number => v != null)
-        .map((v) => ({ v })),
-    }),
-    [topDeals]
   );
 
   const hasAnyDeals = data.allDeals.length > 0;
@@ -566,12 +536,6 @@ export function DashboardHome({
                 );
               })}
             </div>
-            {/* Hidden but kept in scope so the sparkline data prep we
-                used to feed StatCard remains referenced by linters when
-                the StatCard-based spotlight design returns. */}
-            <span aria-hidden className="hidden">
-              {realScoreSpark.length + realCashSpark.length + realRoiSpark.length}
-            </span>
           </section>
         ) : null}
 
@@ -608,7 +572,7 @@ export function DashboardHome({
               <AIInsights data={insights} riskReturnInsights={riskReturn.insights} />
             </div>
             <div className="xl:col-span-2">
-              <RiskReturn data={riskReturn.points} />
+              <RiskReturn deals={riskReturn.chartDeals} />
             </div>
           </div>
         ) : null}

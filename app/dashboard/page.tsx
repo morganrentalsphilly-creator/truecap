@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { DashboardHome, type DashboardHomeData } from "@/components/dashboard/DashboardHome";
 
 export const metadata: Metadata = {
@@ -114,7 +115,9 @@ export default async function DashboardPage() {
     // hundreds of deals cost almost nothing.
     supabase
       .from("saved_analyses")
-      .select("purchase_price, net_cash_flow_monthly, cap_rate_raw:result_snapshot->>capRate")
+      .select(
+        "purchase_price, net_cash_flow_monthly, cap_rate_raw:result_snapshot->>capRate, ncf_snapshot:result_snapshot->>netCashFlow"
+      )
       .eq("user_id", user.id)
       .is("deleted_at", null)
       .eq("is_completed", false)
@@ -130,6 +133,7 @@ export default async function DashboardPage() {
     purchase_price: number | null;
     net_cash_flow_monthly: number | null;
     cap_rate_raw: string | null;
+    ncf_snapshot: string | null;
   };
   let portfolioAggregates: DashboardHomeData["portfolioAggregates"] = null;
   if (!aggregateResult.error) {
@@ -149,7 +153,15 @@ export default async function DashboardPage() {
           capDen += r.purchase_price;
         }
       }
-      totalCashFlow += r.net_cash_flow_monthly ?? 0;
+      // Prefer the snapshot's netCashFlow — the SAME source the per-deal
+      // cards use (see buildDashboardDeal) — so the headline total can't
+      // disagree with the rows below it. Fall back to the denormalized
+      // column only when the snapshot lacks the field.
+      const ncfSnap = Number(r.ncf_snapshot);
+      totalCashFlow +=
+        r.ncf_snapshot != null && Number.isFinite(ncfSnap)
+          ? ncfSnap
+          : (r.net_cash_flow_monthly ?? 0);
     }
     portfolioAggregates = {
       totalValue,
@@ -166,7 +178,16 @@ export default async function DashboardPage() {
         <main id="main" className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
           <div className="rounded-2xl border border-destructive/25 bg-destructive/5 p-6">
             <h1 className="text-xl font-bold text-foreground">Could not load dashboard</h1>
-            <p className="mt-2 text-sm text-muted-foreground">Please try again in a few moments.</p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Something went wrong loading your deals. This is usually temporary.
+            </p>
+            <Link
+              href="/dashboard"
+              prefetch={false}
+              className="mt-4 inline-flex items-center rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
+            >
+              Reload dashboard
+            </Link>
           </div>
         </main>
       </div>

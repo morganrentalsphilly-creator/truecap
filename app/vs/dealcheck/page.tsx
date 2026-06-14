@@ -152,7 +152,7 @@ export default function VsDealCheckPage() {
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
                 <li>You want a fully usable free tier with no analysis limits.</li>
                 <li>Your free analyses should feel like the real product, not a teaser.</li>
-                <li>You want explicit benchmarks ("Above 8% — top quartile") inline with each metric.</li>
+                <li>You want explicit benchmarks (&quot;Above 8% — top quartile&quot;) inline with each metric.</li>
                 <li>You want a portfolio rollup across saved deals.</li>
                 <li>You want a deal score with a plain-English breakdown.</li>
                 <li>You prefer transparent open-data sources (HUD, FRED, state tax) you can audit.</li>
@@ -235,10 +235,10 @@ export default function VsDealCheckPage() {
             When investors actually switch to TrueCap
           </h2>
           <ul className="space-y-2 text-sm sm:text-base leading-relaxed text-foreground">
-            <li><strong>"I want the free tier to actually be useful."</strong> TrueCap&apos;s free analyzer is the full thing — cap rate, CoC, DSCR, NCF, address auto-fill, every operating expense, all of it. No signup wall, no analysis count limit. Pro adds power (sensitivity, exit scenarios, tax strategy, share links, PDFs) but the underwriting itself is free.</li>
-            <li><strong>"I want benchmarks inline, not in a separate doc."</strong> Every metric tile shows you what tier you&apos;re in ("Above 8% — top quartile") without leaving the analysis. Pulls from the same engine that drives the score.</li>
-            <li><strong>"I run a portfolio."</strong> Saved deals get a rollup header (total cash flow / weighted cap rate / weighted CoC) — feels like running a book, not a notebook.</li>
-            <li><strong>"I want to understand the score, not just trust it."</strong> Click "Why this score?" on any analysis and see the contribution from each subscore plus what would move the number.</li>
+            <li><strong>&quot;I want the free tier to actually be useful.&quot;</strong> TrueCap&apos;s free analyzer is the full thing — cap rate, CoC, DSCR, NCF, address auto-fill, every operating expense, all of it. No signup wall, no analysis count limit. Pro adds power (sensitivity, exit scenarios, tax strategy, share links, PDFs) but the underwriting itself is free.</li>
+            <li><strong>&quot;I want benchmarks inline, not in a separate doc.&quot;</strong> Every metric tile shows you what tier you&apos;re in (&quot;Above 8% — top quartile&quot;) without leaving the analysis. Pulls from the same engine that drives the score.</li>
+            <li><strong>&quot;I run a portfolio.&quot;</strong> Saved deals get a rollup header (total cash flow / weighted cap rate / weighted CoC) — feels like running a book, not a notebook.</li>
+            <li><strong>&quot;I want to understand the score, not just trust it.&quot;</strong> Click &quot;Why this score?&quot; on any analysis and see the contribution from each subscore plus what would move the number.</li>
           </ul>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
             Prefer to kick the tires on a single metric first? Try the

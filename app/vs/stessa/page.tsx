@@ -153,7 +153,7 @@ export default function VsStessaPage() {
             <strong className="text-foreground">Honest take:</strong> these aren&apos;t
             competing products — they&apos;re complementary. Use TrueCap to underwrite,
             Stessa to operate. The only reason this comparison exists is search-intent
-            confusion ("rental property tool"), not real overlap.
+            confusion (&quot;rental property tool&quot;), not real overlap.
           </p>
         </section>
 
@@ -162,7 +162,7 @@ export default function VsStessaPage() {
             Feature-by-feature
           </h2>
           <p className="text-base text-muted-foreground mb-6 leading-relaxed">
-            Note: green check ≠ "better" — it means "this is what the tool is built for."
+            Note: green check ≠ &quot;better&quot; — it means &quot;this is what the tool is built for.&quot;
           </p>
           <div className="overflow-x-auto rounded-2xl border border-border bg-card">
             <table className="w-full text-sm">

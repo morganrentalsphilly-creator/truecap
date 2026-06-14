@@ -224,7 +224,7 @@ export default async function GlossaryTermPage({
         {/* Formula */}
         {entry.formula ? (
           <section className="mt-10">
-            <h2 className="text-xl font-extrabold text-foreground mb-3">How it's calculated</h2>
+            <h2 className="text-xl font-extrabold text-foreground mb-3">How it&apos;s calculated</h2>
             <div className="rounded-xl border border-border bg-muted/30 p-5">
               <code className="text-base text-foreground font-mono">{entry.formula}</code>
             </div>

@@ -84,7 +84,7 @@ export default function HouseHackingPost() {
             $10.5k vs $60-75k to control the same property. That capital efficiency is why house hacking is the most-recommended first step in serious investor communities.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">The rules — what counts as a "house hack"</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">The rules — what counts as a &quot;house hack&quot;</h2>
           <p>
             FHA + Fannie/Freddie owner-occupant loans require:
           </p>

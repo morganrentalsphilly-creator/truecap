@@ -43,12 +43,6 @@ const STORAGE_KEY = "truecap_cookie_consent_v1";
 
 type ConsentValue = "granted" | "denied";
 
-declare global {
-  interface Window {
-    /* gtag is already declared in track-conversion.ts; just reference it here */
-  }
-}
-
 function readStoredConsent(): ConsentValue | null {
   try {
     if (typeof window === "undefined") return null;

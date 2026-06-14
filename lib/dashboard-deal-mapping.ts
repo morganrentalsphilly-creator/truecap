@@ -105,17 +105,21 @@ function getAddress(row: SavedAnalysisDashboardRow): string {
 
 function getRoiPct(snapshot: ResultSnapshot): number | null {
   const compareSnapshot = snapshot?.compareSnapshot ?? snapshot?.compare_snapshot;
+  // Prefer the explicitly-cumulative 10-yr ROI fields FIRST so the
+  // dashboard's "10-yr ROI" label is accurate. The ambiguous roi/roiPct
+  // fields (which may carry an annual figure for some snapshots) are used
+  // only as a last resort when no 10-yr total is present.
   return firstNumber(
-    snapshot?.roiPct,
-    snapshot?.roi_pct,
-    snapshot?.roi,
     snapshot?.totalROI,
     snapshot?.total_roi,
     compareSnapshot?.longTermSummary?.totalROI,
     compareSnapshot?.longTermSummary?.totalRoi,
     compareSnapshot?.long_term_summary?.total_roi,
     compareSnapshot?.exitScenarios?.summary?.totalROI,
-    compareSnapshot?.exitScenarios?.summary?.totalRoi
+    compareSnapshot?.exitScenarios?.summary?.totalRoi,
+    snapshot?.roiPct,
+    snapshot?.roi_pct,
+    snapshot?.roi
   );
 }
 

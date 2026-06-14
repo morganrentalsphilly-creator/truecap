@@ -179,7 +179,7 @@ export default function FiftyPercentRulePost() {
             The 50% rule was calibrated for a specific era + property type — pre-2010, Midwest SFR, mid-tax states, conventional financing, long-term tenants. It still works for that exact archetype. For everything else, use it as a directional sanity check, not a verdict.
           </p>
           <p>
-            The investors who use it best treat it as a "10-second listing filter" while keeping the actual decision math separate. The investors who lose money on it use it as the actual underwriting calculation in markets where it&apos;s wrong by 15-25 percentage points.
+            The investors who use it best treat it as a &quot;10-second listing filter&quot; while keeping the actual decision math separate. The investors who lose money on it use it as the actual underwriting calculation in markets where it&apos;s wrong by 15-25 percentage points.
           </p>
         </div>
         </article>

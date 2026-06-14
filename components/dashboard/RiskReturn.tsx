@@ -1,99 +1,214 @@
-import { CartesianGrid, ResponsiveContainer, Scatter, ScatterChart, Tooltip, XAxis, YAxis, ZAxis, ReferenceLine } from "recharts";
+"use client";
 
-type RiskReturnPoint = {
+import { useMemo, useState } from "react";
+import {
+  CartesianGrid,
+  ResponsiveContainer,
+  Scatter,
+  ScatterChart,
+  Tooltip,
+  XAxis,
+  YAxis,
+  ZAxis,
+  ReferenceLine,
+} from "recharts";
+import { usePrefersDark } from "@/hooks/use-prefers-dark";
+
+/**
+ * One point per saved deal, with BOTH candidate return metrics carried so
+ * the user can toggle the X axis without a server round-trip. The Y axis is
+ * always DSCR — a single, consistent risk scale. Cash purchases have no
+ * debt service (DSCR is N/A, not 0/"underwater"), so `dscr` is null for them
+ * and they're surfaced in the footnote instead of being plotted on a DSCR
+ * axis they don't belong on.
+ *
+ * This replaces the previous chart, which mixed units on BOTH axes — ROI%
+ * OR annual cash flow $ on X, and DSCR OR riskScore OR a mapped risk level
+ * on Y — so two points were rarely measured on the same scale.
+ */
+export type RiskReturnDeal = {
   dealId?: string;
   name: string;
   type?: string;
-  risk: number;
-  return: number;
-  returnKind?: "roi" | "annualCashFlow";
-  hasRiskMetric?: boolean;
-  hasReturnMetric?: boolean;
+  coc: number | null;
+  roi: number | null;
+  dscr: number | null;
+  isCashPurchase?: boolean;
   size: number;
   score?: number;
   cashFlow?: number;
-  annualCashFlow?: number;
-  roi?: number;
-  dscr?: number;
 };
 
-function formatCurrency(value: number): string {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0,
-  }).format(value);
-}
+type ReturnMetricId = "coc" | "roi";
 
-function formatReturn(point: RiskReturnPoint): string {
-  if (point.hasReturnMetric === false) return "Not provided by backend";
-  if (point.returnKind === "annualCashFlow") return `${formatCurrency(point.return)}/yr`;
-  return `${point.return.toLocaleString("en-US", { maximumFractionDigits: 1 })}%`;
-}
+const RETURN_METRICS: { id: ReturnMetricId; label: string; axis: string }[] = [
+  { id: "coc", label: "CoC %", axis: "Cash-on-cash %" },
+  { id: "roi", label: "10-yr ROI %", axis: "10-yr ROI %" },
+];
 
-function RiskReturnTooltip({
+// Concrete colors per OS theme — recharts sets SVG presentation attributes,
+// which don't resolve CSS var(), so we pick literals based on the theme.
+const CHART_COLORS = {
+  light: { grid: "oklch(0.92 0.012 255)", axis: "oklch(0.52 0.03 256)", point: "oklch(0.55 0.22 265)" },
+  dark: { grid: "oklch(0.34 0.02 262)", axis: "oklch(0.72 0.02 256)", point: "oklch(0.65 0.22 265)" },
+};
+
+type PlottedPoint = {
+  name: string;
+  type?: string;
+  ret: number;
+  dscr: number;
+  size: number;
+};
+
+function ChartTooltip({
   active,
   payload,
+  metricLabel,
 }: {
   active?: boolean;
-  payload?: Array<{ payload?: RiskReturnPoint }>;
+  payload?: Array<{ payload?: PlottedPoint }>;
+  metricLabel: string;
 }) {
   if (!active || !payload?.length || !payload[0]?.payload) return null;
-  const point = payload[0].payload;
-
+  const p = payload[0].payload;
   return (
     <div className="rounded-xl border border-border bg-card px-3 py-2 text-xs shadow-sm">
-      <div><span className="font-semibold text-muted-foreground">Property:</span> <span className="font-semibold text-foreground">{point.name || "-"}</span></div>
-      <div className="mt-1"><span className="font-semibold text-muted-foreground">Type:</span> <span className="text-foreground">{point.type || "-"}</span></div>
-      <div className="mt-1"><span className="font-semibold text-muted-foreground">Return:</span> <span className="text-foreground">{formatReturn(point)}</span></div>
+      <div>
+        <span className="font-semibold text-muted-foreground">Property:</span>{" "}
+        <span className="font-semibold text-foreground">{p.name || "-"}</span>
+      </div>
+      {p.type ? (
+        <div className="mt-1">
+          <span className="font-semibold text-muted-foreground">Type:</span>{" "}
+          <span className="text-foreground">{p.type}</span>
+        </div>
+      ) : null}
       <div className="mt-1">
-        <span className="font-semibold text-muted-foreground">Risk (DSCR):</span>{" "}
-        <span className="text-foreground">
-          {point.hasRiskMetric === false
-            ? "Not provided by backend"
-            : point.risk.toLocaleString("en-US", { maximumFractionDigits: 2 })}
-        </span>
+        <span className="font-semibold text-muted-foreground">{metricLabel}:</span>{" "}
+        <span className="text-foreground">{p.ret.toLocaleString("en-US", { maximumFractionDigits: 1 })}%</span>
+      </div>
+      <div className="mt-1">
+        <span className="font-semibold text-muted-foreground">DSCR:</span>{" "}
+        <span className="text-foreground">{p.dscr.toLocaleString("en-US", { maximumFractionDigits: 2 })}</span>
       </div>
     </div>
   );
 }
 
-export function RiskReturn({ data = [] }: { data?: RiskReturnPoint[] }) {
+export function RiskReturn({ deals = [] }: { deals?: RiskReturnDeal[] }) {
+  const [metric, setMetric] = useState<ReturnMetricId>("coc");
+  const active = RETURN_METRICS.find((m) => m.id === metric) ?? RETURN_METRICS[0];
+  const prefersDark = usePrefersDark();
+  const { grid: GRID, axis: AXIS, point: POINT } = prefersDark ? CHART_COLORS.dark : CHART_COLORS.light;
+
+  const { points, excludedCount, cashCount, total } = useMemo(() => {
+    const totalDeals = deals.length;
+    const cash = deals.filter((d) => d.isCashPurchase).length;
+    const plotted: PlottedPoint[] = deals
+      .map((d): PlottedPoint | null => {
+        const ret = metric === "coc" ? d.coc : d.roi;
+        // A point only plots when it has BOTH the active return metric AND a
+        // DSCR — otherwise its position on one axis would be fabricated.
+        if (ret == null || d.dscr == null) return null;
+        return { name: d.name, type: d.type, ret, dscr: d.dscr, size: d.size };
+      })
+      .filter((p): p is PlottedPoint => p !== null);
+    return { points: plotted, excludedCount: totalDeals - plotted.length, cashCount: cash, total: totalDeals };
+  }, [deals, metric]);
+
+  // sr-only summary so the scatter isn't an opaque image to screen readers.
+  const summary =
+    points.length > 0
+      ? `Risk versus return: ${points.length} deals plotted by ${active.axis} against DSCR. ` +
+        points
+          .slice(0, 8)
+          .map((p) => `${p.name}, ${p.ret.toFixed(1)} percent at DSCR ${p.dscr.toFixed(2)}`)
+          .join("; ") +
+        (points.length > 8 ? `, and ${points.length - 8} more.` : ".")
+      : "No deals have both the selected return metric and a DSCR to plot.";
+
   return (
     <div className="rounded-2xl bg-card border border-border p-6">
-      <div className="flex items-start justify-between mb-4">
+      <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
         <div>
           <h3 className="font-display text-lg font-semibold">Risk vs Return</h3>
-          <p className="text-sm text-muted-foreground mt-0.5">Each point is a saved deal. Return uses ROI first, then annual cash flow.</p>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            One point per saved deal — up and to the right is better. Same units on each axis.
+          </p>
         </div>
-        <div className="flex items-center gap-3 text-[11px]">
-          <div className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-success" /> Optimal</div>
-          <div className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-destructive" /> Caution</div>
+        <div className="flex items-center gap-1 p-1 rounded-lg bg-muted" role="tablist" aria-label="Return metric">
+          {RETURN_METRICS.map((m) => (
+            <button
+              key={m.id}
+              type="button"
+              role="tab"
+              aria-selected={metric === m.id}
+              onClick={() => setMetric(m.id)}
+              className={`px-3 py-1 text-xs font-semibold rounded-md transition ${
+                metric === m.id ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {m.label}
+            </button>
+          ))}
         </div>
       </div>
-      <div className="h-[260px] -ml-2">
-        <ResponsiveContainer width="100%" height="100%">
-          <ScatterChart margin={{ top: 10, right: 20, bottom: 10, left: 0 }}>
-            <CartesianGrid strokeDasharray="3 6" stroke="oklch(0.92 0.012 255)" />
-            <XAxis type="number" dataKey="return" name="Return" stroke="oklch(0.52 0.03 256)" fontSize={12} tickLine={false} axisLine={false}
-              label={{ value: "Return →", position: "insideBottom", offset: -2, fontSize: 11, fill: "oklch(0.52 0.03 256)" }} />
-            {/* DSCR is the y-axis data, and higher DSCR means SAFER —
-                not riskier. The old label ("Risk / DSCR ↑") had the
-                arrow pointing the wrong way for what the data means.
-                Relabeled to read: higher = safer. */}
-            <YAxis type="number" dataKey="risk" name="DSCR (safer ↑)" stroke="oklch(0.52 0.03 256)" fontSize={12} tickLine={false} axisLine={false}
-              label={{ value: "DSCR (safer ↑)", angle: -90, position: "insideLeft", fontSize: 11, fill: "oklch(0.52 0.03 256)" }} />
-            <ZAxis type="number" dataKey="size" range={[80, 400]} />
-            <ReferenceLine x={10} stroke="oklch(0.92 0.012 255)" strokeDasharray="3 3" />
-            <ReferenceLine y={1} stroke="oklch(0.92 0.012 255)" strokeDasharray="3 3" />
-            <Tooltip
-              cursor={{ strokeDasharray: "3 3" }}
-              content={<RiskReturnTooltip />}
-            />
-            <Scatter data={data} fill="oklch(0.55 0.22 265)" fillOpacity={0.7} />
-          </ScatterChart>
-        </ResponsiveContainer>
-      </div>
+
+      {points.length > 0 ? (
+        <>
+          <div className="h-[260px] -ml-2" role="img" aria-label={summary}>
+            <ResponsiveContainer width="100%" height="100%">
+              <ScatterChart margin={{ top: 10, right: 20, bottom: 14, left: 0 }}>
+                <CartesianGrid strokeDasharray="3 6" stroke={GRID} />
+                <XAxis
+                  type="number"
+                  dataKey="ret"
+                  name={active.axis}
+                  stroke={AXIS}
+                  fontSize={12}
+                  tickLine={false}
+                  axisLine={false}
+                  tickFormatter={(v) => `${v}%`}
+                  label={{ value: `${active.axis} →`, position: "insideBottom", offset: -6, fontSize: 11, fill: AXIS }}
+                />
+                <YAxis
+                  type="number"
+                  dataKey="dscr"
+                  name="DSCR"
+                  stroke={AXIS}
+                  fontSize={12}
+                  tickLine={false}
+                  axisLine={false}
+                  label={{ value: "DSCR (safer ↑)", angle: -90, position: "insideLeft", fontSize: 11, fill: AXIS }}
+                />
+                <ZAxis type="number" dataKey="size" range={[80, 400]} />
+                <ReferenceLine y={1} stroke={GRID} strokeDasharray="3 3" />
+                <Tooltip cursor={{ strokeDasharray: "3 3" }} content={<ChartTooltip metricLabel={active.axis} />} />
+                <Scatter data={points} fill={POINT} fillOpacity={0.7} />
+              </ScatterChart>
+            </ResponsiveContainer>
+          </div>
+          {excludedCount > 0 ? (
+            <p className="mt-2 text-xs text-muted-foreground">
+              Showing {points.length} of {total} deals that have both {active.label} and a DSCR.
+              {cashCount > 0
+                ? ` ${cashCount} cash ${cashCount === 1 ? "purchase has" : "purchases have"} no DSCR.`
+                : ""}
+            </p>
+          ) : null}
+        </>
+      ) : (
+        <div className="flex h-[200px] flex-col items-center justify-center rounded-xl border border-dashed border-border text-center">
+          <p className="text-sm font-medium text-foreground">Not enough data to plot</p>
+          <p className="mt-1 max-w-xs text-xs text-muted-foreground">
+            Deals need both a {active.label} value and a DSCR to appear here.
+            {cashCount > 0
+              ? ` ${cashCount} cash ${cashCount === 1 ? "purchase has" : "purchases have"} no DSCR.`
+              : " Run a 10-yr projection on a deal to populate its ROI."}
+          </p>
+        </div>
+      )}
     </div>
   );
 }

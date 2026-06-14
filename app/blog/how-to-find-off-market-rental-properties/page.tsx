@@ -154,10 +154,10 @@ export default function OffMarketPost() {
             <li><strong>Absentee owner lists</strong> — landlords who live in a different state often want out. Response rates: 0.5-2%.</li>
             <li><strong>Tax-delinquent lists</strong> — owners 1-2 years behind on property tax. Higher motivation. Response: 1-3%.</li>
             <li><strong>Inherited property lists</strong> — heirs of recently-deceased owners often want to liquidate. Response: 2-5% but lists are harder to source.</li>
-            <li><strong>30-90 day pre-foreclosure</strong> — last-resort sellers. Response high (3-5%) but you'll compete with foreclosure investors.</li>
+            <li><strong>30-90 day pre-foreclosure</strong> — last-resort sellers. Response high (3-5%) but you&apos;ll compete with foreclosure investors.</li>
           </ul>
           <p>
-            What doesn't work: spray-and-pray to every property in a zip code. Targeting is the entire game.
+            What doesn&apos;t work: spray-and-pray to every property in a zip code. Targeting is the entire game.
           </p>
           <p>
             Budget: $0.45-0.90 per piece all-in (postcard + postage + list cost). $2-5k/month sustainable budget produces 1-3 deals/year for an investor who answers calls within 4 hours and runs the math fast (use <Link href="/" className="text-primary font-semibold hover:underline">TrueCap</Link> to underwrite leads in 60 seconds instead of 30 minutes).
@@ -176,18 +176,18 @@ export default function OffMarketPost() {
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">4. Wholesaler relationships</h2>
           <p>
-            Wholesalers source distressed properties + assign the contract to investors for a markup of $5-15k. Done right, they're a real source of pre-MLS deals. Done wrong, they're a way to overpay on a property dressed up as a deal.
+            Wholesalers source distressed properties + assign the contract to investors for a markup of $5-15k. Done right, they&apos;re a real source of pre-MLS deals. Done wrong, they&apos;re a way to overpay on a property dressed up as a deal.
           </p>
           <p>
             The play: build relationships with 5-10 active wholesalers in your market. Get on their cash-buyer email lists. Respond to every deal they email — fast (run it through <Link href="/" className="text-primary font-semibold hover:underline">TrueCap</Link> in 60 seconds), then either commit or pass clearly. Wholesalers prioritize investors who respond fast and close reliably; ghost their emails and you fall off their list.
           </p>
           <p>
-            Verification matters. Run your OWN underwriting on every wholesale deal. Verify ARV from comps (not the wholesaler's number). Pull tax bills yourself. Read the full inspection report. <Link href="/blog/spot-bad-rental-in-60-seconds" className="text-primary font-semibold hover:underline">The red flags</Link> matter even more on wholesale deals because the wholesaler is incentivized to hide them.
+            Verification matters. Run your OWN underwriting on every wholesale deal. Verify ARV from comps (not the wholesaler&apos;s number). Pull tax bills yourself. Read the full inspection report. <Link href="/blog/spot-bad-rental-in-60-seconds" className="text-primary font-semibold hover:underline">The red flags</Link> matter even more on wholesale deals because the wholesaler is incentivized to hide them.
           </p>
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">5. Networking with local agents (the right way)</h2>
           <p>
-            Most agents work the MLS. A subset specializes in investor clients and hears about pocket listings (deals an owner wants to sell but hasn't listed yet). These investor-focused agents are gold.
+            Most agents work the MLS. A subset specializes in investor clients and hears about pocket listings (deals an owner wants to sell but hasn&apos;t listed yet). These investor-focused agents are gold.
           </p>
           <p>
             How to find them: ask wholesalers + property managers + other investors which agents have brought them deals. The same 2-3 names will come up. Build relationships with those agents. Make it easy for them to bring you deals — fast underwriting (60 seconds via TrueCap), clear buying criteria, reliable closes, no haggling on commission.
@@ -201,18 +201,18 @@ export default function OffMarketPost() {
             County websites publish foreclosure auction lists, tax-lien certificate sales, and sheriff sale schedules. These are public, free to access, and meaningfully under-shopped by individual investors (most attendees are professional flippers).
           </p>
           <p>
-            What works: tax-lien auctions in landlord-friendly states (FL, IN, AZ, OH). Tax-deed sales in NC, IA. Specific knowledge of your county's auction process is critical — the rules vary dramatically by jurisdiction.
+            What works: tax-lien auctions in landlord-friendly states (FL, IN, AZ, OH). Tax-deed sales in NC, IA. Specific knowledge of your county&apos;s auction process is critical — the rules vary dramatically by jurisdiction.
           </p>
           <p>
-            What doesn't: showing up to a foreclosure auction unprepared. Most properties at auction need cash purchase (no financing contingency), have unknown condition (often you can't see inside), and have title issues (junior liens, occupancy disputes). Don't bid until you've gone to 3-5 auctions to observe.
+            What doesn&apos;t: showing up to a foreclosure auction unprepared. Most properties at auction need cash purchase (no financing contingency), have unknown condition (often you can&apos;t see inside), and have title issues (junior liens, occupancy disputes). Don&apos;t bid until you&apos;ve gone to 3-5 auctions to observe.
           </p>
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">7. Facebook + Nextdoor + local FB investor groups</h2>
           <p>
-            Underrated. Sellers often post "considering selling" in local Facebook groups before going to an agent. Investors who participate in these groups for months — answering questions, being helpful, not pitching — get first call when posts go up.
+            Underrated. Sellers often post &quot;considering selling&quot; in local Facebook groups before going to an agent. Investors who participate in these groups for months — answering questions, being helpful, not pitching — get first call when posts go up.
           </p>
           <p>
-            What works: join 3-5 local real estate Facebook groups + your neighborhood Nextdoor. Be present. Comment substantively. Never pitch in the thread (admins will ban you). When someone posts "thinking about selling my rental," DM them privately and offer to chat.
+            What works: join 3-5 local real estate Facebook groups + your neighborhood Nextdoor. Be present. Comment substantively. Never pitch in the thread (admins will ban you). When someone posts &quot;thinking about selling my rental,&quot; DM them privately and offer to chat.
           </p>
           <p>
             Timeline: 6-12 months of presence before the deal flow starts. Pays off indefinitely once it does.
@@ -220,10 +220,10 @@ export default function OffMarketPost() {
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">8. Bandit signs (with caveats)</h2>
           <p>
-            "We Buy Houses" signs at intersections. They work — measurably. They're also illegal in many municipalities and create brand-perception issues if you ever want to do other things in real estate.
+            &quot;We Buy Houses&quot; signs at intersections. They work — measurably. They&apos;re also illegal in many municipalities and create brand-perception issues if you ever want to do other things in real estate.
           </p>
           <p>
-            If you go this route, post in zip codes where they're legal, use cheap signs you can replace weekly, and have a dedicated phone number that goes to a virtual assistant who pre-qualifies leads. Cost: $1-2 per sign + ~$200/mo for VA. Response: 5-15 calls/month per 100 signs in a major metro.
+            If you go this route, post in zip codes where they&apos;re legal, use cheap signs you can replace weekly, and have a dedicated phone number that goes to a virtual assistant who pre-qualifies leads. Cost: $1-2 per sign + ~$200/mo for VA. Response: 5-15 calls/month per 100 signs in a major metro.
           </p>
           <p>
             The bigger investors mostly use this as a brand-building tactic combined with direct mail and digital. Solo investors should weigh the legal + reputational tradeoffs.
@@ -239,7 +239,7 @@ export default function OffMarketPost() {
           <ul>
             <li><strong>Speed of response</strong> — answer calls and emails within 4 hours, ideally faster. Sellers who reach out to multiple investors go with whoever responds first.</li>
             <li><strong>Speed of underwriting</strong> — being able to run a deal in 60 seconds vs 30 minutes lets you respond to 20x more leads per month. <Link href="/" className="text-primary font-semibold hover:underline">TrueCap</Link> exists specifically for this moment.</li>
-            <li><strong>Clear buying criteria</strong> — wholesalers + agents send deals to investors who say "yes" or "no" cleanly. Investors who waffle get fewer deals.</li>
+            <li><strong>Clear buying criteria</strong> — wholesalers + agents send deals to investors who say &quot;yes&quot; or &quot;no&quot; cleanly. Investors who waffle get fewer deals.</li>
             <li><strong>Reliability of close</strong> — fall through on one deal and the source stops sending you deals. Close fast, close clean, close on terms agreed.</li>
           </ul>
           <p>
