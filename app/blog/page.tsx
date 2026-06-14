@@ -48,6 +48,16 @@ export type BlogPost = {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: "depreciation-recapture-rental-property",
+    title:
+      "Depreciation recapture on rental property: how the tax works when you sell (2026)",
+    excerpt:
+      "Depreciation lowers your basis every year — and recapture taxes the gain that creates when you sell, at up to 25%. A full worked example on a $250K rental sold for $360K, why the real bill is 2.4x the naive estimate, the §1245 cost-seg trap, and five ways to defer or erase it.",
+    readingTimeMinutes: 11,
+    publishedAt: "2026-06-14",
+    available: true,
+  },
+  {
     slug: "schedule-e-rental-property",
     title:
       "Schedule E for rental property: a line-by-line walkthrough (2026)",
