@@ -11,12 +11,12 @@ export const metadata: Metadata = {
 };
 import {
   getDashboardNavAccess,
-  getEntitlementsForUser,
   hasDashboardAccess,
   hasDashboardInsightsAccess,
   hasPaidPlanSubscription,
   hasPlanFeature,
 } from "@/lib/entitlements";
+import { getRequestUser, getRequestEntitlements } from "@/lib/request-auth";
 import { buildDashboardDeal, type SavedAnalysisDashboardRow } from "@/lib/dashboard-deal-mapping";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
@@ -65,15 +65,13 @@ function buildDashboardData(
 
 export default async function DashboardPage() {
   const supabase = await createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getRequestUser();
 
   if (!user) {
     redirect("/auth/login");
   }
 
-  const entitlements = await getEntitlementsForUser(supabase, user.id);
+  const entitlements = await getRequestEntitlements(user.id);
   if (!hasDashboardAccess(entitlements)) {
     redirect("/");
   }

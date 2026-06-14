@@ -12,11 +12,11 @@ import { Topbar } from "@/components/dashboard/Topbar";
 import { listAnalysisTemplatesAction } from "@/app/actions/analysis-templates";
 import {
   getDashboardNavAccess,
-  getEntitlementsForUser,
   hasDashboardAccess,
   hasPaidPlanSubscription,
   hasPlanFeature,
 } from "@/lib/entitlements";
+import { getRequestUser, getRequestEntitlements } from "@/lib/request-auth";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 type ProfileRow = {
@@ -41,15 +41,13 @@ function getInitials(displayName: string, email: string): string {
 
 export default async function DashboardTemplatesPage() {
   const supabase = await createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getRequestUser();
 
   if (!user) {
     redirect("/auth/login");
   }
 
-  const entitlements = await getEntitlementsForUser(supabase, user.id);
+  const entitlements = await getRequestEntitlements(user.id);
   if (!hasDashboardAccess(entitlements) || !hasPlanFeature(entitlements, "template_manage")) {
     redirect("/");
   }

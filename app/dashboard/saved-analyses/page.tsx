@@ -16,11 +16,11 @@ import { Topbar } from "@/components/dashboard/Topbar";
 import { getCompareIdsFromCookie } from "@/app/actions/compare";
 import {
   getDashboardNavAccess,
-  getEntitlementsForUser,
   hasDashboardAccess,
   hasPaidPlanSubscription,
   hasPlanFeature,
 } from "@/lib/entitlements";
+import { getRequestUser, getRequestEntitlements } from "@/lib/request-auth";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import type { StoredRecommendation, StoredRiskLevel } from "@/lib/compare-metrics";
 
@@ -129,15 +129,13 @@ export default async function DashboardSavedAnalysesPage({
   searchParams?: Promise<{ sort?: string; dir?: string; state?: string }>;
 }) {
   const supabase = await createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getRequestUser();
 
   if (!user) {
     redirect("/auth/login");
   }
 
-  const entitlements = await getEntitlementsForUser(supabase, user.id);
+  const entitlements = await getRequestEntitlements(user.id);
   if (!hasDashboardAccess(entitlements) || !hasPlanFeature(entitlements, "save_deal")) {
     redirect("/");
   }

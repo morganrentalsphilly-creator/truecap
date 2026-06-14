@@ -21,11 +21,11 @@ import {
 import { recommendationToSignal, type PropertyType, type StoredRecommendation, type StoredRiskLevel } from "@/lib/compare-metrics";
 import {
   getDashboardNavAccess,
-  getEntitlementsForUser,
   hasDashboardAccess,
   hasPaidPlanSubscription,
   hasPlanFeature,
 } from "@/lib/entitlements";
+import { getRequestUser, getRequestEntitlements } from "@/lib/request-auth";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 const MAX_COMPARE_ITEMS = 4;
@@ -156,15 +156,13 @@ function mapDeal(row: SavedAnalysisRow): CompareDealViewModel {
 
 export default async function DashboardComparePage() {
   const supabase = await createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getRequestUser();
 
   if (!user) {
     redirect("/auth/login");
   }
 
-  const entitlements = await getEntitlementsForUser(supabase, user.id);
+  const entitlements = await getRequestEntitlements(user.id);
   if (!hasDashboardAccess(entitlements) || !hasPlanFeature(entitlements, "compare_deals")) {
     redirect("/");
   }

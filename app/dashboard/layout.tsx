@@ -21,23 +21,21 @@ import { redirect } from "next/navigation";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import {
   getDashboardNavAccess,
-  getEntitlementsForUser,
   hasDashboardAccess,
 } from "@/lib/entitlements";
+import { getRequestUser, getRequestEntitlements } from "@/lib/request-auth";
 import { getSavedAnalysesTotalCount } from "@/lib/saved-analyses-count";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
   const supabase = await createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getRequestUser();
 
   if (!user) {
     redirect("/auth/login");
   }
 
-  const entitlements = await getEntitlementsForUser(supabase, user.id);
+  const entitlements = await getRequestEntitlements(user.id);
   if (!hasDashboardAccess(entitlements)) {
     redirect("/");
   }
