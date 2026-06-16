@@ -48,6 +48,16 @@ export type BlogPost = {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: "how-to-calculate-noi-rental-property",
+    title:
+      "How to calculate NOI (net operating income) on a rental property (2026)",
+    excerpt:
+      "NOI = effective gross income minus operating expenses, before the mortgage — and it's the number cap rate, DSCR, and 5+ unit valuation are all built on. The formula, a full line-by-line $250K duplex example, the CapEx classification trap that swings the cap rate a full point, and the three ways people get NOI wrong.",
+    readingTimeMinutes: 10,
+    publishedAt: "2026-06-16",
+    available: true,
+  },
+  {
     slug: "depreciation-recapture-rental-property",
     title:
       "Depreciation recapture on rental property: how the tax works when you sell (2026)",
