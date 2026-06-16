@@ -61,7 +61,7 @@ const MATRIX: Row[] = [
   { feature: "Accounting + Schedule E", truecap: "Forward projection only", rentecdirect: "Yes — full GL + 1099 + Schedule E", winner: "rentecdirect" },
   { feature: "Owner portals (for partnerships)", truecap: "No", rentecdirect: "Yes — multi-owner statements", winner: "rentecdirect" },
   { feature: "Free tier", truecap: "Yes — full underwriting math", rentecdirect: "No — paid only (trial available)", winner: "truecap" },
-  { feature: "Pricing (entry tier)", truecap: "Free; Pro $19/mo", rentecdirect: "~$45/mo for landlords, ~$60+/mo for PMs (as of 2026)", winner: "truecap" },
+  { feature: "Pricing (entry tier)", truecap: "Free; Pro $20/mo", rentecdirect: "~$45/mo for landlords, ~$60+/mo for PMs (as of 2026)", winner: "truecap" },
   { feature: "Sweet spot", truecap: "1-30 doors, solo investor", rentecdirect: "5-100 units, small PM or scaling landlord", winner: "tie" },
 ];
 

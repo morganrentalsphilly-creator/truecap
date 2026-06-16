@@ -62,7 +62,7 @@ const MATRIX: Row[] = [
   { feature: "Control over property choice", truecap: "Total", fundrise: "None — Fundrise picks deals", winner: "truecap" },
   { feature: "Tax benefits", truecap: "Full depreciation + interest + 1031", fundrise: "Some depreciation pass-through (K-1 funds); no 1031 from shares", winner: "truecap" },
   { feature: "Cash flow model", truecap: "You design — fixed-rate mortgage, your CF goes to you", fundrise: "Quarterly distributions from fund returns", winner: "tie" },
-  { feature: "Pricing / fees", truecap: "Free; Pro $19/mo (analysis tools only)", fundrise: "0.15% advisory + 0.85% fund management (1% all-in, plus expense ratios)", winner: "tie" },
+  { feature: "Pricing / fees", truecap: "Free; Pro $20/mo (analysis tools only)", fundrise: "0.15% advisory + 0.85% fund management (1% all-in, plus expense ratios)", winner: "tie" },
   { feature: "Free tier (for analysis)", truecap: "Yes — full underwriting math", fundrise: "Not applicable", winner: "truecap" },
 ];
 

@@ -4,7 +4,7 @@
  * Shown when a user without PDF entitlement clicks Export PDF.
  * Two paths, clearly priced:
  *
- *   - Pro ($19/mo)  → /pricing (unlimited PDFs + everything else)
+ *   - Pro ($20/mo)  → /pricing (unlimited PDFs + everything else)
  *   - One-time $5   → Stripe Checkout for just this report
  *
  * The one-time path is the conversion-rescue: visitors who will never

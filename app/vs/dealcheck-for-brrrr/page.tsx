@@ -68,7 +68,7 @@ const MATRIX: Row[] = [
   // DealCheck includes its rental/BRRRR calculators on every plan
   // (verified dealcheck.io/pricing June 2026) — its tiers gate saved-
   // property caps, not the calculators. Don't claim otherwise.
-  { feature: "Free tier covers BRRRR analyzer",      truecap: "No — Pro feature ($19/mo) but full underwriting math is free",          dealcheck: "Yes — included on all plans (free tier caps saved deals)", winner: "dealcheck" },
+  { feature: "Free tier covers BRRRR analyzer",      truecap: "No — Pro feature ($20/mo) but full underwriting math is free",          dealcheck: "Yes — included on all plans (free tier caps saved deals)", winner: "dealcheck" },
   { feature: "Shareable BRRRR analysis link",        truecap: "Pro — public read-only link with branding",                              dealcheck: "Pro — PDF export",                                    winner: "truecap" },
   { feature: "PDF export of BRRRR analysis",         truecap: "Pro — multi-page lender-ready report",                                   dealcheck: "Pro",                                                 winner: "tie" },
 ];
@@ -82,14 +82,14 @@ const DEALCHECK_BRRRR_FAQ: FaqItem[] = [
         explicit &quot;capital recovered&quot; headline metric (so you instantly see
         if it&apos;s an infinite-return deal), a sensitivity grid that
         stress-tests ARV (the single biggest BRRRR risk), and a Pro tier
-        that bundles everything for $19/month — DealCheck&apos;s $10-20/month
+        that bundles everything for $20/month — DealCheck&apos;s $10-20/month
         tiers mostly raise saved-deal caps. DealCheck has native iOS/Android apps
         and a longer track record in the BRRRR community — if mobile is
         your primary workflow, that matters.
       </>
     ),
     plainTextAnswer:
-      "Both work. TrueCap edges out on BRRRR-specific things: explicit 'capital recovered' headline metric, sensitivity grid that stress-tests ARV, single $19/mo Pro tier. DealCheck has native mobile apps + longer BRRRR community trust.",
+      "Both work. TrueCap edges out on BRRRR-specific things: explicit 'capital recovered' headline metric, sensitivity grid that stress-tests ARV, single $20/mo Pro tier. DealCheck has native mobile apps + longer BRRRR community trust.",
   },
   {
     question: "Does TrueCap have a BRRRR-specific calculator?",
@@ -130,14 +130,14 @@ const DEALCHECK_BRRRR_FAQ: FaqItem[] = [
         highlights when your capital recovered hits 100%, so you don&apos;t
         have to mentally compute it; (2) sensitivity on ARV — DealCheck
         requires manual re-runs, TrueCap&apos;s Pro grid varies ARV ±10%
-        in one view; (3) bundling — TrueCap Pro is $19/mo with BRRRR,
+        in one view; (3) bundling — TrueCap Pro is $20/mo with BRRRR,
         sensitivity, tax strategy, and exit scenarios all included,
         while DealCheck&apos;s plans ($10-20/mo) mostly raise saved-property
         caps. The fundamental BRRRR math is the same on both.
       </>
     ),
     plainTextAnswer:
-      "Three things: (1) explicit infinite-return flagging when capital recovered hits 100%; (2) ARV sensitivity in one view vs manual re-runs; (3) TrueCap Pro at $19/mo bundles BRRRR + sensitivity + tax strategy + exit scenarios, while DealCheck's $10-20/mo plans mostly raise saved-property caps. Fundamental BRRRR math is identical.",
+      "Three things: (1) explicit infinite-return flagging when capital recovered hits 100%; (2) ARV sensitivity in one view vs manual re-runs; (3) TrueCap Pro at $20/mo bundles BRRRR + sensitivity + tax strategy + exit scenarios, while DealCheck's $10-20/mo plans mostly raise saved-property caps. Fundamental BRRRR math is identical.",
   },
   {
     question: "Can I use TrueCap free for BRRRR?",
@@ -146,13 +146,13 @@ const DEALCHECK_BRRRR_FAQ: FaqItem[] = [
         The standard underwriting (cap rate, cash flow, DSCR) is free on
         any BRRRR property. The dedicated BRRRR analyzer (cash-out refi
         math, capital recovered, infinite-return detection) is a Pro
-        feature ($19/month). For your first BRRRR deal evaluation, free
+        feature ($20/month). For your first BRRRR deal evaluation, free
         TrueCap + your spreadsheet covers the cash-out math; if you do
         BRRRR repeatedly, Pro pays for itself in the first deal.
       </>
     ),
     plainTextAnswer:
-      "Standard underwriting (cap rate, cash flow, DSCR) is free on BRRRR properties. The dedicated BRRRR analyzer (cash-out refi, capital recovered, infinite-return detection) is Pro ($19/mo). One BRRRR deal pays for Pro.",
+      "Standard underwriting (cap rate, cash flow, DSCR) is free on BRRRR properties. The dedicated BRRRR analyzer (cash-out refi, capital recovered, infinite-return detection) is Pro ($20/mo). One BRRRR deal pays for Pro.",
   },
   {
     question: "What's the right refi LTV to model in a BRRRR analysis?",
@@ -244,7 +244,7 @@ export default function VsDealCheckForBrrrrPage() {
             BRRRR-specific things: explicit &quot;capital recovered&quot;
             headline metric (so infinite-return deals are obvious), a
             sensitivity grid that stress-tests ARV (the single biggest
-            BRRRR risk), and a single $19/month Pro tier that bundles
+            BRRRR risk), and a single $20/month Pro tier that bundles
             the BRRRR analyzer + everything else.
             <strong> DealCheck</strong> has native iOS/Android apps and a
             longer track record in the BRRRR community — if you
@@ -329,7 +329,7 @@ export default function VsDealCheckForBrrrrPage() {
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             Free covers the standard cap rate, CoC, DSCR, and cash flow
-            on the property. Pro ($19/mo) unlocks the full BRRRR
+            on the property. Pro ($20/mo) unlocks the full BRRRR
             analyzer with capital recovered, infinite-return flagging,
             and ARV sensitivity stress-testing.
           </p>

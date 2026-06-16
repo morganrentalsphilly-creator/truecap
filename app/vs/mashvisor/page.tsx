@@ -277,7 +277,7 @@ const MASHVISOR_FAQ: FaqItem[] = [
     question: "Is Mashvisor or TrueCap cheaper?",
     answer: (
       <>
-        TrueCap is cheaper. TrueCap Pro is $19/month. Mashvisor&apos;s
+        TrueCap is cheaper. TrueCap Pro is $20/month. Mashvisor&apos;s
         plans range from ~$70/month to ~$300/month depending on
         feature access and market data depth (as of 2026). TrueCap
         doesn&apos;t carry market-data subscription costs because the
@@ -286,7 +286,7 @@ const MASHVISOR_FAQ: FaqItem[] = [
       </>
     ),
     plainTextAnswer:
-      "TrueCap is cheaper. TrueCap Pro is $19/month. Mashvisor's plans range from ~$70/month to ~$300/month depending on feature access (as of 2026). TrueCap's scope is narrower (per-deal underwriting, not nationwide neighborhood data).",
+      "TrueCap is cheaper. TrueCap Pro is $20/month. Mashvisor's plans range from ~$70/month to ~$300/month depending on feature access (as of 2026). TrueCap's scope is narrower (per-deal underwriting, not nationwide neighborhood data).",
   },
   {
     question: "Does TrueCap have neighborhood heatmaps like Mashvisor?",

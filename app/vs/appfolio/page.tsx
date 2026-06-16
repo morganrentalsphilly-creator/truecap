@@ -62,7 +62,7 @@ const MATRIX: Row[] = [
   { feature: "Resident services + utilities", truecap: "No", appfolio: "Yes — bundled smart-home, utility billing", winner: "appfolio" },
   { feature: "AI assistant for renters", truecap: "No", appfolio: "Yes — AI leasing assistant", winner: "appfolio" },
   { feature: "Free tier", truecap: "Yes — full underwriting math", appfolio: "No — paid only", winner: "truecap" },
-  { feature: "Pricing (entry tier)", truecap: "Free; Pro $19/mo", appfolio: "Core plan ~$1.40/unit/mo with $250 minimum (as of 2026)", winner: "truecap" },
+  { feature: "Pricing (entry tier)", truecap: "Free; Pro $20/mo", appfolio: "Core plan ~$1.40/unit/mo with $250 minimum (as of 2026)", winner: "truecap" },
   { feature: "Built for solo investors", truecap: "Yes — 1-30 doors", appfolio: "No — minimum spend assumes 200+ units", winner: "truecap" },
   { feature: "Shareable read-only deal link", truecap: "Pro — public URL + branding", appfolio: "Internal portal only", winner: "truecap" },
 ];

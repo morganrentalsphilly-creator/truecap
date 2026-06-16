@@ -60,7 +60,7 @@ const MATRIX: Row[] = [
   { feature: "Online rent collection", truecap: "No", cozy: "Was ACH free", winner: "cozy" },
   { feature: "Tenant screening", truecap: "No", cozy: "Was TransUnion-backed", winner: "cozy" },
   { feature: "Free tier", truecap: "Yes — full underwriting math", cozy: "Was free", winner: "tie" },
-  { feature: "Pricing", truecap: "Free; Pro $19/mo", cozy: "Was free (shut down)", winner: "truecap" },
+  { feature: "Pricing", truecap: "Free; Pro $20/mo", cozy: "Was free (shut down)", winner: "truecap" },
 ];
 
 export default function VsCozyPage() {

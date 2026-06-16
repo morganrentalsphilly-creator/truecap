@@ -61,7 +61,7 @@ const MATRIX: Row[] = [
   { feature: "Rent tracking", truecap: "No", landlordstudio: "Yes — payment logging (no ACH collection itself)", winner: "landlordstudio" },
   { feature: "Mobile app", truecap: "PWA", landlordstudio: "Native iOS + Android", winner: "tie" },
   { feature: "Free tier", truecap: "Yes — full underwriting math", landlordstudio: "Yes — limited properties", winner: "tie" },
-  { feature: "Pricing (paid tier)", truecap: "Pro $19/mo for projections + tax + share + PDF", landlordstudio: "Starter ~$12/mo, Premium ~$30/mo (as of 2026)", winner: "tie" },
+  { feature: "Pricing (paid tier)", truecap: "Pro $20/mo for projections + tax + share + PDF", landlordstudio: "Starter ~$12/mo, Premium ~$30/mo (as of 2026)", winner: "tie" },
 ];
 
 export default function VsLandlordStudioPage() {

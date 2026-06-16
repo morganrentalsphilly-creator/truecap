@@ -71,7 +71,7 @@ const MATRIX: Row[] = [
   { feature: "AI deal Q&A on your numbers", truecap: "Yes — grounded in the computed analysis", bricked: "AI picks comps; no investment Q&A", winner: "truecap" },
   { feature: "Try without signup", truecap: "Yes — full analysis, no account", bricked: "No — account + 3-day trial", winner: "truecap" },
   { feature: "Free tier", truecap: "Yes — unlimited core underwriting", bricked: "No — trial only", winner: "truecap" },
-  { feature: "Entry pricing", truecap: "Free; Pro $19/mo unlimited; $5 one-time PDF", bricked: "$49/mo for 100 comps, metered up to $199/mo (as of June 2026)", winner: "truecap" },
+  { feature: "Entry pricing", truecap: "Free; Pro $20/mo unlimited; $5 one-time PDF", bricked: "$49/mo for 100 comps, metered up to $199/mo (as of June 2026)", winner: "truecap" },
   { feature: "Lender-ready PDF + share links", truecap: "Pro — multi-page report + read-only links", bricked: "Not the focus", winner: "truecap" },
   { feature: "API access", truecap: "No", bricked: "Yes — Growth tier and up", winner: "bricked" },
 ];
@@ -282,7 +282,7 @@ export default function VsBrickedPage() {
             TrueCap free covers cap rate, CoC, DSCR, and monthly cash flow with no
             account and no analysis cap. Pro adds projections, tax strategy, exit
             scenarios, BRRRR + flip analyzers, deal score, and lender-ready PDFs —
-            $19/mo flat, never metered.
+            $20/mo flat, never metered.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link
@@ -355,14 +355,14 @@ const BRICKED_FAQ: FaqItem[] = [
         Bricked starts at $49/month for 100 comps, rising to $199/month for 500
         (metered, with a 3-day trial and no free tier) — priced for acquisition
         teams running volume. TrueCap&apos;s core analyzer is free with no analysis
-        cap and no account required; Pro is $19/month flat with everything
+        cap and no account required; Pro is $20/month flat with everything
         unlimited, and there&apos;s a $5 one-time option for a single lender-ready
         PDF. For a solo investor analyzing a few deals a month, the pricing models
         aren&apos;t really comparable.
       </>
     ),
     plainTextAnswer:
-      "Bricked: $49/mo for 100 comps up to $199/mo for 500, metered, 3-day trial, no free tier. TrueCap: free unlimited core, Pro $19/mo flat, $5 one-time PDF. Different models for different volumes.",
+      "Bricked: $49/mo for 100 comps up to $199/mo for 500, metered, 3-day trial, no free tier. TrueCap: free unlimited core, Pro $20/mo flat, $5 one-time PDF. Different models for different volumes.",
   },
   {
     question: "Are Bricked's repair estimates better than TrueCap's rehab estimator?",
@@ -388,13 +388,13 @@ const BRICKED_FAQ: FaqItem[] = [
         acquisition workflow. If you flip occasionally — or you&apos;re deciding
         between flipping and holding — TrueCap Pro&apos;s fix-and-flip analyzer
         (net profit, annualized ROI, break-even ARV) plus the BRRRR analyzer covers
-        the math at $19/month, and the hold analysis tells you whether keeping it
+        the math at $20/month, and the hold analysis tells you whether keeping it
         as a rental beats selling. Many investors use both: Bricked for the offer,
         TrueCap for the hold decision.
       </>
     ),
     plainTextAnswer:
-      "Volume flippers: Bricked fits the acquisition workflow. Occasional flippers or flip-vs-hold deciders: TrueCap Pro's flip + BRRRR analyzers at $19/mo, plus hold analysis. Many use both: Bricked for the offer, TrueCap for the hold decision.",
+      "Volume flippers: Bricked fits the acquisition workflow. Occasional flippers or flip-vs-hold deciders: TrueCap Pro's flip + BRRRR analyzers at $20/mo, plus hold analysis. Many use both: Bricked for the offer, TrueCap for the hold decision.",
   },
 ];
 

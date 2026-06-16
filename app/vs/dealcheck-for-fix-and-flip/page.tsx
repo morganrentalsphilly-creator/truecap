@@ -52,7 +52,7 @@ const MATRIX: Row[] = [
   // DealCheck's house-flipping calculator is included on every plan
   // (verified dealcheck.io/pricing June 2026) — tiers gate saved-
   // property caps, not the calculators.
-  { feature: "Free tier covers flip math", truecap: "No — Pro feature ($19/mo)", dealcheck: "Yes — included on all plans (free tier caps saved deals)", winner: "dealcheck" },
+  { feature: "Free tier covers flip math", truecap: "No — Pro feature ($20/mo)", dealcheck: "Yes — included on all plans (free tier caps saved deals)", winner: "dealcheck" },
   { feature: "Shareable flip analysis", truecap: "Pro — public read-only link + branding", dealcheck: "Pro — PDF export", winner: "truecap" },
 ];
 
@@ -91,11 +91,11 @@ const NICHE_FAQ: FaqItem[] = [
     question: "Can I use TrueCap free for flip analysis?",
     answer: (
       <>
-        The standard cap rate / cash flow / DSCR underwriting is free on any property. The dedicated flip analyzer (ARV math, holding costs, break-even ARV, profit) is a Pro feature ($19/mo). For your first flip evaluation, free TrueCap + a spreadsheet covers the basics; if you do flips repeatedly, Pro pays for itself fast.
+        The standard cap rate / cash flow / DSCR underwriting is free on any property. The dedicated flip analyzer (ARV math, holding costs, break-even ARV, profit) is a Pro feature ($20/mo). For your first flip evaluation, free TrueCap + a spreadsheet covers the basics; if you do flips repeatedly, Pro pays for itself fast.
       </>
     ),
     plainTextAnswer:
-      "Standard underwriting free. Dedicated flip analyzer (ARV math, holding, break-even ARV, profit) is Pro $19/mo. One flip pays for Pro.",
+      "Standard underwriting free. Dedicated flip analyzer (ARV math, holding, break-even ARV, profit) is Pro $20/mo. One flip pays for Pro.",
   },
   {
     question: "How accurate are ARV estimates in flip analysis?",
@@ -178,7 +178,7 @@ export default function VsDealcheckForFixAndFlipPage() {
                 <li>You&apos;re evaluating a flip before making an offer.</li>
                 <li>You want break-even ARV math + sensitivity on ARV assumptions.</li>
                 <li>You want holding-cost detail (per-month).</li>
-                <li>You want the cheapest Pro tier ($19/mo all-in).</li>
+                <li>You want the cheapest Pro tier ($20/mo all-in).</li>
               </ul>
             </div>
             <div>

@@ -66,7 +66,7 @@ const TOOLS = [
     name: "TrueCap (underwriting)",
     bestFor: "Best STR underwriting with LTR/STR scenario comparison",
     url: "/vs/dealcheck-for-short-term-rentals",
-    pricing: "Free; Pro $19/mo",
+    pricing: "Free; Pro $20/mo",
     freeCovers: [
       "Plug AirDNA monthly revenue into rent field; run full cap rate / DSCR / cash flow",
       "Compare LTR vs STR scenarios on same property",

@@ -62,7 +62,7 @@ const MATRIX: Row[] = [
   { feature: "Cleaning + vendor scheduling", truecap: "No", hostaway: "Yes — turnover automation", winner: "hostaway" },
   { feature: "Mobile app", truecap: "PWA", hostaway: "Native iOS + Android", winner: "tie" },
   { feature: "Free tier", truecap: "Yes — full underwriting math", hostaway: "No — paid only (~$10-15 per listing/mo as of 2026)", winner: "truecap" },
-  { feature: "Pricing model", truecap: "Free; Pro $19/mo", hostaway: "Per-listing pricing, custom enterprise tiers", winner: "tie" },
+  { feature: "Pricing model", truecap: "Free; Pro $20/mo", hostaway: "Per-listing pricing, custom enterprise tiers", winner: "tie" },
 ];
 
 export default function VsHostawayPage() {

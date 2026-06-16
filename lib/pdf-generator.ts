@@ -388,7 +388,7 @@ function drawHeader(
   doc: jsPDF,
   pageNum: number,
   totalPages: number,
-  generatedAt: Date,
+  _generatedAt: Date,
   logoData: { dataUrl: string; width: number; height: number } | null,
   branding?: BrandingConfig | null
 ) {
@@ -463,14 +463,8 @@ function drawHeader(
   doc.setFont("helvetica", "bold");
   doc.setFontSize(15);
   doc.text(titleText, titleLeftX, 46);
-  setText(doc, COLOR.sub);
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(8);
-  doc.text(
-    `Generated ${generatedAt.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`,
-    titleLeftX,
-    62,
-  );
+  // "Generated [date]" line intentionally removed — the report no longer
+  // stamps an export date in the header (keeps it evergreen for sharing).
 
   // Header divider — a single calm hairline across the full width.
   // Previously this had a brand-color accent segment on the left,
@@ -788,30 +782,77 @@ function pageInputs(
 
   // Units
   y = sectionTitle(doc, "Units", y, undefined, themeColor);
-  const uW = (SAFE.w - 12) / 2;
-  d.units.forEach((u, i) => {
-    const x = M.left + i * (uW + 12);
-    card(doc, x, y, uW, 60);
-    setFill(doc, i === 0 ? COLOR.primarySoft : COLOR.cardSoft);
-    doc.roundedRect(x, y, uW, 22, 8, 8, "F");
-    setText(doc, COLOR.ink);
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(10);
-    doc.text(u.label, x + 12, y + 15);
-    setText(doc, COLOR.sub);
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(7.5);
-    ["BEDS", "BATHS", "SQ FT", "RENT"].forEach((lbl, j) => {
-      doc.text(lbl, x + 12 + j * ((uW - 24) / 4), y + 36);
+  if (d.units.length <= 2) {
+    // 1-2 units fit cleanly as side-by-side cards.
+    const uW = (SAFE.w - 12) / 2;
+    d.units.forEach((u, i) => {
+      const x = M.left + i * (uW + 12);
+      card(doc, x, y, uW, 60);
+      setFill(doc, i === 0 ? COLOR.primarySoft : COLOR.cardSoft);
+      doc.roundedRect(x, y, uW, 22, 8, 8, "F");
+      setText(doc, COLOR.ink);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(10);
+      doc.text(u.label, x + 12, y + 15);
+      setText(doc, COLOR.sub);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(7.5);
+      ["BEDS", "BATHS", "SQ FT", "RENT"].forEach((lbl, j) => {
+        doc.text(lbl, x + 12 + j * ((uW - 24) / 4), y + 36);
+      });
+      setText(doc, COLOR.ink);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(11);
+      [String(u.beds), String(u.baths), String(u.sqft), u.rent ? `${fmtCurrency(u.rent)}/mo` : "$0"].forEach((v, j) => {
+        doc.text(v, x + 12 + j * ((uW - 24) / 4), y + 52);
+      });
     });
-    setText(doc, COLOR.ink);
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(11);
-    [String(u.beds), String(u.baths), String(u.sqft), u.rent ? `${fmtCurrency(u.rent)}/mo` : "$0"].forEach((v, j) => {
-      doc.text(v, x + 12 + j * ((uW - 24) / 4), y + 52);
+    y += 60 + 22;
+  } else {
+    // 3+ units: the previous code positioned every unit card in a single
+    // row (x = left + i·(cardWidth+gap)) with no wrapping, so on a
+    // multifamily deal the 3rd card clipped the right margin and units
+    // 3..N rendered off-page entirely. A unit-mix + rent-roll summary in
+    // the same vertical band conveys EVERY unit, always fits the cover,
+    // and is how a lender scans a multifamily.
+    const stripH = 60;
+    const grossRent = d.units.reduce((sum, u) => sum + (u.rent || 0), 0);
+    const avgRent = grossRent / d.units.length;
+    const mix = new Map<string, number>();
+    d.units.forEach((u) => {
+      const k = `${u.beds}/${u.baths}`;
+      mix.set(k, (mix.get(k) || 0) + 1);
     });
-  });
-  y += 60 + 22;
+    const mixStr = Array.from(mix.entries()).map(([k, n]) => `${n}×${k}`).join("  ·  ");
+    card(doc, M.left, y, SAFE.w, stripH);
+    const cols = [
+      { label: "UNITS", value: String(d.units.length), big: true },
+      { label: "UNIT MIX (BD/BA)", value: mixStr, big: false },
+      { label: "GROSS RENT", value: `${fmtCurrency(grossRent)}/mo`, big: true },
+      { label: "AVG / UNIT", value: `${fmtCurrency(avgRent)}/mo`, big: true },
+    ];
+    const colW = SAFE.w / cols.length;
+    cols.forEach((c, k) => {
+      const cx = M.left + k * colW + 14;
+      setText(doc, COLOR.sub);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(7);
+      doc.setCharSpace(0.6);
+      doc.text(c.label, cx, y + 22);
+      doc.setCharSpace(0);
+      setText(doc, COLOR.ink);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(c.big ? 14 : 10);
+      let v = c.value;
+      const maxW = colW - 22;
+      if (doc.getTextWidth(v) > maxW) {
+        v = `${mix.size} unit types`;
+        if (doc.getTextWidth(v) > maxW) doc.setFontSize(9);
+      }
+      doc.text(v, cx, y + 44);
+    });
+    y += stripH + 22;
+  }
 
   // Recommendation / verdict card (full width). Auto-sizes to its
   // content so short Neutral/Risky rationales don't leave a giant

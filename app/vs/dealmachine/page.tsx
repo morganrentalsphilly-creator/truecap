@@ -62,7 +62,7 @@ const MATRIX: Row[] = [
   { feature: "Property data + lists", truecap: "Limited (HUD FMR + FRED)", dealmachine: "Yes — 150M+ properties, motivated lists", winner: "dealmachine" },
   { feature: "Mobile-first UX", truecap: "PWA installable", dealmachine: "Native app (built for mobile)", winner: "dealmachine" },
   { feature: "Free tier", truecap: "Yes — full underwriting math", dealmachine: "Trial only ($59-99/mo paid)", winner: "truecap" },
-  { feature: "Pricing (entry tier)", truecap: "Free; Pro $19/mo", dealmachine: "Starter ~$59/mo, Pro ~$99/mo (as of 2026)", winner: "truecap" },
+  { feature: "Pricing (entry tier)", truecap: "Free; Pro $20/mo", dealmachine: "Starter ~$59/mo, Pro ~$99/mo (as of 2026)", winner: "truecap" },
   { feature: "Shareable read-only deal link", truecap: "Pro — public URL + branding", dealmachine: "Internal-only data", winner: "truecap" },
   { feature: "Lender-ready PDF", truecap: "Pro — multi-page report", dealmachine: "Not the use case", winner: "truecap" },
 ];
@@ -330,11 +330,11 @@ const DEALMACHINE_FAQ: FaqItem[] = [
     question: "Is DealMachine worth $59-99/month?",
     answer: (
       <>
-        Depends on volume. If you&apos;re sending 200+ postcards a month or actively driving for dollars several days a week, DealMachine&apos;s all-in workflow pays back quickly. If you buy 1-3 properties a year through MLS, both DealMachine and PropStream are overkill. TrueCap&apos;s $19/mo Pro is the right spend bracket for solo buy-and-hold investors.
+        Depends on volume. If you&apos;re sending 200+ postcards a month or actively driving for dollars several days a week, DealMachine&apos;s all-in workflow pays back quickly. If you buy 1-3 properties a year through MLS, both DealMachine and PropStream are overkill. TrueCap&apos;s $20/mo Pro is the right spend bracket for solo buy-and-hold investors.
       </>
     ),
     plainTextAnswer:
-      "Depends on volume. 200+ postcards/month or active driving for dollars? Pays back. 1-3 properties/year via MLS? Overkill. TrueCap&apos;s $19/mo Pro is the right bracket for solo buy-and-hold.",
+      "Depends on volume. 200+ postcards/month or active driving for dollars? Pays back. 1-3 properties/year via MLS? Overkill. TrueCap&apos;s $20/mo Pro is the right bracket for solo buy-and-hold.",
   },
   {
     question: "Does DealMachine do underwriting?",

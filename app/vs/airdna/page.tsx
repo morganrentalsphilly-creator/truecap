@@ -61,7 +61,7 @@ const MATRIX: Row[] = [
   { feature: "Mortgage + financing math", truecap: "Yes — PITI + DSCR + amortization", airdna: "Not included", winner: "truecap" },
   { feature: "Address auto-fill (rent/rate/tax)", truecap: "Yes — HUD + FRED + state property tax", airdna: "STR-specific data only", winner: "truecap" },
   { feature: "Free tier", truecap: "Yes — full underwriting math", airdna: "Free MarketMinder dashboard with limited data", winner: "tie" },
-  { feature: "Pricing (paid tier)", truecap: "Pro $19/mo", airdna: "Rentalizer ~$20-40 per property; Markets subscription $50-200+/mo (as of 2026)", winner: "truecap" },
+  { feature: "Pricing (paid tier)", truecap: "Pro $20/mo", airdna: "Rentalizer ~$20-40 per property; Markets subscription $50-200+/mo (as of 2026)", winner: "truecap" },
   { feature: "Shareable read-only analysis", truecap: "Pro — public URL + branding", airdna: "PDF reports on paid tier", winner: "tie" },
 ];
 

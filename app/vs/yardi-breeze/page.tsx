@@ -61,7 +61,7 @@ const MATRIX: Row[] = [
   { feature: "Owner / partner portals", truecap: "No", yardibreeze: "Yes — multi-owner statements", winner: "yardibreeze" },
   { feature: "Full GL accounting", truecap: "Forward projection only", yardibreeze: "Yes — chart of accounts, balance sheet, 1099s", winner: "yardibreeze" },
   { feature: "Free tier", truecap: "Yes — full underwriting math", yardibreeze: "No — paid only (demo available)", winner: "truecap" },
-  { feature: "Pricing (entry tier)", truecap: "Free; Pro $19/mo", yardibreeze: "~$1-2/unit/month with $100 minimum (as of 2026)", winner: "tie" },
+  { feature: "Pricing (entry tier)", truecap: "Free; Pro $20/mo", yardibreeze: "~$1-2/unit/month with $100 minimum (as of 2026)", winner: "tie" },
   { feature: "Built for solo investors (1-30 doors)", truecap: "Yes", yardibreeze: "Yes — 1-100 sweet spot", winner: "tie" },
 ];
 

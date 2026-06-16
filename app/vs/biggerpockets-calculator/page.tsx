@@ -374,7 +374,7 @@ const BP_FAQ: FaqItem[] = [
     question: "How much is TrueCap vs BiggerPockets Pro?",
     answer: (
       <>
-        TrueCap Pro is $19/month (or ~$16.67/month billed annually).
+        TrueCap Pro is $20/month (or ~$16.67/month billed annually).
         BiggerPockets Pro is ~$390/year (~$32.50/month). For the
         calculator alone, TrueCap is roughly half the price. BiggerPockets
         Pro of course bundles forums, courses, and other community
@@ -384,7 +384,7 @@ const BP_FAQ: FaqItem[] = [
       </>
     ),
     plainTextAnswer:
-      "TrueCap Pro is $19/month or ~$16.67/month annual. BiggerPockets Pro is ~$390/year (~$32.50/month). For the calculator alone, TrueCap is roughly half the price.",
+      "TrueCap Pro is $20/month or ~$16.67/month annual. BiggerPockets Pro is ~$390/year (~$32.50/month). For the calculator alone, TrueCap is roughly half the price.",
   },
   {
     question: "Does TrueCap have a 10-year projection like BiggerPockets?",

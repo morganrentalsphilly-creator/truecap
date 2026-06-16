@@ -50,7 +50,7 @@ const MATRIX: Row[] = [
   { feature: "Deal score + verdict", truecap: "Pro — 0-100 score + plain-English verdict", mashvisor: "Investibility score per property", winner: "tie" },
   { feature: "Address auto-fill (rent/rate/tax)", truecap: "Yes — HUD + FRED + state property tax", mashvisor: "STR-focused; LTR rent estimates included", winner: "tie" },
   { feature: "Free tier", truecap: "Yes — full underwriting math", mashvisor: "Limited free dashboard; full data paid", winner: "truecap" },
-  { feature: "Pricing (paid tier)", truecap: "Pro $19/mo", mashvisor: "$70-300/mo depending on plan (as of 2026)", winner: "truecap" },
+  { feature: "Pricing (paid tier)", truecap: "Pro $20/mo", mashvisor: "$70-300/mo depending on plan (as of 2026)", winner: "truecap" },
 ];
 
 const NICHE_FAQ: FaqItem[] = [

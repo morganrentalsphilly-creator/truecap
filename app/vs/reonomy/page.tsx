@@ -60,7 +60,7 @@ const MATRIX: Row[] = [
   { feature: "Debt + transaction history", truecap: "No", reonomy: "Yes — mortgage + sale history", winner: "reonomy" },
   { feature: "Tenant rosters (CRE)", truecap: "No", reonomy: "Yes — tenant lookup", winner: "reonomy" },
   { feature: "Free tier", truecap: "Yes — full residential underwriting", reonomy: "Paid only (enterprise pricing)", winner: "truecap" },
-  { feature: "Pricing", truecap: "Free; Pro $19/mo", reonomy: "Custom (typically $300+/mo enterprise)", winner: "truecap" },
+  { feature: "Pricing", truecap: "Free; Pro $20/mo", reonomy: "Custom (typically $300+/mo enterprise)", winner: "truecap" },
 ];
 
 export default function VsReonomyPage() {

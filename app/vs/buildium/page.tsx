@@ -62,7 +62,7 @@ const MATRIX: Row[] = [
   { feature: "Owner reports + portals", truecap: "No", buildium: "Yes — multi-owner statement generation", winner: "buildium" },
   { feature: "Maintenance vendor management", truecap: "No", buildium: "Yes — full work-order workflow", winner: "buildium" },
   { feature: "Free tier", truecap: "Yes — full underwriting math", buildium: "No — trial only", winner: "truecap" },
-  { feature: "Pricing (entry tier)", truecap: "Free; Pro $19/mo", buildium: "Essential ~$55/mo + per-unit fees (as of 2026)", winner: "truecap" },
+  { feature: "Pricing (entry tier)", truecap: "Free; Pro $20/mo", buildium: "Essential ~$55/mo + per-unit fees (as of 2026)", winner: "truecap" },
   { feature: "Built for landlords scaling beyond 30 units", truecap: "No — TrueCap targets 1-30 doors", buildium: "Yes — built for property management companies", winner: "buildium" },
   { feature: "Shareable read-only deal link", truecap: "Pro — public URL + branding", buildium: "Internal portal only", winner: "truecap" },
 ];

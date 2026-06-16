@@ -61,7 +61,7 @@ const MATRIX: Row[] = [
   { feature: "Public records data", truecap: "Limited (HUD FMR + FRED)", propstream: "Yes — 150M+ properties", winner: "propstream" },
   { feature: "List builder / direct mail integration", truecap: "No", propstream: "Yes — full marketing stack", winner: "propstream" },
   { feature: "Mobile-first UX", truecap: "Yes — PWA installable", propstream: "Mobile app exists", winner: "tie" },
-  { feature: "Pricing (entry tier)", truecap: "Free for underwriting; Pro $19/mo", propstream: "~$99/mo (as of 2026), no real free tier", winner: "truecap" },
+  { feature: "Pricing (entry tier)", truecap: "Free for underwriting; Pro $20/mo", propstream: "~$99/mo (as of 2026), no real free tier", winner: "truecap" },
   { feature: "Free tier", truecap: "Yes — full underwriting math", propstream: "No — paid only", winner: "truecap" },
   { feature: "Shareable read-only deal link", truecap: "Pro — public URL + branding", propstream: "Internal-only data", winner: "truecap" },
   { feature: "Lender-ready PDF", truecap: "Pro — multi-page report", propstream: "Not the use case", winner: "truecap" },
@@ -340,11 +340,11 @@ const PROPSTREAM_FAQ: FaqItem[] = [
     question: "Does TrueCap have a free tier? PropStream doesn&apos;t.",
     answer: (
       <>
-        Yes — TrueCap&apos;s free tier covers cap rate, cash-on-cash, DSCR, cash flow, and address auto-fill on unlimited deals. No card required. Pro ($19/mo) adds projections, tax strategy, sensitivity, deal score, and PDF export. PropStream is paid-only — no real free tier beyond a trial.
+        Yes — TrueCap&apos;s free tier covers cap rate, cash-on-cash, DSCR, cash flow, and address auto-fill on unlimited deals. No card required. Pro ($20/mo) adds projections, tax strategy, sensitivity, deal score, and PDF export. PropStream is paid-only — no real free tier beyond a trial.
       </>
     ),
     plainTextAnswer:
-      "Yes. TrueCap free covers cap rate, CoC, DSCR, cash flow, address auto-fill on unlimited deals. Pro is $19/mo. PropStream has no real free tier.",
+      "Yes. TrueCap free covers cap rate, CoC, DSCR, cash flow, address auto-fill on unlimited deals. Pro is $20/mo. PropStream has no real free tier.",
   },
   {
     question: "What&apos;s the best PropStream alternative for finding deals?",

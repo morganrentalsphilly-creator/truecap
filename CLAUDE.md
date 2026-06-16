@@ -15,7 +15,7 @@ tax strategy, exit scenarios, plus a plain-English verdict and a
 shareable read-only link.
 
 - **Audience**: solo / small-portfolio buy-and-hold investors and house-hackers.
-- **Business model**: free tier (run analyses, no save) + Pro at **$19/mo**
+- **Business model**: free tier (run analyses, no save) + Pro at **$20/mo**
   or an annual plan (saved deals, dashboard, compare, templates, tax
   strategy, exit scenarios, PDF export, Deal Score, etc.). Pricing logic
   lives in the `plans.entitlements` JSON column — see `lib/entitlements.ts`.
@@ -674,7 +674,7 @@ Operational dry-runs:
 Don't autonomously do any of the following. Surface a proposal first
 and let Morgan say yes.
 
-1. **Change pricing** — the `$19/mo` figure, the annual discount, or
+1. **Change pricing** — the `$20/mo` figure, the annual discount, or
    anything that changes what a user sees on the pricing page or in
    the Stripe checkout amount.
 
