@@ -368,3 +368,81 @@ describe("computeTenYearAnnualizedReturnPct — edge branches", () => {
     expect(pct as number).toBeLessThan(100);
   });
 });
+
+describe("computeDealScore — strategy lens", () => {
+  // Tucker-style appreciation play: negative year-1 CF, positive after-tax,
+  // strong projected total return.
+  const appreciationPlay = input({
+    monthlyCashFlow: -159,
+    cashOnCashReturn: -19,
+    capRate: 7.0,
+    dscr: 0.9,
+    monthlyPropertyTax: 200,
+    monthlyRentIncome: 2_000,
+    afterTaxMonthlyCashFlow: 226,
+    tenYearAnnualizedReturnPct: 22.8,
+  });
+  const strongAllRound = input({
+    monthlyCashFlow: 650,
+    cashOnCashReturn: 9,
+    capRate: 7.5,
+    dscr: 1.35,
+    propertyAge: 8,
+    monthlyPropertyTax: 200,
+    monthlyRentIncome: 2_200,
+    afterTaxMonthlyCashFlow: 800,
+    tenYearAnnualizedReturnPct: 14,
+  });
+
+  it("defaults to balanced (identity) — the lens never moves an unset score", () => {
+    const def = computeDealScore(appreciationPlay);
+    const bal = computeDealScore(appreciationPlay, "balanced");
+    expect(def.score).toBe(bal.score);
+    expect(def.recommendation).toBe(bal.recommendation);
+  });
+
+  it("scores the SAME appreciation play differently per investor lens", () => {
+    const cf = computeDealScore(appreciationPlay, "cash-flow");
+    const bal = computeDealScore(appreciationPlay, "balanced");
+    const appr = computeDealScore(appreciationPlay, "appreciation");
+
+    // Monotonic across the spectrum: cash-flow ≤ balanced ≤ appreciation.
+    expect(cf.score).toBeLessThan(bal.score);
+    expect(appr.score).toBeGreaterThan(bal.score);
+
+    // A cash-flow investor should be told to avoid a negative-cash-flow deal…
+    expect(["Avoid", "Risky"]).toContain(cf.recommendation);
+    // …while an appreciation investor sees its strong long-term return.
+    expect(["Neutral", "Buy"]).toContain(appr.recommendation);
+  });
+
+  it("does not apply the appreciation floor under the cash-flow lens", () => {
+    // Balanced floors this deal to 40; the cash-flow lens must be free to
+    // score it below that floor (a negative-CF deal isn't a cash-flow buy).
+    expect(computeDealScore(appreciationPlay, "cash-flow").score).toBeLessThan(40);
+    expect(computeDealScore(appreciationPlay, "balanced").score).toBe(40);
+  });
+
+  it("keeps a genuinely strong deal a buy in every lens", () => {
+    for (const strategy of ["cash-flow", "balanced", "appreciation"] as const) {
+      const r = computeDealScore(strongAllRound, strategy);
+      expect(["Buy", "Strong Buy"]).toContain(r.recommendation);
+    }
+  });
+
+  it("renormalizes so a maxed-out deal tops out near 100 in every lens", () => {
+    const perfect = input({
+      monthlyCashFlow: 5_000,
+      cashOnCashReturn: 30,
+      capRate: 15,
+      dscr: 3,
+      monthlyPropertyTax: 50,
+      monthlyRentIncome: 5_000,
+      afterTaxMonthlyCashFlow: 5_200,
+      tenYearAnnualizedReturnPct: 40,
+    });
+    for (const strategy of ["cash-flow", "balanced", "appreciation"] as const) {
+      expect(computeDealScore(perfect, strategy).score).toBeGreaterThanOrEqual(99);
+    }
+  });
+});

@@ -216,6 +216,56 @@ const OWNER_OCCUPANT_RISK_LABEL_CF_MAX = 100;
 export const APPRECIATION_PLAY_MIN_ANNUAL_RETURN_PCT = 12;
 const APPRECIATION_FLOOR_SCORE = 40;
 
+/**
+ * Strategy lens — re-weights the five score components so the verdict speaks
+ * the investor's language. "Good" is strategy-dependent: a cash-flow investor
+ * and an appreciation investor rate the same property differently. Multipliers
+ * scale each component's sub-score; the score is then renormalized back to the
+ * 0-100 scale so a perfect deal still tops out near 100.
+ *
+ * Balanced is the identity (all 1.0) → byte-for-byte the pre-lens behaviour,
+ * so existing scores and the pinned tests never move when no lens is chosen.
+ */
+export type DealStrategy = "cash-flow" | "balanced" | "appreciation";
+
+/** Max points each component can contribute (investment scale). Single source
+ *  for the renormalization factor so changing a multiplier stays consistent. */
+const COMPONENT_MAXES = {
+  cashFlow: 22,
+  coc: 20,
+  capRate: 16,
+  dscr: 17,
+  totalReturn: 25,
+} as const;
+
+interface StrategyWeights {
+  cashFlow: number;
+  coc: number;
+  capRate: number;
+  dscr: number;
+  totalReturn: number;
+  /** Whether the appreciation-play floor applies. A cash-flow investor should
+   *  NOT be told a negative-cash-flow deal is "Neutral" on appreciation alone. */
+  appreciationFloor: boolean;
+}
+
+const STRATEGY_WEIGHTS: Record<DealStrategy, StrategyWeights> = {
+  "cash-flow": { cashFlow: 1.7, coc: 1.5, capRate: 1.0, dscr: 1.4, totalReturn: 0.3, appreciationFloor: false },
+  balanced: { cashFlow: 1.0, coc: 1.0, capRate: 1.0, dscr: 1.0, totalReturn: 1.0, appreciationFloor: true },
+  appreciation: { cashFlow: 0.5, coc: 0.7, capRate: 1.3, dscr: 0.6, totalReturn: 1.9, appreciationFloor: true },
+};
+
+/** 100 / (Σ componentMax × multiplier) — maps the weighted sum back to 0-100. */
+function strategyNormFactor(w: StrategyWeights): number {
+  const weightedMax =
+    COMPONENT_MAXES.cashFlow * w.cashFlow +
+    COMPONENT_MAXES.coc * w.coc +
+    COMPONENT_MAXES.capRate * w.capRate +
+    COMPONENT_MAXES.dscr * w.dscr +
+    COMPONENT_MAXES.totalReturn * w.totalReturn;
+  return 100 / weightedMax;
+}
+
 function isOwnerOccupantDeal(input: DealScoreInput): boolean {
   return input.propertyType === "owner-occupant";
 }
@@ -236,8 +286,11 @@ function isOwnerOccupantNearBreakEvenForRiskLabel(input: DealScoreInput): boolea
   );
 }
 
-/** Does this deal qualify for the appreciation-play score floor? Investment deals only. */
-function qualifiesForAppreciationFloor(input: DealScoreInput): boolean {
+/** Does this deal qualify for the appreciation-play score floor? Investment
+ *  deals only, and only under a lens where long-term return counts (not the
+ *  cash-flow lens, where a negative-cash-flow deal genuinely isn't a buy). */
+function qualifiesForAppreciationFloor(input: DealScoreInput, strategy: DealStrategy): boolean {
+  if (!STRATEGY_WEIGHTS[strategy].appreciationFloor) return false;
   if (isOwnerOccupantDeal(input)) return false;
   const annual = input.tenYearAnnualizedReturnPct;
   if (annual == null) return false;
@@ -424,7 +477,10 @@ function buildExplanation(
   return `This deal is balanced with ${balancedStrength}, but has ${balancedWeakness}.`;
 }
 
-export function computeDealScore(input: DealScoreInput): DealScoreResult {
+export function computeDealScore(
+  input: DealScoreInput,
+  strategy: DealStrategy = "balanced"
+): DealScoreResult {
   const cashFlowScore = getCashFlowScore(input);
 
   // Cash-on-cash — 6-tier granular scoring on a 20-pt max. In 2026 with
@@ -506,15 +562,25 @@ export function computeDealScore(input: DealScoreInput): DealScoreResult {
   // bad-deal signal; the penalty is a modifier, not a second scoring engine.
   riskPenalty = Math.max(riskPenalty, -30);
 
-  const rawScore =
-    cashFlowScore + cocScore + capRateScore + dscrScore + totalReturnScore + riskPenalty;
+  // Strategy lens: weight each component, renormalize to 0-100, then apply the
+  // (unweighted) risk penalty. Balanced = identity, so the score is unchanged
+  // when no lens is chosen.
+  const w = STRATEGY_WEIGHTS[strategy];
+  const weightedComponents =
+    cashFlowScore * w.cashFlow +
+    cocScore * w.coc +
+    capRateScore * w.capRate +
+    dscrScore * w.dscr +
+    totalReturnScore * w.totalReturn;
+  const rawScore = weightedComponents * strategyNormFactor(w) + riskPenalty;
   let score = Math.max(0, Math.min(100, Math.round(rawScore)));
 
   // Appreciation-play floor: never let a financed deal with strong projected
-  // total return and non-negative after-tax cash flow read as "Avoid". This
-  // is the explicit fix for the year-1-only score labeling a +678%
+  // total return and non-negative after-tax cash flow read as "Avoid" — except
+  // under the cash-flow lens, where a negative-cash-flow deal genuinely isn't a
+  // buy. This is the explicit fix for the year-1-only score labeling a +678%
   // total-return deal "Avoid / 0".
-  if (qualifiesForAppreciationFloor(input) && score < APPRECIATION_FLOOR_SCORE) {
+  if (qualifiesForAppreciationFloor(input, strategy) && score < APPRECIATION_FLOOR_SCORE) {
     score = APPRECIATION_FLOOR_SCORE;
   }
 

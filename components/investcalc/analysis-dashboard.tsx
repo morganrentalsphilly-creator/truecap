@@ -95,7 +95,11 @@ import { cn } from "@/lib/utils";
 import type { DealScoreActionResult } from "@/app/actions/deal-score";
 import {
   APPRECIATION_PLAY_MIN_ANNUAL_RETURN_PCT,
+  buildDealScoreInputFromAnalysis,
+  computeDealScore,
   computeTenYearAnnualizedReturnPct,
+  type DealScoreInput,
+  type DealStrategy,
 } from "@/lib/deal-score";
 
 interface AnalysisDashboardProps {
@@ -389,6 +393,13 @@ export function AnalysisDashboard({
   );
   const appreciationPlay =
     !!result && isAppreciationPlayDeal(result, propertyType, annualizedReturnPct);
+  // Built here (the dashboard already holds values + result) so the Deal Score
+  // card can recompute the score under a different investor lens client-side,
+  // instantly, without a server round-trip.
+  const dealScoreInput = useMemo(
+    () => (result && values ? buildDealScoreInputFromAnalysis(values, result) : null),
+    [result, values]
+  );
   const router = useRouter();
   const goToLogin = () => router.push("/auth/login");
   const goToBilling = () => router.push("/profile#billing");
@@ -611,6 +622,7 @@ export function AnalysisDashboard({
           isAnalysisLoading={isLoading}
           isDealScoreLoading={isLoadingDealScore}
           dealScoreResult={dealScoreResult}
+          dealScoreInput={dealScoreInput}
           isSaving={isSaving}
           onUpgrade={goToBilling}
           canUseDealScore={canUseDealScore}
@@ -1251,10 +1263,64 @@ function buildRecommendationModel(dealScoreResult: DealScoreActionResult | null)
   };
 }
 
+const DEAL_STRATEGY_STORAGE_KEY = "truecap_deal_strategy";
+
+const DEAL_STRATEGIES: { value: DealStrategy; label: string; hint: string }[] = [
+  { value: "cash-flow", label: "Cash flow", hint: "Prioritizes monthly income, cash-on-cash, and debt coverage." },
+  { value: "balanced", label: "Balanced", hint: "Weights all return sources evenly (default)." },
+  { value: "appreciation", label: "Appreciation", hint: "Prioritizes long-term total return and yield." },
+];
+
+/** Compact segmented control to score the deal through the investor's own lens.
+ *  Score, recommendation, and risk all recompute live when this changes. */
+function DealStrategyToggle({
+  strategy,
+  onChange,
+}: {
+  strategy: DealStrategy;
+  onChange: (next: DealStrategy) => void;
+}) {
+  return (
+    <div className="mb-3">
+      <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+        Investor lens
+      </p>
+      <div
+        role="radiogroup"
+        aria-label="Scoring strategy"
+        className="grid grid-cols-3 gap-0.5 rounded-lg bg-muted/60 p-0.5"
+      >
+        {DEAL_STRATEGIES.map((s) => {
+          const active = strategy === s.value;
+          return (
+            <button
+              key={s.value}
+              type="button"
+              role="radio"
+              aria-checked={active}
+              title={s.hint}
+              onClick={() => onChange(s.value)}
+              className={cn(
+                "rounded-md px-1 py-1 text-[10px] font-semibold leading-tight transition-colors",
+                active
+                  ? "bg-card text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              {s.label}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function DealScoreCard({
   isAnalysisLoading,
   isDealScoreLoading,
   dealScoreResult,
+  dealScoreInput,
   isSaving,
   onUpgrade,
   canUseDealScore,
@@ -1264,6 +1330,8 @@ function DealScoreCard({
   isAnalysisLoading: boolean;
   isDealScoreLoading: boolean;
   dealScoreResult: DealScoreActionResult | null;
+  /** Raw score input, so the card can recompute under a different lens. */
+  dealScoreInput: DealScoreInput | null;
   isSaving: boolean;
   onUpgrade: () => void;
   canUseDealScore: boolean;
@@ -1276,6 +1344,29 @@ function DealScoreCard({
   isCashPurchase?: boolean;
 }) {
   const isLoading = isAnalysisLoading || isDealScoreLoading;
+
+  // Investor lens — re-weights the score to match the user's strategy. Hooks
+  // must run before any early return below. Remembered across deals so a
+  // cash-flow investor isn't reset to Balanced on every analysis.
+  const [strategy, setStrategy] = useState<DealStrategy>("balanced");
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem(DEAL_STRATEGY_STORAGE_KEY);
+      if (saved === "cash-flow" || saved === "balanced" || saved === "appreciation") {
+        setStrategy(saved);
+      }
+    } catch {
+      // private mode etc. — fine, default Balanced
+    }
+  }, []);
+  const pickStrategy = (next: DealStrategy) => {
+    setStrategy(next);
+    try {
+      window.localStorage.setItem(DEAL_STRATEGY_STORAGE_KEY, next);
+    } catch {
+      // ignore
+    }
+  };
 
   if (isLoading) {
     return (
@@ -1367,7 +1458,13 @@ function DealScoreCard({
     );
   }
 
-  const { score, riskLevel, recommendation, explanation, breakdown } = dealScoreResult.data;
+  // Recompute under the chosen lens (client-side, instant). Balanced uses the
+  // server-computed result as-is; other lenses re-weight from the raw input.
+  const displayed =
+    strategy !== "balanced" && dealScoreInput
+      ? computeDealScore(dealScoreInput, strategy)
+      : dealScoreResult.data;
+  const { score, riskLevel, recommendation, explanation, breakdown } = displayed;
   // Owner-occupant deals use different cash-flow bands and a 30-point
   // max (vs investor 25). Branch the explanation labels accordingly so
   // the breakdown matches the engine's actual scoring tiers.
@@ -1499,6 +1596,7 @@ function DealScoreCard({
       <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2">
         Deal Score
       </p>
+      <DealStrategyToggle strategy={strategy} onChange={pickStrategy} />
       <div className="flex items-center justify-between gap-3 mb-3">
         <div
           className={cn(
@@ -1584,17 +1682,30 @@ function DealScoreCard({
           Why this score?
         </summary>
         <div className="mt-2 rounded-xl border border-border bg-muted/30 p-3 text-xs leading-relaxed text-foreground/80">
-          <p>
-            Score is the sum of cash flow ({breakdown.cashFlowScore}), CoC ({breakdown.cocScore}),
-            cap rate ({breakdown.capRateScore}), DSCR ({breakdown.dscrScore}), and 10-year total
-            return ({breakdown.totalReturnScore}),
-            {breakdown.riskPenalty < 0 ? <> minus a risk penalty of {Math.abs(breakdown.riskPenalty)}</> : null}
-            {" "}={" "}
-            <span className="font-bold text-foreground">{score} / 100</span>.
-            {" "}Bands: <strong>75+</strong> Strong Buy, <strong>55–74</strong> Buy,
-            {" "}<strong>35–54</strong> Neutral, <strong>18–34</strong> Risky,
-            {" "}<strong>&lt;18</strong> Avoid.
-          </p>
+          {strategy === "balanced" ? (
+            <p>
+              Score is the sum of cash flow ({breakdown.cashFlowScore}), CoC ({breakdown.cocScore}),
+              cap rate ({breakdown.capRateScore}), DSCR ({breakdown.dscrScore}), and 10-year total
+              return ({breakdown.totalReturnScore}),
+              {breakdown.riskPenalty < 0 ? <> minus a risk penalty of {Math.abs(breakdown.riskPenalty)}</> : null}
+              {" "}={" "}
+              <span className="font-bold text-foreground">{score} / 100</span>.
+              {" "}Bands: <strong>75+</strong> Strong Buy, <strong>55–74</strong> Buy,
+              {" "}<strong>35–54</strong> Neutral, <strong>18–34</strong> Risky,
+              {" "}<strong>&lt;18</strong> Avoid.
+            </p>
+          ) : (
+            <p>
+              Under the{" "}
+              <strong>{DEAL_STRATEGIES.find((s) => s.value === strategy)?.label}</strong> lens, the
+              five components below are re-weighted to match that strategy and rescaled to{" "}
+              <span className="font-bold text-foreground">{score} / 100</span> (the bars show each
+              component&apos;s base strength before weighting).
+              {" "}Bands: <strong>75+</strong> Strong Buy, <strong>55–74</strong> Buy,
+              {" "}<strong>35–54</strong> Neutral, <strong>18–34</strong> Risky,
+              {" "}<strong>&lt;18</strong> Avoid.
+            </p>
+          )}
           <p className="mt-2 text-muted-foreground">
             Looking to improve the score? The largest movers are typically (1) a lower
             purchase price (lifts cap rate and CoC together), (2) better financing terms
