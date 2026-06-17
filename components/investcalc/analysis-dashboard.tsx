@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import {
@@ -93,7 +93,10 @@ import type { TaxStrategyInput, TaxStrategyYear } from "@/lib/tax-strategy";
 import type { ExitScenarioInput, ExitScenarioYear } from "@/lib/exit-scenarios";
 import { cn } from "@/lib/utils";
 import type { DealScoreActionResult } from "@/app/actions/deal-score";
-import { computeTenYearAnnualizedReturnPct } from "@/lib/deal-score";
+import {
+  APPRECIATION_PLAY_MIN_ANNUAL_RETURN_PCT,
+  computeTenYearAnnualizedReturnPct,
+} from "@/lib/deal-score";
 
 interface AnalysisDashboardProps {
   result: AnalysisResult | null;
@@ -264,7 +267,7 @@ function isAppreciationPlayDeal(
     r.monthlyPayment > 0 &&
     r.netCashFlow < 0 &&
     r.afterTaxCF >= 0 &&
-    (annualizedReturnPct ?? 0) > 12
+    (annualizedReturnPct ?? 0) > APPRECIATION_PLAY_MIN_ANNUAL_RETURN_PCT
   );
 }
 
@@ -380,8 +383,10 @@ export function AnalysisDashboard({
   // Holistic context for the Overview. Computed from the BASE result (not
   // the what-if state) so dragging sliders doesn't flicker the banner.
   // Reuses the same exit-scenario engine as the Deal Score + PDF.
-  const annualizedReturnPct =
-    result && values ? computeTenYearAnnualizedReturnPct(values, result) : null;
+  const annualizedReturnPct = useMemo(
+    () => (result && values ? computeTenYearAnnualizedReturnPct(values, result) : null),
+    [result, values]
+  );
   const appreciationPlay =
     !!result && isAppreciationPlayDeal(result, propertyType, annualizedReturnPct);
   const router = useRouter();
@@ -834,22 +839,27 @@ export function AnalysisDashboard({
             exit-scenario engine as the Deal Score, so it never contradicts
             them. Does NOT alter the year-1 facts above — it explains them. */}
         {appreciationPlay && result ? (
-          <div className="flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-            <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700">
+          <div className="flex items-start gap-3 rounded-2xl border border-[var(--brand-green)]/25 bg-[var(--brand-green-light)] p-4">
+            <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-card text-[var(--brand-green)]">
               <TrendingUp className="size-4" />
             </span>
             <div className="space-y-1">
-              <p className="text-sm font-bold text-emerald-900">
+              <p className="text-sm font-bold text-[var(--brand-green)]">
                 Stronger than it looks — this is an appreciation play, not a losing deal.
               </p>
-              <p className="text-xs leading-relaxed text-emerald-800/90">
+              <p className="text-xs leading-relaxed text-foreground/70">
                 Year-1 cash flow is negative because of the high leverage, but after the
                 depreciation + interest shield it runs about{" "}
-                <strong>+${Math.round(result.afterTaxCF).toLocaleString()}/mo</strong>, and the
-                projected 10-year total return is{" "}
-                <strong>~{Math.round(annualizedReturnPct ?? 0)}%/yr</strong> (appreciation + loan
-                paydown). The monthly shortfall is the cost of low money down — confirm you can
-                carry it and that your rent and appreciation assumptions hold.
+                <strong className="text-foreground">
+                  +${Math.round(result.afterTaxCF).toLocaleString()}/mo
+                </strong>
+                , and the projected 10-year total return is{" "}
+                <strong className="text-foreground">
+                  ~{Math.round(annualizedReturnPct ?? 0)}%/yr
+                </strong>{" "}
+                (appreciation + loan paydown). The monthly shortfall is the cost of low money
+                down — confirm you can carry it and that your rent and appreciation assumptions
+                hold.
               </p>
             </div>
           </div>

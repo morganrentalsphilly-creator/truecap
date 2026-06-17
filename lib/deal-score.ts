@@ -208,8 +208,12 @@ const OWNER_OCCUPANT_RISK_LABEL_CF_MAX = 100;
  * into the Neutral band so the headline never reads "Avoid / weak
  * fundamentals" on a deal that builds real long-term wealth — the failure
  * the year-1-only score produced (e.g. a +678% total-return deal scoring 0).
+ *
+ * Exported because the Overview's appreciation-play banner reframes on the
+ * exact same threshold — defining the bar once keeps the score and the UI
+ * copy from ever disagreeing about what counts as an appreciation play.
  */
-const APPRECIATION_FLOOR_MIN_ANNUAL_RETURN = 12;
+export const APPRECIATION_PLAY_MIN_ANNUAL_RETURN_PCT = 12;
 const APPRECIATION_FLOOR_SCORE = 40;
 
 function isOwnerOccupantDeal(input: DealScoreInput): boolean {
@@ -217,7 +221,7 @@ function isOwnerOccupantDeal(input: DealScoreInput): boolean {
 }
 
 /** After-tax year-1 monthly cash flow, falling back to pre-tax when not supplied. */
-function afterTaxMonthlyCashFlow(input: DealScoreInput): number {
+function resolveAfterTaxCashFlow(input: DealScoreInput): number {
   return input.afterTaxMonthlyCashFlow ?? input.monthlyCashFlow;
 }
 
@@ -237,7 +241,7 @@ function qualifiesForAppreciationFloor(input: DealScoreInput): boolean {
   if (isOwnerOccupantDeal(input)) return false;
   const annual = input.tenYearAnnualizedReturnPct;
   if (annual == null) return false;
-  return annual > APPRECIATION_FLOOR_MIN_ANNUAL_RETURN && afterTaxMonthlyCashFlow(input) >= 0;
+  return annual > APPRECIATION_PLAY_MIN_ANNUAL_RETURN_PCT && resolveAfterTaxCashFlow(input) >= 0;
 }
 
 function getCashFlowScore(input: DealScoreInput): number {
@@ -325,7 +329,7 @@ function buildExplanation(
   if (breakdown.dscrScore >= 13) strengths.push("strong debt-service coverage");
   if (breakdown.totalReturnScore >= 20) strengths.push("strong projected 10-year total return");
   else if (breakdown.totalReturnScore >= 14) strengths.push("solid long-term total return");
-  if (!isOwnerOccupantDeal(input) && input.monthlyCashFlow < 0 && afterTaxMonthlyCashFlow(input) >= 0) {
+  if (!isOwnerOccupantDeal(input) && input.monthlyCashFlow < 0 && resolveAfterTaxCashFlow(input) >= 0) {
     strengths.push("positive after-tax cash flow");
   }
 
@@ -366,7 +370,7 @@ function buildExplanation(
     (input.isCashPurchase || input.dscr < 1)
   ) {
     const strongTotalReturn = breakdown.totalReturnScore >= 14;
-    const afterTaxPositive = afterTaxMonthlyCashFlow(input) >= 0;
+    const afterTaxPositive = resolveAfterTaxCashFlow(input) >= 0;
     if (strongTotalReturn && afterTaxPositive) {
       const annual = input.tenYearAnnualizedReturnPct;
       const retClause = annual != null ? ` (~${Math.round(annual)}%/yr)` : "";
@@ -479,7 +483,7 @@ export function computeDealScore(input: DealScoreInput): DealScoreResult {
     (!isOwnerOccupantDeal(input) && input.monthlyCashFlow < 0) ||
     (isOwnerOccupantDeal(input) && input.monthlyCashFlow < -OWNER_OCCUPANT_NEAR_ZERO_THRESHOLD)
   ) {
-    riskPenalty += afterTaxMonthlyCashFlow(input) >= 0 ? -6 : -16;
+    riskPenalty += resolveAfterTaxCashFlow(input) >= 0 ? -6 : -16;
   }
   riskPenalty += getAgeRiskPenalty(input.propertyAge);
   if (input.capexPct > 10) riskPenalty -= 10;
