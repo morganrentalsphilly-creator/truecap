@@ -29,7 +29,6 @@ import {
   MapPin,
   Quote,
   ShieldCheck,
-  Sparkles,
   TrendingUp,
   Type,
   Wand2,

@@ -6,7 +6,6 @@ import {
   BarChart3,
   Building2,
   CalendarDays,
-  Download,
   Home,
   Info,
   KeyRound,
@@ -93,7 +92,7 @@ function getTypeIcon(type: PropertyType | null) {
   return Home;
 }
 
-function getTypeClasses(type: PropertyType | null): string {
+function getTypeClasses(_type: PropertyType | null): string {
   return "bg-card  border border-border/70 text-primary ring-border/70";
 }
 

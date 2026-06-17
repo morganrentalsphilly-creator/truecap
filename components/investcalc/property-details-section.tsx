@@ -30,9 +30,15 @@ export function PropertyDetailsSection({ form, onAddressSelected }: PropertyDeta
       <div className="space-y-4">
         {/* Address — Google Places autocomplete attached when key is set */}
         <div>
-          <Label className="text-sm font-medium text-foreground mb-1.5 block">
+          <Label className="text-sm font-medium text-foreground mb-1 block">
             Property Address
           </Label>
+          {/* First-run signpost: makes the address the obvious starting
+              point and tells new users it auto-fills the deal — the single
+              biggest "how do I use this" cue, right at the point of action. */}
+          <p className="mb-1.5 text-[11px] leading-snug text-muted-foreground">
+            <span className="font-semibold text-foreground">Start here</span> — paste an address and we auto-fill rent, rate, and property tax. Adjust anything after.
+          </p>
           <AddressAutocomplete
             form={form}
             hasError={!!errors.address}

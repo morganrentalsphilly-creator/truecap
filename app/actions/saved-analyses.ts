@@ -2,7 +2,7 @@
 
 import * as Sentry from "@sentry/nextjs";
 import { calculateAnalysis } from "@/lib/calc-analysis";
-import { computeDealScore } from "@/lib/deal-score";
+import { computeDealScore, buildDealScoreInputFromAnalysis } from "@/lib/deal-score";
 import {
   getEntitlementsForUser,
   getSavedDealLimitLabel,
@@ -205,20 +205,10 @@ export async function saveDealAction(input: unknown, existingId?: string | null)
   };
   const addressTrimmed = values.address.trim();
   const result = calculateAnalysis(sanitizedValues);
-  const dealScore = computeDealScore({
-    propertyType: values.propertyType,
-    monthlyCashFlow: result.netCashFlow,
-    cashOnCashReturn: result.cocReturn,
-    capRate: result.capRate,
-    dscr: result.dscr,
-    vacancyRate: values.vacancyPct,
-    propertyAge: result.propertyAge,
-    capexPct: result.capexPctEffective,
-    maintenancePct: result.maintenancePctEffective,
-    monthlyPropertyTax: result.propertyTax,
-    monthlyRentIncome: result.monthlyRentalIncome,
-    isCashPurchase: result.monthlyPayment <= 0,
-  });
+  // Holistic (total-return-aware) score — computed server-side from the real
+  // form values + result via the shared builder, so the saved score matches
+  // what investcalc-page and the hero render for the same deal.
+  const dealScore = computeDealScore(buildDealScoreInputFromAnalysis(sanitizedValues, result));
   const { snapshotVersion, compareSnapshot } = buildCompareSnapshotPayload(result, sanitizedValues);
   const resultSnapshotWithScore = {
     ...result,

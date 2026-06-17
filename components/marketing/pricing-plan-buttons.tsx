@@ -14,7 +14,6 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { ArrowRight, Loader2, Sparkles } from "lucide-react";
 import { createCheckoutSessionAction } from "@/app/actions/billing";
 import { useToast } from "@/hooks/use-toast";
@@ -30,7 +29,6 @@ export function PricingPlanButtons({
   isAuthenticated: boolean;
   isPaid: boolean;
 }) {
-  const router = useRouter();
   const { toast } = useToast();
   const [, startTransition] = useTransition();
   const [pending, setPending] = useState(false);

@@ -10,7 +10,6 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowUpRight, Check } from "lucide-react";
 import { getSiteUrl } from "@/lib/site-url";
 import { DscrCalculatorWidget } from "@/components/tools/dscr-calculator-widget";
 import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta";

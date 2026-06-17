@@ -4,14 +4,15 @@
  * Post-analysis email capture + drip scheduler.
  *
  * Triggered when a free user runs an analysis and submits their email.
- * Schedules a 4-email sequence via Resend's transactional API using its
+ * Schedules a 5-email sequence via Resend's transactional API using its
  * `scheduled_at` field — no cron needed, Resend handles timing.
  *
- * Sequence (calibrated to first 12 days, hottest window for conversion):
- *   Day 0:  "Here's your analysis." (instant)
+ * Sequence (calibrated to the first ~12 days — the hottest conversion window):
+ *   Day 0:  Underwriting checklist (the 7 numbers) — instant, delivers value
  *   Day 2:  "5 metrics most investors forget"
- *   Day 5:  "Pro unlocks the 10-year projection"
- *   Day 12: "Last chance: 20% off your first month"
+ *   Day 5:  "What does year 10 look like?" (Pro 10-year projection)
+ *   Day 8:  "$5 lender PDF" — lowest-friction paid step
+ *   Day 12: "20% off your first month" (final nudge)
  *
  * Result shape follows the codebase convention from CLAUDE.md (§3.2):
  * discriminated union with ok: true/false. Never throws to the client.
@@ -45,21 +46,28 @@ type SequenceEmail = {
 const SEQUENCE: SequenceEmail[] = [
   {
     delayDays: 0,
-    subject: "Your TrueCap analysis is saved",
+    subject: "Your rental underwriting checklist (the 7 numbers)",
     build: ({ address, siteUrl }) => `<!DOCTYPE html>
 <html><body style="margin:0;padding:0;background:#f6f7fb;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#111827;">
 <div style="max-width:560px;margin:32px auto;padding:32px 24px;background:#fff;border-radius:16px;border:1px solid #e5e7eb;">
-  <h1 style="margin:0 0 12px 0;font-size:22px;font-weight:800;line-height:1.2;">Your analysis is saved.</h1>
+  <h1 style="margin:0 0 12px 0;font-size:22px;font-weight:800;line-height:1.2;">The 7 numbers I run before any offer</h1>
   <p style="margin:0 0 16px 0;color:#374151;line-height:1.6;font-size:15px;">
-    Thanks for running ${address ? `<strong>${address}</strong>` : "that deal"} through TrueCap.
-    It's bookmarked — come back any time to re-open it.
+    Thanks for running ${address ? `<strong>${address}</strong>` : "that deal"} through TrueCap. Here's the checklist it's built on — the numbers that decide whether a rental actually makes money. Steal it for every deal:
   </p>
-  <p style="margin:0 0 24px 0;color:#374151;line-height:1.6;font-size:15px;">
-    Over the next few days I'll send you a couple of short emails about the metrics most investors miss
-    (and what changes when you upgrade to Pro). No fluff — unsubscribe anytime.
+  <ol style="margin:0 0 20px 0;padding-left:20px;color:#374151;line-height:1.7;font-size:15px;">
+    <li><strong>Cap rate</strong> — NOI &divide; price (NOI <em>after</em> vacancy + management).</li>
+    <li><strong>Cash-on-cash</strong> — the return on the cash you actually put in.</li>
+    <li><strong>DSCR</strong> — what the lender checks. Under ~1.2 is a hard conversation.</li>
+    <li><strong>Cash flow after reserves</strong> — only real once CapEx + vacancy + maintenance are set aside.</li>
+    <li><strong>Sensitivity</strong> — does it survive a 10% rent drop or a 1-point rate bump?</li>
+    <li><strong>10-year projection</strong> — year-1 cash flow lies; model rent + expense growth.</li>
+    <li><strong>The exit</strong> — the best year to sell, after selling costs and taxes.</li>
+  </ol>
+  <p style="margin:0 0 20px 0;color:#374151;line-height:1.6;font-size:15px;">
+    TrueCap runs all seven from a single address — free. Over the next few days I'll send a couple of short notes on the ones investors miss most.
   </p>
   <div style="text-align:center;margin:24px 0;">
-    <a href="${siteUrl}" style="display:inline-block;background:#5248D4;color:#fff;text-decoration:none;padding:12px 24px;border-radius:10px;font-weight:700;font-size:14px;">Run another deal</a>
+    <a href="${siteUrl}" style="display:inline-block;background:#5248D4;color:#fff;text-decoration:none;padding:12px 24px;border-radius:10px;font-weight:700;font-size:14px;">Run a deal in 60 seconds</a>
   </div>
   <p style="margin:0;color:#9ca3af;font-size:12px;line-height:1.5;text-align:center;">— Morgan, founder · usetruecap.com</p>
 </div></body></html>`,
@@ -110,6 +118,26 @@ const SEQUENCE: SequenceEmail[] = [
     <a href="${siteUrl}/pricing" style="display:inline-block;background:#5248D4;color:#fff;text-decoration:none;padding:12px 24px;border-radius:10px;font-weight:700;font-size:14px;">See Pro features</a>
   </div>
   <p style="margin:0;color:#9ca3af;font-size:12px;line-height:1.5;text-align:center;">— Morgan · usetruecap.com</p>
+</div></body></html>`,
+  },
+  {
+    delayDays: 8,
+    subject: "Just need the lender PDF? $5, no subscription",
+    build: ({ address, siteUrl }) => `<!DOCTYPE html>
+<html><body style="margin:0;padding:0;background:#f6f7fb;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#111827;">
+<div style="max-width:560px;margin:32px auto;padding:32px 24px;background:#fff;border-radius:16px;border:1px solid #e5e7eb;">
+  <h1 style="margin:0 0 12px 0;font-size:22px;font-weight:800;line-height:1.2;">Just need the report? $5.</h1>
+  <p style="margin:0 0 16px 0;color:#374151;line-height:1.6;font-size:15px;">
+    Taking ${address ? `<strong>${address}</strong>` : "a deal"} to a lender, partner, or seller? You can download the full multi-page report — verdict, 10-year projection, tax strategy, exit scenarios, and deal score — as a polished, lender-ready PDF for a one-time <strong>$5</strong>. No account, no subscription.
+  </p>
+  <p style="margin:0 0 20px 0;color:#374151;line-height:1.6;font-size:15px;">
+    Re-run your deal, click <strong>Export PDF</strong>, and choose the $5 one-time option.
+  </p>
+  <div style="text-align:center;margin:24px 0;">
+    <a href="${siteUrl}" style="display:inline-block;background:#5248D4;color:#fff;text-decoration:none;padding:12px 24px;border-radius:10px;font-weight:700;font-size:14px;">Get your PDF</a>
+  </div>
+  <p style="margin:0 0 0 0;color:#6b7280;line-height:1.6;font-size:13px;text-align:center;">Want the full toolkit instead? Pro is $20/mo — unlimited PDFs, saved deals, and side-by-side compare.</p>
+  <p style="margin:12px 0 0 0;color:#9ca3af;font-size:12px;line-height:1.5;text-align:center;">— Morgan · usetruecap.com</p>
 </div></body></html>`,
   },
   {

@@ -4,8 +4,8 @@
  * Post-analysis email capture prompt.
  *
  * Shown after a user completes an analysis as anonymous (not signed in).
- * The pitch is "save this analysis" — capture the email by promising
- * something useful (their actual analysis bookmarked + a 4-email drip).
+ * The pitch is a free underwriting checklist — capture the email by
+ * delivering something genuinely useful (the checklist + a short drip).
  *
  * Behaviour:
  *   - Hidden by default
@@ -113,7 +113,7 @@ export function PostAnalysisEmailPrompt({ hasCompletedAnalysis, propertyAddress 
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="Save your analysis"
+      aria-label="Get the underwriting checklist"
       className="fixed inset-x-3 bottom-3 z-[55] sm:inset-auto sm:bottom-6 sm:right-6 sm:max-w-sm"
     >
       <div className="relative overflow-hidden rounded-2xl border-2 border-primary bg-card p-5 shadow-2xl">
@@ -130,26 +130,26 @@ export function PostAnalysisEmailPrompt({ hasCompletedAnalysis, propertyAddress 
           <div>
             <div className="flex items-center gap-2 text-[var(--metric-positive,#16a34a)]">
               <CheckCircle2 className="h-5 w-5" />
-              <h3 className="text-base font-extrabold">Saved!</h3>
+              <h3 className="text-base font-extrabold">Checklist sent!</h3>
             </div>
             <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-              Check your inbox in a minute — your analysis is on its way.
+              Check your inbox in a minute — your checklist is on its way.
             </p>
           </div>
         ) : (
           <>
             <p className="text-[10px] font-bold uppercase tracking-widest text-primary">
-              Save your analysis
+              Free underwriting checklist
             </p>
             <h3 className="mt-1 text-lg font-extrabold leading-tight text-foreground">
-              Want this saved to your inbox?
+              Get the 7-number deal checklist
             </h3>
             {/* Body copy desktop-only (Jun 2026 mobile audit): on a
                 390px phone the full card covered ~45% of the viewport
                 on top of the analysis the user was reading. Headline +
                 input carries the pitch on mobile. */}
             <p className="mt-2 hidden text-[13px] leading-relaxed text-muted-foreground sm:block">
-              Drop your email — I&apos;ll send you the full analysis plus 3 short notes on the metrics most investors miss.
+              Drop your email — I&apos;ll send the underwriting checklist I run before every offer, plus a few short notes on the numbers most investors miss.
             </p>
             <form onSubmit={onSubmit} className="mt-4 flex flex-col gap-2">
               <input
@@ -167,7 +167,7 @@ export function PostAnalysisEmailPrompt({ hasCompletedAnalysis, propertyAddress 
                 disabled={status === "submitting" || email.trim().length === 0}
                 className="inline-flex items-center justify-center rounded-lg bg-primary px-3 py-2 text-sm font-bold text-primary-foreground transition hover:bg-primary/90 disabled:opacity-60"
               >
-                {status === "submitting" ? "Sending…" : "Send it to me"}
+                {status === "submitting" ? "Sending…" : "Send me the checklist"}
               </button>
               {errorMsg ? (
                 <p className="text-xs text-destructive">{errorMsg}</p>

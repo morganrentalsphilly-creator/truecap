@@ -92,7 +92,7 @@ export function BrrrrCard({ values, result, defaultRehab }: BrrrrCardProps) {
   }, [
     purchasePrice, downPaymentPct, baseRatePct, baseCloseAcqPct,
     effectiveRehab, arvInput, refiLtvInput, refiRateInput, refiTermInput,
-    refiCloseInput, holdMonthsInput, values, result,
+    refiCloseInput, holdMonthsInput, result,
   ]);
 
   return (
@@ -219,6 +219,22 @@ export function BrrrrCard({ values, result, defaultRehab }: BrrrrCardProps) {
                 className="pr-10 border-input bg-background"
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">mo</span>
+            </div>
+          </div>
+          <div>
+            <Label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
+              Refi Closing
+            </Label>
+            <div className="relative">
+              <Input
+                type="number"
+                inputMode="decimal"
+                step="0.25"
+                value={refiCloseInput}
+                onChange={(e) => setRefiCloseInput(e.target.value)}
+                className="pr-8 border-input bg-background"
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">%</span>
             </div>
           </div>
         </div>

@@ -316,7 +316,7 @@ export function AnalysisDashboard({
   canUseMaxOffer = false,
   canUseSensitivity = false,
   canUseStrategies = false,
-  canUseShareLinks = false,
+  canUseShareLinks: _canUseShareLinks = false,
   isSampleProPreview = false,
   dealQaEnabled = false,
   saveDealLimitReached = false,
@@ -1294,32 +1294,42 @@ function DealScoreCard({
         : breakdown.cashFlowScore >= 25
           ? "Within $300/mo of break-even — typical for house-hack"
           : "Owner cost meaningfully above break-even"
-      : breakdown.cashFlowScore >= 25
-        ? "Above $1,000/mo — strong"
-        : breakdown.cashFlowScore >= 15
-          ? "Positive but modest ($0–$1,000/mo)"
-          : "Negative — eats into your return",
+      : breakdown.cashFlowScore >= 18
+        ? "Above $500/mo — strong"
+        : breakdown.cashFlowScore >= 8
+          ? "Positive but modest ($0–$500/mo)"
+          : "Negative — relies on appreciation + tax to pay off",
     coc:
-      breakdown.cocScore >= 25
-        ? "Above 12% — strong"
-        : breakdown.cocScore >= 15
-          ? "8–12% — healthy"
+      breakdown.cocScore >= 17
+        ? "Above 7% — strong"
+        : breakdown.cocScore >= 13
+          ? "5–7% — healthy"
           : breakdown.cocScore >= 8
-            ? "5–8% — modest"
-            : "Below 5% — weak",
+            ? "3–5% — modest"
+            : "Below 3% — weak",
     capRate:
-      breakdown.capRateScore >= 20
-        ? "Above 8% — strong"
-        : breakdown.capRateScore >= 10
-          ? "5–8% — fair for the market"
+      breakdown.capRateScore >= 13
+        ? "Above 6.5% — strong"
+        : breakdown.capRateScore >= 9
+          ? "5–6.5% — fair for the market"
           : "Below 5% — appreciation-dependent",
     dscr: isCashPurchase
       ? "N/A — all-cash purchase (no debt to cover)"
-      : breakdown.dscrScore >= 20
-        ? "Above 1.25 — clears lender threshold"
-        : breakdown.dscrScore >= 10
-          ? "1.00–1.25 — thin coverage cushion"
-          : "Below 1.00 — does not cover debt",
+      : breakdown.dscrScore >= 13
+        ? "Above 1.20 — clears lender threshold"
+        : breakdown.dscrScore >= 7
+          ? "1.10–1.20 — thin coverage cushion"
+          : breakdown.dscrScore >= 3
+            ? "1.00–1.10 — very tight"
+            : "Below 1.00 — does not cover debt",
+    totalReturn:
+      breakdown.totalReturnScore >= 20
+        ? "Above 11%/yr projected — strong long-term wealth build"
+        : breakdown.totalReturnScore >= 14
+          ? "8–11%/yr projected — solid total return"
+          : breakdown.totalReturnScore >= 8
+            ? "5–8%/yr projected — modest total return"
+            : "Below 5%/yr projected — limited long-term upside",
     risk:
       breakdown.riskPenalty === 0
         ? "No penalty — risk profile is clean"
@@ -1431,30 +1441,38 @@ function DealScoreCard({
         <ScoreBreakdownTile
           label="Cash flow"
           value={breakdown.cashFlowScore}
-          max={isOwnerOccupant ? 30 : 25}
+          max={isOwnerOccupant ? 30 : 22}
           explanation={breakdownExplanations.cashFlow}
           cellClass={activeStyle.metricCell}
         />
         <ScoreBreakdownTile
           label="Cash-on-cash"
           value={breakdown.cocScore}
-          max={25}
+          max={20}
           explanation={breakdownExplanations.coc}
           cellClass={activeStyle.metricCell}
         />
         <ScoreBreakdownTile
           label="Cap rate"
           value={breakdown.capRateScore}
-          max={20}
+          max={16}
           explanation={breakdownExplanations.capRate}
           cellClass={activeStyle.metricCell}
         />
         <ScoreBreakdownTile
           label="DSCR"
           value={breakdown.dscrScore}
-          max={20}
+          max={17}
           explanation={breakdownExplanations.dscr}
           cellClass={activeStyle.metricCell}
+        />
+        <ScoreBreakdownTile
+          label="Total return (10-yr)"
+          value={breakdown.totalReturnScore}
+          max={25}
+          explanation={breakdownExplanations.totalReturn}
+          cellClass={activeStyle.metricCell}
+          spanFull
         />
         <ScoreBreakdownTile
           label="Risk penalty"
@@ -1478,13 +1496,14 @@ function DealScoreCard({
         <div className="mt-2 rounded-xl border border-border bg-muted/30 p-3 text-xs leading-relaxed text-foreground/80">
           <p>
             Score is the sum of cash flow ({breakdown.cashFlowScore}), CoC ({breakdown.cocScore}),
-            cap rate ({breakdown.capRateScore}), and DSCR ({breakdown.dscrScore}),
+            cap rate ({breakdown.capRateScore}), DSCR ({breakdown.dscrScore}), and 10-year total
+            return ({breakdown.totalReturnScore}),
             {breakdown.riskPenalty < 0 ? <> minus a risk penalty of {Math.abs(breakdown.riskPenalty)}</> : null}
             {" "}={" "}
             <span className="font-bold text-foreground">{score} / 100</span>.
-            {" "}Bands: <strong>80+</strong> Strong Buy, <strong>60–79</strong> Buy,
-            {" "}<strong>40–59</strong> Neutral, <strong>20–39</strong> Risky,
-            {" "}<strong>&lt;20</strong> Avoid.
+            {" "}Bands: <strong>75+</strong> Strong Buy, <strong>55–74</strong> Buy,
+            {" "}<strong>35–54</strong> Neutral, <strong>18–34</strong> Risky,
+            {" "}<strong>&lt;18</strong> Avoid.
           </p>
           <p className="mt-2 text-muted-foreground">
             Looking to improve the score? The largest movers are typically (1) a lower

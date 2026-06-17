@@ -9,7 +9,6 @@ import {
   Briefcase,
   DollarSign,
   Layers,
-  ListTodo,
   Percent,
   Plus,
   TrendingUp,
