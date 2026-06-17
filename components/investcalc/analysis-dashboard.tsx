@@ -299,7 +299,7 @@ function MetricCard({
   glossaryTerm?: keyof typeof GLOSSARY;
 }) {
   const labelEl = (
-    <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-muted-foreground leading-tight">
+    <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-muted-foreground leading-tight">
       {label}
     </span>
   );
@@ -892,16 +892,7 @@ export function AnalysisDashboard({
                 <Skeleton className="h-5 w-16" />
               ) : (
                 <>
-                  <span
-                    className={cn(
-                      "text-sm sm:text-base font-bold tabular-nums",
-                      result
-                        ? result.annualCashFlow >= 0
-                          ? "text-[var(--metric-positive)]"
-                          : "text-[var(--metric-negative)]"
-                        : "text-foreground"
-                    )}
-                  >
+                  <span className="text-sm sm:text-base font-bold tabular-nums text-foreground">
                     {result
                       ? `${result.annualCashFlow >= 0 ? "" : "-"}${fmt(result.annualCashFlow)}`
                       : "—"}
@@ -922,16 +913,7 @@ export function AnalysisDashboard({
                 <Skeleton className="h-5 w-16" />
               ) : (
                 <>
-                  <span
-                    className={cn(
-                      "text-sm sm:text-base font-bold tabular-nums",
-                      result
-                        ? result.afterTaxCF >= 0
-                          ? "text-[var(--metric-positive)]"
-                          : "text-[var(--metric-negative)]"
-                        : "text-foreground"
-                    )}
-                  >
+                  <span className="text-sm sm:text-base font-bold tabular-nums text-foreground">
                     {result ? `${result.afterTaxCF >= 0 ? "+" : "-"}${fmt(result.afterTaxCF)}` : "—"}
                   </span>
                   <span className="text-[10px] sm:text-[11px] text-muted-foreground">/mo</span>
@@ -950,7 +932,7 @@ export function AnalysisDashboard({
                 <Skeleton className="h-5 w-16" />
               ) : (
                 <>
-                  <span className="text-sm sm:text-base font-bold text-primary">
+                  <span className="text-sm sm:text-base font-bold tabular-nums text-foreground">
                     {result ? fmt(result.taxSavingsMonthly) : "—"}
                   </span>
                   <span className="text-[10px] sm:text-[11px] text-muted-foreground">/mo</span>
