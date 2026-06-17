@@ -48,6 +48,16 @@ export type BlogPost = {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: "gross-rent-multiplier-explained",
+    title:
+      "Gross rent multiplier (GRM) explained: how to screen rentals fast (2026)",
+    excerpt:
+      "GRM = price ÷ annual gross rent — the fastest screen in real estate and the first number to compute on any listing. The formula, a three-listing screen, the cap-rate bridge ((1 − expense ratio) ÷ GRM), how it maps to the 1% rule, and two $250K duplexes with identical GRMs that cash flow +$365 and −$155.",
+    readingTimeMinutes: 10,
+    publishedAt: "2026-06-17",
+    available: true,
+  },
+  {
     slug: "how-to-calculate-noi-rental-property",
     title:
       "How to calculate NOI (net operating income) on a rental property (2026)",
