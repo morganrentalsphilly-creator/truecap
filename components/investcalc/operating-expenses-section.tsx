@@ -91,12 +91,17 @@ function FieldLabelWithTooltip({ label, term, tooltip }: FieldLabelWithTooltipPr
 function FieldLabel({
   children,
   icon,
+  htmlFor,
 }: {
   children: ReactNode;
   icon?: ReactNode;
+  htmlFor?: string;
 }) {
   return (
-    <Label className="mb-2 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-[var(--brand-orange)]">
+    <Label
+      htmlFor={htmlFor}
+      className="mb-2 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-[var(--brand-orange)]"
+    >
       {icon ? <span className="text-[var(--brand-orange)]/80">{icon}</span> : null}
       {children}
     </Label>
@@ -254,24 +259,27 @@ export function OperatingExpensesSection({
         <div className={cn("overflow-hidden rounded-xl border border-[var(--brand-orange)]/10 bg-card/50", !showAdvanced && "hidden")}>
           <div className="grid grid-cols-1 divide-y divide-[var(--brand-orange)]/10 md:grid-cols-2 md:divide-x md:divide-y-0 xl:grid-cols-4">
             <SectionField>
-              <FieldLabel>
+              <FieldLabel htmlFor="propertyTaxPct">
                 <FieldLabelWithTooltip label="Property Tax % (Annual)" term="propertyTax" />
               </FieldLabel>
               <div className="relative">
                 <Input
                   {...register("propertyTaxPct", { setValueAs: optionalNumberSetValueAs })}
+                  id="propertyTaxPct"
                   type="number"
                   inputMode="decimal"
                   step="0.01"
                   min={0}
                   max={100}
                   placeholder="1.1"
+                  aria-invalid={!!errors.propertyTaxPct}
+                  aria-describedby={errors.propertyTaxPct ? "propertyTaxPct-error" : undefined}
                   className={cn(inputClassName, "pr-8", errors.propertyTaxPct && "border-destructive")}
                 />
                 <PercentIcon />
               </div>
               <FieldHint>Used as annual tax rate on purchase price.</FieldHint>
-              <FieldError message={errors.propertyTaxPct?.message} />
+              <FieldError id="propertyTaxPct-error" message={errors.propertyTaxPct?.message} />
             </SectionField>
 
             <SectionField>
@@ -308,7 +316,7 @@ export function OperatingExpensesSection({
             </SectionField>
 
             <SectionField>
-              <FieldLabel>
+              <FieldLabel htmlFor="insuranceAmount">
                 <FieldLabelWithTooltip
                   label={insuranceInputMode === "monthly" ? "Insurance (Monthly $)" : "Insurance % (Annual)"}
                   term="insurance"
@@ -320,11 +328,20 @@ export function OperatingExpensesSection({
                   {...register(insuranceInputMode === "monthly" ? "insuranceMonthly" : "insurancePct", {
                     setValueAs: optionalNumberSetValueAs,
                   })}
+                  id="insuranceAmount"
                   type="number"
                   inputMode="decimal"
                   step="0.01"
                   min={0}
                   placeholder={insuranceInputMode === "monthly" ? String(insuranceEst) : "0.50"}
+                  aria-invalid={
+                    !!(insuranceInputMode === "monthly" ? errors.insuranceMonthly : errors.insurancePct)
+                  }
+                  aria-describedby={
+                    (insuranceInputMode === "monthly" ? errors.insuranceMonthly : errors.insurancePct)
+                      ? "insuranceAmount-error"
+                      : undefined
+                  }
                   className={cn(
                     inputClassName,
                     insuranceInputMode === "monthly" ? "pl-8" : "pr-8",
@@ -340,6 +357,7 @@ export function OperatingExpensesSection({
                   : "Annual insurance rate applied to purchase price. Leave blank to use the default 0.5%."}
               </FieldHint>
               <FieldError
+                id="insuranceAmount-error"
                 message={
                   insuranceInputMode === "monthly"
                     ? errors.insuranceMonthly?.message
@@ -349,23 +367,26 @@ export function OperatingExpensesSection({
             </SectionField>
 
             <SectionField>
-              <FieldLabel>
+              <FieldLabel htmlFor="hoaMonthly">
                 <FieldLabelWithTooltip label="HOA (Monthly $)" term="hoa" />
               </FieldLabel>
               <div className="relative">
                 <DollarIcon />
                 <Input
                   {...register("hoaMonthly", { setValueAs: optionalNumberSetValueAs })}
+                  id="hoaMonthly"
                   type="number"
                   inputMode="decimal"
                   step="0.01"
                   min={0}
                   placeholder="0"
+                  aria-invalid={!!errors.hoaMonthly}
+                  aria-describedby={errors.hoaMonthly ? "hoaMonthly-error" : undefined}
                   className={cn(inputClassName, "pl-8", errors.hoaMonthly && "border-destructive")}
                 />
               </div>
               <FieldHint>Monthly homeowners association fees if applicable.</FieldHint>
-              <FieldError message={errors.hoaMonthly?.message} />
+              <FieldError id="hoaMonthly-error" message={errors.hoaMonthly?.message} />
             </SectionField>
           </div>
         </div>
@@ -376,22 +397,25 @@ export function OperatingExpensesSection({
           </p>
           <div className={cn("grid grid-cols-1 gap-3 sm:grid-cols-2", showAdvanced ? "xl:grid-cols-3 2xl:grid-cols-5" : "xl:grid-cols-4")}>
             <SectionField className={cn("rounded-lg border border-[var(--brand-orange)]/10 bg-card p-3", !showAdvanced && "hidden")}>
-              <FieldLabel icon={<Plug className="size-3" />}>
+              <FieldLabel icon={<Plug className="size-3" />} htmlFor="utilitiesMonthly">
                 <FieldLabelWithTooltip label="Utilities" term="utilities" />
               </FieldLabel>
               <div className="relative">
                 <DollarIcon />
                 <Input
                   {...register("utilitiesMonthly", { setValueAs: optionalNumberSetValueAs })}
+                  id="utilitiesMonthly"
                   type="number"
                   inputMode="decimal"
                   step="0.01"
                   min={0}
                   placeholder="0"
+                  aria-invalid={!!errors.utilitiesMonthly}
+                  aria-describedby={errors.utilitiesMonthly ? "utilitiesMonthly-error" : undefined}
                   className={cn(inputClassName, "pl-8", errors.utilitiesMonthly && "border-destructive")}
                 />
               </div>
-              <FieldError message={errors.utilitiesMonthly?.message} />
+              <FieldError id="utilitiesMonthly-error" message={errors.utilitiesMonthly?.message} />
             </SectionField>
 
             {/* Maintenance / Vacancy / Management / CapEx — previously
@@ -401,75 +425,87 @@ export function OperatingExpensesSection({
                 defaults" block above. User clicks "Show Advanced
                 Options" to override any of these inputs. */}
             <SectionField className={cn("rounded-lg border border-[var(--brand-orange)]/10 bg-card p-3", !showAdvanced && "hidden")}>
-              <FieldLabel icon={<Wrench className="size-3" />}>
+              <FieldLabel icon={<Wrench className="size-3" />} htmlFor="maintenancePct">
                 <FieldLabelWithTooltip label="Maintenance %" term="maintenance" />
               </FieldLabel>
               <div className="relative">
                 <Input
                   {...register("maintenancePct", { valueAsNumber: true })}
+                  id="maintenancePct"
                   type="number"
                   inputMode="decimal"
                   step="0.01"
                   placeholder="10"
+                  aria-invalid={!!errors.maintenancePct}
+                  aria-describedby={errors.maintenancePct ? "maintenancePct-error" : undefined}
                   className={cn(inputClassName, "pr-8", errors.maintenancePct && "border-destructive")}
                 />
                 <PercentIcon />
               </div>
-              <FieldError message={errors.maintenancePct?.message} />
+              <FieldError id="maintenancePct-error" message={errors.maintenancePct?.message} />
             </SectionField>
 
             <SectionField className={cn("rounded-lg border border-[var(--brand-orange)]/10 bg-card p-3", !showAdvanced && "hidden")}>
-              <FieldLabel icon={<Home className="size-3" />}>
+              <FieldLabel icon={<Home className="size-3" />} htmlFor="vacancyPct">
                 <FieldLabelWithTooltip label="Vacancy %" term="vacancy" />
               </FieldLabel>
               <div className="relative">
                 <Input
                   {...register("vacancyPct", { valueAsNumber: true })}
+                  id="vacancyPct"
                   type="number"
                   inputMode="decimal"
                   step="0.01"
                   placeholder="5"
+                  aria-invalid={!!errors.vacancyPct}
+                  aria-describedby={errors.vacancyPct ? "vacancyPct-error" : undefined}
                   className={cn(inputClassName, "pr-8", errors.vacancyPct && "border-destructive")}
                 />
                 <PercentIcon />
               </div>
-              <FieldError message={errors.vacancyPct?.message} />
+              <FieldError id="vacancyPct-error" message={errors.vacancyPct?.message} />
             </SectionField>
 
             <SectionField className={cn("rounded-lg border border-[var(--brand-orange)]/10 bg-card p-3", !showAdvanced && "hidden")}>
-              <FieldLabel icon={<Building2 className="size-3" />}>
+              <FieldLabel icon={<Building2 className="size-3" />} htmlFor="mgmtPct">
                 <FieldLabelWithTooltip label="Management %" term="management" />
               </FieldLabel>
               <div className="relative">
                 <Input
                   {...register("mgmtPct", { valueAsNumber: true })}
+                  id="mgmtPct"
                   type="number"
                   inputMode="decimal"
                   step="0.01"
                   placeholder="8"
+                  aria-invalid={!!errors.mgmtPct}
+                  aria-describedby={errors.mgmtPct ? "mgmtPct-error" : undefined}
                   className={cn(inputClassName, "pr-8", errors.mgmtPct && "border-destructive")}
                 />
                 <PercentIcon />
               </div>
-              <FieldError message={errors.mgmtPct?.message} />
+              <FieldError id="mgmtPct-error" message={errors.mgmtPct?.message} />
             </SectionField>
 
             <SectionField className={cn("rounded-lg border border-[var(--brand-orange)]/10 bg-card p-3", !showAdvanced && "hidden")}>
-              <FieldLabel icon={<BarChart3 className="size-3" />}>
+              <FieldLabel icon={<BarChart3 className="size-3" />} htmlFor="capexPct">
                 <FieldLabelWithTooltip label="CapEx %" term="capex" />
               </FieldLabel>
               <div className="relative">
                 <Input
                   {...register("capexPct", { valueAsNumber: true })}
+                  id="capexPct"
                   type="number"
                   inputMode="decimal"
                   step="0.01"
                   placeholder="5"
+                  aria-invalid={!!errors.capexPct}
+                  aria-describedby={errors.capexPct ? "capexPct-error" : undefined}
                   className={cn(inputClassName, "pr-8", errors.capexPct && "border-destructive")}
                 />
                 <PercentIcon />
               </div>
-              <FieldError message={errors.capexPct?.message} />
+              <FieldError id="capexPct-error" message={errors.capexPct?.message} />
             </SectionField>
           </div>
         </div>
@@ -480,32 +516,38 @@ export function OperatingExpensesSection({
           </p>
           <div className="grid grid-cols-1 gap-x-6 gap-y-4 md:grid-cols-2 xl:grid-cols-4">
             <div>
-              <FieldLabel>
+              <FieldLabel htmlFor="buildingValuePct">
                 <FieldLabelWithTooltip label="Building Value %" term="buildingValue" />
               </FieldLabel>
               <div className="relative">
                 <Input
                   {...register("buildingValuePct", { valueAsNumber: true })}
+                  id="buildingValuePct"
                   type="number"
                   inputMode="decimal"
                   step="0.01"
                   min={0}
                   max={100}
                   placeholder="85"
+                  aria-invalid={!!errors.buildingValuePct}
+                  aria-describedby={errors.buildingValuePct ? "buildingValuePct-error" : undefined}
                   className={cn(inputClassName, "pr-8", errors.buildingValuePct && "border-destructive")}
                 />
                 <PercentIcon />
               </div>
               <FieldHint>Portion of purchase price allocated to depreciable building value.</FieldHint>
-              <FieldError message={errors.buildingValuePct?.message} />
+              <FieldError id="buildingValuePct-error" message={errors.buildingValuePct?.message} />
             </div>
 
             <div>
-              <FieldLabel>
+              <FieldLabel htmlFor="depreciationYears">
                 <FieldLabelWithTooltip label="Depreciation Period" term="depreciationYears" />
               </FieldLabel>
               <select
                 {...register("depreciationYears", { setValueAs: (v) => Number(v) })}
+                id="depreciationYears"
+                aria-invalid={!!errors.depreciationYears}
+                aria-describedby={errors.depreciationYears ? "depreciationYears-error" : undefined}
                 className={cn(
                   "h-10 w-full rounded-lg border border-[var(--brand-orange)]/15 bg-background px-3 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-orange)]/25",
                   errors.depreciationYears && "border-destructive"
@@ -515,110 +557,125 @@ export function OperatingExpensesSection({
                 <option value={39}>39 years (Commercial)</option>
               </select>
               <FieldHint>IRS standard recovery period for depreciation.</FieldHint>
-              <FieldError message={errors.depreciationYears?.message} />
+              <FieldError id="depreciationYears-error" message={errors.depreciationYears?.message} />
             </div>
 
             <div>
-              <FieldLabel>
+              <FieldLabel htmlFor="expenseGrowthPct">
                 <FieldLabelWithTooltip label="Expense Growth %" term="expenseGrowth" />
               </FieldLabel>
               <div className="relative">
                 <Input
                   {...register("expenseGrowthPct", { valueAsNumber: true })}
+                  id="expenseGrowthPct"
                   type="number"
                   inputMode="decimal"
                   step="0.01"
                   min={0}
                   placeholder="2.5"
+                  aria-invalid={!!errors.expenseGrowthPct}
+                  aria-describedby={errors.expenseGrowthPct ? "expenseGrowthPct-error" : undefined}
                   className={cn(inputClassName, "pr-8", errors.expenseGrowthPct && "border-destructive")}
                 />
                 <PercentIcon />
               </div>
               <FieldHint>Annual growth rate for operating expenses.</FieldHint>
-              <FieldError message={errors.expenseGrowthPct?.message} />
+              <FieldError id="expenseGrowthPct-error" message={errors.expenseGrowthPct?.message} />
             </div>
 
             <div>
-              <FieldLabel>
+              <FieldLabel htmlFor="rentGrowthPct">
                 <FieldLabelWithTooltip label="Rent Growth %" term="rentGrowth" />
               </FieldLabel>
               <div className="relative">
                 <Input
                   {...register("rentGrowthPct", { valueAsNumber: true })}
+                  id="rentGrowthPct"
                   type="number"
                   inputMode="decimal"
                   step="0.01"
                   min={0}
                   placeholder="2.5"
+                  aria-invalid={!!errors.rentGrowthPct}
+                  aria-describedby={errors.rentGrowthPct ? "rentGrowthPct-error" : undefined}
                   className={cn(inputClassName, "pr-8", errors.rentGrowthPct && "border-destructive")}
                 />
                 <PercentIcon />
               </div>
               <FieldHint>Annual growth rate for rental income.</FieldHint>
-              <FieldError message={errors.rentGrowthPct?.message} />
+              <FieldError id="rentGrowthPct-error" message={errors.rentGrowthPct?.message} />
             </div>
 
             <div>
-              <FieldLabel>
+              <FieldLabel htmlFor="appreciationRatePct">
                 <FieldLabelWithTooltip label="Appreciation Rate % (Exit Scenarios)" term="appreciation" />
               </FieldLabel>
               <div className="relative">
                 <Input
                   {...register("appreciationRatePct", { setValueAs: optionalNumberSetValueAs })}
+                  id="appreciationRatePct"
                   type="number"
                   inputMode="decimal"
                   step="0.01"
                   min={0}
                   max={100}
                   placeholder="3"
+                  aria-invalid={!!errors.appreciationRatePct}
+                  aria-describedby={errors.appreciationRatePct ? "appreciationRatePct-error" : undefined}
                   className={cn(inputClassName, "pr-8", errors.appreciationRatePct && "border-destructive")}
                 />
                 <PercentIcon />
               </div>
               <FieldHint>Expected annual property appreciation rate.</FieldHint>
-              <FieldError message={errors.appreciationRatePct?.message} />
+              <FieldError id="appreciationRatePct-error" message={errors.appreciationRatePct?.message} />
             </div>
 
             <div>
-              <FieldLabel>
+              <FieldLabel htmlFor="sellingCostPct">
                 <FieldLabelWithTooltip label="Selling Cost % (Exit Scenarios)" term="sellingCost" />
               </FieldLabel>
               <div className="relative">
                 <Input
                   {...register("sellingCostPct", { setValueAs: optionalNumberSetValueAs })}
+                  id="sellingCostPct"
                   type="number"
                   inputMode="decimal"
                   step="0.01"
                   min={0}
                   max={100}
                   placeholder="6"
+                  aria-invalid={!!errors.sellingCostPct}
+                  aria-describedby={errors.sellingCostPct ? "sellingCostPct-error" : undefined}
                   className={cn(inputClassName, "pr-8", errors.sellingCostPct && "border-destructive")}
                 />
                 <PercentIcon />
               </div>
               <FieldHint>Total selling costs as a percentage of sale price.</FieldHint>
-              <FieldError message={errors.sellingCostPct?.message} />
+              <FieldError id="sellingCostPct-error" message={errors.sellingCostPct?.message} />
             </div>
 
             <div>
-              <FieldLabel>
+              <FieldLabel htmlFor="taxRatePct">
                 <FieldLabelWithTooltip label="Tax Rate % (Optional)" term="taxSavings" />
               </FieldLabel>
               <div className="relative">
                 <Input
                   {...register("taxRatePct", { setValueAs: optionalNumberSetValueAs })}
+                  id="taxRatePct"
                   type="number"
                   inputMode="decimal"
                   step="0.01"
                   min={0}
                   max={100}
                   placeholder="24"
+                  aria-invalid={!!errors.taxRatePct}
+                  aria-describedby={errors.taxRatePct ? "taxRatePct-error" : undefined}
                   className={cn(inputClassName, "pr-8", errors.taxRatePct && "border-destructive")}
                 />
                 <PercentIcon />
               </div>
               <FieldHint>Your personal income tax rate for tax savings calculation.</FieldHint>
-              <FieldError message={errors.taxRatePct?.message} />
+              <FieldError id="taxRatePct-error" message={errors.taxRatePct?.message} />
             </div>
 
             <div className="flex min-h-[94px] items-start justify-between gap-4 pt-1 xl:items-center">

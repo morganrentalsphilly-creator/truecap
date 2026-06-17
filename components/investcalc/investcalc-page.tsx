@@ -73,7 +73,6 @@ import {
   type ExitScenarioInput,
   type ExitScenarioYear,
 } from "@/lib/exit-scenarios";
-import { buildAutoVerdict } from "@/lib/verdict";
 import { trackConversion } from "@/lib/analytics/track-conversion";
 import { trackEvent } from "@/lib/analytics";
 
@@ -242,20 +241,19 @@ function toPdfReportData(args: {
         }));
 
   const proScore = dealScoreResult?.ok && dealScoreResult.tier === "pro" ? dealScoreResult.data : null;
-  const recommendation = proScore?.recommendation ?? "Neutral";
-  const risk = proScore?.riskLevel ?? "Medium Risk";
-  const score = proScore?.score ?? Math.round(Math.max(0, Math.min(100, (result.cocReturn + result.capRate) * 4)));
-  // Use the Pro Deal Score explanation when available (it's tuned by the
-  // same engine that computes the score). For free users, fall back to
-  // the auto-verdict generator — a richer 5-6 sentence plain-English
-  // summary derived from the observable metrics.
-  const rationale =
-    proScore?.explanation ??
-    buildAutoVerdict({
-      result,
-      address: values.address,
-      purchasePrice: values.purchasePrice,
-    });
+  // When the Pro Deal Score result isn't loaded (free users, one-time-PDF
+  // buyers), compute the REAL score locally for the PDF. computeDealScore is
+  // a pure function — entitlement gating controls whether we SHOW the
+  // breakdown panel, not whether we can score the deal. Previously this path
+  // hard-coded "Neutral / Medium Risk" + an ad-hoc (coc+cap)*4 score + a
+  // year-1 verdict paragraph that could contradict the headline. Sourcing all
+  // four fields from one engine keeps the cover page self-consistent and
+  // gives free/one-time buyers the same holistic verdict as Pro.
+  const localScore = computeDealScore(buildDealScoreInputFromAnalysis(values, result));
+  const recommendation = proScore?.recommendation ?? localScore.recommendation;
+  const risk = proScore?.riskLevel ?? localScore.riskLevel;
+  const score = proScore?.score ?? localScore.score;
+  const rationale = proScore?.explanation ?? localScore.explanation;
 
   const projectionRows = projectionYears.map((row) => ({
     y: row.year,
@@ -2229,7 +2227,10 @@ export function InvestCalcPage({
                 </kbd>
                 <span>to calculate from anywhere</span>
               </p>
-              <AutosaveIndicator form={form} />
+              {/* Only when the localStorage draft writer is actually active
+                  (anonymous / new-deal). Editing a loaded saved deal skips
+                  the draft write, so showing "Auto-saved" there would lie. */}
+              {!savedDealId ? <AutosaveIndicator form={form} /> : null}
             </div>
           </div>
           {/* Mobile sticky bottom Calculate bar. Inside the form so its

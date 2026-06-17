@@ -292,6 +292,12 @@ export function TemplateSelectorSection({
               setIsOpen((v) => !v);
             }}
             disabled={isInteractionBlocked}
+            aria-haspopup="listbox"
+            aria-expanded={isOpen}
+            aria-label={`Calculation template: ${
+              isTemplateLocked ? "locked" : displayTemplate?.templateName ?? "no template"
+            }`}
+            aria-describedby={mainFormErrors.templateId?.message ? "templateId-error" : undefined}
             className={cn(
               "w-full flex items-center justify-between px-4 py-3.5 rounded-xl border transition-all text-left",
               "bg-[var(--brand-blue-light)] border-primary/20 hover:border-primary/50",
@@ -420,7 +426,9 @@ export function TemplateSelectorSection({
         </Button>
       </div>
       {mainFormErrors.templateId?.message && (
-        <p className="text-xs text-destructive">{mainFormErrors.templateId?.message}</p>
+        <p id="templateId-error" role="alert" className="text-xs text-destructive">
+          {mainFormErrors.templateId?.message}
+        </p>
       )}
 
       {dialogInitialValues && (

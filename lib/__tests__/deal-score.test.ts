@@ -25,6 +25,7 @@ import {
   buildDealScoreInputFromAnalysis,
   computeDealScore,
   dealScoreInputSchema,
+  computeTenYearAnnualizedReturnPct,
   type DealScoreInput,
 } from "../deal-score";
 import { SAMPLE_DEAL_VALUES } from "../sample-deal";
@@ -309,5 +310,61 @@ describe("buildDealScoreInputFromAnalysis — end-to-end wiring", () => {
     expect(r.recommendation).not.toBe("Avoid");
     expect(r.recommendation).not.toBe("Risky");
     expect(r.score).toBeGreaterThanOrEqual(35);
+  });
+});
+
+describe("computeTenYearAnnualizedReturnPct — edge branches", () => {
+  const baseResult = {
+    loanAmount: 160_000,
+    monthlyPayment: 1_100,
+    downPayment: 40_000,
+    closingCosts: 6_000,
+    totalCashRequired: 46_000,
+    tenYearProjection: Array.from({ length: 10 }, (_, i) => ({
+      cumulativeCashFlowAnnual: 1_200 * (i + 1),
+    })),
+    taxStrategyYears: Array.from({ length: 10 }, (_, i) => ({
+      cumulativeTaxBenefitAnnual: 2_000 * (i + 1),
+    })),
+  };
+  const baseValues = {
+    purchasePrice: 200_000,
+    interestRate: 7,
+    loanTermYears: 30,
+    appreciationRatePct: 3,
+    sellingCostPct: 6,
+  };
+
+  it("returns null when no cash is invested (totalCashRequired = 0)", () => {
+    expect(
+      computeTenYearAnnualizedReturnPct(baseValues, { ...baseResult, totalCashRequired: 0 })
+    ).toBeNull();
+  });
+
+  it("returns null when the projection is empty", () => {
+    expect(
+      computeTenYearAnnualizedReturnPct(baseValues, { ...baseResult, tenYearProjection: [] })
+    ).toBeNull();
+  });
+
+  it("returns -100 (full loss) when you'd lose more than your basis", () => {
+    const wipeout = {
+      ...baseResult,
+      purchasePrice: 200_000,
+      tenYearProjection: Array.from({ length: 10 }, () => ({
+        cumulativeCashFlowAnnual: -400_000,
+      })),
+      taxStrategyYears: Array.from({ length: 10 }, () => ({ cumulativeTaxBenefitAnnual: 0 })),
+    };
+    expect(
+      computeTenYearAnnualizedReturnPct({ ...baseValues, appreciationRatePct: 0 }, wipeout)
+    ).toBe(-100);
+  });
+
+  it("returns a positive annualized percent for a healthy leveraged deal", () => {
+    const pct = computeTenYearAnnualizedReturnPct(baseValues, baseResult);
+    expect(pct).not.toBeNull();
+    expect(pct as number).toBeGreaterThan(0);
+    expect(pct as number).toBeLessThan(100);
   });
 });

@@ -16,7 +16,7 @@
  * every key press.
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Check, Loader2 } from "lucide-react";
 import type { UseFormReturn } from "react-hook-form";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
@@ -30,22 +30,31 @@ export function AutosaveIndicator({ form }: Props) {
   const [isSaving, setIsSaving] = useState(false);
   const [, setTick] = useState(0);
 
-  // Watch the form for any change. RHF's watch() is a function call
-  // returning current values; the subscribe-style overload (passing a
-  // callback) fires on every field update. We use it as a "field
-  // changed" trigger; the persistence itself already happens elsewhere
-  // (the welcome-back draft restore proves a save is occurring).
+  // Watch the form for any change. RHF's watch() subscribe overload fires
+  // on every field update; we use it as a "field changed" trigger. The
+  // persistence itself happens in investcalc-page (the localStorage draft
+  // writer). This component is only mounted when that writer is active
+  // (anonymous / new-deal sessions, gated at the call site), so the
+  // "Auto-saved" claim is always truthful.
+  //
+  // The debounce timer lives in a ref, not a closure: RHF does NOT consume
+  // a cleanup returned from the watch callback, so returning clearTimeout
+  // there leaks a timer per keystroke (and defeats the debounce). Clearing
+  // the prior ref-held timer each change is the correct pattern.
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
     const subscription = form.watch(() => {
       setIsSaving(true);
-      // Debounce: bunched typing should resolve to one "saved" state.
-      const t = setTimeout(() => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+      timerRef.current = setTimeout(() => {
         setIsSaving(false);
         setSavedAt(Date.now());
       }, 600);
-      return () => clearTimeout(t);
     });
-    return () => subscription.unsubscribe();
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+      subscription.unsubscribe();
+    };
   }, [form]);
 
   // Re-render every 5s so "X seconds ago" stays current.

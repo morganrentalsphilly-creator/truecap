@@ -82,6 +82,7 @@ export function ReadOnlyAnalysisView({ values, result }: ReadOnlyAnalysisViewPro
           label="Cap Rate"
           value={fmtPct(result.capRate)}
           positive={result.capRate >= 0}
+          negative={result.capRate < 0}
         />
         <MetricTile
           label="DSCR"

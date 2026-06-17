@@ -50,35 +50,41 @@ export function PropertyDetailsSection({ form, onAddressSelected }: PropertyDeta
         {/* Purchase Price + Year Built */}
         <div className="grid grid-cols-2 sm:grid-cols-2 gap-4">
           <div>
-            <Label className="text-sm font-medium text-foreground mb-1.5 block">
+            <Label htmlFor="purchasePrice" className="text-sm font-medium text-foreground mb-1.5 block">
               Purchase Price
             </Label>
             <div className="relative">
               <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 {...register("purchasePrice", { valueAsNumber: true })}
+                id="purchasePrice"
                 type="number"
                 inputMode="decimal"
                 step="0.01"
                 placeholder="385000"
+                aria-invalid={!!errors.purchasePrice}
+                aria-describedby={errors.purchasePrice ? "purchasePrice-error" : undefined}
                 className={cn(
                   "pl-8 border-input bg-background",
                   errors.purchasePrice && "border-destructive focus-visible:ring-destructive"
                 )}
               />
             </div>
-            <FieldError message={errors.purchasePrice?.message} />
+            <FieldError id="purchasePrice-error" message={errors.purchasePrice?.message} />
           </div>
 
           <div>
-            <Label className="text-sm font-medium text-foreground mb-1.5 block">
+            <Label htmlFor="yearBuilt" className="text-sm font-medium text-foreground mb-1.5 block">
               Year Built <span className="text-xs text-muted-foreground">(Optional)</span>
             </Label>
             <Input
               {...register("yearBuilt", { setValueAs: optionalNumberSetValueAs })}
+              id="yearBuilt"
               type="number"
               inputMode="decimal"
               placeholder="2015"
+              aria-invalid={!!errors.yearBuilt}
+              aria-describedby={errors.yearBuilt ? "yearBuilt-error" : undefined}
               className={cn(
                 "border-input bg-background",
                 errors.yearBuilt && "border-destructive focus-visible:ring-destructive"
@@ -87,7 +93,7 @@ export function PropertyDetailsSection({ form, onAddressSelected }: PropertyDeta
             <p className="mt-1 text-[11px] text-muted-foreground">
               Used for reference only. It does not auto-adjust your expenses.
             </p>
-            <FieldError message={errors.yearBuilt?.message} />
+            <FieldError id="yearBuilt-error" message={errors.yearBuilt?.message} />
           </div>
         </div>
       </div>

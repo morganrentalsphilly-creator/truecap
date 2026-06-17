@@ -33,16 +33,19 @@ export function FinancingSection({ form }: FinancingSectionProps) {
 
       <div className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <div>
-          <Label className="text-xs font-semibold text-[var(--brand-green)] mb-1.5 block uppercase tracking-wide">
+          <Label htmlFor="downPaymentPct" className="text-xs font-semibold text-[var(--brand-green)] mb-1.5 block uppercase tracking-wide">
             <GlossaryTip term="downPayment" showIcon={false}>Down Payment %</GlossaryTip>
           </Label>
           <div className="relative">
             <Input
               {...register("downPaymentPct", { valueAsNumber: true })}
+              id="downPaymentPct"
               type="number"
               inputMode="decimal"
               step="0.01"
               placeholder="20"
+              aria-invalid={!!errors.downPaymentPct}
+              aria-describedby={errors.downPaymentPct ? "downPaymentPct-error" : undefined}
               className={cn(
                 "pr-8 border-[var(--brand-green)]/30 bg-background focus-visible:ring-[var(--brand-green)]/30",
                 errors.downPaymentPct && "border-destructive"
@@ -50,20 +53,23 @@ export function FinancingSection({ form }: FinancingSectionProps) {
             />
             <Percent className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           </div>
-          <FieldError message={errors.downPaymentPct?.message} />
+          <FieldError id="downPaymentPct-error" message={errors.downPaymentPct?.message} />
         </div>
 
         <div>
-          <Label className="text-xs font-semibold text-[var(--brand-green)] mb-1.5 block uppercase tracking-wide">
+          <Label htmlFor="interestRate" className="text-xs font-semibold text-[var(--brand-green)] mb-1.5 block uppercase tracking-wide">
             <GlossaryTip term="interestRate" showIcon={false}>Interest Rate %</GlossaryTip>
           </Label>
           <div className="relative">
             <Input
               {...register("interestRate", { valueAsNumber: true })}
+              id="interestRate"
               type="number"
               inputMode="decimal"
               step="0.01"
               placeholder="6.75"
+              aria-invalid={!!errors.interestRate}
+              aria-describedby={errors.interestRate ? "interestRate-error" : undefined}
               className={cn(
                 "pr-8 border-[var(--brand-green)]/30 bg-background focus-visible:ring-[var(--brand-green)]/30",
                 errors.interestRate && "border-destructive"
@@ -71,40 +77,46 @@ export function FinancingSection({ form }: FinancingSectionProps) {
             />
             <Percent className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           </div>
-          <FieldError message={errors.interestRate?.message} />
+          <FieldError id="interestRate-error" message={errors.interestRate?.message} />
         </div>
 
         <div>
-          <Label className="text-xs font-semibold text-[var(--brand-green)] mb-1.5 block uppercase tracking-wide">
+          <Label htmlFor="loanTermYears" className="text-xs font-semibold text-[var(--brand-green)] mb-1.5 block uppercase tracking-wide">
             <GlossaryTip term="loanTerm" showIcon={false}>Loan Term (Years)</GlossaryTip>
           </Label>
           <Input
             {...register("loanTermYears", { valueAsNumber: true })}
+            id="loanTermYears"
             type="number"
             inputMode="decimal"
             placeholder="30"
+            aria-invalid={!!errors.loanTermYears}
+            aria-describedby={errors.loanTermYears ? "loanTermYears-error" : undefined}
             className={cn(
               "border-[var(--brand-green)]/30 bg-background focus-visible:ring-[var(--brand-green)]/30",
               errors.loanTermYears && "border-destructive"
             )}
           />
-          <FieldError message={errors.loanTermYears?.message} />
+          <FieldError id="loanTermYears-error" message={errors.loanTermYears?.message} />
         </div>
 
         <div>
-          <Label className="text-xs font-semibold text-[var(--brand-green)] mb-1.5 block uppercase tracking-wide">
+          <Label htmlFor="closingCostsPct" className="text-xs font-semibold text-[var(--brand-green)] mb-1.5 block uppercase tracking-wide">
             <GlossaryTip term="closingCosts" showIcon={false}>Closing Costs %</GlossaryTip>
             {" "}<span className="text-[10px] sm:text-xs text-muted-foreground">(Optional)</span>
           </Label>
           <div className="relative">
             <Input
               {...register("closingCostsPct", { setValueAs: optionalNumberSetValueAs })}
+              id="closingCostsPct"
               type="number"
               inputMode="decimal"
               step="0.01"
               min={0}
               max={100}
               placeholder="3"
+              aria-invalid={!!errors.closingCostsPct}
+              aria-describedby={errors.closingCostsPct ? "closingCostsPct-error" : undefined}
               className={cn(
                 "pr-8 border-[var(--brand-green)]/30 bg-background focus-visible:ring-[var(--brand-green)]/30",
                 errors.closingCostsPct && "border-destructive"
@@ -115,7 +127,7 @@ export function FinancingSection({ form }: FinancingSectionProps) {
           <p className="text-[11px] text-muted-foreground mt-1">
             Defaults to 3% of purchase price if left blank.
           </p>
-          <FieldError message={errors.closingCostsPct?.message} />
+          <FieldError id="closingCostsPct-error" message={errors.closingCostsPct?.message} />
         </div>
       </div>
     </div>

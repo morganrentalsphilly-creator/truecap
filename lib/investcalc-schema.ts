@@ -45,7 +45,7 @@ const optionalYearBuilt = z.preprocess((val) => {
   const n = typeof val === "number" ? val : Number(val);
   if (!Number.isFinite(n)) return undefined;
   return n;
-}, z.number({ invalid_type_error: "Enter year built" }).min(1800, "Year must be after 1800").max(new Date().getFullYear() + 5, "Year too far in future").optional());
+}, z.number({ invalid_type_error: "Enter a 4-digit year" }).min(1800, "Year must be after 1800").max(new Date().getFullYear() + 5, "Year too far in future").optional());
 
 export const insuranceInputModeSchema = z.enum(["percent", "monthly"]);
 

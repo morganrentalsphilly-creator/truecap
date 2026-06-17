@@ -164,75 +164,87 @@ export function MultiFamilyUnitsSection({
 
               <div className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-4 gap-3">
                 <div>
-                  <Label className="text-xs font-semibold text-primary mb-1 block uppercase tracking-wide">
+                  <Label htmlFor={`unit-${index}-bedrooms`} className="text-xs font-semibold text-primary mb-1 block uppercase tracking-wide">
                     Bedrooms
                   </Label>
                   <Input
                     {...register(`units.${index}.bedrooms`, { valueAsNumber: true })}
+                    id={`unit-${index}-bedrooms`}
                     type="number"
                     inputMode="decimal"
                     placeholder="2"
+                    aria-invalid={!!unitErrors?.bedrooms}
+                    aria-describedby={unitErrors?.bedrooms ? `unit-${index}-bedrooms-error` : undefined}
                     className={cn(
                       "border-input bg-background text-sm h-9",
                       unitErrors?.bedrooms && "border-destructive"
                     )}
                   />
-                  <FieldError message={unitErrors?.bedrooms?.message} />
+                  <FieldError id={`unit-${index}-bedrooms-error`} message={unitErrors?.bedrooms?.message} />
                 </div>
 
                 <div>
-                  <Label className="text-xs font-semibold text-primary mb-1 block uppercase tracking-wide">
+                  <Label htmlFor={`unit-${index}-bathrooms`} className="text-xs font-semibold text-primary mb-1 block uppercase tracking-wide">
                     Bathrooms
                   </Label>
                   <Input
                     {...register(`units.${index}.bathrooms`, { valueAsNumber: true })}
+                    id={`unit-${index}-bathrooms`}
                     type="number"
                     inputMode="decimal"
                     placeholder="1"
+                    aria-invalid={!!unitErrors?.bathrooms}
+                    aria-describedby={unitErrors?.bathrooms ? `unit-${index}-bathrooms-error` : undefined}
                     className={cn(
                       "border-input bg-background text-sm h-9",
                       unitErrors?.bathrooms && "border-destructive"
                     )}
                   />
-                  <FieldError message={unitErrors?.bathrooms?.message} />
+                  <FieldError id={`unit-${index}-bathrooms-error`} message={unitErrors?.bathrooms?.message} />
                 </div>
 
                 <div>
-                  <Label className="text-xs font-semibold text-primary mb-1 block uppercase tracking-wide">
+                  <Label htmlFor={`unit-${index}-sqft`} className="text-xs font-semibold text-primary mb-1 block uppercase tracking-wide">
                     Sq Ft
                   </Label>
                   <Input
                     {...register(`units.${index}.sqft`, { valueAsNumber: true })}
+                    id={`unit-${index}-sqft`}
                     type="number"
                     inputMode="decimal"
                     placeholder="850"
+                    aria-invalid={!!unitErrors?.sqft}
+                    aria-describedby={unitErrors?.sqft ? `unit-${index}-sqft-error` : undefined}
                     className={cn(
                       "border-input bg-background text-sm h-9",
                       unitErrors?.sqft && "border-destructive"
                     )}
                   />
-                  <FieldError message={unitErrors?.sqft?.message} />
+                  <FieldError id={`unit-${index}-sqft-error`} message={unitErrors?.sqft?.message} />
                 </div>
 
                 <div>
-                  <Label className="text-xs font-semibold text-primary mb-1 block uppercase tracking-wide">
+                  <Label htmlFor={`unit-${index}-monthlyRent`} className="text-xs font-semibold text-primary mb-1 block uppercase tracking-wide">
                     {isOwner ? "Rent (Owner)" : "Monthly Rent"}
                   </Label>
                   <div className="relative">
                     <DollarSign className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
                     <Input
                       {...register(`units.${index}.monthlyRent`, { valueAsNumber: true })}
+                      id={`unit-${index}-monthlyRent`}
                       type="number"
                       inputMode="decimal"
                       step="0.01"
                       placeholder="1800"
+                      aria-invalid={!!unitErrors?.monthlyRent}
+                      aria-describedby={unitErrors?.monthlyRent ? `unit-${index}-monthlyRent-error` : undefined}
                       className={cn(
                         "pl-7 border-input bg-background text-sm h-9",
                         unitErrors?.monthlyRent && "border-destructive"
                       )}
                     />
                   </div>
-                  <FieldError message={unitErrors?.monthlyRent?.message} />
+                  <FieldError id={`unit-${index}-monthlyRent-error`} message={unitErrors?.monthlyRent?.message} />
                 </div>
               </div>
             </div>

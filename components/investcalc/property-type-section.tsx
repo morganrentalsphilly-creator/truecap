@@ -53,6 +53,9 @@ export function PropertyTypeSection({
             <button
               type="button"
               onClick={() => setIsOpen((v) => !v)}
+              aria-haspopup="listbox"
+              aria-expanded={isOpen}
+              aria-label={`Property type: ${selectedType?.label ?? "select"}`}
               className={cn(
                 "w-full flex items-center justify-between px-4 py-3.5 rounded-xl border transition-all",
                 "bg-[var(--brand-blue-light)] border-primary/20 hover:border-primary/50"

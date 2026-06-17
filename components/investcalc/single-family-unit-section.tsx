@@ -27,75 +27,87 @@ export function SingleFamilyUnitSection({ form }: SingleFamilyUnitSectionProps) 
 
       <div className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <div>
-          <Label className="text-xs font-semibold text-primary mb-1.5 block uppercase tracking-wide">
+          <Label htmlFor="bedrooms" className="text-xs font-semibold text-primary mb-1.5 block uppercase tracking-wide">
             Bedrooms
           </Label>
           <Input
             {...register("bedrooms", { valueAsNumber: true })}
+            id="bedrooms"
             type="number"
-            inputMode="decimal"
+            inputMode="numeric"
             placeholder="3"
+            aria-invalid={!!errors.bedrooms}
+            aria-describedby={errors.bedrooms ? "bedrooms-error" : undefined}
             className={cn(
               "border-input bg-background",
               errors.bedrooms && "border-destructive"
             )}
           />
-          <FieldError message={errors.bedrooms?.message} />
+          <FieldError id="bedrooms-error" message={errors.bedrooms?.message} />
         </div>
 
         <div>
-          <Label className="text-xs font-semibold text-primary mb-1.5 block uppercase tracking-wide">
+          <Label htmlFor="bathrooms" className="text-xs font-semibold text-primary mb-1.5 block uppercase tracking-wide">
             Bathrooms
           </Label>
           <Input
             {...register("bathrooms", { valueAsNumber: true })}
+            id="bathrooms"
             type="number"
             inputMode="decimal"
             placeholder="2"
+            aria-invalid={!!errors.bathrooms}
+            aria-describedby={errors.bathrooms ? "bathrooms-error" : undefined}
             className={cn(
               "border-input bg-background",
               errors.bathrooms && "border-destructive"
             )}
           />
-          <FieldError message={errors.bathrooms?.message} />
+          <FieldError id="bathrooms-error" message={errors.bathrooms?.message} />
         </div>
 
         <div>
-          <Label className="text-xs font-semibold text-primary mb-1.5 block uppercase tracking-wide">
+          <Label htmlFor="sqft" className="text-xs font-semibold text-primary mb-1.5 block uppercase tracking-wide">
             Square Feet
           </Label>
           <Input
             {...register("sqft", { valueAsNumber: true })}
+            id="sqft"
             type="number"
-            inputMode="decimal"
+            inputMode="numeric"
             placeholder="1850"
+            aria-invalid={!!errors.sqft}
+            aria-describedby={errors.sqft ? "sqft-error" : undefined}
             className={cn(
               "border-input bg-background",
               errors.sqft && "border-destructive"
             )}
           />
-          <FieldError message={errors.sqft?.message} />
+          <FieldError id="sqft-error" message={errors.sqft?.message} />
         </div>
 
         <div>
-          <Label className="text-xs font-semibold text-primary mb-1.5 block uppercase tracking-wide">
+          <Label htmlFor="monthlyRent" className="text-xs font-semibold text-primary mb-1.5 block uppercase tracking-wide">
             Monthly Rent
           </Label>
           <div className="relative">
             <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               {...register("monthlyRent", { valueAsNumber: true })}
+              id="monthlyRent"
               type="number"
               inputMode="decimal"
               step="0.01"
               placeholder="2800"
+              aria-invalid={!!errors.monthlyRent}
+              aria-describedby={errors.monthlyRent ? "monthlyRent-error" : undefined}
               className={cn(
                 "pl-8 border-input bg-background",
                 errors.monthlyRent && "border-destructive"
               )}
             />
           </div>
-          <FieldError message={errors.monthlyRent?.message} />
+          <FieldError id="monthlyRent-error" message={errors.monthlyRent?.message} />
         </div>
       </div>
     </div>

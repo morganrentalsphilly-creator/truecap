@@ -590,7 +590,6 @@ export function AnalysisDashboard({
                 size="sm"
                 className="h-9 gap-1 rounded-xl bg-primary px-1.5 text-[11px] font-semibold text-primary-foreground sm:h-10 sm:gap-0 sm:rounded-xl sm:px-4 sm:text-sm max-[380px]:h-9 max-[380px]:gap-0.5 max-[380px]:rounded-lg max-[380px]:px-1 max-[380px]:text-[10px]"
                 onClick={() => void onNewAnalysis()}
-                // style={{ background: "!var(--gradient-premium)", boxShadow: "var(--shadow-glow)"}}
                 title="Create a new analysis"
               >
                 <Sparkles className="w-3.5 h-3.5 shrink-0 sm:mr-1.5 max-[380px]:h-3 max-[380px]:w-3" />
@@ -721,7 +720,7 @@ export function AnalysisDashboard({
             </>
           ) : (
             <div className="flex items-center justify-center h-24 text-sm text-muted-foreground">
-              Fill in the form and click Calculate to see your analysis.
+              Run the analysis to see your results.
             </div>
           )}
         </div>
@@ -1977,7 +1976,7 @@ function CashFlowTab({
   if (!result) {
     return (
       <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
-        Submit the form to see your cash flow analysis.
+        Run the analysis to see your cash flow.
       </div>
     );
   }
