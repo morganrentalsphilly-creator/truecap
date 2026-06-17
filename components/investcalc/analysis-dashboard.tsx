@@ -93,6 +93,7 @@ import type { TaxStrategyInput, TaxStrategyYear } from "@/lib/tax-strategy";
 import type { ExitScenarioInput, ExitScenarioYear } from "@/lib/exit-scenarios";
 import { cn } from "@/lib/utils";
 import type { DealScoreActionResult } from "@/app/actions/deal-score";
+import { computeTenYearAnnualizedReturnPct } from "@/lib/deal-score";
 
 interface AnalysisDashboardProps {
   result: AnalysisResult | null;
@@ -231,6 +232,42 @@ function cashFlowBenchmarkLabel(monthlyCashFlow: number): string {
   return "Losing money monthly";
 }
 
+/**
+ * Sub-label for the Monthly Cash Flow card. When year-1 cash flow is
+ * negative but the depreciation + interest shield flips it positive
+ * after-tax, lead with the after-tax figure right on the card — the big
+ * red pre-tax number alone misreads as "this deal loses money" when, for
+ * a tax-paying owner, it doesn't. Otherwise fall back to the plain
+ * benchmark band.
+ */
+function cashFlowSubLabel(r: AnalysisResult): string {
+  if (r.netCashFlow < 0 && r.afterTaxCF >= 0) {
+    return `≈ +$${Math.round(r.afterTaxCF).toLocaleString()}/mo after tax`;
+  }
+  return cashFlowBenchmarkLabel(r.netCashFlow);
+}
+
+/**
+ * Is this an "appreciation play" — a financed deal whose year-1 cash flow
+ * is negative (usually high leverage) but which still pays off after-tax
+ * and projects a strong 10-year total return? These deals read as
+ * uniformly red in the year-1 Overview even though they're viable holds;
+ * the context banner reframes that without faking the year-1 facts.
+ */
+function isAppreciationPlayDeal(
+  r: AnalysisResult,
+  propertyType: string,
+  annualizedReturnPct: number | null
+): boolean {
+  return (
+    propertyType !== "owner-occupant" &&
+    r.monthlyPayment > 0 &&
+    r.netCashFlow < 0 &&
+    r.afterTaxCF >= 0 &&
+    (annualizedReturnPct ?? 0) > 12
+  );
+}
+
 function fmt(n: number) {
   return `$${Math.abs(n).toLocaleString()}`;
 }
@@ -340,6 +377,13 @@ export function AnalysisDashboard({
   const [whatIfState, setWhatIfState] = useState<WhatIfState | null>(null);
   const displayResult: AnalysisResult | null =
     whatIfState?.result ?? result;
+  // Holistic context for the Overview. Computed from the BASE result (not
+  // the what-if state) so dragging sliders doesn't flicker the banner.
+  // Reuses the same exit-scenario engine as the Deal Score + PDF.
+  const annualizedReturnPct =
+    result && values ? computeTenYearAnnualizedReturnPct(values, result) : null;
+  const appreciationPlay =
+    !!result && isAppreciationPlayDeal(result, propertyType, annualizedReturnPct);
   const router = useRouter();
   const goToLogin = () => router.push("/auth/login");
   const goToBilling = () => router.push("/profile#billing");
@@ -714,7 +758,7 @@ export function AnalysisDashboard({
             label="Monthly Cash Flow"
             glossaryTerm="cashFlow"
             value={displayResult ? (displayResult.netCashFlow >= 0 ? fmt(displayResult.netCashFlow) : `-${fmt(displayResult.netCashFlow)}`) : "—"}
-            sub={displayResult ? cashFlowBenchmarkLabel(displayResult.netCashFlow) : undefined}
+            sub={displayResult ? cashFlowSubLabel(displayResult) : undefined}
             color={displayResult ? (displayResult.netCashFlow >= 0 ? "text-[var(--metric-positive)]" : "text-[var(--metric-negative)]") : undefined}
             isLoading={isLoading}
           />
@@ -783,6 +827,34 @@ export function AnalysisDashboard({
           />
         </div>
 
+        {/* Appreciation-play context banner — reframes a deal whose
+            year-1 cards read uniformly red (negative cash flow, sub-1
+            DSCR) but which pays off after-tax and projects a strong
+            10-year total return. Sourced from the BASE result + the same
+            exit-scenario engine as the Deal Score, so it never contradicts
+            them. Does NOT alter the year-1 facts above — it explains them. */}
+        {appreciationPlay && result ? (
+          <div className="flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+            <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700">
+              <TrendingUp className="size-4" />
+            </span>
+            <div className="space-y-1">
+              <p className="text-sm font-bold text-emerald-900">
+                Stronger than it looks — this is an appreciation play, not a losing deal.
+              </p>
+              <p className="text-xs leading-relaxed text-emerald-800/90">
+                Year-1 cash flow is negative because of the high leverage, but after the
+                depreciation + interest shield it runs about{" "}
+                <strong>+${Math.round(result.afterTaxCF).toLocaleString()}/mo</strong>, and the
+                projected 10-year total return is{" "}
+                <strong>~{Math.round(annualizedReturnPct ?? 0)}%/yr</strong> (appreciation + loan
+                paydown). The monthly shortfall is the cost of low money down — confirm you can
+                carry it and that your rent and appreciation assumptions hold.
+              </p>
+            </div>
+          </div>
+        ) : null}
+
         {/* What-if sliders — below the metrics they modify (see reading-
             order note above). Pure client-side compute, no IO, sub-ms. */}
         {result && values ? (
@@ -848,8 +920,17 @@ export function AnalysisDashboard({
                 <Skeleton className="h-5 w-16" />
               ) : (
                 <>
-                  <span className="text-sm sm:text-base font-bold text-primary">
-                    {result ? fmt(result.afterTaxCF) : "—"}
+                  <span
+                    className={cn(
+                      "text-sm sm:text-base font-bold tabular-nums",
+                      result
+                        ? result.afterTaxCF >= 0
+                          ? "text-[var(--metric-positive)]"
+                          : "text-[var(--metric-negative)]"
+                        : "text-foreground"
+                    )}
+                  >
+                    {result ? `${result.afterTaxCF >= 0 ? "+" : "-"}${fmt(result.afterTaxCF)}` : "—"}
                   </span>
                   <span className="text-[10px] sm:text-[11px] text-muted-foreground">/mo</span>
                 </>
