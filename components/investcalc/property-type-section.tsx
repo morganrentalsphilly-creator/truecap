@@ -1,8 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { UseFormReturn } from "react-hook-form";
-import { Home, Building2, KeyRound, ChevronDown, ChevronUp, Target } from "lucide-react";
+import { Home, Building2, KeyRound, Target } from "lucide-react";
 import { InvestmentFormValues, PROPERTY_TYPES } from "@/lib/investcalc-schema";
 import { cn } from "@/lib/utils";
 import { TemplateSelectorSection } from "./template-selector-section";
@@ -26,15 +25,7 @@ export function PropertyTypeSection({
   form,
   savedTemplateFallback = null,
 }: PropertyTypeSectionProps) {
-  const [isOpen, setIsOpen] = useState(false);
   const selected = form.watch("propertyType");
-  const selectedType = PROPERTY_TYPES.find((t) => t.value === selected);
-  const SelectedIcon = selectedType ? ICONS[selectedType.icon] : Home;
-
-  const handleSelect = (value: InvestmentFormValues["propertyType"]) => {
-    form.setValue("propertyType", value);
-    setIsOpen(false);
-  };
 
   return (
     <div className="bg-card rounded-2xl border border-border shadow-sm p-6">
@@ -43,72 +34,59 @@ export function PropertyTypeSection({
         <span className="font-semibold text-sm text-foreground">Property Setup</span>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-            Property Type
-          </p>
-          <div className="relative">
-            {/* Trigger */}
-            <button
-              type="button"
-              onClick={() => setIsOpen((v) => !v)}
-              aria-haspopup="listbox"
-              aria-expanded={isOpen}
-              aria-label={`Property type: ${selectedType?.label ?? "select"}`}
-              className={cn(
-                "w-full flex items-center justify-between px-4 py-3.5 rounded-xl border transition-all",
-                "bg-[var(--brand-blue-light)] border-primary/20 hover:border-primary/50"
-              )}
-            >
-              <div className="flex items-center gap-3">
-                <SelectedIcon className="w-5 h-5 text-primary" />
-                <div className="text-left">
-                  <p className="text-sm font-semibold text-primary">
-                    {selectedType?.label}
-                  </p>
-                  <p className="text-xs text-primary/70">{selectedType?.description}</p>
-                </div>
-              </div>
-              {isOpen ? (
-                <ChevronUp className="w-4 h-4 text-muted-foreground" />
-              ) : (
-                <ChevronDown className="w-4 h-4 text-muted-foreground" />
-              )}
-            </button>
-
-            {/* Dropdown */}
-            {isOpen && (
-              <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-xl shadow-lg z-30 overflow-hidden">
-                {PROPERTY_TYPES.map((type) => {
-                  const Icon = ICONS[type.icon];
-                  const isSelected = selected === type.value;
-                  return (
-                    <button
-                      key={type.value}
-                      type="button"
-                      onClick={() => handleSelect(type.value as InvestmentFormValues["propertyType"])}
-                      className={cn(
-                        "w-full flex items-center gap-3 px-4 py-3.5 hover:bg-muted transition-colors text-left",
-                        isSelected && "bg-[var(--brand-blue-light)]"
-                      )}
-                    >
-                      <Icon className="w-5 h-5 text-primary" />
-                      <div>
-                        <p className="text-sm font-medium text-foreground">{type.label}</p>
-                        <p className="text-xs text-muted-foreground">{type.description}</p>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
+      {/* Property type — segmented control. A 3-way choice doesn't need a
+          dropdown: inline segments are one tap, always visible, and drop the
+          icon+title+subtitle density the old dropdown carried. */}
+      <div className="space-y-2">
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+          Property Type
+        </p>
+        <div role="radiogroup" aria-label="Property type" className="grid grid-cols-3 gap-2">
+          {PROPERTY_TYPES.map((type) => {
+            const Icon = ICONS[type.icon];
+            const isSelected = selected === type.value;
+            return (
+              <button
+                key={type.value}
+                type="button"
+                role="radio"
+                aria-checked={isSelected}
+                aria-label={`${type.label} — ${type.description}`}
+                title={type.description}
+                onClick={() =>
+                  form.setValue(
+                    "propertyType",
+                    type.value as InvestmentFormValues["propertyType"]
+                  )
+                }
+                className={cn(
+                  "flex flex-col items-center justify-center gap-1.5 rounded-xl border px-2 py-3 text-center transition-colors",
+                  isSelected
+                    ? "border-primary/30 bg-[var(--brand-blue-light)]"
+                    : "border-border bg-card hover:border-primary/30 hover:bg-muted/40"
+                )}
+              >
+                <Icon
+                  className={cn("h-5 w-5", isSelected ? "text-primary" : "text-muted-foreground")}
+                />
+                <span
+                  className={cn(
+                    "text-xs font-medium leading-tight",
+                    isSelected ? "text-primary" : "text-foreground"
+                  )}
+                >
+                  {type.label}
+                </span>
+              </button>
+            );
+          })}
         </div>
+      </div>
 
-        <div>
-          <TemplateSelectorSection form={form} savedTemplateFallback={savedTemplateFallback} />
-        </div>
+      {/* Template — optional. Demoted below the type (behind a divider) so it
+          reads as a secondary "advanced" choice, not co-equal with the type. */}
+      <div className="mt-4 border-t border-border pt-4">
+        <TemplateSelectorSection form={form} savedTemplateFallback={savedTemplateFallback} />
       </div>
     </div>
   );
