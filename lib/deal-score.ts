@@ -228,6 +228,11 @@ const APPRECIATION_FLOOR_SCORE = 40;
  */
 export type DealStrategy = "cash-flow" | "balanced" | "appreciation";
 
+/** localStorage key for the user's chosen investor lens — shared by the Deal
+ *  Score card toggle and the PDF export so an exported report matches the
+ *  on-screen lens. */
+export const DEAL_STRATEGY_STORAGE_KEY = "truecap_deal_strategy";
+
 /** Max points each component can contribute (investment scale). Single source
  *  for the renormalization factor so changing a multiplier stays consistent. */
 const COMPONENT_MAXES = {

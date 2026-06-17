@@ -41,7 +41,12 @@ import { cn } from "@/lib/utils";
 import { saveDealAction } from "@/app/actions/saved-analyses";
 import { addDealToCompareAction } from "@/app/actions/compare";
 import { getDealScoreAction, type DealScoreActionResult } from "@/app/actions/deal-score";
-import { buildDealScoreInputFromAnalysis, computeDealScore } from "@/lib/deal-score";
+import {
+  buildDealScoreInputFromAnalysis,
+  computeDealScore,
+  DEAL_STRATEGY_STORAGE_KEY,
+  type DealStrategy,
+} from "@/lib/deal-score";
 import {
   createOneTimePdfCheckoutAction,
   verifyOneTimePdfPaymentAction,
@@ -214,12 +219,12 @@ const SAVED_ANALYSIS_AUTO_EXPORT_PDF_KEY = "truecap_saved_analysis_auto_export_p
 function toPdfReportData(args: {
   values: InvestmentFormValues;
   result: AnalysisResult;
-  dealScoreResult: DealScoreActionResult | null;
+  strategy: DealStrategy;
   projectionYears: ProjectionYear[];
   taxYears: TaxStrategyYear[];
   exitYears: ExitScenarioYear[];
 }): ReportData {
-  const { values, result, dealScoreResult, projectionYears, taxYears, exitYears } = args;
+  const { values, result, strategy, projectionYears, taxYears, exitYears } = args;
 
   const units =
     values.propertyType === "single-family"
@@ -240,20 +245,23 @@ function toPdfReportData(args: {
           rent: Number(unit.monthlyRent ?? 0),
         }));
 
-  const proScore = dealScoreResult?.ok && dealScoreResult.tier === "pro" ? dealScoreResult.data : null;
-  // When the Pro Deal Score result isn't loaded (free users, one-time-PDF
-  // buyers), compute the REAL score locally for the PDF. computeDealScore is
-  // a pure function — entitlement gating controls whether we SHOW the
-  // breakdown panel, not whether we can score the deal. Previously this path
-  // hard-coded "Neutral / Medium Risk" + an ad-hoc (coc+cap)*4 score + a
-  // year-1 verdict paragraph that could contradict the headline. Sourcing all
-  // four fields from one engine keeps the cover page self-consistent and
-  // gives free/one-time buyers the same holistic verdict as Pro.
-  const localScore = computeDealScore(buildDealScoreInputFromAnalysis(values, result));
-  const recommendation = proScore?.recommendation ?? localScore.recommendation;
-  const risk = proScore?.riskLevel ?? localScore.riskLevel;
-  const score = proScore?.score ?? localScore.score;
-  const rationale = proScore?.explanation ?? localScore.explanation;
+  // Score the deal through the investor's chosen lens so the exported report
+  // matches the on-screen Deal Score. computeDealScore is pure; for "balanced"
+  // it equals the server-computed Pro score, so nothing regresses. The PDF is
+  // gated (Pro or one-time purchase), so everyone exporting gets the real score.
+  const lensedScore = computeDealScore(buildDealScoreInputFromAnalysis(values, result), strategy);
+  const recommendation = lensedScore.recommendation;
+  const risk = lensedScore.riskLevel;
+  const score = lensedScore.score;
+  // Prefix the rationale with the lens (when it isn't the default) so a
+  // Cash-flow "Avoid" and an Appreciation "Buy" report on the SAME deal are
+  // never read as contradictory — the cover states which lens scored it.
+  const rationale =
+    strategy === "balanced"
+      ? lensedScore.explanation
+      : `Scored for ${
+          strategy === "cash-flow" ? "a cash-flow" : "an appreciation"
+        } strategy. ${lensedScore.explanation}`;
 
   const projectionRows = projectionYears.map((row) => ({
     y: row.year,
@@ -1602,22 +1610,28 @@ export function InvestCalcPage({
           cumulativeTaxBenefitByYear: taxYears.map((year) => year.cumulativeTaxBenefitAnnual),
         });
 
-      // One-time buyers paid for the FULL report. If their (free-tier)
-      // deal score lacks the Pro breakdown, compute it client-side via
-      // the same pure function the server action wraps.
-      const effectiveDealScoreResult: DealScoreActionResult | null =
-        oneTimeUnlocked && !(dealScoreResult?.ok && dealScoreResult.tier === "pro")
-          ? {
-              ok: true,
-              tier: "pro",
-              data: computeDealScore(buildDealScoreInputFromAnalysis(values, analysisResult)),
-            }
-          : dealScoreResult;
+      // Investor lens (persisted by the Deal Score card toggle). Score the PDF
+      // through the same lens so the exported report matches the screen. The
+      // PDF always computes the full score locally now, so one-time / free
+      // buyers get the real verdict without the old Pro-result special-case.
+      let strategy: DealStrategy = "balanced";
+      try {
+        const savedStrategy = window.localStorage.getItem(DEAL_STRATEGY_STORAGE_KEY);
+        if (
+          savedStrategy === "cash-flow" ||
+          savedStrategy === "balanced" ||
+          savedStrategy === "appreciation"
+        ) {
+          strategy = savedStrategy;
+        }
+      } catch {
+        // localStorage unavailable (private mode) — default to balanced.
+      }
 
       const reportData = toPdfReportData({
         values,
         result: analysisResult,
-        dealScoreResult: effectiveDealScoreResult,
+        strategy,
         projectionYears,
         taxYears,
         exitYears,

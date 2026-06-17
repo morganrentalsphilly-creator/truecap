@@ -98,6 +98,7 @@ import {
   buildDealScoreInputFromAnalysis,
   computeDealScore,
   computeTenYearAnnualizedReturnPct,
+  DEAL_STRATEGY_STORAGE_KEY,
   type DealScoreInput,
   type DealStrategy,
 } from "@/lib/deal-score";
@@ -1252,8 +1253,6 @@ function buildRecommendationModel(dealScoreResult: DealScoreActionResult | null)
     ...modelByRecommendation[recommendation],
   };
 }
-
-const DEAL_STRATEGY_STORAGE_KEY = "truecap_deal_strategy";
 
 const DEAL_STRATEGIES: { value: DealStrategy; label: string; hint: string }[] = [
   { value: "cash-flow", label: "Cash flow", hint: "Prioritizes monthly income, cash-on-cash, and debt coverage." },
