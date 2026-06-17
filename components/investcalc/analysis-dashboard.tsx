@@ -764,11 +764,12 @@ export function AnalysisDashboard({
           <span className="h-px flex-1 bg-border" />
         </div>
 
-        {/* Reading order (Jun 2026 UX pass): ANSWER FIRST. The four
-            headline metric cards lead the Overview; the what-if sliders
-            (which modify them) moved BELOW the grid — on phones the
-            always-open slider card was pushing the numbers people came
-            for under the fold. Controls after content. */}
+        {/* Reading order (investor-scan pass): NUMBERS FIRST, TOOLS LAST.
+            The four headline metric cards lead, then the appreciation reframe,
+            then the supporting numbers (Annual / after-tax / tax) — so every
+            readout an investor scans is grouped together. The interactive
+            stress-test tools (what-if sliders + breakpoint) sit in a labeled
+            group below all the numbers, so controls never crowd the answer. */}
         <div className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-4 gap-2 sm:gap-3">
           <MetricCard
             label="Monthly Cash Flow"
@@ -876,31 +877,11 @@ export function AnalysisDashboard({
           </div>
         ) : null}
 
-        {/* What-if sliders — below the metrics they modify (see reading-
-            order note above). Pure client-side compute, no IO, sub-ms. */}
-        {result && values ? (
-          <WhatIfSliders
-            values={values}
-            baseResult={result}
-            onStateChange={setWhatIfState}
-          />
-        ) : null}
-
-        {/* Breakpoint suggestion — only renders for deals below Strong
-            tier, and only when there's a reachable price/rent within ±30%.
-            Uses base result (not whatIfState) so the suggestion stays
-            anchored to the actual deal — moving sliders shouldn't reframe
-            "what would make this Solid?" relative to a what-if state. */}
-        {result && values ? (
-          <BreakpointSuggestionCard values={values} result={result} />
-        ) : null}
-
-        {/* Tier 2: secondary cash-flow + tax metrics in a 3-up grid.
-            Annual CF was previously shown only inside the Cash Flow tab
-            (NetCashFlowCard). Surfacing it here consolidates every
-            cash-flow readout in OVERVIEW, which lets us delete the
-            now-redundant tab hero. Muted card chrome signals "supporting
-            info" rather than "co-equal with the 4 prominent tiles." */}
+        {/* Supporting numbers — grouped right under the headline metrics (and
+            the appreciation reframe) so every readout an investor scans sits
+            together, BEFORE the interactive stress-test tools below. Muted
+            card chrome signals "supporting info", not co-equal with the four
+            prominent tiles. */}
         <div className="grid grid-cols-3 gap-2 sm:gap-3">
           <div className="rounded-xl border border-border bg-card/60 px-3 py-2 sm:px-4 sm:py-2.5">
             <div className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
@@ -978,6 +959,33 @@ export function AnalysisDashboard({
             </div>
           </div>
         </div>
+
+        {/* Stress-test tools — collapsed by default so the first read of the
+            Overview is calm (verdict + numbers). One click reveals the live
+            what-if sliders + the "what would make it Solid" targets. Closing
+            the panel resets any what-if adjustment so the headline cards
+            always return to the actual deal. */}
+        {result && values ? (
+          <details
+            className="group"
+            onToggle={(e) => {
+              if (!(e.currentTarget as HTMLDetailsElement).open) setWhatIfState(null);
+            }}
+          >
+            <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 px-1 py-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground">
+              <ChevronRight
+                aria-hidden
+                className="size-3.5 shrink-0 transition-transform group-open:rotate-90"
+              />
+              Stress-test this deal
+              <span className="h-px flex-1 bg-border" />
+            </summary>
+            <div className="mt-2 space-y-3">
+              <WhatIfSliders values={values} baseResult={result} onStateChange={setWhatIfState} />
+              <BreakpointSuggestionCard values={values} result={result} />
+            </div>
+          </details>
+        ) : null}
       </div>
 
       {/* Free-tier prompt — shows ONE card, not two stacked.
