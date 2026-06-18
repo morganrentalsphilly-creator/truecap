@@ -48,6 +48,16 @@ export type BlogPost = {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: "how-much-down-payment-investment-property",
+    title:
+      "How much down payment do you need for an investment property? (2026)",
+    excerpt:
+      "15% down on a single-family rental, 25% on a 2–4 unit — but only if you don't live in it. The full 2026 down-payment menu, the no-PMI rule, and worked cash-on-cash and DSCR math on a $250k rental at 15% vs 20% vs 25% down — including why more down can mean a higher return when the loan constant (~8.2%) tops the cap rate. Plus the house-hack route in for $8,750.",
+    readingTimeMinutes: 11,
+    publishedAt: "2026-06-18",
+    available: true,
+  },
+  {
     slug: "gross-rent-multiplier-explained",
     title:
       "Gross rent multiplier (GRM) explained: how to screen rentals fast (2026)",
