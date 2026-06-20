@@ -147,6 +147,15 @@ textarea,
     @apply border-border outline-ring/50;
     -webkit-tap-highlight-color: transparent;
   }
+  /* On iOS Safari, `html` is the horizontal scroll container, so
+     `overflow-x: hidden` on body ALONE doesn't stop the "swipe left into dead
+     space" bug. `overflow-x: clip` on html fixes it — and unlike `hidden`, it
+     does NOT create a scroll container, so sticky/fixed bars and vertical
+     scrolling are unaffected. The body rule stays as a fallback for browsers
+     without `clip` support (pre-iOS 16). */
+  html {
+    overflow-x: clip;
+  }
   body {
     @apply bg-background text-foreground;
     /* Prevent horizontal overflow on mobile */
