@@ -900,17 +900,17 @@ export function AnalysisDashboard({
         </div>
       </div>
 
-      {/* Metric cards — split into two tiers for visual hierarchy.
-          Tier 1 (4 prominent cards): Cash Flow, CoC, Cap Rate, DSCR —
-            the "is this a good deal?" answer at a glance.
-          Tier 2 (2 smaller chips): Tax Savings, After-Tax CF — still
-            visible, but visually demoted because tax math is downstream
-            of the core deal economics.
+      {/* Metric cards — lens-curated, two visibility tiers.
+          Primary (3 cards, chosen by the active investor lens): the
+            "is this a good deal?" answer at a glance, always visible.
+          Secondary (the remaining metrics): folded into "Show all
+            metrics" below so the first read stays uncrowded.
 
-          Tier 1 cards consume `displayResult` (= whatIfState.result if
-          sliders are non-zero, else base result). Tier 2 + everything
-          below this section continues to use base `result` so Pro
-          panels and projections don't thrash on slider drags. */}
+          The cash-flow / CoC / cap-rate / DSCR / 10-yr-return tiles read
+          from `displayResult` (= whatIfState.result when sliders are
+          non-zero, else base result) so they react live to the
+          stress-test sliders; the after-tax / annual-CF / tax-savings
+          tiles read base `result` so Pro panels don't thrash on drags. */}
       <div className="space-y-3">
         <div className="flex items-center gap-2 px-1">
           <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
@@ -920,8 +920,8 @@ export function AnalysisDashboard({
         </div>
 
         {/* Reading order (investor-scan pass): NUMBERS FIRST, TOOLS LAST.
-            The four headline metric cards lead, then the appreciation reframe,
-            then the supporting numbers (Annual / after-tax / tax) — so every
+            The lens's three primary metric cards lead, then the appreciation
+            reframe, then "Show all metrics" (the supporting numbers) — so every
             readout an investor scans is grouped together. The interactive
             stress-test tools (what-if sliders + breakpoint) sit in a labeled
             group below all the numbers, so controls never crowd the answer. */}

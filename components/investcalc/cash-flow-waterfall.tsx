@@ -53,7 +53,7 @@ export function CashFlowWaterfall({ result }: { result: AnalysisResult }) {
   const segments: Segment[] = [
     { key: "vacancy",     label: "Vacancy",        value: Math.max(0, result.vacancy),     color: "rgb(148, 163, 184)" }, // slate-400
     { key: "tax",         label: "Property tax",   value: Math.max(0, result.propertyTax), color: "rgb(245, 158, 11)" }, // amber-500
-    { key: "insurance",   label: "Insurance",      value: Math.max(0, result.insurance),   color: "rgb(251, 146, 60)" }, // orange-400
+    { key: "insurance",   label: "Insurance",      value: Math.max(0, result.insurance),   color: "rgb(59, 130, 246)" }, // blue-500 — moved off the warm tones so Insurance doesn't blend into the adjacent amber Property-tax segment in the bar + legend
     { key: "mgmt",        label: "Management",     value: Math.max(0, result.management),  color: "rgb(168, 85, 247)" }, // purple-500
     { key: "maintenance", label: "Maintenance",    value: Math.max(0, result.maintenance), color: "rgb(13, 148, 136)" }, // teal-600 — spread away from the purple/pink neighbours so adjacent segments stay distinguishable
     { key: "capex",       label: "CapEx reserve",  value: Math.max(0, result.capex),       color: "rgb(236, 72, 153)" }, // pink-500
