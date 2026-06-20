@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import {
@@ -99,7 +99,6 @@ import {
   computeDealScore,
   computeTenYearAnnualizedReturnPct,
   DEAL_STRATEGY_STORAGE_KEY,
-  type DealScoreInput,
   type DealStrategy,
 } from "@/lib/deal-score";
 
@@ -401,6 +400,39 @@ export function AnalysisDashboard({
     () => (result && values ? buildDealScoreInputFromAnalysis(values, result) : null),
     [result, values]
   );
+  // Investor lens — owned HERE (the common parent of the Deal Score + the
+  // Recommendation cards) so BOTH recompute together when it changes. Persisted
+  // across deals so a cash-flow investor isn't reset to Balanced each analysis.
+  const [strategy, setStrategy] = useState<DealStrategy>("balanced");
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem(DEAL_STRATEGY_STORAGE_KEY);
+      if (saved === "cash-flow" || saved === "balanced" || saved === "appreciation") {
+        setStrategy(saved);
+      }
+    } catch {
+      // private mode — default Balanced
+    }
+  }, []);
+  const pickStrategy = (next: DealStrategy) => {
+    setStrategy(next);
+    try {
+      window.localStorage.setItem(DEAL_STRATEGY_STORAGE_KEY, next);
+    } catch {
+      // ignore
+    }
+  };
+  // Re-score under the chosen lens so the score, recommendation, and risk are
+  // consistent across both verdict cards. Balanced uses the server result as-is.
+  const lensedDealScoreResult: DealScoreActionResult | null = useMemo(() => {
+    if (strategy === "balanced" || !dealScoreInput || !dealScoreResult || !dealScoreResult.ok) {
+      return dealScoreResult;
+    }
+    const data = computeDealScore(dealScoreInput, strategy);
+    return dealScoreResult.tier === "pro"
+      ? { ok: true, tier: "pro", data }
+      : { ok: true, tier: "free", recommendation: data.recommendation };
+  }, [strategy, dealScoreInput, dealScoreResult]);
   const router = useRouter();
   const goToLogin = () => router.push("/auth/login");
   const goToBilling = () => router.push("/profile#billing");
@@ -429,13 +461,141 @@ export function AnalysisDashboard({
     setActiveTab(activeTabProp);
   }, [activeTabProp]);
 
-  const recommendation = buildRecommendationModel(dealScoreResult);
+  const recommendation = buildRecommendationModel(lensedDealScoreResult);
 
   const labelMap: Record<string, string> = {
     "single-family": "Single Family",
     "multi-family": "Multi-Family",
     "owner-occupant": "Owner Occupant",
   };
+
+  // Lens-curated metrics. Each investor lens leads with the 3 metrics that
+  // investor actually optimizes for; the rest collapse behind "Show all
+  // metrics" so the first read isn't crowded. Same data underneath — just
+  // what surfaces first. Tiles preserve the exact per-metric value/sub/color
+  // logic; this only changes WHICH tiles lead and which are tucked.
+  const metricTiles: Record<string, ReactNode> = {
+    cashFlow: (
+      <MetricCard
+        key="cashFlow"
+        label="Monthly Cash Flow"
+        glossaryTerm="cashFlow"
+        value={displayResult ? (displayResult.netCashFlow >= 0 ? fmt(displayResult.netCashFlow) : `-${fmt(displayResult.netCashFlow)}`) : "—"}
+        sub={displayResult ? cashFlowSubLabel(displayResult) : undefined}
+        color={displayResult ? (displayResult.netCashFlow >= 0 ? "text-[var(--metric-positive)]" : "text-[var(--metric-negative)]") : undefined}
+        isLoading={isLoading}
+      />
+    ),
+    coc: (
+      <MetricCard
+        key="coc"
+        label="CoC Return"
+        glossaryTerm="coc"
+        value={displayResult ? `${displayResult.cocReturn >= 0 ? "+" : ""}${displayResult.cocReturn.toFixed(1)}%` : "—"}
+        sub={displayResult ? cocBenchmarkLabel(displayResult.cocReturn) : undefined}
+        color={displayResult ? (displayResult.cocReturn >= 0 ? "text-[var(--metric-positive)]" : "text-[var(--metric-negative)]") : undefined}
+        isLoading={isLoading}
+      />
+    ),
+    capRate: (
+      <MetricCard
+        key="capRate"
+        label="Cap Rate"
+        glossaryTerm="capRate"
+        value={displayResult ? `${displayResult.capRate >= 0 ? "+" : ""}${displayResult.capRate.toFixed(1)}%` : "—"}
+        sub={displayResult ? capRateBenchmarkLabel(displayResult.capRate, values?.address) : undefined}
+        color={
+          displayResult
+            ? displayResult.capRate >= 5
+              ? "text-[var(--metric-positive)]"
+              : displayResult.capRate >= 0
+                ? "text-foreground"
+                : "text-[var(--metric-negative)]"
+            : undefined
+        }
+        isLoading={isLoading}
+      />
+    ),
+    dscr: (
+      <MetricCard
+        key="dscr"
+        label="DSCR"
+        glossaryTerm="dscr"
+        value={displayResult ? (displayResult.monthlyPayment <= 0 ? "—" : displayResult.dscr.toFixed(2)) : "—"}
+        sub={
+          displayResult
+            ? displayResult.monthlyPayment <= 0
+              ? "Cash purchase"
+              : displayResult.dscr >= 1.25
+                ? "Bankable (≥1.25)"
+                : displayResult.dscr >= 1.0
+                  ? "Tight (≥1.0)"
+                  : "Underwater"
+            : undefined
+        }
+        color={
+          displayResult
+            ? displayResult.monthlyPayment <= 0
+              ? undefined
+              : displayResult.dscr >= 1.25
+                ? "text-[var(--metric-positive)]"
+                : "text-[var(--metric-negative)]"
+            : undefined
+        }
+        isLoading={isLoading}
+      />
+    ),
+    return: (
+      <MetricCard
+        key="return"
+        label="10-Yr Return"
+        value={annualizedReturnPct != null ? `~${Math.round(annualizedReturnPct)}%/yr` : "—"}
+        sub="Total return incl. appreciation"
+        color={annualizedReturnPct != null && annualizedReturnPct >= 0 ? "text-[var(--metric-positive)]" : undefined}
+        isLoading={isLoading}
+      />
+    ),
+    afterTax: (
+      <MetricCard
+        key="afterTax"
+        label="After-Tax CF"
+        glossaryTerm="afterTaxCF"
+        value={result ? `${result.afterTaxCF >= 0 ? "+" : "-"}${fmt(result.afterTaxCF)}` : "—"}
+        sub="/mo"
+        color={result ? (result.afterTaxCF >= 0 ? "text-[var(--metric-positive)]" : "text-[var(--metric-negative)]") : undefined}
+        isLoading={isLoading}
+      />
+    ),
+    annualCf: (
+      <MetricCard
+        key="annualCf"
+        label="Annual CF"
+        value={result ? `${result.annualCashFlow >= 0 ? "" : "-"}${fmt(result.annualCashFlow)}` : "—"}
+        sub="/yr"
+        color={result ? (result.annualCashFlow >= 0 ? "text-[var(--metric-positive)]" : "text-[var(--metric-negative)]") : undefined}
+        isLoading={isLoading}
+      />
+    ),
+    taxSavings: (
+      <MetricCard
+        key="taxSavings"
+        label="Tax Savings"
+        glossaryTerm="taxSavings"
+        value={result ? fmt(result.taxSavingsMonthly) : "—"}
+        sub="/mo"
+        color="text-primary"
+        isLoading={isLoading}
+      />
+    ),
+  };
+  const METRIC_ORDER = ["cashFlow", "coc", "capRate", "dscr", "return", "afterTax", "annualCf", "taxSavings"];
+  const PRIMARY_METRICS: Record<DealStrategy, string[]> = {
+    "cash-flow": ["cashFlow", "coc", "dscr"],
+    balanced: ["cashFlow", "capRate", "dscr"],
+    appreciation: ["return", "capRate", "afterTax"],
+  };
+  const primaryMetricKeys = PRIMARY_METRICS[strategy];
+  const secondaryMetricKeys = METRIC_ORDER.filter((k) => !primaryMetricKeys.includes(k));
 
   return (
     <div className="space-y-6">
@@ -622,8 +782,9 @@ export function AnalysisDashboard({
         <DealScoreCard
           isAnalysisLoading={isLoading}
           isDealScoreLoading={isLoadingDealScore}
-          dealScoreResult={dealScoreResult}
-          dealScoreInput={dealScoreInput}
+          dealScoreResult={lensedDealScoreResult}
+          strategy={strategy}
+          onStrategyChange={pickStrategy}
           isSaving={isSaving}
           onUpgrade={goToBilling}
           canUseDealScore={canUseDealScore}
@@ -739,13 +900,6 @@ export function AnalysisDashboard({
         </div>
       </div>
 
-      {/* Deal notes — only rendered when this is an actual saved
-          deal that's been re-opened. Lazy-fetches its own data so it
-          doesn't add latency to the page render. */}
-      {isExistingSavedDeal && savedDealId ? (
-        <DealNotesPanel savedDealId={savedDealId} />
-      ) : null}
-
       {/* Metric cards — split into two tiers for visual hierarchy.
           Tier 1 (4 prominent cards): Cash Flow, CoC, Cap Rate, DSCR —
             the "is this a good deal?" answer at a glance.
@@ -771,78 +925,11 @@ export function AnalysisDashboard({
             readout an investor scans is grouped together. The interactive
             stress-test tools (what-if sliders + breakpoint) sit in a labeled
             group below all the numbers, so controls never crowd the answer. */}
-        <div className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-4 gap-2 sm:gap-3">
-          <MetricCard
-            label="Monthly Cash Flow"
-            glossaryTerm="cashFlow"
-            value={displayResult ? (displayResult.netCashFlow >= 0 ? fmt(displayResult.netCashFlow) : `-${fmt(displayResult.netCashFlow)}`) : "—"}
-            sub={displayResult ? cashFlowSubLabel(displayResult) : undefined}
-            color={displayResult ? (displayResult.netCashFlow >= 0 ? "text-[var(--metric-positive)]" : "text-[var(--metric-negative)]") : undefined}
-            isLoading={isLoading}
-          />
-          <MetricCard
-            label="CoC Return"
-            glossaryTerm="coc"
-            value={displayResult ? `${displayResult.cocReturn >= 0 ? "+" : ""}${displayResult.cocReturn.toFixed(1)}%` : "—"}
-            sub={displayResult ? cocBenchmarkLabel(displayResult.cocReturn) : undefined}
-            color={displayResult ? (displayResult.cocReturn >= 0 ? "text-[var(--metric-positive)]" : "text-[var(--metric-negative)]") : undefined}
-            isLoading={isLoading}
-          />
-          <MetricCard
-            label="Cap Rate"
-            glossaryTerm="capRate"
-            value={
-              displayResult
-                ? `${displayResult.capRate >= 0 ? "+" : ""}${displayResult.capRate.toFixed(1)}%`
-                : "—"
-            }
-            sub={displayResult ? capRateBenchmarkLabel(displayResult.capRate, values?.address) : undefined}
-            color={
-              displayResult
-                ? displayResult.capRate >= 5
-                  ? "text-[var(--metric-positive)]"
-                  : displayResult.capRate >= 0
-                    ? "text-foreground"
-                    : "text-[var(--metric-negative)]"
-                : undefined
-            }
-            isLoading={isLoading}
-          />
-          <MetricCard
-            label="DSCR"
-            glossaryTerm="dscr"
-            // Cash purchases have no debt service, so DSCR is undefined. We
-            // surface "—" + a clear sub-label rather than a misleading 0.00 /
-            // "Underwater" badge.
-            value={
-              displayResult
-                ? displayResult.monthlyPayment <= 0
-                  ? "—"
-                  : displayResult.dscr.toFixed(2)
-                : "—"
-            }
-            sub={
-              displayResult
-                ? displayResult.monthlyPayment <= 0
-                  ? "Cash purchase"
-                  : displayResult.dscr >= 1.25
-                  ? "Bankable (≥1.25)"
-                  : displayResult.dscr >= 1.0
-                  ? "Tight (≥1.0)"
-                  : "Underwater"
-                : undefined
-            }
-            color={
-              displayResult
-                ? displayResult.monthlyPayment <= 0
-                  ? undefined
-                  : displayResult.dscr >= 1.25
-                  ? "text-[var(--metric-positive)]"
-                  : "text-[var(--metric-negative)]"
-                : undefined
-            }
-            isLoading={isLoading}
-          />
+        {/* Lens-curated primary metrics — the 3 that matter for the selected
+            investor lens, in one scannable row. The rest collapse into
+            "Show all metrics" below. */}
+        <div className="grid grid-cols-3 gap-2 sm:gap-3">
+          {primaryMetricKeys.map((k) => metricTiles[k])}
         </div>
 
         {/* Appreciation-play context banner — reframes a deal whose
@@ -878,70 +965,19 @@ export function AnalysisDashboard({
           </div>
         ) : null}
 
-        {/* Supporting numbers — grouped right under the headline metrics (and
-            the appreciation reframe) so every readout an investor scans sits
-            together, BEFORE the interactive stress-test tools below. Muted
-            card chrome signals "supporting info", not co-equal with the four
-            prominent tiles. */}
-        <div className="grid grid-cols-3 gap-2 sm:gap-3">
-          <div className="rounded-xl border border-border bg-card/60 px-3 py-2 sm:px-4 sm:py-2.5">
-            <div className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-              Annual CF
-            </div>
-            <div className="mt-0.5 flex items-baseline gap-1">
-              {isLoading ? (
-                <Skeleton className="h-5 w-16" />
-              ) : (
-                <>
-                  <span className="text-sm sm:text-base font-bold tabular-nums text-foreground">
-                    {result
-                      ? `${result.annualCashFlow >= 0 ? "" : "-"}${fmt(result.annualCashFlow)}`
-                      : "—"}
-                  </span>
-                  <span className="text-[10px] sm:text-[11px] text-muted-foreground">/yr</span>
-                </>
-              )}
-            </div>
+        {/* Secondary metrics — everything not in the lens's primary 3,
+            collapsed by default so the first read stays uncrowded. One tap
+            reveals the full metric set. */}
+        <details className="group">
+          <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 px-1 py-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground">
+            <ChevronRight aria-hidden className="size-3.5 shrink-0 transition-transform group-open:rotate-90" />
+            Show all metrics
+            <span className="h-px flex-1 bg-border" />
+          </summary>
+          <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
+            {secondaryMetricKeys.map((k) => metricTiles[k])}
           </div>
-          <div className="rounded-xl border border-border bg-card/60 px-3 py-2 sm:px-4 sm:py-2.5">
-            <div className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-              <GlossaryTip term="afterTaxCF" showIcon={false}>
-                After-tax CF
-              </GlossaryTip>
-            </div>
-            <div className="mt-0.5 flex items-baseline gap-1">
-              {isLoading ? (
-                <Skeleton className="h-5 w-16" />
-              ) : (
-                <>
-                  <span className="text-sm sm:text-base font-bold tabular-nums text-foreground">
-                    {result ? `${result.afterTaxCF >= 0 ? "+" : "-"}${fmt(result.afterTaxCF)}` : "—"}
-                  </span>
-                  <span className="text-[10px] sm:text-[11px] text-muted-foreground">/mo</span>
-                </>
-              )}
-            </div>
-          </div>
-          <div className="rounded-xl border border-border bg-card/60 px-3 py-2 sm:px-4 sm:py-2.5">
-            <div className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-              <GlossaryTip term="taxSavings" showIcon={false}>
-                Tax savings
-              </GlossaryTip>
-            </div>
-            <div className="mt-0.5 flex items-baseline gap-1">
-              {isLoading ? (
-                <Skeleton className="h-5 w-16" />
-              ) : (
-                <>
-                  <span className="text-sm sm:text-base font-bold tabular-nums text-foreground">
-                    {result ? fmt(result.taxSavingsMonthly) : "—"}
-                  </span>
-                  <span className="text-[10px] sm:text-[11px] text-muted-foreground">/mo</span>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
+        </details>
 
         {/* Stress-test tools — collapsed by default so the first read of the
             Overview is calm (verdict + numbers). One click reveals the live
@@ -1168,6 +1204,13 @@ export function AnalysisDashboard({
           )}
         </div>
       </div>
+
+      {/* Deal notes — at the bottom (after the Details tabs) so they don't
+          interrupt the verdict → numbers → details read. Only renders for a
+          re-opened saved deal; lazy-fetches its own data. */}
+      {isExistingSavedDeal && savedDealId ? (
+        <DealNotesPanel savedDealId={savedDealId} />
+      ) : null}
     </div>
   );
 }
@@ -1309,7 +1352,8 @@ function DealScoreCard({
   isAnalysisLoading,
   isDealScoreLoading,
   dealScoreResult,
-  dealScoreInput,
+  strategy,
+  onStrategyChange,
   isSaving,
   onUpgrade,
   canUseDealScore,
@@ -1318,9 +1362,11 @@ function DealScoreCard({
 }: {
   isAnalysisLoading: boolean;
   isDealScoreLoading: boolean;
+  /** Already re-scored for the chosen lens by the parent, so this card and the
+   *  Recommendation card beside it always agree. */
   dealScoreResult: DealScoreActionResult | null;
-  /** Raw score input, so the card can recompute under a different lens. */
-  dealScoreInput: DealScoreInput | null;
+  strategy: DealStrategy;
+  onStrategyChange: (next: DealStrategy) => void;
   isSaving: boolean;
   onUpgrade: () => void;
   canUseDealScore: boolean;
@@ -1333,29 +1379,6 @@ function DealScoreCard({
   isCashPurchase?: boolean;
 }) {
   const isLoading = isAnalysisLoading || isDealScoreLoading;
-
-  // Investor lens — re-weights the score to match the user's strategy. Hooks
-  // must run before any early return below. Remembered across deals so a
-  // cash-flow investor isn't reset to Balanced on every analysis.
-  const [strategy, setStrategy] = useState<DealStrategy>("balanced");
-  useEffect(() => {
-    try {
-      const saved = window.localStorage.getItem(DEAL_STRATEGY_STORAGE_KEY);
-      if (saved === "cash-flow" || saved === "balanced" || saved === "appreciation") {
-        setStrategy(saved);
-      }
-    } catch {
-      // private mode etc. — fine, default Balanced
-    }
-  }, []);
-  const pickStrategy = (next: DealStrategy) => {
-    setStrategy(next);
-    try {
-      window.localStorage.setItem(DEAL_STRATEGY_STORAGE_KEY, next);
-    } catch {
-      // ignore
-    }
-  };
 
   if (isLoading) {
     return (
@@ -1447,13 +1470,9 @@ function DealScoreCard({
     );
   }
 
-  // Recompute under the chosen lens (client-side, instant). Balanced uses the
-  // server-computed result as-is; other lenses re-weight from the raw input.
-  const displayed =
-    strategy !== "balanced" && dealScoreInput
-      ? computeDealScore(dealScoreInput, strategy)
-      : dealScoreResult.data;
-  const { score, riskLevel, recommendation, explanation, breakdown } = displayed;
+  // dealScoreResult is already re-scored for the chosen lens by the parent, so
+  // this card and the Recommendation card beside it always agree.
+  const { score, riskLevel, recommendation, breakdown } = dealScoreResult.data;
   // Owner-occupant deals use different cash-flow bands and a 30-point
   // max (vs investor 25). Branch the explanation labels accordingly so
   // the breakdown matches the engine's actual scoring tiers.
@@ -1585,7 +1604,7 @@ function DealScoreCard({
       <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2">
         Deal Score
       </p>
-      <DealStrategyToggle strategy={strategy} onChange={pickStrategy} />
+      <DealStrategyToggle strategy={strategy} onChange={onStrategyChange} />
       <div className="flex items-center justify-between gap-3 mb-3">
         <div
           className={cn(
@@ -1660,7 +1679,8 @@ function DealScoreCard({
           spanFull
         />
       </div>
-      <p className={cn("text-xs leading-relaxed", activeStyle.descriptionText)}>{explanation}</p>
+      {/* The plain-English verdict lives once, in the Recommendation card
+          beside this one — no need to repeat the paragraph here. */}
       {/* Collapsible deep-detail breakdown. Hidden by default so the
           score card stays scannable; click-to-reveal for the analyst
           who wants the receipts behind each number. Native <details>
@@ -2219,7 +2239,7 @@ function CashFlowTab({
           <div className="bg-[var(--brand-blue-light)] rounded-xl p-4">
             <p className="text-xs text-muted-foreground mb-1">Loan Amount</p>
             <p className="text-xl font-bold text-foreground">
-              ${result.loanAmount.toLocaleString()}
+              ${Math.round(result.loanAmount).toLocaleString()}
             </p>
           </div>
           <div className="flex justify-between text-sm">

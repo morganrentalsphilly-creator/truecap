@@ -20,6 +20,7 @@ import {
   hasPaidPlanSubscription,
   hasPlanFeature,
 } from "@/lib/entitlements";
+import { recomputeSavedDealVerdict } from "@/lib/recompute-saved-deal-verdict";
 import { getRequestUser, getRequestEntitlements } from "@/lib/request-auth";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import type { StoredRecommendation, StoredRiskLevel } from "@/lib/compare-metrics";
@@ -52,6 +53,7 @@ type SavedAnalysisRow = {
     recommendation?: StoredRecommendation | null;
     riskLevel?: StoredRiskLevel | null;
   } | null;
+  form_snapshot?: unknown;
 };
 
 function getDisplayName(profile: ProfileRow | null, email?: string | null): string {
@@ -88,8 +90,13 @@ function mapSavedRow(row: SavedAnalysisRow): SavedAnalysisListItem | null {
   // missing display fields instead, matching the convention the
   // saved-analyses detail view already uses (Neutral / Medium Risk /
   // null score → renders as a neutral row, data intact and clickable).
-  const recommendation = row.result_snapshot?.recommendation ?? "Neutral";
-  const riskLevel = row.result_snapshot?.riskLevel ?? "Medium Risk";
+  const storedRecommendation = row.result_snapshot?.recommendation ?? "Neutral";
+  const storedRiskLevel = row.result_snapshot?.riskLevel ?? "Medium Risk";
+
+  // Re-score with the current engine from the saved form values so a deal saved
+  // before the holistic-score upgrade doesn't show a stale "Avoid / 0" signal.
+  // Falls back to the stored verdict when the snapshot doesn't validate.
+  const fresh = recomputeSavedDealVerdict(row.form_snapshot);
 
   return {
     id: row.id,
@@ -100,9 +107,9 @@ function mapSavedRow(row: SavedAnalysisRow): SavedAnalysisListItem | null {
     netCashFlowMonthly: row.net_cash_flow_monthly,
     cocReturnPct: row.coc_return_pct,
     capRatePct: Number.isFinite(parsedCapRate) ? parsedCapRate : null,
-    score: Number.isFinite(parsedScore) ? parsedScore : null,
-    recommendation,
-    riskLevel,
+    score: fresh ? fresh.score : Number.isFinite(parsedScore) ? parsedScore : null,
+    recommendation: fresh ? fresh.recommendation : storedRecommendation,
+    riskLevel: fresh ? fresh.riskLevel : storedRiskLevel,
     createdAt: row.created_at,
     status: row.is_completed ? "completed" : row.is_archived ? "archived" : "active",
   };
@@ -159,7 +166,7 @@ export default async function DashboardSavedAnalysesPage({
   let query = supabase
     .from("saved_analyses")
     .select(
-      "id, address, title, property_type, purchase_price, net_cash_flow_monthly, coc_return_pct, created_at, is_completed, is_archived, result_snapshot"
+      "id, address, title, property_type, purchase_price, net_cash_flow_monthly, coc_return_pct, created_at, is_completed, is_archived, result_snapshot, form_snapshot"
     )
     .eq("user_id", user.id)
     .is("deleted_at", null);

@@ -151,6 +151,9 @@ export function OperatingExpensesSection({
   const insurancePct = watch("insurancePct");
   const insuranceMonthly = watch("insuranceMonthly");
   const purchasePriceForEstimate = Number.isFinite(purchasePrice) ? purchasePrice : 0;
+  // No price entered yet → don't show "$0/mo" (reads like a false claim that
+  // the property has no tax/insurance); show a dash until there's a price.
+  const hasPrice = purchasePriceForEstimate > 0;
   const propertyTaxPctEffective = propertyTaxPct ?? 1.1;
   const propertyTaxEst = Math.round((purchasePriceForEstimate * (propertyTaxPctEffective / 100)) / 12);
   const insurancePctEffective = insurancePct ?? 0.5;
@@ -201,10 +204,10 @@ export function OperatingExpensesSection({
       </div>
 
       {!showAdvanced && (
-        <div className="mb-4 rounded-xl border border-[var(--brand-orange)]/15 bg-card p-4">
+        <div className="mb-4 rounded-xl border border-border bg-card p-4">
           <div className="mb-3 flex items-center gap-1.5">
-            <Info className="size-4 text-[var(--brand-orange)]" />
-            <span className="text-sm font-semibold text-[var(--brand-orange)]">
+            <Info className="size-4 text-muted-foreground" />
+            <span className="text-sm font-semibold text-foreground">
               Using sensible defaults
             </span>
           </div>
@@ -214,13 +217,13 @@ export function OperatingExpensesSection({
             <div>
               <span className="text-sm text-muted-foreground">Property Tax:</span>{" "}
               <span className="text-sm font-semibold text-foreground">
-                ${propertyTaxEst.toLocaleString()}/mo
+                {hasPrice ? `$${propertyTaxEst.toLocaleString()}/mo` : "—"}
               </span>
             </div>
             <div>
               <span className="text-sm text-muted-foreground">Insurance:</span>{" "}
               <span className="text-sm font-semibold text-foreground">
-                ${insuranceEst.toLocaleString()}/mo
+                {hasPrice ? `$${insuranceEst.toLocaleString()}/mo` : "—"}
               </span>
             </div>
           </div>
@@ -247,7 +250,7 @@ export function OperatingExpensesSection({
               CapEx <span className="font-semibold text-foreground">5%</span>
             </span>
           </div>
-          <p className="text-xs text-[var(--brand-orange)]">
+          <p className="text-xs text-muted-foreground">
             Click &quot;Show Advanced Options&quot; to override any of these or
             customize tax, insurance, HOA, utilities, and tax strategy.
           </p>

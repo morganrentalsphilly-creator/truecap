@@ -58,6 +58,9 @@ export type SavedAnalysisDashboardRow = {
   coc_return_pct: NumericLike;
   created_at: string;
   result_snapshot: ResultSnapshot;
+  /** Stored form values — lets callers re-score with the current engine so a
+   *  pre-upgrade stored score isn't shown stale. Optional/back-compatible. */
+  form_snapshot?: unknown;
 };
 
 export type DashboardDeal = {

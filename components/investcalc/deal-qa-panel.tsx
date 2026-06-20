@@ -143,7 +143,7 @@ export function DealQaPanel({ values }: { values: InvestmentFormValues }) {
             maxLength={500}
             placeholder="e.g. What rent would make this cash-flow $300/mo?"
             disabled={isAsking}
-            className="h-10 min-w-0 flex-1 rounded-xl border border-border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:opacity-60"
+            className="h-10 min-w-0 flex-1 rounded-xl border border-border bg-background px-3 text-base md:text-sm text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:opacity-60"
           />
           <button
             type="submit"

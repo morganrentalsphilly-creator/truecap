@@ -55,7 +55,7 @@ export function CashFlowWaterfall({ result }: { result: AnalysisResult }) {
     { key: "tax",         label: "Property tax",   value: Math.max(0, result.propertyTax), color: "rgb(245, 158, 11)" }, // amber-500
     { key: "insurance",   label: "Insurance",      value: Math.max(0, result.insurance),   color: "rgb(251, 146, 60)" }, // orange-400
     { key: "mgmt",        label: "Management",     value: Math.max(0, result.management),  color: "rgb(168, 85, 247)" }, // purple-500
-    { key: "maintenance", label: "Maintenance",    value: Math.max(0, result.maintenance), color: "rgb(217, 70, 239)" }, // fuchsia-500
+    { key: "maintenance", label: "Maintenance",    value: Math.max(0, result.maintenance), color: "rgb(13, 148, 136)" }, // teal-600 — spread away from the purple/pink neighbours so adjacent segments stay distinguishable
     { key: "capex",       label: "CapEx reserve",  value: Math.max(0, result.capex),       color: "rgb(236, 72, 153)" }, // pink-500
     { key: "hoa",         label: "HOA",            value: Math.max(0, result.hoa),         color: "rgb(99, 102, 241)" }, // indigo-500
     { key: "utilities",   label: "Utilities",      value: Math.max(0, result.utilities),   color: "rgb(56, 189, 248)" }, // sky-400

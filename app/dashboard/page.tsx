@@ -18,6 +18,7 @@ import {
 } from "@/lib/entitlements";
 import { getRequestUser, getRequestEntitlements } from "@/lib/request-auth";
 import { buildDashboardDeal, type SavedAnalysisDashboardRow } from "@/lib/dashboard-deal-mapping";
+import { recomputeSavedDealVerdict } from "@/lib/recompute-saved-deal-verdict";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 const DASHBOARD_ACTIVE_DEALS_LIMIT = 20;
@@ -43,7 +44,17 @@ function buildDashboardData(
   isPremium: boolean,
   canAccessDashboard: boolean
 ): DashboardHomeData {
-  const deals = rows.map(buildDashboardDeal);
+  // Re-score each deal with the CURRENT engine from its saved form values, so
+  // the dashboard never shows a stale pre-upgrade verdict (e.g. "Avoid / 0" on
+  // a deal the analyzer now scores "Neutral / 40"). Falls back to the stored
+  // score when the snapshot doesn't validate.
+  const deals = rows.map((row) => {
+    const deal = buildDashboardDeal(row);
+    const fresh = recomputeSavedDealVerdict(row.form_snapshot);
+    return fresh
+      ? { ...deal, score: fresh.score, recommendation: fresh.recommendation, riskLevel: fresh.riskLevel }
+      : deal;
+  });
 
   return {
     user: {
@@ -96,7 +107,7 @@ export default async function DashboardPage() {
     supabase
       .from("saved_analyses")
       .select(
-        "id, address, title, property_type, purchase_price, net_cash_flow_monthly, coc_return_pct, created_at, result_snapshot"
+        "id, address, title, property_type, purchase_price, net_cash_flow_monthly, coc_return_pct, created_at, result_snapshot, form_snapshot"
       )
       .eq("user_id", user.id)
       .is("deleted_at", null)

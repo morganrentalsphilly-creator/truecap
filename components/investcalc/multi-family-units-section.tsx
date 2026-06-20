@@ -73,7 +73,7 @@ export function MultiFamilyUnitsSection({
   })();
 
   return (
-    <div className="bg-[var(--brand-blue-light)] rounded-2xl border border-primary/15 shadow-sm p-4 sm:p-6">
+    <div className="bg-card rounded-2xl border border-border shadow-sm p-4 sm:p-6">
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-2">
           <Building2 className="w-4 h-4 text-primary" />
@@ -176,7 +176,7 @@ export function MultiFamilyUnitsSection({
                     aria-invalid={!!unitErrors?.bedrooms}
                     aria-describedby={unitErrors?.bedrooms ? `unit-${index}-bedrooms-error` : undefined}
                     className={cn(
-                      "border-input bg-background text-sm h-9",
+                      "border-input bg-background text-base h-9 md:text-sm",
                       unitErrors?.bedrooms && "border-destructive"
                     )}
                   />
@@ -196,7 +196,7 @@ export function MultiFamilyUnitsSection({
                     aria-invalid={!!unitErrors?.bathrooms}
                     aria-describedby={unitErrors?.bathrooms ? `unit-${index}-bathrooms-error` : undefined}
                     className={cn(
-                      "border-input bg-background text-sm h-9",
+                      "border-input bg-background text-base h-9 md:text-sm",
                       unitErrors?.bathrooms && "border-destructive"
                     )}
                   />
@@ -216,7 +216,7 @@ export function MultiFamilyUnitsSection({
                     aria-invalid={!!unitErrors?.sqft}
                     aria-describedby={unitErrors?.sqft ? `unit-${index}-sqft-error` : undefined}
                     className={cn(
-                      "border-input bg-background text-sm h-9",
+                      "border-input bg-background text-base h-9 md:text-sm",
                       unitErrors?.sqft && "border-destructive"
                     )}
                   />
@@ -239,7 +239,7 @@ export function MultiFamilyUnitsSection({
                       aria-invalid={!!unitErrors?.monthlyRent}
                       aria-describedby={unitErrors?.monthlyRent ? `unit-${index}-monthlyRent-error` : undefined}
                       className={cn(
-                        "pl-7 border-input bg-background text-sm h-9",
+                        "pl-7 border-input bg-background text-base h-9 md:text-sm",
                         unitErrors?.monthlyRent && "border-destructive"
                       )}
                     />

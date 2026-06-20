@@ -127,7 +127,7 @@ export function PortfolioChart({ data = [] }: { data?: DealComparisonPoint[] }) 
                 fontSize: 12,
                 color: "var(--foreground)",
               }}
-              formatter={(v: number) => (metric === "cashFlow" ? `$${v.toLocaleString()}` : `${v}${metric === "roi" ? "%" : ""}`)}
+              formatter={(v: number) => (metric === "cashFlow" ? `$${Math.round(v).toLocaleString()}` : `${v}${metric === "roi" ? "%" : ""}`)}
               labelFormatter={(label) => `${label} · ${metricLabel}`}
             />
             <Bar dataKey={metric} name={metricLabel} fill={colors.bar} radius={[6, 6, 0, 0]} />
