@@ -122,9 +122,13 @@ export function MarketingHero() {
         {/* Real-data social proof — hides itself if count < 25 so we
             never advertise low volume. Sits right under the CTA so it
             lands in the "is this real?" decision moment instead of being
-            in a separate stripe below the hero. */}
+            in a separate stripe below the hero. Window is "all" (cumulative
+            all-time) rather than "7d": for a young product the rolling-7-day
+            count often sits below the threshold and hides, whereas the
+            all-time total clears it sooner AND reads as a bigger, stronger
+            number. Switch back to "7d" once weekly volume reliably clears 25. */}
         <div className="mt-5 text-center">
-          <DealsAnalyzedTicker window="7d" />
+          <DealsAnalyzedTicker window="all" />
         </div>
 
         {/* Mock-up screenshot — pure CSS, lightweight.

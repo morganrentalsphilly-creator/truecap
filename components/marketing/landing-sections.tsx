@@ -235,7 +235,7 @@ const COMPETITORS_ROWS: Array<{ label: string; values: (string | boolean)[]; hig
   // Starter $0, Plus $10/mo, Pro $20/mo. A previous version claimed
   // $35/mo — inflating a competitor's price in a table titled "honest,
   // side-by-side" is exactly the credibility hit we can't afford.
-  { label: "Starting Pro price",                          values: ["See pricing", "—", "$20/mo", "—"] },
+  { label: "Starting Pro price",                          values: ["From $16.67/mo", "—", "$20/mo", "—"] },
 ];
 
 export function VsCompetitors() {

@@ -184,7 +184,11 @@ export default function Home() {
       <HomepageFaq />
       <PreCalculatorCta />
       {/* Anonymous-visitor entitlement props — keep in lockstep with
-          the user == null branch in app/home-authed/page.tsx. */}
+          the user == null branch in app/home-authed/page.tsx.
+          NOTE: canUseDealScore is intentionally TRUE for everyone — the
+          headline 0-100 Deal Score is given away free (it converts better
+          unlocked than as a blurred teaser). Only the DEPTH (projections /
+          tax / exit / save / PDF / compare) stays Pro. */}
       <InvestCalcPage
         canSaveDeals={false}
         canCompareDeals={false}
@@ -192,7 +196,7 @@ export default function Home() {
         canUseProjections={false}
         canUseTaxStrategy={false}
         canUseExitScenarios={false}
-        canUseDealScore={false}
+        canUseDealScore={true}
         canUseMaxOffer={false}
         canUseSensitivity={false}
         canUseStrategies={false}

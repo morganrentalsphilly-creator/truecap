@@ -101,7 +101,10 @@ export default async function AuthedHome() {
   const canUseProjections = entitlements ? hasPlanFeature(entitlements, "projections") : false;
   const canUseTaxStrategy = entitlements ? hasPlanFeature(entitlements, "tax_strategy") : false;
   const canUseExitScenarios = entitlements ? hasPlanFeature(entitlements, "exit_scenarios") : false;
-  const canUseDealScore = entitlements ? hasPlanFeature(entitlements, "deal_score") : false;
+  // Deal Score is FREE for everyone (free + Pro): the headline 0-100 verdict
+  // converts better given away than locked behind Pro. Depth (projections /
+  // tax / exit / save / PDF / compare) stays gated by the checks above/below.
+  const canUseDealScore = true;
   // Pro-gated features that weren't previously gated. Derived from
   // hasPaidPlanSubscription (any paid plan = unlocked) so we don't need
   // a DB migration to add new feature keys per plan. If you later split
