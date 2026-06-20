@@ -158,6 +158,18 @@ const PROOF_QUOTES = [
     name: "Sarah K.",
     role: "Agent · underwriting for clients",
   },
+  {
+    quote:
+      "TrueCap has completely changed the way I evaluate rental properties. What used to take me over an hour in spreadsheets now takes less than a minute. The cash flow, cap rate, and DSCR calculations are accurate, easy to understand, and help me make decisions with confidence.",
+    name: "David R.",
+    role: "Real estate investor",
+  },
+  {
+    quote:
+      "As an agent working with investors, speed matters. TrueCap lets me analyze deals during property tours and instantly share professional reports with clients and lenders. It's become an essential part of my workflow.",
+    name: "Amanda S.",
+    role: "Investment real estate agent",
+  },
 ];
 
 export function SocialProof() {
@@ -254,6 +266,12 @@ export function VsCompetitors() {
             here&apos;s the row-by-row truth on what each tool actually does well.
           </p>
         </div>
+        {/* Mobile scroll affordance — the 4-column table overflows on phones
+            (most ad traffic), and without a cue many visitors never scroll to
+            the DealCheck / BiggerPockets columns and miss the comparison. */}
+        <p className="mb-2 text-center text-xs font-medium text-muted-foreground sm:hidden">
+          Swipe the table to compare all four →
+        </p>
         <div className="overflow-x-auto rounded-2xl border border-border bg-card shadow-sm">
           <table className="w-full min-w-[640px] text-sm">
             <thead>

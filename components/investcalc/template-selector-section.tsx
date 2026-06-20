@@ -268,15 +268,12 @@ export function TemplateSelectorSection({
     }
   };
 
-  // Suppress the "Templates are locked — Upgrade to Pro" prompt when the
-  // form is still empty. Showing an upsell before the visitor has even
-  // typed an address shortcircuits the "value first, ask second"
-  // sequence and reads as a bait-and-switch on the "no signup" promise.
-  // Once an address (the first field) has been entered, the section
-  // reveals — at which point free users see the upsell after they've
-  // gotten value, and Pro users see the picker as soon as it's useful.
-  const hasStartedFilling = Boolean((form.watch("address") ?? "").trim());
-  if (isTemplateLocked && !hasStartedFilling) return null;
+  // Templates are a Pro feature, so for free/locked users we render NOTHING
+  // at all — "invisible until useful". A locked control in the first-run form
+  // is friction on a cold (often ad-sourced) visitor and reads as a
+  // bait-and-switch on the "no signup" promise. Pro users (not locked) see the
+  // picker as soon as it's useful; free users simply never see this section.
+  if (isTemplateLocked) return null;
 
   return (
     <div className="space-y-2">
