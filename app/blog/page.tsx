@@ -48,6 +48,15 @@ export type BlogPost = {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: "piti-explained-rental-property",
+    title: "PITI explained: the real monthly payment on a rental (2026)",
+    excerpt:
+      "P&I isn't your real payment — PITI is: principal, interest, taxes, and insurance. On a $250k rental at 7% with 25% down, taxes and insurance pile $400/month on top of the loan — 32% more — before the reassessment trap and escrow surprises. How to estimate each part, and how a $1,647 payment becomes a 1.27 DSCR.",
+    readingTimeMinutes: 11,
+    publishedAt: "2026-06-20",
+    available: true,
+  },
+  {
     slug: "how-much-down-payment-investment-property",
     title:
       "How much down payment do you need for an investment property? (2026)",
