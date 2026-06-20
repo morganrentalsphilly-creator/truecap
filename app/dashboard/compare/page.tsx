@@ -12,6 +12,7 @@ export const metadata: Metadata = {
 import { getCompareIdsFromCookie } from "@/app/actions/compare";
 import { Button } from "@/components/ui/button";
 import { CompareDealsClient, type CompareDealViewModel } from "@/components/investcalc/compare-deals-client";
+import { CompareDealPicker, type ComparePickerDeal } from "@/components/investcalc/compare-deal-picker";
 import { Topbar } from "@/components/dashboard/Topbar";
 import { buildDealAssumptions } from "@/lib/compare-assumptions";
 import {
@@ -181,6 +182,35 @@ export default async function DashboardComparePage() {
   const initials = getInitials(displayName, user.email ?? "");
 
   if (ids.length < 1) {
+    // Inline picker: load the user's saved deals so they can choose 2-4 to
+    // compare right here, instead of being bounced to Saved Analyses and back.
+    const { data: pickerRows } = await supabase
+      .from("saved_analyses")
+      .select("id, address, title, net_cash_flow_monthly, result_snapshot")
+      .eq("user_id", user.id)
+      .is("deleted_at", null)
+      .eq("is_completed", false)
+      .eq("is_archived", false)
+      .order("created_at", { ascending: false });
+
+    const pickerDeals: ComparePickerDeal[] = (pickerRows ?? []).map((r) => {
+      const snap = (r.result_snapshot ?? {}) as ResultSnapshot;
+      const score = toNumber(snap.score);
+      const rec = snap.recommendation ?? null;
+      return {
+        id: r.id as string,
+        label:
+          (r.address as string | null)?.trim() ||
+          (r.title as string | null)?.trim() ||
+          "Untitled Property",
+        score,
+        signal: score != null && rec ? recommendationToSignal(rec) : null,
+        netCashFlow:
+          toNumber(snap.netCashFlow) ?? toNumber(r.net_cash_flow_monthly as number | string | null),
+        capRate: toNumber(snap.capRate),
+      };
+    });
+
     return (
       <>
         <div className="flex-1 min-w-0 flex flex-col lg:h-screen lg:overflow-hidden">
@@ -193,17 +223,32 @@ export default async function DashboardComparePage() {
             canAccessDashboard={navAccess.dashboard}
           />
           <main id="main" className="min-h-[calc(100vh-4rem)] bg-muted/30 px-4 py-8 sm:px-6">
-            <div className="mx-auto max-w-3xl rounded-2xl border border-border bg-card p-6 text-center shadow-sm sm:p-8">
-              <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                <Plus className="size-5" />
+            <div className="mx-auto max-w-2xl">
+              <div className="mb-5 text-center">
+                <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <Plus className="size-5" />
+                </div>
+                <h1 className="text-2xl font-extrabold text-foreground">Compare Deals</h1>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  {pickerDeals.length >= 2
+                    ? "Pick 2-4 of your saved deals to line them up side by side."
+                    : "You need at least 2 saved deals to compare."}
+                </p>
               </div>
-              <h1 className="text-2xl font-extrabold text-foreground">Compare Deals</h1>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Save a deal or select 2-4 saved analyses to compare side by side.
-              </p>
-              <Button className="mt-5 rounded-full" asChild>
-                <Link href="/dashboard/saved-analyses">Go to Saved Analyses</Link>
-              </Button>
+              {pickerDeals.length >= 2 ? (
+                <CompareDealPicker deals={pickerDeals} />
+              ) : (
+                <div className="rounded-2xl border border-border bg-card p-6 text-center shadow-sm">
+                  <p className="text-sm text-muted-foreground">
+                    {pickerDeals.length === 1
+                      ? "Save one more deal to start comparing."
+                      : "Save a couple of deals first, then come back to compare them."}
+                  </p>
+                  <Button className="mt-4 rounded-full" asChild>
+                    <Link href="/">Analyze a property</Link>
+                  </Button>
+                </div>
+              )}
             </div>
           </main>
         </div>
