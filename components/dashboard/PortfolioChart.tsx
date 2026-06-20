@@ -14,7 +14,7 @@ import { usePrefersDark } from "@/hooks/use-prefers-dark";
 const metrics = [
   { id: "score", label: "Score" },
   { id: "cashFlow", label: "Monthly Cash Flow" },
-  { id: "roi", label: "ROI" },
+  { id: "roi", label: "10-Yr ROI" },
 ] as const;
 
 type DealComparisonPoint = {
@@ -85,7 +85,7 @@ export function PortfolioChart({ data = [] }: { data?: DealComparisonPoint[] }) 
               <TrendingUp className="h-3 w-3" /> Decision View
             </span>
           </div>
-          <p className="text-sm text-muted-foreground mt-0.5">Compare saved deals by score, monthly cash flow, or ROI</p>
+          <p className="text-sm text-muted-foreground mt-0.5">Compare saved deals by score, monthly cash flow, or 10-yr ROI</p>
         </div>
         <div className="flex items-center gap-1 p-1 rounded-lg bg-muted" role="tablist" aria-label="Comparison metric">
           {metrics.map((item) => (

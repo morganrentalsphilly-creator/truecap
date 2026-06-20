@@ -17,9 +17,11 @@ export function TenYearProjectionSummaryCards({
     <SummaryCardGrid
       items={[
         {
-          label: "Year 10 Cumulative CF",
+          label: "10-Yr Cumulative CF (Pre-Tax)",
           value: formatCurrency(finalYear?.cumulativeCashFlowAnnual ?? 0),
           tone: (finalYear?.cumulativeCashFlowAnnual ?? 0) >= 0 ? "positive" : "negative",
+          labelTooltip:
+            "Operating cash flow summed across the 10-year hold, before tax. The after-tax total is higher once the depreciation + mortgage-interest shield is applied — compare the after-tax card.",
         },
         {
           label: "Best Annual After-Tax CF",
@@ -27,10 +29,11 @@ export function TenYearProjectionSummaryCards({
           tone: bestAfterTax >= 0 ? "positive" : "negative",
         },
         {
-          label: "10-Year After-Tax Cash Flow (Projection)",
+          label: "10-Yr Cumulative CF (After-Tax)",
           value: formatCurrency(totalAfterTax),
           tone: totalAfterTax >= 0 ? "positive" : "negative",
-          labelTooltip: "Includes rental cash flow plus estimated tax savings over time",
+          labelTooltip:
+            "Pre-tax cumulative cash flow plus the estimated depreciation + interest tax shield over the 10-year hold. The gap between this and the pre-tax card is your tax benefit.",
         },
       ]}
     />

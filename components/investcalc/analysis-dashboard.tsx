@@ -224,6 +224,28 @@ function capRateBenchmarkLabel(capRatePct: number, address?: string | null): str
   return "Below 5% — appreciation-dependent (U.S.)";
 }
 
+/**
+ * Cap-rate card COLOR — driven by the SAME benchmark the subline uses, so the
+ * color and the "Above/Near/Below the X% median" label can never disagree.
+ * Green only when the cap rate beats the local median (or the national
+ * top-quartile when the address doesn't parse); neutral when near or below;
+ * red only when the cap rate is negative. Replaces the old `>= 5 ? green` rule
+ * that lit up green on a 5.4% cap sitting BELOW a 7.5% local median.
+ */
+function capRateBenchmarkColor(capRatePct: number, address?: string | null): string | undefined {
+  if (capRatePct < 0) return "text-[var(--metric-negative)]";
+  const benchmark = getCapRateBenchmark(address);
+  if (benchmark && benchmark.scope !== "national") {
+    // Mirror formatCapRateBenchmarkSubline's +/-0.5pt band exactly.
+    return capRatePct - benchmark.median >= 0.5
+      ? "text-[var(--metric-positive)]"
+      : "text-foreground";
+  }
+  // National fallback — green only for the top-quartile (>8%) band, matching
+  // the national subline ("Above 8% — top quartile").
+  return capRatePct > 8 ? "text-[var(--metric-positive)]" : "text-foreground";
+}
+
 function cocBenchmarkLabel(cocPct: number): string {
   if (cocPct > 12) return "Above 12% — strong";
   if (cocPct > 8) return "8–12% — healthy";
@@ -504,15 +526,7 @@ export function AnalysisDashboard({
         glossaryTerm="capRate"
         value={displayResult ? `${displayResult.capRate >= 0 ? "+" : ""}${displayResult.capRate.toFixed(1)}%` : "—"}
         sub={displayResult ? capRateBenchmarkLabel(displayResult.capRate, values?.address) : undefined}
-        color={
-          displayResult
-            ? displayResult.capRate >= 5
-              ? "text-[var(--metric-positive)]"
-              : displayResult.capRate >= 0
-                ? "text-foreground"
-                : "text-[var(--metric-negative)]"
-            : undefined
-        }
+        color={displayResult ? capRateBenchmarkColor(displayResult.capRate, values?.address) : undefined}
         isLoading={isLoading}
       />
     ),
@@ -790,6 +804,7 @@ export function AnalysisDashboard({
           canUseDealScore={canUseDealScore}
           propertyType={propertyType}
           isCashPurchase={Boolean(result && result.monthlyPayment <= 0)}
+          isAppreciationPlay={appreciationPlay}
         />
 
         {/* Recommendation card */}
@@ -1359,6 +1374,7 @@ function DealScoreCard({
   canUseDealScore,
   propertyType,
   isCashPurchase,
+  isAppreciationPlay,
 }: {
   isAnalysisLoading: boolean;
   isDealScoreLoading: boolean;
@@ -1377,6 +1393,11 @@ function DealScoreCard({
    *  relabel the DSCR breakdown tile, which otherwise reads
    *  "Above 1.25" — confusing alongside the MetricCard's "Cash purchase". */
   isCashPurchase?: boolean;
+  /** True when the deal scores as an appreciation play (strong projected
+   *  long-term return + non-negative after-tax cash flow). Surfaces a chip on
+   *  the score so a Neutral verdict on a red year-1 deal is self-explanatory at
+   *  a glance — the same signal that drives the Overview reframe banner. */
+  isAppreciationPlay?: boolean;
 }) {
   const isLoading = isAnalysisLoading || isDealScoreLoading;
 
@@ -1631,6 +1652,12 @@ function DealScoreCard({
           >
             {riskLevel}
           </span>
+          {isAppreciationPlay ? (
+            <span className="inline-flex items-center gap-1 rounded-full border border-[var(--brand-green)]/30 bg-[var(--brand-green-light)] px-2 py-0.5 text-[10px] font-bold text-[var(--brand-green)]">
+              <TrendingUp aria-hidden className="size-3" />
+              Appreciation play
+            </span>
+          ) : null}
         </div>
       </div>
       {/* Plain-English verdict lives once, in the Recommendation card beside

@@ -27,7 +27,7 @@ export function TaxStrategySummaryCards({
           tone: (yearOne?.taxSavingsAnnual ?? 0) > 0 ? "positive" : "neutral",
         },
         {
-          label: "10-Year Tax Benefit (Tax Strategy)",
+          label: "10-Year Tax Benefit",
           value: formatCurrency(totalTaxBenefit),
           tone: totalTaxBenefit >= 0 ? "positive" : "negative",
           labelTooltip: "Represents tax impact from depreciation and mortgage interest deductions",

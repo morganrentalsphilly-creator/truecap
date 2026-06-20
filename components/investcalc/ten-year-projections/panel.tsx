@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { getTenYearProjectionSnapshotAction } from "@/app/actions/ten-year-projections";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SnapshotStatusCard } from "@/components/investcalc/analysis-panels/shared/snapshot-status-card";
+import { PanelInsight } from "@/components/investcalc/analysis-panels/shared/panel-insight";
+import { formatCurrency } from "@/components/investcalc/analysis-panels/shared/formatters";
 import { TenYearProjectionCharts } from "@/components/investcalc/ten-year-projections/charts";
 import { TenYearProjectionSummaryCards } from "@/components/investcalc/ten-year-projections/summary-cards";
 import { TenYearProjectionTable } from "@/components/investcalc/ten-year-projections/table";
@@ -82,6 +84,7 @@ export function TenYearProjectionsPanel({
   return (
     <div className="space-y-5">
       <TenYearProjectionSummaryCards projectionYears={projectionYears} />
+      <PanelInsight>{buildProjectionInsight(projectionYears)}</PanelInsight>
       <SnapshotStatusCard
         title="10-Year Projections"
         snapshotSource={snapshotSource}
@@ -90,6 +93,38 @@ export function TenYearProjectionsPanel({
       <TenYearProjectionCharts projectionYears={projectionYears} />
       <TenYearProjectionTable projectionYears={projectionYears} />
     </div>
+  );
+}
+
+function buildProjectionInsight(years: ProjectionYear[]): ReactNode {
+  if (years.length === 0) return null;
+  const year1 = years[0];
+  const final = years[years.length - 1];
+  if (!year1 || !final) return null;
+  const firstPositive = years.find((y) => y.netCashFlowAnnual >= 0);
+  if (year1.netCashFlowAnnual >= 0) {
+    return (
+      <>
+        Cash-flow positive from year 1, growing to about{" "}
+        <strong className="text-foreground">{formatCurrency(final.netCashFlowAnnual)}/yr</strong> by year{" "}
+        {final.year} as rent outpaces the fixed mortgage.
+      </>
+    );
+  }
+  if (firstPositive) {
+    return (
+      <>
+        Cash flow turns <strong className="text-foreground">positive in year {firstPositive.year}</strong> as
+        rising rent outgrows the fixed mortgage payment, reaching about{" "}
+        <strong className="text-foreground">{formatCurrency(final.netCashFlowAnnual)}/yr</strong> by year {final.year}.
+      </>
+    );
+  }
+  return (
+    <>
+      Cash flow stays negative through year {final.year}, so the return here leans on appreciation and loan
+      paydown rather than monthly income — confirm you can carry the shortfall.
+    </>
   );
 }
 

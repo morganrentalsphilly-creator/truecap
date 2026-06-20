@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { getExitScenarioSnapshotAction } from "@/app/actions/exit-scenarios";
 import { SnapshotStatusCard } from "@/components/investcalc/analysis-panels/shared/snapshot-status-card";
+import { PanelInsight } from "@/components/investcalc/analysis-panels/shared/panel-insight";
+import { formatCurrency } from "@/components/investcalc/analysis-panels/shared/formatters";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ExitScenarioCharts } from "@/components/investcalc/exit-scenarios/charts";
 import { ExitScenarioSummaryCards } from "@/components/investcalc/exit-scenarios/summary-cards";
@@ -87,6 +89,7 @@ export function ExitScenariosPanel({
   return (
     <div className="space-y-5">
       <ExitScenarioSummaryCards years={years} />
+      <PanelInsight>{buildExitInsight(years)}</PanelInsight>
       <SnapshotStatusCard
         title="Exit Scenarios"
         snapshotSource={snapshotSource}
@@ -98,5 +101,36 @@ export function ExitScenariosPanel({
       <ExitScenarioCharts years={years} />
       <ExitScenarioTable years={years} />
     </div>
+  );
+}
+
+function buildExitInsight(years: ExitScenarioYear[]): ReactNode {
+  if (years.length === 0) return null;
+  const bestYear = years.reduce<ExitScenarioYear | null>(
+    (best, y) => (!best || y.totalProfit > best.totalProfit ? y : best),
+    null
+  );
+  const year10 = years.find((y) => y.year === 10) ?? years[years.length - 1] ?? null;
+  if (!bestYear || !year10) return null;
+  // Same initial-investment / ROI derivation the summary cards use, so the
+  // takeaway can never disagree with the Total ROI card above it.
+  const initialInvestment =
+    year10.netSaleProceeds + year10.cumulativeCashFlow + year10.cumulativeTaxBenefit - year10.totalProfit;
+  const roi = initialInvestment > 0 ? (year10.totalProfit / initialInvestment) * 100 : 0;
+  if (bestYear.totalProfit <= 0) {
+    return (
+      <>
+        Even at the best modeled exit (year {bestYear.year}), this deal doesn&apos;t turn a profit on sale — the
+        appreciation assumption doesn&apos;t cover the carry and selling costs.
+      </>
+    );
+  }
+  return (
+    <>
+      Most of the return shows up at sale: by year {year10.year}, projected profit is about{" "}
+      <strong className="text-foreground">{formatCurrency(year10.totalProfit)}</strong> ({roi >= 0 ? "+" : ""}
+      {roi.toFixed(0)}% on cash) — an equity-and-appreciation payoff you realize when you sell or refinance, not
+      monthly income.
+    </>
   );
 }

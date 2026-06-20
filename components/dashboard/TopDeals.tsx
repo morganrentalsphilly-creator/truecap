@@ -156,7 +156,7 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
                   </p>
                 </div>
                 <div className="rounded-xl bg-muted/40 p-3">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">ROI</p>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">10-Yr ROI</p>
                   <p className="mt-1 text-sm font-extrabold tabular-nums text-foreground">{d.roi == null ? "-" : `${d.roi.toFixed(1)}%`}</p>
                 </div>
                 <div className="rounded-xl bg-muted/40 p-3">
@@ -190,7 +190,7 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
             <tr className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground border-y border-border bg-muted/40">
               <th className="text-left px-6 py-3">Property</th>
               <th className="text-left px-3 py-3">Score</th>
-              <th className="text-right px-3 py-3 hidden md:table-cell">ROI</th>
+              <th className="text-right px-3 py-3 hidden md:table-cell">10-Yr ROI</th>
               <th className="text-right px-3 py-3 hidden md:table-cell">Cap Rate</th>
               <th className="text-right px-3 py-3">Cash Flow</th>
               <th className="text-right px-3 py-3 hidden xl:table-cell">Risk</th>

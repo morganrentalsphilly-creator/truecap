@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { getTaxStrategySnapshotAction } from "@/app/actions/tax-strategy";
 import { SnapshotStatusCard } from "@/components/investcalc/analysis-panels/shared/snapshot-status-card";
+import { PanelInsight } from "@/components/investcalc/analysis-panels/shared/panel-insight";
+import { formatCurrency } from "@/components/investcalc/analysis-panels/shared/formatters";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TaxStrategyCharts } from "@/components/investcalc/tax-strategy/charts";
 import { TaxStrategySummaryCards } from "@/components/investcalc/tax-strategy/summary-cards";
@@ -80,6 +82,7 @@ export function TaxStrategyPanel({
   return (
     <div className="space-y-5">
       <TaxStrategySummaryCards years={years} />
+      <PanelInsight>{buildTaxInsight(years)}</PanelInsight>
       <SnapshotStatusCard
         title="Tax Strategy"
         snapshotSource={snapshotSource}
@@ -91,5 +94,31 @@ export function TaxStrategyPanel({
       </p>
       <TaxStrategyTable years={years} />
     </div>
+  );
+}
+
+function buildTaxInsight(years: TaxStrategyYear[]): ReactNode {
+  if (years.length === 0) return null;
+  const y1 = years[0];
+  const yLast = years[years.length - 1];
+  if (!y1 || !yLast) return null;
+  const total = years.reduce((sum, y) => sum + y.netTaxBenefitAnnual, 0);
+  const frontLoaded = y1.taxSavingsAnnual > yLast.taxSavingsAnnual * 1.05;
+  if (frontLoaded) {
+    return (
+      <>
+        Your tax shield is <strong className="text-foreground">front-loaded</strong>: about{" "}
+        <strong className="text-foreground">{formatCurrency(y1.taxSavingsAnnual)}</strong> in year 1, easing to{" "}
+        {formatCurrency(yLast.taxSavingsAnnual)} by year {yLast.year} as the mortgage-interest deduction shrinks —{" "}
+        roughly {formatCurrency(total)} in estimated benefit over the hold.
+      </>
+    );
+  }
+  return (
+    <>
+      Depreciation and mortgage-interest deductions total about{" "}
+      <strong className="text-foreground">{formatCurrency(total)}</strong> in estimated tax benefit across the
+      10-year hold.
+    </>
   );
 }

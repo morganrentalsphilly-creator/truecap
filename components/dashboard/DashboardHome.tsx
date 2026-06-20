@@ -267,8 +267,8 @@ function buildDecisionInsights(deals: DashboardDeal[]) {
       : null,
     roi
       ? {
-          title: `${roi.address} has the highest ROI`,
-          body: `ROI: ${formatPercent(roi.roiPct)}. Risk level: ${roi.riskLevel ?? "-"}.`,
+          title: `${roi.address} has the highest 10-yr ROI`,
+          body: `10-yr ROI: ${formatPercent(roi.roiPct)}. Risk level: ${roi.riskLevel ?? "-"}.`,
           tone: "opportunity" as const,
         }
       : null,
