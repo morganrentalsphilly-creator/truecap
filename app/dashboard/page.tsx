@@ -20,8 +20,35 @@ import { getRequestUser, getRequestEntitlements } from "@/lib/request-auth";
 import { buildDashboardDeal, type SavedAnalysisDashboardRow } from "@/lib/dashboard-deal-mapping";
 import { recomputeSavedDealVerdict } from "@/lib/recompute-saved-deal-verdict";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { buildRateWatch } from "@/lib/rate-watch";
 
 const DASHBOARD_ACTIVE_DEALS_LIMIT = 20;
+
+/**
+ * Current 30-yr mortgage rate (FRED MORTGAGE30US), cached 6h. FRED prints
+ * weekly, so a per-request fetch would be wasteful, and the cache means a slow
+ * or down FRED never blocks dashboard render for long. Null on missing key or
+ * failure — the rate watch is additive, so a null simply hides the strip.
+ */
+async function fetchCurrentMortgageRate(): Promise<number | null> {
+  const apiKey = process.env.FRED_API_KEY;
+  if (!apiKey) return null;
+  const url = new URL("https://api.stlouisfed.org/fred/series/observations");
+  url.searchParams.set("series_id", "MORTGAGE30US");
+  url.searchParams.set("api_key", apiKey);
+  url.searchParams.set("file_type", "json");
+  url.searchParams.set("sort_order", "desc");
+  url.searchParams.set("limit", "1");
+  try {
+    const res = await fetch(url.toString(), { next: { revalidate: 21600 } });
+    if (!res.ok) return null;
+    const json = (await res.json()) as { observations?: Array<{ value: string }> };
+    const value = Number(json.observations?.[0]?.value);
+    return Number.isFinite(value) ? value : null;
+  } catch {
+    return null;
+  }
+}
 
 type ProfileRow = {
   first_name: string | null;
@@ -97,7 +124,7 @@ export default async function DashboardPage() {
   // have passed — run them in ONE round-trip wave instead of two
   // sequential awaits (the deals query previously waited for the
   // profile/count/premium wave to finish for no reason).
-  const [{ data: profile }, isPremium, dealsResult, aggregateResult] = await Promise.all([
+  const [{ data: profile }, isPremium, dealsResult, aggregateResult, currentRate] = await Promise.all([
     supabase
       .from("profiles")
       .select("first_name, last_name, display_name, avatar_url")
@@ -131,6 +158,9 @@ export default async function DashboardPage() {
       .is("deleted_at", null)
       .eq("is_completed", false)
       .eq("is_archived", false),
+    // Current 30-yr rate for the dashboard rate watch (cached 6h). Independent
+    // of the deal queries, so it rides in the same Promise.all wave.
+    fetchCurrentMortgageRate(),
   ]);
 
   const profileRow = (profile as ProfileRow | null) ?? null;
@@ -211,6 +241,17 @@ export default async function DashboardPage() {
     navAccess.dashboard
   );
   dashboardData.portfolioAggregates = portfolioAggregates;
+  // Rate watch — re-underwrite saved deals at today's rate; the strip shows
+  // only the ones whose signal changed (null = nothing to show, strip hides).
+  dashboardData.rateWatch = buildRateWatch(
+    (rows ?? []) as Array<{
+      id: string;
+      title: string | null;
+      address: string | null;
+      form_snapshot: unknown;
+    }>,
+    currentRate
+  );
 
   return (
     <>

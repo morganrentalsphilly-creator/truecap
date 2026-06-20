@@ -38,6 +38,8 @@ import type { DashboardDeal } from "@/lib/dashboard-deal-mapping";
 import { mapRiskLevelToRisk, resolveReturnMetric, resolveRiskMetric } from "@/lib/dashboard-risk-return";
 
 export type { DashboardDeal } from "@/lib/dashboard-deal-mapping";
+import { RateWatchStrip } from "@/components/dashboard/RateWatchStrip";
+import type { RateWatchSummary } from "@/lib/rate-watch";
 
 export type DashboardHomeData = {
   user: {
@@ -65,6 +67,12 @@ export type DashboardHomeData = {
     activeCount: number;
     totalCount: number;
   } | null;
+  /**
+   * Saved deals whose signal changed at today's 30-yr rate (see
+   * lib/rate-watch). Null when the rate is unavailable or nothing changed —
+   * the RateWatchStrip then renders nothing.
+   */
+  rateWatch?: RateWatchSummary | null;
 };
 
 function formatCurrency(value: number | null | undefined, compact = false): string {
@@ -389,6 +397,12 @@ export function DashboardHome({
             )}
           </div>
         </div>
+
+        {/* Rate watch — re-underwrites saved deals at today's 30-yr rate and
+            surfaces the ones whose signal changed since they were saved (the
+            retention hook; same pure logic as the weekly rate-alert email).
+            Renders nothing when nothing changed — invisible until useful. */}
+        <RateWatchStrip rateWatch={data.rateWatch ?? null} />
 
         {/* ── Portfolio overview — answers "what's my book worth?" ──
             Trimmed from 4 StatCards to 2 hero cards + 1 stat strip.
