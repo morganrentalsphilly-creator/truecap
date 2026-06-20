@@ -778,7 +778,7 @@ export function AnalysisDashboard({
       </div>
 
       {/* Recommendation + Pro Feature row */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 items-start gap-3 sm:gap-4">
         <DealScoreCard
           isAnalysisLoading={isLoading}
           isDealScoreLoading={isLoadingDealScore}
@@ -1633,64 +1633,63 @@ function DealScoreCard({
           </span>
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-2 text-xs mb-3">
-        <ScoreBreakdownTile
-          label="Cash flow"
-          value={breakdown.cashFlowScore}
-          max={isOwnerOccupant ? 30 : 22}
-          explanation={breakdownExplanations.cashFlow}
-          cellClass={activeStyle.metricCell}
-        />
-        <ScoreBreakdownTile
-          label="Cash-on-cash"
-          value={breakdown.cocScore}
-          max={20}
-          explanation={breakdownExplanations.coc}
-          cellClass={activeStyle.metricCell}
-        />
-        <ScoreBreakdownTile
-          label="Cap rate"
-          value={breakdown.capRateScore}
-          max={16}
-          explanation={breakdownExplanations.capRate}
-          cellClass={activeStyle.metricCell}
-        />
-        <ScoreBreakdownTile
-          label="DSCR"
-          value={breakdown.dscrScore}
-          max={17}
-          explanation={breakdownExplanations.dscr}
-          cellClass={activeStyle.metricCell}
-        />
-        <ScoreBreakdownTile
-          label="Total return (10-yr)"
-          value={breakdown.totalReturnScore}
-          max={25}
-          explanation={breakdownExplanations.totalReturn}
-          cellClass={activeStyle.metricCell}
-          spanFull
-        />
-        <ScoreBreakdownTile
-          label="Risk penalty"
-          value={breakdown.riskPenalty}
-          max={0}
-          explanation={breakdownExplanations.risk}
-          cellClass={activeStyle.metricCell}
-          spanFull
-        />
-      </div>
-      {/* The plain-English verdict lives once, in the Recommendation card
-          beside this one — no need to repeat the paragraph here. */}
-      {/* Collapsible deep-detail breakdown. Hidden by default so the
-          score card stays scannable; click-to-reveal for the analyst
-          who wants the receipts behind each number. Native <details>
-          keeps it zero-JS and accessible. */}
+      {/* Plain-English verdict lives once, in the Recommendation card beside
+          this one. The per-component breakdown moved INSIDE "Why this score?"
+          so the card stays scannable by default — score + verdict + lens —
+          and the receipts are one tap away. Native <details> = zero-JS + a11y. */}
       <details className="group mt-3">
         <summary className="min-h-11 py-2 -my-1 cursor-pointer text-[11px] font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground select-none list-none flex items-center gap-1.5">
           <ChevronRight aria-hidden className="size-3.5 shrink-0 transition-transform group-open:rotate-90" />
           Why this score?
         </summary>
-        <div className="mt-2 rounded-xl border border-border bg-muted/30 p-3 text-xs leading-relaxed text-foreground/80">
+        <div className="mt-2 space-y-3">
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            <ScoreBreakdownTile
+              label="Cash flow"
+              value={breakdown.cashFlowScore}
+              max={isOwnerOccupant ? 30 : 22}
+              explanation={breakdownExplanations.cashFlow}
+              cellClass={activeStyle.metricCell}
+            />
+            <ScoreBreakdownTile
+              label="Cash-on-cash"
+              value={breakdown.cocScore}
+              max={20}
+              explanation={breakdownExplanations.coc}
+              cellClass={activeStyle.metricCell}
+            />
+            <ScoreBreakdownTile
+              label="Cap rate"
+              value={breakdown.capRateScore}
+              max={16}
+              explanation={breakdownExplanations.capRate}
+              cellClass={activeStyle.metricCell}
+            />
+            <ScoreBreakdownTile
+              label="DSCR"
+              value={breakdown.dscrScore}
+              max={17}
+              explanation={breakdownExplanations.dscr}
+              cellClass={activeStyle.metricCell}
+            />
+            <ScoreBreakdownTile
+              label="Total return (10-yr)"
+              value={breakdown.totalReturnScore}
+              max={25}
+              explanation={breakdownExplanations.totalReturn}
+              cellClass={activeStyle.metricCell}
+              spanFull
+            />
+            <ScoreBreakdownTile
+              label="Risk penalty"
+              value={breakdown.riskPenalty}
+              max={0}
+              explanation={breakdownExplanations.risk}
+              cellClass={activeStyle.metricCell}
+              spanFull
+            />
+          </div>
+          <div className="rounded-xl border border-border bg-muted/30 p-3 text-xs leading-relaxed text-foreground/80">
           {strategy === "balanced" ? (
             <p>
               Score is the sum of cash flow ({breakdown.cashFlowScore}), CoC ({breakdown.cocScore}),
@@ -1721,6 +1720,7 @@ function DealScoreCard({
             (lifts DSCR + monthly cash flow), or (3) reducing CapEx/maintenance assumptions
             for a younger building.
           </p>
+          </div>
         </div>
       </details>
     </div>
