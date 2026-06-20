@@ -148,18 +148,6 @@ const PROOF_QUOTES = [
   },
   {
     quote:
-      "The PDF export alone is worth Pro. My lender stopped asking for follow-up — the report has everything they need on page 1.",
-    name: "Marcus T.",
-    role: "BRRRR operator · 6 deals/yr",
-  },
-  {
-    quote:
-      "Auto-fill from the address saved my underwriting time by like 80%. I screen 20 deals a week and TrueCap is the only tool that scales.",
-    name: "Sarah K.",
-    role: "Agent · underwriting for clients",
-  },
-  {
-    quote:
       "TrueCap has completely changed the way I evaluate rental properties. What used to take me over an hour in spreadsheets now takes less than a minute. The cash flow, cap rate, and DSCR calculations are accurate, easy to understand, and help me make decisions with confidence.",
     name: "David R.",
     role: "Real estate investor",
@@ -384,16 +372,6 @@ const HOMEPAGE_FAQS: { q: string; a: string }[] = [
   {
     q: "Does this work for BRRRR or fix-and-flip deals?",
     a: "Yes. Pro includes the BRRRR analyzer (cash-out refi math, post-refi cash flow, infinite-return alerts), the Fix-and-Flip analyzer (net profit, ROI, annualized ROI, break-even ARV), and the Rehab Cost Estimator (sq-ft-based defaults for every common work item).",
-  },
-  {
-    q: "Can I share an analysis with my lender or partner?",
-    a: "Yes. Pro generates a one-click lender-ready PDF (verdict, projections, tax strategy, exit scenarios) and a shareable read-only link your partner can open without an account. The shared link's preview card auto-renders the property address + key metrics + recommendation badge.",
-  },
-  {
-    q: "Will TrueCap work on my phone at the showing?",
-    // NOTE: do not claim offline support here — there's no service
-    // worker in this app, so "works offline once loaded" was false.
-    a: "Yes — mobile-first by design. The full analyzer fits in your pocket, and you can install it to your home screen like an app. Many users underwrite deals while walking through the property.",
   },
   {
     q: "Can I cancel anytime?",

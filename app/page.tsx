@@ -32,7 +32,6 @@ import {
   PreCalculatorCta,
   SocialProof,
   VsCompetitors,
-  WhyNotSpreadsheet,
 } from "@/components/marketing/landing-sections";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { TrackLandingView } from "@/components/analytics/track-landing-view";
@@ -178,7 +177,6 @@ export default function Home() {
           → the calculator. */}
       <MarketingHero />
       <HowItWorks />
-      <WhyNotSpreadsheet />
       <VsCompetitors />
       <SocialProof />
       <HomepageFaq />

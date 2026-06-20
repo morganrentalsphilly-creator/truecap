@@ -23,7 +23,7 @@
  */
 
 import Link from "next/link";
-import { ArrowRight, Calculator, FileDown, Lock, ShieldCheck, Sparkles, TrendingUp, Zap } from "lucide-react";
+import { ArrowRight, Calculator, Lock, Sparkles, TrendingUp } from "lucide-react";
 import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
 import { DealsAnalyzedTicker } from "@/components/marketing/deals-analyzed-ticker";
 import { calculateAnalysis } from "@/lib/calc-analysis";
@@ -36,26 +36,9 @@ import { SAMPLE_DEAL_DISPLAY, SAMPLE_DEAL_VALUES } from "@/lib/sample-deal";
 // animated mock card. Four trust signals competing for the same
 // real estate stacked the hero too tall and one of them had to go.
 
-// Title-only feature row (Jun 2026): the body subtexts were removed —
-// three paragraphs of supporting copy under the hero competed with the
-// animated mock card and slowed the scroll to the calculator. Each
-// title now carries the full claim on its own. The old "Save 2+ hours
-// per deal" framing undersold it; "2 hours → 60 seconds" is the same
-// honest comparison (spreadsheet vs TrueCap) framed as the ~100x it is.
-const FEATURES = [
-  {
-    icon: Zap,
-    title: "2 hours of spreadsheets → 60 seconds",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Catch bad assumptions before you offer",
-  },
-  {
-    icon: FileDown,
-    title: "Lender-ready PDFs in one click",
-  },
-];
+// Hero feature cards removed (Jun 2026) — they repeated How-It-Works and the
+// comparison table and stacked the hero too tall for a cold-traffic landing.
+// The same value props live in How-It-Works + the comparison matrix below.
 
 export function MarketingHero() {
   return (
@@ -128,7 +111,7 @@ export function MarketingHero() {
             all-time total clears it sooner AND reads as a bigger, stronger
             number. Switch back to "7d" once weekly volume reliably clears 25. */}
         <div className="mt-5 text-center">
-          <DealsAnalyzedTicker window="all" />
+          <DealsAnalyzedTicker window="all" minimum={1} />
         </div>
 
         {/* Mock-up screenshot — pure CSS, lightweight.
@@ -138,23 +121,6 @@ export function MarketingHero() {
             hiding it on phones (~60% of traffic) was undervaluing
             it. The card auto-shrinks fine on narrow viewports. */}
         <HeroProductMock />
-
-        {/* 3-up features — title-only cards, icon inline with the text
-            so the row reads as three quick claims rather than three
-            content blocks (bodies removed, see FEATURES note above). */}
-        <div className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-5">
-          {FEATURES.map((f) => (
-            <div
-              key={f.title}
-              className="flex items-center gap-3 rounded-2xl border border-border bg-card p-5 shadow-sm"
-            >
-              <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                <f.icon className="size-5" />
-              </div>
-              <div className="text-base font-bold leading-snug text-foreground">{f.title}</div>
-            </div>
-          ))}
-        </div>
 
         {/* "Built for" — promoted from inline body text to a proper
             5-button row. These are audience self-selection links and
