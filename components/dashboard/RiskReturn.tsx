@@ -12,7 +12,6 @@ import {
   ZAxis,
   ReferenceLine,
 } from "recharts";
-import { usePrefersDark } from "@/hooks/use-prefers-dark";
 
 /**
  * One point per saved deal, with BOTH candidate return metrics carried so
@@ -99,8 +98,8 @@ function ChartTooltip({
 export function RiskReturn({ deals = [] }: { deals?: RiskReturnDeal[] }) {
   const [metric, setMetric] = useState<ReturnMetricId>("coc");
   const active = RETURN_METRICS.find((m) => m.id === metric) ?? RETURN_METRICS[0];
-  const prefersDark = usePrefersDark();
-  const { grid: GRID, axis: AXIS, point: POINT } = prefersDark ? CHART_COLORS.dark : CHART_COLORS.light;
+  // Dashboard is always light — chart colors are fixed to the light palette.
+  const { grid: GRID, axis: AXIS, point: POINT } = CHART_COLORS.light;
 
   const { points, excludedCount, cashCount, total } = useMemo(() => {
     const totalDeals = deals.length;

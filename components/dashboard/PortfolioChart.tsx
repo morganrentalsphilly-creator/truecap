@@ -9,7 +9,6 @@ import {
   YAxis,
 } from "recharts";
 import { TrendingUp } from "lucide-react";
-import { usePrefersDark } from "@/hooks/use-prefers-dark";
 
 const metrics = [
   { id: "score", label: "Score" },
@@ -51,8 +50,8 @@ const CHART_COLORS = {
 // forgets to pass data (renders empty axes, never fabricated numbers).
 export function PortfolioChart({ data = [] }: { data?: DealComparisonPoint[] }) {
   const [metric, setMetric] = useState<(typeof metrics)[number]["id"]>("score");
-  const prefersDark = usePrefersDark();
-  const colors = prefersDark ? CHART_COLORS.dark : CHART_COLORS.light;
+  // Dashboard is always light — chart colors are fixed to the light palette.
+  const colors = CHART_COLORS.light;
   const activeMetric = metrics.find((item) => item.id === metric) ?? metrics[0];
   const metricLabel = activeMetric.label;
 

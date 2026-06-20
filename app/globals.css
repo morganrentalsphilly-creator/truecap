@@ -194,13 +194,13 @@ textarea,
 }
 
 /* ============================================================
-   Dashboard theme tokens — moved out of inline styles in
-   dashboard-shell.tsx so they can carry a dark-mode variant.
-   The dashboard has its OWN palette, distinct from the marketing
-   site's :root, scoped to .dashboard-shell so it never leaks out.
-   The light values below are identical to the previous inline
-   styles (light mode is unchanged). Dark mode is OS-driven via
-   prefers-color-scheme — the app has no theme toggle.
+   Dashboard theme tokens. The dashboard has its OWN palette,
+   distinct from the marketing site's :root, scoped to
+   .dashboard-shell so it never leaks out. The dashboard is
+   ALWAYS LIGHT — matching the always-light analyzer so the two
+   core surfaces read as one product (an OS-driven dark override
+   used to live below; see the note where it was removed). The
+   app has no theme toggle.
    ============================================================ */
 .dashboard-shell {
   --radius: 0.875rem;
@@ -261,38 +261,11 @@ textarea,
   font-family: "Inter", system-ui, sans-serif;
 }
 
-/* Dark mode — OS-driven, scoped to the dashboard. Sidebar tokens are
-   already dark in light mode, so they intentionally carry over unchanged. */
-@media (prefers-color-scheme: dark) {
-  .dashboard-shell {
-    --background: oklch(0.17 0.02 262);
-    --foreground: oklch(0.95 0.01 250);
-    --card: oklch(0.215 0.025 262);
-    --card-foreground: oklch(0.95 0.01 250);
-    --popover: oklch(0.215 0.025 262);
-    --popover-foreground: oklch(0.95 0.01 250);
-    --primary: oklch(0.62 0.22 265);
-    --primary-foreground: oklch(0.99 0 0);
-    --secondary: oklch(0.27 0.03 262);
-    --secondary-foreground: oklch(0.92 0.01 250);
-    --muted: oklch(0.25 0.025 262);
-    --muted-foreground: oklch(0.72 0.02 256);
-    --accent: oklch(0.31 0.05 265);
-    --accent-foreground: oklch(0.95 0.01 250);
-    --success: oklch(0.72 0.16 158);
-    --warning: oklch(0.80 0.15 75);
-    --gold: oklch(0.80 0.13 85);
-    --border: oklch(0.30 0.02 262);
-    --input: oklch(0.30 0.02 262);
-    --ring: oklch(0.62 0.22 265);
-    --destructive: oklch(0.62 0.22 18);
-    --destructive-foreground: oklch(0.99 0 0);
-    --ai-insights-bg: linear-gradient(135deg, oklch(0.225 0.03 265), oklch(0.2 0.045 290));
-    /* Light foreground for warning tints on a dark surface (badges use
-       bg-warning/15 text-warning-foreground — needs to flip to light here). */
-    --warning-foreground: oklch(0.93 0.05 90);
-    --compare-surface: radial-gradient(circle at top right, rgba(98, 80, 212, 0.16), transparent 32%), linear-gradient(180deg, oklch(0.19 0.02 262), oklch(0.165 0.02 262));
-    --gradient-card-glow: radial-gradient(circle at top right, oklch(0.62 0.22 265 / 0.14), transparent 60%);
-    --shadow-lg: 0 12px 32px -8px oklch(0 0 0 / 0.55), 0 4px 8px -4px oklch(0 0 0 / 0.4);
-  }
-}
+/* The dashboard is intentionally ALWAYS LIGHT. It shares the marketing /
+   analyzer site's always-light look so the two core surfaces read as one
+   product — the analyzer has no OS-dark variant, so neither should the
+   dashboard. (An OS-driven `prefers-color-scheme: dark` override used to live
+   here; it was removed because it flipped ONLY the dashboard dark on a
+   dark-mode machine while the analyzer stayed light — the "two products"
+   mismatch.) The sidebar stays dark-navy in both, the standard
+   light-dashboard-with-dark-rail pattern. */

@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react";
 import { Building2, Home, KeyRound } from "lucide-react";
-import { usePrefersDark } from "@/hooks/use-prefers-dark";
 
 export type DashboardTopDeal = {
   id?: string;
@@ -74,9 +73,9 @@ function getSortValue(deal: DashboardTopDeal, sortBy: SortMetric) {
 
 export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
   const [sortBy, setSortBy] = useState<SortMetric>("score");
-  const prefersDark = usePrefersDark();
-  // Score-ring track + no-risk arc color, themed (SVG strokes can't use var()).
-  const ringTrack = prefersDark ? "oklch(0.34 0.02 262)" : "oklch(0.92 0.012 255)";
+  // Score-ring track + no-risk arc color (SVG strokes can't use var()). The
+  // dashboard is always light, so this is the fixed light-mode track.
+  const ringTrack = "oklch(0.92 0.012 255)";
   const sortedData = useMemo(() => {
     return data
       .map((deal, index) => ({ deal, index }))

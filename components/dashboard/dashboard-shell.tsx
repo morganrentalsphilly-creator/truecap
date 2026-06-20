@@ -3,12 +3,11 @@ import { Sidebar } from "@/components/dashboard/Sidebar";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 
 /**
- * The dashboard's theme tokens (light + OS-driven dark) live in
- * app/globals.css under `.dashboard-shell` and `.dashboard-mobile-sheet`,
- * not inline here, so they can carry a `@media (prefers-color-scheme: dark)`
- * variant (an inline style object can't). The shell just applies the
- * classes; the mobile sheet is portaled outside the shell, so it gets its
- * own token class.
+ * The dashboard's theme tokens live in app/globals.css under `.dashboard-shell`
+ * and `.dashboard-mobile-sheet`, not inline here, so they sit with the rest of
+ * the palette. The dashboard is always light (matching the analyzer); the shell
+ * just applies the classes. The mobile sheet is portaled outside the shell, so
+ * it gets its own token class.
  */
 
 export type DashboardNavAccess = {
