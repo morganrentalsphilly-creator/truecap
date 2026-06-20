@@ -446,3 +446,100 @@ describe("computeDealScore — strategy lens", () => {
     }
   });
 });
+
+describe("computeDealScore — Phase 1: appreciation-floor recalibration + coherence", () => {
+  // The 8–11%/yr "dead zone": before the floor threshold moved 12 → 8, a deal
+  // the engine itself calls a "solid total return" (its >8%/yr tier) but under
+  // 12% got NO floor and cratered to ~13 / Avoid — contradicting its own green
+  // metrics and "wealth-building hold" copy. This pins the fix.
+  it("floors an ~10%/yr after-tax-positive appreciation play to Neutral, not Avoid", () => {
+    const tenPctPlay = input({
+      monthlyCashFlow: -205,
+      cashOnCashReturn: -3.6,
+      capRate: 5.4,
+      dscr: 0.87,
+      propertyAge: 84,
+      maintenancePct: 10,
+      monthlyPropertyTax: 373,
+      monthlyRentIncome: 2_500,
+      afterTaxMonthlyCashFlow: 303,
+      tenYearAnnualizedReturnPct: 10,
+    });
+    for (const strategy of ["balanced", "appreciation"] as const) {
+      const r = computeDealScore(tenPctPlay, strategy);
+      expect(r.score).toBeGreaterThanOrEqual(40);
+      expect(r.recommendation).not.toBe("Avoid");
+      expect(r.recommendation).not.toBe("Risky");
+      expect(r.riskLevel).not.toBe("High Risk");
+    }
+  });
+
+  // Coherence invariant: the headline number and the prose must agree. The
+  // "wealth-building hold" copy and the score floor share ONE predicate, so the
+  // copy can never appear on a deal the score calls Avoid/Risky.
+  it("never shows 'wealth-building hold' copy while the score says Avoid/Risky", () => {
+    for (const annual of [9, 12, 18, 25]) {
+      for (const strategy of ["balanced", "appreciation"] as const) {
+        const r = computeDealScore(
+          input({
+            monthlyCashFlow: -180,
+            cashOnCashReturn: -10,
+            capRate: 6,
+            dscr: 0.9,
+            monthlyPropertyTax: 200,
+            monthlyRentIncome: 2_000,
+            afterTaxMonthlyCashFlow: 120,
+            tenYearAnnualizedReturnPct: annual,
+          }),
+          strategy
+        );
+        if (r.explanation.toLowerCase().includes("wealth-building hold")) {
+          expect(r.recommendation).not.toBe("Avoid");
+          expect(r.recommendation).not.toBe("Risky");
+          expect(r.score).toBeGreaterThanOrEqual(35);
+        }
+      }
+    }
+  });
+
+  // Lens-aware prose: under the cash-flow lens (which doesn't credit
+  // appreciation) a negative-cash-flow deal must NOT be called a wealth-
+  // building hold — it should point the user to the lens that does.
+  it("does not call a negative-CF deal a wealth-building hold under the cash-flow lens", () => {
+    const r = computeDealScore(
+      input({
+        monthlyCashFlow: -159,
+        cashOnCashReturn: -19,
+        capRate: 7,
+        dscr: 0.9,
+        monthlyPropertyTax: 200,
+        monthlyRentIncome: 2_000,
+        afterTaxMonthlyCashFlow: 226,
+        tenYearAnnualizedReturnPct: 22.8,
+      }),
+      "cash-flow"
+    );
+    expect(r.explanation.toLowerCase()).not.toContain("wealth-building hold");
+    expect(r.explanation.toLowerCase()).toContain("lens");
+  });
+
+  // Age softening (-10/-5/-2 → -6/-4/-2): pre-war stock isn't dragged a risk
+  // tier purely for being old; genuine condition risk is still captured by the
+  // separate age>20 + high-capex/maintenance penalty.
+  it("does not over-penalize a sound deal purely for being old (pre-war stock)", () => {
+    const oldButFine = {
+      monthlyCashFlow: 250,
+      cashOnCashReturn: 8,
+      capRate: 7,
+      dscr: 1.3,
+      monthlyPropertyTax: 200,
+      monthlyRentIncome: 1_500,
+      afterTaxMonthlyCashFlow: 320,
+      tenYearAnnualizedReturnPct: 12,
+    };
+    const young = computeDealScore(input({ ...oldButFine, propertyAge: 5 }));
+    const old = computeDealScore(input({ ...oldButFine, propertyAge: 84 }));
+    expect(young.score - old.score).toBeLessThanOrEqual(6);
+    expect(old.recommendation).not.toBe("Avoid");
+  });
+});

@@ -212,8 +212,14 @@ const OWNER_OCCUPANT_RISK_LABEL_CF_MAX = 100;
  * Exported because the Overview's appreciation-play banner reframes on the
  * exact same threshold — defining the bar once keeps the score and the UI
  * copy from ever disagreeing about what counts as an appreciation play.
+ *
+ * Set to 8 (was 12) to align with the totalReturn component's ">8%/yr →
+ * 'solid total return' (14/25)" tier: a deal the engine already describes as a
+ * solid long-term return shouldn't simultaneously read "Avoid". The floor
+ * still requires NON-NEGATIVE after-tax cash flow, so a genuinely bleeding
+ * deal (negative after-tax) is never rescued.
  */
-export const APPRECIATION_PLAY_MIN_ANNUAL_RETURN_PCT = 12;
+export const APPRECIATION_PLAY_MIN_ANNUAL_RETURN_PCT = 8;
 const APPRECIATION_FLOOR_SCORE = 40;
 
 /**
@@ -291,15 +297,29 @@ function isOwnerOccupantNearBreakEvenForRiskLabel(input: DealScoreInput): boolea
   );
 }
 
-/** Does this deal qualify for the appreciation-play score floor? Investment
- *  deals only, and only under a lens where long-term return counts (not the
- *  cash-flow lens, where a negative-cash-flow deal genuinely isn't a buy). */
-function qualifiesForAppreciationFloor(input: DealScoreInput, strategy: DealStrategy): boolean {
-  if (!STRATEGY_WEIGHTS[strategy].appreciationFloor) return false;
+/**
+ * Is this an appreciation play? A non-owner-occupant INVESTMENT deal whose
+ * projected long-term return clears the bar AND whose after-tax cash flow is
+ * non-negative — a wealth-building hold rather than a weak deal. This is the
+ * ONE definition shared by (a) the score floor and (b) the "wealth-building
+ * hold" recommendation copy in buildExplanation, so the number and the prose
+ * can never disagree about what counts as an appreciation play. Lens-
+ * independent: whether the active lens *credits* it is a separate question
+ * handled by qualifiesForAppreciationFloor.
+ */
+function isAppreciationPlay(input: DealScoreInput): boolean {
   if (isOwnerOccupantDeal(input)) return false;
   const annual = input.tenYearAnnualizedReturnPct;
   if (annual == null) return false;
   return annual > APPRECIATION_PLAY_MIN_ANNUAL_RETURN_PCT && resolveAfterTaxCashFlow(input) >= 0;
+}
+
+/** Does this deal qualify for the appreciation-play score floor? An
+ *  appreciation play, but only under a lens where long-term return counts (not
+ *  the cash-flow lens, where a negative-cash-flow deal genuinely isn't a buy). */
+function qualifiesForAppreciationFloor(input: DealScoreInput, strategy: DealStrategy): boolean {
+  if (!STRATEGY_WEIGHTS[strategy].appreciationFloor) return false;
+  return isAppreciationPlay(input);
 }
 
 function getCashFlowScore(input: DealScoreInput): number {
@@ -361,8 +381,13 @@ function getRiskLevel(score: number, input: DealScoreInput): DealRiskLevel {
 }
 
 function getAgeRiskPenalty(propertyAge: number): number {
-  if (propertyAge > 30) return -10;
-  if (propertyAge > 15) return -5;
+  // Softened from -10/-5/-2. In pre-war markets (Philadelphia, the Northeast)
+  // an 80+ year building is ordinary stock, not a 10-point risk — and genuine
+  // age-driven condition risk is already captured separately by the
+  // age>20 + high-capex/high-maintenance combined penalty in computeDealScore.
+  // Keep age here as a light modifier so it doesn't bury the whole market.
+  if (propertyAge > 30) return -6;
+  if (propertyAge > 15) return -4;
   if (propertyAge > 5) return -2;
   return 0;
 }
@@ -371,7 +396,8 @@ function buildExplanation(
   input: DealScoreInput,
   breakdown: DealScoreBreakdown,
   score: number,
-  recommendation: DealRecommendation
+  recommendation: DealRecommendation,
+  strategy: DealStrategy
 ): string {
   const strengths: string[] = [];
   const weaknesses: string[] = [];
@@ -427,9 +453,12 @@ function buildExplanation(
     input.monthlyCashFlow < 0 &&
     (input.isCashPurchase || input.dscr < 1)
   ) {
-    const strongTotalReturn = breakdown.totalReturnScore >= 14;
-    const afterTaxPositive = resolveAfterTaxCashFlow(input) >= 0;
-    if (strongTotalReturn && afterTaxPositive) {
+    // "Wealth-building hold" copy is gated on the SAME predicate as the score
+    // floor, so it can only appear when the active lens actually credits the
+    // appreciation play — in which case the score is floored out of "Avoid".
+    // This is the invariant: the prose can never call a deal a wealth-builder
+    // while the headline number says Avoid.
+    if (qualifiesForAppreciationFloor(input, strategy)) {
       const annual = input.tenYearAnnualizedReturnPct;
       const retClause = annual != null ? ` (~${Math.round(annual)}%/yr)` : "";
       const debtClause = input.isCashPurchase
@@ -440,6 +469,15 @@ function buildExplanation(
         `and positive after-tax cash flow point to a wealth-building hold. The return leans on appreciation and ` +
         `loan paydown rather than monthly income — confirm you can carry the shortfall and that your rent and ` +
         `appreciation assumptions are realistic.`
+      );
+    }
+    // It IS an appreciation play, but the active lens (cash-flow) doesn't
+    // credit appreciation — so point the user to the lens that does instead of
+    // calling a negative-cash-flow deal a buy under a cash-flow strategy.
+    if (isAppreciationPlay(input)) {
+      return (
+        "Year-1 cash flow is negative. The projected 10-year total return is solid, but on a cash-flow strategy " +
+        "this deal doesn't pencil — switch to the Balanced or Appreciation lens to weigh its long-term case."
       );
     }
     return (
@@ -605,6 +643,6 @@ export function computeDealScore(
     recommendation,
     riskLevel: getRiskLevel(score, input),
     breakdown,
-    explanation: buildExplanation(input, breakdown, score, recommendation),
+    explanation: buildExplanation(input, breakdown, score, recommendation, strategy),
   };
 }
