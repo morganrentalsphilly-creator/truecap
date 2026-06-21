@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { UserDefaultsCard } from "@/components/settings/user-defaults-card";
 import { BuyBoxCard } from "@/components/settings/buy-box-card";
+import { RateAlertsToggle } from "@/components/settings/rate-alerts-toggle";
 import { getEntitlementsForUser, hasPlanFeature } from "@/lib/entitlements";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
@@ -38,6 +39,10 @@ export default async function SettingsPage() {
         {/* Buy Box — self-gates: shows a Pro upsell to free users, the
             editor to Pro. Drives the inline buy-box verdict on analyses. */}
         <BuyBoxCard />
+
+        {/* Deal rate alerts — opt-in for the weekly rate-alert email.
+            Self-hides until the schema migration is applied. */}
+        <RateAlertsToggle />
 
         {/* Branding card — links to the dedicated /settings/branding page.
             Shown for everyone (Pro link + Pro badge for unentitled users

@@ -130,11 +130,24 @@ export async function GET(request: Request) {
       return NextResponse.json({ skipped: true, reason: "no_paid_users" });
     }
 
+    // …who have OPTED IN to rate-alert emails (consent gate — see
+    // profiles.rate_alert_emails + the Settings toggle).
+    const { data: prefRows, error: prefError } = await admin
+      .from("profiles")
+      .select("id")
+      .in("id", userIds)
+      .eq("rate_alert_emails", true);
+    if (prefError) throw prefError;
+    const optedInIds = (prefRows ?? []).map((r) => r.id as string);
+    if (optedInIds.length === 0) {
+      return NextResponse.json({ skipped: true, reason: "no_opted_in_users" });
+    }
+
     // …with saved, non-archived deals.
     const { data: dealRows, error: dealError } = await admin
       .from("saved_analyses")
       .select("id, user_id, title, address, form_snapshot")
-      .in("user_id", userIds)
+      .in("user_id", optedInIds)
       .is("deleted_at", null)
       .neq("is_archived", true);
     if (dealError) throw dealError;
