@@ -221,7 +221,7 @@ export default async function PricingPage() {
                   ["Due-diligence checklist + document vault", false, true],
                   ["Rate-drop alerts on saved deals", false, true],
                   ["Lender · partner · personal PDF reports", false, true],
-                  ["Save deals", "Limited", "Unlimited"],
+                  ["Save deals", "Up to 5", "Unlimited"],
                   ["Compare deals side-by-side", false, "Up to 4"],
                   ["Priority support", false, true],
                 ].map(([label, free, pro], i) => (

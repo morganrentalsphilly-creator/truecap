@@ -43,7 +43,8 @@ const FREE_FEATURES: { label: string; included: boolean }[] = [
   { label: "Exit scenarios", included: false },
   { label: "Lender-ready PDF export", included: false },
   { label: "Custom PDF branding (logo, color, contact)", included: false },
-  { label: "Save + compare deals", included: false },
+  { label: "Save up to 5 deals", included: true },
+  { label: "Compare deals", included: false },
 ];
 
 const PRO_FEATURES = [

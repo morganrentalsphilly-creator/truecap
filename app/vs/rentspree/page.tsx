@@ -54,7 +54,7 @@ const MATRIX: Row[] = [
   { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", rentspree: "Not modeled", winner: "truecap" },
   { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", rentspree: "Not modeled", winner: "truecap" },
   { feature: "Tax strategy modeling", truecap: "Pro — depreciation + interest + after-tax CF", rentspree: "Not modeled", winner: "truecap" },
-  { feature: "Deal score + verdict", truecap: "Pro — 0-100 score + plain-English verdict", rentspree: "Not applicable", winner: "truecap" },
+  { feature: "Deal score + verdict", truecap: "Free — 0-100 score + plain-English verdict", rentspree: "Not applicable", winner: "truecap" },
   { feature: "Address auto-fill (rent/rate/tax)", truecap: "Yes — HUD + FRED + state property tax", rentspree: "Not applicable", winner: "truecap" },
   { feature: "Tenant credit / criminal reports", truecap: "No", rentspree: "Yes — TransUnion-backed", winner: "rentspree" },
   { feature: "Online rental applications", truecap: "No", rentspree: "Yes — customizable", winner: "rentspree" },

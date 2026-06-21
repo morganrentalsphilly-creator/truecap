@@ -228,7 +228,7 @@ const COMPETITORS_HEADERS = ["", "TrueCap", "Spreadsheet", "DealCheck", "BiggerP
 const COMPETITORS_ROWS: Array<{ label: string; values: (string | boolean)[]; highlight?: boolean }> = [
   { label: "Time to first answer",                        values: ["60 seconds", "2-4 hours", "5-10 min", "5-10 min"], highlight: true },
   { label: "Free tier",                                   values: [true, "DIY only", "Limited", true] },
-  { label: "Address auto-fill (HUD + FRED)",              values: [true, false, false, false], highlight: true },
+  { label: "Sourced underwriting defaults (HUD rent · FRED rate · state tax)", values: [true, false, false, false], highlight: true },
   { label: "Cap rate · CoC · DSCR · cash flow",           values: [true, "If you built it", true, true] },
   { label: "10-year projection",                          values: ["Pro", "Manual, error-prone", true, false] },
   { label: "Tax strategy + depreciation",                 values: ["Pro", "Manual, error-prone", "Pro", false] },

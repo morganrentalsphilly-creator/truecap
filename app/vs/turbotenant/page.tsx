@@ -54,7 +54,7 @@ const MATRIX: Row[] = [
   { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", turbotenant: "Not modeled", winner: "truecap" },
   { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", turbotenant: "Not modeled", winner: "truecap" },
   { feature: "Tax strategy modeling", truecap: "Pro — depreciation + interest + after-tax CF", turbotenant: "Not modeled", winner: "truecap" },
-  { feature: "Deal score + verdict", truecap: "Pro — 0-100 score + plain-English verdict", turbotenant: "Not applicable", winner: "truecap" },
+  { feature: "Deal score + verdict", truecap: "Free — 0-100 score + plain-English verdict", turbotenant: "Not applicable", winner: "truecap" },
   { feature: "Sensitivity grid", truecap: "Pro — rent ±10%, vacancy ±5pp, rate ±1pp", turbotenant: "Not modeled", winner: "truecap" },
   { feature: "Rental listing distribution", truecap: "No", turbotenant: "Yes — syndicated to Zillow, Realtor, etc.", winner: "turbotenant" },
   { feature: "Online rental application", truecap: "No", turbotenant: "Yes — customizable forms", winner: "turbotenant" },

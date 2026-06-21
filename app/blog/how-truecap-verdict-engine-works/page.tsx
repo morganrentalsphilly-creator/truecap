@@ -78,8 +78,8 @@ const FAQ_ITEMS = [
     a: "DSCR doesn't apply to cash purchases — there's no debt service. The verdict engine detects this (monthlyPayment <= 0) and switches to a cash-only classifier that leans on cash flow, cap rate, and cash-on-cash. A cash deal with $400+/mo cash flow, ≥ 7% cap rate, and ≥ 8% CoC is Strong; ≥ $100/mo, ≥ 5% cap, ≥ 5% CoC is Solid.",
   },
   {
-    q: "What's the difference between the verdict and the Pro Deal Score?",
-    a: "The verdict is the free-tier rule-of-thumb classifier (Strong / Solid / Mixed / Marginal / Negative). The Pro Deal Score is a 0-100 weighted score with subscore breakdown that lives behind a Pro subscription. The verdict is intentionally simpler — it tells you which bucket the deal lands in. The Deal Score tells you why, with contribution from each underlying metric.",
+    q: "What's the difference between the verdict and the Deal Score?",
+    a: "The verdict is the free-tier rule-of-thumb classifier (Strong / Solid / Mixed / Marginal / Negative). The Deal Score is a 0-100 weighted score with a subscore breakdown — and both are free for every user. The verdict is intentionally simpler — it tells you which bucket the deal lands in. The Deal Score tells you why, with contribution from each underlying metric.",
   },
 ];
 
@@ -426,7 +426,7 @@ export default function HowVerdictEngineWorksPost() {
                 <strong>No partial credit.</strong> Strong requires
                 <em>all three</em> thresholds. Two-out-of-three knocks
                 you to Solid. We thought about a weighted score
-                (that&apos;s what the Pro Deal Score does) but for the
+                (that&apos;s what the Deal Score does) but for the
                 free verdict tier, hard cutoffs are easier to trust.
               </li>
             </ul>

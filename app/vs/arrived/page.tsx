@@ -54,7 +54,7 @@ const MATRIX: Row[] = [
   { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", arrived: "Not applicable (you don't own debt)", winner: "truecap" },
   { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", arrived: "Forward dividend + appreciation forecast", winner: "tie" },
   { feature: "Tax strategy modeling", truecap: "Pro — depreciation + interest + after-tax CF", arrived: "K-1 distributions; no direct depreciation control", winner: "truecap" },
-  { feature: "Deal score + verdict", truecap: "Pro — 0-100 score + plain-English verdict", arrived: "Not applicable", winner: "truecap" },
+  { feature: "Deal score + verdict", truecap: "Free — 0-100 score + plain-English verdict", arrived: "Not applicable", winner: "truecap" },
   { feature: "Minimum to start", truecap: "Down payment on a whole property (~$20-50k typical)", arrived: "$100 per share", winner: "arrived" },
   { feature: "Time commitment", truecap: "Active — you find, underwrite, close, manage (or hire PM)", arrived: "Passive — Arrived handles everything", winner: "arrived" },
   { feature: "Liquidity", truecap: "Low — property sale takes months", arrived: "Limited secondary market (Arrived's platform)", winner: "arrived" },

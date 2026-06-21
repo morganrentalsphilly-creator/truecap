@@ -54,7 +54,7 @@ const MATRIX: Row[] = [
   { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", propstream: "Not modeled", winner: "truecap" },
   { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", propstream: "Not modeled", winner: "truecap" },
   { feature: "Tax strategy modeling", truecap: "Pro — depreciation + interest + after-tax CF", propstream: "Not modeled", winner: "truecap" },
-  { feature: "Deal score + verdict", truecap: "Pro — 0-100 score + Strong / Solid / Mixed / Negative", propstream: "Not applicable", winner: "truecap" },
+  { feature: "Deal score + verdict", truecap: "Free — 0-100 score + Strong / Solid / Mixed / Negative", propstream: "Not applicable", winner: "truecap" },
   { feature: "Address auto-fill (rent/rate/tax)", truecap: "Yes — HUD + FRED + state property tax", propstream: "Property data only — no underwriting", winner: "truecap" },
   { feature: "Skip tracing", truecap: "No", propstream: "Yes — owner phone + email lookup", winner: "propstream" },
   { feature: "Motivated-seller lists", truecap: "No", propstream: "Yes — pre-foreclosure, probate, vacant, tax delinquent", winner: "propstream" },

@@ -274,16 +274,16 @@ export default async function StatePage({
           <h2 className="text-base font-extrabold text-foreground mb-3">
             Underwrite a {state.name} deal in three steps
           </h2>
-          <ul className="space-y-2 text-sm leading-relaxed text-foreground">
+          <ol className="list-decimal space-y-2 pl-5 text-sm leading-relaxed text-foreground">
             <li>
-              1. Screen the listing with the{" "}
+              Screen the listing with the{" "}
               <Link href="/tools/1-percent-rule-calculator" className="text-primary font-semibold hover:underline">
                 1% rule calculator
               </Link>{" "}
               — if it&apos;s in the ballpark for {state.name}, move on.
             </li>
             <li>
-              2. Compute returns with the{" "}
+              Compute returns with the{" "}
               <Link href="/tools/cap-rate-calculator" className="text-primary font-semibold hover:underline">
                 cap rate calculator
               </Link>{" "}
@@ -294,7 +294,7 @@ export default async function StatePage({
               using local property tax + insurance figures.
             </li>
             <li>
-              3. Match the deal to your strategy — see the playbooks for{" "}
+              Match the deal to your strategy — see the playbooks for{" "}
               <Link href="/for-buy-and-hold" className="text-primary font-semibold hover:underline">
                 buy-and-hold investors
               </Link>{" "}
@@ -304,7 +304,7 @@ export default async function StatePage({
               </Link>
               .
             </li>
-          </ul>
+          </ol>
         </section>
 
         {/* Other states */}

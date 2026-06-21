@@ -54,7 +54,7 @@ const MATRIX: Row[] = [
   { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", baselane: "Not modeled", winner: "truecap" },
   { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", baselane: "Not modeled", winner: "truecap" },
   { feature: "Tax strategy modeling", truecap: "Pro — depreciation + interest + after-tax CF (forward-looking)", baselane: "Yes — actuals tracking for Schedule E", winner: "tie" },
-  { feature: "Deal score + verdict", truecap: "Pro — 0-100 score + plain-English verdict", baselane: "Not applicable", winner: "truecap" },
+  { feature: "Deal score + verdict", truecap: "Free — 0-100 score + plain-English verdict", baselane: "Not applicable", winner: "truecap" },
   { feature: "Sensitivity grid", truecap: "Pro — rent ±10%, vacancy ±5pp, rate ±1pp", baselane: "Not modeled", winner: "truecap" },
   { feature: "Rental business banking", truecap: "No", baselane: "Yes — FDIC-insured business checking", winner: "baselane" },
   { feature: "Auto-categorized expenses", truecap: "No", baselane: "Yes — synced with bank feed", winner: "baselane" },

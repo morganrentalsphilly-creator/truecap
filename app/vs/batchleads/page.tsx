@@ -53,7 +53,7 @@ const MATRIX: Row[] = [
   { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", batchleads: "Not modeled", winner: "truecap" },
   { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", batchleads: "Not modeled", winner: "truecap" },
   { feature: "Tax strategy modeling", truecap: "Pro — depreciation + interest + after-tax CF", batchleads: "Not modeled", winner: "truecap" },
-  { feature: "Deal score + verdict", truecap: "Pro — 0-100 score + plain-English verdict", batchleads: "Not applicable", winner: "truecap" },
+  { feature: "Deal score + verdict", truecap: "Free — 0-100 score + plain-English verdict", batchleads: "Not applicable", winner: "truecap" },
   { feature: "Address auto-fill (rent/rate/tax)", truecap: "Yes — HUD + FRED + state property tax", batchleads: "Property data only", winner: "truecap" },
   { feature: "Motivated-seller lists", truecap: "No", batchleads: "Yes — pre-foreclosure, probate, vacant, etc.", winner: "batchleads" },
   { feature: "Skip tracing", truecap: "No", batchleads: "Yes — owner phone + email", winner: "batchleads" },
@@ -347,11 +347,11 @@ const BATCHLEADS_FAQ: FaqItem[] = [
     question: "Can I use BatchLeads + TrueCap together?",
     answer: (
       <>
-        Yes — the standard workflow for active off-market buyers. BatchLeads surfaces motivated-seller leads, you reach out and get a verbal price, paste the address into TrueCap and run the underwrite. Pro Deal Score + MAO solver helps you make a defensible offer.
+        Yes — the standard workflow for active off-market buyers. BatchLeads surfaces motivated-seller leads, you reach out and get a verbal price, paste the address into TrueCap and run the underwrite. Deal Score + MAO solver helps you make a defensible offer.
       </>
     ),
     plainTextAnswer:
-      "Yes — standard active-off-market workflow. BatchLeads surfaces leads; you reach out; paste address into TrueCap; underwrite. Pro Deal Score + MAO solver helps you offer defensibly.",
+      "Yes — standard active-off-market workflow. BatchLeads surfaces leads; you reach out; paste address into TrueCap; underwrite. Deal Score + MAO solver helps you offer defensibly.",
   },
 ];
 

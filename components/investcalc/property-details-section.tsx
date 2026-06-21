@@ -49,7 +49,7 @@ export function PropertyDetailsSection({
               point and tells new users it auto-fills the deal — the single
               biggest "how do I use this" cue, right at the point of action. */}
           <p className="mb-1.5 text-[11px] leading-snug text-muted-foreground">
-            <span className="font-semibold text-foreground">Start here</span> — enter the address, then tap Autofill to pull beds, baths, price &amp; rent. Adjust anything after.
+            <span className="font-semibold text-foreground">Start here</span> — enter the address — we auto-fill rent, rate &amp; tax from public data (HUD · FRED · state). Beds, baths &amp; price fill from the Autofill button when available.
           </p>
           <AddressAutocomplete
             form={form}

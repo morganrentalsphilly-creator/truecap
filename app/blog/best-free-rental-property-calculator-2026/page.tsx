@@ -60,7 +60,7 @@ const TOOLS = [
     freeGates: [
       "10-year projection (Pro)",
       "Tax strategy + sensitivity (Pro)",
-      "Deal Score, MAO, BRRRR analyzer (Pro)",
+      "MAO solver, BRRRR & fix-flip analyzer (Pro)",
       "Save / compare deals (Pro)",
       "PDF export + share links (Pro)"
     ],

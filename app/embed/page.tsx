@@ -19,17 +19,16 @@ import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { EmbedCodeBlock } from "@/components/embed/embed-code-block";
 import { EMBED_LIST } from "@/lib/embed-registry";
+import { EMBEDDABLE_COUNT } from "@/lib/calculator-registry";
 import { getSiteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
   title: "Embed TrueCap Calculators on Your Site (Free)",
-  description:
-    "Embed any of TrueCap's 14 free real estate calculators on your blog, agent website, or course platform. Copy-paste iframe code. Auto-resizing. Free to use.",
+  description: `Embed any of TrueCap's ${EMBEDDABLE_COUNT} free real estate calculators on your blog, agent website, or course platform. Copy-paste iframe code. Auto-resizing. Free to use.`,
   alternates: { canonical: "/embed" },
   openGraph: {
     title: "Embed free real estate calculators — TrueCap",
-    description:
-      "14 free embeddable calculators for real estate blogs, agent sites, and educational platforms.",
+    description: `${EMBEDDABLE_COUNT} free embeddable calculators for real estate blogs, agent sites, and educational platforms.`,
     url: "/embed",
     type: "website",
     images: [
@@ -57,7 +56,7 @@ export default function EmbedHubPage() {
           </h1>
           <p className="text-base text-muted-foreground mt-3 leading-relaxed max-w-2xl">
             Real estate bloggers, agents, course creators, and finance writers:
-            grab the iframe code below and drop any of our 14 free
+            grab the iframe code below and drop any of our {EMBEDDABLE_COUNT} free
             calculators on your site. Free to use forever. No signup, no
             attribution required beyond the small &quot;Powered by TrueCap&quot;
             footer (which links back to us — so you get a free calculator,
@@ -66,7 +65,7 @@ export default function EmbedHubPage() {
 
           <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
             <div className="rounded-xl border border-border bg-card p-3">
-              <p className="font-bold text-foreground">14 calculators</p>
+              <p className="font-bold text-foreground">{EMBEDDABLE_COUNT} calculators</p>
               <p className="text-xs text-muted-foreground mt-0.5">
                 Cap rate, CoC, DSCR, BRRRR, more
               </p>

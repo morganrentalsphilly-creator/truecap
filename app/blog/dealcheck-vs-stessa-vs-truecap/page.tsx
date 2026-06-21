@@ -272,7 +272,7 @@ export default function DealCheckVsStessaVsTrueCapPost() {
                 portfolio rollup across saved deals, tax-strategy
                 modeling with depreciation and bracket-aware after-tax
                 cash flow, sensitivity grid (rent ±10%, vacancy ±5pp,
-                rate ±1pp), max allowable offer solver, Pro Deal Score
+                rate ±1pp), max allowable offer solver, Deal Score
                 (0-100) with subscore breakdown, address auto-fill via
                 authoritative open data sources you can audit.
               </li>
@@ -410,7 +410,7 @@ export default function DealCheckVsStessaVsTrueCapPost() {
               <li>
                 <strong>&quot;I want a plain-English verdict, not just
                 metrics.&quot;</strong> TrueCap — Strong / Solid /
-                Mixed / Marginal / Negative tier with a Pro Deal Score
+                Mixed / Marginal / Negative tier with a Deal Score
                 breakdown.
               </li>
               <li>

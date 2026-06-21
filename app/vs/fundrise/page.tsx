@@ -54,7 +54,7 @@ const MATRIX: Row[] = [
   { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", fundrise: "Not applicable (no individual property)", winner: "truecap" },
   { feature: "10-year projection", truecap: "Pro — per-property rent + expense + appreciation", fundrise: "Fund-level forward returns (historical 8-12%)", winner: "tie" },
   { feature: "Tax strategy modeling", truecap: "Pro — depreciation + interest + after-tax CF + 1031", fundrise: "K-1 / 1099 distributions; some depreciation pass-through", winner: "truecap" },
-  { feature: "Deal score + verdict", truecap: "Pro — 0-100 score + plain-English verdict", fundrise: "Not applicable", winner: "truecap" },
+  { feature: "Deal score + verdict", truecap: "Free — 0-100 score + plain-English verdict", fundrise: "Not applicable", winner: "truecap" },
   { feature: "Minimum to start", truecap: "Down payment on a whole property (~$20-50k)", fundrise: "$10 (Starter), $1k+ for higher tiers", winner: "fundrise" },
   { feature: "Time commitment", truecap: "Active — you source, underwrite, close, manage (or hire)", fundrise: "Passive — Fundrise allocates capital", winner: "fundrise" },
   { feature: "Liquidity", truecap: "Low — sale takes months", fundrise: "Limited — quarterly redemption windows with potential gates", winner: "fundrise" },

@@ -569,7 +569,7 @@ const ENTRIES: Entry[] = [
   {
     date: "2026-05-18",
     category: "Feature",
-    title: "Deal Score + AI verdict (Pro)",
+    title: "Deal Score + AI verdict (free)",
     description:
       "Every analyzed property gets a 0-100 score with risk level (Conservative / Balanced / Aggressive / High Risk) and a plain-English explanation of why the deal scored where it did.",
   },

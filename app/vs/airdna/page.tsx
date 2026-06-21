@@ -54,7 +54,7 @@ const MATRIX: Row[] = [
   { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", airdna: "Not modeled", winner: "truecap" },
   { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", airdna: "Forward STR revenue forecast", winner: "tie" },
   { feature: "Tax strategy modeling", truecap: "Pro — depreciation + interest + after-tax CF", airdna: "Not modeled", winner: "truecap" },
-  { feature: "Deal score + verdict", truecap: "Pro — 0-100 score + plain-English verdict", airdna: "Property-level investibility score", winner: "tie" },
+  { feature: "Deal score + verdict", truecap: "Free — 0-100 score + plain-English verdict", airdna: "Property-level investibility score", winner: "tie" },
   { feature: "STR revenue projection (ADR + occupancy)", truecap: "Editable input only", airdna: "Yes — best-in-class market data", winner: "airdna" },
   { feature: "Comparable STR listings nearby", truecap: "No", airdna: "Yes — Airbnb + Vrbo comp set", winner: "airdna" },
   { feature: "Long-term rent baseline", truecap: "HUD Fair Market Rent", airdna: "Not the focus", winner: "truecap" },

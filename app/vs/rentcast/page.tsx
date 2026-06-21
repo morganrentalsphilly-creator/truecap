@@ -54,7 +54,7 @@ const MATRIX: Row[] = [
   { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", rentcast: "Not modeled", winner: "truecap" },
   { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", rentcast: "Not modeled", winner: "truecap" },
   { feature: "Tax strategy modeling", truecap: "Pro — depreciation + interest + after-tax CF", rentcast: "Not modeled", winner: "truecap" },
-  { feature: "Deal score + verdict", truecap: "Pro — 0-100 score with subscore breakdown", rentcast: "Not applicable", winner: "truecap" },
+  { feature: "Deal score + verdict", truecap: "Free — 0-100 score with subscore breakdown", rentcast: "Not applicable", winner: "truecap" },
   { feature: "Rent comp data", truecap: "HUD Fair Market Rent (county-level, gov-published)", rentcast: "Yes — listings-based comps with addresses", winner: "rentcast" },
   { feature: "Property value estimate", truecap: "Purchase price as user input", rentcast: "Yes — automated valuation model", winner: "rentcast" },
   { feature: "API access for developers", truecap: "No", rentcast: "Yes — REST API for rent + value", winner: "rentcast" },

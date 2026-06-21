@@ -55,7 +55,7 @@ const MATRIX: Row[] = [
   { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", buildium: "Not modeled", winner: "truecap" },
   { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", buildium: "Not modeled", winner: "truecap" },
   { feature: "Tax strategy modeling", truecap: "Pro — depreciation + interest + after-tax CF", buildium: "Not modeled", winner: "truecap" },
-  { feature: "Deal score + verdict", truecap: "Pro — 0-100 score + plain-English verdict", buildium: "Not applicable", winner: "truecap" },
+  { feature: "Deal score + verdict", truecap: "Free — 0-100 score + plain-English verdict", buildium: "Not applicable", winner: "truecap" },
   { feature: "Address auto-fill (rent/rate/tax)", truecap: "Yes — HUD + FRED + state property tax", buildium: "Not applicable", winner: "truecap" },
   { feature: "Tenant + lease management at scale", truecap: "No", buildium: "Yes — 50-5000 unit support", winner: "buildium" },
   { feature: "Accounting (GL, P&L, balance sheet)", truecap: "No", buildium: "Yes — full PM-grade accounting", winner: "buildium" },

@@ -4,9 +4,19 @@ import { MARKET_CITIES } from "@/lib/markets/cities";
 import { GLOSSARY } from "@/lib/glossary";
 import { STATES } from "@/lib/states";
 import { getSiteUrl } from "@/lib/site-url";
+import { CALCULATOR_REGISTRY } from "@/lib/calculator-registry";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const siteUrl = getSiteUrl();
+
+  // Calculator tool pages — derived from lib/calculator-registry.ts (the single
+  // source of truth) so the sitemap can never drift from /tools again.
+  const toolUrls: MetadataRoute.Sitemap = CALCULATOR_REGISTRY.map((c) => ({
+    url: `${siteUrl}/tools/${c.slug}`,
+    lastModified: new Date(),
+    changeFrequency: "monthly" as const,
+    priority: 0.8,
+  }));
 
   // Per-glossary-term pages — one URL per term in lib/glossary.ts.
   // 30+ pages ranking for "what is X" / "X definition" long-tail queries.
@@ -85,90 +95,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly",
       priority: 0.7,
     },
-    {
-      url: `${siteUrl}/tools/cap-rate-calculator`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${siteUrl}/tools/cash-on-cash-calculator`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${siteUrl}/tools/brrrr-calculator`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${siteUrl}/tools/1-percent-rule-calculator`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${siteUrl}/tools/rehab-cost-estimator`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${siteUrl}/tools/dscr-calculator`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${siteUrl}/tools/noi-calculator`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${siteUrl}/tools/mortgage-payment-calculator`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${siteUrl}/tools/gross-rent-multiplier-calculator`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${siteUrl}/tools/break-even-calculator`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${siteUrl}/tools/roi-calculator`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${siteUrl}/tools/closing-cost-calculator`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${siteUrl}/tools/vacancy-rate-calculator`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${siteUrl}/tools/rental-property-tax-calculator`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
+    ...toolUrls,
     {
       url: `${siteUrl}/privacy`,
       lastModified: new Date(),

@@ -54,7 +54,7 @@ const MATRIX: Row[] = [
   { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", dealmachine: "Not modeled", winner: "truecap" },
   { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", dealmachine: "Not modeled", winner: "truecap" },
   { feature: "Tax strategy modeling", truecap: "Pro — depreciation + interest + after-tax CF", dealmachine: "Not modeled", winner: "truecap" },
-  { feature: "Deal score + verdict", truecap: "Pro — 0-100 score + plain-English verdict", dealmachine: "Not applicable", winner: "truecap" },
+  { feature: "Deal score + verdict", truecap: "Free — 0-100 score + plain-English verdict", dealmachine: "Not applicable", winner: "truecap" },
   { feature: "Address auto-fill (rent/rate/tax)", truecap: "Yes — HUD + FRED + state property tax", dealmachine: "Property data only", winner: "truecap" },
   { feature: "Driving for dollars / mobile lead capture", truecap: "No", dealmachine: "Yes — photo + instant owner lookup", winner: "dealmachine" },
   { feature: "Skip tracing (owner phone/email)", truecap: "No", dealmachine: "Yes — built-in", winner: "dealmachine" },
