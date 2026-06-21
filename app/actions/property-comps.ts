@@ -19,6 +19,11 @@ import { fetchRentCastEnrichment, type PropertyEnrichment } from "@/lib/property
 
 const CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 
+// Hard monthly cap on LIVE enrichments (each ≈ 3 RentCast API calls), to
+// guard the 1,000-calls/mo plan limit even across many paid users. Tunable
+// via env; default 300 enrichments (~900 calls), leaving headroom.
+const MONTHLY_ENRICHMENT_CAP = Number.parseInt(process.env.RENTCAST_MONTHLY_ENRICHMENT_CAP ?? "300", 10);
+
 const inputSchema = z.object({
   address: z.string().trim().min(5).max(300),
   propertyType: z.enum(["single-family", "multi-family", "owner-occupant"]).optional(),
@@ -36,6 +41,7 @@ export type PropertyCompsResult =
         | "ENTITLEMENT_REQUIRED"
         | "NOT_CONFIGURED"
         | "NOT_FOUND"
+        | "CAP_REACHED"
         | "VALIDATION_ERROR"
         | "SERVER_ERROR";
       message: string;
@@ -83,19 +89,38 @@ export async function getPropertyCompsAction(input: unknown): Promise<PropertyCo
   const key = addressKey(parsed.data.address);
   const admin = createAdminSupabaseClient();
 
-  // Cache-first.
+  // Cache-first. Read the row once; serve it if fresh, keep it as a stale
+  // fallback for the cap / fetch-failure paths below.
   const { data: cached } = await admin
     .from("property_enrichment_cache")
     .select("payload, fetched_at")
     .eq("address_key", key)
     .maybeSingle();
+  const cachedPayload = cached ? (cached as { payload: PropertyEnrichment }).payload : null;
   if (cached) {
     const fetchedAt = new Date((cached as { fetched_at: string }).fetched_at).getTime();
     if (Number.isFinite(fetchedAt) && Date.now() - fetchedAt < CACHE_TTL_MS) {
+      return { ok: true, source: "cache", enrichment: cachedPayload! };
+    }
+  }
+
+  // Monthly spend guard — a live call would consume API quota, so stop before
+  // the plan limit. Counts live enrichments per calendar month (UTC).
+  const monthKey = `rentcast_enrichments_${new Date().toISOString().slice(0, 7)}`;
+  if (Number.isFinite(MONTHLY_ENRICHMENT_CAP) && MONTHLY_ENRICHMENT_CAP > 0) {
+    const { data: counterRow } = await admin
+      .from("app_counters")
+      .select("count")
+      .eq("key", monthKey)
+      .maybeSingle();
+    const used = Number((counterRow as { count?: number } | null)?.count ?? 0);
+    if (used >= MONTHLY_ENRICHMENT_CAP) {
+      // At the cap: serve a stale cached copy if we have one, else say so.
+      if (cachedPayload) return { ok: true, source: "cache", enrichment: cachedPayload };
       return {
-        ok: true,
-        source: "cache",
-        enrichment: (cached as { payload: PropertyEnrichment }).payload,
+        ok: false,
+        code: "CAP_REACHED",
+        message: "Comps have reached this month's data limit. They'll reset at the start of next month.",
       };
     }
   }
@@ -111,12 +136,20 @@ export async function getPropertyCompsAction(input: unknown): Promise<PropertyCo
       squareFootage: parsed.data.squareFootage ?? null,
     });
   } catch {
+    if (cachedPayload) return { ok: true, source: "cache", enrichment: cachedPayload };
     return { ok: false, code: "SERVER_ERROR", message: "Couldn't reach the data provider. Try again." };
   }
 
   if (!enrichment) {
+    if (cachedPayload) return { ok: true, source: "cache", enrichment: cachedPayload };
     return { ok: false, code: "NOT_FOUND", message: "No comps found for this address." };
   }
+
+  // Count this live enrichment against the monthly cap (atomic; best-effort).
+  await admin.rpc("increment_app_counter", { counter_key: monthKey }).then(
+    () => undefined,
+    () => undefined
+  );
 
   // Upsert cache (best-effort — never fail the request on a cache write).
   await admin
