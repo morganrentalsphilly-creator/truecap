@@ -296,7 +296,7 @@ const ENTRIES: Entry[] = [
   {
     date: "2026-05-24",
     category: "Feature",
-    title: "Starter strategy templates on /dashboard/templates",
+    title: "Starter strategy templates",
     description:
       "Five prebuilt starting points — Long-term rental, House hack, FHA 3.5% owner-occupant, BRRRR, Short-term rental — each opens the template editor pre-populated with strategy-correct defaults (down %, rate, vacancy, mgmt fee, depreciation years, etc.). Customize once, save, reuse on every deal. Eliminates the blank-page problem on the templates surface.",
   },

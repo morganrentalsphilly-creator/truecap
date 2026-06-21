@@ -12,6 +12,7 @@
  */
 
 import type { Metadata } from "next";
+import { SourceMethodologyBox } from "@/components/marketing/source-methodology-box";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowRight, Check, X } from "lucide-react";
@@ -193,6 +194,12 @@ export default async function StatePage({
             </div>
           ))}
         </section>
+
+        <SourceMethodologyBox
+          className="mt-3"
+          sources={["Tax Foundation (tax rates)", "State landlord-tenant statutes"]}
+          updated="June 2026"
+        />
 
         {/* Pros + Cons */}
         <section className="mt-12 grid gap-6 lg:grid-cols-2">

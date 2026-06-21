@@ -67,7 +67,7 @@ const USE_CASES: { icon: typeof Calculator; title: string; body: string }[] = [
   {
     icon: Wallet,
     title: "Hard-money initial rate, refi rate after",
-    body: "The 'BRRRR' starter template (/dashboard/templates) seeds 9.5% hard-money rate, 15% down, higher CapEx + maint for the value-add property. Re-run at your refi rate after stabilization to see the long-term picture.",
+    body: "The 'BRRRR' starter template (in Templates) seeds 9.5% hard-money rate, 15% down, higher CapEx + maint for the value-add property. Re-run at your refi rate after stabilization to see the long-term picture.",
   },
 ];
 
@@ -158,7 +158,7 @@ export default function ForBrrrrPage() {
               "Underwrite the buy. Use the calculator with the 'BRRRR' starter template (hard-money rate, 15% down, higher reserves).",
               "Open the BRRRR analyzer tab (Pro): plug in purchase + rehab + ARV. See your projected refi loan amount, cash recovered, and stabilized cash flow.",
               "Stress-test the ARV. If ARV comes in 10% under expectation, does the deal still work? The sensitivity grid will tell you.",
-              "Save the deal. Compare BRRRR vs straight buy-and-hold in /dashboard/compare to see which strategy returns more capital on this property.",
+              "Save the deal. Compare BRRRR vs straight buy-and-hold in Compare Deals to see which strategy returns more capital on this property.",
             ].map((step, i) => (
               <li key={i} className="flex items-start gap-3">
                 <span className="inline-flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-extrabold tabular-nums">

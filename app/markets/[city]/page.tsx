@@ -14,6 +14,7 @@
  */
 
 import type { Metadata } from "next";
+import { SourceMethodologyBox } from "@/components/marketing/source-methodology-box";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowRight, Calculator, MapPin, TrendingUp } from "lucide-react";
@@ -237,6 +238,11 @@ export default async function MarketCityPage({
           <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
             Rent is HUD Fair Market Rent where available, otherwise a market estimate; price is a market estimate. Cap-rate and tax are the defaults TrueCap applies — enter a specific address for exact, auto-filled numbers.
           </p>
+          <SourceMethodologyBox
+            className="mt-4"
+            sources={["HUD Fair Market Rent", "FRED 30-yr mortgage rate", "Tax Foundation (property tax)"]}
+            updated="June 2026"
+          />
         </section>
 
         {/* Why invest here */}

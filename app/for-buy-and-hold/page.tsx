@@ -163,7 +163,7 @@ export default function ForBuyAndHoldPage() {
               "Hit Calculate — cap rate, CoC, DSCR, monthly cash flow appear in 1 second.",
               "Pro: open the 10-year projection to see how cash flow grows. Open Tax Strategy for after-tax CF.",
               "Pro: stress-test in the Sensitivity grid before you write the offer.",
-              "Save the deal. The portfolio rollup on /dashboard/saved-analyses shows your aggregate cash flow across everything you're considering.",
+              "Save the deal. The portfolio rollup in My Deals shows your aggregate cash flow across everything you're considering.",
             ].map((step, i) => (
               <li key={i} className="flex items-start gap-3">
                 <span className="inline-flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-extrabold tabular-nums">

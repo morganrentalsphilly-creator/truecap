@@ -144,6 +144,15 @@ export function ReadOnlyAnalysisView({ values, result }: ReadOnlyAnalysisViewPro
           Try TrueCap free →
         </span>
       </Link>
+
+      {/* Advice guardrail — this page is shared to lenders/partners/clients and
+          shows verdict + recommendation language, but has no SiteFooter. */}
+      <p className="mt-4 px-2 text-center text-[11px] leading-relaxed text-muted-foreground">
+        This shared analysis is an automated estimate for screening only — not an
+        appraisal, and not financial, tax, or investment advice. Figures depend on
+        assumptions that may be out of date; verify independently before making any
+        decision.
+      </p>
     </div>
   );
 }

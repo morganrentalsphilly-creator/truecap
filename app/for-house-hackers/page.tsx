@@ -57,7 +57,7 @@ const USE_CASES: { icon: typeof Calculator; title: string; body: string }[] = [
   {
     icon: Key,
     title: "FHA 3.5% down — modeled correctly",
-    body: "Set down payment to 3.5%, mark insurance % to include MIP (~0.55-0.85% annual). The starter 'FHA 3.5% owner-occupant' template on /dashboard/templates pre-fills the right defaults.",
+    body: "Set down payment to 3.5%, mark insurance % to include MIP (~0.55-0.85% annual). The starter 'FHA 3.5% owner-occupant' template in Templates pre-fills the right defaults.",
   },
   {
     icon: Users,
@@ -154,7 +154,7 @@ export default function ForHouseHackersPage() {
           </h2>
           <ol className="mt-4 space-y-3">
             {[
-              "Open /dashboard/templates (Pro) and clone the 'House hack' or 'FHA 3.5% owner-occupant' starter — the defaults are already shaped for your strategy.",
+              "Open Templates (Pro) and clone the 'House hack' or 'FHA 3.5% owner-occupant' starter — the defaults are already shaped for your strategy.",
               "Paste the listing address (the engine handles 2-4 unit multi-family automatically).",
               "Set per-unit rent for the units you'll rent out. Leave your-unit rent at $0.",
               "Hit Calculate — see your monthly out-of-pocket (the gap between rent collected and total carrying cost). Owner-occupant scoring uses the right break-even bands.",
