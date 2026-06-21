@@ -1,0 +1,70 @@
+/**
+ * Geo identifiers for market cities — the county HUD uses to resolve
+ * Fair Market Rent. The build-market-rents script matches each city to
+ * a HUD entity by county name (within its state's FMR data), so this is
+ * the bridge between MarketCity.slug and a real HUD lookup.
+ *
+ * `county` is the HUD county/independent-city name WITHOUT the "County"
+ * suffix (e.g. "Franklin", "Baltimore city"). If a name doesn't match,
+ * the script skips that city and the page keeps its estimate range —
+ * a wrong/missing county degrades gracefully, it never breaks the page.
+ *
+ * `hudZip` (optional) is a representative central ZIP; reserved for
+ * future ZIP-level Small Area FMR precision (not required for the
+ * county-level snapshot).
+ */
+
+export type CityGeo = { county: string; hudZip?: string };
+
+export const CITY_GEO: Record<string, CityGeo> = {
+  columbus: { county: "Franklin" },
+  cincinnati: { county: "Hamilton" },
+  pittsburgh: { county: "Allegheny" },
+  baltimore: { county: "Baltimore city" },
+  "st-louis": { county: "St. Louis city" },
+  milwaukee: { county: "Milwaukee" },
+  "san-antonio": { county: "Bexar" },
+  jacksonville: { county: "Duval" },
+  birmingham: { county: "Jefferson" },
+  louisville: { county: "Jefferson" },
+  nashville: { county: "Davidson" },
+  raleigh: { county: "Wake" },
+  richmond: { county: "Richmond city" },
+  columbia: { county: "Richland" },
+  greenville: { county: "Greenville" },
+  "oklahoma-city": { county: "Oklahoma" },
+  tulsa: { county: "Tulsa" },
+  omaha: { county: "Douglas" },
+  "des-moines": { county: "Polk" },
+  minneapolis: { county: "Hennepin" },
+  buffalo: { county: "Erie" },
+  rochester: { county: "Monroe" },
+  orlando: { county: "Orange" },
+  tucson: { county: "Pima" },
+  "grand-rapids": { county: "Kent" },
+  austin: { county: "Travis" },
+  "fort-worth": { county: "Tarrant" },
+  denver: { county: "Denver" },
+  "colorado-springs": { county: "El Paso" },
+  "salt-lake-city": { county: "Salt Lake" },
+  boise: { county: "Ada" },
+  albuquerque: { county: "Bernalillo" },
+  "las-vegas": { county: "Clark" },
+  sacramento: { county: "Sacramento" },
+  portland: { county: "Multnomah" },
+  chicago: { county: "Cook" },
+  madison: { county: "Dane" },
+  dayton: { county: "Montgomery" },
+  akron: { county: "Summit" },
+  toledo: { county: "Lucas" },
+  lexington: { county: "Fayette" },
+  knoxville: { county: "Knox" },
+  chattanooga: { county: "Hamilton" },
+  huntsville: { county: "Madison" },
+  "little-rock": { county: "Pulaski" },
+  "new-orleans": { county: "Orleans" },
+  wichita: { county: "Sedgwick" },
+  greensboro: { county: "Guilford" },
+  "winston-salem": { county: "Forsyth" },
+  savannah: { county: "Chatham" },
+};

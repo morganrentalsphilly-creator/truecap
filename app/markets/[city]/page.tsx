@@ -25,6 +25,7 @@ import {
   getMarketCity,
   getMarketCityParams,
 } from "@/lib/markets/cities";
+import { HUD_RENTS } from "@/lib/markets/hud-rents";
 import { getCapRateBenchmark } from "@/lib/market-benchmarks";
 import { getStatePropertyTaxPct } from "@/lib/property-enrichment/state-property-tax";
 import { CITY_STRATEGY_COMBOS } from "@/lib/city-strategy-combos";
@@ -107,6 +108,14 @@ export default async function MarketCityPage({
   const taxRaw = getStatePropertyTaxPct(data.stateCode);
   const taxPct = typeof taxRaw === "number" ? `${taxRaw.toFixed(2)}%` : "varies";
 
+  // Prefer real HUD Fair Market Rent (from build-market-rents) over the
+  // hand-authored estimate range; fall back to the estimate when absent.
+  const hud = HUD_RENTS[data.slug];
+  const rentDisplay = hud
+    ? `$${hud.rent2br.toLocaleString("en-US")}–$${hud.rent3br.toLocaleString("en-US")}/mo`
+    : data.typicalRent;
+  const rentSub = hud ? `HUD FMR · 2–3BR · ${hud.year}` : "est., SFR / small multi";
+
   // Internal links: any existing city+strategy combos for this city.
   const cityCombos = CITY_STRATEGY_COMBOS.filter((c) => c.citySlug === data.slug);
 
@@ -158,7 +167,7 @@ export default async function MarketCityPage({
         name: `What's the average rent for a rental in ${data.name}?`,
         acceptedAnswer: {
           "@type": "Answer",
-          text: `A typical single-family or small-multi rental in ${data.name} rents for roughly ${data.typicalRent} (estimate; varies by neighborhood, size, and condition). TrueCap auto-fills HUD Fair Market Rent for the exact address you enter.`,
+          text: `A typical rental in ${data.name} runs about ${rentDisplay}${hud ? " (HUD Fair Market Rent, 2–3BR)" : " (estimate; varies by neighborhood, size, and condition)"}. TrueCap auto-fills HUD Fair Market Rent for the exact address you enter.`,
         },
       },
       {
@@ -211,8 +220,8 @@ export default async function MarketCityPage({
             </div>
             <div>
               <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Typical rent</p>
-              <p className="mt-1 text-lg font-extrabold text-foreground">{data.typicalRent}</p>
-              <p className="text-[11px] text-muted-foreground">est., SFR / small multi</p>
+              <p className="mt-1 text-lg font-extrabold text-foreground">{rentDisplay}</p>
+              <p className="text-[11px] text-muted-foreground">{rentSub}</p>
             </div>
             <div>
               <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Typical price</p>
@@ -226,7 +235,7 @@ export default async function MarketCityPage({
             </div>
           </div>
           <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
-            Rent and price are market estimates for context. Cap-rate and tax figures are the defaults TrueCap applies — enter a specific address for exact, auto-filled numbers.
+            Rent is HUD Fair Market Rent where available, otherwise a market estimate; price is a market estimate. Cap-rate and tax are the defaults TrueCap applies — enter a specific address for exact, auto-filled numbers.
           </p>
         </section>
 
