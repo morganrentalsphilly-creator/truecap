@@ -27,6 +27,7 @@ const FOOTER_COLS: Array<{
     links: [
       { label: "Free analyzer", href: "/" },
       { label: "Pricing", href: "/pricing" },
+      { label: "Why TrueCap", href: "/why-truecap" },
       { label: "All free tools", href: "/tools" },
       { label: "Blog", href: "/blog" },
       // NOTE: "Compare TrueCap" link to /vs hub intentionally removed.

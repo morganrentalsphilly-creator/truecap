@@ -16,6 +16,7 @@
 
 import { CheckCircle2 } from "lucide-react";
 import { getDealsAnalyzedCount } from "@/lib/stats/deals-analyzed-count";
+import { getTotalAnalysesRunCount } from "@/lib/stats/total-analyses-run";
 
 type Props = {
   /** Time window for the count (default: rolling 7 days). */
@@ -28,14 +29,24 @@ type Props = {
   minimum?: number;
   /** Override the label suffix (default: 'deals analyzed this week'). */
   labelSuffix?: string;
+  /**
+   * Count source. "saved" = saved_analyses rows (a fraction of usage).
+   * "runs" = total analyses RUN (PostHog analyzer_started) — the honest, much
+   * larger figure; needs POSTHOG_API_KEY + POSTHOG_PROJECT_ID configured.
+   */
+  source?: "saved" | "runs";
 };
 
 export async function DealsAnalyzedTicker({
   window = "7d",
   minimum = 25,
   labelSuffix,
+  source = "saved",
 }: Props) {
-  const count = await getDealsAnalyzedCount(window);
+  const count =
+    source === "runs"
+      ? await getTotalAnalysesRunCount()
+      : await getDealsAnalyzedCount(window);
 
   // Hide on error or below-threshold. Caller renders no fallback —
   // the homepage already has 4 static trust stat tiles, so a missing
@@ -45,7 +56,7 @@ export async function DealsAnalyzedTicker({
   const formatted = count.toLocaleString("en-US");
   const suffix =
     labelSuffix ??
-    (window === "all"
+    (source === "runs" || window === "all"
       ? "deals analyzed on TrueCap"
       : window === "30d"
         ? "deals analyzed in the last 30 days"

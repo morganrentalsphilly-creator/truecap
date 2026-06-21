@@ -26,13 +26,7 @@ import type { Metadata } from "next";
 import { Header } from "@/components/investcalc/header";
 import { InvestCalcPage } from "@/components/investcalc/investcalc-page";
 import { MarketingHero } from "@/components/marketing/marketing-hero";
-import {
-  HomepageFaq,
-  HowItWorks,
-  PreCalculatorCta,
-  SocialProof,
-  VsCompetitors,
-} from "@/components/marketing/landing-sections";
+import { HowItWorks, SocialProof } from "@/components/marketing/landing-sections";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { TrackLandingView } from "@/components/analytics/track-landing-view";
 import { StickyConversionBar } from "@/components/marketing/sticky-conversion-bar";
@@ -170,17 +164,15 @@ export default function Home() {
           Supabase session in the rare case a signed-in user reaches the
           static page (e.g. the proxy cookie check missed). */}
       <Header initialUser={null} initialEntitlements={null} />
-      {/* Full landing page experience — this page only serves cold
-          visitors (signed-in users are rewritten to /home-authed before
-          rendering). Order mirrors the buying journey: hero → how it
-          works → why us vs spreadsheet → social proof → final-push CTA
-          → the calculator. */}
+      {/* Minimalist landing — this page only serves cold visitors (signed-in
+          users are rewritten to /home-authed). Stripped to the essentials for a
+          clean, high-converting first screen: hero → how it works → social
+          proof → the calculator. The competitor comparison + FAQ moved to a
+          dedicated /why-truecap page (linked in the footer) so they keep their
+          SEO + persuasion value without crowding the hero. */}
       <MarketingHero />
       <HowItWorks />
-      <VsCompetitors />
       <SocialProof />
-      <HomepageFaq />
-      <PreCalculatorCta />
       {/* Anonymous-visitor entitlement props — keep in lockstep with
           the user == null branch in app/home-authed/page.tsx.
           NOTE: canUseDealScore is intentionally TRUE for everyone — the

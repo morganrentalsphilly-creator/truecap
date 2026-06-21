@@ -111,7 +111,7 @@ export function MarketingHero() {
             all-time total clears it sooner AND reads as a bigger, stronger
             number. Switch back to "7d" once weekly volume reliably clears 25. */}
         <div className="mt-5 text-center">
-          <DealsAnalyzedTicker window="all" minimum={1} />
+          <DealsAnalyzedTicker source="runs" minimum={1} />
         </div>
 
         {/* Mock-up screenshot — pure CSS, lightweight.
@@ -122,35 +122,6 @@ export function MarketingHero() {
             it. The card auto-shrinks fine on narrow viewports. */}
         <HeroProductMock />
 
-        {/* "Built for" — promoted from inline body text to a proper
-            5-button row. These are audience self-selection links and
-            high-converting destinations for paid traffic; burying them as
-            inline links was undervaluing their role. Expanded from 3 to
-            5 to surface house-hackers and BRRRR operators (both already
-            had persona landing pages but were hidden in the footer
-            nav). */}
-        <div className="mt-12 text-center">
-          <p className="mb-3 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
-            Built for
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
-            {[
-              { href: "/for-buy-and-hold", label: "Buy-and-hold" },
-              { href: "/for-house-hackers", label: "House hackers" },
-              { href: "/for-brrrr", label: "BRRRR operators" },
-              { href: "/for-flippers", label: "Fix & flippers" },
-              { href: "/for-agents", label: "Agents" },
-            ].map((persona) => (
-              <Link
-                key={persona.href}
-                href={persona.href}
-                className="inline-flex h-10 items-center gap-1.5 rounded-xl border border-border bg-card px-3.5 text-sm font-semibold text-foreground/85 transition hover:border-primary/40 hover:bg-primary/5 hover:text-primary sm:h-11 sm:px-4"
-              >
-                {persona.label}
-              </Link>
-            ))}
-          </div>
-        </div>
       </div>
     </section>
   );
