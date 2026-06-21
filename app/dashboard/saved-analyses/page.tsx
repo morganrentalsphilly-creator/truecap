@@ -110,6 +110,7 @@ function mapSavedRow(row: SavedAnalysisRow): SavedAnalysisListItem | null {
     score: fresh ? fresh.score : Number.isFinite(parsedScore) ? parsedScore : null,
     recommendation: fresh ? fresh.recommendation : storedRecommendation,
     riskLevel: fresh ? fresh.riskLevel : storedRiskLevel,
+    breakdown: fresh ? fresh.breakdown : null,
     createdAt: row.created_at,
     status: row.is_completed ? "completed" : row.is_archived ? "archived" : "active",
   };

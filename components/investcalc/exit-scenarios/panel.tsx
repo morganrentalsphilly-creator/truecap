@@ -8,6 +8,7 @@ import { formatCurrency } from "@/components/investcalc/analysis-panels/shared/f
 import { Skeleton } from "@/components/ui/skeleton";
 import { ExitScenarioCharts } from "@/components/investcalc/exit-scenarios/charts";
 import { ExitScenarioSummaryCards } from "@/components/investcalc/exit-scenarios/summary-cards";
+import { ReturnsExplainer } from "@/components/investcalc/exit-scenarios/returns-explainer";
 import { ExitScenarioTable } from "@/components/investcalc/exit-scenarios/table";
 import {
   DEFAULT_APPRECIATION_RATE,
@@ -89,6 +90,11 @@ export function ExitScenariosPanel({
   return (
     <div className="space-y-5">
       <ExitScenarioSummaryCards years={years} />
+      <ReturnsExplainer
+        years={years}
+        appreciationRate={source.input.appreciationRate}
+        sellingCostPct={source.input.sellingCostPct}
+      />
       <PanelInsight>{buildExitInsight(years)}</PanelInsight>
       <SnapshotStatusCard
         title="Exit Scenarios"

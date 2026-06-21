@@ -38,6 +38,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ScoreBreakdown } from "@/components/investcalc/score-breakdown";
+import type { DealScoreBreakdown } from "@/lib/deal-score";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
@@ -79,6 +81,8 @@ export type CompareDealViewModel = {
   recommendation: StoredRecommendation | null;
   riskLevel: StoredRiskLevel | null;
   scoringComplete: boolean;
+  /** Per-factor score breakdown for the "Why this score" popover. */
+  breakdown?: DealScoreBreakdown | null;
   metrics: Record<string, number | null>;
   signal: Signal | null;
   assumptions: DealAssumptions;
@@ -1110,6 +1114,18 @@ export function CompareDealsClient({
                         Incomplete
                       </Badge>
                     )}
+                    {deal.breakdown && deal.score != null ? (
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <button type="button" className="text-[11px] font-semibold text-primary underline-offset-2 hover:underline">
+                            Why?
+                          </button>
+                        </PopoverTrigger>
+                        <PopoverContent align="start" className="w-auto p-3">
+                          <ScoreBreakdown breakdown={deal.breakdown} score={deal.score} />
+                        </PopoverContent>
+                      </Popover>
+                    ) : null}
                     {isBalancedDeal && (
                       <Badge className="rounded-full border border-success/30 bg-success/10 px-2.5 py-1 text-xs font-bold text-success">
                         Balanced

@@ -160,6 +160,7 @@ function mapDeal(row: SavedAnalysisRow): CompareDealViewModel {
     recommendation,
     riskLevel,
     scoringComplete,
+    breakdown: recomputed ? recomputed.breakdown : null,
     metrics,
     signal,
     assumptions,

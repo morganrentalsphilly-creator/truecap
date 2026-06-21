@@ -58,6 +58,7 @@ import {
   computeDealScore,
   DEAL_STRATEGY_STORAGE_KEY,
   type DealStrategy,
+  type DealScoreBreakdown,
 } from "@/lib/deal-score";
 import type { ReportData } from "@/lib/pdf-generator";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
@@ -68,6 +69,8 @@ import {
   type ExitScenarioYear,
 } from "@/lib/exit-scenarios";
 import { buildAutoVerdict } from "@/lib/verdict";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ScoreBreakdown } from "@/components/investcalc/score-breakdown";
 
 type SavedSignal = "strong-buy" | "buy" | "neutral" | "risky" | "avoid";
 type SavedPropertyType = "single-family" | "multi-family" | "owner-occupant";
@@ -89,6 +92,8 @@ export type SavedAnalysisListItem = {
   score: number | null;
   recommendation: "Strong Buy" | "Buy" | "Neutral" | "Risky" | "Avoid";
   riskLevel: StoredRiskLevel;
+  /** Per-factor score breakdown for the "Why this score" popover. */
+  breakdown?: DealScoreBreakdown | null;
   createdAt: string;
   status: "active" | "completed" | "archived";
 };
@@ -1215,6 +1220,16 @@ export function SavedAnalysesPage({
                       <div className="mt-1 flex flex-wrap items-center gap-1.5">
                         {getStatusBadge(item)}
                         <Badge className={cn("rounded-full border text-xs font-semibold", getSignalClasses(signal))}>{SIGNAL_LABELS[signal]}</Badge>
+                        {item.breakdown && item.score != null ? (
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <button type="button" className="text-[11px] font-semibold text-primary underline-offset-2 hover:underline">Why?</button>
+                            </PopoverTrigger>
+                            <PopoverContent align="start" className="w-auto p-3">
+                              <ScoreBreakdown breakdown={item.breakdown} score={item.score} />
+                            </PopoverContent>
+                          </Popover>
+                        ) : null}
                       </div>
                       <p className="mt-1 text-xs text-muted-foreground">{getTypeLabel(item.propertyType)}</p>
                     </div>
@@ -1382,7 +1397,19 @@ export function SavedAnalysesPage({
                         </div>
                       </td>
                       <td className="pr-2">
-                        <Badge className={cn("rounded-full border text-xs font-semibold", getSignalClasses(signal))}>{SIGNAL_LABELS[signal]}</Badge>
+                        <span className="inline-flex items-center gap-1.5">
+                          <Badge className={cn("rounded-full border text-xs font-semibold", getSignalClasses(signal))}>{SIGNAL_LABELS[signal]}</Badge>
+                          {item.breakdown && item.score != null ? (
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <button type="button" className="text-[11px] font-semibold text-primary underline-offset-2 hover:underline">Why?</button>
+                              </PopoverTrigger>
+                              <PopoverContent align="end" className="w-auto p-3">
+                                <ScoreBreakdown breakdown={item.breakdown} score={item.score} />
+                              </PopoverContent>
+                            </Popover>
+                          ) : null}
+                        </span>
                       </td>
                       <td className={cn("font-semibold", (item.netCashFlowMonthly ?? 0) >= 0 ? "text-success" : "text-[var(--metric-negative)]")}>{toMonthCashFlow(item.netCashFlowMonthly)}</td>
                       <td className={cn("font-semibold", (item.cocReturnPct ?? 0) >= 0 ? "text-success" : "text-[var(--metric-negative)]")}>{toPercent(item.cocReturnPct)}</td>

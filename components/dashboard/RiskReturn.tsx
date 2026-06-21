@@ -45,6 +45,12 @@ const RETURN_METRICS: { id: ReturnMetricId; label: string; axis: string }[] = [
   { id: "roi", label: "10-yr ROI %", axis: "10-yr ROI %" },
 ];
 
+/** "Good return" threshold per metric — draws the vertical quadrant divider.
+ *  CoC ≥ 8% is a solid 2026 deal; 100% cumulative 10-yr ROI ≈ a ~7% CAGR. */
+const RETURN_THRESHOLD: Record<ReturnMetricId, number> = { coc: 8, roi: 100 };
+/** Lender DSCR bar — the horizontal quadrant divider (matches the verdict copy). */
+const DSCR_LENDER_BAR = 1.25;
+
 // Concrete colors per OS theme — recharts sets SVG presentation attributes,
 // which don't resolve CSS var(), so we pick literals based on the theme.
 const CHART_COLORS = {
@@ -58,6 +64,8 @@ type PlottedPoint = {
   ret: number;
   dscr: number;
   size: number;
+  score?: number;
+  cashFlow?: number;
 };
 
 function ChartTooltip({
@@ -91,6 +99,20 @@ function ChartTooltip({
         <span className="font-semibold text-muted-foreground">DSCR:</span>{" "}
         <span className="text-foreground">{p.dscr.toLocaleString("en-US", { maximumFractionDigits: 2 })}</span>
       </div>
+      {p.cashFlow != null ? (
+        <div className="mt-1">
+          <span className="font-semibold text-muted-foreground">Cash flow:</span>{" "}
+          <span className="text-foreground">
+            {p.cashFlow < 0 ? "-" : "+"}${Math.abs(Math.round(p.cashFlow)).toLocaleString("en-US")}/mo
+          </span>
+        </div>
+      ) : null}
+      {p.score != null ? (
+        <div className="mt-1">
+          <span className="font-semibold text-muted-foreground">Deal Score:</span>{" "}
+          <span className="text-foreground">{Math.round(p.score)}/100</span>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -110,7 +132,7 @@ export function RiskReturn({ deals = [] }: { deals?: RiskReturnDeal[] }) {
         // A point only plots when it has BOTH the active return metric AND a
         // DSCR — otherwise its position on one axis would be fabricated.
         if (ret == null || d.dscr == null) return null;
-        return { name: d.name, type: d.type, ret, dscr: d.dscr, size: d.size };
+        return { name: d.name, type: d.type, ret, dscr: d.dscr, size: d.size, score: d.score, cashFlow: d.cashFlow };
       })
       .filter((p): p is PlottedPoint => p !== null);
     return { points: plotted, excludedCount: totalDeals - plotted.length, cashCount: cash, total: totalDeals };
@@ -133,7 +155,7 @@ export function RiskReturn({ deals = [] }: { deals?: RiskReturnDeal[] }) {
         <div>
           <h3 className="font-display text-lg font-semibold">Risk vs Return</h3>
           <p className="text-sm text-muted-foreground mt-0.5">
-            One point per saved deal — up and to the right is better. Same units on each axis.
+            One point per saved deal — top-right (safe + strong return) is the target. Dashed lines mark the lender DSCR bar and a solid return.
           </p>
         </div>
         <div className="flex items-center gap-1 p-1 rounded-lg bg-muted" role="tablist" aria-label="Return metric">
@@ -156,7 +178,17 @@ export function RiskReturn({ deals = [] }: { deals?: RiskReturnDeal[] }) {
 
       {points.length > 0 ? (
         <>
-          <div className="h-[260px] -ml-2" role="img" aria-label={summary}>
+          <div className="relative h-[260px] -ml-2" role="img" aria-label={summary}>
+            {/* Quadrant orientation — best (top-right) and worst (bottom-left).
+                pointer-events-none so they never block the chart tooltip. */}
+            <div aria-hidden className="pointer-events-none absolute inset-0 z-10">
+              <span className="absolute right-3 top-1 rounded bg-success/10 px-1.5 py-0.5 text-[10px] font-semibold text-success">
+                Target ✓
+              </span>
+              <span className="absolute bottom-9 left-10 rounded bg-destructive/10 px-1.5 py-0.5 text-[10px] font-semibold text-destructive">
+                Higher risk
+              </span>
+            </div>
             <ResponsiveContainer width="100%" height="100%">
               <ScatterChart margin={{ top: 10, right: 20, bottom: 14, left: 0 }}>
                 <CartesianGrid strokeDasharray="3 6" stroke={GRID} />
@@ -182,7 +214,22 @@ export function RiskReturn({ deals = [] }: { deals?: RiskReturnDeal[] }) {
                   label={{ value: "DSCR (safer ↑)", angle: -90, position: "insideLeft", fontSize: 11, fill: AXIS }}
                 />
                 <ZAxis type="number" dataKey="size" range={[80, 400]} />
+                {/* Break-even DSCR (faint), lender bar (labeled, horizontal
+                    divider), and the return threshold (vertical divider) — the
+                    two labeled lines split the plot into risk/return quadrants. */}
                 <ReferenceLine y={1} stroke={GRID} strokeDasharray="3 3" />
+                <ReferenceLine
+                  y={DSCR_LENDER_BAR}
+                  stroke={AXIS}
+                  strokeDasharray="5 4"
+                  label={{ value: `DSCR ${DSCR_LENDER_BAR}`, position: "insideTopLeft", fontSize: 10, fill: AXIS }}
+                />
+                <ReferenceLine
+                  x={RETURN_THRESHOLD[metric]}
+                  stroke={AXIS}
+                  strokeDasharray="5 4"
+                  label={{ value: metric === "coc" ? "8% CoC" : "100% ROI", position: "top", fontSize: 10, fill: AXIS }}
+                />
                 <Tooltip cursor={{ strokeDasharray: "3 3" }} content={<ChartTooltip metricLabel={active.axis} />} />
                 <Scatter data={points} fill={POINT} fillOpacity={0.7} />
               </ScatterChart>

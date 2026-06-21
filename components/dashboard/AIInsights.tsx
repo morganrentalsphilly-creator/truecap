@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Sparkles, Lightbulb, AlertTriangle, TrendingUp } from "lucide-react";
 
 const toneMap = {
@@ -10,6 +11,8 @@ type AIInsight = {
   title: string;
   body: string;
   tone: keyof typeof toneMap;
+  /** Optional next-step CTA — every insight should end with an action. */
+  action?: { label: string; href: string };
 };
 
 type RiskReturnInsightData = {
@@ -75,6 +78,15 @@ export function AIInsights({
               <div>
                 <div className="font-semibold text-sm">{ins.title}</div>
                 <div className="text-xs text-muted-foreground mt-0.5">{ins.body}</div>
+                {ins.action ? (
+                  <Link
+                    href={ins.action.href}
+                    prefetch={false}
+                    className="mt-1.5 inline-block text-xs font-semibold text-primary underline-offset-2 hover:underline"
+                  >
+                    {ins.action.label} →
+                  </Link>
+                ) : null}
               </div>
             </div>
           );
