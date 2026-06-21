@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { CITY_STRATEGY_COMBOS } from "@/lib/city-strategy-combos";
+import { MARKET_CITIES } from "@/lib/markets/cities";
 import { GLOSSARY } from "@/lib/glossary";
 import { STATES } from "@/lib/states";
 import { getSiteUrl } from "@/lib/site-url";
@@ -39,10 +40,21 @@ export default function sitemap(): MetadataRoute.Sitemap {
     })
   );
 
+  // Programmatic city market pages — data-driven /markets/[city] pages
+  // from lib/markets/cities.ts (excludes the bespoke static market pages,
+  // which are listed separately below).
+  const marketCityUrls: MetadataRoute.Sitemap = MARKET_CITIES.map((c) => ({
+    url: `${siteUrl}/markets/${c.slug}`,
+    lastModified: new Date(),
+    changeFrequency: "monthly" as const,
+    priority: 0.7,
+  }));
+
   return [
     ...glossaryUrls,
     ...stateUrls,
     ...cityStrategyUrls,
+    ...marketCityUrls,
     {
       url: `${siteUrl}/states`,
       lastModified: new Date(),
