@@ -148,7 +148,7 @@ export function WhyNotSpreadsheet() {
 const PROOF_QUOTES = [
   {
     quote:
-      "I used to spend 2 hours per deal in a spreadsheet. Now I underwrite at the showing. Closed three more deals this quarter because I could move faster.",
+      "I used to spend 2 hours per deal in a spreadsheet. Now I underwrite at the showing.",
     name: "Jordan M.",
     role: "Buy-and-hold investor · 18 doors",
   },
@@ -364,24 +364,32 @@ const HOMEPAGE_FAQS: { q: string; a: string }[] = [
     a: "Yes. The cash-flow analyzer — cap rate, CoC, DSCR, monthly cash flow, address auto-fill, the 0–100 Deal Score, and a plain-English verdict — is free forever and unlimited. No card required. Pro adds save/compare deals, lender-ready PDFs, and the advanced modules (BRRRR + Fix-and-Flip, Sensitivity, 10-year projections, tax strategy, exit scenarios).",
   },
   {
-    q: "How is this different from a spreadsheet?",
-    a: "Spreadsheets break the first time you change a formula. TrueCap auto-fills rent from HUD, rate from FRED, and tax from your state's effective rate — you don't look anything up. The math is pressure-tested. You get a defensible answer in 60 seconds instead of two hours.",
+    q: "Do I need a credit card?",
+    a: "No. The free analyzer needs zero signup and zero card — type an address and go. You only create an account if you want to save deals or unlock Pro.",
   },
   {
     q: "How accurate is the auto-fill?",
-    a: "Rent is pulled from HUD Fair Market Rent for the county. Mortgage rate is the current FRED 30-year fixed series. Property tax uses your state's effective rate. All editable — these are sensible market defaults, not absolutes. Override anything with your own numbers.",
+    a: "Rent comes from HUD Fair Market Rent for the county, the mortgage rate from the current FRED 30-year fixed series, and property tax from your state's effective rate. These are sensible market defaults, not absolutes — every field is editable, so override anything with your own numbers.",
   },
   {
-    q: "Do I need a credit card to try it?",
-    a: "No. The free analyzer needs zero signup and zero card. Sign up only if you want to save deals and access Pro features. Pro is month-to-month — cancel anytime.",
+    q: "Can I edit the assumptions?",
+    a: "Yes — every number is editable. TrueCap pre-fills rent, rate, tax, and expense defaults so you get an instant first pass, then you can change financing, expenses, and growth assumptions under “Improve accuracy” and rerun in a click.",
+  },
+  {
+    q: "What do I get with the $5 PDF?",
+    a: "A one-time, lender-ready PDF for a single deal — the full multi-page report (verdict, cash flow, cap rate, DSCR, 10-year projection, tax strategy, exit scenarios, and Deal Score). No account, no subscription. It's the fastest way to send one finished deal to a lender, partner, or client.",
+  },
+  {
+    q: "When should I upgrade to Pro?",
+    a: "Use Free to analyze unlimited deals. Use the $5 PDF when you need to send one finished report. Upgrade to Pro when you want to save deals, compare properties, reuse your assumptions, brand your reports, and export unlimited PDFs. Pro is month-to-month — cancel anytime.",
   },
   {
     q: "Does this work for BRRRR or fix-and-flip deals?",
     a: "Yes. Pro includes the BRRRR analyzer (cash-out refi math, post-refi cash flow, infinite-return alerts), the Fix-and-Flip analyzer (net profit, ROI, annualized ROI, break-even ARV), and the Rehab Cost Estimator (sq-ft-based defaults for every common work item).",
   },
   {
-    q: "Can I cancel anytime?",
-    a: "Yes. Cancel from your profile in one click. Pro features stay active until the end of the period you've paid for, then auto-downgrade to Free. Your saved deals never leave your account — you'll just lose the ability to create / update them on Free.",
+    q: "Is this financial advice?",
+    a: "No. TrueCap surfaces the math you'd compute yourself — accurate formulas and market-data defaults — but every assumption is editable and the decision is yours. It's a calculator, not a financial advisor.",
   },
 ];
 

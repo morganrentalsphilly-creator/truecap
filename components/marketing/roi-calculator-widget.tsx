@@ -152,8 +152,8 @@ export function RoiCalculatorWidget({ proMonthlyPrice }: Props) {
         <div className="mt-5 rounded-xl border border-[var(--brand-green)]/25 bg-[var(--brand-green-light)] p-4 text-sm text-foreground">
           {result.dollarValue >= effectivePrice ? (
             <p className="leading-relaxed">
-              At {result.deals} deal{result.deals === 1 ? "" : "s"} per month, TrueCap Pro pays for
-              itself <strong>after {result.breakevenDeals < 1 ? "less than 1" : Math.ceil(result.breakevenDeals)} deal{Math.ceil(result.breakevenDeals) === 1 ? "" : "s"}</strong>.
+              At {result.deals} {result.deals === 1 ? "deal" : "deals"} per month, TrueCap Pro pays for
+              itself <strong>after {result.breakevenDeals < 1 ? "less than 1" : Math.ceil(result.breakevenDeals)} {Math.ceil(result.breakevenDeals) === 1 ? "deal" : "deals"}</strong>.
               The rest of the month is pure return.
             </p>
           ) : (

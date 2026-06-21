@@ -54,8 +54,10 @@ export function MarketingHero() {
             in a 375px viewport without wrapping or pushing layout. */}
         <div className="mx-auto mb-5 flex w-fit max-w-full items-center gap-1.5 rounded-full border border-primary/20 bg-card/70 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-primary shadow-sm backdrop-blur sm:gap-2 sm:px-3.5 sm:text-[11px] sm:tracking-widest">
           <Sparkles className="size-3 shrink-0" />
-          <span className="sm:hidden">Free analyzer · No signup</span>
-          <span className="hidden sm:inline">Free rental property analyzer · No signup required</span>
+          {/* Single eyebrow (no responsive split) so it reads as one line
+              to crawlers / screen readers instead of two concatenated
+              variants. Kept short so it never wraps inside the pill. */}
+          <span>Free analyzer · No card · No signup</span>
         </div>
 
         {/* headline + sub — action/outcome-led: says exactly what the
@@ -272,7 +274,7 @@ function HeroProductMock() {
               {score.recommendation}
             </span>
             <span className="rounded-full bg-primary px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-white sm:px-2.5 sm:py-1 sm:text-[10px]">
-              Score {Math.round(score.score)}
+              Deal Score {Math.round(score.score)}
             </span>
             <span className="rounded-full bg-[var(--brand-green)] px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-white sm:px-2.5 sm:py-1 sm:text-[10px]">
               {score.riskLevel}
