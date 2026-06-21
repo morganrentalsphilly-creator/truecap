@@ -43,6 +43,7 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { saveDealAction } from "@/app/actions/saved-analyses";
 import { buildDataConfidence, type EnrichmentProvenanceInput } from "@/lib/data-confidence";
+import type { ReportMode } from "@/lib/pdf-export-constants";
 import { addDealToCompareAction } from "@/app/actions/compare";
 import { getDealScoreAction, type DealScoreActionResult } from "@/app/actions/deal-score";
 import { trackAnalysisRunAction } from "@/app/actions/track-analysis-run";
@@ -1743,7 +1744,7 @@ export function InvestCalcPage({
     }
   };
 
-  const handleExportPdf = async () => {
+  const handleExportPdf = async (mode: ReportMode = "personal") => {
     if (!analysisResult) return;
     const oneTimeUnlocked = oneTimePdfUnlockedRef.current;
     // Without entitlement (or auth), offer the two purchase paths
@@ -1827,7 +1828,7 @@ export function InvestCalcPage({
               contactWebsite: brandingResult.branding.contact_website,
             }
           : null;
-      await generateInvestmentPDF(reportData, brandingConfig);
+      await generateInvestmentPDF(reportData, brandingConfig, mode);
       // Consume the one-time unlock only after a successful generation
       // so a transient failure doesn't burn the purchase.
       if (oneTimeUnlocked) oneTimePdfUnlockedRef.current = false;

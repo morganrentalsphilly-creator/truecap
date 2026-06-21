@@ -4,6 +4,7 @@
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import { recommendationLabel } from "@/lib/deal-score";
+import type { ReportMode } from "@/lib/pdf-export-constants";
 import {
   Chart,
   BarController,
@@ -1324,7 +1325,8 @@ async function pageExit(
 // ===================== Public API =====================
 async function buildInvestmentPDFDocument(
   data: ReportData,
-  branding?: BrandingConfig | null
+  branding?: BrandingConfig | null,
+  mode: ReportMode = "personal"
 ) {
   const doc = new jsPDF({ unit: "pt", format: "a4", compress: true });
   const d = data;
@@ -1345,10 +1347,16 @@ async function buildInvestmentPDFDocument(
   pageInputs(doc, d, branding ?? null);
   doc.addPage();
   await pageProjection(doc, d, branding ?? null);
-  doc.addPage();
-  await pageTax(doc, d, branding ?? null);
-  doc.addPage();
-  await pageExit(doc, d, branding ?? null);
+  // Tax Strategy is a personal-tax view — only the full personal report.
+  if (mode === "personal") {
+    doc.addPage();
+    await pageTax(doc, d, branding ?? null);
+  }
+  // Exit Scenarios (returns/IRR) go to personal + partner, not lender.
+  if (mode !== "lender") {
+    doc.addPage();
+    await pageExit(doc, d, branding ?? null);
+  }
 
   // Add headers/footers AFTER all pages exist
   const total = doc.getNumberOfPages();
@@ -1362,9 +1370,10 @@ async function buildInvestmentPDFDocument(
 
 export async function generateInvestmentPDFBlob(
   data: ReportData,
-  branding?: BrandingConfig | null
+  branding?: BrandingConfig | null,
+  mode: ReportMode = "personal"
 ): Promise<Blob> {
-  const doc = await buildInvestmentPDFDocument(data, branding);
+  const doc = await buildInvestmentPDFDocument(data, branding, mode);
   return doc.output("blob");
 }
 
@@ -1380,14 +1389,16 @@ export async function generateInvestmentPDFBlob(
  */
 export async function generateInvestmentPDF(
   data: ReportData,
-  branding?: BrandingConfig | null
+  branding?: BrandingConfig | null,
+  mode: ReportMode = "personal"
 ): Promise<Blob> {
-  const doc = await buildInvestmentPDFDocument(data, branding);
+  const doc = await buildInvestmentPDFDocument(data, branding, mode);
   // Use the user's company name as a filename prefix if set, otherwise
   // the TrueCap default. Sanitize to filesystem-safe characters.
   const prefix =
     branding?.companyName?.trim().replace(/[^A-Za-z0-9_-]+/g, "-") ||
     "TrueCap";
-  doc.save(`${prefix}-Investment-Report-${Date.now()}.pdf`);
+  const modeLabel = mode === "lender" ? "Lender" : mode === "partner" ? "Partner" : "Investment";
+  doc.save(`${prefix}-${modeLabel}-Report-${Date.now()}.pdf`);
   return doc.output("blob");
 }

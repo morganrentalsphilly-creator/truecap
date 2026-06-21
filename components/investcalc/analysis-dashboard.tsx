@@ -73,6 +73,8 @@ import { BuyBoxVerdictCard } from "@/components/investcalc/buy-box-verdict-card"
 import { deriveStateFromAddress } from "@/lib/buy-box";
 import { DataConfidenceBadge } from "@/components/investcalc/data-confidence-badge";
 import type { DataConfidence } from "@/lib/data-confidence";
+import { REPORT_MODES, type ReportMode } from "@/lib/pdf-export-constants";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Activity, Target } from "lucide-react";
 import { MomentOfValueUpsell } from "@/components/marketing/moment-of-value-upsell";
 import { SignupPromptCard } from "@/components/marketing/signup-prompt-card";
@@ -132,7 +134,7 @@ interface AnalysisDashboardProps {
   } | null;
   onSaveDeal: () => void | Promise<void>;
   onCompareDeals: () => void | Promise<void>;
-  onExportPdf: () => void | Promise<void>;
+  onExportPdf: (mode?: ReportMode) => void | Promise<void>;
   onNewAnalysis: () => void | Promise<void>;
   isSaving?: boolean;
   isComparing?: boolean;
@@ -781,6 +783,43 @@ export function AnalysisDashboard({
                 <span className="hidden sm:inline">Export PDF</span>
                 <span className="sm:hidden">PDF</span>
               </Button>
+              {/* Report-style menu — only for users who can actually export
+                  (entitled + saved). Lets them pick a lender / partner /
+                  personal variant; the main button stays the personal default
+                  and keeps its purchase-dialog behavior for everyone else. */}
+              {canExportPdf && isSaved ? (
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-9 rounded-xl px-2 sm:h-10"
+                      disabled={isExporting}
+                      aria-label="Choose a report style"
+                      title="Choose a report style (lender / partner / personal)"
+                    >
+                      <ChevronDown className="h-4 w-4" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent align="end" className="w-64 p-1.5">
+                    <p className="px-2 py-1 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                      Export as…
+                    </p>
+                    {REPORT_MODES.map((m) => (
+                      <button
+                        key={m.id}
+                        type="button"
+                        disabled={isExporting}
+                        onClick={() => void onExportPdf(m.id)}
+                        className="block w-full rounded-lg px-2 py-1.5 text-left hover:bg-muted disabled:opacity-50"
+                      >
+                        <span className="text-sm font-semibold text-foreground">{m.label}</span>
+                        <span className="block text-[11px] leading-snug text-muted-foreground">{m.description}</span>
+                      </button>
+                    ))}
+                  </PopoverContent>
+                </Popover>
+              ) : null}
               <Button
                 size="sm"
                 className="h-9 gap-1 rounded-xl bg-primary px-1.5 text-[11px] font-semibold text-primary-foreground sm:h-10 sm:gap-0 sm:rounded-xl sm:px-4 sm:text-sm max-[380px]:h-9 max-[380px]:gap-0.5 max-[380px]:rounded-lg max-[380px]:px-1 max-[380px]:text-[10px]"
