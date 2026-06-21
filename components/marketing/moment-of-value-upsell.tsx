@@ -23,6 +23,10 @@ interface MomentOfValueUpsellProps {
   estimatedAnnualTaxSavings: number;
   /** True when the viewer is already on a paid plan; if so we render nothing. */
   isPaid: boolean;
+  /** Triggers the PDF export flow (the $5 one-time chooser for free users).
+   *  When provided, the "Export this PDF — $5" next-step is shown so the
+   *  visitor isn't funneled only toward Pro. */
+  onExportPdf?: () => void;
 }
 
 const fmtMoney = (n: number) => {
@@ -36,9 +40,18 @@ export function MomentOfValueUpsell({
   cocReturn,
   estimatedAnnualTaxSavings,
   isPaid,
+  onExportPdf,
 }: MomentOfValueUpsellProps) {
   const [dismissed, setDismissed] = useState(false);
   if (isPaid || dismissed) return null;
+
+  // "Keep editing" — jump back to the form so refining a default and
+  // rerunning is one click from the numbers the user is judging.
+  const handleKeepEditing = () => {
+    if (typeof window === "undefined") return;
+    const el = document.getElementById("main");
+    if (el) window.scrollTo({ top: el.offsetTop - 64, behavior: "smooth" });
+  };
 
   // Choose a personalized hook based on the actual numbers
   const positiveCF = netCashFlow >= 0;
@@ -54,8 +67,8 @@ export function MomentOfValueUpsell({
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-2">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-primary px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-widest text-primary-foreground">
-            <Lock className="size-3" />
-            Pro unlocks
+            <TrendingUp className="size-3" />
+            Next steps
           </span>
           <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
             for this deal
@@ -97,18 +110,50 @@ export function MomentOfValueUpsell({
         />
       </div>
 
-      {/* CTAs */}
-      <div className="mt-5 flex flex-wrap items-center gap-3">
+      {/* Next steps — three clear paths so the visitor isn't funneled only
+          toward Pro: keep refining (free), send one $5 report, or upgrade
+          for the repeat workflow. */}
+      <div className="mt-5 space-y-2.5">
+        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+          Next steps
+        </p>
+
+        <button
+          type="button"
+          onClick={handleKeepEditing}
+          className="flex w-full items-start gap-2.5 rounded-xl border border-border bg-card p-3 text-left text-sm transition-colors hover:bg-muted"
+        >
+          <Calculator className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+          <span className="text-foreground">
+            <strong>Keep editing</strong> — refine assumptions and rerun the numbers.
+          </span>
+        </button>
+
+        {onExportPdf ? (
+          <button
+            type="button"
+            onClick={onExportPdf}
+            className="flex w-full items-start gap-2.5 rounded-xl border border-border bg-card p-3 text-left text-sm transition-colors hover:bg-muted"
+          >
+            <FileDown className="mt-0.5 size-4 shrink-0 text-[var(--brand-green)]" />
+            <span className="text-foreground">
+              <strong>Export this PDF — $5</strong> — a lender-ready report for this one
+              deal. No subscription.
+            </span>
+          </button>
+        ) : null}
+
         <Link
           href="/pricing"
-          className="group inline-flex h-11 items-center gap-1.5 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-[0_10px_24px_rgba(82,72,212,0.28)] transition-transform hover:-translate-y-0.5"
+          className="group flex w-full items-start gap-2.5 rounded-xl border-2 border-primary/40 bg-primary/5 p-3 text-left text-sm transition-colors hover:bg-primary/10"
         >
-          See Pro pricing
-          <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+          <Lock className="mt-0.5 size-4 shrink-0 text-primary" />
+          <span className="flex-1 text-foreground">
+            <strong>Save, compare &amp; export unlimited — Pro</strong> — reuse assumptions,
+            brand reports, export unlimited PDFs. Cancel anytime.
+          </span>
+          <ArrowRight className="mt-0.5 size-4 shrink-0 text-primary transition-transform group-hover:translate-x-0.5" />
         </Link>
-        <span className="text-xs text-muted-foreground">
-          Cancel anytime · monthly or annual
-        </span>
       </div>
 
       {/* Inline note — softens the upsell */}

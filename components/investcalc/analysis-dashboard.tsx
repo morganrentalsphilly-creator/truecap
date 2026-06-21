@@ -1046,6 +1046,7 @@ export function AnalysisDashboard({
           cocReturn={result.cocReturn}
           estimatedAnnualTaxSavings={Math.round((result.taxSavingsMonthly ?? 0) * 12)}
           isPaid={canUseProjections}
+          onExportPdf={onExportPdf}
         />
       )}
 
