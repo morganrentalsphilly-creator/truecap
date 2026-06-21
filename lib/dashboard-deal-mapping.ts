@@ -1,4 +1,5 @@
 import { getTypeLabel, type PropertyType, type StoredRecommendation, type StoredRiskLevel } from "@/lib/compare-metrics";
+import type { DealScoreBreakdown } from "@/lib/deal-score";
 
 type NumericLike = number | string | null | undefined;
 
@@ -85,6 +86,10 @@ export type DashboardDeal = {
   recommendation: string | null;
   riskLevel: string | null;
   riskScore: number | null;
+  /** Per-factor score breakdown (cash flow / CoC / cap / DSCR / total-return /
+   *  risk penalty). Optional/null from the stored snapshot; populated by the
+   *  dashboard's recompute-on-read so the "Why this score" popover can show it. */
+  breakdown?: DealScoreBreakdown | null;
   tags: string[];
 };
 
@@ -165,6 +170,9 @@ export function buildDashboardDeal(row: SavedAnalysisDashboardRow): DashboardDea
     recommendation: snapshot.recommendation ?? null,
     riskLevel: snapshot.riskLevel ?? snapshot.risk_level ?? null,
     riskScore: getRiskScore(snapshot),
+    // Stored snapshots don't carry the per-factor breakdown; the dashboard
+    // overlays it from the recompute (see app/dashboard/page.tsx).
+    breakdown: null,
     tags: Array.isArray(snapshot.tags) ? snapshot.tags.filter((tag): tag is string => typeof tag === "string") : [],
   };
 }

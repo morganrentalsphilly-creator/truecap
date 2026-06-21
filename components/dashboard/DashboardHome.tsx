@@ -123,6 +123,7 @@ function getTopDeals(data: DashboardHomeData): DashboardTopDeal[] {
       signal: deal.recommendation,
       roi: deal.roiPct == null ? null : Number(deal.roiPct.toFixed(1)),
       riskLevel: deal.riskLevel,
+      breakdown: deal.breakdown,
       tags: deal.tags,
     }));
 }

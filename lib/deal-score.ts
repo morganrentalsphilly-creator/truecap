@@ -263,8 +263,9 @@ export type DealStrategy = "cash-flow" | "balanced" | "appreciation";
 export const DEAL_STRATEGY_STORAGE_KEY = "truecap_deal_strategy";
 
 /** Max points each component can contribute (investment scale). Single source
- *  for the renormalization factor so changing a multiplier stays consistent. */
-const COMPONENT_MAXES = {
+ *  for the renormalization factor so changing a multiplier stays consistent.
+ *  Exported so the "Why this score" UI can show each factor as "x / max". */
+export const COMPONENT_MAXES = {
   cashFlow: 22,
   coc: 20,
   capRate: 16,

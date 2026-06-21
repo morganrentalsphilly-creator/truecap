@@ -80,7 +80,7 @@ function buildDashboardData(
     const deal = buildDashboardDeal(row);
     const fresh = recomputeSavedDealVerdict(row.form_snapshot);
     return fresh
-      ? { ...deal, score: fresh.score, recommendation: fresh.recommendation, riskLevel: fresh.riskLevel }
+      ? { ...deal, score: fresh.score, recommendation: fresh.recommendation, riskLevel: fresh.riskLevel, breakdown: fresh.breakdown }
       : deal;
   });
 

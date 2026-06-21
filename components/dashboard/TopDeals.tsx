@@ -2,7 +2,9 @@
 
 import { useMemo, useState } from "react";
 import { Building2, Home, KeyRound } from "lucide-react";
-import { recommendationLabel } from "@/lib/deal-score";
+import { recommendationLabel, type DealScoreBreakdown } from "@/lib/deal-score";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ScoreBreakdown } from "@/components/investcalc/score-breakdown";
 
 export type DashboardTopDeal = {
   id?: string;
@@ -17,6 +19,8 @@ export type DashboardTopDeal = {
   signal: string | null;
   roi: number | null;
   riskLevel: string | null;
+  /** Per-factor score breakdown for the "Why this score" popover. */
+  breakdown?: DealScoreBreakdown | null;
   tags?: string[];
 };
 
@@ -173,6 +177,16 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
                 {d.signal ? (
                   <span className={`text-[11px] font-semibold px-2 py-1 rounded-md ring-1 ${signalStyle[d.signal] ?? "bg-muted text-muted-foreground ring-border"}`}>{recommendationLabel(d.signal)}</span>
                 ) : null}
+                {d.breakdown && d.score != null ? (
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <button type="button" className="text-[11px] font-semibold text-primary underline-offset-2 hover:underline">Why?</button>
+                    </PopoverTrigger>
+                    <PopoverContent align="start" className="w-auto p-3">
+                      <ScoreBreakdown breakdown={d.breakdown} score={d.score} />
+                    </PopoverContent>
+                  </Popover>
+                ) : null}
                 {d.tags?.map((tag) => (
                   <span key={tag} className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
                     {tag}
@@ -251,7 +265,19 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
                   </td>
                   <td className="px-6 py-4 text-right">
                     {d.signal ? (
-                      <span className={`text-[11px] font-semibold px-2 py-1 rounded-md ring-1 ${signalStyle[d.signal] ?? "bg-muted text-muted-foreground ring-border"}`}>{recommendationLabel(d.signal)}</span>
+                      <span className="inline-flex items-center justify-end gap-1.5">
+                        <span className={`text-[11px] font-semibold px-2 py-1 rounded-md ring-1 ${signalStyle[d.signal] ?? "bg-muted text-muted-foreground ring-border"}`}>{recommendationLabel(d.signal)}</span>
+                        {d.breakdown && d.score != null ? (
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <button type="button" className="text-[11px] font-semibold text-primary underline-offset-2 hover:underline">Why?</button>
+                            </PopoverTrigger>
+                            <PopoverContent align="end" className="w-auto p-3">
+                              <ScoreBreakdown breakdown={d.breakdown} score={d.score} />
+                            </PopoverContent>
+                          </Popover>
+                        ) : null}
+                      </span>
                     ) : (
                       <span className="text-muted-foreground">-</span>
                     )}

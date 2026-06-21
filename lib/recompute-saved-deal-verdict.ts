@@ -4,6 +4,7 @@ import {
   computeDealScore,
   type DealRecommendation,
   type DealRiskLevel,
+  type DealScoreBreakdown,
 } from "@/lib/deal-score";
 import { investmentFormSchema } from "@/lib/investcalc-schema";
 
@@ -27,6 +28,7 @@ export function recomputeSavedDealVerdict(formSnapshot: unknown): {
   score: number;
   recommendation: DealRecommendation;
   riskLevel: DealRiskLevel;
+  breakdown: DealScoreBreakdown;
 } | null {
   const parsed = investmentFormSchema.safeParse(formSnapshot);
   if (!parsed.success) return null;
@@ -37,6 +39,7 @@ export function recomputeSavedDealVerdict(formSnapshot: unknown): {
       score: scored.score,
       recommendation: scored.recommendation,
       riskLevel: scored.riskLevel,
+      breakdown: scored.breakdown,
     };
   } catch {
     return null;
