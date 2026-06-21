@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Building2, Home, KeyRound } from "lucide-react";
+import { recommendationLabel } from "@/lib/deal-score";
 
 export type DashboardTopDeal = {
   id?: string;
@@ -170,7 +171,7 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
 
               <div className="mt-4 flex flex-wrap items-center gap-2">
                 {d.signal ? (
-                  <span className={`text-[11px] font-semibold px-2 py-1 rounded-md ring-1 ${signalStyle[d.signal] ?? "bg-muted text-muted-foreground ring-border"}`}>{d.signal}</span>
+                  <span className={`text-[11px] font-semibold px-2 py-1 rounded-md ring-1 ${signalStyle[d.signal] ?? "bg-muted text-muted-foreground ring-border"}`}>{recommendationLabel(d.signal)}</span>
                 ) : null}
                 {d.tags?.map((tag) => (
                   <span key={tag} className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
@@ -250,7 +251,7 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
                   </td>
                   <td className="px-6 py-4 text-right">
                     {d.signal ? (
-                      <span className={`text-[11px] font-semibold px-2 py-1 rounded-md ring-1 ${signalStyle[d.signal] ?? "bg-muted text-muted-foreground ring-border"}`}>{d.signal}</span>
+                      <span className={`text-[11px] font-semibold px-2 py-1 rounded-md ring-1 ${signalStyle[d.signal] ?? "bg-muted text-muted-foreground ring-border"}`}>{recommendationLabel(d.signal)}</span>
                     ) : (
                       <span className="text-muted-foreground">-</span>
                     )}

@@ -36,6 +36,7 @@ const RiskReturn = dynamic(
 );
 import type { DashboardDeal } from "@/lib/dashboard-deal-mapping";
 import { mapRiskLevelToRisk, resolveReturnMetric, resolveRiskMetric } from "@/lib/dashboard-risk-return";
+import { recommendationLabel } from "@/lib/deal-score";
 
 export type { DashboardDeal } from "@/lib/dashboard-deal-mapping";
 import { RateWatchStrip } from "@/components/dashboard/RateWatchStrip";
@@ -52,6 +53,13 @@ export type DashboardHomeData = {
   stats: {
     totalDeals: number;
   };
+  /**
+   * True saved-deal total (active + completed + archived, non-deleted) —
+   * the SAME count as the sidebar "My Deals" badge. portfolioAggregates is
+   * active-only, so the header uses this to show active vs. total instead
+   * of a number that looks like it disagrees with the sidebar.
+   */
+  savedTotalCount?: number;
   allDeals: DashboardDeal[];
   topDeals: DashboardDeal[];
   /**
@@ -262,7 +270,7 @@ function buildDecisionInsights(deals: DashboardDeal[]) {
     best
       ? {
           title: `${best.address} has the highest score`,
-          body: `Score ${best.score == null ? "-" : Math.round(best.score)}. Backend recommendation: ${best.recommendation ?? "-"}.`,
+          body: `Score ${best.score == null ? "-" : Math.round(best.score)}. Recommendation: ${best.recommendation ? recommendationLabel(best.recommendation) : "-"}.`,
           tone: "opportunity" as const,
         }
       : null,
@@ -309,6 +317,17 @@ export function DashboardHome({
   );
 
   const hasAnyDeals = data.allDeals.length > 0;
+  // Active deals (portfolio.totalCount) vs the full saved set
+  // (savedTotalCount = the sidebar "My Deals" badge count). When the user
+  // has archived/completed deals the two differ, so we surface both and
+  // never show a dashboard number that contradicts the sidebar badge.
+  const savedTotalCount = data.savedTotalCount ?? portfolio.totalCount;
+  const hasArchivedOrCompleted = savedTotalCount > portfolio.totalCount;
+  const headerSubtitle = !hasAnyDeals
+    ? "No saved deals yet. Run your first analysis to see it appear here."
+    : hasArchivedOrCompleted
+      ? `Active pipeline: ${portfolio.totalCount} of ${savedTotalCount} saved ${savedTotalCount === 1 ? "deal" : "deals"}.`
+      : `Your book at a glance — ${portfolio.totalCount} active ${portfolio.totalCount === 1 ? "deal" : "deals"}.`;
 
   // SCROLL CONTRACT (fixed Jun 2026): DashboardShell holds a desktop
   // viewport lock (`lg:h-screen lg:overflow-hidden`), so every page
@@ -346,9 +365,7 @@ export function DashboardHome({
               Welcome back, {(data.user.displayName.split(" ")[0] || data.user.email.split("@")[0]) ?? "investor"}
             </h1>
             <p className="text-muted-foreground mt-1.5 text-sm sm:text-base">
-              {hasAnyDeals
-                ? `Your book at a glance — ${portfolio.totalCount} saved ${portfolio.totalCount === 1 ? "deal" : "deals"}.`
-                : "No saved deals yet. Run your first analysis to see it appear here."}
+              {headerSubtitle}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2 lg:hidden">
@@ -459,8 +476,17 @@ export function DashboardHome({
               <span className="inline-flex items-center gap-1.5">
                 <Layers className="h-3.5 w-3.5 text-muted-foreground/60" />
                 <span className="font-semibold text-foreground">{portfolio.totalCount}</span>
-                <span>{portfolio.totalCount === 1 ? "deal" : "deals"} saved</span>
+                <span>active</span>
               </span>
+              {hasArchivedOrCompleted ? (
+                <>
+                  <span aria-hidden className="text-muted-foreground/40">·</span>
+                  <span>
+                    <span className="font-semibold text-foreground">{savedTotalCount}</span>{" "}
+                    saved total
+                  </span>
+                </>
+              ) : null}
               <span aria-hidden className="text-muted-foreground/40">·</span>
               <span>
                 <span className="font-semibold text-foreground">{portfolio.activeCount}</span>{" "}

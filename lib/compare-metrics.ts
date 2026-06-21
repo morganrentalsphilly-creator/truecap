@@ -31,12 +31,15 @@ export const METRIC_ROWS: MetricRow[] = [
   { key: "taxSavingsMonthly", label: "Tax Savings / mo", group: "DEAL", kind: "currency", direction: "higher" },
 ];
 
+// Display labels for the recommendation signal. Keys (the Signal union)
+// and the color/badge maps stay internal — only these shown strings use
+// the criteria-based wording.
 export const SIGNAL_LABELS: Record<Signal, string> = {
-  "strong-buy": "Strong Buy",
-  buy: "Buy",
-  neutral: "Neutral",
-  risky: "Risky",
-  avoid: "Avoid",
+  "strong-buy": "Excellent fit",
+  buy: "Meets buy box",
+  neutral: "Watchlist",
+  risky: "Needs work",
+  avoid: "Does not meet buy box",
 };
 
 export function formatCurrency(value: number | null, signed = false): string {

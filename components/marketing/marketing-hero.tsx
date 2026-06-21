@@ -27,7 +27,7 @@ import { Check, Quote, Sparkles, TrendingUp } from "lucide-react";
 import { HeroAddressForm } from "@/components/marketing/hero-address-form";
 import { DealsAnalyzedTicker } from "@/components/marketing/deals-analyzed-ticker";
 import { calculateAnalysis } from "@/lib/calc-analysis";
-import { buildDealScoreInputFromAnalysis, computeDealScore } from "@/lib/deal-score";
+import { buildDealScoreInputFromAnalysis, computeDealScore, recommendationLabel } from "@/lib/deal-score";
 import { SAMPLE_DEAL_DISPLAY, SAMPLE_DEAL_VALUES } from "@/lib/sample-deal";
 
 // TRUST_STATS row removed (Jun 2026) — redundant with risk-reversal
@@ -271,7 +271,7 @@ function HeroProductMock() {
           </div>
           <div className="tc-hero-step-5 flex flex-wrap items-center gap-1.5 sm:gap-2">
             <span className="rounded-full bg-[var(--brand-green)] px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-white sm:px-2.5 sm:py-1 sm:text-[10px]">
-              {score.recommendation}
+              {recommendationLabel(score.recommendation)}
             </span>
             <span className="rounded-full bg-primary px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-white sm:px-2.5 sm:py-1 sm:text-[10px]">
               Deal Score {Math.round(score.score)}

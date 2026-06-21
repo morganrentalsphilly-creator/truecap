@@ -98,6 +98,7 @@ import {
   buildDealScoreInputFromAnalysis,
   computeDealScore,
   computeTenYearAnnualizedReturnPct,
+  recommendationLabel,
   DEAL_STRATEGY_STORAGE_KEY,
   type DealStrategy,
 } from "@/lib/deal-score";
@@ -852,7 +853,7 @@ export function AnalysisDashboard({
                   )}
                 </div>
                 <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground">
-                  {recommendation.label}
+                  {recommendationLabel(recommendation.label)}
                 </h2>
               </div>
               <p className="text-sm text-muted-foreground mb-4">
@@ -1643,7 +1644,7 @@ function DealScoreCard({
               activeStyle.recommendationChip
             )}
           >
-            {recommendation}
+            {recommendationLabel(recommendation)}
           </span>
           <span
             className={cn(

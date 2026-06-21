@@ -19,6 +19,7 @@ import {
 import { getRequestUser, getRequestEntitlements } from "@/lib/request-auth";
 import { buildDashboardDeal, type SavedAnalysisDashboardRow } from "@/lib/dashboard-deal-mapping";
 import { recomputeSavedDealVerdict } from "@/lib/recompute-saved-deal-verdict";
+import { getSavedAnalysesTotalCount } from "@/lib/saved-analyses-count";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { buildRateWatch } from "@/lib/rate-watch";
 
@@ -124,7 +125,7 @@ export default async function DashboardPage() {
   // have passed — run them in ONE round-trip wave instead of two
   // sequential awaits (the deals query previously waited for the
   // profile/count/premium wave to finish for no reason).
-  const [{ data: profile }, isPremium, dealsResult, aggregateResult, currentRate] = await Promise.all([
+  const [{ data: profile }, isPremium, dealsResult, aggregateResult, currentRate, savedTotalCount] = await Promise.all([
     supabase
       .from("profiles")
       .select("first_name, last_name, display_name, avatar_url")
@@ -161,6 +162,12 @@ export default async function DashboardPage() {
     // Current 30-yr rate for the dashboard rate watch (cached 6h). Independent
     // of the deal queries, so it rides in the same Promise.all wave.
     fetchCurrentMortgageRate(),
+    // TRUE saved-deal total (active + completed + archived, non-deleted) —
+    // the same count the sidebar "My Deals" badge uses. The portfolio
+    // aggregates above are ACTIVE-only, so the header showed a smaller
+    // number than the sidebar badge and looked like a mismatch. We pass
+    // both so the header can read "X active · Y saved total".
+    getSavedAnalysesTotalCount(supabase, user.id),
   ]);
 
   const profileRow = (profile as ProfileRow | null) ?? null;
@@ -241,6 +248,9 @@ export default async function DashboardPage() {
     navAccess.dashboard
   );
   dashboardData.portfolioAggregates = portfolioAggregates;
+  // True saved total (matches the sidebar "My Deals" badge) so the header
+  // can distinguish active deals from the full saved set.
+  dashboardData.savedTotalCount = savedTotalCount;
   // Rate watch — re-underwrite saved deals at today's rate; the strip shows
   // only the ones whose signal changed (null = nothing to show, strip hides).
   dashboardData.rateWatch = buildRateWatch(

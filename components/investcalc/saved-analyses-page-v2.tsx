@@ -94,11 +94,11 @@ export type SavedAnalysisListItem = {
 };
 
 const SIGNAL_LABELS: Record<SavedSignal, string> = {
-  "strong-buy": "Strong Buy",
-  buy: "Buy",
-  neutral: "Neutral",
-  risky: "Risky",
-  avoid: "Avoid",
+  "strong-buy": "Excellent fit",
+  buy: "Meets buy box",
+  neutral: "Watchlist",
+  risky: "Needs work",
+  avoid: "Does not meet buy box",
 };
 
 function toCurrency(value: number | null): string {

@@ -168,6 +168,29 @@ export function buildDealScoreInputFromAnalysis(
 }
 
 export type DealRecommendation = "Strong Buy" | "Buy" | "Neutral" | "Risky" | "Avoid";
+
+/**
+ * DISPLAY-layer labels for the recommendation tiers. The INTERNAL value
+ * (DealRecommendation) stays "Strong Buy"/etc. — it's persisted in saved
+ * snapshots, drives the signal/color mapping (recommendationToSignal) and
+ * the recommendation switches, and is asserted in unit tests. This maps it
+ * to criteria-based, advice-safe wording shown to users. Renaming only the
+ * display avoids a DB backfill and keeps all logic intact.
+ *
+ * `recommendationLabel` is TOLERANT: it returns the input unchanged for any
+ * unmapped/stale value (some call sites receive a generic `string`).
+ */
+export const RECOMMENDATION_DISPLAY_LABELS: Record<DealRecommendation, string> = {
+  "Strong Buy": "Excellent fit",
+  Buy: "Meets buy box",
+  Neutral: "Watchlist",
+  Risky: "Needs work",
+  Avoid: "Does not meet buy box",
+};
+
+export function recommendationLabel(recommendation: string): string {
+  return RECOMMENDATION_DISPLAY_LABELS[recommendation as DealRecommendation] ?? recommendation;
+}
 /** Investment deals use Low/Medium/High. Owner-occupant near break-even may use softer labels instead of High Risk. */
 export type DealRiskLevel =
   | "Low Risk"

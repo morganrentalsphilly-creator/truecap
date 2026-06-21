@@ -3,6 +3,7 @@
 // changed — silently failing PDF export.
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
+import { recommendationLabel } from "@/lib/deal-score";
 import {
   Chart,
   BarController,
@@ -907,7 +908,7 @@ function pageInputs(
   setText(doc, tierColor);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(14);
-  doc.text(`${d.performance.recommendation} — ${d.performance.risk}`, M.left + 16, y + 34);
+  doc.text(`${recommendationLabel(d.performance.recommendation)} — ${d.performance.risk}`, M.left + 16, y + 34);
 
   // Deal Score badge — refined right-aligned typography.
   // Reads as "52 / 100" with the score number prominent on the LEFT

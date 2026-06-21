@@ -19,6 +19,7 @@ import {
   parseCompareSnapshotV1,
   type CompareSnapshotV1,
 } from "@/lib/compare-result-snapshot";
+import { recomputeSavedDealVerdict } from "@/lib/recompute-saved-deal-verdict";
 import { recommendationToSignal, type PropertyType, type StoredRecommendation, type StoredRiskLevel } from "@/lib/compare-metrics";
 import {
   getDashboardNavAccess,
@@ -112,11 +113,23 @@ function mapDeal(row: SavedAnalysisRow): CompareDealViewModel {
   const cocReturn = toNumber(snapshot.cocReturn) ?? toNumber(row.coc_return_pct);
   const capRate = toNumber(snapshot.capRate);
   const purchasePrice = toNumber(row.purchase_price);
-  const storedScore = toNumber(snapshot.score);
-  const storedRecommendation = snapshot.recommendation ?? null;
-  const storedRiskLevel = snapshot.riskLevel ?? null;
-  const scoringComplete = storedScore != null && !!storedRecommendation && !!storedRiskLevel;
-  const signal = scoringComplete ? recommendationToSignal(storedRecommendation) : null;
+  // Recompute the verdict from the form snapshot with the CURRENT engine
+  // (Balanced lens) so Compare matches the Dashboard and My Deals lists —
+  // both already recompute on read (see recomputeSavedDealVerdict). Reading
+  // the stored snapshot verbatim showed a STALE score here while those
+  // surfaces showed the fresh one: the same deal reading two different
+  // numbers (the 52-vs-78 P0). Falls back to stored values if the snapshot
+  // can't be reparsed.
+  const recomputed = recomputeSavedDealVerdict(row.form_snapshot);
+  const score = recomputed ? recomputed.score : toNumber(snapshot.score);
+  const recommendation: StoredRecommendation | null = recomputed
+    ? recomputed.recommendation
+    : (snapshot.recommendation ?? null);
+  const riskLevel: StoredRiskLevel | null = recomputed
+    ? recomputed.riskLevel
+    : (snapshot.riskLevel ?? null);
+  const scoringComplete = score != null && !!recommendation && !!riskLevel;
+  const signal = scoringComplete && recommendation ? recommendationToSignal(recommendation) : null;
 
   const metrics = {
     netCashFlow,
@@ -143,9 +156,9 @@ function mapDeal(row: SavedAnalysisRow): CompareDealViewModel {
     createdAt: row.created_at,
     propertyType: row.property_type,
     purchasePrice,
-    score: storedScore,
-    recommendation: storedRecommendation,
-    riskLevel: storedRiskLevel,
+    score,
+    recommendation,
+    riskLevel,
     scoringComplete,
     metrics,
     signal,
@@ -186,7 +199,7 @@ export default async function DashboardComparePage() {
     // compare right here, instead of being bounced to Saved Analyses and back.
     const { data: pickerRows } = await supabase
       .from("saved_analyses")
-      .select("id, address, title, net_cash_flow_monthly, result_snapshot")
+      .select("id, address, title, net_cash_flow_monthly, result_snapshot, form_snapshot")
       .eq("user_id", user.id)
       .is("deleted_at", null)
       .eq("is_completed", false)
@@ -195,8 +208,13 @@ export default async function DashboardComparePage() {
 
     const pickerDeals: ComparePickerDeal[] = (pickerRows ?? []).map((r) => {
       const snap = (r.result_snapshot ?? {}) as ResultSnapshot;
-      const score = toNumber(snap.score);
-      const rec = snap.recommendation ?? null;
+      // Recompute with the current engine so the picker score matches the
+      // Compare results + Dashboard (not the stale stored snapshot).
+      const recomputed = recomputeSavedDealVerdict((r as { form_snapshot?: unknown }).form_snapshot);
+      const score = recomputed ? recomputed.score : toNumber(snap.score);
+      const rec: StoredRecommendation | null = recomputed
+        ? recomputed.recommendation
+        : (snap.recommendation ?? null);
       return {
         id: r.id as string,
         label:
