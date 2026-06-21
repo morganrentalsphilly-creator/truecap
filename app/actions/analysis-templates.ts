@@ -4,6 +4,8 @@ import { analysisTemplateSchema, type AnalysisTemplateBuyBox } from "@/lib/analy
 import { getEntitlementsForUser } from "@/lib/entitlements";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { DEFAULT_APPRECIATION_RATE, DEFAULT_SELLING_COST_PCT } from "@/lib/exit-scenarios";
+import { investmentFormSchema, type InvestmentFormValues } from "@/lib/investcalc-schema";
+import { saveDealAction } from "@/app/actions/saved-analyses";
 
 /** Columns shared with `saved_analyses` / investment form (camelCase in app). */
 export type AnalysisTemplateOption = {
@@ -99,6 +101,39 @@ function mapTemplateRow(row: Record<string, unknown>): AnalysisTemplateOption {
     kind: (row.kind as string | null) ?? null,
     buyBox: normalizeTemplateBuyBox(row.buy_box),
   };
+}
+
+type DbClient = Awaited<ReturnType<typeof createServerSupabaseClient>>;
+
+/**
+ * Append an immutable version snapshot for a template. Best-effort: never
+ * blocks a save (e.g. if the versions table isn't migrated yet). Snapshot is
+ * the raw template row (snake_case) so restore can write it back directly.
+ */
+async function recordTemplateVersion(
+  supabase: DbClient,
+  userId: string,
+  templateId: string,
+  snapshot: Record<string, unknown>
+): Promise<void> {
+  try {
+    const { data: maxRow } = await supabase
+      .from("analysis_template_versions")
+      .select("version")
+      .eq("template_id", templateId)
+      .order("version", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    const nextVersion = ((maxRow as { version?: number } | null)?.version ?? 0) + 1;
+    await supabase.from("analysis_template_versions").insert({
+      template_id: templateId,
+      created_by: userId,
+      version: nextVersion,
+      snapshot,
+    });
+  } catch {
+    // Version history is best-effort — never block the underlying save.
+  }
 }
 
 export type ListTemplatesResult =
@@ -338,10 +373,9 @@ export async function createAnalysisTemplateAction(
     return { ok: false, code: "SERVER_ERROR", message: error.message };
   }
 
-  return {
-    ok: true,
-    template: mapTemplateRow(data as Record<string, unknown>),
-  };
+  const saved = mapTemplateRow(data as Record<string, unknown>);
+  await recordTemplateVersion(supabase, user.id, saved.id, data as Record<string, unknown>);
+  return { ok: true, template: saved };
 }
 
 export async function updateAnalysisTemplateAction(
@@ -468,10 +502,9 @@ export async function updateAnalysisTemplateAction(
     return { ok: false, code: "SERVER_ERROR", message: error.message };
   }
 
-  return {
-    ok: true,
-    template: mapTemplateRow(data as Record<string, unknown>),
-  };
+  const saved = mapTemplateRow(data as Record<string, unknown>);
+  await recordTemplateVersion(supabase, user.id, saved.id, data as Record<string, unknown>);
+  return { ok: true, template: saved };
 }
 
 export async function deleteAnalysisTemplateAction(
@@ -667,4 +700,292 @@ export async function duplicateTemplateAction(templateId: string): Promise<Updat
   };
 
   return createAnalysisTemplateAction(input, src.kind);
+}
+
+/**
+ * Overlay a template's *assumption* fields onto a deal's form values, keeping
+ * the deal-specific facts (address, type, price, beds/baths/sqft, rent, units,
+ * loan term). Mirrors the analyzer's applyTemplateToForm mapping exactly
+ * (template `managementPct`→form `mgmtPct`, `interestRatePct`→`interestRate`,
+ * `insuranceMo`→`insuranceMonthly`).
+ */
+function applyTemplateAssumptions(
+  values: InvestmentFormValues,
+  tpl: AnalysisTemplateOption
+): InvestmentFormValues {
+  return {
+    ...values,
+    propertyTaxPct: tpl.propertyTaxPct,
+    insuranceInputMode: tpl.insuranceInputMode,
+    insurancePct: tpl.insurancePct ?? undefined,
+    insuranceMonthly: tpl.insuranceMo ?? undefined,
+    maintenancePct: tpl.maintenancePct,
+    vacancyPct: tpl.vacancyPct,
+    mgmtPct: tpl.managementPct,
+    capexPct: tpl.capexPct,
+    closingCostsPct: tpl.closingCostsPct,
+    interestRate: tpl.interestRatePct,
+    downPaymentPct: tpl.downPaymentPct,
+    expenseGrowthPct: tpl.expenseGrowthPct,
+    rentGrowthPct: tpl.rentGrowthPct,
+    appreciationRatePct: tpl.appreciationRatePct,
+    sellingCostPct: tpl.sellingCostPct,
+    buildingValuePct: tpl.buildingValuePct,
+    depreciationYears: tpl.depreciationYears,
+    includeInterestDeduction: tpl.includeInterestDeduction,
+    taxRatePct: tpl.taxRatePct,
+  };
+}
+
+export type ApplyTemplateToDealResult =
+  | { ok: true; dealId: string }
+  | {
+      ok: false;
+      code: "SIGN_IN_REQUIRED" | "ENTITLEMENT_TEMPLATE" | "NOT_FOUND" | "VALIDATION_ERROR" | "SERVER_ERROR";
+      message: string;
+    };
+
+/**
+ * Re-underwrite an existing saved deal with a template's assumptions overlaid
+ * (deal facts kept). Reuses saveDealAction so the recompute, score, and
+ * persistence are identical to a normal save. Pro-gated.
+ */
+export async function applyTemplateToDealAction(
+  dealId: string,
+  templateId: string
+): Promise<ApplyTemplateToDealResult> {
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in." };
+  }
+
+  const entitlements = await getEntitlementsForUser(supabase, user.id);
+  if (!entitlements.features.includes("template_manage")) {
+    return { ok: false, code: "ENTITLEMENT_TEMPLATE", message: "Upgrade required to apply templates." };
+  }
+
+  const { data: dealRow, error: dealErr } = await supabase
+    .from("saved_analyses")
+    .select("form_snapshot")
+    .eq("id", dealId)
+    .eq("user_id", user.id)
+    .is("deleted_at", null)
+    .maybeSingle();
+  if (dealErr) {
+    return { ok: false, code: "SERVER_ERROR", message: dealErr.message };
+  }
+  if (!dealRow) {
+    return { ok: false, code: "NOT_FOUND", message: "Deal not found." };
+  }
+
+  const { data: tplRow, error: tplErr } = await supabase
+    .from("analysis_templates")
+    .select(TEMPLATE_ROW_FIELDS)
+    .eq("id", templateId)
+    .maybeSingle();
+  if (tplErr) {
+    return { ok: false, code: "SERVER_ERROR", message: tplErr.message };
+  }
+  if (!tplRow) {
+    return { ok: false, code: "NOT_FOUND", message: "Template not found." };
+  }
+  const template = mapTemplateRow(tplRow as Record<string, unknown>);
+
+  const parsed = investmentFormSchema.safeParse((dealRow as { form_snapshot?: unknown }).form_snapshot);
+  if (!parsed.success) {
+    return { ok: false, code: "VALIDATION_ERROR", message: "This deal's saved inputs can't be re-run." };
+  }
+
+  const merged: InvestmentFormValues = {
+    ...applyTemplateAssumptions(parsed.data, template),
+    templateId,
+  };
+
+  const result = await saveDealAction(merged, dealId);
+  if (!result.ok) {
+    return {
+      ok: false,
+      code: "SERVER_ERROR",
+      message: result.message ?? "Could not apply the template to this deal.",
+    };
+  }
+  return { ok: true, dealId: result.id ?? dealId };
+}
+
+export type TemplateVersionSummary = {
+  id: string;
+  version: number;
+  createdAt: string;
+  templateName: string;
+  downPaymentPct: number | null;
+  interestRatePct: number | null;
+  vacancyPct: number | null;
+};
+
+export type ListTemplateVersionsResult =
+  | { ok: true; versions: TemplateVersionSummary[] }
+  | {
+      ok: false;
+      code: "SIGN_IN_REQUIRED" | "ENTITLEMENT_TEMPLATE" | "NOT_FOUND" | "SERVER_ERROR";
+      message: string;
+    };
+
+export async function listTemplateVersionsAction(templateId: string): Promise<ListTemplateVersionsResult> {
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in." };
+  }
+  const entitlements = await getEntitlementsForUser(supabase, user.id);
+  if (!entitlements.features.includes("template_manage")) {
+    return { ok: false, code: "ENTITLEMENT_TEMPLATE", message: "Upgrade required to manage templates." };
+  }
+
+  const { data: tpl, error: tplErr } = await supabase
+    .from("analysis_templates")
+    .select("id")
+    .eq("id", templateId)
+    .eq("user_id", user.id)
+    .maybeSingle();
+  if (tplErr) {
+    return { ok: false, code: "SERVER_ERROR", message: tplErr.message };
+  }
+  if (!tpl) {
+    return { ok: false, code: "NOT_FOUND", message: "Template not found." };
+  }
+
+  const { data, error } = await supabase
+    .from("analysis_template_versions")
+    .select("id, version, created_at, snapshot")
+    .eq("template_id", templateId)
+    .order("version", { ascending: false });
+  if (error) {
+    // Migration not applied yet → no history rather than an error.
+    if (error.code === "42P01") return { ok: true, versions: [] };
+    return { ok: false, code: "SERVER_ERROR", message: error.message };
+  }
+
+  const toNum = (v: unknown): number | null => {
+    const n = typeof v === "number" ? v : Number(v);
+    return Number.isFinite(n) ? n : null;
+  };
+  const versions: TemplateVersionSummary[] = (data ?? []).map((r) => {
+    const row = r as {
+      id: string;
+      version: number;
+      created_at: string;
+      snapshot: Record<string, unknown> | null;
+    };
+    const s = row.snapshot ?? {};
+    return {
+      id: row.id,
+      version: row.version,
+      createdAt: row.created_at,
+      templateName: String(s.template_name ?? ""),
+      downPaymentPct: toNum(s.down_payment_pct),
+      interestRatePct: toNum(s.interest_rate_pct),
+      vacancyPct: toNum(s.vacancy_pct),
+    };
+  });
+  return { ok: true, versions };
+}
+
+/** Restore a template to a prior version (and record the restore as a new
+ *  version, so history stays append-only). */
+export async function restoreTemplateVersionAction(
+  templateId: string,
+  versionId: string
+): Promise<UpdateTemplateResult> {
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in." };
+  }
+  const entitlements = await getEntitlementsForUser(supabase, user.id);
+  if (!entitlements.features.includes("template_manage")) {
+    return { ok: false, code: "ENTITLEMENT_TEMPLATE", message: "Upgrade required to manage templates." };
+  }
+
+  const { data: tpl, error: tplErr } = await supabase
+    .from("analysis_templates")
+    .select("id, is_system")
+    .eq("id", templateId)
+    .eq("user_id", user.id)
+    .maybeSingle();
+  if (tplErr) {
+    return { ok: false, code: "SERVER_ERROR", message: tplErr.message };
+  }
+  if (!tpl || tpl.is_system) {
+    return { ok: false, code: "NOT_FOUND", message: "Template not found." };
+  }
+
+  const { data: ver, error: verErr } = await supabase
+    .from("analysis_template_versions")
+    .select("snapshot")
+    .eq("id", versionId)
+    .eq("template_id", templateId)
+    .maybeSingle();
+  if (verErr) {
+    return { ok: false, code: "SERVER_ERROR", message: verErr.message };
+  }
+  if (!ver) {
+    return { ok: false, code: "NOT_FOUND", message: "Version not found." };
+  }
+  const snap = ((ver as { snapshot: Record<string, unknown> | null }).snapshot ?? {}) as Record<string, unknown>;
+
+  const updatePayload = {
+    template_name: snap.template_name,
+    template_description: snap.template_description ?? null,
+    property_tax_pct: snap.property_tax_pct,
+    insurance_input_mode: snap.insurance_input_mode,
+    insurance_pct: snap.insurance_pct ?? null,
+    insurance_mo: snap.insurance_mo ?? null,
+    maintenance_pct: snap.maintenance_pct,
+    vacancy_pct: snap.vacancy_pct,
+    management_pct: snap.management_pct,
+    capex_pct: snap.capex_pct,
+    closing_costs_pct: snap.closing_costs_pct,
+    interest_rate_pct: snap.interest_rate_pct,
+    down_payment_pct: snap.down_payment_pct,
+    expense_growth_pct: snap.expense_growth_pct,
+    rent_growth_pct: snap.rent_growth_pct,
+    appreciation_rate_pct: snap.appreciation_rate_pct,
+    selling_cost_pct: snap.selling_cost_pct,
+    building_value_pct: snap.building_value_pct,
+    depreciation_years: snap.depreciation_years,
+    include_interest_deduction: snap.include_interest_deduction,
+    tax_rate_pct: snap.tax_rate_pct,
+    kind: snap.kind ?? null,
+    buy_box: snap.buy_box ?? null,
+  };
+
+  const { data, error } = await supabase
+    .from("analysis_templates")
+    .update(updatePayload)
+    .eq("id", templateId)
+    .eq("user_id", user.id)
+    .eq("is_system", false)
+    .select(TEMPLATE_ROW_FIELDS)
+    .single();
+  if (error) {
+    if (error.code === "23505") {
+      return {
+        ok: false,
+        code: "DUPLICATE_TEMPLATE_NAME",
+        message: "A template with that name already exists. Rename it first.",
+      };
+    }
+    return { ok: false, code: "SERVER_ERROR", message: error.message };
+  }
+
+  const restored = mapTemplateRow(data as Record<string, unknown>);
+  await recordTemplateVersion(supabase, user.id, templateId, data as Record<string, unknown>);
+  return { ok: true, template: restored };
 }

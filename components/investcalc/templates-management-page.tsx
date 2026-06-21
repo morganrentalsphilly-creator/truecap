@@ -3,8 +3,10 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft,
+  ArrowRightLeft,
   Copy,
   FileText,
+  History,
   Loader2,
   Pencil,
   Plus,
@@ -17,12 +19,17 @@ import {
 import { STARTER_TEMPLATES, type StarterTemplate } from "@/lib/starter-templates";
 import type { AnalysisTemplateOption } from "@/app/actions/analysis-templates";
 import {
+  applyTemplateToDealAction,
   createAnalysisTemplateAction,
   deleteAnalysisTemplateAction,
   duplicateTemplateAction,
+  listTemplateVersionsAction,
+  restoreTemplateVersionAction,
   setDefaultTemplateAction,
   updateAnalysisTemplateAction,
+  type TemplateVersionSummary,
 } from "@/app/actions/analysis-templates";
+import { listSavedDealsBriefAction, type SavedDealBrief } from "@/app/actions/saved-analyses";
 import { saveBuyBoxAction } from "@/app/actions/user-buy-box";
 import type { AnalysisTemplateInput } from "@/lib/analysis-template-schema";
 import { useToast } from "@/hooks/use-toast";
@@ -252,6 +259,15 @@ export function TemplatesManagementPage({
   };
 
   const [busyTemplateId, setBusyTemplateId] = useState<string | null>(null);
+  const [applyForTemplate, setApplyForTemplate] = useState<AnalysisTemplateOption | null>(null);
+  const [dealOptions, setDealOptions] = useState<SavedDealBrief[]>([]);
+  const [loadingDeals, setLoadingDeals] = useState(false);
+  const [selectedDealId, setSelectedDealId] = useState<string>("");
+  const [applyingToDeal, setApplyingToDeal] = useState(false);
+  const [versionsForTemplate, setVersionsForTemplate] = useState<AnalysisTemplateOption | null>(null);
+  const [versions, setVersions] = useState<TemplateVersionSummary[]>([]);
+  const [loadingVersions, setLoadingVersions] = useState(false);
+  const [restoringVersionId, setRestoringVersionId] = useState<string | null>(null);
 
   const handleSetDefault = async (template: AnalysisTemplateOption) => {
     setBusyTemplateId(template.id);
@@ -307,6 +323,74 @@ export function TemplatesManagementPage({
       });
     } finally {
       setBusyTemplateId(null);
+    }
+  };
+
+  const openApplyDialog = (template: AnalysisTemplateOption) => {
+    setApplyForTemplate(template);
+    setSelectedDealId("");
+    setDealOptions([]);
+    setLoadingDeals(true);
+    void listSavedDealsBriefAction()
+      .then((res) => {
+        if (res.ok) setDealOptions(res.deals);
+        else toast({ title: "Couldn't load your deals", description: res.message, variant: "destructive" });
+      })
+      .catch(() => {
+        /* non-critical */
+      })
+      .finally(() => setLoadingDeals(false));
+  };
+
+  const handleApplyToDeal = async () => {
+    if (!applyForTemplate || !selectedDealId) return;
+    setApplyingToDeal(true);
+    try {
+      const res = await applyTemplateToDealAction(selectedDealId, applyForTemplate.id);
+      if (!res.ok) {
+        toast({ title: "Couldn't apply template", description: res.message, variant: "destructive" });
+        return;
+      }
+      const dealLabel = dealOptions.find((d) => d.id === selectedDealId)?.label ?? "the deal";
+      toast({
+        title: "Template applied",
+        description: `Re-ran ${dealLabel} with "${applyForTemplate.templateName}".`,
+      });
+      setApplyForTemplate(null);
+    } finally {
+      setApplyingToDeal(false);
+    }
+  };
+
+  const openVersionDialog = (template: AnalysisTemplateOption) => {
+    setVersionsForTemplate(template);
+    setVersions([]);
+    setLoadingVersions(true);
+    void listTemplateVersionsAction(template.id)
+      .then((res) => {
+        if (res.ok) setVersions(res.versions);
+        else toast({ title: "Couldn't load history", description: res.message, variant: "destructive" });
+      })
+      .catch(() => {
+        /* non-critical */
+      })
+      .finally(() => setLoadingVersions(false));
+  };
+
+  const handleRestoreVersion = async (versionId: string) => {
+    if (!versionsForTemplate) return;
+    setRestoringVersionId(versionId);
+    try {
+      const res = await restoreTemplateVersionAction(versionsForTemplate.id, versionId);
+      if (!res.ok) {
+        toast({ title: "Couldn't restore version", description: res.message, variant: "destructive" });
+        return;
+      }
+      setTemplates((prev) => prev.map((t) => (t.id === res.template.id ? res.template : t)));
+      toast({ title: "Version restored", description: `"${res.template.templateName}" was restored.` });
+      setVersionsForTemplate(null);
+    } finally {
+      setRestoringVersionId(null);
     }
   };
 
@@ -516,6 +600,26 @@ export function TemplatesManagementPage({
                     Use as my Buy Box
                   </Button>
                 ) : null}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="mt-2 h-9 w-full rounded-xl"
+                  onClick={() => openApplyDialog(template)}
+                >
+                  <ArrowRightLeft className="w-4 h-4 mr-1.5" />
+                  Apply to a deal
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="mt-2 h-9 w-full rounded-xl"
+                  onClick={() => openVersionDialog(template)}
+                >
+                  <History className="w-4 h-4 mr-1.5" />
+                  Version history
+                </Button>
               </article>
             ))}
           </div>
@@ -616,6 +720,28 @@ export function TemplatesManagementPage({
                         >
                           <Copy className="w-4 h-4" />
                           <span className="sr-only">Duplicate template</span>
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          title="Apply to a deal"
+                          onClick={() => openApplyDialog(template)}
+                        >
+                          <ArrowRightLeft className="w-4 h-4" />
+                          <span className="sr-only">Apply to a deal</span>
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          title="Version history"
+                          onClick={() => openVersionDialog(template)}
+                        >
+                          <History className="w-4 h-4" />
+                          <span className="sr-only">Version history</span>
                         </Button>
                         <Button
                           type="button"
@@ -770,6 +896,146 @@ export function TemplatesManagementPage({
                   Delete Template
                 </>
               )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={!!applyForTemplate}
+        onOpenChange={(open) => {
+          if (!open && applyingToDeal) return;
+          if (!open) setApplyForTemplate(null);
+        }}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Apply template to a deal</DialogTitle>
+            <DialogDescription>
+              Re-runs the deal with {applyForTemplate?.templateName ?? "this template"} assumptions. Price,
+              beds, and rent stay; financing, expenses, and growth update.
+            </DialogDescription>
+          </DialogHeader>
+
+          {loadingDeals ? (
+            <div className="flex items-center gap-2 py-6 text-sm text-muted-foreground">
+              <Loader2 className="size-4 animate-spin" /> Loading your deals…
+            </div>
+          ) : dealOptions.length === 0 ? (
+            <p className="py-6 text-sm text-muted-foreground">
+              You have no saved deals to apply this to yet.
+            </p>
+          ) : (
+            <div className="space-y-1.5">
+              <label htmlFor="apply-deal-select" className="text-xs font-semibold text-muted-foreground">
+                Choose a saved deal
+              </label>
+              <select
+                id="apply-deal-select"
+                value={selectedDealId}
+                onChange={(e) => setSelectedDealId(e.target.value)}
+                className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm"
+              >
+                <option value="">Select a deal…</option>
+                {dealOptions.map((d) => (
+                  <option key={d.id} value={d.id}>
+                    {d.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={applyingToDeal}
+              onClick={() => setApplyForTemplate(null)}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              disabled={!selectedDealId || applyingToDeal}
+              onClick={() => void handleApplyToDeal()}
+            >
+              {applyingToDeal ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Applying…
+                </>
+              ) : (
+                "Apply template"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={!!versionsForTemplate}
+        onOpenChange={(open) => {
+          if (!open && restoringVersionId) return;
+          if (!open) setVersionsForTemplate(null);
+        }}
+      >
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Version history</DialogTitle>
+            <DialogDescription>
+              Saved versions of {versionsForTemplate?.templateName ?? "this template"}. Restore one to roll
+              its assumptions back.
+            </DialogDescription>
+          </DialogHeader>
+
+          {loadingVersions ? (
+            <div className="flex items-center gap-2 py-6 text-sm text-muted-foreground">
+              <Loader2 className="size-4 animate-spin" /> Loading history…
+            </div>
+          ) : versions.length === 0 ? (
+            <p className="py-6 text-sm text-muted-foreground">
+              No saved versions yet. Each edit you make is recorded here.
+            </p>
+          ) : (
+            <div className="max-h-[50vh] space-y-2 overflow-y-auto">
+              {versions.map((v, i) => (
+                <div
+                  key={v.id}
+                  className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card p-3"
+                >
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-foreground">
+                      v{v.version}
+                      {i === 0 ? " · current" : ""}
+                    </p>
+                    <p className="text-[11px] text-muted-foreground">
+                      {new Date(v.createdAt).toLocaleString()} · {v.downPaymentPct ?? "—"}% down ·{" "}
+                      {v.interestRatePct ?? "—"}% rate · {v.vacancyPct ?? "—"}% vac
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={i === 0 || restoringVersionId != null}
+                    onClick={() => void handleRestoreVersion(v.id)}
+                  >
+                    {restoringVersionId === v.id ? <Loader2 className="w-4 h-4 animate-spin" /> : "Restore"}
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setVersionsForTemplate(null)}
+              disabled={restoringVersionId != null}
+            >
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>

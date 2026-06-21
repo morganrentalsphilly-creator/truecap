@@ -910,6 +910,42 @@ export async function updateSavedDealTagsAction(
   return { ok: true, tags: normalized };
 }
 
+export type SavedDealBrief = { id: string; label: string; pipelineStage: string | null };
+export type ListSavedDealsBriefResult =
+  | { ok: true; deals: SavedDealBrief[] }
+  | { ok: false; code: "SIGN_IN_REQUIRED" | "SERVER_ERROR"; message: string };
+
+/** Lightweight list of the user's saved deals (id + label) for pickers,
+ *  e.g. "apply a template to an existing deal". */
+export async function listSavedDealsBriefAction(): Promise<ListSavedDealsBriefResult> {
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in." };
+  }
+  const { data, error } = await supabase
+    .from("saved_analyses")
+    .select("id, address, title, pipeline_stage, created_at")
+    .eq("user_id", user.id)
+    .is("deleted_at", null)
+    .order("created_at", { ascending: false })
+    .limit(200);
+  if (error) {
+    return { ok: false, code: "SERVER_ERROR", message: error.message };
+  }
+  const deals: SavedDealBrief[] = (data ?? []).map((r) => {
+    const row = r as { id: string; address: string | null; title: string | null; pipeline_stage: string | null };
+    return {
+      id: row.id,
+      label: row.address?.trim() || row.title?.trim() || "Untitled property",
+      pipelineStage: row.pipeline_stage ?? null,
+    };
+  });
+  return { ok: true, deals };
+}
+
 /**
  * Bulk archive or delete saved analyses.
  *
