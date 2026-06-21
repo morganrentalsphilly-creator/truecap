@@ -21,6 +21,7 @@ import {
   Search,
   SlidersHorizontal,
   Sparkles,
+  Tag,
   Trash2,
   X,
 } from "lucide-react";
@@ -41,10 +42,13 @@ import {
   getSavedAnalysisPdfExportAction,
   getSavedDealForEditingAction,
   updateSavedDealLifecycleStateAction,
+  updateSavedDealStageAction,
+  updateSavedDealTagsAction,
 } from "@/app/actions/saved-analyses";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import type { StoredRiskLevel } from "@/lib/compare-metrics";
+import { PIPELINE_STAGES, pipelineStageLabel, type PipelineStage } from "@/lib/pipeline";
 import { consumePendingSavedListSearch } from "@/lib/dashboard-saved-search-bridge";
 import { Switch } from "../ui/switch";
 import {
@@ -94,6 +98,8 @@ export type SavedAnalysisListItem = {
   riskLevel: StoredRiskLevel;
   /** Per-factor score breakdown for the "Why this score" popover. */
   breakdown?: DealScoreBreakdown | null;
+  pipelineStage?: PipelineStage;
+  tags?: string[];
   createdAt: string;
   status: "active" | "completed" | "archived";
 };
@@ -358,6 +364,85 @@ function buildReportDataFromSavedSnapshot(args: {
   };
 }
 
+/**
+ * Per-deal tag editor (Pro). Chips with inline remove + a popover to add.
+ * Stateless re: persistence — each change calls onSave, which hits the
+ * server action and refreshes. Reused in both the mobile card and the
+ * desktop table cell.
+ */
+function DealTags({
+  tags,
+  onSave,
+  disabled,
+}: {
+  tags: string[];
+  onSave: (tags: string[]) => void;
+  disabled?: boolean;
+}) {
+  const [input, setInput] = useState("");
+  const addTag = () => {
+    const t = input.trim().replace(/\s+/g, " ").slice(0, 24);
+    if (!t) return;
+    if (!tags.some((x) => x.toLowerCase() === t.toLowerCase()) && tags.length < 12) {
+      onSave([...tags, t]);
+    }
+    setInput("");
+  };
+  return (
+    <div className="flex flex-wrap items-center gap-1.5">
+      {tags.map((tag) => (
+        <span
+          key={tag}
+          className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-foreground"
+        >
+          {tag}
+          <button
+            type="button"
+            disabled={disabled}
+            aria-label={`Remove ${tag}`}
+            onClick={() => onSave(tags.filter((x) => x !== tag))}
+            className="text-muted-foreground hover:text-foreground disabled:opacity-50"
+          >
+            <X className="size-3" />
+          </button>
+        </span>
+      ))}
+      <Popover>
+        <PopoverTrigger asChild>
+          <button
+            type="button"
+            disabled={disabled}
+            className="inline-flex items-center gap-1 rounded-full border border-dashed border-border px-2 py-0.5 text-[11px] font-medium text-muted-foreground hover:text-foreground disabled:opacity-50"
+          >
+            <Tag className="size-3" />
+            {tags.length === 0 ? "Add tag" : "Add"}
+          </button>
+        </PopoverTrigger>
+        <PopoverContent align="start" className="w-56 p-2">
+          <div className="flex gap-1.5">
+            <Input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  addTag();
+                }
+              }}
+              placeholder="e.g. BRRRR"
+              className="h-8 text-xs"
+            />
+            <Button type="button" size="sm" className="h-8" onClick={addTag} disabled={disabled}>
+              Add
+            </Button>
+          </div>
+          <p className="mt-1.5 text-[10px] text-muted-foreground">Up to 12 tags, 24 chars each.</p>
+        </PopoverContent>
+      </Popover>
+    </div>
+  );
+}
+
 export function SavedAnalysesPage({
   initialItems,
   initialSelectedIds,
@@ -366,6 +451,7 @@ export function SavedAnalysesPage({
   activeDealStateFilter,
   canCompareDeals = false,
   canExportPdf = false,
+  canUsePipeline = false,
 }: {
   initialItems: SavedAnalysisListItem[];
   initialSelectedIds?: string[];
@@ -374,6 +460,7 @@ export function SavedAnalysesPage({
   activeDealStateFilter: DealStateFilter;
   canCompareDeals?: boolean;
   canExportPdf?: boolean;
+  canUsePipeline?: boolean;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -511,6 +598,35 @@ export function SavedAnalysesPage({
         description: "The deal lifecycle status was updated.",
         variant: "success",
       });
+      router.refresh();
+      setUpdatingDealStatusId(null);
+    });
+  };
+
+  const handleDealStageChange = (id: string, stage: PipelineStage) => {
+    setUpdatingDealStatusId(id);
+    startUpdateStatusTransition(async () => {
+      const result = await updateSavedDealStageAction(id, stage);
+      if (!result.ok) {
+        toast({ title: "Could not update stage", description: result.message, variant: "destructive" });
+        setUpdatingDealStatusId(null);
+        return;
+      }
+      toast({ title: "Stage updated", description: `Moved to ${pipelineStageLabel(stage)}.`, variant: "success" });
+      router.refresh();
+      setUpdatingDealStatusId(null);
+    });
+  };
+
+  const handleDealTagsChange = (id: string, tags: string[]) => {
+    setUpdatingDealStatusId(id);
+    startUpdateStatusTransition(async () => {
+      const result = await updateSavedDealTagsAction(id, tags);
+      if (!result.ok) {
+        toast({ title: "Could not update tags", description: result.message, variant: "destructive" });
+        setUpdatingDealStatusId(null);
+        return;
+      }
       router.refresh();
       setUpdatingDealStatusId(null);
     });
@@ -1267,20 +1383,46 @@ export function SavedAnalysesPage({
                   </div>
 
                   <div className="mt-4 grid gap-3">
-                    <Select
-                      value={item.status}
-                      onValueChange={(value) => handleDealStatusChange(item.id, value as SavedAnalysisListItem["status"])}
-                      disabled={isUpdatingStatus && updatingDealStatusId === item.id}
-                    >
-                      <SelectTrigger className="h-10 w-full rounded-xl text-xs">
-                        <SelectValue placeholder="Status" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="active">Active</SelectItem>
-                        <SelectItem value="completed">Completed</SelectItem>
-                        <SelectItem value="archived">Archived</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    {canUsePipeline ? (
+                      <Select
+                        value={item.pipelineStage ?? "analyzing"}
+                        onValueChange={(value) => handleDealStageChange(item.id, value as PipelineStage)}
+                        disabled={isUpdatingStatus && updatingDealStatusId === item.id}
+                      >
+                        <SelectTrigger className="h-10 w-full rounded-xl text-xs">
+                          <SelectValue placeholder="Stage" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {PIPELINE_STAGES.map((s) => (
+                            <SelectItem key={s.id} value={s.id}>
+                              {s.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <Select
+                        value={item.status}
+                        onValueChange={(value) => handleDealStatusChange(item.id, value as SavedAnalysisListItem["status"])}
+                        disabled={isUpdatingStatus && updatingDealStatusId === item.id}
+                      >
+                        <SelectTrigger className="h-10 w-full rounded-xl text-xs">
+                          <SelectValue placeholder="Status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="active">Active</SelectItem>
+                          <SelectItem value="completed">Completed</SelectItem>
+                          <SelectItem value="archived">Archived</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                    {canUsePipeline ? (
+                      <DealTags
+                        tags={item.tags ?? []}
+                        disabled={isUpdatingStatus && updatingDealStatusId === item.id}
+                        onSave={(t) => handleDealTagsChange(item.id, t)}
+                      />
+                    ) : null}
                     <div className="grid grid-cols-2 gap-2">
                       <Button
                         type="button"
@@ -1416,20 +1558,48 @@ export function SavedAnalysesPage({
                       <td className="font-medium">{toPercent(item.capRatePct)}</td>
                       <td className="font-semibold text-foreground">{toCurrency(item.purchasePrice)}</td>
                       <td className="pr-2">
-                        <Select
-                          value={item.status}
-                          onValueChange={(value) => handleDealStatusChange(item.id, value as SavedAnalysisListItem["status"])}
-                          disabled={isUpdatingStatus && updatingDealStatusId === item.id}
-                        >
-                          <SelectTrigger className="h-8 w-[150px] rounded-md text-xs">
-                            <SelectValue placeholder="Status" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="active">Active</SelectItem>
-                            <SelectItem value="completed">Completed</SelectItem>
-                            <SelectItem value="archived">Archived</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <div className="flex flex-col gap-2">
+                          {canUsePipeline ? (
+                            <Select
+                              value={item.pipelineStage ?? "analyzing"}
+                              onValueChange={(value) => handleDealStageChange(item.id, value as PipelineStage)}
+                              disabled={isUpdatingStatus && updatingDealStatusId === item.id}
+                            >
+                              <SelectTrigger className="h-8 w-[150px] rounded-md text-xs">
+                                <SelectValue placeholder="Stage" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {PIPELINE_STAGES.map((s) => (
+                                  <SelectItem key={s.id} value={s.id}>
+                                    {s.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          ) : (
+                            <Select
+                              value={item.status}
+                              onValueChange={(value) => handleDealStatusChange(item.id, value as SavedAnalysisListItem["status"])}
+                              disabled={isUpdatingStatus && updatingDealStatusId === item.id}
+                            >
+                              <SelectTrigger className="h-8 w-[150px] rounded-md text-xs">
+                                <SelectValue placeholder="Status" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="active">Active</SelectItem>
+                                <SelectItem value="completed">Completed</SelectItem>
+                                <SelectItem value="archived">Archived</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          )}
+                          {canUsePipeline ? (
+                            <DealTags
+                              tags={item.tags ?? []}
+                              disabled={isUpdatingStatus && updatingDealStatusId === item.id}
+                              onSave={(t) => handleDealTagsChange(item.id, t)}
+                            />
+                          ) : null}
+                        </div>
                       </td>
                       <td className="pr-2">
                         <div className="flex items-center gap-2">

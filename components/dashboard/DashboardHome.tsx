@@ -39,6 +39,7 @@ import type { DashboardDeal } from "@/lib/dashboard-deal-mapping";
 import { mapRiskLevelToRisk, resolveReturnMetric, resolveRiskMetric } from "@/lib/dashboard-risk-return";
 import { recommendationLabel } from "@/lib/deal-score";
 import { cn } from "@/lib/utils";
+import { PIPELINE_STAGES, type PipelineStage } from "@/lib/pipeline";
 
 export type { DashboardDeal } from "@/lib/dashboard-deal-mapping";
 import { RateWatchStrip } from "@/components/dashboard/RateWatchStrip";
@@ -285,6 +286,30 @@ function getPortfolioKpis(data: DashboardHomeData) {
 }
 
 /**
+ * Pipeline summary — count + total value per acquisition stage. Self-hides
+ * unless the user's deals span ≥2 distinct stages, so free users (who can't
+ * set stages) and Pro users who haven't started moving deals see nothing.
+ */
+function getPipelineSummary(data: DashboardHomeData) {
+  const deals = data.allDeals;
+  if (deals.length === 0) return null;
+  const byStage = new Map<PipelineStage, { count: number; value: number }>();
+  for (const d of deals) {
+    const stage = (d.pipelineStage ?? "analyzing") as PipelineStage;
+    const cur = byStage.get(stage) ?? { count: 0, value: 0 };
+    cur.count += 1;
+    cur.value += d.purchasePrice ?? 0;
+    byStage.set(stage, cur);
+  }
+  if (byStage.size < 2) return null;
+  const segments = PIPELINE_STAGES.filter((s) => byStage.has(s.id)).map((s) => {
+    const entry = byStage.get(s.id)!;
+    return { id: s.id, label: s.label, count: entry.count, value: entry.value };
+  });
+  return { segments };
+}
+
+/**
  * Portfolio-level totals — answers the question every investor asks
  * each morning: "what does my book look like right now?" Computed
  * over allDeals (not topDeals) so it reflects the full saved set.
@@ -415,7 +440,7 @@ export function DashboardHome({
   // several times each, and re-running them on every re-render (Topbar
   // interactions etc.) is pure waste. `data` comes from the server
   // component and is referentially stable per page load.
-  const { topDeals, riskReturn, dealComparison, highlights, insights, portfolio, decisionCenter, kpis } = useMemo(
+  const { topDeals, riskReturn, dealComparison, highlights, insights, portfolio, decisionCenter, kpis, pipeline } = useMemo(
     () => ({
       topDeals: getTopDeals(data),
       riskReturn: getRiskReturn(data),
@@ -425,6 +450,7 @@ export function DashboardHome({
       portfolio: getPortfolioTotals(data),
       decisionCenter: getDecisionCenter(data),
       kpis: getPortfolioKpis(data),
+      pipeline: getPipelineSummary(data),
     }),
     [data]
   );
@@ -736,6 +762,35 @@ export function DashboardHome({
                 </div>
               </div>
             ) : null}
+          </section>
+        ) : null}
+
+        {/* ── Pipeline summary — count + value per acquisition stage.
+            Self-hides unless deals span ≥2 stages (Pro feature; invisible
+            until the user actually moves deals through the funnel). */}
+        {pipeline ? (
+          <section>
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Pipeline</h2>
+              <Link
+                href="/dashboard/saved-analyses"
+                prefetch={false}
+                className="text-xs font-semibold text-primary underline-offset-2 hover:underline"
+              >
+                Manage →
+              </Link>
+            </div>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+              {pipeline.segments.map((seg) => (
+                <div key={seg.id} className="rounded-xl border border-border bg-card p-3">
+                  <div className="truncate text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                    {seg.label}
+                  </div>
+                  <div className="mt-1 text-lg font-bold text-foreground">{seg.count}</div>
+                  <div className="truncate text-[11px] text-muted-foreground">{formatCurrency(seg.value, true)}</div>
+                </div>
+              ))}
+            </div>
           </section>
         ) : null}
 

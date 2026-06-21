@@ -1,5 +1,6 @@
 import { getTypeLabel, type PropertyType, type StoredRecommendation, type StoredRiskLevel } from "@/lib/compare-metrics";
 import type { DealScoreBreakdown } from "@/lib/deal-score";
+import { DEFAULT_PIPELINE_STAGE, isPipelineStage, type PipelineStage } from "@/lib/pipeline";
 
 type NumericLike = number | string | null | undefined;
 
@@ -63,6 +64,8 @@ export type SavedAnalysisDashboardRow = {
   /** Stored form values — lets callers re-score with the current engine so a
    *  pre-upgrade stored score isn't shown stale. Optional/back-compatible. */
   form_snapshot?: unknown;
+  pipeline_stage?: string | null;
+  tags?: string[] | null;
 };
 
 export type DashboardDeal = {
@@ -95,6 +98,8 @@ export type DashboardDeal = {
    *  risk penalty). Optional/null from the stored snapshot; populated by the
    *  dashboard's recompute-on-read so the "Why this score" popover can show it. */
   breakdown?: DealScoreBreakdown | null;
+  /** Acquisition-funnel stage (optional; defaults to analyzing). */
+  pipelineStage?: PipelineStage;
   tags: string[];
 };
 
@@ -179,6 +184,12 @@ export function buildDashboardDeal(row: SavedAnalysisDashboardRow): DashboardDea
     // Stored snapshots don't carry the per-factor breakdown; the dashboard
     // overlays it from the recompute (see app/dashboard/page.tsx).
     breakdown: null,
-    tags: Array.isArray(snapshot.tags) ? snapshot.tags.filter((tag): tag is string => typeof tag === "string") : [],
+    pipelineStage: isPipelineStage(row.pipeline_stage) ? row.pipeline_stage : DEFAULT_PIPELINE_STAGE,
+    // Prefer the real tags column; fall back to any legacy snapshot.tags.
+    tags: Array.isArray(row.tags)
+      ? row.tags.filter((tag): tag is string => typeof tag === "string")
+      : Array.isArray(snapshot.tags)
+        ? snapshot.tags.filter((tag): tag is string => typeof tag === "string")
+        : [],
   };
 }

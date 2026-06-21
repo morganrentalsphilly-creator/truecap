@@ -16,6 +16,7 @@ import {
   isValidRentalUnit,
   type InvestmentFormValues,
 } from "@/lib/investcalc-schema";
+import { flagsForStage, isPipelineStage, normalizeTags, type PipelineStage } from "@/lib/pipeline";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { DEFAULT_APPRECIATION_RATE, DEFAULT_SELLING_COST_PCT } from "@/lib/exit-scenarios";
 import { buildCompareSnapshotPayload } from "@/lib/compare-result-snapshot";
@@ -770,6 +771,109 @@ export async function updateSavedDealLifecycleStateAction(
   }
 
   return { ok: true };
+}
+
+/**
+ * Move a saved deal to a pipeline stage (Pro). pipeline_stage is the single
+ * lifecycle dimension; we sync the legacy is_completed/is_archived mirrors
+ * from it (closed⇒completed, passed⇒archived) so the stale-archive cron and
+ * older filters stay consistent. The last_activity_at trigger bumps on update.
+ */
+export async function updateSavedDealStageAction(
+  id: string,
+  stage: PipelineStage
+): Promise<UpdateSavedDealLifecycleResult> {
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in to update deal stage." };
+  }
+
+  const savedDealId = id.trim();
+  if (!savedDealId || !isPipelineStage(stage)) {
+    return { ok: false, code: "VALIDATION_ERROR", message: "Invalid deal or stage." };
+  }
+
+  const entitlements = await getEntitlementsForUser(supabase, user.id);
+  if (!hasPlanFeature(entitlements, "pipeline")) {
+    return { ok: false, code: "ENTITLEMENT_REQUIRED", message: "Pipeline stages are a Pro feature." };
+  }
+
+  const { data, error } = await supabase
+    .from("saved_analyses")
+    .update({
+      pipeline_stage: stage,
+      ...flagsForStage(stage),
+      last_activity_at: new Date().toISOString(),
+    })
+    .eq("id", savedDealId)
+    .eq("user_id", user.id)
+    .is("deleted_at", null)
+    .select("id")
+    .maybeSingle();
+
+  if (error) {
+    return { ok: false, code: "SERVER_ERROR", message: error.message };
+  }
+  if (!data) {
+    return { ok: false, code: "NOT_FOUND", message: "Deal was not found." };
+  }
+  return { ok: true };
+}
+
+export type UpdateSavedDealTagsResult =
+  | { ok: true; tags: string[] }
+  | {
+      ok: false;
+      code: "SIGN_IN_REQUIRED" | "ENTITLEMENT_REQUIRED" | "NOT_FOUND" | "VALIDATION_ERROR" | "SERVER_ERROR";
+      message: string;
+    };
+
+/** Replace a saved deal's tags (Pro). Tags are normalized server-side. */
+export async function updateSavedDealTagsAction(
+  id: string,
+  tags: unknown
+): Promise<UpdateSavedDealTagsResult> {
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in to update tags." };
+  }
+
+  const savedDealId = id.trim();
+  if (!savedDealId) {
+    return { ok: false, code: "VALIDATION_ERROR", message: "Invalid deal id." };
+  }
+
+  const entitlements = await getEntitlementsForUser(supabase, user.id);
+  if (!hasPlanFeature(entitlements, "pipeline")) {
+    return { ok: false, code: "ENTITLEMENT_REQUIRED", message: "Deal tags are a Pro feature." };
+  }
+
+  const normalized = normalizeTags(tags);
+
+  const { data, error } = await supabase
+    .from("saved_analyses")
+    .update({ tags: normalized, last_activity_at: new Date().toISOString() })
+    .eq("id", savedDealId)
+    .eq("user_id", user.id)
+    .is("deleted_at", null)
+    .select("id")
+    .maybeSingle();
+
+  if (error) {
+    return { ok: false, code: "SERVER_ERROR", message: error.message };
+  }
+  if (!data) {
+    return { ok: false, code: "NOT_FOUND", message: "Deal was not found." };
+  }
+  return { ok: true, tags: normalized };
 }
 
 /**
