@@ -111,6 +111,14 @@ export function parsePropertyRecord(raw: unknown): PropertyFacts | null {
   return hasAny ? facts : null;
 }
 
+/** The AVM responses carry the subject property's facts in `subjectProperty`
+ *  (same field shape as a property record), so we parse facts from there
+ *  instead of a separate /properties call. */
+export function parseSubjectProperty(avmRaw: unknown): PropertyFacts | null {
+  if (!avmRaw || typeof avmRaw !== "object") return null;
+  return parsePropertyRecord((avmRaw as Record<string, unknown>).subjectProperty);
+}
+
 function parseComp(raw: unknown): EnrichmentComp | null {
   if (!raw || typeof raw !== "object") return null;
   const o = raw as Record<string, unknown>;
@@ -184,21 +192,32 @@ function buildQuery(q: RentCastQuery): string {
  * is configured (feature dormant) or every lookup failed. Each of the three
  * lookups is independent and null-safe.
  */
+/**
+ * RentCast wants "Street, City, State, Zip"; Google Places appends a country
+ * ("…, USA"), which can break the address match — strip it.
+ */
+function sanitizeAddress(address: string): string {
+  return address.replace(/,?\s*(united states|usa|us)\s*$/i, "").trim();
+}
+
 export async function fetchRentCastEnrichment(q: RentCastQuery): Promise<PropertyEnrichment | null> {
   const apiKey = process.env.RENTCAST_API_KEY;
   if (!apiKey) return null;
-  if (!q.address || !q.address.trim()) return null;
+  const address = sanitizeAddress(q.address ?? "");
+  if (!address) return null;
 
-  const qs = buildQuery(q);
-  const [recordRaw, valueRaw, rentRaw] = await Promise.all([
-    fetchJson(`/properties?${new URLSearchParams({ address: q.address }).toString()}`, apiKey),
+  // Two calls, not three: each AVM response carries a `subjectProperty` with
+  // the facts, so we skip a separate /properties lookup — ~1/3 less quota per
+  // enrichment.
+  const qs = buildQuery({ ...q, address });
+  const [valueRaw, rentRaw] = await Promise.all([
     fetchJson(`/avm/value?${qs}`, apiKey),
     fetchJson(`/avm/rent/long-term?${qs}`, apiKey),
   ]);
 
-  const facts = parsePropertyRecord(recordRaw);
   const value = parseAvm(valueRaw, "value");
   const rent = parseAvm(rentRaw, "rent");
+  const facts = parseSubjectProperty(valueRaw) ?? parseSubjectProperty(rentRaw);
 
   if (!facts && !value && !rent) return null;
 

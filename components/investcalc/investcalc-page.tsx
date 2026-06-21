@@ -44,6 +44,7 @@ import { cn } from "@/lib/utils";
 import { saveDealAction } from "@/app/actions/saved-analyses";
 import { buildDataConfidence, type EnrichmentProvenanceInput } from "@/lib/data-confidence";
 import type { ReportMode } from "@/lib/pdf-export-constants";
+import type { PropertyEnrichment } from "@/lib/property-enrichment/rentcast";
 import { addDealToCompareAction } from "@/app/actions/compare";
 import { getDealScoreAction, type DealScoreActionResult } from "@/app/actions/deal-score";
 import { trackAnalysisRunAction } from "@/app/actions/track-analysis-run";
@@ -1744,6 +1745,23 @@ export function InvestCalcPage({
     }
   };
 
+  /** Fill the form from pulled comps (facts + AVM estimates). Deal-specific
+   *  fields the user typed are overwritten intentionally — they clicked "Use
+   *  these numbers" — and recompute fires via the form watch. */
+  const handleApplyComps = (enrichment: PropertyEnrichment) => {
+    const f = enrichment.facts;
+    if (f?.bedrooms != null) form.setValue("bedrooms", f.bedrooms, { shouldDirty: true, shouldValidate: true });
+    if (f?.bathrooms != null) form.setValue("bathrooms", f.bathrooms, { shouldDirty: true, shouldValidate: true });
+    if (f?.squareFootage != null) form.setValue("sqft", f.squareFootage, { shouldDirty: true, shouldValidate: true });
+    if (enrichment.valueEstimate != null) {
+      form.setValue("purchasePrice", Math.round(enrichment.valueEstimate), { shouldDirty: true, shouldValidate: true });
+    }
+    const pt = form.getValues("propertyType");
+    if (enrichment.rentEstimate != null && (pt === "single-family" || pt === "owner-occupant")) {
+      form.setValue("monthlyRent", Math.round(enrichment.rentEstimate), { shouldDirty: true, shouldValidate: true });
+    }
+  };
+
   const handleExportPdf = async (mode: ReportMode = "personal") => {
     if (!analysisResult) return;
     const oneTimeUnlocked = oneTimePdfUnlockedRef.current;
@@ -2596,6 +2614,7 @@ export function InvestCalcPage({
               onCompareDeals={handleCompareDeals}
               onExportPdf={handleExportPdf}
               onNewAnalysis={handleNewAnalysis}
+              onApplyComps={handleApplyComps}
               isSaving={isSavingDeal}
               isComparing={isComparingDeals}
               isExporting={isExportingPdf}

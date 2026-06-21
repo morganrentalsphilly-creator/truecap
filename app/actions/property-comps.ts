@@ -19,7 +19,7 @@ import { fetchRentCastEnrichment, type PropertyEnrichment } from "@/lib/property
 
 const CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 
-// Hard monthly cap on LIVE enrichments (each ≈ 3 RentCast API calls), to
+// Hard monthly cap on LIVE enrichments (each ≈ 2 RentCast API calls), to
 // guard the 1,000-calls/mo plan limit even across many paid users. Tunable
 // via env; default 300 enrichments (~900 calls), leaving headroom.
 const MONTHLY_ENRICHMENT_CAP = Number.parseInt(process.env.RENTCAST_MONTHLY_ENRICHMENT_CAP ?? "300", 10);
@@ -72,14 +72,25 @@ export async function getPropertyCompsAction(input: unknown): Promise<PropertyCo
     return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in." };
   }
 
-  // Paid-only — each lookup consumes paid API quota.
+  // Pro = unlimited (within the monthly cap). Free users get ONE live lookup
+  // as a taste, then are gated. Cached views never burn the freebie (handled
+  // at the live-fetch commit point below).
   const isPaid = await hasPaidPlanSubscription(supabase, user.id);
-  if (!isPaid) {
-    return {
-      ok: false,
-      code: "ENTITLEMENT_REQUIRED",
-      message: "Live comps are a Pro feature. Upgrade to pull sale + rent comps for this address.",
-    };
+  const freeUser = !isPaid;
+  if (freeUser) {
+    const { data: prof, error: profErr } = await supabase
+      .from("profiles")
+      .select("comps_free_used")
+      .eq("id", user.id)
+      .maybeSingle();
+    // Column missing (migration pending) → don't risk free spend; gate.
+    if (profErr || Boolean((prof as { comps_free_used?: boolean } | null)?.comps_free_used)) {
+      return {
+        ok: false,
+        code: "ENTITLEMENT_REQUIRED",
+        message: "You've used your free comps lookup. Upgrade to Pro for unlimited sale + rent comps.",
+      };
+    }
   }
 
   if (!process.env.RENTCAST_API_KEY) {
@@ -123,6 +134,20 @@ export async function getPropertyCompsAction(input: unknown): Promise<PropertyCo
         message: "Comps have reached this month's data limit. They'll reset at the start of next month.",
       };
     }
+  }
+
+  // Committing to a live lookup (cache miss, under cap). For a free user this
+  // spends their one freebie — mark it now so it's consumed on the attempt and
+  // can't be gamed by retrying after an error.
+  if (freeUser) {
+    await supabase
+      .from("profiles")
+      .update({ comps_free_used: true })
+      .eq("id", user.id)
+      .then(
+        () => undefined,
+        () => undefined
+      );
   }
 
   // Live fetch.

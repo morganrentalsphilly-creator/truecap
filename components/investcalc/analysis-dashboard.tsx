@@ -73,6 +73,7 @@ import { BuyBoxVerdictCard } from "@/components/investcalc/buy-box-verdict-card"
 import { deriveStateFromAddress } from "@/lib/buy-box";
 import { DataConfidenceBadge } from "@/components/investcalc/data-confidence-badge";
 import { PropertyCompsCard } from "@/components/investcalc/property-comps-card";
+import type { PropertyEnrichment } from "@/lib/property-enrichment/rentcast";
 import type { DataConfidence } from "@/lib/data-confidence";
 import { REPORT_MODES, type ReportMode } from "@/lib/pdf-export-constants";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -139,6 +140,8 @@ interface AnalysisDashboardProps {
   onCompareDeals: () => void | Promise<void>;
   onExportPdf: (mode?: ReportMode) => void | Promise<void>;
   onNewAnalysis: () => void | Promise<void>;
+  /** Fill the analyzer form from pulled comps (facts + estimates). */
+  onApplyComps?: (enrichment: PropertyEnrichment) => void;
   isSaving?: boolean;
   isComparing?: boolean;
   isExporting?: boolean;
@@ -377,6 +380,7 @@ export function AnalysisDashboard({
   onCompareDeals,
   onExportPdf,
   onNewAnalysis,
+  onApplyComps,
   isSaving = false,
   isComparing = false,
   isExporting = false,
@@ -992,12 +996,13 @@ export function AnalysisDashboard({
           self-hides if the provider isn't configured. */}
       {values?.address ? (
         <PropertyCompsCard
-          enabled={Boolean(isAuthenticated && canUseProjections)}
+          enabled={Boolean(isAuthenticated)}
           address={values.address}
           propertyType={values.propertyType}
           bedrooms={values.bedrooms ?? null}
           bathrooms={values.bathrooms ?? null}
           squareFootage={values.sqft ?? null}
+          onApply={onApplyComps}
         />
       ) : null}
 

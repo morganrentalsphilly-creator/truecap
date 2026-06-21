@@ -55,6 +55,7 @@ export function PropertyCompsCard({
   bedrooms,
   bathrooms,
   squareFootage,
+  onApply,
 }: {
   enabled: boolean;
   address: string | null;
@@ -62,6 +63,8 @@ export function PropertyCompsCard({
   bedrooms?: number | null;
   bathrooms?: number | null;
   squareFootage?: number | null;
+  /** Fill the analyzer form from the pulled facts + estimates. */
+  onApply?: (enrichment: PropertyEnrichment) => void;
 }) {
   const { toast } = useToast();
   const [data, setData] = useState<PropertyEnrichment | null>(null);
@@ -142,6 +145,23 @@ export function PropertyCompsCard({
               ) : null}
             </div>
           </div>
+
+          {onApply ? (
+            <Button
+              type="button"
+              size="sm"
+              className="w-full"
+              onClick={() => {
+                onApply(data);
+                toast({
+                  title: "Applied to your analysis",
+                  description: "Filled facts + estimates from comps — tweak anything that's off.",
+                });
+              }}
+            >
+              Use these numbers in my analysis
+            </Button>
+          ) : null}
 
           <CompList title="Sale comps" comps={data.saleComps} />
           <CompList title="Rent comps" comps={data.rentComps} suffix="/mo" />
