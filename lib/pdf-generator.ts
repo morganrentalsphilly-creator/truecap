@@ -497,9 +497,11 @@ function drawHeader(
 
   // Footer-left text. Priority:
   //   1) Company name when branded
-  //   2) "Investment Report" default when unbranded
+  //   2) "Made with TrueCap — usetruecap.com" default when unbranded
+  //      (viral attribution — only on non-white-labeled reports, so a
+  //      Pro user's branded lender packet stays fully their own).
   // The "Prepared by [Name]" attribution was removed per design.
-  let footerLeft = "Investment Report";
+  let footerLeft = "Made with TrueCap — usetruecap.com";
   if (branding?.companyName?.trim()) {
     footerLeft = branding.companyName.trim();
   }

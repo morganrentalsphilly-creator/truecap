@@ -12,6 +12,7 @@
  * deal score) — those become upgrade prompts on the parent page.
  */
 
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 import type { AnalysisResult } from "@/lib/calc-analysis";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
@@ -127,6 +128,22 @@ export function ReadOnlyAnalysisView({ values, result }: ReadOnlyAnalysisViewPro
         </div>
         <StrategiesPanel values={values} result={result} />
       </div>
+
+      {/* Viral loop: this public share page is seen by partners, lenders,
+          and other investors. Convert them into TrueCap users. */}
+      <Link
+        href="/?utm_source=shared_deal&utm_medium=share_link"
+        className="block rounded-2xl bg-primary p-6 sm:p-8 text-center text-primary-foreground no-underline transition-opacity hover:opacity-90"
+      >
+        <p className="text-lg sm:text-xl font-extrabold">Analyzed with TrueCap</p>
+        <p className="mt-1 text-sm sm:text-base opacity-90">
+          Run your own rental deal free — cap rate, cash flow, and DSCR from
+          just an address in 60 seconds.
+        </p>
+        <span className="mt-4 inline-block rounded-xl bg-primary-foreground px-4 py-2.5 text-sm font-bold text-primary">
+          Try TrueCap free →
+        </span>
+      </Link>
     </div>
   );
 }
