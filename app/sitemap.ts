@@ -56,6 +56,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...cityStrategyUrls,
     ...marketCityUrls,
     {
+      url: `${siteUrl}/markets`,
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.8,
+    },
+    {
       url: `${siteUrl}/states`,
       lastModified: new Date(),
       changeFrequency: "monthly" as const,
