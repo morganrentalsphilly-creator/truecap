@@ -11,6 +11,7 @@ import {
   Search,
   Sparkles,
   Star,
+  Target,
   Trash2,
 } from "lucide-react";
 import { STARTER_TEMPLATES, type StarterTemplate } from "@/lib/starter-templates";
@@ -22,6 +23,7 @@ import {
   setDefaultTemplateAction,
   updateAnalysisTemplateAction,
 } from "@/app/actions/analysis-templates";
+import { saveBuyBoxAction } from "@/app/actions/user-buy-box";
 import type { AnalysisTemplateInput } from "@/lib/analysis-template-schema";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -49,6 +51,16 @@ const TEMPLATE_PAGE_SIZE = 10;
 
 function toPercentLabel(value: number): string {
   return `${value.toFixed(1)}%`;
+}
+
+function formatBuyBoxSummary(bb: NonNullable<AnalysisTemplateOption["buyBox"]>): string {
+  const parts: string[] = [];
+  if (bb.minCapRatePct != null) parts.push(`cap ≥${bb.minCapRatePct}%`);
+  if (bb.minCocPct != null) parts.push(`CoC ≥${bb.minCocPct}%`);
+  if (bb.minDscr != null) parts.push(`DSCR ≥${bb.minDscr}`);
+  if (bb.minCashFlowMonthly != null) parts.push(`CF ≥$${bb.minCashFlowMonthly.toLocaleString()}`);
+  if (bb.maxPurchasePrice != null) parts.push(`≤$${Math.round(bb.maxPurchasePrice).toLocaleString()}`);
+  return parts.join(" · ");
 }
 
 const DEFAULT_TEMPLATE_VALUES: AnalysisTemplateInput = {
@@ -98,6 +110,7 @@ function getTemplateValues(template: AnalysisTemplateOption): AnalysisTemplateIn
     depreciationYears: template.depreciationYears,
     includeInterestDeduction: template.includeInterestDeduction,
     taxRatePct: template.taxRatePct,
+    buyBox: template.buyBox ?? undefined,
   };
 }
 
@@ -270,6 +283,33 @@ export function TemplatesManagementPage({
     }
   };
 
+  const handleUseAsBuyBox = async (template: AnalysisTemplateOption) => {
+    if (!template.buyBox) return;
+    setBusyTemplateId(template.id);
+    try {
+      const result = await saveBuyBoxAction({
+        minCapRatePct: template.buyBox.minCapRatePct ?? null,
+        minCocPct: template.buyBox.minCocPct ?? null,
+        minDscr: template.buyBox.minDscr ?? null,
+        minCashFlowMonthly: template.buyBox.minCashFlowMonthly ?? null,
+        maxPurchasePrice: template.buyBox.maxPurchasePrice ?? null,
+        propertyTypes: [],
+        targetStates: [],
+        isActive: true,
+      });
+      if (!result.ok) {
+        toast({ title: "Couldn't set Buy Box", description: result.message, variant: "destructive" });
+        return;
+      }
+      toast({
+        title: "Buy Box updated",
+        description: `Now using "${template.templateName}" targets as your Buy Box.`,
+      });
+    } finally {
+      setBusyTemplateId(null);
+    }
+  };
+
   return (
     <main id="main" className="min-h-full bg-muted/30 pb-12">
       <section className="w-full px-4 sm:px-6 xl:px-8 pt-6 sm:pt-8 space-y-4 sm:space-y-6">
@@ -392,6 +432,11 @@ export function TemplatesManagementPage({
                     <p className="mt-1 text-[11px] text-muted-foreground">
                       Used by {template.usedCount ?? 0} {(template.usedCount ?? 0) === 1 ? "deal" : "deals"}
                     </p>
+                    {template.buyBox ? (
+                      <p className="mt-1 text-[11px] font-medium text-primary">
+                        Targets: {formatBuyBoxSummary(template.buyBox)}
+                      </p>
+                    ) : null}
                   </div>
                 </div>
 
@@ -458,6 +503,19 @@ export function TemplatesManagementPage({
                     Delete
                   </Button>
                 </div>
+                {template.buyBox ? (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="mt-2 h-9 w-full rounded-xl text-primary"
+                    disabled={busyTemplateId === template.id}
+                    onClick={() => handleUseAsBuyBox(template)}
+                  >
+                    <Target className="w-4 h-4 mr-1.5" />
+                    Use as my Buy Box
+                  </Button>
+                ) : null}
               </article>
             ))}
           </div>
@@ -521,6 +579,20 @@ export function TemplatesManagementPage({
                     <td className="px-4 text-right tabular-nums text-foreground">{toPercentLabel(template.taxRatePct)}</td>
                     <td className="px-4">
                       <div className="flex items-center justify-end gap-1.5">
+                        {template.buyBox ? (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-primary"
+                            disabled={busyTemplateId === template.id}
+                            title="Use as my Buy Box"
+                            onClick={() => handleUseAsBuyBox(template)}
+                          >
+                            <Target className="w-4 h-4" />
+                            <span className="sr-only">Use as my Buy Box</span>
+                          </Button>
+                        ) : null}
                         <Button
                           type="button"
                           variant="ghost"

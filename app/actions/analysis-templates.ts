@@ -1,6 +1,6 @@
 "use server";
 
-import { analysisTemplateSchema } from "@/lib/analysis-template-schema";
+import { analysisTemplateSchema, type AnalysisTemplateBuyBox } from "@/lib/analysis-template-schema";
 import { getEntitlementsForUser } from "@/lib/entitlements";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { DEFAULT_APPRECIATION_RATE, DEFAULT_SELLING_COST_PCT } from "@/lib/exit-scenarios";
@@ -33,16 +33,38 @@ export type AnalysisTemplateOption = {
   taxRatePct: number;
   isDefault: boolean;
   kind: string | null;
+  buyBox: AnalysisTemplateBuyBox | null;
   /** Number of saved deals using this template (derived at read time). */
   usedCount?: number;
 };
 
 const TEMPLATE_ROW_FIELDS =
-  "id, template_name, template_description, template_type, is_system, property_tax_pct, insurance_input_mode, insurance_pct, insurance_mo, maintenance_pct, vacancy_pct, management_pct, capex_pct, closing_costs_pct, interest_rate_pct, down_payment_pct, expense_growth_pct, rent_growth_pct, appreciation_rate_pct, selling_cost_pct, building_value_pct, depreciation_years, include_interest_deduction, tax_rate_pct, is_default, kind";
+  "id, template_name, template_description, template_type, is_system, property_tax_pct, insurance_input_mode, insurance_pct, insurance_mo, maintenance_pct, vacancy_pct, management_pct, capex_pct, closing_costs_pct, interest_rate_pct, down_payment_pct, expense_growth_pct, rent_growth_pct, appreciation_rate_pct, selling_cost_pct, building_value_pct, depreciation_years, include_interest_deduction, tax_rate_pct, is_default, kind, buy_box";
 
 function num(v: unknown, fallback: number): number {
   const n = typeof v === "number" ? v : Number(v);
   return Number.isFinite(n) ? n : fallback;
+}
+
+function normalizeTemplateBuyBox(raw: unknown): AnalysisTemplateBuyBox | null {
+  if (!raw || typeof raw !== "object") return null;
+  const o = raw as Record<string, unknown>;
+  const pick = (v: unknown): number | null => {
+    if (v == null || v === "") return null;
+    const n = typeof v === "number" ? v : Number(v);
+    return Number.isFinite(n) ? n : null;
+  };
+  const bb: AnalysisTemplateBuyBox = {
+    minCapRatePct: pick(o.minCapRatePct),
+    minCocPct: pick(o.minCocPct),
+    minDscr: pick(o.minDscr),
+    minCashFlowMonthly: pick(o.minCashFlowMonthly),
+    maxPurchasePrice: pick(o.maxPurchasePrice),
+  };
+  const hasAny = [bb.minCapRatePct, bb.minCocPct, bb.minDscr, bb.minCashFlowMonthly, bb.maxPurchasePrice].some(
+    (v) => v != null
+  );
+  return hasAny ? bb : null;
 }
 
 function mapTemplateRow(row: Record<string, unknown>): AnalysisTemplateOption {
@@ -75,6 +97,7 @@ function mapTemplateRow(row: Record<string, unknown>): AnalysisTemplateOption {
     taxRatePct: num(row.tax_rate_pct, 24),
     isDefault: !!row.is_default,
     kind: (row.kind as string | null) ?? null,
+    buyBox: normalizeTemplateBuyBox(row.buy_box),
   };
 }
 
@@ -299,6 +322,7 @@ export async function createAnalysisTemplateAction(
       tax_rate_pct: payload.taxRatePct ?? 24,
       is_system: false,
       kind: kind ?? null,
+      buy_box: normalizeTemplateBuyBox(payload.buyBox),
     })
     .select(TEMPLATE_ROW_FIELDS)
     .single();
@@ -425,6 +449,7 @@ export async function updateAnalysisTemplateAction(
       depreciation_years: payload.depreciationYears,
       include_interest_deduction: payload.includeInterestDeduction ?? true,
       tax_rate_pct: payload.taxRatePct ?? 24,
+      buy_box: normalizeTemplateBuyBox(payload.buyBox),
     })
     .eq("id", templateId)
     .eq("user_id", user.id)
@@ -638,6 +663,7 @@ export async function duplicateTemplateAction(templateId: string): Promise<Updat
     depreciationYears: src.depreciationYears,
     includeInterestDeduction: src.includeInterestDeduction,
     taxRatePct: src.taxRatePct,
+    buyBox: src.buyBox,
   };
 
   return createAnalysisTemplateAction(input, src.kind);

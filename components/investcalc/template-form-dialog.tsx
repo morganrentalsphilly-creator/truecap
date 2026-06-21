@@ -11,6 +11,7 @@ import {
   Loader2,
   Save,
   SlidersHorizontal,
+  Target,
   X,
 } from "lucide-react";
 import type { AnalysisTemplateOption } from "@/app/actions/analysis-templates";
@@ -121,6 +122,65 @@ function NumberInputField({
           ) : (
             <p className="mt-1 min-h-[14px]" />
           )}
+          <FormMessage className="text-[11px]" />
+        </FormItem>
+      )}
+    />
+  );
+}
+
+type BuyBoxFieldName =
+  | "buyBox.minCapRatePct"
+  | "buyBox.minCocPct"
+  | "buyBox.minDscr"
+  | "buyBox.minCashFlowMonthly"
+  | "buyBox.maxPurchasePrice";
+
+function BuyBoxField({
+  form,
+  name,
+  label,
+  prefix,
+  suffix,
+  step = "0.01",
+}: {
+  form: ReturnType<typeof useForm<AnalysisTemplateInput>>;
+  name: BuyBoxFieldName;
+  label: string;
+  prefix?: string;
+  suffix?: string;
+  step?: string;
+}) {
+  return (
+    <FormField
+      control={form.control}
+      name={name}
+      render={({ field }) => (
+        <FormItem className="rounded-lg border border-border bg-card px-3 py-2.5">
+          <FormLabel className="text-xs font-semibold text-foreground">{label}</FormLabel>
+          <div className="relative mt-1.5">
+            {prefix ? (
+              <span className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-xs font-semibold text-muted-foreground">
+                {prefix}
+              </span>
+            ) : null}
+            <FormControl>
+              <Input
+                type="number"
+                inputMode="decimal"
+                step={step}
+                value={field.value == null ? "" : (field.value as number)}
+                onChange={(e) => field.onChange(e.target.value === "" ? null : Number(e.target.value))}
+                placeholder="—"
+                className={cn("h-10 rounded-md", prefix ? "pl-6" : "", suffix ? "pr-8" : "")}
+              />
+            </FormControl>
+            {suffix ? (
+              <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-xs font-semibold text-muted-foreground">
+                {suffix}
+              </span>
+            ) : null}
+          </div>
           <FormMessage className="text-[11px]" />
         </FormItem>
       )}
@@ -414,6 +474,30 @@ export function TemplateFormDialog({
                     </FormItem>
                   )}
                 />
+              </div>
+
+              {/* Buy box targets — optional acquisition criteria the template
+                  aims for. Adopt them as your personal Buy Box in one click
+                  from the templates page. Every field is optional. */}
+              <div className="rounded-xl border border-border bg-card p-4 sm:p-5 space-y-4">
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <Target className="w-4 h-4" />
+                  </span>
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">Buy box targets (optional)</p>
+                    <p className="text-xs text-muted-foreground">
+                      Criteria this template aims for — leave blank to skip.
+                    </p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                  <BuyBoxField form={templateForm} name="buyBox.minCapRatePct" label="Min cap rate" suffix="%" step="0.1" />
+                  <BuyBoxField form={templateForm} name="buyBox.minCocPct" label="Min cash-on-cash" suffix="%" step="0.1" />
+                  <BuyBoxField form={templateForm} name="buyBox.minDscr" label="Min DSCR" suffix="×" step="0.05" />
+                  <BuyBoxField form={templateForm} name="buyBox.minCashFlowMonthly" label="Min monthly cash flow" prefix="$" step="25" />
+                  <BuyBoxField form={templateForm} name="buyBox.maxPurchasePrice" label="Max purchase price" prefix="$" step="5000" />
+                </div>
               </div>
             </form>
           </Form>

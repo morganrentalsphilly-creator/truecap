@@ -38,6 +38,17 @@ export const analysisTemplateSchema = z.object({
   depreciationYears: z.union([z.literal(27.5), z.literal(39)]),
   includeInterestDeduction: z.boolean().optional(),
   taxRatePct: z.number().gt(0, "Must be greater than 0").max(100, "Max 100%").optional(),
+  /** Optional acquisition-criteria thresholds the template targets. Each
+   *  field is optional — a template can carry none, some, or all. */
+  buyBox: z
+    .object({
+      minCapRatePct: z.number().min(0).max(100).nullish(),
+      minCocPct: z.number().min(-100).max(1000).nullish(),
+      minDscr: z.number().min(0).max(100).nullish(),
+      minCashFlowMonthly: z.number().min(-1_000_000).max(1_000_000).nullish(),
+      maxPurchasePrice: z.number().min(0).max(1_000_000_000).nullish(),
+    })
+    .nullish(),
 }).superRefine((values, ctx) => {
   if (values.insuranceInputMode === "percent" && values.insurancePct == null) {
     ctx.addIssue({
@@ -73,3 +84,4 @@ export const analysisTemplateSchema = z.object({
 });
 
 export type AnalysisTemplateInput = z.infer<typeof analysisTemplateSchema>;
+export type AnalysisTemplateBuyBox = NonNullable<AnalysisTemplateInput["buyBox"]>;
