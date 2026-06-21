@@ -83,6 +83,7 @@ import { MortgageScenarioCompare } from "@/components/investcalc/mortgage-scenar
 import { LoanAmortizationView } from "@/components/investcalc/loan-amortization-view";
 import { DealNotesPanel } from "@/components/investcalc/deal-notes-panel";
 import { DueDiligenceCard } from "@/components/investcalc/due-diligence-card";
+import { DealDocumentsCard } from "@/components/investcalc/deal-documents-card";
 // ShareLinkButton import temporarily removed — Share button was pulled from
 // the Quick Actions row because it wrapped onto a second line. Component
 // + share-link.ts + /d/[encoded] route all remain in the codebase ready
@@ -1299,6 +1300,7 @@ export function AnalysisDashboard({
         <>
           <DealNotesPanel savedDealId={savedDealId} />
           <DueDiligenceCard savedDealId={savedDealId} />
+          <DealDocumentsCard savedDealId={savedDealId} />
         </>
       ) : null}
     </div>
