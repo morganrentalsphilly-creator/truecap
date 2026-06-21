@@ -72,6 +72,7 @@ import { DealQaPanel } from "@/components/investcalc/deal-qa-panel";
 import { BuyBoxVerdictCard } from "@/components/investcalc/buy-box-verdict-card";
 import { deriveStateFromAddress } from "@/lib/buy-box";
 import { DataConfidenceBadge } from "@/components/investcalc/data-confidence-badge";
+import { PropertyCompsCard } from "@/components/investcalc/property-comps-card";
 import type { DataConfidence } from "@/lib/data-confidence";
 import { REPORT_MODES, type ReportMode } from "@/lib/pdf-export-constants";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -983,6 +984,20 @@ export function AnalysisDashboard({
             state: deriveStateFromAddress(values.address),
             isCashPurchase: result.monthlyPayment <= 0,
           }}
+        />
+      ) : null}
+
+      {/* Sale & rent comps — on-demand external enrichment (RentCast).
+          Paid + address gated; pulls only on click (API cost control);
+          self-hides if the provider isn't configured. */}
+      {values?.address ? (
+        <PropertyCompsCard
+          enabled={Boolean(isAuthenticated && canUseProjections)}
+          address={values.address}
+          propertyType={values.propertyType}
+          bedrooms={values.bedrooms ?? null}
+          bathrooms={values.bathrooms ?? null}
+          squareFootage={values.sqft ?? null}
         />
       ) : null}
 
