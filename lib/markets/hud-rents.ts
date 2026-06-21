@@ -9,4 +9,505 @@ export type HudRent = {
   year: number;
 };
 
-export const HUD_RENTS: Record<string, HudRent> = {};
+export const HUD_RENTS: Record<string, HudRent> = {
+  "columbus": {
+    "rent2br": 1430,
+    "rent3br": 1715,
+    "year": 2026
+  },
+  "cincinnati": {
+    "rent2br": 1353,
+    "rent3br": 1785,
+    "year": 2026
+  },
+  "pittsburgh": {
+    "rent2br": 1299,
+    "rent3br": 1661,
+    "year": 2026
+  },
+  "baltimore": {
+    "rent2br": 1857,
+    "rent3br": 2358,
+    "year": 2026
+  },
+  "st-louis": {
+    "rent2br": 1218,
+    "rent3br": 1568,
+    "year": 2026
+  },
+  "milwaukee": {
+    "rent2br": 1338,
+    "rent3br": 1648,
+    "year": 2026
+  },
+  "san-antonio": {
+    "rent2br": 1426,
+    "rent3br": 1830,
+    "year": 2026
+  },
+  "jacksonville": {
+    "rent2br": 1658,
+    "rent3br": 2043,
+    "year": 2026
+  },
+  "birmingham": {
+    "rent2br": 1266,
+    "rent3br": 1583,
+    "year": 2026
+  },
+  "louisville": {
+    "rent2br": 1272,
+    "rent3br": 1625,
+    "year": 2026
+  },
+  "nashville": {
+    "rent2br": 1730,
+    "rent3br": 2211,
+    "year": 2026
+  },
+  "raleigh": {
+    "rent2br": 1750,
+    "rent3br": 2196,
+    "year": 2026
+  },
+  "richmond": {
+    "rent2br": 1655,
+    "rent3br": 2072,
+    "year": 2026
+  },
+  "columbia": {
+    "rent2br": 1276,
+    "rent3br": 1623,
+    "year": 2026
+  },
+  "greenville": {
+    "rent2br": 1339,
+    "rent3br": 1612,
+    "year": 2026
+  },
+  "oklahoma-city": {
+    "rent2br": 1244,
+    "rent3br": 1675,
+    "year": 2026
+  },
+  "tulsa": {
+    "rent2br": 1217,
+    "rent3br": 1602,
+    "year": 2026
+  },
+  "omaha": {
+    "rent2br": 1368,
+    "rent3br": 1813,
+    "year": 2026
+  },
+  "des-moines": {
+    "rent2br": 1318,
+    "rent3br": 1794,
+    "year": 2026
+  },
+  "minneapolis": {
+    "rent2br": 1709,
+    "rent3br": 2262,
+    "year": 2026
+  },
+  "buffalo": {
+    "rent2br": 1343,
+    "rent3br": 1640,
+    "year": 2026
+  },
+  "rochester": {
+    "rent2br": 1573,
+    "rent3br": 1895,
+    "year": 2026
+  },
+  "orlando": {
+    "rent2br": 1972,
+    "rent3br": 2476,
+    "year": 2026
+  },
+  "tucson": {
+    "rent2br": 1402,
+    "rent3br": 1950,
+    "year": 2026
+  },
+  "grand-rapids": {
+    "rent2br": 1531,
+    "rent3br": 1980,
+    "year": 2026
+  },
+  "austin": {
+    "rent2br": 1852,
+    "rent3br": 2347,
+    "year": 2026
+  },
+  "fort-worth": {
+    "rent2br": 1723,
+    "rent3br": 2273,
+    "year": 2026
+  },
+  "denver": {
+    "rent2br": 2089,
+    "rent3br": 2734,
+    "year": 2026
+  },
+  "colorado-springs": {
+    "rent2br": 1735,
+    "rent3br": 2413,
+    "year": 2026
+  },
+  "salt-lake-city": {
+    "rent2br": 1747,
+    "rent3br": 2333,
+    "year": 2026
+  },
+  "boise": {
+    "rent2br": 1655,
+    "rent3br": 2318,
+    "year": 2026
+  },
+  "albuquerque": {
+    "rent2br": 1464,
+    "rent3br": 2036,
+    "year": 2026
+  },
+  "las-vegas": {
+    "rent2br": 1735,
+    "rent3br": 2413,
+    "year": 2026
+  },
+  "sacramento": {
+    "rent2br": 2255,
+    "rent3br": 3002,
+    "year": 2026
+  },
+  "portland": {
+    "rent2br": 1922,
+    "rent3br": 2619,
+    "year": 2026
+  },
+  "chicago": {
+    "rent2br": 1781,
+    "rent3br": 2294,
+    "year": 2026
+  },
+  "madison": {
+    "rent2br": 1694,
+    "rent3br": 2236,
+    "year": 2026
+  },
+  "dayton": {
+    "rent2br": 1273,
+    "rent3br": 1651,
+    "year": 2026
+  },
+  "akron": {
+    "rent2br": 1268,
+    "rent3br": 1547,
+    "year": 2026
+  },
+  "toledo": {
+    "rent2br": 1076,
+    "rent3br": 1380,
+    "year": 2026
+  },
+  "lexington": {
+    "rent2br": 1272,
+    "rent3br": 1743,
+    "year": 2026
+  },
+  "knoxville": {
+    "rent2br": 1471,
+    "rent3br": 1864,
+    "year": 2026
+  },
+  "chattanooga": {
+    "rent2br": 1390,
+    "rent3br": 1734,
+    "year": 2026
+  },
+  "huntsville": {
+    "rent2br": 1310,
+    "rent3br": 1690,
+    "year": 2026
+  },
+  "little-rock": {
+    "rent2br": 1147,
+    "rent3br": 1540,
+    "year": 2026
+  },
+  "new-orleans": {
+    "rent2br": 1331,
+    "rent3br": 1701,
+    "year": 2026
+  },
+  "wichita": {
+    "rent2br": 1099,
+    "rent3br": 1444,
+    "year": 2026
+  },
+  "greensboro": {
+    "rent2br": 1330,
+    "rent3br": 1703,
+    "year": 2026
+  },
+  "winston-salem": {
+    "rent2br": 1232,
+    "rent3br": 1607,
+    "year": 2026
+  },
+  "savannah": {
+    "rent2br": 1680,
+    "rent3br": 2235,
+    "year": 2026
+  },
+  "fort-wayne": {
+    "rent2br": 1113,
+    "rent3br": 1381,
+    "year": 2026
+  },
+  "spokane": {
+    "rent2br": 1531,
+    "rent3br": 2088,
+    "year": 2026
+  },
+  "reno": {
+    "rent2br": 1870,
+    "rent3br": 2539,
+    "year": 2026
+  },
+  "el-paso": {
+    "rent2br": 1191,
+    "rent3br": 1633,
+    "year": 2026
+  },
+  "corpus-christi": {
+    "rent2br": 1366,
+    "rent3br": 1796,
+    "year": 2026
+  },
+  "baton-rouge": {
+    "rent2br": 1204,
+    "rent3br": 1511,
+    "year": 2026
+  },
+  "shreveport": {
+    "rent2br": 1111,
+    "rent3br": 1458,
+    "year": 2026
+  },
+  "jackson": {
+    "rent2br": 1288,
+    "rent3br": 1544,
+    "year": 2026
+  },
+  "augusta": {
+    "rent2br": 1261,
+    "rent3br": 1627,
+    "year": 2026
+  },
+  "macon": {
+    "rent2br": 1307,
+    "rent3br": 1567,
+    "year": 2026
+  },
+  "lansing": {
+    "rent2br": 1268,
+    "rent3br": 1627,
+    "year": 2026
+  },
+  "fort-collins": {
+    "rent2br": 1732,
+    "rent3br": 2385,
+    "year": 2026
+  },
+  "provo": {
+    "rent2br": 1460,
+    "rent3br": 2031,
+    "year": 2026
+  },
+  "ogden": {
+    "rent2br": 1614,
+    "rent3br": 2163,
+    "year": 2026
+  },
+  "lincoln": {
+    "rent2br": 1141,
+    "rent3br": 1587,
+    "year": 2026
+  },
+  "sioux-falls": {
+    "rent2br": 1156,
+    "rent3br": 1586,
+    "year": 2026
+  },
+  "fargo": {
+    "rent2br": 1112,
+    "rent3br": 1547,
+    "year": 2026
+  },
+  "peoria": {
+    "rent2br": 1039,
+    "rent3br": 1346,
+    "year": 2026
+  },
+  "rockford": {
+    "rent2br": 1175,
+    "rent3br": 1555,
+    "year": 2026
+  },
+  "green-bay": {
+    "rent2br": 1164,
+    "rent3br": 1545,
+    "year": 2026
+  },
+  "fort-myers": {
+    "rent2br": 1961,
+    "rent3br": 2560,
+    "year": 2026
+  },
+  "lakeland": {
+    "rent2br": 1497,
+    "rent3br": 2023,
+    "year": 2026
+  },
+  "tallahassee": {
+    "rent2br": 1352,
+    "rent3br": 1674,
+    "year": 2026
+  },
+  "pensacola": {
+    "rent2br": 1471,
+    "rent3br": 1952,
+    "year": 2026
+  },
+  "clarksville": {
+    "rent2br": 1346,
+    "rent3br": 1871,
+    "year": 2026
+  },
+  "wilmington": {
+    "rent2br": 1810,
+    "rent3br": 2170,
+    "year": 2026
+  },
+  "allentown": {
+    "rent2br": 1634,
+    "rent3br": 2087,
+    "year": 2026
+  },
+  "harrisburg": {
+    "rent2br": 1493,
+    "rent3br": 1920,
+    "year": 2026
+  },
+  "scranton": {
+    "rent2br": 1252,
+    "rent3br": 1631,
+    "year": 2026
+  },
+  "worcester": {
+    "rent2br": 1749,
+    "rent3br": 2247,
+    "year": 2026
+  },
+  "hartford": {
+    "rent2br": 1865,
+    "rent3br": 2236,
+    "year": 2026
+  },
+  "new-haven": {
+    "rent2br": 1969,
+    "rent3br": 2433,
+    "year": 2026
+  },
+  "providence": {
+    "rent2br": 1729,
+    "rent3br": 2087,
+    "year": 2026
+  },
+  "manchester": {
+    "rent2br": 2127,
+    "rent3br": 2822,
+    "year": 2026
+  },
+  "syracuse": {
+    "rent2br": 1392,
+    "rent3br": 1691,
+    "year": 2026
+  },
+  "albany": {
+    "rent2br": 1702,
+    "rent3br": 2041,
+    "year": 2026
+  },
+  "youngstown": {
+    "rent2br": 973,
+    "rent3br": 1270,
+    "year": 2026
+  },
+  "canton": {
+    "rent2br": 1086,
+    "rent3br": 1371,
+    "year": 2026
+  },
+  "evansville": {
+    "rent2br": 1113,
+    "rent3br": 1370,
+    "year": 2026
+  },
+  "south-bend": {
+    "rent2br": 1292,
+    "rent3br": 1567,
+    "year": 2026
+  },
+  "fresno": {
+    "rent2br": 1664,
+    "rent3br": 2314,
+    "year": 2026
+  },
+  "bakersfield": {
+    "rent2br": 1483,
+    "rent3br": 2062,
+    "year": 2026
+  },
+  "stockton": {
+    "rent2br": 1742,
+    "rent3br": 2423,
+    "year": 2026
+  },
+  "modesto": {
+    "rent2br": 1758,
+    "rent3br": 2442,
+    "year": 2026
+  },
+  "salem": {
+    "rent2br": 1560,
+    "rent3br": 2159,
+    "year": 2026
+  },
+  "tacoma": {
+    "rent2br": 1971,
+    "rent3br": 2733,
+    "year": 2026
+  },
+  "killeen": {
+    "rent2br": 1233,
+    "rent3br": 1711,
+    "year": 2026
+  },
+  "waco": {
+    "rent2br": 1240,
+    "rent3br": 1599,
+    "year": 2026
+  },
+  "lubbock": {
+    "rent2br": 1175,
+    "rent3br": 1634,
+    "year": 2026
+  },
+  "mobile": {
+    "rent2br": 1083,
+    "rent3br": 1414,
+    "year": 2026
+  }
+};
