@@ -5,6 +5,7 @@ import { Header } from "@/components/investcalc/header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { UserDefaultsCard } from "@/components/settings/user-defaults-card";
+import { BuyBoxCard } from "@/components/settings/buy-box-card";
 import { getEntitlementsForUser, hasPlanFeature } from "@/lib/entitlements";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
@@ -33,6 +34,10 @@ export default async function SettingsPage() {
       <Header initialUser={user} initialEntitlements={entitlements} />
       <main id="main" className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-5 space-y-6">
         <UserDefaultsCard />
+
+        {/* Buy Box — self-gates: shows a Pro upsell to free users, the
+            editor to Pro. Drives the inline buy-box verdict on analyses. */}
+        <BuyBoxCard />
 
         {/* Branding card — links to the dedicated /settings/branding page.
             Shown for everyone (Pro link + Pro badge for unentitled users

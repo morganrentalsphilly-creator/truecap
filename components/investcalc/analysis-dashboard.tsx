@@ -69,6 +69,8 @@ import { SensitivityGrid } from "@/components/investcalc/sensitivity-grid";
 import { StrategiesPanel } from "@/components/investcalc/strategies-panel";
 import { ProInlineGate } from "@/components/investcalc/pro-inline-gate";
 import { DealQaPanel } from "@/components/investcalc/deal-qa-panel";
+import { BuyBoxVerdictCard } from "@/components/investcalc/buy-box-verdict-card";
+import { deriveStateFromAddress } from "@/lib/buy-box";
 import { Activity, Target } from "lucide-react";
 import { MomentOfValueUpsell } from "@/components/marketing/moment-of-value-upsell";
 import { SignupPromptCard } from "@/components/marketing/signup-prompt-card";
@@ -915,6 +917,27 @@ export function AnalysisDashboard({
           )}
         </div>
       </div>
+
+      {/* Buy Box verdict — personalized "meets your buy box" line that
+          complements the Deal Score above. Self-gates: only authenticated
+          Pro users with an active Buy Box (≥1 criterion) ever see it.
+          Evaluates the BASE result (not the what-if sliders), matching the
+          Deal Score. */}
+      {result && values ? (
+        <BuyBoxVerdictCard
+          enabled={Boolean(isAuthenticated)}
+          metrics={{
+            capRatePct: result.capRate ?? null,
+            cocPct: result.cocReturn ?? null,
+            dscr: result.dscr ?? null,
+            cashFlowMonthly: result.netCashFlow ?? null,
+            purchasePrice: values.purchasePrice ?? null,
+            propertyType: values.propertyType,
+            state: deriveStateFromAddress(values.address),
+            isCashPurchase: result.monthlyPayment <= 0,
+          }}
+        />
+      ) : null}
 
       {/* Metric cards — lens-curated, two visibility tiers.
           Primary (3 cards, chosen by the active investor lens): the
