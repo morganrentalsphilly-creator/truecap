@@ -1,0 +1,151 @@
+"use client";
+
+/**
+ * Hero address input — the homepage's primary action, lifted ABOVE the
+ * fold so cold visitors can start the core flow ("type an address") the
+ * instant they land, instead of scrolling past How-It-Works + social
+ * proof to reach the calculator. This is the #1 conversion lever: the
+ * product promise is speed, so the first action can't be a scroll.
+ *
+ * It deliberately reuses the SAME <AddressAutocomplete> the calculator
+ * uses, so the Google Places script (already loaded on this page by the
+ * calculator below) is shared — no extra script cost — and a selection
+ * here carries the parsed state/county/zip needed for HUD/FRED/state
+ * auto-fill.
+ *
+ * Handshake: the hero and calculator live on the SAME page, so a plain
+ * sessionStorage-on-mount handoff would miss a click that happens after
+ * the calculator already mounted. Instead we dispatch a window
+ * CustomEvent ("truecap:hero-analyze") that the calculator listens for
+ * live, and ALSO stash the payload in sessionStorage as a race/refresh
+ * fallback. The calculator dedupes on the payload token so it never
+ * double-handles. This component owns ZERO analysis logic — it only
+ * captures the address and tells the calculator to take over.
+ */
+
+import { useRef, useState } from "react";
+import Link from "next/link";
+import { useForm, type DefaultValues } from "react-hook-form";
+import { ArrowRight, Calculator, Sparkles } from "lucide-react";
+import { AddressAutocomplete, type SelectedAddress } from "@/components/investcalc/address-autocomplete";
+import type { InvestmentFormValues } from "@/lib/investcalc-schema";
+import {
+  HERO_ANALYZE_EVENT,
+  HERO_ANALYZE_STORAGE_KEY,
+  type HeroAnalyzeDetail,
+} from "@/lib/hero-handoff";
+
+function scrollToCalculator() {
+  if (typeof window === "undefined") return;
+  const el = document.getElementById("main");
+  if (el) window.scrollTo({ top: el.offsetTop - 64, behavior: "smooth" });
+}
+
+function dispatchHeroAnalyze(detail: HeroAnalyzeDetail) {
+  if (typeof window === "undefined") return;
+  try {
+    window.sessionStorage.setItem(HERO_ANALYZE_STORAGE_KEY, JSON.stringify(detail));
+  } catch {
+    /* private mode / quota — the live event below still delivers it */
+  }
+  window.dispatchEvent(new CustomEvent<HeroAnalyzeDetail>(HERO_ANALYZE_EVENT, { detail }));
+}
+
+function newToken() {
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+export function HeroAddressForm() {
+  // Throwaway form instance purely to satisfy <AddressAutocomplete>'s
+  // react-hook-form API. We never submit it — we read the address value
+  // and the last selection's components on click.
+  const form = useForm<InvestmentFormValues>({
+    defaultValues: { address: "" } as DefaultValues<InvestmentFormValues>,
+  });
+  // Last suggestion the user actually picked (carries state/county/zip).
+  const selectedRef = useRef<SelectedAddress | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleAnalyze = (e: React.FormEvent) => {
+    e.preventDefault();
+    const address = (form.getValues("address") ?? "").trim();
+    if (!address) {
+      // Nothing typed — send them to the full calculator to start there.
+      form.setFocus("address");
+      scrollToCalculator();
+      return;
+    }
+    setSubmitting(true);
+    const picked = selectedRef.current;
+    const sameAsPicked = picked && picked.formattedAddress.trim() === address;
+    dispatchHeroAnalyze({
+      token: newToken(),
+      address,
+      state: sameAsPicked ? picked.state : undefined,
+      county: sameAsPicked ? picked.county : undefined,
+      zip: sameAsPicked ? picked.zip : undefined,
+    });
+    scrollToCalculator();
+    // The calculator takes over from here; drop the spinner shortly so the
+    // button doesn't look stuck if the user scrolls back up.
+    window.setTimeout(() => setSubmitting(false), 1200);
+  };
+
+  const handleTrySample = () => {
+    dispatchHeroAnalyze({ token: newToken(), address: "", sample: true });
+    scrollToCalculator();
+  };
+
+  return (
+    <div className="mx-auto mt-7 w-full max-w-2xl">
+      <form
+        onSubmit={handleAnalyze}
+        className="flex flex-col items-stretch gap-2.5 sm:flex-row"
+      >
+        <div className="min-w-0 flex-1">
+          <AddressAutocomplete
+            form={form}
+            placeholder="Enter a property address"
+            inputClassName="h-12 rounded-xl px-4 text-base shadow-sm sm:h-14"
+            onPlaceSelected={(place) => {
+              // Capture the picked suggestion's parsed components so
+              // "Analyze free" can hand them to the calculator for the
+              // same HUD/FRED/state auto-fill an in-form selection gets.
+              selectedRef.current = place;
+            }}
+          />
+        </div>
+        <button
+          type="submit"
+          disabled={submitting}
+          className="group inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(82,72,212,0.28)] transition-transform hover:-translate-y-0.5 disabled:opacity-70 sm:h-14"
+        >
+          <Calculator className="size-4" />
+          Analyze free
+          <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+        </button>
+      </form>
+
+      {/* Secondary actions — sample demo (no typing) + a low-friction
+          peek at Pro. Pricing is deliberately the quietest link here so
+          the primary action stays "analyze a deal," not "evaluate cost." */}
+      <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm">
+        <button
+          type="button"
+          onClick={handleTrySample}
+          className="inline-flex items-center gap-1.5 font-semibold text-primary underline-offset-4 hover:underline"
+        >
+          <Sparkles className="size-4" />
+          Try a sample deal
+        </button>
+        <span aria-hidden className="text-muted-foreground/40">·</span>
+        <Link
+          href="/pricing"
+          className="font-medium text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+        >
+          See Pro features
+        </Link>
+      </div>
+    </div>
+  );
+}

@@ -4,27 +4,27 @@
  * what TrueCap is and want the calculator immediately.
  *
  * Conversion-focused, single-screen layout:
- *   - bold value prop + sub
- *   - "Run a free deal" primary CTA that scrolls to the calculator form
- *     (no signup required to use the calculator — that's the wedge)
- *   - secondary "See pricing" link
- *   - trust strip (4 stats / claims)
- *   - 3-up feature row with concrete payoffs
- *   - "Trusted by" social proof bar
+ *   - bold, outcome-led value prop + sub
+ *   - an address input ("Analyze free") IN the hero so the core flow
+ *     starts with no scroll — it hands off to the calculator below via a
+ *     window event (see hero-address-form.tsx)
+ *   - "Try a sample deal" + a quiet "See Pro features" link
+ *   - trust line, proof strip + data-source line, live deals ticker
+ *   - one outcome-specific testimonial, then the live sample result card
  *
  * No images that need an external CDN — everything is rendered in the
  * browser via CSS/SVG so it stays fast on first paint.
  *
- * SERVER COMPONENT. The single client-only behavior — scrolling to the
- * calculator form — is isolated into the tiny <ScrollToFormButton />
- * client island below so the rest of this big tree ships zero JS to
- * the browser. That's a real LCP win on the homepage (every paid-
- * traffic visitor lands here first).
+ * SERVER COMPONENT. The client-only behavior is isolated into the tiny
+ * <HeroAddressForm /> island (the address field + handoff) so the rest
+ * of this big tree ships zero JS to the browser. That's a real LCP win
+ * on the homepage (every paid-traffic visitor lands here first). The
+ * Google Places script the island uses is already loaded by the
+ * calculator on this same page, so the input adds no extra script cost.
  */
 
-import Link from "next/link";
-import { ArrowRight, Calculator, Lock, Sparkles, TrendingUp } from "lucide-react";
-import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
+import { Check, Quote, Sparkles, TrendingUp } from "lucide-react";
+import { HeroAddressForm } from "@/components/marketing/hero-address-form";
 import { DealsAnalyzedTicker } from "@/components/marketing/deals-analyzed-ticker";
 import { calculateAnalysis } from "@/lib/calc-analysis";
 import { buildDealScoreInputFromAnalysis, computeDealScore } from "@/lib/deal-score";
@@ -51,68 +51,70 @@ export function MarketingHero() {
 
       <div className="mx-auto max-w-6xl px-4 pb-10 pt-10 sm:px-6 sm:pb-14 sm:pt-16">
         {/* Eyebrow chip — shorter copy on mobile so the full text fits
-            in a 375px viewport without wrapping or pushing layout. The
-            uppercase + tracking-widest combo eats horizontal space fast;
-            keep the long, value-rich copy for desktop where there's room. */}
+            in a 375px viewport without wrapping or pushing layout. */}
         <div className="mx-auto mb-5 flex w-fit max-w-full items-center gap-1.5 rounded-full border border-primary/20 bg-card/70 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-primary shadow-sm backdrop-blur sm:gap-2 sm:px-3.5 sm:text-[11px] sm:tracking-widest">
           <Sparkles className="size-3 shrink-0" />
-          <span className="sm:hidden">New · Address auto-fill</span>
-          <span className="hidden sm:inline">New · Auto-fill rent + rate from any address</span>
+          <span className="sm:hidden">Free analyzer · No signup</span>
+          <span className="hidden sm:inline">Free rental property analyzer · No signup required</span>
         </div>
 
-        {/* headline + sub */}
+        {/* headline + sub — action/outcome-led: says exactly what the
+            product tells you, and how fast. */}
         <h1 className="mx-auto max-w-3xl text-balance text-center text-3xl font-extrabold leading-[1.05] tracking-tight text-foreground sm:text-[58px]">
-          Stop losing deals to <span className="text-primary">bad math.</span>
+          Know if a rental deal <span className="text-primary">cash-flows in 60 seconds.</span>
         </h1>
         <p className="mx-auto mt-4 max-w-2xl text-balance text-center text-[15px] leading-relaxed text-muted-foreground sm:text-lg">
-          Type the address. Get cap rate, cash flow, DSCR, and a plain-English
-          verdict in <strong className="text-foreground">60 seconds</strong>. No spreadsheet, no signup.
+          Enter an address and TrueCap auto-fills rent, mortgage rate, and
+          property tax — then gives you cap rate, cash flow, DSCR, and a
+          plain-English verdict.
         </p>
 
-        {/* CTAs — primary stretches full-width on mobile (better tap-
-            target, no chance of being cut off), inline-sized on sm+. */}
-        <div className="mx-auto mt-7 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-          <ScrollToFormButton
-            className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(82,72,212,0.28)] transition-transform hover:-translate-y-0.5"
-          >
-            <Calculator className="size-4" />
-            {/* Standardized CTA copy used across every primary surface on
-                the homepage. Consistency matters for A/B test signal and
-                brand recall — previous mix of 6 phrasings ("Run a free
-                analysis", "Try it now — free", etc.) split funnel data. */}
-            Run a deal — 60 seconds
-            <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-          </ScrollToFormButton>
-          <Link
-            href="/pricing"
-            className="inline-flex h-12 items-center justify-center gap-1.5 rounded-xl border border-border bg-card px-5 text-sm font-semibold text-foreground hover:bg-muted"
-          >
-            See pricing
-          </Link>
+        {/* Primary action — the address input lives IN the hero so the
+            core flow starts without a scroll. Hands off to the calculator
+            below via a window event (see hero-address-form.tsx). */}
+        <HeroAddressForm />
+
+        {/* Trust line — "Cancel anytime" intentionally removed: it implies
+            a subscription and contradicts "no signup" at the exact moment
+            the visitor is deciding to click. It now lives only on /pricing,
+            where a subscription is actually in play. */}
+        <p className="mt-3 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 px-2 text-center text-xs text-muted-foreground">
+          <Check className="size-3.5 shrink-0 text-[var(--metric-positive)]" />
+          <span>Free forever · No card · No signup required</span>
+        </p>
+
+        {/* Proof strip (#5) + data-source line (#6) — answers "what
+            happens after I type an address?" and "can I trust the
+            numbers?" right in the decision moment, before the CTA. */}
+        <div className="mx-auto mt-5 max-w-2xl space-y-1.5 text-center">
+          <p className="text-xs font-medium text-foreground/80">
+            Auto-fills rent, rate &amp; tax · Editable assumptions · Cap rate · CoC · DSCR · cash flow
+          </p>
+          <p className="text-[11px] leading-relaxed text-muted-foreground">
+            Uses <strong className="font-semibold text-foreground">HUD</strong> rent,{" "}
+            <strong className="font-semibold text-foreground">FRED</strong> mortgage rates, and{" "}
+            <strong className="font-semibold text-foreground">state</strong> tax defaults — all editable.
+          </p>
         </div>
-        {/* Risk-reversal microcopy — shorter on mobile so it stays on
-            one or two lines instead of wrapping into a paragraph block. */}
-        <p className="mt-3 flex items-center justify-center gap-1.5 text-balance px-2 text-center text-xs text-muted-foreground">
-          <Lock className="size-3 shrink-0" />
-          {/* Single canonical microcopy for both viewports. Previously
-              the desktop variant ('No credit card · No signup needed
-              to use the calculator · Cancel anytime') was 20% longer
-              for no added clarity — the mobile version says the same
-              thing in 8 words instead of 13. */}
-          <span>No card · No signup · Cancel anytime</span>
-        </p>
 
-        {/* Real-data social proof — hides itself if count < 25 so we
-            never advertise low volume. Sits right under the CTA so it
-            lands in the "is this real?" decision moment instead of being
-            in a separate stripe below the hero. Window is "all" (cumulative
-            all-time) rather than "7d": for a young product the rolling-7-day
-            count often sits below the threshold and hides, whereas the
-            all-time total clears it sooner AND reads as a bigger, stronger
-            number. Switch back to "7d" once weekly volume reliably clears 25. */}
+        {/* Real-data social proof — hides itself if count is low so we
+            never advertise low volume. */}
         <div className="mt-5 text-center">
           <DealsAnalyzedTicker source="runs" minimum={1} />
         </div>
+
+        {/* One outcome-specific testimonial (#8) — the strongest,
+            revenue-tied quote sits near the CTA to support the first
+            decision; the rest live in the SocialProof section below. */}
+        <figure className="mx-auto mt-5 flex max-w-xl items-start justify-center gap-2 text-center">
+          <Quote className="mt-0.5 size-4 shrink-0 text-primary/40" />
+          <figcaption className="text-xs leading-relaxed text-muted-foreground">
+            <span className="text-foreground">
+              &ldquo;Closed three more deals this quarter because I could move faster.&rdquo;
+            </span>{" "}
+            — Jordan M., buy-and-hold investor (18 doors)
+          </figcaption>
+        </figure>
 
         {/* Mock-up screenshot — pure CSS, lightweight.
             Previously hidden on mobile to save scroll; now shown

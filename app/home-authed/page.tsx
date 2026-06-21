@@ -21,12 +21,12 @@ import { Header } from "@/components/investcalc/header";
 import { InvestCalcPage } from "@/components/investcalc/investcalc-page";
 import { MarketingHero } from "@/components/marketing/marketing-hero";
 import {
+  DataSourcesSection,
   HomepageFaq,
   HowItWorks,
-  PreCalculatorCta,
+  PdfProUpsell,
+  Personas,
   SocialProof,
-  VsCompetitors,
-  WhyNotSpreadsheet,
 } from "@/components/marketing/landing-sections";
 import { OnboardingTour } from "@/components/marketing/onboarding-tour";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
@@ -118,19 +118,17 @@ export default async function AuthedHome() {
   return (
     <>
       <Header initialUser={user} initialEntitlements={entitlements} />
-      {/* Full landing page experience ONLY for cold visitors. Authenticated
-          users skip ALL of it — the calculator is their workspace. Order
-          mirrors the buying journey: hero → how it works → why us vs
-          spreadsheet → social proof → final-push CTA → the calculator. */}
+      {/* Full landing experience ONLY for cold visitors (anon fallback —
+          the canonical anon homepage is the static app/page.tsx, and this
+          mirrors its flow). Authenticated users skip ALL of it — the
+          calculator is their workspace. Pre-calculator order: hero (address
+          input) → how it works → data sources → social proof. */}
       {!user && (
         <>
           <MarketingHero />
           <HowItWorks />
-          <WhyNotSpreadsheet />
-          <VsCompetitors />
+          <DataSourcesSection />
           <SocialProof />
-          <HomepageFaq />
-          <PreCalculatorCta />
         </>
       )}
       <InvestCalcPage
@@ -153,6 +151,15 @@ export default async function AuthedHome() {
         userAnalysisDefaults={userAnalysisDefaults}
         dealQaEnabled={Boolean(process.env.ANTHROPIC_API_KEY)}
       />
+      {/* Post-value monetization + persuasion — anon fallback only,
+          mirrors app/page.tsx (surfaced after the calculator). */}
+      {!user && (
+        <>
+          <PdfProUpsell />
+          <Personas />
+          <HomepageFaq />
+        </>
+      )}
       {/* Sticky scroll-activated CTA bar for cold visitors only. Renders
           nothing for auth'd users. */}
       {!user && <StickyConversionBar />}

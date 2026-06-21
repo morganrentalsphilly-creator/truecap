@@ -23,14 +23,20 @@
 import Link from "next/link";
 import {
   ArrowRight,
+  Building2,
   Check,
   Clock,
+  FileText,
   HelpCircle,
+  Home,
   MapPin,
+  Percent,
   Quote,
   ShieldCheck,
+  Sparkles,
   TrendingUp,
   Type,
+  Users,
   Wand2,
   X,
   Zap,
@@ -88,7 +94,7 @@ export function HowItWorks() {
         </div>
         <div className="mt-10 text-center">
           <ScrollToFormButton className="group inline-flex h-11 items-center gap-1.5 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-[0_10px_24px_rgba(82,72,212,0.28)] hover:-translate-y-0.5 transition-transform">
-            Run a deal — 60 seconds
+            Analyze my first deal free
             <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
           </ScrollToFormButton>
         </div>
@@ -458,14 +464,14 @@ export function PreCalculatorCta() {
           <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
             <ScrollToFormButton className="group inline-flex h-12 items-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_14px_32px_rgba(82,72,212,0.32)] hover:-translate-y-0.5 transition-transform sm:h-14 sm:text-base">
               <Zap className="size-4 sm:size-5" />
-              Run a deal — 60 seconds
+              Analyze my first deal free
               <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5 sm:size-5" />
             </ScrollToFormButton>
             <Link
               href="/pricing"
               className="inline-flex h-12 items-center gap-1.5 rounded-xl border border-border bg-card px-5 text-sm font-semibold text-foreground hover:bg-muted sm:h-14 sm:text-base"
             >
-              See Pro pricing
+              See Pro features
             </Link>
           </div>
 
@@ -478,14 +484,207 @@ export function PreCalculatorCta() {
             <span aria-hidden className="text-muted-foreground/40">·</span>
             <span className="inline-flex items-center gap-1.5">
               <Clock className="size-4 text-primary" />
-              Cancel anytime
+              60-second analysis
             </span>
             <span aria-hidden className="text-muted-foreground/40">·</span>
             <span className="inline-flex items-center gap-1.5">
               <Type className="size-4 text-muted-foreground" />
-              Free to try
+              Free forever
             </span>
           </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ───────────────────────────────────────── Data sources / accuracy
+/**
+ * #6 — investors care deeply about where the numbers come from. This
+ * section names the primary source behind each auto-filled field and
+ * hammers the "everything is editable" point, so the auto-fill reads as
+ * a credible starting baseline rather than a black box. Kept tight (3
+ * cards) so it reinforces the hero's data-source line without repeating
+ * the How-It-Works step.
+ */
+const DATA_SOURCES: { icon: typeof Home; label: string; source: string; body: string }[] = [
+  {
+    icon: Home,
+    label: "Rent",
+    source: "HUD Fair Market Rent",
+    body: "Pulled for the property's county and bedroom count — a real market baseline, not a guess.",
+  },
+  {
+    icon: Percent,
+    label: "Mortgage rate",
+    source: "FRED 30-year fixed",
+    body: "The current national average rate, fetched automatically so your financing starts realistic.",
+  },
+  {
+    icon: Building2,
+    label: "Property tax",
+    source: "State effective rate",
+    body: "Your state's typical effective rate, applied to the purchase price you enter.",
+  },
+];
+
+export function DataSourcesSection() {
+  return (
+    <section className="border-t border-border bg-background">
+      <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
+        <div className="mb-10 text-center sm:mb-12">
+          <p className="text-[11px] font-bold uppercase tracking-widest text-primary">Built on real data</p>
+          <h2 className="mt-2 text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">
+            Defensible numbers, <span className="text-primary">not guesses.</span>
+          </h2>
+          <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+            TrueCap pre-fills every deal from primary sources, so you start from a real
+            baseline — then change anything to match your own comps and terms.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-5">
+          {DATA_SOURCES.map((s) => (
+            <div key={s.label} className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+              <div className="mb-4 flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <s.icon className="size-5" />
+              </div>
+              <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">{s.label}</p>
+              <h3 className="mt-0.5 text-lg font-bold text-foreground">{s.source}</h3>
+              <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{s.body}</p>
+            </div>
+          ))}
+        </div>
+        <p className="mt-6 text-center text-xs text-muted-foreground">
+          Every field is editable — these are sensible market defaults, not absolutes.
+        </p>
+      </div>
+    </section>
+  );
+}
+
+// ───────────────────────────────────────── PDF / Pro upsell
+/**
+ * #7 — a low-friction paid path for non-subscribers, surfaced AFTER the
+ * calculator (i.e. after the visitor has felt the value). The $5 one-time
+ * PDF is a real, fully-automated product (see app/actions/one-time-pdf.ts);
+ * we deliberately do NOT hardcode the Pro monthly price here — it's loaded
+ * live from Stripe on /pricing, and duplicating it risks drift.
+ */
+export function PdfProUpsell() {
+  return (
+    <section className="border-t border-border bg-card/40">
+      <div className="mx-auto max-w-4xl px-4 py-14 sm:px-6 sm:py-20">
+        <div className="mb-8 text-center sm:mb-10">
+          <p className="text-[11px] font-bold uppercase tracking-widest text-primary">Send it onward</p>
+          <h2 className="mt-2 text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">
+            Need to send this to a lender or client?
+          </h2>
+          <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+            Run your analysis free. When you&apos;re ready to share it, export a
+            lender-ready PDF for $5 — or unlock everything with Pro.
+          </p>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 sm:gap-5">
+          {/* One-time $5 PDF */}
+          <div className="flex flex-col rounded-2xl border border-border bg-card p-6 shadow-sm">
+            <div className="mb-4 flex size-11 items-center justify-center rounded-xl bg-[var(--brand-green)]/10 text-[var(--brand-green)]">
+              <FileText className="size-5" />
+            </div>
+            <span className="w-fit rounded-full bg-[var(--brand-green)]/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-[var(--brand-green)]">
+              One-time · $5
+            </span>
+            <h3 className="mt-2 text-lg font-bold text-foreground">Lender-ready PDF</h3>
+            <p className="mt-1.5 flex-1 text-sm leading-relaxed text-muted-foreground">
+              Run a deal, click Export PDF, and pay $5 once. The full multi-page
+              report downloads instantly — no subscription, no account.
+            </p>
+            <div className="mt-5">
+              <ScrollToFormButton className="group inline-flex h-11 items-center gap-1.5 rounded-xl border border-border bg-background px-5 text-sm font-bold text-foreground hover:bg-muted">
+                Run a deal → export PDF
+                <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+              </ScrollToFormButton>
+            </div>
+          </div>
+
+          {/* Pro */}
+          <div className="flex flex-col rounded-2xl border-2 border-primary/30 bg-card p-6 shadow-[0_16px_40px_rgba(82,72,212,0.10)]">
+            <div className="mb-4 flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <Sparkles className="size-5" />
+            </div>
+            <span className="w-fit rounded-full bg-primary/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-primary">
+              Pro
+            </span>
+            <h3 className="mt-2 text-lg font-bold text-foreground">Unlimited PDFs + everything</h3>
+            <p className="mt-1.5 flex-1 text-sm leading-relaxed text-muted-foreground">
+              Save &amp; compare deals, 10-year projections, tax strategy, exit
+              scenarios, the Pro Deal Score, and unlimited branded PDF exports.
+            </p>
+            <div className="mt-5">
+              <Link
+                href="/pricing"
+                className="group inline-flex h-11 items-center gap-1.5 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-[0_10px_24px_rgba(82,72,212,0.28)] hover:-translate-y-0.5 transition-transform"
+              >
+                See Pro features
+                <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ───────────────────────────────────────── Personas
+/**
+ * #9 — the homepage leads with ONE universal action (analyze a rental).
+ * Persona cards live LOWER, after intent is captured, so they help a
+ * visitor self-identify without diluting the single above-the-fold CTA.
+ */
+const PERSONAS: { icon: typeof Home; title: string; body: string }[] = [
+  {
+    icon: TrendingUp,
+    title: "For investors",
+    body: "Underwrite buy-and-hold deals in seconds — cash flow, cap rate, CoC, DSCR, and a 10-year view.",
+  },
+  {
+    icon: Users,
+    title: "For agents",
+    body: "Hand clients a defensible analysis at the showing, with a shareable link or lender-ready PDF.",
+  },
+  {
+    icon: Home,
+    title: "For house hackers",
+    body: "Model owner-occupied units and see what's left of your mortgage payment after rent.",
+  },
+];
+
+export function Personas() {
+  return (
+    <section className="border-t border-border bg-background">
+      <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
+        <div className="mb-10 text-center sm:mb-12">
+          <p className="text-[11px] font-bold uppercase tracking-widest text-primary">Who it&apos;s for</p>
+          <h2 className="mt-2 text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">
+            One tool, whatever you&apos;re underwriting.
+          </h2>
+        </div>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-5">
+          {PERSONAS.map((p) => (
+            <div key={p.title} className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+              <div className="mb-4 flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <p.icon className="size-5" />
+              </div>
+              <h3 className="text-lg font-bold text-foreground">{p.title}</h3>
+              <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{p.body}</p>
+            </div>
+          ))}
+        </div>
+        <div className="mt-10 text-center">
+          <ScrollToFormButton className="group inline-flex h-11 items-center gap-1.5 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-[0_10px_24px_rgba(82,72,212,0.28)] hover:-translate-y-0.5 transition-transform">
+            Analyze a rental property
+            <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+          </ScrollToFormButton>
         </div>
       </div>
     </section>

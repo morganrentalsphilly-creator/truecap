@@ -98,6 +98,11 @@ interface AddressAutocompleteProps {
   form: UseFormReturn<InvestmentFormValues>;
   hasError?: boolean;
   placeholder?: string;
+  /** Extra classes merged onto the <Input> (twMerge wins on conflicts),
+   * so callers like the homepage hero can size the field up without
+   * forking the component. Optional — the calculator passes nothing and
+   * keeps the default form-field sizing. */
+  inputClassName?: string;
   /** Fired when the user picks a suggestion. Parsed state/county/zip
    * are best-effort — missing on rare cases where Google doesn't return
    * the corresponding addressComponent. */
@@ -108,6 +113,7 @@ export function AddressAutocomplete({
   form,
   hasError,
   placeholder = "123 Main Street, Austin, TX 78701",
+  inputClassName,
   onPlaceSelected,
 }: AddressAutocompleteProps) {
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY;
@@ -331,7 +337,8 @@ export function AddressAutocomplete({
         onKeyDown={handleKeyDown}
         className={cn(
           "border-input bg-background",
-          hasError && "border-destructive focus-visible:ring-destructive"
+          hasError && "border-destructive focus-visible:ring-destructive",
+          inputClassName
         )}
       />
       {/* In-flight indicator — shows BEFORE predictions land. Without

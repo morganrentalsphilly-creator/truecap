@@ -26,7 +26,14 @@ import type { Metadata } from "next";
 import { Header } from "@/components/investcalc/header";
 import { InvestCalcPage } from "@/components/investcalc/investcalc-page";
 import { MarketingHero } from "@/components/marketing/marketing-hero";
-import { HowItWorks, SocialProof } from "@/components/marketing/landing-sections";
+import {
+  DataSourcesSection,
+  HomepageFaq,
+  HowItWorks,
+  PdfProUpsell,
+  Personas,
+  SocialProof,
+} from "@/components/marketing/landing-sections";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { TrackLandingView } from "@/components/analytics/track-landing-view";
 import { StickyConversionBar } from "@/components/marketing/sticky-conversion-bar";
@@ -164,14 +171,17 @@ export default function Home() {
           Supabase session in the rare case a signed-in user reaches the
           static page (e.g. the proxy cookie check missed). */}
       <Header initialUser={null} initialEntitlements={null} />
-      {/* Minimalist landing — this page only serves cold visitors (signed-in
-          users are rewritten to /home-authed). Stripped to the essentials for a
-          clean, high-converting first screen: hero → how it works → social
-          proof → the calculator. The competitor comparison + FAQ moved to a
-          dedicated /why-truecap page (linked in the footer) so they keep their
-          SEO + persuasion value without crowding the hero. */}
+      {/* Landing flow — this page only serves cold visitors (signed-in
+          users are rewritten to /home-authed). Order follows the buying
+          journey, with the core action lifted into the hero:
+            hero (address input) → how it works → data sources/accuracy →
+            social proof → the calculator → PDF/Pro upsell → personas → FAQ.
+          The full DealCheck/BiggerPockets comparison table stays on the
+          dedicated /why-truecap page (linked in the footer) so it keeps its
+          SEO + persuasion value without crowding this page. */}
       <MarketingHero />
       <HowItWorks />
+      <DataSourcesSection />
       <SocialProof />
       {/* Anonymous-visitor entitlement props — keep in lockstep with
           the user == null branch in app/home-authed/page.tsx.
@@ -201,6 +211,13 @@ export default function Home() {
         // build; the key VALUE never reaches the client).
         dealQaEnabled={Boolean(process.env.ANTHROPIC_API_KEY)}
       />
+      {/* Post-value monetization + persuasion — surfaced AFTER the
+          calculator so the upsell lands once the visitor has felt the
+          value: low-friction $5 lender PDF / Pro, then persona self-ID,
+          then the objection-handling FAQ. */}
+      <PdfProUpsell />
+      <Personas />
+      <HomepageFaq />
       {/* Sticky scroll-activated CTA bar — cold visitors only, and this
           page only serves cold visitors. */}
       <StickyConversionBar />

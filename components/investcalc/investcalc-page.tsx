@@ -12,7 +12,9 @@ import {
   Lock,
   Calculator,
   ArrowUpRight,
+  ChevronDown,
   Loader2,
+  Settings2,
   Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -54,6 +56,11 @@ import {
 } from "@/app/actions/one-time-pdf";
 import { PdfPurchaseDialog } from "@/components/investcalc/pdf-purchase-dialog";
 import { SAMPLE_DEAL_VALUES } from "@/lib/sample-deal";
+import {
+  HERO_ANALYZE_EVENT,
+  HERO_ANALYZE_STORAGE_KEY,
+  type HeroAnalyzeDetail,
+} from "@/lib/hero-handoff";
 
 /**
  * localStorage key for the deal stashed right before redirecting to the
@@ -102,6 +109,13 @@ const CALC_FORM_DRAFT_KEY = "truecap_calc_form_draft_v1";
  * sweet spot: imperceptible to humans, kind to mobile CPUs.
  */
 const CALC_FORM_DRAFT_DEBOUNCE_MS = 400;
+/**
+ * Remembers whether the user opened the collapsible "advanced options"
+ * (financing + operating expenses) block. Presence of this key means the
+ * user has an explicit preference, which suppresses the one-time
+ * auto-open-after-first-result nudge. Version-suffixed like the draft key.
+ */
+const CALC_ADVANCED_OPEN_KEY = "truecap_calc_advanced_open_v1";
 
 /** Safely read the draft string without throwing in Safari private mode / disabled storage. */
 function readCalcDraftRaw(): string | null {
@@ -431,6 +445,26 @@ export function InvestCalcPage({
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
   const [showResults, setShowResults] = useState(false);
+  // ── Progressive disclosure (financing + operating expenses) ──────────
+  // Cold visitors start with just the basics (property type, address,
+  // price, beds/rent); financing + operating expenses collapse behind a
+  // toggle backed by smart defaults, so the first answer comes fast. The
+  // sections stay MOUNTED (hidden via CSS) so address auto-fill still
+  // writes into them and their values submit normally.
+  const [advancedOpen, setAdvancedOpen] = useState(false);
+  // True once the user has a remembered preference OR toggles this session.
+  // Prevents the post-first-result auto-open from overriding a deliberate
+  // choice (the value is read from localStorage on mount).
+  const advancedUserChoiceRef = useRef(false);
+  const hasAutoOpenedAdvancedRef = useRef(false);
+  // ── Hero address handoff ─────────────────────────────────────────────
+  // The homepage hero (hero-address-form.tsx) dispatches "truecap:hero-
+  // analyze"; we apply the address (+ enrich when it carried Places
+  // components) or run the sample flow. Deduped by token. The handler is
+  // kept in a ref so the []-deps listener effect always calls the latest
+  // closures (form, runPropertyEnrichment, handleTrySampleDeal).
+  const lastHeroTokenRef = useRef<string | null>(null);
+  const heroAnalyzeHandlerRef = useRef<(detail: HeroAnalyzeDetail) => void>(() => {});
   /**
    * Flipped true on mount when we restore the form from the anonymous
    * auto-save draft. Drives a small "Welcome back — picked up where
@@ -1233,6 +1267,53 @@ export function InvestCalcPage({
     }, 100);
   }, [analysisResult, isCalculating]);
 
+  // Restore the user's remembered advanced-options preference. Presence of
+  // the key (either "1" or "0") marks an explicit choice, so we also flip
+  // advancedUserChoiceRef to suppress the auto-open nudge below.
+  useEffect(() => {
+    try {
+      const v = window.localStorage.getItem(CALC_ADVANCED_OPEN_KEY);
+      if (v === "1" || v === "0") {
+        advancedUserChoiceRef.current = true;
+        setAdvancedOpen(v === "1");
+      }
+    } catch {
+      /* private mode / disabled storage — keep the default (collapsed) */
+    }
+  }, []);
+
+  // Progressive disclosure nudge: the FIRST time results appear (and only
+  // if the user hasn't expressed a preference), reveal the advanced
+  // financing/expenses block so refining assumptions is the obvious next
+  // step. Once-per-mount; never overrides a deliberate user choice, and is
+  // deliberately not persisted (it's an auto behavior, not a user setting).
+  useEffect(() => {
+    if (!analysisResult) return;
+    if (hasAutoOpenedAdvancedRef.current || advancedUserChoiceRef.current) return;
+    hasAutoOpenedAdvancedRef.current = true;
+    setAdvancedOpen(true);
+  }, [analysisResult]);
+
+  // Listen for the homepage hero's address handoff. The calculator is
+  // already mounted when the hero is clicked (same page), so the live
+  // event is the primary path; we ALSO drain a sessionStorage fallback
+  // once on mount to cover a hard race or a cross-navigation. Both route
+  // through heroAnalyzeHandlerRef.current, which dedupes on token.
+  useEffect(() => {
+    const onHeroAnalyze = (e: Event) => {
+      const detail = (e as CustomEvent<HeroAnalyzeDetail>).detail;
+      if (detail) heroAnalyzeHandlerRef.current?.(detail);
+    };
+    window.addEventListener(HERO_ANALYZE_EVENT, onHeroAnalyze as EventListener);
+    try {
+      const raw = window.sessionStorage.getItem(HERO_ANALYZE_STORAGE_KEY);
+      if (raw) heroAnalyzeHandlerRef.current?.(JSON.parse(raw) as HeroAnalyzeDetail);
+    } catch {
+      /* malformed / unavailable storage — the live event still delivers it */
+    }
+    return () => window.removeEventListener(HERO_ANALYZE_EVENT, onHeroAnalyze as EventListener);
+  }, []);
+
   const onSubmit = async (validated: InvestmentFormValues) => {
     // Use a synchronous snapshot of the live form right after validation. This
     // matches what the user sees (including fields that only exist while mounted)
@@ -2006,6 +2087,72 @@ export function InvestCalcPage({
     });
   };
 
+  // Latest-closure assignment for the hero address handoff (refs declared
+  // up top; the listener effect calls this). Runs every render so it always
+  // sees the current form + handlers without re-subscribing the listener.
+  heroAnalyzeHandlerRef.current = (detail: HeroAnalyzeDetail) => {
+    if (!detail || typeof detail.token !== "string") return;
+    // Idempotency: the same payload can arrive via both the live event and
+    // the sessionStorage fallback — handle it once.
+    if (lastHeroTokenRef.current === detail.token) return;
+    lastHeroTokenRef.current = detail.token;
+    try {
+      window.sessionStorage.removeItem(HERO_ANALYZE_STORAGE_KEY);
+    } catch {
+      /* ignore */
+    }
+
+    // "Try a sample deal" from the hero → run the existing full sample flow.
+    if (detail.sample) {
+      handleTrySampleDeal();
+      return;
+    }
+
+    const address = (detail.address ?? "").trim();
+    if (!address) return;
+    form.setValue("address", address, {
+      shouldDirty: true,
+      shouldValidate: true,
+      shouldTouch: true,
+    });
+
+    // If the hero captured Google Places components, run the SAME
+    // enrichment an in-form address selection triggers (rent/rate/tax).
+    if (detail.state || detail.county || detail.zip) {
+      const place: SelectedAddress = {
+        formattedAddress: address,
+        state: detail.state,
+        county: detail.county,
+        zip: detail.zip,
+      };
+      lastSelectedAddressRef.current = place;
+      void runPropertyEnrichment(place).catch((err) => {
+        console.warn("[hero handoff] enrichment failed:", err);
+      });
+    }
+
+    // Land the user on the next field they need to fill.
+    requestAnimationFrame(() => {
+      try {
+        form.setFocus("purchasePrice");
+      } catch {
+        /* field may be unmounted for some property types — non-fatal */
+      }
+    });
+  };
+
+  const toggleAdvanced = () => {
+    advancedUserChoiceRef.current = true;
+    setAdvancedOpen((prev) => {
+      const next = !prev;
+      try {
+        window.localStorage.setItem(CALC_ADVANCED_OPEN_KEY, next ? "1" : "0");
+      } catch {
+        /* ignore */
+      }
+      return next;
+    });
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -2208,8 +2355,50 @@ export function InvestCalcPage({
               />
             )}
 
-            <FinancingSection form={form} />
-            <OperatingExpensesSection form={form} purchasePrice={purchasePrice} />
+            {/* Progressive disclosure — financing + operating expenses
+                start collapsed behind smart defaults so the first run
+                needs only the basics (type, address, price, beds/rent).
+                The sections stay MOUNTED (hidden via CSS, not unmounted)
+                so address auto-fill can still write rate/tax into them and
+                their values are included on submit. The user's open/closed
+                choice is remembered; the block auto-opens once after the
+                first result to invite refinement. */}
+            <button
+              type="button"
+              onClick={toggleAdvanced}
+              aria-expanded={advancedOpen}
+              aria-controls="advanced-options"
+              className="flex w-full items-center justify-between gap-3 rounded-2xl border border-border bg-card p-4 sm:p-5 text-left shadow-sm transition-colors hover:bg-muted/40"
+            >
+              <span className="flex min-w-0 items-center gap-2.5">
+                <Settings2 className="size-4 shrink-0 text-primary" />
+                <span className="min-w-0">
+                  <span className="block text-sm font-semibold text-foreground">
+                    {advancedOpen ? "Hide advanced options" : "Improve accuracy (optional)"}
+                  </span>
+                  <span className="block text-[11px] leading-snug text-muted-foreground">
+                    {advancedOpen
+                      ? "Financing & operating expenses"
+                      : analysisResult
+                        ? "Adjust financing & expenses to sharpen your numbers"
+                        : "Financing & expenses — running on smart defaults"}
+                  </span>
+                </span>
+              </span>
+              <ChevronDown
+                className={cn(
+                  "size-5 shrink-0 text-muted-foreground transition-transform",
+                  advancedOpen && "rotate-180"
+                )}
+              />
+            </button>
+            <div
+              id="advanced-options"
+              className={cn("space-y-5", advancedOpen ? "block" : "hidden")}
+            >
+              <FinancingSection form={form} />
+              <OperatingExpensesSection form={form} purchasePrice={purchasePrice} />
+            </div>
 
             {/* Calculate button — solid brand color (gradient was too
                 visually heavy and competed with the verdict card
