@@ -19,6 +19,11 @@ import {
 } from "@/lib/investcalc-schema";
 import { flagsForStage, isPipelineStage, normalizeTags, type PipelineStage } from "@/lib/pipeline";
 import { buildDataConfidence, type EnrichmentProvenanceInput } from "@/lib/data-confidence";
+import {
+  defaultDueDiligenceItems,
+  normalizeDueDiligenceItems,
+  type DueDiligenceItem,
+} from "@/lib/due-diligence";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { DEFAULT_APPRECIATION_RATE, DEFAULT_SELLING_COST_PCT } from "@/lib/exit-scenarios";
 import { buildCompareSnapshotPayload } from "@/lib/compare-result-snapshot";
@@ -944,6 +949,112 @@ export async function listSavedDealsBriefAction(): Promise<ListSavedDealsBriefRe
     };
   });
   return { ok: true, deals };
+}
+
+export type DealDueDiligenceResult =
+  | { ok: true; items: DueDiligenceItem[] }
+  | {
+      ok: false;
+      code: "SIGN_IN_REQUIRED" | "MIGRATION_PENDING" | "NOT_FOUND" | "VALIDATION_ERROR" | "SERVER_ERROR";
+      message: string;
+    };
+
+function isMissingDueDiligenceTable(error: { code?: string; message?: string }): boolean {
+  return error.code === "42P01" || /relation .* does not exist/i.test(error.message ?? "");
+}
+
+/** Read a saved deal's due-diligence checklist. Seeds the default checklist
+ *  when the deal has none yet. Tolerant of the migration being unapplied. */
+export async function getDealDueDiligenceAction(id: string): Promise<DealDueDiligenceResult> {
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in." };
+  }
+  const dealId = id.trim();
+  if (!dealId) {
+    return { ok: false, code: "VALIDATION_ERROR", message: "Invalid deal id." };
+  }
+  const { data: deal, error: dealErr } = await supabase
+    .from("saved_analyses")
+    .select("id")
+    .eq("id", dealId)
+    .eq("user_id", user.id)
+    .is("deleted_at", null)
+    .maybeSingle();
+  if (dealErr) {
+    return { ok: false, code: "SERVER_ERROR", message: dealErr.message };
+  }
+  if (!deal) {
+    return { ok: false, code: "NOT_FOUND", message: "Deal was not found." };
+  }
+
+  const { data, error } = await supabase
+    .from("deal_due_diligence")
+    .select("items")
+    .eq("analysis_id", dealId)
+    .eq("user_id", user.id)
+    .maybeSingle();
+  if (error) {
+    if (isMissingDueDiligenceTable(error)) {
+      return { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." };
+    }
+    return { ok: false, code: "SERVER_ERROR", message: error.message };
+  }
+  const stored = data ? normalizeDueDiligenceItems((data as { items?: unknown }).items) : [];
+  return { ok: true, items: stored.length > 0 ? stored : defaultDueDiligenceItems() };
+}
+
+/** Replace a saved deal's due-diligence checklist (normalized server-side). */
+export async function updateDealDueDiligenceAction(
+  id: string,
+  items: unknown
+): Promise<DealDueDiligenceResult> {
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in." };
+  }
+  const dealId = id.trim();
+  if (!dealId) {
+    return { ok: false, code: "VALIDATION_ERROR", message: "Invalid deal id." };
+  }
+  const normalized = normalizeDueDiligenceItems(items);
+
+  const { data: deal, error: dealErr } = await supabase
+    .from("saved_analyses")
+    .select("id")
+    .eq("id", dealId)
+    .eq("user_id", user.id)
+    .is("deleted_at", null)
+    .maybeSingle();
+  if (dealErr) {
+    return { ok: false, code: "SERVER_ERROR", message: dealErr.message };
+  }
+  if (!deal) {
+    return { ok: false, code: "NOT_FOUND", message: "Deal was not found." };
+  }
+
+  const { error } = await supabase.from("deal_due_diligence").upsert(
+    {
+      analysis_id: dealId,
+      user_id: user.id,
+      items: normalized,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: "analysis_id" }
+  );
+  if (error) {
+    if (isMissingDueDiligenceTable(error)) {
+      return { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." };
+    }
+    return { ok: false, code: "SERVER_ERROR", message: error.message };
+  }
+  return { ok: true, items: normalized };
 }
 
 /**

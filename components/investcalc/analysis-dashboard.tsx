@@ -82,6 +82,7 @@ import { CashFlowWaterfall } from "@/components/investcalc/cash-flow-waterfall";
 import { MortgageScenarioCompare } from "@/components/investcalc/mortgage-scenario-compare";
 import { LoanAmortizationView } from "@/components/investcalc/loan-amortization-view";
 import { DealNotesPanel } from "@/components/investcalc/deal-notes-panel";
+import { DueDiligenceCard } from "@/components/investcalc/due-diligence-card";
 // ShareLinkButton import temporarily removed — Share button was pulled from
 // the Quick Actions row because it wrapped onto a second line. Component
 // + share-link.ts + /d/[encoded] route all remain in the codebase ready
@@ -1295,7 +1296,10 @@ export function AnalysisDashboard({
           interrupt the verdict → numbers → details read. Only renders for a
           re-opened saved deal; lazy-fetches its own data. */}
       {isExistingSavedDeal && savedDealId ? (
-        <DealNotesPanel savedDealId={savedDealId} />
+        <>
+          <DealNotesPanel savedDealId={savedDealId} />
+          <DueDiligenceCard savedDealId={savedDealId} />
+        </>
       ) : null}
     </div>
   );
