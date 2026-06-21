@@ -246,6 +246,45 @@ function getDecisionCenter(data: DashboardHomeData) {
 }
 
 /**
+ * Portfolio KPIs — the four numbers an investor underwrites a *book* on,
+ * complementing the Pipeline Value / Monthly Cash Flow headline cards:
+ *  - Average Deal Score (book quality)
+ *  - Weighted DSCR (leverage safety; purchase-price-weighted, financed
+ *    deals only — cash purchases have no debt service)
+ *  - Cash to Close (capital at work = down payment + closing across deals)
+ *  - Needs Review (count of cash-flow-negative deals)
+ * Computed over the active set (allDeals). Returns null when empty.
+ */
+function getPortfolioKpis(data: DashboardHomeData) {
+  const deals = data.allDeals;
+  if (deals.length === 0) return null;
+
+  const scored = deals.filter((d) => d.score != null);
+  const avgScore = scored.length
+    ? scored.reduce((sum, d) => sum + (d.score ?? 0), 0) / scored.length
+    : null;
+
+  let dscrNumerator = 0;
+  let dscrDenominator = 0;
+  for (const d of deals) {
+    if (d.dscr != null && d.purchasePrice != null && d.purchasePrice > 0) {
+      dscrNumerator += d.dscr * d.purchasePrice;
+      dscrDenominator += d.purchasePrice;
+    }
+  }
+  const weightedDscr = dscrDenominator > 0 ? dscrNumerator / dscrDenominator : null;
+
+  const withCash = deals.filter((d) => d.cashToClose != null);
+  const cashToClose = withCash.length
+    ? withCash.reduce((sum, d) => sum + (d.cashToClose ?? 0), 0)
+    : null;
+
+  const needsReviewCount = deals.filter((d) => d.cashFlowMonthly != null && d.cashFlowMonthly < 0).length;
+
+  return { avgScore, weightedDscr, cashToClose, needsReviewCount };
+}
+
+/**
  * Portfolio-level totals — answers the question every investor asks
  * each morning: "what does my book look like right now?" Computed
  * over allDeals (not topDeals) so it reflects the full saved set.
@@ -376,7 +415,7 @@ export function DashboardHome({
   // several times each, and re-running them on every re-render (Topbar
   // interactions etc.) is pure waste. `data` comes from the server
   // component and is referentially stable per page load.
-  const { topDeals, riskReturn, dealComparison, highlights, insights, portfolio, decisionCenter } = useMemo(
+  const { topDeals, riskReturn, dealComparison, highlights, insights, portfolio, decisionCenter, kpis } = useMemo(
     () => ({
       topDeals: getTopDeals(data),
       riskReturn: getRiskReturn(data),
@@ -385,6 +424,7 @@ export function DashboardHome({
       insights: buildDecisionInsights(data.topDeals),
       portfolio: getPortfolioTotals(data),
       decisionCenter: getDecisionCenter(data),
+      kpis: getPortfolioKpis(data),
     }),
     [data]
   );
@@ -632,6 +672,70 @@ export function DashboardHome({
                 with price data
               </span>
             </div>
+            {/* ── Portfolio KPIs — book quality (avg score), leverage safety
+                (weighted DSCR), capital at work (cash to close), and how many
+                deals need attention. Complements the value/cash-flow headlines
+                above without adding new inputs. */}
+            {kpis ? (
+              <div className="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-4">
+                <div className="rounded-xl border border-border bg-card p-3">
+                  <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                    <Award className="h-3.5 w-3.5" /> Avg Deal Score
+                  </div>
+                  <div className="mt-1 text-lg font-bold text-foreground">
+                    {kpis.avgScore == null ? "—" : Math.round(kpis.avgScore)}
+                    {kpis.avgScore != null ? <span className="text-xs font-medium text-muted-foreground"> / 100</span> : null}
+                  </div>
+                </div>
+                <div className="rounded-xl border border-border bg-card p-3">
+                  <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                    <Layers className="h-3.5 w-3.5" /> Weighted DSCR
+                  </div>
+                  <div className="mt-1 text-lg font-bold text-foreground">
+                    {kpis.weightedDscr == null ? "—" : `${kpis.weightedDscr.toFixed(2)}×`}
+                  </div>
+                  <div className="text-[10px] text-muted-foreground">
+                    {kpis.weightedDscr == null
+                      ? "cash purchases only"
+                      : kpis.weightedDscr >= 1.25
+                        ? "above 1.25 lender bar"
+                        : "below 1.25 lender bar"}
+                  </div>
+                </div>
+                <div className="rounded-xl border border-border bg-card p-3">
+                  <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                    <DollarSign className="h-3.5 w-3.5" /> Cash to Close
+                  </div>
+                  <div className="mt-1 text-lg font-bold text-foreground">
+                    {kpis.cashToClose == null ? "—" : formatCurrency(kpis.cashToClose, true)}
+                  </div>
+                  <div className="text-[10px] text-muted-foreground">down + closing, active deals</div>
+                </div>
+                <div
+                  className={cn(
+                    "rounded-xl border p-3",
+                    kpis.needsReviewCount > 0 ? "border-destructive/30 bg-destructive/5" : "border-border bg-card"
+                  )}
+                >
+                  <div
+                    className={cn(
+                      "flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest",
+                      kpis.needsReviewCount > 0 ? "text-destructive" : "text-muted-foreground"
+                    )}
+                  >
+                    <AlertTriangle className="h-3.5 w-3.5" /> Needs Review
+                  </div>
+                  <div className="mt-1 text-lg font-bold text-foreground">{kpis.needsReviewCount}</div>
+                  <div className="text-[10px] text-muted-foreground">
+                    {kpis.needsReviewCount === 0
+                      ? "all cash-flow positive"
+                      : kpis.needsReviewCount === 1
+                        ? "deal cash-flow negative"
+                        : "deals cash-flow negative"}
+                  </div>
+                </div>
+              </div>
+            ) : null}
           </section>
         ) : null}
 

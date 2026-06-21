@@ -31,6 +31,7 @@ export type ResultSnapshot = {
   capRate?: NumericLike;
   dscr?: NumericLike;
   dscrRatio?: NumericLike;
+  totalCashRequired?: NumericLike;
   monthlyPayment?: NumericLike;
   monthly_payment?: NumericLike;
   score?: NumericLike;
@@ -81,6 +82,10 @@ export type DashboardDeal = {
    * and the dashboard should not penalize the deal for it.
    */
   monthlyPayment: number | null;
+  /** Cash to close (down payment + closing costs) from the saved snapshot.
+   *  Optional/back-compatible so existing DashboardDeal literals (e.g. in
+   *  tests) don't need to supply it. */
+  cashToClose?: number | null;
   roiPct: number | null;
   score: number | null;
   recommendation: string | null;
@@ -165,6 +170,7 @@ export function buildDashboardDeal(row: SavedAnalysisDashboardRow): DashboardDea
     capRatePct: toNumber(snapshot.capRate),
     dscr: getDscr(snapshot),
     monthlyPayment: getMonthlyPayment(snapshot),
+    cashToClose: toNumber(snapshot.totalCashRequired),
     roiPct: getRoiPct(snapshot),
     score: toNumber(snapshot.score),
     recommendation: snapshot.recommendation ?? null,
