@@ -15,7 +15,7 @@
  * Email keys (stored in lifecycle_email_log.email_key):
  *   "welcome"        — once, after the account is confirmed
  *   "drip_<n>"       — onboarding drip day n (1..MAX_DRIP_DAY)
- *   "pro_nudge"      — once, active free users a few days in
+ *   "pro_nudge"      — once, free users still on free after the drip
  *   "winback_21d"    — once, users inactive >= WINBACK_AFTER_INACTIVE_DAYS
  */
 
@@ -48,7 +48,9 @@ export type DueLifecycleEmail = {
 };
 
 export const MAX_DRIP_DAY = 30;
-export const PRO_NUDGE_AFTER_DAYS = 5;
+// Drip out-prioritizes the nudge, so with a 30-day drip this naturally
+// lands just after onboarding finishes — a "you're still free" upgrade ask.
+export const PRO_NUDGE_AFTER_DAYS = 31;
 export const WINBACK_AFTER_INACTIVE_DAYS = 21;
 
 const DAY_MS = 86_400_000;
@@ -92,10 +94,11 @@ export function selectDueLifecycleEmail(
     }
   }
 
-  // 3) Free -> Pro nudge — once, for active free users a few days in.
+  // 3) Free -> Pro nudge — once, for free users who moved through the
+  //    onboarding drip without upgrading. (Free users have no per-user
+  //    activity signal — they can't save deals — so this is age-based.)
   if (
     user.plan === "free" &&
-    user.lastActivityAt !== null &&
     daysBetween(user.signupAt, now) >= PRO_NUDGE_AFTER_DAYS &&
     !sent.has("pro_nudge")
   ) {

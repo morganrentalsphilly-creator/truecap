@@ -11,6 +11,10 @@
     {
       "path": "/api/cron/send-rate-alerts",
       "schedule": "0 18 * * 4"
+    },
+    {
+      "path": "/api/cron/send-lifecycle-emails",
+      "schedule": "0 14 * * *"
     }
   ]
 }

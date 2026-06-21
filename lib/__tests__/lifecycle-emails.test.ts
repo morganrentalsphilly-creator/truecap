@@ -64,19 +64,19 @@ describe("selectDueLifecycleEmail", () => {
     expect(selectDueLifecycleEmail(user({ sentKeys: ["welcome"] }), NOW)).toBeNull();
   });
 
-  it("sends the Pro nudge to active free users a few days in", () => {
-    const sent = ["welcome", "drip_1", "drip_2", "drip_3", "drip_4", "drip_5", "drip_6"];
+  const allDrips = Array.from({ length: 30 }, (_, i) => `drip_${i + 1}`);
+
+  it("sends the Pro nudge to free users after the drip completes", () => {
     const due = selectDueLifecycleEmail(
-      user({ signupAt: daysAgo(6), lastActivityAt: daysAgo(1), sentKeys: sent }),
+      user({ signupAt: daysAgo(31), sentKeys: ["welcome", ...allDrips] }),
       NOW
     );
     expect(due?.kind).toBe("pro_nudge");
   });
 
   it("never sends the Pro nudge to paid users", () => {
-    const sent = ["welcome", "drip_1", "drip_2", "drip_3", "drip_4", "drip_5", "drip_6"];
     const due = selectDueLifecycleEmail(
-      user({ plan: "paid", signupAt: daysAgo(6), lastActivityAt: daysAgo(1), sentKeys: sent }),
+      user({ plan: "paid", signupAt: daysAgo(31), sentKeys: ["welcome", ...allDrips] }),
       NOW
     );
     expect(due).toBeNull();
