@@ -7,9 +7,9 @@
  * gated for visibility; hides itself if the provider isn't configured yet
  * (NOT_CONFIGURED), keeping it invisible until actually enabled.
  */
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { Building2, Loader2 } from "lucide-react";
-import { getPropertyCompsAction } from "@/app/actions/property-comps";
+import { getPropertyCompsAction, getSavedDealCompsAction } from "@/app/actions/property-comps";
 import type { EnrichmentComp, PropertyEnrichment } from "@/lib/property-enrichment/rentcast";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -55,6 +55,7 @@ export function PropertyCompsCard({
   bedrooms,
   bathrooms,
   squareFootage,
+  savedDealId,
   onApply,
 }: {
   enabled: boolean;
@@ -63,14 +64,32 @@ export function PropertyCompsCard({
   bedrooms?: number | null;
   bathrooms?: number | null;
   squareFootage?: number | null;
+  /** When set, comps are saved to + loaded from this deal (persistent set). */
+  savedDealId?: string | null;
   /** Fill the analyzer form from the pulled facts + estimates. */
   onApply?: (enrichment: PropertyEnrichment) => void;
 }) {
   const { toast } = useToast();
   const [data, setData] = useState<PropertyEnrichment | null>(null);
-  const [source, setSource] = useState<"cache" | "live" | null>(null);
+  const [source, setSource] = useState<"cache" | "live" | "saved" | null>(null);
   const [unavailable, setUnavailable] = useState(false);
   const [loading, startLoading] = useTransition();
+
+  // On a saved deal, load any previously-saved comp set (no API call / quota).
+  useEffect(() => {
+    if (!enabled || !savedDealId) return;
+    let active = true;
+    void (async () => {
+      const r = await getSavedDealCompsAction(savedDealId);
+      if (active && r.ok && r.enrichment) {
+        setData(r.enrichment);
+        setSource("saved");
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [enabled, savedDealId]);
 
   if (!enabled || !address || unavailable) return null;
 
@@ -82,6 +101,7 @@ export function PropertyCompsCard({
         bedrooms: bedrooms ?? undefined,
         bathrooms: bathrooms ?? undefined,
         squareFootage: squareFootage ?? undefined,
+        dealId: savedDealId ?? undefined,
       });
       if (!r.ok) {
         if (r.code === "NOT_CONFIGURED") {
@@ -111,7 +131,7 @@ export function PropertyCompsCard({
           disabled={loading}
           onClick={pull}
         >
-          {loading ? <Loader2 className="size-4 animate-spin" /> : data ? "Refresh" : "Pull comps"}
+          {loading ? <Loader2 className="size-4 animate-spin" /> : data ? "Refresh" : "Run comps"}
         </Button>
       </div>
 
@@ -167,8 +187,8 @@ export function PropertyCompsCard({
           <CompList title="Rent comps" comps={data.rentComps} suffix="/mo" />
 
           <p className="text-[10px] text-muted-foreground">
-            Source: RentCast · {source === "cache" ? "cached" : "live"}. Automated estimates — verify
-            against local comps before relying on them.
+            Source: RentCast · {source === "live" ? "live" : source === "saved" ? "saved to this deal" : "cached"}.
+            Automated estimates — verify against local comps before relying on them.
           </p>
         </div>
       )}

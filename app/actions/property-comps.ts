@@ -21,8 +21,13 @@ const CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 
 // Hard monthly cap on LIVE enrichments (each ≈ 2 RentCast API calls), to
 // guard the 1,000-calls/mo plan limit even across many paid users. Tunable
-// via env; default 300 enrichments (~900 calls), leaving headroom.
+// via env; default 300 enrichments (~600 calls), leaving headroom.
 const MONTHLY_ENRICHMENT_CAP = Number.parseInt(process.env.RENTCAST_MONTHLY_ENRICHMENT_CAP ?? "300", 10);
+
+// Per-Pro-user monthly cap on live lookups (distinct properties). Each property
+// ≈ 2 API calls. Default 30 properties/user/month. Free users instead get one
+// lifetime lookup (profiles.comps_free_used). Tunable via env.
+const PER_USER_MONTHLY_CAP = Number.parseInt(process.env.RENTCAST_PER_USER_MONTHLY_CAP ?? "30", 10);
 
 const inputSchema = z.object({
   address: z.string().trim().min(5).max(300),
@@ -30,6 +35,8 @@ const inputSchema = z.object({
   bedrooms: z.number().min(0).max(50).nullish(),
   bathrooms: z.number().min(0).max(50).nullish(),
   squareFootage: z.number().min(0).max(1_000_000).nullish(),
+  /** When present, the pulled comp set is saved onto this saved deal. */
+  dealId: z.string().uuid().optional(),
 });
 
 export type PropertyCompsResult =
@@ -100,6 +107,36 @@ export async function getPropertyCompsAction(input: unknown): Promise<PropertyCo
   const key = addressKey(parsed.data.address);
   const admin = createAdminSupabaseClient();
 
+  // When a dealId is supplied, persist the pulled comp set onto that saved
+  // deal (a reference set — it never feeds the analysis math). Verify the
+  // caller owns the deal first, since admin bypasses RLS.
+  const dealId = parsed.data.dealId ?? null;
+  const persistToDeal = async (payload: PropertyEnrichment) => {
+    if (!dealId) return;
+    const { data: owns } = await admin
+      .from("saved_analyses")
+      .select("id")
+      .eq("id", dealId)
+      .eq("user_id", user.id)
+      .maybeSingle();
+    if (!owns) return;
+    await admin
+      .from("deal_comps")
+      .upsert(
+        {
+          analysis_id: dealId,
+          user_id: user.id,
+          payload: payload as unknown as Record<string, unknown>,
+          fetched_at: new Date().toISOString(),
+        },
+        { onConflict: "analysis_id" }
+      )
+      .then(
+        () => undefined,
+        () => undefined
+      );
+  };
+
   // Cache-first. Read the row once; serve it if fresh, keep it as a stale
   // fallback for the cap / fetch-failure paths below.
   const { data: cached } = await admin
@@ -111,13 +148,19 @@ export async function getPropertyCompsAction(input: unknown): Promise<PropertyCo
   if (cached) {
     const fetchedAt = new Date((cached as { fetched_at: string }).fetched_at).getTime();
     if (Number.isFinite(fetchedAt) && Date.now() - fetchedAt < CACHE_TTL_MS) {
+      await persistToDeal(cachedPayload!);
       return { ok: true, source: "cache", enrichment: cachedPayload! };
     }
   }
 
-  // Monthly spend guard — a live call would consume API quota, so stop before
-  // the plan limit. Counts live enrichments per calendar month (UTC).
-  const monthKey = `rentcast_enrichments_${new Date().toISOString().slice(0, 7)}`;
+  // Spend guards — a live call consumes API quota, so stop before two limits:
+  // a global monthly cap (across all users) and a per-Pro-user monthly cap.
+  // Both count live enrichments per calendar month (UTC); cache hits above
+  // never reach here, so they don't count.
+  const month = new Date().toISOString().slice(0, 7);
+  const monthKey = `rentcast_enrichments_${month}`;
+  const userMonthKey = `comps_user_${user.id}_${month}`;
+
   if (Number.isFinite(MONTHLY_ENRICHMENT_CAP) && MONTHLY_ENRICHMENT_CAP > 0) {
     const { data: counterRow } = await admin
       .from("app_counters")
@@ -126,12 +169,37 @@ export async function getPropertyCompsAction(input: unknown): Promise<PropertyCo
       .maybeSingle();
     const used = Number((counterRow as { count?: number } | null)?.count ?? 0);
     if (used >= MONTHLY_ENRICHMENT_CAP) {
-      // At the cap: serve a stale cached copy if we have one, else say so.
-      if (cachedPayload) return { ok: true, source: "cache", enrichment: cachedPayload };
+      // At the global cap: serve a stale cached copy if we have one, else say so.
+      if (cachedPayload) {
+        await persistToDeal(cachedPayload);
+        return { ok: true, source: "cache", enrichment: cachedPayload };
+      }
       return {
         ok: false,
         code: "CAP_REACHED",
         message: "Comps have reached this month's data limit. They'll reset at the start of next month.",
+      };
+    }
+  }
+
+  // Per-Pro-user monthly cap (free users are bounded by the one-lifetime gate
+  // above, so this only applies to paid users).
+  if (isPaid && Number.isFinite(PER_USER_MONTHLY_CAP) && PER_USER_MONTHLY_CAP > 0) {
+    const { data: userRow } = await admin
+      .from("app_counters")
+      .select("count")
+      .eq("key", userMonthKey)
+      .maybeSingle();
+    const userUsed = Number((userRow as { count?: number } | null)?.count ?? 0);
+    if (userUsed >= PER_USER_MONTHLY_CAP) {
+      if (cachedPayload) {
+        await persistToDeal(cachedPayload);
+        return { ok: true, source: "cache", enrichment: cachedPayload };
+      }
+      return {
+        ok: false,
+        code: "CAP_REACHED",
+        message: `You've used all ${PER_USER_MONTHLY_CAP} comp lookups in your plan this month. Your limit resets on the 1st.`,
       };
     }
   }
@@ -170,11 +238,18 @@ export async function getPropertyCompsAction(input: unknown): Promise<PropertyCo
     return { ok: false, code: "NOT_FOUND", message: "No comps found for this address." };
   }
 
-  // Count this live enrichment against the monthly cap (atomic; best-effort).
-  await admin.rpc("increment_app_counter", { counter_key: monthKey }).then(
-    () => undefined,
-    () => undefined
-  );
+  // Count this live enrichment against both the global + per-user monthly caps
+  // (atomic; best-effort).
+  await Promise.all([
+    admin.rpc("increment_app_counter", { counter_key: monthKey }).then(
+      () => undefined,
+      () => undefined
+    ),
+    admin.rpc("increment_app_counter", { counter_key: userMonthKey }).then(
+      () => undefined,
+      () => undefined
+    ),
+  ]);
 
   // Upsert cache (best-effort — never fail the request on a cache write).
   await admin
@@ -188,5 +263,39 @@ export async function getPropertyCompsAction(input: unknown): Promise<PropertyCo
       () => undefined
     );
 
+  // Save the comp set onto the deal (reference-only; never feeds the math).
+  await persistToDeal(enrichment);
+
   return { ok: true, source: "live", enrichment };
+}
+
+export type SavedDealCompsResult =
+  | { ok: true; enrichment: PropertyEnrichment | null; fetchedAt: string | null }
+  | { ok: false };
+
+/** Load a previously-saved comp set for a deal (no API call, no quota). Returns
+ *  the stored set, or null when none exists / the table isn't migrated yet. */
+export async function getSavedDealCompsAction(dealId: unknown): Promise<SavedDealCompsResult> {
+  const id = typeof dealId === "string" ? dealId.trim() : "";
+  if (!id) return { ok: false };
+
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false };
+
+  const { data, error } = await supabase
+    .from("deal_comps")
+    .select("payload, fetched_at")
+    .eq("analysis_id", id)
+    .maybeSingle();
+  // Table missing (migration pending) or no row → simply "no saved set".
+  if (error || !data) return { ok: true, enrichment: null, fetchedAt: null };
+
+  return {
+    ok: true,
+    enrichment: (data as { payload: PropertyEnrichment }).payload,
+    fetchedAt: (data as { fetched_at: string | null }).fetched_at ?? null,
+  };
 }

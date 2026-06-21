@@ -74,6 +74,7 @@ import {
  */
 const ONE_TIME_PDF_DRAFT_KEY = "truecap:one-time-pdf-draft";
 import { enrichPropertyAction } from "@/app/actions/enrich-property";
+import { getPropertyCompsAction } from "@/app/actions/property-comps";
 import type { SelectedAddress } from "./address-autocomplete";
 import type { TenYearProjectionInput, ProjectionYear } from "@/lib/ten-year-projections";
 import type { TaxStrategyInput, TaxStrategyYear } from "@/lib/tax-strategy";
@@ -1024,6 +1025,84 @@ export function InvestCalcPage({
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [unitsEnrichmentKey]);
+
+  /**
+   * RentCast autofill. The cheap enrichment (enrich-property) only knows
+   * property tax, mortgage rate, and HUD area rent — it has NO source for
+   * beds, baths, sqft, or price. RentCast does. So when a signed-in user
+   * enters a complete address, pull the property's facts + value/rent
+   * estimate and fill the EMPTY form fields (never clobbering what the user
+   * already typed). Cost is bounded by the per-user + global caps in the
+   * action; any failure (no budget / not configured / no data / signed out)
+   * degrades silently — the user just types the values.
+   */
+  const watchedAddress = form.watch("address");
+  const compsAutofillRef = useRef<string>("");
+
+  const applyCompsToEmptyFields = useCallback(
+    (e: PropertyEnrichment) => {
+      const f = e.facts;
+      const filled: string[] = [];
+      const opts = { shouldDirty: false, shouldTouch: false, shouldValidate: true };
+      if (f?.bedrooms != null && isEmptyNumber(form.getValues("bedrooms"))) {
+        form.setValue("bedrooms", f.bedrooms, opts);
+        filled.push("beds");
+      }
+      if (f?.bathrooms != null && isEmptyNumber(form.getValues("bathrooms"))) {
+        form.setValue("bathrooms", f.bathrooms, opts);
+        filled.push("baths");
+      }
+      if (f?.squareFootage != null && isEmptyNumber(form.getValues("sqft"))) {
+        form.setValue("sqft", f.squareFootage, opts);
+        filled.push("size");
+      }
+      if (e.valueEstimate != null && isEmptyNumber(form.getValues("purchasePrice"))) {
+        form.setValue("purchasePrice", Math.round(e.valueEstimate), opts);
+        filled.push("price");
+      }
+      const pt = form.getValues("propertyType");
+      if (
+        e.rentEstimate != null &&
+        (pt === "single-family" || pt === "owner-occupant") &&
+        isEmptyNumber(form.getValues("monthlyRent"))
+      ) {
+        form.setValue("monthlyRent", Math.round(e.rentEstimate), opts);
+        filled.push("rent");
+      }
+      if (filled.length > 0) {
+        toast({
+          title: "Auto-filled from address",
+          description: `Filled ${filled.join(", ")} from RentCast — adjust anything that's off.`,
+        });
+      }
+    },
+    [form, toast]
+  );
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    const addr = (watchedAddress ?? "").trim();
+    // Only for a complete-looking address (carries a 5-digit ZIP), once per
+    // distinct address. Debounced so we don't fire mid-typing; the action's
+    // 30-day cache means re-entering the same address costs nothing anyway.
+    if (addr.length < 8 || !/\b\d{5}\b/.test(addr)) return;
+    if (compsAutofillRef.current === addr) return;
+    const handle = window.setTimeout(() => {
+      compsAutofillRef.current = addr;
+      void (async () => {
+        try {
+          const r = await getPropertyCompsAction({
+            address: addr,
+            propertyType: form.getValues("propertyType"),
+          });
+          if (r.ok) applyCompsToEmptyFields(r.enrichment);
+        } catch {
+          // best-effort; silent
+        }
+      })();
+    }, 700);
+    return () => window.clearTimeout(handle);
+  }, [watchedAddress, isAuthenticated, form, applyCompsToEmptyFields]);
 
   const buildTaxStrategySource = (
     analysisId: string | null,
