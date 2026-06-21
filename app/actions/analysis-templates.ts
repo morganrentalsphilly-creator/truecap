@@ -31,10 +31,14 @@ export type AnalysisTemplateOption = {
   depreciationYears: 27.5 | 39;
   includeInterestDeduction: boolean;
   taxRatePct: number;
+  isDefault: boolean;
+  kind: string | null;
+  /** Number of saved deals using this template (derived at read time). */
+  usedCount?: number;
 };
 
 const TEMPLATE_ROW_FIELDS =
-  "id, template_name, template_description, template_type, is_system, property_tax_pct, insurance_input_mode, insurance_pct, insurance_mo, maintenance_pct, vacancy_pct, management_pct, capex_pct, closing_costs_pct, interest_rate_pct, down_payment_pct, expense_growth_pct, rent_growth_pct, appreciation_rate_pct, selling_cost_pct, building_value_pct, depreciation_years, include_interest_deduction, tax_rate_pct";
+  "id, template_name, template_description, template_type, is_system, property_tax_pct, insurance_input_mode, insurance_pct, insurance_mo, maintenance_pct, vacancy_pct, management_pct, capex_pct, closing_costs_pct, interest_rate_pct, down_payment_pct, expense_growth_pct, rent_growth_pct, appreciation_rate_pct, selling_cost_pct, building_value_pct, depreciation_years, include_interest_deduction, tax_rate_pct, is_default, kind";
 
 function num(v: unknown, fallback: number): number {
   const n = typeof v === "number" ? v : Number(v);
@@ -69,6 +73,8 @@ function mapTemplateRow(row: Record<string, unknown>): AnalysisTemplateOption {
     depreciationYears,
     includeInterestDeduction: row.include_interest_deduction !== false,
     taxRatePct: num(row.tax_rate_pct, 24),
+    isDefault: !!row.is_default,
+    kind: (row.kind as string | null) ?? null,
   };
 }
 
@@ -140,8 +146,9 @@ export async function listAnalysisTemplatesAction(): Promise<ListTemplatesResult
   const { data, error } = await supabase
     .from("analysis_templates")
     .select(TEMPLATE_ROW_FIELDS)
+    .eq("user_id", user.id)
     .eq("is_system", false)
-    .order("is_system", { ascending: false })
+    .order("is_default", { ascending: false })
     .order("template_name", { ascending: true });
 
   if (error) {
@@ -151,6 +158,21 @@ export async function listAnalysisTemplatesAction(): Promise<ListTemplatesResult
   const templates: AnalysisTemplateOption[] = (data ?? []).map((row) =>
     mapTemplateRow(row as Record<string, unknown>)
   );
+
+  // Derive "used by X deals" — one cheap query, counted in JS so we don't
+  // need a denormalized counter to keep in sync.
+  const { data: usageRows } = await supabase
+    .from("saved_analyses")
+    .select("template_id")
+    .eq("user_id", user.id)
+    .is("deleted_at", null)
+    .not("template_id", "is", null);
+  const counts = new Map<string, number>();
+  for (const r of usageRows ?? []) {
+    const id = (r as { template_id: string | null }).template_id;
+    if (id) counts.set(id, (counts.get(id) ?? 0) + 1);
+  }
+  for (const t of templates) t.usedCount = counts.get(t.id) ?? 0;
 
   return { ok: true, templates };
 }
@@ -190,7 +212,10 @@ export type DeleteTemplateResult =
       message: string;
     };
 
-export async function createAnalysisTemplateAction(input: unknown): Promise<CreateTemplateResult> {
+export async function createAnalysisTemplateAction(
+  input: unknown,
+  kind?: string | null
+): Promise<CreateTemplateResult> {
   const supabase = await createServerSupabaseClient();
   const {
     data: { user },
@@ -273,6 +298,7 @@ export async function createAnalysisTemplateAction(input: unknown): Promise<Crea
       include_interest_deduction: payload.includeInterestDeduction ?? true,
       tax_rate_pct: payload.taxRatePct ?? 24,
       is_system: false,
+      kind: kind ?? null,
     })
     .select(TEMPLATE_ROW_FIELDS)
     .single();
@@ -479,4 +505,140 @@ export async function deleteAnalysisTemplateAction(
   }
 
   return { ok: true };
+}
+
+export type SetDefaultTemplateResult =
+  | { ok: true }
+  | {
+      ok: false;
+      code: "SIGN_IN_REQUIRED" | "ENTITLEMENT_TEMPLATE" | "NOT_FOUND" | "SERVER_ERROR";
+      message: string;
+    };
+
+/**
+ * Mark one of the user's templates as their default (at most one — the
+ * partial unique index enforces it, so we clear the prior default first).
+ */
+export async function setDefaultTemplateAction(templateId: string): Promise<SetDefaultTemplateResult> {
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in to manage templates." };
+  }
+
+  const entitlements = await getEntitlementsForUser(supabase, user.id);
+  if (!entitlements.features.includes("template_manage")) {
+    return { ok: false, code: "ENTITLEMENT_TEMPLATE", message: "Upgrade required to manage templates." };
+  }
+
+  const { data: row, error: rowErr } = await supabase
+    .from("analysis_templates")
+    .select("id, is_system")
+    .eq("id", templateId)
+    .eq("user_id", user.id)
+    .maybeSingle();
+  if (rowErr) {
+    return { ok: false, code: "SERVER_ERROR", message: rowErr.message };
+  }
+  if (!row || row.is_system) {
+    return { ok: false, code: "NOT_FOUND", message: "Template not found." };
+  }
+
+  // Clear the prior default first so the one-default-per-user index is happy.
+  const { error: clearErr } = await supabase
+    .from("analysis_templates")
+    .update({ is_default: false })
+    .eq("user_id", user.id)
+    .eq("is_default", true);
+  if (clearErr) {
+    return { ok: false, code: "SERVER_ERROR", message: clearErr.message };
+  }
+
+  const { error: setErr } = await supabase
+    .from("analysis_templates")
+    .update({ is_default: true })
+    .eq("id", templateId)
+    .eq("user_id", user.id)
+    .eq("is_system", false);
+  if (setErr) {
+    return { ok: false, code: "SERVER_ERROR", message: setErr.message };
+  }
+
+  return { ok: true };
+}
+
+/**
+ * Duplicate a template the user can see (their own or a system/starter one)
+ * into a new owned template named "<name> (copy)". Reuses the create path
+ * for validation + dedupe; carries the source's `kind`.
+ */
+export async function duplicateTemplateAction(templateId: string): Promise<UpdateTemplateResult> {
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in to manage templates." };
+  }
+
+  const entitlements = await getEntitlementsForUser(supabase, user.id);
+  if (!entitlements.features.includes("template_manage")) {
+    return { ok: false, code: "ENTITLEMENT_TEMPLATE", message: "Upgrade required to manage templates." };
+  }
+
+  const { data: srcRow, error: srcErr } = await supabase
+    .from("analysis_templates")
+    .select(TEMPLATE_ROW_FIELDS)
+    .eq("id", templateId)
+    .maybeSingle();
+  if (srcErr) {
+    return { ok: false, code: "SERVER_ERROR", message: srcErr.message };
+  }
+  if (!srcRow) {
+    return { ok: false, code: "NOT_FOUND", message: "Template not found." };
+  }
+  const src = mapTemplateRow(srcRow as Record<string, unknown>);
+
+  const { data: names } = await supabase
+    .from("analysis_templates")
+    .select("template_name")
+    .eq("user_id", user.id)
+    .eq("is_system", false);
+  const existing = new Set(
+    (names ?? []).map((r) => String(r.template_name ?? "").trim().toLowerCase())
+  );
+  let candidate = `${src.templateName} (copy)`.slice(0, 100);
+  let n = 2;
+  while (existing.has(candidate.toLowerCase())) {
+    candidate = `${src.templateName} (copy ${n})`.slice(0, 100);
+    n += 1;
+  }
+
+  const input = {
+    templateName: candidate,
+    templateDescription: src.templateDescription ?? undefined,
+    propertyTaxPct: src.propertyTaxPct,
+    insuranceInputMode: src.insuranceInputMode,
+    insurancePct: src.insurancePct ?? undefined,
+    insuranceMo: src.insuranceMo ?? undefined,
+    maintenancePct: src.maintenancePct,
+    vacancyPct: src.vacancyPct,
+    managementPct: src.managementPct,
+    capexPct: src.capexPct,
+    closingCostsPct: src.closingCostsPct,
+    interestRatePct: src.interestRatePct,
+    downPaymentPct: src.downPaymentPct,
+    expenseGrowthPct: src.expenseGrowthPct,
+    rentGrowthPct: src.rentGrowthPct,
+    appreciationRatePct: src.appreciationRatePct,
+    sellingCostPct: src.sellingCostPct,
+    buildingValuePct: src.buildingValuePct,
+    depreciationYears: src.depreciationYears,
+    includeInterestDeduction: src.includeInterestDeduction,
+    taxRatePct: src.taxRatePct,
+  };
+
+  return createAnalysisTemplateAction(input, src.kind);
 }

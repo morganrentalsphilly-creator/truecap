@@ -3,12 +3,14 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft,
+  Copy,
   FileText,
   Loader2,
   Pencil,
   Plus,
   Search,
   Sparkles,
+  Star,
   Trash2,
 } from "lucide-react";
 import { STARTER_TEMPLATES, type StarterTemplate } from "@/lib/starter-templates";
@@ -16,6 +18,8 @@ import type { AnalysisTemplateOption } from "@/app/actions/analysis-templates";
 import {
   createAnalysisTemplateAction,
   deleteAnalysisTemplateAction,
+  duplicateTemplateAction,
+  setDefaultTemplateAction,
   updateAnalysisTemplateAction,
 } from "@/app/actions/analysis-templates";
 import type { AnalysisTemplateInput } from "@/lib/analysis-template-schema";
@@ -234,6 +238,38 @@ export function TemplatesManagementPage({
     }
   };
 
+  const [busyTemplateId, setBusyTemplateId] = useState<string | null>(null);
+
+  const handleSetDefault = async (template: AnalysisTemplateOption) => {
+    setBusyTemplateId(template.id);
+    try {
+      const result = await setDefaultTemplateAction(template.id);
+      if (!result.ok) {
+        toast({ title: "Couldn't set default", description: result.message, variant: "destructive" });
+        return;
+      }
+      setTemplates((prev) => prev.map((t) => ({ ...t, isDefault: t.id === template.id })));
+      toast({ title: "Default template set", description: `"${template.templateName}" is now your default.` });
+    } finally {
+      setBusyTemplateId(null);
+    }
+  };
+
+  const handleDuplicate = async (template: AnalysisTemplateOption) => {
+    setBusyTemplateId(template.id);
+    try {
+      const result = await duplicateTemplateAction(template.id);
+      if (!result.ok) {
+        toast({ title: "Couldn't duplicate", description: result.message, variant: "destructive" });
+        return;
+      }
+      setTemplates((prev) => [...prev, result.template]);
+      toast({ title: "Template duplicated", description: `Created "${result.template.templateName}".` });
+    } finally {
+      setBusyTemplateId(null);
+    }
+  };
+
   return (
     <main id="main" className="min-h-full bg-muted/30 pb-12">
       <section className="w-full px-4 sm:px-6 xl:px-8 pt-6 sm:pt-8 space-y-4 sm:space-y-6">
@@ -317,6 +353,10 @@ export function TemplatesManagementPage({
           </div>
         </section>
 
+        <div className="flex items-baseline gap-2 pt-1">
+          <FileText className="size-4 text-muted-foreground" />
+          <h2 className="text-sm font-bold uppercase tracking-widest text-foreground">Your templates</h2>
+        </div>
         <div className="rounded-2xl border border-border bg-card p-3 sm:p-4">
           <div className="relative max-w-md">
             <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
@@ -338,9 +378,19 @@ export function TemplatesManagementPage({
                     <FileText className="w-4 h-4" />
                   </span>
                   <div className="min-w-0 flex-1">
-                    <h2 className="text-base font-bold leading-tight text-foreground">{template.templateName}</h2>
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <h2 className="text-base font-bold leading-tight text-foreground">{template.templateName}</h2>
+                      {template.isDefault ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary">
+                          <Star className="size-3" /> Default
+                        </span>
+                      ) : null}
+                    </div>
                     <p className="mt-1 text-sm text-muted-foreground">
                       {template.templateDescription?.trim() || "No description"}
+                    </p>
+                    <p className="mt-1 text-[11px] text-muted-foreground">
+                      Used by {template.usedCount ?? 0} {(template.usedCount ?? 0) === 1 ? "deal" : "deals"}
                     </p>
                   </div>
                 </div>
@@ -374,6 +424,28 @@ export function TemplatesManagementPage({
                   >
                     <Pencil className="w-4 h-4 mr-1.5" />
                     Edit
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-10 rounded-xl"
+                    disabled={busyTemplateId === template.id}
+                    onClick={() => handleDuplicate(template)}
+                  >
+                    <Copy className="w-4 h-4 mr-1.5" />
+                    Duplicate
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-10 rounded-xl"
+                    disabled={template.isDefault || busyTemplateId === template.id}
+                    onClick={() => handleSetDefault(template)}
+                  >
+                    <Star className="w-4 h-4 mr-1.5" />
+                    {template.isDefault ? "Default" : "Set default"}
                   </Button>
                   <Button
                     type="button"
@@ -425,7 +497,19 @@ export function TemplatesManagementPage({
                         <span className="mt-0.5 inline-flex size-7 rounded-full bg-primary/10 text-primary items-center justify-center shrink-0">
                           <FileText className="w-3.5 h-3.5" />
                         </span>
-                        <p className="font-semibold text-foreground">{template.templateName}</p>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <p className="font-semibold text-foreground truncate">{template.templateName}</p>
+                            {template.isDefault ? (
+                              <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-primary">
+                                <Star className="size-2.5" /> Default
+                              </span>
+                            ) : null}
+                          </div>
+                          <p className="text-[11px] text-muted-foreground">
+                            Used by {template.usedCount ?? 0} {(template.usedCount ?? 0) === 1 ? "deal" : "deals"}
+                          </p>
+                        </div>
                       </div>
                     </td>
                     <td className="px-4 text-muted-foreground max-w-[320px] truncate">
@@ -437,6 +521,30 @@ export function TemplatesManagementPage({
                     <td className="px-4 text-right tabular-nums text-foreground">{toPercentLabel(template.taxRatePct)}</td>
                     <td className="px-4">
                       <div className="flex items-center justify-end gap-1.5">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className={`h-8 w-8 ${template.isDefault ? "text-primary" : ""}`}
+                          disabled={template.isDefault || busyTemplateId === template.id}
+                          title={template.isDefault ? "Default template" : "Set as default"}
+                          onClick={() => handleSetDefault(template)}
+                        >
+                          <Star className="w-4 h-4" />
+                          <span className="sr-only">Set as default</span>
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          disabled={busyTemplateId === template.id}
+                          title="Duplicate"
+                          onClick={() => handleDuplicate(template)}
+                        >
+                          <Copy className="w-4 h-4" />
+                          <span className="sr-only">Duplicate template</span>
+                        </Button>
                         <Button
                           type="button"
                           variant="ghost"
