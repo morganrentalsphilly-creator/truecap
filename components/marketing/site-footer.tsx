@@ -151,11 +151,11 @@ export function SiteFooter() {
             </li>
             <li className="inline-flex items-center gap-1.5">
               <ShieldCheck className="size-3.5 text-primary/70" />
-              <span>Cancel anytime</span>
+              <span>No card to start</span>
             </li>
             <li className="inline-flex items-center gap-1.5">
               <CreditCard className="size-3.5 text-primary/70" />
-              <span>Stripe billing</span>
+              <span>Stripe for paid upgrades</span>
             </li>
           </ul>
           <p className="order-3 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 sm:justify-end">

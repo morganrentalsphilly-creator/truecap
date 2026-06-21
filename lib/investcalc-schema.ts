@@ -185,6 +185,16 @@ export const investmentFormSchema = z.object({
   utilitiesMonthly: optionalMoneyMo,
 }).superRefine((values, ctx) => {
   const addSingleFamilyUnitDetailsIssues = () => {
+    // Only bedrooms + monthlyRent are REQUIRED for a single-family run:
+    // bedrooms drives the HUD rent auto-fill and rent is required for the
+    // cash-flow math. Bathrooms + square feet are OPTIONAL — they aren't
+    // used by calc-analysis or the Deal Score (verified), only by richer
+    // reports/rehab. Keeping them optional lets the homepage promise a
+    // genuine "address → price → run" minimal flow with baths/sqft tucked
+    // under "Improve accuracy". Range checks for baths/sqft still apply
+    // when a value IS provided (see the field-level schemas above). This
+    // loosening is backward-compatible, so INVESTCALC_SCHEMA_VERSION is
+    // intentionally NOT bumped (existing snapshots still parse).
     const b = values.bedrooms;
     if (typeof b !== "number" || !Number.isFinite(b)) {
       ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["bedrooms"], message: "Enter bedrooms" });
@@ -192,22 +202,6 @@ export const investmentFormSchema = z.object({
       ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["bedrooms"], message: "Min 0" });
     } else if (b > 20) {
       ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["bedrooms"], message: "Max 20" });
-    }
-
-    const ba = values.bathrooms;
-    if (typeof ba !== "number" || !Number.isFinite(ba)) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["bathrooms"], message: "Enter bathrooms" });
-    } else if (ba < 0) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["bathrooms"], message: "Min 0" });
-    } else if (ba > 20) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["bathrooms"], message: "Max 20" });
-    }
-
-    const s = values.sqft;
-    if (typeof s !== "number" || !Number.isFinite(s)) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["sqft"], message: "Enter sq ft" });
-    } else if (s < 50) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["sqft"], message: "Min 50 sq ft" });
     }
 
     const r = values.monthlyRent;

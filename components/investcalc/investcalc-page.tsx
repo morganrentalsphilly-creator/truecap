@@ -2068,9 +2068,9 @@ export function InvestCalcPage({
     // the demo loaded — important because the submit fires async and
     // we want a UI signal that *something* happened on click.
     toast({
-      title: "Sample deal loaded",
+      title: "Sample rental loaded",
       description:
-        "Running the analysis on a real Philadelphia rental — with the full Pro report unlocked for this demo.",
+        "Running the analysis on a real Philadelphia rental — with a full Pro report preview unlocked for this demo.",
     });
 
     // Defer the submit to the next paint frame. RHF's setValue calls
@@ -2192,14 +2192,14 @@ export function InvestCalcPage({
               type="button"
               onClick={handleTrySampleDeal}
               className="group inline-flex shrink-0 flex-col items-start gap-0.5 self-start rounded-xl bg-primary px-5 py-3 text-left shadow-[0_10px_24px_rgba(82,72,212,0.28)] transition-transform hover:-translate-y-0.5 sm:self-end"
-              aria-label="Try a sample deal — see the full Pro report on a real Philadelphia rental"
+              aria-label="Try a sample rental — preview a sample Pro report on a real Philadelphia rental"
             >
               <span className="inline-flex items-center gap-1.5 text-sm font-bold text-primary-foreground">
                 <Sparkles className="size-4" />
-                Try a sample deal
+                Try a sample rental
               </span>
               <span className="text-[11px] font-medium text-primary-foreground/80">
-                See the full Pro report — free
+                Preview a sample Pro report
               </span>
             </button>
           )}
@@ -2345,8 +2345,12 @@ export function InvestCalcPage({
             <PropertyTypeSection form={form} savedTemplateFallback={savedTemplateFallback} />
             <PropertyDetailsSection form={form} onAddressSelected={handleAddressSelected} />
 
+            {/* Single-family: only the two fields a cash-flow run needs
+                (bedrooms → HUD rent auto-fill, rent → the math) on the
+                first screen. Bathrooms + square feet are optional and live
+                in the "Improve accuracy" block below. */}
             {propertyType === "single-family" && (
-              <SingleFamilyUnitSection form={form} />
+              <SingleFamilyUnitSection form={form} fields="primary" />
             )}
             {(propertyType === "multi-family" || propertyType === "owner-occupant") && (
               <MultiFamilyUnitsSection
@@ -2378,10 +2382,10 @@ export function InvestCalcPage({
                   </span>
                   <span className="block text-[11px] leading-snug text-muted-foreground">
                     {advancedOpen
-                      ? "Financing & operating expenses"
+                      ? "Bathrooms, size, financing & operating expenses"
                       : analysisResult
-                        ? "Adjust financing & expenses to sharpen your numbers"
-                        : "Financing & expenses — running on smart defaults"}
+                        ? "Adjust details, financing & expenses to sharpen your numbers"
+                        : "Bathrooms, size, financing & expenses — running on smart defaults"}
                   </span>
                 </span>
               </span>
@@ -2396,6 +2400,11 @@ export function InvestCalcPage({
               id="advanced-options"
               className={cn("space-y-5", advancedOpen ? "block" : "hidden")}
             >
+              {/* Optional single-family details (bathrooms + square feet) —
+                  kept mounted so values persist + submit even while hidden. */}
+              {propertyType === "single-family" && (
+                <SingleFamilyUnitSection form={form} fields="secondary" />
+              )}
               <FinancingSection form={form} />
               <OperatingExpensesSection form={form} purchasePrice={purchasePrice} />
             </div>

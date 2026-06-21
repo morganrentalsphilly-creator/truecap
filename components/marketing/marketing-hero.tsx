@@ -100,7 +100,12 @@ export function MarketingHero() {
         {/* Real-data social proof — hides itself if count is low so we
             never advertise low volume. */}
         <div className="mt-5 text-center">
-          <DealsAnalyzedTicker source="runs" minimum={1} />
+          <DealsAnalyzedTicker
+            source="runs"
+            minimum={1}
+            plus
+            labelSuffix="deals analyzed by investors, agents, and house hackers"
+          />
         </div>
 
         {/* One outcome-specific testimonial (#8) — the strongest,
@@ -303,22 +308,17 @@ function HeroProductMock() {
         </div>
 
         {/* Verdict line — final step 6, reveals last after tiles + pills.
-            Two variants: shorter on mobile (the long version was 137
-            chars and wrapped to 5 lines on a phone, reading as a wall
-            of text inside a small card). */}
+            ONE concise sentence (no mobile/desktop split): a single clean
+            line reads better on screen AND to crawlers/AI/SEO than two
+            variants that concatenate in the raw HTML. */}
         <div className="tc-hero-step-6 mt-4 flex items-start gap-2 rounded-xl border border-[var(--brand-green)]/25 bg-[var(--brand-green-light)] p-3 text-xs text-foreground">
           <TrendingUp className="mt-0.5 size-4 shrink-0 text-[var(--brand-green)]" />
           <span>
             <strong>1700 W Erie: strong fundamentals.</strong>{" "}
-            <span className="sm:hidden">
-              Cash-flows {cfLabel}/mo at {capLabel} cap. DSCR {dscrLabel} {dscrClears ? "clears most lenders" : "is below the 1.25 most lenders want"}.
-            </span>
-            <span className="hidden sm:inline">
-              Cash flow {cfLabel}/mo, cap {capLabel}, DSCR {dscrLabel}{" "}
-              {dscrClears
-                ? "clears the typical ≥1.25 lender threshold. Worth a deeper underwrite."
-                : "sits below the typical ≥1.25 lender threshold — stress-test before offering."}
-            </span>
+            {cfLabel}/mo cash flow, {capLabel} cap, DSCR {dscrLabel}
+            {dscrClears
+              ? " — clears the typical ≥1.25 lender bar. Worth a deeper underwrite."
+              : " — below the typical ≥1.25 lender bar; stress-test before offering."}
           </span>
         </div>
       </div>

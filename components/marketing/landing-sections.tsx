@@ -61,7 +61,7 @@ const HOW_STEPS = [
     icon: TrendingUp,
     step: "03",
     title: "Get the verdict",
-    body: "Cap rate, CoC, DSCR, cash flow, projection, tax, exit — live. Plus a plain-English summary you can show your spouse.",
+    body: "Cap rate, CoC, DSCR, cash flow, projection, tax, exit — live. Plus a plain-English summary you can show a partner, client, or lender.",
   },
 ];
 
@@ -94,7 +94,7 @@ export function HowItWorks() {
         </div>
         <div className="mt-10 text-center">
           <ScrollToFormButton className="group inline-flex h-11 items-center gap-1.5 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-[0_10px_24px_rgba(82,72,212,0.28)] hover:-translate-y-0.5 transition-transform">
-            Analyze my first deal free
+            Analyze a deal free
             <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
           </ScrollToFormButton>
         </div>
@@ -230,13 +230,13 @@ const COMPETITORS_ROWS: Array<{ label: string; values: (string | boolean)[]; hig
   { label: "Free tier",                                   values: [true, "DIY only", "Limited", true] },
   { label: "Address auto-fill (HUD + FRED)",              values: [true, false, false, false], highlight: true },
   { label: "Cap rate · CoC · DSCR · cash flow",           values: [true, "If you built it", true, true] },
-  { label: "10-year projection",                          values: ["Pro", "Tab 4, probably broken", true, false] },
-  { label: "Tax strategy + depreciation",                 values: ["Pro", "Tab 5, definitely broken", "Pro", false] },
+  { label: "10-year projection",                          values: ["Pro", "Manual, error-prone", true, false] },
+  { label: "Tax strategy + depreciation",                 values: ["Pro", "Manual, error-prone", "Pro", false] },
   { label: "Sensitivity grid + MAO solver",               values: ["Pro", false, false, false], highlight: true },
   { label: "BRRRR + fix-and-flip + rehab estimator",      values: ["Pro", "Separate sheet", "Partial", "Separate calc"] },
   { label: "Mobile / at the showing",                     values: [true, false, "Desktop-leaning", "Desktop-leaning"], highlight: true },
   { label: "Share with lender",                           values: ["Pro · 1-click PDF + link", "Email the .xlsx", true, false] },
-  { label: "Compare 4 deals side-by-side",                values: ["Pro", "Copy/paste hell", true, false] },
+  { label: "Compare 4 deals side-by-side",                values: ["Pro", "Manual copy/paste", true, false] },
   // DealCheck pricing verified against dealcheck.io/pricing June 2026:
   // Starter $0, Plus $10/mo, Pro $20/mo. A previous version claimed
   // $35/mo — inflating a competitor's price in a table titled "honest,
@@ -361,7 +361,7 @@ export function VsCompetitors() {
 const HOMEPAGE_FAQS: { q: string; a: string }[] = [
   {
     q: "Is TrueCap really free?",
-    a: "Yes. The cash-flow analyzer — cap rate, CoC, DSCR, monthly cash flow, address auto-fill, plain-English verdict — is free forever and unlimited. No card required. Pro adds save/compare deals, lender-ready PDFs, and the advanced modules (BRRRR + Fix-and-Flip, Sensitivity, 10-year projections, tax strategy, exit scenarios, Deal Score).",
+    a: "Yes. The cash-flow analyzer — cap rate, CoC, DSCR, monthly cash flow, address auto-fill, the 0–100 Deal Score, and a plain-English verdict — is free forever and unlimited. No card required. Pro adds save/compare deals, lender-ready PDFs, and the advanced modules (BRRRR + Fix-and-Flip, Sensitivity, 10-year projections, tax strategy, exit scenarios).",
   },
   {
     q: "How is this different from a spreadsheet?",
@@ -464,7 +464,7 @@ export function PreCalculatorCta() {
           <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
             <ScrollToFormButton className="group inline-flex h-12 items-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_14px_32px_rgba(82,72,212,0.32)] hover:-translate-y-0.5 transition-transform sm:h-14 sm:text-base">
               <Zap className="size-4 sm:size-5" />
-              Analyze my first deal free
+              Analyze a deal free
               <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5 sm:size-5" />
             </ScrollToFormButton>
             <Link
@@ -580,8 +580,9 @@ export function PdfProUpsell() {
             Need to send this to a lender or client?
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-            Run your analysis free. When you&apos;re ready to share it, export a
-            lender-ready PDF for $5 — or unlock everything with Pro.
+            Run your analysis free. Need to send one deal? Export a lender-ready
+            PDF for $5. Doing this every week? Pro saves, compares, and exports
+            every deal.
           </p>
         </div>
         <div className="grid gap-4 sm:grid-cols-2 sm:gap-5">
@@ -595,8 +596,9 @@ export function PdfProUpsell() {
             </span>
             <h3 className="mt-2 text-lg font-bold text-foreground">Lender-ready PDF</h3>
             <p className="mt-1.5 flex-1 text-sm leading-relaxed text-muted-foreground">
-              Run a deal, click Export PDF, and pay $5 once. The full multi-page
-              report downloads instantly — no subscription, no account.
+              Need to send the numbers to a lender or client? Run your deal,
+              click Export PDF, and pay $5 once — one polished, multi-page
+              report, downloaded instantly. No subscription, no account.
             </p>
             <div className="mt-5">
               <ScrollToFormButton className="group inline-flex h-11 items-center gap-1.5 rounded-xl border border-border bg-background px-5 text-sm font-bold text-foreground hover:bg-muted">
@@ -614,10 +616,12 @@ export function PdfProUpsell() {
             <span className="w-fit rounded-full bg-primary/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-primary">
               Pro
             </span>
-            <h3 className="mt-2 text-lg font-bold text-foreground">Unlimited PDFs + everything</h3>
+            <h3 className="mt-2 text-lg font-bold text-foreground">Save, compare &amp; export every deal</h3>
             <p className="mt-1.5 flex-1 text-sm leading-relaxed text-muted-foreground">
-              Save &amp; compare deals, 10-year projections, tax strategy, exit
-              scenarios, the Pro Deal Score, and unlimited branded PDF exports.
+              For repeat underwriting: save and revisit deals, compare them
+              side-by-side, reuse your assumptions, brand your reports, and
+              export unlimited PDFs — plus 10-year projections, tax strategy,
+              and exit scenarios.
             </p>
             <div className="mt-5">
               <Link
@@ -682,7 +686,7 @@ export function Personas() {
         </div>
         <div className="mt-10 text-center">
           <ScrollToFormButton className="group inline-flex h-11 items-center gap-1.5 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-[0_10px_24px_rgba(82,72,212,0.28)] hover:-translate-y-0.5 transition-transform">
-            Analyze a rental property
+            Analyze a deal free
             <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
           </ScrollToFormButton>
         </div>

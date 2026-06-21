@@ -73,7 +73,7 @@ const FAQS: { q: string; a: string }[] = [
     // app/page.tsx. MAO, sensitivity, BRRRR/fix-and-flip, and share
     // links are PRO features — a previous version of this answer
     // claimed they were free, contradicting every other surface.
-    a: "Yes. The cash-flow analyzer — cap rate, CoC, DSCR, monthly cash flow, address auto-fill, plain-English verdict — is free forever and unlimited. No card required to start. Pro adds MAO solver, sensitivity grid, BRRRR + fix-and-flip, 10-year projections, tax strategy, exit scenarios, Deal Score, shareable links, and lender-ready PDFs.",
+    a: "Yes. The cash-flow analyzer — cap rate, CoC, DSCR, monthly cash flow, address auto-fill, the 0–100 Deal Score, and a plain-English verdict — is free forever and unlimited. No card required to start. Pro adds MAO solver, sensitivity grid, BRRRR + fix-and-flip, 10-year projections, tax strategy, exit scenarios, shareable links, and lender-ready PDFs.",
   },
   {
     q: "Can I cancel anytime?",
@@ -207,13 +207,13 @@ export default async function PricingPage() {
                   ["Unlimited analyses", true, true],
                   ["Cap rate · CoC · DSCR · cash flow", true, true],
                   ["Auto-fill (HUD rent · FRED rate · state tax)", true, true],
+                  ["Deal Score (0–100) with breakdown", true, true],
                   ["MAO solver · Sensitivity grid", false, true],
                   ["BRRRR + fix-and-flip + rehab estimator", false, true],
                   ["Shareable read-only deal links", false, true],
                   ["10-year cash flow projection", false, true],
                   ["Tax strategy + depreciation", false, true],
                   ["Exit scenarios (best year to sell)", false, true],
-                  ["Pro Deal Score (0-100)", false, true],
                   ["Lender-ready PDF export", false, true],
                   ["Save deals", "Limited", "Unlimited"],
                   ["Compare deals side-by-side", false, "Up to 4"],
@@ -251,7 +251,9 @@ export default async function PricingPage() {
                 <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
                   Run your analysis free, then click Export PDF and pay $5 once. The full
                   multi-page report — verdict, 10-year projection, tax strategy, exit
-                  scenarios, deal score — downloads instantly. No subscription, no commitment.
+                  scenarios, Deal Score — downloads instantly. No subscription, no commitment.
+                  Doing this for every deal? Pro saves and compares your deals and exports
+                  unlimited branded reports.
                 </p>
               </div>
               <Link

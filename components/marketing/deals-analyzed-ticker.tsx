@@ -29,6 +29,8 @@ type Props = {
   minimum?: number;
   /** Override the label suffix (default: 'deals analyzed this week'). */
   labelSuffix?: string;
+  /** Append a "+" after the number ("1,500+") to read as "at least". */
+  plus?: boolean;
   /**
    * Count source. "saved" = saved_analyses rows (a fraction of usage).
    * "runs" = total analyses RUN (PostHog analyzer_started) — the honest, much
@@ -41,6 +43,7 @@ export async function DealsAnalyzedTicker({
   window = "7d",
   minimum = 25,
   labelSuffix,
+  plus = false,
   source = "saved",
 }: Props) {
   const count =
@@ -53,7 +56,7 @@ export async function DealsAnalyzedTicker({
   // dynamic ticker just means one less row; no visible hole.
   if (count == null || count < minimum) return null;
 
-  const formatted = count.toLocaleString("en-US");
+  const formatted = `${count.toLocaleString("en-US")}${plus ? "+" : ""}`;
   const suffix =
     labelSuffix ??
     (source === "runs" || window === "all"
