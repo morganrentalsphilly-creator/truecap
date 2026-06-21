@@ -1,60 +1,53 @@
 import "server-only";
 
 import { unstable_cache } from "next/cache";
+import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 
 /**
- * Total number of analyses RUN — the count of the `analyzer_started` PostHog
- * event across all users, all time. This is the HONEST "deals analyzed" figure:
- * the saved-deals count (lib/stats/deals-analyzed-count) only counts the small
- * fraction of runs a user chose to save, so it dramatically undercounts usage.
+ * Total number of analyses RUN across all users, all time — the count behind
+ * the homepage "deals analyzed on TrueCap" ticker.
  *
- * Reads PostHog's HogQL query API (read-only). On the static homepage this runs
- * at build / hourly revalidation — never per visitor. Returns null on ANY error
- * or missing config so the ticker hides gracefully — it never shows a
- * fabricated or stale number.
+ * This is the HONEST "deals analyzed" figure: it counts every time someone
+ * clicks Run analysis (incremented once per run via the increment_analysis_runs
+ * RPC — see app/actions/track-analysis-run.ts), seeded from a real floor (the
+ * existing saved-analyses count, in the migration). The saved-deals count alone
+ * (lib/stats/deals-analyzed-count) only reflects the small fraction of runs a
+ * user chose to save, so it dramatically undercounts usage.
  *
- * Required env:
- *   - POSTHOG_API_KEY     personal key (phx_...), must have query/read scope
- *   - POSTHOG_PROJECT_ID  the numeric project id (PostHog → Settings → Project)
- * Optional:
- *   - NEXT_PUBLIC_POSTHOG_HOST (defaults to US cloud)
+ * Reads a single counter row via the service-role client (RLS-bypassing,
+ * count-only — no row data or PII leaves this function). On the static homepage
+ * this runs at build / hourly revalidation, never per visitor. Returns null on
+ * ANY error or if the counter row is absent (e.g. the migration hasn't been
+ * applied yet) so the ticker hides gracefully rather than showing a fabricated
+ * or stale number.
  */
 async function fetchTotalAnalysesRun(): Promise<number | null> {
-  const apiKey = process.env.POSTHOG_API_KEY;
-  const projectId = process.env.POSTHOG_PROJECT_ID;
-  if (!apiKey || !projectId) return null;
-  const host = process.env.NEXT_PUBLIC_POSTHOG_HOST ?? "https://us.i.posthog.com";
-
   try {
-    const res = await fetch(`${host}/api/projects/${projectId}/query/`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        query: {
-          kind: "HogQLQuery",
-          query: "SELECT count() FROM events WHERE event = 'analyzer_started'",
-        },
-      }),
-      // Next's unstable_cache (below) owns the caching window; tell fetch not
-      // to also cache so a stale build-time response can't pin the number.
-      cache: "no-store",
-    });
-    if (!res.ok) return null;
-    const json = (await res.json()) as { results?: Array<Array<number>> };
-    const count = json.results?.[0]?.[0];
-    return typeof count === "number" && Number.isFinite(count) ? count : null;
-  } catch {
+    const admin = createAdminSupabaseClient();
+    const { data, error } = await admin
+      .from("app_counters")
+      .select("count")
+      .eq("key", "analysis_runs")
+      .maybeSingle();
+    if (error) {
+      console.warn("[stats] total-analyses-run failed:", error.message);
+      return null;
+    }
+    if (!data) return null;
+    const count = Number(data.count);
+    return Number.isFinite(count) ? count : null;
+  } catch (err) {
+    console.warn(
+      "[stats] total-analyses-run threw:",
+      err instanceof Error ? err.message : String(err)
+    );
     return null;
   }
 }
 
 /**
- * Cached public entry point. 1-hour TTL — long enough to avoid hammering the
- * PostHog query API on every homepage revalidation, short enough that the
- * number stays fresh.
+ * Cached public entry point. 1-hour TTL — long enough to avoid hitting the DB
+ * on every homepage revalidation, short enough that the number stays fresh.
  */
 export const getTotalAnalysesRunCount = unstable_cache(
   async () => fetchTotalAnalysesRun(),

@@ -1,8 +1,6 @@
 "use server";
 
 import { computeDealScore, dealScoreInputSchema, DealScoreResult } from "@/lib/deal-score";
-import { getEntitlementsForUser } from "@/lib/entitlements";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 export type DealScoreActionResult =
   | { ok: true; tier: "pro"; data: DealScoreResult }
@@ -15,23 +13,23 @@ export async function getDealScoreAction(input: unknown): Promise<DealScoreActio
     return { ok: false, code: "VALIDATION_ERROR", message: "Invalid deal score input." };
   }
 
-  const supabase = await createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  const result = computeDealScore(parsed.data);
-  if (!user) {
-    return { ok: true, tier: "free", recommendation: result.recommendation };
-  }
-
+  // Deal Score is a FREE feature for every user (moved to the free tier in
+  // June 2026 — see pricing-toggle-plans.tsx and canUseDealScore={true} on both
+  // homepages). The full 0–100 score + breakdown is no longer gated, so we
+  // return the complete payload to everyone.
+  //
+  // Previously this gated the full `data` behind the `deal_score` entitlement
+  // and returned only `recommendation` (tier: "free") to anon/free users — but
+  // once the card UI was unlocked, that left free users staring at the empty
+  // "Run the analysis to view your live Deal Score" placeholder even after the
+  // analysis ran. computeDealScore is a pure function (no secrets, no DB), so
+  // there is nothing to protect and no reason to pay for a Supabase
+  // auth/entitlement round-trip here — dropping it also makes the score appear
+  // faster after the user clicks Run. The `tier: "free"` union member is kept
+  // for backwards-compatible typing of existing callers but is no longer
+  // returned.
   try {
-    const entitlements = await getEntitlementsForUser(supabase, user.id);
-    const hasDealScore = entitlements.features.includes("deal_score");
-    if (!hasDealScore) {
-      return { ok: true, tier: "free", recommendation: result.recommendation };
-    }
-    return { ok: true, tier: "pro", data: result };
+    return { ok: true, tier: "pro", data: computeDealScore(parsed.data) };
   } catch (error) {
     return {
       ok: false,

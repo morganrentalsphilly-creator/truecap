@@ -41,6 +41,7 @@ import { cn } from "@/lib/utils";
 import { saveDealAction } from "@/app/actions/saved-analyses";
 import { addDealToCompareAction } from "@/app/actions/compare";
 import { getDealScoreAction, type DealScoreActionResult } from "@/app/actions/deal-score";
+import { trackAnalysisRunAction } from "@/app/actions/track-analysis-run";
 import {
   buildDealScoreInputFromAnalysis,
   computeDealScore,
@@ -1264,6 +1265,14 @@ export function InvestCalcPage({
       is_cash_purchase: !values.downPaymentPct || values.downPaymentPct >= 100,
       input_tab: activeInputTab,
     });
+
+    // Increment the global "analyses run" counter behind the homepage
+    // social-proof ticker. Fires only here — on a real Run click, not on
+    // saved-deal loads/restores — so it counts exactly "times Run analysis was
+    // clicked." Fire-and-forget + best-effort (the action swallows its own
+    // errors); never awaited, so a counter write can't slow or block the
+    // analysis.
+    void trackAnalysisRunAction();
 
     try {
       // Brief artificial delay so the loading state registers — the

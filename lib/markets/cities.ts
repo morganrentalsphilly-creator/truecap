@@ -245,6 +245,276 @@ export const MARKET_CITIES: MarketCity[] = [
     ],
     relatedPosts: ["what-is-a-good-cap-rate", "single-family-vs-multi-family-rental", "cap-rate-vs-cash-on-cash-vs-dscr"],
   },
+  {
+    slug: "nashville",
+    name: "Nashville",
+    stateCode: "TN",
+    stateName: "Tennessee",
+    blurb:
+      "Nashville is a growth-market favorite — strong in-migration, a diversified economy (healthcare, music, tech), and no state income tax — though appreciation has compressed cap rates.",
+    typicalRent: "$1,800–$2,500/mo",
+    typicalPrice: "$330,000–$450,000",
+    investorAngle:
+      "Buy here for appreciation and rent growth, not day-one cash flow — many deals run thin until rents catch up. Best for investors with reserves and a longer hold.",
+    neighborhoods: [
+      { name: "Antioch", why: "More affordable SFRs, steady demand, better rent ratios." },
+      { name: "Madison", why: "Value relative to the core, improving area, solid rentals." },
+      { name: "East Nashville edges", why: "Appreciation-led, younger renters, premium pricing." },
+    ],
+    relatedPosts: ["cash-flow-vs-appreciation", "what-is-a-good-cap-rate", "best-states-for-rental-investors-2026"],
+  },
+  {
+    slug: "raleigh",
+    name: "Raleigh",
+    stateCode: "NC",
+    stateName: "North Carolina",
+    blurb:
+      "Raleigh rides the Research Triangle's tech and university engine — fast job growth and educated renters, with appreciation that outpaces day-one cash flow.",
+    typicalRent: "$1,600–$2,200/mo",
+    typicalPrice: "$320,000–$430,000",
+    investorAngle:
+      "A growth play: vacancy is low and rents keep rising, but entry prices mean modest cash flow up front. Strong for buy-and-hold with a 5+ year horizon.",
+    neighborhoods: [
+      { name: "Southeast Raleigh", why: "Lower entry, gentrifying, real upside." },
+      { name: "Garner", why: "Affordable suburb, family renters, stable demand." },
+      { name: "Durham edges", why: "Triangle demand at better acquisition prices." },
+    ],
+    relatedPosts: ["cash-flow-vs-appreciation", "what-is-a-good-cap-rate", "how-to-underwrite-a-rental-property-in-60-seconds"],
+  },
+  {
+    slug: "richmond",
+    name: "Richmond",
+    stateCode: "VA",
+    stateName: "Virginia",
+    blurb:
+      "Richmond offers East Coast stability at mid-market prices — government, university, and healthcare employment keep demand steady through cycles.",
+    typicalRent: "$1,400–$2,000/mo",
+    typicalPrice: "$250,000–$360,000",
+    investorAngle:
+      "A balanced market: decent cash flow with real appreciation and low volatility. A good second market for investors diversifying out of pure cash-flow metros.",
+    neighborhoods: [
+      { name: "Southside", why: "Affordable SFRs, value-add, solid rent ratios." },
+      { name: "Church Hill", why: "Historic, gentrifying, appreciation upside." },
+      { name: "Henrico County", why: "Suburban, owner-occupant-grade, low vacancy." },
+    ],
+    relatedPosts: ["what-is-a-good-cap-rate", "single-family-vs-multi-family-rental", "best-states-for-rental-investors-2026"],
+  },
+  {
+    slug: "columbia",
+    name: "Columbia",
+    stateCode: "SC",
+    stateName: "South Carolina",
+    blurb:
+      "Columbia, South Carolina's capital, pairs a university and state-government anchor with low prices — a quietly strong cash-flow market.",
+    typicalRent: "$1,200–$1,700/mo",
+    typicalPrice: "$180,000–$270,000",
+    investorAngle:
+      "Affordable entry, steady USC + government tenant demand, and landlord-friendly law. A solid first market for cash-flow-focused buyers.",
+    neighborhoods: [
+      { name: "Northeast Columbia", why: "Newer SFRs, family renters, low vacancy." },
+      { name: "West Columbia", why: "Affordable, value-add, good rent ratios." },
+      { name: "Forest Acres", why: "Stable, owner-occupant feel, reliable tenants." },
+    ],
+    relatedPosts: ["what-is-a-good-cap-rate", "section-8-rental-property-investing", "how-to-underwrite-a-rental-property-in-60-seconds"],
+  },
+  {
+    slug: "greenville",
+    name: "Greenville",
+    stateCode: "SC",
+    stateName: "South Carolina",
+    blurb:
+      "Greenville is one of the Southeast's fastest-growing small metros — a revitalized downtown and a manufacturing base (BMW, Michelin) driving steady rental demand.",
+    typicalRent: "$1,400–$1,900/mo",
+    typicalPrice: "$230,000–$330,000",
+    investorAngle:
+      "Growth plus reasonable entry: cash flow is achievable and appreciation has been strong. Downtown-adjacent pricing has run up — the math is better a ring out.",
+    neighborhoods: [
+      { name: "Berea", why: "Affordable, improving, good rent ratios." },
+      { name: "Wade Hampton", why: "Stable suburban rentals, family demand." },
+      { name: "Mauldin", why: "Growing suburb, newer stock, low vacancy." },
+    ],
+    relatedPosts: ["cash-flow-vs-appreciation", "what-is-a-good-cap-rate", "best-states-for-rental-investors-2026"],
+  },
+  {
+    slug: "oklahoma-city",
+    name: "Oklahoma City",
+    stateCode: "OK",
+    stateName: "Oklahoma",
+    blurb:
+      "Oklahoma City is a textbook cash-flow market — low prices, healthy rents, and an economy anchored by energy, aerospace, and government.",
+    typicalRent: "$1,100–$1,600/mo",
+    typicalPrice: "$160,000–$250,000",
+    investorAngle:
+      "Strong rent-to-price ratios make day-one cash flow realistic, and Oklahoma is landlord-friendly. Appreciation is modest, so underwrite for yield, not equity growth.",
+    neighborhoods: [
+      { name: "The Village", why: "Affordable SFRs, central, reliable tenants." },
+      { name: "Midwest City", why: "Near Tinker AFB — steady military demand." },
+      { name: "Del City", why: "Low entry, strong cash flow, value-add." },
+    ],
+    relatedPosts: ["what-is-a-good-cap-rate", "spot-bad-rental-in-60-seconds", "cap-rate-vs-cash-on-cash-vs-dscr"],
+  },
+  {
+    slug: "tulsa",
+    name: "Tulsa",
+    stateCode: "OK",
+    stateName: "Oklahoma",
+    blurb:
+      "Tulsa offers some of the lowest entry prices among growing metros, with cash flow that still clears screening thresholds most markets can't.",
+    typicalRent: "$1,050–$1,500/mo",
+    typicalPrice: "$140,000–$230,000",
+    investorAngle:
+      "A pure yield market: cheap acquisition plus solid rents. Tulsa Remote and a diversifying economy add demand stability. Budget capex honestly on older stock.",
+    neighborhoods: [
+      { name: "Midtown edges", why: "Value-add SFRs, improving demand." },
+      { name: "Broken Arrow", why: "Suburb with newer stock, family renters, low vacancy." },
+      { name: "East Tulsa", why: "Affordable, strong cash flow, more management." },
+    ],
+    relatedPosts: ["what-is-a-good-cap-rate", "capex-maintenance-reserves-rental-property", "how-to-underwrite-a-rental-property-in-60-seconds"],
+  },
+  {
+    slug: "omaha",
+    name: "Omaha",
+    stateCode: "NE",
+    stateName: "Nebraska",
+    blurb:
+      "Omaha is a stability play — a diversified, recession-resistant economy (insurance, finance, agriculture) with low volatility and dependable rents.",
+    typicalRent: "$1,300–$1,800/mo",
+    typicalPrice: "$200,000–$300,000",
+    investorAngle:
+      "Boring in the best way: steady demand, low vacancy, modest but reliable cash flow and appreciation. A strong core-holding market.",
+    neighborhoods: [
+      { name: "Benson", why: "Revitalizing, younger renters, upside." },
+      { name: "Millard", why: "Suburb with family rentals, top schools, low vacancy." },
+      { name: "South Omaha", why: "Affordable, strong cash flow, steady demand." },
+    ],
+    relatedPosts: ["what-is-a-good-cap-rate", "single-family-vs-multi-family-rental", "best-states-for-rental-investors-2026"],
+  },
+  {
+    slug: "des-moines",
+    name: "Des Moines",
+    stateCode: "IA",
+    stateName: "Iowa",
+    blurb:
+      "Des Moines is an underrated stability market — an insurance-and-finance hub with steady job growth, low unemployment, and affordable housing.",
+    typicalRent: "$1,250–$1,750/mo",
+    typicalPrice: "$190,000–$290,000",
+    investorAngle:
+      "Low volatility, dependable tenants, and reasonable entry make for a clean buy-and-hold market. Cash flow is solid; appreciation is steady, not spectacular.",
+    neighborhoods: [
+      { name: "Beaverdale", why: "Desirable, stable, strong tenant demand." },
+      { name: "East Des Moines", why: "Affordable SFRs, good rent ratios." },
+      { name: "West Des Moines", why: "Suburb with newer stock, family renters, low vacancy." },
+    ],
+    relatedPosts: ["what-is-a-good-cap-rate", "best-states-for-rental-investors-2026", "how-to-underwrite-a-rental-property-in-60-seconds"],
+  },
+  {
+    slug: "minneapolis",
+    name: "Minneapolis",
+    stateCode: "MN",
+    stateName: "Minnesota",
+    blurb:
+      "Minneapolis pairs a strong, diversified economy with deep rental demand — but high property taxes and tenant-friendly rules require careful underwriting.",
+    typicalRent: "$1,500–$2,200/mo",
+    typicalPrice: "$260,000–$380,000",
+    investorAngle:
+      "A solid metro for buy-and-hold if you model the real tax bill and tenant-protection rules. Duplexes and small multis are plentiful and house-hack well.",
+    neighborhoods: [
+      { name: "Northeast Minneapolis", why: "Popular, walkable, strong demand." },
+      { name: "St. Paul (Midway)", why: "Affordable, central, steady rentals." },
+      { name: "Brooklyn Park", why: "Suburb with newer stock, family renters, low vacancy." },
+    ],
+    relatedPosts: ["house-hacking-explained", "what-is-a-good-cap-rate", "rental-property-tax-deductions"],
+  },
+  {
+    slug: "buffalo",
+    name: "Buffalo",
+    stateCode: "NY",
+    stateName: "New York",
+    blurb:
+      "Buffalo combines bargain prices with a surprising appreciation run — an affordable Rust Belt market that's quietly rewarded patient landlords.",
+    typicalRent: "$1,150–$1,650/mo",
+    typicalPrice: "$150,000–$250,000",
+    investorAngle:
+      "Low entry plus rising rents drives strong cash-on-cash, with appreciation upside as the metro stabilizes. Mind New York's higher taxes and tenant protections.",
+    neighborhoods: [
+      { name: "North Buffalo", why: "Desirable, stable, strong demand." },
+      { name: "West Side", why: "Gentrifying, upside, value-add." },
+      { name: "Kenmore", why: "Suburb that's owner-occupant-grade, low vacancy." },
+    ],
+    relatedPosts: ["what-is-a-good-cap-rate", "cash-flow-vs-appreciation", "capex-maintenance-reserves-rental-property"],
+  },
+  {
+    slug: "rochester",
+    name: "Rochester",
+    stateCode: "NY",
+    stateName: "New York",
+    blurb:
+      "Rochester is a high-cap, high-tax cash-flow market — cheap entry and strong rent ratios offset by some of the highest effective property taxes in the country.",
+    typicalRent: "$1,150–$1,600/mo",
+    typicalPrice: "$140,000–$230,000",
+    investorAngle:
+      "Yields look excellent until you model the tax line — so model it first. For disciplined operators, the cash-on-cash is among the best in the Northeast.",
+    neighborhoods: [
+      { name: "Park Ave area", why: "Desirable, stable, strong demand." },
+      { name: "South Wedge", why: "Walkable, younger renters, upside." },
+      { name: "Irondequoit", why: "Suburb that's owner-occupant-grade, steady tenants." },
+    ],
+    relatedPosts: ["what-is-a-good-cap-rate", "vacancy-rate-rental-property", "rental-property-tax-deductions"],
+  },
+  {
+    slug: "orlando",
+    name: "Orlando",
+    stateCode: "FL",
+    stateName: "Florida",
+    blurb:
+      "Orlando blends strong population growth, tourism-driven demand, and no state income tax — a market where long-term and short-term rental strategies both compete.",
+    typicalRent: "$1,800–$2,400/mo",
+    typicalPrice: "$300,000–$400,000",
+    investorAngle:
+      "Growth and rent demand are real, but Florida insurance and HOA costs are the swing factors — quote them before you offer. Short-term-rental rules vary sharply by jurisdiction.",
+    neighborhoods: [
+      { name: "Pine Hills", why: "Affordable SFRs, value-add, better ratios." },
+      { name: "Kissimmee", why: "STR-friendly pockets, tourist demand." },
+      { name: "East Orlando (near UCF)", why: "Student + family demand, steady rentals." },
+    ],
+    relatedPosts: ["what-is-a-good-cap-rate", "cash-flow-vs-appreciation", "best-states-for-rental-investors-2026"],
+  },
+  {
+    slug: "tucson",
+    name: "Tucson",
+    stateCode: "AZ",
+    stateName: "Arizona",
+    blurb:
+      "Tucson offers Sun Belt growth at a discount to Phoenix — university and defense employment underpin steady rental demand.",
+    typicalRent: "$1,400–$1,900/mo",
+    typicalPrice: "$260,000–$360,000",
+    investorAngle:
+      "More affordable entry than Phoenix with comparable demand drivers (University of Arizona, Raytheon, Davis-Monthan AFB). Solid for balanced cash flow + appreciation.",
+    neighborhoods: [
+      { name: "Midtown", why: "Central, stable, strong demand." },
+      { name: "University area", why: "Student rentals, high occupancy." },
+      { name: "Rita Ranch", why: "Newer SFRs near the base, family renters." },
+    ],
+    relatedPosts: ["what-is-a-good-cap-rate", "cash-flow-vs-appreciation", "how-to-underwrite-a-rental-property-in-60-seconds"],
+  },
+  {
+    slug: "grand-rapids",
+    name: "Grand Rapids",
+    stateCode: "MI",
+    stateName: "Michigan",
+    blurb:
+      "Grand Rapids is one of the Midwest's stronger growth stories — a diversifying economy and tight housing supply driving steady rent and price gains.",
+    typicalRent: "$1,400–$1,900/mo",
+    typicalPrice: "$230,000–$330,000",
+    investorAngle:
+      "Low vacancy and consistent demand make this a dependable buy-and-hold market with better appreciation than most cash-flow metros. Inventory is tight, so deals move fast.",
+    neighborhoods: [
+      { name: "Eastown", why: "Desirable, walkable, strong demand." },
+      { name: "Wyoming", why: "Suburb that's affordable, family renters, low vacancy." },
+      { name: "Creston", why: "Improving, value-add, good rent ratios." },
+    ],
+    relatedPosts: ["what-is-a-good-cap-rate", "single-family-vs-multi-family-rental", "best-states-for-rental-investors-2026"],
+  },
 ];
 
 const MARKET_CITY_BY_SLUG = new Map(MARKET_CITIES.map((c) => [c.slug, c]));
