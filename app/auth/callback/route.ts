@@ -1,6 +1,28 @@
 import { createServerClient } from "@supabase/ssr";
-import { NextResponse, type NextRequest } from "next/server";
+import { NextResponse, after, type NextRequest } from "next/server";
 import type { EmailOtpType } from "@supabase/supabase-js";
+import { sendLifecycleEmailNow } from "@/lib/email/send-lifecycle";
+import { getSiteUrl } from "@/lib/site-url";
+
+/**
+ * Fire the instant welcome email after a confirmation establishes a
+ * session. Runs via `after()` so it never delays the redirect, and is
+ * once-only: sendLifecycleEmailNow claims the lifecycle_email_log row, so
+ * repeat logins and the daily cron can't duplicate it. Best-effort.
+ */
+function scheduleWelcome(
+  user: { id: string; email?: string | null } | null | undefined
+) {
+  const email = user?.email;
+  if (!user || !email) return;
+  const id = user.id;
+  after(() =>
+    sendLifecycleEmailNow(
+      { userId: id, email, kind: "welcome", key: "welcome" },
+      getSiteUrl()
+    )
+  );
+}
 
 /**
  * Single landing page for every Supabase email link (password reset,
@@ -53,16 +75,26 @@ export async function GET(request: NextRequest) {
   );
 
   if (code) {
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
-    if (!error) return redirectResponse;
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+    if (!error) {
+      // Signup confirmation comes through the PKCE code flow. Welcome is
+      // deduped, so welcoming on any first successful exchange is safe.
+      scheduleWelcome(data.user);
+      return redirectResponse;
+    }
     return NextResponse.redirect(
       `${origin}/auth/login?error=auth&reason=${encodeURIComponent(error.message)}`
     );
   }
 
   if (tokenHash && type) {
-    const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type });
-    if (!error) return redirectResponse;
+    const { data, error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type });
+    if (!error) {
+      // Only signup/email-confirmation token-hash links should welcome —
+      // not password recovery, email change, or invite.
+      if (type === "signup" || type === "email") scheduleWelcome(data.user);
+      return redirectResponse;
+    }
     return NextResponse.redirect(
       `${origin}/auth/login?error=auth&reason=${encodeURIComponent(error.message)}`
     );
