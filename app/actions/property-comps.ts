@@ -205,17 +205,25 @@ export async function getPropertyCompsAction(input: unknown): Promise<PropertyCo
   }
 
   // Committing to a live lookup (cache miss, under cap). For a free user this
-  // spends their one freebie — mark it now so it's consumed on the attempt and
-  // can't be gamed by retrying after an error.
+  // spends their one freebie. Claim it ATOMICALLY — a conditional update that
+  // only succeeds while it's still unused — so two concurrent requests can't
+  // both clear the earlier read-gate and spend two live RentCast calls on one
+  // freebie (protects the monthly API budget).
   if (freeUser) {
-    await supabase
+    const { data: claimed } = await supabase
       .from("profiles")
       .update({ comps_free_used: true })
       .eq("id", user.id)
-      .then(
-        () => undefined,
-        () => undefined
-      );
+      .eq("comps_free_used", false)
+      .select("id")
+      .maybeSingle();
+    if (!claimed) {
+      return {
+        ok: false,
+        code: "ENTITLEMENT_REQUIRED",
+        message: "You've used your free comps lookup. Upgrade to Pro for unlimited sale + rent comps.",
+      };
+    }
   }
 
   // Live fetch.

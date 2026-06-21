@@ -84,8 +84,6 @@ import { CashFlowWaterfall } from "@/components/investcalc/cash-flow-waterfall";
 import { MortgageScenarioCompare } from "@/components/investcalc/mortgage-scenario-compare";
 import { LoanAmortizationView } from "@/components/investcalc/loan-amortization-view";
 import { DealNotesPanel } from "@/components/investcalc/deal-notes-panel";
-import { DueDiligenceCard } from "@/components/investcalc/due-diligence-card";
-import { DealDocumentsCard } from "@/components/investcalc/deal-documents-card";
 // ShareLinkButton import temporarily removed — Share button was pulled from
 // the Quick Actions row because it wrapped onto a second line. Component
 // + share-link.ts + /d/[encoded] route all remain in the codebase ready
@@ -1316,14 +1314,10 @@ export function AnalysisDashboard({
 
       {/* Deal notes — at the bottom (after the Details tabs) so they don't
           interrupt the verdict → numbers → details read. Only renders for a
-          re-opened saved deal; lazy-fetches its own data. */}
-      {isExistingSavedDeal && savedDealId ? (
-        <>
-          <DealNotesPanel savedDealId={savedDealId} />
-          <DueDiligenceCard savedDealId={savedDealId} />
-          <DealDocumentsCard savedDealId={savedDealId} />
-        </>
-      ) : null}
+          re-opened saved deal; lazy-fetches its own data. Due-diligence +
+          documents moved to the dashboard deal workspace
+          (/dashboard/saved-analyses/[id]) to keep the underwrite output clean. */}
+      {isExistingSavedDeal && savedDealId ? <DealNotesPanel savedDealId={savedDealId} /> : null}
     </div>
   );
 }

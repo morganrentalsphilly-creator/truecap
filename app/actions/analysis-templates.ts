@@ -210,6 +210,13 @@ export async function listAnalysisTemplatesAction(): Promise<ListTemplatesResult
     .order("template_name", { ascending: true });
 
   if (error) {
+    // Templates v2 columns (is_default / kind / buy_box) ship across several
+    // migrations; mid-rollout the SELECT can 42703 (undefined_column) / 42P01
+    // (undefined_table). Degrade to the normal empty state instead of erroring
+    // the whole templates page.
+    if (error.code === "42P01" || error.code === "42703") {
+      return { ok: true, templates: [] };
+    }
     return { ok: false, code: "SERVER_ERROR", message: error.message };
   }
 

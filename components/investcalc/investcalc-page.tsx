@@ -363,7 +363,7 @@ function toPdfReportData(args: {
     },
     projection10y: {
       cumulativeCF: projectionRows[projectionRows.length - 1]?.cum ?? 0,
-      bestAnnualAfterTax: Math.max(...projectionRows.map((row) => row.after)),
+      bestAnnualAfterTax: projectionRows.length ? Math.max(...projectionRows.map((row) => row.after)) : 0,
       totalAfterTax: projectionRows.reduce((acc, row) => acc + row.after, 0),
       rows: projectionRows,
     },

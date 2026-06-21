@@ -24,6 +24,7 @@ import {
   Tag,
   Trash2,
   X,
+  ClipboardList,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -1466,6 +1467,17 @@ export function SavedAnalysesPage({
                           </span>
                         ) : null}
                       </Button>
+                      <Button
+                        asChild
+                        variant="outline"
+                        size="sm"
+                        className="col-span-2 h-10 rounded-xl px-2.5 text-xs"
+                      >
+                        <Link href={`/dashboard/saved-analyses/${item.id}`}>
+                          <ClipboardList className="w-3.5 h-3.5 mr-1" />
+                          Checklist &amp; docs
+                        </Link>
+                      </Button>
                     </div>
                   </div>
 
@@ -1647,6 +1659,17 @@ export function SavedAnalysesPage({
                                 PRO
                               </span>
                             ) : null}
+                          </Button>
+                          <Button
+                            asChild
+                            variant="outline"
+                            size="sm"
+                            className="h-8 rounded-md px-2.5 text-xs"
+                          >
+                            <Link href={`/dashboard/saved-analyses/${item.id}`}>
+                              <ClipboardList className="w-3.5 h-3.5 mr-1" />
+                              Checklist
+                            </Link>
                           </Button>
                         </div>
                       </td>
