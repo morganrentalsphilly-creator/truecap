@@ -1,8 +1,9 @@
 "use client";
 
 import { UseFormReturn } from "react-hook-form";
-import { Home, DollarSign } from "lucide-react";
+import { Home, DollarSign, Sparkles, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { cn } from "@/lib/utils";
@@ -12,9 +13,20 @@ import { AddressAutocomplete, type SelectedAddress } from "@/components/investca
 interface PropertyDetailsSectionProps {
   form: UseFormReturn<InvestmentFormValues>;
   onAddressSelected?: (place: SelectedAddress) => void;
+  /** Pull beds/baths/sqft/price/rent from RentCast for the typed address. */
+  onAutofillFromAddress?: () => void;
+  isAutofilling?: boolean;
+  /** Show the autofill button (signed-in + provider configured). */
+  showAutofill?: boolean;
 }
 
-export function PropertyDetailsSection({ form, onAddressSelected }: PropertyDetailsSectionProps) {
+export function PropertyDetailsSection({
+  form,
+  onAddressSelected,
+  onAutofillFromAddress,
+  isAutofilling,
+  showAutofill,
+}: PropertyDetailsSectionProps) {
   const {
     register,
     formState: { errors },
@@ -37,7 +49,7 @@ export function PropertyDetailsSection({ form, onAddressSelected }: PropertyDeta
               point and tells new users it auto-fills the deal — the single
               biggest "how do I use this" cue, right at the point of action. */}
           <p className="mb-1.5 text-[11px] leading-snug text-muted-foreground">
-            <span className="font-semibold text-foreground">Start here</span> — paste an address and we auto-fill rent, rate, and property tax. Adjust anything after.
+            <span className="font-semibold text-foreground">Start here</span> — enter the address, then tap Autofill to pull beds, baths, price &amp; rent. Adjust anything after.
           </p>
           <AddressAutocomplete
             form={form}
@@ -45,6 +57,23 @@ export function PropertyDetailsSection({ form, onAddressSelected }: PropertyDeta
             onPlaceSelected={onAddressSelected}
           />
           <FieldError message={errors.address?.message} />
+          {showAutofill && onAutofillFromAddress ? (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="mt-2 h-8 gap-1.5"
+              onClick={onAutofillFromAddress}
+              disabled={isAutofilling}
+            >
+              {isAutofilling ? (
+                <Loader2 className="size-3.5 animate-spin" />
+              ) : (
+                <Sparkles className="size-3.5" />
+              )}
+              {isAutofilling ? "Pulling property data…" : "Autofill from address"}
+            </Button>
+          ) : null}
         </div>
 
         {/* Purchase Price + Year Built */}

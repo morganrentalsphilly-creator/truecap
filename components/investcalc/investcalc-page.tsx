@@ -1027,17 +1027,16 @@ export function InvestCalcPage({
   }, [unitsEnrichmentKey]);
 
   /**
-   * RentCast autofill. The cheap enrichment (enrich-property) only knows
-   * property tax, mortgage rate, and HUD area rent — it has NO source for
-   * beds, baths, sqft, or price. RentCast does. So when a signed-in user
-   * enters a complete address, pull the property's facts + value/rent
-   * estimate and fill the EMPTY form fields (never clobbering what the user
-   * already typed). Cost is bounded by the per-user + global caps in the
-   * action; any failure (no budget / not configured / no data / signed out)
-   * degrades silently — the user just types the values.
+   * RentCast autofill (button-triggered). The cheap enrichment only knows
+   * tax / rate / HUD-rent — beds, baths, sqft, and price can ONLY come from
+   * RentCast. So an explicit "Autofill from address" button pulls the
+   * property's facts + value/rent estimate and fills the EMPTY form fields
+   * (never clobbering what the user typed). On-demand by design: a comp
+   * credit is spent only on a deliberate click, bounded by the per-user +
+   * global caps in the action.
    */
-  const watchedAddress = form.watch("address");
-  const compsAutofillRef = useRef<string>("");
+  const [isAutofilling, setIsAutofilling] = useState(false);
+  const [autofillUnavailable, setAutofillUnavailable] = useState(false);
 
   const applyCompsToEmptyFields = useCallback(
     (e: PropertyEnrichment) => {
@@ -1079,30 +1078,43 @@ export function InvestCalcPage({
     [form, toast]
   );
 
-  useEffect(() => {
-    if (!isAuthenticated) return;
-    const addr = (watchedAddress ?? "").trim();
-    // Only for a complete-looking address (carries a 5-digit ZIP), once per
-    // distinct address. Debounced so we don't fire mid-typing; the action's
-    // 30-day cache means re-entering the same address costs nothing anyway.
-    if (addr.length < 8 || !/\b\d{5}\b/.test(addr)) return;
-    if (compsAutofillRef.current === addr) return;
-    const handle = window.setTimeout(() => {
-      compsAutofillRef.current = addr;
-      void (async () => {
-        try {
-          const r = await getPropertyCompsAction({
-            address: addr,
-            propertyType: form.getValues("propertyType"),
-          });
-          if (r.ok) applyCompsToEmptyFields(r.enrichment);
-        } catch {
-          // best-effort; silent
-        }
-      })();
-    }, 700);
-    return () => window.clearTimeout(handle);
-  }, [watchedAddress, isAuthenticated, form, applyCompsToEmptyFields]);
+  const handleAutofillFromAddress = useCallback(async () => {
+    const addr = (form.getValues("address") ?? "").trim();
+    if (!addr) {
+      toast({ title: "Enter an address first", description: "Add the property address, then tap Autofill." });
+      return;
+    }
+    setIsAutofilling(true);
+    try {
+      const r = await getPropertyCompsAction({
+        address: addr,
+        propertyType: form.getValues("propertyType"),
+      });
+      if (r.ok) {
+        applyCompsToEmptyFields(r.enrichment);
+        return;
+      }
+      if (r.code === "NOT_CONFIGURED") {
+        setAutofillUnavailable(true);
+        return;
+      }
+      const title =
+        r.code === "SIGN_IN_REQUIRED"
+          ? "Sign in to autofill"
+          : r.code === "ENTITLEMENT_REQUIRED"
+          ? "Upgrade for more autofills"
+          : r.code === "CAP_REACHED"
+          ? "Monthly limit reached"
+          : r.code === "NOT_FOUND"
+          ? "No data for this address"
+          : "Couldn't autofill";
+      toast({ title, description: r.message, variant: "destructive" });
+    } catch {
+      toast({ title: "Couldn't autofill", description: "Try again in a moment.", variant: "destructive" });
+    } finally {
+      setIsAutofilling(false);
+    }
+  }, [form, applyCompsToEmptyFields, toast]);
 
   const buildTaxStrategySource = (
     analysisId: string | null,
@@ -2537,7 +2549,13 @@ export function InvestCalcPage({
         >
           <div className="space-y-5">
             <PropertyTypeSection form={form} savedTemplateFallback={savedTemplateFallback} />
-            <PropertyDetailsSection form={form} onAddressSelected={handleAddressSelected} />
+            <PropertyDetailsSection
+              form={form}
+              onAddressSelected={handleAddressSelected}
+              onAutofillFromAddress={handleAutofillFromAddress}
+              isAutofilling={isAutofilling}
+              showAutofill={isAuthenticated && !autofillUnavailable}
+            />
 
             {/* Single-family: only the two fields a cash-flow run needs
                 (bedrooms → HUD rent auto-fill, rent → the math) on the

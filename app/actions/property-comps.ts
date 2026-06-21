@@ -25,9 +25,9 @@ const CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 const MONTHLY_ENRICHMENT_CAP = Number.parseInt(process.env.RENTCAST_MONTHLY_ENRICHMENT_CAP ?? "300", 10);
 
 // Per-Pro-user monthly cap on live lookups (distinct properties). Each property
-// ≈ 2 API calls. Default 30 properties/user/month. Free users instead get one
+// ≈ 2 API calls. Default 50 properties/user/month. Free users instead get one
 // lifetime lookup (profiles.comps_free_used). Tunable via env.
-const PER_USER_MONTHLY_CAP = Number.parseInt(process.env.RENTCAST_PER_USER_MONTHLY_CAP ?? "30", 10);
+const PER_USER_MONTHLY_CAP = Number.parseInt(process.env.RENTCAST_PER_USER_MONTHLY_CAP ?? "50", 10);
 
 const inputSchema = z.object({
   address: z.string().trim().min(5).max(300),
