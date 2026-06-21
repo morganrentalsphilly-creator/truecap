@@ -1415,6 +1415,456 @@ export const MARKET_CITIES: MarketCity[] = [
     ],
     relatedPosts: ["what-is-a-good-cap-rate", "cash-flow-vs-appreciation", "best-states-for-rental-investors-2026"],
   },
+  {
+    slug: "wilmington",
+    name: "Wilmington",
+    stateCode: "DE",
+    stateName: "Delaware",
+    blurb:
+      "Wilmington offers Mid-Atlantic access between Philadelphia and Baltimore with Delaware's business-friendly, no-sales-tax climate and a banking employment base.",
+    typicalRent: "$1,300–$1,800/mo",
+    typicalPrice: "$220,000–$310,000",
+    investorAngle:
+      "Steady financial-sector and commuter demand with reasonable entry. Balanced cash flow; neighborhood selection matters in the urban core.",
+    neighborhoods: [
+      { name: "Trolley Square", why: "Desirable, walkable, steady demand." },
+      { name: "Riverside / Northeast", why: "Value-add, higher cash flow." },
+      { name: "Newark", why: "Nearby; Univ. of Delaware demand, low vacancy." },
+    ],
+    relatedPosts: ["what-is-a-good-cap-rate", "cash-flow-vs-appreciation", "how-to-underwrite-a-rental-property-in-60-seconds"],
+  },
+  {
+    slug: "allentown",
+    name: "Allentown",
+    stateCode: "PA",
+    stateName: "Pennsylvania",
+    blurb:
+      "Allentown anchors the Lehigh Valley — a logistics-and-warehousing boom plus NYC/Philly overflow has driven steady rent growth at Pennsylvania prices.",
+    typicalRent: "$1,300–$1,800/mo",
+    typicalPrice: "$220,000–$310,000",
+    investorAngle:
+      "E-commerce warehousing jobs and metro overflow support demand and appreciation, with cash flow that still pencils. A strong PA growth-plus-yield blend.",
+    neighborhoods: [
+      { name: "West End", why: "Desirable, stable, reliable tenants." },
+      { name: "Bethlehem", why: "Adjacent; college + steady demand." },
+      { name: "Easton", why: "Value-add, walkable, upside." },
+    ],
+    relatedPosts: ["what-is-a-good-cap-rate", "cash-flow-vs-appreciation", "best-states-for-rental-investors-2026"],
+  },
+  {
+    slug: "harrisburg",
+    name: "Harrisburg",
+    stateCode: "PA",
+    stateName: "Pennsylvania",
+    blurb:
+      "Harrisburg, Pennsylvania's capital, pairs state-government stability with logistics employment and affordable entry — dependable, low-volatility demand.",
+    typicalRent: "$1,200–$1,650/mo",
+    typicalPrice: "$180,000–$270,000",
+    investorAngle:
+      "Recession-resistant government jobs and reasonable prices make for steady cash flow. A solid core market with modest appreciation.",
+    neighborhoods: [
+      { name: "Midtown", why: "Revitalizing, walkable, steady demand." },
+      { name: "Camp Hill", why: "Suburb; desirable, low vacancy." },
+      { name: "Allison Hill", why: "Value-add, higher cash flow." },
+    ],
+    relatedPosts: ["what-is-a-good-cap-rate", "single-family-vs-multi-family-rental", "how-to-underwrite-a-rental-property-in-60-seconds"],
+  },
+  {
+    slug: "scranton",
+    name: "Scranton",
+    stateCode: "PA",
+    stateName: "Pennsylvania",
+    blurb:
+      "Scranton is a deep-value Northeast cash-flow market — among the lowest prices in the region, with healthcare and education anchoring demand.",
+    typicalRent: "$1,050–$1,500/mo",
+    typicalPrice: "$130,000–$210,000",
+    investorAngle:
+      "Cheap entry and strong rent ratios drive solid cash-on-cash. Older housing stock — reserve for capex — and screen neighborhoods carefully.",
+    neighborhoods: [
+      { name: "Green Ridge", why: "Desirable, stable, reliable tenants." },
+      { name: "Hill Section", why: "Near universities, steady demand." },
+      { name: "West Scranton", why: "Affordable, value-add." },
+    ],
+    relatedPosts: ["what-is-a-good-cap-rate", "capex-maintenance-reserves-rental-property", "spot-bad-rental-in-60-seconds"],
+  },
+  {
+    slug: "worcester",
+    name: "Worcester",
+    stateCode: "MA",
+    stateName: "Massachusetts",
+    blurb:
+      "Worcester is New England's value play — Boston-overflow demand and a large student-and-healthcare base at well below Boston prices.",
+    typicalRent: "$1,700–$2,300/mo",
+    typicalPrice: "$360,000–$470,000",
+    investorAngle:
+      "Strong demand from colleges, hospitals, and priced-out Boston renters. Massachusetts is tenant-friendly — model regulation and turnover; appreciation-leaning.",
+    neighborhoods: [
+      { name: "West Side", why: "Desirable, stable, family renters." },
+      { name: "Main South", why: "Student demand, value-add." },
+      { name: "Burncoat", why: "Affordable SFRs, steady demand." },
+    ],
+    relatedPosts: ["cash-flow-vs-appreciation", "what-is-a-good-cap-rate", "vacancy-rate-rental-property"],
+  },
+  {
+    slug: "hartford",
+    name: "Hartford",
+    stateCode: "CT",
+    stateName: "Connecticut",
+    blurb:
+      "Hartford, Connecticut's insurance-industry capital, offers higher cap rates than most of the Northeast with stable, white-collar-anchored demand.",
+    typicalRent: "$1,500–$2,000/mo",
+    typicalPrice: "$230,000–$330,000",
+    investorAngle:
+      "Insurance and government employment keep demand steady, and yields beat coastal New England. Connecticut taxes + tenant rules need careful modeling.",
+    neighborhoods: [
+      { name: "West End", why: "Desirable, historic, steady demand." },
+      { name: "West Hartford", why: "Suburb; top schools, low vacancy." },
+      { name: "Parkville", why: "Value-add, improving area." },
+    ],
+    relatedPosts: ["what-is-a-good-cap-rate", "rental-property-tax-deductions", "cash-flow-vs-appreciation"],
+  },
+  {
+    slug: "new-haven",
+    name: "New Haven",
+    stateCode: "CT",
+    stateName: "Connecticut",
+    blurb:
+      "New Haven pairs Yale and a major medical system with Connecticut prices below the NYC commuter belt — steady, institution-anchored demand.",
+    typicalRent: "$1,600–$2,100/mo",
+    typicalPrice: "$250,000–$350,000",
+    investorAngle:
+      "Yale + hospitals create a durable tenant base, and yields are reasonable for the Northeast. Model CT taxes and tenant protections.",
+    neighborhoods: [
+      { name: "East Rock", why: "Desirable, walkable, high demand." },
+      { name: "Westville", why: "Stable, family renters." },
+      { name: "Fair Haven", why: "Value-add, higher cash flow." },
+    ],
+    relatedPosts: ["what-is-a-good-cap-rate", "cash-flow-vs-appreciation", "vacancy-rate-rental-property"],
+  },
+  {
+    slug: "providence",
+    name: "Providence",
+    stateCode: "RI",
+    stateName: "Rhode Island",
+    blurb:
+      "Providence anchors Rhode Island with a deep college base (Brown, RISD, PC) and Boston-overflow demand at a meaningful discount to Boston.",
+    typicalRent: "$1,700–$2,200/mo",
+    typicalPrice: "$340,000–$440,000",
+    investorAngle:
+      "Students plus priced-out Boston renters keep occupancy high. Rhode Island is tenant-friendly and stock is old — model regulation + capex; appreciation-leaning.",
+    neighborhoods: [
+      { name: "East Side", why: "Desirable, college demand, premium." },
+      { name: "Federal Hill", why: "Walkable, steady demand." },
+      { name: "Elmhurst", why: "Family renters, value." },
+    ],
+    relatedPosts: ["cash-flow-vs-appreciation", "what-is-a-good-cap-rate", "capex-maintenance-reserves-rental-property"],
+  },
+  {
+    slug: "manchester",
+    name: "Manchester",
+    stateCode: "NH",
+    stateName: "New Hampshire",
+    blurb:
+      "Manchester is New Hampshire's largest city — no state income or sales tax, Boston-commuter overflow, and tight supply driving steady rent growth.",
+    typicalRent: "$1,600–$2,100/mo",
+    typicalPrice: "$330,000–$430,000",
+    investorAngle:
+      "Tax advantages and Boston overflow support demand and appreciation; cash flow is tight at current prices. A growth-leaning New England market.",
+    neighborhoods: [
+      { name: "North End", why: "Desirable, stable, family renters." },
+      { name: "Downtown", why: "Walkable, younger renters." },
+      { name: "West Side", why: "Value-add, steady demand." },
+    ],
+    relatedPosts: ["cash-flow-vs-appreciation", "what-is-a-good-cap-rate", "best-states-for-rental-investors-2026"],
+  },
+  {
+    slug: "syracuse",
+    name: "Syracuse",
+    stateCode: "NY",
+    stateName: "New York",
+    blurb:
+      "Syracuse is an affordable upstate-New York cash-flow market — Syracuse University and healthcare anchor demand, with a Micron chip plant adding long-term upside.",
+    typicalRent: "$1,150–$1,600/mo",
+    typicalPrice: "$150,000–$240,000",
+    investorAngle:
+      "Low entry and strong rent ratios deliver solid cash-on-cash, with Micron-driven growth on the horizon. Mind New York taxes; reserve for older stock.",
+    neighborhoods: [
+      { name: "University Hill", why: "Student demand, high occupancy." },
+      { name: "Eastwood", why: "Stable, family renters." },
+      { name: "Strathmore", why: "Desirable, steady demand." },
+    ],
+    relatedPosts: ["what-is-a-good-cap-rate", "cash-flow-vs-appreciation", "capex-maintenance-reserves-rental-property"],
+  },
+  {
+    slug: "albany",
+    name: "Albany",
+    stateCode: "NY",
+    stateName: "New York",
+    blurb:
+      "Albany, New York's capital, offers government-anchored stability and affordable upstate prices — dependable, low-volatility rental demand.",
+    typicalRent: "$1,300–$1,750/mo",
+    typicalPrice: "$200,000–$290,000",
+    investorAngle:
+      "State government and universities keep occupancy steady through cycles. Reliable cash flow; model New York's higher taxes.",
+    neighborhoods: [
+      { name: "Pine Hills", why: "Student + young-professional demand." },
+      { name: "Delmar", why: "Suburb; top schools, low vacancy." },
+      { name: "Center Square", why: "Walkable, steady demand." },
+    ],
+    relatedPosts: ["what-is-a-good-cap-rate", "single-family-vs-multi-family-rental", "rental-property-tax-deductions"],
+  },
+  {
+    slug: "youngstown",
+    name: "Youngstown",
+    stateCode: "OH",
+    stateName: "Ohio",
+    blurb:
+      "Youngstown is one of the lowest-priced metros in the country — a pure cash-flow market for disciplined operators who screen carefully.",
+    typicalRent: "$850–$1,250/mo",
+    typicalPrice: "$80,000–$160,000",
+    investorAngle:
+      "Rock-bottom entry produces eye-catching cash-on-cash, but population has declined and stock is old — neighborhood + tenant selection are everything.",
+    neighborhoods: [
+      { name: "Boardman", why: "Suburb; stable, owner-occupant feel, reliable tenants." },
+      { name: "Canfield", why: "Desirable, low vacancy." },
+      { name: "Austintown", why: "Affordable, family renters." },
+    ],
+    relatedPosts: ["what-is-a-good-cap-rate", "spot-bad-rental-in-60-seconds", "capex-maintenance-reserves-rental-property"],
+  },
+  {
+    slug: "canton",
+    name: "Canton",
+    stateCode: "OH",
+    stateName: "Ohio",
+    blurb:
+      "Canton offers deep-value Ohio cash flow within the Cleveland-Akron economic orbit — very low prices and healthy rent ratios.",
+    typicalRent: "$900–$1,300/mo",
+    typicalPrice: "$100,000–$180,000",
+    investorAngle:
+      "Strong yields at low entry; older stock and a flat-growth economy mean reserve for capex and underwrite conservatively. Hands-on operators do well.",
+    neighborhoods: [
+      { name: "Jackson Township", why: "Suburb; desirable, low vacancy, reliable tenants." },
+      { name: "Plain Township", why: "Family renters, steady demand." },
+      { name: "Northwest Canton", why: "Value-add, cash flow." },
+    ],
+    relatedPosts: ["what-is-a-good-cap-rate", "capex-maintenance-reserves-rental-property", "spot-bad-rental-in-60-seconds"],
+  },
+  {
+    slug: "evansville",
+    name: "Evansville",
+    stateCode: "IN",
+    stateName: "Indiana",
+    blurb:
+      "Evansville is a stable, low-cost southern-Indiana market — healthcare, manufacturing, and a university base support dependable demand.",
+    typicalRent: "$1,000–$1,400/mo",
+    typicalPrice: "$130,000–$210,000",
+    investorAngle:
+      "Affordable entry, landlord-friendly Indiana law, and steady tenants make for reliable cash flow. Modest appreciation; a clean yield market.",
+    neighborhoods: [
+      { name: "East Side", why: "Desirable, stable, family renters." },
+      { name: "North Side", why: "Newer SFRs, low vacancy." },
+      { name: "Near University", why: "Student demand." },
+    ],
+    relatedPosts: ["what-is-a-good-cap-rate", "single-family-vs-multi-family-rental", "how-to-underwrite-a-rental-property-in-60-seconds"],
+  },
+  {
+    slug: "south-bend",
+    name: "South Bend",
+    stateCode: "IN",
+    stateName: "Indiana",
+    blurb:
+      "South Bend, home to Notre Dame, pairs a recession-resistant university-and-healthcare base with very affordable entry and strong rent ratios.",
+    typicalRent: "$1,050–$1,450/mo",
+    typicalPrice: "$130,000–$210,000",
+    investorAngle:
+      "Notre Dame demand plus low prices drive solid cash-on-cash, and Indiana is landlord-friendly. A dependable cash-flow market with a steady demand floor.",
+    neighborhoods: [
+      { name: "Near Notre Dame", why: "Student + staff demand, high occupancy." },
+      { name: "Granger", why: "Suburb; top schools, low vacancy." },
+      { name: "Near West Side", why: "Value-add, cash flow." },
+    ],
+    relatedPosts: ["what-is-a-good-cap-rate", "house-hacking-explained", "cap-rate-vs-cash-on-cash-vs-dscr"],
+  },
+  {
+    slug: "fresno",
+    name: "Fresno",
+    stateCode: "CA",
+    stateName: "California",
+    blurb:
+      "Fresno is California's affordability and cash-flow play — Central Valley agriculture and logistics demand at a fraction of coastal-California prices.",
+    typicalRent: "$1,500–$2,000/mo",
+    typicalPrice: "$340,000–$440,000",
+    investorAngle:
+      "Better yields than coastal CA with steady ag-and-logistics demand, but California tenant rules + rent caps need careful modeling. Balanced returns.",
+    neighborhoods: [
+      { name: "Northwest Fresno", why: "Desirable, family renters, low vacancy." },
+      { name: "Clovis", why: "Suburb; top schools, steady demand." },
+      { name: "Tower District", why: "Walkable, value-add." },
+    ],
+    relatedPosts: ["what-is-a-good-cap-rate", "rental-property-tax-deductions", "cash-flow-vs-appreciation"],
+  },
+  {
+    slug: "bakersfield",
+    name: "Bakersfield",
+    stateCode: "CA",
+    stateName: "California",
+    blurb:
+      "Bakersfield offers some of California's most attainable entry — energy and agriculture employment with rent ratios that actually pencil for the state.",
+    typicalRent: "$1,500–$1,950/mo",
+    typicalPrice: "$330,000–$420,000",
+    investorAngle:
+      "One of the few California markets where cash flow is realistic, anchored by oil and ag. Model CA tenant protections and rent caps.",
+    neighborhoods: [
+      { name: "Northwest Bakersfield", why: "Newer SFRs, family renters, low vacancy." },
+      { name: "Seven Oaks", why: "Desirable, steady demand." },
+      { name: "Oildale", why: "Affordable, value-add." },
+    ],
+    relatedPosts: ["what-is-a-good-cap-rate", "cash-flow-vs-appreciation", "rental-property-tax-deductions"],
+  },
+  {
+    slug: "stockton",
+    name: "Stockton",
+    stateCode: "CA",
+    stateName: "California",
+    blurb:
+      "Stockton offers Northern-California affordability with Bay Area spillover demand — a more attainable entry than the coast, an hour-plus from the Bay.",
+    typicalRent: "$1,700–$2,200/mo",
+    typicalPrice: "$420,000–$520,000",
+    investorAngle:
+      "Bay Area commuters and a port-and-ag economy support demand; yields beat the coast but California rules apply. Appreciation-leaning.",
+    neighborhoods: [
+      { name: "Brookside", why: "Desirable, family renters, low vacancy." },
+      { name: "Lincoln Village", why: "Stable, steady demand." },
+      { name: "Weston Ranch", why: "Affordable, value-add." },
+    ],
+    relatedPosts: ["cash-flow-vs-appreciation", "what-is-a-good-cap-rate", "rental-property-tax-deductions"],
+  },
+  {
+    slug: "modesto",
+    name: "Modesto",
+    stateCode: "CA",
+    stateName: "California",
+    blurb:
+      "Modesto pairs Central Valley affordability with Bay Area overflow — agriculture-anchored demand at prices well below the coast.",
+    typicalRent: "$1,600–$2,100/mo",
+    typicalPrice: "$390,000–$490,000",
+    investorAngle:
+      "Commuter and agricultural demand keep occupancy steady; cash flow is tight by non-CA standards but strong for California. Model state tenant rules.",
+    neighborhoods: [
+      { name: "North Modesto", why: "Desirable, family renters, low vacancy." },
+      { name: "Village One", why: "Newer SFRs, steady demand." },
+      { name: "Airport District", why: "Affordable, value-add." },
+    ],
+    relatedPosts: ["what-is-a-good-cap-rate", "cash-flow-vs-appreciation", "rental-property-tax-deductions"],
+  },
+  {
+    slug: "salem",
+    name: "Salem",
+    stateCode: "OR",
+    stateName: "Oregon",
+    blurb:
+      "Salem, Oregon's capital, offers government-anchored stability at a discount to Portland, with no sales tax and steady, low-volatility demand.",
+    typicalRent: "$1,500–$1,950/mo",
+    typicalPrice: "$370,000–$470,000",
+    investorAngle:
+      "State-government employment underpins demand, and entry beats Portland. Oregon is tenant-friendly with rent caps — model regulation. Balanced returns.",
+    neighborhoods: [
+      { name: "South Salem", why: "Desirable, family renters, low vacancy." },
+      { name: "West Salem", why: "Newer SFRs, steady demand." },
+      { name: "Northeast Salem", why: "Affordable, value-add." },
+    ],
+    relatedPosts: ["what-is-a-good-cap-rate", "cash-flow-vs-appreciation", "vacancy-rate-rental-property"],
+  },
+  {
+    slug: "tacoma",
+    name: "Tacoma",
+    stateCode: "WA",
+    stateName: "Washington",
+    blurb:
+      "Tacoma is the Puget Sound value play — Seattle-overflow demand and a major port at a meaningful discount to Seattle, with no state income tax.",
+    typicalRent: "$1,700–$2,250/mo",
+    typicalPrice: "$420,000–$540,000",
+    investorAngle:
+      "Seattle commuters and JBLM military demand support occupancy; yields beat Seattle but Washington tenant rules apply. Appreciation-leaning.",
+    neighborhoods: [
+      { name: "North Tacoma", why: "Desirable, walkable, steady demand." },
+      { name: "University Place", why: "Suburb; top schools, low vacancy." },
+      { name: "South Tacoma", why: "Affordable, value-add." },
+    ],
+    relatedPosts: ["cash-flow-vs-appreciation", "what-is-a-good-cap-rate", "best-states-for-rental-investors-2026"],
+  },
+  {
+    slug: "killeen",
+    name: "Killeen",
+    stateCode: "TX",
+    stateName: "Texas",
+    blurb:
+      "Killeen is built around Fort Cavazos (formerly Fort Hood), one of the largest U.S. Army posts — military demand creates exceptionally steady, low-vacancy rentals.",
+    typicalRent: "$1,250–$1,650/mo",
+    typicalPrice: "$200,000–$280,000",
+    investorAngle:
+      "Constant military rotation keeps occupancy high and demand predictable — a classic cash-flow market. Model BAH-driven rents and Texas property taxes.",
+    neighborhoods: [
+      { name: "Near Fort Cavazos", why: "Reliable military tenant pool." },
+      { name: "Harker Heights", why: "Suburb; desirable, top schools, low vacancy." },
+      { name: "South Killeen", why: "Affordable, value-add." },
+    ],
+    relatedPosts: ["what-is-a-good-cap-rate", "cash-flow-vs-appreciation", "rental-property-tax-deductions"],
+  },
+  {
+    slug: "waco",
+    name: "Waco",
+    stateCode: "TX",
+    stateName: "Texas",
+    blurb:
+      "Waco has ridden Baylor University and an I-35 location between Dallas and Austin — steady student demand plus Central-Texas growth at reasonable prices.",
+    typicalRent: "$1,250–$1,700/mo",
+    typicalPrice: "$210,000–$300,000",
+    investorAngle:
+      "Baylor demand and a central location support occupancy and gradual appreciation. Model Texas taxes; student submarkets need turnover-aware underwriting.",
+    neighborhoods: [
+      { name: "Near Baylor", why: "Student rentals, high occupancy." },
+      { name: "Woodway", why: "Suburb; desirable, top schools, low vacancy." },
+      { name: "East Waco", why: "Value-add, higher cash flow." },
+    ],
+    relatedPosts: ["what-is-a-good-cap-rate", "cash-flow-vs-appreciation", "vacancy-rate-rental-property"],
+  },
+  {
+    slug: "lubbock",
+    name: "Lubbock",
+    stateCode: "TX",
+    stateName: "Texas",
+    blurb:
+      "Lubbock is a stable West-Texas market built around Texas Tech — a large, renewing student base plus healthcare keeps demand reliably high.",
+    typicalRent: "$1,150–$1,600/mo",
+    typicalPrice: "$190,000–$270,000",
+    investorAngle:
+      "Texas Tech's ~40k students underpin demand and occupancy, with affordable entry. Model Texas taxes; near-campus submarkets are turnover-heavy.",
+    neighborhoods: [
+      { name: "Tech Terrace", why: "Near campus, high demand, desirable." },
+      { name: "Southwest Lubbock", why: "Newer SFRs, family renters, low vacancy." },
+      { name: "North Lubbock", why: "Affordable, value-add." },
+    ],
+    relatedPosts: ["what-is-a-good-cap-rate", "cash-flow-vs-appreciation", "rental-property-tax-deductions"],
+  },
+  {
+    slug: "mobile",
+    name: "Mobile",
+    stateCode: "AL",
+    stateName: "Alabama",
+    blurb:
+      "Mobile is a Gulf Coast cash-flow market — port, aerospace (Airbus), and shipbuilding employment with affordable entry and healthy rent ratios.",
+    typicalRent: "$1,150–$1,550/mo",
+    typicalPrice: "$150,000–$240,000",
+    investorAngle:
+      "Industrial and port jobs anchor demand, and yields are strong for the price. Quote coastal insurance before you offer; reserve for older stock.",
+    neighborhoods: [
+      { name: "West Mobile", why: "Desirable, family renters, low vacancy." },
+      { name: "Midtown", why: "Historic, walkable, steady demand." },
+      { name: "Tillmans Corner", why: "Affordable, value-add." },
+    ],
+    relatedPosts: ["what-is-a-good-cap-rate", "cash-flow-vs-appreciation", "closing-costs-investment-property"],
+  },
 ];
 
 const MARKET_CITY_BY_SLUG = new Map(MARKET_CITIES.map((c) => [c.slug, c]));
