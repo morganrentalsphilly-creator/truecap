@@ -135,7 +135,7 @@ export default async function DashboardPage() {
     supabase
       .from("saved_analyses")
       .select(
-        "id, address, title, property_type, purchase_price, net_cash_flow_monthly, coc_return_pct, created_at, result_snapshot, form_snapshot, pipeline_stage, tags"
+        "id, address, title, property_type, purchase_price, net_cash_flow_monthly, coc_return_pct, created_at, result_snapshot, form_snapshot, pipeline_stage, tags, data_confidence"
       )
       .eq("user_id", user.id)
       .is("deleted_at", null)

@@ -71,6 +71,8 @@ import { ProInlineGate } from "@/components/investcalc/pro-inline-gate";
 import { DealQaPanel } from "@/components/investcalc/deal-qa-panel";
 import { BuyBoxVerdictCard } from "@/components/investcalc/buy-box-verdict-card";
 import { deriveStateFromAddress } from "@/lib/buy-box";
+import { DataConfidenceBadge } from "@/components/investcalc/data-confidence-badge";
+import type { DataConfidence } from "@/lib/data-confidence";
 import { Activity, Target } from "lucide-react";
 import { MomentOfValueUpsell } from "@/components/marketing/moment-of-value-upsell";
 import { SignupPromptCard } from "@/components/marketing/signup-prompt-card";
@@ -172,6 +174,9 @@ interface AnalysisDashboardProps {
    */
   dealQaEnabled?: boolean;
   saveDealLimitReached?: boolean;
+  /** Live data-confidence for the current analysis (computed in the analyzer
+   *  from enrich-property provenance). Null hides the badge. */
+  dataConfidence?: DataConfidence | null;
   activeTab?: AnalysisDashboardTab;
   /** Shown when Compare / Export are disabled (e.g. unsaved edits). */
   persistedActionsBlockHint?: string;
@@ -389,6 +394,7 @@ export function AnalysisDashboard({
   isSampleProPreview = false,
   dealQaEnabled = false,
   saveDealLimitReached = false,
+  dataConfidence = null,
   activeTab: activeTabProp,
   persistedActionsBlockHint,
 }: AnalysisDashboardProps) {
@@ -956,6 +962,7 @@ export function AnalysisDashboard({
             Overview
           </span>
           <span className="h-px flex-1 bg-border" />
+          {dataConfidence ? <DataConfidenceBadge confidence={dataConfidence} /> : null}
         </div>
 
         {/* Reading order (investor-scan pass): NUMBERS FIRST, TOOLS LAST.

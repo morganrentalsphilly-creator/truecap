@@ -42,6 +42,7 @@ import { PostAnalysisEmailPrompt } from "@/components/marketing/post-analysis-em
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { saveDealAction } from "@/app/actions/saved-analyses";
+import { buildDataConfidence, type EnrichmentProvenanceInput } from "@/lib/data-confidence";
 import { addDealToCompareAction } from "@/app/actions/compare";
 import { getDealScoreAction, type DealScoreActionResult } from "@/app/actions/deal-score";
 import { trackAnalysisRunAction } from "@/app/actions/track-analysis-run";
@@ -390,6 +391,53 @@ function toPdfReportData(args: {
   };
 }
 
+/** What enrich-property filled, captured so we can attribute data confidence
+ *  at save time (and live on the result screen). */
+type EnrichmentCapture = {
+  monthlyRent?: { source: "hud-fmr" | "hud-safmr"; detail?: string; fetchedAt?: string; value: number };
+  interestRate?: { source: "fred"; fetchedAt?: string; value: number };
+  propertyTaxPct?: { source: "state-static"; detail?: string; value: number };
+};
+
+function provNum(v: unknown): number | null {
+  const n = typeof v === "number" ? v : Number(v);
+  return Number.isFinite(n) ? n : null;
+}
+
+/** Build the provenance payload from captured enrichment + current values,
+ *  flagging a field "overridden" when the user changed it after auto-fill. */
+function buildProvenanceInput(
+  capture: EnrichmentCapture,
+  values: { propertyTaxPct?: unknown; interestRate?: unknown; monthlyRent?: unknown }
+): EnrichmentProvenanceInput {
+  const approxEq = (a: number | null, b: number | null) =>
+    a != null && b != null && Math.abs(a - b) <= 0.005 * Math.max(1, Math.abs(b));
+  const out: EnrichmentProvenanceInput = {};
+  if (capture.propertyTaxPct) {
+    out.propertyTaxPct = {
+      source: "state-static",
+      detail: capture.propertyTaxPct.detail,
+      overridden: !approxEq(provNum(values.propertyTaxPct), capture.propertyTaxPct.value),
+    };
+  }
+  if (capture.interestRate) {
+    out.interestRate = {
+      source: "fred",
+      fetchedAt: capture.interestRate.fetchedAt,
+      overridden: !approxEq(provNum(values.interestRate), capture.interestRate.value),
+    };
+  }
+  if (capture.monthlyRent) {
+    out.monthlyRent = {
+      source: capture.monthlyRent.source,
+      detail: capture.monthlyRent.detail,
+      fetchedAt: capture.monthlyRent.fetchedAt,
+      overridden: !approxEq(provNum(values.monthlyRent), capture.monthlyRent.value),
+    };
+  }
+  return out;
+}
+
 export function InvestCalcPage({
   canSaveDeals = false,
   canCompareDeals = false,
@@ -691,6 +739,7 @@ export function InvestCalcPage({
       form.setValue("bathrooms", undefined, { shouldDirty: false, shouldValidate: false });
       form.setValue("sqft", undefined, { shouldDirty: false, shouldValidate: false });
       form.setValue("monthlyRent", undefined, { shouldDirty: false, shouldValidate: false });
+      enrichmentCaptureRef.current = {};
       form.setValue("units", getDefaultUnitsForPropertyType(nextPropertyType), {
         shouldDirty: false,
         shouldValidate: false,
@@ -728,6 +777,7 @@ export function InvestCalcPage({
    * typically address first, then beds/baths).
    */
   const lastSelectedAddressRef = useRef<SelectedAddress | null>(null);
+  const enrichmentCaptureRef = useRef<EnrichmentCapture>({});
 
   /**
    * Run the enrichment lookups (state property tax, FRED mortgage rate,
@@ -767,6 +817,11 @@ export function InvestCalcPage({
       // state rate is strictly more informative.
       if (enrichment.propertyTaxPct !== undefined) {
         form.setValue("propertyTaxPct", enrichment.propertyTaxPct, setOpts);
+        enrichmentCaptureRef.current.propertyTaxPct = {
+          source: "state-static",
+          detail: enrichment.meta.propertyTax?.state,
+          value: enrichment.propertyTaxPct,
+        };
         filled.push(
           `Property tax ${enrichment.propertyTaxPct.toFixed(2)}% (${enrichment.meta.propertyTax?.state})`
         );
@@ -779,6 +834,11 @@ export function InvestCalcPage({
         const isDirty = form.formState.dirtyFields.interestRate;
         if (!isDirty) {
           form.setValue("interestRate", enrichment.interestRate, setOpts);
+          enrichmentCaptureRef.current.interestRate = {
+            source: "fred",
+            fetchedAt: enrichment.meta.mortgageRate?.asOf,
+            value: enrichment.interestRate,
+          };
           filled.push(
             `Interest rate ${enrichment.interestRate.toFixed(2)}% (current avg)`
           );
@@ -799,6 +859,12 @@ export function InvestCalcPage({
             shouldTouch: false,
             shouldValidate: false,
           });
+          enrichmentCaptureRef.current.monthlyRent = {
+            source: enrichment.meta.rent?.source ?? "hud-fmr",
+            detail: enrichment.meta.rent?.county,
+            fetchedAt: enrichment.meta.rent ? String(enrichment.meta.rent.year) : undefined,
+            value: enrichment.monthlyRent,
+          };
           filled.push(
             `Rent ~$${enrichment.monthlyRent.toLocaleString()}/mo (HUD FMR)`
           );
@@ -822,6 +888,8 @@ export function InvestCalcPage({
   const handleAddressSelected = useCallback(
     async (place: SelectedAddress) => {
       lastSelectedAddressRef.current = place;
+      // New property → fresh provenance capture for this address.
+      enrichmentCaptureRef.current = {};
       // Funnel step — coarse only (state), never the full address (PII).
       trackEvent("address_selected", { state: place.state });
       await runPropertyEnrichment(place);
@@ -1566,7 +1634,12 @@ export function InvestCalcPage({
 
     setIsSavingDeal(true);
     try {
-      const result = await saveDealAction(form.getValues(), savedDealId);
+      const currentValues = form.getValues();
+      const result = await saveDealAction(
+        currentValues,
+        savedDealId,
+        buildProvenanceInput(enrichmentCaptureRef.current, currentValues)
+      );
       if (result.ok) {
         const parsedValues = investmentFormSchema.safeParse(form.getValues());
         setSavedDealId(result.id);
@@ -2502,6 +2575,15 @@ export function InvestCalcPage({
             <AnalysisDashboard
               result={analysisResult}
               values={form.getValues()}
+              dataConfidence={
+                analysisResult
+                  ? buildDataConfidence(buildProvenanceInput(enrichmentCaptureRef.current, form.getValues()), {
+                      hasRent: analysisResult.monthlyRentalIncome > 0,
+                      hasPrice: (form.getValues("purchasePrice") ?? 0) > 0,
+                      hasBeds: (form.getValues("bedrooms") ?? 0) > 0,
+                    })
+                  : null
+              }
               isLoading={isCalculating}
               dealScoreResult={dealScoreResult}
               isLoadingDealScore={isLoadingDealScore}

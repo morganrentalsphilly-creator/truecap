@@ -22,6 +22,7 @@ import {
 } from "@/lib/entitlements";
 import { recomputeSavedDealVerdict } from "@/lib/recompute-saved-deal-verdict";
 import { DEFAULT_PIPELINE_STAGE, isPipelineStage } from "@/lib/pipeline";
+import { normalizeDataConfidence } from "@/lib/data-confidence";
 import { getRequestUser, getRequestEntitlements } from "@/lib/request-auth";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import type { StoredRecommendation, StoredRiskLevel } from "@/lib/compare-metrics";
@@ -57,6 +58,7 @@ type SavedAnalysisRow = {
   form_snapshot?: unknown;
   pipeline_stage?: string | null;
   tags?: string[] | null;
+  data_confidence?: unknown;
 };
 
 function getDisplayName(profile: ProfileRow | null, email?: string | null): string {
@@ -116,6 +118,7 @@ function mapSavedRow(row: SavedAnalysisRow): SavedAnalysisListItem | null {
     breakdown: fresh ? fresh.breakdown : null,
     pipelineStage: isPipelineStage(row.pipeline_stage) ? row.pipeline_stage : DEFAULT_PIPELINE_STAGE,
     tags: Array.isArray(row.tags) ? row.tags.filter((t): t is string => typeof t === "string") : [],
+    dataConfidence: normalizeDataConfidence(row.data_confidence),
     createdAt: row.created_at,
     status: row.is_completed ? "completed" : row.is_archived ? "archived" : "active",
   };
@@ -172,7 +175,7 @@ export default async function DashboardSavedAnalysesPage({
   let query = supabase
     .from("saved_analyses")
     .select(
-      "id, address, title, property_type, purchase_price, net_cash_flow_monthly, coc_return_pct, created_at, is_completed, is_archived, result_snapshot, form_snapshot, pipeline_stage, tags"
+      "id, address, title, property_type, purchase_price, net_cash_flow_monthly, coc_return_pct, created_at, is_completed, is_archived, result_snapshot, form_snapshot, pipeline_stage, tags, data_confidence"
     )
     .eq("user_id", user.id)
     .is("deleted_at", null);

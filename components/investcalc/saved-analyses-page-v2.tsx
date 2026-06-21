@@ -49,6 +49,8 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import type { StoredRiskLevel } from "@/lib/compare-metrics";
 import { PIPELINE_STAGES, pipelineStageLabel, type PipelineStage } from "@/lib/pipeline";
+import { DataConfidenceBadge } from "@/components/investcalc/data-confidence-badge";
+import { type DataConfidence } from "@/lib/data-confidence";
 import { consumePendingSavedListSearch } from "@/lib/dashboard-saved-search-bridge";
 import { Switch } from "../ui/switch";
 import {
@@ -100,6 +102,7 @@ export type SavedAnalysisListItem = {
   breakdown?: DealScoreBreakdown | null;
   pipelineStage?: PipelineStage;
   tags?: string[];
+  dataConfidence?: DataConfidence | null;
   createdAt: string;
   status: "active" | "completed" | "archived";
 };
@@ -1346,6 +1349,9 @@ export function SavedAnalysesPage({
                             </PopoverContent>
                           </Popover>
                         ) : null}
+                        {item.dataConfidence ? (
+                          <DataConfidenceBadge confidence={item.dataConfidence} size="xs" />
+                        ) : null}
                       </div>
                       <p className="mt-1 text-xs text-muted-foreground">{getTypeLabel(item.propertyType)}</p>
                     </div>
@@ -1550,6 +1556,9 @@ export function SavedAnalysesPage({
                                 <ScoreBreakdown breakdown={item.breakdown} score={item.score} />
                               </PopoverContent>
                             </Popover>
+                          ) : null}
+                          {item.dataConfidence ? (
+                            <DataConfidenceBadge confidence={item.dataConfidence} size="xs" />
                           ) : null}
                         </span>
                       </td>

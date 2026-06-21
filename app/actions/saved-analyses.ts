@@ -1,6 +1,7 @@
 "use server";
 
 import * as Sentry from "@sentry/nextjs";
+import { z } from "zod";
 import { calculateAnalysis } from "@/lib/calc-analysis";
 import { computeDealScore, buildDealScoreInputFromAnalysis } from "@/lib/deal-score";
 import {
@@ -17,6 +18,7 @@ import {
   type InvestmentFormValues,
 } from "@/lib/investcalc-schema";
 import { flagsForStage, isPipelineStage, normalizeTags, type PipelineStage } from "@/lib/pipeline";
+import { buildDataConfidence, type EnrichmentProvenanceInput } from "@/lib/data-confidence";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { DEFAULT_APPRECIATION_RATE, DEFAULT_SELLING_COST_PCT } from "@/lib/exit-scenarios";
 import { buildCompareSnapshotPayload } from "@/lib/compare-result-snapshot";
@@ -170,7 +172,25 @@ function buildEditFormSnapshotFromRow(row: Record<string, unknown>): Record<stri
   };
 }
 
-export async function saveDealAction(input: unknown, existingId?: string | null): Promise<SaveDealResult> {
+const provenanceFieldSchema = z.object({
+  source: z.enum(["hud-fmr", "hud-safmr", "fred", "state-static", "manual"]),
+  fetchedAt: z.string().max(40).nullish(),
+  detail: z.string().max(160).optional(),
+  overridden: z.boolean().optional(),
+});
+const saveProvenanceSchema = z
+  .object({
+    monthlyRent: provenanceFieldSchema.optional(),
+    interestRate: provenanceFieldSchema.optional(),
+    propertyTaxPct: provenanceFieldSchema.optional(),
+  })
+  .optional();
+
+export async function saveDealAction(
+  input: unknown,
+  existingId?: string | null,
+  provenanceInput?: unknown
+): Promise<SaveDealResult> {
   const supabase = await createServerSupabaseClient();
   const {
     data: { user },
@@ -235,6 +255,19 @@ export async function saveDealAction(input: unknown, existingId?: string | null)
     sellingCostPct: sellingCostPctStored,
   };
 
+  // Per-input provenance → data confidence. The client passes which fields
+  // enrich-property filled (and whether the user overrode them); we compute
+  // the High/Medium/Low level here from that + completeness, and persist it.
+  const provenanceParsed = saveProvenanceSchema.safeParse(provenanceInput);
+  const dataConfidence = buildDataConfidence(
+    provenanceParsed.success ? (provenanceParsed.data as EnrichmentProvenanceInput | undefined) : undefined,
+    {
+      hasRent: result.monthlyRentalIncome > 0,
+      hasPrice: (sanitizedValues.purchasePrice ?? 0) > 0,
+      hasBeds: (sanitizedValues.bedrooms ?? 0) > 0,
+    }
+  );
+
   const payload = {
     title,
     schema_version: INVESTCALC_SCHEMA_VERSION,
@@ -277,6 +310,7 @@ export async function saveDealAction(input: unknown, existingId?: string | null)
     pdf_generated_at: null,
     pdf_snapshot_version: 0,
     last_activity_at: new Date().toISOString(),
+    data_confidence: dataConfidence as unknown as Record<string, unknown>,
   };
 
   const candidateExistingId = existingId?.trim();

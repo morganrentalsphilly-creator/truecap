@@ -1,6 +1,7 @@
 import { getTypeLabel, type PropertyType, type StoredRecommendation, type StoredRiskLevel } from "@/lib/compare-metrics";
 import type { DealScoreBreakdown } from "@/lib/deal-score";
 import { DEFAULT_PIPELINE_STAGE, isPipelineStage, type PipelineStage } from "@/lib/pipeline";
+import { normalizeDataConfidence, type DataConfidence } from "@/lib/data-confidence";
 
 type NumericLike = number | string | null | undefined;
 
@@ -66,6 +67,7 @@ export type SavedAnalysisDashboardRow = {
   form_snapshot?: unknown;
   pipeline_stage?: string | null;
   tags?: string[] | null;
+  data_confidence?: unknown;
 };
 
 export type DashboardDeal = {
@@ -101,6 +103,8 @@ export type DashboardDeal = {
   /** Acquisition-funnel stage (optional; defaults to analyzing). */
   pipelineStage?: PipelineStage;
   tags: string[];
+  /** Per-input data confidence (optional; null when unknown). */
+  dataConfidence?: DataConfidence | null;
 };
 
 export function toNumber(value: NumericLike): number | null {
@@ -191,5 +195,6 @@ export function buildDashboardDeal(row: SavedAnalysisDashboardRow): DashboardDea
       : Array.isArray(snapshot.tags)
         ? snapshot.tags.filter((tag): tag is string => typeof tag === "string")
         : [],
+    dataConfidence: normalizeDataConfidence(row.data_confidence),
   };
 }
