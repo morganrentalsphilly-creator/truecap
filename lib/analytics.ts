@@ -61,6 +61,15 @@ export type FunnelEvent =
   | "one_time_pdf_purchased"
   // Deal Q&A (AI panel under the recommendation card).
   | "deal_qa_asked" // properties: question_length
+  // ── Homepage → analyzer funnel (hero input + simplified flow) ──
+  // Granular steps so we can A/B the hero input + minimal analyzer and
+  // see exactly where starts drop off. No PII: we never send the typed
+  // address string, only coarse signals (state, has_components).
+  | "hero_address_submit"      // properties: has_components (Places state/zip captured)
+  | "hero_sample_clicked"
+  | "address_selected"         // properties: state (coarse; never the full address)
+  | "optional_section_opened"  // properties: source ("toggle" | "edit_link")
+  | "result_assumptions_edited"
 
 /**
  * Safe capture. Use this everywhere instead of `posthog.capture(...)`

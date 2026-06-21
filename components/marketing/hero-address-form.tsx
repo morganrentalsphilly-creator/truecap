@@ -34,6 +34,7 @@ import {
   HERO_ANALYZE_STORAGE_KEY,
   type HeroAnalyzeDetail,
 } from "@/lib/hero-handoff";
+import { trackEvent } from "@/lib/analytics";
 
 function scrollToCalculator() {
   if (typeof window === "undefined") return;
@@ -78,6 +79,8 @@ export function HeroAddressForm() {
     setSubmitting(true);
     const picked = selectedRef.current;
     const sameAsPicked = picked && picked.formattedAddress.trim() === address;
+    // Funnel: top of the hero-start path. No address string sent (PII).
+    trackEvent("hero_address_submit", { has_components: Boolean(sameAsPicked) });
     dispatchHeroAnalyze({
       token: newToken(),
       address,
@@ -92,6 +95,7 @@ export function HeroAddressForm() {
   };
 
   const handleTrySample = () => {
+    trackEvent("hero_sample_clicked");
     dispatchHeroAnalyze({ token: newToken(), address: "", sample: true });
     scrollToCalculator();
   };

@@ -37,6 +37,7 @@ import { StickyCalculateBar } from "./sticky-calculate-bar";
 import { AutosaveIndicator } from "./autosave-indicator";
 import { AnalysisDashboard, type AnalysisDashboardTab } from "./analysis-dashboard";
 import { AnalysisErrorBoundary } from "@/components/investcalc/analysis-error-boundary";
+import { AssumptionsSourceStrip } from "@/components/investcalc/assumptions-source-strip";
 import { PostAnalysisEmailPrompt } from "@/components/marketing/post-analysis-email-prompt";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -821,6 +822,8 @@ export function InvestCalcPage({
   const handleAddressSelected = useCallback(
     async (place: SelectedAddress) => {
       lastSelectedAddressRef.current = place;
+      // Funnel step — coarse only (state), never the full address (PII).
+      trackEvent("address_selected", { state: place.state });
       await runPropertyEnrichment(place);
     },
     [runPropertyEnrichment]
@@ -2143,15 +2146,35 @@ export function InvestCalcPage({
 
   const toggleAdvanced = () => {
     advancedUserChoiceRef.current = true;
-    setAdvancedOpen((prev) => {
-      const next = !prev;
-      try {
-        window.localStorage.setItem(CALC_ADVANCED_OPEN_KEY, next ? "1" : "0");
-      } catch {
-        /* ignore */
-      }
-      return next;
-    });
+    const next = !advancedOpen;
+    if (next) trackEvent("optional_section_opened", { source: "toggle" });
+    setAdvancedOpen(next);
+    try {
+      window.localStorage.setItem(CALC_ADVANCED_OPEN_KEY, next ? "1" : "0");
+    } catch {
+      /* ignore */
+    }
+  };
+
+  /**
+   * "Edit assumptions" from the result-state trust strip: open the
+   * Improve-accuracy section and jump back to the form so refining a
+   * default is one click from the numbers the user is judging.
+   */
+  const handleEditAssumptions = () => {
+    advancedUserChoiceRef.current = true;
+    setAdvancedOpen(true);
+    try {
+      window.localStorage.setItem(CALC_ADVANCED_OPEN_KEY, "1");
+    } catch {
+      /* ignore */
+    }
+    trackEvent("result_assumptions_edited", {});
+    trackEvent("optional_section_opened", { source: "edit_link" });
+    if (typeof window !== "undefined") {
+      const el = document.getElementById("main");
+      if (el) window.scrollTo({ top: el.offsetTop - 64, behavior: "smooth" });
+    }
   };
 
   return (
@@ -2469,6 +2492,12 @@ export function InvestCalcPage({
             so the user's numbers are never lost. */}
         {(showResults || isCalculating || analysisResult !== null) && (
           <div className="mt-8" data-analysis-results="true">
+            {/* Result-state trust strip — names the default sources behind
+                the numbers (HUD/FRED/state) + "all editable", with a jump
+                back to the form. Only once real results exist. */}
+            {analysisResult && !isCalculating ? (
+              <AssumptionsSourceStrip onEdit={handleEditAssumptions} />
+            ) : null}
             <AnalysisErrorBoundary result={analysisResult}>
             <AnalysisDashboard
               result={analysisResult}
