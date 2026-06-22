@@ -31,7 +31,7 @@ const MODIFIED_AT = "2026-06-07";
 const READING_TIME_MIN = 14;
 
 export const metadata: Metadata = {
-  title: `${TITLE} | TrueCap Blog`,
+  title: TITLE,
   description: DESCRIPTION,
   keywords: [
     "short term rental underwriting",

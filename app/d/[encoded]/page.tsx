@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const payload = decodeShareLink(encoded);
   const title = payload?.meta?.title || payload?.values?.address || "Shared deal";
   return {
-    title: `${title} | TrueCap`,
+    title: title,
     description:
       "A rental property analysis shared with you via TrueCap — institutional-grade math, no spreadsheet required.",
     alternates: { canonical: `/d/${encoded}` },

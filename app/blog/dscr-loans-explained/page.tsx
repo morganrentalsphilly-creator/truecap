@@ -34,7 +34,7 @@ const MODIFIED_AT = "2026-06-01";
 const READING_TIME_MIN = 10;
 
 export const metadata: Metadata = {
-  title: `${TITLE} | TrueCap Blog`,
+  title: TITLE,
   description: DESCRIPTION,
   keywords: [
     "dscr loan",

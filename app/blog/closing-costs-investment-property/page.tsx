@@ -26,7 +26,7 @@ const MODIFIED_AT = "2026-06-09";
 const READING_TIME = 11;
 
 export const metadata: Metadata = {
-  title: `${TITLE} | TrueCap`,
+  title: TITLE,
   description: DESCRIPTION,
   keywords: [
     "closing costs investment property",

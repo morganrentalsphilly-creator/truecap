@@ -34,8 +34,8 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const state = getStateBySlug(slug);
-  if (!state) return { title: "State not found | TrueCap" };
-  const title = `Investing in ${state.name} rental property in 2026 | TrueCap`;
+  if (!state) return { title: "State not found" };
+  const title = `Investing in ${state.name} rental property in 2026`;
   return {
     title,
     description: state.pitch.slice(0, 158),

@@ -27,7 +27,7 @@ const MODIFIED_AT = "2026-06-07";
 const READING_TIME_MIN = 12;
 
 export const metadata: Metadata = {
-  title: `${TITLE} | TrueCap Blog`,
+  title: TITLE,
   description: DESCRIPTION,
   keywords: [
     "best rental property calculator",

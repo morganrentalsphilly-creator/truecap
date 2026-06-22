@@ -29,7 +29,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { topic: slug } = await params;
   const topic = getBlogTopic(slug);
-  if (!topic) return { title: "Topic not found | TrueCap" };
+  if (!topic) return { title: "Topic not found" };
   return {
     title: `${topic.title} — Guides & Calculators`,
     description: topic.description,

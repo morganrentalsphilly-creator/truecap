@@ -43,7 +43,7 @@ const ALL: Entry[] = [
 ];
 
 export const metadata: Metadata = {
-  title: "Rental property markets — cap rates, rents & cash flow by city | TrueCap",
+  title: "Rental property markets — cap rates, rents & cash flow by city",
   description: `Explore rental investment analysis for ${ALL.length}+ U.S. cities — cap-rate benchmarks, HUD rents, property tax, and a 60-second analyzer for every market.`,
   keywords: [
     "rental property markets",

@@ -39,8 +39,8 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { city, strategy } = await params;
   const combo = getCityStrategyCombo(city, strategy);
-  if (!combo) return { title: "Combo not found | TrueCap" };
-  const title = `${combo.strategyLabel} investing in ${combo.cityName} — the honest playbook | TrueCap`;
+  if (!combo) return { title: "Combo not found" };
+  const title = `${combo.strategyLabel} investing in ${combo.cityName} — the honest playbook`;
   return {
     title,
     description: combo.pitch.slice(0, 158),

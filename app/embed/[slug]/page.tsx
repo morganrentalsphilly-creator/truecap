@@ -43,7 +43,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const entry = getEmbedEntry(slug);
-  if (!entry) return { title: "Embed not found | TrueCap" };
+  if (!entry) return { title: "Embed not found" };
   return {
     title: `${entry.title} — Embed`,
     description: entry.description,

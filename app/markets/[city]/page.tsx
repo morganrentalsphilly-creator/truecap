@@ -52,9 +52,9 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { city } = await params;
   const data = getMarketCity(city);
-  if (!data) return { title: "Market not found | TrueCap" };
+  if (!data) return { title: "Market not found" };
 
-  const title = `${data.name} rental property analysis — cap rates, rent & cash flow (2026) | TrueCap`;
+  const title = `${data.name} rental property analysis — cap rates, rent & cash flow (2026)`;
   const description =
     `Run a ${data.name}, ${data.stateCode} rental deal in 60 seconds. ${data.blurb} Typical rent ${data.typicalRent}; typical price ${data.typicalPrice}.`.slice(
       0,

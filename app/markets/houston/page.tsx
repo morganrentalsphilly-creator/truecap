@@ -33,7 +33,7 @@ const PUBLISHED_AT = "2026-05-24";
 const MODIFIED_AT = "2026-06-01";
 
 export const metadata: Metadata = {
-  title: `${TITLE} | TrueCap`,
+  title: TITLE,
   description: DESCRIPTION,
   keywords: [
     "houston rental property analysis",

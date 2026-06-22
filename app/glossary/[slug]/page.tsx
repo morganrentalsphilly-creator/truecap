@@ -38,13 +38,13 @@ export async function generateMetadata({
   const { slug } = await params;
   const entry = getGlossaryEntryBySlug(slug);
   if (!entry) {
-    return { title: "Glossary term not found | TrueCap" };
+    return { title: "Glossary term not found" };
   }
   const description = entry.benchmark
     ? `${entry.definition} ${entry.benchmark}`
     : entry.definition;
   return {
-    title: `${entry.term} — definition, formula, example | TrueCap Glossary`,
+    title: `${entry.term} — definition, formula, example`,
     description: description.slice(0, 158),
     keywords: [
       entry.term.toLowerCase(),

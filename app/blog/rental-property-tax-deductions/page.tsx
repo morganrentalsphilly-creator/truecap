@@ -31,7 +31,7 @@ const MODIFIED_AT = "2026-06-01";
 const READING_TIME = 11;
 
 export const metadata: Metadata = {
-  title: `${TITLE} | TrueCap`,
+  title: TITLE,
   description: DESCRIPTION,
   keywords: [
     "rental property tax deductions",

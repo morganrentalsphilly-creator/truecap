@@ -36,7 +36,7 @@ const MODIFIED_AT = "2026-06-16";
 const READING_TIME_MIN = 10;
 
 export const metadata: Metadata = {
-  title: `${TITLE} | TrueCap Blog`,
+  title: TITLE,
   description: DESCRIPTION,
   keywords: [
     "how to calculate noi",

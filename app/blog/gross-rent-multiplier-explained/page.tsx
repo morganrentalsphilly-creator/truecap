@@ -26,7 +26,7 @@ const MODIFIED_AT = "2026-06-17";
 const READING_TIME = 10;
 
 export const metadata: Metadata = {
-  title: `${TITLE} | TrueCap`,
+  title: TITLE,
   description: DESCRIPTION,
   keywords: [
     "gross rent multiplier",
