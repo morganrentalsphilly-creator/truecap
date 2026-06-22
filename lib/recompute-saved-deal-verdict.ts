@@ -33,6 +33,13 @@ export function recomputeSavedDealVerdict(formSnapshot: unknown): {
   dscr: number;
   /** Cash needed to close (down payment + closing costs). */
   cashToClose: number;
+  /** Monthly net cash flow ($). Recomputed so list/dashboard/compare match the
+   *  live engine instead of drifting from the stored snapshot. */
+  netCashFlowMonthly: number;
+  /** Cap rate (%). */
+  capRatePct: number;
+  /** Cash-on-cash return (%). */
+  cocReturnPct: number;
 } | null {
   const parsed = investmentFormSchema.safeParse(formSnapshot);
   if (!parsed.success) return null;
@@ -46,6 +53,9 @@ export function recomputeSavedDealVerdict(formSnapshot: unknown): {
       breakdown: scored.breakdown,
       dscr: result.dscr,
       cashToClose: result.totalCashRequired,
+      netCashFlowMonthly: result.netCashFlow,
+      capRatePct: result.capRate,
+      cocReturnPct: result.cocReturn,
     };
   } catch {
     return null;

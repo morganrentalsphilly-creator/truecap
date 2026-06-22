@@ -109,18 +109,21 @@ function getInitials(displayName: string, email: string): string {
 
 function mapDeal(row: SavedAnalysisRow): CompareDealViewModel {
   const snapshot = row.result_snapshot ?? {};
-  const netCashFlow = toNumber(snapshot.netCashFlow) ?? toNumber(row.net_cash_flow_monthly);
-  const cocReturn = toNumber(snapshot.cocReturn) ?? toNumber(row.coc_return_pct);
-  const capRate = toNumber(snapshot.capRate);
   const purchasePrice = toNumber(row.purchase_price);
-  // Recompute the verdict from the form snapshot with the CURRENT engine
-  // (Balanced lens) so Compare matches the Dashboard and My Deals lists —
-  // both already recompute on read (see recomputeSavedDealVerdict). Reading
-  // the stored snapshot verbatim showed a STALE score here while those
-  // surfaces showed the fresh one: the same deal reading two different
-  // numbers (the 52-vs-78 P0). Falls back to stored values if the snapshot
-  // can't be reparsed.
+  // Recompute the verdict AND the decision metrics from the form snapshot with
+  // the CURRENT engine (Balanced lens) so Compare matches the Dashboard and My
+  // Deals lists — all recompute on read (see recomputeSavedDealVerdict). Reading
+  // the stored snapshot verbatim showed STALE numbers here while those surfaces
+  // showed the fresh ones: the same deal reading two different values (the
+  // 52-vs-78 P0). Falls back to stored values if the snapshot can't be reparsed.
   const recomputed = recomputeSavedDealVerdict(row.form_snapshot);
+  const netCashFlow = recomputed
+    ? recomputed.netCashFlowMonthly
+    : (toNumber(snapshot.netCashFlow) ?? toNumber(row.net_cash_flow_monthly));
+  const cocReturn = recomputed
+    ? recomputed.cocReturnPct
+    : (toNumber(snapshot.cocReturn) ?? toNumber(row.coc_return_pct));
+  const capRate = recomputed ? recomputed.capRatePct : toNumber(snapshot.capRate);
   const score = recomputed ? recomputed.score : toNumber(snapshot.score);
   const recommendation: StoredRecommendation | null = recomputed
     ? recomputed.recommendation
@@ -136,12 +139,12 @@ function mapDeal(row: SavedAnalysisRow): CompareDealViewModel {
     cocReturn,
     capRate,
     afterTaxCF: toNumber(snapshot.afterTaxCF),
-    annualCashFlow: toNumber(snapshot.annualCashFlow),
-    dscr: toNumber(snapshot.dscr),
+    annualCashFlow: recomputed ? recomputed.netCashFlowMonthly * 12 : toNumber(snapshot.annualCashFlow),
+    dscr: recomputed ? recomputed.dscr : toNumber(snapshot.dscr),
     monthlyRentalIncome: toNumber(snapshot.monthlyRentalIncome),
     totalOperatingExpenses: toNumber(snapshot.totalOperatingExpenses),
     purchasePrice,
-    totalCashRequired: toNumber(snapshot.totalCashRequired),
+    totalCashRequired: recomputed ? recomputed.cashToClose : toNumber(snapshot.totalCashRequired),
     monthlyPayment: toNumber(snapshot.monthlyPayment),
     taxSavingsMonthly: toNumber(snapshot.taxSavingsMonthly),
   };
@@ -224,9 +227,10 @@ export default async function DashboardComparePage() {
           "Untitled Property",
         score,
         signal: score != null && rec ? recommendationToSignal(rec) : null,
-        netCashFlow:
-          toNumber(snap.netCashFlow) ?? toNumber(r.net_cash_flow_monthly as number | string | null),
-        capRate: toNumber(snap.capRate),
+        netCashFlow: recomputed
+          ? recomputed.netCashFlowMonthly
+          : (toNumber(snap.netCashFlow) ?? toNumber(r.net_cash_flow_monthly as number | string | null)),
+        capRate: recomputed ? recomputed.capRatePct : toNumber(snap.capRate),
       };
     });
 

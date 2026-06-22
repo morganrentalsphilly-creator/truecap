@@ -112,12 +112,13 @@ function mapSavedRow(row: SavedAnalysisRow): SavedAnalysisListItem | null {
     title: row.title,
     propertyType: row.property_type,
     purchasePrice: row.purchase_price,
-    netCashFlowMonthly: row.net_cash_flow_monthly,
-    cocReturnPct: row.coc_return_pct,
-    capRatePct: Number.isFinite(parsedCapRate) ? parsedCapRate : null,
-    // Recompute-on-read (Balanced), same as the verdict — so these stay in
-    // lockstep with the live engine. Null for legacy snapshots that don't
-    // validate; the column renders "—".
+    // Recompute-on-read (Balanced), same as the verdict — so cash flow / CoC /
+    // cap / DSCR / cash-to-close all stay in lockstep with the live engine
+    // rather than drifting from the stored snapshot. Fall back to the stored
+    // values for legacy snapshots that don't validate.
+    netCashFlowMonthly: fresh ? fresh.netCashFlowMonthly : row.net_cash_flow_monthly,
+    cocReturnPct: fresh ? fresh.cocReturnPct : row.coc_return_pct,
+    capRatePct: fresh ? fresh.capRatePct : Number.isFinite(parsedCapRate) ? parsedCapRate : null,
     dscr: fresh ? fresh.dscr : null,
     cashToClose: fresh ? fresh.cashToClose : null,
     score: fresh ? fresh.score : Number.isFinite(parsedScore) ? parsedScore : null,

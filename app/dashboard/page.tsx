@@ -79,8 +79,21 @@ function buildDashboardData(
   const deals = rows.map((row) => {
     const deal = buildDashboardDeal(row);
     const fresh = recomputeSavedDealVerdict(row.form_snapshot);
+    // Recompute-on-read: score AND the headline financials (cash flow / CoC /
+    // cap) come from the live engine, so the dashboard never shows numbers that
+    // drifted from the stored snapshot after a calc change. ROI stays on the
+    // snapshot (it's the projection engine, computed separately).
     return fresh
-      ? { ...deal, score: fresh.score, recommendation: fresh.recommendation, riskLevel: fresh.riskLevel, breakdown: fresh.breakdown }
+      ? {
+          ...deal,
+          score: fresh.score,
+          recommendation: fresh.recommendation,
+          riskLevel: fresh.riskLevel,
+          breakdown: fresh.breakdown,
+          cashFlowMonthly: fresh.netCashFlowMonthly,
+          cocReturnPct: fresh.cocReturnPct,
+          capRatePct: fresh.capRatePct,
+        }
       : deal;
   });
 
@@ -153,7 +166,7 @@ export default async function DashboardPage() {
     supabase
       .from("saved_analyses")
       .select(
-        "purchase_price, net_cash_flow_monthly, cap_rate_raw:result_snapshot->>capRate, ncf_snapshot:result_snapshot->>netCashFlow"
+        "purchase_price, net_cash_flow_monthly, cap_rate_raw:result_snapshot->>capRate, ncf_snapshot:result_snapshot->>netCashFlow, form_snapshot"
       )
       .eq("user_id", user.id)
       .is("deleted_at", null)
@@ -180,6 +193,7 @@ export default async function DashboardPage() {
     net_cash_flow_monthly: number | null;
     cap_rate_raw: string | null;
     ncf_snapshot: string | null;
+    form_snapshot: unknown;
   };
   let portfolioAggregates: DashboardHomeData["portfolioAggregates"] = null;
   if (!aggregateResult.error) {
@@ -190,24 +204,28 @@ export default async function DashboardPage() {
     let capDen = 0;
     let activeCount = 0;
     for (const r of aggRows) {
+      // Recompute-on-read so the portfolio totals stay in lockstep with the
+      // per-deal cards (which now recompute too) and the live engine. Falls
+      // back to the snapshot/denormalized values for legacy snapshots.
+      const fresh = recomputeSavedDealVerdict(r.form_snapshot);
       if (r.purchase_price != null) {
         totalValue += r.purchase_price;
         activeCount += 1;
-        const cap = Number(r.cap_rate_raw);
-        if (r.cap_rate_raw != null && Number.isFinite(cap) && r.purchase_price > 0) {
+        const cap = fresh ? fresh.capRatePct : Number(r.cap_rate_raw);
+        if (Number.isFinite(cap) && r.purchase_price > 0) {
           capNum += cap * r.purchase_price;
           capDen += r.purchase_price;
         }
       }
-      // Prefer the snapshot's netCashFlow — the SAME source the per-deal
-      // cards use (see buildDashboardDeal) — so the headline total can't
-      // disagree with the rows below it. Fall back to the denormalized
-      // column only when the snapshot lacks the field.
-      const ncfSnap = Number(r.ncf_snapshot);
-      totalCashFlow +=
-        r.ncf_snapshot != null && Number.isFinite(ncfSnap)
-          ? ncfSnap
-          : (r.net_cash_flow_monthly ?? 0);
+      if (fresh) {
+        totalCashFlow += fresh.netCashFlowMonthly;
+      } else {
+        const ncfSnap = Number(r.ncf_snapshot);
+        totalCashFlow +=
+          r.ncf_snapshot != null && Number.isFinite(ncfSnap)
+            ? ncfSnap
+            : (r.net_cash_flow_monthly ?? 0);
+      }
     }
     portfolioAggregates = {
       totalValue,
