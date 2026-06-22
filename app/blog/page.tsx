@@ -20,6 +20,7 @@ import { ArrowUpRight, BookOpen } from "lucide-react";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
+import { BLOG_TOPICS } from "@/lib/blog-topics";
 
 export const metadata: Metadata = {
   title: "Blog",
@@ -358,6 +359,31 @@ export default function BlogIndexPage() {
             underwriting best practices from the team behind TrueCap.
           </p>
         </header>
+
+        {/* Browse by topic — hubs that group the posts by investor journey
+            (P2-4) and pair each with the relevant calculators. */}
+        <nav aria-label="Browse by topic" className="mb-8">
+          <p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+            Browse by topic
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {BLOG_TOPICS.map((t) => (
+              <Link
+                key={t.slug}
+                href={`/blog/topics/${t.slug}`}
+                className="rounded-full border border-border bg-card px-3 py-1.5 text-xs font-semibold text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
+              >
+                {t.title}
+              </Link>
+            ))}
+            <Link
+              href="/blog/topics"
+              className="rounded-full px-3 py-1.5 text-xs font-semibold text-primary hover:underline"
+            >
+              All topics →
+            </Link>
+          </div>
+        </nav>
 
         <ul className="space-y-4">
           {BLOG_POSTS.filter((p) => p.available).map((post) => (

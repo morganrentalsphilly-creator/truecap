@@ -5,6 +5,7 @@ import { GLOSSARY } from "@/lib/glossary";
 import { STATES } from "@/lib/states";
 import { getSiteUrl } from "@/lib/site-url";
 import { CALCULATOR_REGISTRY } from "@/lib/calculator-registry";
+import { BLOG_TOPICS } from "@/lib/blog-topics";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const siteUrl = getSiteUrl();
@@ -60,11 +61,28 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
+  // Blog topic hubs (P2-4) — the /blog/topics index + one hub per topic.
+  const topicHubUrls: MetadataRoute.Sitemap = [
+    {
+      url: `${siteUrl}/blog/topics`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
+    },
+    ...BLOG_TOPICS.map((t) => ({
+      url: `${siteUrl}/blog/topics/${t.slug}`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.7,
+    })),
+  ];
+
   return [
     ...glossaryUrls,
     ...stateUrls,
     ...cityStrategyUrls,
     ...marketCityUrls,
+    ...topicHubUrls,
     {
       url: `${siteUrl}/markets`,
       lastModified: new Date(),
