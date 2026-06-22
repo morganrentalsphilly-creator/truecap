@@ -259,10 +259,10 @@ export default function BrrrrCalculatorPage() {
             </p>
             <ul className="text-sm space-y-1.5 mb-5 opacity-90">
               {[
-                "Save unlimited BRRRR analyses",
-                "Compare 2-4 BRRRRs side by side",
-                "10-year post-refi projection with rent growth",
-                "Tax savings + exit scenario modeling",
+                "Save your BRRRRs — up to 5 free, unlimited with Pro",
+                "Compare 2–4 side by side (Pro)",
+                "10-year post-refi projection with rent growth (Pro)",
+                "Tax savings + exit scenario modeling (Pro)",
                 "Rehab cost estimator with sq-ft defaults",
                 "Free to start",
               ].map((line) => (

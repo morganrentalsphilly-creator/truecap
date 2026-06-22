@@ -266,10 +266,10 @@ export default function OnePercentRulePage() {
             <ul className="text-sm space-y-1.5 mb-5 opacity-90">
               {[
                 "Cap rate + CoC + DSCR + monthly cash flow",
-                "10-year projection with rent growth",
-                "Depreciation tax savings model",
-                "Sell / refi / hold exit comparison",
-                "BRRRR + fix-and-flip calculators included",
+                "10-year projection with rent growth (Pro)",
+                "Depreciation tax savings model (Pro)",
+                "Sell / refi / hold exit comparison (Pro)",
+                "BRRRR + fix-and-flip calculators (Pro)",
                 "Free to start",
               ].map((line) => (
                 <li key={line} className="flex items-start gap-2">

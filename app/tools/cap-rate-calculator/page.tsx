@@ -386,9 +386,9 @@ export default function CapRateCalculatorPage() {
             <ul className="text-sm space-y-1.5 mb-5 opacity-90">
               {[
                 "Cash flow, cap rate, CoC, DSCR — auto-calculated",
-                "10-year projection with rent + expense growth",
-                "Depreciation modeling and tax savings",
-                "Sell / refi / hold exit comparison",
+                "10-year projection with rent + expense growth (Pro)",
+                "Depreciation modeling and tax savings (Pro)",
+                "Sell / refi / hold exit comparison (Pro)",
                 "Deal Score with thresholds across 4 dimensions",
                 "Free to start — no credit card",
               ].map((line) => (

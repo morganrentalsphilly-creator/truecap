@@ -267,8 +267,9 @@ export default function RehabEstimatorPage() {
                 "Rehab estimator total flows into BRRRR + Flip inputs",
                 "BRRRR: cash left in deal, post-refi CF, infinite-return detection",
                 "Fix-and-Flip: net profit, ROI, annualized ROI, profit/day, break-even ARV",
-                "Save unlimited analyses, compare side-by-side",
-                "Export as one-page lender-ready PDF",
+                "Save up to 5 deals free — unlimited with Pro",
+                "Compare side-by-side (Pro)",
+                "Export a lender-ready PDF — $5 one-time, or unlimited with Pro",
                 "Free to start",
               ].map((line) => (
                 <li key={line} className="flex items-start gap-2">

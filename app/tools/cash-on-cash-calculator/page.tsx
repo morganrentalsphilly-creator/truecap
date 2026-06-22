@@ -285,10 +285,10 @@ export default function CoCCalculatorPage() {
             <ul className="text-sm space-y-1.5 mb-5 opacity-90">
               {[
                 "Full cash-flow model with rent + expense growth",
-                "Depreciation modeling and tax savings projection",
+                "Depreciation modeling and tax savings projection (Pro)",
                 "DSCR readout sized to lender thresholds",
-                "Sell / refi / hold exit comparison",
-                "BRRRR + fix-and-flip strategy calculators included",
+                "Sell / refi / hold exit comparison (Pro)",
+                "BRRRR + fix-and-flip strategy calculators (Pro)",
                 "Free to start — no credit card",
               ].map((line) => (
                 <li key={line} className="flex items-start gap-2">

@@ -231,7 +231,7 @@ export default function ForBuyAndHoldPage() {
             Free covers the offer. Pro covers the hold.
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
-            Free analyzer gives you cap rate, CoC, DSCR, monthly cash flow — enough to underwrite the buy. Pro unlocks the 10-year projection, tax strategy, exit scenarios, sensitivity grid, deal score, max-allowable-offer calculator, PDF exports, and share links. Built for serious buy-and-hold operators.
+            Free analyzer gives you cap rate, CoC, DSCR, monthly cash flow, and the 0–100 Deal Score — enough to underwrite the buy. Pro unlocks the 10-year projection, tax strategy, exit scenarios, sensitivity grid, max-allowable-offer calculator, PDF exports, and share links. Built for serious buy-and-hold operators.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link
