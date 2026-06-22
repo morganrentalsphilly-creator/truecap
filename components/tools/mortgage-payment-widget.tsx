@@ -7,9 +7,12 @@
  */
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
+import { ArrowUpRight, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { buildAnalyzerHandoffUrl } from "@/lib/analyzer-handoff";
 
 const num = (s: string) => {
   const n = Number(s);
@@ -50,6 +53,12 @@ export function MortgagePaymentWidget() {
     const totalInterest = totalPayments - loan;
     return { loan, downPayment, monthlyPI, monthlyTax, monthlyInsurance, monthlyPITI, totalInterest };
   }, [priceInput, downPctInput, rateInput, termInput, taxPctInput, insurancePctInput]);
+
+  // Carry the user's home price into the full analyzer (P2-2 handoff).
+  const handoffHref = buildAnalyzerHandoffUrl(
+    { purchasePrice: num(priceInput) },
+    { utmSource: "mortgage-payment-calculator" }
+  );
 
   return (
     <div className="bg-card rounded-2xl border border-border shadow-sm p-5 sm:p-7">
@@ -96,6 +105,15 @@ export function MortgagePaymentWidget() {
           </div>
         </div>
       </div>
+
+      <Link
+        href={handoffHref}
+        className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline"
+      >
+        <Sparkles className="w-4 h-4" />
+        Run the full analysis with these numbers — cap rate, cash flow, DSCR, projections — free
+        <ArrowUpRight className="w-4 h-4" />
+      </Link>
     </div>
   );
 }

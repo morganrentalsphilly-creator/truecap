@@ -8,9 +8,12 @@
  */
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
+import { ArrowUpRight, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { buildAnalyzerHandoffUrl } from "@/lib/analyzer-handoff";
 
 const num = (s: string): number => {
   const n = Number(s);
@@ -54,6 +57,12 @@ export function NoiCalculatorWidget() {
     const opexRatio = effectiveRent > 0 ? (annualOpex / effectiveRent) * 100 : 0;
     return { monthlyRent, annualGross, annualVacancy, effectiveRent, monthlyOpex, annualOpex, annualNoi, monthlyNoi, opexRatio };
   }, [rentInput, vacancyInput, taxInput, insuranceInput, maintenanceInput, mgmtInput, capexInput, hoaInput, utilitiesInput]);
+
+  // Carry the user's monthly rent into the full analyzer (P2-2 handoff).
+  const handoffHref = buildAnalyzerHandoffUrl(
+    { monthlyRent: num(rentInput) },
+    { utmSource: "noi-calculator" }
+  );
 
   return (
     <div className="bg-card rounded-2xl border border-border shadow-sm p-5 sm:p-7">
@@ -112,6 +121,15 @@ export function NoiCalculatorWidget() {
           </div>
         </div>
       </div>
+
+      <Link
+        href={handoffHref}
+        className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline"
+      >
+        <Sparkles className="w-4 h-4" />
+        Run the full analysis with these numbers — cap rate, cash flow, DSCR — free
+        <ArrowUpRight className="w-4 h-4" />
+      </Link>
     </div>
   );
 }

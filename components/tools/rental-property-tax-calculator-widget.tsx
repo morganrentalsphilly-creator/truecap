@@ -15,9 +15,12 @@
  */
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
+import { ArrowUpRight, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { buildAnalyzerHandoffUrl } from "@/lib/analyzer-handoff";
 
 const num = (s: string) => {
   const n = Number(s);
@@ -95,6 +98,12 @@ export function RentalPropertyTaxCalculatorWidget() {
     result.taxableIncome <= 0
       ? "text-[var(--metric-positive)]"
       : "text-amber-600";
+
+  // Carry the user's price + rent into the full analyzer (P2-2 handoff).
+  const handoffHref = buildAnalyzerHandoffUrl(
+    { purchasePrice: num(purchasePrice), monthlyRent: num(monthlyRent) },
+    { utmSource: "rental-property-tax-calculator" }
+  );
 
   return (
     <div className="rounded-2xl border border-border bg-card p-5 sm:p-6">
@@ -323,6 +332,15 @@ export function RentalPropertyTaxCalculatorWidget() {
         Always consult a CPA before relying on these numbers for tax
         planning.
       </p>
+
+      <Link
+        href={handoffHref}
+        className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline"
+      >
+        <Sparkles className="w-4 h-4" />
+        Run the full analysis with these numbers — cash flow, depreciation, after-tax return — free
+        <ArrowUpRight className="w-4 h-4" />
+      </Link>
     </div>
   );
 }
