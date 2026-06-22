@@ -20,6 +20,7 @@ import {
   CALCULATOR_COUNT,
   CALCULATOR_COUNT_WORD,
   CALCULATOR_NAMES_LIST,
+  calculatorsByCategory,
 } from "@/lib/calculator-registry";
 
 export const metadata: Metadata = {
@@ -91,20 +92,35 @@ export default function ToolsLandingPage() {
           </p>
         </header>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-          {CALCULATOR_REGISTRY.map((tool) => (
-            <Link
-              key={tool.slug}
-              href={`/tools/${tool.slug}`}
-              className="group bg-card border border-border rounded-2xl p-5 hover:border-primary transition-colors flex flex-col gap-2"
-            >
-              <div className="flex items-center justify-between">
-                <Calculator className="w-5 h-5 text-primary" />
-                <ArrowUpRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+        {/* Grouped by job (registry categories) so investors can find the
+            calculator for the question they're answering: screen a deal →
+            finance it → model income/expenses → check returns → set an offer. */}
+        <div className="space-y-9">
+          {calculatorsByCategory().map((group) => (
+            <section key={group.category} aria-labelledby={`cat-${group.category}`}>
+              <h2
+                id={`cat-${group.category}`}
+                className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3"
+              >
+                {group.label}
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                {group.items.map((tool) => (
+                  <Link
+                    key={tool.slug}
+                    href={`/tools/${tool.slug}`}
+                    className="group bg-card border border-border rounded-2xl p-5 hover:border-primary transition-colors flex flex-col gap-2"
+                  >
+                    <div className="flex items-center justify-between">
+                      <Calculator className="w-5 h-5 text-primary" />
+                      <ArrowUpRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                    </div>
+                    <h3 className="font-bold text-foreground">{tool.title}</h3>
+                    <p className="text-sm text-muted-foreground">{tool.description}</p>
+                  </Link>
+                ))}
               </div>
-              <h2 className="font-bold text-foreground">{tool.title}</h2>
-              <p className="text-sm text-muted-foreground">{tool.description}</p>
-            </Link>
+            </section>
           ))}
         </div>
 

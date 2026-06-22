@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FieldErrors, useForm } from "react-hook-form";
@@ -33,6 +33,12 @@ import { SingleFamilyUnitSection } from "./single-family-unit-section";
 import { MultiFamilyUnitsSection } from "./multi-family-units-section";
 import { FinancingSection } from "./financing-section";
 import { OperatingExpensesSection } from "./operating-expenses-section";
+import { AnalyzerStepRail } from "./analyzer-step-rail";
+import {
+  computeAnalyzerSteps,
+  isAnalyzerStepId,
+  type AnalyzerStepId,
+} from "@/lib/analyzer-steps";
 import { StickyCalculateBar } from "./sticky-calculate-bar";
 import { AutosaveIndicator } from "./autosave-indicator";
 import { AnalysisDashboard, type AnalysisDashboardTab } from "./analysis-dashboard";
@@ -938,6 +944,84 @@ export function InvestCalcPage({
    * hit HUD multiple times.
    */
   const watchedUnits = form.watch("units");
+
+  // ── Guided step rail (AN-1) ──────────────────────────────────────────
+  // Additive orientation/navigation over the existing single-scroll form.
+  // Reads form values (never writes), so it can't affect validation, the
+  // manual "Run analysis" flow, or the localStorage draft.
+  const watchedAddress = form.watch("address");
+  const watchedMonthlyRent = form.watch("monthlyRent");
+  const watchedDownPaymentPct = form.watch("downPaymentPct");
+  const watchedInterestRate = form.watch("interestRate");
+  const watchedLoanTermYears = form.watch("loanTermYears");
+
+  const analyzerSteps = useMemo(
+    () =>
+      computeAnalyzerSteps(
+        {
+          propertyType,
+          address: watchedAddress,
+          purchasePrice,
+          bedrooms: watchedBedrooms,
+          monthlyRent: watchedMonthlyRent,
+          units: watchedUnits,
+          downPaymentPct: watchedDownPaymentPct,
+          interestRate: watchedInterestRate,
+          loanTermYears: watchedLoanTermYears,
+        },
+        { hasResults: analysisResult != null }
+      ),
+    [
+      propertyType,
+      watchedAddress,
+      purchasePrice,
+      watchedBedrooms,
+      watchedMonthlyRent,
+      watchedUnits,
+      watchedDownPaymentPct,
+      watchedInterestRate,
+      watchedLoanTermYears,
+      analysisResult,
+    ]
+  );
+
+  const [activeStep, setActiveStep] = useState<AnalyzerStepId | null>(null);
+
+  const handleStepNavigate = useCallback(
+    (id: AnalyzerStepId) => {
+      setActiveStep(id);
+      if (id === "decision") {
+        scrollToAnalysisResults();
+        return;
+      }
+      // Financing + Expenses live inside the collapsed "advanced" block —
+      // open it first, then scroll once it's had a frame to expand.
+      if (id === "financing" || id === "expenses") {
+        setAdvancedOpen(true);
+      }
+      requestAnimationFrame(() => {
+        window.setTimeout(() => {
+          document
+            .getElementById(`step-${id}`)
+            ?.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 70);
+      });
+    },
+    [scrollToAnalysisResults]
+  );
+
+  // Deep link: ?step=financing (income / expenses / decision / property)
+  // scrolls to that section once on load. Ref-guarded so it fires only once.
+  const deepLinkHandledRef = useRef(false);
+  useEffect(() => {
+    if (deepLinkHandledRef.current) return;
+    deepLinkHandledRef.current = true;
+    const stepParam = new URLSearchParams(window.location.search).get("step");
+    if (stepParam && isAnalyzerStepId(stepParam)) {
+      window.setTimeout(() => handleStepNavigate(stepParam), 250);
+    }
+  }, [handleStepNavigate]);
+
   const enrichedUnitsRef = useRef<Set<string>>(new Set());
   // Build a stable dep string that changes only when a unit's
   // bedrooms or owner-occupied flag changes.
@@ -2548,28 +2632,42 @@ export function InvestCalcPage({
           noValidate
         >
           <div className="space-y-5">
-            <PropertyTypeSection form={form} savedTemplateFallback={savedTemplateFallback} />
-            <PropertyDetailsSection
-              form={form}
-              onAddressSelected={handleAddressSelected}
-              onAutofillFromAddress={handleAutofillFromAddress}
-              isAutofilling={isAutofilling}
-              showAutofill={isAuthenticated && !autofillUnavailable}
+            {/* Guided step rail (AN-1) — sticky orientation + jump navigation
+                over the existing form. Additive: reads values + scrolls only;
+                never gates input or changes the manual run flow. */}
+            <AnalyzerStepRail
+              steps={analyzerSteps}
+              activeStepId={activeStep}
+              onNavigate={handleStepNavigate}
+              className="sticky top-2 z-20"
             />
+
+            <div id="step-property" className="space-y-5 scroll-mt-24">
+              <PropertyTypeSection form={form} savedTemplateFallback={savedTemplateFallback} />
+              <PropertyDetailsSection
+                form={form}
+                onAddressSelected={handleAddressSelected}
+                onAutofillFromAddress={handleAutofillFromAddress}
+                isAutofilling={isAutofilling}
+                showAutofill={isAuthenticated && !autofillUnavailable}
+              />
+            </div>
 
             {/* Single-family: only the two fields a cash-flow run needs
                 (bedrooms → HUD rent auto-fill, rent → the math) on the
                 first screen. Bathrooms + square feet are optional and live
                 in the "Improve accuracy" block below. */}
-            {propertyType === "single-family" && (
-              <SingleFamilyUnitSection form={form} fields="primary" />
-            )}
-            {(propertyType === "multi-family" || propertyType === "owner-occupant") && (
-              <MultiFamilyUnitsSection
-                form={form}
-                isHouseHack={propertyType === "owner-occupant"}
-              />
-            )}
+            <div id="step-income" className="scroll-mt-24">
+              {propertyType === "single-family" && (
+                <SingleFamilyUnitSection form={form} fields="primary" />
+              )}
+              {(propertyType === "multi-family" || propertyType === "owner-occupant") && (
+                <MultiFamilyUnitsSection
+                  form={form}
+                  isHouseHack={propertyType === "owner-occupant"}
+                />
+              )}
+            </div>
 
             {/* Progressive disclosure — financing + operating expenses
                 start collapsed behind smart defaults so the first run
@@ -2617,8 +2715,12 @@ export function InvestCalcPage({
               {propertyType === "single-family" && (
                 <SingleFamilyUnitSection form={form} fields="secondary" />
               )}
-              <FinancingSection form={form} />
-              <OperatingExpensesSection form={form} purchasePrice={purchasePrice} />
+              <div id="step-financing" className="scroll-mt-24">
+                <FinancingSection form={form} />
+              </div>
+              <div id="step-expenses" className="scroll-mt-24">
+                <OperatingExpensesSection form={form} purchasePrice={purchasePrice} />
+              </div>
             </div>
 
             {/* Calculate button — solid brand color (gradient was too
