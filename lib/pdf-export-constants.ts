@@ -18,11 +18,15 @@ export const ANALYSIS_PDF_BUCKET = "analysis-pdfs";
  *               Drops personal tax strategy + speculative exit scenarios.
  *   - partner:  returns focus — performance, projection, exit scenarios.
  *               Drops personal tax strategy.
+ *   - agent:    client-facing returns summary — same sections as partner,
+ *               meant to be sent branded (your logo/color/contact) to a buyer
+ *               client. Drops personal tax.
  */
-export type ReportMode = "personal" | "lender" | "partner";
+export type ReportMode = "personal" | "lender" | "partner" | "agent";
 
 export const REPORT_MODES: ReadonlyArray<{ id: ReportMode; label: string; description: string }> = [
   { id: "personal", label: "Personal", description: "Full report — cash flow, projection, tax strategy, and exit scenarios." },
   { id: "lender", label: "Lender", description: "Debt-service focus — performance, property, and the 10-year projection. No personal tax or exit speculation." },
   { id: "partner", label: "Partner", description: "Returns focus — performance, projection, and exit scenarios. No personal tax." },
+  { id: "agent", label: "Agent / client", description: "Client-facing returns summary to send branded to a buyer — performance, projection, and exit scenarios. No personal tax." },
 ];

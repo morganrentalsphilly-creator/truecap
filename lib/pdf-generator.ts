@@ -1352,7 +1352,7 @@ async function buildInvestmentPDFDocument(
     doc.addPage();
     await pageTax(doc, d, branding ?? null);
   }
-  // Exit Scenarios (returns/IRR) go to personal + partner, not lender.
+  // Exit Scenarios (returns/IRR) go to personal, partner + agent, not lender.
   if (mode !== "lender") {
     doc.addPage();
     await pageExit(doc, d, branding ?? null);
@@ -1398,7 +1398,7 @@ export async function generateInvestmentPDF(
   const prefix =
     branding?.companyName?.trim().replace(/[^A-Za-z0-9_-]+/g, "-") ||
     "TrueCap";
-  const modeLabel = mode === "lender" ? "Lender" : mode === "partner" ? "Partner" : "Investment";
+  const modeLabel = mode === "lender" ? "Lender" : mode === "partner" ? "Partner" : mode === "agent" ? "Agent" : "Investment";
   doc.save(`${prefix}-${modeLabel}-Report-${Date.now()}.pdf`);
   return doc.output("blob");
 }
