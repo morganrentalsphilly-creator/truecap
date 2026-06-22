@@ -18,6 +18,8 @@ import { Topbar } from "@/components/dashboard/Topbar";
 import { DueDiligenceCard } from "@/components/investcalc/due-diligence-card";
 import { DealDocumentsCard } from "@/components/investcalc/deal-documents-card";
 import { ScenariosCard } from "@/components/investcalc/scenarios-card";
+import { NextActionBanner } from "@/components/investcalc/next-action-banner";
+import { nextActionForDeal } from "@/lib/next-action";
 import {
   getDashboardNavAccess,
   hasDashboardAccess,
@@ -80,7 +82,7 @@ export default async function DealWorkspacePage({
     hasPaidPlanSubscription(supabase, user.id),
     supabase
       .from("saved_analyses")
-      .select("id, address, title")
+      .select("id, address, title, result_snapshot, net_cash_flow_monthly")
       .eq("id", id)
       .eq("user_id", user.id)
       .is("deleted_at", null)
@@ -93,8 +95,26 @@ export default async function DealWorkspacePage({
     redirect("/dashboard/saved-analyses");
   }
 
-  const dealRow = deal as { id: string; address: string | null; title: string | null };
+  const dealRow = deal as {
+    id: string;
+    address: string | null;
+    title: string | null;
+    result_snapshot: Record<string, unknown> | null;
+    net_cash_flow_monthly: number | null;
+  };
   const heading = dealRow.address?.trim() || dealRow.title?.trim() || "Untitled property";
+
+  // Recommended next step from the saved underwrite (cash flow + DSCR).
+  const snap = dealRow.result_snapshot ?? {};
+  const num = (v: unknown): number => {
+    const n = typeof v === "number" ? v : Number(v);
+    return Number.isFinite(n) ? n : 0;
+  };
+  const nextAction = nextActionForDeal({
+    netCashFlow: num(snap["netCashFlow"] ?? dealRow.net_cash_flow_monthly),
+    dscr: snap["dscr"] != null ? num(snap["dscr"]) : null,
+    monthlyPayment: num(snap["monthlyPayment"]),
+  });
 
   const displayName = getDisplayName((profile as ProfileRow | null) ?? null, user.email);
   const initials = getInitials(displayName, user.email ?? "");
@@ -127,6 +147,7 @@ export default async function DealWorkspacePage({
             </p>
           </div>
 
+          <NextActionBanner action={nextAction} />
           <ScenariosCard savedDealId={dealRow.id} />
           <DueDiligenceCard savedDealId={dealRow.id} />
           <DealDocumentsCard savedDealId={dealRow.id} />
