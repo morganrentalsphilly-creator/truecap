@@ -9,6 +9,7 @@
  */
 
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 
 const MAX_BODY = 2_000;
 
@@ -67,7 +68,11 @@ export async function listDealCommentsAction(id: string): Promise<DealCommentsRe
     return { ok: false, code: "NOT_FOUND", message: "Deal was not found." };
   }
 
-  const { data, error } = await supabase
+  // Admin client: ownership is enforced in-action (ownsDeal above + the
+  // user_id/analysis_id filters), so we don't depend on the deal_comments RLS
+  // policy, which didn't take during the migration apply.
+  const admin = createAdminSupabaseClient();
+  const { data, error } = await admin
     .from("deal_comments")
     .select("id, body, author_name, created_at")
     .eq("analysis_id", dealId)
@@ -109,7 +114,8 @@ export async function addDealCommentAction(id: string, body: string): Promise<De
     user.email?.split("@")[0] ||
     null;
 
-  const { error } = await supabase.from("deal_comments").insert({
+  const admin = createAdminSupabaseClient();
+  const { error } = await admin.from("deal_comments").insert({
     analysis_id: dealId,
     user_id: user.id,
     body: trimmed,
@@ -134,8 +140,10 @@ export async function deleteDealCommentAction(id: string, commentId: string): Pr
   const cId = commentId.trim();
   if (!dealId || !cId) return { ok: false, code: "VALIDATION_ERROR", message: "Invalid id." };
 
-  // RLS (user_id = auth.uid()) already scopes the delete to the owner.
-  const { error } = await supabase
+  // Admin client (RLS not relied on); the user_id + analysis_id filters scope
+  // the delete to the owner's own comment on their own deal.
+  const admin = createAdminSupabaseClient();
+  const { error } = await admin
     .from("deal_comments")
     .delete()
     .eq("id", cId)

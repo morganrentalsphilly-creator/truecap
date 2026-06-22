@@ -40,10 +40,12 @@ export function DealDetailsCard({ savedDealId }: { savedDealId: string }) {
     };
   }, [savedDealId]);
 
-  const save = (next: DealLabels) => {
+  // Save only the changed field (partial patch) so editing one field on blur
+  // never clobbers another whose latest value isn't in this render's state.
+  const save = (patch: Partial<DealLabels>) => {
     const dealAtSubmit = savedDealId;
     startSaving(async () => {
-      const r = await updateDealLabelsAction(dealAtSubmit, next);
+      const r = await updateDealLabelsAction(dealAtSubmit, patch);
       if (dealAtSubmit !== savedDealId) return;
       if (!r.ok) {
         if (r.code === "MIGRATION_PENDING") setMigrationPending(true);
@@ -102,7 +104,7 @@ export function DealDetailsCard({ savedDealId }: { savedDealId: string }) {
               onBlur={(e) => {
                 const value = e.target.value.trim();
                 if ((labels[f.key] ?? "") === value) return; // unchanged
-                save({ ...labels, [f.key]: value || null });
+                save({ [f.key]: value || null });
               }}
               className="h-9 rounded-md border border-border bg-transparent px-2.5 text-sm text-foreground"
             />

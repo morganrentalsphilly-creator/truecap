@@ -84,11 +84,15 @@ export async function updateDealLabelsAction(
   const dealId = id.trim();
   if (!dealId) return { ok: false, code: "VALIDATION_ERROR", message: "Invalid deal id." };
 
-  const patch = {
-    nickname: clean(input.nickname),
-    market: clean(input.market),
-    neighborhood: clean(input.neighborhood),
-  };
+  // PARTIAL update — only touch the keys actually provided, so editing one
+  // field on blur never clobbers another field the caller didn't send.
+  const patch: Record<string, string | null> = {};
+  if ("nickname" in input) patch.nickname = clean(input.nickname);
+  if ("market" in input) patch.market = clean(input.market);
+  if ("neighborhood" in input) patch.neighborhood = clean(input.neighborhood);
+  if (Object.keys(patch).length === 0) {
+    return getDealLabelsAction(dealId);
+  }
   const { data, error } = await supabase
     .from("saved_analyses")
     .update(patch)
