@@ -13,6 +13,7 @@ import { ArrowUpRight, Sparkles } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { buildAnalyzerHandoffUrl } from "@/lib/analyzer-handoff";
 
 const num = (s: string) => {
   const n = Number(s);
@@ -69,6 +70,12 @@ export function CocCalculatorWidget() {
 
   const c = classify(result.coc);
 
+  // Carry the user's price + rent into the full analyzer (P2-2 handoff).
+  const handoffHref = buildAnalyzerHandoffUrl(
+    { purchasePrice: num(price), monthlyRent: num(rent) },
+    { utmSource: "cash-on-cash-calculator" }
+  );
+
   return (
     <div className="bg-card rounded-2xl border border-border shadow-sm p-5 sm:p-7">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
@@ -115,11 +122,11 @@ export function CocCalculatorWidget() {
       </div>
 
       <Link
-        href="/"
+        href={handoffHref}
         className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline"
       >
         <Sparkles className="w-4 h-4" />
-        Run the full analysis (cap rate, DSCR, 10-year projections, tax, exit) free in TrueCap
+        Run the full analysis with these numbers — cap rate, DSCR, projections, tax, exit — free
         <ArrowUpRight className="w-4 h-4" />
       </Link>
     </div>

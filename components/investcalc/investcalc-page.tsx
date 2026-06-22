@@ -39,6 +39,7 @@ import {
   isAnalyzerStepId,
   type AnalyzerStepId,
 } from "@/lib/analyzer-steps";
+import { readAnalyzerHandoff } from "@/lib/analyzer-handoff";
 import { StickyCalculateBar } from "./sticky-calculate-bar";
 import { AutosaveIndicator } from "./autosave-indicator";
 import { AnalysisDashboard, type AnalysisDashboardTab } from "./analysis-dashboard";
@@ -1436,6 +1437,23 @@ export function InvestCalcPage({
         window.localStorage.removeItem(SAVED_ANALYSIS_EDIT_DRAFT_KEY);
         // Fall through to a clean reset when the handoff payload is invalid.
       }
+    }
+
+    // Calculator → analyzer handoff (P2-2): /?price=&rent=&beds=&address=
+    // carries the numbers from a /tools calculator (or an embed of one).
+    // Higher priority than a stale anon draft; prefills ONLY the provided
+    // fields on top of defaults (partial handoffs like price+rent are
+    // expected) and returns so the draft restore doesn't clobber them.
+    const handoff = readAnalyzerHandoff(window.location.search);
+    if (handoff) {
+      if (handoff.address !== undefined) form.setValue("address", handoff.address);
+      if (handoff.purchasePrice !== undefined) form.setValue("purchasePrice", handoff.purchasePrice);
+      if (handoff.bedrooms !== undefined) form.setValue("bedrooms", handoff.bedrooms);
+      if (handoff.monthlyRent !== undefined) form.setValue("monthlyRent", handoff.monthlyRent);
+      queueMicrotask(() => {
+        isProgrammaticResetRef.current = false;
+      });
+      return;
     }
 
     // No edit-handoff payload. Before falling back to a clean reset,

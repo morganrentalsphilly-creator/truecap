@@ -12,6 +12,7 @@ import { ArrowUpRight, Sparkles } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { buildAnalyzerHandoffUrl } from "@/lib/analyzer-handoff";
 
 const numberOrZero = (s: string): number => {
   const n = Number(s);
@@ -46,6 +47,12 @@ export function CapRateCalculatorWidget() {
   }, [priceInput, rentInput, opexPctInput]);
 
   const classification = classifyCapRate(capRate);
+
+  // Carry the user's price + rent into the full analyzer (P2-2 handoff).
+  const handoffHref = buildAnalyzerHandoffUrl(
+    { purchasePrice: numberOrZero(priceInput), monthlyRent: numberOrZero(rentInput) },
+    { utmSource: "cap-rate-calculator" }
+  );
 
   return (
     <div className="bg-card rounded-2xl border border-border shadow-sm p-5 sm:p-7">
@@ -138,11 +145,11 @@ export function CapRateCalculatorWidget() {
       </div>
 
       <Link
-        href="/"
+        href={handoffHref}
         className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline"
       >
         <Sparkles className="w-4 h-4" />
-        Run the full analysis (cash flow, projections, tax, exit) free in TrueCap
+        Run the full analysis with these numbers — cash flow, projections, tax, exit — free
         <ArrowUpRight className="w-4 h-4" />
       </Link>
     </div>
