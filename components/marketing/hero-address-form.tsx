@@ -130,9 +130,11 @@ export function HeroAddressForm() {
         </button>
       </form>
 
-      {/* Secondary actions — sample demo (no typing) + a low-friction
-          peek at Pro. Pricing is deliberately the quietest link here so
-          the primary action stays "analyze a deal," not "evaluate cost." */}
+      {/* Secondary actions — the single secondary CTA is the sample
+          report (loads a real, finished analysis so visitors see the
+          OUTCOME, not just "a demo"), plus a low-friction peek at Pro.
+          Pricing is deliberately the quietest link here so the primary
+          action stays "analyze a deal," not "evaluate cost." */}
       <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm">
         <button
           type="button"
@@ -140,7 +142,7 @@ export function HeroAddressForm() {
           className="inline-flex items-center gap-1.5 font-semibold text-primary underline-offset-4 hover:underline"
         >
           <Sparkles className="size-4" />
-          Try a sample rental
+          View a sample report
         </button>
         <span aria-hidden className="text-muted-foreground/40">·</span>
         <Link

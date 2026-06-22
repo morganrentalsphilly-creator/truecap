@@ -33,6 +33,7 @@ import {
   PdfProUpsell,
   Personas,
   SocialProof,
+  WhyNotSpreadsheet,
 } from "@/components/marketing/landing-sections";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { TrackLandingView } from "@/components/analytics/track-landing-view";
@@ -172,17 +173,21 @@ export default function Home() {
           static page (e.g. the proxy cookie check missed). */}
       <Header initialUser={null} initialEntitlements={null} />
       {/* Landing flow — this page only serves cold visitors (signed-in
-          users are rewritten to /home-authed). Order follows the buying
-          journey, with the core action lifted into the hero:
-            hero (address input) → how it works → data sources/accuracy →
-            social proof → the calculator → PDF/Pro upsell → personas → FAQ.
-          The full DealCheck/BiggerPockets comparison table stays on the
-          dedicated /why-truecap page (linked in the footer) so it keeps its
-          SEO + persuasion value without crowding this page. */}
+          users are rewritten to /home-authed). TOOL-FIRST order (CRO,
+          Jun 2026): the product promise is speed, so the working
+          calculator sits directly under the hero — a visitor can run a
+          real deal without scrolling past marketing first. The persuasion
+          + objection content then catches everyone who scrolled instead of
+          converting:
+            hero (address input) → the calculator → spreadsheet-pain →
+            how it works → data sources/accuracy → social proof →
+            value-ladder/PDF/Pro → personas → FAQ.
+          Keep this order in lockstep with the anon branch of
+          app/home-authed/page.tsx. The full DealCheck/BiggerPockets
+          comparison table stays on the dedicated /why-truecap page
+          (linked in the footer) so it keeps its SEO + persuasion value
+          without crowding this page. */}
       <MarketingHero />
-      <HowItWorks />
-      <DataSourcesSection />
-      <SocialProof />
       {/* Anonymous-visitor entitlement props — keep in lockstep with
           the user == null branch in app/home-authed/page.tsx.
           NOTE: canUseDealScore is intentionally TRUE for everyone — the
@@ -211,10 +216,15 @@ export default function Home() {
         // build; the key VALUE never reaches the client).
         dealQaEnabled={Boolean(process.env.ANTHROPIC_API_KEY)}
       />
-      {/* Post-value monetization + persuasion — surfaced AFTER the
-          calculator so the upsell lands once the visitor has felt the
-          value: low-friction $5 lender PDF / Pro, then persona self-ID,
-          then the objection-handling FAQ. */}
+      {/* Persuasion + objection-handling — surfaced AFTER the calculator
+          (the visitor has now felt the value): name the spreadsheet pain,
+          show how it works, then prove the data sources and social proof. */}
+      <WhyNotSpreadsheet />
+      <HowItWorks />
+      <DataSourcesSection />
+      <SocialProof />
+      {/* Post-value monetization — the $5 lender PDF / Pro value ladder,
+          then persona self-ID, then the objection-handling FAQ. */}
       <PdfProUpsell />
       <Personas />
       <HomepageFaq />

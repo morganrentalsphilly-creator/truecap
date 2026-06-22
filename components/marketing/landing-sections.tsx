@@ -122,15 +122,101 @@ const COMPARISON_ROWS: { label: string; spreadsheet: string | false; truecap: st
 void COMPARISON_ROWS;
 
 /**
- * Consolidated into VsCompetitors (single "Why TrueCap" matrix below).
- * Previously this rendered a standalone spreadsheet-vs-TrueCap table
- * directly above VsCompetitors. Two comparison tables back-to-back
- * fought for the same attention and read as overkill. Kept exported
- * as a no-op so app/page.tsx imports don't have to change; remove the
- * <WhyNotSpreadsheet /> render call from page.tsx in a follow-up.
+ * Spreadsheet-pain section (CRO, Jun 2026). Re-activated from the old
+ * no-op: a cold visitor comparing alternatives doesn't feel the pain of
+ * the status quo unless we name it. This is a tight before/after that
+ * leads with the cost of NOT changing — loss aversion ("one bad rental
+ * can cost tens of thousands") and opportunity cost ("analyze 20 deals
+ * in the time it took to underwrite one") — then hands straight to the
+ * one dominant action. Deliberately NOT a second comparison matrix (the
+ * full DealCheck/BiggerPockets table still lives on /why-truecap); two
+ * tables back-to-back was the reason this was retired the first time.
+ *
+ * Rendered on the homepage right before <HowItWorks /> (see app/page.tsx
+ * and the anon branch of app/home-authed/page.tsx — keep them in lockstep).
  */
+const SPREADSHEET_PAINS = [
+  "Two-plus hours building a model for every property",
+  "Good deals gone while you're still wiring up formulas",
+  "Rent and rate guesses that are already out of date",
+  "Re-keying the same math, deal after deal",
+];
+const TRUECAP_WINS = [
+  "A defensible answer in about 60 seconds",
+  "HUD rent, FRED rate & property tax auto-filled",
+  "Cap rate, CoC, DSCR & cash flow, computed live",
+  "A plain-English verdict you can hand a lender",
+];
+
 export function WhyNotSpreadsheet() {
-  return null;
+  return (
+    <section className="border-t border-border bg-background">
+      <div className="mx-auto max-w-5xl px-4 py-14 sm:px-6 sm:py-20">
+        <div className="mb-10 text-center sm:mb-12">
+          <p className="text-[11px] font-bold uppercase tracking-widest text-primary">The old way</p>
+          <h2 className="mt-2 text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">
+            Still underwriting deals in a <span className="text-primary">spreadsheet?</span>
+          </h2>
+          <p className="mx-auto mt-3 max-w-2xl text-balance text-sm leading-relaxed text-muted-foreground sm:text-base">
+            One bad rental can cost you tens of thousands. The math is the part that
+            should slow you down the least — not the most.
+          </p>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2 sm:gap-5">
+          {/* Pain column — the status-quo cost. */}
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-7">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-muted px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+              <Clock className="size-3.5" />
+              The spreadsheet grind
+            </div>
+            <ul className="space-y-3">
+              {SPREADSHEET_PAINS.map((p) => (
+                <li
+                  key={p}
+                  className="flex items-start gap-2.5 text-sm leading-relaxed text-muted-foreground"
+                >
+                  <X aria-hidden className="mt-0.5 size-4 shrink-0 text-muted-foreground/50" />
+                  <span>{p}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Win column — the same jobs, done for you. */}
+          <div className="rounded-2xl border-2 border-primary/30 bg-card p-6 shadow-[0_16px_40px_rgba(82,72,212,0.10)] sm:p-7">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-primary">
+              <Zap className="size-3.5" />
+              With TrueCap
+            </div>
+            <ul className="space-y-3">
+              {TRUECAP_WINS.map((w) => (
+                <li
+                  key={w}
+                  className="flex items-start gap-2.5 text-sm leading-relaxed text-foreground"
+                >
+                  <Check aria-hidden className="mt-0.5 size-4 shrink-0 text-[var(--metric-positive)]" />
+                  <span>{w}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        {/* Opportunity-cost payoff line + the one dominant action. */}
+        <div className="mt-8 flex flex-col items-center gap-4 text-center">
+          <p className="max-w-2xl text-balance text-sm font-medium text-foreground sm:text-base">
+            Analyze 20 deals in the time it used to take to underwrite one — and stop
+            losing the good ones while a spreadsheet catches up.
+          </p>
+          <ScrollToFormButton className="group inline-flex h-11 items-center gap-1.5 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-[0_10px_24px_rgba(82,72,212,0.28)] hover:-translate-y-0.5 transition-transform">
+            Analyze a deal free
+            <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+          </ScrollToFormButton>
+        </div>
+      </div>
+    </section>
+  );
 }
 
 // ───────────────────────────────────────── Social proof
@@ -582,21 +668,113 @@ export function DataSourcesSection() {
  * we deliberately do NOT hardcode the Pro monthly price here — it's loaded
  * live from Stripe on /pricing, and duplicating it risks drift.
  */
+// Honest value ladder — what each path actually unlocks. Mirrors the
+// entitlements bag (lib/entitlements.ts) + the $5 one-time PDF product.
+// Pro's monthly price is deliberately NOT printed here (it's loaded live
+// from Stripe on /pricing); the Pro card below links out so the two can
+// never drift. "true" → included, "false" → not, string → a qualifier.
+const LADDER_HEADERS = ["Free", "$5 PDF", "Pro"] as const;
+const LADDER_SUBHEADERS = ["Free forever", "One-time", "Subscription"] as const;
+const LADDER_ROWS: { label: string; cells: (boolean | string)[] }[] = [
+  { label: "Analyze unlimited deals", cells: [true, true, true] },
+  { label: "Cap rate · CoC · DSCR · cash flow", cells: [true, true, true] },
+  { label: "0–100 Deal Score + plain-English verdict", cells: [true, true, true] },
+  { label: "Lender-ready PDF export", cells: [false, "One deal", "Unlimited"] },
+  { label: "Save & revisit deals", cells: [false, false, true] },
+  { label: "Compare deals side-by-side", cells: [false, false, true] },
+  { label: "10-year projections · tax · exit", cells: [false, false, true] },
+  { label: "BRRRR · fix & flip · sensitivity", cells: [false, false, true] },
+];
+
 export function PdfProUpsell() {
   return (
     <section className="border-t border-border bg-card/40">
       <div className="mx-auto max-w-4xl px-4 py-14 sm:px-6 sm:py-20">
         <div className="mb-8 text-center sm:mb-10">
-          <p className="text-[11px] font-bold uppercase tracking-widest text-primary">Send it onward</p>
+          <p className="text-[11px] font-bold uppercase tracking-widest text-primary">What you get</p>
           <h2 className="mt-2 text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-            Need to send this to a lender or client?
+            Free to analyze. <span className="text-primary">$5</span> to send one.{" "}
+            <span className="text-primary">Pro</span> to do it all.
           </h2>
-          <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-            Run your analysis free. Need to send one deal? Export a lender-ready
-            PDF for $5. Doing this every week? Pro saves, compares, and exports
-            every deal.
+          <p className="mx-auto mt-3 max-w-2xl text-balance text-sm leading-relaxed text-muted-foreground sm:text-base">
+            The cash-flow analyzer is free and unlimited. Pay $5 once to send a single
+            lender-ready PDF, or go Pro to save, compare, and export every deal.
           </p>
         </div>
+
+        {/* Value ladder — answers "what exactly do I get free?" at a glance,
+            so the visitor isn't guessing where the line is. */}
+        <p className="mb-2 text-center text-xs font-medium text-muted-foreground sm:hidden">
+          Swipe to compare all three →
+        </p>
+        <div className="mb-8 overflow-x-auto rounded-2xl border border-border bg-card shadow-sm sm:mb-10">
+          <table className="w-full min-w-[560px] text-sm">
+            <thead>
+              <tr className="border-b border-border bg-muted/30">
+                <th className="px-4 py-3 text-left font-bold text-muted-foreground sm:px-6">
+                  <span className="sr-only">Feature</span>
+                </th>
+                {LADDER_HEADERS.map((h, i) => (
+                  <th
+                    key={h}
+                    className={
+                      i === 2
+                        ? "px-4 py-3 text-center font-extrabold text-primary sm:px-6"
+                        : "px-4 py-3 text-center font-bold text-foreground sm:px-6"
+                    }
+                  >
+                    {h}
+                    <span className="mt-0.5 block text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+                      {LADDER_SUBHEADERS[i]}
+                    </span>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {LADDER_ROWS.map((row, ri) => (
+                <tr key={row.label} className={ri % 2 === 0 ? "bg-card" : "bg-muted/20"}>
+                  <td className="px-4 py-3 font-medium text-foreground sm:px-6">{row.label}</td>
+                  {row.cells.map((cell, ci) => (
+                    <td key={`${row.label}-${ci}`} className="px-4 py-3 text-center sm:px-6">
+                      {/* sr-only labels so the matrix is legible to screen
+                          readers / crawlers, not a wall of blank cells. */}
+                      {cell === true ? (
+                        <>
+                          <Check
+                            aria-hidden
+                            className={
+                              ci === 2
+                                ? "mx-auto size-4 text-[var(--metric-positive)]"
+                                : "mx-auto size-4 text-[var(--metric-positive)]/80"
+                            }
+                          />
+                          <span className="sr-only">Included</span>
+                        </>
+                      ) : cell === false ? (
+                        <>
+                          <X aria-hidden className="mx-auto size-4 text-muted-foreground/40" />
+                          <span className="sr-only">Not included</span>
+                        </>
+                      ) : (
+                        <span
+                          className={
+                            ci === 2
+                              ? "text-xs font-semibold text-primary"
+                              : "text-xs font-medium text-foreground"
+                          }
+                        >
+                          {cell}
+                        </span>
+                      )}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
         <div className="grid gap-4 sm:grid-cols-2 sm:gap-5">
           {/* One-time $5 PDF */}
           <div className="flex flex-col rounded-2xl border border-border bg-card p-6 shadow-sm">

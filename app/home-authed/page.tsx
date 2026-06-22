@@ -27,6 +27,7 @@ import {
   PdfProUpsell,
   Personas,
   SocialProof,
+  WhyNotSpreadsheet,
 } from "@/components/marketing/landing-sections";
 import { OnboardingTour } from "@/components/marketing/onboarding-tour";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
@@ -120,17 +121,11 @@ export default async function AuthedHome() {
       <Header initialUser={user} initialEntitlements={entitlements} />
       {/* Full landing experience ONLY for cold visitors (anon fallback —
           the canonical anon homepage is the static app/page.tsx, and this
-          mirrors its flow). Authenticated users skip ALL of it — the
-          calculator is their workspace. Pre-calculator order: hero (address
-          input) → how it works → data sources → social proof. */}
-      {!user && (
-        <>
-          <MarketingHero />
-          <HowItWorks />
-          <DataSourcesSection />
-          <SocialProof />
-        </>
-      )}
+          mirrors its TOOL-FIRST flow). Authenticated users skip ALL of it
+          — the calculator is their workspace. For anon, only the hero
+          renders above the calculator; the persuasion content follows it
+          (block below) so a cold visitor reaches the working tool first. */}
+      {!user && <MarketingHero />}
       <InvestCalcPage
         canSaveDeals={canSaveDeals}
         canCompareDeals={canCompareDeals}
@@ -151,10 +146,16 @@ export default async function AuthedHome() {
         userAnalysisDefaults={userAnalysisDefaults}
         dealQaEnabled={Boolean(process.env.ANTHROPIC_API_KEY)}
       />
-      {/* Post-value monetization + persuasion — anon fallback only,
-          mirrors app/page.tsx (surfaced after the calculator). */}
+      {/* Persuasion + monetization — anon fallback only, mirrors the
+          tool-first order in app/page.tsx (all surfaced after the
+          calculator): spreadsheet-pain → how it works → data sources →
+          social proof → $5/Pro value ladder → personas → FAQ. */}
       {!user && (
         <>
+          <WhyNotSpreadsheet />
+          <HowItWorks />
+          <DataSourcesSection />
+          <SocialProof />
           <PdfProUpsell />
           <Personas />
           <HomepageFaq />
