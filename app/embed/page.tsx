@@ -19,7 +19,7 @@ import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { EmbedCodeBlock } from "@/components/embed/embed-code-block";
 import { EMBED_LIST } from "@/lib/embed-registry";
-import { EMBEDDABLE_COUNT } from "@/lib/calculator-registry";
+import { EMBEDDABLE_COUNT, CALCULATOR_COUNT } from "@/lib/calculator-registry";
 import { getSiteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
@@ -56,8 +56,10 @@ export default function EmbedHubPage() {
           </h1>
           <p className="text-base text-muted-foreground mt-3 leading-relaxed max-w-2xl">
             Real estate bloggers, agents, course creators, and finance writers:
-            grab the iframe code below and drop any of our {EMBEDDABLE_COUNT} free
-            calculators on your site. Free to use forever. No signup, no
+            grab the iframe code below and drop any of our {EMBEDDABLE_COUNT} embeddable
+            calculators on your site — {EMBEDDABLE_COUNT} of our {CALCULATOR_COUNT} free
+            tools (the Rehab Cost Estimator runs on TrueCap only). Free to use
+            forever. No signup, no
             attribution required beyond the small &quot;Powered by TrueCap&quot;
             footer (which links back to us — so you get a free calculator,
             we get a backlink).
@@ -65,9 +67,9 @@ export default function EmbedHubPage() {
 
           <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
             <div className="rounded-xl border border-border bg-card p-3">
-              <p className="font-bold text-foreground">{EMBEDDABLE_COUNT} calculators</p>
+              <p className="font-bold text-foreground">{EMBEDDABLE_COUNT} embeddable</p>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Cap rate, CoC, DSCR, BRRRR, more
+                Of {CALCULATOR_COUNT} TrueCap calculators
               </p>
             </div>
             <div className="rounded-xl border border-border bg-card p-3">

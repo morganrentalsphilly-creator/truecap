@@ -34,6 +34,8 @@ const FREE_FEATURES: { label: string; included: boolean }[] = [
   { label: "Plain-English deal verdict", included: true },
   { label: "Deal Score (0-100) with breakdown", included: true },
   { label: "1 free sale + rent comps lookup", included: true },
+  { label: "Save up to 5 deals", included: true },
+  { label: "Lender-ready PDF export — $5 one-time per deal", included: true },
   { label: "MAO solver", included: false },
   { label: "Sensitivity grid", included: false },
   { label: "Strategies (BRRRR + flip + rehab)", included: false },
@@ -41,10 +43,8 @@ const FREE_FEATURES: { label: string; included: boolean }[] = [
   { label: "10-year projections", included: false },
   { label: "Tax strategy", included: false },
   { label: "Exit scenarios", included: false },
-  { label: "Lender-ready PDF export", included: false },
-  { label: "Custom PDF branding (logo, color, contact)", included: false },
-  { label: "Save up to 5 deals", included: true },
   { label: "Compare deals", included: false },
+  { label: "Custom PDF branding (logo, color, contact)", included: false },
 ];
 
 const PRO_FEATURES = [
@@ -274,6 +274,10 @@ export function PricingTogglePlans({
               isPaid={isPaid}
             />
           </div>
+          <p className="mt-2.5 text-center text-xs text-muted-foreground">
+            Cancel anytime — month-to-month, no contract. Downgrade and your
+            saved deals + reports stay in your account.
+          </p>
           <ul className="mt-6 space-y-2.5">
             {PRO_FEATURES.map((f) => (
               <li key={f} className="flex items-start gap-2 text-sm">

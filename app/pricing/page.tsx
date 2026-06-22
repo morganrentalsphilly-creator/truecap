@@ -220,7 +220,7 @@ export default async function PricingPage() {
                   ["Saved analysis templates", false, true],
                   ["Due-diligence checklist + document vault", false, true],
                   ["Rate-drop alerts on saved deals", false, true],
-                  ["Lender · partner · personal PDF reports", false, true],
+                  ["Lender · partner · personal PDF reports", "$5 one-time", true],
                   ["Save deals", "Up to 5", "Unlimited"],
                   ["Compare deals side-by-side", false, "Up to 4"],
                   ["Priority support", false, true],
