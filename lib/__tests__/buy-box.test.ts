@@ -4,8 +4,11 @@ import {
   buyBoxHasCriteria,
   deriveStateFromAddress,
   evaluateBuyBox,
+  evaluateBuyBoxes,
+  summarizeBuyBoxFit,
   type BuyBoxCriteria,
   type BuyBoxDealMetrics,
+  type NamedBuyBox,
 } from "@/lib/buy-box";
 
 const baseMetrics: BuyBoxDealMetrics = {
@@ -134,5 +137,56 @@ describe("deriveStateFromAddress", () => {
     expect(deriveStateFromAddress("123 Main Street")).toBeNull();
     expect(deriveStateFromAddress("")).toBeNull();
     expect(deriveStateFromAddress(null)).toBeNull();
+  });
+});
+
+function namedBox(
+  id: string,
+  criteria: Partial<BuyBoxCriteria>,
+  meta?: Partial<Pick<NamedBuyBox, "name" | "strategyKind" | "isDefault" | "sortOrder">>
+): NamedBuyBox {
+  return {
+    ...EMPTY_BUY_BOX,
+    ...criteria,
+    id,
+    name: meta?.name ?? id,
+    strategyKind: meta?.strategyKind ?? null,
+    isDefault: meta?.isDefault ?? false,
+    sortOrder: meta?.sortOrder ?? 0,
+  };
+}
+
+describe("evaluateBuyBoxes (multiple boxes)", () => {
+  it("evaluates every box, ordered default-first then by sort order", () => {
+    const a = namedBox("a", { minCapRatePct: 6 }, { sortOrder: 2 });
+    const def = namedBox("def", { minCapRatePct: 6 }, { isDefault: true, sortOrder: 5 });
+    const results = evaluateBuyBoxes([a, def], baseMetrics);
+    expect(results.map((r) => r.box.id)).toEqual(["def", "a"]);
+    expect(results.every((r) => r.result.passes)).toBe(true);
+  });
+
+  it("summarizes pass count + best fit across active boxes", () => {
+    const pass = namedBox("pa", { minCapRatePct: 6, targetStates: ["PA"] });
+    const failTx = namedBox("tx", { targetStates: ["TX"] });
+    const sum = summarizeBuyBoxFit(evaluateBuyBoxes([pass, failTx], baseMetrics));
+    expect(sum.activeCount).toBe(2);
+    expect(sum.passingCount).toBe(1);
+    expect(sum.anyPass).toBe(true);
+    expect(sum.bestFit?.id).toBe("pa");
+  });
+
+  it("ignores inactive boxes in the summary", () => {
+    const inactive = namedBox("off", { minCapRatePct: 6, isActive: false });
+    const sum = summarizeBuyBoxFit(evaluateBuyBoxes([inactive], baseMetrics));
+    expect(sum.activeCount).toBe(0);
+    expect(sum.anyPass).toBe(false);
+    expect(sum.bestFit).toBeNull();
+  });
+
+  it("bestFit prefers the default box when several pass", () => {
+    const def = namedBox("def", { minCapRatePct: 6, targetStates: ["PA"] }, { isDefault: true });
+    const other = namedBox("other", { minCocPct: 8 }, { sortOrder: 1 });
+    const sum = summarizeBuyBoxFit(evaluateBuyBoxes([other, def], baseMetrics));
+    expect(sum.bestFit?.id).toBe("def");
   });
 });

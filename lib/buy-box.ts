@@ -302,3 +302,67 @@ export function deriveStateFromAddress(address: string | null | undefined): stri
   }
   return null;
 }
+
+// ─────────────────────────────────────────────────────────────────────────
+// Multiple Buy Boxes (DM-2) — thin, pure layer over evaluateBuyBox so a deal
+// can be screened against every box the user keeps (e.g. a Memphis-BRRRR box
+// and a Philly-house-hack box). Backed by the user_buy_boxes table; ships
+// dormant until that migration is applied.
+// ─────────────────────────────────────────────────────────────────────────
+
+/** A saved Buy Box with identity + ordering. */
+export type NamedBuyBox = BuyBoxCriteria & {
+  id: string;
+  name: string;
+  /** Strategy this box screens for (e.g. 'brrrr','house_hack'); null = any. */
+  strategyKind: string | null;
+  isDefault: boolean;
+  sortOrder: number;
+};
+
+export type NamedBuyBoxResult = {
+  box: NamedBuyBox;
+  result: BuyBoxResult;
+};
+
+/**
+ * Evaluate a deal against every box, returned default-first then by sort
+ * order so the highest-priority box leads. Pure — reuses evaluateBuyBox.
+ */
+export function evaluateBuyBoxes(
+  boxes: NamedBuyBox[],
+  metrics: BuyBoxDealMetrics
+): NamedBuyBoxResult[] {
+  return [...boxes]
+    .sort((a, b) =>
+      a.isDefault === b.isDefault ? a.sortOrder - b.sortOrder : a.isDefault ? -1 : 1
+    )
+    .map((box) => ({ box, result: evaluateBuyBox(box, metrics) }));
+}
+
+export type BuyBoxFitSummary = {
+  /** Boxes that are active (have criteria AND isActive). */
+  activeCount: number;
+  /** Active boxes the deal passes. */
+  passingCount: number;
+  /** True when the deal passes at least one active box. */
+  anyPass: boolean;
+  /** Highest-priority passing box (default first), or null. */
+  bestFit: NamedBuyBox | null;
+};
+
+/**
+ * Roll up per-box results into a one-glance "passes N of M boxes" summary.
+ * Expects the output of evaluateBuyBoxes (already priority-ordered), so
+ * bestFit is simply the first passing box.
+ */
+export function summarizeBuyBoxFit(results: NamedBuyBoxResult[]): BuyBoxFitSummary {
+  const active = results.filter((r) => r.result.active);
+  const passing = active.filter((r) => r.result.passes);
+  return {
+    activeCount: active.length,
+    passingCount: passing.length,
+    anyPass: passing.length > 0,
+    bestFit: passing[0]?.box ?? null,
+  };
+}
