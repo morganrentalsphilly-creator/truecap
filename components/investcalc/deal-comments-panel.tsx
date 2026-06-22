@@ -120,7 +120,7 @@ export function DealCommentsPanel({ savedDealId }: { savedDealId: string }) {
           rows={2}
           maxLength={2000}
           placeholder="Log an update — seller motivation, agent call, a decision… (⌘/Ctrl+Enter)"
-          className="min-h-[2.5rem] flex-1 resize-y rounded-md border border-border bg-transparent px-2.5 py-2 text-sm text-foreground"
+          className="min-h-[2.5rem] flex-1 resize-y rounded-md border border-input bg-transparent px-2.5 py-2 text-sm text-foreground outline-none transition-[color,box-shadow] placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
         />
         <Button type="button" size="sm" variant="outline" className="h-9 self-end" onClick={add} disabled={!draft.trim() || isBusy}>
           <Send className="size-4" />
@@ -140,7 +140,7 @@ export function DealCommentsPanel({ savedDealId }: { savedDealId: string }) {
                   type="button"
                   aria-label="Delete comment"
                   onClick={() => remove(c.id)}
-                  className="text-muted-foreground/40 opacity-0 transition-opacity hover:text-destructive group-hover:opacity-100"
+                  className="shrink-0 text-muted-foreground/40 transition-colors hover:text-destructive focus-visible:text-destructive focus-visible:outline-none"
                 >
                   <X className="size-3.5" />
                 </button>

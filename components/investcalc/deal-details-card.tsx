@@ -11,6 +11,7 @@ import { useEffect, useState, useTransition } from "react";
 import { Loader2, MapPin } from "lucide-react";
 import { getDealLabelsAction, updateDealLabelsAction, type DealLabels } from "@/app/actions/deal-labels";
 import { useToast } from "@/hooks/use-toast";
+import { Input } from "@/components/ui/input";
 
 const EMPTY: DealLabels = { nickname: null, market: null, neighborhood: null };
 
@@ -96,7 +97,7 @@ export function DealDetailsCard({ savedDealId }: { savedDealId: string }) {
         {fields.map((f) => (
           <label key={f.key} className="flex flex-col gap-1">
             <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{f.label}</span>
-            <input
+            <Input
               type="text"
               defaultValue={labels[f.key] ?? ""}
               placeholder={f.placeholder}
@@ -106,7 +107,6 @@ export function DealDetailsCard({ savedDealId }: { savedDealId: string }) {
                 if ((labels[f.key] ?? "") === value) return; // unchanged
                 save({ [f.key]: value || null });
               }}
-              className="h-9 rounded-md border border-border bg-transparent px-2.5 text-sm text-foreground"
             />
           </label>
         ))}

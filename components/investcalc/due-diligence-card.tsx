@@ -197,7 +197,7 @@ export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
                 onChange={(e) => setDueDate(item.id, e.target.value)}
                 aria-label={`Due date for ${item.label}`}
                 className={cn(
-                  "h-7 shrink-0 rounded-md border border-border bg-transparent px-1.5 text-[11px]",
+                  "h-7 shrink-0 rounded-md border border-input bg-transparent px-1.5 text-[11px] outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
                   status === "overdue"
                     ? "text-[var(--metric-negative)]"
                     : item.dueDate
