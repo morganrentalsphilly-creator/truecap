@@ -5,7 +5,7 @@ import { Header } from "@/components/investcalc/header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { UserDefaultsCard } from "@/components/settings/user-defaults-card";
-import { BuyBoxCard } from "@/components/settings/buy-box-card";
+import { BuyBoxesCard } from "@/components/settings/buy-boxes-card";
 import { RateAlertsToggle } from "@/components/settings/rate-alerts-toggle";
 import { getEntitlementsForUser, hasPlanFeature } from "@/lib/entitlements";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
@@ -36,9 +36,10 @@ export default async function SettingsPage() {
       <main id="main" className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-5 space-y-6">
         <UserDefaultsCard />
 
-        {/* Buy Box — self-gates: shows a Pro upsell to free users, the
-            editor to Pro. Drives the inline buy-box verdict on analyses. */}
-        <BuyBoxCard />
+        {/* Buy Boxes — self-gates: shows a Pro upsell to free users, the
+            multi-box manager to Pro. Drives the inline buy-box verdict on
+            analyses (each deal is screened against every active box). */}
+        <BuyBoxesCard />
 
         {/* Deal rate alerts — opt-in for the weekly rate-alert email.
             Self-hides until the schema migration is applied. */}

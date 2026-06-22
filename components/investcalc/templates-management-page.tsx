@@ -30,7 +30,7 @@ import {
   type TemplateVersionSummary,
 } from "@/app/actions/analysis-templates";
 import { listSavedDealsBriefAction, type SavedDealBrief } from "@/app/actions/saved-analyses";
-import { saveBuyBoxAction } from "@/app/actions/user-buy-box";
+import { upsertBuyBoxAction } from "@/app/actions/user-buy-boxes";
 import type { AnalysisTemplateInput } from "@/lib/analysis-template-schema";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -303,7 +303,9 @@ export function TemplatesManagementPage({
     if (!template.buyBox) return;
     setBusyTemplateId(template.id);
     try {
-      const result = await saveBuyBoxAction({
+      const result = await upsertBuyBoxAction({
+        name: template.templateName,
+        strategyKind: null,
         minCapRatePct: template.buyBox.minCapRatePct ?? null,
         minCocPct: template.buyBox.minCocPct ?? null,
         minDscr: template.buyBox.minDscr ?? null,
@@ -312,6 +314,7 @@ export function TemplatesManagementPage({
         propertyTypes: [],
         targetStates: [],
         isActive: true,
+        isDefault: true,
       });
       if (!result.ok) {
         toast({ title: "Couldn't set Buy Box", description: result.message, variant: "destructive" });
