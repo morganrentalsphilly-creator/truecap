@@ -27,6 +27,7 @@ import {
   type NamedBuyBox,
 } from "@/lib/buy-box";
 import { STRATEGY_KINDS, strategyLabel } from "@/lib/strategy-kinds";
+import { trackEvent } from "@/lib/analytics";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -193,6 +194,12 @@ export function BuyBoxesCard() {
         isDefault: editor.isDefault,
       });
       if (applyResult(result)) {
+        trackEvent("buy_box_saved", {
+          source: "settings",
+          is_new: !editor.id,
+          is_default: editor.isDefault,
+          has_strategy: Boolean(editor.strategyKind),
+        });
         setEditor(null);
         toast({ title: editor.id ? "Buy box updated" : "Buy box added" });
       }

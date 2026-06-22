@@ -31,6 +31,7 @@ import {
 } from "@/app/actions/analysis-templates";
 import { listSavedDealsBriefAction, type SavedDealBrief } from "@/app/actions/saved-analyses";
 import { upsertBuyBoxAction } from "@/app/actions/user-buy-boxes";
+import { trackEvent } from "@/lib/analytics";
 import type { AnalysisTemplateInput } from "@/lib/analysis-template-schema";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -320,6 +321,7 @@ export function TemplatesManagementPage({
         toast({ title: "Couldn't set Buy Box", description: result.message, variant: "destructive" });
         return;
       }
+      trackEvent("buy_box_saved", { source: "template", is_default: true, has_strategy: false });
       toast({
         title: "Buy Box updated",
         description: `Now using "${template.templateName}" targets as your Buy Box.`,

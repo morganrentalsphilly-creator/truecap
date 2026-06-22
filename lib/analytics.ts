@@ -70,6 +70,15 @@ export type FunnelEvent =
   | "address_selected"         // properties: state (coarse; never the full address)
   | "optional_section_opened"  // properties: source ("toggle" | "edit_link")
   | "result_assumptions_edited"
+  // ── Investor-OS saved-deal workflow (P1-12) ────────────────────
+  // The Pro buy-box and scenario flows write to the DB but fired no
+  // events, leaving that whole workflow invisible in the funnel. These
+  // close the attribution gap so we can see buy-box adoption and which
+  // strategies investors model as scenarios. No PII — only coarse
+  // signals (source, default flag, strategy kind, counts).
+  | "buy_box_saved"      // properties: source ("settings" | "template"), is_new?, is_default, has_strategy
+  | "scenario_added"     // properties: has_strategy, strategy_kind (kind | null)
+  | "scenarios_compared" // properties: count
 
 /**
  * Safe capture. Use this everywhere instead of `posthog.capture(...)`

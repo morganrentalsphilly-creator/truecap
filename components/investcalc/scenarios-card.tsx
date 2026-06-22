@@ -22,6 +22,7 @@ import {
 import { compareScenariosAction } from "@/app/actions/compare";
 import { STRATEGY_KINDS, strategyLabel } from "@/lib/strategy-kinds";
 import { describeStrategyPreset } from "@/lib/scenario-presets";
+import { trackEvent } from "@/lib/analytics";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -73,6 +74,10 @@ export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
         toast({ title: "Couldn't add scenario", description: result.message, variant: "destructive" });
         return;
       }
+      trackEvent("scenario_added", {
+        has_strategy: Boolean(strategy),
+        strategy_kind: strategy || null,
+      });
       setName("");
       setStrategy("");
       setAdding(false);
@@ -82,6 +87,7 @@ export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
   }
 
   function handleCompare() {
+    trackEvent("scenarios_compared", { count: scenarios.length });
     startSaving(async () => {
       const result = await compareScenariosAction(savedDealId);
       // Success redirects to /dashboard/compare; only an error returns here.
