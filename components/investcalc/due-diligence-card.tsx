@@ -11,13 +11,15 @@
  *
  * Free per-deal annotation (no entitlement), like Deal Notes.
  */
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { ClipboardCheck, Loader2, Plus, X } from "lucide-react";
 import {
   getDealDueDiligenceAction,
   updateDealDueDiligenceAction,
 } from "@/app/actions/saved-analyses";
 import {
+  dueDiligenceDueSummary,
+  dueDiligenceItemStatus,
   dueDiligenceProgress,
   makeDueDiligenceItemId,
   type DueDiligenceItem,
@@ -90,6 +92,22 @@ export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
     setNewLabel("");
     persist(next);
   };
+  const setDueDate = (id: string, value: string) => {
+    // Empty string clears the deadline; otherwise store the YYYY-MM-DD the
+    // native date input gives us (the lib re-validates on save).
+    const next = items.map((i) =>
+      i.id === id ? { ...i, ...(value ? { dueDate: value } : { dueDate: undefined }) } : i
+    );
+    setItems(next);
+    persist(next);
+  };
+
+  // Viewer-local "today" so overdue/due-soon match the date input's local
+  // semantics. Recomputed per render — cheap, and keeps the day fresh.
+  const todayISO = useMemo(() => {
+    const n = new Date();
+    return `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, "0")}-${String(n.getDate()).padStart(2, "0")}`;
+  }, []);
 
   if (!loaded) return null;
 
@@ -106,6 +124,7 @@ export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
   }
 
   const { done, total, pct } = dueDiligenceProgress(items);
+  const dueSummary = dueDiligenceDueSummary(items, todayISO);
 
   return (
     <section aria-label="Due diligence" className="rounded-2xl border border-border bg-card p-4 sm:p-5">
@@ -115,6 +134,15 @@ export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
           <h3 className="text-xs font-bold uppercase tracking-widest text-foreground">Due diligence</h3>
         </div>
         <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+          {dueSummary.overdue > 0 ? (
+            <span className="rounded-full bg-[var(--metric-negative)]/10 px-2 py-0.5 font-semibold text-[var(--metric-negative)]">
+              {dueSummary.overdue} overdue
+            </span>
+          ) : dueSummary.dueSoon > 0 ? (
+            <span className="rounded-full bg-amber-500/10 px-2 py-0.5 font-semibold text-amber-600">
+              {dueSummary.dueSoon} due soon
+            </span>
+          ) : null}
           {isSaving ? (
             <span className="inline-flex items-center gap-1">
               <Loader2 className="size-3 animate-spin" /> Saving…
@@ -135,33 +163,59 @@ export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
       </div>
 
       <ul className="space-y-1.5">
-        {items.map((item) => (
-          <li key={item.id} className="group flex items-center gap-2.5">
-            <input
-              type="checkbox"
-              checked={item.done}
-              onChange={() => toggle(item.id)}
-              className="size-4 shrink-0 rounded border-border accent-[var(--brand-green)]"
-              aria-label={item.label}
-            />
-            <span
-              className={cn(
-                "flex-1 text-sm",
-                item.done ? "text-muted-foreground line-through" : "text-foreground"
-              )}
-            >
-              {item.label}
-            </span>
-            <button
-              type="button"
-              aria-label={`Remove ${item.label}`}
-              onClick={() => remove(item.id)}
-              className="text-muted-foreground/50 hover:text-destructive"
-            >
-              <X className="size-3.5" />
-            </button>
-          </li>
-        ))}
+        {items.map((item) => {
+          const status = dueDiligenceItemStatus(item, todayISO);
+          return (
+            <li key={item.id} className="group flex items-center gap-2.5">
+              <input
+                type="checkbox"
+                checked={item.done}
+                onChange={() => toggle(item.id)}
+                className="size-4 shrink-0 rounded border-border accent-[var(--brand-green)]"
+                aria-label={item.label}
+              />
+              <span
+                className={cn(
+                  "flex-1 text-sm",
+                  item.done ? "text-muted-foreground line-through" : "text-foreground"
+                )}
+              >
+                {item.label}
+              </span>
+              {status === "overdue" ? (
+                <span className="shrink-0 rounded-full bg-[var(--metric-negative)]/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[var(--metric-negative)]">
+                  Overdue
+                </span>
+              ) : status === "due-soon" ? (
+                <span className="shrink-0 rounded-full bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-600">
+                  Due soon
+                </span>
+              ) : null}
+              <input
+                type="date"
+                value={item.dueDate ?? ""}
+                onChange={(e) => setDueDate(item.id, e.target.value)}
+                aria-label={`Due date for ${item.label}`}
+                className={cn(
+                  "h-7 shrink-0 rounded-md border border-border bg-transparent px-1.5 text-[11px]",
+                  status === "overdue"
+                    ? "text-[var(--metric-negative)]"
+                    : item.dueDate
+                      ? "text-foreground"
+                      : "text-muted-foreground/60"
+                )}
+              />
+              <button
+                type="button"
+                aria-label={`Remove ${item.label}`}
+                onClick={() => remove(item.id)}
+                className="text-muted-foreground/50 hover:text-destructive"
+              >
+                <X className="size-3.5" />
+              </button>
+            </li>
+          );
+        })}
       </ul>
 
       <div className="mt-3 flex gap-2">
