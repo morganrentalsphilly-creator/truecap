@@ -62,10 +62,6 @@ import {
 } from "@/lib/investcalc-schema";
 import { calculateAnalysis, type AnalysisResult } from "@/lib/calc-analysis";
 import {
-  buildDealScoreInputFromAnalysis,
-  computeDealScore,
-  DEAL_STRATEGY_STORAGE_KEY,
-  type DealStrategy,
   type DealScoreBreakdown,
 } from "@/lib/deal-score";
 import type { ReportData } from "@/lib/pdf-generator";
@@ -233,9 +229,8 @@ function buildReportDataFromSavedSnapshot(args: {
   result: AnalysisResult & Record<string, unknown>;
   templateFallback: { templateName: string } | null;
   exitYears: ExitScenarioYear[];
-  strategy: DealStrategy;
 }): ReportData {
-  const { values, result, templateFallback, exitYears, strategy } = args;
+  const { values, result, templateFallback, exitYears } = args;
   const projectionYears = Array.isArray(result.tenYearProjection) ? result.tenYearProjection : [];
   const taxYears = Array.isArray(result.taxStrategyYears) ? result.taxStrategyYears : [];
 
@@ -289,30 +284,22 @@ function buildReportDataFromSavedSnapshot(args: {
   );
   const year5Exit = exitYears.find((row) => row.year === 5);
   const year10Exit = exitYears.find((row) => row.year === 10) ?? exitYears[exitYears.length - 1];
-  // Investor lens: a non-default lens recomputes the score from the (freshly
-  // recomputed) result so the exported saved-deal report matches the on-screen
-  // view. Balanced keeps the score exactly as it was saved.
-  const lensedScore =
-    strategy === "balanced"
-      ? null
-      : computeDealScore(buildDealScoreInputFromAnalysis(values, result), strategy);
-  const score = lensedScore?.score ?? numberFromSnapshot(result.score) ?? 0;
-  const recommendation =
-    lensedScore?.recommendation ?? stringFromSnapshot(result.recommendation) ?? "Neutral";
-  const risk = lensedScore?.riskLevel ?? stringFromSnapshot(result.riskLevel) ?? "Medium Risk";
-  // Lensed: prefix with the strategy so a non-default report is self-explanatory.
-  // Balanced: prefer the stored Pro explanation, else the shared auto-verdict
-  // so cash purchases and other edge cases read consistently with the app.
-  const rationale = lensedScore
-    ? `Scored for ${
-        strategy === "cash-flow" ? "a cash-flow" : "an appreciation"
-      } strategy. ${lensedScore.explanation}`
-    : stringFromSnapshot(result.explanation) ??
-      buildAutoVerdict({
-        result,
-        address: values.address,
-        purchasePrice: values.purchasePrice,
-      });
+  // The exported saved-deal report uses the deal's canonical Balanced score —
+  // the same number stored at save time and shown on every surface (My Deals,
+  // dashboard, compare, share). The investor lens only reorders metrics on the
+  // analyzer; it never rescores an exported report.
+  const score = numberFromSnapshot(result.score) ?? 0;
+  const recommendation = stringFromSnapshot(result.recommendation) ?? "Neutral";
+  const risk = stringFromSnapshot(result.riskLevel) ?? "Medium Risk";
+  // Prefer the stored explanation, else the shared auto-verdict so cash
+  // purchases and other edge cases read consistently with the app.
+  const rationale =
+    stringFromSnapshot(result.explanation) ??
+    buildAutoVerdict({
+      result,
+      address: values.address,
+      purchasePrice: values.purchasePrice,
+    });
 
   return {
     generatedAt: new Date(),
@@ -1070,28 +1057,11 @@ export function SavedAnalysesPage({
           cumulativeCashFlowByYear: projectionYears.map((row) => row.cumulativeCashFlowAnnual),
           cumulativeTaxBenefitByYear: taxYears.map((row) => row.cumulativeTaxBenefitAnnual),
         });
-        // Investor lens (persisted by the Deal Score card toggle) — score the
-        // exported saved-deal report through the same lens as the screen.
-        let strategy: DealStrategy = "balanced";
-        try {
-          const savedStrategy = window.localStorage.getItem(DEAL_STRATEGY_STORAGE_KEY);
-          if (
-            savedStrategy === "cash-flow" ||
-            savedStrategy === "balanced" ||
-            savedStrategy === "appreciation"
-          ) {
-            strategy = savedStrategy;
-          }
-        } catch {
-          // localStorage unavailable (private mode) — default to balanced.
-        }
-
         const reportData = buildReportDataFromSavedSnapshot({
           values: parsed.data,
           result: resultSnapshot,
           templateFallback: exportResult.templateFallback,
           exitYears,
-          strategy,
         });
         // Pull Pro-tier branding (logo, color, contact info) so the
         // exported PDF reflects the user's brand. Falls back to TrueCap
