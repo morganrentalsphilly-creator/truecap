@@ -11,6 +11,7 @@ import { ArrowUpRight, Sparkles, Check, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { buildAnalyzerHandoffUrl } from "@/lib/analyzer-handoff";
 
 const num = (s: string) => {
   const n = Number(s);
@@ -27,6 +28,12 @@ export function OnePercentRuleWidget() {
     const ratio = p > 0 ? (r / p) * 100 : 0;
     return { ratio, passes: ratio >= 1 };
   }, [price, rent]);
+
+  // Carry the user's price + rent into the full analyzer (P2-2 handoff).
+  const handoffHref = buildAnalyzerHandoffUrl(
+    { purchasePrice: num(price), monthlyRent: num(rent) },
+    { utmSource: "1-percent-rule-calculator" }
+  );
 
   return (
     <div className="bg-card rounded-2xl border border-border shadow-sm p-5 sm:p-7">
@@ -105,11 +112,11 @@ export function OnePercentRuleWidget() {
       </div>
 
       <Link
-        href="/"
+        href={handoffHref}
         className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline"
       >
         <Sparkles className="w-4 h-4" />
-        Run the full underwrite (cap rate, CoC, DSCR, cash flow, exits) free in TrueCap
+        Run the full analysis with these numbers — cap rate, CoC, DSCR, cash flow, exits — free in TrueCap
         <ArrowUpRight className="w-4 h-4" />
       </Link>
     </div>

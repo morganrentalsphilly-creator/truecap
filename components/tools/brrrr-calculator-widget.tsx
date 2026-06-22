@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { analyzeBrrrr } from "@/lib/brrrr-analysis";
+import { buildAnalyzerHandoffUrl } from "@/lib/analyzer-handoff";
 
 const num = (s: string) => {
   const n = Number(s);
@@ -55,6 +56,12 @@ export function BrrrrCalculatorWidget() {
       postRefiMonthlyRent: num(rent),
     });
   }, [price, rehab, arv, refiLtv, refiRate, refiTerm, closeAcq, closeRefi, downPct, hold, carry, rent, opex]);
+
+  // Carry the user's purchase price + post-refi rent into the full analyzer (P2-2 handoff).
+  const handoffHref = buildAnalyzerHandoffUrl(
+    { purchasePrice: num(price), monthlyRent: num(rent) },
+    { utmSource: "brrrr-calculator" }
+  );
 
   return (
     <div className="bg-card rounded-2xl border border-border shadow-sm p-5 sm:p-7">
@@ -116,9 +123,9 @@ export function BrrrrCalculatorWidget() {
         </div>
       </div>
 
-      <Link href="/" className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline">
+      <Link href={handoffHref} className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline">
         <Sparkles className="w-4 h-4" />
-        Save BRRRRs, compare them, export PDFs — free in TrueCap
+        Run the full analysis with these numbers — save BRRRRs, compare them, export PDFs — free in TrueCap
         <ArrowUpRight className="w-4 h-4" />
       </Link>
     </div>
