@@ -645,10 +645,10 @@ export function AnalysisDashboard({
                 You&apos;re seeing the full Pro report on this sample deal.
               </p>
               <p className="text-xs leading-relaxed text-muted-foreground">
-                10-year projections, tax strategy, exit scenarios, Deal Score, and
-                stress-testing — every tab is unlocked for the demo. Run your own
-                deal to see the free analysis, or go Pro to get all of this on
-                every deal.
+                10-year projections, tax strategy, exit scenarios, and
+                stress-testing — every tab is unlocked for the demo. Deal Score
+                is always free. Run your own deal to see the free analysis, or go
+                Pro to get all of this on every deal.
               </p>
             </div>
           </div>

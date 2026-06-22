@@ -12,6 +12,7 @@ import Link from "next/link";
 import { ArrowUpRight, Calculator, MapPin } from "lucide-react";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { SourceMethodologyBox } from "@/components/marketing/source-methodology-box";
 import { getSiteUrl } from "@/lib/site-url";
 
 const CITY = "Tampa";
@@ -239,6 +240,12 @@ export default function TampaMarketPage() {
             <ArrowUpRight className="w-4 h-4" />
           </Link>
         </section>
+
+        <SourceMethodologyBox
+          className="mt-10"
+          sources={["HUD Fair Market Rent", "FRED 30-yr mortgage rate", "Tax Foundation (property tax)"]}
+          updated="June 2026"
+        />
 
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
           Other US markets covered:{" "}

@@ -301,7 +301,7 @@ export default function VsRentRediPage() {
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly
             cash flow — enough to underwrite. Pro unlocks share links,
             PDF exports, 10-year projections, tax strategy, sensitivity,
-            deal score, MAO, and strategy analyzers. No card to start.
+            MAO, and strategy analyzers. No card to start.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link

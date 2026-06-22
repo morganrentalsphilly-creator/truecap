@@ -281,7 +281,7 @@ export default function VsBrickedPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, and monthly cash flow with no
             account and no analysis cap. Pro adds projections, tax strategy, exit
-            scenarios, BRRRR + flip analyzers, deal score, and lender-ready PDFs —
+            scenarios, BRRRR + flip analyzers, and lender-ready PDFs —
             $20/mo flat, never metered.
           </p>
           <div className="flex flex-wrap gap-3">

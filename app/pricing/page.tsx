@@ -23,7 +23,7 @@ import { ExitIntentOffer } from "@/components/marketing/exit-intent-offer";
 export const metadata: Metadata = {
   title: "Pricing — Free + Pro plans for rental analysis",
   description:
-    "TrueCap is free to start — no card required. Pro adds 10-year projections, tax strategy, exit scenarios, Deal Score, PDF export, and unlimited saved deals.",
+    "TrueCap is free to start — no card required, and the 0–100 Deal Score is free for everyone. Pro adds 10-year projections, tax strategy, exit scenarios, PDF export, and unlimited saved deals.",
   alternates: { canonical: "/pricing" },
   openGraph: {
     title: "TrueCap pricing — free + Pro",

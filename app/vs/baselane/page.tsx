@@ -269,7 +269,7 @@ export default function VsBaselanePage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
             Pro unlocks projections, sensitivity, tax strategy, exit scenarios,
-            deal score, MAO, PDF exports, and shareable read-only deal links.
+            MAO, PDF exports, and shareable read-only deal links.
             No card to start.
           </p>
           <div className="flex flex-wrap gap-3">

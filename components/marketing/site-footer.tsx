@@ -17,6 +17,7 @@
 import Link from "next/link";
 import { Lock, ShieldCheck, CreditCard } from "lucide-react";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
+import { FOOTER_CALCULATORS } from "@/lib/calculator-registry";
 
 const FOOTER_COLS: Array<{
   title: string;
@@ -55,13 +56,12 @@ const FOOTER_COLS: Array<{
   },
   {
     title: "Free calculators",
-    links: [
-      { label: "Cap rate", href: "/tools/cap-rate-calculator" },
-      { label: "Cash-on-cash", href: "/tools/cash-on-cash-calculator" },
-      { label: "BRRRR", href: "/tools/brrrr-calculator" },
-      { label: "1% rule", href: "/tools/1-percent-rule-calculator" },
-      { label: "Rehab cost", href: "/tools/rehab-cost-estimator" },
-    ],
+    // Driven by the calculator registry's footerFeatured flags so this
+    // shortlist can never drift from /tools (see lib/calculator-registry.ts).
+    links: FOOTER_CALCULATORS.map((c) => ({
+      label: c.shortTitle,
+      href: `/tools/${c.slug}`,
+    })),
   },
   {
     title: "Account",

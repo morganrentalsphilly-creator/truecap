@@ -219,7 +219,7 @@ export default function ForAgentsPage() {
             Free to start. Pro pays for itself on the first deal you don&apos;t lose.
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
-            Free covers cash-flow analysis (cap rate, CoC, DSCR, monthly cash flow) — enough to underwrite at the showing. Pro unlocks share links, PDF export, 10-year projections, tax strategy, deal score, and the strategy analyzers. Cancel anytime.
+            Free covers cash-flow analysis (cap rate, CoC, DSCR, monthly cash flow) — enough to underwrite at the showing. Pro unlocks share links, PDF export, 10-year projections, tax strategy, and the strategy analyzers. Cancel anytime.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link

@@ -269,7 +269,7 @@ export default function VsPropstreamPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
             Pro unlocks projections, sensitivity, tax strategy, exit scenarios,
-            deal score, MAO, PDF exports, and shareable read-only deal links.
+            MAO, PDF exports, and shareable read-only deal links.
             No card to start.
           </p>
           <div className="flex flex-wrap gap-3">
@@ -340,7 +340,7 @@ const PROPSTREAM_FAQ: FaqItem[] = [
     question: "Does TrueCap have a free tier? PropStream doesn&apos;t.",
     answer: (
       <>
-        Yes — TrueCap&apos;s free tier covers cap rate, cash-on-cash, DSCR, cash flow, and address auto-fill on unlimited deals. No card required. Pro ($20/mo) adds projections, tax strategy, sensitivity, deal score, and PDF export. PropStream is paid-only — no real free tier beyond a trial.
+        Yes — TrueCap&apos;s free tier covers cap rate, cash-on-cash, DSCR, cash flow, and address auto-fill on unlimited deals. No card required. Pro ($20/mo) adds projections, tax strategy, sensitivity, and PDF export. PropStream is paid-only — no real free tier beyond a trial.
       </>
     ),
     plainTextAnswer:

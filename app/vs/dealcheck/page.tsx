@@ -271,7 +271,7 @@ export default function VsDealCheckPage() {
             Try TrueCap free — see if it fits your workflow.
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
-            Free covers cash-flow analysis (cap rate, CoC, DSCR, NCF) — enough to underwrite. Pro unlocks share links, PDF exports, 10-year projections, tax strategy, sensitivity, deal score, MAO, and the strategy analyzers. No card to start. Cancel anytime.
+            Free covers cash-flow analysis (cap rate, CoC, DSCR, NCF) — enough to underwrite. Pro unlocks share links, PDF exports, 10-year projections, tax strategy, sensitivity, MAO, and the strategy analyzers. No card to start. Cancel anytime.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link
@@ -334,12 +334,12 @@ const DEALCHECK_FAQ: FaqItem[] = [
         $20/month (as of June 2026) — but those tiers mostly raise
         saved-property caps. TrueCap&apos;s single tier is about analysis
         depth: share links, PDF export, tax strategy, exit scenarios,
-        sensitivity, MAO, and deal score all included — no
+        sensitivity, and MAO all included — no
         &quot;upgrade for X&quot; gating.
       </>
     ),
     plainTextAnswer:
-      "TrueCap Pro is $20/month (or $200/year annual, ~$16.67/mo). DealCheck Plus is $10/month and Pro $20/month (as of June 2026), but those tiers mostly raise saved-property caps. TrueCap's single tier includes share links, PDF export, tax strategy, exit scenarios, sensitivity, MAO, and deal score.",
+      "TrueCap Pro is $20/month (or $200/year annual, ~$16.67/mo). DealCheck Plus is $10/month and Pro $20/month (as of June 2026), but those tiers mostly raise saved-property caps. TrueCap's single tier includes share links, PDF export, tax strategy, exit scenarios, sensitivity, and MAO.",
   },
   {
     question: "Which tool is better for new investors?",
@@ -399,14 +399,14 @@ const DEALCHECK_FAQ: FaqItem[] = [
         many properties a day, you want a native app, and listing-site
         property import is your top workflow. Pick TrueCap if you want
         the deepest free tier on the market, plain-English verdicts,
-        tax-strategy modeling, sensitivity analysis, MAO, deal score,
+        tax-strategy modeling, sensitivity analysis, MAO,
         portfolio rollup across saved deals, and shareable read-only
         deal links — all in a single Pro tier without per-feature
         upcharges.
       </>
     ),
     plainTextAnswer:
-      "Pick DealCheck if you're mobile-first, want a native app, and listing-import is your top workflow. Pick TrueCap if you want the deepest free tier, plain-English verdicts, tax modeling, sensitivity, MAO, deal score, portfolio rollup, and share links — all in one Pro tier.",
+      "Pick DealCheck if you're mobile-first, want a native app, and listing-import is your top workflow. Pick TrueCap if you want the deepest free tier, plain-English verdicts, tax modeling, sensitivity, MAO, portfolio rollup, and share links — all in one Pro tier.",
   },
 ];
 

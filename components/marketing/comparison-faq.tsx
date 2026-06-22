@@ -24,6 +24,14 @@
 
 import type { ReactNode } from "react";
 
+/**
+ * Manual last-reviewed date for the comparison content (feature rows +
+ * pricing) shown on every /vs page. This is intentionally NOT auto-`now()`:
+ * a "last reviewed" date must reflect a real human review, not the render
+ * time. Update this when the comparison tables are actually re-checked.
+ */
+const COMPARISON_REVIEWED = "June 2026";
+
 export type FaqItem = {
   /** Question — phrased exactly as a comparison-shopper would type it. */
   question: string;
@@ -96,6 +104,21 @@ export function ComparisonFaq({
           </details>
         ))}
       </div>
+
+      {/* Sources & methodology — transparency note attached to every
+          /vs comparison. Keeps the matrix defensible: we don't claim a
+          competitor lacks a capability they publicly offer, and we date
+          the review so stale claims are obvious. */}
+      <p className="mt-6 max-w-2xl text-xs leading-relaxed text-muted-foreground">
+        <span className="font-semibold text-foreground/80">Sources &amp; methodology:</span>{" "}
+        Feature and pricing rows reflect {competitorName}&apos;s publicly listed
+        information, last reviewed {COMPARISON_REVIEWED}. Vendors change features
+        and prices often — verify current details on {competitorName}&apos;s own
+        site. Where TrueCap claims &ldquo;sourced defaults,&rdquo; that refers
+        specifically to auto-filled HUD Fair Market Rent, the FRED 30-year
+        mortgage rate, and state average effective property tax — not a general
+        claim about property-data import, which several of these tools also offer.
+      </p>
     </section>
   );
 }

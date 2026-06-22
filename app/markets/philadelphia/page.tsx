@@ -22,6 +22,7 @@ import Link from "next/link";
 import { ArrowUpRight, Calculator, MapPin } from "lucide-react";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { SourceMethodologyBox } from "@/components/marketing/source-methodology-box";
 import { getSiteUrl } from "@/lib/site-url";
 
 const CITY = "Philadelphia";
@@ -319,6 +320,12 @@ export default function PhiladelphiaMarketPage() {
             Open TrueCap
           </Link>
         </section>
+
+        <SourceMethodologyBox
+          className="mt-10"
+          sources={["HUD Fair Market Rent", "FRED 30-yr mortgage rate", "Tax Foundation (property tax)"]}
+          updated="June 2026"
+        />
 
         <footer className="mt-12 pt-8 border-t border-border text-sm text-muted-foreground leading-relaxed">
           More markets coming. Want us to add yours?{" "}

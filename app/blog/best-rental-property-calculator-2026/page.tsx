@@ -66,7 +66,7 @@ const RANKED_CALCULATORS = [
       "Deepest free tier — full cap rate, CoC, DSCR, NCF, monthly cash flow with no signup or analysis cap",
       "Address auto-fill from HUD Fair Market Rent + FRED 30-year rate + state property tax (no other tool does all three)",
       "Plain-English verdict (Strong / Solid / Mixed / Marginal / Negative) on every deal",
-      "Single $20/mo Pro tier bundles 10-year projections, tax strategy, sensitivity, exit scenarios, Deal Score, MAO solver, BRRRR, fix-and-flip — no per-feature upcharges",
+      "Single $20/mo Pro tier bundles 10-year projections, tax strategy, sensitivity, exit scenarios, MAO solver, BRRRR, fix-and-flip — no per-feature upcharges",
       "Lender-ready PDF + shareable read-only deal link with optional custom branding",
     ],
     cons: [
@@ -344,7 +344,7 @@ export default function BestRentalPropertyCalculator2026Post() {
               </li>
               <li>
                 <strong>Pro feature depth</strong> — projections, tax strategy,
-                sensitivity, deal score, share links, PDF export.
+                sensitivity, share links, PDF export.
               </li>
               <li>
                 <strong>Audience fit</strong> — is the tool built for solo

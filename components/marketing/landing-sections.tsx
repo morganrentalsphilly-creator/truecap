@@ -343,8 +343,12 @@ export function VsCompetitors() {
             </tbody>
           </table>
         </div>
-        <p className="mt-4 text-center text-[11px] text-muted-foreground">
-          Competitor pricing verified June 2026; check each vendor&apos;s site for current numbers.
+        <p className="mx-auto mt-4 max-w-2xl text-center text-[11px] leading-relaxed text-muted-foreground">
+          Feature and pricing rows reflect each tool&apos;s publicly listed
+          information, last reviewed June 2026 — verify current details on each
+          vendor&apos;s site. &ldquo;Sourced underwriting defaults&rdquo; means
+          auto-filled HUD rent, the FRED 30-year rate, and state average property
+          tax specifically; some competitors offer other property-data imports.
         </p>
       </div>
     </section>

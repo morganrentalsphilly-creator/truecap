@@ -240,7 +240,7 @@ export default function VsBiggerPocketsCalculatorPage() {
             When BiggerPockets users actually switch
           </h2>
           <ul className="space-y-2 text-sm sm:text-base leading-relaxed text-foreground">
-            <li><strong>&quot;The 5-free-uses-then-paywall thing is annoying.&quot;</strong> TrueCap&apos;s free tier is unlimited. Run as many analyses as you want. Pro unlocks projections, sensitivity, share links, PDFs, deal score — but the core underwriting (cap rate, CoC, DSCR, NCF) is always free.</li>
+            <li><strong>&quot;The 5-free-uses-then-paywall thing is annoying.&quot;</strong> TrueCap&apos;s free tier is unlimited. Run as many analyses as you want. Pro unlocks projections, sensitivity, share links, PDFs — but the core underwriting (cap rate, CoC, DSCR, NCF) is always free.</li>
             <li><strong>&quot;The manual entry is slow.&quot;</strong> Paste an address. TrueCap pulls property tax from the county, rent from HUD, mortgage rate from FRED. You start with 60-70% of the underwrite done. BP has you typing everything.</li>
             <li><strong>&quot;I just want a calculator, not another community to manage.&quot;</strong> BP&apos;s value is the ecosystem (forums + podcast + courses). TrueCap is just the tool. Some investors want the bundle; others want focus.</li>
             <li><strong>&quot;I&apos;m paying $390/yr for the BP membership and use 10% of what comes with it.&quot;</strong> If you&apos;re a BP member primarily for the calculator, TrueCap Pro at $16.67/mo annual ($200/yr) cuts your tool cost in half.</li>
@@ -296,7 +296,7 @@ export default function VsBiggerPocketsCalculatorPage() {
             Free includes full cap rate, CoC, DSCR, and monthly cash flow
             analysis with address auto-fill — enough to underwrite. Pro at
             $16.67/mo annual unlocks share links, PDF exports, 10-year
-            projections, tax strategy, sensitivity, deal score, MAO, and the
+            projections, tax strategy, sensitivity, MAO, and the
             strategy analyzers. No card to start.
           </p>
           <div className="flex flex-wrap gap-3">

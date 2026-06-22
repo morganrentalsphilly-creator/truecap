@@ -132,7 +132,7 @@ export default function EmbedHubPage() {
               Pick a calculator
             </h2>
             <p className="text-xs text-muted-foreground">
-              {EMBED_LIST.length} available
+              {EMBEDDABLE_COUNT} available
             </p>
           </div>
 

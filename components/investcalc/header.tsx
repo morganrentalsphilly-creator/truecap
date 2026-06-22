@@ -267,7 +267,7 @@ export function Header({
         <div className="flex items-center gap-2 text-[12px] sm:text-[13px] font-medium">
           <Zap className="w-3.5 h-3.5 fill-current opacity-90 shrink-0" />
           <span className="hidden sm:inline">
-            Unlock Deal Score, 10-Year Projections and Tax Strategy with
+            Unlock 10-Year Projections, Tax Strategy and Exit Scenarios with
           </span>
           <span className="sm:hidden">Upgrade to</span>
           <Link href="/pricing">

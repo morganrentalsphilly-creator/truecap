@@ -225,7 +225,7 @@ export default function ForHouseHackersPage() {
             Free analyzer is enough to pick the property.
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
-            Free covers monthly out-of-pocket, cap rate, CoC for your live-in year. Pro unlocks the 10-year projection (essential for modeling the year-2 transition), tax strategy, deal score, and the saved-analyses portfolio view.
+            Free covers monthly out-of-pocket, cap rate, CoC for your live-in year. Pro unlocks the 10-year projection (essential for modeling the year-2 transition), tax strategy, and the saved-analyses portfolio view.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link

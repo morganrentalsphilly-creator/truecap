@@ -245,7 +245,7 @@ export default function VsStessaPage() {
             Underwriting the next deal? Start free.
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
-            TrueCap free covers cap rate, CoC, DSCR, NCF, monthly cash flow — enough to underwrite. Pro unlocks share links, PDF exports, 10-year projections, tax strategy, sensitivity grid, deal score, MAO, and the strategy analyzers. No card to start.
+            TrueCap free covers cap rate, CoC, DSCR, NCF, monthly cash flow — enough to underwrite. Pro unlocks share links, PDF exports, 10-year projections, tax strategy, sensitivity grid, MAO, and the strategy analyzers. No card to start.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link href="/pricing" className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity">
@@ -311,12 +311,12 @@ const STESSA_FAQ: FaqItem[] = [
         ~$12/month) adds advanced reporting, document organization,
         and rent collection features. TrueCap free covers the
         underwriting math; TrueCap Pro ($20/month) adds projections,
-        tax strategy, sensitivity, MAO, and deal score. So free Stessa
+        tax strategy, sensitivity, and MAO. So free Stessa
         + free TrueCap covers a lot of the workflow already.
       </>
     ),
     plainTextAnswer:
-      "Stessa's base tier is free for accounting + bank feeds on unlimited properties. Stessa Pro is ~$12/month. TrueCap free covers underwriting math; TrueCap Pro is $20/month for projections, tax, sensitivity, MAO, deal score.",
+      "Stessa's base tier is free for accounting + bank feeds on unlimited properties. Stessa Pro is ~$12/month. TrueCap free covers underwriting math; TrueCap Pro is $20/month for projections, tax, sensitivity, and MAO.",
   },
   {
     question: "Does TrueCap track expenses like Stessa?",
@@ -346,7 +346,7 @@ const STESSA_FAQ: FaqItem[] = [
       </>
     ),
     plainTextAnswer:
-      "Yes — TrueCap Pro exports a multi-page PDF and generates a public read-only share link with optional branding. Both include the projection, tax strategy view, and deal score so your accountant can validate after-tax cash flow assumptions.",
+      "Yes — TrueCap Pro exports a multi-page PDF and generates a public read-only share link with optional branding. Both include the projection and tax strategy view so your accountant can validate after-tax cash flow assumptions.",
   },
 ];
 

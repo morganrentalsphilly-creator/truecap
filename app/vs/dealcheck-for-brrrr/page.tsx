@@ -63,7 +63,7 @@ const MATRIX: Row[] = [
   { feature: "Capital-recovered focus",              truecap: "Yes — UI explicitly shows 'capital recovered' as a headline metric",    dealcheck: "Cap rate + CoC as primary metrics",                   winner: "truecap" },
   { feature: "Sensitivity on ARV (what if ARV is 10% lower?)", truecap: "Pro — sensitivity grid stress-tests ARV + rent + rate",         dealcheck: "Manual re-runs",                                      winner: "truecap" },
   { feature: "Hold-period decision modeling",        truecap: "Pro — exit scenarios with year-by-year sell vs hold",                    dealcheck: "Pro — exit modeling available",                       winner: "tie" },
-  { feature: "BRRRR-specific deal score",            truecap: "Pro — Deal Score considers BRRRR cash-recovered subscore",               dealcheck: "Standard cap rate / CoC scoring",                     winner: "truecap" },
+  { feature: "BRRRR-specific deal score",            truecap: "Free — Deal Score considers BRRRR cash-recovered subscore",               dealcheck: "Standard cap rate / CoC scoring",                     winner: "truecap" },
   { feature: "Refi rate vs purchase rate handling",  "truecap": "Yes — separate refi rate input",                                       dealcheck: "Yes",                                                 winner: "tie" },
   // DealCheck includes its rental/BRRRR calculators on every plan
   // (verified dealcheck.io/pricing June 2026) — its tiers gate saved-

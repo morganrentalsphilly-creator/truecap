@@ -64,6 +64,18 @@ export const CALCULATOR_REGISTRY: CalculatorEntry[] = [
 /** Total calculator PAGES under /tools (currently 14). */
 export const CALCULATOR_COUNT = CALCULATOR_REGISTRY.length;
 
+/** Spelled-out count for marketing/meta prose ("Fourteen…") — drift-proof.
+ *  Falls back to the numeral outside the mapped range. */
+const COUNT_WORDS: Record<number, string> = {
+  10: "Ten", 11: "Eleven", 12: "Twelve", 13: "Thirteen", 14: "Fourteen",
+  15: "Fifteen", 16: "Sixteen", 17: "Seventeen", 18: "Eighteen", 19: "Nineteen", 20: "Twenty",
+};
+export const CALCULATOR_COUNT_WORD = COUNT_WORDS[CALCULATOR_COUNT] ?? String(CALCULATOR_COUNT);
+
+/** Comma-joined short names for marketing/meta copy — generated so the
+ *  list can never disagree with the registry's actual membership. */
+export const CALCULATOR_NAMES_LIST = CALCULATOR_REGISTRY.map((c) => c.shortTitle).join(", ");
+
 /** Calculators with an embeddable iframe widget (currently 13). */
 export const EMBEDDABLE_CALCULATORS = CALCULATOR_REGISTRY.filter((c) => c.embeddable);
 export const EMBEDDABLE_COUNT = EMBEDDABLE_CALCULATORS.length;

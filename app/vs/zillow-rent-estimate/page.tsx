@@ -57,7 +57,7 @@ const MATRIX: Row[] = [
   { feature: "Photo / virtual tour",             truecap: "Not in scope — TrueCap is analysis, not browsing",                              zillow: "Yes — extensive photos + tours",                                         winner: "zillow" },
   { feature: "Save deals + portfolio rollup",    truecap: "Pro — saved deals, portfolio rollup, comparison",                               zillow: "Save listings but no portfolio analysis",                                winner: "truecap" },
   { feature: "Shareable analysis URL",           truecap: "Pro — clean public URL with full underwrite",                                    zillow: "Share listing URL only",                                                 winner: "truecap" },
-  { feature: "Verdict / decision support",       truecap: "Pro — deal score + verdict (Strong / Decent / Marginal / Skip)",                zillow: "No analytical verdict",                                                  winner: "truecap" },
+  { feature: "Verdict / decision support",       truecap: "Free — deal score + verdict (Strong / Decent / Marginal / Skip)",                zillow: "No analytical verdict",                                                  winner: "truecap" },
 ];
 
 export default function VsZillowRentPage() {
@@ -277,7 +277,7 @@ const ZILLOW_FAQ: FaqItem[] = [
       </>
     ),
     plainTextAnswer:
-      "TrueCap takes rent + expenses + financing + tax assumptions and runs cap rate, CoC, DSCR, and monthly cash flow, then classifies the deal Strong/Solid/Mixed/Marginal/Negative. Pro adds a 0–100 Deal Score. Zillow stops at the rent number.",
+      "TrueCap takes rent + expenses + financing + tax assumptions and runs cap rate, CoC, DSCR, and monthly cash flow, then classifies the deal Strong/Solid/Mixed/Marginal/Negative, plus a free 0–100 Deal Score. Zillow stops at the rent number.",
   },
 ];
 

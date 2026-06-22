@@ -277,7 +277,7 @@ export default function VsRoofstockPage() {
               cash-flowing rental, that&apos;s a speculation on rate cuts.
             </li>
             <li>
-              <strong>Check the deal score (Pro).</strong> Below 60 is a
+              <strong>Check the deal score.</strong> Below 60 is a
               decline. 60-75 is &quot;maybe if you love the location.&quot;
               Above 75 is a real deal.
             </li>
@@ -308,7 +308,7 @@ export default function VsRoofstockPage() {
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             Free covers the underwrite. Pro unlocks 10-year projections,
-            sensitivity, tax strategy, exit scenarios, deal score, PDF
+            sensitivity, tax strategy, exit scenarios, PDF
             exports, and shareable read-only deal links. No card to start.
           </p>
           <div className="flex flex-wrap gap-3">

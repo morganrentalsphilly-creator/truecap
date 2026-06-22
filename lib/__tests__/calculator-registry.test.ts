@@ -3,7 +3,10 @@ import {
   CALCULATOR_REGISTRY,
   EMBEDDABLE_CALCULATORS,
   CALCULATOR_COUNT,
+  CALCULATOR_COUNT_WORD,
+  CALCULATOR_NAMES_LIST,
   EMBEDDABLE_COUNT,
+  FOOTER_CALCULATORS,
   getCalculator,
   calculatorsByCategory,
 } from "@/lib/calculator-registry";
@@ -57,5 +60,21 @@ describe("calculator registry", () => {
     expect(getCalculator("nope")).toBeNull();
     const grouped = calculatorsByCategory();
     expect(grouped.reduce((n, g) => n + g.items.length, 0)).toBe(CALCULATOR_COUNT);
+  });
+
+  it("derived marketing copy stays in sync with the registry", () => {
+    // Spelled-out count used in /tools + OG prose.
+    expect(CALCULATOR_COUNT_WORD).toBe("Fourteen");
+    // Names list is generated from the registry, never hand-typed.
+    expect(CALCULATOR_NAMES_LIST.split(", ")).toHaveLength(CALCULATOR_COUNT);
+    expect(CALCULATOR_NAMES_LIST).toContain("Cap Rate");
+  });
+
+  it("footer shortlist is a non-empty subset of the registry", () => {
+    expect(FOOTER_CALCULATORS.length).toBeGreaterThan(0);
+    expect(FOOTER_CALCULATORS.length).toBeLessThan(CALCULATOR_COUNT);
+    for (const c of FOOTER_CALCULATORS) {
+      expect(getCalculator(c.slug)).not.toBeNull();
+    }
   });
 });

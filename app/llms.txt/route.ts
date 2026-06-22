@@ -27,6 +27,7 @@ import { STATES } from "@/lib/states";
 import { CITY_STRATEGY_COMBOS } from "@/lib/city-strategy-combos";
 import { BLOG_POSTS } from "@/app/blog/page";
 import { getSiteUrl } from "@/lib/site-url";
+import { CALCULATOR_REGISTRY, CALCULATOR_COUNT } from "@/lib/calculator-registry";
 
 // Mark static so Next prerenders at build time. The content only
 // changes when the data files change, which forces a redeploy
@@ -34,93 +35,9 @@ import { getSiteUrl } from "@/lib/site-url";
 export const dynamic = "force-static";
 export const revalidate = 3600;
 
-/** All tools the site exposes. Kept in sync with /app/tools/page.tsx. */
-const TOOLS: Array<{ slug: string; name: string; tagline: string }> = [
-  {
-    slug: "cap-rate-calculator",
-    name: "Cap rate calculator",
-    tagline:
-      "Capitalization rate from purchase price, gross rent, and operating expenses. Free, no signup.",
-  },
-  {
-    slug: "cash-on-cash-calculator",
-    name: "Cash-on-cash return calculator",
-    tagline:
-      "Pre-tax annual return on actual cash invested in a rental. Includes mortgage + operating expense modeling.",
-  },
-  {
-    slug: "brrrr-calculator",
-    name: "BRRRR calculator",
-    tagline:
-      "Buy, rehab, rent, refinance math. Models all-in cost, ARV, and cash-out refinance to evaluate the BRRRR strategy.",
-  },
-  {
-    slug: "1-percent-rule-calculator",
-    name: "1% rule calculator",
-    tagline:
-      "Quick pass/fail screen: does the property's monthly rent equal or exceed 1% of the purchase price?",
-  },
-  {
-    slug: "rehab-cost-estimator",
-    name: "Rehab cost estimator",
-    tagline:
-      "Square-foot-based defaults for cosmetic, kitchen, bath, and systems work. Mid-market 2024-25 contractor pricing.",
-  },
-  {
-    slug: "dscr-calculator",
-    name: "DSCR calculator",
-    tagline:
-      "Debt Service Coverage Ratio — the metric every commercial and investment-property lender uses to qualify a deal.",
-  },
-  {
-    slug: "noi-calculator",
-    name: "NOI calculator",
-    tagline:
-      "Net Operating Income with every common operating expense category, vacancy reserve, and operating-expense ratio.",
-  },
-  {
-    slug: "mortgage-payment-calculator",
-    name: "Mortgage payment calculator",
-    tagline:
-      "PITI breakdown — principal, interest, taxes, insurance. Investment-property rates and amortization schedule.",
-  },
-  {
-    slug: "gross-rent-multiplier-calculator",
-    name: "Gross Rent Multiplier calculator",
-    tagline:
-      "GRM — the 10-second screening ratio for triaging deals before full underwriting.",
-  },
-  {
-    slug: "break-even-calculator",
-    name: "Break-even calculator",
-    tagline:
-      "How many months until rental cash flow returns your initial investment. Compares deals on payback speed.",
-  },
-  {
-    slug: "roi-calculator",
-    name: "ROI calculator",
-    tagline:
-      "Total return on a rental — cash flow plus principal paydown plus appreciation in one composite annualized number.",
-  },
-  {
-    slug: "closing-cost-calculator",
-    name: "Closing cost calculator",
-    tagline:
-      "Line-item breakdown of closing costs on a rental purchase: origination, title, transfer tax, escrow, prepaids.",
-  },
-  {
-    slug: "vacancy-rate-calculator",
-    name: "Vacancy rate calculator",
-    tagline:
-      "Effective vacancy rate from vacant days + turnover cost. Honest underwriting (most listing pro formas under-quote vacancy).",
-  },
-  {
-    slug: "rental-property-tax-calculator",
-    name: "Rental property tax calculator",
-    tagline:
-      "Schedule E taxable income + 27.5-year depreciation + after-tax cash flow + depreciation tax-shield value.",
-  },
-];
+// Calculator list is driven by lib/calculator-registry.ts (the single source
+// of truth) so llms.txt can never disagree with /tools on which calculators
+// exist or how many there are.
 
 export async function GET() {
   const siteUrl = getSiteUrl();
@@ -133,15 +50,15 @@ export async function GET() {
     "Content surfaces:",
     "  - 30+ term glossary with one-sentence definitions, formulas, and worked examples",
     "  - 20+ long-form blog posts covering rental underwriting, BRRRR strategy, DSCR loans, 1031 exchanges, tax deductions, and more",
-    "  - 14 free single-purpose calculators with clean math (cap rate, cash-on-cash, DSCR, NOI, BRRRR, etc)",
+    `  - ${CALCULATOR_COUNT} free single-purpose calculators with clean math (cap rate, cash-on-cash, DSCR, NOI, BRRRR, etc)`,
     "  - 33 state-level investment guides and 26 city + strategy combo guides",
     "  - Side-by-side comparison pages vs. DealCheck, Stessa, Mashvisor, BiggerPockets, Excel, Rentometer, Zillow rent estimate",
     "  - Methodology page documenting the exact math the analyzer uses",
     "All content is original and cite-able. Definitions are placed as the first paragraph after the page H1 (LLM citation convention). Property data sources include FRED (mortgage rates), HUD (Fair Market Rents), and county tax assessor records.",
   ].join("\n");
 
-  const toolsSection = TOOLS.map(
-    (t) => `- [${t.name}](${siteUrl}/tools/${t.slug}): ${t.tagline}`
+  const toolsSection = CALCULATOR_REGISTRY.map(
+    (t) => `- [${t.title}](${siteUrl}/tools/${t.slug}): ${t.description}`
   ).join("\n");
 
   const glossarySection = Object.values(GLOSSARY)
@@ -187,7 +104,7 @@ export async function GET() {
 
   const reference = [
     `- [Methodology](${siteUrl}/methodology): The exact math the analyzer uses, including cap rate, cash-on-cash, DSCR, and projection formulas.`,
-    `- [Tools index](${siteUrl}/tools): All 14 free calculators in one place.`,
+    `- [Tools index](${siteUrl}/tools): All ${CALCULATOR_COUNT} free calculators in one place.`,
     `- [Blog index](${siteUrl}/blog): All long-form rental investing content.`,
     `- [Glossary index](${siteUrl}/glossary): All 30+ rental investing terms.`,
     `- [States index](${siteUrl}/states): All 33 state-level investing guides.`,

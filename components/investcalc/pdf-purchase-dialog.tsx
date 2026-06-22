@@ -62,7 +62,7 @@ export function PdfPurchaseDialog({
               </p>
               <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
                 Unlimited PDFs with your own branding, plus saved deals,
-                projections, tax strategy, and Deal Score on every analysis.
+                projections, tax strategy, and exit scenarios on every analysis.
               </p>
             </div>
             <span className="mt-0.5 inline-flex shrink-0 items-center gap-1 text-sm font-bold text-primary">
