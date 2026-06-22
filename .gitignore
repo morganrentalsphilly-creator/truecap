@@ -38,6 +38,9 @@ pnpm-debug.log*
 # misc
 .DS_Store
 *.pem
+# FUSE mount artifacts — transient hidden copies the synced workspace creates
+# while a file has an open handle. Never source; safe to ignore (and delete).
+.fuse_hidden*
 
 # debug — `*.log` is fine. `*.md` and `*.ps1` removed: blocking every
 # markdown file silently hides README/CLAUDE/changelog edits from git.
