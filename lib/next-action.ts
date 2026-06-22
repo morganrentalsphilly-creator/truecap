@@ -84,3 +84,35 @@ export function nextActionForDeal(input: NextActionInput): NextAction {
     tone: "ready",
   };
 }
+
+export type DealVerdict = "Strong Buy" | "Buy" | "Neutral" | "Risky" | "Avoid";
+
+/**
+ * Next action from a saved deal's verdict tier + cash flow — for list surfaces
+ * (My Deals) that carry the recommendation but not raw DSCR. The verdict
+ * already folds in DSCR, CoC, and cash flow via the Deal Score, so this stays
+ * consistent with nextActionForDeal without needing the result snapshot.
+ */
+export function nextActionFromVerdict(input: {
+  recommendation: DealVerdict;
+  netCashFlow: number;
+  meetsBuyBox?: boolean | null;
+}): NextAction {
+  const cf = Number(input.netCashFlow) || 0;
+  if (cf < 0) {
+    return { label: "Lower your offer or raise rent", reason: "cash flow is negative", tone: "blocked" };
+  }
+  if (input.recommendation === "Avoid") {
+    return { label: "Pass or restructure the deal", reason: "the numbers don't support it as entered", tone: "blocked" };
+  }
+  if (input.meetsBuyBox === false) {
+    return { label: "Adjust to hit your buy box", reason: "this deal misses your buy-box criteria", tone: "review" };
+  }
+  if (input.recommendation === "Risky") {
+    return { label: "Verify the weak assumptions", reason: "thin margins — confirm rent, rate, and expenses", tone: "review" };
+  }
+  if (input.recommendation === "Neutral") {
+    return { label: "Compare, then decide", reason: "a middling deal — weigh it against your others", tone: "review" };
+  }
+  return { label: "Line up financing and make your offer", reason: "clears your targets", tone: "ready" };
+}

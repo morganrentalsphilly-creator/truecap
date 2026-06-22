@@ -50,6 +50,7 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import type { StoredRiskLevel } from "@/lib/compare-metrics";
 import { PIPELINE_STAGES, pipelineStageLabel, type PipelineStage } from "@/lib/pipeline";
+import { nextActionFromVerdict } from "@/lib/next-action";
 import { DataConfidenceBadge } from "@/components/investcalc/data-confidence-badge";
 import { type DataConfidence } from "@/lib/data-confidence";
 import { consumePendingSavedListSearch } from "@/lib/dashboard-saved-search-bridge";
@@ -107,6 +108,31 @@ export type SavedAnalysisListItem = {
   createdAt: string;
   status: "active" | "completed" | "archived";
 };
+
+/** Compact "Next: <step>" line driven by the verdict-based next-action lib. */
+function NextActionLine({
+  recommendation,
+  netCashFlow,
+  className,
+}: {
+  recommendation: SavedAnalysisListItem["recommendation"];
+  netCashFlow: number | null;
+  className?: string;
+}) {
+  const a = nextActionFromVerdict({ recommendation, netCashFlow: netCashFlow ?? 0 });
+  const dot =
+    a.tone === "blocked"
+      ? "bg-[var(--metric-negative)]"
+      : a.tone === "review"
+        ? "bg-amber-500"
+        : "bg-[var(--metric-positive)]";
+  return (
+    <p className={cn("flex items-center gap-1.5 text-[11px] text-muted-foreground", className)} title={a.reason}>
+      <span aria-hidden className={cn("inline-block size-1.5 shrink-0 rounded-full", dot)} />
+      <span className="font-semibold text-foreground">Next:</span> {a.label}
+    </p>
+  );
+}
 
 const SIGNAL_LABELS: Record<SavedSignal, string> = {
   "strong-buy": "Excellent fit",
@@ -1355,6 +1381,7 @@ export function SavedAnalysesPage({
                         ) : null}
                       </div>
                       <p className="mt-1 text-xs text-muted-foreground">{getTypeLabel(item.propertyType)}</p>
+                      <NextActionLine recommendation={item.recommendation} netCashFlow={item.netCashFlowMonthly} className="mt-1.5" />
                     </div>
                     <input
                       type="checkbox"
@@ -1553,6 +1580,7 @@ export function SavedAnalysesPage({
                             <p className="text-xs text-muted-foreground truncate">
                               {getTypeLabel(item.propertyType)}
                             </p>
+                            <NextActionLine recommendation={item.recommendation} netCashFlow={item.netCashFlowMonthly} className="mt-0.5" />
                           </div>
                         </div>
                       </td>
