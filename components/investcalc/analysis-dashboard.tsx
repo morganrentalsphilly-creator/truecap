@@ -65,6 +65,7 @@ const ExitScenariosPanel = dynamic(
   }
 );
 import { MaxOfferCard } from "@/components/investcalc/max-offer-card";
+import { AssumptionImpactCard } from "@/components/investcalc/assumption-impact-card";
 import { SensitivityGrid } from "@/components/investcalc/sensitivity-grid";
 import { StrategiesPanel } from "@/components/investcalc/strategies-panel";
 import { ProInlineGate } from "@/components/investcalc/pro-inline-gate";
@@ -1281,6 +1282,7 @@ export function AnalysisDashboard({
                   ]}
                 />
               )}
+              {canUseMaxOffer ? <AssumptionImpactCard values={values} /> : null}
               {canUseSensitivity ? (
                 <SensitivityGrid values={values} />
               ) : (
