@@ -21,6 +21,7 @@ import {
 } from "@/app/actions/scenarios";
 import { compareScenariosAction } from "@/app/actions/compare";
 import { STRATEGY_KINDS, strategyLabel } from "@/lib/strategy-kinds";
+import { describeStrategyPreset } from "@/lib/scenario-presets";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -189,7 +190,8 @@ export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
             </div>
           </div>
           <p className="mt-2 text-[11px] text-muted-foreground">
-            Starts as a copy of this deal&apos;s numbers — open it to adjust the assumptions for that strategy.
+            {describeStrategyPreset(strategy) ??
+              "Starts as a copy of this deal's numbers — open it to adjust the assumptions for that strategy."}
           </p>
           <div className="mt-3 flex items-center justify-end gap-2">
             <Button type="button" variant="ghost" onClick={() => setAdding(false)} disabled={isSaving}>

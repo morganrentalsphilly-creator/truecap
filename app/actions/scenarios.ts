@@ -24,6 +24,9 @@ import { z } from "zod";
 import { getEntitlementsForUser, hasPlanFeature } from "@/lib/entitlements";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { defaultScenarioName, isStrategyKind } from "@/lib/strategy-kinds";
+import { applyStrategyPreset } from "@/lib/scenario-presets";
+import { calculateAnalysis } from "@/lib/calc-analysis";
+import { normalizeInvestmentFormSnapshot } from "@/lib/investcalc-schema";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 export type ScenarioSummary = {
@@ -273,6 +276,23 @@ export async function addScenarioAction(input: unknown): Promise<AddScenarioResu
   clone.property_id = propertyId;
   clone.scenario_name = scenarioName;
   clone.strategy_kind = strategyKind;
+
+  // Apply the (conservative) strategy preset to the assumptions and RECOMPUTE
+  // the stored metrics, so the new scenario doesn't show the source deal's
+  // numbers. Only touches the fields the preset changes; the user edits the
+  // rest (notably rent) in the deal view. Skipped if the snapshot can't parse.
+  if (strategyKind) {
+    const baseValues = normalizeInvestmentFormSnapshot(deal.form_snapshot);
+    if (baseValues) {
+      const adjusted = applyStrategyPreset(baseValues, strategyKind);
+      const result = calculateAnalysis(adjusted);
+      clone.form_snapshot = adjusted as unknown as Record<string, unknown>;
+      clone.result_snapshot = result as unknown as Record<string, unknown>;
+      clone.down_payment_pct = adjusted.downPaymentPct;
+      clone.net_cash_flow_monthly = result.netCashFlow;
+      clone.coc_return_pct = result.cocReturn;
+    }
+  }
 
   const { data: inserted, error: insertErr } = await supabase
     .from("saved_analyses")
