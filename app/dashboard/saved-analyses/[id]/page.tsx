@@ -17,6 +17,7 @@ import { ArrowLeft } from "lucide-react";
 import { Topbar } from "@/components/dashboard/Topbar";
 import { DueDiligenceCard } from "@/components/investcalc/due-diligence-card";
 import { DealDocumentsCard } from "@/components/investcalc/deal-documents-card";
+import { ScenariosCard } from "@/components/investcalc/scenarios-card";
 import {
   getDashboardNavAccess,
   hasDashboardAccess,
@@ -126,6 +127,7 @@ export default async function DealWorkspacePage({
             </p>
           </div>
 
+          <ScenariosCard savedDealId={dealRow.id} />
           <DueDiligenceCard savedDealId={dealRow.id} />
           <DealDocumentsCard savedDealId={dealRow.id} />
         </main>
