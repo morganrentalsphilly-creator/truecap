@@ -59,6 +59,9 @@ type SavedAnalysisRow = {
   pipeline_stage?: string | null;
   tags?: string[] | null;
   data_confidence?: unknown;
+  nickname?: string | null;
+  market?: string | null;
+  neighborhood?: string | null;
 };
 
 function getDisplayName(profile: ProfileRow | null, email?: string | null): string {
@@ -124,6 +127,10 @@ function mapSavedRow(row: SavedAnalysisRow): SavedAnalysisListItem | null {
     pipelineStage: isPipelineStage(row.pipeline_stage) ? row.pipeline_stage : DEFAULT_PIPELINE_STAGE,
     tags: Array.isArray(row.tags) ? row.tags.filter((t): t is string => typeof t === "string") : [],
     dataConfidence: normalizeDataConfidence(row.data_confidence),
+    nickname: typeof row.nickname === "string" && row.nickname.trim() ? row.nickname.trim() : null,
+    market: typeof row.market === "string" && row.market.trim() ? row.market.trim() : null,
+    neighborhood:
+      typeof row.neighborhood === "string" && row.neighborhood.trim() ? row.neighborhood.trim() : null,
     createdAt: row.created_at,
     status: row.is_completed ? "completed" : row.is_archived ? "archived" : "active",
   };
@@ -177,44 +184,53 @@ export default async function DashboardSavedAnalysesPage({
   const sortDirection = normalizeDirection(resolvedSearchParams.dir ?? "desc");
   const activeDealStateFilter = normalizeDealStateFilter(resolvedSearchParams.state);
 
-  let query = supabase
-    .from("saved_analyses")
-    .select(
-      "id, address, title, property_type, purchase_price, net_cash_flow_monthly, coc_return_pct, created_at, is_completed, is_archived, result_snapshot, form_snapshot, pipeline_stage, tags, data_confidence"
-    )
-    .eq("user_id", user.id)
-    .is("deleted_at", null);
+  const BASE_SELECT =
+    "id, address, title, property_type, purchase_price, net_cash_flow_monthly, coc_return_pct, created_at, is_completed, is_archived, result_snapshot, form_snapshot, pipeline_stage, tags, data_confidence";
+  // Optional investor labels ship in a separate migration; until it's applied,
+  // selecting them 42703s. Try with them, fall back to the base columns so the
+  // My Deals list never breaks mid-rollout.
+  const WITH_LABELS_SELECT = `${BASE_SELECT}, nickname, market, neighborhood`;
 
-  if (activeDealStateFilter === "active") {
-    query = query.eq("is_completed", false).eq("is_archived", false);
-  } else if (activeDealStateFilter === "completed") {
-    query = query.eq("is_completed", true);
-  } else if (activeDealStateFilter === "archived") {
-    query = query.eq("is_archived", true);
+  const buildSavedQuery = (select: string) => {
+    let q = supabase
+      .from("saved_analyses")
+      .select(select)
+      .eq("user_id", user.id)
+      .is("deleted_at", null);
+    if (activeDealStateFilter === "active") {
+      q = q.eq("is_completed", false).eq("is_archived", false);
+    } else if (activeDealStateFilter === "completed") {
+      q = q.eq("is_completed", true);
+    } else if (activeDealStateFilter === "archived") {
+      q = q.eq("is_archived", true);
+    }
+    if (sortField === "saved" && sortDirection) {
+      q = q.order("created_at", { ascending: sortDirection === "asc", nullsFirst: false });
+    } else if (sortField === "cash-flow") {
+      q = q
+        .order("net_cash_flow_monthly", { ascending: sortDirection === "asc", nullsFirst: false })
+        .order("created_at", { ascending: false, nullsFirst: false });
+    } else if (sortField === "coc") {
+      q = q
+        .order("coc_return_pct", { ascending: sortDirection === "asc", nullsFirst: false })
+        .order("created_at", { ascending: false, nullsFirst: false });
+    } else if (sortField === "price") {
+      q = q
+        .order("purchase_price", { ascending: sortDirection === "asc", nullsFirst: false })
+        .order("created_at", { ascending: false, nullsFirst: false });
+    } else {
+      q = q.order("created_at", { ascending: false, nullsFirst: false });
+    }
+    return q;
+  };
+
+  let { data: rows, error } = await buildSavedQuery(WITH_LABELS_SELECT);
+  if (error && (error.code === "42703" || /column .* does not exist/i.test(error.message ?? ""))) {
+    ({ data: rows, error } = await buildSavedQuery(BASE_SELECT));
   }
-
-  if (sortField === "saved" && sortDirection) {
-    query = query.order("created_at", { ascending: sortDirection === "asc", nullsFirst: false });
-  } else if (sortField === "cash-flow") {
-    query = query
-      .order("net_cash_flow_monthly", { ascending: sortDirection === "asc", nullsFirst: false })
-      .order("created_at", { ascending: false, nullsFirst: false });
-  } else if (sortField === "coc") {
-    query = query
-      .order("coc_return_pct", { ascending: sortDirection === "asc", nullsFirst: false })
-      .order("created_at", { ascending: false, nullsFirst: false });
-  } else if (sortField === "price") {
-    query = query
-      .order("purchase_price", { ascending: sortDirection === "asc", nullsFirst: false })
-      .order("created_at", { ascending: false, nullsFirst: false });
-  } else if (sortField === "cap-rate") {
-    query = query.order("created_at", { ascending: false, nullsFirst: false });
-  } else {
-    query = query.order("created_at", { ascending: false, nullsFirst: false });
-  }
-
-  const { data: rows, error } = await query;
-  const mappedItems = (rows ?? [])
+  // Dynamic string selects (for the labels fallback) defeat Supabase's row-type
+  // inference, so the rows come back loosely typed — cast through unknown.
+  const mappedItems = ((rows ?? []) as unknown[])
     .map((row) => mapSavedRow(row as SavedAnalysisRow))
     .filter((row): row is SavedAnalysisListItem => Boolean(row));
   const displayName = getDisplayName((profile as ProfileRow | null) ?? null, user.email);

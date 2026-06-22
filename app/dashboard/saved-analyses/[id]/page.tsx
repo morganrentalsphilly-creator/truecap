@@ -17,6 +17,8 @@ import { ArrowLeft } from "lucide-react";
 import { Topbar } from "@/components/dashboard/Topbar";
 import { DueDiligenceCard } from "@/components/investcalc/due-diligence-card";
 import { DealDocumentsCard } from "@/components/investcalc/deal-documents-card";
+import { DealDetailsCard } from "@/components/investcalc/deal-details-card";
+import { DealCommentsPanel } from "@/components/investcalc/deal-comments-panel";
 import { ScenariosCard } from "@/components/investcalc/scenarios-card";
 import { NextActionBanner } from "@/components/investcalc/next-action-banner";
 import { nextActionForDeal } from "@/lib/next-action";
@@ -148,9 +150,11 @@ export default async function DealWorkspacePage({
           </div>
 
           <NextActionBanner action={nextAction} />
+          <DealDetailsCard savedDealId={dealRow.id} />
           <ScenariosCard savedDealId={dealRow.id} />
           <DueDiligenceCard savedDealId={dealRow.id} />
           <DealDocumentsCard savedDealId={dealRow.id} />
+          <DealCommentsPanel savedDealId={dealRow.id} />
         </main>
       </div>
     </div>

@@ -95,7 +95,7 @@ const SAVED_ANALYSIS_EDIT_DRAFT_KEY = "truecap_saved_analysis_edit_draft";
 /** Optional decision columns on the My Deals table (off by default; the table
  *  already shows cash flow / CoC / cap / price). Persisted per browser. */
 const MYDEALS_COLUMNS_KEY = "truecap_mydeals_columns";
-type OptionalColumns = { dscr: boolean; cashToClose: boolean };
+type OptionalColumns = { dscr: boolean; cashToClose: boolean; market: boolean; neighborhood: boolean };
 
 export type SavedAnalysisListItem = {
   id: string;
@@ -118,6 +118,11 @@ export type SavedAnalysisListItem = {
   pipelineStage?: PipelineStage;
   tags?: string[];
   dataConfidence?: DataConfidence | null;
+  /** Optional investor labels (Phase 2 #11). nickname displays in place of
+   *  the address; market/neighborhood are optional columns. */
+  nickname?: string | null;
+  market?: string | null;
+  neighborhood?: string | null;
   createdAt: string;
   status: "active" | "completed" | "archived";
 };
@@ -196,6 +201,9 @@ function getSignalClasses(signal: SavedSignal): string {
 
 function getAddressParts(item: SavedAnalysisListItem): { main: string; secondary: string } {
   const source = item.address?.trim() || item.title?.trim() || "Untitled Property";
+  // A nickname, when set, leads — the address drops to the secondary line.
+  const nickname = item.nickname?.trim();
+  if (nickname) return { main: nickname, secondary: source };
   const parts = source
     .split(",")
     .map((part) => part.trim())
@@ -513,13 +521,23 @@ export function SavedAnalysesPage({
   const [currentPage, setCurrentPage] = useState(1);
   // Optional decision columns (DSCR, cash to close) — off by default so the
   // default table stays uncrowded; remembered per browser.
-  const [optionalColumns, setOptionalColumns] = useState<OptionalColumns>({ dscr: false, cashToClose: false });
+  const [optionalColumns, setOptionalColumns] = useState<OptionalColumns>({
+    dscr: false,
+    cashToClose: false,
+    market: false,
+    neighborhood: false,
+  });
   useEffect(() => {
     try {
       const raw = window.localStorage.getItem(MYDEALS_COLUMNS_KEY);
       if (raw) {
         const parsed = JSON.parse(raw) as Partial<OptionalColumns>;
-        setOptionalColumns({ dscr: parsed.dscr === true, cashToClose: parsed.cashToClose === true });
+        setOptionalColumns({
+          dscr: parsed.dscr === true,
+          cashToClose: parsed.cashToClose === true,
+          market: parsed.market === true,
+          neighborhood: parsed.neighborhood === true,
+        });
       }
     } catch {
       // private mode / bad JSON — keep defaults
@@ -536,7 +554,11 @@ export function SavedAnalysesPage({
       return next;
     });
   };
-  const optionalColumnCount = (optionalColumns.dscr ? 1 : 0) + (optionalColumns.cashToClose ? 1 : 0);
+  const optionalColumnCount =
+    (optionalColumns.dscr ? 1 : 0) +
+    (optionalColumns.cashToClose ? 1 : 0) +
+    (optionalColumns.market ? 1 : 0) +
+    (optionalColumns.neighborhood ? 1 : 0);
   const initialItemIds = useMemo(() => new Set(initialItems.map((item) => item.id)), [initialItems]);
   const [selectedIds, setSelectedIds] = useState<string[]>(() =>
     canCompareDeals ? (initialSelectedIds ?? []).filter((id) => initialItemIds.has(id)).slice(0, 4) : []
@@ -1362,6 +1384,20 @@ export function SavedAnalysesPage({
                 >
                   Cash to close
                 </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem
+                  checked={optionalColumns.market}
+                  onCheckedChange={(value) => setOptionalColumn("market", value === true)}
+                  onSelect={(event) => event.preventDefault()}
+                >
+                  Market
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem
+                  checked={optionalColumns.neighborhood}
+                  onCheckedChange={(value) => setOptionalColumn("neighborhood", value === true)}
+                  onSelect={(event) => event.preventDefault()}
+                >
+                  Neighborhood
+                </DropdownMenuCheckboxItem>
               </DropdownMenuContent>
             </DropdownMenu>
             <div className="inline-flex items-center gap-1.5">
@@ -1589,6 +1625,12 @@ export function SavedAnalysesPage({
                   {optionalColumns.cashToClose ? (
                     <th className="whitespace-nowrap text-left text-xs uppercase tracking-wider text-muted-foreground font-bold">Cash to close</th>
                   ) : null}
+                  {optionalColumns.market ? (
+                    <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold">Market</th>
+                  ) : null}
+                  {optionalColumns.neighborhood ? (
+                    <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold">Neighborhood</th>
+                  ) : null}
                   <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold">Status</th>
                   <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold">Actions</th>
                   <th className="whitespace-nowrap pr-4 text-left text-xs uppercase tracking-wider text-muted-foreground font-bold"><SortToggle field="saved" label="Saved" /></th>
@@ -1665,6 +1707,12 @@ export function SavedAnalysesPage({
                       ) : null}
                       {optionalColumns.cashToClose ? (
                         <td className="font-medium tabular-nums text-foreground">{toCurrency(item.cashToClose ?? null)}</td>
+                      ) : null}
+                      {optionalColumns.market ? (
+                        <td className="text-foreground">{item.market?.trim() || "—"}</td>
+                      ) : null}
+                      {optionalColumns.neighborhood ? (
+                        <td className="text-foreground">{item.neighborhood?.trim() || "—"}</td>
                       ) : null}
                       <td className="pr-2">
                         <div className="flex flex-col gap-2">
