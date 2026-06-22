@@ -1001,6 +1001,8 @@ export function AnalysisDashboard({
           bedrooms={values.bedrooms ?? null}
           bathrooms={values.bathrooms ?? null}
           squareFootage={values.sqft ?? null}
+          currentRent={values.monthlyRent ?? null}
+          currentPrice={values.purchasePrice ?? null}
           savedDealId={savedDealId}
           onApply={onApplyComps}
         />

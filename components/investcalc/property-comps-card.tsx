@@ -11,6 +11,7 @@ import { useEffect, useState, useTransition } from "react";
 import { Building2, Loader2 } from "lucide-react";
 import { getPropertyCompsAction, getSavedDealCompsAction } from "@/app/actions/property-comps";
 import type { EnrichmentComp, PropertyEnrichment } from "@/lib/property-enrichment/rentcast";
+import { checkCompRange } from "@/lib/comp-range-check";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 
@@ -48,6 +49,36 @@ function CompList({ title, comps, suffix }: { title: string; comps: EnrichmentCo
   );
 }
 
+/** Build actionable warnings when the analyzer's rent/price sit outside the
+ *  pulled comp ranges — the "make comps actionable" layer. */
+function buildCompWarnings(
+  data: PropertyEnrichment,
+  currentRent: number | null | undefined,
+  currentPrice: number | null | undefined
+): { tone: "warn" | "info"; text: string }[] {
+  const out: { tone: "warn" | "info"; text: string }[] = [];
+  const rent = checkCompRange(currentRent, data.rentRange);
+  if (rent.status === "above" && rent.pctOutside >= 5) {
+    out.push({
+      tone: "warn",
+      text: `Your ${money(currentRent ?? null)}/mo rent is ${rent.pctOutside}% above the comp range (${money(rent.low)}–${money(rent.high)}). Cash flow may be optimistic — comps support up to about ${money(rent.high)}.`,
+    });
+  } else if (rent.status === "below" && rent.pctOutside >= 8) {
+    out.push({
+      tone: "info",
+      text: `Your ${money(currentRent ?? null)}/mo rent is ${rent.pctOutside}% below the comp range (${money(rent.low)}–${money(rent.high)}) — you may be under-renting.`,
+    });
+  }
+  const price = checkCompRange(currentPrice, data.valueRange);
+  if (price.status === "above" && price.pctOutside >= 5) {
+    out.push({
+      tone: "warn",
+      text: `Your ${money(currentPrice ?? null)} price is ${price.pctOutside}% above the comp value range (${money(price.low)}–${money(price.high)}) — you may be paying above recent sales.`,
+    });
+  }
+  return out;
+}
+
 export function PropertyCompsCard({
   enabled,
   address,
@@ -55,6 +86,8 @@ export function PropertyCompsCard({
   bedrooms,
   bathrooms,
   squareFootage,
+  currentRent,
+  currentPrice,
   savedDealId,
   onApply,
 }: {
@@ -64,6 +97,9 @@ export function PropertyCompsCard({
   bedrooms?: number | null;
   bathrooms?: number | null;
   squareFootage?: number | null;
+  /** The analyzer's current rent + price, to flag when they fall outside comps. */
+  currentRent?: number | null;
+  currentPrice?: number | null;
   /** When set, comps are saved to + loaded from this deal (persistent set). */
   savedDealId?: string | null;
   /** Fill the analyzer form from the pulled facts + estimates. */
@@ -116,6 +152,8 @@ export function PropertyCompsCard({
     });
   };
 
+  const compWarnings = data ? buildCompWarnings(data, currentRent, currentPrice) : [];
+
   return (
     <section aria-label="Sale and rent comps" className="rounded-2xl border border-border bg-card p-4 sm:p-5">
       <div className="flex items-center justify-between gap-3">
@@ -165,6 +203,23 @@ export function PropertyCompsCard({
               ) : null}
             </div>
           </div>
+
+          {compWarnings.length > 0 ? (
+            <div className="space-y-1.5">
+              {compWarnings.map((w, i) => (
+                <div
+                  key={i}
+                  className={
+                    w.tone === "warn"
+                      ? "rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-[11px] leading-relaxed text-foreground"
+                      : "rounded-lg border border-border bg-muted/30 px-3 py-2 text-[11px] leading-relaxed text-muted-foreground"
+                  }
+                >
+                  {w.text}
+                </div>
+              ))}
+            </div>
+          ) : null}
 
           {onApply ? (
             <Button
