@@ -104,8 +104,6 @@ import { cn } from "@/lib/utils";
 import type { DealScoreActionResult } from "@/app/actions/deal-score";
 import {
   APPRECIATION_PLAY_MIN_ANNUAL_RETURN_PCT,
-  buildDealScoreInputFromAnalysis,
-  computeDealScore,
   computeTenYearAnnualizedReturnPct,
   recommendationLabel,
   DEAL_STRATEGY_STORAGE_KEY,
@@ -432,16 +430,13 @@ export function AnalysisDashboard({
   );
   const appreciationPlay =
     !!result && isAppreciationPlayDeal(result, propertyType, annualizedReturnPct);
-  // Built here (the dashboard already holds values + result) so the Deal Score
-  // card can recompute the score under a different investor lens client-side,
-  // instantly, without a server round-trip.
-  const dealScoreInput = useMemo(
-    () => (result && values ? buildDealScoreInputFromAnalysis(values, result) : null),
-    [result, values]
-  );
   // Investor lens — owned HERE (the common parent of the Deal Score + the
-  // Recommendation cards) so BOTH recompute together when it changes. Persisted
+  // metric cards) so the metric ordering reacts when it changes. Persisted
   // across deals so a cash-flow investor isn't reset to Balanced each analysis.
+  // The lens only reorders which metrics LEAD (see PRIMARY_METRICS); the Deal
+  // Score itself is lens-free (canonical Balanced) on every surface, so the
+  // headline number never diverges between the analyzer and the dashboard/
+  // My Deals/compare/PDF.
   const [strategy, setStrategy] = useState<DealStrategy>("balanced");
   useEffect(() => {
     try {
@@ -461,17 +456,6 @@ export function AnalysisDashboard({
       // ignore
     }
   };
-  // Re-score under the chosen lens so the score, recommendation, and risk are
-  // consistent across both verdict cards. Balanced uses the server result as-is.
-  const lensedDealScoreResult: DealScoreActionResult | null = useMemo(() => {
-    if (strategy === "balanced" || !dealScoreInput || !dealScoreResult || !dealScoreResult.ok) {
-      return dealScoreResult;
-    }
-    const data = computeDealScore(dealScoreInput, strategy);
-    return dealScoreResult.tier === "pro"
-      ? { ok: true, tier: "pro", data }
-      : { ok: true, tier: "free", recommendation: data.recommendation };
-  }, [strategy, dealScoreInput, dealScoreResult]);
   const router = useRouter();
   const goToLogin = () => router.push("/auth/login");
   const goToBilling = () => router.push("/profile#billing");
@@ -500,7 +484,9 @@ export function AnalysisDashboard({
     setActiveTab(activeTabProp);
   }, [activeTabProp]);
 
-  const recommendation = buildRecommendationModel(lensedDealScoreResult);
+  // Canonical Balanced verdict — identical to the dashboard, My Deals, compare,
+  // PDF, and share surfaces. The lens never changes it.
+  const recommendation = buildRecommendationModel(dealScoreResult);
 
   const labelMap: Record<string, string> = {
     "single-family": "Single Family",
@@ -850,7 +836,7 @@ export function AnalysisDashboard({
         <DealScoreCard
           isAnalysisLoading={isLoading}
           isDealScoreLoading={isLoadingDealScore}
-          dealScoreResult={lensedDealScoreResult}
+          dealScoreResult={dealScoreResult}
           strategy={strategy}
           onStrategyChange={pickStrategy}
           isSaving={isSaving}
@@ -1414,8 +1400,10 @@ const DEAL_STRATEGIES: { value: DealStrategy; label: string; hint: string }[] = 
   { value: "appreciation", label: "Appreciation", hint: "Prioritizes long-term total return and yield." },
 ];
 
-/** Compact segmented control to score the deal through the investor's own lens.
- *  Score, recommendation, and risk all recompute live when this changes. */
+/** Compact segmented control that reorders which metrics lead with the
+ *  investor's focus. The Deal Score itself is lens-free (canonical Balanced) on
+ *  every surface, so picking a lens never changes the score, verdict, or risk —
+ *  only which 3 metric tiles surface first. */
 function DealStrategyToggle({
   strategy,
   onChange,
@@ -1430,7 +1418,7 @@ function DealStrategyToggle({
       </p>
       <div
         role="radiogroup"
-        aria-label="Scoring strategy"
+        aria-label="Investor lens — reorders which metrics lead"
         className="grid grid-cols-3 gap-0.5 rounded-lg bg-muted/60 p-0.5"
       >
         {DEAL_STRATEGIES.map((s) => {
@@ -1455,6 +1443,9 @@ function DealStrategyToggle({
           );
         })}
       </div>
+      <p className="mt-1 text-[10px] leading-tight text-muted-foreground">
+        Reorders the metrics you see first. Your Deal Score is the same on every screen.
+      </p>
     </div>
   );
 }
@@ -1474,8 +1465,9 @@ function DealScoreCard({
 }: {
   isAnalysisLoading: boolean;
   isDealScoreLoading: boolean;
-  /** Already re-scored for the chosen lens by the parent, so this card and the
-   *  Recommendation card beside it always agree. */
+  /** Canonical Balanced score from the parent — the same number the dashboard,
+   *  My Deals, compare, PDF, and share surfaces show. Lens-free, so this card and
+   *  the Recommendation card beside it always agree with every other surface. */
   dealScoreResult: DealScoreActionResult | null;
   strategy: DealStrategy;
   onStrategyChange: (next: DealStrategy) => void;
@@ -1587,8 +1579,9 @@ function DealScoreCard({
     );
   }
 
-  // dealScoreResult is already re-scored for the chosen lens by the parent, so
-  // this card and the Recommendation card beside it always agree.
+  // dealScoreResult is the canonical Balanced score from the parent (lens-free),
+  // so this card, the Recommendation card beside it, and every other surface
+  // (dashboard, My Deals, compare, PDF, share) always agree.
   const { score, riskLevel, recommendation, breakdown } = dealScoreResult.data;
   // Owner-occupant deals use different cash-flow bands and a 30-point
   // max (vs investor 25). Branch the explanation labels accordingly so
@@ -1813,7 +1806,6 @@ function DealScoreCard({
             />
           </div>
           <div className="rounded-xl border border-border bg-muted/30 p-3 text-xs leading-relaxed text-foreground/80">
-          {strategy === "balanced" ? (
             <p>
               Score is the sum of cash flow ({breakdown.cashFlowScore}), CoC ({breakdown.cocScore}),
               cap rate ({breakdown.capRateScore}), DSCR ({breakdown.dscrScore}), and 10-year total
@@ -1824,19 +1816,9 @@ function DealScoreCard({
               {" "}Bands: <strong>75+</strong> Strong Buy, <strong>55–74</strong> Buy,
               {" "}<strong>35–54</strong> Neutral, <strong>18–34</strong> Risky,
               {" "}<strong>&lt;18</strong> Avoid.
+              {" "}This is the same score on every screen — your investor lens reorders which
+              metrics lead, but never changes the number.
             </p>
-          ) : (
-            <p>
-              Under the{" "}
-              <strong>{DEAL_STRATEGIES.find((s) => s.value === strategy)?.label}</strong> lens, the
-              five components below are re-weighted to match that strategy and rescaled to{" "}
-              <span className="font-bold text-foreground">{score} / 100</span> (the bars show each
-              component&apos;s base strength before weighting).
-              {" "}Bands: <strong>75+</strong> Strong Buy, <strong>55–74</strong> Buy,
-              {" "}<strong>35–54</strong> Neutral, <strong>18–34</strong> Risky,
-              {" "}<strong>&lt;18</strong> Avoid.
-            </p>
-          )}
           <p className="mt-2 text-muted-foreground">
             Looking to improve the score? The largest movers are typically (1) a lower
             purchase price (lifts cap rate and CoC together), (2) better financing terms

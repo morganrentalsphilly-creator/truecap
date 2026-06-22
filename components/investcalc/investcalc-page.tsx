@@ -58,8 +58,6 @@ import { trackAnalysisRunAction } from "@/app/actions/track-analysis-run";
 import {
   buildDealScoreInputFromAnalysis,
   computeDealScore,
-  DEAL_STRATEGY_STORAGE_KEY,
-  type DealStrategy,
 } from "@/lib/deal-score";
 import {
   createOneTimePdfCheckoutAction,
@@ -246,12 +244,11 @@ const SAVED_ANALYSIS_AUTO_EXPORT_PDF_KEY = "truecap_saved_analysis_auto_export_p
 function toPdfReportData(args: {
   values: InvestmentFormValues;
   result: AnalysisResult;
-  strategy: DealStrategy;
   projectionYears: ProjectionYear[];
   taxYears: TaxStrategyYear[];
   exitYears: ExitScenarioYear[];
 }): ReportData {
-  const { values, result, strategy, projectionYears, taxYears, exitYears } = args;
+  const { values, result, projectionYears, taxYears, exitYears } = args;
 
   const units =
     values.propertyType === "single-family"
@@ -272,23 +269,17 @@ function toPdfReportData(args: {
           rent: Number(unit.monthlyRent ?? 0),
         }));
 
-  // Score the deal through the investor's chosen lens so the exported report
-  // matches the on-screen Deal Score. computeDealScore is pure; for "balanced"
-  // it equals the server-computed Pro score, so nothing regresses. The PDF is
-  // gated (Pro or one-time purchase), so everyone exporting gets the real score.
-  const lensedScore = computeDealScore(buildDealScoreInputFromAnalysis(values, result), strategy);
-  const recommendation = lensedScore.recommendation;
-  const risk = lensedScore.riskLevel;
-  const score = lensedScore.score;
-  // Prefix the rationale with the lens (when it isn't the default) so a
-  // Cash-flow "Avoid" and an Appreciation "Buy" report on the SAME deal are
-  // never read as contradictory — the cover states which lens scored it.
-  const rationale =
-    strategy === "balanced"
-      ? lensedScore.explanation
-      : `Scored for ${
-          strategy === "cash-flow" ? "a cash-flow" : "an appreciation"
-        } strategy. ${lensedScore.explanation}`;
+  // Canonical Deal Score is always Balanced (lens-free) — the same number every
+  // surface shows (analyzer headline, dashboard, My Deals, compare, share, OG).
+  // The investor lens only reorders which metrics lead on the analyzer; it never
+  // changes the exported score, so a shared report can't disagree with the
+  // screen it came from. computeDealScore defaults to balanced when no lens is
+  // passed.
+  const balancedScore = computeDealScore(buildDealScoreInputFromAnalysis(values, result));
+  const recommendation = balancedScore.recommendation;
+  const risk = balancedScore.riskLevel;
+  const score = balancedScore.score;
+  const rationale = balancedScore.explanation;
 
   const projectionRows = projectionYears.map((row) => ({
     y: row.year,
@@ -1988,28 +1979,12 @@ export function InvestCalcPage({
           cumulativeTaxBenefitByYear: taxYears.map((year) => year.cumulativeTaxBenefitAnnual),
         });
 
-      // Investor lens (persisted by the Deal Score card toggle). Score the PDF
-      // through the same lens so the exported report matches the screen. The
-      // PDF always computes the full score locally now, so one-time / free
-      // buyers get the real verdict without the old Pro-result special-case.
-      let strategy: DealStrategy = "balanced";
-      try {
-        const savedStrategy = window.localStorage.getItem(DEAL_STRATEGY_STORAGE_KEY);
-        if (
-          savedStrategy === "cash-flow" ||
-          savedStrategy === "balanced" ||
-          savedStrategy === "appreciation"
-        ) {
-          strategy = savedStrategy;
-        }
-      } catch {
-        // localStorage unavailable (private mode) — default to balanced.
-      }
-
+      // The exported Deal Score is the canonical Balanced score (computed inside
+      // toPdfReportData) — the same number every surface shows — so the report
+      // never contradicts the screen it came from regardless of the active lens.
       const reportData = toPdfReportData({
         values,
         result: analysisResult,
-        strategy,
         projectionYears,
         taxYears,
         exitYears,
