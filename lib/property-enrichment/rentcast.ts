@@ -232,3 +232,19 @@ export async function fetchRentCastEnrichment(q: RentCastQuery): Promise<Propert
     fetchedAt: new Date().toISOString(),
   };
 }
+
+/**
+ * Rent-only lookup — fetches JUST /avm/rent/long-term (one call, vs two for the
+ * full enrichment). Used by the rent-alert cron, which only needs the current
+ * market rent and is cost-sensitive (one call per saved deal it re-prices).
+ * Returns null when dormant (no key), the address is blank/unmatched, or
+ * RentCast has no rent figure.
+ */
+export async function fetchRentCastRentEstimate(q: RentCastQuery): Promise<number | null> {
+  const apiKey = process.env.RENTCAST_API_KEY;
+  if (!apiKey) return null;
+  const address = sanitizeAddress(q.address ?? "");
+  if (!address) return null;
+  const raw = await fetchJson(`/avm/rent/long-term?${buildQuery({ ...q, address })}`, apiKey);
+  return parseAvm(raw, "rent")?.estimate ?? null;
+}

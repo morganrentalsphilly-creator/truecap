@@ -13,6 +13,10 @@
       "schedule": "0 18 * * 4"
     },
     {
+      "path": "/api/cron/send-rent-alerts",
+      "schedule": "0 17 1 * *"
+    },
+    {
       "path": "/api/cron/send-lifecycle-emails",
       "schedule": "0 14 * * *"
     }
