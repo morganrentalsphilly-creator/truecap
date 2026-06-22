@@ -20,6 +20,7 @@ import { Header } from "@/components/investcalc/header";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { STATES, getStateBySlug } from "@/lib/states";
+import { strategyFitFromTier } from "@/lib/market-strategy-fit";
 import { getSiteUrl } from "@/lib/site-url";
 
 export async function generateStaticParams() {
@@ -67,6 +68,15 @@ export default async function StatePage({
   const { slug } = await params;
   const state = getStateBySlug(slug);
   if (!state) notFound();
+
+  // Strategy-fit badge from the curated state tier (P2-3).
+  const fit = strategyFitFromTier(state.tier);
+  const fitToneClass =
+    fit.tone === "cashflow"
+      ? "bg-[var(--brand-green-light)] text-[var(--brand-green)]"
+      : fit.tone === "appreciation"
+        ? "bg-[var(--brand-blue-light)] text-primary"
+        : "bg-muted text-foreground";
 
   const siteUrl = getSiteUrl();
   const canonicalUrl = `${siteUrl}/states/${state.slug}`;
@@ -164,9 +174,17 @@ export default async function StatePage({
         </nav>
 
         {/* Eyebrow + H1 */}
-        <p className="text-[11px] uppercase tracking-widest text-primary font-bold">
-          {state.tier} market · {state.abbr}
-        </p>
+        <div className="flex flex-wrap items-center gap-2">
+          <span
+            className={`inline-flex items-center rounded-full px-3 py-1 text-[11px] font-bold ${fitToneClass}`}
+            title={fit.blurb}
+          >
+            {fit.label}
+          </span>
+          <span className="text-[11px] uppercase tracking-widest text-primary font-bold">
+            {state.abbr} · State guide
+          </span>
+        </div>
         <h1 className="mt-2 text-3xl sm:text-5xl font-extrabold text-foreground leading-[1.05] tracking-tight">
           Investing in {state.name} rental property
         </h1>

@@ -13,6 +13,8 @@ import { ArrowUpRight, Calculator, MapPin } from "lucide-react";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { SourceMethodologyBox } from "@/components/marketing/source-methodology-box";
+import { getCapRateBenchmark } from "@/lib/market-benchmarks";
+import { marketStrategyFit } from "@/lib/market-strategy-fit";
 import { getSiteUrl } from "@/lib/site-url";
 
 const CITY = "Dallas";
@@ -62,6 +64,15 @@ const FAQS: { q: string; a: string }[] = [
 export default function DallasMarketPage() {
   const siteUrl = getSiteUrl();
   const canonicalUrl = `${siteUrl}/markets/${SLUG}`;
+  // Strategy-fit badge — a label over the market's median cap rate.
+  const benchmark = getCapRateBenchmark("Dallas, TX");
+  const fit = benchmark ? marketStrategyFit(benchmark.median) : null;
+  const fitToneClass =
+    fit?.tone === "cashflow"
+      ? "bg-[var(--brand-green-light)] text-[var(--brand-green)]"
+      : fit?.tone === "appreciation"
+        ? "bg-[var(--brand-blue-light)] text-primary"
+        : "bg-muted text-foreground";
   const ld = { "@context": "https://schema.org", "@type": "WebPage", "@id": `${canonicalUrl}#page`, name: TITLE, description: DESCRIPTION, url: canonicalUrl, datePublished: PUBLISHED_AT, dateModified: MODIFIED_AT, inLanguage: "en-US", isPartOf: { "@id": `${siteUrl}/#website` }, about: { "@type": "Place", name: `${CITY}, ${STATE}`, address: { "@type": "PostalAddress", addressLocality: CITY, addressRegion: STATE, addressCountry: "US" } } };
   const faqLd = { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: FAQS.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })) };
 
@@ -73,6 +84,16 @@ export default function DallasMarketPage() {
         <div className="mb-2"><Link href="/" className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground">← TrueCap</Link></div>
         <header className="mb-10">
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-primary mb-3"><MapPin className="size-3" />{CITY}-Fort Worth, {STATE}</div>
+          {fit && (
+            <div className="mb-3">
+              <span
+                className={`inline-flex items-center rounded-full px-3 py-1 text-[11px] font-bold ${fitToneClass}`}
+                title={fit.blurb}
+              >
+                {fit.label}
+              </span>
+            </div>
+          )}
           <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight">{CITY}-Fort Worth rental property analysis — calculator + 2026 cap-rate benchmarks</h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">Run a DFW rental deal in 60 seconds with TrueCap. Address auto-fills Texas property tax (1.6-2.5%+ effective depending on MUD), HUD rent by county, and current FRED mortgage rates. Below: neighborhood cap rates plus the high-tax / no-income-tax trade-off that defines TX underwriting.</p>
           <div className="mt-6 flex flex-wrap gap-3"><Link href="/" className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground hover:opacity-90"><Calculator className="size-4" />Underwrite a DFW deal — free</Link></div>

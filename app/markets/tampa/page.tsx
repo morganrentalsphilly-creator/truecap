@@ -13,6 +13,8 @@ import { ArrowUpRight, Calculator, MapPin } from "lucide-react";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { SourceMethodologyBox } from "@/components/marketing/source-methodology-box";
+import { getCapRateBenchmark } from "@/lib/market-benchmarks";
+import { marketStrategyFit } from "@/lib/market-strategy-fit";
 import { getSiteUrl } from "@/lib/site-url";
 
 const CITY = "Tampa";
@@ -87,6 +89,16 @@ export default function TampaMarketPage() {
   const siteUrl = getSiteUrl();
   const canonicalUrl = `${siteUrl}/markets/${SLUG}`;
 
+  // Strategy-fit badge — a label over the market's median cap rate.
+  const benchmark = getCapRateBenchmark("Tampa, FL");
+  const fit = benchmark ? marketStrategyFit(benchmark.median) : null;
+  const fitToneClass =
+    fit?.tone === "cashflow"
+      ? "bg-[var(--brand-green-light)] text-[var(--brand-green)]"
+      : fit?.tone === "appreciation"
+        ? "bg-[var(--brand-blue-light)] text-primary"
+        : "bg-muted text-foreground";
+
   const ld = {
     "@context": "https://schema.org",
     "@type": "WebPage",
@@ -136,6 +148,16 @@ export default function TampaMarketPage() {
             <MapPin className="size-3" />
             {CITY}, {STATE}
           </div>
+          {fit && (
+            <div className="mb-3">
+              <span
+                className={`inline-flex items-center rounded-full px-3 py-1 text-[11px] font-bold ${fitToneClass}`}
+                title={fit.blurb}
+              >
+                {fit.label}
+              </span>
+            </div>
+          )}
           <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight">
             {CITY} rental property analysis — calculator + 2026 cap-rate benchmarks
           </h1>

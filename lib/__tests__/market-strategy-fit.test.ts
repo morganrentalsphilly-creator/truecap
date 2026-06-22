@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { marketStrategyFit } from "@/lib/market-strategy-fit";
+import { marketStrategyFit, strategyFitFromTier } from "@/lib/market-strategy-fit";
 
 describe("marketStrategyFit", () => {
   it("high cap-rate metros read as cash-flow markets", () => {
@@ -30,5 +30,19 @@ describe("marketStrategyFit", () => {
       expect(fit.blurb.length).toBeGreaterThan(0);
     }
     expect(marketStrategyFit(NaN).tone).toBe("balanced");
+  });
+});
+
+describe("strategyFitFromTier", () => {
+  it("maps curated StateData tiers to the same badge shape", () => {
+    expect(strategyFitFromTier("Cash flow").tone).toBe("cashflow");
+    expect(strategyFitFromTier("Appreciation").tone).toBe("appreciation");
+    expect(strategyFitFromTier("Balanced").tone).toBe("balanced");
+  });
+
+  it("is tolerant of casing and unknown values", () => {
+    expect(strategyFitFromTier("CASH FLOW").tone).toBe("cashflow");
+    expect(strategyFitFromTier("whatever").tone).toBe("balanced");
+    expect(strategyFitFromTier("").tone).toBe("balanced");
   });
 });
