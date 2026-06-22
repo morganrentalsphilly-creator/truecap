@@ -36,6 +36,14 @@ import {
 } from "@/components/ui/pagination";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { startCompareAction } from "@/app/actions/compare";
 import {
   bulkUpdateSavedDealsAction,
@@ -84,6 +92,11 @@ type DealStateFilter = "active" | "completed" | "archived" | "all";
 const PAGE_SIZE = 7;
 const SAVED_ANALYSIS_EDIT_DRAFT_KEY = "truecap_saved_analysis_edit_draft";
 
+/** Optional decision columns on the My Deals table (off by default; the table
+ *  already shows cash flow / CoC / cap / price). Persisted per browser. */
+const MYDEALS_COLUMNS_KEY = "truecap_mydeals_columns";
+type OptionalColumns = { dscr: boolean; cashToClose: boolean };
+
 export type SavedAnalysisListItem = {
   id: string;
   address: string | null;
@@ -93,6 +106,10 @@ export type SavedAnalysisListItem = {
   netCashFlowMonthly: number | null;
   cocReturnPct: number | null;
   capRatePct: number | null;
+  /** Debt-service coverage ratio; null = unknown, 0 = cash purchase (N/A). */
+  dscr?: number | null;
+  /** Cash needed to close (down payment + closing costs). */
+  cashToClose?: number | null;
   score: number | null;
   recommendation: "Strong Buy" | "Buy" | "Neutral" | "Risky" | "Avoid";
   riskLevel: StoredRiskLevel;
@@ -494,6 +511,32 @@ export function SavedAnalysesPage({
   const [selectedSignal, setSelectedSignal] = useState<"all" | SavedSignal>("all");
   const [selectedType, setSelectedType] = useState<"all" | SavedPropertyType>("all");
   const [currentPage, setCurrentPage] = useState(1);
+  // Optional decision columns (DSCR, cash to close) — off by default so the
+  // default table stays uncrowded; remembered per browser.
+  const [optionalColumns, setOptionalColumns] = useState<OptionalColumns>({ dscr: false, cashToClose: false });
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(MYDEALS_COLUMNS_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw) as Partial<OptionalColumns>;
+        setOptionalColumns({ dscr: parsed.dscr === true, cashToClose: parsed.cashToClose === true });
+      }
+    } catch {
+      // private mode / bad JSON — keep defaults
+    }
+  }, []);
+  const setOptionalColumn = (key: keyof OptionalColumns, on: boolean) => {
+    setOptionalColumns((prev) => {
+      const next = { ...prev, [key]: on };
+      try {
+        window.localStorage.setItem(MYDEALS_COLUMNS_KEY, JSON.stringify(next));
+      } catch {
+        // ignore persistence failures
+      }
+      return next;
+    });
+  };
+  const optionalColumnCount = (optionalColumns.dscr ? 1 : 0) + (optionalColumns.cashToClose ? 1 : 0);
   const initialItemIds = useMemo(() => new Set(initialItems.map((item) => item.id)), [initialItems]);
   const [selectedIds, setSelectedIds] = useState<string[]>(() =>
     canCompareDeals ? (initialSelectedIds ?? []).filter((id) => initialItemIds.has(id)).slice(0, 4) : []
@@ -1289,15 +1332,48 @@ export function SavedAnalysesPage({
             </Tabs>
 
            
-           <div className="inline-flex items-center gap-1.5 ml-auto">
-            <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground mr-1.5">Show selected</span>
-            <Switch
-              id="template-include-interest-deduction"
-              checked={showcompare ?? false}
-              disabled={!canCompareDeals}
-              onCheckedChange={(value)=> canCompareDeals && setShowcompare(value ?? false)}
-              aria-label="Show selected analyses only"
-            />
+           <div className="ml-auto flex items-center gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="h-9 gap-1.5 rounded-full text-xs">
+                  <SlidersHorizontal className="h-3.5 w-3.5" />
+                  Columns
+                  {optionalColumnCount > 0 ? (
+                    <span className="rounded-full bg-foreground px-1.5 text-[10px] font-bold leading-4 text-background">
+                      {optionalColumnCount}
+                    </span>
+                  ) : null}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-52">
+                <DropdownMenuLabel>Extra columns</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuCheckboxItem
+                  checked={optionalColumns.dscr}
+                  onCheckedChange={(value) => setOptionalColumn("dscr", value === true)}
+                  onSelect={(event) => event.preventDefault()}
+                >
+                  DSCR
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem
+                  checked={optionalColumns.cashToClose}
+                  onCheckedChange={(value) => setOptionalColumn("cashToClose", value === true)}
+                  onSelect={(event) => event.preventDefault()}
+                >
+                  Cash to close
+                </DropdownMenuCheckboxItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <div className="inline-flex items-center gap-1.5">
+              <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground mr-1.5">Show selected</span>
+              <Switch
+                id="template-include-interest-deduction"
+                checked={showcompare ?? false}
+                disabled={!canCompareDeals}
+                onCheckedChange={(value)=> canCompareDeals && setShowcompare(value ?? false)}
+                aria-label="Show selected analyses only"
+              />
+            </div>
           </div>
 
           </div>
@@ -1507,6 +1583,12 @@ export function SavedAnalysesPage({
                   <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold"><SortToggle field="coc" label="CoC" /></th>
                   <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold"><SortToggle field="cap-rate" label="Cap Rate" /></th>
                   <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold"><SortToggle field="price" label="Price" /></th>
+                  {optionalColumns.dscr ? (
+                    <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold">DSCR</th>
+                  ) : null}
+                  {optionalColumns.cashToClose ? (
+                    <th className="whitespace-nowrap text-left text-xs uppercase tracking-wider text-muted-foreground font-bold">Cash to close</th>
+                  ) : null}
                   <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold">Status</th>
                   <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold">Actions</th>
                   <th className="whitespace-nowrap pr-4 text-left text-xs uppercase tracking-wider text-muted-foreground font-bold"><SortToggle field="saved" label="Saved" /></th>
@@ -1576,6 +1658,14 @@ export function SavedAnalysesPage({
                       <td className={cn("font-semibold", (item.cocReturnPct ?? 0) >= 0 ? "text-success" : "text-[var(--metric-negative)]")}>{toPercent(item.cocReturnPct)}</td>
                       <td className="font-medium">{toPercent(item.capRatePct)}</td>
                       <td className="font-semibold text-foreground">{toCurrency(item.purchasePrice)}</td>
+                      {optionalColumns.dscr ? (
+                        <td className="font-medium tabular-nums text-foreground">
+                          {item.dscr == null ? "—" : item.dscr <= 0 ? "Cash" : item.dscr.toFixed(2)}
+                        </td>
+                      ) : null}
+                      {optionalColumns.cashToClose ? (
+                        <td className="font-medium tabular-nums text-foreground">{toCurrency(item.cashToClose ?? null)}</td>
+                      ) : null}
                       <td className="pr-2">
                         <div className="flex flex-col gap-2">
                           {canUsePipeline ? (

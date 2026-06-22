@@ -112,6 +112,11 @@ function mapSavedRow(row: SavedAnalysisRow): SavedAnalysisListItem | null {
     netCashFlowMonthly: row.net_cash_flow_monthly,
     cocReturnPct: row.coc_return_pct,
     capRatePct: Number.isFinite(parsedCapRate) ? parsedCapRate : null,
+    // Recompute-on-read (Balanced), same as the verdict — so these stay in
+    // lockstep with the live engine. Null for legacy snapshots that don't
+    // validate; the column renders "—".
+    dscr: fresh ? fresh.dscr : null,
+    cashToClose: fresh ? fresh.cashToClose : null,
     score: fresh ? fresh.score : Number.isFinite(parsedScore) ? parsedScore : null,
     recommendation: fresh ? fresh.recommendation : storedRecommendation,
     riskLevel: fresh ? fresh.riskLevel : storedRiskLevel,

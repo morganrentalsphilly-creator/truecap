@@ -29,6 +29,10 @@ export function recomputeSavedDealVerdict(formSnapshot: unknown): {
   recommendation: DealRecommendation;
   riskLevel: DealRiskLevel;
   breakdown: DealScoreBreakdown;
+  /** Debt-service coverage ratio; 0 for a cash purchase (no debt to cover). */
+  dscr: number;
+  /** Cash needed to close (down payment + closing costs). */
+  cashToClose: number;
 } | null {
   const parsed = investmentFormSchema.safeParse(formSnapshot);
   if (!parsed.success) return null;
@@ -40,6 +44,8 @@ export function recomputeSavedDealVerdict(formSnapshot: unknown): {
       recommendation: scored.recommendation,
       riskLevel: scored.riskLevel,
       breakdown: scored.breakdown,
+      dscr: result.dscr,
+      cashToClose: result.totalCashRequired,
     };
   } catch {
     return null;
