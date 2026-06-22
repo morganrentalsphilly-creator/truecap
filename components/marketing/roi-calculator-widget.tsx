@@ -49,6 +49,19 @@ const MINUTES_SAVED_PER_DEAL = 90;
 /** Placeholder Pro monthly price for the breakeven math. */
 const PRO_MONTHLY_PRICE = 29;
 
+/**
+ * Persona presets — a starting point for the two editable inputs (deal
+ * volume + time value), not separate math. Numbers are deliberately
+ * conservative and editable: investors run a handful of deals a month;
+ * agents underwrite more listings on behalf of clients but value their
+ * time a bit lower; flippers run fewer, higher-stakes deals.
+ */
+const PRESETS = [
+  { id: "investor", label: "Investor", deals: "5", rate: "75" },
+  { id: "agent", label: "Agent", deals: "12", rate: "60" },
+  { id: "flipper", label: "Flipper", deals: "4", rate: "90" },
+] as const;
+
 type Props = {
   /**
    * Pro monthly price loaded server-side from Stripe. Falls back to
@@ -85,6 +98,38 @@ export function RoiCalculatorWidget({ proMonthlyPrice }: Props) {
         <span className="hidden rounded-full bg-[var(--brand-green-light)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-[var(--brand-green)] sm:inline-flex">
           Your numbers
         </span>
+      </div>
+
+      {/* Persona presets — one tap to seed the two inputs below, then
+          edit freely. Highlighted when the inputs match a preset. */}
+      <div className="mt-4">
+        <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+          Start from a preset
+        </span>
+        <div className="flex flex-wrap gap-2" role="group" aria-label="ROI presets">
+          {PRESETS.map((preset) => {
+            const active = preset.deals === dealsInput && preset.rate === rateInput;
+            return (
+              <button
+                key={preset.id}
+                type="button"
+                onClick={() => {
+                  setDealsInput(preset.deals);
+                  setRateInput(preset.rate);
+                }}
+                aria-pressed={active}
+                className={cn(
+                  "rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors",
+                  active
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border bg-background text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                )}
+              >
+                {preset.label}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Inputs — stacked on mobile, side-by-side on sm+ */}

@@ -28,6 +28,7 @@ import {
 } from "@/lib/markets/cities";
 import { HUD_RENTS } from "@/lib/markets/hud-rents";
 import { getCapRateBenchmark } from "@/lib/market-benchmarks";
+import { marketStrategyFit } from "@/lib/market-strategy-fit";
 import { getStatePropertyTaxPct } from "@/lib/property-enrichment/state-property-tax";
 import { CITY_STRATEGY_COMBOS } from "@/lib/city-strategy-combos";
 import { getSiteUrl } from "@/lib/site-url";
@@ -98,6 +99,14 @@ export default async function MarketCityPage({
 
   const benchmark = getCapRateBenchmark(`${data.name}, ${data.stateCode}`);
   const capMedian = benchmark ? `${benchmark.median.toFixed(1)}%` : "—";
+  // Strategy-fit badge — a label over the same median cap rate shown below.
+  const fit = benchmark ? marketStrategyFit(benchmark.median) : null;
+  const fitToneClass =
+    fit?.tone === "cashflow"
+      ? "bg-[var(--brand-green-light)] text-[var(--brand-green)]"
+      : fit?.tone === "appreciation"
+        ? "bg-[var(--brand-blue-light)] text-primary"
+        : "bg-muted text-foreground";
   const capScope = benchmark
     ? benchmark.scope === "metro"
       ? `${benchmark.scopeName} metro`
@@ -212,7 +221,20 @@ export default async function MarketCityPage({
 
         {/* Market snapshot */}
         <section className="mt-10 rounded-2xl border border-border bg-card p-6">
-          <p className="text-[11px] uppercase tracking-widest text-primary font-bold mb-4">{data.name} market snapshot</p>
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+            <p className="text-[11px] uppercase tracking-widest text-primary font-bold">{data.name} market snapshot</p>
+            {fit && (
+              <span
+                className={`inline-flex items-center rounded-full px-3 py-1 text-[11px] font-bold ${fitToneClass}`}
+                title={fit.blurb}
+              >
+                {fit.label}
+              </span>
+            )}
+          </div>
+          {fit && (
+            <p className="mb-4 text-xs leading-relaxed text-muted-foreground">{fit.blurb}</p>
+          )}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div>
               <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Typical cap rate</p>
