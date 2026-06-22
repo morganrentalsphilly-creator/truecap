@@ -36,6 +36,7 @@ export type RiskReturnDeal = {
   size: number;
   score?: number;
   cashFlow?: number;
+  cashNeeded?: number;
 };
 
 type ReturnMetricId = "coc" | "roi";
@@ -66,6 +67,7 @@ type PlottedPoint = {
   size: number;
   score?: number;
   cashFlow?: number;
+  cashNeeded?: number;
 };
 
 function ChartTooltip({
@@ -107,6 +109,12 @@ function ChartTooltip({
           </span>
         </div>
       ) : null}
+      {p.cashNeeded != null ? (
+        <div className="mt-1">
+          <span className="font-semibold text-muted-foreground">Cash to close:</span>{" "}
+          <span className="text-foreground">${Math.round(p.cashNeeded).toLocaleString("en-US")}</span>
+        </div>
+      ) : null}
       {p.score != null ? (
         <div className="mt-1">
           <span className="font-semibold text-muted-foreground">Deal Score:</span>{" "}
@@ -132,7 +140,7 @@ export function RiskReturn({ deals = [] }: { deals?: RiskReturnDeal[] }) {
         // A point only plots when it has BOTH the active return metric AND a
         // DSCR — otherwise its position on one axis would be fabricated.
         if (ret == null || d.dscr == null) return null;
-        return { name: d.name, type: d.type, ret, dscr: d.dscr, size: d.size, score: d.score, cashFlow: d.cashFlow };
+        return { name: d.name, type: d.type, ret, dscr: d.dscr, size: d.size, score: d.score, cashFlow: d.cashFlow, cashNeeded: d.cashNeeded };
       })
       .filter((p): p is PlottedPoint => p !== null);
     return { points: plotted, excludedCount: totalDeals - plotted.length, cashCount: cash, total: totalDeals };
@@ -155,7 +163,7 @@ export function RiskReturn({ deals = [] }: { deals?: RiskReturnDeal[] }) {
         <div>
           <h3 className="font-display text-lg font-semibold">Risk vs Return</h3>
           <p className="text-sm text-muted-foreground mt-0.5">
-            One point per saved deal — top-right (safe + strong return) is the target. Dashed lines mark the lender DSCR bar and a solid return.
+            One point per saved deal — top-right (safe + strong return) is the target. Bigger dots need more cash to close; dashed lines mark the lender DSCR bar and a solid return.
           </p>
         </div>
         <div className="flex items-center gap-1 p-1 rounded-lg bg-muted" role="tablist" aria-label="Return metric">

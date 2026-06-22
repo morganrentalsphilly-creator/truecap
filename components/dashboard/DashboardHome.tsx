@@ -145,7 +145,11 @@ function getRiskReturn(data: DashboardHomeData) {
       roi: deal.roiPct,
       dscr: isCashPurchase ? null : deal.dscr,
       isCashPurchase,
-      size: Math.max(80, Math.round((deal.purchasePrice ?? 0) / 1000)),
+      // Dot size encodes cash to close (capital required) — the spec's
+      // "dot size = cash needed". Falls back to ~25% of price when the
+      // cash figure is unknown so the point still renders sensibly.
+      size: Math.max(80, Math.round((deal.cashToClose ?? (deal.purchasePrice ?? 0) * 0.25) / 500)),
+      cashNeeded: deal.cashToClose ?? undefined,
       score: deal.score ?? undefined,
       cashFlow: deal.cashFlowMonthly == null ? undefined : Math.round(deal.cashFlowMonthly),
     };
