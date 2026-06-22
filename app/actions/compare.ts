@@ -146,6 +146,68 @@ export async function addDealToCompareAction(id: string): Promise<CompareActionR
   return { ok: true };
 }
 
+/**
+ * Compare-scenarios shortcut (DM-1 / CMP-1): given any saved deal, pre-select
+ * its property's scenarios into the compare flow and jump to /dashboard/compare.
+ * Reuses the same cookie + entitlement gate as manual compare.
+ */
+export async function compareScenariosAction(dealId: string): Promise<CompareActionResult> {
+  const id = dealId.trim();
+  if (!id) {
+    return { ok: false, code: "INVALID_SELECTION", message: "Open a saved deal to compare its scenarios." };
+  }
+
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in to compare deals." };
+  }
+
+  const entitlements = await getEntitlementsForUser(supabase, user.id);
+  if (!hasPlanFeature(entitlements, "compare_deals")) {
+    return { ok: false, code: "ENTITLEMENT_REQUIRED", message: "Compare is not available for your current plan." };
+  }
+
+  const { data: deal, error: dealError } = await supabase
+    .from("saved_analyses")
+    .select("property_id")
+    .eq("id", id)
+    .eq("user_id", user.id)
+    .is("deleted_at", null)
+    .maybeSingle();
+  if (dealError) {
+    return { ok: false, code: "SERVER_ERROR", message: "Could not load the deal." };
+  }
+  const propertyId = (deal as { property_id: string | null } | null)?.property_id ?? null;
+  if (!propertyId) {
+    return { ok: false, code: "INVALID_SELECTION", message: "This deal has no other scenarios to compare yet." };
+  }
+
+  const { data: rows, error: listError } = await supabase
+    .from("saved_analyses")
+    .select("id")
+    .eq("user_id", user.id)
+    .eq("property_id", propertyId)
+    .is("deleted_at", null)
+    .eq("is_completed", false)
+    .eq("is_archived", false)
+    .order("created_at", { ascending: true })
+    .limit(MAX_COMPARE_ITEMS);
+  if (listError) {
+    return { ok: false, code: "SERVER_ERROR", message: "Could not load scenarios." };
+  }
+
+  const ids = uniqueIds((rows ?? []).map((r) => (r as { id: string }).id));
+  if (ids.length < 2) {
+    return { ok: false, code: "INVALID_SELECTION", message: "Add another scenario before comparing." };
+  }
+
+  await setCompareCookie(ids);
+  redirect("/dashboard/compare");
+}
+
 export async function removeCompareDealAction(id: string) {
   const ids = (await getCompareIdsFromCookie()).filter((currentId) => currentId !== id);
   await setCompareCookie(ids);

@@ -13,12 +13,13 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import Link from "next/link";
-import { Layers, Loader2, Plus } from "lucide-react";
+import { GitCompare, Layers, Loader2, Plus } from "lucide-react";
 import {
   addScenarioAction,
   listScenariosAction,
   type ScenarioSummary,
 } from "@/app/actions/scenarios";
+import { compareScenariosAction } from "@/app/actions/compare";
 import { STRATEGY_KINDS, strategyLabel } from "@/lib/strategy-kinds";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -79,6 +80,16 @@ export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
     });
   }
 
+  function handleCompare() {
+    startSaving(async () => {
+      const result = await compareScenariosAction(savedDealId);
+      // Success redirects to /dashboard/compare; only an error returns here.
+      if (result && !result.ok) {
+        toast({ title: "Couldn't compare scenarios", description: result.message, variant: "destructive" });
+      }
+    });
+  }
+
   if (!loaded || hidden) return null;
 
   // Show the deal itself as a scenario row even before any siblings exist.
@@ -89,9 +100,23 @@ export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
 
   return (
     <section className="rounded-2xl border border-border bg-card p-5 sm:p-6">
-      <div className="mb-1 flex items-center gap-2">
-        <Layers className="size-4 text-primary" />
-        <h2 className="text-base font-bold text-foreground">Scenarios</h2>
+      <div className="mb-1 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <Layers className="size-4 text-primary" />
+          <h2 className="text-base font-bold text-foreground">Scenarios</h2>
+        </div>
+        {scenarios.length >= 2 ? (
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            onClick={handleCompare}
+            disabled={isSaving}
+            className="gap-1.5 text-xs text-primary"
+          >
+            <GitCompare className="size-3.5" /> Compare
+          </Button>
+        ) : null}
       </div>
       <p className="mb-4 max-w-prose text-sm leading-relaxed text-muted-foreground">
         Model this property under different strategies. Each scenario is its own saved analysis sharing
