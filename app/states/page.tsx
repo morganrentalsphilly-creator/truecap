@@ -64,14 +64,14 @@ export default function StatesIndexPage() {
           Fifteen states ranked across the variables that actually matter — property tax burden, landlord-friendliness, eviction speed, insurance volatility, and the cities where the math currently works.
         </p>
 
-        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="tc-reveal mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {Object.values(STATES)
             .sort((a, b) => a.name.localeCompare(b.name))
             .map((s) => (
               <Link
                 key={s.slug}
                 href={`/states/${s.slug}`}
-                className="block rounded-2xl border border-border bg-card p-5 transition-colors hover:border-primary/40"
+                className="block rounded-2xl border border-border bg-card p-5 transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
               >
                 <p className="text-[11px] uppercase tracking-widest text-primary font-bold">{s.tier}</p>
                 <p className="mt-1 text-lg font-extrabold text-foreground">{s.name}</p>

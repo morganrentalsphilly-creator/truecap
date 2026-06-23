@@ -193,7 +193,7 @@ export default async function PricingPage() {
               instead of clipping columns. The inner min-w-[520px] keeps
               the column widths legible at the smallest phones — without
               it, three columns squeezed into 320px is unreadable. */}
-          <div className="mt-8 overflow-x-auto rounded-2xl border border-border bg-card">
+          <div className="tc-reveal mt-8 overflow-x-auto rounded-2xl border border-border bg-card">
             <table className="w-full min-w-[520px] text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/30">
@@ -264,7 +264,7 @@ export default async function PricingPage() {
               </div>
               <Link
                 href="/#main"
-                className="shrink-0 inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 text-sm font-bold text-foreground hover:bg-muted"
+                className="shrink-0 inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 text-sm font-bold text-foreground transition-transform hover:bg-muted hover:-translate-y-0.5 active:scale-[0.98]"
               >
                 Run a deal → get the PDF
               </Link>
@@ -277,7 +277,7 @@ export default async function PricingPage() {
           <h2 className="text-center text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
             Frequently asked
           </h2>
-          <div className="mt-8 divide-y divide-border rounded-2xl border border-border bg-card">
+          <div className="tc-reveal mt-8 divide-y divide-border rounded-2xl border border-border bg-card">
             {FAQS.map((faq) => (
               <details key={faq.q} className="group px-5 py-4 sm:px-6 sm:py-5">
                 <summary className="flex cursor-pointer items-center justify-between gap-3 list-none">

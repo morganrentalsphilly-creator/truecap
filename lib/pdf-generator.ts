@@ -153,7 +153,7 @@ const COLOR = {
   cardBg: "#FFFFFF",
   cardSoft: "#F8FAFC",
   border: "#E5E9F2",
-  primary: "#2563EB",
+  primary: "#0070c4",
   primarySoft: "#EFF4FF",
   success: "#16A34A",
   successSoft: "#ECFDF5",

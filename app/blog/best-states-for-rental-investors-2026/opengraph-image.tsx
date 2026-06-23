@@ -10,7 +10,7 @@ export const alt = "Best states for rental property investors in 2026 — TrueCa
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-const BRAND_BLUE = "#2563EB";
+const BRAND_BLUE = "#0070c4";
 const TEXT_INK = "#0F172A";
 const TEXT_SUB = "#475569";
 

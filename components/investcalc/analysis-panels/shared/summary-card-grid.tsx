@@ -19,9 +19,12 @@ export function SummaryCardGrid({
   columnsClassName?: string;
 }) {
   return (
-    <div className={cn("grid gap-3", columnsClassName)}>
+    // Dashboard-hardening: one surface with hairline-separated cells
+    // (gap-px over a border-colored background) instead of a row of
+    // boxed cards. Robust for any column count, including wrapping.
+    <div className={cn("grid gap-px overflow-hidden rounded-2xl border border-border bg-border", columnsClassName)}>
       {items.map((item) => (
-        <div key={item.label} className="rounded-2xl border border-border bg-card p-4">
+        <div key={item.label} className="bg-card p-4 sm:p-5">
           {item.labelTooltip ? (
             <Tooltip delayDuration={200}>
               <TooltipTrigger asChild>
@@ -42,7 +45,7 @@ export function SummaryCardGrid({
           )}
           <p
             className={cn(
-              "mt-2 text-2xl font-extrabold",
+              "mt-2 font-mono text-2xl font-extrabold tabular-nums tracking-tight",
               item.tone === "positive" && "text-[var(--metric-positive)]",
               item.tone === "negative" && "text-[var(--metric-negative)]",
               (!item.tone || item.tone === "neutral") && "text-foreground"

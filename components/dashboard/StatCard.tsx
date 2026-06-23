@@ -57,7 +57,7 @@ export function StatCard({ label, value, change, changeLabel, icon: Icon, spark,
           <Icon className="h-4 w-4 text-white" />
         </div>
       </div>
-      <div className="relative font-display text-3xl font-bold tracking-tight">{value}</div>
+      <div className="relative font-mono text-3xl font-bold tabular-nums tracking-tight">{value}</div>
       {/* Trend pill renders ONLY when there's an actual numeric change to
           show. Previously we'd render "↗ -" for null changes, which read
           as a (broken) trend indicator. The green ↑ arrow visually

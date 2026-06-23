@@ -10,7 +10,7 @@ export const alt = "How to estimate rehab costs on a rental property — TrueCap
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-const BRAND_BLUE = "#2563EB";
+const BRAND_BLUE = "#0070c4";
 const TEXT_INK = "#0F172A";
 const TEXT_SUB = "#475569";
 

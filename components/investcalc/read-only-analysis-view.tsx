@@ -49,7 +49,7 @@ function MetricTile({
       </span>
       <span
         className={cn(
-          "text-xl sm:text-2xl font-bold tabular-nums",
+          "font-mono text-xl font-bold tabular-nums tracking-tight sm:text-2xl",
           positive && "text-[var(--metric-positive)]",
           negative && "text-[var(--metric-negative)]",
           !positive && !negative && "text-foreground"
@@ -90,7 +90,7 @@ export function ReadOnlyAnalysisView({ values, result }: ReadOnlyAnalysisViewPro
           // Cash purchases have no debt service so DSCR is undefined.
           // calc-analysis returns 0 in that case — surface a clear sub
           // rather than a misleading "Underwater" badge.
-          value={result.monthlyPayment <= 0 ? "—" : result.dscr.toFixed(2)}
+          value={result.monthlyPayment <= 0 ? "n/a" : result.dscr.toFixed(2)}
           sub={
             result.monthlyPayment <= 0
               ? "Cash purchase"
@@ -137,7 +137,7 @@ export function ReadOnlyAnalysisView({ values, result }: ReadOnlyAnalysisViewPro
       >
         <p className="text-lg sm:text-xl font-extrabold">Analyzed with TrueCap</p>
         <p className="mt-1 text-sm sm:text-base opacity-90">
-          Run your own rental deal free — cap rate, cash flow, and DSCR from
+          Run your own rental deal free. Cap rate, cash flow, and DSCR from
           just an address in 60 seconds.
         </p>
         <span className="mt-4 inline-block rounded-xl bg-primary-foreground px-4 py-2.5 text-sm font-bold text-primary">
@@ -148,7 +148,7 @@ export function ReadOnlyAnalysisView({ values, result }: ReadOnlyAnalysisViewPro
       {/* Advice guardrail — this page is shared to lenders/partners/clients and
           shows verdict + recommendation language, but has no SiteFooter. */}
       <p className="mt-4 px-2 text-center text-[11px] leading-relaxed text-muted-foreground">
-        This shared analysis is an automated estimate for screening only — not an
+        This shared analysis is an automated estimate for screening only, not an
         appraisal, and not financial, tax, or investment advice. Figures depend on
         assumptions that may be out of date; verify independently before making any
         decision.

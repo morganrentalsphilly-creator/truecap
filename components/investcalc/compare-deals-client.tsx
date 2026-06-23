@@ -58,10 +58,10 @@ const MOBILE_DEAL_COLORS = [
     bg: "bg-primary/10",
   },
   {
-    chip: "bg-violet-500 text-white",
-    border: "border-primary/30",
-    text: "text-primary",
-    bg: "bg-primary/10",
+    chip: "bg-rose-500 text-white",
+    border: "border-rose-500/30",
+    text: "text-rose-600",
+    bg: "bg-rose-500/10",
   },
   {
     chip: "bg-amber-500 text-white",

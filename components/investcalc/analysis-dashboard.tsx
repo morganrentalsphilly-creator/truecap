@@ -339,7 +339,7 @@ function MetricCard({
     </span>
   );
   return (
-    <div className="bg-card rounded-2xl border border-border p-3 sm:p-5 flex flex-col gap-1">
+    <div className="flex flex-col gap-1 rounded-2xl border border-border bg-card p-3 shadow-[0_1px_2px_rgba(15,23,42,0.04)] sm:p-5">
       {glossaryTerm ? (
         <GlossaryTip term={glossaryTerm} showIcon={false} className="!no-underline">
           {labelEl}
@@ -350,7 +350,7 @@ function MetricCard({
       {isLoading ? (
         <Skeleton className="h-7 sm:h-8 w-20 sm:w-24 mt-1" />
       ) : (
-        <span className={cn("text-xl sm:text-2xl font-bold", color ?? "text-foreground")}>
+        <span className={cn("font-mono text-xl font-bold tabular-nums tracking-tight sm:text-2xl", color ?? "text-foreground")}>
           {value}
         </span>
       )}

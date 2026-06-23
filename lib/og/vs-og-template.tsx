@@ -17,7 +17,7 @@ import { ImageResponse } from "next/og";
 
 export const OG_SIZE = { width: 1200, height: 630 } as const;
 
-const BRAND_BLUE = "#2563EB";
+const BRAND_BLUE = "#0070c4";
 const TEXT_INK = "#0F172A";
 const TEXT_SUB = "#475569";
 
