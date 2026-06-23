@@ -310,6 +310,26 @@ textarea,
 .tc-delay-4 { animation-delay: 0.24s; }
 .tc-delay-5 { animation-delay: 0.30s; }
 
+/* Skeleton shimmer (taste-skill loading state) — a soft sweep across
+   placeholder boxes instead of a flat pulse. Degrades safely: the global
+   reduced-motion rule freezes the sweep off-screen-left, leaving a solid
+   skeleton. transform/opacity only, so it's GPU-cheap. */
+@keyframes tc-shimmer {
+  100% { transform: translateX(100%); }
+}
+.tc-skeleton {
+  position: relative;
+  overflow: hidden;
+}
+.tc-skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+  animation: tc-shimmer 1.6s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   @supports (animation-timeline: view()) {
     .tc-reveal {
