@@ -17,6 +17,7 @@ import Link from "next/link";
 import { ArrowRight, Loader2, Sparkles } from "lucide-react";
 import { createCheckoutSessionAction } from "@/app/actions/billing";
 import { useToast } from "@/hooks/use-toast";
+import { TRIAL_LABEL } from "@/lib/trial";
 
 type Slot = "free" | "pro_monthly" | "pro_annual";
 
@@ -74,7 +75,7 @@ export function PricingPlanButtons({
         href={`/auth/sign-up?next=${encodeURIComponent("/pricing")}`}
         className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground shadow-[0_8px_22px_rgba(82,72,212,0.30)] hover:bg-primary/95"
       >
-        <Sparkles className="size-4" /> Get Pro — start with free account
+        <Sparkles className="size-4" /> Start your {TRIAL_LABEL}
       </Link>
     );
   }
@@ -121,7 +122,7 @@ export function PricingPlanButtons({
         </>
       ) : (
         <>
-          <Sparkles className="size-4" /> Upgrade to Pro
+          <Sparkles className="size-4" /> Start {TRIAL_LABEL}
         </>
       )}
     </button>

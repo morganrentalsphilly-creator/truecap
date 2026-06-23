@@ -18,6 +18,7 @@ import { useEffect, useRef, useState } from "react";
 import { Check, Sparkles, X } from "lucide-react";
 import { PricingPlanButtons } from "@/components/marketing/pricing-plan-buttons";
 import { trackEvent } from "@/lib/analytics";
+import { TRIAL_LABEL } from "@/lib/trial";
 
 type ResolvedPrice = { amountLabel: string; period: string } | null;
 
@@ -280,6 +281,11 @@ export function PricingTogglePlans({
             <span className="text-sm text-muted-foreground">{proCard.priceSub}</span>
           </div>
           <div className="mt-1 text-xs text-muted-foreground">{proCard.subline}</div>
+          <div className="mt-3 flex justify-center">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--metric-positive)]/12 px-3 py-1 text-xs font-extrabold uppercase tracking-wide text-[var(--metric-positive)]">
+              <Sparkles className="size-3" /> {TRIAL_LABEL}
+            </span>
+          </div>
           <div className="mt-5">
             <PricingPlanButtons
               slot={proCard.slot}
@@ -288,7 +294,7 @@ export function PricingTogglePlans({
             />
           </div>
           <p className="mt-2.5 text-center text-xs text-muted-foreground">
-            Start with a <strong className="text-foreground">3-day free trial</strong> — cancel anytime, no
+            Start with a <strong className="text-foreground">{TRIAL_LABEL}</strong> — cancel anytime, no
             contract. Downgrade and your saved deals + reports stay in your account.
           </p>
           <ul className="mt-6 space-y-2.5">

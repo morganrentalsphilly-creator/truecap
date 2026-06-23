@@ -15,6 +15,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Lock, X, FileDown, Calculator, TrendingUp } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
+import { TRIAL_LABEL } from "@/lib/trial";
 
 interface MomentOfValueUpsellProps {
   netCashFlow: number;
@@ -165,8 +166,8 @@ export function MomentOfValueUpsell({
         >
           <Lock className="mt-0.5 size-4 shrink-0 text-primary" />
           <span className="flex-1 text-foreground">
-            <strong>Save, compare &amp; export unlimited — Pro</strong> — reuse assumptions,
-            brand reports, export unlimited PDFs. Cancel anytime.
+            <strong>Start your {TRIAL_LABEL} — Pro</strong> — save, compare &amp; export
+            unlimited, reuse assumptions, brand reports. Cancel anytime.
           </span>
           <ArrowRight className="mt-0.5 size-4 shrink-0 text-primary transition-transform group-hover:translate-x-0.5" />
         </Link>
