@@ -87,8 +87,8 @@ export const FEATURE_CATALOG: Record<FeatureKey, FeatureSpec> = {
   projections: { key: "projections", label: "10-year cash flow & equity projection", tiers: ["pro"], category: "analysis", gate: "flag" },
   tax_strategy: { key: "tax_strategy", label: "Tax strategy — depreciation & interest", tiers: ["pro"], category: "analysis", gate: "flag" },
   exit_scenarios: { key: "exit_scenarios", label: "Exit scenarios — best year to sell", tiers: ["pro"], category: "analysis", gate: "flag" },
-  pdf_export: { key: "pdf_export", label: "Lender-ready PDF report", tiers: ["one_time_pdf", "pro"], freeLimit: "$5 one-time per deal", proLimit: "unlimited", category: "reporting", gate: "flag" },
-  custom_branding: { key: "custom_branding", label: "Custom PDF branding (logo, color, contact)", tiers: ["pro"], category: "reporting", gate: "flag" },
+  pdf_export: { key: "pdf_export", label: "Lender-ready PDF report with sale + rent comps", tiers: ["one_time_pdf", "pro"], freeLimit: "$5 one-time per deal", proLimit: "unlimited", category: "reporting", gate: "flag" },
+  custom_branding: { key: "custom_branding", label: "Custom branding — PDFs + co-branded lead-capture share pages", tiers: ["pro"], category: "reporting", gate: "flag" },
   // Sharing is FREE for everyone (the growth loop): basic links are TrueCap-branded.
   // Pro adds co-branded share pages + lead capture via `custom_branding` (separate key).
   share_links: { key: "share_links", label: "Shareable read-only deal links", tiers: ["free", "pro"], category: "reporting", gate: "always" },

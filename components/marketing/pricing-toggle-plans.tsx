@@ -64,8 +64,9 @@ const PRO_FEATURES = [
   "Saved analysis templates",
   "Due-diligence checklist + document vault",
   "Rate-drop alerts on your saved deals",
-  "Lender · partner · personal PDF reports",
+  "Lender · partner · personal PDF reports — now with sale + rent comps",
   "Custom PDF branding — your logo, color, and contact on every export",
+  "Co-branded share pages that capture buyer leads",
   "Save unlimited deals · compare up to 4",
   "Priority email support",
 ];

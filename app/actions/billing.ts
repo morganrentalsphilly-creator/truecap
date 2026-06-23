@@ -9,6 +9,10 @@ import { TRIAL_DAYS } from "@/lib/trial";
 
 const checkoutSchema = z.object({
   planSlug: z.enum(["pro_monthly", "pro_annual"]),
+  // Optional campaign code from the URL (?coupon=…). Resolved SERVER-SIDE
+  // against a whitelist → env coupon id, so a client can never inject an
+  // arbitrary Stripe coupon into checkout.
+  offer: z.string().max(40).optional(),
 });
 
 export type BillingActionResult =
@@ -36,6 +40,21 @@ function getPlanPriceId(planSlug: "pro_monthly" | "pro_annual", dbPriceId?: stri
   const envPriceId =
     planSlug === "pro_monthly" ? process.env.STRIPE_PRICE_PRO_MONTHLY : process.env.STRIPE_PRICE_PRO_ANNUAL;
   return envPriceId ?? dbPriceId ?? null;
+}
+
+/**
+ * Resolve a campaign code (?coupon=…) to a configured Stripe COUPON id.
+ * Whitelisted server-side so clients can't pass arbitrary coupon ids; an
+ * unknown code or an unset env var yields null (checkout proceeds at full
+ * price — fail-safe). Morgan owns the coupon + env var in Stripe/Vercel.
+ */
+function resolveOfferCouponId(offer: string | undefined): string | null {
+  if (!offer) return null;
+  const code = offer.trim().toUpperCase();
+  const map: Record<string, string | undefined> = {
+    EXIT50: process.env.EXIT_INTENT_COUPON_ID,
+  };
+  return map[code] ?? null;
 }
 
 function getDisplayName(profile: {
@@ -186,8 +205,13 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
       existingCustomerId: profile?.stripe_customer_id ?? null,
     });
     const siteUrl = getSiteUrl();
+    // A campaign coupon from the URL (e.g. the exit-intent EXIT50) takes
+    // precedence over the standard annual coupon, and applies to monthly OR
+    // annual. Both resolve to a Stripe coupon id we control.
+    const offerCoupon = resolveOfferCouponId(parsed.data.offer);
     const annualCoupon =
       parsed.data.planSlug === "pro_annual" ? process.env.STRIPE_ANNUAL_DISCOUNT_COUPON_ID : undefined;
+    const appliedCoupon = offerCoupon ?? annualCoupon;
     // Free Pro trial on new subscriptions. Card is collected at checkout and
     // auto-charges when the trial ends. Env-adjustable; PRO_TRIAL_DAYS=0 turns
     // trials off without a deploy. Default 3 days.
@@ -203,8 +227,8 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
           quantity: 1,
         },
       ],
-      discounts: annualCoupon ? [{ coupon: annualCoupon }] : undefined,
-      allow_promotion_codes: annualCoupon ? undefined : true,
+      discounts: appliedCoupon ? [{ coupon: appliedCoupon }] : undefined,
+      allow_promotion_codes: appliedCoupon ? undefined : true,
       success_url: `${siteUrl}/profile?billing=success`,
       cancel_url: `${siteUrl}/profile?billing=checkout_cancelled`,
       metadata: {

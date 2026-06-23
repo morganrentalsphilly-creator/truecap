@@ -33,6 +33,9 @@ import { SingleFamilyUnitSection } from "./single-family-unit-section";
 import { MultiFamilyUnitsSection } from "./multi-family-units-section";
 import { FinancingSection } from "./financing-section";
 import { OperatingExpensesSection } from "./operating-expenses-section";
+import { StrategyChips } from "./strategy-chips";
+import { STARTER_TEMPLATES, type StarterTemplate } from "@/lib/starter-templates";
+import { getStrategyByKey } from "@/lib/investor-strategies";
 import { AnalyzerStepRail } from "./analyzer-step-rail";
 import {
   computeAnalyzerSteps,
@@ -492,6 +495,8 @@ export function InvestCalcPage({
   const router = useRouter();
   const [activeInputTab, setActiveInputTab] = useState<InputTab>("cash-flow");
   const [activeDashboardTab, setActiveDashboardTab] = useState<AnalysisDashboardTab>("cash-flow");
+  // Active investor-strategy chip ("What's your play?"). null = default full flow.
+  const [activeStrategyKey, setActiveStrategyKey] = useState<string | null>(null);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
   const [showResults, setShowResults] = useState(false);
@@ -1106,41 +1111,40 @@ export function InvestCalcPage({
    * RentCast autofill (button-triggered). The cheap enrichment only knows
    * tax / rate / HUD-rent — beds, baths, sqft, and price can ONLY come from
    * RentCast. So an explicit "Autofill from address" button pulls the
-   * property's facts + value/rent estimate and fills the EMPTY form fields
-   * (never clobbering what the user typed). On-demand by design: a comp
-   * credit is spent only on a deliberate click, bounded by the per-user +
-   * global caps in the action.
+   * property's facts + value/rent estimate and OVERWRITES the autofill-owned
+   * fields (beds, baths, size, price, rent) with the fresh data — the click is
+   * an explicit request for RentCast's numbers, so it replaces whatever was
+   * there. On-demand by design: a comp credit is spent only on a deliberate
+   * click, bounded by the per-user + global caps in the action.
    */
   const [isAutofilling, setIsAutofilling] = useState(false);
   const [autofillUnavailable, setAutofillUnavailable] = useState(false);
 
-  const applyCompsToEmptyFields = useCallback(
+  const applyComps = useCallback(
     (e: PropertyEnrichment) => {
       const f = e.facts;
       const filled: string[] = [];
+      // Explicit click = the user is asking for RentCast's numbers, so
+      // OVERWRITE the autofill-owned fields rather than only filling blanks.
       const opts = { shouldDirty: false, shouldTouch: false, shouldValidate: true };
-      if (f?.bedrooms != null && isEmptyNumber(form.getValues("bedrooms"))) {
+      if (f?.bedrooms != null) {
         form.setValue("bedrooms", f.bedrooms, opts);
         filled.push("beds");
       }
-      if (f?.bathrooms != null && isEmptyNumber(form.getValues("bathrooms"))) {
+      if (f?.bathrooms != null) {
         form.setValue("bathrooms", f.bathrooms, opts);
         filled.push("baths");
       }
-      if (f?.squareFootage != null && isEmptyNumber(form.getValues("sqft"))) {
+      if (f?.squareFootage != null) {
         form.setValue("sqft", f.squareFootage, opts);
         filled.push("size");
       }
-      if (e.valueEstimate != null && isEmptyNumber(form.getValues("purchasePrice"))) {
+      if (e.valueEstimate != null) {
         form.setValue("purchasePrice", Math.round(e.valueEstimate), opts);
         filled.push("price");
       }
       const pt = form.getValues("propertyType");
-      if (
-        e.rentEstimate != null &&
-        (pt === "single-family" || pt === "owner-occupant") &&
-        isEmptyNumber(form.getValues("monthlyRent"))
-      ) {
+      if (e.rentEstimate != null && (pt === "single-family" || pt === "owner-occupant")) {
         form.setValue("monthlyRent", Math.round(e.rentEstimate), opts);
         filled.push("rent");
       }
@@ -1167,7 +1171,7 @@ export function InvestCalcPage({
         propertyType: form.getValues("propertyType"),
       });
       if (r.ok) {
-        applyCompsToEmptyFields(r.enrichment);
+        applyComps(r.enrichment);
         return;
       }
       if (r.code === "NOT_CONFIGURED") {
@@ -1190,7 +1194,69 @@ export function InvestCalcPage({
     } finally {
       setIsAutofilling(false);
     }
-  }, [form, applyCompsToEmptyFields, toast]);
+  }, [form, applyComps, toast]);
+
+  /**
+   * Apply a starter template's assumption set (financing + expenses + growth)
+   * to the form WITHOUT touching the address / price / rent the user entered.
+   * Mirrors the field mapping in template-selector-section's applyTemplateToForm.
+   */
+  const applyStarterAssumptions = useCallback(
+    (starterKey: StarterTemplate["key"]) => {
+      const starter = STARTER_TEMPLATES.find((s) => s.key === starterKey);
+      if (!starter) return;
+      const t = starter.template;
+      const opts = { shouldDirty: true, shouldValidate: false } as const;
+      form.setValue("propertyTaxPct", t.propertyTaxPct, opts);
+      form.setValue("insuranceInputMode", t.insuranceInputMode, opts);
+      if (t.insurancePct != null) form.setValue("insurancePct", t.insurancePct, opts);
+      if (t.insuranceMo != null) form.setValue("insuranceMonthly", t.insuranceMo, opts);
+      form.setValue("maintenancePct", t.maintenancePct, opts);
+      form.setValue("vacancyPct", t.vacancyPct, opts);
+      form.setValue("mgmtPct", t.managementPct, opts);
+      form.setValue("capexPct", t.capexPct, opts);
+      form.setValue("closingCostsPct", t.closingCostsPct, opts);
+      form.setValue("interestRate", t.interestRatePct, opts);
+      form.setValue("downPaymentPct", t.downPaymentPct, opts);
+      form.setValue("expenseGrowthPct", t.expenseGrowthPct, opts);
+      form.setValue("rentGrowthPct", t.rentGrowthPct, opts);
+      form.setValue("appreciationRatePct", t.appreciationRatePct, opts);
+      form.setValue("sellingCostPct", t.sellingCostPct, opts);
+      if (t.buildingValuePct != null) form.setValue("buildingValuePct", t.buildingValuePct, opts);
+      if (t.depreciationYears != null) form.setValue("depreciationYears", t.depreciationYears, opts);
+      if (t.includeInterestDeduction != null)
+        form.setValue("includeInterestDeduction", t.includeInterestDeduction, opts);
+      if (t.taxRatePct != null) form.setValue("taxRatePct", t.taxRatePct, opts);
+    },
+    [form]
+  );
+
+  /**
+   * "What's your play?" chip handler. Tailors the form to the chosen investor
+   * strategy: sets property type, applies that play's assumption defaults, and
+   * points the results view at the tab that leads with its key number. null
+   * clears back to the default full flow (values left as-is).
+   */
+  const handleSelectStrategy = useCallback(
+    (key: string | null) => {
+      const strategy = getStrategyByKey(key);
+      if (!strategy) {
+        setActiveStrategyKey(null);
+        return;
+      }
+      if (form.getValues("propertyType") !== strategy.propertyType) {
+        form.setValue("propertyType", strategy.propertyType, {
+          shouldDirty: true,
+          shouldValidate: false,
+        });
+      }
+      applyStarterAssumptions(strategy.starterKey);
+      setActiveStrategyKey(strategy.key);
+      setActiveDashboardTab(strategy.primaryTab);
+      setAdvancedOpen(false);
+    },
+    [form, applyStarterAssumptions]
+  );
 
   const buildTaxStrategySource = (
     analysisId: string | null,
@@ -2662,6 +2728,8 @@ export function InvestCalcPage({
               onNavigate={handleStepNavigate}
               className="sticky top-2 z-20"
             />
+
+            <StrategyChips activeKey={activeStrategyKey} onSelect={handleSelectStrategy} />
 
             <div id="step-property" className="space-y-5 scroll-mt-24">
               <PropertyTypeSection form={form} savedTemplateFallback={savedTemplateFallback} />
