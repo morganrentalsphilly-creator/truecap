@@ -23,7 +23,7 @@ import { ExitIntentOffer } from "@/components/marketing/exit-intent-offer";
 export const metadata: Metadata = {
   title: "Pricing — Free + Pro plans for rental analysis",
   description:
-    "TrueCap is free to start — no card required, and the 0–100 Deal Score is free for everyone. Pro adds 10-year projections, tax strategy, exit scenarios, PDF export, and unlimited saved deals.",
+    "TrueCap is free to start — no card required, and the 0–100 Deal Score is free for everyone. Try Pro free for 3 days: 10-year projections, tax strategy, exit scenarios, PDF export, and unlimited saved deals.",
   alternates: { canonical: "/pricing" },
   openGraph: {
     title: "TrueCap pricing — free + Pro",
@@ -134,8 +134,8 @@ export default async function PricingPage() {
               Pricing that pays for itself <span className="text-primary">on the first deal.</span>
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-balance text-[15px] leading-relaxed text-muted-foreground sm:text-lg">
-              Start free — unlimited analyses, every core metric, auto-fill from the address. Upgrade to Pro
-              when you need projections, tax modeling, and lender-ready PDFs.
+              Start free — unlimited analyses, every core metric, auto-fill from the address. Or start a
+              3-day free trial of Pro when you need projections, tax modeling, and lender-ready PDFs.
             </p>
             {/* Real-data social proof — investors arriving at /pricing
                 are evaluating credibility. A live count of recent
