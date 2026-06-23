@@ -49,6 +49,15 @@ export type BlogPost = {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: "1-percent-rule-rental-property",
+    title: "The 1% rule for rental property: does it still work in 2026?",
+    excerpt:
+      "The fastest screen in real estate — monthly rent ≥ 1% of price — and why 7% rates quietly moved the bar. The GRM bridge (a 1% deal is a GRM of ~8.3), the break-even ratio that climbed from ~0.57% to ~0.76%, two 1% properties whose returns sit 40% apart, and how to use the rule without letting it talk you into a bad deal.",
+    readingTimeMinutes: 10,
+    publishedAt: "2026-06-23",
+    available: true,
+  },
+  {
     slug: "piti-explained-rental-property",
     title: "PITI explained: the real monthly payment on a rental (2026)",
     excerpt:
