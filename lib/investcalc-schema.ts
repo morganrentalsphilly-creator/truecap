@@ -185,23 +185,22 @@ export const investmentFormSchema = z.object({
   utilitiesMonthly: optionalMoneyMo,
 }).superRefine((values, ctx) => {
   const addSingleFamilyUnitDetailsIssues = () => {
-    // Only bedrooms + monthlyRent are REQUIRED for a single-family run:
-    // bedrooms drives the HUD rent auto-fill and rent is required for the
-    // cash-flow math. Bathrooms + square feet are OPTIONAL — they aren't
-    // used by calc-analysis or the Deal Score (verified), only by richer
-    // reports/rehab. Keeping them optional lets the homepage promise a
-    // genuine "address → price → run" minimal flow with baths/sqft tucked
-    // under "Improve accuracy". Range checks for baths/sqft still apply
-    // when a value IS provided (see the field-level schemas above). This
-    // loosening is backward-compatible, so INVESTCALC_SCHEMA_VERSION is
-    // intentionally NOT bumped (existing snapshots still parse).
+    // Only monthlyRent is REQUIRED for a single-family run — it's the one
+    // input the cash-flow math can't proceed without. Bedrooms is now OPTIONAL
+    // (Jun 2026): the per-strategy focus flows (e.g. Wholesale → MAO) need an
+    // address-only path, and beds aren't used by calc-analysis or the Deal
+    // Score — they only drive the HUD rent auto-fill + richer reports. Baths +
+    // square feet are likewise optional. Range checks still apply when a value
+    // IS provided (see the field-level schemas above). This loosening is
+    // backward-compatible, so INVESTCALC_SCHEMA_VERSION is intentionally NOT
+    // bumped (existing snapshots still parse).
     const b = values.bedrooms;
-    if (typeof b !== "number" || !Number.isFinite(b)) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["bedrooms"], message: "Enter bedrooms" });
-    } else if (b < 0) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["bedrooms"], message: "Min 0" });
-    } else if (b > 20) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["bedrooms"], message: "Max 20" });
+    if (typeof b === "number" && Number.isFinite(b)) {
+      if (b < 0) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["bedrooms"], message: "Min 0" });
+      } else if (b > 20) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["bedrooms"], message: "Max 20" });
+      }
     }
 
     const r = values.monthlyRent;

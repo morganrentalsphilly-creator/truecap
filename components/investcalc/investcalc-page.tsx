@@ -497,6 +497,7 @@ export function InvestCalcPage({
   const [activeDashboardTab, setActiveDashboardTab] = useState<AnalysisDashboardTab>("cash-flow");
   // Active investor-strategy chip ("What's your play?"). null = default full flow.
   const [activeStrategyKey, setActiveStrategyKey] = useState<string | null>(null);
+  const activeStrategy = getStrategyByKey(activeStrategyKey);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
   const [showResults, setShowResults] = useState(false);
@@ -2732,13 +2733,17 @@ export function InvestCalcPage({
             <StrategyChips activeKey={activeStrategyKey} onSelect={handleSelectStrategy} />
 
             <div id="step-property" className="space-y-5 scroll-mt-24">
-              <PropertyTypeSection form={form} savedTemplateFallback={savedTemplateFallback} />
+              {!activeStrategy && (
+                <PropertyTypeSection form={form} savedTemplateFallback={savedTemplateFallback} />
+              )}
               <PropertyDetailsSection
                 form={form}
                 onAddressSelected={handleAddressSelected}
                 onAutofillFromAddress={handleAutofillFromAddress}
                 isAutofilling={isAutofilling}
                 showAutofill={isAuthenticated && !autofillUnavailable}
+                showYearBuilt={!activeStrategy}
+                priceLabel={activeStrategy?.priceLabel}
               />
             </div>
 
@@ -2748,7 +2753,12 @@ export function InvestCalcPage({
                 in the "Improve accuracy" block below. */}
             <div id="step-income" className="scroll-mt-24">
               {propertyType === "single-family" && (
-                <SingleFamilyUnitSection form={form} fields="primary" />
+                <SingleFamilyUnitSection
+                  form={form}
+                  fields="primary"
+                  hideBedrooms={!!activeStrategy}
+                  rentLabel={activeStrategy?.rentLabel}
+                />
               )}
               {(propertyType === "multi-family" || propertyType === "owner-occupant") && (
                 <MultiFamilyUnitsSection
@@ -2777,14 +2787,22 @@ export function InvestCalcPage({
                 <Settings2 className="size-4 shrink-0 text-primary" />
                 <span className="min-w-0">
                   <span className="block text-sm font-semibold text-foreground">
-                    {advancedOpen ? "Hide advanced options" : "Improve accuracy (optional)"}
+                    {advancedOpen
+                      ? activeStrategy
+                        ? `Hide ${activeStrategy.label} details`
+                        : "Hide advanced options"
+                      : activeStrategy
+                        ? `Refine ${activeStrategy.label} assumptions`
+                        : "Improve accuracy (optional)"}
                   </span>
                   <span className="block text-[11px] leading-snug text-muted-foreground">
                     {advancedOpen
                       ? "Bathrooms, size, financing & operating expenses"
-                      : analysisResult
-                        ? "Adjust details, financing & expenses to sharpen your numbers"
-                        : "Bathrooms, size, financing & expenses — running on smart defaults"}
+                      : activeStrategy
+                        ? `${activeStrategy.label} defaults applied — open to fine-tune financing & expenses`
+                        : analysisResult
+                          ? "Adjust details, financing & expenses to sharpen your numbers"
+                          : "Bathrooms, size, financing & expenses — running on smart defaults"}
                   </span>
                 </span>
               </span>
@@ -2832,7 +2850,7 @@ export function InvestCalcPage({
               ) : (
                 <>
                   <Calculator className="w-5 h-5 mr-2" />
-                  Run analysis
+                  {activeStrategy?.runCta ?? "Run analysis"}
                   <ArrowUpRight className="w-5 h-5 ml-2" />
                 </>
               )}

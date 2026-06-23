@@ -48,6 +48,12 @@ export interface InvestorStrategy {
   primaryOutputIsPro: boolean;
   /** Short hint shown above the form once the strategy is active. */
   focusHint: string;
+  /** Strategy-tailored Run-button label (falls back to "Run analysis"). */
+  runCta?: string;
+  /** Override the price field label (e.g. "Asking price" for wholesale). */
+  priceLabel?: string;
+  /** Override the rent field label (e.g. "Stabilized rent" for BRRRR). */
+  rentLabel?: string;
 }
 
 export const INVESTOR_STRATEGIES: InvestorStrategy[] = [
@@ -64,6 +70,7 @@ export const INVESTOR_STRATEGIES: InvestorStrategy[] = [
   },
   {
     key: "house-hack",
+    runCta: "Run house-hack numbers",
     label: "House Hack",
     tagline: "Live in one unit",
     Icon: Home,
@@ -75,6 +82,8 @@ export const INVESTOR_STRATEGIES: InvestorStrategy[] = [
   },
   {
     key: "brrrr",
+    runCta: "Run BRRRR numbers",
+    rentLabel: "Stabilized rent (after rehab)",
     label: "BRRRR",
     tagline: "Buy, rehab, rent, refi",
     Icon: Wrench,
@@ -86,6 +95,9 @@ export const INVESTOR_STRATEGIES: InvestorStrategy[] = [
   },
   {
     key: "wholesale-mao",
+    runCta: "Solve my max offer",
+    priceLabel: "Asking price",
+    rentLabel: "Market rent",
     label: "Wholesale / MAO",
     tagline: "Max offer to hit your number",
     Icon: Tag,
@@ -97,6 +109,8 @@ export const INVESTOR_STRATEGIES: InvestorStrategy[] = [
   },
   {
     key: "fix-flip",
+    runCta: "Run flip numbers",
+    rentLabel: "Rent (only if you hold)",
     label: "Fix & Flip",
     tagline: "Rehab and resell",
     Icon: Hammer,
@@ -108,6 +122,8 @@ export const INVESTOR_STRATEGIES: InvestorStrategy[] = [
   },
   {
     key: "short-term",
+    runCta: "Run STR numbers",
+    rentLabel: "Monthly revenue (nightly × occupancy)",
     label: "Short-term Rental",
     tagline: "Nightly / STR",
     Icon: CalendarClock,

@@ -22,19 +22,35 @@ type SingleFamilyFields = "all" | "primary" | "secondary";
 interface SingleFamilyUnitSectionProps {
   form: UseFormReturn<InvestmentFormValues>;
   fields?: SingleFamilyFields;
+  /** Hide the bedrooms field (strategy-focus mode — beds is optional). */
+  hideBedrooms?: boolean;
+  /** Override the "Monthly Rent" label (e.g. "Stabilized rent" for BRRRR). */
+  rentLabel?: string;
 }
 
-export function SingleFamilyUnitSection({ form, fields = "all" }: SingleFamilyUnitSectionProps) {
+export function SingleFamilyUnitSection({
+  form,
+  fields = "all",
+  hideBedrooms = false,
+  rentLabel,
+}: SingleFamilyUnitSectionProps) {
   const {
     register,
     formState: { errors },
   } = form;
 
-  const showBeds = fields !== "secondary";
+  const showBeds = fields !== "secondary" && !hideBedrooms;
   const showRent = fields !== "secondary";
   const showBaths = fields !== "primary";
   const showSqft = fields !== "primary";
   const isSecondary = fields === "secondary";
+  const visibleCount = [showBeds, showRent, showBaths, showSqft].filter(Boolean).length;
+  const gridCols =
+    visibleCount >= 3
+      ? "grid-cols-2 sm:grid-cols-2 xl:grid-cols-4"
+      : visibleCount === 2
+        ? "grid-cols-2"
+        : "grid-cols-1";
 
   return (
     <div className="bg-card rounded-2xl border border-border shadow-sm p-6">
@@ -48,7 +64,7 @@ export function SingleFamilyUnitSection({ form, fields = "all" }: SingleFamilyUn
         ) : null}
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+      <div className={cn("grid gap-4", gridCols)}>
         {showBeds ? (
           <div>
             <Label htmlFor="bedrooms" className="text-xs font-semibold text-primary mb-1.5 block uppercase tracking-wide">
@@ -74,7 +90,7 @@ export function SingleFamilyUnitSection({ form, fields = "all" }: SingleFamilyUn
         {showRent ? (
           <div>
             <Label htmlFor="monthlyRent" className="text-xs font-semibold text-primary mb-1.5 block uppercase tracking-wide">
-              Monthly Rent
+              {rentLabel ?? "Monthly Rent"}
             </Label>
             <div className="relative">
               <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />

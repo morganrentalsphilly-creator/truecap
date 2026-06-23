@@ -18,6 +18,10 @@ interface PropertyDetailsSectionProps {
   isAutofilling?: boolean;
   /** Show the autofill button (signed-in + provider configured). */
   showAutofill?: boolean;
+  /** Show the (optional) Year Built field. Hidden in strategy-focus mode. */
+  showYearBuilt?: boolean;
+  /** Override the "Purchase Price" label (e.g. "Asking price" for wholesale). */
+  priceLabel?: string;
 }
 
 export function PropertyDetailsSection({
@@ -26,6 +30,8 @@ export function PropertyDetailsSection({
   onAutofillFromAddress,
   isAutofilling,
   showAutofill,
+  showYearBuilt = true,
+  priceLabel,
 }: PropertyDetailsSectionProps) {
   const {
     register,
@@ -76,11 +82,11 @@ export function PropertyDetailsSection({
           ) : null}
         </div>
 
-        {/* Purchase Price + Year Built */}
-        <div className="grid grid-cols-2 sm:grid-cols-2 gap-4">
+        {/* Purchase Price + Year Built (Year Built hidden in strategy-focus mode) */}
+        <div className={cn("grid gap-4", showYearBuilt ? "grid-cols-2 sm:grid-cols-2" : "grid-cols-1")}>
           <div>
             <Label htmlFor="purchasePrice" className="text-sm font-medium text-foreground mb-1.5 block">
-              Purchase Price
+              {priceLabel ?? "Purchase Price"}
             </Label>
             <div className="relative">
               <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -102,28 +108,30 @@ export function PropertyDetailsSection({
             <FieldError id="purchasePrice-error" message={errors.purchasePrice?.message} />
           </div>
 
-          <div>
-            <Label htmlFor="yearBuilt" className="text-sm font-medium text-foreground mb-1.5 block">
-              Year Built <span className="text-xs text-muted-foreground">(Optional)</span>
-            </Label>
-            <Input
-              {...register("yearBuilt", { setValueAs: optionalNumberSetValueAs })}
-              id="yearBuilt"
-              type="number"
-              inputMode="decimal"
-              placeholder="2015"
-              aria-invalid={!!errors.yearBuilt}
-              aria-describedby={errors.yearBuilt ? "yearBuilt-error" : undefined}
-              className={cn(
-                "border-input bg-background",
-                errors.yearBuilt && "border-destructive focus-visible:ring-destructive"
-              )}
-            />
-            <p className="mt-1 text-[11px] text-muted-foreground">
-              Used for reference only. It does not auto-adjust your expenses.
-            </p>
-            <FieldError id="yearBuilt-error" message={errors.yearBuilt?.message} />
-          </div>
+          {showYearBuilt ? (
+            <div>
+              <Label htmlFor="yearBuilt" className="text-sm font-medium text-foreground mb-1.5 block">
+                Year Built <span className="text-xs text-muted-foreground">(Optional)</span>
+              </Label>
+              <Input
+                {...register("yearBuilt", { setValueAs: optionalNumberSetValueAs })}
+                id="yearBuilt"
+                type="number"
+                inputMode="decimal"
+                placeholder="2015"
+                aria-invalid={!!errors.yearBuilt}
+                aria-describedby={errors.yearBuilt ? "yearBuilt-error" : undefined}
+                className={cn(
+                  "border-input bg-background",
+                  errors.yearBuilt && "border-destructive focus-visible:ring-destructive"
+                )}
+              />
+              <p className="mt-1 text-[11px] text-muted-foreground">
+                Used for reference only. It does not auto-adjust your expenses.
+              </p>
+              <FieldError id="yearBuilt-error" message={errors.yearBuilt?.message} />
+            </div>
+          ) : null}
         </div>
       </div>
     </div>
