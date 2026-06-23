@@ -123,8 +123,9 @@ export function ExitIntentOffer() {
           <span className="text-primary">50% off your first year.</span>
         </h2>
         <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-          You came this close to upgrading. Save $114/yr on Pro — full toolkit,
-          10-year projections, PDF exports, save unlimited deals. Cancel anytime.
+          You came this close to upgrading. Start with a 3-day free trial, then 50% off
+          your first year of Pro — full toolkit, 10-year projections, PDF exports,
+          unlimited saved deals. Cancel anytime.
         </p>
 
         <div className="mt-5 flex flex-col gap-2.5 sm:flex-row">

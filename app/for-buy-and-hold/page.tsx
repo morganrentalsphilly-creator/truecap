@@ -114,7 +114,7 @@ export default function ForBuyAndHoldPage() {
               href="/pricing"
               className="inline-flex h-12 items-center justify-center gap-1.5 rounded-xl border border-border bg-card px-5 text-sm font-semibold text-foreground hover:bg-muted"
             >
-              See Pro pricing
+              Start a 3-day free trial
             </Link>
           </div>
           <p className="mt-3 text-xs text-muted-foreground">
@@ -238,7 +238,7 @@ export default function ForBuyAndHoldPage() {
               href="/pricing"
               className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
             >
-              See Pro pricing
+              Start a 3-day free trial
               <ArrowUpRight className="w-4 h-4" />
             </Link>
             <Link

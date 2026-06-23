@@ -307,8 +307,8 @@ export function Header({
                 <Crown className="w-2.5 h-2.5" />
                 Pro
               </span>
-              <span className="text-[11px] text-muted-foreground font-medium tracking-[0.01em]">
-                Deal Score
+              <span className="text-[11px] font-bold text-[var(--brand-orange)] tracking-[0.01em]">
+                3-day free trial
               </span>
               <span className="text-muted-foreground/40 text-[11px]">&bull;</span>
               <span className="text-[11px] text-muted-foreground font-medium tracking-[0.01em]">
