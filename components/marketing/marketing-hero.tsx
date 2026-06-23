@@ -50,7 +50,7 @@ export function MarketingHero() {
 
             {/* Headline: 2 lines max, hierarchy by weight + accent color,
                 not runaway scale. Left-aligned (anti-center bias). */}
-            <h1 className="text-balance text-4xl font-extrabold leading-[1.04] tracking-tight text-foreground sm:text-5xl lg:text-[2.8rem]">
+            <h1 className="text-balance text-4xl font-extrabold leading-[1.04] tracking-tight text-foreground sm:text-5xl lg:text-[2.4rem]">
               Know if a rental deal{" "}
               <span className="text-primary">cash-flows in 60 seconds.</span>
             </h1>
