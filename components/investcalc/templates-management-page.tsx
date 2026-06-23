@@ -8,6 +8,7 @@ import {
   FileText,
   History,
   Loader2,
+  MoreHorizontal,
   Pencil,
   Plus,
   Search,
@@ -35,6 +36,12 @@ import { trackEvent } from "@/lib/analytics";
 import type { AnalysisTemplateInput } from "@/lib/analysis-template-schema";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import {
   Pagination,
@@ -630,7 +637,7 @@ export function TemplatesManagementPage({
           </div>
 
           <div className="hidden overflow-x-auto xl:block">
-            <table className="w-full min-w-[1040px] text-sm">
+            <table className="w-full min-w-[880px] text-sm">
               <thead className="bg-muted/40 border-b border-border">
                 <tr className="h-12">
                   <th className="text-left px-4 text-xs uppercase tracking-wider text-muted-foreground font-bold">
@@ -688,44 +695,6 @@ export function TemplatesManagementPage({
                     <td className="px-4 text-right tabular-nums text-foreground">{toPercentLabel(template.taxRatePct)}</td>
                     <td className="px-4">
                       <div className="flex items-center justify-end gap-1.5">
-                        {template.buyBox ? (
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-primary"
-                            disabled={busyTemplateId === template.id}
-                            title="Use as my Buy Box"
-                            onClick={() => handleUseAsBuyBox(template)}
-                          >
-                            <Target className="w-4 h-4" />
-                            <span className="sr-only">Use as my Buy Box</span>
-                          </Button>
-                        ) : null}
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className={`h-8 w-8 ${template.isDefault ? "text-primary" : ""}`}
-                          disabled={template.isDefault || busyTemplateId === template.id}
-                          title={template.isDefault ? "Default template" : "Set as default"}
-                          onClick={() => handleSetDefault(template)}
-                        >
-                          <Star className="w-4 h-4" />
-                          <span className="sr-only">Set as default</span>
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
-                          disabled={busyTemplateId === template.id}
-                          title="Duplicate"
-                          onClick={() => handleDuplicate(template)}
-                        >
-                          <Copy className="w-4 h-4" />
-                          <span className="sr-only">Duplicate template</span>
-                        </Button>
                         <Button
                           type="button"
                           variant="ghost"
@@ -742,17 +711,7 @@ export function TemplatesManagementPage({
                           variant="ghost"
                           size="icon"
                           className="h-8 w-8"
-                          title="Version history"
-                          onClick={() => openVersionDialog(template)}
-                        >
-                          <History className="w-4 h-4" />
-                          <span className="sr-only">Version history</span>
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
+                          title="Edit template"
                           onClick={() => openEditDialog(template)}
                         >
                           <Pencil className="w-4 h-4" />
@@ -763,11 +722,56 @@ export function TemplatesManagementPage({
                           variant="ghost"
                           size="icon"
                           className="h-8 w-8 text-destructive hover:text-destructive"
+                          title="Delete template"
                           onClick={() => setTemplateToDelete(template)}
                         >
                           <Trash2 className="w-4 h-4" />
                           <span className="sr-only">Delete template</span>
                         </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              title="More actions"
+                              disabled={busyTemplateId === template.id}
+                            >
+                              <MoreHorizontal className="w-4 h-4" />
+                              <span className="sr-only">More actions</span>
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-48">
+                            {template.buyBox ? (
+                              <DropdownMenuItem
+                                disabled={busyTemplateId === template.id}
+                                onSelect={() => handleUseAsBuyBox(template)}
+                              >
+                                <Target className="mr-2 h-4 w-4 text-primary" />
+                                Use as my Buy Box
+                              </DropdownMenuItem>
+                            ) : null}
+                            <DropdownMenuItem
+                              disabled={template.isDefault || busyTemplateId === template.id}
+                              onSelect={() => handleSetDefault(template)}
+                            >
+                              <Star className="mr-2 h-4 w-4" />
+                              {template.isDefault ? "Default template" : "Set as default"}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              disabled={busyTemplateId === template.id}
+                              onSelect={() => handleDuplicate(template)}
+                            >
+                              <Copy className="mr-2 h-4 w-4" />
+                              Duplicate
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onSelect={() => openVersionDialog(template)}>
+                              <History className="mr-2 h-4 w-4" />
+                              Version history
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </td>
                   </tr>
