@@ -1018,7 +1018,7 @@ export function AnalysisDashboard({
           non-zero, else base result) so they react live to the
           stress-test sliders; the after-tax / annual-CF / tax-savings
           tiles read base `result` so Pro panels don't thrash on drags. */}
-      <div className="space-y-3">
+      <div className={cn("space-y-3", strategyLeadsOutput && "hidden")}>
         <div className="flex items-center gap-2 px-1">
           <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
             Overview

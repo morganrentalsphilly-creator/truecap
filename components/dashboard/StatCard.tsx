@@ -23,10 +23,10 @@ interface Props {
 }
 
 const toneMap = {
-  primary: { color: "oklch(0.55 0.22 265)", grad: "var(--gradient-premium)" },
+  primary: { color: "oklch(0.54 0.18 240)", grad: "var(--gradient-premium)" },
   success: { color: "oklch(0.68 0.17 158)", grad: "var(--gradient-success)" },
   gold: { color: "oklch(0.78 0.14 85)", grad: "var(--gradient-gold)" },
-  violet: { color: "oklch(0.62 0.22 320)", grad: "linear-gradient(135deg, oklch(0.62 0.22 320), oklch(0.55 0.22 265))" },
+  violet: { color: "oklch(0.66 0.13 210)", grad: "linear-gradient(135deg, oklch(0.66 0.13 210), oklch(0.54 0.18 240))" },
 };
 
 export function StatCard({ label, value, change, changeLabel, icon: Icon, spark, tone = "primary", onClick, badge, changeSuffix = "%" }: Props) {

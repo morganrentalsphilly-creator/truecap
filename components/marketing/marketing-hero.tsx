@@ -3,24 +3,18 @@
  * visitors. Authenticated users skip this entirely — they already know
  * what TrueCap is and want the calculator immediately.
  *
- * Conversion-focused, single-screen layout:
- *   - bold, outcome-led value prop + sub
- *   - an address input ("Analyze free") IN the hero so the core flow
- *     starts with no scroll — it hands off to the calculator below via a
- *     window event (see hero-address-form.tsx)
- *   - "Try a sample deal" + a quiet "See Pro features" link
- *   - trust line, proof strip + data-source line, live deals ticker
- *   - one outcome-specific testimonial, then the live sample result card
+ * Layout (taste-skill redesign, Jun 2026): an ASYMMETRIC SPLIT, not a
+ * centered stack. Left column carries the value prop + the primary
+ * action (address input above the fold); the right column is the live,
+ * computed preview card (the hero "asset"). Social proof regroups into
+ * a divided trust band beneath the split — logic-grouped with rules,
+ * not boxed cards. We deliberately keep the computed live card instead
+ * of stock imagery: it renders REAL engine output for the sample deal,
+ * so it's the most honest, on-brand asset and needs no external CDN.
  *
- * No images that need an external CDN — everything is rendered in the
- * browser via CSS/SVG so it stays fast on first paint.
- *
- * SERVER COMPONENT. The client-only behavior is isolated into the tiny
- * <HeroAddressForm /> island (the address field + handoff) so the rest
- * of this big tree ships zero JS to the browser. That's a real LCP win
- * on the homepage (every paid-traffic visitor lands here first). The
- * Google Places script the island uses is already loaded by the
- * calculator on this same page, so the input adds no extra script cost.
+ * SERVER COMPONENT. The only client behavior is the tiny
+ * <HeroAddressForm /> island (address field + handoff) and the
+ * <DealsAnalyzedTicker />, so the rest of this tree ships zero JS.
  */
 
 import { Check, Quote, Sparkles, TrendingUp } from "lucide-react";
@@ -30,130 +24,117 @@ import { calculateAnalysis } from "@/lib/calc-analysis";
 import { buildDealScoreInputFromAnalysis, computeDealScore, recommendationLabel } from "@/lib/deal-score";
 import { SAMPLE_DEAL_DISPLAY, SAMPLE_DEAL_VALUES } from "@/lib/sample-deal";
 
-// TRUST_STATS row removed (Jun 2026) — redundant with risk-reversal
-// microcopy ("No card · No signup · Cancel anytime"), the eyebrow chip
-// ("HUD+FRED auto-fill"), the live DealsAnalyzedTicker, and the
-// animated mock card. Four trust signals competing for the same
-// real estate stacked the hero too tall and one of them had to go.
-
-// Hero feature cards removed (Jun 2026) — they repeated How-It-Works and the
-// comparison table and stacked the hero too tall for a cold-traffic landing.
-// The same value props live in How-It-Works + the comparison matrix below.
-
 export function MarketingHero() {
   return (
     <section className="relative overflow-hidden border-b border-border bg-gradient-to-b from-[var(--brand-blue-light)] via-background to-background">
-      {/* subtle radial glow */}
+      {/* Soft ambient accent behind the preview — a single tinted blob,
+          no neon glow. Sits to the right so the composition reads
+          asymmetric rather than a centered halo. */}
       <div
         aria-hidden
-        className="pointer-events-none absolute -top-32 left-1/2 -z-10 h-[480px] w-[920px] -translate-x-1/2 rounded-full bg-primary/10 blur-3xl"
+        className="pointer-events-none absolute -top-24 right-[-12%] -z-10 h-[460px] w-[680px] rounded-full bg-primary/10 blur-3xl"
       />
 
-      <div className="mx-auto max-w-6xl px-4 pb-10 pt-10 sm:px-6 sm:pb-14 sm:pt-16">
-        {/* Eyebrow chip — shorter copy on mobile so the full text fits
-            in a 375px viewport without wrapping or pushing layout. */}
-        <div className="mx-auto mb-5 flex w-fit max-w-full items-center gap-1.5 rounded-full border border-primary/20 bg-card/70 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-primary shadow-sm backdrop-blur sm:gap-2 sm:px-3.5 sm:text-[11px] sm:tracking-widest">
-          <Sparkles className="size-3 shrink-0" />
-          {/* Single eyebrow (no responsive split) so it reads as one line
-              to crawlers / screen readers instead of two concatenated
-              variants. Kept short so it never wraps inside the pill. */}
-          <span>Free analyzer · No card · No signup</span>
+      <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16 lg:py-20">
+        {/* Asymmetric split: conversion copy left, live preview right.
+            Collapses to a single column below lg — mobile gets the copy
+            + form first, then the preview. */}
+        <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,30rem)] lg:gap-14">
+          {/* ── Left: value prop + the primary action ─────────────── */}
+          <div className="tc-rise-in max-w-2xl">
+            {/* Risk-reversal eyebrow — value chip, not a version label. */}
+            <div className="mb-5 inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-card/70 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-primary shadow-sm backdrop-blur">
+              <Sparkles className="size-3 shrink-0" />
+              <span>Free analyzer · No card · No signup</span>
+            </div>
+
+            {/* Headline: 2 lines max, hierarchy by weight + accent color,
+                not runaway scale. Left-aligned (anti-center bias). */}
+            <h1 className="text-balance text-4xl font-extrabold leading-[1.04] tracking-tight text-foreground sm:text-5xl lg:text-[3.4rem]">
+              Know if a rental deal{" "}
+              <span className="text-primary">cash-flows in 60 seconds.</span>
+            </h1>
+            {/* Subtext: 20 words, no em-dash. */}
+            <p className="mt-4 max-w-xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg">
+              Enter an address. TrueCap auto-fills rent, rate, and tax, then
+              returns cap rate, cash flow, DSCR, and a plain-English verdict.
+            </p>
+
+            {/* Primary action — the address input. Hands off to the
+                calculator below via a window event (hero-address-form.tsx). */}
+            <HeroAddressForm />
+
+            {/* Risk-reversal line. */}
+            <p className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+              <Check className="size-3.5 shrink-0 text-[var(--metric-positive)]" />
+              <span>Free forever · No card · No signup required</span>
+            </p>
+          </div>
+
+          {/* ── Right: live, computed preview (the hero asset) ────── */}
+          <div className="tc-rise-in tc-delay-2 w-full lg:justify-self-end">
+            <HeroProductMock />
+          </div>
         </div>
 
-        {/* headline + sub — action/outcome-led: says exactly what the
-            product tells you, and how fast. */}
-        <h1 className="mx-auto max-w-3xl text-balance text-center text-3xl font-extrabold leading-[1.05] tracking-tight text-foreground sm:text-[58px]">
-          Know if a rental deal <span className="text-primary">cash-flows in 60 seconds.</span>
-        </h1>
-        <p className="mx-auto mt-4 max-w-2xl text-balance text-center text-[15px] leading-relaxed text-muted-foreground sm:text-lg">
-          Enter an address and TrueCap auto-fills rent, mortgage rate, and
-          property tax — then gives you cap rate, cash flow, DSCR, and a
-          plain-English verdict.
-        </p>
-
-        {/* Primary action — the address input lives IN the hero so the
-            core flow starts without a scroll. Hands off to the calculator
-            below via a window event (see hero-address-form.tsx). */}
-        <HeroAddressForm />
-
-        {/* Trust line — "Cancel anytime" intentionally removed: it implies
-            a subscription and contradicts "no signup" at the exact moment
-            the visitor is deciding to click. It now lives only on /pricing,
-            where a subscription is actually in play. */}
-        <p className="mt-3 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 px-2 text-center text-xs text-muted-foreground">
-          <Check className="size-3.5 shrink-0 text-[var(--metric-positive)]" />
-          <span>Free forever · No card · No signup required</span>
-        </p>
-
-        {/* Proof strip (#5) + data-source line (#6) — answers "what
-            happens after I type an address?" and "can I trust the
-            numbers?" right in the decision moment, before the CTA. */}
-        <div className="mx-auto mt-5 max-w-2xl space-y-1.5 text-center">
-          <p className="text-xs font-medium text-foreground/80">
-            Auto-fills rent, rate &amp; tax · Editable assumptions · Cap rate · CoC · DSCR · cash flow
-          </p>
-          <p className="text-[11px] leading-relaxed text-muted-foreground">
-            Uses <strong className="font-semibold text-foreground">HUD</strong> rent,{" "}
-            <strong className="font-semibold text-foreground">FRED</strong> mortgage rates, and{" "}
-            <strong className="font-semibold text-foreground">state</strong> tax defaults — all editable.
-          </p>
+        {/* Trust band — proof line, data sources, live count, and one
+            outcome quote, grouped beneath the split with divider rules
+            instead of card boxes (Rule 4: logic-grouping over card overuse). */}
+        <div className="tc-reveal mt-12 border-t border-border pt-8 sm:mt-14">
+          <div className="grid gap-6 sm:gap-8 lg:grid-cols-[1.5fr_1fr]">
+            <div className="space-y-1.5">
+              <p className="text-xs font-medium text-foreground/80">
+                Auto-fills rent, rate &amp; tax · Editable assumptions · Cap rate · CoC · DSCR · cash flow
+              </p>
+              <p className="text-[11px] leading-relaxed text-muted-foreground">
+                Uses <strong className="font-semibold text-foreground">HUD</strong> rent,{" "}
+                <strong className="font-semibold text-foreground">FRED</strong> mortgage rates, and{" "}
+                <strong className="font-semibold text-foreground">state</strong> tax defaults, all editable.
+              </p>
+              <div className="pt-1">
+                <DealsAnalyzedTicker
+                  source="runs"
+                  minimum={1}
+                  plus
+                  labelSuffix="deals analyzed by investors, agents, and house hackers"
+                />
+              </div>
+            </div>
+            {/* One outcome-specific quote — the strongest, revenue-tied
+                proof sits near the CTA; the rest live in SocialProof below. */}
+            <figure className="flex items-start gap-2.5 border-t border-border pt-4 sm:border-l sm:border-t-0 sm:pl-6 sm:pt-0">
+              <Quote className="mt-0.5 size-4 shrink-0 text-primary/40" />
+              <figcaption className="text-xs leading-relaxed text-muted-foreground">
+                <span className="text-foreground">
+                  &ldquo;Closed three more deals this quarter because I could move faster.&rdquo;
+                </span>
+                <span className="mt-1 block font-semibold text-foreground/70">
+                  Jordan M., buy-and-hold investor (18 doors)
+                </span>
+              </figcaption>
+            </figure>
+          </div>
         </div>
-
-        {/* Real-data social proof — hides itself if count is low so we
-            never advertise low volume. */}
-        <div className="mt-5 text-center">
-          <DealsAnalyzedTicker
-            source="runs"
-            minimum={1}
-            plus
-            labelSuffix="deals analyzed by investors, agents, and house hackers"
-          />
-        </div>
-
-        {/* One outcome-specific testimonial (#8) — the strongest,
-            revenue-tied quote sits near the CTA to support the first
-            decision; the rest live in the SocialProof section below. */}
-        <figure className="mx-auto mt-5 flex max-w-xl items-start justify-center gap-2 text-center">
-          <Quote className="mt-0.5 size-4 shrink-0 text-primary/40" />
-          <figcaption className="text-xs leading-relaxed text-muted-foreground">
-            <span className="text-foreground">
-              &ldquo;Closed three more deals this quarter because I could move faster.&rdquo;
-            </span>{" "}
-            — Jordan M., buy-and-hold investor (18 doors)
-          </figcaption>
-        </figure>
-
-        {/* Mock-up screenshot — pure CSS, lightweight.
-            Previously hidden on mobile to save scroll; now shown
-            everywhere because the sequential reveal loop is THE
-            single best thing we communicate on the home page and
-            hiding it on phones (~60% of traffic) was undervaluing
-            it. The card auto-shrinks fine on narrow viewports. */}
-        <HeroProductMock />
-
       </div>
     </section>
   );
 }
 
 /**
- * Static product preview — fast-loading CSS/SVG mockup of a finished
- * deal. Mirrors the per-deal OG card aesthetic so the brand looks
- * coherent across surfaces.
- */
-/**
- * Animation styles inlined into the component because the same
- * keyframes defined in globals.css weren't reaching the browser in
- * production (Morgan reported nothing animating at all, including
- * the LIVE dot). Inlining via a server-rendered <style> tag bypasses
- * the entire Tailwind v4 / PostCSS pipeline — the rules ship in the
- * HTML payload verbatim.
+ * Static product preview — fast-loading CSS mockup of a finished deal.
+ * Mirrors the per-deal OG card aesthetic so the brand looks coherent
+ * across surfaces.
+ *
+ * Animation styles inlined into the component because the same keyframes
+ * defined in globals.css weren't reaching the browser in production
+ * (Morgan reported nothing animating at all, including the LIVE dot).
+ * Inlining via a server-rendered <style> tag bypasses the Tailwind v4 /
+ * PostCSS pipeline — the rules ship in the HTML payload verbatim.
  *
  * Defines:
  *   - .tc-hero-pulse-dot — 1.5s blink for the LIVE indicator.
  *   - .tc-hero-step-1 .. .tc-hero-step-6 — 5s sequential reveal loop
- *     (address → tile 1 → tile 2 → tile 3 → pills → verdict line),
- *     each on the same 5s clock with a different fade-in offset.
+ *     (address → tile 1 → tile 2 → tile 3 → pills → verdict line).
  *
  * Honors prefers-reduced-motion to disable for a11y compliance.
  */
@@ -209,14 +190,11 @@ const HERO_ANIM_CSS = `
 `;
 
 function HeroProductMock() {
-  // COMPUTED, not hard-coded (Jun 2026 mobile audit): the card renders
-  // the REAL engine output for the REAL sample deal the "Try a sample
-  // deal" button loads. A previous version hard-coded numbers that the
-  // engine contradicted the moment a visitor clicked the demo —
-  // "Strong Buy · Score 84" on the card, "Risky · Score 20" in the
-  // analysis. Sharing lib/sample-deal.ts + computing here makes that
-  // divergence impossible. This is a server component, so this math
-  // runs at build/ISR time — zero client cost.
+  // COMPUTED, not hard-coded: the card renders the REAL engine output for
+  // the REAL sample deal the "View a sample report" button loads. Sharing
+  // lib/sample-deal.ts + computing here makes card/analysis divergence
+  // impossible. Server component, so this runs at build/ISR time — zero
+  // client cost.
   const result = calculateAnalysis(SAMPLE_DEAL_VALUES);
   const score = computeDealScore(buildDealScoreInputFromAnalysis(SAMPLE_DEAL_VALUES, result));
   const cf = Math.round(result.netCashFlow);
@@ -226,28 +204,21 @@ function HeroProductMock() {
   const dscrClears = result.dscr >= 1.25;
 
   return (
-    <div className="relative mx-auto mt-10 max-w-3xl">
+    <div className="relative mx-auto w-full max-w-lg">
       {/* Inline keyframes — see HERO_ANIM_CSS comment above. */}
       <style dangerouslySetInnerHTML={{ __html: HERO_ANIM_CSS }} />
 
       {/* card */}
       <div className="rounded-2xl border border-border bg-card p-4 shadow-[0_24px_70px_rgba(15,23,42,0.10)] sm:p-6">
-        {/* browser chrome — shorter URL pill on mobile so the full
-            string fits without truncation, full URL on sm+. A small
-            LIVE indicator on the right communicates that the analyzer
-            is *running*, not a static screenshot.
-
-            The LIVE dot uses BOTH our custom tc-hero-pulse-dot AND
-            Tailwind's built-in animate-pulse as a belt-and-suspenders
-            fallback: if our inlined keyframes ever break, animate-pulse
-            still gives the user some movement. */}
+        {/* browser chrome + a small LIVE indicator communicating that the
+            analyzer is running, not a static screenshot. */}
         <div className="mb-4 flex items-center gap-1.5">
           <span className="size-2.5 rounded-full bg-red-400/80" />
           <span className="size-2.5 rounded-full bg-amber-400/80" />
           <span className="size-2.5 rounded-full bg-emerald-400/80" />
           <span className="ml-3 min-w-0 flex-1 truncate rounded-full bg-muted px-3 py-0.5 text-[10px] font-medium text-muted-foreground">
             <span className="sm:hidden">usetruecap.com</span>
-            <span className="hidden sm:inline">usetruecap.com — {SAMPLE_DEAL_DISPLAY.shortAddress}</span>
+            <span className="hidden sm:inline">usetruecap.com / {SAMPLE_DEAL_DISPLAY.shortAddress}</span>
           </span>
           <span
             aria-label="Live demo"
@@ -258,12 +229,7 @@ function HeroProductMock() {
           </span>
         </div>
 
-        {/* address + verdict row.
-            Mobile: stack vertically — address on top with full width
-            (so 'Philadelphia' doesn't wrap onto 3 lines), then the
-            verdict pills on a second row. Desktop: original side-by-
-            side layout. The address still gets step-1 and the pills
-            cluster step-5 of the sequential reveal animation. */}
+        {/* address + verdict row. */}
         <div className="flex flex-col gap-2 border-b border-border pb-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-3">
           <div className="tc-hero-step-1 min-w-0 sm:flex-1">
             <div className="text-base font-extrabold text-foreground sm:text-lg">{SAMPLE_DEAL_DISPLAY.shortAddress}</div>
@@ -282,45 +248,23 @@ function HeroProductMock() {
           </div>
         </div>
 
-        {/* Metric tiles — trimmed from 7 metrics (4 main + 3 secondary +
-            sparkline) to 3 cleanest. Previously the card showed cash flow,
-            cap rate, CoC, DSCR, 10-yr CF + sparkline, tax save/yr, and
-            year-7 exit — that's the calculator's full output, doing the
-            tool's job before the visitor types anything. Now: the verdict
-            badge does the headline work, and three tiles answer the three
-            questions every investor asks first — "does it cash flow?",
-            "what's the unleveraged return?", and "will the lender like
-            this?". */}
         {/* Metric tiles — sequential reveal steps 2 → 3 → 4 (cash flow,
-            cap rate, DSCR). Each tile carries its own step class so
-            the 3 tiles populate left-to-right after the address. */}
+            cap rate, DSCR). Live engine output (see computed values above). */}
         <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-3">
-          {/* Mobile-friendly labels: "Cash flow / mo" was wrapping onto
-              two lines at narrow viewports, making that tile taller
-              than the other two. Shortened to "Cash flow" — the
-              monthly unit is implied by the dollar sign + product
-              context. Desktop keeps the longer label via the
-              responsive prop below. */}
-          {/* Live engine output — see the computed values at the top of
-              HeroProductMock. These can never disagree with what the
-              "Try a sample deal" button produces. */}
           <MockTile label="Cash flow" value={cfLabel} tone="success" stepClass="tc-hero-step-2" />
           <MockTile label="Cap rate" value={capLabel} tone="success" stepClass="tc-hero-step-3" />
           <MockTile label="DSCR" value={dscrLabel} tone="success" sub={dscrClears ? "Bankable" : "Tight"} stepClass="tc-hero-step-4" />
         </div>
 
-        {/* Verdict line — final step 6, reveals last after tiles + pills.
-            ONE concise sentence (no mobile/desktop split): a single clean
-            line reads better on screen AND to crawlers/AI/SEO than two
-            variants that concatenate in the raw HTML. */}
+        {/* Verdict line — final step 6, one concise sentence. */}
         <div className="tc-hero-step-6 mt-4 flex items-start gap-2 rounded-xl border border-[var(--brand-green)]/25 bg-[var(--brand-green-light)] p-3 text-xs text-foreground">
           <TrendingUp className="mt-0.5 size-4 shrink-0 text-[var(--brand-green)]" />
           <span>
             <strong>1700 W Erie: strong fundamentals.</strong>{" "}
             {cfLabel}/mo cash flow, {capLabel} cap, DSCR {dscrLabel}
             {dscrClears
-              ? " — clears the typical ≥1.25 lender bar. Worth a deeper underwrite."
-              : " — below the typical ≥1.25 lender bar; stress-test before offering."}
+              ? ". Clears the typical ≥1.25 lender bar. Worth a deeper underwrite."
+              : ". Below the typical ≥1.25 lender bar; stress-test before offering."}
           </span>
         </div>
       </div>
@@ -345,9 +289,7 @@ function MockTile({
   small?: boolean;
   /**
    * Optional sequential-reveal animation class (`tc-hero-step-N`).
-   * Used by the marketing hero mock card so the three tiles populate
-   * left-to-right after the address. No-op when prefers-reduced-motion
-   * is set (handled in globals.css media query).
+   * No-op when prefers-reduced-motion is set (handled in HERO_ANIM_CSS).
    */
   stepClass?: string;
 }) {
@@ -357,8 +299,6 @@ function MockTile({
     <div
       className={`rounded-xl border border-border bg-background p-3 ${stepClass ?? ""}`}
     >
-      {/* Label bumped from text-[9px] to text-[10px] — 9px is below
-          readable mobile minimum even for ALL-CAPS labels. */}
       <div className={`text-[10px] font-bold uppercase tracking-widest text-muted-foreground ${small ? "" : "sm:text-[10px]"}`}>
         {label}
       </div>

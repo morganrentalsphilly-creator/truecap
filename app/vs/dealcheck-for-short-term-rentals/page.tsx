@@ -148,7 +148,7 @@ export default function VsDealcheckForShortTermRentalsPage() {
             Both calculators were built for long-term rentals first. Both let you model short-term rentals by overriding rent with a projected monthly STR revenue. This is the STR-investor cut: which one handles seasonal ADR + occupancy, supports AirDNA inputs cleanly, and models the STR tax loophole (cost segregation + bonus depreciation) properly.
           </p>
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-            <ScrollToFormButton className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(82,72,212,0.28)] transition-transform hover:-translate-y-0.5">
+            <ScrollToFormButton className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0, 112, 196,0.28)] transition-transform hover:-translate-y-0.5">
               <Calculator className="size-4" />
               Run a deal — 60 seconds
               <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />

@@ -1,143 +1,99 @@
 # TrueCap — Analysis Dashboard UX Improvement Plan
 
-> Generated with the **UI/UX Pro Max** skill (installed at `.claude/skills/ui-ux-pro-max/`),
-> grounded in the actual code of `components/investcalc/analysis-dashboard.tsx`
-> (2,338 lines) and the app's design tokens in `app/globals.css`.
+> Generated with the **UI/UX Pro Max** skill (`.claude/skills/ui-ux-pro-max/`),
+> then **verified against the actual code** in
+> `components/investcalc/analysis-dashboard.tsx` and `app/globals.css`.
 >
-> Scope: the **analysis dashboard** (the tabbed result view — verdict → numbers →
-> details). This is the implementation/visual layer. It is complementary to
-> `TRUECAP_UX_AUDIT.md`, which covers higher-level product/packaging UX.
->
-> Every item respects Morgan's standing directive (CLAUDE.md §1): no new required
-> inputs, no new top-level nav, invisible-until-useful. These are polish and
-> correctness changes to an already-strong surface — not a redesign.
+> Scope: the **analysis dashboard** (verdict → numbers → details). Implementation/
+> visual layer — complementary to `TRUECAP_UX_AUDIT.md` (product/packaging UX).
+> Every item respects Morgan's standing directive: no new required inputs, no new
+> top-level nav, invisible-until-useful. Polish, not redesign.
 
 ---
 
-## The surface is already well-built
+## Verification corrections (read this first)
 
-Worth saying up front: the dashboard has a deliberate, calm information
-hierarchy (verdict card → metric grid → tabbed detail), a real token system
-(`--brand-green`, `--brand-blue-light`, `--metric-positive`, `--metric-negative`),
-consistent `rounded-2xl` / `border-border` / `bg-card` framing, glossary tooltips,
-and skeleton loading states. The recommendations below sharpen what's there; they
-don't rebuild it.
+An initial draft of this plan flagged findings from a fast code scan. Reading the
+real code overturned several of them — recording that honestly so nobody acts on a
+phantom:
 
----
+- **Dark mode is NOT broken — it's intentionally absent.** `app/globals.css`
+  (L196–272) documents that the analyzer + dashboard are **always light** ("The app
+  has no theme toggle"), and there is no `ThemeProvider`/`next-themes` wired up and
+  nothing ever applies the `.dark` class. So the raw `amber-50/orange-50/red-50`
+  verdict palette is **correct**, and adding "dark-aware tokens" would be pure churn
+  against a documented decision. **Dropped.**
+- **`prefers-reduced-motion` is already handled** — global block at
+  `app/globals.css` L182–194. **Dropped.**
+- **Tap targets already handled** — `touch-action: manipulation` +
+  `-webkit-tap-highlight-color` at L148/177, and toggles use `min-h-11`. **Dropped.**
 
-## P0 — Dark mode is broken on the verdict/risk states
-
-**This is a correctness bug, not a preference.** The app ships a dark theme
-(`app/globals.css` defines `.dark`, and `theme-provider.tsx` is wired up), but the
-dashboard's verdict states are painted with **raw, light-only Tailwind palette
-values that have no `dark:` variant**:
-
-- Recommendation card (`analysis-dashboard.tsx` ~L842–852): `neutral` →
-  `bg-amber-50 border-amber-200`, `risky` → `bg-orange-50 border-orange-200`,
-  `avoid` → `bg-red-50 border-red-200`. The `strong-buy` / `buy` states correctly
-  use tokens (`--brand-green-light`, `--brand-blue-light`); the negative states do not.
-- Across the file there are **~60 raw `*-50/100/200/700/800` usages**
-  (amber/orange/red/blue) and **zero paired `dark:` variants**. In dark mode these
-  render as pale panels with dark-on-light text floating on a dark page — low
-  contrast and visually broken.
-
-Skill guideline (pre-delivery checklist): *light-mode text contrast 4.5:1 minimum*
-— and dark-mode must reach parity, not fall back to light swatches.
-
-**Fix (the clean way):** add a semantic verdict scale to `app/globals.css` with
-`.dark` overrides, then replace the raw palette with the tokens. One source of
-truth, both themes correct:
-
-```css
-/* app/globals.css — :root */
---verdict-neutral-bg: oklch(0.97 0.03 85);   --verdict-neutral-fg: oklch(0.45 0.10 75);
---verdict-risky-bg:   oklch(0.96 0.05 55);   --verdict-risky-fg:   oklch(0.50 0.14 45);
---verdict-avoid-bg:   oklch(0.95 0.05 25);   --verdict-avoid-fg:   oklch(0.50 0.16 25);
-/* .dark — same names, dark-appropriate values (deep, desaturated bg; light fg) */
-```
-
-Then `bg-amber-50` → `bg-[var(--verdict-neutral-bg)]`, `text-amber-700` →
-`text-[var(--verdict-neutral-fg)]`, etc. (This mirrors how `strong-buy`/`buy`
-already work, so it's consistent with the existing pattern.)
-
-**Impact:** high (whole dark-mode experience on the most-viewed surface). **Effort:** medium.
+Net: the surface was already in better shape than a grep implied. The lesson —
+verify against render/code before assigning severity.
 
 ---
 
-## P1 — Interactive affordances are inconsistent
+## DONE — Interactive affordances on raw buttons ✅ (shipped)
 
-The file has **11 `onClick` handlers but only 3 `cursor-pointer`** declarations,
-and the custom `<button>` elements (e.g. "Show all / Show fewer" at ~L928, strategy
-toggles) rely on default cursor and have no explicit focus ring.
+Most `onClick`s sit on shadcn `<Button>` (cursor/focus handled) and the
+`<details>/<summary>` toggles already use `cursor-pointer`. The real gap was four
+**raw `<button>`** groups missing pointer affordance + a visible keyboard focus
+ring (WCAG 2.4.7 Focus Visible):
 
-Skill checklist items, verbatim: *cursor-pointer on all clickable elements* ·
-*focus states visible for keyboard nav* · *hover states with smooth transitions
-(150–300ms)* · *prefers-reduced-motion respected*.
+| Element | Line | Change |
+|---|---|---|
+| Tab strip | ~1185 | `cursor-pointer` + `focus-visible:ring-2 ring-ring` |
+| Strategy chips | ~1448 | `cursor-pointer` + `focus-visible:ring-2 ring-ring` |
+| "Show all / fewer" tips | ~953 | `cursor-pointer` + `focus-visible:underline` (mirrors hover) |
+| Export-mode rows | ~809 | `cursor-pointer` + `focus-visible:bg-muted` (mirrors hover) + `disabled:cursor-not-allowed` |
 
-**Fix:** a small shared `className` for interactive non-`<Button>` elements —
-`cursor-pointer transition-colors duration-200 focus-visible:outline-none
-focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2` — applied
-to the raw buttons and clickable cards. Add a global
-`@media (prefers-reduced-motion: reduce)` block that neutralizes transitions/animations.
-
-**Impact:** medium-high (accessibility + perceived quality). **Effort:** low.
+Each focus state mirrors that element's existing hover treatment, so it reads as
+part of the design rather than a bolt-on. String-literal class edits only — no type
+surface touched.
 
 ---
 
-## P1 — Charts show data but not the "so-what"
+## NEXT (highest value) — Chart "so-what" insight lines
 
-Ties directly to `TRUECAP_UX_AUDIT.md` P1. The tabs render strong charts (cash-flow
-crossing positive, tax shield decay, equity growth) but rarely state the takeaway in
-words. A `panel-insight.tsx` shared component already exists
-(`analysis-panels/shared/`) — it's the right home for a one-line, plain-English
-read per chart ("Cash-flow turns positive in year 8" / "Your tax shield shrinks as
-the loan amortizes").
+Corroborated by `TRUECAP_UX_AUDIT.md` P1. The tabs render strong charts but rarely
+state the takeaway in words; the user has to infer "cash-flow turns positive in
+year 8" or "the tax shield shrinks as the loan amortizes." A `panel-insight.tsx`
+shared component already exists in `analysis-panels/shared/` — it's the right home
+for a one-line, plain-English read per chart.
 
 Skill guideline (UX → Content): pair every visualization with a labeled,
-human-readable interpretation; never make the user infer the conclusion.
+human-readable interpretation. This is the product's whole promise — a *verdict*,
+not a spreadsheet.
 
-**Impact:** high (this is the product's whole promise — a *verdict*, not a
-spreadsheet). **Effort:** medium (compute the inflection points from the existing
-projection arrays; no new inputs).
-
----
-
-## P2 — Polish (do after the above)
-
-- **Number formatting.** Skill flags long unformatted numbers. Confirm
-  `analysis-panels/shared/formatters.ts` is used everywhere, and abbreviate large
-  values in the tight metric cards (`$1.2M`, `$184K`) so a 6–7 digit figure never
-  overflows the `text-xl sm:text-2xl` slot at 375px.
-- **Token consistency.** Today positive verdicts use `--brand-*` tokens while
-  negative verdicts use raw palette. After P0, unify everything onto the semantic
-  verdict scale so the verdict color language is one system.
-- **Label legibility.** The metric/summary labels are `text-[10px]` uppercase
-  (`summary-card-grid.tsx` L41, metric card L333). At 10px, letter-spaced uppercase
-  is near the comfortable floor — bump to `text-[11px] sm:text-xs`.
-- **Responsive sweep.** Skill checklist breakpoints: 375 / 768 / 1024 / 1440.
-  The verdict headline (`text-2xl sm:text-3xl`, ~L885) + 48px icon + long labels
-  like "Strong Buy" should be checked at 375px for wrapping.
+**Effort:** medium — compute inflection points from the existing projection arrays
+(no new inputs). **Best done in Claude Code with hot reload** so each insight line
+is checked against the actual chart it summarizes.
 
 ---
 
-## Suggested sequence
+## P2 — Polish (verify, then decide)
 
-1. **P0 dark-mode tokens** — highest correctness payoff, self-contained.
-2. **P1 interactive affordances** — fast, broad quality lift.
-3. **P1 chart insight lines** — the biggest *product* win; do once the visual base is solid.
-4. **P2 polish** — formatting, token unification, legibility, responsive pass.
+These need eyes on the running app; framed as "check," not "defect":
 
-## Executing this with the skill
+- **Number formatting at 375px.** Confirm `analysis-panels/shared/formatters.ts`
+  is used everywhere and that 6–7-digit values abbreviate (`$1.2M`) so they don't
+  overflow the `text-xl sm:text-2xl` metric slot on the smallest breakpoint.
+- **Label legibility.** The `text-[10px]` uppercase labels are used *deliberately
+  and consistently*; only revisit if they test poorly for readability — not a defect.
+- **Responsive sweep.** Skill breakpoints 375/768/1024/1440 — check the verdict
+  headline (`text-2xl sm:text-3xl`) + 48px icon + "Strong Buy" label for wrapping at 375.
 
-The skill is installed and auto-activates in Claude Code on UI/UX requests. For
-this surface, in your repo:
+---
+
+## Executing with the skill
+
+Installed and auto-activates in Claude Code on UI/UX requests. To persist a
+project design system for reference across sessions:
 
 ```bash
-# Persist a project design system the skill (and you) can reference across sessions
 python3 .claude/skills/ui-ux-pro-max/scripts/search.py \
-  "real estate investment analytics dashboard light and dark mode" \
+  "real estate investment analytics dashboard" \
   --design-system --persist -p "TrueCap" --page "analysis-dashboard"
 ```
 
-Then, in Claude Code with hot reload, work the list top-down — that's where the
-skill is strongest, because you can see each change render live.
+Then work top-down in Claude Code with hot reload.

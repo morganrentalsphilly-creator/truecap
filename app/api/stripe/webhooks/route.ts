@@ -261,10 +261,10 @@ async function sendAbandonedCheckoutEmail(
       You started checkout for TrueCap Pro but didn't quite get there. No worries — life happens.
     </p>
     <p style="margin:0 0 24px 0;color:#374151;line-height:1.6;font-size:15px;">
-      We saved your spot. Here's <strong style="color:#5248D4;">50% off your first year</strong> to make finishing easier:
+      We saved your spot. Here's <strong style="color:#0070c4;">50% off your first year</strong> to make finishing easier:
     </p>
     <div style="text-align:center;margin:24px 0;">
-      <a href="${pricingUrl}" style="display:inline-block;background:#5248D4;color:#ffffff;text-decoration:none;padding:14px 28px;border-radius:12px;font-weight:700;font-size:15px;">
+      <a href="${pricingUrl}" style="display:inline-block;background:#0070c4;color:#ffffff;text-decoration:none;padding:14px 28px;border-radius:12px;font-weight:700;font-size:15px;">
         Finish upgrading — 50% off
       </a>
     </div>

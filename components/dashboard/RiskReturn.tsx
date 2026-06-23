@@ -55,8 +55,8 @@ const DSCR_LENDER_BAR = 1.25;
 // Concrete colors per OS theme — recharts sets SVG presentation attributes,
 // which don't resolve CSS var(), so we pick literals based on the theme.
 const CHART_COLORS = {
-  light: { grid: "oklch(0.92 0.012 255)", axis: "oklch(0.52 0.03 256)", point: "oklch(0.55 0.22 265)" },
-  dark: { grid: "oklch(0.34 0.02 262)", axis: "oklch(0.72 0.02 256)", point: "oklch(0.65 0.22 265)" },
+  light: { grid: "oklch(0.92 0.012 255)", axis: "oklch(0.52 0.03 256)", point: "oklch(0.54 0.18 240)" },
+  dark: { grid: "oklch(0.34 0.02 262)", axis: "oklch(0.72 0.02 256)", point: "oklch(0.62 0.18 240)" },
 };
 
 type PlottedPoint = {

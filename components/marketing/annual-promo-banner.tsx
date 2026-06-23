@@ -67,8 +67,8 @@ export function AnnualPromoBanner() {
           Limited
         </span>
         <p>
-          Save <span className="text-primary">2 months free</span> on annual Pro
-          {" "}—{" "}
+          Save <span className="text-primary">2 months free</span> on annual Pro.
+          {" "}
           <Link
             href="/pricing"
             className="font-bold text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary"

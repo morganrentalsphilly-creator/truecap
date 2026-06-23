@@ -198,7 +198,7 @@ export function PricingTogglePlans({
         </div>
 
         {/* PRO (with toggle) */}
-        <div className="relative -mt-2 rounded-3xl border-2 border-primary bg-card p-6 shadow-[0_24px_70px_rgba(82,72,212,0.18)] lg:scale-[1.03]">
+        <div className="relative -mt-2 rounded-3xl border-2 border-primary bg-card p-6 shadow-[0_24px_70px_rgba(0, 112, 196,0.18)] lg:scale-[1.03]">
           {/* Savings badge — prefer the dollar-amount savings when
               available because concrete numbers convert better than
               percentages. Falls back to "X months free" or % savings. */}

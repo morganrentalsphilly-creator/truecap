@@ -67,7 +67,7 @@ const SEQUENCE: SequenceEmail[] = [
     TrueCap runs all seven from a single address — free. Over the next few days I'll send a couple of short notes on the ones investors miss most.
   </p>
   <div style="text-align:center;margin:24px 0;">
-    <a href="${siteUrl}" style="display:inline-block;background:#5248D4;color:#fff;text-decoration:none;padding:12px 24px;border-radius:10px;font-weight:700;font-size:14px;">Run a deal in 60 seconds</a>
+    <a href="${siteUrl}" style="display:inline-block;background:#0070c4;color:#fff;text-decoration:none;padding:12px 24px;border-radius:10px;font-weight:700;font-size:14px;">Run a deal in 60 seconds</a>
   </div>
   <p style="margin:0;color:#9ca3af;font-size:12px;line-height:1.5;text-align:center;">— Morgan, founder · usetruecap.com</p>
 </div></body></html>`,
@@ -93,7 +93,7 @@ const SEQUENCE: SequenceEmail[] = [
     TrueCap bakes all five in automatically. Re-run your deal and look at the real cash flow.
   </p>
   <div style="text-align:center;margin:24px 0;">
-    <a href="${siteUrl}" style="display:inline-block;background:#5248D4;color:#fff;text-decoration:none;padding:12px 24px;border-radius:10px;font-weight:700;font-size:14px;">Re-run your deal</a>
+    <a href="${siteUrl}" style="display:inline-block;background:#0070c4;color:#fff;text-decoration:none;padding:12px 24px;border-radius:10px;font-weight:700;font-size:14px;">Re-run your deal</a>
   </div>
   <p style="margin:0;color:#9ca3af;font-size:12px;line-height:1.5;text-align:center;">— Morgan · usetruecap.com</p>
 </div></body></html>`,
@@ -115,7 +115,7 @@ const SEQUENCE: SequenceEmail[] = [
     Same deal, complete picture.
   </p>
   <div style="text-align:center;margin:24px 0;">
-    <a href="${siteUrl}/pricing" style="display:inline-block;background:#5248D4;color:#fff;text-decoration:none;padding:12px 24px;border-radius:10px;font-weight:700;font-size:14px;">See Pro features</a>
+    <a href="${siteUrl}/pricing" style="display:inline-block;background:#0070c4;color:#fff;text-decoration:none;padding:12px 24px;border-radius:10px;font-weight:700;font-size:14px;">See Pro features</a>
   </div>
   <p style="margin:0;color:#9ca3af;font-size:12px;line-height:1.5;text-align:center;">— Morgan · usetruecap.com</p>
 </div></body></html>`,
@@ -134,7 +134,7 @@ const SEQUENCE: SequenceEmail[] = [
     Re-run your deal, click <strong>Export PDF</strong>, and choose the $5 one-time option.
   </p>
   <div style="text-align:center;margin:24px 0;">
-    <a href="${siteUrl}" style="display:inline-block;background:#5248D4;color:#fff;text-decoration:none;padding:12px 24px;border-radius:10px;font-weight:700;font-size:14px;">Get your PDF</a>
+    <a href="${siteUrl}" style="display:inline-block;background:#0070c4;color:#fff;text-decoration:none;padding:12px 24px;border-radius:10px;font-weight:700;font-size:14px;">Get your PDF</a>
   </div>
   <p style="margin:0 0 0 0;color:#6b7280;line-height:1.6;font-size:13px;text-align:center;">Want the full toolkit instead? Pro is $29/mo — unlimited PDFs, saved deals, and side-by-side compare.</p>
   <p style="margin:12px 0 0 0;color:#9ca3af;font-size:12px;line-height:1.5;text-align:center;">— Morgan · usetruecap.com</p>
@@ -151,11 +151,11 @@ const SEQUENCE: SequenceEmail[] = [
     You ran an analysis recently and never came back. No worries — here's a small thank-you for trying TrueCap.
   </p>
   <p style="margin:0 0 20px 0;color:#374151;line-height:1.6;font-size:15px;">
-    Code <strong style="color:#5248D4;">${couponCode}</strong> takes <strong>20% off</strong> your first month of Pro.
+    Code <strong style="color:#0070c4;">${couponCode}</strong> takes <strong>20% off</strong> your first month of Pro.
     Auto-applies at checkout. Cancel anytime.
   </p>
   <div style="text-align:center;margin:24px 0;">
-    <a href="${siteUrl}/pricing?coupon=${couponCode}" style="display:inline-block;background:#5248D4;color:#fff;text-decoration:none;padding:14px 28px;border-radius:10px;font-weight:700;font-size:14px;">Claim 20% off</a>
+    <a href="${siteUrl}/pricing?coupon=${couponCode}" style="display:inline-block;background:#0070c4;color:#fff;text-decoration:none;padding:14px 28px;border-radius:10px;font-weight:700;font-size:14px;">Claim 20% off</a>
   </div>
   <p style="margin:0;color:#9ca3af;font-size:12px;line-height:1.5;text-align:center;">
     Not interested? Just ignore this — no follow-up.<br>— Morgan · usetruecap.com

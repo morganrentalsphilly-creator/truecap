@@ -275,7 +275,7 @@ export function Header({
             Pro
           </span>
           </Link>
-          <span className="hidden sm:inline opacity-70">&mdash; institutional-grade analysis in seconds.</span>
+          <span className="hidden sm:inline opacity-70">for institutional-grade analysis in seconds.</span>
         </div>
         <button
           onClick={() => setBannerDismissed(true)}
@@ -382,8 +382,8 @@ export function Header({
                 className={cn(
                   "h-9 px-4 sm:px-5 rounded-full text-[13px] font-semibold",
                   "bg-primary hover:bg-primary/90 text-primary-foreground",
-                  "shadow-[0_2px_8px_0_rgba(82,72,212,0.35)] hover:shadow-[0_4px_12px_0_rgba(82,72,212,0.45)]",
-                  "transition-all duration-200",
+                  "shadow-[0_2px_8px_0_rgba(0,112,196,0.35)] hover:shadow-[0_4px_12px_0_rgba(0,112,196,0.45)]",
+                  "transition-all duration-200 active:scale-[0.98]",
                 )}
               >
                 <Link href="/auth/sign-up">

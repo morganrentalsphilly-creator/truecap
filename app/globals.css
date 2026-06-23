@@ -10,20 +10,20 @@
   --card-foreground: oklch(0.15 0.02 250);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.15 0.02 250);
-  --primary: oklch(0.52 0.22 264);
+  --primary: oklch(0.52 0.18 240);
   --primary-foreground: oklch(0.99 0 0);
   --secondary: oklch(0.94 0.01 240);
-  --secondary-foreground: oklch(0.3 0.04 260);
+  --secondary-foreground: oklch(0.3 0.04 255);
   --muted: oklch(0.94 0.01 240);
   --muted-foreground: oklch(0.52 0.03 250);
   --accent: oklch(0.94 0.01 240);
-  --accent-foreground: oklch(0.3 0.04 260);
+  --accent-foreground: oklch(0.3 0.04 255);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.99 0 0);
   --border: oklch(0.89 0.01 240);
   --input: oklch(0.93 0.01 240);
-  --ring: oklch(0.52 0.22 264);
-  --chart-1: oklch(0.52 0.22 264);
+  --ring: oklch(0.52 0.18 240);
+  --chart-1: oklch(0.52 0.18 240);
   --chart-2: oklch(0.6 0.16 155);
   --chart-3: oklch(0.65 0.18 42);
   --chart-4: oklch(0.62 0.19 305);
@@ -31,15 +31,17 @@
   --radius: 0.75rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.15 0.02 250);
-  --sidebar-primary: oklch(0.52 0.22 264);
+  --sidebar-primary: oklch(0.52 0.18 240);
   --sidebar-primary-foreground: oklch(0.99 0 0);
   --sidebar-accent: oklch(0.94 0.01 240);
-  --sidebar-accent-foreground: oklch(0.3 0.04 260);
+  --sidebar-accent-foreground: oklch(0.3 0.04 255);
   --sidebar-border: oklch(0.89 0.01 240);
-  --sidebar-ring: oklch(0.52 0.22 264);
-  /* Custom tokens */
-  --brand-blue: oklch(0.52 0.22 264);
-  --brand-blue-light: oklch(0.93 0.05 264);
+  --sidebar-ring: oklch(0.52 0.18 240);
+  /* Custom tokens — accent refreshed from indigo-violet (hue 264) to a
+     desaturated electric blue (hue 240, ~#0070c4). Single accent, sat
+     dialed down per the taste-skill color-calibration rule. */
+  --brand-blue: oklch(0.52 0.18 240);
+  --brand-blue-light: oklch(0.93 0.05 235);
   --brand-green: oklch(0.55 0.15 155);
   --brand-green-light: oklch(0.95 0.04 155);
   --brand-orange: oklch(0.65 0.18 42);
@@ -68,14 +70,14 @@
   --border: oklch(0.269 0 0);
   --input: oklch(0.269 0 0);
   --ring: oklch(0.439 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-1: oklch(0.58 0.16 240);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
   --sidebar: oklch(0.205 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary: oklch(0.58 0.16 240);
   --sidebar-primary-foreground: oklch(0.985 0 0);
   --sidebar-accent: oklch(0.269 0 0);
   --sidebar-accent-foreground: oklch(0.985 0 0);
@@ -210,7 +212,7 @@ textarea,
   --card-foreground: oklch(0.18 0.03 250);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.18 0.03 250);
-  --primary: oklch(0.55 0.22 265);
+  --primary: oklch(0.54 0.18 240);
   --primary-foreground: oklch(0.99 0 0);
   --secondary: oklch(0.96 0.01 250);
   --secondary-foreground: oklch(0.22 0.04 260);
@@ -225,22 +227,22 @@ textarea,
   --gold: oklch(0.78 0.14 85);
   --border: oklch(0.92 0.012 255);
   --input: oklch(0.92 0.012 255);
-  --ring: oklch(0.55 0.22 265);
+  --ring: oklch(0.54 0.18 240);
   --sidebar: oklch(0.18 0.04 260);
   --sidebar-foreground: oklch(0.85 0.02 250);
-  --sidebar-primary: oklch(0.65 0.22 265);
+  --sidebar-primary: oklch(0.62 0.18 240);
   --sidebar-primary-foreground: oklch(0.99 0 0);
   --sidebar-accent: oklch(0.24 0.05 262);
   --sidebar-accent-foreground: oklch(0.99 0 0);
   --sidebar-border: oklch(0.28 0.04 262);
-  --sidebar-ring: oklch(0.55 0.22 265);
-  --gradient-premium: linear-gradient(135deg, oklch(0.55 0.22 265), oklch(0.62 0.22 320));
+  --sidebar-ring: oklch(0.54 0.18 240);
+  --gradient-premium: linear-gradient(135deg, oklch(0.54 0.18 240), oklch(0.66 0.13 210));
   --gradient-success: linear-gradient(135deg, oklch(0.68 0.17 158), oklch(0.72 0.18 180));
   --gradient-gold: linear-gradient(135deg, oklch(0.82 0.14 85), oklch(0.72 0.16 50));
   --gradient-sidebar: linear-gradient(180deg, oklch(0.2 0.05 262), oklch(0.15 0.04 260));
-  --gradient-card-glow: radial-gradient(circle at top right, oklch(0.55 0.22 265 / 0.08), transparent 60%);
+  --gradient-card-glow: radial-gradient(circle at top right, oklch(0.54 0.18 240 / 0.08), transparent 60%);
   --shadow-lg: 0 12px 32px -8px oklch(0.2 0.04 260 / 0.12), 0 4px 8px -4px oklch(0.2 0.04 260 / 0.06);
-  --shadow-glow: 0 0 40px -8px oklch(0.55 0.22 265 / 0.35);
+  --shadow-glow: 0 0 40px -8px oklch(0.54 0.18 240 / 0.35);
   --shadow-gold-glow: 0 0 24px -4px oklch(0.78 0.14 85 / 0.4);
   /* AIInsights panel background (previously hardcoded in the component). */
   --ai-insights-bg: linear-gradient(135deg, oklch(0.99 0.005 260), oklch(0.97 0.02 280));
@@ -252,7 +254,7 @@ textarea,
 /* The mobile nav sheet is portaled OUTSIDE .dashboard-shell and can't
    inherit the tokens above — re-declare the subset the sidebar needs. */
 .dashboard-mobile-sheet {
-  --primary: oklch(0.55 0.22 265);
+  --primary: oklch(0.54 0.18 240);
   --sidebar-foreground: oklch(0.85 0.02 250);
   --sidebar-accent: oklch(0.24 0.05 262);
   --sidebar-accent-foreground: oklch(0.99 0 0);
@@ -269,3 +271,56 @@ textarea,
    dark-mode machine while the analyzer stayed light — the "two products"
    mismatch.) The sidebar stays dark-navy in both, the standard
    light-dashboard-with-dark-rail pattern. */
+
+/* ============================================================
+   Taste-skill "Balanced" motion (MOTION_INTENSITY ~5).
+
+   Two delivery mechanisms, both transform/opacity only (GPU-cheap),
+   both degrading SAFE:
+
+   1. Scroll-driven reveals (.tc-reveal / .tc-reveal-fade) ride the CSS
+      view() timeline. Browsers without animation-timeline support
+      (Safari, Firefox, and every crawler today) get NO animation and
+      render the final, fully-visible state — content is never hidden
+      behind an unsupported feature or JavaScript. Zero JS, zero CLS.
+
+   2. Load-in cascade (.tc-rise-in + .tc-delay-*) plays once on mount,
+      for above-the-fold hero elements that are always seen.
+
+   prefers-reduced-motion users get neither (the global reduce block
+   above collapses durations; the @supports reveals are additionally
+   gated on no-preference here as belt-and-suspenders).
+   ============================================================ */
+@keyframes tc-reveal-rise {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes tc-reveal-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes tc-rise-in {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.tc-rise-in { animation: tc-rise-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.tc-delay-1 { animation-delay: 0.06s; }
+.tc-delay-2 { animation-delay: 0.12s; }
+.tc-delay-3 { animation-delay: 0.18s; }
+.tc-delay-4 { animation-delay: 0.24s; }
+.tc-delay-5 { animation-delay: 0.30s; }
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .tc-reveal {
+      animation: tc-reveal-rise both;
+      animation-timeline: view();
+      animation-range: entry 2% cover 26%;
+    }
+    .tc-reveal-fade {
+      animation: tc-reveal-fade both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 22%;
+    }
+  }
+}

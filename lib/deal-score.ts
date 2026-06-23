@@ -444,7 +444,7 @@ function buildExplanation(
   if (input.vacancyRate > 8) weaknesses.push("elevated vacancy risk");
   if (!isOwnerOccupantDeal(input) && input.monthlyCashFlow < 0) weaknesses.push("negative cash flow");
   if (isOwnerOccupantDeal(input) && input.monthlyCashFlow < -OWNER_OCCUPANT_NEAR_ZERO_THRESHOLD) {
-    weaknesses.push("owner costs are still meaningfully above break-even");
+    weaknesses.push("owner costs still well above break-even");
   }
   if (input.capexPct > 10) weaknesses.push("high CapEx burden");
   else if (input.capexPct > 5) weaknesses.push("moderate CapEx burden");

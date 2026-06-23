@@ -54,7 +54,7 @@ export const viewport = {
   maximumScale: 5,
   userScalable: true,
   viewportFit: "cover",
-  themeColor: "#5248d4",
+  themeColor: "#0070c4",
 };
 
 const siteUrl = getSiteUrl();

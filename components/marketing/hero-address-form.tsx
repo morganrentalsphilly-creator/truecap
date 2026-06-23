@@ -101,7 +101,7 @@ export function HeroAddressForm() {
   };
 
   return (
-    <div className="mx-auto mt-7 w-full max-w-2xl">
+    <div className="mt-7 w-full max-w-xl">
       <form
         onSubmit={handleAnalyze}
         className="flex flex-col items-stretch gap-2.5 sm:flex-row"
@@ -122,7 +122,7 @@ export function HeroAddressForm() {
         <button
           type="submit"
           disabled={submitting}
-          className="group inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(82,72,212,0.28)] transition-transform hover:-translate-y-0.5 disabled:opacity-70 sm:h-14"
+          className="group inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] disabled:opacity-70 sm:h-14"
         >
           <Calculator className="size-4" />
           Analyze this property
@@ -135,7 +135,7 @@ export function HeroAddressForm() {
           OUTCOME, not just "a demo"), plus a low-friction peek at Pro.
           Pricing is deliberately the quietest link here so the primary
           action stays "analyze a deal," not "evaluate cost." */}
-      <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm">
+      <div className="mt-3 flex flex-wrap items-center justify-start gap-x-4 gap-y-2 text-sm">
         <button
           type="button"
           onClick={handleTrySample}

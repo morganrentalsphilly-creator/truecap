@@ -506,9 +506,13 @@ export function getDefaultUnitsForPropertyType(propertyType: InvestmentFormValue
     return [{ bedrooms: undefined, bathrooms: undefined, sqft: undefined, monthlyRent: undefined, isOwnerOccupied: false }];
   }
   if (propertyType === "owner-occupant") {
+    // Seed sensible per-unit defaults so a house-hack run doesn't open with a
+    // wall of empty-unit errors. Owner unit rent is 0 (you live there); the
+    // user just fills the rental unit's rent — exactly like single-family
+    // requires rent. Beds/baths/sqft are starting points the user adjusts.
     return [
-      { bedrooms: undefined, bathrooms: undefined, sqft: undefined, monthlyRent: undefined, isOwnerOccupied: true },
-      { bedrooms: undefined, bathrooms: undefined, sqft: undefined, monthlyRent: undefined, isOwnerOccupied: false },
+      { bedrooms: 2, bathrooms: 1, sqft: 900, monthlyRent: 0, isOwnerOccupied: true },
+      { bedrooms: 2, bathrooms: 1, sqft: 900, monthlyRent: undefined, isOwnerOccupied: false },
     ];
   }
   return [
