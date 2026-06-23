@@ -806,7 +806,7 @@ export function AnalysisDashboard({
                         type="button"
                         disabled={isExporting}
                         onClick={() => void onExportPdf(m.id)}
-                        className="block w-full rounded-lg px-2 py-1.5 text-left hover:bg-muted disabled:opacity-50"
+                        className="block w-full cursor-pointer rounded-lg px-2 py-1.5 text-left hover:bg-muted focus-visible:bg-muted focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         <span className="text-sm font-semibold text-foreground">{m.label}</span>
                         <span className="block text-[11px] leading-snug text-muted-foreground">{m.description}</span>
@@ -950,7 +950,7 @@ export function AnalysisDashboard({
                     <button
                       type="button"
                       onClick={() => setShowAllTips((prev) => !prev)}
-                      className="mt-2 text-xs font-semibold text-muted-foreground underline-offset-2 hover:underline"
+                      className="mt-2 cursor-pointer text-xs font-semibold text-muted-foreground underline-offset-2 hover:underline focus-visible:underline focus-visible:outline-none"
                     >
                       {showAllTips
                         ? "Show fewer"
@@ -1182,7 +1182,7 @@ export function AnalysisDashboard({
               type="button"
               onClick={() => setActiveTab(tab.id)}
               className={cn(
-                "flex items-center gap-1.5 sm:gap-2 rounded-full border px-3 py-2 text-[12px] font-medium whitespace-nowrap transition-colors shrink-0 sm:rounded-none sm:border-0 sm:px-5 sm:py-3.5 sm:text-sm",
+                "flex items-center gap-1.5 sm:gap-2 rounded-full border px-3 py-2 text-[12px] font-medium whitespace-nowrap transition-colors shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:rounded-none sm:border-0 sm:px-5 sm:py-3.5 sm:text-sm",
                 activeTab === tab.id
                   ? "bg-primary text-primary-foreground"
                   : "border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted sm:bg-transparent"
@@ -1445,7 +1445,7 @@ function DealStrategyToggle({
               title={s.hint}
               onClick={() => onChange(s.value)}
               className={cn(
-                "rounded-md px-1 py-1 text-[10px] font-semibold leading-tight transition-colors",
+                "rounded-md px-1 py-1 text-[10px] font-semibold leading-tight transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                 active
                   ? "bg-card text-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
