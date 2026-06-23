@@ -119,7 +119,7 @@ export function MaxOfferCard({ values }: MaxOfferCardProps) {
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
           <div>
             <div className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Max offer</div>
-            <div className={cn("text-3xl sm:text-4xl font-extrabold mt-1", mao ? "text-primary" : "text-muted-foreground")}>
+            <div className={cn("mt-1 font-mono text-3xl font-extrabold tabular-nums tracking-tight sm:text-4xl", mao ? "text-primary" : "text-muted-foreground")}>
               {!values ? "—" : noneSet ? "Set a target" : mao ? money(mao.maxPrice) : "No price hits these targets"}
             </div>
           </div>

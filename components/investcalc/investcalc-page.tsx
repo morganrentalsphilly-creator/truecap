@@ -1253,8 +1253,12 @@ export function InvestCalcPage({
       }
       applyStarterAssumptions(strategy.starterKey);
       setActiveStrategyKey(strategy.key);
-      setActiveDashboardTab(strategy.primaryTab);
+      // BRRRR/Flip render their model inline as the results hero, so don't also
+      // lead the Details tabs with the (duplicate) Strategies tab — default to
+      // cash-flow context. Wholesale keeps Stress Test so "Adjust targets" lands.
+      setActiveDashboardTab(strategy.primaryTab === "strategies" ? "cash-flow" : strategy.primaryTab);
       setAdvancedOpen(false);
+      trackEvent("strategy_selected", { strategy: strategy.key });
     },
     [form, applyStarterAssumptions]
   );

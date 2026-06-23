@@ -22,7 +22,10 @@ import { ArrowUpRight, Hammer, Target, Wrench, type LucideIcon } from "lucide-re
 import { Button } from "@/components/ui/button";
 import { calculateMaxAllowableOffer, type MaoTarget } from "@/lib/max-allowable-offer";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
+import type { AnalysisResult } from "@/lib/calc-analysis";
 import type { InvestorStrategy } from "@/lib/investor-strategies";
+import { BrrrrCard } from "@/components/investcalc/brrrr-card";
+import { FixFlipCard } from "@/components/investcalc/fix-flip-card";
 
 const usd = (n: number) =>
   new Intl.NumberFormat("en-US", {
@@ -38,6 +41,7 @@ const DEFAULT_MAO_TARGET: MaoTarget = { capRate: 8, cocReturn: 8, monthlyCashFlo
 export function StrategyOutcomeCard({
   strategy,
   values,
+  result,
   canUseMaxOffer,
   canUseStrategies,
   onJumpToTab,
@@ -45,6 +49,7 @@ export function StrategyOutcomeCard({
 }: {
   strategy: InvestorStrategy;
   values: InvestmentFormValues;
+  result: AnalysisResult | null;
   canUseMaxOffer: boolean;
   canUseStrategies: boolean;
   onJumpToTab: (tab: "stress-test" | "strategies") => void;
@@ -96,13 +101,36 @@ export function StrategyOutcomeCard({
           The most you can pay and still hit an 8% cap, 8% cash-on-cash, and break-even cash flow.
         </p>
         {asking != null ? (
-          <p className="mt-1 text-sm font-medium text-foreground">
-            {spread != null && spread > 0
-              ? `Asking ${usd(asking)} — that's ${usd(spread)}${
-                  spreadPct != null ? ` (${spreadPct}%)` : ""
-                } above your max. Negotiate down or pass.`
-              : `At the ${usd(asking)} ask this already clears your targets.`}
-          </p>
+          <div className="mt-4 rounded-xl border border-border bg-card/70 p-3">
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-muted-foreground">Asking price</span>
+              <span className="font-semibold tabular-nums text-foreground">{usd(asking)}</span>
+            </div>
+            <div className="relative my-2 h-2 overflow-hidden rounded-full bg-muted">
+              <div
+                className="absolute inset-y-0 left-0 rounded-full bg-primary"
+                style={{
+                  width: `${Math.max(4, Math.min(100, asking > 0 ? (mao.maxPrice / asking) * 100 : 100))}%`,
+                }}
+              />
+            </div>
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-bold tabular-nums text-primary">Your max {usd(mao.maxPrice)}</span>
+              {spread != null && spread > 0 ? (
+                <span className="font-medium text-muted-foreground">
+                  {usd(spread)}
+                  {spreadPct != null ? ` (${spreadPct}%)` : ""} below ask
+                </span>
+              ) : (
+                <span className="font-medium text-[var(--brand-green)]">Clears your targets</span>
+              )}
+            </div>
+            <p className="mt-2 text-xs leading-snug text-muted-foreground">
+              {spread != null && spread > 0
+                ? "Offer at or below your max — negotiate down or pass."
+                : "At the asking price this already hits your return targets."}
+            </p>
+          </div>
         ) : null}
         <JumpButton label="Adjust targets in Stress Test" onClick={() => onJumpToTab("stress-test")} />
       </OutcomeShell>
@@ -130,16 +158,9 @@ export function StrategyOutcomeCard({
     );
   }
 
-  return (
-    <OutcomeShell icon={Icon} eyebrow={strategy.label} title={isFlip ? "Your flip model" : "Your BRRRR model"}>
-      <p className="text-sm text-muted-foreground">
-        {isFlip
-          ? "Flips hinge on rehab budget and after-repair value — open the model to enter ARV + rehab and see your projected profit and ROI."
-          : "BRRRR hinges on the rehab and refinance — open the model to enter ARV + rehab and see your cash left in after the cash-out."}
-      </p>
-      <JumpButton label={`Open ${isFlip ? "Flip" : "BRRRR"} analysis`} onClick={() => onJumpToTab("strategies")} />
-    </OutcomeShell>
-  );
+  // Pro: lead with the real interactive model so the play shows its actual
+  // numbers (rehab/ARV → profit / cash-left-in), just like Wholesale's MAO.
+  return isFlip ? <FixFlipCard values={values} /> : <BrrrrCard values={values} result={result} />;
 }
 
 function OutcomeShell({

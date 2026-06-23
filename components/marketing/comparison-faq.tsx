@@ -83,11 +83,11 @@ export function ComparisonFaq({
         Quick answers to the questions investors comparison-shopping
         these tools actually ask.
       </p>
-      <div className="space-y-3">
+      <div className="tc-reveal space-y-3">
         {items.map((item) => (
           <details
             key={item.question}
-            className="group rounded-xl border border-border bg-card p-4 sm:p-5"
+            className="group rounded-xl border border-border bg-card p-4 transition-colors hover:border-primary/30 sm:p-5"
           >
             <summary className="cursor-pointer list-none flex items-start justify-between gap-3 font-bold text-sm sm:text-base text-foreground">
               <span>{item.question}</span>

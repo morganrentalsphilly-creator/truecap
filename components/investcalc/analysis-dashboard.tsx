@@ -840,6 +840,7 @@ export function AnalysisDashboard({
         <StrategyOutcomeCard
           strategy={activeStrategy}
           values={values}
+          result={result}
           canUseMaxOffer={canUseMaxOffer}
           canUseStrategies={canUseStrategies}
           onJumpToTab={setActiveTab}
@@ -1668,7 +1669,7 @@ function DealScoreCard({
             activeStyle.scoreRing
           )}
         >
-          <p className={cn("text-4xl leading-none font-extrabold", activeStyle.scoreText)}>{score}</p>
+          <p className={cn("font-mono text-4xl leading-none font-extrabold tabular-nums", activeStyle.scoreText)}>{score}</p>
         </div>
         <div className="flex flex-col items-end gap-1">
           <span

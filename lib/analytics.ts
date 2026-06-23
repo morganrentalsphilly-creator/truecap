@@ -90,6 +90,10 @@ export type FunnelEvent =
   // ── Agent Loop: co-branded share lead capture (T6) ─────────────
   | "lead_form_shown"       // properties: owner_present
   | "lead_captured"         // properties: has_message
+  // ── Investor strategy chips ("What's your play?") ──────────────
+  // Which plays investors pick — measures adoption + which strategy
+  // converts to Pro. PII-free; just the strategy key.
+  | "strategy_selected"     // properties: strategy (e.g. "wholesale-mao")
 
 /**
  * Safe capture. Use this everywhere instead of `posthog.capture(...)`
