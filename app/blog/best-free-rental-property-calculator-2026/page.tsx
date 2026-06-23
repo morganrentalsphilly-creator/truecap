@@ -50,7 +50,7 @@ const TOOLS = [
     name: "TrueCap",
     bestFor: "Best truly free tier — unlimited analyses, no signup",
     url: "/",
-    pricing: "Free; Pro $20/mo",
+    pricing: "Free; Pro $29.99/mo",
     freeCovers: [
       "Cap rate, CoC, DSCR, NCF, monthly cash flow",
       "Address auto-fill (HUD rent + FRED rate + state property tax)",

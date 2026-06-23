@@ -61,7 +61,7 @@ const MATRIX: Row[] = [
   { feature: "Eviction records check", truecap: "No", rentspree: "Yes — court records", winner: "rentspree" },
   { feature: "Agent / brokerage workflow", truecap: "Yes — agent persona page exists", rentspree: "Yes — built for realtor-managed rentals", winner: "tie" },
   { feature: "Free tier", truecap: "Yes — full underwriting math", rentspree: "Yes — tenant pays for screening (typical)", winner: "tie" },
-  { feature: "Pricing model", truecap: "Free; Pro $20/mo", rentspree: "Tenant typically pays $30-40 per application", winner: "tie" },
+  { feature: "Pricing model", truecap: "Free; Pro $29.99/mo", rentspree: "Tenant typically pays $30-40 per application", winner: "tie" },
   { feature: "Shareable read-only analysis", truecap: "Pro — public URL + branding", rentspree: "N/A", winner: "truecap" },
 ];
 

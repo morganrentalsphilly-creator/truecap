@@ -61,7 +61,7 @@ const MATRIX: Row[] = [
   { feature: "AI assistant + automation", truecap: "No", guesty: "Yes — Guesty AI for guest messaging", winner: "guesty" },
   { feature: "Dynamic pricing integrations", truecap: "No", guesty: "Yes — full ecosystem", winner: "guesty" },
   { feature: "Free tier", truecap: "Yes — full underwriting math", guesty: "No — custom pricing only", winner: "truecap" },
-  { feature: "Pricing (entry tier)", truecap: "Free; Pro $20/mo", guesty: "Custom pricing (typically $50-200+/mo per listing)", winner: "truecap" },
+  { feature: "Pricing (entry tier)", truecap: "Free; Pro $29.99/mo", guesty: "Custom pricing (typically $50-200+/mo per listing)", winner: "truecap" },
   { feature: "Built for solo investors", truecap: "Yes — 1-30 doors", guesty: "No — minimum spend assumes 30+ properties", winner: "truecap" },
 ];
 

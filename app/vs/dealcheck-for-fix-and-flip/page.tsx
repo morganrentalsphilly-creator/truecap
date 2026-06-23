@@ -52,7 +52,7 @@ const MATRIX: Row[] = [
   // DealCheck's house-flipping calculator is included on every plan
   // (verified dealcheck.io/pricing June 2026) — tiers gate saved-
   // property caps, not the calculators.
-  { feature: "Free tier covers flip math", truecap: "No — Pro feature ($20/mo)", dealcheck: "Yes — included on all plans (free tier caps saved deals)", winner: "dealcheck" },
+  { feature: "Free tier covers flip math", truecap: "No — Pro feature ($29.99/mo)", dealcheck: "Yes — included on all plans (free tier caps saved deals)", winner: "dealcheck" },
   { feature: "Shareable flip analysis", truecap: "Pro — public read-only link + branding", dealcheck: "Pro — PDF export", winner: "truecap" },
 ];
 
@@ -178,7 +178,7 @@ export default function VsDealcheckForFixAndFlipPage() {
                 <li>You&apos;re evaluating a flip before making an offer.</li>
                 <li>You want break-even ARV math + sensitivity on ARV assumptions.</li>
                 <li>You want holding-cost detail (per-month).</li>
-                <li>You want the cheapest Pro tier ($20/mo all-in).</li>
+                <li>You want the deepest analysis bundled in one Pro tier ($29.99/mo all-in).</li>
               </ul>
             </div>
             <div>

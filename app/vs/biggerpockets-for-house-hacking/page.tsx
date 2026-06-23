@@ -66,7 +66,7 @@ const MATRIX: Row[] = [
   { feature: "Sensitivity grid (vacancy on rental units)", truecap: "Pro — rent ±10%, vacancy ±5pp on rental units only",             biggerpockets: "Manual re-runs",                                winner: "truecap" },
   { feature: "Mobile UX at the showing",                truecap: "PWA installable",                                                    biggerpockets: "Desktop-leaning calculator + separate mobile app", winner: "tie" },
   { feature: "Free tier covers house hacking",          truecap: "Yes — full owner-occupant underwriting on free tier",                biggerpockets: "Free calc covers basic; Pro ($390/yr) for projections", winner: "truecap" },
-  { feature: "Standalone calculator pricing",            truecap: "Pro $20/mo (or $200/yr annual)",                                   biggerpockets: "Bundled with $390/yr BiggerPockets Pro",        winner: "truecap" },
+  { feature: "Standalone calculator pricing",            truecap: "Pro $29.99/mo (or $300/yr annual)",                                   biggerpockets: "Bundled with $390/yr BiggerPockets Pro",        winner: "truecap" },
 ];
 
 const BP_HOUSE_HACK_FAQ: FaqItem[] = [
@@ -141,7 +141,7 @@ const BP_HOUSE_HACK_FAQ: FaqItem[] = [
     question: "BiggerPockets calculator is bundled with Pro at $390/yr — is the calculator alone worth it?",
     answer: (
       <>
-        For house-hacking specifically, no — TrueCap Pro at $20/month
+        For house-hacking specifically, no — TrueCap Pro at $29.99/month
         ($200/year) covers the owner-occupant workflow more cleanly
         for half the price. BiggerPockets Pro at $390/year makes sense
         if you also use the community, courses, books, and podcasts;
@@ -149,7 +149,7 @@ const BP_HOUSE_HACK_FAQ: FaqItem[] = [
       </>
     ),
     plainTextAnswer:
-      "For house-hacking specifically, no — TrueCap Pro at $20/mo ($200/yr) covers the owner-occupant workflow more cleanly for half the price. BiggerPockets Pro at $390/yr makes sense for community + courses + podcasts; for the calculator alone, you're overpaying ~$200/yr.",
+      "For house-hacking specifically, no — TrueCap Pro at $29.99/mo ($200/yr) covers the owner-occupant workflow more cleanly for half the price. BiggerPockets Pro at $390/yr makes sense for community + courses + podcasts; for the calculator alone, you're overpaying ~$200/yr.",
   },
   {
     question: "What changes when I model the post-move-out scenario?",
@@ -247,7 +247,7 @@ export default function VsBiggerPocketsForHouseHackingPage() {
             <strong> BiggerPockets&apos;</strong> calculator treats the
             property as generic multifamily and requires you to
             mentally adjust the math for your owner-occupied unit. For
-            the calculator alone, TrueCap Pro ($20/month) is half the
+            the calculator alone, TrueCap Pro ($29.99/month) is half the
             price of BiggerPockets Pro ($390/year) and better-fitted to
             the house-hack workflow.
           </p>

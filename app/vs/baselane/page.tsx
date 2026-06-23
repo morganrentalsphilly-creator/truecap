@@ -61,7 +61,7 @@ const MATRIX: Row[] = [
   { feature: "Schedule E P&L reports", truecap: "Forward projection only", baselane: "Yes — actuals from bank feed", winner: "baselane" },
   { feature: "Rent collection (ACH)", truecap: "No", baselane: "Yes — ACH free", winner: "baselane" },
   { feature: "Address auto-fill (rent/rate/tax)", truecap: "Yes — HUD + FRED + state property tax", baselane: "Not applicable", winner: "truecap" },
-  { feature: "Pricing (entry tier)", truecap: "Free for underwriting; Pro $20/mo", baselane: "Banking + bookkeeping free; advanced ~$22/mo (as of 2026)", winner: "tie" },
+  { feature: "Pricing (entry tier)", truecap: "Free for underwriting; Pro $29.99/mo", baselane: "Banking + bookkeeping free; advanced ~$22/mo (as of 2026)", winner: "tie" },
   { feature: "Free tier", truecap: "Yes — full underwriting math", baselane: "Yes — banking + basic bookkeeping", winner: "tie" },
   { feature: "Shareable read-only deal link", truecap: "Pro — public URL + branding", baselane: "Not the use case", winner: "truecap" },
   { feature: "Lender-ready PDF", truecap: "Pro — multi-page projection", baselane: "Schedule E reports for tax filing", winner: "tie" },

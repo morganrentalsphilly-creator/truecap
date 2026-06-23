@@ -62,7 +62,7 @@ const MATRIX: Row[] = [
   { feature: "Property data + lists", truecap: "Limited (HUD FMR + FRED)", dealmachine: "Yes — 150M+ properties, motivated lists", winner: "dealmachine" },
   { feature: "Mobile-first UX", truecap: "PWA installable", dealmachine: "Native app (built for mobile)", winner: "dealmachine" },
   { feature: "Free tier", truecap: "Yes — full underwriting math", dealmachine: "Trial only ($59-99/mo paid)", winner: "truecap" },
-  { feature: "Pricing (entry tier)", truecap: "Free; Pro $20/mo", dealmachine: "Starter ~$59/mo, Pro ~$99/mo (as of 2026)", winner: "truecap" },
+  { feature: "Pricing (entry tier)", truecap: "Free; Pro $29.99/mo", dealmachine: "Starter ~$59/mo, Pro ~$99/mo (as of 2026)", winner: "truecap" },
   { feature: "Shareable read-only deal link", truecap: "Pro — public URL + branding", dealmachine: "Internal-only data", winner: "truecap" },
   { feature: "Lender-ready PDF", truecap: "Pro — multi-page report", dealmachine: "Not the use case", winner: "truecap" },
 ];

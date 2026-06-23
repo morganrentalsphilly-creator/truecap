@@ -61,7 +61,7 @@ const MATRIX: Row[] = [
   { feature: "Reservation system", truecap: "No", lodgify: "Yes — built-in calendar + payments", winner: "lodgify" },
   { feature: "Sweet spot", truecap: "1-30 doors, solo investor underwriting", lodgify: "1-10 STRs, solo operator", winner: "tie" },
   { feature: "Free tier", truecap: "Yes — full underwriting math", lodgify: "Trial only; paid from ~$13/mo (as of 2026)", winner: "truecap" },
-  { feature: "Pricing (entry tier)", truecap: "Free; Pro $20/mo", lodgify: "~$13/mo Starter + per-booking fees on lower tiers", winner: "truecap" },
+  { feature: "Pricing (entry tier)", truecap: "Free; Pro $29.99/mo", lodgify: "~$13/mo Starter + per-booking fees on lower tiers", winner: "truecap" },
 ];
 
 export default function VsLodgifyPage() {

@@ -136,7 +136,7 @@ const SEQUENCE: SequenceEmail[] = [
   <div style="text-align:center;margin:24px 0;">
     <a href="${siteUrl}" style="display:inline-block;background:#5248D4;color:#fff;text-decoration:none;padding:12px 24px;border-radius:10px;font-weight:700;font-size:14px;">Get your PDF</a>
   </div>
-  <p style="margin:0 0 0 0;color:#6b7280;line-height:1.6;font-size:13px;text-align:center;">Want the full toolkit instead? Pro is $20/mo — unlimited PDFs, saved deals, and side-by-side compare.</p>
+  <p style="margin:0 0 0 0;color:#6b7280;line-height:1.6;font-size:13px;text-align:center;">Want the full toolkit instead? Pro is $29/mo — unlimited PDFs, saved deals, and side-by-side compare.</p>
   <p style="margin:12px 0 0 0;color:#9ca3af;font-size:12px;line-height:1.5;text-align:center;">— Morgan · usetruecap.com</p>
 </div></body></html>`,
   },

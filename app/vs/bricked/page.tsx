@@ -71,7 +71,7 @@ const MATRIX: Row[] = [
   { feature: "AI deal Q&A on your numbers", truecap: "Yes — grounded in the computed analysis", bricked: "AI picks comps; no investment Q&A", winner: "truecap" },
   { feature: "Try without signup", truecap: "Yes — full analysis, no account", bricked: "No — account + 3-day trial", winner: "truecap" },
   { feature: "Free tier", truecap: "Yes — unlimited core underwriting", bricked: "No — trial only", winner: "truecap" },
-  { feature: "Entry pricing", truecap: "Free; Pro $20/mo unlimited; $5 one-time PDF", bricked: "$49/mo for 100 comps, metered up to $199/mo (as of June 2026)", winner: "truecap" },
+  { feature: "Entry pricing", truecap: "Free; Pro $29.99/mo unlimited; $5 one-time PDF", bricked: "$49/mo for 100 comps, metered up to $199/mo (as of June 2026)", winner: "truecap" },
   { feature: "Lender-ready PDF + share links", truecap: "Pro — multi-page report + read-only links", bricked: "Not the focus", winner: "truecap" },
   { feature: "API access", truecap: "No", bricked: "Yes — Growth tier and up", winner: "bricked" },
 ];
@@ -355,7 +355,7 @@ const BRICKED_FAQ: FaqItem[] = [
         Bricked starts at $49/month for 100 comps, rising to $199/month for 500
         (metered, with a 3-day trial and no free tier) — priced for acquisition
         teams running volume. TrueCap&apos;s core analyzer is free with no analysis
-        cap and no account required; Pro is $20/month flat with everything
+        cap and no account required; Pro is $29.99/month flat with everything
         unlimited, and there&apos;s a $5 one-time option for a single lender-ready
         PDF. For a solo investor analyzing a few deals a month, the pricing models
         aren&apos;t really comparable.

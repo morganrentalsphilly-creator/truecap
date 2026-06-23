@@ -61,7 +61,7 @@ const RANKED_CALCULATORS = [
     name: "TrueCap",
     bestFor: "Best free tier + best single-tier Pro pricing",
     url: "/",
-    pricing: "Free; Pro $20/mo (or $200/yr annual)",
+    pricing: "Free; Pro $29.99/mo (or $300/yr annual)",
     pros: [
       "Deepest free tier — full cap rate, CoC, DSCR, NCF, monthly cash flow with no signup or analysis cap",
       "Address auto-fill from HUD Fair Market Rent + FRED 30-year rate + state property tax (no other tool does all three)",
@@ -201,7 +201,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "DealCheck vs BiggerPockets vs TrueCap — which is best?",
-    a: "Depends on what you optimize for. TrueCap wins on free tier depth, pricing, and single-tier Pro simplicity. DealCheck wins on native mobile apps and listing-import workflow. BiggerPockets makes sense if you're already paying for the community access bundled with Pro. For the calculator alone, TrueCap is roughly half the price of either.",
+    a: "Depends on what you optimize for. TrueCap wins on free tier depth, pricing, and single-tier Pro simplicity. DealCheck wins on native mobile apps and listing-import workflow. BiggerPockets makes sense if you're already paying for the community access bundled with Pro. For the calculator alone, TrueCap has a deeper free tier and bundles everything in one Pro tier.of either.",
   },
   {
     q: "Is Mashvisor a rental property calculator?",
@@ -418,7 +418,7 @@ export default function BestRentalPropertyCalculator2026Post() {
             <h2>Quick decision matrix</h2>
             <ul>
               <li>
-                <strong>&quot;I want the cheapest Pro tier.&quot;</strong> TrueCap ($20/mo) — half the price of DealCheck Plus or BiggerPockets Pro.
+                <strong>&quot;I want the cheapest Pro tier.&quot;</strong> TrueCap — the deepest free tier, with everything bundled in one $29.99/mo Pro tier.
               </li>
               <li>
                 <strong>&quot;I want the deepest free tier.&quot;</strong> TrueCap — unlimited analyses, no signup, no analysis cap.

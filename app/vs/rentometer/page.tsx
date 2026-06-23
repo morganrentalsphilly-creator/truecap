@@ -56,7 +56,7 @@ const MATRIX: Row[] = [
   { feature: "Verdict / decision support",       truecap: "Free — deal score + verdict (Strong / Decent / Marginal / Skip)",         rentometer: "Rent comp only — you make the decision",                          winner: "truecap" },
   { feature: "Branded PDF report",               truecap: "Pro — multi-page lender-ready report",                                   rentometer: "PDF of rent comp data",                                           winner: "tie" },
   { feature: "Use case",                          truecap: "Full investor underwriting workflow",                                    rentometer: "Quick rent comp lookup",                                          winner: "tie" },
-  { feature: "Pricing — Pro tier",                truecap: "$16.67/mo annual",                                                       rentometer: "$29-49/mo depending on plan",                                     winner: "truecap" },
+  { feature: "Pricing — Pro tier",                truecap: "$25/mo annual",                                                       rentometer: "$29-49/mo depending on plan",                                     winner: "truecap" },
 ];
 
 export default function VsRentometerPage() {

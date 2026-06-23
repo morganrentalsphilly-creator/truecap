@@ -43,7 +43,7 @@ const POLISH: Record<string, Polish> = {
       title: "Start with the free TrueCap analyzer",
       items: [
         "Free: unlimited cap rate, cash-on-cash, DSCR, monthly cash flow — auto-filled with property tax + rent",
-        "Pro at $16.67/mo: 10-year projection, sensitivity grid, MAO calculator, A/B mortgage compare, PDF reports, saved-deals portfolio",
+        "Pro at $25/mo (annual): 10-year projection, sensitivity grid, MAO calculator, A/B mortgage compare, PDF reports, saved-deals portfolio",
         "Open the analyzer →",
       ],
     },

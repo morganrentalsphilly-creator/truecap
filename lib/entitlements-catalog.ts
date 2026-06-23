@@ -89,7 +89,9 @@ export const FEATURE_CATALOG: Record<FeatureKey, FeatureSpec> = {
   exit_scenarios: { key: "exit_scenarios", label: "Exit scenarios — best year to sell", tiers: ["pro"], category: "analysis", gate: "flag" },
   pdf_export: { key: "pdf_export", label: "Lender-ready PDF report", tiers: ["one_time_pdf", "pro"], freeLimit: "$5 one-time per deal", proLimit: "unlimited", category: "reporting", gate: "flag" },
   custom_branding: { key: "custom_branding", label: "Custom PDF branding (logo, color, contact)", tiers: ["pro"], category: "reporting", gate: "flag" },
-  share_links: { key: "share_links", label: "Shareable read-only deal links", tiers: ["pro"], category: "reporting", gate: "paid" },
+  // Sharing is FREE for everyone (the growth loop): basic links are TrueCap-branded.
+  // Pro adds co-branded share pages + lead capture via `custom_branding` (separate key).
+  share_links: { key: "share_links", label: "Shareable read-only deal links", tiers: ["free", "pro"], category: "reporting", gate: "always" },
   template_manage: { key: "template_manage", label: "Strategy Profiles (saved assumption sets)", tiers: ["pro"], category: "pipeline", gate: "flag" },
   buy_box: { key: "buy_box", label: "Buy Box — auto-screen every deal to your criteria", tiers: ["pro"], category: "pipeline", gate: "flag" },
   pipeline: { key: "pipeline", label: "Deal pipeline + tags (CRM)", tiers: ["pro"], category: "pipeline", gate: "flag" },

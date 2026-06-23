@@ -61,7 +61,7 @@ const MATRIX: Row[] = [
   { feature: "Control over property choice", truecap: "Total — you pick everything", arrived: "Curated by Arrived; you pick from their listings", winner: "truecap" },
   { feature: "Cash flow vs growth", truecap: "You design — fixed-rate mortgage, cash-flow focused", arrived: "Depends on Arrived's deals (mix of yield + appreciation)", winner: "tie" },
   { feature: "Tax benefits (depreciation, 1031)", truecap: "Direct — full Schedule E treatment", arrived: "K-1 pass-through; no 1031 from shares", winner: "truecap" },
-  { feature: "Pricing / fees", truecap: "Free; Pro $20/mo (analysis tools)", arrived: "1% AUM + property mgmt fees baked into yield", winner: "tie" },
+  { feature: "Pricing / fees", truecap: "Free; Pro $29.99/mo (analysis tools)", arrived: "1% AUM + property mgmt fees baked into yield", winner: "tie" },
 ];
 
 export default function VsArrivedPage() {

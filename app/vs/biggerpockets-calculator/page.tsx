@@ -55,7 +55,7 @@ type Row = { feature: string; truecap: string; bp: string; winner: Verdict };
 
 const MATRIX: Row[] = [
   { feature: "Free tier — full analysis depth",      truecap: "Unlimited cap rate, CoC, DSCR, NCF, monthly cash flow — no signup",                        bp: "5 free uses, then Pro required ($39/mo)",                            winner: "truecap" },
-  { feature: "Pricing — entry point",                 truecap: "$16.67/mo annual Pro · 100% free underwriting tier",                                       bp: "$390/yr Pro ($39/mo) · limited free",                                winner: "truecap" },
+  { feature: "Pricing — entry point",                 truecap: "$25/mo annual Pro · 100% free underwriting tier",                                       bp: "$390/yr Pro ($39/mo) · limited free",                                winner: "truecap" },
   { feature: "Address auto-fill",                     truecap: "Paste address → HUD rent + FRED rate + county tax populate live",                          bp: "Manual entry; no live data integrations",                            winner: "truecap" },
   { feature: "Modern UI / mobile UX",                 truecap: "Built 2024-2026, designed mobile-first — works at the showing",                            bp: "Long-established interface; functional but dated",                   winner: "truecap" },
   { feature: "BRRRR analyzer",                        truecap: "Yes — ARV-driven refi math + capital-recovery focus",                                      bp: "Yes — long-standing BRRRR support",                                  winner: "tie" },
@@ -243,7 +243,7 @@ export default function VsBiggerPocketsCalculatorPage() {
             <li><strong>&quot;The 5-free-uses-then-paywall thing is annoying.&quot;</strong> TrueCap&apos;s free tier is unlimited. Run as many analyses as you want. Pro unlocks projections, sensitivity, share links, PDFs — but the core underwriting (cap rate, CoC, DSCR, NCF) is always free.</li>
             <li><strong>&quot;The manual entry is slow.&quot;</strong> Paste an address. TrueCap pulls property tax from the county, rent from HUD, mortgage rate from FRED. You start with 60-70% of the underwrite done. BP has you typing everything.</li>
             <li><strong>&quot;I just want a calculator, not another community to manage.&quot;</strong> BP&apos;s value is the ecosystem (forums + podcast + courses). TrueCap is just the tool. Some investors want the bundle; others want focus.</li>
-            <li><strong>&quot;I&apos;m paying $390/yr for the BP membership and use 10% of what comes with it.&quot;</strong> If you&apos;re a BP member primarily for the calculator, TrueCap Pro at $16.67/mo annual ($200/yr) cuts your tool cost in half.</li>
+            <li><strong>&quot;I&apos;m paying $390/yr for the BP membership and use 10% of what comes with it.&quot;</strong> If you&apos;re a BP member primarily for the calculator, TrueCap Pro at $25/mo annual ($300/yr) costs less — and it is built around the deal analysis you actually use.</li>
             <li><strong>&quot;The deal score on TrueCap actually helps me decide.&quot;</strong> 0-100 composite with a subscore breakdown — you see WHY a deal scored 67 (e.g., cap rate strong, DSCR weak, rents above market), not just a color.</li>
           </ul>
         </section>
@@ -295,7 +295,7 @@ export default function VsBiggerPocketsCalculatorPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             Free includes full cap rate, CoC, DSCR, and monthly cash flow
             analysis with address auto-fill — enough to underwrite. Pro at
-            $16.67/mo annual unlocks share links, PDF exports, 10-year
+            $25/mo annual unlocks share links, PDF exports, 10-year
             projections, tax strategy, sensitivity, MAO, and the
             strategy analyzers. No card to start.
           </p>
@@ -374,7 +374,7 @@ const BP_FAQ: FaqItem[] = [
     question: "How much is TrueCap vs BiggerPockets Pro?",
     answer: (
       <>
-        TrueCap Pro is $20/month (or ~$16.67/month billed annually).
+        TrueCap Pro is $29.99/month (or ~$25/month billed annually).
         BiggerPockets Pro is ~$390/year (~$32.50/month). For the
         calculator alone, TrueCap is roughly half the price. BiggerPockets
         Pro of course bundles forums, courses, and other community
@@ -384,7 +384,7 @@ const BP_FAQ: FaqItem[] = [
       </>
     ),
     plainTextAnswer:
-      "TrueCap Pro is $20/month or ~$16.67/month annual. BiggerPockets Pro is ~$390/year (~$32.50/month). For the calculator alone, TrueCap is roughly half the price.",
+      "TrueCap Pro is $29.99/month or ~$25/month annual. BiggerPockets Pro is ~$390/year (~$32.50/month). For the calculator alone, TrueCap has a deeper free tier and bundles everything in one Pro tier.",
   },
   {
     question: "Does TrueCap have a 10-year projection like BiggerPockets?",

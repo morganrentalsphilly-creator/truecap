@@ -85,10 +85,7 @@ import { CashFlowWaterfall } from "@/components/investcalc/cash-flow-waterfall";
 import { MortgageScenarioCompare } from "@/components/investcalc/mortgage-scenario-compare";
 import { LoanAmortizationView } from "@/components/investcalc/loan-amortization-view";
 import { DealNotesPanel } from "@/components/investcalc/deal-notes-panel";
-// ShareLinkButton import temporarily removed — Share button was pulled from
-// the Quick Actions row because it wrapped onto a second line. Component
-// + share-link.ts + /d/[encoded] route all remain in the codebase ready
-// for re-introduction in a less prominent UI spot.
+import { ShareLinkButton } from "@/components/investcalc/share-link-button";
 import { GlossaryTip } from "@/components/investcalc/glossary-tip";
 import type { GLOSSARY } from "@/lib/glossary";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
@@ -155,7 +152,6 @@ interface AnalysisDashboardProps {
   canUseProjections?: boolean;
   canUseTaxStrategy?: boolean;
   canUseExitScenarios?: boolean;
-  canUseDealScore?: boolean;
   /** Pro: max-allowable-offer solver. False = render upsell teaser. */
   canUseMaxOffer?: boolean;
   /** Pro: sensitivity grid. False = render upsell teaser. */
@@ -392,7 +388,6 @@ export function AnalysisDashboard({
   canUseProjections = false,
   canUseTaxStrategy = false,
   canUseExitScenarios = false,
-  canUseDealScore = false,
   canUseMaxOffer = false,
   canUseSensitivity = false,
   canUseStrategies = false,
@@ -822,12 +817,11 @@ export function AnalysisDashboard({
                 <span className="hidden sm:inline">New Analysis</span>
                 <span className="sm:hidden">New</span>
               </Button>
-              {/* Share link button moved out of Quick Actions — it wrapped
-                  to a second row and broke the action-row alignment. The
-                  share link can be re-surfaced in a more deliberate spot
-                  later (e.g. as part of the export menu or near saved-deal
-                  list-items). Underlying ShareLinkButton component is still
-                  imported but unused; keeping it ready for re-introduction. */}
+              {/* Share is FREE for everyone — the read-only /d/[encoded] view
+                  is the core growth loop (every shared deal markets TrueCap).
+                  Icon-forward (label hidden on mobile) so it doesn't wrap the
+                  action row the way the old full-text button did. */}
+              <ShareLinkButton values={values} />
         </div>
       </div>
 
@@ -839,9 +833,6 @@ export function AnalysisDashboard({
           dealScoreResult={dealScoreResult}
           strategy={strategy}
           onStrategyChange={pickStrategy}
-          isSaving={isSaving}
-          onUpgrade={goToBilling}
-          canUseDealScore={canUseDealScore}
           propertyType={propertyType}
           isCashPurchase={Boolean(result && result.monthlyPayment <= 0)}
           isAppreciationPlay={appreciationPlay}
@@ -1456,9 +1447,6 @@ function DealScoreCard({
   dealScoreResult,
   strategy,
   onStrategyChange,
-  isSaving,
-  onUpgrade,
-  canUseDealScore,
   propertyType,
   isCashPurchase,
   isAppreciationPlay,
@@ -1471,9 +1459,6 @@ function DealScoreCard({
   dealScoreResult: DealScoreActionResult | null;
   strategy: DealStrategy;
   onStrategyChange: (next: DealStrategy) => void;
-  isSaving: boolean;
-  onUpgrade: () => void;
-  canUseDealScore: boolean;
   /** Property type — passed through so the cash-flow tier max + label
    *  can branch correctly for owner-occupant deals (different bands). */
   propertyType?: AnalysisDashboardProps["propertyType"];
@@ -1498,67 +1483,6 @@ function DealScoreCard({
           <Skeleton className="h-4 w-24 mx-auto" />
           <Skeleton className="h-3 w-full" />
           <Skeleton className="h-3 w-3/4" />
-        </div>
-      </div>
-    );
-  }
-
-  if (!canUseDealScore) {
-    return (
-      <div className="relative overflow-hidden bg-card rounded-2xl border border-border p-4 sm:p-6">
-        <div className="pointer-events-none select-none opacity-75 blur-[4.5px]">
-          <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2">
-            Deal Score
-          </p>
-          <div className="flex items-center justify-between gap-3 mb-3">
-            <div className="w-20 h-20 rounded-2xl ring-2 ring-primary/35 bg-[var(--brand-blue-light)] flex flex-col items-center justify-center shadow-sm">
-              {/* Sample score = 72 with "Buy" + "Medium Risk" — chosen
-                  to be internally consistent with the live deal-score
-                  engine's bands (Strong Buy ≥75 / Buy ≥55 / Neutral ≥35
-                  / Risky ≥18) and Risk Level bands (Low ≥65 / Medium ≥40
-                  / High <40). Previously this showed "32" with the "Buy"
-                  + "High Risk" chips — which the live engine would
-                  classify as "Risky" + "High Risk", a contradiction that
-                  free users could spot the moment they upgraded. */}
-              <p className="text-4xl leading-none font-extrabold text-primary">72</p>
-            </div>
-            <div className="flex flex-col items-end gap-1">
-              <span className="px-3 py-1 rounded-xl border border-primary/30 bg-primary text-primary-foreground text-sm font-bold">
-                Buy
-              </span>
-              <span className="px-2.5 py-0.5 rounded-full border border-amber-200 bg-amber-50 text-amber-700 text-xs font-semibold">
-                Medium Risk
-              </span>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-2 text-xs mb-3">
-            {/* Numbers add to 74; -2 risk penalty = 72 — math checks. */}
-            <div className="rounded-lg bg-blue-50 border border-blue-100 p-2">Cash Flow Score: 18</div>
-            <div className="rounded-lg bg-blue-50 border border-blue-100 p-2">CoC Score: 21</div>
-            <div className="rounded-lg bg-blue-50 border border-blue-100 p-2">Cap Rate Score: 20</div>
-            <div className="rounded-lg bg-blue-50 border border-blue-100 p-2">DSCR Score: 15</div>
-            <div className="rounded-lg bg-blue-50 border border-blue-100 p-2 col-span-2">
-              Risk Penalty: -2
-            </div>
-          </div>
-          <p className="text-xs leading-relaxed text-blue-800">
-            This sample score preview shows the type of breakdown Pro unlocks for each deal.
-          </p>
-        </div>
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/35 px-5 text-center backdrop-blur-[1px]">
-          <Lock className="w-10 h-10 text-muted-foreground mb-3" />
-          <p className="font-semibold text-foreground mb-1">Deal Score (Pro)</p>
-          <p className="max-w-xs text-xs text-muted-foreground mb-4">
-            Upgrade to Pro to unlock risk scoring, score breakdowns, and recommendation details.
-          </p>
-          <Button
-            size="sm"
-            className="bg-primary text-primary-foreground rounded-full font-semibold text-sm"
-            onClick={onUpgrade}
-            disabled={isSaving}
-          >
-            {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Upgrade to Pro"}
-          </Button>
         </div>
       </div>
     );

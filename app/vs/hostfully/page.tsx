@@ -61,7 +61,7 @@ const MATRIX: Row[] = [
   { feature: "Cleaning / vendor scheduling", truecap: "No", hostfully: "Yes — turn-over automation", winner: "hostfully" },
   { feature: "Free tier", truecap: "Yes — full underwriting math", hostfully: "No — trial only, $109+/mo (as of 2026)", winner: "truecap" },
   { feature: "STR-specific underwriting (ADR, occupancy)", truecap: "Inputs editable; not auto-pulled", hostfully: "Not the use case", winner: "truecap" },
-  { feature: "Pricing model", truecap: "Free; Pro $20/mo", hostfully: "$109+/mo for STR managers (as of 2026)", winner: "truecap" },
+  { feature: "Pricing model", truecap: "Free; Pro $29.99/mo", hostfully: "$109+/mo for STR managers (as of 2026)", winner: "truecap" },
 ];
 
 export default function VsHostfullyPage() {

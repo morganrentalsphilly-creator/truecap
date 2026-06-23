@@ -1837,6 +1837,19 @@ export function InvestCalcPage({
         clearCalcDraftRaw();
         if (result.mode === "inserted") {
           setSavedDealCount((count) => count + 1);
+          // Auto-pull RentCast comps ONCE for a Pro user's newly-saved deal so
+          // the comps appear on its report without a manual lookup. Fire-and-
+          // forget — never blocks the save. The action enforces entitlement +
+          // monthly caps + 30-day cache and persists the set onto the deal.
+          // Gated to Pro (canUseProjections) so a free user's one-lifetime
+          // comps freebie is never silently spent on save.
+          if (canUseProjections && parsedValues.success && result.id) {
+            void getPropertyCompsAction({
+              address: parsedValues.data.address,
+              propertyType: parsedValues.data.propertyType,
+              dealId: result.id,
+            });
+          }
           // Only fire the conversion event on a true first-save, not
           // on subsequent updates of an existing deal. Otherwise a
           // power-user editing a saved deal 5 times would emit 5
@@ -1989,6 +2002,21 @@ export function InvestCalcPage({
         taxYears,
         exitYears,
       });
+
+      // Attach this deal's stored RentCast comps (saved deals only — reads the
+      // saved set, no API call) so the report includes the comp tables.
+      if (savedDealId) {
+        try {
+          const { getSavedDealCompsAction } = await import("@/app/actions/property-comps");
+          const compsRes = await getSavedDealCompsAction(savedDealId);
+          if (compsRes.ok && compsRes.enrichment) {
+            const { enrichmentToReportComps } = await import("@/lib/report-comps");
+            reportData.comps = enrichmentToReportComps(compsRes.enrichment);
+          }
+        } catch {
+          /* export proceeds without comps */
+        }
+      }
 
       // Lazy-load the PDF generator on first Export click. This keeps
       // jspdf + chart.js (~130-150 KB gzipped) out of the homepage's
@@ -2825,7 +2853,6 @@ export function InvestCalcPage({
               canUseProjections={canUseProjections || isSampleProPreview}
               canUseTaxStrategy={canUseTaxStrategy || isSampleProPreview}
               canUseExitScenarios={canUseExitScenarios || isSampleProPreview}
-              canUseDealScore={canUseDealScore || isSampleProPreview}
               canUseMaxOffer={canUseMaxOffer || isSampleProPreview}
               canUseSensitivity={canUseSensitivity || isSampleProPreview}
               canUseStrategies={canUseStrategies || isSampleProPreview}

@@ -252,7 +252,7 @@ export default function DealCheckVsStessaVsTrueCapPost() {
             <h3>Pricing</h3>
             <p>
               <strong>TrueCap Pro</strong> is a single $20/month tier
-              (or $200/year annually). Everything is included —
+              (or $300/year annually). Everything is included —
               share links, PDF exports, 10-year projections, tax
               strategy, sensitivity, MAO, BRRRR, and
               fix-and-flip analyzers.
@@ -373,7 +373,7 @@ export default function DealCheckVsStessaVsTrueCapPost() {
               When you start running into limits — typically the moment
               you want 10-year projections, sensitivity, tax strategy,
               share links, or PDF reports for partners /
-              lenders — TrueCap Pro at $20/month unlocks them all in
+              lenders — TrueCap Pro at $29.99/month unlocks them all in
               one tier. If your Stessa accounting volume grows and you
               want their advanced reporting, Stessa Pro adds another
               ~$12/month. Together that&apos;s about $31/month for a

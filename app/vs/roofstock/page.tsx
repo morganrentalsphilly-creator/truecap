@@ -60,7 +60,7 @@ type Row = { feature: string; truecap: string; roofstock: string; winner: Verdic
 
 const MATRIX: Row[] = [
   { feature: "Primary purpose",                   truecap: "Per-deal underwriting calculator",                                       roofstock: "Marketplace + brokerage for turnkey SFR",                          winner: "tie" },
-  { feature: "Cost to use",                       truecap: "Free to underwrite; Pro $20/mo for projections + share + PDF",          roofstock: "Free to browse; 0.5% buyer fee at close (typically $1k–$3k)",      winner: "truecap" },
+  { feature: "Cost to use",                       truecap: "Free to underwrite; Pro $29.99/mo for projections + share + PDF",          roofstock: "Free to browse; 0.5% buyer fee at close (typically $1k–$3k)",      winner: "truecap" },
   { feature: "Independent underwriting",           truecap: "Yes — our engine, your assumptions",                                     roofstock: "Listing pro-formas authored by the seller / Roofstock",            winner: "truecap" },
   { feature: "Cap rate / CoC / DSCR",              truecap: "All standard, plus benchmarks per metric",                                roofstock: "Cap rate + cash flow on listing card",                              winner: "truecap" },
   { feature: "Editable assumptions",               truecap: "Every input — vacancy, mgmt %, capex, taxes, etc.",                      roofstock: "Limited override of listing pro-forma",                             winner: "truecap" },
@@ -388,14 +388,14 @@ const ROOFSTOCK_FAQ: FaqItem[] = [
       <>
         Roofstock charges a 0.5% buyer marketplace fee at close — on a
         $200k property that&apos;s ~$1,000. TrueCap is free to
-        underwrite and $20/month for Pro features. They&apos;re not
+        underwrite and $29.99/month for Pro features. They&apos;re not
         substitutes — Roofstock&apos;s fee buys you a brokered
         transaction, TrueCap&apos;s subscription gives you the
         analytical tooling to decide which transactions are worth doing.
       </>
     ),
     plainTextAnswer:
-      "Roofstock charges 0.5% buyer marketplace fee at close (~$1,000 on a $200k property). TrueCap is free to underwrite, $20/month for Pro. Not substitutes — Roofstock fee buys you a brokered transaction, TrueCap subscription gives you the analytical tools.",
+      "Roofstock charges 0.5% buyer marketplace fee at close (~$1,000 on a $200k property). TrueCap is free to underwrite, $29.99/month for Pro. Not substitutes — Roofstock fee buys you a brokered transaction, TrueCap subscription gives you the analytical tools.",
   },
   {
     question: "Can TrueCap analyze any Roofstock listing?",

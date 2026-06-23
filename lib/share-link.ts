@@ -21,6 +21,10 @@ export type SharePayload = {
   meta?: {
     sharedAt?: string; // ISO timestamp
     title?: string;    // e.g. address for the page <title>
+    /** The signed-in sharer's user id, when available. Lets the public
+     *  viewer co-brand the page and route a captured lead to that owner
+     *  (T6). Optional + additive — old v:1 links without it still decode. */
+    ownerId?: string;
   };
 };
 

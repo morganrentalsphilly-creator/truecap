@@ -117,6 +117,16 @@ export interface ReportData {
       profit: number;
     }>;
   };
+  /** RentCast sale + rent comps (reference data; never feeds the analysis math).
+   *  Optional — the comps page renders only when present + non-empty. */
+  comps?: {
+    valueEstimate: number | null;
+    valueRange: { low: number | null; high: number | null } | null;
+    rentEstimate: number | null;
+    rentRange: { low: number | null; high: number | null } | null;
+    saleComps: Array<{ address: string; price: number | null; bedrooms: number | null; bathrooms: number | null; squareFootage: number | null; distanceMiles: number | null }>;
+    rentComps: Array<{ address: string; price: number | null; bedrooms: number | null; bathrooms: number | null; squareFootage: number | null; distanceMiles: number | null }>;
+  } | null;
 }
 
 Chart.register(
@@ -1322,6 +1332,102 @@ async function pageExit(
   });
 }
 
+function pageComps(doc: jsPDF, d: ReportData, branding?: BrandingConfig | null) {
+  const c = d.comps;
+  if (!c) return;
+  let y = M.top + 12;
+  const themeColor = resolveThemeColor(branding);
+  y = sectionTitle(doc, "Sale & Rent Comps", y, undefined, themeColor);
+  setText(doc, COLOR.sub);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9.5);
+  doc.text(
+    "Comparable sales and rentals near this property (RentCast). Reference only — not used in the analysis math.",
+    M.left,
+    y
+  );
+  y += 22;
+
+  const cw = (SAFE.w - 12) / 2;
+  const ch = 60;
+  statCard(doc, M.left, y, cw, ch, "Estimated Value", c.valueEstimate != null ? fmtCurrency(c.valueEstimate) : "—", { tone: "primary", themeColor });
+  statCard(doc, M.left + cw + 12, y, cw, ch, "Estimated Rent", c.rentEstimate != null ? `${fmtCurrency(c.rentEstimate)}/mo` : "—", { tone: "success", themeColor });
+  y += ch + 10;
+
+  const valRange =
+    c.valueRange && c.valueRange.low != null && c.valueRange.high != null
+      ? `Value range ${fmtCurrency(c.valueRange.low)}–${fmtCurrency(c.valueRange.high)}`
+      : null;
+  const rentRange =
+    c.rentRange && c.rentRange.low != null && c.rentRange.high != null
+      ? `Rent range ${fmtCurrency(c.rentRange.low)}–${fmtCurrency(c.rentRange.high)}/mo`
+      : null;
+  const rangeLine = [valRange, rentRange].filter(Boolean).join("     ·     ");
+  if (rangeLine) {
+    setText(doc, COLOR.sub);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8.5);
+    doc.text(rangeLine, M.left, y);
+    y += 18;
+  }
+  y += 4;
+
+  const rowOf = (s: {
+    address: string;
+    price: number | null;
+    bedrooms: number | null;
+    bathrooms: number | null;
+    squareFootage: number | null;
+    distanceMiles: number | null;
+  }) => [
+    s.address,
+    s.price != null ? fmtCurrency(s.price) : "—",
+    s.bedrooms != null ? String(s.bedrooms) : "—",
+    s.bathrooms != null ? String(s.bathrooms) : "—",
+    s.squareFootage != null ? s.squareFootage.toLocaleString("en-US") : "—",
+    s.distanceMiles != null ? s.distanceMiles.toFixed(2) : "—",
+  ];
+
+  if (c.saleComps.length) {
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    setText(doc, COLOR.ink);
+    doc.text("Sale comps", M.left, y);
+    y += 8;
+    autoTable(doc, {
+      startY: y,
+      margin: { left: M.left, right: M.right },
+      head: [["Address", "Sale Price", "Bd", "Ba", "Sq Ft", "Dist (mi)"]],
+      body: c.saleComps.map(rowOf),
+      theme: "plain",
+      styles: { font: "helvetica", fontSize: 8.5, cellPadding: 4.5, lineColor: hexToRgb(COLOR.line), lineWidth: 0.3 },
+      headStyles: { fillColor: hexToRgb(COLOR.cardSoft), textColor: hexToRgb(themeColor), fontStyle: "bold", fontSize: 7.5, halign: "left", lineWidth: { bottom: 0.6, top: 0, left: 0, right: 0 }, lineColor: hexToRgb(themeColor) },
+      columnStyles: { 1: { fontStyle: "bold", textColor: hexToRgb(COLOR.ink) } },
+      alternateRowStyles: { fillColor: [252, 253, 255] },
+    });
+    y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 18;
+  }
+
+  if (c.rentComps.length) {
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    setText(doc, COLOR.ink);
+    doc.text("Rent comps", M.left, y);
+    y += 8;
+    autoTable(doc, {
+      startY: y,
+      margin: { left: M.left, right: M.right },
+      head: [["Address", "Rent / mo", "Bd", "Ba", "Sq Ft", "Dist (mi)"]],
+      body: c.rentComps.map(rowOf),
+      theme: "plain",
+      styles: { font: "helvetica", fontSize: 8.5, cellPadding: 4.5, lineColor: hexToRgb(COLOR.line), lineWidth: 0.3 },
+      headStyles: { fillColor: hexToRgb(COLOR.cardSoft), textColor: hexToRgb(themeColor), fontStyle: "bold", fontSize: 7.5, halign: "left", lineWidth: { bottom: 0.6, top: 0, left: 0, right: 0 }, lineColor: hexToRgb(themeColor) },
+      columnStyles: { 1: { fontStyle: "bold", textColor: hexToRgb(COLOR.ink) } },
+      alternateRowStyles: { fillColor: [252, 253, 255] },
+    });
+  }
+}
+
 // ===================== Public API =====================
 async function buildInvestmentPDFDocument(
   data: ReportData,
@@ -1356,6 +1462,12 @@ async function buildInvestmentPDFDocument(
   if (mode !== "lender") {
     doc.addPage();
     await pageExit(doc, d, branding ?? null);
+  }
+  // Sale + rent comps — reference data valued in every report mode (lenders
+  // especially want comps). Renders only when a comp set is present.
+  if (d.comps && (d.comps.saleComps.length > 0 || d.comps.rentComps.length > 0)) {
+    doc.addPage();
+    pageComps(doc, d, branding ?? null);
   }
 
   // Add headers/footers AFTER all pages exist

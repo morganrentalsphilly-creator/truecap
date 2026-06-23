@@ -14,9 +14,10 @@
  * toggle logic + checkout wiring lives in one place.
  */
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Check, Sparkles, X } from "lucide-react";
 import { PricingPlanButtons } from "@/components/marketing/pricing-plan-buttons";
+import { trackEvent } from "@/lib/analytics";
 
 type ResolvedPrice = { amountLabel: string; period: string } | null;
 
@@ -81,6 +82,18 @@ export function PricingTogglePlans({
   isPaid,
 }: PricingTogglePlansProps) {
   const [period, setPeriod] = useState<"monthly" | "annual">("annual");
+
+  // Top of the pricing-page funnel — fire once on mount so we can measure
+  // pricing_view → pro_checkout_started (checkout fires server-side in
+  // billing.ts). Path-tagged in case these plan cards are ever reused.
+  const viewFired = useRef(false);
+  useEffect(() => {
+    if (viewFired.current) return;
+    viewFired.current = true;
+    trackEvent("pricing_view", {
+      path: typeof window !== "undefined" ? window.location.pathname : "/pricing",
+    });
+  }, []);
 
   const monthlyAmount = parsePriceAmount(monthly);
   const annualAmount = parsePriceAmount(annual);
@@ -275,8 +288,8 @@ export function PricingTogglePlans({
             />
           </div>
           <p className="mt-2.5 text-center text-xs text-muted-foreground">
-            Cancel anytime — month-to-month, no contract. Downgrade and your
-            saved deals + reports stay in your account.
+            Start with a <strong className="text-foreground">3-day free trial</strong> — cancel anytime, no
+            contract. Downgrade and your saved deals + reports stay in your account.
           </p>
           <ul className="mt-6 space-y-2.5">
             {PRO_FEATURES.map((f) => (

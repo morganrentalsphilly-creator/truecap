@@ -60,7 +60,7 @@ const MATRIX: Row[] = [
   { feature: "API access for developers", truecap: "No", rentcast: "Yes — REST API for rent + value", winner: "rentcast" },
   { feature: "Address auto-fill (multi-source)", truecap: "Yes — HUD + FRED + state property tax", rentcast: "Property data only", winner: "truecap" },
   { feature: "Mortgage + financing math", truecap: "Yes — full PITI + DSCR + amortization", rentcast: "Not included", winner: "truecap" },
-  { feature: "Pricing (entry tier)", truecap: "Free; Pro $20/mo", rentcast: "Free + paid tiers ~$15-$74/mo (as of 2026)", winner: "tie" },
+  { feature: "Pricing (entry tier)", truecap: "Free; Pro $29.99/mo", rentcast: "Free + paid tiers ~$15-$74/mo (as of 2026)", winner: "tie" },
   { feature: "Free tier", truecap: "Yes — full underwriting math", rentcast: "Limited free lookups", winner: "truecap" },
   { feature: "Shareable read-only deal link", truecap: "Pro — public URL + branding", rentcast: "Not the use case", winner: "truecap" },
   { feature: "Lender-ready PDF", truecap: "Pro — multi-page report", rentcast: "PDF reports available on paid", winner: "tie" },

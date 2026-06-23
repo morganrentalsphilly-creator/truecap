@@ -67,7 +67,7 @@ const MATRIX: Row[] = [
   { feature: "PDF export for lenders / partners", truecap: "Pro — branded multi-page report",                                          excel: "Print → PDF, manual formatting",                                          winner: "truecap" },
   { feature: "Tax strategy modeling",             truecap: "Pro — bracket-aware depreciation + after-tax CF",                          excel: "Possible if you build the formulas",                                       winner: "truecap" },
   { feature: "BRRRR / fix-and-flip analyzers",    truecap: "Built-in dedicated workflows",                                             excel: "Custom build per deal type",                                              winner: "truecap" },
-  { feature: "Cost",                              truecap: "Free or $16.67/mo annual Pro",                                            excel: "$0 (if you have Office or Google Workspace)",                              winner: "tie" },
+  { feature: "Cost",                              truecap: "Free or $25/mo annual Pro",                                            excel: "$0 (if you have Office or Google Workspace)",                              winner: "tie" },
 ];
 
 export default function VsExcelPage() {

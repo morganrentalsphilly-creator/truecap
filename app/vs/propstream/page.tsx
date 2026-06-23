@@ -61,7 +61,7 @@ const MATRIX: Row[] = [
   { feature: "Public records data", truecap: "Limited (HUD FMR + FRED)", propstream: "Yes — 150M+ properties", winner: "propstream" },
   { feature: "List builder / direct mail integration", truecap: "No", propstream: "Yes — full marketing stack", winner: "propstream" },
   { feature: "Mobile-first UX", truecap: "Yes — PWA installable", propstream: "Mobile app exists", winner: "tie" },
-  { feature: "Pricing (entry tier)", truecap: "Free for underwriting; Pro $20/mo", propstream: "~$99/mo (as of 2026), no real free tier", winner: "truecap" },
+  { feature: "Pricing (entry tier)", truecap: "Free for underwriting; Pro $29.99/mo", propstream: "~$99/mo (as of 2026), no real free tier", winner: "truecap" },
   { feature: "Free tier", truecap: "Yes — full underwriting math", propstream: "No — paid only", winner: "truecap" },
   { feature: "Shareable read-only deal link", truecap: "Pro — public URL + branding", propstream: "Internal-only data", winner: "truecap" },
   { feature: "Lender-ready PDF", truecap: "Pro — multi-page report", propstream: "Not the use case", winner: "truecap" },
@@ -344,7 +344,7 @@ const PROPSTREAM_FAQ: FaqItem[] = [
       </>
     ),
     plainTextAnswer:
-      "Yes. TrueCap free covers cap rate, CoC, DSCR, cash flow, address auto-fill on unlimited deals. Pro is $20/mo. PropStream has no real free tier.",
+      "Yes. TrueCap free covers cap rate, CoC, DSCR, cash flow, address auto-fill on unlimited deals. Pro is $29.99/mo. PropStream has no real free tier.",
   },
   {
     question: "What&apos;s the best PropStream alternative for finding deals?",

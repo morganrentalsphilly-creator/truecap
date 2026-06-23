@@ -15,7 +15,7 @@ tax strategy, exit scenarios, plus a plain-English verdict and a
 shareable read-only link.
 
 - **Audience**: solo / small-portfolio buy-and-hold investors and house-hackers.
-- **Business model**: free tier (run analyses, no save) + Pro at **$20/mo**
+- **Business model**: free tier (run analyses, no save) + Pro at **$29/mo**
   or an annual plan (saved deals, dashboard, compare, templates, tax
   strategy, exit scenarios, PDF export, Deal Score, etc.). Pricing logic
   lives in the `plans.entitlements` JSON column — see `lib/entitlements.ts`.

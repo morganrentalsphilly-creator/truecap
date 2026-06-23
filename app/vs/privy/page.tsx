@@ -61,7 +61,7 @@ const MATRIX: Row[] = [
   { feature: "Off-market lead generation", truecap: "No", privy: "Limited (MLS-focused)", winner: "privy" },
   { feature: "Mortgage + financing math", truecap: "Yes — PITI + DSCR + amortization", privy: "Not included", winner: "truecap" },
   { feature: "Free tier", truecap: "Yes — full underwriting math", privy: "Trial only; paid from ~$99/mo (as of 2026)", winner: "truecap" },
-  { feature: "Pricing (entry tier)", truecap: "Free; Pro $20/mo", privy: "~$99/mo + setup fees", winner: "truecap" },
+  { feature: "Pricing (entry tier)", truecap: "Free; Pro $29.99/mo", privy: "~$99/mo + setup fees", winner: "truecap" },
 ];
 
 export default function VsPrivyPage() {

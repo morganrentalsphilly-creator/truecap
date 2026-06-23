@@ -389,13 +389,13 @@ const AVAIL_FAQ: FaqItem[] = [
         and includes listings, lease signing, and ACH rent collection.
         &quot;Unlimited Plus&quot; is ~$7/unit/month (as of 2026) for
         advanced features. TrueCap is free for the underwriting math;
-        Pro is $20/month for projections, sensitivity, tax strategy,
+        Pro is $29.99/month for projections, sensitivity, tax strategy,
         deal score, and share/PDF features. Both have legitimately
         useful free tiers.
       </>
     ),
     plainTextAnswer:
-      "Avail Unlimited is free (listings, lease signing, ACH rent collection). Avail Unlimited Plus is ~$7/unit/month (2026). TrueCap free covers underwriting; TrueCap Pro is $20/month. Both have useful free tiers.",
+      "Avail Unlimited is free (listings, lease signing, ACH rent collection). Avail Unlimited Plus is ~$7/unit/month (2026). TrueCap free covers underwriting; TrueCap Pro is $29.99/month. Both have useful free tiers.",
   },
   {
     question: "Does Avail's calculator replace TrueCap?",

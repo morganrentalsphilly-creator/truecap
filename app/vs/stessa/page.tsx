@@ -310,13 +310,13 @@ const STESSA_FAQ: FaqItem[] = [
         tracking on unlimited properties. Their paid tier (Stessa Pro,
         ~$12/month) adds advanced reporting, document organization,
         and rent collection features. TrueCap free covers the
-        underwriting math; TrueCap Pro ($20/month) adds projections,
+        underwriting math; TrueCap Pro ($29.99/month) adds projections,
         tax strategy, sensitivity, and MAO. So free Stessa
         + free TrueCap covers a lot of the workflow already.
       </>
     ),
     plainTextAnswer:
-      "Stessa's base tier is free for accounting + bank feeds on unlimited properties. Stessa Pro is ~$12/month. TrueCap free covers underwriting math; TrueCap Pro is $20/month for projections, tax, sensitivity, and MAO.",
+      "Stessa's base tier is free for accounting + bank feeds on unlimited properties. Stessa Pro is ~$12/month. TrueCap free covers underwriting math; TrueCap Pro is $29.99/month for projections, tax, sensitivity, and MAO.",
   },
   {
     question: "Does TrueCap track expenses like Stessa?",

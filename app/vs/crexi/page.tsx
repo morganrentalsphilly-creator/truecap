@@ -61,7 +61,7 @@ const MATRIX: Row[] = [
   { feature: "Tenant info (CRE)", truecap: "Not applicable", crexi: "Yes — public-record tenant data", winner: "crexi" },
   { feature: "Tax strategy modeling (residential)", truecap: "Pro — depreciation + interest + after-tax CF", crexi: "Not the focus", winner: "truecap" },
   { feature: "Free tier", truecap: "Yes — full residential underwriting", crexi: "Free to browse listings; paid for intelligence", winner: "tie" },
-  { feature: "Pricing (entry tier)", truecap: "Free; Pro $20/mo", crexi: "Free for buyers/browsers; Intelligence ~$100+/mo", winner: "tie" },
+  { feature: "Pricing (entry tier)", truecap: "Free; Pro $29.99/mo", crexi: "Free for buyers/browsers; Intelligence ~$100+/mo", winner: "tie" },
 ];
 
 export default function VsCrexiPage() {

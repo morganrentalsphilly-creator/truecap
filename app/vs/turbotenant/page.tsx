@@ -65,7 +65,7 @@ const MATRIX: Row[] = [
   { feature: "Free tier", truecap: "Yes — full underwriting math", turbotenant: "Yes — listings + lease + ACH rent collection", winner: "tie" },
   { feature: "Address auto-fill (rent/rate/tax)", truecap: "Yes — HUD + FRED + state property tax", turbotenant: "Not applicable", winner: "truecap" },
   { feature: "Multi-property dashboard", truecap: "Yes — portfolio rollup of saved deals", turbotenant: "Yes — multi-unit ops dashboard", winner: "tie" },
-  { feature: "Pricing (paid tier)", truecap: "Pro $20/mo for projections + tax + share + PDF", turbotenant: "Premium ~$8-12/mo per unit (as of 2026)", winner: "tie" },
+  { feature: "Pricing (paid tier)", truecap: "Pro $29.99/mo for projections + tax + share + PDF", turbotenant: "Premium ~$8-12/mo per unit (as of 2026)", winner: "tie" },
 ];
 
 export default function VsTurbotenantPage() {

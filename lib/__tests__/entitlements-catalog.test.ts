@@ -30,13 +30,18 @@ describe("entitlements catalog — policy guards", () => {
     const proOnly: FeatureKey[] = [
       "compare_deals", "tax_strategy", "projections", "exit_scenarios",
       "pdf_export", "custom_branding", "buy_box", "pipeline",
-      "template_manage", "mao", "sensitivity", "strategies", "share_links",
+      "template_manage", "mao", "sensitivity", "strategies",
       "dashboard_insights",
     ];
     for (const k of proOnly) {
       expect(tierHas("free", k)).toBe(false);
       expect(tierHas("pro", k)).toBe(true);
     }
+  });
+
+  it("Shareable read-only links are FREE (the growth loop), not Pro-gated", () => {
+    expect(tierHas("free", "share_links")).toBe(true);
+    expect(tierHas("pro", "share_links")).toBe(true);
   });
 
   it("$5 one-time PDF unlocks pdf_export but not custom branding", () => {

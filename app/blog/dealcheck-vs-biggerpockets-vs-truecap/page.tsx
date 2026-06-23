@@ -177,7 +177,7 @@ export default function ThreeWayComparisonPost() {
 
             <h2>Pricing (paid tier comparison)</h2>
             <div dangerouslySetInnerHTML={{ __html: `<ul>
-              <li><strong>TrueCap Pro</strong> — \$20/month (or \$200/year on the annual plan, ~\$16.67/mo). Single tier. Everything included: 10-year projections, tax strategy, sensitivity grid, exit scenarios, MAO solver, BRRRR + fix-and-flip analyzers, share links, PDF exports, branded reports, save / compare / template deals.</li>
+              <li><strong>TrueCap Pro</strong> — \$20/month (or \$200/year on the annual plan, ~\$25/mo). Single tier. Everything included: 10-year projections, tax strategy, sensitivity grid, exit scenarios, MAO solver, BRRRR + fix-and-flip analyzers, share links, PDF exports, branded reports, save / compare / template deals.</li>
               <li><strong>DealCheck Plus</strong> — \$10/month. Raises caps: 50 saved properties, more photos, comps, and templates.</li>
               <li><strong>DealCheck Pro</strong> — \$20/month. Unlimited saved properties, photos, comps, and templates.</li>
               <li><strong>BiggerPockets Pro</strong> — ~\$32.50/month (annual). Bundles the calculator with community, courses, forums, podcasts, books. Calculator alone isn&apos;t cheaper.</li>

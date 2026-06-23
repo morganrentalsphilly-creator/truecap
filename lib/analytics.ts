@@ -79,6 +79,17 @@ export type FunnelEvent =
   | "buy_box_saved"      // properties: source ("settings" | "template"), is_new?, is_default, has_strategy
   | "scenario_added"     // properties: has_strategy, strategy_kind (kind | null)
   | "scenarios_compared" // properties: count
+  // ── Upsell + pricing + share-loop attribution (T3) ─────────────
+  // Closes the "saw the upsell → started checkout" gap (the biggest
+  // attribution hole), measures the pricing-page funnel, and the share
+  // loop's reach (a shared deal viewed = the K-factor numerator). PII-free.
+  | "upsell_prompt_shown"   // properties: feature, placement
+  | "upsell_prompt_clicked" // properties: feature, placement
+  | "pricing_view"          // properties: path
+  | "shared_deal_viewed"    // properties: has_address
+  // ── Agent Loop: co-branded share lead capture (T6) ─────────────
+  | "lead_form_shown"       // properties: owner_present
+  | "lead_captured"         // properties: has_message
 
 /**
  * Safe capture. Use this everywhere instead of `posthog.capture(...)`

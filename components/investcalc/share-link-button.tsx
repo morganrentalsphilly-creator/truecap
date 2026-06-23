@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { encodeShareLink, buildShareUrl } from "@/lib/share-link";
+import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import { trackEvent } from "@/lib/analytics";
 import { useToast } from "@/hooks/use-toast";
 
@@ -29,15 +30,26 @@ export function ShareLinkButton({ values, className }: ShareLinkButtonProps) {
   const [shareUrl, setShareUrl] = useState<string>("");
   const { toast } = useToast();
 
-  const openShare = () => {
+  const openShare = async () => {
     if (!values) return;
     try {
+      // Include the signed-in sharer's id so the public viewer can co-brand
+      // the page and route a captured lead back to them (T6). Anonymous
+      // sharers simply omit it and the page stays generic.
+      let ownerId: string | undefined;
+      try {
+        const { data } = await createBrowserSupabaseClient().auth.getUser();
+        ownerId = data.user?.id;
+      } catch {
+        /* not signed in — share stays generic */
+      }
       const encoded = encodeShareLink({
         v: 1,
         values,
         meta: {
           sharedAt: new Date().toISOString(),
           title: values.address || "Shared deal",
+          ...(ownerId ? { ownerId } : {}),
         },
       });
       setShareUrl(buildShareUrl(encoded));
@@ -85,7 +97,7 @@ export function ShareLinkButton({ values, className }: ShareLinkButtonProps) {
         title={disabled ? "Enter an address and price first" : "Share a read-only view of this deal"}
       >
         <Share2 className="w-3.5 h-3.5" />
-        <span>Share</span>
+        <span className="hidden sm:inline">Share</span>
       </Button>
 
       {open && (

@@ -28,9 +28,13 @@ function getSiteUrl(): string {
 }
 
 function getPlanPriceId(planSlug: "pro_monthly" | "pro_annual", dbPriceId?: string | null): string | null {
-  if (dbPriceId) return dbPriceId;
-  if (planSlug === "pro_monthly") return process.env.STRIPE_PRICE_PRO_MONTHLY ?? null;
-  return process.env.STRIPE_PRICE_PRO_ANNUAL ?? null;
+  // Env-first so a price change is a single env-var swap: new checkouts follow
+  // STRIPE_PRICE_PRO_* immediately, while plans.stripe_price_id (kept = the OLD
+  // price) still lets the webhook map grandfathered subscriptions to Pro.
+  // Behaviour-neutral until the env vars point at a new Stripe Price.
+  const envPriceId =
+    planSlug === "pro_monthly" ? process.env.STRIPE_PRICE_PRO_MONTHLY : process.env.STRIPE_PRICE_PRO_ANNUAL;
+  return envPriceId ?? dbPriceId ?? null;
 }
 
 function getDisplayName(profile: {
@@ -183,6 +187,10 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
     const siteUrl = getSiteUrl();
     const annualCoupon =
       parsed.data.planSlug === "pro_annual" ? process.env.STRIPE_ANNUAL_DISCOUNT_COUPON_ID : undefined;
+    // Free Pro trial on new subscriptions. Card is collected at checkout and
+    // auto-charges when the trial ends. Env-adjustable; PRO_TRIAL_DAYS=0 turns
+    // trials off without a deploy. Default 3 days.
+    const proTrialDays = Math.max(0, Number.parseInt(process.env.PRO_TRIAL_DAYS ?? "3", 10) || 0);
     const stripe = getStripe();
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
@@ -207,6 +215,7 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
           user_id: user.id,
           plan_slug: parsed.data.planSlug,
         },
+        ...(proTrialDays > 0 ? { trial_period_days: proTrialDays } : {}),
       },
     });
 

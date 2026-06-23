@@ -50,7 +50,7 @@ const TOOLS = [
     name: "TrueCap (Pro tier)",
     bestFor: "Best BRRRR analyzer + ARV sensitivity",
     url: "/vs/dealcheck-for-brrrr",
-    pricing: "Free for standard underwriting; Pro $20/mo for BRRRR analyzer",
+    pricing: "Free for standard underwriting; Pro $29.99/mo for BRRRR analyzer",
     freeCovers: [
       "Standard cap rate / CoC / DSCR / cash flow on BRRRR candidates",
       "ARV input + rehab cost modeling",

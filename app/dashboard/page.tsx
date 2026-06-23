@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { DashboardHome, type DashboardHomeData } from "@/components/dashboard/DashboardHome";
+import { DealLeadsCard } from "@/components/dashboard/DealLeadsCard";
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -284,6 +285,7 @@ export default async function DashboardPage() {
   return (
     <>
       <DashboardHome data={dashboardData} canCompareDeals={hasPlanFeature(entitlements, "compare_deals")} />
+      <DealLeadsCard />
     </>
   );
 }

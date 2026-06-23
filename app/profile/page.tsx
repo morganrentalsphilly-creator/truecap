@@ -57,8 +57,11 @@ function formatPrice(planSlug: "pro_monthly" | "pro_annual", stripePrice?: Strip
 }
 
 function getPlanPriceId(planSlug: "pro_monthly" | "pro_annual", dbPriceId?: string | null): string | undefined {
-  if (dbPriceId) return dbPriceId;
-  return planSlug === "pro_monthly" ? process.env.STRIPE_PRICE_PRO_MONTHLY : process.env.STRIPE_PRICE_PRO_ANNUAL;
+  // Env-first (mirrors billing.ts getPlanPriceId): a price change is one
+  // env-var swap; dbPriceId stays a fallback for grandfathered mapping.
+  const envPriceId =
+    planSlug === "pro_monthly" ? process.env.STRIPE_PRICE_PRO_MONTHLY : process.env.STRIPE_PRICE_PRO_ANNUAL;
+  return envPriceId ?? dbPriceId ?? undefined;
 }
 
 async function getStripePriceDisplays(

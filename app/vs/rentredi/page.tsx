@@ -68,7 +68,7 @@ const MATRIX: Row[] = [
   { feature: "Online rental application",          truecap: "No",                                                                     rentredi: "Yes — customizable forms",                                          winner: "rentredi" },
   { feature: "Maintenance request workflow",       truecap: "No",                                                                     rentredi: "Yes — tenant portal + tracker",                                     winner: "rentredi" },
   { feature: "Listing distribution",               truecap: "No",                                                                     rentredi: "Yes — syndicated to Realtor.com, Zillow, etc.",                     winner: "rentredi" },
-  { feature: "Pricing (entry tier)",               truecap: "Free for underwriting",                                                  rentredi: "~$20/month or ~$120/year (as of 2026)",                              winner: "truecap" },
+  { feature: "Pricing (entry tier)",               truecap: "Free for underwriting",                                                  rentredi: "~$29.99/month or ~$120/year (as of 2026)",                              winner: "truecap" },
   { feature: "Per-property cost",                  truecap: "Unlimited deals analyzed",                                               rentredi: "Per-unit pricing typically applies above a base",                    winner: "truecap" },
   { feature: "Free tier exists",                   truecap: "Yes — full underwriting",                                                rentredi: "Trial only",                                                        winner: "truecap" },
   { feature: "Address auto-fill (rent, rate, tax)", truecap: "Yes — HUD + FRED + state property tax",                                  rentredi: "Not applicable",                                                    winner: "truecap" },
@@ -377,14 +377,14 @@ const RENTREDI_FAQ: FaqItem[] = [
     answer: (
       <>
         TrueCap is cheaper. TrueCap free covers a full underwrite at no
-        cost; TrueCap Pro is $20/month. RentRedi is ~$20/month or
+        cost; TrueCap Pro is $29.99/month. RentRedi is ~$20/month or
         ~$120/year for landlords (as of 2026). The pricing isn&apos;t
         really comparable though — you&apos;d pay for both because they
         do different things.
       </>
     ),
     plainTextAnswer:
-      "TrueCap is cheaper. TrueCap free covers underwriting; TrueCap Pro is $20/month. RentRedi is ~$20/month or ~$120/year (2026). Pricing isn't really comparable — they do different things.",
+      "TrueCap is cheaper. TrueCap free covers underwriting; TrueCap Pro is $29.99/month. RentRedi is ~$20/month or ~$120/year (2026). Pricing isn't really comparable — they do different things.",
   },
   {
     question: "What do I need before I use RentRedi?",

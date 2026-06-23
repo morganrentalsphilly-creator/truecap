@@ -73,7 +73,7 @@ const COMPARISONS: ComparisonCard[] = [
     tagline: "The other modern rental calculator. Deeper free tier, simpler pricing, plain-English verdict.",
     group: "Direct alternative" },
   { slug: "biggerpockets-calculator", competitor: "BiggerPockets Calculator",
-    tagline: "The household name. We're newer, faster, and roughly half the price for the calculator alone.",
+    tagline: "The household name. We're newer, faster, with a deeper free tier and everything bundled in one Pro tier.",
     group: "Direct alternative" },
   { slug: "excel", competitor: "Excel / Google Sheets",
     tagline: "Your spreadsheet is brittle, mobile-hostile, and quietly wrong. Validated math, every device, no formulas to break.",

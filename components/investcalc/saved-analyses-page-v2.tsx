@@ -1128,6 +1128,19 @@ export function SavedAnalysesPage({
           templateFallback: exportResult.templateFallback,
           exitYears,
         });
+        // Attach this deal's stored RentCast comps (no API call — reads the
+        // saved set) so the report includes the sale + rent comp tables.
+        // Best-effort: comps are optional reference data, never block export.
+        try {
+          const { getSavedDealCompsAction } = await import("@/app/actions/property-comps");
+          const compsRes = await getSavedDealCompsAction(id);
+          if (compsRes.ok && compsRes.enrichment) {
+            const { enrichmentToReportComps } = await import("@/lib/report-comps");
+            reportData.comps = enrichmentToReportComps(compsRes.enrichment);
+          }
+        } catch {
+          /* report proceeds without comps */
+        }
         // Pull Pro-tier branding (logo, color, contact info) so the
         // exported PDF reflects the user's brand. Falls back to TrueCap
         // defaults if the user is unentitled or hasn't configured anything.

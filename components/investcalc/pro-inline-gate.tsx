@@ -13,6 +13,8 @@
 
 import { ArrowRight, Lock, Sparkles } from "lucide-react";
 import Link from "next/link";
+import { useEffect, useRef } from "react";
+import { trackEvent } from "@/lib/analytics";
 
 interface ProInlineGateProps {
   /** Brand-color icon at the top — same icon as the gated feature uses. */
@@ -26,6 +28,17 @@ interface ProInlineGateProps {
 }
 
 export function ProInlineGate({ icon: Icon, title, description, previewBullets }: ProInlineGateProps) {
+  // Upsell attribution: fire once when this gate renders (the user reached a
+  // Pro feature), and again if they click through — closes the
+  // analysis_completed → saw-upsell → pro_checkout_started gap. `feature` is
+  // the gate title (e.g. "Max Allowable Offer"); no PII.
+  const fired = useRef(false);
+  useEffect(() => {
+    if (fired.current) return;
+    fired.current = true;
+    trackEvent("upsell_prompt_shown", { feature: title, placement: "analysis_dashboard" });
+  }, [title]);
+
   return (
     <div className="relative overflow-hidden rounded-2xl border-2 border-primary/25 bg-gradient-to-br from-[var(--brand-blue-light)] via-card to-card p-5 shadow-sm sm:p-6">
       <div className="flex items-start justify-between gap-3">
@@ -59,6 +72,9 @@ export function ProInlineGate({ icon: Icon, title, description, previewBullets }
       {/* CTA */}
       <Link
         href="/pricing"
+        onClick={() =>
+          trackEvent("upsell_prompt_clicked", { feature: title, placement: "analysis_dashboard" })
+        }
         className="group mt-4 inline-flex items-center gap-1.5 text-sm font-bold text-primary hover:underline"
       >
         <Sparkles className="size-4" />

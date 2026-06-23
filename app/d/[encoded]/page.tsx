@@ -14,6 +14,9 @@ import { decodeShareLink } from "@/lib/share-link";
 import { calculateAnalysis } from "@/lib/calc-analysis";
 import { investmentFormSchema } from "@/lib/investcalc-schema";
 import { ReadOnlyAnalysisView } from "@/components/investcalc/read-only-analysis-view";
+import { TrackSharedDealView } from "@/components/analytics/track-shared-deal-view";
+import { getPublicAgentBranding } from "@/lib/agent-share";
+import { LeadCaptureForm } from "@/components/investcalc/lead-capture-form";
 
 // Next.js 15+ makes `params` async (Promise). Without awaiting it, accessing
 // .encoded synchronously throws in dev and silently breaks in prod.
@@ -68,20 +71,38 @@ export default async function PublicDealPage({ params }: Props) {
     return <InvalidLink reason="We couldn't recompute the analysis from this share link." />;
   }
 
+  // Co-branding (T6): if a Pro owner shared this, surface their brand + a lead
+  // form. Falls back to the generic TrueCap view for free/anonymous shares.
+  const agent = await getPublicAgentBranding(payload.meta?.ownerId);
+
   return (
     <div className="min-h-screen bg-background">
-      {/* Top banner */}
-      <div className="bg-primary text-primary-foreground py-2 px-4 text-center text-xs sm:text-sm">
-        Shared via{" "}
-        <Link href="/" className="font-bold underline underline-offset-2">
-          TrueCap
-        </Link>{" "}
-        — view-only. Want to edit, save, or run your own? Start free at{" "}
-        <Link href="/" className="font-bold underline underline-offset-2">
-          usetruecap.com
-        </Link>
-        .
-      </div>
+      <TrackSharedDealView hasAddress={Boolean(parsed.data.address)} />
+      {/* Top banner — agent-branded when a Pro owner shared it, else TrueCap. */}
+      {agent ? (
+        <div
+          className="flex items-center justify-center gap-2 py-2.5 px-4 text-center text-xs font-semibold text-white sm:text-sm"
+          style={{ background: agent.primaryColor ?? "var(--primary)" }}
+        >
+          {agent.logoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={agent.logoUrl} alt="" className="h-5 w-auto rounded-sm bg-white/90 p-0.5" />
+          ) : null}
+          <span>Shared by {agent.displayName}</span>
+        </div>
+      ) : (
+        <div className="bg-primary text-primary-foreground py-2 px-4 text-center text-xs sm:text-sm">
+          Shared via{" "}
+          <Link href="/" className="font-bold underline underline-offset-2">
+            TrueCap
+          </Link>{" "}
+          — view-only. Want to edit, save, or run your own? Start free at{" "}
+          <Link href="/" className="font-bold underline underline-offset-2">
+            usetruecap.com
+          </Link>
+          .
+        </div>
+      )}
 
       <main id="main" className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
         <header className="mb-6 sm:mb-8">
@@ -101,37 +122,55 @@ export default async function PublicDealPage({ params }: Props) {
 
         <ReadOnlyAnalysisView values={parsed.data} result={result} />
 
-        {/* Pro features upsell */}
-        <div className="mt-6 rounded-2xl border border-primary/30 bg-[var(--brand-blue-light)] p-5 sm:p-6">
-          <div className="flex items-start gap-3">
-            <Lock className="w-5 h-5 text-primary mt-0.5 shrink-0" />
-            <div className="min-w-0 flex-1">
-              <div className="font-bold text-foreground">
-                See 10-year projections, tax strategy, exit scenarios, and Deal Score
+        {/* Agent lead capture (co-branded shares) OR the generic Pro upsell. */}
+        {agent && payload.meta?.ownerId ? (
+          <LeadCaptureForm
+            ownerId={payload.meta.ownerId}
+            agentName={agent.displayName}
+            dealAddress={parsed.data.address}
+            accentColor={agent.primaryColor}
+          />
+        ) : (
+          <div className="mt-6 rounded-2xl border border-primary/30 bg-[var(--brand-blue-light)] p-5 sm:p-6">
+            <div className="flex items-start gap-3">
+              <Lock className="w-5 h-5 text-primary mt-0.5 shrink-0" />
+              <div className="min-w-0 flex-1">
+                <div className="font-bold text-foreground">
+                  See 10-year projections, tax strategy, exit scenarios, and Deal Score
+                </div>
+                <p className="text-sm text-muted-foreground mt-1">
+                  The full analysis with multi-year cash flow projections,
+                  depreciation tax modeling, and exit scenario comparison is free
+                  to start. Run this property in your own account — your edits
+                  stay private.
+                </p>
+                <Link
+                  href="/"
+                  className="inline-flex items-center gap-1.5 mt-3 text-sm font-bold text-primary hover:underline"
+                >
+                  Start free at usetruecap.com
+                  <ArrowUpRight className="w-4 h-4" />
+                </Link>
               </div>
-              <p className="text-sm text-muted-foreground mt-1">
-                The full analysis with multi-year cash flow projections,
-                depreciation tax modeling, and exit scenario comparison is free
-                to start. Run this property in your own account — your edits
-                stay private.
-              </p>
-              <Link
-                href="/"
-                className="inline-flex items-center gap-1.5 mt-3 text-sm font-bold text-primary hover:underline"
-              >
-                Start free at usetruecap.com
-                <ArrowUpRight className="w-4 h-4" />
-              </Link>
             </div>
           </div>
-        </div>
+        )}
 
         <footer className="mt-10 pb-8 text-center text-xs text-muted-foreground">
-          Built with{" "}
-          <Link href="/" className="font-bold text-foreground hover:underline">
-            TrueCap
-          </Link>{" "}
-          — institutional-grade rental analysis, free to start.
+          <p className="mx-auto max-w-2xl">
+            This shared analysis is for informational purposes only and is not
+            financial, tax, or legal advice. The figures are estimates based on
+            the assumptions entered by whoever created this link — verify rent,
+            expenses, and financing independently before making any investment
+            decision.
+          </p>
+          <p className="mt-3">
+            Built with{" "}
+            <Link href="/" className="font-bold text-foreground hover:underline">
+              TrueCap
+            </Link>{" "}
+            — institutional-grade rental analysis, free to start.
+          </p>
         </footer>
       </main>
     </div>

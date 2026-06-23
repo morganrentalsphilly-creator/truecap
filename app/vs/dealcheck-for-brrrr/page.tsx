@@ -68,7 +68,7 @@ const MATRIX: Row[] = [
   // DealCheck includes its rental/BRRRR calculators on every plan
   // (verified dealcheck.io/pricing June 2026) — its tiers gate saved-
   // property caps, not the calculators. Don't claim otherwise.
-  { feature: "Free tier covers BRRRR analyzer",      truecap: "No — Pro feature ($20/mo) but full underwriting math is free",          dealcheck: "Yes — included on all plans (free tier caps saved deals)", winner: "dealcheck" },
+  { feature: "Free tier covers BRRRR analyzer",      truecap: "No — Pro feature ($29.99/mo) but full underwriting math is free",          dealcheck: "Yes — included on all plans (free tier caps saved deals)", winner: "dealcheck" },
   { feature: "Shareable BRRRR analysis link",        truecap: "Pro — public read-only link with branding",                              dealcheck: "Pro — PDF export",                                    winner: "truecap" },
   { feature: "PDF export of BRRRR analysis",         truecap: "Pro — multi-page lender-ready report",                                   dealcheck: "Pro",                                                 winner: "tie" },
 ];
@@ -130,14 +130,14 @@ const DEALCHECK_BRRRR_FAQ: FaqItem[] = [
         highlights when your capital recovered hits 100%, so you don&apos;t
         have to mentally compute it; (2) sensitivity on ARV — DealCheck
         requires manual re-runs, TrueCap&apos;s Pro grid varies ARV ±10%
-        in one view; (3) bundling — TrueCap Pro is $20/mo with BRRRR,
+        in one view; (3) bundling — TrueCap Pro is $29.99/mo with BRRRR,
         sensitivity, tax strategy, and exit scenarios all included,
         while DealCheck&apos;s plans ($10-20/mo) mostly raise saved-property
         caps. The fundamental BRRRR math is the same on both.
       </>
     ),
     plainTextAnswer:
-      "Three things: (1) explicit infinite-return flagging when capital recovered hits 100%; (2) ARV sensitivity in one view vs manual re-runs; (3) TrueCap Pro at $20/mo bundles BRRRR + sensitivity + tax strategy + exit scenarios, while DealCheck's $10-20/mo plans mostly raise saved-property caps. Fundamental BRRRR math is identical.",
+      "Three things: (1) explicit infinite-return flagging when capital recovered hits 100%; (2) ARV sensitivity in one view vs manual re-runs; (3) TrueCap Pro at $29.99/mo bundles BRRRR + sensitivity + tax strategy + exit scenarios, while DealCheck's $10-20/mo plans mostly raise saved-property caps. Fundamental BRRRR math is identical.",
   },
   {
     question: "Can I use TrueCap free for BRRRR?",

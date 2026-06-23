@@ -11,9 +11,10 @@
  *  - the user hasn't dismissed it for this session
  */
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Lock, X, FileDown, Calculator, TrendingUp } from "lucide-react";
+import { trackEvent } from "@/lib/analytics";
 
 interface MomentOfValueUpsellProps {
   netCashFlow: number;
@@ -43,6 +44,18 @@ export function MomentOfValueUpsell({
   onExportPdf,
 }: MomentOfValueUpsellProps) {
   const [dismissed, setDismissed] = useState(false);
+
+  // Upsell attribution — fire once when this post-analysis upsell actually
+  // renders (free user). Pairs with upsell_prompt_clicked on the Pro CTA to
+  // measure moment-of-value → checkout. Effect runs before the early return
+  // below so the Rules of Hooks hold.
+  const fired = useRef(false);
+  useEffect(() => {
+    if (isPaid || fired.current) return;
+    fired.current = true;
+    trackEvent("upsell_prompt_shown", { feature: "moment_of_value", placement: "post_analysis" });
+  }, [isPaid]);
+
   if (isPaid || dismissed) return null;
 
   // "Keep editing" — jump back to the form so refining a default and
@@ -145,6 +158,9 @@ export function MomentOfValueUpsell({
 
         <Link
           href="/pricing"
+          onClick={() =>
+            trackEvent("upsell_prompt_clicked", { feature: "moment_of_value", placement: "post_analysis" })
+          }
           className="group flex w-full items-start gap-2.5 rounded-xl border-2 border-primary/40 bg-primary/5 p-3 text-left text-sm transition-colors hover:bg-primary/10"
         >
           <Lock className="mt-0.5 size-4 shrink-0 text-primary" />

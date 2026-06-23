@@ -60,7 +60,7 @@ const MATRIX: Row[] = [
   { feature: "Direct mail + SMS campaigns", truecap: "No", batchleads: "Yes — built-in outreach", winner: "batchleads" },
   { feature: "Stacked / multi-criteria lists", truecap: "No", batchleads: "Yes — overlay multiple filters", winner: "batchleads" },
   { feature: "Free tier", truecap: "Yes — full underwriting math", batchleads: "Trial; paid from ~$99/mo (as of 2026)", winner: "truecap" },
-  { feature: "Pricing (entry tier)", truecap: "Free; Pro $20/mo", batchleads: "Standard ~$99/mo + per-skiptrace fees", winner: "truecap" },
+  { feature: "Pricing (entry tier)", truecap: "Free; Pro $29.99/mo", batchleads: "Standard ~$99/mo + per-skiptrace fees", winner: "truecap" },
   { feature: "Shareable read-only deal link", truecap: "Pro — public URL + branding", batchleads: "Internal-only", winner: "truecap" },
 ];
 

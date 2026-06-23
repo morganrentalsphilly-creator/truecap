@@ -50,7 +50,7 @@ const TOOLS = [
     name: "TrueCap",
     bestFor: "Best owner-occupant property type + effective-rent-saved math",
     url: "/vs/biggerpockets-for-house-hacking",
-    pricing: "Free; Pro $20/mo",
+    pricing: "Free; Pro $29.99/mo",
     freeCovers: [
       "Explicit 'owner-occupant' property type with per-unit setup",
       "Mark which unit you live in — TrueCap excludes it from rent income",
