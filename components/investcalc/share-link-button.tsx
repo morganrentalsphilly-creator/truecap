@@ -41,7 +41,7 @@ export function ShareLinkButton({ values, className }: ShareLinkButtonProps) {
         const { data } = await createBrowserSupabaseClient().auth.getUser();
         ownerId = data.user?.id;
       } catch {
-        /* not signed in — share stays generic */
+        /* not signed in - share stays generic */
       }
       const encoded = encodeShareLink({
         v: 1,
@@ -56,7 +56,7 @@ export function ShareLinkButton({ values, className }: ShareLinkButtonProps) {
       setOpen(true);
       setCopied(false);
     } catch (err) {
-      // Encoding failure used to be a silent no-op — user clicked Share
+      // Encoding failure used to be a silent no-op - user clicked Share
       // and nothing happened. Surface a toast so they know to try again,
       // and capture to Sentry so we know when this is happening.
       Sentry.captureException(err, {
@@ -64,7 +64,7 @@ export function ShareLinkButton({ values, className }: ShareLinkButtonProps) {
       });
       toast({
         title: "Couldn't generate share link",
-        description: "Try again — if it persists let us know.",
+        description: "Try again - if it persists let us know.",
         variant: "destructive",
       });
     }
@@ -110,7 +110,7 @@ export function ShareLinkButton({ values, className }: ShareLinkButtonProps) {
                 </h3>
                 <p className="text-xs text-muted-foreground mt-1">
                   Anyone with the link can view a read-only version. The
-                  details encoded in the URL — no account needed to open it.
+                  details encoded in the URL - no account needed to open it.
                 </p>
               </div>
               <button

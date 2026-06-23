@@ -188,19 +188,19 @@ export function TemplatesManagementPage({
   /**
    * Clone a starter template into the user's library. Open the form
    * dialog pre-populated with the starter's values so the user can
-   * tweak before saving — gives them a starting point AND immediate
+   * tweak before saving - gives them a starting point AND immediate
    * agency over the defaults. The save itself happens through the
    * normal create flow so all validation + name-uniqueness rules
    * still apply.
    */
   const cloneStarterTemplate = (starter: StarterTemplate) => {
     setEditingTemplate(null);
-    // Append " — Mine" so it doesn't collide with another starter copy
+    // Append " - Mine" so it doesn't collide with another starter copy
     // they may have saved earlier (unique-name constraint).
-    const baseName = starter.template.templateName.replace(/^Starter — /, "");
+    const baseName = starter.template.templateName.replace(/^Starter - /, "");
     setDialogInitialValues({
       ...starter.template,
-      templateName: `${baseName} — Mine`,
+      templateName: `${baseName} - Mine`,
     });
     setIsFormDialogOpen(true);
   };
@@ -429,10 +429,10 @@ export function TemplatesManagementPage({
           </Button>
           </div>
 
-        {/* Starter templates — prebuilt strategies (Long-term, House
+        {/* Starter templates - prebuilt strategies (Long-term, House
             hack, FHA, BRRRR, STR). Each opens the create dialog
             pre-populated with the starter's values so the user can
-            tweak before saving — perfect for new users who don't yet
+            tweak before saving - perfect for new users who don't yet
             know what every percent field means. */}
         <section className="rounded-2xl border border-border bg-gradient-to-br from-primary/5 via-card to-card p-4 sm:p-5">
           <div className="flex items-baseline gap-2">
@@ -442,7 +442,7 @@ export function TemplatesManagementPage({
             </h2>
           </div>
           <p className="mt-1 text-xs text-muted-foreground">
-            Each one opens with editable defaults — make it yours, save it once, reuse it forever.
+            Each one opens with editable defaults - make it yours, save it once, reuse it forever.
           </p>
           <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {STARTER_TEMPLATES.map((starter) => (
@@ -452,7 +452,7 @@ export function TemplatesManagementPage({
               >
                 <div className="flex items-start justify-between gap-2">
                   <h3 className="text-sm font-bold leading-tight text-foreground">
-                    {starter.template.templateName.replace(/^Starter — /, "")}
+                    {starter.template.templateName.replace(/^Starter - /, "")}
                   </h3>
                   <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-primary">
                     {starter.tag}

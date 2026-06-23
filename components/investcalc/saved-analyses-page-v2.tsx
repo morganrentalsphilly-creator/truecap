@@ -201,7 +201,7 @@ function getSignalClasses(signal: SavedSignal): string {
 
 function getAddressParts(item: SavedAnalysisListItem): { main: string; secondary: string } {
   const source = item.address?.trim() || item.title?.trim() || "Untitled Property";
-  // A nickname, when set, leads — the address drops to the secondary line.
+  // A nickname, when set, leads - the address drops to the secondary line.
   const nickname = item.nickname?.trim();
   if (nickname) return { main: nickname, secondary: source };
   const parts = source
@@ -408,7 +408,7 @@ function buildReportDataFromSavedSnapshot(args: {
 
 /**
  * Per-deal tag editor (Pro). Chips with inline remove + a popover to add.
- * Stateless re: persistence — each change calls onSave, which hits the
+ * Stateless re: persistence - each change calls onSave, which hits the
  * server action and refreshes. Reused in both the mobile card and the
  * desktop table cell.
  */
@@ -519,7 +519,7 @@ export function SavedAnalysesPage({
   const [selectedSignal, setSelectedSignal] = useState<"all" | SavedSignal>("all");
   const [selectedType, setSelectedType] = useState<"all" | SavedPropertyType>("all");
   const [currentPage, setCurrentPage] = useState(1);
-  // Optional decision columns (DSCR, cash to close) — off by default so the
+  // Optional decision columns (DSCR, cash to close) - off by default so the
   // default table stays uncrowded; remembered per browser.
   const [optionalColumns, setOptionalColumns] = useState<OptionalColumns>({
     dscr: false,
@@ -540,7 +540,7 @@ export function SavedAnalysesPage({
         });
       }
     } catch {
-      // private mode / bad JSON — keep defaults
+      // private mode / bad JSON - keep defaults
     }
   }, []);
   const setOptionalColumn = (key: keyof OptionalColumns, on: boolean) => {
@@ -747,7 +747,7 @@ export function SavedAnalysesPage({
 
   const handleBulkDelete = () => {
     if (selectedIds.length === 0 || bulkRunning) return;
-    // Defensive confirm — deletion is irreversible from the UI even
+    // Defensive confirm - deletion is irreversible from the UI even
     // though the DB row stays around with deleted_at set.
     const confirmed = window.confirm(
       `Delete ${selectedIds.length} deal${selectedIds.length === 1 ? "" : "s"}? This cannot be undone from the UI.`
@@ -916,7 +916,7 @@ export function SavedAnalysesPage({
 
   const handleCompareSelected = () => {
     // Hard guard against rapid double-clicks. The button's disabled
-    // attribute alone isn't sufficient — React 19's useTransition
+    // attribute alone isn't sufficient - React 19's useTransition
     // doesn't synchronously flip isStartingCompare, so a fast second
     // click can fire startCompareAction twice and race two
     // router.push() calls, manifesting as a "stuck" compare flow.
@@ -1051,7 +1051,7 @@ export function SavedAnalysesPage({
         }
 
         if (exportResult.source === "cache") {
-          // Cache hit — fetch the cached PDF and trigger a download
+          // Cache hit - fetch the cached PDF and trigger a download
           // (instead of opening in a new tab via a link click, which
           // gets popup-blocked after async work). Falls back to opening
           // the URL directly if the fetch fails.
@@ -1073,7 +1073,7 @@ export function SavedAnalysesPage({
               variant: "success",
             });
           } catch {
-            // Fallback — try the original popup approach.
+            // Fallback - try the original popup approach.
             openPdfUrl(exportResult.pdfUrl);
           }
           return;
@@ -1128,7 +1128,7 @@ export function SavedAnalysesPage({
           templateFallback: exportResult.templateFallback,
           exitYears,
         });
-        // Attach this deal's stored RentCast comps (no API call — reads the
+        // Attach this deal's stored RentCast comps (no API call - reads the
         // saved set) so the report includes the sale + rent comp tables.
         // Best-effort: comps are optional reference data, never block export.
         try {
@@ -1160,7 +1160,7 @@ export function SavedAnalysesPage({
               }
             : null;
 
-        // Use generateInvestmentPDF (not …Blob) — it triggers a direct
+        // Use generateInvestmentPDF (not …Blob) - it triggers a direct
         // doc.save() download AND returns the blob for caching. This is
         // the critical bug fix: the previous flow generated a blob,
         // uploaded to Supabase, then tried to open the public URL in a
@@ -1180,7 +1180,7 @@ export function SavedAnalysesPage({
           variant: "success",
         });
 
-        // Cache the PDF to Supabase Storage in the background — this is
+        // Cache the PDF to Supabase Storage in the background - this is
         // a best-effort cache for future exports. The user already has
         // their PDF; failures here only mean the next dashboard export
         // for this deal will regenerate. We capture to Sentry with a
@@ -1230,7 +1230,7 @@ export function SavedAnalysesPage({
           }
         })();
       } catch (err) {
-        // Top-level catch — any error in the regenerate path (parsing,
+        // Top-level catch - any error in the regenerate path (parsing,
         // generation, etc.) surfaces a toast AND captures to Sentry so
         // failures are findable rather than silent. Previously this had
         // try/finally with no catch, so unhandled errors bubbled up
@@ -1575,7 +1575,7 @@ export function SavedAnalysesPage({
                         className="h-10 rounded-xl px-2.5 text-xs"
                         onClick={() => handleExportPdfClick(item.id)}
                         disabled={exportingPdfDealId === item.id}
-                        title={!canExportPdf ? "PDF export — Pro feature" : undefined}
+                        title={!canExportPdf ? "PDF export - Pro feature" : undefined}
                       >
                         {exportingPdfDealId === item.id ? (
                           <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" />
@@ -1795,7 +1795,7 @@ export function SavedAnalysesPage({
                             className="h-8 rounded-md px-2.5 text-xs"
                             onClick={() => handleExportPdfClick(item.id)}
                             disabled={exportingPdfDealId === item.id}
-                            title={!canExportPdf ? "PDF export — Pro feature" : undefined}
+                            title={!canExportPdf ? "PDF export - Pro feature" : undefined}
                           >
                             {exportingPdfDealId === item.id ? (
                               <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" />
@@ -1838,7 +1838,7 @@ export function SavedAnalysesPage({
           {displayItems.length === 0 && (
             <div className="py-16 px-6 text-center">
               {initialItems.length === 0 ? (
-                /* Brand-new user — never saved a deal. Welcome them
+                /* Brand-new user - never saved a deal. Welcome them
                    instead of showing a search-y "no results" state. */
                 <>
                   <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
@@ -1955,7 +1955,7 @@ export function SavedAnalysesPage({
       </section>
 
       {/*
-        Floating bulk-action bar — visible only when at least one deal
+        Floating bulk-action bar - visible only when at least one deal
         is checkbox-selected. Sticky to the bottom of the viewport so
         users can scroll through long lists without losing access to
         the actions. Centered + max-width so it doesn't span the whole

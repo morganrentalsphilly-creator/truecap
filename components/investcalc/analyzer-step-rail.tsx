@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * AnalyzerStepRail (AN-1) — a sticky orientation rail across the top of the
+ * AnalyzerStepRail (AN-1) - a sticky orientation rail across the top of the
  * analyzer that shows the investor where they are in the flow, what's done,
  * and lets them jump to any section. It is purely additive navigation: it does
  * not gate inputs, change validation, or alter the manual "Run analysis" flow.
@@ -88,7 +88,7 @@ export function AnalyzerStepRail({
                 type="button"
                 onClick={() => onNavigate(step.id)}
                 aria-current={active ? "step" : undefined}
-                aria-label={`${step.label} — ${STATUS_A11Y[step.status]}`}
+                aria-label={`${step.label} - ${STATUS_A11Y[step.status]}`}
                 className={cn(
                   "flex items-center gap-1.5 rounded-xl px-2 py-1.5 text-xs font-semibold transition-colors sm:px-2.5",
                   active

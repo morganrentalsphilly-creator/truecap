@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * "How the ROI is built" — makes a big cumulative 10-yr ROI legible by showing
+ * "How the ROI is built" - makes a big cumulative 10-yr ROI legible by showing
  * the cash invested, total profit, equity multiple, and a true IRR, plus the
  * assumptions behind it. Pure presentation over the exit-scenario series.
  */
@@ -40,12 +40,12 @@ export function ReturnsExplainer({
         {s.roiPct != null ? (
           <>
             {s.years}-yr ROI <strong className="text-foreground">{fmtPct(s.roiPct)}</strong> is{" "}
-            <em>cumulative</em> (total profit ÷ cash invested), not annual — annualized that&apos;s a{" "}
+            <em>cumulative</em> (total profit ÷ cash invested), not annual - annualized that&apos;s a{" "}
             <strong className="text-foreground">{fmtPct(s.cagrPct)}</strong> CAGR.{" "}
           </>
         ) : null}
         Profit = net sale proceeds + cumulative cash flow + tax benefit − cash invested. Assumptions:{" "}
-        {appreciationRate}% appreciation, {sellingCostPct}% selling cost, {s.years}-yr hold — all editable.
+        {appreciationRate}% appreciation, {sellingCostPct}% selling cost, {s.years}-yr hold - all editable.
       </p>
     </div>
   );

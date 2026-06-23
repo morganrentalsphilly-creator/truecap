@@ -5,11 +5,11 @@
  *
  * Shows the headline metric tiles, MAO card, sensitivity grid, and
  * Strategies tab content (rehab estimator, BRRRR, fix-and-flip). All
- * computed client-side from the encoded form snapshot — no auth, no
+ * computed client-side from the encoded form snapshot - no auth, no
  * server actions needed.
  *
  * Hides the four Pro-gated tabs (10-year, tax strategy, exit scenarios,
- * deal score) — those become upgrade prompts on the parent page.
+ * deal score) - those become upgrade prompts on the parent page.
  */
 
 import Link from "next/link";
@@ -88,7 +88,7 @@ export function ReadOnlyAnalysisView({ values, result }: ReadOnlyAnalysisViewPro
         <MetricTile
           label="DSCR"
           // Cash purchases have no debt service so DSCR is undefined.
-          // calc-analysis returns 0 in that case — surface a clear sub
+          // calc-analysis returns 0 in that case - surface a clear sub
           // rather than a misleading "Underwater" badge.
           value={result.monthlyPayment <= 0 ? "n/a" : result.dscr.toFixed(2)}
           sub={
@@ -118,7 +118,7 @@ export function ReadOnlyAnalysisView({ values, result }: ReadOnlyAnalysisViewPro
       <MaxOfferCard values={values} />
       <SensitivityGrid values={values} />
 
-      {/* Strategies section — embedded inline rather than in a tab so the
+      {/* Strategies section - embedded inline rather than in a tab so the
           read-only viewer doesn't have hidden content. */}
       <div className="bg-card rounded-2xl border border-border shadow-sm">
         <div className="border-b border-border px-5 py-3">
@@ -145,7 +145,7 @@ export function ReadOnlyAnalysisView({ values, result }: ReadOnlyAnalysisViewPro
         </span>
       </Link>
 
-      {/* Advice guardrail — this page is shared to lenders/partners/clients and
+      {/* Advice guardrail - this page is shared to lenders/partners/clients and
           shows verdict + recommendation language, but has no SiteFooter. */}
       <p className="mt-4 px-2 text-center text-[11px] leading-relaxed text-muted-foreground">
         This shared analysis is an automated estimate for screening only, not an

@@ -3,7 +3,7 @@
 /**
  * Deal Notes Panel.
  *
- * Free-text notes attached to a saved deal — seller context, agent
+ * Free-text notes attached to a saved deal - seller context, agent
  * commentary, inspector findings, your offer-strategy reasoning, etc.
  * The kind of stuff that doesn't fit into structured form fields but
  * is essential when you re-open a deal a week later.
@@ -11,12 +11,12 @@
  * Behavior:
  *   - Renders only when there's a savedDealId (no notes for previews)
  *   - Lazy-fetches the current notes on first mount via server action
- *   - Saves on blur (no Save button needed — keeps the surface clean)
+ *   - Saves on blur (no Save button needed - keeps the surface clean)
  *   - Shows "Saved" status briefly after successful save
  *   - Soft cap at 10,000 chars (matches server)
  *
  * Defensive: gracefully handles the case where the DB migration hasn't
- * been applied yet — shows a quiet inline notice instead of crashing.
+ * been applied yet - shows a quiet inline notice instead of crashing.
  */
 import { useEffect, useState, useTransition } from "react";
 import { Loader2, NotebookPen } from "lucide-react";
@@ -45,7 +45,7 @@ export function DealNotesPanel({ savedDealId }: { savedDealId: string }) {
     // .catch contains action rejections from becoming unhandled
     // browser promise rejections. If the action throws (transient
     // Supabase outage, etc.), the panel just stays in its loading
-    // state — no Sentry false-positive.
+    // state - no Sentry false-positive.
     void getSavedDealNotesAction(savedDealId)
       .then((result) => {
         if (cancelled) return;
@@ -75,14 +75,14 @@ export function DealNotesPanel({ savedDealId }: { savedDealId: string }) {
     // switches to a different saved deal mid-save (e.g. clicks another
     // saved deal in the list before the server action returns), we
     // must not update lastSavedNotes for the new deal with values from
-    // the previous deal — that would mark the new deal's textarea as
+    // the previous deal - that would mark the new deal's textarea as
     // "saved" when it actually hasn't been touched yet.
     const dealIdAtSubmit = savedDealId;
     const notesAtSubmit = notes;
     startTransition(async () => {
       const result = await updateSavedDealNotesAction(dealIdAtSubmit, notesAtSubmit);
       if (dealIdAtSubmit !== savedDealId) {
-        // User switched deals while this save was in flight — its
+        // User switched deals while this save was in flight - its
         // result is no longer relevant. Discard silently.
         return;
       }
@@ -103,7 +103,7 @@ export function DealNotesPanel({ savedDealId }: { savedDealId: string }) {
     });
   };
 
-  // Render nothing while we wait for the first fetch — avoids a flash
+  // Render nothing while we wait for the first fetch - avoids a flash
   // of empty notes before the saved content arrives.
   if (!initialLoaded) {
     return null;
@@ -158,7 +158,7 @@ export function DealNotesPanel({ savedDealId }: { savedDealId: string }) {
         onBlur={persistOnBlur}
         rows={4}
         maxLength={NOTES_MAX}
-        placeholder="Seller motivation, agent commentary, inspector findings, your offer-strategy reasoning — anything that helps you remember the context when you re-open this deal."
+        placeholder="Seller motivation, agent commentary, inspector findings, your offer-strategy reasoning - anything that helps you remember the context when you re-open this deal."
         className="w-full resize-y rounded-xl border border-border bg-background p-3 text-base md:text-sm leading-relaxed text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-primary/40"
       />
       <p className="mt-1.5 text-right text-[10px] text-muted-foreground">

@@ -269,7 +269,7 @@ export function TemplateSelectorSection({
   };
 
   // Templates are a Pro feature, so for free/locked users we render NOTHING
-  // at all — "invisible until useful". A locked control in the first-run form
+  // at all - "invisible until useful". A locked control in the first-run form
   // is friction on a cold (often ad-sourced) visitor and reads as a
   // bait-and-switch on the "no signup" promise. Pro users (not locked) see the
   // picker as soon as it's useful; free users simply never see this section.

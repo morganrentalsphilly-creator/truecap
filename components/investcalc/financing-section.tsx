@@ -21,7 +21,7 @@ export function FinancingSection({ form }: FinancingSectionProps) {
 
   return (
     // Card chrome unified with the other input sections (PropertyType /
-    // PropertyDetails / SingleFamily — all `bg-card` + neutral border).
+    // PropertyDetails / SingleFamily - all `bg-card` + neutral border).
     // Previously the green tint made the form read as three glued-together
     // products. Green stays on the icon and the per-field accent borders
     // to preserve the "this is the financing section" cue.

@@ -2,7 +2,7 @@
 
 /**
  * Inline Pro-feature gate used for cards that sit in the main column of
- * the analysis dashboard (MaxOfferCard, SensitivityGrid, etc.) — i.e.
+ * the analysis dashboard (MaxOfferCard, SensitivityGrid, etc.) - i.e.
  * features that aren't tab-gated.
  *
  * Renders a teaser card that hints at the value (title + value-prop
@@ -18,19 +18,19 @@ import { trackEvent } from "@/lib/analytics";
 import { TRIAL_LABEL } from "@/lib/trial";
 
 interface ProInlineGateProps {
-  /** Brand-color icon at the top — same icon as the gated feature uses. */
+  /** Brand-color icon at the top - same icon as the gated feature uses. */
   icon: React.ComponentType<{ className?: string }>;
   /** Headline of the gated feature, e.g. "Max Allowable Offer". */
   title: string;
   /** One-line description of what the user would see if unlocked. */
   description: string;
-  /** Compact "preview" pill values — make the feature feel tangible. */
+  /** Compact "preview" pill values - make the feature feel tangible. */
   previewBullets: string[];
 }
 
 export function ProInlineGate({ icon: Icon, title, description, previewBullets }: ProInlineGateProps) {
   // Upsell attribution: fire once when this gate renders (the user reached a
-  // Pro feature), and again if they click through — closes the
+  // Pro feature), and again if they click through - closes the
   // analysis_completed → saw-upsell → pro_checkout_started gap. `feature` is
   // the gate title (e.g. "Max Allowable Offer"); no PII.
   const fired = useRef(false);
@@ -58,7 +58,7 @@ export function ProInlineGate({ icon: Icon, title, description, previewBullets }
         </span>
       </div>
 
-      {/* Preview bullets — make the gated feature feel tangible */}
+      {/* Preview bullets - make the gated feature feel tangible */}
       <ul className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
         {previewBullets.map((bullet) => (
           <li

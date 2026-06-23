@@ -34,7 +34,7 @@ export function PropertyTypeSection({
         <span className="font-semibold text-sm text-foreground">Property Setup</span>
       </div>
 
-      {/* Property type — segmented control. A 3-way choice doesn't need a
+      {/* Property type - segmented control. A 3-way choice doesn't need a
           dropdown: inline segments are one tap, always visible, and drop the
           icon+title+subtitle density the old dropdown carried. */}
       <div className="space-y-2">
@@ -51,7 +51,7 @@ export function PropertyTypeSection({
                 type="button"
                 role="radio"
                 aria-checked={isSelected}
-                aria-label={`${type.label} — ${type.description}`}
+                aria-label={`${type.label} - ${type.description}`}
                 title={type.description}
                 onClick={() =>
                   form.setValue(
@@ -83,7 +83,7 @@ export function PropertyTypeSection({
         </div>
       </div>
 
-      {/* Template — optional. Demoted below the type (behind a divider) so it
+      {/* Template - optional. Demoted below the type (behind a divider) so it
           reads as a secondary "advanced" choice, not co-equal with the type. */}
       <div className="mt-4 border-t border-border pt-4">
         <TemplateSelectorSection form={form} savedTemplateFallback={savedTemplateFallback} />

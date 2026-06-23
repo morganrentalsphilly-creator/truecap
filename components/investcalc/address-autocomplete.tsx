@@ -100,11 +100,11 @@ interface AddressAutocompleteProps {
   placeholder?: string;
   /** Extra classes merged onto the <Input> (twMerge wins on conflicts),
    * so callers like the homepage hero can size the field up without
-   * forking the component. Optional — the calculator passes nothing and
+   * forking the component. Optional - the calculator passes nothing and
    * keeps the default form-field sizing. */
   inputClassName?: string;
   /** Fired when the user picks a suggestion. Parsed state/county/zip
-   * are best-effort — missing on rare cases where Google doesn't return
+   * are best-effort - missing on rare cases where Google doesn't return
    * the corresponding addressComponent. */
   onPlaceSelected?: (place: SelectedAddress) => void;
 }
@@ -125,9 +125,9 @@ export function AddressAutocomplete({
   const [open, setOpen] = useState(false);
   const [highlight, setHighlight] = useState(0);
   const [scriptReady, setScriptReady] = useState(false);
-  // Search progress signal — drives the "Searching…" indicator. Without
+  // Search progress signal - drives the "Searching…" indicator. Without
   // it, slow networks or blocked Google Places (ad blockers, restricted
-  // regions, API key issues) make the dropdown appear "broken" — the
+  // regions, API key issues) make the dropdown appear "broken" - the
   // user types but nothing happens. Surfacing the search state makes
   // the silence visible.
   const [isSearching, setIsSearching] = useState(false);
@@ -151,7 +151,7 @@ export function AddressAutocomplete({
         if (cancelled) return;
         if (!window.google?.maps?.places?.AutocompleteSuggestion) {
           console.warn(
-            "[AddressAutocomplete] AutocompleteSuggestion not in Places library — enable 'Places API (New)' in Google Cloud Console."
+            "[AddressAutocomplete] AutocompleteSuggestion not in Places library - enable 'Places API (New)' in Google Cloud Console."
           );
           return;
         }
@@ -249,7 +249,7 @@ export function AddressAutocomplete({
 
         if (onPlaceSelected) {
           // Consumer's handler is typed as `void`-returning but is
-          // usually an async function — its returned promise can reject
+          // usually an async function - its returned promise can reject
           // (enrichment failures, Supabase errors, etc.). Coerce to a
           // promise so we can attach a .catch and prevent that from
           // becoming an unhandled rejection in the browser.
@@ -274,7 +274,7 @@ export function AddressAutocomplete({
           shouldValidate: true,
         });
         if (onPlaceSelected) {
-          // Same coercion as above — handler may be async even though
+          // Same coercion as above - handler may be async even though
           // the prop type doesn't say so.
           void Promise.resolve(onPlaceSelected({ formattedAddress: text })).catch(
             (err2) => {
@@ -341,7 +341,7 @@ export function AddressAutocomplete({
           inputClassName
         )}
       />
-      {/* In-flight indicator — shows BEFORE predictions land. Without
+      {/* In-flight indicator - shows BEFORE predictions land. Without
           this, slow networks or blocked Google Places make the dropdown
           stay closed silently and the user thinks autocomplete is
           broken. Surfacing the "Searching…" line makes the request
@@ -370,7 +370,7 @@ export function AddressAutocomplete({
                   <button
                     type="button"
                     onMouseDown={(e) => {
-                      // mousedown fires before input blur — keeps focus and avoids race
+                      // mousedown fires before input blur - keeps focus and avoids race
                       e.preventDefault();
                     }}
                     onClick={() => handleSelect(p)}

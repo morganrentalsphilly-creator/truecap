@@ -9,10 +9,10 @@
  * Renders the label children, plus a tiny "?" indicator, with a hover/focus
  * tooltip showing the plain-English definition and benchmark.
  *
- * NOTE — earlier we tried converting this to a Popover so it would work
+ * NOTE - earlier we tried converting this to a Popover so it would work
  * on touch devices (which never fire hover). That broke the dashboard
  * because GlossaryTip is sometimes rendered inside a <Label>, and
- * <label><button></button></label> is invalid HTML — Radix + React 19
+ * <label><button></button></label> is invalid HTML - Radix + React 19
  * threw hydration errors that bubbled to the AnalysisErrorBoundary.
  *
  * To make tooltips tappable on mobile WITHOUT breaking the existing
@@ -52,7 +52,7 @@ export function GlossaryTip({
 }: GlossaryTipProps) {
   const entry: GlossaryEntry | undefined = GLOSSARY[term];
   if (!entry) {
-    // No glossary entry — render plain children so nothing breaks.
+    // No glossary entry - render plain children so nothing breaks.
     return <>{children}</>;
   }
 

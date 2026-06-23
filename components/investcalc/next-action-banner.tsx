@@ -1,5 +1,5 @@
 /**
- * Next-action banner — the single recommended next step for a deal, shown at
+ * Next-action banner - the single recommended next step for a deal, shown at
  * the top of the deal workspace. Pure presentational; the step itself is
  * computed by lib/next-action.ts so the wording/logic stays in one place.
  * Server-renderable (no client hooks).

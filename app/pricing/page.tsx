@@ -134,7 +134,7 @@ export default async function PricingPage() {
               Pricing that pays for itself <span className="text-primary">on the first deal.</span>
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-balance text-[15px] leading-relaxed text-muted-foreground sm:text-lg">
-              Start free — unlimited analyses, every core metric, auto-fill from the address. Or start a
+              Start free. Unlimited analyses, every core metric, auto-fill from the address. Or start a
               3-day free trial of Pro when you need projections, tax modeling, and lender-ready PDFs.
             </p>
             {/* Real-data social proof — investors arriving at /pricing

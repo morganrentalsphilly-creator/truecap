@@ -81,7 +81,7 @@ export function renderToolOgImage(config: ToolOgConfig): ImageResponse {
               display: "flex",
             }}
           >
-            Truecap<span style={{ color: BRAND_BLUE }}>.</span>
+            TrueCap<span style={{ color: BRAND_BLUE }}>.</span>
           </div>
           <div
             style={{

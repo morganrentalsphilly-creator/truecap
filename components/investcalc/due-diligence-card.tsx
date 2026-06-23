@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Due-diligence checklist for a saved deal — the verification tasks an
+ * Due-diligence checklist for a saved deal - the verification tasks an
  * investor works through between offer and close (inspection, title,
  * insurance, financing, leases…). Mirrors the Deal Notes panel:
  *   - Renders only for a saved deal (savedDealId)
@@ -103,7 +103,7 @@ export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
   };
 
   // Viewer-local "today" so overdue/due-soon match the date input's local
-  // semantics. Recomputed per render — cheap, and keeps the day fresh.
+  // semantics. Recomputed per render - cheap, and keeps the day fresh.
   const todayISO = useMemo(() => {
     const n = new Date();
     return `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, "0")}-${String(n.getDate()).padStart(2, "0")}`;

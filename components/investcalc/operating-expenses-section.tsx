@@ -164,7 +164,7 @@ export function OperatingExpensesSection({
       : insuranceDefault;
 
   return (
-    // Card chrome unified with the other input sections — `bg-card` +
+    // Card chrome unified with the other input sections - `bg-card` +
     // neutral border. Previously the orange tint made the form read as
     // three glued-together products. Orange stays on the icon and the
     // per-field accent borders to preserve the "this is operating
@@ -227,7 +227,7 @@ export function OperatingExpensesSection({
               </span>
             </div>
           </div>
-          {/* Default percentages summary — the four operating-cost
+          {/* Default percentages summary - the four operating-cost
               assumptions that used to show as four full Input fields
               even on the empty form. Surfacing them as a compact
               one-line summary cuts ~120px of visible form height and
@@ -421,7 +421,7 @@ export function OperatingExpensesSection({
               <FieldError id="utilitiesMonthly-error" message={errors.utilitiesMonthly?.message} />
             </SectionField>
 
-            {/* Maintenance / Vacancy / Management / CapEx — previously
+            {/* Maintenance / Vacancy / Management / CapEx - previously
                 visible on the empty form. Now hidden by default in the
                 same way Utilities / Property Tax already are; surfaced
                 as a one-line default summary in the "Using sensible

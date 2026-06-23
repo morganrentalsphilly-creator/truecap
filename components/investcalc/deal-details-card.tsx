@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Deal details — optional investor labels for a saved deal: a nickname (used
+ * Deal details - optional investor labels for a saved deal: a nickname (used
  * as the deal's display name across My Deals when set) plus market +
  * neighborhood for organizing a portfolio by area. Free per-deal annotation
  * (no entitlement), saves on blur, mirrors the Deal Notes / Due Diligence

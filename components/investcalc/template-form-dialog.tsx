@@ -476,7 +476,7 @@ export function TemplateFormDialog({
                 />
               </div>
 
-              {/* Buy box targets — optional acquisition criteria the template
+              {/* Buy box targets - optional acquisition criteria the template
                   aims for. Adopt them as your personal Buy Box in one click
                   from the templates page. Every field is optional. */}
               <div className="rounded-xl border border-border bg-card p-4 sm:p-5 space-y-4">
@@ -487,7 +487,7 @@ export function TemplateFormDialog({
                   <div>
                     <p className="text-sm font-semibold text-foreground">Buy box targets (optional)</p>
                     <p className="text-xs text-muted-foreground">
-                      Criteria this template aims for — leave blank to skip.
+                      Criteria this template aims for - leave blank to skip.
                     </p>
                   </div>
                 </div>

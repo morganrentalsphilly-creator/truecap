@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Scenarios card (DM-1) — on a saved deal, model the SAME property under
+ * Scenarios card (DM-1) - on a saved deal, model the SAME property under
  * different strategies (buy-and-hold vs BRRRR vs flip vs STR) as sibling
  * scenarios. Lists the property's scenarios and adds a new one (clone of this
  * deal with a name + strategy), via app/actions/scenarios.ts.
@@ -197,7 +197,7 @@ export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
           </div>
           <p className="mt-2 text-[11px] text-muted-foreground">
             {describeStrategyPreset(strategy) ??
-              "Starts as a copy of this deal's numbers — open it to adjust the assumptions for that strategy."}
+              "Starts as a copy of this deal's numbers - open it to adjust the assumptions for that strategy."}
           </p>
           <div className="mt-3 flex items-center justify-end gap-2">
             <Button type="button" variant="ghost" onClick={() => setAdding(false)} disabled={isSaving}>

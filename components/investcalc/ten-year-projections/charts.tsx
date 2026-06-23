@@ -77,7 +77,7 @@ export function TenYearProjectionCharts({
             {/* Debt service was previously omitted, so the gap between income
                 and "expenses" looked like healthy cash flow even on a
                 cash-flow-negative deal. Plotting it makes the real squeeze
-                visible — income vs operating expenses AND the mortgage. */}
+                visible - income vs operating expenses AND the mortgage. */}
             <Line
               type="monotone"
               dataKey="debtServiceAnnual"

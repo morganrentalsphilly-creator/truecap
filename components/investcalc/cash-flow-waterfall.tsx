@@ -2,13 +2,13 @@
  * Cash Flow Waterfall.
  *
  * Renders a horizontal stacked-bar visualization of where every dollar
- * of monthly rent goes — from gross rent through vacancy, operating
+ * of monthly rent goes - from gross rent through vacancy, operating
  * expenses, debt service, down to net cash flow (or shortfall).
  *
  * Why this exists: numbers in tiles don't *feel* like math. A
  * waterfall does. Even seasoned investors find it useful for spotting
  * which line item is eating their margin. The visualization also
- * works as a credibility signal — competitors don't show this.
+ * works as a credibility signal - competitors don't show this.
  *
  * Pure presentation. Computed from AnalysisResult fields that already
  * exist; no new business logic. Self-hides when monthlyRentalIncome
@@ -17,7 +17,7 @@
  * Mobile: bar collapses to a vertical legend layout because a 12-row
  * horizontal stack at 320px is unreadable. The legend always shows
  * the dollar + percent for each segment, which is the actual signal
- * — the bar visualization is the cherry on top.
+ * - the bar visualization is the cherry on top.
  */
 import type { AnalysisResult } from "@/lib/calc-analysis";
 
@@ -53,9 +53,9 @@ export function CashFlowWaterfall({ result }: { result: AnalysisResult }) {
   const segments: Segment[] = [
     { key: "vacancy",     label: "Vacancy",        value: Math.max(0, result.vacancy),     color: "rgb(148, 163, 184)" }, // slate-400
     { key: "tax",         label: "Property tax",   value: Math.max(0, result.propertyTax), color: "rgb(245, 158, 11)" }, // amber-500
-    { key: "insurance",   label: "Insurance",      value: Math.max(0, result.insurance),   color: "rgb(59, 130, 246)" }, // blue-500 — moved off the warm tones so Insurance doesn't blend into the adjacent amber Property-tax segment in the bar + legend
+    { key: "insurance",   label: "Insurance",      value: Math.max(0, result.insurance),   color: "rgb(59, 130, 246)" }, // blue-500 - moved off the warm tones so Insurance doesn't blend into the adjacent amber Property-tax segment in the bar + legend
     { key: "mgmt",        label: "Management",     value: Math.max(0, result.management),  color: "rgb(249, 115, 22)" }, // orange-500 (moved off purple to stay on-brand)
-    { key: "maintenance", label: "Maintenance",    value: Math.max(0, result.maintenance), color: "rgb(13, 148, 136)" }, // teal-600 — spread away from the purple/pink neighbours so adjacent segments stay distinguishable
+    { key: "maintenance", label: "Maintenance",    value: Math.max(0, result.maintenance), color: "rgb(13, 148, 136)" }, // teal-600 - spread away from the purple/pink neighbours so adjacent segments stay distinguishable
     { key: "capex",       label: "CapEx reserve",  value: Math.max(0, result.capex),       color: "rgb(236, 72, 153)" }, // pink-500
     { key: "hoa",         label: "HOA",            value: Math.max(0, result.hoa),         color: "rgb(132, 204, 22)" }, // lime-500 (moved off indigo to stay on-brand)
     { key: "utilities",   label: "Utilities",      value: Math.max(0, result.utilities),   color: "rgb(56, 189, 248)" }, // sky-400
@@ -65,7 +65,7 @@ export function CashFlowWaterfall({ result }: { result: AnalysisResult }) {
   const totalOutflow = segments.reduce((sum, s) => sum + s.value, 0);
   const ncf = gross - totalOutflow;
 
-  // Each segment's percent of GROSS — so percentages always add to
+  // Each segment's percent of GROSS - so percentages always add to
   // 100% (segments + NCF). Makes the chart legible at a glance.
   const ncfPositive = ncf >= 0;
   const ncfSegment: Segment = {
@@ -86,7 +86,7 @@ export function CashFlowWaterfall({ result }: { result: AnalysisResult }) {
       aria-label="Cash flow waterfall"
       className="rounded-2xl border border-border bg-card p-4 sm:p-5"
     >
-      {/* Header — title left, the two headline numbers (Gross rent IN,
+      {/* Header - title left, the two headline numbers (Gross rent IN,
           Net cash flow OUT) prominently displayed on the right so the
           punchline conclusion is the FIRST thing the eye lands on, not
           buried at the bottom of the legend. */}
@@ -96,7 +96,7 @@ export function CashFlowWaterfall({ result }: { result: AnalysisResult }) {
             Where the rent goes
           </p>
           <p className="mt-0.5 text-[11px] text-muted-foreground">
-            Monthly — every dollar in, every dollar out
+            Monthly - every dollar in, every dollar out
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-4 sm:gap-6">
@@ -129,8 +129,8 @@ export function CashFlowWaterfall({ result }: { result: AnalysisResult }) {
       </div>
 
       {/* Stacked bar (desktop + tablet). On the smallest viewports the
-          bar still renders — 9 thin segments are still informative as
-          a visual anchor — but the legend below is the real readout. */}
+          bar still renders - 9 thin segments are still informative as
+          a visual anchor - but the legend below is the real readout. */}
       <div
         className="mt-4 flex h-8 w-full overflow-hidden rounded-lg ring-1 ring-border"
         role="img"
@@ -154,7 +154,7 @@ export function CashFlowWaterfall({ result }: { result: AnalysisResult }) {
         })}
       </div>
 
-      {/* Legend — the per-segment readout. NCF is no longer duplicated
+      {/* Legend - the per-segment readout. NCF is no longer duplicated
           here because it's already the headline in the card header
           (top-right). Keeping the legend focused on the outflow lines
           makes the waterfall less noisy. */}

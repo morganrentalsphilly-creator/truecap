@@ -78,7 +78,7 @@ import {
  * localStorage key for the deal stashed right before redirecting to the
  * one-time-PDF Stripe Checkout. Restored (and removed) when the user
  * returns with ?pdf_purchase=<session_id>. Same-browser assumption is
- * fine — Stripe redirects back in the same tab.
+ * fine - Stripe redirects back in the same tab.
  */
 const ONE_TIME_PDF_DRAFT_KEY = "truecap:one-time-pdf-draft";
 import { enrichPropertyAction } from "@/app/actions/enrich-property";
@@ -87,7 +87,7 @@ import type { SelectedAddress } from "./address-autocomplete";
 import type { TenYearProjectionInput, ProjectionYear } from "@/lib/ten-year-projections";
 import type { TaxStrategyInput, TaxStrategyYear } from "@/lib/tax-strategy";
 // `generateInvestmentPDF` is dynamic-imported inside the Export PDF
-// handler — it pulls in jspdf + jspdf-autotable + chart.js (~130-150 KB
+// handler - it pulls in jspdf + jspdf-autotable + chart.js (~130-150 KB
 // gzipped). Static-importing here would ship all of that to every
 // cold homepage visitor even though only ~1-2% click Export PDF.
 // We still need the value-type `ReportData` at compile time, so import
@@ -116,7 +116,7 @@ const SAVED_ANALYSIS_EDIT_DRAFT_KEY = "truecap_saved_analysis_edit_draft";
  */
 const CALC_FORM_DRAFT_KEY = "truecap_calc_form_draft_v1";
 /**
- * Debounce window for the draft write — long enough that we don't hit
+ * Debounce window for the draft write - long enough that we don't hit
  * localStorage on every keystroke, short enough that a phone interruption
  * after typing a few fields will still have persisted them. 400ms is the
  * sweet spot: imperceptible to humans, kind to mobile CPUs.
@@ -144,7 +144,7 @@ function writeCalcDraftRaw(json: string): void {
   try {
     if (typeof window !== "undefined") window.localStorage.setItem(CALC_FORM_DRAFT_KEY, json);
   } catch {
-    /* private-mode Safari, quota exceeded, etc. — drafts are best-effort */
+    /* private-mode Safari, quota exceeded, etc. - drafts are best-effort */
   }
 }
 
@@ -160,7 +160,7 @@ function clearCalcDraftRaw(): void {
 /**
  * Map a user-defaults payload (from user_analysis_defaults.preferences)
  * onto the form's field shape. The user-defaults schema uses
- * `interestRatePct` while the form schema uses `interestRate` — handle
+ * `interestRatePct` while the form schema uses `interestRate` - handle
  * that here so callers don't have to know about the mismatch. Returns
  * a sparse object; only keys with finite numeric values are written.
  */
@@ -189,7 +189,7 @@ function mapUserDefaultsToForm(
       out[key as string] = v;
     }
   }
-  // The one shape mismatch — defaults schema uses interestRatePct,
+  // The one shape mismatch - defaults schema uses interestRatePct,
   // form schema uses interestRate.
   if (
     typeof userDefaults.interestRatePct === "number" &&
@@ -272,7 +272,7 @@ function toPdfReportData(args: {
           rent: Number(unit.monthlyRent ?? 0),
         }));
 
-  // Canonical Deal Score is always Balanced (lens-free) — the same number every
+  // Canonical Deal Score is always Balanced (lens-free) - the same number every
   // surface shows (analyzer headline, dashboard, My Deals, compare, share, OG).
   // The investor lens only reorders which metrics lead on the analyzer; it never
   // changes the exported score, so a shared report can't disagree with the
@@ -488,7 +488,7 @@ export function InvestCalcPage({
    *  engine's built-in defaults at form initialization + on every
    *  resetToNewAnalysis. */
   userAnalysisDefaults?: Record<string, number> | null;
-  /** True when ANTHROPIC_API_KEY is configured — shows the Deal Q&A
+  /** True when ANTHROPIC_API_KEY is configured - shows the Deal Q&A
    *  panel. Per-user limits enforced server-side in the action. */
   dealQaEnabled?: boolean;
 }) {
@@ -523,7 +523,7 @@ export function InvestCalcPage({
   const heroAnalyzeHandlerRef = useRef<(detail: HeroAnalyzeDetail) => void>(() => {});
   /**
    * Flipped true on mount when we restore the form from the anonymous
-   * auto-save draft. Drives a small "Welcome back — picked up where
+   * auto-save draft. Drives a small "Welcome back - picked up where
    * you left off" banner so the user understands why the form is
    * pre-filled (and can one-click "start fresh" if it's not theirs,
    * e.g. shared device).
@@ -531,7 +531,7 @@ export function InvestCalcPage({
   const [restoredFromDraft, setRestoredFromDraft] = useState(false);
   /**
    * Snapshot of the address from the restored draft so the welcome
-   * banner can show it ("Welcome back — your draft for 1700 W Erie
+   * banner can show it ("Welcome back - your draft for 1700 W Erie
    * Ave is ready"). Captured at restore time so it doesn't update if
    * the user edits the field afterwards.
    */
@@ -551,7 +551,7 @@ export function InvestCalcPage({
   // like instead of a locked teaser. It's a pure UI unlock: the sample
   // is never saved (no analysisId), so the snapshot server actions are
   // never called and real entitlement gating is untouched. Save / PDF /
-  // share / compare stay gated — those hit server actions.
+  // share / compare stay gated - those hit server actions.
   // The flag clears whenever outputs are invalidated (form drift, reset,
   // loading a saved deal) or a normal non-sample run happens.
   const [isSampleProPreview, setIsSampleProPreview] = useState(false);
@@ -638,7 +638,7 @@ export function InvestCalcPage({
       const dealScore = await getDealScoreAction(buildDealScoreInputFromAnalysis(values, result));
       setDealScoreResult(dealScore);
     } catch (err) {
-      // Swallow + log instead of throwing — there are 4+ call sites,
+      // Swallow + log instead of throwing - there are 4+ call sites,
       // two of which are fire-and-forget (`void loadDealScore(...)`).
       // Without this, a transient server error becomes an unhandled
       // promise rejection in Sentry with no useful context. Failing
@@ -667,7 +667,7 @@ export function InvestCalcPage({
     // A null snapshot means the form is mid-restore (e.g. a multi-family
     // saved deal whose units array is partially populated while RHF
     // resets) and the schema parse failed transiently. Don't flip the
-    // dirty flag on that intermediate state — the next watch tick after
+    // dirty flag on that intermediate state - the next watch tick after
     // the restore completes will compute the real answer. Previously
     // this branch set hasUnsavedChanges(true) and users saw a false
     // "Unsaved changes" badge right after loading a saved deal.
@@ -687,7 +687,7 @@ export function InvestCalcPage({
     setDealScoreResult(null);
     setShowResults(false);
     setIsLoadingDealScore(false);
-    // Editing away from the sample deal ends the Pro preview — the
+    // Editing away from the sample deal ends the Pro preview - the
     // unlock is for the demo numbers only, not the user's own deal.
     setIsSampleProPreview(false);
   }, []);
@@ -725,7 +725,7 @@ export function InvestCalcPage({
       savedDealIdRef.current = null;
       lastPersistedFormJsonRef.current = null;
       lastComputedFormJsonRef.current = null;
-      // Wipe the anonymous auto-save draft — the user is explicitly
+      // Wipe the anonymous auto-save draft - the user is explicitly
       // asking for a fresh start. Without this they'd reset, then on
       // next page load the old draft would silently come back.
       clearCalcDraftRaw();
@@ -763,7 +763,7 @@ export function InvestCalcPage({
   const watchedBedrooms = form.watch("bedrooms");
 
   /**
-   * "Is this form value functionally empty?" — handles all the ways
+   * "Is this form value functionally empty?" - handles all the ways
    * react-hook-form can yield no value:
    *   - undefined / null  (default)
    *   - NaN               (valueAsNumber on an empty input)
@@ -819,7 +819,7 @@ export function InvestCalcPage({
       };
       const filled: string[] = [];
 
-      // Property tax — always overwrite with the state-level rate.
+      // Property tax - always overwrite with the state-level rate.
       // Defaults baked into the form schema aren't location-aware, so the
       // state rate is strictly more informative.
       if (enrichment.propertyTaxPct !== undefined) {
@@ -834,7 +834,7 @@ export function InvestCalcPage({
         );
       }
 
-      // Interest rate — overwrite unless the user has manually edited it.
+      // Interest rate - overwrite unless the user has manually edited it.
       // dirtyFields.interestRate is true only after a manual change, so
       // saved-analysis edits (which use form.reset) are also covered.
       if (enrichment.interestRate !== undefined) {
@@ -852,7 +852,7 @@ export function InvestCalcPage({
         }
       }
 
-      // Monthly rent — single-family only at this entry point. Multi-family
+      // Monthly rent - single-family only at this entry point. Multi-family
       // rents are filled per-unit by a separate effect below. `valueAsNumber:
       // true` means an empty input reads as NaN, so we must treat NaN as
       // empty too.
@@ -883,7 +883,7 @@ export function InvestCalcPage({
         toast({
           title: "Auto-filled from address",
           description: rentFilledFromHud
-            ? `${filled.join("  ·  ")} — HUD FMR is an area average; adjust to local comps.`
+            ? `${filled.join("  ·  ")} - HUD FMR is an area average; adjust to local comps.`
             : filled.join("  ·  "),
         });
       }
@@ -897,7 +897,7 @@ export function InvestCalcPage({
       lastSelectedAddressRef.current = place;
       // New property → fresh provenance capture for this address.
       enrichmentCaptureRef.current = {};
-      // Funnel step — coarse only (state), never the full address (PII).
+      // Funnel step - coarse only (state), never the full address (PII).
       trackEvent("address_selected", { state: place.state });
       await runPropertyEnrichment(place);
     },
@@ -922,7 +922,7 @@ export function InvestCalcPage({
     // Non-silent so the user gets explicit confirmation that the rent
     // estimate populated.
     //
-    // .catch is mandatory — this useEffect can't await, so a thrown
+    // .catch is mandatory - this useEffect can't await, so a thrown
     // error inside runPropertyEnrichment would otherwise surface as
     // an unhandled promise rejection in the browser (which fires
     // Sentry's "Load failed" / "Failed to fetch" alerts on mobile).
@@ -936,7 +936,7 @@ export function InvestCalcPage({
   /**
    * Multi-family / house-hack: when the user fills in bedroom counts for
    * each unit, look up the HUD rent estimate per unit (skipping any
-   * owner-occupied unit — that one doesn't generate rent). Each
+   * owner-occupied unit - that one doesn't generate rent). Each
    * (unitIndex, bedrooms) combo is fetched at most once per session;
    * the server caches HUD data so multiple per-unit calls don't actually
    * hit HUD multiple times.
@@ -1054,7 +1054,7 @@ export function InvestCalcPage({
     if (pending.length === 0) return;
 
     // Wrapped in try/catch because Promise.all rejects on the first
-    // failed action — without this, a single HUD blip would surface as
+    // failed action - without this, a single HUD blip would surface as
     // an unhandled rejection in the user's browser. Enrichment is
     // best-effort: if it fails, the user still types rents manually.
     (async () => {
@@ -1092,12 +1092,12 @@ export function InvestCalcPage({
         if (filledLines.length > 0) {
           toast({
             title: "Auto-filled per-unit rent",
-            description: `${filledLines.join("  ·  ")} — HUD FMR is an area average; adjust to local comps.`,
+            description: `${filledLines.join("  ·  ")} - HUD FMR is an area average; adjust to local comps.`,
           });
         }
       } catch (err) {
         // Releasing the in-flight cache entries so the next interaction
-        // can retry — otherwise the user is stuck waiting for a fill
+        // can retry - otherwise the user is stuck waiting for a fill
         // that will never come.
         for (const { idx, beds } of pending) {
           enrichedUnitsRef.current.delete(`${idx}:${beds}`);
@@ -1110,10 +1110,10 @@ export function InvestCalcPage({
 
   /**
    * RentCast autofill (button-triggered). The cheap enrichment only knows
-   * tax / rate / HUD-rent — beds, baths, sqft, and price can ONLY come from
+   * tax / rate / HUD-rent - beds, baths, sqft, and price can ONLY come from
    * RentCast. So an explicit "Autofill from address" button pulls the
    * property's facts + value/rent estimate and OVERWRITES the autofill-owned
-   * fields (beds, baths, size, price, rent) with the fresh data — the click is
+   * fields (beds, baths, size, price, rent) with the fresh data - the click is
    * an explicit request for RentCast's numbers, so it replaces whatever was
    * there. On-demand by design: a comp credit is spent only on a deliberate
    * click, bounded by the per-user + global caps in the action.
@@ -1152,7 +1152,7 @@ export function InvestCalcPage({
       if (filled.length > 0) {
         toast({
           title: "Auto-filled from address",
-          description: `Filled ${filled.join(", ")} from RentCast — adjust anything that's off.`,
+          description: `Filled ${filled.join(", ")} from RentCast - adjust anything that's off.`,
         });
       }
     },
@@ -1254,7 +1254,7 @@ export function InvestCalcPage({
       applyStarterAssumptions(strategy.starterKey);
       setActiveStrategyKey(strategy.key);
       // BRRRR/Flip render their model inline as the results hero, so don't also
-      // lead the Details tabs with the (duplicate) Strategies tab — default to
+      // lead the Details tabs with the (duplicate) Strategies tab - default to
       // cash-flow context. Wholesale keeps Stress Test so "Adjust targets" lands.
       setActiveDashboardTab(strategy.primaryTab === "strategies" ? "cash-flow" : strategy.primaryTab);
       setAdvancedOpen(false);
@@ -1534,12 +1534,12 @@ export function InvestCalcPage({
           // sees a pre-filled form and wonders what happened.
           setRestoredFromDraft(true);
           // Capture the address so the banner can name the deal
-          // specifically ("Welcome back — your draft for 1700 W Erie
+          // specifically ("Welcome back - your draft for 1700 W Erie
           // Ave is ready"). Trim + cap to a sane length so a
           // pathologically long address can't blow out the layout.
           const addr = (normalized.address ?? "").trim();
           setRestoredAddress(addr ? addr.slice(0, 60) : null);
-          // Don't auto-calculate — restoring inputs is the contract,
+          // Don't auto-calculate - restoring inputs is the contract,
           // running the analysis is the user's intent click. Auto-
           // calculating would race with the loading-spinner UI and
           // ambush the user with results they didn't ask for.
@@ -1548,7 +1548,7 @@ export function InvestCalcPage({
           });
           return;
         }
-        // Draft parsed but failed schema validation — wipe it so the
+        // Draft parsed but failed schema validation - wipe it so the
         // user isn't stuck with a permanently-rejected blob.
         clearCalcDraftRaw();
       } catch {
@@ -1606,7 +1606,7 @@ export function InvestCalcPage({
         setAdvancedOpen(v === "1");
       }
     } catch {
-      /* private mode / disabled storage — keep the default (collapsed) */
+      /* private mode / disabled storage - keep the default (collapsed) */
     }
   }, []);
 
@@ -1617,7 +1617,7 @@ export function InvestCalcPage({
   // deliberately not persisted (it's an auto behavior, not a user setting).
   useEffect(() => {
     if (!analysisResult) return;
-    // In strategy-focus mode, keep the Refine section collapsed — auto-opening
+    // In strategy-focus mode, keep the Refine section collapsed - auto-opening
     // it re-clutters the tailored form the user deliberately simplified.
     if (activeStrategyKey) return;
     if (hasAutoOpenedAdvancedRef.current || advancedUserChoiceRef.current) return;
@@ -1640,7 +1640,7 @@ export function InvestCalcPage({
       const raw = window.sessionStorage.getItem(HERO_ANALYZE_STORAGE_KEY);
       if (raw) heroAnalyzeHandlerRef.current?.(JSON.parse(raw) as HeroAnalyzeDetail);
     } catch {
-      /* malformed / unavailable storage — the live event still delivers it */
+      /* malformed / unavailable storage - the live event still delivers it */
     }
     return () => window.removeEventListener(HERO_ANALYZE_EVENT, onHeroAnalyze as EventListener);
   }, []);
@@ -1666,11 +1666,11 @@ export function InvestCalcPage({
       !(canUseProjections && canUseTaxStrategy && canUseExitScenarios && canUseDealScore);
     pendingSamplePreviewRef.current = false;
 
-    // PostHog funnel event — fires the moment the user commits to
+    // PostHog funnel event - fires the moment the user commits to
     // analyzing a deal (form passed validation, calculation started).
     // This is the top of the in-product funnel above analysis_completed.
     // Properties capture the deal shape so we can later segment funnels
-    // by property type / cash purchase / etc. — no PII (no address).
+    // by property type / cash purchase / etc. - no PII (no address).
     trackEvent("analyzer_started", {
       property_type: values.propertyType,
       purchase_price: values.purchasePrice,
@@ -1679,19 +1679,19 @@ export function InvestCalcPage({
     });
 
     // Increment the global "analyses run" counter behind the homepage
-    // social-proof ticker. Fires only here — on a real Run click, not on
-    // saved-deal loads/restores — so it counts exactly "times Run analysis was
+    // social-proof ticker. Fires only here - on a real Run click, not on
+    // saved-deal loads/restores - so it counts exactly "times Run analysis was
     // clicked." Fire-and-forget + best-effort (the action swallows its own
     // errors); never awaited, so a counter write can't slow or block the
     // analysis.
     void trackAnalysisRunAction();
 
     try {
-      // Brief artificial delay so the loading state registers — the
+      // Brief artificial delay so the loading state registers - the
       // analysis is actually instant. 400ms is enough to feel
       // intentional without burning user time. 1500ms was too long
       // for paid traffic (every second of perceived wait reduces
-      // conversion measurably) — cut it ~73%.
+      // conversion measurably) - cut it ~73%.
       await new Promise((r) => setTimeout(r, 400));
       const result = calculateAnalysis(values);
       const mappedTab = mapInputTabToDashboardTab(activeInputTab);
@@ -1699,17 +1699,17 @@ export function InvestCalcPage({
       // Sample-deal Pro preview: this run came from "Try a sample deal"
       // and the user isn't fully Pro → unlock the full report for the
       // demo (flag consumed at the top of onSubmit). Any normal run
-      // exits preview mode — the state below is set unconditionally.
+      // exits preview mode - the state below is set unconditionally.
       setIsSampleProPreview(sampleProPreview);
       if (sampleProPreview) {
-        // Funnel event — lets PostHog compare pro_checkout_started rates
+        // Funnel event - lets PostHog compare pro_checkout_started rates
         // for sessions that saw the full sample Pro report vs not.
         trackEvent("sample_pro_preview_viewed", {
           property_type: values.propertyType,
         });
       }
       // Preview runs always use a null analysisId so the trio panels
-      // never call the snapshot server actions — even if a previously
+      // never call the snapshot server actions - even if a previously
       // loaded saved deal left savedDealId populated. The demo renders
       // entirely from the locally computed initialYears.
       const sourceAnalysisId = sampleProPreview ? null : savedDealId;
@@ -1720,11 +1720,11 @@ export function InvestCalcPage({
         ? buildTaxStrategySource(sourceAnalysisId, values, result)
         : null;
       setAnalysisResult(result);
-      // Fire Google Ads conversion event — primary intent signal we can
+      // Fire Google Ads conversion event - primary intent signal we can
       // optimize spend against (analyze-an-actual-deal is the
       // micro-conversion that precedes signup).
       trackConversion("calc_completed");
-      // PostHog funnel event — fires once the analysis is rendered.
+      // PostHog funnel event - fires once the analysis is rendered.
       // Properties include the headline metrics so PostHog dashboards
       // can segment "users who saw a STRONG BUY verdict" vs "users who
       // saw AVOID" and compare downstream conversion to Pro.
@@ -1757,7 +1757,7 @@ export function InvestCalcPage({
       if (sampleProPreview && !canUseDealScore) {
         // Compute the full Deal Score client-side for the demo using
         // the same pure function the server action wraps. No server
-        // call, no entitlement bypass — the sample can't be saved.
+        // call, no entitlement bypass - the sample can't be saved.
         setDealScoreResult({
           ok: true,
           tier: "pro",
@@ -1785,7 +1785,7 @@ export function InvestCalcPage({
         if (target && typeof (target as HTMLElement).getBoundingClientRect === "function") {
           const rect = (target as HTMLElement).getBoundingClientRect();
           // Subtract a small offset so the results card isn't flush
-          // with the top edge — gives the eye some breathing room.
+          // with the top edge - gives the eye some breathing room.
           const y = window.scrollY + rect.top - 16;
           window.scrollTo({ top: y, behavior: "smooth" });
         }
@@ -1800,7 +1800,7 @@ export function InvestCalcPage({
 
   const onError = (errors: FieldErrors<InvestmentFormValues>) => {
     // Disarm the sample Pro preview if the sample submit somehow failed
-    // validation — otherwise the armed flag would leak onto the user's
+    // validation - otherwise the armed flag would leak onto the user's
     // next manual Calculate and unlock Pro on their own deal.
     pendingSamplePreviewRef.current = false;
     const findFirstFieldError = (
@@ -1904,7 +1904,7 @@ export function InvestCalcPage({
         const parsedValues = investmentFormSchema.safeParse(form.getValues());
         setSavedDealId(result.id);
         savedDealIdRef.current = result.id;
-        // Deal is now persisted server-side — the local anonymous
+        // Deal is now persisted server-side - the local anonymous
         // auto-save draft is no longer needed. If we leave it, the
         // next anonymous visitor on this device would see this deal's
         // inputs, which is both confusing and a minor privacy concern.
@@ -1913,7 +1913,7 @@ export function InvestCalcPage({
           setSavedDealCount((count) => count + 1);
           // Auto-pull RentCast comps ONCE for a Pro user's newly-saved deal so
           // the comps appear on its report without a manual lookup. Fire-and-
-          // forget — never blocks the save. The action enforces entitlement +
+          // forget - never blocks the save. The action enforces entitlement +
           // monthly caps + 30-day cache and persists the set onto the deal.
           // Gated to Pro (canUseProjections) so a free user's one-lifetime
           // comps freebie is never silently spent on save.
@@ -2017,8 +2017,8 @@ export function InvestCalcPage({
   };
 
   /** Fill the form from pulled comps (facts + AVM estimates). Deal-specific
-   *  fields the user typed are overwritten intentionally — they clicked "Use
-   *  these numbers" — and recompute fires via the form watch. */
+   *  fields the user typed are overwritten intentionally - they clicked "Use
+   *  these numbers" - and recompute fires via the form watch. */
   const handleApplyComps = (enrichment: PropertyEnrichment) => {
     const f = enrichment.facts;
     if (f?.bedrooms != null) form.setValue("bedrooms", f.bedrooms, { shouldDirty: true, shouldValidate: true });
@@ -2067,7 +2067,7 @@ export function InvestCalcPage({
         });
 
       // The exported Deal Score is the canonical Balanced score (computed inside
-      // toPdfReportData) — the same number every surface shows — so the report
+      // toPdfReportData) - the same number every surface shows - so the report
       // never contradicts the screen it came from regardless of the active lens.
       const reportData = toPdfReportData({
         values,
@@ -2077,7 +2077,7 @@ export function InvestCalcPage({
         exitYears,
       });
 
-      // Attach this deal's stored RentCast comps (saved deals only — reads the
+      // Attach this deal's stored RentCast comps (saved deals only - reads the
       // saved set, no API call) so the report includes the comp tables.
       if (savedDealId) {
         try {
@@ -2124,7 +2124,7 @@ export function InvestCalcPage({
       // signal (user is sharing the analysis with a lender / partner).
       // Even though it's not a revenue event, surfacing it to the Ads
       // optimizer gives the bidding algo extra positive signal beyond
-      // the rare 'paid_subscribed' event — critical for new accounts
+      // the rare 'paid_subscribed' event - critical for new accounts
       // where conversion data is sparse.
       trackConversion("pdf_exported");
       trackEvent("pdf_exported", {
@@ -2156,7 +2156,7 @@ export function InvestCalcPage({
         variant: "success",
       });
     } catch (err) {
-      // Surface PDF errors so we don't fail silently — was silently
+      // Surface PDF errors so we don't fail silently - was silently
       // swallowed before because the original 'jspdf/dist/...' import
       // broke on some jspdf versions.
       console.error("[handleExportPdf] PDF generation failed:", err);
@@ -2186,7 +2186,7 @@ export function InvestCalcPage({
           JSON.stringify({ v: 1, values: form.getValues(), savedAt: Date.now() })
         );
       } catch {
-        // Storage unavailable (private mode quota etc.) — checkout still
+        // Storage unavailable (private mode quota etc.) - checkout still
         // works; worst case the user re-enters values after returning
         // and exports with the unlock.
       }
@@ -2263,13 +2263,13 @@ export function InvestCalcPage({
           if (parsedValues.success) restoredValues = parsedValues.data;
         }
       } catch {
-        // Corrupt/missing draft — fall through to the manual path below.
+        // Corrupt/missing draft - fall through to the manual path below.
       }
       window.localStorage.removeItem(ONE_TIME_PDF_DRAFT_KEY);
 
       if (!restoredValues) {
         toast({
-          title: "Payment received — PDF unlocked",
+          title: "Payment received - PDF unlocked",
           description:
             "Re-enter your deal and click Export PDF. Your one-time report is unlocked.",
           variant: "success",
@@ -2308,7 +2308,7 @@ export function InvestCalcPage({
     // re-saved), confirm before nuking the form. resetToNewAnalysis
     // wipes address/price/rent and clears the localStorage draft, so
     // a misclick here is irrecoverable. A native confirm() is the
-    // lightest possible guard — no modal infrastructure needed.
+    // lightest possible guard - no modal infrastructure needed.
     const shouldConfirm =
       Boolean(analysisResult) || hasUnsavedChanges || Boolean(savedDealId);
     if (shouldConfirm) {
@@ -2332,19 +2332,19 @@ export function InvestCalcPage({
   }, [analysisResult]);
 
   /**
-   * Workflow protection — warn before unloading the page when the
+   * Workflow protection - warn before unloading the page when the
    * user has unsaved edits to an existing saved deal. We deliberately
    * skip this for anonymous users (no save path) and brand-new
    * previews (localStorage auto-save catches them on next visit).
    * Browser policy ignores custom messages now, but the prompt itself
-   * still fires — that's enough to prevent the accidental close.
+   * still fires - that's enough to prevent the accidental close.
    */
   useEffect(() => {
     const shouldWarn = isAuthenticated && Boolean(savedDealId) && hasUnsavedChanges;
     if (!shouldWarn) return;
     const handler = (event: BeforeUnloadEvent) => {
       event.preventDefault();
-      // Required for older browsers — modern browsers show a generic
+      // Required for older browsers - modern browsers show a generic
       // "Reload site? Changes you made may not be saved." regardless
       // of returnValue text.
       event.returnValue = "";
@@ -2403,14 +2403,14 @@ export function InvestCalcPage({
   };
 
   /**
-   * "Try a sample deal" — pre-fills the form with a realistic
+   * "Try a sample deal" - pre-fills the form with a realistic
    * Philadelphia rental and triggers calculate. The single biggest
    * friction-killer for cold paid traffic: visitor lands on the
    * calculator, sees a wall of empty fields, bounces. This button
    * gives them a fully-populated working demo in one click.
    */
   const handleTrySampleDeal = () => {
-    // Shared single source of truth (lib/sample-deal.ts) — the homepage
+    // Shared single source of truth (lib/sample-deal.ts) - the homepage
     // hero mock card COMPUTES its displayed numbers from these same
     // values, so the demo can never contradict the marketing card
     // again (it did once: 'Strong Buy · 84' on the card, 'Risky · 20'
@@ -2426,20 +2426,20 @@ export function InvestCalcPage({
       });
     });
 
-    // Arm the one-shot Pro preview for this run — consumed in onSubmit.
+    // Arm the one-shot Pro preview for this run - consumed in onSubmit.
     pendingSamplePreviewRef.current = true;
 
     // Show the toast right away so the user sees confirmation that
-    // the demo loaded — important because the submit fires async and
+    // the demo loaded - important because the submit fires async and
     // we want a UI signal that *something* happened on click.
     toast({
       title: "Sample rental loaded",
       description:
-        "Running the analysis on a real Philadelphia rental — with a full Pro report preview unlocked for this demo.",
+        "Running the analysis on a real Philadelphia rental - with a full Pro report preview unlocked for this demo.",
     });
 
     // Defer the submit to the next paint frame. RHF's setValue calls
-    // above schedule re-renders asynchronously — submitting in the same
+    // above schedule re-renders asynchronously - submitting in the same
     // tick can race the field updates and, more importantly, the user
     // never sees the prefilled form before being teleported to results.
     // Two requestAnimationFrames = one to flush the setValue renders,
@@ -2458,7 +2458,7 @@ export function InvestCalcPage({
   heroAnalyzeHandlerRef.current = (detail: HeroAnalyzeDetail) => {
     if (!detail || typeof detail.token !== "string") return;
     // Idempotency: the same payload can arrive via both the live event and
-    // the sessionStorage fallback — handle it once.
+    // the sessionStorage fallback - handle it once.
     if (lastHeroTokenRef.current === detail.token) return;
     lastHeroTokenRef.current = detail.token;
     try {
@@ -2501,7 +2501,7 @@ export function InvestCalcPage({
       try {
         form.setFocus("purchasePrice");
       } catch {
-        /* field may be unmounted for some property types — non-fatal */
+        /* field may be unmounted for some property types - non-fatal */
       }
     });
   };
@@ -2547,7 +2547,7 @@ export function InvestCalcPage({
           <div className="min-w-0">
             {/* Heading level is auth-aware: for cold visitors the
                 marketing hero above already renders the page's single
-                <h1> ("Stop losing deals to bad math.") — two H1s on
+                <h1> ("Stop losing deals to bad math.") - two H1s on
                 one page dilutes the SEO signal and confuses screen-
                 reader document outlines. For signed-in users the hero
                 is skipped entirely, so this becomes the page's H1. */}
@@ -2565,10 +2565,10 @@ export function InvestCalcPage({
               assessment in seconds.
             </p>
           </div>
-          {/* Sample-deal button — anonymous visitors only, before any
+          {/* Sample-deal button - anonymous visitors only, before any
               analysis has run. Signed-in users already know the product
               (and their onboarding tour now starts with their own first
-              deal), so the demo button is pure noise for them — removed
+              deal), so the demo button is pure noise for them - removed
               Jun 2026. For cold traffic it's promoted from a quiet chip
               to a filled primary button: it's the single highest-value
               click on the page now that it unlocks the full Pro report. */}
@@ -2577,7 +2577,7 @@ export function InvestCalcPage({
               type="button"
               onClick={handleTrySampleDeal}
               className="group inline-flex shrink-0 flex-col items-start gap-0.5 self-start rounded-xl bg-primary px-5 py-3 text-left shadow-[0_10px_24px_rgba(0, 112, 196,0.28)] transition-transform hover:-translate-y-0.5 sm:self-end"
-              aria-label="Try a sample rental — preview a sample Pro report on a real Philadelphia rental"
+              aria-label="Try a sample rental - preview a sample Pro report on a real Philadelphia rental"
             >
               <span className="inline-flex items-center gap-1.5 text-sm font-bold text-primary-foreground">
                 <Sparkles className="size-4" />
@@ -2590,7 +2590,7 @@ export function InvestCalcPage({
           )}
         </div>
 
-        {/* "Welcome back" banner — only shown when the form was just
+        {/* "Welcome back" banner - only shown when the form was just
             restored from a localStorage auto-save draft. Without this
             the user sees a pre-filled form and wonders what happened.
             "Start fresh" wipes the draft and resets to defaults, which
@@ -2639,9 +2639,9 @@ export function InvestCalcPage({
           </div>
         )}
 
-        {/* Input tabs — only rendered AFTER the first Calculate run.
+        {/* Input tabs - only rendered AFTER the first Calculate run.
             Previously these were always visible but disabled with a
-            tooltip ("Calculate the analysis first") — which inverted
+            tooltip ("Calculate the analysis first") - which inverted
             the UX: new users saw a disabled tab strip above the form
             and misread it as "I need to pick a tab to start." Hiding
             them until results exist removes the confusion entirely;
@@ -2696,7 +2696,7 @@ export function InvestCalcPage({
                 ((tab.id === "projections" && !canUseProjections) ||
                   (tab.id === "tax-strategy" && !canUseTaxStrategy) ||
                   (tab.id === "deal-score" && !canUseDealScore)) && (
-                // Lock icon now shows on mobile too — mobile users
+                // Lock icon now shows on mobile too - mobile users
                 // previously couldn't tell a tab was Pro-gated until
                 // they tapped and hit a paywall. Surfacing the lock
                 // upfront prevents the bait-and-switch UX.
@@ -2727,7 +2727,7 @@ export function InvestCalcPage({
           noValidate
         >
           <div className="space-y-5">
-            {/* Guided step rail (AN-1) — sticky orientation + jump navigation
+            {/* Guided step rail (AN-1) - sticky orientation + jump navigation
                 over the existing form. Additive: reads values + scrolls only;
                 never gates input or changes the manual run flow. */}
             <AnalyzerStepRail
@@ -2775,7 +2775,7 @@ export function InvestCalcPage({
               )}
             </div>
 
-            {/* Progressive disclosure — financing + operating expenses
+            {/* Progressive disclosure - financing + operating expenses
                 start collapsed behind smart defaults so the first run
                 needs only the basics (type, address, price, beds/rent).
                 The sections stay MOUNTED (hidden via CSS, not unmounted)
@@ -2806,10 +2806,10 @@ export function InvestCalcPage({
                     {advancedOpen
                       ? "Bathrooms, size, financing & operating expenses"
                       : activeStrategy
-                        ? `${activeStrategy.label} defaults applied — open to fine-tune financing & expenses`
+                        ? `${activeStrategy.label} defaults applied - open to fine-tune financing & expenses`
                         : analysisResult
                           ? "Adjust details, financing & expenses to sharpen your numbers"
-                          : "Bathrooms, size, financing & expenses — running on smart defaults"}
+                          : "Bathrooms, size, financing & expenses - running on smart defaults"}
                   </span>
                 </span>
               </span>
@@ -2837,10 +2837,10 @@ export function InvestCalcPage({
               </div>
             </div>
 
-            {/* Calculate button — solid brand color (gradient was too
+            {/* Calculate button - solid brand color (gradient was too
                 visually heavy and competed with the verdict card
                 downstream). Copy standardized to "Run analysis" to
-                match the homepage "Run a deal — 60 seconds" register. */}
+                match the homepage "Run a deal - 60 seconds" register. */}
             <Button
               type="submit"
               disabled={isCalculating}
@@ -2863,7 +2863,7 @@ export function InvestCalcPage({
               )}
             </Button>
             {/* Bottom row: keyboard hint (left) + autosave indicator
-                (right). Both desktop-only — mobile users get the
+                (right). Both desktop-only - mobile users get the
                 sticky bottom Calculate bar instead, and the autosave
                 indicator there would compete with iOS keyboard chrome. */}
             <div className="hidden sm:flex items-center justify-between gap-3 text-[11px] text-muted-foreground">
@@ -2890,14 +2890,14 @@ export function InvestCalcPage({
           <StickyCalculateBar isCalculating={isCalculating} />
         </form>
 
-        {/* Results — wrapped in an error boundary so a render bug in
+        {/* Results - wrapped in an error boundary so a render bug in
             any child (waterfall, mortgage compare, projections, etc.)
             cannot blank the whole post-calc surface. The fallback
             surfaces the headline metrics directly from analysisResult
             so the user's numbers are never lost. */}
         {(showResults || isCalculating || analysisResult !== null) && (
           <div className="mt-8" data-analysis-results="true">
-            {/* Result-state trust strip — names the default sources behind
+            {/* Result-state trust strip - names the default sources behind
                 the numbers (HUD/FRED/state) + "all editable", with a jump
                 back to the form. Only once real results exist. */}
             {analysisResult && !isCalculating ? (
@@ -2967,7 +2967,7 @@ export function InvestCalcPage({
           </div>
         )}
       </main>
-      {/* Anonymous email capture — fires 5s after a successful analysis
+      {/* Anonymous email capture - fires 5s after a successful analysis
           for unauthenticated users only. Captures the email and schedules
           a 4-email drip via Resend `scheduled_at`. Once captured or
           dismissed, never re-fires in the same browser (localStorage). */}
@@ -2977,7 +2977,7 @@ export function InvestCalcPage({
           propertyAddress={form.getValues("address")}
         />
       ) : null}
-      {/* Pro vs $5 one-time chooser — opens when a user without PDF
+      {/* Pro vs $5 one-time chooser - opens when a user without PDF
           entitlement clicks Export PDF. */}
       <PdfPurchaseDialog
         open={isPdfPurchaseDialogOpen}

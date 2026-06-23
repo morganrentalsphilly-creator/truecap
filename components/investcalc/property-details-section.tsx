@@ -46,16 +46,16 @@ export function PropertyDetailsSection({
       </div>
 
       <div className="space-y-4">
-        {/* Address — Google Places autocomplete attached when key is set */}
+        {/* Address - Google Places autocomplete attached when key is set */}
         <div>
           <Label className="text-sm font-medium text-foreground mb-1 block">
             Property Address
           </Label>
           {/* First-run signpost: makes the address the obvious starting
-              point and tells new users it auto-fills the deal — the single
+              point and tells new users it auto-fills the deal - the single
               biggest "how do I use this" cue, right at the point of action. */}
           <p className="mb-1.5 text-[11px] leading-snug text-muted-foreground">
-            <span className="font-semibold text-foreground">Start here</span> — enter the address — we auto-fill rent, rate &amp; tax from public data (HUD · FRED · state). Beds, baths &amp; price fill from the Autofill button when available.
+            <span className="font-semibold text-foreground">Start here</span> - enter the address - we auto-fill rent, rate &amp; tax from public data (HUD · FRED · state). Beds, baths &amp; price fill from the Autofill button when available.
           </p>
           <AddressAutocomplete
             form={form}

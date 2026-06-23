@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * WhatIfSliders — two-knob live sensitivity for the Overview metric tier.
+ * WhatIfSliders - two-knob live sensitivity for the Overview metric tier.
  *
  * The single most powerful thing TrueCap can do that competitors don't:
  * let you DRAG rent and purchase price, and watch the verdict +
@@ -18,7 +18,7 @@
  * (Monthly Cash Flow, CoC, Cap Rate, DSCR) + a live tier-headline pill.
  * The Pro snapshot panels (10-yr projections, tax strategy, exit
  * scenarios) stay anchored to the saved/base analysis so they don't
- * thrash on every slider tick — those are for "this is the deal"
+ * thrash on every slider tick - those are for "this is the deal"
  * decisions, not "what if?" exploration.
  *
  * Math:
@@ -42,13 +42,13 @@ import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { getDealTier, type DealTier } from "@/lib/verdict";
 
 export interface WhatIfState {
-  /** The result to render in the Overview tier — adjusted if user has dragged a slider, otherwise the base result. */
+  /** The result to render in the Overview tier - adjusted if user has dragged a slider, otherwise the base result. */
   result: AnalysisResult;
   /** True when ANY slider is non-zero. Controls the "What-if mode" badge + reset button. */
   isAdjusted: boolean;
   /** Tier headline for the adjusted (or base) result. Used by the live tier pill. */
   tier: DealTier;
-  /** Current adjustments — exposed for downstream consumers. */
+  /** Current adjustments - exposed for downstream consumers. */
   rentPct: number;
   pricePct: number;
 }
@@ -76,7 +76,7 @@ export function applyWhatIfAdjustments(
   const rentMul = 1 + rentPct / 100;
   const priceMul = 1 + pricePct / 100;
   // Clone shallowly + walk rent fields. We don't deep-clone the entire
-  // object because calculateAnalysis only reads — never mutates.
+  // object because calculateAnalysis only reads - never mutates.
   const next: InvestmentFormValues = {
     ...values,
     purchasePrice:
@@ -141,7 +141,7 @@ export function WhatIfSliders({ values, baseResult, onStateChange }: Props) {
 
   return (
     <div className="rounded-2xl border border-border bg-card/60 p-3 sm:p-4">
-      {/* Header row — kicker + tier pill + (optional) reset button. */}
+      {/* Header row - kicker + tier pill + (optional) reset button. */}
       <div className="mb-3 flex flex-wrap items-center gap-2">
         <div className="flex items-center gap-1.5">
           <Sparkles className="size-3.5 text-primary" />

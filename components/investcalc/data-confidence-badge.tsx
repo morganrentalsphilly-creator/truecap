@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Data confidence badge — a High/Medium/Low pill that, on click, shows
+ * Data confidence badge - a High/Medium/Low pill that, on click, shows
  * where each key input came from (HUD FMR / FRED / state tax / your own
  * entry) and when it was fetched. Reused on the result screen, My Deals
  * rows, and dashboard Top Deals. Renders nothing when confidence is

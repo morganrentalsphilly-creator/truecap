@@ -3,7 +3,7 @@
 /**
  * Error boundary around the analysis dashboard.
  *
- * Workflow protection — if any of the dashboard's many child
+ * Workflow protection - if any of the dashboard's many child
  * components (waterfall, mortgage compare, score breakdown, NCF card,
  * projections chart, tax strategy table, exit scenarios, etc.) ever
  * throws on a weird/malformed AnalysisResult, the WHOLE post-calc
@@ -26,7 +26,7 @@ import { Button } from "@/components/ui/button";
 import type { AnalysisResult } from "@/lib/calc-analysis";
 
 type Props = {
-  /** Optional — passed so the fallback can show the user's numbers
+  /** Optional - passed so the fallback can show the user's numbers
    *  even when the children crash. When omitted, fallback shows a
    *  pure-text recovery message. */
   result?: AnalysisResult | null;
@@ -53,7 +53,7 @@ export class AnalysisErrorBoundary extends React.Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
     // Structured log so it's easy to spot in dev-tools when triaging
-    // user reports. Don't break the parent's render — just log.
+    // user reports. Don't break the parent's render - just log.
     console.error("[AnalysisErrorBoundary] dashboard child threw:", {
       message: error.message,
       stack: error.stack,
@@ -62,7 +62,7 @@ export class AnalysisErrorBoundary extends React.Component<Props, State> {
   }
 
   handleRetry = (): void => {
-    // Reset our own state — the parent's data is still valid, so a
+    // Reset our own state - the parent's data is still valid, so a
     // re-render of the children may succeed if the cause was a
     // transient state issue.
     this.setState({ hasError: false, errorMessage: null });
@@ -91,7 +91,7 @@ export class AnalysisErrorBoundary extends React.Component<Props, State> {
               Something glitched while rendering the dashboard
             </h2>
             <p className="mt-1 text-sm text-amber-800/90">
-              Your numbers are safe — only the visualization broke. Try refreshing
+              Your numbers are safe - only the visualization broke. Try refreshing
               the page, or recalculate. The error has been logged.
             </p>
 

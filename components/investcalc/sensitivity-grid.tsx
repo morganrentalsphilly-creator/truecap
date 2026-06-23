@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Sensitivity grid — visualizes how cash flow, cap rate, CoC, and DSCR
+ * Sensitivity grid - visualizes how cash flow, cap rate, CoC, and DSCR
  * change when rent / vacancy / interest rate move from the entered base.
  *
  * Self-contained, additive to the analysis dashboard. Reads the current
@@ -45,7 +45,7 @@ function ScenarioCell({
   baseResult: AnalysisResult;
   scenarioName: string;
 }) {
-  // Cash purchases have no debt service — DSCR is N/A. Show "no debt"
+  // Cash purchases have no debt service - DSCR is N/A. Show "no debt"
   // rather than a misleading "DSCR 0.00" in every cell.
   const isCashPurchase = result.monthlyPayment <= 0;
   return (

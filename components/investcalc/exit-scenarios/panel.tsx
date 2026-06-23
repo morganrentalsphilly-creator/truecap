@@ -49,7 +49,7 @@ export function ExitScenariosPanel({
     // Wrapped in try/catch so a transient Supabase / network failure
     // inside the action doesn't escape as an unhandled promise
     // rejection (which Sentry would otherwise capture as a fake bug).
-    // Snapshot load failure is a no-op for the user — they fall back
+    // Snapshot load failure is a no-op for the user - they fall back
     // to live calculation from the in-memory input.
     void (async () => {
       try {
@@ -126,7 +126,7 @@ function buildExitInsight(years: ExitScenarioYear[]): ReactNode {
   if (bestYear.totalProfit <= 0) {
     return (
       <>
-        Even at the best modeled exit (year {bestYear.year}), this deal doesn&apos;t turn a profit on sale — the
+        Even at the best modeled exit (year {bestYear.year}), this deal doesn&apos;t turn a profit on sale - the
         appreciation assumption doesn&apos;t cover the carry and selling costs.
       </>
     );
@@ -135,7 +135,7 @@ function buildExitInsight(years: ExitScenarioYear[]): ReactNode {
     <>
       Most of the return shows up at sale: by year {year10.year}, projected profit is about{" "}
       <strong className="text-foreground">{formatCurrency(year10.totalProfit)}</strong> ({roi >= 0 ? "+" : ""}
-      {roi.toFixed(0)}% on cash) — an equity-and-appreciation payoff you realize when you sell or refinance, not
+      {roi.toFixed(0)}% on cash) - an equity-and-appreciation payoff you realize when you sell or refinance, not
       monthly income.
     </>
   );

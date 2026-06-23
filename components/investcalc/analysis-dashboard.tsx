@@ -28,7 +28,7 @@ import { WhatIfSliders, type WhatIfState } from "@/components/investcalc/what-if
 import { BreakpointSuggestionCard } from "@/components/investcalc/breakpoint-suggestion-card";
 
 // The three Pro snapshot panels each pull in recharts (~90 KB gzipped
-// combined). They're tab-gated AND Pro-gated — most homepage visitors
+// combined). They're tab-gated AND Pro-gated - most homepage visitors
 // (and all free-tier users on the default tab) never render them. Lazy-
 // loading via next/dynamic keeps recharts out of the initial bundle.
 // Each panel shows a small skeleton during the brief load (typically
@@ -111,7 +111,7 @@ import {
 
 interface AnalysisDashboardProps {
   result: AnalysisResult | null;
-  /** Current form values — needed by MaxOfferCard to re-solve at varied prices. */
+  /** Current form values - needed by MaxOfferCard to re-solve at varied prices. */
   values?: InvestmentFormValues | null;
   isLoading: boolean;
   dealScoreResult: DealScoreActionResult | null;
@@ -172,7 +172,7 @@ interface AnalysisDashboardProps {
   isSampleProPreview?: boolean;
   /**
    * True when ANTHROPIC_API_KEY is configured (passed down from the
-   * page). Controls whether the Deal Q&A panel renders at all — the
+   * page). Controls whether the Deal Q&A panel renders at all - the
    * per-user limits are enforced server-side in the action.
    */
   dealQaEnabled?: boolean;
@@ -181,7 +181,7 @@ interface AnalysisDashboardProps {
    *  from enrich-property provenance). Null hides the badge. */
   dataConfidence?: DataConfidence | null;
   activeTab?: AnalysisDashboardTab;
-  /** Active investor strategy — drives the strategy-aware results headline. */
+  /** Active investor strategy - drives the strategy-aware results headline. */
   activeStrategy?: InvestorStrategy | null;
   /** Shown when Compare / Export are disabled (e.g. unsaved edits). */
   persistedActionsBlockHint?: string;
@@ -201,7 +201,7 @@ const TABS: { id: AnalysisDashboardTab; label: string; mobileLabel: string; isPr
   { id: "projections", label: "10-Year Projections", mobileLabel: "10-Year", isPro: true },
   { id: "tax-strategy", label: "Tax Strategy", mobileLabel: "Tax", isPro: true },
   { id: "exit-scenarios", label: "Exit Scenarios", mobileLabel: "Exit", isPro: true },
-  // Renamed from "Strategies" (Jun 2026 UX pass) — vague label for the
+  // Renamed from "Strategies" (Jun 2026 UX pass) - vague label for the
   // not-Excel-power-user audience; the tab IS the BRRRR + fix-and-flip
   // + rehab analyzers, so say that.
   { id: "strategies", label: "BRRRR & Flip", mobileLabel: "BRRRR", isPro: true },
@@ -217,7 +217,7 @@ const TABS: { id: AnalysisDashboardTab; label: string; mobileLabel: string; isPr
  *
  * Phase 2: market-aware benchmarks via lib/market-benchmarks. When
  * the address parses to a known metro or state, we surface the
- * local median — "Above the 7.5% Philadelphia median" — which is
+ * local median - "Above the 7.5% Philadelphia median" - which is
  * strictly more useful than a national band because a 7% cap rate
  * is excellent in California (4-5% typical) and mediocre in
  * Detroit (9-10% typical).
@@ -230,15 +230,15 @@ function capRateBenchmarkLabel(capRatePct: number, address?: string | null): str
   if (benchmark && benchmark.scope !== "national") {
     return formatCapRateBenchmarkSubline(capRatePct, benchmark);
   }
-  // National fallback bands — keep the same thresholds the scoring
+  // National fallback bands - keep the same thresholds the scoring
   // engine uses so the metric subline and the score subline agree.
-  if (capRatePct > 8) return "Above 8% — top quartile (U.S.)";
-  if (capRatePct > 5) return "5–8% — fair for market (U.S.)";
-  return "Below 5% — appreciation-dependent (U.S.)";
+  if (capRatePct > 8) return "Above 8% - top quartile (U.S.)";
+  if (capRatePct > 5) return "5–8% - fair for market (U.S.)";
+  return "Below 5% - appreciation-dependent (U.S.)";
 }
 
 /**
- * Cap-rate card COLOR — driven by the SAME benchmark the subline uses, so the
+ * Cap-rate card COLOR - driven by the SAME benchmark the subline uses, so the
  * color and the "Above/Near/Below the X% median" label can never disagree.
  * Green only when the cap rate beats the local median (or the national
  * top-quartile when the address doesn't parse); neutral when near or below;
@@ -254,17 +254,17 @@ function capRateBenchmarkColor(capRatePct: number, address?: string | null): str
       ? "text-[var(--metric-positive)]"
       : "text-foreground";
   }
-  // National fallback — green only for the top-quartile (>8%) band, matching
-  // the national subline ("Above 8% — top quartile").
+  // National fallback - green only for the top-quartile (>8%) band, matching
+  // the national subline ("Above 8% - top quartile").
   return capRatePct > 8 ? "text-[var(--metric-positive)]" : "text-foreground";
 }
 
 function cocBenchmarkLabel(cocPct: number): string {
-  if (cocPct > 12) return "Above 12% — strong";
-  if (cocPct > 8) return "8–12% — healthy";
-  if (cocPct > 5) return "5–8% — modest";
-  if (cocPct >= 0) return "Below 5% — weak";
-  return "Negative — losing money";
+  if (cocPct > 12) return "Above 12% - strong";
+  if (cocPct > 8) return "8–12% - healthy";
+  if (cocPct > 5) return "5–8% - modest";
+  if (cocPct >= 0) return "Below 5% - weak";
+  return "Negative - losing money";
 }
 
 function cashFlowBenchmarkLabel(monthlyCashFlow: number): string {
@@ -277,7 +277,7 @@ function cashFlowBenchmarkLabel(monthlyCashFlow: number): string {
 /**
  * Sub-label for the Monthly Cash Flow card. When year-1 cash flow is
  * negative but the depreciation + interest shield flips it positive
- * after-tax, lead with the after-tax figure right on the card — the big
+ * after-tax, lead with the after-tax figure right on the card - the big
  * red pre-tax number alone misreads as "this deal loses money" when, for
  * a tax-paying owner, it doesn't. Otherwise fall back to the plain
  * benchmark band.
@@ -290,7 +290,7 @@ function cashFlowSubLabel(r: AnalysisResult): string {
 }
 
 /**
- * Is this an "appreciation play" — a financed deal whose year-1 cash flow
+ * Is this an "appreciation play" - a financed deal whose year-1 cash flow
  * is negative (usually high leverage) but which still pays off after-tax
  * and projects a strong 10-year total return? These deals read as
  * uniformly red in the year-1 Overview even though they're viable holds;
@@ -408,7 +408,7 @@ export function AnalysisDashboard({
   // When a non-cash-flow strategy is active (Wholesale/BRRRR/Flip), lead the
   // results with that play's real answer instead of the generic buy-box verdict.
   const strategyLeadsOutput = !!activeStrategy && activeStrategy.primaryTab !== "cash-flow";
-  // Show only the first 3 recommendation tips by default — beyond that
+  // Show only the first 3 recommendation tips by default - beyond that
   // the Recommendation card starts feeling busy. User can expand to see
   // the rest. Resets implicitly when the parent component re-mounts on
   // a new analysis; we don't reset on each recommendation change because
@@ -418,7 +418,7 @@ export function AnalysisDashboard({
   // What-if slider state. When the user drags rent / rate, this holds
   // the adjusted result; otherwise null and we render the base `result`
   // unchanged. SCOPED: only the 4 Overview tier metric cards consume
-  // this — projections, tax strategy, exit scenarios, deal score, and
+  // this - projections, tax strategy, exit scenarios, deal score, and
   // every Pro panel stay anchored to the saved/base analysis. Sliders
   // are a "what-if peek" on headline numbers, not a full reanalysis.
   const [whatIfState, setWhatIfState] = useState<WhatIfState | null>(null);
@@ -433,7 +433,7 @@ export function AnalysisDashboard({
   );
   const appreciationPlay =
     !!result && isAppreciationPlayDeal(result, propertyType, annualizedReturnPct);
-  // Investor lens — owned HERE (the common parent of the Deal Score + the
+  // Investor lens - owned HERE (the common parent of the Deal Score + the
   // metric cards) so the metric ordering reacts when it changes. Persisted
   // across deals so a cash-flow investor isn't reset to Balanced each analysis.
   // The lens only reorders which metrics LEAD (see PRIMARY_METRICS); the Deal
@@ -448,7 +448,7 @@ export function AnalysisDashboard({
         setStrategy(saved);
       }
     } catch {
-      // private mode — default Balanced
+      // private mode - default Balanced
     }
   }, []);
   const pickStrategy = (next: DealStrategy) => {
@@ -468,7 +468,7 @@ export function AnalysisDashboard({
     "tax-strategy": canUseTaxStrategy,
     "exit-scenarios": canUseExitScenarios,
     // Strategies tab (BRRRR + Fix-and-Flip + rehab estimator) is now a
-    // Pro feature — gated by canUseStrategies. Free users see the tab
+    // Pro feature - gated by canUseStrategies. Free users see the tab
     // with a lock icon and the ProFeaturePreview placeholder on click.
     strategies: canUseStrategies,
     // Stress Test tab houses Max Allowable Offer + Sensitivity Grid.
@@ -487,7 +487,7 @@ export function AnalysisDashboard({
     setActiveTab(activeTabProp);
   }, [activeTabProp]);
 
-  // Canonical Balanced verdict — identical to the dashboard, My Deals, compare,
+  // Canonical Balanced verdict - identical to the dashboard, My Deals, compare,
   // PDF, and share surfaces. The lens never changes it.
   const recommendation = buildRecommendationModel(dealScoreResult);
 
@@ -499,7 +499,7 @@ export function AnalysisDashboard({
 
   // Lens-curated metrics. Each investor lens leads with the 3 metrics that
   // investor actually optimizes for; the rest collapse behind "Show all
-  // metrics" so the first read isn't crowded. Same data underneath — just
+  // metrics" so the first read isn't crowded. Same data underneath - just
   // what surfaces first. Tiles preserve the exact per-metric value/sub/color
   // logic; this only changes WHICH tiles lead and which are tucked.
   const metricTiles: Record<string, ReactNode> = {
@@ -619,7 +619,7 @@ export function AnalysisDashboard({
 
   return (
     <div className="space-y-6">
-      {/* Sample-deal Pro preview banner — explains why every Pro tab is
+      {/* Sample-deal Pro preview banner - explains why every Pro tab is
           open on the demo and converts the "wow" into a pricing visit.
           Gradient + border language matches ProInlineGate so the brand
           reads consistent between "locked" and "unlocked for demo". */}
@@ -635,7 +635,7 @@ export function AnalysisDashboard({
               </p>
               <p className="text-xs leading-relaxed text-muted-foreground">
                 10-year projections, tax strategy, exit scenarios, and
-                stress-testing — every tab is unlocked for the demo. Deal Score
+                stress-testing - every tab is unlocked for the demo. Deal Score
                 is always free. Run your own deal to see the free analysis, or go
                 Pro to get all of this on every deal.
               </p>
@@ -651,13 +651,13 @@ export function AnalysisDashboard({
           </Button>
         </div>
       )}
-      {/* Action bar — split into two visually distinct elements:
+      {/* Action bar - split into two visually distinct elements:
           a lightweight identity strip ("what is this?") and a
           chunkier Quick Actions panel ("what can I do with it?").
           Previously these were nested inside the same rounded card,
           which gave the area a busy double-border feel. */}
       <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
-        {/* Identity strip — property type + saved-status badge.
+        {/* Identity strip - property type + saved-status badge.
             Inline, no card chrome. Reads as a header rather than
             a UI element. */}
         <div className="flex items-center gap-2 px-1">
@@ -679,7 +679,7 @@ export function AnalysisDashboard({
                 ? "All changes saved"
                 : isExistingSavedDeal
                   ? "You've edited this deal since the last save. Click Save to persist."
-                  : "This is a preview — click Save to persist this deal."
+                  : "This is a preview - click Save to persist this deal."
             }
           >
             {isSaved
@@ -689,10 +689,10 @@ export function AnalysisDashboard({
                 : "Preview"}
           </span>
         </div>
-        {/* Quick Actions — naked button row, no panel chrome.
+        {/* Quick Actions - naked button row, no panel chrome.
             Previously wrapped in a bordered card with a floating
             "Quick actions" label, which added visual weight without
-            adding meaning — the 4 buttons themselves are clearly a
+            adding meaning - the 4 buttons themselves are clearly a
             toolbar. Removing the chrome lets the row read as inline
             with the identity strip. */}
         <div className="grid grid-cols-4 gap-1.5 sm:gap-2 xl:min-w-[560px] max-[380px]:gap-1">
@@ -759,14 +759,14 @@ export function AnalysisDashboard({
                 // Clickable for users WITHOUT the entitlement on purpose:
                 // the click opens the Pro-vs-$5-one-time purchase dialog
                 // (see PdfPurchaseDialog in investcalc-page). The isSaved
-                // requirement only applies to entitled users — one-time
+                // requirement only applies to entitled users - one-time
                 // buyers are often anonymous and can't save at all.
                 disabled={isExporting || (canExportPdf && !isSaved)}
                 title={
                   canExportPdf && !isSaved
                     ? persistedActionsBlockHint ?? "Save this analysis before exporting PDF."
                     : !canExportPdf
-                      ? "Get the lender-ready PDF — included with Pro, or $5 one-time."
+                      ? "Get the lender-ready PDF - included with Pro, or $5 one-time."
                       : undefined
                 }
               >
@@ -778,7 +778,7 @@ export function AnalysisDashboard({
                 <span className="hidden sm:inline">Export PDF</span>
                 <span className="sm:hidden">PDF</span>
               </Button>
-              {/* Report-style menu — only for users who can actually export
+              {/* Report-style menu - only for users who can actually export
                   (entitled + saved). Lets them pick a lender / partner /
                   personal variant; the main button stays the personal default
                   and keeps its purchase-dialog behavior for everyone else. */}
@@ -825,7 +825,7 @@ export function AnalysisDashboard({
                 <span className="hidden sm:inline">New Analysis</span>
                 <span className="sm:hidden">New</span>
               </Button>
-              {/* Share is FREE for everyone — the read-only /d/[encoded] view
+              {/* Share is FREE for everyone - the read-only /d/[encoded] view
                   is the core growth loop (every shared deal markets TrueCap).
                   Icon-forward (label hidden on mobile) so it doesn't wrap the
                   action row the way the old full-text button did. */}
@@ -833,7 +833,7 @@ export function AnalysisDashboard({
         </div>
       </div>
 
-      {/* Strategy-aware headline — when a non-cash-flow strategy is active
+      {/* Strategy-aware headline - when a non-cash-flow strategy is active
           (Wholesale/BRRRR/Flip), lead with that play's real answer; the generic
           buy-box verdict below is hidden because it misreads those plays. */}
       {strategyLeadsOutput && activeStrategy && values ? (
@@ -969,7 +969,7 @@ export function AnalysisDashboard({
         </div>
       </div>
 
-      {/* Buy Box verdict — personalized "meets your buy box" line that
+      {/* Buy Box verdict - personalized "meets your buy box" line that
           complements the Deal Score above. Self-gates: only authenticated
           Pro users with an active Buy Box (≥1 criterion) ever see it.
           Evaluates the BASE result (not the what-if sliders), matching the
@@ -990,7 +990,7 @@ export function AnalysisDashboard({
         />
       ) : null}
 
-      {/* Sale & rent comps — on-demand external enrichment (RentCast).
+      {/* Sale & rent comps - on-demand external enrichment (RentCast).
           Paid + address gated; pulls only on click (API cost control);
           self-hides if the provider isn't configured. */}
       {values?.address ? (
@@ -1008,7 +1008,7 @@ export function AnalysisDashboard({
         />
       ) : null}
 
-      {/* Metric cards — lens-curated, two visibility tiers.
+      {/* Metric cards - lens-curated, two visibility tiers.
           Primary (3 cards, chosen by the active investor lens): the
             "is this a good deal?" answer at a glance, always visible.
           Secondary (the remaining metrics): folded into "Show all
@@ -1030,23 +1030,23 @@ export function AnalysisDashboard({
 
         {/* Reading order (investor-scan pass): NUMBERS FIRST, TOOLS LAST.
             The lens's three primary metric cards lead, then the appreciation
-            reframe, then "Show all metrics" (the supporting numbers) — so every
+            reframe, then "Show all metrics" (the supporting numbers) - so every
             readout an investor scans is grouped together. The interactive
             stress-test tools (what-if sliders + breakpoint) sit in a labeled
             group below all the numbers, so controls never crowd the answer. */}
-        {/* Lens-curated primary metrics — the 3 that matter for the selected
+        {/* Lens-curated primary metrics - the 3 that matter for the selected
             investor lens, in one scannable row. The rest collapse into
             "Show all metrics" below. */}
         <div className="grid grid-cols-3 gap-2 sm:gap-3">
           {primaryMetricKeys.map((k) => metricTiles[k])}
         </div>
 
-        {/* Appreciation-play context banner — reframes a deal whose
+        {/* Appreciation-play context banner - reframes a deal whose
             year-1 cards read uniformly red (negative cash flow, sub-1
             DSCR) but which pays off after-tax and projects a strong
             10-year total return. Sourced from the BASE result + the same
             exit-scenario engine as the Deal Score, so it never contradicts
-            them. Does NOT alter the year-1 facts above — it explains them. */}
+            them. Does NOT alter the year-1 facts above - it explains them. */}
         {appreciationPlay && result ? (
           <div className="flex items-start gap-3 rounded-2xl border border-[var(--brand-green)]/25 bg-[var(--brand-green-light)] p-4">
             <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-card text-[var(--brand-green)]">
@@ -1054,7 +1054,7 @@ export function AnalysisDashboard({
             </span>
             <div className="space-y-1">
               <p className="text-sm font-bold text-[var(--brand-green)]">
-                Stronger than it looks — this is an appreciation play, not a losing deal.
+                Stronger than it looks - this is an appreciation play, not a losing deal.
               </p>
               <p className="text-xs leading-relaxed text-foreground/70">
                 Year-1 cash flow is negative because of the high leverage, but after the
@@ -1067,14 +1067,14 @@ export function AnalysisDashboard({
                   ~{Math.round(annualizedReturnPct ?? 0)}%/yr
                 </strong>{" "}
                 (appreciation + loan paydown). The monthly shortfall is the cost of low money
-                down — confirm you can carry it and that your rent and appreciation assumptions
+                down - confirm you can carry it and that your rent and appreciation assumptions
                 hold.
               </p>
             </div>
           </div>
         ) : null}
 
-        {/* Secondary metrics — everything not in the lens's primary 3,
+        {/* Secondary metrics - everything not in the lens's primary 3,
             collapsed by default so the first read stays uncrowded. One tap
             reveals the full metric set. */}
         <details className="group">
@@ -1088,7 +1088,7 @@ export function AnalysisDashboard({
           </div>
         </details>
 
-        {/* Stress-test tools — collapsed by default so the first read of the
+        {/* Stress-test tools - collapsed by default so the first read of the
             Overview is calm (verdict + numbers). One click reveals the live
             what-if sliders + the "what would make it Solid" targets. Closing
             the panel resets any what-if adjustment so the headline cards
@@ -1116,13 +1116,13 @@ export function AnalysisDashboard({
         ) : null}
       </div>
 
-      {/* Free-tier prompt — shows ONE card, not two stacked.
+      {/* Free-tier prompt - shows ONE card, not two stacked.
           Decision tree:
             - Anonymous user → SignupPromptCard (cheap "save this" ask).
               Signing up is the lower-friction win; we don't double-up
               with a Pro pitch on top of it.
             - Signed-in free user → MomentOfValueUpsell (deal-specific
-              Pro pitch — they've already cleared signup, so it's time
+              Pro pitch - they've already cleared signup, so it's time
               to monetize).
             - Pro user → nothing renders here.
           Previously both rendered for anonymous users, which buried
@@ -1150,7 +1150,7 @@ export function AnalysisDashboard({
           below to keep the headline scroll calmer. See the
           activeTab === "stress-test" block in tab content. */}
 
-      {/* Deal Q&A — grounded AI explainer. Placed at the END of the
+      {/* Deal Q&A - grounded AI explainer. Placed at the END of the
           Overview (after the numbers, before the Details tabs): the
           natural moment for "what does this mean?" is after seeing the
           metrics, and putting it earlier pushed the headline numbers
@@ -1159,7 +1159,7 @@ export function AnalysisDashboard({
           a few questions/day (server-enforced). */}
       {dealQaEnabled && result && values && !isLoading ? <DealQaPanel values={values} /> : null}
 
-      {/* "Details" landmark — pairs with the "Overview" landmark above
+      {/* "Details" landmark - pairs with the "Overview" landmark above
           the metric grid. Gives the eye a clear "here's where the
           deeper analysis starts" cue without adding clutter. */}
       <div className="flex items-center gap-2 px-1 pt-1">
@@ -1172,7 +1172,7 @@ export function AnalysisDashboard({
       {/* Analysis tabs */}
       <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
         {/* Tab bar */}
-        {/* Tab bar — horizontal scroll on all phone widths. Was forcing
+        {/* Tab bar - horizontal scroll on all phone widths. Was forcing
             a cramped 4-col grid at <=380px which collapsed tap-targets
             to 60-70px wide; scrollable gives full-size targets and
             readable labels. */}
@@ -1193,7 +1193,7 @@ export function AnalysisDashboard({
               {tab.id === "projections" && <ArrowUpRight className="w-3.5 h-3.5 sm:hidden" />}
               {tab.id === "tax-strategy" && <FileText className="w-3.5 h-3.5 sm:hidden" />}
               {/* Exit previously reused the projections arrow and
-                  Strategies had NO icon — every mobile tab now has a
+                  Strategies had NO icon - every mobile tab now has a
                   distinct glyph. */}
               {tab.id === "exit-scenarios" && <Building2 className="w-3.5 h-3.5 sm:hidden" />}
               {tab.id === "strategies" && <Target className="w-3.5 h-3.5 sm:hidden" />}
@@ -1201,7 +1201,7 @@ export function AnalysisDashboard({
               <span className="sm:hidden">{tab.mobileLabel}</span>
               <span className="hidden sm:inline">{tab.label}</span>
               {tab.isPro && !tabEntitlements[tab.id] && (
-                // PRO badge now visible on mobile too — previously
+                // PRO badge now visible on mobile too - previously
                 // hidden via 'hidden sm:inline-flex', which meant
                 // mobile users tapped Pro tabs without warning and
                 // hit a paywall. Surfacing the badge upfront prevents
@@ -1263,7 +1263,7 @@ export function AnalysisDashboard({
           {activeTab === "strategies" && canUseStrategies && (
             <StrategiesPanel values={values} result={result} />
           )}
-          {/* Stress Test tab — Max Allowable Offer + Sensitivity Grid.
+          {/* Stress Test tab - Max Allowable Offer + Sensitivity Grid.
               Each card independently respects its own entitlement: a
               user could have unlocked one without the other (rare, but
               possible if entitlements drift). Cards render as full
@@ -1316,7 +1316,7 @@ export function AnalysisDashboard({
         </div>
       </div>
 
-      {/* Deal notes — at the bottom (after the Details tabs) so they don't
+      {/* Deal notes - at the bottom (after the Details tabs) so they don't
           interrupt the verdict → numbers → details read. Only renders for a
           re-opened saved deal; lazy-fetches its own data. Due-diligence +
           documents moved to the dashboard deal workspace
@@ -1432,7 +1432,7 @@ function DealStrategyToggle({
       </p>
       <div
         role="radiogroup"
-        aria-label="Investor lens — reorders which metrics lead"
+        aria-label="Investor lens - reorders which metrics lead"
         className="grid grid-cols-3 gap-0.5 rounded-lg bg-muted/60 p-0.5"
       >
         {DEAL_STRATEGIES.map((s) => {
@@ -1476,23 +1476,23 @@ function DealScoreCard({
 }: {
   isAnalysisLoading: boolean;
   isDealScoreLoading: boolean;
-  /** Canonical Balanced score from the parent — the same number the dashboard,
+  /** Canonical Balanced score from the parent - the same number the dashboard,
    *  My Deals, compare, PDF, and share surfaces show. Lens-free, so this card and
    *  the Recommendation card beside it always agree with every other surface. */
   dealScoreResult: DealScoreActionResult | null;
   strategy: DealStrategy;
   onStrategyChange: (next: DealStrategy) => void;
-  /** Property type — passed through so the cash-flow tier max + label
+  /** Property type - passed through so the cash-flow tier max + label
    *  can branch correctly for owner-occupant deals (different bands). */
   propertyType?: AnalysisDashboardProps["propertyType"];
   /** True if the deal has no debt service (100% down). Used to
    *  relabel the DSCR breakdown tile, which otherwise reads
-   *  "Above 1.25" — confusing alongside the MetricCard's "Cash purchase". */
+   *  "Above 1.25" - confusing alongside the MetricCard's "Cash purchase". */
   isCashPurchase?: boolean;
   /** True when the deal scores as an appreciation play (strong projected
    *  long-term return + non-negative after-tax cash flow). Surfaces a chip on
    *  the score so a Neutral verdict on a red year-1 deal is self-explanatory at
-   *  a glance — the same signal that drives the Overview reframe banner. */
+   *  a glance - the same signal that drives the Overview reframe banner. */
   isAppreciationPlay?: boolean;
 }) {
   const isLoading = isAnalysisLoading || isDealScoreLoading;
@@ -1534,62 +1534,62 @@ function DealScoreCard({
   // max (vs investor 25). Branch the explanation labels accordingly so
   // the breakdown matches the engine's actual scoring tiers.
   const isOwnerOccupant = propertyType === "owner-occupant";
-  // Plain-English subline for each subscore — turns "Cash Flow Score: 25"
-  // into "Cash Flow: 25/25 — Above $1,000/mo target". Computed from the
+  // Plain-English subline for each subscore - turns "Cash Flow Score: 25"
+  // into "Cash Flow: 25/25 - Above $1,000/mo target". Computed from the
   // subscore value + property context alone (the engine's thresholds
-  // are encoded here as labels). Pure display — does not touch the
+  // are encoded here as labels). Pure display - does not touch the
   // scoring engine.
   const breakdownExplanations = {
     cashFlow: isOwnerOccupant
       ? breakdown.cashFlowScore >= 30
-        ? "Above $300/mo — strong for house-hack"
+        ? "Above $300/mo - strong for house-hack"
         : breakdown.cashFlowScore >= 25
-          ? "Within $300/mo of break-even — typical for house-hack"
+          ? "Within $300/mo of break-even - typical for house-hack"
           : "Owner cost meaningfully above break-even"
       : breakdown.cashFlowScore >= 18
-        ? "Above $500/mo — strong"
+        ? "Above $500/mo - strong"
         : breakdown.cashFlowScore >= 8
           ? "Positive but modest ($0–$500/mo)"
-          : "Negative — relies on appreciation + tax to pay off",
+          : "Negative - relies on appreciation + tax to pay off",
     coc:
       breakdown.cocScore >= 17
-        ? "Above 7% — strong"
+        ? "Above 7% - strong"
         : breakdown.cocScore >= 13
-          ? "5–7% — healthy"
+          ? "5–7% - healthy"
           : breakdown.cocScore >= 8
-            ? "3–5% — modest"
-            : "Below 3% — weak",
+            ? "3–5% - modest"
+            : "Below 3% - weak",
     capRate:
       breakdown.capRateScore >= 13
-        ? "Above 6.5% — strong"
+        ? "Above 6.5% - strong"
         : breakdown.capRateScore >= 9
-          ? "5–6.5% — fair for the market"
-          : "Below 5% — appreciation-dependent",
+          ? "5–6.5% - fair for the market"
+          : "Below 5% - appreciation-dependent",
     dscr: isCashPurchase
-      ? "N/A — all-cash purchase (no debt to cover)"
+      ? "N/A - all-cash purchase (no debt to cover)"
       : breakdown.dscrScore >= 13
-        ? "Above 1.20 — clears lender threshold"
+        ? "Above 1.20 - clears lender threshold"
         : breakdown.dscrScore >= 7
-          ? "1.10–1.20 — thin coverage cushion"
+          ? "1.10–1.20 - thin coverage cushion"
           : breakdown.dscrScore >= 3
-            ? "1.00–1.10 — very tight"
-            : "Below 1.00 — does not cover debt",
+            ? "1.00–1.10 - very tight"
+            : "Below 1.00 - does not cover debt",
     totalReturn:
       breakdown.totalReturnScore >= 20
-        ? "Above 11%/yr projected — strong long-term wealth build"
+        ? "Above 11%/yr projected - strong long-term wealth build"
         : breakdown.totalReturnScore >= 14
-          ? "8–11%/yr projected — solid total return"
+          ? "8–11%/yr projected - solid total return"
           : breakdown.totalReturnScore >= 8
-            ? "5–8%/yr projected — modest total return"
-            : "Below 5%/yr projected — limited long-term upside",
+            ? "5–8%/yr projected - modest total return"
+            : "Below 5%/yr projected - limited long-term upside",
     risk:
       breakdown.riskPenalty === 0
-        ? "No penalty — risk profile is clean"
+        ? "No penalty - risk profile is clean"
         : breakdown.riskPenalty > -10
           ? "Mild penalty for elevated risk factors"
           : breakdown.riskPenalty > -20
-            ? "Moderate penalty — review CapEx, age, vacancy"
-            : "Heavy penalty — multiple risk factors stacking",
+            ? "Moderate penalty - review CapEx, age, vacancy"
+            : "Heavy penalty - multiple risk factors stacking",
   } as const;
   const recommendationVariant: RecommendationVariant =
     recommendation === "Strong Buy"
@@ -1698,7 +1698,7 @@ function DealScoreCard({
       </div>
       {/* Plain-English verdict lives once, in the Recommendation card beside
           this one. The per-component breakdown moved INSIDE "Why this score?"
-          so the card stays scannable by default — score + verdict + lens —
+          so the card stays scannable by default - score + verdict + lens —
           and the receipts are one tap away. Native <details> = zero-JS + a11y. */}
       <details className="group mt-3">
         <summary className="min-h-11 py-2 -my-1 cursor-pointer text-[11px] font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground select-none list-none flex items-center gap-1.5">
@@ -1763,7 +1763,7 @@ function DealScoreCard({
               {" "}Bands: <strong>75+</strong> Strong Buy, <strong>55–74</strong> Buy,
               {" "}<strong>35–54</strong> Neutral, <strong>18–34</strong> Risky,
               {" "}<strong>&lt;18</strong> Avoid.
-              {" "}This is the same score on every screen — your investor lens reorders which
+              {" "}This is the same score on every screen - your investor lens reorders which
               metrics lead, but never changes the number.
             </p>
           <p className="mt-2 text-muted-foreground">
@@ -1841,12 +1841,12 @@ function ProFeaturePreview({
   /**
    * The user's actual computed analysis. Optional so the component
    * still renders cleanly in any context that doesn't have a result
-   * yet (defensive — should always be passed from the dashboard).
+   * yet (defensive - should always be passed from the dashboard).
    * When present, the 3 metric tiles render with the user's REAL
    * deal numbers rather than the generic $48,260 placeholder that
    * made the gate feel like a generic ad. Personalizing these
    * numbers turns the preview into a "here's exactly what YOUR deal
-   * would show" CTA — much higher converting.
+   * would show" CTA - much higher converting.
    *
    * Accepts null because the call sites pass the page-level
    * `analysisResult` state which is `AnalysisResult | null` before
@@ -1859,7 +1859,7 @@ function ProFeaturePreview({
 
   /**
    * Per-kind derivation of the 3 metric tile values from the user's
-   * actual analysis. Conservative back-of-envelope numbers — meant to
+   * actual analysis. Conservative back-of-envelope numbers - meant to
    * give a credible peek at "this is the rough magnitude you'd see in
    * the Pro panel," not a precise forecast. Cash-purchase + edge
    * cases fall through to the generic placeholder so we never show
@@ -1875,7 +1875,7 @@ function ProFeaturePreview({
     const annualCashFlow = result.netCashFlow * 12;
     const annualDeprecSavings = result.annualDepreciation * result.effectiveTaxRate;
     if (kind === "projections") {
-      // 10yr cumulative cash flow (rough — ignores rent growth, OK for preview),
+      // 10yr cumulative cash flow (rough - ignores rent growth, OK for preview),
       // year-10 equity bump from amort/appreciation (rough 30% blend),
       // total ROI estimate.
       const tenYrCashFlow = annualCashFlow * 10;
@@ -1983,7 +1983,7 @@ function ProFeaturePreview({
  * Cash flow over time strip.
  *
  * Solves a real product gap: the headline NCF only shows month-1 cash
- * flow. But rent grows ~3%/yr and expenses ~2%/yr — so a deal that
+ * flow. But rent grows ~3%/yr and expenses ~2%/yr - so a deal that
  * cash-flows $749/mo today might be $1,420/mo by year 5 and $2,100/mo
  * by year 10. Most investors think in 10-year terms, not month 1, and
  * burying that progression inside the Pro 10-Year Projections tab
@@ -1991,7 +1991,7 @@ function ProFeaturePreview({
  *
  * Renders three pillars (Y1 / Y5 / Y10) using monthly NCF derived
  * from result.tenYearProjection (which calculateAnalysis already
- * computes for free). No entitlement gate — this is a free-tier
+ * computes for free). No entitlement gate - this is a free-tier
  * teaser that also serves as a natural upgrade hook ("see the full
  * 10-year breakdown" in the Pro Projections tab).
  *
@@ -2026,7 +2026,7 @@ function CashFlowOverTimeStrip({ result }: { result: AnalysisResult }) {
     return `${sign}$${Math.abs(value).toLocaleString()}`;
   };
 
-  // Growth ratio between Y1 and Y10 — surfaced as a single sentence
+  // Growth ratio between Y1 and Y10 - surfaced as a single sentence
   // below the strip so the user immediately gets the "compounding"
   // insight without doing the math themselves.
   const growthMultiplier =
@@ -2040,7 +2040,7 @@ function CashFlowOverTimeStrip({ result }: { result: AnalysisResult }) {
       return `Cash flow compounds ~${growthMultiplier.toFixed(1)}× over the hold period as rent grows faster than expenses.`;
     }
     if (growthMultiplier < 0.95 && growthMultiplier > 0) {
-      return `Cash flow compresses over the hold period — review your rent/expense growth assumptions.`;
+      return `Cash flow compresses over the hold period - review your rent/expense growth assumptions.`;
     }
     return null;
   })();
@@ -2107,7 +2107,7 @@ function CashFlowOverTimeStrip({ result }: { result: AnalysisResult }) {
   );
 }
 
-// NetCashFlowCard was deleted — its monthly/annual/after-tax readouts
+// NetCashFlowCard was deleted - its monthly/annual/after-tax readouts
 // are now surfaced upstairs in the OVERVIEW section (4 metric tiles +
 // 3-up secondary chip row). Having a giant 4xl/5xl hero of the same
 // number inside the Cash Flow tab was duplication. See the OVERVIEW
@@ -2124,7 +2124,7 @@ function CashFlowTab({
   values: InvestmentFormValues | null;
   isPro: boolean;
 }) {
-  // Default OPEN — users explicitly said they "love all the information"
+  // Default OPEN - users explicitly said they "love all the information"
   // and don't want it hidden. But the line-item 3-column grid duplicates
   // what the waterfall above already visualizes, so we let users
   // collapse it for a calmer view if they want. Acts as escape valve,
@@ -2163,14 +2163,14 @@ function CashFlowTab({
           with the time strip (which is unique to this view), giving
           the user something new to look at instead of re-stating the
           headline they just read. */}
-      {/* Cash flow over time — Y1/Y5/Y10 monthly NCF strip. */}
+      {/* Cash flow over time - Y1/Y5/Y10 monthly NCF strip. */}
       <CashFlowOverTimeStrip result={result} />
-      {/* Where the rent goes — single-glance waterfall. Sits below
+      {/* Where the rent goes - single-glance waterfall. Sits below
           the time strip and above the optional 3-col breakdown so
           the reading order is: how it grows → where it goes → line
           items (collapsible). */}
       <CashFlowWaterfall result={result} />
-      {/* Collapsible line-item breakdown — Monthly Income, Operating
+      {/* Collapsible line-item breakdown - Monthly Income, Operating
           Expenses, Debt Service / Total Cash Required. The waterfall
           above visualizes the same dollar flows; this 3-column grid
           gives the exact line items for users who want them. Default
@@ -2306,7 +2306,7 @@ function CashFlowTab({
                   are already itemized in the Operating Expenses column.
               (2) A leaked developer-debug paragraph that read like a
                   code comment ("the current engine uses monthlyPayment
-                  for principal and interest only…") — internal context,
+                  for principal and interest only…") - internal context,
                   not end-user content.
               (3) A second Net Cash Flow line at the bottom of this
                   column. NCF is already the headline at the very top of
@@ -2349,11 +2349,11 @@ function CashFlowTab({
       </div>
       </div>
       )}
-      {/* Loan amortization — collapsible year-by-year view. Free
+      {/* Loan amortization - collapsible year-by-year view. Free
           feature, opt-in (click-to-expand). Self-hides on cash
           purchases since there's no debt to amortize. */}
       <LoanAmortizationView result={result} />
-      {/* Compare financing scenarios — Pro feature. Self-hides on
+      {/* Compare financing scenarios - Pro feature. Self-hides on
           cash purchases. Click-to-open keeps default surface clean. */}
       <MortgageScenarioCompare result={result} values={values} isPro={isPro} />
     </div>

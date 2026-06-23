@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Reusable "Why this score" breakdown — renders the six Deal Score factors
+ * Reusable "Why this score" breakdown - renders the six Deal Score factors
  * (the engine's DealScoreBreakdown) as labeled bars with points/max, plus
  * the risk adjustment and the resulting score. Pure presentation; drop it
  * anywhere a Deal Score is shown (popover on Top Deals / Compare, inline in
@@ -66,7 +66,7 @@ export function ScoreBreakdown({
         <span className="tabular-nums">{Math.round(score)} / 100</span>
       </div>
       <p className="mt-2 text-[11px] leading-snug text-muted-foreground">
-        Balanced scoring — each factor caps at the points shown; risk adjustments can subtract up to 30.
+        Balanced scoring - each factor caps at the points shown; risk adjustments can subtract up to 30.
       </p>
     </div>
   );

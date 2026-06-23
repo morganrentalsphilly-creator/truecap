@@ -2,8 +2,8 @@
 
 /**
  * On-demand sale + rent comps for the analyzed address (RentCast, via
- * getPropertyCompsAction). On-demand by design — each pull costs paid API
- * quota — so nothing fetches until the user clicks. Paid-gated + address-
+ * getPropertyCompsAction). On-demand by design - each pull costs paid API
+ * quota - so nothing fetches until the user clicks. Paid-gated + address-
  * gated for visibility; hides itself if the provider isn't configured yet
  * (NOT_CONFIGURED), keeping it invisible until actually enabled.
  */
@@ -50,7 +50,7 @@ function CompList({ title, comps, suffix }: { title: string; comps: EnrichmentCo
 }
 
 /** Build actionable warnings when the analyzer's rent/price sit outside the
- *  pulled comp ranges — the "make comps actionable" layer. */
+ *  pulled comp ranges - the "make comps actionable" layer. */
 function buildCompWarnings(
   data: PropertyEnrichment,
   currentRent: number | null | undefined,
@@ -61,19 +61,19 @@ function buildCompWarnings(
   if (rent.status === "above" && rent.pctOutside >= 5) {
     out.push({
       tone: "warn",
-      text: `Your ${money(currentRent ?? null)}/mo rent is ${rent.pctOutside}% above the comp range (${money(rent.low)}–${money(rent.high)}). Cash flow may be optimistic — comps support up to about ${money(rent.high)}.`,
+      text: `Your ${money(currentRent ?? null)}/mo rent is ${rent.pctOutside}% above the comp range (${money(rent.low)}–${money(rent.high)}). Cash flow may be optimistic - comps support up to about ${money(rent.high)}.`,
     });
   } else if (rent.status === "below" && rent.pctOutside >= 8) {
     out.push({
       tone: "info",
-      text: `Your ${money(currentRent ?? null)}/mo rent is ${rent.pctOutside}% below the comp range (${money(rent.low)}–${money(rent.high)}) — you may be under-renting.`,
+      text: `Your ${money(currentRent ?? null)}/mo rent is ${rent.pctOutside}% below the comp range (${money(rent.low)}–${money(rent.high)}) - you may be under-renting.`,
     });
   }
   const price = checkCompRange(currentPrice, data.valueRange);
   if (price.status === "above" && price.pctOutside >= 5) {
     out.push({
       tone: "warn",
-      text: `Your ${money(currentPrice ?? null)} price is ${price.pctOutside}% above the comp value range (${money(price.low)}–${money(price.high)}) — you may be paying above recent sales.`,
+      text: `Your ${money(currentPrice ?? null)} price is ${price.pctOutside}% above the comp value range (${money(price.low)}–${money(price.high)}) - you may be paying above recent sales.`,
     });
   }
   return out;
@@ -175,7 +175,7 @@ export function PropertyCompsCard({
 
       {!data ? (
         <p className="mt-2 text-xs text-muted-foreground">
-          Pull live sale and rental comparables for this address — value + rent estimates from nearby
+          Pull live sale and rental comparables for this address - value + rent estimates from nearby
           properties to sanity-check your assumptions.
         </p>
       ) : (
@@ -230,7 +230,7 @@ export function PropertyCompsCard({
                 onApply(data);
                 toast({
                   title: "Applied to your analysis",
-                  description: "Filled facts + estimates from comps — tweak anything that's off.",
+                  description: "Filled facts + estimates from comps - tweak anything that's off.",
                 });
               }}
             >
@@ -243,7 +243,7 @@ export function PropertyCompsCard({
 
           <p className="text-[10px] text-muted-foreground">
             Source: RentCast · {source === "live" ? "live" : source === "saved" ? "saved to this deal" : "cached"}.
-            Automated estimates — verify against local comps before relying on them.
+            Automated estimates - verify against local comps before relying on them.
           </p>
         </div>
       )}

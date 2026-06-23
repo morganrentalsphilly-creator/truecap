@@ -289,7 +289,7 @@ function NetCashFlowTooltip({ deal }: { deal: CompareDealViewModel }) {
 
 /**
  * Cash-purchase detection for compared deals. The saved snapshot stores
- * monthlyPayment — 0 (or absent) signals an all-cash deal where DSCR is
+ * monthlyPayment - 0 (or absent) signals an all-cash deal where DSCR is
  * mathematically undefined.
  */
 function isCashPurchaseDeal(deal: CompareDealViewModel): boolean {
@@ -469,7 +469,7 @@ function getLongTermHighlightedWinCounts(deals: CompareDealViewModel[]): Map<str
 function getShortTermHighlightedWinCounts(deals: CompareDealViewModel[]): Map<string, number> {
   const counts = new Map<string, number>(deals.map((deal) => [deal.id, 0]));
   for (const row of METRIC_ROWS) {
-    // For DSCR, only rank financed deals against each other — a cash
+    // For DSCR, only rank financed deals against each other - a cash
     // purchase's stored dscr=0 isn't comparable to a real ratio.
     const eligibleDeals =
       row.key === "dscr" ? deals.filter((deal) => !isCashPurchaseDeal(deal)) : deals;
@@ -650,7 +650,7 @@ function MobileMetricValue({
   className?: string;
 }) {
   const body = getMetricGuidanceBody(deal, row);
-  // DSCR is N/A for cash purchases — override the compact display.
+  // DSCR is N/A for cash purchases - override the compact display.
   const text =
     row.key === "dscr" && isCashPurchaseDeal(deal)
       ? "Cash"
@@ -872,7 +872,7 @@ export function CompareDealsClient({
     const bestValue = best?.compareSnapshot?.longTermSummary.totalROI ?? best?.metrics.cocReturn ?? Number.NEGATIVE_INFINITY;
     return value > bestValue ? deal : best;
   }, null);
-  // Skip cash-purchase deals when ranking strongest DSCR — they have
+  // Skip cash-purchase deals when ranking strongest DSCR - they have
   // no loan, so DSCR is N/A and a stored 0 isn't comparable to a real
   // ratio. If every compared deal is cash, the tile will read "—".
   const strongestDscrDeal = deals

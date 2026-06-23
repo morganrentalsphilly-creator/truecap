@@ -12,7 +12,7 @@ import { FieldError } from "@/components/investcalc/form-field-helpers";
  * Which fields to render:
  *  - "all"       → bedrooms, bathrooms, sqft, rent (default; backward compatible)
  *  - "primary"   → bedrooms + monthly rent only (the two the cash-flow run
- *                  actually needs — beds drives HUD rent auto-fill, rent is
+ *                  actually needs - beds drives HUD rent auto-fill, rent is
  *                  required by the math). Shown on the minimal first screen.
  *  - "secondary" → bathrooms + square feet (optional; live under
  *                  "Improve accuracy" so the first screen stays minimal).
@@ -22,7 +22,7 @@ type SingleFamilyFields = "all" | "primary" | "secondary";
 interface SingleFamilyUnitSectionProps {
   form: UseFormReturn<InvestmentFormValues>;
   fields?: SingleFamilyFields;
-  /** Hide the bedrooms field (strategy-focus mode — beds is optional). */
+  /** Hide the bedrooms field (strategy-focus mode - beds is optional). */
   hideBedrooms?: boolean;
   /** Override the "Monthly Rent" label (e.g. "Stabilized rent" for BRRRR). */
   rentLabel?: string;

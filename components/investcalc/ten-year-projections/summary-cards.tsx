@@ -21,7 +21,7 @@ export function TenYearProjectionSummaryCards({
           value: formatCurrency(finalYear?.cumulativeCashFlowAnnual ?? 0),
           tone: (finalYear?.cumulativeCashFlowAnnual ?? 0) >= 0 ? "positive" : "negative",
           labelTooltip:
-            "Operating cash flow summed across the 10-year hold, before tax. The after-tax total is higher once the depreciation + mortgage-interest shield is applied — compare the after-tax card.",
+            "Operating cash flow summed across the 10-year hold, before tax. The after-tax total is higher once the depreciation + mortgage-interest shield is applied - compare the after-tax card.",
         },
         {
           label: "Best Annual After-Tax CF",

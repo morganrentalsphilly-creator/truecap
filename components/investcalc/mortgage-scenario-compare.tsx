@@ -13,12 +13,12 @@
  * user is on a free plan, the trigger renders a one-line teaser
  * pointing at /pricing instead of opening.
  *
- * Math: we don't re-run the full analysis engine — we only need to
+ * Math: we don't re-run the full analysis engine - we only need to
  * recompute the four numbers that change with financing (loan amount,
  * monthly P&I, cash flow, DSCR, CoC). Everything else (rent, opEx,
  * cap rate, tax math) is invariant in the property's financing.
  *
- * Strictly additive to the codebase — does not touch calc-analysis,
+ * Strictly additive to the codebase - does not touch calc-analysis,
  * the schema, or saved-deal payloads.
  */
 import { useState } from "react";
@@ -83,14 +83,14 @@ function buildScenarios(values: InvestmentFormValues, result: AnalysisResult): S
   const baseDownPct = Number(values.downPaymentPct ?? 0);
   const baseRate = Number(values.interestRate ?? 0);
   const baseTerm = Number(values.loanTermYears ?? 30);
-  // rent_minus_opEx invariant — independent of financing
+  // rent_minus_opEx invariant - independent of financing
   const rentMinusOpEx = result.netCashFlow + result.loanPrincipalAndInterest;
   const closingCosts = result.closingCosts; // doesn't change with down%
 
   const variants: ScenarioInput[] = [
     { key: "current",   label: "Current",          downPct: baseDownPct, termYears: baseTerm, rate: baseRate },
     // Build the alternatives off the current as the baseline. Skip the
-    // "+5pp down" scenario when the user is already at 95%+ down — it
+    // "+5pp down" scenario when the user is already at 95%+ down - it
     // would collapse to an effectively-cash purchase and clutter the
     // grid with a near-duplicate of the current column.
     ...(baseDownPct < 95
@@ -120,7 +120,7 @@ function buildScenarios(values: InvestmentFormValues, result: AnalysisResult): S
     // DSCR = NOI / annual debt service; NOI ~= (rent - opEx_ex_debt) * 12.
     // Null when there's no debt service (cash purchase) OR when NOI is
     // negative (a "negative DSCR" is mathematically valid but
-    // misleading-to-look-at — the right signal is "operating loss
+    // misleading-to-look-at - the right signal is "operating loss
     // before debt", which the negative monthlyCashFlow already
     // communicates via its red color).
     const dscr =
@@ -162,7 +162,7 @@ export function MortgageScenarioCompare({
   // If this is a cash purchase there's no mortgage to compare. Self-hide.
   if (!values || result.loanAmount <= 0 || result.monthlyPayment <= 0) return null;
 
-  // Free-tier teaser — single line that points at /pricing instead of
+  // Free-tier teaser - single line that points at /pricing instead of
   // expanding the comparison panel. Honest about being a Pro feature.
   if (!isPro) {
     return (
@@ -171,7 +171,7 @@ export function MortgageScenarioCompare({
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Lock className="size-4 shrink-0 text-muted-foreground" />
             <span>
-              <strong className="text-foreground">Compare financing scenarios</strong> — 25% down,
+              <strong className="text-foreground">Compare financing scenarios</strong> - 25% down,
               15-year term, DSCR loans, side-by-side. Pro feature.
             </span>
           </div>
@@ -210,7 +210,7 @@ export function MortgageScenarioCompare({
             </span>
           </span>
           <span className="mt-0.5 block text-[11px] leading-snug text-muted-foreground">
-            +5pp down, 15-yr term, DSCR loan — side-by-side
+            +5pp down, 15-yr term, DSCR loan - side-by-side
           </span>
         </span>
       </button>
@@ -329,7 +329,7 @@ export function MortgageScenarioCompare({
         </div>
       </div>
 
-      {/* Mobile — vertical cards */}
+      {/* Mobile - vertical cards */}
       <div className="space-y-3 sm:hidden">
         {scenarios.map((s) => (
           <div
@@ -395,7 +395,7 @@ export function MortgageScenarioCompare({
       </div>
 
       <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">
-        Cap rate, rent, and operating expenses are independent of financing — only debt service,
+        Cap rate, rent, and operating expenses are independent of financing - only debt service,
         cash flow, DSCR, and total cash needed change. DSCR scenario assumes the same property
         with a typical DSCR-loan rate premium (~1.5pp).
       </p>

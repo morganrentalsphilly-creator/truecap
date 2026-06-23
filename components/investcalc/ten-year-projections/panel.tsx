@@ -44,7 +44,7 @@ export function TenYearProjectionsPanel({
 
     // Try/catch contains action rejections from becoming unhandled
     // browser promise rejections. Snapshot load failure is a no-op for
-    // the user — live calc from input still renders.
+    // the user - live calc from input still renders.
     void (async () => {
       try {
         const result = await getTenYearProjectionSnapshotAction({
@@ -123,7 +123,7 @@ function buildProjectionInsight(years: ProjectionYear[]): ReactNode {
   return (
     <>
       Cash flow stays negative through year {final.year}, so the return here leans on appreciation and loan
-      paydown rather than monthly income — confirm you can carry the shortfall.
+      paydown rather than monthly income - confirm you can carry the shortfall.
     </>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Deal comments — an append-only, dated log on a saved deal (seller updates,
+ * Deal comments - an append-only, dated log on a saved deal (seller updates,
  * agent notes, your evolving reasoning over time). Distinct from the single
  * Deal Notes blob: a sequence you can scroll back through. Free per-deal
  * annotation; entries are immutable (add / delete). Renders a graceful notice
@@ -119,7 +119,7 @@ export function DealCommentsPanel({ savedDealId }: { savedDealId: string }) {
           }}
           rows={2}
           maxLength={2000}
-          placeholder="Log an update — seller motivation, agent call, a decision… (⌘/Ctrl+Enter)"
+          placeholder="Log an update - seller motivation, agent call, a decision… (⌘/Ctrl+Enter)"
           className="min-h-[2.5rem] flex-1 resize-y rounded-md border border-input bg-transparent px-2.5 py-2 text-sm text-foreground outline-none transition-[color,box-shadow] placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
         />
         <Button type="button" size="sm" variant="outline" className="h-9 self-end" onClick={add} disabled={!draft.trim() || isBusy}>

@@ -256,7 +256,7 @@ export function Header({
 
   return (
     <div className="sticky top-0 z-50">
-    {/* Announcement bar — Pro upgrade prompt. Only shown to AUTHENTICATED
+    {/* Announcement bar - Pro upgrade prompt. Only shown to AUTHENTICATED
         free users (who can actually 'upgrade'). Suppressed for cold
         visitors because (a) 'upgrade' doesn't apply when they don't have
         an account yet, and (b) the AnnualPromoBanner above already
@@ -287,7 +287,7 @@ export function Header({
       </div>
     )}
 
-    {/* Main nav — sticky handled by the outer wrapper above. Don't re-apply
+    {/* Main nav - sticky handled by the outer wrapper above. Don't re-apply
         `sticky top-0` here or the white header background overlays the
         primary-colored announcement bar (visible on mobile as a white box
         blocking the top banner). */}
@@ -298,7 +298,7 @@ export function Header({
         </div>
 
 
-          {/* Center — Pro upsell pill (free / non-premium only, desktop) */}
+          {/* Center - Pro upsell pill (free / non-premium only, desktop) */}
           {isPremiumStatusReady && !isPremium && (
              <Link href="/pricing"
             >
@@ -325,11 +325,11 @@ export function Header({
 
           
 
-          {/* Right — Auth buttons */}
-          {/* Right — Nav actions + user */}
+          {/* Right - Auth buttons */}
+          {/* Right - Nav actions + user */}
           <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
 
-            {/* Blog moved out of the top nav — was competing with the
+            {/* Blog moved out of the top nav - was competing with the
                 Dashboard link visually for auth'd users. Still linked
                 from the site footer Product column, the homepage hero
                 "Related" rail, and from every blog post's related-posts

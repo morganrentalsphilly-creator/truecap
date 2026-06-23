@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * "What's your play?" strategy chips — the goal-first entry on the calculator.
+ * "What's your play?" strategy chips - the goal-first entry on the calculator.
  * Picking a chip tailors the form (property type + assumption defaults) and
  * tells the results view which tab to lead with. Fully optional: with nothing
  * selected the calculator is unchanged. Free to all users; plays whose headline
@@ -26,7 +26,7 @@ export function StrategyChips({
         <div className="min-w-0">
           <p className="text-sm font-semibold text-foreground">What&apos;s your play?</p>
           <p className="text-[11px] leading-snug text-muted-foreground">
-            Optional — tailor the form and lead with the number that matters for your strategy.
+            Optional - tailor the form and lead with the number that matters for your strategy.
           </p>
         </div>
         {active ? (

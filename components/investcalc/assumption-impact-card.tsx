@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * "What moves this deal" — a tornado-style readout of which assumptions most
+ * "What moves this deal" - a tornado-style readout of which assumptions most
  * swing monthly cash flow (and DSCR). Helps a user focus diligence on the
  * inputs that actually matter for THIS deal. Self-contained; reuses
  * computeAssumptionImpact (calc-analysis under the hood).
@@ -29,7 +29,7 @@ export function AssumptionImpactCard({ values }: { values: InvestmentFormValues 
         <span className="font-semibold text-sm text-foreground">What moves this deal</span>
       </div>
       <p className="text-xs text-muted-foreground mb-4">
-        How much monthly cash flow swings when each assumption moves — plus where each number comes from
+        How much monthly cash flow swings when each assumption moves - plus where each number comes from
         and how confident it is. Verify the top, lowest-confidence ones first.
       </p>
 
@@ -65,7 +65,7 @@ export function AssumptionImpactCard({ values }: { values: InvestmentFormValues 
                           : "bg-red-500"
                     }`}
                   />
-                  <span className="truncate" title={`${CONFIDENCE_LABEL[meta.confidence]} — ${meta.verify}`}>
+                  <span className="truncate" title={`${CONFIDENCE_LABEL[meta.confidence]} - ${meta.verify}`}>
                     {meta.source} · {CONFIDENCE_LABEL[meta.confidence]}
                   </span>
                 </div>

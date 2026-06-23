@@ -9,7 +9,7 @@
  *
  * The one-time path is the conversion-rescue: visitors who will never
  * subscribe but want this one lender package. Anonymous purchase is
- * fine — no account required.
+ * fine - no account required.
  */
 
 import { ArrowRight, FileDown, Loader2, Sparkles } from "lucide-react";
@@ -44,13 +44,13 @@ export function PdfPurchaseDialog({
         <DialogHeader>
           <DialogTitle>Get the lender-ready PDF</DialogTitle>
           <DialogDescription>
-            Multi-page report for this deal — verdict, 10-year projection, tax
+            Multi-page report for this deal - verdict, 10-year projection, tax
             strategy, and exit scenarios. Two ways to get it:
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3">
-          {/* Pro — preferred option, listed first */}
+          {/* Pro - preferred option, listed first */}
           <Link
             href="/pricing"
             className="group flex items-start justify-between gap-3 rounded-2xl border-2 border-primary/30 bg-gradient-to-br from-[var(--brand-blue-light)] via-card to-card p-4 transition hover:border-primary/60"

@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 
 /**
  * Inline deal picker for the Compare page's empty state. Previously the empty
- * state only offered a "Go to Saved Analyses" button — the user had to leave,
+ * state only offered a "Go to Saved Analyses" button - the user had to leave,
  * tick boxes there, and come back. This lets them select 2-4 saved deals right
  * here and start the comparison in place (startCompareAction sets the selection
  * cookie; router.refresh re-runs the page's server component to render the
@@ -122,7 +122,7 @@ export function CompareDealPicker({ deals }: { deals: ComparePickerDeal[] }) {
       <div className="mt-4 flex items-center justify-between gap-3">
         <p className="text-xs text-muted-foreground">
           {selected.length} of {MAX_COMPARE_ITEMS} selected
-          {selected.length < 2 ? " — pick at least 2" : ""}
+          {selected.length < 2 ? " - pick at least 2" : ""}
         </p>
         <button
           type="button"

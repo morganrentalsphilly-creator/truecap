@@ -1,10 +1,10 @@
 "use client";
 
 /**
- * STRATEGY OUTCOME CARD — the strategy-aware headline for the results.
+ * STRATEGY OUTCOME CARD - the strategy-aware headline for the results.
  *
  * When a non-cash-flow strategy is active (Wholesale, BRRRR, Fix & Flip), the
- * generic "Does not meet buy box / Deal Score" verdict is misleading — a
+ * generic "Does not meet buy box / Deal Score" verdict is misleading - a
  * wholesaler offering below ask EXPECTS the asking-price underwrite to be
  * negative. This card replaces that verdict and leads with the number that
  * play actually came for:
@@ -62,7 +62,7 @@ export function StrategyOutcomeCard({
         <OutcomeShell icon={Target} eyebrow="Wholesale / MAO" title="Unlock your max allowable offer">
           <p className="text-sm text-muted-foreground">
             See the highest price you can offer and still hit an 8% cap, 8% cash-on-cash, and
-            break-even cash flow — reverse-solved from this address.
+            break-even cash flow - reverse-solved from this address.
           </p>
           {onUpgrade ? (
             <Button onClick={onUpgrade} className="mt-3 rounded-xl">
@@ -127,7 +127,7 @@ export function StrategyOutcomeCard({
             </div>
             <p className="mt-2 text-xs leading-snug text-muted-foreground">
               {spread != null && spread > 0
-                ? "Offer at or below your max — negotiate down or pass."
+                ? "Offer at or below your max - negotiate down or pass."
                 : "At the asking price this already hits your return targets."}
             </p>
           </div>

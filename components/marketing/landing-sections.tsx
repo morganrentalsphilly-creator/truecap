@@ -900,12 +900,12 @@ export function Personas() {
         </div>
         {/* Bento - asymmetric tiles (lead persona featured large, the
             other two stacked) instead of three equal cards. */}
-        <div className="tc-reveal grid gap-4 sm:gap-5 lg:grid-cols-3 lg:grid-rows-2">
+        <div className="tc-reveal grid gap-4 sm:gap-5 lg:grid-cols-2">
           {PERSONAS.map((p, i) => (
             <div
               key={p.title}
               className={`group flex flex-col rounded-2xl border border-border bg-card p-6 transition-transform hover:-translate-y-0.5 sm:p-7 ${
-                i === 0 ? "lg:col-span-2 lg:row-span-2 lg:p-9" : ""
+                i === 0 ? "lg:col-span-2 lg:items-center lg:p-9 lg:text-center" : ""
               }`}
             >
               <div
@@ -918,7 +918,7 @@ export function Personas() {
               <h3 className={`font-bold tracking-tight text-foreground ${i === 0 ? "text-2xl" : "text-lg"}`}>
                 {p.title}
               </h3>
-              <p className={`mt-2 leading-relaxed text-muted-foreground ${i === 0 ? "max-w-md text-base" : "text-sm"}`}>
+              <p className={`mt-2 leading-relaxed text-muted-foreground ${i === 0 ? "max-w-md text-base lg:mx-auto" : "text-sm"}`}>
                 {p.body}
               </p>
             </div>

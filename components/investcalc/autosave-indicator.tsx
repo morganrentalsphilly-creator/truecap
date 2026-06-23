@@ -4,7 +4,7 @@
  * Live "Auto-saved · Xs ago" indicator for the analyzer form.
  *
  * The form already persists draft state to localStorage on field
- * changes (see investcalc-page.tsx — the "Welcome back" banner is
+ * changes (see investcalc-page.tsx - the "Welcome back" banner is
  * proof). This component just surfaces that the save is happening, so
  * users on long forms trust that closing the tab won't lose their
  * work. Without a visible signal, that's the kind of friction that

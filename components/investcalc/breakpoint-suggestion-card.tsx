@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * BreakpointSuggestionCard — surfaces "what would make it [Solid/Strong]?"
+ * BreakpointSuggestionCard - surfaces "what would make it [Solid/Strong]?"
  * inline next to the verdict for deals that come back Mixed / Marginal /
  * Negative.
  *
@@ -16,7 +16,7 @@
  * Hides itself when:
  *   - Current tier is already Strong (nothing to solve toward).
  *   - Solver couldn't find a breakpoint within ±30% (deal is too far
- *     off to fix with rent or price alone — surfacing a 50% rent
+ *     off to fix with rent or price alone - surfacing a 50% rent
  *     increase would be misleading).
  */
 
@@ -135,7 +135,7 @@ function PriceBreakpoint({
     <span>
       <strong className="text-foreground">${price.toLocaleString("en-US")}</strong>
       <span className="text-muted-foreground">
-        {" "}(currently ${current.toLocaleString("en-US")} — save $
+        {" "}(currently ${current.toLocaleString("en-US")} - save $
         {savings.toLocaleString("en-US")}, −{deltaPct}%)
       </span>
     </span>
@@ -156,7 +156,7 @@ function RentBreakpoint({
     <span>
       <strong className="text-foreground">${rent.toLocaleString("en-US")}/mo</strong>
       <span className="text-muted-foreground">
-        {" "}(currently ${current.toLocaleString("en-US")}/mo — add $
+        {" "}(currently ${current.toLocaleString("en-US")}/mo - add $
         {gain.toLocaleString("en-US")}, +{deltaPct}%)
       </span>
     </span>

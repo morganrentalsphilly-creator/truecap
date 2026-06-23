@@ -6,7 +6,7 @@
  * A viewer of an agent's branded deal submits their contact; it is stored for
  * the agent via captureDealLeadAction (and emails the agent when
  * LEAD_NOTIFICATIONS_MODE=live). This is the monetization half of the Agent
- * Loop — the reason an agent pays for Pro.
+ * Loop - the reason an agent pays for Pro.
  */
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
@@ -67,7 +67,7 @@ export function LeadCaptureForm({
         <div className="mx-auto mb-2 flex size-10 items-center justify-center rounded-full bg-[var(--metric-positive)]/15">
           <Check className="size-5 text-[var(--metric-positive)]" />
         </div>
-        <p className="font-bold text-foreground">Thanks — {agentName} will be in touch.</p>
+        <p className="font-bold text-foreground">Thanks - {agentName} will be in touch.</p>
         <p className="mt-1 text-sm text-muted-foreground">
           Your message was sent. Expect a reply at the email you provided.
         </p>

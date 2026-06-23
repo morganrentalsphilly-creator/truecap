@@ -1,14 +1,14 @@
 "use client";
 
 /**
- * Rehab estimator card — UI for the rehab cost estimator library.
+ * Rehab estimator card - UI for the rehab cost estimator library.
  *
  * Self-contained: holds its own state (selected work items, contingency,
  * overrides). Pre-fills sqft + bath count from the parent property data
  * if available, but the user can edit them. Outputs a per-line breakdown
  * and a total.
  *
- * Does not write to the form — exposes its total via an optional
+ * Does not write to the form - exposes its total via an optional
  * onTotalChange callback so the BRRRR / Flip cards can consume it.
  */
 
@@ -29,7 +29,7 @@ interface RehabEstimatorCardProps {
   defaultSqft?: number | null;
   /** Bath count from the form, if known. */
   defaultBathCount?: number | null;
-  /** Called whenever the computed total changes — for downstream cards. */
+  /** Called whenever the computed total changes - for downstream cards. */
   onTotalChange?: (total: number, breakdown: RehabResult) => void;
 }
 
@@ -140,7 +140,7 @@ export function RehabEstimatorCard({
         </button>
       </div>
       <p className="text-xs text-muted-foreground mb-4">
-        Mid-market defaults from contractor pricing surveys — use as a starting
+        Mid-market defaults from contractor pricing surveys - use as a starting
         point, not a binding bid. Total flows into the BRRRR &amp; Fix-and-Flip
         cards below.
       </p>

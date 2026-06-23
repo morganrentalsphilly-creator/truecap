@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Buy Box verdict — inline card that shows whether the current deal meets the
+ * Buy Box verdict - inline card that shows whether the current deal meets the
  * user's saved acquisition criteria. COMPLEMENTS the Deal Score (never
  * replaces it). With multiple buy boxes (DM-2) it screens the deal against
  * every active box, shows a "meets N of M" summary, and details the default

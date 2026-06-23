@@ -1,13 +1,13 @@
 "use client";
 
 /**
- * "Assumptions used" trust strip — shown at the top of the result state,
+ * "Assumptions used" trust strip - shown at the top of the result state,
  * right where the visitor judges the output. It names the primary source
  * behind each pre-filled input and makes the "everything is editable"
  * promise concrete at the decision moment (before they export or upgrade).
  *
  * These are the DEFAULT sources TrueCap uses; the user may have already
- * overridden any of them, which is exactly the point — the "Edit
+ * overridden any of them, which is exactly the point - the "Edit
  * assumptions" action jumps back to the form and opens the advanced
  * section so refining is one click away.
  *

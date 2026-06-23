@@ -56,7 +56,7 @@ export function BrrrrCard({ values, result, defaultRehab }: BrrrrCardProps) {
   const [expanded, setExpanded] = useState(true);
 
   // Default the rehab budget from the rehab estimator's total whenever it
-  // changes — but only if the user hasn't typed their own value.
+  // changes - but only if the user hasn't typed their own value.
   const effectiveRehab = (() => {
     const typed = Number(rehabInput);
     if (rehabInput !== "" && Number.isFinite(typed)) return typed;

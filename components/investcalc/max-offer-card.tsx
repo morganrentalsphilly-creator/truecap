@@ -1,14 +1,14 @@
 "use client";
 
 /**
- * "What price makes this deal work?" — the Max Allowable Offer surface.
+ * "What price makes this deal work?" - the Max Allowable Offer surface.
  *
  * Answers two questions from the same targets:
- *   1. Forward — the HIGHEST price you should pay to still hit every target
+ *   1. Forward - the HIGHEST price you should pay to still hit every target
  *      (cap rate, cash-on-cash, monthly cash flow, DSCR).
- *   2. Inverse — to make YOUR CURRENT price work, the rent or rate you'd need.
+ *   2. Inverse - to make YOUR CURRENT price work, the rent or rate you'd need.
  *
- * Self-contained state — never touches the form. Reuses calculateAnalysis via
+ * Self-contained state - never touches the form. Reuses calculateAnalysis via
  * the solvers in lib/max-allowable-offer.ts so the math stays consistent.
  */
 
@@ -74,7 +74,7 @@ export function MaxOfferCard({ values }: MaxOfferCardProps) {
         <span className="font-semibold text-sm text-foreground">What price makes this deal work?</span>
       </div>
       <p className="text-xs text-muted-foreground mb-4">
-        Set your return targets — we solve the highest price you should pay, and what it&apos;d take to
+        Set your return targets - we solve the highest price you should pay, and what it&apos;d take to
         make your current price work. Uses your current rent, financing, and operating assumptions.
       </p>
 
@@ -137,7 +137,7 @@ export function MaxOfferCard({ values }: MaxOfferCardProps) {
         </div>
         {!mao && !noneSet && values && (
           <p className="text-xs text-muted-foreground mt-2">
-            Try loosening one of your targets — these returns aren&apos;t reachable at any reasonable price given the rent and expenses entered.
+            Try loosening one of your targets - these returns aren&apos;t reachable at any reasonable price given the rent and expenses entered.
           </p>
         )}
       </div>
@@ -146,7 +146,7 @@ export function MaxOfferCard({ values }: MaxOfferCardProps) {
       {active && currentPrice ? (
         <div className="mt-4 rounded-xl border border-dashed border-border p-4 sm:p-5">
           <div className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
-            Or — make your current price work
+            Or - make your current price work
           </div>
           {currentMeets ? (
             <p className="mt-1.5 text-sm text-foreground">

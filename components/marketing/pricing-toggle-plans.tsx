@@ -159,7 +159,7 @@ export function PricingTogglePlans({
             Everything you need to triage a deal in 60 seconds.
           </p>
           <div className="mt-5 flex items-baseline gap-1.5">
-            <span className="text-4xl font-extrabold text-foreground sm:text-5xl">$0</span>
+            <span className="font-mono text-4xl font-extrabold tabular-nums tracking-tight text-foreground sm:text-5xl">$0</span>
             <span className="text-sm text-muted-foreground">forever</span>
           </div>
           <div className="mt-5">
@@ -276,7 +276,7 @@ export function PricingTogglePlans({
           </div>
 
           <div className="mt-5 flex items-baseline gap-1.5">
-            <span className="text-4xl font-extrabold text-foreground sm:text-5xl">
+            <span className="font-mono text-4xl font-extrabold tabular-nums tracking-tight text-foreground sm:text-5xl">
               {proCard.priceTop}
             </span>
             <span className="text-sm text-muted-foreground">{proCard.priceSub}</span>

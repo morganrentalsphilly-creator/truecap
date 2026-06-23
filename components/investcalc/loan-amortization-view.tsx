@@ -8,10 +8,10 @@
  *       every year while interest shrinks)
  *   (2) it makes tax math tangible (deductible interest by year)
  *
- * Collapsed by default so the Cash Flow tab stays clean — click to
+ * Collapsed by default so the Cash Flow tab stays clean - click to
  * expand. Self-hides on cash purchases (no debt to amortize).
  *
- * Pure presentation — derived from AnalysisResult.yearlyInterestSchedule
+ * Pure presentation - derived from AnalysisResult.yearlyInterestSchedule
  * (which the engine already computes for the tax-deduction model) plus
  * the monthly P&I. We compute principal-per-year + remaining balance
  * locally so we don't touch lib/calc-analysis.
@@ -62,7 +62,7 @@ function buildAmortization(
 }
 
 export function LoanAmortizationView({ result }: { result: AnalysisResult }) {
-  // Self-hide on cash purchase — no debt to amortize.
+  // Self-hide on cash purchase - no debt to amortize.
   if (result.loanAmount <= 0 || result.monthlyPayment <= 0) return null;
 
   const rows = buildAmortization(
@@ -90,7 +90,7 @@ export function LoanAmortizationView({ result }: { result: AnalysisResult }) {
             Loan amortization
           </span>
           <span className="mt-0.5 block text-[11px] leading-snug text-muted-foreground">
-            Year-by-year interest, principal, balance — {rows.length}-year schedule
+            Year-by-year interest, principal, balance - {rows.length}-year schedule
           </span>
         </span>
       </summary>

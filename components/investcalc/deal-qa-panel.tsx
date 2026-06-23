@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * "Ask about this deal" — compact Q&A card rendered under the
+ * "Ask about this deal" - compact Q&A card rendered under the
  * recommendation row in the analysis dashboard.
  *
  * Design constraints (deliberate):
@@ -9,7 +9,7 @@
  *    tab, no modal, nothing to learn.
  *  - Everyone gets a few free questions/day (limit enforced server-
  *    side); the panel surfaces the upsell only when the limit hits.
- *  - Conversation is per-analysis, in-memory only — editing the form
+ *  - Conversation is per-analysis, in-memory only - editing the form
  *    and re-running clears it (the parent remounts us via key), which
  *    is correct: old answers describe old numbers.
  */
@@ -94,7 +94,7 @@ export function DealQaPanel({ values }: { values: InvestmentFormValues }) {
         </div>
       )}
 
-      {/* Suggested chips — hidden once a conversation is going */}
+      {/* Suggested chips - hidden once a conversation is going */}
       {turns.length === 0 && !limitHit && (
         <div className="mt-3 flex flex-wrap gap-1.5">
           {SUGGESTED_QUESTIONS.map((q) => (

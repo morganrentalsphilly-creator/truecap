@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Deal documents — per-deal file storage (inspection reports, leases,
+ * Deal documents - per-deal file storage (inspection reports, leases,
  * photos, estoppels…). Uploads/lists/downloads/deletes go straight to a
  * PRIVATE Supabase Storage bucket from the browser client, so RLS
  * (path = {userId}/{dealId}/file) enforces ownership and large files
@@ -16,7 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 
 const BUCKET = "deal-documents";
-const MAX_BYTES = 10 * 1024 * 1024; // 10 MB — matches the bucket limit
+const MAX_BYTES = 10 * 1024 * 1024; // 10 MB - matches the bucket limit
 
 type DocItem = { name: string; path: string; size: number | null; createdAt: string | null };
 
@@ -60,7 +60,7 @@ export function DealDocumentsCard({ savedDealId }: { savedDealId: string }) {
       return;
     }
     const items: DocItem[] = (data ?? [])
-      // .list() can include a placeholder folder row with a null id — skip it.
+      // .list() can include a placeholder folder row with a null id - skip it.
       .filter((o) => o.id !== null)
       .map((o) => ({
         name: o.name,

@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Strategies panel — the content of the "Strategies" tab on the analysis
+ * Strategies panel - the content of the "Strategies" tab on the analysis
  * dashboard. Contains the three new Phase 1 calculators stacked:
  *
  *   1. Rehab cost estimator

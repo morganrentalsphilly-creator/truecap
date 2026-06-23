@@ -42,7 +42,7 @@ export function TaxStrategyPanel({
 
     // Try/catch contains action rejections from becoming unhandled
     // browser promise rejections. Snapshot load failure is a no-op for
-    // the user — live calc from input still renders.
+    // the user - live calc from input still renders.
     void (async () => {
       try {
         const result = await getTaxStrategySnapshotAction({
