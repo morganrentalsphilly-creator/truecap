@@ -122,6 +122,25 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Horizontal-scroll containers must establish a positioning context so
+     that absolutely-positioned descendants are clipped by the scroller
+     instead of escaping to the document root. The load-bearing case is
+     `.sr-only` labels (position: absolute) inside `min-w-[…]` comparison
+     tables on the homepage and the /vs, /markets, /pricing, /tools, and
+     /blog pages: with a static wrapper, each sr-only span lands at its
+     cell's natural column offset (hundreds of px past a phone's viewport),
+     inflating <html> scrollWidth. Mobile browsers then shrink-to-fit the
+     whole page, so it renders "zoomed out". Making every horizontal
+     scroller `position: relative` re-parents those spans so the scroller
+     clips them — no page overflow. This mirrors the `relative` already
+     paired with `overflow-x-auto` in components/ui/table.tsx. `relative`
+     with no offsets/z-index is visually inert and creates no stacking
+     context, and any explicit position utility (absolute/fixed/sticky)
+     still wins via Tailwind's utilities layer. */
+  .overflow-x-auto {
+    position: relative;
+  }
 }
 
 /* Hero product-mock animations were previously defined here but
