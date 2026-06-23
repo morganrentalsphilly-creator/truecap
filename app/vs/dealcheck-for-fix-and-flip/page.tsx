@@ -91,11 +91,11 @@ const NICHE_FAQ: FaqItem[] = [
     question: "Can I use TrueCap free for flip analysis?",
     answer: (
       <>
-        The standard cap rate / cash flow / DSCR underwriting is free on any property. The dedicated flip analyzer (ARV math, holding costs, break-even ARV, profit) is a Pro feature ($20/mo). For your first flip evaluation, free TrueCap + a spreadsheet covers the basics; if you do flips repeatedly, Pro pays for itself fast.
+        The standard cap rate / cash flow / DSCR underwriting is free on any property. The dedicated flip analyzer (ARV math, holding costs, break-even ARV, profit) is a Pro feature ($29.99/mo). For your first flip evaluation, free TrueCap + a spreadsheet covers the basics; if you do flips repeatedly, Pro pays for itself fast.
       </>
     ),
     plainTextAnswer:
-      "Standard underwriting free. Dedicated flip analyzer (ARV math, holding, break-even ARV, profit) is Pro $20/mo. One flip pays for Pro.",
+      "Standard underwriting free. Dedicated flip analyzer (ARV math, holding, break-even ARV, profit) is Pro $29.99/mo. One flip pays for Pro.",
   },
   {
     question: "How accurate are ARV estimates in flip analysis?",

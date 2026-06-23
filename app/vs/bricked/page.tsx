@@ -282,7 +282,7 @@ export default function VsBrickedPage() {
             TrueCap free covers cap rate, CoC, DSCR, and monthly cash flow with no
             account and no analysis cap. Pro adds projections, tax strategy, exit
             scenarios, BRRRR + flip analyzers, and lender-ready PDFs —
-            $20/mo flat, never metered.
+            $29.99/mo flat, never metered.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link
@@ -362,7 +362,7 @@ const BRICKED_FAQ: FaqItem[] = [
       </>
     ),
     plainTextAnswer:
-      "Bricked: $49/mo for 100 comps up to $199/mo for 500, metered, 3-day trial, no free tier. TrueCap: free unlimited core, Pro $20/mo flat, $5 one-time PDF. Different models for different volumes.",
+      "Bricked: $49/mo for 100 comps up to $199/mo for 500, metered, 3-day trial, no free tier. TrueCap: free unlimited core, Pro $29.99/mo flat, $5 one-time PDF. Different models for different volumes.",
   },
   {
     question: "Are Bricked's repair estimates better than TrueCap's rehab estimator?",
@@ -388,13 +388,13 @@ const BRICKED_FAQ: FaqItem[] = [
         acquisition workflow. If you flip occasionally — or you&apos;re deciding
         between flipping and holding — TrueCap Pro&apos;s fix-and-flip analyzer
         (net profit, annualized ROI, break-even ARV) plus the BRRRR analyzer covers
-        the math at $20/month, and the hold analysis tells you whether keeping it
+        the math at $29.99/month, and the hold analysis tells you whether keeping it
         as a rental beats selling. Many investors use both: Bricked for the offer,
         TrueCap for the hold decision.
       </>
     ),
     plainTextAnswer:
-      "Volume flippers: Bricked fits the acquisition workflow. Occasional flippers or flip-vs-hold deciders: TrueCap Pro's flip + BRRRR analyzers at $20/mo, plus hold analysis. Many use both: Bricked for the offer, TrueCap for the hold decision.",
+      "Volume flippers: Bricked fits the acquisition workflow. Occasional flippers or flip-vs-hold deciders: TrueCap Pro's flip + BRRRR analyzers at $29.99/mo, plus hold analysis. Many use both: Bricked for the offer, TrueCap for the hold decision.",
   },
 ];
 

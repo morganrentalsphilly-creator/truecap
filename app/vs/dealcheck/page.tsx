@@ -329,7 +329,7 @@ const DEALCHECK_FAQ: FaqItem[] = [
     question: "How much does TrueCap cost compared to DealCheck?",
     answer: (
       <>
-        TrueCap Pro is $29.99/month or $200/year on the annual plan
+        TrueCap Pro is $29.99/month or $300/year on the annual plan
         (~$25/mo). DealCheck&apos;s Plus tier is $10/month and Pro is
         $20/month (as of June 2026) — but those tiers mostly raise
         saved-property caps. TrueCap&apos;s single tier is about analysis

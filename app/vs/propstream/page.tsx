@@ -340,7 +340,7 @@ const PROPSTREAM_FAQ: FaqItem[] = [
     question: "Does TrueCap have a free tier? PropStream doesn&apos;t.",
     answer: (
       <>
-        Yes — TrueCap&apos;s free tier covers cap rate, cash-on-cash, DSCR, cash flow, and address auto-fill on unlimited deals. No card required. Pro ($20/mo) adds projections, tax strategy, sensitivity, and PDF export. PropStream is paid-only — no real free tier beyond a trial.
+        Yes — TrueCap&apos;s free tier covers cap rate, cash-on-cash, DSCR, cash flow, and address auto-fill on unlimited deals. No card required. Pro ($29.99/mo) adds projections, tax strategy, sensitivity, and PDF export. PropStream is paid-only — no real free tier beyond a trial.
       </>
     ),
     plainTextAnswer:

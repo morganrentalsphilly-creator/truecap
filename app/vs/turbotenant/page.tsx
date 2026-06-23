@@ -354,7 +354,7 @@ const TURBOTENANT_FAQ: FaqItem[] = [
     question: "Can I afford TrueCap + TurboTenant?",
     answer: (
       <>
-        Yes. TurboTenant free + TrueCap free covers a lot. When you need TrueCap Pro features ($20/month) and TurboTenant Premium (~$8-12/unit/month), one property runs about $27-31/month total. That&apos;s less than a single hour of property management.
+        Yes. TurboTenant free + TrueCap free covers a lot. When you need TrueCap Pro features ($29.99/month) and TurboTenant Premium (~$8-12/unit/month), one property runs about $38-42/month total. That&apos;s less than a single hour of property management.
       </>
     ),
     plainTextAnswer:

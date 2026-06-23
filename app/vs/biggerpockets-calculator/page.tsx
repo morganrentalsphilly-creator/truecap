@@ -160,7 +160,7 @@ export default function VsBiggerPocketsCalculatorPage() {
                 <li>You want a deal score with plain-English breakdown.</li>
                 <li>You want a portfolio rollup across saved deals.</li>
                 <li>You don&apos;t need to be part of yet another real estate community.</li>
-                <li>You want to spend $200/yr instead of $390/yr.</li>
+                <li>You want to spend $300/yr instead of $390/yr.</li>
               </ul>
             </div>
             <div>
@@ -376,7 +376,7 @@ const BP_FAQ: FaqItem[] = [
       <>
         TrueCap Pro is $29.99/month (or ~$25/month billed annually).
         BiggerPockets Pro is ~$390/year (~$32.50/month). For the
-        calculator alone, TrueCap is roughly half the price. BiggerPockets
+        calculator alone, TrueCap has a deeper free tier and bundles everything in one Pro tier. BiggerPockets
         Pro of course bundles forums, courses, and other community
         access — if that&apos;s what you&apos;re buying, the calculator
         is a bonus. If you want the calculator itself, TrueCap is the

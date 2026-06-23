@@ -330,11 +330,11 @@ const DEALMACHINE_FAQ: FaqItem[] = [
     question: "Is DealMachine worth $59-99/month?",
     answer: (
       <>
-        Depends on volume. If you&apos;re sending 200+ postcards a month or actively driving for dollars several days a week, DealMachine&apos;s all-in workflow pays back quickly. If you buy 1-3 properties a year through MLS, both DealMachine and PropStream are overkill. TrueCap&apos;s $20/mo Pro is the right spend bracket for solo buy-and-hold investors.
+        Depends on volume. If you&apos;re sending 200+ postcards a month or actively driving for dollars several days a week, DealMachine&apos;s all-in workflow pays back quickly. If you buy 1-3 properties a year through MLS, both DealMachine and PropStream are overkill. TrueCap&apos;s $29.99/mo Pro is the right spend bracket for solo buy-and-hold investors.
       </>
     ),
     plainTextAnswer:
-      "Depends on volume. 200+ postcards/month or active driving for dollars? Pays back. 1-3 properties/year via MLS? Overkill. TrueCap&apos;s $20/mo Pro is the right bracket for solo buy-and-hold.",
+      "Depends on volume. 200+ postcards/month or active driving for dollars? Pays back. 1-3 properties/year via MLS? Overkill. TrueCap&apos;s $29.99/mo Pro is the right bracket for solo buy-and-hold.",
   },
   {
     question: "Does DealMachine do underwriting?",

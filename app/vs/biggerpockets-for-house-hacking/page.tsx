@@ -142,14 +142,14 @@ const BP_HOUSE_HACK_FAQ: FaqItem[] = [
     answer: (
       <>
         For house-hacking specifically, no — TrueCap Pro at $29.99/month
-        ($200/year) covers the owner-occupant workflow more cleanly
-        for half the price. BiggerPockets Pro at $390/year makes sense
+        ($300/year) covers the owner-occupant workflow more cleanly
+        with a deeper free tier. BiggerPockets Pro at $390/year makes sense
         if you also use the community, courses, books, and podcasts;
-        for the calculator alone, you&apos;re overpaying by ~$200/year.
+        for the calculator alone, you&apos;re overpaying by ~$90/year.
       </>
     ),
     plainTextAnswer:
-      "For house-hacking specifically, no — TrueCap Pro at $29.99/mo ($200/yr) covers the owner-occupant workflow more cleanly for half the price. BiggerPockets Pro at $390/yr makes sense for community + courses + podcasts; for the calculator alone, you're overpaying ~$200/yr.",
+      "For house-hacking specifically, no — TrueCap Pro at $29.99/mo ($300/yr) covers the owner-occupant workflow more cleanly with a deeper free tier. BiggerPockets Pro at $390/yr makes sense for community + courses + podcasts; for the calculator alone, you're overpaying ~$90/yr.",
   },
   {
     question: "What changes when I model the post-move-out scenario?",
@@ -329,7 +329,7 @@ export default function VsBiggerPocketsForHouseHackingPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap&apos;s free tier covers owner-occupant property
             types, per-unit rent + status, FHA financing, and
-            effective-rent-saved math. Pro ($20/mo) adds projections,
+            effective-rent-saved math. Pro ($29.99/mo) adds projections,
             tax strategy, sensitivity, and the post-move-out scenario
             modeling.
           </p>

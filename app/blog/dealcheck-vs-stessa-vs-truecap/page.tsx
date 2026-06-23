@@ -83,7 +83,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "What's the cheapest stack for a serious rental investor?",
-    a: "TrueCap free for underwriting + Stessa free for accounting covers a lot of ground at $0/month. Most investors eventually upgrade TrueCap to Pro ($20/month) for projections, tax strategy, and sensitivity — together with Stessa Pro that's about $31/month for a complete pre-purchase + post-purchase software stack.",
+    a: "TrueCap free for underwriting + Stessa free for accounting covers a lot of ground at $0/month. Most investors eventually upgrade TrueCap to Pro ($29.99/month) for projections, tax strategy, and sensitivity — together with Stessa Pro that's about $42/month for a complete pre-purchase + post-purchase software stack.",
   },
 ];
 
@@ -251,7 +251,7 @@ export default function DealCheckVsStessaVsTrueCapPost() {
 
             <h3>Pricing</h3>
             <p>
-              <strong>TrueCap Pro</strong> is a single $20/month tier
+              <strong>TrueCap Pro</strong> is a single $29.99/month tier
               (or $300/year annually). Everything is included —
               share links, PDF exports, 10-year projections, tax
               strategy, sensitivity, MAO, BRRRR, and

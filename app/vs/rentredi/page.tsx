@@ -376,7 +376,7 @@ const RENTREDI_FAQ: FaqItem[] = [
     question: "Is RentRedi cheaper than TrueCap?",
     answer: (
       <>
-        TrueCap is cheaper. TrueCap free covers a full underwrite at no
+        TrueCap and RentRedi do different jobs. TrueCap free covers a full underwrite at no
         cost; TrueCap Pro is $29.99/month. RentRedi is ~$20/month or
         ~$120/year for landlords (as of 2026). The pricing isn&apos;t
         really comparable though — you&apos;d pay for both because they
@@ -384,7 +384,7 @@ const RENTREDI_FAQ: FaqItem[] = [
       </>
     ),
     plainTextAnswer:
-      "TrueCap is cheaper. TrueCap free covers underwriting; TrueCap Pro is $29.99/month. RentRedi is ~$20/month or ~$120/year (2026). Pricing isn't really comparable — they do different things.",
+      "TrueCap and RentRedi do different jobs. TrueCap free covers underwriting; TrueCap Pro is $29.99/month. RentRedi is ~$20/month or ~$120/year (2026). Pricing isn't really comparable — they do different things.",
   },
   {
     question: "What do I need before I use RentRedi?",

@@ -61,7 +61,7 @@ const TOOLS = [
     freeGates: [
       "Dedicated BRRRR analyzer (cash-out refi math + capital recovered) is Pro"
     ],
-    pickIf: "You want the cheapest Pro tier with explicit infinite-return flagging and ARV stress-testing.",
+    pickIf: "You want the deepest BRRRR analysis in one Pro tier, with explicit infinite-return flagging and ARV stress-testing.",
   },
   {
     rank: 2,
@@ -120,7 +120,7 @@ const FAQ_ITEMS = [
   { q: "What's 'capital recovered' and why is it the BRRRR metric that matters?", a: "Capital recovered = (cash-out refi proceeds) ÷ (total capital invested including down payment + rehab + holding). If it's 100%+, you've pulled all your money back out and the deal is 'infinite return' (true return is undefined because your invested capital is zero). TrueCap surfaces this as a headline metric; DealCheck and BiggerPockets require you to read it from the cash-on-cash math." },
   { q: "What ARV (After Repair Value) should I use in a BRRRR analysis?", a: "Pull a CMA from your agent or have an appraiser do a pre-rehab estimate. Use that as the central case. Then stress-test ±10% in TrueCap's sensitivity grid — if the deal still works at ARV minus 10%, you have margin. If it doesn't, you're betting the CMA was conservative." },
   { q: "What refi LTV should I model for a BRRRR?", a: "75% is the standard cap from BRRRR-friendly DSCR + portfolio lenders as of 2026. Some lenders go to 80% on seasoned properties (6+ months of rental history). Default to 75% in your underwriting and adjust if you have a specific lender quote." },
-  { q: "Can I underwrite BRRRR deals on a free tier?", a: "Sort of. TrueCap's free tier handles standard cap rate / CoC / DSCR / cash flow on the property — enough to decide if it cash-flows post-refi assuming you know the math. The dedicated BRRRR analyzer (auto-calculated cash-out refi proceeds + capital recovered + infinite-return flag) is Pro ($20/mo). DealCheck and BiggerPockets gate BRRRR mode to paid tiers too." },
+  { q: "Can I underwrite BRRRR deals on a free tier?", a: "Sort of. TrueCap's free tier handles standard cap rate / CoC / DSCR / cash flow on the property — enough to decide if it cash-flows post-refi assuming you know the math. The dedicated BRRRR analyzer (auto-calculated cash-out refi proceeds + capital recovered + infinite-return flag) is Pro ($29.99/mo). DealCheck and BiggerPockets gate BRRRR mode to paid tiers too." },
 ];
 
 const DECISION_LINES: Array<{ q: string; a: string }> = [
@@ -208,7 +208,7 @@ export default function BestRentalPropertyCalculatorForBrrrrPost() {
 
           <section className="mb-10 rounded-2xl border border-border bg-card p-5 sm:p-6">
             <h2 className="text-sm font-bold uppercase tracking-widest text-primary mb-3">Quick answer</h2>
-            <p className="text-sm sm:text-base leading-relaxed text-foreground" dangerouslySetInnerHTML={{ __html: `For BRRRR investors specifically: <strong>TrueCap Pro</strong> (\$20/mo) edges out on capital-recovered headline metric, infinite-return flagging, and ARV sensitivity. <strong>DealCheck</strong> has the longest BRRRR track record + native mobile apps. <strong>BiggerPockets</strong> is bundled with the community where the BRRRR method originated.` }} />
+            <p className="text-sm sm:text-base leading-relaxed text-foreground" dangerouslySetInnerHTML={{ __html: `For BRRRR investors specifically: <strong>TrueCap Pro</strong> (\$29.99/mo) edges out on capital-recovered headline metric, infinite-return flagging, and ARV sensitivity. <strong>DealCheck</strong> has the longest BRRRR track record + native mobile apps. <strong>BiggerPockets</strong> is bundled with the community where the BRRRR method originated.` }} />
           </section>
 
           <div className="prose prose-neutral max-w-none prose-headings:font-extrabold prose-headings:text-foreground prose-p:text-foreground prose-p:leading-relaxed prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-li:text-foreground prose-li:leading-relaxed">

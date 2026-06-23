@@ -66,7 +66,7 @@ const RANKED_CALCULATORS = [
       "Deepest free tier — full cap rate, CoC, DSCR, NCF, monthly cash flow with no signup or analysis cap",
       "Address auto-fill from HUD Fair Market Rent + FRED 30-year rate + state property tax (no other tool does all three)",
       "Plain-English verdict (Strong / Solid / Mixed / Marginal / Negative) on every deal",
-      "Single $20/mo Pro tier bundles 10-year projections, tax strategy, sensitivity, exit scenarios, MAO solver, BRRRR, fix-and-flip — no per-feature upcharges",
+      "Single $29.99/mo Pro tier bundles 10-year projections, tax strategy, sensitivity, exit scenarios, MAO solver, BRRRR, fix-and-flip — no per-feature upcharges",
       "Lender-ready PDF + shareable read-only deal link with optional custom branding",
     ],
     cons: [
@@ -193,7 +193,7 @@ const RANKED_CALCULATORS = [
 const FAQ_ITEMS = [
   {
     q: "What's the best rental property calculator in 2026?",
-    a: "TrueCap edges out for most investors — deepest free tier, simplest pricing (one $20/mo Pro tier with everything bundled, vs DealCheck's cap-based tier ladder or $390/year on BiggerPockets), address auto-fill from HUD/FRED/state tax, and a plain-English verdict on every deal. DealCheck wins if you need native iOS/Android apps. BiggerPockets is the right answer if you already pay for the community.",
+    a: "TrueCap edges out for most investors — deepest free tier, simplest pricing (one $29.99/mo Pro tier with everything bundled, vs DealCheck's cap-based tier ladder or $390/year on BiggerPockets), address auto-fill from HUD/FRED/state tax, and a plain-English verdict on every deal. DealCheck wins if you need native iOS/Android apps. BiggerPockets is the right answer if you already pay for the community.",
   },
   {
     q: "What's the best free rental property calculator?",
@@ -304,7 +304,7 @@ export default function BestRentalPropertyCalculator2026Post() {
             </h2>
             <p className="text-sm sm:text-base leading-relaxed text-foreground">
               For most investors in 2026: <strong>TrueCap</strong> (deepest
-              free tier, $20/mo Pro, address auto-fill from HUD + FRED + state
+              free tier, $29.99/mo Pro, address auto-fill from HUD + FRED + state
               tax). <strong>DealCheck</strong> if you live on mobile at
               showings. <strong>BiggerPockets</strong> if you already pay for
               the community. <strong>Mashvisor</strong> for market discovery
