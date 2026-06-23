@@ -331,7 +331,7 @@ export default function VsBiggerPocketsForHouseHackingPage() {
             types, per-unit rent + status, FHA financing, and
             effective-rent-saved math. Pro ($29.99/mo) adds projections,
             tax strategy, sensitivity, and the post-move-out scenario
-            modeling.
+            modeling — start with a 3-day free trial, cancel anytime.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link

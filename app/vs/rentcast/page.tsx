@@ -274,7 +274,7 @@ export default function VsRentcastPage() {
               href="/pricing"
               className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
             >
-              See Pro pricing
+              Start a 3-day free trial
               <ArrowUpRight className="w-4 h-4" />
             </Link>
             <Link
