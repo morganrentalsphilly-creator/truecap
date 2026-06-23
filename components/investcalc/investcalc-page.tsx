@@ -1613,10 +1613,13 @@ export function InvestCalcPage({
   // deliberately not persisted (it's an auto behavior, not a user setting).
   useEffect(() => {
     if (!analysisResult) return;
+    // In strategy-focus mode, keep the Refine section collapsed — auto-opening
+    // it re-clutters the tailored form the user deliberately simplified.
+    if (activeStrategyKey) return;
     if (hasAutoOpenedAdvancedRef.current || advancedUserChoiceRef.current) return;
     hasAutoOpenedAdvancedRef.current = true;
     setAdvancedOpen(true);
-  }, [analysisResult]);
+  }, [analysisResult, activeStrategyKey]);
 
   // Listen for the homepage hero's address handoff. The calculator is
   // already mounted when the hero is clicked (same page), so the live
@@ -2946,6 +2949,7 @@ export function InvestCalcPage({
               isSampleProPreview={isSampleProPreview}
               dealQaEnabled={dealQaEnabled}
               activeTab={activeDashboardTab}
+              activeStrategy={activeStrategy}
               saveDealLimitReached={currentSaveDealLimitReached}
               persistedActionsBlockHint={
                 !savedDealId

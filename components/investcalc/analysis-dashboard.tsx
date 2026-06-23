@@ -71,6 +71,8 @@ import { StrategiesPanel } from "@/components/investcalc/strategies-panel";
 import { ProInlineGate } from "@/components/investcalc/pro-inline-gate";
 import { DealQaPanel } from "@/components/investcalc/deal-qa-panel";
 import { BuyBoxVerdictCard } from "@/components/investcalc/buy-box-verdict-card";
+import { StrategyOutcomeCard } from "@/components/investcalc/strategy-outcome-card";
+import type { InvestorStrategy } from "@/lib/investor-strategies";
 import { deriveStateFromAddress } from "@/lib/buy-box";
 import { DataConfidenceBadge } from "@/components/investcalc/data-confidence-badge";
 import { PropertyCompsCard } from "@/components/investcalc/property-comps-card";
@@ -179,6 +181,8 @@ interface AnalysisDashboardProps {
    *  from enrich-property provenance). Null hides the badge. */
   dataConfidence?: DataConfidence | null;
   activeTab?: AnalysisDashboardTab;
+  /** Active investor strategy — drives the strategy-aware results headline. */
+  activeStrategy?: InvestorStrategy | null;
   /** Shown when Compare / Export are disabled (e.g. unsaved edits). */
   persistedActionsBlockHint?: string;
 }
@@ -397,9 +401,13 @@ export function AnalysisDashboard({
   saveDealLimitReached = false,
   dataConfidence = null,
   activeTab: activeTabProp,
+  activeStrategy = null,
   persistedActionsBlockHint,
 }: AnalysisDashboardProps) {
   const [activeTab, setActiveTab] = useState<AnalysisDashboardTab>(activeTabProp ?? "cash-flow");
+  // When a non-cash-flow strategy is active (Wholesale/BRRRR/Flip), lead the
+  // results with that play's real answer instead of the generic buy-box verdict.
+  const strategyLeadsOutput = !!activeStrategy && activeStrategy.primaryTab !== "cash-flow";
   // Show only the first 3 recommendation tips by default — beyond that
   // the Recommendation card starts feeling busy. User can expand to see
   // the rest. Resets implicitly when the parent component re-mounts on
@@ -825,8 +833,22 @@ export function AnalysisDashboard({
         </div>
       </div>
 
+      {/* Strategy-aware headline — when a non-cash-flow strategy is active
+          (Wholesale/BRRRR/Flip), lead with that play's real answer; the generic
+          buy-box verdict below is hidden because it misreads those plays. */}
+      {strategyLeadsOutput && activeStrategy && values ? (
+        <StrategyOutcomeCard
+          strategy={activeStrategy}
+          values={values}
+          canUseMaxOffer={canUseMaxOffer}
+          canUseStrategies={canUseStrategies}
+          onJumpToTab={setActiveTab}
+          onUpgrade={goToBilling}
+        />
+      ) : null}
+
       {/* Recommendation + Pro Feature row */}
-      <div className="grid grid-cols-1 md:grid-cols-3 items-start gap-3 sm:gap-4">
+      <div className={cn("grid grid-cols-1 md:grid-cols-3 items-start gap-3 sm:gap-4", strategyLeadsOutput && "hidden")}>
         <DealScoreCard
           isAnalysisLoading={isLoading}
           isDealScoreLoading={isLoadingDealScore}

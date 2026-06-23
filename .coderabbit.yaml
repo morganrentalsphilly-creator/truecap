@@ -1,0 +1,227 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+#
+# CodeRabbit configuration for TrueCap (usetruecap.com).
+#
+# This file teaches CodeRabbit the load-bearing conventions documented in
+# CLAUDE.md so it enforces them on every pull request. The path_instructions
+# below mirror the "conventions that matter", "common pitfalls", and
+# "out-of-scope — ask first" sections of CLAUDE.md. When you change a
+# convention in CLAUDE.md, update the matching instruction here too.
+#
+# Docs: https://docs.coderabbit.ai/reference/configuration
+# Commands (use in PR comments): https://docs.coderabbit.ai/guides/commands
+
+language: "en-US"
+early_access: false
+
+tone_instructions: >-
+  Be concise and direct. Skip praise and filler. Prioritize correctness,
+  security, and adherence to the conventions in CLAUDE.md over style nits.
+  This is a solo-founder production codebase — flag anything that could
+  ship a regression to real users.
+
+reviews:
+  # "assertive" = thorough; surfaces nitpicks and minor suggestions too.
+  profile: "assertive"
+
+  # Solo founder is the only human reviewer — CodeRabbit advises, it does
+  # not block merges. Flip to true if you ever want it to gate.
+  request_changes_workflow: false
+
+  high_level_summary: true
+  review_status: true
+  collapse_walkthrough: false
+  sequence_diagrams: true
+  poem: false
+  abort_on_close: true
+
+  # Don't waste review budget on generated / vendored / binary files.
+  path_filters:
+    - "!**/pnpm-lock.yaml"
+    - "!**/package-lock.json"
+    - "!**/*.min.*"
+    - "!.next/**"
+    - "!public/**"
+
+  auto_review:
+    enabled: true
+    auto_incremental_review: true
+    drafts: false
+    ignore_title_keywords:
+      - "WIP"
+      - "DO NOT MERGE"
+
+  # Static-analysis tools CodeRabbit runs and folds into its review.
+  tools:
+    eslint:
+      enabled: true
+    gitleaks: # secret scanning — this repo handles many API keys/secrets
+      enabled: true
+    actionlint: # lint the GitHub Actions workflows in .github/workflows
+      enabled: true
+    yamllint:
+      enabled: true
+    sqlfluff: # Supabase SQL migrations
+      enabled: true
+
+  path_instructions:
+    # --- The math: single source of truth (CLAUDE.md §3.4, §5.3, §8.5) ---
+    - path: "lib/calc-analysis.ts"
+      instructions: >-
+        calculateAnalysis() is the SINGLE source of truth for cash flow, cap
+        rate, cash-on-cash, DSCR, and monthly payment. Verify the cash-purchase
+        edge case is preserved: monthlyPayment <= 0 means DSCR is undefined and
+        must return 0 / be treated as N/A — do not simplify this away. Any change
+        to the math must be smoke-tested across single-family, multi-family,
+        owner-occupant, and cash purchases, and must extend the Vitest tests in
+        lib/__tests__/. Flag any change to cap-rate / DSCR / CoC thresholds or
+        the Strong/Solid/Mixed/Marginal/Negative bands and call out that it needs
+        founder sign-off (these ripple into the verdict, OG image, deal score, and PDFs).
+    - path: "lib/verdict.ts"
+      instructions: >-
+        Verdict thresholds and the headline classifier live here and are mirrored
+        by the OG image classifier in app/d/[encoded]/opengraph-image.tsx — if you
+        change a band or cutoff here, the OG file must change to match. Treat any
+        threshold change as requiring founder sign-off and explain the deltas.
+        Confirm the cash-purchase (DSCR N/A) branch is handled explicitly.
+
+    # --- Don't duplicate the math (CLAUDE.md §3.4, §5.7) ---
+    - path: "components/**/*.{ts,tsx}"
+      instructions: >-
+        Never hand-roll cash-flow, cap-rate, CoC, or DSCR math in a component —
+        import calculateAnalysis from lib/calc-analysis.ts. Also flag any import
+        of lib/supabase/admin.ts (service-role, server-only) or other server-only
+        modules from a component, especially anything in a "use client" tree;
+        that is a security/bundle bug the build is meant to catch.
+
+    # --- OG images: edge runtime, fail-safe (CLAUDE.md §3.6, §5.5) ---
+    - path: "app/**/opengraph-image.tsx"
+      instructions: >-
+        OG images run on the edge runtime. Allowed imports only: decodeShareLink,
+        calculateAnalysis, the Zod schema, and pure helpers. DISALLOW any
+        server-only import (Supabase, fs, secrets, env-with-secrets). Use only the
+        next/og JSX subset (plain divs + inline styles + text) — no Tailwind classes.
+        Input must be wrapped in safeParse + try/catch and return the Fallback
+        ImageResponse on bad input; a malformed share link must never surface a 500.
+        The verdict tier classifier here must stay in sync with lib/verdict.ts.
+
+    # --- Share links: frozen payload (CLAUDE.md §3.7, §5, §8.8) ---
+    - path: "lib/share-link.ts"
+      instructions: >-
+        The share-link payload format is FROZEN at v:1 (URL-safe base64 of the
+        JSON payload) — existing links in the wild depend on it. Do not change the
+        v:1 shape. New fields go on the optional meta object, or behind a new v:2
+        decoder that runs ALONGSIDE the still-working v:1 decoder. Reject any change
+        that breaks backward-compatible decoding of v:1.
+
+    # --- Stripe webhook: verification + idempotency (CLAUDE.md §3.5, §5.9, §8.4) ---
+    - path: "app/api/stripe/webhooks/route.ts"
+      instructions: >-
+        Do NOT weaken or alter the stripe.webhooks.constructEvent signature
+        verification or STRIPE_WEBHOOK_SECRET handling — invalid signature must
+        400 immediately. Idempotency is enforced via the stripe_webhook_events
+        table: a 23505 unique-violation with processed_at present is a duplicate
+        (return early); with processed_at IS NULL it must RE-PROCESS (a prior
+        attempt failed and Stripe is retrying). Don't short-circuit on insert
+        conflict alone, and don't manually flip processed_at to back-fill state.
+        On failure, return 500 so Stripe retries.
+    - path: "lib/stripe/**"
+      instructions: >-
+        The Stripe API version is pinned in lib/stripe/client.ts — flag any bump
+        and note it requires reading the Stripe changelog. lib/stripe/client.ts is
+        server-only; keep it that way. subscription-sync helpers must keep the
+        webhook->DB sync idempotent.
+
+    # --- Supabase client variants (CLAUDE.md §3.1, §5.1) ---
+    - path: "lib/supabase/**"
+      instructions: >-
+        Three clients with different trust levels. createServerSupabaseClient
+        (server.ts) and createBrowserSupabaseClient (client.ts) use the anon key +
+        session and respect RLS. createAdminSupabaseClient (admin.ts) uses the
+        service role and bypasses RLS — it is import "server-only" and must only be
+        reached from the Stripe webhook or admin scripts. Never remove the
+        server-only guard to fix an import; fix the import instead. Don't add auth
+        logic to proxy.ts beyond the existing updateSession refresh.
+
+    # --- Server actions: return shape + gating (CLAUDE.md §3.2, §3.3, §5.2) ---
+    - path: "app/actions/**"
+      instructions: >-
+        Every server action returns a discriminated union { ok: true, ... } |
+        { ok: false, code, message } and NEVER throws to the client. Don't change
+        that shape without updating every caller. Pro features must gate via
+        getEntitlementsForUser + hasPlanFeature from lib/entitlements.ts — never
+        gate on subscription.status === "active" directly. Confirm callers await
+        the action (a missing await makes .ok narrow wrong). Escalate to the admin
+        client only to write fields the user can't set themselves.
+
+    # --- Pricing / entitlements: founder sign-off (CLAUDE.md §8.1) ---
+    - path: "lib/entitlements.ts"
+      instructions: >-
+        Changes to plan entitlements, saved-deal limits, or feature gates affect
+        what users can access and may change billing behavior. Flag and request
+        founder sign-off for anything that changes the published plan, pricing, the
+        annual discount, or the Stripe checkout amount.
+
+    # --- Migrations: append-only (CLAUDE.md §3 §5.10, §8.3) ---
+    - path: "supabase/migrations/**"
+      instructions: >-
+        Migrations are timestamped and already applied to production. NEVER edit an
+        existing migration file — flag any modification to a pre-existing migration
+        as a hard error and require a new migration with today's timestamp instead.
+        New schema changes need a new migration and should be surfaced for review.
+
+    # --- Sentry: append-only ignore list (CLAUDE.md §3.9, §5.4, §8.7) ---
+    - path: "instrumentation-client.ts"
+      instructions: >-
+        Appending to the ignoreErrors allow-list (with a comment explaining the
+        source) is fine. Flag removal of existing ignoreErrors entries, disabling
+        Sentry, lowering sample rates, or catch-and-swallow at call sites. Watch for
+        PII added to Sentry events — sendDefaultPii is on, so don't put user_email /
+        address in extra; prefer opaque IDs.
+
+    # --- Build config: don't mask type errors (CLAUDE.md §3.10, §8.6) ---
+    - path: "next.config.mjs"
+      instructions: >-
+        Flag any change that sets typescript.ignoreBuildErrors to true — it was
+        deliberately flipped to false to stop React 19 / Next 16 regressions from
+        shipping silently. Type errors must be fixed, not suppressed.
+
+    # --- Email crons: idempotent + kill switch (CLAUDE.md §3.8, §5.8) ---
+    - path: "app/api/cron/**"
+      instructions: >-
+        Crons are auth-gated on Authorization: Bearer CRON_SECRET — keep that gate.
+        The weekly digest must stay idempotent: it skips if a Resend broadcast named
+        exactly "Weekly digest · YYYY-MM-DD" already exists, so don't change that
+        naming or bypass the check. Preserve the NEWSLETTER_PAUSED kill switch. The
+        rate-alert and rent-alert crons must respect their *_MODE env gates
+        (off/dry/live) and the RentCast budget caps — they ship dormant by design.
+    - path: "emails/**"
+      instructions: >-
+        Email copy lives in the JSON content layer (emails/content/*.json and
+        emails/daily-campaign-content/day-NN.json) — don't hardcode copy into the
+        React Email templates. Preserve the {{{RESEND_UNSUBSCRIBE_URL}}} placeholder.
+
+    # --- Homepage split + proxy (CLAUDE.md §3.1) ---
+    - path: "app/page.tsx"
+      instructions: >-
+        This is the STATIC anonymous landing page (ISR). It must never import
+        anything that reads cookies() or headers(). Any new InvestCalcPage prop
+        must be added to BOTH this file (static anon values) AND
+        app/home-authed/page.tsx (computed values) — flag if only one is updated.
+
+    # --- Global TypeScript hygiene (CLAUDE.md §3.10, §5.6) ---
+    - path: "**/*.{ts,tsx}"
+      instructions: >-
+        Strict TypeScript. Flag any @ts-ignore / @ts-expect-error that lacks a
+        comment explaining why. Don't rely on console.log for production debugging —
+        Sentry log forwarding is dev-only; use Sentry.captureMessage /
+        captureException with tags. Prefer the existing discriminated-union and
+        entitlement helpers over ad-hoc checks.
+
+chat:
+  auto_reply: true
+
+# Let CodeRabbit accumulate learnings from this repo's PRs/issues over time so
+# it gets sharper on TrueCap's conventions. Set opt_out: true to disable.
+knowledge_base:
+  opt_out: false
