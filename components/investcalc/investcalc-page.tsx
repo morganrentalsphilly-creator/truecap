@@ -68,6 +68,7 @@ import {
 } from "@/app/actions/one-time-pdf";
 import { PdfPurchaseDialog } from "@/components/investcalc/pdf-purchase-dialog";
 import { SAMPLE_DEAL_VALUES } from "@/lib/sample-deal";
+import { estimatePurchasePrice } from "@/lib/estimate-price";
 import {
   HERO_ANALYZE_EVENT,
   HERO_ANALYZE_STORAGE_KEY,
@@ -501,6 +502,14 @@ export function InvestCalcPage({
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
   const [showResults, setShowResults] = useState(false);
+  // Hero "instant verdict" path: when a cold visitor types an address we
+  // estimate the purchase price from local rent so the analyzer can run
+  // immediately. These drive the honest "estimated price — confirm it"
+  // notice on the result screen; cleared once the user edits the price and
+  // re-runs (see onSubmit).
+  const [priceEstimated, setPriceEstimated] = useState(false);
+  const [estimatedPriceValue, setEstimatedPriceValue] = useState<number | null>(null);
+  const [priceEstimateBasis, setPriceEstimateBasis] = useState<string | null>(null);
   // ── Progressive disclosure (financing + operating expenses) ──────────
   // Cold visitors start with just the basics (property type, address,
   // price, beds/rent); financing + operating expenses collapse behind a
@@ -1652,6 +1661,15 @@ export function InvestCalcPage({
     const liveParse = investmentFormSchema.safeParse(form.getValues());
     const values: InvestmentFormValues = liveParse.success ? liveParse.data : validated;
 
+    // If the user changed the purchase price away from the hero auto-
+    // estimate, this verdict is on their number now — drop the
+    // "estimated price" notice. (The auto-run itself keeps it: price still
+    // equals the estimate at that point.)
+    if (estimatedPriceValue != null && values.purchasePrice !== estimatedPriceValue) {
+      setEstimatedPriceValue(null);
+      setPriceEstimated(false);
+    }
+
     isCalculatingRef.current = true;
     setIsCalculating(true);
     setIsLoadingDealScore(true);
@@ -2481,29 +2499,76 @@ export function InvestCalcPage({
       shouldTouch: true,
     });
 
-    // If the hero captured Google Places components, run the SAME
-    // enrichment an in-form address selection triggers (rent/rate/tax).
-    if (detail.state || detail.county || detail.zip) {
-      const place: SelectedAddress = {
-        formattedAddress: address,
-        state: detail.state,
-        county: detail.county,
-        zip: detail.zip,
-      };
-      lastSelectedAddressRef.current = place;
-      void runPropertyEnrichment(place).catch((err) => {
-        console.warn("[hero handoff] enrichment failed:", err);
+    const landOnPrice = () => {
+      // Fallback: land the user on the one field still needed.
+      requestAnimationFrame(() => {
+        try {
+          form.setFocus("purchasePrice");
+        } catch {
+          /* field may be unmounted for some property types - non-fatal */
+        }
       });
+    };
+
+    // No Google Places components → can't enrich or estimate; just land
+    // the user on the price field (legacy behavior).
+    if (!(detail.state || detail.county || detail.zip)) {
+      landOnPrice();
+      return;
     }
 
-    // Land the user on the next field they need to fill.
-    requestAnimationFrame(() => {
+    const place: SelectedAddress = {
+      formattedAddress: address,
+      state: detail.state,
+      county: detail.county,
+      zip: detail.zip,
+    };
+    lastSelectedAddressRef.current = place;
+
+    // Run the SAME enrichment an in-form selection triggers (rent/rate/
+    // tax), THEN estimate a purchase price from the address-specific rent
+    // so a cold visitor sees an INSTANT verdict. The price is clearly
+    // labeled an estimate on the result screen and is fully editable — we
+    // never persist it or pass it off as the real asking price.
+    void (async () => {
       try {
-        form.setFocus("purchasePrice");
-      } catch {
-        /* field may be unmounted for some property types - non-fatal */
+        await runPropertyEnrichment(place);
+      } catch (err) {
+        console.warn("[hero handoff] enrichment failed:", err);
       }
-    });
+
+      const canEstimate =
+        form.getValues("propertyType") === "single-family" &&
+        isEmptyNumber(form.getValues("purchasePrice")) &&
+        !isEmptyNumber(form.getValues("monthlyRent"));
+
+      if (canEstimate) {
+        const est = estimatePurchasePrice({
+          monthlyRent: Number(form.getValues("monthlyRent")),
+          state: detail.state,
+        });
+        if (est) {
+          form.setValue("purchasePrice", est.price, {
+            shouldDirty: false,
+            shouldValidate: false,
+            shouldTouch: false,
+          });
+          setEstimatedPriceValue(est.price);
+          setPriceEstimateBasis(est.basis);
+          setPriceEstimated(true);
+          // Auto-run the verdict. Double-rAF lets RHF flush the setValue
+          // calls before validation (same pattern as the sample deal).
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              void form.handleSubmit(onSubmit, onError)();
+            });
+          });
+          return;
+        }
+      }
+
+      landOnPrice();
+    })();
   };
 
   const toggleAdvanced = () => {
@@ -2516,6 +2581,25 @@ export function InvestCalcPage({
     } catch {
       /* ignore */
     }
+  };
+
+  /**
+   * "Enter price" from the estimated-price notice: jump back to the form
+   * and focus the purchase-price field so confirming the one estimated
+   * input is a single click from the verdict.
+   */
+  const handleEditPrice = () => {
+    if (typeof window !== "undefined") {
+      const el = document.getElementById("main");
+      if (el) window.scrollTo({ top: el.offsetTop - 64, behavior: "smooth" });
+    }
+    requestAnimationFrame(() => {
+      try {
+        form.setFocus("purchasePrice");
+      } catch {
+        /* field may be unmounted for some property types — non-fatal */
+      }
+    });
   };
 
   /**
@@ -2900,6 +2984,31 @@ export function InvestCalcPage({
             {/* Result-state trust strip - names the default sources behind
                 the numbers (HUD/FRED/state) + "all editable", with a jump
                 back to the form. Only once real results exist. */}
+            {analysisResult && !isCalculating && priceEstimated ? (
+              <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-border bg-card p-3.5 text-sm shadow-sm">
+                <span className="mt-1.5 size-2 shrink-0 rounded-full bg-amber-500" aria-hidden />
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold text-foreground">
+                    Estimated purchase price
+                    {estimatedPriceValue != null
+                      ? ` (~$${estimatedPriceValue.toLocaleString("en-US")})`
+                      : ""}
+                  </p>
+                  <p className="mt-0.5 text-muted-foreground">
+                    We estimated the price from local rent
+                    {priceEstimateBasis ? ` — ${priceEstimateBasis}` : ""} so you could see a
+                    verdict instantly. Enter the actual asking price to make this accurate.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleEditPrice}
+                  className="shrink-0 rounded-lg border border-input bg-background px-3 py-1.5 text-xs font-bold text-primary transition-colors hover:bg-muted"
+                >
+                  Enter price
+                </button>
+              </div>
+            ) : null}
             {analysisResult && !isCalculating ? (
               <AssumptionsSourceStrip onEdit={handleEditAssumptions} />
             ) : null}
