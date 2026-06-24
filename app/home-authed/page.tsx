@@ -117,7 +117,9 @@ export default async function AuthedHome() {
   const canUseShareLinks = isPaidPlan;
 
   return (
-    <>
+    // overflow-x-clip: mirror of app/page.tsx — clips horizontal bleed so the
+    // mobile homepage can't scroll sideways. `clip` keeps sticky/fixed working.
+    <div className="overflow-x-clip">
       <Header initialUser={user} initialEntitlements={entitlements} />
       {/* Full landing experience ONLY for cold visitors (anon fallback —
           the canonical anon homepage is the static app/page.tsx, and this
@@ -186,6 +188,6 @@ export default async function AuthedHome() {
       {/* Site footer — trust + sitemap + brand. Shown to everyone; helps
           with Quality Score and dwell time. */}
       <SiteFooter />
-    </>
+    </div>
   );
 }

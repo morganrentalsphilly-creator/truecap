@@ -2727,7 +2727,7 @@ export function InvestCalcPage({
             <button
               type="button"
               onClick={handleTrySampleDeal}
-              className="group inline-flex shrink-0 flex-col items-start gap-0.5 self-start rounded-xl bg-primary px-5 py-3 text-left shadow-[0_10px_24px_rgba(0, 112, 196,0.28)] transition-transform hover:-translate-y-0.5 sm:self-end"
+              className="group inline-flex shrink-0 flex-col items-start gap-0.5 self-start rounded-xl bg-primary px-5 py-3 text-left shadow-[0_10px_24px_rgba(0,_112,_196,0.28)] transition-transform hover:-translate-y-0.5 sm:self-end"
               aria-label="Try a sample rental - preview a sample Pro report on a real Philadelphia rental"
             >
               <span className="inline-flex items-center gap-1.5 text-sm font-bold text-primary-foreground">
