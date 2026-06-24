@@ -17,6 +17,7 @@ import { Header } from "@/components/investcalc/header";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { MARKET_CITIES } from "@/lib/markets/cities";
+import { STATES } from "@/lib/states";
 import { getSiteUrl } from "@/lib/site-url";
 
 type Entry = { slug: string; name: string; stateName: string };
@@ -75,6 +76,14 @@ export default function MarketsIndexPage() {
   const states = [...byState.keys()].sort();
   for (const s of states) byState.get(s)!.sort((a, b) => a.name.localeCompare(b.name));
 
+  // Map state display-name → /states/<slug> so each state heading links to
+  // its investing guide where one exists. This closes the orphaned-/states
+  // internal-link gap (the hub previously rendered states as plain text).
+  // States without a guide page stay as plain text — no broken links.
+  const stateSlugByName = new Map(
+    Object.values(STATES).map((s) => [s.name, s.slug] as const)
+  );
+
   const collectionLd = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
@@ -118,7 +127,16 @@ export default function MarketsIndexPage() {
           {states.map((state) => (
             <section key={state}>
               <h2 className="text-lg font-extrabold text-foreground border-b border-border pb-2 mb-4">
-                {state}
+                {stateSlugByName.has(state) ? (
+                  <Link
+                    href={`/states/${stateSlugByName.get(state)}`}
+                    className="transition-colors hover:text-primary"
+                  >
+                    {state}
+                  </Link>
+                ) : (
+                  state
+                )}
               </h2>
               <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                 {byState.get(state)!.map((c) => (

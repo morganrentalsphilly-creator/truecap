@@ -32,6 +32,7 @@ const FOOTER_COLS: Array<{
       { label: "All free tools", href: "/tools" },
       { label: "Blog", href: "/blog" },
       { label: "Rental markets", href: "/markets" },
+      { label: "Investing by state", href: "/states" },
       // NOTE: "Compare TrueCap" link to /vs hub intentionally removed.
       // The 20+ /vs/<competitor> pages still exist as SEO landing
       // surfaces (visitors arrive directly from Google), but the

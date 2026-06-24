@@ -32,6 +32,7 @@ import { marketStrategyFit } from "@/lib/market-strategy-fit";
 import { getStatePropertyTaxPct } from "@/lib/property-enrichment/state-property-tax";
 import { CITY_STRATEGY_COMBOS } from "@/lib/city-strategy-combos";
 import { getSiteUrl } from "@/lib/site-url";
+import { STATES } from "@/lib/states";
 
 const RELATED_TOOLS: { slug: string; label: string }[] = [
   { slug: "cap-rate-calculator", label: "Cap rate calculator" },
@@ -97,6 +98,11 @@ export default async function MarketCityPage({
   const siteUrl = getSiteUrl();
   const canonicalUrl = `${siteUrl}/markets/${data.slug}`;
 
+  // State investing guide for this city's state (if one exists) — used for
+  // the breadcrumb crumb + a contextual link so city pages feed link equity
+  // up to the previously-orphaned /states cluster.
+  const stateSlug = Object.values(STATES).find((s) => s.name === data.stateName)?.slug;
+
   const benchmark = getCapRateBenchmark(`${data.name}, ${data.stateCode}`);
   const capMedian = benchmark ? `${benchmark.median.toFixed(1)}%` : "—";
   // Strategy-fit badge — a label over the same median cap rate shown below.
@@ -144,7 +150,17 @@ export default async function MarketCityPage({
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Home", item: siteUrl },
       { "@type": "ListItem", position: 2, name: "Markets", item: `${siteUrl}/markets` },
-      { "@type": "ListItem", position: 3, name: data.name, item: canonicalUrl },
+      ...(stateSlug
+        ? [
+            {
+              "@type": "ListItem",
+              position: 3,
+              name: data.stateName,
+              item: `${siteUrl}/states/${stateSlug}`,
+            },
+            { "@type": "ListItem", position: 4, name: data.name, item: canonicalUrl },
+          ]
+        : [{ "@type": "ListItem", position: 3, name: data.name, item: canonicalUrl }]),
     ],
   };
 
@@ -206,6 +222,16 @@ export default async function MarketCityPage({
             <li aria-hidden="true">›</li>
             <li><Link href="/markets" className="hover:text-foreground">Markets</Link></li>
             <li aria-hidden="true">›</li>
+            {stateSlug ? (
+              <>
+                <li>
+                  <Link href={`/states/${stateSlug}`} className="hover:text-foreground">
+                    {data.stateName}
+                  </Link>
+                </li>
+                <li aria-hidden="true">›</li>
+              </>
+            ) : null}
             <li className="font-semibold text-foreground">{data.name}</li>
           </ol>
         </nav>
@@ -271,6 +297,16 @@ export default async function MarketCityPage({
         <section className="mt-12">
           <h2 className="text-2xl font-extrabold text-foreground mb-3">Is {data.name} a good place to buy rentals?</h2>
           <p className="text-base leading-relaxed text-foreground">{data.investorAngle}</p>
+          {stateSlug ? (
+            <p className="mt-4 text-sm">
+              <Link
+                href={`/states/${stateSlug}`}
+                className="font-semibold text-primary hover:underline"
+              >
+                See the full {data.stateName} investing guide — taxes, landlord law &amp; top metros →
+              </Link>
+            </p>
+          ) : null}
         </section>
 
         {/* Neighborhoods */}
