@@ -130,21 +130,25 @@ export function HeroAddressForm() {
         </button>
       </form>
 
-      {/* Secondary actions — the single secondary CTA is the sample
-          report (loads a real, finished analysis so visitors see the
-          OUTCOME, not just "a demo"), plus a low-friction peek at Pro.
-          Pricing is deliberately the quietest link here so the primary
-          action stays "analyze a deal," not "evaluate cost." */}
+      {/* Secondary actions. The sample report is elevated from a quiet
+          text link to a clear outline button because a large share of
+          cold/paid traffic lands WITHOUT a specific property to type — for
+          them the address input is a dead end, and the one-click sample
+          verdict is the fastest path to the product's value. So we name the
+          objection directly ("no address yet?"). It stays visually
+          secondary to the primary "Analyze this property" action, and
+          pricing remains the quietest link so the emphasis is on
+          experiencing a deal, not evaluating cost. */}
       <div className="mt-3 flex flex-wrap items-center justify-start gap-x-4 gap-y-2 text-sm">
         <button
           type="button"
           onClick={handleTrySample}
-          className="inline-flex items-center gap-1.5 font-semibold text-primary underline-offset-4 hover:underline"
+          className="group inline-flex items-center gap-1.5 rounded-xl border border-primary/30 bg-card px-4 py-2 font-semibold text-primary shadow-sm transition-colors hover:border-primary/60 hover:bg-[var(--brand-blue-light)]"
         >
           <Sparkles className="size-4" />
-          View a sample report
+          No address yet? See a sample report
+          <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
         </button>
-        <span aria-hidden className="text-muted-foreground/40">·</span>
         <Link
           href="/pricing"
           className="font-medium text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
