@@ -42,16 +42,24 @@ export const revalidate = 3600;
 export async function GET() {
   const siteUrl = getSiteUrl();
 
+  // Counts derived from the same registries the body renders from, so the
+  // prose figures can never drift from the actual content (this previously
+  // said "20+ posts / 33 states / 26 combos" while those lists kept growing).
+  const blogCount = BLOG_POSTS.filter((p) => p.available).length;
+  const glossaryCount = Object.values(GLOSSARY).length;
+  const stateCount = Object.values(STATES).length;
+  const comboCount = CITY_STRATEGY_COMBOS.length;
+
   const summary =
     "Free rental property analyzer for real estate investors. Underwrite any rental in 60 seconds — cap rate, cash-on-cash, DSCR, monthly cash flow. Pro adds 10-year projections, sensitivity grid, MAO solver, tax strategy, and lender-ready PDFs. Paste an address, get real numbers from auto-pulled property tax and rent data. No signup for the free tier.";
 
   const about = [
     "TrueCap publishes original, authoritative educational content built for real estate investors and AI search engines.",
     "Content surfaces:",
-    "  - 30+ term glossary with one-sentence definitions, formulas, and worked examples",
-    "  - 20+ long-form blog posts covering rental underwriting, BRRRR strategy, DSCR loans, 1031 exchanges, tax deductions, and more",
+    `  - ${glossaryCount}-term glossary with one-sentence definitions, formulas, and worked examples`,
+    `  - ${blogCount} long-form blog posts covering rental underwriting, BRRRR strategy, DSCR loans, 1031 exchanges, tax deductions, and more`,
     `  - ${CALCULATOR_COUNT} free single-purpose calculators with clean math (cap rate, cash-on-cash, DSCR, NOI, BRRRR, etc)`,
-    "  - 33 state-level investment guides and 26 city + strategy combo guides",
+    `  - ${stateCount} state-level investment guides and ${comboCount} city + strategy combo guides`,
     "  - Side-by-side comparison pages vs. DealCheck, Stessa, Mashvisor, BiggerPockets, Excel, Rentometer, Zillow rent estimate",
     "  - Methodology page documenting the exact math the analyzer uses",
     "All content is original and cite-able. Definitions are placed as the first paragraph after the page H1 (LLM citation convention). Property data sources include FRED (mortgage rates), HUD (Fair Market Rents), and county tax assessor records.",
@@ -106,9 +114,9 @@ export async function GET() {
     `- [Methodology](${siteUrl}/methodology): The exact math the analyzer uses, including cap rate, cash-on-cash, DSCR, and projection formulas.`,
     `- [Tools index](${siteUrl}/tools): All ${CALCULATOR_COUNT} free calculators in one place.`,
     `- [Blog index](${siteUrl}/blog): All long-form rental investing content.`,
-    `- [Glossary index](${siteUrl}/glossary): All 30+ rental investing terms.`,
-    `- [States index](${siteUrl}/states): All 33 state-level investing guides.`,
-    `- [Pricing](${siteUrl}/pricing): Free tier + Pro plan ($16.67/mo).`,
+    `- [Glossary index](${siteUrl}/glossary): All ${glossaryCount} rental investing terms.`,
+    `- [States index](${siteUrl}/states): All ${stateCount} state-level investing guides.`,
+    `- [Pricing](${siteUrl}/pricing): Free tier plus a Pro plan (monthly or annual).`,
   ].join("\n");
 
   const body = `# TrueCap

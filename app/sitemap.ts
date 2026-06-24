@@ -6,6 +6,7 @@ import { STATES } from "@/lib/states";
 import { getSiteUrl } from "@/lib/site-url";
 import { CALCULATOR_REGISTRY } from "@/lib/calculator-registry";
 import { BLOG_TOPICS } from "@/lib/blog-topics";
+import { BLOG_POSTS } from "@/app/blog/page";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const siteUrl = getSiteUrl();
@@ -77,12 +78,27 @@ export default function sitemap(): MetadataRoute.Sitemap {
     })),
   ];
 
-  return [
+  // Blog posts — derived from BLOG_POSTS (app/blog/page.tsx), the single
+  // source of truth that /blog and llms.txt already render from. Deriving
+  // here (not a hardcoded list) means new posts appear in the sitemap
+  // automatically; the two can never drift again. publishedAt → lastModified
+  // (Google ignores sitemap priority/changefreq).
+  const blogUrls: MetadataRoute.Sitemap = BLOG_POSTS.filter(
+    (p) => p.available
+  ).map((p) => ({
+    url: `${siteUrl}/blog/${p.slug}`,
+    lastModified: new Date(p.publishedAt),
+    changeFrequency: "monthly" as const,
+    priority: 0.8,
+  }));
+
+  const entries: MetadataRoute.Sitemap = [
     ...glossaryUrls,
     ...stateUrls,
     ...cityStrategyUrls,
     ...marketCityUrls,
     ...topicHubUrls,
+    ...blogUrls,
     {
       url: `${siteUrl}/markets`,
       lastModified: new Date(),
@@ -203,6 +219,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.5,
+    },
+    {
+      url: `${siteUrl}/why-truecap`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.8,
     },
     {
       url: `${siteUrl}/for-agents`,
@@ -612,4 +634,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.85,
     },
   ];
+
+  // Defensive de-dup by URL (keeps first occurrence) so the derived blog
+  // list and the legacy hardcoded blog entries below can't double-list a
+  // post. New posts flow in via blogUrls above; the hardcoded blog entries
+  // are now redundant and can be pruned in a follow-up.
+  const seen = new Set<string>();
+  return entries.filter((e) => {
+    if (seen.has(e.url)) return false;
+    seen.add(e.url);
+    return true;
+  });
 }
