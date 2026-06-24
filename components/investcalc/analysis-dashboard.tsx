@@ -83,6 +83,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Activity, Target } from "lucide-react";
 import { MomentOfValueUpsell } from "@/components/marketing/moment-of-value-upsell";
 import { SignupPromptCard } from "@/components/marketing/signup-prompt-card";
+import { RateAlertsToggle } from "@/components/settings/rate-alerts-toggle";
 import { CashFlowWaterfall } from "@/components/investcalc/cash-flow-waterfall";
 import { MortgageScenarioCompare } from "@/components/investcalc/mortgage-scenario-compare";
 import { LoanAmortizationView } from "@/components/investcalc/loan-amortization-view";
@@ -1142,6 +1143,14 @@ export function AnalysisDashboard({
           isPaid={canUseProjections}
           onExportPdf={onExportPdf}
         />
+      )}
+      {/* Retention: when a signed-in user has a saved deal on screen, offer
+          the rate-alert opt-in right where the intent is, instead of burying
+          it in /settings. Self-hides if already enabled or the schema
+          migration isn't applied. Sends are governed by the send-rate-alerts
+          cron (RATE_ALERTS_MODE) — this only captures the consent. */}
+      {result && !isLoading && isAuthenticated && isSaved && (
+        <RateAlertsToggle variant="inline" />
       )}
 
       {/* MAO + Sensitivity were previously rendered here as two
