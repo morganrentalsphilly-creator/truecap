@@ -98,7 +98,7 @@ export default function BestStatesPost() {
           </p>
           <p>
             <strong>Read the full Indianapolis breakdown:</strong>{" "}
-            <Link href="/markets/indianapolis" className="text-primary font-semibold hover:underline">/markets/indianapolis</Link>
+            <Link href="/markets/indianapolis" className="text-primary font-semibold hover:underline">/markets/indianapolis</Link>{" · "}<Link href="/states/indiana" className="text-primary font-semibold hover:underline">Indiana investing guide →</Link>
           </p>
 
           <h3 className="text-xl font-extrabold text-foreground mt-8 mb-2">2. Ohio (Cleveland + Cincinnati + Columbus)</h3>
@@ -107,7 +107,7 @@ export default function BestStatesPost() {
           </p>
           <p>
             <strong>Read the full Cleveland breakdown:</strong>{" "}
-            <Link href="/markets/cleveland" className="text-primary font-semibold hover:underline">/markets/cleveland</Link>
+            <Link href="/markets/cleveland" className="text-primary font-semibold hover:underline">/markets/cleveland</Link>{" · "}<Link href="/states/ohio" className="text-primary font-semibold hover:underline">Ohio investing guide →</Link>
           </p>
 
           <h3 className="text-xl font-extrabold text-foreground mt-8 mb-2">3. Missouri (Kansas City + St. Louis)</h3>
@@ -116,7 +116,7 @@ export default function BestStatesPost() {
           </p>
           <p>
             <strong>Read the full Kansas City breakdown:</strong>{" "}
-            <Link href="/markets/kansas-city" className="text-primary font-semibold hover:underline">/markets/kansas-city</Link>
+            <Link href="/markets/kansas-city" className="text-primary font-semibold hover:underline">/markets/kansas-city</Link>{" · "}<Link href="/states/missouri" className="text-primary font-semibold hover:underline">Missouri investing guide →</Link>
           </p>
 
           <h3 className="text-xl font-extrabold text-foreground mt-8 mb-2">4. Michigan (Detroit metro)</h3>
@@ -125,7 +125,7 @@ export default function BestStatesPost() {
           </p>
           <p>
             <strong>Read the full Detroit breakdown:</strong>{" "}
-            <Link href="/markets/detroit" className="text-primary font-semibold hover:underline">/markets/detroit</Link>
+            <Link href="/markets/detroit" className="text-primary font-semibold hover:underline">/markets/detroit</Link>{" · "}<Link href="/states/michigan" className="text-primary font-semibold hover:underline">Michigan investing guide →</Link>
           </p>
 
           <h3 className="text-xl font-extrabold text-foreground mt-8 mb-2">5. Tennessee (Memphis + Nashville)</h3>
@@ -134,7 +134,7 @@ export default function BestStatesPost() {
           </p>
           <p>
             <strong>Read the full Memphis breakdown:</strong>{" "}
-            <Link href="/markets/memphis" className="text-primary font-semibold hover:underline">/markets/memphis</Link>
+            <Link href="/markets/memphis" className="text-primary font-semibold hover:underline">/markets/memphis</Link>{" · "}<Link href="/states/tennessee" className="text-primary font-semibold hover:underline">Tennessee investing guide →</Link>
           </p>
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">Tier 2 — Balanced cash + appreciation</h2>
@@ -145,7 +145,7 @@ export default function BestStatesPost() {
           </p>
           <p>
             <strong>Read the full Charlotte breakdown:</strong>{" "}
-            <Link href="/markets/charlotte" className="text-primary font-semibold hover:underline">/markets/charlotte</Link>
+            <Link href="/markets/charlotte" className="text-primary font-semibold hover:underline">/markets/charlotte</Link>{" · "}<Link href="/states/north-carolina" className="text-primary font-semibold hover:underline">North Carolina investing guide →</Link>
           </p>
 
           <h3 className="text-xl font-extrabold text-foreground mt-8 mb-2">7. Georgia (Atlanta + secondary cities)</h3>
@@ -154,7 +154,7 @@ export default function BestStatesPost() {
           </p>
           <p>
             <strong>Read the full Atlanta breakdown:</strong>{" "}
-            <Link href="/markets/atlanta" className="text-primary font-semibold hover:underline">/markets/atlanta</Link>
+            <Link href="/markets/atlanta" className="text-primary font-semibold hover:underline">/markets/atlanta</Link>{" · "}<Link href="/states/georgia" className="text-primary font-semibold hover:underline">Georgia investing guide →</Link>
           </p>
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">Tier 3 — Appreciation leaders (low cap, growth bet)</h2>
@@ -165,7 +165,7 @@ export default function BestStatesPost() {
           </p>
           <p>
             <strong>Read the full Phoenix breakdown:</strong>{" "}
-            <Link href="/markets/phoenix" className="text-primary font-semibold hover:underline">/markets/phoenix</Link>
+            <Link href="/markets/phoenix" className="text-primary font-semibold hover:underline">/markets/phoenix</Link>{" · "}<Link href="/states/arizona" className="text-primary font-semibold hover:underline">Arizona investing guide →</Link>
           </p>
 
           <h3 className="text-xl font-extrabold text-foreground mt-8 mb-2">9. Florida (Tampa + Orlando + Jacksonville)</h3>
@@ -174,7 +174,7 @@ export default function BestStatesPost() {
           </p>
           <p>
             <strong>Read the full Tampa breakdown:</strong>{" "}
-            <Link href="/markets/tampa" className="text-primary font-semibold hover:underline">/markets/tampa</Link>
+            <Link href="/markets/tampa" className="text-primary font-semibold hover:underline">/markets/tampa</Link>{" · "}<Link href="/states/florida" className="text-primary font-semibold hover:underline">Florida investing guide →</Link>
           </p>
 
           <h3 className="text-xl font-extrabold text-foreground mt-8 mb-2">10. Texas (Dallas-Fort Worth + Houston)</h3>
@@ -184,19 +184,19 @@ export default function BestStatesPost() {
           <p>
             <strong>Read the full Dallas + Houston breakdowns:</strong>{" "}
             <Link href="/markets/dallas" className="text-primary font-semibold hover:underline">/markets/dallas</Link> ·{" "}
-            <Link href="/markets/houston" className="text-primary font-semibold hover:underline">/markets/houston</Link>
+            <Link href="/markets/houston" className="text-primary font-semibold hover:underline">/markets/houston</Link>{" · "}<Link href="/states/texas" className="text-primary font-semibold hover:underline">Texas investing guide →</Link>
           </p>
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">Honorable mentions</h2>
           <p>
-            <strong>Pennsylvania (Philadelphia + Pittsburgh)</strong> — Philly has uniquely strong neighborhood-by-neighborhood variation; the BRRRR + buy-and-hold math works in working-class North Philly while South Philly is appreciation-leaning. See the{" "}
+            <strong><Link href="/states/pennsylvania" className="text-foreground hover:text-primary hover:underline">Pennsylvania</Link> (Philadelphia + Pittsburgh)</strong> — Philly has uniquely strong neighborhood-by-neighborhood variation; the BRRRR + buy-and-hold math works in working-class North Philly while South Philly is appreciation-leaning. See the{" "}
             <Link href="/markets/philadelphia" className="text-primary font-semibold hover:underline">Philadelphia breakdown</Link>.
           </p>
           <p>
-            <strong>Alabama (Birmingham + Huntsville)</strong> — Birmingham produces solid 8-10% caps in workforce neighborhoods with low entry prices and low property tax (~0.4% effective — one of the lowest in the US).
+            <strong><Link href="/states/alabama" className="text-foreground hover:text-primary hover:underline">Alabama</Link> (Birmingham + Huntsville)</strong> — Birmingham produces solid 8-10% caps in workforce neighborhoods with low entry prices and low property tax (~0.4% effective — one of the lowest in the US).
           </p>
           <p>
-            <strong>Oklahoma (Oklahoma City + Tulsa)</strong> — quietly one of the most consistent cash-flow markets in the US. Low entry prices, low property tax, stable rental demand from oil/gas + healthcare employment.
+            <strong><Link href="/states/oklahoma" className="text-foreground hover:text-primary hover:underline">Oklahoma</Link> (Oklahoma City + Tulsa)</strong> — quietly one of the most consistent cash-flow markets in the US. Low entry prices, low property tax, stable rental demand from oil/gas + healthcare employment.
           </p>
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">States to be cautious about</h2>

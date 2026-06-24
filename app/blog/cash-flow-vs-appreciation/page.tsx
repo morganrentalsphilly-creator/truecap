@@ -171,8 +171,10 @@ export default function BlogPost() {
             <strong>Cash-flow investing</strong>: buy in markets where the
             property generates positive <Link href="/glossary/monthly-cash-flow" className="text-primary font-semibold hover:underline">monthly cash flow</Link> after every
             expense + the mortgage. Optimize for <Link href="/glossary/cap-rate" className="text-primary font-semibold hover:underline">cap rate</Link> and <Link href="/glossary/dscr" className="text-primary font-semibold hover:underline">DSCR</Link>.
-            Typical markets: Midwest cash-flow cities, older Sun Belt
-            multifamily, blue-collar suburbs.
+            Typical markets: Midwest cash-flow cities like{" "}
+            <Link href="/markets/cleveland" className="text-primary font-semibold hover:underline">Cleveland</Link>{" "}
+            and <Link href="/markets/indianapolis" className="text-primary font-semibold hover:underline">Indianapolis</Link>,
+            older Sun Belt multifamily, blue-collar suburbs.
           </p>
           <p>
             <strong>Appreciation investing</strong>: buy in markets where
@@ -363,6 +365,14 @@ export default function BlogPost() {
             get cash flow that pays the bills, appreciation that
             compounds, downside protection if appreciation underdelivers,
             and tax benefits on top.
+          </p>
+          <p>
+            Concrete 2026 examples of that balance:{" "}
+            <Link href="/markets/atlanta" className="text-primary font-semibold hover:underline">Atlanta</Link>,{" "}
+            <Link href="/markets/charlotte" className="text-primary font-semibold hover:underline">Charlotte</Link>, and{" "}
+            <Link href="/markets/tampa" className="text-primary font-semibold hover:underline">Tampa</Link>{" "}
+            tend to pair mid-single-digit cap rates with a real appreciation tailwind — see each
+            market&apos;s breakdown for current cap-rate and rent benchmarks.
           </p>
           <p>
             Picking that hybrid sweet spot deal requires actually
