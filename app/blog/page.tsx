@@ -49,6 +49,44 @@ export type BlogPost = {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: "rental-property-insurance",
+    title: "Rental property insurance: landlord coverage and cost in 2026",
+    excerpt:
+      "The most-underestimated line in a 2026 underwrite. Landlord (DP-3) vs homeowners coverage, what loss-of-rent actually protects, real 2026 cost ranges (~$1,200–$1,900 and climbing), how to estimate it before you have a quote, and how a $1,500-vs-$3,500 premium swings cash flow ~$167/month and drags DSCR below the line.",
+    readingTimeMinutes: 11,
+    publishedAt: "2026-06-23",
+    available: true,
+  },
+  {
+    slug: "cash-out-refinance-vs-heloc-rental",
+    title:
+      "Cash-out refinance vs HELOC on a rental: which pulls equity better in 2026?",
+    excerpt:
+      "Two ways to pull equity from a rental — and in 2026 they aren't interchangeable. The investment-property LTV and rate reality, the cheap-first-mortgage trap (a refi resets your whole 3.5% loan to 7%; a HELOC doesn't), and a worked side-by-side where the higher-rate HELOC is the cheaper decision by thousands a year.",
+    readingTimeMinutes: 11,
+    publishedAt: "2026-06-23",
+    available: true,
+  },
+  {
+    slug: "rental-property-llc",
+    title: "Should you put your rental property in an LLC? (2026)",
+    excerpt:
+      "An honest answer to the most-asked entity question. What an LLC does (liability) and doesn't (cut your taxes), the Garn-St. Germain due-on-sale trap when you transfer a mortgaged rental, why a conventional loan won't follow you into an LLC, the 2026 Corporate Transparency Act reversal that exempted domestic LLCs from BOI filing, and when it's actually worth the cost.",
+    readingTimeMinutes: 12,
+    publishedAt: "2026-06-23",
+    available: true,
+  },
+  {
+    slug: "seller-financing-subject-to",
+    title:
+      "Seller financing and subject-to: creative deals explained (2026)",
+    excerpt:
+      "When 7% bank loans kill the deal, creative financing moves it. How seller financing and subject-to work, the due-on-sale risk that defines subject-to, where Dodd-Frank does and doesn't apply to investors, and the 2026 rate arbitrage (~$650/month on a 3.5% subject-to loan) underwritten with the downside priced in.",
+    readingTimeMinutes: 11,
+    publishedAt: "2026-06-23",
+    available: true,
+  },
+  {
     slug: "1-percent-rule-rental-property",
     title: "The 1% rule for rental property: does it still work in 2026?",
     excerpt:

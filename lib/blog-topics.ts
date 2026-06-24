@@ -45,6 +45,7 @@ export const BLOG_TOPICS: BlogTopic[] = [
       "50-percent-rule-rentals",
       "vacancy-rate-rental-property",
       "capex-maintenance-reserves-rental-property",
+      "rental-property-insurance",
     ],
     calculatorSlugs: [
       "cap-rate-calculator",
@@ -68,6 +69,8 @@ export const BLOG_TOPICS: BlogTopic[] = [
       "dscr-loans-explained",
       "how-to-refinance-a-rental-property",
       "closing-costs-investment-property",
+      "cash-out-refinance-vs-heloc-rental",
+      "seller-financing-subject-to",
     ],
     calculatorSlugs: [
       "mortgage-payment-calculator",
@@ -87,6 +90,7 @@ export const BLOG_TOPICS: BlogTopic[] = [
       "depreciation-recapture-rental-property",
       "schedule-e-rental-property",
       "1031-exchange-basics",
+      "rental-property-llc",
     ],
     calculatorSlugs: ["rental-property-tax-calculator"],
   },
