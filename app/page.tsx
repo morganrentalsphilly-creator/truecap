@@ -163,13 +163,16 @@ export default function Home() {
   };
 
   return (
-    // overflow-x-clip: clips any horizontal bleed from a descendant so the
-    // mobile page can't scroll sideways. `clip` (not `hidden`) does NOT
-    // establish a scroll container, so the sticky header / step rail and the
-    // fixed bottom bars keep working — unlike overflow on html/body, which is
-    // known to break position:sticky and scrollTo on iOS Safari (the reason
-    // the codebase has historically fixed overflow surgically at the CSS layer).
-    <div className="overflow-x-clip">
+    // relative + overflow-x-clip: clips any horizontal bleed from a descendant
+    // so the mobile page can't scroll sideways. `relative` makes this the
+    // containing block for any descendant `position: absolute` that lacks a
+    // closer positioned ancestor (e.g. an `sr-only` label inside a wide
+    // element) so it's re-parented here and then clipped — the exact escape
+    // route documented in globals.css. `clip` (not `hidden`) does NOT establish
+    // a scroll container, so the sticky header / step rail and the fixed bottom
+    // bars keep working — unlike overflow on html/body, which is known to break
+    // position:sticky and scrollTo on iOS Safari.
+    <div className="relative overflow-x-clip">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
