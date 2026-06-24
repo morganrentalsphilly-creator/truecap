@@ -171,10 +171,15 @@ export function TemplateSelectorSection({
     form.setValue("insuranceInputMode", tpl.insuranceInputMode, { shouldDirty: true });
     form.setValue("insurancePct", tpl.insurancePct ?? undefined, { shouldDirty: true });
     form.setValue("insuranceMonthly", tpl.insuranceMo ?? undefined, { shouldDirty: true });
-    form.setValue("maintenancePct", tpl.maintenancePct, { shouldDirty: true });
-    form.setValue("vacancyPct", tpl.vacancyPct, { shouldDirty: true });
-    form.setValue("mgmtPct", tpl.managementPct, { shouldDirty: true });
-    form.setValue("capexPct", tpl.capexPct, { shouldDirty: true });
+    // Clamp the four expense %s to the analyzer form's 50% ceiling. New
+    // templates are already capped at 50 (analysis-template-schema.ts), but a
+    // legacy template saved under the old 100% cap would otherwise push the
+    // form past its max and surface a "Max 50%" error on a field the user
+    // never touched.
+    form.setValue("maintenancePct", Math.min(tpl.maintenancePct, 50), { shouldDirty: true });
+    form.setValue("vacancyPct", Math.min(tpl.vacancyPct, 50), { shouldDirty: true });
+    form.setValue("mgmtPct", Math.min(tpl.managementPct, 50), { shouldDirty: true });
+    form.setValue("capexPct", Math.min(tpl.capexPct, 50), { shouldDirty: true });
     form.setValue("closingCostsPct", tpl.closingCostsPct, { shouldDirty: true });
     form.setValue("interestRate", tpl.interestRatePct, { shouldDirty: true });
     form.setValue("downPaymentPct", tpl.downPaymentPct, { shouldDirty: true });

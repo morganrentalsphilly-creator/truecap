@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { analysisTemplateSchema } from "../analysis-template-schema";
+import { STARTER_TEMPLATES } from "../starter-templates";
 
 const validBase = {
   templateName: "My template",
@@ -53,5 +54,31 @@ describe("analysisTemplateSchema", () => {
       insuranceMo: 0,
     });
     expect(monthlyParsed.success).toBe(false);
+  });
+
+  it("accepts every shipped starter template", () => {
+    // Guards against a starter whose description exceeds 40 chars or whose
+    // expense %s exceed the form's 50% cap — both would save fine in code but
+    // fail when a user clicks "Customize & save" or applies the template.
+    const failures = STARTER_TEMPLATES.filter(
+      (starter) => !analysisTemplateSchema.safeParse(starter.template).success
+    ).map((starter) => starter.template.templateName);
+    expect(failures).toEqual([]);
+  });
+
+  it("rejects expense %s above the analyzer form's 50% ceiling", () => {
+    for (const field of ["maintenancePct", "vacancyPct", "managementPct", "capexPct"] as const) {
+      expect(analysisTemplateSchema.safeParse({ ...validBase, [field]: 60 }).success).toBe(false);
+      expect(analysisTemplateSchema.safeParse({ ...validBase, [field]: 50 }).success).toBe(true);
+    }
+  });
+
+  it("rejects a template description longer than 40 characters", () => {
+    expect(
+      analysisTemplateSchema.safeParse({ ...validBase, templateDescription: "x".repeat(41) }).success
+    ).toBe(false);
+    expect(
+      analysisTemplateSchema.safeParse({ ...validBase, templateDescription: "x".repeat(40) }).success
+    ).toBe(true);
   });
 });

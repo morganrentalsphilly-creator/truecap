@@ -21,10 +21,13 @@ export const analysisTemplateSchema = z.object({
   insuranceInputMode: z.enum(["percent", "monthly"]),
   insurancePct: z.number().gt(0, "Must be greater than 0").max(100, "Max 100%").optional(),
   insuranceMo: z.number().gt(0, "Must be greater than 0").max(1_000_000, "Amount too large").optional(),
-  maintenancePct: z.number().gt(0, "Must be greater than 0").max(100, "Max 100%"),
-  vacancyPct: z.number().gt(0, "Must be greater than 0").max(100, "Max 100%"),
-  managementPct: z.number().gt(0, "Must be greater than 0").max(100, "Max 100%"),
-  capexPct: z.number().gt(0, "Must be greater than 0").max(100, "Max 100%"),
+  // Capped at 50% to match the analyzer form's expense-% ceiling
+  // (lib/investcalc-schema.ts). A template above the form's max would
+  // save fine but fail validation the moment it's applied to the form.
+  maintenancePct: z.number().gt(0, "Must be greater than 0").max(50, "Max 50%"),
+  vacancyPct: z.number().gt(0, "Must be greater than 0").max(50, "Max 50%"),
+  managementPct: z.number().gt(0, "Must be greater than 0").max(50, "Max 50%"),
+  capexPct: z.number().gt(0, "Must be greater than 0").max(50, "Max 50%"),
   closingCostsPct: z.number().gt(0, "Must be greater than 0").max(100, "Max 100%").optional(),
   interestRatePct: z.number().gt(0, "Must be greater than 0").max(100, "Max 100%"),
   downPaymentPct: z.number().gt(0, "Must be greater than 0").max(100, "Max 100%"),

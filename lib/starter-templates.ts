@@ -368,7 +368,7 @@ export const STARTER_TEMPLATES: StarterTemplate[] = [
       "Wholesaling — screen contracts on Maximum Allowable Offer before assigning to an end buyer. Conservative buy-box defaults to keep only deals that re-trade.",
     template: {
       templateName: "Starter — Wholesaler MAO",
-      templateDescription: "Wholesale / assignment screening defaults",
+      templateDescription: "Wholesale / assignment screening",
       propertyTaxPct: 1.5,
       insuranceInputMode: "percent",
       insurancePct: 0.5,

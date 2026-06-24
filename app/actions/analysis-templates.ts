@@ -305,10 +305,18 @@ export async function createAnalysisTemplateAction(
 
   const parsed = analysisTemplateSchema.safeParse(input);
   if (!parsed.success) {
+    // Surface the actual reason (e.g. "Description must be 40 characters or
+    // fewer") instead of a generic "check the highlighted fields" — the
+    // dialog can't always highlight a server-only failure, so the toast is
+    // the user's only signal.
+    const issue = parsed.error.issues[0];
+    const field = issue?.path?.length ? `${issue.path.join(".")}: ` : "";
     return {
       ok: false,
       code: "VALIDATION_ERROR",
-      message: "Template form is invalid. Please check the highlighted fields.",
+      message: issue
+        ? `Template couldn't be saved — ${field}${issue.message}`
+        : "Template form is invalid. Please check the highlighted fields.",
     };
   }
 
@@ -413,10 +421,18 @@ export async function updateAnalysisTemplateAction(
 
   const parsed = analysisTemplateSchema.safeParse(input);
   if (!parsed.success) {
+    // Surface the actual reason (e.g. "Description must be 40 characters or
+    // fewer") instead of a generic "check the highlighted fields" — the
+    // dialog can't always highlight a server-only failure, so the toast is
+    // the user's only signal.
+    const issue = parsed.error.issues[0];
+    const field = issue?.path?.length ? `${issue.path.join(".")}: ` : "";
     return {
       ok: false,
       code: "VALIDATION_ERROR",
-      message: "Template form is invalid. Please check the highlighted fields.",
+      message: issue
+        ? `Template couldn't be saved — ${field}${issue.message}`
+        : "Template form is invalid. Please check the highlighted fields.",
     };
   }
 

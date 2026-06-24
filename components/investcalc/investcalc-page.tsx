@@ -500,6 +500,12 @@ export function InvestCalcPage({
   const [activeStrategyKey, setActiveStrategyKey] = useState<string | null>(null);
   const activeStrategy = getStrategyByKey(activeStrategyKey);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
+  // The exact form values that produced `analysisResult`. The results
+  // dashboard reads from this (not a live form.getValues() snapshot) so the
+  // headline metrics and the derived cards (Max Offer, Sensitivity, etc.) are
+  // always computed from the SAME inputs — never a mix of frozen result +
+  // live form state. Updated everywhere `analysisResult` is set.
+  const [analysisValues, setAnalysisValues] = useState<InvestmentFormValues | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
   const [showResults, setShowResults] = useState(false);
   // Hero "instant verdict" path: when a cold visitor types an address we
@@ -690,6 +696,7 @@ export function InvestCalcPage({
 
   const clearAnalysisOutputs = useCallback(() => {
     setAnalysisResult(null);
+    setAnalysisValues(null);
     setProjectionSource(null);
     setTaxStrategySource(null);
     setExitScenarioSource(null);
@@ -701,17 +708,14 @@ export function InvestCalcPage({
     setIsSampleProPreview(false);
   }, []);
 
-  const invalidateAnalysisOutputsIfFormDriftedFromLastRun = useCallback(() => {
-    if (isProgrammaticResetRef.current || isCalculatingRef.current) return;
-    const baseline = lastComputedFormJsonRef.current;
-    if (baseline === null) return;
-    const now = formSnapshotForCompare(form.getValues());
-    if (now === null || now === baseline) return;
-
-    // Any edit after Calculate invalidates the currently shown outputs.
-    lastComputedFormJsonRef.current = null;
-    clearAnalysisOutputs();
-  }, [form, clearAnalysisOutputs]);
+  // Live recompute: once a result is on screen, editing any input updates the
+  // analysis in place instead of blanking it until the next explicit Run.
+  // Kept in a ref so the form watcher (below) subscribes ONCE and never tears
+  // down its debounce timer on re-render — re-subscribing would clear the
+  // pending timer and silently drop the user's final edit. The body is
+  // reassigned every render (after the source builders, where the canUse*
+  // flags + builders are in scope) so it always closes over fresh values.
+  const recomputeOutputsFromFormRef = useRef<() => void>(() => {});
 
   const resetToNewAnalysis = useCallback(
     (nextPropertyType: InvestmentFormValues["propertyType"] = "single-family") => {
@@ -1359,6 +1363,64 @@ export function InvestCalcPage({
     };
   };
 
+  // Reassigned every render so it closes over the current entitlement flags,
+  // builders, and form state. Mirrors onSubmit's output wiring but with NO
+  // server call, spinner, toast, or analytics — pure client math for an
+  // instant live update. Snapshot sources use a null analysisId so the Pro
+  // panels render from the freshly computed years locally instead of firing
+  // snapshot fetch/upsert server actions on every keystroke.
+  recomputeOutputsFromFormRef.current = () => {
+    if (isProgrammaticResetRef.current || isCalculatingRef.current) return;
+    const baseline = lastComputedFormJsonRef.current;
+    // No prior run → the first compute stays an explicit Run, preserving the
+    // funnel events, loading state, and server-action gating in onSubmit.
+    if (baseline === null) return;
+    const nextSnapshot = formSnapshotForCompare(form.getValues());
+    // Unchanged, or transiently unparseable mid-edit (e.g. a required field
+    // momentarily cleared): keep the last good results on screen instead of
+    // blanking them — that silent blank was the core "sticky / nothing
+    // happens" complaint.
+    if (nextSnapshot === null || nextSnapshot === baseline) return;
+    const parsed = investmentFormSchema.safeParse(form.getValues());
+    if (!parsed.success) return;
+    const values = parsed.data;
+    const result = calculateAnalysis(values);
+
+    // Editing away from the sample deal ends the Pro preview — the unlock is
+    // for the demo numbers only, so panels re-gate to the real entitlement.
+    setIsSampleProPreview(false);
+    setAnalysisResult(result);
+    setAnalysisValues(values);
+    setProjectionSource(
+      canUseProjections ? buildProjectionSource(null, values, result) : null
+    );
+    setTaxStrategySource(
+      canUseTaxStrategy ? buildTaxStrategySource(null, values, result) : null
+    );
+    setExitScenarioSource(
+      canUseExitScenarios
+        ? buildExitScenarioSource(
+            null,
+            values,
+            result,
+            result.tenYearProjection,
+            result.taxStrategyYears
+          )
+        : null
+    );
+    // Deal Score recomputed client-side with the same pure fn the server
+    // action wraps — only when the user is actually entitled, so we neither
+    // bypass the free-tier gate nor hammer the server on every keystroke.
+    if (canUseDealScore) {
+      setDealScoreResult({
+        ok: true,
+        tier: "pro",
+        data: computeDealScore(buildDealScoreInputFromAnalysis(values, result)),
+      });
+    }
+    lastComputedFormJsonRef.current = nextSnapshot;
+  };
+
   useEffect(() => {
     savedDealIdRef.current = savedDealId;
   }, [savedDealId]);
@@ -1370,21 +1432,23 @@ export function InvestCalcPage({
     // main-thread time per character (visible as input latency / TBT).
     // The programmatic-reset check stays SYNCHRONOUS at event time —
     // checking it inside the deferred callback would race the reset
-    // flag being cleared.
+    // flag being cleared. The recompute is read from a ref so this
+    // subscription is created ONCE and its pending debounce timer is never
+    // cleared by a re-render (which would drop the user's final edit).
     let debounceTimer: ReturnType<typeof setTimeout> | null = null;
     const subscription = form.watch(() => {
       if (isProgrammaticResetRef.current) return;
       if (debounceTimer) clearTimeout(debounceTimer);
       debounceTimer = setTimeout(() => {
         syncFormDirtyVersusPersisted();
-        invalidateAnalysisOutputsIfFormDriftedFromLastRun();
+        recomputeOutputsFromFormRef.current();
       }, 100);
     });
     return () => {
       if (debounceTimer) clearTimeout(debounceTimer);
       subscription.unsubscribe();
     };
-  }, [form, syncFormDirtyVersusPersisted, invalidateAnalysisOutputsIfFormDriftedFromLastRun]);
+  }, [form, syncFormDirtyVersusPersisted]);
 
   /**
    * Auto-save draft for anonymous / walk-in users.
@@ -1478,6 +1542,7 @@ export function InvestCalcPage({
             ? buildTaxStrategySource(parsed.id, hydratedValues, result)
             : null;
           setAnalysisResult(result);
+          setAnalysisValues(hydratedValues);
           setProjectionSource(builtProjectionSource);
           setTaxStrategySource(builtTaxStrategySource);
           setExitScenarioSource(
@@ -1738,6 +1803,7 @@ export function InvestCalcPage({
         ? buildTaxStrategySource(sourceAnalysisId, values, result)
         : null;
       setAnalysisResult(result);
+      setAnalysisValues(values);
       // Fire Google Ads conversion event - primary intent signal we can
       // optimize spend against (analyze-an-actual-deal is the
       // micro-conversion that precedes signup).
@@ -1966,6 +2032,7 @@ export function InvestCalcPage({
             ? buildTaxStrategySource(result.id, values, savedResult)
             : null;
           setAnalysisResult(savedResult);
+          setAnalysisValues(values);
           setProjectionSource(builtProjectionSource);
           setTaxStrategySource(builtTaxStrategySource);
           setExitScenarioSource(
@@ -3015,7 +3082,7 @@ export function InvestCalcPage({
             <AnalysisErrorBoundary result={analysisResult}>
             <AnalysisDashboard
               result={analysisResult}
-              values={form.getValues()}
+              values={analysisValues ?? form.getValues()}
               dataConfidence={
                 analysisResult
                   ? buildDataConfidence(buildProvenanceInput(enrichmentCaptureRef.current, form.getValues()), {
