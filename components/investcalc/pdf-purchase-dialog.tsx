@@ -21,6 +21,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { TRIAL_LABEL } from "@/lib/trial";
 
 interface PdfPurchaseDialogProps {
   open: boolean;
@@ -50,23 +51,30 @@ export function PdfPurchaseDialog({
         </DialogHeader>
 
         <div className="space-y-3">
-          {/* Pro - preferred option, listed first */}
+          {/* Pro - preferred option, listed first and framed as best value
+              at the moment of intent: a warm buyer who wants a lender PDF is
+              the most likely person to convert, so anchor on the free trial
+              and "pays for itself after one extra report". */}
           <Link
             href="/pricing"
-            className="group flex items-start justify-between gap-3 rounded-2xl border-2 border-primary/30 bg-gradient-to-br from-[var(--brand-blue-light)] via-card to-card p-4 transition hover:border-primary/60"
+            className="group relative flex items-start justify-between gap-3 rounded-2xl border-2 border-primary bg-gradient-to-br from-[var(--brand-blue-light)] via-card to-card p-4 transition hover:border-primary/70"
           >
+            <span className="absolute -top-2.5 left-4 rounded-full bg-primary px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-widest text-primary-foreground shadow-sm">
+              Best value
+            </span>
             <div>
               <p className="flex items-center gap-1.5 text-sm font-bold text-foreground">
                 <Sparkles className="size-4 text-primary" />
                 TrueCap Pro
               </p>
               <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                Unlimited PDFs with your own branding, plus saved deals,
-                projections, tax strategy, and exit scenarios on every analysis.
+                Unlimited branded PDFs, plus saved deals, projections, tax
+                strategy, and exit scenarios on every analysis. Send more than
+                one report and Pro already pays for itself.
               </p>
             </div>
-            <span className="mt-0.5 inline-flex shrink-0 items-center gap-1 text-sm font-bold text-primary">
-              See pricing
+            <span className="mt-0.5 inline-flex shrink-0 items-center gap-1 text-right text-sm font-bold text-primary">
+              {TRIAL_LABEL}
               <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
             </span>
           </Link>
