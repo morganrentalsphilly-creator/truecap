@@ -166,6 +166,22 @@ textarea,
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
   }
+  /* Contain absolutely-positioned descendants (notably `.sr-only` labels in
+     the `min-w-[…]` comparison tables on the homepage and /why-truecap) inside
+     their horizontal scroller instead of letting them escape to <body> and
+     widen the document. Without this they land hundreds of px past a phone's
+     viewport; the html/body overflow guards above only CLIP that — the
+     document is still over-wide, and iOS Safari still rubber-bands sideways.
+     Making the scroller a containing block genuinely shrinks the content back
+     to the viewport. The `:where(:not(.relative)…)` guard is zero-specificity,
+     so any element that opts into an explicit position utility still wins.
+     NOTE: a copy of this rule previously lived in styles/globals.css, which
+     nothing imports — so it never shipped. This file (app/globals.css) is the
+     one layout.tsx imports. Verified in-browser at a 390px viewport: drops
+     /why-truecap scrollWidth 589→390 and the homepage 518→390. */
+  .overflow-x-auto:where(:not(.relative):not(.absolute):not(.fixed):not(.sticky)) {
+    position: relative;
+  }
   /* Prevent number input spinners on mobile */
   input[type='number']::-webkit-inner-spin-button,
   input[type='number']::-webkit-outer-spin-button {
