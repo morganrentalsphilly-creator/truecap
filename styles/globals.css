@@ -122,25 +122,32 @@
   body {
     @apply bg-background text-foreground;
   }
+}
 
-  /* Horizontal-scroll containers must establish a positioning context so
-     that absolutely-positioned descendants are clipped by the scroller
-     instead of escaping to the document root. The load-bearing case is
-     `.sr-only` labels (position: absolute) inside `min-w-[…]` comparison
-     tables on the homepage and the /vs, /markets, /pricing, /tools, and
-     /blog pages: with a static wrapper, each sr-only span lands at its
-     cell's natural column offset (hundreds of px past a phone's viewport),
-     inflating <html> scrollWidth. Mobile browsers then shrink-to-fit the
-     whole page, so it renders "zoomed out". Making every horizontal
-     scroller `position: relative` re-parents those spans so the scroller
-     clips them — no page overflow. This mirrors the `relative` already
-     paired with `overflow-x-auto` in components/ui/table.tsx. `relative`
-     with no offsets/z-index is visually inert and creates no stacking
-     context, and any explicit position utility (absolute/fixed/sticky)
-     still wins via Tailwind's utilities layer. */
-  .overflow-x-auto {
-    position: relative;
-  }
+/* Horizontal-scroll containers must establish a positioning context so that
+   absolutely-positioned descendants are clipped by the scroller instead of
+   escaping to the document root. The load-bearing case is `.sr-only` labels
+   (position: absolute) inside `min-w-[…]` comparison tables on the homepage
+   and the /vs, /markets, /pricing, /tools, and /blog pages: with a static
+   wrapper, each sr-only span lands at its cell's natural column offset
+   (hundreds of px past a phone's viewport), inflating <html> scrollWidth and
+   letting the page scroll sideways on mobile. (Confirmed June 2026 via a
+   390px-viewport DOM scan of the live homepage: sr-only "Included" spans from
+   the pricing comparison table sat at left:518 with offsetParent=<body>,
+   pushing documentElement.scrollWidth to 518 against a 390px viewport.)
+
+   This rule is INTENTIONALLY UNLAYERED — NOT inside `@layer base`. The Tailwind
+   v4 build silently DROPPED the `@layer base` version (the compiled CSS shipped
+   only the `.overflow-x-auto { overflow-x: auto }` utility and no position rule
+   at all — verified on the live build), so the safeguard never reached
+   production. An unlayered rule always emits and outranks the utilities layer.
+   The `:where(:not(.relative)…)` guard has zero specificity, so any element
+   that opts into an explicit position utility (relative/absolute/fixed/sticky)
+   still wins and we never clobber a deliberately-positioned scroller.
+   `relative` with no offsets is visually inert and creates no stacking context.
+   Verified in-browser to drop the homepage scrollWidth from 518 → 390. */
+.overflow-x-auto:where(:not(.relative):not(.absolute):not(.fixed):not(.sticky)) {
+  position: relative;
 }
 
 /* Hero product-mock animations were previously defined here but
