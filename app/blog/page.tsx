@@ -49,6 +49,15 @@ export type BlogPost = {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: "how-to-estimate-rent-rental-property",
+    title: "How to estimate rent on a rental property (2026)",
+    excerpt:
+      "Rent is the input every metric leans on — and the one investors most often guess. The appraiser's comp-adjustment method with a worked grid, the GRM and 1% cross-checks that bound the number, the haircut from market to effective rent, and why an 8% ($150/month) rent miss moves the cap rate 0.6 points, swings cash flow ~$128/month, and pushes DSCR from 1.15 to 1.24 — across the lender's line.",
+    readingTimeMinutes: 11,
+    publishedAt: "2026-06-25",
+    available: true,
+  },
+  {
     slug: "rental-property-insurance",
     title: "Rental property insurance: landlord coverage and cost in 2026",
     excerpt:
