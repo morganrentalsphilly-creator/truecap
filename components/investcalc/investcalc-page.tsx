@@ -27,6 +27,7 @@ import {
   normalizeInvestmentFormSnapshot,
 } from "@/lib/investcalc-schema";
 import { calculateAnalysis, AnalysisResult } from "@/lib/calc-analysis";
+import { getDealTier, type DealTier } from "@/lib/verdict";
 import { PropertyTypeSection } from "./property-type-section";
 import { PropertyDetailsSection } from "./property-details-section";
 import { SingleFamilyUnitSection } from "./single-family-unit-section";
@@ -508,6 +509,18 @@ export function InvestCalcPage({
   const [analysisValues, setAnalysisValues] = useState<InvestmentFormValues | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
   const [showResults, setShowResults] = useState(false);
+  // Live instant-verdict preview: a lightweight verdict that forms as the user
+  // types, BEFORE the first explicit "Run analysis". Pure client math, kept
+  // separate from analysisResult so it never triggers the heavy dashboard,
+  // funnel events, or server actions - it just makes the "60-second" promise
+  // feel instant. Cleared/ignored once a real run produces analysisResult.
+  const [livePreview, setLivePreview] = useState<{
+    tier: DealTier;
+    netCashFlow: number;
+    capRate: number;
+    dscr: number;
+    monthlyPayment: number;
+  } | null>(null);
   // Hero "instant verdict" path: when a cold visitor types an address we
   // estimate the purchase price from local rent so the analyzer can run
   // immediately. These drive the honest "estimated price — confirm it"
@@ -1373,9 +1386,30 @@ export function InvestCalcPage({
   recomputeOutputsFromFormRef.current = () => {
     if (isProgrammaticResetRef.current || isCalculatingRef.current) return;
     const baseline = lastComputedFormJsonRef.current;
-    // No prior run → the first compute stays an explicit Run, preserving the
-    // funnel events, loading state, and server-action gating in onSubmit.
-    if (baseline === null) return;
+    // No prior run → the first FULL compute stays an explicit Run (preserving
+    // the funnel events, loading state, and server-action gating in onSubmit).
+    // But we DO compute a lightweight live preview so the verdict forms as the
+    // user types - the magic moment - without any of that machinery.
+    if (baseline === null) {
+      const liveParsed = investmentFormSchema.safeParse(form.getValues());
+      if (liveParsed.success) {
+        try {
+          const r = calculateAnalysis(liveParsed.data);
+          setLivePreview({
+            tier: getDealTier(r),
+            netCashFlow: r.netCashFlow,
+            capRate: r.capRate,
+            dscr: r.dscr,
+            monthlyPayment: r.monthlyPayment,
+          });
+        } catch {
+          setLivePreview(null);
+        }
+      } else {
+        setLivePreview(null);
+      }
+      return;
+    }
     const nextSnapshot = formSnapshotForCompare(form.getValues());
     // Unchanged, or transiently unparseable mid-edit (e.g. a required field
     // momentarily cleared): keep the last good results on screen instead of
@@ -2997,6 +3031,76 @@ export function InvestCalcPage({
                 <OperatingExpensesSection form={form} purchasePrice={purchasePrice} />
               </div>
             </div>
+
+            {/* Live instant-verdict preview - forms as the user types, before
+                they ever click Run. The "60 seconds" promise made literal:
+                the answer is already on screen. Pure client math; the full
+                dashboard still lives behind the explicit Run below. */}
+            {!showResults && !analysisResult && !isCalculating && livePreview ? (
+              <div
+                aria-live="polite"
+                className="rounded-2xl border-2 border-dashed border-primary/30 bg-[var(--brand-blue-light)] p-4 sm:p-5"
+              >
+                <div className="mb-3 flex items-center justify-between gap-2">
+                  <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-primary">
+                    <span className="relative flex size-2">
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary/60" />
+                      <span className="relative inline-flex size-2 rounded-full bg-primary" />
+                    </span>
+                    Live preview
+                  </span>
+                  <span
+                    className={cn(
+                      "rounded-full px-2.5 py-0.5 text-xs font-extrabold uppercase tracking-wide",
+                      livePreview.tier === "Strong" && "bg-[var(--brand-green)] text-white",
+                      livePreview.tier === "Solid" && "bg-primary text-primary-foreground",
+                      livePreview.tier === "Mixed" && "bg-amber-500 text-white",
+                      livePreview.tier === "Marginal" && "bg-orange-500 text-white",
+                      livePreview.tier === "Negative" && "bg-red-600 text-white"
+                    )}
+                  >
+                    {livePreview.tier}
+                  </span>
+                </div>
+                <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                  <div>
+                    <div className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+                      Cash flow
+                    </div>
+                    <div
+                      className={cn(
+                        "font-mono text-lg font-bold tabular-nums sm:text-xl",
+                        livePreview.netCashFlow >= 0
+                          ? "text-[var(--metric-positive)]"
+                          : "text-[var(--metric-negative)]"
+                      )}
+                    >
+                      {livePreview.netCashFlow >= 0 ? "+" : "-"}$
+                      {Math.abs(Math.round(livePreview.netCashFlow)).toLocaleString()}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+                      Cap rate
+                    </div>
+                    <div className="font-mono text-lg font-bold tabular-nums text-foreground sm:text-xl">
+                      {livePreview.capRate.toFixed(1)}%
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+                      DSCR
+                    </div>
+                    <div className="font-mono text-lg font-bold tabular-nums text-foreground sm:text-xl">
+                      {livePreview.monthlyPayment <= 0 ? "—" : livePreview.dscr.toFixed(2)}
+                    </div>
+                  </div>
+                </div>
+                <p className="mt-2.5 text-[11px] leading-snug text-muted-foreground">
+                  Updating as you type — run the full analysis for your Deal Score, projections, tax &amp; exit.
+                </p>
+              </div>
+            ) : null}
 
             {/* Calculate button - solid brand color (gradient was too
                 visually heavy and competed with the verdict card
