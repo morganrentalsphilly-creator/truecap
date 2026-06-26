@@ -131,6 +131,34 @@ function classifyDeal(result: AnalysisResult): {
 }
 
 /**
+ * Public API — the verdict broken into its parts, so UI surfaces can render
+ * it with progressive disclosure (a one-line closer always visible, the
+ * per-metric "why" sentences tucked behind a toggle). Free-tier safe and
+ * per-deal — the same engine that powers the PDF paragraph, exposed
+ * structured instead of pre-joined. The dashboard uses this to give FREE
+ * users the plain-English "why this verdict" that was previously Pro-only.
+ */
+export function getVerdictNarrative(input: VerdictInputs): {
+  headline: DealTier;
+  opener: string;
+  /** The four per-metric explanations: cash flow, cap rate, DSCR, CoC. */
+  sentences: string[];
+  closer: string;
+} {
+  const { result, address } = input;
+  const c = classifyDeal(result);
+  const opener = address
+    ? `${address}: ${c.headline.toLowerCase()} fundamentals.`
+    : `Overall: ${c.headline.toLowerCase()} fundamentals.`;
+  return {
+    headline: c.headline,
+    opener,
+    sentences: [c.cashFlowSentence, c.capRateSentence, c.dscrSentence, c.cocSentence],
+    closer: c.closer,
+  };
+}
+
+/**
  * Public API — returns a single paragraph string (3-5 sentences) suitable
  * for embedding in the PDF cover page, share links, etc.
  */

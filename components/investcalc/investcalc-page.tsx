@@ -1340,6 +1340,7 @@ export function InvestCalcPage({
       closingCosts: result.closingCosts,
       cumulativeCashFlowByYear: projectionYears.map((year) => year.cumulativeCashFlowAnnual),
       cumulativeTaxBenefitByYear: taxStrategyYears.map((year) => year.cumulativeTaxBenefitAnnual),
+      annualDepreciation: taxStrategyYears[0]?.depreciationDeductionAnnual ?? 0,
     };
 
     return {
@@ -1872,6 +1873,11 @@ export function InvestCalcPage({
           // with the top edge - gives the eye some breathing room.
           const y = window.scrollY + rect.top - 16;
           window.scrollTo({ top: y, behavior: "smooth" });
+          // Move keyboard/screen-reader focus to the results region too, so
+          // non-sighted users land on the verdict instead of being stranded
+          // on the submit button while the page scrolls visually past them.
+          // preventScroll: our own smooth scroll above owns the motion.
+          (target as HTMLElement).focus({ preventScroll: true });
         }
       });
     } finally {
@@ -2149,6 +2155,7 @@ export function InvestCalcPage({
           closingCosts: analysisResult.closingCosts,
           cumulativeCashFlowByYear: projectionYears.map((year) => year.cumulativeCashFlowAnnual),
           cumulativeTaxBenefitByYear: taxYears.map((year) => year.cumulativeTaxBenefitAnnual),
+          annualDepreciation: taxYears[0]?.depreciationDeductionAnnual ?? 0,
         });
 
       // The exported Deal Score is the canonical Balanced score (computed inside
@@ -2860,7 +2867,10 @@ export function InvestCalcPage({
       </section>
 
       {/* Form */}
-      <main id="main" className="max-w-7xl mx-auto px-4 sm:px-6 pb-20 sm:pb-16">
+      {/* Bottom padding on mobile reserves room for the fixed Calculate bar
+          (~h-12 button + its own safe-area pad) so the last form control is
+          never trapped under it on phones with a home indicator. */}
+      <main id="main" className="max-w-7xl mx-auto px-4 sm:px-6 pb-[calc(5.5rem+env(safe-area-inset-bottom))] sm:pb-16">
         <form
           ref={formElementRef}
           onSubmit={form.handleSubmit(onSubmit, onError)}
@@ -3047,7 +3057,12 @@ export function InvestCalcPage({
             surfaces the headline metrics directly from analysisResult
             so the user's numbers are never lost. */}
         {(showResults || isCalculating || analysisResult !== null) && (
-          <div className="mt-8" data-analysis-results="true">
+          <div
+            className="mt-8 scroll-mt-4 focus-visible:outline-none"
+            data-analysis-results="true"
+            tabIndex={-1}
+            aria-label="Analysis results"
+          >
             {/* Result-state trust strip - names the default sources behind
                 the numbers (HUD/FRED/state) + "all editable", with a jump
                 back to the form. Only once real results exist. */}

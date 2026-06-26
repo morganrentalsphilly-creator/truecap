@@ -28,10 +28,28 @@ export function AssumptionImpactCard({ values }: { values: InvestmentFormValues 
         <Activity className="w-4 h-4 text-primary" />
         <span className="font-semibold text-sm text-foreground">What moves this deal</span>
       </div>
-      <p className="text-xs text-muted-foreground mb-4">
+      <p className="text-xs text-muted-foreground mb-3">
         How much monthly cash flow swings when each assumption moves - plus where each number comes from
         and how confident it is. Verify the top, lowest-confidence ones first.
       </p>
+
+      {/* Color key for the per-driver confidence dots below - otherwise the
+          red/amber/green is meaningless (and the old hover-only title never
+          fired on touch). */}
+      <div className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
+        <span className="inline-flex items-center gap-1">
+          <span className="inline-block size-1.5 shrink-0 rounded-full bg-emerald-500" />
+          High confidence
+        </span>
+        <span className="inline-flex items-center gap-1">
+          <span className="inline-block size-1.5 shrink-0 rounded-full bg-amber-500" />
+          Medium
+        </span>
+        <span className="inline-flex items-center gap-1">
+          <span className="inline-block size-1.5 shrink-0 rounded-full bg-red-500" />
+          Low - verify first
+        </span>
+      </div>
 
       <div className="space-y-2.5">
         {top.map((d) => {

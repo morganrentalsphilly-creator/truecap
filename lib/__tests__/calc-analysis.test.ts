@@ -371,7 +371,7 @@ describe("exit scenarios", () => {
     expect(Math.abs(years[4]!.propertyValue - expectedY5)).toBeLessThanOrEqual(1);
   });
 
-  it("totalProfit = netSaleProceeds + cumulativeCashFlow + cumulativeTaxBenefit - initialInvestment", () => {
+  it("totalProfit = netSaleProceeds + cumulativeCashFlow + cumulativeTaxBenefit - initialInvestment - exitTax", () => {
     const input: ExitScenarioInput = {
       purchasePrice: 245_000,
       appreciationRate: 3,
@@ -391,8 +391,34 @@ describe("exit scenarios", () => {
       y10.netSaleProceeds +
       y10.cumulativeCashFlow +
       y10.cumulativeTaxBenefit -
-      (49_000 + 7_350);
+      (49_000 + 7_350) -
+      (y10.exitTax ?? 0);
     expect(y10.totalProfit).toBe(expected);
+  });
+
+  it("exit tax adds depreciation recapture on top of capital gains", () => {
+    const base = {
+      purchasePrice: 245_000,
+      appreciationRate: 3,
+      sellingCostPct: 6,
+      loanAmount: 196_000,
+      interestRate: 7,
+      loanTermYears: 30,
+      monthlyPayment: 1_304,
+      downPayment: 49_000,
+      closingCosts: 7_350,
+      cumulativeCashFlowByYear: Array(10).fill(0),
+      cumulativeTaxBenefitByYear: Array(10).fill(0),
+    };
+    // An appreciating property has a capital gain, so some exit tax is owed
+    // even with no depreciation.
+    const noDep = buildExitScenarios({ ...base, annualDepreciation: 0 });
+    expect(noDep[9]!.exitTax ?? 0).toBeGreaterThan(0);
+    // Adding annual depreciation lowers the basis -> larger gain taxed partly
+    // at the higher recapture rate -> strictly more exit tax, less profit.
+    const withDep = buildExitScenarios({ ...base, annualDepreciation: 8_000 });
+    expect(withDep[9]!.exitTax ?? 0).toBeGreaterThan(noDep[9]!.exitTax ?? 0);
+    expect(withDep[9]!.totalProfit).toBeLessThan(noDep[9]!.totalProfit);
   });
 });
 

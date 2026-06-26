@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import {
@@ -20,6 +20,7 @@ import {
   FileDown,
   Sparkles,
   ListTodo,
+  SlidersHorizontal,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -71,6 +72,9 @@ import { StrategiesPanel } from "@/components/investcalc/strategies-panel";
 import { ProInlineGate } from "@/components/investcalc/pro-inline-gate";
 import { DealQaPanel } from "@/components/investcalc/deal-qa-panel";
 import { BuyBoxVerdictCard } from "@/components/investcalc/buy-box-verdict-card";
+import { NextActionBanner } from "@/components/investcalc/next-action-banner";
+import { nextActionForDeal } from "@/lib/next-action";
+import { getVerdictNarrative } from "@/lib/verdict";
 import { StrategyOutcomeCard } from "@/components/investcalc/strategy-outcome-card";
 import type { InvestorStrategy } from "@/lib/investor-strategies";
 import { deriveStateFromAddress } from "@/lib/buy-box";
@@ -269,8 +273,12 @@ function cocBenchmarkLabel(cocPct: number): string {
 }
 
 function cashFlowBenchmarkLabel(monthlyCashFlow: number): string {
-  if (monthlyCashFlow > 1000) return "Above $1,000/mo target";
-  if (monthlyCashFlow > 0) return "Positive but modest";
+  // Bands aligned with the Deal Score's own cash-flow tiers so the sub-label
+  // never contradicts the score (the old flat "$1,000/mo target" deflated
+  // perfectly good $300-500/mo deals).
+  if (monthlyCashFlow >= 500) return "Strong (≥$500/mo)";
+  if (monthlyCashFlow >= 200) return "Solid ($200–500/mo)";
+  if (monthlyCashFlow > 0) return "Thin but positive";
   if (monthlyCashFlow > -100) return "~Break-even";
   return "Losing money monthly";
 }
@@ -342,7 +350,7 @@ function MetricCard({
   return (
     <div className="flex flex-col gap-1 rounded-2xl border border-border bg-card p-3 shadow-[0_1px_2px_rgba(15,23,42,0.04)] sm:p-5">
       {glossaryTerm ? (
-        <GlossaryTip term={glossaryTerm} showIcon={false} className="!no-underline">
+        <GlossaryTip term={glossaryTerm} className="!no-underline">
           {labelEl}
         </GlossaryTip>
       ) : (
@@ -478,6 +486,29 @@ export function AnalysisDashboard({
     // is unlocked).
     "stress-test": canUseMaxOffer || canUseSensitivity,
   };
+
+  // Roving-tabindex keyboard nav for the results tab bar (WAI-ARIA tabs):
+  // Left/Right move between tabs, Home/End jump to the ends, and focus
+  // follows selection so a screen-reader/keyboard user can traverse the
+  // Pro analyses (projections, tax, exit, stress) the same way a mouse user
+  // can. Pairs with the role=tab/tablist/tabpanel wiring on the markup.
+  const handleTabKeyDown = (e: ReactKeyboardEvent<HTMLButtonElement>) => {
+    const order = TABS.map((t) => t.id);
+    const idx = order.indexOf(activeTab);
+    let nextIdx: number | null = null;
+    if (e.key === "ArrowRight" || e.key === "ArrowDown") nextIdx = (idx + 1) % order.length;
+    else if (e.key === "ArrowLeft" || e.key === "ArrowUp") nextIdx = (idx - 1 + order.length) % order.length;
+    else if (e.key === "Home") nextIdx = 0;
+    else if (e.key === "End") nextIdx = order.length - 1;
+    if (nextIdx === null) return;
+    e.preventDefault();
+    const nextId = order[nextIdx];
+    setActiveTab(nextId);
+    requestAnimationFrame(() => {
+      document.getElementById(`analysis-tab-${nextId}`)?.focus();
+    });
+  };
+
   const isEditingLockedByPlan = isAuthenticated && isExistingSavedDeal && !canUpdateSavedDeals;
   const isSaveLimitLockedByPlan = isAuthenticated && !isExistingSavedDeal && saveDealLimitReached;
   const isSaveLockedByPlan =
@@ -491,6 +522,33 @@ export function AnalysisDashboard({
   // Canonical Balanced verdict - identical to the dashboard, My Deals, compare,
   // PDF, and share surfaces. The lens never changes it.
   const recommendation = buildRecommendationModel(dealScoreResult);
+
+  // One-glance "what do I do next" - the single imperative step that turns a
+  // verdict into action ("Lower your offer or raise rent", "Make your offer").
+  // Derived from the BASE result (not the what-if sliders) so it stays
+  // consistent with the Deal Score + verdict above it. Same lib that drives
+  // the saved-deal pages, so the wording never diverges between surfaces.
+  const nextAction =
+    result && !isLoading
+      ? nextActionForDeal({
+          netCashFlow: result.netCashFlow,
+          dscr: result.dscr ?? null,
+          monthlyPayment: result.monthlyPayment ?? null,
+        })
+      : null;
+
+  // Plain-English "why this verdict" - the per-deal narrative (cash flow,
+  // cap rate, DSCR, CoC) that the PDF/share already use but free users never
+  // saw on screen. Free-tier safe and per-deal; rendered with progressive
+  // disclosure inside the Recommendation card so the first read stays calm.
+  const verdictNarrative =
+    result && !isLoading
+      ? getVerdictNarrative({
+          result,
+          address: values?.address,
+          purchasePrice: values?.purchasePrice,
+        })
+      : null;
 
   const labelMap: Record<string, string> = {
     "single-family": "Single Family",
@@ -509,7 +567,7 @@ export function AnalysisDashboard({
         key="cashFlow"
         label="Monthly Cash Flow"
         glossaryTerm="cashFlow"
-        value={displayResult ? (displayResult.netCashFlow >= 0 ? fmt(displayResult.netCashFlow) : `-${fmt(displayResult.netCashFlow)}`) : "—"}
+        value={displayResult ? (displayResult.netCashFlow >= 0 ? `+${fmt(displayResult.netCashFlow)}` : `-${fmt(displayResult.netCashFlow)}`) : "—"}
         sub={displayResult ? cashFlowSubLabel(displayResult) : undefined}
         color={displayResult ? (displayResult.netCashFlow >= 0 ? "text-[var(--metric-positive)]" : "text-[var(--metric-negative)]") : undefined}
         isLoading={isLoading}
@@ -551,7 +609,9 @@ export function AnalysisDashboard({
                 ? "Bankable (≥1.25)"
                 : displayResult.dscr >= 1.0
                   ? "Tight (≥1.0)"
-                  : "Underwater"
+                  : propertyType === "owner-occupant"
+                    ? "Below 1.0 — normal for a house-hack"
+                    : "Underwater"
             : undefined
         }
         color={
@@ -560,7 +620,12 @@ export function AnalysisDashboard({
               ? undefined
               : displayResult.dscr >= 1.25
                 ? "text-[var(--metric-positive)]"
-                : "text-[var(--metric-negative)]"
+                : // A sub-1 DSCR is expected for an owner-occupied house-hack
+                  // (rent intentionally doesn't cover full PITI), so don't
+                  // paint it alarm-red there - keep it neutral.
+                  propertyType === "owner-occupant" && displayResult.dscr < 1.0
+                  ? undefined
+                  : "text-[var(--metric-negative)]"
             : undefined
         }
         isLoading={isLoading}
@@ -570,6 +635,7 @@ export function AnalysisDashboard({
       <MetricCard
         key="return"
         label="10-Yr Return"
+        glossaryTerm="tenYearReturn"
         value={annualizedReturnPct != null ? `~${Math.round(annualizedReturnPct)}%/yr` : "—"}
         sub="Total return incl. appreciation"
         color={annualizedReturnPct != null && annualizedReturnPct >= 0 ? "text-[var(--metric-positive)]" : undefined}
@@ -591,7 +657,8 @@ export function AnalysisDashboard({
       <MetricCard
         key="annualCf"
         label="Annual CF"
-        value={result ? `${result.annualCashFlow >= 0 ? "" : "-"}${fmt(result.annualCashFlow)}` : "—"}
+        glossaryTerm="cashFlow"
+        value={result ? `${result.annualCashFlow >= 0 ? "+" : "-"}${fmt(result.annualCashFlow)}` : "—"}
         sub="/yr"
         color={result ? (result.annualCashFlow >= 0 ? "text-[var(--metric-positive)]" : "text-[var(--metric-negative)]") : undefined}
         isLoading={isLoading}
@@ -652,12 +719,18 @@ export function AnalysisDashboard({
           </Button>
         </div>
       )}
+      {/* Verdict-first wrapper: on phones the verdict + next action come
+          BEFORE the action toolbar, so the answer is the first thing the
+          user sees after the sample/identity context - not a block of
+          secondary buttons. On md+ the original toolbar-on-top order is
+          restored via `order`. */}
+      <div className="flex flex-col gap-6">
       {/* Action bar - split into two visually distinct elements:
           a lightweight identity strip ("what is this?") and a
           chunkier Quick Actions panel ("what can I do with it?").
           Previously these were nested inside the same rounded card,
           which gave the area a busy double-border feel. */}
-      <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+      <div className="order-2 flex flex-col gap-3 md:order-1 xl:flex-row xl:items-center xl:justify-between">
         {/* Identity strip - property type + saved-status badge.
             Inline, no card chrome. Reads as a header rather than
             a UI element. */}
@@ -717,7 +790,7 @@ export function AnalysisDashboard({
                         ? "Save is not available for your current plan."
                         : undefined
                 }
-                className="h-9 gap-1 rounded-xl px-1.5 text-[11px] sm:h-10 sm:gap-0 sm:rounded-xl sm:px-4 sm:text-sm max-[380px]:h-9 max-[380px]:gap-0.5 max-[380px]:rounded-lg max-[380px]:px-1 max-[380px]:text-[10px]"
+                className="h-11 gap-1 rounded-xl px-2 text-[11px] sm:h-10 sm:gap-0 sm:rounded-xl sm:px-4 sm:text-sm max-[380px]:gap-0.5 max-[380px]:rounded-lg max-[380px]:px-1 max-[380px]:text-[10px]"
               >
                 {isSaving ? (
                   <Loader2 className="w-3.5 h-3.5 shrink-0 sm:mr-1.5 animate-spin max-[380px]:h-3 max-[380px]:w-3" />
@@ -734,7 +807,7 @@ export function AnalysisDashboard({
               <Button
                 variant="outline"
                 size="sm"
-                className="h-9 gap-1 rounded-xl px-1.5 text-[11px] sm:h-10 sm:gap-0 sm:rounded-xl sm:px-4 sm:text-sm max-[380px]:h-9 max-[380px]:gap-0.5 max-[380px]:rounded-lg max-[380px]:px-1 max-[380px]:text-[10px]"
+                className="h-11 gap-1 rounded-xl px-2 text-[11px] sm:h-10 sm:gap-0 sm:rounded-xl sm:px-4 sm:text-sm max-[380px]:gap-0.5 max-[380px]:rounded-lg max-[380px]:px-1 max-[380px]:text-[10px]"
                 onClick={() => void onCompareDeals()}
                 disabled={!isSaved || !canCompareDeals || isComparing}
                 title={
@@ -755,7 +828,7 @@ export function AnalysisDashboard({
               </Button>
               <Button
                 size="sm"
-                className="h-9 gap-1 rounded-xl bg-primary px-1.5 text-[11px] font-semibold text-primary-foreground sm:h-10 sm:gap-0 sm:rounded-xl sm:px-4 sm:text-sm max-[380px]:h-9 max-[380px]:gap-0.5 max-[380px]:rounded-lg max-[380px]:px-1 max-[380px]:text-[10px]"
+                className="h-11 gap-1 rounded-xl bg-primary px-2 text-[11px] font-semibold text-primary-foreground sm:h-10 sm:gap-0 sm:rounded-xl sm:px-4 sm:text-sm max-[380px]:gap-0.5 max-[380px]:rounded-lg max-[380px]:px-1 max-[380px]:text-[10px]"
                 onClick={() => void onExportPdf()}
                 // Clickable for users WITHOUT the entitlement on purpose:
                 // the click opens the Pro-vs-$5-one-time purchase dialog
@@ -789,7 +862,7 @@ export function AnalysisDashboard({
                     <Button
                       size="sm"
                       variant="outline"
-                      className="h-9 rounded-xl px-2 sm:h-10"
+                      className="h-11 rounded-xl px-2 sm:h-10"
                       disabled={isExporting}
                       aria-label="Choose a report style"
                       title="Choose a report style (lender / partner / personal)"
@@ -818,7 +891,7 @@ export function AnalysisDashboard({
               ) : null}
               <Button
                 size="sm"
-                className="h-9 gap-1 rounded-xl bg-primary px-1.5 text-[11px] font-semibold text-primary-foreground sm:h-10 sm:gap-0 sm:rounded-xl sm:px-4 sm:text-sm max-[380px]:h-9 max-[380px]:gap-0.5 max-[380px]:rounded-lg max-[380px]:px-1 max-[380px]:text-[10px]"
+                className="h-11 gap-1 rounded-xl bg-primary px-2 text-[11px] font-semibold text-primary-foreground sm:h-10 sm:gap-0 sm:rounded-xl sm:px-4 sm:text-sm max-[380px]:gap-0.5 max-[380px]:rounded-lg max-[380px]:px-1 max-[380px]:text-[10px]"
                 onClick={() => void onNewAnalysis()}
                 title="Create a new analysis"
               >
@@ -838,19 +911,21 @@ export function AnalysisDashboard({
           (Wholesale/BRRRR/Flip), lead with that play's real answer; the generic
           buy-box verdict below is hidden because it misreads those plays. */}
       {strategyLeadsOutput && activeStrategy && values ? (
-        <StrategyOutcomeCard
-          strategy={activeStrategy}
-          values={values}
-          result={result}
-          canUseMaxOffer={canUseMaxOffer}
-          canUseStrategies={canUseStrategies}
-          onJumpToTab={setActiveTab}
-          onUpgrade={goToBilling}
-        />
+        <div className="order-1 md:order-2">
+          <StrategyOutcomeCard
+            strategy={activeStrategy}
+            values={values}
+            result={result}
+            canUseMaxOffer={canUseMaxOffer}
+            canUseStrategies={canUseStrategies}
+            onJumpToTab={setActiveTab}
+            onUpgrade={goToBilling}
+          />
+        </div>
       ) : null}
 
       {/* Recommendation + Pro Feature row */}
-      <div className={cn("grid grid-cols-1 md:grid-cols-3 items-start gap-3 sm:gap-4", strategyLeadsOutput && "hidden")}>
+      <div className={cn("order-1 grid grid-cols-1 items-start gap-3 sm:gap-4 md:order-2 md:grid-cols-3", strategyLeadsOutput && "hidden")}>
         <DealScoreCard
           isAnalysisLoading={isLoading}
           isDealScoreLoading={isLoadingDealScore}
@@ -913,6 +988,28 @@ export function AnalysisDashboard({
               <p className="text-sm text-muted-foreground mb-4">
                 {recommendation.description}
               </p>
+              {/* Plain-English "why" — per-deal, free-tier safe. Progressive
+                  disclosure: the verdict + one-line description stay the calm
+                  first read; tapping reveals the metric-by-metric reasoning
+                  a beginner needs to actually trust (and learn from) the call. */}
+              {verdictNarrative && verdictNarrative.sentences.length > 0 && (
+                <details className="group mb-4 -mt-1">
+                  <summary className="flex min-h-9 cursor-pointer list-none items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground">
+                    <ChevronRight
+                      aria-hidden
+                      className="size-3.5 shrink-0 transition-transform group-open:rotate-90"
+                    />
+                    Why this verdict?
+                  </summary>
+                  <ul className="mt-1.5 space-y-1.5 pl-1">
+                    {verdictNarrative.sentences.map((s, i) => (
+                      <li key={i} className="text-sm leading-relaxed text-foreground/80">
+                        {s}
+                      </li>
+                    ))}
+                  </ul>
+                </details>
+              )}
               {recommendation.tips.length > 0 && (
                 <>
                   <p
@@ -969,6 +1066,18 @@ export function AnalysisDashboard({
           )}
         </div>
       </div>
+
+      {/* Next action - the one imperative step the verdict implies, so the
+          user never has to wonder "now what?". Placed directly under the
+          verdict row, BASE-result driven (matches the Deal Score). Hidden
+          while a strategy play leads the output (it has its own CTA). */}
+      {nextAction && !strategyLeadsOutput ? (
+        <div className="order-1 md:order-2">
+          <NextActionBanner action={nextAction} />
+        </div>
+      ) : null}
+      </div>
+      {/* end verdict-first wrapper */}
 
       {/* Buy Box verdict - personalized "meets your buy box" line that
           complements the Deal Score above. Self-gates: only authenticated
@@ -1101,13 +1210,22 @@ export function AnalysisDashboard({
               if (!(e.currentTarget as HTMLDetailsElement).open) setWhatIfState(null);
             }}
           >
-            <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 px-1 py-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground">
+            <summary className="flex min-h-11 cursor-pointer list-none items-center gap-3 rounded-2xl border border-primary/20 bg-[var(--brand-blue-light)] px-4 py-3 transition-colors hover:border-primary/40">
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-card text-primary">
+                <SlidersHorizontal className="size-4" />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-sm font-bold text-foreground">
+                  Play with the numbers
+                </span>
+                <span className="block text-xs text-muted-foreground">
+                  Drag rent, price &amp; rate to watch the verdict move - live.
+                </span>
+              </span>
               <ChevronRight
                 aria-hidden
-                className="size-3.5 shrink-0 transition-transform group-open:rotate-90"
+                className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-90"
               />
-              Stress-test this deal
-              <span className="h-px flex-1 bg-border" />
             </summary>
             <div className="mt-2 space-y-3">
               <WhatIfSliders values={values} baseResult={result} onStateChange={setWhatIfState} />
@@ -1185,12 +1303,23 @@ export function AnalysisDashboard({
             a cramped 4-col grid at <=380px which collapsed tap-targets
             to 60-70px wide; scrollable gives full-size targets and
             readable labels. */}
-        <div className="flex gap-1.5 overflow-x-auto scrollbar-none p-2 sm:gap-0 sm:border-b sm:border-border sm:p-0">
+        <div className="relative">
+        <div
+          role="tablist"
+          aria-label="Analysis sections"
+          className="flex gap-1.5 overflow-x-auto scrollbar-none p-2 sm:gap-0 sm:border-b sm:border-border sm:p-0"
+        >
           {TABS.map((tab) => (
             <button
               key={tab.id}
               type="button"
+              role="tab"
+              id={`analysis-tab-${tab.id}`}
+              aria-selected={activeTab === tab.id}
+              aria-controls="analysis-tabpanel"
+              tabIndex={activeTab === tab.id ? 0 : -1}
               onClick={() => setActiveTab(tab.id)}
+              onKeyDown={handleTabKeyDown}
               className={cn(
                 "flex items-center gap-1.5 sm:gap-2 rounded-full border px-3 py-2 text-[12px] font-medium whitespace-nowrap transition-colors shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:rounded-none sm:border-0 sm:px-5 sm:py-3.5 sm:text-sm",
                 activeTab === tab.id
@@ -1222,9 +1351,22 @@ export function AnalysisDashboard({
             </button>
           ))}
         </div>
+          {/* Right-edge fade: signals more tabs exist when the row scrolls
+              past the viewport on phones (the scrollbar is hidden). */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-card to-transparent sm:hidden"
+          />
+        </div>
 
         {/* Tab content */}
-        <div className="min-w-0 overflow-hidden p-2 sm:p-6">
+        <div
+          role="tabpanel"
+          id="analysis-tabpanel"
+          aria-labelledby={`analysis-tab-${activeTab}`}
+          tabIndex={0}
+          className="min-w-0 overflow-hidden p-2 focus-visible:outline-none sm:p-6"
+        >
           {activeTab === "cash-flow" && (
             <CashFlowTab
               result={result}

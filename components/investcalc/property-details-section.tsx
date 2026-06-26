@@ -48,21 +48,24 @@ export function PropertyDetailsSection({
       <div className="space-y-4">
         {/* Address - Google Places autocomplete attached when key is set */}
         <div>
-          <Label className="text-sm font-medium text-foreground mb-1 block">
+          <Label htmlFor="address" className="text-sm font-medium text-foreground mb-1 block">
             Property Address
           </Label>
           {/* First-run signpost: makes the address the obvious starting
               point and tells new users it auto-fills the deal - the single
               biggest "how do I use this" cue, right at the point of action. */}
           <p className="mb-1.5 text-[11px] leading-snug text-muted-foreground">
-            <span className="font-semibold text-foreground">Start here</span> - enter the address - we auto-fill rent, rate &amp; tax from public data (HUD · FRED · state). Beds, baths &amp; price fill from the Autofill button when available.
+            <span className="font-semibold text-foreground">Start here</span> - address, price, beds &amp; rent is all you need. We auto-fill your rate, taxes, area rent &amp; expenses from public data (HUD · FRED · state){showAutofill ? ", and Autofill can pull beds, baths & price for you" : ""} - everything stays editable.
           </p>
           <AddressAutocomplete
             form={form}
             hasError={!!errors.address}
+            inputId="address"
+            errorId="address-error"
+            required
             onPlaceSelected={onAddressSelected}
           />
-          <FieldError message={errors.address?.message} />
+          <FieldError id="address-error" message={errors.address?.message} />
           {showAutofill && onAutofillFromAddress ? (
             <Button
               type="button"
@@ -97,6 +100,7 @@ export function PropertyDetailsSection({
                 inputMode="decimal"
                 step="0.01"
                 placeholder="385000"
+                aria-required="true"
                 aria-invalid={!!errors.purchasePrice}
                 aria-describedby={errors.purchasePrice ? "purchasePrice-error" : undefined}
                 className={cn(

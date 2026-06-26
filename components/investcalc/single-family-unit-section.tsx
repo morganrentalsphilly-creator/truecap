@@ -101,6 +101,7 @@ export function SingleFamilyUnitSection({
                 inputMode="decimal"
                 step="0.01"
                 placeholder="2800"
+                aria-required="true"
                 aria-invalid={!!errors.monthlyRent}
                 aria-describedby={errors.monthlyRent ? "monthlyRent-error" : undefined}
                 className={cn(

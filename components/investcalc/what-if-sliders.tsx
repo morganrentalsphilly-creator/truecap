@@ -137,10 +137,35 @@ export function WhatIfSliders({ values, baseResult, onStateChange }: Props) {
     setPricePct(0);
   }, []);
 
+  // Screen-reader announcement of the ACTUAL numbers as the user drags - the
+  // tier pill alone ("Mixed") hides the dollar values that ARE the answer.
+  // Debounced so a fast drag doesn't flood the SR queue, and only while
+  // adjusted so it never speaks on first render.
+  const [liveMsg, setLiveMsg] = useState("");
+  useEffect(() => {
+    if (!isAdjusted) {
+      setLiveMsg("");
+      return;
+    }
+    const r = adjustedResult;
+    const id = window.setTimeout(() => {
+      const cf = `${r.netCashFlow >= 0 ? "+" : "-"}$${Math.abs(Math.round(r.netCashFlow)).toLocaleString("en-US")}/mo`;
+      const dscr = r.monthlyPayment > 0 ? `, DSCR ${r.dscr.toFixed(2)}` : "";
+      setLiveMsg(
+        `Adjusted: cash flow ${cf}, cap rate ${r.capRate.toFixed(1)}%, cash-on-cash ${r.cocReturn.toFixed(1)}%${dscr}. Verdict: ${tier}.`
+      );
+    }, 350);
+    return () => window.clearTimeout(id);
+  }, [adjustedResult, isAdjusted, tier]);
+
   const tierToneClass = TIER_TONE[tier];
 
   return (
     <div className="rounded-2xl border border-border bg-card/60 p-3 sm:p-4">
+      {/* SR-only running commentary of the adjusted metrics (see liveMsg). */}
+      <span className="sr-only" aria-live="polite" aria-atomic="true">
+        {liveMsg}
+      </span>
       {/* Header row - kicker + tier pill + (optional) reset button. */}
       <div className="mb-3 flex flex-wrap items-center gap-2">
         <div className="flex items-center gap-1.5">

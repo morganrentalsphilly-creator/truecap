@@ -44,8 +44,10 @@ export function ReturnsExplainer({
             <strong className="text-foreground">{fmtPct(s.cagrPct)}</strong> CAGR.{" "}
           </>
         ) : null}
-        Profit = net sale proceeds + cumulative cash flow + tax benefit − cash invested. Assumptions:{" "}
-        {appreciationRate}% appreciation, {sellingCostPct}% selling cost, {s.years}-yr hold - all editable.
+        Profit = net sale proceeds + cumulative cash flow + tax benefit − cash invested −{" "}
+        <strong className="text-foreground">est. exit tax {formatCurrency(s.exitTax)}</strong>{" "}
+        (depreciation recapture + capital gains). Assumptions: {appreciationRate}% appreciation,{" "}
+        {sellingCostPct}% selling cost, 25%/15% exit-tax rates, {s.years}-yr hold - all estimates.
       </p>
     </div>
   );

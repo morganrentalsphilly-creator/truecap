@@ -14,7 +14,7 @@
  * Falls back to a plain Input when the key is missing or Maps fails to load.
  */
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { InvestmentFormValues } from "@/lib/investcalc-schema";
@@ -98,6 +98,12 @@ interface AddressAutocompleteProps {
   form: UseFormReturn<InvestmentFormValues>;
   hasError?: boolean;
   placeholder?: string;
+  /** id for the <input>, so a visible <Label htmlFor> can associate with it. */
+  inputId?: string;
+  /** id of the field's error node, wired to aria-describedby when hasError. */
+  errorId?: string;
+  /** Marks the field aria-required for assistive tech. */
+  required?: boolean;
   /** Extra classes merged onto the <Input> (twMerge wins on conflicts),
    * so callers like the homepage hero can size the field up without
    * forking the component. Optional - the calculator passes nothing and
@@ -114,9 +120,18 @@ export function AddressAutocomplete({
   hasError,
   placeholder = "123 Main Street, Austin, TX 78701",
   inputClassName,
+  inputId,
+  errorId,
+  required,
   onPlaceSelected,
 }: AddressAutocompleteProps) {
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY;
+  // Stable ids for the ARIA combobox wiring. Use the caller-provided inputId
+  // when present (so a <Label htmlFor> can target it); otherwise fall back to
+  // a generated id so the listbox/option associations still resolve.
+  const generatedId = useId();
+  const fieldId = inputId ?? generatedId;
+  const listboxId = `${fieldId}-listbox`;
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const sessionTokenRef = useRef<SessionToken | null>(null);
@@ -131,6 +146,10 @@ export function AddressAutocomplete({
   // user types but nothing happens. Surfacing the search state makes
   // the silence visible.
   const [isSearching, setIsSearching] = useState(false);
+
+  // Whether the suggestion listbox is currently presented - drives the
+  // combobox aria-expanded / aria-activedescendant wiring below.
+  const hasSuggestions = open && predictions.length > 0;
 
   // react-hook-form binding
   const { ref: rhfRef, onChange: rhfOnChange, ...registerRest } = form.register("address");
@@ -328,8 +347,17 @@ export function AddressAutocomplete({
       <Input
         {...registerRest}
         ref={setInputRef}
+        id={fieldId}
         placeholder={placeholder}
         autoComplete="off"
+        role="combobox"
+        aria-autocomplete="list"
+        aria-expanded={hasSuggestions}
+        aria-controls={hasSuggestions ? listboxId : undefined}
+        aria-activedescendant={hasSuggestions ? `${fieldId}-option-${highlight}` : undefined}
+        aria-invalid={hasError || undefined}
+        aria-describedby={hasError && errorId ? errorId : undefined}
+        aria-required={required || undefined}
         onChange={handleInputChange}
         onFocus={() => {
           if (predictions.length > 0) setOpen(true);
@@ -341,6 +369,11 @@ export function AddressAutocomplete({
           inputClassName
         )}
       />
+      {/* Visually-hidden live count so screen readers hear that suggestions
+          appeared and how many - the visual dropdown is otherwise silent. */}
+      <span className="sr-only" role="status" aria-live="polite">
+        {hasSuggestions ? `${predictions.length} address suggestion${predictions.length === 1 ? "" : "s"} available` : ""}
+      </span>
       {/* In-flight indicator - shows BEFORE predictions land. Without
           this, slow networks or blocked Google Places make the dropdown
           stay closed silently and the user thinks autocomplete is
@@ -357,13 +390,14 @@ export function AddressAutocomplete({
       ) : null}
       {open && predictions.length > 0 && (
         <div className="absolute left-0 right-0 top-full z-50 mt-1 overflow-hidden rounded-md border border-border bg-popover text-popover-foreground shadow-md">
-          <ul role="listbox" aria-label="Address suggestions">
+          <ul role="listbox" id={listboxId} aria-label="Address suggestions">
             {predictions.map((p, i) => {
               const text = p.text?.toString() ?? "";
               const isActive = i === highlight;
               return (
                 <li
                   key={`${text}-${i}`}
+                  id={`${fieldId}-option-${i}`}
                   role="option"
                   aria-selected={isActive}
                 >

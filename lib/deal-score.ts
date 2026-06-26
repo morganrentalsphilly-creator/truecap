@@ -78,7 +78,7 @@ export function computeTenYearAnnualizedReturnPct(
     closingCosts: number;
     totalCashRequired: number;
     tenYearProjection: { cumulativeCashFlowAnnual: number }[];
-    taxStrategyYears: { cumulativeTaxBenefitAnnual: number }[];
+    taxStrategyYears: { cumulativeTaxBenefitAnnual: number; depreciationDeductionAnnual?: number }[];
   }
 ): number | null {
   if (!(result.totalCashRequired > 0)) return null;
@@ -96,6 +96,7 @@ export function computeTenYearAnnualizedReturnPct(
     closingCosts: result.closingCosts,
     cumulativeCashFlowByYear: result.tenYearProjection.map((y) => y.cumulativeCashFlowAnnual),
     cumulativeTaxBenefitByYear: result.taxStrategyYears.map((y) => y.cumulativeTaxBenefitAnnual),
+    annualDepreciation: result.taxStrategyYears[0]?.depreciationDeductionAnnual ?? 0,
   });
 
   const year10 = exitYears[exitYears.length - 1];
@@ -145,7 +146,7 @@ export function buildDealScoreInputFromAnalysis(
     closingCosts: number;
     totalCashRequired: number;
     tenYearProjection: { cumulativeCashFlowAnnual: number }[];
-    taxStrategyYears: { cumulativeTaxBenefitAnnual: number }[];
+    taxStrategyYears: { cumulativeTaxBenefitAnnual: number; depreciationDeductionAnnual?: number }[];
   }
 ): DealScoreInput {
   const tenYearAnnualizedReturnPct = computeTenYearAnnualizedReturnPct(values, result);

@@ -133,6 +133,18 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
       "IRR captures the FULL return story: monthly cash flow + principal paydown + appreciation + exit value, all rolled into one annualized number. It's the right metric for wealth-builders.",
     related: ["coc", "cashFlow", "appreciation"],
   },
+  tenYearReturn: {
+    term: "10-Year Total Return",
+    slug: "ten-year-total-return",
+    category: "projection",
+    definition:
+      "Your estimated average return per year over a 10-year hold, blending cash flow, loan paydown, and appreciation — not just the rent you pocket today.",
+    benchmark:
+      "8–12%/yr is a solid long-run target for a leveraged buy-and-hold. It leans on appreciation and rent-growth assumptions, so treat it as a projection, not a promise.",
+    whyItMatters:
+      "Cash flow alone undersells a rental: a deal that's near break-even today can still build real wealth through equity paydown and appreciation. This number is the closest single figure to 'what will this actually earn me long-term.'",
+    related: ["irr", "coc", "appreciation"],
+  },
   mao: {
     term: "Maximum Allowable Offer (MAO)",
     slug: "max-allowable-offer",

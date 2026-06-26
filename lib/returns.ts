@@ -22,6 +22,8 @@ export interface ReturnSummary {
   cagrPct: number | null;
   /** True IRR over the cash-flow timeline (null when not solvable). */
   irrPct: number | null;
+  /** Estimated tax owed at sale (depreciation recapture + capital gains). */
+  exitTax: number;
   /** Modeled hold length (years to the exit used). */
   years: number;
 }
@@ -75,10 +77,15 @@ export function computeReturnSummaryFromExitYears(
   const final = sorted[sorted.length - 1];
   const horizon = final.year;
 
+  // Exit tax is netted into totalProfit by the engine, so it must be added
+  // back here to recover cash invested from the identity (otherwise the tax
+  // would inflate the apparent cash basis).
+  const exitTax = final.exitTax ?? 0;
   const cashInvested =
     final.netSaleProceeds +
     final.cumulativeCashFlow +
     final.cumulativeTaxBenefit -
+    exitTax -
     final.totalProfit;
   const totalProfit = final.totalProfit;
 
@@ -90,6 +97,7 @@ export function computeReturnSummaryFromExitYears(
       equityMultiple: null,
       cagrPct: null,
       irrPct: null,
+      exitTax,
       years: horizon,
     };
   }
@@ -108,9 +116,10 @@ export function computeReturnSummaryFromExitYears(
     const yearCf = y.cumulativeCashFlow - prevCum + (y.cumulativeTaxBenefit - prevTax);
     prevCum = y.cumulativeCashFlow;
     prevTax = y.cumulativeTaxBenefit;
-    flows.push(yearCf + (y.year === final.year ? final.netSaleProceeds : 0));
+    // The sale lands in the final year, net of the exit tax owed at sale.
+    flows.push(yearCf + (y.year === final.year ? final.netSaleProceeds - exitTax : 0));
   }
   const irrPct = computeIrr(flows);
 
-  return { cashInvested, totalProfit, roiPct, equityMultiple, cagrPct, irrPct, years: horizon };
+  return { cashInvested, totalProfit, roiPct, equityMultiple, cagrPct, irrPct, exitTax, years: horizon };
 }

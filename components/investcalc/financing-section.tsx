@@ -19,6 +19,15 @@ export function FinancingSection({ form }: FinancingSectionProps) {
     formState: { errors },
   } = form;
 
+  // A 0% (or 100%) down payment silently switches the underwrite to all-cash:
+  // no mortgage, so DSCR drops out and cash-on-cash is computed differently.
+  // Surface that so a user who zeroes it (or fat-fingers it) understands the
+  // verdict changed on purpose, not that something broke. Invisible at the
+  // default 20%, so it never adds chrome to the normal financed path.
+  const downPaymentPct = form.watch("downPaymentPct");
+  const isAllCash =
+    downPaymentPct === 0 || (typeof downPaymentPct === "number" && downPaymentPct >= 100);
+
   return (
     // Card chrome unified with the other input sections (PropertyType /
     // PropertyDetails / SingleFamily - all `bg-card` + neutral border).
@@ -54,6 +63,11 @@ export function FinancingSection({ form }: FinancingSectionProps) {
             <Percent className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           </div>
           <FieldError id="downPaymentPct-error" message={errors.downPaymentPct?.message} />
+          {isAllCash && (
+            <p className="mt-1 text-[11px] leading-snug text-[var(--brand-green)]">
+              Modeling this as an all-cash purchase - no mortgage, so DSCR doesn&apos;t apply.
+            </p>
+          )}
         </div>
 
         <div>

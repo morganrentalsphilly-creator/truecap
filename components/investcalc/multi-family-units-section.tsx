@@ -135,10 +135,10 @@ export function MultiFamilyUnitsSection({
                   <button
                     type="button"
                     onClick={() => remove(index)}
-                    className="text-destructive hover:text-destructive/80 transition-colors p-1"
+                    className="-mr-2 flex size-11 shrink-0 items-center justify-center rounded-lg text-destructive transition-colors hover:text-destructive/80"
                     aria-label={`Remove unit ${index + 1}`}
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="h-4 w-4" />
                   </button>
                 )}
               </div>
@@ -176,7 +176,7 @@ export function MultiFamilyUnitsSection({
                     aria-invalid={!!unitErrors?.bedrooms}
                     aria-describedby={unitErrors?.bedrooms ? `unit-${index}-bedrooms-error` : undefined}
                     className={cn(
-                      "border-input bg-background text-base h-9 md:text-sm",
+                      "border-input bg-background text-base h-11 md:h-9 md:text-sm",
                       unitErrors?.bedrooms && "border-destructive"
                     )}
                   />
@@ -196,7 +196,7 @@ export function MultiFamilyUnitsSection({
                     aria-invalid={!!unitErrors?.bathrooms}
                     aria-describedby={unitErrors?.bathrooms ? `unit-${index}-bathrooms-error` : undefined}
                     className={cn(
-                      "border-input bg-background text-base h-9 md:text-sm",
+                      "border-input bg-background text-base h-11 md:h-9 md:text-sm",
                       unitErrors?.bathrooms && "border-destructive"
                     )}
                   />
@@ -216,7 +216,7 @@ export function MultiFamilyUnitsSection({
                     aria-invalid={!!unitErrors?.sqft}
                     aria-describedby={unitErrors?.sqft ? `unit-${index}-sqft-error` : undefined}
                     className={cn(
-                      "border-input bg-background text-base h-9 md:text-sm",
+                      "border-input bg-background text-base h-11 md:h-9 md:text-sm",
                       unitErrors?.sqft && "border-destructive"
                     )}
                   />
@@ -239,7 +239,7 @@ export function MultiFamilyUnitsSection({
                       aria-invalid={!!unitErrors?.monthlyRent}
                       aria-describedby={unitErrors?.monthlyRent ? `unit-${index}-monthlyRent-error` : undefined}
                       className={cn(
-                        "pl-7 border-input bg-background text-base h-9 md:text-sm",
+                        "pl-7 border-input bg-background text-base h-11 md:h-9 md:text-sm",
                         unitErrors?.monthlyRent && "border-destructive"
                       )}
                     />

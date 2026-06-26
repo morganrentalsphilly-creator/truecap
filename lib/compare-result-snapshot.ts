@@ -117,7 +117,11 @@ function buildExitSummaryFromYears(years: ExitScenarioYear[]): CompareSnapshotEx
   const year5 = years.find((y) => y.year === 5) ?? null;
   const year10 = years.find((y) => y.year === 10) ?? years[years.length - 1] ?? null;
   const initialInvestment = year10
-    ? year10.netSaleProceeds + year10.cumulativeCashFlow + year10.cumulativeTaxBenefit - year10.totalProfit
+    ? year10.netSaleProceeds +
+      year10.cumulativeCashFlow +
+      year10.cumulativeTaxBenefit -
+      (year10.exitTax ?? 0) -
+      year10.totalProfit
     : 0;
   const totalROI =
     initialInvestment > 0 && year10 ? (year10.totalProfit / initialInvestment) * 100 : 0;
@@ -157,6 +161,7 @@ export function buildCompareSnapshotPayload(
     closingCosts: result.closingCosts,
     cumulativeCashFlowByYear: projection.map((p) => p.cumulativeCashFlowAnnual),
     cumulativeTaxBenefitByYear: taxYears.map((t) => t.cumulativeTaxBenefitAnnual),
+    annualDepreciation: taxYears[0]?.depreciationDeductionAnnual ?? 0,
   });
 
   const exitSummary = buildExitSummaryFromYears(exitYears);
