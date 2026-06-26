@@ -527,6 +527,27 @@ export function InvestCalcPage({
     dscr: number;
     monthlyPayment: number;
   } | null>(null);
+  // One concise, debounced screen-reader announcement for the live preview,
+  // written into a persistent sr-only region (the visible card is NOT a live
+  // region). Debounced past the form watcher so fast typing doesn't flood the
+  // SR queue - mirrors the what-if-sliders pattern.
+  const [livePreviewMsg, setLivePreviewMsg] = useState("");
+  useEffect(() => {
+    if (!livePreview) {
+      setLivePreviewMsg("");
+      return;
+    }
+    const lp = livePreview;
+    const id = window.setTimeout(() => {
+      const ncf = Math.round(lp.netCashFlow);
+      const cf = `${ncf >= 0 ? "+" : "-"}$${Math.abs(ncf).toLocaleString()}/mo`;
+      const dscr = lp.monthlyPayment > 0 ? `, DSCR ${lp.dscr.toFixed(2)}` : "";
+      setLivePreviewMsg(
+        `Live preview: ${lp.tier}, Deal Score ${lp.score} out of 100, cash flow ${cf}, cap rate ${lp.capRate.toFixed(1)}%${dscr}.`
+      );
+    }, 400);
+    return () => window.clearTimeout(id);
+  }, [livePreview]);
   // Hero "instant verdict" path: when a cold visitor types an address we
   // estimate the purchase price from local rent so the analyzer can run
   // immediately. These drive the honest "estimated price — confirm it"
@@ -722,6 +743,11 @@ export function InvestCalcPage({
     setDealScoreResult(null);
     setShowResults(false);
     setIsLoadingDealScore(false);
+    // Clear the live instant-verdict preview too - otherwise the previous
+    // deal's verdict flashes over the freshly-blanked form on New Analysis
+    // (the form watcher can't self-heal: reset mutations fire under the
+    // programmatic-reset guard, so no recompute runs until the next keystroke).
+    setLivePreview(null);
     // Editing away from the sample deal ends the Pro preview - the
     // unlock is for the demo numbers only, not the user's own deal.
     setIsSampleProPreview(false);
@@ -3051,11 +3077,18 @@ export function InvestCalcPage({
                 they ever click Run. The "60 seconds" promise made literal:
                 the answer is already on screen. Pure client math; the full
                 dashboard still lives behind the explicit Run below. */}
+            {/* Persistent SR live region (always mounted, sibling to the
+                conditional card) so the verdict-forming announcement is
+                reliable and concise - mirrors the what-if-sliders pattern.
+                The visible card is NOT a live region (it would churn the whole
+                verbose card on every keystroke). */}
+            {!showResults && !analysisResult && !isCalculating ? (
+              <span className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+                {livePreviewMsg}
+              </span>
+            ) : null}
             {!showResults && !analysisResult && !isCalculating && livePreview ? (
-              <div
-                aria-live="polite"
-                className="rounded-2xl border-2 border-dashed border-primary/30 bg-[var(--brand-blue-light)] p-4 sm:p-5"
-              >
+              <div className="rounded-2xl border-2 border-dashed border-primary/30 bg-[var(--brand-blue-light)] p-4 sm:p-5">
                 <div className="mb-3 flex items-center justify-between gap-2">
                   <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-primary">
                     <span className="relative flex size-2">
@@ -3093,12 +3126,14 @@ export function InvestCalcPage({
                     <div
                       className={cn(
                         "font-mono text-lg font-bold tabular-nums sm:text-xl",
-                        livePreview.netCashFlow >= 0
+                        // Sign + color keyed off the SAME rounded value so a
+                        // sub-dollar negative (e.g. -$0.30) never renders "-$0".
+                        Math.round(livePreview.netCashFlow) >= 0
                           ? "text-[var(--metric-positive)]"
                           : "text-[var(--metric-negative)]"
                       )}
                     >
-                      {livePreview.netCashFlow >= 0 ? "+" : "-"}$
+                      {Math.round(livePreview.netCashFlow) >= 0 ? "+" : "-"}$
                       {Math.abs(Math.round(livePreview.netCashFlow)).toLocaleString()}
                     </div>
                   </div>

@@ -1,10 +1,13 @@
-import type { AnalysisResult } from "@/lib/calc-analysis";
-import type { InvestmentFormValues } from "@/lib/investcalc-schema";
+import { calculateAnalysis, type AnalysisResult } from "@/lib/calc-analysis";
+import { investmentFormSchema, type InvestmentFormValues } from "@/lib/investcalc-schema";
 import { buildExitScenarios, resolveExitScenarioRates, type ExitScenarioYear } from "@/lib/exit-scenarios";
 import type { TaxStrategyYear } from "@/lib/tax-strategy";
 
-/** Version of `compareSnapshot` + `snapshotVersion` on `result_snapshot` (compare fast path). */
-export const COMPARE_RESULT_SNAPSHOT_VERSION = 1;
+/** Version of `compareSnapshot` + `snapshotVersion` on `result_snapshot` (compare fast path).
+ *  Bumped to 2 when exit-tax (recapture + capital gains) changed exit-scenario
+ *  totalProfit/ROI semantics — deals saved at v1 carry pre-exit-tax figures, so
+ *  surfaces recompute on read via recomputeCompareSnapshotFromForm. */
+export const COMPARE_RESULT_SNAPSHOT_VERSION = 2;
 
 export type CompareSnapshotProjectionYear = {
   year: number;
@@ -214,6 +217,25 @@ export function buildCompareSnapshotPayload(
 
 function isRecord(v: unknown): v is Record<string, unknown> {
   return !!v && typeof v === "object" && !Array.isArray(v);
+}
+
+/**
+ * Recompute the compareSnapshot fresh from a saved deal's form snapshot, using
+ * the CURRENT engine — so exit-scenario figures (year-10 profit, Total ROI)
+ * reflect today's exit-tax math instead of whatever was persisted at save time.
+ * Mirrors the codebase's "recompute on read" philosophy (see
+ * recomputeSavedDealVerdict) so old and new saves never show mixed pre/post-tax
+ * ROI side by side. Returns null on bad/legacy snapshots; callers fall back to
+ * parseCompareSnapshotV1(persisted).
+ */
+export function recomputeCompareSnapshotFromForm(formSnapshot: unknown): CompareSnapshotV1 | null {
+  const parsed = investmentFormSchema.safeParse(formSnapshot);
+  if (!parsed.success) return null;
+  try {
+    return buildCompareSnapshotPayload(calculateAnalysis(parsed.data), parsed.data).compareSnapshot;
+  } catch {
+    return null;
+  }
 }
 
 /** Best-effort parse of persisted `compareSnapshot` (older saves return null). */

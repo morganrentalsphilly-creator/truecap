@@ -17,6 +17,7 @@ import { Topbar } from "@/components/dashboard/Topbar";
 import { buildDealAssumptions } from "@/lib/compare-assumptions";
 import {
   parseCompareSnapshotV1,
+  recomputeCompareSnapshotFromForm,
   type CompareSnapshotV1,
 } from "@/lib/compare-result-snapshot";
 import { recomputeSavedDealVerdict } from "@/lib/recompute-saved-deal-verdict";
@@ -151,7 +152,13 @@ function mapDeal(row: SavedAnalysisRow): CompareDealViewModel {
 
   const assumptions = buildDealAssumptions(row.form_snapshot, row);
   const compareSnapshotVersion = toNumber(snapshot.snapshotVersion ?? null);
-  const compareSnapshot: CompareSnapshotV1 | null = parseCompareSnapshotV1(snapshot.compareSnapshot);
+  // Recompute the compareSnapshot from the form so exit-scenario figures (year-10
+  // profit, Total ROI) reflect the current exit-tax math — otherwise deals saved
+  // before the exit-tax change would show pre-tax ROI next to post-tax ones.
+  // Falls back to the persisted snapshot for legacy/unparseable forms.
+  const compareSnapshot: CompareSnapshotV1 | null =
+    recomputeCompareSnapshotFromForm(row.form_snapshot) ??
+    parseCompareSnapshotV1(snapshot.compareSnapshot);
 
   return {
     id: row.id,

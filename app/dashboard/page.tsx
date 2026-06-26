@@ -20,6 +20,7 @@ import {
 import { getRequestUser, getRequestEntitlements } from "@/lib/request-auth";
 import { buildDashboardDeal, type SavedAnalysisDashboardRow } from "@/lib/dashboard-deal-mapping";
 import { recomputeSavedDealVerdict } from "@/lib/recompute-saved-deal-verdict";
+import { recomputeCompareSnapshotFromForm } from "@/lib/compare-result-snapshot";
 import { getSavedAnalysesTotalCount } from "@/lib/saved-analyses-count";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { buildRateWatch } from "@/lib/rate-watch";
@@ -82,8 +83,10 @@ function buildDashboardData(
     const fresh = recomputeSavedDealVerdict(row.form_snapshot);
     // Recompute-on-read: score AND the headline financials (cash flow / CoC /
     // cap) come from the live engine, so the dashboard never shows numbers that
-    // drifted from the stored snapshot after a calc change. ROI stays on the
-    // snapshot (it's the projection engine, computed separately).
+    // drifted from the stored snapshot after a calc change. The 10-yr ROI is
+    // recomputed too (exit-tax-aware) so it never shows a stale pre-exit-tax
+    // figure next to freshly-saved post-tax deals.
+    const freshRoi = recomputeCompareSnapshotFromForm(row.form_snapshot)?.longTermSummary?.totalROI;
     return fresh
       ? {
           ...deal,
@@ -94,6 +97,7 @@ function buildDashboardData(
           cashFlowMonthly: fresh.netCashFlowMonthly,
           cocReturnPct: fresh.cocReturnPct,
           capRatePct: fresh.capRatePct,
+          roiPct: typeof freshRoi === "number" ? freshRoi : deal.roiPct,
         }
       : deal;
   });
