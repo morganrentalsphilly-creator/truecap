@@ -75,6 +75,7 @@ import { BuyBoxVerdictCard } from "@/components/investcalc/buy-box-verdict-card"
 import { NextActionBanner } from "@/components/investcalc/next-action-banner";
 import { nextActionForDeal } from "@/lib/next-action";
 import { getVerdictNarrative } from "@/lib/verdict";
+import { DealDriverInsight } from "@/components/investcalc/deal-driver-insight";
 import { StrategyOutcomeCard } from "@/components/investcalc/strategy-outcome-card";
 import type { InvestorStrategy } from "@/lib/investor-strategies";
 import { deriveStateFromAddress } from "@/lib/buy-box";
@@ -1078,6 +1079,14 @@ export function AnalysisDashboard({
       ) : null}
       </div>
       {/* end verdict-first wrapper */}
+
+      {/* "What decides this deal" - elevates the single biggest sensitivity
+          driver (from the same engine as the Cash Flow tab's tornado) to a
+          headline next to the verdict. Hidden during a strategy-led output
+          (that has its own framing) and while loading. */}
+      {result && values && !isLoading && !strategyLeadsOutput ? (
+        <DealDriverInsight values={values} result={result} />
+      ) : null}
 
       {/* Buy Box verdict - personalized "meets your buy box" line that
           complements the Deal Score above. Self-gates: only authenticated
