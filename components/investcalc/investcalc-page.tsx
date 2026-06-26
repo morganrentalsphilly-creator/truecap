@@ -514,6 +514,11 @@ export function InvestCalcPage({
   // separate from analysisResult so it never triggers the heavy dashboard,
   // funnel events, or server actions - it just makes the "60-second" promise
   // feel instant. Cleared/ignored once a real run produces analysisResult.
+  // HUD Fair Market Rent for the entered address (single-family), captured on
+  // enrichment regardless of whether it auto-filled the field. Used as a free
+  // "ground truth" benchmark to reality-check the user's rent - the single
+  // assumption the deal is most sensitive to.
+  const [marketRentEstimate, setMarketRentEstimate] = useState<number | null>(null);
   const [livePreview, setLivePreview] = useState<{
     tier: DealTier;
     score: number;
@@ -774,6 +779,7 @@ export function InvestCalcPage({
       form.setValue("sqft", undefined, { shouldDirty: false, shouldValidate: false });
       form.setValue("monthlyRent", undefined, { shouldDirty: false, shouldValidate: false });
       enrichmentCaptureRef.current = {};
+      setMarketRentEstimate(null);
       form.setValue("units", getDefaultUnitsForPropertyType(nextPropertyType), {
         shouldDirty: false,
         shouldValidate: false,
@@ -885,6 +891,9 @@ export function InvestCalcPage({
       // empty too.
       let rentFilledFromHud = false;
       if (isSingleFamily && enrichment.monthlyRent !== undefined) {
+        // Always record the HUD benchmark for the rent reality-check, even if
+        // the user already typed their own rent (so we can compare the two).
+        setMarketRentEstimate(enrichment.monthlyRent);
         const current = form.getValues("monthlyRent") as number | undefined | null;
         const isEmpty = isEmptyNumber(current);
         if (isEmpty) {
@@ -924,6 +933,7 @@ export function InvestCalcPage({
       lastSelectedAddressRef.current = place;
       // New property → fresh provenance capture for this address.
       enrichmentCaptureRef.current = {};
+      setMarketRentEstimate(null);
       // Funnel step - coarse only (state), never the full address (PII).
       trackEvent("address_selected", { state: place.state });
       await runPropertyEnrichment(place);
@@ -3228,6 +3238,7 @@ export function InvestCalcPage({
               dealScoreResult={dealScoreResult}
               isLoadingDealScore={isLoadingDealScore}
               propertyType={propertyType}
+              marketRentEstimate={marketRentEstimate}
               projectionSource={projectionSource}
               taxStrategySource={taxStrategySource}
               exitScenarioSource={exitScenarioSource}

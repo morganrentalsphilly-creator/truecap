@@ -123,6 +123,8 @@ interface AnalysisDashboardProps {
   dealScoreResult: DealScoreActionResult | null;
   isLoadingDealScore: boolean;
   propertyType: "single-family" | "multi-family" | "owner-occupant";
+  /** HUD area rent benchmark for the entered address (single-family). */
+  marketRentEstimate?: number | null;
   projectionSource: {
     analysisId: string | null;
     input: TenYearProjectionInput;
@@ -380,6 +382,7 @@ export function AnalysisDashboard({
   dealScoreResult,
   isLoadingDealScore,
   propertyType,
+  marketRentEstimate,
   projectionSource,
   taxStrategySource,
   exitScenarioSource,
@@ -1085,7 +1088,7 @@ export function AnalysisDashboard({
           headline next to the verdict. Hidden during a strategy-led output
           (that has its own framing) and while loading. */}
       {result && values && !isLoading && !strategyLeadsOutput ? (
-        <DealDriverInsight values={values} result={result} />
+        <DealDriverInsight values={values} result={result} marketRentEstimate={marketRentEstimate} />
       ) : null}
 
       {/* Buy Box verdict - personalized "meets your buy box" line that

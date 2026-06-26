@@ -57,9 +57,12 @@ const DRIVER_ADVICE: Record<string, { noun: string; risk: string }> = {
 export function DealDriverInsight({
   values,
   result,
+  marketRentEstimate,
 }: {
   values: InvestmentFormValues | null;
   result: AnalysisResult | null;
+  /** HUD area rent benchmark — turns the rent advice into a concrete check. */
+  marketRentEstimate?: number | null;
 }) {
   const drivers = useMemo(
     () => (values ? computeAssumptionImpact(values) : []),
@@ -76,6 +79,22 @@ export function DealDriverInsight({
   const advice = DRIVER_ADVICE[top.key];
   const noun = advice?.noun ?? top.label.toLowerCase();
 
+  // Concrete rent reality-check vs the HUD area benchmark — only for the rent
+  // driver, single-family, and only when we actually fetched a benchmark for
+  // this address. Turns "verify your rent" into a ground-truth comparison.
+  const enteredRent =
+    values.propertyType === "single-family" && typeof values.monthlyRent === "number"
+      ? Math.round(values.monthlyRent)
+      : null;
+  const market =
+    typeof marketRentEstimate === "number" && marketRentEstimate > 0
+      ? Math.round(marketRentEstimate)
+      : null;
+  const rentDiffPct =
+    top.key === "rent" && enteredRent != null && market != null
+      ? Math.round(((enteredRent - market) / market) * 100)
+      : null;
+
   return (
     <div className="flex items-start gap-3 rounded-2xl border border-primary/20 bg-[var(--brand-blue-light)] p-4 sm:p-5">
       <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-card text-primary">
@@ -89,7 +108,29 @@ export function DealDriverInsight({
           {top.label} is the swing factor — a {top.deltaLabel} move changes your monthly cash flow by{" "}
           <span className="text-primary">±${swing.toLocaleString()}</span>.
         </p>
-        {advice ? (
+        {rentDiffPct != null && market != null && enteredRent != null ? (
+          <p className="text-xs leading-relaxed text-foreground/70">
+            {Math.abs(rentDiffPct) < 4 ? (
+              <>
+                Your <strong className="text-foreground">${enteredRent.toLocaleString()}</strong> rent is in
+                line with the <strong className="text-foreground">${market.toLocaleString()}</strong> HUD area
+                estimate — a good sign it&apos;s achievable.
+              </>
+            ) : rentDiffPct > 0 ? (
+              <>
+                Your <strong className="text-foreground">${enteredRent.toLocaleString()}</strong> rent is{" "}
+                <strong className="text-foreground">{rentDiffPct}% above</strong> the ${market.toLocaleString()}{" "}
+                HUD area estimate — make sure you can actually get it, or the verdict softens fast.
+              </>
+            ) : (
+              <>
+                Your <strong className="text-foreground">${enteredRent.toLocaleString()}</strong> rent is{" "}
+                <strong className="text-foreground">{Math.abs(rentDiffPct)}% below</strong> the $
+                {market.toLocaleString()} HUD area estimate — you may be leaving upside on the table.
+              </>
+            )}
+          </p>
+        ) : advice ? (
           <p className="text-xs leading-relaxed text-foreground/70">{advice.risk}</p>
         ) : (
           <p className="text-xs leading-relaxed text-foreground/70">
