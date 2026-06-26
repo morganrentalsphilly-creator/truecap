@@ -516,6 +516,7 @@ export function InvestCalcPage({
   // feel instant. Cleared/ignored once a real run produces analysisResult.
   const [livePreview, setLivePreview] = useState<{
     tier: DealTier;
+    score: number;
     netCashFlow: number;
     capRate: number;
     dscr: number;
@@ -1395,8 +1396,12 @@ export function InvestCalcPage({
       if (liveParsed.success) {
         try {
           const r = calculateAnalysis(liveParsed.data);
+          // Deal Score is free for everyone, so compute it for the preview too
+          // - the hero 0-100 number forming live is the magic moment.
+          const ds = computeDealScore(buildDealScoreInputFromAnalysis(liveParsed.data, r));
           setLivePreview({
             tier: getDealTier(r),
+            score: ds.score,
             netCashFlow: r.netCashFlow,
             capRate: r.capRate,
             dscr: r.dscr,
@@ -3062,6 +3067,14 @@ export function InvestCalcPage({
                     {livePreview.tier}
                   </span>
                 </div>
+                <div className="mb-3 flex items-baseline gap-1.5">
+                  <span className="font-mono text-3xl font-extrabold tabular-nums text-foreground">
+                    {livePreview.score}
+                  </span>
+                  <span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+                    / 100 Deal Score
+                  </span>
+                </div>
                 <div className="grid grid-cols-3 gap-2 sm:gap-3">
                   <div>
                     <div className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
@@ -3097,7 +3110,7 @@ export function InvestCalcPage({
                   </div>
                 </div>
                 <p className="mt-2.5 text-[11px] leading-snug text-muted-foreground">
-                  Updating as you type — run the full analysis for your Deal Score, projections, tax &amp; exit.
+                  Updating as you type — run the full analysis for projections, tax strategy &amp; exit scenarios.
                 </p>
               </div>
             ) : null}
