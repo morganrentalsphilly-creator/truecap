@@ -49,6 +49,15 @@ export type BlogPost = {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: "break-even-occupancy-rental-property",
+    title: "Break-even occupancy: how much vacancy a rental can survive (2026)",
+    excerpt:
+      "Cap rate tells you what a rental earns; break-even occupancy tells you how much can go wrong before it stops paying for itself. The formula — (operating expenses + debt service) ÷ gross potential rent — a worked 2026 duplex where 86% break-even leaves a 14-point cushion, the overpaid twin where that cushion collapses below 5 points, and why break-even occupancy is just the occupancy where DSCR hits 1.0.",
+    readingTimeMinutes: 10,
+    publishedAt: "2026-06-26",
+    available: true,
+  },
+  {
     slug: "how-to-estimate-rent-rental-property",
     title: "How to estimate rent on a rental property (2026)",
     excerpt:
