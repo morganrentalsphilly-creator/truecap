@@ -60,6 +60,7 @@ export function CashFlowWaterfall({ result }: { result: AnalysisResult }) {
     { key: "hoa",         label: "HOA",            value: Math.max(0, result.hoa),         color: "rgb(132, 204, 22)" }, // lime-500 (moved off indigo to stay on-brand)
     { key: "utilities",   label: "Utilities",      value: Math.max(0, result.utilities),   color: "rgb(56, 189, 248)" }, // sky-400
     { key: "debt",        label: "Mortgage (P&I)", value: Math.max(0, result.loanPrincipalAndInterest), color: "rgb(220, 38, 38)" }, // red-600
+    { key: "pmi",         label: "PMI",            value: Math.max(0, result.pmiMonthly),  color: "rgb(157, 23, 77)" }, // pink-800 — financing-adjacent, distinct from debt + capex
   ].filter((s) => s.value > 0);
 
   const totalOutflow = segments.reduce((sum, s) => sum + s.value, 0);

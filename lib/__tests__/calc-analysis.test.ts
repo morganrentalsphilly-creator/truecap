@@ -136,10 +136,21 @@ describe("monthly mortgage payment (via calculateAnalysis)", () => {
 describe("cap rate", () => {
   it("matches NOI / Purchase Price exactly", () => {
     const result = calculateAnalysis(baseSingleFamily());
-    // NOI = (rent - opEx) * 12
-    const noi = (result.monthlyRentalIncome - result.totalOperatingExpenses) * 12;
+    // NOI = (rent - operating expenses EXCLUDING the CapEx reserve) * 12.
+    // CapEx is a below-the-line return-of-capital reserve, not an operating
+    // expense (matches the glossary + the lender-standard NOI definition).
+    const noi = (result.monthlyRentalIncome - (result.totalOperatingExpenses - result.capex)) * 12;
     const expectedCapRate = (noi / 245_000) * 100;
     expect(Math.abs(result.capRate - expectedCapRate)).toBeLessThan(0.01);
+  });
+
+  it("EXCLUDES the CapEx reserve from NOI but keeps it in cash flow", () => {
+    const withCapex = calculateAnalysis(baseSingleFamily({ capexPct: 10 }));
+    const noCapex = calculateAnalysis(baseSingleFamily({ capexPct: 0 }));
+    // Cap rate must NOT change with the CapEx reserve (CapEx is out of NOI)...
+    expect(Math.abs(withCapex.capRate - noCapex.capRate)).toBeLessThan(0.01);
+    // ...but cash flow MUST be lower with a higher CapEx reserve.
+    expect(withCapex.netCashFlow).toBeLessThan(noCapex.netCashFlow);
   });
 
   it("EXCLUDES debt service from NOI", () => {
@@ -188,7 +199,9 @@ describe("cash-on-cash return", () => {
 describe("DSCR", () => {
   it("monthly NOI / monthly P&I matches annual NOI / annual P&I", () => {
     const result = calculateAnalysis(baseSingleFamily());
-    const monthlyNoi = result.monthlyRentalIncome - result.totalOperatingExpenses;
+    // DSCR NOI excludes the CapEx reserve (lender-standard).
+    const monthlyNoi =
+      result.monthlyRentalIncome - (result.totalOperatingExpenses - result.capex);
     const expectedDscr =
       result.monthlyPayment > 0 ? monthlyNoi / result.monthlyPayment : 0;
     expect(Math.abs(result.dscr - expectedDscr)).toBeLessThan(0.001);
@@ -199,6 +212,42 @@ describe("DSCR", () => {
       baseSingleFamily({ downPaymentPct: 100 })
     );
     expect(result.dscr).toBe(0);
+  });
+});
+
+// ──────────────────────────────────────────────────────────────────
+// PMI — financed conventional loans under 20% down
+// ──────────────────────────────────────────────────────────────────
+describe("PMI", () => {
+  it("applies when down payment < 20% and reduces cash flow", () => {
+    const lowDown = calculateAnalysis(baseSingleFamily({ downPaymentPct: 10 }));
+    expect(lowDown.pmiMonthly).toBeGreaterThan(0);
+    const expected =
+      lowDown.monthlyRentalIncome -
+      lowDown.totalOperatingExpenses -
+      lowDown.monthlyPayment -
+      lowDown.pmiMonthly;
+    expect(lowDown.netCashFlow).toBe(expected);
+  });
+
+  it("is 0 at 20%+ down and on a cash purchase", () => {
+    expect(calculateAnalysis(baseSingleFamily({ downPaymentPct: 20 })).pmiMonthly).toBe(0);
+    expect(calculateAnalysis(baseSingleFamily({ downPaymentPct: 25 })).pmiMonthly).toBe(0);
+    expect(calculateAnalysis(baseSingleFamily({ downPaymentPct: 100 })).pmiMonthly).toBe(0);
+  });
+
+  it("is excluded from DSCR (DSCR uses P&I only)", () => {
+    const lowDown = calculateAnalysis(baseSingleFamily({ downPaymentPct: 10 }));
+    const monthlyNoi =
+      lowDown.monthlyRentalIncome - (lowDown.totalOperatingExpenses - lowDown.capex);
+    expect(Math.abs(lowDown.dscr - monthlyNoi / lowDown.monthlyPayment)).toBeLessThan(0.001);
+  });
+
+  it("is in early projection debt service, then drops as the loan pays down", () => {
+    const proj = calculateAnalysis(baseSingleFamily({ downPaymentPct: 10 })).tenYearProjection;
+    const pAndIAnnual = calculateAnalysis(baseSingleFamily({ downPaymentPct: 10 })).monthlyPayment * 12;
+    expect(proj[0].debtServiceAnnual).toBeGreaterThan(pAndIAnnual); // PMI present year 1
+    expect(proj[9].debtServiceAnnual).toBeLessThanOrEqual(proj[0].debtServiceAnnual); // never increases
   });
 });
 

@@ -125,8 +125,10 @@ describe("getDealTier — cash purchase (no debt service)", () => {
 
   it("classifies a modest cash deal as Mixed (cap below 5)", () => {
     // Cap rate < 5% → falls through Strong and Solid, lands at Mixed.
+    // (NOI now excludes the CapEx reserve, so rent is set so the standard-
+    // definition cap rate is still genuinely below 5%.)
     const r = calculateAnalysis(
-      baseSingleFamily({ monthlyRent: 1_500, downPaymentPct: 100 })
+      baseSingleFamily({ monthlyRent: 1_400, downPaymentPct: 100 })
     );
     expect(r.monthlyPayment).toBeLessThanOrEqual(0);
     expect(r.netCashFlow).toBeGreaterThan(0);

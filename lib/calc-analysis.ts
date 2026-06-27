@@ -2,6 +2,13 @@ import { InvestmentFormValues, isValidRentalUnit } from "./investcalc-schema";
 import { buildTaxStrategyProjection, type TaxStrategyYear } from "./tax-strategy";
 import { buildTenYearProjection, ProjectionYear } from "./ten-year-projections";
 
+/** Annual private mortgage insurance as a % of the loan balance, applied to
+ *  financed conventional loans with < 20% down and dropped once the loan
+ *  amortizes to 80% LTV. 0.8% is a mid-range conventional estimate. */
+export const DEFAULT_PMI_ANNUAL_RATE_PCT = 0.8;
+/** Down-payment threshold (%) below which PMI applies. */
+export const PMI_DOWN_PAYMENT_THRESHOLD_PCT = 20;
+
 export interface AnalysisResult {
   // income
   monthlyRentalIncome: number;
@@ -28,6 +35,10 @@ export interface AnalysisResult {
   loanAmount: number;
   monthlyPayment: number;
   loanPrincipalAndInterest: number;
+  /** Monthly private mortgage insurance (0 unless a financed conventional
+   *  loan with < 20% down). Reduces cash flow; not part of the P&I used for
+   *  DSCR. */
+  pmiMonthly: number;
   propertyTaxMonthly: number;
   insuranceMonthly: number;
   hoaMonthly: number;
@@ -183,14 +194,28 @@ export function calculateAnalysis(values: InvestmentFormValues): AnalysisResult 
     vacancy +
     management +
     capex;
+  // NOI / cap rate / DSCR use operating expenses EXCLUDING the CapEx reserve.
+  // CapEx is a below-the-line return-of-capital reserve, not an operating
+  // expense — this matches the app's own glossary and the lender-standard
+  // definition of NOI and DSCR. (CapEx still reduces cash flow / CoC below.)
+  const operatingExpensesExCapex = totalOperatingExpenses - capex;
 
   // Financing
   const downPayment = Math.round((purchasePrice * downPaymentPct) / 100);
   const loanAmount = purchasePrice - downPayment;
   const monthlyPayment = Math.round(calcMonthlyPayment(loanAmount, interestRate, loanTermYears));
 
-  // Cash flow
-  const netCashFlow = monthlyRentalIncome - totalOperatingExpenses - monthlyPayment;
+  // Private mortgage insurance: financed conventional loans with < 20% down
+  // carry PMI until the loan amortizes to ~80% LTV. It's a real monthly outlay
+  // that reduces cash flow (and was previously ignored, overstating cash flow
+  // on low-down / house-hack deals). Not part of the P&I used for DSCR.
+  const pmiMonthly =
+    loanAmount > 0 && downPaymentPct < PMI_DOWN_PAYMENT_THRESHOLD_PCT
+      ? Math.round((loanAmount * (DEFAULT_PMI_ANNUAL_RATE_PCT / 100)) / 12)
+      : 0;
+
+  // Cash flow (CapEx reserve + PMI both reduce real cash flow)
+  const netCashFlow = monthlyRentalIncome - totalOperatingExpenses - monthlyPayment - pmiMonthly;
   const annualCashFlow = netCashFlow * 12;
 
   const closingCostsPctEffective = closingCostsPct ?? 3;
@@ -199,9 +224,10 @@ export function calculateAnalysis(values: InvestmentFormValues): AnalysisResult 
 
   // Metrics
   const cocReturn = totalCashRequired > 0 ? (annualCashFlow / totalCashRequired) * 100 : 0;
-  const noi = (monthlyRentalIncome - totalOperatingExpenses) * 12;
+  const noi = (monthlyRentalIncome - operatingExpensesExCapex) * 12;
   const capRate = purchasePrice > 0 ? (noi / purchasePrice) * 100 : 0;
-  const dscr = monthlyPayment > 0 ? (monthlyRentalIncome - totalOperatingExpenses) / monthlyPayment : 0;
+  const dscr =
+    monthlyPayment > 0 ? (monthlyRentalIncome - operatingExpensesExCapex) / monthlyPayment : 0;
 
   // Estimated tax savings:
   // If includeInterestDeduction => (Depreciation + Interest) * Tax Rate
@@ -227,6 +253,9 @@ export function calculateAnalysis(values: InvestmentFormValues): AnalysisResult 
     monthlyRentalIncome,
     totalOperatingExpenses,
     monthlyPayment,
+    pmiMonthly,
+    loanAmount,
+    purchasePrice,
     taxSavingsMonthly,
     annualDepreciation,
     yearlyInterestSchedule,
@@ -271,6 +300,7 @@ export function calculateAnalysis(values: InvestmentFormValues): AnalysisResult 
     loanAmount,
     monthlyPayment,
     loanPrincipalAndInterest: monthlyPayment,
+    pmiMonthly,
     propertyTaxMonthly: propertyTax,
     insuranceMonthly: insurance,
     hoaMonthly: hoa,

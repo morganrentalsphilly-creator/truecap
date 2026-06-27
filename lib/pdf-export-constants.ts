@@ -12,7 +12,10 @@
 //       deal-score gauge + headline numbers), visual deal-score gauge,
 //       chart data-ink (endpoint labels + $0 reference lines), and an
 //       Assumptions & Disclosures closing page.
-export const PDF_SNAPSHOT_VERSION = 3;
+//   4 - Model correction: NOI/cap rate/DSCR now exclude the CapEx reserve,
+//       and PMI is modeled on sub-20%-down loans — so cached PDFs must
+//       regenerate to match the corrected headline numbers.
+export const PDF_SNAPSHOT_VERSION = 4;
 export const ANALYSIS_PDF_BUCKET = "analysis-pdfs";
 
 /**
