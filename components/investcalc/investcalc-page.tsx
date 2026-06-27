@@ -51,6 +51,7 @@ import { AnalysisErrorBoundary } from "@/components/investcalc/analysis-error-bo
 import { AssumptionsSourceStrip } from "@/components/investcalc/assumptions-source-strip";
 import { PostAnalysisEmailPrompt } from "@/components/marketing/post-analysis-email-prompt";
 import { useToast } from "@/hooks/use-toast";
+import { ToastAction } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
 import { saveDealAction } from "@/app/actions/saved-analyses";
 import { buildDataConfidence, type EnrichmentProvenanceInput } from "@/lib/data-confidence";
@@ -2170,8 +2171,12 @@ export function InvestCalcPage({
           title: "Already saved",
           description:
             result.message ??
-            "You already saved an analysis for this address. Open your saved deals or use a different address.",
-          variant: "destructive",
+            "You already saved an analysis for this address. Open it to update, or change the address to save a new scenario.",
+          action: (
+            <ToastAction altText="View your saved deals" onClick={() => router.push("/saved-analyses")}>
+              View deals
+            </ToastAction>
+          ),
         });
         return;
       }

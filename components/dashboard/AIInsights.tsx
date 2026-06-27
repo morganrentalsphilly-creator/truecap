@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Sparkles, Lightbulb, AlertTriangle, TrendingUp } from "lucide-react";
+import { Lightbulb, AlertTriangle, TrendingUp } from "lucide-react";
 
 const toneMap = {
   opportunity: { icon: TrendingUp, color: "text-success", bg: "bg-success/10" },
@@ -39,9 +39,9 @@ export function AIInsights({
       <div className="absolute -top-12 -right-12 h-40 w-40 rounded-full opacity-30 blur-3xl" style={{ background: "var(--gradient-premium)" }} />
       <div className="relative flex items-center gap-2 mb-1">
         <div className="h-7 w-7 rounded-lg grid place-items-center" style={{ background: "var(--gradient-premium)" }}>
-          <Sparkles className="h-3.5 w-3.5 text-white" />
+          <TrendingUp className="h-3.5 w-3.5 text-white" />
         </div>
-        <h3 className="font-display text-lg font-semibold">AI Insights</h3>
+        <h3 className="font-display text-lg font-semibold">Portfolio Signals</h3>
         <span className="text-[10px] font-bold tracking-wider px-2 py-0.5 rounded-full text-white ml-1" style={{ background: "var(--gradient-gold)" }}>PREMIUM</span>
       </div>
       <p className="relative text-sm text-muted-foreground mb-4">Comparative signals from your saved deals</p>
