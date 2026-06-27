@@ -9,6 +9,7 @@ import {
   FileBarChart,
   Settings,
   ListTodo,
+  CircleUserRound,
 } from "lucide-react";
 import { AppLogo } from "@/components/brand/app-logo";
 import type { DashboardNavAccess } from "@/components/dashboard/dashboard-shell";
@@ -113,8 +114,8 @@ export function Sidebar({ savedDealCount, navAccess, mobile = false }: SidebarPr
           prefetch={false}
           className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-sidebar-foreground/70 hover:text-white hover:bg-sidebar-accent/50 transition"
         >
-          <Briefcase className="h-[18px] w-[18px]" />
-          <span>Profile &amp; Billing</span>
+          <CircleUserRound className="h-[18px] w-[18px]" />
+          <span>Profile</span>
         </Link>
       </div>
     </aside>
