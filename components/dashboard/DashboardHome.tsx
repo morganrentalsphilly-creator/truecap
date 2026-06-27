@@ -185,7 +185,17 @@ function getRiskReturn(data: DashboardHomeData) {
     })
     .filter((item) => item.dscr != null || item.mappedRisk != null)
     .sort((a, b) => {
-      if (a.dscr != null || b.dscr != null) return (b.dscr ?? -Infinity) - (a.dscr ?? -Infinity);
+      // DSCR (~1-2, higher = safer) and mappedRisk (0.8-1.2, LOWER = safer) are
+      // different scales with opposite polarity — never compare across them. So:
+      // deals that have a DSCR rank among themselves by DSCR; a deal WITH a DSCR
+      // outranks one without (can't put them on one scale); only when NEITHER
+      // has a DSCR do we fall back to the risk-level scale. The old `||` compared
+      // a real DSCR against -Infinity, dumping every DSCR-less deal to the bottom.
+      const aHasDscr = a.dscr != null;
+      const bHasDscr = b.dscr != null;
+      if (aHasDscr && bHasDscr) return (b.dscr as number) - (a.dscr as number);
+      if (aHasDscr) return -1;
+      if (bHasDscr) return 1;
       return (a.mappedRisk ?? Infinity) - (b.mappedRisk ?? Infinity);
     })[0]?.deal;
 
