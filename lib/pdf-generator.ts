@@ -395,6 +395,74 @@ const baseScales = {
   },
 };
 
+// ===================== Chart data-ink plugins =====================
+// Inline chart.js plugins (passed per-chart via the `plugins` array). We
+// deliberately avoid external chart.js plugins (datalabels/annotation) to
+// keep the export bundle lean — these hooks do the same job in a few lines.
+
+/** Compact money label for in-chart annotations: 1240000 → "$1.2M", 8400 → "$8.4K". */
+function fmtChartMoney(n: number): string {
+  const a = Math.abs(n);
+  if (a >= 1_000_000) return `${n < 0 ? "-" : ""}$${(a / 1_000_000).toFixed(1)}M`;
+  if (a >= 1_000) return `${n < 0 ? "-" : ""}$${Math.round(a / 1000)}K`;
+  return `${n < 0 ? "-" : ""}$${Math.round(a)}`;
+}
+
+/**
+ * Draws a crisp horizontal reference line at y = 0 when the scale crosses
+ * zero. Makes "above/below break-even" instantly legible on signed charts
+ * (net cash flow, total profit, taxable income) instead of leaving the
+ * reader to infer the baseline from the axis ticks.
+ */
+const zeroLinePlugin = {
+  id: "zeroLine",
+  beforeDatasetsDraw(chart: any) {
+    const yScale = chart.scales?.y;
+    if (!yScale || yScale.min > 0 || yScale.max < 0) return;
+    const yZero = yScale.getPixelForValue(0);
+    const { left, right } = chart.chartArea;
+    const { ctx } = chart;
+    ctx.save();
+    ctx.beginPath();
+    ctx.strokeStyle = "#94A3B8";
+    ctx.lineWidth = 1;
+    ctx.setLineDash([3, 3]);
+    ctx.moveTo(left, yZero);
+    ctx.lineTo(right, yZero);
+    ctx.stroke();
+    ctx.restore();
+  },
+};
+
+/**
+ * Labels the FINAL data point of each line dataset with its value — the
+ * "where does this end up?" number that the reader most wants from a
+ * cumulative curve (cumulative cash flow, equity, total profit). Labeling
+ * every point would clutter a small multiyear chart; the endpoint carries
+ * the story. Pads the chart's right inset so the label never clips.
+ */
+const endpointLabelPlugin = {
+  id: "endpointLabel",
+  afterDatasetsDraw(chart: any) {
+    const { ctx } = chart;
+    ctx.save();
+    ctx.font = "700 12px Inter, Helvetica, Arial";
+    ctx.textAlign = "right";
+    ctx.textBaseline = "bottom";
+    chart.data.datasets.forEach((ds: any, di: number) => {
+      const meta = chart.getDatasetMeta(di);
+      if (meta.hidden || ds.type === "bar") return;
+      const i = ds.data.length - 1;
+      const el = meta.data?.[i];
+      const v = ds.data[i];
+      if (!el || v == null) return;
+      ctx.fillStyle = ds.borderColor || "#334155";
+      ctx.fillText(fmtChartMoney(v), el.x - 2, el.y - 5);
+    });
+    ctx.restore();
+  },
+};
+
 // ===================== Page chrome =====================
 function drawHeader(
   doc: jsPDF,
@@ -638,7 +706,307 @@ function statCard(
 // hero panel and the Deal Score was refactored to refined typography
 // rather than a colored pill.
 
+/**
+ * Visual deal-score readout: a "DEAL SCORE" kicker, the big tier-colored
+ * number with a "/100" denominator, a 0–100 progress track filled to the
+ * score in the tier color, and a one-word band (Strong / Moderate / Weak).
+ * Replaces the old plain-text "72 / 100" — the number that answers "is this
+ * a good deal?" now reads at a glance. Right-aligned to `rightX`; returns
+ * the y of its bottom edge so callers can flow content beneath it.
+ */
+function drawScoreGauge(
+  doc: jsPDF,
+  opts: { rightX: number; topY: number; width: number; score: number; size?: "sm" | "lg" }
+): number {
+  const { rightX, topY, width, score } = opts;
+  const leftX = rightX - width;
+  const big = opts.size === "lg";
+  const clamped = Math.max(0, Math.min(100, Math.round(score)));
+  const tier =
+    clamped >= 70
+      ? { c: COLOR.success, label: "Strong" }
+      : clamped >= 40
+        ? { c: COLOR.warn, label: "Moderate" }
+        : { c: COLOR.danger, label: "Weak" };
+
+  // Kicker
+  setText(doc, COLOR.sub);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(big ? 8 : 7);
+  doc.setCharSpace(0.8);
+  doc.text("DEAL SCORE", rightX, topY, { align: "right" });
+  doc.setCharSpace(0);
+
+  // Score number (numerator big, "/100" small) — visual reading order "72 /100"
+  const numY = topY + (big ? 30 : 22);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(big ? 12 : 9);
+  setText(doc, COLOR.sub);
+  const denom = " /100";
+  const denomW = doc.getTextWidth(denom);
+  doc.text(denom, rightX, numY, { align: "right" });
+  setText(doc, tier.c);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(big ? 34 : 22);
+  doc.text(String(clamped), rightX - denomW, numY, { align: "right" });
+
+  // Tier track — light rail with a tier-colored fill to the score.
+  const trackY = numY + (big ? 12 : 9);
+  const trackH = big ? 8 : 5;
+  setFill(doc, "#E9EEF5");
+  doc.roundedRect(leftX, trackY, width, trackH, trackH / 2, trackH / 2, "F");
+  const fillW = Math.max(trackH, (width * clamped) / 100);
+  setFill(doc, tier.c);
+  doc.roundedRect(leftX, trackY, fillW, trackH, trackH / 2, trackH / 2, "F");
+
+  // Band label
+  const labelY = trackY + trackH + (big ? 14 : 11);
+  setText(doc, tier.c);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(big ? 9 : 7.5);
+  doc.text(tier.label, rightX, labelY, { align: "right" });
+
+  // Restore neutral stroke defaults for downstream draws.
+  setStroke(doc, COLOR.line);
+  doc.setLineWidth(0.5);
+  return labelY + 2;
+}
+
 // ===================== Pages =====================
+
+/**
+ * One-sentence investment thesis for the cover's "Bottom Line" — the first
+ * sentence (occasionally two, if the first is very short) of the AI
+ * rationale, capped so it never overruns the panel. Reuses the rationale we
+ * already have rather than inventing a second verdict that could disagree
+ * with the body of the report.
+ */
+function buildThesis(d: ReportData): string {
+  const r = (d.performance.rationale || "").trim();
+  if (!r) return "";
+  const parts = r.match(/[^.!?]+[.!?]+/g) || [r];
+  let out = (parts[0] || r).trim();
+  if (out.length < 90 && parts[1]) out = `${out} ${parts[1].trim()}`.trim();
+  if (out.length > 230) out = `${out.slice(0, 227).trimEnd()}…`;
+  return out;
+}
+
+/**
+ * Cover page — the "arrival" beat a premium report earns before the data.
+ * Big address headline, an "Investment Analysis" kicker, then a full-width
+ * "THE BOTTOM LINE" panel that states the verdict, a one-sentence thesis,
+ * the deal-score gauge, and the three numbers that matter — so a reader
+ * knows the answer in five seconds. Brand-aware; self-contained (the running
+ * header/footer is skipped on this page). Anchored attribution + confidential
+ * line sit at the page foot.
+ */
+function pageCover(
+  doc: jsPDF,
+  d: ReportData,
+  branding: BrandingConfig | null,
+  logoData: { dataUrl: string; width: number; height: number } | null
+) {
+  const themeColor = resolveThemeColor(branding);
+
+  // Top accent bar.
+  setFill(doc, themeColor);
+  doc.rect(0, 0, PAGE.w, 6, "F");
+
+  // Logo, top-left (slightly larger than the running header for presence).
+  if (logoData) {
+    try {
+      const maxW = 132;
+      const maxH = 46;
+      const aspect =
+        logoData.width > 0 && logoData.height > 0 ? logoData.width / logoData.height : maxW / maxH;
+      let tw = maxW;
+      let th = maxW / aspect;
+      if (th > maxH) {
+        th = maxH;
+        tw = maxH * aspect;
+      }
+      doc.addImage(logoData.dataUrl, "PNG", M.left, 30, tw, th, undefined, "FAST");
+    } catch {
+      // cover stays clean even if the logo can't be drawn
+    }
+  }
+
+  // Date, top-right.
+  setText(doc, COLOR.muted);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.text(
+    d.generatedAt.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }),
+    PAGE.w - M.right,
+    52,
+    { align: "right" }
+  );
+
+  // ---- Title zone ----
+  let y = 168;
+  setText(doc, themeColor);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(9);
+  doc.setCharSpace(1.6);
+  doc.text("INVESTMENT ANALYSIS", M.left, y);
+  doc.setCharSpace(0);
+  y += 34;
+
+  const ap = splitAddress(d.property.address);
+  setText(doc, COLOR.ink);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(30);
+  const addrLines = (doc.splitTextToSize(ap.primary, SAFE.w) as string[]).slice(0, 2);
+  doc.text(addrLines, M.left, y, { lineHeightFactor: 1.1 });
+  y += (addrLines.length - 1) * 30 * 1.1 + 18;
+
+  if (ap.secondary) {
+    setText(doc, COLOR.sub);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(13);
+    doc.text(ap.secondary, M.left, y);
+    y += 20;
+  }
+
+  setStroke(doc, themeColor);
+  doc.setLineWidth(2);
+  doc.line(M.left, y, M.left + 36, y);
+  setStroke(doc, COLOR.line);
+  doc.setLineWidth(0.5);
+  y += 16;
+
+  setText(doc, COLOR.muted);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10.5);
+  const unitsLabel = d.units.length === 1 ? "1 unit" : `${d.units.length} units`;
+  doc.text(
+    `${formatPropertyType(d.property.type)}   ·   Built ${d.property.yearBuilt}   ·   ${unitsLabel}   ·   ${fmtCurrency(d.property.purchasePrice)}`,
+    M.left,
+    y
+  );
+  y += 36;
+
+  // ---- "THE BOTTOM LINE" panel ----
+  const tierColor = getRecommendationRiskTextColor(d.performance.recommendation, d.performance.risk);
+  const thesis = buildThesis(d);
+  const panelX = M.left;
+  const panelW = SAFE.w;
+  const gaugeW = 150;
+  const textW = panelW - 40 - gaugeW - 12; // left pad + gauge column
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(11);
+  const thesisLines = (doc.splitTextToSize(thesis, textW) as string[]).slice(0, 4);
+  const thesisH = thesisLines.length * 11 * 1.4;
+  const panelH = Math.round(152 + thesisH);
+
+  setFill(doc, COLOR.cardSoft);
+  setStroke(doc, COLOR.border);
+  doc.setLineWidth(0.6);
+  doc.roundedRect(panelX, y, panelW, panelH, 10, 10, "FD");
+  setFill(doc, tierColor);
+  doc.roundedRect(panelX, y, 3, panelH, 1.5, 1.5, "F");
+
+  let py = y + 30;
+  // Kicker (left) + deal-score gauge (right).
+  setText(doc, COLOR.sub);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(7.5);
+  doc.setCharSpace(0.8);
+  doc.text("THE BOTTOM LINE", panelX + 20, py);
+  doc.setCharSpace(0);
+  drawScoreGauge(doc, {
+    rightX: panelX + panelW - 20,
+    topY: py - 8,
+    width: gaugeW,
+    score: d.performance.dealScore,
+    size: "sm",
+  });
+
+  py += 22;
+  setText(doc, tierColor);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(17);
+  doc.text(
+    `${recommendationLabel(d.performance.recommendation)} — ${d.performance.risk}`,
+    panelX + 20,
+    py
+  );
+
+  py += 22;
+  setText(doc, COLOR.text);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(11);
+  doc.text(thesisLines, panelX + 20, py, { lineHeightFactor: 1.4 });
+  py += thesisH + 22;
+
+  // Three headline numbers across the foot of the panel.
+  const metrics: Array<[string, string]> = [
+    ["MONTHLY CASH FLOW", fmtCurrency(d.performance.monthlyCashFlow, true)],
+    ["CAP RATE", fmtPct(d.performance.capRate)],
+    ["CASH-ON-CASH", fmtPct(d.performance.cocReturn)],
+  ];
+  const mColW = (panelW - 40) / 3;
+  metrics.forEach((m, i) => {
+    const mx = panelX + 20 + i * mColW;
+    setText(doc, COLOR.sub);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(7);
+    doc.setCharSpace(0.6);
+    doc.text(m[0], mx, py);
+    doc.setCharSpace(0);
+    setText(doc, i === 0 ? (d.performance.monthlyCashFlow >= 0 ? COLOR.success : COLOR.danger) : COLOR.ink);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text(m[1], mx, py + 18);
+  });
+
+  // ---- Attribution + confidential, anchored at the page foot ----
+  const footY = 772;
+  setStroke(doc, COLOR.line);
+  doc.setLineWidth(0.5);
+  doc.line(M.left, footY - 22, PAGE.w - M.right, footY - 22);
+
+  setText(doc, COLOR.sub);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(7);
+  doc.setCharSpace(0.8);
+  doc.text("PREPARED BY", M.left, footY - 6);
+  doc.setCharSpace(0);
+  setText(doc, COLOR.ink);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(10);
+  const preparedBy =
+    branding?.companyName?.trim() || branding?.contactName?.trim() || "TrueCap";
+  doc.text(preparedBy, M.left, footY + 8);
+  const contactBits = [
+    branding?.contactName,
+    branding?.contactEmail,
+    branding?.contactPhone,
+    branding?.contactWebsite,
+  ]
+    .map((s) => s?.trim())
+    .filter((s): s is string => Boolean(s));
+  if (!branding?.companyName?.trim()) {
+    // Unbranded: the "Prepared by TrueCap" line carries the attribution;
+    // add the site so the cover still points somewhere.
+    if (contactBits.length === 0) contactBits.push("usetruecap.com");
+  }
+  if (contactBits.length) {
+    setText(doc, COLOR.sub);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8.5);
+    doc.text(contactBits.join("   ·   "), M.left, footY + 22);
+  }
+
+  setText(doc, COLOR.muted);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  doc.text("Confidential — for the named recipient only", PAGE.w - M.right, footY + 8, {
+    align: "right",
+  });
+}
+
 function pageInputs(
   doc: jsPDF,
   d: ReportData,
@@ -1058,18 +1426,71 @@ async function pageProjection(
         },
       ],
     },
+    plugins: [zeroLinePlugin],
     options: { plugins: { legend: { display: false } }, scales: baseScales },
   });
+  // Year-1 cash-flow waterfall — how gross rent becomes net cash flow, the
+  // single most intuitive "where does the money go?" visual for an investor.
+  // Floating bars (chart.js accepts [start, end] pairs): rent rises from 0,
+  // operating expenses and debt service step it down, net cash flow lands
+  // from the baseline. Uses the Year-1 projection row so it ties out to the
+  // table below. Replaces the old income-vs-expenses trend lines (that data
+  // still lives in the 10-year table).
+  const wfRow = d.projection10y.rows[0];
+  const wfGross = wfRow.rental;
+  const wfOpex = wfRow.opex;
+  const wfDebt = wfRow.debt;
+  const wfNet = wfRow.net;
+  const wfSteps = [wfGross, -wfOpex, -wfDebt, wfNet]; // signed deltas for labels
   const incomeExpense = await renderChart({
-    type: "line",
+    type: "bar",
     data: {
-      labels,
+      labels: ["Gross Rent", "Op. Expenses", "Debt Service", "Net Cash Flow"],
       datasets: [
-        { label: "Rental Income", data: d.projection10y.rows.map((r) => r.rental), borderColor: COLOR.success, backgroundColor: "rgba(22,163,74,0.1)", fill: true, tension: 0.35, pointRadius: 0, borderWidth: 2 },
-        { label: "Operating Expenses", data: d.projection10y.rows.map((r) => r.opex), borderColor: COLOR.danger, backgroundColor: "rgba(220,38,38,0.08)", fill: true, tension: 0.35, pointRadius: 0, borderWidth: 2 },
+        {
+          label: "Year-1 Cash Flow",
+          data: [
+            [0, wfGross],
+            [wfGross - wfOpex, wfGross],
+            [wfGross - wfOpex - wfDebt, wfGross - wfOpex],
+            [Math.min(0, wfNet), Math.max(0, wfNet)],
+          ],
+          backgroundColor: [
+            COLOR.success,
+            COLOR.danger,
+            COLOR.warn,
+            wfNet >= 0 ? themeColor : COLOR.danger,
+          ],
+          borderRadius: 3,
+          borderSkipped: false,
+        },
       ],
     },
-    options: { plugins: { legend: { position: "bottom", labels: { boxWidth: 10, font: { size: 11 } } } }, scales: baseScales },
+    plugins: [
+      {
+        id: "waterfallLabels",
+        afterDatasetsDraw(chart: any) {
+          const { ctx } = chart;
+          const meta = chart.getDatasetMeta(0);
+          ctx.save();
+          ctx.font = "700 10px Inter, Helvetica, Arial";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "bottom";
+          ctx.fillStyle = "#334155";
+          meta.data.forEach((el: any, i: number) => {
+            ctx.fillText(fmtChartMoney(wfSteps[i]), el.x, el.y - 4);
+          });
+          ctx.restore();
+        },
+      },
+    ],
+    options: {
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ...baseScales.x, ticks: { color: COLOR.sub, font: { size: 8.5, family: "Inter, Helvetica, Arial" } } },
+        y: baseScales.y,
+      },
+    },
   });
   const cumCF = await renderChart({
     type: "line",
@@ -1079,6 +1500,7 @@ async function pageProjection(
         { label: "Cumulative CF", data: d.projection10y.rows.map((r) => r.cum), borderColor: COLOR.violet, backgroundColor: "rgba(124,58,237,0.18)", fill: true, tension: 0.35, pointRadius: 0, borderWidth: 2.5 },
       ],
     },
+    plugins: [zeroLinePlugin, endpointLabelPlugin],
     options: { plugins: { legend: { display: false } }, scales: baseScales },
   });
   const afterTax = await renderChart({
@@ -1093,7 +1515,7 @@ async function pageProjection(
   });
 
   drawChartCard(doc, M.left, y, chW, chH, "Annual Cash Flow", annualCF);
-  drawChartCard(doc, M.left + chW + 12, y, chW, chH, "Income vs Expenses", incomeExpense);
+  drawChartCard(doc, M.left + chW + 12, y, chW, chH, "Year-1 Cash Flow", incomeExpense);
   y += chH + 12;
   drawChartCard(doc, M.left, y, chW, chH, "Cumulative Cash Flow", cumCF);
   drawChartCard(doc, M.left + chW + 12, y, chW, chH, "After-Tax Growth", afterTax);
@@ -1177,6 +1599,7 @@ async function pageTax(
       labels,
       datasets: [{ label: "Taxable Income", data: d.taxStrategy.rows.map((r) => r.taxable), borderColor: themeColor, backgroundColor: hexToRgba(themeColor, 0.12), fill: true, tension: 0.35, pointRadius: 0, borderWidth: 2 }],
     },
+    plugins: [zeroLinePlugin, endpointLabelPlugin],
     options: { plugins: { legend: { display: false } }, scales: baseScales },
   });
   const intDepChart = await renderChart({
@@ -1280,6 +1703,7 @@ async function pageExit(
       labels,
       datasets: [{ label: "Equity", data: d.exitScenarios.rows.map((r) => r.equity), borderColor: COLOR.success, backgroundColor: "rgba(22,163,74,0.18)", fill: true, tension: 0.35, pointRadius: 0, borderWidth: 2.5 }],
     },
+    plugins: [endpointLabelPlugin],
     options: { plugins: { legend: { display: false } }, scales: baseScales },
   });
   const profit = await renderChart({
@@ -1288,6 +1712,7 @@ async function pageExit(
       labels,
       datasets: [{ label: "Total Profit", data: d.exitScenarios.rows.map((r) => r.profit), borderColor: COLOR.violet, backgroundColor: "rgba(124,58,237,0.18)", fill: true, tension: 0.35, pointRadius: 0, borderWidth: 2.5 }],
     },
+    plugins: [zeroLinePlugin, endpointLabelPlugin],
     options: { plugins: { legend: { display: false } }, scales: baseScales },
   });
   const profitBreakdown = await renderChart({
@@ -1428,6 +1853,107 @@ function pageComps(doc: jsPDF, d: ReportData, branding?: BrandingConfig | null) 
   }
 }
 
+/**
+ * Draws a wrapped paragraph at (x, y) within width w and returns the y
+ * just below the last line. Keeps the multi-paragraph Disclosures page
+ * readable without hand-counting line offsets.
+ */
+function drawParagraph(
+  doc: jsPDF,
+  text: string,
+  x: number,
+  y: number,
+  w: number,
+  opts: { size?: number; color?: string; leading?: number } = {}
+): number {
+  const size = opts.size ?? 9.5;
+  const leading = opts.leading ?? 1.45;
+  setText(doc, opts.color ?? COLOR.text);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(size);
+  doc.setCharSpace(0);
+  const lines = doc.splitTextToSize(text, w) as string[];
+  doc.text(lines, x, y, { lineHeightFactor: leading });
+  return y + lines.length * size * leading;
+}
+
+/**
+ * Closing page: states the assumptions the projections rest on and the
+ * disclosures a serious reader (a lender, a partner, a client's attorney)
+ * expects. Both credibility and CYA — an investor report without an
+ * assumptions/disclaimer page reads as a back-of-napkin estimate.
+ */
+function pageDisclosures(doc: jsPDF, d: ReportData, branding?: BrandingConfig | null) {
+  let y = M.top + 12;
+  const themeColor = resolveThemeColor(branding);
+  y = sectionTitle(doc, "Assumptions & Disclosures", y, undefined, themeColor);
+  y = drawParagraph(
+    doc,
+    "Every figure in this report is a projection derived from the inputs and assumptions below. Actual results will vary. The assumptions are shown here in full so the analysis can be reviewed, stress-tested, and reproduced.",
+    M.left,
+    y,
+    SAFE.w,
+    { size: 9.5, color: COLOR.sub }
+  );
+  y += 16;
+
+  // Key assumptions — reuse the input-block grid for a familiar, scannable
+  // two-column layout.
+  const colW = (SAFE.w - 12) / 2;
+  const rowH = 92;
+  drawInputBlock(
+    doc,
+    M.left,
+    y,
+    colW,
+    rowH,
+    "Growth & Exit",
+    [
+      ["Rent growth", `${d.expenses.rentGrowth}% / yr`],
+      ["Expense growth", `${d.expenses.expenseGrowth}% / yr`],
+      ["Appreciation", `${d.expenses.appreciation}% / yr`],
+      ["Selling cost", `${d.expenses.sellingCost}%`],
+    ],
+    themeColor
+  );
+  drawInputBlock(
+    doc,
+    M.left + colW + 12,
+    y,
+    colW,
+    rowH,
+    "Operating & Tax",
+    [
+      ["Vacancy", `${d.expenses.vacancyPct}%`],
+      ["Management", `${d.expenses.managementPct}%`],
+      ["Maintenance / CapEx", `${d.expenses.maintenancePct}% / ${d.expenses.capexPct}%`],
+      ["Assumed tax rate", `${d.expenses.taxRate}%`],
+    ],
+    themeColor
+  );
+  y += rowH + 24;
+
+  y = sectionTitle(doc, "Methodology", y, undefined, themeColor);
+  y = drawParagraph(
+    doc,
+    "Returns are computed by TrueCap's underwriting engine from the purchase price, financing terms, rents, and operating expenses entered for this property. The 10-year projection grows rents and operating expenses at the rates above and amortizes the loan on its stated schedule. Tax figures estimate the effect of depreciation and deductible expenses at the marginal tax rate shown and are not a substitute for advice from a licensed CPA.",
+    M.left,
+    y,
+    SAFE.w
+  );
+  y += 22;
+
+  y = sectionTitle(doc, "Disclaimer", y, undefined, themeColor);
+  y = drawParagraph(
+    doc,
+    "This report is provided for informational purposes only and does not constitute financial, investment, tax, or legal advice. Projections are estimates based on the inputs and assumptions stated above and are not guarantees of future performance. Rents, expenses, interest rates, market conditions, and tax law can change. Independently verify all figures and consult licensed professionals before making any investment decision.",
+    M.left,
+    y,
+    SAFE.w,
+    { color: COLOR.sub }
+  );
+}
+
 // ===================== Public API =====================
 async function buildInvestmentPDFDocument(
   data: ReportData,
@@ -1450,6 +1976,10 @@ async function buildInvestmentPDFDocument(
     logoData = await loadLogoDataUrl(); // TrueCap default
   }
 
+  // Cover page first — the "arrival" beat (address + verdict + bottom line).
+  // Self-contained: the running header/footer loop skips page 1.
+  pageCover(doc, d, branding ?? null, logoData);
+  doc.addPage();
   pageInputs(doc, d, branding ?? null);
   doc.addPage();
   await pageProjection(doc, d, branding ?? null);
@@ -1470,10 +2000,17 @@ async function buildInvestmentPDFDocument(
     pageComps(doc, d, branding ?? null);
   }
 
+  // Assumptions & Disclosures — always last. Credibility + CYA for every
+  // mode (a lender packet, a partner memo, and a client-facing agent report
+  // all expect stated assumptions and a disclaimer).
+  doc.addPage();
+  pageDisclosures(doc, d, branding ?? null);
+
   // Add headers/footers AFTER all pages exist
   const total = doc.getNumberOfPages();
   for (let i = 1; i <= total; i++) {
     doc.setPage(i);
+    if (i === 1) continue; // cover draws its own chrome
     drawHeader(doc, i, total, d.generatedAt, logoData, branding ?? null);
   }
 

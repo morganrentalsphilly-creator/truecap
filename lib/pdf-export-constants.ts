@@ -8,7 +8,11 @@
 //       throughout + removed Section N kickers + refined hero panel.
 //       Anything cached at v1 looks dramatically different from a
 //       fresh export, so this bump is mandatory.
-export const PDF_SNAPSHOT_VERSION = 2;
+//   3 - Premium pass: dedicated cover page ("The Bottom Line" verdict +
+//       deal-score gauge + headline numbers), visual deal-score gauge,
+//       chart data-ink (endpoint labels + $0 reference lines), and an
+//       Assumptions & Disclosures closing page.
+export const PDF_SNAPSHOT_VERSION = 3;
 export const ANALYSIS_PDF_BUCKET = "analysis-pdfs";
 
 /**
