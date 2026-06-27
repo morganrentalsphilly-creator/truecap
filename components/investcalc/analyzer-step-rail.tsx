@@ -25,20 +25,20 @@ const STATUS_A11Y: Record<StepStatus, string> = {
 function StepIndicator({
   status,
   index,
-  active,
 }: {
   status: StepStatus;
   index: number;
-  active: boolean;
 }) {
+  // The active step is signalled by the button's pill (background + bold
+  // label) and aria-current — NOT by a ring on this dot. A translucent
+  // same-hue ring with no offset muddied the filled green disc (it read as
+  // a lighter halo / "not cleanly filled" edge over the active pill), so the
+  // dot stays a clean solid shape in every state.
   if (status === "complete") {
     return (
       <span
         aria-hidden
-        className={cn(
-          "flex size-5 shrink-0 items-center justify-center rounded-full bg-[var(--brand-green)] text-white",
-          active && "ring-2 ring-[var(--brand-green)]/30"
-        )}
+        className="flex size-5 shrink-0 items-center justify-center rounded-full bg-[var(--brand-green)] text-white"
       >
         <Check className="size-3" strokeWidth={3} />
       </span>
@@ -51,8 +51,7 @@ function StepIndicator({
         "flex size-5 shrink-0 items-center justify-center rounded-full border text-[10px] font-bold tabular-nums",
         status === "partial" && "border-[var(--brand-orange)] text-[var(--brand-orange)]",
         status === "pending" && "border-dashed border-muted-foreground/40 text-muted-foreground",
-        status === "empty" && "border-border text-muted-foreground",
-        active && "ring-2 ring-primary/30"
+        status === "empty" && "border-border text-muted-foreground"
       )}
     >
       {index}
@@ -96,7 +95,7 @@ export function AnalyzerStepRail({
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 )}
               >
-                <StepIndicator status={step.status} index={i + 1} active={active} />
+                <StepIndicator status={step.status} index={i + 1} />
                 <span className="whitespace-nowrap">{step.label}</span>
               </button>
             </li>
