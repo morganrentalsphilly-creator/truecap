@@ -75,7 +75,7 @@ export function PortfolioChart({ data = [] }: { data?: DealComparisonPoint[] }) 
     : "No deals to compare yet.";
 
   return (
-    <div className="rounded-2xl bg-card border border-border p-6">
+    <div className="rounded-2xl bg-card border border-border p-4 sm:p-6">
       <div className="flex flex-wrap items-start justify-between gap-3 mb-6">
         <div>
           <div className="flex items-center gap-2">
@@ -94,7 +94,7 @@ export function PortfolioChart({ data = [] }: { data?: DealComparisonPoint[] }) 
               role="tab"
               aria-selected={metric === item.id}
               onClick={() => setMetric(item.id)}
-              className={`px-3 py-1 text-xs font-semibold rounded-md transition ${
+              className={`px-3 py-2 text-xs font-semibold rounded-md transition sm:py-1 ${
                 metric === item.id ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
               }`}
             >
@@ -104,7 +104,11 @@ export function PortfolioChart({ data = [] }: { data?: DealComparisonPoint[] }) 
         </div>
       </div>
 
-      <div className="h-[280px] -ml-2" role="img" aria-label={chartSummary}>
+      {/* SR announcement: the role=img aria-label below doesn't re-announce
+          when the metric toggle changes it, so mirror the summary in a live
+          region that does. */}
+      <span className="sr-only" aria-live="polite">{chartSummary}</span>
+      <div className="h-[280px] sm:-ml-2" role="img" aria-label={chartSummary}>
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} barGap={4}>
             <CartesianGrid strokeDasharray="3 6" stroke={colors.grid} vertical={false} />

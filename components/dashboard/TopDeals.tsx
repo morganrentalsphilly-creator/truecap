@@ -101,13 +101,14 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
           <p className="text-sm text-muted-foreground mt-0.5">Sort saved deals by the metric that matters for the next purchase.</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <div className="flex items-center gap-1 p-1 rounded-lg bg-muted">
+          <div role="group" aria-label="Sort deals by" className="flex items-center gap-1 p-1 rounded-lg bg-muted">
             {sortOptions.map((option) => (
               <button
                 key={option.id}
                 type="button"
+                aria-pressed={sortBy === option.id}
                 onClick={() => setSortBy(option.id)}
-                className={`px-3 py-1 text-xs font-semibold rounded-md transition ${
+                className={`px-3 py-2 text-xs font-semibold rounded-md transition sm:py-1 ${
                   sortBy === option.id ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
                 }`}
               >
@@ -133,7 +134,7 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
                   <p className="mt-1 text-xs text-muted-foreground">{d.address}</p>
                 </div>
                 <div className="relative h-11 w-11 shrink-0">
-                  <svg className="h-11 w-11 -rotate-90" viewBox="0 0 36 36">
+                  <svg aria-hidden className="h-11 w-11 -rotate-90" viewBox="0 0 36 36">
                     <circle cx="18" cy="18" r="15" fill="none" stroke={ringTrack} strokeWidth="3" />
                     {d.score != null ? (
                       <circle
@@ -148,7 +149,13 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
                       />
                     ) : null}
                   </svg>
-                  <div className="absolute inset-0 grid place-items-center text-xs font-bold">{d.score ?? "-"}</div>
+                  <div aria-hidden className="absolute inset-0 grid place-items-center text-xs font-bold">{d.score ?? "-"}</div>
+                  {/* Risk is encoded in the ring COLOR only — give SR/colorblind
+                      users the score + risk as text. */}
+                  <span className="sr-only">
+                    {d.score != null ? `Deal score ${d.score} out of 100` : "Not scored"}
+                    {d.riskLevel ? `, ${d.riskLevel} risk` : ""}
+                  </span>
                 </div>
               </div>
 
@@ -202,13 +209,13 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
         <table className="w-full text-sm">
           <thead>
             <tr className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground border-y border-border bg-muted/40">
-              <th className="text-left px-6 py-3">Property</th>
-              <th className="text-left px-3 py-3">Score</th>
-              <th className="text-right px-3 py-3 hidden md:table-cell">10-Yr ROI</th>
-              <th className="text-right px-3 py-3 hidden md:table-cell">Cap Rate</th>
-              <th className="text-right px-3 py-3">Cash Flow</th>
-              <th className="text-right px-3 py-3 hidden xl:table-cell">Risk</th>
-              <th className="text-right px-6 py-3">Recommendation</th>
+              <th scope="col" className="text-left px-6 py-3">Property</th>
+              <th scope="col" className="text-left px-3 py-3">Score</th>
+              <th scope="col" className="text-right px-3 py-3 hidden md:table-cell">10-Yr ROI</th>
+              <th scope="col" className="text-right px-3 py-3 hidden md:table-cell">Cap Rate</th>
+              <th scope="col" className="text-right px-3 py-3">Cash Flow</th>
+              <th scope="col" className="text-right px-3 py-3 hidden xl:table-cell">Risk</th>
+              <th scope="col" className="text-right px-6 py-3">Recommendation</th>
             </tr>
           </thead>
           <tbody>
@@ -240,14 +247,18 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
                   <td className="px-3 py-4">
                     <div className="flex items-center gap-2">
                       <div className="relative h-9 w-9">
-                        <svg className="h-9 w-9 -rotate-90" viewBox="0 0 36 36">
+                        <svg aria-hidden className="h-9 w-9 -rotate-90" viewBox="0 0 36 36">
                           <circle cx="18" cy="18" r="15" fill="none" stroke={ringTrack} strokeWidth="3" />
                           {d.score != null ? (
                             <circle cx="18" cy="18" r="15" fill="none" stroke={d.riskLevel ? scoreRingStrokeByRisk[d.riskLevel] ?? ringTrack : ringTrack} strokeWidth="3"
                               strokeDasharray={`${(d.score / 100) * 94.2} 94.2`} strokeLinecap="round" />
                           ) : null}
                         </svg>
-                        <div className="absolute inset-0 grid place-items-center text-[11px] font-bold">{d.score ?? "-"}</div>
+                        <div aria-hidden className="absolute inset-0 grid place-items-center text-[11px] font-bold">{d.score ?? "-"}</div>
+                        <span className="sr-only">
+                          {d.score != null ? `Deal score ${d.score} out of 100` : "Not scored"}
+                          {d.riskLevel ? `, ${d.riskLevel} risk` : ""}
+                        </span>
                       </div>
                     </div>
                   </td>

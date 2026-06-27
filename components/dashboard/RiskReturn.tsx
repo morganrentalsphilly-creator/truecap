@@ -158,7 +158,7 @@ export function RiskReturn({ deals = [] }: { deals?: RiskReturnDeal[] }) {
       : "No deals have both the selected return metric and a DSCR to plot.";
 
   return (
-    <div className="rounded-2xl bg-card border border-border p-6">
+    <div className="rounded-2xl bg-card border border-border p-4 sm:p-6">
       <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
         <div>
           <h3 className="font-display text-lg font-semibold">Risk vs Return</h3>
@@ -174,7 +174,7 @@ export function RiskReturn({ deals = [] }: { deals?: RiskReturnDeal[] }) {
               role="tab"
               aria-selected={metric === m.id}
               onClick={() => setMetric(m.id)}
-              className={`px-3 py-1 text-xs font-semibold rounded-md transition ${
+              className={`px-3 py-2 text-xs font-semibold rounded-md transition sm:py-1 ${
                 metric === m.id ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
               }`}
             >
@@ -186,7 +186,10 @@ export function RiskReturn({ deals = [] }: { deals?: RiskReturnDeal[] }) {
 
       {points.length > 0 ? (
         <>
-          <div className="relative h-[260px] -ml-2" role="img" aria-label={summary}>
+          {/* Live region so toggling the return metric re-announces the chart
+              summary (the role=img aria-label alone doesn't re-announce). */}
+          <span className="sr-only" aria-live="polite">{summary}</span>
+          <div className="relative h-[260px] sm:-ml-2" role="img" aria-label={summary}>
             {/* Quadrant orientation — best (top-right) and worst (bottom-left).
                 pointer-events-none so they never block the chart tooltip. */}
             <div aria-hidden className="pointer-events-none absolute inset-0 z-10">
