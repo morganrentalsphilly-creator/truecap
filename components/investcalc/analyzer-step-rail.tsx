@@ -29,11 +29,10 @@ function StepIndicator({
   status: StepStatus;
   index: number;
 }) {
-  // The active step is signalled by the button's pill (background + bold
-  // label) and aria-current — NOT by a ring on this dot. A translucent
-  // same-hue ring with no offset muddied the filled green disc (it read as
-  // a lighter halo / "not cleanly filled" edge over the active pill), so the
-  // dot stays a clean solid shape in every state.
+  // No active ring on the dot. The active step is signalled by the button's
+  // pill (background + bold label) and aria-current — a translucent same-hue
+  // ring with no offset muddied the filled green disc. (Flicker stabilization
+  // lives on the sticky <nav> via will-change-transform, not here.)
   if (status === "complete") {
     return (
       <span
@@ -79,8 +78,17 @@ export function AnalyzerStepRail({
       // dots (a white notch punched into the green disc, visible after a
       // refresh). A solid card fill renders the dots cleanly and is more
       // legible over scrolling content anyway.
+      //
+      // will-change-transform keeps this STICKY rail on its own stable
+      // compositor layer. Without it, the rail repaints as the page scrolls
+      // and the tiny rounded-full dots get re-rasterized at fractional
+      // sub-pixel positions each paint — their antialiased edges shimmer.
+      // will-change (a promotion hint, not an actual transform) avoids the
+      // containing-block side effects that a real `transform` would impose on
+      // sticky positioning, and — unlike backdrop-filter — honours the dots'
+      // border-radius, so the rasterize-once-then-composite path stays clean.
       className={cn(
-        "rounded-2xl border border-border bg-card px-2 py-1.5 shadow-sm",
+        "rounded-2xl border border-border bg-card px-2 py-1.5 shadow-sm will-change-transform",
         className
       )}
     >
