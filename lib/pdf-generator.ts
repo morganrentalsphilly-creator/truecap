@@ -512,6 +512,13 @@ function drawHeader(
     } catch {
       // keep header clean even if logo cannot be drawn
     }
+  } else if (branding?.companyName?.trim()) {
+    // Branded report with no uploaded logo — render the company name as a
+    // text wordmark so the header is the user's, never TrueCap's.
+    setText(doc, COLOR.ink);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(14);
+    doc.text(branding.companyName.trim(), M.left, 40);
   }
 
   // Header subtitle ("Prepared by [Name]") was removed per design
@@ -784,7 +791,10 @@ function drawScoreGauge(
 function buildThesis(d: ReportData): string {
   const r = (d.performance.rationale || "").trim();
   if (!r) return "";
-  const parts = r.match(/[^.!?]+[.!?]+/g) || [r];
+  // Split on sentence terminators that are followed by whitespace or end of
+  // string, so a decimal like "1.28 DSCR" is NOT treated as a sentence break
+  // (the period there is followed by a digit, not a space).
+  const parts = r.match(/[\s\S]+?[.!?](?=\s|$)/g) || [r];
   let out = (parts[0] || r).trim();
   if (out.length < 90 && parts[1]) out = `${out} ${parts[1].trim()}`.trim();
   if (out.length > 230) out = `${out.slice(0, 227).trimEnd()}…`;
@@ -829,6 +839,12 @@ function pageCover(
     } catch {
       // cover stays clean even if the logo can't be drawn
     }
+  } else if (branding?.companyName?.trim()) {
+    // Branded report, no uploaded logo — the company name is the wordmark.
+    setText(doc, COLOR.ink);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(18);
+    doc.text(branding.companyName.trim(), M.left, 54);
   }
 
   // Date, top-right.
@@ -843,7 +859,7 @@ function pageCover(
   );
 
   // ---- Title zone ----
-  let y = 168;
+  let y = 196;
   setText(doc, themeColor);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(9);
@@ -959,6 +975,38 @@ function pageCover(
     doc.setFont("helvetica", "bold");
     doc.setFontSize(16);
     doc.text(m[1], mx, py + 18);
+  });
+
+  // ---- Deal terms strip — financing snapshot below the panel. Balances the
+  // cover (no longer a void above the footer) and adds the at-a-glance terms a
+  // lender / partner looks for first. ----
+  const isCashPurchase = d.financing.downPaymentPct >= 100;
+  const termsY = y + panelH + 42;
+  setText(doc, COLOR.sub);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(7.5);
+  doc.setCharSpace(0.8);
+  doc.text("DEAL TERMS", M.left, termsY);
+  doc.setCharSpace(0);
+  const terms: Array<[string, string]> = [
+    ["PURCHASE PRICE", fmtCurrency(d.property.purchasePrice)],
+    ["DOWN PAYMENT", `${d.financing.downPaymentPct}%  ·  ${fmtCurrency(d.financing.downPayment)}`],
+    ["INTEREST RATE", isCashPurchase ? "Cash purchase" : `${d.financing.interestRate}%`],
+    ["LOAN TERM", isCashPurchase ? "—" : `${d.financing.loanTerm} yrs`],
+  ];
+  const tColW = SAFE.w / 4;
+  terms.forEach((t, i) => {
+    const tx = M.left + i * tColW;
+    setText(doc, COLOR.muted);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(6.5);
+    doc.setCharSpace(0.5);
+    doc.text(t[0], tx, termsY + 26);
+    doc.setCharSpace(0);
+    setText(doc, COLOR.ink);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(13);
+    doc.text(t[1], tx, termsY + 45);
   });
 
   // ---- Attribution + confidential, anchored at the page foot ----
@@ -1972,7 +2020,14 @@ async function buildInvestmentPDFDocument(
   if (branding?.logoUrl) {
     logoData = await loadLogoDataUrl(branding.logoUrl);
   }
-  if (!logoData) {
+  // Fall back to the TrueCap mark ONLY for unbranded reports. A branded
+  // report with no uploaded logo must NOT show TrueCap's logo (it would
+  // undercut the white-label) — drawHeader / pageCover render the company
+  // NAME as a text wordmark instead when logoData is null but branding exists.
+  const isBranded = Boolean(
+    branding?.companyName?.trim() || branding?.logoUrl || branding?.primaryColorHex
+  );
+  if (!logoData && !isBranded) {
     logoData = await loadLogoDataUrl(); // TrueCap default
   }
 
