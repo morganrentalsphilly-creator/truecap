@@ -236,11 +236,18 @@ textarea,
   --muted-foreground: oklch(0.52 0.03 256);
   --accent: oklch(0.95 0.04 260);
   --accent-foreground: oklch(0.22 0.04 260);
-  --success: oklch(0.68 0.17 158);
+  /* Darkened from 0.68 → 0.50 lightness so text-success (positive cash flow,
+     "Strong Buy/Buy" pills) clears 4.5:1 on the white dashboard cards (was
+     ~2.5:1). Matches the proven-accessible --metric-positive; the only non-text
+     uses are faint /30 and /5 tints, so the shift there is imperceptible. */
+  --success: oklch(0.50 0.16 158);
   --success-foreground: oklch(0.99 0 0);
   --warning: oklch(0.78 0.16 75);
   --warning-foreground: oklch(0.2 0.05 60);
-  --gold: oklch(0.78 0.14 85);
+  /* Darkened from 0.78 → 0.56 so text-gold (AIInsights "tip" tone) is readable
+     on its light tinted card (was well under 4.5:1). The gold gradient/badge
+     and the StatCard gold tone use their own values, so they're unaffected. */
+  --gold: oklch(0.56 0.13 85);
   --border: oklch(0.92 0.012 255);
   --input: oklch(0.92 0.012 255);
   --ring: oklch(0.54 0.18 240);

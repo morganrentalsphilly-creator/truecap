@@ -68,7 +68,7 @@ export function Sidebar({ savedDealCount, navAccess, mobile = false }: SidebarPr
 
       <div className="px-3 py-5">
         <div className="px-3 mb-2 text-[10px] font-semibold tracking-[0.18em] text-sidebar-foreground/40">MAIN MENU</div>
-        <nav className="space-y-1">
+        <nav aria-label={mobile ? "Dashboard (mobile)" : "Dashboard"} className="space-y-1">
           {nav.map((item) => {
             const Icon = item.icon;
             return (
@@ -83,6 +83,7 @@ export function Sidebar({ savedDealCount, navAccess, mobile = false }: SidebarPr
                 // for marketing surfaces, not the app shell.
                 prefetch={item.enabled}
                 aria-disabled={!item.enabled}
+                aria-current={item.active ? "page" : undefined}
                 tabIndex={item.enabled ? undefined : -1}
                 className={`group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
                   item.active
