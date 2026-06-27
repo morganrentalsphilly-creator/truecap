@@ -73,8 +73,14 @@ export function AnalyzerStepRail({
   return (
     <nav
       aria-label="Analyzer steps"
+      // Solid background — intentionally NO backdrop-blur. A backdrop-filter
+      // on this sticky container forced the subtree onto a separate GPU
+      // raster layer, which intermittently squared off the rounded-full step
+      // dots (a white notch punched into the green disc, visible after a
+      // refresh). A solid card fill renders the dots cleanly and is more
+      // legible over scrolling content anyway.
       className={cn(
-        "rounded-2xl border border-border bg-card/90 px-2 py-1.5 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-card/75",
+        "rounded-2xl border border-border bg-card px-2 py-1.5 shadow-sm",
         className
       )}
     >
