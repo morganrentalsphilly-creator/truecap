@@ -1166,6 +1166,51 @@ export function AnalysisDashboard({
           {primaryMetricKeys.map((k) => metricTiles[k])}
         </div>
 
+        {/* Quick-screen ratios investors use to triage at a glance: break-even
+            occupancy (how much vacancy the deal can absorb before cash flow
+            hits zero), GRM, and rent-to-price (the "1% rule"). Derived from the
+            existing result — no new inputs. */}
+        {result ? (() => {
+          const price = result.loanAmount + result.downPayment;
+          const annualRent = result.monthlyRentalIncome * 12;
+          const grm = annualRent > 0 ? price / annualRent : null;
+          const rentToPrice = price > 0 ? (result.monthlyRentalIncome / price) * 100 : null;
+          // Costs that don't scale with occupancy (vacancy is the occupancy
+          // variable itself) that the collected rent must cover.
+          const fixedCosts =
+            result.totalOperatingExpenses - result.vacancy + result.monthlyPayment + result.pmiMonthly;
+          const breakEvenOcc =
+            result.monthlyRentalIncome > 0 ? (fixedCosts / result.monthlyRentalIncome) * 100 : null;
+          const chips: Array<{ label: string; value: string; hint: string }> = [
+            {
+              label: "Break-even occupancy",
+              value:
+                breakEvenOcc == null ? "—" : breakEvenOcc > 100 ? ">100%" : `${Math.round(breakEvenOcc)}%`,
+              hint: "Occupancy needed to cover all costs — lower means more vacancy cushion.",
+            },
+            { label: "GRM", value: grm == null ? "—" : grm.toFixed(1), hint: "Price ÷ annual gross rent (lower is cheaper)." },
+            {
+              label: "Rent-to-price",
+              value: rentToPrice == null ? "—" : `${rentToPrice.toFixed(2)}%`,
+              hint: "Monthly rent ÷ price — the 1% rule of thumb.",
+            },
+          ];
+          return (
+            <div className="flex flex-wrap gap-2">
+              {chips.map((c) => (
+                <span
+                  key={c.label}
+                  title={c.hint}
+                  className="inline-flex items-baseline gap-1.5 rounded-full border border-border bg-muted/40 px-3 py-1 text-xs"
+                >
+                  <span className="text-muted-foreground">{c.label}</span>
+                  <span className="font-bold tabular-nums text-foreground">{c.value}</span>
+                </span>
+              ))}
+            </div>
+          );
+        })() : null}
+
         {/* Appreciation-play context banner - reframes a deal whose
             year-1 cards read uniformly red (negative cash flow, sub-1
             DSCR) but which pays off after-tax and projects a strong

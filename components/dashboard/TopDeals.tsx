@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import { Building2, Home, KeyRound } from "lucide-react";
 import { recommendationLabel, type DealScoreBreakdown } from "@/lib/deal-score";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -130,7 +131,15 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
                   <Icon className="h-4 w-4" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h4 className="text-base font-bold leading-tight text-foreground">{d.name}</h4>
+                  <h4 className="text-base font-bold leading-tight text-foreground">
+                    {d.id ? (
+                      <Link href={`/dashboard/saved-analyses/${d.id}`} className="hover:text-primary hover:underline">
+                        {d.name}
+                      </Link>
+                    ) : (
+                      d.name
+                    )}
+                  </h4>
                   <p className="mt-1 text-xs text-muted-foreground">{d.address}</p>
                 </div>
                 <div className="relative h-11 w-11 shrink-0">
@@ -230,7 +239,15 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
                         <Icon className="h-4 w-4" />
                       </div>
                       <div>
-                        <div className="font-semibold">{d.name}</div>
+                        <div className="font-semibold">
+                          {d.id ? (
+                            <Link href={`/dashboard/saved-analyses/${d.id}`} className="hover:text-primary hover:underline">
+                              {d.name}
+                            </Link>
+                          ) : (
+                            d.name
+                          )}
+                        </div>
                         <div className="text-xs text-muted-foreground">{d.address}</div>
                         {d.tags?.length ? (
                           <div className="mt-2 flex flex-wrap gap-1">

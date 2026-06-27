@@ -13,6 +13,7 @@
  */
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import type { AnalysisResult } from "@/lib/calc-analysis";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
@@ -63,6 +64,19 @@ function MetricTile({
 }
 
 export function ReadOnlyAnalysisView({ values, result }: ReadOnlyAnalysisViewProps) {
+  const router = useRouter();
+  // "Make this mine": hand the FULL deal to the calculator via its autosave
+  // draft (restored on mount via normalizeInvestmentFormSnapshot), so the
+  // highest-intent viewer lands on a populated analysis instead of a blank
+  // homepage. Key must match CALC_FORM_DRAFT_KEY in investcalc-page.tsx.
+  const makeThisMine = () => {
+    try {
+      window.localStorage.setItem("truecap_calc_form_draft_v1", JSON.stringify(values));
+    } catch {
+      /* storage unavailable — fall through to a clean calculator */
+    }
+    router.push("/?utm_source=shared_deal&utm_medium=clone");
+  };
   return (
     <div className="space-y-5">
       {/* Headline metric tiles */}
@@ -114,6 +128,17 @@ export function ReadOnlyAnalysisView({ values, result }: ReadOnlyAnalysisViewPro
           sub="/month"
         />
       </div>
+
+      {/* Primary conversion action for a high-intent viewer: clone the deal
+          into the calculator (full inputs preloaded) instead of sending them
+          to a blank homepage. */}
+      <button
+        type="button"
+        onClick={makeThisMine}
+        className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-bold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
+      >
+        Make this deal mine — open it in the calculator →
+      </button>
 
       <MaxOfferCard values={values} />
       <SensitivityGrid values={values} />
