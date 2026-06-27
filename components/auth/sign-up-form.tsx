@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react";
@@ -24,6 +24,7 @@ import { useToast } from "@/hooks/use-toast";
 
 export function SignUpForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -79,7 +80,12 @@ export function SignUpForm() {
       });
     }
     form.reset();
-    router.push("/");
+    // Honor ?next (internal paths only) so a gated action returns the user to
+    // where they were instead of the homepage.
+    const nextParam = searchParams.get("next");
+    router.push(
+      nextParam && nextParam.startsWith("/") && !nextParam.startsWith("//") ? nextParam : "/"
+    );
     router.refresh();
   }
 

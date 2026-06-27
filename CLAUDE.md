@@ -675,7 +675,7 @@ Operational dry-runs:
 Don't autonomously do any of the following. Surface a proposal first
 and let Morgan say yes.
 
-1. **Change pricing** — the `$20/mo` figure, the annual discount, or
+1. **Change pricing** — the `$29/mo` figure, the annual discount, or
    anything that changes what a user sees on the pricing page or in
    the Stripe checkout amount.
 

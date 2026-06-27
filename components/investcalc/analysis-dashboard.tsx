@@ -473,7 +473,10 @@ export function AnalysisDashboard({
     }
   };
   const router = useRouter();
-  const goToLogin = () => router.push("/auth/login");
+  // Send the user back to the calculator after auth (?next=/) so the
+  // auto-saved form draft restores their analysis instead of landing them on
+  // a blank homepage with their work seemingly gone.
+  const goToLogin = () => router.push("/auth/login?next=/");
   const goToBilling = () => router.push("/profile#billing");
   const tabEntitlements: Record<AnalysisDashboardTab, boolean> = {
     "cash-flow": true,

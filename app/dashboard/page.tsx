@@ -95,6 +95,10 @@ function buildDashboardData(
           riskLevel: fresh.riskLevel,
           breakdown: fresh.breakdown,
           cashFlowMonthly: fresh.netCashFlowMonthly,
+          // Annual cash flow was left stale while monthly recomputed, so the
+          // risk-adjusted return axis divided a stale numerator by a fresh
+          // DSCR. Recompute it from the fresh monthly (mirrors Compare).
+          annualCashFlow: fresh.netCashFlowMonthly * 12,
           cocReturnPct: fresh.cocReturnPct,
           capRatePct: fresh.capRatePct,
           // DSCR + cash-to-close were left on the stale snapshot while every

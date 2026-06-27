@@ -73,7 +73,7 @@ const FAQS: { q: string; a: string }[] = [
     // app/page.tsx. MAO, sensitivity, BRRRR/fix-and-flip, and share
     // links are PRO features — a previous version of this answer
     // claimed they were free, contradicting every other surface.
-    a: "Yes. The cash-flow analyzer — cap rate, CoC, DSCR, monthly cash flow, address auto-fill, the 0–100 Deal Score, and a plain-English verdict — is free forever and unlimited. No card required to start. Pro adds MAO solver, sensitivity grid, BRRRR + fix-and-flip, 10-year projections, tax strategy, exit scenarios, shareable links, and lender-ready PDFs.",
+    a: "Yes. The cash-flow analyzer — cap rate, CoC, DSCR, monthly cash flow, address auto-fill, the 0–100 Deal Score, and a plain-English verdict — is free forever and unlimited. No card required to start. Pro adds MAO solver, sensitivity grid, BRRRR + fix-and-flip, 10-year projections, tax strategy, exit scenarios, co-branded shareable links, and lender-ready PDFs.",
   },
   {
     q: "Can I cancel anytime?",
@@ -211,7 +211,7 @@ export default async function PricingPage() {
                   ["Sale + rent comps from the address", "1 free", "50 / mo"],
                   ["MAO solver · Sensitivity grid", false, true],
                   ["BRRRR + fix-and-flip + rehab estimator", false, true],
-                  ["Shareable read-only deal links", false, true],
+                  ["Shareable read-only deal links", true, true],
                   ["10-year cash flow projection", false, true],
                   ["Tax strategy + depreciation", false, true],
                   ["Exit scenarios (best year to sell)", false, true],

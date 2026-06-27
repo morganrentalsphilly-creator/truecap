@@ -2984,7 +2984,11 @@ export function InvestCalcPage({
                 onAddressSelected={handleAddressSelected}
                 onAutofillFromAddress={handleAutofillFromAddress}
                 isAutofilling={isAutofilling}
-                showAutofill={isAuthenticated && !autofillUnavailable}
+                // Show Autofill to anonymous users too — it's the clearest
+                // expression of the core promise. The handler already returns a
+                // graceful "Sign in to autofill" toast for signed-out users, so
+                // the button becomes a sign-in CTA instead of being hidden.
+                showAutofill={!autofillUnavailable}
                 showYearBuilt={!activeStrategy}
                 priceLabel={activeStrategy?.priceLabel}
               />

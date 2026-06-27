@@ -1,4 +1,4 @@
-import { investmentFormSchema } from "@/lib/investcalc-schema";
+import { normalizeInvestmentFormSnapshot } from "@/lib/investcalc-schema";
 import { buildRateAlertForDeal, type RateAlertDeal } from "@/lib/rate-alerts";
 
 /**
@@ -40,13 +40,13 @@ export function buildRateWatch(
   if (currentRatePct == null || !Number.isFinite(currentRatePct)) return null;
   const changedDeals: RateAlertDeal[] = [];
   for (const row of rows) {
-    const parsed = investmentFormSchema.safeParse(row.form_snapshot);
-    if (!parsed.success) continue; // pre-snapshot or partial save — skip quietly
+    const values = normalizeInvestmentFormSnapshot(row.form_snapshot);
+    if (!values) continue; // pre-snapshot or partial save — skip quietly
     const alert = buildRateAlertForDeal({
       id: row.id,
       title: row.title ?? null,
       address: row.address ?? null,
-      values: parsed.data,
+      values,
       currentRatePct,
     });
     if (alert) changedDeals.push(alert);

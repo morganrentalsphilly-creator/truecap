@@ -43,6 +43,17 @@ export function SingleFamilyUnitSection({
   const showRent = fields !== "secondary";
   const showBaths = fields !== "primary";
   const showSqft = fields !== "primary";
+
+  // HUD rent auto-fill is keyed on bedroom count, so without beds the rent
+  // estimate silently never appears. Surface the dependency: when beds and rent
+  // are both empty, tell the user beds unlocks the estimate.
+  const beds = form.watch("bedrooms");
+  const rentVal = form.watch("monthlyRent");
+  const showRentNudge =
+    showBeds &&
+    showRent &&
+    (beds == null || Number.isNaN(beds)) &&
+    (rentVal == null || Number.isNaN(rentVal));
   const isSecondary = fields === "secondary";
   const visibleCount = [showBeds, showRent, showBaths, showSqft].filter(Boolean).length;
   const gridCols =
@@ -111,6 +122,11 @@ export function SingleFamilyUnitSection({
               />
             </div>
             <FieldError id="monthlyRent-error" message={errors.monthlyRent?.message} />
+            {showRentNudge ? (
+              <p className="mt-1 text-[11px] text-muted-foreground">
+                Add bedrooms to auto-estimate rent (HUD area data).
+              </p>
+            ) : null}
           </div>
         ) : null}
 

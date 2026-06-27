@@ -98,7 +98,13 @@ export function LoginForm() {
       title: "Welcome back",
       description: rememberMe ? "You are signed in." : "You are signed in for this session.",
     });
-    router.push("/");
+    // Honor ?next so a gated action (Save, a Pro CTA, the share viewer) returns
+    // the user to where they were instead of dumping them on the homepage.
+    // Only internal paths are allowed (no open redirects).
+    const nextParam = searchParams.get("next");
+    router.push(
+      nextParam && nextParam.startsWith("/") && !nextParam.startsWith("//") ? nextParam : "/"
+    );
     router.refresh();
   }
 

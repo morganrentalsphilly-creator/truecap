@@ -6,7 +6,7 @@ import {
   type DealRiskLevel,
   type DealScoreBreakdown,
 } from "@/lib/deal-score";
-import { investmentFormSchema } from "@/lib/investcalc-schema";
+import { normalizeInvestmentFormSnapshot } from "@/lib/investcalc-schema";
 
 /**
  * Re-score a saved deal with the CURRENT scoring engine from its stored form
@@ -41,11 +41,14 @@ export function recomputeSavedDealVerdict(formSnapshot: unknown): {
   /** Cash-on-cash return (%). */
   cocReturnPct: number;
 } | null {
-  const parsed = investmentFormSchema.safeParse(formSnapshot);
-  if (!parsed.success) return null;
+  // Use the resilient normalizer (same as the editor) rather than a raw
+  // safeParse, so legacy snapshots that open fine in the editor recompute
+  // here too instead of silently falling back to a stale stored score.
+  const values = normalizeInvestmentFormSnapshot(formSnapshot);
+  if (!values) return null;
   try {
-    const result = calculateAnalysis(parsed.data);
-    const scored = computeDealScore(buildDealScoreInputFromAnalysis(parsed.data, result));
+    const result = calculateAnalysis(values);
+    const scored = computeDealScore(buildDealScoreInputFromAnalysis(values, result));
     return {
       score: scored.score,
       recommendation: scored.recommendation,
