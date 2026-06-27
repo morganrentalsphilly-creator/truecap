@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, type ReactNode } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import {
@@ -440,9 +440,14 @@ function buildDecisionInsights(deals: DashboardDeal[]) {
 export function DashboardHome({
   data,
   canCompareDeals = false,
+  leadsSlot = null,
 }: {
   data: DashboardHomeData;
   canCompareDeals?: boolean;
+  /** Rendered inside the scrolling <main> (e.g. DealLeadsCard, an async server
+   *  component passed from the page) so it isn't clipped by the fixed-viewport
+   *  shell on desktop. */
+  leadsSlot?: ReactNode;
 }) {
   const initials = getInitials(data.user.displayName, data.user.email);
 
@@ -927,6 +932,11 @@ export function DashboardHome({
         {hasAnyDeals && data.topDeals.length > 0 ? (
           <TopDeals data={topDeals} />
         ) : null}
+
+        {/* Leads from co-branded shared deals — lives INSIDE the scrolling
+            main so it isn't clipped by the fixed-viewport shell on desktop.
+            Self-gates (renders null when there are no leads). */}
+        {leadsSlot}
       </main>
     </div>
   );

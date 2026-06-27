@@ -296,9 +296,10 @@ export default async function DashboardPage() {
   );
 
   return (
-    <>
-      <DashboardHome data={dashboardData} canCompareDeals={hasPlanFeature(entitlements, "compare_deals")} />
-      <DealLeadsCard />
-    </>
+    <DashboardHome
+      data={dashboardData}
+      canCompareDeals={hasPlanFeature(entitlements, "compare_deals")}
+      leadsSlot={<DealLeadsCard />}
+    />
   );
 }
