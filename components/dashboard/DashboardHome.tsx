@@ -226,7 +226,13 @@ function getDealAnchorId(deal: DashboardDeal | undefined, index = 0) {
 function scrollToDeal(deal: DashboardDeal | undefined, index = 0) {
   const id = getDealAnchorId(deal, index);
   if (!id) return;
-  document.getElementById(`deal-${id}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+  const el = document.getElementById(`deal-${id}`);
+  if (!el) return;
+  el.scrollIntoView({ behavior: "smooth", block: "center" });
+  // Move focus to the target so SR / keyboard users land on the deal instead
+  // of being stranded while the viewport scrolls away (the row is tabIndex=-1
+  // in TopDeals). preventScroll: our own smooth scroll owns the motion.
+  if (el instanceof HTMLElement) el.focus({ preventScroll: true });
 }
 
 function getDecisionHighlights(data: DashboardHomeData) {
@@ -872,6 +878,7 @@ export function DashboardHome({
                     key={row.label}
                     type="button"
                     onClick={() => scrollToDeal(row.deal)}
+                    aria-label={`${row.label}: ${row.address} — jump to it in the deal list`}
                     className="group flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-muted/40 sm:gap-4 sm:px-5 sm:py-3.5"
                   >
                     <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
@@ -886,13 +893,13 @@ export function DashboardHome({
                       </span>
                     </span>
                     <span className="shrink-0 text-right">
-                      <span className="block text-base font-extrabold tabular-nums text-foreground sm:text-lg">
+                      <span className="block text-sm font-extrabold tabular-nums text-foreground sm:text-lg">
                         {row.value}
                       </span>
                     </span>
                     <ArrowUpDown
                       aria-hidden
-                      className="size-3.5 shrink-0 text-muted-foreground/30 transition group-hover:translate-x-0.5 group-hover:text-primary sm:size-4"
+                      className="hidden size-3.5 shrink-0 text-muted-foreground/30 transition group-hover:translate-x-0.5 group-hover:text-primary sm:block sm:size-4"
                     />
                   </button>
                 );

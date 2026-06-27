@@ -196,6 +196,19 @@ export function Topbar({
         </form>
 
         <div className="flex items-center gap-2 ml-auto">
+          {/* Mobile: the primary action ("analyze a new property" — the whole
+              product promise) as a compact icon button, since the full CTA is
+              md+ only and the topbar otherwise leads with searching EXISTING
+              deals. 44px touch target. */}
+          <Link
+            href="/"
+            prefetch={false}
+            aria-label="New analysis"
+            className="inline-flex size-11 items-center justify-center rounded-lg text-white transition hover:opacity-90 md:hidden"
+            style={{ background: "var(--gradient-premium)", boxShadow: "var(--shadow-glow)" }}
+          >
+            <Sparkles className="h-5 w-5" />
+          </Link>
           <Link
             href="/"
             prefetch={false}

@@ -124,7 +124,7 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
           const Icon = typeIcon[d.type] ?? Building2;
           const dealId = getDealId(d);
           return (
-            <article id={`deal-${dealId}`} key={dealId} className="scroll-mt-24 rounded-2xl border border-border bg-background p-4 shadow-sm">
+            <article id={`deal-${dealId}`} key={dealId} tabIndex={-1} className="scroll-mt-24 rounded-2xl border border-border bg-background p-4 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
               <div className="flex items-start gap-3">
                 <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
                   <Icon className="h-4 w-4" />
@@ -223,7 +223,7 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
               const Icon = typeIcon[d.type] ?? Building2;
               const dealId = getDealId(d);
               return (
-                <tr id={`deal-${dealId}`} key={dealId} className="border-b border-border last:border-0 hover:bg-muted/30 transition scroll-mt-24">
+                <tr id={`deal-${dealId}`} key={dealId} tabIndex={-1} className="border-b border-border last:border-0 hover:bg-muted/30 transition scroll-mt-24 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       <div className="grid h-9 w-9 place-items-center rounded-full bg-primary/10 text-primary">
