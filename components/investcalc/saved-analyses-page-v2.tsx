@@ -18,6 +18,7 @@ import {
   Home,
   KeyRound,
   Loader2,
+  MoreHorizontal,
   Search,
   SlidersHorizontal,
   Sparkles,
@@ -40,6 +41,7 @@ import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
@@ -1613,7 +1615,7 @@ export function SavedAnalysesPage({
           </div>
 
           <div className="hidden overflow-x-auto xl:block">
-            <table className="w-full min-w-[980px] text-sm">
+            <table className="w-full min-w-[900px] text-sm">
               <thead className="bg-muted/40 border-b border-border">
                 <tr className="h-12">
                   <th className="w-10 px-3">
@@ -1656,7 +1658,7 @@ export function SavedAnalysesPage({
                   const signal = item.signal;
                   const PropertyTypeIcon = getTypeIcon(item.propertyType);
                   return (
-                    <tr key={item.id} className={cn("h-[72px] border-b border-border/80 transition-colors", isSelected ? "bg-primary/5" : "hover:bg-muted/40")}>
+                    <tr key={item.id} className={cn("h-16 border-b border-border/80 transition-colors", isSelected ? "bg-primary/5" : "hover:bg-muted/40")}>
                       <td className="px-3 align-middle">
                         <input
                           type="checkbox"
@@ -1692,22 +1694,27 @@ export function SavedAnalysesPage({
                         </div>
                       </td>
                       <td className="pr-2">
-                        <span className="inline-flex items-center gap-1.5">
-                          <Badge className={cn("rounded-full border text-xs font-semibold", getSignalClasses(signal))}>{SIGNAL_LABELS[signal]}</Badge>
-                          {item.breakdown && item.score != null ? (
-                            <Popover>
-                              <PopoverTrigger asChild>
-                                <button type="button" className="text-[11px] font-semibold text-primary underline-offset-2 hover:underline">Why?</button>
-                              </PopoverTrigger>
-                              <PopoverContent align="end" className="w-auto p-3">
-                                <ScoreBreakdown breakdown={item.breakdown} score={item.score} />
-                              </PopoverContent>
-                            </Popover>
-                          ) : null}
+                        {/* Stacked: verdict badge + "Why?" on one line, the data-
+                            confidence pill on its own line below — uses vertical
+                            space instead of widening the column. */}
+                        <div className="flex flex-col items-start gap-1.5">
+                          <span className="inline-flex items-center gap-1.5">
+                            <Badge className={cn("rounded-full border text-xs font-semibold", getSignalClasses(signal))}>{SIGNAL_LABELS[signal]}</Badge>
+                            {item.breakdown && item.score != null ? (
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <button type="button" className="text-[11px] font-semibold text-primary underline-offset-2 hover:underline">Why?</button>
+                                </PopoverTrigger>
+                                <PopoverContent align="end" className="w-auto p-3">
+                                  <ScoreBreakdown breakdown={item.breakdown} score={item.score} />
+                                </PopoverContent>
+                              </Popover>
+                            ) : null}
+                          </span>
                           {item.dataConfidence ? (
                             <DataConfidenceBadge confidence={item.dataConfidence} size="xs" />
                           ) : null}
-                        </span>
+                        </div>
                       </td>
                       <td className={cn("font-semibold", (item.netCashFlowMonthly ?? 0) >= 0 ? "text-success" : "text-[var(--metric-negative)]")}>{toMonthCashFlow(item.netCashFlowMonthly)}</td>
                       <td className={cn("font-semibold", (item.cocReturnPct ?? 0) >= 0 ? "text-success" : "text-[var(--metric-negative)]")}>{toPercent(item.cocReturnPct)}</td>
@@ -1772,7 +1779,11 @@ export function SavedAnalysesPage({
                         </div>
                       </td>
                       <td className="pr-2">
-                        <div className="flex items-center gap-2">
+                        {/* Consolidated: a single primary "Open Analysis" plus a
+                            ⋯ overflow menu for the secondary actions. Previously
+                            three full-width buttons here overflowed the row and
+                            truncated the table. */}
+                        <div className="flex items-center gap-1.5">
                           <Button
                             type="button"
                             variant="outline"
@@ -1788,38 +1799,36 @@ export function SavedAnalysesPage({
                             )}
                             Open Analysis
                           </Button>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            className="h-8 rounded-md px-2.5 text-xs"
-                            onClick={() => handleExportPdfClick(item.id)}
-                            disabled={exportingPdfDealId === item.id}
-                            title={!canExportPdf ? "PDF export - Pro feature" : undefined}
-                          >
-                            {exportingPdfDealId === item.id ? (
-                              <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" />
-                            ) : (
-                              <FileDown className="w-3.5 h-3.5 mr-1" />
-                            )}
-                            Export PDF
-                            {!canExportPdf ? (
-                              <span className="ml-1.5 rounded-full bg-primary/10 px-1.5 py-0 text-[9px] font-bold text-primary">
-                                PRO
-                              </span>
-                            ) : null}
-                          </Button>
-                          <Button
-                            asChild
-                            variant="outline"
-                            size="sm"
-                            className="h-8 rounded-md px-2.5 text-xs"
-                          >
-                            <Link href={`/dashboard/saved-analyses/${item.id}`}>
-                              <ClipboardList className="w-3.5 h-3.5 mr-1" />
-                              Checklist
-                            </Link>
-                          </Button>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                className="h-8 w-8 rounded-md p-0"
+                                aria-label={`More actions for ${address.main}`}
+                              >
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-44">
+                              <DropdownMenuItem onSelect={() => handleExportPdfClick(item.id)}>
+                                <FileDown className="mr-2 h-3.5 w-3.5" />
+                                Export PDF
+                                {!canExportPdf ? (
+                                  <span className="ml-auto rounded-full bg-primary/10 px-1.5 py-0 text-[9px] font-bold text-primary">
+                                    PRO
+                                  </span>
+                                ) : null}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem asChild>
+                                <Link href={`/dashboard/saved-analyses/${item.id}`}>
+                                  <ClipboardList className="mr-2 h-3.5 w-3.5" />
+                                  Checklist
+                                </Link>
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
                       </td>
                       <td className="whitespace-nowrap pr-4 text-muted-foreground">
