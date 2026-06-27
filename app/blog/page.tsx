@@ -49,6 +49,16 @@ export type BlogPost = {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: "property-tax-reassessment-rental-property",
+    title:
+      "Property tax reassessment: don't underwrite the seller's tax bill (2026)",
+    excerpt:
+      "The most expensive shortcut in underwriting is copying the property-tax line straight off the listing. Why the seller's bill reflects a capped, years-old assessment and an owner-occupant exemption you'll never get, how a sale resets taxes toward your purchase price (Prop 13 and the cyclical-reassessment states), the supplemental bill that lands after closing, and a worked $400K duplex where a $3,400-vs-$6,000 tax line drops the cap rate 0.65 points, pushes DSCR from 1.00 to 0.90, and swings cash flow from +$9 to −$208 a month.",
+    readingTimeMinutes: 10,
+    publishedAt: "2026-06-27",
+    available: true,
+  },
+  {
     slug: "break-even-occupancy-rental-property",
     title: "Break-even occupancy: how much vacancy a rental can survive (2026)",
     excerpt:
