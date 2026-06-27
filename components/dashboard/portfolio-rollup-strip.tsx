@@ -113,7 +113,7 @@ export function PortfolioRollupStrip({
         </p>
         <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-5">
           <RollupTile
-            label="Monthly cash flow"
+            label="Monthly Cash Flow"
             value={
               cashFlowSampleCount > 0
                 ? fmtMonthlyCashFlow(totalMonthlyCashFlow)
@@ -135,7 +135,7 @@ export function PortfolioRollupStrip({
             }
           />
           <RollupTile
-            label="Total deal value"
+            label="Pipeline Value"
             value={totalPurchasePrice > 0 ? fmtCurrency(totalPurchasePrice) : "—"}
             sub="sum of purchase prices"
             tone="neutral"

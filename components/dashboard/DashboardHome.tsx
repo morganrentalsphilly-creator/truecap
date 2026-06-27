@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, type ReactNode } from "react";
+import { GlossaryTip } from "@/components/investcalc/glossary-tip";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import {
@@ -706,7 +707,7 @@ export function DashboardHome({
                 <span className="font-semibold text-foreground">
                   {portfolio.weightedCap == null ? "-" : `${portfolio.weightedCap.toFixed(2)}%`}
                 </span>
-                <span>weighted cap rate</span>
+                <GlossaryTip term="capRate"><span>weighted cap rate</span></GlossaryTip>
               </span>
               <span aria-hidden className="text-muted-foreground/40">·</span>
               <span className="inline-flex items-center gap-1.5">
@@ -746,7 +747,7 @@ export function DashboardHome({
                 </div>
                 <div className="rounded-xl border border-border bg-card p-3">
                   <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                    <Layers className="h-3.5 w-3.5" /> Weighted DSCR
+                    <Layers className="h-3.5 w-3.5" /> <GlossaryTip term="dscr">Weighted DSCR</GlossaryTip>
                   </div>
                   <div className="mt-1 text-lg font-bold text-foreground">
                     {kpis.weightedDscr == null ? "—" : `${kpis.weightedDscr.toFixed(2)}×`}
@@ -865,7 +866,7 @@ export function DashboardHome({
                     // 10-yr ROI is cumulative (exitScenarios.summary.totalROI)
                     // — label carries the time-frame so 900%+ values don't
                     // read as nonsense beside annual cap rates.
-                    label: "Highest 10-yr ROI",
+                    label: "Highest 10-Yr ROI (cumulative)",
                     value: formatPercent(highlights.byRoi?.roiPct),
                     address: highlights.byRoi?.address ?? "—",
                     deal: highlights.byRoi,
