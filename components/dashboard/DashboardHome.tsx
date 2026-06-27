@@ -272,7 +272,13 @@ function getPortfolioKpis(data: DashboardHomeData) {
   let dscrNumerator = 0;
   let dscrDenominator = 0;
   for (const d of deals) {
-    if (d.dscr != null && d.purchasePrice != null && d.purchasePrice > 0) {
+    // Exclude cash purchases (monthlyPayment <= 0): they have no debt service,
+    // so calc-analysis stores DSCR = 0 for them. Folding that 0 into the
+    // weighted average drags portfolio "leverage safety" toward 0 — a false
+    // alarm on a book that's actually safer for being un-levered. RiskReturn
+    // and the "safest deal" insight already exclude cash; this KPI was the gap.
+    const isCashPurchase = d.monthlyPayment != null && d.monthlyPayment <= 0;
+    if (!isCashPurchase && d.dscr != null && d.purchasePrice != null && d.purchasePrice > 0) {
       dscrNumerator += d.dscr * d.purchasePrice;
       dscrDenominator += d.purchasePrice;
     }

@@ -97,6 +97,11 @@ function buildDashboardData(
           cashFlowMonthly: fresh.netCashFlowMonthly,
           cocReturnPct: fresh.cocReturnPct,
           capRatePct: fresh.capRatePct,
+          // DSCR + cash-to-close were left on the stale snapshot while every
+          // neighbour recomputed fresh, so /dashboard disagreed with the My
+          // Deals list (which already uses fresh.dscr/cashToClose). Carry them.
+          dscr: fresh.dscr,
+          cashToClose: fresh.cashToClose,
           roiPct: typeof freshRoi === "number" ? freshRoi : deal.roiPct,
         }
       : deal;
@@ -216,7 +221,11 @@ export default async function DashboardPage() {
       if (r.purchase_price != null) {
         totalValue += r.purchase_price;
         activeCount += 1;
-        const cap = fresh ? fresh.capRatePct : Number(r.cap_rate_raw);
+        // Guard the legacy fallback: cap_rate_raw is null when absent, and
+        // Number(null) === 0 passes Number.isFinite — folding a phantom 0%
+        // (weighted by full price) into the headline weighted-cap aggregate.
+        // Keep a missing cap OUT entirely (mirrors the ncf branch below).
+        const cap = fresh ? fresh.capRatePct : (r.cap_rate_raw != null ? Number(r.cap_rate_raw) : NaN);
         if (Number.isFinite(cap) && r.purchase_price > 0) {
           capNum += cap * r.purchase_price;
           capDen += r.purchase_price;
