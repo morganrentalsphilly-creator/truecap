@@ -12,6 +12,10 @@
  *   - Hides for anyone who's dismissed it (localStorage flag)
  *   - Hides on auth pages (clean signup/login surfaces)
  *   - Hides on /pricing (the destination — don't promote it from itself)
+ *   - Hides on /dashboard/* — that's the signed-in app shell, which is
+ *     viewport-locked (lg:h-screen lg:overflow-hidden). A normal-flow banner
+ *     above a 100vh shell makes the whole page over-scroll into dead space
+ *     below the dashboard. Marketing chrome doesn't belong in the app shell.
  *
  * Copy is intentionally light — not a sales scream. The banner is a
  * passive nudge for the segment that's already considering paying.
@@ -23,7 +27,7 @@ import { X } from "lucide-react";
 
 const DISMISS_KEY = "truecap_annual_promo_dismissed_v1";
 
-const HIDE_ON_PATHS = ["/pricing", "/auth", "/embed"];
+const HIDE_ON_PATHS = ["/pricing", "/auth", "/embed", "/dashboard"];
 
 export function AnnualPromoBanner() {
   const pathname = usePathname() ?? "/";
