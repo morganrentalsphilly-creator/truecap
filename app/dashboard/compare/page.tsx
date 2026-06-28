@@ -151,7 +151,7 @@ function mapDeal(row: SavedAnalysisRow): CompareDealViewModel {
     monthlyPayment: recomputed ? recomputed.monthlyPayment : toNumber(snapshot.monthlyPayment),
     pmiMonthly: recomputed
       ? recomputed.pmiMonthly
-      : toNumber((snapshot as Record<string, unknown>).pmiMonthly),
+      : toNumber((snapshot as Record<string, number | null | undefined>).pmiMonthly),
     taxSavingsMonthly: toNumber(snapshot.taxSavingsMonthly),
   };
 
