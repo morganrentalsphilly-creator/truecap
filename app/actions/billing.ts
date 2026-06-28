@@ -1,6 +1,7 @@
 "use server";
 
 import { z } from "zod";
+import * as Sentry from "@sentry/nextjs";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getStripe } from "@/lib/stripe/client";
@@ -51,10 +52,25 @@ function getPlanPriceId(planSlug: "pro_monthly" | "pro_annual", dbPriceId?: stri
 function resolveOfferCouponId(offer: string | undefined): string | null {
   if (!offer) return null;
   const code = offer.trim().toUpperCase();
+  // The post-analysis drip's final nudge links ?coupon=<POST_ANALYSIS_COUPON_CODE>
+  // (default ANALYZE20). Key the map off that same code so the promised 20% off
+  // actually applies once POST_ANALYSIS_COUPON_ID is set — previously only EXIT50
+  // was wired, so ANALYZE20 silently fell through to full price.
+  const postAnalysisCode = (process.env.POST_ANALYSIS_COUPON_CODE || "ANALYZE20").trim().toUpperCase();
   const map: Record<string, string | undefined> = {
     EXIT50: process.env.EXIT_INTENT_COUPON_ID,
+    [postAnalysisCode]: process.env.POST_ANALYSIS_COUPON_ID,
   };
-  return map[code] ?? null;
+  const resolved = map[code] ?? null;
+  // A KNOWN offer code with no configured coupon id = a promo we promised but
+  // can't honor. Surface it loudly instead of silently charging full price.
+  if (resolved == null && code in map) {
+    Sentry.captureMessage(`offer coupon '${code}' has no configured Stripe coupon id`, {
+      level: "warning",
+      tags: { feature: "billing-offer-coupon" },
+    });
+  }
+  return resolved;
 }
 
 function getDisplayName(profile: {
@@ -164,6 +180,18 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
     };
   }
 
+  // Repeat-trial guard: the free trial is a FIRST-time offer. A returning user
+  // who ever subscribed before (any status, incl. canceled/incomplete) does NOT
+  // get it again — otherwise cancel-and-resubscribe farms a fresh trial each
+  // cycle. Only grant the trial when there's no prior subscription row at all.
+  const { data: priorSubscription } = await supabase
+    .from("subscriptions")
+    .select("id")
+    .eq("user_id", user.id)
+    .limit(1)
+    .maybeSingle();
+  const grantTrial = !priorSubscription;
+
   const [{ data: profile }, { data: plan, error: planError }] = await Promise.all([
     supabase
       .from("profiles")
@@ -240,7 +268,7 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
           user_id: user.id,
           plan_slug: parsed.data.planSlug,
         },
-        ...(proTrialDays > 0 ? { trial_period_days: proTrialDays } : {}),
+        ...(grantTrial && proTrialDays > 0 ? { trial_period_days: proTrialDays } : {}),
       },
     });
 
