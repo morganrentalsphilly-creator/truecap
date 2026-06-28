@@ -23,6 +23,7 @@ import {
   SlidersHorizontal,
   Sparkles,
   Tag,
+  Target,
   Trash2,
   X,
   ClipboardList,
@@ -85,6 +86,16 @@ import {
 import { buildAutoVerdict } from "@/lib/verdict";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ScoreBreakdown } from "@/components/investcalc/score-breakdown";
+import { listBuyBoxesAction } from "@/app/actions/user-buy-boxes";
+import {
+  buyBoxHasCriteria,
+  deriveStateFromAddress,
+  evaluateBuyBoxes,
+  summarizeBuyBoxFit,
+  type BuyBoxDealMetrics,
+  type BuyBoxFitSummary,
+  type NamedBuyBox,
+} from "@/lib/buy-box";
 
 type SavedSignal = "strong-buy" | "buy" | "neutral" | "risky" | "avoid";
 type SavedPropertyType = "single-family" | "multi-family" | "owner-occupant";
@@ -128,6 +139,49 @@ export type SavedAnalysisListItem = {
   createdAt: string;
   status: "active" | "completed" | "archived";
 };
+
+/**
+ * Map a saved-deal list row to the metrics the Buy Box screens against. All
+ * fields already live on the row, so screening is a pure local computation —
+ * no per-deal recompute. calc-analysis stores DSCR 0 for cash purchases, which
+ * is the signal that the DSCR criterion should be skipped, not failed.
+ */
+function toBuyBoxMetrics(item: SavedAnalysisListItem): BuyBoxDealMetrics {
+  return {
+    capRatePct: item.capRatePct,
+    cocPct: item.cocReturnPct,
+    dscr: item.dscr ?? null,
+    cashFlowMonthly: item.netCashFlowMonthly,
+    purchasePrice: item.purchasePrice,
+    propertyType: item.propertyType,
+    state: deriveStateFromAddress(item.address),
+    isCashPurchase: item.dscr === 0,
+  };
+}
+
+/** Per-row "fit vs your buy box(es)" pill. Renders nothing unless ≥1 active
+ *  box applied to this deal — keeps the list clean for box-less users. */
+function BuyBoxFitBadge({ fit }: { fit: BuyBoxFitSummary | undefined }) {
+  if (!fit || fit.activeCount === 0) return null;
+  const label = fit.anyPass
+    ? fit.activeCount > 1
+      ? `Buy box ${fit.passingCount}/${fit.activeCount}`
+      : "Meets buy box"
+    : "Misses buy box";
+  return (
+    <Badge
+      className={cn(
+        "gap-1 rounded-full border text-xs font-semibold",
+        fit.anyPass
+          ? "border-[var(--brand-green)]/30 bg-[var(--brand-green-light)] text-[var(--brand-green)]"
+          : "border-amber-300 bg-amber-50 text-amber-700"
+      )}
+    >
+      <Target className="size-3" />
+      {label}
+    </Badge>
+  );
+}
 
 /** Compact "Next: <step>" line driven by the verdict-based next-action lib. */
 function NextActionLine({
@@ -521,6 +575,11 @@ export function SavedAnalysesPage({
   const [showcompare, setShowcompare] = useState(false);
   const [selectedSignal, setSelectedSignal] = useState<"all" | SavedSignal>("all");
   const [selectedType, setSelectedType] = useState<"all" | SavedPropertyType>("all");
+  // Buy-box screening: the user's active boxes (null until loaded / none) and a
+  // "only deals that meet a box" filter. Invisible-until-useful — both stay
+  // dormant for users without an active buy box.
+  const [buyBoxes, setBuyBoxes] = useState<NamedBuyBox[] | null>(null);
+  const [buyBoxOnly, setBuyBoxOnly] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   // Optional decision columns (DSCR, cash to close) - off by default so the
   // default table stays uncrowded; remembered per browser.
@@ -576,6 +635,53 @@ export function SavedAnalysesPage({
     [initialItems]
   );
 
+  // Load the user's buy boxes once; keep only the switched-on ones with ≥1 rule
+  // (same gate as the single-deal verdict card). Failures / no-boxes / free
+  // users leave buyBoxes null, so nothing screening-related ever renders.
+  useEffect(() => {
+    let cancelled = false;
+    void listBuyBoxesAction()
+      .then((result) => {
+        if (cancelled) return;
+        if (result.ok && result.canUse) {
+          setBuyBoxes(result.boxes.filter((b) => b.isActive && buyBoxHasCriteria(b)));
+        } else {
+          setBuyBoxes(null);
+        }
+      })
+      .catch((err) => {
+        if (!cancelled) console.warn("[saved-analyses buy-box] load failed:", err);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Pure local fit per deal — id → summary, only for deals where ≥1 active box
+  // applied. null when the user has no usable boxes (the screening UI hides).
+  const buyBoxFitById = useMemo(() => {
+    if (!buyBoxes || buyBoxes.length === 0) return null;
+    const map = new Map<string, BuyBoxFitSummary>();
+    for (const item of enrichedItems) {
+      const results = evaluateBuyBoxes(buyBoxes, toBuyBoxMetrics(item)).filter((r) => r.result.active);
+      if (results.length > 0) map.set(item.id, summarizeBuyBoxFit(results));
+    }
+    return map.size > 0 ? map : null;
+  }, [buyBoxes, enrichedItems]);
+
+  // If the filter is on but the boxes go away (deleted in another tab), drop it.
+  useEffect(() => {
+    if (!buyBoxFitById && buyBoxOnly) setBuyBoxOnly(false);
+  }, [buyBoxFitById, buyBoxOnly]);
+
+  // How many saved deals meet at least one active box — shown on the filter chip.
+  const buyBoxMatchCount = useMemo(() => {
+    if (!buyBoxFitById) return 0;
+    let n = 0;
+    for (const fit of buyBoxFitById.values()) if (fit.anyPass) n += 1;
+    return n;
+  }, [buyBoxFitById]);
+
   useEffect(() => {
     const pending = consumePendingSavedListSearch();
     if (pending) setSearchQuery(pending);
@@ -599,9 +705,10 @@ export function SavedAnalysesPage({
         const matchesSignal = selectedSignal === "all" ? true : item.signal === selectedSignal;
         const matchesType = selectedType === "all" ? true : item.propertyType === selectedType;
         const matchshowcompare = showcompare ? selectedIds.includes(item.id) : true;
-        return matchesSearch && matchesSignal && matchesType && matchshowcompare;
+        const matchesBuyBox = !buyBoxOnly || (buyBoxFitById?.get(item.id)?.anyPass ?? false);
+        return matchesSearch && matchesSignal && matchesType && matchshowcompare && matchesBuyBox;
       }),
-    [enrichedItems, searchQuery, selectedSignal, selectedType, selectedIds, showcompare]
+    [enrichedItems, searchQuery, selectedSignal, selectedType, selectedIds, showcompare, buyBoxOnly, buyBoxFitById]
   );
 
   const displayItems = useMemo(() => {
@@ -632,8 +739,8 @@ export function SavedAnalysesPage({
   );
 
   const resetPageTriggerKey = useMemo(
-    () => `${searchQuery}|${selectedSignal}|${selectedType}|${activeSortField ?? ""}|${activeSortDirection ?? ""}|${showcompare}`,
-    [searchQuery, selectedSignal, selectedType, activeSortField, activeSortDirection, showcompare]
+    () => `${searchQuery}|${selectedSignal}|${selectedType}|${activeSortField ?? ""}|${activeSortDirection ?? ""}|${showcompare}|${buyBoxOnly ? "bb" : ""}`,
+    [searchQuery, selectedSignal, selectedType, activeSortField, activeSortDirection, showcompare, buyBoxOnly]
   );
 
   useEffect(() => {
@@ -1339,6 +1446,35 @@ export function SavedAnalysesPage({
 
           <SavedMobileFilters />
 
+          {/* Real buy-box screening — only when the user has ≥1 active box.
+              Filters the list to deals that meet at least one of their saved
+              acquisition boxes (the per-deal verdict mirrors the single-deal
+              card). Invisible for everyone else. */}
+          {buyBoxFitById ? (
+            <button
+              type="button"
+              onClick={() => setBuyBoxOnly((v) => !v)}
+              aria-pressed={buyBoxOnly}
+              className={cn(
+                "inline-flex items-center gap-1.5 self-start rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors",
+                buyBoxOnly
+                  ? "border-[var(--brand-green)] bg-[var(--brand-green)] text-white"
+                  : "border-[var(--brand-green)]/30 bg-[var(--brand-green-light)] text-[var(--brand-green)] hover:bg-[var(--brand-green)]/15"
+              )}
+            >
+              <Target className="size-3.5" />
+              Meets my buy box
+              <span
+                className={cn(
+                  "rounded-full px-1.5 py-px text-[10px] tabular-nums",
+                  buyBoxOnly ? "bg-white/20" : "bg-[var(--brand-green)]/15"
+                )}
+              >
+                {buyBoxMatchCount}
+              </span>
+            </button>
+          ) : null}
+
           <div className="hidden flex-wrap items-center gap-2 xl:flex">
             <Tabs value={selectedSignal} onValueChange={(value) => setSelectedSignal(value as "all" | SavedSignal)} className="gap-0">
               <TabsList className="bg-muted/60 h-9 rounded-full p-1">
@@ -1464,6 +1600,7 @@ export function SavedAnalysesPage({
                       <div className="mt-1 flex flex-wrap items-center gap-1.5">
                         {getStatusBadge(item)}
                         <Badge className={cn("rounded-full border text-xs font-semibold", getSignalClasses(signal))}>{SIGNAL_LABELS[signal]}</Badge>
+                        <BuyBoxFitBadge fit={buyBoxFitById?.get(item.id)} />
                         {item.breakdown && item.score != null ? (
                           <Popover>
                             <PopoverTrigger asChild>
@@ -1712,6 +1849,7 @@ export function SavedAnalysesPage({
                               </Popover>
                             ) : null}
                           </span>
+                          <BuyBoxFitBadge fit={buyBoxFitById?.get(item.id)} />
                           {item.dataConfidence ? (
                             <DataConfidenceBadge confidence={item.dataConfidence} size="xs" />
                           ) : null}
