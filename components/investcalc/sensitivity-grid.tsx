@@ -36,6 +36,13 @@ function pickColor(scenarioName: string, baseRefValue: number, value: number) {
     : "text-[var(--metric-negative)]";
 }
 
+/** Non-color cue (▲ better / ▼ worse than base) so the direction survives
+ *  color-blindness and grayscale print. Empty for the Base column. */
+function pickGlyph(scenarioName: string, baseRefValue: number, value: number): string {
+  if (scenarioName === "Base") return "";
+  return value >= baseRefValue ? "▲" : "▼";
+}
+
 function ScenarioCell({
   result,
   baseResult,
@@ -51,6 +58,11 @@ function ScenarioCell({
   return (
     <div className="space-y-0.5">
       <div className={cn("text-sm font-semibold tabular-nums", pickColor(scenarioName, baseResult.netCashFlow, result.netCashFlow))}>
+        {pickGlyph(scenarioName, baseResult.netCashFlow, result.netCashFlow) ? (
+          <span aria-hidden="true" className="mr-0.5">
+            {pickGlyph(scenarioName, baseResult.netCashFlow, result.netCashFlow)}
+          </span>
+        ) : null}
         {fmtCash(result.netCashFlow)}/mo
       </div>
       <div className="text-[11px] text-muted-foreground tabular-nums">

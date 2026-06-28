@@ -296,6 +296,7 @@ function SliderRow({
         step={step}
         value={value}
         onChange={(e) => onChange(parseFloat(e.target.value))}
+        aria-label={`${label} adjustment`}
         aria-valuetext={ariaText}
         className="h-2 w-full cursor-pointer appearance-none rounded-full bg-muted accent-primary"
       />

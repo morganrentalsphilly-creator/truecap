@@ -350,6 +350,8 @@ export function AddressAutocomplete({
         id={fieldId}
         placeholder={placeholder}
         autoComplete="off"
+        inputMode="text"
+        enterKeyHint="search"
         role="combobox"
         aria-autocomplete="list"
         aria-expanded={hasSuggestions}
