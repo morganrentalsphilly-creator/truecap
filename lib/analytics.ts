@@ -61,6 +61,8 @@ export type FunnelEvent =
   | "one_time_pdf_purchased"
   // Deal Q&A (AI panel under the recommendation card).
   | "deal_qa_asked" // properties: question_length
+  // AI deal summary (one-tap grounded summary card).
+  | "deal_summary_generated"
   // ── Homepage → analyzer funnel (hero input + simplified flow) ──
   // Granular steps so we can A/B the hero input + minimal analyzer and
   // see exactly where starts drop off. No PII: we never send the typed

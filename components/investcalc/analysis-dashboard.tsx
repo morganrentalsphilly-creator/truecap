@@ -71,6 +71,7 @@ import { SensitivityGrid } from "@/components/investcalc/sensitivity-grid";
 import { StrategiesPanel } from "@/components/investcalc/strategies-panel";
 import { ProInlineGate } from "@/components/investcalc/pro-inline-gate";
 import { DealQaPanel } from "@/components/investcalc/deal-qa-panel";
+import { DealSummaryCard } from "@/components/investcalc/deal-summary-card";
 import { BuyBoxVerdictCard } from "@/components/investcalc/buy-box-verdict-card";
 import { NextActionBanner } from "@/components/investcalc/next-action-banner";
 import { nextActionForDeal } from "@/lib/next-action";
@@ -1389,6 +1390,7 @@ export function AnalysisDashboard({
           below the fold on phones. Renders only when the page says the
           feature is configured (Anthropic key present). Free users get
           a few questions/day (server-enforced). */}
+      {dealQaEnabled && result && values && !isLoading ? <DealSummaryCard values={values} /> : null}
       {dealQaEnabled && result && values && !isLoading ? <DealQaPanel values={values} /> : null}
 
       {/* "Details" landmark - pairs with the "Overview" landmark above
