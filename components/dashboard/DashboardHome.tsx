@@ -506,16 +506,17 @@ export function DashboardHome({
 
   // SCROLL CONTRACT (fixed Jun 2026): DashboardShell holds a desktop
   // viewport lock (`lg:h-screen lg:overflow-hidden`), so every page
-  // inside it MUST own its scrolling via `flex-1 min-h-0
+  // inside it MUST (1) re-assert that lock on its own content wrapper
+  // (`lg:h-screen lg:overflow-hidden`) so `main` has a definite-height
+  // parent, AND (2) own its scrolling via `flex-1 min-h-0
   // lg:overflow-y-auto` — exactly what saved-analyses, compare, and
-  // templates do. A previous edit removed main's overflow here aiming
-  // for "natural page scroll" but left the shell lock in place, which
-  // made the dashboard home UNSCROLLABLE on desktop (content below the
-  // first viewport unreachable). If natural page scroll is ever wanted,
-  // the shell lock and ALL four pages' inner scrolls must change
-  // together — never one side alone.
+  // templates do. WITHOUT the wrapper lock, `main`'s internal scroll
+  // has no fixed-height parent on desktop, so the column over-grows and
+  // the whole BODY scrolls past the shell, leaving dead space below the
+  // content. If natural page scroll is ever wanted, the shell lock and
+  // ALL four pages' wrappers + inner scrolls must change together.
   return (
-    <div className="flex-1 min-w-0 flex flex-col">
+    <div className="flex-1 min-w-0 flex flex-col lg:h-screen lg:overflow-hidden">
       <Topbar
         displayName={data.user.displayName}
         email={data.user.email}
