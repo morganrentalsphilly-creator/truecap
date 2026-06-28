@@ -28,7 +28,7 @@ export function RateWatchStrip({ rateWatch }: { rateWatch: RateWatchSummary | nu
             <div>
               <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Rate watch</p>
               <p className="text-sm font-semibold text-foreground">
-                Monitoring {monitoredCount === 1 ? "1 saved deal" : `${monitoredCount} saved deals`} —
+                Monitoring {monitoredCount === 1 ? "1 active deal" : `${monitoredCount} active deals`} —
                 all steady at today&apos;s {currentRatePct.toFixed(2)}% rate
               </p>
             </div>

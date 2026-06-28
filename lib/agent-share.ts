@@ -26,10 +26,15 @@ export type PublicAgentBranding = {
   contactWebsite: string | null;
 };
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export async function getPublicAgentBranding(
   ownerId: string | undefined | null
 ): Promise<PublicAgentBranding | null> {
-  if (!ownerId) return null;
+  // ownerId is URL-controlled on a PUBLIC page — reject anything that isn't a
+  // well-formed UUID before any service-role round-trip (don't let crafted
+  // links spray uncached admin queries at the DB).
+  if (!ownerId || !UUID_RE.test(ownerId)) return null;
   try {
     const admin = createAdminSupabaseClient();
 

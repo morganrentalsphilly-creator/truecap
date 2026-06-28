@@ -28,6 +28,8 @@ export function LeadCaptureForm({
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [message, setMessage] = useState("");
+  // Honeypot — hidden from humans; bots that fill it are silently dropped.
+  const [website, setWebsite] = useState("");
   const [status, setStatus] = useState<"idle" | "sending" | "done" | "error">("idle");
   const [error, setError] = useState("");
   const shown = useRef(false);
@@ -51,6 +53,7 @@ export function LeadCaptureForm({
       name: name || undefined,
       message: message || undefined,
       dealAddress,
+      website: website || undefined,
     });
     if (res.ok) {
       setStatus("done");
@@ -81,6 +84,18 @@ export function LeadCaptureForm({
       <p className="mt-1 text-sm text-muted-foreground">
         Send {agentName} a message and they will follow up with you directly.
       </p>
+      {/* Honeypot: off-screen, not tabbable, not autofilled. Real users never
+          see or fill it; bots that auto-fill every field trip it. */}
+      <input
+        type="text"
+        name="website"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        value={website}
+        onChange={(e) => setWebsite(e.target.value)}
+        className="absolute left-[-9999px] h-0 w-0 opacity-0"
+      />
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
         <input
           required

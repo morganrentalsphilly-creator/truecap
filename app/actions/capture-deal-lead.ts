@@ -14,6 +14,7 @@
  */
 
 import { z } from "zod";
+import { headers } from "next/headers";
 import * as Sentry from "@sentry/nextjs";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { getEntitlementsForUser, hasPlanFeature } from "@/lib/entitlements";
@@ -32,10 +33,35 @@ const leadSchema = z.object({
   name: z.string().trim().max(100).optional(),
   message: z.string().trim().max(1000).optional(),
   dealAddress: z.string().trim().max(200).optional(),
+  /** Honeypot — a hidden field real users never see/fill. Bots that fill it
+   *  get a fake success and are silently dropped (no insert, no notify). */
+  website: z.string().optional(),
 });
 
 function notificationsLive(): boolean {
   return (process.env.LEAD_NOTIFICATIONS_MODE ?? "off").trim().toLowerCase() === "live";
+}
+
+// Best-effort per-IP submission limiter (in-memory, per serverless instance) —
+// caps spam inserts (and, when live, owner-notify email cost) on the public
+// lead form. Worst case under instance churn is a few extra rows; don't add a
+// DB table for this.
+const LEAD_WINDOW_MS = 60 * 60 * 1000;
+const LEAD_MAX_PER_WINDOW = 15;
+const leadBuckets = new Map<string, { windowStart: number; count: number }>();
+
+function overLeadLimit(ip: string): boolean {
+  const now = Date.now();
+  const b = leadBuckets.get(ip);
+  if (!b || now - b.windowStart > LEAD_WINDOW_MS) {
+    leadBuckets.set(ip, { windowStart: now, count: 1 });
+    return false;
+  }
+  b.count += 1;
+  if (leadBuckets.size > 5000) {
+    for (const [k, v] of leadBuckets) if (now - v.windowStart > LEAD_WINDOW_MS) leadBuckets.delete(k);
+  }
+  return b.count > LEAD_MAX_PER_WINDOW;
 }
 
 export async function captureDealLeadAction(input: unknown): Promise<CaptureLeadResult> {
@@ -47,7 +73,24 @@ export async function captureDealLeadAction(input: unknown): Promise<CaptureLead
       message: parsed.error.issues[0]?.message ?? "Please check the form and try again.",
     };
   }
+  // Honeypot tripped → pretend it worked, drop silently (no insert/notify).
+  if (parsed.data.website && parsed.data.website.trim().length > 0) {
+    return { ok: true };
+  }
   const { ownerId, email, name, message, dealAddress } = parsed.data;
+
+  // Per-IP rate limit (best-effort). Returns a soft error rather than silently
+  // dropping a legit user's message.
+  let ip = "unknown";
+  try {
+    const h = await headers();
+    ip = h.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+  } catch {
+    /* headers() unavailable — fall through with the shared bucket */
+  }
+  if (overLeadLimit(ip)) {
+    return { ok: false, code: "SERVER_ERROR", message: "Too many messages just now — please try again shortly." };
+  }
 
   try {
     const admin = createAdminSupabaseClient();
