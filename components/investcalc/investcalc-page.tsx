@@ -1208,9 +1208,13 @@ export function InvestCalcPage({
         form.setValue("sqft", f.squareFootage, opts);
         filled.push("size");
       }
-      if (e.valueEstimate != null) {
-        form.setValue("purchasePrice", Math.round(e.valueEstimate), opts);
-        filled.push("price");
+      // Prefer the REAL for-sale list price (asking price) when we have it;
+      // fall back to the AVM value estimate otherwise.
+      const price = e.listPrice ?? e.valueEstimate;
+      const priceIsAsking = e.listPrice != null;
+      if (price != null) {
+        form.setValue("purchasePrice", Math.round(price), opts);
+        filled.push(priceIsAsking ? "asking price" : "price");
       }
       const pt = form.getValues("propertyType");
       if (e.rentEstimate != null && (pt === "single-family" || pt === "owner-occupant")) {
@@ -1220,7 +1224,9 @@ export function InvestCalcPage({
       if (filled.length > 0) {
         toast({
           title: "Auto-filled from address",
-          description: `Filled ${filled.join(", ")} from RentCast - adjust anything that's off.`,
+          description: `Filled ${filled.join(", ")} from RentCast${
+            priceIsAsking ? " (asking price from the active listing)" : ""
+          } - adjust anything that's off.`,
         });
       }
     },
@@ -2789,6 +2795,9 @@ export function InvestCalcPage({
             address,
             propertyType: form.getValues("propertyType"),
             proOnly: true,
+            // Also pull the real for-sale list price (the asking price), not
+            // just the AVM estimate — the whole point of pasting the listing.
+            includeListing: true,
           });
           if (r.ok) {
             applyComps(r.enrichment);

@@ -3,7 +3,36 @@ import {
   mapRentCastPropertyType,
   parseAvm,
   parsePropertyRecord,
+  parseSaleListing,
 } from "@/lib/property-enrichment/rentcast";
+
+describe("parseSaleListing", () => {
+  it("returns the active listing's list price + facts", () => {
+    const r = parseSaleListing([
+      { status: "Inactive", price: 250000, listedDate: "2024-01-01" },
+      { status: "Active", price: 329000, listedDate: "2026-05-01", bedrooms: 3, bathrooms: 2, squareFootage: 1500 },
+    ])!;
+    expect(r.listPrice).toBe(329000);
+    expect(r.status).toBe("Active");
+    expect(r.bedrooms).toBe(3);
+    expect(r.squareFootage).toBe(1500);
+  });
+
+  it("falls back to the most recently listed when none are active", () => {
+    const r = parseSaleListing([
+      { status: "Inactive", price: 200000, listedDate: "2023-01-01" },
+      { status: "Inactive", price: 275000, listedDate: "2025-09-01" },
+    ])!;
+    expect(r.listPrice).toBe(275000);
+  });
+
+  it("accepts a single object and returns null without a usable price", () => {
+    expect(parseSaleListing({ status: "Active", price: 410000 })!.listPrice).toBe(410000);
+    expect(parseSaleListing({ status: "Active" })).toBeNull();
+    expect(parseSaleListing([])).toBeNull();
+    expect(parseSaleListing(null)).toBeNull();
+  });
+});
 
 describe("mapRentCastPropertyType", () => {
   it("maps RentCast types to the form union", () => {

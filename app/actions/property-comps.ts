@@ -42,6 +42,10 @@ const inputSchema = z.object({
    *  action they didn't explicitly click. Non-Pro callers get ENTITLEMENT_REQUIRED
    *  before any freebie is touched. */
   proOnly: z.boolean().optional(),
+  /** Also fetch the real for-sale list price (one extra RentCast call to
+   *  /listings/sale). Used by the listing-link paste so the deal gets the
+   *  actual asking price, not just the AVM estimate. */
+  includeListing: z.boolean().optional(),
 });
 
 export type PropertyCompsResult =
@@ -159,7 +163,11 @@ export async function getPropertyCompsAction(input: unknown): Promise<PropertyCo
     .eq("address_key", key)
     .maybeSingle();
   const cachedPayload = cached ? (cached as { payload: PropertyEnrichment }).payload : null;
-  if (cached) {
+  // When the asking price is requested, a cached payload that predates the
+  // listing feature (no listPrice) isn't good enough — fall through to a live
+  // fetch so we actually get the list price. Otherwise serve the fresh cache.
+  const cacheHasWhatWeNeed = !parsed.data.includeListing || cachedPayload?.listPrice != null;
+  if (cached && cacheHasWhatWeNeed) {
     const fetchedAt = new Date((cached as { fetched_at: string }).fetched_at).getTime();
     if (Number.isFinite(fetchedAt) && Date.now() - fetchedAt < CACHE_TTL_MS) {
       await persistToDeal(cachedPayload!);
@@ -243,13 +251,16 @@ export async function getPropertyCompsAction(input: unknown): Promise<PropertyCo
   // Live fetch.
   let enrichment: PropertyEnrichment | null = null;
   try {
-    enrichment = await fetchRentCastEnrichment({
-      address: parsed.data.address,
-      propertyType: rentCastType(parsed.data.propertyType),
-      bedrooms: parsed.data.bedrooms ?? null,
-      bathrooms: parsed.data.bathrooms ?? null,
-      squareFootage: parsed.data.squareFootage ?? null,
-    });
+    enrichment = await fetchRentCastEnrichment(
+      {
+        address: parsed.data.address,
+        propertyType: rentCastType(parsed.data.propertyType),
+        bedrooms: parsed.data.bedrooms ?? null,
+        bathrooms: parsed.data.bathrooms ?? null,
+        squareFootage: parsed.data.squareFootage ?? null,
+      },
+      { includeListing: parsed.data.includeListing }
+    );
   } catch {
     if (cachedPayload) return { ok: true, source: "cache", enrichment: cachedPayload };
     return { ok: false, code: "SERVER_ERROR", message: "Couldn't reach the data provider. Try again." };

@@ -43,6 +43,12 @@ export type PropertyEnrichment = {
   rentEstimate: number | null;
   rentRange: { low: number | null; high: number | null } | null;
   rentComps: EnrichmentComp[];
+  /** Real for-sale list price (the asking price) when the address is actively
+   *  listed, from RentCast's MLS-sourced /listings/sale — only fetched when
+   *  `includeListing` is requested. Null when not listed or not requested. */
+  listPrice?: number | null;
+  /** Listing status (e.g. "Active") accompanying listPrice. */
+  listingStatus?: string | null;
   fetchedAt: string;
 };
 
@@ -155,6 +161,37 @@ export function parseAvm(
   return { estimate, range: { low, high }, comps };
 }
 
+export type SaleListing = {
+  listPrice: number | null;
+  status: string | null;
+  bedrooms: number | null;
+  bathrooms: number | null;
+  squareFootage: number | null;
+};
+
+/** Parse a /listings/sale response (array of active/recent sale listings).
+ *  Prefer an "Active" listing; else the most recently listed. Returns null
+ *  unless a usable list price is found. */
+export function parseSaleListing(raw: unknown): SaleListing | null {
+  const arr = Array.isArray(raw) ? raw : raw && typeof raw === "object" ? [raw] : [];
+  const items = arr.filter((x): x is Record<string, unknown> => !!x && typeof x === "object");
+  if (items.length === 0) return null;
+  const active = items.find((o) => String(o.status ?? "").toLowerCase() === "active");
+  const pick =
+    active ??
+    [...items].sort((a, b) => String(b.listedDate ?? "").localeCompare(String(a.listedDate ?? "")))[0];
+  if (!pick) return null;
+  const listPrice = num(pick.price);
+  if (listPrice == null) return null;
+  return {
+    listPrice,
+    status: str(pick.status),
+    bedrooms: num(pick.bedrooms),
+    bathrooms: num(pick.bathrooms),
+    squareFootage: num(pick.squareFootage),
+  };
+}
+
 async function fetchJson(path: string, apiKey: string): Promise<unknown | null> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), REMOTE_TIMEOUT_MS);
@@ -200,26 +237,52 @@ function sanitizeAddress(address: string): string {
   return address.replace(/,?\s*(united states|usa|us)\s*$/i, "").trim();
 }
 
-export async function fetchRentCastEnrichment(q: RentCastQuery): Promise<PropertyEnrichment | null> {
+export async function fetchRentCastEnrichment(
+  q: RentCastQuery,
+  opts?: { includeListing?: boolean }
+): Promise<PropertyEnrichment | null> {
   const apiKey = process.env.RENTCAST_API_KEY;
   if (!apiKey) return null;
   const address = sanitizeAddress(q.address ?? "");
   if (!address) return null;
 
-  // Two calls, not three: each AVM response carries a `subjectProperty` with
-  // the facts, so we skip a separate /properties lookup — ~1/3 less quota per
-  // enrichment.
+  // Two AVM calls (each carries the subject `facts`, so we skip a /properties
+  // call). When the caller needs the REAL asking price (e.g. a pasted listing
+  // link), add a third call to /listings/sale — the MLS-sourced for-sale
+  // listing — so we can fill the actual list price instead of the AVM estimate.
   const qs = buildQuery({ ...q, address });
-  const [valueRaw, rentRaw] = await Promise.all([
+  const [valueRaw, rentRaw, listingRaw] = await Promise.all([
     fetchJson(`/avm/value?${qs}`, apiKey),
     fetchJson(`/avm/rent/long-term?${qs}`, apiKey),
+    opts?.includeListing ? fetchJson(`/listings/sale?${qs}`, apiKey) : Promise.resolve(null),
   ]);
 
   const value = parseAvm(valueRaw, "value");
   const rent = parseAvm(rentRaw, "rent");
-  const facts = parseSubjectProperty(valueRaw) ?? parseSubjectProperty(rentRaw);
+  const listing = listingRaw ? parseSaleListing(listingRaw) : null;
+  let facts = parseSubjectProperty(valueRaw) ?? parseSubjectProperty(rentRaw);
+  // Backfill missing facts from the listing (it carries beds/baths/sqft too).
+  if (listing) {
+    const base: PropertyFacts =
+      facts ?? {
+        bedrooms: null,
+        bathrooms: null,
+        squareFootage: null,
+        yearBuilt: null,
+        lotSize: null,
+        propertyType: null,
+        lastSalePrice: null,
+        lastSaleDate: null,
+      };
+    facts = {
+      ...base,
+      bedrooms: base.bedrooms ?? listing.bedrooms,
+      bathrooms: base.bathrooms ?? listing.bathrooms,
+      squareFootage: base.squareFootage ?? listing.squareFootage,
+    };
+  }
 
-  if (!facts && !value && !rent) return null;
+  if (!facts && !value && !rent && !listing) return null;
 
   return {
     facts,
@@ -229,6 +292,8 @@ export async function fetchRentCastEnrichment(q: RentCastQuery): Promise<Propert
     rentEstimate: rent?.estimate ?? null,
     rentRange: rent?.range ?? null,
     rentComps: rent?.comps ?? [],
+    listPrice: listing?.listPrice ?? null,
+    listingStatus: listing?.status ?? null,
     fetchedAt: new Date().toISOString(),
   };
 }
