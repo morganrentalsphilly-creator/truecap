@@ -72,6 +72,7 @@ import { PdfPurchaseDialog } from "@/components/investcalc/pdf-purchase-dialog";
 import { SAMPLE_DEAL_VALUES } from "@/lib/sample-deal";
 import { estimatePurchasePrice } from "@/lib/estimate-price";
 import { parseListingUrl } from "@/lib/listing-url";
+import { parseAddressLocation } from "@/lib/parse-address";
 import {
   HERO_ANALYZE_EVENT,
   HERO_ANALYZE_STORAGE_KEY,
@@ -2703,8 +2704,16 @@ export function InvestCalcPage({
       shouldTouch: true,
     });
 
-    const landOnPrice = () => {
-      // Fallback: land the user on the one field still needed.
+    const landOnPrice = (missedAutofill = false) => {
+      if (missedAutofill) {
+        // The one case the instant-verdict path can't cover: we couldn't even
+        // recover a state from the typed string. Nudge instead of dead air.
+        toast({
+          title: "Enter the asking price to finish",
+          description:
+            "Couldn't auto-detect the location from that address — type the price below, or pick a suggestion as you type for full auto-fill.",
+        });
+      }
       requestAnimationFrame(() => {
         try {
           form.setFocus("purchasePrice");
@@ -2714,18 +2723,33 @@ export function InvestCalcPage({
       });
     };
 
-    // No Google Places components → can't enrich or estimate; just land
-    // the user on the price field (legacy behavior).
-    if (!(detail.state || detail.county || detail.zip)) {
-      landOnPrice();
+    // Google Places only returns structured components when the visitor PICKS a
+    // suggestion. Fast typers / dropdown-dismissers / ad-blocked-Places users
+    // submit a bare string — recover the state (+ ZIP) from it so they still get
+    // the instant verdict instead of dead-ending on a blank form.
+    let resolvedState = detail.state;
+    let resolvedCounty = detail.county;
+    let resolvedZip = detail.zip;
+    if (!(resolvedState || resolvedCounty || resolvedZip)) {
+      const parsed = parseAddressLocation(address);
+      if (parsed.state) {
+        resolvedState = parsed.state;
+        resolvedZip = parsed.zip;
+      }
+    }
+
+    // Still nothing usable (no state anywhere) → land on the price field with a
+    // one-line nudge. Rare: only when the typed string has no state or ZIP.
+    if (!(resolvedState || resolvedCounty || resolvedZip)) {
+      landOnPrice(true);
       return;
     }
 
     const place: SelectedAddress = {
       formattedAddress: address,
-      state: detail.state,
-      county: detail.county,
-      zip: detail.zip,
+      state: resolvedState,
+      county: resolvedCounty,
+      zip: resolvedZip,
     };
     lastSelectedAddressRef.current = place;
 
@@ -2749,7 +2773,7 @@ export function InvestCalcPage({
       if (canEstimate) {
         const est = estimatePurchasePrice({
           monthlyRent: Number(form.getValues("monthlyRent")),
-          state: detail.state,
+          state: resolvedState,
         });
         if (est) {
           form.setValue("purchasePrice", est.price, {
