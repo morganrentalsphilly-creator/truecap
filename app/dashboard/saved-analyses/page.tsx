@@ -21,6 +21,9 @@ import {
   hasPlanFeature,
 } from "@/lib/entitlements";
 import { recomputeSavedDealVerdict } from "@/lib/recompute-saved-deal-verdict";
+import { normalizeInvestmentFormSnapshot } from "@/lib/investcalc-schema";
+import { calculateAnalysis } from "@/lib/calc-analysis";
+import { computeOwnedEquity, monthsOwnedBetween } from "@/lib/owned-equity";
 import { DEFAULT_PIPELINE_STAGE, isPipelineStage } from "@/lib/pipeline";
 import { normalizeDataConfidence } from "@/lib/data-confidence";
 import { getRequestUser, getRequestEntitlements } from "@/lib/request-auth";
@@ -62,7 +65,35 @@ type SavedAnalysisRow = {
   nickname?: string | null;
   market?: string | null;
   neighborhood?: string | null;
+  /** Owned-deal close date (optional; ships in a later migration). */
+  close_date?: string | null;
 };
+
+/**
+ * Estimate today's equity for an OWNED deal from its close date + its own saved
+ * financing/appreciation assumptions. Returns null unless the deal is completed,
+ * has a close date, and its snapshot validates — so the equity UI stays hidden
+ * until there's a real number to show.
+ */
+function computeRowEquity(row: SavedAnalysisRow) {
+  if (!row.is_completed || !row.close_date) return null;
+  const values = normalizeInvestmentFormSnapshot(row.form_snapshot);
+  if (!values) return null;
+  const closed = new Date(row.close_date);
+  if (Number.isNaN(closed.getTime())) return null;
+  const result = calculateAnalysis(values);
+  const months = monthsOwnedBetween(closed, new Date());
+  return computeOwnedEquity(
+    {
+      purchasePrice: values.purchasePrice ?? 0,
+      loanAmount: result.loanAmount ?? 0,
+      annualRatePct: values.interestRate ?? 0,
+      termYears: values.loanTermYears ?? 30,
+      appreciationRatePct: values.appreciationRatePct ?? 0,
+    },
+    months
+  );
+}
 
 function getDisplayName(profile: ProfileRow | null, email?: string | null): string {
   const profileName =
@@ -134,6 +165,8 @@ function mapSavedRow(row: SavedAnalysisRow): SavedAnalysisListItem | null {
       typeof row.neighborhood === "string" && row.neighborhood.trim() ? row.neighborhood.trim() : null,
     createdAt: row.created_at,
     status: row.is_completed ? "completed" : row.is_archived ? "archived" : "active",
+    closeDate: row.close_date ?? null,
+    ownedEquity: computeRowEquity(row),
   };
 }
 
@@ -187,10 +220,12 @@ export default async function DashboardSavedAnalysesPage({
 
   const BASE_SELECT =
     "id, address, title, property_type, purchase_price, net_cash_flow_monthly, coc_return_pct, created_at, is_completed, is_archived, result_snapshot, form_snapshot, pipeline_stage, tags, data_confidence";
-  // Optional investor labels ship in a separate migration; until it's applied,
-  // selecting them 42703s. Try with them, fall back to the base columns so the
-  // My Deals list never breaks mid-rollout.
+  // Optional investor labels + the owned-deal close_date each ship in their own
+  // migration; until applied, selecting them 42703s. Tiered fallback (most →
+  // least columns) so the My Deals list never breaks mid-rollout and either
+  // optional set can be absent independently.
   const WITH_LABELS_SELECT = `${BASE_SELECT}, nickname, market, neighborhood`;
+  const FULL_SELECT = `${WITH_LABELS_SELECT}, close_date`;
 
   const buildSavedQuery = (select: string) => {
     let q = supabase
@@ -225,8 +260,16 @@ export default async function DashboardSavedAnalysesPage({
     return q;
   };
 
-  let { data: rows, error } = await buildSavedQuery(WITH_LABELS_SELECT);
-  if (error && (error.code === "42703" || /column .* does not exist/i.test(error.message ?? ""))) {
+  const isMissingColumn = (e: typeof error) =>
+    !!e && (e.code === "42703" || /column .* does not exist/i.test(e.message ?? ""));
+  // Owned-equity tracking is live only once close_date exists (FULL_SELECT wins).
+  let ownedEquityEnabled = true;
+  let { data: rows, error } = await buildSavedQuery(FULL_SELECT);
+  if (isMissingColumn(error)) {
+    ownedEquityEnabled = false;
+    ({ data: rows, error } = await buildSavedQuery(WITH_LABELS_SELECT));
+  }
+  if (isMissingColumn(error)) {
     ({ data: rows, error } = await buildSavedQuery(BASE_SELECT));
   }
   // Dynamic string selects (for the labels fallback) defeat Supabase's row-type
@@ -289,6 +332,7 @@ export default async function DashboardSavedAnalysesPage({
           <SavedAnalysesPage
             initialItems={mappedItems}
             initialSelectedIds={compareIds}
+            ownedEquityEnabled={ownedEquityEnabled}
             activeSortField={sortField}
             activeSortDirection={sortDirection}
             activeDealStateFilter={activeDealStateFilter}

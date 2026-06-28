@@ -863,6 +863,67 @@ export async function updateSavedDealStageAction(
   return { ok: true };
 }
 
+export type SetCloseDateResult =
+  | { ok: true }
+  | {
+      ok: false;
+      code: "SIGN_IN_REQUIRED" | "VALIDATION_ERROR" | "MIGRATION_PENDING" | "NOT_FOUND" | "SERVER_ERROR";
+      message: string;
+    };
+
+/**
+ * Set (or clear) the close date on an OWNED deal — the date the user actually
+ * closed, which drives the dashboard equity estimate. Pass null to clear.
+ * Resilient to the close_date column not existing yet (ships in its own
+ * migration): a 42703 returns MIGRATION_PENDING so the UI can hide gracefully.
+ */
+export async function setSavedDealCloseDateAction(
+  id: string,
+  closeDate: string | null
+): Promise<SetCloseDateResult> {
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in to update this deal." };
+  }
+
+  const savedDealId = id.trim();
+  if (!savedDealId) {
+    return { ok: false, code: "VALIDATION_ERROR", message: "Invalid deal." };
+  }
+  // Accept an ISO yyyy-mm-dd date or null (clear). Reject anything else.
+  let value: string | null = null;
+  if (closeDate != null) {
+    const trimmed = closeDate.trim();
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(trimmed) || Number.isNaN(new Date(trimmed).getTime())) {
+      return { ok: false, code: "VALIDATION_ERROR", message: "Enter a valid date." };
+    }
+    value = trimmed;
+  }
+
+  const { data, error } = await supabase
+    .from("saved_analyses")
+    .update({ close_date: value })
+    .eq("id", savedDealId)
+    .eq("user_id", user.id)
+    .is("deleted_at", null)
+    .select("id")
+    .maybeSingle();
+
+  if (error) {
+    if (error.code === "42703" || /column .* does not exist/i.test(error.message ?? "")) {
+      return { ok: false, code: "MIGRATION_PENDING", message: "Owned-deal tracking isn't enabled yet." };
+    }
+    return { ok: false, code: "SERVER_ERROR", message: error.message };
+  }
+  if (!data) {
+    return { ok: false, code: "NOT_FOUND", message: "Deal was not found." };
+  }
+  return { ok: true };
+}
+
 export type UpdateSavedDealTagsResult =
   | { ok: true; tags: string[] }
   | {

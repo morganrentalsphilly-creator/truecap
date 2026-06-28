@@ -96,6 +96,8 @@ import {
   type BuyBoxFitSummary,
   type NamedBuyBox,
 } from "@/lib/buy-box";
+import type { OwnedEquitySummary } from "@/lib/owned-equity";
+import { setSavedDealCloseDateAction } from "@/app/actions/saved-analyses";
 
 type SavedSignal = "strong-buy" | "buy" | "neutral" | "risky" | "avoid";
 type SavedPropertyType = "single-family" | "multi-family" | "owner-occupant";
@@ -138,6 +140,10 @@ export type SavedAnalysisListItem = {
   neighborhood?: string | null;
   createdAt: string;
   status: "active" | "completed" | "archived";
+  /** Owned-deal close date (ISO yyyy-mm-dd) + derived equity. Present only for
+   *  completed deals once the close_date migration is applied + a date is set. */
+  closeDate?: string | null;
+  ownedEquity?: OwnedEquitySummary | null;
 };
 
 /**
@@ -180,6 +186,102 @@ function BuyBoxFitBadge({ fit }: { fit: BuyBoxFitSummary | undefined }) {
       <Target className="size-3" />
       {label}
     </Badge>
+  );
+}
+
+function fmtMoney0(n: number): string {
+  return `$${Math.round(n).toLocaleString("en-US")}`;
+}
+
+function fmtCloseDate(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString("en-US", { month: "short", year: "numeric", timeZone: "UTC" });
+}
+
+/**
+ * Owned-deal equity readout + close-date capture. Completed deals only:
+ *  - with a close date → estimated equity (appreciation + principal paid),
+ *    editable;
+ *  - without → a compact "add close date" prompt that unlocks the estimate.
+ * The server recomputes equity from the new date on save (router.refresh).
+ * Stays invisible for non-completed deals.
+ */
+function OwnedEquityCell({ item, enabled }: { item: SavedAnalysisListItem; enabled: boolean }) {
+  const router = useRouter();
+  const { toast } = useToast();
+  const [isSaving, startSaving] = useTransition();
+  const [editing, setEditing] = useState(false);
+
+  // Owned deals only, and only once the close_date column is live.
+  if (!enabled || item.status !== "completed") return null;
+
+  const save = (value: string | null) => {
+    startSaving(async () => {
+      const r = await setSavedDealCloseDateAction(item.id, value);
+      if (r.ok) {
+        setEditing(false);
+        router.refresh();
+      } else if (r.code === "MIGRATION_PENDING") {
+        toast({ title: "Rolling out", description: "Owned-deal equity tracking isn't enabled yet." });
+      } else {
+        toast({ title: "Couldn't save close date", description: r.message, variant: "destructive" });
+      }
+    });
+  };
+
+  const dateInput = (
+    <input
+      type="date"
+      defaultValue={item.closeDate ?? undefined}
+      max={new Date().toISOString().slice(0, 10)}
+      disabled={isSaving}
+      onChange={(e) => {
+        if (e.target.value) save(e.target.value);
+      }}
+      aria-label="Close date"
+      className="h-8 rounded-lg border border-input bg-background px-2 text-xs text-foreground"
+    />
+  );
+
+  const eq = item.ownedEquity;
+  if (item.closeDate && eq) {
+    return (
+      <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs">
+        <span className="font-semibold text-success">Equity ~{fmtMoney0(eq.equity)}</span>
+        <span className="text-muted-foreground">
+          {fmtMoney0(eq.appreciationGain)} appreciation · {fmtMoney0(eq.principalPaid)} paid down · since{" "}
+          {fmtCloseDate(item.closeDate)}
+        </span>
+        {editing ? (
+          dateInput
+        ) : (
+          <button
+            type="button"
+            onClick={() => setEditing(true)}
+            className="font-semibold text-primary hover:underline"
+          >
+            Edit
+          </button>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-1.5 text-xs">
+      {editing ? (
+        dateInput
+      ) : (
+        <button
+          type="button"
+          onClick={() => setEditing(true)}
+          className="font-semibold text-primary hover:underline"
+        >
+          + Add close date to track equity
+        </button>
+      )}
+    </div>
   );
 }
 
@@ -551,6 +653,7 @@ export function SavedAnalysesPage({
   canCompareDeals = false,
   canExportPdf = false,
   canUsePipeline = false,
+  ownedEquityEnabled = false,
 }: {
   initialItems: SavedAnalysisListItem[];
   initialSelectedIds?: string[];
@@ -560,6 +663,9 @@ export function SavedAnalysesPage({
   canCompareDeals?: boolean;
   canExportPdf?: boolean;
   canUsePipeline?: boolean;
+  /** True once the close_date column exists — gates the owned-equity capture so
+   *  the prompt stays invisible until the migration is applied. */
+  ownedEquityEnabled?: boolean;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -1617,6 +1723,7 @@ export function SavedAnalysesPage({
                       </div>
                       <p className="mt-1 text-xs text-muted-foreground">{getTypeLabel(item.propertyType)}</p>
                       <NextActionLine recommendation={item.recommendation} netCashFlow={item.netCashFlowMonthly} className="mt-1.5" />
+                      <OwnedEquityCell item={item} enabled={ownedEquityEnabled} />
                     </div>
                     <input
                       type="checkbox"
@@ -1828,6 +1935,7 @@ export function SavedAnalysesPage({
                               {getTypeLabel(item.propertyType)}
                             </p>
                             <NextActionLine recommendation={item.recommendation} netCashFlow={item.netCashFlowMonthly} className="mt-0.5" />
+                            <OwnedEquityCell item={item} enabled={ownedEquityEnabled} />
                           </div>
                         </div>
                       </td>

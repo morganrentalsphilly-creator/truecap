@@ -124,6 +124,19 @@ export function PortfolioRollupStrip({
 
   const valueTile = valueTileMeta(scope);
 
+  // Owned-equity rollup — only meaningful for the owned (completed) set, and
+  // only once at least one deal has a close date driving an equity estimate.
+  let totalOwnedEquity = 0;
+  let ownedEquitySampleCount = 0;
+  for (const item of items) {
+    const e = item.ownedEquity?.equity;
+    if (typeof e === "number" && Number.isFinite(e)) {
+      totalOwnedEquity += e;
+      ownedEquitySampleCount += 1;
+    }
+  }
+  const showOwnedEquity = scope === "completed" && ownedEquitySampleCount > 0;
+
   return (
     <section
       aria-label="Portfolio summary"
@@ -168,12 +181,21 @@ export function PortfolioRollupStrip({
             sub="by purchase price"
             tone="neutral"
           />
-          <RollupTile
-            label="Weighted CoC"
-            value={weightedCoc != null ? fmtPct(weightedCoc) : "—"}
-            sub="cash-on-cash blended"
-            tone="neutral"
-          />
+          {showOwnedEquity ? (
+            <RollupTile
+              label="Owned Equity"
+              value={fmtCurrency(totalOwnedEquity)}
+              sub={`est. across ${ownedEquitySampleCount} dated ${ownedEquitySampleCount === 1 ? "deal" : "deals"}`}
+              tone="positive"
+            />
+          ) : (
+            <RollupTile
+              label="Weighted CoC"
+              value={weightedCoc != null ? fmtPct(weightedCoc) : "—"}
+              sub="cash-on-cash blended"
+              tone="neutral"
+            />
+          )}
         </div>
       </div>
     </section>
