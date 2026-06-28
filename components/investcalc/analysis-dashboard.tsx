@@ -105,6 +105,7 @@ import {
 import type { ProjectionYear, TenYearProjectionInput } from "@/lib/ten-year-projections";
 import type { TaxStrategyInput, TaxStrategyYear } from "@/lib/tax-strategy";
 import type { ExitScenarioInput, ExitScenarioYear } from "@/lib/exit-scenarios";
+import { computeReturnSummaryFromExitYears } from "@/lib/returns";
 import { cn } from "@/lib/utils";
 import type { DealScoreActionResult } from "@/app/actions/deal-score";
 import {
@@ -1207,6 +1208,50 @@ export function AnalysisDashboard({
                   <span className="font-bold tabular-nums text-foreground">{c.value}</span>
                 </span>
               ))}
+            </div>
+          );
+        })() : null}
+
+        {/* 10-Year Returns — IRR, equity multiple, and total return. Computed by
+            the same exit engine that already feeds the Deal Score, but surfaced
+            for free here instead of being buried in the Pro exit panel. */}
+        {exitScenarioSource ? (() => {
+          const s = computeReturnSummaryFromExitYears(exitScenarioSource.initialYears);
+          if (!s || (s.irrPct == null && s.equityMultiple == null && s.roiPct == null)) return null;
+          const items: Array<{ label: string; value: string; hint: string }> = [
+            {
+              label: `${s.years}-yr IRR`,
+              value: s.irrPct == null ? "—" : `${s.irrPct.toFixed(1)}%`,
+              hint: "Annualized internal rate of return over the hold (interim cash flow + sale proceeds).",
+            },
+            {
+              label: "Equity multiple",
+              value: s.equityMultiple == null ? "—" : `${s.equityMultiple.toFixed(2)}×`,
+              hint: "Total cash returned ÷ cash invested (2.0× = doubled your money).",
+            },
+            {
+              label: "Total return",
+              value: s.roiPct == null ? "—" : `${s.roiPct >= 0 ? "+" : ""}${Math.round(s.roiPct)}%`,
+              hint: `Cumulative profit over ${s.years} years ÷ cash invested.`,
+            },
+          ];
+          return (
+            <div className="rounded-2xl border border-border bg-muted/30 p-4">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                {s.years}-year returns
+              </p>
+              <div className="mt-2 grid grid-cols-3 gap-2 sm:gap-4">
+                {items.map((it) => (
+                  <div key={it.label} title={it.hint}>
+                    <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                      {it.label}
+                    </p>
+                    <p className="mt-0.5 text-lg font-extrabold tabular-nums text-foreground sm:text-xl">
+                      {it.value}
+                    </p>
+                  </div>
+                ))}
+              </div>
             </div>
           );
         })() : null}
