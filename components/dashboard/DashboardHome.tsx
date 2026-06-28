@@ -513,19 +513,17 @@ export function DashboardHome({
       ? `Active pipeline: ${portfolio.totalCount} of ${savedTotalCount} saved ${savedTotalCount === 1 ? "deal" : "deals"}.`
       : `Your book at a glance — ${portfolio.totalCount} active ${portfolio.totalCount === 1 ? "deal" : "deals"}.`;
 
-  // SCROLL CONTRACT (fixed Jun 2026): DashboardShell holds a desktop
-  // viewport lock (`lg:h-screen lg:overflow-hidden`), so every page
-  // inside it MUST (1) re-assert that lock on its own content wrapper
-  // (`lg:h-screen lg:overflow-hidden`) so `main` has a definite-height
-  // parent, AND (2) own its scrolling via `flex-1 min-h-0
-  // lg:overflow-y-auto` — exactly what saved-analyses, compare, and
-  // templates do. WITHOUT the wrapper lock, `main`'s internal scroll
-  // has no fixed-height parent on desktop, so the column over-grows and
-  // the whole BODY scrolls past the shell, leaving dead space below the
-  // content. If natural page scroll is ever wanted, the shell lock and
-  // ALL four pages' wrappers + inner scrolls must change together.
+  // SCROLL CONTRACT (natural scroll, Jun 2026): the dashboard scrolls the
+  // PAGE/body naturally — NOT a viewport-locked inner pane. The shell is a
+  // `min-h-screen` flex row; the Sidebar is `lg:sticky lg:top-0 lg:h-screen`
+  // so it pins while the content scrolls; each page's content is plain flow
+  // (no `lg:h-screen`/`overflow-hidden`/inner `overflow-y-auto`). This
+  // replaced an earlier viewport-lock that repeatedly let the body over-scroll
+  // into dead space when a marketing banner sat above the 100vh shell. Keep all
+  // four pages (home, saved-analyses, compare, templates) + the shell + sidebar
+  // on this same model — never reintroduce the lock on one side alone.
   return (
-    <div className="flex-1 min-w-0 flex flex-col lg:h-screen lg:overflow-hidden">
+    <div className="flex-1 min-w-0 flex flex-col">
       <Topbar
         displayName={data.user.displayName}
         email={data.user.email}
@@ -534,7 +532,7 @@ export function DashboardHome({
         isPremium={data.user.isPremium}
         canAccessDashboard={data.user.canAccessDashboard}
       />
-      <main id="main" className="flex-1 min-h-0 lg:overflow-y-auto px-4 py-4 space-y-6 sm:px-6 sm:py-6 sm:space-y-8 lg:px-8">
+      <main id="main" className="flex-1 px-4 py-4 space-y-6 sm:px-6 sm:py-6 sm:space-y-8 lg:px-8">
         {/* ── Header + quick actions ──────────────────────────────── */}
         {/* Top-right action buttons (Analyze Property / My Deals /
             Compare) now ONLY render on mobile (`lg:hidden`). On desktop

@@ -248,7 +248,7 @@ export default async function DashboardComparePage() {
 
     return (
       <>
-        <div className="flex-1 min-w-0 flex flex-col lg:h-screen lg:overflow-hidden">
+        <div className="flex-1 min-w-0 flex flex-col">
           <Topbar
             displayName={displayName}
             email={user.email ?? ""}
@@ -305,7 +305,7 @@ export default async function DashboardComparePage() {
   if (error) {
     return (
       <>
-        <div className="flex-1 min-w-0 flex flex-col lg:h-screen lg:overflow-hidden">
+        <div className="flex-1 min-w-0 flex flex-col">
           <Topbar
             displayName={displayName}
             email={user.email ?? ""}
@@ -359,7 +359,7 @@ export default async function DashboardComparePage() {
 
   return (
     <>
-      <div className="flex-1 min-w-0 flex flex-col lg:h-screen lg:overflow-hidden">
+      <div className="flex-1 min-w-0 flex flex-col">
         <Topbar
           displayName={displayName}
           email={user.email ?? ""}
@@ -368,7 +368,7 @@ export default async function DashboardComparePage() {
           isPremium={isPremium}
           canAccessDashboard={navAccess.dashboard}
         />
-        <div className="flex-1 min-h-0 lg:overflow-y-auto">
+        <div className="flex-1">
           <CompareDealsClient deals={deals.slice(0, MAX_COMPARE_ITEMS)} />
         </div>
       </div>

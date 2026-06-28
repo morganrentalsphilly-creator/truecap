@@ -54,7 +54,10 @@ export function Sidebar({ savedDealCount, navAccess, mobile = false }: SidebarPr
       className={
         mobile
           ? "flex h-full w-64 max-w-full shrink-0 flex-col text-sidebar-foreground"
-          : "hidden h-screen w-64 shrink-0 flex-col text-sidebar-foreground lg:flex"
+          : // Natural-scroll dashboard: the sidebar pins to the viewport
+            // (sticky, self-start so the flex row doesn't stretch it) and owns
+            // its own overflow, while the page scrolls the main content.
+            "hidden w-64 shrink-0 flex-col text-sidebar-foreground lg:flex lg:sticky lg:top-0 lg:self-start lg:h-screen lg:overflow-y-auto"
       }
       style={{ background: "var(--gradient-sidebar)" }}
     >

@@ -69,7 +69,7 @@ export default async function DashboardTemplatesPage() {
   if (!result.ok) {
     return (
       <>
-        <div className="flex-1 min-w-0 flex flex-col lg:h-screen lg:overflow-hidden">
+        <div className="flex-1 min-w-0 flex flex-col">
           <Topbar
             displayName={displayName}
             email={user.email ?? ""}
@@ -91,7 +91,7 @@ export default async function DashboardTemplatesPage() {
 
   return (
     <>
-      <div className="flex-1 min-w-0 flex flex-col lg:h-screen lg:overflow-hidden">
+      <div className="flex-1 min-w-0 flex flex-col">
         <Topbar
           displayName={displayName}
           email={user.email ?? ""}
@@ -100,7 +100,7 @@ export default async function DashboardTemplatesPage() {
           isPremium={isPremium}
           canAccessDashboard={navAccess.dashboard}
         />
-        <div className="flex-1 min-h-0 lg:overflow-y-auto">
+        <div className="flex-1">
           <TemplatesManagementPage initialTemplates={result.templates} />
         </div>
       </div>

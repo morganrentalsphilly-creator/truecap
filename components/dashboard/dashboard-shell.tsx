@@ -32,7 +32,7 @@ export function DashboardShell({
   children: ReactNode;
 }) {
   return (
-    <div className="dashboard-shell flex min-h-screen w-full overflow-x-hidden bg-background text-foreground lg:h-screen lg:overflow-hidden">
+    <div className="dashboard-shell flex min-h-screen w-full overflow-x-hidden bg-background text-foreground">
       {/* Skip link — first focusable element, so keyboard/switch users can
           bypass the persistent sidebar nav on every page (the shell stays
           mounted across navigations). Targets the <main id="main"> in the page. */}
