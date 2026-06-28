@@ -142,11 +142,16 @@ function mapDeal(row: SavedAnalysisRow): CompareDealViewModel {
     afterTaxCF: toNumber(snapshot.afterTaxCF),
     annualCashFlow: recomputed ? recomputed.netCashFlowMonthly * 12 : toNumber(snapshot.annualCashFlow),
     dscr: recomputed ? recomputed.dscr : toNumber(snapshot.dscr),
-    monthlyRentalIncome: toNumber(snapshot.monthlyRentalIncome),
-    totalOperatingExpenses: toNumber(snapshot.totalOperatingExpenses),
+    // Bridge components from the SAME recompute as netCashFlow so the tooltip
+    // reconciles (rent − opex − P&I − PMI = NCF); fall back to the stored snapshot.
+    monthlyRentalIncome: recomputed ? recomputed.monthlyRentalIncome : toNumber(snapshot.monthlyRentalIncome),
+    totalOperatingExpenses: recomputed ? recomputed.totalOperatingExpenses : toNumber(snapshot.totalOperatingExpenses),
     purchasePrice,
     totalCashRequired: recomputed ? recomputed.cashToClose : toNumber(snapshot.totalCashRequired),
-    monthlyPayment: toNumber(snapshot.monthlyPayment),
+    monthlyPayment: recomputed ? recomputed.monthlyPayment : toNumber(snapshot.monthlyPayment),
+    pmiMonthly: recomputed
+      ? recomputed.pmiMonthly
+      : toNumber((snapshot as Record<string, unknown>).pmiMonthly),
     taxSavingsMonthly: toNumber(snapshot.taxSavingsMonthly),
   };
 

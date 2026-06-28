@@ -275,10 +275,13 @@ function capRateBenchmarkColor(capRatePct: number, address?: string | null): str
 }
 
 function cocBenchmarkLabel(cocPct: number): string {
-  if (cocPct > 12) return "Above 12% - strong";
-  if (cocPct > 8) return "8–12% - healthy";
-  if (cocPct > 5) return "5–8% - modest";
-  if (cocPct >= 0) return "Below 5% - weak";
+  // Bands mirror the Deal Score's displayed CoC tiers (>7 strong, 5–7 healthy,
+  // 3–5 modest, <3 weak) so the tile sub-label never contradicts the score's
+  // "Why this score" breakdown for the same deal.
+  if (cocPct > 7) return "Above 7% - strong";
+  if (cocPct > 5) return "5–7% - healthy";
+  if (cocPct > 3) return "3–5% - modest";
+  if (cocPct >= 0) return "Below 3% - weak";
   return "Negative - losing money";
 }
 

@@ -136,7 +136,7 @@ function getRiskReturn(data: DashboardHomeData) {
   // Each deal carries BOTH return metrics (CoC + 10-yr ROI) and its DSCR so
   // the chart can toggle the X axis client-side. Cash purchases have no DSCR
   // (N/A, not 0) — null keeps them off the DSCR axis; the chart notes them.
-  const chartDeals = data.topDeals.map((deal) => {
+  const chartDeals = data.allDeals.map((deal) => {
     const isCashPurchase = deal.monthlyPayment != null && deal.monthlyPayment <= 0;
     return {
       dealId: deal.id,
@@ -156,7 +156,7 @@ function getRiskReturn(data: DashboardHomeData) {
     };
   });
 
-  const riskAdjusted = data.topDeals
+  const riskAdjusted = data.allDeals
     .map((deal) => {
       const returnValue = resolveReturnMetric(deal).value;
       const riskValue = resolveRiskMetric(deal).value;
@@ -166,7 +166,7 @@ function getRiskReturn(data: DashboardHomeData) {
     .filter((item): item is NonNullable<typeof item> => Boolean(item))
     .sort((a, b) => b.value - a.value)[0]?.deal;
 
-  const highestReturn = [...data.topDeals]
+  const highestReturn = [...data.allDeals]
     .map((deal) => ({ deal, value: resolveReturnMetric(deal).value }))
     .filter((item): item is { deal: DashboardDeal; value: number } => item.value != null)
     .sort((a, b) => b.value - a.value)[0]?.deal;
@@ -175,7 +175,7 @@ function getRiskReturn(data: DashboardHomeData) {
   // as effectively the safest possible debt structure — they have no debt
   // service to cover. Their stored dscr=0 is N/A, not "underwater". We map
   // them to Infinity in the comparator so they win over any financed deal.
-  const safest = [...data.topDeals]
+  const safest = [...data.allDeals]
     .map((deal) => {
       const isCashPurchase = deal.monthlyPayment != null && deal.monthlyPayment <= 0;
       return {
@@ -211,7 +211,7 @@ function getRiskReturn(data: DashboardHomeData) {
 }
 
 function getDealComparison(data: DashboardHomeData) {
-  return data.topDeals.map((deal) => ({
+  return data.allDeals.map((deal) => ({
     name: deal.address.length > 18 ? `${deal.address.slice(0, 18)}...` : deal.address,
     score: deal.score == null ? null : Math.round(deal.score),
     cashFlow: deal.cashFlowMonthly == null ? null : Math.round(deal.cashFlowMonthly),
@@ -482,7 +482,7 @@ export function DashboardHome({
       riskReturn: getRiskReturn(data),
       dealComparison: getDealComparison(data),
       highlights: getDecisionHighlights(data),
-      insights: buildDecisionInsights(data.topDeals),
+      insights: buildDecisionInsights(data.allDeals),
       portfolio: getPortfolioTotals(data),
       decisionCenter: getDecisionCenter(data),
       kpis: getPortfolioKpis(data),

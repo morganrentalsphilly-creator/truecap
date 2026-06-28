@@ -275,13 +275,17 @@ function NetCashFlowTooltip({ deal }: { deal: CompareDealViewModel }) {
   const rent = deal.metrics.monthlyRentalIncome;
   const opex = deal.metrics.totalOperatingExpenses;
   const pmt = deal.metrics.monthlyPayment;
+  const pmi = deal.metrics.pmiMonthly;
   const ncf = deal.metrics.netCashFlow;
+  const hasPmi = typeof pmi === "number" && pmi > 0;
   return (
     <div className="max-w-xs space-y-1.5 text-left text-xs font-normal leading-snug">
       <p className="font-semibold text-foreground">Net cash flow bridge</p>
       <p className="text-muted-foreground">
         Rent {formatCurrency(rent)} − Operating expenses {formatCurrency(opex)} − Loan payment{" "}
-        {formatCurrency(pmt)} → <span className="font-medium text-foreground">{formatCurrency(ncf)}</span>
+        {formatCurrency(pmt)}
+        {hasPmi ? <> − PMI {formatCurrency(pmi)}</> : null} →{" "}
+        <span className="font-medium text-foreground">{formatCurrency(ncf)}</span>
       </p>
     </div>
   );

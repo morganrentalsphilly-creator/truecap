@@ -44,6 +44,12 @@ export function recomputeSavedDealVerdict(formSnapshot: unknown): {
   capRatePct: number;
   /** Cash-on-cash return (%). */
   cocReturnPct: number;
+  /** Net-cash-flow bridge components — all from this same recompute so the
+   *  compare tooltip reconciles: rent − opex − P&I − PMI = net cash flow. */
+  monthlyRentalIncome: number;
+  totalOperatingExpenses: number;
+  monthlyPayment: number;
+  pmiMonthly: number;
 } | null {
   // Use the resilient normalizer (same as the editor) rather than a raw
   // safeParse, so legacy snapshots that open fine in the editor recompute
@@ -64,6 +70,10 @@ export function recomputeSavedDealVerdict(formSnapshot: unknown): {
       netCashFlowMonthly: result.netCashFlow,
       capRatePct: result.capRate,
       cocReturnPct: result.cocReturn,
+      monthlyRentalIncome: result.monthlyRentalIncome,
+      totalOperatingExpenses: result.totalOperatingExpenses,
+      monthlyPayment: result.monthlyPayment,
+      pmiMonthly: result.pmiMonthly,
     };
   } catch {
     return null;
