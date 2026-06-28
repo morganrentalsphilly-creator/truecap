@@ -2593,7 +2593,7 @@ function CashFlowTab({
               ${result.downPayment.toLocaleString()}
             </span>
           </div>
-          <div className="flex justify-between text-sm mb-3">
+          <div className="flex justify-between text-sm mb-1">
             <div>
               <p className="text-muted-foreground">Closing Costs</p>
               <p className="text-xs text-muted-foreground">{fmtPct(result.closingCostsPct)}</p>
@@ -2602,6 +2602,24 @@ function CashFlowTab({
               ${result.closingCosts.toLocaleString()}
             </span>
           </div>
+          {/* Up-front rehab + STR furnishing are in totalCashRequired too, so
+              itemize the residual or the lines won't sum to Total Investment. */}
+          {(() => {
+            const upfrontExtra = Math.max(
+              0,
+              Math.round(result.totalCashRequired - result.downPayment - result.closingCosts)
+            );
+            return upfrontExtra > 0 ? (
+              <div className="flex justify-between text-sm mb-3">
+                <p className="text-muted-foreground">Rehab / Furnishing</p>
+                <span className="font-semibold text-foreground">
+                  ${upfrontExtra.toLocaleString()}
+                </span>
+              </div>
+            ) : (
+              <div className="mb-2" />
+            );
+          })()}
           <div className="bg-primary rounded-xl p-4 flex justify-between items-center">
             <p className="text-sm font-semibold text-primary-foreground">
               Total Investment

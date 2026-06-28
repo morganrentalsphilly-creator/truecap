@@ -18,12 +18,13 @@ describe("parseSaleListing", () => {
     expect(r.squareFootage).toBe(1500);
   });
 
-  it("falls back to the most recently listed when none are active", () => {
-    const r = parseSaleListing([
-      { status: "Inactive", price: 200000, listedDate: "2023-01-01" },
-      { status: "Inactive", price: 275000, listedDate: "2025-09-01" },
-    ])!;
-    expect(r.listPrice).toBe(275000);
+  it("returns null when no listing is active (never surface a sold price as the ask)", () => {
+    expect(
+      parseSaleListing([
+        { status: "Inactive", price: 200000, listedDate: "2023-01-01" },
+        { status: "Sold", price: 275000, listedDate: "2025-09-01" },
+      ])
+    ).toBeNull();
   });
 
   it("accepts a single object and returns null without a usable price", () => {

@@ -173,26 +173,24 @@ export type SaleListing = {
   squareFootage: number | null;
 };
 
-/** Parse a /listings/sale response (array of active/recent sale listings).
- *  Prefer an "Active" listing; else the most recently listed. Returns null
- *  unless a usable list price is found. */
+/** Parse a /listings/sale response (array of sale listings). Returns ONLY an
+ *  ACTIVE listing's price — a sold/inactive listing's old price must never be
+ *  surfaced as the live "asking price" (callers fall back to the AVM estimate
+ *  when this is null). */
 export function parseSaleListing(raw: unknown): SaleListing | null {
   const arr = Array.isArray(raw) ? raw : raw && typeof raw === "object" ? [raw] : [];
   const items = arr.filter((x): x is Record<string, unknown> => !!x && typeof x === "object");
   if (items.length === 0) return null;
   const active = items.find((o) => String(o.status ?? "").toLowerCase() === "active");
-  const pick =
-    active ??
-    [...items].sort((a, b) => String(b.listedDate ?? "").localeCompare(String(a.listedDate ?? "")))[0];
-  if (!pick) return null;
-  const listPrice = num(pick.price);
+  if (!active) return null;
+  const listPrice = num(active.price);
   if (listPrice == null) return null;
   return {
     listPrice,
-    status: str(pick.status),
-    bedrooms: num(pick.bedrooms),
-    bathrooms: num(pick.bathrooms),
-    squareFootage: num(pick.squareFootage),
+    status: str(active.status),
+    bedrooms: num(active.bedrooms),
+    bathrooms: num(active.bathrooms),
+    squareFootage: num(active.squareFootage),
   };
 }
 

@@ -98,6 +98,7 @@ import {
 } from "@/lib/buy-box";
 import type { OwnedEquitySummary } from "@/lib/owned-equity";
 import { setSavedDealCloseDateAction } from "@/app/actions/saved-analyses";
+import { recomputeSavedDealVerdict } from "@/lib/recompute-saved-deal-verdict";
 
 type SavedSignal = "strong-buy" | "buy" | "neutral" | "risky" | "avoid";
 type SavedPropertyType = "single-family" | "multi-family" | "owner-occupant";
@@ -1322,9 +1323,22 @@ export function SavedAnalysesPage({
         }
 
         const computedResult = calculateAnalysis(parsed.data);
+        // The lender-facing PDF must show the SAME live numbers every other
+        // surface recomputes — not the stored snapshot. Spread computedResult
+        // LAST so fresh headline metrics + projection/tax arrays win; keep the
+        // stored snapshot only for any extra fields, and inject the fresh
+        // score/recommendation/risk from the canonical verdict recompute.
+        const freshVerdict = recomputeSavedDealVerdict(exportResult.formSnapshot);
         const resultSnapshot = {
+          ...((exportResult.resultSnapshot ?? {}) as Record<string, unknown>),
           ...computedResult,
-          ...exportResult.resultSnapshot,
+          ...(freshVerdict
+            ? {
+                score: freshVerdict.score,
+                recommendation: freshVerdict.recommendation,
+                riskLevel: freshVerdict.riskLevel,
+              }
+            : {}),
         } as AnalysisResult & Record<string, unknown>;
         const projectionYears = Array.isArray(resultSnapshot.tenYearProjection)
           ? resultSnapshot.tenYearProjection
