@@ -31,15 +31,15 @@ export const METRIC_ROWS: MetricRow[] = [
   { key: "taxSavingsMonthly", label: "Tax Savings / mo", group: "DEAL", kind: "currency", direction: "higher" },
 ];
 
-// Display labels for the recommendation signal. Keys (the Signal union)
-// and the color/badge maps stay internal — only these shown strings use
-// the criteria-based wording.
+// Display labels for the recommendation signal — the deal's OWN score, not the
+// user's personal buy box. Don't use "buy box" wording here: it implied a
+// criteria screen that never ran.
 export const SIGNAL_LABELS: Record<Signal, string> = {
   "strong-buy": "Excellent fit",
-  buy: "Meets buy box",
+  buy: "Buy",
   neutral: "Watchlist",
   risky: "Needs work",
-  avoid: "Does not meet buy box",
+  avoid: "Pass",
 };
 
 export function formatCurrency(value: number | null, signed = false): string {

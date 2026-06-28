@@ -47,14 +47,15 @@ const fmtPct = (n: number) => `${n >= 0 ? "+" : ""}${n.toFixed(1)}%`;
  * "Mixed" — exactly the kind of math inconsistency the product
  * exists to prevent. Don't reintroduce a local classifier.
  */
-// Display labels remapped to criteria-based wording (matches the in-app
-// recommendation labels). The DealTier keys + colors stay as-is.
+// Display labels for the deal's own score (matches the in-app recommendation
+// labels). NOT a personal buy box — avoid "buy box" wording, which implied a
+// criteria screen that never ran. The DealTier keys + colors stay as-is.
 const TIER_BADGE: Record<DealTier, { label: string; color: string }> = {
   Strong: { label: "Excellent fit", color: SUCCESS },
-  Solid: { label: "Meets buy box", color: SUCCESS },
+  Solid: { label: "Buy", color: SUCCESS },
   Mixed: { label: "Watchlist", color: WARN },
   Marginal: { label: "Needs work", color: WARN },
-  Negative: { label: "Does not meet buy box", color: DANGER },
+  Negative: { label: "Pass", color: DANGER },
 };
 
 function Fallback({ headline }: { headline: string }) {

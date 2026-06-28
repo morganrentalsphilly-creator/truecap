@@ -154,12 +154,13 @@ function NextActionLine({
   );
 }
 
+// Deal-score signal labels — the deal's own metrics, NOT a personal buy box.
 const SIGNAL_LABELS: Record<SavedSignal, string> = {
   "strong-buy": "Excellent fit",
-  buy: "Meets buy box",
+  buy: "Buy",
   neutral: "Watchlist",
   risky: "Needs work",
-  avoid: "Does not meet buy box",
+  avoid: "Pass",
 };
 
 function toCurrency(value: number | null): string {

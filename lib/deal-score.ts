@@ -181,12 +181,15 @@ export type DealRecommendation = "Strong Buy" | "Buy" | "Neutral" | "Risky" | "A
  * `recommendationLabel` is TOLERANT: it returns the input unchanged for any
  * unmapped/stale value (some call sites receive a generic `string`).
  */
+// Deal-SCORE vocabulary — derived from the deal's own metrics, NOT the user's
+// personal buy box. Earlier "Meets / Does not meet buy box" wording falsely
+// implied each row had been screened against a criteria set it never saw.
 export const RECOMMENDATION_DISPLAY_LABELS: Record<DealRecommendation, string> = {
   "Strong Buy": "Excellent fit",
-  Buy: "Meets buy box",
+  Buy: "Buy",
   Neutral: "Watchlist",
   Risky: "Needs work",
-  Avoid: "Does not meet buy box",
+  Avoid: "Pass",
 };
 
 export function recommendationLabel(recommendation: string): string {

@@ -433,7 +433,10 @@ function buildDecisionInsights(deals: DashboardDeal[]) {
           title: `Review: ${reviewPick.address} is cash-flow negative`,
           body: `${formatSignedCurrency(reviewPick.cashFlowMonthly)}/mo at current assumptions${reviewPick.dscr != null ? ` · DSCR ${reviewPick.dscr.toFixed(2)}` : ""}. Next: lower your offer or raise rent and rerun — or pass.`,
           tone: "risk" as const,
-          action: { label: "Open My Deals", href: "/dashboard/saved-analyses" },
+          // Deep-link to the named deal so "fix it" is one tap, not a hunt
+          // through the list (the deal-detail screen is where re-underwriting,
+          // lowering the offer, and exporting actually happen).
+          action: { label: "Open this deal", href: `/dashboard/saved-analyses/${reviewPick.id}` },
         }
       : null,
     cashPick
@@ -441,6 +444,7 @@ function buildDecisionInsights(deals: DashboardDeal[]) {
           title: `Strongest cash flow: ${cashPick.address}`,
           body: `${formatSignedCurrency(cashPick.cashFlowMonthly)}/mo today${cashPick.cocReturnPct != null ? ` · ${cashPick.cocReturnPct.toFixed(1)}% cash-on-cash` : ""}. Next: stress-test vacancy and repairs before you commit.`,
           tone: "tip" as const,
+          action: { label: "Open this deal", href: `/dashboard/saved-analyses/${cashPick.id}` },
         }
       : null,
     roiPick
@@ -448,7 +452,7 @@ function buildDecisionInsights(deals: DashboardDeal[]) {
           title: `Best long-term upside: ${roiPick.address}`,
           body: `${formatPercent(roiPick.roiPct)} projected 10-yr ROI at ${roiPick.riskLevel ?? "unrated"} risk. Note: that's cumulative — check the deal's exit scenarios for IRR and equity multiple before trusting it.`,
           tone: "opportunity" as const,
-          action: { label: "Open My Deals", href: "/dashboard/saved-analyses" },
+          action: { label: "Open this deal", href: `/dashboard/saved-analyses/${roiPick.id}` },
         }
       : null,
   ].filter((item): item is NonNullable<typeof item> => Boolean(item));
