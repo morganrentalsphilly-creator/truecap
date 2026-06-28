@@ -71,6 +71,7 @@ import {
 import { PdfPurchaseDialog } from "@/components/investcalc/pdf-purchase-dialog";
 import { SAMPLE_DEAL_VALUES } from "@/lib/sample-deal";
 import { estimatePurchasePrice } from "@/lib/estimate-price";
+import { parseListingUrl } from "@/lib/listing-url";
 import {
   HERO_ANALYZE_EVENT,
   HERO_ANALYZE_STORAGE_KEY,
@@ -1184,6 +1185,8 @@ export function InvestCalcPage({
    */
   const [isAutofilling, setIsAutofilling] = useState(false);
   const [autofillUnavailable, setAutofillUnavailable] = useState(false);
+  const [listingUrl, setListingUrl] = useState("");
+  const [listingUrlError, setListingUrlError] = useState(false);
 
   const applyComps = useCallback(
     (e: PropertyEnrichment) => {
@@ -1260,6 +1263,26 @@ export function InvestCalcPage({
       setIsAutofilling(false);
     }
   }, [form, applyComps, toast]);
+
+  // Paste a Zillow/Redfin/Realtor link → parse the address from the URL slug
+  // (we never fetch the page — those sites block bots) and run it through the
+  // existing hero-handoff flow: set address, enrich (HUD rent / FRED rate /
+  // state tax), estimate the price, auto-run the verdict. The user confirms the
+  // parsed address via the enrichment, same as a typed address.
+  const handleListingUrl = useCallback(() => {
+    const parsed = parseListingUrl(listingUrl);
+    if (!parsed) {
+      setListingUrlError(true);
+      return;
+    }
+    setListingUrlError(false);
+    heroAnalyzeHandlerRef.current?.({
+      token: `listing:${parsed.address}:${Date.now()}`,
+      address: parsed.address,
+      state: parsed.state,
+    });
+    setListingUrl("");
+  }, [listingUrl]);
 
   /**
    * Apply a starter template's assumption set (financing + expenses + growth)
@@ -2984,6 +3007,50 @@ export function InvestCalcPage({
             <StrategyChips activeKey={activeStrategyKey} onSelect={handleSelectStrategy} />
 
             <div id="step-property" className="space-y-5 scroll-mt-24">
+              {/* Paste a listing link → parse the address from the URL and run
+                  the full enrich + verdict flow. Reuses everything; just a
+                  faster on-ramp than typing the address. */}
+              <div className="rounded-2xl border border-dashed border-border bg-muted/30 p-3 sm:p-4">
+                <label htmlFor="listing-url" className="text-xs font-semibold text-foreground">
+                  Paste a listing link
+                </label>
+                <p className="mt-0.5 text-[11px] text-muted-foreground">
+                  Zillow, Redfin, or Realtor.com — we&apos;ll pull the address and pre-fill the deal.
+                </p>
+                <div className="mt-2 flex gap-2">
+                  <input
+                    id="listing-url"
+                    type="url"
+                    inputMode="url"
+                    value={listingUrl}
+                    onChange={(e) => {
+                      setListingUrl(e.target.value);
+                      setListingUrlError(false);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleListingUrl();
+                      }
+                    }}
+                    placeholder="https://www.zillow.com/homedetails/…"
+                    className="min-w-0 flex-1 rounded-lg border border-input bg-background px-3 py-2 text-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleListingUrl}
+                    disabled={!listingUrl.trim()}
+                    className="shrink-0 rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
+                  >
+                    Pull it in
+                  </button>
+                </div>
+                {listingUrlError ? (
+                  <p className="mt-1.5 text-[11px] text-[var(--metric-negative,#dc2626)]">
+                    Couldn&apos;t read that link — paste the full property address below instead.
+                  </p>
+                ) : null}
+              </div>
               {!activeStrategy && (
                 <PropertyTypeSection form={form} savedTemplateFallback={savedTemplateFallback} />
               )}
