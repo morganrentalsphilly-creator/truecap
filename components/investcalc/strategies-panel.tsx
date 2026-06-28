@@ -23,6 +23,8 @@ import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 interface StrategiesPanelProps {
   values: InvestmentFormValues | null;
   result: AnalysisResult | null;
+  /** Apply the rehab estimate to the deal's cash invested (rehabBudget). */
+  onApplyRehab?: (total: number) => void;
 }
 
 function deriveDefaultSqft(values: InvestmentFormValues | null): number | null {
@@ -44,19 +46,45 @@ function deriveDefaultBaths(values: InvestmentFormValues | null): number | null 
   return sum > 0 ? sum : null;
 }
 
-export function StrategiesPanel({ values, result }: StrategiesPanelProps) {
+export function StrategiesPanel({ values, result, onApplyRehab }: StrategiesPanelProps) {
   const [rehabTotal, setRehabTotal] = useState<number>(0);
 
   const defaultSqft = useMemo(() => deriveDefaultSqft(values), [values]);
   const defaultBaths = useMemo(() => deriveDefaultBaths(values), [values]);
 
+  // Already reflected in the deal once it matches the estimate — avoids a no-op
+  // "Apply" that looks like it did nothing.
+  const alreadyApplied =
+    onApplyRehab != null &&
+    rehabTotal > 0 &&
+    Math.round(values?.rehabBudget ?? 0) === Math.round(rehabTotal);
+
   return (
     <div className="p-4 sm:p-6 space-y-4 sm:space-y-5">
-      <RehabEstimatorCard
-        defaultSqft={defaultSqft}
-        defaultBathCount={defaultBaths}
-        onTotalChange={(total) => setRehabTotal(total)}
-      />
+      <div>
+        <RehabEstimatorCard
+          defaultSqft={defaultSqft}
+          defaultBathCount={defaultBaths}
+          onTotalChange={(total) => setRehabTotal(total)}
+        />
+        {onApplyRehab && rehabTotal > 0 ? (
+          <div className="mt-2 flex items-center justify-end gap-2">
+            {alreadyApplied ? (
+              <span className="text-xs font-medium text-muted-foreground">
+                Applied to this deal&apos;s cash invested
+              </span>
+            ) : (
+              <button
+                type="button"
+                onClick={() => onApplyRehab(rehabTotal)}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--brand-green)] px-3 py-1.5 text-xs font-semibold text-white transition hover:opacity-90"
+              >
+                Apply ${Math.round(rehabTotal).toLocaleString()} to this deal
+              </button>
+            )}
+          </div>
+        ) : null}
+      </div>
       <BrrrrCard
         values={values}
         result={result}

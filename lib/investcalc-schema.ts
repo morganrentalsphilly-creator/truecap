@@ -204,6 +204,11 @@ export const investmentFormSchema = z.object({
   avgDailyRate: optionalMoneyMo,
   occupancyPct: optionalPercent,
   strFurnishingCost: optionalMoneyMo,
+  // Up-front rehab / initial repairs (value-add deals). A one-time cost added to
+  // cash required — it lowers cash-on-cash, just like STR furnishing. Kept
+  // honest in v1: it does NOT change the depreciation basis or appreciation.
+  // Additive + optional, so INVESTCALC_SCHEMA_VERSION is intentionally NOT bumped.
+  rehabBudget: optionalMoneyMo,
 }).superRefine((values, ctx) => {
   const addSingleFamilyUnitDetailsIssues = () => {
     // Only monthlyRent is REQUIRED for a single-family run — it's the one
@@ -419,6 +424,7 @@ export const defaultValues: Partial<InvestmentFormValues> = {
   avgDailyRate: undefined,
   occupancyPct: undefined,
   strFurnishingCost: undefined,
+  rehabBudget: undefined,
   units: [
     { bedrooms: undefined, bathrooms: undefined, sqft: undefined, monthlyRent: undefined, isOwnerOccupied: false },
   ],
@@ -535,6 +541,7 @@ export function normalizeInvestmentFormSnapshot(raw: unknown): InvestmentFormVal
     avgDailyRate: asNumber(snapshot.avgDailyRate),
     occupancyPct: asNumber(snapshot.occupancyPct),
     strFurnishingCost: asNumber(snapshot.strFurnishingCost),
+    rehabBudget: asNumber(snapshot.rehabBudget),
     units,
     templateId: typeof snapshot.templateId === "string" ? snapshot.templateId : undefined,
   });

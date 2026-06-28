@@ -2255,6 +2255,18 @@ export function InvestCalcPage({
     }
   };
 
+  // "Apply to deal" from the rehab estimator — writes the estimate into the
+  // rehabBudget field (Financing) so it counts toward cash invested. The
+  // estimator stops being a dead-end calculator.
+  const handleApplyRehab = (total: number) => {
+    const amount = Math.max(0, Math.round(total));
+    form.setValue("rehabBudget", amount, { shouldDirty: true, shouldValidate: true });
+    toast({
+      title: "Rehab added to the deal",
+      description: `$${amount.toLocaleString()} added to cash invested — re-run to see the impact on cash-on-cash.`,
+    });
+  };
+
   const handleExportPdf = async (mode: ReportMode = "personal") => {
     if (!analysisResult) return;
     const oneTimeUnlocked = oneTimePdfUnlockedRef.current;
@@ -3410,6 +3422,7 @@ export function InvestCalcPage({
               onExportPdf={handleExportPdf}
               onNewAnalysis={handleNewAnalysis}
               onApplyComps={handleApplyComps}
+              onApplyRehab={handleApplyRehab}
               isSaving={isSavingDeal}
               isComparing={isComparingDeals}
               isExporting={isExportingPdf}

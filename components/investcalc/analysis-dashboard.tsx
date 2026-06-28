@@ -148,6 +148,8 @@ interface AnalysisDashboardProps {
   onNewAnalysis: () => void | Promise<void>;
   /** Fill the analyzer form from pulled comps (facts + estimates). */
   onApplyComps?: (enrichment: PropertyEnrichment) => void;
+  /** Apply the rehab estimator's total to the deal's cash invested. */
+  onApplyRehab?: (total: number) => void;
   isSaving?: boolean;
   isComparing?: boolean;
   isExporting?: boolean;
@@ -393,6 +395,7 @@ export function AnalysisDashboard({
   onExportPdf,
   onNewAnalysis,
   onApplyComps,
+  onApplyRehab,
   isSaving = false,
   isComparing = false,
   isExporting = false,
@@ -1519,7 +1522,7 @@ export function AnalysisDashboard({
             <ProFeaturePreview kind="strategies" onUpgrade={goToBilling} result={result} />
           )}
           {activeTab === "strategies" && canUseStrategies && (
-            <StrategiesPanel values={values} result={result} />
+            <StrategiesPanel values={values} result={result} onApplyRehab={onApplyRehab} />
           )}
           {/* Stress Test tab - Max Allowable Offer + Sensitivity Grid.
               Each card independently respects its own entitlement: a

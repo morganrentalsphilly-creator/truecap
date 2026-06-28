@@ -347,6 +347,29 @@ describe("short-term rental income", () => {
 });
 
 // ──────────────────────────────────────────────────────────────────
+// 4c. Rehab / initial-repair budget — one-time cash, lowers cash-on-cash
+// ──────────────────────────────────────────────────────────────────
+describe("rehab budget", () => {
+  it("adds to cash invested and lowers cash-on-cash (not NOI/cap)", () => {
+    const without = calculateAnalysis(baseSingleFamily());
+    const withRehab = calculateAnalysis(baseSingleFamily({ rehabBudget: 25_000 }));
+    expect(withRehab.totalCashRequired).toBeCloseTo(without.totalCashRequired + 25_000, 2);
+    expect(withRehab.cocReturn).toBeLessThan(without.cocReturn);
+    // Rehab is cash-only in v1 — NOI and cap rate are untouched.
+    expect(withRehab.capRate).toBeCloseTo(without.capRate, 6);
+    expect(withRehab.netCashFlow).toBeCloseTo(without.netCashFlow, 6);
+  });
+
+  it("stacks with STR furnishing in cash required", () => {
+    const both = calculateAnalysis(
+      baseSingleFamily({ rehabBudget: 10_000, strFurnishingCost: 15_000 })
+    );
+    const neither = calculateAnalysis(baseSingleFamily());
+    expect(both.totalCashRequired).toBeCloseTo(neither.totalCashRequired + 25_000, 2);
+  });
+});
+
+// ──────────────────────────────────────────────────────────────────
 // 5. Operating expenses — each line item formula
 // ──────────────────────────────────────────────────────────────────
 describe("operating expenses", () => {

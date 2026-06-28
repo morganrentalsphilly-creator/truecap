@@ -147,6 +147,7 @@ export function calculateAnalysis(values: InvestmentFormValues): AnalysisResult 
     avgDailyRate,
     occupancyPct,
     strFurnishingCost,
+    rehabBudget,
   } = values;
   const validUnits = (units ?? []).filter((unit) =>
     isValidRentalUnit(unit, {
@@ -239,9 +240,12 @@ export function calculateAnalysis(values: InvestmentFormValues): AnalysisResult 
 
   const closingCostsPctEffective = closingCostsPct ?? 3;
   const closingCosts = Math.round(purchasePrice * (closingCostsPctEffective / 100));
-  // STR furnishing/startup is a one-time cash outlay, so it raises the cash
-  // invested (and lowers cash-on-cash) just like rehab would.
-  const totalCashRequired = downPayment + closingCosts + (strFurnishingCost ?? 0);
+  // One-time cash outlays — STR furnishing/startup and up-front rehab/initial
+  // repairs — raise the cash invested (and lower cash-on-cash). v1 keeps these
+  // honest as cash-only: they do NOT change the depreciation basis or
+  // appreciation (purchasePrice still anchors those).
+  const totalCashRequired =
+    downPayment + closingCosts + (strFurnishingCost ?? 0) + (rehabBudget ?? 0);
 
   // Metrics
   const cocReturn = totalCashRequired > 0 ? (annualCashFlow / totalCashRequired) * 100 : 0;

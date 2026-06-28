@@ -147,6 +147,35 @@ export function FinancingSection({ form }: FinancingSectionProps) {
           </p>
           <FieldError id="closingCostsPct-error" message={errors.closingCostsPct?.message} />
         </div>
+
+        <div>
+          <Label htmlFor="rehabBudget" className="text-xs font-semibold text-[var(--brand-green)] mb-1.5 block uppercase tracking-wide">
+            Rehab / Initial Repairs
+            {" "}<span className="text-[10px] sm:text-xs text-muted-foreground">(Optional)</span>
+          </Label>
+          <div className="relative">
+            <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              {...register("rehabBudget", { setValueAs: optionalNumberSetValueAs })}
+              id="rehabBudget"
+              type="number"
+              inputMode="decimal"
+              step="100"
+              min={0}
+              placeholder="0"
+              aria-invalid={!!errors.rehabBudget}
+              aria-describedby={errors.rehabBudget ? "rehabBudget-error" : undefined}
+              className={cn(
+                "pl-8 border-[var(--brand-green)]/30 bg-background focus-visible:ring-[var(--brand-green)]/30",
+                errors.rehabBudget && "border-destructive"
+              )}
+            />
+          </div>
+          <p className="text-[11px] text-muted-foreground mt-1">
+            Up-front repairs — added to cash invested (lowers cash-on-cash).
+          </p>
+          <FieldError id="rehabBudget-error" message={errors.rehabBudget?.message} />
+        </div>
       </div>
 
       {pmiApplies ? (
