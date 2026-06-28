@@ -3,15 +3,53 @@ import { Bell, TrendingDown, TrendingUp } from "lucide-react";
 import type { RateWatchSummary } from "@/lib/rate-watch";
 
 /**
- * Dashboard "rate watch" strip — surfaces saved deals whose signal changed at
- * today's 30-yr rate (see lib/rate-watch). Invisible until useful: renders
- * nothing when the rate is unavailable or no deal changed state, so it never
- * shows an empty "nothing happened" card. Type-only import of the (server-only)
- * rate-watch module is erased at build, so this stays safe in the client tree.
+ * Dashboard "rate watch" strip — makes the saved-deal monitoring loop visible.
+ * Two states (see lib/rate-watch):
+ *  - Alert: one or more saved deals' signal flipped at today's 30-yr rate.
+ *  - Ambient: deals are being watched but nothing changed — shows "monitoring N
+ *    deals" so the user knows the loop is running before the first alert fires.
+ * Invisible until useful: renders nothing when the rate is unavailable or there
+ * are no watchable saved deals. Type-only import of the (server-only) rate-watch
+ * module is erased at build, so this stays safe in the client tree.
  */
 export function RateWatchStrip({ rateWatch }: { rateWatch: RateWatchSummary | null }) {
-  if (!rateWatch || rateWatch.changedDeals.length === 0) return null;
-  const { currentRatePct, changedDeals } = rateWatch;
+  if (!rateWatch || rateWatch.monitoredCount === 0) return null;
+  const { currentRatePct, changedDeals, monitoredCount } = rateWatch;
+
+  // Ambient state — deals are watched, nothing changed yet.
+  if (changedDeals.length === 0) {
+    return (
+      <section aria-label="Rate watch" className="rounded-2xl border border-border bg-card p-4 sm:p-5">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <Bell className="size-4" />
+            </span>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Rate watch</p>
+              <p className="text-sm font-semibold text-foreground">
+                Monitoring {monitoredCount === 1 ? "1 saved deal" : `${monitoredCount} saved deals`} —
+                all steady at today&apos;s {currentRatePct.toFixed(2)}% rate
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/settings"
+            prefetch={false}
+            className="shrink-0 text-xs font-semibold text-primary hover:underline"
+          >
+            Manage alerts
+          </Link>
+        </div>
+        <p className="mt-2.5 text-xs leading-relaxed text-muted-foreground">
+          We re-underwrite your saved deals whenever the 30-yr rate moves, and flag any whose
+          tier, DSCR band, or cash-flow sign changes. Turn on alerts in settings to hear about it
+          by email.
+        </p>
+      </section>
+    );
+  }
+
   const count = changedDeals.length;
   const shown = changedDeals.slice(0, 5);
   const extra = count - shown.length;

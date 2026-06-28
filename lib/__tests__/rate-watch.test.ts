@@ -57,10 +57,17 @@ describe("buildRateWatch", () => {
     expect(buildRateWatch([], 5.5)).toBeNull();
   });
 
-  it("returns null when no deal changes state at today's rate", () => {
+  it("returns null when every saved snapshot is unparseable (nothing watchable)", () => {
+    expect(buildRateWatch([row("bad", { not: "valid" })], 5.5)).toBeNull();
+  });
+
+  it("returns an ambient summary (no changes, but deals are monitored)", () => {
     // 7% → 6.7% on a comfortable deal: numbers shift, but tier/band/sign hold.
     const rows = [row("flat", baseDeal({ interestRate: 7, monthlyRent: 2_600 }))];
-    expect(buildRateWatch(rows, 6.7)).toBeNull();
+    const result = buildRateWatch(rows, 6.7);
+    expect(result).not.toBeNull();
+    expect(result!.changedDeals).toHaveLength(0);
+    expect(result!.monitoredCount).toBe(1);
   });
 
   it("surfaces deals whose signal flips and excludes unchanged ones", () => {
@@ -76,6 +83,8 @@ describe("buildRateWatch", () => {
     expect(result!.changedDeals).toHaveLength(1);
     expect(result!.changedDeals[0]!.id).toBe("mover");
     expect(result!.changedDeals[0]!.improved).toBe(true);
+    // Both deals are watched even though only one changed.
+    expect(result!.monitoredCount).toBe(2);
   });
 
   it("skips rows whose form snapshot doesn't validate", () => {
