@@ -49,6 +49,16 @@ export type BlogPost = {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: "negative-leverage-real-estate",
+    title:
+      "Negative leverage in real estate: when borrowing lowers your return (2026)",
+    excerpt:
+      "&quot;Use leverage, returns go up&quot; is only true when the asset out-earns the debt — and in 2026 it usually doesn't. The one number that sets the sign (the loan constant, not the rate), the cap-rate-vs-loan-constant rule, the leverage identity that makes it exact, a worked $300K property across five cap rates, and the trap where a deal still cash-flows and still clears a DSCR lender while quietly dragging cash-on-cash below the all-cash return.",
+    readingTimeMinutes: 11,
+    publishedAt: "2026-06-28",
+    available: true,
+  },
+  {
     slug: "property-tax-reassessment-rental-property",
     title:
       "Property tax reassessment: don't underwrite the seller's tax bill (2026)",
