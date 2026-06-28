@@ -1328,8 +1328,14 @@ export function InvestCalcPage({
   const handleSelectStrategy = useCallback(
     (key: string | null) => {
       const strategy = getStrategyByKey(key);
+      const strOpts = { shouldDirty: true, shouldValidate: false } as const;
       if (!strategy) {
         setActiveStrategyKey(null);
+        // Clear STR income fields so a derived ADR×occupancy income can't leak
+        // into the default (monthly-rent) flow after the chip is cleared.
+        form.setValue("avgDailyRate", undefined, strOpts);
+        form.setValue("occupancyPct", undefined, strOpts);
+        form.setValue("strFurnishingCost", undefined, strOpts);
         return;
       }
       if (form.getValues("propertyType") !== strategy.propertyType) {
@@ -1339,6 +1345,20 @@ export function InvestCalcPage({
         });
       }
       applyStarterAssumptions(strategy.starterKey);
+      // Keep the income data model aligned with the inputs the chip shows. STR
+      // collects nightly rate + occupancy (income is derived from them), so seed
+      // a default occupancy and drop any stale monthly rent. Every other play
+      // collects monthly rent, so clear any STR fields left from a prior STR run.
+      if (strategy.incomeMode === "str") {
+        form.setValue("monthlyRent", undefined, strOpts);
+        if (form.getValues("occupancyPct") == null) {
+          form.setValue("occupancyPct", 65, strOpts); // ~US STR average; user-editable
+        }
+      } else {
+        form.setValue("avgDailyRate", undefined, strOpts);
+        form.setValue("occupancyPct", undefined, strOpts);
+        form.setValue("strFurnishingCost", undefined, strOpts);
+      }
       setActiveStrategyKey(strategy.key);
       // BRRRR/Flip render their model inline as the results hero, so don't also
       // lead the Details tabs with the (duplicate) Strategies tab - default to
@@ -3080,6 +3100,7 @@ export function InvestCalcPage({
                   fields="primary"
                   hideBedrooms={!!activeStrategy}
                   rentLabel={activeStrategy?.rentLabel}
+                  strMode={activeStrategy?.incomeMode === "str"}
                 />
               )}
               {(propertyType === "multi-family" || propertyType === "owner-occupant") && (

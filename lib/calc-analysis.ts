@@ -142,6 +142,9 @@ export function calculateAnalysis(values: InvestmentFormValues): AnalysisResult 
     insuranceMonthly,
     hoaMonthly,
     utilitiesMonthly,
+    avgDailyRate,
+    occupancyPct,
+    strFurnishingCost,
   } = values;
   const validUnits = (units ?? []).filter((unit) =>
     isValidRentalUnit(unit, {
@@ -152,7 +155,14 @@ export function calculateAnalysis(values: InvestmentFormValues): AnalysisResult 
   // Monthly income
   let monthlyRentalIncome = 0;
   if (propertyType === "single-family") {
-    monthlyRentalIncome = monthlyRent ?? 0;
+    // Short-term rental income model: when a nightly rate is set, gross income
+    // is ADR × occupancy × 365 / 12 (not a hand-typed monthly rent). The
+    // STR strategy's higher vacancy/management defaults still apply on top.
+    if (typeof avgDailyRate === "number" && avgDailyRate > 0) {
+      monthlyRentalIncome = (avgDailyRate * 365 * ((occupancyPct ?? 0) / 100)) / 12;
+    } else {
+      monthlyRentalIncome = monthlyRent ?? 0;
+    }
   } else {
     monthlyRentalIncome = validUnits
       .filter((u) => !(propertyType === "owner-occupant" && u.isOwnerOccupied))
@@ -220,7 +230,9 @@ export function calculateAnalysis(values: InvestmentFormValues): AnalysisResult 
 
   const closingCostsPctEffective = closingCostsPct ?? 3;
   const closingCosts = Math.round(purchasePrice * (closingCostsPctEffective / 100));
-  const totalCashRequired = downPayment + closingCosts;
+  // STR furnishing/startup is a one-time cash outlay, so it raises the cash
+  // invested (and lowers cash-on-cash) just like rehab would.
+  const totalCashRequired = downPayment + closingCosts + (strFurnishingCost ?? 0);
 
   // Metrics
   const cocReturn = totalCashRequired > 0 ? (annualCashFlow / totalCashRequired) * 100 : 0;

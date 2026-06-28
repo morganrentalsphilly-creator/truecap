@@ -54,6 +54,9 @@ export interface InvestorStrategy {
   priceLabel?: string;
   /** Override the rent field label (e.g. "Stabilized rent" for BRRRR). */
   rentLabel?: string;
+  /** STR: collect nightly rate × occupancy (+ furnishing) instead of a hand-
+   *  typed monthly rent; calc-analysis derives the income from them. */
+  incomeMode?: "str";
 }
 
 export const INVESTOR_STRATEGIES: InvestorStrategy[] = [
@@ -123,7 +126,7 @@ export const INVESTOR_STRATEGIES: InvestorStrategy[] = [
   {
     key: "short-term",
     runCta: "Run STR numbers",
-    rentLabel: "Monthly revenue (nightly × occupancy)",
+    incomeMode: "str",
     label: "Short-term Rental",
     tagline: "Nightly / STR",
     Icon: CalendarClock,
@@ -131,7 +134,7 @@ export const INVESTOR_STRATEGIES: InvestorStrategy[] = [
     starterKey: "short-term-rental",
     primaryTab: "cash-flow",
     primaryOutputIsPro: false,
-    focusHint: "STR defaults applied — higher vacancy and management baked in; enter your projected nightly-equivalent monthly rent.",
+    focusHint: "STR defaults applied — enter your nightly rate and occupancy; we'll model the revenue (ADR × occupancy) with higher vacancy and management baked in.",
   },
 ];
 

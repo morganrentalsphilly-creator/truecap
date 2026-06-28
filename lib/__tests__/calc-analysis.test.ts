@@ -252,6 +252,64 @@ describe("PMI", () => {
 });
 
 // ──────────────────────────────────────────────────────────────────
+// 4b. Short-term rental income model — ADR × occupancy
+// ──────────────────────────────────────────────────────────────────
+describe("short-term rental income", () => {
+  it("derives monthly income from nightly rate × occupancy × 365 / 12", () => {
+    const result = calculateAnalysis(
+      baseSingleFamily({
+        monthlyRent: undefined,
+        avgDailyRate: 220,
+        occupancyPct: 65,
+        vacancyPct: 0, // STR: occupancy captures vacancy, so no separate haircut
+      })
+    );
+    // 220 × 365 × 0.65 / 12 = 4,349.58…
+    expect(result.monthlyRentalIncome).toBeCloseTo((220 * 365 * 0.65) / 12, 2);
+  });
+
+  it("ignores monthlyRent when a nightly rate is present (STR wins)", () => {
+    const result = calculateAnalysis(
+      baseSingleFamily({
+        monthlyRent: 9_999, // should be overridden by the STR model
+        avgDailyRate: 150,
+        occupancyPct: 50,
+        vacancyPct: 0,
+      })
+    );
+    expect(result.monthlyRentalIncome).toBeCloseTo((150 * 365 * 0.5) / 12, 2);
+  });
+
+  it("falls back to monthlyRent when no nightly rate is set", () => {
+    const result = calculateAnalysis(
+      baseSingleFamily({ monthlyRent: 2_100, avgDailyRate: undefined, occupancyPct: undefined })
+    );
+    expect(result.monthlyRentalIncome).toBe(2_100);
+  });
+
+  it("adds furnishing as a one-time cost to cash invested (lowers cash-on-cash)", () => {
+    const withoutFurnishing = calculateAnalysis(
+      baseSingleFamily({ monthlyRent: undefined, avgDailyRate: 200, occupancyPct: 60, vacancyPct: 0 })
+    );
+    const withFurnishing = calculateAnalysis(
+      baseSingleFamily({
+        monthlyRent: undefined,
+        avgDailyRate: 200,
+        occupancyPct: 60,
+        vacancyPct: 0,
+        strFurnishingCost: 20_000,
+      })
+    );
+    expect(withFurnishing.totalCashRequired).toBeCloseTo(
+      withoutFurnishing.totalCashRequired + 20_000,
+      2
+    );
+    // Same income + more cash invested ⇒ strictly lower cash-on-cash.
+    expect(withFurnishing.cocReturn).toBeLessThan(withoutFurnishing.cocReturn);
+  });
+});
+
+// ──────────────────────────────────────────────────────────────────
 // 5. Operating expenses — each line item formula
 // ──────────────────────────────────────────────────────────────────
 describe("operating expenses", () => {

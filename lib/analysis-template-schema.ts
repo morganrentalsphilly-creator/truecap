@@ -25,7 +25,9 @@ export const analysisTemplateSchema = z.object({
   // (lib/investcalc-schema.ts). A template above the form's max would
   // save fine but fail validation the moment it's applied to the form.
   maintenancePct: z.number().gt(0, "Must be greater than 0").max(50, "Max 50%"),
-  vacancyPct: z.number().gt(0, "Must be greater than 0").max(50, "Max 50%"),
+  // 0% is allowed: short-term rentals model vacancy via the occupancy input
+  // (revenue = ADR × occupancy), so their operating-expense vacancy is 0.
+  vacancyPct: z.number().min(0, "Must be 0% or more").max(50, "Max 50%"),
   managementPct: z.number().gt(0, "Must be greater than 0").max(50, "Max 50%"),
   capexPct: z.number().gt(0, "Must be greater than 0").max(50, "Max 50%"),
   closingCostsPct: z.number().gt(0, "Must be greater than 0").max(100, "Max 100%").optional(),

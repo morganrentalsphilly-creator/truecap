@@ -164,7 +164,7 @@ export const STARTER_TEMPLATES: StarterTemplate[] = [
     key: "short-term-rental",
     tag: "Airbnb / VRBO",
     cardDescription:
-      "Short-term rental defaults. High vacancy/'unoccupied' assumption (annualized), STR insurance premium, higher mgmt fees, and 39-year commercial depreciation.",
+      "Short-term rental defaults. Income is modeled directly as nightly rate × occupancy, an STR insurance premium, higher mgmt fees, and 39-year commercial depreciation.",
     template: {
       templateName: "Starter — Short-term rental",
       templateDescription: "Airbnb / VRBO operator defaults",
@@ -173,8 +173,10 @@ export const STARTER_TEMPLATES: StarterTemplate[] = [
       // STR insurance is materially higher — often 2-3x long-term landlord policy
       insurancePct: 1.5,
       maintenancePct: 10,
-      // 35% annualized "vacancy" approximates an ~65% occupancy book
-      vacancyPct: 35,
+      // Vacancy is 0 here because the STR income model captures unbooked nights
+      // directly via the occupancy input (revenue = ADR × 365 × occupancy / 12).
+      // Applying a vacancy haircut on top would double-count empty nights.
+      vacancyPct: 0,
       // STR management is typically 15-25% of revenue
       managementPct: 18,
       capexPct: 8,

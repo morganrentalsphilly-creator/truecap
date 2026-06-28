@@ -183,6 +183,15 @@ export const investmentFormSchema = z.object({
   insuranceMonthly: optionalMoneyMo,
   hoaMonthly: optionalMoneyMo,
   utilitiesMonthly: optionalMoneyMo,
+  // Short-term-rental income model (the "Short-term Rental" strategy). When
+  // avgDailyRate is set, calc-analysis derives monthly income from
+  // ADR × occupancy × 365 / 12 instead of monthlyRent, and strFurnishingCost is
+  // a one-time startup cost added to cash required. Additive + optional, so
+  // INVESTCALC_SCHEMA_VERSION is intentionally NOT bumped (existing snapshots
+  // still parse; STR fields default to undefined → long-term-rent behavior).
+  avgDailyRate: optionalMoneyMo,
+  occupancyPct: optionalPercent,
+  strFurnishingCost: optionalMoneyMo,
 }).superRefine((values, ctx) => {
   const addSingleFamilyUnitDetailsIssues = () => {
     // Only monthlyRent is REQUIRED for a single-family run — it's the one
@@ -203,6 +212,23 @@ export const investmentFormSchema = z.object({
       }
     }
 
+    // STR mode is income-driven by nightly rate × occupancy, so monthlyRent
+    // isn't required — both STR inputs are. Treat the presence of EITHER STR
+    // field as STR intent so the validation guides the user to fill the other
+    // (on a visible STR input) rather than erroring on the hidden rent field.
+    const adr = values.avgDailyRate;
+    const occ = values.occupancyPct;
+    const hasAdr = typeof adr === "number" && Number.isFinite(adr) && adr > 0;
+    const hasOcc = typeof occ === "number" && Number.isFinite(occ) && occ > 0;
+    if (hasAdr || hasOcc) {
+      if (!hasAdr) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["avgDailyRate"], message: "Enter a nightly rate" });
+      }
+      if (!hasOcc) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["occupancyPct"], message: "Enter occupancy %" });
+      }
+      return;
+    }
     const r = values.monthlyRent;
     if (typeof r !== "number" || !Number.isFinite(r)) {
       ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["monthlyRent"], message: "Enter monthly rent" });
@@ -378,6 +404,9 @@ export const defaultValues: Partial<InvestmentFormValues> = {
   bathrooms: undefined,
   sqft: undefined,
   monthlyRent: undefined,
+  avgDailyRate: undefined,
+  occupancyPct: undefined,
+  strFurnishingCost: undefined,
   units: [
     { bedrooms: undefined, bathrooms: undefined, sqft: undefined, monthlyRent: undefined, isOwnerOccupied: false },
   ],
@@ -487,6 +516,9 @@ export function normalizeInvestmentFormSnapshot(raw: unknown): InvestmentFormVal
     insuranceMonthly: asNumber(snapshot.insuranceMonthly),
     hoaMonthly: asNumber(snapshot.hoaMonthly),
     utilitiesMonthly: asNumber(snapshot.utilitiesMonthly),
+    avgDailyRate: asNumber(snapshot.avgDailyRate),
+    occupancyPct: asNumber(snapshot.occupancyPct),
+    strFurnishingCost: asNumber(snapshot.strFurnishingCost),
     units,
     templateId: typeof snapshot.templateId === "string" ? snapshot.templateId : undefined,
   });
