@@ -177,9 +177,14 @@ export default function Home() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
-      {/* Header hydrates client-side and self-corrects via the browser
-          Supabase session in the rare case a signed-in user reaches the
-          static page (e.g. the proxy cookie check missed). */}
+      {/* This static page only serves cold visitors — signed-in users are
+          rewritten to /home-authed by the proxy. In the RARE case a signed-in
+          user reaches this cached page (proxy cookie miss), they see the
+          anonymous header + free-tier calculator until they navigate: the
+          entitlements below are baked anon at build and do NOT self-correct
+          client-side. (A cookie-gated getUser→reload self-heal is possible but
+          deliberately omitted — not worth a reload-loop risk on the highest-
+          traffic page for a rare edge.) */}
       <Header initialUser={null} initialEntitlements={null} />
       {/* Landing flow — this page only serves cold visitors (signed-in
           users are rewritten to /home-authed). TOOL-FIRST order (CRO,

@@ -10,7 +10,6 @@ import { resendConfirmationAction, signInAction } from "@/app/actions/auth";
 import { loginSchema, type LoginInput } from "@/lib/auth-schema";
 import { GoogleAuthButton } from "@/components/auth/google-auth-button";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import {
   Form,
@@ -28,7 +27,6 @@ export function LoginForm() {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(true);
   // When a sign-in fails because the email isn't confirmed, surface a
   // one-click "Resend confirmation" affordance. We stash the email
   // they tried so the resend goes to the right address.
@@ -96,7 +94,7 @@ export function LoginForm() {
     setUnconfirmedEmail(null);
     toast({
       title: "Welcome back",
-      description: rememberMe ? "You are signed in." : "You are signed in for this session.",
+      description: "You are signed in.",
     });
     // Honor ?next so a gated action (Save, a Pro CTA, the share viewer) returns
     // the user to where they were instead of dumping them on the homepage.
@@ -237,11 +235,6 @@ export function LoginForm() {
             </button>
           </div>
         ) : null}
-
-        <label className="flex items-center gap-2 text-xs text-muted-foreground">
-          <Checkbox checked={rememberMe} onCheckedChange={(checked) => setRememberMe(checked === true)} />
-          Remember me
-        </label>
 
         <Button
           type="submit"

@@ -447,6 +447,10 @@ export function AnalysisDashboard({
   // every Pro panel stay anchored to the saved/base analysis. Sliders
   // are a "what-if peek" on headline numbers, not a full reanalysis.
   const [whatIfState, setWhatIfState] = useState<WhatIfState | null>(null);
+  // Drives a remount key on the sliders so reopening the panel starts them at
+  // zero in lockstep with the (reset) headline cards — otherwise the collapsed-
+  // but-still-mounted sliders keep stale positions while the cards show base.
+  const [whatIfOpen, setWhatIfOpen] = useState(false);
   const displayResult: AnalysisResult | null =
     whatIfState?.result ?? result;
   // Holistic context for the Overview. Computed from the BASE result (not
@@ -1323,7 +1327,9 @@ export function AnalysisDashboard({
           <details
             className="group"
             onToggle={(e) => {
-              if (!(e.currentTarget as HTMLDetailsElement).open) setWhatIfState(null);
+              const open = (e.currentTarget as HTMLDetailsElement).open;
+              setWhatIfOpen(open);
+              if (!open) setWhatIfState(null);
             }}
           >
             <summary className="flex min-h-11 cursor-pointer list-none items-center gap-3 rounded-2xl border border-primary/20 bg-[var(--brand-blue-light)] px-4 py-3 transition-colors hover:border-primary/40">
@@ -1344,7 +1350,12 @@ export function AnalysisDashboard({
               />
             </summary>
             <div className="mt-2 space-y-3">
-              <WhatIfSliders values={values} baseResult={result} onStateChange={setWhatIfState} />
+              <WhatIfSliders
+                key={whatIfOpen ? "open" : "closed"}
+                values={values}
+                baseResult={result}
+                onStateChange={setWhatIfState}
+              />
               <BreakpointSuggestionCard values={values} result={result} />
             </div>
           </details>

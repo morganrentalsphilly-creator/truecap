@@ -847,6 +847,12 @@ export function InvestCalcPage({
    */
   const lastSelectedAddressRef = useRef<SelectedAddress | null>(null);
   const enrichmentCaptureRef = useRef<EnrichmentCapture>({});
+  // The address whose enrichment provenance is currently captured. Distinct
+  // from lastSelectedAddressRef (which callers set BEFORE enriching) so we can
+  // detect a genuinely new address inside runPropertyEnrichment and drop stale
+  // provenance — the hero/listing path otherwise leaked the prior address's
+  // sourcing into the data-confidence badge + saved deal.
+  const lastEnrichedAddressRef = useRef<string | null>(null);
 
   /**
    * Run the enrichment lookups (state property tax, FRED mortgage rate,
@@ -856,6 +862,16 @@ export function InvestCalcPage({
    */
   const runPropertyEnrichment = useCallback(
     async (place: SelectedAddress, opts?: { silent?: boolean }) => {
+      // New address → clear the previous address's captured provenance + market
+      // rent BEFORE repopulating, so the confidence badge can't attribute the
+      // old "from <addr>" sourcing to this deal (every enrichment path, incl.
+      // the hero/listing handoff, funnels through here).
+      const placeKey = place.formattedAddress ?? `${place.state ?? ""}:${place.county ?? ""}:${place.zip ?? ""}`;
+      if (lastEnrichedAddressRef.current !== placeKey) {
+        enrichmentCaptureRef.current = {};
+        setMarketRentEstimate(null);
+        lastEnrichedAddressRef.current = placeKey;
+      }
       const currentPropertyType = form.getValues("propertyType");
       const isSingleFamily = currentPropertyType === "single-family";
       const rawBedrooms = isSingleFamily ? form.getValues("bedrooms") : undefined;
