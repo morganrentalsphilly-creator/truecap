@@ -16,12 +16,14 @@
  * the calc, the error is logged to the console for debugging, and a
  * "Try refreshing" button gives them a graceful recovery path.
  *
- * Logging hook: errors are written to console.error in a structured
- * shape so they're easy to grep in browser dev-tools. If we ever wire
- * Sentry/etc, add the report() call inside componentDidCatch.
+ * Logging hook: errors are written to console.error for local triage AND
+ * reported to Sentry in componentDidCatch — this boundary wraps the entire
+ * post-calc dashboard (the app's highest-value screen), so a prod render crash
+ * here must surface as an alert, not just a silent fallback card.
  */
 import React from "react";
 import { AlertTriangle, RotateCw } from "lucide-react";
+import * as Sentry from "@sentry/nextjs";
 import { Button } from "@/components/ui/button";
 import type { AnalysisResult } from "@/lib/calc-analysis";
 
@@ -58,6 +60,13 @@ export class AnalysisErrorBoundary extends React.Component<Props, State> {
       message: error.message,
       stack: error.stack,
       componentStack: errorInfo.componentStack,
+    });
+    // Report to Sentry so a prod crash on the dashboard alerts the team.
+    // PII-safe: sendDefaultPii is on, so deliberately do NOT attach the
+    // AnalysisResult or address — only the React component stack.
+    Sentry.captureException(error, {
+      tags: { feature: "analysis-dashboard" },
+      extra: { componentStack: errorInfo.componentStack },
     });
   }
 

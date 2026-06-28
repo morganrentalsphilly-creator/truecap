@@ -106,14 +106,20 @@ export const STARTER_TEMPLATES: StarterTemplate[] = [
     key: "fha-owner-occupant",
     tag: "Primary residence",
     cardDescription:
-      "FHA 3.5% down primary residence. Insurance pct is bumped to model the FHA MIP. Plan to live there at least 1 year before renting out.",
+      "FHA 3.5% down primary residence. FHA MIP is modeled as mortgage insurance (~0.55%/yr, for the life of the loan), separate from hazard insurance. Plan to live there at least 1 year before renting out.",
     template: {
       templateName: "Starter — FHA 3.5% owner-occupant",
       templateDescription: "FHA low-down primary residence",
       propertyTaxPct: 1.5,
       insuranceInputMode: "percent",
-      // 0.5% baseline + ~0.55% MIP rolled in
-      insurancePct: 1.05,
+      // Hazard insurance only — FHA MIP is modeled ONCE via the PMI line below
+      // (was previously double-counted: ~0.55% MIP rolled into insurance AND
+      // the default 0.8% conventional PMI applied on top of the 3.5%-down loan).
+      insurancePct: 0.5,
+      // FHA annual MIP ≈ 0.55% of the loan, and with <10% down it runs for the
+      // life of the loan (never cancels at 80% LTV).
+      pmiAnnualRatePct: 0.55,
+      pmiNoCancel: true,
       maintenancePct: 8,
       vacancyPct: 1,
       managementPct: 1,

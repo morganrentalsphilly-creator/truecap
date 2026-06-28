@@ -56,6 +56,9 @@ export function AssumptionsSourceStrip({ onEdit }: { onEdit: () => void }) {
           </li>
         ))}
       </ul>
+      <p className="mt-3 border-t border-border/60 pt-2.5 text-[11px] leading-relaxed text-muted-foreground">
+        Estimates for planning, not financial advice — verify rent, taxes, and the asking price before you offer.
+      </p>
     </div>
   );
 }

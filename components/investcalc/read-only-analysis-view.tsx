@@ -104,7 +104,7 @@ export function ReadOnlyAnalysisView({ values, result }: ReadOnlyAnalysisViewPro
           // Cash purchases have no debt service so DSCR is undefined.
           // calc-analysis returns 0 in that case - surface a clear sub
           // rather than a misleading "Underwater" badge.
-          value={result.monthlyPayment <= 0 ? "n/a" : result.dscr.toFixed(2)}
+          value={result.monthlyPayment <= 0 ? "—" : result.dscr.toFixed(2)}
           sub={
             result.monthlyPayment <= 0
               ? "Cash purchase"

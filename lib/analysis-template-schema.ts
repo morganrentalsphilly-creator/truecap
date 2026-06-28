@@ -33,6 +33,11 @@ export const analysisTemplateSchema = z.object({
   closingCostsPct: z.number().gt(0, "Must be greater than 0").max(100, "Max 100%").optional(),
   interestRatePct: z.number().gt(0, "Must be greater than 0").max(100, "Max 100%"),
   downPaymentPct: z.number().gt(0, "Must be greater than 0").max(100, "Max 100%"),
+  /** Optional PMI/MIP annual rate (% of loan). 0 disables; omitted uses the
+   *  calc default on sub-20%-down deals. */
+  pmiAnnualRatePct: z.number().min(0, "Must be 0 or more").max(5, "Max 5%").optional(),
+  /** Optional; true = mortgage insurance never cancels (FHA MIP for life). */
+  pmiNoCancel: z.boolean().optional(),
   expenseGrowthPct: z.number().gt(0, "Must be greater than 0").max(100, "Max 100%"),
   rentGrowthPct: z.number().gt(0, "Must be greater than 0").max(100, "Max 100%"),
   /** Optional; defaults to 3% annual appreciation when saving if omitted. */

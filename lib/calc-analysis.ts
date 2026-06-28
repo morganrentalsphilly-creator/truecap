@@ -126,6 +126,8 @@ export function calculateAnalysis(values: InvestmentFormValues): AnalysisResult 
     interestRate,
     loanTermYears,
     closingCostsPct,
+    pmiAnnualRatePct,
+    pmiNoCancel,
     maintenancePct,
     vacancyPct,
     mgmtPct,
@@ -215,13 +217,20 @@ export function calculateAnalysis(values: InvestmentFormValues): AnalysisResult 
   const loanAmount = purchasePrice - downPayment;
   const monthlyPayment = Math.round(calcMonthlyPayment(loanAmount, interestRate, loanTermYears));
 
-  // Private mortgage insurance: financed conventional loans with < 20% down
-  // carry PMI until the loan amortizes to ~80% LTV. It's a real monthly outlay
-  // that reduces cash flow (and was previously ignored, overstating cash flow
-  // on low-down / house-hack deals). Not part of the P&I used for DSCR.
+  // Mortgage insurance: financed loans with < 20% down carry PMI/MIP until the
+  // loan amortizes to ~80% LTV (unless pmiNoCancel — FHA MIP runs for the life
+  // of the loan). It's a real monthly outlay that reduces cash flow (and was
+  // previously ignored, overstating cash flow on low-down / house-hack deals).
+  // Not part of the P&I used for DSCR. The rate is user-overridable
+  // (pmiAnnualRatePct); 0 disables it (lender-paid MI, gift of equity). Model
+  // mortgage insurance ONCE here — never also fold it into the insurance %.
+  const pmiAnnualRate =
+    pmiAnnualRatePct != null && Number.isFinite(pmiAnnualRatePct)
+      ? pmiAnnualRatePct
+      : DEFAULT_PMI_ANNUAL_RATE_PCT;
   const pmiMonthly =
-    loanAmount > 0 && downPaymentPct < PMI_DOWN_PAYMENT_THRESHOLD_PCT
-      ? Math.round((loanAmount * (DEFAULT_PMI_ANNUAL_RATE_PCT / 100)) / 12)
+    loanAmount > 0 && downPaymentPct < PMI_DOWN_PAYMENT_THRESHOLD_PCT && pmiAnnualRate > 0
+      ? Math.round((loanAmount * (pmiAnnualRate / 100)) / 12)
       : 0;
 
   // Cash flow (CapEx reserve + PMI both reduce real cash flow)
@@ -266,6 +275,7 @@ export function calculateAnalysis(values: InvestmentFormValues): AnalysisResult 
     totalOperatingExpenses,
     monthlyPayment,
     pmiMonthly,
+    pmiNoCancel: pmiNoCancel === true,
     loanAmount,
     purchasePrice,
     taxSavingsMonthly,

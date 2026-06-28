@@ -249,6 +249,43 @@ describe("PMI", () => {
     expect(proj[0].debtServiceAnnual).toBeGreaterThan(pAndIAnnual); // PMI present year 1
     expect(proj[9].debtServiceAnnual).toBeLessThanOrEqual(proj[0].debtServiceAnnual); // never increases
   });
+
+  it("honors a custom pmiAnnualRatePct override", () => {
+    const dflt = calculateAnalysis(baseSingleFamily({ downPaymentPct: 10 }));
+    const higher = calculateAnalysis(baseSingleFamily({ downPaymentPct: 10, pmiAnnualRatePct: 1.5 }));
+    expect(higher.pmiMonthly).toBeGreaterThan(dflt.pmiMonthly);
+    // 1.5% of the loan / 12.
+    expect(higher.pmiMonthly).toBe(Math.round((higher.loanAmount * (1.5 / 100)) / 12));
+  });
+
+  it("pmiAnnualRatePct = 0 disables PMI entirely (lender-paid MI)", () => {
+    const r = calculateAnalysis(baseSingleFamily({ downPaymentPct: 10, pmiAnnualRatePct: 0 }));
+    expect(r.pmiMonthly).toBe(0);
+  });
+
+  it("pmiNoCancel keeps mortgage insurance for the life of the loan (FHA MIP)", () => {
+    // Deterministic projection: loan starts just above 80% LTV and pays down
+    // below it after year 1, so PMI cancels in year 2 unless pmiNoCancel.
+    const base = {
+      monthlyRentalIncome: 2_000,
+      totalOperatingExpenses: 500,
+      monthlyPayment: 1_000,
+      pmiMonthly: 100,
+      loanAmount: 82_000,
+      purchasePrice: 100_000, // 80% LTV drop threshold = $80,000
+      taxSavingsMonthly: 0,
+      annualDepreciation: 0,
+      yearlyInterestSchedule: Array.from({ length: 10 }, () => 5_000), // $7k principal/yr
+      rentGrowthPct: 0,
+      expenseGrowthPct: 0,
+      taxRate: 0.24,
+      includeInterestDeduction: false,
+    };
+    const cancels = buildTenYearProjection({ ...base, pmiNoCancel: false });
+    const forLife = buildTenYearProjection({ ...base, pmiNoCancel: true });
+    expect(cancels[0]!.debtServiceAnnual).toBe(forLife[0]!.debtServiceAnnual); // PMI both, year 1
+    expect(forLife[9]!.debtServiceAnnual).toBeGreaterThan(cancels[9]!.debtServiceAnnual); // MIP stays
+  });
 });
 
 // ──────────────────────────────────────────────────────────────────
@@ -452,6 +489,45 @@ describe("ten-year projection", () => {
     // year-1 = 12,000; year-10 = 12,000 × 1.03^9 ≈ 15,657
     const expectedY10 = Math.round(12_000 * Math.pow(1.03, 9));
     expect(Math.abs(years[9]!.rentalIncomeAnnual - expectedY10)).toBeLessThanOrEqual(2);
+  });
+
+  it("tax effect is a SIGNED net — a shield on paper-loss years", () => {
+    // 12k rent − 6k opex − 12k depreciation = −6k taxable ⇒ +$1,440 shield.
+    const years = buildTenYearProjection({
+      monthlyRentalIncome: 1_000,
+      totalOperatingExpenses: 500,
+      monthlyPayment: 0,
+      taxSavingsMonthly: 0,
+      annualDepreciation: 12_000,
+      yearlyInterestSchedule: [],
+      rentGrowthPct: 0,
+      expenseGrowthPct: 0,
+      taxRate: 0.24,
+      includeInterestDeduction: false,
+    });
+    expect(years[0]!.taxSavingsAnnual).toBe(Math.round(6_000 * 0.24)); // +1,440
+    expect(years[0]!.afterTaxCashFlowAnnual).toBe(
+      years[0]!.netCashFlowAnnual + years[0]!.taxSavingsAnnual
+    );
+  });
+
+  it("tax effect goes NEGATIVE once the deal is tax-positive (owes tax)", () => {
+    // 36k rent − 6k opex − 5k depreciation = +25k taxable ⇒ −$6,000 tax owed.
+    const years = buildTenYearProjection({
+      monthlyRentalIncome: 3_000,
+      totalOperatingExpenses: 500,
+      monthlyPayment: 0,
+      taxSavingsMonthly: 0,
+      annualDepreciation: 5_000,
+      yearlyInterestSchedule: [],
+      rentGrowthPct: 0,
+      expenseGrowthPct: 0,
+      taxRate: 0.24,
+      includeInterestDeduction: false,
+    });
+    expect(years[0]!.taxSavingsAnnual).toBe(-Math.round(25_000 * 0.24)); // −6,000
+    // After-tax must be BELOW pre-tax net cash flow — the old formula got this wrong.
+    expect(years[0]!.afterTaxCashFlowAnnual).toBeLessThan(years[0]!.netCashFlowAnnual);
   });
 });
 

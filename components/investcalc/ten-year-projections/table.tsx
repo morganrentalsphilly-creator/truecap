@@ -12,7 +12,7 @@ const COLUMNS = [
   "Operating Expenses",
   "Annual Debt Service (Principal & Interest)",
   "Net Cash Flow",
-  "Tax Savings",
+  "Tax Effect",
   "After-Tax Cash Flow",
   "Cumulative Cash Flow",
 ];
@@ -59,7 +59,7 @@ export function TenYearProjectionTable({
                     ["Operating Expenses", formatCurrency(year.operatingExpensesAnnual)],
                     ["Annual Debt Service", formatCurrency(year.debtServiceAnnual)],
                     ["Net Cash Flow", formatCurrency(year.netCashFlowAnnual), year.netCashFlowAnnual],
-                    ["Tax Savings", formatCurrency(year.taxSavingsAnnual), year.taxSavingsAnnual],
+                    ["Tax Effect", formatCurrency(year.taxSavingsAnnual), year.taxSavingsAnnual],
                     ["After-Tax Cash Flow", formatCurrency(year.afterTaxCashFlowAnnual), year.afterTaxCashFlowAnnual],
                     ["Cumulative Cash Flow", formatCurrency(year.cumulativeCashFlowAnnual), year.cumulativeCashFlowAnnual],
                   ].map(([label, value, numericValue]) => (
@@ -115,7 +115,16 @@ export function TenYearProjectionTable({
                 >
                   {formatCurrency(year.netCashFlowAnnual)}
                 </td>
-                <td className="px-4 py-3 text-primary">{formatCurrency(year.taxSavingsAnnual)}</td>
+                <td
+                  className={cn(
+                    "px-4 py-3 font-medium",
+                    year.taxSavingsAnnual >= 0
+                      ? "text-[var(--metric-positive)]"
+                      : "text-[var(--metric-negative)]"
+                  )}
+                >
+                  {formatCurrency(year.taxSavingsAnnual)}
+                </td>
                 <td
                   className={cn(
                     "px-4 py-3 font-semibold",

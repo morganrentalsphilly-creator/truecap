@@ -1573,7 +1573,7 @@ async function pageProjection(
   autoTable(doc, {
     startY: y,
     margin: { left: M.left, right: M.right },
-    head: [["Year", "Rental Income", "Op. Expenses", "Debt Service", "Net CF", "Tax Savings", "After-Tax CF", "Cumulative CF"]],
+    head: [["Year", "Rental Income", "Op. Expenses", "Debt Service", "Net CF", "Tax Effect", "After-Tax CF", "Cumulative CF"]],
     body: d.projection10y.rows.map((r) => [
       `Y${r.y}`,
       fmtCurrency(r.rental),

@@ -1306,6 +1306,10 @@ export function InvestCalcPage({
       form.setValue("closingCostsPct", t.closingCostsPct, opts);
       form.setValue("interestRate", t.interestRatePct, opts);
       form.setValue("downPaymentPct", t.downPaymentPct, opts);
+      // Mortgage-insurance overrides (FHA MIP etc.). Always set — including back
+      // to undefined — so a prior strategy's PMI settings don't leak forward.
+      form.setValue("pmiAnnualRatePct", t.pmiAnnualRatePct ?? undefined, opts);
+      form.setValue("pmiNoCancel", t.pmiNoCancel ?? undefined, opts);
       form.setValue("expenseGrowthPct", t.expenseGrowthPct, opts);
       form.setValue("rentGrowthPct", t.rentGrowthPct, opts);
       form.setValue("appreciationRatePct", t.appreciationRatePct, opts);

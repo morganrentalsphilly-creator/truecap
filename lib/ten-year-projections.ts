@@ -1,4 +1,7 @@
-export const TEN_YEAR_PROJECTION_SNAPSHOT_VERSION = 2;
+// v3: taxSavingsAnnual is now a SIGNED net tax effect (nets rental income
+// against deductions), not a one-way shield — so cached v2 snapshots, which
+// overstated after-tax cash flow in tax-positive years, regenerate.
+export const TEN_YEAR_PROJECTION_SNAPSHOT_VERSION = 3;
 
 export interface ProjectionYear {
   year: number;
@@ -22,6 +25,9 @@ export interface TenYearProjectionInput {
   loanAmount?: number;
   /** Purchase price — the 80% LTV basis for the PMI drop. */
   purchasePrice?: number;
+  /** When true, mortgage insurance never drops (FHA MIP for the life of the
+   *  loan); otherwise it cancels once the balance reaches 80% LTV. */
+  pmiNoCancel?: boolean;
   taxSavingsMonthly: number;
   annualDepreciation: number;
   yearlyInterestSchedule?: number[];
@@ -63,22 +69,31 @@ export function buildTenYearProjection(input: TenYearProjectionInput): Projectio
     const yearlyInterestForYear = input.yearlyInterestSchedule?.[index];
 
     // PMI applies while the loan balance at the start of the year is above the
-    // 80% LTV threshold; then pay down the balance for next year's check.
-    const pmiThisYear = pmiAnnual > 0 && loanBalance > pmiDropBalance ? pmiAnnual : 0;
+    // 80% LTV threshold (or always, for FHA MIP that never cancels); then pay
+    // down the balance for next year's check.
+    const pmiThisYear =
+      pmiAnnual > 0 && (input.pmiNoCancel === true || loanBalance > pmiDropBalance) ? pmiAnnual : 0;
     const debtServiceAnnual = principalAndInterestAnnual + pmiThisYear;
     if (typeof yearlyInterestForYear === "number") {
       loanBalance = Math.max(0, loanBalance - Math.max(0, principalAndInterestAnnual - yearlyInterestForYear));
     }
 
     const netCashFlowAnnual = rentalIncomeAnnual - operatingExpensesAnnual - debtServiceAnnual;
-    const taxSavingsAnnual =
-      typeof yearlyInterestForYear === "number"
-        ? Math.round(
-            (input.annualDepreciation +
-              (input.includeInterestDeduction ? yearlyInterestForYear : 0)) *
-              input.taxRate
-          )
-        : Math.round(input.taxSavingsMonthly * 12);
+    // Signed tax EFFECT for the year — not a one-way "savings". Deductions
+    // (operating expenses + deductible mortgage interest + depreciation) shelter
+    // rental income; once they no longer cover it the deal turns tax-POSITIVE
+    // and OWES tax. Net rental income against deductions — identical to the
+    // tax-strategy panel's netTaxBenefitAnnual — so after-tax cash flow stays
+    // honest in later years. The old formula only ever ADDED the deduction value
+    // (ignoring rental income + operating expenses), which overstated after-tax
+    // returns once the shelter ran out — always in the optimistic direction.
+    const deductibleInterestAnnual =
+      input.includeInterestDeduction && typeof yearlyInterestForYear === "number"
+        ? yearlyInterestForYear
+        : 0;
+    const taxableIncomeAnnual =
+      rentalIncomeAnnual - operatingExpensesAnnual - deductibleInterestAnnual - input.annualDepreciation;
+    const taxSavingsAnnual = Math.round(-taxableIncomeAnnual * input.taxRate);
     const afterTaxCashFlowAnnual = netCashFlowAnnual + taxSavingsAnnual;
     cumulativeCashFlowAnnual += netCashFlowAnnual;
 
@@ -101,6 +116,7 @@ export function buildTenYearProjectionInputHash(input: TenYearProjectionInput): 
     totalOperatingExpenses: input.totalOperatingExpenses,
     monthlyPayment: input.monthlyPayment,
     pmiMonthly: input.pmiMonthly ?? 0,
+    pmiNoCancel: input.pmiNoCancel === true,
     loanAmount: input.loanAmount ?? 0,
     purchasePrice: input.purchasePrice ?? 0,
     taxSavingsMonthly: input.taxSavingsMonthly,

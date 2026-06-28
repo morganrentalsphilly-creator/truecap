@@ -130,6 +130,18 @@ export const investmentFormSchema = z.object({
     .max(50, "Max 50 years"),
   /** Optional; omitted uses default closing cost % (see defaultValues / calc). */
   closingCostsPct: optionalPercent,
+  /** Optional PMI / mortgage-insurance annual rate (% of loan balance). When
+   *  omitted, calc-analysis applies DEFAULT_PMI_ANNUAL_RATE_PCT on sub-20%-down
+   *  deals. 0 disables PMI entirely (lender-paid MI, gift-of-equity, etc.). */
+  pmiAnnualRatePct: z.preprocess((val) => {
+    if (val === undefined || val === null || val === "") return undefined;
+    const n = typeof val === "number" ? val : Number(val);
+    if (!Number.isFinite(n)) return undefined;
+    return n;
+  }, z.number().min(0, "Min 0%").max(5, "Max 5%").optional()),
+  /** When true, mortgage insurance does NOT cancel at 80% LTV — models FHA MIP,
+   *  which (with the typical <10% down) runs for the life of the loan. */
+  pmiNoCancel: z.boolean().optional(),
 
   // Operating expenses. Preprocess: empty / NaN / null -> 0. This lets
   // self-managers (mgmt 0%), full-occupancy assumptions, etc. simply
@@ -414,6 +426,8 @@ export const defaultValues: Partial<InvestmentFormValues> = {
   interestRate: 6.75,
   loanTermYears: 30,
   closingCostsPct: undefined,
+  pmiAnnualRatePct: undefined,
+  pmiNoCancel: undefined,
   maintenancePct: 10,
   vacancyPct: 5,
   mgmtPct: 8,
@@ -495,6 +509,8 @@ export function normalizeInvestmentFormSnapshot(raw: unknown): InvestmentFormVal
     interestRate: asNumber(snapshot.interestRate),
     loanTermYears: asNumber(snapshot.loanTermYears),
     closingCostsPct: asNumber(snapshot.closingCostsPct),
+    pmiAnnualRatePct: asNumber(snapshot.pmiAnnualRatePct),
+    pmiNoCancel: asBoolean(snapshot.pmiNoCancel),
     maintenancePct: asNumber(snapshot.maintenancePct),
     vacancyPct: asNumber(snapshot.vacancyPct),
     mgmtPct: asNumber(snapshot.mgmtPct),

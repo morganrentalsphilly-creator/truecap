@@ -27,6 +27,10 @@ export function FinancingSection({ form }: FinancingSectionProps) {
   const downPaymentPct = form.watch("downPaymentPct");
   const isAllCash =
     downPaymentPct === 0 || (typeof downPaymentPct === "number" && downPaymentPct >= 100);
+  // PMI / MIP only applies to a financed loan with < 20% down — show the lever
+  // exactly when it's relevant, so it never clutters the standard 20%-down path.
+  const pmiApplies =
+    typeof downPaymentPct === "number" && downPaymentPct > 0 && downPaymentPct < 20;
 
   return (
     // Card chrome unified with the other input sections (PropertyType /
@@ -144,6 +148,55 @@ export function FinancingSection({ form }: FinancingSectionProps) {
           <FieldError id="closingCostsPct-error" message={errors.closingCostsPct?.message} />
         </div>
       </div>
+
+      {pmiApplies ? (
+        <div className="mt-4 rounded-xl border border-[var(--brand-green)]/20 bg-[var(--brand-green)]/[0.04] p-4">
+          <div className="grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_auto] gap-4 sm:items-start">
+            <div>
+              <Label htmlFor="pmiAnnualRatePct" className="text-xs font-semibold text-[var(--brand-green)] mb-1.5 block uppercase tracking-wide">
+                PMI / MIP rate %
+                <span className="ml-1 normal-case font-normal text-muted-foreground">(under 20% down)</span>
+              </Label>
+              <div className="relative max-w-[180px]">
+                <Input
+                  {...register("pmiAnnualRatePct", { setValueAs: optionalNumberSetValueAs })}
+                  id="pmiAnnualRatePct"
+                  type="number"
+                  inputMode="decimal"
+                  step="0.05"
+                  min={0}
+                  max={5}
+                  placeholder="0.8"
+                  aria-invalid={!!errors.pmiAnnualRatePct}
+                  aria-describedby={errors.pmiAnnualRatePct ? "pmiAnnualRatePct-error" : undefined}
+                  className={cn(
+                    "pr-8 border-[var(--brand-green)]/30 bg-background focus-visible:ring-[var(--brand-green)]/30",
+                    errors.pmiAnnualRatePct && "border-destructive"
+                  )}
+                />
+                <Percent className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              </div>
+              <p className="text-[11px] text-muted-foreground mt-1">
+                Annual mortgage insurance, % of loan. Defaults to 0.8%; set 0 if none.
+              </p>
+              <FieldError id="pmiAnnualRatePct-error" message={errors.pmiAnnualRatePct?.message} />
+            </div>
+
+            <label htmlFor="pmiNoCancel" className="flex items-start gap-2.5 sm:pt-7 cursor-pointer select-none">
+              <input
+                {...register("pmiNoCancel")}
+                id="pmiNoCancel"
+                type="checkbox"
+                className="mt-0.5 size-4 rounded border-input accent-[var(--brand-green)]"
+              />
+              <span className="text-xs leading-snug text-foreground">
+                Runs for the life of the loan
+                <span className="block text-[11px] text-muted-foreground">FHA MIP — doesn&apos;t cancel at 20% equity.</span>
+              </span>
+            </label>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
