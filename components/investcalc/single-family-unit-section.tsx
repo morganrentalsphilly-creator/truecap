@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { cn } from "@/lib/utils";
 import { FieldError } from "@/components/investcalc/form-field-helpers";
+import { GlossaryTip } from "@/components/investcalc/glossary-tip";
 
 /**
  * Which fields to render:
@@ -128,7 +129,7 @@ export function SingleFamilyUnitSection({
         {showRent ? (
           <div>
             <Label htmlFor="monthlyRent" className="text-xs font-semibold text-primary mb-1.5 block uppercase tracking-wide">
-              {rentLabel ?? "Monthly Rent"}
+              <GlossaryTip term="onePercentRule" showIcon={false}>{rentLabel ?? "Monthly Rent"}</GlossaryTip>
             </Label>
             <div className="relative">
               <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
