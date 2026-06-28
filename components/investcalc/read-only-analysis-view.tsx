@@ -20,10 +20,14 @@ import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { MaxOfferCard } from "@/components/investcalc/max-offer-card";
 import { SensitivityGrid } from "@/components/investcalc/sensitivity-grid";
 import { StrategiesPanel } from "@/components/investcalc/strategies-panel";
+import type { ReportComp, ReportComps } from "@/lib/report-comps";
 
 interface ReadOnlyAnalysisViewProps {
   values: InvestmentFormValues;
   result: AnalysisResult;
+  /** Owner's stored sale/rent comps (when a saved deal was shared). Backs the
+   *  rent/value with real comparables; null hides the section. */
+  comps?: ReportComps | null;
 }
 
 const fmtCash = (n: number) =>
@@ -63,7 +67,81 @@ function MetricTile({
   );
 }
 
-export function ReadOnlyAnalysisView({ values, result }: ReadOnlyAnalysisViewProps) {
+const money0 = (n: number | null | undefined) =>
+  n == null || !Number.isFinite(n) ? "—" : `$${Math.round(n).toLocaleString("en-US")}`;
+
+function CompRow({ c }: { c: ReportComp }) {
+  const facts = [
+    c.bedrooms != null ? `${c.bedrooms} bd` : null,
+    c.bathrooms != null ? `${c.bathrooms} ba` : null,
+    c.squareFootage != null ? `${c.squareFootage.toLocaleString("en-US")} sqft` : null,
+    c.distanceMiles != null ? `${c.distanceMiles.toFixed(1)} mi` : null,
+  ].filter(Boolean).join(" · ");
+  return (
+    <li className="flex items-start justify-between gap-3 py-1.5">
+      <div className="min-w-0">
+        <p className="truncate text-xs font-medium text-foreground">{c.address || "Nearby comp"}</p>
+        {facts ? <p className="truncate text-[11px] text-muted-foreground">{facts}</p> : null}
+      </div>
+      <span className="shrink-0 text-xs font-semibold tabular-nums text-foreground">{money0(c.price)}</span>
+    </li>
+  );
+}
+
+/**
+ * Read-only "backed by comps" section on the shared deal page. Renders the
+ * owner's stored RentCast value/rent estimates + a few comparables, so a
+ * recipient (spouse, partner, lender) sees the rent/value is grounded in real
+ * nearby sales — the credibility layer the audit flagged as dying at the share
+ * boundary. Self-hides via the parent (only rendered when comps exist).
+ */
+function SharedDealComps({ comps }: { comps: ReportComps }) {
+  const sale = comps.saleComps.slice(0, 4);
+  const rent = comps.rentComps.slice(0, 4);
+  const range = (r: { low: number | null; high: number | null } | null) =>
+    r && (r.low != null || r.high != null) ? `${money0(r.low)} – ${money0(r.high)}` : null;
+  const valueRange = range(comps.valueRange);
+  const rentRange = range(comps.rentRange);
+
+  return (
+    <section aria-label="Market comps" className="bg-card rounded-2xl border border-border shadow-sm">
+      <div className="border-b border-border px-5 py-3">
+        <h2 className="text-sm font-semibold text-foreground">Backed by market comps</h2>
+        <p className="text-[11px] text-muted-foreground">Nearby sales &amp; rentals via RentCast — reference only.</p>
+      </div>
+      <div className="p-5 space-y-4">
+        <div className="grid grid-cols-2 gap-3">
+          <div className="rounded-xl border border-border bg-muted/30 p-3">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Est. value</p>
+            <p className="mt-0.5 text-lg font-bold tabular-nums text-foreground">{money0(comps.valueEstimate)}</p>
+            {valueRange ? <p className="text-[11px] text-muted-foreground">{valueRange}</p> : null}
+          </div>
+          <div className="rounded-xl border border-border bg-muted/30 p-3">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Est. rent</p>
+            <p className="mt-0.5 text-lg font-bold tabular-nums text-foreground">
+              {comps.rentEstimate == null ? "—" : `${money0(comps.rentEstimate)}/mo`}
+            </p>
+            {rentRange ? <p className="text-[11px] text-muted-foreground">{rentRange}</p> : null}
+          </div>
+        </div>
+        {sale.length > 0 ? (
+          <div>
+            <p className="mb-1 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Comparable sales</p>
+            <ul className="divide-y divide-border/70">{sale.map((c, i) => <CompRow key={`s-${i}`} c={c} />)}</ul>
+          </div>
+        ) : null}
+        {rent.length > 0 ? (
+          <div>
+            <p className="mb-1 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Comparable rentals</p>
+            <ul className="divide-y divide-border/70">{rent.map((c, i) => <CompRow key={`r-${i}`} c={c} />)}</ul>
+          </div>
+        ) : null}
+      </div>
+    </section>
+  );
+}
+
+export function ReadOnlyAnalysisView({ values, result, comps }: ReadOnlyAnalysisViewProps) {
   const router = useRouter();
   // "Make this mine": hand the FULL deal to the calculator via its autosave
   // draft (restored on mount via normalizeInvestmentFormSnapshot), so the
@@ -139,6 +217,8 @@ export function ReadOnlyAnalysisView({ values, result }: ReadOnlyAnalysisViewPro
       >
         Make this deal mine — open it in the calculator →
       </button>
+
+      {comps ? <SharedDealComps comps={comps} /> : null}
 
       <MaxOfferCard values={values} />
       <SensitivityGrid values={values} />

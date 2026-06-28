@@ -25,6 +25,10 @@ export type SharePayload = {
      *  viewer co-brand the page and route a captured lead to that owner
      *  (T6). Optional + additive — old v:1 links without it still decode. */
     ownerId?: string;
+    /** The saved deal's id, when sharing a saved analysis. Lets the public
+     *  viewer pull the deal's stored sale/rent comps (verified against
+     *  ownerId). Optional + additive — old v:1 links still decode. */
+    dealId?: string;
   };
 };
 

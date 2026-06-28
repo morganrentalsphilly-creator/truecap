@@ -915,7 +915,7 @@ export function AnalysisDashboard({
                   is the core growth loop (every shared deal markets TrueCap).
                   Icon-forward (label hidden on mobile) so it doesn't wrap the
                   action row the way the old full-text button did. */}
-              <ShareLinkButton values={values} />
+              <ShareLinkButton values={values} savedDealId={savedDealId} />
         </div>
       </div>
 

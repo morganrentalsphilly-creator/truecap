@@ -22,9 +22,12 @@ import { useToast } from "@/hooks/use-toast";
 interface ShareLinkButtonProps {
   values: InvestmentFormValues | null;
   className?: string;
+  /** Saved deal id, when sharing a saved analysis. Lets the public viewer pull
+   *  this deal's stored sale/rent comps (verified against the owner). */
+  savedDealId?: string | null;
 }
 
-export function ShareLinkButton({ values, className }: ShareLinkButtonProps) {
+export function ShareLinkButton({ values, className, savedDealId }: ShareLinkButtonProps) {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [shareUrl, setShareUrl] = useState<string>("");
@@ -50,6 +53,9 @@ export function ShareLinkButton({ values, className }: ShareLinkButtonProps) {
           sharedAt: new Date().toISOString(),
           title: values.address || "Shared deal",
           ...(ownerId ? { ownerId } : {}),
+          // Only carry the deal id when we also know the owner — the viewer
+          // verifies comps belong to that owner before showing them.
+          ...(ownerId && savedDealId ? { dealId: savedDealId } : {}),
         },
       });
       setShareUrl(buildShareUrl(encoded));

@@ -16,6 +16,7 @@ import { investmentFormSchema } from "@/lib/investcalc-schema";
 import { ReadOnlyAnalysisView } from "@/components/investcalc/read-only-analysis-view";
 import { TrackSharedDealView } from "@/components/analytics/track-shared-deal-view";
 import { getPublicAgentBranding } from "@/lib/agent-share";
+import { getPublicDealComps } from "@/lib/public-deal-comps";
 import { LeadCaptureForm } from "@/components/investcalc/lead-capture-form";
 
 // Next.js 15+ makes `params` async (Promise). Without awaiting it, accessing
@@ -73,7 +74,12 @@ export default async function PublicDealPage({ params }: Props) {
 
   // Co-branding (T6): if a Pro owner shared this, surface their brand + a lead
   // form. Falls back to the generic TrueCap view for free/anonymous shares.
-  const agent = await getPublicAgentBranding(payload.meta?.ownerId);
+  // Comps: if a saved deal was shared, back the rent/value with its stored
+  // comparables (owner-verified). Both are best-effort and parallelizable.
+  const [agent, comps] = await Promise.all([
+    getPublicAgentBranding(payload.meta?.ownerId),
+    getPublicDealComps(payload.meta?.dealId, payload.meta?.ownerId),
+  ]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -120,7 +126,7 @@ export default async function PublicDealPage({ params }: Props) {
           )}
         </header>
 
-        <ReadOnlyAnalysisView values={parsed.data} result={result} />
+        <ReadOnlyAnalysisView values={parsed.data} result={result} comps={comps} />
 
         {/* Agent lead capture (co-branded shares) OR the generic Pro upsell. */}
         {agent && payload.meta?.ownerId ? (

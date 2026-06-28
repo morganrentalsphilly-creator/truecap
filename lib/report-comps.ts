@@ -1,6 +1,6 @@
 import type { PropertyEnrichment } from "@/lib/property-enrichment/rentcast";
 
-type ReportComp = {
+export type ReportComp = {
   address: string;
   price: number | null;
   bedrooms: number | null;
