@@ -31,6 +31,10 @@ export function recomputeSavedDealVerdict(formSnapshot: unknown): {
   breakdown: DealScoreBreakdown;
   /** Debt-service coverage ratio; 0 for a cash purchase (no debt to cover). */
   dscr: number;
+  /** True for an all-cash purchase (no loan) — the canonical calc-analysis
+   *  definition (monthlyPayment <= 0). Distinguishes a cash deal from a
+   *  financed deal that merely recomputed to DSCR 0. */
+  isCashPurchase: boolean;
   /** Cash needed to close (down payment + closing costs). */
   cashToClose: number;
   /** Monthly net cash flow ($). Recomputed so list/dashboard/compare match the
@@ -55,6 +59,7 @@ export function recomputeSavedDealVerdict(formSnapshot: unknown): {
       riskLevel: scored.riskLevel,
       breakdown: scored.breakdown,
       dscr: result.dscr,
+      isCashPurchase: result.monthlyPayment <= 0,
       cashToClose: result.totalCashRequired,
       netCashFlowMonthly: result.netCashFlow,
       capRatePct: result.capRate,

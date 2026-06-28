@@ -25,6 +25,9 @@ interface StrategiesPanelProps {
   result: AnalysisResult | null;
   /** Apply the rehab estimate to the deal's cash invested (rehabBudget). */
   onApplyRehab?: (total: number) => void;
+  /** Live rehabBudget form value (not the last-computed snapshot), so "Applied"
+   *  reflects the current input immediately after Apply. */
+  currentRehabBudget?: number | null;
 }
 
 function deriveDefaultSqft(values: InvestmentFormValues | null): number | null {
@@ -46,18 +49,20 @@ function deriveDefaultBaths(values: InvestmentFormValues | null): number | null 
   return sum > 0 ? sum : null;
 }
 
-export function StrategiesPanel({ values, result, onApplyRehab }: StrategiesPanelProps) {
+export function StrategiesPanel({ values, result, onApplyRehab, currentRehabBudget }: StrategiesPanelProps) {
   const [rehabTotal, setRehabTotal] = useState<number>(0);
 
   const defaultSqft = useMemo(() => deriveDefaultSqft(values), [values]);
   const defaultBaths = useMemo(() => deriveDefaultBaths(values), [values]);
 
-  // Already reflected in the deal once it matches the estimate — avoids a no-op
-  // "Apply" that looks like it did nothing.
+  // Already reflected in the deal once the LIVE form value matches the estimate
+  // — avoids a no-op "Apply" that looks like it did nothing. Uses the live
+  // rehabBudget (not values, which is the last-computed snapshot and wouldn't
+  // update until a re-run), so "Applied" appears immediately after Apply.
   const alreadyApplied =
     onApplyRehab != null &&
     rehabTotal > 0 &&
-    Math.round(values?.rehabBudget ?? 0) === Math.round(rehabTotal);
+    Math.round(currentRehabBudget ?? 0) === Math.round(rehabTotal);
 
   return (
     <div className="p-4 sm:p-6 space-y-4 sm:space-y-5">

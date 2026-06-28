@@ -2,8 +2,8 @@
  * Owned-deal equity — once a deal closes, the question flips from "should I
  * buy?" to "how is it doing?". Given when the user bought (close date) and the
  * deal's own financing + appreciation assumptions, this derives today's
- * estimated equity: appreciation since purchase + principal paid down, on top
- * of the original cash in the property.
+ * estimated equity = the original down payment + appreciation since purchase +
+ * principal paid down (i.e. current value − remaining loan balance).
  *
  * Pure + dependency-free (no IO, client-safe, unit-tested). Appreciation uses
  * the DEAL's own appreciationRatePct so this can't tell a different story than

@@ -151,6 +151,7 @@ function mapSavedRow(row: SavedAnalysisRow): SavedAnalysisListItem | null {
     cocReturnPct: fresh ? fresh.cocReturnPct : row.coc_return_pct,
     capRatePct: fresh ? fresh.capRatePct : Number.isFinite(parsedCapRate) ? parsedCapRate : null,
     dscr: fresh ? fresh.dscr : null,
+    isCashPurchase: fresh ? fresh.isCashPurchase : undefined,
     cashToClose: fresh ? fresh.cashToClose : null,
     score: fresh ? fresh.score : Number.isFinite(parsedScore) ? parsedScore : null,
     recommendation: fresh ? fresh.recommendation : storedRecommendation,

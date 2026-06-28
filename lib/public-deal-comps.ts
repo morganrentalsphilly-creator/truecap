@@ -8,22 +8,27 @@ import "server-only";
  * that already prints in the owner's PDF, which just died at the share boundary.
  *
  * Uses the service-role admin client because the share page is public (no
- * viewer session) and deal_comps RLS is owner-only. We ONLY return comps whose
- * row user_id matches the claimed owner, and comps are non-PII market data the
- * owner already chose to put on their exported report. Best-effort: any miss
- * (no deal id, no row, owner mismatch, migration pending) returns null and the
- * shared view simply omits the comps section.
+ * viewer session) and deal_comps RLS is owner-only. The `user_id === ownerId`
+ * check is a CONSISTENCY guard (comps belong to the link's stated owner), NOT
+ * an authorization boundary: both ids come from the URL, so this adds no trust
+ * boundary beyond the share link itself — which already encodes the full deal.
+ * That's acceptable because comps are non-PII market data the owner already put
+ * on their exported report. Best-effort: any miss (bad/absent id, no row, owner
+ * mismatch, migration pending) returns null and the section is simply omitted.
  */
 
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { enrichmentToReportComps, type ReportComps } from "@/lib/report-comps";
 import type { PropertyEnrichment } from "@/lib/property-enrichment/rentcast";
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export async function getPublicDealComps(
   dealId: string | undefined | null,
   ownerId: string | undefined | null,
 ): Promise<ReportComps | null> {
-  if (!dealId || !ownerId) return null;
+  // Both are uuid columns — reject malformed ids before any DB round-trip.
+  if (!dealId || !ownerId || !UUID_RE.test(dealId) || !UUID_RE.test(ownerId)) return null;
   try {
     const admin = createAdminSupabaseClient();
     const { data } = await admin

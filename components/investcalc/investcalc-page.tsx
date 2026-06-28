@@ -3469,6 +3469,7 @@ export function InvestCalcPage({
               onNewAnalysis={handleNewAnalysis}
               onApplyComps={handleApplyComps}
               onApplyRehab={handleApplyRehab}
+              currentRehabBudget={form.watch("rehabBudget") ?? null}
               isSaving={isSavingDeal}
               isComparing={isComparingDeals}
               isExporting={isExportingPdf}

@@ -49,6 +49,10 @@ export type PropertyEnrichment = {
   listPrice?: number | null;
   /** Listing status (e.g. "Active") accompanying listPrice. */
   listingStatus?: string | null;
+  /** True when the for-sale listing WAS looked up (includeListing), regardless
+   *  of whether one was found — so a confirmed "not listed" result caches and
+   *  doesn't force a fresh 3-call fetch on every repeat lookup. */
+  listingChecked?: boolean;
   fetchedAt: string;
 };
 
@@ -294,6 +298,7 @@ export async function fetchRentCastEnrichment(
     rentComps: rent?.comps ?? [],
     listPrice: listing?.listPrice ?? null,
     listingStatus: listing?.status ?? null,
+    listingChecked: opts?.includeListing === true,
     fetchedAt: new Date().toISOString(),
   };
 }

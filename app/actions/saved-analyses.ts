@@ -893,12 +893,19 @@ export async function setSavedDealCloseDateAction(
   if (!savedDealId) {
     return { ok: false, code: "VALIDATION_ERROR", message: "Invalid deal." };
   }
-  // Accept an ISO yyyy-mm-dd date or null (clear). Reject anything else.
+  // Accept an ISO yyyy-mm-dd date or null (clear). Reject anything else. The
+  // client `max=today` is only an HTML hint, so re-check here (the authoritative
+  // gate): a future close date would make months-owned 0 and report the down
+  // payment as today's equity. Lexical compare is correct for zero-padded
+  // yyyy-mm-dd and avoids the timezone fragility of Date-object comparison.
   let value: string | null = null;
   if (closeDate != null) {
     const trimmed = closeDate.trim();
     if (!/^\d{4}-\d{2}-\d{2}$/.test(trimmed) || Number.isNaN(new Date(trimmed).getTime())) {
       return { ok: false, code: "VALIDATION_ERROR", message: "Enter a valid date." };
+    }
+    if (trimmed > new Date().toISOString().slice(0, 10)) {
+      return { ok: false, code: "VALIDATION_ERROR", message: "Close date can't be in the future." };
     }
     value = trimmed;
   }

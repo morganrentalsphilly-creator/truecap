@@ -123,6 +123,9 @@ export type SavedAnalysisListItem = {
   capRatePct: number | null;
   /** Debt-service coverage ratio; null = unknown, 0 = cash purchase (N/A). */
   dscr?: number | null;
+  /** True for an all-cash purchase (canonical monthlyPayment<=0). Distinguishes
+   *  a cash deal from a financed deal that recomputed to DSCR exactly 0. */
+  isCashPurchase?: boolean;
   /** Cash needed to close (down payment + closing costs). */
   cashToClose?: number | null;
   score: number | null;
@@ -161,7 +164,10 @@ function toBuyBoxMetrics(item: SavedAnalysisListItem): BuyBoxDealMetrics {
     purchasePrice: item.purchasePrice,
     propertyType: item.propertyType,
     state: deriveStateFromAddress(item.address),
-    isCashPurchase: item.dscr === 0,
+    // Use the explicit cash flag (canonical monthlyPayment<=0); fall back to
+    // not-cash so a financed deal that recomputed to DSCR 0 still gets its DSCR
+    // criterion applied rather than silently skipped.
+    isCashPurchase: item.isCashPurchase ?? false,
   };
 }
 
@@ -236,9 +242,7 @@ function OwnedEquityCell({ item, enabled }: { item: SavedAnalysisListItem; enabl
       defaultValue={item.closeDate ?? undefined}
       max={new Date().toISOString().slice(0, 10)}
       disabled={isSaving}
-      onChange={(e) => {
-        if (e.target.value) save(e.target.value);
-      }}
+      onChange={(e) => save(e.target.value || null)}
       aria-label="Close date"
       className="h-8 rounded-lg border border-input bg-background px-2 text-xs text-foreground"
     />
@@ -248,10 +252,12 @@ function OwnedEquityCell({ item, enabled }: { item: SavedAnalysisListItem; enabl
   if (item.closeDate && eq) {
     return (
       <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs">
-        <span className="font-semibold text-success">Equity ~{fmtMoney0(eq.equity)}</span>
+        <span className={cn("font-semibold", eq.equity >= 0 ? "text-success" : "text-[var(--metric-negative)]")}>
+          Equity ~{fmtMoney0(eq.equity)}
+        </span>
         <span className="text-muted-foreground">
-          {fmtMoney0(eq.appreciationGain)} appreciation · {fmtMoney0(eq.principalPaid)} paid down · since{" "}
-          {fmtCloseDate(item.closeDate)}
+          {fmtMoney0(eq.downPayment)} down · {fmtMoney0(eq.appreciationGain)} appreciation ·{" "}
+          {fmtMoney0(eq.principalPaid)} paid down · since {fmtCloseDate(item.closeDate)}
         </span>
         {editing ? (
           dateInput

@@ -186,7 +186,7 @@ export function PortfolioRollupStrip({
               label="Owned Equity"
               value={fmtCurrency(totalOwnedEquity)}
               sub={`est. across ${ownedEquitySampleCount} dated ${ownedEquitySampleCount === 1 ? "deal" : "deals"}`}
-              tone="positive"
+              tone={totalOwnedEquity > 0 ? "positive" : totalOwnedEquity < 0 ? "negative" : "neutral"}
             />
           ) : (
             <RollupTile

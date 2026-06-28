@@ -19,9 +19,10 @@ import { fetchRentCastEnrichment, type PropertyEnrichment } from "@/lib/property
 
 const CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 
-// Hard monthly cap on LIVE enrichments (each ≈ 2 RentCast API calls), to
-// guard the 1,000-calls/mo plan limit even across many paid users. Tunable
-// via env; default 300 enrichments (~600 calls), leaving headroom.
+// Hard monthly cap on LIVE enrichments (each ≈ 2 RentCast API calls; a
+// listing-paste enrichment is 3 calls and counts as 2 cap-units), to guard the
+// 1,000-calls/mo plan limit even across many paid users. Tunable via env;
+// default 300 enrichments (~600 calls), leaving headroom.
 const MONTHLY_ENRICHMENT_CAP = Number.parseInt(process.env.RENTCAST_MONTHLY_ENRICHMENT_CAP ?? "300", 10);
 
 // Per-Pro-user monthly cap on live lookups (distinct properties). Each property
@@ -163,10 +164,13 @@ export async function getPropertyCompsAction(input: unknown): Promise<PropertyCo
     .eq("address_key", key)
     .maybeSingle();
   const cachedPayload = cached ? (cached as { payload: PropertyEnrichment }).payload : null;
-  // When the asking price is requested, a cached payload that predates the
-  // listing feature (no listPrice) isn't good enough — fall through to a live
-  // fetch so we actually get the list price. Otherwise serve the fresh cache.
-  const cacheHasWhatWeNeed = !parsed.data.includeListing || cachedPayload?.listPrice != null;
+  // When the asking price is requested, only serve a cached payload whose
+  // listing was actually CHECKED (listingChecked) — a confirmed "not listed"
+  // result is good enough and must be cacheable, or every repeat paste of a
+  // non-listed address would re-fetch 3 calls forever. Cache rows that predate
+  // the listing feature (listingChecked undefined) fall through once to refresh.
+  const cacheHasWhatWeNeed =
+    !parsed.data.includeListing || cachedPayload?.listingChecked === true;
   if (cached && cacheHasWhatWeNeed) {
     const fetchedAt = new Date((cached as { fetched_at: string }).fetched_at).getTime();
     if (Number.isFinite(fetchedAt) && Date.now() - fetchedAt < CACHE_TTL_MS) {
@@ -272,17 +276,18 @@ export async function getPropertyCompsAction(input: unknown): Promise<PropertyCo
   }
 
   // Count this live enrichment against both the global + per-user monthly caps
-  // (atomic; best-effort).
-  await Promise.all([
-    admin.rpc("increment_app_counter", { counter_key: monthKey }).then(
-      () => undefined,
-      () => undefined
-    ),
-    admin.rpc("increment_app_counter", { counter_key: userMonthKey }).then(
-      () => undefined,
-      () => undefined
-    ),
-  ]);
+  // (atomic; best-effort). A listing-paste enrichment makes a 3rd RentCast call
+  // (/listings/sale), so charge the GLOBAL budget cap an extra unit to keep it
+  // honest against the plan's call limit (the per-user cap counts properties, so
+  // it stays 1 — still one property).
+  const bumps = [
+    admin.rpc("increment_app_counter", { counter_key: monthKey }),
+    admin.rpc("increment_app_counter", { counter_key: userMonthKey }),
+  ];
+  if (parsed.data.includeListing) {
+    bumps.push(admin.rpc("increment_app_counter", { counter_key: monthKey }));
+  }
+  await Promise.all(bumps.map((p) => p.then(() => undefined, () => undefined)));
 
   // Upsert cache (best-effort — never fail the request on a cache write).
   await admin
