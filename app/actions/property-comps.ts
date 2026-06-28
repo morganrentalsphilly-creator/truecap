@@ -252,6 +252,18 @@ export async function getPropertyCompsAction(input: unknown): Promise<PropertyCo
     }
   }
 
+  // Give the freebie back when the live lookup yields nothing billable (an
+  // un-indexed address or a provider outage). RentCast doesn't charge for a
+  // null result, so a free user shouldn't lose their one shot on empty data.
+  const refundFreebie = async () => {
+    if (!freeUser) return;
+    await supabase
+      .from("profiles")
+      .update({ comps_free_used: false })
+      .eq("id", user.id)
+      .then(() => undefined, () => undefined);
+  };
+
   // Live fetch.
   let enrichment: PropertyEnrichment | null = null;
   try {
@@ -267,11 +279,13 @@ export async function getPropertyCompsAction(input: unknown): Promise<PropertyCo
     );
   } catch {
     if (cachedPayload) return { ok: true, source: "cache", enrichment: cachedPayload };
+    await refundFreebie();
     return { ok: false, code: "SERVER_ERROR", message: "Couldn't reach the data provider. Try again." };
   }
 
   if (!enrichment) {
     if (cachedPayload) return { ok: true, source: "cache", enrichment: cachedPayload };
+    await refundFreebie();
     return { ok: false, code: "NOT_FOUND", message: "No comps found for this address." };
   }
 

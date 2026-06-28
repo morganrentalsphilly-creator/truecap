@@ -602,6 +602,26 @@ describe("exit scenarios", () => {
     expect(y10.totalProfit).toBe(expected);
   });
 
+  it("initialCashInvested (rehab + furnishing) lowers profit vs down+closing basis", () => {
+    const base: ExitScenarioInput = {
+      purchasePrice: 245_000,
+      appreciationRate: 3,
+      sellingCostPct: 6,
+      loanAmount: 196_000,
+      interestRate: 7,
+      loanTermYears: 30,
+      monthlyPayment: 1_304,
+      downPayment: 49_000,
+      closingCosts: 7_350,
+      cumulativeCashFlowByYear: Array(10).fill(0).map((_, i) => (i + 1) * 4000),
+      cumulativeTaxBenefitByYear: Array(10).fill(0),
+    };
+    const lean = buildExitScenarios(base)[9]!;
+    // $40k rehab pushes total cash in to 49k + 7.35k + 40k = 96,350.
+    const withRehab = buildExitScenarios({ ...base, initialCashInvested: 96_350 })[9]!;
+    expect(withRehab.totalProfit).toBe(lean.totalProfit - 40_000);
+  });
+
   it("exit tax adds depreciation recapture on top of capital gains", () => {
     const base = {
       purchasePrice: 245_000,

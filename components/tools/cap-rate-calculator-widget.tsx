@@ -27,7 +27,9 @@ function classifyCapRate(rate: number): { label: string; color: string; desc: st
   if (rate < 6) return { label: "Coastal / luxury market", color: "text-foreground", desc: "Typical for Tier 1 / appreciation plays." };
   if (rate < 8) return { label: "Healthy", color: "text-[var(--metric-positive)]", desc: "Solid cash-flowing market." };
   if (rate < 11) return { label: "Strong", color: "text-[var(--metric-positive)]", desc: "Cash-flow-heavy market." };
-  return { label: "High-risk / distressed", color: "text-[var(--metric-positive)]", desc: "Verify rents and condition." };
+  // Neutral, NOT green — a double-digit cap usually signals risk (C/D class,
+  // soft rents, deferred maintenance), so don't color it like a healthy deal.
+  return { label: "High-risk / distressed", color: "text-foreground", desc: "Verify rents and condition." };
 }
 
 export function CapRateCalculatorWidget() {

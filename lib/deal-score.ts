@@ -94,6 +94,9 @@ export function computeTenYearAnnualizedReturnPct(
     monthlyPayment: result.monthlyPayment,
     downPayment: result.downPayment,
     closingCosts: result.closingCosts,
+    // Measure exit profit against ALL cash in (incl. rehab + furnishing) so the
+    // cumulativeRoi numerator + the totalCashRequired denominator below agree.
+    initialCashInvested: result.totalCashRequired,
     cumulativeCashFlowByYear: result.tenYearProjection.map((y) => y.cumulativeCashFlowAnnual),
     cumulativeTaxBenefitByYear: result.taxStrategyYears.map((y) => y.cumulativeTaxBenefitAnnual),
     annualDepreciation: result.taxStrategyYears[0]?.depreciationDeductionAnnual ?? 0,

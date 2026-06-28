@@ -1,6 +1,6 @@
 // Bumped to 2: totalProfit now nets out estimated exit tax (depreciation
 // recapture + capital gains). Cached snapshots at v1 regenerate on read.
-export const EXIT_SCENARIOS_SNAPSHOT_VERSION = 2;
+export const EXIT_SCENARIOS_SNAPSHOT_VERSION = 3;
 export const DEFAULT_APPRECIATION_RATE = 3;
 export const DEFAULT_SELLING_COST_PCT = 6;
 // Exit-tax assumptions. Depreciation taken during the hold is "recaptured" at
@@ -37,6 +37,10 @@ export interface ExitScenarioInput {
   monthlyPayment: number;
   downPayment: number;
   closingCosts: number;
+  /** Total cash actually in the deal (down payment + closing + rehab +
+   *  STR furnishing) — the basis returns are measured against. Optional for
+   *  backward-compatibility; falls back to downPayment + closingCosts. */
+  initialCashInvested?: number;
   cumulativeCashFlowByYear: number[];
   cumulativeTaxBenefitByYear: number[];
   /** Annual straight-line depreciation deduction ($/yr). Drives recapture at
@@ -98,7 +102,11 @@ export function buildExitScenarios(input: ExitScenarioInput): ExitScenarioYear[]
   const appreciationFactor = 1 + input.appreciationRate / 100;
   const sellingCostRate = input.sellingCostPct / 100;
   const remainingLoanBalanceByYear = buildYearlyRemainingLoanBalanceSchedule(input);
-  const initialInvestment = input.downPayment + input.closingCosts;
+  // Returns are measured against ALL cash in the deal — including rehab + STR
+  // furnishing (calc-analysis's totalCashRequired) — not just down + closing,
+  // or IRR/equity-multiple/CAGR overstate every value-add / STR deal.
+  const initialInvestment =
+    input.initialCashInvested ?? input.downPayment + input.closingCosts;
 
   // Exit-tax inputs. Cost basis ≈ purchase price + capitalized acquisition
   // (closing) costs; depreciation lowers that basis over the hold.
@@ -160,6 +168,7 @@ export function buildExitScenarioInputHash(input: ExitScenarioInput): string {
     monthlyPayment: input.monthlyPayment,
     downPayment: input.downPayment,
     closingCosts: input.closingCosts,
+    initialCashInvested: input.initialCashInvested ?? input.downPayment + input.closingCosts,
     cumulativeCashFlowByYear: input.cumulativeCashFlowByYear,
     cumulativeTaxBenefitByYear: input.cumulativeTaxBenefitByYear,
     annualDepreciation: input.annualDepreciation ?? 0,

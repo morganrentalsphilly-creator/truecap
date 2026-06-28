@@ -1341,6 +1341,7 @@ export function SavedAnalysesPage({
           monthlyPayment: resultSnapshot.monthlyPayment,
           downPayment: resultSnapshot.downPayment,
           closingCosts: resultSnapshot.closingCosts,
+          initialCashInvested: resultSnapshot.totalCashRequired,
           cumulativeCashFlowByYear: projectionYears.map((row) => row.cumulativeCashFlowAnnual),
           cumulativeTaxBenefitByYear: taxYears.map((row) => row.cumulativeTaxBenefitAnnual),
         });

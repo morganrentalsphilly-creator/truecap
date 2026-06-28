@@ -162,6 +162,7 @@ export function buildCompareSnapshotPayload(
     monthlyPayment: result.monthlyPayment,
     downPayment: result.downPayment,
     closingCosts: result.closingCosts,
+    initialCashInvested: result.totalCashRequired,
     cumulativeCashFlowByYear: projection.map((p) => p.cumulativeCashFlowAnnual),
     cumulativeTaxBenefitByYear: taxYears.map((t) => t.cumulativeTaxBenefitAnnual),
     annualDepreciation: taxYears[0]?.depreciationDeductionAnnual ?? 0,
