@@ -136,6 +136,20 @@ export async function GET(request: Request) {
       sentByUser.set(uid, list);
     }
 
+    // Marketing consent — the PROMOTIONAL kinds (pro_nudge, winback) only go to
+    // users who explicitly opted in; welcome + drip are onboarding (allowed).
+    // Resilient to the marketing_emails column not existing yet: if we can't
+    // read consent, NO promo is sent (fail CLOSED — never market without it).
+    const marketingConsent = new Set<string>();
+    {
+      const { data: consentRows, error: consentErr } = await admin
+        .from("profiles")
+        .select("id")
+        .eq("marketing_emails", true);
+      if (!consentErr) for (const r of consentRows ?? []) marketingConsent.add(r.id as string);
+    }
+    const PROMO_KINDS = new Set<string>(["pro_nudge", "winback"]);
+
     // Build per-user state + compute the one due email each.
     const users = await listAllUsers(admin);
     const now = new Date();
@@ -153,6 +167,8 @@ export async function GET(request: Request) {
         return selectDueLifecycleEmail(state, now);
       })
       .filter((d): d is NonNullable<typeof d> => d !== null)
+      // Drop promotional kinds for users who haven't opted into marketing.
+      .filter((d) => !PROMO_KINDS.has(d.kind) || marketingConsent.has(d.userId))
       .slice(0, MAX_SENDS_PER_RUN);
 
     if (due.length === 0) {
@@ -197,6 +213,25 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: "Not configured" }, { status: 500 });
       }
 
+      // CLAIM before sending: insert the log row FIRST. 23505 (unique on
+      // user_id+email_key) means another run already claimed/sent this → skip.
+      // This closes the double-send window where a send succeeded but the
+      // post-send log write was lost. Trade-off: a claim followed by a send
+      // failure is at-most-once (skipped, not retried) — the right default
+      // for marketing email.
+      const { error: claimErr } = await admin
+        .from("lifecycle_email_log")
+        .insert({ user_id: item.userId, email_key: item.key, resend_id: null });
+      if (claimErr) {
+        if (claimErr.code === "23505") continue;
+        Sentry.captureMessage("lifecycle cron: claim insert failed", {
+          level: "error",
+          tags: { feature: "lifecycle-emails" },
+          extra: { key: item.key, code: claimErr.code, message: claimErr.message },
+        });
+        continue;
+      }
+
       let resendId: string | null = null;
       try {
         const res = await fetch("https://api.resend.com/emails", {
@@ -238,17 +273,14 @@ export async function GET(request: Request) {
         continue;
       }
 
-      // Record the send so it never repeats. Unique (user_id,email_key)
-      // makes this idempotent under overlapping runs.
-      const { error: insErr } = await admin
-        .from("lifecycle_email_log")
-        .insert({ user_id: item.userId, email_key: item.key, resend_id: resendId });
-      if (insErr && insErr.code !== "23505") {
-        Sentry.captureMessage("lifecycle cron: log insert failed after send", {
-          level: "error",
-          tags: { feature: "lifecycle-emails" },
-          extra: { key: item.key, code: insErr.code, message: insErr.message },
-        });
+      // Already claimed above; best-effort stamp the Resend id for tracing.
+      if (resendId) {
+        await admin
+          .from("lifecycle_email_log")
+          .update({ resend_id: resendId })
+          .eq("user_id", item.userId)
+          .eq("email_key", item.key)
+          .then(() => undefined, () => undefined);
       }
       sent += 1;
     }
