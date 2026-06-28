@@ -193,12 +193,15 @@ export async function GET(request: Request) {
         bathrooms: typeof deal.values.bathrooms === "number" ? deal.values.bathrooms : null,
         squareFootage: typeof deal.values.sqft === "number" ? deal.values.sqft : null,
       });
-      // Count the spend against the shared monthly budget (fire-and-forget).
+      // A null result (no API key, or address un-indexed) is NOT a billable
+      // RentCast call — skip BEFORE counting it, or a missing key silently
+      // drains the shared monthly budget on phantom lookups.
+      if (marketRent == null || marketRent <= 0) continue;
+      // Count the (billable) spend against the shared monthly budget.
       void admin.rpc("increment_app_counter", { counter_key: monthKey }).then(
         () => undefined,
         () => undefined
       );
-      if (marketRent == null || marketRent <= 0) continue;
 
       const alert = buildRentAlertForDeal({
         id: deal.id,

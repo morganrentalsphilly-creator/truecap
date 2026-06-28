@@ -53,6 +53,16 @@ function safeMonthlyRent(values: InvestmentFormValues): number {
 }
 
 function rentScenario(values: InvestmentFormValues, pctDelta: number): AnalysisResult {
+  // STR deals derive income from avgDailyRate × occupancy and IGNORE
+  // monthlyRent, so for them the rent axis must scale the nightly rate — else
+  // the −10%/Base/+10% Rent columns come back identical (a false "insensitive").
+  const adr = Number(values.avgDailyRate);
+  if (Number.isFinite(adr) && adr > 0) {
+    return calculateAnalysis({
+      ...values,
+      avgDailyRate: Math.round(adr * (1 + pctDelta) * 100) / 100,
+    } as InvestmentFormValues);
+  }
   const baseRent = safeMonthlyRent(values);
   const newTopLevelRent = baseRent * (1 + pctDelta);
   // Mutate units proportionally so the calc reflects the new rent.
