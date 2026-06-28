@@ -54,6 +54,26 @@ function scopeLabel(scope: PortfolioRollupScope, count: number): string {
   }
 }
 
+/**
+ * The purchase-price-sum tile means different things by scope. For OWNED deals
+ * it's the cost basis (what you paid) — calling it "Pipeline Value" would dress
+ * a closed portfolio up as deals you're still considering. Only the active
+ * pipeline is genuinely "pipeline value".
+ */
+function valueTileMeta(scope: PortfolioRollupScope): { label: string; sub: string } {
+  switch (scope) {
+    case "completed":
+      return { label: "Cost Basis", sub: "what you paid" };
+    case "active":
+      return { label: "Pipeline Value", sub: "sum of purchase prices" };
+    case "archived":
+      return { label: "Total Price", sub: "sum of purchase prices" };
+    case "all":
+    default:
+      return { label: "Total Value", sub: "sum of purchase prices" };
+  }
+}
+
 export function PortfolioRollupStrip({
   items,
   scope,
@@ -102,6 +122,8 @@ export function PortfolioRollupStrip({
   const weightedCoc =
     weightedCocDenominator > 0 ? weightedCocNumerator / weightedCocDenominator : null;
 
+  const valueTile = valueTileMeta(scope);
+
   return (
     <section
       aria-label="Portfolio summary"
@@ -135,9 +157,9 @@ export function PortfolioRollupStrip({
             }
           />
           <RollupTile
-            label="Pipeline Value"
+            label={valueTile.label}
             value={totalPurchasePrice > 0 ? fmtCurrency(totalPurchasePrice) : "—"}
-            sub="sum of purchase prices"
+            sub={valueTile.sub}
             tone="neutral"
           />
           <RollupTile
