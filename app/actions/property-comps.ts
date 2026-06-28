@@ -37,6 +37,11 @@ const inputSchema = z.object({
   squareFootage: z.number().min(0).max(1_000_000).nullish(),
   /** When present, the pulled comp set is saved onto this saved deal. */
   dealId: z.string().uuid().optional(),
+  /** Auto-fill paths (e.g. pasting a listing link) set this so the lookup runs
+   *  ONLY for Pro users — a free user's one-time freebie is never spent on an
+   *  action they didn't explicitly click. Non-Pro callers get ENTITLEMENT_REQUIRED
+   *  before any freebie is touched. */
+  proOnly: z.boolean().optional(),
 });
 
 export type PropertyCompsResult =
@@ -84,6 +89,15 @@ export async function getPropertyCompsAction(input: unknown): Promise<PropertyCo
   // at the live-fetch commit point below).
   const isPaid = await hasPaidPlanSubscription(supabase, user.id);
   const freeUser = !isPaid;
+  // Pro-only auto-fill (e.g. listing-link paste): never spend a free user's
+  // freebie on a lookup they didn't explicitly request.
+  if (parsed.data.proOnly && freeUser) {
+    return {
+      ok: false,
+      code: "ENTITLEMENT_REQUIRED",
+      message: "Pull comps to fill beds, baths, and value — included with Pro.",
+    };
+  }
   if (freeUser) {
     const { data: prof, error: profErr } = await supabase
       .from("profiles")

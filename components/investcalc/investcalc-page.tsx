@@ -1266,10 +1266,11 @@ export function InvestCalcPage({
   }, [form, applyComps, toast]);
 
   // Paste a Zillow/Redfin/Realtor link → parse the address from the URL slug
-  // (we never fetch the page — those sites block bots) and run it through the
-  // existing hero-handoff flow: set address, enrich (HUD rent / FRED rate /
-  // state tax), estimate the price, auto-run the verdict. The user confirms the
-  // parsed address via the enrichment, same as a typed address.
+  // (we never fetch the page — those sites block bots with a captcha) and run it
+  // through the hero-handoff flow: set address, enrich (HUD rent / FRED rate /
+  // state tax). Pro users additionally get beds/baths/sqft + value + rent pulled
+  // from RentCast by address (the listing's own numbers aren't fetchable);
+  // everyone else gets an estimated price. Then it auto-runs the verdict.
   const handleListingUrl = useCallback(() => {
     const parsed = parseListingUrl(listingUrl);
     if (!parsed) {
@@ -2777,6 +2778,27 @@ export function InvestCalcPage({
         console.warn("[hero handoff] enrichment failed:", err);
       }
 
+      // Listing-link paste by a Pro user: the portal page is bot-blocked, so the
+      // only way to get the real property facts (beds/baths/sqft) + value + rent
+      // is a RentCast lookup by address. proOnly → a free user's one freebie is
+      // never spent here; they fall through to the address + estimate path.
+      let compsFilled = false;
+      if (detail.token.startsWith("listing:") && isAuthenticated) {
+        try {
+          const r = await getPropertyCompsAction({
+            address,
+            propertyType: form.getValues("propertyType"),
+            proOnly: true,
+          });
+          if (r.ok) {
+            applyComps(r.enrichment);
+            compsFilled = true;
+          }
+        } catch (err) {
+          console.warn("[listing comps] lookup failed:", err);
+        }
+      }
+
       const canEstimate =
         form.getValues("propertyType") === "single-family" &&
         isEmptyNumber(form.getValues("purchasePrice")) &&
@@ -2805,6 +2827,21 @@ export function InvestCalcPage({
           });
           return;
         }
+      }
+
+      // Comps already populated price + rent (Pro listing paste) → run the
+      // verdict straight away instead of landing on the price field.
+      if (
+        compsFilled &&
+        !isEmptyNumber(form.getValues("purchasePrice")) &&
+        !isEmptyNumber(form.getValues("monthlyRent"))
+      ) {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            void form.handleSubmit(onSubmit, onError)();
+          });
+        });
+        return;
       }
 
       landOnPrice();
