@@ -123,7 +123,7 @@ export function BrrrrCalculatorWidget() {
         </div>
       </div>
 
-      <Link href={handoffHref} className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline">
+      <Link href={handoffHref} target="_top" className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline">
         <Sparkles className="w-4 h-4" />
         Run the full analysis with these numbers — save BRRRRs, compare them, export PDFs — free in TrueCap
         <ArrowUpRight className="w-4 h-4" />

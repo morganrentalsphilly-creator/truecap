@@ -1103,6 +1103,11 @@ export function InvestCalcPage({
     if (propType !== "multi-family" && propType !== "owner-occupant") return;
     const units = form.getValues("units") ?? [];
 
+    // Key the "already enriched" cache by METRO too — otherwise after the user
+    // changes the address to a new market, the same idx:beds key is still
+    // present and HUD per-unit autofill is permanently suppressed for the new
+    // metro (it would silently never fill again).
+    const metroPrefix = `${place.state ?? ""}:${place.county ?? ""}:${place.zip ?? ""}`;
     type Pending = { idx: number; beds: number };
     const pending: Pending[] = [];
     for (let idx = 0; idx < units.length; idx++) {
@@ -1112,7 +1117,7 @@ export function InvestCalcPage({
       const beds = Number(unit.bedrooms);
       if (!Number.isFinite(beds) || beds <= 0) continue;
       if (!isEmptyNumber(unit.monthlyRent)) continue;
-      const cacheKey = `${idx}:${beds}`;
+      const cacheKey = `${metroPrefix}:${idx}:${beds}`;
       if (enrichedUnitsRef.current.has(cacheKey)) continue;
       enrichedUnitsRef.current.add(cacheKey);
       pending.push({ idx, beds });
@@ -1166,7 +1171,7 @@ export function InvestCalcPage({
         // can retry - otherwise the user is stuck waiting for a fill
         // that will never come.
         for (const { idx, beds } of pending) {
-          enrichedUnitsRef.current.delete(`${idx}:${beds}`);
+          enrichedUnitsRef.current.delete(`${metroPrefix}:${idx}:${beds}`);
         }
         console.warn("[multi-unit enrichment] failed:", err);
       }

@@ -147,7 +147,7 @@ export function CapRateCalculatorWidget() {
       </div>
 
       <Link
-        href={handoffHref}
+        href={handoffHref} target="_top"
         className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline"
       >
         <Sparkles className="w-4 h-4" />

@@ -211,12 +211,21 @@ function getRiskReturn(data: DashboardHomeData) {
 }
 
 function getDealComparison(data: DashboardHomeData) {
-  return data.allDeals.map((deal) => ({
-    name: deal.address.length > 18 ? `${deal.address.slice(0, 18)}...` : deal.address,
-    score: deal.score == null ? null : Math.round(deal.score),
-    cashFlow: deal.cashFlowMonthly == null ? null : Math.round(deal.cashFlowMonthly),
-    roi: deal.roiPct == null ? null : Number(deal.roiPct.toFixed(1)),
-  }));
+  // De-collide truncated labels: two deals that share their first 18 chars
+  // (e.g. same street, different unit) would otherwise plot on one merged
+  // X-axis tick. Append a counter so each deal keeps a distinct tick.
+  const seen = new Map<string, number>();
+  return data.allDeals.map((deal) => {
+    const base = deal.address.length > 18 ? `${deal.address.slice(0, 18)}...` : deal.address;
+    const n = (seen.get(base) ?? 0) + 1;
+    seen.set(base, n);
+    return {
+      name: n > 1 ? `${base} (${n})` : base,
+      score: deal.score == null ? null : Math.round(deal.score),
+      cashFlow: deal.cashFlowMonthly == null ? null : Math.round(deal.cashFlowMonthly),
+      roi: deal.roiPct == null ? null : Number(deal.roiPct.toFixed(1)),
+    };
+  });
 }
 
 function getDealAnchorId(deal: DashboardDeal | undefined, index = 0) {
