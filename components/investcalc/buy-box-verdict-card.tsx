@@ -153,7 +153,7 @@ export function BuyBoxVerdictCard({
             </div>
             <div className="mt-0.5 text-[11px] text-muted-foreground">
               <span className="font-medium text-foreground">{c.actual}</span>{" "}
-              <span className="text-muted-foreground/70">vs {c.target}</span>
+              <span className="text-muted-foreground">vs {c.target}</span>
             </div>
           </div>
         ))}

@@ -118,7 +118,7 @@ export function DealSummaryCard({ values }: { values: InvestmentFormValues }) {
       )}
 
       {notice && <p className="mt-2 text-[11px] text-muted-foreground">{notice}</p>}
-      <p className="mt-2 text-[10px] leading-relaxed text-muted-foreground/70">
+      <p className="mt-2 text-[10px] leading-relaxed text-muted-foreground">
         Generated from this analysis&apos;s numbers only. Not financial advice.
       </p>
     </div>

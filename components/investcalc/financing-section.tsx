@@ -69,7 +69,7 @@ export function FinancingSection({ form }: FinancingSectionProps) {
           <FieldError id="downPaymentPct-error" message={errors.downPaymentPct?.message} />
           {isAllCash && (
             <p className="mt-1 text-[11px] leading-snug text-[var(--brand-green)]">
-              Modeling this as an all-cash purchase - no mortgage, so DSCR doesn&apos;t apply.
+              Modeling this as an all-cash purchase — no mortgage, so there&apos;s no debt-coverage ratio (DSCR). You&apos;ll still get cash-on-cash and monthly cash flow.
             </p>
           )}
         </div>

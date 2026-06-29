@@ -249,7 +249,7 @@ function capRateBenchmarkLabel(capRatePct: number, address?: string | null): str
   // engine uses so the metric subline and the score subline agree.
   if (capRatePct > 8) return "Above 8% - top quartile (U.S.)";
   if (capRatePct > 5) return "5–8% - fair for market (U.S.)";
-  return "Below 5% - appreciation-dependent (U.S.)";
+  return "Below 5% - returns rely on price growth (U.S.)";
 }
 
 /**
@@ -291,7 +291,7 @@ function cashFlowBenchmarkLabel(monthlyCashFlow: number): string {
   // perfectly good $300-500/mo deals).
   if (monthlyCashFlow >= 500) return "Strong (≥$500/mo)";
   if (monthlyCashFlow >= 200) return "Solid ($200–500/mo)";
-  if (monthlyCashFlow > 0) return "Thin but positive";
+  if (monthlyCashFlow > 0) return "Modest ($1–$200/mo)";
   if (monthlyCashFlow > -100) return "~Break-even";
   return "Losing money monthly";
 }
@@ -377,7 +377,7 @@ function MetricCard({
         </span>
       )}
       {sub && !isLoading && (
-        <span className="text-[10px] leading-tight text-muted-foreground/80 sm:text-[11px]">
+        <span className="text-[10px] leading-tight text-muted-foreground sm:text-[11px]">
           {sub}
         </span>
       )}
@@ -1843,7 +1843,7 @@ function DealScoreCard({
         ? "Above 6.5% - strong"
         : breakdown.capRateScore >= 9
           ? "5–6.5% - fair for the market"
-          : "Below 5% - appreciation-dependent",
+          : "Below 5% - returns rely on price growth",
     dscr: isCashPurchase
       ? "N/A - all-cash purchase (no debt to cover)"
       : breakdown.dscrScore >= 13

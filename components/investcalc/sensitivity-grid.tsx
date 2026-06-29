@@ -75,7 +75,7 @@ function ScenarioCell({
         </span>{" "}
         ·{" "}
         {isCashPurchase ? (
-          <span className="text-muted-foreground/70">cash</span>
+          <span className="text-muted-foreground">cash</span>
         ) : (
           <span className={cn(pickColor(scenarioName, baseResult.dscr, result.dscr))}>
             DSCR {result.dscr.toFixed(2)}
@@ -102,7 +102,7 @@ function Row({ row }: { row: SensitivityRow }) {
                 <div className="text-[10px] uppercase tracking-wide font-semibold text-muted-foreground">
                   {s.name}
                 </div>
-                <div className="text-[10px] text-muted-foreground/70">{s.deltaLabel}</div>
+                <div className="text-[10px] text-muted-foreground">{s.deltaLabel}</div>
               </div>
               <div className="flex-1 min-w-0 text-right">
                 <ScenarioCell result={s.result} baseResult={base.result} scenarioName={s.name} />
@@ -123,7 +123,7 @@ function Row({ row }: { row: SensitivityRow }) {
         {row.scenarios.map((s) => (
           <div key={s.name}>
             <div className="text-[10px] uppercase tracking-wide text-muted-foreground mb-1 font-semibold">
-              {s.name} · <span className="text-muted-foreground/70 font-normal">{s.deltaLabel}</span>
+              {s.name} · <span className="text-muted-foreground font-normal">{s.deltaLabel}</span>
             </div>
             <ScenarioCell result={s.result} baseResult={base.result} scenarioName={s.name} />
           </div>
