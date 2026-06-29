@@ -29,6 +29,13 @@ export type SharePayload = {
      *  viewer pull the deal's stored sale/rent comps (verified against
      *  ownerId). Optional + additive — old v:1 links still decode. */
     dealId?: string;
+    /** HMAC over {ownerId, dealId, valuesHash}, minted server-side at share
+     *  time (lib/share-attribution.ts). The public viewer must verify it
+     *  before trusting ownerId/dealId for co-branding + comps — otherwise a
+     *  hand-edited payload could impersonate any owner's brand and harvest
+     *  leads. Optional + additive: old/unsigned links still decode, they just
+     *  render the generic TrueCap view. */
+    sig?: string;
   };
 };
 

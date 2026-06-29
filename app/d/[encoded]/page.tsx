@@ -16,6 +16,7 @@ import { investmentFormSchema } from "@/lib/investcalc-schema";
 import { ReadOnlyAnalysisView } from "@/components/investcalc/read-only-analysis-view";
 import { TrackSharedDealView } from "@/components/analytics/track-shared-deal-view";
 import { getPublicAgentBranding } from "@/lib/agent-share";
+import { verifyShareAttribution, hashShareValues } from "@/lib/share-attribution";
 import { getPublicDealComps } from "@/lib/public-deal-comps";
 import { LeadCaptureForm } from "@/components/investcalc/lead-capture-form";
 
@@ -76,9 +77,22 @@ export default async function PublicDealPage({ params }: Props) {
   // form. Falls back to the generic TrueCap view for free/anonymous shares.
   // Comps: if a saved deal was shared, back the rent/value with its stored
   // comparables (owner-verified). Both are best-effort and parallelizable.
+  // Owner attribution (co-branding + lead capture + the owner's saved comps) is
+  // only honored when its HMAC verifies against {ownerId, dealId, valuesHash} —
+  // otherwise a hand-edited payload could wrap this deal in any user's brand and
+  // harvest leads to them. Unsigned/forged/secret-unset → generic TrueCap view.
+  const attributionVerified = verifyShareAttribution({
+    ownerId: payload.meta?.ownerId,
+    dealId: payload.meta?.dealId,
+    valuesHash: hashShareValues(parsed.data),
+    sig: payload.meta?.sig,
+  });
+  const verifiedOwnerId = attributionVerified ? payload.meta?.ownerId : undefined;
+  const verifiedDealId = attributionVerified ? payload.meta?.dealId : undefined;
+
   const [agent, comps] = await Promise.all([
-    getPublicAgentBranding(payload.meta?.ownerId),
-    getPublicDealComps(payload.meta?.dealId, payload.meta?.ownerId),
+    getPublicAgentBranding(verifiedOwnerId),
+    getPublicDealComps(verifiedDealId, verifiedOwnerId),
   ]);
 
   return (
@@ -129,9 +143,9 @@ export default async function PublicDealPage({ params }: Props) {
         <ReadOnlyAnalysisView values={parsed.data} result={result} comps={comps} />
 
         {/* Agent lead capture (co-branded shares) OR the generic Pro upsell. */}
-        {agent && payload.meta?.ownerId ? (
+        {agent && verifiedOwnerId ? (
           <LeadCaptureForm
-            ownerId={payload.meta.ownerId}
+            ownerId={verifiedOwnerId}
             agentName={agent.displayName}
             dealAddress={parsed.data.address}
             accentColor={agent.primaryColor}

@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { encodeShareLink, buildShareUrl } from "@/lib/share-link";
-import { createBrowserSupabaseClient } from "@/lib/supabase/client";
+import { getSignedShareAttribution } from "@/app/actions/share-attribution";
 import { trackEvent } from "@/lib/analytics";
 import { useToast } from "@/hooks/use-toast";
 
@@ -36,15 +36,16 @@ export function ShareLinkButton({ values, className, savedDealId }: ShareLinkBut
   const openShare = async () => {
     if (!values) return;
     try {
-      // Include the signed-in sharer's id so the public viewer can co-brand
-      // the page and route a captured lead back to them (T6). Anonymous
-      // sharers simply omit it and the page stays generic.
-      let ownerId: string | undefined;
+      // Mint a SIGNED owner attribution server-side (the only place that holds
+      // SHARE_LINK_SECRET). It lets the public viewer co-brand the page + route
+      // a captured lead back to the owner — but only because the signature
+      // proves the owner actually generated this link. Anonymous sharers, or a
+      // server without the secret, get null and the page stays generic.
+      let attribution: Awaited<ReturnType<typeof getSignedShareAttribution>> = null;
       try {
-        const { data } = await createBrowserSupabaseClient().auth.getUser();
-        ownerId = data.user?.id;
+        attribution = await getSignedShareAttribution({ values, savedDealId: savedDealId ?? undefined });
       } catch {
-        /* not signed in - share stays generic */
+        /* signing failed → share stays generic */
       }
       const encoded = encodeShareLink({
         v: 1,
@@ -52,10 +53,14 @@ export function ShareLinkButton({ values, className, savedDealId }: ShareLinkBut
         meta: {
           sharedAt: new Date().toISOString(),
           title: values.address || "Shared deal",
-          ...(ownerId ? { ownerId } : {}),
-          // Only carry the deal id when we also know the owner — the viewer
-          // verifies comps belong to that owner before showing them.
-          ...(ownerId && savedDealId ? { dealId: savedDealId } : {}),
+          ...(attribution
+            ? {
+                ownerId: attribution.ownerId,
+                sig: attribution.sig,
+                // Only present when the owner actually owns this saved deal.
+                ...(attribution.dealId ? { dealId: attribution.dealId } : {}),
+              }
+            : {}),
         },
       });
       setShareUrl(buildShareUrl(encoded));
