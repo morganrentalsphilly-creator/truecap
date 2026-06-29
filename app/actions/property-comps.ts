@@ -187,14 +187,42 @@ export async function getPropertyCompsAction(input: unknown): Promise<PropertyCo
   const monthKey = `rentcast_enrichments_${month}`;
   const userMonthKey = `comps_user_${user.id}_${month}`;
 
+  // A listing-paste enrichment makes a 3rd RentCast call (/listings/sale), so it
+  // costs 2 global budget units; a plain enrichment costs 1.
+  const globalCost = parsed.data.includeListing ? 2 : 1;
+  let reservedGlobal = 0; // units reserved on monthKey upfront (refund on failure)
+  let legacyGlobalCounting = false; // RPC absent → fall back to post-fetch counting
+
   if (Number.isFinite(MONTHLY_ENRICHMENT_CAP) && MONTHLY_ENRICHMENT_CAP > 0) {
-    const { data: counterRow } = await admin
-      .from("app_counters")
-      .select("count")
-      .eq("key", monthKey)
-      .maybeSingle();
-    const used = Number((counterRow as { count?: number } | null)?.count ?? 0);
-    if (used >= MONTHLY_ENRICHMENT_CAP) {
+    // RESERVE atomically BEFORE the fetch — bumps the counter only while still
+    // under the cap, so concurrent lookups can't all clear one read-gate and
+    // overshoot the budget. NULL = already at cap.
+    const { data: reserved, error: reserveErr } = await admin.rpc("increment_app_counter_if_under", {
+      counter_key: monthKey,
+      max_value: MONTHLY_ENRICHMENT_CAP,
+      amount: globalCost,
+    });
+    if (reserveErr) {
+      // Atomic RPC not deployed yet → legacy read-gate + post-fetch increment.
+      legacyGlobalCounting = true;
+      const { data: counterRow } = await admin
+        .from("app_counters")
+        .select("count")
+        .eq("key", monthKey)
+        .maybeSingle();
+      const used = Number((counterRow as { count?: number } | null)?.count ?? 0);
+      if (used >= MONTHLY_ENRICHMENT_CAP) {
+        if (cachedPayload) {
+          await persistToDeal(cachedPayload);
+          return { ok: true, source: "cache", enrichment: cachedPayload };
+        }
+        return {
+          ok: false,
+          code: "CAP_REACHED",
+          message: "Comps have reached this month's data limit. They'll reset at the start of next month.",
+        };
+      }
+    } else if (reserved == null) {
       // At the global cap: serve a stale cached copy if we have one, else say so.
       if (cachedPayload) {
         await persistToDeal(cachedPayload);
@@ -205,6 +233,8 @@ export async function getPropertyCompsAction(input: unknown): Promise<PropertyCo
         code: "CAP_REACHED",
         message: "Comps have reached this month's data limit. They'll reset at the start of next month.",
       };
+    } else {
+      reservedGlobal = globalCost;
     }
   }
 
@@ -218,6 +248,14 @@ export async function getPropertyCompsAction(input: unknown): Promise<PropertyCo
       .maybeSingle();
     const userUsed = Number((userRow as { count?: number } | null)?.count ?? 0);
     if (userUsed >= PER_USER_MONTHLY_CAP) {
+      // We may have already reserved a global unit above — give it back since
+      // this lookup won't proceed.
+      if (reservedGlobal > 0) {
+        await admin
+          .rpc("decrement_app_counter", { counter_key: monthKey, amount: reservedGlobal })
+          .then(() => undefined, () => undefined);
+        reservedGlobal = 0;
+      }
       if (cachedPayload) {
         await persistToDeal(cachedPayload);
         return { ok: true, source: "cache", enrichment: cachedPayload };
@@ -244,6 +282,13 @@ export async function getPropertyCompsAction(input: unknown): Promise<PropertyCo
       .select("id")
       .maybeSingle();
     if (!claimed) {
+      // Lost the freebie race — give back the global unit we reserved upfront.
+      if (reservedGlobal > 0) {
+        await admin
+          .rpc("decrement_app_counter", { counter_key: monthKey, amount: reservedGlobal })
+          .then(() => undefined, () => undefined);
+        reservedGlobal = 0;
+      }
       return {
         ok: false,
         code: "ENTITLEMENT_REQUIRED",
@@ -255,7 +300,16 @@ export async function getPropertyCompsAction(input: unknown): Promise<PropertyCo
   // Give the freebie back when the live lookup yields nothing billable (an
   // un-indexed address or a provider outage). RentCast doesn't charge for a
   // null result, so a free user shouldn't lose their one shot on empty data.
-  const refundFreebie = async () => {
+  const refundUnbilledLookup = async () => {
+    // The live lookup yielded nothing billable — undo what we charged upfront:
+    // the reserved global budget unit(s)…
+    if (reservedGlobal > 0) {
+      await admin
+        .rpc("decrement_app_counter", { counter_key: monthKey, amount: reservedGlobal })
+        .then(() => undefined, () => undefined);
+      reservedGlobal = 0;
+    }
+    // …and a free user's one-shot freebie.
     if (!freeUser) return;
     await supabase
       .from("profiles")
@@ -279,13 +333,13 @@ export async function getPropertyCompsAction(input: unknown): Promise<PropertyCo
     );
   } catch {
     if (cachedPayload) return { ok: true, source: "cache", enrichment: cachedPayload };
-    await refundFreebie();
+    await refundUnbilledLookup();
     return { ok: false, code: "SERVER_ERROR", message: "Couldn't reach the data provider. Try again." };
   }
 
   if (!enrichment) {
     if (cachedPayload) return { ok: true, source: "cache", enrichment: cachedPayload };
-    await refundFreebie();
+    await refundUnbilledLookup();
     return { ok: false, code: "NOT_FOUND", message: "No comps found for this address." };
   }
 
@@ -294,12 +348,15 @@ export async function getPropertyCompsAction(input: unknown): Promise<PropertyCo
   // (/listings/sale), so charge the GLOBAL budget cap an extra unit to keep it
   // honest against the plan's call limit (the per-user cap counts properties, so
   // it stays 1 — still one property).
-  const bumps = [
-    admin.rpc("increment_app_counter", { counter_key: monthKey }),
-    admin.rpc("increment_app_counter", { counter_key: userMonthKey }),
-  ];
-  if (parsed.data.includeListing) {
+  // The per-user counter is always tallied post-fetch (counts properties → 1).
+  const bumps = [admin.rpc("increment_app_counter", { counter_key: userMonthKey })];
+  // The global counter was already RESERVED atomically upfront — only count it
+  // here in the legacy fallback path (RPC absent), where nothing was reserved.
+  if (legacyGlobalCounting) {
     bumps.push(admin.rpc("increment_app_counter", { counter_key: monthKey }));
+    if (parsed.data.includeListing) {
+      bumps.push(admin.rpc("increment_app_counter", { counter_key: monthKey }));
+    }
   }
   await Promise.all(bumps.map((p) => p.then(() => undefined, () => undefined)));
 
