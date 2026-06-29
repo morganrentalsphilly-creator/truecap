@@ -20,6 +20,25 @@ export const metadata: Metadata = {
   description:
     "See how TrueCap compares to spreadsheets, DealCheck, and BiggerPockets on speed, address auto-fill, and analysis depth — plus the questions every investor asks first.",
   alternates: { canonical: "/why-truecap" },
+  // Own OG/Twitter card so shares of this "vs competitor" money page show the
+  // comparison intent, not the generic homepage card from layout.tsx. Mirrors
+  // the /for-agents pattern; /home.jpg already exists.
+  openGraph: {
+    title: "Why TrueCap — vs Spreadsheets, DealCheck & BiggerPockets",
+    description:
+      "See how TrueCap compares to spreadsheets, DealCheck, and BiggerPockets on speed, address auto-fill, and analysis depth.",
+    url: "/why-truecap",
+    type: "website",
+    images: [
+      {
+        url: "/home.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Why TrueCap vs spreadsheets, DealCheck, and BiggerPockets",
+      },
+    ],
+  },
+  twitter: { card: "summary_large_image", images: ["/home.jpg"] },
 };
 
 export default function WhyTrueCapPage() {

@@ -252,6 +252,168 @@ export const BLOG_POSTS: BlogPost[] = [
     available: true,
   },
   {
+    slug: "how-to-calculate-cap-rate",
+    title: "How to calculate cap rate (with worked examples) — 2026 guide",
+    excerpt:
+      "Cap rate = NOI ÷ purchase price. Sounds simple, but most investors get NOI wrong by skipping CapEx reserves or vacancy. Here's the formula, three worked examples (good deal / bad deal / cash purchase), and when cap rate is the wrong metric.",
+    readingTimeMinutes: 7,
+    publishedAt: "2026-06-07",
+    available: true,
+  },
+  {
+    slug: "how-to-calculate-cash-on-cash-return",
+    title: "How to calculate cash-on-cash return on a rental property — 2026 guide",
+    excerpt:
+      "Cash-on-cash return = annual cash flow ÷ total cash invested. It's the only metric that tells you the return on the dollars you actually put in. Here's the formula, what counts as 'total cash invested,' three worked examples, and the trap most calculators fall into.",
+    readingTimeMinutes: 7,
+    publishedAt: "2026-06-07",
+    available: true,
+  },
+  {
+    slug: "how-to-calculate-dscr",
+    title: "How to calculate DSCR (debt service coverage ratio) — 2026 guide",
+    excerpt:
+      "DSCR = NOI ÷ annual debt service. It's the metric DSCR lenders use to qualify your loan. Here's the formula, what lenders include and exclude, three worked examples, and the difference between your DSCR and the lender's DSCR (which is usually lower).",
+    readingTimeMinutes: 8,
+    publishedAt: "2026-06-07",
+    available: true,
+  },
+  {
+    slug: "how-truecap-verdict-engine-works",
+    title: "How TrueCap's verdict engine decides Strong Buy vs Avoid",
+    excerpt:
+      "The exact cash flow, DSCR, cap rate, and cash-on-cash thresholds TrueCap uses to classify a rental deal as Strong / Solid / Mixed / Marginal / Negative — pulled directly from the production code.",
+    readingTimeMinutes: 10,
+    publishedAt: "2026-06-07",
+    available: true,
+  },
+  {
+    slug: "house-hack-underwriting-guide",
+    title: "House hack underwriting: how to know if a duplex, triplex, or fourplex actually beats renting",
+    excerpt:
+      "House hacking sounds great in a podcast and confusing in a spreadsheet. The honest math: your housing cost vs. renting the equivalent, factoring in down payment, mortgage paydown, appreciation, and the very real cost of being your tenants' landlord.",
+    readingTimeMinutes: 12,
+    publishedAt: "2026-06-07",
+    available: true,
+  },
+  {
+    slug: "short-term-rental-underwriting-playbook",
+    title: "Short-term rental underwriting playbook: how to model an Airbnb in 2026",
+    excerpt:
+      "STR cash flow lives or dies on three numbers: ADR, occupancy, and operating expenses. Here's the full playbook for underwriting a short-term rental in 2026 — what data sources to use, what hidden costs everyone forgets, and how to stress-test for a bad off-season.",
+    readingTimeMinutes: 14,
+    publishedAt: "2026-06-07",
+    available: true,
+  },
+  {
+    slug: "hard-money-vs-dscr-loan",
+    title: "Hard money vs DSCR: which loan product is right for your next deal in 2026",
+    excerpt:
+      "Hard money and DSCR loans solve different problems. Hard money is short-term capital for a deal you'll rehab and exit; DSCR is long-term capital for a rental you'll hold. Picking the wrong one costs you 4-6 points and 18 months of friction. Here's how to choose.",
+    readingTimeMinutes: 11,
+    publishedAt: "2026-06-07",
+    available: true,
+  },
+  {
+    slug: "bonus-depreciation-rental-property-2026",
+    title: "Bonus depreciation on rental property in 2026: what changed, what's left, and how to use it",
+    excerpt:
+      "Bonus depreciation phased down from 100% in 2022 to 40% in 2025 and 20% in 2026. But cost segregation studies, the short-term rental loophole, and the real-estate professional designation still create real tax savings. Here's the current playbook.",
+    readingTimeMinutes: 13,
+    publishedAt: "2026-06-07",
+    available: true,
+  },
+  {
+    slug: "best-rental-property-calculator-2026",
+    title: "Best rental property calculator 2026: 7 tools compared",
+    excerpt:
+      "Honest 2026 ranking of the 7 most popular rental property calculators — TrueCap, DealCheck, BiggerPockets, Mashvisor, Stessa, Excel, and Roofstock — across free tier depth, pricing, mobile, and audience fit.",
+    readingTimeMinutes: 12,
+    publishedAt: "2026-06-07",
+    available: true,
+  },
+  {
+    slug: "best-free-rental-property-calculator-2026",
+    title: "Best free rental property calculator 2026: 5 tools that actually work for free",
+    excerpt:
+      "Honest 2026 ranking of the 5 best truly-free rental property calculators — TrueCap, BiggerPockets' free reports, Stessa's calculator, Excel templates, and Zillow's mortgage calculator. What each free tier covers and where the gates kick in.",
+    readingTimeMinutes: 9,
+    publishedAt: "2026-06-07",
+    available: true,
+  },
+  {
+    slug: "best-rental-property-calculator-for-brrrr",
+    title: "Best rental property calculator for BRRRR investors (2026)",
+    excerpt:
+      "Honest 2026 ranking of the best calculators for BRRRR — TrueCap, DealCheck, BiggerPockets, and what makes a BRRRR-specific calculator different from a standard rental analyzer.",
+    readingTimeMinutes: 9,
+    publishedAt: "2026-06-07",
+    available: true,
+  },
+  {
+    slug: "best-rental-analysis-tool-for-house-hackers",
+    title: "Best rental analysis tool for house hackers (2026)",
+    excerpt:
+      "Honest 2026 ranking of the best calculators for house hackers — TrueCap, DealCheck, BiggerPockets, and what owner-occupant underwriting requires that standard rental calculators miss.",
+    readingTimeMinutes: 8,
+    publishedAt: "2026-06-07",
+    available: true,
+  },
+  {
+    slug: "best-short-term-rental-analysis-tool-2026",
+    title: "Best short-term rental analysis tool 2026: 6 tools STR investors compare",
+    excerpt:
+      "Honest 2026 ranking of the best STR analysis tools — AirDNA for revenue data, TrueCap for underwriting, Mashvisor for market discovery, plus PMS platforms STR investors evaluate.",
+    readingTimeMinutes: 10,
+    publishedAt: "2026-06-07",
+    available: true,
+  },
+  {
+    slug: "dealcheck-vs-biggerpockets-vs-truecap",
+    title: "DealCheck vs BiggerPockets vs TrueCap: which rental calculator wins?",
+    excerpt:
+      "Honest 3-way comparison of DealCheck, BiggerPockets Calculator, and TrueCap. Free tier depth, pricing, projections, mobile, and which fits which investor.",
+    readingTimeMinutes: 11,
+    publishedAt: "2026-06-07",
+    available: true,
+  },
+  {
+    slug: "dealcheck-vs-stessa-vs-truecap",
+    title: "DealCheck vs Stessa vs TrueCap: which one do you actually need?",
+    excerpt:
+      "An honest 3-way comparison of DealCheck, Stessa, and TrueCap. Different tools for different stages — pre-purchase underwriting vs post-purchase ops — with concrete recommendations.",
+    readingTimeMinutes: 11,
+    publishedAt: "2026-06-07",
+    available: true,
+  },
+  {
+    slug: "roofstock-vs-mashvisor-vs-propstream",
+    title: "Roofstock vs Mashvisor vs PropStream: 3-way deal discovery comparison",
+    excerpt:
+      "Roofstock sells turnkey rentals. Mashvisor scores neighborhoods. PropStream finds motivated sellers. Honest 3-way comparison plus where TrueCap fits after they each find you a property.",
+    readingTimeMinutes: 10,
+    publishedAt: "2026-06-07",
+    available: true,
+  },
+  {
+    slug: "stessa-vs-avail-vs-baselane",
+    title: "Stessa vs Avail vs Baselane: 3-way landlord ops comparison",
+    excerpt:
+      "Stessa is accounting. Avail is leasing + rent collection. Baselane bundles both with banking. Honest 3-way comparison plus where TrueCap fits before any of them.",
+    readingTimeMinutes: 10,
+    publishedAt: "2026-06-07",
+    available: true,
+  },
+  {
+    slug: "hostfully-vs-hostaway-vs-guesty",
+    title: "Hostfully vs Hostaway vs Guesty: which STR PMS wins in 2026?",
+    excerpt:
+      "Honest 3-way comparison of Hostfully, Hostaway, and Guesty — channel managers, automation, pricing tiers, and which fits 1, 10, or 100 short-term rentals.",
+    readingTimeMinutes: 11,
+    publishedAt: "2026-06-07",
+    available: true,
+  },
+  {
     slug: "single-family-vs-multi-family-rental",
     title: "Single-family vs multi-family rental property — which actually wins?",
     excerpt:
