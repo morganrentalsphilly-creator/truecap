@@ -160,7 +160,8 @@ export async function GET(request: Request) {
       .eq("key", monthKey)
       .maybeSingle();
     const used = Number((counterRow as { count?: number } | null)?.count ?? 0);
-    const budgetRemaining = Number.isFinite(MONTHLY_ENRICHMENT_CAP)
+    const capFinite = Number.isFinite(MONTHLY_ENRICHMENT_CAP) && MONTHLY_ENRICHMENT_CAP > 0;
+    const budgetRemaining = capFinite
       ? Math.max(0, MONTHLY_ENRICHMENT_CAP - used)
       : Number.POSITIVE_INFINITY;
     const lookupBudget = Math.max(0, Math.min(MAX_LOOKUPS_PER_RUN, budgetRemaining, priceable.length));
@@ -183,8 +184,26 @@ export async function GET(request: Request) {
     // 6. Re-price up to the budget; group state-change alerts per user.
     const alertsByUser = new Map<string, RentAlertDeal[]>();
     let lookups = 0;
+    let rpcMissing = false;
     for (const deal of priceable) {
       if (lookups >= lookupBudget) break;
+      // RESERVE one unit of the shared monthly budget BEFORE the (billable)
+      // call — atomic, so a failed or duplicate run can't re-read a stale-low
+      // counter and overshoot the cap (the previous fire-and-forget increment
+      // could). NULL = at cap → stop; reserveErr = the atomic RPC isn't
+      // deployed → fail SAFE by stopping (a background cron should under-send
+      // rather than risk overspending the RentCast budget).
+      if (capFinite) {
+        const { data: reserved, error: reserveErr } = await admin.rpc(
+          "increment_app_counter_if_under",
+          { counter_key: monthKey, max_value: MONTHLY_ENRICHMENT_CAP, amount: 1 }
+        );
+        if (reserveErr) {
+          rpcMissing = true;
+          break;
+        }
+        if (reserved == null) break; // monthly cap reached
+      }
       lookups += 1;
       const marketRent = await fetchRentCastRentEstimate({
         address: deal.address,
@@ -193,15 +212,17 @@ export async function GET(request: Request) {
         bathrooms: typeof deal.values.bathrooms === "number" ? deal.values.bathrooms : null,
         squareFootage: typeof deal.values.sqft === "number" ? deal.values.sqft : null,
       });
-      // A null result (no API key, or address un-indexed) is NOT a billable
-      // RentCast call — skip BEFORE counting it, or a missing key silently
-      // drains the shared monthly budget on phantom lookups.
-      if (marketRent == null || marketRent <= 0) continue;
-      // Count the (billable) spend against the shared monthly budget.
-      void admin.rpc("increment_app_counter", { counter_key: monthKey }).then(
-        () => undefined,
-        () => undefined
-      );
+      // A null/<=0 result (no API key, or address un-indexed) is NOT a billable
+      // RentCast call — refund the unit we reserved so phantom lookups don't
+      // drain the shared monthly budget.
+      if (marketRent == null || marketRent <= 0) {
+        if (capFinite) {
+          await admin
+            .rpc("decrement_app_counter", { counter_key: monthKey, amount: 1 })
+            .then(() => undefined, () => undefined);
+        }
+        continue;
+      }
 
       const alert = buildRentAlertForDeal({
         id: deal.id,
@@ -214,6 +235,16 @@ export async function GET(request: Request) {
       const list = alertsByUser.get(deal.userId) ?? [];
       if (list.length < RENT_ALERTS_MAX_DEALS_PER_EMAIL) list.push(alert);
       alertsByUser.set(deal.userId, list);
+    }
+
+    if (rpcMissing) {
+      // The atomic-counter migration (20260628150000) isn't applied in this
+      // env, so we stopped early to avoid overspending. Surface it rather than
+      // silently degrade (the cron will under-send until the migration lands).
+      Sentry.captureMessage(
+        "rent-alerts cron: atomic counter RPC missing — stopped early to avoid overspend (apply migration 20260628150000)",
+        { level: "warning", tags: { feature: "rent-alerts" } }
+      );
     }
 
     if (alertsByUser.size === 0) {

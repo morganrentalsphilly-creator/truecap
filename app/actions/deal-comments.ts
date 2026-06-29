@@ -1,4 +1,5 @@
 "use server";
+import { toServerErrorResult } from "@/lib/db-error";
 
 /**
  * Per-deal comment log (Phase 3 #15) — an append-only, dated journal on a saved
@@ -82,7 +83,7 @@ export async function listDealCommentsAction(id: string): Promise<DealCommentsRe
     if (isMissingCommentsTable(error)) {
       return { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." };
     }
-    return { ok: false, code: "SERVER_ERROR", message: error.message };
+    return toServerErrorResult(error, "deal-comments");
   }
   return { ok: true, comments: (data ?? []).map((r) => mapComment(r as Record<string, unknown>)) };
 }
@@ -125,7 +126,7 @@ export async function addDealCommentAction(id: string, body: string): Promise<De
     if (isMissingCommentsTable(error)) {
       return { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." };
     }
-    return { ok: false, code: "SERVER_ERROR", message: error.message };
+    return toServerErrorResult(error, "deal-comments");
   }
   return listDealCommentsAction(dealId);
 }
@@ -153,7 +154,7 @@ export async function deleteDealCommentAction(id: string, commentId: string): Pr
     if (isMissingCommentsTable(error)) {
       return { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." };
     }
-    return { ok: false, code: "SERVER_ERROR", message: error.message };
+    return toServerErrorResult(error, "deal-comments");
   }
   return listDealCommentsAction(dealId);
 }

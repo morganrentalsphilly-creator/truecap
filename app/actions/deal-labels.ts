@@ -1,4 +1,5 @@
 "use server";
+import { toServerErrorResult } from "@/lib/db-error";
 
 /**
  * Per-deal investor labels (Phase 2 #11): nickname / market / neighborhood.
@@ -66,7 +67,7 @@ export async function getDealLabelsAction(id: string): Promise<DealLabelsResult>
     if (isMissingLabelColumn(error)) {
       return { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." };
     }
-    return { ok: false, code: "SERVER_ERROR", message: error.message };
+    return toServerErrorResult(error, "deal-labels");
   }
   if (!data) return { ok: false, code: "NOT_FOUND", message: "Deal was not found." };
   return { ok: true, labels: readLabels(data as Record<string, unknown>) };
@@ -105,7 +106,7 @@ export async function updateDealLabelsAction(
     if (isMissingLabelColumn(error)) {
       return { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." };
     }
-    return { ok: false, code: "SERVER_ERROR", message: error.message };
+    return toServerErrorResult(error, "deal-labels");
   }
   if (!data) return { ok: false, code: "NOT_FOUND", message: "Deal was not found." };
   return { ok: true, labels: readLabels(data as Record<string, unknown>) };

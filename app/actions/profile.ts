@@ -1,5 +1,6 @@
 "use server";
 
+import * as Sentry from "@sentry/nextjs";
 import { z } from "zod";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
@@ -57,7 +58,10 @@ export async function updateProfileAction(input: unknown): Promise<UpdateProfile
     .maybeSingle();
 
   if (error) {
-    return { ok: false, code: "SERVER", message: error.message };
+    // Don't leak the raw Postgres error.message (table/column names) to the
+    // client; send it to Sentry for triage instead.
+    Sentry.captureException(error, { tags: { feature: "profile" } });
+    return { ok: false, code: "SERVER", message: "We couldn't update your profile. Please try again." };
   }
   if (!data) {
     return {

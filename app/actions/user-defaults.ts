@@ -1,4 +1,5 @@
 "use server";
+import { toServerErrorResult } from "@/lib/db-error";
 
 /**
  * User-specific analysis form defaults — overlaid on top of the
@@ -77,7 +78,7 @@ export async function getUserAnalysisDefaultsAction(): Promise<UserDefaultsActio
     ) {
       return { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." };
     }
-    return { ok: false, code: "SERVER_ERROR", message: error.message };
+    return toServerErrorResult(error, "user-defaults");
   }
   const raw = (data as { preferences?: unknown } | null)?.preferences ?? {};
   // Tolerant parse — skip unknown keys without erroring so we can
@@ -121,7 +122,7 @@ export async function saveUserAnalysisDefaultsAction(
     ) {
       return { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." };
     }
-    return { ok: false, code: "SERVER_ERROR", message: error.message };
+    return toServerErrorResult(error, "user-defaults");
   }
   return { ok: true, preferences: parsed.data };
 }

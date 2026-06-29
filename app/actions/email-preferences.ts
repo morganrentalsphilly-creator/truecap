@@ -1,4 +1,5 @@
 "use server";
+import { toServerErrorResult } from "@/lib/db-error";
 
 /**
  * Per-user email preferences. Currently just the rate-alert opt-in
@@ -37,7 +38,7 @@ export async function getEmailPreferencesAction(): Promise<EmailPrefsResult> {
     if (isMissingColumn(error)) {
       return { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." };
     }
-    return { ok: false, code: "SERVER_ERROR", message: error.message };
+    return toServerErrorResult(error, "email-preferences");
   }
   return {
     ok: true,
@@ -61,7 +62,7 @@ export async function setRateAlertEmailsAction(enabled: boolean): Promise<EmailP
     if (isMissingColumn(error)) {
       return { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." };
     }
-    return { ok: false, code: "SERVER_ERROR", message: error.message };
+    return toServerErrorResult(error, "email-preferences");
   }
   return { ok: true, rateAlertEmails: enabled };
 }

@@ -1,4 +1,5 @@
 "use server";
+import { toServerErrorResult } from "@/lib/db-error";
 
 import { analysisTemplateSchema, type AnalysisTemplateBuyBox } from "@/lib/analysis-template-schema";
 import { getEntitlementsForUser } from "@/lib/entitlements";
@@ -244,7 +245,7 @@ export async function listAnalysisTemplatesAction(): Promise<ListTemplatesResult
     if (error.code === "42P01" || error.code === "42703") {
       return { ok: true, templates: [] };
     }
-    return { ok: false, code: "SERVER_ERROR", message: error.message };
+    return toServerErrorResult(error, "analysis-templates");
   }
 
   const templates: AnalysisTemplateOption[] = (data ?? []).map((row) =>
@@ -414,7 +415,7 @@ export async function createAnalysisTemplateAction(
         message: "You already have a template with this name. Choose a different name.",
       };
     }
-    return { ok: false, code: "SERVER_ERROR", message: error.message };
+    return toServerErrorResult(error, "analysis-templates");
   }
 
   const saved = mapTemplateRow(data as unknown as Record<string, unknown>);
@@ -553,7 +554,7 @@ export async function updateAnalysisTemplateAction(
         message: "You already have a template with this name. Choose a different name.",
       };
     }
-    return { ok: false, code: "SERVER_ERROR", message: error.message };
+    return toServerErrorResult(error, "analysis-templates");
   }
 
   const saved = mapTemplateRow(data as unknown as Record<string, unknown>);
@@ -613,7 +614,7 @@ export async function deleteAnalysisTemplateAction(
     .eq("is_system", false);
 
   if (error) {
-    return { ok: false, code: "SERVER_ERROR", message: error.message };
+    return toServerErrorResult(error, "analysis-templates");
   }
 
   return { ok: true };
@@ -925,7 +926,7 @@ export async function listTemplateVersionsAction(templateId: string): Promise<Li
   if (error) {
     // Migration not applied yet → no history rather than an error.
     if (error.code === "42P01") return { ok: true, versions: [] };
-    return { ok: false, code: "SERVER_ERROR", message: error.message };
+    return toServerErrorResult(error, "analysis-templates");
   }
 
   const toNum = (v: unknown): number | null => {
@@ -1040,7 +1041,7 @@ export async function restoreTemplateVersionAction(
         message: "A template with that name already exists. Rename it first.",
       };
     }
-    return { ok: false, code: "SERVER_ERROR", message: error.message };
+    return toServerErrorResult(error, "analysis-templates");
   }
 
   const restored = mapTemplateRow(data as unknown as Record<string, unknown>);

@@ -1,4 +1,5 @@
 "use server";
+import { toServerErrorResult } from "@/lib/db-error";
 
 import * as Sentry from "@sentry/nextjs";
 import { z } from "zod";
@@ -360,7 +361,7 @@ export async function saveDealAction(
         .single();
 
       if (error) {
-        return { ok: false, code: "SERVER_ERROR", message: error.message };
+        return toServerErrorResult(error, "saved-analyses");
       }
 
       return { ok: true, id: data.id, mode: "updated" };
@@ -410,7 +411,7 @@ export async function saveDealAction(
     .single();
 
   if (error) {
-    return { ok: false, code: "SERVER_ERROR", message: error.message };
+    return toServerErrorResult(error, "saved-analyses");
   }
 
   return { ok: true, id: data.id, mode: "inserted" };
@@ -441,7 +442,7 @@ export async function getSavedDealForEditingAction(id: string): Promise<GetSaved
     .maybeSingle();
 
   if (error) {
-    return { ok: false, code: "SERVER_ERROR", message: error.message };
+    return toServerErrorResult(error, "saved-analyses");
   }
 
   if (!data) {
@@ -553,7 +554,7 @@ export async function getSavedAnalysisPdfExportAction(
     .maybeSingle();
 
   if (error) {
-    return { ok: false, code: "SERVER_ERROR", message: error.message };
+    return toServerErrorResult(error, "saved-analyses");
   }
 
   if (!data) {
@@ -676,7 +677,7 @@ export async function completeSavedAnalysisPdfExportAction(
     .maybeSingle();
 
   if (error) {
-    return { ok: false, code: "SERVER_ERROR", message: error.message };
+    return toServerErrorResult(error, "saved-analyses");
   }
 
   if (!data) {
@@ -729,7 +730,7 @@ export async function updateSavedDealNotesAction(
           "Notes are temporarily disabled — the schema migration hasn't been applied yet. Ask the site admin to apply 20260524120000_saved_analyses_notes.sql.",
       };
     }
-    return { ok: false, code: "SERVER_ERROR", message: error.message };
+    return toServerErrorResult(error, "saved-analyses");
   }
   if (!data) {
     return { ok: false, code: "NOT_FOUND", message: "Deal not found." };
@@ -762,7 +763,7 @@ export async function getSavedDealNotesAction(
     if (error.code === "42703" || /column .* does not exist/i.test(error.message)) {
       return { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." };
     }
-    return { ok: false, code: "SERVER_ERROR", message: error.message };
+    return toServerErrorResult(error, "saved-analyses");
   }
   return { ok: true, notes: (data as { notes: string | null } | null)?.notes ?? null };
 }
@@ -802,7 +803,7 @@ export async function updateSavedDealLifecycleStateAction(
     .maybeSingle();
 
   if (error) {
-    return { ok: false, code: "SERVER_ERROR", message: error.message };
+    return toServerErrorResult(error, "saved-analyses");
   }
 
   if (!data) {
@@ -855,7 +856,7 @@ export async function updateSavedDealStageAction(
     .maybeSingle();
 
   if (error) {
-    return { ok: false, code: "SERVER_ERROR", message: error.message };
+    return toServerErrorResult(error, "saved-analyses");
   }
   if (!data) {
     return { ok: false, code: "NOT_FOUND", message: "Deal was not found." };
@@ -923,7 +924,7 @@ export async function setSavedDealCloseDateAction(
     if (error.code === "42703" || /column .* does not exist/i.test(error.message ?? "")) {
       return { ok: false, code: "MIGRATION_PENDING", message: "Owned-deal tracking isn't enabled yet." };
     }
-    return { ok: false, code: "SERVER_ERROR", message: error.message };
+    return toServerErrorResult(error, "saved-analyses");
   }
   if (!data) {
     return { ok: false, code: "NOT_FOUND", message: "Deal was not found." };
@@ -975,7 +976,7 @@ export async function updateSavedDealTagsAction(
     .maybeSingle();
 
   if (error) {
-    return { ok: false, code: "SERVER_ERROR", message: error.message };
+    return toServerErrorResult(error, "saved-analyses");
   }
   if (!data) {
     return { ok: false, code: "NOT_FOUND", message: "Deal was not found." };
@@ -1006,7 +1007,7 @@ export async function listSavedDealsBriefAction(): Promise<ListSavedDealsBriefRe
     .order("created_at", { ascending: false })
     .limit(200);
   if (error) {
-    return { ok: false, code: "SERVER_ERROR", message: error.message };
+    return toServerErrorResult(error, "saved-analyses");
   }
   const deals: SavedDealBrief[] = (data ?? []).map((r) => {
     const row = r as { id: string; address: string | null; title: string | null; pipeline_stage: string | null };
@@ -1069,7 +1070,7 @@ export async function getDealDueDiligenceAction(id: string): Promise<DealDueDili
     if (isMissingDueDiligenceTable(error)) {
       return { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." };
     }
-    return { ok: false, code: "SERVER_ERROR", message: error.message };
+    return toServerErrorResult(error, "saved-analyses");
   }
   const stored = data ? normalizeDueDiligenceItems((data as { items?: unknown }).items) : [];
   return { ok: true, items: stored.length > 0 ? stored : defaultDueDiligenceItems() };
@@ -1120,7 +1121,7 @@ export async function updateDealDueDiligenceAction(
     if (isMissingDueDiligenceTable(error)) {
       return { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." };
     }
-    return { ok: false, code: "SERVER_ERROR", message: error.message };
+    return toServerErrorResult(error, "saved-analyses");
   }
   return { ok: true, items: normalized };
 }
@@ -1200,7 +1201,7 @@ export async function bulkUpdateSavedDealsAction(
   const { data, error } = await query.select("id");
 
   if (error) {
-    return { ok: false, code: "SERVER_ERROR", message: error.message };
+    return toServerErrorResult(error, "saved-analyses");
   }
 
   return { ok: true, affectedCount: data?.length ?? 0 };

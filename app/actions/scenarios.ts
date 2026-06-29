@@ -1,4 +1,5 @@
 "use server";
+import { toServerErrorResult } from "@/lib/db-error";
 
 /**
  * Scenarios (DM-1) — model the SAME property under different strategies
@@ -158,7 +159,7 @@ export async function listScenariosAction(dealId: unknown): Promise<ScenariosLis
   if (error) {
     return isMissingSchema(error)
       ? { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." }
-      : { ok: false, code: "SERVER_ERROR", message: error.message };
+      : toServerErrorResult(error, "scenarios");
   }
   if (!deal) return { ok: false, code: "NOT_FOUND", message: "Deal not found." };
 

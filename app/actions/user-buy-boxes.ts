@@ -1,4 +1,5 @@
 "use server";
+import { toServerErrorResult } from "@/lib/db-error";
 
 /**
  * Multiple Buy Boxes server action (DM-2) — CRUD over user_buy_boxes
@@ -176,7 +177,7 @@ async function fetchBoxes(
       ok: false,
       result: isMissingTable(error)
         ? { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." }
-        : { ok: false, code: "SERVER_ERROR", message: error.message },
+        : toServerErrorResult(error, "user-buy-boxes"),
     };
   }
   return { ok: true, boxes: (data ?? []).map((r) => rowToNamedBuyBox(r as BuyBoxesRow)) };
@@ -273,7 +274,7 @@ export async function upsertBuyBoxAction(input: unknown): Promise<BuyBoxesAction
     if (error) {
       return isMissingTable(error)
         ? { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." }
-        : { ok: false, code: "SERVER_ERROR", message: error.message };
+        : toServerErrorResult(error, "user-buy-boxes");
     }
   } else {
     // Ownership-scoped update; a foreign / missing id returns NOT_FOUND.
@@ -287,7 +288,7 @@ export async function upsertBuyBoxAction(input: unknown): Promise<BuyBoxesAction
     if (error) {
       return isMissingTable(error)
         ? { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." }
-        : { ok: false, code: "SERVER_ERROR", message: error.message };
+        : toServerErrorResult(error, "user-buy-boxes");
     }
     if (!data) return { ok: false, code: "NOT_FOUND", message: "Buy box not found." };
   }
@@ -320,7 +321,7 @@ export async function deleteBuyBoxAction(id: unknown): Promise<BuyBoxesActionRes
   if (error) {
     return isMissingTable(error)
       ? { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." }
-      : { ok: false, code: "SERVER_ERROR", message: error.message };
+      : toServerErrorResult(error, "user-buy-boxes");
   }
 
   const refreshed = await fetchBoxes(supabase, userId);
@@ -354,7 +355,7 @@ export async function setDefaultBuyBoxAction(id: unknown): Promise<BuyBoxesActio
   if (error) {
     return isMissingTable(error)
       ? { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." }
-      : { ok: false, code: "SERVER_ERROR", message: error.message };
+      : toServerErrorResult(error, "user-buy-boxes");
   }
   if (!data) return { ok: false, code: "NOT_FOUND", message: "Buy box not found." };
 
