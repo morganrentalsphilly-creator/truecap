@@ -21,7 +21,9 @@ import { DealDetailsCard } from "@/components/investcalc/deal-details-card";
 import { DealCommentsPanel } from "@/components/investcalc/deal-comments-panel";
 import { ScenariosCard } from "@/components/investcalc/scenarios-card";
 import { NextActionBanner } from "@/components/investcalc/next-action-banner";
+import { DealAgingNudge } from "@/components/investcalc/deal-aging-nudge";
 import { nextActionForDeal } from "@/lib/next-action";
+import { isPipelineStage, DEFAULT_PIPELINE_STAGE } from "@/lib/pipeline";
 import {
   getDashboardNavAccess,
   hasDashboardAccess,
@@ -84,7 +86,7 @@ export default async function DealWorkspacePage({
     hasPaidPlanSubscription(supabase, user.id),
     supabase
       .from("saved_analyses")
-      .select("id, address, title, result_snapshot, net_cash_flow_monthly")
+      .select("id, address, title, result_snapshot, net_cash_flow_monthly, pipeline_stage, created_at")
       .eq("id", id)
       .eq("user_id", user.id)
       .is("deleted_at", null)
@@ -103,6 +105,8 @@ export default async function DealWorkspacePage({
     title: string | null;
     result_snapshot: Record<string, unknown> | null;
     net_cash_flow_monthly: number | null;
+    pipeline_stage: string | null;
+    created_at: string | null;
   };
   const heading = dealRow.address?.trim() || dealRow.title?.trim() || "Untitled property";
 
@@ -150,6 +154,12 @@ export default async function DealWorkspacePage({
           </div>
 
           <NextActionBanner action={nextAction} />
+          <DealAgingNudge
+            dealId={dealRow.id}
+            stage={isPipelineStage(dealRow.pipeline_stage) ? dealRow.pipeline_stage : DEFAULT_PIPELINE_STAGE}
+            createdAt={dealRow.created_at}
+            address={heading}
+          />
           <DealDetailsCard savedDealId={dealRow.id} />
           <ScenariosCard savedDealId={dealRow.id} />
           <DueDiligenceCard savedDealId={dealRow.id} />
