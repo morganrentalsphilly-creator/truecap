@@ -124,7 +124,10 @@ export default async function PublicDealPage({ params }: Props) {
         </div>
       )}
 
-      <main id="main" className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+      {/* pb-28/sm:pb-16 reserves clearance so the footer's last row scrolls
+          clear of the fixed cookie-consent banner (z-50, bottom-0) that overlays
+          /d for a first-visit, pre-consent viewer. */}
+      <main id="main" className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10 pb-28 sm:pb-16">
         <header className="mb-6 sm:mb-8">
           <div className="text-xs uppercase tracking-widest text-muted-foreground font-bold mb-1">
             Shared analysis

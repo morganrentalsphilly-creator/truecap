@@ -122,7 +122,7 @@ export function CookieConsentBanner() {
       role="dialog"
       aria-label="Cookie consent"
       aria-live="polite"
-      className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-card/95 px-3 py-3 shadow-[0_-12px_28px_rgba(15,23,42,0.10)] backdrop-blur supports-[backdrop-filter]:bg-card/90 sm:px-4 sm:py-4"
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-card/95 px-3 pt-3 pb-[max(env(safe-area-inset-bottom),0.75rem)] shadow-[0_-12px_28px_rgba(15,23,42,0.10)] backdrop-blur supports-[backdrop-filter]:bg-card/90 sm:px-4 sm:pt-4 sm:pb-[max(env(safe-area-inset-bottom),1rem)]"
     >
       <div className="mx-auto flex max-w-5xl flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
         <div className="flex min-w-0 flex-1 items-start gap-2.5 sm:items-center">
