@@ -143,7 +143,7 @@ export function PortfolioRollupStrip({
       className="mx-auto mt-1 w-full max-w-7xl px-4 pt-4 sm:px-6 sm:pt-6"
     >
       <div className="rounded-2xl border border-border bg-gradient-to-br from-card via-card to-card/60 p-4 shadow-sm sm:p-5">
-        <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+        <p className="line-clamp-2 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
           {scopeLabel(scope, items.length)}
         </p>
         <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-5">

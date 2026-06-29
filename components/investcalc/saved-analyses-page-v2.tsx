@@ -1114,7 +1114,7 @@ export function SavedAnalysesPage({
       </div>
 
       <div className="flex items-center justify-between rounded-2xl bg-muted/40 px-3 py-2">
-        <span className="text-xs font-semibold text-muted-foreground">Show selected</span>
+        <span className="text-xs font-semibold text-muted-foreground">Show only selected</span>
         <Switch
           id="template-include-interest-deduction-mobile"
           checked={showcompare ?? false}
@@ -1680,7 +1680,7 @@ export function SavedAnalysesPage({
               </DropdownMenuContent>
             </DropdownMenu>
             <div className="inline-flex items-center gap-1.5">
-              <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground mr-1.5">Show selected</span>
+              <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground mr-1.5">Show only selected</span>
               <Switch
                 id="template-include-interest-deduction"
                 checked={showcompare ?? false}

@@ -721,7 +721,7 @@ export function DashboardHome({
                 </span>
                 <GlossaryTip term="capRate"><span>weighted cap rate</span></GlossaryTip>
               </span>
-              <span aria-hidden className="text-muted-foreground/40">·</span>
+              <span aria-hidden className="hidden text-muted-foreground/40 sm:inline">·</span>
               <span className="inline-flex items-center gap-1.5">
                 <Layers className="h-3.5 w-3.5 text-muted-foreground/60" />
                 <span className="font-semibold text-foreground">{portfolio.totalCount}</span>
@@ -729,14 +729,14 @@ export function DashboardHome({
               </span>
               {hasArchivedOrCompleted ? (
                 <>
-                  <span aria-hidden className="text-muted-foreground/40">·</span>
+                  <span aria-hidden className="hidden text-muted-foreground/40 sm:inline">·</span>
                   <span>
                     <span className="font-semibold text-foreground">{savedTotalCount}</span>{" "}
                     saved total
                   </span>
                 </>
               ) : null}
-              <span aria-hidden className="text-muted-foreground/40">·</span>
+              <span aria-hidden className="hidden text-muted-foreground/40 sm:inline">·</span>
               <span>
                 <span className="font-semibold text-foreground">{portfolio.activeCount}</span>{" "}
                 with price data

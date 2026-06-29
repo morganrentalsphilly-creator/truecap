@@ -317,10 +317,10 @@ export function ProfileForm({
   return (
     <>
       <div className="space-y-8">
-        {/* <div>
+        <div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">Profile</h1>
-          <p className="text-muted-foreground mt-2">Your account details and profile photo.</p>
-        </div> */}
+          <p className="text-muted-foreground mt-2">Your account details, profile photo, and billing.</p>
+        </div>
 
         <Form {...form}>
           <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)} noValidate>

@@ -80,14 +80,22 @@ export function RateWatchStrip({ rateWatch }: { rateWatch: RateWatchSummary | nu
 
       <ul className="mt-3 space-y-2">
         {shown.map((deal) => (
-          <li key={deal.id} className="flex items-start gap-2.5 rounded-xl bg-muted/40 px-3 py-2">
-            <span className={`mt-0.5 shrink-0 ${deal.improved ? "text-success" : "text-destructive"}`}>
-              {deal.improved ? <TrendingUp className="size-3.5" /> : <TrendingDown className="size-3.5" />}
-            </span>
-            <div className="min-w-0">
-              <p className="truncate text-sm font-medium text-foreground">{deal.label}</p>
-              <p className="text-xs leading-relaxed text-muted-foreground">{deal.changes[0]}</p>
-            </div>
+          <li key={deal.id}>
+            {/* The named deal is a link straight to its detail page — "N deals
+                changed" → "here's the one" in a single click. */}
+            <Link
+              href={`/dashboard/saved-analyses/${deal.id}`}
+              prefetch={false}
+              className="flex items-start gap-2.5 rounded-xl bg-muted/40 px-3 py-2 transition-colors hover:bg-muted"
+            >
+              <span className={`mt-0.5 shrink-0 ${deal.improved ? "text-success" : "text-destructive"}`}>
+                {deal.improved ? <TrendingUp className="size-3.5" /> : <TrendingDown className="size-3.5" />}
+              </span>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-medium text-foreground">{deal.label}</p>
+                <p className="text-xs leading-relaxed text-muted-foreground">{deal.changes[0]}</p>
+              </div>
+            </Link>
           </li>
         ))}
       </ul>

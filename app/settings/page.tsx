@@ -75,31 +75,6 @@ export default async function SettingsPage() {
             </Link>
           </CardContent>
         </Card>
-        <Card className="border-border/70 shadow-md">
-          <CardHeader>
-            <div className="flex items-center justify-between gap-2">
-              <CardTitle>Settings</CardTitle>
-              <Badge variant="outline">Account</Badge>
-            </div>
-            <CardDescription>
-              Manage your account preferences. More controls can be added here as the app grows.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-4 sm:grid-cols-2">
-            <div className="rounded-lg border p-4 bg-muted/30">
-              <p className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Email notifications</p>
-              <p className="font-semibold text-foreground">Enabled</p>
-            </div>
-            <div className="rounded-lg border p-4 bg-muted/30">
-              <p className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Two-factor auth</p>
-              <p className="font-semibold text-foreground">Not configured</p>
-            </div>
-            <div className="rounded-lg border p-4 bg-muted/30 sm:col-span-2">
-              <p className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Signed in as</p>
-              <p className="font-semibold text-foreground break-all">{user.email}</p>
-            </div>
-          </CardContent>
-        </Card>
       </main>
     </>
   );
