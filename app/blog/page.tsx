@@ -49,6 +49,16 @@ export type BlogPost = {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: "mortgage-points-investment-property",
+    title:
+      "Are mortgage points worth it on an investment property? (2026)",
+    excerpt:
+      "Points trade cash at closing for a permanently lower rate. At 2026 pricing the break-even runs about five years and the implied return about 20% a year — but only while you keep the loan. The buydown-ladder steepness that actually sets the break-even, the IRS rule that makes you amortize rental points instead of deducting them up front, the two points that lift a $200K-loan deal from a 1.14 to a 1.20 DSCR, and the refinance trap where buying down a rate you abandon in three years quietly costs about $1,600.",
+    readingTimeMinutes: 11,
+    publishedAt: "2026-06-29",
+    available: true,
+  },
+  {
     slug: "negative-leverage-real-estate",
     title:
       "Negative leverage in real estate: when borrowing lowers your return (2026)",

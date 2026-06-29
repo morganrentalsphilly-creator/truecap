@@ -127,11 +127,13 @@ export function PortfolioRollupStrip({
   // Owned-equity rollup — only meaningful for the owned (completed) set, and
   // only once at least one deal has a close date driving an equity estimate.
   let totalOwnedEquity = 0;
+  let totalEquityBuilt = 0; // equity gained since close (appreciation + paydown)
   let ownedEquitySampleCount = 0;
   for (const item of items) {
     const e = item.ownedEquity?.equity;
     if (typeof e === "number" && Number.isFinite(e)) {
       totalOwnedEquity += e;
+      totalEquityBuilt += item.ownedEquity?.totalEquityGain ?? 0;
       ownedEquitySampleCount += 1;
     }
   }
@@ -185,7 +187,11 @@ export function PortfolioRollupStrip({
             <RollupTile
               label="Owned Equity"
               value={fmtCurrency(totalOwnedEquity)}
-              sub={`est. across ${ownedEquitySampleCount} dated ${ownedEquitySampleCount === 1 ? "deal" : "deals"}`}
+              sub={
+                totalEquityBuilt > 0
+                  ? `+${fmtCurrency(totalEquityBuilt)} built since close`
+                  : `est. across ${ownedEquitySampleCount} dated ${ownedEquitySampleCount === 1 ? "deal" : "deals"}`
+              }
               tone={totalOwnedEquity > 0 ? "positive" : totalOwnedEquity < 0 ? "negative" : "neutral"}
             />
           ) : (

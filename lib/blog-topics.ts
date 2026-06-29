@@ -66,6 +66,7 @@ export const BLOG_TOPICS: BlogTopic[] = [
     postSlugs: [
       "piti-explained-rental-property",
       "how-much-down-payment-investment-property",
+      "mortgage-points-investment-property",
       "dscr-loans-explained",
       "how-to-refinance-a-rental-property",
       "closing-costs-investment-property",
