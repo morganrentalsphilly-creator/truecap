@@ -318,6 +318,15 @@ export default function VsDealCheckForBrrrrPage() {
             </a>{" "}
             for their current state.
           </p>
+          <p className="mt-4 text-sm leading-relaxed text-foreground">
+            Want to model a refi before committing to a tool? Run the numbers in the standalone{" "}
+            <Link href="/tools/brrrr-calculator" className="font-semibold text-primary hover:underline">BRRRR calculator</Link>
+            {" "}and size the rehab line with the{" "}
+            <Link href="/tools/rehab-cost-estimator" className="font-semibold text-primary hover:underline">rehab cost estimator</Link>
+            {" "}— same engine as the full analyzer. New to the strategy? Our{" "}
+            <Link href="/blog/brrrr-method-explained" className="font-semibold text-primary hover:underline">BRRRR method explained</Link>
+            {" "}guide covers the full buy → refi → repeat cycle.
+          </p>
         </section>
 
         <ComparisonFaq competitorName="DealCheck (BRRRR)" items={DEALCHECK_BRRRR_FAQ} />

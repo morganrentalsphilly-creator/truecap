@@ -241,6 +241,14 @@ export default function VsMashvisorForShortTermRentalsPage() {
               </tbody>
             </table>
           </div>
+          <p className="mt-4 text-sm leading-relaxed text-foreground">
+            Once Mashvisor hands you an ADR and occupancy figure, the underwrite is on you. Our{" "}
+            <Link href="/blog/short-term-rental-underwriting-playbook" className="font-semibold text-primary hover:underline">short-term rental underwriting playbook</Link>
+            {" "}walks through turning revenue projections into a real deal verdict, and the{" "}
+            <Link href="/blog/best-short-term-rental-analysis-tool-2026" className="font-semibold text-primary hover:underline">best STR analysis tools of 2026</Link>
+            {" "}rounds up where the data comes from. To check the math on one metric first, try the standalone{" "}
+            <Link href="/tools/cap-rate-calculator" className="font-semibold text-primary hover:underline">cap rate calculator</Link>.
+          </p>
         </section>
 
         <ComparisonFaq competitorName="Mashvisor (Short-term rentals)" items={NICHE_FAQ} />

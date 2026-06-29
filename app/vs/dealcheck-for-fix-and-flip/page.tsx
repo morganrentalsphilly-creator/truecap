@@ -243,6 +243,15 @@ export default function VsDealcheckForFixAndFlipPage() {
               </tbody>
             </table>
           </div>
+          <p className="mt-4 text-sm leading-relaxed text-foreground">
+            Most flips live or die on the rehab budget. Pin yours down with the standalone{" "}
+            <Link href="/tools/rehab-cost-estimator" className="font-semibold text-primary hover:underline">rehab cost estimator</Link>
+            {" "}before you make an offer. If the plan is to keep the property instead of selling, the{" "}
+            <Link href="/tools/brrrr-calculator" className="font-semibold text-primary hover:underline">BRRRR calculator</Link>
+            {" "}runs the refi math — and our{" "}
+            <Link href="/blog/brrrr-method-explained" className="font-semibold text-primary hover:underline">BRRRR method explained</Link>
+            {" "}guide covers when flip-vs-hold tips one way.
+          </p>
         </section>
 
         <ComparisonFaq competitorName="DealCheck (Fix & Flip)" items={NICHE_FAQ} />

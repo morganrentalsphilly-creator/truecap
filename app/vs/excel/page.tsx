@@ -7,6 +7,7 @@
  */
 
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -48,7 +49,7 @@ export const metadata: Metadata = {
 };
 
 type Verdict = "truecap" | "excel" | "tie";
-type Row = { feature: string; truecap: string; excel: string; winner: Verdict };
+type Row = { feature: string; truecap: ReactNode; excel: string; winner: Verdict };
 
 const MATRIX: Row[] = [
   { feature: "Time to first underwrite",          truecap: "60 seconds — paste address, auto-fills everything",                      excel: "30-60 minutes — gather data, type formulas, debug",                       winner: "truecap" },
@@ -63,7 +64,7 @@ const MATRIX: Row[] = [
   { feature: "Free to start",                     truecap: "Yes — unlimited free analyses, no signup",                                 excel: "Yes if you have Excel/Sheets",                                            winner: "tie" },
   { feature: "Offline use",                       truecap: "Requires internet",                                                        excel: "Works offline once file is open",                                          winner: "excel" },
   { feature: "Audit trail / version history",     truecap: "Pro saves history of saved deals",                                         excel: "Manual file naming or Google Sheets version history",                     winner: "tie" },
-  { feature: "Glossary / explanation of metrics", truecap: "Inline tooltips + /glossary/ with full definitions per term",              excel: "Whatever you remember from your last research session",                    winner: "truecap" },
+  { feature: "Glossary / explanation of metrics", truecap: (<>Inline tooltips + a <Link href="/glossary" className="font-semibold text-primary hover:underline">real estate glossary</Link> with full definitions per term</>),              excel: "Whatever you remember from your last research session",                    winner: "truecap" },
   { feature: "PDF export for lenders / partners", truecap: "Pro — branded multi-page report",                                          excel: "Print → PDF, manual formatting",                                          winner: "truecap" },
   { feature: "Tax strategy modeling",             truecap: "Pro — bracket-aware depreciation + after-tax CF",                          excel: "Possible if you build the formulas",                                       winner: "truecap" },
   { feature: "BRRRR / fix-and-flip analyzers",    truecap: "Built-in dedicated workflows",                                             excel: "Custom build per deal type",                                              winner: "truecap" },
@@ -179,6 +180,15 @@ export default function VsExcelPage() {
             <li><strong>&quot;I lost a deal because I couldn&apos;t pull up numbers at the showing.&quot;</strong> Mobile is where deals are made now. Excel on mobile is unusable; TrueCap works in your pocket.</li>
             <li><strong>&quot;I realized I&apos;d been using the wrong cap rate formula for 6 months.&quot;</strong> This happens. Engine-based tools validate the math once; spreadsheet errors compound across every deal until you find them.</li>
           </ul>
+          <p className="mt-4 text-sm leading-relaxed text-foreground">
+            Want to sanity-check one formula before you trust a whole sheet? Run the standalone{" "}
+            <Link href="/tools/cap-rate-calculator" className="font-semibold text-primary hover:underline">cap rate calculator</Link>
+            {" "}or{" "}
+            <Link href="/tools/dscr-calculator" className="font-semibold text-primary hover:underline">DSCR calculator</Link>
+            {" "}— same validated engine as the full analyzer. And if you&apos;re building the income statement by hand, our guide to a{" "}
+            <Link href="/blog/rental-property-pro-forma-explained" className="font-semibold text-primary hover:underline">rental property pro forma</Link>
+            {" "}walks through every line a spreadsheet should have.
+          </p>
         </section>
 
         <ComparisonFaq competitorName="Excel" items={EXCEL_FAQ} />

@@ -240,6 +240,15 @@ export default function VsDealcheckForShortTermRentalsPage() {
               </tbody>
             </table>
           </div>
+          <p className="mt-4 text-sm leading-relaxed text-foreground">
+            Whichever calculator you land on, the STR underwrite is the same job. Our{" "}
+            <Link href="/blog/short-term-rental-underwriting-playbook" className="font-semibold text-primary hover:underline">short-term rental underwriting playbook</Link>
+            {" "}breaks down seasonal revenue into a defensible analysis, and our roundup of the{" "}
+            <Link href="/blog/best-short-term-rental-analysis-tool-2026" className="font-semibold text-primary hover:underline">best short-term rental analysis tools for 2026</Link>
+            {" "}covers where the ADR and occupancy data should come from. For a quick single-metric check, the standalone{" "}
+            <Link href="/tools/cap-rate-calculator" className="font-semibold text-primary hover:underline">cap rate calculator</Link>
+            {" "}runs the same engine.
+          </p>
         </section>
 
         <ComparisonFaq competitorName="DealCheck (Short-term rentals)" items={NICHE_FAQ} />

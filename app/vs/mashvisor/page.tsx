@@ -207,6 +207,15 @@ export default function VsMashvisorPage() {
             For long-term rentals especially, the per-deal math is what determines
             whether you&apos;re making money — the heatmaps just told you to look.
           </p>
+          <p className="mt-4 text-sm leading-relaxed text-foreground">
+            Once the heatmap points you somewhere, the per-deal math is one address away. Start with the standalone{" "}
+            <Link href="/tools/cap-rate-calculator" className="font-semibold text-primary hover:underline">cap rate calculator</Link>
+            {" "}or{" "}
+            <Link href="/tools/cash-on-cash-calculator" className="font-semibold text-primary hover:underline">cash-on-cash return calculator</Link>
+            {" "}— same engine as the full analyzer. Our walkthrough on{" "}
+            <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="font-semibold text-primary hover:underline">underwriting a rental in 60 seconds</Link>
+            {" "}shows the full move from listing to verdict.
+          </p>
         </section>
 
         <ComparisonFaq competitorName="Mashvisor" items={MASHVISOR_FAQ} />

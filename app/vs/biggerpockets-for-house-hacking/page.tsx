@@ -317,6 +317,15 @@ export default function VsBiggerPocketsForHouseHackingPage() {
             </a>{" "}
             for their current state.
           </p>
+          <p className="mt-4 text-sm leading-relaxed text-foreground">
+            New to running an owner-occupant deal? Our{" "}
+            <Link href="/blog/house-hack-underwriting-guide" className="font-semibold text-primary hover:underline">house hack underwriting guide</Link>
+            {" "}walks through counting only the rental units&apos; income. To pressure-test a single metric, the standalone{" "}
+            <Link href="/tools/cap-rate-calculator" className="font-semibold text-primary hover:underline">cap rate calculator</Link>
+            {" "}and{" "}
+            <Link href="/tools/cash-on-cash-calculator" className="font-semibold text-primary hover:underline">cash-on-cash return calculator</Link>
+            {" "}run the same engine as the full analyzer.
+          </p>
         </section>
 
         <ComparisonFaq competitorName="BiggerPockets (House Hacking)" items={BP_HOUSE_HACK_FAQ} />

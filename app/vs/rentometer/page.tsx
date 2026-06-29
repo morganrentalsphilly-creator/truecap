@@ -158,6 +158,15 @@ export default function VsRentometerPage() {
               </tbody>
             </table>
           </div>
+          <p className="mt-4 text-sm leading-relaxed text-foreground">
+            A rent number only matters once it flows into returns. Drop your Rentometer comp into the standalone{" "}
+            <Link href="/tools/cash-on-cash-calculator" className="font-semibold text-primary hover:underline">cash-on-cash return calculator</Link>
+            {" "}or{" "}
+            <Link href="/tools/cap-rate-calculator" className="font-semibold text-primary hover:underline">cap rate calculator</Link>
+            {" "}to see what that rent actually earns. For the full income statement behind those metrics, our{" "}
+            <Link href="/blog/rental-property-pro-forma-explained" className="font-semibold text-primary hover:underline">rental property pro forma guide</Link>
+            {" "}lays out every line.
+          </p>
         </section>
 
         <ComparisonFaq competitorName="Rentometer" items={RENTOMETER_FAQ} />
