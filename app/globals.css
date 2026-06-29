@@ -212,6 +212,38 @@ textarea,
   html[data-conversion-bar="1"] [data-sticky-calc-bar] {
     display: none;
   }
+  /* What-if sliders: appearance-none strips the native thumb, leaving nothing to
+     grab on touch. Restore a 22px branded thumb so the marquee "watch the verdict
+     move" control is actually draggable on mobile (WCAG 2.5.5). */
+  .whatif-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 22px;
+    width: 22px;
+    margin-top: -7px; /* center the 22px thumb on the 8px (h-2) track */
+    border-radius: 9999px;
+    background: var(--primary);
+    border: 2px solid var(--card);
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.25);
+    cursor: pointer;
+  }
+  .whatif-range::-moz-range-thumb {
+    height: 22px;
+    width: 22px;
+    border-radius: 9999px;
+    background: var(--primary);
+    border: 2px solid var(--card);
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.25);
+    cursor: pointer;
+  }
+  .whatif-range:focus-visible::-webkit-slider-thumb {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
+  .whatif-range:focus-visible::-moz-range-thumb {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
 }
 
 /* Honor the user's prefers-reduced-motion OS preference (WCAG 2.3.3).

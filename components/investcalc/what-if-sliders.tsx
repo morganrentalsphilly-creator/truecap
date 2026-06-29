@@ -289,17 +289,22 @@ function SliderRow({
           {unit}
         </span>
       </div>
-      <input
-        type="range"
-        min={min}
-        max={max}
-        step={step}
-        value={value}
-        onChange={(e) => onChange(parseFloat(e.target.value))}
-        aria-label={`${label} adjustment`}
-        aria-valuetext={ariaText}
-        className="h-2 w-full cursor-pointer appearance-none rounded-full bg-muted accent-primary"
-      />
+      {/* min-h-[44px] flex wrapper gives the thin track a full 44px vertical
+          touch band (WCAG 2.5.5); the real thumb is defined by .whatif-range in
+          globals.css since appearance-none strips the native one. */}
+      <div className="flex min-h-[44px] items-center">
+        <input
+          type="range"
+          min={min}
+          max={max}
+          step={step}
+          value={value}
+          onChange={(e) => onChange(parseFloat(e.target.value))}
+          aria-label={`${label} adjustment`}
+          aria-valuetext={ariaText}
+          className="whatif-range h-2 w-full cursor-pointer appearance-none rounded-full bg-muted"
+        />
+      </div>
       <div className="flex justify-between text-[10px] text-muted-foreground">
         <span>
           {min > 0 ? "+" : ""}
