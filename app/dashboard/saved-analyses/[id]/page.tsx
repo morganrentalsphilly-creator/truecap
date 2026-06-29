@@ -122,7 +122,7 @@ export default async function DealWorkspacePage({
   const initials = getInitials(displayName, user.email ?? "");
 
   return (
-    <div className="flex-1 min-w-0 flex flex-col lg:h-screen lg:overflow-hidden">
+    <div className="flex-1 min-w-0 flex flex-col">
       <Topbar
         displayName={displayName}
         email={user.email ?? ""}
@@ -131,7 +131,7 @@ export default async function DealWorkspacePage({
         isPremium={isPremium}
         canAccessDashboard={navAccess.dashboard}
       />
-      <div className="flex-1 min-h-0 lg:overflow-y-auto">
+      <div className="flex-1">
         <main id="main" className="mx-auto max-w-3xl space-y-5 px-4 py-6 sm:px-6 sm:py-8">
           <div className="min-w-0">
             <Link
