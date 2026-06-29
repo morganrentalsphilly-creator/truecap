@@ -18,6 +18,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Sparkles, X } from "lucide-react";
+import { useCookieBannerOpen } from "@/lib/use-cookie-banner";
 
 interface ToolsConversionCtaProps {
   /** Name of the calculator the user just used — shown in the pitch. */
@@ -31,6 +32,7 @@ const STORAGE_KEY = "truecap_tools_cta_dismissed";
 export function ToolsConversionCta({ calculatorName, hook }: ToolsConversionCtaProps) {
   const [dismissed, setDismissed] = useState(true); // start hidden, then check storage
   const [stickyVisible, setStickyVisible] = useState(false);
+  const cookieBannerOpen = useCookieBannerOpen();
 
   useEffect(() => {
     // Safari Private Mode + strict CSPs throw on localStorage access;
@@ -101,8 +103,9 @@ export function ToolsConversionCta({ calculatorName, hook }: ToolsConversionCtaP
         </div>
       </section>
 
-      {/* Sticky mobile-friendly bottom bar — only after scroll */}
-      {!dismissed && stickyVisible && (
+      {/* Sticky mobile-friendly bottom bar — only after scroll, and not while
+          the opaque cookie-consent banner occupies the bottom on a first visit */}
+      {!dismissed && stickyVisible && !cookieBannerOpen && (
         <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 px-3 pt-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] shadow-[0_-12px_28px_rgba(15,23,42,0.10)] backdrop-blur supports-[backdrop-filter]:bg-card/80 sm:px-4 sm:pt-3 sm:pb-[max(env(safe-area-inset-bottom),0.75rem)]">
           <div className="mx-auto flex max-w-3xl items-center gap-3">
             <div className="min-w-0 flex-1">

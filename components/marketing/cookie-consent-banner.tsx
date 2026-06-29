@@ -30,6 +30,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Cookie, X } from "lucide-react";
 import { setAnalyticsConsent } from "@/lib/analytics";
+import { notifyCookieConsentChanged } from "@/lib/use-cookie-banner";
 
 /**
  * Paths where the cookie banner must be suppressed entirely. These
@@ -101,6 +102,7 @@ export function CookieConsentBanner() {
     // PostHog isn't loaded (missing env var, ad-block, etc.).
     setAnalyticsConsent(true);
     setDecision("granted");
+    notifyCookieConsentChanged(); // let secondary bottom bars reappear immediately
   };
 
   const handleReject = () => {
@@ -108,6 +110,7 @@ export function CookieConsentBanner() {
     pushGtagConsent("denied");
     setAnalyticsConsent(false);
     setDecision("denied");
+    notifyCookieConsentChanged(); // let secondary bottom bars reappear immediately
   };
 
   // Suppress entirely on opt-out paths (e.g. /embed/* — partner site
