@@ -14,7 +14,7 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "Break-Even Calculator | Free Rental Property Tool",
+  title: "Rental Property Break-Even Calculator",
   description:
     "Free rental break-even calculator. How many months until cash flow returns your initial investment. Plus healthy break-even benchmarks by strategy.",
   keywords: [

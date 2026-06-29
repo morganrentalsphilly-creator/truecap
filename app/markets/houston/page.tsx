@@ -196,7 +196,7 @@ export default function HoustonMarketPage() {
 
         <article className="prose prose-slate max-w-none [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground [&_li]:leading-relaxed [&_strong]:text-foreground">
 
-          <h2 className="text-2xl sm:text-3xl">Houston cap rate benchmarks by submarket</h2>
+          <h2 className="text-2xl sm:text-3xl">Houston <Link href="/glossary/cap-rate" className="font-semibold text-primary hover:underline">cap rate</Link> benchmarks by submarket</h2>
           <p>
             Houston has no zoning. The submarkets are defined by
             distance from the Loop, school district, and (uniquely)
@@ -238,7 +238,7 @@ export default function HoustonMarketPage() {
 
           <h2 className="text-2xl sm:text-3xl">Houston-specific underwriting notes</h2>
 
-          <h3>Property tax: 1.8-2.5% effective (the highest of any major US metro)</h3>
+          <h3><Link href="/glossary/property-tax" className="font-semibold text-primary hover:underline">Property tax</Link>: 1.8-2.5% effective (the highest of any major US metro)</h3>
           <p>
             This is the single most-mis-modeled number in Houston
             underwriting. Harris County base + Houston ISD + city
@@ -253,7 +253,7 @@ export default function HoustonMarketPage() {
 
           <h3>No state income tax = real cash-flow advantage for residents</h3>
           <p>
-            For Texas residents, rental income flows through to the
+            For <Link href="/states/texas" className="font-semibold text-primary hover:underline">Texas</Link> residents, rental income flows through to the
             federal return without state income tax on top.
             Comparable to other no-tax states (FL, NV, WA, TN, NH).
             For out-of-state investors, your home-state income tax
@@ -287,7 +287,7 @@ export default function HoustonMarketPage() {
           <p>
             Texas evictions move fast (21-45 days uncontested). No
             state rent control. Lease enforcement is reliable. These
-            factors compress your vacancy + bad-debt assumption
+            factors compress your <Link href="/glossary/vacancy" className="font-semibold text-primary hover:underline">vacancy</Link> + bad-debt assumption
             relative to tenant-friendly markets. Realistic vacancy in
             mid-tier Houston SFR rentals runs 4-6%; bad debt under
             1.5% with proper tenant screening.

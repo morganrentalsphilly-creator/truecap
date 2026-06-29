@@ -124,6 +124,28 @@ export default function ToolsLandingPage() {
           ))}
         </div>
 
+        <section
+          aria-labelledby="learn-the-math"
+          className="mt-10 rounded-2xl border border-border bg-card p-6 sm:p-8"
+        >
+          <h2
+            id="learn-the-math"
+            className="text-xl sm:text-2xl font-extrabold text-foreground mb-2"
+          >
+            Learn the math behind the calculators
+          </h2>
+          <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+            Want to understand what these tools are actually computing? Our
+            step-by-step guides walk through{" "}
+            <Link href="/blog/how-to-calculate-cap-rate" className="font-semibold text-primary hover:underline">how to calculate cap rate</Link>,{" "}
+            <Link href="/blog/how-to-calculate-cash-on-cash-return" className="font-semibold text-primary hover:underline">how to calculate cash-on-cash return</Link>,{" "}
+            <Link href="/blog/how-to-calculate-dscr" className="font-semibold text-primary hover:underline">how to calculate DSCR</Link>, and{" "}
+            <Link href="/blog/how-to-calculate-noi-rental-property" className="font-semibold text-primary hover:underline">how to calculate NOI</Link>{" "}
+            — or see all the pieces come together in{" "}
+            <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="font-semibold text-primary hover:underline">how to underwrite a rental property in 60 seconds</Link>.
+          </p>
+        </section>
+
         <section className="mt-10 rounded-2xl bg-primary text-primary-foreground p-6 sm:p-8">
           <h2 className="text-xl sm:text-2xl font-extrabold mb-2">
             Want the full picture?

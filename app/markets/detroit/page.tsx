@@ -113,7 +113,7 @@ export default function DetroitMarketPage() {
             </div>
           )}
           <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight">{CITY} rental property analysis — calculator + 2026 cap-rate benchmarks</h1>
-          <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">Run a Detroit rental deal in 60 seconds with TrueCap. Address auto-fills Michigan property tax (~1.7% in Detroit proper), HUD rent by Wayne/Oakland/Macomb county, and current FRED mortgage rates. Below: the honest take on Detroit cap rates plus neighborhood-by-neighborhood risk.</p>
+          <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">Run a Detroit rental deal in 60 seconds with TrueCap. Address auto-fills <Link href="/states/michigan" className="font-semibold text-primary hover:underline">Michigan property tax</Link> (~1.7% in Detroit proper), HUD rent by Wayne/Oakland/Macomb county, and current FRED mortgage rates. Below: the honest take on Detroit <Link href="/glossary/cap-rate" className="font-semibold text-primary hover:underline">cap rates</Link> plus neighborhood-by-neighborhood risk.</p>
           <div className="mt-6 flex flex-wrap gap-3"><Link href="/" className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground hover:opacity-90"><Calculator className="size-4" />Underwrite a Detroit deal — free</Link></div>
         </header>
 
@@ -130,7 +130,7 @@ export default function DetroitMarketPage() {
 
         <section className="mb-10 rounded-2xl border border-[var(--brand-orange)]/25 bg-[var(--brand-orange-light)] p-5 sm:p-6">
           <h2 className="text-base font-extrabold uppercase tracking-widest text-[var(--brand-orange)] mb-2">The honest Detroit warning</h2>
-          <p className="text-sm leading-relaxed text-foreground">Detroit is the market where out-of-state investors lose the most money in US real estate. The 15%+ headline caps are mathematically real but operationally hard to capture — they assume you can collect rent, fix capex surprises, and screen tenants in neighborhoods you&apos;ve never set foot in. Stick to Northwest Detroit (Bagley, Rosedale, Sherwood Forest, Grandmont) or East English Village for first-time out-of-state deals. Save the 15% Brightmoor / Far East blocks for after you have local relationships.</p>
+          <p className="text-sm leading-relaxed text-foreground">Detroit is the market where out-of-state investors lose the most money in US real estate. The 15%+ headline caps are mathematically real but operationally hard to capture — they assume you can collect rent, fix <Link href="/glossary/capex" className="font-semibold text-primary hover:underline">capex</Link> surprises, and screen tenants in neighborhoods you&apos;ve never set foot in. Stick to Northwest Detroit (Bagley, Rosedale, Sherwood Forest, Grandmont) or East English Village for first-time out-of-state deals. Save the 15% Brightmoor / Far East blocks for after you have local relationships.</p>
         </section>
 
         <section className="mb-10">
@@ -140,7 +140,7 @@ export default function DetroitMarketPage() {
 
         <section className="mb-10 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
           <h2 className="text-xl sm:text-2xl font-extrabold mb-2">Run your next Detroit deal in 60 seconds</h2>
-          <p className="text-sm sm:text-base opacity-90 mb-4 max-w-2xl">Paste the address. Michigan tax, HUD rent for the right county, and current rate auto-fill. Cap rate, CoC, DSCR, and monthly cash flow in 1 second. Free to start. No card required.</p>
+          <p className="text-sm sm:text-base opacity-90 mb-4 max-w-2xl">Paste the address. Michigan tax, HUD rent for the right county, and current rate auto-fill. Cap rate, CoC, <Link href="/glossary/dscr" className="font-semibold text-primary hover:underline">DSCR</Link>, and monthly cash flow in 1 second. Free to start. No card required.</p>
           <Link href="/" className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity">Open the analyzer<ArrowUpRight className="w-4 h-4" /></Link>
         </section>
 

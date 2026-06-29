@@ -170,9 +170,9 @@ export default function ClevelandMarketPage() {
           </h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
             Run a Cleveland rental in 60 seconds. TrueCap auto-fills
-            the Ohio property tax rate, HUD market rent for Cuyahoga +
+            the <Link href="/states/ohio" className="font-semibold text-primary hover:underline">Ohio property tax rate</Link>, HUD market rent for Cuyahoga +
             surrounding counties, and current 30-yr fixed mortgage
-            rate. Plus 2026 cap-rate benchmarks by neighborhood + why
+            rate. Plus 2026 <Link href="/glossary/cap-rate" className="font-semibold text-primary hover:underline">cap-rate</Link> benchmarks by neighborhood + why
             Cleveland is arguably the top US BRRRR market in 2026.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
@@ -201,7 +201,7 @@ export default function ClevelandMarketPage() {
             metro — you can find 5% cap deals in Tremont and 12% cap
             deals in Slavic Village in the same day. The wide spread
             reflects real underlying differences in tenant quality,
-            property condition, and appreciation thesis. Pick the wrong
+            property condition, and <Link href="/glossary/appreciation-rate" className="font-semibold text-primary hover:underline">appreciation</Link> thesis. Pick the wrong
             neighborhood for your risk tolerance and you&apos;re
             fighting issues you didn&apos;t underwrite for.
           </p>
@@ -255,7 +255,7 @@ export default function ClevelandMarketPage() {
 
           <h3>Property tax: 1.4-1.8% effective, school district matters</h3>
           <p>
-            Ohio property tax is set at the county + school district
+            Ohio <Link href="/glossary/property-tax" className="font-semibold text-primary hover:underline">property tax</Link> is set at the county + school district
             level. Cuyahoga County combined rates in Cleveland Municipal
             School District (most of the city) effective out to ~1.5-1.8%
             of market value. Inner-ring suburbs (Lakewood, Cleveland

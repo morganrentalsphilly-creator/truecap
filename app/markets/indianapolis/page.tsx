@@ -98,13 +98,13 @@ export default function IndianapolisMarketPage() {
             </div>
           )}
           <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight">{CITY} rental property analysis — calculator + 2026 cap-rate benchmarks</h1>
-          <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">Run an Indianapolis rental deal in 60 seconds with TrueCap. Address auto-fills Indiana property tax (2% gross-assessed cap; ~1.0-1.5% effective in Marion County), HUD rent by county, and current FRED mortgage rates. Below: neighborhood-by-neighborhood cap rates plus the Indy cash-flow thesis.</p>
+          <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">Run an Indianapolis rental deal in 60 seconds with TrueCap. Address auto-fills <Link href="/states/indiana" className="font-semibold text-primary hover:underline">Indiana</Link> property tax (2% gross-assessed cap; ~1.0-1.5% effective in Marion County), HUD rent by county, and current FRED mortgage rates. Below: neighborhood-by-neighborhood <Link href="/glossary/cap-rate" className="font-semibold text-primary hover:underline">cap rates</Link> plus the Indy cash-flow thesis.</p>
           <div className="mt-6 flex flex-wrap gap-3"><Link href="/" className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground hover:opacity-90"><Calculator className="size-4" />Underwrite an Indy deal — free</Link></div>
         </header>
 
         <section className="mb-10">
           <h2 className="text-2xl font-extrabold text-foreground mb-3">Indianapolis neighborhood cap-rate map (2026)</h2>
-          <p className="text-sm text-muted-foreground mb-4 leading-relaxed">Ranges below reflect typical conventional-financing single-family + small-multi deals in each submarket. Indy still routinely produces 1% rule deals in workforce neighborhoods — pure cash-flow without the operational complexity of higher-cap Cleveland or Detroit blocks.</p>
+          <p className="text-sm text-muted-foreground mb-4 leading-relaxed">Ranges below reflect typical conventional-financing single-family + small-multi deals in each submarket. Indy still routinely produces <Link href="/glossary/1-percent-rule" className="font-semibold text-primary hover:underline">1% rule</Link> deals in workforce neighborhoods — pure cash-flow without the operational complexity of higher-cap Cleveland or Detroit blocks.</p>
           <div className="overflow-x-auto rounded-2xl border border-border bg-card">
             <table className="w-full text-sm">
               <thead className="bg-muted/40"><tr className="text-left"><th className="py-3 px-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Submarket</th><th className="py-3 px-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Cap rate</th><th className="py-3 px-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Rent</th><th className="py-3 px-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Character</th></tr></thead>
@@ -115,7 +115,7 @@ export default function IndianapolisMarketPage() {
 
         <section className="mb-10 rounded-2xl border border-[var(--brand-green)]/25 bg-[var(--brand-green-light)] p-5 sm:p-6">
           <h2 className="text-base font-extrabold uppercase tracking-widest text-[var(--brand-green)] mb-2">Why Indianapolis stays on the cash-flow list</h2>
-          <p className="text-sm leading-relaxed text-foreground">Indianapolis is one of the only major US markets where the 1% rule still routinely works in 2026. Combine sub-$100k entry prices in workforce neighborhoods with Indiana&apos;s 2% gross-assessed property tax cap, and you get genuine cash-flow math without the operational complexity of higher-cap northern industrial markets. Just don&apos;t expect coastal-style appreciation — Indy MSA appreciates 2-4%/yr.</p>
+          <p className="text-sm leading-relaxed text-foreground">Indianapolis is one of the only major US markets where the 1% rule still routinely works in 2026. Combine sub-$100k entry prices in workforce neighborhoods with Indiana&apos;s 2% gross-assessed <Link href="/glossary/property-tax" className="font-semibold text-primary hover:underline">property tax</Link> cap, and you get genuine cash-flow math without the operational complexity of higher-cap northern industrial markets. Just don&apos;t expect coastal-style <Link href="/glossary/appreciation-rate" className="font-semibold text-primary hover:underline">appreciation</Link> — Indy MSA appreciates 2-4%/yr.</p>
         </section>
 
         <section className="mb-10">

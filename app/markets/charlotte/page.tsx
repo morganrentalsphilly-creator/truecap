@@ -105,7 +105,7 @@ export default function CharlotteMarketPage() {
           )}
           <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight">{CITY} rental property analysis — calculator + 2026 cap-rate benchmarks</h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
-            Run a Charlotte rental deal in 60 seconds with TrueCap. Address auto-fills NC property tax (~0.85-0.95% effective in Mecklenburg), HUD rent by county, and current FRED mortgage rates. Below: neighborhood-by-neighborhood cap rates plus the Charlotte job-growth context.
+            Run a Charlotte rental deal in 60 seconds with TrueCap. Address auto-fills <Link href="/states/north-carolina" className="font-semibold text-primary hover:underline">NC property tax</Link> (~0.85-0.95% effective in Mecklenburg), HUD rent by county, and current FRED mortgage rates. Below: neighborhood-by-neighborhood <Link href="/glossary/cap-rate" className="font-semibold text-primary hover:underline">cap rates</Link> plus the Charlotte job-growth context.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Link href="/" className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground hover:opacity-90"><Calculator className="size-4" />Underwrite a Charlotte deal — free</Link>
@@ -134,7 +134,7 @@ export default function CharlotteMarketPage() {
 
         <section className="mb-10 rounded-2xl border border-[var(--brand-green)]/25 bg-[var(--brand-green-light)] p-5 sm:p-6">
           <h2 className="text-base font-extrabold uppercase tracking-widest text-[var(--brand-green)] mb-2">Why Charlotte keeps showing up on lists</h2>
-          <p className="text-sm leading-relaxed text-foreground">Charlotte is one of the few US metros with all three positive signals at once: net in-migration (50k+ residents/yr), employment growth (banking + fintech + tech), and property tax in the low end (~0.85-0.95%). The trade-off is appreciation-driven cap-rate compression — the days of 8% caps in inner Charlotte are gone. But for balanced cash + appreciation in a growing market, it&apos;s hard to beat.</p>
+          <p className="text-sm leading-relaxed text-foreground">Charlotte is one of the few US metros with all three positive signals at once: net in-migration (50k+ residents/yr), employment growth (banking + fintech + tech), and <Link href="/glossary/property-tax" className="font-semibold text-primary hover:underline">property tax</Link> in the low end (~0.85-0.95%). The trade-off is appreciation-driven cap-rate compression — the days of 8% caps in inner Charlotte are gone. But for balanced cash + appreciation in a growing market, it&apos;s hard to beat.</p>
         </section>
 
         <section className="mb-10">
@@ -151,7 +151,7 @@ export default function CharlotteMarketPage() {
 
         <section className="mb-10 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
           <h2 className="text-xl sm:text-2xl font-extrabold mb-2">Run your next Charlotte deal in 60 seconds</h2>
-          <p className="text-sm sm:text-base opacity-90 mb-4 max-w-2xl">Paste the address. NC tax, HUD rent for Mecklenburg, and current rate auto-fill. Cap rate, CoC, DSCR, and monthly cash flow in 1 second. Free to start. No card required.</p>
+          <p className="text-sm sm:text-base opacity-90 mb-4 max-w-2xl">Paste the address. NC tax, HUD rent for Mecklenburg, and current rate auto-fill. Cap rate, CoC, <Link href="/glossary/dscr" className="font-semibold text-primary hover:underline">DSCR</Link>, and monthly cash flow in 1 second. Free to start. No card required.</p>
           <Link href="/" className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity">Open the analyzer<ArrowUpRight className="w-4 h-4" /></Link>
         </section>
 

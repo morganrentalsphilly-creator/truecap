@@ -96,7 +96,7 @@ export default function MemphisMarketPage() {
             </div>
           )}
           <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight">{CITY} rental property analysis — calculator + 2026 cap-rate benchmarks</h1>
-          <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">Run a Memphis rental deal in 60 seconds with TrueCap. Address auto-fills Tennessee property tax (~0.7-1.1% in Shelby County), HUD rent by county, and current FRED mortgage rates. Below: neighborhood cap-rate map plus the turnkey vs. direct trade-off most Memphis investors face.</p>
+          <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">Run a Memphis rental deal in 60 seconds with TrueCap. Address auto-fills <Link href="/states/tennessee" className="font-semibold text-primary hover:underline">Tennessee</Link> <Link href="/glossary/property-tax" className="font-semibold text-primary hover:underline">property tax</Link> (~0.7-1.1% in Shelby County), HUD rent by county, and current FRED mortgage rates. Below: neighborhood <Link href="/glossary/cap-rate" className="font-semibold text-primary hover:underline">cap-rate</Link> map plus the turnkey vs. direct trade-off most Memphis investors face.</p>
           <div className="mt-6 flex flex-wrap gap-3"><Link href="/" className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground hover:opacity-90"><Calculator className="size-4" />Underwrite a Memphis deal — free</Link></div>
         </header>
 
@@ -123,7 +123,7 @@ export default function MemphisMarketPage() {
 
         <section className="mb-10 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
           <h2 className="text-xl sm:text-2xl font-extrabold mb-2">Run your next Memphis deal in 60 seconds</h2>
-          <p className="text-sm sm:text-base opacity-90 mb-4 max-w-2xl">Paste the address. Tennessee tax, HUD rent for Shelby County, and current rate auto-fill. Cap rate, CoC, DSCR, and monthly cash flow in 1 second. Free to start. No card required.</p>
+          <p className="text-sm sm:text-base opacity-90 mb-4 max-w-2xl">Paste the address. Tennessee tax, HUD rent for Shelby County, and current rate auto-fill. Cap rate, CoC, <Link href="/glossary/dscr" className="font-semibold text-primary hover:underline">DSCR</Link>, and monthly cash flow in 1 second. Free to start. No card required.</p>
           <Link href="/" className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity">Open the analyzer<ArrowUpRight className="w-4 h-4" /></Link>
         </section>
 

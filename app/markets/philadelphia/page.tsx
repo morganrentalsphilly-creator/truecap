@@ -208,8 +208,11 @@ export default function PhiladelphiaMarketPage() {
             neighborhoods to 10%+ in distressed-but-recovering blocks
             within a 15-minute drive. Pick the right neighborhood and
             the deal pencils with positive leverage; pick the wrong one
-            and you&apos;re fighting vacancy + capex you didn&apos;t
-            underwrite for.
+            and you&apos;re fighting{" "}
+            <Link href="/glossary/vacancy" className="font-semibold text-primary hover:underline">vacancy</Link>{" "}
+            +{" "}
+            <Link href="/glossary/capex" className="font-semibold text-primary hover:underline">capex</Link>{" "}
+            you didn&apos;t underwrite for.
           </p>
 
           <div className="not-prose mt-4 overflow-x-auto rounded-2xl border border-border bg-card">
@@ -245,9 +248,13 @@ export default function PhiladelphiaMarketPage() {
 
           <h3>Property tax: 1.49% effective + the Homestead Exemption</h3>
           <p>
-            Philadelphia property tax is based on 100% of the OPA
+            Philadelphia{" "}
+            <Link href="/glossary/property-tax" className="font-semibold text-primary hover:underline">property tax</Link>{" "}
+            is based on 100% of the OPA
             (Office of Property Assessment) market value × 1.3998%
-            combined rate. Effective rate runs ~1.49% of fair market
+            combined rate, and is one of the higher rates across{" "}
+            <Link href="/states/pennsylvania" className="font-semibold text-primary hover:underline">Pennsylvania</Link>.
+            Effective rate runs ~1.49% of fair market
             value once you account for assessment lag + actual sales
             prices. Owner-occupied properties qualify for the Homestead
             Exemption ($80,000 off assessed value) — doesn&apos;t help

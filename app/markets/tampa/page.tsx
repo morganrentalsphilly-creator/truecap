@@ -163,7 +163,10 @@ export default function TampaMarketPage() {
           </h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
             Run a Tampa rental deal in 60 seconds with TrueCap. Address
-            auto-fills Florida property tax (~0.95-1.05%), HUD rent for
+            auto-fills{" "}
+            <Link href="/states/florida" className="font-semibold text-primary hover:underline">Florida</Link>{" "}
+            <Link href="/glossary/property-tax" className="font-semibold text-primary hover:underline">property tax</Link>{" "}
+            (~0.95-1.05%), HUD rent for
             Hillsborough + Pinellas counties, and current FRED mortgage rates.
             Below: neighborhood-by-neighborhood cap rates and the insurance
             picture for 2026.
@@ -251,7 +254,11 @@ export default function TampaMarketPage() {
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-4 max-w-2xl">
             Paste the address. Florida tax, HUD rent for the right county, and
-            current rate auto-fill. Cap rate, CoC, DSCR, and monthly cash flow
+            current rate auto-fill.{" "}
+            <Link href="/glossary/cap-rate" className="font-semibold text-primary hover:underline">Cap rate</Link>,
+            CoC,{" "}
+            <Link href="/glossary/dscr" className="font-semibold text-primary hover:underline">DSCR</Link>,
+            and monthly cash flow
             in 1 second. Free to start. No card required.
           </p>
           <Link

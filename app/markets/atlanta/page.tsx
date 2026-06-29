@@ -243,9 +243,12 @@ export default function AtlantaMarketPage() {
           </p>
           <p>
             <strong>The boring-but-correct ATL play:</strong> balanced
-            submarkets at 5-7% cap rates with 3-4% expected
-            appreciation, combined with principal paydown and tax
-            savings. Total levered return in the 14-18% range with
+            submarkets at 5-7%{" "}
+            <Link href="/glossary/cap-rate" className="font-semibold text-primary hover:underline">cap rates</Link>{" "}
+            with 3-4% expected appreciation, combined with principal
+            paydown and{" "}
+            <Link href="/glossary/tax-savings" className="font-semibold text-primary hover:underline">tax savings</Link>.
+            Total levered return in the 14-18% range with
             real downside protection. Grant Park, East Atlanta Village,
             parts of West End, parts of Smyrna/Marietta all fit this
             profile.
@@ -255,7 +258,8 @@ export default function AtlantaMarketPage() {
 
           <h3>Property tax: 0.85-1.1% effective, county-dependent</h3>
           <p>
-            Georgia property tax is set at the county level + school
+            <Link href="/states/georgia" className="font-semibold text-primary hover:underline">Georgia</Link>{" "}
+            property tax is set at the county level + school
             district + city millage. Fulton County (Atlanta proper)
             effective rate runs ~1.0-1.1%. DeKalb similar. Cobb +
             Gwinnett (suburbs) closer to 0.8-0.9%. Owner-occupied

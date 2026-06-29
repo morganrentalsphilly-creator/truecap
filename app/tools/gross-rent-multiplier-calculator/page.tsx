@@ -154,7 +154,11 @@ export default function GrmCalculatorPage() {
               do have is price and asking rent. GRM is the ratio that lets
               you sort that list of 40 into the 8 worth actually
               underwriting, in about 90 seconds. That&apos;s why it&apos;s
-              the first metric every experienced investor reaches for.
+              the first metric every experienced investor reaches for — read{" "}
+              <Link href="/blog/gross-rent-multiplier-explained" className="font-semibold text-primary hover:underline">gross rent multiplier explained</Link>{" "}
+              for the full primer, and pair it with the{" "}
+              <Link href="/tools/1-percent-rule-calculator" className="font-semibold text-primary hover:underline">1% rule calculator</Link>{" "}
+              as a second fast screen.
             </p>
 
             <h3>The formula</h3>

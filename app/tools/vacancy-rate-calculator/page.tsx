@@ -14,7 +14,7 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "Vacancy Rate Calculator — Free Rental Property Tool",
+  title: "Rental Property Vacancy Rate Calculator",
   description:
     "Free vacancy rate calculator. Convert vacant days + turnover cost into an effective rate, with realistic benchmarks sellers often under-quote.",
   keywords: [

@@ -316,7 +316,13 @@ export default function BestFreeRentalPropertyCalculator2026Post() {
             <p>
               The fastest way to know which tool fits your workflow is to run
               one of your real deals through it. TrueCap is free for the core
-              underwriting, takes 60 seconds, no signup required.
+              underwriting, takes 60 seconds, no signup required. Browse the
+              full set of{" "}
+              <Link href="/tools" className="font-semibold text-primary hover:underline">free rental property calculators</Link>, start
+              with the{" "}
+              <Link href="/tools/cap-rate-calculator" className="font-semibold text-primary hover:underline">cap rate calculator</Link>, or
+              see how the numbers play out in a specific market like our{" "}
+              <Link href="/markets/atlanta" className="font-semibold text-primary hover:underline">Atlanta rental market breakdown</Link>.
             </p>
             <p className="not-prose">
               <Link href="/" className="inline-flex items-center gap-2 rounded-xl bg-primary text-primary-foreground px-5 py-3 font-bold hover:opacity-90">

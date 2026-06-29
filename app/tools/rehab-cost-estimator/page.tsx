@@ -151,7 +151,8 @@ export default function RehabEstimatorPage() {
               common rehab work item. Pick the scope, the calculator does
               the math, you get a number in seconds. Then add a contingency
               percentage (10-20% is standard) and you have a defensible
-              budget.
+              budget. For the full methodology behind these numbers, read{" "}
+              <Link href="/blog/how-to-estimate-rehab-costs" className="font-semibold text-primary hover:underline">how to estimate rehab costs</Link>.
             </p>
 
             <h2 className="text-2xl sm:text-3xl">How to use the estimator</h2>
@@ -171,8 +172,12 @@ export default function RehabEstimatorPage() {
               </li>
               <li>
                 <strong>Use the total as your underwriting input.</strong>{" "}
-                When you run the full BRRRR or Fix-and-Flip in TrueCap, the
-                rehab estimator&apos;s total flows in as the default.
+                When you run the full{" "}
+                <Link href="/tools/brrrr-calculator" className="font-semibold text-primary hover:underline">BRRRR calculator</Link>{" "}
+                or Fix-and-Flip in TrueCap, the
+                rehab estimator&apos;s total flows in as the default. New to
+                the strategy? Start with{" "}
+                <Link href="/blog/brrrr-method-explained" className="font-semibold text-primary hover:underline">the BRRRR method explained</Link>.
               </li>
             </ol>
 

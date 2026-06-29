@@ -14,7 +14,7 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "Closing Cost Calculator | Free Rental Property Tool",
+  title: "Rental Property Closing Cost Calculator",
   description:
     "Free closing cost calculator for rental purchases. Origination, title, transfer tax, escrow, prepaids — every line item, plus a typical total.",
   keywords: [

@@ -95,7 +95,7 @@ export default function DallasMarketPage() {
             </div>
           )}
           <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight">{CITY}-Fort Worth rental property analysis — calculator + 2026 cap-rate benchmarks</h1>
-          <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">Run a DFW rental deal in 60 seconds with TrueCap. Address auto-fills Texas property tax (1.6-2.5%+ effective depending on MUD), HUD rent by county, and current FRED mortgage rates. Below: neighborhood cap rates plus the high-tax / no-income-tax trade-off that defines TX underwriting.</p>
+          <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">Run a DFW rental deal in 60 seconds with TrueCap. Address auto-fills <Link href="/states/texas" className="font-semibold text-primary hover:underline">Texas property tax</Link> (1.6-2.5%+ effective depending on MUD), HUD rent by county, and current FRED mortgage rates. Below: neighborhood <Link href="/glossary/cap-rate" className="font-semibold text-primary hover:underline">cap rates</Link> plus the high-tax / no-income-tax trade-off that defines TX underwriting.</p>
           <div className="mt-6 flex flex-wrap gap-3"><Link href="/" className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground hover:opacity-90"><Calculator className="size-4" />Underwrite a DFW deal — free</Link></div>
         </header>
 
@@ -112,7 +112,7 @@ export default function DallasMarketPage() {
 
         <section className="mb-10 rounded-2xl border border-[var(--brand-orange)]/25 bg-[var(--brand-orange-light)] p-5 sm:p-6">
           <h2 className="text-base font-extrabold uppercase tracking-widest text-[var(--brand-orange)] mb-2">The Texas property tax reality check</h2>
-          <p className="text-sm leading-relaxed text-foreground">Texas has the highest effective property tax rates in the US — typically 1.6-2.5%+, with new-construction MUD suburbs hitting 2.8-3.2% effective. This is the single biggest variable in TX underwriting. A 6% headline cap can shrink to 3.5% net after the tax bill. Always pull the actual current tax record from the County Appraisal District (Dallas CAD, Tarrant CAD, Collin CAD) before committing. Don&apos;t trust generic state averages.</p>
+          <p className="text-sm leading-relaxed text-foreground">Texas has the highest effective <Link href="/glossary/property-tax" className="font-semibold text-primary hover:underline">property tax</Link> rates in the US — typically 1.6-2.5%+, with new-construction MUD suburbs hitting 2.8-3.2% effective. This is the single biggest variable in TX underwriting. A 6% headline cap can shrink to 3.5% net after the tax bill. Always pull the actual current tax record from the County Appraisal District (Dallas CAD, Tarrant CAD, Collin CAD) before committing. Don&apos;t trust generic state averages.</p>
         </section>
 
         <section className="mb-10">
@@ -122,7 +122,7 @@ export default function DallasMarketPage() {
 
         <section className="mb-10 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
           <h2 className="text-xl sm:text-2xl font-extrabold mb-2">Run your next DFW deal in 60 seconds</h2>
-          <p className="text-sm sm:text-base opacity-90 mb-4 max-w-2xl">Paste the address. Texas tax baseline, HUD rent for the right county, and current rate auto-fill. Cap rate, CoC, DSCR, and monthly cash flow in 1 second. Free to start. No card required.</p>
+          <p className="text-sm sm:text-base opacity-90 mb-4 max-w-2xl">Paste the address. Texas tax baseline, HUD rent for the right county, and current rate auto-fill. Cap rate, CoC, <Link href="/glossary/dscr" className="font-semibold text-primary hover:underline">DSCR</Link>, and monthly cash flow in 1 second. Free to start. No card required.</p>
           <Link href="/" className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity">Open the analyzer<ArrowUpRight className="w-4 h-4" /></Link>
         </section>
 

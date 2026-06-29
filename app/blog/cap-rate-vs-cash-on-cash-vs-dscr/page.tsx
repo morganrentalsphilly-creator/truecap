@@ -244,7 +244,7 @@ export default function BlogPost() {
           </p>
           <p>
             <Link href="/tools/cap-rate-calculator" className="text-primary font-semibold hover:underline">
-              Compute cap rate on a real property →
+              Use our free cap rate calculator →
             </Link>
           </p>
 

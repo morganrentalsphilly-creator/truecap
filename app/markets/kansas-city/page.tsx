@@ -94,13 +94,13 @@ export default function KansasCityMarketPage() {
             </div>
           )}
           <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight">{CITY} rental property analysis — calculator + 2026 cap-rate benchmarks</h1>
-          <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">Run a Kansas City rental deal in 60 seconds with TrueCap. Address auto-fills Missouri property tax (~1.0%), HUD rent by county, and current FRED mortgage rates. Below: neighborhood-by-neighborhood cap rates plus the KC cash-flow thesis (and the MO-vs-KS-side question).</p>
+          <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">Run a Kansas City rental deal in 60 seconds with TrueCap. Address auto-fills <Link href="/states/missouri" className="font-semibold text-primary hover:underline">Missouri</Link> <Link href="/glossary/property-tax" className="font-semibold text-primary hover:underline">property tax</Link> (~1.0%), HUD rent by county, and current FRED mortgage rates. Below: neighborhood-by-neighborhood <Link href="/glossary/cap-rate" className="font-semibold text-primary hover:underline">cap rates</Link> plus the KC cash-flow thesis (and the MO-vs-KS-side question).</p>
           <div className="mt-6 flex flex-wrap gap-3"><Link href="/" className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground hover:opacity-90"><Calculator className="size-4" />Underwrite a KC deal — free</Link></div>
         </header>
 
         <section className="mb-10">
           <h2 className="text-2xl font-extrabold text-foreground mb-3">Kansas City neighborhood cap-rate map (2026)</h2>
-          <p className="text-sm text-muted-foreground mb-4 leading-relaxed">Ranges reflect typical conventional-financing single-family + small-multi deals. KC is one of the most reliably cash-flow-positive top-50 US markets; the trade-off vs Sun Belt growth markets is lower appreciation.</p>
+          <p className="text-sm text-muted-foreground mb-4 leading-relaxed">Ranges reflect typical conventional-financing single-family + small-multi deals. KC is one of the most reliably cash-flow-positive top-50 US markets; the trade-off vs Sun Belt growth markets is lower <Link href="/glossary/appreciation-rate" className="font-semibold text-primary hover:underline">appreciation</Link>.</p>
           <div className="overflow-x-auto rounded-2xl border border-border bg-card">
             <table className="w-full text-sm">
               <thead className="bg-muted/40"><tr className="text-left"><th className="py-3 px-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Submarket</th><th className="py-3 px-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Cap rate</th><th className="py-3 px-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Rent</th><th className="py-3 px-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Character</th></tr></thead>

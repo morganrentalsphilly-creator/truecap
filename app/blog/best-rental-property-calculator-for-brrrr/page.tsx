@@ -294,7 +294,13 @@ export default function BestRentalPropertyCalculatorForBrrrrPost() {
             <p>
               The fastest way to know which tool fits your workflow is to run
               one of your real deals through it. TrueCap is free for the core
-              underwriting, takes 60 seconds, no signup required.
+              underwriting, takes 60 seconds, no signup required. Start with our{" "}
+              <Link href="/tools/brrrr-calculator" className="font-semibold text-primary hover:underline">BRRRR calculator</Link>{" "}
+              to model the buy-rehab-rent-refinance cycle, pressure-test the refinance with the{" "}
+              <Link href="/tools/dscr-calculator" className="font-semibold text-primary hover:underline">DSCR calculator</Link>, and
+              if the strategy itself is still new to you, read{" "}
+              <Link href="/blog/brrrr-method-explained" className="font-semibold text-primary hover:underline">the BRRRR method explained</Link>{" "}
+              first.
             </p>
             <p className="not-prose">
               <Link href="/" className="inline-flex items-center gap-2 rounded-xl bg-primary text-primary-foreground px-5 py-3 font-bold hover:opacity-90">

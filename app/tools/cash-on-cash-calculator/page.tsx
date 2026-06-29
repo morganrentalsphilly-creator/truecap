@@ -145,7 +145,11 @@ export default function CoCCalculatorPage() {
               Cash-on-cash return measures the annual cash flow a property
               generates as a percentage of the actual cash you invested to
               acquire it. It&apos;s the &ldquo;return on the money you put
-              in&rdquo; — and unlike cap rate, it accounts for financing.
+              in&rdquo; — and unlike the{" "}
+              <Link href="/tools/cap-rate-calculator" className="font-semibold text-primary hover:underline">cap rate</Link>,
+              it accounts for financing. For a worked example start to
+              finish, see{" "}
+              <Link href="/blog/how-to-calculate-cash-on-cash-return" className="font-semibold text-primary hover:underline">how to calculate cash-on-cash return</Link>.
             </p>
 
             <h3>The formula</h3>
@@ -238,7 +242,9 @@ export default function CoCCalculatorPage() {
             <p>
               Use CoC for &ldquo;does this deal beat my other options for
               cash today?&rdquo; — and use the full TrueCap analyzer for the
-              after-tax, multi-year, exit-aware view.
+              after-tax, multi-year, exit-aware view. If you currently run
+              this math in another tool, see how TrueCap stacks up against the{" "}
+              <Link href="/vs/biggerpockets-calculator" className="font-semibold text-primary hover:underline">BiggerPockets calculator</Link>.
             </p>
 
             <h2 className="text-2xl sm:text-3xl">Common mistakes</h2>

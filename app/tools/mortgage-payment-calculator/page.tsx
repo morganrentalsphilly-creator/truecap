@@ -150,7 +150,9 @@ export default function MortgagePaymentPage() {
               cash that leaves your account. PITI typically runs 15-25%
               higher than P&amp;I depending on your state&apos;s tax rate.
               Underwriting a deal on P&amp;I-only math is the fastest way
-              to make a deal look more profitable than it is.
+              to make a deal look more profitable than it is. (For a full
+              breakdown of each piece, read{" "}
+              <Link href="/blog/piti-explained-rental-property" className="font-semibold text-primary hover:underline">PITI explained for rental property</Link>.)
             </p>
 
             <h2 className="text-2xl sm:text-3xl">The amortization formula</h2>
@@ -199,8 +201,12 @@ export default function MortgagePaymentPage() {
             <p>
               A mortgage payment is just one input in a real underwrite.
               You also need to know your DSCR (does the property cover
-              the payment?), cash-on-cash return (what does your money
-              actually earn?), 10-year projection (does this compound?),
+              the payment? — run the{" "}
+              <Link href="/tools/dscr-calculator" className="font-semibold text-primary hover:underline">DSCR calculator</Link>),
+              cash-on-cash return (what does your money
+              actually earn?), the upfront cash to close (estimate it with the{" "}
+              <Link href="/tools/closing-cost-calculator" className="font-semibold text-primary hover:underline">closing cost calculator</Link>),
+              10-year projection (does this compound?),
               and tax position (how much do you actually keep?). TrueCap&apos;s
               full analyzer runs all of those at once — free to start, no
               card required.

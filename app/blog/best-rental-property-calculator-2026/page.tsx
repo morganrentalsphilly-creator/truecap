@@ -321,7 +321,12 @@ export default function BestRentalPropertyCalculator2026Post() {
             <p>
               The 7 calculators below are the ones rental investors most often
               evaluate when they search &quot;best rental property
-              calculator&quot; or &quot;rental analysis tool&quot;. Ranking
+              calculator&quot; or &quot;rental analysis tool&quot;. If you just
+              want a single metric fast, our free{" "}
+              <Link href="/tools/cap-rate-calculator" className="font-semibold text-primary hover:underline">cap rate calculator</Link>,{" "}
+              <Link href="/tools/cash-on-cash-calculator" className="font-semibold text-primary hover:underline">cash-on-cash return calculator</Link>, and{" "}
+              <Link href="/tools/dscr-calculator" className="font-semibold text-primary hover:underline">DSCR calculator</Link>{" "}
+              each handle one piece of the underwrite with no signup. Ranking
               criteria, weighted roughly by impact on a typical solo investor:
             </p>
             <ol>
