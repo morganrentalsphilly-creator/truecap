@@ -1717,6 +1717,7 @@ export function SavedAnalysesPage({
                       <button
                         type="button"
                         onClick={() => handleOpenSavedDeal(item.id)}
+                        title={item.address ?? undefined}
                         className="flex max-w-full items-center gap-2 text-left text-base font-bold leading-tight text-foreground hover:text-primary"
                       >
                         <span className="truncate">{address.main}</span>

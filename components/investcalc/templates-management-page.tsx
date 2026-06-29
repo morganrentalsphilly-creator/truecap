@@ -931,9 +931,14 @@ export function TemplatesManagementPage({
               <Loader2 className="size-4 animate-spin" /> Loading your deals…
             </div>
           ) : dealOptions.length === 0 ? (
-            <p className="py-6 text-sm text-muted-foreground">
-              You have no saved deals to apply this to yet.
-            </p>
+            <div className="py-6 text-center">
+              <p className="text-sm text-muted-foreground">
+                No saved deals yet — analyze a property and save it, then apply this template to it.
+              </p>
+              <Button asChild className="mt-3 rounded-full" onClick={() => setApplyForTemplate(null)}>
+                <Link href="/">Analyze a property</Link>
+              </Button>
+            </div>
           ) : (
             <div className="space-y-1.5">
               <label htmlFor="apply-deal-select" className="text-xs font-semibold text-muted-foreground">
