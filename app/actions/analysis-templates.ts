@@ -61,7 +61,7 @@ function num(v: unknown, fallback: number): number {
 
 function normalizeTemplateBuyBox(raw: unknown): AnalysisTemplateBuyBox | null {
   if (!raw || typeof raw !== "object") return null;
-  const o = raw as Record<string, unknown>;
+  const o = raw as unknown as Record<string, unknown>;
   const pick = (v: unknown): number | null => {
     if (v == null || v === "") return null;
     const n = typeof v === "number" ? v : Number(v);
@@ -248,7 +248,7 @@ export async function listAnalysisTemplatesAction(): Promise<ListTemplatesResult
   }
 
   const templates: AnalysisTemplateOption[] = (data ?? []).map((row) =>
-    mapTemplateRow(row as Record<string, unknown>)
+    mapTemplateRow(row as unknown as Record<string, unknown>)
   );
 
   // Derive "used by X deals" — one cheap query, counted in JS so we don't
@@ -417,8 +417,8 @@ export async function createAnalysisTemplateAction(
     return { ok: false, code: "SERVER_ERROR", message: error.message };
   }
 
-  const saved = mapTemplateRow(data as Record<string, unknown>);
-  await recordTemplateVersion(supabase, user.id, saved.id, data as Record<string, unknown>);
+  const saved = mapTemplateRow(data as unknown as Record<string, unknown>);
+  await recordTemplateVersion(supabase, user.id, saved.id, data as unknown as Record<string, unknown>);
   return { ok: true, template: saved };
 }
 
@@ -556,8 +556,8 @@ export async function updateAnalysisTemplateAction(
     return { ok: false, code: "SERVER_ERROR", message: error.message };
   }
 
-  const saved = mapTemplateRow(data as Record<string, unknown>);
-  await recordTemplateVersion(supabase, user.id, saved.id, data as Record<string, unknown>);
+  const saved = mapTemplateRow(data as unknown as Record<string, unknown>);
+  await recordTemplateVersion(supabase, user.id, saved.id, data as unknown as Record<string, unknown>);
   return { ok: true, template: saved };
 }
 
@@ -711,7 +711,7 @@ export async function duplicateTemplateAction(templateId: string): Promise<Updat
   if (!srcRow) {
     return { ok: false, code: "NOT_FOUND", message: "Template not found." };
   }
-  const src = mapTemplateRow(srcRow as Record<string, unknown>);
+  const src = mapTemplateRow(srcRow as unknown as Record<string, unknown>);
 
   const { data: names } = await supabase
     .from("analysis_templates")
@@ -850,7 +850,7 @@ export async function applyTemplateToDealAction(
   if (!tplRow) {
     return { ok: false, code: "NOT_FOUND", message: "Template not found." };
   }
-  const template = mapTemplateRow(tplRow as Record<string, unknown>);
+  const template = mapTemplateRow(tplRow as unknown as Record<string, unknown>);
 
   const parsed = investmentFormSchema.safeParse((dealRow as { form_snapshot?: unknown }).form_snapshot);
   if (!parsed.success) {
@@ -996,7 +996,7 @@ export async function restoreTemplateVersionAction(
   if (!ver) {
     return { ok: false, code: "NOT_FOUND", message: "Version not found." };
   }
-  const snap = ((ver as { snapshot: Record<string, unknown> | null }).snapshot ?? {}) as Record<string, unknown>;
+  const snap = ((ver as { snapshot: Record<string, unknown> | null }).snapshot ?? {}) as unknown as Record<string, unknown>;
 
   const updatePayload = {
     template_name: snap.template_name,
@@ -1043,7 +1043,7 @@ export async function restoreTemplateVersionAction(
     return { ok: false, code: "SERVER_ERROR", message: error.message };
   }
 
-  const restored = mapTemplateRow(data as Record<string, unknown>);
-  await recordTemplateVersion(supabase, user.id, templateId, data as Record<string, unknown>);
+  const restored = mapTemplateRow(data as unknown as Record<string, unknown>);
+  await recordTemplateVersion(supabase, user.id, templateId, data as unknown as Record<string, unknown>);
   return { ok: true, template: restored };
 }
