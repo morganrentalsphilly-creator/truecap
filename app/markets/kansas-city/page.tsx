@@ -63,6 +63,15 @@ const FAQS: { q: string; a: string }[] = [
 export default function KansasCityMarketPage() {
   const siteUrl = getSiteUrl();
   const canonicalUrl = `${siteUrl}/markets/${SLUG}`;
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "TrueCap", item: `${siteUrl}/` },
+      { "@type": "ListItem", position: 2, name: "Markets", item: `${siteUrl}/markets` },
+      { "@type": "ListItem", position: 3, name: CITY, item: canonicalUrl },
+    ],
+  };
   // Strategy-fit badge — a label over the market's median cap rate.
   const benchmark = getCapRateBenchmark("Kansas City, MO");
   const fit = benchmark ? marketStrategyFit(benchmark.median) : null;
@@ -78,6 +87,7 @@ export default function KansasCityMarketPage() {
   return (
     <div className="min-h-screen bg-background">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
       <main id="main" className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <div className="mb-2"><Link href="/" className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground">← TrueCap</Link></div>

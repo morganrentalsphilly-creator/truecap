@@ -51,10 +51,20 @@ export default function PropertyManagementPost() {
     mainEntityOfPage: `${siteUrl}/blog/${SLUG}`,
     isPartOf: { "@id": `${siteUrl}/blog#blog` },
   };
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "TrueCap", item: `${siteUrl}/` },
+      { "@type": "ListItem", position: 2, name: "Blog", item: `${siteUrl}/blog` },
+      { "@type": "ListItem", position: 3, name: TITLE, item: `${siteUrl}/blog/${SLUG}` },
+    ],
+  };
 
   return (
     <div className="min-h-screen bg-background">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <article>
         <div className="mb-2"><Link href="/blog" className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground">← Blog</Link></div>
