@@ -1411,6 +1411,7 @@ export function InvestCalcPage({
     const input: TaxStrategyInput = {
       monthlyRentalIncome: result.monthlyRentalIncome,
       totalOperatingExpenses: result.totalOperatingExpenses,
+      capexReserveMonthly: result.capex,
       annualDepreciation: result.annualDepreciation,
       yearlyInterestSchedule: result.yearlyInterestSchedule,
       rentGrowthPct: values.rentGrowthPct,
@@ -1435,6 +1436,7 @@ export function InvestCalcPage({
     input: {
       monthlyRentalIncome: result.monthlyRentalIncome,
       totalOperatingExpenses: result.totalOperatingExpenses,
+      capexReserveMonthly: result.capex,
       monthlyPayment: result.monthlyPayment,
       pmiMonthly: result.pmiMonthly,
       loanAmount: result.loanAmount,

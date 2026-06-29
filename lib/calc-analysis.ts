@@ -277,6 +277,7 @@ export function calculateAnalysis(values: InvestmentFormValues): AnalysisResult 
   const tenYearProjection = buildTenYearProjection({
     monthlyRentalIncome,
     totalOperatingExpenses,
+    capexReserveMonthly: capex,
     monthlyPayment,
     pmiMonthly,
     pmiNoCancel: pmiNoCancel === true,
@@ -295,6 +296,7 @@ export function calculateAnalysis(values: InvestmentFormValues): AnalysisResult 
   const taxStrategyYears = buildTaxStrategyProjection({
     monthlyRentalIncome,
     totalOperatingExpenses,
+    capexReserveMonthly: capex,
     annualDepreciation: annualDepreciationRounded,
     yearlyInterestSchedule,
     rentGrowthPct,

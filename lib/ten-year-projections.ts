@@ -1,7 +1,10 @@
 // v3: taxSavingsAnnual is now a SIGNED net tax effect (nets rental income
 // against deductions), not a one-way shield — so cached v2 snapshots, which
 // overstated after-tax cash flow in tax-positive years, regenerate.
-export const TEN_YEAR_PROJECTION_SNAPSHOT_VERSION = 3;
+// v4: the CapEx reserve is excluded from the TAXABLE-income line (a reserve
+// isn't a deductible operating expense), so v3 snapshots that over-sheltered
+// rental income regenerate.
+export const TEN_YEAR_PROJECTION_SNAPSHOT_VERSION = 4;
 
 export interface ProjectionYear {
   year: number;
@@ -17,6 +20,10 @@ export interface ProjectionYear {
 export interface TenYearProjectionInput {
   monthlyRentalIncome: number;
   totalOperatingExpenses: number;
+  /** Monthly CapEx RESERVE inside totalOperatingExpenses — a cash set-aside,
+   *  not a deductible operating expense. Kept in the cash-flow line, excluded
+   *  from the taxable-income line. */
+  capexReserveMonthly: number;
   monthlyPayment: number;
   /** Monthly PMI (0 if none). Folded into the displayed debt service and
    *  dropped once the loan amortizes to 80% LTV. */
@@ -48,6 +55,10 @@ export interface TenYearProjectionSnapshotPayload {
 export function buildTenYearProjection(input: TenYearProjectionInput): ProjectionYear[] {
   const baseAnnualRent = input.monthlyRentalIncome * 12;
   const baseAnnualExpenses = input.totalOperatingExpenses * 12;
+  // Same expenses MINUS the CapEx reserve — used only for the taxable-income
+  // line, since a reserve isn't a deductible operating expense.
+  const baseAnnualExpensesExCapex =
+    Math.max(0, input.totalOperatingExpenses - input.capexReserveMonthly) * 12;
   const principalAndInterestAnnual = input.monthlyPayment * 12;
   const expenseGrowthFactor = 1 + input.expenseGrowthPct / 100;
   const rentGrowthFactor = 1 + input.rentGrowthPct / 100;
@@ -91,8 +102,11 @@ export function buildTenYearProjection(input: TenYearProjectionInput): Projectio
       input.includeInterestDeduction && typeof yearlyInterestForYear === "number"
         ? yearlyInterestForYear
         : 0;
+    const operatingExpensesExCapexAnnual = Math.round(
+      baseAnnualExpensesExCapex * Math.pow(expenseGrowthFactor, index)
+    );
     const taxableIncomeAnnual =
-      rentalIncomeAnnual - operatingExpensesAnnual - deductibleInterestAnnual - input.annualDepreciation;
+      rentalIncomeAnnual - operatingExpensesExCapexAnnual - deductibleInterestAnnual - input.annualDepreciation;
     const taxSavingsAnnual = Math.round(-taxableIncomeAnnual * input.taxRate);
     const afterTaxCashFlowAnnual = netCashFlowAnnual + taxSavingsAnnual;
     cumulativeCashFlowAnnual += netCashFlowAnnual;

@@ -269,6 +269,7 @@ describe("PMI", () => {
     const base = {
       monthlyRentalIncome: 2_000,
       totalOperatingExpenses: 500,
+      capexReserveMonthly: 0,
       monthlyPayment: 1_000,
       pmiMonthly: 100,
       loanAmount: 82_000,
@@ -285,6 +286,30 @@ describe("PMI", () => {
     const forLife = buildTenYearProjection({ ...base, pmiNoCancel: true });
     expect(cancels[0]!.debtServiceAnnual).toBe(forLife[0]!.debtServiceAnnual); // PMI both, year 1
     expect(forLife[9]!.debtServiceAnnual).toBeGreaterThan(cancels[9]!.debtServiceAnnual); // MIP stays
+  });
+
+  it("excludes the CapEx reserve from the taxable-income line, not the cash-flow line", () => {
+    const base = {
+      monthlyRentalIncome: 2_000,
+      totalOperatingExpenses: 500,
+      monthlyPayment: 1_000,
+      taxSavingsMonthly: 0,
+      annualDepreciation: 0,
+      yearlyInterestSchedule: [] as number[],
+      rentGrowthPct: 0,
+      expenseGrowthPct: 0,
+      taxRate: 0.24,
+      includeInterestDeduction: false,
+    };
+    const noReserve = buildTenYearProjection({ ...base, capexReserveMonthly: 0 });
+    const withReserve = buildTenYearProjection({ ...base, capexReserveMonthly: 100 });
+    // Cash flow is identical — the reserve is still a real outflow.
+    expect(withReserve[0]!.netCashFlowAnnual).toBe(noReserve[0]!.netCashFlowAnnual);
+    // But the reserve no longer shelters rental income, so the after-tax line is
+    // lower by exactly reserveAnnual × taxRate = 100 × 12 × 0.24 = 288.
+    expect(noReserve[0]!.afterTaxCashFlowAnnual - withReserve[0]!.afterTaxCashFlowAnnual).toBe(
+      Math.round(100 * 12 * 0.24)
+    );
   });
 });
 
@@ -465,6 +490,7 @@ describe("ten-year projection", () => {
     const years = buildTenYearProjection({
       monthlyRentalIncome: 2_000,
       totalOperatingExpenses: 500,
+      capexReserveMonthly: 0,
       monthlyPayment: 1_000,
       taxSavingsMonthly: 0,
       annualDepreciation: 0,
@@ -481,6 +507,7 @@ describe("ten-year projection", () => {
     const years = buildTenYearProjection({
       monthlyRentalIncome: 2_000,
       totalOperatingExpenses: 500,
+      capexReserveMonthly: 0,
       monthlyPayment: 1_000,
       taxSavingsMonthly: 0,
       annualDepreciation: 0,
@@ -500,6 +527,7 @@ describe("ten-year projection", () => {
     const years = buildTenYearProjection({
       monthlyRentalIncome: 1_000,
       totalOperatingExpenses: 0,
+      capexReserveMonthly: 0,
       monthlyPayment: 0,
       taxSavingsMonthly: 0,
       annualDepreciation: 0,
@@ -519,6 +547,7 @@ describe("ten-year projection", () => {
     const years = buildTenYearProjection({
       monthlyRentalIncome: 1_000,
       totalOperatingExpenses: 500,
+      capexReserveMonthly: 0,
       monthlyPayment: 0,
       taxSavingsMonthly: 0,
       annualDepreciation: 12_000,
@@ -539,6 +568,7 @@ describe("ten-year projection", () => {
     const years = buildTenYearProjection({
       monthlyRentalIncome: 3_000,
       totalOperatingExpenses: 500,
+      capexReserveMonthly: 0,
       monthlyPayment: 0,
       taxSavingsMonthly: 0,
       annualDepreciation: 5_000,

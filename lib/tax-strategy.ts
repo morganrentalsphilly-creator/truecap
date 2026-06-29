@@ -1,4 +1,4 @@
-export const TAX_STRATEGY_SNAPSHOT_VERSION = 3;
+export const TAX_STRATEGY_SNAPSHOT_VERSION = 4;
 
 export interface TaxStrategyYear {
   year: number;
@@ -17,6 +17,10 @@ export interface TaxStrategyYear {
 export interface TaxStrategyInput {
   monthlyRentalIncome: number;
   totalOperatingExpenses: number;
+  /** Monthly CapEx RESERVE included in totalOperatingExpenses. It's a cash
+   *  set-aside, NOT a deductible operating expense (capital improvements are
+   *  capitalized + depreciated), so it's excluded from the taxable-income line. */
+  capexReserveMonthly: number;
   annualDepreciation: number;
   yearlyInterestSchedule?: number[];
   rentGrowthPct: number;
@@ -93,7 +97,12 @@ function assertTaxStrategyYearConsistency(
 
 export function buildTaxStrategyProjection(input: TaxStrategyInput): TaxStrategyYear[] {
   const baseAnnualRent = input.monthlyRentalIncome * 12;
-  const baseAnnualExpenses = input.totalOperatingExpenses * 12;
+  // The deductible operating-expense line EXCLUDES the CapEx reserve — a reserve
+  // is money set aside, not a current deductible expense, so it can't shelter
+  // rental income. (The cash-flow side keeps the full reserve; this is the tax
+  // side only.) The consistency assertion ties the displayed deduction to this.
+  const baseAnnualExpenses =
+    Math.max(0, input.totalOperatingExpenses - input.capexReserveMonthly) * 12;
   const expenseGrowthFactor = 1 + input.expenseGrowthPct / 100;
   const rentGrowthFactor = 1 + input.rentGrowthPct / 100;
 
