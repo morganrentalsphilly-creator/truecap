@@ -50,7 +50,20 @@ export function StickyConversionBar() {
   }, [dismissed]);
 
   // Don't stack behind the opaque cookie-consent banner on a first visit.
-  if (dismissed || !visible || cookieBannerOpen) return null;
+  const showing = !dismissed && visible && !cookieBannerOpen;
+
+  // Publish our visibility so the homepage's mobile StickyCalculateBar (which is
+  // ~12px taller and also fixed bottom-0) hides while this funnel bar is up —
+  // otherwise its top edge peeks above ours. A global data-attr + a CSS rule in
+  // globals.css keeps the two bars decoupled (no shared React state).
+  useEffect(() => {
+    const root = document.documentElement;
+    if (showing) root.setAttribute("data-conversion-bar", "1");
+    else root.removeAttribute("data-conversion-bar");
+    return () => root.removeAttribute("data-conversion-bar");
+  }, [showing]);
+
+  if (!showing) return null;
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 px-3 pt-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] shadow-[0_-12px_28px_rgba(15,23,42,0.10)] backdrop-blur supports-[backdrop-filter]:bg-card/85 sm:px-4 sm:pt-3 sm:pb-[max(env(safe-area-inset-bottom),0.75rem)]">

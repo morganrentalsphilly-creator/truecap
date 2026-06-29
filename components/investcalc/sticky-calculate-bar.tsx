@@ -47,12 +47,9 @@ export function StickyCalculateBar({ isCalculating, contextLabel }: Props) {
   if (!visible && !isCalculating) return null;
 
   return (
-    // z-[45] sits ABOVE the marketing StickyConversionBar (z-40) so when both
-    // are on screen (homepage, in-form, scrolled past 720) the more relevant
-    // "Run analysis" bar wins instead of being painted over — while staying
-    // below the cookie banner (z-50).
     <div
-      className="sm:hidden fixed inset-x-0 bottom-0 z-[45] border-t border-border bg-card/95 px-3 pt-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] shadow-[0_-12px_28px_rgba(15,23,42,0.10)] backdrop-blur supports-[backdrop-filter]:bg-card/85"
+      data-sticky-calc-bar=""
+      className="sm:hidden fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 px-3 pt-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] shadow-[0_-12px_28px_rgba(15,23,42,0.10)] backdrop-blur supports-[backdrop-filter]:bg-card/85"
       role="presentation"
     >
       {contextLabel ? (

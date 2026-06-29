@@ -195,6 +195,14 @@ textarea,
   button, [role='button'], input, select, textarea {
     touch-action: manipulation;
   }
+  /* The homepage's mobile StickyCalculateBar and the StickyConversionBar are
+     both fixed bottom-0; the calc bar is ~12px taller, so when both show its top
+     edge peeks above the funnel bar. Hide the redundant calc bar while the
+     conversion bar is up (decoupled via the data-conversion-bar attr the
+     conversion bar sets on <html> while visible). Clean 600→720px handoff. */
+  html[data-conversion-bar="1"] [data-sticky-calc-bar] {
+    display: none;
+  }
 }
 
 /* Honor the user's prefers-reduced-motion OS preference (WCAG 2.3.3).
