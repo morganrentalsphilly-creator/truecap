@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from "react";
+import { useDeferredValue, useEffect, useMemo, useState, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import {
@@ -451,8 +452,15 @@ export function AnalysisDashboard({
   // zero in lockstep with the (reset) headline cards — otherwise the collapsed-
   // but-still-mounted sliders keep stale positions while the cards show base.
   const [whatIfOpen, setWhatIfOpen] = useState(false);
+  // Defer the what-if state (React 19): the slider thumb stays responsive while
+  // React renders the metric-card update at a lower priority and can interrupt
+  // intermediate frames during a fast drag. Zero lag at rest; on slow phones the
+  // cards trail the thumb by a frame then snap — the right trade vs a fixed
+  // debounce (which would lag even fast phones). The base `result` is unchanged,
+  // so the Overview banner (which reads it directly) never flickers.
+  const deferredWhatIfState = useDeferredValue(whatIfState);
   const displayResult: AnalysisResult | null =
-    whatIfState?.result ?? result;
+    deferredWhatIfState?.result ?? result;
   // Holistic context for the Overview. Computed from the BASE result (not
   // the what-if state) so dragging sliders doesn't flicker the banner.
   // Reuses the same exit-scenario engine as the Deal Score + PDF.
@@ -785,6 +793,18 @@ export function AnalysisDashboard({
                 ? "Unsaved changes"
                 : "Preview"}
           </span>
+          {/* Cross-link to this deal's workspace (checklist, docs, notes,
+              scenarios) — only when a saved deal is loaded. Contextual link, not
+              new top-level nav. */}
+          {isExistingSavedDeal && savedDealId ? (
+            <Link
+              href={`/dashboard/saved-analyses/${savedDealId}`}
+              className="ml-auto inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-primary hover:underline"
+            >
+              Deal workspace
+              <ArrowUpRight className="size-3.5" />
+            </Link>
+          ) : null}
         </div>
         {/* Quick Actions - naked button row, no panel chrome.
             Previously wrapped in a bordered card with a floating
