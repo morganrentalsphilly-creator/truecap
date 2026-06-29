@@ -252,12 +252,13 @@ export function MortgageScenarioCompare({
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border text-left">
-                <th className="py-2 pr-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                <th scope="col" className="py-2 pr-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                   Scenario
                 </th>
                 {scenarios.map((s) => (
                   <th
                     key={s.key}
+                    scope="col"
                     className={`py-2 px-3 text-[11px] font-bold ${
                       s.isBaseline ? "text-foreground" : "text-foreground/80"
                     }`}
@@ -416,9 +417,9 @@ function ScenarioRow({
 }) {
   return (
     <tr className="border-b border-border/50 last:border-b-0">
-      <td className="py-2 pr-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+      <th scope="row" className="py-2 pr-3 text-left text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
         {label}
-      </td>
+      </th>
       {cells.map((cell, i) => {
         const t = tone?.(i) ?? "neutral";
         const cellClass =

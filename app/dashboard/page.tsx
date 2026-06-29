@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import * as Sentry from "@sentry/nextjs";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { DashboardHome, type DashboardHomeData } from "@/components/dashboard/DashboardHome";
@@ -210,6 +211,17 @@ export default async function DashboardPage() {
     form_snapshot: unknown;
   };
   let portfolioAggregates: DashboardHomeData["portfolioAggregates"] = null;
+  if (aggregateResult.error) {
+    // The unbounded aggregate query failed → the dashboard falls back to the
+    // ≤20-deal sample, which UNDERSTATES portfolio totals for 20+ deal users.
+    // Surface it loudly (truth-layer integrity) rather than show wrong numbers
+    // silently — prod log forwarding is off, so this must be a Sentry message.
+    Sentry.captureMessage("dashboard portfolio aggregates query failed — falling back to ≤20-deal sample", {
+      level: "warning",
+      tags: { feature: "dashboard-aggregates" },
+      extra: { code: aggregateResult.error.code, message: aggregateResult.error.message },
+    });
+  }
   if (!aggregateResult.error) {
     const aggRows = (aggregateResult.data ?? []) as AggregateRow[];
     let totalValue = 0;

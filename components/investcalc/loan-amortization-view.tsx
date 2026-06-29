@@ -99,16 +99,16 @@ export function LoanAmortizationView({ result }: { result: AnalysisResult }) {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border text-left">
-              <th className="py-2 pr-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              <th scope="col" className="py-2 pr-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                 Year
               </th>
-              <th className="py-2 px-3 text-right text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              <th scope="col" className="py-2 px-3 text-right text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                 Interest paid
               </th>
-              <th className="py-2 px-3 text-right text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              <th scope="col" className="py-2 px-3 text-right text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                 Principal paid
               </th>
-              <th className="py-2 pl-3 text-right text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              <th scope="col" className="py-2 pl-3 text-right text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                 Ending balance
               </th>
             </tr>
