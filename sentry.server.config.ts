@@ -53,6 +53,15 @@ Sentry.init({
       delete event.user.username;
       delete event.user.ip_address;
     }
+    // sendDefaultPii also populates event.request.data with the request body —
+    // for our forms that's property prices, rents, and financial assumptions.
+    // Error triage never needs the raw body, so scrub it to shrink the PII
+    // blast radius if a Sentry token/export is ever compromised. (The Stripe
+    // webhook is unaffected: constructEvent runs on the raw body before any
+    // capture, and stripe-signature is already scrubbed above.)
+    if (event.request && "data" in event.request) {
+      event.request.data = "[scrubbed]";
+    }
     return event;
   },
 });

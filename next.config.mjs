@@ -70,13 +70,49 @@ const nextConfig = {
   // app/layout.tsx — defer until you have time to test thoroughly.
   async headers() {
     return [
+      // /embed/* widgets are DESIGNED to be embedded in third-party iframes
+      // (postMessage auto-resize). The site-wide X-Frame-Options: SAMEORIGIN
+      // below would make them render BLANK on every partner site — a broken
+      // distribution channel. Give the embed routes their own header set:
+      // keep nosniff / HSTS / Referrer / Permissions, but allow framing via
+      // CSP `frame-ancestors *` instead of XFO. These pages are public, with
+      // no auth flow or state-changing action, so framing them is safe by
+      // design. The catch-all source below uses a negative lookahead to skip
+      // /embed/* so it doesn't re-add XFO on top of this. `:path+` (one-or-more
+      // segments) targets the embeddable widgets only, not the bare /embed
+      // index, which keeps the strict catch-all headers.
       {
-        source: "/:path*",
+        source: "/embed/:path+",
+        headers: [
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          {
+            key: "Strict-Transport-Security",
+            value: "max-age=63072000; includeSubDomains; preload",
+          },
+          {
+            key: "Permissions-Policy",
+            value: [
+              "camera=()",
+              "microphone=()",
+              "geolocation=()",
+              "payment=()",
+              "interest-cohort=()",
+              "browsing-topics=()",
+            ].join(", "),
+          },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "Content-Security-Policy", value: "frame-ancestors *" },
+        ],
+      },
+      {
+        // Catch-all EXCEPT /embed/* (negative lookahead) — the embed widgets
+        // get their framing-friendly header set above instead.
+        source: "/((?!embed/).*)",
         headers: [
           // Clickjacking protection — refuse to be loaded in an iframe.
-          // SAMEORIGIN allows our own iframes (none currently) while
-          // blocking third-party embedding. Critical because the auth
-          // flow accepts credentials.
+          // SAMEORIGIN allows our own iframes while blocking third-party
+          // embedding. Critical because the auth flow accepts credentials.
+          // (Embeddable widgets under /embed/* are exempted above.)
           { key: "X-Frame-Options", value: "SAMEORIGIN" },
           // MIME-sniffing protection. Without this, an attacker who could
           // upload a "PDF" that's actually HTML could get it served with
