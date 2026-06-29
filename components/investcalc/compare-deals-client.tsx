@@ -807,7 +807,9 @@ function CompareMobileHighlights({
 }) {
   return (
     <>
-      <div className="grid grid-cols-3 gap-2">
+      {/* DSCR is N/A on all-cash compares — drop that tile entirely rather than
+          show "—", and collapse the row to 2-up so it doesn't leave a gap. */}
+      <div className={`grid gap-2 ${strongestDscrDeal?.metrics.dscr != null ? "grid-cols-3" : "grid-cols-2"}`}>
         <div className="rounded-2xl bg-card p-3 shadow-sm">
           <p className="text-[10px] font-extrabold text-success">Best Deal</p>
           <p className="mt-1 line-clamp-2 text-xs font-extrabold leading-tight text-foreground">
@@ -822,12 +824,14 @@ function CompareMobileHighlights({
               : fmtPct(highestRoiDeal?.metrics.cocReturn ?? null, 1)}
           </p>
         </div>
-        <div className="rounded-2xl bg-card p-3 shadow-sm">
-          <p className="text-[10px] font-extrabold text-primary">Strongest DSCR</p>
-          <p className="mt-1 text-xs font-extrabold text-foreground">
-            {strongestDscrDeal?.metrics.dscr == null ? "-" : strongestDscrDeal.metrics.dscr.toFixed(2)}
-          </p>
-        </div>
+        {strongestDscrDeal?.metrics.dscr != null ? (
+          <div className="rounded-2xl bg-card p-3 shadow-sm">
+            <p className="text-[10px] font-extrabold text-primary">Strongest DSCR</p>
+            <p className="mt-1 text-xs font-extrabold text-foreground">
+              {strongestDscrDeal.metrics.dscr.toFixed(2)}
+            </p>
+          </div>
+        ) : null}
       </div>
 
       {bestDeal ? (

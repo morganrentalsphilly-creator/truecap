@@ -209,9 +209,9 @@ export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
                 type="button"
                 aria-label={`Remove ${item.label}`}
                 onClick={() => remove(item.id)}
-                className="text-muted-foreground/50 hover:text-destructive"
+                className="shrink-0 rounded-md p-1.5 text-muted-foreground/50 transition-colors hover:bg-destructive/10 hover:text-destructive"
               >
-                <X className="size-3.5" />
+                <X className="size-4" />
               </button>
             </li>
           );

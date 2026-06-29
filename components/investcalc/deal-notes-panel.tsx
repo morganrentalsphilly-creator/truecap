@@ -145,7 +145,7 @@ export function DealNotesPanel({ savedDealId }: { savedDealId: string }) {
           ) : showSaved ? (
             <span className="text-[var(--metric-positive,#16a34a)]">Saved</span>
           ) : (
-            <span>Saves automatically on blur</span>
+            <span>Auto-saves</span>
           )}
         </div>
       </div>
@@ -158,8 +158,8 @@ export function DealNotesPanel({ savedDealId }: { savedDealId: string }) {
         onBlur={persistOnBlur}
         rows={4}
         maxLength={NOTES_MAX}
-        placeholder="Seller motivation, agent commentary, inspector findings, your offer-strategy reasoning - anything that helps you remember the context when you re-open this deal."
-        className="w-full resize-y rounded-xl border border-border bg-background p-3 text-base md:text-sm leading-relaxed text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-primary/40"
+        placeholder="Seller motivation, inspector findings, offer strategy — anything to remember about this deal."
+        className="w-full resize-none rounded-xl border border-border bg-background p-3 text-base md:text-sm leading-relaxed text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-primary/40"
       />
       <p className="mt-1.5 text-right text-[10px] text-muted-foreground">
         {remaining.toLocaleString()} characters left

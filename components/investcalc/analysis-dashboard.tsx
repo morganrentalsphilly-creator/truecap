@@ -2462,7 +2462,7 @@ function CashFlowTab({
           className="group flex w-full items-center justify-between gap-2 rounded-xl px-1 py-1.5 text-left hover:bg-muted/50"
         >
           <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
-            {showBreakdown ? "Full breakdown" : "Show full breakdown"}
+            Full breakdown
           </span>
           <ChevronDown
             className={cn(
