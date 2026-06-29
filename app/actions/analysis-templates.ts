@@ -45,7 +45,14 @@ export type AnalysisTemplateOption = {
 };
 
 const TEMPLATE_ROW_FIELDS =
-  "id, template_name, template_description, template_type, is_system, property_tax_pct, insurance_input_mode, insurance_pct, insurance_mo, maintenance_pct, vacancy_pct, management_pct, capex_pct, closing_costs_pct, interest_rate_pct, down_payment_pct, expense_growth_pct, rent_growth_pct, appreciation_rate_pct, selling_cost_pct, building_value_pct, depreciation_years, include_interest_deduction, tax_rate_pct, pmi_annual_rate_pct, pmi_no_cancel, is_default, kind, buy_box";
+  "id, template_name, template_description, template_type, is_system, property_tax_pct, insurance_input_mode, insurance_pct, insurance_mo, maintenance_pct, vacancy_pct, management_pct, capex_pct, closing_costs_pct, interest_rate_pct, down_payment_pct, expense_growth_pct, rent_growth_pct, appreciation_rate_pct, selling_cost_pct, building_value_pct, depreciation_years, include_interest_deduction, tax_rate_pct, is_default, kind, buy_box";
+
+// Same set PLUS the PMI override columns. Selected only when those columns
+// exist (see getTemplateRowFields) so a deploy that lands before the
+// 20260628140000_analysis_templates_pmi migration doesn't 42703 the whole
+// templates page — reads fall back to the base set (PMI reads as null), and
+// writes degrade to a graceful "couldn't save" until the column is added.
+const TEMPLATE_ROW_FIELDS_PMI = `${TEMPLATE_ROW_FIELDS}, pmi_annual_rate_pct, pmi_no_cancel`;
 
 function num(v: unknown, fallback: number): number {
   const n = typeof v === "number" ? v : Number(v);
@@ -110,6 +117,20 @@ function mapTemplateRow(row: Record<string, unknown>): AnalysisTemplateOption {
 }
 
 type DbClient = Awaited<ReturnType<typeof createServerSupabaseClient>>;
+
+// Once the PMI columns exist we cache that (positive) result for the process.
+// We intentionally do NOT cache the negative result: during the window before
+// the migration is applied we re-probe each call (one cheap query) so the code
+// self-heals the moment the column lands — no redeploy/restart needed.
+let templatePmiColumnsPresent = false;
+async function getTemplateRowFields(client: DbClient): Promise<string> {
+  if (templatePmiColumnsPresent) return TEMPLATE_ROW_FIELDS_PMI;
+  const probe = await client.from("analysis_templates").select("pmi_no_cancel").limit(1);
+  const missing = !!probe.error && (probe.error as { code?: string }).code === "42703";
+  if (missing) return TEMPLATE_ROW_FIELDS; // base set; re-probe next call
+  templatePmiColumnsPresent = true;
+  return TEMPLATE_ROW_FIELDS_PMI;
+}
 
 /**
  * Append an immutable version snapshot for a template. Best-effort: never
@@ -209,7 +230,7 @@ export async function listAnalysisTemplatesAction(): Promise<ListTemplatesResult
 
   const { data, error } = await supabase
     .from("analysis_templates")
-    .select(TEMPLATE_ROW_FIELDS)
+    .select(await getTemplateRowFields(supabase))
     .eq("user_id", user.id)
     .eq("is_system", false)
     .order("is_default", { ascending: false })
@@ -382,7 +403,7 @@ export async function createAnalysisTemplateAction(
       kind: kind ?? null,
       buy_box: normalizeTemplateBuyBox(payload.buyBox),
     })
-    .select(TEMPLATE_ROW_FIELDS)
+    .select(await getTemplateRowFields(supabase))
     .single();
 
   if (error) {
@@ -521,7 +542,7 @@ export async function updateAnalysisTemplateAction(
     .eq("id", templateId)
     .eq("user_id", user.id)
     .eq("is_system", false)
-    .select(TEMPLATE_ROW_FIELDS)
+    .select(await getTemplateRowFields(supabase))
     .single();
 
   if (error) {
@@ -681,7 +702,7 @@ export async function duplicateTemplateAction(templateId: string): Promise<Updat
 
   const { data: srcRow, error: srcErr } = await supabase
     .from("analysis_templates")
-    .select(TEMPLATE_ROW_FIELDS)
+    .select(await getTemplateRowFields(supabase))
     .eq("id", templateId)
     .maybeSingle();
   if (srcErr) {
@@ -820,7 +841,7 @@ export async function applyTemplateToDealAction(
 
   const { data: tplRow, error: tplErr } = await supabase
     .from("analysis_templates")
-    .select(TEMPLATE_ROW_FIELDS)
+    .select(await getTemplateRowFields(supabase))
     .eq("id", templateId)
     .maybeSingle();
   if (tplErr) {
@@ -1009,7 +1030,7 @@ export async function restoreTemplateVersionAction(
     .eq("id", templateId)
     .eq("user_id", user.id)
     .eq("is_system", false)
-    .select(TEMPLATE_ROW_FIELDS)
+    .select(await getTemplateRowFields(supabase))
     .single();
   if (error) {
     if (error.code === "23505") {
