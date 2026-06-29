@@ -33,6 +33,10 @@ export type AnalysisTemplateOption = {
   depreciationYears: 27.5 | 39;
   includeInterestDeduction: boolean;
   taxRatePct: number;
+  /** Optional PMI/MIP override (% of loan); null = calc default. */
+  pmiAnnualRatePct: number | null;
+  /** FHA MIP that never cancels at 80% LTV. */
+  pmiNoCancel: boolean;
   isDefault: boolean;
   kind: string | null;
   buyBox: AnalysisTemplateBuyBox | null;
@@ -41,7 +45,7 @@ export type AnalysisTemplateOption = {
 };
 
 const TEMPLATE_ROW_FIELDS =
-  "id, template_name, template_description, template_type, is_system, property_tax_pct, insurance_input_mode, insurance_pct, insurance_mo, maintenance_pct, vacancy_pct, management_pct, capex_pct, closing_costs_pct, interest_rate_pct, down_payment_pct, expense_growth_pct, rent_growth_pct, appreciation_rate_pct, selling_cost_pct, building_value_pct, depreciation_years, include_interest_deduction, tax_rate_pct, is_default, kind, buy_box";
+  "id, template_name, template_description, template_type, is_system, property_tax_pct, insurance_input_mode, insurance_pct, insurance_mo, maintenance_pct, vacancy_pct, management_pct, capex_pct, closing_costs_pct, interest_rate_pct, down_payment_pct, expense_growth_pct, rent_growth_pct, appreciation_rate_pct, selling_cost_pct, building_value_pct, depreciation_years, include_interest_deduction, tax_rate_pct, pmi_annual_rate_pct, pmi_no_cancel, is_default, kind, buy_box";
 
 function num(v: unknown, fallback: number): number {
   const n = typeof v === "number" ? v : Number(v);
@@ -97,6 +101,8 @@ function mapTemplateRow(row: Record<string, unknown>): AnalysisTemplateOption {
     depreciationYears,
     includeInterestDeduction: row.include_interest_deduction !== false,
     taxRatePct: num(row.tax_rate_pct, 24),
+    pmiAnnualRatePct: row.pmi_annual_rate_pct == null ? null : num(row.pmi_annual_rate_pct, 0),
+    pmiNoCancel: row.pmi_no_cancel === true,
     isDefault: !!row.is_default,
     kind: (row.kind as string | null) ?? null,
     buyBox: normalizeTemplateBuyBox(row.buy_box),
@@ -359,6 +365,8 @@ export async function createAnalysisTemplateAction(
       vacancy_pct: payload.vacancyPct,
       management_pct: payload.managementPct,
       capex_pct: payload.capexPct,
+      pmi_annual_rate_pct: payload.pmiAnnualRatePct ?? null,
+      pmi_no_cancel: payload.pmiNoCancel ?? null,
       closing_costs_pct: payload.closingCostsPct ?? 3,
       interest_rate_pct: payload.interestRatePct,
       down_payment_pct: payload.downPaymentPct,
@@ -495,6 +503,8 @@ export async function updateAnalysisTemplateAction(
       vacancy_pct: payload.vacancyPct,
       management_pct: payload.managementPct,
       capex_pct: payload.capexPct,
+      pmi_annual_rate_pct: payload.pmiAnnualRatePct ?? null,
+      pmi_no_cancel: payload.pmiNoCancel ?? null,
       closing_costs_pct: payload.closingCostsPct ?? 3,
       interest_rate_pct: payload.interestRatePct,
       down_payment_pct: payload.downPaymentPct,
@@ -719,6 +729,8 @@ export async function duplicateTemplateAction(templateId: string): Promise<Updat
     depreciationYears: src.depreciationYears,
     includeInterestDeduction: src.includeInterestDeduction,
     taxRatePct: src.taxRatePct,
+    pmiAnnualRatePct: src.pmiAnnualRatePct ?? undefined,
+    pmiNoCancel: src.pmiNoCancel,
     buyBox: src.buyBox,
   };
 
@@ -757,6 +769,8 @@ function applyTemplateAssumptions(
     depreciationYears: tpl.depreciationYears,
     includeInterestDeduction: tpl.includeInterestDeduction,
     taxRatePct: tpl.taxRatePct,
+    pmiAnnualRatePct: tpl.pmiAnnualRatePct ?? undefined,
+    pmiNoCancel: tpl.pmiNoCancel,
   };
 }
 
