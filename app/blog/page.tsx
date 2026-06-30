@@ -49,6 +49,16 @@ export type BlogPost = {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: "how-to-read-a-rent-roll",
+    title:
+      "How to read a rent roll: verify a rental's income before you buy (2026)",
+    excerpt:
+      "A rent roll is where the seller&apos;s story meets the leases — and the gap is the deal. Why a fourplex that &quot;grosses $63,600&quot; is really collecting $42,900, how to split the $20,700 gap into curable vacancy ($16,800) and sticky loss-to-lease ($3,900), the five places rent rolls mislead, the GRM that reads 8.2 on potential rent and 12.1 on collected, and the estoppel-and-bank-deposit check that turns the seller&apos;s claim into proof before you wire a dime.",
+    readingTimeMinutes: 11,
+    publishedAt: "2026-06-30",
+    available: true,
+  },
+  {
     slug: "mortgage-points-investment-property",
     title:
       "Are mortgage points worth it on an investment property? (2026)",
