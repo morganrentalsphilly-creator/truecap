@@ -166,7 +166,7 @@ async function notifyOwner(
     <p style="margin:16px 0 0;color:#9ca3af;font-size:12px;">Captured via your co-branded TrueCap share link. Reply directly to reach them.</p>
   </div></body></html>`;
 
-  await fetch("https://api.resend.com/emails", {
+  const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: `Bearer ${resendKey}`, "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -179,4 +179,15 @@ async function notifyOwner(
     }),
     signal: AbortSignal.timeout(10_000),
   });
+
+  // fetch() only rejects on network/abort errors — NOT on HTTP 4xx/5xx. Without
+  // this check a Resend rate-limit / outage / auth failure resolves normally and
+  // the owner's lead-notification email is dropped with zero visibility (the
+  // caller's .catch() never fires). Throw on non-2xx so it's Sentry-captured at
+  // warning level. The lead row is already committed, so this never fails the
+  // capture — it only surfaces the delivery failure.
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(`Resend ${res.status}: ${body.slice(0, 300)}`);
+  }
 }
