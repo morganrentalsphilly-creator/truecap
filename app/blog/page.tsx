@@ -49,6 +49,16 @@ export type BlogPost = {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: "return-on-equity-rental-property",
+    title:
+      "Return on equity (ROE) on a rental property: the lazy-equity test (2026)",
+    excerpt:
+      "Cash-on-cash tracks your original down payment forever; return on equity tracks what the equity you hold today is actually earning — and on a rental you&apos;ve owned a while, only the second one drives decisions. The formula, a 10-year example where the dollar return nearly doubles while ROE slips from 16.9% to 12%, why the decay is pure leverage, the cash-on-equity figure that lands at 3.7%, and the honest cost of the refinance ROE tempts you into.",
+    readingTimeMinutes: 11,
+    publishedAt: "2026-07-01",
+    available: true,
+  },
+  {
     slug: "how-to-read-a-rent-roll",
     title:
       "How to read a rent roll: verify a rental's income before you buy (2026)",
