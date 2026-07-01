@@ -136,6 +136,10 @@ export function AddressAutocomplete({
   const inputRef = useRef<HTMLInputElement | null>(null);
   const sessionTokenRef = useRef<SessionToken | null>(null);
   const debounceRef = useRef<number | null>(null);
+  // One-shot guard for the deferred Maps-script load + the latest typed value,
+  // used to re-run the search once the (lazy) script becomes ready.
+  const loadStartedRef = useRef(false);
+  const lastValueRef = useRef("");
   const [predictions, setPredictions] = useState<PlacePrediction[]>([]);
   const [open, setOpen] = useState(false);
   const [highlight, setHighlight] = useState(0);
@@ -161,13 +165,19 @@ export function AddressAutocomplete({
     [rhfRef]
   );
 
-  // Load Google Maps Places on mount
-  useEffect(() => {
-    if (!apiKey) return;
-    let cancelled = false;
+  // Google Maps Places is DEFERRED from mount to first interaction with the
+  // address field. Loading it on mount pulled hundreds of KB of Maps JS on
+  // EVERY page (landing, blog, pricing, tools) even when the address field was
+  // never touched — dead weight on the critical path for the paid-ad traffic
+  // that lands there. This one-shot callback runs on first focus/change instead;
+  // the shared window.__googleMapsPlacesLoading promise still keeps the hero +
+  // in-form instances to a single download, and the layout preconnect keeps the
+  // deferred fetch's DNS+TLS warm.
+  const loadScript = useCallback(() => {
+    if (!apiKey || loadStartedRef.current) return;
+    loadStartedRef.current = true;
     loadGoogleMapsScript(apiKey)
       .then(() => {
-        if (cancelled) return;
         if (!window.google?.maps?.places?.AutocompleteSuggestion) {
           console.warn(
             "[AddressAutocomplete] AutocompleteSuggestion not in Places library - enable 'Places API (New)' in Google Cloud Console."
@@ -178,10 +188,8 @@ export function AddressAutocomplete({
       })
       .catch((err) => {
         console.warn("[AddressAutocomplete] script load failed:", err);
+        loadStartedRef.current = false; // allow a retry on the next focus
       });
-    return () => {
-      cancelled = true;
-    };
   }, [apiKey]);
 
   // Close dropdown when clicking outside
@@ -232,11 +240,30 @@ export function AddressAutocomplete({
     }
   };
 
+  // Deferred-load race: if the user typed before the (now lazy) Maps script
+  // finished loading, fetchPredictions early-returned (scriptReady was false).
+  // When it becomes ready, re-run the search for whatever they've typed so a
+  // fast typer's first query isn't silently dropped.
+  useEffect(() => {
+    if (!scriptReady) return;
+    const v = lastValueRef.current;
+    if (v.length >= 3 && document.activeElement === inputRef.current) {
+      fetchPredictions(v);
+    }
+    // Intentionally only re-run when scriptReady flips; fetchPredictions is
+    // stable within a render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [scriptReady]);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // Pass through to react-hook-form
     rhfOnChange(e);
 
     const value = e.target.value;
+    lastValueRef.current = value;
+    // Belt-and-suspenders: also kick off the deferred load here — covers paste /
+    // programmatic value changes that don't fire a focus event first.
+    loadScript();
     if (debounceRef.current) {
       window.clearTimeout(debounceRef.current);
     }
@@ -362,6 +389,7 @@ export function AddressAutocomplete({
         aria-required={required || undefined}
         onChange={handleInputChange}
         onFocus={() => {
+          loadScript();
           if (predictions.length > 0) setOpen(true);
         }}
         onKeyDown={handleKeyDown}
