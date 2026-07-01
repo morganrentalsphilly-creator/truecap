@@ -150,6 +150,10 @@ export function AddressAutocomplete({
   // user types but nothing happens. Surfacing the search state makes
   // the silence visible.
   const [isSearching, setIsSearching] = useState(false);
+  // On mobile the on-screen keyboard can hide a below-input dropdown; this caps
+  // the dropdown to the space above the keyboard (measured via visualViewport)
+  // so suggestions stay tappable. undefined = use the CSS fallback (desktop).
+  const [dropdownMaxHeight, setDropdownMaxHeight] = useState<number | undefined>(undefined);
 
   // Whether the suggestion listbox is currently presented - drives the
   // combobox aria-expanded / aria-activedescendant wiring below.
@@ -202,6 +206,34 @@ export function AddressAutocomplete({
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
+
+  // Keep the suggestions dropdown visible above the mobile keyboard. It renders
+  // below the input, so when the on-screen keyboard is up it can be hidden
+  // underneath it — a cold mobile-from-ad visitor then can't tap a result and
+  // never reaches an analysis (the aha moment). Cap the dropdown to the space
+  // between the input's bottom and the visual-viewport bottom (which EXCLUDES the
+  // keyboard) and let it scroll internally. Recomputes as the keyboard opens/
+  // closes or the page scrolls. On desktop that space is large, so the 360px
+  // ceiling keeps behavior identical.
+  useEffect(() => {
+    if (!open || predictions.length === 0) return;
+    const vv = typeof window !== "undefined" ? window.visualViewport : null;
+    const recompute = () => {
+      const input = inputRef.current;
+      if (!input) return;
+      const bottom = input.getBoundingClientRect().bottom;
+      const viewportBottom = vv ? vv.offsetTop + vv.height : window.innerHeight;
+      const space = viewportBottom - bottom - 16;
+      setDropdownMaxHeight(Math.max(140, Math.min(space, 360)));
+    };
+    recompute();
+    vv?.addEventListener("resize", recompute);
+    vv?.addEventListener("scroll", recompute);
+    return () => {
+      vv?.removeEventListener("resize", recompute);
+      vv?.removeEventListener("scroll", recompute);
+    };
+  }, [open, predictions.length]);
 
   const ensureSessionToken = (): SessionToken | undefined => {
     const TokenCtor = window.google?.maps?.places?.AutocompleteSessionToken;
@@ -419,7 +451,10 @@ export function AddressAutocomplete({
         </div>
       ) : null}
       {open && predictions.length > 0 && (
-        <div className="absolute left-0 right-0 top-full z-50 mt-1 overflow-hidden rounded-md border border-border bg-popover text-popover-foreground shadow-md">
+        <div
+          className="absolute left-0 right-0 top-full z-50 mt-1 max-h-[60vh] overflow-y-auto overscroll-contain rounded-md border border-border bg-popover text-popover-foreground shadow-md"
+          style={dropdownMaxHeight ? { maxHeight: dropdownMaxHeight } : undefined}
+        >
           <ul role="listbox" id={listboxId} aria-label="Address suggestions">
             {predictions.map((p, i) => {
               const text = p.text?.toString() ?? "";
