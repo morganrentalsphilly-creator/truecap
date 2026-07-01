@@ -28,6 +28,7 @@ import { InvestCalcPage } from "@/components/investcalc/investcalc-page";
 import { MarketingHero } from "@/components/marketing/marketing-hero";
 import {
   DataSourcesSection,
+  FeaturedIn,
   HomepageFaq,
   HowItWorks,
   PdfProUpsell,
@@ -230,6 +231,9 @@ export default function Home() {
         // build; the key VALUE never reaches the client).
         dealQaEnabled={Boolean(process.env.ANTHROPIC_API_KEY)}
       />
+      {/* Third-party press credibility — the first trust beat after the
+          visitor has felt the value in the calculator above. */}
+      <FeaturedIn />
       {/* Persuasion + objection-handling — surfaced AFTER the calculator
           (the visitor has now felt the value): name the spreadsheet pain,
           show how it works, then prove the data sources and social proof. */}

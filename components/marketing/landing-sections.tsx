@@ -357,6 +357,72 @@ const COMPETITORS_ROWS: Array<{ label: string; values: (string | boolean)[]; hig
   { label: "Starting Pro price",                          values: ["From $25/mo", "n/a", "$20/mo", "n/a"] },
 ];
 
+// ───────────────────────────────────────── Press / "As featured in"
+/**
+ * Third-party press credibility for cold visitors. Both features lead with
+ * TrueCap's own "60-second, address → analysis" hook, so they reinforce the
+ * value prop rather than distract. Styled text wordmarks (not image logos) keep
+ * it zero-weight on the critical path; links open the articles. Placed AFTER the
+ * calculator, matching the page's "let them feel the value, then persuade" IA.
+ */
+const PRESS_FEATURES = [
+  {
+    name: "Insider Weekly",
+    href: "https://theinsiderweekly.com/the-60-second-underwrite-how-one-tool-wants-to-eliminate-deal-analysis-paralysis-in-real-estate/",
+    wordmark: (
+      <span className="text-lg font-black uppercase tracking-tight sm:text-xl">
+        Insider<span className="font-medium">Weekly</span>
+      </span>
+    ),
+  },
+  {
+    name: "International Business Journal",
+    href: "https://ibjournal.net/how-a-60-second-analysis-tool-is-helping-real-estate-investors-beat-spreadsheet-fatigue/",
+    wordmark: (
+      <span className="font-serif text-sm font-semibold uppercase tracking-[0.14em] sm:text-base">
+        International Business Journal
+      </span>
+    ),
+  },
+];
+
+export function FeaturedIn() {
+  return (
+    <section className="border-t border-border bg-background">
+      <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 sm:py-14">
+        <p className="text-center text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+          As featured in
+        </p>
+        <div className="mt-5 flex flex-wrap items-center justify-center gap-x-10 gap-y-4 sm:mt-6 sm:gap-x-16">
+          {PRESS_FEATURES.map((p) => (
+            <a
+              key={p.name}
+              href={p.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              title={`Read the ${p.name} feature on TrueCap`}
+              className="text-muted-foreground/70 transition-colors hover:text-foreground"
+            >
+              {p.wordmark}
+              <span className="sr-only"> — read the feature on TrueCap</span>
+            </a>
+          ))}
+        </div>
+        <figure className="mt-7 text-center">
+          <blockquote className="mx-auto max-w-2xl text-balance text-base italic leading-relaxed text-foreground/90 sm:text-lg">
+            &ldquo;Takes a property address and returns a complete investment analysis in
+            about 60 seconds &mdash; auto-filling the data points that typically require a
+            dozen open browser tabs.&rdquo;
+          </blockquote>
+          <figcaption className="mt-3 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+            Insider Weekly
+          </figcaption>
+        </figure>
+      </div>
+    </section>
+  );
+}
+
 export function VsCompetitors() {
   return (
     <section className="border-t border-border bg-background">

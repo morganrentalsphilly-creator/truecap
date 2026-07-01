@@ -22,6 +22,7 @@ import { InvestCalcPage } from "@/components/investcalc/investcalc-page";
 import { MarketingHero } from "@/components/marketing/marketing-hero";
 import {
   DataSourcesSection,
+  FeaturedIn,
   HomepageFaq,
   HowItWorks,
   PdfProUpsell,
@@ -155,6 +156,7 @@ export default async function AuthedHome() {
           social proof → $5/Pro value ladder → personas → FAQ. */}
       {!user && (
         <>
+          <FeaturedIn />
           <WhyNotSpreadsheet />
           <HowItWorks />
           <DataSourcesSection />
