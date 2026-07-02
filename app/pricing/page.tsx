@@ -73,7 +73,7 @@ const FAQS: { q: string; a: string }[] = [
     // app/page.tsx. MAO, sensitivity, BRRRR/fix-and-flip, and share
     // links are PRO features — a previous version of this answer
     // claimed they were free, contradicting every other surface.
-    a: "Yes. The cash-flow analyzer — cap rate, CoC, DSCR, monthly cash flow, address auto-fill, the 0–100 Deal Score, and a plain-English verdict — is free forever and unlimited. No card required to start. Pro adds MAO solver, sensitivity grid, BRRRR + fix-and-flip, 10-year projections, tax strategy, exit scenarios, co-branded shareable links, and lender-ready PDFs.",
+    a: "Yes. The cash-flow analyzer — cap rate, CoC, DSCR, monthly cash flow, address auto-fill, the 0–100 Deal Score, and a plain-English verdict — is free forever and unlimited. No card required to start. Pro adds a personal buy box (your criteria, pass/failed on every deal), MAO solver, sensitivity grid, BRRRR + fix-and-flip, 10-year projections, tax strategy, exit scenarios, co-branded shareable links, and lender-ready PDFs.",
   },
   {
     q: "Can I cancel anytime?",
@@ -135,7 +135,8 @@ export default async function PricingPage() {
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-balance text-[15px] leading-relaxed text-muted-foreground sm:text-lg">
               Start free. Unlimited analyses, every core metric, auto-fill from the address. Or start a
-              3-day free trial of Pro when you need projections, tax modeling, and lender-ready PDFs.
+              3-day free trial of Pro when you need projections, tax modeling, lender-ready PDFs, and a
+              buy box that pass/fails every deal against your own criteria.
             </p>
             {/* Real-data social proof — investors arriving at /pricing
                 are evaluating credibility. A live count of recent

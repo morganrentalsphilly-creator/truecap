@@ -544,7 +544,7 @@ export function VsCompetitors() {
 const HOMEPAGE_FAQS: { q: string; a: string }[] = [
   {
     q: "Is TrueCap really free?",
-    a: "Yes. The cash-flow analyzer - cap rate, CoC, DSCR, monthly cash flow, address auto-fill, the 0-100 Deal Score, and a plain-English verdict - is free forever and unlimited. No card required. Pro adds save/compare deals, lender-ready PDFs, and the advanced modules (BRRRR + Fix-and-Flip, Sensitivity, 10-year projections, tax strategy, exit scenarios).",
+    a: "Yes. The cash-flow analyzer - cap rate, CoC, DSCR, monthly cash flow, address auto-fill, the 0-100 Deal Score, and a plain-English verdict - is free forever and unlimited. No card required. Pro adds save/compare deals, lender-ready PDFs, a personal buy box (your criteria, checked on every deal), and the advanced modules (BRRRR + Fix-and-Flip, Sensitivity, 10-year projections, tax strategy, exit scenarios).",
   },
   {
     q: "Do I need a credit card?",
@@ -564,7 +564,7 @@ const HOMEPAGE_FAQS: { q: string; a: string }[] = [
   },
   {
     q: "When should I upgrade to Pro?",
-    a: "Use Free to analyze unlimited deals. Use the $5 PDF when you need to send one finished report. Upgrade to Pro when you want to save deals, compare properties, reuse your assumptions, brand your reports, and export unlimited PDFs. Pro is month-to-month - cancel anytime.",
+    a: "Use Free to analyze unlimited deals. Use the $5 PDF when you need to send one finished report. Upgrade to Pro when you want TrueCap to know what you're looking for: set your buy box once and every deal gets a personal pass/fail - plus save deals, compare properties, reuse your assumptions, brand your reports, and export unlimited PDFs. Pro is month-to-month - cancel anytime.",
   },
   {
     q: "Does this work for BRRRR or fix-and-flip deals?",
@@ -782,6 +782,7 @@ const LADDER_ROWS: { label: string; cells: (boolean | string)[] }[] = [
   { label: "Lender-ready PDF export", cells: [false, "One deal", "Unlimited"] },
   { label: "Save & revisit deals", cells: [false, false, true] },
   { label: "Compare deals side-by-side", cells: [false, false, true] },
+  { label: "Buy box: personal pass/fail on every deal", cells: [false, false, true] },
   { label: "10-year projections · tax · exit", cells: [false, false, true] },
   { label: "BRRRR · fix & flip · sensitivity", cells: [false, false, true] },
 ];
@@ -906,12 +907,13 @@ export function PdfProUpsell() {
             <span className="w-fit rounded-full bg-primary/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-primary">
               Pro
             </span>
-            <h3 className="mt-2 text-lg font-bold text-foreground">Save, compare &amp; export every deal</h3>
+            <h3 className="mt-2 text-lg font-bold text-foreground">A deal engine that knows your buy box</h3>
             <p className="mt-1.5 flex-1 text-sm leading-relaxed text-muted-foreground">
-              For repeat underwriting: save and revisit deals, compare them
-              side-by-side, reuse your assumptions, brand your reports, and
-              export unlimited PDFs - plus 10-year projections, tax strategy,
-              and exit scenarios.
+              Set your buy box once and every deal gets a personal pass/fail
+              beside its Deal Score - on screen, in your PDFs, even on deals
+              shared with you. Plus saved deals, side-by-side compare, 10-year
+              projections, tax strategy, exit scenarios, and unlimited branded
+              reports.
             </p>
             <div className="mt-5">
               <Link
@@ -940,7 +942,7 @@ const PERSONAS: { icon: typeof Home; title: string; body: string }[] = [
   {
     icon: TrendingUp,
     title: "For investors",
-    body: "Underwrite buy-and-hold deals in seconds - cash flow, cap rate, CoC, DSCR, and a 10-year view.",
+    body: "Underwrite buy-and-hold deals in seconds - cash flow, cap rate, CoC, DSCR, a 10-year view, and a pass/fail against your own buy box.",
   },
   {
     icon: Users,

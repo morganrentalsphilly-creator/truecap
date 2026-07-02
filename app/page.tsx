@@ -56,7 +56,7 @@ export const metadata: Metadata = {
   // keyword and no differentiator for the SERP.
   title: "Rental Property Calculator — Cap Rate, Cash Flow & DSCR",
   description:
-    "Use TrueCap to analyze rental properties with cap rate, cash-on-cash return, monthly cash flow, and long-term investment projections.",
+    "Analyze any rental in 60 seconds — cap rate, cash flow, DSCR auto-filled from the address. Set your buy box and every deal gets a personal pass/fail.",
   keywords: [
     "rental property analysis",
     "investment property calculator",
@@ -72,7 +72,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "TrueCap Rental Property Analysis",
     description:
-      "Analyze rental property deals with cap rate, cash flow, ROI, and projection tools in a single dashboard.",
+      "Type an address, get the verdict — cap rate, cash flow, DSCR in 60 seconds. Set your buy box and every deal gets a personal pass/fail.",
     url: "/",
     type: "website",
     // Re-declare images because page-level openGraph fully replaces the
@@ -91,7 +91,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "TrueCap Rental Property Analysis",
     description:
-      "Analyze rental property deals with cap rate, cash flow, ROI, and projection tools in a single dashboard.",
+      "Type an address, get the verdict — cap rate, cash flow, DSCR in 60 seconds. Set your buy box and every deal gets a personal pass/fail.",
     images: ["/home.jpg"],
   },
 };
