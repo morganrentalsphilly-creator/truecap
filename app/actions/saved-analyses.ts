@@ -976,6 +976,12 @@ export async function setSavedDealCloseDateAction(
     if (trimmed > new Date().toISOString().slice(0, 10)) {
       return { ok: false, code: "VALIDATION_ERROR", message: "Close date can't be in the future." };
     }
+    // Sane floor: native date inputs can commit partial years (e.g. 0001)
+    // mid-typing; a pre-1900 close date is never real and would produce a
+    // multi-millennium months-owned figure.
+    if (trimmed < "1900-01-01") {
+      return { ok: false, code: "VALIDATION_ERROR", message: "Enter a valid close date." };
+    }
     value = trimmed;
   }
 

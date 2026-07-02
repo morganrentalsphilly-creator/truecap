@@ -36,6 +36,10 @@ export type NextActionInput = {
   meetsBuyBox?: boolean | null;
   /** Where the deal sits in the saved-deal pipeline. Omitted = advise as if shopping. */
   stage?: PipelineStage;
+  /** Closed deals only: whether a close date is already recorded. true =
+   *  equity tracking is live (never instruct adding what's added); omitted/
+   *  false = keep the add-a-close-date instruction. */
+  hasCloseDate?: boolean;
 };
 
 /** Conventional DSCR floor lenders look for on investment property. */
@@ -45,11 +49,20 @@ export const LENDER_DSCR_BAR = 1.25;
  * Terminal stages replace the underwrite advice entirely — the decision is
  * already made, so the next step is about living with it, not shopping.
  */
-function terminalStageAction(stage: PipelineStage | undefined): NextAction | null {
+function terminalStageAction(
+  stage: PipelineStage | undefined,
+  hasCloseDate?: boolean
+): NextAction | null {
   if (stage === "closed") {
     return {
-      label: "Track equity and actuals",
-      reason: "this deal closed — add a close date to track your equity",
+      // "Track your equity" — no "actuals": actuals tracking doesn't exist in
+      // the product yet, and the label must not promise more than the equity
+      // card delivers. With a close date recorded, the banner must not
+      // instruct adding one directly above the card that already shows it.
+      label: "Track your equity",
+      reason: hasCloseDate
+        ? "this deal closed — your equity updates monthly below; revisit after a re-appraisal or rent change"
+        : "this deal closed — add a close date to track your equity",
       tone: "ready",
     };
   }
@@ -92,7 +105,7 @@ function applyInFlightStage(action: NextAction, stage: PipelineStage | undefined
 }
 
 export function nextActionForDeal(input: NextActionInput): NextAction {
-  const terminal = terminalStageAction(input.stage);
+  const terminal = terminalStageAction(input.stage, input.hasCloseDate);
   if (terminal) return terminal;
   return applyInFlightStage(baseActionForDeal(input), input.stage);
 }
@@ -166,8 +179,10 @@ export function nextActionFromVerdict(input: {
   meetsBuyBox?: boolean | null;
   /** Where the deal sits in the saved-deal pipeline. Omitted = advise as if shopping. */
   stage?: PipelineStage;
+  /** Closed deals only: a recorded close date suppresses the add-one advice. */
+  hasCloseDate?: boolean;
 }): NextAction {
-  const terminal = terminalStageAction(input.stage);
+  const terminal = terminalStageAction(input.stage, input.hasCloseDate);
   if (terminal) return terminal;
   return applyInFlightStage(baseActionFromVerdict(input), input.stage);
 }

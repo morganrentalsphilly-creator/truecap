@@ -19,11 +19,23 @@ import { DueDiligenceCard } from "@/components/investcalc/due-diligence-card";
 import { DealDocumentsCard } from "@/components/investcalc/deal-documents-card";
 import { DealDetailsCard } from "@/components/investcalc/deal-details-card";
 import { DealCommentsPanel } from "@/components/investcalc/deal-comments-panel";
+import { DealNotesPanel } from "@/components/investcalc/deal-notes-panel";
 import { ScenariosCard } from "@/components/investcalc/scenarios-card";
 import { NextActionBanner } from "@/components/investcalc/next-action-banner";
 import { DealAgingNudge } from "@/components/investcalc/deal-aging-nudge";
+import { DealStageSelect } from "@/components/investcalc/deal-stage-select";
+import { OpenFullAnalysisButton } from "@/components/investcalc/open-saved-deal-in-analyzer";
+import { OwnedEquityCard } from "@/components/investcalc/owned-equity-card";
 import { nextActionForDeal } from "@/lib/next-action";
 import { recomputeSavedDealVerdict } from "@/lib/recompute-saved-deal-verdict";
+import { calculateAnalysis } from "@/lib/calc-analysis";
+import { normalizeInvestmentFormSnapshot } from "@/lib/investcalc-schema";
+import {
+  computeOwnedEquity,
+  monthsOwnedBetween,
+  type OwnedEquitySummary,
+} from "@/lib/owned-equity";
+import type { DealRecommendation } from "@/lib/deal-score";
 import { listBuyBoxesAction } from "@/app/actions/user-buy-boxes";
 import {
   buyBoxHasCriteria,
@@ -69,6 +81,91 @@ function getInitials(displayName: string, email: string): string {
   return (displayName || email || "U").slice(0, 2).toUpperCase();
 }
 
+const RECOMMENDATION_TIERS: readonly DealRecommendation[] = [
+  "Strong Buy",
+  "Buy",
+  "Neutral",
+  "Risky",
+  "Avoid",
+];
+
+/** Same tone mapping My Deals' verdict badge uses (getSignalClasses). */
+function verdictBadgeClasses(rec: DealRecommendation): string {
+  if (rec === "Strong Buy") return "bg-success/10 text-success border-success/30";
+  if (rec === "Buy") return "bg-primary/10 text-primary border-primary/30";
+  if (rec === "Neutral" || rec === "Risky") return "bg-warning/15 text-warning-foreground border-warning/30";
+  return "bg-destructive/10 text-destructive border-destructive/20";
+}
+
+function fmtCashFlow(n: number): string {
+  const cur = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  }).format(Math.abs(n));
+  const sign = n > 0 ? "+" : n < 0 ? "-" : "";
+  return `${sign}${cur}/mo`;
+}
+
+/** One label+value pair in the compact underwrite strip. */
+function Metric({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: string;
+  tone?: "positive" | "negative";
+}) {
+  const valueClass =
+    tone === "positive"
+      ? "text-success"
+      : tone === "negative"
+        ? "text-[var(--metric-negative)]"
+        : "text-foreground";
+  return (
+    <span className="inline-flex items-baseline gap-1.5 whitespace-nowrap">
+      <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+        {label}
+      </span>
+      <span className={`text-sm font-semibold tabular-nums ${valueClass}`}>{value}</span>
+    </span>
+  );
+}
+
+const DEAL_SELECT =
+  "id, address, title, property_type, purchase_price, form_snapshot, result_snapshot, net_cash_flow_monthly, pipeline_stage, created_at";
+
+/**
+ * Load the deal with the owned-deal close_date, tolerating the column not
+ * existing yet (it ships in its own migration): a 42703 retries without it
+ * and flags the owned-equity surfaces off — same tiered-select pattern as
+ * the My Deals list. RLS + the user_id filter scope the read to the owner.
+ */
+async function fetchDeal(
+  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>,
+  id: string,
+  userId: string
+): Promise<{ data: unknown; ownedEquityEnabled: boolean }> {
+  const run = (select: string) =>
+    supabase
+      .from("saved_analyses")
+      .select(select)
+      .eq("id", id)
+      .eq("user_id", userId)
+      .is("deleted_at", null)
+      .maybeSingle();
+
+  const withClose = await run(`${DEAL_SELECT}, close_date`);
+  const missingColumn =
+    !!withClose.error &&
+    (withClose.error.code === "42703" ||
+      /column .* does not exist/i.test(withClose.error.message ?? ""));
+  if (!missingColumn) return { data: withClose.data, ownedEquityEnabled: true };
+  const base = await run(DEAL_SELECT);
+  return { data: base.data, ownedEquityEnabled: false };
+}
+
 export default async function DealWorkspacePage({
   params,
 }: {
@@ -88,22 +185,15 @@ export default async function DealWorkspacePage({
   }
   const navAccess = getDashboardNavAccess(entitlements);
 
-  const [{ data: profile }, isPremium, { data: deal }, buyBoxesResult] = await Promise.all([
+  const [{ data: profile }, isPremium, { data: deal, ownedEquityEnabled }, buyBoxesResult] =
+    await Promise.all([
     supabase
       .from("profiles")
       .select("first_name, last_name, display_name, avatar_url")
       .eq("id", user.id)
       .maybeSingle(),
     hasPaidPlanSubscription(supabase, user.id),
-    supabase
-      .from("saved_analyses")
-      .select(
-        "id, address, title, property_type, purchase_price, form_snapshot, result_snapshot, net_cash_flow_monthly, pipeline_stage, created_at"
-      )
-      .eq("id", id)
-      .eq("user_id", user.id)
-      .is("deleted_at", null)
-      .maybeSingle(),
+    fetchDeal(supabase, id, user.id),
     // Buy-box fit (PV-5): the same RLS-scoped user_buy_boxes read My Deals
     // uses (listBuyBoxesAction — canUse gate + MIGRATION_PENDING tolerance
     // built in). Any failure, missing table, or entitlement miss degrades to
@@ -128,8 +218,12 @@ export default async function DealWorkspacePage({
     net_cash_flow_monthly: number | null;
     pipeline_stage: string | null;
     created_at: string | null;
+    /** Owned-deal close date — absent until its migration is applied. */
+    close_date?: string | null;
   };
   const heading = dealRow.address?.trim() || dealRow.title?.trim() || "Untitled property";
+  const stage = isPipelineStage(dealRow.pipeline_stage) ? dealRow.pipeline_stage : null;
+  const canUsePipeline = hasPlanFeature(entitlements, "pipeline");
 
   // Recommended next step from the saved underwrite (cash flow + DSCR),
   // adjusted for where the deal sits in the pipeline (a closed deal is told
@@ -156,6 +250,46 @@ export default async function DealWorkspacePage({
   const dscr = fresh ? fresh.dscr : snap["dscr"] != null ? num(snap["dscr"]) : null;
   const monthlyPayment = fresh ? fresh.monthlyPayment : num(snap["monthlyPayment"]);
 
+  // Compact underwrite header (DEC-1/WS-1) — same recompute-with-stored-
+  // fallback numbers the banner uses. Metrics a legacy snapshot doesn't carry
+  // stay null and their tile is OMITTED (never rendered as $0/0.00).
+  const cocPct = fresh ? fresh.cocReturnPct : numOrNull(snap["cocReturn"]);
+  const dealScore = fresh ? fresh.score : numOrNull(snap["score"]);
+  const recommendation: DealRecommendation | null = fresh
+    ? fresh.recommendation
+    : typeof snap["recommendation"] === "string" &&
+        (RECOMMENDATION_TIERS as readonly string[]).includes(snap["recommendation"])
+      ? (snap["recommendation"] as DealRecommendation)
+      : null;
+  // Mirrors the My Deals DSCR column: <= 0 means a cash purchase (N/A, shown
+  // as "Cash"); null (legacy snapshot without dscr) omits the tile.
+  const dscrDisplay = dscr == null ? null : dscr <= 0 ? "Cash" : dscr.toFixed(2);
+
+  // Owned equity (M3-2/WOW-4) — closed deals only. Server-computed from the
+  // deal's OWN snapshot assumptions, exactly like My Deals' computeRowEquity;
+  // null (card shows just the date/prompt) when the legacy snapshot doesn't
+  // validate or there's no close date yet.
+  const closeDate =
+    ownedEquityEnabled && typeof dealRow.close_date === "string" ? dealRow.close_date : null;
+  let ownedEquity: OwnedEquitySummary | null = null;
+  if (stage === "closed" && closeDate) {
+    const values = normalizeInvestmentFormSnapshot(dealRow.form_snapshot);
+    const closed = new Date(closeDate);
+    if (values && !Number.isNaN(closed.getTime())) {
+      const result = calculateAnalysis(values);
+      ownedEquity = computeOwnedEquity(
+        {
+          purchasePrice: values.purchasePrice ?? 0,
+          loanAmount: result.loanAmount ?? 0,
+          annualRatePct: values.interestRate ?? 0,
+          termYears: values.loanTermYears ?? 30,
+          appreciationRatePct: values.appreciationRatePct ?? 0,
+        },
+        monthsOwnedBetween(closed, new Date())
+      );
+    }
+  }
+
   // Buy-box fit (PV-5): evaluate the user's active boxes against the SAME
   // recomputed-with-stored-fallback numbers the banner uses, server-side
   // (pure, no IO). null when the user has no usable box — the banner and the
@@ -180,7 +314,7 @@ export default async function DealWorkspacePage({
         : null;
     const metrics: BuyBoxDealMetrics = {
       capRatePct: fresh ? fresh.capRatePct : numOrNull(snap["capRate"]),
-      cocPct: fresh ? fresh.cocReturnPct : numOrNull(snap["cocReturn"]),
+      cocPct,
       dscr,
       cashFlowMonthly: netCashFlow,
       purchasePrice: dealRow.purchase_price != null ? num(dealRow.purchase_price) : numOrNull(snap["purchasePrice"]),
@@ -203,7 +337,10 @@ export default async function DealWorkspacePage({
     dscr,
     monthlyPayment,
     meetsBuyBox: buyBoxFit ? buyBoxFit.anyPass : null,
-    stage: isPipelineStage(dealRow.pipeline_stage) ? dealRow.pipeline_stage : undefined,
+    stage: stage ?? undefined,
+    // With a close date recorded the banner stops instructing the user to
+    // add one directly above the equity card that already shows it.
+    hasCloseDate: closeDate != null,
   });
 
   const displayName = getDisplayName((profile as ProfileRow | null) ?? null, user.email);
@@ -222,23 +359,71 @@ export default async function DealWorkspacePage({
       <div className="flex-1">
         <main id="main" className="mx-auto max-w-3xl space-y-5 px-4 py-6 sm:px-6 sm:py-8">
           <div className="min-w-0">
-            <Link
-              href="/dashboard/saved-analyses"
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground"
-            >
-              <ArrowLeft className="size-3.5" />
-              My Deals
-            </Link>
-            <h1 className="mt-1 truncate text-xl font-extrabold tracking-tight text-foreground sm:text-2xl">
-              {heading}
-            </h1>
-            <p className="text-xs text-muted-foreground">
-              Due-diligence checklist &amp; documents for this deal. Your analysis stays in the deal view.
-            </p>
+            <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
+              <div className="min-w-0">
+                <Link
+                  href="/dashboard/saved-analyses"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground"
+                >
+                  <ArrowLeft className="size-3.5" />
+                  My Deals
+                </Link>
+                <h1 className="mt-1 truncate text-xl font-extrabold tracking-tight text-foreground sm:text-2xl">
+                  {heading}
+                </h1>
+                <p className="text-xs text-muted-foreground">
+                  Due-diligence checklist &amp; documents for this deal.
+                </p>
+              </div>
+              <div className="flex shrink-0 items-center gap-2 pt-0.5">
+                {/* Stage changes happen while the user is IN the workspace
+                    (WS-2) — same write path + entitlement gate as My Deals. */}
+                {canUsePipeline ? (
+                  <DealStageSelect
+                    savedDealId={dealRow.id}
+                    stage={stage ?? DEFAULT_PIPELINE_STAGE}
+                  />
+                ) : null}
+                <OpenFullAnalysisButton savedDealId={dealRow.id} />
+              </div>
+            </div>
+            {/* Compact underwrite strip (DEC-1/WS-1): the numbers the dashboard
+                deep-linked about, from the same recompute the banner uses.
+                Tiles a legacy snapshot doesn't carry are omitted entirely. */}
+            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5">
+              {recommendation ? (
+                <span
+                  className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${verdictBadgeClasses(recommendation)}`}
+                >
+                  {recommendation}
+                </span>
+              ) : null}
+              <Metric
+                label="Cash flow"
+                value={fmtCashFlow(netCashFlow)}
+                tone={netCashFlow >= 0 ? "positive" : "negative"}
+              />
+              {cocPct != null ? <Metric label="CoC" value={`${cocPct.toFixed(1)}%`} /> : null}
+              {dscrDisplay ? <Metric label="DSCR" value={dscrDisplay} /> : null}
+              {dealScore != null ? (
+                <Metric label="Deal Score" value={`${Math.round(dealScore)}`} />
+              ) : null}
+            </div>
           </div>
 
           <div>
-            <NextActionBanner action={nextAction} />
+            <NextActionBanner
+              action={nextAction}
+              // The closed-stage instruction ("add a close date") is doable in
+              // place: jump to the owned-equity card below (M3-2/WOW-4). Only
+              // offered while there's still a date to add and the close_date
+              // migration is live.
+              cta={
+                stage === "closed" && ownedEquityEnabled && !closeDate
+                  ? { label: "Add close date", href: "#owned-equity" }
+                  : undefined
+              }
+            />
             {buyBoxPersonalLine ? (
               // The one personal line from the user's own buy box — muted,
               // directly under the advice it contextualizes (PV-5).
@@ -247,9 +432,15 @@ export default async function DealWorkspacePage({
               </p>
             ) : null}
           </div>
+          {/* Owned equity (M3-2/WOW-4): closed deals capture their close date
+              and see the equity estimate on the page that told them to.
+              Hidden until the close_date migration is applied. */}
+          {stage === "closed" && ownedEquityEnabled ? (
+            <OwnedEquityCard savedDealId={dealRow.id} closeDate={closeDate} equity={ownedEquity} />
+          ) : null}
           <DealAgingNudge
             dealId={dealRow.id}
-            stage={isPipelineStage(dealRow.pipeline_stage) ? dealRow.pipeline_stage : DEFAULT_PIPELINE_STAGE}
+            stage={stage ?? DEFAULT_PIPELINE_STAGE}
             createdAt={dealRow.created_at}
             address={heading}
           />
@@ -257,6 +448,10 @@ export default async function DealWorkspacePage({
           <ScenariosCard savedDealId={dealRow.id} />
           <DueDiligenceCard savedDealId={dealRow.id} />
           <DealDocumentsCard savedDealId={dealRow.id} />
+          {/* Notes + comments side by side (WS-4): the free-text deal file no
+              longer lives only in the analyzer view. Same blob, saves on blur,
+              last-write-wins with the analyzer copy. */}
+          <DealNotesPanel savedDealId={dealRow.id} />
           <DealCommentsPanel savedDealId={dealRow.id} />
         </main>
       </div>

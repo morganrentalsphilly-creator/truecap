@@ -53,7 +53,6 @@ import {
   bulkUpdateSavedDealsAction,
   completeSavedAnalysisPdfExportAction,
   getSavedAnalysisPdfExportAction,
-  getSavedDealForEditingAction,
   updateSavedDealLifecycleStateAction,
   updateSavedDealStageAction,
   updateSavedDealTagsAction,
@@ -101,6 +100,7 @@ import {
 import type { OwnedEquitySummary } from "@/lib/owned-equity";
 import { setSavedDealCloseDateAction } from "@/app/actions/saved-analyses";
 import { recomputeSavedDealVerdict } from "@/lib/recompute-saved-deal-verdict";
+import { openSavedDealInAnalysisTab as openSavedDealInAnalysisTabShared } from "@/components/investcalc/open-saved-deal-in-analyzer";
 
 type SavedSignal = "strong-buy" | "buy" | "neutral" | "risky" | "avoid";
 type SavedPropertyType = "single-family" | "multi-family" | "owner-occupant";
@@ -108,7 +108,6 @@ type SortField = "saved" | "cash-flow" | "coc" | "cap-rate" | "price";
 type SortDirection = "asc" | "desc";
 type DealStateFilter = "active" | "completed" | "archived" | "all";
 const PAGE_SIZE = 7;
-const SAVED_ANALYSIS_EDIT_DRAFT_KEY = "truecap_saved_analysis_edit_draft";
 
 /** Optional decision columns on the My Deals table (off by default; the table
  *  already shows cash flow / CoC / cap / price). Persisted per browser. */
@@ -239,13 +238,26 @@ function OwnedEquityCell({ item, enabled }: { item: SavedAnalysisListItem; enabl
     });
   };
 
+  // Commit on blur/Enter, NOT on change (mirrors OwnedEquityCard): per-
+  // keystroke saves made Backspace clear the persisted date and committed
+  // partial years like 0001 mid-typing.
+  const commit = (raw: string) => {
+    const value = raw || null;
+    if (value && Number(value.slice(0, 4)) < 1900) return;
+    if (value === item.closeDate || (!value && !item.closeDate)) return;
+    save(value);
+  };
   const dateInput = (
     <input
       type="date"
       defaultValue={item.closeDate ?? undefined}
+      min="1900-01-01"
       max={new Date().toISOString().slice(0, 10)}
       disabled={isSaving}
-      onChange={(e) => save(e.target.value || null)}
+      onBlur={(e) => commit(e.target.value)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") commit((e.target as HTMLInputElement).value);
+      }}
       aria-label="Close date"
       className="h-8 rounded-lg border border-input bg-background px-2 text-xs text-foreground"
     />
@@ -306,15 +318,23 @@ function NextActionLine({
   netCashFlow,
   stage,
   meetsBuyBox,
+  hasCloseDate,
   className,
 }: {
   recommendation: SavedAnalysisListItem["recommendation"];
   netCashFlow: number | null;
   stage?: PipelineStage;
   meetsBuyBox?: boolean | null;
+  hasCloseDate?: boolean;
   className?: string;
 }) {
-  const a = nextActionFromVerdict({ recommendation, netCashFlow: netCashFlow ?? 0, meetsBuyBox, stage });
+  const a = nextActionFromVerdict({
+    recommendation,
+    netCashFlow: netCashFlow ?? 0,
+    meetsBuyBox,
+    stage,
+    hasCloseDate,
+  });
   const dot =
     a.tone === "blocked"
       ? "bg-[var(--metric-negative)]"
@@ -1239,32 +1259,18 @@ export function SavedAnalysesPage({
     });
   };
 
+  // The handoff itself is the shared helper (also used by the deal
+  // workspace's "Open full analysis" button) — this wrapper only adds My
+  // Deals' toast on failure. Behavior identical to the pre-extraction code.
   const openSavedDealInAnalysisTab = async (id: string, targetWindow: Window | null) => {
-    const result = await getSavedDealForEditingAction(id);
+    const result = await openSavedDealInAnalysisTabShared(id, targetWindow);
     if (!result.ok) {
-      targetWindow?.close();
       toast({
         title: "Could not open saved deal",
         description: result.message,
         variant: "destructive",
       });
-      return;
     }
-
-    const payload = JSON.stringify({
-      id: result.id,
-      schemaVersion: result.schemaVersion,
-      formSnapshot: result.formSnapshot,
-      templateFallback: result.templateFallback,
-      resultSnapshot: result.resultSnapshot,
-    });
-    window.localStorage.setItem(SAVED_ANALYSIS_EDIT_DRAFT_KEY, payload);
-    window.sessionStorage.setItem(SAVED_ANALYSIS_EDIT_DRAFT_KEY, payload);
-    if (targetWindow) {
-      targetWindow.location.href = "/";
-      return;
-    }
-    window.open("/", "_blank", "noopener,noreferrer");
   };
 
   const handleOpenSavedDeal = (id: string) => {
@@ -1885,7 +1891,7 @@ export function SavedAnalysesPage({
                         ) : null}
                       </div>
                       <p className="mt-1 text-xs text-muted-foreground">{getTypeLabel(item.propertyType)}</p>
-                      <NextActionLine recommendation={item.recommendation} netCashFlow={item.netCashFlowMonthly} stage={item.pipelineStage} meetsBuyBox={buyBoxFitById?.get(item.id)?.anyPass ?? null} className="mt-1.5" />
+                      <NextActionLine recommendation={item.recommendation} netCashFlow={item.netCashFlowMonthly} stage={item.pipelineStage} meetsBuyBox={buyBoxFitById?.get(item.id)?.anyPass ?? null} hasCloseDate={item.closeDate != null} className="mt-1.5" />
                       <OwnedEquityCell item={item} enabled={ownedEquityEnabled} />
                     </div>
                     <input
@@ -2128,7 +2134,7 @@ export function SavedAnalysesPage({
                             <p className="text-xs text-muted-foreground truncate">
                               {getTypeLabel(item.propertyType)}
                             </p>
-                            <NextActionLine recommendation={item.recommendation} netCashFlow={item.netCashFlowMonthly} stage={item.pipelineStage} meetsBuyBox={buyBoxFitById?.get(item.id)?.anyPass ?? null} className="mt-0.5" />
+                            <NextActionLine recommendation={item.recommendation} netCashFlow={item.netCashFlowMonthly} stage={item.pipelineStage} meetsBuyBox={buyBoxFitById?.get(item.id)?.anyPass ?? null} hasCloseDate={item.closeDate != null} className="mt-0.5" />
                             <OwnedEquityCell item={item} enabled={ownedEquityEnabled} />
                           </div>
                         </div>

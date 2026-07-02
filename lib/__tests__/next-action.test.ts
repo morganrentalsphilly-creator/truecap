@@ -75,14 +75,25 @@ describe("nextActionForDeal", () => {
       }
     });
 
-    it("closed → track equity and actuals, regardless of the underwrite", () => {
+    it("closed → track your equity, regardless of the underwrite", () => {
       const good = nextActionForDeal({ netCashFlow: 400, dscr: 1.5, monthlyPayment: 1400, stage: "closed" });
       const bad = nextActionForDeal({ netCashFlow: -200, dscr: 0.8, monthlyPayment: 1400, stage: "closed" });
       for (const a of [good, bad]) {
         expect(a.tone).toBe("ready");
-        expect(a.label).toBe("Track equity and actuals");
+        expect(a.label).toBe("Track your equity");
         expect(a.reason).toMatch(/closed/i);
       }
+    });
+
+    it("closed WITHOUT a close date → instructs adding one; WITH one → never does", () => {
+      const without = nextActionForDeal({ netCashFlow: 400, stage: "closed", hasCloseDate: false });
+      expect(without.reason).toMatch(/add a close date/i);
+      // With the date recorded, the banner must not instruct adding what's
+      // already added (it renders directly above the equity card showing it).
+      const withDate = nextActionForDeal({ netCashFlow: 400, stage: "closed", hasCloseDate: true });
+      expect(withDate.label).toBe("Track your equity");
+      expect(withDate.reason).not.toMatch(/add a close date/i);
+      expect(withDate.reason).toMatch(/equity/i);
     });
 
     it("passed → revisit if the price drops, regardless of the underwrite", () => {
@@ -183,10 +194,10 @@ describe("nextActionFromVerdict", () => {
       }
     });
 
-    it("closed → track equity and actuals, matching nextActionForDeal's copy", () => {
+    it("closed → track your equity, matching nextActionForDeal's copy", () => {
       const a = nextActionFromVerdict({ recommendation: "Avoid", netCashFlow: -200, stage: "closed" });
       expect(a).toEqual(nextActionForDeal({ netCashFlow: -200, stage: "closed" }));
-      expect(a.label).toBe("Track equity and actuals");
+      expect(a.label).toBe("Track your equity");
       expect(a.tone).toBe("ready");
     });
 
