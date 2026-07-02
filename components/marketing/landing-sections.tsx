@@ -938,7 +938,7 @@ export function PdfProUpsell() {
  * Persona cards live LOWER, after intent is captured, so they help a
  * visitor self-identify without diluting the single above-the-fold CTA.
  */
-const PERSONAS: { icon: typeof Home; title: string; body: string }[] = [
+const PERSONAS: { icon: typeof Home; title: string; body: string; seed?: { href: string; label: string } }[] = [
   {
     icon: TrendingUp,
     title: "For investors",
@@ -953,6 +953,9 @@ const PERSONAS: { icon: typeof Home; title: string; body: string }[] = [
     icon: Home,
     title: "For house hackers",
     body: "Model owner-occupied units and see what's left of your mortgage payment after rent.",
+    // Deep-link straight to the owner-occupant form (analyzer handoff ?type=)
+    // so a house hacker doesn't start on a blank single-family deal.
+    seed: { href: "/?type=owner-occupant#main", label: "Start a house-hack analysis" },
   },
 ];
 
@@ -989,6 +992,16 @@ export function Personas() {
               <p className={`mt-2 leading-relaxed text-muted-foreground ${i === 0 ? "max-w-md text-base lg:mx-auto" : "text-sm"}`}>
                 {p.body}
               </p>
+              {p.seed ? (
+                <Link
+                  href={p.seed.href}
+                  prefetch={false}
+                  className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-primary underline-offset-2 hover:underline"
+                >
+                  {p.seed.label}
+                  <ArrowRight className="size-3.5" />
+                </Link>
+              ) : null}
             </div>
           ))}
         </div>

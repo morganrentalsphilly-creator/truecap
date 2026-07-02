@@ -15,6 +15,15 @@
  * prefills what's provided and leaves the rest on defaults.
  */
 
+/** The three property types the analyzer supports (mirrors the form enum;
+ *  kept local so this module stays dependency-free). */
+export type HandoffPropertyType = "single-family" | "multi-family" | "owner-occupant";
+const HANDOFF_PROPERTY_TYPES: readonly HandoffPropertyType[] = [
+  "single-family",
+  "multi-family",
+  "owner-occupant",
+];
+
 export interface AnalyzerHandoff {
   /** Maps to purchasePrice. */
   purchasePrice?: number;
@@ -24,6 +33,13 @@ export interface AnalyzerHandoff {
   bedrooms?: number;
   /** Maps to address. */
   address?: string;
+  /**
+   * Maps to propertyType — lets a persona/marketing link land the visitor on
+   * the right form (house-hacker → owner-occupant, multi-family investor →
+   * multi-family) instead of a blank single-family form. Ignored when it
+   * isn't one of the three valid types.
+   */
+  propertyType?: HandoffPropertyType;
 }
 
 function toFiniteNum(v: string | null): number | undefined {
@@ -66,6 +82,13 @@ export function readAnalyzerHandoff(search: string): AnalyzerHandoff | null {
     out.address = address;
   }
 
+  // `type` (or the explicit `propertyType`) — validated against the enum;
+  // anything else is silently ignored so a bad link never crashes init.
+  const rawType = (params.get("type") ?? params.get("propertyType"))?.trim();
+  if (rawType && (HANDOFF_PROPERTY_TYPES as readonly string[]).includes(rawType)) {
+    out.propertyType = rawType as HandoffPropertyType;
+  }
+
   return Object.keys(out).length > 0 ? out : null;
 }
 
@@ -91,6 +114,10 @@ export function buildAnalyzerHandoffUrl(
   }
   if (input.address && input.address.trim().length >= 5) {
     params.set("address", input.address.trim());
+  }
+  if (input.propertyType && input.propertyType !== "single-family") {
+    // single-family is the analyzer default — omit it to keep links clean.
+    params.set("type", input.propertyType);
   }
   params.set("utm_source", opts?.utmSource ?? "tool-handoff");
 

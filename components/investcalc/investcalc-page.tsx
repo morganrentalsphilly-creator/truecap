@@ -34,6 +34,7 @@ import { SingleFamilyUnitSection } from "./single-family-unit-section";
 import { MultiFamilyUnitsSection } from "./multi-family-units-section";
 import { FinancingSection } from "./financing-section";
 import { OperatingExpensesSection } from "./operating-expenses-section";
+import { SaveAsDefaultsChip } from "./save-as-defaults-chip";
 import { StrategyChips } from "./strategy-chips";
 import { STARTER_TEMPLATES, type StarterTemplate } from "@/lib/starter-templates";
 import { buildTemplateFormPatch, type TemplateFormPatchEntry } from "@/lib/template-form-patch";
@@ -1983,6 +1984,22 @@ export function InvestCalcPage({
     // expected) and returns so the draft restore doesn't clobber them.
     const handoff = readAnalyzerHandoff(window.location.search);
     if (handoff) {
+      // Property type first: a persona/marketing link (?type=owner-occupant)
+      // lands the visitor on the right form. We're inside the mount reset
+      // (isProgrammaticResetRef is true), so the reactive propertyType effect
+      // is suppressed — seed the units + sync prevPropertyTypeRef here, the
+      // same way that effect would, so multi-family / owner-occupant get
+      // their unit rows instead of an empty grid.
+      if (handoff.propertyType !== undefined) {
+        form.setValue("propertyType", handoff.propertyType);
+        prevPropertyTypeRef.current = handoff.propertyType;
+        if (handoff.propertyType !== "single-family") {
+          form.setValue("units", getDefaultUnitsForPropertyType(handoff.propertyType), {
+            shouldDirty: false,
+            shouldValidate: false,
+          });
+        }
+      }
       if (handoff.address !== undefined) form.setValue("address", handoff.address);
       if (handoff.purchasePrice !== undefined) form.setValue("purchasePrice", handoff.purchasePrice);
       if (handoff.bedrooms !== undefined) form.setValue("bedrooms", handoff.bedrooms);
@@ -3619,6 +3636,16 @@ export function InvestCalcPage({
               </div>
               <div id="step-expenses" className="scroll-mt-24">
                 <OperatingExpensesSection form={form} purchasePrice={purchasePrice} />
+                {/* Bank the current assumptions as this user's defaults — self-
+                    gates to signed-in users who've changed a value from what's
+                    saved (see SaveAsDefaultsChip). */}
+                <div className="mt-2 flex justify-end">
+                  <SaveAsDefaultsChip
+                    form={form}
+                    enabled={Boolean(isAuthenticated)}
+                    currentDefaults={userAnalysisDefaults}
+                  />
+                </div>
               </div>
             </div>
 

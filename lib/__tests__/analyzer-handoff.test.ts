@@ -32,6 +32,21 @@ describe("readAnalyzerHandoff", () => {
   it("ignores non-numeric junk", () => {
     expect(readAnalyzerHandoff("?price=abc&rent=xyz")).toBeNull();
   });
+
+  it("seeds a valid property type (persona deep link)", () => {
+    expect(readAnalyzerHandoff("?type=owner-occupant")).toEqual({ propertyType: "owner-occupant" });
+    expect(readAnalyzerHandoff("?type=multi-family&price=400000")).toEqual({
+      propertyType: "multi-family",
+      purchasePrice: 400000,
+    });
+    // The explicit alias also works.
+    expect(readAnalyzerHandoff("?propertyType=single-family")).toEqual({ propertyType: "single-family" });
+  });
+
+  it("silently ignores an invalid property type", () => {
+    expect(readAnalyzerHandoff("?type=mansion")).toBeNull();
+    expect(readAnalyzerHandoff("?type=commercial&rent=1500")).toEqual({ monthlyRent: 1500 });
+  });
 });
 
 describe("buildAnalyzerHandoffUrl", () => {
@@ -56,5 +71,13 @@ describe("buildAnalyzerHandoffUrl", () => {
     const url = buildAnalyzerHandoffUrl({ purchasePrice: 0, monthlyRent: 1800 });
     expect(url).not.toContain("price=");
     expect(url).toContain("rent=1800");
+  });
+
+  it("carries a non-default property type but omits single-family", () => {
+    expect(buildAnalyzerHandoffUrl({ propertyType: "owner-occupant" })).toContain("type=owner-occupant");
+    // single-family is the analyzer default → keep links clean.
+    expect(buildAnalyzerHandoffUrl({ purchasePrice: 200000, propertyType: "single-family" })).not.toContain(
+      "type="
+    );
   });
 });
