@@ -8,6 +8,7 @@ import {
   Briefcase,
   FileBarChart,
   Settings,
+  ListChecks,
   ListTodo,
   CircleUserRound,
 } from "lucide-react";
@@ -41,6 +42,8 @@ export function Sidebar({ savedDealCount, navAccess, mobile = false }: SidebarPr
     { icon: PlusCircle, label: "New Analysis", href: "/", enabled: true },
     { icon: Briefcase, label: "My Deals", href: "/dashboard/saved-analyses", badge: String(savedDealCount), enabled: navAccess.myDeals },
     { icon: ListTodo, label: "Compare Deals", href: "/dashboard/compare", enabled: navAccess.compareDeals },
+    // Batch triage — the power-tool tier, same gate as Compare.
+    { icon: ListChecks, label: "Screen Listings", href: "/dashboard/triage", enabled: navAccess.compareDeals },
     { icon: FileBarChart, label: "Manage Templates", href: "/dashboard/templates", enabled: navAccess.templates },
     // Settings promoted from the avatar dropdown into the main sidebar.
     // Pro users pay for Branding (configured at /settings/branding); it
