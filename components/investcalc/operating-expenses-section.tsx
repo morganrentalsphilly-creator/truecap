@@ -3,6 +3,7 @@
 import { useState, type ReactNode } from "react";
 import { Controller, UseFormReturn } from "react-hook-form";
 import {
+  AlertTriangle,
   BarChart3,
   Building2,
   ChevronDown,
@@ -149,6 +150,8 @@ export function OperatingExpensesSection({
   const propertyTaxPct = watch("propertyTaxPct");
   const propertyTaxInputMode = watch("propertyTaxInputMode");
   const propertyTaxAnnual = watch("propertyTaxAnnual");
+  const propertyType = watch("propertyType");
+  const utilitiesMonthly = watch("utilitiesMonthly");
   const insuranceInputMode = watch("insuranceInputMode");
   const insurancePct = watch("insurancePct");
   const insuranceMonthly = watch("insuranceMonthly");
@@ -264,6 +267,36 @@ export function OperatingExpensesSection({
           </p>
         </div>
       )}
+
+      {/* Expense-realism guard (Phase 2 #2): a multi-unit modeled with $0
+          owner-paid utilities is the most common way an underwrite sails
+          through too rosy — landlords typically cover water/sewer/trash
+          and common-area electric on 2+ units. Non-blocking nudge, never
+          an error; renders only for multi-family with utilities blank/0
+          (visible even while Advanced is collapsed, which is exactly when
+          the $0 slips through). */}
+      {propertyType === "multi-family" && !((utilitiesMonthly ?? 0) > 0) ? (
+        <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-amber-300 bg-amber-50 px-3.5 py-2.5">
+          <AlertTriangle className="mt-0.5 size-4 shrink-0 text-amber-600" />
+          <div className="min-w-0 text-xs leading-relaxed text-amber-900">
+            <span className="font-semibold">Owner-paid utilities are $0.</span>{" "}
+            Most multi-family owners cover water, sewer, trash, or common-area
+            electric — a $0 assumption usually overstates cash flow.{" "}
+            <button
+              type="button"
+              onClick={() => {
+                setShowAdvanced(true);
+                // Post-commit tick: the advanced panel must be unhidden
+                // before a focus() on the input can land.
+                setTimeout(() => document.getElementById("utilitiesMonthly")?.focus(), 60);
+              }}
+              className="font-semibold text-amber-900 underline underline-offset-2 hover:text-amber-950"
+            >
+              Add utilities
+            </button>
+          </div>
+        </div>
+      ) : null}
 
       {/* Keep advanced inputs mounted so RHF values remain registered while the panel is collapsed. */}
       <div className="space-y-4">
