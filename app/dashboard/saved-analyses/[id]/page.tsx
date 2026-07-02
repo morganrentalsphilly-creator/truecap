@@ -37,11 +37,8 @@ import {
   describeMaoTarget,
 } from "@/lib/mao-targets";
 import { normalizeInvestmentFormSnapshot } from "@/lib/investcalc-schema";
-import {
-  computeOwnedEquity,
-  monthsOwnedBetween,
-  type OwnedEquitySummary,
-} from "@/lib/owned-equity";
+import type { OwnedEquitySummary } from "@/lib/owned-equity";
+import { computeRowEquity } from "@/lib/owned-equity-series";
 import type { DealRecommendation } from "@/lib/deal-score";
 import { listBuyBoxesAction } from "@/app/actions/user-buy-boxes";
 import {
@@ -288,30 +285,23 @@ export default async function DealWorkspacePage({
   // as "Cash"); null (legacy snapshot without dscr) omits the tile.
   const dscrDisplay = dscr == null ? null : dscr <= 0 ? "Cash" : dscr.toFixed(2);
 
-  // Owned equity (M3-2/WOW-4) — closed deals only. Server-computed from the
-  // deal's OWN snapshot assumptions, exactly like My Deals' computeRowEquity;
-  // null (card shows just the date/prompt) when the legacy snapshot doesn't
-  // validate or there's no close date yet.
+  // Owned equity (M3-2/WOW-4) — closed deals only. ONE definition of owned
+  // equity everywhere: the shared computeRowEquity (lib/owned-equity-series)
+  // that My Deals and the dashboard home use. The workspace's closed-stage
+  // gate stands in for is_completed (this page keys on pipeline_stage, and
+  // the old inline derivation never checked the flag either). Null when the
+  // legacy snapshot doesn't validate or the date is malformed — the card
+  // still renders the close date, just without an equity figure.
   const closeDate =
     ownedEquityEnabled && typeof dealRow.close_date === "string" ? dealRow.close_date : null;
-  let ownedEquity: OwnedEquitySummary | null = null;
-  if (stage === "closed" && closeDate) {
-    const values = formValues;
-    const closed = new Date(closeDate);
-    if (values && !Number.isNaN(closed.getTime())) {
-      const result = calculateAnalysis(values);
-      ownedEquity = computeOwnedEquity(
-        {
-          purchasePrice: values.purchasePrice ?? 0,
-          loanAmount: result.loanAmount ?? 0,
-          annualRatePct: values.interestRate ?? 0,
-          termYears: values.loanTermYears ?? 30,
-          appreciationRatePct: values.appreciationRatePct ?? 0,
-        },
-        monthsOwnedBetween(closed, new Date())
-      );
-    }
-  }
+  const ownedEquity: OwnedEquitySummary | null =
+    stage === "closed" && closeDate
+      ? computeRowEquity({
+          is_completed: true,
+          close_date: closeDate,
+          form_snapshot: dealRow.form_snapshot,
+        })
+      : null;
 
   // Buy-box fit (PV-5): evaluate the user's active boxes against the SAME
   // recomputed-with-stored-fallback numbers the banner uses, server-side

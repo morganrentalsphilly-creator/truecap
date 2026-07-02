@@ -87,6 +87,21 @@ export type DashboardHomeData = {
     weightedCap: number | null;
     activeCount: number;
     totalCount: number;
+    /**
+     * Decision Center / KPI winners computed server-side over the FULL
+     * active set (NT-4) — scalars only, never the row set. Without these a
+     * 21+-deal user's insights ran on the 20-most-recent sample: "Needs
+     * Review: 0" while deal #23 bleeds. Optional/back-compatible: absent →
+     * getDecisionCenter/getPortfolioKpis fall back to the sample.
+     */
+    winners?: {
+      bestByScore: { id: string; address: string; score: number; recommendation: string } | null;
+      /** Most negative cash-flow deal; null = a TRUE all-clear over the full set. */
+      worstNegative: { id: string; address: string; cashFlowMonthly: number } | null;
+      bestRoi: { id: string; address: string; roiPct: number } | null;
+      /** Cash-flow-negative deal count over the full active set. */
+      negativeCount: number;
+    } | null;
   } | null;
   /**
    * Saved deals whose signal changed at today's 30-yr rate (see
@@ -322,26 +337,54 @@ function getDecisionHighlights(data: DashboardHomeData) {
 }
 
 /**
- * Decision Center — the "what do I do next" band. Pure-derived from active
- * deals (no new data): the best-scoring deal, the worst cash-flow-negative
- * deal to review, the best 10-yr upside, a count of negatives, and a
- * context-aware next action.
+ * Decision Center — the "what do I do next" band: the best-scoring deal, the
+ * worst cash-flow-negative deal to review, the best 10-yr upside, a count of
+ * negatives, and a context-aware next action.
+ *
+ * NT-4: prefers the FULL-active-set winners computed server-side
+ * (portfolioAggregates.winners) so a 21+-deal user's deal #23 can win a tile
+ * or trip "Needs review" — allDeals is a 20-most-recent sample. Falls back to
+ * the sample only when the aggregate query failed (winners absent).
  */
 function getDecisionCenter(data: DashboardHomeData) {
   const deals = data.allDeals;
   if (deals.length === 0) return null;
-  const best = [...deals].sort((a, b) => (b.score ?? -1) - (a.score ?? -1))[0] ?? null;
+  const winners = data.portfolioAggregates?.winners ?? null;
+  const sampleBest = [...deals].sort((a, b) => (b.score ?? -1) - (a.score ?? -1))[0] ?? null;
   const negatives = deals.filter((d) => d.cashFlowMonthly != null && d.cashFlowMonthly < 0);
-  const needsReview =
+  const sampleNeedsReview =
     [...negatives].sort((a, b) => (a.cashFlowMonthly ?? 0) - (b.cashFlowMonthly ?? 0))[0] ?? null;
-  const bestUpside =
+  const sampleBestUpside =
     [...deals].filter((d) => d.roiPct != null).sort((a, b) => (b.roiPct ?? -Infinity) - (a.roiPct ?? -Infinity))[0] ??
     null;
+  // A null full-set "best" just means no snapshot recomputed (legacy book) —
+  // the sample's stored-score winner is still better than an empty tile.
+  // MAX-GUARD for mixed books: full-set winners are fresh-score-only while
+  // sample cards fall back to STORED scores for legacy snapshots — a
+  // stored-92 legacy deal in the sample must not lose the tile to a
+  // fresh-80 deal while outranking it in the card grid directly below.
+  const best =
+    winners?.bestByScore && sampleBest
+      ? (winners.bestByScore.score ?? -1) >= (sampleBest.score ?? -1)
+        ? winners.bestByScore
+        : sampleBest
+      : (winners?.bestByScore ?? sampleBest);
+  const bestUpside =
+    winners?.bestRoi && sampleBestUpside
+      ? (winners.bestRoi.roiPct ?? -Infinity) >= (sampleBestUpside.roiPct ?? -Infinity)
+        ? winners.bestRoi
+        : sampleBestUpside
+      : (winners?.bestRoi ?? sampleBestUpside);
+  // needsReview is the asymmetric one: when the full set was scanned, null is
+  // a TRUE all-clear (the server's fallback chain covers legacy rows too) —
+  // never overwrite it with a sample-derived value in either direction.
+  const needsReview = winners ? winners.worstNegative : sampleNeedsReview;
+  const negativeCount = winners ? winners.negativeCount : negatives.length;
   const nextAction =
     deals.length >= 2
       ? { label: "Compare your top deals", href: "/dashboard/compare" }
       : { label: "Analyze another property", href: "/" };
-  return { best, needsReview, bestUpside, negativeCount: negatives.length, nextAction };
+  return { best, needsReview, bestUpside, negativeCount, nextAction };
 }
 
 /**
@@ -351,7 +394,8 @@ function getDecisionCenter(data: DashboardHomeData) {
  *  - Weighted DSCR (leverage safety; purchase-price-weighted, financed
  *    deals only — cash purchases have no debt service)
  *  - Cash to Close (capital at work = down payment + closing across deals)
- *  - Needs Review (count of cash-flow-negative deals)
+ *  - Needs Review (count of cash-flow-negative deals — full active set via
+ *    portfolioAggregates.winners when available, sample fallback; NT-4)
  * Computed over the active set (allDeals). Returns null when empty.
  */
 function getPortfolioKpis(data: DashboardHomeData) {
@@ -384,7 +428,12 @@ function getPortfolioKpis(data: DashboardHomeData) {
     ? withCash.reduce((sum, d) => sum + (d.cashToClose ?? 0), 0)
     : null;
 
-  const needsReviewCount = deals.filter((d) => d.cashFlowMonthly != null && d.cashFlowMonthly < 0).length;
+  // NT-4: the full-set negative count (server-computed over EVERY active
+  // deal) beats counting the 20-most-recent sample — "Needs Review: 0" while
+  // deal #23 bleeds is a false all-clear. Sample fallback when absent.
+  const needsReviewCount =
+    data.portfolioAggregates?.winners?.negativeCount ??
+    deals.filter((d) => d.cashFlowMonthly != null && d.cashFlowMonthly < 0).length;
 
   return { avgScore, weightedDscr, cashToClose, needsReviewCount };
 }
@@ -579,6 +628,15 @@ export function DashboardHome({
   );
 
   const hasAnyDeals = data.allDeals.length > 0;
+  // NT-4: the charts + deal list below run on the 20-most-recent sample by
+  // design (per-row payload is heavy). When the full active set is LARGER,
+  // say so in a muted caption — a truth-layer product never lets a sampled
+  // chart pass itself off as the whole book. Null (no caption) when the
+  // sample IS the full set or the aggregate count is unavailable.
+  const sampledNote =
+    data.portfolioAggregates && data.portfolioAggregates.totalCount > data.allDeals.length
+      ? `Showing your ${data.allDeals.length} most recent active deals (of ${data.portfolioAggregates.totalCount}) — totals and Decision Center cover every active deal.`
+      : null;
   // Active deals (portfolio.totalCount) vs the full saved set
   // (savedTotalCount = the sidebar "My Deals" badge count). When the user
   // has archived/completed deals the two differ, so we surface both and
@@ -1254,29 +1312,41 @@ export function DashboardHome({
 
         {/* ── Charts + insights — only if we have data to show ────── */}
         {hasAnyDeals && data.topDeals.length > 0 ? (
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-            <div className="xl:col-span-2 space-y-6">
-              <PortfolioChart data={dealComparison} />
+          <div>
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+              <div className="xl:col-span-2 space-y-6">
+                <PortfolioChart data={dealComparison} />
+              </div>
+              <div className="space-y-6 xl:row-span-2">
+                {/* Risk-vs-Return block gated on ≥2 deals (FFM-2): over a set
+                    of one it names the same address as "best risk-adjusted",
+                    "highest return" AND "safest" — the 1-deal nudge card
+                    above already owns that slot's message. The insight cards
+                    themselves stay (they're deal-count-aware via FFM-4). */}
+                <AIInsights
+                  data={insights}
+                  riskReturnInsights={data.allDeals.length >= 2 ? riskReturn.insights : undefined}
+                />
+              </div>
+              <div className="xl:col-span-2">
+                <RiskReturn deals={riskReturn.chartDeals} />
+              </div>
             </div>
-            <div className="space-y-6 xl:row-span-2">
-              {/* Risk-vs-Return block gated on ≥2 deals (FFM-2): over a set
-                  of one it names the same address as "best risk-adjusted",
-                  "highest return" AND "safest" — the 1-deal nudge card
-                  above already owns that slot's message. The insight cards
-                  themselves stay (they're deal-count-aware via FFM-4). */}
-              <AIInsights
-                data={insights}
-                riskReturnInsights={data.allDeals.length >= 2 ? riskReturn.insights : undefined}
-              />
-            </div>
-            <div className="xl:col-span-2">
-              <RiskReturn deals={riskReturn.chartDeals} />
-            </div>
+            {/* NT-4: honest sample label — only renders when deals were
+                actually left out of the charts above. */}
+            {sampledNote ? (
+              <p className="mt-2 px-1 text-[11px] text-muted-foreground">{sampledNote}</p>
+            ) : null}
           </div>
         ) : null}
 
         {hasAnyDeals && data.topDeals.length > 0 ? (
-          <TopDeals data={topDeals} />
+          <div>
+            <TopDeals data={topDeals} />
+            {sampledNote ? (
+              <p className="mt-2 px-1 text-[11px] text-muted-foreground">{sampledNote}</p>
+            ) : null}
+          </div>
         ) : null}
 
         {/* Leads from co-branded shared deals — lives INSIDE the scrolling

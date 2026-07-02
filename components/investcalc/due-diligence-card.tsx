@@ -11,8 +11,8 @@
  *
  * Free per-deal annotation (no entitlement), like Deal Notes.
  */
-import { useEffect, useMemo, useState, useTransition } from "react";
-import { ClipboardCheck, Loader2, Plus, X } from "lucide-react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { ChevronDown, ClipboardCheck, Loader2, Plus, X } from "lucide-react";
 import {
   getDealDueDiligenceAction,
   updateDealDueDiligenceAction,
@@ -36,11 +36,17 @@ export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
   const [migrationPending, setMigrationPending] = useState(false);
   const [newLabel, setNewLabel] = useState("");
   const [isSaving, startSaving] = useTransition();
+  // WS-3: which row's note editor is open (accordion — one at a time keeps
+  // the checklist compact on mobile). The ref holds the note as it was when
+  // the editor opened so blur only persists an ACTUAL change.
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const noteAtOpenRef = useRef<string>("");
 
   useEffect(() => {
     let cancelled = false;
     setLoaded(false);
     setMigrationPending(false);
+    setExpandedId(null);
     void getDealDueDiligenceAction(savedDealId)
       .then((r) => {
         if (cancelled) return;
@@ -100,6 +106,37 @@ export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
     );
     setItems(next);
     persist(next);
+  };
+  // WS-3: expand/collapse a row's note editor. Opening snapshots the current
+  // note so commitNote can skip the server write when nothing changed.
+  const toggleNote = (id: string) => {
+    if (expandedId === id) {
+      setExpandedId(null);
+      return;
+    }
+    noteAtOpenRef.current = items.find((i) => i.id === id)?.note ?? "";
+    setExpandedId(id);
+  };
+  // Keystrokes only update local state; the server write happens on
+  // blur/Enter (commitNote) so typing doesn't spam the persist action.
+  const setNoteDraft = (id: string, value: string) => {
+    setItems(items.map((i) => (i.id === id ? { ...i, note: value } : i)));
+  };
+  const commitNote = (id: string) => {
+    const raw = items.find((i) => i.id === id)?.note ?? "";
+    // Same trim + 500-char cap the server normalizer applies, so the local
+    // state matches what actually persisted. Empty clears the note entirely.
+    const trimmed = raw.trim().slice(0, 500);
+    const next = items.map((i) => {
+      if (i.id !== id) return i;
+      const { note: _note, ...rest } = i;
+      return trimmed ? { ...rest, note: trimmed } : rest;
+    });
+    setItems(next);
+    if (trimmed !== noteAtOpenRef.current.trim()) {
+      noteAtOpenRef.current = trimmed;
+      persist(next);
+    }
   };
 
   // Viewer-local "today" so overdue/due-soon match the date input's local
@@ -165,8 +202,10 @@ export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
       <ul className="space-y-1.5">
         {items.map((item) => {
           const status = dueDiligenceItemStatus(item, todayISO);
+          const isExpanded = expandedId === item.id;
           return (
-            <li key={item.id} className="group flex items-center gap-2.5">
+            <li key={item.id} className="group">
+              <div className="flex items-center gap-2.5">
               <input
                 type="checkbox"
                 checked={item.done}
@@ -174,14 +213,32 @@ export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
                 className="size-4 shrink-0 rounded border-border accent-[var(--brand-green)]"
                 aria-label={item.label}
               />
-              <span
-                className={cn(
-                  "flex-1 text-sm",
-                  item.done ? "text-muted-foreground line-through" : "text-foreground"
-                )}
+              {/* WS-3: the label is the expand/collapse control (big tap
+                  target on mobile; a real <button>, so Enter/Space work).
+                  aria-expanded + aria-controls tie it to the note region. */}
+              <button
+                type="button"
+                onClick={() => toggleNote(item.id)}
+                aria-expanded={isExpanded}
+                aria-controls={`dd-note-${item.id}`}
+                className="flex min-w-0 flex-1 items-center gap-1.5 rounded-md text-left outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
               >
-                {item.label}
-              </span>
+                <span
+                  className={cn(
+                    "min-w-0 truncate text-sm",
+                    item.done ? "text-muted-foreground line-through" : "text-foreground"
+                  )}
+                >
+                  {item.label}
+                </span>
+                <ChevronDown
+                  aria-hidden
+                  className={cn(
+                    "size-3.5 shrink-0 text-muted-foreground/50 transition-transform",
+                    isExpanded && "rotate-180"
+                  )}
+                />
+              </button>
               {status === "overdue" ? (
                 <span className="shrink-0 rounded-full bg-[var(--metric-negative)]/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[var(--metric-negative)]">
                   Overdue
@@ -213,6 +270,36 @@ export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
               >
                 <X className="size-4" />
               </button>
+              </div>
+              {/* Collapsed note preview — one truncated muted line under the
+                  label so the context ("Inspector: Mike @ ProCheck, Thu 2pm")
+                  is visible without opening the row. */}
+              {!isExpanded && item.note ? (
+                <p className="ml-[26px] truncate pr-8 text-xs text-muted-foreground">{item.note}</p>
+              ) : null}
+              {isExpanded ? (
+                <div id={`dd-note-${item.id}`} className="ml-[26px] mt-1.5 pr-8">
+                  <Input
+                    value={item.note ?? ""}
+                    onChange={(e) => setNoteDraft(item.id, e.target.value)}
+                    onBlur={() => commitNote(item.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        // Blur triggers commitNote — one save path.
+                        e.currentTarget.blur();
+                      }
+                    }}
+                    maxLength={500}
+                    placeholder="Add a note — inspector, quote, contact…"
+                    aria-label={`Note for ${item.label}`}
+                    className="h-8 text-xs"
+                    // Just expanded via the label/chevron — put the caret in
+                    // the editor so keyboard users don't have to Tab-hunt.
+                    autoFocus
+                  />
+                </div>
+              ) : null}
             </li>
           );
         })}

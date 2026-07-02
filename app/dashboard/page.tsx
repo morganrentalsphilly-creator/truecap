@@ -84,6 +84,15 @@ function getDisplayName(profile: ProfileRow | null, email?: string | null): stri
   return profileName || email?.split("@")[0] || "Investor";
 }
 
+/** Same label fallback buildDashboardDeal uses: a title that differs from the
+ *  address (scenario saves) wins; otherwise address, title, or the placeholder. */
+function aggregateRowLabel(r: { address: string | null; title: string | null }): string {
+  const address = r.address?.trim();
+  const title = r.title?.trim();
+  if (address && title && title !== address) return title;
+  return address || title || "Untitled Property";
+}
+
 function buildDashboardData(
   rows: SavedAnalysisDashboardRow[],
   profile: ProfileRow | null,
@@ -292,11 +301,22 @@ export default async function DashboardPage() {
     let capNum = 0;
     let capDen = 0;
     let activeCount = 0;
+    // NT-4: Decision Center / KPI winners tracked over the FULL active set —
+    // scalars only (id + label + value), never the row set, so a 21+-deal
+    // user's deal #23 can win "Best deal" or trip "Needs review" without
+    // ballooning the client payload. The 20-row sample stays the fallback
+    // in DashboardHome when this aggregate query failed.
+    let bestByScore: { id: string; address: string; score: number; recommendation: string } | null =
+      null;
+    let worstNegative: { id: string; address: string; cashFlowMonthly: number } | null = null;
+    let bestRoi: { id: string; address: string; roiPct: number } | null = null;
+    let negativeCount = 0;
     for (const r of aggRows) {
       // Recompute-on-read so the portfolio totals stay in lockstep with the
       // per-deal cards (which now recompute too) and the live engine. Falls
       // back to the snapshot/denormalized values for legacy snapshots.
       const fresh = recomputeSavedDealVerdict(r.form_snapshot);
+      const label = aggregateRowLabel(r);
       if (r.purchase_price != null) {
         totalValue += r.purchase_price;
         activeCount += 1;
@@ -310,14 +330,33 @@ export default async function DashboardPage() {
           capDen += r.purchase_price;
         }
       }
+      // Cash flow with the SAME fresh → snapshot → denormalized fallback chain
+      // the totals always used, reused for the negative-deal winners so
+      // "Needs review" counts legacy rows too.
+      let ncf: number | null;
       if (fresh) {
-        totalCashFlow += fresh.netCashFlowMonthly;
+        ncf = fresh.netCashFlowMonthly;
       } else {
         const ncfSnap = Number(r.ncf_snapshot);
-        totalCashFlow +=
+        ncf =
           r.ncf_snapshot != null && Number.isFinite(ncfSnap)
             ? ncfSnap
-            : (r.net_cash_flow_monthly ?? 0);
+            : r.net_cash_flow_monthly;
+      }
+      totalCashFlow += ncf ?? 0;
+      if (fresh && (bestByScore == null || fresh.score > bestByScore.score)) {
+        bestByScore = { id: r.id, address: label, score: fresh.score, recommendation: fresh.recommendation };
+      }
+      if (ncf != null && ncf < 0) {
+        negativeCount += 1;
+        if (worstNegative == null || ncf < worstNegative.cashFlowMonthly) {
+          worstNegative = { id: r.id, address: label, cashFlowMonthly: ncf };
+        }
+      }
+      // 10-yr ROI from the same exit-tax-aware recompute the sample cards use.
+      const roi = recomputeCompareSnapshotFromForm(r.form_snapshot)?.longTermSummary?.totalROI;
+      if (typeof roi === "number" && Number.isFinite(roi) && (bestRoi == null || roi > bestRoi.roiPct)) {
+        bestRoi = { id: r.id, address: label, roiPct: roi };
       }
     }
     portfolioAggregates = {
@@ -326,6 +365,7 @@ export default async function DashboardPage() {
       weightedCap: capDen > 0 ? capNum / capDen : null,
       activeCount,
       totalCount: aggRows.length,
+      winners: { bestByScore, worstNegative, bestRoi, negativeCount },
     };
   }
 
