@@ -23,8 +23,10 @@
  */
 
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Header } from "@/components/investcalc/header";
 import { InvestCalcPage } from "@/components/investcalc/investcalc-page";
+import { BillingSuccessBanner } from "@/components/marketing/billing-success-banner";
 import { MarketingHero } from "@/components/marketing/marketing-hero";
 import {
   DataSourcesSection,
@@ -187,6 +189,17 @@ export default function Home() {
           deliberately omitted — not worth a reload-loop risk on the highest-
           traffic page for a rare edge.) */}
       <Header initialUser={null} initialEntitlements={null} />
+      {/* Post-checkout landing (?billing=success) — Google Ads purchase
+          conversion + one-time "Pro unlocked" banner. Pure client
+          component reading useSearchParams (NOT cookies/headers), so the
+          page stays static; the Suspense boundary satisfies the CSR
+          bailout requirement. Real post-checkout users normally hit
+          /home-authed via the auth-cookie rewrite — this mount covers
+          the proxy cookie-miss edge so the paid-ads conversion can
+          never be lost. */}
+      <Suspense fallback={null}>
+        <BillingSuccessBanner />
+      </Suspense>
       {/* Landing flow — this page only serves cold visitors (signed-in
           users are rewritten to /home-authed). TOOL-FIRST order (CRO,
           Jun 2026): the product promise is speed, so the working

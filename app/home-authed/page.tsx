@@ -17,8 +17,10 @@
  */
 
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Header } from "@/components/investcalc/header";
 import { InvestCalcPage } from "@/components/investcalc/investcalc-page";
+import { BillingSuccessBanner } from "@/components/marketing/billing-success-banner";
 import { MarketingHero } from "@/components/marketing/marketing-hero";
 import {
   DataSourcesSection,
@@ -42,6 +44,7 @@ import {
   hasSavedDealCapacity,
 } from "@/lib/entitlements";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { getStripe } from "@/lib/stripe/client";
 
 export const metadata: Metadata = {
   // Same title/description as the static homepage (this IS the homepage
@@ -59,13 +62,56 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function AuthedHome() {
+export default async function AuthedHome({
+  searchParams,
+}: {
+  searchParams?: Promise<{ billing?: string; session_id?: string }>;
+}) {
   // No JSON-LD here — this route is noindex; the schema.org graph
   // lives on the static public homepage (app/page.tsx) only.
   const supabase = await createServerSupabaseClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  // ── Post-checkout landing (?billing=success&session_id=cs_…) ────────
+  // Stripe's success_url points at "/" (app/actions/billing.ts); the
+  // proxy rewrites signed-in "/" here WITH the query string preserved.
+  // Resolve the plan's list price from the checkout session so the
+  // Google Ads conversion carries a real value for value-based bidding.
+  // Deliberately read from the CHECKOUT SESSION (available instantly)
+  // and not the subscriptions table — the webhook that writes that row
+  // lands ~1-2s after this redirect, so a DB read would race to nothing.
+  // Any failure degrades to value 0; the conversion itself is fired
+  // client-side from the URL params and NEVER depends on this lookup.
+  const resolvedSearchParams = (await searchParams) ?? {};
+  let billingConversionValue: number | undefined;
+  if (
+    resolvedSearchParams.billing === "success" &&
+    user &&
+    process.env.STRIPE_SECRET_KEY
+  ) {
+    const sessionId = resolvedSearchParams.session_id;
+    // Cheap shape guard so junk params never spend a Stripe API call.
+    if (typeof sessionId === "string" && /^cs_[a-zA-Z0-9_]{8,240}$/.test(sessionId)) {
+      try {
+        const stripe = getStripe();
+        const session = await stripe.checkout.sessions.retrieve(sessionId, {
+          expand: ["line_items"],
+        });
+        // Only trust a session this user actually started.
+        if (session.client_reference_id === user.id) {
+          const unitAmount = session.line_items?.data?.[0]?.price?.unit_amount;
+          if (unitAmount != null) billingConversionValue = unitAmount / 100;
+        }
+      } catch (error) {
+        console.warn(
+          "[billing] could not resolve checkout session for conversion value:",
+          error instanceof Error ? error.message : error
+        );
+      }
+    }
+  }
   const entitlements = user ? await getEntitlementsForUser(supabase, user.id) : null;
   // Fetch the user's analysis defaults so the form pre-fills with
   // their preferred vacancy/mgmt/financing values instead of the
@@ -123,6 +169,15 @@ export default async function AuthedHome() {
     // bleed while keeping sticky/fixed working.
     <div className="relative overflow-x-clip">
       <Header initialUser={user} initialEntitlements={entitlements} />
+      {/* Post-checkout landing (?billing=success) — fires the Google Ads
+          purchase conversion (value resolved above) and shows the
+          one-time "Pro unlocked" acknowledgment right above the
+          calculator, where the auto-saved draft + welcome-back banner
+          pull the new subscriber toward completing the save. Renders
+          nothing without the billing param. */}
+      <Suspense fallback={null}>
+        <BillingSuccessBanner conversionValue={billingConversionValue} />
+      </Suspense>
       {/* Full landing experience ONLY for cold visitors (anon fallback —
           the canonical anon homepage is the static app/page.tsx, and this
           mirrors its TOOL-FIRST flow). Authenticated users skip ALL of it

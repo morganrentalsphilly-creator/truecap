@@ -257,7 +257,18 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
       ],
       discounts: appliedCoupon ? [{ coupon: appliedCoupon }] : undefined,
       allow_promotion_codes: appliedCoupon ? undefined : true,
-      success_url: `${siteUrl}/profile?billing=success`,
+      // Land the new subscriber back on the calculator ("/") where their
+      // auto-saved draft + welcome-back banner are waiting, so the first
+      // post-purchase act is completing the save they paid for (previously
+      // /profile — a name/avatar form with zero purchase acknowledgment).
+      // The params drive the Google Ads purchase conversion AND the
+      // "Pro unlocked" banner (components/marketing/billing-success-banner.tsx,
+      // mounted on BOTH homepage variants). {CHECKOUT_SESSION_ID} is
+      // substituted by Stripe and doubles as the conversion dedup key.
+      // Signed-in "/" requests are rewritten to /home-authed by proxy.ts
+      // (query string preserved), where the conversion value is resolved
+      // server-side from the checkout session.
+      success_url: `${siteUrl}/?billing=success&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${siteUrl}/profile?billing=checkout_cancelled`,
       metadata: {
         user_id: user.id,

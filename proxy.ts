@@ -27,7 +27,15 @@ export async function proxy(request: NextRequest) {
   const sessionResponse = await updateSession(request);
 
   if (request.nextUrl.pathname === "/" && hasSupabaseAuthCookie(request)) {
-    const rewritten = NextResponse.rewrite(new URL("/home-authed", request.url), {
+    // Clone nextUrl so the QUERY STRING survives the rewrite — the old
+    // `new URL("/home-authed", request.url)` form dropped it, which hid
+    // params like the Stripe checkout landing's `?billing=success&
+    // session_id=…` from /home-authed's server-side searchParams (the
+    // Google Ads conversion value is resolved there). Path-only change;
+    // requests without a query behave exactly as before.
+    const rewriteUrl = request.nextUrl.clone();
+    rewriteUrl.pathname = "/home-authed";
+    const rewritten = NextResponse.rewrite(rewriteUrl, {
       request,
     });
     // Preserve any refreshed session cookies updateSession just set —

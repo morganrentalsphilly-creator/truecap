@@ -404,6 +404,12 @@ function getPortfolioTotals(data: DashboardHomeData) {
 function buildDecisionInsights(deals: DashboardDeal[]) {
   if (deals.length === 0) return [];
 
+  // With a single saved deal, "Compare deals" dead-ends on the compare
+  // page's "you need at least 2 deals" apology screen — the first CTA a
+  // new subscriber taps must not bounce. Mirror getDecisionCenter's ≥2
+  // gate and point them at analyzing a second property instead. (FFM-4)
+  const canCompare = deals.length >= 2;
+
   const best = [...deals].sort((a, b) => (b.score ?? -1) - (a.score ?? -1))[0];
   const needsReview = [...deals]
     .filter((d) => d.cashFlowMonthly != null && d.cashFlowMonthly < 0)
@@ -441,9 +447,13 @@ function buildDecisionInsights(deals: DashboardDeal[]) {
     bestPick
       ? {
           title: `Top opportunity: ${bestPick.address}`,
-          body: `${evidence(bestPick)}. Next: line it up against your other top deals before you offer.`,
+          body: canCompare
+            ? `${evidence(bestPick)}. Next: line it up against your other top deals before you offer.`
+            : `${evidence(bestPick)}. Next: save a second deal to compare it side-by-side.`,
           tone: "opportunity" as const,
-          action: { label: "Compare deals", href: "/dashboard/compare" },
+          action: canCompare
+            ? { label: "Compare deals", href: "/dashboard/compare" }
+            : { label: "Analyze another property", href: "/" },
         }
       : null,
     reviewPick
@@ -860,11 +870,15 @@ export function DashboardHome({
             mobile. Visually distinct from the StatCards above so the
             eye doesn't read "7 of the same thing." Clickable: hover +
             chevron affordance signals the deep-link interaction. */}
-        {hasAnyDeals && data.topDeals.length > 0 ? (
+        {hasAnyDeals && data.allDeals.length >= 2 && data.topDeals.length > 0 ? (
           // hidden below sm: these 3 rows are a subset of what Decision
           // Center + Portfolio Signals already show — on a phone this was
           // the 4th re-summarization of the same deals before any deal
           // list (mobile density audit DH-1). Desktop unchanged.
+          // ≥2 gate (FFM-2, mirrors getPipelineSummary's ≥2 pattern): with
+          // one saved deal all three "best of" rows crown the same address
+          // — fake-analytics padding on a truth-layer product. The 1-deal
+          // slot renders the honest nudge card below instead.
           <section className="hidden sm:block">
             <div className="mb-3">
               <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
@@ -939,6 +953,33 @@ export function DashboardHome({
           </section>
         ) : null}
 
+        {/* ── One-deal honest replacement (FFM-2) ─────────────────────
+            Takes the Top-performers slot when exactly 1 deal is saved:
+            one card that says what a second deal unlocks instead of
+            eight rankings crowning the same house. hidden below sm to
+            compose with the mobile density pass — the ranked blocks it
+            replaces are desktop-only too, so phones see no change. */}
+        {hasAnyDeals && data.allDeals.length === 1 ? (
+          <section className="hidden sm:block" aria-label="Save a second deal">
+            <div className="flex flex-col items-start gap-3 rounded-xl border border-dashed border-border bg-card px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                {/* "active" — the sidebar's My Deals badge counts archived/
+                    completed too, so a bare "1 saved deal" could contradict it. */}
+                <h2 className="text-sm font-semibold text-foreground">You have 1 active deal</h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Save a second deal to unlock rankings, risk/return, and side-by-side compare.
+                </p>
+              </div>
+              <Button asChild variant="outline" className="h-9 shrink-0 rounded-xl px-4 text-sm">
+                <Link href="/" prefetch={false}>
+                  <Plus className="h-4 w-4" />
+                  Analyze another property
+                </Link>
+              </Button>
+            </div>
+          </section>
+        ) : null}
+
         {/* ── Empty-state hero — when 0 saved deals ───────────────── */}
         {!hasAnyDeals ? (
           <div className="rounded-2xl border border-dashed border-border bg-card p-10 text-center">
@@ -969,7 +1010,15 @@ export function DashboardHome({
               <PortfolioChart data={dealComparison} />
             </div>
             <div className="space-y-6 xl:row-span-2">
-              <AIInsights data={insights} riskReturnInsights={riskReturn.insights} />
+              {/* Risk-vs-Return block gated on ≥2 deals (FFM-2): over a set
+                  of one it names the same address as "best risk-adjusted",
+                  "highest return" AND "safest" — the 1-deal nudge card
+                  above already owns that slot's message. The insight cards
+                  themselves stay (they're deal-count-aware via FFM-4). */}
+              <AIInsights
+                data={insights}
+                riskReturnInsights={data.allDeals.length >= 2 ? riskReturn.insights : undefined}
+              />
             </div>
             <div className="xl:col-span-2">
               <RiskReturn deals={riskReturn.chartDeals} />
