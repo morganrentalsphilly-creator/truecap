@@ -12,6 +12,7 @@ import {
   ArrowUpDown,
   Building2,
   CalendarClock,
+  ChevronDown,
   ChevronsUpDown,
   ExternalLink,
   FileDown,
@@ -701,6 +702,12 @@ export function SavedAnalysesPage({
 
   const [searchQuery, setSearchQuery] = useState("");
   const [showcompare, setShowcompare] = useState(false);
+  // Below sm the filter chip groups collapse behind one "Filters"
+  // disclosure (defaults are All/All/Active, so it opens showing 0 active).
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  // Mobile-card tag editing lives behind the ⋯ menu; tracks which card
+  // (if any) currently shows the inline DealTags editor.
+  const [editingTagsDealId, setEditingTagsDealId] = useState<string | null>(null);
   const [selectedSignal, setSelectedSignal] = useState<"all" | SavedSignal>("all");
   const [selectedType, setSelectedType] = useState<"all" | SavedPropertyType>("all");
   // Buy-box screening: the user's active boxes (null until loaded / none) and a
@@ -1091,11 +1098,38 @@ export function SavedAnalysesPage({
     </button>
   );
 
+  // How many mobile filters sit off their defaults (All / All Types /
+  // Active / switch off) — shown on the collapsed "Filters" button so a
+  // hidden filter can never silently empty the list.
+  const savedMobileFilterCount =
+    (selectedSignal !== "all" ? 1 : 0) +
+    (selectedType !== "all" ? 1 : 0) +
+    (activeDealStateFilter !== "active" ? 1 : 0) +
+    (showcompare ? 1 : 0);
+
   const SavedMobileFilters = () => (
-    <div className="space-y-3 xl:hidden">
+    <div className="xl:hidden">
+      {/* Phone-width disclosure: the chip groups default-collapsed behind
+          one button. From sm up the groups render expanded, as before. */}
+      <button
+        type="button"
+        onClick={() => setMobileFiltersOpen((open) => !open)}
+        aria-expanded={mobileFiltersOpen}
+        className="inline-flex h-9 items-center gap-1.5 rounded-full border border-border bg-muted/60 px-3 text-xs font-bold text-foreground transition-colors hover:bg-muted sm:hidden"
+      >
+        <SlidersHorizontal className="h-3.5 w-3.5" />
+        Filters
+        {savedMobileFilterCount > 0 ? (
+          <span className="rounded-full bg-foreground px-1.5 text-[10px] font-bold leading-4 text-background">
+            {savedMobileFilterCount}
+          </span>
+        ) : null}
+        <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", mobileFiltersOpen && "rotate-180")} />
+      </button>
+      <div className={cn("space-y-3", mobileFiltersOpen ? "mt-3 sm:mt-0" : "hidden sm:block")}>
       <div>
         <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Signal</p>
-        <div className="flex flex-wrap gap-1.5">
+        <div className="-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0 [&>*]:shrink-0 sm:[&>*]:shrink">
           <MobileFilterButton label="All" active={selectedSignal === "all"} onClick={() => setSelectedSignal("all")} />
           {(Object.keys(SIGNAL_LABELS) as SavedSignal[]).map((signal) => (
             <MobileFilterButton
@@ -1110,7 +1144,7 @@ export function SavedAnalysesPage({
 
       <div>
         <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Property Type</p>
-        <div className="flex flex-wrap gap-1.5">
+        <div className="-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0 [&>*]:shrink-0 sm:[&>*]:shrink">
           <MobileFilterButton label="All Types" active={selectedType === "all"} onClick={() => setSelectedType("all")} />
           <MobileFilterButton label="Single Family" active={selectedType === "single-family"} onClick={() => setSelectedType("single-family")} />
           <MobileFilterButton label="Multi-Family" active={selectedType === "multi-family"} onClick={() => setSelectedType("multi-family")} />
@@ -1120,7 +1154,7 @@ export function SavedAnalysesPage({
 
       <div>
         <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Status</p>
-        <div className="flex flex-wrap gap-1.5">
+        <div className="-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0 [&>*]:shrink-0 sm:[&>*]:shrink">
           <MobileFilterButton label="Active" active={activeDealStateFilter === "active"} onClick={() => handleStateFilterChange("active")} />
           <MobileFilterButton label="Completed" active={activeDealStateFilter === "completed"} onClick={() => handleStateFilterChange("completed")} />
           <MobileFilterButton label="Archived" active={activeDealStateFilter === "archived"} onClick={() => handleStateFilterChange("archived")} />
@@ -1137,6 +1171,7 @@ export function SavedAnalysesPage({
           onCheckedChange={(value) => canCompareDeals && setShowcompare(value ?? false)}
           aria-label="Show selected analyses only"
         />
+      </div>
       </div>
     </div>
   );
@@ -1573,7 +1608,47 @@ export function SavedAnalysesPage({
                 className="pl-9 h-10 rounded-xl bg-muted/60 border-border"
               />
             </div>
-            <div className="flex flex-wrap items-center gap-1.5">
+            {/* Phone width: the five sort pills collapse into one compact
+                Select + a direction toggle. The pill row is unchanged from
+                sm up. Re-picking the active field in the Select is a no-op
+                (Radix only fires on change), so the arrow button owns the
+                asc/desc flip. */}
+            <div className="flex items-center gap-1.5 sm:hidden">
+              <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                <SlidersHorizontal className="w-3.5 h-3.5" />
+                Sort
+              </span>
+              <Select
+                value={activeSortField ?? undefined}
+                onValueChange={(value) => handleSort(value as SortField)}
+              >
+                <SelectTrigger className="h-9 flex-1 rounded-xl text-xs" aria-label="Sort deals by">
+                  <SelectValue placeholder="Date Saved" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="saved">Date Saved</SelectItem>
+                  <SelectItem value="cash-flow">Cash Flow</SelectItem>
+                  <SelectItem value="coc">CoC Return</SelectItem>
+                  <SelectItem value="cap-rate">Cap Rate</SelectItem>
+                  <SelectItem value="price">Price</SelectItem>
+                </SelectContent>
+              </Select>
+              <button
+                type="button"
+                onClick={() => handleSort(activeSortField ?? "saved")}
+                aria-label="Toggle sort direction"
+                className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-border bg-muted/60 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              >
+                {activeSortField && activeSortDirection === "asc" ? (
+                  <ArrowUp className="w-3.5 h-3.5" />
+                ) : activeSortField && activeSortDirection === "desc" ? (
+                  <ArrowDown className="w-3.5 h-3.5" />
+                ) : (
+                  <ChevronsUpDown className="w-3.5 h-3.5" />
+                )}
+              </button>
+            </div>
+            <div className="hidden flex-wrap items-center gap-1.5 sm:flex">
               <span className="inline-flex w-full items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground sm:w-auto sm:mr-1.5">
                 <SlidersHorizontal className="w-3.5 h-3.5" />
                 Sort by
@@ -1716,6 +1791,15 @@ export function SavedAnalysesPage({
               const isSelected = selectedIds.includes(item.id);
               const signal = item.signal;
               const PropertyTypeIcon = getTypeIcon(item.propertyType);
+              // Badge row stays one line: signal + buy-box fit lead, and the
+              // status / score-breakdown / data-confidence extras fold behind
+              // a compact "+N" popover so completed deals with confidence data
+              // don't wrap the header to three lines.
+              const statusBadge = getStatusBadge(item);
+              const foldedBadgeCount =
+                (statusBadge ? 1 : 0) +
+                (item.breakdown && item.score != null ? 1 : 0) +
+                (item.dataConfidence ? 1 : 0);
               return (
                 <article
                   key={item.id}
@@ -1741,21 +1825,33 @@ export function SavedAnalysesPage({
                         ) : null}
                       </button>
                       <div className="mt-1 flex flex-wrap items-center gap-1.5">
-                        {getStatusBadge(item)}
                         <Badge className={cn("rounded-full border text-xs font-semibold", getSignalClasses(signal))}>{SIGNAL_LABELS[signal]}</Badge>
                         <BuyBoxFitBadge fit={buyBoxFitById?.get(item.id)} />
-                        {item.breakdown && item.score != null ? (
+                        {foldedBadgeCount > 0 ? (
                           <Popover>
                             <PopoverTrigger asChild>
-                              <button type="button" className="text-[11px] font-semibold text-primary underline-offset-2 hover:underline">Why?</button>
+                              <button
+                                type="button"
+                                aria-label={`${foldedBadgeCount} more detail${foldedBadgeCount === 1 ? "" : "s"} for ${address.main}`}
+                                className="text-[11px] font-semibold text-primary underline-offset-2 hover:underline"
+                              >
+                                +{foldedBadgeCount} more
+                              </button>
                             </PopoverTrigger>
-                            <PopoverContent align="start" className="w-auto p-3">
-                              <ScoreBreakdown breakdown={item.breakdown} score={item.score} />
+                            <PopoverContent align="start" className="w-auto max-w-[280px] space-y-2.5 p-3">
+                              {statusBadge || item.dataConfidence ? (
+                                <div className="flex flex-wrap items-center gap-1.5">
+                                  {statusBadge}
+                                  {item.dataConfidence ? (
+                                    <DataConfidenceBadge confidence={item.dataConfidence} size="xs" />
+                                  ) : null}
+                                </div>
+                              ) : null}
+                              {item.breakdown && item.score != null ? (
+                                <ScoreBreakdown breakdown={item.breakdown} score={item.score} />
+                              ) : null}
                             </PopoverContent>
                           </Popover>
-                        ) : null}
-                        {item.dataConfidence ? (
-                          <DataConfidenceBadge confidence={item.dataConfidence} size="xs" />
                         ) : null}
                       </div>
                       <p className="mt-1 text-xs text-muted-foreground">{getTypeLabel(item.propertyType)}</p>
@@ -1795,53 +1891,36 @@ export function SavedAnalysesPage({
                     </div>
                   </div>
 
+                  {/* One primary Open action + a ⋯ overflow menu — mirrors the
+                      desktop table's consolidation below. Stage/status and tag
+                      editing live in the menu; tags stay visible as read-only
+                      chips so the card keeps its context without the expanded
+                      editor + selects that used to add ~190px per card. */}
                   <div className="mt-4 grid gap-3">
-                    {canUsePipeline ? (
-                      <Select
-                        value={item.pipelineStage ?? "analyzing"}
-                        onValueChange={(value) => handleDealStageChange(item.id, value as PipelineStage)}
-                        disabled={isUpdatingStatus && updatingDealStatusId === item.id}
-                      >
-                        <SelectTrigger className="h-10 w-full rounded-xl text-xs">
-                          <SelectValue placeholder="Stage" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {PIPELINE_STAGES.map((s) => (
-                            <SelectItem key={s.id} value={s.id}>
-                              {s.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    ) : (
-                      <Select
-                        value={item.status}
-                        onValueChange={(value) => handleDealStatusChange(item.id, value as SavedAnalysisListItem["status"])}
-                        disabled={isUpdatingStatus && updatingDealStatusId === item.id}
-                      >
-                        <SelectTrigger className="h-10 w-full rounded-xl text-xs">
-                          <SelectValue placeholder="Status" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="active">Active</SelectItem>
-                          <SelectItem value="completed">Completed</SelectItem>
-                          <SelectItem value="archived">Archived</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    )}
-                    {canUsePipeline ? (
+                    {canUsePipeline && editingTagsDealId === item.id ? (
                       <DealTags
                         tags={item.tags ?? []}
                         disabled={isUpdatingStatus && updatingDealStatusId === item.id}
                         onSave={(t) => handleDealTagsChange(item.id, t)}
                       />
+                    ) : canUsePipeline && (item.tags?.length ?? 0) > 0 ? (
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        {(item.tags ?? []).map((tag) => (
+                          <span
+                            key={tag}
+                            className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-foreground"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
                     ) : null}
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="flex items-center gap-2">
                       <Button
                         type="button"
                         variant="outline"
                         size="sm"
-                        className="h-10 rounded-xl px-2.5 text-xs"
+                        className="h-10 flex-1 rounded-xl px-2.5 text-xs"
                         onClick={() => handleOpenAnalysisClick(item.id)}
                         disabled={openingDealId === item.id}
                       >
@@ -1852,38 +1931,86 @@ export function SavedAnalysesPage({
                         )}
                         Open
                       </Button>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="h-10 rounded-xl px-2.5 text-xs"
-                        onClick={() => handleExportPdfClick(item.id)}
-                        disabled={exportingPdfDealId === item.id}
-                        title={!canExportPdf ? "PDF export - Pro feature" : undefined}
-                      >
-                        {exportingPdfDealId === item.id ? (
-                          <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" />
-                        ) : (
-                          <FileDown className="w-3.5 h-3.5 mr-1" />
-                        )}
-                        PDF
-                        {!canExportPdf ? (
-                          <span className="ml-1.5 rounded-full bg-primary/10 px-1.5 py-0 text-[9px] font-bold text-primary">
-                            PRO
-                          </span>
-                        ) : null}
-                      </Button>
-                      <Button
-                        asChild
-                        variant="outline"
-                        size="sm"
-                        className="col-span-2 h-10 rounded-xl px-2.5 text-xs"
-                      >
-                        <Link href={`/dashboard/saved-analyses/${item.id}`}>
-                          <ClipboardList className="w-3.5 h-3.5 mr-1" />
-                          Checklist &amp; docs
-                        </Link>
-                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="h-10 w-10 shrink-0 rounded-xl p-0"
+                            aria-label={`More actions for ${address.main}`}
+                          >
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-56">
+                          <DropdownMenuItem
+                            onSelect={() => handleExportPdfClick(item.id)}
+                            disabled={exportingPdfDealId === item.id}
+                          >
+                            {exportingPdfDealId === item.id ? (
+                              <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+                            ) : (
+                              <FileDown className="mr-2 h-3.5 w-3.5" />
+                            )}
+                            Export PDF
+                            {!canExportPdf ? (
+                              <span className="ml-auto rounded-full bg-primary/10 px-1.5 py-0 text-[9px] font-bold text-primary">
+                                PRO
+                              </span>
+                            ) : null}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <Link href={`/dashboard/saved-analyses/${item.id}`}>
+                              <ClipboardList className="mr-2 h-3.5 w-3.5" />
+                              Checklist &amp; docs
+                            </Link>
+                          </DropdownMenuItem>
+                          {canUsePipeline ? (
+                            <DropdownMenuItem
+                              onSelect={() =>
+                                setEditingTagsDealId((prev) => (prev === item.id ? null : item.id))
+                              }
+                            >
+                              <Tag className="mr-2 h-3.5 w-3.5" />
+                              {editingTagsDealId === item.id ? "Done editing tags" : "Edit tags"}
+                            </DropdownMenuItem>
+                          ) : null}
+                          <DropdownMenuSeparator />
+                          <DropdownMenuLabel>{canUsePipeline ? "Stage" : "Status"}</DropdownMenuLabel>
+                          {canUsePipeline
+                            ? PIPELINE_STAGES.map((s) => (
+                                <DropdownMenuCheckboxItem
+                                  key={s.id}
+                                  checked={(item.pipelineStage ?? "analyzing") === s.id}
+                                  disabled={isUpdatingStatus && updatingDealStatusId === item.id}
+                                  onCheckedChange={(checked) => {
+                                    if (checked) handleDealStageChange(item.id, s.id);
+                                  }}
+                                >
+                                  {s.label}
+                                </DropdownMenuCheckboxItem>
+                              ))
+                            : (
+                                [
+                                  ["active", "Active"],
+                                  ["completed", "Completed"],
+                                  ["archived", "Archived"],
+                                ] as const
+                              ).map(([value, label]) => (
+                                <DropdownMenuCheckboxItem
+                                  key={value}
+                                  checked={item.status === value}
+                                  disabled={isUpdatingStatus && updatingDealStatusId === item.id}
+                                  onCheckedChange={(checked) => {
+                                    if (checked) handleDealStatusChange(item.id, value);
+                                  }}
+                                >
+                                  {label}
+                                </DropdownMenuCheckboxItem>
+                              ))}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </div>
 
