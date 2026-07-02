@@ -205,12 +205,19 @@ textarea,
     touch-action: manipulation;
   }
   /* The homepage's mobile StickyCalculateBar and the StickyConversionBar are
-     both fixed bottom-0; the calc bar is ~12px taller, so when both show its top
-     edge peeks above the funnel bar. Hide the redundant calc bar while the
-     conversion bar is up (decoupled via the data-conversion-bar attr the
-     conversion bar sets on <html> while visible). Clean 600→720px handoff. */
-  html[data-conversion-bar="1"] [data-sticky-calc-bar] {
-    display: none;
+     both fixed bottom-0. PRIORITY: the product bar wins — while the user is
+     inside the calculator form (the calc bar publishes data-calc-bar on <html>
+     when it renders), the marketing funnel bar yields. The old rule had this
+     backwards, making people fill the form under a permanent "Analyze free"
+     banner with the actual submit bar suppressed. The calc bar now retires
+     itself outside the form / while the submit button or results are on
+     screen, so the funnel bar still owns the marketing sections. */
+  /* Scoped below sm: the calc bar is sm:hidden (renders but is invisible on
+     desktop), so its data-calc-bar attr must not suppress the desktop pill. */
+  @media (max-width: 639.9px) {
+    html[data-calc-bar="1"] [data-conversion-bar-root] {
+      display: none;
+    }
   }
   /* What-if sliders: appearance-none strips the native thumb, leaving nothing to
      grab on touch. Restore a 22px branded thumb so the marquee "watch the verdict

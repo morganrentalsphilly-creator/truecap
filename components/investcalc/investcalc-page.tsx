@@ -3354,6 +3354,7 @@ export function InvestCalcPage({
       <main id="main" className="max-w-7xl mx-auto px-4 sm:px-6 pb-[calc(5.5rem+env(safe-area-inset-bottom))] sm:pb-16">
         <form
           ref={formElementRef}
+          data-calc-form="true"
           onSubmit={form.handleSubmit(onSubmit, onError)}
           // Cmd+Enter (Mac) / Ctrl+Enter (Win/Linux) anywhere inside
           // the form fires the calculate submit. Power-user shortcut
@@ -3376,7 +3377,10 @@ export function InvestCalcPage({
               steps={analyzerSteps}
               activeStepId={activeStep}
               onNavigate={handleStepNavigate}
-              className="sticky top-2 z-20"
+              // Sticky only from sm: — on phones the bottom Run bar already
+              // anchors the flow, and double sticky chrome (rail + bar) ate
+              // ~135px of a 667px viewport while typing.
+              className="sm:sticky sm:top-2 sm:z-20"
             />
 
             <StrategyChips activeKey={activeStrategyKey} onSelect={handleSelectStrategy} />
@@ -3627,6 +3631,7 @@ export function InvestCalcPage({
             <Button
               type="submit"
               disabled={isCalculating}
+              data-inform-submit="true"
               className={cn(
                 "w-full h-14 text-base font-bold rounded-2xl shadow-lg transition-all",
                 "bg-primary text-primary-foreground hover:bg-primary/95"
@@ -3670,7 +3675,7 @@ export function InvestCalcPage({
               in-form button does. Appears once the user scrolls past
               ~600px so we never double up on the visible Calculate
               button. */}
-          <StickyCalculateBar isCalculating={isCalculating} />
+          <StickyCalculateBar isCalculating={isCalculating} hasResults={analysisResult !== null} />
         </form>
 
         {/* Results - wrapped in an error boundary so a render bug in

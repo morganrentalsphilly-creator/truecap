@@ -52,21 +52,17 @@ export function StickyConversionBar() {
   // Don't stack behind the opaque cookie-consent banner on a first visit.
   const showing = !dismissed && visible && !cookieBannerOpen;
 
-  // Publish our visibility so the homepage's mobile StickyCalculateBar (which is
-  // ~12px taller and also fixed bottom-0) hides while this funnel bar is up —
-  // otherwise its top edge peeks above ours. A global data-attr + a CSS rule in
-  // globals.css keeps the two bars decoupled (no shared React state).
-  useEffect(() => {
-    const root = document.documentElement;
-    if (showing) root.setAttribute("data-conversion-bar", "1");
-    else root.removeAttribute("data-conversion-bar");
-    return () => root.removeAttribute("data-conversion-bar");
-  }, [showing]);
-
   if (!showing) return null;
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 px-3 pt-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] shadow-[0_-12px_28px_rgba(15,23,42,0.10)] backdrop-blur supports-[backdrop-filter]:bg-card/85 sm:px-4 sm:pt-3 sm:pb-[max(env(safe-area-inset-bottom),0.75rem)]">
+    // data-conversion-bar-root: globals.css hides this bar while the
+    // calculator's own sticky submit bar is up (html[data-calc-bar]) — the
+    // product action outranks the funnel CTA inside the form. The calc bar
+    // retires itself outside the form / while the submit button or results
+    // are on screen, so this bar still owns the marketing sections.
+    <div
+      data-conversion-bar-root=""
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 px-3 pt-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] shadow-[0_-12px_28px_rgba(15,23,42,0.10)] backdrop-blur supports-[backdrop-filter]:bg-card/85 sm:px-4 sm:pt-3 sm:pb-[max(env(safe-area-inset-bottom),0.75rem)]">
       <div className="mx-auto flex max-w-5xl items-center gap-3">
         <div className="min-w-0 flex-1">
           <p className="truncate text-xs font-bold text-foreground sm:text-sm">
