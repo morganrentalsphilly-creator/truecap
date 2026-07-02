@@ -292,17 +292,21 @@ function OwnedEquityCell({ item, enabled }: { item: SavedAnalysisListItem; enabl
   );
 }
 
-/** Compact "Next: <step>" line driven by the verdict-based next-action lib. */
+/** Compact "Next: <step>" line driven by the verdict-based next-action lib.
+ *  Stage-aware: pipeline stage adjusts the step (closed → track equity,
+ *  passed → revisit, offer/under contract → renegotiate or keep it moving). */
 function NextActionLine({
   recommendation,
   netCashFlow,
+  stage,
   className,
 }: {
   recommendation: SavedAnalysisListItem["recommendation"];
   netCashFlow: number | null;
+  stage?: PipelineStage;
   className?: string;
 }) {
-  const a = nextActionFromVerdict({ recommendation, netCashFlow: netCashFlow ?? 0 });
+  const a = nextActionFromVerdict({ recommendation, netCashFlow: netCashFlow ?? 0, stage });
   const dot =
     a.tone === "blocked"
       ? "bg-[var(--metric-negative)]"
@@ -1744,7 +1748,7 @@ export function SavedAnalysesPage({
                         ) : null}
                       </div>
                       <p className="mt-1 text-xs text-muted-foreground">{getTypeLabel(item.propertyType)}</p>
-                      <NextActionLine recommendation={item.recommendation} netCashFlow={item.netCashFlowMonthly} className="mt-1.5" />
+                      <NextActionLine recommendation={item.recommendation} netCashFlow={item.netCashFlowMonthly} stage={item.pipelineStage} className="mt-1.5" />
                       <OwnedEquityCell item={item} enabled={ownedEquityEnabled} />
                     </div>
                     <input
@@ -1956,7 +1960,7 @@ export function SavedAnalysesPage({
                             <p className="text-xs text-muted-foreground truncate">
                               {getTypeLabel(item.propertyType)}
                             </p>
-                            <NextActionLine recommendation={item.recommendation} netCashFlow={item.netCashFlowMonthly} className="mt-0.5" />
+                            <NextActionLine recommendation={item.recommendation} netCashFlow={item.netCashFlowMonthly} stage={item.pipelineStage} className="mt-0.5" />
                             <OwnedEquityCell item={item} enabled={ownedEquityEnabled} />
                           </div>
                         </div>

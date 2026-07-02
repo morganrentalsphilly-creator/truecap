@@ -110,7 +110,9 @@ export default async function DealWorkspacePage({
   };
   const heading = dealRow.address?.trim() || dealRow.title?.trim() || "Untitled property";
 
-  // Recommended next step from the saved underwrite (cash flow + DSCR).
+  // Recommended next step from the saved underwrite (cash flow + DSCR),
+  // adjusted for where the deal sits in the pipeline (a closed deal is told
+  // to track equity, not to make an offer).
   const snap = dealRow.result_snapshot ?? {};
   const num = (v: unknown): number => {
     const n = typeof v === "number" ? v : Number(v);
@@ -120,6 +122,7 @@ export default async function DealWorkspacePage({
     netCashFlow: num(snap["netCashFlow"] ?? dealRow.net_cash_flow_monthly),
     dscr: snap["dscr"] != null ? num(snap["dscr"]) : null,
     monthlyPayment: num(snap["monthlyPayment"]),
+    stage: isPipelineStage(dealRow.pipeline_stage) ? dealRow.pipeline_stage : undefined,
   });
 
   const displayName = getDisplayName((profile as ProfileRow | null) ?? null, user.email);

@@ -4,8 +4,16 @@
  * previously inline in the dashboard so saved-deal cards, the decision center,
  * and My Deals can all show ONE consistent "what do I do next" per deal.
  *
+ * Stage-aware: when the caller passes the deal's pipeline stage, the advice
+ * matches where the deal actually is — a closed deal is told to track equity,
+ * a passed deal to revisit if the price drops, and an offer/under-contract
+ * deal gets its blocker/ready copy rephrased (you don't "make your offer"
+ * twice). No stage (or a still-shopping stage) reads exactly as before.
+ *
  * Pure: numbers in, a {label, reason, tone} out. Tested in lib/__tests__.
  */
+
+import type { PipelineStage } from "./pipeline";
 
 export type NextActionTone = "blocked" | "review" | "ready";
 
@@ -26,12 +34,71 @@ export type NextActionInput = {
   monthlyPayment?: number | null;
   /** Whether the deal meets the user's (default) buy box. null = none set. */
   meetsBuyBox?: boolean | null;
+  /** Where the deal sits in the saved-deal pipeline. Omitted = advise as if shopping. */
+  stage?: PipelineStage;
 };
 
 /** Conventional DSCR floor lenders look for on investment property. */
 export const LENDER_DSCR_BAR = 1.25;
 
+/**
+ * Terminal stages replace the underwrite advice entirely — the decision is
+ * already made, so the next step is about living with it, not shopping.
+ */
+function terminalStageAction(stage: PipelineStage | undefined): NextAction | null {
+  if (stage === "closed") {
+    return {
+      label: "Track equity and actuals",
+      reason: "this deal closed — add a close date to track your equity",
+      tone: "ready",
+    };
+  }
+  if (stage === "passed") {
+    return {
+      label: "Revisit if the price drops",
+      reason: "you passed on this deal — the numbers may work at a lower price",
+      tone: "review",
+    };
+  }
+  return null;
+}
+
+/**
+ * Offer / under-contract deals keep the underwrite's verdict (tone + reason)
+ * but the step is rephrased for where the deal is: a blocker means
+ * renegotiate — not re-shop — and a clean underwrite means keep the deal
+ * moving (chase the offer, work the due-diligence checklist in the deal
+ * workspace). Review-tone advice (buy-box fit, lender bar) still applies
+ * as written, so it passes through untouched.
+ */
+function applyInFlightStage(action: NextAction, stage: PipelineStage | undefined): NextAction {
+  if (stage === "offer") {
+    if (action.tone === "blocked") {
+      return { label: "Renegotiate or withdraw your offer", reason: action.reason, tone: "blocked" };
+    }
+    if (action.tone === "ready") {
+      return { label: "Follow up on your offer", reason: "your offer is out and the numbers still hold up", tone: "ready" };
+    }
+  }
+  if (stage === "under_contract") {
+    if (action.tone === "blocked") {
+      return { label: "Renegotiate before your contingencies expire", reason: action.reason, tone: "blocked" };
+    }
+    if (action.tone === "ready") {
+      return { label: "Work your due-diligence checklist", reason: "under contract — verify your assumptions before closing", tone: "ready" };
+    }
+  }
+  return action;
+}
+
 export function nextActionForDeal(input: NextActionInput): NextAction {
+  const terminal = terminalStageAction(input.stage);
+  if (terminal) return terminal;
+  return applyInFlightStage(baseActionForDeal(input), input.stage);
+}
+
+/** The stage-agnostic underwrite advice — unchanged shopping-phase logic. */
+function baseActionForDeal(input: NextActionInput): NextAction {
   const cf = Number(input.netCashFlow) || 0;
   const isCash = (Number(input.monthlyPayment) || 0) <= 0;
   const dscr = isCash ? null : typeof input.dscr === "number" && Number.isFinite(input.dscr) ? input.dscr : null;
@@ -94,6 +161,19 @@ export type DealVerdict = "Strong Buy" | "Buy" | "Neutral" | "Risky" | "Avoid";
  * consistent with nextActionForDeal without needing the result snapshot.
  */
 export function nextActionFromVerdict(input: {
+  recommendation: DealVerdict;
+  netCashFlow: number;
+  meetsBuyBox?: boolean | null;
+  /** Where the deal sits in the saved-deal pipeline. Omitted = advise as if shopping. */
+  stage?: PipelineStage;
+}): NextAction {
+  const terminal = terminalStageAction(input.stage);
+  if (terminal) return terminal;
+  return applyInFlightStage(baseActionFromVerdict(input), input.stage);
+}
+
+/** The stage-agnostic verdict-tier advice — unchanged shopping-phase logic. */
+function baseActionFromVerdict(input: {
   recommendation: DealVerdict;
   netCashFlow: number;
   meetsBuyBox?: boolean | null;

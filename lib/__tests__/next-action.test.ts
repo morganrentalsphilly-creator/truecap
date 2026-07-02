@@ -45,6 +45,89 @@ describe("nextActionForDeal", () => {
     const blocked = nextActionForDeal({ netCashFlow: -50, monthlyPayment: 0 });
     expect(blocked.tone).toBe("blocked");
   });
+
+  describe("pipeline-stage awareness", () => {
+    it("no stage → byte-identical to today's output (backward compat snapshot)", () => {
+      expect(nextActionForDeal({ netCashFlow: 400, dscr: 1.5, monthlyPayment: 1400, meetsBuyBox: true })).toEqual({
+        label: "Make your offer",
+        reason: "meets your buy box and clears the lender bar",
+        tone: "ready",
+      });
+      expect(nextActionForDeal({ netCashFlow: -120, dscr: 0.9, monthlyPayment: 1400, meetsBuyBox: false })).toEqual({
+        label: "Lower your offer or raise rent",
+        reason: "cash flow is negative at these assumptions",
+        tone: "blocked",
+      });
+    });
+
+    it("shopping stages (researching / analyzing) match the no-stage output exactly", () => {
+      const inputs = [
+        { netCashFlow: 400, dscr: 1.5, monthlyPayment: 1400, meetsBuyBox: true },
+        { netCashFlow: -120, dscr: 0.9, monthlyPayment: 1400, meetsBuyBox: false },
+        { netCashFlow: 100, dscr: 1.1, monthlyPayment: 1400, meetsBuyBox: true },
+        { netCashFlow: 300, dscr: 1.4, monthlyPayment: 1400, meetsBuyBox: false },
+      ] as const;
+      for (const input of inputs) {
+        const base = nextActionForDeal(input);
+        expect(nextActionForDeal({ ...input, stage: "researching" })).toEqual(base);
+        expect(nextActionForDeal({ ...input, stage: "analyzing" })).toEqual(base);
+        expect(nextActionForDeal({ ...input, stage: undefined })).toEqual(base);
+      }
+    });
+
+    it("closed → track equity and actuals, regardless of the underwrite", () => {
+      const good = nextActionForDeal({ netCashFlow: 400, dscr: 1.5, monthlyPayment: 1400, stage: "closed" });
+      const bad = nextActionForDeal({ netCashFlow: -200, dscr: 0.8, monthlyPayment: 1400, stage: "closed" });
+      for (const a of [good, bad]) {
+        expect(a.tone).toBe("ready");
+        expect(a.label).toBe("Track equity and actuals");
+        expect(a.reason).toMatch(/closed/i);
+      }
+    });
+
+    it("passed → revisit if the price drops, regardless of the underwrite", () => {
+      const good = nextActionForDeal({ netCashFlow: 400, dscr: 1.5, monthlyPayment: 1400, stage: "passed" });
+      const bad = nextActionForDeal({ netCashFlow: -200, dscr: 0.8, monthlyPayment: 1400, stage: "passed" });
+      for (const a of [good, bad]) {
+        expect(a.tone).toBe("review");
+        expect(a.label).toBe("Revisit if the price drops");
+        expect(a.reason).toMatch(/passed/i);
+      }
+    });
+
+    it("offer stage rephrases a blocker as renegotiate/withdraw, keeping the numeric reason", () => {
+      const a = nextActionForDeal({ netCashFlow: -120, dscr: 0.9, monthlyPayment: 1400, stage: "offer" });
+      expect(a.tone).toBe("blocked");
+      expect(a.label).toBe("Renegotiate or withdraw your offer");
+      expect(a.reason).toBe("cash flow is negative at these assumptions");
+    });
+
+    it("offer stage tells a ready deal to follow up, not to make the offer again", () => {
+      const a = nextActionForDeal({ netCashFlow: 400, dscr: 1.5, monthlyPayment: 1400, meetsBuyBox: true, stage: "offer" });
+      expect(a.tone).toBe("ready");
+      expect(a.label).toBe("Follow up on your offer");
+    });
+
+    it("under contract rephrases a blocker around the contingency window", () => {
+      const a = nextActionForDeal({ netCashFlow: 50, dscr: 0.95, monthlyPayment: 1400, stage: "under_contract" });
+      expect(a.tone).toBe("blocked");
+      expect(a.label).toBe("Renegotiate before your contingencies expire");
+      expect(a.reason).toBe("DSCR is under 1.0 — rent doesn't cover the debt");
+    });
+
+    it("under contract routes a ready deal to the due-diligence checklist", () => {
+      const a = nextActionForDeal({ netCashFlow: 400, dscr: 1.5, monthlyPayment: 1400, meetsBuyBox: true, stage: "under_contract" });
+      expect(a.tone).toBe("ready");
+      expect(a.label).toBe("Work your due-diligence checklist");
+    });
+
+    it("review-tone advice (buy box, lender bar) passes through unchanged at offer/under contract", () => {
+      const buyBoxMiss = { netCashFlow: 300, dscr: 1.4, monthlyPayment: 1400, meetsBuyBox: false } as const;
+      const belowBar = { netCashFlow: 100, dscr: 1.1, monthlyPayment: 1400, meetsBuyBox: true } as const;
+      expect(nextActionForDeal({ ...buyBoxMiss, stage: "offer" })).toEqual(nextActionForDeal(buyBoxMiss));
+      expect(nextActionForDeal({ ...belowBar, stage: "under_contract" })).toEqual(nextActionForDeal(belowBar));
+    });
+  });
 });
 
 describe("nextActionFromVerdict", () => {
@@ -69,5 +152,78 @@ describe("nextActionFromVerdict", () => {
     const a = nextActionFromVerdict({ recommendation: "Strong Buy", netCashFlow: 400 });
     expect(a.tone).toBe("ready");
     expect(a.label).toMatch(/make your offer/i);
+  });
+
+  describe("pipeline-stage awareness", () => {
+    it("no stage → byte-identical to today's output (backward compat snapshot)", () => {
+      expect(nextActionFromVerdict({ recommendation: "Strong Buy", netCashFlow: 400 })).toEqual({
+        label: "Line up financing and make your offer",
+        reason: "clears your targets",
+        tone: "ready",
+      });
+      expect(nextActionFromVerdict({ recommendation: "Avoid", netCashFlow: 100 })).toEqual({
+        label: "Pass or restructure the deal",
+        reason: "the numbers don't support it as entered",
+        tone: "blocked",
+      });
+    });
+
+    it("shopping stages (researching / analyzing) match the no-stage output exactly", () => {
+      const inputs = [
+        { recommendation: "Strong Buy", netCashFlow: 400 },
+        { recommendation: "Avoid", netCashFlow: 100 },
+        { recommendation: "Risky", netCashFlow: 50 },
+        { recommendation: "Buy", netCashFlow: 200, meetsBuyBox: false },
+      ] as const;
+      for (const input of inputs) {
+        const base = nextActionFromVerdict(input);
+        expect(nextActionFromVerdict({ ...input, stage: "researching" })).toEqual(base);
+        expect(nextActionFromVerdict({ ...input, stage: "analyzing" })).toEqual(base);
+        expect(nextActionFromVerdict({ ...input, stage: undefined })).toEqual(base);
+      }
+    });
+
+    it("closed → track equity and actuals, matching nextActionForDeal's copy", () => {
+      const a = nextActionFromVerdict({ recommendation: "Avoid", netCashFlow: -200, stage: "closed" });
+      expect(a).toEqual(nextActionForDeal({ netCashFlow: -200, stage: "closed" }));
+      expect(a.label).toBe("Track equity and actuals");
+      expect(a.tone).toBe("ready");
+    });
+
+    it("passed → revisit if the price drops, matching nextActionForDeal's copy", () => {
+      const a = nextActionFromVerdict({ recommendation: "Strong Buy", netCashFlow: 400, stage: "passed" });
+      expect(a).toEqual(nextActionForDeal({ netCashFlow: 400, stage: "passed" }));
+      expect(a.label).toBe("Revisit if the price drops");
+      expect(a.tone).toBe("review");
+    });
+
+    it("offer stage rephrases blockers and the ready path", () => {
+      const blocked = nextActionFromVerdict({ recommendation: "Avoid", netCashFlow: 100, stage: "offer" });
+      expect(blocked.tone).toBe("blocked");
+      expect(blocked.label).toBe("Renegotiate or withdraw your offer");
+      expect(blocked.reason).toBe("the numbers don't support it as entered");
+      const ready = nextActionFromVerdict({ recommendation: "Strong Buy", netCashFlow: 400, stage: "offer" });
+      expect(ready.tone).toBe("ready");
+      expect(ready.label).toBe("Follow up on your offer");
+    });
+
+    it("under contract rephrases blockers and routes ready deals to due diligence", () => {
+      const blocked = nextActionFromVerdict({ recommendation: "Buy", netCashFlow: -50, stage: "under_contract" });
+      expect(blocked.tone).toBe("blocked");
+      expect(blocked.label).toBe("Renegotiate before your contingencies expire");
+      expect(blocked.reason).toBe("cash flow is negative");
+      const ready = nextActionFromVerdict({ recommendation: "Strong Buy", netCashFlow: 400, stage: "under_contract" });
+      expect(ready.tone).toBe("ready");
+      expect(ready.label).toBe("Work your due-diligence checklist");
+    });
+
+    it("review-tone advice (Risky / Neutral / buy-box miss) passes through unchanged at offer/under contract", () => {
+      const risky = { recommendation: "Risky", netCashFlow: 50 } as const;
+      const neutral = { recommendation: "Neutral", netCashFlow: 50 } as const;
+      const buyBoxMiss = { recommendation: "Buy", netCashFlow: 200, meetsBuyBox: false } as const;
+      expect(nextActionFromVerdict({ ...risky, stage: "offer" })).toEqual(nextActionFromVerdict(risky));
+      expect(nextActionFromVerdict({ ...neutral, stage: "under_contract" })).toEqual(nextActionFromVerdict(neutral));
+      expect(nextActionFromVerdict({ ...buyBoxMiss, stage: "offer" })).toEqual(nextActionFromVerdict(buyBoxMiss));
+    });
   });
 });
