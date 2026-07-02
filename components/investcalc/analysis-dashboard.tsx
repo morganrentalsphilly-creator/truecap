@@ -1178,24 +1178,6 @@ export function AnalysisDashboard({
         />
       ) : null}
 
-      {/* Sale & rent comps - on-demand external enrichment (RentCast).
-          Paid + address gated; pulls only on click (API cost control);
-          self-hides if the provider isn't configured. */}
-      {values?.address ? (
-        <PropertyCompsCard
-          enabled={Boolean(isAuthenticated)}
-          address={values.address}
-          propertyType={values.propertyType}
-          bedrooms={values.bedrooms ?? null}
-          bathrooms={values.bathrooms ?? null}
-          squareFootage={values.sqft ?? null}
-          currentRent={values.monthlyRent ?? null}
-          currentPrice={values.purchasePrice ?? null}
-          savedDealId={savedDealId}
-          onApply={onApplyComps}
-        />
-      ) : null}
-
       {/* Metric cards - lens-curated, two visibility tiers.
           Primary (3 cards, chosen by the active investor lens): the
             "is this a good deal?" answer at a glance, always visible.
@@ -1225,8 +1207,15 @@ export function AnalysisDashboard({
         {/* Lens-curated primary metrics - the 3 that matter for the selected
             investor lens, in one scannable row. The rest collapse into
             "Show all metrics" below. */}
-        <div className="grid grid-cols-3 gap-2 sm:gap-3">
-          {primaryMetricKeys.map((k) => metricTiles[k])}
+        {/* 2-col below sm with the lens's #1 metric spanning the row: at
+            375px three-up tiles were ~107px wide and "MONTHLY CASH FLOW"
+            wrapped to three lines next to a cramped figure. */}
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3">
+          {primaryMetricKeys.map((k, i) => (
+            <div key={k} className={cn("min-w-0 [&>*]:h-full", i === 0 && "col-span-2 sm:col-span-1")}>
+              {metricTiles[k]}
+            </div>
+          ))}
         </div>
 
         {/* Quick-screen ratios investors use to triage at a glance: break-even
@@ -1408,6 +1397,27 @@ export function AnalysisDashboard({
           </details>
         ) : null}
       </div>
+
+      {/* Sale & rent comps - on-demand external enrichment (RentCast).
+          Paid + address gated; pulls only on click (API cost control);
+          self-hides if the provider isn't configured. Sits BELOW the
+          metric block: it's an on-demand tool ("Run comps"), not a
+          readout — above the metrics it pushed the answer a full card
+          further down every phone screen. */}
+      {values?.address ? (
+        <PropertyCompsCard
+          enabled={Boolean(isAuthenticated)}
+          address={values.address}
+          propertyType={values.propertyType}
+          bedrooms={values.bedrooms ?? null}
+          bathrooms={values.bathrooms ?? null}
+          squareFootage={values.sqft ?? null}
+          currentRent={values.monthlyRent ?? null}
+          currentPrice={values.purchasePrice ?? null}
+          savedDealId={savedDealId}
+          onApply={onApplyComps}
+        />
+      ) : null}
 
       {/* Free-tier prompt - shows ONE card, not two stacked.
           Decision tree:

@@ -12,7 +12,7 @@
  */
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Check, Minus, Target, X } from "lucide-react";
+import { Check, ChevronDown, Minus, Target, X } from "lucide-react";
 import { listBuyBoxesAction } from "@/app/actions/user-buy-boxes";
 import {
   buyBoxHasCriteria,
@@ -31,6 +31,9 @@ export function BuyBoxVerdictCard({
   metrics: BuyBoxDealMetrics | null;
 }) {
   const [boxes, setBoxes] = useState<NamedBuyBox[] | null>(null);
+  // Mobile-only progressive disclosure for the per-criterion grid — the
+  // headline + personal line answer "does it fit?"; the grid is detail.
+  const [showChecks, setShowChecks] = useState(false);
 
   useEffect(() => {
     if (!enabled) {
@@ -142,7 +145,21 @@ export function BuyBoxVerdictCard({
         <p className="mt-2 text-xs font-medium text-foreground/80">{r.personalLine}</p>
       ) : null}
 
-      <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+      {/* At 375px the full criterion grid made this card ~300px tall in a
+          stack of five cards before the first metric; the verdict line +
+          personal gap already answer the question, so the grid is
+          tap-to-expand on phones (always expanded from sm:). */}
+      <button
+        type="button"
+        onClick={() => setShowChecks((v) => !v)}
+        aria-expanded={showChecks}
+        className="mt-2 flex min-h-9 items-center gap-1 text-xs font-semibold text-muted-foreground underline-offset-2 hover:text-foreground hover:underline sm:hidden"
+      >
+        {showChecks ? "Hide criteria" : `Show all ${r.checks.length} criteria`}
+        <ChevronDown className={cn("size-3.5 transition-transform", showChecks && "rotate-180")} />
+      </button>
+
+      <div className={cn("mt-3 grid-cols-2 gap-2 sm:mt-3 sm:grid sm:grid-cols-3", showChecks ? "grid" : "hidden sm:grid")}>
         {r.checks.map((c) => (
           <div key={c.id} className="rounded-lg border border-border/70 bg-card px-2.5 py-1.5">
             <div className="flex items-center justify-between gap-1">

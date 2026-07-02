@@ -50,7 +50,9 @@ export function StrategyLensOutcomeCard({
   };
 
   return (
-    <div className="rounded-2xl border border-primary/20 bg-[var(--brand-blue-light)] px-4 py-3 sm:px-5">
+    // Neutral chrome (not the blue tint): the blue treatment is reserved
+    // for the interactive what-if affordance so exactly one element pops.
+    <div className="rounded-2xl border border-border bg-muted/30 px-4 py-3 sm:px-5">
       <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-foreground/80">
         <Target aria-hidden className="size-3.5 shrink-0 text-primary" />
         {outcome.headline}
