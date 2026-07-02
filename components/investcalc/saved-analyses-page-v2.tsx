@@ -101,6 +101,7 @@ import {
 import type { OwnedEquitySummary } from "@/lib/owned-equity";
 import { setSavedDealCloseDateAction } from "@/app/actions/saved-analyses";
 import { recomputeSavedDealVerdict } from "@/lib/recompute-saved-deal-verdict";
+import { buildDealsCsv, dealsCsvFilename, type DealsCsvItem } from "@/lib/deals-csv";
 import { openSavedDealInAnalysisTab as openSavedDealInAnalysisTabShared } from "@/components/investcalc/open-saved-deal-in-analyzer";
 
 type SavedSignal = "strong-buy" | "buy" | "neutral" | "risky" | "avoid";
@@ -1133,6 +1134,55 @@ export function SavedAnalysesPage({
     </button>
   );
 
+  // CSV export (Phase 2): downloads WHAT THE USER SEES — the currently
+  // filtered + sorted view (displayItems, all pages), not the raw list.
+  // Entirely client-side via a Blob + anchor; the pure builder lives in
+  // lib/deals-csv.ts (RFC 4180 + formula-injection hardening).
+  const handleExportCsv = () => {
+    if (displayItems.length === 0) return;
+    const csv = buildDealsCsv(
+      displayItems.map(
+        (item): DealsCsvItem => ({
+          address: item.address,
+          // Nickname leads in the list UI, so it leads in the sheet too.
+          title: item.nickname?.trim() ? item.nickname.trim() : item.title,
+          stageLabel: pipelineStageLabel(item.pipelineStage ?? "analyzing"),
+          status: item.status,
+          recommendation: item.recommendation,
+          score: item.score,
+          purchasePrice: item.purchasePrice,
+          netCashFlowMonthly: item.netCashFlowMonthly,
+          cocReturnPct: item.cocReturnPct,
+          capRatePct: item.capRatePct,
+          dscr: item.dscr ?? null,
+          isCashPurchase: item.isCashPurchase ?? false,
+          cashToClose: item.cashToClose ?? null,
+          // Not carried on the loaded list rows — stays an empty cell.
+          tenYearRoiPct: null,
+          tags: item.tags ?? [],
+          createdAt: item.createdAt,
+          closeDate: item.closeDate ?? null,
+        })
+      )
+    );
+    // UTF-8 BOM: Excel on Windows assumes ANSI for BOM-less .csv files,
+    // turning "Peña St" into mojibake; Sheets/Numbers ignore the BOM.
+    const blob = new Blob(["\uFEFF", csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = dealsCsvFilename();
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+    toast({
+      title: `Exported ${displayItems.length} deal${displayItems.length === 1 ? "" : "s"}`,
+      description: "The CSV reflects your current filters and sort.",
+      variant: "success",
+    });
+  };
+
   // How many mobile filters sit off their defaults (All / All Types /
   // Active / switch off) — shown on the collapsed "Filters" button so a
   // hidden filter can never silently empty the list.
@@ -1207,6 +1257,19 @@ export function SavedAnalysesPage({
           aria-label="Show selected analyses only"
         />
       </div>
+
+      {/* Export the current view (filtered + sorted) as a spreadsheet. Lives
+          inside the Filters disclosure below xl; the xl toolbar has its own
+          Export CSV button. */}
+      <button
+        type="button"
+        onClick={handleExportCsv}
+        disabled={displayItems.length === 0}
+        className="inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-2xl border border-border bg-muted/40 text-xs font-bold text-foreground transition-colors hover:bg-muted disabled:pointer-events-none disabled:opacity-50"
+      >
+        <FileDown className="h-3.5 w-3.5" />
+        Export CSV ({displayItems.length})
+      </button>
       </div>
     </div>
   );
@@ -1753,6 +1816,17 @@ export function SavedAnalysesPage({
 
            
            <div className="ml-auto flex items-center gap-2">
+            {/* Download the current view (filtered + sorted) as a CSV. */}
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-9 gap-1.5 rounded-full text-xs"
+              onClick={handleExportCsv}
+              disabled={displayItems.length === 0}
+            >
+              <FileDown className="h-3.5 w-3.5" />
+              Export CSV
+            </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm" className="h-9 gap-1.5 rounded-full text-xs">
