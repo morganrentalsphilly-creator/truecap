@@ -19,11 +19,17 @@ interface PropertyTypeSectionProps {
     templateName: string;
     templateDescription: string | null;
   } | null;
+  /** Passed through to the template selector (see template-selector-section). */
+  onTemplatesLoaded?: Parameters<typeof TemplateSelectorSection>[0]["onTemplatesLoaded"];
+  /** Passed through to the template selector (see template-selector-section). */
+  onExplicitTemplateChange?: Parameters<typeof TemplateSelectorSection>[0]["onExplicitTemplateChange"];
 }
 
 export function PropertyTypeSection({
   form,
   savedTemplateFallback = null,
+  onTemplatesLoaded,
+  onExplicitTemplateChange,
 }: PropertyTypeSectionProps) {
   const selected = form.watch("propertyType");
 
@@ -86,7 +92,11 @@ export function PropertyTypeSection({
       {/* Template - optional. Demoted below the type (behind a divider) so it
           reads as a secondary "advanced" choice, not co-equal with the type. */}
       <div className="mt-4 border-t border-border pt-4">
-        <TemplateSelectorSection form={form} savedTemplateFallback={savedTemplateFallback} />
+        <TemplateSelectorSection
+          form={form}
+          savedTemplateFallback={savedTemplateFallback}
+          onTemplatesLoaded={onTemplatesLoaded}
+        />
       </div>
     </div>
   );

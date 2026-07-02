@@ -20,6 +20,7 @@ import {
   listAnalysisTemplatesAction,
   updateAnalysisTemplateAction,
 } from "@/app/actions/analysis-templates";
+import { buildTemplateFormPatch } from "@/lib/template-form-patch";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import {
@@ -39,11 +40,21 @@ interface TemplateSelectorSectionProps {
     templateName: string;
     templateDescription: string | null;
   } | null;
+  /** Fired once the Pro user's templates load (never for free/locked users).
+   *  The analyzer page uses it to auto-apply the default template. */
+  onTemplatesLoaded?: (templates: AnalysisTemplateOption[]) => void;
+  /** Fired on every explicit pick in the selector — the template id, or
+   *  null for "None". The analyzer page uses it to reconcile the
+   *  default-template auto-apply (an explicit pick supersedes it; "None"
+   *  right after an auto-apply restores the pre-apply values). */
+  onExplicitTemplateChange?: (templateId: string | null) => void;
 }
 
 export function TemplateSelectorSection({
   form,
   savedTemplateFallback = null,
+  onTemplatesLoaded,
+  onExplicitTemplateChange,
 }: TemplateSelectorSectionProps) {
   const { toast } = useToast();
   const [templates, setTemplates] = useState<AnalysisTemplateOption[]>([]);
@@ -147,6 +158,7 @@ export function TemplateSelectorSection({
       }
       setTemplates(result.templates);
       setIsLoadingTemplates(false);
+      onTemplatesLoaded?.(result.templates);
     };
 
     // .catch shields the outer effect from unhandled rejections if
@@ -164,40 +176,27 @@ export function TemplateSelectorSection({
     return () => {
       cancelled = true;
     };
-  }, [toast]);
+  }, [toast, onTemplatesLoaded]);
 
   const applyTemplateToForm = (tpl: AnalysisTemplateOption) => {
-    form.setValue("propertyTaxPct", tpl.propertyTaxPct, { shouldDirty: true, shouldValidate: true });
-    form.setValue("insuranceInputMode", tpl.insuranceInputMode, { shouldDirty: true });
-    form.setValue("insurancePct", tpl.insurancePct ?? undefined, { shouldDirty: true });
-    form.setValue("insuranceMonthly", tpl.insuranceMo ?? undefined, { shouldDirty: true });
-    // Clamp the four expense %s to the analyzer form's 50% ceiling. New
-    // templates are already capped at 50 (analysis-template-schema.ts), but a
-    // legacy template saved under the old 100% cap would otherwise push the
-    // form past its max and surface a "Max 50%" error on a field the user
-    // never touched.
-    form.setValue("maintenancePct", Math.min(tpl.maintenancePct, 50), { shouldDirty: true });
-    form.setValue("vacancyPct", Math.min(tpl.vacancyPct, 50), { shouldDirty: true });
-    form.setValue("mgmtPct", Math.min(tpl.managementPct, 50), { shouldDirty: true });
-    form.setValue("capexPct", Math.min(tpl.capexPct, 50), { shouldDirty: true });
-    form.setValue("closingCostsPct", tpl.closingCostsPct, { shouldDirty: true });
-    form.setValue("interestRate", tpl.interestRatePct, { shouldDirty: true });
-    form.setValue("downPaymentPct", tpl.downPaymentPct, { shouldDirty: true });
-    form.setValue("expenseGrowthPct", tpl.expenseGrowthPct, { shouldDirty: true });
-    form.setValue("rentGrowthPct", tpl.rentGrowthPct, { shouldDirty: true });
-    form.setValue("appreciationRatePct", tpl.appreciationRatePct, { shouldDirty: true });
-    form.setValue("sellingCostPct", tpl.sellingCostPct, { shouldDirty: true });
-    form.setValue("buildingValuePct", tpl.buildingValuePct, { shouldDirty: true });
-    form.setValue("depreciationYears", tpl.depreciationYears, { shouldDirty: true });
-    form.setValue("includeInterestDeduction", tpl.includeInterestDeduction, { shouldDirty: true });
-    form.setValue("taxRatePct", tpl.taxRatePct === 24 ? undefined : tpl.taxRatePct, {
-      shouldDirty: true,
-    });
+    // Field mapping (renames, legacy expense-% clamp, tax-rate sentinel)
+    // lives in buildTemplateFormPatch so the explicit picker and the
+    // default-template auto-apply can never drift apart.
+    for (const { field, value } of buildTemplateFormPatch(tpl)) {
+      form.setValue(field, value as never, {
+        shouldDirty: true,
+        // Only propertyTaxPct validates eagerly (pre-existing behavior):
+        // it's the one field a template fills that the visible form
+        // surfaces an inline error for.
+        shouldValidate: field === "propertyTaxPct",
+      });
+    }
   };
 
   const handleTemplateChange = (value: string) => {
     if (value === "__none__") {
       form.setValue("templateId", undefined, { shouldValidate: true, shouldDirty: true });
+      onExplicitTemplateChange?.(null);
       setIsOpen(false);
       return;
     }
@@ -205,6 +204,7 @@ export function TemplateSelectorSection({
     if (tpl) {
       applyTemplateToForm(tpl);
       form.setValue("templateId", value, { shouldValidate: true, shouldDirty: true });
+      onExplicitTemplateChange?.(value);
     }
     setIsOpen(false);
   };

@@ -36,6 +36,8 @@ import { FinancingSection } from "./financing-section";
 import { OperatingExpensesSection } from "./operating-expenses-section";
 import { StrategyChips } from "./strategy-chips";
 import { STARTER_TEMPLATES, type StarterTemplate } from "@/lib/starter-templates";
+import { buildTemplateFormPatch, type TemplateFormPatchEntry } from "@/lib/template-form-patch";
+import type { AnalysisTemplateOption } from "@/app/actions/analysis-templates";
 import { getStrategyByKey } from "@/lib/investor-strategies";
 import { AnalyzerStepRail } from "./analyzer-step-rail";
 import {
@@ -778,6 +780,32 @@ export function InvestCalcPage({
   // flags + builders are in scope) so it always closes over fresh values.
   const recomputeOutputsFromFormRef = useRef<() => void>(() => {});
 
+  // ── Default-template auto-apply (roadmap P1-7) ───────────────────────
+  // A Pro user who marked a template as their default gets THEIR
+  // assumptions on every brand-new analyzer session — zero clicks. The
+  // template list arrives via TemplateSelectorSection's onTemplatesLoaded
+  // callback (no second fetch). Refs, not state: none of this should
+  // re-render anything — the applied form values do that.
+  /** The user's is_default template, captured when the list loads. */
+  const defaultTemplateRef = useRef<AnalysisTemplateOption | null>(null);
+  /** True only when the session started factory-fresh (clean reset or a
+   *  tools-calculator handoff). Draft restores, saved-deal edits, and
+   *  share-link "Make this mine" imports (which arrive via the draft key)
+   *  leave it false so their values are never clobbered. */
+  const autoApplyEligibleRef = useRef(false);
+  /** Set when the user clicks Undo on the applied-defaults toast — they
+   *  said no, so we stay factory for the rest of this mount. */
+  const autoApplySuppressedRef = useRef(false);
+  /** Pre-apply values of exactly the fields we overwrote, for one-click undo. */
+  const autoApplyUndoRef = useRef<TemplateFormPatchEntry[] | null>(null);
+  // Latest-closure fn ref (same pattern as recomputeOutputsFromFormRef):
+  // resetToNewAnalysis below needs to call it, but the body closes over
+  // helpers declared later (enrichmentCaptureRef, toast wiring).
+  const autoApplyDefaultTemplateRef = useRef<() => void>(() => {});
+  /** Latest-closure ref for the undo, so the stable
+   *  handleExplicitTemplateChange callback can reach it. */
+  const undoAutoAppliedTemplateRef = useRef<() => void>(() => {});
+
   const resetToNewAnalysis = useCallback(
     (nextPropertyType: InvestmentFormValues["propertyType"] = "single-family") => {
       isProgrammaticResetRef.current = true;
@@ -826,6 +854,11 @@ export function InvestCalcPage({
         shouldDirty: false,
         shouldValidate: false,
       });
+      // A reset IS a brand-new session — re-arm and re-apply the user's
+      // default template (no-op until the template list has loaded, and
+      // for free users / users without a default it never does anything).
+      autoApplyEligibleRef.current = true;
+      autoApplyDefaultTemplateRef.current();
       queueMicrotask(() => {
         isProgrammaticResetRef.current = false;
       });
@@ -1366,6 +1399,118 @@ export function InvestCalcPage({
   );
 
   /**
+   * One-click undo for the default-template auto-apply: restore the exact
+   * pre-apply values (factory defaults + any user_analysis_defaults overlay)
+   * and stop auto-applying for the rest of this mount — the user said no.
+   * Plain closure (captured by the toast at apply time); touches only refs
+   * + the stable form object, so staleness isn't a concern.
+   */
+  const undoAutoAppliedTemplate = () => {
+    const undo = autoApplyUndoRef.current;
+    if (!undo) return;
+    autoApplyUndoRef.current = null;
+    autoApplySuppressedRef.current = true;
+    isProgrammaticResetRef.current = true;
+    for (const { field, value } of undo) {
+      form.setValue(field, value as never, {
+        shouldDirty: false,
+        shouldTouch: false,
+        shouldValidate: false,
+      });
+    }
+    queueMicrotask(() => {
+      isProgrammaticResetRef.current = false;
+      recomputeOutputsFromFormRef.current();
+    });
+  };
+  undoAutoAppliedTemplateRef.current = undoAutoAppliedTemplate;
+
+  // Latest-closure assignment for the default-template auto-apply (ref
+  // declared next to resetToNewAnalysis, which re-triggers it). Guards, in
+  // order: template list not loaded / no default; session didn't start
+  // factory-fresh (draft restore, saved-deal edit, "Make this mine");
+  // user clicked Undo; a saved deal is loaded; a template is already
+  // applied (explicitly picked or carried by a restore). Per-field: never
+  // overwrite a field the user edited (dirty) or one address-enrichment
+  // filled — enrichment stays the winner for rate/tax, exactly how the
+  // user_analysis_defaults overlay already defers to it (applied with
+  // shouldDirty:false, so a later FRED/state-tax fill still overwrites).
+  autoApplyDefaultTemplateRef.current = () => {
+    const tpl = defaultTemplateRef.current;
+    if (!tpl) return;
+    if (!autoApplyEligibleRef.current || autoApplySuppressedRef.current) return;
+    if (savedDealIdRef.current) return;
+    if (form.getValues("templateId")) return;
+    const dirty = form.formState.dirtyFields as Record<string, unknown>;
+    const skipFields = new Set<keyof InvestmentFormValues>();
+    for (const key of Object.keys(dirty)) {
+      if (dirty[key]) skipFields.add(key as keyof InvestmentFormValues);
+    }
+    if (enrichmentCaptureRef.current.propertyTaxPct) skipFields.add("propertyTaxPct");
+    if (enrichmentCaptureRef.current.interestRate) skipFields.add("interestRate");
+    const patch = buildTemplateFormPatch(tpl, { skipFields });
+    if (patch.length === 0) return;
+    // Snapshot exactly what we're about to overwrite (+ templateId) so
+    // Undo restores the untouched form, not a blanket factory reset.
+    autoApplyUndoRef.current = [
+      ...patch.map(({ field }) => ({ field, value: form.getValues(field) })),
+      { field: "templateId" as const, value: form.getValues("templateId") },
+    ];
+    isProgrammaticResetRef.current = true;
+    const opts = { shouldDirty: false, shouldTouch: false, shouldValidate: false };
+    for (const { field, value } of patch) form.setValue(field, value as never, opts);
+    // Link the deal to the template like an explicit pick would — the
+    // selector chip shows the template name, and a save records template_id.
+    form.setValue("templateId", tpl.id, opts);
+    // One apply per session: disarm until the next clean reset re-arms.
+    // Without this, a selector remount (strategy-chip toggle) re-fires
+    // onTemplatesLoaded and could re-apply after the user picked "None".
+    autoApplyEligibleRef.current = false;
+    queueMicrotask(() => {
+      isProgrammaticResetRef.current = false;
+      recomputeOutputsFromFormRef.current();
+    });
+    // The quiet "why isn't this form factory-fresh" explanation + escape
+    // hatch. Matches the enrichment "Auto-filled from address" pattern.
+    toast({
+      title: "Your default template was applied",
+      description: `"${tpl.templateName}" pre-filled your assumptions for this deal.`,
+      action: (
+        <ToastAction altText="Undo — use standard defaults instead" onClick={undoAutoAppliedTemplate}>
+          Undo
+        </ToastAction>
+      ),
+    });
+  };
+
+  /** TemplateSelectorSection reports the Pro user's templates here once
+   *  loaded (free/anon users: never called). Capture the default and try
+   *  the auto-apply — by now the mount init effect has already decided
+   *  eligibility (child effects fire before the parent's, and the list
+   *  arrives a server roundtrip later regardless). */
+  const handleTemplatesLoaded = useCallback((templates: AnalysisTemplateOption[]) => {
+    defaultTemplateRef.current = templates.find((t) => t.isDefault) ?? null;
+    autoApplyDefaultTemplateRef.current();
+  }, []);
+
+  /** Explicit selector picks reconcile the auto-apply. The Undo toast can
+   *  be evicted within seconds (TOAST_LIMIT=1 — the enrichment toast
+   *  replaces it), so "None" doubles as the durable escape hatch: while
+   *  the auto-apply snapshot is live it restores the pre-apply values
+   *  (no-op otherwise — explicit-pick users keep today's behavior). An
+   *  explicit template pick supersedes the auto-apply instead: drop the
+   *  snapshot so a later "None"/Undo can't stomp the user's choice. */
+  const handleExplicitTemplateChange = useCallback((templateId: string | null) => {
+    if (templateId) {
+      // Only the snapshot is dropped — NOT the suppressed flag, so a
+      // future "New Analysis" reset still auto-applies their default.
+      autoApplyUndoRef.current = null;
+      return;
+    }
+    undoAutoAppliedTemplateRef.current();
+  }, []);
+
+  /**
    * "What's your play?" chip handler. Tailors the form to the chosen investor
    * strategy: sets property type, applies that play's assumption defaults, and
    * points the results view at the tab that leads with its key number. null
@@ -1758,6 +1903,10 @@ export function InvestCalcPage({
       if (handoff.purchasePrice !== undefined) form.setValue("purchasePrice", handoff.purchasePrice);
       if (handoff.bedrooms !== undefined) form.setValue("bedrooms", handoff.bedrooms);
       if (handoff.monthlyRent !== undefined) form.setValue("monthlyRent", handoff.monthlyRent);
+      // A handed-off deal is still a NEW deal: the user's default template
+      // may pre-fill the assumption fields (never the handed-off
+      // price/rent/beds/address — the patch doesn't touch those).
+      autoApplyEligibleRef.current = true;
       queueMicrotask(() => {
         isProgrammaticResetRef.current = false;
       });
@@ -3278,7 +3427,12 @@ export function InvestCalcPage({
                 ) : null}
               </div>
               {!activeStrategy && (
-                <PropertyTypeSection form={form} savedTemplateFallback={savedTemplateFallback} />
+                <PropertyTypeSection
+                  form={form}
+                  savedTemplateFallback={savedTemplateFallback}
+                  onTemplatesLoaded={handleTemplatesLoaded}
+                  onExplicitTemplateChange={handleExplicitTemplateChange}
+                />
               )}
               <PropertyDetailsSection
                 form={form}
