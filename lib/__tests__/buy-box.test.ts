@@ -112,6 +112,63 @@ describe("evaluateBuyBox", () => {
     const r = evaluateBuyBox({ ...fullCriteria, isActive: false }, baseMetrics);
     expect(r.active).toBe(false);
   });
+
+  it("attaches a favor-aware gap to each numeric check", () => {
+    const r = evaluateBuyBox(
+      { ...EMPTY_BUY_BOX, minCapRatePct: 6, minCashFlowMonthly: 200, maxPurchasePrice: 300_000 },
+      { ...baseMetrics, capRatePct: 5.2, cashFlowMonthly: 120, purchasePrice: 320_000 }
+    );
+    expect(r.checks.find((c) => c.id === "capRate")!.gapText).toBe("0.8pp short");
+    expect(r.checks.find((c) => c.id === "cashFlow")!.gapText).toBe("$80/mo short");
+    // Price is over budget by $20k (a miss on a ≤ check).
+    expect(r.checks.find((c) => c.id === "price")!.gapText).toBe("$20,000 over budget");
+  });
+
+  it("shows headroom ('to spare' / 'under budget') when a numeric check passes", () => {
+    const r = evaluateBuyBox(
+      { ...EMPTY_BUY_BOX, minCapRatePct: 6, maxPurchasePrice: 300_000 },
+      { ...baseMetrics, capRatePct: 7.5, purchasePrice: 250_000 }
+    );
+    expect(r.checks.find((c) => c.id === "capRate")!.gapText).toBe("1.5pp to spare");
+    expect(r.checks.find((c) => c.id === "price")!.gapText).toBe("$50,000 under budget");
+  });
+
+  it("leaves gapText undefined for non-numeric and skipped checks", () => {
+    const r = evaluateBuyBox(
+      { ...EMPTY_BUY_BOX, minCapRatePct: 6, propertyTypes: ["single-family"] },
+      { ...baseMetrics, capRatePct: null }
+    );
+    expect(r.checks.find((c) => c.id === "capRate")!.gapText).toBeUndefined(); // skipped (null metric)
+    expect(r.checks.find((c) => c.id === "propertyType")!.gapText).toBeUndefined(); // non-numeric
+  });
+
+  it("names the biggest miss in the personal line on a fail", () => {
+    const r = evaluateBuyBox(
+      { ...EMPTY_BUY_BOX, minCapRatePct: 6, minCocPct: 8 },
+      { ...baseMetrics, capRatePct: 3, cocPct: 7.5 } // cap misses by 50%, CoC by ~6%
+    );
+    expect(r.passes).toBe(false);
+    expect(r.personalLine).toContain("Biggest gap — Cap rate");
+    expect(r.personalLine).toContain("3% vs ≥ 6%");
+  });
+
+  it("names the tightest margin in the personal line on a pass", () => {
+    const r = evaluateBuyBox(
+      { ...EMPTY_BUY_BOX, minCapRatePct: 6, minCocPct: 8 },
+      { ...baseMetrics, capRatePct: 12, cocPct: 8.1 } // CoC is the tighter pass
+    );
+    expect(r.passes).toBe(true);
+    expect(r.personalLine).toContain("Tightest margin — Cash-on-cash");
+  });
+
+  it("has a null personal line when only non-numeric criteria apply", () => {
+    const r = evaluateBuyBox(
+      { ...EMPTY_BUY_BOX, propertyTypes: ["single-family"], targetStates: ["PA"] },
+      baseMetrics
+    );
+    expect(r.passes).toBe(true);
+    expect(r.personalLine).toBeNull();
+  });
 });
 
 describe("deriveStateFromAddress", () => {

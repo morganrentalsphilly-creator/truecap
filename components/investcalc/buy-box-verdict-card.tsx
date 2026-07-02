@@ -138,6 +138,10 @@ export function BuyBoxVerdictCard({
         </span>
       </div>
 
+      {r.personalLine ? (
+        <p className="mt-2 text-xs font-medium text-foreground/80">{r.personalLine}</p>
+      ) : null}
+
       <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
         {r.checks.map((c) => (
           <div key={c.id} className="rounded-lg border border-border/70 bg-card px-2.5 py-1.5">
@@ -155,6 +159,16 @@ export function BuyBoxVerdictCard({
               <span className="font-medium text-foreground">{c.actual}</span>{" "}
               <span className="text-muted-foreground">vs {c.target}</span>
             </div>
+            {c.gapText ? (
+              <div
+                className={cn(
+                  "mt-0.5 text-[10px] font-semibold",
+                  c.pass === false ? "text-red-600" : "text-[var(--brand-green)]"
+                )}
+              >
+                {c.gapText}
+              </div>
+            ) : null}
           </div>
         ))}
       </div>
