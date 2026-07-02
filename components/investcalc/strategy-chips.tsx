@@ -40,7 +40,11 @@ export function StrategyChips({
         ) : null}
       </div>
 
-      <div className="mt-3 flex flex-wrap gap-2">
+      {/* One swipeable row on phones (the 6 chips wrapped to 3 rows at
+          375px, ~140px of card height for a set-and-forget control);
+          wraps as before from sm:. Negative margin bleeds the scroll
+          gutter to the card edge so the row hints its overflow. */}
+      <div className="mt-3 -mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0">
         {INVESTOR_STRATEGIES.map((s) => {
           const isActive = s.key === activeKey;
           const Icon = s.Icon;
@@ -52,7 +56,7 @@ export function StrategyChips({
               title={s.tagline}
               onClick={() => onSelect(isActive ? null : s.key)}
               className={cn(
-                "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors",
+                "inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors sm:shrink",
                 isActive
                   ? "border-primary bg-primary text-primary-foreground"
                   : "border-border bg-background text-foreground hover:bg-muted"

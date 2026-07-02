@@ -55,7 +55,8 @@ export function PropertyDetailsSection({
               point and tells new users it auto-fills the deal - the single
               biggest "how do I use this" cue, right at the point of action. */}
           <p className="mb-1.5 text-[11px] leading-snug text-muted-foreground">
-            <span className="font-semibold text-foreground">Start here</span> - address, price, beds &amp; rent is all you need. We auto-fill your rate, taxes, area rent &amp; expenses from public data (HUD · FRED · state){showAutofill ? ", and Autofill can pull beds, baths & price for you" : ""} - everything stays editable.
+            <span className="font-semibold text-foreground">Start here</span>
+            {" - we auto-fill rates, taxes & area rent from public data. Everything stays editable."}
           </p>
           <AddressAutocomplete
             form={form}
@@ -85,8 +86,10 @@ export function PropertyDetailsSection({
           ) : null}
         </div>
 
-        {/* Purchase Price + Year Built (Year Built hidden in strategy-focus mode) */}
-        <div className={cn("grid gap-4", showYearBuilt ? "grid-cols-2 sm:grid-cols-2" : "grid-cols-1")}>
+        {/* Purchase Price + Year Built (Year Built hidden in strategy-focus
+            mode). Single column below sm: at 375px the 2-col split squeezed
+            the marquee Price input to ~140px next to an optional field. */}
+        <div className={cn("grid gap-4", showYearBuilt ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1")}>
           <div>
             <Label htmlFor="purchasePrice" className="text-sm font-medium text-foreground mb-1.5 block">
               {priceLabel ?? "Purchase Price"}
