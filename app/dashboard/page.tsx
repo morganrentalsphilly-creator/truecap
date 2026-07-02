@@ -153,7 +153,7 @@ export default async function DashboardPage() {
   // have passed — run them in ONE round-trip wave instead of two
   // sequential awaits (the deals query previously waited for the
   // profile/count/premium wave to finish for no reason).
-  const [{ data: profile }, isPremium, dealsResult, aggregateResult, currentRate, savedTotalCount] = await Promise.all([
+  const [{ data: profile }, isPremium, dealsResult, aggregateResult, currentRate, savedTotalCount, dueDiligenceResult] = await Promise.all([
     supabase
       .from("profiles")
       .select("first_name, last_name, display_name, avatar_url")
@@ -196,6 +196,21 @@ export default async function DashboardPage() {
     // number than the sidebar badge and looked like a mismatch. We pass
     // both so the header can read "X active · Y saved total".
     getSavedAnalysesTotalCount(supabase, user.id),
+    // Due-diligence deadlines for ALL the user's ACTIVE deals (NOT the 20-row
+    // recency sample above — deal #21's inspection deadline is exactly the one
+    // that lapses unnoticed). We query deal_due_diligence and inner-join the
+    // parent saved_analyses row so we can filter to active (non-archived,
+    // non-completed, non-deleted) deals and pull the address label in one
+    // round-trip. RLS scopes both tables to the user; the extra user_id filter
+    // is belt-and-suspenders. The "Due this week" card computes overdue/
+    // due-soon status client-side in the viewer's local time.
+    supabase
+      .from("deal_due_diligence")
+      .select("analysis_id, items, saved_analyses!inner(id, address, title, is_archived, is_completed, deleted_at)")
+      .eq("user_id", user.id)
+      .eq("saved_analyses.is_archived", false)
+      .eq("saved_analyses.is_completed", false)
+      .is("saved_analyses.deleted_at", null),
   ]);
 
   const profileRow = (profile as ProfileRow | null) ?? null;
@@ -299,6 +314,33 @@ export default async function DashboardPage() {
   // True saved total (matches the sidebar "My Deals" badge) so the header
   // can distinguish active deals from the full saved set.
   dashboardData.savedTotalCount = savedTotalCount;
+  // Due-diligence deadlines for the "Due this week" card. Shape the RLS-scoped
+  // query result into { id, address, items } per active deal; the client card
+  // statuses each item in the viewer's local time and self-hides when nothing
+  // is overdue/due-soon. On error (incl. the migration being unapplied) we log
+  // and pass nothing — the card renders null, never a broken empty state.
+  type DueDiligenceJoinRow = {
+    analysis_id: string;
+    items: unknown;
+    // PostgREST returns the inner-joined to-one relation as an object, but
+    // types it loosely — narrow to what we read (id + address label).
+    saved_analyses: { id: string; address: string | null; title: string | null } | null;
+  };
+  if (dueDiligenceResult.error) {
+    Sentry.captureMessage("dashboard due-diligence deadlines query failed — 'Due this week' card hidden", {
+      level: "warning",
+      tags: { feature: "dashboard-due-this-week" },
+      extra: { code: dueDiligenceResult.error.code, message: dueDiligenceResult.error.message },
+    });
+  } else {
+    const ddRows = (dueDiligenceResult.data ?? []) as unknown as DueDiligenceJoinRow[];
+    dashboardData.dueThisWeek = ddRows.map((r) => ({
+      id: r.saved_analyses?.id ?? r.analysis_id,
+      address: r.saved_analyses?.address?.trim() || r.saved_analyses?.title?.trim() || "Untitled Property",
+      items: r.items,
+    }));
+  }
+
   // Rate watch — re-underwrite saved deals at today's rate; the strip shows
   // only the ones whose signal changed (null = nothing to show, strip hides).
   dashboardData.rateWatch = buildRateWatch(

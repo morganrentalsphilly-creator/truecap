@@ -45,6 +45,7 @@ import { PIPELINE_STAGES, type PipelineStage } from "@/lib/pipeline";
 export type { DashboardDeal } from "@/lib/dashboard-deal-mapping";
 import { RateWatchStrip } from "@/components/dashboard/RateWatchStrip";
 import type { RateWatchSummary } from "@/lib/rate-watch";
+import { DueThisWeekCard, type DueThisWeekDeal } from "@/components/dashboard/due-this-week-card";
 
 export type DashboardHomeData = {
   user: {
@@ -85,6 +86,14 @@ export type DashboardHomeData = {
    * the RateWatchStrip then renders nothing.
    */
   rateWatch?: RateWatchSummary | null;
+  /**
+   * Due-diligence checklists for the user's ACTIVE saved deals (raw items +
+   * deal label), used by the "Due this week" card to surface overdue / due-
+   * within-7d contingency deadlines. Status is computed client-side in the
+   * viewer's local time. Undefined when the query errored or the migration is
+   * unapplied — the card then renders nothing.
+   */
+  dueThisWeek?: DueThisWeekDeal[];
 };
 
 function formatCurrency(value: number | null | undefined, compact = false): string {
@@ -663,6 +672,14 @@ export function DashboardHome({
             </div>
           </section>
         ) : null}
+
+        {/* Due this week — overdue / due-within-7d due-diligence deadlines
+            (inspection, appraisal, financing contingencies) across active
+            saved deals. The most time-sensitive "what do I DO this week"
+            answer, so it sits at the top of the action lane. Status is
+            computed in the viewer's local time; renders nothing when nothing
+            is overdue or due within 7 days — invisible until useful. */}
+        <DueThisWeekCard deals={data.dueThisWeek ?? []} />
 
         {/* Rate watch — re-underwrites saved deals at today's 30-yr rate and
             surfaces the ones whose signal changed since they were saved (the
