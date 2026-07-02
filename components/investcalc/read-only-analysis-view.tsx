@@ -20,6 +20,7 @@ import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { MaxOfferCard } from "@/components/investcalc/max-offer-card";
 import { SensitivityGrid } from "@/components/investcalc/sensitivity-grid";
 import { StrategiesPanel } from "@/components/investcalc/strategies-panel";
+import { SharedDealViewerBuyBox } from "@/components/investcalc/shared-deal-viewer-buy-box";
 import type { ReportComp, ReportComps } from "@/lib/report-comps";
 
 interface ReadOnlyAnalysisViewProps {
@@ -206,6 +207,12 @@ export function ReadOnlyAnalysisView({ values, result, comps }: ReadOnlyAnalysis
           sub="/month"
         />
       </div>
+
+      {/* The VIEWER's own buy box verdict on this shared deal — renders only
+          for a signed-in viewer with an active buy box; anonymous viewers see
+          nothing here. Sits right above "Make this mine" so a personal miss
+          ("0.8pp short") flows into "import it and adjust". */}
+      <SharedDealViewerBuyBox values={values} result={result} />
 
       {/* Primary conversion action for a high-intent viewer: clone the deal
           into the calculator (full inputs preloaded) instead of sending them
