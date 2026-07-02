@@ -46,6 +46,7 @@ export type { DashboardDeal } from "@/lib/dashboard-deal-mapping";
 import { RateWatchStrip } from "@/components/dashboard/RateWatchStrip";
 import type { RateWatchSummary } from "@/lib/rate-watch";
 import { DueThisWeekCard, type DueThisWeekDeal } from "@/components/dashboard/due-this-week-card";
+import { BuyBoxNudge } from "@/components/dashboard/buy-box-nudge";
 
 export type DashboardHomeData = {
   user: {
@@ -987,6 +988,14 @@ export function DashboardHome({
           </section>
         ) : null}
 
+        {/* ── Buy-box discovery (FFM-3) — slim, dismissible, 1-3-deal
+            dashboards only, and only for users who CAN use buy boxes but have
+            zero (BuyBoxNudge checks that itself and renders nothing
+            otherwise). Deliberate flagged exception to invisible-until-useful
+            (principle 5): one sentence + link, one self-contained component,
+            shared dismissal key with the My Deals nudge — never double-nag. */}
+        {hasAnyDeals && data.allDeals.length <= 3 ? <BuyBoxNudge variant="dashboard" /> : null}
+
         {/* ── Empty-state hero — when 0 saved deals ───────────────── */}
         {!hasAnyDeals ? (
           <div className="rounded-2xl border border-dashed border-border bg-card p-10 text-center">
@@ -996,6 +1005,17 @@ export function DashboardHome({
             <h2 className="text-xl font-bold text-foreground">Your dashboard is ready</h2>
             <p className="mt-2 text-sm text-muted-foreground max-w-md mx-auto leading-relaxed">
               Run your first rental property through the analyzer and save it. You&apos;ll see portfolio totals, top performers, and risk/return analysis here.
+              {/* FFM-3: the one personalization feature worth naming up front —
+                  a buy box makes every future deal get a personal pass/fail. */}{" "}
+              Set{" "}
+              <Link
+                href="/settings#buy-boxes-heading"
+                prefetch={false}
+                className="font-semibold text-primary underline-offset-2 hover:underline"
+              >
+                your buy box
+              </Link>{" "}
+              and every deal gets a pass/fail against your numbers.
             </p>
             <Button
               asChild

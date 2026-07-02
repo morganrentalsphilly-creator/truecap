@@ -453,6 +453,11 @@ export function AnalysisDashboard({
   // before firing its action.
   const [moreActionsOpen, setMoreActionsOpen] = useState(false);
 
+  // Buy-box fit reported up by BuyBoxVerdictCard (client-side fetch lives
+  // there), consumed by the Next Action banner so both speak with one
+  // voice. null = no active box / not evaluated.
+  const [buyBoxAnyPass, setBuyBoxAnyPass] = useState<boolean | null>(null);
+
   // What-if slider state. When the user drags rent / rate, this holds
   // the adjusted result; otherwise null and we render the base `result`
   // unchanged. SCOPED: only the 4 Overview tier metric cards consume
@@ -584,6 +589,10 @@ export function AnalysisDashboard({
           netCashFlow: result.netCashFlow,
           dscr: result.dscr ?? null,
           monthlyPayment: result.monthlyPayment ?? null,
+          // Reported up by BuyBoxVerdictCard on this same surface, so the
+          // banner can never say "make your offer" one card above a
+          // "Misses your buy box" verdict (null = no box / not evaluated).
+          meetsBuyBox: buyBoxAnyPass,
         })
       : null;
 
@@ -1267,6 +1276,7 @@ export function AnalysisDashboard({
             state: deriveStateFromAddress(values.address),
             isCashPurchase: result.monthlyPayment <= 0,
           }}
+          onFitChange={setBuyBoxAnyPass}
         />
       ) : null}
 

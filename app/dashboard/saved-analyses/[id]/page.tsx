@@ -24,6 +24,16 @@ import { NextActionBanner } from "@/components/investcalc/next-action-banner";
 import { DealAgingNudge } from "@/components/investcalc/deal-aging-nudge";
 import { nextActionForDeal } from "@/lib/next-action";
 import { recomputeSavedDealVerdict } from "@/lib/recompute-saved-deal-verdict";
+import { listBuyBoxesAction } from "@/app/actions/user-buy-boxes";
+import {
+  buyBoxHasCriteria,
+  deriveStateFromAddress,
+  evaluateBuyBoxes,
+  summarizeBuyBoxFit,
+  type BuyBoxDealMetrics,
+  type BuyBoxFitSummary,
+  type BuyBoxPropertyType,
+} from "@/lib/buy-box";
 import { isPipelineStage, DEFAULT_PIPELINE_STAGE } from "@/lib/pipeline";
 import {
   getDashboardNavAccess,
@@ -78,7 +88,7 @@ export default async function DealWorkspacePage({
   }
   const navAccess = getDashboardNavAccess(entitlements);
 
-  const [{ data: profile }, isPremium, { data: deal }] = await Promise.all([
+  const [{ data: profile }, isPremium, { data: deal }, buyBoxesResult] = await Promise.all([
     supabase
       .from("profiles")
       .select("first_name, last_name, display_name, avatar_url")
@@ -87,11 +97,18 @@ export default async function DealWorkspacePage({
     hasPaidPlanSubscription(supabase, user.id),
     supabase
       .from("saved_analyses")
-      .select("id, address, title, form_snapshot, result_snapshot, net_cash_flow_monthly, pipeline_stage, created_at")
+      .select(
+        "id, address, title, property_type, purchase_price, form_snapshot, result_snapshot, net_cash_flow_monthly, pipeline_stage, created_at"
+      )
       .eq("id", id)
       .eq("user_id", user.id)
       .is("deleted_at", null)
       .maybeSingle(),
+    // Buy-box fit (PV-5): the same RLS-scoped user_buy_boxes read My Deals
+    // uses (listBuyBoxesAction — canUse gate + MIGRATION_PENDING tolerance
+    // built in). Any failure, missing table, or entitlement miss degrades to
+    // "no boxes" → the banner behaves exactly as before. Never crash.
+    listBuyBoxesAction().catch(() => null),
   ]);
 
   // Missing or not owned (the user_id filter makes this an ownership check) →
@@ -104,6 +121,8 @@ export default async function DealWorkspacePage({
     id: string;
     address: string | null;
     title: string | null;
+    property_type: string | null;
+    purchase_price: number | null;
     form_snapshot: unknown;
     result_snapshot: Record<string, unknown> | null;
     net_cash_flow_monthly: number | null;
@@ -127,13 +146,63 @@ export default async function DealWorkspacePage({
     const n = typeof v === "number" ? v : Number(v);
     return Number.isFinite(n) ? n : 0;
   };
+  // null (criterion skipped) — NOT 0 (criterion failed) — for metrics the
+  // legacy snapshot may simply not carry.
+  const numOrNull = (v: unknown): number | null => (v == null ? null : num(v));
   const fresh = recomputeSavedDealVerdict(dealRow.form_snapshot);
+  const netCashFlow = fresh
+    ? fresh.netCashFlowMonthly
+    : num(snap["netCashFlow"] ?? dealRow.net_cash_flow_monthly);
+  const dscr = fresh ? fresh.dscr : snap["dscr"] != null ? num(snap["dscr"]) : null;
+  const monthlyPayment = fresh ? fresh.monthlyPayment : num(snap["monthlyPayment"]);
+
+  // Buy-box fit (PV-5): evaluate the user's active boxes against the SAME
+  // recomputed-with-stored-fallback numbers the banner uses, server-side
+  // (pure, no IO). null when the user has no usable box — the banner and the
+  // personal line then behave exactly as before.
+  const activeBuyBoxes =
+    buyBoxesResult && buyBoxesResult.ok && buyBoxesResult.canUse
+      ? buyBoxesResult.boxes.filter((b) => b.isActive && buyBoxHasCriteria(b))
+      : [];
+  let buyBoxFit: BuyBoxFitSummary | null = null;
+  // The fit's one personal, number-carrying line ("Biggest gap — Cap rate:
+  // 5.2% vs ≥ 6.0% (0.8pp short)") from the box that decides the verdict:
+  // the first passing box on a pass, else the highest-priority active box
+  // (evaluateBuyBoxes returns default-first). Null when no numeric
+  // criterion applied.
+  let buyBoxPersonalLine: string | null = null;
+  if (activeBuyBoxes.length > 0) {
+    const propertyType: BuyBoxPropertyType | null =
+      dealRow.property_type === "single-family" ||
+      dealRow.property_type === "multi-family" ||
+      dealRow.property_type === "owner-occupant"
+        ? dealRow.property_type
+        : null;
+    const metrics: BuyBoxDealMetrics = {
+      capRatePct: fresh ? fresh.capRatePct : numOrNull(snap["capRate"]),
+      cocPct: fresh ? fresh.cocReturnPct : numOrNull(snap["cocReturn"]),
+      dscr,
+      cashFlowMonthly: netCashFlow,
+      purchasePrice: dealRow.purchase_price != null ? num(dealRow.purchase_price) : numOrNull(snap["purchasePrice"]),
+      propertyType,
+      state: deriveStateFromAddress(dealRow.address),
+      // calc-analysis canon: monthlyPayment <= 0 means a cash purchase, so
+      // the DSCR criterion is skipped (N/A), never failed.
+      isCashPurchase: fresh ? fresh.isCashPurchase : monthlyPayment <= 0,
+    };
+    const boxResults = evaluateBuyBoxes(activeBuyBoxes, metrics).filter((r) => r.result.active);
+    if (boxResults.length > 0) {
+      buyBoxFit = summarizeBuyBoxFit(boxResults);
+      const leadResult = boxResults.find((r) => r.result.passes) ?? boxResults[0];
+      buyBoxPersonalLine = leadResult?.result.personalLine ?? null;
+    }
+  }
+
   const nextAction = nextActionForDeal({
-    netCashFlow: fresh
-      ? fresh.netCashFlowMonthly
-      : num(snap["netCashFlow"] ?? dealRow.net_cash_flow_monthly),
-    dscr: fresh ? fresh.dscr : snap["dscr"] != null ? num(snap["dscr"]) : null,
-    monthlyPayment: fresh ? fresh.monthlyPayment : num(snap["monthlyPayment"]),
+    netCashFlow,
+    dscr,
+    monthlyPayment,
+    meetsBuyBox: buyBoxFit ? buyBoxFit.anyPass : null,
     stage: isPipelineStage(dealRow.pipeline_stage) ? dealRow.pipeline_stage : undefined,
   });
 
@@ -168,7 +237,16 @@ export default async function DealWorkspacePage({
             </p>
           </div>
 
-          <NextActionBanner action={nextAction} />
+          <div>
+            <NextActionBanner action={nextAction} />
+            {buyBoxPersonalLine ? (
+              // The one personal line from the user's own buy box — muted,
+              // directly under the advice it contextualizes (PV-5).
+              <p className="mt-1.5 px-1 text-xs text-muted-foreground">
+                Your buy box · {buyBoxPersonalLine}
+              </p>
+            ) : null}
+          </div>
           <DealAgingNudge
             dealId={dealRow.id}
             stage={isPipelineStage(dealRow.pipeline_stage) ? dealRow.pipeline_stage : DEFAULT_PIPELINE_STAGE}

@@ -26,9 +26,16 @@ import { cn } from "@/lib/utils";
 export function BuyBoxVerdictCard({
   enabled,
   metrics,
+  onFitChange,
 }: {
   enabled: boolean;
   metrics: BuyBoxDealMetrics | null;
+  /** Reports the evaluated fit up to the analysis dashboard (true/false =
+   *  evaluated, null = no active box / can't evaluate) so the Next Action
+   *  banner on the SAME surface can honor the buy box — otherwise this
+   *  card could say "Misses your buy box" one card below a banner saying
+   *  "make your offer". */
+  onFitChange?: (anyPass: boolean | null) => void;
 }) {
   const [boxes, setBoxes] = useState<NamedBuyBox[] | null>(null);
   // Mobile-only progressive disclosure for the per-criterion grid — the
@@ -65,6 +72,12 @@ export function BuyBoxVerdictCard({
     if (results.length === 0) return null;
     return { results, summary: summarizeBuyBoxFit(results) };
   }, [boxes, metrics]);
+
+  // Effect (not inline) so the parent isn't set-stated mid-render.
+  const anyPass = evaluated ? evaluated.summary.anyPass : null;
+  useEffect(() => {
+    onFitChange?.(anyPass);
+  }, [anyPass, onFitChange]);
 
   if (!evaluated) return null;
 

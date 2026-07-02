@@ -88,6 +88,7 @@ import { buildAutoVerdict } from "@/lib/verdict";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ScoreBreakdown } from "@/components/investcalc/score-breakdown";
 import { listBuyBoxesAction } from "@/app/actions/user-buy-boxes";
+import { BuyBoxNudge } from "@/components/dashboard/buy-box-nudge";
 import {
   buyBoxHasCriteria,
   deriveStateFromAddress,
@@ -295,19 +296,25 @@ function OwnedEquityCell({ item, enabled }: { item: SavedAnalysisListItem; enabl
 
 /** Compact "Next: <step>" line driven by the verdict-based next-action lib.
  *  Stage-aware: pipeline stage adjusts the step (closed → track equity,
- *  passed → revisit, offer/under contract → renegotiate or keep it moving). */
+ *  passed → revisit, offer/under contract → renegotiate or keep it moving).
+ *  Buy-box-aware: when the caller knows the deal's fit (the same map that
+ *  drives BuyBoxFitBadge), a missing fit flips the step to "Adjust to hit
+ *  your buy box" — so the badge and this line never contradict each other.
+ *  null/omitted = no box set, unchanged behavior. */
 function NextActionLine({
   recommendation,
   netCashFlow,
   stage,
+  meetsBuyBox,
   className,
 }: {
   recommendation: SavedAnalysisListItem["recommendation"];
   netCashFlow: number | null;
   stage?: PipelineStage;
+  meetsBuyBox?: boolean | null;
   className?: string;
 }) {
-  const a = nextActionFromVerdict({ recommendation, netCashFlow: netCashFlow ?? 0, stage });
+  const a = nextActionFromVerdict({ recommendation, netCashFlow: netCashFlow ?? 0, meetsBuyBox, stage });
   const dot =
     a.tone === "blocked"
       ? "bg-[var(--metric-negative)]"
@@ -715,6 +722,11 @@ export function SavedAnalysesPage({
   // dormant for users without an active buy box.
   const [buyBoxes, setBuyBoxes] = useState<NamedBuyBox[] | null>(null);
   const [buyBoxOnly, setBuyBoxOnly] = useState(false);
+  // Discovery nudge (PV-2): the user CAN use buy boxes but has never created
+  // one — surfaced only alongside ≥3 active deals (moment of need), and
+  // dismissible inside BuyBoxNudge (shared localStorage key with the
+  // dashboard's nudge, so dismissing either silences both).
+  const [buyBoxNudgeEligible, setBuyBoxNudgeEligible] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   // Optional decision columns (DSCR, cash to close) - off by default so the
   // default table stays uncrowded; remembered per browser.
@@ -780,8 +792,12 @@ export function SavedAnalysesPage({
         if (cancelled) return;
         if (result.ok && result.canUse) {
           setBuyBoxes(result.boxes.filter((b) => b.isActive && buyBoxHasCriteria(b)));
+          // Zero boxes EVER created (not just zero usable) — a user with an
+          // inactive/empty box already knows the feature exists, so no nudge.
+          setBuyBoxNudgeEligible(result.boxes.length === 0);
         } else {
           setBuyBoxes(null);
+          setBuyBoxNudgeEligible(false);
         }
       })
       .catch((err) => {
@@ -808,6 +824,12 @@ export function SavedAnalysesPage({
   useEffect(() => {
     if (!buyBoxFitById && buyBoxOnly) setBuyBoxOnly(false);
   }, [buyBoxFitById, buyBoxOnly]);
+
+  // PV-2 gate: only nudge users with a real list to screen (≥3 active deals).
+  const activeDealCount = useMemo(
+    () => enrichedItems.reduce((n, item) => (item.status === "active" ? n + 1 : n), 0),
+    [enrichedItems]
+  );
 
   // How many saved deals meet at least one active box — shown on the filter chip.
   const buyBoxMatchCount = useMemo(() => {
@@ -1694,6 +1716,10 @@ export function SavedAnalysesPage({
                 {buyBoxMatchCount}
               </span>
             </button>
+          ) : buyBoxNudgeEligible && activeDealCount >= 3 ? (
+            // Discovery nudge (PV-2) — sits exactly where the screening pill
+            // will appear once a box exists. Dismissal handled inside.
+            <BuyBoxNudge variant="my-deals" eligible />
           ) : null}
 
           <div className="hidden flex-wrap items-center gap-2 xl:flex">
@@ -1859,7 +1885,7 @@ export function SavedAnalysesPage({
                         ) : null}
                       </div>
                       <p className="mt-1 text-xs text-muted-foreground">{getTypeLabel(item.propertyType)}</p>
-                      <NextActionLine recommendation={item.recommendation} netCashFlow={item.netCashFlowMonthly} stage={item.pipelineStage} className="mt-1.5" />
+                      <NextActionLine recommendation={item.recommendation} netCashFlow={item.netCashFlowMonthly} stage={item.pipelineStage} meetsBuyBox={buyBoxFitById?.get(item.id)?.anyPass ?? null} className="mt-1.5" />
                       <OwnedEquityCell item={item} enabled={ownedEquityEnabled} />
                     </div>
                     <input
@@ -2102,7 +2128,7 @@ export function SavedAnalysesPage({
                             <p className="text-xs text-muted-foreground truncate">
                               {getTypeLabel(item.propertyType)}
                             </p>
-                            <NextActionLine recommendation={item.recommendation} netCashFlow={item.netCashFlowMonthly} stage={item.pipelineStage} className="mt-0.5" />
+                            <NextActionLine recommendation={item.recommendation} netCashFlow={item.netCashFlowMonthly} stage={item.pipelineStage} meetsBuyBox={buyBoxFitById?.get(item.id)?.anyPass ?? null} className="mt-0.5" />
                             <OwnedEquityCell item={item} enabled={ownedEquityEnabled} />
                           </div>
                         </div>
