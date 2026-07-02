@@ -24,10 +24,20 @@
  * Math:
  *   - Rent slider in [-15%, +15%], 1% increments.
  *   - Price slider in [-15%, +15%], 1% increments.
+ *   - Rate slider in [-2pp, +2pp], 0.25pp increments (hidden for cash
+ *     purchases, where monthlyPayment <= 0 makes it a no-op).
+ *   - Vacancy slider in [-5pp, +15pp], 1pp increments.
  *   - We clone `values`, multiply every rent input by (1 + rentPct/100)
- *     and the purchase price by (1 + pricePct/100), then call
- *     `calculateAnalysis` to get the adjusted result. Pure compute,
+ *     and the purchase price by (1 + pricePct/100), shift interestRate /
+ *     vacancyPct by their pp deltas (clamped to the schema bounds), then
+ *     call `calculateAnalysis` to get the adjusted result. Pure compute,
  *     no IO, sub-millisecond.
+ *
+ * Worst-case preset:
+ *   One tap composes the coherent downside scenario nobody drags by
+ *   hand: rent −10%, vacancy +5pp, rate +1pp — every value reachable on
+ *   the sliders too (the preset just sets the same state). "Base case"
+ *   resets. On cash purchases the rate leg is skipped (no loan).
  *
  * Accessibility:
  *   - Sliders are native <input type="range"> for keyboard a11y.
@@ -36,7 +46,7 @@
  */
 
 import { useMemo, useState, useCallback, useEffect } from "react";
-import { RotateCcw, Sparkles } from "lucide-react";
+import { CloudRain, RotateCcw, Sparkles } from "lucide-react";
 import { calculateAnalysis, type AnalysisResult } from "@/lib/calc-analysis";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { getDealTier, type DealTier } from "@/lib/verdict";
@@ -51,7 +61,18 @@ export interface WhatIfState {
   /** Current adjustments - exposed for downstream consumers. */
   rentPct: number;
   pricePct: number;
+  /** Interest-rate adjustment in percentage points (0 = actuals). */
+  ratePp: number;
+  /** Vacancy adjustment in percentage points (0 = actuals). */
+  vacancyPp: number;
 }
+
+/**
+ * The one-tap worst-case bundle: rent −10%, vacancy +5pp, rate +1pp.
+ * Every leg matches a slider's domain + step, so the same scenario is
+ * reachable by hand. On cash purchases the rate leg is skipped.
+ */
+export const WORST_CASE_PRESET = { rentPct: -10, vacancyPp: 5, ratePp: 1 } as const;
 
 interface Props {
   values: InvestmentFormValues;
@@ -71,7 +92,9 @@ interface Props {
 export function applyWhatIfAdjustments(
   values: InvestmentFormValues,
   rentPct: number,
-  pricePct: number
+  pricePct: number,
+  ratePp = 0,
+  vacancyPp = 0
 ): InvestmentFormValues {
   const rentMul = 1 + rentPct / 100;
   const priceMul = 1 + pricePct / 100;
@@ -83,10 +106,27 @@ export function applyWhatIfAdjustments(
       typeof values.purchasePrice === "number"
         ? Math.round(values.purchasePrice * priceMul)
         : values.purchasePrice,
+    // pp deltas clamped to the schema bounds (rate 0–30, vacancy 0–50) so a
+    // stressed re-run can never feed calculateAnalysis an out-of-range input.
+    interestRate:
+      ratePp !== 0 && typeof values.interestRate === "number"
+        ? Math.min(30, Math.max(0, Math.round((values.interestRate + ratePp) * 100) / 100))
+        : values.interestRate,
+    vacancyPct:
+      vacancyPp !== 0 && typeof values.vacancyPct === "number"
+        ? Math.min(50, Math.max(0, Math.round((values.vacancyPct + vacancyPp) * 100) / 100))
+        : values.vacancyPct,
   };
   if (next.propertyType === "single-family") {
     if (typeof next.monthlyRent === "number") {
       next.monthlyRent = Math.round(next.monthlyRent * rentMul);
+    }
+    // STR income model: when a nightly rate is set, calc-analysis derives
+    // income from ADR × occupancy and IGNORES monthlyRent — the rent
+    // stress must scale the ADR too, or "rent −10%" is a silent no-op and
+    // the survivability card would claim a stress it never applied.
+    if (typeof next.avgDailyRate === "number" && next.avgDailyRate > 0) {
+      next.avgDailyRate = Math.round(next.avgDailyRate * rentMul * 100) / 100;
     }
   } else if (Array.isArray(next.units)) {
     next.units = next.units.map((u) => ({
@@ -103,13 +143,21 @@ export function applyWhatIfAdjustments(
 export function WhatIfSliders({ values, baseResult, onStateChange }: Props) {
   const [rentPct, setRentPct] = useState(0);
   const [pricePct, setPricePct] = useState(0);
+  const [ratePp, setRatePp] = useState(0);
+  const [vacancyPp, setVacancyPp] = useState(0);
 
-  const isAdjusted = rentPct !== 0 || pricePct !== 0;
+  // Cash purchase: no loan, so a rate adjustment is a no-op
+  // (monthlyPayment <= 0). Hide the rate slider + skip the preset's
+  // rate leg instead of showing a knob that does nothing.
+  const isCashPurchase = baseResult.monthlyPayment <= 0;
+
+  const isAdjusted =
+    rentPct !== 0 || pricePct !== 0 || ratePp !== 0 || vacancyPp !== 0;
 
   const adjustedResult = useMemo<AnalysisResult>(() => {
     if (!isAdjusted) return baseResult;
     try {
-      const adjusted = applyWhatIfAdjustments(values, rentPct, pricePct);
+      const adjusted = applyWhatIfAdjustments(values, rentPct, pricePct, ratePp, vacancyPp);
       return calculateAnalysis(adjusted);
     } catch {
       // calculateAnalysis throws if rent is mis-shaped (e.g. zod-cleaned
@@ -117,7 +165,7 @@ export function WhatIfSliders({ values, baseResult, onStateChange }: Props) {
       // UI never breaks; reset clears the bad state.
       return baseResult;
     }
-  }, [values, baseResult, rentPct, pricePct, isAdjusted]);
+  }, [values, baseResult, rentPct, pricePct, ratePp, vacancyPp, isAdjusted]);
 
   const tier = useMemo(() => getDealTier(adjustedResult), [adjustedResult]);
 
@@ -129,13 +177,35 @@ export function WhatIfSliders({ values, baseResult, onStateChange }: Props) {
       tier,
       rentPct,
       pricePct,
+      ratePp,
+      vacancyPp,
     });
-  }, [adjustedResult, isAdjusted, tier, rentPct, pricePct, onStateChange]);
+  }, [adjustedResult, isAdjusted, tier, rentPct, pricePct, ratePp, vacancyPp, onStateChange]);
 
   const reset = useCallback(() => {
     setRentPct(0);
     setPricePct(0);
+    setRatePp(0);
+    setVacancyPp(0);
   }, []);
+
+  // One-tap coherent downside: sets the SAME state the sliders set — the
+  // metric tiles + survivability card react through the exact same path.
+  // Price is deliberately reset to 0: the bundle stresses operations
+  // (rent, vacancy, rate), and leaving a stale price drag mixed in would
+  // make the scenario irreproducible.
+  const worstCaseRatePp = isCashPurchase ? 0 : WORST_CASE_PRESET.ratePp;
+  const isWorstCase =
+    rentPct === WORST_CASE_PRESET.rentPct &&
+    vacancyPp === WORST_CASE_PRESET.vacancyPp &&
+    ratePp === worstCaseRatePp &&
+    pricePct === 0;
+  const applyWorstCase = useCallback(() => {
+    setRentPct(WORST_CASE_PRESET.rentPct);
+    setVacancyPp(WORST_CASE_PRESET.vacancyPp);
+    setRatePp(isCashPurchase ? 0 : WORST_CASE_PRESET.ratePp);
+    setPricePct(0);
+  }, [isCashPurchase]);
 
   // Screen-reader announcement of the ACTUAL numbers as the user drags - the
   // tier pill alone ("Mixed") hides the dollar values that ARE the answer.
@@ -183,7 +253,7 @@ export function WhatIfSliders({ values, baseResult, onStateChange }: Props) {
         </span>
         {isAdjusted ? (
           <span className="ml-1 inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
-            {formatAdjustmentLabel(rentPct, pricePct)}
+            {formatAdjustmentLabel(rentPct, pricePct, ratePp, vacancyPp)}
           </span>
         ) : null}
         <span className="flex-1" />
@@ -197,6 +267,45 @@ export function WhatIfSliders({ values, baseResult, onStateChange }: Props) {
             <RotateCcw className="size-3" />
             Reset
           </button>
+        ) : null}
+      </div>
+
+      {/* One-tap scenario presets. "Worst case" composes the downside
+          bundle nobody drags by hand; "Base case" returns to actuals. */}
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          onClick={applyWorstCase}
+          aria-pressed={isWorstCase}
+          className={`inline-flex min-h-8 items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-semibold transition-colors ${
+            isWorstCase
+              ? "border-primary bg-primary/10 text-primary"
+              : "border-border bg-background text-foreground/80 hover:bg-muted"
+          }`}
+        >
+          <CloudRain className="size-3.5" aria-hidden />
+          Worst case
+          <span className="font-normal text-muted-foreground">
+            {isCashPurchase ? "rent −10% · vacancy +5pp" : "rent −10% · vacancy +5pp · rate +1pp"}
+          </span>
+        </button>
+        <button
+          type="button"
+          onClick={reset}
+          aria-pressed={!isAdjusted}
+          disabled={!isAdjusted}
+          className={`inline-flex min-h-8 items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-semibold transition-colors ${
+            !isAdjusted
+              ? "border-primary bg-primary/10 text-primary"
+              : "border-border bg-background text-foreground/80 hover:bg-muted"
+          }`}
+        >
+          Base case
+        </button>
+        {isCashPurchase ? (
+          <span className="text-[10px] text-muted-foreground">
+            Cash purchase — no loan, so rate stress is skipped.
+          </span>
         ) : null}
       </div>
 
@@ -223,6 +332,31 @@ export function WhatIfSliders({ values, baseResult, onStateChange }: Props) {
           onChange={setPricePct}
           ariaText={`Purchase price adjusted by ${pricePct >= 0 ? "+" : ""}${pricePct} percent`}
         />
+        {!isCashPurchase ? (
+          <SliderRow
+            label="Interest rate"
+            value={ratePp}
+            unit="pp"
+            min={-2}
+            max={2}
+            step={0.25}
+            decimals={2}
+            showSign
+            onChange={setRatePp}
+            ariaText={`Interest rate adjusted by ${ratePp >= 0 ? "+" : ""}${ratePp} percentage points`}
+          />
+        ) : null}
+        <SliderRow
+          label="Vacancy"
+          value={vacancyPp}
+          unit="pp"
+          min={-5}
+          max={15}
+          step={1}
+          showSign
+          onChange={setVacancyPp}
+          ariaText={`Vacancy adjusted by ${vacancyPp >= 0 ? "+" : ""}${vacancyPp} percentage points`}
+        />
       </div>
 
       <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">
@@ -241,10 +375,19 @@ const TIER_TONE: Record<DealTier, string> = {
   Negative: "bg-rose-600 text-white",
 };
 
-function formatAdjustmentLabel(rentPct: number, pricePct: number): string {
+/** "rent −10% · vacancy +5pp · rate +1pp" style summary of the current
+ *  adjustments. Exported so the survivability card can echo the scenario. */
+export function formatAdjustmentLabel(
+  rentPct: number,
+  pricePct: number,
+  ratePp = 0,
+  vacancyPp = 0
+): string {
   const parts: string[] = [];
   if (rentPct !== 0) parts.push(`rent ${rentPct > 0 ? "+" : ""}${rentPct}%`);
   if (pricePct !== 0) parts.push(`price ${pricePct > 0 ? "+" : ""}${pricePct}%`);
+  if (vacancyPp !== 0) parts.push(`vacancy ${vacancyPp > 0 ? "+" : ""}${vacancyPp}pp`);
+  if (ratePp !== 0) parts.push(`rate ${ratePp > 0 ? "+" : ""}${ratePp}pp`);
   return parts.join(" · ");
 }
 

@@ -28,8 +28,9 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AnalysisResult } from "@/lib/calc-analysis";
 import { setPendingSaveIntent } from "@/lib/save-intent";
-import { WhatIfSliders, type WhatIfState } from "@/components/investcalc/what-if-sliders";
+import { WhatIfSliders, formatAdjustmentLabel, type WhatIfState } from "@/components/investcalc/what-if-sliders";
 import { BreakpointSuggestionCard } from "@/components/investcalc/breakpoint-suggestion-card";
+import { StressSurvivabilityCard } from "@/components/investcalc/stress-survivability-card";
 
 // The three Pro snapshot panels each pull in recharts (~90 KB gzipped
 // combined). They're tab-gated AND Pro-gated - most homepage visitors
@@ -1468,7 +1469,7 @@ export function AnalysisDashboard({
                   Play with the numbers
                 </span>
                 <span className="block text-xs text-muted-foreground">
-                  Drag rent, price &amp; rate to watch the verdict move - live.
+                  Drag the levers - or tap Worst case - and watch the verdict move, live.
                 </span>
               </span>
               <ChevronRight
@@ -1483,6 +1484,23 @@ export function AnalysisDashboard({
                 baseResult={result}
                 onStateChange={setWhatIfState}
               />
+              {/* Survivability readout - renders whenever ANY stress is
+                  active (worst-case preset or a hand-dragged slider) and
+                  answers "does it still cash-flow?" in plain English.
+                  Reads the same deferred state as the metric tiles so the
+                  two can never disagree mid-drag. Free for everyone. */}
+              {deferredWhatIfState?.isAdjusted ? (
+                <StressSurvivabilityCard
+                  base={result}
+                  stressed={deferredWhatIfState.result}
+                  adjustmentLabel={formatAdjustmentLabel(
+                    deferredWhatIfState.rentPct,
+                    deferredWhatIfState.pricePct,
+                    deferredWhatIfState.ratePp,
+                    deferredWhatIfState.vacancyPp
+                  )}
+                />
+              ) : null}
               <BreakpointSuggestionCard values={values} result={result} />
             </div>
           </details>
