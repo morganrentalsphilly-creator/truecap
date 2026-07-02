@@ -156,6 +156,18 @@ export function parseTriageInput(text: string): TriageParseResult {
   return { rows, errors };
 }
 
+/**
+ * Render parsed rows back to the tab-separated block the paste box uses, so
+ * AI-extracted listings drop into the SAME review-then-screen flow as a
+ * hand-paste (round-trips through parseTriageInput). Tab-delimited because an
+ * address can contain commas.
+ */
+export function formatTriageRowsAsText(rows: TriageListingInput[]): string {
+  return rows
+    .map((r) => [r.address, r.purchasePrice, r.monthlyRent ?? "", r.bedrooms ?? ""].join("\t"))
+    .join("\n");
+}
+
 // ── Underwriting one row ─────────────────────────────────────────────────────
 
 /** A loose form snapshot for one listing; the normalizer fills the defaults. */

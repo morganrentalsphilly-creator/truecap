@@ -10,8 +10,8 @@
 
 import { useMemo, useState, useTransition } from "react";
 import Link from "next/link";
-import { ArrowUpRight, ListChecks, Loader2, SlidersHorizontal } from "lucide-react";
-import { screenBatchAction, type BatchTriageResult } from "@/app/actions/batch-triage";
+import { ArrowUpRight, ListChecks, Loader2, SlidersHorizontal, Sparkles } from "lucide-react";
+import { screenBatchAction, extractTriageListingsAction, type BatchTriageResult } from "@/app/actions/batch-triage";
 import {
   MAX_TRIAGE_ROWS,
   rankTriageRows,
@@ -60,10 +60,11 @@ function openUrl(row: TriageRowResult): string {
   );
 }
 
-export function BatchTriageClient() {
+export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }) {
   const { toast } = useToast();
   const [text, setText] = useState("");
   const [pending, startScreening] = useTransition();
+  const [extracting, startExtracting] = useTransition();
   const [result, setResult] = useState<Extract<BatchTriageResult, { ok: true }> | null>(null);
   const [sort, setSort] = useState<TriageSort>("score");
   const [passersOnly, setPassersOnly] = useState(false);
@@ -78,6 +79,29 @@ export function BatchTriageClient() {
       setResult(r);
       setSort(r.sort);
       setPassersOnly(false);
+    });
+  };
+
+  // Paste messy listing text (descriptions, an email) → AI normalizes it into
+  // the structured lines IN PLACE; the user then reviews + hits Screen. Never
+  // auto-screens (extraction can misread).
+  const extract = () => {
+    startExtracting(async () => {
+      const r = await extractTriageListingsAction({ text });
+      if (!r.ok) {
+        toast({ title: "Couldn't extract", description: r.message, variant: "destructive" });
+        return;
+      }
+      if (r.count === 0) {
+        toast({ title: "No listings found", description: "Couldn't spot any property listings in that text." });
+        return;
+      }
+      setText(r.text);
+      toast({
+        title: `Extracted ${r.count} ${r.count === 1 ? "listing" : "listings"}`,
+        description: "Review the rows, then Screen deals.",
+        variant: "success",
+      });
     });
   };
 
@@ -118,19 +142,34 @@ export function BatchTriageClient() {
         aria-label="Listings to screen"
         className="w-full resize-y rounded-xl border border-border bg-card p-3 font-mono text-xs text-foreground shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       />
-      <div className="mt-3 flex items-center justify-between gap-3">
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
         <p className="text-[11px] text-muted-foreground">
-          Tip: paste straight from a spreadsheet — the columns line up automatically.
+          {aiEnabled
+            ? "Tip: paste a listing description or email and hit Auto-extract, or paste columns straight from a spreadsheet."
+            : "Tip: paste straight from a spreadsheet — the columns line up automatically."}
         </p>
-        <button
-          type="button"
-          onClick={screen}
-          disabled={pending || text.trim() === ""}
-          className="inline-flex h-10 shrink-0 items-center gap-2 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-md hover:bg-primary/95 disabled:opacity-60"
-        >
-          {pending ? <Loader2 className="size-4 animate-spin" /> : <ListChecks className="size-4" />}
-          Screen deals
-        </button>
+        <div className="flex items-center gap-2">
+          {aiEnabled ? (
+            <button
+              type="button"
+              onClick={extract}
+              disabled={extracting || pending || text.trim() === ""}
+              className="inline-flex h-10 shrink-0 items-center gap-2 rounded-xl border border-border bg-background px-4 text-sm font-semibold text-foreground hover:bg-muted disabled:opacity-60"
+            >
+              {extracting ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4 text-primary" />}
+              Auto-extract from text
+            </button>
+          ) : null}
+          <button
+            type="button"
+            onClick={screen}
+            disabled={pending || extracting || text.trim() === ""}
+            className="inline-flex h-10 shrink-0 items-center gap-2 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-md hover:bg-primary/95 disabled:opacity-60"
+          >
+            {pending ? <Loader2 className="size-4 animate-spin" /> : <ListChecks className="size-4" />}
+            Screen deals
+          </button>
+        </div>
       </div>
 
       {result ? (

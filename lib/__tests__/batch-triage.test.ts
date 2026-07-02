@@ -4,6 +4,7 @@ import {
   triageListing,
   rankTriageRows,
   buildTriageSnapshot,
+  formatTriageRowsAsText,
   type TriageRowResult,
 } from "@/lib/batch-triage";
 import { EMPTY_BUY_BOX, type NamedBuyBox } from "@/lib/buy-box";
@@ -55,6 +56,16 @@ describe("parseTriageInput", () => {
     const { rows, errors } = parseTriageInput("123 Main Street\t500");
     expect(rows).toEqual([]);
     expect(errors[0]!.reason).toMatch(/purchase price/i);
+  });
+
+  it("formatTriageRowsAsText round-trips through parseTriageInput", () => {
+    const rows = [
+      { address: "1700 W Erie Ave, Philadelphia, PA 19140", purchasePrice: 265000, monthlyRent: 2100, bedrooms: 3 },
+      { address: "456 Oak Ave, Denver, CO", purchasePrice: 420000 },
+    ];
+    const reparsed = parseTriageInput(formatTriageRowsAsText(rows));
+    expect(reparsed.errors).toEqual([]);
+    expect(reparsed.rows).toEqual(rows);
   });
 });
 
