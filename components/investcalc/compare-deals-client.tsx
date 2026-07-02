@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -21,6 +21,17 @@ import {
 } from "lucide-react";
 import { removeCompareDealAction } from "@/app/actions/compare";
 import { updateSavedDealStageAction } from "@/app/actions/saved-analyses";
+import { listBuyBoxesAction } from "@/app/actions/user-buy-boxes";
+import {
+  buyBoxHasCriteria,
+  deriveStateFromAddress,
+  evaluateBuyBoxes,
+  summarizeBuyBoxFit,
+  type BuyBoxDealMetrics,
+  type BuyBoxFitSummary,
+  type NamedBuyBox,
+} from "@/lib/buy-box";
+import { BuyBoxFitBadge } from "@/components/investcalc/buy-box-fit-badge";
 import { useToast } from "@/hooks/use-toast";
 import type { DealAssumptions } from "@/lib/compare-assumptions";
 import type { CompareSnapshotV1 } from "@/lib/compare-result-snapshot";
@@ -1010,6 +1021,62 @@ export function CompareDealsClient({
    *  Deals gates its stage writes. The server action re-enforces it. */
   canUsePipeline?: boolean;
 }) {
+  // Buy-box fit (PV-4) — same listBuyBoxesAction useEffect pattern as My
+  // Deals. Failures / no-boxes / free users leave buyBoxes null, so the
+  // "Your buy box" row group renders nothing (invisible until useful).
+  const [buyBoxes, setBuyBoxes] = useState<NamedBuyBox[] | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    void listBuyBoxesAction()
+      .then((result) => {
+        if (cancelled) return;
+        if (result.ok && result.canUse) {
+          setBuyBoxes(result.boxes.filter((b) => b.isActive && buyBoxHasCriteria(b)));
+        } else {
+          setBuyBoxes(null);
+        }
+      })
+      .catch((err) => {
+        if (!cancelled) console.warn("[compare buy-box] load failed:", err);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Per-deal fit + the one personal, number-carrying line, evaluated with the
+  // shared lib/buy-box primitives against the ALREADY-recomputed compare
+  // metrics (the same numbers every row in this grid shows). The line comes
+  // from the box that decides the verdict: the first passing box on a pass,
+  // else the highest-priority active box (evaluateBuyBoxes is default-first)
+  // — the exact rule the deal workspace uses.
+  const buyBoxFitById = useMemo(() => {
+    if (!buyBoxes || buyBoxes.length === 0) return null;
+    const map = new Map<string, { fit: BuyBoxFitSummary; personalLine: string | null }>();
+    for (const deal of deals) {
+      const metrics: BuyBoxDealMetrics = {
+        capRatePct: deal.metrics.capRate ?? null,
+        cocPct: deal.metrics.cocReturn ?? null,
+        dscr: deal.metrics.dscr ?? null,
+        cashFlowMonthly: deal.metrics.netCashFlow ?? null,
+        purchasePrice: deal.purchasePrice,
+        propertyType: deal.propertyType,
+        state: deriveStateFromAddress(deal.address),
+        // Cash purchases have no debt service → the DSCR criterion is
+        // skipped (N/A), never failed — same canon as the DSCR column.
+        isCashPurchase: isCashPurchaseDeal(deal),
+      };
+      const results = evaluateBuyBoxes(buyBoxes, metrics).filter((r) => r.result.active);
+      if (results.length === 0) continue;
+      const lead = results.find((r) => r.result.passes) ?? results[0];
+      map.set(deal.id, {
+        fit: summarizeBuyBoxFit(results),
+        personalLine: lead?.result.personalLine ?? null,
+      });
+    }
+    return map.size > 0 ? map : null;
+  }, [buyBoxes, deals]);
+
   const shortTermHighlightedWinCounts = getShortTermHighlightedWinCounts(deals);
   const longTermHighlightedWinCounts = getLongTermHighlightedWinCounts(deals);
   const shortTermWinnerIds = getLeaderIdsFromHighlightedCounts(deals, shortTermHighlightedWinCounts);
@@ -1114,6 +1181,48 @@ export function CompareDealsClient({
               shortTermHighlightedWinCounts={shortTermHighlightedWinCounts}
               longTermHighlightedWinCounts={longTermHighlightedWinCounts}
             />
+
+            {/* ── Your buy box (PV-4), mobile — one row per compared deal:
+                numbered chip + Meets/Misses pill + the fit's personal line.
+                Renders nothing without an active box. */}
+            {buyBoxFitById ? (
+              <div className="rounded-3xl border border-border bg-card p-4 shadow-sm">
+                <p className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-muted-foreground">
+                  Your buy box
+                </p>
+                <ul className="mt-3 space-y-3">
+                  {deals.map((deal, index) => {
+                    const entry = buyBoxFitById.get(deal.id);
+                    const color = getMobileDealColor(index);
+                    return (
+                      <li key={deal.id} className="flex items-start gap-2.5">
+                        <span
+                          className={cn(
+                            "mt-0.5 inline-flex size-5 shrink-0 items-center justify-center rounded-full text-[10px] font-extrabold",
+                            color.chip
+                          )}
+                        >
+                          {index + 1}
+                        </span>
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            <span className="text-xs font-extrabold leading-tight text-foreground">
+                              {getShortAddress(deal.address)}
+                            </span>
+                            <BuyBoxFitBadge fit={entry?.fit} />
+                          </div>
+                          {entry?.personalLine ? (
+                            <p className="mt-0.5 text-[11px] leading-snug text-muted-foreground">
+                              {entry.personalLine}
+                            </p>
+                          ) : null}
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            ) : null}
 
             <Accordion type="multiple" defaultValue={["returns"]} className="space-y-3">
               {mobileSections.map((section) => {
@@ -1443,6 +1552,50 @@ export function CompareDealsClient({
           </div>
 
           <div className="hidden space-y-4 xl:block">
+            {/* ── Your buy box (PV-4) — the personal row group: per deal a
+                Meets/Misses pill (the shared My Deals badge) + the fit's one
+                number-carrying line ("Biggest gap — Cap rate: 5.2% vs ≥ 6.0%
+                (0.8pp short)"). Evaluated from the same recomputed metrics as
+                every other row; renders nothing without an active box. */}
+            {buyBoxFitById ? (
+              <section className="space-y-1.5">
+                <div className="grid grid-cols-4">
+                  <h3 className="col-span-4 px-1 text-xs font-extrabold tracking-[0.24em] text-muted-foreground">
+                    YOUR BUY BOX
+                  </h3>
+                </div>
+                <div className="grid grid-cols-4 gap-x-1">
+                  {desktopSlots.map((deal, index) => {
+                    const entry = deal ? buyBoxFitById.get(deal.id) : undefined;
+                    return (
+                      <div
+                        key={`${deal?.id ?? "empty"}-buy-box-${index}`}
+                        className="flex min-h-8 flex-col justify-center gap-1 rounded-2xl bg-card/45 px-4 py-2 text-sm"
+                      >
+                        {deal && entry ? (
+                          <>
+                            <BuyBoxFitBadge fit={entry.fit} />
+                            {entry.personalLine ? (
+                              <p className="text-[11px] leading-snug text-muted-foreground">
+                                {entry.personalLine}
+                              </p>
+                            ) : null}
+                          </>
+                        ) : deal ? (
+                          // A deal none of the boxes' criteria could read
+                          // (all checks N/A) — rare, but never a blank cell.
+                          <span className="text-xs font-semibold text-muted-foreground/70">
+                            No criteria apply
+                          </span>
+                        ) : (
+                          <span className="font-semibold text-muted-foreground/70">—</span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+            ) : null}
             {(["RETURNS", "RISK", "DEAL"] as const).map((group) => (
               <section key={group} className="space-y-1.5">
                 <div className="grid grid-cols-4">

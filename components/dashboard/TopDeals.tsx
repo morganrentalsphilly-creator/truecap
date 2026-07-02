@@ -6,6 +6,8 @@ import { Building2, Home, KeyRound } from "lucide-react";
 import { recommendationLabel, type DealScoreBreakdown } from "@/lib/deal-score";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ScoreBreakdown } from "@/components/investcalc/score-breakdown";
+import { BuyBoxFitBadge } from "@/components/investcalc/buy-box-fit-badge";
+import type { BuyBoxFitSummary } from "@/lib/buy-box";
 
 export type DashboardTopDeal = {
   id?: string;
@@ -23,6 +25,9 @@ export type DashboardTopDeal = {
   /** Per-factor score breakdown for the "Why this score" popover. */
   breakdown?: DealScoreBreakdown | null;
   tags?: string[];
+  /** Buy-box fit (PV-6) — null/undefined for users without an active box, so
+   *  the badge and the Fit sort stay invisible for them. */
+  fit?: BuyBoxFitSummary | null;
 };
 
 const typeIcon: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -63,6 +68,9 @@ const sortOptions = [
   { id: "score", label: "Score" },
   { id: "roi", label: "ROI" },
   { id: "cashFlow", label: "CF" },
+  // Buy-box fit (PV-6) — the option only renders when ≥1 deal actually
+  // carries a fit (i.e. the user has an active box); see visibleSortOptions.
+  { id: "fit", label: "Fit" },
 ] as const;
 
 type SortMetric = (typeof sortOptions)[number]["id"];
@@ -84,10 +92,27 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
   // Score-ring track + no-risk arc color (SVG strokes can't use var()). The
   // dashboard is always light, so this is the fixed light-mode track.
   const ringTrack = "oklch(0.92 0.012 255)";
+  // Fit sort exists only for users with an active buy box — everyone else
+  // keeps the exact Score/ROI/CF control (invisible until useful).
+  const hasBuyBoxFit = data.some((deal) => deal.fit != null && deal.fit.activeCount > 0);
+  const visibleSortOptions = hasBuyBoxFit
+    ? sortOptions
+    : sortOptions.filter((option) => option.id !== "fit");
   const sortedData = useMemo(() => {
     return data
       .map((deal, index) => ({ deal, index }))
       .sort((a, b) => {
+        // Fit sort (PV-6): passing deals first, then generic score, then the
+        // stable server order — equal-fit deals never reshuffle.
+        if (sortBy === "fit") {
+          const aPass = a.deal.fit?.anyPass ? 1 : 0;
+          const bPass = b.deal.fit?.anyPass ? 1 : 0;
+          if (aPass !== bPass) return bPass - aPass;
+          const aScore = a.deal.score ?? Number.NEGATIVE_INFINITY;
+          const bScore = b.deal.score ?? Number.NEGATIVE_INFINITY;
+          if (aScore !== bScore) return bScore - aScore;
+          return a.index - b.index;
+        }
         const aValue = getSortValue(a.deal, sortBy) ?? Number.NEGATIVE_INFINITY;
         const bValue = getSortValue(b.deal, sortBy) ?? Number.NEGATIVE_INFINITY;
         if (aValue !== bValue) return bValue - aValue;
@@ -105,7 +130,7 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <div role="group" aria-label="Sort deals by" className="flex items-center gap-1 p-1 rounded-lg bg-muted">
-            {sortOptions.map((option) => (
+            {visibleSortOptions.map((option) => (
               <button
                 key={option.id}
                 type="button"
@@ -199,6 +224,9 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
                 {d.signal ? (
                   <span className={`text-[11px] font-semibold px-2 py-1 rounded-md ring-1 ${signalStyle[d.signal] ?? "bg-muted text-muted-foreground ring-border"}`}>{recommendationLabel(d.signal)}</span>
                 ) : null}
+                {/* Buy-box fit (PV-6) — the shared My Deals pill; renders
+                    nothing for users without an active box. */}
+                <BuyBoxFitBadge fit={d.fit ?? undefined} />
                 {d.breakdown && d.score != null ? (
                   <Popover>
                     <PopoverTrigger asChild>
@@ -307,23 +335,28 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
                     )}
                   </td>
                   <td className="px-6 py-4 text-right">
-                    {d.signal ? (
-                      <span className="inline-flex items-center justify-end gap-1.5">
-                        <span className={`text-[11px] font-semibold px-2 py-1 rounded-md ring-1 ${signalStyle[d.signal] ?? "bg-muted text-muted-foreground ring-border"}`}>{recommendationLabel(d.signal)}</span>
-                        {d.breakdown && d.score != null ? (
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <button type="button" className="text-[11px] font-semibold text-primary underline-offset-2 hover:underline">Why?</button>
-                            </PopoverTrigger>
-                            <PopoverContent align="end" className="w-auto p-3">
-                              <ScoreBreakdown breakdown={d.breakdown} score={d.score} />
-                            </PopoverContent>
-                          </Popover>
-                        ) : null}
-                      </span>
-                    ) : (
-                      <span className="text-muted-foreground">-</span>
-                    )}
+                    <span className="inline-flex flex-wrap items-center justify-end gap-1.5">
+                      {/* Buy-box fit (PV-6) — the shared My Deals pill;
+                          renders nothing for users without an active box. */}
+                      <BuyBoxFitBadge fit={d.fit ?? undefined} />
+                      {d.signal ? (
+                        <span className="inline-flex items-center justify-end gap-1.5">
+                          <span className={`text-[11px] font-semibold px-2 py-1 rounded-md ring-1 ${signalStyle[d.signal] ?? "bg-muted text-muted-foreground ring-border"}`}>{recommendationLabel(d.signal)}</span>
+                          {d.breakdown && d.score != null ? (
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <button type="button" className="text-[11px] font-semibold text-primary underline-offset-2 hover:underline">Why?</button>
+                              </PopoverTrigger>
+                              <PopoverContent align="end" className="w-auto p-3">
+                                <ScoreBreakdown breakdown={d.breakdown} score={d.score} />
+                              </PopoverContent>
+                            </Popover>
+                          ) : null}
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground">-</span>
+                      )}
+                    </span>
                   </td>
                 </tr>
               );

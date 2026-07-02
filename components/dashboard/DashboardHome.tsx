@@ -13,6 +13,7 @@ import {
   Layers,
   Percent,
   Plus,
+  Target,
   TrendingUp,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -52,6 +53,7 @@ import type { RateWatchSummary } from "@/lib/rate-watch";
 import { DueThisWeekCard, type DueThisWeekDeal } from "@/components/dashboard/due-this-week-card";
 import { BuyBoxNudge } from "@/components/dashboard/buy-box-nudge";
 import type { OwnedEquitySeriesPoint } from "@/lib/owned-equity-series";
+import type { BuyBoxFitSummary } from "@/lib/buy-box";
 
 export type DashboardHomeData = {
   user: {
@@ -128,6 +130,26 @@ export type DashboardHomeData = {
      *  dates" CTA would dead-end on a page whose date editor is hidden. */
     equityEnabled: boolean;
   } | null;
+  /**
+   * Buy-box fit over the ACTIVE deals, server-evaluated (PV-1/PV-6) with the
+   * same lib/buy-box primitives My Deals uses. Unset when the user has no
+   * active box (or the migration is pending / the read failed) — every
+   * consuming surface (header subtitle, Decision Center tile, Deal Decision
+   * List badges + Fit sort) then renders nothing, the same
+   * invisible-until-useful contract as My Deals.
+   */
+  buyBox?: {
+    activeBoxCount: number;
+    /** Evaluated deals that pass ≥1 active box. */
+    passingCount: number;
+    /** How many active deals were evaluated (allDeals, capped at 20). */
+    evaluatedCount: number;
+    /** True when the evaluated set is the FULL active set — the "X of your N
+     *  deals" headline and tile only render when this holds, so a 21+-deal
+     *  user never sees a count computed over a recency sample. */
+    complete: boolean;
+    fitByDealId: Record<string, BuyBoxFitSummary>;
+  } | null;
 };
 
 function formatCurrency(value: number | null | undefined, compact = false): string {
@@ -172,6 +194,9 @@ function getTopDeals(data: DashboardHomeData): DashboardTopDeal[] {
       riskLevel: deal.riskLevel,
       breakdown: deal.breakdown,
       tags: deal.tags,
+      // Buy-box fit (PV-6) — undefined for users without an active box, so
+      // the badge and the Fit sort stay invisible for them.
+      fit: data.buyBox?.fitByDealId[deal.id] ?? null,
     }));
 }
 
@@ -562,6 +587,12 @@ export function DashboardHome({
   const hasArchivedOrCompleted = savedTotalCount > portfolio.totalCount;
   const owned = data.ownedPortfolio ?? null;
   const ownedCount = owned?.count ?? 0;
+  // Buy-box awareness (PV-1): headline + Decision Center tile only when the
+  // user has ≥1 active box AND the server evaluated the FULL active set AND
+  // there are ≥2 active deals — the FFM-2 gate (CONFLICT #8): a 1-deal user
+  // gets the honest nudge card, not a fourth tile crowning a set of one.
+  const buyBoxSummary =
+    data.buyBox && data.buyBox.complete && data.allDeals.length >= 2 ? data.buyBox : null;
   // FALSE-HEADER FIX (M3-1): "No saved deals yet" was factually wrong for a
   // customer whose deals all CLOSED (savedTotalCount > 0, active = 0) — the
   // product's success case. Owners get their portfolio as the headline;
@@ -578,9 +609,13 @@ export function DashboardHome({
           // so it must not assert "archived" as fact.
           `No active deals — your ${savedTotalCount} saved ${savedTotalCount === 1 ? "deal is" : "deals are"} closed or archived. Analyze a new property to restart your pipeline.`
         : "No saved deals yet. Run your first analysis to see it appear here."
-    : hasArchivedOrCompleted
-      ? `Active pipeline: ${portfolio.totalCount} of ${savedTotalCount} saved ${savedTotalCount === 1 ? "deal" : "deals"}.`
-      : `Your book at a glance — ${portfolio.totalCount} active ${portfolio.totalCount === 1 ? "deal" : "deals"}.`;
+    : buyBoxSummary
+      ? // PV-1: the month-3 question is "do any of MY deals meet MY criteria
+        // yet?" — answer it in the headline for configured users.
+        `${buyBoxSummary.passingCount} of your ${buyBoxSummary.evaluatedCount} active deals ${buyBoxSummary.passingCount === 1 ? "meets" : "meet"} your buy box.`
+      : hasArchivedOrCompleted
+        ? `Active pipeline: ${portfolio.totalCount} of ${savedTotalCount} saved ${savedTotalCount === 1 ? "deal" : "deals"}.`
+        : `Your book at a glance — ${portfolio.totalCount} active ${portfolio.totalCount === 1 ? "deal" : "deals"}.`;
 
   // SCROLL CONTRACT (natural scroll, Jun 2026): the dashboard scrolls the
   // PAGE/body naturally — NOT a viewport-locked inner pane. The shell is a
@@ -678,8 +713,15 @@ export function DashboardHome({
             </div>
             {/* Horizontal snap rail below sm — three stacked full-width
                 tiles made the "band" a full screen tall at 375px
-                (mobile density audit DH-3). Grid from sm: as before. */}
-            <div className="mt-3 flex snap-x snap-mandatory gap-3 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:grid sm:grid-cols-3 sm:overflow-visible sm:pb-0 [&>*]:min-w-[72%] [&>*]:snap-start sm:[&>*]:min-w-0">
+                (mobile density audit DH-3). Grid from sm: as before; when the
+                buy-box tile (PV-1) joins, 2×2 at sm and one row of 4 at xl so
+                the fourth tile never orphans onto its own row. */}
+            <div
+              className={cn(
+                "mt-3 flex snap-x snap-mandatory gap-3 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:grid sm:overflow-visible sm:pb-0 [&>*]:min-w-[72%] [&>*]:snap-start sm:[&>*]:min-w-0",
+                buyBoxSummary ? "sm:grid-cols-2 xl:grid-cols-4" : "sm:grid-cols-3"
+              )}
+            >
               <div className="rounded-xl border border-success/30 bg-success/5 p-3">
                 <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-success">
                   <Award className="h-3.5 w-3.5" /> Best deal
@@ -726,6 +768,37 @@ export function DashboardHome({
                     : "Run a 10-yr projection"}
                 </div>
               </div>
+              {/* PV-1: the personal tile — how many active deals pass the
+                  user's own criteria, deep-linking to My Deals pre-filtered
+                  to the fits (?buyBox=1 seeds the existing buyBoxOnly
+                  filter). Only for users with ≥1 active box AND ≥2 deals
+                  (CONFLICT #8) — everyone else keeps the 3-tile band. */}
+              {buyBoxSummary ? (
+                <Link
+                  // 0 passing + the fit filter = an empty list with no
+                  // explanation; land unfiltered instead so the per-deal
+                  // "Misses buy box" badges show the gaps.
+                  href={
+                    buyBoxSummary.passingCount > 0
+                      ? "/dashboard/saved-analyses?buyBox=1"
+                      : "/dashboard/saved-analyses"
+                  }
+                  prefetch={false}
+                  className="rounded-xl border border-[var(--brand-green)]/30 bg-[var(--brand-green-light)]/50 p-3 transition hover:bg-[var(--brand-green-light)]"
+                >
+                  <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-[var(--brand-green)]">
+                    <Target className="h-3.5 w-3.5" /> Meets your buy box
+                  </div>
+                  <div className="mt-1 truncate text-sm font-bold text-foreground">
+                    {buyBoxSummary.passingCount} of {buyBoxSummary.evaluatedCount} deals
+                  </div>
+                  <div className="truncate text-xs text-muted-foreground">
+                    {buyBoxSummary.passingCount > 0
+                      ? "See the deals that pass →"
+                      : "None pass yet — see the gaps →"}
+                  </div>
+                </Link>
+              ) : null}
             </div>
           </section>
         ) : null}

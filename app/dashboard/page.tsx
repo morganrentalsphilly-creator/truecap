@@ -32,6 +32,15 @@ import {
   resolveOwnedEquityBasis,
   type OwnedDealEquityBasis,
 } from "@/lib/owned-equity-series";
+import { listBuyBoxesAction } from "@/app/actions/user-buy-boxes";
+import {
+  buyBoxHasCriteria,
+  deriveStateFromAddress,
+  evaluateBuyBoxes,
+  summarizeBuyBoxFit,
+  type BuyBoxDealMetrics,
+  type BuyBoxFitSummary,
+} from "@/lib/buy-box";
 
 const DASHBOARD_ACTIVE_DEALS_LIMIT = 20;
 
@@ -114,6 +123,11 @@ function buildDashboardData(
           // Deals list (which already uses fresh.dscr/cashToClose). Carry them.
           dscr: fresh.dscr,
           cashToClose: fresh.cashToClose,
+          // monthlyPayment feeds the buy-box fit loop's cash-purchase
+          // derivation (monthlyPayment <= 0) — stale snapshots missing it
+          // made the SAME deal pass here but miss on My Deals (which uses
+          // the recompute's isCashPurchase). One canon.
+          monthlyPayment: fresh.monthlyPayment,
           roiPct: typeof freshRoi === "number" ? freshRoi : deal.roiPct,
         }
       : deal;
@@ -160,7 +174,7 @@ export default async function DashboardPage() {
   // have passed — run them in ONE round-trip wave instead of two
   // sequential awaits (the deals query previously waited for the
   // profile/count/premium wave to finish for no reason).
-  const [{ data: profile }, isPremium, dealsResult, aggregateResult, currentRate, savedTotalCount, dueDiligenceResult, ownedResult] = await Promise.all([
+  const [{ data: profile }, isPremium, dealsResult, aggregateResult, currentRate, savedTotalCount, dueDiligenceResult, ownedResult, buyBoxesResult] = await Promise.all([
     supabase
       .from("profiles")
       .select("first_name, last_name, display_name, avatar_url")
@@ -231,6 +245,11 @@ export default async function DashboardPage() {
       .eq("user_id", user.id)
       .is("deleted_at", null)
       .eq("is_completed", true),
+    // Buy boxes (PV-1/PV-6): the same RLS-scoped user_buy_boxes read My Deals
+    // and the deal workspace use (listBuyBoxesAction — canUse gate +
+    // MIGRATION_PENDING tolerance built in). Any failure degrades to "no
+    // boxes" → every buy-box surface on the home page renders nothing.
+    listBuyBoxesAction().catch(() => null),
   ]);
 
   const profileRow = (profile as ProfileRow | null) ?? null;
@@ -343,6 +362,71 @@ export default async function DashboardPage() {
   // True saved total (matches the sidebar "My Deals" badge) so the header
   // can distinguish active deals from the full saved set.
   dashboardData.savedTotalCount = savedTotalCount;
+
+  // ── Buy-box fit (PV-1 / PV-6) ─────────────────────────────────────────
+  // Evaluate every ACTIVE deal against the user's active boxes server-side —
+  // the exact My Deals pattern (evaluateBuyBoxes/summarizeBuyBoxFit, pure, no
+  // extra IO) over fields DashboardDeal already carries. Powers the header
+  // subtitle, the Decision Center tile, and the Deal Decision List badges/
+  // sort. Users without a usable box get `buyBox` unset → every consuming
+  // surface renders nothing (invisible until useful).
+  const activeBuyBoxes =
+    buyBoxesResult && buyBoxesResult.ok && buyBoxesResult.canUse
+      ? buyBoxesResult.boxes.filter((b) => b.isActive && buyBoxHasCriteria(b))
+      : [];
+  if (activeBuyBoxes.length > 0 && dashboardData.allDeals.length > 0) {
+    const fitByDealId: Record<string, BuyBoxFitSummary> = {};
+    let passingCount = 0;
+    for (const deal of dashboardData.allDeals) {
+      const metrics: BuyBoxDealMetrics = {
+        capRatePct: deal.capRatePct,
+        cocPct: deal.cocReturnPct,
+        dscr: deal.dscr,
+        cashFlowMonthly: deal.cashFlowMonthly,
+        purchasePrice: deal.purchasePrice,
+        propertyType: deal.propertyType,
+        state: deriveStateFromAddress(deal.address),
+        // calc-analysis canon: monthlyPayment <= 0 means a cash purchase, so
+        // the DSCR criterion is skipped (N/A), never failed — same derivation
+        // as getRiskReturn / getPortfolioKpis.
+        isCashPurchase: deal.monthlyPayment != null && deal.monthlyPayment <= 0,
+      };
+      const results = evaluateBuyBoxes(activeBuyBoxes, metrics).filter((r) => r.result.active);
+      if (results.length === 0) continue;
+      const summary = summarizeBuyBoxFit(results);
+      fitByDealId[deal.id] = summary;
+      if (summary.anyPass) passingCount += 1;
+    }
+    if (Object.keys(fitByDealId).length > 0) {
+      dashboardData.buyBox = {
+        activeBoxCount: activeBuyBoxes.length,
+        passingCount,
+        evaluatedCount: dashboardData.allDeals.length,
+        // The detailed query is capped at DASHBOARD_ACTIVE_DEALS_LIMIT; the
+        // "X of your N deals" headline/tile only render when the evaluated
+        // set IS the full active set (under the cap, or the unbounded
+        // aggregate query confirms nothing was left out). Per-deal badges
+        // and the Fit sort stay correct on the sample either way.
+        complete:
+          (rows ?? []).length < DASHBOARD_ACTIVE_DEALS_LIMIT ||
+          (fullActiveRows != null && fullActiveRows.length <= dashboardData.allDeals.length),
+        fitByDealId,
+      };
+      // PV-6: stable-boost passing deals into the top-6 slice so a deal that
+      // meets the user's box but ranks #7 by generic score is never invisible
+      // on the home page. Array.prototype.sort is stable, so equal-fit deals
+      // keep their existing score-then-cash-flow order (allDeals is already
+      // sorted by that comparator above).
+      if (passingCount > 0) {
+        dashboardData.topDeals = [...dashboardData.allDeals]
+          .sort(
+            (a, b) =>
+              (fitByDealId[b.id]?.anyPass ? 1 : 0) - (fitByDealId[a.id]?.anyPass ? 1 : 0)
+          )
+          .slice(0, 6);
+      }
+    }
+  }
   // Due-diligence deadlines for the "Due this week" card. Shape the RLS-scoped
   // query result into { id, address, items } per active deal; the client card
   // statuses each item in the viewer's local time and self-hides when nothing

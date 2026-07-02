@@ -88,6 +88,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { ScoreBreakdown } from "@/components/investcalc/score-breakdown";
 import { listBuyBoxesAction } from "@/app/actions/user-buy-boxes";
 import { BuyBoxNudge } from "@/components/dashboard/buy-box-nudge";
+import { BuyBoxFitBadge } from "@/components/investcalc/buy-box-fit-badge";
 import {
   buyBoxHasCriteria,
   deriveStateFromAddress,
@@ -171,30 +172,6 @@ function toBuyBoxMetrics(item: SavedAnalysisListItem): BuyBoxDealMetrics {
     // criterion applied rather than silently skipped.
     isCashPurchase: item.isCashPurchase ?? false,
   };
-}
-
-/** Per-row "fit vs your buy box(es)" pill. Renders nothing unless ≥1 active
- *  box applied to this deal — keeps the list clean for box-less users. */
-function BuyBoxFitBadge({ fit }: { fit: BuyBoxFitSummary | undefined }) {
-  if (!fit || fit.activeCount === 0) return null;
-  const label = fit.anyPass
-    ? fit.activeCount > 1
-      ? `Buy box ${fit.passingCount}/${fit.activeCount}`
-      : "Meets buy box"
-    : "Misses buy box";
-  return (
-    <Badge
-      className={cn(
-        "gap-1 rounded-full border text-xs font-semibold",
-        fit.anyPass
-          ? "border-[var(--brand-green)]/30 bg-[var(--brand-green-light)] text-[var(--brand-green)]"
-          : "border-amber-300 bg-amber-50 text-amber-700"
-      )}
-    >
-      <Target className="size-3" />
-      {label}
-    </Badge>
-  );
 }
 
 function fmtMoney0(n: number): string {
@@ -739,9 +716,14 @@ export function SavedAnalysesPage({
   const [selectedType, setSelectedType] = useState<"all" | SavedPropertyType>("all");
   // Buy-box screening: the user's active boxes (null until loaded / none) and a
   // "only deals that meet a box" filter. Invisible-until-useful — both stay
-  // dormant for users without an active buy box.
+  // dormant for users without an active buy box. `?buyBox=1` seeds the filter
+  // ON so the dashboard's "Meets your buy box" tile (PV-1) lands here already
+  // filtered; after that the toggle stays local state exactly as before.
   const [buyBoxes, setBuyBoxes] = useState<NamedBuyBox[] | null>(null);
-  const [buyBoxOnly, setBuyBoxOnly] = useState(false);
+  // Distinguishes "boxes not fetched yet" from "fetched, none usable" so the
+  // reset effect below can't clear a URL-seeded filter before the load lands.
+  const [buyBoxesLoaded, setBuyBoxesLoaded] = useState(false);
+  const [buyBoxOnly, setBuyBoxOnly] = useState(() => searchParams.get("buyBox") === "1");
   // Discovery nudge (PV-2): the user CAN use buy boxes but has never created
   // one — surfaced only alongside ≥3 active deals (moment of need), and
   // dismissible inside BuyBoxNudge (shared localStorage key with the
@@ -819,9 +801,15 @@ export function SavedAnalysesPage({
           setBuyBoxes(null);
           setBuyBoxNudgeEligible(false);
         }
+        setBuyBoxesLoaded(true);
       })
       .catch((err) => {
-        if (!cancelled) console.warn("[saved-analyses buy-box] load failed:", err);
+        // Bail only on CANCELLED runs (unmount/StrictMode remount) — a real
+        // failure on the live component must log + mark loaded, or the
+        // URL-seeded ?buyBox=1 filter gets cleared by the reset effect.
+        if (cancelled) return;
+        console.warn("[saved-analyses buy-box] load failed:", err);
+        setBuyBoxesLoaded(true);
       });
     return () => {
       cancelled = true;
@@ -840,10 +828,13 @@ export function SavedAnalysesPage({
     return map.size > 0 ? map : null;
   }, [buyBoxes, enrichedItems]);
 
-  // If the filter is on but the boxes go away (deleted in another tab), drop it.
+  // If the filter is on but the boxes go away (deleted in another tab) or the
+  // user arrived via ?buyBox=1 without a usable box, drop it — but only AFTER
+  // the load resolves, or the URL-seeded filter would be cleared while the
+  // boxes are still in flight.
   useEffect(() => {
-    if (!buyBoxFitById && buyBoxOnly) setBuyBoxOnly(false);
-  }, [buyBoxFitById, buyBoxOnly]);
+    if (buyBoxesLoaded && !buyBoxFitById && buyBoxOnly) setBuyBoxOnly(false);
+  }, [buyBoxesLoaded, buyBoxFitById, buyBoxOnly]);
 
   // PV-2 gate: only nudge users with a real list to screen (≥3 active deals).
   const activeDealCount = useMemo(
@@ -882,7 +873,9 @@ export function SavedAnalysesPage({
         const matchesSignal = selectedSignal === "all" ? true : item.signal === selectedSignal;
         const matchesType = selectedType === "all" ? true : item.propertyType === selectedType;
         const matchshowcompare = showcompare ? selectedIds.includes(item.id) : true;
-        const matchesBuyBox = !buyBoxOnly || (buyBoxFitById?.get(item.id)?.anyPass ?? false);
+        // No-op until the fit map exists so a URL-seeded filter (?buyBox=1)
+        // never blanks the list while the boxes are still loading.
+        const matchesBuyBox = !buyBoxOnly || !buyBoxFitById || (buyBoxFitById.get(item.id)?.anyPass ?? false);
         return matchesSearch && matchesSignal && matchesType && matchshowcompare && matchesBuyBox;
       }),
     [enrichedItems, searchQuery, selectedSignal, selectedType, selectedIds, showcompare, buyBoxOnly, buyBoxFitById]
