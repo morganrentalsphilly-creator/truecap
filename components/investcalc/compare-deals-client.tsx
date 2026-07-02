@@ -1,8 +1,11 @@
 "use client";
 
+import { useState, useTransition } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
+  ArrowUpRight,
   BarChart3,
   Building2,
   CalendarDays,
@@ -17,6 +20,8 @@ import {
   X,
 } from "lucide-react";
 import { removeCompareDealAction } from "@/app/actions/compare";
+import { updateSavedDealStageAction } from "@/app/actions/saved-analyses";
+import { useToast } from "@/hooks/use-toast";
 import type { DealAssumptions } from "@/lib/compare-assumptions";
 import type { CompareSnapshotV1 } from "@/lib/compare-result-snapshot";
 import {
@@ -559,6 +564,120 @@ function getBestDealIdByWins(
   }).id;
 }
 
+/**
+ * DEC-3 guard: winning the most metrics in a weak set is not a buy signal.
+ * A "best" deal that is avoid/risky or cash-flow negative gets "best of this
+ * set" framing instead of the unconditional crown.
+ */
+function doesBestDealClearBar(deal: CompareDealViewModel | null): boolean {
+  if (!deal) return false;
+  if (deal.signal === "avoid" || deal.signal === "risky") return false;
+  const netCashFlow = deal.metrics.netCashFlow;
+  if (netCashFlow != null && netCashFlow < 0) return false;
+  return true;
+}
+
+/**
+ * DEC-3: Compare ends in an action. Rendered on the winner card — open its
+ * workspace, and one tap to mark the losers Passed. The bulk stage write is
+ * confirm-first (never silent), reuses updateSavedDealStageAction (which
+ * enforces the "pipeline" entitlement server-side), and only mounts when the
+ * page says the user holds that entitlement — the same gate every other
+ * stage write respects. Per-deal failures surface as toasts, never throws.
+ */
+function WinnerActions({
+  winner,
+  others,
+  canUsePipeline,
+}: {
+  winner: CompareDealViewModel;
+  others: CompareDealViewModel[];
+  canUsePipeline: boolean;
+}) {
+  const router = useRouter();
+  const { toast } = useToast();
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [isPassing, startPassing] = useTransition();
+
+  const markOthersPassed = () => {
+    setConfirmOpen(false);
+    startPassing(async () => {
+      const results = await Promise.all(
+        others.map(async (deal) => ({
+          deal,
+          result: await updateSavedDealStageAction(deal.id, "passed"),
+        }))
+      );
+      const failures = results.filter(({ result }) => !result.ok);
+      const passedCount = results.length - failures.length;
+      if (passedCount > 0) {
+        toast({
+          title: `Marked ${passedCount} deal${passedCount === 1 ? "" : "s"} as Passed`,
+          description: "They leave this comparison — find them under Passed in My Deals.",
+          variant: "success",
+        });
+      }
+      for (const { deal, result } of failures) {
+        if (result.ok) continue;
+        toast({
+          title: `Could not mark ${getShortAddress(deal.address)} as Passed`,
+          description: result.message,
+          variant: "destructive",
+        });
+      }
+      // Passed deals drop out of the active compare set on refresh; the
+      // winner stays, ready to open.
+      router.refresh();
+    });
+  };
+
+  return (
+    <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-border/70 pt-3">
+      <Button asChild size="sm" className="rounded-full">
+        <Link href={`/dashboard/saved-analyses/${winner.id}`}>
+          Open this deal
+          <ArrowUpRight className="ml-1 size-3.5" />
+        </Link>
+      </Button>
+      {canUsePipeline && others.length > 0 ? (
+        <Popover open={confirmOpen} onOpenChange={setConfirmOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="rounded-full"
+              disabled={isPassing}
+            >
+              {isPassing
+                ? "Marking…"
+                : `Mark the other${others.length === 1 ? "" : "s"} as Passed`}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent align="start" className="w-72">
+            <p className="text-sm font-semibold text-foreground">
+              Mark {others.length === 1 ? "1 deal" : `${others.length} deals`} as Passed?
+            </p>
+            <p className="mt-1 text-xs leading-snug text-muted-foreground">
+              {others.map((deal) => getShortAddress(deal.address)).join(", ")} will move to the
+              Passed stage and drop out of this comparison. You can restage them from My Deals
+              anytime.
+            </p>
+            <div className="mt-3 flex justify-end gap-2">
+              <Button type="button" variant="ghost" size="sm" onClick={() => setConfirmOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="button" size="sm" onClick={markOthersPassed}>
+                Mark as Passed
+              </Button>
+            </div>
+          </PopoverContent>
+        </Popover>
+      ) : null}
+    </div>
+  );
+}
+
 function formatLongTermCell(row: LongTermMetricRow, value: number | null): string {
   if (value == null) return "-";
   if (row.kind === "currency") return formatCurrency(value, row.direction === "higher");
@@ -794,12 +913,18 @@ function CompareMobileDealStrip({ deals }: { deals: CompareDealViewModel[] }) {
 
 function CompareMobileHighlights({
   bestDeal,
+  bestDealClears,
+  otherDeals,
+  canUsePipeline,
   highestRoiDeal,
   strongestDscrDeal,
   shortTermHighlightedWinCounts,
   longTermHighlightedWinCounts,
 }: {
   bestDeal: CompareDealViewModel | null;
+  bestDealClears: boolean;
+  otherDeals: CompareDealViewModel[];
+  canUsePipeline: boolean;
   highestRoiDeal: CompareDealViewModel | null;
   strongestDscrDeal: CompareDealViewModel | null;
   shortTermHighlightedWinCounts: Map<string, number>;
@@ -841,8 +966,23 @@ function CompareMobileHighlights({
               <p className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-muted-foreground">Selected Winner</p>
               <h2 className="mt-1 text-base font-extrabold leading-tight text-foreground">{getShortAddress(bestDeal.address)}</h2>
             </div>
-            <Badge className="rounded-full border border-success/30 bg-success/10 text-success">Best</Badge>
+            <Badge
+              className={cn(
+                "rounded-full border",
+                bestDealClears
+                  ? "border-success/30 bg-success/10 text-success"
+                  : "border-warning/30 bg-warning/15 text-warning-foreground"
+              )}
+            >
+              {bestDealClears ? "Best" : "Best of set"}
+            </Badge>
           </div>
+          {!bestDealClears ? (
+            // DEC-3: no unconditional crown for the best of a bad bunch.
+            <p className="mt-2 rounded-lg bg-warning/15 px-2.5 py-1.5 text-[11px] font-medium leading-snug text-warning-foreground">
+              Best of this set — but it doesn&apos;t clear your targets.
+            </p>
+          ) : null}
           <div className="mt-4 grid grid-cols-2 gap-2">
             <div className="rounded-2xl bg-muted/40 p-3">
               <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Short Score</p>
@@ -853,6 +993,7 @@ function CompareMobileHighlights({
               <p className="mt-1 text-lg font-extrabold text-foreground">{longTermHighlightedWinCounts.get(bestDeal.id) ?? 0}</p>
             </div>
           </div>
+          <WinnerActions winner={bestDeal} others={otherDeals} canUsePipeline={canUsePipeline} />
         </div>
       ) : null}
     </>
@@ -861,8 +1002,13 @@ function CompareMobileHighlights({
 
 export function CompareDealsClient({
   deals,
+  canUsePipeline = false,
 }: {
   deals: CompareDealViewModel[];
+  /** Whether the user holds the "pipeline" entitlement (server-derived) —
+   *  gates the bulk "Mark the others as Passed" action the same way My
+   *  Deals gates its stage writes. The server action re-enforces it. */
+  canUsePipeline?: boolean;
 }) {
   const shortTermHighlightedWinCounts = getShortTermHighlightedWinCounts(deals);
   const longTermHighlightedWinCounts = getLongTermHighlightedWinCounts(deals);
@@ -875,6 +1021,8 @@ export function CompareDealsClient({
   );
   const bestDealId = getBestDealIdByWins(deals, shortTermHighlightedWinCounts, longTermHighlightedWinCounts);
   const bestDeal = deals.find((deal) => deal.id === bestDealId) ?? deals[0] ?? null;
+  const bestDealClears = doesBestDealClearBar(bestDeal);
+  const nonWinnerDeals = bestDeal ? deals.filter((deal) => deal.id !== bestDeal.id) : [];
   const highestRoiDeal = deals.reduce<CompareDealViewModel | null>((best, deal) => {
     const value = deal.compareSnapshot?.longTermSummary.totalROI ?? deal.metrics.cocReturn ?? Number.NEGATIVE_INFINITY;
     const bestValue = best?.compareSnapshot?.longTermSummary.totalROI ?? best?.metrics.cocReturn ?? Number.NEGATIVE_INFINITY;
@@ -958,6 +1106,9 @@ export function CompareDealsClient({
             <CompareMobileDealStrip deals={deals} />
             <CompareMobileHighlights
               bestDeal={bestDeal}
+              bestDealClears={bestDealClears}
+              otherDeals={nonWinnerDeals}
+              canUsePipeline={canUsePipeline}
               highestRoiDeal={highestRoiDeal}
               strongestDscrDeal={strongestDscrDeal}
               shortTermHighlightedWinCounts={shortTermHighlightedWinCounts}
@@ -1081,12 +1232,20 @@ export function CompareDealsClient({
                     "relative flex min-h-[17.5rem] flex-col rounded-2xl border border-t-[3px] border-border/80 bg-card/95 p-5 shadow-[0_16px_48px_rgba(15,23,42,0.07)] ring-2 ring-transparent",
                     typeClasses,
                     getDesktopCardTopBorderClass(deal, isBestDeal),
-                    isBestDeal && "border-success/30 ring-success/40"
+                    isBestDeal &&
+                      (bestDealClears
+                        ? "border-success/30 ring-success/40"
+                        : "border-warning/40 ring-amber-400/40")
                   )}
                 >
                   {isBestDeal && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-b-xl rounded-t-sm bg-emerald-700 px-6 py-1 text-xs font-bold text-white shadow-sm">
-                      Best Deal
+                    <div
+                      className={cn(
+                        "absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-b-xl rounded-t-sm px-6 py-1 text-xs font-bold text-white shadow-sm",
+                        bestDealClears ? "bg-emerald-700" : "bg-amber-600"
+                      )}
+                    >
+                      {bestDealClears ? "Best Deal" : "Best of this set"}
                     </div>
                   )}
                   <form action={removeAction} className="absolute right-4 top-4">
@@ -1247,14 +1406,25 @@ export function CompareDealsClient({
                       Top 2 in both short-term and long-term scoring.
                     </p>
                   )}
+                  {isBestDeal &&
+                    (bestDealClears ? (
+                      <p className="mt-3 rounded-lg bg-success/10 px-2.5 py-1.5 text-[11px] font-medium leading-snug text-success">
+                        Top performer across most metrics with {totalWins} total win{totalWins === 1 ? "" : "s"}.
+                      </p>
+                    ) : (
+                      // DEC-3: winning a weak set is not a buy signal.
+                      <p className="mt-3 rounded-lg bg-warning/15 px-2.5 py-1.5 text-[11px] font-medium leading-snug text-warning-foreground">
+                        Best of this set — but it doesn&apos;t clear your targets. It wins the most
+                        metrics here; that&apos;s not a recommendation to buy.
+                      </p>
+                    ))}
                   {isBestDeal && (
-                    <p className="mt-3 rounded-lg bg-success/10 px-2.5 py-1.5 text-[11px] font-medium leading-snug text-success">
-                      Top performer across most metrics with {totalWins} total win{totalWins === 1 ? "" : "s"}.
-                    </p>
+                    <WinnerActions
+                      winner={deal}
+                      others={nonWinnerDeals}
+                      canUsePipeline={canUsePipeline}
+                    />
                   )}
-
-
-                 
                 </div>
               );
             })}

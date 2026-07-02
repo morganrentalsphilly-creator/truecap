@@ -13,7 +13,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Target } from "lucide-react";
 import { Topbar } from "@/components/dashboard/Topbar";
 import { DueDiligenceCard } from "@/components/investcalc/due-diligence-card";
 import { DealDocumentsCard } from "@/components/investcalc/deal-documents-card";
@@ -29,6 +29,13 @@ import { OwnedEquityCard } from "@/components/investcalc/owned-equity-card";
 import { nextActionForDeal } from "@/lib/next-action";
 import { recomputeSavedDealVerdict } from "@/lib/recompute-saved-deal-verdict";
 import { calculateAnalysis } from "@/lib/calc-analysis";
+import { calculateMaxAllowableOffer, meetsTarget } from "@/lib/max-allowable-offer";
+import {
+  buildMaoTarget,
+  buyBoxContributesToMaoTarget,
+  buyBoxHasReturnTargets,
+  describeMaoTarget,
+} from "@/lib/mao-targets";
 import { normalizeInvestmentFormSnapshot } from "@/lib/investcalc-schema";
 import {
   computeOwnedEquity,
@@ -45,8 +52,9 @@ import {
   type BuyBoxDealMetrics,
   type BuyBoxFitSummary,
   type BuyBoxPropertyType,
+  type NamedBuyBox,
 } from "@/lib/buy-box";
-import { isPipelineStage, DEFAULT_PIPELINE_STAGE } from "@/lib/pipeline";
+import { isActiveStage, isPipelineStage, DEFAULT_PIPELINE_STAGE } from "@/lib/pipeline";
 import {
   getDashboardNavAccess,
   hasDashboardAccess,
@@ -95,6 +103,14 @@ function verdictBadgeClasses(rec: DealRecommendation): string {
   if (rec === "Buy") return "bg-primary/10 text-primary border-primary/30";
   if (rec === "Neutral" || rec === "Risky") return "bg-warning/15 text-warning-foreground border-warning/30";
   return "bg-destructive/10 text-destructive border-destructive/20";
+}
+
+function fmtMoney(n: number): string {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  }).format(n);
 }
 
 function fmtCashFlow(n: number): string {
@@ -249,6 +265,13 @@ export default async function DealWorkspacePage({
     : num(snap["netCashFlow"] ?? dealRow.net_cash_flow_monthly);
   const dscr = fresh ? fresh.dscr : snap["dscr"] != null ? num(snap["dscr"]) : null;
   const monthlyPayment = fresh ? fresh.monthlyPayment : num(snap["monthlyPayment"]);
+  // calc-analysis canon: monthlyPayment <= 0 means a cash purchase (DSCR is
+  // N/A, never failed). One derivation, shared by the buy-box metrics and the
+  // MAO target below.
+  const isCashPurchase = fresh ? fresh.isCashPurchase : monthlyPayment <= 0;
+  // Current-engine form values — reused by the max-offer solver and the
+  // owned-equity estimate. Null for legacy snapshots that don't validate.
+  const formValues = normalizeInvestmentFormSnapshot(dealRow.form_snapshot);
 
   // Compact underwrite header (DEC-1/WS-1) — same recompute-with-stored-
   // fallback numbers the banner uses. Metrics a legacy snapshot doesn't carry
@@ -273,7 +296,7 @@ export default async function DealWorkspacePage({
     ownedEquityEnabled && typeof dealRow.close_date === "string" ? dealRow.close_date : null;
   let ownedEquity: OwnedEquitySummary | null = null;
   if (stage === "closed" && closeDate) {
-    const values = normalizeInvestmentFormSnapshot(dealRow.form_snapshot);
+    const values = formValues;
     const closed = new Date(closeDate);
     if (values && !Number.isNaN(closed.getTime())) {
       const result = calculateAnalysis(values);
@@ -305,6 +328,10 @@ export default async function DealWorkspacePage({
   // (evaluateBuyBoxes returns default-first). Null when no numeric
   // criterion applied.
   let buyBoxPersonalLine: string | null = null;
+  // Highest-priority active box that sets numeric RETURN thresholds — those
+  // become the MAO target basis (CONFLICT #6: their criteria beat defaults,
+  // and the basis is labeled inline either way).
+  let maoBasisBox: NamedBuyBox | null = null;
   if (activeBuyBoxes.length > 0) {
     const propertyType: BuyBoxPropertyType | null =
       dealRow.property_type === "single-family" ||
@@ -322,13 +349,56 @@ export default async function DealWorkspacePage({
       state: deriveStateFromAddress(dealRow.address),
       // calc-analysis canon: monthlyPayment <= 0 means a cash purchase, so
       // the DSCR criterion is skipped (N/A), never failed.
-      isCashPurchase: fresh ? fresh.isCashPurchase : monthlyPayment <= 0,
+      isCashPurchase,
     };
     const boxResults = evaluateBuyBoxes(activeBuyBoxes, metrics).filter((r) => r.result.active);
     if (boxResults.length > 0) {
       buyBoxFit = summarizeBuyBoxFit(boxResults);
       const leadResult = boxResults.find((r) => r.result.passes) ?? boxResults[0];
       buyBoxPersonalLine = leadResult?.result.personalLine ?? null;
+      maoBasisBox = boxResults.map((r) => r.box).find(buyBoxHasReturnTargets) ?? null;
+    }
+  }
+
+  // Max allowable offer (DEC-2): the verdict → offer-number path. Solve the
+  // highest price that still clears the user's targets (buy-box thresholds
+  // when set, else break-even cash flow + DSCR 1.25 — see lib/mao-targets)
+  // from the SAME current-engine form snapshot everything above recomputes
+  // from. Server-side and pure; solver failure or a legacy snapshot simply
+  // hides the line. Shopping stages only — a closed or passed deal has no
+  // offer left to make.
+  type MaoLine =
+    | { kind: "cut"; maxPrice: number; asking: number | null; discountPct: number | null }
+    | { kind: "clears"; maxPrice: number | null };
+  let maoLine: MaoLine | null = null;
+  let maoBasisLabel = "";
+  if (formValues && (stage == null || isActiveStage(stage))) {
+    const maoTarget = buildMaoTarget(maoBasisBox, { isCashPurchase });
+    // Credit the buy box only when it actually shaped the target — a
+    // DSCR-only box on a cash deal falls back to the default floor, and
+    // attributing that default to "your buy box" would be false.
+    maoBasisLabel = buyBoxContributesToMaoTarget(maoBasisBox, { isCashPurchase })
+      ? `your “${maoBasisBox!.name}” buy box — ${describeMaoTarget(maoTarget)}`
+      : describeMaoTarget(maoTarget);
+    let clearsAtAsking = false;
+    try {
+      clearsAtAsking = meetsTarget(calculateAnalysis(formValues), maoTarget);
+    } catch {
+      // Unparseable math at asking → fall through to the solver alone.
+    }
+    const mao = calculateMaxAllowableOffer(formValues, maoTarget);
+    if (clearsAtAsking) {
+      maoLine = { kind: "clears", maxPrice: mao?.maxPrice ?? null };
+    } else if (mao) {
+      const asking =
+        typeof formValues.purchasePrice === "number" && formValues.purchasePrice > 0
+          ? formValues.purchasePrice
+          : null;
+      const discountPct =
+        asking != null && asking > mao.maxPrice
+          ? Math.round(((asking - mao.maxPrice) / asking) * 100)
+          : null;
+      maoLine = { kind: "cut", maxPrice: mao.maxPrice, asking, discountPct };
     }
   }
 
@@ -430,6 +500,55 @@ export default async function DealWorkspacePage({
               <p className="mt-1.5 px-1 text-xs text-muted-foreground">
                 Your buy box · {buyBoxPersonalLine}
               </p>
+            ) : null}
+            {/* Max offer line (DEC-2): "lower your offer" becomes an
+                executable number, right beside the advice. The basis is
+                labeled inline (CONFLICT #6) so this never reads as a second,
+                unexplained "your max" vs the analyzer's MAO surfaces. */}
+            {maoLine ? (
+              <div className="mt-2 flex items-start gap-3 rounded-2xl border border-border bg-card p-4">
+                <Target aria-hidden className="mt-0.5 size-5 shrink-0 text-primary" />
+                <div className="min-w-0 flex-1">
+                  <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                    Your max offer
+                  </div>
+                  {maoLine.kind === "clears" ? (
+                    <>
+                      <div className="text-sm font-bold text-foreground">
+                        Asking price works at your targets
+                      </div>
+                      {maoLine.maxPrice != null ? (
+                        <div className="text-xs text-muted-foreground">
+                          You could pay up to{" "}
+                          <span className="font-semibold tabular-nums text-foreground">
+                            {fmtMoney(maoLine.maxPrice)}
+                          </span>{" "}
+                          and still hit them.
+                        </div>
+                      ) : null}
+                    </>
+                  ) : (
+                    <div className="text-sm font-bold text-foreground">
+                      Works at ≤{" "}
+                      <span className="tabular-nums">{fmtMoney(maoLine.maxPrice)}</span> — your max
+                      offer
+                      {maoLine.asking != null ? (
+                        <span className="font-medium text-muted-foreground">
+                          {" "}
+                          (asking {fmtMoney(maoLine.asking)}
+                          {maoLine.discountPct != null && maoLine.discountPct > 0
+                            ? `, −${maoLine.discountPct}%`
+                            : ""}
+                          )
+                        </span>
+                      ) : null}
+                    </div>
+                  )}
+                  <div className="mt-0.5 text-xs text-muted-foreground">
+                    Targets: {maoBasisLabel}
+                  </div>
+                </div>
+              </div>
             ) : null}
           </div>
           {/* Owned equity (M3-2/WOW-4): closed deals capture their close date

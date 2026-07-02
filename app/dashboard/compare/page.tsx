@@ -379,7 +379,13 @@ export default async function DashboardComparePage() {
           canAccessDashboard={navAccess.dashboard}
         />
         <div className="flex-1">
-          <CompareDealsClient deals={deals.slice(0, MAX_COMPARE_ITEMS)} />
+          <CompareDealsClient
+            deals={deals.slice(0, MAX_COMPARE_ITEMS)}
+            // Gates the winner card's "Mark the others as Passed" bulk stage
+            // write the same way My Deals gates stage changes; the server
+            // action re-enforces the entitlement regardless.
+            canUsePipeline={hasPlanFeature(entitlements, "pipeline")}
+          />
         </div>
       </div>
     </>

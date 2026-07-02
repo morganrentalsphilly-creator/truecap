@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { InvestmentFormValues } from "@/lib/investcalc-schema";
+import { calculateAnalysis } from "@/lib/calc-analysis";
 import {
   calculateMaxAllowableOffer,
   solveRequiredMonthlyRent,
@@ -38,19 +39,36 @@ const numberOrUndefined = (s: string): number | undefined => {
 const money = (n: number) => `$${Math.round(n).toLocaleString("en-US")}`;
 
 export function MaxOfferCard({ values }: MaxOfferCardProps) {
-  const [capRateInput, setCapRateInput] = useState("8");
-  const [cocInput, setCocInput] = useState("8");
+  // Initial targets = the canonical MAO basis (break-even cash flow + DSCR
+  // 1.25 — see lib/mao-targets, CONFLICT #6) so the first number this solver
+  // shows equals the wholesale StrategyOutcomeCard headline and the deal
+  // workspace's max-offer line. Cap/CoC start unset — every field stays
+  // user-editable.
+  const [capRateInput, setCapRateInput] = useState("");
+  const [cocInput, setCocInput] = useState("");
   const [cashFlowInput, setCashFlowInput] = useState("0");
-  const [dscrInput, setDscrInput] = useState("");
+  const [dscrInput, setDscrInput] = useState("1.25");
+
+  // Cash purchases have no debt service: calc-analysis reports dscr 0, so a
+  // DSCR floor could never pass. Omit that target at this call site (the
+  // solver's documented contract) instead of showing "no price works".
+  const isCashDeal = useMemo(() => {
+    if (!values) return false;
+    try {
+      return calculateAnalysis(values).monthlyPayment <= 0;
+    } catch {
+      return false;
+    }
+  }, [values]);
 
   const target: MaoTarget = useMemo(
     () => ({
       capRate: numberOrUndefined(capRateInput),
       cocReturn: numberOrUndefined(cocInput),
       monthlyCashFlow: numberOrUndefined(cashFlowInput),
-      dscr: numberOrUndefined(dscrInput),
+      dscr: isCashDeal ? undefined : numberOrUndefined(dscrInput),
     }),
-    [capRateInput, cocInput, cashFlowInput, dscrInput]
+    [capRateInput, cocInput, cashFlowInput, dscrInput, isCashDeal]
   );
 
   const noneSet =
@@ -81,19 +99,19 @@ export function MaxOfferCard({ values }: MaxOfferCardProps) {
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
         <div>
           <Label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
-            Target Cap Rate
+            Target Cap Rate <span className="font-normal lowercase tracking-normal">(opt)</span>
           </Label>
           <div className="relative">
-            <Input type="number" inputMode="decimal" step="0.1" value={capRateInput} onChange={(e) => setCapRateInput(e.target.value)} placeholder="8.0" className="pr-7 border-input bg-background" />
+            <Input type="number" inputMode="decimal" step="0.1" value={capRateInput} onChange={(e) => setCapRateInput(e.target.value)} placeholder="Any" className="pr-7 border-input bg-background" />
             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">%</span>
           </div>
         </div>
         <div>
           <Label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
-            Target Cash-on-Cash
+            Target Cash-on-Cash <span className="font-normal lowercase tracking-normal">(opt)</span>
           </Label>
           <div className="relative">
-            <Input type="number" inputMode="decimal" step="0.1" value={cocInput} onChange={(e) => setCocInput(e.target.value)} placeholder="8.0" className="pr-7 border-input bg-background" />
+            <Input type="number" inputMode="decimal" step="0.1" value={cocInput} onChange={(e) => setCocInput(e.target.value)} placeholder="Any" className="pr-7 border-input bg-background" />
             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">%</span>
           </div>
         </div>
@@ -108,9 +126,12 @@ export function MaxOfferCard({ values }: MaxOfferCardProps) {
         </div>
         <div>
           <Label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
-            Min DSCR <span className="font-normal lowercase tracking-normal">(opt)</span>
+            Min DSCR{" "}
+            <span className="font-normal lowercase tracking-normal">
+              {isCashDeal ? "(n/a — cash purchase)" : "(opt)"}
+            </span>
           </Label>
-          <Input type="number" inputMode="decimal" step="0.05" value={dscrInput} onChange={(e) => setDscrInput(e.target.value)} placeholder="1.25" className="border-input bg-background" />
+          <Input type="number" inputMode="decimal" step="0.05" value={dscrInput} onChange={(e) => setDscrInput(e.target.value)} placeholder="1.25" disabled={isCashDeal} className="border-input bg-background" />
         </div>
       </div>
 

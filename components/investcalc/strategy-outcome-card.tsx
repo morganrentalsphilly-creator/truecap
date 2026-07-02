@@ -20,9 +20,10 @@
 import type { ReactNode } from "react";
 import { ArrowUpRight, Hammer, Target, Wrench, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { calculateMaxAllowableOffer, type MaoTarget } from "@/lib/max-allowable-offer";
+import { calculateMaxAllowableOffer } from "@/lib/max-allowable-offer";
+import { buildMaoTarget, describeMaoTarget } from "@/lib/mao-targets";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
-import type { AnalysisResult } from "@/lib/calc-analysis";
+import { calculateAnalysis, type AnalysisResult } from "@/lib/calc-analysis";
 import type { InvestorStrategy } from "@/lib/investor-strategies";
 import { BrrrrCard } from "@/components/investcalc/brrrr-card";
 import { FixFlipCard } from "@/components/investcalc/fix-flip-card";
@@ -34,9 +35,10 @@ const usd = (n: number) =>
     maximumFractionDigits: 0,
   }).format(Math.round(n));
 
-// Matches the Stress Test tab's default MAO targets so this headline equals
-// what the user sees when they open the full solver (max-offer-card.tsx).
-const DEFAULT_MAO_TARGET: MaoTarget = { capRate: 8, cocReturn: 8, monthlyCashFlow: 0 };
+// MAO target basis comes from lib/mao-targets (CONFLICT #6): the same
+// break-even-cash-flow + DSCR-1.25 default the deal workspace and the Stress
+// Test tab's initial inputs use, so every "your max offer" number in the app
+// solves against ONE labeled basis.
 
 export function StrategyOutcomeCard({
   strategy,
@@ -57,12 +59,28 @@ export function StrategyOutcomeCard({
 }) {
   // ---- Wholesale → Max Allowable Offer ----
   if (strategy.key === "wholesale-mao") {
+    // Cash purchases omit the DSCR target (calc-analysis returns dscr 0 with
+    // no debt service, so a DSCR floor could never pass). Same call-site rule
+    // as the deal workspace; the solver itself is untouched.
+    const isCashPurchase =
+      result != null
+        ? result.monthlyPayment <= 0
+        : (() => {
+            try {
+              return calculateAnalysis(values).monthlyPayment <= 0;
+            } catch {
+              return false;
+            }
+          })();
+    const maoTarget = buildMaoTarget(null, { isCashPurchase });
+    const targetsLabel = describeMaoTarget(maoTarget);
+
     if (!canUseMaxOffer) {
       return (
         <OutcomeShell icon={Target} eyebrow="Wholesale / MAO" title="Unlock your max allowable offer">
           <p className="text-sm text-muted-foreground">
-            See the highest price you can offer and still hit an 8% cap, 8% cash-on-cash, and
-            break-even cash flow - reverse-solved from this address.
+            See the highest price you can offer and still hit {targetsLabel} - reverse-solved from
+            this address.
           </p>
           {onUpgrade ? (
             <Button onClick={onUpgrade} className="mt-3 rounded-xl">
@@ -73,15 +91,15 @@ export function StrategyOutcomeCard({
       );
     }
 
-    const mao = calculateMaxAllowableOffer(values, DEFAULT_MAO_TARGET);
+    const mao = calculateMaxAllowableOffer(values, maoTarget);
     const asking = typeof values.purchasePrice === "number" ? values.purchasePrice : null;
 
     if (!mao) {
       return (
         <OutcomeShell icon={Target} eyebrow="Wholesale / MAO" title="Rent's too low for these targets">
           <p className="text-sm text-muted-foreground">
-            Even at a low purchase price, {usd(values.monthlyRent ?? 0)}/mo rent doesn&apos;t reach an
-            8% cap + 8% cash-on-cash. Raise the rent assumption or loosen the targets in Stress Test.
+            Even at a low purchase price, {usd(values.monthlyRent ?? 0)}/mo rent doesn&apos;t reach{" "}
+            {targetsLabel}. Raise the rent assumption or loosen the targets in Stress Test.
           </p>
           <JumpButton label="Adjust targets in Stress Test" onClick={() => onJumpToTab("stress-test")} />
         </OutcomeShell>
@@ -98,7 +116,7 @@ export function StrategyOutcomeCard({
           {usd(mao.maxPrice)}
         </p>
         <p className="mt-2 text-sm text-muted-foreground">
-          The most you can pay and still hit an 8% cap, 8% cash-on-cash, and break-even cash flow.
+          The most you can pay and still hit your targets — {targetsLabel}.
         </p>
         {asking != null ? (
           <div className="mt-4 rounded-xl border border-border bg-card/70 p-3">
