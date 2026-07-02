@@ -23,16 +23,24 @@ import { z } from "zod";
 import { calculateAnalysis } from "@/lib/calc-analysis";
 import { investmentFormSchema } from "@/lib/investcalc-schema";
 import {
-  buildDealSummaryContext,
   DEAL_SUMMARY_LIMITS,
   DEAL_SUMMARY_SYSTEM_PROMPT,
   hashDealInput,
 } from "@/lib/deal-summary";
+import {
+  buildGroundedDealContext,
+  dealQaExtraContextSchema,
+} from "@/lib/deal-qa-context";
 import { hasPaidPlanSubscription } from "@/lib/entitlements";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { headers } from "next/headers";
 
-const inputSchema = z.object({ values: investmentFormSchema });
+const inputSchema = z.object({
+  values: investmentFormSchema,
+  /** Optional client-side grounding depth (buy box / MAO / projection /
+   *  comps) — shared shape with Deal Q&A so the pair can't drift. */
+  context: dealQaExtraContextSchema.optional(),
+});
 
 export type DealSummaryResult =
   | { ok: true; summary: string; remainingToday: number | null; cached: boolean }
@@ -121,8 +129,10 @@ export async function generateDealSummaryAction(input: unknown): Promise<DealSum
     return { ok: false, code: "VALIDATION_ERROR", message: "Invalid deal data." };
   }
 
-  // Cache hit → return free, no rate-limit token spent.
-  const hash = hashDealInput(parsed.data.values);
+  // Cache hit → return free, no rate-limit token spent. Keyed on values +
+  // grounding context: the same deal WITH comps/buy-box context produces a
+  // different (richer) summary than without.
+  const hash = hashDealInput(parsed.data.values, parsed.data.context);
   const cached = readCache(hash);
   if (cached) {
     return { ok: true, summary: cached, remainingToday: null, cached: true };
@@ -142,7 +152,7 @@ export async function generateDealSummaryAction(input: unknown): Promise<DealSum
 
   try {
     const result = calculateAnalysis(parsed.data.values);
-    const context = buildDealSummaryContext(parsed.data.values, result);
+    const context = buildGroundedDealContext(parsed.data.values, result, parsed.data.context);
 
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -154,7 +164,9 @@ export async function generateDealSummaryAction(input: unknown): Promise<DealSum
       body: JSON.stringify({
         model: process.env.DEAL_QA_MODEL ?? "claude-haiku-4-5-20251001",
         max_tokens: 320,
-        system: `${DEAL_SUMMARY_SYSTEM_PROMPT}\n\nTHE DEAL:\n${context}`,
+        // buildGroundedDealContext emits its own section headers
+        // ("THE DEAL", "YOUR BUY BOX", ..., "NOT PROVIDED").
+        system: `${DEAL_SUMMARY_SYSTEM_PROMPT}\n\n${context}`,
         messages: [
           { role: "user", content: "Summarize this deal." },
         ],

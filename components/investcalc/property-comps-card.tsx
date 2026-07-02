@@ -7,7 +7,7 @@
  * gated for visibility; hides itself if the provider isn't configured yet
  * (NOT_CONFIGURED), keeping it invisible until actually enabled.
  */
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { Building2, Loader2 } from "lucide-react";
 import { getPropertyCompsAction, getSavedDealCompsAction } from "@/app/actions/property-comps";
 import type { EnrichmentComp, PropertyEnrichment } from "@/lib/property-enrichment/rentcast";
@@ -90,6 +90,7 @@ export function PropertyCompsCard({
   currentPrice,
   savedDealId,
   onApply,
+  onDataChange,
 }: {
   enabled: boolean;
   address: string | null;
@@ -104,12 +105,33 @@ export function PropertyCompsCard({
   savedDealId?: string | null;
   /** Fill the analyzer form from the pulled facts + estimates. */
   onApply?: (enrichment: PropertyEnrichment) => void;
+  /** Reports the comp set this card is showing up to the dashboard so the
+   *  Deal Q&A grounding context can include it (no extra fetch — exactly
+   *  the data already on screen). */
+  onDataChange?: (enrichment: PropertyEnrichment | null) => void;
 }) {
   const { toast } = useToast();
   const [data, setData] = useState<PropertyEnrichment | null>(null);
   const [source, setSource] = useState<"cache" | "live" | "saved" | null>(null);
   const [unavailable, setUnavailable] = useState(false);
   const [loading, startLoading] = useTransition();
+
+  // Comps belong to ONE address. When the analyzed address changes, the
+  // previous pull must not survive — on screen OR in the Deal Q&A grounding
+  // context (which hard-claims "the user ran comps on this address"); a
+  // stale set would ground AI answers on the wrong property.
+  const lastAddressRef = useRef<string | null>(address);
+  useEffect(() => {
+    if (lastAddressRef.current === address) return;
+    lastAddressRef.current = address;
+    setData(null);
+    setSource(null);
+    setUnavailable(false);
+    onDataChange?.(null);
+    // onDataChange is a stable setter in practice; keying on it would
+    // re-fire the clear on parent re-renders with inline handlers.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [address]);
 
   // On a saved deal, load any previously-saved comp set (no API call / quota).
   useEffect(() => {
@@ -120,6 +142,7 @@ export function PropertyCompsCard({
       if (active && r.ok && r.enrichment) {
         setData(r.enrichment);
         setSource("saved");
+        onDataChange?.(r.enrichment);
       }
     })();
     return () => {
@@ -149,6 +172,7 @@ export function PropertyCompsCard({
       }
       setData(r.enrichment);
       setSource(r.source);
+      onDataChange?.(r.enrichment);
     });
   };
 

@@ -18,9 +18,19 @@ import { Loader2, Sparkles, WandSparkles } from "lucide-react";
 import Link from "next/link";
 import { generateDealSummaryAction } from "@/app/actions/deal-summary";
 import { trackEvent } from "@/lib/analytics";
+import type { DealQaExtraContext } from "@/lib/deal-qa-context";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 
-export function DealSummaryCard({ values }: { values: InvestmentFormValues }) {
+export function DealSummaryCard({
+  values,
+  context,
+}: {
+  values: InvestmentFormValues;
+  /** Optional grounding depth (buy box / MAO / projection / comps) already
+   *  computed on the dashboard — the summary can then speak to the user's
+   *  own criteria. Absent pieces are omitted. */
+  context?: DealQaExtraContext;
+}) {
   const [summary, setSummary] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
@@ -32,7 +42,7 @@ export function DealSummaryCard({ values }: { values: InvestmentFormValues }) {
     setNotice(null);
     trackEvent("deal_summary_generated", {});
     try {
-      const result = await generateDealSummaryAction({ values });
+      const result = await generateDealSummaryAction({ values, context });
       if (result.ok) {
         setSummary(result.summary);
         if (result.remainingToday !== null && result.remainingToday <= 1) {

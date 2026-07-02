@@ -10,7 +10,7 @@
  *   - they're on Pro with ≥1 active buy box that has criteria.
  * Invisible-until-useful: free users / users without a buy box see nothing.
  */
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { Check, ChevronDown, Minus, Target, X } from "lucide-react";
 import { listBuyBoxesAction } from "@/app/actions/user-buy-boxes";
@@ -21,12 +21,14 @@ import {
   type BuyBoxDealMetrics,
   type NamedBuyBox,
 } from "@/lib/buy-box";
+import { buildBuyBoxQaReport, type DealQaBuyBoxReport } from "@/lib/deal-qa-context";
 import { cn } from "@/lib/utils";
 
 export function BuyBoxVerdictCard({
   enabled,
   metrics,
   onFitChange,
+  onQaContextChange,
 }: {
   enabled: boolean;
   metrics: BuyBoxDealMetrics | null;
@@ -36,6 +38,11 @@ export function BuyBoxVerdictCard({
    *  card could say "Misses your buy box" one card below a banner saying
    *  "make your offer". */
   onFitChange?: (anyPass: boolean | null) => void;
+  /** Reports the SAME evaluation as a compact Deal Q&A grounding block
+   *  (plus the primary box's numeric thresholds, the canonical MAO basis),
+   *  so AI answers are grounded in exactly what this card shows on screen.
+   *  null = no active box / not evaluated. */
+  onQaContextChange?: (report: DealQaBuyBoxReport | null) => void;
 }) {
   const [boxes, setBoxes] = useState<NamedBuyBox[] | null>(null);
   // Mobile-only progressive disclosure for the per-criterion grid — the
@@ -78,6 +85,23 @@ export function BuyBoxVerdictCard({
   useEffect(() => {
     onFitChange?.(anyPass);
   }, [anyPass, onFitChange]);
+
+  // Deal Q&A grounding report — same evaluation, prompt-ready shape. The
+  // JSON key guard makes re-sends idempotent even if `metrics` (an inline
+  // object prop) gets a fresh identity every parent render, so this can
+  // never set-state-loop the dashboard.
+  const qaReport = useMemo(
+    () => (evaluated ? buildBuyBoxQaReport(evaluated.results, evaluated.summary) : null),
+    [evaluated]
+  );
+  const lastQaKeyRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!onQaContextChange) return;
+    const key = qaReport ? JSON.stringify(qaReport) : null;
+    if (key === lastQaKeyRef.current) return;
+    lastQaKeyRef.current = key;
+    onQaContextChange(qaReport);
+  }, [qaReport, onQaContextChange]);
 
   if (!evaluated) return null;
 

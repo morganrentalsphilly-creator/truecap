@@ -5,11 +5,17 @@
  * specific analysis, grounded in numbers recomputed server-side.
  *
  * Trust model:
- *  - The client sends only the form VALUES (validated by the same Zod
+ *  - The client sends the form VALUES (validated by the same Zod
  *    schema the calculator uses). The analysis is recomputed here via
  *    calculateAnalysis — the model never sees client-claimed metrics,
  *    so a tampered request can't make the AI bless fake numbers beyond
  *    what the user could type into the public form anyway.
+ *  - The client MAY also forward an optional grounding-context block
+ *    (buy-box evaluation, MAO, projection headline, pulled comps) that
+ *    already exists client-side on the dashboard. It's zod-validated and
+ *    size-bounded (lib/deal-qa-context) and adds DEPTH only — a tampered
+ *    block is the same self-deception class as typing a fake rent. It
+ *    has zero effect on auth, rate limits, or entitlements.
  *  - Anonymous + free users get DEAL_QA_LIMITS.free questions/day
  *    (taste of Pro — mirrors the sample-deal preview philosophy).
  *    Paid plans get DEAL_QA_LIMITS.pro/day as a fair-use cap.
@@ -24,11 +30,11 @@
 import { z } from "zod";
 import { calculateAnalysis } from "@/lib/calc-analysis";
 import { investmentFormSchema } from "@/lib/investcalc-schema";
+import { DEAL_QA_LIMITS, DEAL_QA_SYSTEM_PROMPT } from "@/lib/deal-qa";
 import {
-  buildDealQaContext,
-  DEAL_QA_LIMITS,
-  DEAL_QA_SYSTEM_PROMPT,
-} from "@/lib/deal-qa";
+  buildGroundedDealContext,
+  dealQaExtraContextSchema,
+} from "@/lib/deal-qa-context";
 import { hasPaidPlanSubscription } from "@/lib/entitlements";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { headers } from "next/headers";
@@ -36,6 +42,9 @@ import { headers } from "next/headers";
 const inputSchema = z.object({
   question: z.string().trim().min(2).max(DEAL_QA_LIMITS.questionChars),
   values: investmentFormSchema,
+  /** Optional client-side grounding depth (buy box / MAO / projection /
+   *  comps). Size-bounded by the schema; omitted pieces are fine. */
+  context: dealQaExtraContextSchema.optional(),
 });
 
 export type DealQaResult =
@@ -123,7 +132,7 @@ export async function askDealQuestionAction(input: unknown): Promise<DealQaResul
 
   try {
     const result = calculateAnalysis(parsed.data.values);
-    const context = buildDealQaContext(parsed.data.values, result);
+    const context = buildGroundedDealContext(parsed.data.values, result, parsed.data.context);
 
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -137,7 +146,9 @@ export async function askDealQuestionAction(input: unknown): Promise<DealQaResul
         // need a frontier model. Override via env for experiments.
         model: process.env.DEAL_QA_MODEL ?? "claude-haiku-4-5-20251001",
         max_tokens: 400,
-        system: `${DEAL_QA_SYSTEM_PROMPT}\n\nTHE DEAL:\n${context}`,
+        // buildGroundedDealContext emits its own section headers
+        // ("THE DEAL", "YOUR BUY BOX", ..., "NOT PROVIDED").
+        system: `${DEAL_QA_SYSTEM_PROMPT}\n\n${context}`,
         messages: [{ role: "user", content: parsed.data.question }],
       }),
       // Generous but bounded — Vercel function timeout is the real cap.

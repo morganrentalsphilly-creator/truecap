@@ -1,6 +1,6 @@
 "use client";
 
-import { useDeferredValue, useEffect, useMemo, useState, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from "react";
+import { useDeferredValue, useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
@@ -85,6 +85,18 @@ import { StrategyOutcomeCard } from "@/components/investcalc/strategy-outcome-ca
 import { StrategyLensOutcomeCard } from "@/components/investcalc/strategy-lens-outcome-card";
 import type { InvestorStrategy } from "@/lib/investor-strategies";
 import { deriveStateFromAddress } from "@/lib/buy-box";
+import {
+  buildCompsQaContext,
+  buildProjectionQaContext,
+  type DealQaBuyBoxReport,
+  type DealQaExtraContext,
+} from "@/lib/deal-qa-context";
+import {
+  buildMaoTarget,
+  buyBoxContributesToMaoTarget,
+  describeMaoTarget,
+} from "@/lib/mao-targets";
+import { calculateMaxAllowableOffer } from "@/lib/max-allowable-offer";
 import { DataConfidenceBadge } from "@/components/investcalc/data-confidence-badge";
 import { PropertyCompsCard } from "@/components/investcalc/property-comps-card";
 import type { PropertyEnrichment } from "@/lib/property-enrichment/rentcast";
@@ -457,6 +469,23 @@ export function AnalysisDashboard({
   // there), consumed by the Next Action banner so both speak with one
   // voice. null = no active box / not evaluated.
   const [buyBoxAnyPass, setBuyBoxAnyPass] = useState<boolean | null>(null);
+  // Deal Q&A grounding depth — assembled ONLY from what this surface already
+  // computes/holds (no new fetches): the buy-box evaluation reported up by
+  // BuyBoxVerdictCard, the comp set reported up by PropertyCompsCard, the
+  // MAO solved from the current form values, and the exit-scenario return
+  // summary. Absent pieces are simply omitted from the AI context.
+  const [buyBoxQaReport, setBuyBoxQaReport] = useState<DealQaBuyBoxReport | null>(null);
+  const [compsQaData, setCompsQaData] = useState<PropertyEnrichment | null>(null);
+  // Comps belong to ONE address. The card clears itself on address change
+  // while mounted, but New Analysis empties the address and UNMOUNTS it —
+  // an unmounted card can't report null, so the dashboard clears too or a
+  // stale set would ground the NEXT deal's AI answers on the old property.
+  const compsAddressRef = useRef<string | null | undefined>(values?.address);
+  useEffect(() => {
+    if (compsAddressRef.current === values?.address) return;
+    compsAddressRef.current = values?.address;
+    setCompsQaData(null);
+  }, [values?.address]);
 
   // What-if slider state. When the user drags rent / rate, this holds
   // the adjusted result; otherwise null and we render the base `result`
@@ -487,6 +516,50 @@ export function AnalysisDashboard({
   );
   const appreciationPlay =
     !!result && isAppreciationPlayDeal(result, propertyType, annualizedReturnPct);
+
+  // ── Deal Q&A grounding context (see the state block above) ──────────
+  // MAO: only when the user can see the Stress Test solver (Pro / sample
+  // preview) so free-tier answers can't leak a gated number. Basis follows
+  // lib/mao-targets: the user's buy-box thresholds when set, else the
+  // canonical default floor — always labeled. Memoized on the BASE
+  // result/values (never the what-if sliders), matching the Deal Score.
+  const maoQaContext = useMemo(() => {
+    if (!values || !result || !canUseMaxOffer) return null;
+    const isCashPurchase = result.monthlyPayment <= 0;
+    const thresholds = buyBoxQaReport?.maoThresholds ?? null;
+    const target = buildMaoTarget(thresholds, { isCashPurchase });
+    const mao = calculateMaxAllowableOffer(values, target);
+    if (!mao) return null;
+    return {
+      maxOffer: mao.maxPrice,
+      basis: describeMaoTarget(target),
+      fromBuyBox: buyBoxContributesToMaoTarget(thresholds, { isCashPurchase }),
+    };
+  }, [values, result, canUseMaxOffer, buyBoxQaReport]);
+  // 10-yr headline from the same exit series the "10-Year Returns" strip
+  // renders (exitScenarioSource is already entitlement-gated by the caller).
+  const projectionQaContext = useMemo(
+    () =>
+      exitScenarioSource
+        ? buildProjectionQaContext(
+            computeReturnSummaryFromExitYears(exitScenarioSource.initialYears)
+          )
+        : null,
+    [exitScenarioSource]
+  );
+  const compsQaContext = useMemo(
+    () => (compsQaData ? buildCompsQaContext(compsQaData) : null),
+    [compsQaData]
+  );
+  const dealQaContext = useMemo<DealQaExtraContext | undefined>(() => {
+    const ctx: DealQaExtraContext = {
+      ...(buyBoxQaReport ? { buyBox: buyBoxQaReport.context } : {}),
+      ...(maoQaContext ? { mao: maoQaContext } : {}),
+      ...(projectionQaContext ? { projection: projectionQaContext } : {}),
+      ...(compsQaContext ? { comps: compsQaContext } : {}),
+    };
+    return Object.keys(ctx).length > 0 ? ctx : undefined;
+  }, [buyBoxQaReport, maoQaContext, projectionQaContext, compsQaContext]);
   // Investor lens - owned HERE (the common parent of the Deal Score + the
   // metric cards) so the metric ordering reacts when it changes. Persisted
   // across deals so a cash-flow investor isn't reset to Balanced each analysis.
@@ -1277,6 +1350,7 @@ export function AnalysisDashboard({
             isCashPurchase: result.monthlyPayment <= 0,
           }}
           onFitChange={setBuyBoxAnyPass}
+          onQaContextChange={setBuyBoxQaReport}
         />
       ) : null}
 
@@ -1535,6 +1609,7 @@ export function AnalysisDashboard({
           currentPrice={values.purchasePrice ?? null}
           savedDealId={savedDealId}
           onApply={onApplyComps}
+          onDataChange={setCompsQaData}
         />
       ) : null}
 
@@ -1587,8 +1662,12 @@ export function AnalysisDashboard({
           below the fold on phones. Renders only when the page says the
           feature is configured (Anthropic key present). Free users get
           a few questions/day (server-enforced). */}
-      {dealQaEnabled && result && values && !isLoading ? <DealSummaryCard values={values} /> : null}
-      {dealQaEnabled && result && values && !isLoading ? <DealQaPanel values={values} /> : null}
+      {dealQaEnabled && result && values && !isLoading ? (
+        <DealSummaryCard values={values} context={dealQaContext} />
+      ) : null}
+      {dealQaEnabled && result && values && !isLoading ? (
+        <DealQaPanel values={values} context={dealQaContext} />
+      ) : null}
 
       {/* "Details" landmark - pairs with the "Overview" landmark above
           the metric grid. Gives the eye a clear "here's where the

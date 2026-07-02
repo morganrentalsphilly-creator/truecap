@@ -24,10 +24,11 @@ export { buildDealQaContext as buildDealSummaryContext } from "@/lib/deal-qa";
  * could paste into their notes or send to a partner.
  */
 export const DEAL_SUMMARY_SYSTEM_PROMPT = [
-  "You are TrueCap's deal analyst. Write a short, balanced summary of ONE rental-property deal whose computed numbers are provided below.",
+  "You are TrueCap's deal analyst. Write a short, balanced summary of ONE rental-property deal using ONLY the context sections provided below (the deal's computed numbers, and — when present — the user's buy box, max allowable offer, projection, and pulled comps).",
   "Rules:",
-  "- Use ONLY the provided numbers. Never invent rents, prices, rates, comps, or market data.",
+  "- Use ONLY the provided numbers. NEVER invent or estimate a number that is not present in the context — no made-up rents, prices, rates, comps, projections, or market data.",
   "- Structure: (1) one sentence on what the deal is, (2) the headline cash flow + the two return metrics that matter most here, (3) the single biggest strength, (4) the single biggest risk or what to watch, (5) a one-sentence balanced bottom line.",
+  "- When a YOUR BUY BOX or YOUR MAX ALLOWABLE OFFER section is present, weave the single most decision-relevant personal fact into the summary (e.g. \"misses your cap-rate floor by 0.8pp\", \"asking price sits above your $268,500 max offer\"). Never mention a buy box, max offer, comps, or projections when that section is absent.",
   "- 4-6 sentences total. Plain English. No headers, no bullet lists, no markdown.",
   "- Reference the actual figures (e.g. \"$312/mo cash flow\", \"6.1% cap\") rather than vague adjectives.",
   "- You are not a financial advisor. Describe what the numbers say for and against the deal; never tell the user whether to buy.",
@@ -43,13 +44,19 @@ export const DEAL_SUMMARY_LIMITS = {
 
 /**
  * Stable cache key for a deal's inputs. The summary is deterministic from the
- * form VALUES (the action recomputes everything else), so two identical deals
- * share one cached summary — the first generation pays, repeats are free. This
- * is a non-cryptographic content hash for an in-memory cache, not a security
+ * form VALUES plus the optional grounding context (buy box / MAO / projection /
+ * comps — the same deal with comps pulled reads differently), so identical
+ * deal+context pairs share one cached summary — the first generation pays,
+ * repeats are free. `extraContext === undefined` hashes exactly like the
+ * pre-context era, keeping old cache buckets valid. This is a
+ * non-cryptographic content hash for an in-memory cache, not a security
  * boundary.
  */
-export function hashDealInput(values: InvestmentFormValues): string {
-  const canonical = stableStringify(values);
+export function hashDealInput(values: InvestmentFormValues, extraContext?: unknown): string {
+  const canonical =
+    extraContext === undefined
+      ? stableStringify(values)
+      : stableStringify({ extra: extraContext, values });
   // FNV-1a 32-bit — fast, dependency-free, good enough for a cache bucket.
   let h = 0x811c9dc5;
   for (let i = 0; i < canonical.length; i += 1) {

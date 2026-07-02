@@ -14,11 +14,12 @@
  *    is correct: old answers describe old numbers.
  */
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { ArrowUp, Loader2, MessageCircleQuestion, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { askDealQuestionAction } from "@/app/actions/deal-qa";
 import { trackEvent } from "@/lib/analytics";
+import type { DealQaExtraContext } from "@/lib/deal-qa-context";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 
 const SUGGESTED_QUESTIONS = [
@@ -29,12 +30,38 @@ const SUGGESTED_QUESTIONS = [
 
 type Turn = { question: string; answer: string };
 
-export function DealQaPanel({ values }: { values: InvestmentFormValues }) {
+export function DealQaPanel({
+  values,
+  context,
+}: {
+  values: InvestmentFormValues;
+  /** Optional grounding depth (buy box / MAO / projection / comps) already
+   *  computed on the dashboard — forwarded with each question so answers
+   *  can reference the user's own criteria. Absent pieces are omitted. */
+  context?: DealQaExtraContext;
+}) {
   const [question, setQuestion] = useState("");
   const [turns, setTurns] = useState<Turn[]>([]);
   const [isAsking, setIsAsking] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [limitHit, setLimitHit] = useState(false);
+
+  // Suggested chips: personal variants lead when their grounding exists
+  // ("Why does this miss my buy box?" only makes sense once a buy box was
+  // actually evaluated), then the static staples fill the remaining slots.
+  // Always exactly 3 chips — the card's design constraint.
+  const suggestedQuestions = useMemo(() => {
+    const personal: string[] = [];
+    if (context?.buyBox) {
+      personal.push(
+        context.buyBox.passes
+          ? "How much margin does this deal have vs my buy box?"
+          : "Why does this deal miss my buy box?"
+      );
+    }
+    if (context?.mao) personal.push("Is the asking price above my max offer?");
+    return [...personal, ...SUGGESTED_QUESTIONS].slice(0, 3);
+  }, [context]);
 
   const ask = async (q: string) => {
     const trimmed = q.trim();
@@ -44,7 +71,7 @@ export function DealQaPanel({ values }: { values: InvestmentFormValues }) {
     setQuestion("");
     trackEvent("deal_qa_asked", { question_length: trimmed.length });
     try {
-      const result = await askDealQuestionAction({ question: trimmed, values });
+      const result = await askDealQuestionAction({ question: trimmed, values, context });
       if (result.ok) {
         setTurns((prev) => [...prev.slice(-7), { question: trimmed, answer: result.answer }]);
         if (result.remainingToday !== null && result.remainingToday <= 1) {
@@ -100,7 +127,7 @@ export function DealQaPanel({ values }: { values: InvestmentFormValues }) {
       {/* Suggested chips - hidden once a conversation is going */}
       {turns.length === 0 && !limitHit && (
         <div className="mt-3 flex flex-wrap gap-1.5">
-          {SUGGESTED_QUESTIONS.map((q) => (
+          {suggestedQuestions.map((q) => (
             <button
               key={q}
               type="button"
