@@ -7,17 +7,26 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { InvestmentFormValues } from "@/lib/investcalc-schema";
+import { checkUnitRentsAgainstFmr, unitRentHint } from "@/lib/multi-family-rent-check";
 import { cn } from "@/lib/utils";
 import { FieldError } from "@/components/investcalc/form-field-helpers";
 
 interface MultiFamilyUnitsSectionProps {
   form: UseFormReturn<InvestmentFormValues>;
   isHouseHack?: boolean;
+  /**
+   * HUD FMR keyed by bedroom count for the entered address (fetched by the
+   * page's enrichment flow). Powers the passive rent reality-check below —
+   * a nudge mirroring the single-family whisper, never a validation error.
+   * null/absent = no address yet or lookup failed → renders nothing.
+   */
+  fmrByBedrooms?: Record<number, number> | null;
 }
 
 export function MultiFamilyUnitsSection({
   form,
   isHouseHack = false,
+  fmrByBedrooms = null,
 }: MultiFamilyUnitsSectionProps) {
   const { register, control, watch, setValue } = form;
 
@@ -40,6 +49,13 @@ export function MultiFamilyUnitsSection({
       ? "Each unit row must be complete. The owner row and every rental row need bedrooms, bathrooms, sq ft, and monthly rent (0 is ok for the owner unit)."
       : "Each unit row must be complete: bedrooms, bathrooms, sq ft, and monthly rent."
     : undefined;
+
+  // HUD rent reality-check (multi-family mirror of the single-family
+  // whisper). Pure comparison over the watched units + the per-bedroom FMR
+  // benchmarks; produces per-unit verdicts (inline hint only when a unit is
+  // FAR off market) and a one-line rollup. Passive text, matching the
+  // single-family precedent — never dismissible chrome, never a blocker.
+  const rentCheck = checkUnitRentsAgainstFmr(units, fmrByBedrooms);
 
   const handleAddUnit = () => {
     append({ bedrooms: undefined, bathrooms: undefined, sqft: undefined, monthlyRent: undefined, isOwnerOccupied: false });
@@ -116,6 +132,11 @@ export function MultiFamilyUnitsSection({
         {fields.map((field, index) => {
           const isOwner = isHouseHack && Boolean(units[index]?.isOwnerOccupied);
           const unitErrors = errors.units?.[index];
+          // Inline reality-check hint - only when this unit's rent is FAR
+          // off the HUD benchmark for its bedroom count (mild gaps are
+          // covered by the rollup line under the section).
+          const unitVerdict = rentCheck.verdicts.find((v) => v.unitIndex === index);
+          const rentHint = unitVerdict ? unitRentHint(unitVerdict) : null;
 
           return (
             <div
@@ -247,10 +268,27 @@ export function MultiFamilyUnitsSection({
                   <FieldError id={`unit-${index}-monthlyRent-error`} message={unitErrors?.monthlyRent?.message} />
                 </div>
               </div>
+
+              {rentHint ? (
+                <p
+                  className={cn(
+                    "mt-2 text-[11px] leading-relaxed",
+                    unitVerdict?.verdict === "above" ? "text-amber-700" : "text-muted-foreground"
+                  )}
+                >
+                  {rentHint}
+                </p>
+              ) : null}
             </div>
           );
         })}
       </div>
+      {/* Rollup line for the HUD rent reality-check. Passive (matches the
+          single-family whisper) - it reads as information, not an error,
+          so it must not share styling with the validation message below. */}
+      {rentCheck.rollup ? (
+        <p className="mt-3 text-xs leading-relaxed text-muted-foreground">{rentCheck.rollup}</p>
+      ) : null}
       {typeof unitsArrayErrorMessage === "string" && (
         <p className="mt-3 text-xs text-destructive">{unitsArrayErrorMessage}</p>
       )}

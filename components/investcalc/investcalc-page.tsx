@@ -540,6 +540,11 @@ export function InvestCalcPage({
   // "ground truth" benchmark to reality-check the user's rent - the single
   // assumption the deal is most sensitive to.
   const [marketRentEstimate, setMarketRentEstimate] = useState<number | null>(null);
+  // Multi-family sibling of marketRentEstimate: HUD FMR keyed by bedroom
+  // count, for the per-unit rent reality-check in the units section. Same
+  // rules: captured on enrichment, never blocks analysis, cleared on a new
+  // address, silent on failure.
+  const [unitFmrByBedrooms, setUnitFmrByBedrooms] = useState<Record<number, number> | null>(null);
   const [livePreview, setLivePreview] = useState<{
     tier: DealTier;
     score: number;
@@ -861,6 +866,10 @@ export function InvestCalcPage({
       form.setValue("monthlyRent", undefined, { shouldDirty: false, shouldValidate: false });
       enrichmentCaptureRef.current = {};
       setMarketRentEstimate(null);
+      // Same rules as marketRentEstimate: a fresh session must never judge
+      // its units against the PREVIOUS deal's market benchmark.
+      setUnitFmrByBedrooms(null);
+      unitFmrKeyRef.current = null;
       form.setValue("units", getDefaultUnitsForPropertyType(nextPropertyType), {
         shouldDirty: false,
         shouldValidate: false,
@@ -904,6 +913,9 @@ export function InvestCalcPage({
    */
   const lastSelectedAddressRef = useRef<SelectedAddress | null>(null);
   const enrichmentCaptureRef = useRef<EnrichmentCapture>({});
+  // Dedup key for the multi-family FMR benchmark fetch: metro + the sorted
+  // distinct bedroom counts already looked up. Cleared on a new address.
+  const unitFmrKeyRef = useRef<string | null>(null);
   // The address whose enrichment provenance is currently captured. Distinct
   // from lastSelectedAddressRef (which callers set BEFORE enriching) so we can
   // detect a genuinely new address inside runPropertyEnrichment and drop stale
@@ -927,6 +939,8 @@ export function InvestCalcPage({
       if (lastEnrichedAddressRef.current !== placeKey) {
         enrichmentCaptureRef.current = {};
         setMarketRentEstimate(null);
+        setUnitFmrByBedrooms(null);
+        unitFmrKeyRef.current = null;
         lastEnrichedAddressRef.current = placeKey;
       }
       const currentPropertyType = form.getValues("propertyType");
@@ -1036,6 +1050,8 @@ export function InvestCalcPage({
       // New property → fresh provenance capture for this address.
       enrichmentCaptureRef.current = {};
       setMarketRentEstimate(null);
+      setUnitFmrByBedrooms(null);
+      unitFmrKeyRef.current = null;
       // Funnel step - coarse only (state), never the full address (PII).
       trackEvent("address_selected", { state: place.state });
       await runPropertyEnrichment(place);
@@ -1251,6 +1267,63 @@ export function InvestCalcPage({
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [unitsEnrichmentKey]);
+
+  /**
+   * Multi-family / house-hack HUD rent reality-check: fetch the FMR
+   * benchmark for the DISTINCT bedroom counts across units (the autofill
+   * effect above only runs for units with EMPTY rent — this one must also
+   * cover the duplex modeled at $2,400/unit the user typed themselves).
+   * One action call per (metro, distinct-beds-set); the server dedupes to
+   * at most one HUD HTTP fetch via its caches. Pure nudge: failures are
+   * silent and analysis never waits on it.
+   */
+  useEffect(() => {
+    const place = lastSelectedAddressRef.current;
+    if (!place) return;
+    const propType = form.getValues("propertyType");
+    if (propType !== "multi-family" && propType !== "owner-occupant") return;
+    const units = form.getValues("units") ?? [];
+    const distinctBeds = [
+      ...new Set(
+        units
+          .map((u) => Math.round(Number(u?.bedrooms)))
+          .filter((b) => Number.isFinite(b) && b > 0)
+      ),
+    ];
+    if (distinctBeds.length === 0) return;
+    const metroPrefix = `${place.state ?? ""}:${place.county ?? ""}:${place.zip ?? ""}`;
+    const key = `${metroPrefix}|${[...distinctBeds].sort((a, b) => a - b).join(",")}`;
+    if (unitFmrKeyRef.current === key) return;
+    unitFmrKeyRef.current = key;
+
+    enrichPropertyAction({
+      state: place.state,
+      county: place.county,
+      zip: place.zip,
+      propertyType: propType,
+      unitBedrooms: distinctBeds,
+    })
+      .then((result) => {
+        // Stale-response guard (mirrors the .catch): if the user switched
+        // addresses while this fetch was in flight, merging would judge the
+        // NEW deal's rents against the OLD market's FMRs.
+        if (unitFmrKeyRef.current !== key) return;
+        if (result.fmrByBedrooms) {
+          // Merge: earlier distinct-bed sets for the SAME address stay
+          // valid (address changes clear the whole map upstream).
+          setUnitFmrByBedrooms((prev) => ({ ...(prev ?? {}), ...result.fmrByBedrooms }));
+        }
+      })
+      .catch((err) => {
+        // Release the key so a later bedrooms/address change can retry.
+        if (unitFmrKeyRef.current === key) unitFmrKeyRef.current = null;
+        console.warn("[multi-family FMR check] enrichment failed:", err);
+      });
+    // watchedAddress is included so picking an address AFTER typing the
+    // units still triggers the benchmark fetch (unitsEnrichmentKey alone
+    // wouldn't change in that order).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [unitsEnrichmentKey, watchedAddress]);
 
   /**
    * RentCast autofill (button-triggered). The cheap enrichment only knows
@@ -3482,6 +3555,7 @@ export function InvestCalcPage({
                 <MultiFamilyUnitsSection
                   form={form}
                   isHouseHack={propertyType === "owner-occupant"}
+                  fmrByBedrooms={unitFmrByBedrooms}
                 />
               )}
             </div>

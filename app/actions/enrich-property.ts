@@ -32,6 +32,14 @@ export type EnrichPropertyInput = {
   zip?: string;         // e.g., "19140"
   propertyType?: "single-family" | "multi-family" | "owner-occupant";
   bedrooms?: number;    // unit[0].bedrooms — only used for HUD lookup
+  /**
+   * Multi-family rent reality-check: the DISTINCT bedroom counts across
+   * units[]. One FMR lookup per distinct count (a 3-unit building of all
+   * 2-beds = one lookup); results come back in `fmrByBedrooms`. The state
+   * + SAFMR responses are cached, so the whole batch is at most one HUD
+   * HTTP fetch (two in SAFMR metros).
+   */
+  unitBedrooms?: number[];
 };
 
 // Runtime validation for the input. All fields optional (matches the
@@ -52,12 +60,21 @@ const enrichInputSchema = z.object({
     .enum(["single-family", "multi-family", "owner-occupant"])
     .optional(),
   bedrooms: z.number().int().min(0).max(20).optional(),
+  // Bounded like `bedrooms`; capped at 24 entries so a malformed payload
+  // can't fan out into an unbounded number of HUD lookups.
+  unitBedrooms: z.array(z.number().int().min(0).max(20)).max(24).optional(),
 });
 
 export type EnrichPropertyResult = {
   propertyTaxPct?: number;
   interestRate?: number;
   monthlyRent?: number;
+  /**
+   * HUD FMR keyed by the requested `unitBedrooms` counts (only counts that
+   * resolved appear). Benchmark data for the multi-family rent
+   * reality-check — never auto-filled into the form.
+   */
+  fmrByBedrooms?: Record<number, number>;
   /** Per-field notes so the UI can show "(suggested)" labels. */
   meta: {
     propertyTax?: { source: "state-static"; state: string };
@@ -68,6 +85,13 @@ export type EnrichPropertyResult = {
       county: string;
       year: number;
       /** Present when source is hud-safmr. */
+      zip?: string;
+    };
+    /** Sourcing for `fmrByBedrooms` (coarse: from the first resolved count). */
+    unitRents?: {
+      source: "hud-fmr" | "hud-safmr";
+      county: string;
+      year: number;
       zip?: string;
     };
   };
@@ -85,10 +109,11 @@ export async function enrichPropertyAction(
   if (!parsed.success) return out;
   const validated = parsed.data;
 
-  const [tax, rate, rent] = await Promise.all([
+  const [tax, rate, rent, unitFmrs] = await Promise.all([
     lookupPropertyTax(validated.state),
     fetchCurrentMortgageRate(),
     maybeFetchHudRent(validated),
+    maybeFetchUnitFmrs(validated),
   ]);
 
   if (tax) {
@@ -106,6 +131,15 @@ export async function enrichPropertyAction(
       county: rent.county,
       year: rent.year,
       ...(rent.zip ? { zip: rent.zip } : {}),
+    };
+  }
+  if (unitFmrs) {
+    out.fmrByBedrooms = unitFmrs.byBedrooms;
+    out.meta.unitRents = {
+      source: unitFmrs.zip ? "hud-safmr" : "hud-fmr",
+      county: unitFmrs.county,
+      year: unitFmrs.year,
+      ...(unitFmrs.zip ? { zip: unitFmrs.zip } : {}),
     };
   }
 
@@ -504,6 +538,41 @@ async function maybeFetchHudRent(
     console.warn("[enrichProperty] HUD fetch threw:", err);
     return null;
   }
+}
+
+/**
+ * Multi-family rent reality-check: fetch the FMR for each DISTINCT bedroom
+ * count in `unitBedrooms`. Reuses maybeFetchHudRent (and therefore the
+ * state + SAFMR caches) per count — run SEQUENTIALLY so the first call
+ * populates the cache and the rest hit it, instead of racing N identical
+ * HTTP fetches. Null-safe like everything else here: any count that fails
+ * simply doesn't appear in the map, and an empty map collapses to null so
+ * the caller emits nothing.
+ */
+async function maybeFetchUnitFmrs(
+  input: EnrichPropertyInput
+): Promise<{
+  byBedrooms: Record<number, number>;
+  county: string;
+  year: number;
+  zip?: string;
+} | null> {
+  const distinct = [...new Set((input.unitBedrooms ?? []).map((b) => Math.round(b)))];
+  if (distinct.length === 0) return null;
+
+  const byBedrooms: Record<number, number> = {};
+  let first: { county: string; year: number; zip?: string } | null = null;
+  for (const beds of distinct) {
+    const rent = await maybeFetchHudRent({ ...input, bedrooms: beds });
+    if (!rent) continue;
+    byBedrooms[beds] = rent.amount;
+    // Coarse sourcing from the first resolved count — counts can
+    // individually fall back from ZIP-level to county, but the label
+    // ("HUD FMR for <county>") is the same either way.
+    if (!first) first = { county: rent.county, year: rent.year, zip: rent.zip };
+  }
+  if (!first) return null;
+  return { byBedrooms, ...first };
 }
 
 function normalizeCounty(name: string): string {
