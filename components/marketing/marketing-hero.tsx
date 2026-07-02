@@ -64,15 +64,21 @@ export function MarketingHero() {
                 calculator below via a window event (hero-address-form.tsx). */}
             <HeroAddressForm />
 
-            {/* Risk-reversal line. */}
-            <p className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+            {/* Risk-reversal line — desktop-only; on phones the eyebrow
+                chip four lines up says the same thing verbatim (mobile
+                density audit LAND-3). */}
+            <p className="mt-3 hidden flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground sm:flex">
               <Check className="size-3.5 shrink-0 text-[var(--metric-positive)]" />
               <span>Free forever · No card · No signup required</span>
             </p>
           </div>
 
-          {/* ── Right: live, computed preview (the hero asset) ────── */}
-          <div className="tc-rise-in tc-delay-2 w-full lg:justify-self-end">
+          {/* ── Right: live, computed preview (the hero asset) ──────
+              Desktop-only: on phones the ~380px mock sat between the
+              hero form and the REAL calculator — a screenshot of the
+              thing directly below it (mobile density audit LAND-2; the
+              sample-report button already gives phones a live demo). */}
+          <div className="tc-rise-in tc-delay-2 hidden w-full lg:block lg:justify-self-end">
             <HeroProductMock />
           </div>
         </div>
@@ -83,10 +89,14 @@ export function MarketingHero() {
         <div className="tc-reveal mt-12 border-t border-border pt-8 sm:mt-14">
           <div className="grid gap-6 sm:gap-8 lg:grid-cols-[1.5fr_1fr]">
             <div className="space-y-1.5">
-              <p className="text-xs font-medium text-foreground/80">
+              {/* Capability + sources lines are desktop-only: both restate
+                  the subheadline word-for-word two viewports up; the two
+                  unique proof elements (ticker + quote) carry the mobile
+                  band (mobile density audit LAND-6). */}
+              <p className="hidden text-xs font-medium text-foreground/80 sm:block">
                 Auto-fills rent, rate &amp; tax · Editable assumptions · Cap rate · CoC · DSCR · cash flow
               </p>
-              <p className="text-[11px] leading-relaxed text-muted-foreground">
+              <p className="hidden text-[11px] leading-relaxed text-muted-foreground sm:block">
                 Uses <strong className="font-semibold text-foreground">HUD</strong> rent,{" "}
                 <strong className="font-semibold text-foreground">FRED</strong> mortgage rates, and{" "}
                 <strong className="font-semibold text-foreground">state</strong> tax defaults, all editable.

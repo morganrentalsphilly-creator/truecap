@@ -130,14 +130,26 @@ export function CookieConsentBanner() {
       <div className="mx-auto flex max-w-5xl flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
         <div className="flex min-w-0 flex-1 items-start gap-2.5 sm:items-center">
           <Cookie className="mt-0.5 size-4 shrink-0 text-primary sm:mt-0" />
+          {/* One line on phones (the full 3-line copy + button row ate
+              ~20% of a 667px first viewport — mobile density audit
+              LAND-5); full copy from sm:. Reject/Accept keep equal
+              prominence either way. */}
           <p className="text-xs leading-relaxed text-foreground sm:text-sm">
-            <strong>We use cookies</strong> for analytics + paid-ad
-            measurement. Reject and only essential session cookies are
-            set. See our{" "}
-            <Link href="/privacy" className="font-semibold text-primary underline-offset-2 hover:underline">
-              privacy policy
-            </Link>
-            .
+            <strong>We use cookies</strong>
+            <span className="sm:hidden">
+              {" for analytics & ads — "}
+              <Link href="/privacy" className="font-semibold text-primary underline-offset-2 hover:underline">
+                privacy policy
+              </Link>
+              .
+            </span>
+            <span className="hidden sm:inline">
+              {" for analytics + paid-ad measurement. Reject and only essential session cookies are set. See our "}
+              <Link href="/privacy" className="font-semibold text-primary underline-offset-2 hover:underline">
+                privacy policy
+              </Link>
+              .
+            </span>
           </p>
         </div>
         <div className="flex shrink-0 gap-2 sm:gap-3">

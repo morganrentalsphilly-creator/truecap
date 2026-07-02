@@ -28,6 +28,12 @@ import { X } from "lucide-react";
 const DISMISS_KEY = "truecap_annual_promo_dismissed_v1";
 
 const HIDE_ON_PATHS = ["/pricing", "/auth", "/embed", "/dashboard"];
+/** Exact-match hides (startsWith("/") would match everything). The landing
+ *  is a paid-ad first touch — a promo banner above the header before the
+ *  visitor has seen any value is the wrong first pixel row (mobile density
+ *  audit LAND-4). The banner stays on blog//tools//glossary, where
+ *  visitors are warmer. */
+const HIDE_EXACT_PATHS = ["/"];
 
 export function AnnualPromoBanner() {
   const pathname = usePathname() ?? "/";
@@ -50,6 +56,7 @@ export function AnnualPromoBanner() {
   if (!hydrated) return null;
   if (dismissed) return null;
   if (HIDE_ON_PATHS.some((p) => pathname.startsWith(p))) return null;
+  if (HIDE_EXACT_PATHS.includes(pathname)) return null;
 
   const handleDismiss = () => {
     setDismissed(true);
