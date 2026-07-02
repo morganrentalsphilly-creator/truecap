@@ -8,9 +8,22 @@ import { toServerErrorResult } from "@/lib/db-error";
  * Settings page never breaks before the column exists.
  */
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { rateAlertEmailsLive } from "@/lib/rate-alerts-mode";
 
 export type EmailPrefsResult =
-  | { ok: true; rateAlertEmails: boolean }
+  | {
+      ok: true;
+      rateAlertEmails: boolean;
+      /**
+       * True only when the send-rate-alerts cron will ACTUALLY send emails
+       * (RATE_ALERTS_MODE === "live"). Server-derived here so every consent
+       * surface (Settings card, inline analyzer nudge) softens its copy to
+       * "launching soon" while the cron is dormant — no surface promises an
+       * email the system won't send, and the promises come back with zero
+       * code changes when the env var flips.
+       */
+      alertsLive: boolean;
+    }
   | {
       ok: false;
       code: "SIGN_IN_REQUIRED" | "MIGRATION_PENDING" | "SERVER_ERROR";
@@ -43,6 +56,7 @@ export async function getEmailPreferencesAction(): Promise<EmailPrefsResult> {
   return {
     ok: true,
     rateAlertEmails: Boolean((data as { rate_alert_emails?: boolean } | null)?.rate_alert_emails),
+    alertsLive: rateAlertEmailsLive(),
   };
 }
 
@@ -64,5 +78,5 @@ export async function setRateAlertEmailsAction(enabled: boolean): Promise<EmailP
     }
     return toServerErrorResult(error, "email-preferences");
   }
-  return { ok: true, rateAlertEmails: enabled };
+  return { ok: true, rateAlertEmails: enabled, alertsLive: rateAlertEmailsLive() };
 }

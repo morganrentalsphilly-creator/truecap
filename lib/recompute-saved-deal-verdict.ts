@@ -50,6 +50,14 @@ export function recomputeSavedDealVerdict(formSnapshot: unknown): {
   totalOperatingExpenses: number;
   monthlyPayment: number;
   pmiMonthly: number;
+  /** Monthly tax savings ($) from the current tax model. Recomputed so Compare
+   *  never shows a stale over-sheltered figure (the CapEx-out-of-taxable fix)
+   *  next to fresh Net CF. */
+  taxSavingsMonthly: number;
+  /** After-tax cash flow ($/mo) = netCashFlow + taxSavingsMonthly — from the
+   *  SAME recompute so the row reconciles with the fresh Net CF + Tax Savings
+   *  rows instead of reading a stale stored snapshot. */
+  afterTaxCF: number;
 } | null {
   // Use the resilient normalizer (same as the editor) rather than a raw
   // safeParse, so legacy snapshots that open fine in the editor recompute
@@ -74,6 +82,8 @@ export function recomputeSavedDealVerdict(formSnapshot: unknown): {
       totalOperatingExpenses: result.totalOperatingExpenses,
       monthlyPayment: result.monthlyPayment,
       pmiMonthly: result.pmiMonthly,
+      taxSavingsMonthly: result.taxSavingsMonthly,
+      afterTaxCF: result.afterTaxCF,
     };
   } catch {
     return null;

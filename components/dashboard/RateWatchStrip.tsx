@@ -12,7 +12,19 @@ import type { RateWatchSummary } from "@/lib/rate-watch";
  * are no watchable saved deals. Type-only import of the (server-only) rate-watch
  * module is erased at build, so this stays safe in the client tree.
  */
-export function RateWatchStrip({ rateWatch }: { rateWatch: RateWatchSummary | null }) {
+export function RateWatchStrip({
+  rateWatch,
+  alertsLive = false,
+}: {
+  rateWatch: RateWatchSummary | null;
+  /**
+   * Server-derived: true only when RATE_ALERTS_MODE === "live" and the
+   * send-rate-alerts cron actually sends. Defaults FALSE (truthful by
+   * default) — the explainer only promises an email when the promise is
+   * real; otherwise it says alerts are launching soon.
+   */
+  alertsLive?: boolean;
+}) {
   if (!rateWatch || rateWatch.monitoredCount === 0) return null;
   const { currentRatePct, changedDeals, monitoredCount } = rateWatch;
 
@@ -47,8 +59,10 @@ export function RateWatchStrip({ rateWatch }: { rateWatch: RateWatchSummary | nu
             the mobile strip alone. */}
         <p className="mt-2.5 hidden text-xs leading-relaxed text-muted-foreground sm:block">
           We re-underwrite your saved deals whenever the 30-yr rate moves, and flag any whose
-          tier, DSCR band, or cash-flow sign changes. Turn on alerts in settings to hear about it
-          by email.
+          tier, DSCR band, or cash-flow sign changes.{" "}
+          {alertsLive
+            ? "Turn on alerts in settings to hear about it by email."
+            : "Email alerts are launching soon — join the list in settings."}
         </p>
       </section>
     );

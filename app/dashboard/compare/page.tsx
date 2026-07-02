@@ -139,7 +139,12 @@ function mapDeal(row: SavedAnalysisRow): CompareDealViewModel {
     netCashFlow,
     cocReturn,
     capRate,
-    afterTaxCF: toNumber(snapshot.afterTaxCF),
+    // After-tax figures from the SAME recompute as netCashFlow so the grid
+    // reconciles (afterTaxCF = netCashFlow + taxSavingsMonthly) — the stored
+    // snapshot predates the PMI/CapEx-taxable corrections for older deals and
+    // could crown the wrong deal on the after-tax winner highlight. Falls back
+    // to the stored values for legacy/unparseable forms.
+    afterTaxCF: recomputed ? recomputed.afterTaxCF : toNumber(snapshot.afterTaxCF),
     annualCashFlow: recomputed ? recomputed.netCashFlowMonthly * 12 : toNumber(snapshot.annualCashFlow),
     dscr: recomputed ? recomputed.dscr : toNumber(snapshot.dscr),
     // Bridge components from the SAME recompute as netCashFlow so the tooltip
@@ -152,7 +157,7 @@ function mapDeal(row: SavedAnalysisRow): CompareDealViewModel {
     pmiMonthly: recomputed
       ? recomputed.pmiMonthly
       : toNumber((snapshot as Record<string, number | null | undefined>).pmiMonthly),
-    taxSavingsMonthly: toNumber(snapshot.taxSavingsMonthly),
+    taxSavingsMonthly: recomputed ? recomputed.taxSavingsMonthly : toNumber(snapshot.taxSavingsMonthly),
   };
 
   const assumptions = buildDealAssumptions(row.form_snapshot, row);

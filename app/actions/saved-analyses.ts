@@ -28,7 +28,7 @@ import {
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { DEFAULT_APPRECIATION_RATE, DEFAULT_SELLING_COST_PCT } from "@/lib/exit-scenarios";
 import { buildCompareSnapshotPayload } from "@/lib/compare-result-snapshot";
-import { PDF_SNAPSHOT_VERSION } from "@/lib/pdf-export-constants";
+import { PDF_CACHE_VERSION } from "@/lib/pdf-export-constants";
 
 export type SaveDealResult =
   | { ok: true; id: string; mode: "inserted" | "updated" }
@@ -648,7 +648,7 @@ export async function getSavedAnalysisPdfExportAction(
   // The third condition exists because cached PDFs don't track the
   // branding state they were generated with. If a user updates their
   // logo, brand color, or "Prepared by" name, the cached PDF would
-  // still show the old branding indefinitely (until PDF_SNAPSHOT_VERSION
+  // still show the old branding indefinitely (until PDF_CACHE_VERSION
   // bumped). Bypassing cache for branded users means their changes
   // always reflect on the next export, at the cost of regenerating
   // (~3-5s + an upload). Acceptable tradeoff — branded users care
@@ -681,9 +681,13 @@ export async function getSavedAnalysisPdfExportAction(
     // Fall through to the normal cache logic on unexpected failures.
   }
 
+  // Version match is against the COMPOSITE template+engine version (see
+  // PDF_CACHE_VERSION) — legacy rows storing the old plain template version
+  // (0-4) simply never match and regenerate. Never throws on odd legacy
+  // values: dbNumber already coerced non-numeric to 0 above.
   if (
     cachedPdfUrl &&
-    cachedVersion === PDF_SNAPSHOT_VERSION &&
+    cachedVersion === PDF_CACHE_VERSION &&
     !hasUserBranding
   ) {
     return { ok: true, source: "cache", pdfUrl: cachedPdfUrl };
@@ -731,7 +735,7 @@ export async function completeSavedAnalysisPdfExportAction(
     .update({
       pdf_url: cleanPdfUrl,
       pdf_generated_at: new Date().toISOString(),
-      pdf_snapshot_version: PDF_SNAPSHOT_VERSION,
+      pdf_snapshot_version: PDF_CACHE_VERSION,
       last_activity_at: new Date().toISOString(),
     })
     .eq("id", savedDealId)

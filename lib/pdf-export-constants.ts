@@ -1,6 +1,13 @@
-// Bump this version whenever the PDF template changes so cached
+import { EXIT_SCENARIOS_SNAPSHOT_VERSION } from "@/lib/exit-scenarios";
+import { INVESTCALC_SCHEMA_VERSION } from "@/lib/investcalc-schema";
+import { TAX_STRATEGY_SNAPSHOT_VERSION } from "@/lib/tax-strategy";
+import { TEN_YEAR_PROJECTION_SNAPSHOT_VERSION } from "@/lib/ten-year-projections";
+
+// Bump this version whenever the PDF TEMPLATE changes so cached
 // snapshots (in the analysis-pdfs storage bucket) are invalidated
-// and regenerated on the next export.
+// and regenerated on the next export. Engine (math) changes are
+// handled automatically by PDF_CACHE_VERSION below — do NOT bump
+// this constant for a calc fix.
 //
 // History:
 //   1 - Original template
@@ -15,8 +22,56 @@
 //   4 - Model correction: NOI/cap rate/DSCR now exclude the CapEx reserve,
 //       and PMI is modeled on sub-20%-down loans — so cached PDFs must
 //       regenerate to match the corrected headline numbers.
-export const PDF_SNAPSHOT_VERSION = 4;
+//   5 - Invalidate PDFs cached before the after-tax / CapEx-taxable engine
+//       corrections (af2e80f after-tax projection + FHA PMI, eff3a96 CapEx
+//       out of taxable income). Those bumped the in-app panel snapshot
+//       versions but not this constant, so cached PDFs kept re-serving
+//       over-sheltered after-tax numbers the dashboard no longer shows.
+export const PDF_SNAPSHOT_VERSION = 5;
 export const ANALYSIS_PDF_BUCKET = "analysis-pdfs";
+
+/**
+ * Each component version must stay within [0, RADIX). The build fails loudly
+ * (module-load throw in `encodePdfCacheVersion`) if one ever grows past it,
+ * rather than silently colliding two distinct version tuples.
+ */
+const PDF_CACHE_VERSION_RADIX = 50;
+
+/**
+ * Pack the template + engine snapshot versions into ONE integer, positional
+ * base-50. Pure + deterministic so the composite is stable across server and
+ * client bundles. Max possible value (all components at 49) is ~312.5M —
+ * comfortably inside Postgres `integer` (the pdf_snapshot_version column).
+ */
+export function encodePdfCacheVersion(versions: readonly number[]): number {
+  return versions.reduce((acc, v) => {
+    if (!Number.isInteger(v) || v < 0 || v >= PDF_CACHE_VERSION_RADIX) {
+      throw new Error(`PDF cache version component out of range [0, ${PDF_CACHE_VERSION_RADIX}): ${v}`);
+    }
+    return acc * PDF_CACHE_VERSION_RADIX + v;
+  }, 0);
+}
+
+/**
+ * The version actually stored in / compared against the numeric
+ * `pdf_snapshot_version` column. A composite of the template version AND every
+ * engine snapshot version that feeds the PDF's numbers, so a future engine
+ * correction (which already bumps its own snapshot constant for the in-app
+ * panels) auto-invalidates cached PDFs too — no one has to remember a manual
+ * PDF bump (it was forgotten twice: af2e80f and eff3a96).
+ *
+ * Legacy rows hold the old plain template version (0-4). Those can never equal
+ * this composite (>= RADIX^4 whenever PDF_SNAPSHOT_VERSION >= 1), so every
+ * legacy cached PDF is treated as stale and regenerates on next export —
+ * exactly the one-time flush the v5 bump wants. No migration needed.
+ */
+export const PDF_CACHE_VERSION = encodePdfCacheVersion([
+  PDF_SNAPSHOT_VERSION,
+  INVESTCALC_SCHEMA_VERSION,
+  TEN_YEAR_PROJECTION_SNAPSHOT_VERSION,
+  TAX_STRATEGY_SNAPSHOT_VERSION,
+  EXIT_SCENARIOS_SNAPSHOT_VERSION,
+]);
 
 /**
  * Report modes — who the PDF is for. Each tailors which sections appear:

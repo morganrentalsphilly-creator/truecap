@@ -78,7 +78,7 @@ import {
 } from "@/lib/deal-score";
 import type { ReportData } from "@/lib/pdf-generator";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
-import { ANALYSIS_PDF_BUCKET, PDF_SNAPSHOT_VERSION } from "@/lib/pdf-export-constants";
+import { ANALYSIS_PDF_BUCKET, PDF_CACHE_VERSION } from "@/lib/pdf-export-constants";
 import {
   buildExitScenarios,
   resolveExitScenarioRates,
@@ -1481,7 +1481,11 @@ export function SavedAnalysesPage({
               data: { user },
             } = await supabase.auth.getUser();
             if (!user) return;
-            const filePath = `${user.id}/${exportResult.id}/investment-analysis-v${PDF_SNAPSHOT_VERSION}.pdf`;
+            // Path embeds the composite cache version so an engine bump writes
+            // a NEW object (fresh public URL) instead of upserting over the old
+            // path — a CDN-cached copy of the old URL can never be re-served as
+            // the "fresh" PDF.
+            const filePath = `${user.id}/${exportResult.id}/investment-analysis-v${PDF_CACHE_VERSION}.pdf`;
             const { error: uploadError } = await supabase.storage
               .from(ANALYSIS_PDF_BUCKET)
               .upload(filePath, pdfBlob, {

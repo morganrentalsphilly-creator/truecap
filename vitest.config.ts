@@ -5,6 +5,10 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "."),
+      // `import "server-only"` throws outside RSC by design; tests exercise
+      // pure logic in those modules, so alias it to an empty stub. The real
+      // guard still protects the Next build (its resolver ignores this).
+      "server-only": path.resolve(__dirname, "lib/__tests__/server-only-stub.ts"),
     },
   },
   test: {

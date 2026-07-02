@@ -25,6 +25,7 @@ import { recomputeCompareSnapshotFromForm } from "@/lib/compare-result-snapshot"
 import { getSavedAnalysesTotalCount } from "@/lib/saved-analyses-count";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { buildRateWatch } from "@/lib/rate-watch";
+import { rateAlertEmailsLive } from "@/lib/rate-alerts-mode";
 
 const DASHBOARD_ACTIVE_DEALS_LIMIT = 20;
 
@@ -181,7 +182,7 @@ export default async function DashboardPage() {
     supabase
       .from("saved_analyses")
       .select(
-        "purchase_price, net_cash_flow_monthly, cap_rate_raw:result_snapshot->>capRate, ncf_snapshot:result_snapshot->>netCashFlow, form_snapshot"
+        "id, title, address, purchase_price, net_cash_flow_monthly, cap_rate_raw:result_snapshot->>capRate, ncf_snapshot:result_snapshot->>netCashFlow, form_snapshot"
       )
       .eq("user_id", user.id)
       .is("deleted_at", null)
@@ -219,6 +220,11 @@ export default async function DashboardPage() {
   // Full-portfolio aggregates (see query note above). Null on error —
   // getPortfolioTotals falls back to the 20-deal sample, same as before.
   type AggregateRow = {
+    // id/title/address ride along (still scalar-only) so the rate watch can
+    // monitor EVERY active deal, not the 20-row recency sample below.
+    id: string;
+    title: string | null;
+    address: string | null;
     purchase_price: number | null;
     net_cash_flow_monthly: number | null;
     cap_rate_raw: string | null;
@@ -226,6 +232,9 @@ export default async function DashboardPage() {
     form_snapshot: unknown;
   };
   let portfolioAggregates: DashboardHomeData["portfolioAggregates"] = null;
+  // Hoisted so the rate watch below can reuse the full active set; null when
+  // the aggregate query failed (rate watch then falls back to the sample).
+  let fullActiveRows: AggregateRow[] | null = null;
   if (aggregateResult.error) {
     // The unbounded aggregate query failed → the dashboard falls back to the
     // ≤20-deal sample, which UNDERSTATES portfolio totals for 20+ deal users.
@@ -238,7 +247,8 @@ export default async function DashboardPage() {
     });
   }
   if (!aggregateResult.error) {
-    const aggRows = (aggregateResult.data ?? []) as AggregateRow[];
+    const aggRows = (aggregateResult.data ?? []) as unknown as AggregateRow[];
+    fullActiveRows = aggRows;
     let totalValue = 0;
     let totalCashFlow = 0;
     let capNum = 0;
@@ -343,15 +353,23 @@ export default async function DashboardPage() {
 
   // Rate watch — re-underwrite saved deals at today's rate; the strip shows
   // only the ones whose signal changed (null = nothing to show, strip hides).
+  // Fed from the UNBOUNDED aggregate rows so a 21+-deal user's deal #21 is
+  // monitored too — the email cron scans ALL non-archived deals, and the strip
+  // must never tell a different story ("Monitoring 20" while 23 are watched).
+  // Falls back to the 20-row sample only if the aggregate query failed.
   dashboardData.rateWatch = buildRateWatch(
-    (rows ?? []) as Array<{
-      id: string;
-      title: string | null;
-      address: string | null;
-      form_snapshot: unknown;
-    }>,
+    fullActiveRows ??
+      ((rows ?? []) as Array<{
+        id: string;
+        title: string | null;
+        address: string | null;
+        form_snapshot: unknown;
+      }>),
     currentRate
   );
+  // Truthful-alerts flag: the strip only promises alert EMAILS when the
+  // send-rate-alerts cron is actually live (G1 fallback — see lib/rate-alerts-mode).
+  dashboardData.alertsLive = rateAlertEmailsLive();
 
   return (
     <DashboardHome

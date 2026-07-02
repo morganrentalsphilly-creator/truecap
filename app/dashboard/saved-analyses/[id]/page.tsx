@@ -23,6 +23,7 @@ import { ScenariosCard } from "@/components/investcalc/scenarios-card";
 import { NextActionBanner } from "@/components/investcalc/next-action-banner";
 import { DealAgingNudge } from "@/components/investcalc/deal-aging-nudge";
 import { nextActionForDeal } from "@/lib/next-action";
+import { recomputeSavedDealVerdict } from "@/lib/recompute-saved-deal-verdict";
 import { isPipelineStage, DEFAULT_PIPELINE_STAGE } from "@/lib/pipeline";
 import {
   getDashboardNavAccess,
@@ -86,7 +87,7 @@ export default async function DealWorkspacePage({
     hasPaidPlanSubscription(supabase, user.id),
     supabase
       .from("saved_analyses")
-      .select("id, address, title, result_snapshot, net_cash_flow_monthly, pipeline_stage, created_at")
+      .select("id, address, title, form_snapshot, result_snapshot, net_cash_flow_monthly, pipeline_stage, created_at")
       .eq("id", id)
       .eq("user_id", user.id)
       .is("deleted_at", null)
@@ -103,6 +104,7 @@ export default async function DealWorkspacePage({
     id: string;
     address: string | null;
     title: string | null;
+    form_snapshot: unknown;
     result_snapshot: Record<string, unknown> | null;
     net_cash_flow_monthly: number | null;
     pipeline_stage: string | null;
@@ -113,15 +115,25 @@ export default async function DealWorkspacePage({
   // Recommended next step from the saved underwrite (cash flow + DSCR),
   // adjusted for where the deal sits in the pipeline (a closed deal is told
   // to track equity, not to make an offer).
+  //
+  // Recompute-on-read: derive the inputs from the CURRENT engine via the form
+  // snapshot — the stored result_snapshot goes stale after engine corrections
+  // (PMI, CapEx-taxable), so this banner could contradict the dashboard's
+  // recomputed "cash-flow negative" warning that deep-links here. Falls back
+  // to the stored snapshot for legacy forms that don't validate (exact same
+  // pattern as app/dashboard/saved-analyses/page.tsx mapSavedRow).
   const snap = dealRow.result_snapshot ?? {};
   const num = (v: unknown): number => {
     const n = typeof v === "number" ? v : Number(v);
     return Number.isFinite(n) ? n : 0;
   };
+  const fresh = recomputeSavedDealVerdict(dealRow.form_snapshot);
   const nextAction = nextActionForDeal({
-    netCashFlow: num(snap["netCashFlow"] ?? dealRow.net_cash_flow_monthly),
-    dscr: snap["dscr"] != null ? num(snap["dscr"]) : null,
-    monthlyPayment: num(snap["monthlyPayment"]),
+    netCashFlow: fresh
+      ? fresh.netCashFlowMonthly
+      : num(snap["netCashFlow"] ?? dealRow.net_cash_flow_monthly),
+    dscr: fresh ? fresh.dscr : snap["dscr"] != null ? num(snap["dscr"]) : null,
+    monthlyPayment: fresh ? fresh.monthlyPayment : num(snap["monthlyPayment"]),
     stage: isPipelineStage(dealRow.pipeline_stage) ? dealRow.pipeline_stage : undefined,
   });
 

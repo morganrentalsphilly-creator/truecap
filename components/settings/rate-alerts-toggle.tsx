@@ -23,6 +23,12 @@ export function RateAlertsToggle({
   const [loaded, setLoaded] = useState(false);
   const [available, setAvailable] = useState(true);
   const [enabled, setEnabled] = useState(false);
+  // Truthful-alerts flag (G1 fallback): server-derived from RATE_ALERTS_MODE
+  // via the preferences action. Defaults FALSE so we never promise an email
+  // while the send-rate-alerts cron is dormant — copy softens to "launching
+  // soon" but the toggle stays functional (consent is still banked). Flips
+  // back to the full promise automatically when the env var goes live.
+  const [alertsLive, setAlertsLive] = useState(false);
   const [pending, startTransition] = useTransition();
 
   useEffect(() => {
@@ -30,8 +36,10 @@ export function RateAlertsToggle({
     void getEmailPreferencesAction()
       .then((r) => {
         if (cancelled) return;
-        if (r.ok) setEnabled(r.rateAlertEmails);
-        else if (r.code === "MIGRATION_PENDING") setAvailable(false);
+        if (r.ok) {
+          setEnabled(r.rateAlertEmails);
+          setAlertsLive(r.alertsLive);
+        } else if (r.code === "MIGRATION_PENDING") setAvailable(false);
         setLoaded(true);
       })
       .catch(() => {
@@ -73,11 +81,19 @@ export function RateAlertsToggle({
             variant: "destructive",
           });
         } else {
-          toast({
-            title: "Rate alerts on",
-            description:
-              "We'll email you only when a rate move flips a saved deal's verdict.",
-          });
+          toast(
+            alertsLive
+              ? {
+                  title: "Rate alerts on",
+                  description:
+                    "We'll email you only when a rate move flips a saved deal's verdict.",
+                }
+              : {
+                  title: "You're on the list",
+                  description:
+                    "Email alerts are launching soon — you'll hear about rate moves that flip a saved deal's verdict.",
+                }
+          );
         }
       });
     };
@@ -90,7 +106,9 @@ export function RateAlertsToggle({
         <div className="flex items-center gap-2.5 px-1 sm:hidden">
           <BellRing className="size-4 shrink-0 text-primary" />
           <p className="min-w-0 flex-1 text-xs leading-snug text-muted-foreground">
-            Get an email if a rate move flips this deal&apos;s verdict.
+            {alertsLive
+              ? "Get an email if a rate move flips this deal's verdict."
+              : "Email alerts for rate moves that flip a verdict are launching soon."}
           </p>
           <button
             type="button"
@@ -98,7 +116,7 @@ export function RateAlertsToggle({
             disabled={pending}
             className="shrink-0 rounded-lg bg-primary px-3 py-1.5 text-xs font-bold text-primary-foreground disabled:opacity-70"
           >
-            {pending ? "Enabling…" : "Notify me"}
+            {pending ? (alertsLive ? "Enabling…" : "Joining…") : alertsLive ? "Notify me" : "Join the list"}
           </button>
         </div>
         <div className="hidden rounded-2xl border border-primary/25 bg-gradient-to-br from-[var(--brand-blue-light)] via-card to-card p-5 shadow-sm sm:block sm:p-6">
@@ -109,9 +127,9 @@ export function RateAlertsToggle({
                 Want a heads-up if this deal changes?
               </h3>
               <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                Mortgage rates move every week. We&apos;ll quietly re-underwrite your
-                saved deals and email you only when a move actually flips a verdict —
-                its tier, DSCR band, or cash-flow sign. At most once a week, never spam.
+                {alertsLive
+                  ? "Mortgage rates move every week. We'll quietly re-underwrite your saved deals and email you only when a move actually flips a verdict — its tier, DSCR band, or cash-flow sign. At most once a week, never spam."
+                  : "Mortgage rates move every week. Email alerts are launching soon — join the list now and, once they're live, you'll only hear when a move actually flips a verdict: its tier, DSCR band, or cash-flow sign. At most once a week, never spam."}
               </p>
               <button
                 type="button"
@@ -120,7 +138,13 @@ export function RateAlertsToggle({
                 className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-sm font-bold text-primary-foreground shadow-sm transition-transform hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-70"
               >
                 <BellRing className="size-4" />
-                {pending ? "Enabling…" : "Email me if rates move this deal"}
+                {pending
+                  ? alertsLive
+                    ? "Enabling…"
+                    : "Joining…"
+                  : alertsLive
+                    ? "Email me if rates move this deal"
+                    : "Join the alert list"}
               </button>
             </div>
           </div>
@@ -137,9 +161,11 @@ export function RateAlertsToggle({
           <div>
             <h2 className="text-base font-bold text-foreground">Deal rate alerts</h2>
             <p className="mt-1 max-w-prose text-sm leading-relaxed text-muted-foreground">
-              Email me when the 30-year mortgage rate moves enough to change one of my saved deals&apos;
-              verdict — its tier, DSCR band, or cash-flow sign. At most once a week, and only when
-              something actually changed.
+              {alertsLive
+                ? "Email me when the 30-year mortgage rate moves enough to change one of my saved deals' verdict — its tier, DSCR band, or cash-flow sign. At most once a week, and only when something actually changed."
+                : enabled
+                  ? "You're on the list — email alerts are launching soon. Once live, we'll email you when the 30-year mortgage rate moves enough to change one of your saved deals' verdicts. At most once a week."
+                  : "Email alerts are launching soon. Flip this on to join the list — once live, we'll email you when the 30-year mortgage rate moves enough to change one of your saved deals' verdicts. At most once a week."}
             </p>
           </div>
         </div>

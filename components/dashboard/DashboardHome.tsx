@@ -87,6 +87,13 @@ export type DashboardHomeData = {
    */
   rateWatch?: RateWatchSummary | null;
   /**
+   * True only when the send-rate-alerts cron will ACTUALLY send emails
+   * (RATE_ALERTS_MODE === "live", derived server-side). The RateWatchStrip
+   * drops its email-promise clause when false so no surface promises an
+   * email the system won't send.
+   */
+  alertsLive?: boolean;
+  /**
    * Due-diligence checklists for the user's ACTIVE saved deals (raw items +
    * deal label), used by the "Due this week" card to surface overdue / due-
    * within-7d contingency deadlines. Status is computed client-side in the
@@ -692,7 +699,7 @@ export function DashboardHome({
             surfaces the ones whose signal changed since they were saved (the
             retention hook; same pure logic as the weekly rate-alert email).
             Renders nothing when nothing changed — invisible until useful. */}
-        <RateWatchStrip rateWatch={data.rateWatch ?? null} />
+        <RateWatchStrip rateWatch={data.rateWatch ?? null} alertsLive={data.alertsLive ?? false} />
 
         {/* ── Portfolio overview — answers "what's my book worth?" ──
             Trimmed from 4 StatCards to 2 hero cards + 1 stat strip.

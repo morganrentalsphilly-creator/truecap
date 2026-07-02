@@ -36,6 +36,7 @@ import {
   type RateAlertDeal,
 } from "@/lib/rate-alerts";
 import { investmentFormSchema } from "@/lib/investcalc-schema";
+import { resolveRateAlertsMode } from "@/lib/rate-alerts-mode";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { getSiteUrl } from "@/lib/site-url";
 
@@ -43,14 +44,9 @@ export const runtime = "nodejs";
 // Re-underwriting many deals + per-user emails can exceed the default.
 export const maxDuration = 120;
 
-type Mode = "off" | "dry" | "live";
-
-function resolveMode(): Mode {
-  const raw = (process.env.RATE_ALERTS_MODE ?? "off").trim().toLowerCase();
-  if (raw === "live") return "live";
-  if (raw === "dry" || raw === "dry-run") return "dry";
-  return "off";
-}
+// Mode parse lives in lib/rate-alerts-mode.ts — SHARED with every surface
+// that promises an alert email, so copy and sends can never disagree.
+const resolveMode = resolveRateAlertsMode;
 
 /** Latest two weekly MORTGAGE30US observations, newest first. */
 async function fetchRatePair(): Promise<{ current: number; previous: number } | null> {
