@@ -139,6 +139,8 @@ export function calculateAnalysis(values: InvestmentFormValues): AnalysisResult 
     expenseGrowthPct,
     rentGrowthPct,
     propertyTaxPct,
+    propertyTaxInputMode,
+    propertyTaxAnnual,
     insuranceInputMode,
     insurancePct,
     insuranceMonthly,
@@ -187,7 +189,13 @@ export function calculateAnalysis(values: InvestmentFormValues): AnalysisResult 
   const propertyTaxDefault = Math.round((purchasePrice * (propertyTaxPctEffective / 100)) / 12);
   const insurancePctEffective = insurancePct ?? 0.5;
   const insuranceDefault = Math.round((purchasePrice * (insurancePctEffective / 100)) / 12);
-  const propertyTax = propertyTaxDefault;
+  // Annual-$ mode: the actual bill off the listing, /12. Blank falls back
+  // to the percent estimate; percent mode is byte-identical to before
+  // (mirrors the insurance dual-mode branch below).
+  const propertyTax =
+    propertyTaxInputMode === "annual" && propertyTaxAnnual != null
+      ? Math.round(propertyTaxAnnual / 12)
+      : propertyTaxDefault;
   const insurance =
     insuranceInputMode === "monthly"
       ? Math.round(insuranceMonthly ?? insuranceDefault)

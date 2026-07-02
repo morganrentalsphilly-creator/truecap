@@ -147,6 +147,8 @@ export function OperatingExpensesSection({
   } = form;
 
   const propertyTaxPct = watch("propertyTaxPct");
+  const propertyTaxInputMode = watch("propertyTaxInputMode");
+  const propertyTaxAnnual = watch("propertyTaxAnnual");
   const insuranceInputMode = watch("insuranceInputMode");
   const insurancePct = watch("insurancePct");
   const insuranceMonthly = watch("insuranceMonthly");
@@ -155,7 +157,13 @@ export function OperatingExpensesSection({
   // the property has no tax/insurance); show a dash until there's a price.
   const hasPrice = purchasePriceForEstimate > 0;
   const propertyTaxPctEffective = propertyTaxPct ?? 1.1;
-  const propertyTaxEst = Math.round((purchasePriceForEstimate * (propertyTaxPctEffective / 100)) / 12);
+  const propertyTaxPctEst = Math.round((purchasePriceForEstimate * (propertyTaxPctEffective / 100)) / 12);
+  // Annual-$ mode mirrors calc-analysis: the bill /12, falling back to the
+  // percent estimate while the field is blank.
+  const propertyTaxEst =
+    propertyTaxInputMode === "annual" && propertyTaxAnnual != null
+      ? Math.round(propertyTaxAnnual / 12)
+      : propertyTaxPctEst;
   const insurancePctEffective = insurancePct ?? 0.5;
   const insuranceDefault = Math.round((purchasePriceForEstimate * (insurancePctEffective / 100)) / 12);
   const insuranceEst =
@@ -262,27 +270,89 @@ export function OperatingExpensesSection({
         <div className={cn("overflow-hidden rounded-xl border border-[var(--brand-orange)]/10 bg-card/50", !showAdvanced && "hidden")}>
           <div className="grid grid-cols-1 divide-y divide-[var(--brand-orange)]/10 md:grid-cols-2 md:divide-x md:divide-y-0 xl:grid-cols-4">
             <SectionField>
-              <FieldLabel htmlFor="propertyTaxPct">
-                <FieldLabelWithTooltip label="Property Tax % (Annual)" term="propertyTax" />
+              <FieldLabel htmlFor="propertyTaxAmount">
+                <FieldLabelWithTooltip
+                  label={propertyTaxInputMode === "annual" ? "Property Tax (Annual $)" : "Property Tax % (Annual)"}
+                  term="propertyTax"
+                />
               </FieldLabel>
+              {/* % ⇄ $ mode toggle (Phase 2 #3): listings state the actual
+                  annual bill — let users type that number directly instead
+                  of reverse-engineering a rate. Mirrors the insurance
+                  dual-mode control below. */}
+              <Controller
+                name="propertyTaxInputMode"
+                control={control}
+                render={({ field }) => (
+                  <div className="mb-2 flex rounded-lg border border-[var(--brand-orange)]/10 bg-background p-1 shadow-sm">
+                    {[
+                      { value: "percent", label: "Annual %" },
+                      { value: "annual", label: "Annual $" },
+                    ].map((option) => (
+                      <button
+                        key={option.value}
+                        type="button"
+                        onClick={() => field.onChange(option.value)}
+                        className={cn(
+                          "h-8 flex-1 rounded-md px-3 text-xs font-semibold transition-colors",
+                          field.value === option.value
+                            ? "bg-[var(--brand-orange)] text-white"
+                            : "text-muted-foreground hover:text-foreground"
+                        )}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              />
               <div className="relative">
+                {propertyTaxInputMode === "annual" ? <DollarIcon /> : null}
                 <Input
-                  {...register("propertyTaxPct", { setValueAs: optionalNumberSetValueAs })}
-                  id="propertyTaxPct"
+                  {...register(propertyTaxInputMode === "annual" ? "propertyTaxAnnual" : "propertyTaxPct", {
+                    setValueAs: optionalNumberSetValueAs,
+                  })}
+                  id="propertyTaxAmount"
                   type="number"
                   inputMode="decimal"
                   step="0.01"
                   min={0}
-                  max={100}
-                  placeholder="1.1"
-                  aria-invalid={!!errors.propertyTaxPct}
-                  aria-describedby={errors.propertyTaxPct ? "propertyTaxPct-error" : undefined}
-                  className={cn(inputClassName, "pr-8", errors.propertyTaxPct && "border-destructive")}
+                  {...(propertyTaxInputMode === "annual" ? {} : { max: 100 })}
+                  placeholder={
+                    propertyTaxInputMode === "annual"
+                      ? hasPrice
+                        ? String(Math.round(purchasePriceForEstimate * 0.011))
+                        : "3000"
+                      : "1.1"
+                  }
+                  aria-invalid={
+                    !!(propertyTaxInputMode === "annual" ? errors.propertyTaxAnnual : errors.propertyTaxPct)
+                  }
+                  aria-describedby={
+                    (propertyTaxInputMode === "annual" ? errors.propertyTaxAnnual : errors.propertyTaxPct)
+                      ? "propertyTaxAmount-error"
+                      : undefined
+                  }
+                  className={cn(
+                    inputClassName,
+                    propertyTaxInputMode === "annual" ? "pl-8" : "pr-8",
+                    (propertyTaxInputMode === "annual" ? errors.propertyTaxAnnual : errors.propertyTaxPct) &&
+                      "border-destructive"
+                  )}
                 />
-                <PercentIcon />
+                {propertyTaxInputMode === "percent" ? <PercentIcon /> : null}
               </div>
-              <FieldHint>Used as annual tax rate on purchase price.</FieldHint>
-              <FieldError id="propertyTaxPct-error" message={errors.propertyTaxPct?.message} />
+              <FieldHint>
+                {propertyTaxInputMode === "annual"
+                  ? "The actual annual tax bill from the listing. Leave blank to fall back to the % estimate."
+                  : "Used as annual tax rate on purchase price."}
+              </FieldHint>
+              <FieldError
+                id="propertyTaxAmount-error"
+                message={
+                  (propertyTaxInputMode === "annual" ? errors.propertyTaxAnnual : errors.propertyTaxPct)?.message
+                }
+              />
             </SectionField>
 
             <SectionField>

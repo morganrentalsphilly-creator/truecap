@@ -424,16 +424,27 @@ function provNum(v: unknown): number | null {
  *  flagging a field "overridden" when the user changed it after auto-fill. */
 function buildProvenanceInput(
   capture: EnrichmentCapture,
-  values: { propertyTaxPct?: unknown; interestRate?: unknown; monthlyRent?: unknown }
+  values: {
+    propertyTaxPct?: unknown;
+    propertyTaxInputMode?: unknown;
+    propertyTaxAnnual?: unknown;
+    interestRate?: unknown;
+    monthlyRent?: unknown;
+  }
 ): EnrichmentProvenanceInput {
   const approxEq = (a: number | null, b: number | null) =>
     a != null && b != null && Math.abs(a - b) <= 0.005 * Math.max(1, Math.abs(b));
   const out: EnrichmentProvenanceInput = {};
   if (capture.propertyTaxPct) {
+    // Annual-$ mode with a bill typed = the user's number is what the calc
+    // actually uses — claiming "state effective rate" would be false.
+    const annualOverride =
+      values.propertyTaxInputMode === "annual" && provNum(values.propertyTaxAnnual) != null;
     out.propertyTaxPct = {
       source: "state-static",
       detail: capture.propertyTaxPct.detail,
-      overridden: !approxEq(provNum(values.propertyTaxPct), capture.propertyTaxPct.value),
+      overridden:
+        annualOverride || !approxEq(provNum(values.propertyTaxPct), capture.propertyTaxPct.value),
     };
   }
   if (capture.interestRate) {

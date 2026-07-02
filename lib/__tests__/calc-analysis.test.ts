@@ -831,3 +831,47 @@ describe("end-to-end sanity check (Philadelphia $245k deal)", () => {
     expect(r.totalCashRequired).toBe(56_350);
   });
 });
+
+// ──────────────────────────────────────────────────────────────────
+// Property tax input mode — annual-$ bill vs annual-% of price
+// ──────────────────────────────────────────────────────────────────
+describe("property tax input mode", () => {
+  it("percent mode (and legacy snapshots with no mode) is byte-identical to before", () => {
+    const base = calculateAnalysis(baseSingleFamily());
+    const explicitPercent = calculateAnalysis(
+      baseSingleFamily({ propertyTaxInputMode: "percent", propertyTaxAnnual: 5_000 })
+    );
+    // 245,000 * 1.1% / 12 = 224.58… → 225
+    expect(base.propertyTax).toBe(225);
+    // In percent mode the annual field is ignored entirely.
+    expect(explicitPercent.propertyTax).toBe(225);
+    expect(explicitPercent.netCashFlow).toBe(base.netCashFlow);
+  });
+
+  it("annual mode uses the actual bill / 12", () => {
+    const r = calculateAnalysis(
+      baseSingleFamily({ propertyTaxInputMode: "annual", propertyTaxAnnual: 4_200 })
+    );
+    expect(r.propertyTax).toBe(350);
+  });
+
+  it("annual mode with a blank bill falls back to the percent estimate", () => {
+    const r = calculateAnalysis(
+      baseSingleFamily({ propertyTaxInputMode: "annual", propertyTaxAnnual: undefined })
+    );
+    expect(r.propertyTax).toBe(225);
+  });
+
+  it("the bill flows through cash flow, cap rate, and DSCR consistently", () => {
+    const cheap = calculateAnalysis(
+      baseSingleFamily({ propertyTaxInputMode: "annual", propertyTaxAnnual: 1_200 })
+    );
+    const dear = calculateAnalysis(
+      baseSingleFamily({ propertyTaxInputMode: "annual", propertyTaxAnnual: 9_600 })
+    );
+    // $700/mo more tax → exactly $700/mo less cash flow.
+    expect(cheap.netCashFlow - dear.netCashFlow).toBe(700);
+    expect(cheap.capRate).toBeGreaterThan(dear.capRate);
+    expect(cheap.dscr).toBeGreaterThan(dear.dscr);
+  });
+});

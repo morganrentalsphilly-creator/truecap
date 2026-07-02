@@ -41,6 +41,7 @@ export const SAMPLE_DEAL_VALUES = {
   loanTermYears: 30,
   closingCostsPct: 3,
   propertyTaxPct: 1.49,
+  propertyTaxInputMode: "percent",
   insuranceInputMode: "percent",
   insurancePct: 0.5,
   hoaMonthly: 0,

@@ -49,6 +49,11 @@ const optionalYearBuilt = z.preprocess((val) => {
 
 export const insuranceInputModeSchema = z.enum(["percent", "monthly"]);
 
+/** Property tax as an annual % of price (default) or the actual annual $
+ *  bill straight off the listing (Phase 2 #3 — "type the number Zillow
+ *  shows you"). Mirrors the insurance dual-mode precedent. */
+export const propertyTaxInputModeSchema = z.enum(["percent", "annual"]);
+
 export const unitSchema = z.object({
   bedrooms: optionalUnitNumber(
     z.number({ invalid_type_error: "Enter number of bedrooms" }).min(0, "Min 0").max(20, "Max 20")
@@ -190,6 +195,15 @@ export const investmentFormSchema = z.object({
 
   /** Monthly $ overrides when using advanced operating expenses; omitted = use auto estimates / zero. */
   propertyTaxPct: optionalPercent,
+  // Annual-$ property tax mode (additive + optional, defaults preserve the
+  // percent path byte-for-byte → INVESTCALC_SCHEMA_VERSION intentionally
+  // NOT bumped, same precedent as the STR fields below). propertyTaxAnnual
+  // caps at 1M/yr via optionalMoneyMo — plenty for any residential bill.
+  // .default("percent"): share-link v1 payloads + saved snapshots predate
+  // this field — a REQUIRED enum would fail their safeParse and break
+  // every existing link (§8). Missing → percent → old behavior exactly.
+  propertyTaxInputMode: propertyTaxInputModeSchema.default("percent"),
+  propertyTaxAnnual: optionalMoneyMo,
   insuranceInputMode: insuranceInputModeSchema,
   insurancePct: optionalPercent,
   insuranceMonthly: optionalMoneyMo,
@@ -448,6 +462,8 @@ export const defaultValues: Partial<InvestmentFormValues> = {
   appreciationRatePct: undefined,
   sellingCostPct: undefined,
   propertyTaxPct: undefined,
+  propertyTaxInputMode: "percent",
+  propertyTaxAnnual: undefined,
   insuranceInputMode: "percent",
   insurancePct: undefined,
   insuranceMonthly: undefined,
@@ -530,6 +546,11 @@ export function normalizeInvestmentFormSnapshot(raw: unknown): InvestmentFormVal
     appreciationRatePct: asNumber(snapshot.appreciationRatePct),
     sellingCostPct: asNumber(snapshot.sellingCostPct),
     propertyTaxPct: asNumber(snapshot.propertyTaxPct),
+    propertyTaxInputMode:
+      snapshot.propertyTaxInputMode === "annual" || snapshot.propertyTaxInputMode === "percent"
+        ? snapshot.propertyTaxInputMode
+        : "percent",
+    propertyTaxAnnual: asNumber(snapshot.propertyTaxAnnual),
     insuranceInputMode:
       snapshot.insuranceInputMode === "monthly" || snapshot.insuranceInputMode === "percent"
         ? snapshot.insuranceInputMode
