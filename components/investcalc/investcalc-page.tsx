@@ -106,6 +106,7 @@ import {
 } from "@/lib/exit-scenarios";
 import { trackConversion } from "@/lib/analytics/track-conversion";
 import { trackEvent } from "@/lib/analytics";
+import { consumePendingSaveIntent, setPendingSaveIntent } from "@/lib/save-intent";
 
 type InputTab = "cash-flow" | "projections" | "tax-strategy" | "deal-score";
 const SAVED_ANALYSIS_EDIT_DRAFT_KEY = "truecap_saved_analysis_edit_draft";
@@ -1772,6 +1773,33 @@ export function InvestCalcPage({
           // pathologically long address can't blow out the layout.
           const addr = (normalized.address ?? "").trim();
           setRestoredAddress(addr ? addr.slice(0, 60) : null);
+          // EXCEPTION to the no-auto-calculate contract below: the user
+          // clicked SAVE while anonymous and just returned from auth
+          // (pending-save-intent flag, set by the Save button's goToLogin).
+          // Their "intent click" already happened pre-auth — re-run the
+          // analysis so the result they tried to save is back on screen,
+          // and point them at Save. Without this they land on a pre-filled
+          // but inert form and must re-Calculate + re-Save manually — a
+          // conversion leak at the moment of highest intent. Double-RAF
+          // mirrors the PDF-return flow: let RHF flush before submitting.
+          if (isAuthenticated && consumePendingSaveIntent()) {
+            toast({
+              title: "Welcome back — your deal is ready",
+              description: addr
+                ? `Re-running your analysis for ${addr.slice(0, 60)}. Hit Save to keep it.`
+                : "Re-running your analysis. Hit Save to keep it.",
+              variant: "success",
+            });
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => {
+                void form.handleSubmit(onSubmit, onError)();
+              });
+            });
+            queueMicrotask(() => {
+              isProgrammaticResetRef.current = false;
+            });
+            return;
+          }
           // Don't auto-calculate - restoring inputs is the contract,
           // running the analysis is the user's intent click. Auto-
           // calculating would race with the loading-spinner UI and
@@ -2230,10 +2258,25 @@ export function InvestCalcPage({
         return;
       }
       if (result.code === "SIGN_IN_REQUIRED") {
+        // Server-side backstop (the UI normally gates anon saves before this
+        // action runs — e.g. an expired session mid-edit lands here). Don't
+        // dead-end the highest-intent click: offer the sign-in route and set
+        // the pending-save-intent flag so their deal auto-resumes after auth.
         toast({
           title: "Sign in required",
           description: "Create an account or sign in to save deals.",
           variant: "destructive",
+          action: (
+            <ToastAction
+              altText="Sign in and come back to this deal"
+              onClick={() => {
+                setPendingSaveIntent();
+                router.push("/auth/login?next=/");
+              }}
+            >
+              Sign in
+            </ToastAction>
+          ),
         });
         return;
       }

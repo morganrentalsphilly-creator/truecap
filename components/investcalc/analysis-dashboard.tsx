@@ -26,6 +26,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AnalysisResult } from "@/lib/calc-analysis";
+import { setPendingSaveIntent } from "@/lib/save-intent";
 import { WhatIfSliders, type WhatIfState } from "@/components/investcalc/what-if-sliders";
 import { BreakpointSuggestionCard } from "@/components/investcalc/breakpoint-suggestion-card";
 
@@ -499,8 +500,15 @@ export function AnalysisDashboard({
   const router = useRouter();
   // Send the user back to the calculator after auth (?next=/) so the
   // auto-saved form draft restores their analysis instead of landing them on
-  // a blank homepage with their work seemingly gone.
-  const goToLogin = () => router.push("/auth/login?next=/");
+  // a blank homepage with their work seemingly gone. The pending-save-intent
+  // flag upgrades that restore: because the user explicitly clicked SAVE
+  // before auth, the calculator auto-runs their analysis on return and points
+  // them back at Save — completing the click they already made instead of
+  // asking them to redo it (goToLogin's only caller is the Save button).
+  const goToLogin = () => {
+    setPendingSaveIntent();
+    router.push("/auth/login?next=/");
+  };
   const goToBilling = () => router.push("/profile#billing");
   const tabEntitlements: Record<AnalysisDashboardTab, boolean> = {
     "cash-flow": true,
