@@ -3719,7 +3719,25 @@ export function InvestCalcPage({
               </div>
             ) : null}
             {analysisResult && !isCalculating ? (
-              <AssumptionsSourceStrip onEdit={handleEditAssumptions} />
+              <AssumptionsSourceStrip
+                onEdit={handleEditAssumptions}
+                // Real per-field provenance (same builder the confidence
+                // badge uses) so the strip never claims "HUD rent" after
+                // the user typed their own (roadmap P1-8).
+                provenance={buildProvenanceInput(enrichmentCaptureRef.current, form.getValues())}
+                expensesEdited={(
+                  [
+                    "insuranceMonthly",
+                    "insurancePct",
+                    "maintenancePct",
+                    "mgmtPct",
+                    "vacancyPct",
+                    "capexPct",
+                    "utilitiesMonthly",
+                    "hoaMonthly",
+                  ] as const
+                ).some((f) => Boolean((form.formState.dirtyFields as Record<string, unknown>)[f]))}
+              />
             ) : null}
             <AnalysisErrorBoundary result={analysisResult}>
             <AnalysisDashboard

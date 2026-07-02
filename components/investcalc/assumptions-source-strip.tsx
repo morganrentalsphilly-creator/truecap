@@ -2,29 +2,96 @@
 
 /**
  * "Assumptions used" trust strip - shown at the top of the result state,
- * right where the visitor judges the output. It names the primary source
- * behind each pre-filled input and makes the "everything is editable"
- * promise concrete at the decision moment (before they export or upgrade).
+ * right where the visitor judges the output. It names the source behind
+ * each pre-filled input and makes the "everything is editable" promise
+ * concrete at the decision moment (before they export or upgrade).
  *
- * These are the DEFAULT sources TrueCap uses; the user may have already
- * overridden any of them, which is exactly the point - the "Edit
- * assumptions" action jumps back to the form and opens the advanced
- * section so refining is one click away.
+ * TRUTHFUL: sources come from the live enrichment provenance, not a
+ * hardcoded list — after the user types their own rent the strip says
+ * "You entered it", never "HUD Fair Market Rent" (roadmap P1-8; the old
+ * static version claimed HUD/FRED/state regardless of what happened).
  *
- * Deliberately compact so it never competes with the headline metrics
- * immediately below it.
+ * Mobile-compact (density audit M4): below sm the card is a single
+ * headline + one-line source summary; the per-field grid + disclaimer
+ * expand on tap. From sm: the full grid renders as before.
  */
 
-import { Database, Pencil } from "lucide-react";
+import { useState } from "react";
+import { ChevronDown, Database, Pencil } from "lucide-react";
+import type { EnrichmentProvenanceInput } from "@/lib/data-confidence";
+import { cn } from "@/lib/utils";
 
-const SOURCES: { label: string; source: string }[] = [
-  { label: "Rent", source: "HUD Fair Market Rent" },
-  { label: "Mortgage rate", source: "FRED 30-yr fixed" },
-  { label: "Property tax", source: "State effective rate" },
-  { label: "Expenses", source: "Smart defaults" },
-];
+type StripEntry = {
+  label: string;
+  /** Full source name for the grid, e.g. "HUD Fair Market Rent". */
+  source: string;
+  /** Compact form for the one-line mobile summary, e.g. "HUD". */
+  short: string;
+  /** True when the value is the user's own entry (styled neutrally). */
+  manual: boolean;
+};
 
-export function AssumptionsSourceStrip({ onEdit }: { onEdit: () => void }) {
+const MANUAL: Pick<StripEntry, "source" | "short" | "manual"> = {
+  source: "You entered it",
+  short: "yours",
+  manual: true,
+};
+
+/** Provenance → display rows. Exported for unit tests (pure). */
+export function buildAssumptionEntries(
+  provenance: EnrichmentProvenanceInput | null | undefined,
+  expensesEdited: boolean
+): StripEntry[] {
+  const rent = provenance?.monthlyRent;
+  const rate = provenance?.interestRate;
+  const tax = provenance?.propertyTaxPct;
+  return [
+    {
+      label: "Rent",
+      ...(rent && !rent.overridden
+        ? {
+            source: rent.source === "hud-safmr" ? "HUD Fair Market Rent (ZIP)" : "HUD Fair Market Rent",
+            short: "HUD",
+            manual: false,
+          }
+        : MANUAL),
+    },
+    {
+      label: "Mortgage rate",
+      ...(rate && !rate.overridden
+        ? { source: "FRED 30-yr fixed", short: "FRED", manual: false }
+        : MANUAL),
+    },
+    {
+      label: "Property tax",
+      ...(tax && !tax.overridden
+        ? { source: "State effective rate", short: "state", manual: false }
+        : MANUAL),
+    },
+    {
+      label: "Expenses",
+      ...(expensesEdited
+        ? MANUAL
+        : { source: "Smart defaults", short: "defaults", manual: false }),
+    },
+  ];
+}
+
+export function AssumptionsSourceStrip({
+  onEdit,
+  provenance,
+  expensesEdited = false,
+}: {
+  onEdit: () => void;
+  /** Live enrichment provenance; null/undefined = nothing auto-filled. */
+  provenance?: EnrichmentProvenanceInput | null;
+  /** True when the user touched any operating-expense field. */
+  expensesEdited?: boolean;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const entries = buildAssumptionEntries(provenance, expensesEdited);
+  const summary = entries.map((e) => `${e.label.split(" ")[0]} ${e.short}`).join(" · ");
+
   return (
     <div className="mb-6 rounded-2xl border border-border bg-card/60 p-4 shadow-sm sm:p-5">
       <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
@@ -44,19 +111,50 @@ export function AssumptionsSourceStrip({ onEdit }: { onEdit: () => void }) {
           Edit assumptions
         </button>
       </div>
-      <ul className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-4">
-        {SOURCES.map((s) => (
+
+      {/* Mobile one-liner + expand toggle (density audit M4): the full
+          grid was ~200px between the user and the verdict at 375px. */}
+      <button
+        type="button"
+        onClick={() => setExpanded((v) => !v)}
+        aria-expanded={expanded}
+        className="mt-2 flex min-h-9 w-full items-center justify-between gap-2 text-left sm:hidden"
+      >
+        <span className="min-w-0 truncate text-xs text-muted-foreground">{summary}</span>
+        <ChevronDown
+          className={cn("size-3.5 shrink-0 text-muted-foreground transition-transform", expanded && "rotate-180")}
+        />
+      </button>
+
+      <ul
+        className={cn(
+          "mt-1 grid-cols-2 gap-x-4 gap-y-2 sm:mt-3 sm:grid sm:grid-cols-4",
+          expanded ? "grid" : "hidden sm:grid"
+        )}
+      >
+        {entries.map((s) => (
           <li key={s.label} className="min-w-0">
             <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
               {s.label}
             </div>
-            <div className="truncate text-sm font-semibold text-foreground" title={s.source}>
+            <div
+              className={cn(
+                "truncate text-sm font-semibold",
+                s.manual ? "text-muted-foreground" : "text-foreground"
+              )}
+              title={s.source}
+            >
               {s.source}
             </div>
           </li>
         ))}
       </ul>
-      <p className="mt-3 border-t border-border/60 pt-2.5 text-[11px] leading-relaxed text-muted-foreground">
+      <p
+        className={cn(
+          "mt-3 border-t border-border/60 pt-2.5 text-[11px] leading-relaxed text-muted-foreground",
+          expanded ? "block" : "hidden sm:block"
+        )}
+      >
         Estimates for planning, not financial advice — verify rent, taxes, and the asking price before you offer.
       </p>
     </div>
