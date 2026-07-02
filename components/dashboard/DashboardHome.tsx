@@ -36,6 +36,10 @@ const RiskReturn = dynamic(
   () => import("@/components/dashboard/RiskReturn").then((m) => m.RiskReturn),
   { ssr: false, loading: () => <ChartSkeleton heightClass="h-[320px]" /> }
 );
+const OwnedEquityChart = dynamic(
+  () => import("@/components/dashboard/owned-equity-chart").then((m) => m.OwnedEquityChart),
+  { ssr: false, loading: () => <ChartSkeleton heightClass="h-[380px]" /> }
+);
 import type { DashboardDeal } from "@/lib/dashboard-deal-mapping";
 import { mapRiskLevelToRisk, resolveReturnMetric, resolveRiskMetric } from "@/lib/dashboard-risk-return";
 import { recommendationLabel } from "@/lib/deal-score";
@@ -47,6 +51,7 @@ import { RateWatchStrip } from "@/components/dashboard/RateWatchStrip";
 import type { RateWatchSummary } from "@/lib/rate-watch";
 import { DueThisWeekCard, type DueThisWeekDeal } from "@/components/dashboard/due-this-week-card";
 import { BuyBoxNudge } from "@/components/dashboard/buy-box-nudge";
+import type { OwnedEquitySeriesPoint } from "@/lib/owned-equity-series";
 
 export type DashboardHomeData = {
   user: {
@@ -102,6 +107,27 @@ export type DashboardHomeData = {
    * unapplied — the card then renders nothing.
    */
   dueThisWeek?: DueThisWeekDeal[];
+  /**
+   * The user's OWNED (completed) deals, server-computed (M3-1). Every other
+   * field on this type is active-only, so without this a customer whose
+   * deals all closed saw "No saved deals yet". `totalEquity`/`equityGain`
+   * are null when no owned deal has a close date + valid snapshot (count
+   * and cash flow still render); `series` is the month-by-month equity
+   * decomposition for the chart (null when no deal is dated). Undefined
+   * when the query failed — the owned section then renders nothing.
+   */
+  ownedPortfolio?: {
+    count: number;
+    monthlyCashFlow: number;
+    totalEquity: number | null;
+    equityGain: number | null;
+    /** How many owned deals have a close date driving the equity figures. */
+    datedCount: number;
+    series: OwnedEquitySeriesPoint[] | null;
+    /** False while the close_date migration is unapplied — the "add close
+     *  dates" CTA would dead-end on a page whose date editor is hidden. */
+    equityEnabled: boolean;
+  } | null;
 };
 
 function formatCurrency(value: number | null | undefined, compact = false): string {
@@ -534,8 +560,24 @@ export function DashboardHome({
   // never show a dashboard number that contradicts the sidebar badge.
   const savedTotalCount = data.savedTotalCount ?? portfolio.totalCount;
   const hasArchivedOrCompleted = savedTotalCount > portfolio.totalCount;
+  const owned = data.ownedPortfolio ?? null;
+  const ownedCount = owned?.count ?? 0;
+  // FALSE-HEADER FIX (M3-1): "No saved deals yet" was factually wrong for a
+  // customer whose deals all CLOSED (savedTotalCount > 0, active = 0) — the
+  // product's success case. Owners get their portfolio as the headline;
+  // archived-only users get an honest "all archived" line. The literal
+  // "no deals" copy is now reserved for genuinely-empty accounts.
   const headerSubtitle = !hasAnyDeals
-    ? "No saved deals yet. Run your first analysis to see it appear here."
+    ? ownedCount > 0
+      ? `You own ${ownedCount} ${ownedCount === 1 ? "property" : "properties"}${
+          owned?.totalEquity != null ? ` · ~${formatCurrency(owned.totalEquity, true)} equity` : ""
+        }.`
+      : savedTotalCount > 0
+        ? // Scope-neutral: this branch also catches completed-not-archived
+          // deals when the owned query errors (ownedPortfolio undefined),
+          // so it must not assert "archived" as fact.
+          `No active deals — your ${savedTotalCount} saved ${savedTotalCount === 1 ? "deal is" : "deals are"} closed or archived. Analyze a new property to restart your pipeline.`
+        : "No saved deals yet. Run your first analysis to see it appear here."
     : hasArchivedOrCompleted
       ? `Active pipeline: ${portfolio.totalCount} of ${savedTotalCount} saved ${savedTotalCount === 1 ? "deal" : "deals"}.`
       : `Your book at a glance — ${portfolio.totalCount} active ${portfolio.totalCount === 1 ? "deal" : "deals"}.`;
@@ -701,6 +743,109 @@ export function DashboardHome({
             retention hook; same pure logic as the weekly rate-alert email).
             Renders nothing when nothing changed — invisible until useful. */}
         <RateWatchStrip rateWatch={data.rateWatch ?? null} alertsLive={data.alertsLive ?? false} />
+
+        {/* ── Owned portfolio (M3-1 / WOW-3) — the month-3 payoff. The one
+            number that grows every month by itself (equity = appreciation +
+            principal paydown) for the customer who actually closed. Every
+            other section on this page is active-only; this is the owner's
+            section. Deals without a close date count toward N but not the
+            equity figures; renders nothing when the user owns nothing —
+            invisible until useful. */}
+        {owned && owned.count > 0 ? (
+          <section aria-label="Owned portfolio" className="space-y-4">
+            <div className="rounded-2xl border border-border bg-gradient-to-br from-card via-card to-card/60 p-4 shadow-sm sm:p-5">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <h2 className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+                  Owned portfolio · {owned.count} {owned.count === 1 ? "property" : "properties"}
+                </h2>
+                <Link
+                  href="/dashboard/saved-analyses?state=completed"
+                  prefetch={false}
+                  className="text-xs font-semibold text-primary underline-offset-2 hover:underline"
+                >
+                  View owned deals →
+                </Link>
+              </div>
+              <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-5">
+                <div>
+                  <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                    Owned Equity
+                  </div>
+                  <div className="mt-1 text-lg font-extrabold tabular-nums leading-tight break-words text-foreground sm:text-2xl">
+                    {owned.totalEquity != null ? `~${formatCurrency(owned.totalEquity)}` : "—"}
+                  </div>
+                  <div className="mt-0.5 text-[11px] text-muted-foreground">
+                    {owned.totalEquity == null ? (
+                      owned.equityEnabled ? (
+                        <Link
+                          href="/dashboard/saved-analyses?state=completed"
+                          prefetch={false}
+                          className="underline-offset-2 hover:underline"
+                        >
+                          add close dates to track equity
+                        </Link>
+                      ) : (
+                        // Migration window: the date editor doesn't exist yet
+                        // anywhere, so don't send the user hunting for it.
+                        "equity tracking rolling out"
+                      )
+                    ) : owned.datedCount < owned.count ? (
+                      `est. across ${owned.datedCount} dated ${owned.datedCount === 1 ? "deal" : "deals"}`
+                    ) : (
+                      "estimated from your assumptions"
+                    )}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                    Built Since Close
+                  </div>
+                  <div
+                    className={cn(
+                      "mt-1 text-lg font-extrabold tabular-nums leading-tight break-words sm:text-2xl",
+                      owned.equityGain != null && owned.equityGain > 0
+                        ? "text-[var(--metric-positive,#16a34a)]"
+                        : owned.equityGain != null && owned.equityGain < 0
+                          ? "text-[var(--metric-negative,#dc2626)]"
+                          : "text-foreground"
+                    )}
+                  >
+                    {owned.equityGain != null ? formatSignedCurrency(owned.equityGain) : "—"}
+                  </div>
+                  <div className="mt-0.5 text-[11px] text-muted-foreground">
+                    appreciation + principal paydown
+                  </div>
+                </div>
+                <div>
+                  <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                    Monthly Cash Flow
+                  </div>
+                  <div
+                    className={cn(
+                      "mt-1 text-lg font-extrabold tabular-nums leading-tight break-words sm:text-2xl",
+                      owned.monthlyCashFlow > 0
+                        ? "text-[var(--metric-positive,#16a34a)]"
+                        : owned.monthlyCashFlow < 0
+                          ? "text-[var(--metric-negative,#dc2626)]"
+                          : "text-foreground"
+                    )}
+                  >
+                    {formatSignedCurrency(owned.monthlyCashFlow)}
+                  </div>
+                  <div className="mt-0.5 text-[11px] text-muted-foreground">
+                    ~{formatCurrency(owned.monthlyCashFlow * 12)} / yr, projected
+                  </div>
+                </div>
+              </div>
+            </div>
+            {/* Equity growth curve — needs ≥2 monthly points to draw a line
+                (a deal closed this month shows the tiles above; the curve
+                appears from month 1). Lazy chunk à la PortfolioChart. */}
+            {owned.series && owned.series.length >= 2 ? (
+              <OwnedEquityChart data={owned.series} />
+            ) : null}
+          </section>
+        ) : null}
 
         {/* ── Portfolio overview — answers "what's my book worth?" ──
             Trimmed from 4 StatCards to 2 hero cards + 1 stat strip.
@@ -996,15 +1141,19 @@ export function DashboardHome({
             shared dismissal key with the My Deals nudge — never double-nag. */}
         {hasAnyDeals && data.allDeals.length <= 3 ? <BuyBoxNudge variant="dashboard" /> : null}
 
-        {/* ── Empty-state hero — when 0 saved deals ───────────────── */}
-        {!hasAnyDeals ? (
+        {/* ── Empty-state hero — when 0 active deals AND nothing owned.
+            An owner with 0 active deals gets the Owned portfolio section
+            above INSTEAD of a first-run hero telling the customer who
+            succeeded to "analyze your first property" (M3-1 / WOW-2). For
+            archived-only users the copy drops the "first" framing. */}
+        {!hasAnyDeals && ownedCount === 0 ? (
           <div className="rounded-2xl border border-dashed border-border bg-card p-10 text-center">
             <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
               <Briefcase className="h-7 w-7" />
             </div>
             <h2 className="text-xl font-bold text-foreground">Your dashboard is ready</h2>
             <p className="mt-2 text-sm text-muted-foreground max-w-md mx-auto leading-relaxed">
-              Run your first rental property through the analyzer and save it. You&apos;ll see portfolio totals, top performers, and risk/return analysis here.
+              Run {savedTotalCount > 0 ? "a" : "your first"} rental property through the analyzer and save it. You&apos;ll see portfolio totals, top performers, and risk/return analysis here.
               {/* FFM-3: the one personalization feature worth naming up front —
                   a buy box makes every future deal get a personal pass/fail. */}{" "}
               Set{" "}
@@ -1024,7 +1173,7 @@ export function DashboardHome({
             >
               <Link href="/">
                 <Plus className="h-4 w-4" />
-                Analyze your first property
+                {savedTotalCount > 0 ? "Analyze a property" : "Analyze your first property"}
               </Link>
             </Button>
           </div>

@@ -26,6 +26,12 @@ import { getSavedAnalysesTotalCount } from "@/lib/saved-analyses-count";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { buildRateWatch } from "@/lib/rate-watch";
 import { rateAlertEmailsLive } from "@/lib/rate-alerts-mode";
+import { computeOwnedEquity, monthsOwnedBetween } from "@/lib/owned-equity";
+import {
+  buildOwnedEquitySeries,
+  resolveOwnedEquityBasis,
+  type OwnedDealEquityBasis,
+} from "@/lib/owned-equity-series";
 
 const DASHBOARD_ACTIVE_DEALS_LIMIT = 20;
 
@@ -154,7 +160,7 @@ export default async function DashboardPage() {
   // have passed — run them in ONE round-trip wave instead of two
   // sequential awaits (the deals query previously waited for the
   // profile/count/premium wave to finish for no reason).
-  const [{ data: profile }, isPremium, dealsResult, aggregateResult, currentRate, savedTotalCount, dueDiligenceResult] = await Promise.all([
+  const [{ data: profile }, isPremium, dealsResult, aggregateResult, currentRate, savedTotalCount, dueDiligenceResult, ownedResult] = await Promise.all([
     supabase
       .from("profiles")
       .select("first_name, last_name, display_name, avatar_url")
@@ -212,6 +218,19 @@ export default async function DashboardPage() {
       .eq("saved_analyses.is_archived", false)
       .eq("saved_analyses.is_completed", false)
       .is("saved_analyses.deleted_at", null),
+    // OWNED (completed) deals — the month-3 surface (M3-1). Every query above
+    // filters is_completed=false, so a customer whose deals all closed saw
+    // "No saved deals yet" — factually false. Selects only what the equity
+    // math + cash-flow sum need. close_date ships in its own migration; a
+    // 42703 here is retried below without it (count + cash flow still work,
+    // the equity figures simply don't render). Same completed scope as
+    // My Deals' ?state=completed filter (is_completed only, RLS-scoped).
+    supabase
+      .from("saved_analyses")
+      .select("id, is_completed, net_cash_flow_monthly, form_snapshot, close_date")
+      .eq("user_id", user.id)
+      .is("deleted_at", null)
+      .eq("is_completed", true),
   ]);
 
   const profileRow = (profile as ProfileRow | null) ?? null;
@@ -370,6 +389,79 @@ export default async function DashboardPage() {
   // Truthful-alerts flag: the strip only promises alert EMAILS when the
   // send-rate-alerts cron is actually live (G1 fallback — see lib/rate-alerts-mode).
   dashboardData.alertsLive = rateAlertEmailsLive();
+
+  // ── Owned portfolio (M3-1 / WOW-3) ────────────────────────────────────
+  // Shape the completed-deals query into the home's owned strip + equity
+  // chart. Recompute-on-read for cash flow (fresh engine, stored fallback);
+  // equity derives from close_date + the deal's own saved assumptions via
+  // the same computeRowEquity math My Deals uses. Deals without a close date
+  // (or with the migration unapplied) count toward N but contribute nothing
+  // to the equity figures — degrade, never crash.
+  type OwnedRow = {
+    id: string;
+    is_completed: boolean | null;
+    net_cash_flow_monthly: number | null;
+    form_snapshot: unknown;
+    close_date?: string | null;
+  };
+  const isMissingColumn = (e: { code?: string; message?: string } | null | undefined) =>
+    !!e && (e.code === "42703" || /column .* does not exist/i.test(e.message ?? ""));
+  let ownedRows: OwnedRow[] | null = null;
+  if (!ownedResult.error) {
+    ownedRows = (ownedResult.data ?? []) as unknown as OwnedRow[];
+  } else if (isMissingColumn(ownedResult.error)) {
+    // close_date migration not applied yet → retry without the column so the
+    // owned COUNT (and the false-header fix) still work; equity stays hidden.
+    const fallback = await supabase
+      .from("saved_analyses")
+      .select("id, is_completed, net_cash_flow_monthly, form_snapshot")
+      .eq("user_id", user.id)
+      .is("deleted_at", null)
+      .eq("is_completed", true);
+    if (!fallback.error) ownedRows = (fallback.data ?? []) as unknown as OwnedRow[];
+  }
+  if (ownedRows == null) {
+    // Query failed outright → the owned section hides. Surface it (an owner
+    // silently seeing "No saved deals yet" again is the exact M3-1 regression).
+    Sentry.captureMessage("dashboard owned-portfolio query failed — owned section hidden", {
+      level: "warning",
+      tags: { feature: "dashboard-owned-portfolio" },
+      extra: { code: ownedResult.error?.code, message: ownedResult.error?.message },
+    });
+  } else if (ownedRows.length > 0) {
+    const now = new Date();
+    let ownedCashFlow = 0;
+    let totalEquity = 0;
+    let equityGain = 0;
+    let datedCount = 0;
+    const equityBases: OwnedDealEquityBasis[] = [];
+    for (const r of ownedRows) {
+      const fresh = recomputeSavedDealVerdict(r.form_snapshot);
+      ownedCashFlow += fresh ? fresh.netCashFlowMonthly : (r.net_cash_flow_monthly ?? 0);
+      const basis = resolveOwnedEquityBasis(r);
+      const summary = basis
+        ? computeOwnedEquity(basis.input, monthsOwnedBetween(basis.closeDate, now))
+        : null;
+      if (basis && summary) {
+        totalEquity += summary.equity;
+        equityGain += summary.totalEquityGain;
+        datedCount += 1;
+        equityBases.push(basis);
+      }
+    }
+    dashboardData.ownedPortfolio = {
+      count: ownedRows.length,
+      monthlyCashFlow: ownedCashFlow,
+      totalEquity: datedCount > 0 ? totalEquity : null,
+      equityGain: datedCount > 0 ? equityGain : null,
+      datedCount,
+      series: equityBases.length > 0 ? buildOwnedEquitySeries(equityBases, now) : null,
+      // False when the close_date fallback fired (migration unapplied):
+      // the "add close dates" CTA would dead-end on a My Deals page whose
+      // date editor is hidden for the same reason.
+      equityEnabled: !ownedResult.error,
+    };
+  }
 
   return (
     <DashboardHome

@@ -83,7 +83,10 @@ export function PortfolioRollupStrip({
 }) {
   // Need at least 2 deals for a rollup to be meaningful — a single-deal
   // total is just that deal's headline. Save the visual real estate.
-  if (items.length < 2) return null;
+  // EXCEPT the completed (owned) scope: the modal buy-and-hold customer owns
+  // exactly 1 property, and the equity tile is NOT the deal's headline — the
+  // deal card shows equity only as a small text line (M3-1).
+  if (items.length < 2 && scope !== "completed") return null;
 
   // Weighted averages use purchase price as weight. Skip items missing
   // the needed field rather than letting them poison the average.
