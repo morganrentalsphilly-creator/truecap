@@ -80,6 +80,7 @@ import { nextActionForDeal } from "@/lib/next-action";
 import { getVerdictNarrative } from "@/lib/verdict";
 import { DealDriverInsight } from "@/components/investcalc/deal-driver-insight";
 import { StrategyOutcomeCard } from "@/components/investcalc/strategy-outcome-card";
+import { StrategyLensOutcomeCard } from "@/components/investcalc/strategy-lens-outcome-card";
 import type { InvestorStrategy } from "@/lib/investor-strategies";
 import { deriveStateFromAddress } from "@/lib/buy-box";
 import { DataConfidenceBadge } from "@/components/investcalc/data-confidence-badge";
@@ -1117,6 +1118,24 @@ export function AnalysisDashboard({
           )}
         </div>
       </div>
+
+      {/* Strategy-lens outcome - makes the investor lens visibly DO something
+          at the verdict: names the metrics that carry the deal for that
+          investor type and how this deal does on them. Balanced (the default)
+          renders nothing - invisible until a lens is actively chosen. BASE-
+          result driven (matches the Deal Score + verdict); hidden while a
+          strategy play leads the output (the lens tiles are hidden there too).
+          Bands are display-only, in lib/strategy-lens-outcome. */}
+      {result && !isLoading && !strategyLeadsOutput ? (
+        <div className="order-1 md:order-2">
+          <StrategyLensOutcomeCard
+            strategy={strategy}
+            result={result}
+            annualizedReturnPct={annualizedReturnPct}
+            isOwnerOccupant={propertyType === "owner-occupant"}
+          />
+        </div>
+      ) : null}
 
       {/* Next action - the one imperative step the verdict implies, so the
           user never has to wonder "now what?". Placed directly under the
