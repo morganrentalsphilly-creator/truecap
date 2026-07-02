@@ -2897,6 +2897,31 @@ function CashFlowTab({
               ${result.totalCashRequired.toLocaleString()}
             </p>
           </div>
+          {/* Lender-reserves note - DISPLAY-ONLY arithmetic over existing
+              results (no calc/verdict change). Lenders on financed deals
+              typically require 2-6 months of the full housing payment
+              (PITI + PMI + HOA) in reserves ON TOP of down payment +
+              closing, which blindsides new investors who budgeted only
+              the Total Investment above. Hidden on cash purchases
+              (monthlyPayment <= 0) - no lender, no reserves. */}
+          {result.monthlyPayment > 0 &&
+            (() => {
+              const pitiMonthly =
+                result.monthlyPayment +
+                result.propertyTax +
+                result.insurance +
+                result.pmiMonthly +
+                result.hoa;
+              const reservesLow = Math.round(pitiMonthly * 2);
+              const reservesHigh = Math.round(pitiMonthly * 6);
+              return (
+                <p className="mt-2 text-xs text-muted-foreground">
+                  Lenders typically also want ~${reservesLow.toLocaleString()}–$
+                  {reservesHigh.toLocaleString()} in reserves (2–6 months of PITI) — plan
+                  cash beyond closing.
+                </p>
+              );
+            })()}
         </div>
       </div>
       </div>
