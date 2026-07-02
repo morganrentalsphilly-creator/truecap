@@ -22,6 +22,7 @@ import {
   Sparkles,
   ListTodo,
   SlidersHorizontal,
+  MoreHorizontal,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -443,6 +444,14 @@ export function AnalysisDashboard({
   // most users keep this collapsed anyway.
   const [showAllTips, setShowAllTips] = useState(false);
 
+  // Mobile-only "More" overflow for the action toolbar. Below sm the row
+  // keeps the 3 post-analysis actions that matter (Save / PDF / SHARE —
+  // the growth loop stays one tap) and folds Compare, New Analysis and
+  // the report-style picker in here so the grid never wraps into a
+  // ragged second row. Controlled so a menu item can close the popover
+  // before firing its action.
+  const [moreActionsOpen, setMoreActionsOpen] = useState(false);
+
   // What-if slider state. When the user drags rent / rate, this holds
   // the adjusted result; otherwise null and we render the base `result`
   // unchanged. SCOPED: only the 4 Overview tier metric cards consume
@@ -820,8 +829,12 @@ export function AnalysisDashboard({
             "Quick actions" label, which added visual weight without
             adding meaning - the 4 buttons themselves are clearly a
             toolbar. Removing the chrome lets the row read as inline
-            with the identity strip. */}
-        <div className="grid grid-cols-4 gap-1.5 sm:gap-2 xl:min-w-[560px] max-[380px]:gap-1">
+            with the identity strip.
+            Below sm the row is 3 equal actions (Save / PDF / Share) plus a
+            slim auto-width "More" overflow - 5-6 cells in grid-cols-4
+            wrapped into a ragged second row at ~82px each. sm+ keeps the
+            original 4-col grid with every action inline. */}
+        <div className="grid grid-cols-[repeat(3,minmax(0,1fr))_auto] gap-1.5 sm:grid-cols-4 sm:gap-2 xl:min-w-[560px] max-[380px]:gap-1">
               <Button
                 variant="outline"
                 size="sm"
@@ -856,10 +869,11 @@ export function AnalysisDashboard({
                   </span>
                 )}
               </Button>
+              {/* Hidden below sm - lives in the "More" overflow there. */}
               <Button
                 variant="outline"
                 size="sm"
-                className="h-11 gap-1 rounded-xl px-2 text-[11px] sm:h-10 sm:gap-0 sm:rounded-xl sm:px-4 sm:text-sm max-[380px]:gap-0.5 max-[380px]:rounded-lg max-[380px]:px-1 max-[380px]:text-[10px]"
+                className="hidden h-11 gap-1 rounded-xl px-2 text-[11px] sm:inline-flex sm:h-10 sm:gap-0 sm:rounded-xl sm:px-4 sm:text-sm max-[380px]:gap-0.5 max-[380px]:rounded-lg max-[380px]:px-1 max-[380px]:text-[10px]"
                 onClick={() => void onCompareDeals()}
                 disabled={!isSaved || !canCompareDeals || isComparing}
                 title={
@@ -907,14 +921,15 @@ export function AnalysisDashboard({
               {/* Report-style menu - only for users who can actually export
                   (entitled + saved). Lets them pick a lender / partner /
                   personal variant; the main button stays the personal default
-                  and keeps its purchase-dialog behavior for everyone else. */}
+                  and keeps its purchase-dialog behavior for everyone else.
+                  Hidden below sm - the modes live in the "More" overflow. */}
               {canExportPdf && isSaved ? (
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
                       size="sm"
                       variant="outline"
-                      className="h-11 rounded-xl px-2 sm:h-10"
+                      className="hidden h-11 rounded-xl px-2 sm:inline-flex sm:h-10"
                       disabled={isExporting}
                       aria-label="Choose a report style"
                       title="Choose a report style (lender / partner / personal)"
@@ -941,21 +956,97 @@ export function AnalysisDashboard({
                   </PopoverContent>
                 </Popover>
               ) : null}
+              {/* Hidden below sm — New Analysis lives in "More" there.
+                  Share keeps the 3-up slot instead: the read-only share
+                  link is the growth loop, and burying it a tap deep on
+                  the mobile-majority audience risks the one action that
+                  markets TrueCap for free. */}
               <Button
                 size="sm"
-                className="h-11 gap-1 rounded-xl bg-primary px-2 text-[11px] font-semibold text-primary-foreground sm:h-10 sm:gap-0 sm:rounded-xl sm:px-4 sm:text-sm max-[380px]:gap-0.5 max-[380px]:rounded-lg max-[380px]:px-1 max-[380px]:text-[10px]"
+                className="hidden h-11 gap-1 rounded-xl bg-primary px-2 text-[11px] font-semibold text-primary-foreground sm:inline-flex sm:h-10 sm:gap-0 sm:rounded-xl sm:px-4 sm:text-sm"
                 onClick={() => void onNewAnalysis()}
                 title="Create a new analysis"
               >
-                <Sparkles className="w-3.5 h-3.5 shrink-0 sm:mr-1.5 max-[380px]:h-3 max-[380px]:w-3" />
+                <Sparkles className="w-3.5 h-3.5 shrink-0 sm:mr-1.5" />
                 <span className="hidden sm:inline">New Analysis</span>
                 <span className="sm:hidden">New</span>
               </Button>
-              {/* Share is FREE for everyone - the read-only /d/[encoded] view
-                  is the core growth loop (every shared deal markets TrueCap).
-                  Icon-forward (label hidden on mobile) so it doesn't wrap the
-                  action row the way the old full-text button did. */}
+              {/* Share is FREE for everyone - the read-only /d/[encoded]
+                  view is the core growth loop (every shared deal markets
+                  TrueCap). Icon-forward and kept in the 3-up row at every
+                  width for exactly that reason. */}
               <ShareLinkButton values={values} savedDealId={savedDealId} />
+              {/* Mobile-only "More" overflow - Compare, New Analysis and
+                  the report-style modes fold in here below sm (see the
+                  grid comment above). Every action stays reachable. */}
+              <Popover open={moreActionsOpen} onOpenChange={setMoreActionsOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-11 rounded-xl px-2 sm:hidden max-[380px]:rounded-lg max-[380px]:px-1"
+                    aria-label="More actions"
+                    title="More actions (Compare, Share, report style)"
+                  >
+                    <MoreHorizontal className="h-4 w-4" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent align="end" className="w-56 p-1.5">
+                  <button
+                    type="button"
+                    disabled={!isSaved || !canCompareDeals || isComparing}
+                    onClick={() => {
+                      setMoreActionsOpen(false);
+                      void onCompareDeals();
+                    }}
+                    title={
+                      !isSaved
+                        ? persistedActionsBlockHint ?? "Save this analysis before comparing it."
+                        : !canCompareDeals
+                          ? "Compare is not available for your current plan."
+                          : undefined
+                    }
+                    className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm font-semibold text-foreground hover:bg-muted focus-visible:bg-muted focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <ListTodo className="size-4 shrink-0 text-muted-foreground" />
+                    Compare Deals
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMoreActionsOpen(false);
+                      void onNewAnalysis();
+                    }}
+                    title="Create a new analysis"
+                    className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm font-semibold text-foreground hover:bg-muted focus-visible:bg-muted focus-visible:outline-none"
+                  >
+                    <Sparkles className="size-4 shrink-0 text-muted-foreground" />
+                    New Analysis
+                  </button>
+                  {canExportPdf && isSaved ? (
+                    <>
+                      <p className="px-2 pt-2 pb-1 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                        Export as…
+                      </p>
+                      {REPORT_MODES.map((m) => (
+                        <button
+                          key={m.id}
+                          type="button"
+                          disabled={isExporting}
+                          onClick={() => {
+                            setMoreActionsOpen(false);
+                            void onExportPdf(m.id);
+                          }}
+                          className="block w-full cursor-pointer rounded-lg px-2 py-1.5 text-left hover:bg-muted focus-visible:bg-muted focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          <span className="text-sm font-semibold text-foreground">{m.label}</span>
+                          <span className="block text-[11px] leading-snug text-muted-foreground">{m.description}</span>
+                        </button>
+                      ))}
+                    </>
+                  ) : null}
+                </PopoverContent>
+              </Popover>
         </div>
       </div>
 

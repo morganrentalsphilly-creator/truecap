@@ -82,30 +82,50 @@ export function RateAlertsToggle({
       });
     };
     return (
-      <div className="rounded-2xl border border-primary/25 bg-gradient-to-br from-[var(--brand-blue-light)] via-card to-card p-5 shadow-sm sm:p-6">
-        <div className="flex items-start gap-2.5">
-          <BellRing className="mt-0.5 size-4 shrink-0 text-primary" />
-          <div className="min-w-0">
-            <h3 className="text-base font-bold text-foreground">
-              Want a heads-up if this deal changes?
-            </h3>
-            <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-              Mortgage rates move every week. We&apos;ll quietly re-underwrite your
-              saved deals and email you only when a move actually flips a verdict —
-              its tier, DSCR band, or cash-flow sign. At most once a week, never spam.
-            </p>
-            <button
-              type="button"
-              onClick={enableInline}
-              disabled={pending}
-              className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-sm font-bold text-primary-foreground shadow-sm transition-transform hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-70"
-            >
-              <BellRing className="size-4" />
-              {pending ? "Enabling…" : "Email me if rates move this deal"}
-            </button>
+      <>
+        {/* Below sm: a single inline line, no card chrome - the full card
+            was one of several stacked non-number cards between the Overview
+            metrics and the Details tabs on phones. Same consent action,
+            a fraction of the height. sm+ keeps the card. */}
+        <div className="flex items-center gap-2.5 px-1 sm:hidden">
+          <BellRing className="size-4 shrink-0 text-primary" />
+          <p className="min-w-0 flex-1 text-xs leading-snug text-muted-foreground">
+            Get an email if a rate move flips this deal&apos;s verdict.
+          </p>
+          <button
+            type="button"
+            onClick={enableInline}
+            disabled={pending}
+            className="shrink-0 rounded-lg bg-primary px-3 py-1.5 text-xs font-bold text-primary-foreground disabled:opacity-70"
+          >
+            {pending ? "Enabling…" : "Notify me"}
+          </button>
+        </div>
+        <div className="hidden rounded-2xl border border-primary/25 bg-gradient-to-br from-[var(--brand-blue-light)] via-card to-card p-5 shadow-sm sm:block sm:p-6">
+          <div className="flex items-start gap-2.5">
+            <BellRing className="mt-0.5 size-4 shrink-0 text-primary" />
+            <div className="min-w-0">
+              <h3 className="text-base font-bold text-foreground">
+                Want a heads-up if this deal changes?
+              </h3>
+              <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                Mortgage rates move every week. We&apos;ll quietly re-underwrite your
+                saved deals and email you only when a move actually flips a verdict —
+                its tier, DSCR band, or cash-flow sign. At most once a week, never spam.
+              </p>
+              <button
+                type="button"
+                onClick={enableInline}
+                disabled={pending}
+                className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-sm font-bold text-primary-foreground shadow-sm transition-transform hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-70"
+              >
+                <BellRing className="size-4" />
+                {pending ? "Enabling…" : "Email me if rates move this deal"}
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      </>
     );
   }
 
