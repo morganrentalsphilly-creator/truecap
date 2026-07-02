@@ -28,7 +28,15 @@ import {
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { DEFAULT_APPRECIATION_RATE, DEFAULT_SELLING_COST_PCT } from "@/lib/exit-scenarios";
 import { buildCompareSnapshotPayload } from "@/lib/compare-result-snapshot";
-import { PDF_CACHE_VERSION } from "@/lib/pdf-export-constants";
+import { PDF_CACHE_VERSION, PDF_CACHE_VERSION_UNCACHEABLE } from "@/lib/pdf-export-constants";
+import {
+  buyBoxHasCriteria,
+  deriveStateFromAddress,
+  type BuyBoxCriteria,
+  type BuyBoxDealMetrics,
+} from "@/lib/buy-box";
+import { buildBuyBoxPdfVerdict, type BuyBoxPdfVerdict } from "@/lib/pdf-buy-box";
+import { listBuyBoxesAction } from "@/app/actions/user-buy-boxes";
 
 export type SaveDealResult =
   | { ok: true; id: string; mode: "inserted" | "updated" }
@@ -581,6 +589,117 @@ async function getTemplateFallback(
   };
 }
 
+/**
+ * Does this user currently have ≥1 active buy box with at least one
+ * criterion (and the plan feature to use it)? This is exactly the condition
+ * under which an exported PDF carries the "Your buy box" block (see
+ * getBuyBoxPdfVerdictAction), so the PDF cache keys off it:
+ *   - read:  bypass the cached PDF so box edits always reflect on export
+ *            (mirrors the branding bypass directly above the cache check);
+ *   - write: store block-carrying PDFs with PDF_CACHE_VERSION_UNCACHEABLE,
+ *            so deleting the last box (or downgrading) can never re-serve a
+ *            stale block from cache.
+ * Fails open to `false` (worst case: a cached, block-free PDF is served) —
+ * degrade, don't block the export. A missing user_buy_boxes table (the
+ * migration ships dormant) is an expected `false`.
+ */
+async function userHasUsableBuyBox(
+  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>,
+  userId: string,
+  entitlements: Awaited<ReturnType<typeof getEntitlementsForUser>>
+): Promise<boolean> {
+  if (!hasPlanFeature(entitlements, "buy_box")) return false;
+  try {
+    const { data, error } = await supabase
+      .from("user_buy_boxes")
+      .select(
+        "min_cap_rate_pct, min_coc_pct, min_dscr, min_cash_flow_monthly, max_purchase_price, property_types, target_states"
+      )
+      .eq("user_id", userId)
+      .eq("is_active", true);
+    if (error || !data) return false;
+    return data.some((row) => {
+      const r = row as Record<string, unknown>;
+      return buyBoxHasCriteria({
+        minCapRatePct: dbNumber(r.min_cap_rate_pct) ?? null,
+        minCocPct: dbNumber(r.min_coc_pct) ?? null,
+        minDscr: dbNumber(r.min_dscr) ?? null,
+        minCashFlowMonthly: dbNumber(r.min_cash_flow_monthly) ?? null,
+        maxPurchasePrice: dbNumber(r.max_purchase_price) ?? null,
+        propertyTypes: Array.isArray(r.property_types)
+          ? (r.property_types as BuyBoxCriteria["propertyTypes"])
+          : [],
+        targetStates: Array.isArray(r.target_states) ? (r.target_states as string[]) : [],
+        isActive: true,
+      });
+    });
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Deal metrics the PDF generator derives from its ReportData payload. These
+ * are calculateAnalysis outputs recomputed by the export pipeline at export
+ * time (both the live-analyzer and saved-deal flows spread the fresh
+ * computed result over any stored snapshot before building ReportData), so
+ * the buy box is evaluated against the same numbers the report prints.
+ */
+const buyBoxPdfMetricsSchema = z
+  .object({
+    capRatePct: z.number().finite().nullable(),
+    cocPct: z.number().finite().nullable(),
+    dscr: z.number().finite().nullable(),
+    cashFlowMonthly: z.number().finite().nullable(),
+    purchasePrice: z.number().finite().nullable(),
+    propertyType: z.enum(["single-family", "multi-family", "owner-occupant"]).nullable(),
+    address: z.string().max(500).nullable(),
+    isCashPurchase: z.boolean(),
+  })
+  .strict();
+
+export type BuyBoxPdfVerdictActionResult =
+  | { ok: true; verdict: BuyBoxPdfVerdict | null }
+  | { ok: false; code: "VALIDATION_ERROR"; message: string };
+
+/**
+ * Server-side buy-box evaluation for the exported PDF's "Your buy box"
+ * block. Called by lib/pdf-generator.ts while composing the report.
+ *
+ * Every expected "no block" state — signed out, no buy_box entitlement,
+ * migration pending, no active box with criteria — maps to
+ * `{ ok: true, verdict: null }`, so the PDF simply omits the block and the
+ * export can never fail because of buy-box state. The boxes are read
+ * RLS-scoped via the canonical listBuyBoxesAction and evaluated with the
+ * lib/buy-box primitives (via buildBuyBoxPdfVerdict).
+ */
+export async function getBuyBoxPdfVerdictAction(
+  input: unknown
+): Promise<BuyBoxPdfVerdictActionResult> {
+  const parsed = buyBoxPdfMetricsSchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, code: "VALIDATION_ERROR", message: "Invalid deal metrics payload." };
+  }
+
+  const listed = await listBuyBoxesAction();
+  if (!listed.ok || !listed.canUse || listed.boxes.length === 0) {
+    return { ok: true, verdict: null };
+  }
+
+  const metrics: BuyBoxDealMetrics = {
+    capRatePct: parsed.data.capRatePct,
+    cocPct: parsed.data.cocPct,
+    dscr: parsed.data.dscr,
+    cashFlowMonthly: parsed.data.cashFlowMonthly,
+    purchasePrice: parsed.data.purchasePrice,
+    propertyType: parsed.data.propertyType,
+    state: deriveStateFromAddress(parsed.data.address),
+    isCashPurchase: parsed.data.isCashPurchase,
+  };
+
+  return { ok: true, verdict: buildBuyBoxPdfVerdict(listed.boxes, metrics) };
+}
+
 export async function getSavedAnalysisPdfExportAction(
   id: string
 ): Promise<GetSavedAnalysisPdfExportResult> {
@@ -690,7 +809,16 @@ export async function getSavedAnalysisPdfExportAction(
     cachedVersion === PDF_CACHE_VERSION &&
     !hasUserBranding
   ) {
-    return { ok: true, source: "cache", pdfUrl: cachedPdfUrl };
+    // Buy-box exports bypass the cache for the same reason branded ones do:
+    // cached PDFs don't track the buy-box state they were generated with.
+    // While the user has a usable buy box, every export regenerates so the
+    // "Your buy box" block always reflects their CURRENT criteria (edits,
+    // new boxes, default changes). Checked only on the would-serve-cache
+    // path so the regenerate path pays no extra query.
+    const hasUsableBuyBox = await userHasUsableBuyBox(supabase, user.id, entitlements);
+    if (!hasUsableBuyBox) {
+      return { ok: true, source: "cache", pdfUrl: cachedPdfUrl };
+    }
   }
 
   const templateFallback = await getTemplateFallback(supabase, dbString(row.template_id));
@@ -730,12 +858,19 @@ export async function completeSavedAnalysisPdfExportAction(
     return { ok: false, code: "VALIDATION_ERROR", message: "Invalid PDF export payload." };
   }
 
+  // A PDF generated while the user has a usable buy box carries the
+  // "Your buy box" block, whose content the version composite can't see.
+  // Store it uncacheable so that if the user later deletes their last box
+  // (or loses the entitlement) the cache can't re-serve the stale block —
+  // the read-time bypass above only fires while boxes still exist.
+  const hasUsableBuyBox = await userHasUsableBuyBox(supabase, user.id, entitlements);
+
   const { data, error } = await supabase
     .from("saved_analyses")
     .update({
       pdf_url: cleanPdfUrl,
       pdf_generated_at: new Date().toISOString(),
-      pdf_snapshot_version: PDF_CACHE_VERSION,
+      pdf_snapshot_version: hasUsableBuyBox ? PDF_CACHE_VERSION_UNCACHEABLE : PDF_CACHE_VERSION,
       last_activity_at: new Date().toISOString(),
     })
     .eq("id", savedDealId)

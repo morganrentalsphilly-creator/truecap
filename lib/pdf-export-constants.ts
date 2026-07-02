@@ -27,8 +27,31 @@ import { TEN_YEAR_PROJECTION_SNAPSHOT_VERSION } from "@/lib/ten-year-projections
 //       out of taxable income). Those bumped the in-app panel snapshot
 //       versions but not this constant, so cached PDFs kept re-serving
 //       over-sheltered after-tax numbers the dashboard no longer shows.
+//
+// NOT bumped for the July 2026 "Your buy box" block: that block renders
+// ONLY for users with an active buy box, and those users' exports bypass
+// the PDF cache entirely (read-time bypass in
+// getSavedAnalysisPdfExportAction, mirroring the branding bypass) while
+// block-carrying PDFs are stored uncacheable (see
+// PDF_CACHE_VERSION_UNCACHEABLE). Box-less users' PDFs stay byte-identical,
+// so flushing their caches with a bump would be pure regeneration waste.
 export const PDF_SNAPSHOT_VERSION = 5;
 export const ANALYSIS_PDF_BUCKET = "analysis-pdfs";
+
+/**
+ * Sentinel stored in `pdf_snapshot_version` for PDFs that must never be
+ * served from the cache again. Used for exports that carried the owner's
+ * "Your buy box" block: the block reflects buy-box state at generation
+ * time, which the version composite can't see — if the user later deletes
+ * their last box (or loses the entitlement), a version-matched cached PDF
+ * would keep re-serving the stale block. Storing 0 (never equal to the
+ * composite PDF_CACHE_VERSION, which is >= RADIX^4 whenever
+ * PDF_SNAPSHOT_VERSION >= 1) guarantees regeneration. The complementary
+ * case — box EDITS while boxes exist — is handled at read time:
+ * getSavedAnalysisPdfExportAction bypasses the cache entirely while the
+ * user has a usable buy box (same pattern as the branding bypass).
+ */
+export const PDF_CACHE_VERSION_UNCACHEABLE = 0;
 
 /**
  * Each component version must stay within [0, RADIX). The build fails loudly

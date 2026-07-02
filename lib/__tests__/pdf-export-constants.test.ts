@@ -13,6 +13,7 @@ import { describe, expect, it } from "vitest";
 import {
   encodePdfCacheVersion,
   PDF_CACHE_VERSION,
+  PDF_CACHE_VERSION_UNCACHEABLE,
   PDF_SNAPSHOT_VERSION,
 } from "../pdf-export-constants";
 import { EXIT_SCENARIOS_SNAPSHOT_VERSION } from "../exit-scenarios";
@@ -54,6 +55,16 @@ describe("PDF_CACHE_VERSION", () => {
       bumped[i] = bumped[i]! + 1;
       expect(encodePdfCacheVersion(bumped)).not.toBe(PDF_CACHE_VERSION);
     }
+  });
+
+  it("uncacheable sentinel (buy-box PDFs) can never match the composite", () => {
+    // Buy-box-carrying PDFs are stored with this sentinel so the cache can
+    // never serve them again (e.g. after the user deletes their last box).
+    expect(PDF_CACHE_VERSION_UNCACHEABLE).not.toBe(PDF_CACHE_VERSION);
+    // The composite is >= RADIX^4 whenever the template version is >= 1, so
+    // the sentinel stays permanently un-matchable, like legacy plain values.
+    expect(PDF_CACHE_VERSION_UNCACHEABLE).toBeLessThan(50 ** 4);
+    expect(PDF_CACHE_VERSION).toBeGreaterThanOrEqual(50 ** 4);
   });
 
   it("rejects out-of-range components loudly instead of colliding", () => {

@@ -5,6 +5,12 @@ import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import { recommendationLabel } from "@/lib/deal-score";
 import type { ReportMode } from "@/lib/pdf-export-constants";
+import type { BuyBoxPdfVerdict } from "@/lib/pdf-buy-box";
+// Server action (RPC from this client-bundled module — same mechanism
+// BuyBoxVerdictCard uses for listBuyBoxesAction). Evaluates the owner's buy
+// boxes server-side, RLS-scoped, and returns the compact block payload, or
+// null when the user has no usable box (→ the PDF renders exactly as today).
+import { getBuyBoxPdfVerdictAction } from "@/app/actions/saved-analyses";
 import {
   Chart,
   BarController,
@@ -1055,10 +1061,162 @@ function pageCover(
   });
 }
 
+// ===================== "Your buy box" block =====================
+
+/**
+ * Derive the buy-box evaluation input from the report payload. These
+ * performance numbers ARE the recomputed calculateAnalysis outputs (both
+ * export flows rebuild them fresh at export time), so the buy box is
+ * checked against the same numbers this report prints.
+ */
+function buildBuyBoxMetricsInput(d: ReportData) {
+  const num = (v: number | null | undefined): number | null =>
+    typeof v === "number" && Number.isFinite(v) ? v : null;
+  const t = d.property.type;
+  const propertyType =
+    t === "single-family" || t === "multi-family" || t === "owner-occupant" ? t : null;
+  return {
+    capRatePct: num(d.performance.capRate),
+    cocPct: num(d.performance.cocReturn),
+    dscr: num(d.performance.dscr),
+    cashFlowMonthly: num(d.performance.monthlyCashFlow),
+    purchasePrice: num(d.property.purchasePrice),
+    propertyType,
+    // Capped to the action's schema limit so an oversized address degrades
+    // to a truncated state lookup instead of dropping the whole block.
+    address: d.property.address?.trim() ? d.property.address.slice(0, 500) : null,
+    // Canonical cash signal in the report payload (same as pageInputs' DSCR N/A).
+    isCashPurchase: d.financing.downPaymentPct >= 100,
+  };
+}
+
+/** Ellipsis-truncate a single line to a max width at the CURRENT font. */
+function truncateToWidth(doc: jsPDF, text: string, maxW: number): string {
+  if (doc.getTextWidth(text) <= maxW) return text;
+  let t = text;
+  while (t.length > 1 && doc.getTextWidth(`${t}…`) > maxW) t = t.slice(0, -1);
+  return `${t.trimEnd()}…`;
+}
+
+/**
+ * Vector pass/fail/skip mark (check, cross, dash) — jsPDF's WinAnsi
+ * Helvetica has no ✓/✗ glyphs, so these are drawn as line art, matching
+ * the in-app card's green check / red cross / muted dash.
+ */
+function drawBuyBoxCheckGlyph(doc: jsPDF, x: number, textBaselineY: number, pass: boolean | null) {
+  const cy = textBaselineY - 3; // optical center of the 8pt text line
+  doc.setLineWidth(1.2);
+  if (pass === true) {
+    setStroke(doc, COLOR.success);
+    doc.line(x, cy, x + 2.4, cy + 2.4);
+    doc.line(x + 2.4, cy + 2.4, x + 6.8, cy - 2.6);
+  } else if (pass === false) {
+    setStroke(doc, COLOR.danger);
+    doc.line(x + 0.6, cy - 2.6, x + 6.2, cy + 2.6);
+    doc.line(x + 6.2, cy - 2.6, x + 0.6, cy + 2.6);
+  } else {
+    setStroke(doc, COLOR.muted);
+    doc.line(x + 0.8, cy, x + 6, cy);
+  }
+  setStroke(doc, COLOR.line);
+  doc.setLineWidth(0.5);
+}
+
+/**
+ * Shared layout math for the buy-box card so pagination can measure the
+ * block BEFORE drawing it (the card auto-sizes to the personal line +
+ * criterion count, like the AI Recommendation card above it).
+ */
+function buyBoxCardLayout(doc: jsPDF, v: BuyBoxPdfVerdict, w: number) {
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8.5);
+  const personalLines = v.personalLine
+    ? (doc.splitTextToSize(v.personalLine, w - 32) as string[]).slice(0, 2)
+    : [];
+  const personalLineH = 8.5 * 1.35;
+  const rows = Math.ceil(v.checks.length / 2);
+  const gridTop =
+    44 + (personalLines.length > 0 ? personalLines.length * personalLineH + 8 : 4);
+  const height = Math.round(gridTop + rows * 15 + 12);
+  return { personalLines, rows, gridTop, height };
+}
+
+/**
+ * The owner's personal verdict — the exact data the in-app BuyBoxVerdictCard
+ * shows (Meets/Misses headline, N/M criteria met, the biggest-gap /
+ * tightest-margin sentence, per-criterion actual vs target with pass/fail
+ * marks). Follows the AI Recommendation card's visual language: white card,
+ * tier-colored left stripe + kicker + headline. Tier colors are semantic
+ * (green = fits, amber = misses) and never swap with branding.
+ */
+function drawBuyBoxVerdictCard(doc: jsPDF, v: BuyBoxPdfVerdict, x: number, y: number, w: number) {
+  const { personalLines, gridTop, height } = buyBoxCardLayout(doc, v, w);
+  const tierColor = v.passes ? COLOR.success : v.applicableCount > 0 ? COLOR.warn : COLOR.muted;
+
+  card(doc, x, y, w, height);
+  setFill(doc, tierColor);
+  doc.roundedRect(x, y, 3, height, 1.5, 1.5, "F");
+
+  // Kicker — names the detailed box when several were screened.
+  setText(doc, tierColor);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(7);
+  doc.setCharSpace(0.8);
+  const kicker = v.multi ? `YOUR BUY BOX — ${v.boxName.toUpperCase()}` : "YOUR BUY BOX";
+  doc.text(truncateToWidth(doc, kicker, w - 200), x + 16, y + 16);
+  // Multi-box rollup, right-aligned on the kicker line ("meets N of M").
+  if (v.multi) {
+    setText(doc, COLOR.sub);
+    doc.text(`MEETS ${v.passingCount} OF ${v.activeCount} BUY BOXES`, x + w - 16, y + 16, {
+      align: "right",
+    });
+  }
+  doc.setCharSpace(0);
+
+  // Headline + criteria-met count on a shared baseline.
+  setText(doc, tierColor);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(13);
+  doc.text(truncateToWidth(doc, v.headline, w - 150), x + 16, y + 34);
+  setText(doc, COLOR.sub);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8.5);
+  doc.text(`${v.passedCount}/${v.applicableCount} criteria met`, x + w - 16, y + 34, {
+    align: "right",
+  });
+
+  // Personal gap sentence ("Biggest gap — …" / "Tightest margin — …").
+  if (personalLines.length > 0) {
+    setText(doc, COLOR.text);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8.5);
+    doc.text(personalLines, x + 16, y + 48, { lineHeightFactor: 1.35 });
+  }
+
+  // Per-criterion grid, two columns: mark + "Label: actual vs target (gap)".
+  const colW = (w - 32 - 12) / 2;
+  v.checks.forEach((c, i) => {
+    const col = i % 2;
+    const row = Math.floor(i / 2);
+    const cx = x + 16 + col * (colW + 12);
+    const cy = y + gridTop + row * 15 + 10;
+    drawBuyBoxCheckGlyph(doc, cx, cy, c.pass);
+    setText(doc, COLOR.text);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    const body = `${c.label}: ${c.actual} vs ${c.target}${c.gapText ? ` (${c.gapText})` : ""}`;
+    doc.text(truncateToWidth(doc, body, colW - 14), cx + 12, cy);
+  });
+
+  setStroke(doc, COLOR.line);
+  doc.setLineWidth(0.5);
+}
+
 function pageInputs(
   doc: jsPDF,
   d: ReportData,
-  branding?: BrandingConfig | null
+  branding?: BrandingConfig | null,
+  buyBox?: BuyBoxPdfVerdict | null
 ) {
   let y = M.top;
 
@@ -1388,6 +1546,24 @@ function pageInputs(
   // A third card on page 1 was redundant chrome. Page 1 now ends with
   // the AI Recommendation card; the attribution lives in the header
   // and footer where it belongs.
+
+  // "Your buy box" — the owner's personal verdict, directly under the AI
+  // recommendation (the same pairing as the app dashboard: Deal Score
+  // verdict first, buy-box fit right after). Renders ONLY when the
+  // exporting user has ≥1 usable buy box; without one this page stays
+  // byte-identical to the pre-buy-box template. If a long rationale +
+  // many criteria won't fit above the page footer, the card moves to its
+  // own page rather than colliding with the footer rule.
+  if (buyBox) {
+    let by = y + cardHeight + 12;
+    const { height: blockH } = buyBoxCardLayout(doc, buyBox, SAFE.w);
+    const footerLineY = PAGE.h - M.bottom + 20; // non-cover footer rule
+    if (by + blockH > footerLineY - 12) {
+      doc.addPage();
+      by = M.top + 12;
+    }
+    drawBuyBoxVerdictCard(doc, buyBox, M.left, by, SAFE.w);
+  }
 }
 
 function drawInputBlock(
@@ -2031,11 +2207,24 @@ async function buildInvestmentPDFDocument(
     logoData = await loadLogoDataUrl(); // TrueCap default
   }
 
+  // The owner's buy-box verdict — evaluated server-side (RLS-scoped, via
+  // the lib/buy-box primitives) against this report's recomputed metrics.
+  // Strictly additive and fail-soft: any failure (signed out, offline,
+  // migration pending) yields null and the report renders exactly as
+  // before — the export never blocks on buy-box state.
+  let buyBoxVerdict: BuyBoxPdfVerdict | null = null;
+  try {
+    const buyBoxRes = await getBuyBoxPdfVerdictAction(buildBuyBoxMetricsInput(d));
+    if (buyBoxRes.ok) buyBoxVerdict = buyBoxRes.verdict;
+  } catch {
+    // no block — never fail the export over the buy-box lookup
+  }
+
   // Cover page first — the "arrival" beat (address + verdict + bottom line).
   // Self-contained: the running header/footer loop skips page 1.
   pageCover(doc, d, branding ?? null, logoData);
   doc.addPage();
-  pageInputs(doc, d, branding ?? null);
+  pageInputs(doc, d, branding ?? null, buyBoxVerdict);
   doc.addPage();
   await pageProjection(doc, d, branding ?? null);
   // Tax Strategy is a personal-tax view — only the full personal report.
