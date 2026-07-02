@@ -79,6 +79,8 @@ function getSortValue(deal: DashboardTopDeal, sortBy: SortMetric) {
 
 export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
   const [sortBy, setSortBy] = useState<SortMetric>("score");
+  // Mobile-only "top 3 → show all" disclosure (density audit DH-5).
+  const [showAllMobile, setShowAllMobile] = useState(false);
   // Score-ring track + no-risk arc color (SVG strokes can't use var()). The
   // dashboard is always light, so this is the fixed light-mode track.
   const ringTrack = "oklch(0.92 0.012 255)";
@@ -121,7 +123,11 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
       </div>
 
       <div className="space-y-3 p-4 pt-0 md:hidden">
-        {sortedData.map((d) => {
+        {/* Top 3 by default on phones — six ~300px cards was ~1,800px of
+            re-scannable stack (mobile density audit DH-5). Deep-link
+            scrolls to a collapsed deal no-op gracefully (scrollToDeal
+            guards on the element existing). */}
+        {(showAllMobile ? sortedData : sortedData.slice(0, 3)).map((d) => {
           const Icon = typeIcon[d.type] ?? Building2;
           const dealId = getDealId(d);
           return (
@@ -212,6 +218,15 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
             </article>
           );
         })}
+        {sortedData.length > 3 ? (
+          <button
+            type="button"
+            onClick={() => setShowAllMobile((v) => !v)}
+            className="flex min-h-11 w-full items-center justify-center rounded-xl border border-dashed border-border text-xs font-semibold text-muted-foreground hover:text-foreground"
+          >
+            {showAllMobile ? "Show fewer" : `Show ${sortedData.length - 3} more deals`}
+          </button>
+        ) : null}
       </div>
 
       <div className="hidden overflow-x-auto md:block">

@@ -561,16 +561,10 @@ export function DashboardHome({
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2 lg:hidden">
-            <Button
-              asChild
-              className="h-10 rounded-xl px-4 text-sm font-semibold"
-              style={{ background: "var(--gradient-premium)", boxShadow: "var(--shadow-glow)" }}
-            >
-              <Link href="/" prefetch={false}>
-                <Plus className="h-4 w-4" />
-                Analyze Property
-              </Link>
-            </Button>
+            {/* No "Analyze Property" here: the fixed Topbar directly above
+                already carries the gradient analyze CTA — two identical
+                primary buttons in the first viewport wrapped this row to
+                two lines at 375px (mobile density audit DH-4). */}
             <Button asChild variant="outline" className="h-10 rounded-xl px-4 text-sm">
               <Link href="/dashboard/saved-analyses" prefetch={false}>
                 <Briefcase className="h-4 w-4" />
@@ -622,7 +616,10 @@ export function DashboardHome({
                 Next: {decisionCenter.nextAction.label} →
               </Link>
             </div>
-            <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
+            {/* Horizontal snap rail below sm — three stacked full-width
+                tiles made the "band" a full screen tall at 375px
+                (mobile density audit DH-3). Grid from sm: as before. */}
+            <div className="mt-3 flex snap-x snap-mandatory gap-3 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:grid sm:grid-cols-3 sm:overflow-visible sm:pb-0 [&>*]:min-w-[72%] [&>*]:snap-start sm:[&>*]:min-w-0">
               <div className="rounded-xl border border-success/30 bg-success/5 p-3">
                 <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-success">
                   <Award className="h-3.5 w-3.5" /> Best deal
@@ -864,7 +861,11 @@ export function DashboardHome({
             eye doesn't read "7 of the same thing." Clickable: hover +
             chevron affordance signals the deep-link interaction. */}
         {hasAnyDeals && data.topDeals.length > 0 ? (
-          <section>
+          // hidden below sm: these 3 rows are a subset of what Decision
+          // Center + Portfolio Signals already show — on a phone this was
+          // the 4th re-summarization of the same deals before any deal
+          // list (mobile density audit DH-1). Desktop unchanged.
+          <section className="hidden sm:block">
             <div className="mb-3">
               <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
                 Top performers

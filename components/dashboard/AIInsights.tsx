@@ -47,8 +47,11 @@ export function AIInsights({
       <p className="relative text-sm text-muted-foreground mb-4">Comparative signals from your saved deals</p>
 
       <div className="relative space-y-3">
+        {/* hidden below sm: on a phone this names the same 2-3 deals the
+            Decision Center already surfaced two sections up — the third
+            re-summarization in one scroll (mobile density audit DH-1). */}
         {riskReturnInsights ? (
-          <div className="rounded-xl bg-card/80 backdrop-blur border border-border/60 p-3">
+          <div className="hidden rounded-xl bg-card/80 backdrop-blur border border-border/60 p-3 sm:block">
             <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">Risk vs Return</div>
             <div className="space-y-3">
               <div>

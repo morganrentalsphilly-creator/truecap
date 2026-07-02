@@ -41,7 +41,11 @@ export function RateWatchStrip({ rateWatch }: { rateWatch: RateWatchSummary | nu
             Manage alerts
           </Link>
         </div>
-        <p className="mt-2.5 text-xs leading-relaxed text-muted-foreground">
+        {/* Explainer is desktop-only: on a phone the ambient (all-steady)
+            state spent ~120px explaining a feature with nothing to say
+            (mobile density audit DH-2). Headline + Manage alerts carry
+            the mobile strip alone. */}
+        <p className="mt-2.5 hidden text-xs leading-relaxed text-muted-foreground sm:block">
           We re-underwrite your saved deals whenever the 30-yr rate moves, and flag any whose
           tier, DSCR band, or cash-flow sign changes. Turn on alerts in settings to hear about it
           by email.
