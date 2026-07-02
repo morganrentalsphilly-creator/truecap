@@ -167,7 +167,12 @@ function mapDeal(row: SavedAnalysisRow): CompareDealViewModel {
 
   return {
     id: row.id,
-    address: row.address?.trim() || row.title?.trim() || "Untitled Property",
+    // Prefer a differing title ("<address> — Scenario 2") so scenario rows
+    // are tellable apart in the picker; otherwise title derives from address.
+    address:
+      row.address?.trim() && row.title?.trim() && row.title.trim() !== row.address.trim()
+        ? row.title.trim()
+        : row.address?.trim() || row.title?.trim() || "Untitled Property",
     createdAt: row.created_at,
     propertyType: row.property_type,
     purchasePrice,

@@ -370,16 +370,27 @@ function getSignalClasses(signal: SavedSignal): string {
 }
 
 function getAddressParts(item: SavedAnalysisListItem): { main: string; secondary: string } {
-  const source = item.address?.trim() || item.title?.trim() || "Untitled Property";
+  const address = item.address?.trim();
+  const title = item.title?.trim();
+  // Scenario saves share the address but carry a distinguishing title
+  // ("<address> — Scenario 2"); surface that suffix on the main line so
+  // sibling rows are tellable apart at a glance. For every other row the
+  // title is derived from the address, so this is a no-op.
+  const scenarioSuffix =
+    address && title && title !== address && title.startsWith(address)
+      ? ` ${title.slice(address.length).trim()}`
+      : "";
+  const source = address || title || "Untitled Property";
   // A nickname, when set, leads - the address drops to the secondary line.
   const nickname = item.nickname?.trim();
-  if (nickname) return { main: nickname, secondary: source };
+  if (nickname) return { main: nickname, secondary: `${source}${scenarioSuffix}` };
   const parts = source
     .split(",")
     .map((part) => part.trim())
     .filter(Boolean);
-  if (parts.length <= 1) return { main: source, secondary: "Address details not available" };
-  return { main: parts[0], secondary: parts.slice(1).join(", ") };
+  if (parts.length <= 1)
+    return { main: `${source}${scenarioSuffix}`, secondary: "Address details not available" };
+  return { main: `${parts[0]}${scenarioSuffix}`, secondary: parts.slice(1).join(", ") };
 }
 
 function getTypeLabel(type: SavedPropertyType | null): string {

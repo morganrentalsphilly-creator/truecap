@@ -41,6 +41,12 @@ export type SaveDealResult =
         | "DUPLICATE_ADDRESS"
         | "SERVER_ERROR";
       message?: string;
+      // DUPLICATE_ADDRESS (insert path) only: the user's own colliding saved
+      // deal, so the client can offer "update it" / "save as new scenario"
+      // instead of a dead-end toast. Optional + additive - existing consumers
+      // that only read code/message keep working unchanged.
+      existingId?: string;
+      existingTitle?: string;
     };
 
 export type GetSavedDealForEditingResult =
@@ -178,6 +184,34 @@ function buildEditFormSnapshotFromRow(row: Record<string, unknown>): Record<stri
   };
 }
 
+/**
+ * The user's non-deleted saved analyses whose address matches, using the same
+ * expression the `saved_analyses_address_taken` RPC checks
+ * (lower/trim of form_snapshot->>'address') so the rows surfaced here are
+ * exactly the rows the duplicate guard flagged. RLS-scoped via the caller's
+ * client + explicit user_id filter; a query error degrades to "no match".
+ */
+async function findSavedAnalysesByAddress(
+  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>,
+  userId: string,
+  address: string
+): Promise<Array<{ id: string; title: string | null }>> {
+  const { data, error } = await supabase
+    .from("saved_analyses")
+    .select("id, title, form_address:form_snapshot->>address")
+    .eq("user_id", userId)
+    .is("deleted_at", null)
+    // Oldest first so [0] is the original deal when scenarios already exist.
+    .order("created_at", { ascending: true });
+
+  if (error || !data) return [];
+
+  const needle = address.trim().toLowerCase();
+  return (data as Array<Record<string, unknown>>)
+    .filter((row) => (dbString(row.form_address) ?? "").trim().toLowerCase() === needle)
+    .map((row) => ({ id: String(row.id), title: dbString(row.title) ?? null }));
+}
+
 const provenanceFieldSchema = z.object({
   source: z.enum(["hud-fmr", "hud-safmr", "fred", "state-static", "manual"]),
   fetchedAt: z.string().max(40).nullish(),
@@ -195,7 +229,12 @@ const saveProvenanceSchema = z
 export async function saveDealAction(
   input: unknown,
   existingId?: string | null,
-  provenanceInput?: unknown
+  provenanceInput?: unknown,
+  // saveAsNewScenario: explicit choice from the duplicate-address dialog -
+  // skip the duplicate gate and insert a second analysis for the same
+  // address, titled "<address> — Scenario 2" (3, 4, …). Defaults to the
+  // pre-existing behavior, so callers that omit it are unchanged.
+  options?: { saveAsNewScenario?: boolean }
 ): Promise<SaveDealResult> {
   const supabase = await createServerSupabaseClient();
   const {
@@ -323,7 +362,7 @@ export async function saveDealAction(
   if (candidateExistingId) {
     const { data: existing, error: existingErr } = await supabase
       .from("saved_analyses")
-      .select("id, address")
+      .select("id, address, title")
       .eq("id", candidateExistingId)
       .eq("user_id", user.id)
       .is("deleted_at", null)
@@ -351,9 +390,14 @@ export async function saveDealAction(
         };
       }
 
+      // Keep the stored title on update - scenario rows carry a
+      // "— Scenario N" suffix that recomputing from the address would
+      // clobber. For every other row title === the derived title (the
+      // address can't change here), so this is a no-op.
+      const preservedTitle = dbString(existing.title)?.trim();
       const { data, error } = await supabase
         .from("saved_analyses")
-        .update(payload)
+        .update(preservedTitle ? { ...payload, title: preservedTitle } : payload)
         .eq("id", existing.id)
         .eq("user_id", user.id)
         .is("deleted_at", null)
@@ -368,19 +412,38 @@ export async function saveDealAction(
     }
   }
 
-  const { data: addressTaken, error: dupErr } = await supabase.rpc("saved_analyses_address_taken", {
-    p_user_id: user.id,
-    p_address: addressTrimmed,
-  });
-  if (dupErr) {
-    return { ok: false, code: "SERVER_ERROR", message: dupErr.message };
-  }
-  if (addressTaken === true) {
-    return {
-      ok: false,
-      code: "DUPLICATE_ADDRESS",
-      message: "You already saved an analysis for this property address.",
-    };
+  let insertTitle = title;
+  if (options?.saveAsNewScenario === true) {
+    // Explicit choice from the duplicate dialog: keep both. Number the title
+    // off the current count of same-address analyses so dashboard rows stay
+    // distinguishable (original = plain address, then Scenario 2, 3, …).
+    const sameAddress = await findSavedAnalysesByAddress(supabase, user.id, addressTrimmed);
+    if (sameAddress.length > 0) {
+      insertTitle = `${title.slice(0, 180)} — Scenario ${sameAddress.length + 1}`;
+    }
+  } else {
+    const { data: addressTaken, error: dupErr } = await supabase.rpc("saved_analyses_address_taken", {
+      p_user_id: user.id,
+      p_address: addressTrimmed,
+    });
+    if (dupErr) {
+      return { ok: false, code: "SERVER_ERROR", message: dupErr.message };
+    }
+    if (addressTaken === true) {
+      // Surface the colliding row so the client can offer a real choice
+      // (update it / save as scenario) instead of a dead end. If the lookup
+      // finds nothing (shouldn't happen - same match as the RPC), degrade to
+      // the plain message the old toast showed.
+      const collision = (await findSavedAnalysesByAddress(supabase, user.id, addressTrimmed))[0];
+      return {
+        ok: false,
+        code: "DUPLICATE_ADDRESS",
+        message: "You already saved an analysis for this property address.",
+        ...(collision
+          ? { existingId: collision.id, existingTitle: collision.title ?? undefined }
+          : {}),
+      };
+    }
   }
 
   const { count, error: countErr } = await supabase
@@ -406,6 +469,7 @@ export async function saveDealAction(
     .insert({
       user_id: user.id,
       ...payload,
+      title: insertTitle,
     })
     .select("id")
     .single();

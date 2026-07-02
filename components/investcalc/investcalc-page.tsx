@@ -69,6 +69,10 @@ import {
   verifyOneTimePdfPaymentAction,
 } from "@/app/actions/one-time-pdf";
 import { PdfPurchaseDialog } from "@/components/investcalc/pdf-purchase-dialog";
+import {
+  DuplicateAddressDialog,
+  type DuplicateAddressChoice,
+} from "@/components/investcalc/duplicate-address-dialog";
 import { SAMPLE_DEAL_VALUES } from "@/lib/sample-deal";
 import { estimatePurchasePrice } from "@/lib/estimate-price";
 import { parseListingUrl } from "@/lib/listing-url";
@@ -596,6 +600,14 @@ export function InvestCalcPage({
    */
   const [restoredAddress, setRestoredAddress] = useState<string | null>(null);
   const [isSavingDeal, setIsSavingDeal] = useState(false);
+  // Duplicate-address collision from the save flow. Non-null opens the
+  // chooser dialog with the user's own colliding saved deal so they can
+  // overwrite it or keep both as scenarios.
+  const [duplicateCollision, setDuplicateCollision] = useState<{
+    existingId: string;
+    existingTitle?: string;
+  } | null>(null);
+  const [duplicateChoiceBusy, setDuplicateChoiceBusy] = useState<DuplicateAddressChoice | null>(null);
   const [savedDealId, setSavedDealId] = useState<string | null>(null);
   const [savedDealCount, setSavedDealCount] = useState(initialSavedDealCount);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -2157,8 +2169,14 @@ export function InvestCalcPage({
     });
   };
 
-  const handleSaveDeal = async () => {
-    if (savedDealId && !canUpdateSavedDeals) {
+  /** Core save. `existingIdOverride` / `saveAsNewScenario` come from the
+   *  duplicate-address dialog choices; the plain Save button passes neither
+   *  (via `handleSaveDeal` below), which keeps the original behavior. */
+  const performSaveDeal = async (
+    options: { existingIdOverride?: string; saveAsNewScenario?: boolean } = {}
+  ) => {
+    const targetExistingId = options.existingIdOverride ?? savedDealId;
+    if (targetExistingId && !canUpdateSavedDeals) {
       toast({
         title: "Upgrade required",
         description: "Upgrade to update saved analyses.",
@@ -2173,10 +2191,13 @@ export function InvestCalcPage({
       const currentValues = form.getValues();
       const result = await saveDealAction(
         currentValues,
-        savedDealId,
-        buildProvenanceInput(enrichmentCaptureRef.current, currentValues)
+        targetExistingId,
+        buildProvenanceInput(enrichmentCaptureRef.current, currentValues),
+        options.saveAsNewScenario ? { saveAsNewScenario: true } : undefined
       );
       if (result.ok) {
+        // A save that came from the duplicate dialog succeeded - close it.
+        setDuplicateCollision(null);
         const parsedValues = investmentFormSchema.safeParse(form.getValues());
         setSavedDealId(result.id);
         savedDealIdRef.current = result.id;
@@ -2289,6 +2310,17 @@ export function InvestCalcPage({
         return;
       }
       if (result.code === "DUPLICATE_ADDRESS") {
+        // When the action identified the user's own colliding deal, open the
+        // chooser dialog (update it / save as scenario / cancel) instead of
+        // dead-ending. Without an id (e.g. the address-changed-on-update
+        // guard, or a lookup miss) keep the original actionable toast.
+        if (result.existingId) {
+          setDuplicateCollision({
+            existingId: result.existingId,
+            existingTitle: result.existingTitle,
+          });
+          return;
+        }
         toast({
           title: "Already saved",
           description:
@@ -2309,6 +2341,26 @@ export function InvestCalcPage({
       });
     } finally {
       setIsSavingDeal(false);
+    }
+  };
+
+  const handleSaveDeal = async () => performSaveDeal();
+
+  /** A choice made in the duplicate-address dialog. "update" overwrites the
+   *  colliding saved deal in place; "scenario" inserts a second analysis for
+   *  the same address. Success closes the dialog inside performSaveDeal;
+   *  failures surface as toasts and leave the dialog open to retry/cancel. */
+  const handleDuplicateChoice = async (choice: DuplicateAddressChoice) => {
+    if (!duplicateCollision) return;
+    setDuplicateChoiceBusy(choice);
+    try {
+      await performSaveDeal(
+        choice === "update"
+          ? { existingIdOverride: duplicateCollision.existingId }
+          : { saveAsNewScenario: true }
+      );
+    } finally {
+      setDuplicateChoiceBusy(null);
     }
   };
 
@@ -3594,6 +3646,18 @@ export function InvestCalcPage({
         onOpenChange={setIsPdfPurchaseDialogOpen}
         onBuyOneTime={handleBuyOneTimePdf}
         isStartingCheckout={isStartingPdfCheckout}
+      />
+      {/* Duplicate-address chooser - opens when saving an address that's
+          already in saved deals: overwrite it, keep both, or cancel. */}
+      <DuplicateAddressDialog
+        open={duplicateCollision !== null}
+        onOpenChange={(next) => {
+          if (!next) setDuplicateCollision(null);
+        }}
+        existingTitle={duplicateCollision?.existingTitle}
+        busyChoice={duplicateChoiceBusy}
+        onUpdateExisting={() => void handleDuplicateChoice("update")}
+        onSaveAsScenario={() => void handleDuplicateChoice("scenario")}
       />
     </div>
   );

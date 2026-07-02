@@ -122,7 +122,13 @@ function firstNumber(...values: NumericLike[]): number | null {
 }
 
 function getAddress(row: SavedAnalysisDashboardRow): string {
-  return row.address?.trim() || row.title?.trim() || "Untitled Property";
+  const address = row.address?.trim();
+  const title = row.title?.trim();
+  // Scenario saves share the address but carry a distinguishing title
+  // ("<address> — Scenario 2") — prefer it so sibling rows stay tellable
+  // apart. Every other row's title is derived from the address (no-op).
+  if (address && title && title !== address) return title;
+  return address || title || "Untitled Property";
 }
 
 function getRoiPct(snapshot: ResultSnapshot): number | null {
