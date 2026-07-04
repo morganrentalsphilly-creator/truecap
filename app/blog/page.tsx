@@ -49,6 +49,16 @@ export type BlogPost = {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: "debt-to-income-ratio-investment-property",
+    title:
+      "Debt-to-income ratio for an investment property: how lenders count rental income (2026)",
+    excerpt:
+      "Every investor assumes the rent &quot;covers itself&quot; on a loan application. It doesn&apos;t. Lenders credit 75% of gross rent, then subtract the property&apos;s full payment — so a rental pulling $446/month over its payment reads as a −$79 debt, not income. The net-rental mechanic worked on a $250K rental, why the 25% haircut swings DTI ~3 points, the house-hack version where the same rule adds $1,275 of income and turns a 54% ratio into 45%, the Schedule E add-backs that make a paper loss net to breakeven, and the DSCR escape hatch when your ratio finally hits the wall.",
+    readingTimeMinutes: 11,
+    publishedAt: "2026-07-04",
+    available: true,
+  },
+  {
     slug: "return-on-equity-rental-property",
     title:
       "Return on equity (ROE) on a rental property: the lazy-equity test (2026)",
