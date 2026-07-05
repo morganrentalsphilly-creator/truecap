@@ -20,6 +20,7 @@ import {
 import { Button } from "@/components/ui/button";
 import {
   investmentFormSchema,
+  previewParse,
   InvestmentFormValues,
   defaultValues,
   getDefaultUnitsForPropertyType,
@@ -1754,7 +1755,10 @@ export function InvestCalcPage({
     // But we DO compute a lightweight live preview so the verdict forms as the
     // user types - the magic moment - without any of that machinery.
     if (baseline === null) {
-      const liveParsed = investmentFormSchema.safeParse(form.getValues());
+      // previewParse (not the full schema): the live verdict forms on
+      // price + rent alone — address is required for save/share but the
+      // math never reads it, so it must not gate the magic moment.
+      const liveParsed = previewParse(form.getValues());
       if (liveParsed.success) {
         try {
           const r = calculateAnalysis(liveParsed.data);
@@ -2407,6 +2411,24 @@ export function InvestCalcPage({
     const firstFieldError = findFirstFieldError(errors);
     if (!hasUnitFieldErrors && firstFieldError?.path) {
       form.setFocus(firstFieldError.path as never);
+    }
+
+    // Address-only block: the live preview already showed the verdict on
+    // price + rent, so a red "Validation Error" here reads as "you did
+    // something wrong" when the user just hasn't typed an address yet.
+    // Give a calm, specific nudge that points at what's left and why
+    // (Run/Save/Share need the real address) instead of alarming them.
+    const onlyAddressMissing =
+      !!errors.address &&
+      !hasUnitFieldErrors &&
+      Object.keys(errors).every((k) => k === "address");
+    if (onlyAddressMissing) {
+      toast({
+        title: "Add the property address",
+        description:
+          "Your live estimate is ready above — add the address to run the full analysis and save it.",
+      });
+      return;
     }
 
     toast({

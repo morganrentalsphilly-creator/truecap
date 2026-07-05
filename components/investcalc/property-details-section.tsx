@@ -51,12 +51,14 @@ export function PropertyDetailsSection({
           <Label htmlFor="address" className="text-sm font-medium text-foreground mb-1 block">
             Property Address
           </Label>
-          {/* First-run signpost: makes the address the obvious starting
-              point and tells new users it auto-fills the deal - the single
-              biggest "how do I use this" cue, right at the point of action. */}
+          {/* First-run signpost. Frames the address as the fast path (it
+              auto-fills the deal) WITHOUT implying it's the only way in —
+              price + rent alone already form a live verdict below. Copy is
+              honest about area rent (HUD covers most, not all addresses —
+              rent-2) so an unmatched address never reads as a broken promise. */}
           <p className="mb-1.5 text-[11px] leading-snug text-muted-foreground">
-            <span className="font-semibold text-foreground">Start here</span>
-            {" - we auto-fill rates, taxes & area rent from public data. Everything stays editable."}
+            <span className="font-semibold text-foreground">Fastest start</span>
+            {" - type an address and we auto-fill rates, taxes & (where public data covers it) area rent. Or just enter price & rent to see your verdict. Everything stays editable."}
           </p>
           <AddressAutocomplete
             form={form}

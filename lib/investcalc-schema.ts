@@ -405,6 +405,31 @@ export const investmentFormSchema = z.object({
 export type InvestmentFormValues = z.infer<typeof investmentFormSchema>;
 export type UnitValues = z.infer<typeof unitSchema>;
 
+/**
+ * Parse for the live instant-verdict PREVIEW only. The verdict math
+ * (calculateAnalysis + deal score) never reads `address` — only
+ * purchasePrice + monthlyRent (single-family) or unit rents (multi) — but
+ * the full form schema requires a 5-char address for save/share (the share
+ * payload + duplicate-address dedup depend on it). Gating the preview on the
+ * full schema meant a user who typed the two numbers the math actually uses
+ * saw blank space until they also typed an address that changes nothing.
+ *
+ * This injects a placeholder address before validating, so the magic-moment
+ * preview lights up on price + rent alone, WITHOUT weakening the real address
+ * requirement on Run / Save / Share (which still call the full schema). No
+ * schema-shape change → INVESTCALC_SCHEMA_VERSION stays put.
+ */
+export function previewParse(values: unknown): ReturnType<typeof investmentFormSchema.safeParse> {
+  if (values && typeof values === "object" && !Array.isArray(values)) {
+    const v = values as Record<string, unknown>;
+    const addr = v.address;
+    if (typeof addr !== "string" || addr.trim().length < 5) {
+      return investmentFormSchema.safeParse({ ...v, address: "Preview property" });
+    }
+  }
+  return investmentFormSchema.safeParse(values);
+}
+
 export const PROPERTY_TYPES = [
   {
     value: "single-family",
