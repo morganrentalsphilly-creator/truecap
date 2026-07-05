@@ -28,6 +28,7 @@ import {
   Trash2,
   X,
   ClipboardList,
+  CopyPlus,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -102,7 +103,10 @@ import type { OwnedEquitySummary } from "@/lib/owned-equity";
 import { setSavedDealCloseDateAction } from "@/app/actions/saved-analyses";
 import { recomputeSavedDealVerdict } from "@/lib/recompute-saved-deal-verdict";
 import { buildDealsCsv, dealsCsvFilename, type DealsCsvItem } from "@/lib/deals-csv";
-import { openSavedDealInAnalysisTab as openSavedDealInAnalysisTabShared } from "@/components/investcalc/open-saved-deal-in-analyzer";
+import {
+  openSavedDealInAnalysisTab as openSavedDealInAnalysisTabShared,
+  duplicateSavedDealInAnalyzer,
+} from "@/components/investcalc/open-saved-deal-in-analyzer";
 
 type SavedSignal = "strong-buy" | "buy" | "neutral" | "risky" | "avoid";
 type SavedPropertyType = "single-family" | "multi-family" | "owner-occupant";
@@ -1374,6 +1378,29 @@ export function SavedAnalysesPage({
     })();
   };
 
+  // "Duplicate" — fork this deal's assumptions into a NEW analysis (financing/
+  // expenses carried over, property identity cleared). Same popup-safe tab
+  // pattern as Open; a save from the forked deal is a fresh insert.
+  const handleDuplicateDeal = (id: string) => {
+    const targetWindow = window.open("about:blank", "_blank");
+    if (targetWindow) targetWindow.opener = null;
+    setOpeningDealId(id);
+    void (async () => {
+      try {
+        const result = await duplicateSavedDealInAnalyzer(id, targetWindow);
+        if (!result.ok) {
+          toast({
+            title: "Could not duplicate deal",
+            description: result.message,
+            variant: "destructive",
+          });
+        }
+      } finally {
+        setOpeningDealId(null);
+      }
+    })();
+  };
+
   const openPdfUrl = (pdfUrl: string) => {
     const link = document.createElement("a");
     link.href = pdfUrl;
@@ -2069,6 +2096,13 @@ export function SavedAnalysesPage({
                               Checklist &amp; docs
                             </Link>
                           </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onSelect={() => handleDuplicateDeal(item.id)}
+                            disabled={openingDealId === item.id}
+                          >
+                            <CopyPlus className="mr-2 h-3.5 w-3.5" />
+                            Duplicate
+                          </DropdownMenuItem>
                           {canUsePipeline ? (
                             <DropdownMenuItem
                               onSelect={() =>
@@ -2340,6 +2374,13 @@ export function SavedAnalysesPage({
                                   <ClipboardList className="mr-2 h-3.5 w-3.5" />
                                   Checklist
                                 </Link>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onSelect={() => handleDuplicateDeal(item.id)}
+                                disabled={openingDealId === item.id}
+                              >
+                                <CopyPlus className="mr-2 h-3.5 w-3.5" />
+                                Duplicate
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>

@@ -118,6 +118,8 @@ import { consumePendingSaveIntent, setPendingSaveIntent } from "@/lib/save-inten
 
 type InputTab = "cash-flow" | "projections" | "tax-strategy" | "deal-score";
 const SAVED_ANALYSIS_EDIT_DRAFT_KEY = "truecap_saved_analysis_edit_draft";
+/** Must match SAVED_ANALYSIS_DUPLICATE_DRAFT_KEY in open-saved-deal-in-analyzer.tsx. */
+const SAVED_ANALYSIS_DUPLICATE_DRAFT_KEY = "truecap_saved_analysis_duplicate_draft";
 /**
  * Auto-save key for anonymous / walk-in form drafts. Mobile paid traffic
  * gets distracted constantly (phone rings, tab swap to text), and an
@@ -1902,6 +1904,48 @@ export function InvestCalcPage({
       window.localStorage.removeItem(SAVED_ANALYSIS_AUTO_EXPORT_PDF_KEY);
     }
 
+    // Duplicate handoff (My Deals → "Duplicate"): fork the deal's ASSUMPTIONS
+    // into a NEW deal. Restore financing/expenses/vacancy/etc. but clear the
+    // property identity (address/price/rent, incl. per-unit rents) so the
+    // user just enters the new property — the "copy a row, change 3 cells"
+    // flow. No savedDealId → a save is a fresh insert (never overwrites the
+    // original). Checked before the edit-draft path; isolated from it.
+    const duplicatePayloadRaw =
+      window.sessionStorage.getItem(SAVED_ANALYSIS_DUPLICATE_DRAFT_KEY) ??
+      window.localStorage.getItem(SAVED_ANALYSIS_DUPLICATE_DRAFT_KEY);
+    if (duplicatePayloadRaw) {
+      window.sessionStorage.removeItem(SAVED_ANALYSIS_DUPLICATE_DRAFT_KEY);
+      window.localStorage.removeItem(SAVED_ANALYSIS_DUPLICATE_DRAFT_KEY);
+      try {
+        const parsed = JSON.parse(duplicatePayloadRaw) as { formSnapshot?: unknown };
+        const normalized = normalizeInvestmentFormSnapshot(parsed.formSnapshot);
+        if (normalized) {
+          const forked: Partial<InvestmentFormValues> = {
+            ...normalized,
+            address: "",
+            purchasePrice: undefined,
+            monthlyRent: undefined,
+            units: (normalized.units ?? []).map((u) => ({ ...u, monthlyRent: undefined })),
+          };
+          prevPropertyTypeRef.current = normalized.propertyType;
+          form.reset(forked);
+          // New deal: no savedDealId, no results yet (price/rent cleared → the
+          // live preview forms once the user enters the new property).
+          toast({
+            title: "Assumptions duplicated",
+            description:
+              "Enter the new property's address, price & rent — your financing and expense assumptions carried over.",
+          });
+          queueMicrotask(() => {
+            isProgrammaticResetRef.current = false;
+          });
+          return;
+        }
+      } catch {
+        // Malformed payload → fall through to a clean new-analysis init.
+      }
+    }
+
     if (reopenPayloadRaw) {
       try {
         const parsed = JSON.parse(reopenPayloadRaw) as {
@@ -2954,7 +2998,11 @@ export function InvestCalcPage({
             );
       if (!ok) return;
     }
-    resetToNewAnalysis("single-family");
+    // Keep the current property type on New Analysis — a multi-family repeat
+    // user shouldn't be silently reset to single-family and have to re-pick
+    // it + re-confirm units every single deal (new-analysis-hardcodes-single-
+    // family). The mount-time reset stays single-family.
+    resetToNewAnalysis(form.getValues("propertyType") ?? "single-family");
     setSavedTemplateFallback(null);
   };
 

@@ -19,6 +19,44 @@ import { useToast } from "@/hooks/use-toast";
 export const SAVED_ANALYSIS_EDIT_DRAFT_KEY = "truecap_saved_analysis_edit_draft";
 
 /**
+ * Duplicate handoff key — distinct from the edit key so the analyzer forks
+ * the deal's ASSUMPTIONS into a brand-new deal (no savedDealId, property
+ * identity cleared) instead of opening it for edit-in-place.
+ */
+export const SAVED_ANALYSIS_DUPLICATE_DRAFT_KEY = "truecap_saved_analysis_duplicate_draft";
+
+/**
+ * "Duplicate" / "New deal from this" — open the analyzer carrying the deal's
+ * form snapshot as a NEW deal: the calculator restores the financing/expense
+ * assumptions but clears the address/price/rent so the user just enters the
+ * new property. The spreadsheet "copy a row, change 3 cells" workflow, and it
+ * fixes the silent overwrite when a user "Opened" a saved deal to model a
+ * different address. Same fetch + popup-safe tab pattern as the open helper.
+ */
+export async function duplicateSavedDealInAnalyzer(
+  id: string,
+  targetWindow: Window | null
+): Promise<{ ok: true } | { ok: false; message: string }> {
+  const result = await getSavedDealForEditingAction(id);
+  if (!result.ok) {
+    targetWindow?.close();
+    return { ok: false, message: result.message };
+  }
+  const payload = JSON.stringify({
+    formSnapshot: result.formSnapshot,
+    templateFallback: result.templateFallback,
+  });
+  window.localStorage.setItem(SAVED_ANALYSIS_DUPLICATE_DRAFT_KEY, payload);
+  window.sessionStorage.setItem(SAVED_ANALYSIS_DUPLICATE_DRAFT_KEY, payload);
+  if (targetWindow) {
+    targetWindow.location.href = "/";
+    return { ok: true };
+  }
+  window.open("/", "_blank", "noopener,noreferrer");
+  return { ok: true };
+}
+
+/**
  * Fetch the saved deal for editing, stash the handoff payload in web storage,
  * and point `targetWindow` (an already-opened about:blank tab — popup-blocker
  * safe) at "/". Falls back to window.open when no target tab was pre-opened.
