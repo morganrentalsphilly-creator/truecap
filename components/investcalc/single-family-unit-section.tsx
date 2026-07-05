@@ -72,16 +72,18 @@ export function SingleFamilyUnitSection({
       ? (adrWatch * 365 * (occWatch / 100)) / 12
       : null;
 
-  // HUD rent auto-fill is keyed on bedroom count, so without beds the rent
-  // estimate silently never appears. Surface the dependency: when beds and rent
-  // are both empty, tell the user beds unlocks the estimate.
+  // Rent is the one required number a first-timer often doesn't know, and
+  // HUD auto-fill (keyed on bedroom count) silently misses on many
+  // addresses. So the nudge shows whenever RENT is empty — not only when
+  // beds are also empty — and adapts: no beds yet → "add beds to
+  // auto-estimate"; beds present but still no rent (HUD missed or is
+  // pending) → a concrete recovery path so the user is never stuck staring
+  // at an empty required field with no next step (finding rent-1).
   const beds = form.watch("bedrooms");
   const rentVal = form.watch("monthlyRent");
-  const showRentNudge =
-    showBeds &&
-    showRent &&
-    (beds == null || Number.isNaN(beds)) &&
-    (rentVal == null || Number.isNaN(rentVal));
+  const rentEmpty = rentVal == null || Number.isNaN(rentVal);
+  const bedsEmpty = beds == null || Number.isNaN(beds);
+  const showRentNudge = showBeds && showRent && rentEmpty;
   const isSecondary = fields === "secondary";
   const visibleCount = [showBeds, showRent, showBaths, showSqft].filter(Boolean).length;
   const gridCols =
@@ -152,7 +154,9 @@ export function SingleFamilyUnitSection({
             <FieldError id="monthlyRent-error" message={errors.monthlyRent?.message} />
             {showRentNudge ? (
               <p className="mt-1 text-[11px] text-muted-foreground">
-                Add bedrooms to auto-estimate rent (HUD area data).
+                {bedsEmpty
+                  ? "Add bedrooms to auto-estimate rent (HUD area data)."
+                  : "No rent estimate for this address? Type your expected monthly rent — Zillow/Rentometer's estimate for the ZIP is a good start."}
               </p>
             ) : null}
           </div>
