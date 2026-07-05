@@ -76,18 +76,16 @@ export function isValidRentalUnit(
 ): boolean {
   if (!unit) return false;
   const minRent = options?.allowZeroRent ? 0 : Number.EPSILON;
-  return (
-    typeof unit.bedrooms === "number" &&
-    unit.bedrooms >= 0 &&
-    unit.bedrooms <= 20 &&
-    typeof unit.bathrooms === "number" &&
-    unit.bathrooms >= 0 &&
-    unit.bathrooms <= 20 &&
-    typeof unit.sqft === "number" &&
-    unit.sqft >= 50 &&
-    typeof unit.monthlyRent === "number" &&
-    unit.monthlyRent >= minRent
-  );
+  // Rent is the ONLY field the cash-flow math reads from a unit
+  // (calc-analysis sums unit.monthlyRent; beds/baths/sqft never enter the
+  // math). So a rental unit is "valid" — counts for income, saves,
+  // compares, and clears validation — on rent alone. Requiring
+  // beds/baths/sqft too used to wall multi-family runs behind ~6 fields
+  // that change nothing. Any facts the user DOES type are still
+  // range-checked by unitSchema's field validation before this runs, so
+  // dropping them here loses no guardrail. (Mirrors the single-family
+  // loosening: rent required, facts optional.)
+  return typeof unit.monthlyRent === "number" && unit.monthlyRent >= minRent;
 }
 
 export const investmentFormSchema = z.object({
@@ -275,60 +273,11 @@ export const investmentFormSchema = z.object({
   ) => {
     const u = unit ?? {};
 
-    if (typeof u.bedrooms !== "number" || !Number.isFinite(u.bedrooms)) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["units", index, "bedrooms"],
-        message: "Enter number of bedrooms",
-      });
-    } else if (u.bedrooms < 0) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["units", index, "bedrooms"],
-        message: "Min 0",
-      });
-    } else if (u.bedrooms > 20) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["units", index, "bedrooms"],
-        message: "Max 20",
-      });
-    }
-
-    if (typeof u.bathrooms !== "number" || !Number.isFinite(u.bathrooms)) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["units", index, "bathrooms"],
-        message: "Enter number of bathrooms",
-      });
-    } else if (u.bathrooms < 0) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["units", index, "bathrooms"],
-        message: "Min 0",
-      });
-    } else if (u.bathrooms > 20) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["units", index, "bathrooms"],
-        message: "Max 20",
-      });
-    }
-
-    if (typeof u.sqft !== "number" || !Number.isFinite(u.sqft)) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["units", index, "sqft"],
-        message: "Enter square feet",
-      });
-    } else if (u.sqft < 50) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["units", index, "sqft"],
-        message: "Min 50 sq ft",
-      });
-    }
-
+    // Only rent is required per unit (beds/baths/sqft never touch the math
+    // and are range-checked by unitSchema when provided) — so this flags
+    // just the one field the deal genuinely can't run without. This branch
+    // now only fires for a unit that's missing its rent (isValidRentalUnit
+    // gates on rent alone), so it never re-walls the fact fields.
     if (typeof u.monthlyRent !== "number" || !Number.isFinite(u.monthlyRent)) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,

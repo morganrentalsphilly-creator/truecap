@@ -67,18 +67,22 @@ describe("computeAnalyzerSteps", () => {
     expect(statusOf(computeAnalyzerSteps({ ...base, bedrooms: 3, monthlyRent: 1850 }, { hasResults: false }), "income")).toBe("complete");
   });
 
-  it("MF income: complete only when every rental unit is fully entered", () => {
-    const full = { bedrooms: 2, bathrooms: 1, sqft: 800, monthlyRent: 1400 };
-    const partialUnit = { bedrooms: 2, monthlyRent: 1400 }; // missing baths/sqft
+  it("MF income: complete when every rental unit has RENT (facts optional, Batch B)", () => {
+    // Rent is the only field the math reads, so a unit is "complete" for the
+    // income step on rent alone — beds/baths/sqft are optional refinements.
+    const rentOnly = { monthlyRent: 1400 };
+    const rentOnly2 = { monthlyRent: 1250 };
+    const noRent = { bedrooms: 2 }; // missing the one field that matters
     expect(
       statusOf(
-        computeAnalyzerSteps({ propertyType: "multi-family", units: [full, full] }, { hasResults: false }),
+        computeAnalyzerSteps({ propertyType: "multi-family", units: [rentOnly, rentOnly2] }, { hasResults: false }),
         "income"
       )
     ).toBe("complete");
+    // A unit still missing its rent keeps the step partial.
     expect(
       statusOf(
-        computeAnalyzerSteps({ propertyType: "multi-family", units: [full, partialUnit] }, { hasResults: false }),
+        computeAnalyzerSteps({ propertyType: "multi-family", units: [rentOnly, noRent] }, { hasResults: false }),
         "income"
       )
     ).toBe("partial");

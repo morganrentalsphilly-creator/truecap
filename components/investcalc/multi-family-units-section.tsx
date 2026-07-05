@@ -186,7 +186,8 @@ export function MultiFamilyUnitsSection({
               <div className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-4 gap-3">
                 <div>
                   <Label htmlFor={`unit-${index}-bedrooms`} className="text-xs font-semibold text-primary mb-1 block uppercase tracking-wide">
-                    Bedrooms
+                    Bedrooms{" "}
+                    <span className="font-normal normal-case tracking-normal text-muted-foreground">· optional</span>
                   </Label>
                   <Input
                     {...register(`units.${index}.bedrooms`, { valueAsNumber: true })}
@@ -206,7 +207,8 @@ export function MultiFamilyUnitsSection({
 
                 <div>
                   <Label htmlFor={`unit-${index}-bathrooms`} className="text-xs font-semibold text-primary mb-1 block uppercase tracking-wide">
-                    Bathrooms
+                    Bathrooms{" "}
+                    <span className="font-normal normal-case tracking-normal text-muted-foreground">· optional</span>
                   </Label>
                   <Input
                     {...register(`units.${index}.bathrooms`, { valueAsNumber: true })}
@@ -226,7 +228,8 @@ export function MultiFamilyUnitsSection({
 
                 <div>
                   <Label htmlFor={`unit-${index}-sqft`} className="text-xs font-semibold text-primary mb-1 block uppercase tracking-wide">
-                    Sq Ft
+                    Sq Ft{" "}
+                    <span className="font-normal normal-case tracking-normal text-muted-foreground">· optional</span>
                   </Label>
                   <Input
                     {...register(`units.${index}.sqft`, { valueAsNumber: true })}
