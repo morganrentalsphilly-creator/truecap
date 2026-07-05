@@ -49,6 +49,16 @@ export type BlogPost = {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: "70-percent-rule-house-flipping",
+    title:
+      "The 70% rule for house flipping (and BRRRR): how to calculate your max offer (2026)",
+    excerpt:
+      "The fastest offer screen in real estate — pay 70% of after-repair value, minus repairs — and what it&apos;s really doing under the hood. The Maximum Allowable Offer formula worked on a $300K flip, a full P&amp;L that shows where the 30% spread actually goes ($37,800 of costs, $52,200 of profit), the price-per-sqft comp method for pinning down ARV against the neighborhood ceiling, the BRRRR twist where the same 70% cap dovetails with a 75% cash-out refinance, and the backward solve that lands within $2,000 of the rule — plus the cheap-house and long-rehab cases where 70% quietly lies.",
+    readingTimeMinutes: 11,
+    publishedAt: "2026-07-05",
+    available: true,
+  },
+  {
     slug: "debt-to-income-ratio-investment-property",
     title:
       "Debt-to-income ratio for an investment property: how lenders count rental income (2026)",
