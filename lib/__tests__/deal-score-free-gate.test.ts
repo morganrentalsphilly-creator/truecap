@@ -23,14 +23,21 @@ describe("Deal Score is free — regression guards", () => {
   });
 
   it("the analyzer no longer ships a 'Deal Score (Pro)' upsell gate", () => {
-    const source = readFileSync(
-      fileURLToPath(
-        new URL("../../components/investcalc/analysis-dashboard.tsx", import.meta.url)
-      ),
-      "utf8"
-    );
-    // The removed lock card rendered this exact label + a canUseDealScore gate.
-    expect(source).not.toContain("Deal Score (Pro)");
-    expect(source).not.toContain("canUseDealScore");
+    // The Deal Score card was extracted from analysis-dashboard.tsx into
+    // answer-hero-card.tsx (calculator redesign Phase 2), so the guard
+    // scans both files - otherwise the extraction would silently take the
+    // scored surface out from under this regression test.
+    for (const file of [
+      "../../components/investcalc/analysis-dashboard.tsx",
+      "../../components/investcalc/answer-hero-card.tsx",
+    ]) {
+      const source = readFileSync(
+        fileURLToPath(new URL(file, import.meta.url)),
+        "utf8"
+      );
+      // The removed lock card rendered this exact label + a canUseDealScore gate.
+      expect(source).not.toContain("Deal Score (Pro)");
+      expect(source).not.toContain("canUseDealScore");
+    }
   });
 });

@@ -66,7 +66,7 @@ const fmtMoneyPerMo = (n: number) =>
 
 const fmtPct1 = (n: number) => `${n.toFixed(1)}%`;
 
-/** Bands mirror cashFlowBenchmarkLabel in analysis-dashboard.tsx
+/** Bands mirror cashFlowBenchmarkLabel in components/investcalc/metrics-band.tsx
  *  (≥$500 strong / $200–500 solid / >$0 modest / >-$100 break-even). */
 function cashFlowMetric(netCashFlow: number): LensOutcomeMetric {
   const band =
