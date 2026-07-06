@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { Home, DollarSign, CalendarClock, Percent, Sofa } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -31,6 +32,23 @@ interface SingleFamilyUnitSectionProps {
    *  one-time furnishing cost) instead of a hand-typed monthly rent. The
    *  monthly revenue is derived for display; calc-analysis recomputes it. */
   strMode?: boolean;
+  /**
+   * ADDITIVE chrome variant (calculator redesign Phase 4, hero unification):
+   * "bare" drops this section's own card wrapper + "Unit Details" header so
+   * the primary fields compose inside the hero's single bordered card (the
+   * hero renders the "What does it earn?" group header above this mount).
+   * Default ("card") keeps today's standalone chrome byte-identical for any
+   * other mount (e.g. the fields="secondary" extras panel).
+   */
+  chrome?: "card" | "bare";
+  /**
+   * Extra grid cell(s) appended after this section's own fields — used by
+   * the fields="secondary" "Property extras" panel to house the relocated
+   * Year Built block (Phase 4: year built moved out of the hero). When set
+   * on a secondary mount, the card header reads "Property extras" to match
+   * the assumptions-strip chip that targets it.
+   */
+  extraFields?: ReactNode;
 }
 
 const currency0 = new Intl.NumberFormat("en-US", {
@@ -45,7 +63,10 @@ export function SingleFamilyUnitSection({
   hideBedrooms = false,
   rentLabel,
   strMode = false,
+  chrome = "card",
+  extraFields,
 }: SingleFamilyUnitSectionProps) {
+  const bare = chrome === "bare";
   const {
     register,
     formState: { errors },
@@ -94,16 +115,18 @@ export function SingleFamilyUnitSection({
         : "grid-cols-1";
 
   return (
-    <div className="bg-card rounded-2xl border border-border shadow-sm p-6">
-      <div className="flex items-center gap-2 mb-5">
-        <Home className="w-4 h-4 text-primary" />
-        <span className="font-semibold text-sm text-foreground">
-          {isSecondary ? "Bathrooms & size" : "Unit Details"}
-        </span>
-        {isSecondary ? (
-          <span className="text-[11px] font-normal text-muted-foreground">(optional)</span>
-        ) : null}
-      </div>
+    <div className={bare ? undefined : "bg-card rounded-2xl border border-border shadow-sm p-6"}>
+      {!bare ? (
+        <div className="flex items-center gap-2 mb-5">
+          <Home className="w-4 h-4 text-primary" />
+          <span className="font-semibold text-sm text-foreground">
+            {isSecondary ? (extraFields ? "Property extras" : "Bathrooms & size") : "Unit Details"}
+          </span>
+          {isSecondary ? (
+            <span className="text-[11px] font-normal text-muted-foreground">(optional)</span>
+          ) : null}
+        </div>
+      ) : null}
 
       <div className={cn("grid gap-4", gridCols)}>
         {showBeds ? (
@@ -205,6 +228,10 @@ export function SingleFamilyUnitSection({
             <FieldError id="sqft-error" message={errors.sqft?.message} />
           </div>
         ) : null}
+
+        {/* Relocated Year Built block (Phase 4) — appended as the panel's
+            last grid cell so "Property extras" is one card, not two. */}
+        {extraFields}
       </div>
 
       {showStr ? (

@@ -21,12 +21,22 @@ interface MultiFamilyUnitsSectionProps {
    * null/absent = no address yet or lookup failed → renders nothing.
    */
   fmrByBedrooms?: Record<number, number> | null;
+  /**
+   * ADDITIVE chrome variant (redesign Phase 4, hero unification — same
+   * contract as PropertyDetailsSection/SingleFamilyUnitSection): "bare"
+   * drops this section's own card wrapper so the unit rows compose inside
+   * the hero's single bordered card (the hero's "What does it earn?"
+   * header replaces the card header; the units count + validation badge +
+   * Add Unit row stay). Default ("card") is byte-identical to before.
+   */
+  chrome?: "card" | "bare";
 }
 
 export function MultiFamilyUnitsSection({
   form,
   isHouseHack = false,
   fmrByBedrooms = null,
+  chrome = "card",
 }: MultiFamilyUnitsSectionProps) {
   const { register, control, watch, setValue } = form;
 
@@ -89,11 +99,24 @@ export function MultiFamilyUnitsSection({
   })();
 
   return (
-    <div className="bg-card rounded-2xl border border-border shadow-sm p-4 sm:p-6">
+    // "bare" (hero mount): no own card — the hero's border/padding wrap it.
+    <div
+      className={
+        chrome === "bare"
+          ? undefined
+          : "bg-card rounded-2xl border border-border shadow-sm p-4 sm:p-6"
+      }
+    >
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-2">
-          <Building2 className="w-4 h-4 text-primary" />
-          <span className="font-semibold text-sm text-foreground">
+          {chrome === "bare" ? null : <Building2 className="w-4 h-4 text-primary" />}
+          <span
+            className={
+              chrome === "bare"
+                ? "text-xs font-semibold text-muted-foreground"
+                : "font-semibold text-sm text-foreground"
+            }
+          >
             Units ({fields.length} total)
           </span>
           {/* Inline validation badge. Shows ONLY when there's an

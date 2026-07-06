@@ -14,6 +14,7 @@ import {
   ArrowUpRight,
   Loader2,
   Sparkles,
+  Home,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,9 +29,10 @@ import {
 import { calculateAnalysis, AnalysisResult } from "@/lib/calc-analysis";
 import { getDealTier, type DealTier } from "@/lib/verdict";
 import { PropertyTypeSection } from "./property-type-section";
-import { PropertyDetailsSection } from "./property-details-section";
+import { PropertyDetailsSection, YearBuiltField } from "./property-details-section";
 import { SingleFamilyUnitSection } from "./single-family-unit-section";
 import { MultiFamilyUnitsSection } from "./multi-family-units-section";
+import { ListingLinkInput } from "./listing-link-input";
 import { FinancingSection } from "./financing-section";
 import { OperatingExpensesSection } from "./operating-expenses-section";
 import { SaveAsDefaultsChip } from "./save-as-defaults-chip";
@@ -1190,20 +1192,25 @@ export function InvestCalcPage({
 
   /**
    * Assumptions-strip chip tap → the EXACT handleStepNavigate mechanics.
-   * Every chip target except "extras" IS an AnalyzerStepId, so it goes
-   * straight through the existing handler (open advanced + #step-* scroll).
-   * "extras" (SF bathrooms/sqft) lives inside the advanced block with no
-   * analyzer step of its own, so it gets the same open-then-scroll sequence
-   * pointed at the #step-extras wrapper.
+   * "financing" / "expenses" ARE AnalyzerStepIds, so they go straight
+   * through the existing handler (open advanced + #step-* scroll). Two chip
+   * targets live inside the advanced block with no analyzer step of their
+   * own and get the same open-then-scroll sequence pointed at their wrapper:
+   *  - "extras"   → #step-extras (SF year-built/bathrooms/sqft panel)
+   *  - "property" → #step-type (the property-type + template panel — moved
+   *    from above the hero into the strip's panel region in Phase 4 — plus
+   *    the MF/house-hack year-built card). The step RAIL's "property" step
+   *    still routes through handleStepNavigate to the #step-property hero.
    */
   const handleChipNavigate = useCallback(
     (target: AssumptionChipTarget) => {
-      if (target === "extras") {
+      if (target === "extras" || target === "property") {
+        const anchor = target === "extras" ? "step-extras" : "step-type";
         setAdvancedOpen(true);
         requestAnimationFrame(() => {
           window.setTimeout(() => {
             document
-              .getElementById("step-extras")
+              .getElementById(anchor)
               ?.scrollIntoView({ behavior: "smooth", block: "start" });
           }, 70);
         });
@@ -1390,6 +1397,10 @@ export function InvestCalcPage({
   const [autofillUnavailable, setAutofillUnavailable] = useState(false);
   const [listingUrl, setListingUrl] = useState("");
   const [listingUrlError, setListingUrlError] = useState(false);
+  // Hero listing-link toggle (Phase 4): while open, the URL row renders in
+  // the address input's place (the address block is CSS-hidden, never
+  // unmounted — RHF registration + enrichment writes are untouched).
+  const [listingLinkOpen, setListingLinkOpen] = useState(false);
 
   const applyComps = useCallback(
     (e: PropertyEnrichment) => {
@@ -1492,6 +1503,9 @@ export function InvestCalcPage({
       state: parsed.state,
     });
     setListingUrl("");
+    // Successful parse → swap the address input back in so the user sees
+    // the parsed address land in the form (Phase 4 hero toggle).
+    setListingLinkOpen(false);
   }, [listingUrl]);
 
   /**
@@ -2300,6 +2314,18 @@ export function InvestCalcPage({
       (document.getElementsByName(path)[0] as HTMLElement | undefined) ??
       document.getElementById(path) ??
       undefined;
+    // Phase 4: while the hero's listing-URL row is open, the address input
+    // is CSS-hidden (swapped out, still mounted). A validation error on
+    // "address" must swap it back in first — same deadend class as the
+    // collapsed-advanced case below.
+    if (listingLinkOpen && path === "address") {
+      setListingLinkOpen(false);
+      requestAnimationFrame(() => {
+        form.setFocus("address");
+        findEl()?.scrollIntoView({ behavior: "smooth", block: "center" });
+      });
+      return;
+    }
     const el = findEl();
     const inCollapsedAdvanced =
       !advancedOpen && !!el && el.closest("#advanced-options") !== null;
@@ -3703,96 +3729,105 @@ export function InvestCalcPage({
                 card into the assumptions strip below (the "Analyzing as:" pill
                 opens the same StrategyChips picker; behavior unchanged). */}
 
-            <div id="step-property" className="space-y-5 scroll-mt-24">
-              {/* Paste a listing link → parse the address from the URL and run
-                  the full enrich + verdict flow. Reuses everything; just a
-                  faster on-ramp than typing the address. */}
-              <div className="rounded-2xl border border-dashed border-border bg-muted/30 p-3 sm:p-4">
-                <label htmlFor="listing-url" className="text-xs font-semibold text-foreground">
-                  Paste a listing link
-                </label>
-                <p className="mt-0.5 text-[11px] text-muted-foreground">
-                  Zillow, Redfin, or Realtor.com — we&apos;ll pull the address and pre-fill the deal.
+            {/* HERO CARD — "Analyze a deal" (Phase 4, hero unification).
+                ONE bordered card wrapping the three core field groups with
+                question-language group headers (the Three Questions graft):
+                "Where's the deal?" (address + autocomplete + Autofill, with
+                the inline listing-link toggle), "What does it cost?"
+                (purchase price) and "What does it earn?" (beds + rent for
+                SF, the MF units block for multi/house-hack). The EXISTING
+                section mounts move inside unchanged — chrome="bare" only
+                drops their own card chrome; registration, field ids and the
+                #step-property / #step-income scroll anchors are untouched.
+                The old standalone "Paste a listing link" card collapsed
+                into ListingLinkInput inside the address group, and the
+                property-type + template card moved into the assumptions
+                strip's panel region below (#step-type). Year built is NOT
+                here — it lives in the "Property extras" panel. */}
+            <section
+              id="step-property"
+              aria-labelledby="analyze-deal-heading"
+              className="scroll-mt-24 bg-card rounded-2xl border border-border shadow-sm p-6"
+            >
+              <div className="mb-5">
+                <h2
+                  id="analyze-deal-heading"
+                  className="flex items-center gap-2 font-semibold text-sm text-foreground"
+                >
+                  <Home className="w-4 h-4 text-primary" aria-hidden />
+                  Analyze a deal
+                </h2>
+                {/* One-line signpost — replaces the 2-line "Fastest start"
+                    copy (the enrichment receipt + strip chips now carry the
+                    what-got-filled detail). */}
+                <p className="mt-1 text-[11px] leading-snug text-muted-foreground">
+                  Type an address — we fill the rest.
                 </p>
-                <div className="mt-2 flex gap-2">
-                  <input
-                    id="listing-url"
-                    type="url"
-                    inputMode="url"
-                    value={listingUrl}
-                    onChange={(e) => {
-                      setListingUrl(e.target.value);
-                      setListingUrlError(false);
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        handleListingUrl();
-                      }
-                    }}
-                    placeholder="https://www.zillow.com/homedetails/…"
-                    className="min-w-0 flex-1 rounded-lg border border-input bg-background px-3 py-2 text-sm"
-                  />
-                  <button
-                    type="button"
-                    onClick={handleListingUrl}
-                    disabled={!listingUrl.trim()}
-                    className="shrink-0 rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
-                  >
-                    Pull it in
-                  </button>
-                </div>
-                {listingUrlError ? (
-                  <p className="mt-1.5 text-[11px] text-[var(--metric-negative,#dc2626)]">
-                    Couldn&apos;t read that link — paste the full property address below instead.
-                  </p>
-                ) : null}
               </div>
-              {!activeStrategy && (
-                <PropertyTypeSection
-                  form={form}
-                  savedTemplateFallback={savedTemplateFallback}
-                  onTemplatesLoaded={handleTemplatesLoaded}
-                  onExplicitTemplateChange={handleExplicitTemplateChange}
-                />
-              )}
-              <PropertyDetailsSection
-                form={form}
-                onAddressSelected={handleAddressSelected}
-                onAutofillFromAddress={handleAutofillFromAddress}
-                isAutofilling={isAutofilling}
-                // Show Autofill to anonymous users too — it's the clearest
-                // expression of the core promise. The handler already returns a
-                // graceful "Sign in to autofill" toast for signed-out users, so
-                // the button becomes a sign-in CTA instead of being hidden.
-                showAutofill={!autofillUnavailable}
-                showYearBuilt={!activeStrategy}
-                priceLabel={activeStrategy?.priceLabel}
-              />
-            </div>
 
-            {/* Single-family: only the two fields a cash-flow run needs
-                (bedrooms → HUD rent auto-fill, rent → the math) on the
-                first screen. Bathrooms + square feet are optional and live
-                in the "Improve accuracy" block below. */}
-            <div id="step-income" className="scroll-mt-24">
-              {propertyType === "single-family" && (
-                <SingleFamilyUnitSection
+              <div className="space-y-6">
+                <PropertyDetailsSection
                   form={form}
-                  fields="primary"
-                  hideBedrooms={!!activeStrategy}
-                  rentLabel={activeStrategy?.rentLabel}
-                  strMode={activeStrategy?.incomeMode === "str"}
+                  chrome="bare"
+                  onAddressSelected={handleAddressSelected}
+                  onAutofillFromAddress={handleAutofillFromAddress}
+                  isAutofilling={isAutofilling}
+                  // Show Autofill to anonymous users too — it's the clearest
+                  // expression of the core promise. The handler already returns a
+                  // graceful "Sign in to autofill" toast for signed-out users, so
+                  // the button becomes a sign-in CTA instead of being hidden.
+                  showAutofill={!autofillUnavailable}
+                  // Year built is out of the hero for every mode (Phase 4) —
+                  // it renders in the "Property extras" panel instead
+                  // (#step-extras for SF, the #step-type panel for MF).
+                  showYearBuilt={false}
+                  priceLabel={activeStrategy?.priceLabel}
+                  hideAddressInput={listingLinkOpen}
+                  listingLinkSlot={
+                    <ListingLinkInput
+                      open={listingLinkOpen}
+                      onOpenChange={setListingLinkOpen}
+                      value={listingUrl}
+                      onValueChange={(value) => {
+                        setListingUrl(value);
+                        setListingUrlError(false);
+                      }}
+                      hasError={listingUrlError}
+                      onSubmit={handleListingUrl}
+                    />
+                  }
                 />
-              )}
-              {(propertyType === "multi-family" || propertyType === "owner-occupant") && (
-                <MultiFamilyUnitsSection
-                  form={form}
-                  isHouseHack={propertyType === "owner-occupant"}
-                  fmrByBedrooms={unitFmrByBedrooms}
-                />
-              )}
-            </div>
+
+                {/* "What does it earn?" — single-family: only the two fields
+                    a cash-flow run needs (bedrooms → HUD rent auto-fill,
+                    rent → the math) on the first screen; bathrooms + square
+                    feet stay optional in the "Property extras" panel below.
+                    MF/house-hack: the units block, mount unchanged. */}
+                <div id="step-income" className="scroll-mt-24">
+                  <p className="mb-2 text-sm font-semibold text-foreground">
+                    What does it earn?
+                  </p>
+                  {propertyType === "single-family" && (
+                    <SingleFamilyUnitSection
+                      form={form}
+                      chrome="bare"
+                      fields="primary"
+                      hideBedrooms={!!activeStrategy}
+                      rentLabel={activeStrategy?.rentLabel}
+                      strMode={activeStrategy?.incomeMode === "str"}
+                    />
+                  )}
+                  {(propertyType === "multi-family" || propertyType === "owner-occupant") && (
+                    <MultiFamilyUnitsSection
+                      form={form}
+                      isHouseHack={propertyType === "owner-occupant"}
+                      fmrByBedrooms={unitFmrByBedrooms}
+                      chrome="bare"
+                    />
+                  )}
+                </div>
+              </div>
+            </section>
 
             {/* Live instant-verdict preview (extracted to LiveVerdictPanel) —
                 relocated from below the advanced block to directly under the
@@ -3851,6 +3886,38 @@ export function InvestCalcPage({
               id="advanced-options"
               className={cn("space-y-5", advancedOpen ? "block" : "hidden")}
             >
+              {/* "Property type & template" panel — the PropertyTypeSection
+                  mount moved from above the hero into the strip's panel
+                  region (Phase 4; deferred from Phase 3). Same component,
+                  same props, new location: the template chip and the MF
+                  "Property extras" chip land here via
+                  handleChipNavigate("property") → #step-type. Kept MOUNTED
+                  while hidden (the advanced block's proven CSS-hide
+                  pattern) so template loading + auto-apply behave exactly
+                  as before. For MF/house-hack the relocated Year Built
+                  block leads the panel (compact card first, so the extras
+                  chip's tap lands on a visible year-built input); SF
+                  year-built lives in #step-extras below instead. */}
+              {!activeStrategy && (
+                <div id="step-type" className="scroll-mt-24 space-y-5">
+                  {(propertyType === "multi-family" || propertyType === "owner-occupant") && (
+                    <div className="bg-card rounded-2xl border border-border shadow-sm p-6">
+                      <div className="flex items-center gap-2 mb-5">
+                        <Home className="w-4 h-4 text-primary" />
+                        <span className="font-semibold text-sm text-foreground">Property extras</span>
+                        <span className="text-[11px] font-normal text-muted-foreground">(optional)</span>
+                      </div>
+                      <YearBuiltField form={form} />
+                    </div>
+                  )}
+                  <PropertyTypeSection
+                    form={form}
+                    savedTemplateFallback={savedTemplateFallback}
+                    onTemplatesLoaded={handleTemplatesLoaded}
+                    onExplicitTemplateChange={handleExplicitTemplateChange}
+                  />
+                </div>
+              )}
               <div id="step-financing" className="scroll-mt-24">
                 <FinancingSection form={form} />
               </div>
@@ -3859,17 +3926,23 @@ export function InvestCalcPage({
                 {/* SaveAsDefaultsChip moved to the assumptions-strip footer
                     (Phase 3) — same component, same props, new mount. */}
               </div>
-              {/* Optional single-family details (bathrooms + square feet) —
-                  kept mounted so values persist + submit even while hidden.
-                  Rendered LAST inside the accuracy block: these are
-                  reference-only fields (calc-analysis never reads them), so
-                  the levers that actually move the verdict — financing +
-                  expenses — lead the refine pass (CL-3). The #step-extras id
-                  is the "Property extras" chip's scroll anchor (same
-                  conditional mount as before — id wrapper only). */}
+              {/* Optional single-family details (year built + bathrooms +
+                  square feet) — kept mounted so values persist + submit even
+                  while hidden. Rendered LAST inside the accuracy block:
+                  these are reference-only fields (calc-analysis never reads
+                  them), so the levers that actually move the verdict —
+                  financing + expenses — lead the refine pass (CL-3). The
+                  #step-extras id is the "Property extras" chip's scroll
+                  anchor. Year built moved here from the hero (Phase 4) via
+                  the extraFields slot — same block, one rendered instance,
+                  hidden in strategy mode exactly as showYearBuilt was. */}
               {propertyType === "single-family" && (
                 <div id="step-extras" className="scroll-mt-24">
-                  <SingleFamilyUnitSection form={form} fields="secondary" />
+                  <SingleFamilyUnitSection
+                    form={form}
+                    fields="secondary"
+                    extraFields={!activeStrategy ? <YearBuiltField form={form} /> : undefined}
+                  />
                 </div>
               )}
             </div>
