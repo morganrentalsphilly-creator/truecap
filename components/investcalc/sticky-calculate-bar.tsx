@@ -13,8 +13,11 @@
  * in-form button does. No extra wiring needed.
  */
 
-import { useEffect, useState } from "react";
-import { ArrowUpRight, Calculator, Loader2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { ArrowUpRight, Calculator, ChevronUp, Loader2 } from "lucide-react";
+
+import type { LivePreviewSnapshot } from "./live-verdict-panel";
+import { cn } from "@/lib/utils";
 
 type Props = {
   isCalculating: boolean;
@@ -32,13 +35,33 @@ type Props = {
    * Keeps the sticky bar from feeling like dead chrome.
    */
   contextLabel?: string;
+  /**
+   * Optional pre-run live verdict snapshot. When set (the caller gates it
+   * to the pre-results state), the bar becomes a verdict dock: a compact
+   * readout (tier pill + score + monthly cash flow) renders alongside the
+   * Run button, and tapping the readout expands a small sheet with the
+   * cap rate + DSCR lines (tap again / swipe down closes). When absent —
+   * results on screen, or a form too empty to preview — the bar renders
+   * exactly as it did before this prop existed.
+   */
+  livePreview?: LivePreviewSnapshot | null;
 };
 
-export function StickyCalculateBar({ isCalculating, hasResults = false, contextLabel }: Props) {
+export function StickyCalculateBar({
+  isCalculating,
+  hasResults = false,
+  contextLabel,
+  livePreview = null,
+}: Props) {
   const [pastFold, setPastFold] = useState(false);
   const [formInView, setFormInView] = useState(true);
   const [submitInView, setSubmitInView] = useState(false);
   const [resultsInView, setResultsInView] = useState(false);
+  // Verdict-dock sheet open/closed. Collapses automatically whenever the
+  // readout itself goes away (results land, preview clears) so the sheet
+  // can never reappear stale on the next form session.
+  const [dockExpanded, setDockExpanded] = useState(false);
+  const touchStartYRef = useRef<number | null>(null);
 
   useEffect(() => {
     // Show once the user has scrolled past the first ~600px of the
@@ -94,6 +117,14 @@ export function StickyCalculateBar({ isCalculating, hasResults = false, contextL
   const visible = pastFold && formInView && !submitInView && !(hasResults && resultsInView);
   const rendered = visible || isCalculating;
 
+  // Compact verdict readout: pre-results only (caller also gates the prop),
+  // and never while the spinner has taken over the bar.
+  const showReadout = Boolean(livePreview) && !hasResults && !isCalculating;
+
+  useEffect(() => {
+    if (!showReadout) setDockExpanded(false);
+  }, [showReadout]);
+
   // Publish visibility on <html> so the marketing StickyConversionBar
   // yields (globals.css hides it while data-calc-bar is up). Inside the
   // form the PRODUCT action outranks the funnel CTA — the old rule had
@@ -121,24 +152,130 @@ export function StickyCalculateBar({ isCalculating, hasResults = false, contextL
           {contextLabel}
         </p>
       ) : null}
-      <button
-        type="submit"
-        disabled={isCalculating}
-        className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary text-sm font-bold text-primary-foreground shadow-md hover:bg-primary/95 disabled:opacity-70"
-      >
-        {isCalculating ? (
-          <>
-            <Loader2 className="size-4 animate-spin" />
-            Running analysis…
-          </>
-        ) : (
-          <>
+      {showReadout && livePreview ? (
+        // Expanded dock sheet: the two metrics the collapsed readout can't
+        // fit. Tap the readout again (or swipe down on the sheet) to close.
+        // Mounted-but-hidden while collapsed so the readout button's
+        // aria-controls always references an existing element (ARIA
+        // validity — a dangling reference trips axe even though
+        // aria-expanded alone would convey the state).
+        <div
+          id="verdict-dock-sheet"
+          hidden={!dockExpanded}
+          className="mb-2 rounded-xl border border-dashed border-primary/30 bg-[var(--brand-blue-light)] px-3 py-2.5"
+          onTouchStart={(e) => {
+            touchStartYRef.current = e.touches[0]?.clientY ?? null;
+          }}
+          onTouchEnd={(e) => {
+            const startY = touchStartYRef.current;
+            touchStartYRef.current = null;
+            const endY = e.changedTouches[0]?.clientY;
+            // Swipe down (finger moved ≥40px toward the bottom) closes.
+            if (startY !== null && typeof endY === "number" && endY - startY >= 40) {
+              setDockExpanded(false);
+            }
+          }}
+        >
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+              Cap rate
+            </span>
+            <span className="font-mono text-sm font-bold tabular-nums text-foreground">
+              {livePreview.capRate.toFixed(1)}%
+            </span>
+          </div>
+          <div className="mt-1 flex items-center justify-between gap-3">
+            <span className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+              DSCR
+            </span>
+            <span className="font-mono text-sm font-bold tabular-nums text-foreground">
+              {livePreview.monthlyPayment <= 0 ? "—" : livePreview.dscr.toFixed(2)}
+            </span>
+          </div>
+        </div>
+      ) : null}
+      {showReadout && livePreview ? (
+        // Verdict dock: compact live readout + Run, sharing the row. The
+        // readout is a button (not a live region) - tapping it toggles the
+        // cap-rate/DSCR sheet above.
+        <div className="flex items-stretch gap-2">
+          <button
+            type="button"
+            onClick={() => setDockExpanded((v) => !v)}
+            aria-expanded={dockExpanded}
+            aria-controls="verdict-dock-sheet"
+            aria-label={`Live preview: ${livePreview.tier}, Deal Score ${livePreview.score}. ${dockExpanded ? "Hide" : "Show"} cap rate and DSCR`}
+            className="flex h-12 min-w-0 flex-1 items-center gap-2 rounded-xl border border-border bg-muted/40 px-2.5 text-left"
+          >
+            <span
+              className={cn(
+                "shrink-0 rounded-full px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide",
+                livePreview.tier === "Strong" && "bg-[var(--brand-green)] text-white",
+                livePreview.tier === "Solid" && "bg-primary text-primary-foreground",
+                livePreview.tier === "Mixed" && "bg-amber-500 text-white",
+                livePreview.tier === "Marginal" && "bg-orange-500 text-white",
+                livePreview.tier === "Negative" && "bg-red-600 text-white"
+              )}
+            >
+              {livePreview.tier}
+            </span>
+            <span className="min-w-0">
+              <span className="block truncate font-mono text-sm font-bold leading-tight tabular-nums text-foreground">
+                {livePreview.score}
+                <span className="text-[10px] font-semibold text-muted-foreground">/100</span>
+              </span>
+              <span
+                className={cn(
+                  "block truncate font-mono text-[11px] font-bold leading-tight tabular-nums",
+                  // Sign + color keyed off the SAME rounded value so a
+                  // sub-dollar negative never renders "-$0" (mirrors the
+                  // in-form live preview card).
+                  Math.round(livePreview.netCashFlow) >= 0
+                    ? "text-[var(--metric-positive)]"
+                    : "text-[var(--metric-negative)]"
+                )}
+              >
+                {Math.round(livePreview.netCashFlow) >= 0 ? "+" : "-"}$
+                {Math.abs(Math.round(livePreview.netCashFlow)).toLocaleString()}/mo
+              </span>
+            </span>
+            <ChevronUp
+              className={cn(
+                "ml-auto size-4 shrink-0 text-muted-foreground transition-transform",
+                dockExpanded && "rotate-180"
+              )}
+            />
+          </button>
+          <button
+            type="submit"
+            disabled={isCalculating}
+            className="flex h-12 shrink-0 items-center justify-center gap-1.5 rounded-xl bg-primary px-4 text-sm font-bold text-primary-foreground shadow-md hover:bg-primary/95 disabled:opacity-70"
+          >
             <Calculator className="size-4" />
-            Run analysis
+            Run
             <ArrowUpRight className="size-4" />
-          </>
-        )}
-      </button>
+          </button>
+        </div>
+      ) : (
+        <button
+          type="submit"
+          disabled={isCalculating}
+          className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary text-sm font-bold text-primary-foreground shadow-md hover:bg-primary/95 disabled:opacity-70"
+        >
+          {isCalculating ? (
+            <>
+              <Loader2 className="size-4 animate-spin" />
+              Running analysis…
+            </>
+          ) : (
+            <>
+              <Calculator className="size-4" />
+              Run analysis
+              <ArrowUpRight className="size-4" />
+            </>
+          )}
+        </button>
+      )}
     </div>
   );
 }

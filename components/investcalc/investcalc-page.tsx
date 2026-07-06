@@ -49,6 +49,7 @@ import {
 } from "@/lib/analyzer-steps";
 import { readAnalyzerHandoff } from "@/lib/analyzer-handoff";
 import { StickyCalculateBar } from "./sticky-calculate-bar";
+import { LiveVerdictPanel } from "./live-verdict-panel";
 import { AutosaveIndicator } from "./autosave-indicator";
 import { AnalysisDashboard, type AnalysisDashboardTab } from "./analysis-dashboard";
 import { AnalysisErrorBoundary } from "@/components/investcalc/analysis-error-boundary";
@@ -3739,6 +3740,18 @@ export function InvestCalcPage({
               )}
             </div>
 
+            {/* Live instant-verdict preview (extracted to LiveVerdictPanel) —
+                relocated from below the advanced block to directly under the
+                income section, so the answer is the next thing on screen
+                while the user types the three core fields. State (livePreview
+                + the debounced SR message) stays here; the panel is purely
+                presentational. */}
+            <LiveVerdictPanel
+              active={!showResults && !analysisResult && !isCalculating}
+              livePreview={livePreview}
+              livePreviewMsg={livePreviewMsg}
+            />
+
             {/* Progressive disclosure - financing + operating expenses
                 start collapsed behind smart defaults so the first run
                 needs only the basics (type, address, price, beds/rent).
@@ -3815,93 +3828,6 @@ export function InvestCalcPage({
               )}
             </div>
 
-            {/* Live instant-verdict preview - forms as the user types, before
-                they ever click Run. The "60 seconds" promise made literal:
-                the answer is already on screen. Pure client math; the full
-                dashboard still lives behind the explicit Run below. */}
-            {/* Persistent SR live region (always mounted, sibling to the
-                conditional card) so the verdict-forming announcement is
-                reliable and concise - mirrors the what-if-sliders pattern.
-                The visible card is NOT a live region (it would churn the whole
-                verbose card on every keystroke). */}
-            {!showResults && !analysisResult && !isCalculating ? (
-              <span className="sr-only" role="status" aria-live="polite" aria-atomic="true">
-                {livePreviewMsg}
-              </span>
-            ) : null}
-            {!showResults && !analysisResult && !isCalculating && livePreview ? (
-              <div className="rounded-2xl border-2 border-dashed border-primary/30 bg-[var(--brand-blue-light)] p-4 sm:p-5">
-                <div className="mb-3 flex items-center justify-between gap-2">
-                  <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-primary">
-                    <span className="relative flex size-2">
-                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary/60" />
-                      <span className="relative inline-flex size-2 rounded-full bg-primary" />
-                    </span>
-                    Live preview
-                  </span>
-                  <span
-                    className={cn(
-                      "rounded-full px-2.5 py-0.5 text-xs font-extrabold uppercase tracking-wide",
-                      livePreview.tier === "Strong" && "bg-[var(--brand-green)] text-white",
-                      livePreview.tier === "Solid" && "bg-primary text-primary-foreground",
-                      livePreview.tier === "Mixed" && "bg-amber-500 text-white",
-                      livePreview.tier === "Marginal" && "bg-orange-500 text-white",
-                      livePreview.tier === "Negative" && "bg-red-600 text-white"
-                    )}
-                  >
-                    {livePreview.tier}
-                  </span>
-                </div>
-                <div className="mb-3 flex items-baseline gap-1.5">
-                  <span className="font-mono text-3xl font-extrabold tabular-nums text-foreground">
-                    {livePreview.score}
-                  </span>
-                  <span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
-                    / 100 Deal Score
-                  </span>
-                </div>
-                <div className="grid grid-cols-3 gap-2 sm:gap-3">
-                  <div>
-                    <div className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
-                      Cash flow
-                    </div>
-                    <div
-                      className={cn(
-                        "font-mono text-lg font-bold tabular-nums sm:text-xl",
-                        // Sign + color keyed off the SAME rounded value so a
-                        // sub-dollar negative (e.g. -$0.30) never renders "-$0".
-                        Math.round(livePreview.netCashFlow) >= 0
-                          ? "text-[var(--metric-positive)]"
-                          : "text-[var(--metric-negative)]"
-                      )}
-                    >
-                      {Math.round(livePreview.netCashFlow) >= 0 ? "+" : "-"}$
-                      {Math.abs(Math.round(livePreview.netCashFlow)).toLocaleString()}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
-                      Cap rate
-                    </div>
-                    <div className="font-mono text-lg font-bold tabular-nums text-foreground sm:text-xl">
-                      {livePreview.capRate.toFixed(1)}%
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
-                      DSCR
-                    </div>
-                    <div className="font-mono text-lg font-bold tabular-nums text-foreground sm:text-xl">
-                      {livePreview.monthlyPayment <= 0 ? "—" : livePreview.dscr.toFixed(2)}
-                    </div>
-                  </div>
-                </div>
-                <p className="mt-2.5 text-[11px] leading-snug text-muted-foreground">
-                  Updating as you type — run the full analysis for projections, tax strategy &amp; exit scenarios.
-                </p>
-              </div>
-            ) : null}
-
             {/* Calculate button - solid brand color (gradient was too
                 visually heavy and competed with the verdict card
                 downstream). Copy standardized to "Run analysis" to
@@ -3953,7 +3879,16 @@ export function InvestCalcPage({
               in-form button does. Appears once the user scrolls past
               ~600px so we never double up on the visible Calculate
               button. */}
-          <StickyCalculateBar isCalculating={isCalculating} hasResults={analysisResult !== null} />
+          <StickyCalculateBar
+            isCalculating={isCalculating}
+            hasResults={analysisResult !== null}
+            // Verdict dock readout: only pre-results (same gate as the
+            // in-form LiveVerdictPanel). Once a real run lands, the bar
+            // renders exactly as before this prop existed.
+            livePreview={
+              !showResults && !analysisResult && !isCalculating ? livePreview : null
+            }
+          />
         </form>
 
         {/* Results - wrapped in an error boundary so a render bug in
