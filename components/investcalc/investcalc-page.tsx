@@ -12,9 +12,7 @@ import {
   Lock,
   Calculator,
   ArrowUpRight,
-  ChevronDown,
   Loader2,
-  Settings2,
   Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -36,7 +34,11 @@ import { MultiFamilyUnitsSection } from "./multi-family-units-section";
 import { FinancingSection } from "./financing-section";
 import { OperatingExpensesSection } from "./operating-expenses-section";
 import { SaveAsDefaultsChip } from "./save-as-defaults-chip";
-import { StrategyChips } from "./strategy-chips";
+// StrategyChips now renders inside AssumptionsStrip (the "Analyzing as:"
+// pill's inline picker) — the page passes state/handlers down instead.
+import { AssumptionsStrip } from "./assumptions-strip";
+import { EnrichmentReceipt } from "./enrichment-receipt";
+import type { AssumptionChipTarget } from "@/lib/assumption-chips";
 import { STARTER_TEMPLATES, type StarterTemplate } from "@/lib/starter-templates";
 import { buildTemplateFormPatch, type TemplateFormPatchEntry } from "@/lib/template-form-patch";
 import type { AnalysisTemplateOption } from "@/app/actions/analysis-templates";
@@ -686,6 +688,14 @@ export function InvestCalcPage({
     templateName: string;
     templateDescription: string | null;
   } | null>(null);
+  /**
+   * The Pro user's template list, captured when TemplateSelectorSection
+   * reports it (free/anon: stays empty). The assumptions strip + enrichment
+   * receipt resolve the watched templateId to a display name from this —
+   * state (not a ref) so the chip re-renders when the list arrives after
+   * a templateId was already restored from a draft/saved deal.
+   */
+  const [templateOptions, setTemplateOptions] = useState<AnalysisTemplateOption[]>([]);
   const [isLoadingDealScore, setIsLoadingDealScore] = useState(false);
   const { toast } = useToast();
   const prevPropertyTypeRef = useRef<InvestmentFormValues["propertyType"]>("single-family");
@@ -1178,6 +1188,32 @@ export function InvestCalcPage({
     [scrollToAnalysisResults]
   );
 
+  /**
+   * Assumptions-strip chip tap → the EXACT handleStepNavigate mechanics.
+   * Every chip target except "extras" IS an AnalyzerStepId, so it goes
+   * straight through the existing handler (open advanced + #step-* scroll).
+   * "extras" (SF bathrooms/sqft) lives inside the advanced block with no
+   * analyzer step of its own, so it gets the same open-then-scroll sequence
+   * pointed at the #step-extras wrapper.
+   */
+  const handleChipNavigate = useCallback(
+    (target: AssumptionChipTarget) => {
+      if (target === "extras") {
+        setAdvancedOpen(true);
+        requestAnimationFrame(() => {
+          window.setTimeout(() => {
+            document
+              .getElementById("step-extras")
+              ?.scrollIntoView({ behavior: "smooth", block: "start" });
+          }, 70);
+        });
+        return;
+      }
+      handleStepNavigate(target);
+    },
+    [handleStepNavigate]
+  );
+
   // Deep link: ?step=financing (income / expenses / decision / property)
   // scrolls to that section once on load. Ref-guarded so it fires only once.
   const deepLinkHandledRef = useRef(false);
@@ -1589,6 +1625,9 @@ export function InvestCalcPage({
    *  arrives a server roundtrip later regardless). */
   const handleTemplatesLoaded = useCallback((templates: AnalysisTemplateOption[]) => {
     defaultTemplateRef.current = templates.find((t) => t.isDefault) ?? null;
+    // Keep the full list for template-name resolution in the assumptions
+    // strip / receipt (the chip shows "Template: <name> ✓").
+    setTemplateOptions(templates);
     autoApplyDefaultTemplateRef.current();
   }, []);
 
@@ -3390,6 +3429,19 @@ export function InvestCalcPage({
     })();
   };
 
+  /**
+   * Live provenance + raw capture getters for the input-side assumptions
+   * strip and enrichment receipt. Read FRESH on every child render (the
+   * children subscribe to form writes themselves), so chips re-derive the
+   * instant enrichment/template setValue-writes land — the same
+   * buildProvenanceInput the result strip + confidence badge use.
+   */
+  const getLiveProvenance = useCallback(
+    () => buildProvenanceInput(enrichmentCaptureRef.current, form.getValues()),
+    [form]
+  );
+  const getEnrichmentCapture = useCallback(() => enrichmentCaptureRef.current, []);
+
   const toggleAdvanced = () => {
     advancedUserChoiceRef.current = true;
     const next = !advancedOpen;
@@ -3647,7 +3699,9 @@ export function InvestCalcPage({
               className="sm:sticky sm:top-2 sm:z-20"
             />
 
-            <StrategyChips activeKey={activeStrategyKey} onSelect={handleSelectStrategy} />
+            {/* "What's your play?" strategy chips — demoted from a top-of-form
+                card into the assumptions strip below (the "Analyzing as:" pill
+                opens the same StrategyChips picker; behavior unchanged). */}
 
             <div id="step-property" className="space-y-5 scroll-mt-24">
               {/* Paste a listing link → parse the address from the URL and run
@@ -3752,51 +3806,47 @@ export function InvestCalcPage({
               livePreviewMsg={livePreviewMsg}
             />
 
-            {/* Progressive disclosure - financing + operating expenses
-                start collapsed behind smart defaults so the first run
-                needs only the basics (type, address, price, beds/rent).
-                The sections stay MOUNTED (hidden via CSS, not unmounted)
-                so address auto-fill can still write rate/tax into them and
-                their values are included on submit. The user's open/closed
-                choice is remembered; the block auto-opens once after the
-                first result to invite refinement. */}
-            <button
-              type="button"
-              onClick={toggleAdvanced}
-              aria-expanded={advancedOpen}
-              aria-controls="advanced-options"
-              className="flex w-full items-center justify-between gap-3 rounded-2xl border border-border bg-card p-4 sm:p-5 text-left shadow-sm transition-colors hover:bg-muted/40"
-            >
-              <span className="flex min-w-0 items-center gap-2.5">
-                <Settings2 className="size-4 shrink-0 text-primary" />
-                <span className="min-w-0">
-                  <span className="block text-sm font-semibold text-foreground">
-                    {advancedOpen
-                      ? activeStrategy
-                        ? `Hide ${activeStrategy.label} details`
-                        : "Hide advanced options"
-                      : activeStrategy
-                        ? `Refine ${activeStrategy.label} assumptions`
-                        : "Improve accuracy (optional)"}
-                  </span>
-                  <span className="block text-[11px] leading-snug text-muted-foreground">
-                    {advancedOpen
-                      ? "Financing, operating expenses, bathrooms & size"
-                      : activeStrategy
-                        ? `${activeStrategy.label} defaults applied - open to fine-tune financing & expenses`
-                        : analysisResult
-                          ? "Adjust details, financing & expenses to sharpen your numbers"
-                          : "Financing, expenses, bathrooms & size - running on smart defaults"}
-                  </span>
-                </span>
-              </span>
-              <ChevronDown
-                className={cn(
-                  "size-5 shrink-0 text-muted-foreground transition-transform",
-                  advancedOpen && "rotate-180"
-                )}
-              />
-            </button>
+            {/* Enrichment receipt - the durable one-line record of what
+                enrichment / template auto-apply filled (toasts retained).
+                Same input-phase gate as the LiveVerdictPanel above. */}
+            <EnrichmentReceipt
+              form={form}
+              active={!showResults && !analysisResult && !isCalculating}
+              getCapture={getEnrichmentCapture}
+              templateOptions={templateOptions}
+              savedTemplateFallback={savedTemplateFallback}
+              hasActiveStrategy={Boolean(activeStrategy)}
+            />
+
+            {/* Assumptions strip - replaces the "Improve accuracy (optional)"
+                toggle button as the entry point to the advanced region. The
+                chips state each pre-answered value with its source; tapping
+                one opens the SAME mounted-but-hidden block below and scrolls
+                to its #step-* anchor (handleStepNavigate mechanics). The
+                progressive-disclosure contract is unchanged: financing +
+                operating expenses stay MOUNTED (hidden via CSS, not
+                unmounted) so address auto-fill still writes rate/tax into
+                them and their values are included on submit; the remembered
+                open/closed choice and the one-time auto-open after the first
+                result both keep working on the same advancedOpen state. */}
+            <AssumptionsStrip
+              form={form}
+              getProvenance={getLiveProvenance}
+              advancedOpen={advancedOpen}
+              onNavigate={handleChipNavigate}
+              onHideDetails={toggleAdvanced}
+              activeStrategyKey={activeStrategyKey}
+              onSelectStrategy={handleSelectStrategy}
+              templateOptions={templateOptions}
+              savedTemplateFallback={savedTemplateFallback}
+              footer={
+                <SaveAsDefaultsChip
+                  form={form}
+                  enabled={Boolean(isAuthenticated)}
+                  currentDefaults={userAnalysisDefaults}
+                />
+              }
+            />
             <div
               id="advanced-options"
               className={cn("space-y-5", advancedOpen ? "block" : "hidden")}
@@ -3806,25 +3856,21 @@ export function InvestCalcPage({
               </div>
               <div id="step-expenses" className="scroll-mt-24">
                 <OperatingExpensesSection form={form} purchasePrice={purchasePrice} />
-                {/* Bank the current assumptions as this user's defaults — self-
-                    gates to signed-in users who've changed a value from what's
-                    saved (see SaveAsDefaultsChip). */}
-                <div className="mt-2 flex justify-end">
-                  <SaveAsDefaultsChip
-                    form={form}
-                    enabled={Boolean(isAuthenticated)}
-                    currentDefaults={userAnalysisDefaults}
-                  />
-                </div>
+                {/* SaveAsDefaultsChip moved to the assumptions-strip footer
+                    (Phase 3) — same component, same props, new mount. */}
               </div>
               {/* Optional single-family details (bathrooms + square feet) —
                   kept mounted so values persist + submit even while hidden.
                   Rendered LAST inside the accuracy block: these are
                   reference-only fields (calc-analysis never reads them), so
                   the levers that actually move the verdict — financing +
-                  expenses — lead the refine pass (CL-3). */}
+                  expenses — lead the refine pass (CL-3). The #step-extras id
+                  is the "Property extras" chip's scroll anchor (same
+                  conditional mount as before — id wrapper only). */}
               {propertyType === "single-family" && (
-                <SingleFamilyUnitSection form={form} fields="secondary" />
+                <div id="step-extras" className="scroll-mt-24">
+                  <SingleFamilyUnitSection form={form} fields="secondary" />
+                </div>
               )}
             </div>
 
