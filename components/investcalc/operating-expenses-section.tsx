@@ -301,7 +301,10 @@ export function OperatingExpensesSection({
       {/* Keep advanced inputs mounted so RHF values remain registered while the panel is collapsed. */}
       <div className="space-y-4">
         <div className={cn("overflow-hidden rounded-xl border border-[var(--brand-orange)]/10 bg-card/50", !showAdvanced && "hidden")}>
-          <div className="grid grid-cols-1 divide-y divide-[var(--brand-orange)]/10 md:grid-cols-2 md:divide-x md:divide-y-0 xl:grid-cols-4">
+          {/* Three cells (Property Tax / Insurance / HOA) since the
+              insurance mode toggle moved inline into its value cell —
+              xl shows all three in one row. */}
+          <div className="grid grid-cols-1 divide-y divide-[var(--brand-orange)]/10 md:grid-cols-2 md:divide-x md:divide-y-0 xl:grid-cols-3">
             <SectionField>
               <FieldLabel htmlFor="propertyTaxAmount">
                 <FieldLabelWithTooltip
@@ -311,8 +314,8 @@ export function OperatingExpensesSection({
               </FieldLabel>
               {/* % ⇄ $ mode toggle (Phase 2 #3): listings state the actual
                   annual bill — let users type that number directly instead
-                  of reverse-engineering a rate. Mirrors the insurance
-                  dual-mode control below. */}
+                  of reverse-engineering a rate. Insurance in the next cell
+                  uses the same inline-toggle pattern. */}
               <Controller
                 name="propertyTaxInputMode"
                 control={control}
@@ -389,12 +392,21 @@ export function OperatingExpensesSection({
             </SectionField>
 
             <SectionField>
-              <FieldLabel>Insurance Input</FieldLabel>
+              <FieldLabel htmlFor="insuranceAmount">
+                <FieldLabelWithTooltip
+                  label={insuranceInputMode === "monthly" ? "Insurance (Monthly $)" : "Insurance % (Annual)"}
+                  term="insurance"
+                />
+              </FieldLabel>
+              {/* % ⇄ $ mode toggle, inline above the value input so
+                  Insurance reads as ONE field — mirrors the Property Tax
+                  cell's inline toggle rather than burning a separate grid
+                  cell on a mode picker. */}
               <Controller
                 name="insuranceInputMode"
                 control={control}
                 render={({ field }) => (
-                  <div className="flex rounded-lg border border-[var(--brand-orange)]/10 bg-background p-1 shadow-sm">
+                  <div className="mb-2 flex rounded-lg border border-[var(--brand-orange)]/10 bg-background p-1 shadow-sm">
                     {[
                       { value: "percent", label: "Annual %" },
                       { value: "monthly", label: "Monthly $" },
@@ -416,18 +428,6 @@ export function OperatingExpensesSection({
                   </div>
                 )}
               />
-              <FieldHint>
-                Choose whether insurance is modeled as an annual percent or a flat monthly amount.
-              </FieldHint>
-            </SectionField>
-
-            <SectionField>
-              <FieldLabel htmlFor="insuranceAmount">
-                <FieldLabelWithTooltip
-                  label={insuranceInputMode === "monthly" ? "Insurance (Monthly $)" : "Insurance % (Annual)"}
-                  term="insurance"
-                />
-              </FieldLabel>
               <div className="relative">
                 {insuranceInputMode === "monthly" ? <DollarIcon /> : null}
                 <Input
