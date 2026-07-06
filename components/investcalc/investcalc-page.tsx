@@ -534,6 +534,14 @@ export function InvestCalcPage({
   const [analysisValues, setAnalysisValues] = useState<InvestmentFormValues | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
   const [showResults, setShowResults] = useState(false);
+  // True when a full result is on screen but the CURRENT form no longer
+  // parses (e.g. the user cleared Purchase Price to retype it and got
+  // interrupted). The live recompute deliberately keeps the last good
+  // numbers up instead of blanking them; this flag drives a slim,
+  // non-blocking amber strip over the results so those numbers are never
+  // silently mistaken for current ones. Cleared the moment the form parses
+  // again (recompute), on a fresh run, a saved-deal restore, or a reset.
+  const [staleResultsWarning, setStaleResultsWarning] = useState(false);
   // Live instant-verdict preview: a lightweight verdict that forms as the user
   // types, BEFORE the first explicit "Run analysis". Pure client math, kept
   // separate from analysisResult so it never triggers the heavy dashboard,
@@ -781,6 +789,8 @@ export function InvestCalcPage({
     setDealScoreResult(null);
     setShowResults(false);
     setIsLoadingDealScore(false);
+    // No results on screen → nothing to be stale.
+    setStaleResultsWarning(false);
     // Clear the live instant-verdict preview too - otherwise the previous
     // deal's verdict flashes over the freshly-blanked form on New Analysis
     // (the form watcher can't self-heal: reset mutations fire under the
@@ -1784,13 +1794,29 @@ export function InvestCalcPage({
       return;
     }
     const nextSnapshot = formSnapshotForCompare(form.getValues());
-    // Unchanged, or transiently unparseable mid-edit (e.g. a required field
-    // momentarily cleared): keep the last good results on screen instead of
-    // blanking them — that silent blank was the core "sticky / nothing
-    // happens" complaint.
-    if (nextSnapshot === null || nextSnapshot === baseline) return;
+    // Unchanged since the last compute: nothing to do, and the results
+    // match the form again (covers the user restoring a cleared value).
+    if (nextSnapshot !== null && nextSnapshot === baseline) {
+      setStaleResultsWarning(false);
+      return;
+    }
+    // Transiently unparseable mid-edit (e.g. a required field momentarily
+    // cleared): keep the last good results on screen instead of blanking
+    // them — that silent blank was the core "sticky / nothing happens"
+    // complaint — but FLAG them as stale. If the field stays invalid (user
+    // got interrupted mid-retype), the results header shows a non-blocking
+    // "reflects your last complete entry" strip instead of letting stale
+    // numbers pass as current (STALE-RESULTS-NO-RERUN-SIGNAL).
+    if (nextSnapshot === null) {
+      setStaleResultsWarning(true);
+      return;
+    }
     const parsed = investmentFormSchema.safeParse(form.getValues());
-    if (!parsed.success) return;
+    if (!parsed.success) {
+      setStaleResultsWarning(true);
+      return;
+    }
+    setStaleResultsWarning(false);
     const values = parsed.data;
     const result = calculateAnalysis(values);
 
@@ -1992,6 +2018,7 @@ export function InvestCalcPage({
             ? buildTaxStrategySource(parsed.id, hydratedValues, result)
             : null;
           setAnalysisResult(result);
+          setStaleResultsWarning(false);
           setAnalysisValues(hydratedValues);
           setProjectionSource(builtProjectionSource);
           setTaxStrategySource(builtTaxStrategySource);
@@ -2216,6 +2243,59 @@ export function InvestCalcPage({
     return () => window.removeEventListener(HERO_ANALYZE_EVENT, onHeroAnalyze as EventListener);
   }, []);
 
+  /**
+   * Focus an invalid field, first un-hiding the collapsed Advanced Options
+   * region when the field lives inside it. The financing, operating-expense
+   * and single-family bathrooms/sqft inputs all render inside
+   * #advanced-options, which is CSS-hidden (display:none) while
+   * advancedOpen is false — form.setFocus on a hidden input is a silent
+   * no-op, so without this a validation error behind the collapsed section
+   * left the user with a destructive toast pointing at a field that was
+   * nowhere on screen (HIDDEN-FIELD-VALIDATION-DEADEND).
+   */
+  const focusInvalidField = (path: string) => {
+    // register() puts the RHF path in the name attribute; most inputs also
+    // carry it as their id. Either is enough to locate the DOM node.
+    const findEl = () =>
+      (document.getElementsByName(path)[0] as HTMLElement | undefined) ??
+      document.getElementById(path) ??
+      undefined;
+    const el = findEl();
+    const inCollapsedAdvanced =
+      !advancedOpen && !!el && el.closest("#advanced-options") !== null;
+    if (!inCollapsedAdvanced) {
+      form.setFocus(path as never);
+      return;
+    }
+    setAdvancedOpen(true);
+    // Defer one frame so the section is visible before focusing (focus on
+    // a display:none input is dropped), then bring the field into view —
+    // focus's default scroll can leave it flush against the viewport edge.
+    requestAnimationFrame(() => {
+      form.setFocus(path as never);
+      findEl()?.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+  };
+
+  /**
+   * Jump-to-fix for the stale-results strip: find the first field the
+   * schema rejects, surface its inline error, and focus it (opening the
+   * collapsed Advanced section when needed). Uses a fresh safeParse rather
+   * than formState.errors because the live recompute never runs RHF
+   * validation — mid-edit invalidity exists only at the schema level.
+   */
+  const handleJumpToFirstInvalidField = () => {
+    const parsed = investmentFormSchema.safeParse(form.getValues());
+    if (parsed.success) return; // already healed — the strip clears on the next recompute
+    const issue = parsed.error.issues[0];
+    if (!issue || issue.path.length === 0) return;
+    const path = issue.path.join(".");
+    // Trigger validation for exactly this field so "the highlighted field"
+    // is literal (inline message + red border), then focus it.
+    void form.trigger(path as never);
+    focusInvalidField(path);
+  };
+
   const onSubmit = async (validated: InvestmentFormValues) => {
     // Use a synchronous snapshot of the live form right after validation. This
     // matches what the user sees (including fields that only exist while mounted)
@@ -2272,7 +2352,14 @@ export function InvestCalcPage({
       // intentional without burning user time. 1500ms was too long
       // for paid traffic (every second of perceived wait reduces
       // conversion measurably) - cut it ~73%.
-      await new Promise((r) => setTimeout(r, 400));
+      // COLD FIRST RUN ONLY: once a result or the live preview is
+      // already on screen the user is looking at the answer, so the
+      // spinner theater is pure manufactured wait — repeat Runs (Pro
+      // screening several listings) and preview-visible Runs jump
+      // straight to the dashboard (TTFV-2 / SWITCHBACK-3).
+      if (!analysisResult && !livePreview) {
+        await new Promise((r) => setTimeout(r, 400));
+      }
       const result = calculateAnalysis(values);
       const mappedTab = mapInputTabToDashboardTab(activeInputTab);
       if (mappedTab) setActiveDashboardTab(mappedTab);
@@ -2300,6 +2387,9 @@ export function InvestCalcPage({
         ? buildTaxStrategySource(sourceAnalysisId, values, result)
         : null;
       setAnalysisResult(result);
+      // A full Run just validated + computed from the live form — the
+      // results are current by definition.
+      setStaleResultsWarning(false);
       setAnalysisValues(values);
       // Fire Google Ads conversion event - primary intent signal we can
       // optimize spend against (analyze-an-actual-deal is the
@@ -2447,14 +2537,16 @@ export function InvestCalcPage({
           ["bedrooms", "bathrooms", "sqft", "monthlyRent"] as const
         ).find((key) => !!unitErr[key]);
         if (firstInvalidField) {
-          form.setFocus(`units.${i}.${firstInvalidField}` as const);
+          focusInvalidField(`units.${i}.${firstInvalidField}`);
           break;
         }
       }
     }
     const firstFieldError = findFirstFieldError(errors);
     if (!hasUnitFieldErrors && firstFieldError?.path) {
-      form.setFocus(firstFieldError.path as never);
+      // Opens the collapsed Advanced Options section first when the invalid
+      // field (financing / expenses / SF bathrooms+sqft) lives inside it.
+      focusInvalidField(firstFieldError.path);
     }
 
     // Address-only block: the live preview already showed the verdict on
@@ -3676,12 +3768,12 @@ export function InvestCalcPage({
                   </span>
                   <span className="block text-[11px] leading-snug text-muted-foreground">
                     {advancedOpen
-                      ? "Bathrooms, size, financing & operating expenses"
+                      ? "Financing, operating expenses, bathrooms & size"
                       : activeStrategy
                         ? `${activeStrategy.label} defaults applied - open to fine-tune financing & expenses`
                         : analysisResult
                           ? "Adjust details, financing & expenses to sharpen your numbers"
-                          : "Bathrooms, size, financing & expenses - running on smart defaults"}
+                          : "Financing, expenses, bathrooms & size - running on smart defaults"}
                   </span>
                 </span>
               </span>
@@ -3696,11 +3788,6 @@ export function InvestCalcPage({
               id="advanced-options"
               className={cn("space-y-5", advancedOpen ? "block" : "hidden")}
             >
-              {/* Optional single-family details (bathrooms + square feet) —
-                  kept mounted so values persist + submit even while hidden. */}
-              {propertyType === "single-family" && (
-                <SingleFamilyUnitSection form={form} fields="secondary" />
-              )}
               <div id="step-financing" className="scroll-mt-24">
                 <FinancingSection form={form} />
               </div>
@@ -3717,6 +3804,15 @@ export function InvestCalcPage({
                   />
                 </div>
               </div>
+              {/* Optional single-family details (bathrooms + square feet) —
+                  kept mounted so values persist + submit even while hidden.
+                  Rendered LAST inside the accuracy block: these are
+                  reference-only fields (calc-analysis never reads them), so
+                  the levers that actually move the verdict — financing +
+                  expenses — lead the refine pass (CL-3). */}
+              {propertyType === "single-family" && (
+                <SingleFamilyUnitSection form={form} fields="secondary" />
+              )}
             </div>
 
             {/* Live instant-verdict preview - forms as the user types, before
@@ -3872,6 +3968,31 @@ export function InvestCalcPage({
             tabIndex={-1}
             aria-label="Analysis results"
           >
+            {/* Stale-results signal (STALE-RESULTS-NO-RERUN-SIGNAL): the live
+                recompute keeps the last good numbers on screen while a form
+                field is mid-edit; if the form is left unparseable this slim,
+                non-blocking amber strip says so — with a jump straight to the
+                first invalid field. Disappears the moment the form parses
+                again (the recompute clears the flag). */}
+            {analysisResult && !isCalculating && staleResultsWarning ? (
+              <div
+                role="status"
+                className="mb-4 flex items-start gap-2.5 rounded-xl border border-amber-500/40 bg-amber-500/10 p-3.5 text-sm shadow-sm"
+              >
+                <span className="mt-1.5 size-2 shrink-0 rounded-full bg-amber-500" aria-hidden />
+                <p className="min-w-0 flex-1 text-foreground">
+                  These numbers reflect your last complete entry — finish the
+                  highlighted field to update them.
+                </p>
+                <button
+                  type="button"
+                  onClick={handleJumpToFirstInvalidField}
+                  className="shrink-0 rounded-lg border border-input bg-background px-3 py-1.5 text-xs font-bold text-primary transition-colors hover:bg-muted"
+                >
+                  Go to field
+                </button>
+              </div>
+            ) : null}
             {/* Result-state trust strip - names the default sources behind
                 the numbers (HUD/FRED/state) + "all editable", with a jump
                 back to the form. Only once real results exist. */}
