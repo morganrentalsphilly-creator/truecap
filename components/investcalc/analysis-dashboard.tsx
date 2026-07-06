@@ -1130,6 +1130,26 @@ export function AnalysisDashboard({
                   ) : null}
                 </PopoverContent>
               </Popover>
+              {/* Cross-link to batch triage (/dashboard/triage, "Screen
+                  Listings" in the sidebar) - the "I have 5 more listings to
+                  check" moment happens right after a single analysis
+                  finishes, and this is the only affordance pointing at the
+                  paste-many-rows tool from the results view. Muted one-line
+                  text, NOT another button, so the de-densified toolbar stays
+                  calm. Gated on canCompareDeals - the same entitlement that
+                  gates the sidebar item - so anon/free users see nothing. */}
+              {canCompareDeals ? (
+                <p className="col-span-full px-1 pt-0.5 text-xs text-muted-foreground">
+                  Screening several listings?{" "}
+                  <Link
+                    href="/dashboard/triage"
+                    className="inline-flex items-center gap-0.5 font-semibold text-primary hover:underline"
+                  >
+                    Triage them at once
+                    <ArrowUpRight aria-hidden className="size-3" />
+                  </Link>
+                </p>
+              ) : null}
         </div>
       </div>
 
@@ -1163,10 +1183,14 @@ export function AnalysisDashboard({
           isAppreciationPlay={appreciationPlay}
         />
 
-        {/* Recommendation card */}
+        {/* Recommendation card. Visually FIRST below md (order-first) so the
+            first thing a phone user reads after Run is the plain-English
+            verdict, not the abstract 0-100 score - the Deal Score card keeps
+            its default order 0 and stacks second. md+ keeps DOM order
+            (score col 1, recommendation cols 2-3), so desktop is unchanged. */}
         <div
           className={cn(
-            "md:col-span-2 rounded-2xl border p-4 sm:p-6",
+            "order-first md:order-none md:col-span-2 rounded-2xl border p-4 sm:p-6",
             recommendation?.variant === "strong-buy" &&
               "bg-[var(--brand-green-light)] border-[var(--brand-green)]/25",
             recommendation?.variant === "buy" && "bg-[var(--brand-blue-light)] border-primary/20",
@@ -2141,7 +2165,6 @@ function DealScoreCard({
     {
       scoreRing: string;
       scoreText: string;
-      recommendationChip: string;
       riskChip: string;
       metricCell: string;
       descriptionText: string;
@@ -2150,7 +2173,6 @@ function DealScoreCard({
     "strong-buy": {
       scoreRing: "ring-[var(--brand-green)]/40 bg-[var(--brand-green-light)]",
       scoreText: "text-[var(--brand-green)]",
-      recommendationChip: "bg-[var(--brand-green)] text-white border-[var(--brand-green)]/40",
       riskChip: "bg-emerald-100 text-emerald-700 border-emerald-200",
       metricCell: "bg-emerald-50 border border-emerald-100",
       descriptionText: "text-emerald-800",
@@ -2158,7 +2180,6 @@ function DealScoreCard({
     buy: {
       scoreRing: "ring-primary/35 bg-[var(--brand-blue-light)]",
       scoreText: "text-primary",
-      recommendationChip: "bg-primary text-primary-foreground border-primary/30",
       riskChip: "bg-blue-100 text-blue-700 border-blue-200",
       metricCell: "bg-blue-50 border border-blue-100",
       descriptionText: "text-blue-800",
@@ -2166,7 +2187,6 @@ function DealScoreCard({
     neutral: {
       scoreRing: "ring-amber-300/50 bg-amber-50",
       scoreText: "text-amber-700",
-      recommendationChip: "bg-amber-500 text-white border-amber-300",
       riskChip: "bg-amber-100 text-amber-700 border-amber-200",
       metricCell: "bg-amber-50 border border-amber-100",
       descriptionText: "text-amber-800",
@@ -2174,7 +2194,6 @@ function DealScoreCard({
     risky: {
       scoreRing: "ring-orange-300/50 bg-orange-50",
       scoreText: "text-orange-700",
-      recommendationChip: "bg-orange-500 text-white border-orange-300",
       riskChip: "bg-orange-100 text-orange-700 border-orange-200",
       metricCell: "bg-orange-50 border border-orange-100",
       descriptionText: "text-orange-800",
@@ -2182,7 +2201,6 @@ function DealScoreCard({
     avoid: {
       scoreRing: "ring-red-300/50 bg-red-50",
       scoreText: "text-red-700",
-      recommendationChip: "bg-red-600 text-white border-red-300",
       riskChip: "bg-red-100 text-red-700 border-red-200",
       metricCell: "bg-red-50 border border-red-100",
       descriptionText: "text-red-800",
@@ -2195,7 +2213,29 @@ function DealScoreCard({
       <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2">
         Deal Score
       </p>
-      <DealStrategyToggle strategy={strategy} onChange={onStrategyChange} />
+      {/* Investor lens: always visible on md+ (unchanged), but below md it
+          collapses behind a small "Change lens" disclosure so a first-timer
+          isn't asked to pick a lens before seeing the answer. The default
+          (Balanced) lens still applies either way - this is presentation
+          only, and the summary names the active lens so nothing is hidden. */}
+      <div className="hidden md:block">
+        <DealStrategyToggle strategy={strategy} onChange={onStrategyChange} />
+      </div>
+      <details className="group/lens mb-3 md:hidden">
+        <summary className="flex min-h-8 cursor-pointer list-none items-center gap-1 text-[11px] font-semibold text-muted-foreground hover:text-foreground">
+          <ChevronRight
+            aria-hidden
+            className="size-3 shrink-0 transition-transform group-open/lens:rotate-90"
+          />
+          Change lens
+          <span className="font-normal">
+            · {DEAL_STRATEGIES.find((s) => s.value === strategy)?.label ?? "Balanced"}
+          </span>
+        </summary>
+        <div className="mt-1.5">
+          <DealStrategyToggle strategy={strategy} onChange={onStrategyChange} />
+        </div>
+      </details>
       <div className="flex items-center justify-between gap-3 mb-3">
         <div
           className={cn(
@@ -2205,15 +2245,11 @@ function DealScoreCard({
         >
           <p className={cn("font-mono text-4xl leading-none font-extrabold tabular-nums", activeStyle.scoreText)}>{score}</p>
         </div>
+        {/* The verdict WORD lives once, as the Recommendation card's headline
+            (they always agree - both come from the canonical Balanced score).
+            This card owns the NUMBER; only the risk chip + appreciation cue
+            stay here, so a phone user never reconciles two identical labels. */}
         <div className="flex flex-col items-end gap-1">
-          <span
-            className={cn(
-              "px-3 py-1 rounded-xl border text-sm font-bold",
-              activeStyle.recommendationChip
-            )}
-          >
-            {recommendationLabel(recommendation)}
-          </span>
           <span
             className={cn(
               "px-2.5 py-0.5 rounded-full border text-xs font-semibold",
