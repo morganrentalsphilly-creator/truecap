@@ -49,6 +49,16 @@ export type BlogPost = {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: "operating-expense-ratio-rental-property",
+    title:
+      "Operating expense ratio (OER): what's a good one for a rental? (2026)",
+    excerpt:
+      "The metric appraisers reach for first — operating expenses ÷ effective gross income — and the hinge that sets NOI, cap rate, and value. The formula, the four costs that aren't operating expenses (mortgage, depreciation, CapEx, income tax), a line-by-line duplex that runs 40% before reserves and 46% after, the exact reconciliation to the 50% rule (~49% of gross rent), and why a 35%-vs-46% assumption swings the building's value about $46,000.",
+    readingTimeMinutes: 11,
+    publishedAt: "2026-07-06",
+    available: true,
+  },
+  {
     slug: "70-percent-rule-house-flipping",
     title:
       "The 70% rule for house flipping (and BRRRR): how to calculate your max offer (2026)",
