@@ -91,6 +91,7 @@ export function PropertyCompsCard({
   savedDealId,
   onApply,
   onDataChange,
+  onUnavailableChange,
 }: {
   enabled: boolean;
   address: string | null;
@@ -109,6 +110,10 @@ export function PropertyCompsCard({
    *  Deal Q&A grounding context can include it (no extra fetch — exactly
    *  the data already on screen). */
   onDataChange?: (enrichment: PropertyEnrichment | null) => void;
+  /** Reports the NOT_CONFIGURED self-hide up so a hosting ledger row can
+   *  hide its shell too — otherwise the row header fronts a card that
+   *  renders null (provider not configured on this deployment). */
+  onUnavailableChange?: (unavailable: boolean) => void;
 }) {
   const { toast } = useToast();
   const [data, setData] = useState<PropertyEnrichment | null>(null);
@@ -165,6 +170,7 @@ export function PropertyCompsCard({
       if (!r.ok) {
         if (r.code === "NOT_CONFIGURED") {
           setUnavailable(true);
+          onUnavailableChange?.(true);
           return;
         }
         toast({ title: "Couldn't pull comps", description: r.message, variant: "destructive" });

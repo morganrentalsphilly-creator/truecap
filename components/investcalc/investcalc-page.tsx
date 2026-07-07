@@ -527,6 +527,14 @@ export function InvestCalcPage({
   const router = useRouter();
   const [activeInputTab, setActiveInputTab] = useState<InputTab>("cash-flow");
   const [activeDashboardTab, setActiveDashboardTab] = useState<AnalysisDashboardTab>("cash-flow");
+  // Bumped on every point-at-tab intent so the ledger reopens a row the
+  // user closed even when the TAB VALUE is unchanged (a same-value
+  // setState bails and the dashboard's effect would never fire).
+  const [activeTabNonce, setActiveTabNonce] = useState(0);
+  const pointDashboardAt = useCallback((tab: AnalysisDashboardTab) => {
+    setActiveDashboardTab(tab);
+    setActiveTabNonce((n) => n + 1);
+  }, []);
   // Active investor-strategy chip ("What's your play?"). null = default full flow.
   const [activeStrategyKey, setActiveStrategyKey] = useState<string | null>(null);
   const activeStrategy = getStrategyByKey(activeStrategyKey);
@@ -734,7 +742,7 @@ export function InvestCalcPage({
       if (!areAnalysisTabsEnabled) return;
       setActiveInputTab(tab);
       const mappedTab = mapInputTabToDashboardTab(tab);
-      if (mappedTab) setActiveDashboardTab(mappedTab);
+      if (mappedTab) pointDashboardAt(mappedTab);
       setTimeout(() => {
         scrollToAnalysisResults();
       }, 50);
@@ -1706,7 +1714,7 @@ export function InvestCalcPage({
       // BRRRR/Flip render their model inline as the results hero, so don't also
       // lead the Details tabs with the (duplicate) Strategies tab - default to
       // cash-flow context. Wholesale keeps Stress Test so "Adjust targets" lands.
-      setActiveDashboardTab(strategy.primaryTab === "strategies" ? "cash-flow" : strategy.primaryTab);
+      pointDashboardAt(strategy.primaryTab === "strategies" ? "cash-flow" : strategy.primaryTab);
       setAdvancedOpen(false);
       trackEvent("strategy_selected", { strategy: strategy.key });
     },
@@ -2428,7 +2436,7 @@ export function InvestCalcPage({
       }
       const result = calculateAnalysis(values);
       const mappedTab = mapInputTabToDashboardTab(activeInputTab);
-      if (mappedTab) setActiveDashboardTab(mappedTab);
+      if (mappedTab) pointDashboardAt(mappedTab);
       // Sample-deal Pro preview: this run came from "Try a sample deal"
       // and the user isn't fully Pro → unlock the full report for the
       // demo (flag consumed at the top of onSubmit). Any normal run
@@ -4149,6 +4157,7 @@ export function InvestCalcPage({
               isSampleProPreview={isSampleProPreview}
               dealQaEnabled={dealQaEnabled}
               activeTab={activeDashboardTab}
+              activeTabNonce={activeTabNonce}
               activeStrategy={activeStrategy}
               saveDealLimitReached={currentSaveDealLimitReached}
               persistedActionsBlockHint={

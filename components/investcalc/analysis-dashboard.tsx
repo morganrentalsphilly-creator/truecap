@@ -1,11 +1,10 @@
 "use client";
 
-import { useDeferredValue, useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
+import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import {
-  Lock,
   TrendingUp,
   ArrowUpRight,
   Building2,
@@ -21,6 +20,10 @@ import {
   SlidersHorizontal,
   MoreHorizontal,
   X,
+  Search,
+  MessageCircle,
+  NotebookPen,
+  type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -109,6 +112,8 @@ import { LoanAmortizationView } from "@/components/investcalc/loan-amortization-
 import { DealNotesPanel } from "@/components/investcalc/deal-notes-panel";
 import { ShareLinkButton } from "@/components/investcalc/share-link-button";
 import { AnswerHeroCard } from "@/components/investcalc/answer-hero-card";
+import { DrillRow } from "@/components/investcalc/drill-row";
+import { DrillLedger } from "@/components/investcalc/drill-ledger";
 import {
   MetricsBand,
   buildMetricTiles,
@@ -208,10 +213,24 @@ interface AnalysisDashboardProps {
    *  from enrich-property provenance). Null hides the badge. */
   dataConfidence?: DataConfidence | null;
   activeTab?: AnalysisDashboardTab;
+  /** Bumped by the caller on every point-at-tab intent, so a SAME-VALUE
+   *  re-point (user closed the row, then re-clicked the input tab or
+   *  re-ran) still reopens the row — the parent's same-value setState
+   *  otherwise bails and the effect never fires. */
+  activeTabNonce?: number;
   /** Active investor strategy - drives the strategy-aware results headline. */
   activeStrategy?: InvestorStrategy | null;
   /** Shown when Compare / Export are disabled (e.g. unsaved edits). */
   persistedActionsBlockHint?: string;
+  /**
+   * Results-side AssumptionsSourceStrip, rendered by investcalc-page (it
+   * needs the form's provenance) and passed in here so it can live inside
+   * the ledger's "Where these numbers came from" row (Phase 5 blueprint —
+   * a prop on AnalysisDashboard, never on InvestCalcPage, so the
+   * two-homepage rule holds). Until a caller passes it, the strip simply
+   * stays where it renders today and this row doesn't exist.
+   */
+  assumptionsSlot?: ReactNode;
 }
 
 export type AnalysisDashboardTab =
@@ -222,21 +241,55 @@ export type AnalysisDashboardTab =
   | "strategies"
   | "stress-test";
 
-const TABS: { id: AnalysisDashboardTab; label: string; mobileLabel: string; isPro: boolean }[] = [
-  { id: "cash-flow", label: "Cash Flow", mobileLabel: "Cash Flow", isPro: false },
-  { id: "projections", label: "10-Year Projections", mobileLabel: "10-Year", isPro: true },
-  { id: "tax-strategy", label: "Tax Strategy", mobileLabel: "Tax", isPro: true },
-  { id: "exit-scenarios", label: "Exit Scenarios", mobileLabel: "Exit", isPro: true },
+/**
+ * Every ledger row id. The six analysis rows ARE the AnalysisDashboardTab
+ * ids (the old tab ids) so every consumer of the tab contract — metric-tap
+ * jumps, StrategyOutcomeCard's onJumpToTab, the saved-deal tab restore,
+ * the strategy primaryTab lead — keeps working unchanged. The rest are the
+ * always-visible cards that joined the ledger as rows (comps, assumptions,
+ * Deal Q&A, notes).
+ */
+export type AnalysisLedgerRowId =
+  | AnalysisDashboardTab
+  | "comps"
+  | "assumptions"
+  | "deal-qa"
+  | "notes";
+
+// The six analysis rows, in the exact order the tabs had. `icon` is the
+// same glyph each mobile tab carried (every row keeps a distinct glyph).
+const TABS: { id: AnalysisDashboardTab; label: string; icon: LucideIcon; isPro: boolean }[] = [
+  { id: "cash-flow", label: "Cash Flow", icon: TrendingUp, isPro: false },
+  { id: "projections", label: "10-Year Projections", icon: ArrowUpRight, isPro: true },
+  { id: "tax-strategy", label: "Tax Strategy", icon: FileText, isPro: true },
+  { id: "exit-scenarios", label: "Exit Scenarios", icon: Building2, isPro: true },
   // Renamed from "Strategies" (Jun 2026 UX pass) - vague label for the
-  // not-Excel-power-user audience; the tab IS the BRRRR + fix-and-flip
+  // not-Excel-power-user audience; the row IS the BRRRR + fix-and-flip
   // + rehab analyzers, so say that.
-  { id: "strategies", label: "BRRRR & Flip", mobileLabel: "BRRRR", isPro: true },
+  { id: "strategies", label: "BRRRR & Flip", icon: Target, isPro: true },
   // Stress Test consolidates Max Allowable Offer + Sensitivity Grid —
   // both Pro features that previously rendered as always-visible cards
-  // between the metrics row and the tab bar. Moving them into a tab
+  // between the metrics row and the tab bar. Keeping them in one row
   // keeps the headline scroll calmer without losing the features.
-  { id: "stress-test", label: "Stress Test", mobileLabel: "Stress", isPro: true },
+  { id: "stress-test", label: "Stress Test", icon: Activity, isPro: true },
 ];
+
+const ALL_LEDGER_ROW_IDS: AnalysisLedgerRowId[] = [
+  ...TABS.map((t) => t.id),
+  "comps",
+  "assumptions",
+  "deal-qa",
+  "notes",
+];
+
+/** Every row starts closed except the lead row (the old "active tab"). */
+function buildInitialOpenRows(lead: AnalysisDashboardTab): Record<AnalysisLedgerRowId, boolean> {
+  const rows = Object.fromEntries(
+    ALL_LEDGER_ROW_IDS.map((id) => [id, false])
+  ) as Record<AnalysisLedgerRowId, boolean>;
+  rows[lead] = true;
+  return rows;
+}
 
 /**
  * Is this an "appreciation play" - a financed deal whose year-1 cash flow
@@ -304,10 +357,42 @@ export function AnalysisDashboard({
   saveDealLimitReached = false,
   dataConfidence = null,
   activeTab: activeTabProp,
+  activeTabNonce = 0,
   activeStrategy = null,
   persistedActionsBlockHint,
+  assumptionsSlot,
 }: AnalysisDashboardProps) {
-  const [activeTab, setActiveTab] = useState<AnalysisDashboardTab>(activeTabProp ?? "cash-flow");
+  // Ledger open state (Phase 5) - replaces the single activeTab. Rows are
+  // INDEPENDENT multi-open accordions: opening one never closes a sibling
+  // (single-open enforcement was explicitly rejected). The lead row (the
+  // old "active tab") starts open so the content the tab bar showed by
+  // default - cash flow, or the strategy's primaryTab when a play leads -
+  // is still on screen without a tap.
+  const [openRows, setOpenRows] = useState<Record<AnalysisLedgerRowId, boolean>>(() =>
+    buildInitialOpenRows(activeTabProp ?? "cash-flow")
+  );
+  const openRow = useCallback((id: AnalysisLedgerRowId) => {
+    setOpenRows((prev) => (prev[id] ? prev : { ...prev, [id]: true }));
+  }, []);
+  const setRowOpen = useCallback((id: AnalysisLedgerRowId, open: boolean) => {
+    setOpenRows((prev) => (prev[id] === open ? prev : { ...prev, [id]: open }));
+  }, []);
+  // KEPT NAME + SIGNATURE from the tab era so no caller churns:
+  // "switch to tab X" is now "open row X and scroll it into view".
+  // Consumers: StrategyOutcomeCard's onJumpToTab, the metric-tap jump
+  // wiring (METRIC_JUMP_TARGETS via handleMetricJump), and anything
+  // else that pointed the results at a section.
+  const setActiveTab = useCallback(
+    (id: AnalysisDashboardTab) => {
+      openRow(id);
+      requestAnimationFrame(() => {
+        document
+          .getElementById(`analysis-tab-${id}`)
+          ?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    },
+    [openRow]
+  );
   // When a non-cash-flow strategy is active (Wholesale/BRRRR/Flip), lead the
   // results with that play's real answer instead of the generic buy-box verdict.
   const strategyLeadsOutput = !!activeStrategy && activeStrategy.primaryTab !== "cash-flow";
@@ -342,6 +427,11 @@ export function AnalysisDashboard({
   // summary. Absent pieces are simply omitted from the AI context.
   const [buyBoxQaReport, setBuyBoxQaReport] = useState<DealQaBuyBoxReport | null>(null);
   const [compsQaData, setCompsQaData] = useState<PropertyEnrichment | null>(null);
+  // Comps provider NOT_CONFIGURED on this deployment: the card self-hides,
+  // so the ledger row shell must hide with it (a header must never front
+  // an empty row). Sticky for the session — the provider won't appear
+  // mid-session.
+  const [compsUnavailable, setCompsUnavailable] = useState(false);
   // Comps belong to ONE address. The card clears itself on address change
   // while mounted, but New Analysis empties the address and UNMOUNTS it —
   // an unmounted card can't report null, so the dashboard clears too or a
@@ -486,27 +576,9 @@ export function AnalysisDashboard({
     "stress-test": canUseMaxOffer || canUseSensitivity,
   };
 
-  // Roving-tabindex keyboard nav for the results tab bar (WAI-ARIA tabs):
-  // Left/Right move between tabs, Home/End jump to the ends, and focus
-  // follows selection so a screen-reader/keyboard user can traverse the
-  // Pro analyses (projections, tax, exit, stress) the same way a mouse user
-  // can. Pairs with the role=tab/tablist/tabpanel wiring on the markup.
-  const handleTabKeyDown = (e: ReactKeyboardEvent<HTMLButtonElement>) => {
-    const order = TABS.map((t) => t.id);
-    const idx = order.indexOf(activeTab);
-    let nextIdx: number | null = null;
-    if (e.key === "ArrowRight" || e.key === "ArrowDown") nextIdx = (idx + 1) % order.length;
-    else if (e.key === "ArrowLeft" || e.key === "ArrowUp") nextIdx = (idx - 1 + order.length) % order.length;
-    else if (e.key === "Home") nextIdx = 0;
-    else if (e.key === "End") nextIdx = order.length - 1;
-    if (nextIdx === null) return;
-    e.preventDefault();
-    const nextId = order[nextIdx];
-    setActiveTab(nextId);
-    requestAnimationFrame(() => {
-      document.getElementById(`analysis-tab-${nextId}`)?.focus();
-    });
-  };
+  // (The roving-tabindex tablist keyboard nav retired with the tab bar -
+  // DrillLedger provides the accordion equivalent: ArrowUp/Down + Home/End
+  // move focus between row headers.)
 
   const isEditingLockedByPlan = isAuthenticated && isExistingSavedDeal && !canUpdateSavedDeals;
   const isSaveLimitLockedByPlan = isAuthenticated && !isExistingSavedDeal && saveDealLimitReached;
@@ -532,22 +604,24 @@ export function AnalysisDashboard({
     void onSaveDeal();
   };
 
-  // Metric tap → jump to the analysis section that explains it (Phase 2).
-  // Reuses the existing tab machinery: same setActiveTab, same tab ids —
-  // then smooth-scrolls the tab row into view once the switch lands.
-  const handleMetricJump = (tab: AnalysisDashboardTab) => {
-    setActiveTab(tab);
-    requestAnimationFrame(() => {
-      document
-        .getElementById(`analysis-tab-${tab}`)
-        ?.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
-  };
+  // Metric tap → jump to the ledger row that explains it (Phase 2 wiring,
+  // Phase 5 target). Same ids (METRIC_JUMP_TARGETS map to the old tab ids,
+  // which ARE the row ids) - setActiveTab now opens the row + scrolls it
+  // into view, so this is a straight delegate.
+  const handleMetricJump = setActiveTab;
 
+  // Programmatic tab pointing from the page (input-tab clicks, the
+  // strategy primaryTab lead, saved-deal restore) - opens the row WITHOUT
+  // scrolling, exactly matching the old semantics where changing the
+  // active tab never moved the viewport (the page scrolls to the results
+  // container itself when it wants to). The mount-time value seeds the
+  // initial open state above.
   useEffect(() => {
     if (!activeTabProp) return;
-    setActiveTab(activeTabProp);
-  }, [activeTabProp]);
+    openRow(activeTabProp);
+    // activeTabNonce: same-value re-points (closed row + re-clicked input
+    // tab / re-run) bump the nonce so this effect fires again.
+  }, [activeTabProp, activeTabNonce, openRow]);
 
   // One-glance "what do I do next" - the single imperative step that turns a
   // verdict into action ("Lower your offer or raise rent", "Make your offer").
@@ -600,6 +674,53 @@ export function AnalysisDashboard({
     onMetricSelect: handleMetricJump,
   });
   const secondaryMetricKeys = getSecondaryMetricKeys(strategy);
+
+  // ── Closed-row summary lines (Phase 5, the Ledger's unique asset) ──
+  // ONE truthful line per closed ledger row, derived ONLY from numbers
+  // already computed on this surface — never new math, never a fake
+  // number. Rows whose data would need a Pro fetch (the exit-engine IRR
+  // for free users) or a user action (comps) fall back to a neutral
+  // verb-first line instead. The stress line reads the SAME deferred
+  // what-if state as the metric tiles, which the "Play with the numbers"
+  // panel resets to null on collapse — so a stale stressed number can
+  // never linger in a closed-row phrase.
+  const fmtSignedMonthly = (n: number) =>
+    `${n >= 0 ? "+" : "−"}$${Math.abs(Math.round(n)).toLocaleString()}/mo`;
+  const annualTaxSavings = result ? Math.round(result.taxSavingsMonthly * 12) : 0;
+  const rowSummaries: Record<AnalysisLedgerRowId, string> = {
+    "cash-flow": result
+      ? `$${Math.round(result.monthlyRentalIncome).toLocaleString()} rent − $${Math.round(
+          result.monthlyRentalIncome - result.netCashFlow
+        ).toLocaleString()} costs = ${fmtSignedMonthly(result.netCashFlow)}`
+      : "See where the rent goes, month by month",
+    projections:
+      result && annualizedReturnPct != null
+        ? `~${Math.round(annualizedReturnPct)}%/yr total return over 10 years`
+        : "See year-by-year cash flow, equity & returns",
+    "tax-strategy":
+      result && annualTaxSavings > 0
+        ? `~$${annualTaxSavings.toLocaleString()}/yr in tax savings on paper`
+        : "See depreciation, interest & what you'd keep",
+    "exit-scenarios":
+      returnSummary?.irrPct != null
+        ? `IRR ${returnSummary.irrPct.toFixed(1)}% over ${returnSummary.years} yrs`
+        : "When should you sell? Model the exit",
+    strategies: "Run the BRRRR & fix-and-flip numbers",
+    "stress-test": deferredWhatIfState?.isAdjusted
+      ? `${deferredWhatIfState.result.netCashFlow >= 0 ? "Survives" : "Goes negative under"} ${formatAdjustmentLabel(
+          deferredWhatIfState.rentPct,
+          deferredWhatIfState.pricePct,
+          deferredWhatIfState.ratePp,
+          deferredWhatIfState.vacancyPp
+        )}: ${fmtSignedMonthly(deferredWhatIfState.result.netCashFlow)}`
+      : "Stress it — find your max offer and worst case",
+    comps: compsQaData
+      ? "Comps pulled — see how your rent & price compare"
+      : "Not run yet — pull comps for this address",
+    assumptions: "Every source behind these numbers — and how to change them",
+    "deal-qa": "Ask anything about this deal",
+    notes: "Your private notes on this deal",
+  };
 
   return (
     <div className="space-y-6">
@@ -1175,27 +1296,10 @@ export function AnalysisDashboard({
         ) : null}
       </div>
 
-      {/* Sale & rent comps - on-demand external enrichment (RentCast).
-          Paid + address gated; pulls only on click (API cost control);
-          self-hides if the provider isn't configured. Sits BELOW the
-          metric block: it's an on-demand tool ("Run comps"), not a
-          readout — above the metrics it pushed the answer a full card
-          further down every phone screen. */}
-      {values?.address ? (
-        <PropertyCompsCard
-          enabled={Boolean(isAuthenticated)}
-          address={values.address}
-          propertyType={values.propertyType}
-          bedrooms={values.bedrooms ?? null}
-          bathrooms={values.bathrooms ?? null}
-          squareFootage={values.sqft ?? null}
-          currentRent={values.monthlyRent ?? null}
-          currentPrice={values.purchasePrice ?? null}
-          savedDealId={savedDealId}
-          onApply={onApplyComps}
-          onDataChange={setCompsQaData}
-        />
-      ) : null}
+      {/* Sale & rent comps moved into the ledger below ("Check rent
+          against the market" row) - Phase 5. The card itself is
+          unchanged: keepMounted so its saved-comps mount fetch and
+          on-demand pull-on-click economics are identical. */}
 
       {/* Free-tier prompt - shows ONE card, not two stacked.
           Decision tree:
@@ -1233,215 +1337,216 @@ export function AnalysisDashboard({
         <RateAlertsToggle variant="inline" />
       )}
 
-      {/* MAO + Sensitivity were previously rendered here as two
-          always-visible cards (Pro for paid users, ProInlineGate teasers
-          for free users). They now live inside the "Stress Test" tab
-          below to keep the headline scroll calmer. See the
-          activeTab === "stress-test" block in tab content. */}
-
-      {/* Deal Q&A - grounded AI explainer. Placed at the END of the
-          Overview (after the numbers, before the Details tabs): the
-          natural moment for "what does this mean?" is after seeing the
-          metrics, and putting it earlier pushed the headline numbers
-          below the fold on phones. Renders only when the page says the
-          feature is configured (Anthropic key present). Free users get
-          a few questions/day (server-enforced). */}
-      {dealQaEnabled && result && values && !isLoading ? (
-        <DealSummaryCard values={values} context={dealQaContext} />
-      ) : null}
-      {dealQaEnabled && result && values && !isLoading ? (
-        <DealQaPanel values={values} context={dealQaContext} />
-      ) : null}
-
-      {/* "Details" landmark - pairs with the "Overview" landmark above
-          the metric grid. Gives the eye a clear "here's where the
-          deeper analysis starts" cue without adding clutter. */}
-      <div className="flex items-center gap-2 px-1 pt-1">
-        <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-          Details
-        </span>
-        <span className="h-px flex-1 bg-border" />
-      </div>
-
-      {/* Analysis tabs */}
-      <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
-        {/* Tab bar */}
-        {/* Tab bar - horizontal scroll on all phone widths. Was forcing
-            a cramped 4-col grid at <=380px which collapsed tap-targets
-            to 60-70px wide; scrollable gives full-size targets and
-            readable labels. */}
-        <div className="relative">
-        <div
-          role="tablist"
-          aria-label="Analysis sections"
-          className="flex gap-1.5 overflow-x-auto scrollbar-none p-2 sm:gap-0 sm:border-b sm:border-border sm:p-0"
-        >
-          {TABS.map((tab) => (
-            <button
+      {/* THE LEDGER (Phase 5) - the results tab bar + tab panels converted
+          into independent MULTI-OPEN accordion rows (opening one never
+          closes a sibling), plus the on-demand cards (comps, Deal Q&A,
+          notes) that joined the ledger as rows. Row ids ARE the old
+          AnalysisDashboardTab ids and each row hosts the EXACT panel its
+          tab hosted: same entitlement gates (a locked row opens to the
+          same ProFeaturePreview / ProInlineGate the locked tab showed),
+          same lazy mount-on-first-open economics (recharts chunks +
+          snapshot server actions still fire on first open, never on page
+          load). Closed, each row carries one truthful summary line so the
+          shut page reads as an executive summary. The old "Details"
+          landmark strip retired - the hero/ledger boundary IS the
+          landmark now. */}
+      <DrillLedger label="Deeper analysis">
+        {TABS.map((tab) => {
+          const Icon = tab.icon;
+          return (
+            <DrillRow
               key={tab.id}
-              type="button"
-              role="tab"
-              id={`analysis-tab-${tab.id}`}
-              aria-selected={activeTab === tab.id}
-              aria-controls="analysis-tabpanel"
-              tabIndex={activeTab === tab.id ? 0 : -1}
-              onClick={() => setActiveTab(tab.id)}
-              onKeyDown={handleTabKeyDown}
-              // scroll-mt clears the sticky site header when the metric
-              // tap-to-jump wiring smooth-scrolls a tab into view.
-              className={cn(
-                "scroll-mt-24 sm:scroll-mt-28 flex items-center gap-1.5 sm:gap-2 rounded-full border px-3 py-2 text-[12px] font-medium whitespace-nowrap transition-colors shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:rounded-none sm:border-0 sm:px-5 sm:py-3.5 sm:text-sm",
-                activeTab === tab.id
-                  ? "bg-primary text-primary-foreground"
-                  : "border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted sm:bg-transparent"
-              )}
+              id={tab.id}
+              title={tab.label}
+              icon={<Icon className="size-4" />}
+              summary={rowSummaries[tab.id]}
+              locked={tab.isPro && !tabEntitlements[tab.id]}
+              open={openRows[tab.id]}
+              onOpenChange={(open) => setRowOpen(tab.id, open)}
             >
-              {tab.id === "cash-flow" && <TrendingUp className="w-3.5 h-3.5 sm:hidden" />}
-              {tab.id === "projections" && <ArrowUpRight className="w-3.5 h-3.5 sm:hidden" />}
-              {tab.id === "tax-strategy" && <FileText className="w-3.5 h-3.5 sm:hidden" />}
-              {/* Exit previously reused the projections arrow and
-                  Strategies had NO icon - every mobile tab now has a
-                  distinct glyph. */}
-              {tab.id === "exit-scenarios" && <Building2 className="w-3.5 h-3.5 sm:hidden" />}
-              {tab.id === "strategies" && <Target className="w-3.5 h-3.5 sm:hidden" />}
-              {tab.id === "stress-test" && <Activity className="w-3.5 h-3.5 sm:hidden" />}
-              <span className="sm:hidden">{tab.mobileLabel}</span>
-              <span className="hidden sm:inline">{tab.label}</span>
-              {tab.isPro && !tabEntitlements[tab.id] && (
-                // PRO badge now visible on mobile too - previously
-                // hidden via 'hidden sm:inline-flex', which meant
-                // mobile users tapped Pro tabs without warning and
-                // hit a paywall. Surfacing the badge upfront prevents
-                // the bait-and-switch UX.
-                <span className="inline-flex text-[9px] sm:text-[10px] font-bold bg-[var(--brand-orange)] text-white px-1 sm:px-1.5 py-0.5 rounded-full uppercase">
-                  PRO
-                </span>
+              {tab.id === "cash-flow" && (
+                <CashFlowTab
+                  result={result}
+                  isLoading={isLoading}
+                  values={values}
+                  isPro={canUseStrategies || canUseSensitivity || canUseProjections}
+                />
               )}
-            </button>
-          ))}
-        </div>
-          {/* Right-edge fade: signals more tabs exist when the row scrolls
-              past the viewport on phones (the scrollbar is hidden). */}
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-card to-transparent sm:hidden"
-          />
-        </div>
+              {tab.id === "projections" && !canUseProjections && (
+                <ProFeaturePreview kind="projections" onUpgrade={goToBilling} result={result} />
+              )}
+              {tab.id === "projections" && canUseProjections && projectionSource && (
+                <TenYearProjectionsPanel source={projectionSource} />
+              )}
+              {tab.id === "projections" && canUseProjections && !projectionSource && (
+                <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
+                  Run the analysis to see the 10-year projection.
+                </div>
+              )}
+              {tab.id === "tax-strategy" && !canUseTaxStrategy && (
+                <ProFeaturePreview kind="tax-strategy" onUpgrade={goToBilling} result={result} />
+              )}
+              {tab.id === "tax-strategy" && canUseTaxStrategy && taxStrategySource && (
+                <TaxStrategyPanel source={taxStrategySource} />
+              )}
+              {tab.id === "tax-strategy" && canUseTaxStrategy && !taxStrategySource && (
+                <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
+                  Run the analysis to see the tax strategy view.
+                </div>
+              )}
+              {tab.id === "exit-scenarios" && !canUseExitScenarios && (
+                <ProFeaturePreview kind="exit-scenarios" onUpgrade={goToBilling} result={result} />
+              )}
+              {tab.id === "exit-scenarios" && canUseExitScenarios && exitScenarioSource && (
+                <ExitScenariosPanel source={exitScenarioSource} />
+              )}
+              {tab.id === "exit-scenarios" && canUseExitScenarios && !exitScenarioSource && (
+                <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
+                  Run the analysis to see exit scenarios.
+                </div>
+              )}
+              {tab.id === "strategies" && !canUseStrategies && (
+                <ProFeaturePreview kind="strategies" onUpgrade={goToBilling} result={result} />
+              )}
+              {tab.id === "strategies" && canUseStrategies && (
+                <StrategiesPanel values={values} result={result} onApplyRehab={onApplyRehab} currentRehabBudget={currentRehabBudget} />
+              )}
+              {/* Stress Test row - Max Allowable Offer + Sensitivity Grid.
+                  Each card independently respects its own entitlement: a
+                  user could have unlocked one without the other (rare, but
+                  possible if entitlements drift). Cards render as full
+                  tools when entitled, or as ProInlineGate teasers when not. */}
+              {tab.id === "stress-test" && (
+                <div className="space-y-4">
+                  {canUseMaxOffer ? (
+                    <MaxOfferCard values={values} />
+                  ) : (
+                    <ProInlineGate
+                      icon={Target}
+                      title="Max Allowable Offer"
+                      description="Reverse-solve the highest price that still hits your return thresholds."
+                      previewBullets={[
+                        "Set targets for cap rate, CoC, or cash flow",
+                        "Binary-search solver runs in <1s",
+                        "'At this price you'd get…' readout",
+                      ]}
+                    />
+                  )}
+                  {canUseMaxOffer ? <AssumptionImpactCard values={values} /> : null}
+                  {canUseSensitivity ? (
+                    <SensitivityGrid values={values} />
+                  ) : (
+                    <ProInlineGate
+                      icon={Activity}
+                      title="Sensitivity analysis"
+                      description="Stress-test the deal if rent comes in lower, vacancy spikes, or rates rise."
+                      previewBullets={[
+                        "Rent ±10% scenarios",
+                        "Vacancy ±5pp scenarios",
+                        "Interest rate ±1pp scenarios",
+                      ]}
+                    />
+                  )}
+                </div>
+              )}
+            </DrillRow>
+          );
+        })}
 
-        {/* Tab content */}
-        <div
-          role="tabpanel"
-          id="analysis-tabpanel"
-          aria-labelledby={`analysis-tab-${activeTab}`}
-          tabIndex={0}
-          className="min-w-0 overflow-hidden p-2 focus-visible:outline-none sm:p-6"
-        >
-          {activeTab === "cash-flow" && (
-            <CashFlowTab
-              result={result}
-              isLoading={isLoading}
-              values={values}
-              isPro={canUseStrategies || canUseSensitivity || canUseProjections}
+        {/* Sale & rent comps - on-demand external enrichment (RentCast).
+            Paid + address gated; pulls only on click (API cost control);
+            self-hides if the provider isn't configured. keepMounted: the
+            card was always mounted pre-ledger, so its saved-comps mount
+            fetch and its Q&A onDataChange report-up keep firing exactly
+            as before - the row only changes what's VISIBLE. The row shell
+            mirrors the card's own enabled gate (authed + address) so a
+            header never fronts a card that renders nothing. */}
+        {isAuthenticated && values?.address && !compsUnavailable ? (
+          <DrillRow
+            id="comps"
+            title="Check rent against the market"
+            icon={<Search className="size-4" />}
+            summary={rowSummaries.comps}
+            open={openRows.comps}
+            onOpenChange={(open) => setRowOpen("comps", open)}
+            keepMounted
+          >
+            <PropertyCompsCard
+              enabled={Boolean(isAuthenticated)}
+              address={values.address}
+              propertyType={values.propertyType}
+              bedrooms={values.bedrooms ?? null}
+              bathrooms={values.bathrooms ?? null}
+              squareFootage={values.sqft ?? null}
+              currentRent={values.monthlyRent ?? null}
+              currentPrice={values.purchasePrice ?? null}
+              savedDealId={savedDealId}
+              onApply={onApplyComps}
+              onDataChange={setCompsQaData}
+              onUnavailableChange={setCompsUnavailable}
             />
-          )}
-          {activeTab === "projections" && !canUseProjections && (
-            <ProFeaturePreview kind="projections" onUpgrade={goToBilling} result={result} />
-          )}
-          {activeTab === "projections" && canUseProjections && projectionSource && (
-            <TenYearProjectionsPanel source={projectionSource} />
-          )}
-          {activeTab === "projections" && canUseProjections && !projectionSource && (
-            <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
-              Run the analysis to see the 10-year projection.
-            </div>
-          )}
-          {activeTab === "tax-strategy" && !canUseTaxStrategy && (
-            <ProFeaturePreview kind="tax-strategy" onUpgrade={goToBilling} result={result} />
-          )}
-          {activeTab === "tax-strategy" && canUseTaxStrategy && taxStrategySource && (
-            <TaxStrategyPanel source={taxStrategySource} />
-          )}
-          {activeTab === "tax-strategy" && canUseTaxStrategy && !taxStrategySource && (
-            <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
-              Run the analysis to see the tax strategy view.
-            </div>
-          )}
-          {activeTab === "exit-scenarios" && !canUseExitScenarios && (
-            <ProFeaturePreview kind="exit-scenarios" onUpgrade={goToBilling} result={result} />
-          )}
-          {activeTab === "exit-scenarios" && canUseExitScenarios && exitScenarioSource && (
-            <ExitScenariosPanel source={exitScenarioSource} />
-          )}
-          {activeTab === "exit-scenarios" && canUseExitScenarios && !exitScenarioSource && (
-            <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
-              Run the analysis to see exit scenarios.
-            </div>
-          )}
-          {activeTab === "strategies" && !canUseStrategies && (
-            <ProFeaturePreview kind="strategies" onUpgrade={goToBilling} result={result} />
-          )}
-          {activeTab === "strategies" && canUseStrategies && (
-            <StrategiesPanel values={values} result={result} onApplyRehab={onApplyRehab} currentRehabBudget={currentRehabBudget} />
-          )}
-          {/* Stress Test tab - Max Allowable Offer + Sensitivity Grid.
-              Each card independently respects its own entitlement: a
-              user could have unlocked one without the other (rare, but
-              possible if entitlements drift). Cards render as full
-              tools when entitled, or as ProInlineGate teasers when not. */}
-          {activeTab === "stress-test" && (
-            <div className="space-y-4">
-              {canUseMaxOffer ? (
-                <MaxOfferCard values={values} />
-              ) : (
-                <ProInlineGate
-                  icon={Target}
-                  title="Max Allowable Offer"
-                  description="Reverse-solve the highest price that still hits your return thresholds."
-                  previewBullets={[
-                    "Set targets for cap rate, CoC, or cash flow",
-                    "Binary-search solver runs in <1s",
-                    "'At this price you'd get…' readout",
-                  ]}
-                />
-              )}
-              {canUseMaxOffer ? <AssumptionImpactCard values={values} /> : null}
-              {canUseSensitivity ? (
-                <SensitivityGrid values={values} />
-              ) : (
-                <ProInlineGate
-                  icon={Activity}
-                  title="Sensitivity analysis"
-                  description="Stress-test the deal if rent comes in lower, vacancy spikes, or rates rise."
-                  previewBullets={[
-                    "Rent ±10% scenarios",
-                    "Vacancy ±5pp scenarios",
-                    "Interest rate ±1pp scenarios",
-                  ]}
-                />
-              )}
-            </div>
-          )}
-          {activeTab !== "cash-flow" && activeTab !== "projections" && activeTab !== "tax-strategy" && activeTab !== "exit-scenarios" && activeTab !== "strategies" && activeTab !== "stress-test" && (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <Lock className="w-10 h-10 text-muted-foreground mb-3" />
-              <h3 className="font-semibold text-foreground mb-1">Pro Feature</h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                Sign in to unlock {TABS.find((t) => t.id === activeTab)?.label}
-              </p>
-              <Button className="bg-primary text-primary-foreground rounded-full font-semibold">
-                Sign Up Free
-              </Button>
-            </div>
-          )}
-        </div>
-      </div>
+          </DrillRow>
+        ) : null}
 
-      {/* Deal notes - at the bottom (after the Details tabs) so they don't
-          interrupt the verdict → numbers → details read. Only renders for a
-          re-opened saved deal; lazy-fetches its own data. Due-diligence +
-          documents moved to the dashboard deal workspace
-          (/dashboard/saved-analyses/[id]) to keep the underwrite output clean. */}
-      {isExistingSavedDeal && savedDealId ? <DealNotesPanel savedDealId={savedDealId} /> : null}
+        {/* "Where these numbers came from" - the results-side assumptions
+            strip, passed down from investcalc-page via assumptionsSlot
+            (it needs the form's provenance so it can't render here).
+            Renders only when a caller provides it. */}
+        {assumptionsSlot ? (
+          <DrillRow
+            id="assumptions"
+            title="Where these numbers came from"
+            icon={<Info className="size-4" />}
+            summary={rowSummaries.assumptions}
+            open={openRows.assumptions}
+            onOpenChange={(open) => setRowOpen("assumptions", open)}
+            keepMounted
+          >
+            {assumptionsSlot}
+          </DrillRow>
+        ) : null}
+
+        {/* Deal Q&A - grounded AI explainer, now a ledger row. Renders
+            only when the page says the feature is configured (Anthropic
+            key present). Free users get a few questions/day (server-
+            enforced - the limit is untouched by the ledger). keepMounted
+            so a typed-but-unsent question survives a collapse. */}
+        {dealQaEnabled && result && values && !isLoading ? (
+          <DrillRow
+            id="deal-qa"
+            title="Ask about this deal"
+            icon={<MessageCircle className="size-4" />}
+            summary={rowSummaries["deal-qa"]}
+            open={openRows["deal-qa"]}
+            onOpenChange={(open) => setRowOpen("deal-qa", open)}
+            keepMounted
+          >
+            <div className="space-y-4">
+              <DealSummaryCard values={values} context={dealQaContext} />
+              <DealQaPanel values={values} context={dealQaContext} />
+            </div>
+          </DrillRow>
+        ) : null}
+
+        {/* Deal notes - last row, saved deals only. keepMounted so the
+            panel's first-mount notes fetch still fires when the saved
+            deal loads (not on first row open), exactly as before.
+            Due-diligence + documents live in the dashboard deal
+            workspace (/dashboard/saved-analyses/[id]). */}
+        {isExistingSavedDeal && savedDealId ? (
+          <DrillRow
+            id="notes"
+            title="Notes"
+            icon={<NotebookPen className="size-4" />}
+            summary={rowSummaries.notes}
+            open={openRows.notes}
+            onOpenChange={(open) => setRowOpen("notes", open)}
+            keepMounted
+          >
+            <DealNotesPanel savedDealId={savedDealId} />
+          </DrillRow>
+        ) : null}
+      </DrillLedger>
     </div>
   );
 }
