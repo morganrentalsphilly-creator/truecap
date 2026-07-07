@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { UserDefaultsCard } from "@/components/settings/user-defaults-card";
 import { BuyBoxesCard } from "@/components/settings/buy-boxes-card";
 import { RateAlertsToggle } from "@/components/settings/rate-alerts-toggle";
+import { WeeklySummaryToggle } from "@/components/settings/weekly-summary-toggle";
 import { getEntitlementsForUser, hasPlanFeature } from "@/lib/entitlements";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
@@ -44,6 +45,11 @@ export default async function SettingsPage() {
         {/* Deal rate alerts — opt-in for the weekly rate-alert email.
             Self-hides until the schema migration is applied. */}
         <RateAlertsToggle />
+
+        {/* Weekly portfolio summary — opt-in for the weekly summary email
+            (its own consent surface, separate from rate alerts).
+            Self-hides until the weekly_summary migration is applied. */}
+        <WeeklySummaryToggle />
 
         {/* Branding card — links to the dedicated /settings/branding page.
             Shown for everyone (Pro link + Pro badge for unentitled users
