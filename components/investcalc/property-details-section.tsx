@@ -67,8 +67,9 @@ export function PropertyDetailsSection({
       <Label htmlFor="address" className="text-sm font-medium text-foreground mb-1 block">
         Property Address
       </Label>
-      {/* First-run signpost (card chrome only — the hero carries its own
-          one-line "Type an address — we fill the rest." signpost instead).
+      {/* First-run signpost (card chrome only — on the analyzer the page
+          heading carries the one-line "Type an address — we fill the rest."
+          signpost instead).
           Frames the address as the fast path (it auto-fills the deal)
           WITHOUT implying it's the only way in — price + rent alone already
           form a live verdict below. Copy is honest about area rent (HUD

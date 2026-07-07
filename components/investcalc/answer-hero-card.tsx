@@ -50,6 +50,69 @@ import { cashFlowSubLabel } from "./metrics-band";
 
 type RecommendationVariant = "strong-buy" | "buy" | "neutral" | "risky" | "avoid";
 
+function variantForRecommendation(recommendation: string): RecommendationVariant {
+  return recommendation === "Strong Buy"
+    ? "strong-buy"
+    : recommendation === "Buy"
+      ? "buy"
+      : recommendation === "Neutral"
+        ? "neutral"
+        : recommendation === "Risky"
+          ? "risky"
+          : "avoid";
+}
+
+/** Per-variant chrome shared by the Deal Score card and the score-breakdown
+ *  receipts (which render inside the Recommendation card's single "Why this
+ *  verdict?" door — Choose-TrueCap Phase B, finding 4). Module-scope so the
+ *  two surfaces can never drift. */
+const RECOMMENDATION_STYLES: Record<
+  RecommendationVariant,
+  {
+    scoreRing: string;
+    scoreText: string;
+    riskChip: string;
+    metricCell: string;
+    descriptionText: string;
+  }
+> = {
+  "strong-buy": {
+    scoreRing: "ring-[var(--brand-green)]/40 bg-[var(--brand-green-light)]",
+    scoreText: "text-[var(--brand-green)]",
+    riskChip: "bg-emerald-100 text-emerald-700 border-emerald-200",
+    metricCell: "bg-emerald-50 border border-emerald-100",
+    descriptionText: "text-emerald-800",
+  },
+  buy: {
+    scoreRing: "ring-primary/35 bg-[var(--brand-blue-light)]",
+    scoreText: "text-primary",
+    riskChip: "bg-blue-100 text-blue-700 border-blue-200",
+    metricCell: "bg-blue-50 border border-blue-100",
+    descriptionText: "text-blue-800",
+  },
+  neutral: {
+    scoreRing: "ring-amber-300/50 bg-amber-50",
+    scoreText: "text-amber-700",
+    riskChip: "bg-amber-100 text-amber-700 border-amber-200",
+    metricCell: "bg-amber-50 border border-amber-100",
+    descriptionText: "text-amber-800",
+  },
+  risky: {
+    scoreRing: "ring-orange-300/50 bg-orange-50",
+    scoreText: "text-orange-700",
+    riskChip: "bg-orange-100 text-orange-700 border-orange-200",
+    metricCell: "bg-orange-50 border border-orange-100",
+    descriptionText: "text-orange-800",
+  },
+  avoid: {
+    scoreRing: "ring-red-300/50 bg-red-50",
+    scoreText: "text-red-700",
+    riskChip: "bg-red-100 text-red-700 border-red-200",
+    metricCell: "bg-red-50 border border-red-100",
+    descriptionText: "text-red-800",
+  },
+};
+
 function buildRecommendationModel(dealScoreResult: DealScoreActionResult | null): {
   label: string;
   description: string;
@@ -136,8 +199,6 @@ function DealScoreCard({
   isAnalysisLoading,
   isDealScoreLoading,
   dealScoreResult,
-  propertyType,
-  isCashPurchase,
   isAppreciationPlay,
   benchmarkSublabel,
 }: {
@@ -147,13 +208,6 @@ function DealScoreCard({
    *  My Deals, compare, PDF, and share surfaces show. Lens-free, so this card and
    *  the Recommendation card beside it always agree with every other surface. */
   dealScoreResult: DealScoreActionResult | null;
-  /** Property type - passed through so the cash-flow tier max + label
-   *  can branch correctly for owner-occupant deals (different bands). */
-  propertyType?: "single-family" | "multi-family" | "owner-occupant";
-  /** True if the deal has no debt service (100% down). Used to
-   *  relabel the DSCR breakdown tile, which otherwise reads
-   *  "Above 1.25" - confusing alongside the MetricCard's "Cash purchase". */
-  isCashPurchase?: boolean;
   /** True when the deal scores as an appreciation play (strong projected
    *  long-term return + non-negative after-tax cash flow). Surfaces a chip on
    *  the score so a Neutral verdict on a red year-1 deal is self-explanatory at
@@ -198,7 +252,87 @@ function DealScoreCard({
   // dealScoreResult is the canonical Balanced score from the parent (lens-free),
   // so this card, the Recommendation card beside it, and every other surface
   // (dashboard, My Deals, compare, PDF, share) always agree.
-  const { score, riskLevel, recommendation, breakdown } = dealScoreResult.data;
+  const { score, riskLevel, recommendation } = dealScoreResult.data;
+  const activeStyle = RECOMMENDATION_STYLES[variantForRecommendation(recommendation)];
+
+  return (
+    <div className="bg-card rounded-2xl border border-border p-4 sm:p-6">
+      <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2">
+        Deal Score
+      </p>
+      {/* The investor-lens toggle previously lived here; it moved into the
+          metrics band header (Phase 2) so the lens sits beside the metric
+          tiles it re-curates. */}
+      <div className="flex items-center justify-between gap-3 mb-3">
+        <div
+          className={cn(
+            "w-20 h-20 rounded-2xl ring-2 flex flex-col items-center justify-center shadow-sm",
+            activeStyle.scoreRing
+          )}
+        >
+          <p className={cn("font-mono text-4xl leading-none font-extrabold tabular-nums", activeStyle.scoreText)}>{score}</p>
+        </div>
+        {/* The verdict WORD lives once, as the Recommendation card's headline
+            (they always agree - both come from the canonical Balanced score).
+            This card owns the NUMBER; only the risk chip + appreciation cue
+            stay here, so a phone user never reconciles two identical labels. */}
+        <div className="flex flex-col items-end gap-1">
+          <span
+            className={cn(
+              "px-2.5 py-0.5 rounded-full border text-xs font-semibold",
+              activeStyle.riskChip
+            )}
+          >
+            {riskLevel}
+          </span>
+          {isAppreciationPlay ? (
+            <span className="inline-flex items-center gap-1 rounded-full border border-[var(--brand-green)]/30 bg-[var(--brand-green-light)] px-2 py-0.5 text-[10px] font-bold text-[var(--brand-green)]">
+              <TrendingUp aria-hidden className="size-3" />
+              Appreciation play
+            </span>
+          ) : null}
+        </div>
+      </div>
+      {/* Benchmark sublabel - the deal's cash flow against the same bands
+          the Monthly Cash Flow tile uses, directly under the score so the
+          0-100 number gets a plain-English yardstick. */}
+      {benchmarkSublabel ? (
+        <p className="-mt-1 mb-2 text-[11px] leading-snug text-muted-foreground">
+          {benchmarkSublabel}
+        </p>
+      ) : null}
+      {/* ONE "Why" door (Choose-TrueCap Phase B, finding 4): this card's
+          "Why this score?" disclosure merged into the Recommendation card's
+          "Why this verdict?" <details> — the subscore breakdown renders
+          there (ScoreBreakdownReceipts), stacked under the narrative, so
+          the answer hero has a single adjacent Why affordance. */}
+    </div>
+  );
+}
+
+/**
+ * Score-breakdown receipts — the per-subscore tiles + the "how the number
+ * adds up" box that used to live behind the Deal Score card's own
+ * "Why this score?" disclosure. Now rendered inside the Recommendation
+ * card's single "Why this verdict?" door (narrative first, receipts second).
+ * Content verbatim; renders null unless a pro-tier score is loaded.
+ */
+function ScoreBreakdownReceipts({
+  dealScoreResult,
+  propertyType,
+  isCashPurchase,
+}: {
+  dealScoreResult: DealScoreActionResult | null;
+  /** Property type - the cash-flow tier max + label branch for
+   *  owner-occupant deals (different bands). */
+  propertyType?: "single-family" | "multi-family" | "owner-occupant";
+  /** True if the deal has no debt service (100% down). Used to
+   *  relabel the DSCR breakdown tile, which otherwise reads
+   *  "Above 1.25" - confusing alongside the MetricCard's "Cash purchase". */
+  isCashPurchase?: boolean;
+}) {
+  if (!dealScoreResult?.ok || dealScoreResult.tier !== "pro") return null;
+  const { score, recommendation, breakdown } = dealScoreResult.data;
   // Owner-occupant deals use different cash-flow bands and a 30-point
   // max (vs investor 25). Branch the explanation labels accordingly so
   // the breakdown matches the engine's actual scoring tiers.
@@ -260,190 +394,77 @@ function DealScoreCard({
             ? "Moderate penalty - review CapEx, age, vacancy"
             : "Heavy penalty - multiple risk factors stacking",
   } as const;
-  const recommendationVariant: RecommendationVariant =
-    recommendation === "Strong Buy"
-      ? "strong-buy"
-      : recommendation === "Buy"
-        ? "buy"
-        : recommendation === "Neutral"
-          ? "neutral"
-          : recommendation === "Risky"
-            ? "risky"
-            : "avoid";
-
-  const recommendationStyles: Record<
-    RecommendationVariant,
-    {
-      scoreRing: string;
-      scoreText: string;
-      riskChip: string;
-      metricCell: string;
-      descriptionText: string;
-    }
-  > = {
-    "strong-buy": {
-      scoreRing: "ring-[var(--brand-green)]/40 bg-[var(--brand-green-light)]",
-      scoreText: "text-[var(--brand-green)]",
-      riskChip: "bg-emerald-100 text-emerald-700 border-emerald-200",
-      metricCell: "bg-emerald-50 border border-emerald-100",
-      descriptionText: "text-emerald-800",
-    },
-    buy: {
-      scoreRing: "ring-primary/35 bg-[var(--brand-blue-light)]",
-      scoreText: "text-primary",
-      riskChip: "bg-blue-100 text-blue-700 border-blue-200",
-      metricCell: "bg-blue-50 border border-blue-100",
-      descriptionText: "text-blue-800",
-    },
-    neutral: {
-      scoreRing: "ring-amber-300/50 bg-amber-50",
-      scoreText: "text-amber-700",
-      riskChip: "bg-amber-100 text-amber-700 border-amber-200",
-      metricCell: "bg-amber-50 border border-amber-100",
-      descriptionText: "text-amber-800",
-    },
-    risky: {
-      scoreRing: "ring-orange-300/50 bg-orange-50",
-      scoreText: "text-orange-700",
-      riskChip: "bg-orange-100 text-orange-700 border-orange-200",
-      metricCell: "bg-orange-50 border border-orange-100",
-      descriptionText: "text-orange-800",
-    },
-    avoid: {
-      scoreRing: "ring-red-300/50 bg-red-50",
-      scoreText: "text-red-700",
-      riskChip: "bg-red-100 text-red-700 border-red-200",
-      metricCell: "bg-red-50 border border-red-100",
-      descriptionText: "text-red-800",
-    },
-  };
-  const activeStyle = recommendationStyles[recommendationVariant];
+  const metricCell = RECOMMENDATION_STYLES[variantForRecommendation(recommendation)].metricCell;
 
   return (
-    <div className="bg-card rounded-2xl border border-border p-4 sm:p-6">
-      <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2">
-        Deal Score
-      </p>
-      {/* The investor-lens toggle previously lived here; it moved into the
-          metrics band header (Phase 2) so the lens sits beside the metric
-          tiles it re-curates. */}
-      <div className="flex items-center justify-between gap-3 mb-3">
-        <div
-          className={cn(
-            "w-20 h-20 rounded-2xl ring-2 flex flex-col items-center justify-center shadow-sm",
-            activeStyle.scoreRing
-          )}
-        >
-          <p className={cn("font-mono text-4xl leading-none font-extrabold tabular-nums", activeStyle.scoreText)}>{score}</p>
-        </div>
-        {/* The verdict WORD lives once, as the Recommendation card's headline
-            (they always agree - both come from the canonical Balanced score).
-            This card owns the NUMBER; only the risk chip + appreciation cue
-            stay here, so a phone user never reconciles two identical labels. */}
-        <div className="flex flex-col items-end gap-1">
-          <span
-            className={cn(
-              "px-2.5 py-0.5 rounded-full border text-xs font-semibold",
-              activeStyle.riskChip
-            )}
-          >
-            {riskLevel}
-          </span>
-          {isAppreciationPlay ? (
-            <span className="inline-flex items-center gap-1 rounded-full border border-[var(--brand-green)]/30 bg-[var(--brand-green-light)] px-2 py-0.5 text-[10px] font-bold text-[var(--brand-green)]">
-              <TrendingUp aria-hidden className="size-3" />
-              Appreciation play
-            </span>
-          ) : null}
-        </div>
+    <div className="space-y-3">
+      <div className="grid grid-cols-2 gap-2 text-xs">
+        <ScoreBreakdownTile
+          label="Cash flow"
+          value={breakdown.cashFlowScore}
+          max={isOwnerOccupant ? 30 : 22}
+          explanation={breakdownExplanations.cashFlow}
+          cellClass={metricCell}
+        />
+        <ScoreBreakdownTile
+          label="Cash-on-cash"
+          value={breakdown.cocScore}
+          max={20}
+          explanation={breakdownExplanations.coc}
+          cellClass={metricCell}
+        />
+        <ScoreBreakdownTile
+          label="Cap rate"
+          value={breakdown.capRateScore}
+          max={16}
+          explanation={breakdownExplanations.capRate}
+          cellClass={metricCell}
+        />
+        <ScoreBreakdownTile
+          label="DSCR"
+          value={breakdown.dscrScore}
+          max={17}
+          explanation={breakdownExplanations.dscr}
+          cellClass={metricCell}
+        />
+        <ScoreBreakdownTile
+          label="Total return (10-yr)"
+          value={breakdown.totalReturnScore}
+          max={25}
+          explanation={breakdownExplanations.totalReturn}
+          cellClass={metricCell}
+          spanFull
+        />
+        <ScoreBreakdownTile
+          label="Risk penalty"
+          value={breakdown.riskPenalty}
+          max={0}
+          explanation={breakdownExplanations.risk}
+          cellClass={metricCell}
+          spanFull
+        />
       </div>
-      {/* Benchmark sublabel - the deal's cash flow against the same bands
-          the Monthly Cash Flow tile uses, directly under the score so the
-          0-100 number gets a plain-English yardstick. */}
-      {benchmarkSublabel ? (
-        <p className="-mt-1 mb-2 text-[11px] leading-snug text-muted-foreground">
-          {benchmarkSublabel}
+      <div className="rounded-xl border border-border bg-muted/30 p-3 text-xs leading-relaxed text-foreground/80">
+        <p>
+          Score is the sum of cash flow ({breakdown.cashFlowScore}), CoC ({breakdown.cocScore}),
+          cap rate ({breakdown.capRateScore}), DSCR ({breakdown.dscrScore}), and 10-year total
+          return ({breakdown.totalReturnScore}),
+          {breakdown.riskPenalty < 0 ? <> minus a risk penalty of {Math.abs(breakdown.riskPenalty)}</> : null}
+          {" "}={" "}
+          <span className="font-bold text-foreground">{score} / 100</span>.
+          {" "}Bands: <strong>75+</strong> Strong Buy, <strong>55–74</strong> Buy,
+          {" "}<strong>35–54</strong> Neutral, <strong>18–34</strong> Risky,
+          {" "}<strong>&lt;18</strong> Avoid.
+          {" "}This is the same score on every screen - your investor lens reorders which
+          metrics lead, but never changes the number.
         </p>
-      ) : null}
-      {/* Plain-English verdict lives once, in the Recommendation card beside
-          this one. The per-component breakdown moved INSIDE "Why this score?"
-          so the card stays scannable by default - score + verdict + lens —
-          and the receipts are one tap away. Native <details> = zero-JS + a11y. */}
-      <details className="group mt-3">
-        <summary className="min-h-11 py-2 -my-1 cursor-pointer text-[11px] font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground select-none list-none flex items-center gap-1.5">
-          <ChevronRight aria-hidden className="size-3.5 shrink-0 transition-transform group-open:rotate-90" />
-          Why this score?
-        </summary>
-        <div className="mt-2 space-y-3">
-          <div className="grid grid-cols-2 gap-2 text-xs">
-            <ScoreBreakdownTile
-              label="Cash flow"
-              value={breakdown.cashFlowScore}
-              max={isOwnerOccupant ? 30 : 22}
-              explanation={breakdownExplanations.cashFlow}
-              cellClass={activeStyle.metricCell}
-            />
-            <ScoreBreakdownTile
-              label="Cash-on-cash"
-              value={breakdown.cocScore}
-              max={20}
-              explanation={breakdownExplanations.coc}
-              cellClass={activeStyle.metricCell}
-            />
-            <ScoreBreakdownTile
-              label="Cap rate"
-              value={breakdown.capRateScore}
-              max={16}
-              explanation={breakdownExplanations.capRate}
-              cellClass={activeStyle.metricCell}
-            />
-            <ScoreBreakdownTile
-              label="DSCR"
-              value={breakdown.dscrScore}
-              max={17}
-              explanation={breakdownExplanations.dscr}
-              cellClass={activeStyle.metricCell}
-            />
-            <ScoreBreakdownTile
-              label="Total return (10-yr)"
-              value={breakdown.totalReturnScore}
-              max={25}
-              explanation={breakdownExplanations.totalReturn}
-              cellClass={activeStyle.metricCell}
-              spanFull
-            />
-            <ScoreBreakdownTile
-              label="Risk penalty"
-              value={breakdown.riskPenalty}
-              max={0}
-              explanation={breakdownExplanations.risk}
-              cellClass={activeStyle.metricCell}
-              spanFull
-            />
-          </div>
-          <div className="rounded-xl border border-border bg-muted/30 p-3 text-xs leading-relaxed text-foreground/80">
-            <p>
-              Score is the sum of cash flow ({breakdown.cashFlowScore}), CoC ({breakdown.cocScore}),
-              cap rate ({breakdown.capRateScore}), DSCR ({breakdown.dscrScore}), and 10-year total
-              return ({breakdown.totalReturnScore}),
-              {breakdown.riskPenalty < 0 ? <> minus a risk penalty of {Math.abs(breakdown.riskPenalty)}</> : null}
-              {" "}={" "}
-              <span className="font-bold text-foreground">{score} / 100</span>.
-              {" "}Bands: <strong>75+</strong> Strong Buy, <strong>55–74</strong> Buy,
-              {" "}<strong>35–54</strong> Neutral, <strong>18–34</strong> Risky,
-              {" "}<strong>&lt;18</strong> Avoid.
-              {" "}This is the same score on every screen - your investor lens reorders which
-              metrics lead, but never changes the number.
-            </p>
-          <p className="mt-2 text-muted-foreground">
-            Looking to improve the score? The largest movers are typically (1) a lower
-            purchase price (lifts cap rate and CoC together), (2) better financing terms
-            (lifts DSCR + monthly cash flow), or (3) reducing CapEx/maintenance assumptions
-            for a younger building.
-          </p>
-          </div>
-        </div>
-      </details>
+        <p className="mt-2 text-muted-foreground">
+          Looking to improve the score? The largest movers are typically (1) a lower
+          purchase price (lifts cap rate and CoC together), (2) better financing terms
+          (lifts DSCR + monthly cash flow), or (3) reducing CapEx/maintenance assumptions
+          for a younger building.
+        </p>
+      </div>
     </div>
   );
 }
@@ -524,6 +545,11 @@ export function AnswerHeroCard({
   // compare, PDF, and share surfaces. The lens never changes it.
   const recommendation = buildRecommendationModel(dealScoreResult);
   const isCashPurchase = Boolean(result && result.monthlyPayment <= 0);
+  // Pro-tier score loaded → the merged "Why this verdict?" door also stacks
+  // the subscore receipts (free tier / anon: narrative only, as before).
+  const hasScoreBreakdown = Boolean(
+    dealScoreResult?.ok && dealScoreResult.tier === "pro"
+  );
   // Cash-flow yardstick under the score - reuses the Monthly Cash Flow
   // tile's exact benchmark label so the two can never disagree.
   const benchmarkSublabel =
@@ -537,8 +563,6 @@ export function AnswerHeroCard({
         isAnalysisLoading={isLoading}
         isDealScoreLoading={isLoadingDealScore}
         dealScoreResult={dealScoreResult}
-        propertyType={propertyType}
-        isCashPurchase={isCashPurchase}
         isAppreciationPlay={isAppreciationPlay}
         benchmarkSublabel={benchmarkSublabel}
       />
@@ -646,28 +670,52 @@ export function AnswerHeroCard({
             <p className="text-sm text-muted-foreground mb-4">
               {recommendation.description}
             </p>
-            {/* Plain-English "why" — per-deal, free-tier safe. Progressive
+            {/* THE one "Why" door (Phase B, finding 4). Progressive
                 disclosure: the verdict + one-line description stay the calm
-                first read; tapping reveals the metric-by-metric reasoning
-                a beginner needs to actually trust (and learn from) the call. */}
-            {verdictNarrative && verdictNarrative.sentences.length > 0 && (
+                first read; ONE tap reveals BOTH the plain-English narrative
+                (per-deal, free-tier safe) AND the subscore receipts that
+                used to hide behind the Deal Score card's separate "Why this
+                score?" disclosure — narrative first, breakdown stacked
+                below. Native <details>/<summary> keeps the surviving
+                disclosure's keyboard + a11y behavior (Enter/Space toggles,
+                open state exposed to AT). */}
+            {(verdictNarrative && verdictNarrative.sentences.length > 0) ||
+            hasScoreBreakdown ? (
               <details className="group mb-4 -mt-1">
-                <summary className="flex min-h-9 cursor-pointer list-none items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground">
+                {/* min-h-11 (44px): the score breakdown's ONLY reach path
+                    now routes through this door, and the retired "Why this
+                    score?" summary deliberately carried the 44px tap-target
+                    standard (changelog a11y fix) — carry it forward. */}
+                <summary className="flex min-h-11 cursor-pointer list-none items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground">
                   <ChevronRight
                     aria-hidden
                     className="size-3.5 shrink-0 transition-transform group-open:rotate-90"
                   />
                   Why this verdict?
                 </summary>
-                <ul className="mt-1.5 space-y-1.5 pl-1">
-                  {verdictNarrative.sentences.map((s, i) => (
-                    <li key={i} className="text-sm leading-relaxed text-foreground/80">
-                      {s}
-                    </li>
-                  ))}
-                </ul>
+                {verdictNarrative && verdictNarrative.sentences.length > 0 ? (
+                  <ul className="mt-1.5 space-y-1.5 pl-1">
+                    {verdictNarrative.sentences.map((s, i) => (
+                      <li key={i} className="text-sm leading-relaxed text-foreground/80">
+                        {s}
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+                {hasScoreBreakdown ? (
+                  <div className="mt-3 space-y-2">
+                    <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+                      Score breakdown
+                    </p>
+                    <ScoreBreakdownReceipts
+                      dealScoreResult={dealScoreResult}
+                      propertyType={propertyType}
+                      isCashPurchase={isCashPurchase}
+                    />
+                  </div>
+                ) : null}
               </details>
-            )}
+            ) : null}
             {recommendation.tips.length > 0 && (
               <>
                 <p

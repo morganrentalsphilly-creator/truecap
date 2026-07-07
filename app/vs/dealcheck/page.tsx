@@ -238,7 +238,7 @@ export default function VsDealCheckPage() {
             <li><strong>&quot;I want the free tier to actually be useful.&quot;</strong> TrueCap&apos;s free analyzer is the full thing — cap rate, CoC, DSCR, NCF, address auto-fill, every operating expense, all of it. No signup wall, no analysis count limit. Pro adds power (sensitivity, exit scenarios, tax strategy, share links, PDFs) but the underwriting itself is free.</li>
             <li><strong>&quot;I want benchmarks inline, not in a separate doc.&quot;</strong> Every metric tile shows you what tier you&apos;re in (&quot;Above 8% — top quartile&quot;) without leaving the analysis. Pulls from the same engine that drives the score.</li>
             <li><strong>&quot;I run a portfolio.&quot;</strong> Saved deals get a rollup header (total cash flow / weighted cap rate / weighted CoC) — feels like running a book, not a notebook.</li>
-            <li><strong>&quot;I want to understand the score, not just trust it.&quot;</strong> Click &quot;Why this score?&quot; on any analysis and see the contribution from each subscore plus what would move the number.</li>
+            <li><strong>&quot;I want to understand the score, not just trust it.&quot;</strong> Click &quot;Why this verdict?&quot; on any analysis and see the contribution from each subscore plus what would move the number.</li>
           </ul>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
             Prefer to kick the tires on a single metric first? Try the

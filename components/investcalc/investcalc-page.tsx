@@ -3668,9 +3668,13 @@ export function InvestCalcPage({
                 Analyze Your Investment Property
               </h2>
             )}
+            {/* ONE headline (Choose-TrueCap Phase B, finding 3): this page
+                heading IS the hero title now — the hero card below lost its
+                internal "Analyze a deal" title row, and the old
+                "institutional-grade analysis…" subtitle collapsed into the
+                card's one-line signpost so the page reads as a single door. */}
             <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
-              Get institutional-grade analysis with cash flow projections, tax benefits, and risk
-              assessment in seconds.
+              Type an address — we fill the rest.
             </p>
           </div>
           {/* Sample-deal button - anonymous visitors only, before any
@@ -3841,18 +3845,27 @@ export function InvestCalcPage({
           <div className="space-y-5">
             {/* Guided step rail (AN-1) - sticky orientation + jump navigation
                 over the existing form. Additive: reads values + scrolls only;
-                never gates input or changes the manual run flow. */}
-            <AnalyzerStepRail
-              steps={analyzerSteps}
-              activeStepId={activeStep}
-              onNavigate={handleStepNavigate}
-              // Desktop-only (BROWSER-5, per the Verdict Ledger blueprint):
-              // at 375px the five pills clipped mid-circle with no scroll
-              // affordance, and two pre-checked green steps on a blank form
-              // read as leftover chrome above the hero. Sticky from sm: —
-              // on phones the bottom Run bar anchors the flow anyway.
-              className="hidden sm:sticky sm:top-2 sm:z-20 sm:block"
-            />
+                never gates input or changes the manual run flow.
+                RESULTS-PHASE ONLY (Choose-TrueCap Phase B, finding 2): the
+                pre-fill rail state was incoherent (green checks on untouched
+                Financing/Expenses because defaults exist, numbers elsewhere,
+                a cryptic "Decision" step) and the 3-field hero + assumptions
+                chips already carry input-phase wayfinding. Post-run the rail
+                stays: it's the jump-nav between the form sections and the
+                Decision anchor while refining a live result. The chips keep
+                using handleStepNavigate's mechanics either way. */}
+            {!isInputPhase && (
+              <AnalyzerStepRail
+                steps={analyzerSteps}
+                activeStepId={activeStep}
+                onNavigate={handleStepNavigate}
+                // Desktop-only (BROWSER-5, per the Verdict Ledger blueprint):
+                // at 375px the five pills clipped mid-circle with no scroll
+                // affordance. Sticky from sm: — on phones the bottom Run bar
+                // anchors the flow anyway.
+                className="hidden sm:sticky sm:top-2 sm:z-20 sm:block"
+              />
+            )}
 
             {/* DESKTOP COCKPIT (input phase, lg+ only) — two-column grid per
                 the redesign blueprint §2: LEFT (3/5 ≈ 726px at max-w-7xl) =
@@ -3894,27 +3907,15 @@ export function InvestCalcPage({
                 property-type + template card moved into the assumptions
                 strip's panel region below (#step-type). Year built is NOT
                 here — it lives in the "Property extras" panel. */}
+            {/* The card's internal title row ("Analyze a deal" + signpost)
+                collapsed into the page heading above (Phase B, finding 3) —
+                one headline, one signpost. aria-label keeps the landmark
+                named for screen readers now that no heading lives inside. */}
             <section
               id="step-property"
-              aria-labelledby="analyze-deal-heading"
+              aria-label="Analyze a deal"
               className="scroll-mt-24 bg-card rounded-2xl border border-border shadow-sm p-6 lg:col-span-3 lg:col-start-1"
             >
-              <div className="mb-5">
-                <h2
-                  id="analyze-deal-heading"
-                  className="flex items-center gap-2 font-semibold text-sm text-foreground"
-                >
-                  <Home className="w-4 h-4 text-primary" aria-hidden />
-                  Analyze a deal
-                </h2>
-                {/* One-line signpost — replaces the 2-line "Fastest start"
-                    copy (the enrichment receipt + strip chips now carry the
-                    what-got-filled detail). */}
-                <p className="mt-1 text-[11px] leading-snug text-muted-foreground">
-                  Type an address — we fill the rest.
-                </p>
-              </div>
-
               <div className="space-y-6">
                 <PropertyDetailsSection
                   form={form}
