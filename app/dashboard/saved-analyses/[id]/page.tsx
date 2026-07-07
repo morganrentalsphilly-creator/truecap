@@ -25,6 +25,7 @@ import { NextActionBanner } from "@/components/investcalc/next-action-banner";
 import { DealAgingNudge } from "@/components/investcalc/deal-aging-nudge";
 import { DealStageSelect } from "@/components/investcalc/deal-stage-select";
 import { OpenFullAnalysisButton } from "@/components/investcalc/open-saved-deal-in-analyzer";
+import { RefreshOnReturn } from "@/components/investcalc/refresh-on-return";
 import { DealWorkspaceAnchorChips } from "@/components/investcalc/deal-workspace-anchor-chips";
 import { OwnedEquityCard } from "@/components/investcalc/owned-equity-card";
 import { nextActionForDeal } from "@/lib/next-action";
@@ -435,6 +436,10 @@ export default async function DealWorkspacePage({
 
   return (
     <div className="flex-1 min-w-0 flex flex-col">
+      {/* "Open full analysis" edits happen in another tab — re-fetch the
+          workspace header when the user tabs back so it shows the just-saved
+          underwrite. */}
+      <RefreshOnReturn />
       <Topbar
         displayName={displayName}
         email={user.email ?? ""}

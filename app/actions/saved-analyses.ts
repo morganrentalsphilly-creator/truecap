@@ -47,12 +47,22 @@ export type SaveDealResult =
         | "VALIDATION_ERROR"
         | "ENTITLEMENT_SAVE"
         | "DUPLICATE_ADDRESS"
+        // Update path: the form's address no longer matches the saved deal
+        // (the caller must choose save-as-new vs. allowAddressChange).
+        | "ADDRESS_CHANGED"
+        // Update path: the row behind existingId is gone (deleted/archived
+        // elsewhere). The caller must detach the id and offer save-as-new —
+        // never silently fall through to an insert.
+        | "DEAL_DELETED"
         | "SERVER_ERROR";
       message?: string;
-      // DUPLICATE_ADDRESS (insert path) only: the user's own colliding saved
+      // DUPLICATE_ADDRESS (insert path): the user's own colliding saved
       // deal, so the client can offer "update it" / "save as new scenario"
-      // instead of a dead-end toast. Optional + additive - existing consumers
-      // that only read code/message keep working unchanged.
+      // instead of a dead-end toast. ADDRESS_CHANGED: the loaded deal the
+      // update targeted (existingTitle names its stored address) so the
+      // chooser can say which deal the form diverged from. Optional +
+      // additive - existing consumers that only read code/message keep
+      // working unchanged.
       existingId?: string;
       existingTitle?: string;
     };
@@ -240,9 +250,13 @@ export async function saveDealAction(
   provenanceInput?: unknown,
   // saveAsNewScenario: explicit choice from the duplicate-address dialog -
   // skip the duplicate gate and insert a second analysis for the same
-  // address, titled "<address> — Scenario 2" (3, 4, …). Defaults to the
-  // pre-existing behavior, so callers that omit it are unchanged.
-  options?: { saveAsNewScenario?: boolean }
+  // address, titled "<address> — Scenario 2" (3, 4, …).
+  // allowAddressChange: explicit choice from the address-changed dialog -
+  // the update proceeds even though the form's address differs from the
+  // saved deal's, moving the row (address column included) to the new
+  // address. Both default to the pre-existing behavior, so callers that
+  // omit them are unchanged.
+  options?: { saveAsNewScenario?: boolean; allowAddressChange?: boolean }
 ): Promise<SaveDealResult> {
   const supabase = await createServerSupabaseClient();
   const {
@@ -312,8 +326,20 @@ export async function saveDealAction(
   // enrich-property filled (and whether the user overrode them); we compute
   // the High/Medium/Low level here from that + completeness, and persist it.
   const provenanceParsed = saveProvenanceSchema.safeParse(provenanceInput);
+  const provenanceFields = provenanceParsed.success ? provenanceParsed.data : undefined;
+  // "Did the client actually attribute any field?" — an empty/absent input
+  // must not be treated as "everything is manual now" on the update path
+  // below: a reopened deal's enrichment capture doesn't survive the edit
+  // handoff, so recomputing from it would silently downgrade the stored
+  // confidence on every re-save.
+  const provenanceProvided = Boolean(
+    provenanceFields &&
+      (provenanceFields.monthlyRent ||
+        provenanceFields.interestRate ||
+        provenanceFields.propertyTaxPct)
+  );
   const dataConfidence = buildDataConfidence(
-    provenanceParsed.success ? (provenanceParsed.data as EnrichmentProvenanceInput | undefined) : undefined,
+    provenanceFields as EnrichmentProvenanceInput | undefined,
     {
       hasRent: result.monthlyRentalIncome > 0,
       hasPrice: (sanitizedValues.purchasePrice ?? 0) > 0,
@@ -370,7 +396,7 @@ export async function saveDealAction(
   if (candidateExistingId) {
     const { data: existing, error: existingErr } = await supabase
       .from("saved_analyses")
-      .select("id, address, title")
+      .select("id, address, title, data_confidence")
       .eq("id", candidateExistingId)
       .eq("user_id", user.id)
       .is("deleted_at", null)
@@ -380,44 +406,77 @@ export async function saveDealAction(
       return { ok: false, code: "SERVER_ERROR", message: existingErr.message };
     }
 
-    if (existing) {
-      const canUpdateSavedDeal = await hasPaidPlanSubscription(supabase, user.id);
-      if (!canUpdateSavedDeal) {
-        return {
-          ok: false,
-          code: "ENTITLEMENT_SAVE",
-          message: "Upgrade required to update saved analyses.",
-        };
-      }
-
-      if ((existing.address ?? "").trim().toLowerCase() !== addressTrimmed.toLowerCase()) {
-        return {
-          ok: false,
-          code: "DUPLICATE_ADDRESS",
-          message: "This saved analysis can only be updated while keeping the same property address.",
-        };
-      }
-
-      // Keep the stored title on update - scenario rows carry a
-      // "— Scenario N" suffix that recomputing from the address would
-      // clobber. For every other row title === the derived title (the
-      // address can't change here), so this is a no-op.
-      const preservedTitle = dbString(existing.title)?.trim();
-      const { data, error } = await supabase
-        .from("saved_analyses")
-        .update(preservedTitle ? { ...payload, title: preservedTitle } : payload)
-        .eq("id", existing.id)
-        .eq("user_id", user.id)
-        .is("deleted_at", null)
-        .select("id")
-        .single();
-
-      if (error) {
-        return toServerErrorResult(error, "saved-analyses");
-      }
-
-      return { ok: true, id: data.id, mode: "updated" };
+    if (!existing) {
+      // The targeted row is gone (deleted or archived in another tab /
+      // My Deals). Never fall through to the insert path here - a silent
+      // re-insert resurrects a deal the user just deleted, and a
+      // same-address sibling would hijack the duplicate chooser. The
+      // client detaches its stale id and offers save-as-new explicitly.
+      return {
+        ok: false,
+        code: "DEAL_DELETED",
+        message: "This saved deal was deleted or archived, so it can't be updated.",
+      };
     }
+
+    const canUpdateSavedDeal = await hasPaidPlanSubscription(supabase, user.id);
+    if (!canUpdateSavedDeal) {
+      return {
+        ok: false,
+        code: "ENTITLEMENT_SAVE",
+        message: "Upgrade required to update saved analyses.",
+      };
+    }
+
+    const addressChanged =
+      (existing.address ?? "").trim().toLowerCase() !== addressTrimmed.toLowerCase();
+    if (addressChanged && options?.allowAddressChange !== true) {
+      // The form's address diverged from the saved deal's. Updating in
+      // place would silently rewrite the old property's row, so the caller
+      // must pick a path: save as a new deal, or re-call with
+      // allowAddressChange to move this deal to the new address.
+      return {
+        ok: false,
+        code: "ADDRESS_CHANGED",
+        message:
+          "The property address no longer matches this saved deal. Save it as a new deal, or update the saved deal's address.",
+        existingId: existing.id,
+        existingTitle: dbString(existing.title) ?? undefined,
+      };
+    }
+
+    // Keep the stored title on update - scenario rows carry a
+    // "— Scenario N" suffix that recomputing from the address would
+    // clobber. When the caller explicitly changed the address
+    // (allowAddressChange), the derived title (the new address) must win
+    // instead - preserving the old-address title would misname the deal
+    // in My Deals.
+    const preservedTitle = addressChanged ? undefined : dbString(existing.title)?.trim();
+    // Keep the stored data_confidence when this save carries no provenance:
+    // the recompute would only ever downgrade (all sources read as manual),
+    // erasing the HUD/FRED attribution the deal earned at first save. A save
+    // that DOES attribute fields re-earns its level the normal way.
+    const existingDataConfidence = asRecord(
+      (existing as Record<string, unknown>).data_confidence
+    );
+    const updatePayload =
+      !provenanceProvided && existingDataConfidence
+        ? { ...payload, data_confidence: existingDataConfidence }
+        : payload;
+    const { data, error } = await supabase
+      .from("saved_analyses")
+      .update(preservedTitle ? { ...updatePayload, title: preservedTitle } : updatePayload)
+      .eq("id", existing.id)
+      .eq("user_id", user.id)
+      .is("deleted_at", null)
+      .select("id")
+      .single();
+
+    if (error) {
+      return toServerErrorResult(error, "saved-analyses");
+    }
+
+    return { ok: true, id: data.id, mode: "updated" };
   }
 
   let insertTitle = title;

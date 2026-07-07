@@ -213,6 +213,13 @@ interface AnalysisDashboardProps {
    */
   dealQaEnabled?: boolean;
   saveDealLimitReached?: boolean;
+  /** Client-side saved-deal count + plan limit, so the limit-reached notice
+   *  can say "N of M" and stay visible without hover (the disabled Save
+   *  button's title tooltip never shows on touch devices). Either may be
+   *  absent (anon homepage passes neither) — the notice degrades to the
+   *  plain label. */
+  savedDealCount?: number | null;
+  savedDealLimit?: number | null;
   /** Live data-confidence for the current analysis (computed in the analyzer
    *  from enrich-property provenance). Null hides the badge. */
   dataConfidence?: DataConfidence | null;
@@ -359,6 +366,8 @@ export function AnalysisDashboard({
   isSampleProPreview = false,
   dealQaEnabled = false,
   saveDealLimitReached = false,
+  savedDealCount = null,
+  savedDealLimit = null,
   dataConfidence = null,
   activeTab: activeTabProp,
   activeTabNonce = 0,
@@ -1136,6 +1145,27 @@ export function AnalysisDashboard({
                   text, NOT another button, so the de-densified toolbar stays
                   calm. Gated on canCompareDeals - the same entitlement that
                   gates the sidebar item - so anon/free users see nothing. */}
+              {/* Save-limit notice - the disabled Save button's title tooltip
+                  is desktop-hover-only, so this is the ALWAYS-VISIBLE (mobile
+                  included) explanation + the path to act: archive/delete in
+                  My Deals frees capacity. Muted one-line text, same quiet
+                  register as the triage cross-link below. */}
+              {isSaveLimitLockedByPlan ? (
+                <p className="col-span-full px-1 pt-0.5 text-xs text-muted-foreground">
+                  Saved-deal limit reached
+                  {savedDealCount != null && savedDealLimit != null
+                    ? ` (${savedDealCount} of ${savedDealLimit})`
+                    : ""}{" "}
+                  —{" "}
+                  <Link
+                    href="/dashboard/saved-analyses"
+                    className="inline-flex items-center gap-0.5 font-semibold text-primary hover:underline"
+                  >
+                    manage deals
+                    <ArrowUpRight aria-hidden className="size-3" />
+                  </Link>
+                </p>
+              ) : null}
               {canCompareDeals ? (
                 <p className="col-span-full px-1 pt-0.5 text-xs text-muted-foreground">
                   Screening several listings?{" "}

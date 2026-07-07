@@ -12,6 +12,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 import { PortfolioRollupStrip } from "@/components/dashboard/portfolio-rollup-strip";
+import { RefreshOnReturn } from "@/components/investcalc/refresh-on-return";
 import { Topbar } from "@/components/dashboard/Topbar";
 import { getCompareIdsFromCookie } from "@/app/actions/compare";
 import {
@@ -298,6 +299,9 @@ export default async function DashboardSavedAnalysesPage({
       {/* Natural page scroll (matches compare + templates + the home): the
           shell is min-h-screen with a sticky sidebar, so content flows and the
           BODY scrolls — no fixed-viewport pane, no inner overflow-y-auto. */}
+      {/* "Open Analysis" edits happen in another tab — re-fetch the rows when
+          the user tabs back so the list reflects the just-saved numbers. */}
+      <RefreshOnReturn />
       <div className="flex-1 min-w-0 flex flex-col">
         <Topbar
           displayName={displayName}

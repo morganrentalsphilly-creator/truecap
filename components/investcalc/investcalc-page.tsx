@@ -15,8 +15,18 @@ import {
   Loader2,
   Sparkles,
   Home,
+  CopyPlus,
+  PencilLine,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   investmentFormSchema,
   previewParse,
@@ -131,6 +141,51 @@ type InputTab = "cash-flow" | "projections" | "tax-strategy" | "deal-score";
 const SAVED_ANALYSIS_EDIT_DRAFT_KEY = "truecap_saved_analysis_edit_draft";
 /** Must match SAVED_ANALYSIS_DUPLICATE_DRAFT_KEY in open-saved-deal-in-analyzer.tsx. */
 const SAVED_ANALYSIS_DUPLICATE_DRAFT_KEY = "truecap_saved_analysis_duplicate_draft";
+/** Query params carrying a saved-deal handoff nonce. Must match
+ *  DEAL_EDIT_HANDOFF_PARAM / DEAL_DUPLICATE_HANDOFF_PARAM in
+ *  open-saved-deal-in-analyzer.tsx (constants duplicated, not imported, so
+ *  the static homepage bundle doesn't pull that module in). */
+const DEAL_EDIT_HANDOFF_PARAM = "dealHandoff";
+const DEAL_DUPLICATE_HANDOFF_PARAM = "dealDuplicate";
+
+/**
+ * Consume a one-time saved-deal handoff payload. Nonce path first: the
+ * writer (open-saved-deal-in-analyzer.tsx) stores each payload under its own
+ * `<baseKey>::<nonce>` localStorage key and passes the nonce in the URL, so
+ * concurrent opens can't cross-wire tabs and no shared copy lingers to
+ * resurrect the previous deal on a later plain "/" visit. The un-nonced
+ * shared keys remain readable as a LEGACY fallback for tabs opened by a
+ * previous deploy — always deleted after reading (found or not), because an
+ * unconsumed copy re-opens the old deal on every future "/" visit.
+ */
+function consumeSavedDealHandoffPayload(
+  baseKey: string,
+  nonce: string | null,
+  allowLegacy: boolean
+): string | null {
+  try {
+    if (nonce) {
+      const key = `${baseKey}::${nonce}`;
+      const raw = window.localStorage.getItem(key);
+      window.localStorage.removeItem(key);
+      if (raw) return raw;
+    }
+    // Legacy shared key: only when THIS navigation carries no handoff nonce
+    // param at all — a pre-nonce deploy's tab always arrived at a bare "/".
+    // If a nonce param IS present we're unambiguously on the new scheme, and
+    // reading the (un-nonced) shared key of the OTHER handoff type could
+    // spuriously consume an orphaned legacy payload during the deploy cutover
+    // — e.g. a stale duplicate key firing ahead of the requested edit open.
+    if (!allowLegacy) return null;
+    const legacy =
+      window.sessionStorage.getItem(baseKey) ?? window.localStorage.getItem(baseKey);
+    window.sessionStorage.removeItem(baseKey);
+    window.localStorage.removeItem(baseKey);
+    return legacy;
+  } catch {
+    return null;
+  }
+}
 /**
  * Auto-save key for anonymous / walk-in form drafts. Mobile paid traffic
  * gets distracted constantly (phone rings, tab swap to text), and an
@@ -243,6 +298,12 @@ function buildNewAnalysisDefaults(
     ...mapUserDefaultsToForm(userDefaults),
   };
 }
+
+/** A choice made in the address-changed dialog (save flow, update path):
+ *  "new" inserts the current form as a fresh deal (the loaded saved deal
+ *  stays untouched); "update-address" moves the loaded saved deal to the
+ *  form's new address (allowAddressChange on the server). */
+type AddressChangedChoice = "new" | "update-address";
 
 /** Canonical JSON for comparing the form to the last persisted snapshot (matches save sanitization). */
 function formSnapshotForCompare(values: InvestmentFormValues): string | null {
@@ -681,6 +742,16 @@ export function InvestCalcPage({
     existingTitle?: string;
   } | null>(null);
   const [duplicateChoiceBusy, setDuplicateChoiceBusy] = useState<DuplicateAddressChoice | null>(null);
+  // Address-changed collision from the update path: the loaded saved deal's
+  // address no longer matches the form. Non-null opens the chooser dialog
+  // (save as new deal / update this deal's address / cancel) so Save never
+  // dead-ends while the stale id stays attached.
+  const [addressChangedPrompt, setAddressChangedPrompt] = useState<{
+    targetId: string;
+    existingTitle?: string;
+  } | null>(null);
+  const [addressChangedChoiceBusy, setAddressChangedChoiceBusy] =
+    useState<AddressChangedChoice | null>(null);
   const [savedDealId, setSavedDealId] = useState<string | null>(null);
   const [savedDealCount, setSavedDealCount] = useState(initialSavedDealCount);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -845,14 +916,23 @@ export function InvestCalcPage({
       return;
     }
     const json = formSnapshotForCompare(form.getValues());
-    // A null snapshot means the form is mid-restore (e.g. a multi-family
-    // saved deal whose units array is partially populated while RHF
-    // resets) and the schema parse failed transiently. Don't flip the
-    // dirty flag on that intermediate state - the next watch tick after
-    // the restore completes will compute the real answer. Previously
-    // this branch set hasUnsavedChanges(true) and users saw a false
-    // "Unsaved changes" badge right after loading a saved deal.
-    if (!json) return;
+    // A null snapshot means the form doesn't parse right now. Two distinct
+    // cases hide in that:
+    //   - No persisted baseline yet (lastPersistedFormJsonRef null): the
+    //     form is mid-restore (e.g. a multi-family saved deal whose units
+    //     array is partially populated while RHF resets). Don't flip the
+    //     dirty flag on that intermediate state - the next watch tick after
+    //     the restore completes computes the real answer. (Flipping it here
+    //     showed a false "Unsaved changes" badge right after load.)
+    //   - A persisted baseline EXISTS: the user broke the parse by editing
+    //     (e.g. cleared the rent field as step one of a change). That IS a
+    //     divergence from the persisted row - arm the dirty flag so the
+    //     badge and the beforeunload guard don't keep claiming "Saved"
+    //     while the on-screen form no longer matches the saved deal.
+    if (!json) {
+      if (lastPersistedFormJsonRef.current) setHasUnsavedChanges(true);
+      return;
+    }
     if (!lastPersistedFormJsonRef.current) {
       setHasUnsavedChanges(true);
       return;
@@ -2020,9 +2100,18 @@ export function InvestCalcPage({
       return computedResult;
     }
 
+    // Fresh math wins: the stored snapshot goes stale after engine
+    // corrections (PMI, CapEx-taxable), and rendering it over the computed
+    // result made the analyzer contradict the workspace header's
+    // recompute-on-read — then every number jumped on the first edit when
+    // the live recompute took over. The snapshot only contributes fields
+    // calculateAnalysis doesn't produce (stored score/recommendation
+    // metadata etc.) — same fresh-over-stored precedence as the PDF export
+    // path. calculateAnalysis returns every AnalysisResult field, so no
+    // stale snapshot value can shadow a computed one.
     return {
-      ...computedResult,
       ...(rawSnapshot as Partial<AnalysisResult>),
+      ...computedResult,
     };
   };
 
@@ -2199,9 +2288,34 @@ export function InvestCalcPage({
     // Initialize from a one-time saved-analysis handoff when present; otherwise
     // start with a clean new-analysis state.
     isProgrammaticResetRef.current = true;
-    const reopenPayloadRaw =
-      window.sessionStorage.getItem(SAVED_ANALYSIS_EDIT_DRAFT_KEY) ??
-      window.localStorage.getItem(SAVED_ANALYSIS_EDIT_DRAFT_KEY);
+    // Nonce-keyed handoff (see consumeSavedDealHandoffPayload): the opener
+    // passes the payload's localStorage key nonce in the URL. Strip the
+    // one-time params immediately so a reload (or a copied URL) never
+    // re-attempts a consumed handoff.
+    const handoffParams = new URLSearchParams(window.location.search);
+    const editHandoffNonce = handoffParams.get(DEAL_EDIT_HANDOFF_PARAM);
+    const duplicateHandoffNonce = handoffParams.get(DEAL_DUPLICATE_HANDOFF_PARAM);
+    // A legacy (pre-nonce) tab always arrives at a bare "/"; a new-scheme
+    // open always carries a nonce param. So the un-nonced shared keys are
+    // only a valid fallback when NEITHER param is present — otherwise a
+    // new-scheme open must never consume an orphaned legacy key of the
+    // other handoff type.
+    const allowLegacyHandoff = editHandoffNonce === null && duplicateHandoffNonce === null;
+    if (!allowLegacyHandoff) {
+      try {
+        const url = new URL(window.location.href);
+        url.searchParams.delete(DEAL_EDIT_HANDOFF_PARAM);
+        url.searchParams.delete(DEAL_DUPLICATE_HANDOFF_PARAM);
+        window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
+      } catch {
+        /* history unavailable — a stale param only costs a no-op re-read */
+      }
+    }
+    const reopenPayloadRaw = consumeSavedDealHandoffPayload(
+      SAVED_ANALYSIS_EDIT_DRAFT_KEY,
+      editHandoffNonce,
+      allowLegacyHandoff
+    );
     const autoExportPdfFlag =
       window.sessionStorage.getItem(SAVED_ANALYSIS_AUTO_EXPORT_PDF_KEY) ??
       window.localStorage.getItem(SAVED_ANALYSIS_AUTO_EXPORT_PDF_KEY);
@@ -2217,12 +2331,12 @@ export function InvestCalcPage({
     // user just enters the new property — the "copy a row, change 3 cells"
     // flow. No savedDealId → a save is a fresh insert (never overwrites the
     // original). Checked before the edit-draft path; isolated from it.
-    const duplicatePayloadRaw =
-      window.sessionStorage.getItem(SAVED_ANALYSIS_DUPLICATE_DRAFT_KEY) ??
-      window.localStorage.getItem(SAVED_ANALYSIS_DUPLICATE_DRAFT_KEY);
+    const duplicatePayloadRaw = consumeSavedDealHandoffPayload(
+      SAVED_ANALYSIS_DUPLICATE_DRAFT_KEY,
+      duplicateHandoffNonce,
+      allowLegacyHandoff
+    );
     if (duplicatePayloadRaw) {
-      window.sessionStorage.removeItem(SAVED_ANALYSIS_DUPLICATE_DRAFT_KEY);
-      window.localStorage.removeItem(SAVED_ANALYSIS_DUPLICATE_DRAFT_KEY);
       try {
         const parsed = JSON.parse(duplicatePayloadRaw) as { formSnapshot?: unknown };
         const normalized = normalizeInvestmentFormSnapshot(parsed.formSnapshot);
@@ -2338,18 +2452,30 @@ export function InvestCalcPage({
           setHasUnsavedChanges(false);
           pendingResultsScrollRef.current = true;
           void loadDealScore(hydratedValues, result);
-          window.sessionStorage.removeItem(SAVED_ANALYSIS_EDIT_DRAFT_KEY);
-          window.localStorage.removeItem(SAVED_ANALYSIS_EDIT_DRAFT_KEY);
           queueMicrotask(() => {
             isProgrammaticResetRef.current = false;
           });
           return;
         }
       } catch {
-        window.sessionStorage.removeItem(SAVED_ANALYSIS_EDIT_DRAFT_KEY);
-        window.localStorage.removeItem(SAVED_ANALYSIS_EDIT_DRAFT_KEY);
-        // Fall through to a clean reset when the handoff payload is invalid.
+        // Malformed JSON — fall through to the failure toast below.
       }
+      // Payload present but not restorable: either malformed, or a legacy
+      // row whose snapshot fails the current schema (normalize → null). The
+      // user clicked "Open Analysis", so a silently blank calculator reads
+      // as data loss — say what happened and land on the clean form (NOT the
+      // anon-draft restore below, which could resurrect an unrelated draft
+      // under this toast). The payload was consumed at read time, so it
+      // can't re-fail on every future "/" visit.
+      toast({
+        title: "Couldn't open this deal",
+        description:
+          "This deal couldn't be opened — it may have been saved in an older format. Open it from My Deals and re-save.",
+        variant: "destructive",
+      });
+      resetToNewAnalysis("single-family");
+      setSavedTemplateFallback(null);
+      return;
     }
 
     // Calculator → analyzer handoff (P2-2): /?price=&rent=&beds=&address=
@@ -2916,10 +3042,21 @@ export function InvestCalcPage({
   };
 
   /** Core save. `existingIdOverride` / `saveAsNewScenario` come from the
-   *  duplicate-address dialog choices; the plain Save button passes neither
-   *  (via `handleSaveDeal` below), which keeps the original behavior. */
+   *  duplicate-address dialog choices; `forceInsert` / `allowAddressChange`
+   *  come from the address-changed dialog (save as new deal vs. move the
+   *  loaded deal to the new address); the plain Save button passes none of
+   *  them (via `handleSaveDeal` below), which keeps the original behavior. */
   const performSaveDeal = async (
-    options: { existingIdOverride?: string; saveAsNewScenario?: boolean } = {}
+    options: {
+      existingIdOverride?: string;
+      saveAsNewScenario?: boolean;
+      /** Ignore the attached savedDealId and insert a fresh deal — the
+       *  loaded saved deal stays untouched. */
+      forceInsert?: boolean;
+      /** Update path only: let the server move the loaded deal to the
+       *  form's (changed) address instead of returning ADDRESS_CHANGED. */
+      allowAddressChange?: boolean;
+    } = {}
   ) => {
     // Snapshot the fork generation: if "Analyze another like this" fires
     // while this save is in flight, the completion below must NOT
@@ -2927,7 +3064,9 @@ export function InvestCalcPage({
     // fork's draft) — that silently turned the NEXT deal's save into an
     // overwrite of the source.
     const saveGeneration = forkGenerationRef.current;
-    const targetExistingId = options.existingIdOverride ?? savedDealId;
+    const targetExistingId = options.forceInsert
+      ? null
+      : options.existingIdOverride ?? savedDealId;
     if (targetExistingId && !canUpdateSavedDeals) {
       toast({
         title: "Upgrade required",
@@ -2945,15 +3084,33 @@ export function InvestCalcPage({
         currentValues,
         targetExistingId,
         buildProvenanceInput(enrichmentCaptureRef.current, currentValues),
-        options.saveAsNewScenario ? { saveAsNewScenario: true } : undefined
+        options.saveAsNewScenario || options.allowAddressChange
+          ? {
+              ...(options.saveAsNewScenario ? { saveAsNewScenario: true } : {}),
+              ...(options.allowAddressChange ? { allowAddressChange: true } : {}),
+            }
+          : undefined
       );
       if (result.ok) {
-        // A save that came from the duplicate dialog succeeded - close it.
+        // A save that came from a chooser dialog succeeded - close it.
         setDuplicateCollision(null);
-        const parsedValues = investmentFormSchema.safeParse(form.getValues());
-        // Fork raced this save (see saveGeneration above): the deal DID
-        // persist server-side, but the form now holds the NEXT deal — do
-        // not attach the saved id or clear the fork's draft.
+        setAddressChangedPrompt(null);
+        // Deal-agnostic bookkeeping first — it must run even when a fork
+        // races this save (the deal DID persist server-side): the local
+        // count feeds the client save-limit gate, and the event refreshes
+        // header/My Deals listeners, regardless of which deal the form
+        // now holds.
+        if (result.mode === "inserted") {
+          setSavedDealCount((count) => count + 1);
+        }
+        window.dispatchEvent(new CustomEvent("saved-analyses-changed"));
+        // parsedValues derives from the payload actually sent (NOT a fresh
+        // form.getValues()): edits made while the save was in flight must
+        // not be stamped as the persisted/displayed "saved" state.
+        const parsedValues = investmentFormSchema.safeParse(currentValues);
+        // Fork raced this save (see saveGeneration above): the form now
+        // holds the NEXT deal — do not attach the saved id or clear the
+        // fork's draft.
         if (saveGeneration !== forkGenerationRef.current) {
           toast({
             title: "Deal saved",
@@ -2970,7 +3127,7 @@ export function InvestCalcPage({
         // inputs, which is both confusing and a minor privacy concern.
         clearCalcDraftRaw();
         if (result.mode === "inserted") {
-          setSavedDealCount((count) => count + 1);
+          // (savedDealCount was already bumped above, pre-fork-guard.)
           // Auto-pull RentCast comps ONCE for a Pro user's newly-saved deal so
           // the comps appear on its report without a manual lookup. Fire-and-
           // forget - never blocks the save. The action enforces entitlement +
@@ -2990,13 +3147,17 @@ export function InvestCalcPage({
           // 'deal_saved' events and skew the optimizer.
           trackConversion("deal_saved");
           trackEvent("deal_saved", {
-            property_type: form.getValues().propertyType,
-            purchase_price: form.getValues().purchasePrice,
+            property_type: currentValues.propertyType,
+            purchase_price: currentValues.purchasePrice,
             cap_rate: analysisResult?.capRate,
             monthly_cash_flow: analysisResult ? Math.round(analysisResult.netCashFlow) : undefined,
           });
         }
-        const persistedJson = formSnapshotForCompare(form.getValues());
+        // The persisted baseline is the payload the server actually stored
+        // (currentValues) — never a fresh form.getValues(): recording
+        // mid-flight edits as "persisted" flipped the badge to "Saved"
+        // while the DB row held the pre-edit numbers.
+        const persistedJson = formSnapshotForCompare(currentValues);
         if (persistedJson) lastPersistedFormJsonRef.current = persistedJson;
         if (parsedValues.success) {
           const values = parsedValues.data;
@@ -3029,8 +3190,11 @@ export function InvestCalcPage({
           setTaxStrategySource((prev) => (prev ? { ...prev, analysisId: result.id } : prev));
           setExitScenarioSource((prev) => (prev ? { ...prev, analysisId: result.id } : prev));
         }
-        setHasUnsavedChanges(false);
-        window.dispatchEvent(new CustomEvent("saved-analyses-changed"));
+        // Recompute the dirty flag against the just-recorded baseline
+        // instead of force-clearing it: if the user edited while the save
+        // roundtrip was in flight, the divergence re-arms the "Unsaved
+        // changes" badge (and the beforeunload guard) for one more Save.
+        syncFormDirtyVersusPersisted();
         toast({
           title: result.mode === "updated" ? "Deal updated" : "Deal saved",
           description:
@@ -3065,19 +3229,87 @@ export function InvestCalcPage({
         return;
       }
       if (result.code === "ENTITLEMENT_SAVE") {
+        // Two causes share this code: a paid user AT their saved-deal cap
+        // (canSaveDeals true) needs to free space; a non-paid user needs to
+        // upgrade. Route the action to the place that actually resolves each
+        // — a plain message here was a dead end on mobile (no hover title).
+        const atCap = canSaveDeals;
         toast({
-          title: "Upgrade required",
-          description: result.message ?? "Subscribe to save and unlock Pro features.",
+          title: atCap ? "Saved-deal limit reached" : "Upgrade required",
+          description:
+            result.message ??
+            (atCap
+              ? "You're at your plan's saved-deal limit. Archive or delete a deal to free space."
+              : "Subscribe to save and unlock Pro features."),
           variant: "destructive",
+          action: (
+            <ToastAction
+              altText={atCap ? "Manage your saved deals" : "See TrueCap plans"}
+              onClick={() => router.push(atCap ? "/dashboard/saved-analyses" : "/pricing")}
+            >
+              {atCap ? "Manage deals" : "See plans"}
+            </ToastAction>
+          ),
+        });
+        return;
+      }
+      if (result.code === "ADDRESS_CHANGED") {
+        // Update path refused: the form's address diverged from the loaded
+        // saved deal's. A plain toast here was a dead end (Save re-failed
+        // forever while the stale id stayed attached) — open the chooser
+        // instead: save as a new deal / move this deal to the new address /
+        // cancel. targetExistingId is always set when the server takes the
+        // update path; if it somehow isn't, fall through to the generic
+        // could-not-save toast below.
+        if (targetExistingId) {
+          setAddressChangedPrompt({
+            targetId: targetExistingId,
+            existingTitle: result.existingTitle,
+          });
+          return;
+        }
+      }
+      if (result.code === "DEAL_DELETED") {
+        // The saved deal this session was attached to is gone (deleted or
+        // archived in another tab / My Deals). Detach the stale id so the
+        // next Save inserts instead of re-targeting the dead row, and give
+        // the user a one-click save-as-new path for the inputs on screen.
+        // Close either chooser too — the row they were aimed at is gone.
+        setDuplicateCollision(null);
+        setAddressChangedPrompt(null);
+        setSavedDealId(null);
+        savedDealIdRef.current = null;
+        lastPersistedFormJsonRef.current = null;
+        syncFormDirtyVersusPersisted();
+        toast({
+          title: "This deal was deleted",
+          description:
+            result.message ??
+            "The saved deal you were editing was deleted or archived. Save your current inputs as a new deal to keep them.",
+          variant: "destructive",
+          action: (
+            // forceInsert (not a plain re-save): this action's closure
+            // captured the pre-detach savedDealId, so an implicit-target
+            // save would re-aim at the deleted row and loop this toast.
+            <ToastAction
+              altText="Save these inputs as a new deal"
+              onClick={() => void performSaveDeal({ forceInsert: true })}
+            >
+              Save as new deal
+            </ToastAction>
+          ),
         });
         return;
       }
       if (result.code === "DUPLICATE_ADDRESS") {
         // When the action identified the user's own colliding deal, open the
         // chooser dialog (update it / save as scenario / cancel) instead of
-        // dead-ending. Without an id (e.g. the address-changed-on-update
-        // guard, or a lookup miss) keep the original actionable toast.
+        // dead-ending. The address-changed chooser closes first — a
+        // save-as-new choice from it can land here when the new address
+        // already has its own saved deal, and only one dialog may own the
+        // screen. Without an id (a lookup miss) keep the actionable toast.
         if (result.existingId) {
+          setAddressChangedPrompt(null);
           setDuplicateCollision({
             existingId: result.existingId,
             existingTitle: result.existingTitle,
@@ -3124,6 +3356,30 @@ export function InvestCalcPage({
       );
     } finally {
       setDuplicateChoiceBusy(null);
+    }
+  };
+
+  /** A choice made in the address-changed dialog. "new" re-saves WITHOUT the
+   *  attached id (a fresh insert; the loaded deal stays untouched — success
+   *  attaches the NEW id, and a duplicate collision on the new address flows
+   *  into the duplicate chooser). "update-address" re-saves against the same
+   *  id with allowAddressChange so the saved deal moves to the new address.
+   *  Success closes the dialog inside performSaveDeal; failures surface as
+   *  toasts and leave the dialog open to retry/cancel. */
+  const handleAddressChangedChoice = async (choice: AddressChangedChoice) => {
+    if (!addressChangedPrompt) return;
+    setAddressChangedChoiceBusy(choice);
+    try {
+      await performSaveDeal(
+        choice === "new"
+          ? { forceInsert: true }
+          : {
+              existingIdOverride: addressChangedPrompt.targetId,
+              allowAddressChange: true,
+            }
+      );
+    } finally {
+      setAddressChangedChoiceBusy(null);
     }
   };
 
@@ -3602,6 +3858,57 @@ export function InvestCalcPage({
     };
     window.addEventListener("beforeunload", handler);
     return () => window.removeEventListener("beforeunload", handler);
+  }, [isAuthenticated, savedDealId, hasUnsavedChanges]);
+
+  /**
+   * Same protection for IN-APP navigation: beforeunload never fires for App
+   * Router client-side transitions, so clicking Dashboard / My Deals in the
+   * header silently unmounted the page and dropped the unsaved edits (the
+   * anon auto-save draft deliberately skips writes while a saved deal is
+   * loaded, so there was no recovery path). A capture-phase document click
+   * listener intercepts internal <a href> navigations before next/link's own
+   * handler and confirms first. Scoped to exactly the beforeunload
+   * condition; external links, new-tab targets, downloads, hash-only jumps,
+   * and modifier/middle clicks all pass through untouched.
+   */
+  useEffect(() => {
+    const shouldWarn = isAuthenticated && Boolean(savedDealId) && hasUnsavedChanges;
+    if (!shouldWarn) return;
+    const handler = (event: MouseEvent) => {
+      if (event.defaultPrevented) return;
+      // Left click only; modifier clicks open new tabs and leave this page alive.
+      if (event.button !== 0) return;
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      const target = event.target instanceof Element ? event.target : null;
+      const anchor = target?.closest<HTMLAnchorElement>("a[href]");
+      if (!anchor) return;
+      if (anchor.target === "_blank" || anchor.hasAttribute("download")) return;
+      let destination: URL;
+      try {
+        destination = new URL(anchor.href, window.location.href);
+      } catch {
+        return;
+      }
+      // External navigations hard-unload → beforeunload above already covers them.
+      if (destination.origin !== window.location.origin) return;
+      // Hash-only jump on the current page: no navigation, nothing lost.
+      if (
+        destination.pathname === window.location.pathname &&
+        destination.search === window.location.search &&
+        destination.hash !== ""
+      ) {
+        return;
+      }
+      const confirmed = window.confirm(
+        "You have unsaved changes on this deal — leave without saving?"
+      );
+      if (!confirmed) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    };
+    document.addEventListener("click", handler, true);
+    return () => document.removeEventListener("click", handler, true);
   }, [isAuthenticated, savedDealId, hasUnsavedChanges]);
 
   const handleCompareDeals = async () => {
@@ -4683,6 +4990,8 @@ export function InvestCalcPage({
               activeTabNonce={activeTabNonce}
               activeStrategy={activeStrategy}
               saveDealLimitReached={currentSaveDealLimitReached}
+              savedDealCount={savedDealCount}
+              savedDealLimit={savedDealLimit}
               persistedActionsBlockHint={
                 !savedDealId
                   ? "Save this analysis first to compare or export a PDF."
@@ -4725,6 +5034,90 @@ export function InvestCalcPage({
         onUpdateExisting={() => void handleDuplicateChoice("update")}
         onSaveAsScenario={() => void handleDuplicateChoice("scenario")}
       />
+      {/* Address-changed chooser - opens when Save targets a loaded saved
+          deal whose address no longer matches the form (same pattern as the
+          duplicate-address chooser above): save the current inputs as a new
+          deal, move the saved deal to the new address, or cancel. */}
+      <Dialog
+        open={addressChangedPrompt !== null}
+        onOpenChange={(next) => {
+          // Don't let backdrop/Esc close the dialog mid-save.
+          if (!next && addressChangedChoiceBusy === null) setAddressChangedPrompt(null);
+        }}
+      >
+        {/* max-h + scroll so both options stay reachable on short viewports
+            (landscape phones, split-screen). */}
+        <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>The address changed</DialogTitle>
+            <DialogDescription>
+              {addressChangedPrompt?.existingTitle
+                ? `Your current inputs use a different address than “${addressChangedPrompt.existingTitle}”.`
+                : "Your current inputs use a different address than the saved deal you loaded."}{" "}
+              Save them as their own deal, or move the saved deal to the new address.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-3">
+            {/* Save as new - the most common intent (screening the next
+                property on top of a loaded deal), so it's listed first. */}
+            <button
+              type="button"
+              onClick={() => void handleAddressChangedChoice("new")}
+              disabled={addressChangedChoiceBusy !== null}
+              className="flex w-full items-start justify-between gap-3 rounded-2xl border border-border bg-card p-4 text-left transition hover:border-primary/40 hover:bg-muted/40 disabled:opacity-60"
+            >
+              <div>
+                <p className="flex items-center gap-1.5 text-sm font-bold text-foreground">
+                  <CopyPlus className="size-4 text-primary" />
+                  Save as a new deal
+                </p>
+                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                  Keep the saved deal as it is and save your current inputs as a
+                  separate deal for the new address.
+                </p>
+              </div>
+              {addressChangedChoiceBusy === "new" ? (
+                <Loader2 className="mt-0.5 size-4 shrink-0 animate-spin text-muted-foreground" />
+              ) : null}
+            </button>
+
+            {/* Move the saved deal - e.g. an address typo fix or a re-pick
+                whose formatting differs from the stored string. */}
+            <button
+              type="button"
+              onClick={() => void handleAddressChangedChoice("update-address")}
+              disabled={addressChangedChoiceBusy !== null}
+              className="flex w-full items-start justify-between gap-3 rounded-2xl border border-border bg-card p-4 text-left transition hover:border-primary/40 hover:bg-muted/40 disabled:opacity-60"
+            >
+              <div>
+                <p className="flex items-center gap-1.5 text-sm font-bold text-foreground">
+                  <PencilLine className="size-4 text-muted-foreground" />
+                  Update this deal&rsquo;s address
+                </p>
+                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                  Update the saved deal with your current inputs, new address
+                  included. Its notes, comps, and share links stay attached.
+                </p>
+              </div>
+              {addressChangedChoiceBusy === "update-address" ? (
+                <Loader2 className="mt-0.5 size-4 shrink-0 animate-spin text-muted-foreground" />
+              ) : null}
+            </button>
+          </div>
+
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="ghost"
+              disabled={addressChangedChoiceBusy !== null}
+              onClick={() => setAddressChangedPrompt(null)}
+            >
+              Cancel
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
