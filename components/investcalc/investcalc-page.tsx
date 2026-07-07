@@ -4083,30 +4083,35 @@ export function InvestCalcPage({
                 </button>
               </div>
             ) : null}
-            {analysisResult && !isCalculating ? (
-              <AssumptionsSourceStrip
-                onEdit={handleEditAssumptions}
-                // Real per-field provenance (same builder the confidence
-                // badge uses) so the strip never claims "HUD rent" after
-                // the user typed their own (roadmap P1-8).
-                provenance={buildProvenanceInput(enrichmentCaptureRef.current, form.getValues())}
-                expensesEdited={(
-                  [
-                    "insuranceMonthly",
-                    "insurancePct",
-                    "maintenancePct",
-                    "mgmtPct",
-                    "vacancyPct",
-                    "capexPct",
-                    "utilitiesMonthly",
-                    "hoaMonthly",
-                  ] as const
-                ).some((f) => Boolean((form.formState.dirtyFields as Record<string, unknown>)[f]))}
-              />
-            ) : null}
             <AnalysisErrorBoundary result={analysisResult}>
             <AnalysisDashboard
               result={analysisResult}
+              // "Where these numbers came from" ledger row (redesign P5
+              // follow-up): the results-side assumptions strip demotes from
+              // a standalone card above the dashboard into a quiet row —
+              // provenance stays truthful (P1-8), chrome="bare" avoids the
+              // card-in-card seam inside the row.
+              assumptionsSlot={
+                analysisResult && !isCalculating ? (
+                  <AssumptionsSourceStrip
+                    chrome="bare"
+                    onEdit={handleEditAssumptions}
+                    provenance={buildProvenanceInput(enrichmentCaptureRef.current, form.getValues())}
+                    expensesEdited={(
+                      [
+                        "insuranceMonthly",
+                        "insurancePct",
+                        "maintenancePct",
+                        "mgmtPct",
+                        "vacancyPct",
+                        "capexPct",
+                        "utilitiesMonthly",
+                        "hoaMonthly",
+                      ] as const
+                    ).some((f) => Boolean((form.formState.dirtyFields as Record<string, unknown>)[f]))}
+                  />
+                ) : null
+              }
               values={analysisValues ?? form.getValues()}
               dataConfidence={
                 analysisResult

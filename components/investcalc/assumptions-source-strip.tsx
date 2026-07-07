@@ -81,19 +81,31 @@ export function AssumptionsSourceStrip({
   onEdit,
   provenance,
   expensesEdited = false,
+  chrome = "card",
 }: {
   onEdit: () => void;
   /** Live enrichment provenance; null/undefined = nothing auto-filled. */
   provenance?: EnrichmentProvenanceInput | null;
   /** True when the user touched any operating-expense field. */
   expensesEdited?: boolean;
+  /** ADDITIVE chrome variant (same contract as the form sections): "bare"
+   *  drops the card wrapper so the strip composes inside the ledger's
+   *  "Where these numbers came from" row without a card-in-card seam.
+   *  Default keeps the standalone chrome byte-identical. */
+  chrome?: "card" | "bare";
 }) {
   const [expanded, setExpanded] = useState(false);
   const entries = buildAssumptionEntries(provenance, expensesEdited);
   const summary = entries.map((e) => `${e.label.split(" ")[0]} ${e.short}`).join(" · ");
 
   return (
-    <div className="mb-6 rounded-2xl border border-border bg-card/60 p-4 shadow-sm sm:p-5">
+    <div
+      className={
+        chrome === "bare"
+          ? undefined
+          : "mb-6 rounded-2xl border border-border bg-card/60 p-4 shadow-sm sm:p-5"
+      }
+    >
       <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
         <p className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
           <Database className="size-3.5 text-primary" />
