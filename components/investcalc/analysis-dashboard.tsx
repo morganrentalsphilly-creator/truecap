@@ -16,6 +16,7 @@ import {
   Info,
   FileDown,
   Sparkles,
+  CopyPlus,
   ListTodo,
   SlidersHorizontal,
   MoreHorizontal,
@@ -164,6 +165,10 @@ interface AnalysisDashboardProps {
   onCompareDeals: () => void | Promise<void>;
   onExportPdf: (mode?: ReportMode) => void | Promise<void>;
   onNewAnalysis: () => void | Promise<void>;
+  /** Phase D "copy a row": clear the property identity + results but keep
+   *  every assumption, so the next listing runs with the same numbers.
+   *  Free + anon get it too — it's a pure form operation, no entitlement. */
+  onAnalyzeAnotherLikeThis: () => void;
   /** Fill the analyzer form from pulled comps (facts + estimates). */
   onApplyComps?: (enrichment: PropertyEnrichment) => void;
   /** Apply the rehab estimator's total to the deal's cash invested. */
@@ -330,6 +335,7 @@ export function AnalysisDashboard({
   onCompareDeals,
   onExportPdf,
   onNewAnalysis,
+  onAnalyzeAnotherLikeThis,
   onApplyComps,
   onApplyRehab,
   currentRehabBudget,
@@ -991,6 +997,24 @@ export function AnalysisDashboard({
                   </PopoverContent>
                 </Popover>
               ) : null}
+              {/* Phase D "copy a row" — quiet OUTLINE secondary next to the
+                  filled New Analysis so the two paths read differently:
+                  Like This = same assumptions, New Analysis = fresh start.
+                  Pure form operation, so free + anon get it too. Hidden
+                  below sm — lives in the "More" overflow there. */}
+              <Button
+                size="sm"
+                variant="outline"
+                // col-span-2: the label is the feature ("same assumptions" in
+                // the user's own words) and Button is whitespace-nowrap — one
+                // minmax(0,1fr) column would clip it.
+                className="hidden h-11 gap-1 rounded-xl px-2 text-[11px] sm:col-span-2 sm:inline-flex sm:h-10 sm:gap-0 sm:rounded-xl sm:px-4 sm:text-sm"
+                onClick={onAnalyzeAnotherLikeThis}
+                title="Keeps your assumptions — just enter the next property"
+              >
+                <CopyPlus className="w-3.5 h-3.5 shrink-0 sm:mr-1.5" />
+                <span>Analyze another like this</span>
+              </Button>
               {/* Hidden below sm — New Analysis lives in "More" there.
                   Share keeps the 3-up slot instead: the read-only share
                   link is the growth loop, and burying it a tap deep on
@@ -1045,6 +1069,28 @@ export function AnalysisDashboard({
                   >
                     <ListTodo className="size-4 shrink-0 text-muted-foreground" />
                     Compare Deals
+                  </button>
+                  {/* Phase D "copy a row" — same-assumptions fork, listed
+                      above New Analysis so the repeat-screening path is
+                      seen first. The subtext carries the distinction the
+                      desktop tooltip makes. */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMoreActionsOpen(false);
+                      onAnalyzeAnotherLikeThis();
+                    }}
+                    className="flex w-full cursor-pointer items-start gap-2 rounded-lg px-2 py-1.5 text-left hover:bg-muted focus-visible:bg-muted focus-visible:outline-none"
+                  >
+                    <CopyPlus className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                    <span>
+                      <span className="block text-sm font-semibold text-foreground">
+                        Analyze another like this
+                      </span>
+                      <span className="block text-[11px] leading-snug text-muted-foreground">
+                        Keeps your assumptions — just enter the next property
+                      </span>
+                    </span>
                   </button>
                   <button
                     type="button"

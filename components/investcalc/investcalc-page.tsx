@@ -742,6 +742,10 @@ export function InvestCalcPage({
   const pendingResultsScrollRef = useRef(false);
   const formElementRef = useRef<HTMLFormElement | null>(null);
   const savedDealIdRef = useRef<string | null>(null);
+  /** Bumped by "Analyze another like this" — an in-flight save whose
+   *  generation no longer matches must not attach its id to the forked
+   *  form (the fork's savedDealId-null guarantee would be defeated). */
+  const forkGenerationRef = useRef(0);
   const lastPersistedFormJsonRef = useRef<string | null>(null);
   /** Form snapshot that produced the currently displayed analysis outputs (last Calculate or loaded saved deal). */
   const lastComputedFormJsonRef = useRef<string | null>(null);
@@ -2765,6 +2769,12 @@ export function InvestCalcPage({
   const performSaveDeal = async (
     options: { existingIdOverride?: string; saveAsNewScenario?: boolean } = {}
   ) => {
+    // Snapshot the fork generation: if "Analyze another like this" fires
+    // while this save is in flight, the completion below must NOT
+    // re-attach the source deal's id to the forked form (or clear the
+    // fork's draft) — that silently turned the NEXT deal's save into an
+    // overwrite of the source.
+    const saveGeneration = forkGenerationRef.current;
     const targetExistingId = options.existingIdOverride ?? savedDealId;
     if (targetExistingId && !canUpdateSavedDeals) {
       toast({
@@ -2789,6 +2799,17 @@ export function InvestCalcPage({
         // A save that came from the duplicate dialog succeeded - close it.
         setDuplicateCollision(null);
         const parsedValues = investmentFormSchema.safeParse(form.getValues());
+        // Fork raced this save (see saveGeneration above): the deal DID
+        // persist server-side, but the form now holds the NEXT deal — do
+        // not attach the saved id or clear the fork's draft.
+        if (saveGeneration !== forkGenerationRef.current) {
+          toast({
+            title: "Deal saved",
+            description: "Saved before you moved on — find it in My Deals.",
+            variant: "success",
+          });
+          return;
+        }
         setSavedDealId(result.id);
         savedDealIdRef.current = result.id;
         // Deal is now persisted server-side - the local anonymous
@@ -3278,6 +3299,127 @@ export function InvestCalcPage({
     // family). The mount-time reset stays single-family.
     resetToNewAnalysis(form.getValues("propertyType") ?? "single-family");
     setSavedTemplateFallback(null);
+  };
+
+  /**
+   * "Analyze another like this" (Phase D) — the in-flow copy-a-row. From the
+   * CURRENT form values (no save required): keep every assumption (financing,
+   * expenses, taxes, insurance, vacancy, growth rates, active play,
+   * templateId link) and clear ONLY the property identity + results, so the
+   * screen-6-listings investor runs the next address with the same
+   * assumptions instead of resetting to factory via New Analysis.
+   *
+   * Deliberately NOT resetToNewAnalysis: that path rebuilds factory/template
+   * defaults. This one mirrors the My Deals "Duplicate" fork
+   * (SAVED_ANALYSIS_DUPLICATE_DRAFT_KEY mount branch above) without the
+   * save + navigation — same clear list, same "assumptions are the point"
+   * semantics. No confirm(): unlike New Analysis nothing irreplaceable is
+   * lost (assumptions survive; only identity fields blank).
+   */
+  const handleAnalyzeAnotherLikeThis = () => {
+    isProgrammaticResetRef.current = true;
+    // Invalidate any in-flight save: performSaveDeal's completion must not
+    // re-attach the SOURCE deal's id (or clear the fork draft) after this
+    // fork — clicking Save then fork during the roundtrip silently turned
+    // the NEXT deal's save into an overwrite of the source (verifier
+    // should-fix). The generation is re-checked after the save's await.
+    forkGenerationRef.current += 1;
+    const clearOpts = { shouldDirty: false, shouldValidate: false } as const;
+    // Property identity — the Duplicate-fork clear list PLUS yearBuilt /
+    // beds / baths / sqft (this in-flow fork deliberately clears more than
+    // the saved-deal mount branch: those are property identity too).
+    // setValue on MOUNTED registered fields (never unmount-clear — the STR
+    // QA lesson); the input form stays mounted through the results phase.
+    form.setValue("address", "", clearOpts);
+    form.setValue("purchasePrice", undefined as unknown as number, clearOpts);
+    form.setValue("yearBuilt", undefined, clearOpts);
+    form.setValue("bedrooms", undefined, clearOpts);
+    form.setValue("bathrooms", undefined, clearOpts);
+    form.setValue("sqft", undefined, clearOpts);
+    form.setValue("monthlyRent", undefined, clearOpts);
+    // STR income is property-specific: ADR × occupancy is the OLD
+    // property's revenue (calc-analysis derives income from ADR when set,
+    // silently ignoring typed rent) — STR-STRATEGY-RESTORE-INVISIBLE-INCOME.
+    // The active play itself is an assumption and survives.
+    form.setValue("avgDailyRate", undefined, clearOpts);
+    form.setValue("occupancyPct", undefined, clearOpts);
+    form.setValue("strFurnishingCost", undefined, clearOpts);
+    // MF: keep the unit STRUCTURE (count + beds/baths/sqft are close on
+    // like-kind listings and cheap to tweak), clear the rents — identical to
+    // the Duplicate fork's per-unit treatment.
+    form.setValue(
+      "units",
+      (form.getValues("units") ?? []).map((u) => ({ ...u, monthlyRent: undefined })),
+      clearOpts
+    );
+    form.clearErrors();
+    // A save from here is a NEW deal — never an overwrite of the source.
+    setSavedDealId(null);
+    savedDealIdRef.current = null;
+    lastPersistedFormJsonRef.current = null;
+    lastComputedFormJsonRef.current = null;
+    setHasUnsavedChanges(false);
+    // Property-specific captures + benchmarks: the next deal must never be
+    // judged against the PREVIOUS address's enrichment / HUD FMR / estimate.
+    enrichmentCaptureRef.current = {};
+    setMarketRentEstimate(null);
+    setUnitFmrByBedrooms(null);
+    unitFmrKeyRef.current = null;
+    // …and the enrichment TRIGGERS, not just the captures (verifier
+    // live-confirmed): with the old refs armed, the MF benchmark effect
+    // refetched the OLD metro's FMRs on the very next render, and the SF
+    // bedrooms watcher could re-enrich a hand-typed new address from the
+    // old county — silently judging the next deal against the wrong market.
+    lastSelectedAddressRef.current = null;
+    lastEnrichedAddressRef.current = null;
+    setPriceEstimated(false);
+    setEstimatedPriceValue(null);
+    setPriceEstimateBasis(null);
+    // Stale listing-URL row (BROWSER-3 class) and the draft-restore banner
+    // both name the OLD property — clear with the identity.
+    setListingLinkOpen(false);
+    setListingUrl("");
+    setListingUrlError(false);
+    setRestoredFromDraft(false);
+    setRestoredAddress(null);
+    // Back to the input phase. clearAnalysisOutputs never touches form
+    // values, so the kept assumptions are safe.
+    clearAnalysisOutputs();
+    setIsCalculating(false);
+    isCalculatingRef.current = false;
+    // The forked assumptions are the point — the default-template auto-apply
+    // must NOT fire over them (mirrors the Duplicate mount branch, which
+    // never arms eligibility). Also drop any live auto-apply Undo snapshot:
+    // restoring pre-apply values now would stomp the fork.
+    autoApplyEligibleRef.current = false;
+    autoApplyUndoRef.current = null;
+    // Overwrite the anon draft so a reload does NOT restore the SOURCE
+    // deal the watcher last wrote. (The forked snapshot itself won't pass
+    // the full-schema restore — no address/price — so a reload lands on a
+    // clean form: acceptable; restoring the old property would not be.)
+    try {
+      writeCalcDraftRaw(JSON.stringify(form.getValues()));
+    } catch {
+      /* storage unavailable — the fork still works for this session */
+    }
+    queueMicrotask(() => {
+      isProgrammaticResetRef.current = false;
+    });
+    toast({
+      title: "Assumptions kept",
+      description:
+        "Enter the next property's address, price & rent — everything else carried over.",
+    });
+    // Land the user on the (now visible again) address input. Deferred a
+    // beat so the results section has unmounted and the input phase is the
+    // scroll target — same timing as the results-scroll effect above.
+    setTimeout(() => {
+      form.setFocus("address");
+      (document.getElementById("address") ?? undefined)?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }, 100);
   };
 
   useEffect(() => {
@@ -4357,6 +4499,7 @@ export function InvestCalcPage({
               onCompareDeals={handleCompareDeals}
               onExportPdf={handleExportPdf}
               onNewAnalysis={handleNewAnalysis}
+              onAnalyzeAnotherLikeThis={handleAnalyzeAnotherLikeThis}
               onApplyComps={handleApplyComps}
               onApplyRehab={handleApplyRehab}
               currentRehabBudget={form.watch("rehabBudget") ?? null}
