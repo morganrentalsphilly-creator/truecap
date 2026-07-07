@@ -40,6 +40,17 @@ function ratio(n: number | null, isCash: boolean): string {
   return n == null ? "—" : n.toFixed(2);
 }
 
+/**
+ * Verdict label, with ONE screening-context override: the global display
+ * vocabulary maps Avoid → "Pass" ("pass on it"), which reads correctly on a
+ * deal row but inverts inside a SCREENING table — "Pass" next to red numbers
+ * scans as "passed the screen". "Skip" carries the same instruction without
+ * the collision. Every other tier uses the shared labels.
+ */
+function triageVerdictLabel(rec: string): string {
+  return rec === "Avoid" ? "Skip" : recommendationLabel(rec);
+}
+
 function verdictClasses(rec: string | null): string {
   if (rec === "Strong Buy") return "bg-success/10 text-success border-success/30";
   if (rec === "Buy") return "bg-primary/10 text-primary border-primary/30";
@@ -251,7 +262,7 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
                         <td className="px-3 py-3">
                           {row.ok ? (
                             <span className={cn("inline-flex rounded-full border px-2 py-0.5 text-xs font-semibold", verdictClasses(row.recommendation))}>
-                              {row.recommendation ? recommendationLabel(row.recommendation) : "—"}
+                              {row.recommendation ? triageVerdictLabel(row.recommendation) : "—"}
                             </span>
                           ) : (
                             <span className="text-xs text-muted-foreground">Needs rent</span>

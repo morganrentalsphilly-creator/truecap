@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import * as Sentry from "@sentry/nextjs";
@@ -149,6 +149,9 @@ export type SavedAnalysisListItem = {
   nickname?: string | null;
   market?: string | null;
   neighborhood?: string | null;
+  /** Workspace-scenario label (DM-1). Sibling scenario rows share one address
+   *  (and nickname), so lists surface this to keep them tellable apart. */
+  scenarioName?: string | null;
   createdAt: string;
   status: "active" | "completed" | "archived";
   /** Owned-deal close date (ISO yyyy-mm-dd) + derived equity. Present only for
@@ -216,6 +219,8 @@ function OwnedEquityCell({ item, enabled }: { item: SavedAnalysisListItem; enabl
         toast({ title: "Rolling out", description: "Owned-deal equity tracking isn't enabled yet." });
       } else {
         toast({ title: "Couldn't save close date", description: r.message, variant: "destructive" });
+        // Ghost row (deleted elsewhere) — refresh so it disappears.
+        if (r.code === "NOT_FOUND") router.refresh();
       }
     });
   };
@@ -339,6 +344,50 @@ const SIGNAL_LABELS: Record<SavedSignal, string> = {
   risky: "Needs work",
   avoid: "Pass",
 };
+
+/** Client-only view state (search/filters/page) persisted to sessionStorage so
+ *  the name-click → workspace → Back round-trip lands on the same list view.
+ *  Session-only by design — sort/deal-state stay in the URL as before. */
+const MYDEALS_VIEW_STATE_KEY = "truecap_mydeals_view_v1";
+type PersistedListView = {
+  searchQuery: string;
+  selectedSignal: "all" | SavedSignal;
+  selectedType: "all" | SavedPropertyType;
+  buyBoxOnly: boolean;
+  currentPage: number;
+};
+
+function readPersistedListView(): PersistedListView | null {
+  // Server render sees defaults; the restored values apply on the client.
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.sessionStorage.getItem(MYDEALS_VIEW_STATE_KEY);
+    if (!raw) return null;
+    const parsed: unknown = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object") return null;
+    const p = parsed as Record<string, unknown>;
+    return {
+      searchQuery: typeof p.searchQuery === "string" ? p.searchQuery : "",
+      selectedSignal:
+        typeof p.selectedSignal === "string" && p.selectedSignal in SIGNAL_LABELS
+          ? (p.selectedSignal as SavedSignal)
+          : "all",
+      selectedType:
+        p.selectedType === "single-family" ||
+        p.selectedType === "multi-family" ||
+        p.selectedType === "owner-occupant"
+          ? p.selectedType
+          : "all",
+      buyBoxOnly: p.buyBoxOnly === true,
+      currentPage:
+        typeof p.currentPage === "number" && Number.isInteger(p.currentPage) && p.currentPage >= 1
+          ? p.currentPage
+          : 1,
+    };
+  } catch {
+    return null; // private mode / bad JSON — start from defaults
+  }
+}
 
 function toCurrency(value: number | null): string {
   if (value == null || Number.isNaN(value)) return "—";
@@ -709,6 +758,15 @@ export function SavedAnalysesPage({
   const [exportingPdfDealId, setExportingPdfDealId] = useState<string | null>(null);
   const [updatingDealStatusId, setUpdatingDealStatusId] = useState<string | null>(null);
 
+  // The persisted view (search/filters/page) is restored in a MOUNT EFFECT,
+  // not in the useState initializers: this page is SSR'd with defaults, so an
+  // initializer restore would make the first client render differ from the
+  // server HTML — a React hydration error + full client re-render on every
+  // hard load where a view was persisted. viewHydrated gates the persist
+  // effect below so a pre-restore run can't clobber the stored view with
+  // defaults (StrictMode's double effect pass included).
+  const [viewHydrated, setViewHydrated] = useState(false);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [showcompare, setShowcompare] = useState(false);
   // Below sm the filter chip groups collapse behind one "Filters"
@@ -728,6 +786,10 @@ export function SavedAnalysesPage({
   // Distinguishes "boxes not fetched yet" from "fetched, none usable" so the
   // reset effect below can't clear a URL-seeded filter before the load lands.
   const [buyBoxesLoaded, setBuyBoxesLoaded] = useState(false);
+  // The URL seed (?buyBox=1 from the dashboard tile) is an explicit intent —
+  // SSR sees the same param so this initializer is hydration-safe; the
+  // persisted value can only turn the filter ON (restore effect below), so
+  // a URL seed is never overridden by a stale persisted "off".
   const [buyBoxOnly, setBuyBoxOnly] = useState(() => searchParams.get("buyBox") === "1");
   // Discovery nudge (PV-2): the user CAN use buy boxes but has never created
   // one — surfaced only alongside ≥3 active deals (moment of need), and
@@ -735,6 +797,22 @@ export function SavedAnalysesPage({
   // dashboard's nudge, so dismissing either silences both).
   const [buyBoxNudgeEligible, setBuyBoxNudgeEligible] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+
+  // Apply the persisted view once, after hydration (see viewHydrated above).
+  // The one-commit flash of the default list on a hard load is the price of
+  // hydration correctness; the primary round-trip (name-click → workspace →
+  // Back) is a client navigation and restores without any flash.
+  useEffect(() => {
+    const persisted = readPersistedListView();
+    if (persisted) {
+      setSearchQuery(persisted.searchQuery);
+      setSelectedSignal(persisted.selectedSignal);
+      setSelectedType(persisted.selectedType);
+      if (persisted.buyBoxOnly) setBuyBoxOnly(true);
+      setCurrentPage(persisted.currentPage);
+    }
+    setViewHydrated(true);
+  }, []);
   // Optional decision columns (DSCR, cash to close) - off by default so the
   // default table stays uncrowded; remembered per browser.
   const [optionalColumns, setOptionalColumns] = useState<OptionalColumns>({
@@ -873,7 +951,7 @@ export function SavedAnalysesPage({
         const typeLabel = item.propertyType ? getTypeLabel(item.propertyType).toLowerCase() : "";
         const typeSlug = (item.propertyType ?? "").toLowerCase();
         const text =
-          `${item.address ?? ""} ${item.title ?? ""} ${item.id} ${typeLabel} ${typeSlug}`.toLowerCase();
+          `${item.address ?? ""} ${item.title ?? ""} ${item.scenarioName ?? ""} ${item.id} ${typeLabel} ${typeSlug}`.toLowerCase();
         const matchesSearch = text.includes(searchQuery.toLowerCase().trim());
         const matchesSignal = selectedSignal === "all" ? true : item.signal === selectedSignal;
         const matchesType = selectedType === "all" ? true : item.propertyType === selectedType;
@@ -918,15 +996,45 @@ export function SavedAnalysesPage({
     [searchQuery, selectedSignal, selectedType, activeSortField, activeSortDirection, showcompare, buyBoxOnly]
   );
 
+  // Reset to page 1 when a filter/sort/search actually CHANGES — but not on
+  // mount, and not on the commit where the persisted view restores (that key
+  // change IS the restore; resetting would clobber the restored page).
+  // Value-compare against the previous key rather than counting effect runs:
+  // run-count skips break under StrictMode's setup/cleanup/setup pass.
+  const prevResetKeyRef = useRef<string | null>(null);
+  const pageResetArmedRef = useRef(false);
   useEffect(() => {
-    setCurrentPage(1);
-  }, [resetPageTriggerKey]);
+    if (!viewHydrated) return; // pre-restore commits are never user changes
+    if (!pageResetArmedRef.current) {
+      // First post-restore run: record the (possibly restored) key only.
+      pageResetArmedRef.current = true;
+      prevResetKeyRef.current = resetPageTriggerKey;
+      return;
+    }
+    if (prevResetKeyRef.current !== resetPageTriggerKey) {
+      prevResetKeyRef.current = resetPageTriggerKey;
+      setCurrentPage(1);
+    }
+  }, [resetPageTriggerKey, viewHydrated]);
 
   useEffect(() => {
     if (currentPage > pageCount) {
       setCurrentPage(pageCount);
     }
   }, [currentPage, pageCount]);
+
+  // Persist the view state on change so Back lands on the same list view.
+  // Gated on viewHydrated: pre-restore runs hold defaults and would overwrite
+  // the very view we're about to restore.
+  useEffect(() => {
+    if (!viewHydrated) return;
+    try {
+      const view: PersistedListView = { searchQuery, selectedSignal, selectedType, buyBoxOnly, currentPage };
+      window.sessionStorage.setItem(MYDEALS_VIEW_STATE_KEY, JSON.stringify(view));
+    } catch {
+      // private mode — the view state just doesn't persist
+    }
+  }, [viewHydrated, searchQuery, selectedSignal, selectedType, buyBoxOnly, currentPage]);
 
   const handleSort = (field: SortField) => {
     const nextDirection: SortDirection =
@@ -957,6 +1065,9 @@ export function SavedAnalysesPage({
           description: result.message,
           variant: "destructive",
         });
+        // Deleted in another tab → clear the ghost row alongside the toast,
+        // or every retry re-errors on a deal that no longer exists.
+        if (result.code === "NOT_FOUND") router.refresh();
         setUpdatingDealStatusId(null);
         return;
       }
@@ -976,6 +1087,8 @@ export function SavedAnalysesPage({
       const result = await updateSavedDealStageAction(id, stage);
       if (!result.ok) {
         toast({ title: "Could not update stage", description: result.message, variant: "destructive" });
+        // Ghost row (deleted elsewhere) — refresh so it disappears.
+        if (result.code === "NOT_FOUND") router.refresh();
         setUpdatingDealStatusId(null);
         return;
       }
@@ -991,6 +1104,8 @@ export function SavedAnalysesPage({
       const result = await updateSavedDealTagsAction(id, tags);
       if (!result.ok) {
         toast({ title: "Could not update tags", description: result.message, variant: "destructive" });
+        // Ghost row (deleted elsewhere) — refresh so it disappears.
+        if (result.code === "NOT_FOUND") router.refresh();
         setUpdatingDealStatusId(null);
         return;
       }
@@ -1939,6 +2054,13 @@ export function SavedAnalysesPage({
                         className="flex max-w-full items-center gap-2 text-left text-base font-bold leading-tight text-foreground hover:text-primary"
                       >
                         <span className="truncate">{address.main}</span>
+                        {item.scenarioName ? (
+                          // Sibling scenarios share the address (and nickname) —
+                          // this suffix keeps them tellable apart at a glance.
+                          <span className="shrink-0 rounded-full border border-border px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
+                            Scenario · {item.scenarioName}
+                          </span>
+                        ) : null}
                       </Link>
                       <div className="mt-1 flex flex-wrap items-center gap-1.5">
                         <Badge className={cn("rounded-full border text-xs font-semibold", getSignalClasses(signal))}>{SIGNAL_LABELS[signal]}</Badge>
@@ -1971,7 +2093,7 @@ export function SavedAnalysesPage({
                         ) : null}
                       </div>
                       <p className="mt-1 text-xs text-muted-foreground">{getTypeLabel(item.propertyType)}</p>
-                      <NextActionLine recommendation={item.recommendation} netCashFlow={item.netCashFlowMonthly} stage={item.pipelineStage} meetsBuyBox={buyBoxFitById?.get(item.id)?.anyPass ?? null} hasCloseDate={item.closeDate != null} className="mt-1.5" />
+                      <NextActionLine recommendation={item.recommendation} netCashFlow={item.netCashFlowMonthly} stage={item.status === "completed" ? "closed" : item.pipelineStage} meetsBuyBox={buyBoxFitById?.get(item.id)?.anyPass ?? null} hasCloseDate={item.closeDate != null} className="mt-1.5" />
                       <OwnedEquityCell item={item} enabled={ownedEquityEnabled} />
                     </div>
                     <input
@@ -2215,12 +2337,19 @@ export function SavedAnalysesPage({
                               className="flex max-w-full items-center gap-2 text-left font-semibold text-foreground hover:text-primary"
                             >
                               <span className="truncate">{address.main}</span>
+                              {item.scenarioName ? (
+                                // Sibling scenarios share the address (and
+                                // nickname) — keep the rows tellable apart.
+                                <span className="shrink-0 rounded-full border border-border px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
+                                  Scenario · {item.scenarioName}
+                                </span>
+                              ) : null}
                             </Link>
                             {getStatusBadge(item)}
                             <p className="text-xs text-muted-foreground truncate">
                               {getTypeLabel(item.propertyType)}
                             </p>
-                            <NextActionLine recommendation={item.recommendation} netCashFlow={item.netCashFlowMonthly} stage={item.pipelineStage} meetsBuyBox={buyBoxFitById?.get(item.id)?.anyPass ?? null} hasCloseDate={item.closeDate != null} className="mt-0.5" />
+                            <NextActionLine recommendation={item.recommendation} netCashFlow={item.netCashFlowMonthly} stage={item.status === "completed" ? "closed" : item.pipelineStage} meetsBuyBox={buyBoxFitById?.get(item.id)?.anyPass ?? null} hasCloseDate={item.closeDate != null} className="mt-0.5" />
                             <OwnedEquityCell item={item} enabled={ownedEquityEnabled} />
                           </div>
                         </div>

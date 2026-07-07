@@ -134,11 +134,25 @@ export async function getPropertyCompsAction(input: unknown): Promise<PropertyCo
     if (!dealId) return;
     const { data: owns } = await admin
       .from("saved_analyses")
-      .select("id")
+      .select("id, address")
       .eq("id", dealId)
       .eq("user_id", user.id)
       .maybeSingle();
     if (!owns) return;
+    // The pulled address must match the deal's stored address: a stale
+    // dealId from a repurposed analyzer form (address typed over a loaded
+    // deal) would otherwise permanently overwrite the ORIGINAL deal's comp
+    // set with another property's comps. Skip persistence only — the caller
+    // still gets the enrichment to display. Rows without a stored address
+    // can't be checked and persist as before.
+    const savedAddress = (owns as { address?: string | null }).address;
+    if (
+      typeof savedAddress === "string" &&
+      savedAddress.trim().length > 0 &&
+      addressKey(savedAddress) !== key
+    ) {
+      return;
+    }
     await admin
       .from("deal_comps")
       .upsert(

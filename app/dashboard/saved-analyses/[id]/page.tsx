@@ -148,13 +148,14 @@ function Metric({
 }
 
 const DEAL_SELECT =
-  "id, address, title, property_type, purchase_price, form_snapshot, result_snapshot, net_cash_flow_monthly, pipeline_stage, created_at";
+  "id, address, title, property_type, purchase_price, form_snapshot, result_snapshot, net_cash_flow_monthly, pipeline_stage, is_completed, created_at";
 
 /**
- * Load the deal with the owned-deal close_date, tolerating the column not
- * existing yet (it ships in its own migration): a 42703 retries without it
- * and flags the owned-equity surfaces off — same tiered-select pattern as
- * the My Deals list. RLS + the user_id filter scope the read to the owner.
+ * Load the deal with the optional investor nickname (labels migration) and the
+ * owned-deal close_date (its own migration), tolerating either column not
+ * existing yet: a 42703 retries with fewer columns and flags the owned-equity
+ * surfaces off — same tiered-select pattern (most → least columns) as the My
+ * Deals list. RLS + the user_id filter scope the read to the owner.
  */
 async function fetchDeal(
   supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>,
@@ -169,13 +170,23 @@ async function fetchDeal(
       .eq("user_id", userId)
       .is("deleted_at", null)
       .maybeSingle();
+  const isMissingColumn = (error: { code?: string; message?: string } | null) =>
+    !!error && (error.code === "42703" || /column .* does not exist/i.test(error.message ?? ""));
 
-  const withClose = await run(`${DEAL_SELECT}, close_date`);
-  const missingColumn =
-    !!withClose.error &&
-    (withClose.error.code === "42703" ||
-      /column .* does not exist/i.test(withClose.error.message ?? ""));
-  if (!missingColumn) return { data: withClose.data, ownedEquityEnabled: true };
+  const WITH_LABELS_SELECT = `${DEAL_SELECT}, nickname`;
+  const full = await run(`${WITH_LABELS_SELECT}, close_date`);
+  if (!isMissingColumn(full.error)) return { data: full.data, ownedEquityEnabled: true };
+  // T2 succeeding pins T1's 42703 on close_date (equity stays off). T2
+  // failing means NICKNAME is the missing one — close_date may still exist
+  // (migrations applied out of order), so probe it alone before giving up
+  // on equity: the workspace tracked equity before nickname joined this
+  // select and must keep doing so.
+  const withLabels = await run(WITH_LABELS_SELECT);
+  if (!isMissingColumn(withLabels.error)) return { data: withLabels.data, ownedEquityEnabled: false };
+  const withCloseOnly = await run(`${DEAL_SELECT}, close_date`);
+  if (!isMissingColumn(withCloseOnly.error)) {
+    return { data: withCloseOnly.data, ownedEquityEnabled: true };
+  }
   const base = await run(DEAL_SELECT);
   return { data: base.data, ownedEquityEnabled: false };
 }
@@ -231,12 +242,24 @@ export default async function DealWorkspacePage({
     result_snapshot: Record<string, unknown> | null;
     net_cash_flow_monthly: number | null;
     pipeline_stage: string | null;
+    is_completed: boolean | null;
     created_at: string | null;
+    /** Investor nickname — absent until the labels migration is applied. */
+    nickname?: string | null;
     /** Owned-deal close date — absent until its migration is applied. */
     close_date?: string | null;
   };
-  const heading = dealRow.address?.trim() || dealRow.title?.trim() || "Untitled property";
+  // Nickname leads (same convention as My Deals rows); the address drops to a
+  // secondary line under the h1 so the property is still identifiable.
+  const nickname = typeof dealRow.nickname === "string" && dealRow.nickname.trim() ? dealRow.nickname.trim() : null;
+  const addressLabel = dealRow.address?.trim() || dealRow.title?.trim() || "Untitled property";
+  const heading = nickname ?? addressLabel;
   const stage = isPipelineStage(dealRow.pipeline_stage) ? dealRow.pipeline_stage : null;
+  // Lifecycle has two dimensions: pipeline_stage (Pro pipeline plans) and
+  // is_completed (the plain Status select syncs only this flag, never stage).
+  // Treat a status-completed deal exactly like stage === "closed" so this
+  // page agrees with the My Deals row for the same deal.
+  const isClosedDeal = stage === "closed" || dealRow.is_completed === true;
   const canUsePipeline = hasPlanFeature(entitlements, "pipeline");
 
   // Recommended next step from the saved underwrite (cash flow + DSCR),
@@ -286,17 +309,17 @@ export default async function DealWorkspacePage({
   // as "Cash"); null (legacy snapshot without dscr) omits the tile.
   const dscrDisplay = dscr == null ? null : dscr <= 0 ? "Cash" : dscr.toFixed(2);
 
-  // Owned equity (M3-2/WOW-4) — closed deals only. ONE definition of owned
-  // equity everywhere: the shared computeRowEquity (lib/owned-equity-series)
-  // that My Deals and the dashboard home use. The workspace's closed-stage
-  // gate stands in for is_completed (this page keys on pipeline_stage, and
-  // the old inline derivation never checked the flag either). Null when the
-  // legacy snapshot doesn't validate or the date is malformed — the card
-  // still renders the close date, just without an equity figure.
+  // Owned equity (M3-2/WOW-4) — closed/completed deals only. ONE definition of
+  // owned equity everywhere: the shared computeRowEquity (lib/owned-equity-
+  // series) that My Deals and the dashboard home use. isClosedDeal covers both
+  // lifecycle dimensions (stage === "closed" OR is_completed) so a deal marked
+  // Completed via the Status select gets the same card the list row shows.
+  // Null when the legacy snapshot doesn't validate or the date is malformed —
+  // the card still renders the close date, just without an equity figure.
   const closeDate =
     ownedEquityEnabled && typeof dealRow.close_date === "string" ? dealRow.close_date : null;
   const ownedEquity: OwnedEquitySummary | null =
-    stage === "closed" && closeDate
+    isClosedDeal && closeDate
       ? computeRowEquity({
           is_completed: true,
           close_date: closeDate,
@@ -356,14 +379,15 @@ export default async function DealWorkspacePage({
   // when set, else break-even cash flow + DSCR 1.25 — see lib/mao-targets)
   // from the SAME current-engine form snapshot everything above recomputes
   // from. Server-side and pure; solver failure or a legacy snapshot simply
-  // hides the line. Shopping stages only — a closed or passed deal has no
-  // offer left to make.
+  // hides the line. Shopping stages only — a closed, completed, or passed
+  // deal has no offer left to make (a status-completed deal keeps stage null,
+  // so the stage check alone would show shopping advice on an owned deal).
   type MaoLine =
     | { kind: "cut"; maxPrice: number; asking: number | null; discountPct: number | null }
     | { kind: "clears"; maxPrice: number | null };
   let maoLine: MaoLine | null = null;
   let maoBasisLabel = "";
-  if (formValues && (stage == null || isActiveStage(stage))) {
+  if (formValues && !isClosedDeal && (stage == null || isActiveStage(stage))) {
     const maoTarget = buildMaoTarget(maoBasisBox, { isCashPurchase });
     // Credit the buy box only when it actually shaped the target — a
     // DSCR-only box on a cash deal falls back to the default floor, and
@@ -398,7 +422,9 @@ export default async function DealWorkspacePage({
     dscr,
     monthlyPayment,
     meetsBuyBox: buyBoxFit ? buyBoxFit.anyPass : null,
-    stage: stage ?? undefined,
+    // Status-completed deals get the closed-stage advice (track equity), not
+    // shopping-stage advice — same lifecycle merge as the equity card below.
+    stage: isClosedDeal ? "closed" : (stage ?? undefined),
     // With a close date recorded the banner stops instructing the user to
     // add one directly above the equity card that already shows it.
     hasCloseDate: closeDate != null,
@@ -432,6 +458,9 @@ export default async function DealWorkspacePage({
                 <h1 className="mt-1 truncate text-xl font-extrabold tracking-tight text-foreground sm:text-2xl">
                   {heading}
                 </h1>
+                {nickname ? (
+                  <p className="truncate text-xs text-muted-foreground">{addressLabel}</p>
+                ) : null}
                 <p className="text-xs text-muted-foreground">
                   Everything for this deal — checklist, documents, notes &amp; scenarios.
                 </p>
@@ -483,7 +512,7 @@ export default async function DealWorkspacePage({
               // offered while there's still a date to add and the close_date
               // migration is live.
               cta={
-                stage === "closed" && ownedEquityEnabled && !closeDate
+                isClosedDeal && ownedEquityEnabled && !closeDate
                   ? { label: "Add close date", href: "#owned-equity" }
                   : undefined
               }
@@ -545,10 +574,10 @@ export default async function DealWorkspacePage({
               </div>
             ) : null}
           </div>
-          {/* Owned equity (M3-2/WOW-4): closed deals capture their close date
-              and see the equity estimate on the page that told them to.
-              Hidden until the close_date migration is applied. */}
-          {stage === "closed" && ownedEquityEnabled ? (
+          {/* Owned equity (M3-2/WOW-4): closed/completed deals capture their
+              close date and see the equity estimate on the page that told them
+              to. Hidden until the close_date migration is applied. */}
+          {isClosedDeal && ownedEquityEnabled ? (
             <OwnedEquityCard savedDealId={dealRow.id} closeDate={closeDate} equity={ownedEquity} />
           ) : null}
           <DealAgingNudge

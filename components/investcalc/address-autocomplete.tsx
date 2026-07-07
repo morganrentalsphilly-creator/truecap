@@ -17,6 +17,7 @@
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { Input } from "@/components/ui/input";
+import { deriveStateFromAddress } from "@/lib/buy-box";
 import { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { cn } from "@/lib/utils";
 
@@ -160,7 +161,12 @@ export function AddressAutocomplete({
   const hasSuggestions = open && predictions.length > 0;
 
   // react-hook-form binding
-  const { ref: rhfRef, onChange: rhfOnChange, ...registerRest } = form.register("address");
+  const {
+    ref: rhfRef,
+    onChange: rhfOnChange,
+    onBlur: rhfOnBlur,
+    ...registerRest
+  } = form.register("address");
   const setInputRef = useCallback(
     (el: HTMLInputElement | null) => {
       inputRef.current = el;
@@ -168,6 +174,13 @@ export function AddressAutocomplete({
     },
     [rhfRef]
   );
+  // True only while the field holds text the USER typed that hasn't been
+  // committed yet (suggestion pick or typed-address commit consumes it).
+  // This is the blur-commit's gate: programmatically-set addresses (loaded
+  // saved deal, fork reset, draft restore) must NOT re-enrich on a mere
+  // focus-blur — enrichment overwrites property tax by design, so a
+  // committed loaded deal's hand-tuned tax would be silently clobbered.
+  const typedSinceCommitRef = useRef(false);
 
   // Google Maps Places is DEFERRED from mount to first interaction with the
   // address field. Loading it on mount pulled hundreds of KB of Maps JS on
@@ -293,6 +306,8 @@ export function AddressAutocomplete({
 
     const value = e.target.value;
     lastValueRef.current = value;
+    // A real keystroke/paste in the field — arms the typed-address commit.
+    typedSinceCommitRef.current = true;
     // Belt-and-suspenders: also kick off the deferred load here — covers paste /
     // programmatic value changes that don't fire a focus event first.
     loadScript();
@@ -319,6 +334,7 @@ export function AddressAutocomplete({
       sessionTokenRef.current = null; // Reset for next selection cycle
 
       if (place.formattedAddress) {
+        typedSinceCommitRef.current = false;
         form.setValue("address", place.formattedAddress, {
           shouldDirty: true,
           shouldTouch: true,
@@ -346,6 +362,7 @@ export function AddressAutocomplete({
       // Fall back to the prediction text
       const text = prediction.text?.toString();
       if (text) {
+        typedSinceCommitRef.current = false;
         form.setValue("address", text, {
           shouldDirty: true,
           shouldTouch: true,
@@ -384,8 +401,49 @@ export function AddressAutocomplete({
     return out;
   };
 
+  /**
+   * Typed-address commit (TYPED-ADDRESS-NEVER-ENRICHES): enrichment used to
+   * fire ONLY from a Google suggestion pick. A pasted or fully-typed address
+   * that never touches the dropdown — the common mobile paste-from-Zillow
+   * path, and the ONLY path when an ad blocker keeps the Maps script out —
+   * silently skipped the whole auto-fill loop (rate, taxes, rent, receipt).
+   * On blur / Enter-without-suggestions, parse state + ZIP straight from the
+   * text and hand it to onPlaceSelected like a selection. State-or-ZIP is
+   * required (that's what tax + HUD rent key on; FRED needs nothing), so a
+   * half-typed street never triggers a junk lookup. Gated on
+   * typedSinceCommitRef so only user-typed text commits — and each typing
+   * burst commits at most once (the gates below intentionally DON'T consume
+   * the flag, so a still-incomplete address can commit on a later blur once
+   * it's finished).
+   */
+  const commitTypedAddress = () => {
+    if (!onPlaceSelected) return;
+    if (!typedSinceCommitRef.current) return;
+    const value = (inputRef.current?.value ?? "").trim();
+    if (value.length < 8 || !/\d/.test(value)) return;
+    const state = deriveStateFromAddress(value) ?? undefined;
+    // Prefer the ZIP right after the state code ("PA 19140"); else accept a
+    // trailing 5-digit group. Never grab a leading street number.
+    const zip =
+      value.match(/[A-Za-z]{2}\s+(\d{5})(?:-\d{4})?\b/)?.[1] ??
+      value.match(/(\d{5})(?:-\d{4})?\s*$/)?.[1];
+    if (!state && !zip) return;
+    typedSinceCommitRef.current = false;
+    void Promise.resolve(
+      onPlaceSelected({ formattedAddress: value, state, zip })
+    ).catch((err) => {
+      console.warn("[AddressAutocomplete] typed-address commit failed:", err);
+    });
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (!open || predictions.length === 0) return;
+    if (!open || predictions.length === 0) {
+      // No dropdown to drive — an Enter here submits the form with whatever
+      // was typed, so commit it for enrichment on the way out. Auto-filled
+      // values repaint via the live recompute even if the run starts first.
+      if (e.key === "Enter") commitTypedAddress();
+      return;
+    }
     if (e.key === "ArrowDown") {
       e.preventDefault();
       setHighlight((h) => (h + 1) % predictions.length);
@@ -420,6 +478,12 @@ export function AddressAutocomplete({
         aria-describedby={hasError && errorId ? errorId : undefined}
         aria-required={required || undefined}
         onChange={handleInputChange}
+        onBlur={(e) => {
+          rhfOnBlur(e);
+          // Suggestion taps preventDefault on mousedown (input keeps focus),
+          // so reaching here means the user left the field with typed text.
+          commitTypedAddress();
+        }}
         onFocus={() => {
           loadScript();
           if (predictions.length > 0) setOpen(true);

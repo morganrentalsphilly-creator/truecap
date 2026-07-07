@@ -158,15 +158,24 @@ export function PropertyCompsCard({
   if (!enabled || !address || unavailable) return null;
 
   const pull = () => {
+    // Captured at click time: a slow RentCast roundtrip must not attach its
+    // result to whatever address the analyzer moved on to mid-flight — the
+    // same stale-response contract as the saved-comps load effect above
+    // (comps ground Deal Q&A answers, so a mismatch is confidently wrong).
+    const pulledAddress = address;
     startLoading(async () => {
       const r = await getPropertyCompsAction({
-        address,
+        address: pulledAddress,
         propertyType,
         bedrooms: bedrooms ?? undefined,
         bathrooms: bathrooms ?? undefined,
         squareFootage: squareFootage ?? undefined,
         dealId: savedDealId ?? undefined,
       });
+      // Address changed while the pull was in flight → the result (or its
+      // error) belongs to the previous deal; drop it silently — the
+      // address-change effect above already cleared the display.
+      if (lastAddressRef.current !== pulledAddress) return;
       if (!r.ok) {
         if (r.code === "NOT_CONFIGURED") {
           setUnavailable(true);

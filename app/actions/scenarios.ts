@@ -22,7 +22,12 @@ import { toServerErrorResult } from "@/lib/db-error";
  */
 
 import { z } from "zod";
-import { getEntitlementsForUser, hasPlanFeature } from "@/lib/entitlements";
+import {
+  getEntitlementsForUser,
+  getSavedDealLimitLabel,
+  hasPlanFeature,
+  hasSavedDealCapacity,
+} from "@/lib/entitlements";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { defaultScenarioName, isStrategyKind } from "@/lib/strategy-kinds";
 import { applyStrategyPreset } from "@/lib/scenario-presets";
@@ -53,6 +58,7 @@ export type AddScenarioResult =
       code:
         | "SIGN_IN_REQUIRED"
         | "ENTITLEMENT_REQUIRED"
+        | "ENTITLEMENT_SAVE"
         | "MIGRATION_PENDING"
         | "NOT_FOUND"
         | "DUPLICATE_SCENARIO_NAME"
@@ -268,6 +274,24 @@ export async function addScenarioAction(input: unknown): Promise<AddScenarioResu
     return { ok: false, code: "DUPLICATE_SCENARIO_NAME", message: `You already have a "${scenarioName}" scenario for this property.` };
   }
 
+  // A scenario is a real saved_analyses row, so it spends saved-deal capacity —
+  // same count + gate (and same code/message) as saveDealAction's insert path.
+  const { count, error: countErr } = await supabase
+    .from("saved_analyses")
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", user.id)
+    .is("deleted_at", null);
+  if (countErr) {
+    return { ok: false, code: "SERVER_ERROR", message: countErr.message };
+  }
+  if (!hasSavedDealCapacity(entitlements, count ?? 0)) {
+    return {
+      ok: false,
+      code: "ENTITLEMENT_SAVE",
+      message: `Saved deal limit reached for your plan (${getSavedDealLimitLabel(entitlements)}).`,
+    };
+  }
+
   // Clone the row: copy everything, strip identity/timestamps, override scenario fields.
   const clone: Record<string, unknown> = { ...deal };
   delete clone.id;
@@ -277,6 +301,13 @@ export async function addScenarioAction(input: unknown): Promise<AddScenarioResu
   clone.property_id = propertyId;
   clone.scenario_name = scenarioName;
   clone.strategy_kind = strategyKind;
+  // Never inherit the source deal's cached PDF: the export cache checks only
+  // pdf_url presence + version (no input hash), so a carried-over URL would
+  // serve the BASE case's report for this scenario. Same reset saveDealAction
+  // applies on every save — the scenario's first export regenerates.
+  clone.pdf_url = null;
+  clone.pdf_generated_at = null;
+  clone.pdf_snapshot_version = 0;
 
   // Apply the (conservative) strategy preset to the assumptions and RECOMPUTE
   // the stored metrics, so the new scenario doesn't show the source deal's

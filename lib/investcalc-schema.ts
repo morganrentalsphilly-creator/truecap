@@ -476,24 +476,18 @@ function normalizeUnit(raw: unknown): UnitValues {
   };
 }
 
-export function normalizeInvestmentFormSnapshot(raw: unknown): InvestmentFormValues | null {
-  const snapshot = asRecord(raw);
-  if (!snapshot) return null;
-
-  const propertyType =
-    snapshot.propertyType === "single-family" ||
-    snapshot.propertyType === "multi-family" ||
-    snapshot.propertyType === "owner-occupant"
-      ? snapshot.propertyType
-      : "single-family";
-
-  const units = Array.isArray(snapshot.units)
-    ? snapshot.units.map(normalizeUnit)
-    : getDefaultUnitsForPropertyType(propertyType);
-
-  const parsed = investmentFormSchema.safeParse({
-    ...defaultValues,
-    ...snapshot,
+/**
+ * The explicit per-field sanitization shared by the strict snapshot
+ * normalizer (below) and the lenient draft normalizer: every known field
+ * coerced to its expected primitive or dropped. Keeping ONE list means a
+ * new schema field only needs adding here.
+ */
+function sanitizeSnapshotFields(
+  snapshot: Record<string, unknown>,
+  propertyType: InvestmentFormValues["propertyType"],
+  units: UnitValues[]
+) {
+  return {
     propertyType,
     purchasePrice: asNumber(snapshot.purchasePrice),
     yearBuilt: asNumber(snapshot.yearBuilt),
@@ -523,12 +517,12 @@ export function normalizeInvestmentFormSnapshot(raw: unknown): InvestmentFormVal
     propertyTaxInputMode:
       snapshot.propertyTaxInputMode === "annual" || snapshot.propertyTaxInputMode === "percent"
         ? snapshot.propertyTaxInputMode
-        : "percent",
+        : ("percent" as const),
     propertyTaxAnnual: asNumber(snapshot.propertyTaxAnnual),
     insuranceInputMode:
       snapshot.insuranceInputMode === "monthly" || snapshot.insuranceInputMode === "percent"
         ? snapshot.insuranceInputMode
-        : "percent",
+        : ("percent" as const),
     insurancePct: asNumber(snapshot.insurancePct),
     insuranceMonthly: asNumber(snapshot.insuranceMonthly),
     hoaMonthly: asNumber(snapshot.hoaMonthly),
@@ -539,6 +533,28 @@ export function normalizeInvestmentFormSnapshot(raw: unknown): InvestmentFormVal
     rehabBudget: asNumber(snapshot.rehabBudget),
     units,
     templateId: typeof snapshot.templateId === "string" ? snapshot.templateId : undefined,
+  };
+}
+
+export function normalizeInvestmentFormSnapshot(raw: unknown): InvestmentFormValues | null {
+  const snapshot = asRecord(raw);
+  if (!snapshot) return null;
+
+  const propertyType =
+    snapshot.propertyType === "single-family" ||
+    snapshot.propertyType === "multi-family" ||
+    snapshot.propertyType === "owner-occupant"
+      ? snapshot.propertyType
+      : "single-family";
+
+  const units = Array.isArray(snapshot.units)
+    ? snapshot.units.map(normalizeUnit)
+    : getDefaultUnitsForPropertyType(propertyType);
+
+  const parsed = investmentFormSchema.safeParse({
+    ...defaultValues,
+    ...snapshot,
+    ...sanitizeSnapshotFields(snapshot, propertyType, units),
   });
 
   if (!parsed.success) return null;
@@ -549,6 +565,49 @@ export function normalizeInvestmentFormSnapshot(raw: unknown): InvestmentFormVal
     appreciationRatePct: data.appreciationRatePct ?? DEFAULT_APPRECIATION_RATE,
     sellingCostPct: data.sellingCostPct ?? DEFAULT_SELLING_COST_PCT,
   };
+}
+
+/**
+ * Lenient sibling of normalizeInvestmentFormSnapshot for the ANONYMOUS
+ * AUTO-SAVE DRAFT only. The draft exists precisely for interrupted sessions
+ * — and an interrupted form is usually schema-INCOMPLETE (address + price
+ * typed, rent not yet). The strict normalizer's full-schema gate rejected
+ * exactly those drafts and the restore path then wiped them: the user the
+ * feature was built for came back to an empty form.
+ *
+ * Field-level sanitization still applies (unknown keys dropped, wrong types
+ * dropped, enums checked) so form.reset only ever sees well-typed values;
+ * what's waived is only the cross-field completeness (rent present, address
+ * length) that Run/Save still enforce via the full schema.
+ */
+export function normalizeInvestmentFormDraft(raw: unknown): InvestmentFormValues | null {
+  const strict = normalizeInvestmentFormSnapshot(raw);
+  if (strict) return strict;
+
+  const snapshot = asRecord(raw);
+  if (!snapshot) return null;
+
+  const propertyType =
+    snapshot.propertyType === "single-family" ||
+    snapshot.propertyType === "multi-family" ||
+    snapshot.propertyType === "owner-occupant"
+      ? snapshot.propertyType
+      : "single-family";
+
+  const units = Array.isArray(snapshot.units)
+    ? snapshot.units.map(normalizeUnit)
+    : getDefaultUnitsForPropertyType(propertyType);
+
+  // No raw spread here: without a schema parse to strip unknown keys, only
+  // the explicit whitelist may reach form.reset. Address is sanitized by
+  // hand (it rides the raw spread in the strict path).
+  const address = typeof snapshot.address === "string" ? snapshot.address.slice(0, 300) : "";
+
+  return {
+    ...defaultValues,
+    address,
+    ...sanitizeSnapshotFields(snapshot, propertyType, units),
+  } as InvestmentFormValues;
 }
 
 export function getDefaultUnitsForPropertyType(propertyType: InvestmentFormValues["propertyType"]): UnitValues[] {

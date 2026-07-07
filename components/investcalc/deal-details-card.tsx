@@ -8,6 +8,7 @@
  * cards. Renders a graceful notice until the labels migration is applied.
  */
 import { useEffect, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { Loader2, MapPin } from "lucide-react";
 import { getDealLabelsAction, updateDealLabelsAction, type DealLabels } from "@/app/actions/deal-labels";
 import { useToast } from "@/hooks/use-toast";
@@ -16,6 +17,7 @@ import { Input } from "@/components/ui/input";
 const EMPTY: DealLabels = { nickname: null, market: null, neighborhood: null };
 
 export function DealDetailsCard({ savedDealId }: { savedDealId: string }) {
+  const router = useRouter();
   const { toast } = useToast();
   const [labels, setLabels] = useState<DealLabels>(EMPTY);
   const [loaded, setLoaded] = useState(false);
@@ -54,6 +56,10 @@ export function DealDetailsCard({ savedDealId }: { savedDealId: string }) {
         return;
       }
       setLabels(r.labels);
+      // The nickname leads the workspace h1 and the My Deals rows — both are
+      // server-rendered, so without a refresh the Router Cache keeps serving
+      // the old name on back-navigation until some other mutation purges it.
+      router.refresh();
     });
   };
 

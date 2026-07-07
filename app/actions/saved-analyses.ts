@@ -1208,21 +1208,38 @@ export async function listSavedDealsBriefAction(): Promise<ListSavedDealsBriefRe
   if (!user) {
     return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in." };
   }
-  const { data, error } = await supabase
-    .from("saved_analyses")
-    .select("id, address, title, pipeline_stage, created_at")
-    .eq("user_id", user.id)
-    .is("deleted_at", null)
-    .order("created_at", { ascending: false })
-    .limit(200);
+  const runQuery = (select: string) =>
+    supabase
+      .from("saved_analyses")
+      .select(select)
+      .eq("user_id", user.id)
+      .is("deleted_at", null)
+      .order("created_at", { ascending: false })
+      .limit(200);
+  // scenario_name ships in the properties/scenarios migration — retry without
+  // it (address-only labels) while the column doesn't exist yet.
+  let { data, error } = await runQuery("id, address, title, pipeline_stage, created_at, scenario_name");
+  if (error && (error.code === "42703" || /column .* does not exist/i.test(error.message ?? ""))) {
+    ({ data, error } = await runQuery("id, address, title, pipeline_stage, created_at"));
+  }
   if (error) {
     return toServerErrorResult(error, "saved-analyses");
   }
-  const deals: SavedDealBrief[] = (data ?? []).map((r) => {
-    const row = r as { id: string; address: string | null; title: string | null; pipeline_stage: string | null };
+  const deals: SavedDealBrief[] = ((data ?? []) as unknown[]).map((r) => {
+    const row = r as {
+      id: string;
+      address: string | null;
+      title: string | null;
+      pipeline_stage: string | null;
+      scenario_name?: string | null;
+    };
+    const base = row.address?.trim() || row.title?.trim() || "Untitled property";
+    // Sibling scenarios share one address — the scenario name keeps picker
+    // rows tellable apart (matches the My Deals row suffix).
+    const scenario = typeof row.scenario_name === "string" ? row.scenario_name.trim() : "";
     return {
       id: row.id,
-      label: row.address?.trim() || row.title?.trim() || "Untitled property",
+      label: scenario ? `${base} — ${scenario}` : base,
       pipelineStage: row.pipeline_stage ?? null,
     };
   });

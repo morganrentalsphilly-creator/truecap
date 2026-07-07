@@ -24,6 +24,7 @@ import {
   defaultValues,
   getDefaultUnitsForPropertyType,
   isValidRentalUnit,
+  normalizeInvestmentFormDraft,
   normalizeInvestmentFormSnapshot,
 } from "@/lib/investcalc-schema";
 import { calculateAnalysis, AnalysisResult } from "@/lib/calc-analysis";
@@ -807,9 +808,15 @@ export function InvestCalcPage({
   // via the same pure lib function the action wraps.
 
   const loadDealScore = async (values: InvestmentFormValues, result: AnalysisResult) => {
+    // Stale-completion guard (same contract as performSaveDeal's
+    // saveGeneration): "Analyze another like this" mid-roundtrip clears
+    // dealScoreResult via clearAnalysisOutputs — a late response must not
+    // repopulate the OLD deal's score under the forked form.
+    const scoreGeneration = forkGenerationRef.current;
     setIsLoadingDealScore(true);
     try {
       const dealScore = await getDealScoreAction(buildDealScoreInputFromAnalysis(values, result));
+      if (forkGenerationRef.current !== scoreGeneration) return;
       setDealScoreResult(dealScore);
     } catch (err) {
       // Swallow + log instead of throwing - there are 4+ call sites,
@@ -819,7 +826,7 @@ export function InvestCalcPage({
       // the score load silently is the right user-visible behavior:
       // the deal still computes, the score card just stays empty.
       console.warn("[deal-score] load failed:", err);
-      setDealScoreResult(null);
+      if (forkGenerationRef.current === scoreGeneration) setDealScoreResult(null);
     } finally {
       setIsLoadingDealScore(false);
     }
@@ -957,6 +964,20 @@ export function InvestCalcPage({
       // its units against the PREVIOUS deal's market benchmark.
       setUnitFmrByBedrooms(null);
       unitFmrKeyRef.current = null;
+      // …and the enrichment TRIGGERS, not just the captures — the same
+      // guarantee the fork path gives. With the old refs armed, typing
+      // bedrooms (or hand-typing the next address without picking a
+      // suggestion) re-ran enrichment against the PREVIOUS deal's place:
+      // wrong-state tax and wrong-county HUD rent onto the fresh form,
+      // with a toast claiming they came "from address".
+      lastSelectedAddressRef.current = null;
+      lastEnrichedAddressRef.current = null;
+      lastEnrichedGeoRef.current = null;
+      // The welcome-back banner names a draft this reset just wiped
+      // (clearCalcDraftRaw above) — left set, it resurrects over the blank
+      // form claiming the old address's draft "is ready".
+      setRestoredFromDraft(false);
+      setRestoredAddress(null);
       // Phase-4 hero listing-link toggle: a stale URL row (especially its
       // red parse-error state) otherwise survives New Analysis and keeps the
       // fresh hero's address input CSS-hidden behind it (BROWSER-3).
@@ -1022,6 +1043,16 @@ export function InvestCalcPage({
   // provenance — the hero/listing path otherwise leaked the prior address's
   // sourcing into the data-confidence badge + saved deal.
   const lastEnrichedAddressRef = useRef<string | null>(null);
+  // Geo facts of that same enrichment, kept so the swap-clear below can tell
+  // "same property, different formatting" (typed commit → Google re-pick of
+  // the identical address) from a real move: the formatted STRING differs in
+  // both cases, but street number + ZIP don't lie. Cleared wherever
+  // lastEnrichedAddressRef is.
+  const lastEnrichedGeoRef = useRef<{
+    state?: string;
+    zip?: string;
+    streetNum: string | null;
+  } | null>(null);
 
   /**
    * Run the enrichment lookups (state property tax, FRED mortgage rate,
@@ -1031,27 +1062,94 @@ export function InvestCalcPage({
    */
   const runPropertyEnrichment = useCallback(
     async (place: SelectedAddress, opts?: { silent?: boolean }) => {
+      // Captured for the post-await staleness check below. Callers set
+      // lastSelectedAddressRef to `place` BEFORE calling (autocomplete pick,
+      // typed-address commit, hero/listing handoff, bedrooms watcher), so an
+      // identity compare after the roundtrip detects a newer selection.
+      const enrichGeneration = forkGenerationRef.current;
       // New address → clear the previous address's captured provenance + market
       // rent BEFORE repopulating, so the confidence badge can't attribute the
       // old "from <addr>" sourcing to this deal (every enrichment path, incl.
       // the hero/listing handoff, funnels through here).
       const placeKey = place.formattedAddress ?? `${place.state ?? ""}:${place.county ?? ""}:${place.zip ?? ""}`;
       if (lastEnrichedAddressRef.current !== placeKey) {
+        // The formatted string changed — but that alone can't distinguish a
+        // real move from the SAME property re-picked with different
+        // formatting (typed commit "…PA 19140" → Google's "…PA 19140, USA"
+        // — the default flow now that pasted addresses commit on blur).
+        // Compare geo facts: same street number + same ZIP ⇒ same property;
+        // same ZIP + state ⇒ same market (HUD SAFMR and state tax are
+        // ZIP/state-granular, so market values stay valid across it).
+        // null prior means first selection or a loaded saved deal
+        // (form.reset leaves everything non-dirty), which must never clear.
+        const prevGeo = lastEnrichedGeoRef.current;
+        const streetNum = place.formattedAddress?.trim().match(/^(\d+)/)?.[1] ?? null;
+        const sameProperty =
+          prevGeo !== null &&
+          prevGeo.zip !== undefined &&
+          prevGeo.zip === place.zip &&
+          prevGeo.streetNum !== null &&
+          prevGeo.streetNum === streetNum;
+        const sameMarket =
+          sameProperty ||
+          (prevGeo !== null &&
+            prevGeo.zip !== undefined &&
+            prevGeo.zip === place.zip &&
+            prevGeo.state === place.state);
+        const isSwap = lastEnrichedAddressRef.current !== null && !sameProperty;
         enrichmentCaptureRef.current = {};
         setMarketRentEstimate(null);
         setUnitFmrByBedrooms(null);
         unitFmrKeyRef.current = null;
         lastEnrichedAddressRef.current = placeKey;
+        lastEnrichedGeoRef.current = { state: place.state, zip: place.zip, streetNum };
+        if (isSwap) {
+          // Auto-filled values describe the OLD property/market and must not
+          // survive the swap: HUD/comps fills use shouldDirty:false while
+          // user typing sets dirty, so non-dirty is exactly "not the user's
+          // number". Price/beds/baths/sqft are the old property's identity
+          // facts (applyComps writes them non-dirty too) — cleared on any
+          // property change. Rent is market-priced; it only clears when the
+          // MARKET actually changed (a same-ZIP move keeps the same HUD
+          // figure), and refills from the new market further down this call.
+          const clearOpts = {
+            shouldDirty: false,
+            shouldTouch: false,
+            shouldValidate: false,
+          } as const;
+          const dirty = form.formState.dirtyFields;
+          if (!sameMarket && !dirty.monthlyRent) {
+            form.setValue("monthlyRent", undefined, clearOpts);
+          }
+          if (!dirty.purchasePrice) {
+            form.setValue("purchasePrice", undefined as unknown as number, clearOpts);
+          }
+          if (!dirty.bedrooms) form.setValue("bedrooms", undefined, clearOpts);
+          if (!dirty.bathrooms) form.setValue("bathrooms", undefined, clearOpts);
+          if (!dirty.sqft) form.setValue("sqft", undefined, clearOpts);
+          const units = form.getValues("units") ?? [];
+          for (let i = 0; i < units.length; i++) {
+            if (!isEmptyNumber(units[i]?.monthlyRent) && !dirty.units?.[i]?.monthlyRent) {
+              form.setValue(`units.${i}.monthlyRent`, undefined, clearOpts);
+            }
+          }
+        }
       }
       const currentPropertyType = form.getValues("propertyType");
       const isSingleFamily = currentPropertyType === "single-family";
       const rawBedrooms = isSingleFamily ? form.getValues("bedrooms") : undefined;
-      const bedrooms =
+      // valueAsNumber yields NaN for an EMPTY bedrooms input — and NaN fails
+      // the action's z.number() input check, which used to reject the WHOLE
+      // payload: address-selection enrichment silently returned nothing (no
+      // rate, no tax) until the bedrooms watcher re-fired with a real count
+      // (ENRICH-NAN-BEDROOMS-EMPTY-RESULT). Send undefined instead.
+      const parsedBedrooms =
         typeof rawBedrooms === "number"
           ? rawBedrooms
           : rawBedrooms != null
           ? Number(rawBedrooms)
           : undefined;
+      const bedrooms = Number.isFinite(parsedBedrooms) ? parsedBedrooms : undefined;
 
       const enrichment = await enrichPropertyAction({
         state: place.state,
@@ -1061,6 +1159,19 @@ export function InvestCalcPage({
         bedrooms,
       });
 
+      // Stale-completion guard (same contract as performSaveDeal's
+      // saveGeneration): "Analyze another like this" or a newer address
+      // selection while this roundtrip was in flight means these results
+      // describe a deal the user already left — writing them would fill the
+      // fresh form with the OLD market's tax/rate/rent under a misleading
+      // "Auto-filled from address" toast.
+      if (
+        forkGenerationRef.current !== enrichGeneration ||
+        lastSelectedAddressRef.current !== place
+      ) {
+        return;
+      }
+
       const setOpts = {
         shouldDirty: false,
         shouldTouch: false,
@@ -1068,19 +1179,28 @@ export function InvestCalcPage({
       };
       const filled: string[] = [];
 
-      // Property tax - always overwrite with the state-level rate.
-      // Defaults baked into the form schema aren't location-aware, so the
-      // state rate is strictly more informative.
+      // Property tax - overwrite the schema default with the state-level
+      // rate (defaults aren't location-aware, so the state rate is strictly
+      // more informative) but never a manual edit — the same dirtyFields
+      // contract interestRate gets below. Tax is editable in TWO modes
+      // (percent / annual $), so a user-typed value in either one blocks
+      // the overwrite; the bedrooms watcher re-runs this whole function
+      // mid-deal and would otherwise silently revert a corrected rate.
       if (enrichment.propertyTaxPct !== undefined) {
-        form.setValue("propertyTaxPct", enrichment.propertyTaxPct, setOpts);
-        enrichmentCaptureRef.current.propertyTaxPct = {
-          source: "state-static",
-          detail: enrichment.meta.propertyTax?.state,
-          value: enrichment.propertyTaxPct,
-        };
-        filled.push(
-          `Property tax ${enrichment.propertyTaxPct.toFixed(2)}% (${enrichment.meta.propertyTax?.state})`
-        );
+        const taxEdited =
+          form.formState.dirtyFields.propertyTaxPct ||
+          form.formState.dirtyFields.propertyTaxAnnual;
+        if (!taxEdited) {
+          form.setValue("propertyTaxPct", enrichment.propertyTaxPct, setOpts);
+          enrichmentCaptureRef.current.propertyTaxPct = {
+            source: "state-static",
+            detail: enrichment.meta.propertyTax?.state,
+            value: enrichment.propertyTaxPct,
+          };
+          filled.push(
+            `Property tax ${enrichment.propertyTaxPct.toFixed(2)}% (${enrichment.meta.propertyTax?.state})`
+          );
+        }
       }
 
       // Interest rate - overwrite unless the user has manually edited it.
@@ -2265,6 +2385,11 @@ export function InvestCalcPage({
       autoApplyEligibleRef.current = true;
       queueMicrotask(() => {
         isProgrammaticResetRef.current = false;
+        // Form the live verdict from the handed-off numbers right away —
+        // the preview normally only wakes on the first keystroke, leaving
+        // a pre-filled form with no numbers anywhere (same contract as the
+        // draft restore below: preview yes, full auto-run no).
+        recomputeOutputsFromFormRef.current();
       });
       return;
     }
@@ -2277,7 +2402,11 @@ export function InvestCalcPage({
     if (autoDraftRaw) {
       try {
         const parsedDraft = JSON.parse(autoDraftRaw) as unknown;
-        const normalized = normalizeInvestmentFormSnapshot(parsedDraft);
+        // Lenient normalizer: an interrupted draft is usually
+        // schema-INCOMPLETE (address + price, no rent yet) — the strict
+        // snapshot gate rejected exactly the drafts this feature exists
+        // for and the catch below then wiped them.
+        const normalized = normalizeInvestmentFormDraft(parsedDraft);
         if (normalized) {
           prevPropertyTypeRef.current = normalized.propertyType;
           form.reset(normalized);
@@ -2328,9 +2457,15 @@ export function InvestCalcPage({
           // Don't auto-calculate - restoring inputs is the contract,
           // running the analysis is the user's intent click. Auto-
           // calculating would race with the loading-spinner UI and
-          // ambush the user with results they didn't ask for.
+          // ambush the user with results they didn't ask for. The LIVE
+          // PREVIEW is different: it's the same pure-client math that
+          // forms beside the user's hands as they type, so a restored
+          // draft should come back with its verdict already forming —
+          // not a full form with zero numbers until the first keystroke
+          // (RESTORED-DRAFT-NO-LIVE-VERDICT).
           queueMicrotask(() => {
             isProgrammaticResetRef.current = false;
+            recomputeOutputsFromFormRef.current();
           });
           return;
         }
@@ -2503,6 +2638,10 @@ export function InvestCalcPage({
     setIsLoadingDealScore(true);
     setShowResults(false);
     setDealScoreResult(null);
+    // For the post-await completion toast below: a fork during the deal-score
+    // roundtrip must not fire "Analysis Complete" for the deal the user just
+    // left (TOAST_LIMIT=1 — it would evict the fork's "Assumptions kept").
+    const runGeneration = forkGenerationRef.current;
 
     // Consume the sample-deal Pro preview arm flag FIRST so it can never
     // leak onto a later run if anything below throws. One sample click =
@@ -2624,6 +2763,10 @@ export function InvestCalcPage({
       } else {
         await loadDealScore(values, result);
       }
+      // Forked away while the score loaded → the toast (and the results
+      // scroll below, which no-ops on the unmounted dashboard) belong to a
+      // deal that's no longer on screen.
+      if (forkGenerationRef.current !== runGeneration) return;
       toast({
         title: "Analysis Complete",
         description: `Net cash flow: $${result.netCashFlow.toLocaleString()}/mo | CoC: ${result.cocReturn.toFixed(1)}%`,
@@ -2729,10 +2872,18 @@ export function InvestCalcPage({
       }
     }
     const firstFieldError = findFirstFieldError(errors);
+    // Short-term play + both STR inputs empty: the schema's STR detection
+    // keys on field PRESENCE, so it falls through to "Enter monthly rent" —
+    // but in STR mode the rent input is CSS-hidden (setFocus on display:none
+    // is a silent no-op), the exact HIDDEN-FIELD-VALIDATION-DEADEND class.
+    // Route the error to the visible STR inputs instead: focus the nightly
+    // rate and say what the play actually needs.
+    const strHiddenRentError =
+      firstFieldError?.path === "monthlyRent" && activeStrategy?.incomeMode === "str";
     if (!hasUnitFieldErrors && firstFieldError?.path) {
       // Opens the collapsed Advanced Options section first when the invalid
       // field (financing / expenses / SF bathrooms+sqft) lives inside it.
-      focusInvalidField(firstFieldError.path);
+      focusInvalidField(strHiddenRentError ? "avgDailyRate" : firstFieldError.path);
     }
 
     // Address-only block: the live preview already showed the verdict on
@@ -2755,10 +2906,11 @@ export function InvestCalcPage({
 
     toast({
       title: "Validation Error",
-      description:
-        unitsErrorMessage ??
-        firstFieldError?.message ??
-        "Please fix the highlighted fields before calculating.",
+      description: strHiddenRentError
+        ? "Enter a nightly rate and occupancy % for the short-term play."
+        : unitsErrorMessage ??
+          firstFieldError?.message ??
+          "Please fix the highlighted fields before calculating.",
       variant: "destructive",
     });
   };
@@ -3372,6 +3524,7 @@ export function InvestCalcPage({
     // old county — silently judging the next deal against the wrong market.
     lastSelectedAddressRef.current = null;
     lastEnrichedAddressRef.current = null;
+    lastEnrichedGeoRef.current = null;
     setPriceEstimated(false);
     setEstimatedPriceValue(null);
     setPriceEstimateBasis(null);

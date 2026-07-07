@@ -13,6 +13,7 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { GitCompare, Layers, Loader2, Plus } from "lucide-react";
 import {
   addScenarioAction,
@@ -29,6 +30,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
+  const router = useRouter();
   const { toast } = useToast();
   const [loaded, setLoaded] = useState(false);
   const [hidden, setHidden] = useState(false);
@@ -83,6 +85,9 @@ export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
       setAdding(false);
       toast({ title: "Scenario added", description: "Open it to adjust assumptions for that strategy." });
       refresh();
+      // A scenario is a new saved_analyses row: the persistent dashboard
+      // layout's My Deals count badge only updates via a server refetch.
+      router.refresh();
     });
   }
 

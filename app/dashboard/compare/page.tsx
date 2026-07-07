@@ -87,7 +87,14 @@ type SavedAnalysisRow = {
   insurance_input_mode?: string | null;
   insurance_pct?: number | string | null;
   insurance_mo?: number | string | null;
+  /** Workspace-scenario label (optional; ships with the properties/scenarios
+   *  migration). Sibling scenarios share one address — this tells them apart. */
+  scenario_name?: string | null;
 };
+
+function isMissingColumnError(error: { code?: string; message?: string } | null): boolean {
+  return !!error && (error.code === "42703" || /column .* does not exist/i.test(error.message ?? ""));
+}
 
 function toNumber(value: number | string | null | undefined): number | null {
   if (value == null || value === "") return null;
@@ -178,6 +185,10 @@ function mapDeal(row: SavedAnalysisRow): CompareDealViewModel {
       row.address?.trim() && row.title?.trim() && row.title.trim() !== row.address.trim()
         ? row.title.trim()
         : row.address?.trim() || row.title?.trim() || "Untitled Property",
+    // Workspace scenarios clone the title verbatim, so the differing-title
+    // trick above can't tell them apart — the scenario name rides separately.
+    scenarioName:
+      typeof row.scenario_name === "string" && row.scenario_name.trim() ? row.scenario_name.trim() : null,
     createdAt: row.created_at,
     propertyType: row.property_type,
     purchasePrice,
@@ -223,35 +234,45 @@ export default async function DashboardComparePage() {
   if (ids.length < 1) {
     // Inline picker: load the user's saved deals so they can choose 2-4 to
     // compare right here, instead of being bounced to Saved Analyses and back.
-    const { data: pickerRows } = await supabase
-      .from("saved_analyses")
-      .select("id, address, title, net_cash_flow_monthly, result_snapshot, form_snapshot")
-      .eq("user_id", user.id)
-      .is("deleted_at", null)
-      .eq("is_completed", false)
-      .eq("is_archived", false)
-      .order("created_at", { ascending: false });
+    // scenario_name ships in its own migration — retry without it on 42703.
+    const PICKER_SELECT = "id, address, title, net_cash_flow_monthly, result_snapshot, form_snapshot";
+    const runPickerQuery = (select: string) =>
+      supabase
+        .from("saved_analyses")
+        .select(select)
+        .eq("user_id", user.id)
+        .is("deleted_at", null)
+        .eq("is_completed", false)
+        .eq("is_archived", false)
+        .order("created_at", { ascending: false });
+    let { data: pickerRows, error: pickerError } = await runPickerQuery(`${PICKER_SELECT}, scenario_name`);
+    if (isMissingColumnError(pickerError)) {
+      ({ data: pickerRows, error: pickerError } = await runPickerQuery(PICKER_SELECT));
+    }
 
-    const pickerDeals: ComparePickerDeal[] = (pickerRows ?? []).map((r) => {
+    const pickerDeals: ComparePickerDeal[] = ((pickerRows ?? []) as unknown[]).map((row) => {
+      const r = row as SavedAnalysisRow;
       const snap = (r.result_snapshot ?? {}) as ResultSnapshot;
       // Recompute with the current engine so the picker score matches the
       // Compare results + Dashboard (not the stale stored snapshot).
-      const recomputed = recomputeSavedDealVerdict((r as { form_snapshot?: unknown }).form_snapshot);
+      const recomputed = recomputeSavedDealVerdict(r.form_snapshot);
       const score = recomputed ? recomputed.score : toNumber(snap.score);
       const rec: StoredRecommendation | null = recomputed
         ? recomputed.recommendation
         : (snap.recommendation ?? null);
+      const baseLabel = r.address?.trim() || r.title?.trim() || "Untitled Property";
+      const scenario =
+        typeof r.scenario_name === "string" && r.scenario_name.trim() ? r.scenario_name.trim() : null;
       return {
-        id: r.id as string,
-        label:
-          (r.address as string | null)?.trim() ||
-          (r.title as string | null)?.trim() ||
-          "Untitled Property",
+        id: r.id,
+        // Sibling scenarios share one address — suffix the scenario name so
+        // picker rows stay tellable apart (matches the My Deals row suffix).
+        label: scenario ? `${baseLabel} — ${scenario}` : baseLabel,
         score,
         signal: score != null && rec ? recommendationToSignal(rec) : null,
         netCashFlow: recomputed
           ? recomputed.netCashFlowMonthly
-          : (toNumber(snap.netCashFlow) ?? toNumber(r.net_cash_flow_monthly as number | string | null)),
+          : (toNumber(snap.netCashFlow) ?? toNumber(r.net_cash_flow_monthly)),
         capRate: recomputed ? recomputed.capRatePct : toNumber(snap.capRate),
       };
     });
@@ -301,16 +322,22 @@ export default async function DashboardComparePage() {
     );
   }
 
-  const { data: rows, error } = await supabase
-    .from("saved_analyses")
-    .select(
-      "id, created_at, address, title, property_type, purchase_price, net_cash_flow_monthly, coc_return_pct, property_tax_pct, maintenance_pct, capex_pct, vacancy_pct, year_built, result_snapshot, form_snapshot, interest_rate_pct, loan_term_years, down_payment_pct, management_pct, monthly_rent, insurance_input_mode, insurance_pct, insurance_mo"
-    )
-    .eq("user_id", user.id)
-    .is("deleted_at", null)
-    .eq("is_completed", false)
-    .eq("is_archived", false)
-    .in("id", ids);
+  // scenario_name ships in its own migration — retry without it on 42703.
+  const COMPARE_SELECT =
+    "id, created_at, address, title, property_type, purchase_price, net_cash_flow_monthly, coc_return_pct, property_tax_pct, maintenance_pct, capex_pct, vacancy_pct, year_built, result_snapshot, form_snapshot, interest_rate_pct, loan_term_years, down_payment_pct, management_pct, monthly_rent, insurance_input_mode, insurance_pct, insurance_mo";
+  const runCompareQuery = (select: string) =>
+    supabase
+      .from("saved_analyses")
+      .select(select)
+      .eq("user_id", user.id)
+      .is("deleted_at", null)
+      .eq("is_completed", false)
+      .eq("is_archived", false)
+      .in("id", ids);
+  let { data: rows, error } = await runCompareQuery(`${COMPARE_SELECT}, scenario_name`);
+  if (isMissingColumnError(error)) {
+    ({ data: rows, error } = await runCompareQuery(COMPARE_SELECT));
+  }
 
   if (error) {
     return (
@@ -335,7 +362,14 @@ export default async function DashboardComparePage() {
     );
   }
 
-  const rowById = new Map((rows ?? []).map((row) => [row.id, row as SavedAnalysisRow]));
+  // Dynamic string selects defeat Supabase's row-type inference, so the rows
+  // come back loosely typed — cast through unknown (same as the My Deals list).
+  const rowById = new Map(
+    ((rows ?? []) as unknown[]).map((row) => {
+      const r = row as SavedAnalysisRow;
+      return [r.id, r] as const;
+    })
+  );
   const deals = ids.map((id) => rowById.get(id)).filter((row): row is SavedAnalysisRow => Boolean(row)).map(mapDeal);
 
   // Stale-cookie recovery: cookie has IDs but none match a current

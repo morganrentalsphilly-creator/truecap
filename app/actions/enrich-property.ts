@@ -47,22 +47,40 @@ export type EnrichPropertyInput = {
 // flow into FRED/HUD/state-tax lookups with surprising shapes. State
 // is uppercased + capped at 2 chars; county is trimmed + capped at 80;
 // zip must be 5 digits; bedrooms 0-20.
+//
+// Every field carries .catch(undefined): enrichment is best-effort and the
+// lookups are independent, so ONE malformed field must degrade to "skip
+// that lookup," not reject the whole payload. Before this, an empty
+// bedrooms input (valueAsNumber → NaN) failed the full parse and returned
+// {} — no rate, no tax — even though neither needs bedrooms
+// (ENRICH-NAN-BEDROOMS-EMPTY-RESULT).
 const enrichInputSchema = z.object({
   state: z
     .string()
     .trim()
     .transform((s) => s.toUpperCase())
     .pipe(z.string().regex(/^[A-Z]{2}$/, "state must be a 2-letter code"))
-    .optional(),
-  county: z.string().trim().max(80).optional(),
-  zip: z.string().trim().regex(/^\d{5}$/, "zip must be 5 digits").optional(),
+    .optional()
+    .catch(undefined),
+  county: z.string().trim().max(80).optional().catch(undefined),
+  zip: z
+    .string()
+    .trim()
+    .regex(/^\d{5}$/, "zip must be 5 digits")
+    .optional()
+    .catch(undefined),
   propertyType: z
     .enum(["single-family", "multi-family", "owner-occupant"])
-    .optional(),
-  bedrooms: z.number().int().min(0).max(20).optional(),
+    .optional()
+    .catch(undefined),
+  bedrooms: z.number().int().min(0).max(20).optional().catch(undefined),
   // Bounded like `bedrooms`; capped at 24 entries so a malformed payload
   // can't fan out into an unbounded number of HUD lookups.
-  unitBedrooms: z.array(z.number().int().min(0).max(20)).max(24).optional(),
+  unitBedrooms: z
+    .array(z.number().int().min(0).max(20))
+    .max(24)
+    .optional()
+    .catch(undefined),
 });
 
 export type EnrichPropertyResult = {

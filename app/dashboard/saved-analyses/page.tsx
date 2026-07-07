@@ -65,6 +65,9 @@ type SavedAnalysisRow = {
   neighborhood?: string | null;
   /** Owned-deal close date (optional; ships in a later migration). */
   close_date?: string | null;
+  /** Workspace-scenario label (optional; ships with the properties/scenarios
+   *  migration). Distinguishes sibling rows that share one address. */
+  scenario_name?: string | null;
 };
 
 // computeRowEquity (owned-deal equity from close_date + saved assumptions)
@@ -137,6 +140,8 @@ function mapSavedRow(row: SavedAnalysisRow): SavedAnalysisListItem | null {
     tags: Array.isArray(row.tags) ? row.tags.filter((t): t is string => typeof t === "string") : [],
     dataConfidence: normalizeDataConfidence(row.data_confidence),
     nickname: typeof row.nickname === "string" && row.nickname.trim() ? row.nickname.trim() : null,
+    scenarioName:
+      typeof row.scenario_name === "string" && row.scenario_name.trim() ? row.scenario_name.trim() : null,
     market: typeof row.market === "string" && row.market.trim() ? row.market.trim() : null,
     neighborhood:
       typeof row.neighborhood === "string" && row.neighborhood.trim() ? row.neighborhood.trim() : null,
@@ -197,11 +202,14 @@ export default async function DashboardSavedAnalysesPage({
 
   const BASE_SELECT =
     "id, address, title, property_type, purchase_price, net_cash_flow_monthly, coc_return_pct, created_at, is_completed, is_archived, result_snapshot, form_snapshot, pipeline_stage, tags, data_confidence";
-  // Optional investor labels + the owned-deal close_date each ship in their own
-  // migration; until applied, selecting them 42703s. Tiered fallback (most →
-  // least columns) so the My Deals list never breaks mid-rollout and either
-  // optional set can be absent independently.
-  const WITH_LABELS_SELECT = `${BASE_SELECT}, nickname, market, neighborhood`;
+  // Three optional column sets each ship in their own migration; until
+  // applied, selecting them 42703s. The tiered fallback drops columns
+  // NEWEST-MIGRATION-FIRST so every partial-application state (migrations
+  // apply in timestamp order) still selects everything that exists:
+  // scenario_name (20260622130000) < labels (20260622140000) <
+  // close_date (20260628120000).
+  const WITH_SCENARIO_SELECT = `${BASE_SELECT}, scenario_name`;
+  const WITH_LABELS_SELECT = `${WITH_SCENARIO_SELECT}, nickname, market, neighborhood`;
   const FULL_SELECT = `${WITH_LABELS_SELECT}, close_date`;
 
   const buildSavedQuery = (select: string) => {
@@ -245,6 +253,9 @@ export default async function DashboardSavedAnalysesPage({
   if (isMissingColumn(error)) {
     ownedEquityEnabled = false;
     ({ data: rows, error } = await buildSavedQuery(WITH_LABELS_SELECT));
+  }
+  if (isMissingColumn(error)) {
+    ({ data: rows, error } = await buildSavedQuery(WITH_SCENARIO_SELECT));
   }
   if (isMissingColumn(error)) {
     ({ data: rows, error } = await buildSavedQuery(BASE_SELECT));

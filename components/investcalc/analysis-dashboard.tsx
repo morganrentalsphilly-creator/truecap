@@ -1583,8 +1583,23 @@ export function AnalysisDashboard({
             keepMounted
           >
             <div className="space-y-4">
-              <DealSummaryCard values={values} context={dealQaContext} />
-              <DealQaPanel values={values} context={dealQaContext} />
+              {/* Both AI panels' doc comments promise "the parent remounts us
+                  via key" — these ARE those keys. Stale AI content (a generated
+                  summary, a Q&A conversation) must not survive a deal change:
+                  keyed on saved id + address + type so editing the form to a
+                  different property (live recompute keeps this row mounted the
+                  whole time) or loading another saved deal starts fresh instead
+                  of narrating the previous deal under the new numbers. */}
+              <DealSummaryCard
+                key={`summary|${savedDealId ?? "unsaved"}|${values.address ?? ""}|${values.propertyType}`}
+                values={values}
+                context={dealQaContext}
+              />
+              <DealQaPanel
+                key={`qa|${savedDealId ?? "unsaved"}|${values.address ?? ""}|${values.propertyType}`}
+                values={values}
+                context={dealQaContext}
+              />
             </div>
           </DrillRow>
         ) : null}

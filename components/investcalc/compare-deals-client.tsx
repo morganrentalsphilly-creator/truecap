@@ -91,6 +91,9 @@ const MOBILE_DEAL_COLORS = [
 export type CompareDealViewModel = {
   id: string;
   address: string;
+  /** Workspace-scenario label (DM-1). Sibling scenarios share one address, so
+   *  compare labels suffix this to stay tellable apart. */
+  scenarioName?: string | null;
   createdAt: string | null;
   propertyType: PropertyType | null;
   purchasePrice: number | null;
@@ -764,6 +767,14 @@ function getShortAddress(address: string): string {
   return words.slice(0, 3).join(" ");
 }
 
+/** Display name for a compared deal. Sibling scenarios share one address, so
+ *  the scenario name rides along — otherwise 2-4 identical labels (the exact
+ *  set the ScenariosCard "Compare" button produces) are untellable apart. */
+function getDealLabel(deal: CompareDealViewModel, opts?: { short?: boolean }): string {
+  const base = opts?.short ? getShortAddress(deal.address) : deal.address;
+  return deal.scenarioName ? `${base} · ${deal.scenarioName}` : base;
+}
+
 function getMobileDealColor(index: number) {
   return MOBILE_DEAL_COLORS[index % MOBILE_DEAL_COLORS.length]!;
 }
@@ -932,7 +943,7 @@ function CompareMobileDealStrip({ deals }: { deals: CompareDealViewModel[] }) {
               </div>
             </div>
             <p className="mt-1.5 line-clamp-2 text-[11px] font-extrabold leading-tight text-foreground">
-              {getShortAddress(deal.address)}
+              {getDealLabel(deal, { short: true })}
             </p>
             <p className="mt-auto pt-2 text-[10px] font-semibold text-muted-foreground">
               {formatCurrency(deal.purchasePrice)}
@@ -982,7 +993,7 @@ function CompareMobileHighlights({
         <div className="rounded-2xl bg-card p-3 shadow-sm">
           <p className="text-[10px] font-extrabold text-success">Best Deal</p>
           <p className="mt-1 line-clamp-2 text-xs font-extrabold leading-tight text-foreground">
-            {bestDeal ? getShortAddress(bestDeal.address) : "-"}
+            {bestDeal ? getDealLabel(bestDeal, { short: true }) : "-"}
           </p>
         </div>
         <div className="rounded-2xl bg-card p-3 shadow-sm">
@@ -1018,7 +1029,7 @@ function CompareMobileHighlights({
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-muted-foreground">Selected Winner</p>
-              <h2 className="mt-1 text-base font-extrabold leading-tight text-foreground">{getShortAddress(bestDeal.address)}</h2>
+              <h2 className="mt-1 text-base font-extrabold leading-tight text-foreground">{getDealLabel(bestDeal, { short: true })}</h2>
             </div>
             <Badge
               className={cn(
@@ -1250,7 +1261,7 @@ export function CompareDealsClient({
                         <div className="min-w-0">
                           <div className="flex flex-wrap items-center gap-1.5">
                             <span className="text-xs font-extrabold leading-tight text-foreground">
-                              {getShortAddress(deal.address)}
+                              {getDealLabel(deal, { short: true })}
                             </span>
                             <BuyBoxFitBadge fit={entry?.fit} />
                           </div>
@@ -1421,7 +1432,7 @@ export function CompareDealsClient({
                     <p className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-primary">{getTypeLabel(deal.propertyType)}</p>
                   </div>
                   <h2 className="line-clamp-2 min-h-10 overflow-hidden pr-8 text-lg font-extrabold leading-snug text-foreground">
-                    {deal.address}
+                    {getDealLabel(deal)}
                   </h2>
                   <p className="mt-6 text-sm font-semibold text-muted-foreground">{formatCurrency(deal.purchasePrice)}</p>
                   <div className="mt-4 flex flex-wrap items-center gap-2">
