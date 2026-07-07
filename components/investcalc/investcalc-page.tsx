@@ -40,7 +40,12 @@ import { SaveAsDefaultsChip } from "./save-as-defaults-chip";
 // pill's inline picker) — the page passes state/handlers down instead.
 import { AssumptionsStrip } from "./assumptions-strip";
 import { EnrichmentReceipt } from "./enrichment-receipt";
-import type { AssumptionChipTarget } from "@/lib/assumption-chips";
+import {
+  computeExpensesEdited,
+  computeStrategyOwnedFields,
+  type AssumptionChipTarget,
+  type StrategyAppliedSnapshot,
+} from "@/lib/assumption-chips";
 import { STARTER_TEMPLATES, type StarterTemplate } from "@/lib/starter-templates";
 import { buildTemplateFormPatch, type TemplateFormPatchEntry } from "@/lib/template-form-patch";
 import type { AnalysisTemplateOption } from "@/app/actions/analysis-templates";
@@ -145,9 +150,8 @@ const CALC_FORM_DRAFT_KEY = "truecap_calc_form_draft_v1";
 const CALC_FORM_DRAFT_DEBOUNCE_MS = 400;
 /**
  * Remembers whether the user opened the collapsible "advanced options"
- * (financing + operating expenses) block. Presence of this key means the
- * user has an explicit preference, which suppresses the one-time
- * auto-open-after-first-result nudge. Version-suffixed like the draft key.
+ * (financing + operating expenses) block, so their open/closed choice
+ * persists across sessions. Version-suffixed like the draft key.
  */
 const CALC_ADVANCED_OPEN_KEY = "truecap_calc_advanced_open_v1";
 
@@ -485,7 +489,6 @@ export function InvestCalcPage({
   canUseMaxOffer = false,
   canUseSensitivity = false,
   canUseStrategies = false,
-  canUseShareLinks = false,
   canUpdateSavedDeals = false,
   saveDealLimitReached = false,
   initialSavedDealCount = 0,
@@ -507,8 +510,6 @@ export function InvestCalcPage({
   canUseSensitivity?: boolean;
   /** Pro: Strategies tab (BRRRR + fix-flip + rehab estimator) */
   canUseStrategies?: boolean;
-  /** Pro: generate shareable read-only deal links */
-  canUseShareLinks?: boolean;
   canUpdateSavedDeals?: boolean;
   saveDealLimitReached?: boolean;
   initialSavedDealCount?: number;
@@ -538,6 +539,23 @@ export function InvestCalcPage({
   // Active investor-strategy chip ("What's your play?"). null = default full flow.
   const [activeStrategyKey, setActiveStrategyKey] = useState<string | null>(null);
   const activeStrategy = getStrategyByKey(activeStrategyKey);
+  // What the active play's starter set actually WROTE (field → value), plus
+  // the play's label (BROWSER-2). The starter writes are dirty on purpose
+  // (the default-template auto-apply skips dirty fields), but "dirty" also
+  // drives the chips' "yours" provenance badge — this record lets the strip
+  // + results ledger badge strategy-written values as the play's defaults
+  // instead of falsely claiming the user typed them. A field drops out of
+  // the set the moment its current value diverges from what the starter
+  // wrote (the enrichment "overridden" pattern), i.e. on a real user edit.
+  const strategyAppliedRef = useRef<StrategyAppliedSnapshot | null>(null);
+  // Pre-run live verdict gating (LIVE-VERDICT-VS-STRATEGY-FRAMING): while a
+  // solve-oriented play is active (Wholesale/BRRRR/Flip — primaryTab !==
+  // "cash-flow"), the generic asking-price verdict directly contradicts the
+  // play's framing ("we'll reverse-solve your max offer" next to a NEGATIVE
+  // buy-box readout). The post-run hero already suppresses that verdict via
+  // strategyLeadsOutput (analysis-dashboard) — apply the same rule to the
+  // in-form LiveVerdictPanel and the sticky dock readout pre-run.
+  const showGenericLivePreview = !activeStrategy || activeStrategy.primaryTab === "cash-flow";
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   // The exact form values that produced `analysisResult`. The results
   // dashboard reads from this (not a live form.getValues() snapshot) so the
@@ -607,6 +625,16 @@ export function InvestCalcPage({
   const [priceEstimated, setPriceEstimated] = useState(false);
   const [estimatedPriceValue, setEstimatedPriceValue] = useState<number | null>(null);
   const [priceEstimateBasis, setPriceEstimateBasis] = useState<string | null>(null);
+  // Hero listing-link toggle (Phase 4): while open, the URL row renders in
+  // the address input's place (the address block is CSS-hidden, never
+  // unmounted — RHF registration + enrichment writes are untouched).
+  // Declared up here (not next to the autofill state) so resetToNewAnalysis
+  // below can clear all three — a stale URL / red parse-error state used to
+  // survive New Analysis and keep the fresh hero's address input hidden
+  // (BROWSER-3).
+  const [listingUrl, setListingUrl] = useState("");
+  const [listingUrlError, setListingUrlError] = useState(false);
+  const [listingLinkOpen, setListingLinkOpen] = useState(false);
   // ── Progressive disclosure (financing + operating expenses) ──────────
   // Cold visitors start with just the basics (property type, address,
   // price, beds/rent); financing + operating expenses collapse behind a
@@ -614,11 +642,12 @@ export function InvestCalcPage({
   // sections stay MOUNTED (hidden via CSS) so address auto-fill still
   // writes into them and their values submit normally.
   const [advancedOpen, setAdvancedOpen] = useState(false);
-  // True once the user has a remembered preference OR toggles this session.
-  // Prevents the post-first-result auto-open from overriding a deliberate
-  // choice (the value is read from localStorage on mount).
-  const advancedUserChoiceRef = useRef(false);
-  const hasAutoOpenedAdvancedRef = useRef(false);
+  // (The pre-redesign auto-open-advanced-after-first-result nudge was
+  // removed: post-Phase-3 the assumptions strip's chips are the designed
+  // entry point to this region, and post-Phase-4 the block also holds the
+  // property-type/template panel — the nudge silently expanded 3-4 panels
+  // the user never opened. The strip chips + the ledger's "Edit
+  // assumptions" now carry discoverability.)
   // ── Hero address handoff ─────────────────────────────────────────────
   // The homepage hero (hero-address-form.tsx) dispatches "truecap:hero-
   // analyze"; we apply the address (+ enrich when it carried Places
@@ -742,12 +771,31 @@ export function InvestCalcPage({
       if (!areAnalysisTabsEnabled) return;
       setActiveInputTab(tab);
       const mappedTab = mapInputTabToDashboardTab(tab);
-      if (mappedTab) pointDashboardAt(mappedTab);
+      if (mappedTab) {
+        pointDashboardAt(mappedTab);
+        // Ledger era: pointDashboardAt opens the row WITHOUT scrolling (the
+        // old no-scroll tab semantics), so land the viewport on the row
+        // header itself once it has had a beat to open — scrolling to the
+        // results TOP left the opened row thousands of px below the fold,
+        // i.e. a dead click (INPUT-TAB-BAR-POST-LEDGER-DEAD-CLICK). The
+        // `analysis-tab-${id}` ids are the ledger row headers (drill-row).
+        setTimeout(() => {
+          const rowHeader = document.getElementById(`analysis-tab-${mappedTab}`);
+          if (rowHeader) {
+            rowHeader.scrollIntoView({ behavior: "smooth", block: "start" });
+          } else {
+            scrollToAnalysisResults();
+          }
+        }, 50);
+        return;
+      }
+      // Deal Score has no ledger row — it lives in the answer hero at the
+      // top of the results, so results-top is the right landing for it.
       setTimeout(() => {
         scrollToAnalysisResults();
       }, 50);
     },
-    [areAnalysisTabsEnabled, mapInputTabToDashboardTab, scrollToAnalysisResults]
+    [areAnalysisTabsEnabled, mapInputTabToDashboardTab, pointDashboardAt, scrollToAnalysisResults]
   );
 
   // Shared between the server-action path (loadDealScore) and the
@@ -905,6 +953,19 @@ export function InvestCalcPage({
       // its units against the PREVIOUS deal's market benchmark.
       setUnitFmrByBedrooms(null);
       unitFmrKeyRef.current = null;
+      // Phase-4 hero listing-link toggle: a stale URL row (especially its
+      // red parse-error state) otherwise survives New Analysis and keeps the
+      // fresh hero's address input CSS-hidden behind it (BROWSER-3).
+      setListingLinkOpen(false);
+      setListingUrl("");
+      setListingUrlError(false);
+      // The active play must not outlive the assumptions it applied: the
+      // form.reset above restored factory values, so a surviving
+      // "Analyzing as: <play>" pill (plus STR income inputs / Wholesale
+      // labels) would claim a tailored analysis the numbers no longer
+      // reflect (BROWSER-3).
+      setActiveStrategyKey(null);
+      strategyAppliedRef.current = null;
       form.setValue("units", getDefaultUnitsForPropertyType(nextPropertyType), {
         shouldDirty: false,
         shouldValidate: false,
@@ -1403,12 +1464,8 @@ export function InvestCalcPage({
    */
   const [isAutofilling, setIsAutofilling] = useState(false);
   const [autofillUnavailable, setAutofillUnavailable] = useState(false);
-  const [listingUrl, setListingUrl] = useState("");
-  const [listingUrlError, setListingUrlError] = useState(false);
-  // Hero listing-link toggle (Phase 4): while open, the URL row renders in
-  // the address input's place (the address block is CSS-hidden, never
-  // unmounted — RHF registration + enrichment writes are untouched).
-  const [listingLinkOpen, setListingLinkOpen] = useState(false);
+  // (listingUrl / listingUrlError / listingLinkOpen are declared up top so
+  // resetToNewAnalysis can clear them — see the hero listing-link comment.)
 
   const applyComps = useCallback(
     (e: PropertyEnrichment) => {
@@ -1520,37 +1577,52 @@ export function InvestCalcPage({
    * Apply a starter template's assumption set (financing + expenses + growth)
    * to the form WITHOUT touching the address / price / rent the user entered.
    * Mirrors the field mapping in template-selector-section's applyTemplateToForm.
+   *
+   * Writes stay `shouldDirty: true` on purpose (the default-template
+   * auto-apply skips dirty fields, so a later auto-apply can't stomp the
+   * play's values). Returns the exact field → value record it wrote so the
+   * caller can badge those chips as the PLAY's defaults instead of letting
+   * the dirty flag masquerade as a user edit (BROWSER-2).
    */
   const applyStarterAssumptions = useCallback(
-    (starterKey: StarterTemplate["key"]) => {
+    (starterKey: StarterTemplate["key"]): Record<string, unknown> | null => {
       const starter = STARTER_TEMPLATES.find((s) => s.key === starterKey);
-      if (!starter) return;
+      if (!starter) return null;
       const t = starter.template;
       const opts = { shouldDirty: true, shouldValidate: false } as const;
-      form.setValue("propertyTaxPct", t.propertyTaxPct, opts);
-      form.setValue("insuranceInputMode", t.insuranceInputMode, opts);
-      if (t.insurancePct != null) form.setValue("insurancePct", t.insurancePct, opts);
-      if (t.insuranceMo != null) form.setValue("insuranceMonthly", t.insuranceMo, opts);
-      form.setValue("maintenancePct", t.maintenancePct, opts);
-      form.setValue("vacancyPct", t.vacancyPct, opts);
-      form.setValue("mgmtPct", t.managementPct, opts);
-      form.setValue("capexPct", t.capexPct, opts);
-      form.setValue("closingCostsPct", t.closingCostsPct, opts);
-      form.setValue("interestRate", t.interestRatePct, opts);
-      form.setValue("downPaymentPct", t.downPaymentPct, opts);
+      const applied: Record<string, unknown> = {};
+      const write = <K extends keyof InvestmentFormValues>(
+        field: K,
+        value: InvestmentFormValues[K]
+      ) => {
+        form.setValue(field, value as never, opts);
+        applied[field] = value;
+      };
+      write("propertyTaxPct", t.propertyTaxPct);
+      write("insuranceInputMode", t.insuranceInputMode);
+      if (t.insurancePct != null) write("insurancePct", t.insurancePct);
+      if (t.insuranceMo != null) write("insuranceMonthly", t.insuranceMo);
+      write("maintenancePct", t.maintenancePct);
+      write("vacancyPct", t.vacancyPct);
+      write("mgmtPct", t.managementPct);
+      write("capexPct", t.capexPct);
+      write("closingCostsPct", t.closingCostsPct);
+      write("interestRate", t.interestRatePct);
+      write("downPaymentPct", t.downPaymentPct);
       // Mortgage-insurance overrides (FHA MIP etc.). Always set — including back
       // to undefined — so a prior strategy's PMI settings don't leak forward.
-      form.setValue("pmiAnnualRatePct", t.pmiAnnualRatePct ?? undefined, opts);
-      form.setValue("pmiNoCancel", t.pmiNoCancel ?? undefined, opts);
-      form.setValue("expenseGrowthPct", t.expenseGrowthPct, opts);
-      form.setValue("rentGrowthPct", t.rentGrowthPct, opts);
-      form.setValue("appreciationRatePct", t.appreciationRatePct, opts);
-      form.setValue("sellingCostPct", t.sellingCostPct, opts);
-      if (t.buildingValuePct != null) form.setValue("buildingValuePct", t.buildingValuePct, opts);
-      if (t.depreciationYears != null) form.setValue("depreciationYears", t.depreciationYears, opts);
+      write("pmiAnnualRatePct", t.pmiAnnualRatePct ?? undefined);
+      write("pmiNoCancel", t.pmiNoCancel ?? undefined);
+      write("expenseGrowthPct", t.expenseGrowthPct);
+      write("rentGrowthPct", t.rentGrowthPct);
+      write("appreciationRatePct", t.appreciationRatePct);
+      write("sellingCostPct", t.sellingCostPct);
+      if (t.buildingValuePct != null) write("buildingValuePct", t.buildingValuePct);
+      if (t.depreciationYears != null) write("depreciationYears", t.depreciationYears);
       if (t.includeInterestDeduction != null)
-        form.setValue("includeInterestDeduction", t.includeInterestDeduction, opts);
-      if (t.taxRatePct != null) form.setValue("taxRatePct", t.taxRatePct, opts);
+        write("includeInterestDeduction", t.includeInterestDeduction);
+      if (t.taxRatePct != null) write("taxRatePct", t.taxRatePct);
+      return applied;
     },
     [form]
   );
@@ -1695,7 +1767,22 @@ export function InvestCalcPage({
           shouldValidate: false,
         });
       }
-      applyStarterAssumptions(strategy.starterKey);
+      const applied = applyStarterAssumptions(strategy.starterKey);
+      // Record what the play wrote so the assumption chips badge those
+      // values as "<play>" defaults, not "yours" (BROWSER-2). Kept after
+      // Clear too — the values ARE still the play's until the user edits
+      // them (a divergent value drops the field from the owned set).
+      strategyAppliedRef.current = applied
+        ? { label: strategy.label, fields: applied }
+        : null;
+      // The starter set just overwrote any applied template's values —
+      // leaving templateId linked would resurface "Template: <name> ✓"
+      // after Clear over numbers that are no longer the template's, and a
+      // Save would persist the stale template_id
+      // (TEMPLATE-CHIP-STALE-AFTER-STRATEGY).
+      if (form.getValues("templateId")) {
+        form.setValue("templateId", undefined, { shouldDirty: true, shouldValidate: false });
+      }
       // Keep the income data model aligned with the inputs the chip shows. STR
       // collects nightly rate + occupancy (income is derived from them), so seed
       // a default occupancy and drop any stale monthly rent. Every other play
@@ -1718,7 +1805,7 @@ export function InvestCalcPage({
       setAdvancedOpen(false);
       trackEvent("strategy_selected", { strategy: strategy.key });
     },
-    [form, applyStarterAssumptions]
+    [form, applyStarterAssumptions, pointDashboardAt]
   );
 
   const buildTaxStrategySource = (
@@ -1880,6 +1967,14 @@ export function InvestCalcPage({
     }
     setStaleResultsWarning(false);
     const values = parsed.data;
+    // Mirror onSubmit's guard: the live recompute repaints every number the
+    // moment the user types the real asking price, so the "Estimated
+    // purchase price (~$X)" strip must drop right then too — not only on an
+    // explicit re-Run (ESTIMATED-PRICE-STRIP-STALE-AFTER-LIVE-RECOMPUTE).
+    if (estimatedPriceValue != null && values.purchasePrice !== estimatedPriceValue) {
+      setEstimatedPriceValue(null);
+      setPriceEstimated(false);
+    }
     const result = calculateAnalysis(values);
 
     // Editing away from the sample deal ends the Pro preview — the unlock is
@@ -2013,6 +2108,15 @@ export function InvestCalcPage({
             address: "",
             purchasePrice: undefined,
             monthlyRent: undefined,
+            // Income is property-specific: an STR deal's nightly rate ×
+            // occupancy is this property's revenue, and carrying it into the
+            // fork silently prices the NEW deal on the OLD property's income
+            // (calc-analysis derives income from ADR when set, so even a
+            // typed rent would be ignored) —
+            // STR-STRATEGY-RESTORE-INVISIBLE-INCOME.
+            avgDailyRate: undefined,
+            occupancyPct: undefined,
+            strFurnishingCost: undefined,
             units: (normalized.units ?? []).map((u) => ({ ...u, monthlyRent: undefined })),
           };
           prevPropertyTypeRef.current = normalized.propertyType;
@@ -2066,6 +2170,16 @@ export function InvestCalcPage({
           };
           prevPropertyTypeRef.current = hydratedValues.propertyType;
           form.reset(hydratedValues);
+          // Reconcile the restored income model with the strategy UI: a
+          // positive nightly rate means this deal was built in Short-term
+          // Rental mode — without the key the ADR/occupancy inputs stay
+          // hidden and "Monthly rent" renders EMPTY while calc-analysis
+          // still derives income from ADR (typed rent silently ignored) —
+          // STR-STRATEGY-RESTORE-INVISIBLE-INCOME. Key only; the restored
+          // values are the truth, so no starter re-apply.
+          if ((hydratedValues.avgDailyRate ?? 0) > 0) {
+            setActiveStrategyKey("short-term");
+          }
           setSavedDealId(parsed.id);
           savedDealIdRef.current = parsed.id;
           lastPersistedFormJsonRef.current = formSnapshotForCompare(hydratedValues);
@@ -2163,6 +2277,14 @@ export function InvestCalcPage({
         if (normalized) {
           prevPropertyTypeRef.current = normalized.propertyType;
           form.reset(normalized);
+          // Same reconciliation as the saved-deal edit path above: an STR
+          // draft (avgDailyRate > 0) must restore the "short-term" play so
+          // its income inputs render — otherwise the rent field shows empty
+          // while ADR income drives the verdict and typed rent is ignored
+          // (STR-STRATEGY-RESTORE-INVISIBLE-INCOME).
+          if ((normalized.avgDailyRate ?? 0) > 0) {
+            setActiveStrategyKey("short-term");
+          }
           // Surface the restore visibly. Without this the user just
           // sees a pre-filled form and wonders what happened.
           setRestoredFromDraft(true);
@@ -2255,14 +2377,11 @@ export function InvestCalcPage({
     }, 100);
   }, [analysisResult, isCalculating]);
 
-  // Restore the user's remembered advanced-options preference. Presence of
-  // the key (either "1" or "0") marks an explicit choice, so we also flip
-  // advancedUserChoiceRef to suppress the auto-open nudge below.
+  // Restore the user's remembered advanced-options preference.
   useEffect(() => {
     try {
       const v = window.localStorage.getItem(CALC_ADVANCED_OPEN_KEY);
       if (v === "1" || v === "0") {
-        advancedUserChoiceRef.current = true;
         setAdvancedOpen(v === "1");
       }
     } catch {
@@ -2270,20 +2389,9 @@ export function InvestCalcPage({
     }
   }, []);
 
-  // Progressive disclosure nudge: the FIRST time results appear (and only
-  // if the user hasn't expressed a preference), reveal the advanced
-  // financing/expenses block so refining assumptions is the obvious next
-  // step. Once-per-mount; never overrides a deliberate user choice, and is
-  // deliberately not persisted (it's an auto behavior, not a user setting).
-  useEffect(() => {
-    if (!analysisResult) return;
-    // In strategy-focus mode, keep the Refine section collapsed - auto-opening
-    // it re-clutters the tailored form the user deliberately simplified.
-    if (activeStrategyKey) return;
-    if (hasAutoOpenedAdvancedRef.current || advancedUserChoiceRef.current) return;
-    hasAutoOpenedAdvancedRef.current = true;
-    setAdvancedOpen(true);
-  }, [analysisResult, activeStrategyKey]);
+  // (The one-time auto-open-advanced-after-first-result nudge was removed —
+  // see the advancedOpen declaration comment. The assumptions strip's chips
+  // and the ledger's "Edit assumptions" row are the refine entry points.)
 
   // Listen for the homepage hero's address handoff. The calculator is
   // already mounted when the hero is clicked (same page), so the live
@@ -3477,7 +3585,6 @@ export function InvestCalcPage({
   const getEnrichmentCapture = useCallback(() => enrichmentCaptureRef.current, []);
 
   const toggleAdvanced = () => {
-    advancedUserChoiceRef.current = true;
     const next = !advancedOpen;
     if (next) trackEvent("optional_section_opened", { source: "toggle" });
     setAdvancedOpen(next);
@@ -3509,11 +3616,11 @@ export function InvestCalcPage({
 
   /**
    * "Edit assumptions" from the result-state trust strip: open the
-   * Improve-accuracy section and jump back to the form so refining a
+   * advanced assumptions region (financing + expenses behind the
+   * assumptions strip) and jump back to the form so refining a
    * default is one click from the numbers the user is judging.
    */
   const handleEditAssumptions = () => {
-    advancedUserChoiceRef.current = true;
     setAdvancedOpen(true);
     try {
       window.localStorage.setItem(CALC_ADVANCED_OPEN_KEY, "1");
@@ -3727,10 +3834,12 @@ export function InvestCalcPage({
               steps={analyzerSteps}
               activeStepId={activeStep}
               onNavigate={handleStepNavigate}
-              // Sticky only from sm: — on phones the bottom Run bar already
-              // anchors the flow, and double sticky chrome (rail + bar) ate
-              // ~135px of a 667px viewport while typing.
-              className="sm:sticky sm:top-2 sm:z-20"
+              // Desktop-only (BROWSER-5, per the Verdict Ledger blueprint):
+              // at 375px the five pills clipped mid-circle with no scroll
+              // affordance, and two pre-checked green steps on a blank form
+              // read as leftover chrome above the hero. Sticky from sm: —
+              // on phones the bottom Run bar anchors the flow anyway.
+              className="hidden sm:sticky sm:top-2 sm:z-20 sm:block"
             />
 
             {/* "What's your play?" strategy chips — demoted from a top-of-form
@@ -3845,8 +3954,11 @@ export function InvestCalcPage({
                 presentational. */}
             <LiveVerdictPanel
               active={!showResults && !analysisResult && !isCalculating}
-              livePreview={livePreview}
-              livePreviewMsg={livePreviewMsg}
+              // Suppressed while a solve-oriented play is active — see
+              // showGenericLivePreview. The SR message is gated with it so
+              // screen readers never hear the contradictory verdict either.
+              livePreview={showGenericLivePreview ? livePreview : null}
+              livePreviewMsg={showGenericLivePreview ? livePreviewMsg : ""}
             />
 
             {/* Enrichment receipt - the durable one-line record of what
@@ -3880,6 +3992,11 @@ export function InvestCalcPage({
               onHideDetails={toggleAdvanced}
               activeStrategyKey={activeStrategyKey}
               onSelectStrategy={handleSelectStrategy}
+              // The play's starter-written field set + label, so chips over
+              // strategy-set values badge as the play's defaults instead of
+              // "yours" (BROWSER-2). Read fresh each render — the strip
+              // re-renders on every strategy pick and form write.
+              strategyApplied={strategyAppliedRef.current}
               templateOptions={templateOptions}
               savedTemplateFallback={savedTemplateFallback}
               footer={
@@ -4010,10 +4127,13 @@ export function InvestCalcPage({
             isCalculating={isCalculating}
             hasResults={analysisResult !== null}
             // Verdict dock readout: only pre-results (same gate as the
-            // in-form LiveVerdictPanel). Once a real run lands, the bar
-            // renders exactly as before this prop existed.
+            // in-form LiveVerdictPanel), and suppressed while a solve-
+            // oriented play is active (showGenericLivePreview). Once a real
+            // run lands, the bar renders exactly as before this prop existed.
             livePreview={
-              !showResults && !analysisResult && !isCalculating ? livePreview : null
+              !showResults && !analysisResult && !isCalculating && showGenericLivePreview
+                ? livePreview
+                : null
             }
           />
         </form>
@@ -4097,18 +4217,18 @@ export function InvestCalcPage({
                     chrome="bare"
                     onEdit={handleEditAssumptions}
                     provenance={buildProvenanceInput(enrichmentCaptureRef.current, form.getValues())}
-                    expensesEdited={(
-                      [
-                        "insuranceMonthly",
-                        "insurancePct",
-                        "maintenancePct",
-                        "mgmtPct",
-                        "vacancyPct",
-                        "capexPct",
-                        "utilitiesMonthly",
-                        "hoaMonthly",
-                      ] as const
-                    ).some((f) => Boolean((form.formState.dirtyFields as Record<string, unknown>)[f]))}
+                    // Shared helper (same predicate the input-side strip
+                    // uses), excluding fields the active play's starter set
+                    // wrote: strategy writes are dirty on purpose, but they
+                    // are the PLAY's defaults, not user edits — claiming
+                    // "yours" here was a provenance lie (BROWSER-2).
+                    expensesEdited={computeExpensesEdited(
+                      form.formState.dirtyFields as Record<string, unknown>,
+                      computeStrategyOwnedFields(
+                        strategyAppliedRef.current,
+                        form.getValues() as unknown as Record<string, unknown>
+                      )
+                    )}
                   />
                 ) : null
               }
@@ -4158,7 +4278,6 @@ export function InvestCalcPage({
               canUseMaxOffer={canUseMaxOffer || isSampleProPreview}
               canUseSensitivity={canUseSensitivity || isSampleProPreview}
               canUseStrategies={canUseStrategies || isSampleProPreview}
-              canUseShareLinks={canUseShareLinks}
               isSampleProPreview={isSampleProPreview}
               dealQaEnabled={dealQaEnabled}
               activeTab={activeDashboardTab}

@@ -57,11 +57,17 @@ export function StickyCalculateBar({
   const [formInView, setFormInView] = useState(true);
   const [submitInView, setSubmitInView] = useState(false);
   const [resultsInView, setResultsInView] = useState(false);
+  // The in-form LiveVerdictPanel card on screen → suppress the dock READOUT
+  // (the plain Run bar stays): at the natural typing scroll position the
+  // panel + dock otherwise showed the identical verdict twice ~600px apart
+  // on one 375px viewport (BROWSER-4).
+  const [livePanelInView, setLivePanelInView] = useState(false);
   // Verdict-dock sheet open/closed. Collapses automatically whenever the
   // readout itself goes away (results land, preview clears) so the sheet
   // can never reappear stale on the next form session.
   const [dockExpanded, setDockExpanded] = useState(false);
   const touchStartYRef = useRef<number | null>(null);
+  const hasLivePreview = Boolean(livePreview);
 
   useEffect(() => {
     // Show once the user has scrolled past the first ~600px of the
@@ -77,7 +83,8 @@ export function StickyCalculateBar({
   }, []);
 
   useEffect(() => {
-    // Three retirement signals the scroll threshold can't see:
+    // Four signals the scroll threshold can't see (1-3 retire the whole
+    // bar; 4 suppresses only the verdict readout):
     // 1. The calculator form itself off screen → hide (on the homepage
     //    the marketing sections above/below the form get the funnel bar
     //    instead — a "Run analysis" CTA there is out of context).
@@ -86,10 +93,17 @@ export function StickyCalculateBar({
     // 3. The results section on screen after a run → hide (the CTA is
     //    stale while the user reads the verdict). Re-observed when
     //    hasResults flips because the results section mounts then.
+    // 4. The in-form LiveVerdictPanel card on screen → suppress the dock
+    //    readout it mirrors (never the same verdict twice on one viewport).
+    //    The panel mounts exactly when the caller passes a livePreview, so
+    //    re-query when that flips.
     const formEl = document.querySelector('[data-calc-form="true"]');
     const submitEl = document.querySelector('[data-inform-submit="true"]');
     const resultsEl = hasResults
       ? document.querySelector('[data-analysis-results="true"]')
+      : null;
+    const livePanelEl = hasLivePreview
+      ? document.querySelector("[data-live-verdict]")
       : null;
     const observers: IntersectionObserver[] = [];
     if (formEl) {
@@ -111,15 +125,23 @@ export function StickyCalculateBar({
     } else {
       setResultsInView(false);
     }
+    if (livePanelEl) {
+      const o = new IntersectionObserver(([e]) => setLivePanelInView(e?.isIntersecting ?? false));
+      o.observe(livePanelEl);
+      observers.push(o);
+    } else {
+      setLivePanelInView(false);
+    }
     return () => observers.forEach((o) => o.disconnect());
-  }, [hasResults]);
+  }, [hasResults, hasLivePreview]);
 
   const visible = pastFold && formInView && !submitInView && !(hasResults && resultsInView);
   const rendered = visible || isCalculating;
 
   // Compact verdict readout: pre-results only (caller also gates the prop),
-  // and never while the spinner has taken over the bar.
-  const showReadout = Boolean(livePreview) && !hasResults && !isCalculating;
+  // never while the spinner has taken over the bar, and never while the
+  // in-form LiveVerdictPanel it mirrors is on screen (BROWSER-4).
+  const showReadout = hasLivePreview && !hasResults && !isCalculating && !livePanelInView;
 
   useEffect(() => {
     if (!showReadout) setDockExpanded(false);

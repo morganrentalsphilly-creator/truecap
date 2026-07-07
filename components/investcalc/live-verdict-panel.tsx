@@ -53,7 +53,13 @@ export function LiveVerdictPanel({ active, livePreview, livePreviewMsg }: Props)
         </span>
       ) : null}
       {active && livePreview ? (
-        <div className="rounded-2xl border-2 border-dashed border-primary/30 bg-[var(--brand-blue-light)] p-4 sm:p-5">
+        // data-live-verdict: observed by StickyCalculateBar so the dock
+        // readout suppresses itself while this card is on screen — the same
+        // answer must never render twice on one phone viewport (BROWSER-4).
+        <div
+          data-live-verdict=""
+          className="rounded-2xl border-2 border-dashed border-primary/30 bg-[var(--brand-blue-light)] p-4 sm:p-5"
+        >
           <div className="mb-3 flex items-center justify-between gap-2">
             <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-primary">
               <span className="relative flex size-2">

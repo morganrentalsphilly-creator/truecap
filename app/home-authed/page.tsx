@@ -161,7 +161,9 @@ export default async function AuthedHome({
   const canUseMaxOffer = isPaidPlan;
   const canUseSensitivity = isPaidPlan;
   const canUseStrategies = isPaidPlan;
-  const canUseShareLinks = isPaidPlan;
+  // (canUseShareLinks was removed: share links are deliberately FREE for
+  // everyone — the /d/[encoded] growth loop — and the prop was dead all the
+  // way down to ShareLinkButton.)
 
   return (
     // relative + overflow-x-clip: mirror of app/page.tsx — `relative` contains
@@ -196,7 +198,6 @@ export default async function AuthedHome({
         canUseMaxOffer={canUseMaxOffer}
         canUseSensitivity={canUseSensitivity}
         canUseStrategies={canUseStrategies}
-        canUseShareLinks={canUseShareLinks}
         canUpdateSavedDeals={canUpdateSavedDeals}
         saveDealLimitReached={saveDealLimitReached}
         initialSavedDealCount={savedDealCount ?? 0}

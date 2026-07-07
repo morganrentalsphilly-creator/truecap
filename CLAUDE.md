@@ -116,7 +116,7 @@ final_source_code/
 │   │   │   single-family-unit-section.tsx, multi-family-units-section.tsx,
 │   │   │   financing-section.tsx, operating-expenses-section.tsx,
 │   │   │   template-selector-section.tsx
-│   │   ├── analysis-dashboard.tsx        # Tabbed result view
+│   │   ├── analysis-dashboard.tsx        # Verdict Ledger result view (accordion rows)
 │   │   ├── analysis-error-boundary.tsx
 │   │   ├── cash-flow-waterfall.tsx, sensitivity-grid.tsx,
 │   │   │   loan-amortization-view.tsx, mortgage-scenario-compare.tsx,
@@ -531,7 +531,7 @@ When adding a fourth such feature, replicate this layout. Shared shells
 ### Frontend entry points
 - `components/investcalc/investcalc-page.tsx` — the main calculator (client component, react-hook-form + zodResolver).
 - `components/investcalc/read-only-analysis-view.tsx` — `/d/[encoded]` viewer.
-- `components/investcalc/analysis-dashboard.tsx` — tabbed result view that pulls the panels together.
+- `components/investcalc/analysis-dashboard.tsx` — Verdict Ledger result view (accordion rows) that pulls the panels together.
 - `components/dashboard/DashboardHome.tsx`, `Sidebar.tsx`, `Topbar.tsx` — Pro dashboard shell.
 - `app/layout.tsx` — root layout + global providers.
 

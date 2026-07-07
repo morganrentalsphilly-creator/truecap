@@ -233,7 +233,6 @@ export default function Home() {
         canUseMaxOffer={false}
         canUseSensitivity={false}
         canUseStrategies={false}
-        canUseShareLinks={false}
         canUpdateSavedDeals={false}
         saveDealLimitReached={false}
         initialSavedDealCount={0}

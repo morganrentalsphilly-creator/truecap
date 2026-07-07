@@ -12,8 +12,7 @@
  * Controlled on purpose: open state lives in AnalysisDashboard so
  * `setActiveTab(id)` (kept name) can open a row programmatically for
  * every existing consumer — metric-tap jumps, StrategyOutcomeCard's
- * onJumpToTab, the saved-deal tab restore and the strategy primaryTab
- * lead.
+ * onJumpToTab, the input-tab clicks and the strategy primaryTab lead.
  *
  * Mount semantics — two modes, matching how each panel behaved BEFORE
  * the ledger so no fetch/bundle timing changes:

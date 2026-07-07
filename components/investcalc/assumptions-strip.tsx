@@ -38,9 +38,11 @@ import type { EnrichmentProvenanceInput } from "@/lib/data-confidence";
 import {
   buildAssumptionChips,
   computeExpensesEdited,
+  computeStrategyOwnedFields,
   resolveTemplateName,
   type AssumptionChip,
   type AssumptionChipTarget,
+  type StrategyAppliedSnapshot,
 } from "@/lib/assumption-chips";
 import { getStrategyByKey } from "@/lib/investor-strategies";
 import { StrategyChips } from "./strategy-chips";
@@ -66,6 +68,10 @@ type Props = {
   /** Active "What's your play?" strategy (null = default flow). */
   activeStrategyKey: string | null;
   onSelectStrategy: (key: string | null) => void;
+  /** What the play's starter set wrote (label + field → value), so chips
+   *  over strategy-set values badge as the play's defaults instead of
+   *  "yours" — the starter writes are RHF-dirty on purpose (BROWSER-2). */
+  strategyApplied?: StrategyAppliedSnapshot | null;
   /** Loaded Pro templates + the saved-deal fallback row, for resolving the
    *  template chip's display name from the watched templateId. */
   templateOptions: ReadonlyArray<{ id: string; templateName: string }>;
@@ -82,6 +88,7 @@ export function AssumptionsStrip({
   onHideDetails,
   activeStrategyKey,
   onSelectStrategy,
+  strategyApplied = null,
   templateOptions,
   savedTemplateFallback,
   footer,
@@ -92,14 +99,26 @@ export function AssumptionsStrip({
   form.watch();
   const values = form.getValues();
   const provenance = getProvenance();
+  // Fields still holding the play's starter-written values: dirty on purpose
+  // (the template auto-apply skips dirty fields) but NOT user edits — they
+  // must badge as the play's defaults, never "yours" (BROWSER-2). A user
+  // edit diverges the value and drops the field from the set.
+  const strategyOwnedFields = computeStrategyOwnedFields(
+    strategyApplied,
+    values as unknown as Record<string, unknown>
+  );
   const expensesEdited = computeExpensesEdited(
-    form.formState.dirtyFields as Record<string, unknown>
+    form.formState.dirtyFields as Record<string, unknown>,
+    strategyOwnedFields
   );
   const activeStrategy = getStrategyByKey(activeStrategyKey);
   const chips = buildAssumptionChips(values, provenance, {
     expensesEdited,
     templateName: resolveTemplateName(values.templateId, templateOptions, savedTemplateFallback),
     hasActiveStrategy: Boolean(activeStrategy),
+    strategyPlay: strategyApplied
+      ? { label: strategyApplied.label, ownedFields: strategyOwnedFields }
+      : null,
   });
 
   // ── Arrival pulse ─────────────────────────────────────────────────────
@@ -168,7 +187,15 @@ export function AssumptionsStrip({
   // behavior — including handleSelectStrategy's form writes — is unchanged.
   const [strategyOpen, setStrategyOpen] = useState(false);
 
-  const advancedTargets: AssumptionChipTarget[] = ["financing", "expenses", "extras"];
+  // Focus landing zone for the "Hide details" collapse (see the button).
+  const headingRef = useRef<HTMLParagraphElement | null>(null);
+
+  // Every chip target that opens the #advanced-options block gets the
+  // disclosure semantics. "property" belongs here too: its #step-type panel
+  // moved INSIDE the advanced block in Phase 4, so the template + MF-extras
+  // chips expand the same region as their siblings and must announce it
+  // (A11Y-PROPERTY-CHIP-ARIA).
+  const advancedTargets: AssumptionChipTarget[] = ["financing", "expenses", "extras", "property"];
   const renderChip = (chip: AssumptionChip) => {
     const opensAdvanced = advancedTargets.includes(chip.target);
     return (
@@ -210,7 +237,13 @@ export function AssumptionsStrip({
     <div className="rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-5">
       <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1">
         <div className="min-w-0">
-          <p className="text-sm font-semibold text-foreground">
+          {/* tabIndex={-1}: focus landing zone for the "Hide details"
+              handoff below — never in the tab order itself. */}
+          <p
+            ref={headingRef}
+            tabIndex={-1}
+            className="text-sm font-semibold text-foreground focus:outline-none"
+          >
             Your assumptions — already filled in
           </p>
           <p className="text-[11px] leading-snug text-muted-foreground">
@@ -220,7 +253,16 @@ export function AssumptionsStrip({
         {advancedOpen ? (
           <button
             type="button"
-            onClick={onHideDetails}
+            onClick={() => {
+              // The button renders only while advancedOpen, so activating it
+              // unmounts the focused element and strands keyboard/SR focus
+              // on <body> at the top of a very long page. Hand focus to the
+              // strip heading BEFORE the collapse commits — the same fix
+              // class listing-link-input.tsx documents
+              // (A11Y-HIDE-DETAILS-FOCUS).
+              headingRef.current?.focus();
+              onHideDetails();
+            }}
             aria-expanded={advancedOpen}
             aria-controls="advanced-options"
             className="inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"

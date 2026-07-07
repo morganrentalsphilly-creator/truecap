@@ -16,8 +16,9 @@ import { GlossaryTip } from "@/components/investcalc/glossary-tip";
  *  - "primary"   → bedrooms + monthly rent only (the two the cash-flow run
  *                  actually needs - beds drives HUD rent auto-fill, rent is
  *                  required by the math). Shown on the minimal first screen.
- *  - "secondary" → bathrooms + square feet (optional; live under
- *                  "Improve accuracy" so the first screen stays minimal).
+ *  - "secondary" → bathrooms + square feet (optional; live in the advanced
+ *                  assumptions region — the "Property extras" panel — so the
+ *                  first screen stays minimal).
  */
 type SingleFamilyFields = "all" | "primary" | "secondary";
 
@@ -74,15 +75,23 @@ export function SingleFamilyUnitSection({
 
   const showBeds = fields !== "secondary" && !hideBedrooms;
   // In STR mode the monthly-rent field is replaced by the nightly-rate +
-  // occupancy inputs (rendered in their own block below).
-  const showRent = fields !== "secondary" && !strMode;
+  // occupancy inputs. Both blocks stay MOUNTED on the primary screen and are
+  // CSS-toggled by strMode (STR-RENT-RESURRECTION): react-hook-form re-seeds
+  // a REMOUNTED registered input from _defaultValues — stale after a draft /
+  // saved-deal form.reset — so unmounting on a strategy switch silently
+  // resurrected the old rent (or ADR) the strategy handler had just cleared,
+  // and the live recompute repainted the verdict on hybrid math. display:none
+  // keeps registration + the cleared values intact (the advanced block's
+  // proven mounted-but-hidden pattern).
+  const incomeMounted = fields !== "secondary";
+  const showRent = incomeMounted && !strMode;
   const showBaths = fields !== "primary";
   const showSqft = fields !== "primary";
 
   // Live "≈ $X/mo" readout for the STR inputs (matches calc-analysis exactly:
   // ADR × 365 × occupancy / 12). Only shown on the primary screen, not the
-  // secondary "improve accuracy" pass.
-  const showStr = strMode && fields !== "secondary";
+  // secondary property-extras pass.
+  const showStr = strMode && incomeMounted;
   const adrWatch = form.watch("avgDailyRate");
   const occWatch = form.watch("occupancyPct");
   const strMonthlyRevenue =
@@ -151,8 +160,8 @@ export function SingleFamilyUnitSection({
           </div>
         ) : null}
 
-        {showRent ? (
-          <div>
+        {incomeMounted ? (
+          <div className={cn(!showRent && "hidden")}>
             <Label htmlFor="monthlyRent" className="text-xs font-semibold text-primary mb-1.5 block uppercase tracking-wide">
               <GlossaryTip term="onePercentRule" showIcon={false}>{rentLabel ?? "Monthly Rent"}</GlossaryTip>
             </Label>
@@ -234,8 +243,8 @@ export function SingleFamilyUnitSection({
         {extraFields}
       </div>
 
-      {showStr ? (
-        <div className="mt-4 rounded-xl border border-border bg-muted/30 p-4">
+      {incomeMounted ? (
+        <div className={cn("mt-4 rounded-xl border border-border bg-muted/30 p-4", !showStr && "hidden")}>
           <div className="flex items-center gap-2 mb-3">
             <CalendarClock className="w-4 h-4 text-primary" />
             <span className="text-xs font-semibold text-foreground uppercase tracking-wide">

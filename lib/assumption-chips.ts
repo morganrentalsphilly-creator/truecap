@@ -30,9 +30,10 @@ import type { EnrichmentProvenanceInput } from "@/lib/data-confidence";
 export type AssumptionChipTarget = "property" | "financing" | "expenses" | "extras";
 
 export type AssumptionChipBadge = {
-  /** Provenance vocabulary shared with the result-state strip. */
-  kind: "live" | "hud" | "state" | "yours";
-  /** Display text, e.g. "live rate", "PA", "yours". */
+  /** Provenance vocabulary shared with the result-state strip, plus "play"
+   *  for values written by an active "What's your play?" starter set. */
+  kind: "live" | "hud" | "state" | "yours" | "play";
+  /** Display text, e.g. "live rate", "PA", "yours", "BRRRR". */
   text: string;
 };
 
@@ -82,6 +83,12 @@ export type AssumptionChipOptions = {
    *  template card is unmounted in that mode, so the template chip (and the
    *  non-SF extras chip, whose year-built field is also hidden) drop out. */
   hasActiveStrategy: boolean;
+  /** The play whose starter set wrote assumption values (BROWSER-2): chips
+   *  whose field is still in ownedFields badge with the play's label — those
+   *  values are the PLAY's defaults, not the user's, even though the writes
+   *  are RHF-dirty (dirtiness is load-bearing for the template auto-apply).
+   *  Null/absent = no play applied this session. */
+  strategyPlay?: { label: string; ownedFields: ReadonlySet<string> } | null;
 };
 
 /** Number-or-null coercion for RHF values (NaN / "" / non-numeric → null). */
@@ -112,8 +119,46 @@ export const EXPENSE_EDIT_FIELDS = [
   "hoaMonthly",
 ] as const;
 
-export function computeExpensesEdited(dirtyFields: Record<string, unknown>): boolean {
-  return EXPENSE_EDIT_FIELDS.some((f) => Boolean(dirtyFields[f]));
+export function computeExpensesEdited(
+  dirtyFields: Record<string, unknown>,
+  /** Fields still owned by an active play's starter set (see
+   *  computeStrategyOwnedFields): dirty on purpose but NOT user edits, so
+   *  they must not flip the "yours" provenance badge (BROWSER-2). */
+  strategyOwnedFields?: ReadonlySet<string>
+): boolean {
+  return EXPENSE_EDIT_FIELDS.some(
+    (f) => Boolean(dirtyFields[f]) && !strategyOwnedFields?.has(f)
+  );
+}
+
+/** What an applied "What's your play?" starter set wrote: the play's label
+ *  plus the exact field → value record (captured at apply time). */
+export type StrategyAppliedSnapshot = {
+  label: string;
+  fields: Record<string, unknown>;
+};
+
+/**
+ * Fields still OWNED by the applied play: the current form value equals what
+ * the starter wrote (numeric compare, mirroring the enrichment "overridden"
+ * check). A user edit diverges the value and drops the field out of the set
+ * automatically — the existing dirty-tracking can't make that distinction
+ * because the starter writes are dirty on purpose (BROWSER-2).
+ */
+export function computeStrategyOwnedFields(
+  applied: StrategyAppliedSnapshot | null | undefined,
+  values: Record<string, unknown>
+): Set<string> {
+  const owned = new Set<string>();
+  if (!applied) return owned;
+  for (const [field, appliedValue] of Object.entries(applied.fields)) {
+    const a = num(appliedValue);
+    const c = num(values[field]);
+    const stillApplied =
+      a != null && c != null ? Math.abs(a - c) < 1e-9 : values[field] === appliedValue;
+    if (stillApplied) owned.add(field);
+  }
+  return owned;
 }
 
 /** templateId → display name: the loaded Pro template list first, then the
@@ -145,6 +190,17 @@ export function buildAssumptionChips(
 
   const chips: AssumptionChip[] = [];
 
+  // A play's starter-written field still at the starter's value badges with
+  // the play's label instead of "yours" — those values are the PLAY's
+  // defaults, not user edits (BROWSER-2). Enrichment ("live"/"state") still
+  // wins where present: it's fresher, address-specific data.
+  const play = opts.strategyPlay ?? null;
+  const playOwns = (...fields: string[]) =>
+    Boolean(play && fields.some((f) => play.ownedFields.has(f)));
+  const playBadge: AssumptionChipBadge | null = play
+    ? { kind: "play", text: play.label }
+    : null;
+
   // ── Financing: "20% down @ 6.9%" (+ "live rate" when FRED-filled) ──────
   const down = num(values.downPaymentPct);
   const rate = num(values.interestRate);
@@ -157,9 +213,11 @@ export function buildAssumptionChips(
         : "Financing —",
     badge: rateIsLive
       ? { kind: "live", text: "live rate" }
-      : provenance.interestRate
-        ? { kind: "yours", text: "yours" }
-        : null,
+      : playOwns("interestRate", "downPaymentPct")
+        ? playBadge
+        : provenance.interestRate
+          ? { kind: "yours", text: "yours" }
+          : null,
     target: "financing",
     pulseKey: rateIsLive ? "rate:fred" : null,
   });
@@ -175,9 +233,11 @@ export function buildAssumptionChips(
       : `Taxes ${fmtPct(num(values.propertyTaxPct) ?? 1.1)}%`,
     badge: taxIsState
       ? { kind: "state", text: provenance.propertyTaxPct?.detail ?? "state" }
-      : provenance.propertyTaxPct
-        ? { kind: "yours", text: "yours" }
-        : null,
+      : playOwns("propertyTaxPct")
+        ? playBadge
+        : provenance.propertyTaxPct
+          ? { kind: "yours", text: "yours" }
+          : null,
     target: "expenses",
     pulseKey: taxIsState ? "tax:state" : null,
   });
@@ -191,14 +251,22 @@ export function buildAssumptionChips(
       values.insuranceInputMode === "monthly" && insMo != null
         ? `Insurance $${fmtMoney(insMo)}/mo`
         : `Insurance ${fmtPct(num(values.insurancePct) ?? 0.5)}%`,
-    badge: expensesYours ? { kind: "yours", text: "yours" } : null,
+    badge: playOwns("insurancePct", "insuranceMonthly")
+      ? playBadge
+      : expensesYours
+        ? { kind: "yours", text: "yours" }
+        : null,
     target: "expenses",
     pulseKey: null,
   });
   chips.push({
     id: "vacancy",
     label: `Vacancy ${fmtPct(num(values.vacancyPct) ?? 5)}%`,
-    badge: expensesYours ? { kind: "yours", text: "yours" } : null,
+    badge: playOwns("vacancyPct")
+      ? playBadge
+      : expensesYours
+        ? { kind: "yours", text: "yours" }
+        : null,
     target: "expenses",
     pulseKey: null,
   });

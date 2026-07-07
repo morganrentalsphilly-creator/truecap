@@ -22,7 +22,7 @@
  * stays in analysis-dashboard.tsx.
  */
 
-import type { KeyboardEvent as ReactKeyboardEvent, ReactNode } from "react";
+import type { ReactNode } from "react";
 import { ChevronRight } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
@@ -155,35 +155,35 @@ function MetricCard({
       {label}
     </span>
   );
-  const handleKeyDown = (e: ReactKeyboardEvent<HTMLDivElement>) => {
-    if (!onSelect) return;
-    // Only when the TILE itself is focused: the nested GlossaryTip "?"
-    // stops click propagation but its Enter/Space handler bubbles, so
-    // without this guard opening the tooltip ALSO fired the jump
-    // (verifier live-reproduced tooltip-opens-and-page-scrolls).
-    if (e.target !== e.currentTarget) return;
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      onSelect();
-    }
-  };
+  // Jump affordance is a stretched SIBLING button, not role="button" on the
+  // tile itself (A11Y-NESTED-BUTTONS-METRIC-TILE): GlossaryTip's trigger is
+  // a focusable role="button" span, and nesting it inside a button-role tile
+  // violated the ARIA button pattern (screen readers announced two stacked
+  // buttons per tile). The absolutely-positioned button covers the tile for
+  // pointer + keyboard users; the GlossaryTip wrapper sits above it (z-10)
+  // so the "?" tooltip keeps working independently.
   return (
     <div
-      role={onSelect ? "button" : undefined}
-      tabIndex={onSelect ? 0 : undefined}
-      onClick={onSelect}
-      onKeyDown={onSelect ? handleKeyDown : undefined}
-      title={onSelect ? "Jump to the section that explains this number" : undefined}
       className={cn(
-        "flex flex-col gap-1 rounded-2xl border border-border bg-card p-3 shadow-[0_1px_2px_rgba(15,23,42,0.04)] sm:p-5",
-        onSelect &&
-          "cursor-pointer transition-colors hover:border-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        "relative flex flex-col gap-1 rounded-2xl border border-border bg-card p-3 shadow-[0_1px_2px_rgba(15,23,42,0.04)] sm:p-5",
+        onSelect && "transition-colors hover:border-primary/40 focus-within:border-primary/40"
       )}
     >
+      {onSelect ? (
+        <button
+          type="button"
+          onClick={onSelect}
+          aria-label={`${label} — jump to the section that explains this number`}
+          title="Jump to the section that explains this number"
+          className="absolute inset-0 cursor-pointer rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        />
+      ) : null}
       {glossaryTerm ? (
-        <GlossaryTip term={glossaryTerm} className="!no-underline">
-          {labelEl}
-        </GlossaryTip>
+        <span className="relative z-10 self-start">
+          <GlossaryTip term={glossaryTerm} className="!no-underline">
+            {labelEl}
+          </GlossaryTip>
+        </span>
       ) : (
         labelEl
       )}

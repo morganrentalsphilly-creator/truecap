@@ -192,8 +192,6 @@ interface AnalysisDashboardProps {
   canUseSensitivity?: boolean;
   /** Pro: Strategies tab. False = tab shown locked with upgrade prompt. */
   canUseStrategies?: boolean;
-  /** Pro: shareable read-only deal links. False = share button hidden / locked. */
-  canUseShareLinks?: boolean;
   /**
    * Sample-deal Pro preview mode: the analysis came from "Try a sample
    * deal" and the can-use flags above were OR'd open by the caller so
@@ -244,7 +242,7 @@ export type AnalysisDashboardTab =
 /**
  * Every ledger row id. The six analysis rows ARE the AnalysisDashboardTab
  * ids (the old tab ids) so every consumer of the tab contract — metric-tap
- * jumps, StrategyOutcomeCard's onJumpToTab, the saved-deal tab restore,
+ * jumps, StrategyOutcomeCard's onJumpToTab, the input-tab clicks and
  * the strategy primaryTab lead — keeps working unchanged. The rest are the
  * always-visible cards that joined the ledger as rows (comps, assumptions,
  * Deal Q&A, notes).
@@ -351,7 +349,6 @@ export function AnalysisDashboard({
   canUseMaxOffer = false,
   canUseSensitivity = false,
   canUseStrategies = false,
-  canUseShareLinks: _canUseShareLinks = false,
   isSampleProPreview = false,
   dealQaEnabled = false,
   saveDealLimitReached = false,
@@ -559,7 +556,20 @@ export function AnalysisDashboard({
     setPendingSaveIntent();
     router.push("/auth/login?next=/");
   };
-  const goToBilling = () => router.push("/profile#billing");
+  // Auth-aware upgrade routing (BROWSER-1 / STRATEGY-UPSELL-LOGIN-DEADEND):
+  // /profile is auth-gated and server-redirects anonymous users to
+  // /auth/login with NO ?next param, so an anon "Get Pro" / "Start your
+  // 3-day free trial" tap dead-ended at a login wall with the billing
+  // intent dropped. Anonymous users go to /pricing instead (matching
+  // ProInlineGate — the sibling gate that always did this right);
+  // authenticated users keep the direct billing deep link.
+  const goToBilling = () => {
+    if (!isAuthenticated) {
+      router.push("/pricing");
+      return;
+    }
+    router.push("/profile#billing");
+  };
   const tabEntitlements: Record<AnalysisDashboardTab, boolean> = {
     "cash-flow": true,
     projections: canUseProjections,
@@ -611,7 +621,7 @@ export function AnalysisDashboard({
   const handleMetricJump = setActiveTab;
 
   // Programmatic tab pointing from the page (input-tab clicks, the
-  // strategy primaryTab lead, saved-deal restore) - opens the row WITHOUT
+  // strategy primaryTab lead, onSubmit) - opens the row WITHOUT
   // scrolling, exactly matching the old semantics where changing the
   // active tab never moved the viewport (the page scrolls to the results
   // container itself when it wants to). The mount-time value seeds the

@@ -9,24 +9,31 @@
  *
  * Behaviour:
  *   - Hidden by default
- *   - Appears 5 seconds after the user's first analysis_completed signal
+ *   - After the user's first analysis_completed signal, appears when they
+ *     SCROLL PAST the results ledger (they've read the answer) or on
+ *     desktop exit-intent (mouse leaves through the top of the viewport)
  *   - Dismissable; remembers dismissal via localStorage so it never
  *     re-fires on subsequent analyses within the same browser
  *   - Submits via capturePostAnalysisEmail server action
  *
- * Why 5s delay: the user is reading the result. Interrupting them with
- * a modal in the first second feels rude. After 5s most users have
- * processed the verdict and are about to leave — that's the window.
+ * Why not a flat timer (BROWSER-6): the redesign's answer-first mobile
+ * ordering put the Deal Score exactly where the old 5s overlay landed —
+ * it slid over ~40% of a 375px viewport while the first-timer was still
+ * reading the verdict. Scroll-past / exit-intent fires at the natural
+ * "about to leave" moment instead of mid-read.
  */
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { CheckCircle2, X } from "lucide-react";
 import { capturePostAnalysisEmail } from "@/app/actions/post-analysis-email-capture";
 import { trackEvent } from "@/lib/analytics";
 
 const DISMISSED_KEY = "truecap_post_analysis_email_dismissed_v1";
 const CAPTURED_KEY = "truecap_post_analysis_email_captured_v1";
-const DELAY_MS = 5000;
+/** The prompt opens once the bottom of the results region is within this
+ *  many px of entering the viewport — i.e. the user scrolled through the
+ *  ledger and is running out of page. */
+const LEDGER_END_MARGIN_PX = 120;
 
 type Props = {
   /** True when an analysis has been completed in the current session. */
@@ -40,7 +47,6 @@ export function PostAnalysisEmailPrompt({ hasCompletedAnalysis, propertyAddress 
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const timerRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (!hasCompletedAnalysis) return;
@@ -55,7 +61,11 @@ export function PostAnalysisEmailPrompt({ hasCompletedAnalysis, propertyAddress 
     } catch {
       return;
     }
-    timerRef.current = window.setTimeout(() => {
+    let fired = false;
+    const openPrompt = () => {
+      if (fired) return;
+      fired = true;
+      removeListeners();
       setOpen(true);
       // Track exposure — the funnel needs to know how many anonymous
       // users actually SAW the prompt (not just how many submitted).
@@ -63,10 +73,27 @@ export function PostAnalysisEmailPrompt({ hasCompletedAnalysis, propertyAddress 
       trackEvent("email_capture_shown", {
         address_present: Boolean(propertyAddress?.trim()),
       });
-    }, DELAY_MS);
-    return () => {
-      if (timerRef.current != null) window.clearTimeout(timerRef.current);
     };
+    // Scroll-past-the-ledger: the user has scrolled through the results —
+    // they've read the answer and are running out of page.
+    const onScroll = () => {
+      const results = document.querySelector('[data-analysis-results="true"]');
+      if (!results) return;
+      const bottom = results.getBoundingClientRect().bottom;
+      if (bottom <= window.innerHeight + LEDGER_END_MARGIN_PX) openPrompt();
+    };
+    // Desktop exit-intent: mouse leaves through the top of the viewport
+    // (heading for the tab bar / URL) — the classic about-to-leave signal.
+    const onMouseLeave = (e: MouseEvent) => {
+      if (e.clientY <= 0) openPrompt();
+    };
+    const removeListeners = () => {
+      window.removeEventListener("scroll", onScroll);
+      document.documentElement.removeEventListener("mouseleave", onMouseLeave);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    document.documentElement.addEventListener("mouseleave", onMouseLeave);
+    return removeListeners;
   }, [hasCompletedAnalysis, propertyAddress]);
 
   const dismiss = () => {
@@ -114,7 +141,10 @@ export function PostAnalysisEmailPrompt({ hasCompletedAnalysis, propertyAddress 
       role="dialog"
       aria-modal="true"
       aria-label="Get the underwriting checklist"
-      className="fixed inset-x-3 bottom-3 z-[55] sm:inset-auto sm:bottom-6 sm:right-6 sm:max-w-sm"
+      // z-30, deliberately BELOW the sticky Run bar / verdict dock (z-40):
+      // if the user scrolls back into the form, the product action wins the
+      // bottom edge — the capture card must never block Run (BROWSER-6).
+      className="fixed inset-x-3 bottom-3 z-30 sm:inset-auto sm:bottom-6 sm:right-6 sm:max-w-sm"
     >
       <div className="relative overflow-hidden rounded-2xl border-2 border-primary bg-card p-5 shadow-2xl">
         <button
