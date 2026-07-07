@@ -3635,6 +3635,18 @@ export function InvestCalcPage({
     }
   };
 
+  /**
+   * Input-phase gate — the SAME expression the LiveVerdictPanel /
+   * EnrichmentReceipt `active` props and the sticky dock readout use
+   * (kept inline there; aliased here for the cockpit grid only).
+   * Pre-run at lg+ the form renders as a two-column cockpit (fields
+   * left, sticky live verdict right); once results exist the grid
+   * classes drop away and the form returns to today's full-width
+   * single column — the cockpit is an input-phase layout only, and
+   * the results below the form stay full-width exactly as before.
+   */
+  const isInputPhase = !showResults && !analysisResult && !isCalculating;
+
   return (
     <div className="min-h-screen bg-background">
       {/* Hero section */}
@@ -3842,6 +3854,27 @@ export function InvestCalcPage({
               className="hidden sm:sticky sm:top-2 sm:z-20 sm:block"
             />
 
+            {/* DESKTOP COCKPIT (input phase, lg+ only) — two-column grid per
+                the redesign blueprint §2: LEFT (3/5 ≈ 726px at max-w-7xl) =
+                hero + receipt + assumptions strip + advanced region + Run;
+                RIGHT (2/5) = the LiveVerdictPanel in a sticky container so
+                the verdict forms in-view while typing. Below lg this wrapper
+                is a plain block carrying the SAME space-y-5 the parent uses,
+                so mobile stacking is byte-identical (the v4 space-y margin
+                lands on the same visible boxes as before; the lg:col-* /
+                lg:row-* classes on children are inert outside a grid parent).
+                The grid classes are gated on isInputPhase: post-run the panel
+                renders nothing, so the form snaps back to full width instead
+                of leaving a dead 40% gutter. At lg the space-y margins double
+                as the row gaps (no gap-y), which keeps trailing empty grid
+                rows (advanced region closed → one unused row from the right
+                rail's row-span) at exactly 0px tall. */}
+            <div
+              className={cn(
+                "space-y-5",
+                isInputPhase && "lg:grid lg:grid-cols-5 lg:gap-x-8"
+              )}
+            >
             {/* "What's your play?" strategy chips — demoted from a top-of-form
                 card into the assumptions strip below (the "Analyzing as:" pill
                 opens the same StrategyChips picker; behavior unchanged). */}
@@ -3864,7 +3897,7 @@ export function InvestCalcPage({
             <section
               id="step-property"
               aria-labelledby="analyze-deal-heading"
-              className="scroll-mt-24 bg-card rounded-2xl border border-border shadow-sm p-6"
+              className="scroll-mt-24 bg-card rounded-2xl border border-border shadow-sm p-6 lg:col-span-3 lg:col-start-1"
             >
               <div className="mb-5">
                 <h2
@@ -3951,27 +3984,52 @@ export function InvestCalcPage({
                 income section, so the answer is the next thing on screen
                 while the user types the three core fields. State (livePreview
                 + the debounced SR message) stays here; the panel is purely
-                presentational. */}
-            <LiveVerdictPanel
-              active={!showResults && !analysisResult && !isCalculating}
-              // Suppressed while a solve-oriented play is active — see
-              // showGenericLivePreview. The SR message is gated with it so
-              // screen readers never hear the contradictory verdict either.
-              livePreview={showGenericLivePreview ? livePreview : null}
-              livePreviewMsg={showGenericLivePreview ? livePreviewMsg : ""}
-            />
+                presentational.
+                COCKPIT (lg+): the outer div is the right-column grid item —
+                it stretches across every left-column row (row-span-6) so the
+                inner lg:sticky container has the full input area as its
+                travel range (lg:top-24 clears the sticky h-16 site header).
+                Below lg both wrappers are plain margin-less blocks: when the
+                panel shows its card the wrapper occupies exactly the card's
+                box (same space-y margin slot as before), and when the panel
+                renders nothing they are empty zero-height blocks whose
+                space-y margins collapse through — mobile spacing identical
+                in every panel state, and no dead white rail at lg since the
+                wrappers carry no chrome. */}
+            <div className="lg:col-start-4 lg:col-span-2 lg:row-start-1 lg:row-span-6">
+              <div className="lg:sticky lg:top-24">
+                <LiveVerdictPanel
+                  active={!showResults && !analysisResult && !isCalculating}
+                  // Suppressed while a solve-oriented play is active — see
+                  // showGenericLivePreview. The SR message is gated with it so
+                  // screen readers never hear the contradictory verdict either.
+                  livePreview={showGenericLivePreview ? livePreview : null}
+                  livePreviewMsg={showGenericLivePreview ? livePreviewMsg : ""}
+                />
+              </div>
+            </div>
 
             {/* Enrichment receipt - the durable one-line record of what
                 enrichment / template auto-apply filled (toasts retained).
-                Same input-phase gate as the LiveVerdictPanel above. */}
-            <EnrichmentReceipt
-              form={form}
-              active={!showResults && !analysisResult && !isCalculating}
-              getCapture={getEnrichmentCapture}
-              templateOptions={templateOptions}
-              savedTemplateFallback={savedTemplateFallback}
-              hasActiveStrategy={Boolean(activeStrategy)}
-            />
+                Same input-phase gate as the LiveVerdictPanel above.
+                The wrapper div exists only to place the component in the
+                cockpit's left column at lg (the component takes no
+                className); below lg it is margin-transparent — see the
+                cockpit note above. */}
+            {/* empty:hidden — when the receipt renders null (fresh form),
+                grid items don't margin-collapse, so this wrapper's space-y
+                margin created a 20px phantom row at lg (verifier-measured
+                40px hero→strip gap vs the uniform 20px rhythm). */}
+            <div className="empty:hidden lg:col-span-3 lg:col-start-1">
+              <EnrichmentReceipt
+                form={form}
+                active={!showResults && !analysisResult && !isCalculating}
+                getCapture={getEnrichmentCapture}
+                templateOptions={templateOptions}
+                savedTemplateFallback={savedTemplateFallback}
+                hasActiveStrategy={Boolean(activeStrategy)}
+              />
+            </div>
 
             {/* Assumptions strip - replaces the "Improve accuracy (optional)"
                 toggle button as the entry point to the advanced region. The
@@ -3984,6 +4042,7 @@ export function InvestCalcPage({
                 them and their values are included on submit; the remembered
                 open/closed choice and the one-time auto-open after the first
                 result both keep working on the same advancedOpen state. */}
+            <div className="lg:col-span-3 lg:col-start-1">
             <AssumptionsStrip
               form={form}
               getProvenance={getLiveProvenance}
@@ -4007,9 +4066,13 @@ export function InvestCalcPage({
                 />
               }
             />
+            </div>
             <div
               id="advanced-options"
-              className={cn("space-y-5", advancedOpen ? "block" : "hidden")}
+              className={cn(
+                "space-y-5 lg:col-span-3 lg:col-start-1",
+                advancedOpen ? "block" : "hidden"
+              )}
             >
               {/* "Property type & template" panel — the PropertyTypeSection
                   mount moved from above the hero into the strip's panel
@@ -4082,7 +4145,8 @@ export function InvestCalcPage({
               data-inform-submit="true"
               className={cn(
                 "w-full h-14 text-base font-bold rounded-2xl shadow-lg transition-all",
-                "bg-primary text-primary-foreground hover:bg-primary/95"
+                "bg-primary text-primary-foreground hover:bg-primary/95",
+                "lg:col-span-3 lg:col-start-1"
               )}
             >
               {isCalculating ? (
@@ -4102,7 +4166,7 @@ export function InvestCalcPage({
                 (right). Both desktop-only - mobile users get the
                 sticky bottom Calculate bar instead, and the autosave
                 indicator there would compete with iOS keyboard chrome. */}
-            <div className="hidden sm:flex items-center justify-between gap-3 text-[11px] text-muted-foreground">
+            <div className="hidden sm:flex items-center justify-between gap-3 text-[11px] text-muted-foreground lg:col-span-3 lg:col-start-1">
               <p className="flex items-center gap-1.5">
                 <kbd className="inline-flex items-center rounded border border-border bg-card px-1.5 py-0.5 font-mono text-[10px] font-semibold text-foreground">
                   ⌘
@@ -4117,6 +4181,8 @@ export function InvestCalcPage({
                   the draft write, so showing "Auto-saved" there would lie. */}
               {!savedDealId ? <AutosaveIndicator form={form} /> : null}
             </div>
+            </div>
+            {/* end DESKTOP COCKPIT grid wrapper */}
           </div>
           {/* Mobile sticky bottom Calculate bar. Inside the form so its
               type="submit" triggers the same onSubmit handler the

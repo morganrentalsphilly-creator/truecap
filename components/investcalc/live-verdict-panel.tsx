@@ -58,7 +58,13 @@ export function LiveVerdictPanel({ active, livePreview, livePreviewMsg }: Props)
         // answer must never render twice on one phone viewport (BROWSER-4).
         <div
           data-live-verdict=""
-          className="rounded-2xl border-2 border-dashed border-primary/30 bg-[var(--brand-blue-light)] p-4 sm:p-5"
+          // lg-only "forms as you type" affordance for the desktop cockpit's
+          // sticky rail: the card fades/rises in when the preview first
+          // parses (mount-time animation from tw-animate-css), consistent
+          // with the dashed live-preview styling it already carries. Guarded
+          // by motion-safe; below lg no class applies, so the mobile card is
+          // byte-identical.
+          className="rounded-2xl border-2 border-dashed border-primary/30 bg-[var(--brand-blue-light)] p-4 sm:p-5 lg:motion-safe:animate-in lg:motion-safe:fade-in lg:motion-safe:slide-in-from-bottom-2 lg:motion-safe:duration-300"
         >
           <div className="mb-3 flex items-center justify-between gap-2">
             <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-primary">
