@@ -25,6 +25,7 @@ import { NextActionBanner } from "@/components/investcalc/next-action-banner";
 import { DealAgingNudge } from "@/components/investcalc/deal-aging-nudge";
 import { DealStageSelect } from "@/components/investcalc/deal-stage-select";
 import { OpenFullAnalysisButton } from "@/components/investcalc/open-saved-deal-in-analyzer";
+import { DealWorkspaceAnchorChips } from "@/components/investcalc/deal-workspace-anchor-chips";
 import { OwnedEquityCard } from "@/components/investcalc/owned-equity-card";
 import { nextActionForDeal } from "@/lib/next-action";
 import { recomputeSavedDealVerdict } from "@/lib/recompute-saved-deal-verdict";
@@ -62,7 +63,7 @@ import { getRequestUser, getRequestEntitlements } from "@/lib/request-auth";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
-  title: "Deal checklist & documents",
+  title: "Deal workspace",
   robots: { index: false, follow: false },
 };
 
@@ -432,7 +433,7 @@ export default async function DealWorkspacePage({
                   {heading}
                 </h1>
                 <p className="text-xs text-muted-foreground">
-                  Due-diligence checklist &amp; documents for this deal.
+                  Everything for this deal — checklist, documents, notes &amp; scenarios.
                 </p>
               </div>
               <div className="flex shrink-0 items-center gap-2 pt-0.5">
@@ -469,6 +470,9 @@ export default async function DealWorkspacePage({
                 <Metric label="Deal Score" value={`${Math.round(dealScore)}`} />
               ) : null}
             </div>
+            {/* Contents scent (WS-3): the cards below start under the fold with
+                no hint they exist — one compact chip row jumps to each. */}
+            <DealWorkspaceAnchorChips />
           </div>
 
           <div>
@@ -554,14 +558,26 @@ export default async function DealWorkspacePage({
             address={heading}
           />
           <DealDetailsCard savedDealId={dealRow.id} />
-          <ScenariosCard savedDealId={dealRow.id} />
-          <DueDiligenceCard savedDealId={dealRow.id} />
-          <DealDocumentsCard savedDealId={dealRow.id} />
+          {/* Anchor targets for the header's contents chips. scroll-mt clears
+              the fixed/sticky Topbar (h-16), same as the analyzer's drill rows. */}
+          <div id="deal-scenarios" className="scroll-mt-24">
+            <ScenariosCard savedDealId={dealRow.id} />
+          </div>
+          <div id="deal-due-diligence" className="scroll-mt-24">
+            <DueDiligenceCard savedDealId={dealRow.id} />
+          </div>
+          <div id="deal-documents" className="scroll-mt-24">
+            <DealDocumentsCard savedDealId={dealRow.id} />
+          </div>
           {/* Notes + comments side by side (WS-4): the free-text deal file no
               longer lives only in the analyzer view. Same blob, saves on blur,
               last-write-wins with the analyzer copy. */}
-          <DealNotesPanel savedDealId={dealRow.id} />
-          <DealCommentsPanel savedDealId={dealRow.id} />
+          <div id="deal-notes" className="scroll-mt-24">
+            <DealNotesPanel savedDealId={dealRow.id} />
+          </div>
+          <div id="deal-comments" className="scroll-mt-24">
+            <DealCommentsPanel savedDealId={dealRow.id} />
+          </div>
         </main>
       </div>
     </div>

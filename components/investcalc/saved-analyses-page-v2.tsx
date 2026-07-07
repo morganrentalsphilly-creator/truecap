@@ -1333,19 +1333,6 @@ export function SavedAnalysesPage({
     }
   };
 
-  const handleOpenSavedDeal = (id: string) => {
-    const targetWindow = window.open("about:blank", "_blank");
-    if (targetWindow) targetWindow.opener = null;
-    setOpeningDealId(id);
-    void (async () => {
-      try {
-        await openSavedDealInAnalysisTab(id, targetWindow);
-      } finally {
-        setOpeningDealId(null);
-      }
-    })();
-  };
-
   const toggleOne = (id: string) => {
     if (!canCompareDeals) {
       toast({
@@ -1943,17 +1930,16 @@ export function SavedAnalysesPage({
                       <PropertyTypeIcon className="w-4 h-4" />
                     </span>
                     <div className="min-w-0 flex-1">
-                      <button
-                        type="button"
-                        onClick={() => handleOpenSavedDeal(item.id)}
+                      {/* Name click = the deal's workspace (same-tab, like every
+                          other workspace deep-link). The analyzer handoff stays
+                          one click away on the Open button below. */}
+                      <Link
+                        href={`/dashboard/saved-analyses/${item.id}`}
                         title={item.address ?? undefined}
                         className="flex max-w-full items-center gap-2 text-left text-base font-bold leading-tight text-foreground hover:text-primary"
                       >
                         <span className="truncate">{address.main}</span>
-                        {openingDealId === item.id ? (
-                          <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin text-primary" />
-                        ) : null}
-                      </button>
+                      </Link>
                       <div className="mt-1 flex flex-wrap items-center gap-1.5">
                         <Badge className={cn("rounded-full border text-xs font-semibold", getSignalClasses(signal))}>{SIGNAL_LABELS[signal]}</Badge>
                         <BuyBoxFitBadge fit={buyBoxFitById?.get(item.id)} />
@@ -2093,7 +2079,7 @@ export function SavedAnalysesPage({
                           <DropdownMenuItem asChild>
                             <Link href={`/dashboard/saved-analyses/${item.id}`}>
                               <ClipboardList className="mr-2 h-3.5 w-3.5" />
-                              Checklist &amp; docs
+                              Deal workspace
                             </Link>
                           </DropdownMenuItem>
                           <DropdownMenuItem
@@ -2221,16 +2207,15 @@ export function SavedAnalysesPage({
                             <PropertyTypeIcon className="w-3.5 h-3.5" />
                           </span>
                           <div className="min-w-0">
-                            <button
-                              type="button"
-                              onClick={() => handleOpenSavedDeal(item.id)}
+                            {/* Name click = the deal's workspace (same-tab). The
+                                analyzer stays one click away via Open Analysis. */}
+                            <Link
+                              href={`/dashboard/saved-analyses/${item.id}`}
+                              title={item.address ?? undefined}
                               className="flex max-w-full items-center gap-2 text-left font-semibold text-foreground hover:text-primary"
                             >
                               <span className="truncate">{address.main}</span>
-                              {openingDealId === item.id ? (
-                                <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin text-primary" />
-                              ) : null}
-                            </button>
+                            </Link>
                             {getStatusBadge(item)}
                             <p className="text-xs text-muted-foreground truncate">
                               {getTypeLabel(item.propertyType)}
@@ -2372,7 +2357,7 @@ export function SavedAnalysesPage({
                               <DropdownMenuItem asChild>
                                 <Link href={`/dashboard/saved-analyses/${item.id}`}>
                                   <ClipboardList className="mr-2 h-3.5 w-3.5" />
-                                  Checklist
+                                  Deal workspace
                                 </Link>
                               </DropdownMenuItem>
                               <DropdownMenuItem
