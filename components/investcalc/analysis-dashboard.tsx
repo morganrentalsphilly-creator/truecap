@@ -125,6 +125,7 @@ import type { ProjectionYear, TenYearProjectionInput } from "@/lib/ten-year-proj
 import type { TaxStrategyInput, TaxStrategyYear } from "@/lib/tax-strategy";
 import type { ExitScenarioInput, ExitScenarioYear } from "@/lib/exit-scenarios";
 import { computeReturnSummaryFromExitYears } from "@/lib/returns";
+import { isExtremeAnnualizedRoi } from "@/lib/extreme-value-format";
 import { cn } from "@/lib/utils";
 import type { DealScoreActionResult } from "@/app/actions/deal-score";
 import {
@@ -705,7 +706,11 @@ export function AnalysisDashboard({
       : "See where the rent goes, month by month",
     projections:
       result && annualizedReturnPct != null
-        ? `~${Math.round(annualizedReturnPct)}%/yr total return over 10 years`
+        ? `~${Math.round(annualizedReturnPct)}%/yr total return over 10 years${
+            // Finding 5: beyond the deal-score's own top band (>15%/yr),
+            // the closed-row phrase carries the caution too.
+            isExtremeAnnualizedRoi(annualizedReturnPct) ? " — verify assumptions" : ""
+          }`
         : "See year-by-year cash flow, equity & returns",
     "tax-strategy":
       result && annualTaxSavings > 0

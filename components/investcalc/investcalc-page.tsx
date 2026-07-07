@@ -3647,6 +3647,28 @@ export function InvestCalcPage({
    */
   const isInputPhase = !showResults && !analysisResult && !isCalculating;
 
+  /**
+   * Sample-deal empty-state affordance (Choose-TrueCap Phase C, finding 6):
+   * a quiet "See a sample deal →" line inside the hero card, directly under
+   * the address input — exactly where a first-timer stares at the empty
+   * form. Pristine-form only: it disappears the moment ANY meaningful input
+   * exists (address, price, or rent — SF field or any MF unit), and while
+   * the listing-URL row is open. Signed-in users only: anonymous visitors
+   * already get the filled "Try a sample rental" hero button above (kept
+   * unchanged); rendering both would re-crowd the empty state this plan
+   * just decluttered. Clicks run the EXISTING handleTrySampleDeal flow
+   * (Pro-preview arming included) — no behavior change.
+   */
+  const hasMeaningfulInput =
+    Boolean(watchedAddress?.trim()) ||
+    (typeof purchasePrice === "number" && Number.isFinite(purchasePrice) && purchasePrice > 0) ||
+    (typeof watchedMonthlyRent === "number" && Number.isFinite(watchedMonthlyRent) && watchedMonthlyRent > 0) ||
+    (watchedUnits ?? []).some(
+      (unit) => typeof unit?.monthlyRent === "number" && Number.isFinite(unit.monthlyRent) && unit.monthlyRent > 0
+    );
+  const showEmptyStateSampleLine =
+    isInputPhase && isAuthenticated && !hasMeaningfulInput && !listingLinkOpen;
+
   return (
     <div className="min-h-screen bg-background">
       {/* Hero section */}
@@ -3946,6 +3968,20 @@ export function InvestCalcPage({
                       hasError={listingUrlError}
                       onSubmit={handleListingUrl}
                     />
+                  }
+                  sampleSlot={
+                    showEmptyStateSampleLine ? (
+                      <p className="mt-2 text-xs text-muted-foreground">
+                        No address handy?{" "}
+                        <button
+                          type="button"
+                          onClick={handleTrySampleDeal}
+                          className="font-semibold text-primary underline-offset-2 hover:underline"
+                        >
+                          See a sample deal →
+                        </button>
+                      </p>
+                    ) : undefined
                   }
                 />
 

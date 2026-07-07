@@ -32,6 +32,7 @@ import { DataConfidenceBadge } from "@/components/investcalc/data-confidence-bad
 import type { DataConfidence } from "@/lib/data-confidence";
 import type { AnalysisResult } from "@/lib/calc-analysis";
 import type { ReturnSummary } from "@/lib/returns";
+import { formatRoiHeadline, isExtremeAnnualizedRoi } from "@/lib/extreme-value-format";
 import type { DealStrategy } from "@/lib/deal-score";
 import {
   getCapRateBenchmark,
@@ -340,8 +341,22 @@ export function buildMetricTiles({
         label="10-Yr Return"
         glossaryTerm="tenYearReturn"
         value={annualizedReturnPct != null ? `~${Math.round(annualizedReturnPct)}%/yr` : "—"}
-        sub="Total return incl. appreciation"
-        color={annualizedReturnPct != null && annualizedReturnPct >= 0 ? "text-[var(--metric-positive)]" : undefined}
+        // Extreme annualized return (finding 5): the per-year figure stays
+        // (it's legible), but the sub leads with the caution and the green
+        // celebration color drops — same band as the cumulative framing
+        // (>15%/yr ≈ >300% cumulative).
+        sub={
+          isExtremeAnnualizedRoi(annualizedReturnPct)
+            ? "Unusually high — verify assumptions"
+            : "Total return incl. appreciation"
+        }
+        color={
+          annualizedReturnPct != null &&
+          annualizedReturnPct >= 0 &&
+          !isExtremeAnnualizedRoi(annualizedReturnPct)
+            ? "text-[var(--metric-positive)]"
+            : undefined
+        }
         isLoading={isLoading}
         onSelect={jump("return")}
       />
@@ -478,15 +493,30 @@ function buildReturnMemberTiles(
     },
     {
       key: "totalReturn",
-      node: (
-        <MetricCard
-          label="Total return"
-          value={s.roiPct == null ? "—" : `${s.roiPct >= 0 ? "+" : ""}${Math.round(s.roiPct)}%`}
-          sub={`Cumulative over ${s.years} years`}
-          isLoading={false}
-          onSelect={jump}
-        />
-      ),
+      node: (() => {
+        // Extreme cumulative ROI (finding 5): framed band in the tile, raw
+        // figure demoted to the sub line. Sane values byte-identical.
+        const roiHeadline = formatRoiHeadline(s.roiPct, { decimals: 0, signed: true, compact: true });
+        return (
+          <MetricCard
+            label="Total return"
+            value={
+              s.roiPct == null
+                ? "—"
+                : roiHeadline.extreme
+                  ? roiHeadline.text
+                  : `${s.roiPct >= 0 ? "+" : ""}${Math.round(s.roiPct)}%`
+            }
+            sub={
+              roiHeadline.extreme
+                ? `${roiHeadline.raw} cumulative — verify assumptions`
+                : `Cumulative over ${s.years} years`
+            }
+            isLoading={false}
+            onSelect={jump}
+          />
+        );
+      })(),
     },
   ];
 }

@@ -4,6 +4,7 @@
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import { recommendationLabel } from "@/lib/deal-score";
+import { formatRoiHeadline } from "@/lib/extreme-value-format";
 import type { ReportMode } from "@/lib/pdf-export-constants";
 import type { BuyBoxPdfVerdict } from "@/lib/pdf-buy-box";
 // Server action (RPC from this client-bundled module — same mechanism
@@ -1903,7 +1904,23 @@ async function pageExit(
   statCard(doc, M.left + cw + 12, y, cw, ch, "Year 5 Profit", fmtCurrency(d.exitScenarios.year5Profit), { tone: "primary", themeColor });
   y += ch + 12;
   statCard(doc, M.left, y, cw, ch, "Year 10 Profit", fmtCurrency(d.exitScenarios.year10Profit), { tone: "success", themeColor });
-  statCard(doc, M.left + cw + 12, y, cw, ch, "Total ROI", fmtPct(d.exitScenarios.totalROI, true), { tone: "violet", themeColor });
+  // Extreme cumulative ROI (Choose-TrueCap finding 5): the PDF card shows
+  // the framed band with the raw figure demoted to the sub line (no hover
+  // in print) and a warn tone instead of the celebratory violet. Sane
+  // values keep the exact fmtPct formatting as before.
+  const totalRoiHeadline = formatRoiHeadline(d.exitScenarios.totalROI, { decimals: 1, signed: true, compact: true });
+  statCard(
+    doc,
+    M.left + cw + 12,
+    y,
+    cw,
+    ch,
+    "Total ROI",
+    totalRoiHeadline.extreme ? totalRoiHeadline.text : fmtPct(d.exitScenarios.totalROI, true),
+    totalRoiHeadline.extreme
+      ? { tone: "warn", sub: `${totalRoiHeadline.raw} cumulative — verify assumptions`, themeColor }
+      : { tone: "violet", themeColor }
+  );
   y += ch + 20;
 
   const labels = d.exitScenarios.rows.map((r) => `Y${r.y}`);

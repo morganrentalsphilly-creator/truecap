@@ -21,6 +21,7 @@
  */
 
 import type { DealStrategy } from "./deal-score";
+import { isExtremeAnnualizedRoi } from "./extreme-value-format";
 
 /** Chip color intent — maps to the metric-positive/negative CSS vars. */
 export type LensMetricTone = "good" | "neutral" | "bad";
@@ -140,6 +141,17 @@ function dscrMetric(
 function tenYearReturnMetric(annualizedReturnPct: number | null): LensOutcomeMetric {
   if (annualizedReturnPct == null) {
     return { label: "10-yr return", value: "—", band: "not available", tone: "neutral" };
+  }
+  // Beyond the Deal Score's own top band (>15%/yr ≈ >300% cumulative,
+  // Choose-TrueCap finding 5): stop celebrating and ask for verification.
+  // The numeric value stays visible — display framing only.
+  if (isExtremeAnnualizedRoi(annualizedReturnPct)) {
+    return {
+      label: "10-yr return",
+      value: `~${Math.round(annualizedReturnPct)}%/yr`,
+      band: "unusually high — verify assumptions",
+      tone: "neutral",
+    };
   }
   const band =
     annualizedReturnPct > 11

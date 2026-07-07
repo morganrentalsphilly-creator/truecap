@@ -5,6 +5,7 @@ import { getExitScenarioSnapshotAction } from "@/app/actions/exit-scenarios";
 import { SnapshotStatusCard } from "@/components/investcalc/analysis-panels/shared/snapshot-status-card";
 import { PanelInsight } from "@/components/investcalc/analysis-panels/shared/panel-insight";
 import { formatCurrency } from "@/components/investcalc/analysis-panels/shared/formatters";
+import { formatRoiHeadline } from "@/lib/extreme-value-format";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ExitScenarioCharts } from "@/components/investcalc/exit-scenarios/charts";
 import { ExitScenarioSummaryCards } from "@/components/investcalc/exit-scenarios/summary-cards";
@@ -131,12 +132,19 @@ function buildExitInsight(years: ExitScenarioYear[]): ReactNode {
       </>
     );
   }
+  // Extreme cumulative ROI (finding 5): the parenthetical leads with the
+  // framed band; the raw figure stays reachable on the span's title attr.
+  const roiHeadline = formatRoiHeadline(roi, { decimals: 0, signed: true, compact: true });
   return (
     <>
       Most of the return shows up at sale: by year {year10.year}, projected profit is about{" "}
-      <strong className="text-foreground">{formatCurrency(year10.totalProfit)}</strong> ({roi >= 0 ? "+" : ""}
-      {roi.toFixed(0)}% on cash) - an equity-and-appreciation payoff you realize when you sell or refinance, not
-      monthly income.
+      <strong className="text-foreground">{formatCurrency(year10.totalProfit)}</strong>{" "}
+      <span title={roiHeadline.title}>
+        ({roiHeadline.extreme
+          ? `${roiHeadline.text} on cash — verify assumptions`
+          : `${roi >= 0 ? "+" : ""}${roi.toFixed(0)}% on cash`})
+      </span>{" "}
+      - an equity-and-appreciation payoff you realize when you sell or refinance, not monthly income.
     </>
   );
 }

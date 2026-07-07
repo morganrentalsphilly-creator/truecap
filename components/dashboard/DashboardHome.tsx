@@ -43,6 +43,11 @@ const OwnedEquityChart = dynamic(
 );
 import type { DashboardDeal } from "@/lib/dashboard-deal-mapping";
 import { mapRiskLevelToRisk, resolveReturnMetric, resolveRiskMetric } from "@/lib/dashboard-risk-return";
+import {
+  EXTREME_ROI_CUMULATIVE_PCT,
+  formatRoiHeadline,
+  isExtremeCumulativeRoi,
+} from "@/lib/extreme-value-format";
 import { recommendationLabel } from "@/lib/deal-score";
 import { cn } from "@/lib/utils";
 import { PIPELINE_STAGES, type PipelineStage } from "@/lib/pipeline";
@@ -185,6 +190,19 @@ function formatSignedCurrency(value: number | null | undefined): string {
 function formatPercent(value: number | null | undefined): string {
   if (value == null || Number.isNaN(value)) return "-";
   return `${value.toFixed(1)}%`;
+}
+
+/**
+ * Best-upside subline (Choose-TrueCap Phase C, finding 5): a sane 10-yr ROI
+ * keeps today's exact copy; an extreme one leads with the framed band —
+ * never "673.0% 10-yr ROI" — with the raw figure one hover away (title).
+ * Display only; the winner selection above is untouched.
+ */
+function bestUpsideSubline(roiPct: number): { text: string; title?: string } {
+  const headline = formatRoiHeadline(roiPct, { decimals: 1, compact: true });
+  return headline.extreme
+    ? { text: `${headline.text} 10-yr ROI — verify assumptions`, title: headline.title }
+    : { text: `${headline.text} 10-yr ROI · verify assumptions` };
 }
 
 function getInitials(displayName: string, email: string): string {
@@ -586,7 +604,11 @@ function buildDecisionInsights(deals: DashboardDeal[]) {
     roiPick
       ? {
           title: `Best long-term upside: ${roiPick.address}`,
-          body: `${formatPercent(roiPick.roiPct)} projected 10-yr ROI at ${roiPick.riskLevel ?? "unrated"} risk. Note: that's cumulative — check the deal's exit scenarios for IRR and equity multiple before trusting it.`,
+          // Extreme cumulative ROI (finding 5): lead with the caution, keep
+          // the raw figure as the secondary clause instead of the headline.
+          body: isExtremeCumulativeRoi(roiPick.roiPct)
+            ? `Unusually high projected 10-yr ROI — ${formatPercent(roiPick.roiPct)} cumulative is above the ${EXTREME_ROI_CUMULATIVE_PCT}% band at ${roiPick.riskLevel ?? "unrated"} risk. Verify rent, price, and appreciation, then check exit scenarios for IRR and equity multiple before trusting it.`
+            : `${formatPercent(roiPick.roiPct)} projected 10-yr ROI at ${roiPick.riskLevel ?? "unrated"} risk. Note: that's cumulative — check the deal's exit scenarios for IRR and equity multiple before trusting it.`,
           tone: "opportunity" as const,
           action: { label: "Open this deal", href: `/dashboard/saved-analyses/${roiPick.id}` },
         }
@@ -820,9 +842,16 @@ export function DashboardHome({
                   <TrendingUp className="h-3.5 w-3.5" /> Best upside
                 </div>
                 <div className="mt-1 truncate text-sm font-bold text-foreground">{decisionCenter.bestUpside?.address ?? "—"}</div>
-                <div className="truncate text-xs text-muted-foreground">
+                <div
+                  className="truncate text-xs text-muted-foreground"
+                  title={
+                    decisionCenter.bestUpside?.roiPct != null
+                      ? bestUpsideSubline(decisionCenter.bestUpside.roiPct).title
+                      : undefined
+                  }
+                >
                   {decisionCenter.bestUpside?.roiPct != null
-                    ? `${formatPercent(decisionCenter.bestUpside.roiPct)} 10-yr ROI · verify assumptions`
+                    ? bestUpsideSubline(decisionCenter.bestUpside.roiPct).text
                     : "Run a 10-yr projection"}
                 </div>
               </div>
@@ -1179,6 +1208,7 @@ export function DashboardHome({
                       highlights.byScore?.score == null
                         ? "—"
                         : `${Math.round(highlights.byScore.score)} / 100`,
+                    valueTitle: undefined,
                     address: highlights.byScore?.address ?? "—",
                     deal: highlights.byScore,
                   },
@@ -1186,6 +1216,7 @@ export function DashboardHome({
                     icon: DollarSign,
                     label: "Highest Cash Flow",
                     value: formatSignedCurrency(highlights.byCashFlow?.cashFlowMonthly),
+                    valueTitle: undefined,
                     address: highlights.byCashFlow?.address ?? "—",
                     deal: highlights.byCashFlow,
                   },
@@ -1193,9 +1224,12 @@ export function DashboardHome({
                     icon: TrendingUp,
                     // 10-yr ROI is cumulative (exitScenarios.summary.totalROI)
                     // — label carries the time-frame so 900%+ values don't
-                    // read as nonsense beside annual cap rates.
+                    // read as nonsense beside annual cap rates. Extreme
+                    // values (finding 5) render the framed band; the raw
+                    // figure stays reachable via valueTitle (title attr).
                     label: "Highest 10-Yr ROI (cumulative)",
-                    value: formatPercent(highlights.byRoi?.roiPct),
+                    value: formatRoiHeadline(highlights.byRoi?.roiPct, { decimals: 1, compact: true }).text,
+                    valueTitle: formatRoiHeadline(highlights.byRoi?.roiPct, { decimals: 1, compact: true }).title,
                     address: highlights.byRoi?.address ?? "—",
                     deal: highlights.byRoi,
                   },
@@ -1222,7 +1256,10 @@ export function DashboardHome({
                       </span>
                     </span>
                     <span className="shrink-0 text-right">
-                      <span className="block text-sm font-extrabold tabular-nums text-foreground sm:text-lg">
+                      <span
+                        className="block text-sm font-extrabold tabular-nums text-foreground sm:text-lg"
+                        title={row.valueTitle}
+                      >
                         {row.value}
                       </span>
                     </span>

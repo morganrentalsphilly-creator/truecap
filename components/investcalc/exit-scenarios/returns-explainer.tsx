@@ -8,6 +8,7 @@
 
 import type { ExitScenarioYear } from "@/lib/exit-scenarios";
 import { computeReturnSummaryFromExitYears } from "@/lib/returns";
+import { isExtremeCumulativeRoi } from "@/lib/extreme-value-format";
 import { formatCurrency } from "@/components/investcalc/analysis-panels/shared/formatters";
 
 const fmtPct = (v: number | null): string => (v == null ? "—" : `${v.toFixed(1)}%`);
@@ -42,6 +43,11 @@ export function ReturnsExplainer({
             {s.years}-yr ROI <strong className="text-foreground">{fmtPct(s.roiPct)}</strong> is{" "}
             <em>cumulative</em> (total profit ÷ cash invested), not annual - annualized that&apos;s a{" "}
             <strong className="text-foreground">{fmtPct(s.cagrPct)}</strong> CAGR.{" "}
+            {/* Finding 5: this explainer is where the raw figure lives in
+                full — when it crossed the sanity band, say so here too. */}
+            {isExtremeCumulativeRoi(s.roiPct) ? (
+              <>A total this high is unusual - double-check rent, price, and appreciation before trusting it.{" "}</>
+            ) : null}
           </>
         ) : null}
         Profit = net sale proceeds + cumulative cash flow + tax benefit − cash invested −{" "}

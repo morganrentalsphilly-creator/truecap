@@ -41,6 +41,12 @@ interface PropertyDetailsSectionProps {
    *  listing-URL row is open. The block stays MOUNTED, so the RHF "address"
    *  registration and enrichment setValue writes are untouched. */
   hideAddressInput?: boolean;
+  /** Hero-only (Choose-TrueCap Phase C, finding 6): the quiet empty-state
+   *  "See a sample deal" line rendered directly under the address group.
+   *  The caller owns visibility (pristine form only) and the click handler
+   *  (the existing sample flow, unchanged). Default undefined — any
+   *  card-chrome mount stays byte-identical. */
+  sampleSlot?: ReactNode;
 }
 
 export function PropertyDetailsSection({
@@ -54,6 +60,7 @@ export function PropertyDetailsSection({
   chrome = "card",
   listingLinkSlot,
   hideAddressInput,
+  sampleSlot,
 }: PropertyDetailsSectionProps) {
   const {
     register,
@@ -155,6 +162,7 @@ export function PropertyDetailsSection({
           <p className="mb-2 text-sm font-semibold text-foreground">Where&apos;s the deal?</p>
           {addressBlock}
           {listingLinkSlot}
+          {sampleSlot}
         </div>
         {priceGrid}
       </div>

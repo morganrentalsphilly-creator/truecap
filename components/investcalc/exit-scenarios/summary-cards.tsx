@@ -2,6 +2,7 @@
 
 import { SummaryCardGrid } from "@/components/investcalc/analysis-panels/shared/summary-card-grid";
 import { formatCurrency } from "@/components/investcalc/analysis-panels/shared/formatters";
+import { formatRoiHeadline } from "@/lib/extreme-value-format";
 import type { ExitScenarioYear } from "@/lib/exit-scenarios";
 
 export function ExitScenarioSummaryCards({
@@ -19,6 +20,10 @@ export function ExitScenarioSummaryCards({
     ? year10.netSaleProceeds + year10.cumulativeCashFlow + year10.cumulativeTaxBenefit - year10.totalProfit
     : 0;
   const totalRoi = initialInvestment > 0 && year10 ? (year10.totalProfit / initialInvestment) * 100 : 0;
+  // Extreme cumulative ROI (finding 5): the card shows the framed band in
+  // a neutral tone (no green celebration); the raw figure stays one hover
+  // away on the label tooltip. Sane values keep today's exact formatting.
+  const roiHeadline = formatRoiHeadline(totalRoi, { decimals: 1, signed: true, compact: true });
 
   return (
     <SummaryCardGrid
@@ -41,8 +46,11 @@ export function ExitScenarioSummaryCards({
         },
         {
           label: "Total ROI",
-          value: `${totalRoi >= 0 ? "+" : ""}${totalRoi.toFixed(1)}%`,
-          tone: totalRoi >= 0 ? "positive" : "negative",
+          value: roiHeadline.extreme
+            ? roiHeadline.text
+            : `${totalRoi >= 0 ? "+" : ""}${totalRoi.toFixed(1)}%`,
+          tone: roiHeadline.extreme ? "neutral" : totalRoi >= 0 ? "positive" : "negative",
+          labelTooltip: roiHeadline.title,
         },
       ]}
     />

@@ -34,6 +34,7 @@ import {
 import { BuyBoxFitBadge } from "@/components/investcalc/buy-box-fit-badge";
 import { useToast } from "@/hooks/use-toast";
 import type { DealAssumptions } from "@/lib/compare-assumptions";
+import { formatRoiHeadline } from "@/lib/extreme-value-format";
 import type { CompareSnapshotV1 } from "@/lib/compare-result-snapshot";
 import {
   METRIC_ROWS,
@@ -185,7 +186,10 @@ function CompareSnapshotPanel({ snapshot }: { snapshot: CompareSnapshotV1 }) {
           </li>
           <li>Year 10 cash flow: {formatCurrency(longTermSummary.year10CashFlow)}</li>
           <li>Year 10 exit profit: {formatCurrency(longTermSummary.year10Profit)}</li>
-          <li>Total ROI: {longTermSummary.totalROI.toFixed(1)}%</li>
+          {/* Extreme cumulative ROI (finding 5): framed form leads; raw on title. */}
+          <li title={formatRoiHeadline(longTermSummary.totalROI, { decimals: 1 }).title}>
+            Total ROI: {formatRoiHeadline(longTermSummary.totalROI, { decimals: 1 }).text}
+          </li>
         </ul>
       </div>
       <div className="border-t border-border pt-3">
@@ -194,7 +198,10 @@ function CompareSnapshotPanel({ snapshot }: { snapshot: CompareSnapshotV1 }) {
           <li>Best year to sell: {s.bestYearToSell > 0 ? `Year ${s.bestYearToSell}` : "—"}</li>
           <li>Year 5 profit: {formatCurrency(s.year5Profit)}</li>
           <li>Year 10 profit: {formatCurrency(s.year10Profit)}</li>
-          <li>Total ROI: {s.totalROI.toFixed(1)}%</li>
+          {/* Extreme cumulative ROI (finding 5): framed form leads; raw on title. */}
+          <li title={formatRoiHeadline(s.totalROI, { decimals: 1 }).title}>
+            Total ROI: {formatRoiHeadline(s.totalROI, { decimals: 1 }).text}
+          </li>
         </ul>
       </div>
       <div className="border-t border-border pt-3">
@@ -689,10 +696,27 @@ function WinnerActions({
   );
 }
 
+/**
+ * The compare grid's only percent-kind long-term row is the cumulative
+ * 10-yr Total ROI — extreme values (finding 5) render the framed band in
+ * the cell, with the raw figure surfaced on the cell's title attr (see
+ * longTermRoiCellTitle). Sane values keep fmtPct exactly as before.
+ */
+function formatLongTermPercent(value: number): string {
+  const headline = formatRoiHeadline(value, { decimals: 1, compact: true });
+  return headline.extreme ? headline.text : fmtPct(value, 1);
+}
+
+/** Raw-value caution for the Total ROI cells; undefined when sane. */
+function longTermRoiCellTitle(row: LongTermMetricRow, value: number | null): string | undefined {
+  if (row.kind !== "percent") return undefined;
+  return formatRoiHeadline(value, { decimals: 1 }).title;
+}
+
 function formatLongTermCell(row: LongTermMetricRow, value: number | null): string {
   if (value == null) return "-";
   if (row.kind === "currency") return formatCurrency(value, row.direction === "higher");
-  if (row.kind === "percent") return fmtPct(value, 1);
+  if (row.kind === "percent") return formatLongTermPercent(value);
   return `Year ${value}`;
 }
 
@@ -721,7 +745,16 @@ function formatCompactMetric(value: number | null, row: MetricRow): string {
 function formatCompactLongTermMetric(row: LongTermMetricRow, value: number | null): string {
   if (value == null) return "-";
   if (row.kind === "currency") return formatCompactCurrency(value, row.direction === "higher");
-  if (row.kind === "percent") return fmtPct(value, 1);
+  if (row.kind === "percent") {
+    // Mobile compact grid: title attrs never surface on touch, and two
+    // extreme deals both reading ">300%" beside one trophy look arbitrary
+    // — compare is a RANKING surface, so the raw figure rides inline here
+    // (small, after the caution). Desktop cells keep hover titles.
+    const headline = formatRoiHeadline(value, { decimals: 1, compact: true });
+    return headline.extreme
+      ? `${headline.text} (${Math.round(value)}%)`
+      : formatLongTermPercent(value);
+  }
   return `Yr ${value}`;
 }
 
@@ -954,9 +987,19 @@ function CompareMobileHighlights({
         </div>
         <div className="rounded-2xl bg-card p-3 shadow-sm">
           <p className="text-[10px] font-extrabold text-primary">Highest ROI</p>
-          <p className="mt-1 text-xs font-extrabold text-foreground">
+          {/* Extreme cumulative 10-yr ROI (finding 5): framed band + raw on
+              title. The CoC fallback is an ANNUAL year-1 metric — different
+              scale, never framed here. */}
+          <p
+            className="mt-1 text-xs font-extrabold text-foreground"
+            title={
+              highestRoiDeal?.compareSnapshot?.longTermSummary.totalROI != null
+                ? formatRoiHeadline(highestRoiDeal.compareSnapshot.longTermSummary.totalROI, { decimals: 1 }).title
+                : undefined
+            }
+          >
             {highestRoiDeal?.compareSnapshot?.longTermSummary.totalROI != null
-              ? fmtPct(highestRoiDeal.compareSnapshot.longTermSummary.totalROI, 1)
+              ? formatLongTermPercent(highestRoiDeal.compareSnapshot.longTermSummary.totalROI)
               : fmtPct(highestRoiDeal?.metrics.cocReturn ?? null, 1)}
           </p>
         </div>
@@ -1305,7 +1348,10 @@ export function CompareDealsClient({
                                       </span>
                                       {isBest ? <Trophy className="size-3 text-success" aria-hidden="true" /> : null}
                                     </span>
-                                    <p className={cn("truncate text-[11px] font-extrabold", color.text)}>
+                                    <p
+                                      className={cn("truncate text-[11px] font-extrabold", color.text)}
+                                      title={longTermRoiCellTitle(row, value)}
+                                    >
                                       {formatCompactLongTermMetric(row, value)}
                                     </p>
                                   </div>
@@ -1698,7 +1744,10 @@ export function CompareDealsClient({
                               </span>
                             ) : null}
                             {deal ? (
-                              <span className="inline-flex shrink-0 items-center gap-2 font-extrabold tabular-nums">
+                              <span
+                                className="inline-flex shrink-0 items-center gap-2 font-extrabold tabular-nums"
+                                title={longTermRoiCellTitle(row, value)}
+                              >
                                 {formatLongTermCell(row, value)}
                                 {isBest ? <Trophy className="size-3.5 text-success" /> : null}
                               </span>

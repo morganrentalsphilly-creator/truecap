@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Building2, Home, KeyRound } from "lucide-react";
 import { recommendationLabel, type DealScoreBreakdown } from "@/lib/deal-score";
+import { formatRoiHeadline } from "@/lib/extreme-value-format";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ScoreBreakdown } from "@/components/investcalc/score-breakdown";
 import { BuyBoxFitBadge } from "@/components/investcalc/buy-box-fit-badge";
@@ -208,7 +209,14 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
                 </div>
                 <div className="rounded-xl bg-muted/40 p-3">
                   <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">10-Yr ROI</p>
-                  <p className="mt-1 text-sm font-extrabold tabular-nums text-foreground">{d.roi == null ? "-" : `${d.roi.toFixed(1)}%`}</p>
+                  {/* Extreme cumulative ROI (finding 5): framed band in the
+                      cell, raw figure on the title attr — never a bare 673%. */}
+                  <p
+                    className="mt-1 text-sm font-extrabold tabular-nums text-foreground"
+                    title={formatRoiHeadline(d.roi, { decimals: 1, compact: true }).title}
+                  >
+                    {formatRoiHeadline(d.roi, { decimals: 1, compact: true }).text}
+                  </p>
                 </div>
                 <div className="rounded-xl bg-muted/40 p-3">
                   <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Cap Rate</p>
@@ -322,7 +330,13 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
                       </div>
                     </div>
                   </td>
-                  <td className="px-3 py-4 text-right tabular-nums hidden md:table-cell">{d.roi == null ? "-" : `${d.roi.toFixed(1)}%`}</td>
+                  {/* Extreme cumulative ROI (finding 5): framed band + raw on title. */}
+                  <td
+                    className="px-3 py-4 text-right tabular-nums hidden md:table-cell"
+                    title={formatRoiHeadline(d.roi, { decimals: 1, compact: true }).title}
+                  >
+                    {formatRoiHeadline(d.roi, { decimals: 1, compact: true }).text}
+                  </td>
                   <td className="px-3 py-4 text-right tabular-nums hidden md:table-cell">{d.capRate == null ? "-" : `${d.capRate}%`}</td>
                   <td className={`px-3 py-4 text-right tabular-nums font-semibold ${d.cashFlow == null ? "" : d.cashFlow >= 0 ? "text-success" : "text-destructive"}`}>
                     {d.cashFlow == null ? "-" : `${d.cashFlow >= 0 ? "+" : ""}$${Math.round(d.cashFlow).toLocaleString()}/mo`}
