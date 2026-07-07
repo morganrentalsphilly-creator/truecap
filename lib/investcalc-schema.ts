@@ -54,6 +54,18 @@ export const insuranceInputModeSchema = z.enum(["percent", "monthly"]);
  *  shows you"). Mirrors the insurance dual-mode precedent. */
 export const propertyTaxInputModeSchema = z.enum(["percent", "annual"]);
 
+/**
+ * Hard cap on the multi-family units array. The audience is small
+ * multifamily / house-hacks (typically 2–8 units, never 50+ — that's
+ * commercial, out of scope). The bound matters beyond UI sanity: the units
+ * array rides the frozen share-link payload, so an UNBOUNDED array would let
+ * a crafted /d/[encoded] link (or its edge OG image) run calculateAnalysis
+ * over an arbitrarily large array when a victim or crawler opens it, and
+ * would fan out one enrichment call per unit. Capping here makes every gated
+ * path (Run/Save/Share/decode) fail safe to the fallback instead.
+ */
+export const MAX_UNITS = 50;
+
 export const unitSchema = z.object({
   bedrooms: optionalUnitNumber(
     z.number({ invalid_type_error: "Enter number of bedrooms" }).min(0, "Min 0").max(20, "Max 20")
@@ -115,8 +127,9 @@ export const investmentFormSchema = z.object({
     z.number({ invalid_type_error: "Enter monthly rent" }).min(0, "Rent must be 0 or more")
   ),
 
-  // Multi-family units
-  units: z.array(unitSchema).optional(),
+  // Multi-family units (bounded — see MAX_UNITS: keeps the share-link payload
+  // and per-unit enrichment fan-out from being an unbounded-work vector).
+  units: z.array(unitSchema).max(MAX_UNITS, `Max ${MAX_UNITS} units`).optional(),
 
   // Financing
   downPaymentPct: z
@@ -548,7 +561,7 @@ export function normalizeInvestmentFormSnapshot(raw: unknown): InvestmentFormVal
       : "single-family";
 
   const units = Array.isArray(snapshot.units)
-    ? snapshot.units.map(normalizeUnit)
+    ? snapshot.units.slice(0, MAX_UNITS).map(normalizeUnit)
     : getDefaultUnitsForPropertyType(propertyType);
 
   const parsed = investmentFormSchema.safeParse({
@@ -595,7 +608,7 @@ export function normalizeInvestmentFormDraft(raw: unknown): InvestmentFormValues
       : "single-family";
 
   const units = Array.isArray(snapshot.units)
-    ? snapshot.units.map(normalizeUnit)
+    ? snapshot.units.slice(0, MAX_UNITS).map(normalizeUnit)
     : getDefaultUnitsForPropertyType(propertyType);
 
   // No raw spread here: without a schema parse to strip unknown keys, only
