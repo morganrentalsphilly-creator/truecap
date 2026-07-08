@@ -49,6 +49,16 @@ export type BlogPost = {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: "exit-cap-rate-rental-property",
+    title:
+      "Exit cap rate: how to pick the number that sets your sale price (2026)",
+    excerpt:
+      "The number most investors pick in four seconds and never revisit — the cap rate you assume a future buyer pays. Why exit-year NOI ÷ exit cap sets most of the return on a multi-year hold, a worked $300K duplex where a 1.5-point swing moves the sale price $73,000 and the 5-year IRR from +11.5% to −2.6%, the exit ≥ entry rule, the residential comps caveat, and why a compressing exit cap is a bet on rates, not a rental.",
+    readingTimeMinutes: 11,
+    publishedAt: "2026-07-08",
+    available: true,
+  },
+  {
     slug: "operating-expense-ratio-rental-property",
     title:
       "Operating expense ratio (OER): what's a good one for a rental? (2026)",
