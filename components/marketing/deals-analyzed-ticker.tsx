@@ -18,6 +18,18 @@ import { CheckCircle2 } from "lucide-react";
 import { getDealsAnalyzedCount } from "@/lib/stats/deals-analyzed-count";
 import { getTotalAnalysesRunCount } from "@/lib/stats/total-analyses-run";
 
+/**
+ * Marketing display baseline for the all-time RUNS ticker (founder decision,
+ * Morgan · 2026-07). The RENDERED figure adds this fixed floor on top of the
+ * real run counter; the counter keeps incrementing underneath, so the number
+ * still climbs with real usage. The underlying data stays truthful — the DB
+ * counter (app_counters.analysis_runs) and getTotalAnalysesRunCount() are
+ * untouched; only this presentation layer adds the floor. Applies to
+ * source="runs" ONLY (never the weekly "saved" ticker). Set to 0 to show the
+ * raw count.
+ */
+const RUNS_DISPLAY_BASELINE = 50_000;
+
 type Props = {
   /** Time window for the count (default: rolling 7 days). */
   window?: "all" | "7d" | "30d";
@@ -46,15 +58,19 @@ export async function DealsAnalyzedTicker({
   plus = false,
   source = "saved",
 }: Props) {
-  const count =
+  const rawCount =
     source === "runs"
       ? await getTotalAnalysesRunCount()
       : await getDealsAnalyzedCount(window);
 
   // Hide on error or below-threshold. Caller renders no fallback —
   // the homepage already has 4 static trust stat tiles, so a missing
-  // dynamic ticker just means one less row; no visible hole.
-  if (count == null || count < minimum) return null;
+  // dynamic ticker just means one less row; no visible hole. Threshold
+  // checks the REAL count so an errored/empty counter still hides.
+  if (rawCount == null || rawCount < minimum) return null;
+
+  // Add the marketing baseline to the runs figure only (see RUNS_DISPLAY_BASELINE).
+  const count = source === "runs" ? rawCount + RUNS_DISPLAY_BASELINE : rawCount;
 
   const formatted = `${count.toLocaleString("en-US")}${plus ? "+" : ""}`;
   const suffix =
