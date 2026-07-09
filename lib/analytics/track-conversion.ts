@@ -1,7 +1,7 @@
 /**
  * Google Ads conversion event helpers.
  *
- * Layout already loads gtag.js with AW-18159235338 in production. This
+ * Layout already loads gtag.js with AW-8236119484 in production. This
  * module wraps the firing of conversion events so callers don't have
  * to know about window.gtag or the conversion IDs.
  *
@@ -23,7 +23,7 @@
  *   - Ad blocker active: catches the error silently
  */
 
-const GOOGLE_ADS_ID = "AW-18159235338";
+const GOOGLE_ADS_ID = "AW-8236119484";
 
 /** Map your application-level event name → Google Ads conversion label.
  *
@@ -33,7 +33,7 @@ const GOOGLE_ADS_ID = "AW-18159235338";
 const LABELS: Record<ConversionKey, string | null> = {
   calc_completed: null,    // e.g. "AbC_DeFgHi-jKlM_NoP"
   signup: null,            // e.g. "AbC_DeFgHi-jKlM_NoP"
-  paid_subscribed: null,   // e.g. "AbC_DeFgHi-jKlM_NoP"
+  paid_subscribed: "BCFeCPrZlqwcEIri_9JD",  // Purchase conversion (AW-8236119484)
   pdf_exported: null,
   deal_saved: null,
 };

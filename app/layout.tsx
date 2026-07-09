@@ -8,7 +8,7 @@ import { PostHogProvider } from '@/components/analytics/posthog-provider'
 import { getSiteUrl } from '@/lib/site-url'
 import './globals.css'
 
-const GOOGLE_ADS_ID = 'AW-18159235338'
+const GOOGLE_ADS_ID = 'AW-8236119484'
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
