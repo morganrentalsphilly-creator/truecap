@@ -9,6 +9,7 @@ import { getSiteUrl } from '@/lib/site-url'
 import './globals.css'
 
 const GOOGLE_ADS_ID = 'AW-8236119484'
+const GTM_ID = 'GTM-TCBNRMBG'
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -186,6 +187,24 @@ gtag('consent', 'default', {
 });`,
             }}
           />
+          {/* Google Tag Manager — loaded AFTER the Consent Mode v2 defaults
+              above so GTM tags inherit the same privacy-safe consent state
+              (denied until the cookie banner grants it). GTM shares the
+              window.dataLayer defined by the consent block, so the tc_*
+              events trackConversion() pushes are available as GTM triggers.
+              NOTE: the Google Ads Purchase conversion (AW-8236119484) already
+              fires from code — do NOT recreate it inside the GTM UI or it
+              double-counts. Use GTM for OTHER pixels/tags. */}
+          <script
+            id="gtm-loader"
+            dangerouslySetInnerHTML={{
+              __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','${GTM_ID}');`,
+            }}
+          />
           {/* Google Ads gtag — emitted as raw script tags so it shows up
               in the server-rendered HTML for Google's tag verifier. */}
           <script
@@ -201,6 +220,19 @@ gtag('config', '${GOOGLE_ADS_ID}');`,
         </head>
       )}
       <body className="font-sans antialiased bg-background text-foreground">
+        {/* Google Tag Manager (noscript) — JS-disabled fallback for the
+            loader above. Production-gated to match. */}
+        {process.env.NODE_ENV === 'production' && (
+          <noscript>
+            <iframe
+              src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}
+              height="0"
+              width="0"
+              style={{ display: 'none', visibility: 'hidden' }}
+              title="Google Tag Manager"
+            />
+          </noscript>
+        )}
         {/* Site-wide structured data — Organization + WebSite. Many child
             pages (especially /vs/* and blog posts) reference the
             Organization by @id (publisher.@id = `${siteUrl}/#organization`).
