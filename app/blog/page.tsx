@@ -49,6 +49,16 @@ export type BlogPost = {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: "how-to-calculate-arv",
+    title:
+      "How to calculate ARV (after-repair value): the comps method, step by step (2026)",
+    excerpt:
+      "The number every flip and BRRRR is built on — and the one you can't look up. Why ARV is a forecast of an appraisal, not purchase + rehab: the renovated-comps method step by step, a worked 1,400 sq ft example that reconciles four comps to a $255,000 ARV, the 70% rule max offer and 75% LTV refi math that key off it, and a sensitivity table where a 10% ARV miss cuts flip profit 74% and more than doubles the cash trapped in a BRRRR.",
+    readingTimeMinutes: 11,
+    publishedAt: "2026-07-10",
+    available: true,
+  },
+  {
     slug: "exit-cap-rate-rental-property",
     title:
       "Exit cap rate: how to pick the number that sets your sale price (2026)",
