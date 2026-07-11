@@ -866,14 +866,18 @@ export function AnalysisDashboard({
                 ? "All changes saved"
                 : isExistingSavedDeal
                   ? "You've edited this deal since the last save. Click Save to persist."
-                  : "This is a preview - click Save to persist this deal."
+                  : "Complete analysis — click Save to keep this deal."
             }
           >
+            {/* "Not saved", never "Preview": the analysis a fresh run shows
+                is complete — only persistence is missing. "Preview" read as
+                "this isn't the real result / there's another step"
+                (UX walkthrough P1-5). */}
             {isSaved
               ? "Saved"
               : isExistingSavedDeal
                 ? "Unsaved changes"
-                : "Preview"}
+                : "Not saved"}
           </span>
           {/* Cross-link to this deal's workspace (checklist, docs, notes,
               scenarios) — only when a saved deal is loaded. Contextual link, not

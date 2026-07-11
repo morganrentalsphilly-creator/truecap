@@ -39,7 +39,14 @@ import { trackEvent } from "@/lib/analytics";
 function scrollToCalculator() {
   if (typeof window === "undefined") return;
   const el = document.getElementById("main");
-  if (el) window.scrollTo({ top: el.offsetTop - 64, behavior: "smooth" });
+  if (!el) return;
+  // Document-absolute position, NOT el.offsetTop: offsetTop is measured
+  // from the nearest positioned ancestor (#main has one — the homepage's
+  // relative overflow-clip wrapper), so it's only correct while that
+  // ancestor happens to sit at the document top. getBoundingClientRect +
+  // scrollY is correct regardless of what layout wraps #main next.
+  const top = el.getBoundingClientRect().top + window.scrollY - 64;
+  window.scrollTo({ top, behavior: "smooth" });
 }
 
 function dispatchHeroAnalyze(detail: HeroAnalyzeDetail) {

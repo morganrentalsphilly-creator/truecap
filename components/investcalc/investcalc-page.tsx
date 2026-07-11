@@ -2876,6 +2876,13 @@ export function InvestCalcPage({
       if (computedFingerprint) lastComputedFormJsonRef.current = computedFingerprint;
       setIsCalculating(false);
       setShowResults(true);
+      // Every explicit Run brings the ANSWER to the user (the existing
+      // results-scroll effect consumes this). Without it, only the
+      // saved-deal reopen path scrolled — on phones and short windows the
+      // verdict mounted below the fold and the user who tapped Run kept
+      // staring at the form (UX walkthrough P0-2). Live recomputes never
+      // pass through onSubmit, so mid-edit repaints don't yank the page.
+      pendingResultsScrollRef.current = true;
       if (sampleProPreview && !canUseDealScore) {
         // Compute the full Deal Score client-side for the demo using
         // the same pure function the server action wraps. No server
@@ -4003,11 +4010,22 @@ export function InvestCalcPage({
     // Two requestAnimationFrames = one to flush the setValue renders,
     // one to let the prefilled state actually paint, then submit.
     // Net delay ~32ms, imperceptible.
+    //
+    // A timeout backstop races the rAF chain: rAF starves in occluded /
+    // backgrounded tabs (browser throttling), and a starved chain meant
+    // the promised sample report NEVER ran — the form filled and then
+    // nothing (UX walkthrough P0-3). The guard makes whichever fires
+    // first the only submit.
+    let sampleSubmitted = false;
+    const fireSampleSubmit = () => {
+      if (sampleSubmitted) return;
+      sampleSubmitted = true;
+      void form.handleSubmit(onSubmit, onError)();
+    };
     requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        void form.handleSubmit(onSubmit, onError)();
-      });
+      requestAnimationFrame(fireSampleSubmit);
     });
+    setTimeout(fireSampleSubmit, 150);
   };
 
   // Latest-closure assignment for the hero address handoff (refs declared
@@ -4270,6 +4288,18 @@ export function InvestCalcPage({
     );
   const showEmptyStateSampleLine =
     isInputPhase && isAuthenticated && !hasMeaningfulInput && !listingLinkOpen;
+
+  // Tell the marketing chrome the visitor is now USING the analyzer. The
+  // homepage's sticky conversion bar ("Ready to underwrite a deal? It's
+  // free · Analyze free") listens for this and hides — it kept selling the
+  // analyzer over the form and even over the RESULTS, eating ~90px of a
+  // phone viewport mid-analysis (UX walkthrough P1-4). Event-based so the
+  // marketing component needs no import from the calculator tree.
+  const analyzerEngaged = hasMeaningfulInput || analysisResult !== null;
+  useEffect(() => {
+    if (!analyzerEngaged) return;
+    window.dispatchEvent(new Event("tc-analyzer-engaged"));
+  }, [analyzerEngaged]);
 
   return (
     <div className="min-h-screen bg-background">

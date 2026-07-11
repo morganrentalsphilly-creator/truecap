@@ -19,13 +19,30 @@ const STORAGE_KEY = "truecap_home_sticky_dismissed";
 function scrollToForm() {
   if (typeof window === "undefined") return;
   const el = document.getElementById("main");
-  if (el) window.scrollTo({ top: el.offsetTop - 64, behavior: "smooth" });
+  if (!el) return;
+  // Document-absolute position, NOT el.offsetTop — offsetTop is measured
+  // from the nearest positioned ancestor, so it's only correct while that
+  // ancestor sits at the document top (same hardening as the hero's
+  // scrollToCalculator).
+  const top = el.getBoundingClientRect().top + window.scrollY - 64;
+  window.scrollTo({ top, behavior: "smooth" });
 }
 
 export function StickyConversionBar() {
   const [dismissed, setDismissed] = useState(true);
   const [visible, setVisible] = useState(false);
+  // Once the visitor is USING the analyzer (typed anything meaningful, or
+  // results exist), this funnel CTA has done its job — keeping it pinned
+  // over the form/results just eats ~90px of phone viewport while telling
+  // an active user to "try it". InvestCalcPage dispatches the event.
+  const [analyzerEngaged, setAnalyzerEngaged] = useState(false);
   const cookieBannerOpen = useCookieBannerOpen();
+
+  useEffect(() => {
+    const onEngaged = () => setAnalyzerEngaged(true);
+    window.addEventListener("tc-analyzer-engaged", onEngaged);
+    return () => window.removeEventListener("tc-analyzer-engaged", onEngaged);
+  }, []);
 
   useEffect(() => {
     // Wrapped — localStorage throws on Safari Private Mode / strict CSP;
@@ -49,8 +66,9 @@ export function StickyConversionBar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, [dismissed]);
 
-  // Don't stack behind the opaque cookie-consent banner on a first visit.
-  const showing = !dismissed && visible && !cookieBannerOpen;
+  // Don't stack behind the opaque cookie-consent banner on a first visit,
+  // and stand down entirely once the visitor is inside the analyzer.
+  const showing = !dismissed && visible && !cookieBannerOpen && !analyzerEngaged;
 
   if (!showing) return null;
 
