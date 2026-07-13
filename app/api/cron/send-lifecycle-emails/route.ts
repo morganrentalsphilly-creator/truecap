@@ -29,6 +29,7 @@ import {
   type LifecycleUserState,
 } from "@/lib/lifecycle-emails";
 import { renderLifecycleEmail } from "@/lib/email/render-lifecycle";
+import { getPaidUserIds } from "@/lib/paid-user-ids";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { getSiteUrl } from "@/lib/site-url";
 
@@ -100,13 +101,11 @@ export async function GET(request: Request) {
   try {
     const admin = createAdminSupabaseClient();
 
-    // Plan: users with an active/trialing subscription are "paid".
-    const { data: subRows, error: subErr } = await admin
-      .from("subscriptions")
-      .select("user_id")
-      .in("status", ["active", "trialing"]);
-    if (subErr) throw subErr;
-    const paid = new Set((subRows ?? []).map((r) => r.user_id as string));
+    // Plan: users the ENTITLEMENT layer considers paid — via the shared
+    // plan-aware helper (joins plans, includes past_due, excludes rows
+    // mapped to the free/no plan), so pro_nudge/winback targeting matches
+    // what the product actually shows the user.
+    const paid = new Set(await getPaidUserIds(admin));
 
     // Activity: latest saved-deal update per user (free users have none).
     const { data: dealRows, error: dealErr } = await admin

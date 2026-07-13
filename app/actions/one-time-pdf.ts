@@ -25,6 +25,7 @@
  */
 
 import { z } from "zod";
+import * as Sentry from "@sentry/nextjs";
 import { getStripe } from "@/lib/stripe/client";
 
 /**
@@ -68,6 +69,12 @@ export async function createOneTimePdfCheckoutAction(): Promise<OneTimePdfChecko
     return { ok: true, url: session.url };
   } catch (error) {
     console.error("[one-time-pdf] createOneTimePdfCheckoutAction failed:", error);
+    // Checkout-create failures are lost sales and console.error is
+    // invisible in prod — page on them (same treatment as billing.ts).
+    Sentry.captureException(error, {
+      tags: { feature: "billing-checkout" },
+      extra: { flow: "one_time_pdf" },
+    });
     return { ok: false, code: "SERVER_ERROR", message: "Unable to start checkout. Please try again." };
   }
 }

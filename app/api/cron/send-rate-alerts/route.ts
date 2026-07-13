@@ -37,6 +37,7 @@ import {
 } from "@/lib/rate-alerts";
 import { investmentFormSchema } from "@/lib/investcalc-schema";
 import { resolveRateAlertsMode } from "@/lib/rate-alerts-mode";
+import { getPaidUserIds } from "@/lib/paid-user-ids";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { getSiteUrl } from "@/lib/site-url";
 
@@ -115,13 +116,10 @@ export async function GET(request: Request) {
 
     const admin = createAdminSupabaseClient();
 
-    // 4. Audience: paying users…
-    const { data: subRows, error: subError } = await admin
-      .from("subscriptions")
-      .select("user_id")
-      .in("status", ["active", "trialing"]);
-    if (subError) throw subError;
-    const userIds = [...new Set((subRows ?? []).map((r) => r.user_id as string))];
+    // 4. Audience: paying users — via the shared plan-aware helper so the
+    // cron audience matches the entitlement layer exactly (includes
+    // past_due, excludes active rows mapped to the free/no plan).
+    const userIds = await getPaidUserIds(admin);
     if (userIds.length === 0) {
       return NextResponse.json({ skipped: true, reason: "no_paid_users" });
     }

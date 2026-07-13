@@ -215,9 +215,54 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
     return { ok: false, code: "PLAN_NOT_FOUND", message: "Selected plan is not available." };
   }
 
+  // STRIPE-SIDE double-billing backstop: the local-row guard above trusts
+  // a subscriptions row the webhook sync may never have written (e.g. a
+  // silently-skipped sync after the account switch). In that state the
+  // user looks free locally, retries checkout, and Stripe would happily
+  // create a SECOND live subscription — and re-grant the trial. When we
+  // already know the Stripe customer, ask Stripe directly before creating
+  // a new session.
+  if (profile?.stripe_customer_id) {
+    try {
+      const stripe = getStripe();
+      const stripeSubs = await stripe.subscriptions.list({
+        customer: profile.stripe_customer_id,
+        status: "all",
+        limit: 10,
+      });
+      const hasLiveStripeSubscription = stripeSubs.data.some((sub) =>
+        ["active", "trialing", "past_due"].includes(sub.status)
+      );
+      if (hasLiveStripeSubscription) {
+        return {
+          ok: false,
+          code: "ALREADY_SUBSCRIBED",
+          message:
+            "You already have an active TrueCap plan. Use Manage billing to switch between monthly and annual — Stripe prorates automatically.",
+        };
+      }
+    } catch (error) {
+      // Don't block checkout on a Stripe API blip — the local-row check
+      // above already passed, so fall through to it. But a degraded guard
+      // must be visible: if this fires alongside checkout traffic, the
+      // double-billing backstop is off.
+      Sentry.captureException(error, {
+        tags: { feature: "billing-checkout" },
+        extra: { userId: user.id, guard: "stripe_subscriptions_list" },
+      });
+    }
+  }
+
   const priceId = getPlanPriceId(parsed.data.planSlug, plan.stripe_price_id);
   if (!priceId) {
     console.error(`[billing] Missing Stripe price id for plan ${parsed.data.planSlug}`);
+    // A missing price id blocks EVERY new checkout for this plan — that's
+    // revenue = 0 with only a generic toast on the user side. Page on it.
+    Sentry.captureMessage(`billing: missing Stripe price id for plan ${parsed.data.planSlug}`, {
+      level: "error",
+      tags: { feature: "billing-checkout" },
+      extra: { planSlug: parsed.data.planSlug },
+    });
     return {
       ok: false,
       code: "MISSING_PRICE",
@@ -285,6 +330,11 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
 
     if (!session.url) {
       console.error("[billing] Stripe checkout session missing URL");
+      Sentry.captureMessage("billing: Stripe checkout session created without a URL", {
+        level: "error",
+        tags: { feature: "billing-checkout" },
+        extra: { planSlug: parsed.data.planSlug, stripeSessionId: session.id },
+      });
       return { ok: false, code: "SERVER_ERROR", message: "Unable to start checkout. Please try again." };
     }
 
@@ -305,6 +355,13 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
     return { ok: true, url: session.url };
   } catch (error) {
     console.error("[billing] createCheckoutSessionAction failed:", error);
+    // A checkout-create failure is a lost sale (e.g. env price id that
+    // doesn't exist in the live Stripe account → 'No such price' on every
+    // single new checkout). console.error goes nowhere in prod — page.
+    Sentry.captureException(error, {
+      tags: { feature: "billing-checkout" },
+      extra: { userId: user.id, planSlug: parsed.data.planSlug },
+    });
     return {
       ok: false,
       code: "SERVER_ERROR",

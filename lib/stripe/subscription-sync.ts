@@ -11,6 +11,49 @@ type ProfileBindingRow = {
   stripe_customer_id: string | null;
 };
 
+/**
+ * Result of a webhook → DB sync attempt.
+ *
+ * `{ synced: false }` means the handler intentionally SKIPPED applying the
+ * event (a user-binding security rejection — retrying won't help, so the
+ * route still 200s to Stripe), as opposed to throwing, which means "transient
+ * failure, 500 so Stripe retries". The route uses `reason` to stamp
+ * `error_message = 'skipped: <reason>'` on the stripe_webhook_events row so
+ * skips stay queryable, and to suppress success-only side effects (the
+ * pro_subscribed PostHog funnel event).
+ */
+export type SubscriptionSyncResult = { synced: true } | { synced: false; reason: string };
+
+const SYNCED: SubscriptionSyncResult = { synced: true };
+
+/**
+ * User-binding rejections are intentional security decisions — we refuse to
+ * attach a Stripe subscription/checkout to a user we can't verify — so they
+ * must NOT throw (a throw would make Stripe retry a genuinely unbindable
+ * event forever). But they involve real money, so they must be LOUD:
+ * console.error is invisible in prod (CLAUDE.md pitfall #6). This is the one
+ * shared alarm for every binding-rejection path in this file; it fires at the
+ * two central skip points (upsertSubscriptionFromStripe /
+ * handleCheckoutSessionCompleted) so a paying user whose subscription never
+ * lands pages someone instead of vanishing.
+ *
+ * `extra` must contain opaque Stripe/user ids ONLY — never emails or
+ * addresses (sendDefaultPii is on, CLAUDE.md pitfall #4).
+ */
+function reportUserBindingSkip(
+  context: "subscription_sync" | "checkout_completed",
+  extra: Record<string, string | null | undefined>
+): void {
+  Sentry.captureMessage(
+    `Stripe webhook sync skipped: user/customer binding could not be verified (${context})`,
+    {
+      level: "error",
+      tags: { feature: "stripe-webhook", failure: "user_binding" },
+      extra,
+    }
+  );
+}
+
 async function getProfileById(
   admin: SupabaseClient,
   userId: string
@@ -179,22 +222,29 @@ function isSubscriptionScheduledToCancel(subscription: Stripe.Subscription): boo
 async function resolvePlanIdForPrice(admin: SupabaseClient, priceId: string | null): Promise<string | null> {
   if (!priceId) return null;
 
-  const { data: planByPrice } = await admin
+  // Throw on query errors instead of falling through to null: a transient
+  // DB blip here must surface as a 500 (→ Sentry + Stripe retry), not write
+  // plan_id=null and permanently downgrade a paying user to FREE. Every
+  // other DB call in this file already throws — these two were the only
+  // fail-open lookups.
+  const { data: planByPrice, error: priceLookupError } = await admin
     .from("plans")
     .select("id")
     .eq("stripe_price_id", priceId)
     .maybeSingle();
+  if (priceLookupError) throw priceLookupError;
 
   if (planByPrice?.id) return planByPrice.id;
 
   const slug = planSlugFromPriceId(priceId);
   if (!slug) return null;
 
-  const { data: planBySlug } = await admin
+  const { data: planBySlug, error: slugLookupError } = await admin
     .from("plans")
     .select("id")
     .eq("slug", slug)
     .maybeSingle();
+  if (slugLookupError) throw slugLookupError;
 
   return planBySlug?.id ?? null;
 }
@@ -203,11 +253,16 @@ export async function upsertSubscriptionFromStripe(
   admin: SupabaseClient,
   subscription: Stripe.Subscription,
   fallbackUserId?: string | null
-): Promise<void> {
+): Promise<SubscriptionSyncResult> {
   const userId = await resolveVerifiedUserIdForSubscription(admin, subscription, fallbackUserId);
   if (!userId) {
     console.error(`[billing] Skipping subscription sync for ${subscription.id}: user binding could not be verified`);
-    return;
+    reportUserBindingSkip("subscription_sync", {
+      stripe_subscription_id: subscription.id,
+      stripe_customer_id: getSubscriptionCustomerId(subscription),
+      subscription_status: subscription.status,
+    });
+    return { synced: false, reason: "user binding could not be verified" };
   }
 
   const primaryItem = subscription.items.data[0];
@@ -287,12 +342,14 @@ export async function upsertSubscriptionFromStripe(
 
   const { error } = await admin.from("subscriptions").upsert(row, { onConflict: "stripe_subscription_id" });
   if (error) throw error;
+
+  return SYNCED;
 }
 
 export async function markSubscriptionCanceled(
   admin: SupabaseClient,
   subscription: Stripe.Subscription
-): Promise<void> {
+): Promise<SubscriptionSyncResult> {
   const { data: existing, error: lookupError } = await admin
     .from("subscriptions")
     .select("id")
@@ -301,8 +358,16 @@ export async function markSubscriptionCanceled(
   if (lookupError) throw lookupError;
 
   if (!existing) {
-    await upsertSubscriptionFromStripe(admin, subscription);
-    return;
+    // No row to cancel — create one, but force status to canceled. The
+    // payload we were handed can be a STALE snapshot (e.g. a redelivered
+    // customer.subscription.updated whose live subscription turned out to be
+    // resource_missing); upserting its old status (possibly "active") for a
+    // subscription that no longer exists in Stripe would grant Pro forever,
+    // since a deleted subscription emits no further events to correct it.
+    return upsertSubscriptionFromStripe(admin, {
+      ...subscription,
+      status: "canceled",
+    } as Stripe.Subscription);
   }
 
   const { error } = await admin
@@ -314,6 +379,8 @@ export async function markSubscriptionCanceled(
     })
     .eq("stripe_subscription_id", subscription.id);
   if (error) throw error;
+
+  return SYNCED;
 }
 
 function getInvoiceSubscriptionId(invoice: Stripe.Invoice): string | null {
@@ -334,19 +401,20 @@ function getInvoiceSubscriptionId(invoice: Stripe.Invoice): string | null {
 export async function upsertSubscriptionFromInvoice(
   admin: SupabaseClient,
   invoice: Stripe.Invoice
-): Promise<void> {
+): Promise<SubscriptionSyncResult> {
   const subscriptionId = getInvoiceSubscriptionId(invoice);
-  if (!subscriptionId) return;
+  // Not a subscription invoice (e.g. a one-off charge) — nothing to sync.
+  if (!subscriptionId) return SYNCED;
 
   const stripe = getStripe();
   const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-  await upsertSubscriptionFromStripe(admin, subscription);
+  return upsertSubscriptionFromStripe(admin, subscription);
 }
 
 export async function upsertSubscriptionFromInvoicePayment(
   admin: SupabaseClient,
   invoicePayment: Stripe.InvoicePayment
-): Promise<void> {
+): Promise<SubscriptionSyncResult> {
   let invoice: Stripe.Invoice | null = null;
 
   if (typeof invoicePayment.invoice === "string") {
@@ -355,9 +423,9 @@ export async function upsertSubscriptionFromInvoicePayment(
     invoice = invoicePayment.invoice;
   }
 
-  if (!invoice) return;
+  if (!invoice) return SYNCED;
 
-  await upsertSubscriptionFromInvoice(admin, invoice);
+  return upsertSubscriptionFromInvoice(admin, invoice);
 }
 
 export async function linkStripeCustomerToProfile(
@@ -381,11 +449,17 @@ export async function linkStripeCustomerToProfile(
 export async function handleCheckoutSessionCompleted(
   admin: SupabaseClient,
   session: Stripe.Checkout.Session
-): Promise<void> {
+): Promise<SubscriptionSyncResult> {
   const verifiedBinding = await resolveVerifiedCheckoutBinding(admin, session);
   if (!verifiedBinding) {
     console.error("[billing] checkout.session.completed skipped due to unverifiable user/customer binding");
-    return;
+    reportUserBindingSkip("checkout_completed", {
+      stripe_session_id: session.id,
+      stripe_customer_id: getCheckoutCustomerId(session),
+      stripe_subscription_id:
+        typeof session.subscription === "string" ? session.subscription : session.subscription?.id ?? null,
+    });
+    return { synced: false, reason: "checkout user/customer binding could not be verified" };
   }
 
   await linkStripeCustomerToProfile(admin, verifiedBinding.userId, verifiedBinding.customerId);
@@ -395,6 +469,8 @@ export async function handleCheckoutSessionCompleted(
   if (subscriptionId) {
     const stripe = getStripe();
     const sub = await stripe.subscriptions.retrieve(subscriptionId);
-    await upsertSubscriptionFromStripe(admin, sub, verifiedBinding.userId);
+    return upsertSubscriptionFromStripe(admin, sub, verifiedBinding.userId);
   }
+
+  return SYNCED;
 }

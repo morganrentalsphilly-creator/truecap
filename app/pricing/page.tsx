@@ -8,6 +8,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import * as Sentry from "@sentry/nextjs";
 import { Check, ShieldCheck, Sparkles, X } from "lucide-react";
 import { Header } from "@/components/investcalc/header";
 import { PricingTogglePlans } from "@/components/marketing/pricing-toggle-plans";
@@ -55,7 +56,14 @@ async function loadStripePrice(slug: "pro_monthly" | "pro_annual"): Promise<Stri
     // like the ROI calculator can use it for breakeven math without
     // dividing themselves.
     return { amountLabel, period, unitAmount: price.unit_amount / 100 };
-  } catch {
+  } catch (error) {
+    // A silent null here degrades the pricing page's displayed price with
+    // zero telemetry — and the same broken STRIPE_PRICE_PRO_* env that
+    // causes it also breaks checkout. Surface it.
+    Sentry.captureException(error, {
+      tags: { feature: "billing-checkout" },
+      extra: { planSlug: slug, priceId },
+    });
     return null;
   }
 }

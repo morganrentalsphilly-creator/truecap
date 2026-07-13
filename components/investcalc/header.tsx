@@ -63,8 +63,14 @@ function getAvatarUrl(user: HeaderUser): string | undefined {
 }
 
 function deriveAccessState(features: string[]) {
+  // PAID-EXCLUSIVE features only. deal_score was removed from this list:
+  // migration 20260621250000_free_deal_score.sql adds deal_score to the
+  // FREE plan, and any free-plan feature here would flip isPremium=true
+  // for every free user — silently suppressing the Pro upgrade banner and
+  // header CTA for everyone. If the free plan ever gains one of the
+  // features below, drop it from this list too (free plan today:
+  // cash_flow, save_deal, dashboard_access, deal_score).
   const hasPremiumFeatures =
-    features.includes("deal_score") ||
     features.includes("pdf_export") ||
     features.includes("template_manage") ||
     features.includes("tax_strategy") ||
