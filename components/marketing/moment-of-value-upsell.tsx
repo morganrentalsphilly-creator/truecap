@@ -17,6 +17,7 @@ import { ArrowRight, Lock, X, FileDown, Calculator, TrendingUp } from "lucide-re
 import { trackEvent } from "@/lib/analytics";
 import { TRIAL_LABEL } from "@/lib/trial";
 import { scrollBehavior } from "@/lib/utils";
+import { usePostCheckoutUpsellSuppression } from "@/hooks/use-post-checkout-upsell-suppression";
 
 interface MomentOfValueUpsellProps {
   netCashFlow: number;
@@ -47,18 +48,24 @@ export function MomentOfValueUpsell({
 }: MomentOfValueUpsellProps) {
   const [dismissed, setDismissed] = useState(false);
 
+  // Post-checkout suppression: while BillingSuccessBanner is confirming a
+  // fresh purchase (billing=success poll pending), render nothing — a buyer
+  // must never see a trial pitch seconds after paying. Fails OPEN to false
+  // (upsell behaves exactly as today) for everyone else.
+  const suppressed = usePostCheckoutUpsellSuppression();
+
   // Upsell attribution — fire once when this post-analysis upsell actually
   // renders (free user). Pairs with upsell_prompt_clicked on the Pro CTA to
   // measure moment-of-value → checkout. Effect runs before the early return
   // below so the Rules of Hooks hold.
   const fired = useRef(false);
   useEffect(() => {
-    if (isPaid || fired.current) return;
+    if (isPaid || suppressed || fired.current) return;
     fired.current = true;
     trackEvent("upsell_prompt_shown", { feature: "moment_of_value", placement: "post_analysis" });
-  }, [isPaid]);
+  }, [isPaid, suppressed]);
 
-  if (isPaid || dismissed) return null;
+  if (isPaid || dismissed || suppressed) return null;
 
   // "Keep editing" — jump back to the form so refining a default and
   // rerunning is one click from the numbers the user is judging.

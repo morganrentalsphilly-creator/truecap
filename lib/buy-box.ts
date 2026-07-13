@@ -456,3 +456,25 @@ export function summarizeBuyBoxFit(results: NamedBuyBoxResult[]): BuyBoxFitSumma
     bestFit: passing[0]?.box ?? null,
   };
 }
+
+/** "X of your N active deals pass this box" — the save-feedback count. */
+export type BuyBoxFitCount = { passing: number; evaluated: number };
+
+/**
+ * Count how many deals pass ONE criteria set — the inverse of
+ * summarizeBuyBoxFit (one box across many deals rather than one deal across
+ * many boxes). Pure — reuses evaluateBuyBox; a deal counts as passing only
+ * when the box is active with ≥1 applicable check (result.active &&
+ * result.passes, the exact dashboard / My Deals rule).
+ */
+export function countBuyBoxFit(
+  criteria: BuyBoxCriteria,
+  metricsList: BuyBoxDealMetrics[]
+): BuyBoxFitCount {
+  let passing = 0;
+  for (const metrics of metricsList) {
+    const result = evaluateBuyBox(criteria, metrics);
+    if (result.active && result.passes) passing += 1;
+  }
+  return { passing, evaluated: metricsList.length };
+}

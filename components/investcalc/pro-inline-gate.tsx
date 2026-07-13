@@ -16,6 +16,7 @@ import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { trackEvent } from "@/lib/analytics";
 import { TRIAL_LABEL } from "@/lib/trial";
+import { usePostCheckoutUpsellSuppression } from "@/hooks/use-post-checkout-upsell-suppression";
 
 interface ProInlineGateProps {
   /** Brand-color icon at the top - same icon as the gated feature uses. */
@@ -29,16 +30,24 @@ interface ProInlineGateProps {
 }
 
 export function ProInlineGate({ icon: Icon, title, description, previewBullets }: ProInlineGateProps) {
+  // Post-checkout suppression: while BillingSuccessBanner is confirming a
+  // fresh purchase (billing=success poll pending), render nothing — a buyer
+  // must never see a trial pitch seconds after paying. Fails OPEN to false
+  // (gate behaves exactly as today) for everyone else.
+  const suppressed = usePostCheckoutUpsellSuppression();
+
   // Upsell attribution: fire once when this gate renders (the user reached a
   // Pro feature), and again if they click through - closes the
   // analysis_completed → saw-upsell → pro_checkout_started gap. `feature` is
   // the gate title (e.g. "Max Allowable Offer"); no PII.
   const fired = useRef(false);
   useEffect(() => {
-    if (fired.current) return;
+    if (suppressed || fired.current) return;
     fired.current = true;
     trackEvent("upsell_prompt_shown", { feature: title, placement: "analysis_dashboard" });
-  }, [title]);
+  }, [title, suppressed]);
+
+  if (suppressed) return null;
 
   return (
     <div className="relative overflow-hidden rounded-2xl border-2 border-primary/25 bg-gradient-to-br from-[var(--brand-blue-light)] via-card to-card p-5 shadow-sm sm:p-6">

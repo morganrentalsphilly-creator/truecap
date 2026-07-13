@@ -76,7 +76,8 @@ import {
 import { StickyCalculateBar } from "./sticky-calculate-bar";
 import { LiveVerdictPanel, type LivePreviewSnapshot } from "./live-verdict-panel";
 import { AutosaveIndicator } from "./autosave-indicator";
-import { AnalysisDashboard, type AnalysisDashboardTab } from "./analysis-dashboard";
+import type { AnalysisDashboardTab } from "./analysis-dashboard";
+import { AnalysisDashboardSkeleton } from "./analysis-dashboard-skeleton";
 import { AnalysisErrorBoundary } from "@/components/investcalc/analysis-error-boundary";
 import { AssumptionsSourceStrip } from "@/components/investcalc/assumptions-source-strip";
 import { PostAnalysisEmailPrompt } from "@/components/marketing/post-analysis-email-prompt";
@@ -143,6 +144,40 @@ import {
 import { trackConversion } from "@/lib/analytics/track-conversion";
 import { trackEvent } from "@/lib/analytics";
 import { consumePendingSaveIntent, setPendingSaveIntent } from "@/lib/save-intent";
+import dynamic from "next/dynamic";
+
+// ── AnalysisDashboard is post-Run-only, so keep it out of the anon
+// landing bundle ────────────────────────────────────────────────────
+// The dashboard (2,264 lines + ~40 statically-pulled subcomponents)
+// only renders behind the `showResults || isCalculating ||
+// analysisResult !== null` gate below, yet a static import shipped the
+// whole tree to every visitor of the static "/" ad-landing page.
+// next/dynamic splits it off; the loader is kept as a named thunk so
+// preloadAnalysisDashboard() can warm the chunk on first form
+// interaction and on Run click — webpack caches the module request, so
+// by the time results render the chunk is already local and the
+// Run→results reveal doesn't visibly regress. Same pattern as the
+// three Pro chart panels inside analysis-dashboard.tsx itself.
+// `ssr: false` because the dashboard only ever renders post-Run in the
+// browser (the gate is closed during SSR/prerender).
+const loadAnalysisDashboard = () => import("./analysis-dashboard");
+const AnalysisDashboard = dynamic(
+  () => loadAnalysisDashboard().then((m) => m.AnalysisDashboard),
+  {
+    ssr: false,
+    loading: () => <AnalysisDashboardSkeleton />,
+  }
+);
+let analysisDashboardPreloaded = false;
+function preloadAnalysisDashboard() {
+  if (analysisDashboardPreloaded) return;
+  analysisDashboardPreloaded = true;
+  loadAnalysisDashboard().catch(() => {
+    // Preload is best-effort — if it fails (flaky network), the dynamic
+    // component retries the request when it actually mounts.
+    analysisDashboardPreloaded = false;
+  });
+}
 
 type InputTab = "cash-flow" | "projections" | "tax-strategy" | "deal-score";
 const SAVED_ANALYSIS_EDIT_DRAFT_KEY = "truecap_saved_analysis_edit_draft";
@@ -2790,6 +2825,10 @@ export function InvestCalcPage({
   };
 
   const onSubmit = async (validated: InvestmentFormValues) => {
+    // Warm the dynamic AnalysisDashboard chunk in parallel with the calc
+    // (covers programmatic runs — hero handoff, saved-deal restore —
+    // that never focused a form field). No-op if already loaded.
+    preloadAnalysisDashboard();
     // Use a synchronous snapshot of the live form right after validation. This
     // matches what the user sees (including fields that only exist while mounted)
     // and avoids any mismatch between RHF state and resolver output.
@@ -4554,6 +4593,10 @@ export function InvestCalcPage({
           ref={formElementRef}
           data-calc-form="true"
           onSubmit={form.handleSubmit(onSubmit, onError)}
+          // First interaction with any field (address focus included)
+          // warms the dynamic AnalysisDashboard chunk — one-shot, see
+          // preloadAnalysisDashboard above.
+          onFocusCapture={preloadAnalysisDashboard}
           // Cmd+Enter (Mac) / Ctrl+Enter (Win/Linux) anywhere inside
           // the form fires the calculate submit. Power-user shortcut
           // that doesn't conflict with normal field editing (plain

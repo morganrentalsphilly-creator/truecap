@@ -1,5 +1,5 @@
 /**
- * Blog topic hubs (P2-4) — group the long-form posts into five investor
+ * Blog topic hubs (P2-4) — group the long-form posts into eight investor
  * journeys and pair each with the matching free calculators. Each hub is an
  * SEO surface in its own right ("rental underwriting guide", "rental property
  * financing", …) and an internal-linking spine that funnels readers from a
@@ -46,6 +46,10 @@ export const BLOG_TOPICS: BlogTopic[] = [
       "vacancy-rate-rental-property",
       "capex-maintenance-reserves-rental-property",
       "rental-property-insurance",
+      "1-percent-rule-rental-property",
+      "break-even-occupancy-rental-property",
+      "operating-expense-ratio-rental-property",
+      "return-on-equity-rental-property",
     ],
     calculatorSlugs: [
       "cap-rate-calculator",
@@ -72,6 +76,9 @@ export const BLOG_TOPICS: BlogTopic[] = [
       "closing-costs-investment-property",
       "cash-out-refinance-vs-heloc-rental",
       "seller-financing-subject-to",
+      "hard-money-vs-dscr-loan",
+      "debt-to-income-ratio-investment-property",
+      "negative-leverage-real-estate",
     ],
     calculatorSlugs: [
       "mortgage-payment-calculator",
@@ -92,6 +99,8 @@ export const BLOG_TOPICS: BlogTopic[] = [
       "schedule-e-rental-property",
       "1031-exchange-basics",
       "rental-property-llc",
+      "bonus-depreciation-rental-property-2026",
+      "property-tax-reassessment-rental-property",
     ],
     calculatorSlugs: ["rental-property-tax-calculator"],
   },
@@ -110,6 +119,9 @@ export const BLOG_TOPICS: BlogTopic[] = [
       "how-to-estimate-rehab-costs",
       "how-to-find-off-market-rental-properties",
       "property-management-yes-or-no",
+      "house-hack-underwriting-guide",
+      "short-term-rental-underwriting-playbook",
+      "70-percent-rule-house-flipping",
     ],
     calculatorSlugs: ["brrrr-calculator", "rehab-cost-estimator", "roi-calculator"],
   },
@@ -122,6 +134,72 @@ export const BLOG_TOPICS: BlogTopic[] = [
       "Where you buy sets the ceiling on what any strategy can do. Cash-flow metros and appreciation metros reward different plays. These guides cover market selection; our market and state pages add sourced local snapshots.",
     postSlugs: ["best-states-for-rental-investors-2026", "cash-flow-vs-appreciation"],
     calculatorSlugs: ["cap-rate-calculator", "cash-on-cash-calculator"],
+  },
+  {
+    slug: "deal-analysis",
+    title: "Deal Analysis How-Tos",
+    description:
+      "Step-by-step guides to the core rental calculations — cap rate, cash-on-cash, DSCR, ARV, and exit cap rate — with worked examples.",
+    intro:
+      "Every verdict starts with a calculation done right. These guides walk each core metric step by step — inputs, formula, worked example, and the mistakes that skew the answer — and the calculators run the same math instantly.",
+    postSlugs: [
+      "how-to-calculate-cap-rate",
+      "how-to-calculate-cash-on-cash-return",
+      "how-to-calculate-dscr",
+      "how-to-calculate-arv",
+      "exit-cap-rate-rental-property",
+      "how-truecap-verdict-engine-works",
+    ],
+    calculatorSlugs: [
+      "cap-rate-calculator",
+      "cash-on-cash-calculator",
+      "dscr-calculator",
+      "roi-calculator",
+    ],
+  },
+  {
+    slug: "due-diligence",
+    title: "Due Diligence & Buying",
+    description:
+      "Verifying a deal before you close — rent rolls, appraisals, market-rent estimates, and buying with tenants in place.",
+    intro:
+      "The listing tells you a story; due diligence tells you the truth. These guides cover the checks that happen between offer and closing — reading the rent roll, surviving the appraisal, pinning down market rent, and inheriting tenants — so the numbers you underwrote are the numbers you get.",
+    postSlugs: [
+      "how-to-read-a-rent-roll",
+      "investment-property-appraisal",
+      "how-to-estimate-rent-rental-property",
+      "buying-rental-property-with-tenants",
+    ],
+    calculatorSlugs: [
+      "gross-rent-multiplier-calculator",
+      "1-percent-rule-calculator",
+      "noi-calculator",
+    ],
+  },
+  {
+    slug: "comparisons",
+    title: "Tool Comparisons",
+    description:
+      "Honest side-by-side comparisons of rental analysis calculators, deal-discovery platforms, and landlord software.",
+    intro:
+      "Picking software shouldn't take longer than picking the deal. These side-by-side comparisons cover rental calculators, deal-discovery platforms, and landlord ops tools — what each does well, where each falls short, and which investor each one actually fits.",
+    postSlugs: [
+      "best-rental-property-calculator-2026",
+      "best-free-rental-property-calculator-2026",
+      "best-rental-property-calculator-for-brrrr",
+      "best-rental-analysis-tool-for-house-hackers",
+      "best-short-term-rental-analysis-tool-2026",
+      "dealcheck-vs-biggerpockets-vs-truecap",
+      "dealcheck-vs-stessa-vs-truecap",
+      "roofstock-vs-mashvisor-vs-propstream",
+      "stessa-vs-avail-vs-baselane",
+      "hostfully-vs-hostaway-vs-guesty",
+    ],
+    calculatorSlugs: [
+      "cap-rate-calculator",
+      "cash-on-cash-calculator",
+      "brrrr-calculator",
+    ],
   },
 ];
 

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   EMPTY_BUY_BOX,
   buyBoxHasCriteria,
+  countBuyBoxFit,
   deriveStateFromAddress,
   evaluateBuyBox,
   evaluateBuyBoxes,
@@ -245,5 +246,39 @@ describe("evaluateBuyBoxes (multiple boxes)", () => {
     const other = namedBox("other", { minCocPct: 8 }, { sortOrder: 1 });
     const sum = summarizeBuyBoxFit(evaluateBuyBoxes([other, def], baseMetrics));
     expect(sum.bestFit?.id).toBe("def");
+  });
+});
+
+describe("countBuyBoxFit (one box across many deals — save feedback)", () => {
+  const capOnly: BuyBoxCriteria = { ...EMPTY_BUY_BOX, minCapRatePct: 6 };
+
+  it("counts passing deals over the evaluated set", () => {
+    const fails = { ...baseMetrics, capRatePct: 5 };
+    expect(countBuyBoxFit(capOnly, [baseMetrics, fails, baseMetrics])).toEqual({
+      passing: 2,
+      evaluated: 3,
+    });
+  });
+
+  it("a deal with no applicable check never passes (matches evaluateBuyBox)", () => {
+    const unknownCap = { ...baseMetrics, capRatePct: null };
+    expect(countBuyBoxFit(capOnly, [unknownCap])).toEqual({ passing: 0, evaluated: 1 });
+  });
+
+  it("skips DSCR on cash purchases instead of failing them", () => {
+    const cashDeal = { ...baseMetrics, dscr: 0, isCashPurchase: true };
+    const dscrBox: BuyBoxCriteria = { ...EMPTY_BUY_BOX, minDscr: 1.25, minCapRatePct: 6 };
+    expect(countBuyBoxFit(dscrBox, [cashDeal])).toEqual({ passing: 1, evaluated: 1 });
+  });
+
+  it("an inactive box passes nothing", () => {
+    expect(countBuyBoxFit({ ...capOnly, isActive: false }, [baseMetrics])).toEqual({
+      passing: 0,
+      evaluated: 1,
+    });
+  });
+
+  it("handles an empty deal set", () => {
+    expect(countBuyBoxFit(capOnly, [])).toEqual({ passing: 0, evaluated: 0 });
   });
 });

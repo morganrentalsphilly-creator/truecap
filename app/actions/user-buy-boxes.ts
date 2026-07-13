@@ -24,16 +24,25 @@ import { toServerErrorResult } from "@/lib/db-error";
 import { z } from "zod";
 import {
   US_STATE_OPTIONS,
+  buyBoxHasCriteria,
+  countBuyBoxFit,
+  deriveStateFromAddress,
+  type BuyBoxCriteria,
+  type BuyBoxDealMetrics,
+  type BuyBoxFitCount,
   type BuyBoxPropertyType,
   type NamedBuyBox,
 } from "@/lib/buy-box";
 import { isStrategyKind } from "@/lib/strategy-kinds";
 import { getEntitlementsForUser, hasPlanFeature } from "@/lib/entitlements";
+import { recomputeSavedDealVerdict } from "@/lib/recompute-saved-deal-verdict";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 const KNOWN_STATE_ABBRS = new Set(US_STATE_OPTIONS.map((s) => s.abbr));
 const MAX_BUY_BOXES = 12;
+/** Sane cap on the save-feedback evaluation query (active deals only). */
+const FIT_FEEDBACK_DEALS_LIMIT = 200;
 
 const SELECT_COLS =
   "id, name, strategy_kind, min_cap_rate_pct, min_coc_pct, min_dscr, min_cash_flow_monthly, max_purchase_price, property_types, target_states, is_active, is_default, sort_order";
@@ -70,7 +79,19 @@ const boxSchema = z
   .strict();
 
 export type BuyBoxesActionResult =
-  | { ok: true; boxes: NamedBuyBox[]; canUse: boolean }
+  | {
+      ok: true;
+      boxes: NamedBuyBox[];
+      canUse: boolean;
+      /**
+       * "X of your N active deals pass this box" save feedback — set only by
+       * upsertBuyBoxAction, and only when the evaluation succeeded (additive:
+       * existing consumers read boxes/canUse and never see it). Absent when
+       * the box is inactive/empty, the user has no active deals, or the
+       * evaluation failed (feedback must never fail a save).
+       */
+      fit?: BuyBoxFitCount;
+    }
   | {
       ok: false;
       code:
@@ -201,6 +222,75 @@ async function clearDefaults(supabase: SupabaseClient, userId: string): Promise<
   await supabase.from("user_buy_boxes").update({ is_default: false }).eq("user_id", userId).eq("is_default", true);
 }
 
+/** Scalar row shape for the save-feedback deals query below. */
+type FitDealRow = {
+  address: string | null;
+  property_type: string | null;
+  purchase_price: number | null;
+  net_cash_flow_monthly: number | null;
+  coc_return_pct: number | null;
+  cap_rate_raw: string | null;
+  form_snapshot: unknown;
+};
+
+/**
+ * Evaluate the user's ACTIVE deals against the just-saved criteria so the
+ * editor can say "3 of your 12 active deals pass this box". Same metrics
+ * derivation My Deals uses (recompute-on-read from form_snapshot, stored
+ * scalars as the legacy fallback) and the same pure evaluation
+ * (countBuyBoxFit → evaluateBuyBox). RLS-scoped via the caller's server
+ * client + explicit user_id filter. Best-effort: any error — or an
+ * inactive/empty box, or zero active deals — returns null and the save
+ * result simply omits the line. Feedback must never fail a save.
+ */
+async function computeSavedBoxFit(
+  supabase: SupabaseClient,
+  userId: string,
+  criteria: BuyBoxCriteria
+): Promise<BuyBoxFitCount | null> {
+  if (!criteria.isActive || !buyBoxHasCriteria(criteria)) return null;
+  try {
+    const { data, error } = await supabase
+      .from("saved_analyses")
+      .select(
+        "address, property_type, purchase_price, net_cash_flow_monthly, coc_return_pct, cap_rate_raw:result_snapshot->>capRate, form_snapshot"
+      )
+      .eq("user_id", userId)
+      .is("deleted_at", null)
+      .eq("is_completed", false)
+      .eq("is_archived", false)
+      .order("created_at", { ascending: false })
+      .limit(FIT_FEEDBACK_DEALS_LIMIT);
+    if (error || !data || data.length === 0) return null;
+
+    const metricsList = (data as unknown as FitDealRow[]).map((row): BuyBoxDealMetrics => {
+      const fresh = recomputeSavedDealVerdict(row.form_snapshot);
+      const capSnap = row.cap_rate_raw != null ? Number(row.cap_rate_raw) : NaN;
+      return {
+        capRatePct: fresh ? fresh.capRatePct : Number.isFinite(capSnap) ? capSnap : null,
+        cocPct: fresh ? fresh.cocReturnPct : row.coc_return_pct,
+        dscr: fresh ? fresh.dscr : null,
+        cashFlowMonthly: fresh ? fresh.netCashFlowMonthly : row.net_cash_flow_monthly,
+        purchasePrice: row.purchase_price,
+        propertyType:
+          row.property_type === "single-family" ||
+          row.property_type === "multi-family" ||
+          row.property_type === "owner-occupant"
+            ? row.property_type
+            : null,
+        state: deriveStateFromAddress(row.address),
+        // Explicit cash flag from the recompute (canonical monthlyPayment<=0);
+        // fall back to not-cash so a legacy deal still gets its DSCR criterion
+        // applied rather than silently skipped — mirrors toBuyBoxMetrics.
+        isCashPurchase: fresh ? fresh.isCashPurchase : false,
+      };
+    });
+    return countBuyBoxFit(criteria, metricsList);
+  } catch {
+    return null;
+  }
+}
+
 export async function listBuyBoxesAction(): Promise<BuyBoxesActionResult> {
   const supabase = await createServerSupabaseClient();
   const {
@@ -298,7 +388,23 @@ export async function upsertBuyBoxAction(input: unknown): Promise<BuyBoxesAction
   await ensureOneDefault(supabase, userId, refreshed.boxes);
   const final = await fetchBoxes(supabase, userId);
   if (!final.ok) return final.result;
-  return { ok: true, boxes: final.boxes, canUse: true };
+
+  // Save feedback (additive): how many of the user's active deals pass the
+  // criteria just saved. Evaluated from the SAME normalized values we wrote,
+  // so it works for create and update alike without re-reading the row.
+  const fit = await computeSavedBoxFit(supabase, userId, {
+    minCapRatePct: parsed.data.minCapRatePct,
+    minCocPct: parsed.data.minCocPct,
+    minDscr: parsed.data.minDscr,
+    minCashFlowMonthly: parsed.data.minCashFlowMonthly,
+    maxPurchasePrice: parsed.data.maxPurchasePrice,
+    propertyTypes: parsed.data.propertyTypes,
+    targetStates,
+    isActive: parsed.data.isActive,
+  });
+  return fit
+    ? { ok: true, boxes: final.boxes, canUse: true, fit }
+    : { ok: true, boxes: final.boxes, canUse: true };
 }
 
 /** Delete one box (ownership-scoped). Promotes a new default if needed. */

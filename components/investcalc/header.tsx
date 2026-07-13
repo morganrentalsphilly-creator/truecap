@@ -9,7 +9,6 @@ import {
   Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
 import { cn } from "@/lib/utils";
 import { AppLogo } from "@/components/brand/app-logo";
@@ -34,6 +33,24 @@ type ProfileUpdatedDetail = {
   lastName?: string;
   avatarUrl?: string | null;
 };
+
+/**
+ * Client-side twin of proxy.ts's hasSupabaseAuthCookie (same
+ * `sb-*-auth-token` name pattern): a cheap "is anyone possibly signed
+ * in?" gate so anonymous marketing-page visitors never download
+ * supabase-js (~51 KB gz) just to render the logged-out header. Cookie
+ * presence is a hint, not auth — `getUser()` re-verifies the session
+ * after the lazy load, exactly like the proxy rewrite does server-side.
+ */
+function hasSupabaseAuthCookie(): boolean {
+  if (typeof document === "undefined") return false;
+  return document.cookie.split(/;\s*/).some((entry) => {
+    const eqIndex = entry.indexOf("=");
+    if (eqIndex <= 0) return false;
+    const name = entry.slice(0, eqIndex);
+    return /^sb-.*-auth-token/.test(name) && entry.length > eqIndex + 1;
+  });
+}
 
 function getDisplayName(user: HeaderUser): string {
   const metadataName =
@@ -106,136 +123,163 @@ export function Header({
   );
 
   useEffect(() => {
-    const supabase = createBrowserSupabaseClient();
-    let savedAnalysesChannel: ReturnType<typeof supabase.channel> | null = null;
-    let savedAnalysesChannelUserId: string | undefined;
-    let savedAnalysesChannelVersion = 0;
-    const loadProfileById = async (uid?: string) => {
-      if (!uid) {
-        setProfileData(null);
-        return;
-      }
-      const { data } = await supabase
-        .from("profiles")
-        .select("first_name, last_name, display_name, avatar_url")
-        .eq("id", uid)
-        .maybeSingle();
-      setProfileData((data as ProfileHeaderData | null) ?? null);
-    };
-    const loadSavedCountById = async (uid?: string) => {
-      if (!uid) {
-        setSavedDealCount(0);
-        return;
-      }
-      const { count } = await supabase
-        .from("saved_analyses")
-        .select("*", { count: "exact", head: true })
-        .eq("user_id", uid)
-        .is("deleted_at", null);
-      setSavedDealCount(count ?? 0);
-    };
-    const teardownSavedAnalysesSubscription = () => {
-      if (!savedAnalysesChannel) return;
-      void supabase.removeChannel(savedAnalysesChannel);
-      savedAnalysesChannel = null;
-      savedAnalysesChannelUserId = undefined;
-    };
-    const subscribeSavedAnalysesCount = (uid?: string) => {
-      if (savedAnalysesChannel && uid && uid === savedAnalysesChannelUserId) return;
-      teardownSavedAnalysesSubscription();
-      if (!uid) return;
-      savedAnalysesChannelUserId = uid;
-      savedAnalysesChannel = supabase
-        .channel(
-          `${savedAnalysesChannelInstanceIdRef.current}:${uid}:${++savedAnalysesChannelVersion}`
-        )
-        .on(
-          "postgres_changes",
-          {
-            event: "*",
-            schema: "public",
-            table: "saved_analyses",
-            filter: `user_id=eq.${uid}`,
-          },
-          () => {
-            void loadSavedCountById(uid);
-          }
-        )
-        .subscribe();
-    };
-    const bootstrapUserId = currentUserIdRef.current;
-    if (bootstrapUserId) {
-      void loadProfileById(bootstrapUserId);
-      void loadSavedCountById(bootstrapUserId);
-      subscribeSavedAnalysesCount(bootstrapUserId);
+    // Anonymous visitors (no server-provided user AND no Supabase auth
+    // cookie): render the logged-out chrome immediately with zero
+    // supabase code. Everything auth-shaped already sits at its
+    // logged-out initial state; we only flip the readiness flags that
+    // the async getUser() path used to set. Signed-in users lazy-load
+    // supabase-js below exactly as they resolved auth async before.
+    if (!currentUserIdRef.current && !hasSupabaseAuthCookie()) {
+      setAuthLoaded(true);
       setIsPremiumStatusReady(true);
+      return;
     }
 
-    supabase.auth.getUser().then(({ data: { user: currentUser } }) => {
-      if (currentUser) {
-        currentUserIdRef.current = currentUser.id;
-        setUser(currentUser);
-        void loadProfileById(currentUser.id);
-        void loadSavedCountById(currentUser.id);
-        subscribeSavedAnalysesCount(currentUser.id);
-      } else if (!currentUserIdRef.current) {
-        setUser(null);
-        setIsPremium(false);
-        setHasDashboardAccess(false);
+    let cancelled = false;
+    let cleanup: (() => void) | null = null;
+
+    void (async () => {
+      const { createBrowserSupabaseClient } = await import("@/lib/supabase/client");
+      if (cancelled) return;
+      const supabase = createBrowserSupabaseClient();
+      let savedAnalysesChannel: ReturnType<typeof supabase.channel> | null = null;
+      let savedAnalysesChannelUserId: string | undefined;
+      let savedAnalysesChannelVersion = 0;
+      const loadProfileById = async (uid?: string) => {
+        if (!uid) {
+          setProfileData(null);
+          return;
+        }
+        const { data } = await supabase
+          .from("profiles")
+          .select("first_name, last_name, display_name, avatar_url")
+          .eq("id", uid)
+          .maybeSingle();
+        setProfileData((data as ProfileHeaderData | null) ?? null);
+      };
+      const loadSavedCountById = async (uid?: string) => {
+        if (!uid) {
+          setSavedDealCount(0);
+          return;
+        }
+        const { count } = await supabase
+          .from("saved_analyses")
+          .select("*", { count: "exact", head: true })
+          .eq("user_id", uid)
+          .is("deleted_at", null);
+        setSavedDealCount(count ?? 0);
+      };
+      const teardownSavedAnalysesSubscription = () => {
+        if (!savedAnalysesChannel) return;
+        void supabase.removeChannel(savedAnalysesChannel);
+        savedAnalysesChannel = null;
+        savedAnalysesChannelUserId = undefined;
+      };
+      const subscribeSavedAnalysesCount = (uid?: string) => {
+        if (savedAnalysesChannel && uid && uid === savedAnalysesChannelUserId) return;
+        teardownSavedAnalysesSubscription();
+        if (!uid) return;
+        savedAnalysesChannelUserId = uid;
+        savedAnalysesChannel = supabase
+          .channel(
+            `${savedAnalysesChannelInstanceIdRef.current}:${uid}:${++savedAnalysesChannelVersion}`
+          )
+          .on(
+            "postgres_changes",
+            {
+              event: "*",
+              schema: "public",
+              table: "saved_analyses",
+              filter: `user_id=eq.${uid}`,
+            },
+            () => {
+              void loadSavedCountById(uid);
+            }
+          )
+          .subscribe();
+      };
+      const bootstrapUserId = currentUserIdRef.current;
+      if (bootstrapUserId) {
+        void loadProfileById(bootstrapUserId);
+        void loadSavedCountById(bootstrapUserId);
+        subscribeSavedAnalysesCount(bootstrapUserId);
         setIsPremiumStatusReady(true);
-        void loadProfileById(undefined);
-        void loadSavedCountById(undefined);
-        subscribeSavedAnalysesCount(undefined);
       }
-      setAuthLoaded(true);
-    });
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      const nextUser = session?.user ?? null;
-      if (!nextUser && event !== "SIGNED_OUT" && currentUserIdRef.current) {
+      supabase.auth.getUser().then(({ data: { user: currentUser } }) => {
+        if (currentUser) {
+          currentUserIdRef.current = currentUser.id;
+          setUser(currentUser);
+          void loadProfileById(currentUser.id);
+          void loadSavedCountById(currentUser.id);
+          subscribeSavedAnalysesCount(currentUser.id);
+        } else if (!currentUserIdRef.current) {
+          setUser(null);
+          setIsPremium(false);
+          setHasDashboardAccess(false);
+          setIsPremiumStatusReady(true);
+          void loadProfileById(undefined);
+          void loadSavedCountById(undefined);
+          subscribeSavedAnalysesCount(undefined);
+        }
         setAuthLoaded(true);
-        return;
-      }
-      currentUserIdRef.current = nextUser?.id;
-      setUser(nextUser);
-      if (!nextUser) {
-        setIsPremium(false);
-        setHasDashboardAccess(false);
-      }
-      setIsPremiumStatusReady(true);
-      setAuthLoaded(true);
-      void loadProfileById(nextUser?.id);
-      void loadSavedCountById(nextUser?.id);
-      subscribeSavedAnalysesCount(nextUser?.id);
-    });
+      });
 
-    const handleProfileUpdated = (event: Event) => {
-      const detail = (event as CustomEvent<ProfileUpdatedDetail>).detail;
-      if (!detail) return;
-      setProfileData((prev) => ({
-        first_name: detail.firstName ?? prev?.first_name ?? null,
-        last_name: detail.lastName ?? prev?.last_name ?? null,
-        display_name:
-          `${detail.firstName ?? prev?.first_name ?? ""} ${detail.lastName ?? prev?.last_name ?? ""}`.trim() ||
-          prev?.display_name ||
-          null,
-        avatar_url: detail.avatarUrl ?? prev?.avatar_url ?? null,
-      }));
-      setAvatarVersion((v) => v + 1);
-    };
-    const handleSavedAnalysesChanged = () => {
-      void loadSavedCountById(currentUserIdRef.current);
-    };
-    window.addEventListener("profile-updated", handleProfileUpdated as EventListener);
-    window.addEventListener("saved-analyses-changed", handleSavedAnalysesChanged);
+      const {
+        data: { subscription },
+      } = supabase.auth.onAuthStateChange((event, session) => {
+        const nextUser = session?.user ?? null;
+        if (!nextUser && event !== "SIGNED_OUT" && currentUserIdRef.current) {
+          setAuthLoaded(true);
+          return;
+        }
+        currentUserIdRef.current = nextUser?.id;
+        setUser(nextUser);
+        if (!nextUser) {
+          setIsPremium(false);
+          setHasDashboardAccess(false);
+        }
+        setIsPremiumStatusReady(true);
+        setAuthLoaded(true);
+        void loadProfileById(nextUser?.id);
+        void loadSavedCountById(nextUser?.id);
+        subscribeSavedAnalysesCount(nextUser?.id);
+      });
+
+      const handleProfileUpdated = (event: Event) => {
+        const detail = (event as CustomEvent<ProfileUpdatedDetail>).detail;
+        if (!detail) return;
+        setProfileData((prev) => ({
+          first_name: detail.firstName ?? prev?.first_name ?? null,
+          last_name: detail.lastName ?? prev?.last_name ?? null,
+          display_name:
+            `${detail.firstName ?? prev?.first_name ?? ""} ${detail.lastName ?? prev?.last_name ?? ""}`.trim() ||
+            prev?.display_name ||
+            null,
+          avatar_url: detail.avatarUrl ?? prev?.avatar_url ?? null,
+        }));
+        setAvatarVersion((v) => v + 1);
+      };
+      const handleSavedAnalysesChanged = () => {
+        void loadSavedCountById(currentUserIdRef.current);
+      };
+      window.addEventListener("profile-updated", handleProfileUpdated as EventListener);
+      window.addEventListener("saved-analyses-changed", handleSavedAnalysesChanged);
+
+      // Everything from client creation to here is synchronous (the only
+      // await is the import above), so cleanup is always assigned before
+      // the effect teardown can observe a half-initialized state.
+      cleanup = () => {
+        subscription.unsubscribe();
+        teardownSavedAnalysesSubscription();
+        window.removeEventListener("profile-updated", handleProfileUpdated as EventListener);
+        window.removeEventListener("saved-analyses-changed", handleSavedAnalysesChanged);
+      };
+    })();
 
     return () => {
-      subscription.unsubscribe();
-      teardownSavedAnalysesSubscription();
-      window.removeEventListener("profile-updated", handleProfileUpdated as EventListener);
-      window.removeEventListener("saved-analyses-changed", handleSavedAnalysesChanged);
+      cancelled = true;
+      cleanup?.();
     };
   }, []);
 

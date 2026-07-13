@@ -14,12 +14,20 @@
  *      text. Typos at call sites become TypeScript errors instead of
  *      silently fragmenting the funnel into 3 lookalike events in the
  *      PostHog dashboard.
+ *   4. LAZY-LOADED — posthog-js is ~60 KB gz, so it is dynamic-imported
+ *      off the critical path instead of statically bundled into every
+ *      route. PostHogProvider schedules `initAnalytics()` via
+ *      requestIdleCallback; every helper below buffers calls made
+ *      before init resolves in a small FIFO queue and replays them once
+ *      the SDK is up. Early funnel events (landing_view, the consent
+ *      decision, identify, the first $pageview) arrive 1-2 s later —
+ *      never lost.
  *
  * Server-side events (e.g. `pro_subscribed` from the Stripe webhook)
  * go through lib/posthog-server.ts, not this file.
  */
 
-import posthog from "posthog-js";
+import type { PostHog } from "posthog-js";
 
 /**
  * Named events tracked client-side. Adding a new one? Add it here AND
@@ -97,28 +105,179 @@ export type FunnelEvent =
   // converts to Pro. PII-free; just the strategy key.
   | "strategy_selected"     // properties: strategy (e.g. "wholesale-mao"), source ("chip" click vs "link" seed)
 
+// ── Lazy init + pre-init call buffering ─────────────────────────────
+
+const POSTHOG_HOST =
+  process.env.NEXT_PUBLIC_POSTHOG_HOST ?? "https://us.i.posthog.com";
+
+/** Same key components/marketing/cookie-consent-banner.tsx writes. */
+const CONSENT_STORAGE_KEY = "truecap_cookie_consent_v1";
+
+type QueuedCall =
+  | { kind: "capture"; event: string; properties?: Record<string, unknown> }
+  | { kind: "identify"; userId: string; properties?: Record<string, unknown> }
+  | { kind: "reset" }
+  | { kind: "consent"; granted: boolean };
+
+/** The initialized SDK once `initAnalytics()` resolves; null until then. */
+let client: PostHog | null = null;
+/** Init ran and analytics is off for this session (no key / SDK load failed). */
+let disabled = false;
+let initPromise: Promise<PostHog | null> | null = null;
+
 /**
- * Safe capture. Use this everywhere instead of `posthog.capture(...)`
- * directly. Returns a boolean for the rare caller that wants to know
- * whether the event was actually dispatched (e.g. for debugging).
+ * Pre-init call buffer, replayed FIFO on init so ordering semantics
+ * (e.g. consent-before-capture, identify-before-capture) are preserved.
+ * Bounded so a session where init never resolves can't grow it forever.
  */
-export function trackEvent(
-  event: FunnelEvent,
+const MAX_QUEUED_CALLS = 100;
+let queue: QueuedCall[] = [];
+
+function readStoredConsent(): "granted" | "denied" | null {
+  try {
+    if (typeof window === "undefined") return null;
+    const v = window.localStorage.getItem(CONSENT_STORAGE_KEY);
+    return v === "granted" || v === "denied" ? v : null;
+  } catch {
+    return null;
+  }
+}
+
+function enqueue(call: QueuedCall): void {
+  if (disabled) return;
+  if (queue.length >= MAX_QUEUED_CALLS) return;
+  queue.push(call);
+}
+
+function applyCall(ph: PostHog, call: QueuedCall): void {
+  switch (call.kind) {
+    case "capture":
+      ph.capture(call.event, call.properties);
+      break;
+    case "identify":
+      ph.identify(call.userId, call.properties);
+      break;
+    case "reset":
+      ph.reset();
+      break;
+    case "consent":
+      if (call.granted) {
+        ph.opt_in_capturing();
+      } else {
+        ph.opt_out_capturing();
+      }
+      break;
+  }
+}
+
+function flushQueue(ph: PostHog): void {
+  const pending = queue;
+  queue = [];
+  for (const call of pending) {
+    try {
+      applyCall(ph, call);
+    } catch (err) {
+      console.warn("[analytics] buffered call failed:", err);
+    }
+  }
+}
+
+/**
+ * Dynamic-import and initialize posthog-js exactly once (the SDK warns
+ * on re-init), then replay buffered calls. PostHogProvider schedules
+ * this from requestIdleCallback so the SDK stays off the critical path.
+ * Safe to call more than once — subsequent calls return the same promise.
+ */
+export function initAnalytics(): Promise<PostHog | null> {
+  if (typeof window === "undefined") return Promise.resolve(null);
+  if (initPromise) return initPromise;
+  initPromise = (async () => {
+    const key = process.env.NEXT_PUBLIC_POSTHOG_KEY;
+    if (!key) {
+      disabled = true;
+      queue = [];
+      return null;
+    }
+    try {
+      const { default: posthog } = await import("posthog-js");
+      if (!posthog.__loaded) {
+        posthog.init(key, {
+          api_host: POSTHOG_HOST,
+          person_profiles: "identified_only",
+          autocapture: true,
+          // We synthesize pageviews manually (trackPageview) on App
+          // Router transitions — Next doesn't fire native pageviews
+          // between routes, only on first load.
+          capture_pageview: false,
+          capture_pageleave: true,
+          // Honor consent — the cookie banner flips this via
+          // setAnalyticsConsent.
+          opt_out_capturing_by_default: true,
+          loaded: (ph) => {
+            if (readStoredConsent() === "granted") {
+              ph.opt_in_capturing();
+            }
+          },
+          // Session recording is heavy and not currently needed for
+          // funnel analysis. Toggle on later from the PostHog dashboard
+          // if you want to debug a specific drop-off.
+          disable_session_recording: true,
+        });
+      }
+      client = posthog;
+      flushQueue(posthog);
+      return posthog;
+    } catch (err) {
+      // Chunk load failed (ad-blocker, offline) — analytics stays off
+      // for this session. Must never break user-facing flows.
+      console.warn("[analytics] init failed:", err);
+      disabled = true;
+      queue = [];
+      return null;
+    }
+  })();
+  return initPromise;
+}
+
+function captureRaw(
+  event: string,
   properties?: Record<string, unknown>
 ): boolean {
   if (typeof window === "undefined") return false;
   try {
-    // posthog-js exposes __loaded as a runtime signal that init() ran.
-    // Guards against capture-before-init when called from a render
-    // path that fires before the provider's useEffect has run.
-    if (!posthog.__loaded) return false;
-    posthog.capture(event, properties);
-    return true;
+    if (client) {
+      client.capture(event, properties);
+      return true;
+    }
+    enqueue({ kind: "capture", event, properties });
+    return false;
   } catch (err) {
     // Analytics must never break user-facing flows. Console-warn only.
     console.warn("[analytics] trackEvent failed:", err);
     return false;
   }
+}
+
+/**
+ * Safe capture. Use this everywhere instead of `posthog.capture(...)`
+ * directly. Returns a boolean for the rare caller that wants to know
+ * whether the event was actually dispatched (e.g. for debugging) —
+ * `false` also covers "buffered until the SDK finishes loading".
+ */
+export function trackEvent(
+  event: FunnelEvent,
+  properties?: Record<string, unknown>
+): boolean {
+  return captureRaw(event, properties);
+}
+
+/**
+ * Synthesized `$pageview` for App Router transitions. Called by
+ * PostHogProvider on every route change; buffered pre-init like every
+ * other call so the landing pageview survives the deferred SDK load.
+ */
+export function trackPageview(currentUrl: string): void {
+  captureRaw("$pageview", { $current_url: currentUrl });
 }
 
 /**
@@ -134,8 +293,11 @@ export function trackEvent(
 export function identifyUser(userId: string, properties?: Record<string, unknown>): void {
   if (typeof window === "undefined") return;
   try {
-    if (!posthog.__loaded) return;
-    posthog.identify(userId, properties);
+    if (client) {
+      client.identify(userId, properties);
+    } else {
+      enqueue({ kind: "identify", userId, properties });
+    }
   } catch (err) {
     console.warn("[analytics] identifyUser failed:", err);
   }
@@ -149,8 +311,11 @@ export function identifyUser(userId: string, properties?: Record<string, unknown
 export function resetAnalytics(): void {
   if (typeof window === "undefined") return;
   try {
-    if (!posthog.__loaded) return;
-    posthog.reset();
+    if (client) {
+      client.reset();
+    } else {
+      enqueue({ kind: "reset" });
+    }
   } catch (err) {
     console.warn("[analytics] resetAnalytics failed:", err);
   }
@@ -159,16 +324,22 @@ export function resetAnalytics(): void {
 /**
  * Sync cookie-consent state with PostHog. Called by the cookie banner
  * when the user makes a decision. Until consent is granted, PostHog
- * stays opted out (init defaults to opt_out_by_default).
+ * stays opted out (init defaults to opt_out_by_default). Buffered if
+ * the SDK isn't up yet — the banner also persists the decision to
+ * localStorage, which init's `loaded` callback reads, so the two paths
+ * agree either way.
  */
 export function setAnalyticsConsent(granted: boolean): void {
   if (typeof window === "undefined") return;
   try {
-    if (!posthog.__loaded) return;
-    if (granted) {
-      posthog.opt_in_capturing();
+    if (client) {
+      if (granted) {
+        client.opt_in_capturing();
+      } else {
+        client.opt_out_capturing();
+      }
     } else {
-      posthog.opt_out_capturing();
+      enqueue({ kind: "consent", granted });
     }
   } catch (err) {
     console.warn("[analytics] setAnalyticsConsent failed:", err);

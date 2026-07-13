@@ -4,6 +4,7 @@ import { z } from "zod";
 import * as Sentry from "@sentry/nextjs";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { hasPaidPlanSubscription } from "@/lib/entitlements";
 import { getStripe } from "@/lib/stripe/client";
 import { getPrimaryPlanPriceId } from "@/lib/stripe/plan-prices";
 import { captureServerEvent } from "@/lib/posthog-server";
@@ -368,6 +369,43 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
       code: "SERVER_ERROR",
       message: "Unable to start checkout. Please try again.",
     };
+  }
+}
+
+export type ProActiveResult =
+  | { ok: true; active: boolean }
+  | { ok: false; code: "SIGN_IN_REQUIRED" | "SERVER_ERROR"; message: string };
+
+/**
+ * Lightweight post-checkout status poll: "has the Stripe webhook landed my
+ * subscription row yet?" BillingSuccessBanner calls this every ~2s (for up
+ * to ~20s) after a billing=success landing and router.refresh()es the
+ * moment it flips true, so the fresh subscriber's page stops treating them
+ * as free without a manual reload.
+ *
+ * Read-only, and deliberately just a wrapper around the EXISTING
+ * hasPaidPlanSubscription helper — no new status logic, no entitlement
+ * writes, no Stripe calls. Callers must treat any non-ok result the same
+ * as `active: false` (keep polling / fail open).
+ */
+export async function isProActiveAction(): Promise<ProActiveResult> {
+  try {
+    const supabase = await createServerSupabaseClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in to check your plan." };
+    }
+
+    const active = await hasPaidPlanSubscription(supabase, user.id);
+    return { ok: true, active };
+  } catch (error) {
+    // Transient failure while the caller is polling — no Sentry page here
+    // (hasPaidPlanSubscription already reports query failures itself).
+    console.error("[billing] isProActiveAction failed:", error);
+    return { ok: false, code: "SERVER_ERROR", message: "Unable to check subscription status." };
   }
 }
 

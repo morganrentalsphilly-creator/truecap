@@ -45,6 +45,7 @@ import type { AnalysisResult } from "@/lib/calc-analysis";
 import type { NextAction } from "@/lib/next-action";
 import type { DealScoreActionResult } from "@/app/actions/deal-score";
 import { recommendationLabel } from "@/lib/deal-score";
+import { buildDealTips } from "@/lib/deal-tips";
 import { NextActionBanner } from "@/components/investcalc/next-action-banner";
 import { cashFlowSubLabel } from "./metrics-band";
 
@@ -113,7 +114,13 @@ const RECOMMENDATION_STYLES: Record<
   },
 };
 
-function buildRecommendationModel(dealScoreResult: DealScoreActionResult | null): {
+function buildRecommendationModel(
+  dealScoreResult: DealScoreActionResult | null,
+  /** Deal-specific tips from buildDealTips (this deal's weakest subscores).
+   *  Null = breakdown unavailable OR nothing weak — fall back to the canned
+   *  per-recommendation list below. */
+  dealTips: string[] | null
+): {
   label: string;
   description: string;
   tips: string[];
@@ -128,6 +135,9 @@ function buildRecommendationModel(dealScoreResult: DealScoreActionResult | null)
   const descriptionFromScore =
     dealScoreResult.tier === "pro" ? dealScoreResult.data.explanation : null;
 
+  // The `tips` below are the generic FALLBACK list per label — used only
+  // when buildDealTips has no breakdown to work from (score not loaded) or
+  // nothing weak enough to call out (strong deal → no alarmist tips).
   const modelByRecommendation: Record<
     string,
     { variant: RecommendationVariant; description: string; tips: string[] }
@@ -189,9 +199,12 @@ function buildRecommendationModel(dealScoreResult: DealScoreActionResult | null)
     },
   };
 
+  const model = modelByRecommendation[recommendation];
   return {
     label: recommendation,
-    ...modelByRecommendation[recommendation],
+    ...model,
+    // This deal's weakest-subscore tips lead; the canned list is the fallback.
+    tips: dealTips ?? model.tips,
   };
 }
 
@@ -541,10 +554,29 @@ export function AnswerHeroCard({
    *  identity strip's "Unsaved changes" badge condition). */
   hasUnsavedChanges: boolean;
 }) {
+  const isCashPurchase = Boolean(result && result.monthlyPayment <= 0);
+  // Deal-specific tips from THIS deal's weakest subscores (null when the
+  // pro-tier breakdown isn't loaded or nothing is weak enough to call out —
+  // buildRecommendationModel then falls back to its canned per-label list).
+  const dealTips = buildDealTips({
+    breakdown:
+      dealScoreResult?.ok && dealScoreResult.tier === "pro"
+        ? dealScoreResult.data.breakdown
+        : null,
+    propertyType,
+    isCashPurchase,
+    metrics: result
+      ? {
+          netCashFlow: result.netCashFlow,
+          cocReturn: result.cocReturn,
+          capRate: result.capRate,
+          dscr: result.dscr,
+        }
+      : undefined,
+  });
   // Canonical Balanced verdict - identical to the dashboard, My Deals,
   // compare, PDF, and share surfaces. The lens never changes it.
-  const recommendation = buildRecommendationModel(dealScoreResult);
-  const isCashPurchase = Boolean(result && result.monthlyPayment <= 0);
+  const recommendation = buildRecommendationModel(dealScoreResult, dealTips);
   // Pro-tier score loaded → the merged "Why this verdict?" door also stacks
   // the subscore receipts (free tier / anon: narrative only, as before).
   const hasScoreBreakdown = Boolean(

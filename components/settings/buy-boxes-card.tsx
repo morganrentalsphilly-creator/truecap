@@ -23,6 +23,7 @@ import {
 import {
   US_STATE_OPTIONS,
   buyBoxPropertyTypeLabel,
+  type BuyBoxFitCount,
   type BuyBoxPropertyType,
   type NamedBuyBox,
 } from "@/lib/buy-box";
@@ -132,6 +133,10 @@ export function BuyBoxesCard() {
   const [editor, setEditor] = useState<EditorState | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [isSaving, startSaving] = useTransition();
+  // "X of your N active deals pass this box" feedback from the last save.
+  // Rendered only while the editor is closed (opening it again hides the
+  // line, since it describes the previous save, not the in-progress edit).
+  const [saveFit, setSaveFit] = useState<BuyBoxFitCount | null>(null);
 
   function applyResult(result: BuyBoxesActionResult): boolean {
     if (result.ok) {
@@ -200,6 +205,9 @@ export function BuyBoxesCard() {
           is_default: editor.isDefault,
           has_strategy: Boolean(editor.strategyKind),
         });
+        // Evaluation is best-effort server-side — no fit means no line,
+        // never a failed save.
+        setSaveFit(result.ok && result.fit ? result.fit : null);
         setEditor(null);
         toast({ title: editor.id ? "Buy box updated" : "Buy box added" });
       }
@@ -208,6 +216,9 @@ export function BuyBoxesCard() {
 
   function handleDelete(id: string) {
     setBusyId(id);
+    // The fit line describes the last-saved box, which may be the one
+    // being deleted — drop it rather than risk a stale claim.
+    setSaveFit(null);
     startSaving(async () => {
       const result = await deleteBuyBoxAction(id);
       applyResult(result);
@@ -326,7 +337,13 @@ export function BuyBoxesCard() {
                   size="sm"
                   variant="ghost"
                   disabled={isSaving}
-                  onClick={() => setEditor(boxToEditor(box))}
+                  onClick={() => {
+                    // The fit line describes the PREVIOUS save — clear it
+                    // when opening an editor so it can't read as describing
+                    // this box after a cancel.
+                    setSaveFit(null);
+                    setEditor(boxToEditor(box));
+                  }}
                   className="h-8 px-2 text-xs"
                 >
                   Edit
@@ -352,8 +369,37 @@ export function BuyBoxesCard() {
         </p>
       )}
 
+      {/* Save feedback (moment-of-save consequence): how many active deals
+          pass the box just saved. Links to My Deals pre-filtered to the fits
+          (?buyBox=1 seeds the existing buyBoxOnly filter); 0 passing lands
+          unfiltered so the per-deal "Misses buy box" badges show the gaps —
+          the Decision Center tile's convention. One template string for the
+          interpolated sentence (SSR whitespace gotcha). */}
+      {editor === null && saveFit ? (
+        <p
+          role="status"
+          className="mb-4 rounded-xl border border-[var(--brand-green)]/30 bg-[var(--brand-green-light)]/50 p-3 text-sm text-foreground"
+        >
+          {`${saveFit.passing} of your ${saveFit.evaluated} active deal${saveFit.evaluated === 1 ? "" : "s"} pass${saveFit.passing === 1 ? "es" : ""} this box — `}
+          <Link
+            href={saveFit.passing > 0 ? "/dashboard/saved-analyses?buyBox=1" : "/dashboard/saved-analyses"}
+            className="font-semibold text-[var(--brand-green)] underline underline-offset-2 hover:opacity-80"
+          >
+            {saveFit.passing > 0 ? "see them →" : "see the gaps →"}
+          </Link>
+        </p>
+      ) : null}
+
       {editor === null ? (
-        <Button type="button" variant="outline" onClick={() => setEditor(emptyEditor(boxes.length === 0))} className="gap-1.5">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => {
+            setSaveFit(null);
+            setEditor(emptyEditor(boxes.length === 0));
+          }}
+          className="gap-1.5"
+        >
           <Plus className="size-4" /> Add a buy box
         </Button>
       ) : (

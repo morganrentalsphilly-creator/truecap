@@ -1,9 +1,14 @@
 /**
  * Public /pricing page. Two plans + free, FAQ, trust strip,
  * conversion-focused. For unauthenticated visitors the CTA routes to
- * /auth/sign-up?next=/pricing (so they come back here to subscribe);
- * for authenticated free users the CTA triggers Stripe checkout
- * directly via the existing billing action.
+ * /auth/sign-up?next=/pricing?checkout=<plan>#plans, so they come back
+ * here and PricingPlanButtons auto-resumes the exact checkout they
+ * started (the param is read client-side via window.location — no
+ * useSearchParams, so no extra Suspense boundary is needed here); for
+ * authenticated free users the CTA triggers Stripe checkout directly
+ * via the existing billing action. A Stripe cancel returns with
+ * ?billing=checkout_cancelled (CheckoutCancelledBanner below), which
+ * the auto-resume treats as mutually exclusive — it never re-fires.
  */
 
 import { Suspense } from "react";

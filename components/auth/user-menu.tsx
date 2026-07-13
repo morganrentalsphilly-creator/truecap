@@ -13,7 +13,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
 type UserMenuProps = {
@@ -42,8 +41,17 @@ export function UserMenu({
   const handleSignOut = async () => {
     if (isSigningOut) return;
     setIsSigningOut(true);
-    const supabase = createBrowserSupabaseClient();
-    void supabase.auth.signOut({ scope: "local" }).catch(() => undefined);
+    try {
+      // Lazy import keeps supabase-js out of the header bundle that every
+      // marketing page ships (UserMenu only renders for signed-in users,
+      // and the header will already have this chunk warm for them).
+      const { createBrowserSupabaseClient } = await import("@/lib/supabase/client");
+      const supabase = createBrowserSupabaseClient();
+      void supabase.auth.signOut({ scope: "local" }).catch(() => undefined);
+    } catch {
+      // Chunk load failed (offline/ad-block) — the server route below
+      // still clears the session cookies, so proceed regardless.
+    }
     window.location.replace("/auth/sign-out");
   };
 
