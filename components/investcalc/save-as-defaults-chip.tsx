@@ -13,7 +13,7 @@
  * saved. Reuses the existing saveUserAnalysisDefaultsAction (no new fields).
  */
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 import type { UseFormReturn } from "react-hook-form";
 import { Loader2, Save } from "lucide-react";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
@@ -70,8 +70,10 @@ export function SaveAsDefaultsChip({
   const { toast } = useToast();
   const [saving, setSaving] = useState(false);
   // What's persisted right now — starts at the prop, advances on each save so
-  // the chip hides the instant the values match what's saved.
-  const savedRef = useRef<Record<string, number> | null>(currentDefaults ?? null);
+  // the chip hides the instant the values match what's saved. State, not a
+  // ref: it's read during render (React 19 forbids render-time ref reads),
+  // and the post-save setState is exactly the re-render that hides the chip.
+  const [saved, setSaved] = useState<Record<string, number> | null>(currentDefaults ?? null);
 
   // Subscribe to form changes + dirty state so this recomputes on edits.
   // (No-arg watch keeps this isolated component in sync; it only re-renders
@@ -86,14 +88,14 @@ export function SaveAsDefaultsChip({
   if (!touchedAny) return null;
 
   const live = buildDefaultsPayload(form);
-  if (payloadMatchesSaved(live, savedRef.current)) return null;
+  if (payloadMatchesSaved(live, saved)) return null;
 
   const onSave = async () => {
     setSaving(true);
     try {
       const result = await saveUserAnalysisDefaultsAction(live);
       if (result.ok) {
-        savedRef.current = live;
+        setSaved(live);
         toast({
           title: "Saved as your defaults",
           description: "New analyses will start from these assumptions.",
