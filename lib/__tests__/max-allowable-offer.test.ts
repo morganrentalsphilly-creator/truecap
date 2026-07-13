@@ -12,6 +12,7 @@ import {
   meetsTarget,
   solveRequiredMonthlyRent,
   solveRequiredInterestRate,
+  type MaoTarget,
 } from "../max-allowable-offer";
 import type { InvestmentFormValues } from "../investcalc-schema";
 
@@ -58,8 +59,9 @@ describe("MAO — DSCR price target", () => {
     expect(res).not.toBeNull();
     if (res) {
       expect(res.maxPrice).toBeGreaterThan(0);
-      // Achieved DSCR should be at/above target (allow tiny binary-search slack).
-      expect(res.achieved.dscr).toBeGreaterThanOrEqual(1.25 - 0.02);
+      // achieved is computed AT maxPrice, which rounds DOWN — so the target
+      // holds exactly, no binary-search slack needed.
+      expect(res.achieved.dscr).toBeGreaterThanOrEqual(1.25);
     }
   });
 
@@ -67,6 +69,81 @@ describe("MAO — DSCR price target", () => {
     const r = calculateAnalysis(baseSingleFamily());
     expect(meetsTarget(r, { dscr: r.dscr - 0.1 })).toBe(true);
     expect(meetsTarget(r, { dscr: r.dscr + 0.5 })).toBe(false);
+  });
+});
+
+describe("MAO — returned price honors its own target (no round-up overshoot)", () => {
+  // The UI quotes maxPrice as "the highest price that clears this" ("Your
+  // number", "Max offer", the break-even hint). Rounding to NEAREST $500 used
+  // to land up to $250 past the pass/fail boundary, so re-running the deal at
+  // the quoted price failed the very bar it claimed to clear (e.g. DSCR ≥ 1.25
+  // → $305,500 quoted, actual DSCR 1.249). Pin: the returned price itself
+  // passes, for every target kind.
+  const targets: { name: string; target: MaoTarget }[] = [
+    { name: "DSCR ≥ 1.25", target: { dscr: 1.25 } },
+    { name: "cash flow ≥ $100/mo", target: { monthlyCashFlow: 100 } },
+    { name: "break-even cash flow", target: { monthlyCashFlow: 0 } },
+    { name: "cash-on-cash ≥ 6%", target: { cocReturn: 6 } },
+    { name: "cap rate ≥ 6%", target: { capRate: 6 } },
+    { name: "break-even + DSCR ≥ 1.25 (default basis)", target: { monthlyCashFlow: 0, dscr: 1.25 } },
+  ];
+
+  for (const { name, target } of targets) {
+    it(`re-running the analysis at the returned price still meets ${name}`, () => {
+      const values = baseSingleFamily();
+      const res = calculateMaxAllowableOffer(values, target);
+      expect(res).not.toBeNull();
+      if (res) {
+        expect(res.maxPrice % 500).toBe(0);
+        const at = calculateAnalysis({ ...values, purchasePrice: res.maxPrice });
+        expect(meetsTarget(at, target)).toBe(true);
+      }
+    });
+  }
+
+  it("holds across rent levels (the audit's $305,500-class overshoots)", () => {
+    for (const monthlyRent of [1_500, 2_100, 2_500, 3_200, 4_000]) {
+      const values = baseSingleFamily({ monthlyRent });
+      for (const target of [{ dscr: 1.25 }, { monthlyCashFlow: 0 }, { cocReturn: 6 }] as MaoTarget[]) {
+        const res = calculateMaxAllowableOffer(values, target);
+        expect(res).not.toBeNull();
+        if (res) {
+          const at = calculateAnalysis({ ...values, purchasePrice: res.maxPrice });
+          expect(meetsTarget(at, target)).toBe(true);
+        }
+      }
+    }
+  });
+
+  it("achieved describes the returned price, not the unrounded solver price", () => {
+    const values = baseSingleFamily();
+    const res = calculateMaxAllowableOffer(values, { monthlyCashFlow: 0 });
+    expect(res).not.toBeNull();
+    if (res) {
+      const at = calculateAnalysis({ ...values, purchasePrice: res.maxPrice });
+      expect(res.achieved.netCashFlow).toBe(at.netCashFlow);
+      expect(res.achieved.dscr).toBe(at.dscr);
+      expect(res.achieved.capRate).toBe(at.capRate);
+      expect(res.achieved.cocReturn).toBe(at.cocReturn);
+    }
+  });
+
+  it("clamps the floored price to minPrice instead of rounding below it", () => {
+    // Range so narrow that flooring to a $500 step would fall below minPrice.
+    const res = calculateMaxAllowableOffer(
+      baseSingleFamily(),
+      { monthlyCashFlow: -99_999 }, // trivially met — the solver walks to the top of the range
+      { minPrice: 10_250, maxPrice: 10_499 }
+    );
+    expect(res).not.toBeNull();
+    expect(res?.maxPrice).toBe(10_250);
+  });
+
+  it("still returns null for unreachable targets and empty targets (contracts preserved)", () => {
+    expect(
+      calculateMaxAllowableOffer(baseSingleFamily({ monthlyRent: 0 }), { monthlyCashFlow: 100 })
+    ).toBeNull();
+    expect(calculateMaxAllowableOffer(baseSingleFamily(), {})).toBeNull();
   });
 });
 

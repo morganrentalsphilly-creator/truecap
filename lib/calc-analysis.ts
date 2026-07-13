@@ -14,6 +14,10 @@ export interface AnalysisResult {
   monthlyRentalIncome: number;
   // expenses
   propertyTax: number;
+  /** Effective annual property-tax % of price — the % the math actually
+   *  used. Annual-$ mode derives it from the typed bill (bill / price);
+   *  percent mode is the input (or the 1.1 default). */
+  propertyTaxPctEffective: number;
   insurance: number;
   insuranceInputMode: "percent" | "monthly";
   insurancePctInput: number | null;
@@ -185,7 +189,14 @@ export function calculateAnalysis(values: InvestmentFormValues): AnalysisResult 
   const capexAgeAdjusted = false;
 
   // Operating expenses (property tax is percentage based; insurance/others remain monthly overrides)
-  const propertyTaxPctEffective = propertyTaxPct ?? 1.1;
+  // Effective annual property-tax % of price — what the math actually used.
+  // Annual-$ mode derives it from the typed bill so display surfaces (PDF
+  // assumptions, Compare, the persisted property_tax_pct column) never print
+  // the unused percent default (mirrors insurancePctEffective below).
+  const propertyTaxPctEffective =
+    propertyTaxInputMode === "annual" && propertyTaxAnnual != null && purchasePrice > 0
+      ? (propertyTaxAnnual / purchasePrice) * 100
+      : propertyTaxPct ?? 1.1;
   const propertyTaxDefault = Math.round((purchasePrice * (propertyTaxPctEffective / 100)) / 12);
   const insurancePctEffective = insurancePct ?? 0.5;
   const insuranceDefault = Math.round((purchasePrice * (insurancePctEffective / 100)) / 12);
@@ -316,6 +327,7 @@ export function calculateAnalysis(values: InvestmentFormValues): AnalysisResult 
   return {
     monthlyRentalIncome,
     propertyTax,
+    propertyTaxPctEffective,
     insurance,
     insuranceInputMode,
     insurancePctInput: insurancePct ?? null,

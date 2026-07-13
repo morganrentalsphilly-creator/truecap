@@ -49,7 +49,11 @@ export function SignUpForm() {
 
   async function onSubmit(values: SignUpInput) {
     setIsSubmitting(true);
-    const result = await signUpAction(values);
+    // Pass the validated ?next so the confirmation EMAIL's link also
+    // returns here (the action threads it into emailRedirectTo). Without
+    // it, an email-confirmation signup dropped the return path — a started
+    // Pro checkout or pending save never resumed after the confirm hop.
+    const result = await signUpAction(values, safeNextPath ?? undefined);
     setIsSubmitting(false);
 
     if (!result.ok) {

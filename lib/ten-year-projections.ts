@@ -128,6 +128,10 @@ export function buildTenYearProjectionInputHash(input: TenYearProjectionInput): 
   const normalizedPayload = {
     monthlyRentalIncome: input.monthlyRentalIncome,
     totalOperatingExpenses: input.totalOperatingExpenses,
+    // v4 subtracts the CapEx reserve from the taxable-income line, so an
+    // offsetting maintenance/CapEx edit (total opex unchanged) must still
+    // produce a new hash — omitting it served stale cached tax lines.
+    capexReserveMonthly: input.capexReserveMonthly,
     monthlyPayment: input.monthlyPayment,
     pmiMonthly: input.pmiMonthly ?? 0,
     pmiNoCancel: input.pmiNoCancel === true,

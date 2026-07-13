@@ -160,6 +160,29 @@ describe("buildDealsCsv", () => {
     expect(records(csv)[1].split(",")[10]).toBe("Cash");
   });
 
+  it("renders a FINANCED deal with DSCR <= 0 as the number, not 'Cash'", () => {
+    // Negative NOI on a financed deal → DSCR is a real (bad) number the
+    // investor needs to see. Labeling it "Cash" hid a failing deal.
+    // "-0.42" starts with "-" so the injection hardening quote-prefixes it,
+    // same as every negative numeric cell.
+    const negative = buildDealsCsv([
+      makeItem({ address: "10 Oak Ave", dscr: -0.42, isCashPurchase: false }),
+    ]);
+    expect(records(negative)[1].split(",")[10]).toBe("'-0.42");
+
+    const zero = buildDealsCsv([
+      makeItem({ address: "10 Oak Ave", dscr: 0, isCashPurchase: false }),
+    ]);
+    expect(records(zero)[1].split(",")[10]).toBe("0.00");
+  });
+
+  it("renders 'Cash' for a cash purchase even when dscr is missing", () => {
+    const csv = buildDealsCsv([
+      makeItem({ address: "10 Oak Ave", dscr: null, isCashPurchase: true }),
+    ]);
+    expect(records(csv)[1].split(",")[10]).toBe("Cash");
+  });
+
   it("passes an unparseable createdAt through untouched", () => {
     const csv = buildDealsCsv([makeItem({ createdAt: "not-a-date" })]);
     expect(records(csv)[1]).toContain(",not-a-date,");

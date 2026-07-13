@@ -100,8 +100,9 @@ describe("solveBuyBoxClearingPrice", () => {
     expect(price).not.toBeNull();
     if (price != null) {
       expect(price).toBeGreaterThan(0);
-      // Allow the solver's $500-rounding slack when re-checking.
-      const at = calculateAnalysis({ ...values, purchasePrice: price - 500 });
+      // The card calls this "the highest price that clears this box" — the
+      // returned price itself must clear it, no rounding slack.
+      const at = calculateAnalysis({ ...values, purchasePrice: price });
       expect(meetsTarget(at, { monthlyCashFlow: 0, dscr: 1.25 })).toBe(true);
     }
   });

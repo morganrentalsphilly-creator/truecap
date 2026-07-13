@@ -68,6 +68,7 @@ import { type DataConfidence } from "@/lib/data-confidence";
 import { consumePendingSavedListSearch } from "@/lib/dashboard-saved-search-bridge";
 import { Switch } from "../ui/switch";
 import {
+  describeInvestmentFormSnapshotIssue,
   investmentFormSchema,
   normalizeInvestmentFormSnapshot,
   type InvestmentFormValues,
@@ -584,7 +585,15 @@ function buildReportDataFromSavedSnapshot(args: {
       closingCosts: result.closingCosts,
     },
     expenses: {
-      propertyTaxPct: Number(values.propertyTaxPct ?? 0),
+      // Effective % — annual-$ mode derives it from the bill (the raw
+      // propertyTaxPct field is undefined in that mode and printed "0%").
+      // result always carries the fresh calculateAnalysis spread, so the
+      // effective field exists even for legacy snapshots.
+      propertyTaxPct: Math.round(Number(result.propertyTaxPctEffective ?? 0) * 100) / 100,
+      propertyTaxAnnualBill:
+        values.propertyTaxInputMode === "annual" && values.propertyTaxAnnual != null
+          ? Number(values.propertyTaxAnnual)
+          : null,
       insurancePct: Number(result.insurancePctEffective ?? 0),
       maintenancePct: Number(result.maintenancePctEffective ?? 0),
       vacancyPct: Number(values.vacancyPct),
@@ -1567,9 +1576,14 @@ export function SavedAnalysesPage({
 
         const normalized = normalizeInvestmentFormSnapshot(exportResult.formSnapshot);
         if (!normalized) {
+          // Name the failing field so the customer can actually fix it —
+          // "not valid enough" with no pointer was a dead end.
+          const issue = describeInvestmentFormSnapshotIssue(exportResult.formSnapshot);
           toast({
             title: "Could not export PDF",
-            description: "The saved analysis data is not valid enough to generate a PDF.",
+            description: issue
+              ? `This deal needs a fix before it can export — ${issue}. Open the deal, update that field, and re-save.`
+              : "The saved analysis data is not valid enough to generate a PDF.",
             variant: "destructive",
           });
           return;
@@ -2086,7 +2100,7 @@ export function SavedAnalysesPage({
                                 </div>
                               ) : null}
                               {item.breakdown && item.score != null ? (
-                                <ScoreBreakdown breakdown={item.breakdown} score={item.score} />
+                                <ScoreBreakdown breakdown={item.breakdown} score={item.score} propertyType={item.propertyType} />
                               ) : null}
                             </PopoverContent>
                           </Popover>
@@ -2367,7 +2381,7 @@ export function SavedAnalysesPage({
                                   <button type="button" className="text-[11px] font-semibold text-primary underline-offset-2 hover:underline">Why?</button>
                                 </PopoverTrigger>
                                 <PopoverContent align="end" className="w-auto p-3">
-                                  <ScoreBreakdown breakdown={item.breakdown} score={item.score} />
+                                  <ScoreBreakdown breakdown={item.breakdown} score={item.score} propertyType={item.propertyType} />
                                 </PopoverContent>
                               </Popover>
                             ) : null}
@@ -2384,7 +2398,9 @@ export function SavedAnalysesPage({
                       <td className="font-semibold text-foreground">{toCurrency(item.purchasePrice)}</td>
                       {optionalColumns.dscr ? (
                         <td className="font-medium tabular-nums text-foreground">
-                          {item.dscr == null ? "—" : item.dscr <= 0 ? "Cash" : item.dscr.toFixed(2)}
+                          {/* "Cash" keys off the explicit flag — a financed deal
+                              with negative NOI has a real DSCR ≤ 0 to show. */}
+                          {item.isCashPurchase ? "Cash" : item.dscr == null ? "—" : item.dscr.toFixed(2)}
                         </td>
                       ) : null}
                       {optionalColumns.cashToClose ? (

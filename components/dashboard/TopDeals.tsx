@@ -25,6 +25,10 @@ export type DashboardTopDeal = {
   riskLevel: string | null;
   /** Per-factor score breakdown for the "Why this score" popover. */
   breakdown?: DealScoreBreakdown | null;
+  /** Raw property type (not the display label) — the popover needs it so
+   *  owner-occupant cash flow renders against its 30-pt max, not the
+   *  investor 22. */
+  propertyType?: "single-family" | "multi-family" | "owner-occupant" | null;
   tags?: string[];
   /** Buy-box fit (PV-6) — null/undefined for users without an active box, so
    *  the badge and the Fit sort stay invisible for them. */
@@ -241,7 +245,7 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
                       <button type="button" className="text-[11px] font-semibold text-primary underline-offset-2 hover:underline">Why?</button>
                     </PopoverTrigger>
                     <PopoverContent align="start" className="w-auto p-3">
-                      <ScoreBreakdown breakdown={d.breakdown} score={d.score} />
+                      <ScoreBreakdown breakdown={d.breakdown} score={d.score} propertyType={d.propertyType} />
                     </PopoverContent>
                   </Popover>
                 ) : null}
@@ -362,7 +366,7 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
                                 <button type="button" className="text-[11px] font-semibold text-primary underline-offset-2 hover:underline">Why?</button>
                               </PopoverTrigger>
                               <PopoverContent align="end" className="w-auto p-3">
-                                <ScoreBreakdown breakdown={d.breakdown} score={d.score} />
+                                <ScoreBreakdown breakdown={d.breakdown} score={d.score} propertyType={d.propertyType} />
                               </PopoverContent>
                             </Popover>
                           ) : null}

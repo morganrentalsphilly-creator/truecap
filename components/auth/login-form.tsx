@@ -116,7 +116,13 @@ export function LoginForm() {
   async function handleResendConfirmation() {
     if (!unconfirmedEmail || isResending) return;
     setIsResending(true);
-    const result = await resendConfirmationAction({ email: unconfirmedEmail });
+    // Keep the caller's return path on the resent link too — the resent
+    // confirmation email should land the user where they were headed
+    // (?next), matching the original sign-up email.
+    const result = await resendConfirmationAction(
+      { email: unconfirmedEmail },
+      safeNextPath ?? undefined
+    );
     setIsResending(false);
     if (!result.ok) {
       toast({

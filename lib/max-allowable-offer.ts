@@ -30,7 +30,8 @@ export type MaoResult = {
   target: MaoTarget;
   /** Highest price that satisfies all provided targets, in dollars. */
   maxPrice: number;
-  /** AnalysisResult at the solved price — useful for the "at this price you'd get..." readout. */
+  /** AnalysisResult at maxPrice itself — the "at this price you'd get..." readout
+   *  must describe the number the user sees, not the unrounded solver price. */
   achieved: AnalysisResult;
 };
 
@@ -112,11 +113,21 @@ export function calculateMaxAllowableOffer(
   }
 
   if (!best) return null;
+  // Round DOWN to a $500 step so the UI shows clean numbers, not $268,431.50.
+  // Never round to nearest: that can land up to $250 ABOVE the pass/fail
+  // boundary and quote a price that fails the very target it claims to clear.
+  // Lower price → stronger returns (the bisection above relies on the same
+  // monotonicity), so the floored price still passes. Clamp to minPrice —
+  // which the quick-reject already verified passes — so flooring can't dip
+  // below the solver's own floor when minPrice isn't a $500 multiple.
+  const roundedPrice = Math.max(minPrice, Math.floor(best.price / 500) * 500);
+  // Recompute the readout AT the displayed price so "at this price you'd
+  // get..." describes the number the user actually sees.
+  const achievedAtRounded = safeCalc({ ...values, purchasePrice: roundedPrice });
   return {
     target,
-    // Round to nearest $500 so the UI shows clean numbers, not $268,431.50.
-    maxPrice: Math.round(best.price / 500) * 500,
-    achieved: best.result,
+    maxPrice: roundedPrice,
+    achieved: achievedAtRounded ?? best.result,
   };
 }
 

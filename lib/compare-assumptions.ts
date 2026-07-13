@@ -15,6 +15,11 @@ export type DealAssumptions = {
     managementPct: number | null;
     maintenancePct: number | null;
     capexPct: number | null;
+    /** How the tax was entered. "annual" means propertyTaxAnnual is the
+     *  customer's actual bill and propertyTaxPct (if any) is only a derived
+     *  effective rate — render the bill, not the percent. */
+    propertyTaxInputMode: "percent" | "annual" | null;
+    propertyTaxAnnual: number | null;
     propertyTaxPct: number | null;
     insuranceInputMode: "percent" | "monthly" | null;
     insurancePct: number | null;
@@ -126,11 +131,21 @@ export function buildDealAssumptions(formSnapshot: unknown, row: RowFallback): D
     unitsDescription: unitsDescription(s),
   };
 
+  const propertyTaxAnnual = numFromUnknown(s.propertyTaxAnnual);
+  const propertyTaxInputMode: DealAssumptions["expenses"]["propertyTaxInputMode"] =
+    s.propertyTaxInputMode === "annual" && propertyTaxAnnual != null
+      ? "annual"
+      : s.propertyTaxInputMode === "percent"
+        ? "percent"
+        : null;
+
   const expenses = {
     vacancyPct: numFromUnknown(s.vacancyPct) ?? toNumber(row.vacancy_pct),
     managementPct: numFromUnknown(s.mgmtPct) ?? toNumber(row.management_pct),
     maintenancePct: numFromUnknown(s.maintenancePct) ?? toNumber(row.maintenance_pct),
     capexPct: numFromUnknown(s.capexPct) ?? toNumber(row.capex_pct),
+    propertyTaxInputMode,
+    propertyTaxAnnual,
     propertyTaxPct: numFromUnknown(s.propertyTaxPct) ?? toNumber(row.property_tax_pct),
     insuranceInputMode,
     insurancePct: numFromUnknown(s.insurancePct) ?? toNumber(row.insurance_pct),

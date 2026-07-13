@@ -750,6 +750,63 @@ describe("BRRRR analysis", () => {
     expect(r.cashLeftInDeal).toBe(0);
     expect(r.isInfiniteReturn).toBe(true);
   });
+
+  it("refi shortfall (low appraisal) increases cash left in deal instead of vanishing", () => {
+    // Purchase 100k / 20% down → payoff 80k. ARV 105k @ 75% LTV → new loan
+    // 78,750; refi closing = 78,750 × 2% = 1,575. Net at refi =
+    // 78,750 − 80,000 − 1,575 = −2,825 — the investor BRINGS cash to the
+    // refi table. The old clamp discarded that 2,825, understating the
+    // customer's true basis.
+    const r = analyzeBrrrr({
+      purchasePrice: 100_000,
+      rehabBudget: 20_000,
+      arv: 105_000,
+      refiLtvPct: 75,
+      refiRatePct: 7,
+      refiTermYears: 30,
+      closingCostsPctAcq: 3,
+      closingCostsRefiPct: 2,
+      downPaymentPct: 20,
+      holdMonths: 6,
+      monthlyCarryingCost: 400,
+      postRefiMonthlyOpEx: 700,
+      postRefiMonthlyRent: 1_500,
+    });
+    // Displayed "cash returned" stays floored at 0…
+    expect(r.cashReturnedAtRefi).toBe(0);
+    // …but the shortfall is named…
+    expect(r.cashNeededAtRefi).toBe(2_825);
+    // …and flows into cash left in deal:
+    // total invested = 20,000 down + 3,000 closing + 2,400 carry + 20,000 rehab
+    // = 45,400; cash left = 45,400 + 2,825 = 48,225.
+    expect(r.totalCashInvested).toBe(45_400);
+    expect(r.cashLeftInDeal).toBe(48_225);
+    expect(r.isInfiniteReturn).toBe(false);
+  });
+
+  it("normal cash-out refi reports no cash needed at refi", () => {
+    const r = analyzeBrrrr({
+      purchasePrice: 150_000,
+      rehabBudget: 30_000,
+      arv: 250_000,
+      refiLtvPct: 75,
+      refiRatePct: 7,
+      refiTermYears: 30,
+      closingCostsPctAcq: 3,
+      closingCostsRefiPct: 2,
+      downPaymentPct: 100,           // all-cash acquisition
+      holdMonths: 6,
+      monthlyCarryingCost: 500,
+      postRefiMonthlyOpEx: 800,
+      postRefiMonthlyRent: 2_000,
+    });
+    // New loan 187,500 − payoff 0 − refi closing 3,750 = 183,750 out.
+    expect(r.cashReturnedAtRefi).toBe(183_750);
+    expect(r.cashNeededAtRefi).toBe(0);
+    // Happy path unchanged by the shortfall pass-through:
+    // invested 187,500 − returned 183,750 = 3,750 left in the deal.
+    expect(r.cashLeftInDeal).toBe(3_750);
+  });
 });
 
 // ──────────────────────────────────────────────────────────────────
@@ -860,6 +917,29 @@ describe("property tax input mode", () => {
       baseSingleFamily({ propertyTaxInputMode: "annual", propertyTaxAnnual: undefined })
     );
     expect(r.propertyTax).toBe(225);
+  });
+
+  it("propertyTaxPctEffective reports the % the math actually used", () => {
+    // Percent mode: the typed % (or the 1.1 default when blank) passes through.
+    expect(
+      calculateAnalysis(baseSingleFamily({ propertyTaxPct: 2.05 })).propertyTaxPctEffective
+    ).toBe(2.05);
+    expect(
+      calculateAnalysis(baseSingleFamily({ propertyTaxPct: undefined })).propertyTaxPctEffective
+    ).toBe(1.1);
+    // Annual-$ mode: derived from the bill — NOT the unused percent field
+    // (the PDF assumptions line used to print "0%" and the saved column
+    // fabricated 1.1% from exactly this gap).
+    const annual = calculateAnalysis(
+      baseSingleFamily({ propertyTaxInputMode: "annual", propertyTaxAnnual: 4_900 })
+    );
+    // 4,900 / 245,000 × 100 = 2%
+    expect(annual.propertyTaxPctEffective).toBeCloseTo(2, 10);
+    // Blank bill in annual mode falls back to the percent path.
+    const blankBill = calculateAnalysis(
+      baseSingleFamily({ propertyTaxInputMode: "annual", propertyTaxAnnual: undefined })
+    );
+    expect(blankBill.propertyTaxPctEffective).toBe(1.1);
   });
 
   it("the bill flows through cash flow, cap rate, and DSCR consistently", () => {

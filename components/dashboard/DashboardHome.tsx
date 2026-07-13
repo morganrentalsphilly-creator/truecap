@@ -233,6 +233,7 @@ function getTopDeals(data: DashboardHomeData): DashboardTopDeal[] {
       roi: deal.roiPct == null ? null : Number(deal.roiPct.toFixed(1)),
       riskLevel: deal.riskLevel,
       breakdown: deal.breakdown,
+      propertyType: deal.propertyType,
       tags: deal.tags,
       // Buy-box fit (PV-6) — undefined for users without an active box, so
       // the badge and the Fit sort stay invisible for them.

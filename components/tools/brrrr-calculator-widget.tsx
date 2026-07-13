@@ -89,7 +89,7 @@ export function BrrrrCalculatorWidget() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
           <Metric label="Cash left in deal" value={fmt(result.cashLeftInDeal)}
             positive={result.cashLeftInDeal === 0}
-            negative={result.cashLeftInDeal > 0 && result.cashLeftInDeal === result.totalCashInvested}
+            negative={result.cashLeftInDeal > 0 && result.cashLeftInDeal >= result.totalCashInvested}
           />
           <Metric label="Cash returned at refi" value={fmt(result.cashReturnedAtRefi)} positive={result.cashReturnedAtRefi > 0} />
           <Metric label="Post-refi CF" value={`${fmt(result.postRefiMonthlyCashFlow)}/mo`}
@@ -102,6 +102,16 @@ export function BrrrrCalculatorWidget() {
             negative={!result.isInfiniteReturn && result.postRefiCashOnCashPct < 0}
           />
         </div>
+
+        {/* Refi shortfall: new loan < payoff + refi costs. The shortfall is
+            already counted in "Cash left in deal" — this names it. */}
+        {result.cashNeededAtRefi > 0 && (
+          <p className="text-xs font-semibold text-[var(--metric-negative)]">
+            Refi shortfall: the new loan doesn&apos;t cover the original loan payoff plus
+            refi closing costs — you&apos;d bring {fmt(result.cashNeededAtRefi)} to the refi
+            table (included in cash left in deal).
+          </p>
+        )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
           <div>
@@ -116,7 +126,11 @@ export function BrrrrCalculatorWidget() {
             <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold mb-1.5">Refi</div>
             <Row label="New loan amount" value={fmt(result.newLoanAmount)} />
             <Row label="Refi closing costs" value={fmt(result.refiClosingCosts)} />
-            <Row label="Cash returned" value={fmt(result.cashReturnedAtRefi)} bold />
+            {result.cashNeededAtRefi > 0 ? (
+              <Row label="Cash needed at refi" value={fmt(result.cashNeededAtRefi)} bold />
+            ) : (
+              <Row label="Cash returned" value={fmt(result.cashReturnedAtRefi)} bold />
+            )}
             <Row label="New monthly payment" value={fmt(result.newMonthlyPayment)} />
             <Row label="Equity created" value={fmt(result.equityCreated)} bold />
           </div>

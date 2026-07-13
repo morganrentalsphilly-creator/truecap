@@ -32,6 +32,7 @@ import {
   previewParse,
   InvestmentFormValues,
   defaultValues,
+  describeInvestmentFormSnapshotIssue,
   getDefaultUnitsForPropertyType,
   isValidRentalUnit,
   normalizeInvestmentFormDraft,
@@ -464,7 +465,13 @@ function toPdfReportData(args: {
       closingCosts: result.closingCosts,
     },
     expenses: {
-      propertyTaxPct: Number(values.propertyTaxPct ?? 0),
+      // Effective % — annual-$ mode derives it from the bill (the raw
+      // propertyTaxPct field is undefined in that mode and printed "0%").
+      propertyTaxPct: Math.round(Number(result.propertyTaxPctEffective ?? 0) * 100) / 100,
+      propertyTaxAnnualBill:
+        values.propertyTaxInputMode === "annual" && values.propertyTaxAnnual != null
+          ? Number(values.propertyTaxAnnual)
+          : null,
       insurancePct: Number(result.insurancePctEffective ?? 0),
       maintenancePct: Number(result.maintenancePctEffective ?? 0),
       vacancyPct: Number(values.vacancyPct),
@@ -2396,7 +2403,14 @@ export function InvestCalcPage({
     if (duplicatePayloadRaw) {
       try {
         const parsed = JSON.parse(duplicatePayloadRaw) as { formSnapshot?: unknown };
-        const normalized = normalizeInvestmentFormSnapshot(parsed.formSnapshot);
+        // Lenient fallback: the fork wipes address/price/rents anyway, so a
+        // legacy snapshot the strict schema rejects (e.g. a pre-Apr-2026
+        // 0-rent unit) can still donate its assumptions — this keeps
+        // "Duplicate assumptions" working as the recovery path for frozen
+        // legacy deals.
+        const normalized =
+          normalizeInvestmentFormSnapshot(parsed.formSnapshot) ??
+          normalizeInvestmentFormDraft(parsed.formSnapshot);
         if (normalized) {
           const forked: Partial<InvestmentFormValues> = {
             ...normalized,
@@ -2514,20 +2528,57 @@ export function InvestCalcPage({
           });
           return;
         }
+        // Strict normalize failed (a legacy row the current schema rejects,
+        // e.g. a pre-Apr-2026 deal saved with rent 0 back when the schema
+        // allowed it). Refusing to open froze those deals behind a circular
+        // toast ("open it and re-save" — opening WAS the failing step).
+        // Open the FORM via the lenient draft normalizer instead: the
+        // sanitized inputs load, validation flags the offending field, and
+        // Save (still full-schema-gated) persists the fix to the same row.
+        // No results render — the schema rejected these values, so nothing
+        // computed from them should either.
+        const lenient =
+          typeof parsed.id === "string" ? normalizeInvestmentFormDraft(parsed.formSnapshot) : null;
+        if (lenient && typeof parsed.id === "string") {
+          const issue = describeInvestmentFormSnapshotIssue(parsed.formSnapshot);
+          prevPropertyTypeRef.current = lenient.propertyType;
+          form.reset(lenient);
+          if ((lenient.avgDailyRate ?? 0) > 0) {
+            setActiveStrategyKey("short-term");
+          }
+          setSavedDealId(parsed.id);
+          savedDealIdRef.current = parsed.id;
+          lastPersistedFormJsonRef.current = formSnapshotForCompare(lenient);
+          toast({
+            title: "One field needs a fix",
+            description: issue
+              ? `This deal was saved in an older format. Fix "${issue}", then Run and re-save.`
+              : "This deal was saved in an older format. Fix the highlighted field, then Run and re-save.",
+          });
+          queueMicrotask(() => {
+            isProgrammaticResetRef.current = false;
+            // Surface the failing field inline right away — the toast names
+            // it, the form highlights it.
+            void form.trigger();
+          });
+          return;
+        }
       } catch {
         // Malformed JSON — fall through to the failure toast below.
       }
-      // Payload present but not restorable: either malformed, or a legacy
-      // row whose snapshot fails the current schema (normalize → null). The
-      // user clicked "Open Analysis", so a silently blank calculator reads
-      // as data loss — say what happened and land on the clean form (NOT the
+      // Payload present but not restorable: malformed beyond even the
+      // lenient normalizer (corrupt JSON / non-object snapshot). The user
+      // clicked "Open Analysis", so a silently blank calculator reads as
+      // data loss — say what happened and land on the clean form (NOT the
       // anon-draft restore below, which could resurrect an unrelated draft
       // under this toast). The payload was consumed at read time, so it
-      // can't re-fail on every future "/" visit.
+      // can't re-fail on every future "/" visit. Advice must not loop back
+      // to the failing step: reopening won't fix unreadable data, support
+      // recovery can.
       toast({
         title: "Couldn't open this deal",
         description:
-          "This deal couldn't be opened — it may have been saved in an older format. Open it from My Deals and re-save.",
+          "This deal's saved data is unreadable, so it can't be reopened. Email hello@usetruecap.com with the property address and we'll recover it.",
         variant: "destructive",
       });
       resetToNewAnalysis("single-family");
@@ -3469,7 +3520,15 @@ export function InvestCalcPage({
       await performSaveDeal(
         choice === "update"
           ? { existingIdOverride: duplicateCollision.existingId }
-          : { saveAsNewScenario: true }
+          : // forceInsert alongside saveAsNewScenario: "save as scenario"
+            // always means INSERT a sibling at this address. Without it, a
+            // collision reached while a saved deal is attached (the
+            // address-changed flow: deal A loaded, address retyped to deal
+            // B's) would re-target deal A's id, take the server's update
+            // path (which ignores saveAsNewScenario), and bounce back into
+            // the ADDRESS_CHANGED dialog — a chooser loop. When no deal is
+            // attached (the plain duplicate flow), forceInsert is a no-op.
+            { saveAsNewScenario: true, forceInsert: true }
       );
     } finally {
       setDuplicateChoiceBusy(null);
@@ -3724,12 +3783,16 @@ export function InvestCalcPage({
     const sessionId = params.get("pdf_purchase");
     if (!sessionId) return;
 
-    // Strip the param immediately so refresh / back-nav doesn't re-run.
-    params.delete("pdf_purchase");
-    const rest = params.toString();
-    window.history.replaceState({}, "", window.location.pathname + (rest ? `?${rest}` : ""));
+    const stripPurchaseParam = () => {
+      const current = new URLSearchParams(window.location.search);
+      current.delete("pdf_purchase");
+      const rest = current.toString();
+      window.history.replaceState({}, "", window.location.pathname + (rest ? `?${rest}` : ""));
+    };
 
     if (sessionId === "cancelled") {
+      // Nothing to verify — strip immediately so refresh / back-nav is clean.
+      stripPurchaseParam();
       toast({
         title: "Checkout cancelled",
         description: "No charge was made. Your deal is still in the form below.",
@@ -3737,17 +3800,46 @@ export function InvestCalcPage({
       return;
     }
 
-    void (async () => {
-      const verified = await verifyOneTimePdfPaymentAction({ sessionId });
+    // Verify FIRST; only a confirmed payment strips the session id from the
+    // URL. Stripping before the verify call meant a transient failure left a
+    // PAID customer with a "try again" toast and nothing to retry — the id
+    // was gone from every piece of client state, and recovery was a support
+    // email. Now a failure keeps the id (URL + this closure) so the retry
+    // action and a plain refresh both re-verify; re-verifying a paid session
+    // is explicitly harmless (see app/actions/one-time-pdf.ts).
+    const verifyAndExport = async (): Promise<void> => {
+      let verified: Awaited<ReturnType<typeof verifyOneTimePdfPaymentAction>>;
+      try {
+        verified = await verifyOneTimePdfPaymentAction({ sessionId });
+      } catch (err) {
+        // A thrown server-action fetch (network blip mid-redirect) must
+        // land in the same retryable toast, not an unhandled rejection the
+        // paid customer never sees.
+        console.warn("[one-time-pdf] verify call failed:", err);
+        verified = {
+          ok: false,
+          code: "SERVER_ERROR",
+          message: "Could not verify payment. Please try again or contact hello@usetruecap.com.",
+        };
+      }
       if (!verified.ok) {
         toast({
           title: "Payment not confirmed",
           description: verified.message,
           variant: "destructive",
+          action: (
+            <ToastAction
+              altText="Retry payment verification"
+              onClick={() => void verifyAndExport()}
+            >
+              Retry verification
+            </ToastAction>
+          ),
         });
         return;
       }
 
+      stripPurchaseParam();
       oneTimePdfUnlockedRef.current = true;
       trackEvent("one_time_pdf_purchased", {});
 
@@ -3796,7 +3888,8 @@ export function InvestCalcPage({
           void form.handleSubmit(onSubmit, onError)();
         });
       });
-    })();
+    };
+    void verifyAndExport();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

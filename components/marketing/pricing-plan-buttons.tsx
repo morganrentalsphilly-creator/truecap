@@ -29,7 +29,7 @@ import {
   resolveCheckoutResume,
   type CheckoutPlanSlug,
 } from "@/lib/pricing-checkout-resume";
-import { TRIAL_LABEL } from "@/lib/trial";
+import { TRIAL_LABEL, willCheckoutGrantTrial } from "@/lib/trial";
 
 type Slot = "free" | "pro_monthly" | "pro_annual";
 
@@ -37,10 +37,14 @@ export function PricingPlanButtons({
   slot,
   isAuthenticated,
   isPaid,
+  hadPriorSubscription,
 }: {
   slot: Slot;
   isAuthenticated: boolean;
   isPaid: boolean;
+  /** True when checkout will NOT grant the trial (prior subscription row,
+   * any status — see hasAnySubscriptionHistory). Swaps trial CTA copy. */
+  hadPriorSubscription: boolean;
 }) {
   const { toast } = useToast();
   const [, startTransition] = useTransition();
@@ -150,6 +154,9 @@ export function PricingPlanButtons({
   // Cold visitor — funnel to signup; the return path encodes the chosen
   // plan (?checkout=<slot>) so the auto-resume effect above continues the
   // purchase after auth. `slot` is a pro plan here — free returned earlier.
+  // Trial copy stays here on purpose: anonymous visitors are overwhelmingly
+  // first-time (hadPriorSubscription is always false without a session), and
+  // checkout re-runs the repeat-trial guard after signup regardless.
   if (!isAuthenticated) {
     const nextPath = buildCheckoutReturnPath(slot, couponCode);
     return (
@@ -177,7 +184,10 @@ export function PricingPlanButtons({
         </>
       ) : (
         <>
-          <Sparkles className="size-4" /> Start {TRIAL_LABEL}
+          {/* Returning ex-subscribers are excluded from the trial by the
+              repeat-trial guard in billing.ts — don't promise one. */}
+          <Sparkles className="size-4" />{" "}
+          {willCheckoutGrantTrial(hadPriorSubscription) ? `Start ${TRIAL_LABEL}` : "Get Pro"}
         </>
       )}
     </button>

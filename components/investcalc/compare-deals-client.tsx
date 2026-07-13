@@ -262,7 +262,12 @@ function AssumptionsPanel({ assumptions, purchasePrice }: { assumptions: DealAss
           <li>Management: {fmtPct(expenses.managementPct)}</li>
           <li>Maintenance: {fmtPct(expenses.maintenancePct)}</li>
           <li>CapEx: {fmtPct(expenses.capexPct)}</li>
-          <li>Property tax (annual %): {fmtPct(expenses.propertyTaxPct)}</li>
+          <li>
+            Property tax:{" "}
+            {expenses.propertyTaxInputMode === "annual" && expenses.propertyTaxAnnual != null
+              ? `${formatCurrency(expenses.propertyTaxAnnual)}/yr (annual bill)`
+              : `${fmtPct(expenses.propertyTaxPct)} annual`}
+          </li>
           <li>
             Insurance:{" "}
             {expenses.insuranceInputMode === "percent"
@@ -1463,7 +1468,7 @@ export function CompareDealsClient({
                           </button>
                         </PopoverTrigger>
                         <PopoverContent align="start" className="w-auto p-3">
-                          <ScoreBreakdown breakdown={deal.breakdown} score={deal.score} />
+                          <ScoreBreakdown breakdown={deal.breakdown} score={deal.score} propertyType={deal.propertyType} />
                         </PopoverContent>
                       </Popover>
                     ) : null}

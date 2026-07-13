@@ -19,7 +19,11 @@ import { Check, Quote, ShieldCheck, Sparkles, X } from "lucide-react";
 import { Header } from "@/components/investcalc/header";
 import { CheckoutCancelledBanner } from "@/components/marketing/checkout-cancelled-banner";
 import { PricingTogglePlans } from "@/components/marketing/pricing-toggle-plans";
-import { getEntitlementsForUser, hasPaidPlanSubscription } from "@/lib/entitlements";
+import {
+  getEntitlementsForUser,
+  hasAnySubscriptionHistory,
+  hasPaidPlanSubscription,
+} from "@/lib/entitlements";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getStripe } from "@/lib/stripe/client";
 import { getPrimaryPlanPriceId } from "@/lib/stripe/plan-prices";
@@ -97,7 +101,12 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Do I keep my saved deals if I downgrade?",
-    a: "Yes. Your saved deals and PDF exports never leave your account. You'll lose the ability to create or update them on Free, but everything is still readable.",
+    // Runtime truth (app/actions/saved-analyses.ts): Free CAN create saves up
+    // to its 5-deal cap; only UPDATING a saved deal is Pro-gated. A previous
+    // version claimed downgraded users lose both creating AND updating — the
+    // creating half was false while under the cap
+    // (pricing-copy-guards.test.ts locks this).
+    a: "Yes. Your saved deals and PDF exports never leave your account. On Free you'll lose the ability to edit them — and new saves cap at Free's 5-deal limit — but everything is still readable.",
   },
   {
     q: "How accurate is the auto-fill?",
@@ -115,10 +124,17 @@ export default async function PricingPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [monthly, annual, isPaid] = await Promise.all([
+  // hadPriorSubscription mirrors the repeat-trial guard in
+  // app/actions/billing.ts (any subscription row, any status): checkout only
+  // grants the 3-day trial to first-time subscribers, so the plan cards swap
+  // their trial-promising copy for a "Welcome back" variant when the trial
+  // won't be granted. Anonymous visitors keep the trial copy — they're
+  // overwhelmingly first-time, and checkout re-checks after signup anyway.
+  const [monthly, annual, isPaid, hadPriorSubscription] = await Promise.all([
     loadStripePrice("pro_monthly"),
     loadStripePrice("pro_annual"),
     user ? hasPaidPlanSubscription(supabase, user.id) : Promise.resolve(false),
+    user ? hasAnySubscriptionHistory(supabase, user.id) : Promise.resolve(false),
   ]);
   const entitlements = user ? await getEntitlementsForUser(supabase, user.id) : null;
   // The Monthly ↔ Annual savings math is now done inside
@@ -148,9 +164,13 @@ export default async function PricingPage() {
               Pricing that pays for itself <span className="text-primary">on the first deal.</span>
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-balance text-[15px] leading-relaxed text-muted-foreground sm:text-lg">
-              Start free. Unlimited analyses, every core metric, auto-fill from the address. Or start a
-              3-day free trial of Pro when you need projections, tax modeling, lender-ready PDFs, and a
-              buy box that pass/fails every deal against your own criteria.
+              {/* Trial-promising hero variant must mirror the checkout guard
+                  (billing.ts repeat-trial check) exactly like the plan cards
+                  below — an ex-subscriber sees "go Pro", not a trial that
+                  checkout won't grant. */}
+              {hadPriorSubscription
+                ? "Start free. Unlimited analyses, every core metric, auto-fill from the address. Or go Pro when you need projections, tax modeling, lender-ready PDFs, and a buy box that pass/fails every deal against your own criteria."
+                : "Start free. Unlimited analyses, every core metric, auto-fill from the address. Or start a 3-day free trial of Pro when you need projections, tax modeling, lender-ready PDFs, and a buy box that pass/fails every deal against your own criteria."}
             </p>
             {/* Real-data social proof — investors arriving at /pricing
                 are evaluating credibility. A live count of recent
@@ -179,6 +199,7 @@ export default async function PricingPage() {
             annual={annual}
             isAuthenticated={Boolean(user)}
             isPaid={isPaid}
+            hadPriorSubscription={hadPriorSubscription}
           />
 
           {/* One outcome quote at the money ask — the same revenue-tied proof

@@ -280,6 +280,54 @@ export const COMPONENT_MAXES = {
   totalReturn: 25,
 } as const;
 
+/** Owner-occupant (house-hack) cash-flow component max. getCashFlowScore
+ *  scores owner-occupant deals on 0/25/30 bands instead of the investor
+ *  0–22 tiers, so their breakdown can legitimately exceed
+ *  COMPONENT_MAXES.cashFlow. Exported so every "Why this score" surface
+ *  renders the property-type-correct "x / max" denominator. */
+export const OWNER_OCCUPANT_CASH_FLOW_MAX = 30;
+
+/** Display helper: the cash-flow "x / max" denominator for a property type.
+ *  Owner-occupant deals cap at OWNER_OCCUPANT_CASH_FLOW_MAX (30); everything
+ *  else uses the investor scale (COMPONENT_MAXES.cashFlow, 22). */
+export function getCashFlowComponentMax(
+  propertyType: DealScoreInput["propertyType"] | null | undefined
+): number {
+  return propertyType === "owner-occupant"
+    ? OWNER_OCCUPANT_CASH_FLOW_MAX
+    : COMPONENT_MAXES.cashFlow;
+}
+
+/** Sum of the five factor scores plus the (negative) risk penalty — the
+ *  arithmetic the "Why this score" surfaces recite. On the Balanced lens this
+ *  equals the headline score, EXCEPT when the appreciation-play floor engaged
+ *  (see isAppreciationFloorApplied). */
+export function getScoreBreakdownSum(breakdown: DealScoreBreakdown): number {
+  return (
+    breakdown.cashFlowScore +
+    breakdown.cocScore +
+    breakdown.capRateScore +
+    breakdown.dscrScore +
+    breakdown.totalReturnScore +
+    breakdown.riskPenalty
+  );
+}
+
+/** Display helper: true when the headline score was held ABOVE what the
+ *  breakdown factors sum to — i.e. the appreciation-play floor
+ *  (APPRECIATION_FLOOR_SCORE) engaged. The floor is the only engine path that
+ *  raises the score above the component arithmetic (the 0/100 clamps only
+ *  match or lower it), so any positive excess means the floor. Breakdown
+ *  surfaces use this to render an explicit "score held at N" line instead of
+ *  reciting an equation that doesn't add up. */
+export function isAppreciationFloorApplied(
+  breakdown: DealScoreBreakdown,
+  score: number
+): boolean {
+  const summed = Math.max(0, Math.min(100, Math.round(getScoreBreakdownSum(breakdown))));
+  return score > summed;
+}
+
 interface StrategyWeights {
   cashFlow: number;
   coc: number;
@@ -368,7 +416,7 @@ function getCashFlowScore(input: DealScoreInput): number {
     return 0;
   }
 
-  if (input.monthlyCashFlow > OWNER_OCCUPANT_NEAR_ZERO_THRESHOLD) return 30;
+  if (input.monthlyCashFlow > OWNER_OCCUPANT_NEAR_ZERO_THRESHOLD) return OWNER_OCCUPANT_CASH_FLOW_MAX;
   if (input.monthlyCashFlow >= -OWNER_OCCUPANT_NEAR_ZERO_THRESHOLD) return 25;
   return 0;
 }

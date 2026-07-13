@@ -18,7 +18,7 @@ import { useEffect, useRef, useState } from "react";
 import { Check, Sparkles, X } from "lucide-react";
 import { PricingPlanButtons } from "@/components/marketing/pricing-plan-buttons";
 import { trackEvent } from "@/lib/analytics";
-import { TRIAL_LABEL } from "@/lib/trial";
+import { TRIAL_LABEL, willCheckoutGrantTrial } from "@/lib/trial";
 
 type ResolvedPrice = { amountLabel: string; period: string } | null;
 
@@ -27,6 +27,14 @@ interface PricingTogglePlansProps {
   annual: ResolvedPrice;
   isAuthenticated: boolean;
   isPaid: boolean;
+  /**
+   * Server-computed mirror of the checkout repeat-trial guard (see
+   * hasAnySubscriptionHistory in lib/entitlements.ts): true when the user has
+   * ANY prior subscription row, so checkout will NOT grant the trial. Swaps
+   * the trial-promising copy for a truthful "Welcome back" variant. Always
+   * false for anonymous visitors.
+   */
+  hadPriorSubscription: boolean;
 }
 
 const FREE_FEATURES: { label: string; included: boolean }[] = [
@@ -42,7 +50,11 @@ const FREE_FEATURES: { label: string; included: boolean }[] = [
   { label: "Your saved defaults on every new deal", included: true },
   { label: "Deal Score (0-100) with breakdown", included: true },
   { label: "1 free sale + rent comps lookup", included: true },
-  { label: "Save up to 5 deals", included: true },
+  // Honest caveat: the runtime lets Free CREATE up to 5 deals but Pro-gates
+  // UPDATING a saved deal (app/actions/saved-analyses.ts update path). Don't
+  // drop the parenthetical without changing that gate — the bare bullet
+  // promised editing the product doesn't deliver.
+  { label: "Save up to 5 deals (editing saved deals is Pro)", included: true },
   { label: "Lender-ready PDF export — $5 one-time per deal", included: true },
   { label: "MAO solver", included: false },
   { label: "Sensitivity grid", included: false },
@@ -88,7 +100,12 @@ export function PricingTogglePlans({
   annual,
   isAuthenticated,
   isPaid,
+  hadPriorSubscription,
 }: PricingTogglePlansProps) {
+  // One decision for every trial mention on this card — must match what
+  // checkout actually grants (billing.ts denies the trial to anyone with
+  // prior subscription history, any status).
+  const offersTrial = willCheckoutGrantTrial(hadPriorSubscription);
   // Monthly-first: visitors arrive primed on the advertised monthly price
   // ($29.99) from ads/FAQ/marketing copy — the annual-first default led with
   // "$25/mo billed annually", a different number they had to reconcile
@@ -177,7 +194,12 @@ export function PricingTogglePlans({
             <span className="text-sm text-muted-foreground">forever</span>
           </div>
           <div className="mt-5">
-            <PricingPlanButtons slot="free" isAuthenticated={isAuthenticated} isPaid={isPaid} />
+            <PricingPlanButtons
+              slot="free"
+              isAuthenticated={isAuthenticated}
+              isPaid={isPaid}
+              hadPriorSubscription={hadPriorSubscription}
+            />
           </div>
           <ul className="mt-6 space-y-2.5">
             {FREE_FEATURES.map((f) => (
@@ -298,7 +320,7 @@ export function PricingTogglePlans({
           <div className="mt-1 text-xs text-muted-foreground">{proCard.subline}</div>
           <div className="mt-3 flex justify-center">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--metric-positive)]/12 px-3 py-1 text-xs font-extrabold uppercase tracking-wide text-[var(--metric-positive)]">
-              <Sparkles className="size-3" /> {TRIAL_LABEL}
+              <Sparkles className="size-3" /> {offersTrial ? TRIAL_LABEL : "Welcome back"}
             </span>
           </div>
           <div className="mt-5">
@@ -306,12 +328,21 @@ export function PricingTogglePlans({
               slot={proCard.slot}
               isAuthenticated={isAuthenticated}
               isPaid={isPaid}
+              hadPriorSubscription={hadPriorSubscription}
             />
           </div>
-          <p className="mt-2.5 text-center text-xs text-muted-foreground">
-            Start with a <strong className="text-foreground">{TRIAL_LABEL}</strong> — cancel anytime, no
-            contract. Downgrade and your saved deals + reports stay in your account.
-          </p>
+          {offersTrial ? (
+            <p className="mt-2.5 text-center text-xs text-muted-foreground">
+              Start with a <strong className="text-foreground">{TRIAL_LABEL}</strong> — cancel anytime, no
+              contract. Downgrade and your saved deals + reports stay in your account.
+            </p>
+          ) : (
+            <p className="mt-2.5 text-center text-xs text-muted-foreground">
+              <strong className="text-foreground">Welcome back</strong> — Pro starts as soon as you check
+              out (the free trial is a first-time offer). Cancel anytime, no contract. Downgrade and your
+              saved deals + reports stay in your account.
+            </p>
+          )}
           <ul className="mt-6 space-y-2.5">
             {PRO_FEATURES.map((f) => (
               <li key={f} className="flex items-start gap-2 text-sm">

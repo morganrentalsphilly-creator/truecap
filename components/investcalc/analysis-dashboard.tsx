@@ -121,6 +121,7 @@ import {
   getSecondaryMetricKeys,
 } from "@/components/investcalc/metrics-band";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
+import { buildProPreviewValues, type ProPreviewKind } from "@/lib/pro-preview-values";
 
 import type { ProjectionYear, TenYearProjectionInput } from "@/lib/ten-year-projections";
 import type { TaxStrategyInput, TaxStrategyYear } from "@/lib/tax-strategy";
@@ -1474,7 +1475,7 @@ export function AnalysisDashboard({
                 />
               )}
               {tab.id === "projections" && !canUseProjections && (
-                <ProFeaturePreview kind="projections" onUpgrade={goToBilling} result={result} />
+                <ProFeaturePreview kind="projections" onUpgrade={goToBilling} result={result} values={values} />
               )}
               {tab.id === "projections" && canUseProjections && projectionSource && (
                 <TenYearProjectionsPanel source={projectionSource} />
@@ -1485,7 +1486,7 @@ export function AnalysisDashboard({
                 </div>
               )}
               {tab.id === "tax-strategy" && !canUseTaxStrategy && (
-                <ProFeaturePreview kind="tax-strategy" onUpgrade={goToBilling} result={result} />
+                <ProFeaturePreview kind="tax-strategy" onUpgrade={goToBilling} result={result} values={values} />
               )}
               {tab.id === "tax-strategy" && canUseTaxStrategy && taxStrategySource && (
                 <TaxStrategyPanel source={taxStrategySource} />
@@ -1496,7 +1497,7 @@ export function AnalysisDashboard({
                 </div>
               )}
               {tab.id === "exit-scenarios" && !canUseExitScenarios && (
-                <ProFeaturePreview kind="exit-scenarios" onUpgrade={goToBilling} result={result} />
+                <ProFeaturePreview kind="exit-scenarios" onUpgrade={goToBilling} result={result} values={values} />
               )}
               {tab.id === "exit-scenarios" && canUseExitScenarios && exitScenarioSource && (
                 <ExitScenariosPanel source={exitScenarioSource} />
@@ -1507,7 +1508,7 @@ export function AnalysisDashboard({
                 </div>
               )}
               {tab.id === "strategies" && !canUseStrategies && (
-                <ProFeaturePreview kind="strategies" onUpgrade={goToBilling} result={result} />
+                <ProFeaturePreview kind="strategies" onUpgrade={goToBilling} result={result} values={values} />
               )}
               {tab.id === "strategies" && canUseStrategies && (
                 <StrategiesPanel values={values} result={result} onApplyRehab={onApplyRehab} currentRehabBudget={currentRehabBudget} />
@@ -1671,8 +1672,6 @@ export function AnalysisDashboard({
   );
 }
 
-type ProPreviewKind = "projections" | "tax-strategy" | "exit-scenarios" | "strategies";
-
 const proPreviewCopy: Record<ProPreviewKind, { title: string; description: string; metrics: string[] }> = {
   projections: {
     title: "10-Year Projections",
@@ -1700,6 +1699,7 @@ function ProFeaturePreview({
   kind,
   onUpgrade,
   result,
+  values,
 }: {
   kind: ProPreviewKind;
   onUpgrade: () => void;
@@ -1718,68 +1718,49 @@ function ProFeaturePreview({
    * the first Calculate click.
    */
   result?: AnalysisResult | null;
+  /** Form values — needed to recompute exit scenarios with the same inputs
+   *  the Pro panel uses. Optional/null-safe like `result`. */
+  values?: InvestmentFormValues | null;
 }) {
   const copy = proPreviewCopy[kind];
   const bars = [18, 28, 42, 55, 70, 88, 104, 122, 142, 164];
 
-  /**
-   * Per-kind derivation of the 3 metric tile values from the user's
-   * actual analysis. Conservative back-of-envelope numbers - meant to
-   * give a credible peek at "this is the rough magnitude you'd see in
-   * the Pro panel," not a precise forecast. Cash-purchase + edge
-   * cases fall through to the generic placeholder so we never show
-   * misleading numbers (e.g. negative cash flow rendered as a
-   * "positive metric").
-   */
-  const fmtMoney = (n: number) => {
-    const sign = n < 0 ? "-" : "";
-    return `${sign}$${Math.abs(Math.round(n)).toLocaleString("en-US")}`;
-  };
-  const previewValues = (() => {
-    if (!result) return null;
-    const annualCashFlow = result.netCashFlow * 12;
-    const annualDeprecSavings = result.annualDepreciation * result.effectiveTaxRate;
-    if (kind === "projections") {
-      // 10yr cumulative cash flow (rough - ignores rent growth, OK for preview),
-      // year-10 equity bump from amort/appreciation (rough 30% blend),
-      // total ROI estimate.
-      const tenYrCashFlow = annualCashFlow * 10;
-      const tenYrEquity = result.monthlyRentalIncome * 12 * 3; // crude proxy
-      return [fmtMoney(tenYrCashFlow), fmtMoney(tenYrEquity), `${Math.max(0, Math.round((tenYrCashFlow / Math.max(1, result.monthlyRentalIncome * 12)) * 10))}%`];
-    }
-    if (kind === "tax-strategy") {
-      const tenYrSavings = annualDeprecSavings * 10;
-      return [fmtMoney(annualDeprecSavings), fmtMoney(tenYrSavings), `${Math.round(result.effectiveTaxRate * 100)}%`];
-    }
-    if (kind === "exit-scenarios") {
-      const year10Equity = result.monthlyRentalIncome * 12 * 4; // proxy
-      const proceeds = year10Equity * 0.94; // crude after-cost
-      return ["Year 10", fmtMoney(year10Equity), fmtMoney(proceeds)];
-    }
-    // strategies (BRRRR / flip): cash left in deal proxy, post-refi cash flow, ROI proxy
-    const cashLeft = Math.max(0, result.monthlyRentalIncome * 6);
-    const postRefi = result.netCashFlow * 1.2;
-    return [fmtMoney(cashLeft), fmtMoney(postRefi), `${Math.max(8, Math.round(Math.abs(result.cocReturn) + 2))}%`];
-  })();
+  // The tiles promise "what YOUR deal would show" — so they come from the
+  // SAME engines the paid panels render (embedded tenYearProjection /
+  // taxStrategyYears + the exit-scenario builder), never proxy arithmetic.
+  // Null (no result, or a kind like strategies whose outputs need inputs
+  // the user hasn't given yet) falls through to the generic placeholder.
+  const previewValues = buildProPreviewValues(kind, result, values);
 
   return (
     <div className="relative overflow-hidden rounded-2xl">
       <div className="pointer-events-none select-none space-y-5 blur-[3px] opacity-70">
         <div className="grid gap-3 md:grid-cols-3">
-          {copy.metrics.map((metric, index) => (
-            <div key={metric} className="rounded-2xl border border-border bg-card p-4">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                {metric}
-              </p>
-              <p className="mt-2 text-2xl font-extrabold text-[var(--metric-positive)]">
-                {previewValues
-                  ? previewValues[index]
-                  : index === 0 && kind === "exit-scenarios"
-                    ? "Year 10"
-                    : "$48,260"}
-              </p>
-            </div>
-          ))}
+          {copy.metrics.map((metric, index) => {
+            const tileValue = previewValues
+              ? previewValues[index]!
+              : index === 0 && kind === "exit-scenarios"
+                ? "Year 10"
+                : "$48,260";
+            return (
+              <div key={metric} className="rounded-2xl border border-border bg-card p-4">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                  {metric}
+                </p>
+                {/* Real numbers can be negative — don't tint a loss green. */}
+                <p
+                  className={cn(
+                    "mt-2 text-2xl font-extrabold",
+                    tileValue.startsWith("-")
+                      ? "text-[var(--metric-negative)]"
+                      : "text-[var(--metric-positive)]"
+                  )}
+                >
+                  {tileValue}
+                </p>
+              </div>
+            );
+          })}
         </div>
 
         <div className="rounded-2xl border border-border bg-card p-4">

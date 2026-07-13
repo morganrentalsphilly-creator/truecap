@@ -178,6 +178,10 @@ export function buildTaxStrategyInputHash(input: TaxStrategyInput): string {
   const normalizedPayload = {
     monthlyRentalIncome: input.monthlyRentalIncome,
     totalOperatingExpenses: input.totalOperatingExpenses,
+    // v4 subtracts the CapEx reserve from the taxable-income line, so an
+    // offsetting maintenance/CapEx edit (total opex unchanged) must still
+    // produce a new hash — omitting it served stale cached tax lines.
+    capexReserveMonthly: input.capexReserveMonthly,
     annualDepreciation: input.annualDepreciation,
     yearlyInterestSchedule: input.yearlyInterestSchedule ?? [],
     rentGrowthPct: input.rentGrowthPct,

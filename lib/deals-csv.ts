@@ -36,7 +36,8 @@ export type DealsCsvItem = {
   netCashFlowMonthly: number | null;
   cocReturnPct: number | null;
   capRatePct: number | null;
-  /** null = unknown; <= 0 with isCashPurchase = cash deal (DSCR N/A). */
+  /** null = unknown. A financed deal with negative NOI legitimately has
+   *  DSCR ≤ 0 — only isCashPurchase marks DSCR as N/A ("Cash"). */
   dscr?: number | null;
   isCashPurchase?: boolean;
   cashToClose?: number | null;
@@ -86,11 +87,13 @@ function numCell(value: number | null | undefined): string {
   return String(Math.round(value * 100) / 100);
 }
 
-/** Mirrors the list UI's DSCR cell: unknown → empty, cash purchase (stored
- *  as dscr <= 0) → "Cash", else 2 decimals. */
+/** Mirrors the list UI's DSCR cell: cash purchase → "Cash", unknown → empty,
+ *  else 2 decimals. Keyed off the explicit isCashPurchase flag — a financed
+ *  deal whose NOI goes negative has a real DSCR ≤ 0 and must export the
+ *  number, not "Cash". */
 function dscrCell(dscr: number | null | undefined, isCashPurchase: boolean | undefined): string {
+  if (isCashPurchase) return "Cash";
   if (dscr == null) return "";
-  if (isCashPurchase || dscr <= 0) return "Cash";
   return dscr.toFixed(2);
 }
 

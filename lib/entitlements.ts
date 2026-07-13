@@ -136,3 +136,34 @@ export async function hasPaidPlanSubscription(
   return Boolean(slug && slug !== "free");
 }
 
+/**
+ * Has this user EVER had a subscription row — any status, including
+ * canceled/incomplete? Mirrors the repeat-trial guard in
+ * app/actions/billing.ts (`grantTrial = !priorSubscription`, deliberately
+ * status-unfiltered), which denies the free trial to anyone with prior
+ * subscription history. Marketing surfaces pair this with
+ * willCheckoutGrantTrial() from lib/trial.ts so trial-promising copy never
+ * shows to a returning ex-subscriber whose checkout would charge
+ * immediately. Head query — existence only, no row payload.
+ */
+export async function hasAnySubscriptionHistory(
+  supabase: SupabaseClient,
+  userId: string
+): Promise<boolean> {
+  const { count, error } = await supabase
+    .from("subscriptions")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", userId);
+  // Fail open to "no history": worst case the trial copy shows and the
+  // checkout guard in billing.ts (the authority) still withholds the trial —
+  // the status-quo behavior. Failing closed would hide a real first-time
+  // offer from a new subscriber. Surface the query failure either way.
+  if (error) {
+    Sentry.captureException(error, {
+      tags: { feature: "entitlements" },
+      extra: { userId, query: "has_any_subscription_history" },
+    });
+  }
+  return (count ?? 0) > 0;
+}
+

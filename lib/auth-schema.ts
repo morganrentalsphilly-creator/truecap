@@ -36,6 +36,16 @@ export const updatePasswordSchema = z
     path: ["confirmPassword"],
   });
 
+/**
+ * Same-origin allowlist for a post-auth return path (?next): internal
+ * paths only, no protocol-relative "//host" open redirects. The single
+ * source for the validation the auth forms, google-auth-button, and the
+ * auth server actions all apply; anything invalid falls back to "/".
+ */
+export function safeInternalNextPath(raw: unknown): string {
+  return typeof raw === "string" && raw.startsWith("/") && !raw.startsWith("//") ? raw : "/";
+}
+
 export type LoginInput = z.infer<typeof loginSchema>;
 export type SignUpInput = z.infer<typeof signUpSchema>;
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;

@@ -351,9 +351,11 @@ export default async function DealWorkspacePage({
         (RECOMMENDATION_TIERS as readonly string[]).includes(snap["recommendation"])
       ? (snap["recommendation"] as DealRecommendation)
       : null;
-  // Mirrors the My Deals DSCR column: <= 0 means a cash purchase (N/A, shown
-  // as "Cash"); null (legacy snapshot without dscr) omits the tile.
-  const dscrDisplay = dscr == null ? null : dscr <= 0 ? "Cash" : dscr.toFixed(2);
+  // Mirrors the My Deals DSCR column: "Cash" keys off the explicit cash flag
+  // (a financed deal with negative NOI has a real DSCR ≤ 0 to show); null
+  // (legacy snapshot without dscr) still omits the tile rather than trusting
+  // a derived cash flag from an incomplete snapshot.
+  const dscrDisplay = dscr == null ? null : isCashPurchase ? "Cash" : dscr.toFixed(2);
 
   // Owned equity (M3-2/WOW-4) — closed/completed deals only. ONE definition of
   // owned equity everywhere: the shared computeRowEquity (lib/owned-equity-

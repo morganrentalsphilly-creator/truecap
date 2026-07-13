@@ -5,6 +5,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import {
   forgotPasswordSchema,
   loginSchema,
+  safeInternalNextPath,
   signUpSchema,
   updatePasswordSchema,
 } from "@/lib/auth-schema";
@@ -48,7 +49,16 @@ export async function signInAction(input: unknown): Promise<AuthActionResult> {
   return { ok: true };
 }
 
-export async function signUpAction(input: unknown): Promise<AuthActionResult> {
+export async function signUpAction(
+  input: unknown,
+  // The caller's validated ?next return path. Threaded into the
+  // confirmation email's redirect so a user who signed up mid-flow (a
+  // started Pro checkout, a pending calculator save) lands back where
+  // they started after confirming — not on the homepage with the intent
+  // dropped. Re-validated server-side (internal paths only); omitted or
+  // invalid falls back to "/", the pre-existing behavior.
+  nextPath?: unknown
+): Promise<AuthActionResult> {
   const parsed = signUpSchema.safeParse(input);
   if (!parsed.success) {
     const first = parsed.error.flatten().fieldErrors;
@@ -61,12 +71,13 @@ export async function signUpAction(input: unknown): Promise<AuthActionResult> {
   }
 
   const siteUrl = getSiteUrl();
+  const next = safeInternalNextPath(nextPath);
   const supabase = await createServerSupabaseClient();
   const { data, error } = await supabase.auth.signUp({
     email: parsed.data.email.trim(),
     password: parsed.data.password,
     options: {
-      emailRedirectTo: `${siteUrl}/auth/callback?next=/`,
+      emailRedirectTo: `${siteUrl}/auth/callback?next=${encodeURIComponent(next)}`,
     },
   });
 
@@ -154,7 +165,12 @@ export async function signOutAction(): Promise<void> {
  * Always returns ok=true to avoid leaking which emails are registered —
  * Supabase no-ops silently on unknown / already-confirmed addresses.
  */
-export async function resendConfirmationAction(input: unknown): Promise<AuthActionResult> {
+export async function resendConfirmationAction(
+  input: unknown,
+  // Same contract as signUpAction's nextPath: the resent confirmation
+  // link keeps the caller's return address instead of hardcoding "/".
+  nextPath?: unknown
+): Promise<AuthActionResult> {
   const parsed = forgotPasswordSchema.safeParse(input);
   if (!parsed.success) {
     const msg = parsed.error.flatten().fieldErrors.email?.[0] ?? "Enter a valid email.";
@@ -162,12 +178,13 @@ export async function resendConfirmationAction(input: unknown): Promise<AuthActi
   }
 
   const siteUrl = getSiteUrl();
+  const next = safeInternalNextPath(nextPath);
   const supabase = await createServerSupabaseClient();
   const { error } = await supabase.auth.resend({
     type: "signup",
     email: parsed.data.email.trim(),
     options: {
-      emailRedirectTo: `${siteUrl}/auth/callback?next=/`,
+      emailRedirectTo: `${siteUrl}/auth/callback?next=${encodeURIComponent(next)}`,
     },
   });
 

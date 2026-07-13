@@ -7,7 +7,10 @@
  * inputs (rehab budget, ARV, refi terms).
  *
  * Outputs the cash trapped in the deal after the refi, the new monthly
- * cash flow, and the infinite-return scenario (cash left ≤ 0).
+ * cash flow, and the infinite-return scenario (cash left ≤ 0). When the
+ * new loan can't cover the original payoff + refi costs (low appraisal),
+ * the shortfall surfaces as cashNeededAtRefi and INCREASES cashLeftInDeal
+ * — it never silently disappears.
  */
 
 export type BrrrrInputs = {
@@ -40,7 +43,12 @@ export type BrrrrResult = {
   // Refi
   newLoanAmount: number;
   refiClosingCosts: number;
+  /** Cash OUT to the investor at the refi table (floored at 0 for display). */
   cashReturnedAtRefi: number;
+  /** Cash the investor must BRING to the refi table when the new loan can't
+   *  cover the original payoff + refi closing costs (low appraisal). 0 on a
+   *  normal cash-out. Already included in cashLeftInDeal. */
+  cashNeededAtRefi: number;
   cashLeftInDeal: number;
 
   // Post-refi cash flow
@@ -92,8 +100,15 @@ export function analyzeBrrrr(inputs: BrrrrInputs): BrrrrResult {
   const refiClosingCosts = (newLoanAmount * closingCostsRefiPct) / 100;
   // Pay off the original loan (purchase price - original down payment).
   const originalLoanRemaining = purchasePrice - originalDownPayment;
-  const cashReturnedAtRefi = Math.max(0, newLoanAmount - originalLoanRemaining - refiClosingCosts);
-  const cashLeftInDeal = Math.max(0, totalCashInvested - cashReturnedAtRefi);
+  // Net cash at the refi table: positive = cash out to the investor,
+  // negative = a shortfall the investor must bring when the new loan can't
+  // cover the payoff + refi costs (low appraisal). The displayed
+  // "cash returned" stays floored at 0, but the shortfall must NOT vanish —
+  // it's more cash in the deal, so it flows through to cashLeftInDeal.
+  const netCashAtRefi = newLoanAmount - originalLoanRemaining - refiClosingCosts;
+  const cashReturnedAtRefi = Math.max(0, netCashAtRefi);
+  const cashNeededAtRefi = Math.max(0, -netCashAtRefi);
+  const cashLeftInDeal = Math.max(0, totalCashInvested - netCashAtRefi);
 
   // Post-refi monthly economics
   const newMonthlyPayment = monthlyPayment(newLoanAmount, refiRatePct, refiTermYears);
@@ -121,6 +136,7 @@ export function analyzeBrrrr(inputs: BrrrrInputs): BrrrrResult {
     newLoanAmount: Math.round(newLoanAmount),
     refiClosingCosts: Math.round(refiClosingCosts),
     cashReturnedAtRefi: Math.round(cashReturnedAtRefi),
+    cashNeededAtRefi: Math.round(cashNeededAtRefi),
     cashLeftInDeal: Math.round(cashLeftInDeal),
 
     newMonthlyPayment: Math.round(newMonthlyPayment),

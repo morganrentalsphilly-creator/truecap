@@ -45,7 +45,12 @@ export interface ReportData {
     closingCosts: number;
   };
   expenses: {
+    /** Effective annual % of price (derived from the bill in annual-$ mode). */
     propertyTaxPct: number;
+    /** Annual-$ property-tax mode: the typed yearly bill. When set, the
+     *  assumptions block prints the bill instead of a percent — the percent
+     *  was never the customer's input. Null in percent mode. */
+    propertyTaxAnnualBill?: number | null;
     insurancePct: number;
     maintenancePct: number;
     vacancyPct: number;
@@ -1356,7 +1361,16 @@ function pageInputs(
   ], themeColor);
   y += rowH + 10;
   drawInputBlock(doc, M.left, y, colW, rowH, "Operating Expenses", [
-    ["Property tax / Insurance", `${d.expenses.propertyTaxPct}% / ${d.expenses.insurancePct}%`],
+    // Annual-$ tax mode prints the customer's actual bill — printing the
+    // unused percent field here used to render "0%" on a paid PDF.
+    [
+      "Property tax / Insurance",
+      `${
+        d.expenses.propertyTaxAnnualBill != null
+          ? `${fmtCurrency(d.expenses.propertyTaxAnnualBill)}/yr (annual bill)`
+          : `${d.expenses.propertyTaxPct}%`
+      } / ${d.expenses.insurancePct}%`,
+    ],
     ["Maintenance / Vacancy", `${d.expenses.maintenancePct}% / ${d.expenses.vacancyPct}%`],
     ["Management / CapEx", `${d.expenses.managementPct}% / ${d.expenses.capexPct}%`],
     ["HOA / Utilities", `${fmtCurrency(d.expenses.hoaMonthly)}/mo  ·  ${fmtCurrency(d.expenses.utilitiesMonthly)}/mo`],

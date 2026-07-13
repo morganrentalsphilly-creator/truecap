@@ -44,7 +44,13 @@ import { cn } from "@/lib/utils";
 import type { AnalysisResult } from "@/lib/calc-analysis";
 import type { NextAction } from "@/lib/next-action";
 import type { DealScoreActionResult } from "@/app/actions/deal-score";
-import { recommendationLabel } from "@/lib/deal-score";
+import {
+  COMPONENT_MAXES,
+  getCashFlowComponentMax,
+  getScoreBreakdownSum,
+  isAppreciationFloorApplied,
+  recommendationLabel,
+} from "@/lib/deal-score";
 import { buildDealTips } from "@/lib/deal-tips";
 import { NextActionBanner } from "@/components/investcalc/next-action-banner";
 import { cashFlowSubLabel } from "./metrics-band";
@@ -350,6 +356,11 @@ function ScoreBreakdownReceipts({
   // max (vs investor 25). Branch the explanation labels accordingly so
   // the breakdown matches the engine's actual scoring tiers.
   const isOwnerOccupant = propertyType === "owner-occupant";
+  // Appreciation-play floor: when the engine held the score up, the factor
+  // arithmetic below does NOT sum to the headline — detect it so the
+  // receipts paragraph can reconcile explicitly.
+  const floorApplied = isAppreciationFloorApplied(breakdown, score);
+  const componentSum = getScoreBreakdownSum(breakdown);
   // Plain-English subline for each subscore - turns "Cash Flow Score: 25"
   // into "Cash Flow: 25/25 - Above $1,000/mo target". Computed from the
   // subscore value + property context alone (the engine's thresholds
@@ -415,35 +426,35 @@ function ScoreBreakdownReceipts({
         <ScoreBreakdownTile
           label="Cash flow"
           value={breakdown.cashFlowScore}
-          max={isOwnerOccupant ? 30 : 22}
+          max={getCashFlowComponentMax(propertyType)}
           explanation={breakdownExplanations.cashFlow}
           cellClass={metricCell}
         />
         <ScoreBreakdownTile
           label="Cash-on-cash"
           value={breakdown.cocScore}
-          max={20}
+          max={COMPONENT_MAXES.coc}
           explanation={breakdownExplanations.coc}
           cellClass={metricCell}
         />
         <ScoreBreakdownTile
           label="Cap rate"
           value={breakdown.capRateScore}
-          max={16}
+          max={COMPONENT_MAXES.capRate}
           explanation={breakdownExplanations.capRate}
           cellClass={metricCell}
         />
         <ScoreBreakdownTile
           label="DSCR"
           value={breakdown.dscrScore}
-          max={17}
+          max={COMPONENT_MAXES.dscr}
           explanation={breakdownExplanations.dscr}
           cellClass={metricCell}
         />
         <ScoreBreakdownTile
           label="Total return (10-yr)"
           value={breakdown.totalReturnScore}
-          max={25}
+          max={COMPONENT_MAXES.totalReturn}
           explanation={breakdownExplanations.totalReturn}
           cellClass={metricCell}
           spanFull
@@ -459,12 +470,30 @@ function ScoreBreakdownReceipts({
       </div>
       <div className="rounded-xl border border-border bg-muted/30 p-3 text-xs leading-relaxed text-foreground/80">
         <p>
-          Score is the sum of cash flow ({breakdown.cashFlowScore}), CoC ({breakdown.cocScore}),
-          cap rate ({breakdown.capRateScore}), DSCR ({breakdown.dscrScore}), and 10-year total
-          return ({breakdown.totalReturnScore}),
-          {breakdown.riskPenalty < 0 ? <> minus a risk penalty of {Math.abs(breakdown.riskPenalty)}</> : null}
-          {" "}={" "}
-          <span className="font-bold text-foreground">{score} / 100</span>.
+          {floorApplied ? (
+            // Appreciation-play floor engaged: the factors do NOT sum to the
+            // headline, so reconcile explicitly instead of reciting an
+            // equation that doesn't add up.
+            <>
+              Cash flow ({breakdown.cashFlowScore}), CoC ({breakdown.cocScore}),
+              cap rate ({breakdown.capRateScore}), DSCR ({breakdown.dscrScore}), and 10-year total
+              return ({breakdown.totalReturnScore})
+              {breakdown.riskPenalty < 0 ? <>, minus a risk penalty of {Math.abs(breakdown.riskPenalty)},</> : null}
+              {" "}sum to {componentSum} — but this deal is an appreciation play (strong projected
+              10-year total return with non-negative after-tax cash flow), so the score is held at{" "}
+              <span className="font-bold text-foreground">{score} / 100</span> instead of reading
+              as weak fundamentals.
+            </>
+          ) : (
+            <>
+              Score is the sum of cash flow ({breakdown.cashFlowScore}), CoC ({breakdown.cocScore}),
+              cap rate ({breakdown.capRateScore}), DSCR ({breakdown.dscrScore}), and 10-year total
+              return ({breakdown.totalReturnScore}),
+              {breakdown.riskPenalty < 0 ? <> minus a risk penalty of {Math.abs(breakdown.riskPenalty)}</> : null}
+              {" "}={" "}
+              <span className="font-bold text-foreground">{score} / 100</span>.
+            </>
+          )}
           {" "}Bands: <strong>75+</strong> Strong Buy, <strong>55–74</strong> Buy,
           {" "}<strong>35–54</strong> Neutral, <strong>18–34</strong> Risky,
           {" "}<strong>&lt;18</strong> Avoid.

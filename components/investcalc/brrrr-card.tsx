@@ -273,6 +273,17 @@ export function BrrrrCard({ values, result, defaultRehab }: BrrrrCardProps) {
             />
           </div>
 
+          {/* Refi shortfall: the new loan doesn't cover the original payoff
+              + refi costs, so the investor brings cash TO the refi table.
+              Already counted in "Cash left in deal" — this names it. */}
+          {analysis.cashNeededAtRefi > 0 && (
+            <p className="text-xs font-semibold text-[var(--metric-negative)]">
+              Refi shortfall: the new loan doesn&apos;t cover the original loan payoff
+              plus refi closing costs — you&apos;d bring {fmt(analysis.cashNeededAtRefi)} to
+              the refi table (included in cash left in deal).
+            </p>
+          )}
+
           {/* Breakdown */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
             <div>
@@ -291,7 +302,11 @@ export function BrrrrCard({ values, result, defaultRehab }: BrrrrCardProps) {
               </div>
               <Row label="New loan amount" value={fmt(analysis.newLoanAmount)} />
               <Row label="Refi closing costs" value={fmt(analysis.refiClosingCosts)} />
-              <Row label="Cash returned" value={fmt(analysis.cashReturnedAtRefi)} bold />
+              {analysis.cashNeededAtRefi > 0 ? (
+                <Row label="Cash needed at refi" value={fmt(analysis.cashNeededAtRefi)} bold />
+              ) : (
+                <Row label="Cash returned" value={fmt(analysis.cashReturnedAtRefi)} bold />
+              )}
               <Row label="New monthly payment" value={fmt(analysis.newMonthlyPayment)} />
               <Row
                 label="Equity created"

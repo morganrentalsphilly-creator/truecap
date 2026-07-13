@@ -366,7 +366,12 @@ export async function saveDealAction(
     monthly_rent: sanitizedValues.monthlyRent ?? null,
     net_cash_flow_monthly: result.netCashFlow,
     coc_return_pct: result.cocReturn,
-    property_tax_pct: sanitizedValues.propertyTaxPct ?? 1.1,
+    // Effective % from the calc — in annual-$ tax mode propertyTaxPct is
+    // undefined and this column used to persist a fabricated 1.1 that the
+    // Compare assumptions then displayed. calc-analysis derives the true
+    // effective % (bill / price) in that mode; percent mode is unchanged
+    // (input, or the same 1.1 default the math used).
+    property_tax_pct: Math.round(result.propertyTaxPctEffective * 100) / 100,
     insurance_input_mode: sanitizedValues.insuranceInputMode,
     insurance_pct: sanitizedValues.insurancePct ?? null,
     insurance_mo: result.insurance,
@@ -443,6 +448,40 @@ export async function saveDealAction(
         existingId: existing.id,
         existingTitle: dbString(existing.title) ?? undefined,
       };
+    }
+
+    if (addressChanged && options?.allowAddressChange === true) {
+      // Moving this deal to the new address must clear the same duplicate
+      // guard the insert path enforces — without it, "update the saved
+      // deal's address" silently created a same-address twin with no
+      // Scenario suffix (two identical-looking My Deals rows whose numbers
+      // differ, and the duplicate chooser only ever surfaces the older
+      // one). The row being moved can't self-match: its stored address is
+      // the OLD one, and scenario siblings share that old address, not the
+      // destination. On collision, return DUPLICATE_ADDRESS with the
+      // colliding row so the existing chooser (update it / save as
+      // scenario) takes over instead of dead-ending.
+      const { data: addressTaken, error: dupErr } = await supabase.rpc(
+        "saved_analyses_address_taken",
+        {
+          p_user_id: user.id,
+          p_address: addressTrimmed,
+        }
+      );
+      if (dupErr) {
+        return { ok: false, code: "SERVER_ERROR", message: dupErr.message };
+      }
+      if (addressTaken === true) {
+        const collision = (await findSavedAnalysesByAddress(supabase, user.id, addressTrimmed))[0];
+        return {
+          ok: false,
+          code: "DUPLICATE_ADDRESS",
+          message: "You already saved an analysis for this property address.",
+          ...(collision
+            ? { existingId: collision.id, existingTitle: collision.title ?? undefined }
+            : {}),
+        };
+      }
     }
 
     // Keep the stored title on update - scenario rows carry a

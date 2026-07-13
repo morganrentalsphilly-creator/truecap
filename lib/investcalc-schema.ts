@@ -500,6 +500,23 @@ function sanitizeSnapshotFields(
   propertyType: InvestmentFormValues["propertyType"],
   units: UnitValues[]
 ) {
+  // Legacy (pre-2026-04-28, schema v7/v8) snapshots predate
+  // insuranceInputMode — back then a stored insuranceMonthly WAS the typed
+  // $/mo bill (calc read `insuranceMonthly ?? default`). Defaulting the
+  // missing mode to "percent" made those deals silently reprice insurance
+  // at the 0.5% estimate on reopen. Infer "monthly" when the legacy shape
+  // says so: a positive insuranceMonthly with no insurancePct. Post-v9
+  // snapshots always serialize the mode, so this never fires on them.
+  const legacyInsuranceMonthly = asNumber(snapshot.insuranceMonthly);
+  const insuranceInputMode =
+    snapshot.insuranceInputMode === "monthly" || snapshot.insuranceInputMode === "percent"
+      ? snapshot.insuranceInputMode
+      : legacyInsuranceMonthly !== undefined &&
+          legacyInsuranceMonthly > 0 &&
+          asNumber(snapshot.insurancePct) === undefined
+        ? ("monthly" as const)
+        : ("percent" as const);
+
   return {
     propertyType,
     purchasePrice: asNumber(snapshot.purchasePrice),
@@ -532,10 +549,7 @@ function sanitizeSnapshotFields(
         ? snapshot.propertyTaxInputMode
         : ("percent" as const),
     propertyTaxAnnual: asNumber(snapshot.propertyTaxAnnual),
-    insuranceInputMode:
-      snapshot.insuranceInputMode === "monthly" || snapshot.insuranceInputMode === "percent"
-        ? snapshot.insuranceInputMode
-        : ("percent" as const),
+    insuranceInputMode,
     insurancePct: asNumber(snapshot.insurancePct),
     insuranceMonthly: asNumber(snapshot.insuranceMonthly),
     hoaMonthly: asNumber(snapshot.hoaMonthly),
@@ -550,6 +564,94 @@ function sanitizeSnapshotFields(
 }
 
 export function normalizeInvestmentFormSnapshot(raw: unknown): InvestmentFormValues | null {
+  // Saved rows get the legacy unit-drop retry; the DRAFT path must NOT
+  // (normalizeInvestmentFormDraft calls the core with dropInvalidUnits
+  // false) — an interrupted draft's mid-typing unit row is exactly what
+  // the lenient draft path exists to preserve, not to silently drop.
+  return normalizeSnapshotCore(raw, { dropInvalidUnits: true });
+}
+
+function normalizeSnapshotCore(
+  raw: unknown,
+  opts: { dropInvalidUnits: boolean }
+): InvestmentFormValues | null {
+  const snapshot = asRecord(raw);
+  if (!snapshot) return null;
+
+  const propertyType =
+    snapshot.propertyType === "single-family" ||
+    snapshot.propertyType === "multi-family" ||
+    snapshot.propertyType === "owner-occupant"
+      ? snapshot.propertyType
+      : "single-family";
+
+  const units = Array.isArray(snapshot.units)
+    ? snapshot.units.slice(0, MAX_UNITS).map(normalizeUnit)
+    : getDefaultUnitsForPropertyType(propertyType);
+
+  let parsed = investmentFormSchema.safeParse({
+    ...defaultValues,
+    ...snapshot,
+    ...sanitizeSnapshotFields(snapshot, propertyType, units),
+  });
+
+  if (!parsed.success) {
+    if (!opts.dropInvalidUnits) return null;
+    // Legacy tolerance (pre-2026-04-28 rows): the schema then allowed
+    // rent 0 ("Rent must be 0 or more"), so old multi-family snapshots can
+    // carry a 0-rent vacant unit that today's rent > 0 rule rejects —
+    // freezing the deal (can't reopen, duplicate, or export). Retry ONCE
+    // with the invalid units dropped, mirroring saveDealAction's save-time
+    // unit filter, so the surviving units open exactly as a fresh save
+    // would persist them. New saves are unaffected: the live form schema
+    // and saveDealAction still enforce rent > 0, and current-era snapshots
+    // never store such units, so the retry only ever fires on legacy rows.
+    const retryUnits = units.filter((unit) =>
+      isValidRentalUnit(unit, {
+        allowZeroRent: propertyType === "owner-occupant" && !!unit.isOwnerOccupied,
+      })
+    );
+    if (retryUnits.length === 0 || retryUnits.length === units.length) return null;
+    parsed = investmentFormSchema.safeParse({
+      ...defaultValues,
+      ...snapshot,
+      ...sanitizeSnapshotFields(snapshot, propertyType, retryUnits),
+    });
+    if (!parsed.success) return null;
+  }
+
+  const data = parsed.data;
+  return {
+    ...data,
+    appreciationRatePct: data.appreciationRatePct ?? DEFAULT_APPRECIATION_RATE,
+    sellingCostPct: data.sellingCostPct ?? DEFAULT_SELLING_COST_PCT,
+  };
+}
+
+/** Friendly labels for the snapshot fields a legacy row most plausibly
+ *  fails on. Anything unmapped falls back to the raw key, which is still
+ *  more actionable than no field name at all. */
+const SNAPSHOT_FIELD_LABELS: Record<string, string> = {
+  monthlyRent: "Monthly rent",
+  purchasePrice: "Purchase price",
+  address: "Address",
+  avgDailyRate: "Nightly rate",
+  occupancyPct: "Occupancy %",
+  interestRate: "Interest rate",
+  downPaymentPct: "Down payment %",
+  loanTermYears: "Loan term",
+};
+
+/**
+ * Names the first schema failure that keeps a saved snapshot from opening,
+ * e.g. `Monthly rent — Rent must be greater than 0` or
+ * `Unit 2 monthly rent — Rent must be greater than 0`. Used by the reopen /
+ * PDF-export failure toasts so "couldn't open this deal" tells the customer
+ * WHICH field to fix instead of dead-ending (the old advice was circular:
+ * "open it and re-save" when opening was the failing step). Returns null
+ * when the snapshot actually parses (or isn't an object at all).
+ */
+export function describeInvestmentFormSnapshotIssue(raw: unknown): string | null {
   const snapshot = asRecord(raw);
   if (!snapshot) return null;
 
@@ -569,15 +671,18 @@ export function normalizeInvestmentFormSnapshot(raw: unknown): InvestmentFormVal
     ...snapshot,
     ...sanitizeSnapshotFields(snapshot, propertyType, units),
   });
+  if (parsed.success) return null;
 
-  if (!parsed.success) return null;
+  const issue = parsed.error.issues[0];
+  if (!issue) return null;
 
-  const data = parsed.data;
-  return {
-    ...data,
-    appreciationRatePct: data.appreciationRatePct ?? DEFAULT_APPRECIATION_RATE,
-    sellingCostPct: data.sellingCostPct ?? DEFAULT_SELLING_COST_PCT,
-  };
+  const path = issue.path;
+  if (path[0] === "units" && typeof path[1] === "number") {
+    return `Unit ${path[1] + 1} monthly rent — ${issue.message}`;
+  }
+  const key = typeof path[0] === "string" ? path[0] : "";
+  const label = SNAPSHOT_FIELD_LABELS[key] ?? key;
+  return label ? `${label} — ${issue.message}` : issue.message;
 }
 
 /**
@@ -594,7 +699,11 @@ export function normalizeInvestmentFormSnapshot(raw: unknown): InvestmentFormVal
  * length) that Run/Save still enforce via the full schema.
  */
 export function normalizeInvestmentFormDraft(raw: unknown): InvestmentFormValues | null {
-  const strict = normalizeInvestmentFormSnapshot(raw);
+  // dropInvalidUnits false: a draft that fails strict parsing must fall
+  // through to the lenient whitelist below (which preserves ALL normalized
+  // units, incl. a mid-typing rent-less row) — the saved-row unit-drop
+  // retry would silently delete the very unit the user was entering.
+  const strict = normalizeSnapshotCore(raw, { dropInvalidUnits: false });
   if (strict) return strict;
 
   const snapshot = asRecord(raw);

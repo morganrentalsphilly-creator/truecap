@@ -546,7 +546,12 @@ export function VsCompetitors() {
 const HOMEPAGE_FAQS: { q: string; a: string }[] = [
   {
     q: "Is TrueCap really free?",
-    a: "Yes. The cash-flow analyzer - cap rate, CoC, DSCR, monthly cash flow, address auto-fill, the 0-100 Deal Score, and a plain-English verdict - is free forever and unlimited. No card required. Pro adds save/compare deals, lender-ready PDFs, a personal buy box (your criteria, checked on every deal), and the advanced modules (BRRRR + Fix-and-Flip, Sensitivity, 10-year projections, tax strategy, exit scenarios).",
+    // Free CAN save (up to 5 deals) — what Pro actually adds on the saved-deal
+    // axis is editing saved deals, unlimited saves, and compare. A previous
+    // version claimed saving itself was a Pro add-on, contradicting the
+    // pricing card's Free save-up-to-5 bullet and the runtime gate
+    // (pricing-copy-guards.test.ts locks this).
+    a: "Yes. The cash-flow analyzer - cap rate, CoC, DSCR, monthly cash flow, address auto-fill, the 0-100 Deal Score, and a plain-English verdict - is free forever and unlimited. No card required. Free even saves up to 5 deals. Pro adds editing + unlimited saved deals, compare deals, lender-ready PDFs, a personal buy box (your criteria, checked on every deal), and the advanced modules (BRRRR + Fix-and-Flip, Sensitivity, 10-year projections, tax strategy, exit scenarios).",
   },
   {
     q: "Do I need a credit card?",
@@ -566,7 +571,7 @@ const HOMEPAGE_FAQS: { q: string; a: string }[] = [
   },
   {
     q: "When should I upgrade to Pro?",
-    a: "Use Free to analyze unlimited deals. Use the $5 PDF when you need to send one finished report. Upgrade to Pro when you want TrueCap to know what you're looking for: set your buy box once and every deal gets a personal pass/fail - plus save deals, compare properties, reuse your assumptions, brand your reports, and export unlimited PDFs. Pro is month-to-month - cancel anytime.",
+    a: "Use Free to analyze unlimited deals. Use the $5 PDF when you need to send one finished report. Upgrade to Pro when you want TrueCap to know what you're looking for: set your buy box once and every deal gets a personal pass/fail - plus save unlimited deals, compare properties, reuse your assumptions, brand your reports, and export unlimited PDFs. Pro is month-to-month - cancel anytime.",
   },
   {
     q: "Does this work for BRRRR or fix-and-flip deals?",
