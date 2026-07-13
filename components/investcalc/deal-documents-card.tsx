@@ -12,6 +12,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Download, Loader2, Paperclip, Trash2, Upload } from "lucide-react";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
+import { friendlyToastError } from "@/lib/friendly-error";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 
@@ -107,7 +108,14 @@ export function DealDocumentsCard({ savedDealId }: { savedDealId: string }) {
           setUnavailable(true);
           return;
         }
-        toast({ title: "Upload failed", description: error.message, variant: "destructive" });
+        toast({
+          title: "Upload failed",
+          description: friendlyToastError(error, {
+            feature: "deal-documents",
+            fallback: "We couldn't upload this file. Please try again.",
+          }),
+          variant: "destructive",
+        });
         return;
       }
       await refresh(userId);
@@ -122,7 +130,14 @@ export function DealDocumentsCard({ savedDealId }: { savedDealId: string }) {
     try {
       const { data, error } = await supabase.storage.from(BUCKET).createSignedUrl(path, 60);
       if (error || !data?.signedUrl) {
-        toast({ title: "Couldn't open document", description: error?.message ?? "Try again.", variant: "destructive" });
+        toast({
+          title: "Couldn't open document",
+          description: friendlyToastError(error ?? new Error("createSignedUrl returned no signed URL"), {
+            feature: "deal-documents",
+            fallback: "We couldn't open this document. Please try again.",
+          }),
+          variant: "destructive",
+        });
         return;
       }
       window.open(data.signedUrl, "_blank", "noopener,noreferrer");
@@ -137,7 +152,14 @@ export function DealDocumentsCard({ savedDealId }: { savedDealId: string }) {
     try {
       const { error } = await supabase.storage.from(BUCKET).remove([path]);
       if (error) {
-        toast({ title: "Couldn't delete document", description: error.message, variant: "destructive" });
+        toast({
+          title: "Couldn't delete document",
+          description: friendlyToastError(error, {
+            feature: "deal-documents",
+            fallback: "We couldn't delete this document. Please try again.",
+          }),
+          variant: "destructive",
+        });
         return;
       }
       await refresh(userId);

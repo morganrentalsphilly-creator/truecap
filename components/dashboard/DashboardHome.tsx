@@ -55,7 +55,7 @@ import { PIPELINE_STAGES, type PipelineStage } from "@/lib/pipeline";
 export type { DashboardDeal } from "@/lib/dashboard-deal-mapping";
 import { RateWatchStrip } from "@/components/dashboard/RateWatchStrip";
 import type { RateWatchSummary } from "@/lib/rate-watch";
-import { DueThisWeekCard, type DueThisWeekDeal } from "@/components/dashboard/due-this-week-card";
+import { DueThisWeekCard, type AgingDealRow, type DueThisWeekDeal } from "@/components/dashboard/due-this-week-card";
 import { BuyBoxNudge } from "@/components/dashboard/buy-box-nudge";
 import type { OwnedEquitySeriesPoint } from "@/lib/owned-equity-series";
 import type { BuyBoxFitSummary } from "@/lib/buy-box";
@@ -129,6 +129,13 @@ export type DashboardHomeData = {
    * unapplied — the card then renders nothing.
    */
   dueThisWeek?: DueThisWeekDeal[];
+  /**
+   * Active deals sitting ≥7 days in Offer / Under contract, server-computed
+   * with the SAME thresholds as the workspace DealAgingNudge (lib/deal-aging)
+   * so the two surfaces can't disagree. Rendered as one quiet line on the
+   * "Due this week" card; undefined/empty → nothing renders.
+   */
+  agingDeals?: AgingDealRow[];
   /**
    * The user's OWNED (completed) deals, server-computed (M3-1). Every other
    * field on this type is active-only, so without this a customer whose
@@ -896,7 +903,7 @@ export function DashboardHome({
             answer, so it sits at the top of the action lane. Status is
             computed in the viewer's local time; renders nothing when nothing
             is overdue or due within 7 days — invisible until useful. */}
-        <DueThisWeekCard deals={data.dueThisWeek ?? []} />
+        <DueThisWeekCard deals={data.dueThisWeek ?? []} agingDeals={data.agingDeals ?? []} />
 
         {/* Rate watch — re-underwrites saved deals at today's 30-yr rate and
             surfaces the ones whose signal changed since they were saved (the

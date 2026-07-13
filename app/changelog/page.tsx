@@ -56,6 +56,69 @@ const CATEGORY_STYLES: Record<Category, { icon: typeof Sparkles; color: string; 
 
 const ENTRIES: Entry[] = [
   {
+    date: "2026-07-13",
+    category: "Feature",
+    title: "Your buy box now answers 'so what price WOULD work?'",
+    description:
+      "When a deal fails your buy box, the verdict card now solves for the highest price that clears your criteria — 'Your number: $272,000' — right on the live analyzer. The Max Offer stress-test also seeds its targets from your buy box instead of generic defaults. Rate-alert emails deep-link each deal to a one-click re-underwrite at the new rate.",
+  },
+  {
+    date: "2026-07-13",
+    category: "Improvement",
+    title: "Negative live previews suggest the break-even price",
+    description:
+      "While you type, a deal that doesn't cash-flow now shows 'Breaks even near $X — try that as your offer price' instead of just a red number. Persona pages (/for-brrrr, /for-house-hackers, and friends) pre-select the right strategy when you land on the calculator, and pricing defaults to the monthly view.",
+  },
+  {
+    date: "2026-07-13",
+    category: "Content",
+    title: "Six new blog posts — ARV, exit cap rate, the 70% rule, and more",
+    description:
+      "New deep-dives on calculating ARV with the comps method, picking an exit cap rate, the 70% rule for flips and BRRRR, operating expense ratio benchmarks, debt-to-income on investment properties, and buying a rental with tenants in place. Blog catalog now at 66 posts.",
+  },
+  {
+    date: "2026-07-07",
+    category: "Feature",
+    title: "The Desktop Cockpit — results beside the form, not below it",
+    description:
+      "On wide screens the analyzer now works like a cockpit: the form on the left, your verdict forming live on the right, no scrolling between edits and answers. Honest extremes ('best case' and 'worst case' at once), a single headline answer with one Why, and an 'Analyze another like this' shortcut that keeps your assumptions.",
+  },
+  {
+    date: "2026-07-06",
+    category: "Feature",
+    title: "The Verdict Ledger — the analysis reads top-down like an answer",
+    description:
+      "Full results redesign: one answer card up top (verdict, deal score, the three numbers that decide it), then an accordion ledger of everything else — cash flow waterfall, 10-year view, tax strategy, exit scenarios, stress tests — each row openable without losing your place. A 'Where these numbers came from' row shows the provenance of every input.",
+  },
+  {
+    date: "2026-07-05",
+    category: "Improvement",
+    title: "Smoother first analysis — multi-family, missing rent, duplicates",
+    description:
+      "Multi-family no longer walls you out mid-form, a rent recovery path kicks in when HUD has no estimate for the address, 'Duplicate' copies a deal without losing its property type, and the live verdict lights up the moment price + rent exist.",
+  },
+  {
+    date: "2026-07-02",
+    category: "Feature",
+    title: "Screen Listings — paste a week of listings, get a shortlist",
+    description:
+      "New Pro power tool at Dashboard → Screen Listings: paste up to 10 listings (free text works — AI extracts the numbers), and every row gets a verdict, deal score, and buy-box fit so you drill into winners instead of underwriting everything.",
+  },
+  {
+    date: "2026-07-02",
+    category: "Feature",
+    title: "Your buy box everywhere + Deal Q&A that cites its sources",
+    description:
+      "Buy-box fit badges now appear on My Deals, the dashboard, compare, and shared links; the Pro PDF carries your box so lenders see your criteria. Deal Q&A answers only from this deal's own numbers, comps, max offer, and projections — it will say 'run comps to answer that' rather than guess. Plus: CSV export of My Deals, a lender-reserves note on cash-to-close, and an HUD rent reality-check for multi-family units.",
+  },
+  {
+    date: "2026-07-02",
+    category: "Improvement",
+    title: "One-click 'Save these as my defaults'",
+    description:
+      "Tuned your assumptions on a deal? A chip now offers to save the 13 overlay fields (vacancy, management, maintenance, growth rates, financing) as your personal defaults so deal #7 starts from your numbers, not ours.",
+  },
+  {
     date: "2026-05-25",
     category: "Feature",
     title: "Three new blog posts — best states, 1031, 50% rule",

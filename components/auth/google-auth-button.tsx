@@ -29,6 +29,7 @@ import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
+import { friendlyToastError } from "@/lib/friendly-error";
 import { useToast } from "@/hooks/use-toast";
 
 type Props = {
@@ -83,11 +84,15 @@ export function GoogleAuthButton({ label = "Continue with Google", disabled = fa
 
       if (error) {
         // Most common failure: Google provider isn't enabled in the
-        // Supabase project yet. Surface the actual message so the
-        // setup gap is obvious.
+        // Supabase project yet. friendlyToastError maps that class to
+        // plain English and captures the raw message to Sentry, so the
+        // setup gap stays visible without piping SDK jargon to users.
         toast({
           title: "Google sign-in unavailable",
-          description: error.message,
+          description: friendlyToastError(error, {
+            feature: "google-auth",
+            fallback: "Google sign-in isn't available right now — use your email and password instead.",
+          }),
           variant: "destructive",
         });
         setIsPending(false);
@@ -101,8 +106,10 @@ export function GoogleAuthButton({ label = "Continue with Google", disabled = fa
       // Network failures fall here. Reset spinner + show a toast.
       toast({
         title: "Google sign-in failed",
-        description:
-          err instanceof Error ? err.message : "Something went wrong. Try email + password instead.",
+        description: friendlyToastError(err, {
+          feature: "google-auth",
+          fallback: "Something went wrong. Try email + password instead.",
+        }),
         variant: "destructive",
       });
       setIsPending(false);

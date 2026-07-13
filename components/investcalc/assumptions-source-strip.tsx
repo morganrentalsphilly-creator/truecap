@@ -17,6 +17,7 @@
  */
 
 import { useState } from "react";
+import Link from "next/link";
 import { ChevronDown, Database, Pencil } from "lucide-react";
 import type { EnrichmentProvenanceInput } from "@/lib/data-confidence";
 import { cn } from "@/lib/utils";
@@ -167,7 +168,17 @@ export function AssumptionsSourceStrip({
           expanded ? "block" : "hidden sm:block"
         )}
       >
-        Estimates for planning, not financial advice — verify rent, taxes, and the asking price before you offer.
+        Estimates for planning, not financial advice — verify rent, taxes, and the asking price before you offer.{" "}
+        {/* Quiet provenance link (trust-polish audit): the skeptical-investor
+            "is this math real?" path used to dead-end here — /methodology
+            documents every formula + data source but had no inbound link
+            at the decision moment. */}
+        <Link
+          href="/methodology"
+          className="font-semibold text-primary/80 transition-colors hover:text-primary"
+        >
+          See exactly how we compute these numbers →
+        </Link>
       </p>
     </div>
   );

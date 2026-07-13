@@ -22,6 +22,26 @@ export type DueThisWeekDeal = {
   items: unknown;
 };
 
+/**
+ * An active deal sitting ≥7 days in Offer / Under contract, server-computed
+ * on /dashboard with the SAME thresholds as the in-workspace DealAgingNudge
+ * (lib/deal-aging). Honesty rule carries over: `days` counts from created_at
+ * (when the deal was SAVED), so copy says "saved N days ago" — never a false
+ * "in this stage N days".
+ */
+export type AgingDealRow = {
+  id: string;
+  /** Display label for the deal (address, falling back to title). */
+  address: string;
+  /** Short stage label ("Offer" / "Contract") from lib/pipeline metadata. */
+  stageLabel: string;
+  /** Whole days since the deal was saved. */
+  days: number;
+};
+
+/** Max deals named in the quiet aging line before collapsing to "+N more". */
+const MAX_AGING_LINKS = 3;
+
 type DueRow = {
   dealId: string;
   address: string;
@@ -78,8 +98,21 @@ const MAX_ROWS = 5;
  * Invisible until useful: renders NULL when nothing is overdue or due within
  * 7 days — no empty state to explain. Status is computed with the shared
  * dueDiligenceItemStatus helper against the viewer's LOCAL today.
+ *
+ * `agingDeals` adds one quiet footer line for deals going cold in Offer /
+ * Under contract (the workspace DealAgingNudge's signal, surfaced where the
+ * user actually starts the session). When there are aging deals but no
+ * deadlines, the card renders in a slim aging-only mode — otherwise the
+ * signal would stay invisible unless the user already opened that deal,
+ * which is exactly the gap this line closes.
  */
-export function DueThisWeekCard({ deals }: { deals: DueThisWeekDeal[] }) {
+export function DueThisWeekCard({
+  deals,
+  agingDeals = [],
+}: {
+  deals: DueThisWeekDeal[];
+  agingDeals?: AgingDealRow[];
+}) {
   const rows = useMemo<DueRow[]>(() => {
     const todayISO = localTodayISO();
     const collected: DueRow[] = [];
@@ -107,16 +140,19 @@ export function DueThisWeekCard({ deals }: { deals: DueThisWeekDeal[] }) {
     return collected;
   }, [deals]);
 
-  // Invisible until useful — nothing overdue or due within 7 days.
-  if (rows.length === 0) return null;
+  // Invisible until useful — nothing overdue, due within 7 days, or aging.
+  if (rows.length === 0 && agingDeals.length === 0) return null;
 
   const overdueCount = rows.filter((r) => r.overdue).length;
   const shown = rows.slice(0, MAX_ROWS);
   const extra = rows.length - shown.length;
+  // No deadlines at all → the aging line carries the card (slim mode with
+  // the workspace nudge's own "Keep it moving" framing).
+  const agingOnly = rows.length === 0;
 
   return (
     <section
-      aria-label="Due this week"
+      aria-label={agingOnly ? "Deals going cold" : "Due this week"}
       className="rounded-2xl border border-border bg-card p-4 sm:p-5"
     >
       <div className="flex items-center justify-between gap-3">
@@ -132,12 +168,14 @@ export function DueThisWeekCard({ deals }: { deals: DueThisWeekDeal[] }) {
           </span>
           <div>
             <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-              Due this week
+              {agingOnly ? "Keep it moving" : "Due this week"}
             </p>
             <p className="text-sm font-semibold text-foreground">
-              {overdueCount > 0
-                ? `${overdueCount} ${overdueCount === 1 ? "deadline is" : "deadlines are"} overdue`
-                : `${rows.length} ${rows.length === 1 ? "deadline" : "deadlines"} coming up`}
+              {agingOnly
+                ? `${agingDeals.length} ${agingDeals.length === 1 ? "deal is" : "deals are"} going cold`
+                : overdueCount > 0
+                  ? `${overdueCount} ${overdueCount === 1 ? "deadline is" : "deadlines are"} overdue`
+                  : `${rows.length} ${rows.length === 1 ? "deadline" : "deadlines"} coming up`}
             </p>
           </div>
         </div>
@@ -150,39 +188,41 @@ export function DueThisWeekCard({ deals }: { deals: DueThisWeekDeal[] }) {
         </Link>
       </div>
 
-      <ul className="mt-3 space-y-2">
-        {shown.map((row) => (
-          <li key={`${row.dealId}-${row.label}`}>
-            <Link
-              href={`/dashboard/saved-analyses/${row.dealId}`}
-              prefetch={false}
-              className="flex items-start gap-2.5 rounded-xl bg-muted/40 px-3 py-2 transition-colors hover:bg-muted"
-            >
-              <span
-                className={`mt-0.5 shrink-0 ${row.overdue ? "text-destructive" : "text-muted-foreground"}`}
+      {shown.length > 0 ? (
+        <ul className="mt-3 space-y-2">
+          {shown.map((row) => (
+            <li key={`${row.dealId}-${row.label}`}>
+              <Link
+                href={`/dashboard/saved-analyses/${row.dealId}`}
+                prefetch={false}
+                className="flex items-start gap-2.5 rounded-xl bg-muted/40 px-3 py-2 transition-colors hover:bg-muted"
               >
-                {row.overdue ? (
-                  <AlertTriangle className="size-3.5" />
-                ) : (
-                  <Clock className="size-3.5" />
-                )}
-              </span>
-              <div className="min-w-0">
-                <p className="truncate text-sm font-medium text-foreground">
-                  {row.label} — {row.address}
-                </p>
-                <p
-                  className={`text-xs leading-relaxed ${
-                    row.overdue ? "font-semibold text-destructive" : "text-muted-foreground"
-                  }`}
+                <span
+                  className={`mt-0.5 shrink-0 ${row.overdue ? "text-destructive" : "text-muted-foreground"}`}
                 >
-                  {relativeLabel(row.days)}
-                </p>
-              </div>
-            </Link>
-          </li>
-        ))}
-      </ul>
+                  {row.overdue ? (
+                    <AlertTriangle className="size-3.5" />
+                  ) : (
+                    <Clock className="size-3.5" />
+                  )}
+                </span>
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium text-foreground">
+                    {row.label} — {row.address}
+                  </p>
+                  <p
+                    className={`text-xs leading-relaxed ${
+                      row.overdue ? "font-semibold text-destructive" : "text-muted-foreground"
+                    }`}
+                  >
+                    {relativeLabel(row.days)}
+                  </p>
+                </div>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      ) : null}
 
       {extra > 0 ? (
         <p className="mt-2 text-xs text-muted-foreground">
@@ -195,6 +235,36 @@ export function DueThisWeekCard({ deals }: { deals: DueThisWeekDeal[] }) {
             My Deals
           </Link>
           .
+        </p>
+      ) : null}
+
+      {/* One quiet aging line — deals going cold in Offer / Under contract,
+          each deep-linking to its workspace (where the DealAgingNudge and
+          next-action live). Copy says "saved Nd ago" (created_at), never
+          "in stage N days" — see lib/deal-aging. */}
+      {agingDeals.length > 0 ? (
+        <p
+          className={`text-xs leading-relaxed text-muted-foreground ${
+            agingOnly ? "mt-3" : "mt-3 border-t border-border pt-2.5"
+          }`}
+        >
+          {agingOnly ? "Still marked as in play, but quiet: " : "Also going cold: "}
+          {agingDeals.slice(0, MAX_AGING_LINKS).map((deal, index) => (
+            <span key={deal.id}>
+              {index > 0 ? " · " : null}
+              <Link
+                href={`/dashboard/saved-analyses/${deal.id}`}
+                prefetch={false}
+                className="font-semibold text-primary hover:underline"
+              >
+                {deal.address}
+              </Link>{" "}
+              ({deal.stageLabel} · saved {deal.days}d ago)
+            </span>
+          ))}
+          {agingDeals.length > MAX_AGING_LINKS
+            ? ` · +${agingDeals.length - MAX_AGING_LINKS} more`
+            : null}
         </p>
       ) : null}
     </section>

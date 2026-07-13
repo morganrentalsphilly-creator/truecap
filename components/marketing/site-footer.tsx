@@ -29,6 +29,13 @@ const FOOTER_COLS: Array<{
       { label: "Free analyzer", href: "/" },
       { label: "Pricing", href: "/pricing" },
       { label: "Why TrueCap", href: "/why-truecap" },
+      // Methodology + Changelog restored (trust-polish audit, Jul 2026):
+      // both pages were orphaned — /methodology (every formula + data
+      // source) had zero inbound links from the product itself, and
+      // /changelog is the "is this actively shipped?" signal prospects
+      // look for. Quiet footer rows, not top-level nav.
+      { label: "Methodology", href: "/methodology" },
+      { label: "Changelog", href: "/changelog" },
       { label: "All free tools", href: "/tools" },
       { label: "Blog", href: "/blog" },
       { label: "Rental markets", href: "/markets" },

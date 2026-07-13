@@ -10,14 +10,15 @@
  * false "in this stage N days." A future stage_changed_at column would make
  * it precise; until then we don't overclaim. Dismissal is per deal+stage in
  * localStorage (no server write — zero data-integrity surface).
+ *
+ * The aging thresholds live in lib/deal-aging (shared with the dashboard
+ * home's aging line) so both surfaces agree on what "aging" means.
  */
 
 import { useEffect, useState } from "react";
 import { Clock, X } from "lucide-react";
 import type { PipelineStage } from "@/lib/pipeline";
-
-const NUDGE_STAGES: PipelineStage[] = ["offer", "under_contract"];
-const MIN_DAYS = 7;
+import { DEAL_AGING_MIN_DAYS, DEAL_AGING_STAGES, daysSinceSaved } from "@/lib/deal-aging";
 
 export function DealAgingNudge({
   dealId,
@@ -33,10 +34,9 @@ export function DealAgingNudge({
   const [dismissed, setDismissed] = useState(true);
 
   const storageKey = `truecap_aging_dismissed_${dealId}_${stage}`;
-  const days = createdAt
-    ? Math.floor((Date.now() - new Date(createdAt).getTime()) / 86_400_000)
-    : NaN;
-  const eligible = NUDGE_STAGES.includes(stage) && Number.isFinite(days) && days >= MIN_DAYS;
+  const days = daysSinceSaved(createdAt) ?? NaN;
+  const eligible =
+    DEAL_AGING_STAGES.includes(stage) && Number.isFinite(days) && days >= DEAL_AGING_MIN_DAYS;
 
   useEffect(() => {
     if (!eligible) {

@@ -28,6 +28,7 @@ import { OpenFullAnalysisButton } from "@/components/investcalc/open-saved-deal-
 import { RefreshOnReturn } from "@/components/investcalc/refresh-on-return";
 import { DealWorkspaceAnchorChips } from "@/components/investcalc/deal-workspace-anchor-chips";
 import { OwnedEquityCard } from "@/components/investcalc/owned-equity-card";
+import { CompareWithAnotherDealLink } from "@/components/dashboard/compare-with-another-deal-link";
 import { RateAlertReUnderwriteBanner } from "@/components/investcalc/rate-alert-reunderwrite-banner";
 import { buildRateReUnderwrite, parseRateAlertRateParam } from "@/lib/rate-alerts";
 import { nextActionForDeal } from "@/lib/next-action";
@@ -226,7 +227,7 @@ export default async function DealWorkspacePage({
   }
   const navAccess = getDashboardNavAccess(entitlements);
 
-  const [{ data: profile }, isPremium, { data: deal, ownedEquityEnabled }, buyBoxesResult] =
+  const [{ data: profile }, isPremium, { data: deal, ownedEquityEnabled }, buyBoxesResult, activeDealsCountResult] =
     await Promise.all([
     supabase
       .from("profiles")
@@ -240,6 +241,17 @@ export default async function DealWorkspacePage({
     // built in). Any failure, missing table, or entitlement miss degrades to
     // "no boxes" → the banner behaves exactly as before. Never crash.
     listBuyBoxesAction().catch(() => null),
+    // Active-deal HEAD count for the "Compare with another deal" header link —
+    // same active scope as compare itself (startCompareAction validates
+    // against it). Below 2 active deals the link renders nothing (invisible
+    // until useful); an error degrades the count to 0 → link hidden.
+    supabase
+      .from("saved_analyses")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .is("deleted_at", null)
+      .eq("is_completed", false)
+      .eq("is_archived", false),
   ]);
 
   // Missing or not owned (the user_id filter makes this an ownership check) →
@@ -277,6 +289,16 @@ export default async function DealWorkspacePage({
   // page agrees with the My Deals row for the same deal.
   const isClosedDeal = stage === "closed" || dealRow.is_completed === true;
   const canUsePipeline = hasPlanFeature(entitlements, "pipeline");
+  // Workspace → Compare cross-link: only when comparing can actually work —
+  // compare entitlement, ≥2 active deals to line up, and THIS deal still
+  // active (startCompareAction validates active-only, so a closed/passed
+  // deal would just error). Count errors degrade to null → link hidden.
+  const activeDealsCount = activeDealsCountResult.error ? null : activeDealsCountResult.count;
+  const showCompareLink =
+    hasPlanFeature(entitlements, "compare_deals") &&
+    !isClosedDeal &&
+    isActiveStage(stage ?? DEFAULT_PIPELINE_STAGE) &&
+    (activeDealsCount ?? 0) >= 2;
 
   // Recommended next step from the saved underwrite (cash flow + DSCR),
   // adjusted for where the deal sits in the pipeline (a closed deal is told
@@ -527,6 +549,15 @@ export default async function DealWorkspacePage({
                 <Metric label="Deal Score" value={`${Math.round(dealScore)}`} />
               ) : null}
             </div>
+            {/* Cross-deal compare, at the "is this one better than my
+                others?" moment. Seeds the compare cookie with this deal and
+                lands on /dashboard/compare; hidden below 2 active deals /
+                without the entitlement / on closed-passed deals. */}
+            {showCompareLink ? (
+              <div className="mt-2">
+                <CompareWithAnotherDealLink savedDealId={dealRow.id} />
+              </div>
+            ) : null}
             {/* Contents scent (WS-3): the cards below start under the fold with
                 no hint they exist — one compact chip row jumps to each. */}
             <DealWorkspaceAnchorChips />

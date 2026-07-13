@@ -24,6 +24,8 @@ import { recomputeSavedDealVerdict } from "@/lib/recompute-saved-deal-verdict";
 import { recomputeCompareSnapshotFromForm } from "@/lib/compare-result-snapshot";
 import { getSavedAnalysesTotalCount } from "@/lib/saved-analyses-count";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { DEAL_AGING_MIN_DAYS, DEAL_AGING_STAGES, daysSinceSaved } from "@/lib/deal-aging";
+import { isPipelineStage, pipelineStageMeta } from "@/lib/pipeline";
 import { buildRateWatch } from "@/lib/rate-watch";
 import { rateAlertEmailsLive } from "@/lib/rate-alerts-mode";
 import { computeOwnedEquity, monthsOwnedBetween } from "@/lib/owned-equity";
@@ -211,7 +213,7 @@ export default async function DashboardPage() {
     supabase
       .from("saved_analyses")
       .select(
-        "id, title, address, purchase_price, net_cash_flow_monthly, cap_rate_raw:result_snapshot->>capRate, ncf_snapshot:result_snapshot->>netCashFlow, form_snapshot"
+        "id, title, address, purchase_price, net_cash_flow_monthly, cap_rate_raw:result_snapshot->>capRate, ncf_snapshot:result_snapshot->>netCashFlow, form_snapshot, created_at, pipeline_stage"
       )
       .eq("user_id", user.id)
       .is("deleted_at", null)
@@ -277,6 +279,11 @@ export default async function DashboardPage() {
     cap_rate_raw: string | null;
     ncf_snapshot: string | null;
     form_snapshot: unknown;
+    // Scalar ride-alongs for the deal-aging line — aging deals are by
+    // definition OLD, so the 20-row recency sample below is exactly the
+    // wrong set to compute them from (deal #21 is the one going cold).
+    created_at: string | null;
+    pipeline_stage: string | null;
   };
   let portfolioAggregates: DashboardHomeData["portfolioAggregates"] = null;
   // Hoisted so the rate watch below can reuse the full active set; null when
@@ -402,6 +409,43 @@ export default async function DashboardPage() {
   // True saved total (matches the sidebar "My Deals" badge) so the header
   // can distinguish active deals from the full saved set.
   dashboardData.savedTotalCount = savedTotalCount;
+
+  // Deal aging — the workspace DealAgingNudge's signal (deals sitting ≥7 days
+  // in Offer / Under contract), surfaced on the home action lane so the user
+  // doesn't have to already open the deal to learn it's going cold. Same
+  // thresholds via lib/deal-aging; created_at + pipeline_stage ride the
+  // queries already on the page, so this costs no extra IO. Computed over the
+  // FULL active set (aging deals are by definition old, so the 20-row recency
+  // sample is exactly the wrong set for them — the rate-watch precedent);
+  // falls back to the sample only if the aggregate query failed. Honesty rule
+  // carries over: days count from created_at (saved), never "in stage N days"
+  // — there is no stage_changed_at column. Oldest first (coldest deal leads).
+  {
+    const nowMs = Date.now();
+    dashboardData.agingDeals = (
+      (fullActiveRows ?? (rows ?? [])) as Array<
+        Pick<SavedAnalysisDashboardRow, "id" | "address" | "title"> & {
+          created_at: string | null;
+          pipeline_stage?: string | null;
+        }
+      >
+    )
+      .flatMap((r) => {
+        const stage = isPipelineStage(r.pipeline_stage) ? r.pipeline_stage : null;
+        if (!stage || !DEAL_AGING_STAGES.includes(stage)) return [];
+        const days = daysSinceSaved(r.created_at, nowMs);
+        if (days == null || days < DEAL_AGING_MIN_DAYS) return [];
+        return [
+          {
+            id: r.id,
+            address: aggregateRowLabel(r),
+            stageLabel: pipelineStageMeta(stage).short,
+            days,
+          },
+        ];
+      })
+      .sort((a, b) => b.days - a.days);
+  }
 
   // ── Buy-box fit (PV-1 / PV-6) ─────────────────────────────────────────
   // Evaluate every ACTIVE deal against the user's active boxes server-side —
