@@ -33,7 +33,10 @@ export function CheckoutCancelledBanner() {
       <p className="flex-1 leading-relaxed">
         <strong className="font-semibold">Checkout cancelled — no charge was made.</strong>{" "}
         <span className="text-muted-foreground">
-          Your {TRIAL_LABEL} is still here whenever you&apos;re ready.
+          {/* One template string, not `{TRIAL_LABEL} is…` JSX segments — the
+              SSR comment separators between segments ate the space after the
+              expression in prod ("trialis"). */}
+          {`Your ${TRIAL_LABEL} is still here whenever you're ready.`}
         </span>
       </p>
       <button
