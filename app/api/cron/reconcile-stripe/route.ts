@@ -151,11 +151,29 @@ export async function GET(request: Request) {
       }
     }
 
-    const { data: localData, error: localError } = await admin
-      .from("subscriptions")
-      .select("id, user_id, plan_id, status, stripe_subscription_id");
-    if (localError) throw localError;
-    const localRows = (localData ?? []) as LocalSubscriptionRow[];
+    // Paginate the local read: `subscriptions` is append-mostly (cancels
+    // mark, never delete), so past PostgREST's default 1000-row cap an
+    // unbounded select would SILENTLY truncate — and this is the safety
+    // net's own source of truth, so a missed row would false-alarm "paid
+    // in Stripe, no local row". Exhaustive .range() scan, mirroring the
+    // Stripe listing's intent; a hard page ceiling keeps it bounded.
+    const LOCAL_PAGE = 1000;
+    const LOCAL_MAX_PAGES = 50; // 50k rows — a hard stop, far above real scale
+    const localRows: LocalSubscriptionRow[] = [];
+    let localTruncated = false;
+    for (let page = 0; page < LOCAL_MAX_PAGES; page += 1) {
+      const from = page * LOCAL_PAGE;
+      const { data: pageData, error: localError } = await admin
+        .from("subscriptions")
+        .select("id, user_id, plan_id, status, stripe_subscription_id")
+        .order("id", { ascending: true })
+        .range(from, from + LOCAL_PAGE - 1);
+      if (localError) throw localError;
+      const rows = (pageData ?? []) as LocalSubscriptionRow[];
+      localRows.push(...rows);
+      if (rows.length < LOCAL_PAGE) break;
+      if (page === LOCAL_MAX_PAGES - 1) localTruncated = true;
+    }
 
     // (a)/(b)/(c): paid Stripe subscriptions vs local rows.
     const mismatches = classifyStripeSubscriptions(
@@ -285,6 +303,7 @@ export async function GET(request: Request) {
               partition.orphanCandidates.length - orphanCandidatesChecked.length
             ),
             stripe_listing_truncated: listingTruncated,
+            local_read_truncated: localTruncated,
             healed,
             heal_failures: healFailures.length,
           },
@@ -302,6 +321,7 @@ export async function GET(request: Request) {
       subscription_check: {
         stripe_subscriptions_scanned: stripeSubsById.size,
         stripe_listing_truncated: listingTruncated,
+        local_read_truncated: localTruncated,
         missing_local: mismatches.missingLocal.length,
         null_plan: mismatches.nullPlan.length,
         status_mismatch: mismatches.statusMismatch.length,
