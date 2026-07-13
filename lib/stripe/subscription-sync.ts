@@ -1,5 +1,7 @@
 import "server-only";
 
+import * as Sentry from "@sentry/nextjs";
+
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type Stripe from "stripe";
 import { getStripe } from "@/lib/stripe/client";
@@ -217,6 +219,29 @@ export async function upsertSubscriptionFromStripe(
         : null;
 
   const planId = await resolvePlanIdForPrice(admin, priceId);
+
+  // ENTITLEMENT-MISMATCH ALARM: a paying subscription whose price maps to no
+  // plan row upserts with plan_id=null, and getEntitlementsForUser then
+  // silently resolves the PAYING user to the FREE plan. This is exactly how
+  // the 2026-07 Stripe-account switch locked two paid accounts out of Pro
+  // for days with zero signal — plans.stripe_price_id was never populated
+  // for the new account and the env fallback was stale. Page someone
+  // instead: ids only, no PII (pitfall #4).
+  if (planId === null && ["active", "trialing", "past_due"].includes(subscription.status)) {
+    Sentry.captureMessage(
+      "Paid subscription upserted with UNMAPPED plan — user will resolve to FREE entitlements",
+      {
+        level: "error",
+        tags: { feature: "billing", kind: "entitlement-mismatch" },
+        extra: {
+          stripe_subscription_id: subscription.id,
+          stripe_price_id: priceId,
+          subscription_status: subscription.status,
+          hint: "Populate plans.stripe_price_id for this price (and verify STRIPE_PRICE_PRO_MONTHLY/ANNUAL env).",
+        },
+      }
+    );
+  }
 
   const subscriptionWithPeriods = subscription as Stripe.Subscription & {
     current_period_start?: number | null;

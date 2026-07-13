@@ -212,7 +212,22 @@ export async function POST(req: Request) {
     // glance, and the existing error_message + processed_at retry path
     // still works (Stripe sees 500, retries, and the next attempt
     // re-runs the handler via the "processed_at IS NULL" branch above).
-    const message = e instanceof Error ? e.message : String(e);
+    // Supabase/Postgrest errors are PLAIN OBJECTS, not Error instances —
+    // String(e) on those stored the useless "[object Object]" (seen on a
+    // real failed invoice.paid event), destroying the diagnostic trail.
+    // Extract .message when present, else JSON-stringify the object.
+    const message =
+      e instanceof Error
+        ? e.message
+        : typeof e === "object" && e !== null && "message" in e
+          ? String((e as { message: unknown }).message)
+          : (() => {
+              try {
+                return JSON.stringify(e);
+              } catch {
+                return String(e);
+              }
+            })();
     Sentry.captureException(e, {
       tags: { feature: "stripe-webhook", endpoint: "webhooks" },
       extra: {
