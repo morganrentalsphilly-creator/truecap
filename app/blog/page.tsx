@@ -49,6 +49,16 @@ export type BlogPost = {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: "buying-rental-property-with-tenants",
+    title:
+      "Buying a rental property with tenants in place: the lease, the estoppel, and the below-market rent math (2026)",
+    excerpt:
+      "Tenant-occupied listings look like day-one income — but the lease survives the sale in all fifty states, and the rent it carries is usually below market. What legally transfers with the deed, worked loss-to-lease math on a $250K duplex ($43 vs $313/mo cash flow on the same building), the 18-month turnover-payback test, the three documents that protect you (leases, ledger, estoppels), closing-day deposit mechanics, and the staged path to market rent.",
+    readingTimeMinutes: 11,
+    publishedAt: "2026-07-13",
+    available: true,
+  },
+  {
     slug: "how-to-calculate-arv",
     title:
       "How to calculate ARV (after-repair value): the comps method, step by step (2026)",
