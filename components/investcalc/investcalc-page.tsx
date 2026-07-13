@@ -82,7 +82,7 @@ import { AssumptionsSourceStrip } from "@/components/investcalc/assumptions-sour
 import { PostAnalysisEmailPrompt } from "@/components/marketing/post-analysis-email-prompt";
 import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "@/components/ui/toast";
-import { cn } from "@/lib/utils";
+import { cn, scrollBehavior } from "@/lib/utils";
 import { saveDealAction } from "@/app/actions/saved-analyses";
 import { buildDataConfidence, type EnrichmentProvenanceInput } from "@/lib/data-confidence";
 import type { ReportMode } from "@/lib/pdf-export-constants";
@@ -95,6 +95,7 @@ import {
   computeDealScore,
 } from "@/lib/deal-score";
 import { calculateMaxAllowableOffer } from "@/lib/max-allowable-offer";
+import { getLimitingFactor } from "@/lib/limiting-factor";
 import {
   createOneTimePdfCheckoutAction,
   verifyOneTimePdfPaymentAction,
@@ -840,7 +841,7 @@ export function InvestCalcPage({
 
   const scrollToAnalysisResults = useCallback(() => {
     const resultsSection = document.querySelector("[data-analysis-results='true']");
-    resultsSection?.scrollIntoView({ behavior: "smooth", block: "start" });
+    resultsSection?.scrollIntoView({ behavior: scrollBehavior(), block: "start" });
   }, []);
 
   const handleInputTabClick = useCallback(
@@ -859,7 +860,7 @@ export function InvestCalcPage({
         setTimeout(() => {
           const rowHeader = document.getElementById(`analysis-tab-${mappedTab}`);
           if (rowHeader) {
-            rowHeader.scrollIntoView({ behavior: "smooth", block: "start" });
+            rowHeader.scrollIntoView({ behavior: scrollBehavior(), block: "start" });
           } else {
             scrollToAnalysisResults();
           }
@@ -1457,7 +1458,7 @@ export function InvestCalcPage({
         window.setTimeout(() => {
           document
             .getElementById(`step-${id}`)
-            ?.scrollIntoView({ behavior: "smooth", block: "start" });
+            ?.scrollIntoView({ behavior: scrollBehavior(), block: "start" });
         }, 70);
       });
     },
@@ -1485,7 +1486,7 @@ export function InvestCalcPage({
           window.setTimeout(() => {
             document
               .getElementById(anchor)
-              ?.scrollIntoView({ behavior: "smooth", block: "start" });
+              ?.scrollIntoView({ behavior: scrollBehavior(), block: "start" });
           }, 70);
         });
         return;
@@ -2154,14 +2155,19 @@ export function InvestCalcPage({
             r.netCashFlow < 0
               ? calculateMaxAllowableOffer(liveParsed.data, { monthlyCashFlow: 0 })
               : null;
+          const tier = getDealTier(r);
           setLivePreview({
-            tier: getDealTier(r),
+            tier,
             score: ds.score,
             netCashFlow: r.netCashFlow,
             capRate: r.capRate,
             dscr: r.dscr,
             monthlyPayment: r.monthlyPayment,
             breakEvenPrice: breakEven ? breakEven.maxPrice : null,
+            // Mixed/Marginal one-liner ("DSCR 1.08 — below the 1.25 lenders
+            // want") so the amber pill isn't a dead end — pure string pick
+            // from metrics already in hand, no extra solver work.
+            limitingFactor: getLimitingFactor(tier, r),
           });
         } catch {
           setLivePreview(null);
@@ -2660,7 +2666,7 @@ export function InvestCalcPage({
     pendingResultsScrollRef.current = false;
     setTimeout(() => {
       const resultsSection = document.querySelector("[data-analysis-results='true']");
-      resultsSection?.scrollIntoView({ behavior: "smooth", block: "start" });
+      resultsSection?.scrollIntoView({ behavior: scrollBehavior(), block: "start" });
     }, 100);
   }, [analysisResult, isCalculating]);
 
@@ -2743,7 +2749,7 @@ export function InvestCalcPage({
       setListingLinkOpen(false);
       requestAnimationFrame(() => {
         form.setFocus("address");
-        findEl()?.scrollIntoView({ behavior: "smooth", block: "center" });
+        findEl()?.scrollIntoView({ behavior: scrollBehavior(), block: "center" });
       });
       return;
     }
@@ -2760,7 +2766,7 @@ export function InvestCalcPage({
     // focus's default scroll can leave it flush against the viewport edge.
     requestAnimationFrame(() => {
       form.setFocus(path as never);
-      findEl()?.scrollIntoView({ behavior: "smooth", block: "center" });
+      findEl()?.scrollIntoView({ behavior: scrollBehavior(), block: "center" });
     });
   };
 
@@ -2942,7 +2948,13 @@ export function InvestCalcPage({
       if (forkGenerationRef.current !== runGeneration) return;
       toast({
         title: "Analysis Complete",
-        description: `Net cash flow: $${result.netCashFlow.toLocaleString()}/mo | CoC: ${result.cocReturn.toFixed(1)}%`,
+        // Rounded like every other surface that shows this number (an
+        // unrounded float renders "$1,234.567/mo" — reads like a bug), and
+        // "Cash-on-cash" spelled out: the toast is the one line every
+        // first-run user reads, so no unexpanded jargon.
+        // Sign keyed off the SAME rounded value (live-verdict-panel pattern)
+        // so a sub-dollar negative never renders "-$0".
+        description: `Net cash flow: ${Math.round(result.netCashFlow) < 0 ? "-" : ""}$${Math.abs(Math.round(result.netCashFlow)).toLocaleString()}/mo | Cash-on-cash: ${result.cocReturn.toFixed(1)}%`,
       });
       // Scroll to the TOP of the results dashboard, not the bottom of
       // the page. The previous behavior dumped users at the footer past
@@ -2960,7 +2972,7 @@ export function InvestCalcPage({
           // Subtract a small offset so the results card isn't flush
           // with the top edge - gives the eye some breathing room.
           const y = window.scrollY + rect.top - 16;
-          window.scrollTo({ top: y, behavior: "smooth" });
+          window.scrollTo({ top: y, behavior: scrollBehavior() });
           // Move keyboard/screen-reader focus to the results region too, so
           // non-sighted users land on the verdict instead of being stranded
           // on the submit button while the page scrolls visually past them.
@@ -3247,8 +3259,25 @@ export function InvestCalcPage({
           description:
             result.mode === "updated"
               ? "Your saved analysis was updated with the latest inputs."
-              : "Your analysis was saved to your account.",
+              : "Saved — checklist, docs and notes now live in its workspace.",
           variant: "success",
+          // First save is the moment a user can learn the workspace
+          // (checklist / docs / notes / scenarios) exists — don't dead-end
+          // it. New tab, not router.push: the analyzer keeps the just-run
+          // result mounted, mirroring the dashboard→analyzer convention
+          // ("Open Analysis" opens a NEW tab so the source stays put — see
+          // refresh-on-return.tsx).
+          action:
+            result.mode === "inserted" ? (
+              <ToastAction
+                altText="Open this deal's workspace in a new tab"
+                onClick={() => {
+                  window.open(`/dashboard/saved-analyses/${result.id}`, "_blank", "noopener");
+                }}
+              >
+                Open deal workspace
+              </ToastAction>
+            ) : undefined,
         });
         return;
       }
@@ -3258,18 +3287,20 @@ export function InvestCalcPage({
         // dead-end the highest-intent click: offer the sign-in route and set
         // the pending-save-intent flag so their deal auto-resumes after auth.
         toast({
-          title: "Sign in required",
-          description: "Create an account or sign in to save deals.",
+          title: "Account needed to save",
+          description: "Create a free account (or sign in) and this deal saves itself.",
           variant: "destructive",
           action: (
             <ToastAction
-              altText="Sign in and come back to this deal"
+              altText="Create a free account and come back to this deal"
               onClick={() => {
                 setPendingSaveIntent();
-                router.push("/auth/login?next=/");
+                // Sign-up, not login — anon savers are mostly first-timers;
+                // the sign-up page has a "Sign in" cross-link that keeps ?next.
+                router.push("/auth/sign-up?next=/");
               }}
             >
-              Sign in
+              Create free account
             </ToastAction>
           ),
         });
@@ -3872,7 +3903,7 @@ export function InvestCalcPage({
     setTimeout(() => {
       form.setFocus("address");
       (document.getElementById("address") ?? undefined)?.scrollIntoView({
-        behavior: "smooth",
+        behavior: scrollBehavior(),
         block: "center",
       });
     }, 100);
@@ -4263,7 +4294,7 @@ export function InvestCalcPage({
   const handleEditPrice = () => {
     if (typeof window !== "undefined") {
       const el = document.getElementById("main");
-      if (el) window.scrollTo({ top: el.offsetTop - 64, behavior: "smooth" });
+      if (el) window.scrollTo({ top: el.offsetTop - 64, behavior: scrollBehavior() });
     }
     requestAnimationFrame(() => {
       try {
@@ -4291,7 +4322,7 @@ export function InvestCalcPage({
     trackEvent("optional_section_opened", { source: "edit_link" });
     if (typeof window !== "undefined") {
       const el = document.getElementById("main");
-      if (el) window.scrollTo({ top: el.offsetTop - 64, behavior: "smooth" });
+      if (el) window.scrollTo({ top: el.offsetTop - 64, behavior: scrollBehavior() });
     }
   };
 
@@ -5115,9 +5146,7 @@ export function InvestCalcPage({
           if (!next && addressChangedChoiceBusy === null) setAddressChangedPrompt(null);
         }}
       >
-        {/* max-h + scroll so both options stay reachable on short viewports
-            (landscape phones, split-screen). */}
-        <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-md">
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>The address changed</DialogTitle>
             <DialogDescription>

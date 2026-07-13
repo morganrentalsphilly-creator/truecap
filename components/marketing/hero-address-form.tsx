@@ -35,6 +35,7 @@ import {
   type HeroAnalyzeDetail,
 } from "@/lib/hero-handoff";
 import { trackEvent } from "@/lib/analytics";
+import { scrollBehavior } from "@/lib/utils";
 
 function scrollToCalculator() {
   if (typeof window === "undefined") return;
@@ -46,7 +47,7 @@ function scrollToCalculator() {
   // ancestor happens to sit at the document top. getBoundingClientRect +
   // scrollY is correct regardless of what layout wraps #main next.
   const top = el.getBoundingClientRect().top + window.scrollY - 64;
-  window.scrollTo({ top, behavior: "smooth" });
+  window.scrollTo({ top, behavior: scrollBehavior() });
 }
 
 function dispatchHeroAnalyze(detail: HeroAnalyzeDetail) {

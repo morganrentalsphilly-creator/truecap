@@ -35,8 +35,8 @@ function classify(roi: number): { label: string; color: string; note: string } {
   if (roi >= 18) return { label: "Excellent", color: "text-[var(--metric-positive)]", note: "Top-decile leveraged return." };
   if (roi >= 12) return { label: "Strong", color: "text-[var(--metric-positive)]", note: "Solid combined return on capital." };
   if (roi >= 8) return { label: "Decent", color: "text-foreground", note: "Reasonable return; better than most index funds." };
-  if (roi >= 4) return { label: "Weak", color: "text-amber-600", note: "Bond-like return — better than nothing but not why you invest in rentals." };
-  return { label: "Poor", color: "text-amber-600", note: "Less than bonds. Don't deploy capital here unless there's a non-financial reason." };
+  if (roi >= 4) return { label: "Weak", color: "text-amber-700", note: "Bond-like return — better than nothing but not why you invest in rentals." };
+  return { label: "Poor", color: "text-amber-700", note: "Less than bonds. Don't deploy capital here unless there's a non-financial reason." };
 }
 
 export function RoiCalculatorWidget() {

@@ -156,7 +156,7 @@ export function Topbar({
           aria-autocomplete="list"
           aria-activedescendant={activeIndex >= 0 && suggestions[activeIndex] ? `sugg-${suggestions[activeIndex]!.id}` : undefined}
           autoComplete="off"
-          className="w-full h-10 pl-10 pr-4 rounded-lg bg-muted/60 border border-transparent focus:border-primary focus:bg-background outline-none text-sm transition"
+          className="w-full h-10 pl-10 pr-4 rounded-lg bg-muted/60 border border-transparent focus:border-primary focus:bg-background outline-none text-base sm:text-sm transition"
         />
 
         {isOpen ? (

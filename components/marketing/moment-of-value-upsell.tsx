@@ -16,6 +16,7 @@ import Link from "next/link";
 import { ArrowRight, Lock, X, FileDown, Calculator, TrendingUp } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 import { TRIAL_LABEL } from "@/lib/trial";
+import { scrollBehavior } from "@/lib/utils";
 
 interface MomentOfValueUpsellProps {
   netCashFlow: number;
@@ -64,7 +65,7 @@ export function MomentOfValueUpsell({
   const handleKeepEditing = () => {
     if (typeof window === "undefined") return;
     const el = document.getElementById("main");
-    if (el) window.scrollTo({ top: el.offsetTop - 64, behavior: "smooth" });
+    if (el) window.scrollTo({ top: el.offsetTop - 64, behavior: scrollBehavior() });
   };
 
   // Choose a personalized hook based on the actual numbers

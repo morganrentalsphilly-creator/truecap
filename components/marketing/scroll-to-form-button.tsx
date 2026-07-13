@@ -11,6 +11,7 @@
  */
 
 import type { ReactNode } from "react";
+import { scrollBehavior } from "@/lib/utils";
 
 type Props = {
   /** Element ID to scroll to (defaults to "main"). */
@@ -39,7 +40,7 @@ export function ScrollToFormButton({
     if (typeof window === "undefined") return;
     const el = document.getElementById(targetId);
     if (!el) return;
-    window.scrollTo({ top: el.offsetTop - offsetPx, behavior: "smooth" });
+    window.scrollTo({ top: el.offsetTop - offsetPx, behavior: scrollBehavior() });
   };
 
   return (

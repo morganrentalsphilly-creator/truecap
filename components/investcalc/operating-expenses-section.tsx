@@ -155,6 +155,28 @@ export function OperatingExpensesSection({
   const insuranceInputMode = watch("insuranceInputMode");
   const insurancePct = watch("insurancePct");
   const insuranceMonthly = watch("insuranceMonthly");
+  // The four % assumptions the collapsed summary shows. These are LIVE
+  // watched values, not hardcoded schema defaults: saved user defaults, an
+  // auto-applied template, or a reopened deal all override them, and the
+  // summary must show the numbers actually driving the verdict. A cleared
+  // field mirrors the schema's coerceExpensePct semantics (blank/NaN → 0%,
+  // "not reserving for this") so the summary never contradicts the math.
+  const vacancyPct = watch("vacancyPct");
+  const mgmtPct = watch("mgmtPct");
+  const maintenancePct = watch("maintenancePct");
+  const capexPct = watch("capexPct");
+  const asExpensePct = (v: number | undefined) => (Number.isFinite(v) ? (v as number) : 0);
+  const vacancyPctEffective = asExpensePct(vacancyPct);
+  const mgmtPctEffective = asExpensePct(mgmtPct);
+  const maintenancePctEffective = asExpensePct(maintenancePct);
+  const capexPctEffective = asExpensePct(capexPct);
+  // Stock schema defaults (lib/investcalc-schema.ts: 5/8/10/5) — drives
+  // the "sensible defaults" vs "your assumptions" heading below.
+  const usingStockPctDefaults =
+    vacancyPctEffective === 5 &&
+    mgmtPctEffective === 8 &&
+    maintenancePctEffective === 10 &&
+    capexPctEffective === 5;
   const purchasePriceForEstimate = Number.isFinite(purchasePrice) ? purchasePrice : 0;
   // No price entered yet → don't show "$0/mo" (reads like a false claim that
   // the property has no tax/insurance); show a dash until there's a price.
@@ -219,7 +241,10 @@ export function OperatingExpensesSection({
           <div className="mb-3 flex items-center gap-1.5">
             <Info className="size-4 text-muted-foreground" />
             <span className="text-sm font-semibold text-foreground">
-              Using sensible defaults
+              {/* Heading tracks reality: personal defaults / templates /
+                  reopened deals override the stock percentages, and calling
+                  those "sensible defaults" mislabels the user's own numbers. */}
+              {usingStockPctDefaults ? "Using sensible defaults" : "Using your expense assumptions"}
             </span>
           </div>
           {/* Auto-calculated dollar estimates (computed from purchase
@@ -238,28 +263,33 @@ export function OperatingExpensesSection({
               </span>
             </div>
           </div>
-          {/* Default percentages summary - the four operating-cost
-              assumptions that used to show as four full Input fields
-              even on the empty form. Surfacing them as a compact
-              one-line summary cuts ~120px of visible form height and
-              keeps the "60 seconds" promise credible. User clicks
-              "Show Advanced Options" to override any of them. */}
+          {/* Percentages summary - the four operating-cost assumptions
+              that used to show as four full Input fields even on the
+              empty form. Surfacing them as a compact one-line summary
+              cuts ~120px of visible form height and keeps the "60
+              seconds" promise credible. User clicks "Show Advanced
+              Options" to override any of them. Values are the LIVE form
+              values (watched above) — this line previously hardcoded
+              5/8/10/5 and contradicted personal defaults, templates, and
+              reopened deals. The "% of rent" basis answers "% of what?"
+              at the moment the jargon appears. */}
           <div className="mb-2.5 flex flex-wrap gap-x-4 gap-y-1 text-sm">
             <span className="text-muted-foreground">
-              Vacancy <span className="font-semibold text-foreground">5%</span>
+              Vacancy <span className="font-semibold text-foreground">{vacancyPctEffective}%</span>
             </span>
             <span aria-hidden className="text-muted-foreground/40">·</span>
             <span className="text-muted-foreground">
-              Management <span className="font-semibold text-foreground">8%</span>
+              Management <span className="font-semibold text-foreground">{mgmtPctEffective}%</span>
             </span>
             <span aria-hidden className="text-muted-foreground/40">·</span>
             <span className="text-muted-foreground">
-              Maintenance <span className="font-semibold text-foreground">10%</span>
+              Maintenance <span className="font-semibold text-foreground">{maintenancePctEffective}%</span>
             </span>
             <span aria-hidden className="text-muted-foreground/40">·</span>
             <span className="text-muted-foreground">
-              CapEx <span className="font-semibold text-foreground">5%</span>
+              CapEx <span className="font-semibold text-foreground">{capexPctEffective}%</span>
             </span>
+            <span className="text-xs text-muted-foreground/80 self-center">(all % of rent)</span>
           </div>
           <p className="text-xs text-muted-foreground">
             Click &quot;Show Advanced Options&quot; to override any of these or

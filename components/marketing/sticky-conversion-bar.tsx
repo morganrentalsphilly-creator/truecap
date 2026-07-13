@@ -13,6 +13,7 @@
 import { useEffect, useState } from "react";
 import { ArrowRight, Calculator, X } from "lucide-react";
 import { useCookieBannerOpen } from "@/lib/use-cookie-banner";
+import { scrollBehavior } from "@/lib/utils";
 
 const STORAGE_KEY = "truecap_home_sticky_dismissed";
 
@@ -25,7 +26,7 @@ function scrollToForm() {
   // ancestor sits at the document top (same hardening as the hero's
   // scrollToCalculator).
   const top = el.getBoundingClientRect().top + window.scrollY - 64;
-  window.scrollTo({ top, behavior: "smooth" });
+  window.scrollTo({ top, behavior: scrollBehavior() });
 }
 
 export function StickyConversionBar() {

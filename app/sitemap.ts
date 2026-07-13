@@ -11,11 +11,20 @@ import { BLOG_POSTS } from "@/app/blog/page";
 export default function sitemap(): MetadataRoute.Sitemap {
   const siteUrl = getSiteUrl();
 
+  // lastModified policy: only emit a date we can stand behind — a blog
+  // post's publishedAt or a hand-stamped content-release date. The evergreen
+  // pages (tools, glossary, states, markets, hubs, static marketing pages)
+  // used to stamp `lastModified: new Date()`, which re-declared ~250
+  // unchanged URLs as "modified today" on EVERY deploy; once lastmod is
+  // provably wrong, Google ignores it site-wide, devaluing the honest blog
+  // dates on a site whose bottleneck is indexing coverage. Omitting
+  // lastModified is valid per the sitemap spec and more truthful than
+  // inventing dates — do not reintroduce build-time stamps here.
+
   // Calculator tool pages — derived from lib/calculator-registry.ts (the single
   // source of truth) so the sitemap can never drift from /tools again.
   const toolUrls: MetadataRoute.Sitemap = CALCULATOR_REGISTRY.map((c) => ({
     url: `${siteUrl}/tools/${c.slug}`,
-    lastModified: new Date(),
     changeFrequency: "monthly" as const,
     priority: 0.8,
   }));
@@ -25,7 +34,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const glossaryUrls: MetadataRoute.Sitemap = Object.values(GLOSSARY).map(
     (entry) => ({
       url: `${siteUrl}/glossary/${entry.slug}`,
-      lastModified: new Date(),
       changeFrequency: "monthly" as const,
       priority: 0.6,
     })
@@ -35,7 +43,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // and related state-level queries.
   const stateUrls: MetadataRoute.Sitemap = Object.values(STATES).map((s) => ({
     url: `${siteUrl}/states/${s.slug}`,
-    lastModified: new Date(),
     changeFrequency: "monthly" as const,
     priority: 0.7,
   }));
@@ -46,7 +53,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const cityStrategyUrls: MetadataRoute.Sitemap = CITY_STRATEGY_COMBOS.map(
     (c) => ({
       url: `${siteUrl}/markets/${c.citySlug}/${c.strategy}`,
-      lastModified: new Date(),
       changeFrequency: "monthly" as const,
       priority: 0.7,
     })
@@ -57,7 +63,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // which are listed separately below).
   const marketCityUrls: MetadataRoute.Sitemap = MARKET_CITIES.map((c) => ({
     url: `${siteUrl}/markets/${c.slug}`,
-    lastModified: new Date(),
     changeFrequency: "monthly" as const,
     priority: 0.7,
   }));
@@ -66,13 +71,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const topicHubUrls: MetadataRoute.Sitemap = [
     {
       url: `${siteUrl}/blog/topics`,
-      lastModified: new Date(),
       changeFrequency: "monthly" as const,
       priority: 0.6,
     },
     ...BLOG_TOPICS.map((t) => ({
       url: `${siteUrl}/blog/topics/${t.slug}`,
-      lastModified: new Date(),
       changeFrequency: "monthly" as const,
       priority: 0.7,
     })),
@@ -101,74 +104,62 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...blogUrls,
     {
       url: `${siteUrl}/markets`,
-      lastModified: new Date(),
       changeFrequency: "weekly" as const,
       priority: 0.8,
     },
     {
       url: `${siteUrl}/states`,
-      lastModified: new Date(),
       changeFrequency: "monthly" as const,
       priority: 0.7,
     },
     {
       url: `${siteUrl}/`,
-      lastModified: new Date(),
       changeFrequency: "daily",
       priority: 1,
     },
     {
       url: `${siteUrl}/pricing`,
-      lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.9,
     },
     {
       url: `${siteUrl}/tools`,
-      lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.7,
     },
     ...toolUrls,
     {
       url: `${siteUrl}/privacy`,
-      lastModified: new Date(),
       changeFrequency: "yearly",
       priority: 0.3,
     },
     {
       url: `${siteUrl}/terms`,
-      lastModified: new Date(),
       changeFrequency: "yearly",
       priority: 0.3,
     },
     {
       url: `${siteUrl}/blog`,
-      lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.7,
     },
     {
       url: `${siteUrl}/feed.xml`,
-      lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.5,
     },
     {
       url: `${siteUrl}/llms.txt`,
-      lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.5,
     },
     {
       url: `${siteUrl}/llms-full.txt`,
-      lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.5,
     },
     {
       url: `${siteUrl}/embed`,
-      lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.6,
     },
@@ -204,55 +195,46 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${siteUrl}/changelog`,
-      lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.4,
     },
     {
       url: `${siteUrl}/glossary`,
-      lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.6,
     },
     {
       url: `${siteUrl}/methodology`,
-      lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.5,
     },
     {
       url: `${siteUrl}/why-truecap`,
-      lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.8,
     },
     {
       url: `${siteUrl}/for-agents`,
-      lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.6,
     },
     {
       url: `${siteUrl}/for-flippers`,
-      lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.6,
     },
     {
       url: `${siteUrl}/for-buy-and-hold`,
-      lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.7,
     },
     {
       url: `${siteUrl}/for-house-hackers`,
-      lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.7,
     },
     {
       url: `${siteUrl}/for-brrrr`,
-      lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.7,
     },
@@ -261,49 +243,41 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // /vs/<competitor> pages remain in the sitemap below.
     {
       url: `${siteUrl}/vs/dealcheck`,
-      lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.7,
     },
     {
       url: `${siteUrl}/vs/bricked`,
-      lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.7,
     },
     {
       url: `${siteUrl}/vs/stessa`,
-      lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.7,
     },
     {
       url: `${siteUrl}/vs/mashvisor`,
-      lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.7,
     },
     {
       url: `${siteUrl}/vs/biggerpockets-calculator`,
-      lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.8,
     },
     {
       url: `${siteUrl}/vs/excel`,
-      lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.8,
     },
     {
       url: `${siteUrl}/vs/rentometer`,
-      lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.7,
     },
     {
       url: `${siteUrl}/vs/zillow-rent-estimate`,
-      lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.8,
     },
@@ -409,73 +383,61 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${siteUrl}/markets/philadelphia`,
-      lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.7,
     },
     {
       url: `${siteUrl}/markets/cleveland`,
-      lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.7,
     },
     {
       url: `${siteUrl}/markets/atlanta`,
-      lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.7,
     },
     {
       url: `${siteUrl}/markets/houston`,
-      lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.7,
     },
     {
       url: `${siteUrl}/markets/tampa`,
-      lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.7,
     },
     {
       url: `${siteUrl}/markets/charlotte`,
-      lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.7,
     },
     {
       url: `${siteUrl}/markets/indianapolis`,
-      lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.7,
     },
     {
       url: `${siteUrl}/markets/kansas-city`,
-      lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.7,
     },
     {
       url: `${siteUrl}/markets/dallas`,
-      lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.7,
     },
     {
       url: `${siteUrl}/markets/detroit`,
-      lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.7,
     },
     {
       url: `${siteUrl}/markets/memphis`,
-      lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.7,
     },
     {
       url: `${siteUrl}/markets/phoenix`,
-      lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.7,
     },

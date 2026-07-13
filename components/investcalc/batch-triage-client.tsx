@@ -6,9 +6,13 @@
  * ranking live in the pure lib/batch-triage engine (client-safe), reached
  * through the Pro-gated screenBatchAction. Re-sorting is instant + local
  * (rankTriageRows is pure) — no server round-trip once the batch is screened.
+ *
+ * The pasted text + screened result also persist to sessionStorage
+ * (lib/batch-triage-storage) and rehydrate on mount, so drilling into a row,
+ * Back, or a refresh never wipes a screened batch mid-triage.
  */
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { ArrowUpRight, ListChecks, Loader2, SlidersHorizontal, Sparkles } from "lucide-react";
 import { screenBatchAction, extractTriageListingsAction, type BatchTriageResult } from "@/app/actions/batch-triage";
@@ -19,6 +23,11 @@ import {
   type TriageSort,
 } from "@/lib/batch-triage";
 import { buildAnalyzerHandoffUrl } from "@/lib/analyzer-handoff";
+import {
+  parseStoredTriageBatch,
+  serializeTriageBatch,
+  TRIAGE_STORAGE_KEY,
+} from "@/lib/batch-triage-storage";
 import { recommendationLabel } from "@/lib/deal-score";
 import { BuyBoxFitBadge } from "@/components/investcalc/buy-box-fit-badge";
 import { useToast } from "@/hooks/use-toast";
@@ -79,6 +88,45 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
   const [result, setResult] = useState<Extract<BatchTriageResult, { ok: true }> | null>(null);
   const [sort, setSort] = useState<TriageSort>("score");
   const [passersOnly, setPassersOnly] = useState(false);
+
+  // Rehydrate a previously screened batch. Done in an effect (not a state
+  // initializer) so the server render and first client render match — the
+  // one-frame empty state is the price of no hydration mismatch.
+  useEffect(() => {
+    try {
+      const stored = parseStoredTriageBatch(window.sessionStorage.getItem(TRIAGE_STORAGE_KEY));
+      if (!stored) return;
+      setText(stored.text);
+      if (stored.result) {
+        setResult(stored.result);
+        setSort(stored.result.sort);
+      }
+    } catch {
+      // Storage unavailable (private mode / disabled) — persistence is
+      // best-effort; the screen still works, it just won't survive a refresh.
+    }
+  }, []);
+
+  // Persist {text, result} on change (small payload — ≤MAX_TRIAGE_ROWS rows).
+  // The first pass is skipped: on mount this effect runs with the initial
+  // empty state, BEFORE the rehydrate effect's setState lands, and must not
+  // clobber the stored batch it's about to restore.
+  const persistArmedRef = useRef(false);
+  useEffect(() => {
+    if (!persistArmedRef.current) {
+      persistArmedRef.current = true;
+      return;
+    }
+    try {
+      if (text === "" && result === null) {
+        window.sessionStorage.removeItem(TRIAGE_STORAGE_KEY);
+      } else {
+        window.sessionStorage.setItem(TRIAGE_STORAGE_KEY, serializeTriageBatch({ text, result }));
+      }
+    } catch {
+      // Quota / private mode — fail silently (see the rehydrate effect).
+    }
+  }, [text, result]);
 
   const screen = () => {
     startScreening(async () => {
@@ -276,10 +324,18 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
                         <td className="px-3 py-3 text-right font-mono tabular-nums text-foreground">{pct(row.capRatePct)}</td>
                         <td className="px-3 py-3 text-right font-mono tabular-nums text-foreground">{ratio(row.dscr, row.isCashPurchase)}</td>
                         <td className="px-3 py-3 text-right">
+                          {/* New tab (the My Deals "Open Analysis" convention,
+                              see refresh-on-return.tsx): the screened batch
+                              stays mounted while the user drills into rows. */}
+                          {/* min-h-11 + canceling negative margin/padding = 44px
+                              touch band (WCAG 2.5.8) without growing the row —
+                              the touch-band convention what-if-sliders.tsx set. */}
                           <Link
                             href={openUrl(row)}
                             prefetch={false}
-                            className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
+                            target="_blank"
+                            rel="noopener"
+                            className="-my-2 inline-flex min-h-11 items-center gap-1 py-2 text-xs font-semibold text-primary hover:underline"
                           >
                             Open <ArrowUpRight className="size-3.5" />
                           </Link>
@@ -314,7 +370,9 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
                     </div>
                     <div className="mt-3 flex items-center justify-between gap-2">
                       <BuyBoxFitBadge fit={row.buyBoxFit ?? undefined} />
-                      <Link href={openUrl(row)} prefetch={false} className="ml-auto inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline">
+                      {/* 44px touch band (min-h-11 + canceling -my/py) — this is
+                          the card's only action; visual height unchanged. */}
+                      <Link href={openUrl(row)} prefetch={false} target="_blank" rel="noopener" className="-my-2 ml-auto inline-flex min-h-11 items-center gap-1 py-2 text-xs font-semibold text-primary hover:underline">
                         Open in analyzer <ArrowUpRight className="size-3.5" />
                       </Link>
                     </div>

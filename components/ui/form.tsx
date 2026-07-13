@@ -147,6 +147,11 @@ function FormMessage({ className, ...props }: React.ComponentProps<'p'>) {
     <p
       data-slot="form-message"
       id={formMessageId}
+      // role="alert" only for real validation errors: they often appear on
+      // blur/change with focus elsewhere, so screen readers would otherwise
+      // never announce them (matches form-field-helpers.tsx). Static helper
+      // children rendered without an error stay a plain <p>.
+      role={error ? 'alert' : undefined}
       className={cn('text-destructive text-sm', className)}
       {...props}
     >

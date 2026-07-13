@@ -30,10 +30,12 @@ export function StrategyChips({
           </p>
         </div>
         {active ? (
+          // min-h-8 + canceling negative margin: the same touch band the
+          // strategy chips below carry, without growing the header row.
           <button
             type="button"
             onClick={() => onSelect(null)}
-            className="shrink-0 text-xs font-semibold text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+            className="-my-1.5 inline-flex min-h-8 shrink-0 items-center text-xs font-semibold text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
           >
             Clear
           </button>

@@ -22,6 +22,7 @@
  */
 
 import { useEffect, useState } from "react";
+import { scrollBehavior } from "@/lib/utils";
 
 const SECTIONS = [
   { id: "deal-scenarios", label: "Scenarios" },
@@ -68,7 +69,7 @@ export function DealWorkspaceAnchorChips() {
             const target = document.getElementById(section.id);
             if (!target) return; // fall back to the default jump
             event.preventDefault();
-            target.scrollIntoView({ behavior: "smooth", block: "start" });
+            target.scrollIntoView({ behavior: scrollBehavior(), block: "start" });
           }}
           className="inline-flex items-center rounded-full border border-border bg-muted/40 px-2.5 py-1 text-[11px] font-semibold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
         >

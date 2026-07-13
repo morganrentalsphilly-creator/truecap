@@ -11,9 +11,12 @@
  */
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
+import { ArrowUpRight, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { buildAnalyzerHandoffUrl } from "@/lib/analyzer-handoff";
 
 const num = (s: string) => {
   const n = Number(s);
@@ -59,10 +62,18 @@ export function VacancyRateCalculatorWidget() {
       : "Distressed";
   const verdictColor =
     result.vacancyPct < 5
-      ? "text-amber-600"
+      ? "text-amber-700"
       : result.vacancyPct < 12
       ? "text-[var(--metric-positive)]"
       : "text-[var(--metric-negative)]";
+
+  // Moment-of-result handoff into the full analyzer (P2-2 pattern shared by
+  // the other tool widgets) — carries the rent the user already typed so the
+  // analyzer prefills it (partial handoffs are supported by design).
+  const handoffHref = buildAnalyzerHandoffUrl(
+    { monthlyRent: num(monthlyRent) },
+    { utmSource: "vacancy-rate-calculator" }
+  );
 
   return (
     <div className="rounded-2xl border border-border bg-card p-5 sm:p-6">
@@ -179,6 +190,15 @@ export function VacancyRateCalculatorWidget() {
         7-9%. Sellers and listing brochures typically quote 5%. Anything
         under 5% is aggressive — adjust your offer accordingly.
       </p>
+
+      <Link
+        href={handoffHref} target="_top"
+        className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline"
+      >
+        <Sparkles className="w-4 h-4" />
+        Run the full analysis with this rent — cash flow, cap rate, DSCR, projections — free
+        <ArrowUpRight className="w-4 h-4" />
+      </Link>
     </div>
   );
 }

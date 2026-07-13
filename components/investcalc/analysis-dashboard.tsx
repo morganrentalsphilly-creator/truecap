@@ -127,7 +127,7 @@ import type { TaxStrategyInput, TaxStrategyYear } from "@/lib/tax-strategy";
 import type { ExitScenarioInput, ExitScenarioYear } from "@/lib/exit-scenarios";
 import { computeReturnSummaryFromExitYears } from "@/lib/returns";
 import { isExtremeAnnualizedRoi } from "@/lib/extreme-value-format";
-import { cn } from "@/lib/utils";
+import { cn, scrollBehavior } from "@/lib/utils";
 import type { DealScoreActionResult } from "@/app/actions/deal-score";
 import {
   APPRECIATION_PLAY_MIN_ANNUAL_RETURN_PCT,
@@ -401,7 +401,7 @@ export function AnalysisDashboard({
       requestAnimationFrame(() => {
         document
           .getElementById(`analysis-tab-${id}`)
-          ?.scrollIntoView({ behavior: "smooth", block: "start" });
+          ?.scrollIntoView({ behavior: scrollBehavior(), block: "start" });
       });
     },
     [openRow]
@@ -568,9 +568,14 @@ export function AnalysisDashboard({
   // before auth, the calculator auto-runs their analysis on return and points
   // them back at Save — completing the click they already made instead of
   // asking them to redo it (goToLogin's only caller is the Save button).
+  // Route to SIGN-UP, not login: an anonymous saver is overwhelmingly a
+  // first-time visitor, and the login page's "Welcome back" framing was
+  // a wall at their highest-intent moment. Sign-up leads with one-tap
+  // Google OAuth and keeps a "Sign in" cross-link (which threads ?next)
+  // for the rare returning user.
   const goToLogin = () => {
     setPendingSaveIntent();
-    router.push("/auth/login?next=/");
+    router.push("/auth/sign-up?next=/");
   };
   // Auth-aware upgrade routing (BROWSER-1 / STRATEGY-UPSELL-LOGIN-DEADEND):
   // /profile is auth-gated and server-redirects anonymous users to

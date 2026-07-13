@@ -53,7 +53,7 @@ export function ClosingCostCalculatorWidget() {
   }, [purchasePrice, originationPct, titlePct, recordingFees, transferTaxPct, insurancePrepay, taxEscrow, appraisal, inspection]);
 
   const verdict = result.pctOfPrice < 2 ? "Low" : result.pctOfPrice < 4 ? "Typical" : result.pctOfPrice < 6 ? "High" : "Very high";
-  const verdictColor = result.pctOfPrice < 4 ? "text-[var(--metric-positive)]" : "text-amber-600";
+  const verdictColor = result.pctOfPrice < 4 ? "text-[var(--metric-positive)]" : "text-amber-700";
 
   // Carry the user's purchase price into the full analyzer (P2-2 handoff).
   const handoffHref = buildAnalyzerHandoffUrl(

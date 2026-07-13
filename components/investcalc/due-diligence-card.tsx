@@ -176,7 +176,7 @@ export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
               {dueSummary.overdue} overdue
             </span>
           ) : dueSummary.dueSoon > 0 ? (
-            <span className="rounded-full bg-amber-500/10 px-2 py-0.5 font-semibold text-amber-600">
+            <span className="rounded-full bg-amber-500/10 px-2 py-0.5 font-semibold text-amber-700">
               {dueSummary.dueSoon} due soon
             </span>
           ) : null}
@@ -244,7 +244,7 @@ export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
                   Overdue
                 </span>
               ) : status === "due-soon" ? (
-                <span className="shrink-0 rounded-full bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-600">
+                <span className="shrink-0 rounded-full bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-700">
                   Due soon
                 </span>
               ) : null}

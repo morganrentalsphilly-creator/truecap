@@ -106,7 +106,7 @@ export function UpdatePasswordForm() {
                     autoComplete="new-password"
                     placeholder="Enter your new password"
                     disabled={isSubmitting}
-                    className="h-12 rounded-xl border-border bg-background px-11 text-sm shadow-sm placeholder:text-muted-foreground/70"
+                    className="h-12 rounded-xl border-border bg-background px-11 text-base sm:text-sm shadow-sm placeholder:text-muted-foreground/70"
                     {...field}
                   />
                   <button
@@ -138,7 +138,7 @@ export function UpdatePasswordForm() {
                     autoComplete="new-password"
                     placeholder="Confirm your new password"
                     disabled={isSubmitting}
-                    className="h-12 rounded-xl border-border bg-background px-11 text-sm shadow-sm placeholder:text-muted-foreground/70"
+                    className="h-12 rounded-xl border-border bg-background px-11 text-base sm:text-sm shadow-sm placeholder:text-muted-foreground/70"
                     {...field}
                   />
                   <button

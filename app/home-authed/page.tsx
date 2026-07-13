@@ -112,36 +112,43 @@ export default async function AuthedHome({
       }
     }
   }
-  const entitlements = user ? await getEntitlementsForUser(supabase, user.id) : null;
-  // Fetch the user's analysis defaults so the form pre-fills with
-  // their preferred vacancy/mgmt/financing values instead of the
-  // generic engine defaults. Done server-side so there's no flash
-  // of generic values before user defaults overlay. Tolerant of
-  // missing migration (returns null on the 42P01 path).
+  // The four reads below (entitlements, analysis defaults, paid-plan
+  // check, saved-deal count) are independent and only need user.id, so
+  // run them concurrently instead of paying four serial DB round-trips
+  // on the most-loaded authed page — same Promise.all batching as
+  // app/dashboard/page.tsx.
+  //
+  // Analysis defaults: fetched so the form pre-fills with the user's
+  // preferred vacancy/mgmt/financing values instead of the generic
+  // engine defaults. Done server-side so there's no flash of generic
+  // values before user defaults overlay. Tolerant of missing migration
+  // (returns null on the 42P01 path).
+  const [entitlements, defaultsQuery, canUpdateSavedDeals, savedCountQuery] = user
+    ? await Promise.all([
+        getEntitlementsForUser(supabase, user.id),
+        supabase
+          .from("user_analysis_defaults")
+          .select("preferences")
+          .eq("user_id", user.id)
+          .maybeSingle(),
+        hasPaidPlanSubscription(supabase, user.id),
+        supabase
+          .from("saved_analyses")
+          .select("*", { count: "exact", head: true })
+          .eq("user_id", user.id)
+          .is("deleted_at", null),
+      ])
+    : [null, null, false, null];
   let userAnalysisDefaults: Record<string, number> | null = null;
-  if (user) {
-    const { data: defaultsRow } = await supabase
-      .from("user_analysis_defaults")
-      .select("preferences")
-      .eq("user_id", user.id)
-      .maybeSingle();
-    const prefs = (defaultsRow as { preferences?: unknown } | null)?.preferences;
-    if (prefs && typeof prefs === "object" && !Array.isArray(prefs)) {
-      const sanitized: Record<string, number> = {};
-      for (const [k, v] of Object.entries(prefs as Record<string, unknown>)) {
-        if (typeof v === "number" && Number.isFinite(v)) sanitized[k] = v;
-      }
-      if (Object.keys(sanitized).length > 0) userAnalysisDefaults = sanitized;
+  const prefs = (defaultsQuery?.data as { preferences?: unknown } | null)?.preferences;
+  if (prefs && typeof prefs === "object" && !Array.isArray(prefs)) {
+    const sanitized: Record<string, number> = {};
+    for (const [k, v] of Object.entries(prefs as Record<string, unknown>)) {
+      if (typeof v === "number" && Number.isFinite(v)) sanitized[k] = v;
     }
+    if (Object.keys(sanitized).length > 0) userAnalysisDefaults = sanitized;
   }
-  const canUpdateSavedDeals = user ? await hasPaidPlanSubscription(supabase, user.id) : false;
-  const { count: savedDealCount } = user
-    ? await supabase
-        .from("saved_analyses")
-        .select("*", { count: "exact", head: true })
-        .eq("user_id", user.id)
-        .is("deleted_at", null)
-    : { count: 0 };
+  const savedDealCount = savedCountQuery?.count ?? 0;
   const canSaveDeals = entitlements ? hasPlanFeature(entitlements, "save_deal") : false;
   const saveDealLimitReached = entitlements ? !hasSavedDealCapacity(entitlements, savedDealCount ?? 0) : false;
   const canCompareDeals = entitlements ? hasPlanFeature(entitlements, "compare_deals") : false;

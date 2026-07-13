@@ -11,6 +11,7 @@
 
 import type { DealTier } from "@/lib/verdict";
 import { cn } from "@/lib/utils";
+import { GlossaryTip } from "./glossary-tip";
 
 /** The lightweight pre-run verdict snapshot computed by the form watcher. */
 export type LivePreviewSnapshot = {
@@ -24,6 +25,11 @@ export type LivePreviewSnapshot = {
    *  preview is NEGATIVE — the "try this as your offer" path out of a bad
    *  first number. Null when positive or unsolvable. */
   breakEvenPrice: number | null;
+  /** One-line "what's dragging this" for MIXED/MARGINAL tiers (computed
+   *  by lib/limiting-factor.ts alongside the tier). Null for every other
+   *  tier and for negative cash flow, where the break-even hint above
+   *  already names the next move. */
+  limitingFactor: string | null;
 };
 
 type Props = {
@@ -119,8 +125,14 @@ export function LiveVerdictPanel({ active, livePreview, livePreviewMsg }: Props)
               </div>
             </div>
             <div>
+              {/* GlossaryTip on the FIRST place this jargon ever appears —
+                  the preview renders before the tipped metrics band exists,
+                  so a first-timer meets "Cap rate"/"DSCR" here first. Same
+                  no-underline treatment as the MetricCard labels. */}
               <div className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
-                Cap rate
+                <GlossaryTip term="capRate" className="!no-underline">
+                  Cap rate
+                </GlossaryTip>
               </div>
               <div className="font-mono text-lg font-bold tabular-nums text-foreground sm:text-xl">
                 {livePreview.capRate.toFixed(1)}%
@@ -128,7 +140,9 @@ export function LiveVerdictPanel({ active, livePreview, livePreviewMsg }: Props)
             </div>
             <div>
               <div className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
-                DSCR
+                <GlossaryTip term="dscr" className="!no-underline">
+                  DSCR
+                </GlossaryTip>
               </div>
               <div className="font-mono text-lg font-bold tabular-nums text-foreground sm:text-xl">
                 {livePreview.monthlyPayment <= 0 ? "—" : livePreview.dscr.toFixed(2)}
@@ -146,6 +160,14 @@ export function LiveVerdictPanel({ active, livePreview, livePreviewMsg }: Props)
                 ${Math.round(livePreview.breakEvenPrice).toLocaleString()}
               </span>{" "}
               — try that as your offer price.
+            </p>
+          ) : livePreview.limitingFactor ? (
+            // Mixed/Marginal get the same next-move treatment Negative
+            // already has: name the one metric dragging the verdict (facts
+            // only — thresholds mirror classifyDeal, see lib/limiting-factor.ts)
+            // so the amber pill isn't a dead end.
+            <p className="mt-2.5 rounded-lg bg-background/60 px-2.5 py-2 text-[11px] font-semibold leading-snug text-foreground">
+              {livePreview.limitingFactor}
             </p>
           ) : null}
           <p className="mt-2.5 text-[11px] leading-snug text-muted-foreground">

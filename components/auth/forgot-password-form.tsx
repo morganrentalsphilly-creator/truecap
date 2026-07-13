@@ -85,7 +85,7 @@ export function ForgotPasswordForm() {
                     autoComplete="email"
                     placeholder="you@example.com"
                     disabled={isSubmitting}
-                    className="h-12 rounded-xl border-border bg-background pl-11 text-sm shadow-sm placeholder:text-muted-foreground/70"
+                    className="h-12 rounded-xl border-border bg-background pl-11 text-base sm:text-sm shadow-sm placeholder:text-muted-foreground/70"
                     {...field}
                   />
                 </div>

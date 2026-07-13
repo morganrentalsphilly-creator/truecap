@@ -11,9 +11,12 @@
  */
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
+import { ArrowUpRight, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { buildAnalyzerHandoffUrl } from "@/lib/analyzer-handoff";
 
 const num = (s: string) => {
   const n = Number(s);
@@ -48,13 +51,13 @@ function classify(months: number, cashFlow: number): { label: string; color: str
   if (months <= 180) {
     return {
       label: "Slow (10-15 years)",
-      color: "text-amber-600",
+      color: "text-amber-700",
       note: "Capital-build is slow — this deal relies on appreciation, not cash flow, for the wealth build.",
     };
   }
   return {
     label: "Very slow (15+ years)",
-    color: "text-amber-600",
+    color: "text-amber-700",
     note: "Almost pure appreciation play — only makes sense in fast-growth markets with strong price upside.",
   };
 }
@@ -76,6 +79,12 @@ export function BreakEvenCalculatorWidget() {
 
   const verdict = classify(result.months, result.cashFlow);
   const isInvalid = !Number.isFinite(result.months);
+
+  // Moment-of-result handoff into the full analyzer (P2-2 pattern shared by
+  // the other tool widgets). Down payment / closing / rehab don't map onto
+  // the analyzer's price/rent handoff fields, so this is a bare tagged link
+  // — the analyzer derives cash flow (and break-even) from its own inputs.
+  const handoffHref = buildAnalyzerHandoffUrl({}, { utmSource: "break-even-calculator" });
 
   return (
     <div className="rounded-2xl border border-border bg-card p-5 sm:p-6">
@@ -135,6 +144,15 @@ export function BreakEvenCalculatorWidget() {
           <span className="text-muted-foreground">{verdict.note}</span>
         </p>
       </div>
+
+      <Link
+        href={handoffHref} target="_top"
+        className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline"
+      >
+        <Sparkles className="w-4 h-4" />
+        Run a full property analysis — cash flow, break-even, 10-year projections — free
+        <ArrowUpRight className="w-4 h-4" />
+      </Link>
     </div>
   );
 }

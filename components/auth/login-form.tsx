@@ -39,6 +39,13 @@ export function LoginForm() {
     mode: "onTouched",
   });
 
+  // Thread ?next through the sign-up cross-link so a gated action's return
+  // address (e.g. the calculator's pending save) survives the login → sign-up
+  // hop. Same internal-paths-only validation as the post-auth redirect below.
+  const rawNext = searchParams.get("next");
+  const safeNextPath =
+    rawNext && rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : null;
+
   useEffect(() => {
     if (searchParams.get("error") === "auth") {
       // Differentiate the common failure modes so users know whether to
@@ -160,7 +167,7 @@ export function LoginForm() {
                     autoComplete="email"
                     placeholder="you@example.com"
                     disabled={isSubmitting}
-                    className="h-12 rounded-xl border-border bg-background pl-11 text-sm shadow-sm placeholder:text-muted-foreground/70"
+                    className="h-12 rounded-xl border-border bg-background pl-11 text-base sm:text-sm shadow-sm placeholder:text-muted-foreground/70"
                     {...field}
                   />
                 </div>
@@ -192,7 +199,7 @@ export function LoginForm() {
                     autoComplete="current-password"
                     placeholder="Enter your password"
                     disabled={isSubmitting}
-                    className="h-12 rounded-xl border-border bg-background px-11 text-sm shadow-sm placeholder:text-muted-foreground/70"
+                    className="h-12 rounded-xl border-border bg-background px-11 text-base sm:text-sm shadow-sm placeholder:text-muted-foreground/70"
                     {...field}
                   />
                   <button
@@ -253,7 +260,14 @@ export function LoginForm() {
 
         <p className="text-center text-sm text-muted-foreground">
           No account?{" "}
-          <Link href="/auth/sign-up" className="font-medium text-primary hover:underline">
+          <Link
+            href={
+              safeNextPath
+                ? `/auth/sign-up?next=${encodeURIComponent(safeNextPath)}`
+                : "/auth/sign-up"
+            }
+            className="font-medium text-primary hover:underline"
+          >
             Sign up
           </Link>
         </p>

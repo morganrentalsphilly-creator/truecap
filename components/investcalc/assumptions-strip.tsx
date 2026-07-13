@@ -265,7 +265,9 @@ export function AssumptionsStrip({
             }}
             aria-expanded={advancedOpen}
             aria-controls="advanced-options"
-            className="inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+            // min-h-8 + canceling negative margin: match the chips' min-h-8
+            // touch band below without growing the header row visually.
+            className="-my-1.5 inline-flex min-h-8 shrink-0 items-center gap-1 text-xs font-semibold text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
           >
             Hide details
             <ChevronUp className="size-3.5" aria-hidden />

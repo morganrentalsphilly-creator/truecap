@@ -223,7 +223,9 @@ export function TemplateFormDialog({
         onOpenChange(nextOpen);
       }}
     >
-      <DialogContent showCloseButton={false} className="sm:max-w-6xl h-[92vh] max-h-[92vh] overflow-hidden  p-0 flex flex-col">
+      {/* dvh (not vh) so the footer Save button clears iOS Safari's
+          expanded toolbar instead of rendering behind the browser chrome. */}
+      <DialogContent showCloseButton={false} className="sm:max-w-6xl h-[92dvh] max-h-[92dvh] overflow-hidden  p-0 flex flex-col">
         <DialogHeader className="px-6 pt-6 pb-2 border-b border-border/70">
           <DialogTitle className="flex items-center gap-3">
             <span className="inline-flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">

@@ -49,7 +49,7 @@ import {
   isExtremeCumulativeRoi,
 } from "@/lib/extreme-value-format";
 import { recommendationLabel } from "@/lib/deal-score";
-import { cn } from "@/lib/utils";
+import { cn, scrollBehavior } from "@/lib/utils";
 import { PIPELINE_STAGES, type PipelineStage } from "@/lib/pipeline";
 
 export type { DashboardDeal } from "@/lib/dashboard-deal-mapping";
@@ -339,7 +339,7 @@ function scrollToDeal(deal: DashboardDeal | undefined, index = 0) {
   if (!id) return;
   const el = document.getElementById(`deal-${id}`);
   if (!el) return;
-  el.scrollIntoView({ behavior: "smooth", block: "center" });
+  el.scrollIntoView({ behavior: scrollBehavior(), block: "center" });
   // Move focus to the target so SR / keyboard users land on the deal instead
   // of being stranded while the viewport scrolls away (the row is tabIndex=-1
   // in TopDeals). preventScroll: our own smooth scroll owns the motion.

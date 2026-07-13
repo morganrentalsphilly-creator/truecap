@@ -864,9 +864,11 @@ function MobileLongTermLabel({ row }: { row: LongTermMetricRow }) {
       <p className="text-[11px] font-bold text-muted-foreground">{row.label}</p>
       <Popover>
         <PopoverTrigger asChild>
+          {/* before:-inset-2 = invisible 36px tap band around the 20px icon
+              (WCAG 2.5.8) — visual size unchanged, nothing interactive nearby. */}
           <button
             type="button"
-            className="inline-flex size-5 items-center justify-center rounded-full bg-muted text-muted-foreground"
+            className="relative inline-flex size-5 items-center justify-center rounded-full bg-muted text-muted-foreground before:absolute before:-inset-2"
             aria-label={`View guidance for ${row.label}`}
           >
             <Info className="size-3" />
@@ -897,11 +899,15 @@ function CompareMobileDealStrip({ deals }: { deals: CompareDealViewModel[] }) {
                     <Tooltip delayDuration={200}>
                       <TooltipTrigger asChild>
                         <PopoverTrigger asChild>
+                          {/* Invisible tap band (WCAG 2.5.8): full-height + LEFT-only
+                              horizontal expansion — the sibling "View inputs" trigger
+                              sits 2px to the right, so a symmetric -inset would overlap
+                              its hit area and misroute taps. */}
                           <Button
                             type="button"
                             variant="ghost"
                             size="icon-sm"
-                            className="size-6 rounded-full text-muted-foreground hover:bg-muted"
+                            className="relative size-6 rounded-full text-muted-foreground hover:bg-muted before:absolute before:-inset-y-2 before:-left-2 before:right-0"
                             aria-label={`View saved projection snapshot for ${deal.address}`}
                           >
                             <Table2 className="size-3.5" />
@@ -921,11 +927,13 @@ function CompareMobileDealStrip({ deals }: { deals: CompareDealViewModel[] }) {
                   <Tooltip delayDuration={200}>
                     <TooltipTrigger asChild>
                       <PopoverTrigger asChild>
+                        {/* Mirror of the snapshot trigger above: expand RIGHT/outward
+                            only so the two 24px triggers' tap bands never overlap. */}
                         <Button
                           type="button"
                           variant="ghost"
                           size="icon-sm"
-                          className="size-6 rounded-full text-muted-foreground hover:bg-muted"
+                          className="relative size-6 rounded-full text-muted-foreground hover:bg-muted before:absolute before:-inset-y-2 before:left-0 before:-right-2"
                           aria-label={`View inputs for ${deal.address}`}
                         >
                           <ListTree className="size-3.5" />

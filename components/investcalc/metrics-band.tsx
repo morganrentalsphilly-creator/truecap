@@ -291,7 +291,11 @@ export function buildMetricTiles({
         key="capRate"
         label="Cap Rate"
         glossaryTerm="capRate"
-        value={displayResult ? `${displayResult.capRate >= 0 ? "+" : ""}${displayResult.capRate.toFixed(1)}%` : "—"}
+        // No "+" prefix: cap rate is a ratio, not a signed delta — "+7.2%"
+        // reads like a change vs baseline to a first-timer. Cash flow and
+        // CoC keep their signs (they're genuinely signed returns); a
+        // negative cap rate still shows its "-" via toFixed.
+        value={displayResult ? `${displayResult.capRate.toFixed(1)}%` : "—"}
         sub={displayResult ? capRateBenchmarkLabel(displayResult.capRate, address) : undefined}
         color={displayResult ? capRateBenchmarkColor(displayResult.capRate, address) : undefined}
         isLoading={isLoading}
@@ -472,6 +476,7 @@ function buildReturnMemberTiles(
       node: (
         <MetricCard
           label={`${s.years}-yr IRR`}
+          glossaryTerm="irr"
           value={s.irrPct == null ? "—" : `${s.irrPct.toFixed(1)}%`}
           sub="Annualized return over the hold"
           isLoading={false}
@@ -484,6 +489,7 @@ function buildReturnMemberTiles(
       node: (
         <MetricCard
           label="Equity multiple"
+          glossaryTerm="equityMultiple"
           value={s.equityMultiple == null ? "—" : `${s.equityMultiple.toFixed(2)}×`}
           sub="Cash returned ÷ cash invested"
           isLoading={false}

@@ -151,7 +151,7 @@ export default async function StatePage({
       ? "text-[color:var(--brand-green,#0f9d58)]"
       : state.landlord === "Tenant-leaning"
         ? "text-[var(--metric-negative,#dc2626)]"
-        : "text-amber-600";
+        : "text-amber-700";
 
   return (
     <div className="min-h-screen bg-background">

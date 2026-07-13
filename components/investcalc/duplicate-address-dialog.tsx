@@ -53,9 +53,7 @@ export function DuplicateAddressDialog({
         if (!busy) onOpenChange(next);
       }}
     >
-      {/* max-h + scroll so both options stay reachable on short viewports
-          (landscape phones, split-screen). */}
-      <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-md">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Already saved this address</DialogTitle>
           <DialogDescription>

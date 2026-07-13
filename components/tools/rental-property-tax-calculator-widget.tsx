@@ -97,7 +97,7 @@ export function RentalPropertyTaxCalculatorWidget() {
   const verdictColor =
     result.taxableIncome <= 0
       ? "text-[var(--metric-positive)]"
-      : "text-amber-600";
+      : "text-amber-700";
 
   // Carry the user's price + rent into the full analyzer (P2-2 handoff).
   const handoffHref = buildAnalyzerHandoffUrl(

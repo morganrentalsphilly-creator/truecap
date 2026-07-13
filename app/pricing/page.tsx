@@ -6,11 +6,13 @@
  * directly via the existing billing action.
  */
 
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import * as Sentry from "@sentry/nextjs";
-import { Check, ShieldCheck, Sparkles, X } from "lucide-react";
+import { Check, Quote, ShieldCheck, Sparkles, X } from "lucide-react";
 import { Header } from "@/components/investcalc/header";
+import { CheckoutCancelledBanner } from "@/components/marketing/checkout-cancelled-banner";
 import { PricingTogglePlans } from "@/components/marketing/pricing-toggle-plans";
 import { getEntitlementsForUser, hasPaidPlanSubscription } from "@/lib/entitlements";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
@@ -161,12 +163,36 @@ export default async function PricingPage() {
         {/* id="plans" — scroll target for exit-intent CTAs and any other
             deep link that needs to land directly on the plan toggle. */}
         <section id="plans" className="mx-auto -mt-2 max-w-5xl px-4 pb-6 sm:px-6">
+          {/* Abandoned-checkout reassurance — cancel_url (app/actions/billing.ts)
+              points back here with ?billing=checkout_cancelled. Suspense keeps
+              the page's rendering unaffected by the banner's useSearchParams. */}
+          <Suspense fallback={null}>
+            <CheckoutCancelledBanner />
+          </Suspense>
           <PricingTogglePlans
             monthly={monthly}
             annual={annual}
             isAuthenticated={Boolean(user)}
             isPaid={isPaid}
           />
+
+          {/* One outcome quote at the money ask — the same revenue-tied proof
+              the homepage hero places beside its CTA (marketing-hero.tsx: the
+              strongest proof sits near the decision point). The live ticker
+              above stays the primary credibility signal; this adds the human
+              beat for cold traffic that never scrolled the homepage's
+              SocialProof section. Kept visually quiet on purpose. */}
+          <figure className="mx-auto mt-6 flex max-w-2xl items-start justify-center gap-2.5 px-2">
+            <Quote aria-hidden className="mt-0.5 size-4 shrink-0 text-primary/40" />
+            <figcaption className="text-sm leading-relaxed text-muted-foreground">
+              <span className="text-foreground">
+                &ldquo;Closed three more deals this quarter because I could move faster.&rdquo;
+              </span>
+              <span className="mt-1 block text-xs font-semibold text-foreground/70">
+                Jordan M., buy-and-hold investor (18 doors)
+              </span>
+            </figcaption>
+          </figure>
 
           {/* Interactive ROI calculator — defangs the 'is it worth $X/mo'
               objection by turning it into the visitor's own math. Real

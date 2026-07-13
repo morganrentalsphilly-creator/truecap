@@ -311,7 +311,11 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
       // (query string preserved), where the conversion value is resolved
       // server-side from the checkout session.
       success_url: `${siteUrl}/?billing=success&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${siteUrl}/profile?billing=checkout_cancelled`,
+      // Cancel lands back on /pricing at the plan cards (not /profile, a
+      // name/avatar form that acknowledged nothing) — the page built to
+      // re-handle whatever objection caused the bail. The param drives a
+      // small "no charge was made" banner (checkout-cancelled-banner.tsx).
+      cancel_url: `${siteUrl}/pricing?billing=checkout_cancelled#plans`,
       metadata: {
         user_id: user.id,
         plan_slug: parsed.data.planSlug,

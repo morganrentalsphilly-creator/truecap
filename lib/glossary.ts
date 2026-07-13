@@ -133,6 +133,20 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
       "IRR captures the FULL return story: monthly cash flow + principal paydown + appreciation + exit value, all rolled into one annualized number. It's the right metric for wealth-builders.",
     related: ["coc", "cashFlow", "appreciation"],
   },
+  equityMultiple: {
+    term: "Equity Multiple",
+    slug: "equity-multiple",
+    category: "metric",
+    definition:
+      "Total cash returned (cash flow + net sale proceeds) ÷ total cash invested. 2.0× means you doubled your money over the hold.",
+    benchmark: "Buy-and-hold investors typically target 1.8–2.5× over a 10-year hold.",
+    formula: "Equity Multiple = Total Cash Returned ÷ Total Cash Invested",
+    example:
+      "Invest $80k, collect $70k of cash flow over 10 years, then net $120k at sale → ($70k + $120k) ÷ $80k = 2.4×.",
+    whyItMatters:
+      "Unlike IRR, the equity multiple ignores timing and answers the blunt question: how many times did I get my money back? Read the two together — IRR is the speed of the return, the multiple is its size.",
+    related: ["irr", "coc", "cashFlow"],
+  },
   tenYearReturn: {
     term: "10-Year Total Return",
     slug: "ten-year-total-return",

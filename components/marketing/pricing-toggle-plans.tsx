@@ -160,7 +160,10 @@ export function PricingTogglePlans({
         <div className="relative rounded-3xl border border-border bg-card p-6 shadow-sm">
           <div className="flex items-baseline justify-between">
             <h3 className="text-lg font-extrabold text-foreground">Free</h3>
-            {!isPaid && (
+            {/* "Current" only means something for a signed-in free user.
+                Showing it to an anonymous visitor told them they already
+                hold a plan — a status-quo anchor toward staying on Free. */}
+            {isAuthenticated && !isPaid && (
               <span className="rounded-full bg-[var(--metric-positive)]/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-[var(--metric-positive)]">
                 Current
               </span>

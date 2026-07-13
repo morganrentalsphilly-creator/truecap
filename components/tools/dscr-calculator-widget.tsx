@@ -8,9 +8,12 @@
  */
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
+import { ArrowUpRight, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { buildAnalyzerHandoffUrl } from "@/lib/analyzer-handoff";
 
 const num = (s: string): number => {
   const n = Number(s);
@@ -71,6 +74,12 @@ export function DscrCalculatorWidget() {
   }, [noiInput, debtInput]);
 
   const c = classify(result.dscr);
+
+  // Moment-of-result handoff into the full analyzer (P2-2 pattern shared by
+  // the other tool widgets). NOI/debt-service don't map onto the analyzer's
+  // price/rent inputs, so this is a bare strategy-tagged link — the analyzer
+  // computes DSCR from its own financing inputs.
+  const handoffHref = buildAnalyzerHandoffUrl({}, { utmSource: "dscr-calculator" });
 
   return (
     <div className="bg-card rounded-2xl border border-border shadow-sm p-5 sm:p-7">
@@ -142,6 +151,15 @@ export function DscrCalculatorWidget() {
           </div>
         </div>
       </div>
+
+      <Link
+        href={handoffHref} target="_top"
+        className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline"
+      >
+        <Sparkles className="w-4 h-4" />
+        Run a full property analysis — DSCR, cash flow, projections, exit — free
+        <ArrowUpRight className="w-4 h-4" />
+      </Link>
     </div>
   );
 }
