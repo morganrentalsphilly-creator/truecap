@@ -51,12 +51,11 @@ function resolveOfferCouponId(offer: string | undefined): string | null {
   if (!offer) return null;
   const code = offer.trim().toUpperCase();
   // The post-analysis drip's final nudge links ?coupon=<POST_ANALYSIS_COUPON_CODE>
-  // (default ANALYZE20). Key the map off that same code so the promised 20% off
-  // actually applies once POST_ANALYSIS_COUPON_ID is set — previously only EXIT50
-  // was wired, so ANALYZE20 silently fell through to full price.
+  // (default ANALYZE20). EXIT50 (the exit-intent 50% offer) was removed
+  // entirely — founder decision, 2026-07: no 50% discounts anywhere. A stale
+  // ?coupon=EXIT50 link now falls through to full price, fail-safe.
   const postAnalysisCode = (process.env.POST_ANALYSIS_COUPON_CODE || "ANALYZE20").trim().toUpperCase();
   const map: Record<string, string | undefined> = {
-    EXIT50: process.env.EXIT_INTENT_COUPON_ID,
     [postAnalysisCode]: process.env.POST_ANALYSIS_COUPON_ID,
   };
   const resolved = map[code] ?? null;
@@ -276,7 +275,7 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
       existingCustomerId: profile?.stripe_customer_id ?? null,
     });
     const siteUrl = getSiteUrl();
-    // A campaign coupon from the URL (e.g. the exit-intent EXIT50) takes
+    // A campaign coupon from the URL (e.g. the post-analysis ANALYZE20) takes
     // precedence over the standard annual coupon, and applies to monthly OR
     // annual. Both resolve to a Stripe coupon id we control.
     const offerCoupon = resolveOfferCouponId(parsed.data.offer);

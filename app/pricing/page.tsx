@@ -21,7 +21,6 @@ import { RoiCalculatorWidget } from "@/components/marketing/roi-calculator-widge
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { DealsAnalyzedTicker } from "@/components/marketing/deals-analyzed-ticker";
-import { ExitIntentOffer } from "@/components/marketing/exit-intent-offer";
 export const metadata: Metadata = {
   title: "Pricing — Free + Pro plans for rental analysis",
   description:
@@ -119,14 +118,12 @@ export default async function PricingPage() {
   // <PricingTogglePlans> so it can react to the user's toggle state.
   // We just hand it both Stripe prices.
 
-  // Free users (no paid subscription) get the exit-intent offer.
-  // Already-paid users would see an awkward "50% off" prompt; skip.
-  const showExitOffer = !isPaid;
+  // The exit-intent "50% off" offer was removed entirely (founder decision,
+  // 2026-07): no discount offers anywhere — full price only.
 
   return (
     <>
       <Header initialUser={user} initialEntitlements={entitlements} />
-      {showExitOffer ? <ExitIntentOffer /> : null}
 
       <main id="main" className="min-h-screen bg-background">
         {/* Hero */}

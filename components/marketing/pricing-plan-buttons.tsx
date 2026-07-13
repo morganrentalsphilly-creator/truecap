@@ -33,7 +33,7 @@ export function PricingPlanButtons({
   const { toast } = useToast();
   const [, startTransition] = useTransition();
   const [pending, setPending] = useState(false);
-  // Carry a campaign code from the URL (?coupon=EXIT50) into checkout + the
+  // Carry a campaign code from the URL (?coupon=ANALYZE20) into checkout + the
   // signup hand-off, so the exit-intent's 50%-off offer survives the click.
   const [couponCode, setCouponCode] = useState("");
   useEffect(() => {
