@@ -15,6 +15,7 @@ import { PricingTogglePlans } from "@/components/marketing/pricing-toggle-plans"
 import { getEntitlementsForUser, hasPaidPlanSubscription } from "@/lib/entitlements";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getStripe } from "@/lib/stripe/client";
+import { getPrimaryPlanPriceId } from "@/lib/stripe/plan-prices";
 
 import { RoiCalculatorWidget } from "@/components/marketing/roi-calculator-widget";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
@@ -39,8 +40,9 @@ export const metadata: Metadata = {
 type StripePrice = { amountLabel: string; period: string; unitAmount: number } | null;
 
 async function loadStripePrice(slug: "pro_monthly" | "pro_annual"): Promise<StripePrice> {
-  const envKey = slug === "pro_monthly" ? "STRIPE_PRICE_PRO_MONTHLY" : "STRIPE_PRICE_PRO_ANNUAL";
-  const priceId = process.env[envKey];
+  // Display the CURRENT/primary price (first configured id); later comma-listed
+  // ids are grandfathered prices for webhook resolution only.
+  const priceId = getPrimaryPlanPriceId(slug);
   if (!priceId || !process.env.STRIPE_SECRET_KEY) return null;
   try {
     const stripe = getStripe();

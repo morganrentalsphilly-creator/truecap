@@ -5,6 +5,7 @@ import * as Sentry from "@sentry/nextjs";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type Stripe from "stripe";
 import { getStripe } from "@/lib/stripe/client";
+import { planSlugFromPriceId } from "@/lib/stripe/plan-prices";
 
 type ProfileBindingRow = {
   id: string;
@@ -202,13 +203,6 @@ async function resolveVerifiedCheckoutBinding(
   }
 
   return { userId: profileByUser.id, customerId };
-}
-
-function planSlugFromPriceId(priceId: string | null): "pro_monthly" | "pro_annual" | null {
-  if (!priceId) return null;
-  if (priceId === process.env.STRIPE_PRICE_PRO_MONTHLY) return "pro_monthly";
-  if (priceId === process.env.STRIPE_PRICE_PRO_ANNUAL) return "pro_annual";
-  return null;
 }
 
 function isSubscriptionScheduledToCancel(subscription: Stripe.Subscription): boolean {

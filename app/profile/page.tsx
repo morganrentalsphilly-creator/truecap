@@ -7,6 +7,7 @@ import { ProfileForm } from "@/components/profile/profile-form";
 import { getEntitlementsForUser } from "@/lib/entitlements";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getStripe } from "@/lib/stripe/client";
+import { getPrimaryPlanPriceId } from "@/lib/stripe/plan-prices";
 
 export const metadata: Metadata = {
   title: "Profile & Billing",
@@ -57,11 +58,10 @@ function formatPrice(planSlug: "pro_monthly" | "pro_annual", stripePrice?: Strip
 }
 
 function getPlanPriceId(planSlug: "pro_monthly" | "pro_annual", dbPriceId?: string | null): string | undefined {
-  // Env-first (mirrors billing.ts getPlanPriceId): a price change is one
-  // env-var swap; dbPriceId stays a fallback for grandfathered mapping.
-  const envPriceId =
-    planSlug === "pro_monthly" ? process.env.STRIPE_PRICE_PRO_MONTHLY : process.env.STRIPE_PRICE_PRO_ANNUAL;
-  return envPriceId ?? dbPriceId ?? undefined;
+  // Primary (first) configured price — mirrors billing.ts getPlanPriceId.
+  // Additional comma-listed prices are grandfathered ids for webhook
+  // resolution only (see lib/stripe/plan-prices).
+  return getPrimaryPlanPriceId(planSlug) ?? dbPriceId ?? undefined;
 }
 
 async function getStripePriceDisplays(

@@ -5,6 +5,7 @@ import * as Sentry from "@sentry/nextjs";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getStripe } from "@/lib/stripe/client";
+import { getPrimaryPlanPriceId } from "@/lib/stripe/plan-prices";
 import { captureServerEvent } from "@/lib/posthog-server";
 import { TRIAL_DAYS } from "@/lib/trial";
 
@@ -34,13 +35,10 @@ function getSiteUrl(): string {
 }
 
 function getPlanPriceId(planSlug: "pro_monthly" | "pro_annual", dbPriceId?: string | null): string | null {
-  // Env-first so a price change is a single env-var swap: new checkouts follow
-  // STRIPE_PRICE_PRO_* immediately, while plans.stripe_price_id (kept = the OLD
-  // price) still lets the webhook map grandfathered subscriptions to Pro.
-  // Behaviour-neutral until the env vars point at a new Stripe Price.
-  const envPriceId =
-    planSlug === "pro_monthly" ? process.env.STRIPE_PRICE_PRO_MONTHLY : process.env.STRIPE_PRICE_PRO_ANNUAL;
-  return envPriceId ?? dbPriceId ?? null;
+  // Checkout sells the PRIMARY (first) configured price; the env may list
+  // additional grandfathered prices after it (see lib/stripe/plan-prices),
+  // which are for webhook resolution only, never for new checkouts.
+  return getPrimaryPlanPriceId(planSlug) ?? dbPriceId ?? null;
 }
 
 /**
