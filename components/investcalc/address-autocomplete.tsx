@@ -342,6 +342,21 @@ export function AddressAutocomplete({
         });
 
         if (onPlaceSelected) {
+          // Google sometimes returns NO postal_code component for a picked
+          // suggestion — which silently changed WHICH HUD rent figure the
+          // enrichment used (county/metro FMR instead of the more accurate
+          // ZIP-level SAFMR), so the same address auto-filled a different
+          // rent depending on whether it was picked or pasted. Backfill the
+          // ZIP from the formatted address, then from whatever the user
+          // TYPED (a pasted listing address usually carries the ZIP even
+          // when Google's suggestion label drops it).
+          const components = parseComponents(place.addressComponents);
+          if (!components.zip) {
+            const zipOf = (s: string | null | undefined) =>
+              s?.match(/[A-Za-z]{2}\s+(\d{5})(?:-\d{4})?\b/)?.[1] ??
+              s?.match(/(\d{5})(?:-\d{4})?\s*$/)?.[1];
+            components.zip = zipOf(place.formattedAddress) ?? zipOf(lastValueRef.current);
+          }
           // Consumer's handler is typed as `void`-returning but is
           // usually an async function - its returned promise can reject
           // (enrichment failures, Supabase errors, etc.). Coerce to a
@@ -350,7 +365,7 @@ export function AddressAutocomplete({
           void Promise.resolve(
             onPlaceSelected({
               formattedAddress: place.formattedAddress,
-              ...parseComponents(place.addressComponents),
+              ...components,
             })
           ).catch((err) => {
             console.warn("[AddressAutocomplete] onPlaceSelected failed:", err);

@@ -12,7 +12,10 @@ import { getRequestUser, getRequestEntitlements } from "@/lib/request-auth";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
-  title: "Batch Triage",
+  // "Screen Listings" — the sidebar's name for this page. One surface, one
+  // name: the tab previously said "Batch Triage" while nav said "Screen
+  // Listings", reading as two different features.
+  title: "Screen Listings",
   description: "Screen a batch of rental listings at once — underwrite and rank them against your buy box.",
   alternates: { canonical: "/dashboard/triage" },
   robots: { index: false, follow: false },
