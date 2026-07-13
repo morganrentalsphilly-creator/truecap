@@ -20,6 +20,10 @@ export type LivePreviewSnapshot = {
   capRate: number;
   dscr: number;
   monthlyPayment: number;
+  /** Break-even purchase price (cash flow ≥ $0), solved only when the
+   *  preview is NEGATIVE — the "try this as your offer" path out of a bad
+   *  first number. Null when positive or unsolvable. */
+  breakEvenPrice: number | null;
 };
 
 type Props = {
@@ -131,6 +135,19 @@ export function LiveVerdictPanel({ active, livePreview, livePreviewMsg }: Props)
               </div>
             </div>
           </div>
+          {/* Path out of a negative first number: most cold visitors' first
+              address won't cash-flow at asking price, and "Negative · 0/100"
+              with no next move invites a bounce. The break-even price turns
+              it into an invitation to play with the one lever they control. */}
+          {Math.round(livePreview.netCashFlow) < 0 && livePreview.breakEvenPrice != null ? (
+            <p className="mt-2.5 rounded-lg bg-background/60 px-2.5 py-2 text-[11px] font-semibold leading-snug text-foreground">
+              Breaks even near{" "}
+              <span className="font-mono font-bold">
+                ${Math.round(livePreview.breakEvenPrice).toLocaleString()}
+              </span>{" "}
+              — try that as your offer price.
+            </p>
+          ) : null}
           <p className="mt-2.5 text-[11px] leading-snug text-muted-foreground">
             Updating as you type — run the full analysis for projections, tax strategy &amp; exit scenarios.
           </p>

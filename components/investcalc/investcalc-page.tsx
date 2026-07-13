@@ -69,7 +69,7 @@ import {
 } from "@/lib/analyzer-steps";
 import { readAnalyzerHandoff } from "@/lib/analyzer-handoff";
 import { StickyCalculateBar } from "./sticky-calculate-bar";
-import { LiveVerdictPanel } from "./live-verdict-panel";
+import { LiveVerdictPanel, type LivePreviewSnapshot } from "./live-verdict-panel";
 import { AutosaveIndicator } from "./autosave-indicator";
 import { AnalysisDashboard, type AnalysisDashboardTab } from "./analysis-dashboard";
 import { AnalysisErrorBoundary } from "@/components/investcalc/analysis-error-boundary";
@@ -89,6 +89,7 @@ import {
   buildDealScoreInputFromAnalysis,
   computeDealScore,
 } from "@/lib/deal-score";
+import { calculateMaxAllowableOffer } from "@/lib/max-allowable-offer";
 import {
   createOneTimePdfCheckoutAction,
   verifyOneTimePdfPaymentAction,
@@ -650,14 +651,9 @@ export function InvestCalcPage({
   // rules: captured on enrichment, never blocks analysis, cleared on a new
   // address, silent on failure.
   const [unitFmrByBedrooms, setUnitFmrByBedrooms] = useState<Record<number, number> | null>(null);
-  const [livePreview, setLivePreview] = useState<{
-    tier: DealTier;
-    score: number;
-    netCashFlow: number;
-    capRate: number;
-    dscr: number;
-    monthlyPayment: number;
-  } | null>(null);
+  // Typed by the panel's exported snapshot shape so the two can't drift
+  // (the inline duplicate did exactly that when breakEvenPrice was added).
+  const [livePreview, setLivePreview] = useState<LivePreviewSnapshot | null>(null);
   // One concise, debounced screen-reader announcement for the live preview,
   // written into a persistent sr-only region (the visible card is NOT a live
   // region). Debounced past the form watcher so fast typing doesn't flood the
@@ -2139,6 +2135,17 @@ export function InvestCalcPage({
           // Deal Score is free for everyone, so compute it for the preview too
           // - the hero 0-100 number forming live is the magic moment.
           const ds = computeDealScore(buildDealScoreInputFromAnalysis(liveParsed.data, r));
+          // A negative first number is what MOST cold visitors see (random
+          // addresses rarely cash-flow at ask) — without a path out it reads
+          // as a dead end and invites a bounce. Solve the break-even price
+          // (cash flow ≥ $0, same solver the MAO card uses) so the preview
+          // can say "try $X as your offer" instead of just "Negative".
+          // Pure client math on the debounced recompute; null when already
+          // positive or unsolvable.
+          const breakEven =
+            r.netCashFlow < 0
+              ? calculateMaxAllowableOffer(liveParsed.data, { monthlyCashFlow: 0 })
+              : null;
           setLivePreview({
             tier: getDealTier(r),
             score: ds.score,
@@ -2146,6 +2153,7 @@ export function InvestCalcPage({
             capRate: r.capRate,
             dscr: r.dscr,
             monthlyPayment: r.monthlyPayment,
+            breakEvenPrice: breakEven ? breakEven.maxPrice : null,
           });
         } catch {
           setLivePreview(null);

@@ -156,9 +156,12 @@ export function HeroAddressForm() {
           No address yet? See a sample report
           <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
         </button>
+        {/* Pill treatment (was a bare text link): sitting beside two real
+            buttons it read as fine print and got skipped (UX walkthrough
+            P2-10). Still visually tertiary — outline only, muted text. */}
         <Link
           href="/pricing"
-          className="font-medium text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+          className="inline-flex items-center rounded-xl border border-border bg-card px-4 py-2 font-medium text-muted-foreground shadow-sm transition-colors hover:border-primary/40 hover:text-foreground"
         >
           See Pro features
         </Link>

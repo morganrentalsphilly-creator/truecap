@@ -83,7 +83,12 @@ export function PricingTogglePlans({
   isAuthenticated,
   isPaid,
 }: PricingTogglePlansProps) {
-  const [period, setPeriod] = useState<"monthly" | "annual">("annual");
+  // Monthly-first: visitors arrive primed on the advertised monthly price
+  // ($29.99) from ads/FAQ/marketing copy — the annual-first default led with
+  // "$25/mo billed annually", a different number they had to reconcile
+  // before trusting the page (UX walkthrough P2-9). The annual toggle still
+  // carries its savings chip, so the discount stays one tap away.
+  const [period, setPeriod] = useState<"monthly" | "annual">("monthly");
 
   // Top of the pricing-page funnel — fire once on mount so we can measure
   // pricing_view → pro_checkout_started (checkout fires server-side in

@@ -86,7 +86,10 @@ export function MarketingHero() {
         {/* Trust band — proof line, data sources, live count, and one
             outcome quote, grouped beneath the split with divider rules
             instead of card boxes (Rule 4: logic-grouping over card overuse). */}
-        <div className="tc-reveal mt-12 border-t border-border pt-8 sm:mt-14">
+        {/* Mobile: tighter gap to the proof band — the desktop-only capability
+            lines above it leave a dead zone between the CTAs and the ticker
+            on phones (UX walkthrough P2-10). Desktop rhythm unchanged. */}
+        <div className="tc-reveal mt-7 border-t border-border pt-5 sm:mt-14 sm:pt-8">
           <div className="grid gap-6 sm:gap-8 lg:grid-cols-[1.5fr_1fr]">
             <div className="space-y-1.5">
               {/* Capability + sources lines are desktop-only: both restate
