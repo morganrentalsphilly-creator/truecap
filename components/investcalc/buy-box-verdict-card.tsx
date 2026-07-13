@@ -22,16 +22,32 @@ import {
   type NamedBuyBox,
 } from "@/lib/buy-box";
 import { buildBuyBoxQaReport, type DealQaBuyBoxReport } from "@/lib/deal-qa-context";
+import { solveBuyBoxClearingPrice } from "@/lib/mao-targets";
+import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { cn } from "@/lib/utils";
+
+const money = (n: number) => `$${Math.round(n).toLocaleString("en-US")}`;
+
+/** "Your number" line for the FAIL state — either the price that clears
+ *  the box, or the reason no price can. */
+type YourNumberLine =
+  | { kind: "price"; maxPrice: number }
+  | { kind: "notPrice"; labels: string[] };
 
 export function BuyBoxVerdictCard({
   enabled,
   metrics,
+  values,
   onFitChange,
   onQaContextChange,
 }: {
   enabled: boolean;
   metrics: BuyBoxDealMetrics | null;
+  /** Current form values — lets the FAIL state answer "so what price
+   *  WOULD work?" via the MAO solver (same basis as the saved-deal
+   *  workspace's max-offer line). Optional: surfaces without form values
+   *  (shared-deal viewer) simply don't render the line. */
+  values?: InvestmentFormValues | null;
   /** Reports the evaluated fit up to the analysis dashboard (true/false =
    *  evaluated, null = no active box / can't evaluate) so the Next Action
    *  banner on the SAME surface can honor the buy box — otherwise this
@@ -102,6 +118,44 @@ export function BuyBoxVerdictCard({
     lastQaKeyRef.current = key;
     onQaContextChange(qaReport);
   }, [qaReport, onQaContextChange]);
+
+  // "Your number" — computed ONLY in the fail state (the memo body bails
+  // first, so the iterative solver never runs on a passing deal). Closes
+  // the loop the per-criterion gaps leave open: what price WOULD clear
+  // this box? Same basis + solver as the saved-deal workspace's max-offer
+  // line (lib/mao-targets), so the two surfaces can't disagree. A
+  // property-type / market miss can't be fixed by price — say that
+  // instead (it's already on screen in the failed checks, so it's free).
+  const yourNumber = useMemo<YourNumberLine | null>(() => {
+    if (!values || !metrics || !evaluated) return null;
+    const primary = evaluated.results[0]!;
+    const r = primary.result;
+    if (r.passes || r.failedLabels.length === 0) return null;
+    const nonPrice = r.checks.filter(
+      (c) => c.pass === false && (c.id === "propertyType" || c.id === "state")
+    );
+    if (nonPrice.length > 0) {
+      return { kind: "notPrice", labels: nonPrice.map((c) => c.label.toLowerCase()) };
+    }
+    try {
+      const maxPrice = solveBuyBoxClearingPrice(values, primary.box, {
+        isCashPurchase: metrics.isCashPurchase,
+      });
+      if (maxPrice == null) return null;
+      const asking =
+        typeof values.purchasePrice === "number" && values.purchasePrice > 0
+          ? values.purchasePrice
+          : null;
+      // Solved at/above asking (solver slack / $500 rounding) → the miss
+      // isn't price-driven after all; don't advise a "cut" to a higher number.
+      if (asking == null || maxPrice >= asking) return null;
+      return { kind: "price", maxPrice };
+    } catch {
+      // Degenerate inputs (cash deal, $0 rent, price at the solver floor)
+      // must never break the verdict card — just skip the line.
+      return null;
+    }
+  }, [values, metrics, evaluated]);
 
   if (!evaluated) return null;
 
@@ -180,6 +234,26 @@ export function BuyBoxVerdictCard({
 
       {r.personalLine ? (
         <p className="mt-2 text-xs font-medium text-foreground/80">{r.personalLine}</p>
+      ) : null}
+
+      {/* The gaps above say what misses; this says what to DO about it —
+          the highest price that clears this box (or that price can't fix
+          it). Non-null only in the fail state (see the memo). */}
+      {yourNumber ? (
+        yourNumber.kind === "price" ? (
+          <p className="mt-1.5 text-xs text-foreground/80">
+            <span className="font-bold text-foreground">
+              Your number: {money(yourNumber.maxPrice)}
+            </span>{" "}
+            — the highest price that clears this box, holding your current rent and financing
+            assumptions.
+          </p>
+        ) : (
+          <p className="mt-1.5 text-xs text-muted-foreground">
+            Price isn&apos;t the blocker — this deal misses on {yourNumber.labels.join(" and ")} at
+            any price.
+          </p>
+        )
       ) : null}
 
       {/* At 375px the full criterion grid made this card ~300px tall in a

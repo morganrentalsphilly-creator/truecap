@@ -59,6 +59,16 @@ export const BLOG_POSTS: BlogPost[] = [
     available: true,
   },
   {
+    slug: "investment-property-appraisal",
+    title:
+      "Investment property appraisals: how they work — and what to do when the value comes in low (2026)",
+    excerpt:
+      "The one number in every financed deal the investor doesn't control. Which forms get ordered (1004, 1025, and the 1007 rent schedule), how the lower-of rule turns a $228K appraisal on a $240K contract into a $9,000 cash call, why a 1007 rent opinion can push a DSCR loan from 1.26 to 1.17 and across a pricing tier, and the five-step playbook when the value misses — renegotiate, gap, reconsideration of value, new lender, walk.",
+    readingTimeMinutes: 11,
+    publishedAt: "2026-07-11",
+    available: true,
+  },
+  {
     slug: "how-to-calculate-arv",
     title:
       "How to calculate ARV (after-repair value): the comps method, step by step (2026)",

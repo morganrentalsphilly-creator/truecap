@@ -67,7 +67,12 @@ import {
   isAnalyzerStepId,
   type AnalyzerStepId,
 } from "@/lib/analyzer-steps";
-import { readAnalyzerHandoff } from "@/lib/analyzer-handoff";
+import {
+  ANALYZER_STRATEGY_EVENT,
+  HANDOFF_STRATEGY_KEYS,
+  readAnalyzerHandoff,
+  type AnalyzerStrategyEventDetail,
+} from "@/lib/analyzer-handoff";
 import { StickyCalculateBar } from "./sticky-calculate-bar";
 import { LiveVerdictPanel, type LivePreviewSnapshot } from "./live-verdict-panel";
 import { AutosaveIndicator } from "./autosave-indicator";
@@ -1949,7 +1954,10 @@ export function InvestCalcPage({
    * clears back to the default full flow (values left as-is).
    */
   const handleSelectStrategy = useCallback(
-    (key: string | null) => {
+    // `source` separates real chip clicks from link-seeded landings
+    // (persona pages / homepage persona cards) in analytics, so seeded
+    // traffic can't inflate chip-engagement numbers.
+    (key: string | null, source: "chip" | "link" = "chip") => {
       const strategy = getStrategyByKey(key);
       const strOpts = { shouldDirty: true, shouldValidate: false } as const;
       if (!strategy) {
@@ -2003,7 +2011,7 @@ export function InvestCalcPage({
       // cash-flow context. Wholesale keeps Stress Test so "Adjust targets" lands.
       pointDashboardAt(strategy.primaryTab === "strategies" ? "cash-flow" : strategy.primaryTab);
       setAdvancedOpen(false);
-      trackEvent("strategy_selected", { strategy: strategy.key });
+      trackEvent("strategy_selected", { strategy: strategy.key, source });
     },
     [form, applyStarterAssumptions, pointDashboardAt]
   );
@@ -2519,6 +2527,12 @@ export function InvestCalcPage({
       autoApplyEligibleRef.current = true;
       queueMicrotask(() => {
         isProgrammaticResetRef.current = false;
+        // Strategy chip from the link (/?strategy=brrrr — persona pages):
+        // applied AFTER the reset flag drops so the chip handler behaves
+        // exactly like a user click — the reactive propertyType effect
+        // seeds units, starter assumptions apply (and win over any ?type=
+        // seeded above), and the results view leads with the play's tab.
+        if (handoff.strategy) handleSelectStrategy(handoff.strategy, "link");
         // Form the live verdict from the handed-off numbers right away —
         // the preview normally only wakes on the first keystroke, leaving
         // a pre-filled form with no numbers anywhere (same contract as the
@@ -2685,6 +2699,24 @@ export function InvestCalcPage({
     }
     return () => window.removeEventListener(HERO_ANALYZE_EVENT, onHeroAnalyze as EventListener);
   }, []);
+
+  // Listen for the persona cards' strategy handoff. The cards live on "/"
+  // with the calculator, so their seeded links are same-route soft navs —
+  // the ?strategy= URL param alone is inert (the mount-time
+  // readAnalyzerHandoff never re-runs). The cards dispatch this event on
+  // click; hard loads still go through the mount path above.
+  useEffect(() => {
+    const onStrategySeed = (e: Event) => {
+      const detail = (e as CustomEvent<AnalyzerStrategyEventDetail>).detail;
+      if (!detail?.strategy) return;
+      // Same validation contract as readAnalyzerHandoff: unknown keys are
+      // ignored (never treated as a "clear strategy" click).
+      if (!(HANDOFF_STRATEGY_KEYS as readonly string[]).includes(detail.strategy)) return;
+      handleSelectStrategy(detail.strategy, "link");
+    };
+    window.addEventListener(ANALYZER_STRATEGY_EVENT, onStrategySeed as EventListener);
+    return () => window.removeEventListener(ANALYZER_STRATEGY_EVENT, onStrategySeed as EventListener);
+  }, [handleSelectStrategy]);
 
   /**
    * Focus an invalid field, first un-hiding the collapsed Advanced Options

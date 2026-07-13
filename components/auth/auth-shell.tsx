@@ -80,7 +80,7 @@ export function AuthShell({
               <div className="m-10 space-y-7">
                 {trustItems.map((item) => (
                   <div key={item.title} className="flex gap-4">
-                    <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary/25 text-white shadow-[0_12px_32px_rgba(0, 112, 196,0.25)]">
+                    <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary/25 text-white shadow-[0_12px_32px_rgba(0,112,196,0.25)]">
                       <item.icon className="size-5" />
                     </span>
                     <span>
@@ -107,7 +107,7 @@ export function AuthShell({
           <div className="flex min-h-0 items-center justify-center px-1 py-4 sm:min-h-[540px] sm:px-9 sm:py-8 lg:min-h-[610px] lg:px-14">
             <div className="w-full max-w-[350px]">
               <div className="mb-8 text-center lg:text-left">
-                <div className="mx-auto mb-6 flex size-24 items-center justify-center rounded-full bg-[radial-gradient(circle_at_35%_30%,rgba(255,255,255,0.95),rgba(0, 112, 196,0.12))] text-primary shadow-[0_18px_42px_rgba(0, 112, 196,0.16)] ring-1 ring-primary/10 lg:hidden">
+                <div className="mx-auto mb-6 flex size-24 items-center justify-center rounded-full bg-[radial-gradient(circle_at_35%_30%,rgba(255,255,255,0.95),rgba(0,112,196,0.12))] text-primary shadow-[0_18px_42px_rgba(0,112,196,0.16)] ring-1 ring-primary/10 lg:hidden">
                   <Building2 className="size-12 stroke-[1.8]" />
                 </div>
                 <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">

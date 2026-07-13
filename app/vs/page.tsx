@@ -265,7 +265,7 @@ export default function VsHubPage() {
           <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
             <Link
               href="/"
-              className="inline-flex h-12 items-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0, 112, 196,0.28)] transition hover:-translate-y-0.5"
+              className="inline-flex h-12 items-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition hover:-translate-y-0.5"
             >
               <Calculator className="size-4" />
               Try TrueCap free

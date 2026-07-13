@@ -95,7 +95,7 @@ export type FunnelEvent =
   // ── Investor strategy chips ("What's your play?") ──────────────
   // Which plays investors pick — measures adoption + which strategy
   // converts to Pro. PII-free; just the strategy key.
-  | "strategy_selected"     // properties: strategy (e.g. "wholesale-mao")
+  | "strategy_selected"     // properties: strategy (e.g. "wholesale-mao"), source ("chip" click vs "link" seed)
 
 /**
  * Safe capture. Use this everywhere instead of `posthog.capture(...)`

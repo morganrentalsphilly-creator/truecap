@@ -84,7 +84,7 @@ export function PricingPlanButtons({
     return (
       <Link
         href={`/auth/sign-up?next=${encodeURIComponent(nextPath)}`}
-        className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground shadow-[0_8px_22px_rgba(0, 112, 196,0.30)] hover:bg-primary/95"
+        className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground shadow-[0_8px_22px_rgba(0,112,196,0.30)] hover:bg-primary/95"
       >
         <Sparkles className="size-4" /> Start your {TRIAL_LABEL}
       </Link>
@@ -124,7 +124,7 @@ export function PricingPlanButtons({
       type="button"
       onClick={handleCheckout}
       disabled={pending}
-      className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground shadow-[0_8px_22px_rgba(0, 112, 196,0.30)] hover:bg-primary/95 disabled:opacity-60"
+      className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground shadow-[0_8px_22px_rgba(0,112,196,0.30)] hover:bg-primary/95 disabled:opacity-60"
     >
       {pending ? (
         <>

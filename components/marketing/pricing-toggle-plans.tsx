@@ -33,7 +33,13 @@ const FREE_FEATURES: { label: string; included: boolean }[] = [
   { label: "Unlimited cash-flow analyses", included: true },
   { label: "Cap rate, CoC, DSCR, monthly cash flow", included: true },
   { label: "Auto-fill rent + rate + tax from address", included: true },
-  { label: "Plain-English deal verdict", included: true },
+  // The personalization wedge, free tier: the strategy lens tunes the
+  // verdict/score to the investor's play, and saved defaults pre-fill every
+  // new deal. Both are free (signed-in) — claimed here, inherited by Pro
+  // via "Everything in Free". The buy-box Personal Verdict is Pro-only, so
+  // it rides in the strikethrough group below.
+  { label: "Plain-English verdict — read through your strategy lens", included: true },
+  { label: "Your saved defaults on every new deal", included: true },
   { label: "Deal Score (0-100) with breakdown", included: true },
   { label: "1 free sale + rent comps lookup", included: true },
   { label: "Save up to 5 deals", included: true },
@@ -42,6 +48,7 @@ const FREE_FEATURES: { label: string; included: boolean }[] = [
   { label: "Sensitivity grid", included: false },
   { label: "Strategies (BRRRR + flip + rehab)", included: false },
   { label: "Shareable read-only deal links", included: true },
+  { label: "Personal Verdict — pass/fail against your buy box", included: false },
   { label: "10-year projections", included: false },
   { label: "Tax strategy", included: false },
   { label: "Exit scenarios", included: false },
@@ -59,14 +66,13 @@ const PRO_FEATURES = [
   "10-year cash flow + equity projection",
   "Tax strategy: depreciation + interest modeling",
   "Exit scenarios: best year to sell",
-  "Buy Box — auto-screen every deal to your criteria",
+  "Personal Verdict — every deal scored pass/fail against YOUR buy box",
   "Deal pipeline + tags (lightweight CRM)",
   "Saved analysis templates",
   "Due-diligence checklist + document vault",
   "Rate-drop alerts on your saved deals",
   "Lender · partner · personal PDF reports — now with sale + rent comps",
   "Custom PDF branding — your logo, color, and contact on every export",
-  "Co-branded share pages that capture buyer leads",
   "Save unlimited deals · compare up to 4",
   "Priority email support",
 ];
@@ -203,7 +209,7 @@ export function PricingTogglePlans({
         </div>
 
         {/* PRO (with toggle) */}
-        <div className="relative -mt-2 rounded-3xl border-2 border-primary bg-card p-6 shadow-[0_24px_70px_rgba(0, 112, 196,0.18)] lg:scale-[1.03]">
+        <div className="relative -mt-2 rounded-3xl border-2 border-primary bg-card p-6 shadow-[0_24px_70px_rgba(0,112,196,0.18)] lg:scale-[1.03]">
           {/* Savings badge — prefer the dollar-amount savings when
               available because concrete numbers convert better than
               percentages. Falls back to "X months free" or % savings. */}

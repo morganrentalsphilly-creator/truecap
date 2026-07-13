@@ -12,6 +12,8 @@ import { Building2, Loader2 } from "lucide-react";
 import { getPropertyCompsAction, getSavedDealCompsAction } from "@/app/actions/property-comps";
 import type { EnrichmentComp, PropertyEnrichment } from "@/lib/property-enrichment/rentcast";
 import { checkCompRange } from "@/lib/comp-range-check";
+import { getCompsFreshness } from "@/lib/comps-freshness";
+import type { PipelineStage } from "@/lib/pipeline";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 
@@ -89,6 +91,7 @@ export function PropertyCompsCard({
   currentRent,
   currentPrice,
   savedDealId,
+  stage,
   onApply,
   onDataChange,
   onUnavailableChange,
@@ -104,6 +107,10 @@ export function PropertyCompsCard({
   currentPrice?: number | null;
   /** When set, comps are saved to + loaded from this deal (persistent set). */
   savedDealId?: string | null;
+  /** The deal's pipeline stage, when the hosting surface knows it — tightens
+   *  the freshness window (lib/comps-freshness) as the deal nears a binding
+   *  number. Absent (the unsaved live analyzer) = loosest window. */
+  stage?: PipelineStage | null;
   /** Fill the analyzer form from the pulled facts + estimates. */
   onApply?: (enrichment: PropertyEnrichment) => void;
   /** Reports the comp set this card is showing up to the dashboard so the
@@ -145,9 +152,15 @@ export function PropertyCompsCard({
     void (async () => {
       const r = await getSavedDealCompsAction(savedDealId);
       if (active && r.ok && r.enrichment) {
-        setData(r.enrichment);
+        // Legacy payloads can predate fetchedAt in the enrichment itself —
+        // backfill from the row's fetched_at so the freshness hint still works.
+        const enrichment =
+          !r.enrichment.fetchedAt && r.fetchedAt
+            ? { ...r.enrichment, fetchedAt: r.fetchedAt }
+            : r.enrichment;
+        setData(enrichment);
         setSource("saved");
-        onDataChange?.(r.enrichment);
+        onDataChange?.(enrichment);
       }
     })();
     return () => {
@@ -192,6 +205,9 @@ export function PropertyCompsCard({
   };
 
   const compWarnings = data ? buildCompWarnings(data, currentRent, currentPrice) : [];
+  // Stage-aware staleness hint (display-only — the Refresh button above is
+  // the action; nothing refetches on its own). No stage = loosest window.
+  const freshness = data ? getCompsFreshness(data.fetchedAt, stage ?? null) : null;
 
   return (
     <section aria-label="Sale and rent comps" className="rounded-2xl border border-border bg-card p-4 sm:p-5">
@@ -219,6 +235,12 @@ export function PropertyCompsCard({
         </p>
       ) : (
         <div className="mt-3 space-y-3">
+          {freshness?.stale ? (
+            <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-[11px] leading-relaxed text-foreground">
+              Comps are {freshness.ageDays} days old — refresh to re-check against today&apos;s
+              market.
+            </div>
+          ) : null}
           <div className="grid grid-cols-2 gap-3">
             <div className="rounded-xl border border-border bg-muted/20 p-3">
               <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Est. value</div>

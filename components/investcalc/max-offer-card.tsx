@@ -12,7 +12,7 @@
  * the solvers in lib/max-allowable-offer.ts so the math stays consistent.
  */
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ChangeEvent } from "react";
 import { Target } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,9 +25,16 @@ import {
   solveRequiredInterestRate,
   type MaoTarget,
 } from "@/lib/max-allowable-offer";
+import { chooseMaoTargetFromBuyBox, type BuyBoxReturnThresholds } from "@/lib/mao-targets";
 
 interface MaxOfferCardProps {
   values: InvestmentFormValues | null;
+  /** The user's primary buy-box return thresholds (reported up by
+   *  BuyBoxVerdictCard on the same surface). When set, they seed the
+   *  solver targets — the user's criteria beat our canonical defaults
+   *  (lib/mao-targets rule 2) — labeled "From your buy box". Absent/null
+   *  = canonical default seeds. Every field stays user-editable. */
+  buyBoxThresholds?: BuyBoxReturnThresholds | null;
 }
 
 const numberOrUndefined = (s: string): number | undefined => {
@@ -38,17 +45,7 @@ const numberOrUndefined = (s: string): number | undefined => {
 
 const money = (n: number) => `$${Math.round(n).toLocaleString("en-US")}`;
 
-export function MaxOfferCard({ values }: MaxOfferCardProps) {
-  // Initial targets = the canonical MAO basis (break-even cash flow + DSCR
-  // 1.25 — see lib/mao-targets, CONFLICT #6) so the first number this solver
-  // shows equals the wholesale StrategyOutcomeCard headline and the deal
-  // workspace's max-offer line. Cap/CoC start unset — every field stays
-  // user-editable.
-  const [capRateInput, setCapRateInput] = useState("");
-  const [cocInput, setCocInput] = useState("");
-  const [cashFlowInput, setCashFlowInput] = useState("0");
-  const [dscrInput, setDscrInput] = useState("1.25");
-
+export function MaxOfferCard({ values, buyBoxThresholds }: MaxOfferCardProps) {
   // Cash purchases have no debt service: calc-analysis reports dscr 0, so a
   // DSCR floor could never pass. Omit that target at this call site (the
   // solver's documented contract) instead of showing "no price works".
@@ -60,6 +57,59 @@ export function MaxOfferCard({ values }: MaxOfferCardProps) {
       return false;
     }
   }, [values]);
+
+  // Buy-box seed: when the user's box carries return thresholds, THOSE are
+  // the initial targets (lib/mao-targets rule 2 — their criteria beat our
+  // defaults). Null = seed the canonical basis instead.
+  const seedTarget = useMemo(
+    () => chooseMaoTargetFromBuyBox(buyBoxThresholds, { isCashPurchase: isCashDeal }),
+    [buyBoxThresholds, isCashDeal]
+  );
+
+  // Initial targets = the buy-box seed when present, else the canonical MAO
+  // basis (break-even cash flow + DSCR 1.25 — see lib/mao-targets, CONFLICT
+  // #6) so the first number this solver shows equals the wholesale
+  // StrategyOutcomeCard headline and the deal workspace's max-offer line.
+  // Every field stays user-editable.
+  const [capRateInput, setCapRateInput] = useState(() =>
+    seedTarget?.capRate != null ? String(seedTarget.capRate) : ""
+  );
+  const [cocInput, setCocInput] = useState(() =>
+    seedTarget?.cocReturn != null ? String(seedTarget.cocReturn) : ""
+  );
+  const [cashFlowInput, setCashFlowInput] = useState(() =>
+    seedTarget ? (seedTarget.monthlyCashFlow != null ? String(seedTarget.monthlyCashFlow) : "") : "0"
+  );
+  const [dscrInput, setDscrInput] = useState(() =>
+    seedTarget ? (seedTarget.dscr != null ? String(seedTarget.dscr) : "") : "1.25"
+  );
+
+  // The box report arrives async (BuyBoxVerdictCard fetches it), so this
+  // card can mount before the seed exists. Apply a late-arriving seed once
+  // — and never clobber targets the user already edited. State (not a
+  // ref) because the "From your buy box" label renders from it.
+  const [touched, setTouched] = useState(false);
+  const seedKey = seedTarget ? JSON.stringify(seedTarget) : null;
+  const [appliedSeedKey, setAppliedSeedKey] = useState<string | null>(seedKey);
+  useEffect(() => {
+    if (!seedTarget || touched || seedKey === appliedSeedKey) return;
+    setAppliedSeedKey(seedKey);
+    setCapRateInput(seedTarget.capRate != null ? String(seedTarget.capRate) : "");
+    setCocInput(seedTarget.cocReturn != null ? String(seedTarget.cocReturn) : "");
+    setCashFlowInput(seedTarget.monthlyCashFlow != null ? String(seedTarget.monthlyCashFlow) : "");
+    setDscrInput(seedTarget.dscr != null ? String(seedTarget.dscr) : "");
+  }, [seedTarget, seedKey, touched, appliedSeedKey]);
+
+  // Label the seed source only while the inputs still ARE the seed — one
+  // edit and the targets are the user's, not the box's.
+  const showBuyBoxSeedLabel = seedTarget != null && !touched && seedKey === appliedSeedKey;
+
+  // Shared onChange wrapper: any edit marks the targets as the user's own.
+  const edit =
+    (set: (v: string) => void) => (e: ChangeEvent<HTMLInputElement>) => {
+      setTouched(true);
+      set(e.target.value);
+    };
 
   const target: MaoTarget = useMemo(
     () => ({
@@ -90,6 +140,11 @@ export function MaxOfferCard({ values }: MaxOfferCardProps) {
       <div className="flex items-center gap-2 mb-1.5">
         <Target className="w-4 h-4 text-primary" />
         <span className="font-semibold text-sm text-foreground">What price makes this deal work?</span>
+        {showBuyBoxSeedLabel ? (
+          <span className="rounded-full border border-primary/30 bg-[var(--brand-blue-light)] px-2 py-0.5 text-[10px] font-semibold text-primary">
+            From your buy box
+          </span>
+        ) : null}
       </div>
       <p className="text-xs text-muted-foreground mb-4">
         Set your return targets - we solve the highest price you should pay, and what it&apos;d take to
@@ -102,7 +157,7 @@ export function MaxOfferCard({ values }: MaxOfferCardProps) {
             Target Cap Rate <span className="font-normal lowercase tracking-normal">(opt)</span>
           </Label>
           <div className="relative">
-            <Input type="number" inputMode="decimal" step="0.1" value={capRateInput} onChange={(e) => setCapRateInput(e.target.value)} placeholder="Any" className="pr-7 border-input bg-background" />
+            <Input type="number" inputMode="decimal" step="0.1" value={capRateInput} onChange={edit(setCapRateInput)} placeholder="Any" className="pr-7 border-input bg-background" />
             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">%</span>
           </div>
         </div>
@@ -111,7 +166,7 @@ export function MaxOfferCard({ values }: MaxOfferCardProps) {
             Target Cash-on-Cash <span className="font-normal lowercase tracking-normal">(opt)</span>
           </Label>
           <div className="relative">
-            <Input type="number" inputMode="decimal" step="0.1" value={cocInput} onChange={(e) => setCocInput(e.target.value)} placeholder="Any" className="pr-7 border-input bg-background" />
+            <Input type="number" inputMode="decimal" step="0.1" value={cocInput} onChange={edit(setCocInput)} placeholder="Any" className="pr-7 border-input bg-background" />
             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">%</span>
           </div>
         </div>
@@ -121,7 +176,7 @@ export function MaxOfferCard({ values }: MaxOfferCardProps) {
           </Label>
           <div className="relative">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">$</span>
-            <Input type="number" inputMode="numeric" step="50" value={cashFlowInput} onChange={(e) => setCashFlowInput(e.target.value)} placeholder="0" className="pl-7 border-input bg-background" />
+            <Input type="number" inputMode="numeric" step="50" value={cashFlowInput} onChange={edit(setCashFlowInput)} placeholder="0" className="pl-7 border-input bg-background" />
           </div>
         </div>
         <div>
@@ -131,7 +186,7 @@ export function MaxOfferCard({ values }: MaxOfferCardProps) {
               {isCashDeal ? "(n/a — cash purchase)" : "(opt)"}
             </span>
           </Label>
-          <Input type="number" inputMode="decimal" step="0.05" value={dscrInput} onChange={(e) => setDscrInput(e.target.value)} placeholder="1.25" disabled={isCashDeal} className="border-input bg-background" />
+          <Input type="number" inputMode="decimal" step="0.05" value={dscrInput} onChange={edit(setDscrInput)} placeholder="1.25" disabled={isCashDeal} className="border-input bg-background" />
         </div>
       </div>
 

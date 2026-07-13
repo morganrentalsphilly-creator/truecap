@@ -152,3 +152,72 @@ export function rateAlertSubject(currentRatePct: number, dealCount: number, fell
   const deals = dealCount === 1 ? "1 of your saved deals" : `${dealCount} of your saved deals`;
   return `Rates ${dir} to ${currentRatePct.toFixed(2)}% — ${deals} changed`;
 }
+
+/**
+ * Plausibility bounds for the `?rate=` deep-link param the alert email puts
+ * on each deal card. Anything outside is ignored silently — a tampered or
+ * mangled link must never re-underwrite at a nonsense rate.
+ */
+export const RATE_ALERT_PARAM_MIN_PCT = 0.5;
+export const RATE_ALERT_PARAM_MAX_PCT = 15;
+
+/**
+ * Validate the `?rate=` search param from a rate-alert deep link.
+ * Accepts the raw Next.js searchParams value (string | string[] | undefined);
+ * returns the rate in percent, or null for anything non-finite or outside
+ * the plausible mortgage-rate bounds. Never throws.
+ */
+export function parseRateAlertRateParam(raw: unknown): number | null {
+  const value = Array.isArray(raw) ? raw[0] : raw;
+  if (typeof value !== "string" || value.trim() === "") return null;
+  const rate = Number(value);
+  if (!Number.isFinite(rate)) return null;
+  if (rate < RATE_ALERT_PARAM_MIN_PCT || rate > RATE_ALERT_PARAM_MAX_PCT) return null;
+  return rate;
+}
+
+/**
+ * Per-deal deep link for the alert email: the deal's workspace page with the
+ * NEW rate carried as a query param, so opening it shows the deal
+ * re-underwritten at the alert's rate (banner in
+ * app/dashboard/saved-analyses/[id]) without mutating the saved deal.
+ */
+export function rateAlertDealUrl(
+  siteUrl: string,
+  deal: Pick<RateAlertDeal, "id" | "currentRatePct">
+): string {
+  const rate = encodeURIComponent(String(deal.currentRatePct));
+  return `${siteUrl}/dashboard/saved-analyses/${deal.id}?rate=${rate}&src=rate-alert`;
+}
+
+export type RateReUnderwrite = {
+  savedRatePct: number;
+  alertRatePct: number;
+  before: RateAlertMetrics;
+  after: RateAlertMetrics;
+};
+
+/**
+ * Re-underwrite a deal at the alert's rate for the deep-link banner. Unlike
+ * buildRateAlertForDeal there is NO minimum-delta or state-change gate — the
+ * user clicked a link that promised this preview, so tiny moves still render.
+ * Null when there's nothing meaningful to show: cash purchase (no debt
+ * service), a snapshot without a finite saved rate, or the saved rate already
+ * matching the alert rate at display precision.
+ */
+export function buildRateReUnderwrite(
+  values: InvestmentFormValues,
+  alertRatePct: number
+): RateReUnderwrite | null {
+  const savedRatePct = values.interestRate;
+  if (typeof savedRatePct !== "number" || !Number.isFinite(savedRatePct)) return null;
+  // Same rate to 2-decimal display precision — the banner would show a no-op.
+  if (Math.abs(savedRatePct - alertRatePct) < 0.005) return null;
+
+  const before = metricsFor(values);
+  if (!before) return null; // cash purchase
+  const after = metricsFor({ ...values, interestRate: alertRatePct });
+  if (!after) return null;
+
+  return { savedRatePct, alertRatePct, before, after };
+}

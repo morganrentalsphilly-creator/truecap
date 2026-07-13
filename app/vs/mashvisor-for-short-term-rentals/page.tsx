@@ -148,7 +148,7 @@ export default function VsMashvisorForShortTermRentalsPage() {
             Both serve STR investors. Mashvisor is the market-discovery + revenue-projection tool (Airbnb occupancy rates, ADR by neighborhood). TrueCap is the underwriting calculator that turns Mashvisor&apos;s revenue numbers into a full deal analysis (cap rate, DSCR, cash flow, projection). STR investors typically use both — Mashvisor to pick the property, TrueCap to decide whether to buy it.
           </p>
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-            <ScrollToFormButton className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0, 112, 196,0.28)] transition-transform hover:-translate-y-0.5">
+            <ScrollToFormButton className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5">
               <Calculator className="size-4" />
               Run a deal — 60 seconds
               <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />

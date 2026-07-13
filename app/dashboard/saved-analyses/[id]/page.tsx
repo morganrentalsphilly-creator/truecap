@@ -28,6 +28,8 @@ import { OpenFullAnalysisButton } from "@/components/investcalc/open-saved-deal-
 import { RefreshOnReturn } from "@/components/investcalc/refresh-on-return";
 import { DealWorkspaceAnchorChips } from "@/components/investcalc/deal-workspace-anchor-chips";
 import { OwnedEquityCard } from "@/components/investcalc/owned-equity-card";
+import { RateAlertReUnderwriteBanner } from "@/components/investcalc/rate-alert-reunderwrite-banner";
+import { buildRateReUnderwrite, parseRateAlertRateParam } from "@/lib/rate-alerts";
 import { nextActionForDeal } from "@/lib/next-action";
 import { recomputeSavedDealVerdict } from "@/lib/recompute-saved-deal-verdict";
 import { calculateAnalysis } from "@/lib/calc-analysis";
@@ -194,15 +196,28 @@ async function fetchDeal(
 
 export default async function DealWorkspacePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { id } = await params;
+  // Rate-alert deep link (?rate= on each email deal card): validated here,
+  // consumed below to render the re-underwrite banner. Invalid or
+  // out-of-bounds values are ignored silently — the page renders as normal.
+  const alertRatePct = parseRateAlertRateParam((await searchParams).rate);
   const supabase = await createServerSupabaseClient();
   const user = await getRequestUser();
 
   if (!user) {
-    redirect("/auth/login");
+    // Preserve the destination — rate-alert email links land here logged
+    // out, and without ?next the validated ?rate= param (the whole point
+    // of the click) would be dropped at the login wall. login-form.tsx
+    // already honors same-origin ?next.
+    const dest = `/dashboard/saved-analyses/${id}${
+      alertRatePct != null ? `?rate=${alertRatePct}&src=rate-alert` : ""
+    }`;
+    redirect(`/auth/login?next=${encodeURIComponent(dest)}`);
   }
 
   const entitlements = await getRequestEntitlements(user.id);
@@ -294,6 +309,14 @@ export default async function DealWorkspacePage({
   // Current-engine form values — reused by the max-offer solver and the
   // owned-equity estimate. Null for legacy snapshots that don't validate.
   const formValues = normalizeInvestmentFormSnapshot(dealRow.form_snapshot);
+
+  // Rate-alert deep link: re-underwrite at the alert's rate (pure preview —
+  // the saved deal is NOT mutated by opening the link; the banner's one
+  // action applies it through the existing saveDealAction update path).
+  // Null — and the banner absent — for cash purchases, legacy snapshots, or
+  // when the saved rate already matches the alert's.
+  const rateReUnderwrite =
+    alertRatePct != null && formValues ? buildRateReUnderwrite(formValues, alertRatePct) : null;
 
   // Compact underwrite header (DEC-1/WS-1) — same recompute-with-stored-
   // fallback numbers the banner uses. Metrics a legacy snapshot doesn't carry
@@ -508,6 +531,20 @@ export default async function DealWorkspacePage({
                 no hint they exist — one compact chip row jumps to each. */}
             <DealWorkspaceAnchorChips />
           </div>
+
+          {/* Rate-alert deep link (?rate=): the deal re-underwritten at the
+              alert's rate, above the fold — this is what the email promised.
+              Shows only while the param is present (implicit dismiss). */}
+          {rateReUnderwrite && formValues ? (
+            <RateAlertReUnderwriteBanner
+              savedDealId={dealRow.id}
+              values={formValues}
+              savedRatePct={rateReUnderwrite.savedRatePct}
+              alertRatePct={rateReUnderwrite.alertRatePct}
+              before={rateReUnderwrite.before}
+              after={rateReUnderwrite.after}
+            />
+          ) : null}
 
           <div>
             <NextActionBanner

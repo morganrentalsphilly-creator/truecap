@@ -15,7 +15,6 @@ import Link from "next/link";
 import { ArrowRight, ArrowUpRight, Calculator, Hammer, ShieldCheck, Sparkles, TrendingUp, Wrench } from "lucide-react";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
-import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
 
 export const metadata: Metadata = {
   title: "For Fix & Flippers",
@@ -92,14 +91,18 @@ export default function ForFlippersPage() {
           </p>
 
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-            <ScrollToFormButton
-              targetId="use-cases"
-              className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0, 112, 196,0.28)] transition-transform hover:-translate-y-0.5"
+            {/* Deep-link into the analyzer with the Fix & Flip play pre-
+                selected (?strategy= analyzer handoff) — hard-money defaults
+                + the flip model, not a blank buy-and-hold form. */}
+            <Link
+              href="/?strategy=fix-flip#main"
+              prefetch={false}
+              className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5"
             >
               <Calculator className="size-4" />
               Run a free flip analysis
               <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-            </ScrollToFormButton>
+            </Link>
             <Link
               href="/tools/rehab-cost-estimator"
               className="inline-flex h-12 items-center justify-center gap-1.5 rounded-xl border border-border bg-card px-5 text-sm font-semibold text-foreground hover:bg-muted"
@@ -220,7 +223,8 @@ export default function ForFlippersPage() {
           </p>
           <div className="flex flex-wrap gap-3">
             <Link
-              href="/"
+              href="/?strategy=fix-flip#main"
+              prefetch={false}
               className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
             >
               <Calculator className="w-4 h-4" />

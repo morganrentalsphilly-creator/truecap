@@ -42,6 +42,8 @@ import {
   Zap,
 } from "lucide-react";
 import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
+import { PersonaSeedLink } from "@/components/marketing/persona-seed-link";
+import type { HandoffStrategyKey } from "@/lib/analyzer-handoff";
 
 // ─────────────────────────────────────────────────────── How It Works
 const HOW_STEPS = [
@@ -99,7 +101,7 @@ export function HowItWorks() {
           ))}
         </ol>
         <div className="mt-10 text-center">
-          <ScrollToFormButton className="group inline-flex h-11 items-center gap-1.5 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-[0_10px_24px_rgba(0, 112, 196,0.28)] hover:-translate-y-0.5 transition-transform">
+          <ScrollToFormButton className="group inline-flex h-11 items-center gap-1.5 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-[0_10px_24px_rgba(0,112,196,0.28)] hover:-translate-y-0.5 transition-transform">
             Analyze a deal free
             <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
           </ScrollToFormButton>
@@ -190,7 +192,7 @@ export function WhyNotSpreadsheet() {
           </div>
 
           {/* Win column - the same jobs, done for you. */}
-          <div className="rounded-2xl border-2 border-primary/30 bg-card p-6 shadow-[0_16px_40px_rgba(0, 112, 196,0.10)] sm:p-7">
+          <div className="rounded-2xl border-2 border-primary/30 bg-card p-6 shadow-[0_16px_40px_rgba(0,112,196,0.10)] sm:p-7">
             <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-primary">
               <Zap className="size-3.5" />
               With TrueCap
@@ -215,7 +217,7 @@ export function WhyNotSpreadsheet() {
             Analyze 20 deals in the time it used to take to underwrite one - and stop
             losing the good ones while a spreadsheet catches up.
           </p>
-          <ScrollToFormButton className="group inline-flex h-11 items-center gap-1.5 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-[0_10px_24px_rgba(0, 112, 196,0.28)] hover:-translate-y-0.5 transition-transform">
+          <ScrollToFormButton className="group inline-flex h-11 items-center gap-1.5 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-[0_10px_24px_rgba(0,112,196,0.28)] hover:-translate-y-0.5 transition-transform">
             Analyze a deal free
             <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
           </ScrollToFormButton>
@@ -642,7 +644,7 @@ export function PreCalculatorCta() {
   return (
     <section className="border-t border-border bg-gradient-to-b from-background via-[var(--brand-blue-light)] to-background">
       <div className="mx-auto max-w-4xl px-4 py-14 sm:px-6 sm:py-20">
-        <div className="rounded-3xl border-2 border-primary/25 bg-card p-7 text-center shadow-[0_24px_70px_rgba(0, 112, 196,0.12)] sm:p-10">
+        <div className="rounded-3xl border-2 border-primary/25 bg-card p-7 text-center shadow-[0_24px_70px_rgba(0,112,196,0.12)] sm:p-10">
           <p className="text-[11px] font-bold uppercase tracking-widest text-primary">Your move</p>
           <h2 className="mt-2 text-balance text-3xl font-extrabold tracking-tight text-foreground sm:text-5xl">
             Run a deal right now. <span className="text-primary">Free.</span>
@@ -653,7 +655,7 @@ export function PreCalculatorCta() {
           </p>
 
           <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
-            <ScrollToFormButton className="group inline-flex h-12 items-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_14px_32px_rgba(0, 112, 196,0.32)] hover:-translate-y-0.5 transition-transform sm:h-14 sm:text-base">
+            <ScrollToFormButton className="group inline-flex h-12 items-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_14px_32px_rgba(0,112,196,0.32)] hover:-translate-y-0.5 transition-transform sm:h-14 sm:text-base">
               <Zap className="size-4 sm:size-5" />
               Analyze a deal free
               <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5 sm:size-5" />
@@ -900,7 +902,7 @@ export function PdfProUpsell() {
           </div>
 
           {/* Pro */}
-          <div className="flex flex-col rounded-2xl border-2 border-primary/30 bg-card p-6 shadow-[0_16px_40px_rgba(0, 112, 196,0.10)]">
+          <div className="flex flex-col rounded-2xl border-2 border-primary/30 bg-card p-6 shadow-[0_16px_40px_rgba(0,112,196,0.10)]">
             <div className="mb-4 flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
               <Sparkles className="size-5" />
             </div>
@@ -918,7 +920,7 @@ export function PdfProUpsell() {
             <div className="mt-5">
               <Link
                 href="/pricing"
-                className="group inline-flex h-11 items-center gap-1.5 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-[0_10px_24px_rgba(0, 112, 196,0.28)] hover:-translate-y-0.5 transition-transform"
+                className="group inline-flex h-11 items-center gap-1.5 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-[0_10px_24px_rgba(0,112,196,0.28)] hover:-translate-y-0.5 transition-transform"
               >
                 Start your 3-day free trial
                 <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
@@ -938,24 +940,35 @@ export function PdfProUpsell() {
  * Persona cards live LOWER, after intent is captured, so they help a
  * visitor self-identify without diluting the single above-the-fold CTA.
  */
-const PERSONAS: { icon: typeof Home; title: string; body: string; seed?: { href: string; label: string } }[] = [
+const PERSONAS: {
+  icon: typeof Home;
+  title: string;
+  body: string;
+  seed?: { href: string; label: string; strategy: HandoffStrategyKey };
+}[] = [
   {
     icon: TrendingUp,
     title: "For investors",
     body: "Underwrite buy-and-hold deals in seconds - cash flow, cap rate, CoC, DSCR, a 10-year view, and a pass/fail against your own buy box.",
+    // Deep-link with the Buy & Hold play pre-selected (analyzer handoff
+    // ?strategy=) so long-term-rental defaults are already applied.
+    seed: { href: "/?strategy=buy-hold#main", label: "Start a buy-and-hold analysis", strategy: "buy-hold" },
   },
   {
     icon: Users,
     title: "For agents",
     body: "Hand clients a defensible analysis at the showing, with a shareable link or lender-ready PDF.",
+    // No seed: agents run whatever their client is buying — no single play
+    // (or property type) fits, so the plain analyzer is the right landing.
   },
   {
     icon: Home,
     title: "For house hackers",
     body: "Model owner-occupied units and see what's left of your mortgage payment after rent.",
-    // Deep-link straight to the owner-occupant form (analyzer handoff ?type=)
-    // so a house hacker doesn't start on a blank single-family deal.
-    seed: { href: "/?type=owner-occupant#main", label: "Start a house-hack analysis" },
+    // Deep-link with the House Hack play pre-selected (analyzer handoff
+    // ?strategy=, upgraded from ?type=) — same owner-occupant form, now with
+    // FHA-style starter assumptions applied too.
+    seed: { href: "/?strategy=house-hack#main", label: "Start a house-hack analysis", strategy: "house-hack" },
   },
 ];
 
@@ -993,20 +1006,16 @@ export function Personas() {
                 {p.body}
               </p>
               {p.seed ? (
-                <Link
-                  href={p.seed.href}
-                  prefetch={false}
-                  className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-primary underline-offset-2 hover:underline"
-                >
-                  {p.seed.label}
-                  <ArrowRight className="size-3.5" />
-                </Link>
+                // Client component: same-page soft navs need the strategy
+                // delivered by event, not just the URL param — see the
+                // component's doc comment.
+                <PersonaSeedLink href={p.seed.href} label={p.seed.label} strategy={p.seed.strategy} />
               ) : null}
             </div>
           ))}
         </div>
         <div className="mt-10 text-center">
-          <ScrollToFormButton className="group inline-flex h-11 items-center gap-1.5 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-[0_10px_24px_rgba(0, 112, 196,0.28)] hover:-translate-y-0.5 transition-transform">
+          <ScrollToFormButton className="group inline-flex h-11 items-center gap-1.5 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-[0_10px_24px_rgba(0,112,196,0.28)] hover:-translate-y-0.5 transition-transform">
             Analyze a deal free
             <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
           </ScrollToFormButton>

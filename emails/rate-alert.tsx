@@ -20,7 +20,7 @@ import {
   Section,
   Text,
 } from "@react-email/components";
-import type { RateAlertDeal } from "@/lib/rate-alerts";
+import { rateAlertDealUrl, type RateAlertDeal } from "@/lib/rate-alerts";
 
 const BRAND = "#5248D4";
 const INK = "#0F172A";
@@ -79,8 +79,13 @@ export default function RateAlertEmail({
                     padding: "14px 16px",
                   }}
                 >
-                  <Text style={{ color: INK, fontWeight: 700, fontSize: 15, margin: "0 0 2px" }}>
-                    {deal.label}
+                  <Text style={{ margin: "0 0 2px" }}>
+                    <Link
+                      href={rateAlertDealUrl(siteUrl, deal)}
+                      style={{ color: INK, fontWeight: 700, fontSize: 15, textDecoration: "none" }}
+                    >
+                      {deal.label}
+                    </Link>
                   </Text>
                   <Text style={{ color: SUB, fontSize: 12, margin: "0 0 8px" }}>
                     Saved at {deal.savedRatePct.toFixed(2)}% · re-run at {deal.currentRatePct.toFixed(2)}%
@@ -101,6 +106,17 @@ export default function RateAlertEmail({
                   <Text style={{ color: SUB, fontSize: 12, margin: "6px 0 0" }}>
                     Cash flow {fmtMoney(deal.before.monthlyCashFlow)} → {fmtMoney(deal.after.monthlyCashFlow)}/mo
                     {" · "}DSCR {deal.before.dscr.toFixed(2)} → {deal.after.dscr.toFixed(2)}
+                  </Text>
+                  {/* One-click loop closer: the deal's workspace, re-underwritten
+                      at the alert's rate (?rate= deep link — banner with an
+                      apply action; opening it never mutates the saved deal). */}
+                  <Text style={{ margin: "8px 0 0" }}>
+                    <Link
+                      href={rateAlertDealUrl(siteUrl, deal)}
+                      style={{ color: BRAND, fontSize: 13, fontWeight: 700, textDecoration: "none" }}
+                    >
+                      Re-underwrite at {deal.currentRatePct.toFixed(2)}% →
+                    </Link>
                   </Text>
                 </Section>
               </Section>

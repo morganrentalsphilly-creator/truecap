@@ -1,8 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
   buildRateAlertForDeal,
+  buildRateReUnderwrite,
   dscrBand,
+  parseRateAlertRateParam,
+  RATE_ALERT_PARAM_MAX_PCT,
+  RATE_ALERT_PARAM_MIN_PCT,
   RATE_ALERTS_MIN_DEAL_DELTA_PP,
+  rateAlertDealUrl,
   rateAlertSubject,
 } from "@/lib/rate-alerts";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
@@ -144,5 +149,75 @@ describe("rateAlertSubject", () => {
     expect(rateAlertSubject(7.4, 3, false)).toBe(
       "Rates rose to 7.40% — 3 of your saved deals changed"
     );
+  });
+});
+
+describe("parseRateAlertRateParam", () => {
+  it("accepts a plausible rate string", () => {
+    expect(parseRateAlertRateParam("6.875")).toBe(6.875);
+    expect(parseRateAlertRateParam(String(RATE_ALERT_PARAM_MIN_PCT))).toBe(
+      RATE_ALERT_PARAM_MIN_PCT
+    );
+    expect(parseRateAlertRateParam(String(RATE_ALERT_PARAM_MAX_PCT))).toBe(
+      RATE_ALERT_PARAM_MAX_PCT
+    );
+  });
+
+  it("takes the first value of a repeated param", () => {
+    expect(parseRateAlertRateParam(["6.5", "999"])).toBe(6.5);
+  });
+
+  it("rejects missing, non-numeric, and non-finite values", () => {
+    expect(parseRateAlertRateParam(undefined)).toBeNull();
+    expect(parseRateAlertRateParam("")).toBeNull();
+    expect(parseRateAlertRateParam("  ")).toBeNull();
+    expect(parseRateAlertRateParam("abc")).toBeNull();
+    expect(parseRateAlertRateParam("NaN")).toBeNull();
+    expect(parseRateAlertRateParam("Infinity")).toBeNull();
+    expect(parseRateAlertRateParam([])).toBeNull();
+    expect(parseRateAlertRateParam(6.5)).toBeNull(); // only strings come off a URL
+  });
+
+  it("rejects rates outside the plausible mortgage bounds", () => {
+    expect(parseRateAlertRateParam("0.4")).toBeNull();
+    expect(parseRateAlertRateParam("15.01")).toBeNull();
+    expect(parseRateAlertRateParam("-6.5")).toBeNull();
+    expect(parseRateAlertRateParam("650")).toBeNull();
+  });
+});
+
+describe("rateAlertDealUrl", () => {
+  it("deep-links to the deal workspace with the new rate + source", () => {
+    expect(
+      rateAlertDealUrl("https://usetruecap.com", { id: "abc-123", currentRatePct: 6.875 })
+    ).toBe("https://usetruecap.com/dashboard/saved-analyses/abc-123?rate=6.875&src=rate-alert");
+  });
+});
+
+describe("buildRateReUnderwrite", () => {
+  it("returns before/after metrics even for small, non-state-changing moves", () => {
+    // 7% → 6.9% is below the email's per-deal delta gate, but the user
+    // clicked a link promising this preview — the banner still renders it.
+    const preview = buildRateReUnderwrite(baseDeal({ interestRate: 7 }), 6.9);
+    expect(preview).not.toBeNull();
+    expect(preview!.savedRatePct).toBe(7);
+    expect(preview!.alertRatePct).toBe(6.9);
+    expect(preview!.after.monthlyCashFlow).toBeGreaterThan(preview!.before.monthlyCashFlow);
+    expect(preview!.after.dscr).toBeGreaterThan(preview!.before.dscr);
+  });
+
+  it("shows deterioration when the alert rate is higher than saved", () => {
+    const preview = buildRateReUnderwrite(baseDeal({ interestRate: 5.5 }), 8.5);
+    expect(preview).not.toBeNull();
+    expect(preview!.after.monthlyCashFlow).toBeLessThan(preview!.before.monthlyCashFlow);
+  });
+
+  it("returns null for cash purchases (no debt service to reprice)", () => {
+    expect(buildRateReUnderwrite(baseDeal({ downPaymentPct: 100 }), 6)).toBeNull();
+  });
+
+  it("returns null when the saved rate already matches at display precision", () => {
+    expect(buildRateReUnderwrite(baseDeal({ interestRate: 6.875 }), 6.875)).toBeNull();
+    expect(buildRateReUnderwrite(baseDeal({ interestRate: 6.875 }), 6.876)).toBeNull();
   });
 });

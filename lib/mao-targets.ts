@@ -19,16 +19,19 @@
  *      break-even cash flow so the solver always has a real bar.
  *
  * Pure module (no IO, client-safe). lib/max-allowable-offer.ts is CONSUMED,
- * never modified — this only standardizes what call sites ask it for.
+ * never modified — this only standardizes what call sites ask it for (and,
+ * for the buy-box "your number" line, wraps ONE solve behind that standard
+ * basis so the verdict card and the workspace can't diverge).
  */
 
-import type { MaoTarget } from "@/lib/max-allowable-offer";
+import { calculateMaxAllowableOffer, type MaoTarget } from "@/lib/max-allowable-offer";
+import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 import type { BuyBoxCriteria } from "@/lib/buy-box";
 
 /** Canonical default basis: break-even cash flow + DSCR 1.25. */
 export const DEFAULT_MAO_TARGET: MaoTarget = { monthlyCashFlow: 0, dscr: 1.25 };
 
-type BuyBoxReturnThresholds = Pick<
+export type BuyBoxReturnThresholds = Pick<
   BuyBoxCriteria,
   "minCapRatePct" | "minCocPct" | "minDscr" | "minCashFlowMonthly"
 >;
@@ -97,6 +100,53 @@ export function buildMaoTarget(
   }
 
   return target;
+}
+
+/**
+ * The buy-box-shaped MAO target, or null when the box doesn't actually
+ * shape one (no return thresholds, or a DSCR-only box on a cash deal).
+ * Use this when the caller wants to solve against THE USER'S BOX
+ * specifically — buildMaoTarget's default-basis fallback would silently
+ * attribute the canonical defaults to "your buy box".
+ */
+export function chooseMaoTargetFromBuyBox(
+  box: BuyBoxReturnThresholds | null | undefined,
+  opts: { isCashPurchase: boolean }
+): MaoTarget | null {
+  if (!buyBoxContributesToMaoTarget(box, opts)) return null;
+  return buildMaoTarget(box, opts);
+}
+
+type BuyBoxPriceCriteria = BuyBoxReturnThresholds &
+  Pick<BuyBoxCriteria, "maxPurchasePrice">;
+
+/**
+ * "Your number" — the highest purchase price that clears the box's
+ * PRICE-SOLVABLE criteria: the return thresholds (via the MAO solver)
+ * capped by the box's own max purchase price. Price can't fix a
+ * property-type or market miss — callers decide separately whether price
+ * is even the blocker. Returns null when the box sets no price-solvable
+ * bar or no price in the solver's range clears it. Never throws:
+ * degenerate inputs ($0 rent, unreachable targets) resolve to null.
+ */
+export function solveBuyBoxClearingPrice(
+  values: InvestmentFormValues,
+  box: BuyBoxPriceCriteria | null | undefined,
+  opts: { isCashPurchase: boolean }
+): number | null {
+  if (!box) return null;
+  const target = chooseMaoTargetFromBuyBox(box, opts);
+  const budget = box.maxPurchasePrice;
+  // No return thresholds in play → the box's price cap is the only bar.
+  if (!target) return budget ?? null;
+  let solved: number | null;
+  try {
+    solved = calculateMaxAllowableOffer(values, target)?.maxPrice ?? null;
+  } catch {
+    return null;
+  }
+  if (solved == null) return null;
+  return budget != null ? Math.min(solved, budget) : solved;
 }
 
 function money(n: number): string {

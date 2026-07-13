@@ -1211,6 +1211,7 @@ export function AnalysisDashboard({
             state: deriveStateFromAddress(values.address),
             isCashPurchase: result.monthlyPayment <= 0,
           }}
+          values={values}
           onFitChange={setBuyBoxAnyPass}
           onQaContextChange={setBuyBoxQaReport}
         />
@@ -1514,7 +1515,11 @@ export function AnalysisDashboard({
               {tab.id === "stress-test" && (
                 <div className="space-y-4">
                   {canUseMaxOffer ? (
-                    <MaxOfferCard values={values} />
+                    // Seeded from the same primary-box thresholds the Q&A
+                    // MAO context uses (reported up by BuyBoxVerdictCard),
+                    // so the solver's first number matches the verdict
+                    // card's "your number" basis. Null = canonical defaults.
+                    <MaxOfferCard values={values} buyBoxThresholds={buyBoxQaReport?.maoThresholds ?? null} />
                   ) : (
                     <ProInlineGate
                       icon={Target}

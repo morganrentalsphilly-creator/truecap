@@ -58,11 +58,14 @@ const STEPS: Step[] = [
     ctaLabel: "Open the analyzer",
     ctaHref: "/",
   },
+  // Step 3 leads with the buy box (the personalization wedge): TrueCap
+  // isn't a generic calculator — set your criteria once and every deal
+  // gets a personal pass/fail. The Pro laundry list rides second.
   {
     id: "explore-pro",
     icon: CheckCircle2,
-    title: "3. See what Pro unlocks",
-    body: "10-year projections, tax strategy, exit scenarios, shareable links, the BRRRR + flip analyzers. Free forever for the basics — upgrade only when the math earns it.",
+    title: "3. Make it yours",
+    body: "Set your buy box — target cash flow, cash-on-cash, price range — and every deal you run gets a personal pass/fail against YOUR criteria. Plus 10-year projections, tax strategy, and the BRRRR + flip analyzers with Pro.",
     ctaLabel: "See pricing",
     ctaHref: "/pricing",
   },

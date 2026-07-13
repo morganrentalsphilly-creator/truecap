@@ -24,6 +24,25 @@ const HANDOFF_PROPERTY_TYPES: readonly HandoffPropertyType[] = [
   "owner-occupant",
 ];
 
+/** "What's your play?" chip keys the analyzer supports (mirrors
+ *  lib/investor-strategies — kept local so this module stays dependency-free;
+ *  the mirror is unit-tested against the registry). */
+export type HandoffStrategyKey =
+  | "buy-hold"
+  | "house-hack"
+  | "brrrr"
+  | "wholesale-mao"
+  | "fix-flip"
+  | "short-term";
+export const HANDOFF_STRATEGY_KEYS: readonly HandoffStrategyKey[] = [
+  "buy-hold",
+  "house-hack",
+  "brrrr",
+  "wholesale-mao",
+  "fix-flip",
+  "short-term",
+];
+
 export interface AnalyzerHandoff {
   /** Maps to purchasePrice. */
   purchasePrice?: number;
@@ -40,6 +59,29 @@ export interface AnalyzerHandoff {
    * isn't one of the three valid types.
    */
   propertyType?: HandoffPropertyType;
+  /**
+   * Maps to the "What's your play?" strategy chip — lets a persona page
+   * (/for-brrrr → /?strategy=brrrr) land the visitor with the play already
+   * selected: property type, starter assumptions, and the lead result tab all
+   * set, exactly as if they'd clicked the chip. Ignored when it isn't one of
+   * the known keys. Wins over `type` when both are present (the play sets its
+   * own property type).
+   */
+  strategy?: HandoffStrategyKey;
+}
+
+/**
+ * Same-page strategy handoff event. The homepage persona cards live on the
+ * SAME route as the calculator ("/"), so clicking a seeded link is a soft
+ * navigation — the URL gains ?strategy= but the calculator's mount-time
+ * readAnalyzerHandoff never re-runs and the seed is inert. The cards
+ * therefore ALSO dispatch this window CustomEvent (the hero address form's
+ * handshake pattern) and the calculator applies the strategy live. Hard
+ * loads and open-in-new-tab still consume the URL param at mount.
+ */
+export const ANALYZER_STRATEGY_EVENT = "truecap:analyzer-strategy";
+export interface AnalyzerStrategyEventDetail {
+  strategy: HandoffStrategyKey;
 }
 
 function toFiniteNum(v: string | null): number | undefined {
@@ -89,6 +131,14 @@ export function readAnalyzerHandoff(search: string): AnalyzerHandoff | null {
     out.propertyType = rawType as HandoffPropertyType;
   }
 
+  // `strategy` — a persona/marketing link pre-selects a "What's your play?"
+  // chip. Same contract as `type`: validated against the known keys, anything
+  // else silently ignored so a bad link never crashes init.
+  const rawStrategy = params.get("strategy")?.trim();
+  if (rawStrategy && (HANDOFF_STRATEGY_KEYS as readonly string[]).includes(rawStrategy)) {
+    out.strategy = rawStrategy as HandoffStrategyKey;
+  }
+
   return Object.keys(out).length > 0 ? out : null;
 }
 
@@ -118,6 +168,9 @@ export function buildAnalyzerHandoffUrl(
   if (input.propertyType && input.propertyType !== "single-family") {
     // single-family is the analyzer default — omit it to keep links clean.
     params.set("type", input.propertyType);
+  }
+  if (input.strategy) {
+    params.set("strategy", input.strategy);
   }
   params.set("utm_source", opts?.utmSource ?? "tool-handoff");
 

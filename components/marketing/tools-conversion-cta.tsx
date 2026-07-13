@@ -69,7 +69,7 @@ export function ToolsConversionCta({ calculatorName, hook }: ToolsConversionCtaP
   return (
     <>
       {/* Inline card — always rendered, below the long-form content */}
-      <section className="mx-auto mt-12 max-w-3xl rounded-3xl border-2 border-primary/25 bg-gradient-to-br from-[var(--brand-blue-light)] via-card to-card p-6 shadow-[0_12px_36px_rgba(0, 112, 196,0.10)] sm:p-8">
+      <section className="mx-auto mt-12 max-w-3xl rounded-3xl border-2 border-primary/25 bg-gradient-to-br from-[var(--brand-blue-light)] via-card to-card p-6 shadow-[0_12px_36px_rgba(0,112,196,0.10)] sm:p-8">
         <div className="flex items-center gap-2">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-primary px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-widest text-primary-foreground">
             <Sparkles className="size-3" />
@@ -89,7 +89,7 @@ export function ToolsConversionCta({ calculatorName, hook }: ToolsConversionCtaP
         <div className="mt-5 flex flex-wrap items-center gap-3">
           <Link
             href="/auth/sign-up"
-            className="group inline-flex h-11 items-center gap-1.5 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-[0_10px_24px_rgba(0, 112, 196,0.28)] transition-transform hover:-translate-y-0.5"
+            className="group inline-flex h-11 items-center gap-1.5 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-[0_10px_24px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5"
           >
             Start free
             <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />

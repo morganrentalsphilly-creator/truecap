@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { readAnalyzerHandoff, buildAnalyzerHandoffUrl } from "@/lib/analyzer-handoff";
+import {
+  readAnalyzerHandoff,
+  buildAnalyzerHandoffUrl,
+  HANDOFF_STRATEGY_KEYS,
+} from "@/lib/analyzer-handoff";
+import { INVESTOR_STRATEGIES } from "@/lib/investor-strategies";
 
 describe("readAnalyzerHandoff", () => {
   it("returns null when no supported params are present", () => {
@@ -47,6 +52,27 @@ describe("readAnalyzerHandoff", () => {
     expect(readAnalyzerHandoff("?type=mansion")).toBeNull();
     expect(readAnalyzerHandoff("?type=commercial&rent=1500")).toEqual({ monthlyRent: 1500 });
   });
+
+  it("seeds a valid strategy (persona deep link)", () => {
+    expect(readAnalyzerHandoff("?strategy=brrrr")).toEqual({ strategy: "brrrr" });
+    expect(readAnalyzerHandoff("?strategy=house-hack&price=400000")).toEqual({
+      strategy: "house-hack",
+      purchasePrice: 400000,
+    });
+  });
+
+  it("silently ignores an invalid strategy", () => {
+    expect(readAnalyzerHandoff("?strategy=day-trading")).toBeNull();
+    expect(readAnalyzerHandoff("?strategy=airbnb&rent=1500")).toEqual({ monthlyRent: 1500 });
+  });
+
+  it("keeps the local strategy-key mirror in sync with the registry", () => {
+    // HANDOFF_STRATEGY_KEYS is a dependency-free mirror of the "What's your
+    // play?" registry — this is the guard that keeps them from drifting.
+    expect([...HANDOFF_STRATEGY_KEYS].sort()).toEqual(
+      INVESTOR_STRATEGIES.map((s) => s.key).sort()
+    );
+  });
 });
 
 describe("buildAnalyzerHandoffUrl", () => {
@@ -79,5 +105,11 @@ describe("buildAnalyzerHandoffUrl", () => {
     expect(buildAnalyzerHandoffUrl({ purchasePrice: 200000, propertyType: "single-family" })).not.toContain(
       "type="
     );
+  });
+
+  it("carries a strategy and round-trips it", () => {
+    const url = buildAnalyzerHandoffUrl({ strategy: "fix-flip" });
+    expect(url).toContain("strategy=fix-flip");
+    expect(readAnalyzerHandoff(url.slice(url.indexOf("?")))).toEqual({ strategy: "fix-flip" });
   });
 });
