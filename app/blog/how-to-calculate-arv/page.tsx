@@ -253,7 +253,16 @@ export default function HowToCalculateArvPost() {
               >
                 rehab cost estimator
               </Link>{" "}
-              cover that side.) Here&apos;s how to turn sold data into an ARV.
+              cover that side.) Here&apos;s how to turn sold data into an ARV —
+              and if you want to run the $/sq ft math live while you read, the
+              free{" "}
+              <Link
+                href="/tools/arv-calculator"
+                className="text-primary font-semibold hover:underline"
+              >
+                ARV calculator
+              </Link>{" "}
+              is preloaded with this exact example.
             </p>
             <p>
               <strong>Step 1 — pull renovated sales only.</strong> Search closed

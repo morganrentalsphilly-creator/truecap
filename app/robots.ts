@@ -51,11 +51,11 @@ export default function robots(): MetadataRoute.Robots {
         disallow: sharedDisallow,
       },
     ],
-    // sitemap.xml = traditional crawler index. /llms.txt = AI training
-    // crawler index (llmstxt.org convention). Some Robots parsers don't
-    // recognize a second `sitemap` field; we pass an array so the route
-    // emits both lines.
-    sitemap: [`${siteUrl}/sitemap.xml`, `${siteUrl}/llms.txt`],
+    // sitemap.xml only: llms.txt is NOT a valid Sitemap-protocol document
+    // — listing it as a Sitemap makes strict parsers (including Google's)
+    // log a fetch-and-fail on every crawl. AI crawlers find /llms.txt by
+    // the llmstxt.org convention + the explicit Allow rules above.
+    sitemap: [`${siteUrl}/sitemap.xml`],
     host: siteUrl,
   };
 }

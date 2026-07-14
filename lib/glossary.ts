@@ -87,6 +87,7 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     whyItMatters:
       "Monthly cash flow is what funds your life. Wealth-building investors weight IRR; income investors weight monthly cash flow.",
     related: ["coc", "noi", "afterTaxCF"],
+    toolUrl: "/tools/rental-cash-flow-calculator",
   },
   dscr: {
     term: "DSCR (Debt Service Coverage Ratio)",
@@ -188,9 +189,9 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     slug: "tax-savings",
     category: "metric",
     definition:
-      "Estimated monthly federal income tax saved by depreciation and (optionally) mortgage interest deduction at your marginal rate.",
+      "Estimated monthly year-1 tax effect at your marginal rate: deductions (operating expenses, depreciation, and optionally mortgage interest) netted against tax owed on the rental income. Positive means the deal shelters income; negative means it owes tax.",
     whyItMatters:
-      "Depreciation is the secret weapon of rental investing. A $400k property with 80% building value depreciates ~$11,600/yr (over 27.5 years), saving a 32% bracket investor ~$3,700/yr in tax — which is real after-tax cash flow you don't see in the basic numbers.",
+      "Depreciation is the secret weapon of rental investing — a $400k property with 80% building value depreciates ~$11,600/yr (over 27.5 years). But the estimate is honest both ways: once deductions no longer cover the rental income, a profitable deal owes tax, so this figure can be negative on strong cash-flowers.",
     related: ["afterTaxCF", "depreciationYears", "buildingValue"],
   },
   afterTaxCF: {
@@ -198,9 +199,9 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     slug: "after-tax-cash-flow",
     category: "metric",
     definition:
-      "Monthly cash flow plus estimated monthly tax savings from depreciation. The real number that hits your pocket post-tax.",
+      "Monthly cash flow plus the estimated year-1 net tax effect — deductions (depreciation, deductible interest, operating expenses) netted against tax owed on the rental income. The same math as the Tax Strategy panel's year-1 line.",
     whyItMatters:
-      "Most investors compare deals on pre-tax cash flow, but the post-tax number can shift the verdict. A deal that looks marginal pre-tax often pencils strongly after depreciation savings, especially for high-bracket investors.",
+      "Most investors compare deals on pre-tax cash flow, but the post-tax number can shift the picture in both directions: a leveraged deal's deductions can turn a small pre-tax loss into an after-tax positive, while a strong cash-flower can owe tax on its rental income. TrueCap nets the two rather than counting deductions as a one-way bonus.",
     related: ["cashFlow", "taxSavings", "depreciationYears"],
   },
 

@@ -509,5 +509,255 @@ export const HUD_RENTS: Record<string, HudRent> = {
     "rent2br": 1083,
     "rent3br": 1414,
     "year": 2026
+  },
+  "mcallen": {
+    "rent2br": 1060,
+    "rent3br": 1376,
+    "year": 2026
+  },
+  "brownsville": {
+    "rent2br": 1047,
+    "rent3br": 1414,
+    "year": 2026
+  },
+  "laredo": {
+    "rent2br": 1161,
+    "rent3br": 1499,
+    "year": 2026
+  },
+  "amarillo": {
+    "rent2br": 1106,
+    "rent3br": 1503,
+    "year": 2026
+  },
+  "beaumont": {
+    "rent2br": 1103,
+    "rent3br": 1446,
+    "year": 2026
+  },
+  "denton": {
+    "rent2br": 1931,
+    "rent3br": 2431,
+    "year": 2026
+  },
+  "mesa": {
+    "rent2br": 1839,
+    "rent3br": 2452,
+    "year": 2026
+  },
+  "fayetteville": {
+    "rent2br": 1347,
+    "rent3br": 1873,
+    "year": 2026
+  },
+  "cedar-rapids": {
+    "rent2br": 1071,
+    "rent3br": 1490,
+    "year": 2026
+  },
+  "davenport": {
+    "rent2br": 1143,
+    "rent3br": 1498,
+    "year": 2026
+  },
+  "topeka": {
+    "rent2br": 1057,
+    "rent3br": 1392,
+    "year": 2026
+  },
+  "olathe": {
+    "rent2br": 1358,
+    "rent3br": 1769,
+    "year": 2026
+  },
+  "champaign": {
+    "rent2br": 1122,
+    "rent3br": 1436,
+    "year": 2026
+  },
+  "flint": {
+    "rent2br": 1033,
+    "rent3br": 1272,
+    "year": 2026
+  },
+  "ann-arbor": {
+    "rent2br": 1656,
+    "rent3br": 1986,
+    "year": 2026
+  },
+  "kalamazoo": {
+    "rent2br": 1162,
+    "rent3br": 1531,
+    "year": 2026
+  },
+  "athens": {
+    "rent2br": 1331,
+    "rent3br": 1734,
+    "year": 2026
+  },
+  "tuscaloosa": {
+    "rent2br": 1169,
+    "rent3br": 1490,
+    "year": 2026
+  },
+  "montgomery": {
+    "rent2br": 1016,
+    "rent3br": 1304,
+    "year": 2026
+  },
+  "gulfport": {
+    "rent2br": 1140,
+    "rent3br": 1471,
+    "year": 2026
+  },
+  "lafayette": {
+    "rent2br": 1019,
+    "rent3br": 1301,
+    "year": 2026
+  },
+  "durham": {
+    "rent2br": 1711,
+    "rent3br": 2117,
+    "year": 2026
+  },
+  "asheville": {
+    "rent2br": 1835,
+    "rent3br": 2231,
+    "year": 2026
+  },
+  "norfolk": {
+    "rent2br": 1713,
+    "rent3br": 2376,
+    "year": 2026
+  },
+  "virginia-beach": {
+    "rent2br": 1713,
+    "rent3br": 2376,
+    "year": 2026
+  },
+  "charleston": {
+    "rent2br": 1787,
+    "rent3br": 2222,
+    "year": 2026
+  },
+  "spartanburg": {
+    "rent2br": 1187,
+    "rent3br": 1439,
+    "year": 2026
+  },
+  "myrtle-beach": {
+    "rent2br": 1465,
+    "rent3br": 1805,
+    "year": 2026
+  },
+  "gainesville": {
+    "rent2br": 1493,
+    "rent3br": 1868,
+    "year": 2026
+  },
+  "ocala": {
+    "rent2br": 1373,
+    "rent3br": 1772,
+    "year": 2026
+  },
+  "daytona-beach": {
+    "rent2br": 1700,
+    "rent3br": 2241,
+    "year": 2026
+  },
+  "sarasota": {
+    "rent2br": 1958,
+    "rent3br": 2537,
+    "year": 2026
+  },
+  "naples": {
+    "rent2br": 1986,
+    "rent3br": 2581,
+    "year": 2026
+  },
+  "boulder": {
+    "rent2br": 2124,
+    "rent3br": 2820,
+    "year": 2026
+  },
+  "pueblo": {
+    "rent2br": 1269,
+    "rent3br": 1617,
+    "year": 2026
+  },
+  "greeley": {
+    "rent2br": 1563,
+    "rent3br": 2174,
+    "year": 2026
+  },
+  "eugene": {
+    "rent2br": 1688,
+    "rent3br": 2348,
+    "year": 2026
+  },
+  "vancouver": {
+    "rent2br": 1922,
+    "rent3br": 2619,
+    "year": 2026
+  },
+  "bellingham": {
+    "rent2br": 1794,
+    "rent3br": 2495,
+    "year": 2026
+  },
+  "nampa": {
+    "rent2br": 1655,
+    "rent3br": 2318,
+    "year": 2026
+  },
+  "billings": {
+    "rent2br": 1417,
+    "rent3br": 1951,
+    "year": 2026
+  },
+  "lowell": {
+    "rent2br": 2941,
+    "rent3br": 3526,
+    "year": 2026
+  },
+  "trenton": {
+    "rent2br": 1950,
+    "rent3br": 2338,
+    "year": 2026
+  },
+  "newark": {
+    "rent2br": 2205,
+    "rent3br": 2761,
+    "year": 2026
+  },
+  "paterson": {
+    "rent2br": 2324,
+    "rent3br": 2835,
+    "year": 2026
+  },
+  "reading": {
+    "rent2br": 1575,
+    "rent3br": 1937,
+    "year": 2026
+  },
+  "lancaster": {
+    "rent2br": 1526,
+    "rent3br": 1980,
+    "year": 2026
+  },
+  "york": {
+    "rent2br": 1335,
+    "rent3br": 1796,
+    "year": 2026
+  },
+  "erie": {
+    "rent2br": 1212,
+    "rent3br": 1499,
+    "year": 2026
+  },
+  "anchorage": {
+    "rent2br": 1631,
+    "rent3br": 2268,
+    "year": 2026
   }
 };

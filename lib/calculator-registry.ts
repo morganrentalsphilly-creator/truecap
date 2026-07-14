@@ -5,9 +5,9 @@
  *
  * Why this exists: counts drifted everywhere they were hand-typed — /tools said
  * "Fourteen", /embed said "14" in one place and "13 available" in another (the
- * embed hub only renders the 13 embeddable ones), the OG image said "9", and
- * the footer hardcoded 5. The mismatch is structural: there are 14 calculator
- * PAGES but only 13 EMBEDDABLE widgets (rehab-cost-estimator has a page, no
+ * embed hub only renders the embeddable ones), the OG image said "9", and
+ * the footer hardcoded 5. The mismatch is structural: there are more calculator
+ * PAGES than EMBEDDABLE widgets (rehab-cost-estimator has a page, no
  * embed). This registry encodes that distinction once.
  *
  * Relationship to lib/embed-registry.ts: that module owns the lazy-loaded
@@ -53,15 +53,17 @@ export const CALCULATOR_REGISTRY: CalculatorEntry[] = [
   { slug: "vacancy-rate-calculator", title: "Vacancy Rate Calculator", shortTitle: "Vacancy", description: "Effective vacancy rate from vacant days + turnover cost.", category: "expenses", embeddable: true },
   { slug: "rental-property-tax-calculator", title: "Rental Property Tax Calculator", shortTitle: "Rental Tax", description: "Schedule E income, 27.5-year depreciation, after-tax cash flow.", category: "expenses", embeddable: true },
   // Returns
+  { slug: "rental-cash-flow-calculator", title: "Rental Property Cash Flow Calculator", shortTitle: "Cash Flow", description: "Monthly cash flow after every operating expense and the mortgage — with the NOI / debt-service split.", category: "returns", embeddable: true, footerFeatured: true },
   { slug: "cap-rate-calculator", title: "Cap Rate Calculator", shortTitle: "Cap Rate", description: "Capitalization rate from price, rent, and operating expenses.", category: "returns", embeddable: true, footerFeatured: true },
   { slug: "cash-on-cash-calculator", title: "Cash-on-Cash Return Calculator", shortTitle: "Cash-on-Cash", description: "Return on the actual cash invested in a rental.", category: "returns", embeddable: true, footerFeatured: true },
   { slug: "roi-calculator", title: "Rental Property ROI Calculator", shortTitle: "ROI", description: "Total return — cash flow + principal paydown + appreciation in one number.", category: "returns", embeddable: true },
   // Offer & strategy
   { slug: "brrrr-calculator", title: "BRRRR Calculator", shortTitle: "BRRRR", description: "Buy, Rehab, Rent, Refinance — model the full strategy in one view.", category: "offer", embeddable: true, footerFeatured: true },
+  { slug: "arv-calculator", title: "ARV Calculator (After-Repair Value + 70% Rule)", shortTitle: "ARV", description: "Comps-based after-repair value plus the 70%-rule max offer for flips and BRRRR.", category: "offer", embeddable: true },
   { slug: "rehab-cost-estimator", title: "Rehab Cost Estimator", shortTitle: "Rehab", description: "Line-item rehab budget by scope of work — the rehab number that feeds BRRRR + flip.", category: "offer", embeddable: false },
 ];
 
-/** Total calculator PAGES under /tools (currently 14). */
+/** Total calculator PAGES under /tools (currently 16). */
 export const CALCULATOR_COUNT = CALCULATOR_REGISTRY.length;
 
 /** Spelled-out count for marketing/meta prose ("Fourteen…") — drift-proof.
@@ -76,7 +78,7 @@ export const CALCULATOR_COUNT_WORD = COUNT_WORDS[CALCULATOR_COUNT] ?? String(CAL
  *  list can never disagree with the registry's actual membership. */
 export const CALCULATOR_NAMES_LIST = CALCULATOR_REGISTRY.map((c) => c.shortTitle).join(", ");
 
-/** Calculators with an embeddable iframe widget (currently 13). */
+/** Calculators with an embeddable iframe widget (currently 15). */
 export const EMBEDDABLE_CALCULATORS = CALCULATOR_REGISTRY.filter((c) => c.embeddable);
 export const EMBEDDABLE_COUNT = EMBEDDABLE_CALCULATORS.length;
 

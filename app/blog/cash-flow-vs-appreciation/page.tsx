@@ -199,7 +199,7 @@ export default function BlogPost() {
           </p>
           <ol>
             <li>
-              <strong>Cash flow</strong> — net monthly income after all expenses + mortgage.
+              <strong>Cash flow</strong> — net monthly income after all expenses + mortgage. Run any deal&apos;s number in 30 seconds with the <Link href="/tools/rental-cash-flow-calculator" className="text-primary font-semibold hover:underline">rental cash flow calculator</Link>.
             </li>
             <li>
               <strong>Principal paydown</strong> — your tenant pays down the mortgage. Forced savings. Usually 4-7% annual return on original investment.

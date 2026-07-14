@@ -163,7 +163,8 @@ export default function FiftyPercentRulePost() {
             <li>If cash flow is negative or zero AND you&apos;re in a non-high-tax non-high-insurance state: the deal almost certainly does NOT pencil — pass</li>
           </ol>
           <p>
-            Above all: <strong>do not commit to a deal based on the 50% rule.</strong> Use it to filter out the bottom 80% of listings so you only spend serious time on the top 20%. For the top 20%, run the actual property through{" "}
+            Above all: <strong>do not commit to a deal based on the 50% rule.</strong> Use it to filter out the bottom 80% of listings so you only spend serious time on the top 20%. As a middle step, the free{" "}
+            <Link href="/tools/rental-cash-flow-calculator" className="text-primary font-semibold hover:underline">rental cash flow calculator</Link> replaces the 50% guess with your actual expense lines — tax, insurance, vacancy, management, maintenance, CapEx — in under a minute. For the top 20%, run the actual property through{" "}
             <Link href="/" className="text-primary font-semibold hover:underline">TrueCap</Link> with the address — the analyzer auto-fills the state property tax, HUD rent benchmark, current rate, and pulls every operating expense into a real calculation. Five seconds with the 50% rule, two minutes for the real number.
           </p>
 

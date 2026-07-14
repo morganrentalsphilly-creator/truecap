@@ -24,6 +24,7 @@ import {
   type GlossaryEntry,
 } from "@/lib/glossary";
 import { getSiteUrl } from "@/lib/site-url";
+import { truncateMetaDescription } from "@/lib/utils";
 
 // Pre-render all glossary pages at build time for max SEO crawlability.
 export async function generateStaticParams() {
@@ -45,7 +46,7 @@ export async function generateMetadata({
     : entry.definition;
   return {
     title: `${entry.term} — definition, formula, example`,
-    description: description.slice(0, 158),
+    description: truncateMetaDescription(description),
     keywords: [
       entry.term.toLowerCase(),
       `${entry.term.toLowerCase()} definition`,

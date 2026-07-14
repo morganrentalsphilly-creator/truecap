@@ -168,6 +168,15 @@ export function SiteFooter() {
             </li>
           </ul>
           <p className="order-3 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 sm:justify-end">
+            {/* /about — quiet E-E-A-T link (who builds TrueCap). Bottom
+                strip only, per the no-new-top-level-nav principle; the
+                blog bylines are the other inbound path. */}
+            <Link href="/about" className="transition-colors hover:text-foreground">
+              About
+            </Link>
+            <span aria-hidden className="text-muted-foreground/30">
+              ·
+            </span>
             <Link href="/privacy" className="transition-colors hover:text-foreground">
               Privacy
             </Link>

@@ -15,6 +15,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowUpRight, Calculator } from "lucide-react";
+import { BlogByline } from "@/components/marketing/blog-byline";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
@@ -100,7 +101,8 @@ export default function BlogPost() {
     description: DESCRIPTION,
     datePublished: PUBLISHED_AT,
     dateModified: MODIFIED_AT,
-    author: { "@type": "Person", name: "Morgan Page", url: siteUrl },
+    // Author points at the /about Person entity (E-E-A-T anchor @id).
+    author: { "@type": "Person", "@id": `${siteUrl}/about#morgan`, name: "Morgan Page", url: `${siteUrl}/about` },
     publisher: { "@id": `${siteUrl}/#organization` },
     mainEntityOfPage: canonicalUrl,
     image: [`${siteUrl}/home.jpg`],
@@ -157,6 +159,7 @@ export default function BlogPost() {
             {new Date(PUBLISHED_AT).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}{" "}
             · {READING_TIME_MIN} min read
           </p>
+          <BlogByline />
           <p className="text-base sm:text-lg text-muted-foreground mt-4 leading-relaxed">
             Cap rate = NOI ÷ purchase price. Sounds simple, but most
             investors get NOI wrong by skipping CapEx reserves or

@@ -10,6 +10,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { BlogByline } from "@/components/marketing/blog-byline";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
@@ -84,7 +85,8 @@ export default function BrrrrMethodPost() {
     datePublished: PUBLISHED_AT,
     dateModified: MODIFIED_AT,
     url: canonicalUrl,
-    author: { "@type": "Person", name: "Morgan Page", url: siteUrl },
+    // Author points at the /about Person entity (E-E-A-T anchor @id).
+    author: { "@type": "Person", "@id": `${siteUrl}/about#morgan`, name: "Morgan Page", url: `${siteUrl}/about` },
     publisher: { "@id": `${siteUrl}/#organization` },
     mainEntityOfPage: canonicalUrl,
     image: [`${siteUrl}/home.jpg`],
@@ -145,6 +147,7 @@ export default function BrrrrMethodPost() {
             })}{" "}
             · {READING_TIME} min read
           </p>
+          <BlogByline />
           <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
             BRRRR — buy, rehab, rent, refinance, repeat — is the strategy of
             recycling one pile of capital through multiple rentals instead of

@@ -116,7 +116,7 @@ export default function HouseHackingPost() {
             <strong>True monthly out-of-pocket =</strong> Mortgage + property tax + insurance + utilities (for your unit) + reserves for vacancy + reserves for maintenance + reserves for CapEx — <strong>rent from other units</strong>.
           </p>
           <p>
-            If you skip reserves, you&apos;ll get crushed the first year someone moves out or the roof needs work. Build them in: 5% vacancy on rented units, 8% maintenance, 5% CapEx (newer building) to 10% CapEx (older building).
+            If you skip reserves, you&apos;ll get crushed the first year someone moves out or the roof needs work. Build them in: 5% vacancy on rented units, 10% maintenance, 5% CapEx (newer building) to 10% CapEx (older building).
           </p>
           <p>
             Quick triage:

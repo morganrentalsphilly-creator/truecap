@@ -58,7 +58,7 @@ export default function MethodologyPage() {
       "How TrueCap computes cap rate, cash-on-cash, DSCR, 10-year projections, tax savings, exit scenarios. Plus data sources and conventions.",
     url: `${siteUrl}/methodology`,
     datePublished: "2026-05-24",
-    dateModified: "2026-06-01",
+    dateModified: "2026-07-13",
     author: { "@type": "Organization", name: "TrueCap", url: siteUrl },
     publisher: { "@id": `${siteUrl}/#organization` },
     inLanguage: "en-US",
@@ -109,10 +109,10 @@ export default function MethodologyPage() {
               effective property tax rates. All editable.
             </li>
             <li>
-              <strong>Defaults are conservative.</strong> 5% vacancy, 8%
-              maintenance, 5% CapEx reserve, 27.5-yr depreciation —
-              within standard industry ranges, biased toward realism over
-              optimism.
+              <strong>Defaults are conservative.</strong> 5% vacancy, 10%
+              maintenance, 8% management, 5% CapEx reserve, 27.5-yr
+              depreciation — within standard industry ranges, biased
+              toward realism over optimism.
             </li>
             <li>
               <strong>You can override everything.</strong> Every
@@ -383,7 +383,7 @@ export default function MethodologyPage() {
         </article>
 
         <footer className="mt-12 pt-8 border-t border-border text-sm text-muted-foreground leading-relaxed">
-          Last updated: May 24, 2026. We update this page whenever the
+          Last updated: July 13, 2026. We update this page whenever the
           methodology materially changes — track shipments at{" "}
           <Link href="/changelog" className="font-bold text-foreground hover:underline">
             /changelog

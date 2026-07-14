@@ -22,3 +22,21 @@ export function scrollBehavior(): ScrollBehavior {
     ? 'auto'
     : 'smooth'
 }
+
+/**
+ * Truncate a meta description at a WORD boundary within `max` chars,
+ * appending an ellipsis when anything was cut. `text.slice(0, 158)` chops
+ * mid-word ("6–8% Midwest / ") — a visibly broken snippet on every SERP
+ * that costs CTR. Descriptions already within the limit pass through
+ * untouched, so this is a no-op for hand-written copy that fits.
+ */
+export function truncateMetaDescription(text: string, max = 158): string {
+  const trimmed = text.trim()
+  if (trimmed.length <= max) return trimmed
+  // Leave room for the ellipsis, then back up to the last full word.
+  const hardCut = trimmed.slice(0, max - 1)
+  const lastSpace = hardCut.lastIndexOf(' ')
+  const cut = lastSpace > max * 0.6 ? hardCut.slice(0, lastSpace) : hardCut
+  // Drop a dangling separator so we never end on "… Midwest /".
+  return `${cut.replace(/[\s,;:/·—-]+$/, '')}…`
+}

@@ -24,6 +24,7 @@ import {
   getCityStrategyCombo,
 } from "@/lib/city-strategy-combos";
 import { getSiteUrl } from "@/lib/site-url";
+import { truncateMetaDescription } from "@/lib/utils";
 
 export async function generateStaticParams() {
   return CITY_STRATEGY_COMBOS.map((c) => ({
@@ -43,7 +44,7 @@ export async function generateMetadata({
   const title = `${combo.strategyLabel} investing in ${combo.cityName} — the honest playbook`;
   return {
     title,
-    description: combo.pitch.slice(0, 158),
+    description: truncateMetaDescription(combo.pitch),
     keywords: [
       `${combo.strategy} ${combo.cityName.toLowerCase()}`,
       `${combo.strategyLabel.toLowerCase()} ${combo.cityName.toLowerCase()}`,

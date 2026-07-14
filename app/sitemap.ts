@@ -129,6 +129,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     ...toolUrls,
     {
+      // /about — E-E-A-T founder page; anchors the Person @id that blog
+      // Article schema references.
+      url: `${siteUrl}/about`,
+      changeFrequency: "yearly",
+      priority: 0.5,
+    },
+    {
       url: `${siteUrl}/privacy`,
       changeFrequency: "yearly",
       priority: 0.3,
@@ -143,21 +150,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly",
       priority: 0.7,
     },
-    {
-      url: `${siteUrl}/feed.xml`,
-      changeFrequency: "weekly",
-      priority: 0.5,
-    },
-    {
-      url: `${siteUrl}/llms.txt`,
-      changeFrequency: "weekly",
-      priority: 0.5,
-    },
-    {
-      url: `${siteUrl}/llms-full.txt`,
-      changeFrequency: "weekly",
-      priority: 0.5,
-    },
+    // NOTE deliberately absent: /feed.xml, /llms.txt, /llms-full.txt.
+    // A sitemap urlset is for INDEXABLE HTML pages — feeds and llms.txt
+    // are non-HTML resources that show up in GSC as "indexed, though
+    // blocked"-style noise and dilute crawl signals on a young domain.
+    // AI crawlers discover llms.txt by convention + the robots Allow.
     {
       url: `${siteUrl}/embed`,
       changeFrequency: "monthly",

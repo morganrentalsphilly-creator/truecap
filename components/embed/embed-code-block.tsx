@@ -25,12 +25,22 @@ export function EmbedCodeBlock({ slug, siteUrl, defaultHeight }: Props) {
   const [copied, setCopied] = useState(false);
 
   const embedSrc = `${siteUrl}/embed/${slug}`;
+  // The caption anchor below the iframe is the entire SEO payoff of the
+  // embed program: it lives in the PARTNER'S dom on the partner's origin,
+  // so it's a real, crawlable backlink (the GIPHY/Typeform pattern). A
+  // "powered by" link INSIDE the iframe would be a same-origin self-link
+  // on a noindexed embed page — zero link equity. It links to the public
+  // tool page (indexed), not the /embed route (noindexed).
+  const toolHref = `${siteUrl}/tools/${slug}?utm_source=embed&utm_medium=referral`;
   const snippet = `<iframe
   src="${embedSrc}"
   loading="lazy"
   style="width:100%; max-width:640px; border:0; height:${defaultHeight}px; display:block;"
   title="TrueCap calculator"
 ></iframe>
+<p style="max-width:640px; margin:6px 0 0; font:12px/1.4 system-ui, sans-serif; color:#6b7280;">
+  Calculator by <a href="${toolHref}" style="color:#0070c4; text-decoration:none;">TrueCap</a> — free rental property analysis
+</p>
 <script>
 (function(){
   window.addEventListener("message",function(e){

@@ -255,6 +255,10 @@ gtag('config', '${GOOGLE_ADS_ID}');`,
                   description:
                     "Rental property investment analyzer — cash flow, cap rate, DSCR, deal score, plain-English verdict in 60 seconds.",
                   sameAs: [],
+                  // Person entity is defined on /about (AboutPage +
+                  // Person @graph) — referencing it here ties the org
+                  // to a real, findable founder for E-E-A-T.
+                  founder: { "@id": `${siteUrl}/about#morgan` },
                 },
                 {
                   "@type": "WebSite",

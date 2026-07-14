@@ -202,7 +202,16 @@ export default function SeventyPercentRulePost() {
               the seller wants or what the property is worth in its current
               condition, but because it leaves 30% of the finished value to cover
               everything between the contract and the closing on the resale, plus
-              your profit.
+              your profit. (The free{" "}
+              <Link
+                href="/tools/arv-calculator"
+                className="text-primary font-semibold hover:underline"
+              >
+                ARV calculator
+              </Link>{" "}
+              runs this exact formula against your own comps — the comps-based
+              ARV, the max offer at any multiplier, and the 75% refi line in one
+              screen.)
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">

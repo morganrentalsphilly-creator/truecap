@@ -16,6 +16,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowUpRight, Calculator } from "lucide-react";
+import { BlogByline } from "@/components/marketing/blog-byline";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
@@ -102,10 +103,13 @@ export default function BlogPost() {
     description: DESCRIPTION,
     datePublished: PUBLISHED_AT,
     dateModified: MODIFIED_AT,
+    // Author points at the /about Person entity (E-E-A-T): same @id as
+    // the AboutPage schema so Google resolves one consistent author.
     author: {
       "@type": "Person",
+      "@id": `${siteUrl}/about#morgan`,
       name: "Morgan Page",
-      url: siteUrl,
+      url: `${siteUrl}/about`,
     },
     publisher: { "@id": `${siteUrl}/#organization` },
     mainEntityOfPage: canonicalUrl,
@@ -209,6 +213,7 @@ export default function BlogPost() {
             })}{" "}
             · {READING_TIME_MIN} min read
           </p>
+          <BlogByline />
           <p className="text-base sm:text-lg text-muted-foreground mt-4 leading-relaxed">
             {DESCRIPTION}
           </p>

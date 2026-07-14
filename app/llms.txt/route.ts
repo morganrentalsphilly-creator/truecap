@@ -111,6 +111,7 @@ export async function GET() {
   ].join("\n");
 
   const reference = [
+    `- [About](${siteUrl}/about): Who builds TrueCap — Morgan Page, a Philadelphia rental investor who underwrites his own deals with it — and why the defaults are conservative.`,
     `- [Methodology](${siteUrl}/methodology): The exact math the analyzer uses, including cap rate, cash-on-cash, DSCR, and projection formulas.`,
     `- [Tools index](${siteUrl}/tools): All ${CALCULATOR_COUNT} free calculators in one place.`,
     `- [Blog index](${siteUrl}/blog): All long-form rental investing content.`,

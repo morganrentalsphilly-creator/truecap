@@ -3,8 +3,8 @@
  *
  * Single source of truth split:
  *   - lib/calculator-registry.ts owns the CANONICAL metadata (title,
- *     shortTitle, description, category, which slugs exist) for all 14
- *     calculator pages. Counts and labels come from there.
+ *     shortTitle, description, category, which slugs exist) for every
+ *     calculator page. Counts and labels come from there.
  *   - THIS module owns only the embeddable subset's lazy-loaded widget
  *     components + default iframe heights. Metadata is pulled FROM the
  *     calculator registry so the two can never drift (the ROI title,
@@ -30,6 +30,7 @@ function EmbedLoading() {
 }
 
 export type EmbedSlug =
+  | "rental-cash-flow-calculator"
   | "cap-rate-calculator"
   | "cash-on-cash-calculator"
   | "dscr-calculator"
@@ -38,6 +39,7 @@ export type EmbedSlug =
   | "gross-rent-multiplier-calculator"
   | "1-percent-rule-calculator"
   | "brrrr-calculator"
+  | "arv-calculator"
   | "break-even-calculator"
   | "roi-calculator"
   | "closing-cost-calculator"
@@ -64,6 +66,16 @@ export type EmbedEntry = {
 type EmbedWidgetSpec = { Widget: ComponentType<unknown>; defaultHeight: number };
 
 const EMBED_WIDGETS: Record<EmbedSlug, EmbedWidgetSpec> = {
+  "rental-cash-flow-calculator": {
+    Widget: dynamic(
+      () =>
+        import("@/components/tools/rental-cash-flow-calculator-widget").then(
+          (m) => m.RentalCashFlowCalculatorWidget
+        ),
+      { loading: EmbedLoading }
+    ),
+    defaultHeight: 880,
+  },
   "cap-rate-calculator": {
     Widget: dynamic(
       () =>
@@ -143,6 +155,16 @@ const EMBED_WIDGETS: Record<EmbedSlug, EmbedWidgetSpec> = {
       { loading: EmbedLoading }
     ),
     defaultHeight: 880,
+  },
+  "arv-calculator": {
+    Widget: dynamic(
+      () =>
+        import("@/components/tools/arv-calculator-widget").then(
+          (m) => m.ArvCalculatorWidget
+        ),
+      { loading: EmbedLoading }
+    ),
+    defaultHeight: 940,
   },
   "break-even-calculator": {
     Widget: dynamic(

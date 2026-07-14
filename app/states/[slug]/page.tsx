@@ -22,6 +22,7 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { STATES, getStateBySlug } from "@/lib/states";
 import { strategyFitFromTier } from "@/lib/market-strategy-fit";
 import { getSiteUrl } from "@/lib/site-url";
+import { truncateMetaDescription } from "@/lib/utils";
 
 export async function generateStaticParams() {
   return Object.values(STATES).map((s) => ({ slug: s.slug }));
@@ -38,7 +39,7 @@ export async function generateMetadata({
   const title = `Investing in ${state.name} rental property in 2026`;
   return {
     title,
-    description: state.pitch.slice(0, 158),
+    description: truncateMetaDescription(state.pitch),
     keywords: [
       `investing in ${state.name.toLowerCase()}`,
       `${state.name.toLowerCase()} rental properties`,
