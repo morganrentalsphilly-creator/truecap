@@ -53,7 +53,16 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm ci --no-audit --no-fund
+        # 2026-07-14 malware investigation: the CI build crashes on a
+        # blockchain-C2 loader fetched at runtime with NO on-disk artifact
+        # (post-install scan found nothing). --ignore-scripts is the
+        # decisive experiment: if the build now goes GREEN, the loader is
+        # triggered by a dependency's install/postinstall script (and this
+        # flag is the mitigation); if it still crashes, it's pulled in by a
+        # normal build-time import. sharp/native dels ship prebuilt via
+        # @img/sharp-* optional packages, so the Next build doesn't need
+        # install scripts to compile.
+        run: npm ci --no-audit --no-fund --ignore-scripts
 
       - name: Type check
         run: npx tsc --noEmit
