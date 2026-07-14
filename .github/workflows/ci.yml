@@ -61,6 +61,12 @@ jobs:
       - name: Unit tests
         run: npm test
 
+      - name: Network probes (diagnosing the silent build death)
+        run: |
+          for url in "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans" "https://fonts.gstatic.com" "https://registry.npmjs.org/-/ping" "https://sentry.io"; do
+            code=$(curl -sS -m 10 -o /dev/null -w "%{http_code}" "$url" 2>&1) && echo "OK  $code  $url" || echo "FAIL $code $url"
+          done
+
       - name: Production build
         env:
           # 2026-07-14 silent-death investigation (exit 1, ~5s into
