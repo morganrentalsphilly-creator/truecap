@@ -273,9 +273,6 @@ export function calculateAnalysis(values: InvestmentFormValues): AnalysisResult 
   const dscr =
     monthlyPayment > 0 ? (monthlyRentalIncome - operatingExpensesExCapex) / monthlyPayment : 0;
 
-  // Estimated tax savings:
-  // If includeInterestDeduction => (Depreciation + Interest) * Tax Rate
-  // Else => Depreciation * Tax Rate
   const yearlyInterestSchedule = calculateYearlyInterestSchedule(
     loanAmount,
     interestRate,
@@ -283,14 +280,31 @@ export function calculateAnalysis(values: InvestmentFormValues): AnalysisResult 
     monthlyPayment
   );
   const annualDepreciation = (purchasePrice * (buildingValuePct / 100)) / depreciationYears;
-  const annualInterestDeduction = yearlyInterestSchedule[0] ?? 0;
   const effectiveTaxRate = (taxRatePct ?? 24) / 100;
-  const taxableShieldBase =
-    includeInterestDeduction === false
-      ? annualDepreciation
-      : annualDepreciation + annualInterestDeduction;
-  const annualTaxSavings = taxableShieldBase * effectiveTaxRate;
-  const taxSavingsMonthly = Math.round(annualTaxSavings / 12);
+
+  // Year-1 tax effect — SIGNED, taken from the same engine as the Tax
+  // Strategy panel (netTaxBenefitAnnual nets rental income against the
+  // deductions). Replaces the legacy one-way shield ((depreciation +
+  // interest) × rate, always ADDED) that ten-year-projections v3 was
+  // explicitly corrected away from: the shield ignored rental income
+  // entirely, overstating after-tax returns — always in the optimistic
+  // direction — and could present a money-losing deal as "covers itself
+  // after tax" while the 10-year table on the same screen disagreed.
+  // Signed means a healthy deal can OWE tax (negative value): consumers
+  // must not assume this figure is a bonus. [Founder-approved 2026-07-14.]
+  const annualDepreciationRounded = Math.round(annualDepreciation);
+  const taxStrategyYears = buildTaxStrategyProjection({
+    monthlyRentalIncome,
+    totalOperatingExpenses,
+    capexReserveMonthly: capex,
+    annualDepreciation: annualDepreciationRounded,
+    yearlyInterestSchedule,
+    rentGrowthPct,
+    expenseGrowthPct,
+    taxRate: effectiveTaxRate,
+    includeInterestDeduction: includeInterestDeduction !== false,
+  });
+  const taxSavingsMonthly = Math.round((taxStrategyYears[0]?.netTaxBenefitAnnual ?? 0) / 12);
   const afterTaxCF = netCashFlow + taxSavingsMonthly;
 
   const tenYearProjection = buildTenYearProjection({
@@ -304,19 +318,6 @@ export function calculateAnalysis(values: InvestmentFormValues): AnalysisResult 
     purchasePrice,
     taxSavingsMonthly,
     annualDepreciation,
-    yearlyInterestSchedule,
-    rentGrowthPct,
-    expenseGrowthPct,
-    taxRate: effectiveTaxRate,
-    includeInterestDeduction: includeInterestDeduction !== false,
-  });
-
-  const annualDepreciationRounded = Math.round(annualDepreciation);
-  const taxStrategyYears = buildTaxStrategyProjection({
-    monthlyRentalIncome,
-    totalOperatingExpenses,
-    capexReserveMonthly: capex,
-    annualDepreciation: annualDepreciationRounded,
     yearlyInterestSchedule,
     rentGrowthPct,
     expenseGrowthPct,

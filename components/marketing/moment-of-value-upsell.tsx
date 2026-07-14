@@ -118,11 +118,14 @@ export function MomentOfValueUpsell({
           value={positiveCF ? `≈ ${fmtMoney(netCashFlow * 12 * 10 * 1.18)}` : "Live projection"}
           sub="modeled with rent growth"
         />
+        {/* The tax hook only makes sense as a hook when it's a benefit —
+            since the after-tax fix the estimate is a SIGNED net effect and
+            a healthy deal can owe tax. Pitch the breakdown instead then. */}
         <FeatureChip
           icon={Calculator}
-          label="Est. annual tax savings"
-          value={`≈ ${fmtMoney(estimatedAnnualTaxSavings)}/yr`}
-          sub="depreciation + interest"
+          label={estimatedAnnualTaxSavings > 0 ? "Est. annual tax savings" : "Tax strategy breakdown"}
+          value={estimatedAnnualTaxSavings > 0 ? `≈ ${fmtMoney(estimatedAnnualTaxSavings)}/yr` : "Year by year"}
+          sub={estimatedAnnualTaxSavings > 0 ? "year-1 net effect" : "depreciation + deductions"}
         />
         <FeatureChip
           icon={FileDown}

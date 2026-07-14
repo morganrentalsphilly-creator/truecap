@@ -1327,7 +1327,7 @@ function pageInputs(
     ["CoC Return", fmtPct(d.performance.cocReturn, true), "primary", "year 1"],
     ["Cap Rate", fmtPct(d.performance.capRate, true), "violet", "gross"],
     ["DSCR", dscrValue, dscrTone, dscrSub],
-    ["Tax Savings", fmtCurrency(d.performance.taxSavings), "success", "/month est."],
+    ["Tax Savings", fmtCurrency(d.performance.taxSavings), d.performance.taxSavings >= 0 ? "success" : "danger", "/month est."],
     ["After-Tax CF", fmtCurrency(d.performance.afterTaxCF), "primary", "/month"],
   ];
   cards.forEach((c, i) => {

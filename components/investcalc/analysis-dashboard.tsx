@@ -1307,7 +1307,8 @@ export function AnalysisDashboard({
               </p>
               <p className="text-xs leading-relaxed text-foreground/70">
                 Year-1 cash flow is negative because of the high leverage, but after the
-                depreciation + interest shield it runs about{" "}
+                year-1 tax effect (depreciation + deductible interest, net of tax on the
+                rental income) it runs about{" "}
                 <strong className="text-foreground">
                   +${Math.round(result.afterTaxCF).toLocaleString()}/mo
                 </strong>

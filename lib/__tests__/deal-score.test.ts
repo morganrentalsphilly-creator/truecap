@@ -288,10 +288,14 @@ describe("buildDealScoreInputFromAnalysis — end-to-end wiring", () => {
     expect(r.score).toBeGreaterThanOrEqual(55);
   });
 
-  it("rescues a real low-money-down appreciation play (2138 E Tucker St)", () => {
+  it("no longer rescues an appreciation play that bleeds AFTER tax (2138 E Tucker St)", () => {
     // 3% down + realistic Philly carry (8% mgmt, ~1.4% tax, 7.25% rate)
-    // pushes year-1 pre-tax cash flow negative while the high-leverage
-    // appreciation + paydown keep the 10-year total return strong.
+    // pushes year-1 pre-tax cash flow negative. Under the legacy one-way
+    // tax shield this deal's after-tax CF looked positive and the
+    // appreciation-play floor rescued it — but the SIGNED year-1 tax
+    // effect (founder-approved 2026-07-14) shows it still bleeds after
+    // tax, so the floor correctly refuses: an "appreciation play" must at
+    // least cover itself post-tax.
     const values = baseSingleFamily({
       downPaymentPct: 3,
       mgmtPct: 8,
@@ -301,9 +305,30 @@ describe("buildDealScoreInputFromAnalysis — end-to-end wiring", () => {
     const result = calculateAnalysis(values);
     const scoreInput = buildDealScoreInputFromAnalysis(values, result);
 
-    // Preconditions: this IS the hard case — negative year-1 cash flow but
-    // a strong projected long-term return.
     expect(result.netCashFlow).toBeLessThan(0);
+    expect(result.afterTaxCF).toBeLessThan(0); // the honest number
+    expect(scoreInput.tenYearAnnualizedReturnPct ?? 0).toBeGreaterThan(12);
+
+    const r = computeDealScore(scoreInput);
+    expect(["Risky", "Avoid"]).toContain(r.recommendation);
+  });
+
+  it("still rescues an appreciation play that genuinely covers itself after tax", () => {
+    // Same low-money-down shape with rent at the after-tax break-even:
+    // pre-tax slightly negative, SIGNED after-tax positive, strong 10-year
+    // return — the exact case the appreciation-play floor exists for.
+    const values = baseSingleFamily({
+      downPaymentPct: 3,
+      mgmtPct: 8,
+      propertyTaxPct: 1.4,
+      interestRate: 7.25,
+      monthlyRent: 2_300,
+    });
+    const result = calculateAnalysis(values);
+    const scoreInput = buildDealScoreInputFromAnalysis(values, result);
+
+    expect(result.netCashFlow).toBeLessThan(0);
+    expect(result.afterTaxCF).toBeGreaterThanOrEqual(0);
     expect(scoreInput.tenYearAnnualizedReturnPct ?? 0).toBeGreaterThan(12);
 
     const r = computeDealScore(scoreInput);

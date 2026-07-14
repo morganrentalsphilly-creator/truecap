@@ -394,9 +394,12 @@ export function buildMetricTiles({
         key="taxSavings"
         label="Tax Savings"
         glossaryTerm="taxSavings"
-        value={result ? fmt(result.taxSavingsMonthly) : "—"}
+        // Signed net tax effect since the after-tax formula fix — a healthy
+        // deal can OWE tax, so the sign must survive fmt()'s Math.abs and
+        // the color can't claim "primary-good" for a negative.
+        value={result ? `${result.taxSavingsMonthly < 0 ? "-" : ""}${fmt(result.taxSavingsMonthly)}` : "—"}
         sub="/mo"
-        color="text-primary"
+        color={result && result.taxSavingsMonthly < 0 ? "text-[var(--metric-negative)]" : "text-primary"}
         isLoading={isLoading}
         onSelect={jump("taxSavings")}
       />
