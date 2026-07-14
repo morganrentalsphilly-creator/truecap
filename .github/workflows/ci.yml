@@ -62,4 +62,14 @@ jobs:
         run: npm test
 
       - name: Production build
+        env:
+          # The app crossed the runner's default node-heap ceiling
+          # (2026-07-14: builds started dying SILENTLY ~5s into webpack —
+          # exit 1, zero output, the OOM-killed-worker signature — on a
+          # tree that passed hours earlier and builds fine locally; a
+          # rerun of the previously-green commit also failed, exonerating
+          # the code). Webpack + Sentry sourcemaps spike early; give node
+          # most of the 7GB runner instead of its conservative default.
+          NODE_OPTIONS: --max-old-space-size=6144
+          NEXT_TELEMETRY_DISABLED: "1"
         run: npm run build
