@@ -24,6 +24,10 @@ import { getSiteUrl } from "@/lib/site-url";
 
 const SLUG = "short-term-rental-underwriting-playbook";
 const TITLE = "Short-term rental underwriting playbook: how to model an Airbnb in 2026";
+// SERP-facing title (metadata/og only): kept ≤50 chars so the root
+// layout's "%s | TrueCap" template stays inside the ~60-char SERP
+// window. The on-page <h1> keeps the longer editorial TITLE.
+const SERP_TITLE = "Short-term rental underwriting playbook (2026)";
 const DESCRIPTION =
   "STR cash flow lives or dies on three numbers: ADR, occupancy, and operating expenses. Here&apos;s the full playbook for underwriting a short-term rental in 2026 — what data sources to use, what hidden costs everyone forgets, and how to stress-test for a bad off-season.";
 const PUBLISHED_AT = "2026-06-07";
@@ -31,7 +35,7 @@ const MODIFIED_AT = "2026-06-07";
 const READING_TIME_MIN = 14;
 
 export const metadata: Metadata = {
-  title: TITLE,
+  title: SERP_TITLE,
   description: DESCRIPTION,
   keywords: [
     "short term rental underwriting",
@@ -45,7 +49,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `/blog/${SLUG}` },
   openGraph: {
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     url: `/blog/${SLUG}`,
     type: "article",
@@ -55,7 +59,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     images: ["/home.jpg"],
   },

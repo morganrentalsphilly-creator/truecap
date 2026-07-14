@@ -24,7 +24,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "TrueCap vs PropStream — honest comparison",
+  title: "PropStream vs TrueCap (2026): Find vs Underwrite",
   description:
     "PropStream finds the deals. TrueCap decides if they actually cash flow. Honest side-by-side of when each fits, plus the workflow most investors run.",
   keywords: [
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/vs/propstream" },
   openGraph: {
-    title: "TrueCap vs PropStream — honest comparison",
+    title: "PropStream vs TrueCap (2026): Find vs Underwrite",
     description:
       "PropStream finds leads. TrueCap underwrites them. Different jobs in the same workflow — most investors use both.",
     url: "/vs/propstream",
@@ -72,7 +72,7 @@ export default function VsPropstreamPage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: "TrueCap vs PropStream — honest comparison",
+    name: "PropStream vs TrueCap (2026): Find vs Underwrite",
     url: `${siteUrl}/vs/propstream`,
     description:
       "PropStream finds the deals. TrueCap decides if they actually cash flow. Honest side-by-side of when each fits, plus the workflow most investors run.",

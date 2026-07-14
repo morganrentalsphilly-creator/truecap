@@ -29,6 +29,10 @@ import { getSiteUrl } from "@/lib/site-url";
 const SLUG = "debt-to-income-ratio-investment-property";
 const TITLE =
   "Debt-to-income ratio for an investment property: how lenders count rental income (2026)";
+// SERP-facing title (metadata/og only): kept ≤50 chars so the root
+// layout's "%s | TrueCap" template stays inside the ~60-char SERP
+// window. The on-page <h1> keeps the longer editorial TITLE.
+const SERP_TITLE = "Debt-to-income ratio for investment property";
 const DESCRIPTION =
   "Lenders count rental income at 75%, then net it against the payment. Here's the DTI math for a rental, the house-hack version, and the DSCR escape hatch.";
 const PUBLISHED_AT = "2026-07-04";
@@ -36,7 +40,7 @@ const MODIFIED_AT = "2026-07-04";
 const READING_TIME = 11;
 
 export const metadata: Metadata = {
-  title: TITLE,
+  title: SERP_TITLE,
   description: DESCRIPTION,
   keywords: [
     "debt to income ratio investment property",
@@ -50,7 +54,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `/blog/${SLUG}` },
   openGraph: {
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     url: `/blog/${SLUG}`,
     type: "article",

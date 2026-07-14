@@ -24,7 +24,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "TrueCap vs TurboTenant — honest comparison",
+  title: "TurboTenant vs TrueCap (2026): Manage vs Analyze",
   description:
     "TurboTenant runs your rentals after you buy them. TrueCap decides if you should buy. Honest comparison and how DIY landlords use both.",
   keywords: [
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/vs/turbotenant" },
   openGraph: {
-    title: "TrueCap vs TurboTenant — honest comparison",
+    title: "TurboTenant vs TrueCap (2026): Manage vs Analyze",
     description:
       "TurboTenant runs your rentals after closing. TrueCap underwrites them before. Different lifecycle stages.",
     url: "/vs/turbotenant",
@@ -73,7 +73,7 @@ export default function VsTurbotenantPage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: "TrueCap vs TurboTenant — honest comparison",
+    name: "TurboTenant vs TrueCap (2026): Manage vs Analyze",
     url: `${siteUrl}/vs/turbotenant`,
     description:
       "TurboTenant runs your rentals after you buy them. TrueCap decides if you should buy. Honest comparison and how DIY landlords use both.",

@@ -19,6 +19,10 @@ import { getSiteUrl } from "@/lib/site-url";
 const SLUG = "vacancy-rate-rental-property";
 const TITLE =
   "Vacancy rate for rentals: what to assume in 2026 (and why 5% is usually a guess)";
+// SERP-facing title (metadata/og only): kept ≤50 chars so the root
+// layout's "%s | TrueCap" template stays inside the ~60-char SERP
+// window. The on-page <h1> keeps the longer editorial TITLE.
+const SERP_TITLE = "Vacancy rate for rentals: what to assume in 2026";
 const DESCRIPTION =
   "How to pick a vacancy assumption that matches reality: physical vs economic vacancy, the turnover math behind the number, and what 5 points does to DSCR.";
 const PUBLISHED_AT = "2026-06-07";
@@ -26,7 +30,7 @@ const MODIFIED_AT = "2026-06-07";
 const READING_TIME = 10;
 
 export const metadata: Metadata = {
-  title: TITLE,
+  title: SERP_TITLE,
   description: DESCRIPTION,
   keywords: [
     "vacancy rate rental property",
@@ -39,7 +43,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `/blog/${SLUG}` },
   openGraph: {
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     url: `/blog/${SLUG}`,
     type: "article",

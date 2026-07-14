@@ -26,6 +26,10 @@ import { getSiteUrl } from "@/lib/site-url";
 
 const SLUG = "cash-flow-vs-appreciation";
 const TITLE = "Cash flow vs appreciation: which rental strategy actually wins in 2026?";
+// SERP-facing title (metadata/og only): kept ≤50 chars so the root
+// layout's "%s | TrueCap" template stays inside the ~60-char SERP
+// window. The on-page <h1> keeps the longer editorial TITLE.
+const SERP_TITLE = "Cash flow vs appreciation: which wins in 2026?";
 const DESCRIPTION =
   "Cash-flow investors and appreciation investors both think they're right. Both can be. A 10-year side-by-side that quantifies when each strategy wins — and the specific 2026 conditions that have flipped the historical math.";
 const PUBLISHED_AT = "2026-05-24";
@@ -33,7 +37,7 @@ const MODIFIED_AT = "2026-06-01";
 const READING_TIME_MIN = 9;
 
 export const metadata: Metadata = {
-  title: TITLE,
+  title: SERP_TITLE,
   description: DESCRIPTION,
   keywords: [
     "cash flow vs appreciation",
@@ -46,7 +50,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `/blog/${SLUG}` },
   openGraph: {
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     url: `/blog/${SLUG}`,
     type: "article",
@@ -56,7 +60,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     images: ["/home.jpg"],
   },

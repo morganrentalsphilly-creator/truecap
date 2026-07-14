@@ -8,7 +8,7 @@ import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 export const metadata: Metadata = {
-  title: "1% Rule Calculator | Free Rental Property Screener",
+  title: "Free 1% Rule Calculator — Instant Pass/Fail Screen",
   description:
     "Free 1% rule calculator. Instantly screen any rental deal Pass / Fail. Plus when the rule applies, when it doesn't, and what to do on a fail.",
   keywords: [
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/tools/1-percent-rule-calculator" },
   openGraph: {
-    title: "1% Rule Calculator — Free Rental Property Screener",
+    title: "Free 1% Rule Calculator — Instant Pass/Fail Screen",
     description:
       "Pass / fail the 1% rule in 5 seconds. Plus plain-English guidance on when the rule applies and when it doesn't.",
     url: "/tools/1-percent-rule-calculator",
@@ -238,7 +238,14 @@ export default function OnePercentRulePage() {
             </ol>
             <p>
               TrueCap handles steps 4 and 5 in about four minutes once you
-              have the inputs.
+              have the inputs. Two sibling screens are worth knowing too:
+              the{" "}
+              <Link href="/tools/50-percent-rule-calculator" className="text-primary font-semibold hover:underline">50% rule calculator</Link>{" "}
+              triages the expense side (does the rent survive operating
+              costs and the mortgage?), and the{" "}
+              <Link href="/tools/2-percent-rule-calculator" className="text-primary font-semibold hover:underline">2% rule calculator</Link>{" "}
+              covers the stricter cash-flow-market bar — including why a
+              2% deal in 2026 deserves suspicion before celebration.
             </p>
 
             <h2 className="text-2xl sm:text-3xl">Frequently asked questions</h2>

@@ -15,7 +15,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "TrueCap vs DealCheck for Fix and Flip — honest comparison",
+  title: "DealCheck vs TrueCap for Fix & Flip (2026)",
   description:
     "Both calculators handle fix-and-flip. Which one models ARV, rehab budgets, holding costs, and break-even ARV cleanest? Honest flip-specific comparison.",
   keywords: [
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/vs/dealcheck-for-fix-and-flip" },
   openGraph: {
-    title: "TrueCap vs DealCheck for Fix and Flip — honest comparison",
+    title: "DealCheck vs TrueCap for Fix & Flip (2026)",
     description:
       "Fix-and-flip-specific TrueCap vs DealCheck: ARV, rehab, holding costs, break-even ARV, profit math.",
     url: "/vs/dealcheck-for-fix-and-flip",
@@ -114,7 +114,7 @@ export default function VsDealcheckForFixAndFlipPage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: "TrueCap vs DealCheck for Fix and Flip — honest comparison",
+    name: "DealCheck vs TrueCap for Fix & Flip (2026)",
     url: `${siteUrl}/vs/dealcheck-for-fix-and-flip`,
     description: "Both calculators handle fix-and-flip. Which one models ARV, rehab budgets, holding costs, and break-even ARV cleanest? Honest flip-specific comparison.",
     dateModified: "2026-06-07",

@@ -25,6 +25,10 @@ import { getSiteUrl } from "@/lib/site-url";
 const SLUG = "return-on-equity-rental-property";
 const TITLE =
   "Return on equity (ROE) on a rental property: the lazy-equity test (2026)";
+// SERP-facing title (metadata/og only): kept ≤50 chars so the root
+// layout's "%s | TrueCap" template stays inside the ~60-char SERP
+// window. The on-page <h1> keeps the longer editorial TITLE.
+const SERP_TITLE = "Return on equity (ROE) on a rental property";
 const DESCRIPTION =
   "Return on equity measures what the equity trapped in a rental earns today — not the cash you put in. The formula, a 10-year decay example, and the refi test.";
 const PUBLISHED_AT = "2026-07-01";
@@ -32,7 +36,7 @@ const MODIFIED_AT = "2026-07-01";
 const READING_TIME = 11;
 
 export const metadata: Metadata = {
-  title: TITLE,
+  title: SERP_TITLE,
   description: DESCRIPTION,
   keywords: [
     "return on equity rental property",
@@ -46,7 +50,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `/blog/${SLUG}` },
   openGraph: {
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     url: `/blog/${SLUG}`,
     type: "article",

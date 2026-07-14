@@ -24,7 +24,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "TrueCap vs AirDNA — honest comparison",
+  title: "AirDNA vs TrueCap (2026): STR Data vs Deal Math",
   description:
     "AirDNA estimates STR revenue. TrueCap underwrites the full deal. Honest comparison for short-term rental investors plus how they fit together.",
   keywords: [
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/vs/airdna" },
   openGraph: {
-    title: "TrueCap vs AirDNA — honest comparison",
+    title: "AirDNA vs TrueCap (2026): STR Data vs Deal Math",
     description:
       "AirDNA estimates STR revenue. TrueCap underwrites the full deal. Often used together by STR investors.",
     url: "/vs/airdna",
@@ -70,7 +70,7 @@ export default function VsAirdnaPage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: "TrueCap vs AirDNA — honest comparison",
+    name: "AirDNA vs TrueCap (2026): STR Data vs Deal Math",
     url: `${siteUrl}/vs/airdna`,
     description:
       "AirDNA estimates STR revenue. TrueCap underwrites the full deal. Honest comparison for short-term rental investors plus how they fit together.",

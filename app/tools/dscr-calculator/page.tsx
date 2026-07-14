@@ -17,7 +17,7 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "DSCR Calculator — Debt Service Coverage Ratio",
+  title: "Free DSCR Calculator — Debt Service Coverage Ratio",
   description:
     "Free DSCR calculator for rental property and DSCR loans. Compute Debt Service Coverage Ratio in seconds, plus a good-DSCR benchmark for lenders.",
   keywords: [
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/tools/dscr-calculator" },
   openGraph: {
-    title: "DSCR Calculator — Free",
+    title: "Free DSCR Calculator — Debt Service Coverage Ratio",
     description:
       "Compute DSCR in seconds. Plus what counts as bankable, what lenders require, and how DSCR loans work.",
     url: "/tools/dscr-calculator",

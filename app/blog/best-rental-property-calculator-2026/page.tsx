@@ -20,6 +20,10 @@ import { getSiteUrl } from "@/lib/site-url";
 
 const SLUG = "best-rental-property-calculator-2026";
 const TITLE = "Best rental property calculator 2026: 7 tools compared";
+// SERP-facing title (metadata/og only): kept ≤50 chars so the root
+// layout's "%s | TrueCap" template stays inside the ~60-char SERP
+// window. The on-page <h1> keeps the longer editorial TITLE.
+const SERP_TITLE = "Best rental property calculator 2026: 7 compared";
 const DESCRIPTION =
   "Honest 2026 ranking of the 7 most popular rental property calculators — TrueCap, DealCheck, BiggerPockets, Mashvisor, Stessa, Excel, and Roofstock — across free tier depth, pricing, mobile, and audience fit.";
 const PUBLISHED_AT = "2026-06-07";
@@ -27,7 +31,7 @@ const MODIFIED_AT = "2026-06-07";
 const READING_TIME_MIN = 12;
 
 export const metadata: Metadata = {
-  title: TITLE,
+  title: SERP_TITLE,
   description: DESCRIPTION,
   keywords: [
     "best rental property calculator",
@@ -39,7 +43,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `/blog/${SLUG}` },
   openGraph: {
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     url: `/blog/${SLUG}`,
     type: "article",
@@ -49,7 +53,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     images: ["/home.jpg"],
   },

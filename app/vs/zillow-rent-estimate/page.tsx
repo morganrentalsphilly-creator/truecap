@@ -18,7 +18,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "TrueCap vs Zillow Rent Estimate — honest comparison",
+  title: "Zillow Rent Estimate vs TrueCap (2026): Accuracy",
   description:
     "Zillow's Rent Zestimate is fast but often 10-25% off market. TrueCap uses HUD Fair Market Rent plus full underwriting. Honest comparison of both.",
   keywords: [
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/vs/zillow-rent-estimate" },
   openGraph: {
-    title: "TrueCap vs Zillow Rent Estimate",
+    title: "Zillow Rent Estimate vs TrueCap (2026): Accuracy",
     description: "Why HUD Fair Market Rent + full underwriting beats Zillow's algorithm-only Zestimate.",
     url: "/vs/zillow-rent-estimate",
     type: "website",
@@ -65,7 +65,7 @@ export default function VsZillowRentPage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: "TrueCap vs Zillow Rent Estimate — honest comparison",
+    name: "Zillow Rent Estimate vs TrueCap (2026): Accuracy",
     url: `${siteUrl}/vs/zillow-rent-estimate`,
     description: "Side-by-side comparison of TrueCap and Zillow's Rent Estimate.",
     dateModified: "2026-06-01",

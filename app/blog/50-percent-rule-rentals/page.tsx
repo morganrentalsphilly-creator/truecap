@@ -17,6 +17,10 @@ import { getSiteUrl } from "@/lib/site-url";
 
 const SLUG = "50-percent-rule-rentals";
 const TITLE = "The 50% rule for rentals — is it still useful in 2026?";
+// SERP-facing title (metadata/og only): kept ≤50 chars so the root
+// layout's "%s | TrueCap" template stays inside the ~60-char SERP
+// window. The on-page <h1> keeps the longer editorial TITLE.
+const SERP_TITLE = "The 50% rule for rentals: still useful in 2026?";
 const DESCRIPTION =
   "The classic 50% rule says operating expenses run ~half of gross rent. Honest take on when it actually works as a triage tool, when it lies, and what to do instead for the deals it can't handle.";
 const PUBLISHED_AT = "2026-05-25";
@@ -24,7 +28,7 @@ const MODIFIED_AT = "2026-06-01";
 const READING_TIME = 6;
 
 export const metadata: Metadata = {
-  title: TITLE,
+  title: SERP_TITLE,
   description: DESCRIPTION,
   keywords: [
     "50 percent rule rental",
@@ -33,7 +37,7 @@ export const metadata: Metadata = {
     "rental triage rule",
   ],
   alternates: { canonical: `/blog/${SLUG}` },
-  openGraph: { title: TITLE, description: DESCRIPTION, url: `/blog/${SLUG}`, type: "article", publishedTime: PUBLISHED_AT, modifiedTime: MODIFIED_AT, images: [{ url: "/home.jpg", width: 1200, height: 630, alt: TITLE }] },
+  openGraph: { title: SERP_TITLE, description: DESCRIPTION, url: `/blog/${SLUG}`, type: "article", publishedTime: PUBLISHED_AT, modifiedTime: MODIFIED_AT, images: [{ url: "/home.jpg", width: 1200, height: 630, alt: TITLE }] },
   twitter: { card: "summary_large_image", images: ["/home.jpg"] },
 };
 
@@ -152,7 +156,9 @@ export default function FiftyPercentRulePost() {
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">How to actually use it</h2>
           <p>
-            The 50% rule is a <strong>triage tool, not a final-decision tool</strong>. Use it in 5 seconds to decide whether a property is worth opening the full underwrite:
+            The 50% rule is a <strong>triage tool, not a final-decision tool</strong>. Use it in 5 seconds to decide whether a property is worth opening the full underwrite (the free{" "}
+            <Link href="/tools/50-percent-rule-calculator" className="text-primary font-semibold hover:underline">50% rule calculator</Link>{" "}
+            runs these steps live, with an adjustable expense ratio for the failure modes above):
           </p>
           <ol>
             <li>Look at gross monthly rent (from listing or rough comps)</li>

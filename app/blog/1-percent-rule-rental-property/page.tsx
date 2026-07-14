@@ -23,6 +23,10 @@ import { getSiteUrl } from "@/lib/site-url";
 
 const SLUG = "1-percent-rule-rental-property";
 const TITLE = "The 1% rule for rental property: does it still work in 2026?";
+// SERP-facing title (metadata/og only): kept ≤50 chars so the root
+// layout's "%s | TrueCap" template stays inside the ~60-char SERP
+// window. The on-page <h1> keeps the longer editorial TITLE.
+const SERP_TITLE = "The 1% rule for rental property in 2026";
 const DESCRIPTION =
   "The 1% rule says a rental's monthly rent should be at least 1% of its price. How it works, why 2026 rates made it harder to pass, and what it hides.";
 const PUBLISHED_AT = "2026-06-23";
@@ -30,7 +34,7 @@ const MODIFIED_AT = "2026-06-23";
 const READING_TIME = 10;
 
 export const metadata: Metadata = {
-  title: TITLE,
+  title: SERP_TITLE,
   description: DESCRIPTION,
   keywords: [
     "1% rule real estate",
@@ -44,7 +48,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `/blog/${SLUG}` },
   openGraph: {
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     url: `/blog/${SLUG}`,
     type: "article",

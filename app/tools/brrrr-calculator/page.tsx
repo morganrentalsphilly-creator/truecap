@@ -8,7 +8,7 @@ import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 export const metadata: Metadata = {
-  title: "BRRRR Calculator | Buy Rehab Rent Refinance Repeat",
+  title: "Free BRRRR Calculator — Refi & Cash Left in Deal",
   description:
     "Free BRRRR calculator. Models purchase, rehab, ARV, refi LTV, and post-refi cash flow. Shows cash left in deal + infinite-return scenarios.",
   keywords: [
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/tools/brrrr-calculator" },
   openGraph: {
-    title: "BRRRR Calculator — Free",
+    title: "Free BRRRR Calculator — Refi & Cash Left in Deal",
     description:
       "Model the buy-rehab-rent-refinance cycle in seconds. See cash left in deal and post-refi cash flow before you commit.",
     url: "/tools/brrrr-calculator",

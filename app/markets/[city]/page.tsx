@@ -55,12 +55,14 @@ export async function generateMetadata({
   const data = getMarketCity(city);
   if (!data) return { title: "Market not found" };
 
-  const title = `${data.name} rental property analysis — cap rates, rent & cash flow (2026)`;
-  const description =
-    `Run a ${data.name}, ${data.stateCode} rental deal in 60 seconds. ${data.blurb} Typical rent ${data.typicalRent}; typical price ${data.typicalPrice}.`.slice(
-      0,
-      300
-    );
+  // Keyword-first + year, and short enough (city name maxes at 16
+  // chars → ≤44 + the layout's " | TrueCap") that nothing gets clipped
+  // in the SERP window. Cap-rate / rent detail lives in the description.
+  const title = `${data.name} Rental Market Analysis 2026`;
+  // Built from fixed-width parts so it always lands under ~160 chars —
+  // the old `.slice(0, 300)` shipped over-length, mid-word-truncated
+  // descriptions. The blurb still leads og:description below.
+  const description = `Run a ${data.name}, ${data.stateCode} rental deal in 60 seconds — typical rent ${data.typicalRent}, prices ${data.typicalPrice}, plus 2026 cap-rate and rent benchmarks.`;
 
   return {
     title,

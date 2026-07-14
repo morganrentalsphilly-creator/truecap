@@ -22,6 +22,10 @@ import { getSiteUrl } from "@/lib/site-url";
 const SLUG = "cash-out-refinance-vs-heloc-rental";
 const TITLE =
   "Cash-out refinance vs HELOC on a rental: which pulls equity better in 2026?";
+// SERP-facing title (metadata/og only): kept ≤50 chars so the root
+// layout's "%s | TrueCap" template stays inside the ~60-char SERP
+// window. The on-page <h1> keeps the longer editorial TITLE.
+const SERP_TITLE = "Cash-out refinance vs HELOC on a rental (2026)";
 const DESCRIPTION =
   "You have equity in a rental and want to put it to work. A cash-out refinance and a HELOC both unlock it — but in 2026 they are not interchangeable. The mechanics, the investment-property LTV and rate reality, the cheap-first-mortgage trap that decides most of these, and a worked side-by-side.";
 const PUBLISHED_AT = "2026-06-23";
@@ -29,7 +33,7 @@ const MODIFIED_AT = "2026-06-23";
 const READING_TIME_MIN = 11;
 
 export const metadata: Metadata = {
-  title: TITLE,
+  title: SERP_TITLE,
   description: DESCRIPTION,
   keywords: [
     "cash-out refinance vs heloc",
@@ -42,7 +46,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `/blog/${SLUG}` },
   openGraph: {
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     url: `/blog/${SLUG}`,
     type: "article",
@@ -52,7 +56,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     images: ["/home.jpg"],
   },

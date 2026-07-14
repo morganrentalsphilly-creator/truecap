@@ -26,6 +26,10 @@ import { getSiteUrl } from "@/lib/site-url";
 
 const SLUG = "cap-rate-vs-cash-on-cash-vs-dscr";
 const TITLE = "Cap rate vs cash-on-cash vs DSCR: which one actually matters?";
+// SERP-facing title (metadata/og only): kept ≤50 chars so the root
+// layout's "%s | TrueCap" template stays inside the ~60-char SERP
+// window. The on-page <h1> keeps the longer editorial TITLE.
+const SERP_TITLE = "Cap rate vs cash-on-cash vs DSCR: which matters?";
 const DESCRIPTION =
   "Three different metrics, three different jobs. A plain-English guide to when each one matters, when to ignore each one, and why most investors get this wrong.";
 const PUBLISHED_AT = "2026-05-24";
@@ -33,7 +37,7 @@ const MODIFIED_AT = "2026-06-01";
 const READING_TIME_MIN = 8;
 
 export const metadata: Metadata = {
-  title: TITLE,
+  title: SERP_TITLE,
   description: DESCRIPTION,
   keywords: [
     "cap rate vs cash on cash",
@@ -46,7 +50,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `/blog/${SLUG}` },
   openGraph: {
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     url: `/blog/${SLUG}`,
     type: "article",
@@ -56,7 +60,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     images: ["/home.jpg"],
   },

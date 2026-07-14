@@ -28,6 +28,10 @@ import { getSiteUrl } from "@/lib/site-url";
 const SLUG = "how-to-calculate-arv";
 const TITLE_PLAIN =
   "How to calculate ARV (after-repair value): the comps method, step by step (2026)";
+// SERP-facing title (metadata/og only): kept ≤50 chars so the root
+// layout's "%s | TrueCap" template stays inside the ~60-char SERP
+// window. The on-page <h1> keeps the longer editorial TITLE_PLAIN.
+const SERP_TITLE = "How to calculate ARV (2026): the comps method";
 const DESCRIPTION =
   "How to calculate ARV: pull renovated comps, adjust, and apply price per square foot. A worked example, the 70% rule max offer, and the BRRRR refi math.";
 const PUBLISHED_AT = "2026-07-10";
@@ -35,7 +39,7 @@ const MODIFIED_AT = "2026-07-10";
 const READING_TIME = 11;
 
 export const metadata: Metadata = {
-  title: TITLE_PLAIN,
+  title: SERP_TITLE,
   description: DESCRIPTION,
   keywords: [
     "how to calculate ARV",
@@ -49,7 +53,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `/blog/${SLUG}` },
   openGraph: {
-    title: TITLE_PLAIN,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     url: `/blog/${SLUG}`,
     type: "article",

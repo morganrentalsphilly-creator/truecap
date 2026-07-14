@@ -24,7 +24,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "TrueCap vs Guesty — honest comparison",
+  title: "Guesty vs TrueCap (2026): STR PM vs Underwriting",
   description:
     "Guesty is enterprise STR management for 50+ property operators. TrueCap is the pre-purchase underwrite for solo and small-portfolio STR investors. Different worlds.",
   keywords: [
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/vs/guesty" },
   openGraph: {
-    title: "TrueCap vs Guesty — honest comparison",
+    title: "Guesty vs TrueCap (2026): STR PM vs Underwriting",
     description:
       "Guesty is enterprise STR PM for 50+ properties. TrueCap is solo STR underwriting. Different worlds.",
     url: "/vs/guesty",
@@ -70,7 +70,7 @@ export default function VsGuestyPage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: "TrueCap vs Guesty — honest comparison",
+    name: "Guesty vs TrueCap (2026): STR PM vs Underwriting",
     url: `${siteUrl}/vs/guesty`,
     description:
       "Guesty is enterprise STR management for 50+ property operators. TrueCap is the pre-purchase underwrite for solo and small-portfolio STR investors. Different worlds.",

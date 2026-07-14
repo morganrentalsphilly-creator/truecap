@@ -24,7 +24,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "TrueCap vs Reonomy — residential underwriting vs commercial intelligence",
+  title: "Reonomy vs TrueCap (2026): CRE Data vs Rentals",
   description:
     "Reonomy is commercial real estate intelligence (owner, debt, tenants). TrueCap is residential underwriting. Different asset classes — honest comparison.",
   keywords: [
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/vs/reonomy" },
   openGraph: {
-    title: "TrueCap vs Reonomy — residential underwriting vs commercial intelligence",
+    title: "Reonomy vs TrueCap (2026): CRE Data vs Rentals",
     description:
       "Reonomy is commercial RE intelligence + owner data. TrueCap is residential underwriting. Different asset classes.",
     url: "/vs/reonomy",
@@ -68,7 +68,7 @@ export default function VsReonomyPage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: "TrueCap vs Reonomy — honest comparison",
+    name: "Reonomy vs TrueCap (2026): CRE Data vs Rentals",
     url: `${siteUrl}/vs/reonomy`,
     description:
       "Reonomy is commercial real estate intelligence (owner, debt, tenants). TrueCap is residential underwriting. Different asset classes — honest comparison.",

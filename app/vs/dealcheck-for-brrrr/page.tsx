@@ -27,7 +27,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "TrueCap vs DealCheck for BRRRR — honest comparison",
+  title: "DealCheck vs TrueCap for BRRRR Deals (2026)",
   description:
     "Both calculators handle BRRRR. Which one does the cash-out refi math better, models the ARV-driven hold value, and helps you decide whether to refi or sell? Honest BRRRR-specific comparison.",
   keywords: [
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/vs/dealcheck-for-brrrr" },
   openGraph: {
-    title: "TrueCap vs DealCheck for BRRRR",
+    title: "DealCheck vs TrueCap for BRRRR Deals (2026)",
     description:
       "BRRRR-specific comparison: cash-out refi math, ARV modeling, infinite-return detection. Which calculator fits the BRRRR workflow better.",
     url: "/vs/dealcheck-for-brrrr",
@@ -176,7 +176,7 @@ export default function VsDealCheckForBrrrrPage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: "TrueCap vs DealCheck for BRRRR — honest comparison",
+    name: "DealCheck vs TrueCap for BRRRR Deals (2026)",
     url: `${siteUrl}/vs/dealcheck-for-brrrr`,
     description:
       "BRRRR-specific comparison of TrueCap and DealCheck — cash-out refi math, ARV modeling, infinite-return detection.",

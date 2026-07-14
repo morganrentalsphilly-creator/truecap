@@ -347,6 +347,10 @@ export default function ArvCalculatorPage() {
               The full ledger — where every dollar of the spread goes on a
               real flip — is worked through in our{" "}
               <Link href="/blog/70-percent-rule-house-flipping" className="text-primary font-semibold hover:underline">70% rule deep-dive</Link>.
+              Already have an ARV and just want the rule? The dedicated{" "}
+              <Link href="/tools/70-percent-rule-calculator" className="text-primary font-semibold hover:underline">70% rule calculator</Link>{" "}
+              runs the same max-offer math with the offer at 60, 65, 70,
+              and 75% side by side.
             </p>
 
             <h3>When the 70% rule lies</h3>

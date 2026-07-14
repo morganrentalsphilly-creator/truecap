@@ -20,9 +20,9 @@ import { getSiteUrl } from "@/lib/site-url";
 const CITY = "Indianapolis";
 const STATE = "IN";
 const SLUG = "indianapolis";
-const TITLE = "Indianapolis rental property analysis — calculator + 2026 cap-rate benchmarks";
+const TITLE = "Indianapolis Rental Market Analysis 2026";
 const DESCRIPTION =
-  "Run an Indianapolis rental deal in 60 seconds. Auto-fills IN property tax (2% gross-assessed cap), HUD rent for Marion County, current mortgage rates. Plus neighborhood cap-rate ranges + why Indy stays a top cash-flow market.";
+  "Neighborhood cap-rate ranges + why Indy stays a top cash-flow market. Run an Indianapolis rental in 60 seconds — IN tax and HUD rent auto-filled.";
 const PUBLISHED_AT = "2026-05-24";
 const MODIFIED_AT = "2026-06-01";
 

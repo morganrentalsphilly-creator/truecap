@@ -24,7 +24,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "TrueCap vs Rentec Direct — honest comparison",
+  title: "Rentec Direct vs TrueCap (2026): PM vs Analysis",
   description:
     "Rentec Direct runs the rentals you own (5-100 units). TrueCap underwrites the ones you're considering. Honest side-by-side.",
   keywords: [
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/vs/rentec-direct" },
   openGraph: {
-    title: "TrueCap vs Rentec Direct — honest comparison",
+    title: "Rentec Direct vs TrueCap (2026): PM vs Analysis",
     description:
       "Rentec Direct manages 5-100 unit landlord ops. TrueCap underwrites the deal before. Different stages.",
     url: "/vs/rentec-direct",
@@ -70,7 +70,7 @@ export default function VsRentecDirectPage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: "TrueCap vs Rentec Direct — honest comparison",
+    name: "Rentec Direct vs TrueCap (2026): PM vs Analysis",
     url: `${siteUrl}/vs/rentec-direct`,
     description:
       "Rentec Direct runs the rentals you own (5-100 units). TrueCap underwrites the ones you're considering. Honest side-by-side.",

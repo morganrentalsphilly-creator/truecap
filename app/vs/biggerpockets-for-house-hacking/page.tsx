@@ -27,7 +27,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "TrueCap vs BiggerPockets for House Hacking — honest comparison",
+  title: "BiggerPockets vs TrueCap for House Hacking (2026)",
   description:
     "Both calculators run house-hack deals. Which one models owner-occupant unit usage, FHA financing, and 'effective rent saved' more cleanly? Honest house-hack-specific comparison.",
   keywords: [
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/vs/biggerpockets-for-house-hacking" },
   openGraph: {
-    title: "TrueCap vs BiggerPockets for House Hacking",
+    title: "BiggerPockets vs TrueCap for House Hacking (2026)",
     description:
       "House-hack-specific comparison: owner-occupant unit modeling, FHA financing, effective rent saved. Which calculator fits the house-hack workflow.",
     url: "/vs/biggerpockets-for-house-hacking",
@@ -174,7 +174,7 @@ export default function VsBiggerPocketsForHouseHackingPage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: "TrueCap vs BiggerPockets for House Hacking — honest comparison",
+    name: "BiggerPockets vs TrueCap for House Hacking (2026)",
     url: `${siteUrl}/vs/biggerpockets-for-house-hacking`,
     description:
       "House-hack-specific comparison of TrueCap and BiggerPockets — owner-occupant modeling, FHA financing, effective rent saved.",

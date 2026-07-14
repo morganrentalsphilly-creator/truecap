@@ -26,6 +26,10 @@ import { getSiteUrl } from "@/lib/site-url";
 
 const SLUG = "what-is-a-good-cap-rate";
 const TITLE = "What's a good cap rate for rental property in 2026?";
+// SERP-facing title (metadata/og only): kept ≤50 chars so the root
+// layout's "%s | TrueCap" template stays inside the ~60-char SERP
+// window. The on-page <h1> keeps the longer editorial TITLE.
+const SERP_TITLE = "What's a good cap rate for rental property in 2026";
 const DESCRIPTION =
   "There's no single answer — cap rate benchmarks shift by market, property type, and the prevailing risk-free rate. Plain-English guide to what's good in cash-flow markets, appreciation markets, and the negative-leverage rate environment of 2026.";
 const PUBLISHED_AT = "2026-05-24";
@@ -33,7 +37,7 @@ const MODIFIED_AT = "2026-06-01";
 const READING_TIME_MIN = 9;
 
 export const metadata: Metadata = {
-  title: TITLE,
+  title: SERP_TITLE,
   description: DESCRIPTION,
   keywords: [
     "what is a good cap rate",
@@ -46,7 +50,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `/blog/${SLUG}` },
   openGraph: {
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     url: `/blog/${SLUG}`,
     type: "article",
@@ -56,7 +60,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     images: ["/home.jpg"],
   },

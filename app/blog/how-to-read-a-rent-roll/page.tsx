@@ -19,6 +19,10 @@ import { getSiteUrl } from "@/lib/site-url";
 const SLUG = "how-to-read-a-rent-roll";
 const TITLE =
   "How to read a rent roll: verify a rental's income before you buy (2026)";
+// SERP-facing title (metadata/og only): kept ≤50 chars so the root
+// layout's "%s | TrueCap" template stays inside the ~60-char SERP
+// window. The on-page <h1> keeps the longer editorial TITLE.
+const SERP_TITLE = "How to read a rent roll before you buy (2026)";
 const DESCRIPTION =
   "How to read a rent roll: a worked fourplex example, the five places rent rolls mislead, and how to verify in-place rent before you buy a rental in 2026.";
 const PUBLISHED_AT = "2026-06-30";
@@ -26,7 +30,7 @@ const MODIFIED_AT = "2026-06-30";
 const READING_TIME = 11;
 
 export const metadata: Metadata = {
-  title: TITLE,
+  title: SERP_TITLE,
   description: DESCRIPTION,
   keywords: [
     "rent roll",
@@ -42,7 +46,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `/blog/${SLUG}` },
   openGraph: {
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     url: `/blog/${SLUG}`,
     type: "article",

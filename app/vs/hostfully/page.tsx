@@ -24,7 +24,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "TrueCap vs Hostfully — honest comparison",
+  title: "Hostfully vs TrueCap (2026): Manage vs Underwrite",
   description:
     "Hostfully manages short-term rentals after you buy them. TrueCap underwrites them before. Honest comparison and how STR investors use both.",
   keywords: [
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/vs/hostfully" },
   openGraph: {
-    title: "TrueCap vs Hostfully — honest comparison",
+    title: "Hostfully vs TrueCap (2026): Manage vs Underwrite",
     description:
       "Hostfully runs your STR after closing. TrueCap underwrites the deal before. Different stages of the STR lifecycle.",
     url: "/vs/hostfully",
@@ -69,7 +69,7 @@ export default function VsHostfullyPage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: "TrueCap vs Hostfully — honest comparison",
+    name: "Hostfully vs TrueCap (2026): Manage vs Underwrite",
     url: `${siteUrl}/vs/hostfully`,
     description:
       "Hostfully manages short-term rentals after you buy them. TrueCap underwrites them before. Honest comparison and how STR investors use both.",

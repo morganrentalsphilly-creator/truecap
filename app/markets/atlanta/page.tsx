@@ -24,9 +24,9 @@ import { getSiteUrl } from "@/lib/site-url";
 const CITY = "Atlanta";
 const STATE = "GA";
 const SLUG = "atlanta";
-const TITLE = "Atlanta rental property analysis — calculator + 2026 cap-rate benchmarks";
+const TITLE = "Atlanta Rental Market Analysis 2026 — Cap Rates";
 const DESCRIPTION =
-  "Run an Atlanta rental in 60 seconds. Auto-fills GA effective property tax (~0.9%), HUD rent by metro county, and current mortgage rates. Plus 2026 cap-rate ranges by Atlanta submarket + why ATL is the dominant balanced-growth play in the Southeast.";
+  "2026 cap-rate ranges by Atlanta submarket + the Southeast's balanced-growth play. Run an Atlanta rental in 60 seconds — GA tax and HUD rent auto-filled.";
 const PUBLISHED_AT = "2026-05-24";
 const MODIFIED_AT = "2026-06-01";
 

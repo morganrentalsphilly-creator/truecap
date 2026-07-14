@@ -14,7 +14,7 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "Rental Property Closing Cost Calculator",
+  title: "Free Closing Cost Calculator — Every Line Item",
   description:
     "Free closing cost calculator for rental purchases. Origination, title, transfer tax, escrow, prepaids — every line item, plus a typical total.",
   keywords: [
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/tools/closing-cost-calculator" },
   openGraph: {
-    title: "Closing Cost Calculator — Free",
+    title: "Free Closing Cost Calculator — Every Line Item",
     description: "Compute closing costs on a rental property purchase. Every line item broken out.",
     url: "/tools/closing-cost-calculator",
     type: "website",

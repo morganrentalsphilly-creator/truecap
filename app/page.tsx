@@ -50,11 +50,13 @@ import { getSiteUrl } from "@/lib/site-url";
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  // Keyword-rich, benefit-led title. The layout template appends
-  // " | TrueCap" — don't add the brand here or it doubles up.
-  // Previous title ("Rental Property Analysis") had no calculator
-  // keyword and no differentiator for the SERP.
-  title: "Rental Property Calculator — Cap Rate, Cash Flow & DSCR",
+  // Keyword-rich, benefit-led title. `absolute` opts out of the layout's
+  // "%s | TrueCap" template: every free-tool SERP rewards "Free" in the
+  // visible title, and at 60 chars there's no room for the brand suffix —
+  // Google appends the site name on its own from the WebSite schema.
+  title: {
+    absolute: "Free Rental Property Calculator — Cash Flow, Cap Rate & DSCR",
+  },
   description:
     "Analyze any rental in 60 seconds — cap rate, cash flow, DSCR auto-filled from the address. Set your buy box and every deal gets a personal pass/fail.",
   keywords: [
@@ -70,7 +72,10 @@ export const metadata: Metadata = {
     canonical: "/",
   },
   openGraph: {
-    title: "TrueCap Rental Property Analysis",
+    // Keep og:title aligned with the <title> — Google falls back to
+    // og:title when rewriting SERP titles, so a mismatched og:title
+    // resurfaces stale phrasing on brand queries.
+    title: "Free Rental Property Calculator — Cash Flow, Cap Rate & DSCR",
     description:
       "Type an address, get the verdict — cap rate, cash flow, DSCR in 60 seconds. Set your buy box and every deal gets a personal pass/fail.",
     url: "/",
@@ -89,7 +94,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "TrueCap Rental Property Analysis",
+    title: "Free Rental Property Calculator — Cash Flow, Cap Rate & DSCR",
     description:
       "Type an address, get the verdict — cap rate, cash flow, DSCR in 60 seconds. Set your buy box and every deal gets a personal pass/fail.",
     images: ["/home.jpg"],
@@ -98,54 +103,15 @@ export const metadata: Metadata = {
 
 export default function Home() {
   const siteUrl = getSiteUrl();
-  // Schema.org @graph — three connected entities Google uses to build
-  // the brand knowledge panel for "TrueCap" queries and the sitelinks
-  // search box for branded organic results.
-  //   1. Organization — the legal/brand entity. Drives the right-rail
-  //      brand panel and powers logo display in SERPs.
-  //   2. WebSite — the canonical site, with a SearchAction declaration
-  //      so Google can render a sitelinks search box under TrueCap
-  //      brand searches.
-  //   3. SoftwareApplication — the product itself, @id-linked to the
-  //      Organization so they're a single graph.
+  // Schema.org — SoftwareApplication only. Organization and WebSite
+  // (with the sitelinks SearchAction) are emitted ONCE, site-wide, by
+  // app/layout.tsx; duplicating them here shipped two identical
+  // Organization/WebSite nodes on the homepage and muddied the
+  // knowledge-graph signal. The @id reference below resolves to the
+  // layout's Organization node — don't re-declare the entity here.
   const structuredData = {
     "@context": "https://schema.org",
     "@graph": [
-      {
-        "@type": "Organization",
-        "@id": `${siteUrl}/#organization`,
-        name: "TrueCap",
-        url: siteUrl,
-        logo: `${siteUrl}/icon-light-32x32.png`,
-        sameAs: [
-          // Add real social profiles here as TrueCap gets accounts.
-          // Leaving the array present (even if empty) tells Google
-          // "we don't have public social yet" rather than "we forgot
-          // this field" — explicit absence > silent absence.
-        ],
-        contactPoint: {
-          "@type": "ContactPoint",
-          contactType: "customer support",
-          email: "hello@usetruecap.com",
-          availableLanguage: "English",
-        },
-      },
-      {
-        "@type": "WebSite",
-        "@id": `${siteUrl}/#website`,
-        url: siteUrl,
-        name: "TrueCap",
-        publisher: { "@id": `${siteUrl}/#organization` },
-        // Sitelinks search box — points at the (noindex) /search page.
-        potentialAction: {
-          "@type": "SearchAction",
-          target: {
-            "@type": "EntryPoint",
-            urlTemplate: `${siteUrl}/search?q={search_term_string}`,
-          },
-          "query-input": "required name=search_term_string",
-        },
-      },
       {
         "@type": "SoftwareApplication",
         "@id": `${siteUrl}/#software`,

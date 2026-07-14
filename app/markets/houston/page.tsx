@@ -26,9 +26,9 @@ import { getSiteUrl } from "@/lib/site-url";
 const CITY = "Houston";
 const STATE = "TX";
 const SLUG = "houston";
-const TITLE = "Houston rental property analysis — calculator + 2026 cap-rate benchmarks";
+const TITLE = "Houston Rental Market Analysis 2026 — Cap Rates";
 const DESCRIPTION =
-  "Run a Houston rental in 60 seconds. Auto-fills TX effective property tax (~1.8% — highest of any major US metro), HUD rent by Harris County, and current mortgage rates. Plus the no-state-income-tax + landlord-friendly trade-offs that make Houston a distinctive Sun Belt play.";
+  "The no-income-tax + landlord-friendly trade-offs of Houston's Sun Belt play. Run a Houston rental in 60 seconds — TX tax and HUD rent auto-filled.";
 const PUBLISHED_AT = "2026-05-24";
 const MODIFIED_AT = "2026-06-01";
 

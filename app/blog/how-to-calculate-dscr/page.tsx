@@ -24,6 +24,10 @@ import { getSiteUrl } from "@/lib/site-url";
 
 const SLUG = "how-to-calculate-dscr";
 const TITLE = "How to calculate DSCR (debt service coverage ratio) — 2026 guide";
+// SERP-facing title (metadata/og only): kept ≤50 chars so the root
+// layout's "%s | TrueCap" template stays inside the ~60-char SERP
+// window. The on-page <h1> keeps the longer editorial TITLE.
+const SERP_TITLE = "How to calculate DSCR — 2026 guide";
 const DESCRIPTION =
   "DSCR = NOI ÷ annual debt service. It&apos;s the metric DSCR lenders use to qualify your loan. Here&apos;s the formula, what lenders include and exclude, three worked examples, and the difference between your DSCR and the lender&apos;s DSCR (which is usually lower).";
 const PUBLISHED_AT = "2026-06-07";
@@ -31,7 +35,7 @@ const MODIFIED_AT = "2026-06-07";
 const READING_TIME_MIN = 8;
 
 export const metadata: Metadata = {
-  title: TITLE,
+  title: SERP_TITLE,
   description: DESCRIPTION,
   keywords: [
     "how to calculate dscr",
@@ -45,7 +49,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `/blog/${SLUG}` },
   openGraph: {
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     url: `/blog/${SLUG}`,
     type: "article",
@@ -55,7 +59,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     images: ["/home.jpg"],
   },

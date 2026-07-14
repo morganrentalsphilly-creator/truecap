@@ -26,7 +26,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "TrueCap vs Mashvisor — honest comparison",
+  title: "Mashvisor Alternative: Free Deal Analysis (2026)",
   description:
     "TrueCap vs Mashvisor for rental investors. Per-deal underwriting (TrueCap) vs market heatmaps + STR data (Mashvisor). Feature matrix + when each wins.",
   keywords: [
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/vs/mashvisor" },
   openGraph: {
-    title: "TrueCap vs Mashvisor — honest comparison",
+    title: "Mashvisor Alternative: Free Deal Analysis (2026)",
     description:
       "Per-deal underwriting vs market heatmaps + Airbnb data. Different jobs, different price points.",
     url: "/vs/mashvisor",
@@ -74,7 +74,7 @@ export default function VsMashvisorPage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: "TrueCap vs Mashvisor — honest comparison",
+    name: "Mashvisor Alternative: Free Deal Analysis (2026)",
     url: `${siteUrl}/vs/mashvisor`,
     description: "Side-by-side comparison of TrueCap and Mashvisor for rental investors.",
     dateModified: "2026-06-01",

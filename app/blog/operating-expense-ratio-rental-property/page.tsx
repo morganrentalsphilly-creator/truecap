@@ -28,6 +28,10 @@ import { getSiteUrl } from "@/lib/site-url";
 const SLUG = "operating-expense-ratio-rental-property";
 const TITLE_PLAIN =
   "Operating expense ratio (OER): what's a good one for a rental? (2026)";
+// SERP-facing title (metadata/og only): kept ≤50 chars so the root
+// layout's "%s | TrueCap" template stays inside the ~60-char SERP
+// window. The on-page <h1> keeps the longer editorial TITLE_PLAIN.
+const SERP_TITLE = "Operating expense ratio (OER) for rentals (2026)";
 const DESCRIPTION =
   "OER = operating expenses ÷ effective gross income. The formula, what counts (and what doesn't), 2026 benchmark bands, and a worked duplex.";
 const PUBLISHED_AT = "2026-07-06";
@@ -35,7 +39,7 @@ const MODIFIED_AT = "2026-07-06";
 const READING_TIME = 11;
 
 export const metadata: Metadata = {
-  title: TITLE_PLAIN,
+  title: SERP_TITLE,
   description: DESCRIPTION,
   keywords: [
     "operating expense ratio",
@@ -49,7 +53,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `/blog/${SLUG}` },
   openGraph: {
-    title: TITLE_PLAIN,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     url: `/blog/${SLUG}`,
     type: "article",

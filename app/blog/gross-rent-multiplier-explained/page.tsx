@@ -19,6 +19,10 @@ import { getSiteUrl } from "@/lib/site-url";
 const SLUG = "gross-rent-multiplier-explained";
 const TITLE =
   "Gross rent multiplier (GRM) explained: how to screen rentals fast (2026)";
+// SERP-facing title (metadata/og only): kept ≤50 chars so the root
+// layout's "%s | TrueCap" template stays inside the ~60-char SERP
+// window. The on-page <h1> keeps the longer editorial TITLE.
+const SERP_TITLE = "Gross rent multiplier (GRM) explained (2026)";
 const DESCRIPTION =
   "GRM = price ÷ annual gross rent — the fastest rental screen. The formula, 2026 worked examples, GRM vs cap rate, a good GRM range, and where it lies.";
 const PUBLISHED_AT = "2026-06-17";
@@ -26,7 +30,7 @@ const MODIFIED_AT = "2026-06-17";
 const READING_TIME = 10;
 
 export const metadata: Metadata = {
-  title: TITLE,
+  title: SERP_TITLE,
   description: DESCRIPTION,
   keywords: [
     "gross rent multiplier",
@@ -40,7 +44,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `/blog/${SLUG}` },
   openGraph: {
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     url: `/blog/${SLUG}`,
     type: "article",

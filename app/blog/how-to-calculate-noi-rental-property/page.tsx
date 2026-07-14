@@ -29,6 +29,10 @@ import { getSiteUrl } from "@/lib/site-url";
 const SLUG = "how-to-calculate-noi-rental-property";
 const TITLE =
   "How to calculate NOI (net operating income) on a rental property — 2026 guide";
+// SERP-facing title (metadata/og only): kept ≤50 chars so the root
+// layout's "%s | TrueCap" template stays inside the ~60-char SERP
+// window. The on-page <h1> keeps the longer editorial TITLE.
+const SERP_TITLE = "How to calculate NOI on a rental property (2026)";
 const DESCRIPTION =
   "NOI = gross income minus operating expenses, before the mortgage. The formula, a full $250K duplex worked example, and how NOI drives cap rate and DSCR.";
 const PUBLISHED_AT = "2026-06-16";
@@ -36,7 +40,7 @@ const MODIFIED_AT = "2026-06-16";
 const READING_TIME_MIN = 10;
 
 export const metadata: Metadata = {
-  title: TITLE,
+  title: SERP_TITLE,
   description: DESCRIPTION,
   keywords: [
     "how to calculate noi",
@@ -50,7 +54,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `/blog/${SLUG}` },
   openGraph: {
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     url: `/blog/${SLUG}`,
     type: "article",
@@ -60,7 +64,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     images: ["/home.jpg"],
   },

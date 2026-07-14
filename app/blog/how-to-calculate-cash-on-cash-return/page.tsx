@@ -24,6 +24,10 @@ import { getSiteUrl } from "@/lib/site-url";
 
 const SLUG = "how-to-calculate-cash-on-cash-return";
 const TITLE = "How to calculate cash-on-cash return on a rental property — 2026 guide";
+// SERP-facing title (metadata/og only): kept ≤50 chars so the root
+// layout's "%s | TrueCap" template stays inside the ~60-char SERP
+// window. The on-page <h1> keeps the longer editorial TITLE.
+const SERP_TITLE = "How to calculate cash-on-cash return (2026)";
 const DESCRIPTION =
   "Cash-on-cash return = annual cash flow ÷ total cash invested. It&apos;s the only metric that tells you the return on the dollars you actually put in. Here&apos;s the formula, what counts as &lsquo;total cash invested,&rsquo; three worked examples, and the trap most calculators fall into.";
 const PUBLISHED_AT = "2026-06-07";
@@ -31,7 +35,7 @@ const MODIFIED_AT = "2026-06-07";
 const READING_TIME_MIN = 7;
 
 export const metadata: Metadata = {
-  title: TITLE,
+  title: SERP_TITLE,
   description: DESCRIPTION,
   keywords: [
     "how to calculate cash on cash return",
@@ -45,7 +49,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `/blog/${SLUG}` },
   openGraph: {
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     url: `/blog/${SLUG}`,
     type: "article",
@@ -55,7 +59,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     images: ["/home.jpg"],
   },

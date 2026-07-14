@@ -26,9 +26,9 @@ import { getSiteUrl } from "@/lib/site-url";
 const CITY = "Cleveland";
 const STATE = "OH";
 const SLUG = "cleveland";
-const TITLE = "Cleveland rental property analysis — calculator + 2026 cap-rate benchmarks";
+const TITLE = "Cleveland Rental Market Analysis 2026 — Cap Rates";
 const DESCRIPTION =
-  "Run a Cleveland rental deal in 60 seconds. Auto-fills OH effective property tax (~1.4%), HUD rent by Cuyahoga / surrounding counties, and current mortgage rates. Plus neighborhood cap-rate ranges + why Cleveland is a top US BRRRR market in 2026.";
+  "Neighborhood cap-rate ranges + why Cleveland is a top US BRRRR market in 2026. Run a Cleveland rental in 60 seconds — OH tax and HUD rent auto-filled.";
 const PUBLISHED_AT = "2026-05-24";
 const MODIFIED_AT = "2026-06-01";
 

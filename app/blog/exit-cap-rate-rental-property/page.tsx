@@ -28,6 +28,10 @@ import { getSiteUrl } from "@/lib/site-url";
 const SLUG = "exit-cap-rate-rental-property";
 const TITLE_PLAIN =
   "Exit cap rate: how to pick the number that sets your sale price (2026)";
+// SERP-facing title (metadata/og only): kept ≤50 chars so the root
+// layout's "%s | TrueCap" template stays inside the ~60-char SERP
+// window. The on-page <h1> keeps the longer editorial TITLE_PLAIN.
+const SERP_TITLE = "Exit cap rate: how to pick the number (2026)";
 const DESCRIPTION =
   "Exit cap rate = exit-year NOI ÷ the cap rate a future buyer pays. Why it drives your sale price and IRR more than any input, plus a worked 2026 example.";
 const PUBLISHED_AT = "2026-07-08";
@@ -35,7 +39,7 @@ const MODIFIED_AT = "2026-07-08";
 const READING_TIME = 11;
 
 export const metadata: Metadata = {
-  title: TITLE_PLAIN,
+  title: SERP_TITLE,
   description: DESCRIPTION,
   keywords: [
     "exit cap rate",
@@ -49,7 +53,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `/blog/${SLUG}` },
   openGraph: {
-    title: TITLE_PLAIN,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     url: `/blog/${SLUG}`,
     type: "article",

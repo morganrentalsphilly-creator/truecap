@@ -27,7 +27,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "TrueCap vs Stessa — honest comparison",
+  title: "Stessa vs TrueCap (2026): Books vs Deal Analysis",
   description:
     "TrueCap vs Stessa for rental investors. Underwriting math (TrueCap) vs portfolio bookkeeping (Stessa). Honest feature matrix + when to pick each.",
   keywords: [
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/vs/stessa" },
   openGraph: {
-    title: "TrueCap vs Stessa — honest comparison",
+    title: "Stessa vs TrueCap (2026): Books vs Deal Analysis",
     description:
       "Underwriting tool vs portfolio bookkeeping tool. Different jobs — when to pick each.",
     url: "/vs/stessa",
@@ -74,7 +74,7 @@ export default function VsStessaPage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: "TrueCap vs Stessa — honest comparison",
+    name: "Stessa vs TrueCap (2026): Books vs Deal Analysis",
     url: `${siteUrl}/vs/stessa`,
     description: "Side-by-side comparison of TrueCap and Stessa for rental investors.",
     dateModified: "2026-06-01",

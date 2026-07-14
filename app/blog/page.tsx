@@ -49,6 +49,24 @@ export type BlogPost = {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: "best-dealcheck-alternatives",
+    title: "7 Best DealCheck Alternatives for Rental Analysis (2026)",
+    excerpt:
+      "Seven real DealCheck alternatives with verified July 2026 pricing — TrueCap (that's us, disclosed), BiggerPockets' calculators, Stessa, Mashvisor, RentCast, Rentometer, and the spreadsheet option — plus an honest section on when sticking with DealCheck is the right call.",
+    readingTimeMinutes: 11,
+    publishedAt: "2026-07-14",
+    available: true,
+  },
+  {
+    slug: "free-biggerpockets-calculator-alternatives",
+    title: "Free BiggerPockets Calculator Alternatives (2026)",
+    excerpt:
+      "BiggerPockets' calculators stop after 5 free reports; the rest sits behind Pro at $390/yr. Six genuinely free alternatives ranked — TrueCap (that's us, disclosed), DealCheck's free Starter plan, Calculator.net, Stessa, RentCast, and spreadsheets — plus when Pro is actually worth it.",
+    readingTimeMinutes: 10,
+    publishedAt: "2026-07-14",
+    available: true,
+  },
+  {
     slug: "how-to-calculate-rental-property-depreciation",
     title:
       "How to calculate depreciation on a rental property: the 27.5-year math, step by step (2026)",

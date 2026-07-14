@@ -66,10 +66,15 @@ const FOOTER_COLS: Array<{
     title: "Free calculators",
     // Driven by the calculator registry's footerFeatured flags so this
     // shortlist can never drift from /tools (see lib/calculator-registry.ts).
-    links: FOOTER_CALCULATORS.map((c) => ({
-      label: c.shortTitle,
-      href: `/tools/${c.slug}`,
-    })),
+    links: [
+      ...FOOTER_CALCULATORS.map((c) => ({
+        label: c.shortTitle,
+        href: `/tools/${c.slug}`,
+      })),
+      // The un-gated spreadsheet download page is not a registry
+      // calculator (no widget), so it's linked manually here.
+      { label: "Rental spreadsheet (Excel)", href: "/tools/rental-property-spreadsheet" },
+    ],
   },
   {
     title: "Account",

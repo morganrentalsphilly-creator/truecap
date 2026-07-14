@@ -19,6 +19,10 @@ import { getSiteUrl } from "@/lib/site-url";
 const SLUG = "capex-maintenance-reserves-rental-property";
 const TITLE =
   "CapEx and maintenance reserves: how much to actually budget for a rental (2026)";
+// SERP-facing title (metadata/og only): kept ≤50 chars so the root
+// layout's "%s | TrueCap" template stays inside the ~60-char SERP
+// window. The on-page <h1> keeps the longer editorial TITLE.
+const SERP_TITLE = "CapEx & maintenance reserves for rentals (2026)";
 const DESCRIPTION =
   "The component-lifespan method for capex and maintenance reserves, worked numbers on a $220K rental, and what honest reserves do to NOI, DSCR, and cash flow.";
 const PUBLISHED_AT = "2026-06-11";
@@ -26,7 +30,7 @@ const MODIFIED_AT = "2026-06-11";
 const READING_TIME = 10;
 
 export const metadata: Metadata = {
-  title: TITLE,
+  title: SERP_TITLE,
   description: DESCRIPTION,
   keywords: [
     "capex rental property",
@@ -39,7 +43,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `/blog/${SLUG}` },
   openGraph: {
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     url: `/blog/${SLUG}`,
     type: "article",

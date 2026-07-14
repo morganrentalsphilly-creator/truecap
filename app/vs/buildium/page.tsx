@@ -24,7 +24,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "TrueCap vs Buildium — honest comparison",
+  title: "Buildium vs TrueCap (2026): PM vs Deal Analysis",
   description:
     "Buildium is enterprise property management for 50+ unit operators. TrueCap is the pre-purchase underwrite for solo investors. Honest comparison.",
   keywords: [
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/vs/buildium" },
   openGraph: {
-    title: "TrueCap vs Buildium — honest comparison",
+    title: "Buildium vs TrueCap (2026): PM vs Deal Analysis",
     description:
       "Buildium is for professional property managers (50+ units). TrueCap is for solo investors underwriting deals. Different audiences.",
     url: "/vs/buildium",
@@ -72,7 +72,7 @@ export default function VsBuildiumPage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: "TrueCap vs Buildium — honest comparison",
+    name: "Buildium vs TrueCap (2026): PM vs Deal Analysis",
     url: `${siteUrl}/vs/buildium`,
     description:
       "Buildium is enterprise property management for 50+ unit operators. TrueCap is the pre-purchase underwrite for solo investors. Honest comparison.",

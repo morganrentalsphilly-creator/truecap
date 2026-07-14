@@ -15,6 +15,10 @@ import { getSiteUrl } from "@/lib/site-url";
 
 const SLUG = "best-free-rental-property-calculator-2026";
 const TITLE = "Best free rental property calculator 2026: 5 tools that actually work for free";
+// SERP-facing title (metadata/og only): kept ≤50 chars so the root
+// layout's "%s | TrueCap" template stays inside the ~60-char SERP
+// window. The on-page <h1> keeps the longer editorial TITLE.
+const SERP_TITLE = "Best free rental property calculator 2026: 5 tools";
 const DESCRIPTION =
   "Honest 2026 ranking of the 5 best truly-free rental property calculators — TrueCap, BiggerPockets' free reports, Stessa's calculator, Excel templates, and Zillow's mortgage calculator. What each free tier covers and where the gates kick in.";
 const PUBLISHED_AT = "2026-06-07";
@@ -22,7 +26,7 @@ const MODIFIED_AT = "2026-06-07";
 const READING_TIME_MIN = 9;
 
 export const metadata: Metadata = {
-  title: TITLE,
+  title: SERP_TITLE,
   description: DESCRIPTION,
   keywords: [
     "best free rental property calculator",
@@ -33,7 +37,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `/blog/${SLUG}` },
   openGraph: {
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     url: `/blog/${SLUG}`,
     type: "article",
@@ -41,7 +45,7 @@ export const metadata: Metadata = {
     modifiedTime: MODIFIED_AT,
     images: [{ url: "/home.jpg", width: 1200, height: 630, alt: TITLE }],
   },
-  twitter: { card: "summary_large_image", title: TITLE, description: DESCRIPTION, images: ["/home.jpg"] },
+  twitter: { card: "summary_large_image", title: SERP_TITLE, description: DESCRIPTION, images: ["/home.jpg"] },
 };
 
 const TOOLS = [

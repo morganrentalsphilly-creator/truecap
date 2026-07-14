@@ -28,6 +28,10 @@ import { getSiteUrl } from "@/lib/site-url";
 
 const SLUG = "dealcheck-vs-stessa-vs-truecap";
 const TITLE = "DealCheck vs Stessa vs TrueCap: which one do you actually need?";
+// SERP-facing title (metadata/og only): kept ≤50 chars so the root
+// layout's "%s | TrueCap" template stays inside the ~60-char SERP
+// window. The on-page <h1> keeps the longer editorial TITLE.
+const SERP_TITLE = "DealCheck vs Stessa vs TrueCap (2026)";
 const DESCRIPTION =
   "An honest 3-way comparison of DealCheck, Stessa, and TrueCap. Different tools for different stages — pre-purchase underwriting vs post-purchase ops — with concrete recommendations.";
 const PUBLISHED_AT = "2026-06-07";
@@ -35,7 +39,7 @@ const MODIFIED_AT = "2026-06-07";
 const READING_TIME_MIN = 11;
 
 export const metadata: Metadata = {
-  title: TITLE,
+  title: SERP_TITLE,
   description: DESCRIPTION,
   keywords: [
     "dealcheck vs stessa",
@@ -48,7 +52,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `/blog/${SLUG}` },
   openGraph: {
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     url: `/blog/${SLUG}`,
     type: "article",
@@ -58,7 +62,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     images: ["/home.jpg"],
   },

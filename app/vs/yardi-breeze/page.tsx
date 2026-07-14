@@ -24,7 +24,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "TrueCap vs Yardi Breeze — honest comparison",
+  title: "Yardi Breeze vs TrueCap (2026): PM vs Analysis",
   description:
     "Yardi Breeze runs your portfolio after closing. TrueCap underwrites deals before. Honest comparison for small landlords.",
   keywords: [
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/vs/yardi-breeze" },
   openGraph: {
-    title: "TrueCap vs Yardi Breeze — honest comparison",
+    title: "Yardi Breeze vs TrueCap (2026): PM vs Analysis",
     description:
       "Yardi Breeze is small-landlord PM software. TrueCap is the pre-purchase underwrite. Different stages.",
     url: "/vs/yardi-breeze",
@@ -70,7 +70,7 @@ export default function VsYardiBreezePage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: "TrueCap vs Yardi Breeze — honest comparison",
+    name: "Yardi Breeze vs TrueCap (2026): PM vs Analysis",
     url: `${siteUrl}/vs/yardi-breeze`,
     description:
       "Yardi Breeze runs your portfolio after closing. TrueCap underwrites deals before. Honest comparison for small landlords.",

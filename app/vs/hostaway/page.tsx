@@ -24,7 +24,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "TrueCap vs Hostaway — honest comparison",
+  title: "Hostaway vs TrueCap (2026): STR PM vs Deal Math",
   description:
     "Hostaway runs your STR portfolio after closing. TrueCap underwrites the STR deal before. Honest comparison for short-term rental investors.",
   keywords: [
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/vs/hostaway" },
   openGraph: {
-    title: "TrueCap vs Hostaway — honest comparison",
+    title: "Hostaway vs TrueCap (2026): STR PM vs Deal Math",
     description:
       "Hostaway manages STRs after closing. TrueCap underwrites the STR deal before. Different stages.",
     url: "/vs/hostaway",
@@ -70,7 +70,7 @@ export default function VsHostawayPage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: "TrueCap vs Hostaway — honest comparison",
+    name: "Hostaway vs TrueCap (2026): STR PM vs Deal Math",
     url: `${siteUrl}/vs/hostaway`,
     description:
       "Hostaway runs your STR portfolio after closing. TrueCap underwrites the STR deal before. Honest comparison for short-term rental investors.",

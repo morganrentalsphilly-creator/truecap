@@ -28,6 +28,10 @@ import { getSiteUrl } from "@/lib/site-url";
 const SLUG = "mortgage-points-investment-property";
 const TITLE =
   "Are mortgage points worth it on an investment property? (2026)";
+// SERP-facing title (metadata/og only): kept ≤50 chars so the root
+// layout's "%s | TrueCap" template stays inside the ~60-char SERP
+// window. The on-page <h1> keeps the longer editorial TITLE.
+const SERP_TITLE = "Mortgage points on an investment property (2026)";
 const DESCRIPTION =
   "Mortgage points trade cash now for a lower rate. The break-even math, the DSCR and cash-on-cash effects, and the rental tax rule that flips the answer.";
 const PUBLISHED_AT = "2026-06-29";
@@ -35,7 +39,7 @@ const MODIFIED_AT = "2026-06-29";
 const READING_TIME = 11;
 
 export const metadata: Metadata = {
-  title: TITLE,
+  title: SERP_TITLE,
   description: DESCRIPTION,
   keywords: [
     "mortgage points investment property",
@@ -49,7 +53,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `/blog/${SLUG}` },
   openGraph: {
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     url: `/blog/${SLUG}`,
     type: "article",

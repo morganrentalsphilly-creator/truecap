@@ -19,9 +19,9 @@ import { getSiteUrl } from "@/lib/site-url";
 const CITY = "Kansas City";
 const STATE = "MO";
 const SLUG = "kansas-city";
-const TITLE = "Kansas City rental property analysis — calculator + 2026 cap-rate benchmarks";
+const TITLE = "Kansas City Rental Market Analysis 2026";
 const DESCRIPTION =
-  "Run a Kansas City rental deal in 60 seconds. Auto-fills MO property tax (~1.0%), HUD rent for Jackson / Clay / Cass counties, current mortgage rates. Plus neighborhood cap-rate ranges + the KC cash-flow thesis for 2026.";
+  "Neighborhood cap-rate ranges + the KC cash-flow thesis for 2026. Run a Kansas City rental in 60 seconds — MO tax and HUD rent auto-filled.";
 const PUBLISHED_AT = "2026-05-24";
 const MODIFIED_AT = "2026-06-01";
 

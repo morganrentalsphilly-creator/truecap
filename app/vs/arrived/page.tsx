@@ -24,7 +24,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "TrueCap vs Arrived — direct ownership vs fractional shares",
+  title: "Arrived vs TrueCap (2026): Shares vs Ownership",
   description:
     "Arrived sells shares in rental properties. TrueCap underwrites whole properties you'd buy yourself. Two very different investing models — honest comparison.",
   keywords: [
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/vs/arrived" },
   openGraph: {
-    title: "TrueCap vs Arrived — direct ownership vs fractional shares",
+    title: "Arrived vs TrueCap (2026): Shares vs Ownership",
     description:
       "Arrived = fractional shares of rental properties. TrueCap = underwriting whole properties you own directly. Different models.",
     url: "/vs/arrived",
@@ -69,7 +69,7 @@ export default function VsArrivedPage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: "TrueCap vs Arrived — honest comparison",
+    name: "Arrived vs TrueCap (2026): Shares vs Ownership",
     url: `${siteUrl}/vs/arrived`,
     description:
       "Arrived sells shares in rental properties. TrueCap underwrites whole properties you'd buy yourself. Two very different investing models — honest comparison.",

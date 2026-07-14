@@ -18,7 +18,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "TrueCap vs Rentometer — honest comparison",
+  title: "Rentometer vs TrueCap (2026): Rent vs Full Deal",
   description:
     "Rentometer estimates rent. TrueCap underwrites the full deal — including the rent. Honest comparison: when each tool fits, and what TrueCap adds.",
   keywords: [
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/vs/rentometer" },
   openGraph: {
-    title: "TrueCap vs Rentometer — honest comparison",
+    title: "Rentometer vs TrueCap (2026): Rent vs Full Deal",
     description: "Rentometer estimates rent. TrueCap estimates rent + everything else needed to underwrite a deal.",
     url: "/vs/rentometer",
     type: "website",
@@ -64,7 +64,7 @@ export default function VsRentometerPage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: "TrueCap vs Rentometer — honest comparison",
+    name: "Rentometer vs TrueCap (2026): Rent vs Full Deal",
     url: `${siteUrl}/vs/rentometer`,
     description: "Side-by-side comparison of TrueCap and Rentometer.",
     dateModified: "2026-06-01",

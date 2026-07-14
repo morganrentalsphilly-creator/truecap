@@ -24,7 +24,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "TrueCap vs Crexi — residential underwriting vs commercial marketplace",
+  title: "Crexi vs TrueCap (2026): Commercial vs Rental",
   description:
     "Crexi is the commercial real-estate marketplace + intelligence platform. TrueCap is residential rental underwriting. Different asset classes — honest comparison.",
   keywords: [
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/vs/crexi" },
   openGraph: {
-    title: "TrueCap vs Crexi — residential underwriting vs commercial marketplace",
+    title: "Crexi vs TrueCap (2026): Commercial vs Rental",
     description:
       "Crexi is the commercial RE marketplace (LoopNet alternative). TrueCap is residential underwriting. Different asset classes.",
     url: "/vs/crexi",
@@ -69,7 +69,7 @@ export default function VsCrexiPage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: "TrueCap vs Crexi — honest comparison",
+    name: "Crexi vs TrueCap (2026): Commercial vs Rental",
     url: `${siteUrl}/vs/crexi`,
     description:
       "Crexi is the commercial real-estate marketplace + intelligence platform. TrueCap is residential rental underwriting. Different asset classes — honest comparison.",

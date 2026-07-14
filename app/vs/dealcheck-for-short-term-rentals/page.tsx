@@ -15,7 +15,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "TrueCap vs DealCheck for Short-Term Rentals — honest comparison",
+  title: "DealCheck vs TrueCap for STR Deals (2026)",
   description:
     "Both calculators can model STRs. Which one handles seasonal ADR, occupancy curves, AirDNA inputs, and STR tax loophole cleaner? Honest STR-specific comparison.",
   keywords: [
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/vs/dealcheck-for-short-term-rentals" },
   openGraph: {
-    title: "TrueCap vs DealCheck for Short-Term Rentals — honest comparison",
+    title: "DealCheck vs TrueCap for STR Deals (2026)",
     description:
       "STR-specific TrueCap vs DealCheck: ADR + occupancy modeling, AirDNA integration, STR tax loophole.",
     url: "/vs/dealcheck-for-short-term-rentals",
@@ -111,7 +111,7 @@ export default function VsDealcheckForShortTermRentalsPage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: "TrueCap vs DealCheck for Short-Term Rentals — honest comparison",
+    name: "DealCheck vs TrueCap for STR Deals (2026)",
     url: `${siteUrl}/vs/dealcheck-for-short-term-rentals`,
     description: "Both calculators can model STRs. Which one handles seasonal ADR, occupancy curves, AirDNA inputs, and STR tax loophole cleaner? Honest STR-specific comparison.",
     dateModified: "2026-06-07",

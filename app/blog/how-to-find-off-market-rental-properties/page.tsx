@@ -17,6 +17,10 @@ import { getSiteUrl } from "@/lib/site-url";
 
 const SLUG = "how-to-find-off-market-rental-properties";
 const TITLE = "How to find off-market rental properties — 8 sources that actually work";
+// SERP-facing title (metadata/og only): kept ≤50 chars so the root
+// layout's "%s | TrueCap" template stays inside the ~60-char SERP
+// window. The on-page <h1> keeps the longer editorial TITLE.
+const SERP_TITLE = "How to find off-market rental properties (2026)";
 const DESCRIPTION =
   "The 8 sources serious rental investors use to find off-market deals — driving for dollars, direct mail, wholesalers, networking, public records, and the underrated channels most investors skip.";
 const PUBLISHED_AT = "2026-05-26";
@@ -24,7 +28,7 @@ const MODIFIED_AT = "2026-06-01";
 const READING_TIME = 10;
 
 export const metadata: Metadata = {
-  title: TITLE,
+  title: SERP_TITLE,
   description: DESCRIPTION,
   keywords: [
     "how to find off-market rental properties",
@@ -37,7 +41,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `/blog/${SLUG}` },
   openGraph: {
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     url: `/blog/${SLUG}`,
     type: "article",

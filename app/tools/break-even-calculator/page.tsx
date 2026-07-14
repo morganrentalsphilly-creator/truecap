@@ -14,7 +14,7 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "Rental Property Break-Even Calculator",
+  title: "Free Break-Even Calculator — Months to Recoup Cash",
   description:
     "Free rental break-even calculator. How many months until cash flow returns your initial investment. Plus healthy break-even benchmarks by strategy.",
   keywords: [
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/tools/break-even-calculator" },
   openGraph: {
-    title: "Break-Even Calculator — Free",
+    title: "Free Break-Even Calculator — Months to Recoup Cash",
     description: "How many months until your rental property has returned your initial investment from cash flow alone.",
     url: "/tools/break-even-calculator",
     type: "website",

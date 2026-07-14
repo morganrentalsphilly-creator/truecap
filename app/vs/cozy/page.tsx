@@ -24,7 +24,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "TrueCap vs Cozy.co (shut down) — alternatives",
+  title: "Cozy.co Alternatives (2026): What Replaced It",
   description:
     "Cozy.co shut down in 2022. Here's what TrueCap does (and doesn't), plus which modern tools replace each part of the Cozy workflow.",
   keywords: [
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/vs/cozy" },
   openGraph: {
-    title: "TrueCap vs Cozy.co (shut down) — alternatives",
+    title: "Cozy.co Alternatives (2026): What Replaced It",
     description:
       "Cozy.co shut down in 2022. TrueCap underwrites deals; here's what replaces Cozy's other features.",
     url: "/vs/cozy",
@@ -68,7 +68,7 @@ export default function VsCozyPage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: "TrueCap vs Cozy — honest comparison",
+    name: "Cozy.co Alternatives (2026): What Replaced It",
     url: `${siteUrl}/vs/cozy`,
     description:
       "Cozy.co shut down in 2022. Here's what TrueCap does (and doesn't), plus which modern tools replace each part of the Cozy workflow.",

@@ -14,7 +14,7 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "Rental Property Vacancy Rate Calculator",
+  title: "Free Vacancy Rate Calculator — Effective Rate",
   description:
     "Free vacancy rate calculator. Convert vacant days + turnover cost into an effective rate, with realistic benchmarks sellers often under-quote.",
   keywords: [
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/tools/vacancy-rate-calculator" },
   openGraph: {
-    title: "Vacancy Rate Calculator — Free",
+    title: "Free Vacancy Rate Calculator — Effective Rate",
     description:
       "Compute effective vacancy rate on a rental property — including turnover cost. Honest vacancy modeling for accurate cash flow.",
     url: "/tools/vacancy-rate-calculator",

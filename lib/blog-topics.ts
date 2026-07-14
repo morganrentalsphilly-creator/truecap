@@ -189,6 +189,8 @@ export const BLOG_TOPICS: BlogTopic[] = [
       "best-rental-property-calculator-for-brrrr",
       "best-rental-analysis-tool-for-house-hackers",
       "best-short-term-rental-analysis-tool-2026",
+      "best-dealcheck-alternatives",
+      "free-biggerpockets-calculator-alternatives",
       "dealcheck-vs-biggerpockets-vs-truecap",
       "dealcheck-vs-stessa-vs-truecap",
       "roofstock-vs-mashvisor-vs-propstream",

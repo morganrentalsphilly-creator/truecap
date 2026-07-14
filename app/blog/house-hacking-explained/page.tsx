@@ -15,6 +15,10 @@ import { getSiteUrl } from "@/lib/site-url";
 
 const SLUG = "house-hacking-explained";
 const TITLE = "House hacking explained: how to (almost) live for free in a 2-4 unit";
+// SERP-facing title (metadata/og only): kept ≤50 chars so the root
+// layout's "%s | TrueCap" template stays inside the ~60-char SERP
+// window. The on-page <h1> keeps the longer editorial TITLE.
+const SERP_TITLE = "House hacking explained: live (almost) free (2026)";
 const DESCRIPTION =
   "The actual math behind house hacking: FHA 3.5% down, owner-occupant rules, year-2 transition planning, and the deal types that make this strategy work in 2026.";
 const PUBLISHED_AT = "2026-05-24";
@@ -22,7 +26,7 @@ const MODIFIED_AT = "2026-06-01";
 const READING_TIME = 9;
 
 export const metadata: Metadata = {
-  title: TITLE,
+  title: SERP_TITLE,
   description: DESCRIPTION,
   keywords: [
     "house hacking",
@@ -32,7 +36,7 @@ export const metadata: Metadata = {
     "how to house hack",
   ],
   alternates: { canonical: `/blog/${SLUG}` },
-  openGraph: { title: TITLE, description: DESCRIPTION, url: `/blog/${SLUG}`, type: "article", publishedTime: PUBLISHED_AT, modifiedTime: MODIFIED_AT, images: [{ url: "/home.jpg", width: 1200, height: 630, alt: TITLE }] },
+  openGraph: { title: SERP_TITLE, description: DESCRIPTION, url: `/blog/${SLUG}`, type: "article", publishedTime: PUBLISHED_AT, modifiedTime: MODIFIED_AT, images: [{ url: "/home.jpg", width: 1200, height: 630, alt: TITLE }] },
   twitter: { card: "summary_large_image", images: ["/home.jpg"] },
 };
 

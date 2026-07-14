@@ -24,7 +24,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "TrueCap vs QuickBooks for rentals — honest comparison",
+  title: "QuickBooks vs TrueCap for Rentals (2026)",
   description:
     "QuickBooks is general-purpose accounting many landlords default to. TrueCap is pre-purchase rental underwriting. Honest comparison and what to use for accounting instead.",
   keywords: [
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/vs/quickbooks-rental" },
   openGraph: {
-    title: "TrueCap vs QuickBooks for rentals — honest comparison",
+    title: "QuickBooks vs TrueCap for Rentals (2026)",
     description:
       "QuickBooks is general accounting many landlords default to. TrueCap is pre-purchase underwriting. Different stages.",
     url: "/vs/quickbooks-rental",
@@ -69,7 +69,7 @@ export default function VsQuickbooksRentalPage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: "TrueCap vs QuickBooks for rentals — honest comparison",
+    name: "QuickBooks vs TrueCap for Rentals (2026)",
     url: `${siteUrl}/vs/quickbooks-rental`,
     description:
       "QuickBooks is general-purpose accounting many landlords default to. TrueCap is pre-purchase rental underwriting. Honest comparison and what to use for accounting instead.",

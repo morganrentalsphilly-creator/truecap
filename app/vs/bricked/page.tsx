@@ -31,7 +31,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "TrueCap vs Bricked AI — honest comparison",
+  title: "Bricked AI vs TrueCap (2026): Flip ARV vs Rentals",
   description:
     "Bricked tells flippers what a house is worth — AI comps, ARV, repair costs. TrueCap tells investors what a rental will earn — cash flow, DSCR, taxes, exit. Honest side-by-side.",
   keywords: [
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/vs/bricked" },
   openGraph: {
-    title: "TrueCap vs Bricked AI — honest comparison",
+    title: "Bricked AI vs TrueCap (2026): Flip ARV vs Rentals",
     description:
       "Bricked: AI comps, ARV, repair costs for flippers. TrueCap: cash flow, DSCR, taxes for rental investors. Honest comparison.",
     url: "/vs/bricked",
@@ -81,7 +81,7 @@ export default function VsBrickedPage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: "TrueCap vs Bricked AI — honest comparison",
+    name: "Bricked AI vs TrueCap (2026): Flip ARV vs Rentals",
     url: `${siteUrl}/vs/bricked`,
     description:
       "Bricked tells flippers what a house is worth — AI comps, ARV, repair costs. TrueCap tells investors what a rental will earn — cash flow, DSCR, taxes, exit.",

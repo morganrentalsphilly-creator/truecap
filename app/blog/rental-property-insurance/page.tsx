@@ -22,6 +22,10 @@ import { getSiteUrl } from "@/lib/site-url";
 const SLUG = "rental-property-insurance";
 const TITLE =
   "Rental property insurance: landlord coverage and cost in 2026";
+// SERP-facing title (metadata/og only): kept ≤50 chars so the root
+// layout's "%s | TrueCap" template stays inside the ~60-char SERP
+// window. The on-page <h1> keeps the longer editorial TITLE.
+const SERP_TITLE = "Rental property insurance: coverage & cost (2026)";
 const DESCRIPTION =
   "Landlord insurance is the line most investors guess at — and the fastest-rising operating cost in 2026. What a landlord policy covers vs. homeowners, what it costs this year, how to estimate it before you have a quote, and how the premium flows straight into NOI, cash flow, and DSCR.";
 const PUBLISHED_AT = "2026-06-23";
@@ -29,7 +33,7 @@ const MODIFIED_AT = "2026-06-23";
 const READING_TIME_MIN = 11;
 
 export const metadata: Metadata = {
-  title: TITLE,
+  title: SERP_TITLE,
   description: DESCRIPTION,
   keywords: [
     "rental property insurance",
@@ -43,7 +47,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `/blog/${SLUG}` },
   openGraph: {
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     url: `/blog/${SLUG}`,
     type: "article",
@@ -53,7 +57,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     images: ["/home.jpg"],
   },

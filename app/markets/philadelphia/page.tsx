@@ -30,9 +30,9 @@ import { getSiteUrl } from "@/lib/site-url";
 const CITY = "Philadelphia";
 const STATE = "PA";
 const SLUG = "philadelphia";
-const TITLE = "Philadelphia rental property analysis — calculator + 2026 benchmarks";
+const TITLE = "Philadelphia Rental Market Analysis 2026";
 const DESCRIPTION =
-  "Run a Philadelphia rental deal in 60 seconds. Auto-fills city-specific property tax (1.49%), HUD rent estimates by county, and current mortgage rates. Plus 2026 cap-rate benchmarks by Philly neighborhood.";
+  "2026 cap-rate benchmarks by Philly neighborhood. Run a Philadelphia rental in 60 seconds — city property tax (1.49%) and HUD rent auto-filled.";
 const PUBLISHED_AT = "2026-05-24";
 const MODIFIED_AT = "2026-06-01";
 

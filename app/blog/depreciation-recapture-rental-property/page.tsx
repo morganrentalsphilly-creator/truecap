@@ -23,6 +23,10 @@ import { getSiteUrl } from "@/lib/site-url";
 const SLUG = "depreciation-recapture-rental-property";
 const TITLE =
   "Depreciation recapture on rental property: how the tax works when you sell (2026)";
+// SERP-facing title (metadata/og only): kept ≤50 chars so the root
+// layout's "%s | TrueCap" template stays inside the ~60-char SERP
+// window. The on-page <h1> keeps the longer editorial TITLE.
+const SERP_TITLE = "Depreciation recapture on rental property (2026)";
 const DESCRIPTION =
   "Sell a depreciated rental and the IRS recaptures depreciation at up to 25%. The full math on a $250K rental sold for $360K — plus five ways to defer it.";
 const PUBLISHED_AT = "2026-06-14";
@@ -30,7 +34,7 @@ const MODIFIED_AT = "2026-06-14";
 const READING_TIME = 11;
 
 export const metadata: Metadata = {
-  title: TITLE,
+  title: SERP_TITLE,
   description: DESCRIPTION,
   keywords: [
     "depreciation recapture rental property",
@@ -43,7 +47,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `/blog/${SLUG}` },
   openGraph: {
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     url: `/blog/${SLUG}`,
     type: "article",

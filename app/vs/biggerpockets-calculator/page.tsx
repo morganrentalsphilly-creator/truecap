@@ -26,7 +26,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "TrueCap vs BiggerPockets Calculator",
+  title: "Free BiggerPockets Calculator Alternative (2026)",
   description:
     "Honest TrueCap vs BiggerPockets calculator: free tier depth, modern UX, address auto-fill, sharing — what each does best and when to pick which.",
   keywords: [
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/vs/biggerpockets-calculator" },
   openGraph: {
-    title: "TrueCap vs BiggerPockets Calculator",
+    title: "Free BiggerPockets Calculator Alternative (2026)",
     description:
       "Free-tier depth, modern UX, address auto-fill, mobile, sharing — what each tool is built for.",
     url: "/vs/biggerpockets-calculator",
@@ -81,7 +81,7 @@ export default function VsBiggerPocketsCalculatorPage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: "TrueCap vs BiggerPockets Calculator — honest comparison",
+    name: "Free BiggerPockets Calculator Alternative (2026)",
     url: `${siteUrl}/vs/biggerpockets-calculator`,
     description:
       "Side-by-side comparison of TrueCap and the BiggerPockets Rental Property Calculator for rental underwriting.",
@@ -176,6 +176,12 @@ export default function VsBiggerPocketsCalculatorPage() {
               </ul>
             </div>
           </div>
+          <p className="mt-5 text-sm leading-relaxed text-muted-foreground">
+            Only need a free calculator? Full list:{" "}
+            <Link href="/blog/free-biggerpockets-calculator-alternatives" className="font-bold text-primary hover:underline">
+              free BiggerPockets calculator alternatives →
+            </Link>
+          </p>
         </section>
 
         {/* Matrix */}

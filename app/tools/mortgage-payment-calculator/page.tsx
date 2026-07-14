@@ -13,7 +13,7 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "Mortgage Payment Calculator | Free PITI Tool",
+  title: "Free Mortgage Payment Calculator — Full PITI",
   description:
     "Free PITI mortgage payment calculator for rental investors. Total interest, monthly breakdown, full amortization schedule. No signup.",
   keywords: [
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/tools/mortgage-payment-calculator" },
   openGraph: {
-    title: "Mortgage Payment Calculator — Free PITI Tool",
+    title: "Free Mortgage Payment Calculator — Full PITI",
     description:
       "Compute principal, interest, tax, insurance — and total interest paid over the loan. Built for investors.",
     url: "/tools/mortgage-payment-calculator",

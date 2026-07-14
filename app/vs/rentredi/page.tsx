@@ -30,7 +30,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "TrueCap vs RentRedi — honest comparison",
+  title: "RentRedi vs TrueCap (2026): Manage vs Underwrite",
   description:
     "RentRedi collects rent. TrueCap decides if the deal cash-flows. Honest comparison of when each tool fits — and why most landlords end up using both.",
   keywords: [
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/vs/rentredi" },
   openGraph: {
-    title: "TrueCap vs RentRedi — honest comparison",
+    title: "RentRedi vs TrueCap (2026): Manage vs Underwrite",
     description:
       "RentRedi is post-purchase landlord ops. TrueCap is pre-purchase underwriting. Different stages of the rental lifecycle.",
     url: "/vs/rentredi",
@@ -80,7 +80,7 @@ export default function VsRentRediPage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: "TrueCap vs RentRedi — honest comparison",
+    name: "RentRedi vs TrueCap (2026): Manage vs Underwrite",
     url: `${siteUrl}/vs/rentredi`,
     description:
       "Side-by-side comparison of TrueCap (rental underwriting calculator) and RentRedi (tenant + rent management).",

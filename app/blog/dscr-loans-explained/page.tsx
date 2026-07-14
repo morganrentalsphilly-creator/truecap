@@ -28,6 +28,10 @@ import { getSiteUrl } from "@/lib/site-url";
 
 const SLUG = "dscr-loans-explained";
 const TITLE = "DSCR loans explained: what they are, when they make sense, what they cost in 2026";
+// SERP-facing title (metadata/og only): kept ≤50 chars so the root
+// layout's "%s | TrueCap" template stays inside the ~60-char SERP
+// window. The on-page <h1> keeps the longer editorial TITLE.
+const SERP_TITLE = "DSCR loans explained: costs & when they fit (2026)";
 const DESCRIPTION =
   "DSCR loans approve based on the property's economics, not your personal income. Here's how they work, who they're for, what rates and DSCR ratios look like in 2026, and the trade-offs vs. conventional financing.";
 const PUBLISHED_AT = "2026-05-24";
@@ -35,7 +39,7 @@ const MODIFIED_AT = "2026-06-01";
 const READING_TIME_MIN = 10;
 
 export const metadata: Metadata = {
-  title: TITLE,
+  title: SERP_TITLE,
   description: DESCRIPTION,
   keywords: [
     "dscr loan",
@@ -49,7 +53,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `/blog/${SLUG}` },
   openGraph: {
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     url: `/blog/${SLUG}`,
     type: "article",
@@ -59,7 +63,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     images: ["/home.jpg"],
   },

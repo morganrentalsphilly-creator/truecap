@@ -17,6 +17,10 @@ import { getSiteUrl } from "@/lib/site-url";
 
 const SLUG = "how-to-refinance-a-rental-property";
 const TITLE = "How to refinance a rental property — rate-and-term, cash-out, and DSCR options";
+// SERP-facing title (metadata/og only): kept ≤50 chars so the root
+// layout's "%s | TrueCap" template stays inside the ~60-char SERP
+// window. The on-page <h1> keeps the longer editorial TITLE.
+const SERP_TITLE = "How to refinance a rental property (2026)";
 const DESCRIPTION =
   "Step-by-step on refinancing a rental property: when refi makes sense, rate-and-term vs cash-out, LTV limits, DSCR loans, the break-even math, and the 5 mistakes most investors make.";
 const PUBLISHED_AT = "2026-05-26";
@@ -24,7 +28,7 @@ const MODIFIED_AT = "2026-06-01";
 const READING_TIME = 10;
 
 export const metadata: Metadata = {
-  title: TITLE,
+  title: SERP_TITLE,
   description: DESCRIPTION,
   keywords: [
     "refinance rental property",
@@ -37,7 +41,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `/blog/${SLUG}` },
   openGraph: {
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     url: `/blog/${SLUG}`,
     type: "article",

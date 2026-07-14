@@ -8,7 +8,7 @@ import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 export const metadata: Metadata = {
-  title: "Rehab Cost Estimator | Free Rental Property Calculator",
+  title: "Free Rehab Cost Estimator — Budget by Sq Ft",
   description:
     "Free rehab cost estimator for flips, BRRRRs, and value-add rentals. Sq-ft defaults for cosmetic, kitchen, bath, and systems. Plus how to budget accurately.",
   keywords: [
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/tools/rehab-cost-estimator" },
   openGraph: {
-    title: "Rehab Cost Estimator — Free",
+    title: "Free Rehab Cost Estimator — Budget by Sq Ft",
     description:
       "Estimate rehab cost in seconds with sq-ft-based defaults for every common work item. Plus a how-to on building a defensible budget.",
     url: "/tools/rehab-cost-estimator",

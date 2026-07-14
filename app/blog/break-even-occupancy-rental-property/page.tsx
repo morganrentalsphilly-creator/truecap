@@ -23,6 +23,10 @@ import { getSiteUrl } from "@/lib/site-url";
 
 const SLUG = "break-even-occupancy-rental-property";
 const TITLE = "Break-even occupancy: how much vacancy a rental can survive (2026)";
+// SERP-facing title (metadata/og only): kept ≤50 chars so the root
+// layout's "%s | TrueCap" template stays inside the ~60-char SERP
+// window. The on-page <h1> keeps the longer editorial TITLE.
+const SERP_TITLE = "Break-even occupancy for rental property (2026)";
 const DESCRIPTION =
   "Break-even occupancy is the rent or occupancy floor where a rental stops covering its bills. The formula, a worked 2026 example, and the DSCR-1.0 link.";
 const PUBLISHED_AT = "2026-06-26";
@@ -30,7 +34,7 @@ const MODIFIED_AT = "2026-06-26";
 const READING_TIME = 10;
 
 export const metadata: Metadata = {
-  title: TITLE,
+  title: SERP_TITLE,
   description: DESCRIPTION,
   keywords: [
     "break-even occupancy",
@@ -44,7 +48,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `/blog/${SLUG}` },
   openGraph: {
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     url: `/blog/${SLUG}`,
     type: "article",

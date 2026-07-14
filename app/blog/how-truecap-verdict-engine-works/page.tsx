@@ -24,6 +24,10 @@ import { getSiteUrl } from "@/lib/site-url";
 
 const SLUG = "how-truecap-verdict-engine-works";
 const TITLE = "How TrueCap's verdict engine decides Strong Buy vs Avoid";
+// SERP-facing title (metadata/og only): kept ≤50 chars so the root
+// layout's "%s | TrueCap" template stays inside the ~60-char SERP
+// window. The on-page <h1> keeps the longer editorial TITLE.
+const SERP_TITLE = "How the verdict engine decides Strong Buy vs Avoid";
 const DESCRIPTION =
   "The exact cash flow, DSCR, cap rate, and cash-on-cash thresholds TrueCap uses to classify a rental deal as Strong / Solid / Mixed / Marginal / Negative — pulled directly from the production code.";
 const PUBLISHED_AT = "2026-06-07";
@@ -31,7 +35,7 @@ const MODIFIED_AT = "2026-06-07";
 const READING_TIME_MIN = 10;
 
 export const metadata: Metadata = {
-  title: TITLE,
+  title: SERP_TITLE,
   description: DESCRIPTION,
   keywords: [
     "rental property verdict engine",
@@ -44,7 +48,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `/blog/${SLUG}` },
   openGraph: {
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     url: `/blog/${SLUG}`,
     type: "article",
@@ -54,7 +58,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     images: ["/home.jpg"],
   },

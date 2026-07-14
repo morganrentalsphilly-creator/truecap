@@ -8,7 +8,7 @@ import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 export const metadata: Metadata = {
-  title: "Cash-on-Cash Return Calculator — Free",
+  title: "Free Cash-on-Cash Calculator — Mortgage Built In",
   description:
     "Free cash-on-cash return calculator. Annual cash flow ÷ cash invested with built-in mortgage math. Plus what counts as a good CoC return.",
   keywords: [
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/tools/cash-on-cash-calculator" },
   openGraph: {
-    title: "Cash-on-Cash Return Calculator — Free",
+    title: "Free Cash-on-Cash Calculator — Mortgage Built In",
     description:
       "Compute cash-on-cash return in seconds. Walks through purchase, financing, rent, and expenses — no spreadsheet needed.",
     url: "/tools/cash-on-cash-calculator",

@@ -129,6 +129,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     ...toolUrls,
     {
+      // Free un-gated spreadsheet download page — deliberately NOT a
+      // calculator-registry entry (it has no widget), so it can't flow in
+      // via toolUrls above and is listed manually here.
+      url: `${siteUrl}/tools/rental-property-spreadsheet`,
+      lastModified: new Date("2026-07-14"),
+      changeFrequency: "monthly" as const,
+      priority: 0.8,
+    },
+    {
       // /about — E-E-A-T founder page; anchors the Person @id that blog
       // Article schema references.
       url: `${siteUrl}/about`,

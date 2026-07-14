@@ -20,9 +20,9 @@ import { getSiteUrl } from "@/lib/site-url";
 const CITY = "Phoenix";
 const STATE = "AZ";
 const SLUG = "phoenix";
-const TITLE = "Phoenix rental property analysis — calculator + 2026 cap-rate benchmarks";
+const TITLE = "Phoenix Rental Market Analysis 2026 — Cap Rates";
 const DESCRIPTION =
-  "Run a Phoenix rental deal in 60 seconds. Auto-fills AZ property tax (~0.6%), HUD rent for Maricopa County, current rates. Plus neighborhood cap-rate map + Phoenix-specific notes on STR rules and water/HOA risk.";
+  "Neighborhood cap-rate map + Phoenix notes on STR rules and water/HOA risk. Run a Phoenix rental in 60 seconds — AZ tax and HUD rent auto-filled.";
 const PUBLISHED_AT = "2026-05-24";
 const MODIFIED_AT = "2026-06-01";
 

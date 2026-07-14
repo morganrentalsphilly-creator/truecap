@@ -20,6 +20,9 @@ import {
  */
 const EXPECTED_EMBEDDABLE = [
   "1-percent-rule-calculator",
+  "2-percent-rule-calculator",
+  "50-percent-rule-calculator",
+  "70-percent-rule-calculator",
   "arv-calculator",
   "brrrr-calculator",
   "break-even-calculator",
@@ -28,6 +31,7 @@ const EXPECTED_EMBEDDABLE = [
   "closing-cost-calculator",
   "dscr-calculator",
   "gross-rent-multiplier-calculator",
+  "house-hacking-calculator",
   "mortgage-payment-calculator",
   "noi-calculator",
   "rental-cash-flow-calculator",
@@ -37,12 +41,12 @@ const EXPECTED_EMBEDDABLE = [
 ].sort();
 
 describe("calculator registry", () => {
-  it("has 16 calculator pages, 15 embeddable", () => {
-    expect(CALCULATOR_COUNT).toBe(16);
-    expect(EMBEDDABLE_COUNT).toBe(15);
+  it("has 20 calculator pages, 19 embeddable", () => {
+    expect(CALCULATOR_COUNT).toBe(20);
+    expect(EMBEDDABLE_COUNT).toBe(19);
   });
 
-  it("embeddable set is exactly the expected 15", () => {
+  it("embeddable set is exactly the expected 19", () => {
     expect(EMBEDDABLE_CALCULATORS.map((c) => c.slug).sort()).toEqual(EXPECTED_EMBEDDABLE);
   });
 
@@ -66,7 +70,7 @@ describe("calculator registry", () => {
 
   it("derived marketing copy stays in sync with the registry", () => {
     // Spelled-out count used in /tools + OG prose.
-    expect(CALCULATOR_COUNT_WORD).toBe("Sixteen");
+    expect(CALCULATOR_COUNT_WORD).toBe("Twenty");
     // Names list is generated from the registry, never hand-typed.
     expect(CALCULATOR_NAMES_LIST.split(", ")).toHaveLength(CALCULATOR_COUNT);
     expect(CALCULATOR_NAMES_LIST).toContain("Cap Rate");

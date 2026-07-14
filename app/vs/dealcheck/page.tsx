@@ -26,7 +26,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "TrueCap vs DealCheck — honest comparison",
+  title: "DealCheck Alternative for Rental Analysis (2026)",
   description:
     "Honest TrueCap vs DealCheck for rental analysis: pricing, free tier depth, features, mobile, sharing — what each does best and when to pick which.",
   keywords: [
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/vs/dealcheck" },
   openGraph: {
-    title: "TrueCap vs DealCheck — honest comparison",
+    title: "DealCheck Alternative for Rental Analysis (2026)",
     description:
       "Side-by-side feature matrix. Pricing, free tier, mobile, sharing, depth — what each tool is built for.",
     url: "/vs/dealcheck",
@@ -77,7 +77,7 @@ export default function VsDealCheckPage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: "TrueCap vs DealCheck — honest comparison",
+    name: "DealCheck Alternative for Rental Analysis (2026)",
     url: `${siteUrl}/vs/dealcheck`,
     description:
       "Side-by-side comparison of TrueCap and DealCheck for rental property underwriting.",
@@ -170,6 +170,12 @@ export default function VsDealCheckPage() {
               </ul>
             </div>
           </div>
+          <p className="mt-5 text-sm leading-relaxed text-muted-foreground">
+            Weighing more than these two? Full list:{" "}
+            <Link href="/blog/best-dealcheck-alternatives" className="font-bold text-primary hover:underline">
+              7 best DealCheck alternatives →
+            </Link>
+          </p>
         </section>
 
         {/* Matrix */}

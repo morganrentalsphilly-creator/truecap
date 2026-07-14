@@ -20,9 +20,9 @@ import { getSiteUrl } from "@/lib/site-url";
 const CITY = "Tampa";
 const STATE = "FL";
 const SLUG = "tampa";
-const TITLE = "Tampa rental property analysis — calculator + 2026 cap-rate benchmarks";
+const TITLE = "Tampa Rental Market Analysis 2026 — Cap Rates";
 const DESCRIPTION =
-  "Run a Tampa rental deal in 60 seconds. Auto-fills FL effective property tax, HUD rent by Hillsborough / Pinellas counties, and current mortgage rates. Plus neighborhood cap-rate ranges + the Tampa insurance picture for 2026.";
+  "Neighborhood cap-rate ranges + the Tampa insurance picture for 2026. Run a Tampa rental in 60 seconds — FL tax and HUD rent auto-filled.";
 const PUBLISHED_AT = "2026-05-24";
 const MODIFIED_AT = "2026-06-01";
 

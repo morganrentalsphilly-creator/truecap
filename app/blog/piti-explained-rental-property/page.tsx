@@ -18,6 +18,10 @@ import { getSiteUrl } from "@/lib/site-url";
 
 const SLUG = "piti-explained-rental-property";
 const TITLE = "PITI explained: the real monthly payment on a rental (2026)";
+// SERP-facing title (metadata/og only): kept ≤50 chars so the root
+// layout's "%s | TrueCap" template stays inside the ~60-char SERP
+// window. The on-page <h1> keeps the longer editorial TITLE.
+const SERP_TITLE = "PITI explained: a rental's real payment (2026)";
 const DESCRIPTION =
   "PITI — principal, interest, taxes, insurance — is a rental's real monthly payment. How to estimate each part, handle escrow, and turn it into DSCR.";
 const PUBLISHED_AT = "2026-06-20";
@@ -25,7 +29,7 @@ const MODIFIED_AT = "2026-06-20";
 const READING_TIME = 11;
 
 export const metadata: Metadata = {
-  title: TITLE,
+  title: SERP_TITLE,
   description: DESCRIPTION,
   keywords: [
     "PITI",
@@ -39,7 +43,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `/blog/${SLUG}` },
   openGraph: {
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     url: `/blog/${SLUG}`,
     type: "article",

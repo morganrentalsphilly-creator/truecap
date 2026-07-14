@@ -41,7 +41,10 @@ export async function generateMetadata({
   const { city, strategy } = await params;
   const combo = getCityStrategyCombo(city, strategy);
   if (!combo) return { title: "Combo not found" };
-  const title = `${combo.strategyLabel} investing in ${combo.cityName} — the honest playbook`;
+  // Keyword-first ("house hacking philadelphia"-class query) + year,
+  // trimmed to the SERP window: longest combo is 46 chars, so with the
+  // layout's " | TrueCap" the title never gets clipped.
+  const title = `${combo.strategyLabel} investing in ${combo.cityName} (2026)`;
   return {
     title,
     description: truncateMetaDescription(combo.pitch),

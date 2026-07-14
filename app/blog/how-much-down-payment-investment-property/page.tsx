@@ -20,6 +20,10 @@ import { getSiteUrl } from "@/lib/site-url";
 const SLUG = "how-much-down-payment-investment-property";
 const TITLE =
   "How much down payment do you need for an investment property? (2026)";
+// SERP-facing title (metadata/og only): kept ≤50 chars so the root
+// layout's "%s | TrueCap" template stays inside the ~60-char SERP
+// window. The on-page <h1> keeps the longer editorial TITLE.
+const SERP_TITLE = "How much down payment for an investment property?";
 const DESCRIPTION =
   "Conventional investment loans need 15% down on a single-family, 25% on 2–4 units. The full 2026 breakdown, worked cash-on-cash and DSCR math, and the house-hack shortcut.";
 const PUBLISHED_AT = "2026-06-18";
@@ -27,7 +31,7 @@ const MODIFIED_AT = "2026-06-18";
 const READING_TIME = 11;
 
 export const metadata: Metadata = {
-  title: TITLE,
+  title: SERP_TITLE,
   description: DESCRIPTION,
   keywords: [
     "down payment for investment property",
@@ -40,7 +44,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `/blog/${SLUG}` },
   openGraph: {
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     url: `/blog/${SLUG}`,
     type: "article",

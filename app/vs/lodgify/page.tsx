@@ -24,7 +24,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "TrueCap vs Lodgify — honest comparison",
+  title: "Lodgify vs TrueCap (2026): STR PM vs Deal Math",
   description:
     "Lodgify is small-operator STR software. TrueCap underwrites the STR deal before. Honest comparison plus how 1-10 unit STR investors use both.",
   keywords: [
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/vs/lodgify" },
   openGraph: {
-    title: "TrueCap vs Lodgify — honest comparison",
+    title: "Lodgify vs TrueCap (2026): STR PM vs Deal Math",
     description:
       "Lodgify is small-operator STR software. TrueCap underwrites the STR deal before. Different stages.",
     url: "/vs/lodgify",
@@ -69,7 +69,7 @@ export default function VsLodgifyPage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: "TrueCap vs Lodgify — honest comparison",
+    name: "Lodgify vs TrueCap (2026): STR PM vs Deal Math",
     url: `${siteUrl}/vs/lodgify`,
     description:
       "Lodgify is small-operator STR software. TrueCap underwrites the STR deal before. Honest comparison plus how 1-10 unit STR investors use both.",

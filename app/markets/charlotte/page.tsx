@@ -19,9 +19,9 @@ import { getSiteUrl } from "@/lib/site-url";
 const CITY = "Charlotte";
 const STATE = "NC";
 const SLUG = "charlotte";
-const TITLE = "Charlotte rental property analysis — calculator + 2026 cap-rate benchmarks";
+const TITLE = "Charlotte Rental Market Analysis 2026 — Cap Rates";
 const DESCRIPTION =
-  "Run a Charlotte rental deal in 60 seconds. Auto-fills NC property tax (~0.8%), HUD rent for Mecklenburg County, current mortgage rates. Plus neighborhood cap-rate ranges + the Charlotte job-growth picture for 2026.";
+  "Neighborhood cap-rate ranges + the Charlotte job-growth picture for 2026. Run a Charlotte rental in 60 seconds — NC tax and HUD rent auto-filled.";
 const PUBLISHED_AT = "2026-05-24";
 const MODIFIED_AT = "2026-06-01";
 

@@ -24,6 +24,10 @@ import { getSiteUrl } from "@/lib/site-url";
 
 const SLUG = "rental-property-tax-deductions";
 const TITLE = "Rental property tax deductions — the 14 every investor should know";
+// SERP-facing title (metadata/og only): kept ≤50 chars so the root
+// layout's "%s | TrueCap" template stays inside the ~60-char SERP
+// window. The on-page <h1> keeps the longer editorial TITLE.
+const SERP_TITLE = "Rental property tax deductions: the top 14 (2026)";
 const DESCRIPTION =
   "Every deductible expense on a rental property, organized by Schedule E line. Worked examples, common-mistake callouts, and the depreciation move that often saves more than all other deductions combined.";
 const PUBLISHED_AT = "2026-05-26";
@@ -31,7 +35,7 @@ const MODIFIED_AT = "2026-06-01";
 const READING_TIME = 11;
 
 export const metadata: Metadata = {
-  title: TITLE,
+  title: SERP_TITLE,
   description: DESCRIPTION,
   keywords: [
     "rental property tax deductions",
@@ -44,7 +48,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `/blog/${SLUG}` },
   openGraph: {
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     url: `/blog/${SLUG}`,
     type: "article",

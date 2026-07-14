@@ -16,7 +16,7 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "NOI Calculator | Free Net Operating Income Tool",
+  title: "Free NOI Calculator — Net Operating Income + OpEx",
   description:
     "Free NOI (Net Operating Income) calculator. Includes vacancy, common operating expenses, and the operating-expense ratio. Plus a good NOI margin benchmark.",
   keywords: [
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/tools/noi-calculator" },
   openGraph: {
-    title: "NOI Calculator — Free",
+    title: "Free NOI Calculator — Net Operating Income + OpEx",
     description:
       "Compute Net Operating Income in seconds. Vacancy, every operating expense, plus the operating-expense ratio.",
     url: "/tools/noi-calculator",

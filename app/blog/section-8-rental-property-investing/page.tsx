@@ -19,6 +19,10 @@ import { getSiteUrl } from "@/lib/site-url";
 const SLUG = "section-8-rental-property-investing";
 const TITLE =
   "Section 8 rentals: how the math actually works in 2026 (pros, cons, underwriting)";
+// SERP-facing title (metadata/og only): kept ≤50 chars so the root
+// layout's "%s | TrueCap" template stays inside the ~60-char SERP
+// window. The on-page <h1> keeps the longer editorial TITLE.
+const SERP_TITLE = "Section 8 rentals: how the math works in 2026";
 const DESCRIPTION =
   "How Section 8 actually pays in 2026 — payment standards, FMR math, NSPIRE inspections, and the underwriting adjustments that decide whether vouchers pencil.";
 const PUBLISHED_AT = "2026-06-10";
@@ -26,7 +30,7 @@ const MODIFIED_AT = "2026-06-10";
 const READING_TIME = 11;
 
 export const metadata: Metadata = {
-  title: TITLE,
+  title: SERP_TITLE,
   description: DESCRIPTION,
   keywords: [
     "section 8 rental property",
@@ -40,7 +44,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `/blog/${SLUG}` },
   openGraph: {
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     url: `/blog/${SLUG}`,
     type: "article",

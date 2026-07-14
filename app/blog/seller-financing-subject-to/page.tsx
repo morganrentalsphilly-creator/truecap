@@ -22,6 +22,10 @@ import { getSiteUrl } from "@/lib/site-url";
 const SLUG = "seller-financing-subject-to";
 const TITLE =
   "Seller financing and subject-to: creative deals explained (2026)";
+// SERP-facing title (metadata/og only): kept ≤50 chars so the root
+// layout's "%s | TrueCap" template stays inside the ~60-char SERP
+// window. The on-page <h1> keeps the longer editorial TITLE.
+const SERP_TITLE = "Seller financing & subject-to deals, explained";
 const DESCRIPTION =
   "When bank financing is expensive or out of reach, creative structures move deals. How seller financing and subject-to actually work, the due-on-sale risk that defines subject-to, where Dodd-Frank does and doesn't apply, and how to underwrite the 2026 rate arbitrage without ignoring the downside.";
 const PUBLISHED_AT = "2026-06-23";
@@ -29,7 +33,7 @@ const MODIFIED_AT = "2026-06-23";
 const READING_TIME_MIN = 11;
 
 export const metadata: Metadata = {
-  title: TITLE,
+  title: SERP_TITLE,
   description: DESCRIPTION,
   keywords: [
     "seller financing",
@@ -42,7 +46,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `/blog/${SLUG}` },
   openGraph: {
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     url: `/blog/${SLUG}`,
     type: "article",
@@ -52,7 +56,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     images: ["/home.jpg"],
   },

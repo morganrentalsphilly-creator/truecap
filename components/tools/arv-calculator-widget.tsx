@@ -25,6 +25,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { buildAnalyzerHandoffUrl } from "@/lib/analyzer-handoff";
+import { computeRuleMaxOffer } from "@/components/tools/max-offer-math";
 
 const num = (s: string) => {
   const n = Number(s);
@@ -60,10 +61,10 @@ export function ArvCalculatorWidget() {
     const ppsfs = comps.map((c) => c.price / c.sqft);
     const avgPpsf = ppsfs.reduce((a, b) => a + b, 0) / ppsfs.length;
     const arv = avgPpsf * sqft;
-    const maoRaw = arv * (num(multiplier) / 100) - num(repairs);
-    // Round DOWN to a $500 step (lib/max-allowable-offer.ts convention):
-    // rounding to nearest could quote an offer ABOVE the rule's ceiling.
-    const mao = maoRaw > 0 ? Math.floor(maoRaw / 500) * 500 : maoRaw;
+    // Shared with the 70% rule widget — rounds DOWN to a $500 step
+    // (lib/max-allowable-offer.ts convention): rounding to nearest could
+    // quote an offer ABOVE the rule's ceiling.
+    const mao = computeRuleMaxOffer(arv, num(multiplier), num(repairs));
     const refiLoan75 = arv * 0.75;
     const compPrices = comps.map((c) => c.price);
     return {

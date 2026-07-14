@@ -32,7 +32,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "TrueCap vs Roofstock — honest comparison",
+  title: "Roofstock vs TrueCap (2026): Verify the Numbers",
   description:
     "TrueCap is the independent underwrite for any Roofstock listing — cap rate, cash flow, DSCR, projection from one address. When to use each tool.",
   keywords: [
@@ -45,7 +45,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/vs/roofstock" },
   openGraph: {
-    title: "TrueCap vs Roofstock — honest comparison",
+    title: "Roofstock vs TrueCap (2026): Verify the Numbers",
     description:
       "Roofstock sells the property. TrueCap underwrites it. The independent second opinion on any turnkey listing.",
     url: "/vs/roofstock",
@@ -84,7 +84,7 @@ export default function VsRoofstockPage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: "TrueCap vs Roofstock — honest comparison",
+    name: "Roofstock vs TrueCap (2026): Verify the Numbers",
     url: `${siteUrl}/vs/roofstock`,
     description:
       "Side-by-side comparison of TrueCap (underwriting calculator) and Roofstock (turnkey rental marketplace).",

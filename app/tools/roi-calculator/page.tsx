@@ -14,7 +14,7 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "Rental Property ROI Calculator | Free",
+  title: "Free Rental Property ROI Calculator — Total Return",
   description:
     "Free total ROI calculator. Combines cash flow + principal paydown + appreciation — the real return on a rental, not just one piece of it.",
   keywords: [
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/tools/roi-calculator" },
   openGraph: {
-    title: "Rental Property ROI Calculator — Free",
+    title: "Free Rental Property ROI Calculator — Total Return",
     description: "Total return on a rental — cash flow + principal paydown + appreciation in one number.",
     url: "/tools/roi-calculator",
     type: "website",

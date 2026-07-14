@@ -27,6 +27,10 @@ import { getSiteUrl } from "@/lib/site-url";
 const SLUG = "property-tax-reassessment-rental-property";
 const TITLE =
   "Property tax reassessment: don't underwrite the seller's tax bill (2026)";
+// SERP-facing title (metadata/og only): kept ≤50 chars so the root
+// layout's "%s | TrueCap" template stays inside the ~60-char SERP
+// window. The on-page <h1> keeps the longer editorial TITLE.
+const SERP_TITLE = "Property tax reassessment for rentals (2026)";
 const DESCRIPTION =
   "Buying a rental usually resets property taxes toward your purchase price. Why the seller's bill misleads and how to estimate the real number before you buy.";
 const PUBLISHED_AT = "2026-06-27";
@@ -34,7 +38,7 @@ const MODIFIED_AT = "2026-06-27";
 const READING_TIME = 10;
 
 export const metadata: Metadata = {
-  title: TITLE,
+  title: SERP_TITLE,
   description: DESCRIPTION,
   keywords: [
     "property tax reassessment rental property",
@@ -48,7 +52,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `/blog/${SLUG}` },
   openGraph: {
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     url: `/blog/${SLUG}`,
     type: "article",

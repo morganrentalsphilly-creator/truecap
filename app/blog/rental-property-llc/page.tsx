@@ -22,6 +22,10 @@ import { getSiteUrl } from "@/lib/site-url";
 const SLUG = "rental-property-llc";
 const TITLE =
   "Should you put your rental property in an LLC? (2026)";
+// SERP-facing title (metadata/og only): kept ≤50 chars so the root
+// layout's "%s | TrueCap" template stays inside the ~60-char SERP
+// window. The on-page <h1> keeps the longer editorial TITLE.
+const SERP_TITLE = "Rental property LLC: worth it in 2026?";
 const DESCRIPTION =
   "The most-asked entity question in real estate — answered honestly. What an LLC actually does (and doesn't) for asset protection and taxes, the due-on-sale trap when you transfer a mortgaged rental, how financing changes, the 2026 Corporate Transparency Act reversal, and when an LLC is worth the cost.";
 const PUBLISHED_AT = "2026-06-23";
@@ -29,7 +33,7 @@ const MODIFIED_AT = "2026-06-23";
 const READING_TIME_MIN = 12;
 
 export const metadata: Metadata = {
-  title: TITLE,
+  title: SERP_TITLE,
   description: DESCRIPTION,
   keywords: [
     "rental property llc",
@@ -42,7 +46,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `/blog/${SLUG}` },
   openGraph: {
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     url: `/blog/${SLUG}`,
     type: "article",
@@ -52,7 +56,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     images: ["/home.jpg"],
   },

@@ -21,6 +21,10 @@ import { getSiteUrl } from "@/lib/site-url";
 
 const SLUG = "dealcheck-vs-biggerpockets-vs-truecap";
 const TITLE = "DealCheck vs BiggerPockets vs TrueCap: which rental calculator wins?";
+// SERP-facing title (metadata/og only): kept ≤50 chars so the root
+// layout's "%s | TrueCap" template stays inside the ~60-char SERP
+// window. The on-page <h1> keeps the longer editorial TITLE.
+const SERP_TITLE = "DealCheck vs BiggerPockets vs TrueCap (2026)";
 const DESCRIPTION =
   "Honest 3-way comparison of DealCheck, BiggerPockets Calculator, and TrueCap. Free tier depth, pricing, projections, mobile, and which fits which investor.";
 const PUBLISHED_AT = "2026-06-07";
@@ -28,7 +32,7 @@ const MODIFIED_AT = "2026-06-07";
 const READING_TIME_MIN = 11;
 
 export const metadata: Metadata = {
-  title: TITLE,
+  title: SERP_TITLE,
   description: DESCRIPTION,
   keywords: [
     "dealcheck vs biggerpockets",
@@ -39,7 +43,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `/blog/${SLUG}` },
   openGraph: {
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     url: `/blog/${SLUG}`,
     type: "article",
@@ -49,7 +53,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     images: ["/home.jpg"],
   },

@@ -21,6 +21,10 @@ import { getSiteUrl } from "@/lib/site-url";
 
 const SLUG = "roofstock-vs-mashvisor-vs-propstream";
 const TITLE = "Roofstock vs Mashvisor vs PropStream: 3-way deal discovery comparison";
+// SERP-facing title (metadata/og only): kept ≤50 chars so the root
+// layout's "%s | TrueCap" template stays inside the ~60-char SERP
+// window. The on-page <h1> keeps the longer editorial TITLE.
+const SERP_TITLE = "Roofstock vs Mashvisor vs PropStream (2026)";
 const DESCRIPTION =
   "Roofstock sells turnkey rentals. Mashvisor scores neighborhoods. PropStream finds motivated sellers. Honest 3-way comparison plus where TrueCap fits after they each find you a property.";
 const PUBLISHED_AT = "2026-06-07";
@@ -28,7 +32,7 @@ const MODIFIED_AT = "2026-06-07";
 const READING_TIME_MIN = 10;
 
 export const metadata: Metadata = {
-  title: TITLE,
+  title: SERP_TITLE,
   description: DESCRIPTION,
   keywords: [
     "roofstock vs mashvisor",
@@ -39,7 +43,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `/blog/${SLUG}` },
   openGraph: {
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     url: `/blog/${SLUG}`,
     type: "article",
@@ -49,7 +53,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     images: ["/home.jpg"],
   },

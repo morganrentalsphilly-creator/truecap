@@ -17,6 +17,10 @@ import { getSiteUrl } from "@/lib/site-url";
 
 const SLUG = "rental-property-pro-forma-explained";
 const TITLE = "How to read a rental property pro forma (and the 7 lies inside most of them)";
+// SERP-facing title (metadata/og only): kept ≤50 chars so the root
+// layout's "%s | TrueCap" template stays inside the ~60-char SERP
+// window. The on-page <h1> keeps the longer editorial TITLE.
+const SERP_TITLE = "How to read a rental property pro forma (2026)";
 const DESCRIPTION =
   "A pro forma is a seller's projection of how a rental property will perform — and it's almost always optimistic. Here's how to translate seller pro formas into real numbers, and the 7 line items most pro formas understate.";
 const PUBLISHED_AT = "2026-05-26";
@@ -24,7 +28,7 @@ const MODIFIED_AT = "2026-06-01";
 const READING_TIME = 9;
 
 export const metadata: Metadata = {
-  title: TITLE,
+  title: SERP_TITLE,
   description: DESCRIPTION,
   keywords: [
     "rental property pro forma",
@@ -37,7 +41,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `/blog/${SLUG}` },
   openGraph: {
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     url: `/blog/${SLUG}`,
     type: "article",

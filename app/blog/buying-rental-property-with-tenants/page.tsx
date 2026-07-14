@@ -30,6 +30,10 @@ import { getSiteUrl } from "@/lib/site-url";
 const SLUG = "buying-rental-property-with-tenants";
 const TITLE_PLAIN =
   "Buying a rental property with tenants in place: the lease, the estoppel, and the below-market rent math (2026)";
+// SERP-facing title (metadata/og only): kept ≤50 chars so the root
+// layout's "%s | TrueCap" template stays inside the ~60-char SERP
+// window. The on-page <h1> keeps the longer editorial TITLE_PLAIN.
+const SERP_TITLE = "Buying a rental property with tenants (2026)";
 const DESCRIPTION =
   "Buying a rental with tenants in place: which lease terms survive the sale, estoppel certificates, deposit transfer, and the below-market rent math.";
 const PUBLISHED_AT = "2026-07-13";
@@ -37,7 +41,7 @@ const MODIFIED_AT = "2026-07-13";
 const READING_TIME = 11;
 
 export const metadata: Metadata = {
-  title: TITLE_PLAIN,
+  title: SERP_TITLE,
   description: DESCRIPTION,
   keywords: [
     "buying a rental property with tenants",
@@ -51,7 +55,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `/blog/${SLUG}` },
   openGraph: {
-    title: TITLE_PLAIN,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     url: `/blog/${SLUG}`,
     type: "article",

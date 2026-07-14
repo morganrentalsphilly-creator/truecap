@@ -21,9 +21,9 @@ import { getSiteUrl } from "@/lib/site-url";
 const CITY = "Memphis";
 const STATE = "TN";
 const SLUG = "memphis";
-const TITLE = "Memphis rental property analysis — calculator + 2026 cap-rate benchmarks";
+const TITLE = "Memphis Rental Market Analysis 2026 — Cap Rates";
 const DESCRIPTION =
-  "Run a Memphis rental deal in 60 seconds. Auto-fills TN property tax (~0.7%), HUD rent for Shelby County, current rates. Plus neighborhood cap-rate map + the turnkey-vs-direct trade-off for 2026.";
+  "Neighborhood cap-rate map + the turnkey-vs-direct trade-off for 2026. Run a Memphis rental in 60 seconds — TN tax and HUD rent auto-filled.";
 const PUBLISHED_AT = "2026-05-24";
 const MODIFIED_AT = "2026-06-01";
 

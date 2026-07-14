@@ -24,7 +24,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "TrueCap vs AppFolio — honest comparison",
+  title: "AppFolio vs TrueCap (2026): PM vs Underwriting",
   description:
     "AppFolio is enterprise property management software for 1000+ unit operators. TrueCap is pre-purchase underwriting for solo investors. Different worlds.",
   keywords: [
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/vs/appfolio" },
   openGraph: {
-    title: "TrueCap vs AppFolio — honest comparison",
+    title: "AppFolio vs TrueCap (2026): PM vs Underwriting",
     description:
       "AppFolio is enterprise PM software (1000+ units). TrueCap is solo-investor underwriting. Different worlds.",
     url: "/vs/appfolio",
@@ -72,7 +72,7 @@ export default function VsAppfolioPage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: "TrueCap vs AppFolio — honest comparison",
+    name: "AppFolio vs TrueCap (2026): PM vs Underwriting",
     url: `${siteUrl}/vs/appfolio`,
     description:
       "AppFolio is enterprise property management software for 1000+ unit operators. TrueCap is pre-purchase underwriting for solo investors. Different worlds.",

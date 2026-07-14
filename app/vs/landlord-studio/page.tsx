@@ -24,7 +24,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "TrueCap vs Landlord Studio — honest comparison",
+  title: "Landlord Studio vs TrueCap (2026): Which to Use",
   description:
     "Landlord Studio is mobile-first accounting for properties you own. TrueCap underwrites the ones you're considering. Honest comparison and how they fit.",
   keywords: [
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/vs/landlord-studio" },
   openGraph: {
-    title: "TrueCap vs Landlord Studio — honest comparison",
+    title: "Landlord Studio vs TrueCap (2026): Which to Use",
     description:
       "Landlord Studio is mobile accounting for properties you own. TrueCap underwrites the deal before. Different stages.",
     url: "/vs/landlord-studio",
@@ -69,7 +69,7 @@ export default function VsLandlordStudioPage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: "TrueCap vs Landlord Studio — honest comparison",
+    name: "Landlord Studio vs TrueCap (2026): Which to Use",
     url: `${siteUrl}/vs/landlord-studio`,
     description:
       "Landlord Studio is mobile-first accounting for properties you own. TrueCap underwrites the ones you're considering. Honest comparison and how they fit.",

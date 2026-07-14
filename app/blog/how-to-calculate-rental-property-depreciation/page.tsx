@@ -28,6 +28,10 @@ import { getSiteUrl } from "@/lib/site-url";
 const SLUG = "how-to-calculate-rental-property-depreciation";
 const TITLE_PLAIN =
   "How to calculate depreciation on a rental property: the 27.5-year math, step by step (2026)";
+// SERP-facing title (metadata/og only): kept ≤50 chars so the root
+// layout's "%s | TrueCap" template stays inside the ~60-char SERP
+// window. The on-page <h1> keeps the longer editorial TITLE_PLAIN.
+const SERP_TITLE = "How to calculate rental property depreciation";
 const DESCRIPTION =
   "Rental property depreciation, worked end to end: depreciable basis, the land-vs-building split, the 27.5-year schedule, and the mid-month convention.";
 const PUBLISHED_AT = "2026-07-14";
@@ -35,7 +39,7 @@ const MODIFIED_AT = "2026-07-14";
 const READING_TIME = 11;
 
 export const metadata: Metadata = {
-  title: TITLE_PLAIN,
+  title: SERP_TITLE,
   description: DESCRIPTION,
   keywords: [
     "rental property depreciation",
@@ -49,7 +53,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `/blog/${SLUG}` },
   openGraph: {
-    title: TITLE_PLAIN,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     url: `/blog/${SLUG}`,
     type: "article",

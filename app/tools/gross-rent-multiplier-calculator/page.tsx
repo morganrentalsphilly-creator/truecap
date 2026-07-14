@@ -16,7 +16,7 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "GRM Calculator | Free Gross Rent Multiplier Tool",
+  title: "Free GRM Calculator — Gross Rent Multiplier Screen",
   description:
     "Free Gross Rent Multiplier (GRM) calculator. The fastest real-estate screen — compare deals in seconds, no operating expenses needed. Plus a good GRM range.",
   keywords: [
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/tools/gross-rent-multiplier-calculator" },
   openGraph: {
-    title: "GRM Calculator — Free",
+    title: "Free GRM Calculator — Gross Rent Multiplier Screen",
     description:
       "Compare rental deals in seconds with Gross Rent Multiplier — the fastest screening ratio in real estate.",
     url: "/tools/gross-rent-multiplier-calculator",

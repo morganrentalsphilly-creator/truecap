@@ -18,6 +18,10 @@ import { getSiteUrl } from "@/lib/site-url";
 
 const SLUG = "brrrr-method-explained";
 const TITLE = "The BRRRR method in 2026: the complete numbers walkthrough";
+// SERP-facing title (metadata/og only): kept ≤50 chars so the root
+// layout's "%s | TrueCap" template stays inside the ~60-char SERP
+// window. The on-page <h1> keeps the longer editorial TITLE.
+const SERP_TITLE = "The BRRRR method in 2026: numbers walkthrough";
 const DESCRIPTION =
   "BRRRR step-by-step with real 2026 numbers: refinance LTV limits, seasoning rules, DSCR qualification, and the cash-out math most guides skip.";
 const PUBLISHED_AT = "2026-06-07";
@@ -25,7 +29,7 @@ const MODIFIED_AT = "2026-06-07";
 const READING_TIME = 11;
 
 export const metadata: Metadata = {
-  title: TITLE,
+  title: SERP_TITLE,
   description: DESCRIPTION,
   keywords: [
     "BRRRR method",
@@ -39,7 +43,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `/blog/${SLUG}` },
   openGraph: {
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     url: `/blog/${SLUG}`,
     type: "article",

@@ -15,6 +15,10 @@ import { getSiteUrl } from "@/lib/site-url";
 
 const SLUG = "property-management-yes-or-no";
 const TITLE = "Should I use a property management company? The actual math.";
+// SERP-facing title (metadata/og only): kept ≤50 chars so the root
+// layout's "%s | TrueCap" template stays inside the ~60-char SERP
+// window. The on-page <h1> keeps the longer editorial TITLE.
+const SERP_TITLE = "Should I use a property management company?";
 const DESCRIPTION =
   "8-10% of rent + lease-up fees + maintenance markup — does paying a PM still beat managing yourself? The honest break-even math, plus when to switch each direction.";
 const PUBLISHED_AT = "2026-05-24";
@@ -22,7 +26,7 @@ const MODIFIED_AT = "2026-06-01";
 const READING_TIME = 8;
 
 export const metadata: Metadata = {
-  title: TITLE,
+  title: SERP_TITLE,
   description: DESCRIPTION,
   keywords: [
     "property management vs self management",
@@ -32,7 +36,7 @@ export const metadata: Metadata = {
     "property manager fee",
   ],
   alternates: { canonical: `/blog/${SLUG}` },
-  openGraph: { title: TITLE, description: DESCRIPTION, url: `/blog/${SLUG}`, type: "article", publishedTime: PUBLISHED_AT, modifiedTime: MODIFIED_AT, images: [{ url: "/home.jpg", width: 1200, height: 630, alt: TITLE }] },
+  openGraph: { title: SERP_TITLE, description: DESCRIPTION, url: `/blog/${SLUG}`, type: "article", publishedTime: PUBLISHED_AT, modifiedTime: MODIFIED_AT, images: [{ url: "/home.jpg", width: 1200, height: 630, alt: TITLE }] },
   twitter: { card: "summary_large_image", images: ["/home.jpg"] },
 };
 

@@ -24,7 +24,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "TrueCap vs RentCast — honest comparison",
+  title: "RentCast vs TrueCap (2026): Rent Data vs Deal Math",
   description:
     "RentCast estimates rent and property value. TrueCap underwrites the full deal — including the rent. Honest side-by-side and how they complement each other.",
   keywords: [
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/vs/rentcast" },
   openGraph: {
-    title: "TrueCap vs RentCast — honest comparison",
+    title: "RentCast vs TrueCap (2026): Rent Data vs Deal Math",
     description:
       "RentCast estimates rent + property value. TrueCap underwrites the full deal. Honest comparison.",
     url: "/vs/rentcast",
@@ -72,7 +72,7 @@ export default function VsRentcastPage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: "TrueCap vs RentCast — honest comparison",
+    name: "RentCast vs TrueCap (2026): Rent Data vs Deal Math",
     url: `${siteUrl}/vs/rentcast`,
     description:
       "RentCast estimates rent and property value. TrueCap underwrites the full deal — including the rent. Honest side-by-side and how they complement each other.",

@@ -29,7 +29,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "TrueCap vs Avail — honest comparison",
+  title: "Avail vs TrueCap (2026): Manage vs Underwrite",
   description:
     "Avail manages your rentals after closing. TrueCap underwrites them before. Honest side-by-side of when each fits, plus how DIY landlords use both together.",
   keywords: [
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/vs/avail" },
   openGraph: {
-    title: "TrueCap vs Avail — honest comparison",
+    title: "Avail vs TrueCap (2026): Manage vs Underwrite",
     description:
       "Avail is post-purchase landlord ops. TrueCap is pre-purchase underwriting. Different halves of the DIY-landlord lifecycle.",
     url: "/vs/avail",
@@ -80,7 +80,7 @@ export default function VsAvailPage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: "TrueCap vs Avail — honest comparison",
+    name: "Avail vs TrueCap (2026): Manage vs Underwrite",
     url: `${siteUrl}/vs/avail`,
     description:
       "Side-by-side comparison of TrueCap (rental underwriting calculator) and Avail (DIY landlord operations).",

@@ -24,7 +24,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "TrueCap vs Privy — find the deals vs underwrite them",
+  title: "Privy vs TrueCap (2026): Find Deals vs Underwrite",
   description:
     "Privy is investor-focused MLS search. TrueCap underwrites the deals once you've found them. Honest comparison and how investors use both.",
   keywords: [
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/vs/privy" },
   openGraph: {
-    title: "TrueCap vs Privy — find the deals vs underwrite them",
+    title: "Privy vs TrueCap (2026): Find Deals vs Underwrite",
     description:
       "Privy is investor MLS search. TrueCap underwrites the deals. Different jobs in the same workflow.",
     url: "/vs/privy",
@@ -69,7 +69,7 @@ export default function VsPrivyPage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: "TrueCap vs Privy — honest comparison",
+    name: "Privy vs TrueCap (2026): Find Deals vs Underwrite",
     url: `${siteUrl}/vs/privy`,
     description:
       "Privy is investor-focused MLS search. TrueCap underwrites the deals once you've found them. Honest comparison and how investors use both.",

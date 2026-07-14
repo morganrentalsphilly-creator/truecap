@@ -44,7 +44,11 @@ export type EmbedSlug =
   | "roi-calculator"
   | "closing-cost-calculator"
   | "vacancy-rate-calculator"
-  | "rental-property-tax-calculator";
+  | "rental-property-tax-calculator"
+  | "house-hacking-calculator"
+  | "70-percent-rule-calculator"
+  | "50-percent-rule-calculator"
+  | "2-percent-rule-calculator";
 
 export type EmbedEntry = {
   slug: EmbedSlug;
@@ -215,6 +219,46 @@ const EMBED_WIDGETS: Record<EmbedSlug, EmbedWidgetSpec> = {
       { loading: EmbedLoading }
     ),
     defaultHeight: 1100,
+  },
+  "house-hacking-calculator": {
+    Widget: dynamic(
+      () =>
+        import("@/components/tools/house-hacking-calculator-widget").then(
+          (m) => m.HouseHackingCalculatorWidget
+        ),
+      { loading: EmbedLoading }
+    ),
+    defaultHeight: 980,
+  },
+  "70-percent-rule-calculator": {
+    Widget: dynamic(
+      () =>
+        import("@/components/tools/seventy-percent-rule-widget").then(
+          (m) => m.SeventyPercentRuleWidget
+        ),
+      { loading: EmbedLoading }
+    ),
+    defaultHeight: 820,
+  },
+  "50-percent-rule-calculator": {
+    Widget: dynamic(
+      () =>
+        import("@/components/tools/fifty-percent-rule-widget").then(
+          (m) => m.FiftyPercentRuleWidget
+        ),
+      { loading: EmbedLoading }
+    ),
+    defaultHeight: 760,
+  },
+  "2-percent-rule-calculator": {
+    Widget: dynamic(
+      () =>
+        import("@/components/tools/two-percent-rule-widget").then(
+          (m) => m.TwoPercentRuleWidget
+        ),
+      { loading: EmbedLoading }
+    ),
+    defaultHeight: 520,
   },
 };
 

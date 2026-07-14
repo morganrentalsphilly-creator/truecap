@@ -18,6 +18,10 @@ import { getSiteUrl } from "@/lib/site-url";
 const SLUG = "how-to-estimate-rehab-costs";
 const TITLE =
   "How to estimate rehab costs on a rental property — the honest framework";
+// SERP-facing title (metadata/og only): kept ≤50 chars so the root
+// layout's "%s | TrueCap" template stays inside the ~60-char SERP
+// window. The on-page <h1> keeps the longer editorial TITLE.
+const SERP_TITLE = "How to estimate rehab costs on a rental (2026)";
 const DESCRIPTION =
   "Walking through a property with a budget number in your head — the framework experienced investors use. Sq-ft pricing for cosmetic, kitchen, bath, and systems. Plus the 25% contingency rule most beginners skip.";
 const PUBLISHED_AT = "2026-05-27";
@@ -25,7 +29,7 @@ const MODIFIED_AT = "2026-06-01";
 const READING_TIME = 12;
 
 export const metadata: Metadata = {
-  title: TITLE,
+  title: SERP_TITLE,
   description: DESCRIPTION,
   keywords: [
     "how to estimate rehab costs",
@@ -38,7 +42,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `/blog/${SLUG}` },
   openGraph: {
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     url: `/blog/${SLUG}`,
     type: "article",

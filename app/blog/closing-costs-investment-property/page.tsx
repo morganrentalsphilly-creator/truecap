@@ -19,6 +19,10 @@ import { getSiteUrl } from "@/lib/site-url";
 const SLUG = "closing-costs-investment-property";
 const TITLE =
   "Closing costs on an investment property — the full breakdown (2026)";
+// SERP-facing title (metadata/og only): kept ≤50 chars so the root
+// layout's "%s | TrueCap" template stays inside the ~60-char SERP
+// window. The on-page <h1> keeps the longer editorial TITLE.
+const SERP_TITLE = "Closing costs on an investment property (2026)";
 const DESCRIPTION =
   "Every line item in investment-property closing costs, with real 2026 dollar figures on a $250k rental. What's negotiable, what isn't, and how to fold it into your cash-to-close.";
 const PUBLISHED_AT = "2026-06-09";
@@ -26,7 +30,7 @@ const MODIFIED_AT = "2026-06-09";
 const READING_TIME = 11;
 
 export const metadata: Metadata = {
-  title: TITLE,
+  title: SERP_TITLE,
   description: DESCRIPTION,
   keywords: [
     "closing costs investment property",
@@ -39,7 +43,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `/blog/${SLUG}` },
   openGraph: {
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     url: `/blog/${SLUG}`,
     type: "article",

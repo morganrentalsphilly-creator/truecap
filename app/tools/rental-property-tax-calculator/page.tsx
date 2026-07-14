@@ -14,7 +14,7 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "Rental Property Tax Calculator — Schedule E",
+  title: "Free Rental Property Tax Calculator — Schedule E",
   description:
     "Free rental property tax calculator. Models Schedule E taxable income, 27.5-year depreciation, mortgage interest, and after-tax cash flow.",
   keywords: [
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/tools/rental-property-tax-calculator" },
   openGraph: {
-    title: "Rental Property Tax Calculator — Free",
+    title: "Free Rental Property Tax Calculator — Schedule E",
     description:
       "Model Schedule E taxable income, depreciation, and after-tax cash flow on a rental property.",
     url: "/tools/rental-property-tax-calculator",

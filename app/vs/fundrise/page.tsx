@@ -24,7 +24,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "TrueCap vs Fundrise — direct ownership vs REIT shares",
+  title: "Fundrise vs TrueCap (2026): REIT vs Ownership",
   description:
     "Fundrise is a non-traded REIT for passive real estate exposure. TrueCap underwrites whole properties you'd buy yourself. Two very different investing models.",
   keywords: [
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/vs/fundrise" },
   openGraph: {
-    title: "TrueCap vs Fundrise — direct ownership vs REIT shares",
+    title: "Fundrise vs TrueCap (2026): REIT vs Ownership",
     description:
       "Fundrise = non-traded REIT shares (passive). TrueCap = underwriting whole properties you own directly. Different models.",
     url: "/vs/fundrise",
@@ -71,7 +71,7 @@ export default function VsFundrisePage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: "TrueCap vs Fundrise — honest comparison",
+    name: "Fundrise vs TrueCap (2026): REIT vs Ownership",
     url: `${siteUrl}/vs/fundrise`,
     description:
       "Fundrise is a non-traded REIT for passive real estate exposure. TrueCap underwrites whole properties you'd buy yourself. Two very different investing models.",

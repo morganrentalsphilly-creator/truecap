@@ -20,6 +20,10 @@ import { getSiteUrl } from "@/lib/site-url";
 
 const SLUG = "hostfully-vs-hostaway-vs-guesty";
 const TITLE = "Hostfully vs Hostaway vs Guesty: which STR PMS wins in 2026?";
+// SERP-facing title (metadata/og only): kept ≤50 chars so the root
+// layout's "%s | TrueCap" template stays inside the ~60-char SERP
+// window. The on-page <h1> keeps the longer editorial TITLE.
+const SERP_TITLE = "Hostfully vs Hostaway vs Guesty (2026)";
 const DESCRIPTION =
   "Honest 3-way comparison of Hostfully, Hostaway, and Guesty — channel managers, automation, pricing tiers, and which fits 1, 10, or 100 short-term rentals.";
 const PUBLISHED_AT = "2026-06-07";
@@ -27,7 +31,7 @@ const MODIFIED_AT = "2026-06-07";
 const READING_TIME_MIN = 11;
 
 export const metadata: Metadata = {
-  title: TITLE,
+  title: SERP_TITLE,
   description: DESCRIPTION,
   keywords: [
     "hostfully vs hostaway",
@@ -39,7 +43,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `/blog/${SLUG}` },
   openGraph: {
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     url: `/blog/${SLUG}`,
     type: "article",
@@ -49,7 +53,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     images: ["/home.jpg"],
   },

@@ -42,8 +42,10 @@ export type CalculatorEntry = {
 export const CALCULATOR_REGISTRY: CalculatorEntry[] = [
   // Screen
   { slug: "1-percent-rule-calculator", title: "1% Rule Calculator", shortTitle: "1% Rule", description: "Pass/fail rental screening filter in 5 seconds.", category: "screen", embeddable: true, footerFeatured: true },
+  { slug: "2-percent-rule-calculator", title: "2% Rule Calculator", shortTitle: "2% Rule", description: "The strict cash-flow screen — rent-to-price against the 2% and 1% bars.", category: "screen", embeddable: true },
   { slug: "gross-rent-multiplier-calculator", title: "Gross Rent Multiplier (GRM) Calculator", shortTitle: "GRM", description: "The 10-second screening ratio for triaging rental deals.", category: "screen", embeddable: true },
   { slug: "break-even-calculator", title: "Break-Even Calculator", shortTitle: "Break-Even", description: "Months until rental cash flow returns your initial investment.", category: "screen", embeddable: true },
+  { slug: "50-percent-rule-calculator", title: "50% Rule Calculator", shortTitle: "50% Rule", description: "3-second expense triage — estimated expenses, NOI, and cash flow from gross rent.", category: "screen", embeddable: true },
   // Finance
   { slug: "dscr-calculator", title: "DSCR Calculator", shortTitle: "DSCR", description: "Debt Service Coverage Ratio — the metric every investment-property lender uses.", category: "finance", embeddable: true, footerFeatured: true },
   { slug: "mortgage-payment-calculator", title: "Mortgage Payment Calculator", shortTitle: "Mortgage Payment", description: "PITI breakdown — principal, interest, taxes, insurance — for investment loans.", category: "finance", embeddable: true },
@@ -60,10 +62,12 @@ export const CALCULATOR_REGISTRY: CalculatorEntry[] = [
   // Offer & strategy
   { slug: "brrrr-calculator", title: "BRRRR Calculator", shortTitle: "BRRRR", description: "Buy, Rehab, Rent, Refinance — model the full strategy in one view.", category: "offer", embeddable: true, footerFeatured: true },
   { slug: "arv-calculator", title: "ARV Calculator (After-Repair Value + 70% Rule)", shortTitle: "ARV", description: "Comps-based after-repair value plus the 70%-rule max offer for flips and BRRRR.", category: "offer", embeddable: true },
+  { slug: "house-hacking-calculator", title: "House Hacking Calculator", shortTitle: "House Hack", description: "Live in one unit, rent the rest — your effective housing cost after tenant rent.", category: "offer", embeddable: true },
+  { slug: "70-percent-rule-calculator", title: "70% Rule Calculator", shortTitle: "70% Rule", description: "Max offer = 70% of ARV minus repairs — the flip and BRRRR screen, at every common multiplier.", category: "offer", embeddable: true },
   { slug: "rehab-cost-estimator", title: "Rehab Cost Estimator", shortTitle: "Rehab", description: "Line-item rehab budget by scope of work — the rehab number that feeds BRRRR + flip.", category: "offer", embeddable: false },
 ];
 
-/** Total calculator PAGES under /tools (currently 16). */
+/** Total calculator PAGES under /tools (currently 20). */
 export const CALCULATOR_COUNT = CALCULATOR_REGISTRY.length;
 
 /** Spelled-out count for marketing/meta prose ("Fourteen…") — drift-proof.
@@ -78,7 +82,7 @@ export const CALCULATOR_COUNT_WORD = COUNT_WORDS[CALCULATOR_COUNT] ?? String(CAL
  *  list can never disagree with the registry's actual membership. */
 export const CALCULATOR_NAMES_LIST = CALCULATOR_REGISTRY.map((c) => c.shortTitle).join(", ");
 
-/** Calculators with an embeddable iframe widget (currently 15). */
+/** Calculators with an embeddable iframe widget (currently 19). */
 export const EMBEDDABLE_CALCULATORS = CALCULATOR_REGISTRY.filter((c) => c.embeddable);
 export const EMBEDDABLE_COUNT = EMBEDDABLE_CALCULATORS.length;
 

@@ -206,7 +206,12 @@ export default function ForHouseHackersPage() {
             <Link href="/blog/single-family-vs-multi-family-rental" className="text-primary font-semibold hover:underline">
               single-family vs multi-family
             </Link>{" "}
-            properties. Once you&apos;ve picked a property, ground the
+            properties. Screen candidates fast with the free{" "}
+            <Link href="/tools/house-hacking-calculator" className="text-primary font-semibold hover:underline">
+              house hacking calculator
+            </Link>{" "}
+            — your effective housing cost after tenant rent, in seconds.
+            Once you&apos;ve picked a property, ground the
             numbers with the{" "}
             <Link href="/tools/cap-rate-calculator" className="text-primary font-semibold hover:underline">
               cap rate

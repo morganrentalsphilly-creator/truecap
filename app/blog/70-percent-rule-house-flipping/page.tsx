@@ -27,6 +27,10 @@ import { getSiteUrl } from "@/lib/site-url";
 const SLUG = "70-percent-rule-house-flipping";
 const TITLE =
   "The 70% rule for house flipping (and BRRRR): how to calculate your max offer (2026)";
+// SERP-facing title (metadata/og only): kept ≤50 chars so the root
+// layout's "%s | TrueCap" template stays inside the ~60-char SERP
+// window. The on-page <h1> keeps the longer editorial TITLE.
+const SERP_TITLE = "The 70% rule for house flipping: max offer (2026)";
 const DESCRIPTION =
   "The 70% rule caps your offer at 70% of ARV minus repairs. Here's the formula, a worked flip and BRRRR example, and when 70% is the wrong number.";
 const PUBLISHED_AT = "2026-07-05";
@@ -34,7 +38,7 @@ const MODIFIED_AT = "2026-07-05";
 const READING_TIME = 11;
 
 export const metadata: Metadata = {
-  title: TITLE,
+  title: SERP_TITLE,
   description: DESCRIPTION,
   keywords: [
     "70 percent rule house flipping",
@@ -48,7 +52,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `/blog/${SLUG}` },
   openGraph: {
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     url: `/blog/${SLUG}`,
     type: "article",
@@ -211,7 +215,14 @@ export default function SeventyPercentRulePost() {
               </Link>{" "}
               runs this exact formula against your own comps — the comps-based
               ARV, the max offer at any multiplier, and the 75% refi line in one
-              screen.)
+              screen. Already have the ARV? The free{" "}
+              <Link
+                href="/tools/70-percent-rule-calculator"
+                className="text-primary font-semibold hover:underline"
+              >
+                70% rule calculator
+              </Link>{" "}
+              skips straight to the max offer, at 60/65/70/75% side by side.)
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">

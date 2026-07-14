@@ -20,9 +20,9 @@ import { getSiteUrl } from "@/lib/site-url";
 const CITY = "Detroit";
 const STATE = "MI";
 const SLUG = "detroit";
-const TITLE = "Detroit rental property analysis — calculator + 2026 cap-rate benchmarks";
+const TITLE = "Detroit Rental Market Analysis 2026 — Cap Rates";
 const DESCRIPTION =
-  "Run a Detroit rental deal in 60 seconds. Auto-fills MI property tax (~1.7%), HUD rent for Wayne/Oakland/Macomb counties, current rates. Plus the honest take on Detroit cap rates + neighborhood-by-neighborhood risk map.";
+  "The honest take on Detroit cap rates + a neighborhood-by-neighborhood risk map. Run a Detroit rental in 60 seconds — MI tax and HUD rent auto-filled.";
 const PUBLISHED_AT = "2026-05-24";
 const MODIFIED_AT = "2026-06-01";
 

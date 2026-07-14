@@ -24,6 +24,10 @@ import { getSiteUrl } from "@/lib/site-url";
 
 const SLUG = "hard-money-vs-dscr-loan";
 const TITLE = "Hard money vs DSCR: which loan product is right for your next deal in 2026";
+// SERP-facing title (metadata/og only): kept ≤50 chars so the root
+// layout's "%s | TrueCap" template stays inside the ~60-char SERP
+// window. The on-page <h1> keeps the longer editorial TITLE.
+const SERP_TITLE = "Hard money vs DSCR loan: which to use in 2026";
 const DESCRIPTION =
   "Hard money and DSCR loans solve different problems. Hard money is short-term capital for a deal you&apos;ll rehab and exit; DSCR is long-term capital for a rental you&apos;ll hold. Picking the wrong one costs you 4-6 points and 18 months of friction. Here&apos;s how to choose.";
 const PUBLISHED_AT = "2026-06-07";
@@ -31,7 +35,7 @@ const MODIFIED_AT = "2026-06-07";
 const READING_TIME_MIN = 11;
 
 export const metadata: Metadata = {
-  title: TITLE,
+  title: SERP_TITLE,
   description: DESCRIPTION,
   keywords: [
     "hard money vs dscr",
@@ -45,7 +49,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `/blog/${SLUG}` },
   openGraph: {
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     url: `/blog/${SLUG}`,
     type: "article",
@@ -55,7 +59,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     images: ["/home.jpg"],
   },

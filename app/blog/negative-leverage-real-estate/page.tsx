@@ -28,6 +28,10 @@ import { getSiteUrl } from "@/lib/site-url";
 const SLUG = "negative-leverage-real-estate";
 const TITLE =
   "Negative leverage in real estate: when borrowing lowers your return (2026)";
+// SERP-facing title (metadata/og only): kept ≤50 chars so the root
+// layout's "%s | TrueCap" template stays inside the ~60-char SERP
+// window. The on-page <h1> keeps the longer editorial TITLE.
+const SERP_TITLE = "Negative leverage in real estate, explained (2026)";
 const DESCRIPTION =
   "Negative leverage is when a mortgage lowers your return. Here's the loan constant vs cap rate rule, with worked 2026 examples and the deals it quietly traps.";
 const PUBLISHED_AT = "2026-06-28";
@@ -35,7 +39,7 @@ const MODIFIED_AT = "2026-06-28";
 const READING_TIME = 11;
 
 export const metadata: Metadata = {
-  title: TITLE,
+  title: SERP_TITLE,
   description: DESCRIPTION,
   keywords: [
     "negative leverage real estate",
@@ -49,7 +53,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `/blog/${SLUG}` },
   openGraph: {
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     url: `/blog/${SLUG}`,
     type: "article",

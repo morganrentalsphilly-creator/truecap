@@ -24,7 +24,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "TrueCap vs RentSpree — honest comparison",
+  title: "RentSpree vs TrueCap (2026): Screening vs Analysis",
   description:
     "RentSpree screens your tenants. TrueCap underwrites your deals. Different jobs in the rental workflow — and how realtors use both.",
   keywords: [
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/vs/rentspree" },
   openGraph: {
-    title: "TrueCap vs RentSpree — honest comparison",
+    title: "RentSpree vs TrueCap (2026): Screening vs Analysis",
     description:
       "RentSpree screens tenants. TrueCap underwrites deals. Different jobs in the rental workflow.",
     url: "/vs/rentspree",
@@ -70,7 +70,7 @@ export default function VsRentspreePage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: "TrueCap vs RentSpree — honest comparison",
+    name: "RentSpree vs TrueCap (2026): Screening vs Analysis",
     url: `${siteUrl}/vs/rentspree`,
     description:
       "RentSpree screens your tenants. TrueCap underwrites your deals. Different jobs in the rental workflow — and how realtors use both.",

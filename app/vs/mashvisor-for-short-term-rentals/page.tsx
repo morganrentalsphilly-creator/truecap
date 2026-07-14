@@ -15,7 +15,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "TrueCap vs Mashvisor for Short-Term Rentals — honest comparison",
+  title: "Mashvisor vs TrueCap for STR Deals (2026)",
   description:
     "Mashvisor scores STR markets with Airbnb data. TrueCap underwrites the specific deal. Honest comparison for STR investors plus how they fit together.",
   keywords: [
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/vs/mashvisor-for-short-term-rentals" },
   openGraph: {
-    title: "TrueCap vs Mashvisor for Short-Term Rentals — honest comparison",
+    title: "Mashvisor vs TrueCap for STR Deals (2026)",
     description:
       "STR-specific TrueCap vs Mashvisor: market scoring vs per-deal underwriting. Most STR investors use both.",
     url: "/vs/mashvisor-for-short-term-rentals",
@@ -111,7 +111,7 @@ export default function VsMashvisorForShortTermRentalsPage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: "TrueCap vs Mashvisor for Short-Term Rentals — honest comparison",
+    name: "Mashvisor vs TrueCap for STR Deals (2026)",
     url: `${siteUrl}/vs/mashvisor-for-short-term-rentals`,
     description: "Mashvisor scores STR markets with Airbnb data. TrueCap underwrites the specific deal. Honest comparison for STR investors plus how they fit together.",
     dateModified: "2026-06-07",

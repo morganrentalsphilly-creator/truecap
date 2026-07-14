@@ -17,6 +17,10 @@ import { getSiteUrl } from "@/lib/site-url";
 
 const SLUG = "spot-bad-rental-in-60-seconds";
 const TITLE = "How to spot a bad rental deal in 60 seconds — 7 red flags";
+// SERP-facing title (metadata/og only): kept ≤50 chars so the root
+// layout's "%s | TrueCap" template stays inside the ~60-char SERP
+// window. The on-page <h1> keeps the longer editorial TITLE.
+const SERP_TITLE = "How to spot a bad rental deal: 7 red flags";
 const DESCRIPTION =
   "Seven red flags that tell you a rental property doesn't pencil — before you waste hours running the full underwrite. The triage every experienced investor does in their head.";
 const PUBLISHED_AT = "2026-05-24";
@@ -24,7 +28,7 @@ const MODIFIED_AT = "2026-06-01";
 const READING_TIME = 8;
 
 export const metadata: Metadata = {
-  title: TITLE,
+  title: SERP_TITLE,
   description: DESCRIPTION,
   keywords: [
     "rental property red flags",
@@ -34,7 +38,7 @@ export const metadata: Metadata = {
     "rental property warning signs",
   ],
   alternates: { canonical: `/blog/${SLUG}` },
-  openGraph: { title: TITLE, description: DESCRIPTION, url: `/blog/${SLUG}`, type: "article", publishedTime: PUBLISHED_AT, modifiedTime: MODIFIED_AT, images: [{ url: "/home.jpg", width: 1200, height: 630, alt: TITLE }] },
+  openGraph: { title: SERP_TITLE, description: DESCRIPTION, url: `/blog/${SLUG}`, type: "article", publishedTime: PUBLISHED_AT, modifiedTime: MODIFIED_AT, images: [{ url: "/home.jpg", width: 1200, height: 630, alt: TITLE }] },
   twitter: { card: "summary_large_image", images: ["/home.jpg"] },
 };
 

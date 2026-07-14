@@ -24,7 +24,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "TrueCap vs BatchLeads — honest comparison",
+  title: "BatchLeads vs TrueCap (2026): Leads vs Analysis",
   description:
     "BatchLeads finds motivated-seller leads. TrueCap underwrites the deals. Honest comparison plus how active investors use both.",
   keywords: [
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/vs/batchleads" },
   openGraph: {
-    title: "TrueCap vs BatchLeads — honest comparison",
+    title: "BatchLeads vs TrueCap (2026): Leads vs Analysis",
     description:
       "BatchLeads is lead generation + skip-tracing. TrueCap underwrites the deals. Different jobs.",
     url: "/vs/batchleads",
@@ -69,7 +69,7 @@ export default function VsBatchleadsPage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: "TrueCap vs BatchLeads — honest comparison",
+    name: "BatchLeads vs TrueCap (2026): Leads vs Analysis",
     url: `${siteUrl}/vs/batchleads`,
     description:
       "BatchLeads finds motivated-seller leads. TrueCap underwrites the deals. Honest comparison plus how active investors use both.",

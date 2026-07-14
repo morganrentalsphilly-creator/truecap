@@ -24,7 +24,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "TrueCap vs DealMachine — honest comparison",
+  title: "DealMachine vs TrueCap (2026): Find vs Underwrite",
   description:
     "DealMachine finds the leads with mobile-first driving for dollars. TrueCap underwrites them. Honest comparison and how investors use both.",
   keywords: [
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/vs/dealmachine" },
   openGraph: {
-    title: "TrueCap vs DealMachine — honest comparison",
+    title: "DealMachine vs TrueCap (2026): Find vs Underwrite",
     description:
       "DealMachine is mobile-first lead generation. TrueCap underwrites the deals it surfaces. Different jobs.",
     url: "/vs/dealmachine",
@@ -72,7 +72,7 @@ export default function VsDealmachinePage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: "TrueCap vs DealMachine — honest comparison",
+    name: "DealMachine vs TrueCap (2026): Find vs Underwrite",
     url: `${siteUrl}/vs/dealmachine`,
     description:
       "DealMachine finds the leads with mobile-first driving for dollars. TrueCap underwrites them. Honest comparison and how investors use both.",

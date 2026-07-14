@@ -20,9 +20,9 @@ import { getSiteUrl } from "@/lib/site-url";
 const CITY = "Dallas";
 const STATE = "TX";
 const SLUG = "dallas";
-const TITLE = "Dallas-Fort Worth rental property analysis — calculator + 2026 cap-rate benchmarks";
+const TITLE = "Dallas-Fort Worth Rental Market Analysis 2026";
 const DESCRIPTION =
-  "Run a Dallas rental deal in 60 seconds. Auto-fills TX property tax (1.6-2.5%+ effective), HUD rent for Dallas / Tarrant / Collin counties, current mortgage rates. Plus DFW neighborhood cap-rate ranges + the high-tax / no-income-tax trade-off.";
+  "DFW neighborhood cap-rate ranges + the high-tax / no-income-tax trade-off. Run a Dallas rental in 60 seconds — TX tax and HUD rent auto-filled.";
 const PUBLISHED_AT = "2026-05-24";
 const MODIFIED_AT = "2026-06-01";
 

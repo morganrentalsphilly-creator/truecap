@@ -24,7 +24,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "TrueCap vs Baselane — honest comparison",
+  title: "Baselane vs TrueCap (2026): Banking vs Analysis",
   description:
     "Baselane is rental banking + bookkeeping for properties you own. TrueCap underwrites the ones you're considering. Honest comparison + how they fit together.",
   keywords: [
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/vs/baselane" },
   openGraph: {
-    title: "TrueCap vs Baselane — honest comparison",
+    title: "Baselane vs TrueCap (2026): Banking vs Analysis",
     description:
       "Baselane is rental banking + bookkeeping after closing. TrueCap underwrites the deal before. Different stages.",
     url: "/vs/baselane",
@@ -72,7 +72,7 @@ export default function VsBaselanePage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: "TrueCap vs Baselane — honest comparison",
+    name: "Baselane vs TrueCap (2026): Banking vs Analysis",
     url: `${siteUrl}/vs/baselane`,
     description:
       "Baselane is rental banking + bookkeeping for properties you own. TrueCap underwrites the ones you're considering. Honest comparison + how they fit together.",

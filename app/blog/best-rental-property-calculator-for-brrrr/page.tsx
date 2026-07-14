@@ -15,6 +15,10 @@ import { getSiteUrl } from "@/lib/site-url";
 
 const SLUG = "best-rental-property-calculator-for-brrrr";
 const TITLE = "Best rental property calculator for BRRRR investors (2026)";
+// SERP-facing title (metadata/og only): kept ≤50 chars so the root
+// layout's "%s | TrueCap" template stays inside the ~60-char SERP
+// window. The on-page <h1> keeps the longer editorial TITLE.
+const SERP_TITLE = "Best rental property calculator for BRRRR (2026)";
 const DESCRIPTION =
   "Honest 2026 ranking of the best calculators for BRRRR — TrueCap, DealCheck, BiggerPockets, and what makes a BRRRR-specific calculator different from a standard rental analyzer.";
 const PUBLISHED_AT = "2026-06-07";
@@ -22,7 +26,7 @@ const MODIFIED_AT = "2026-06-07";
 const READING_TIME_MIN = 9;
 
 export const metadata: Metadata = {
-  title: TITLE,
+  title: SERP_TITLE,
   description: DESCRIPTION,
   keywords: [
     "best brrrr calculator",
@@ -33,7 +37,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `/blog/${SLUG}` },
   openGraph: {
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     url: `/blog/${SLUG}`,
     type: "article",
@@ -41,7 +45,7 @@ export const metadata: Metadata = {
     modifiedTime: MODIFIED_AT,
     images: [{ url: "/home.jpg", width: 1200, height: 630, alt: TITLE }],
   },
-  twitter: { card: "summary_large_image", title: TITLE, description: DESCRIPTION, images: ["/home.jpg"] },
+  twitter: { card: "summary_large_image", title: SERP_TITLE, description: DESCRIPTION, images: ["/home.jpg"] },
 };
 
 const TOOLS = [

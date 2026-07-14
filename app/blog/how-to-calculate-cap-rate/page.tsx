@@ -25,6 +25,10 @@ import { getSiteUrl } from "@/lib/site-url";
 
 const SLUG = "how-to-calculate-cap-rate";
 const TITLE = "How to calculate cap rate (with worked examples) — 2026 guide";
+// SERP-facing title (metadata/og only): kept ≤50 chars so the root
+// layout's "%s | TrueCap" template stays inside the ~60-char SERP
+// window. The on-page <h1> keeps the longer editorial TITLE.
+const SERP_TITLE = "How to calculate cap rate: worked examples (2026)";
 const DESCRIPTION =
   "Cap rate = NOI ÷ purchase price. Sounds simple, but most investors get NOI wrong by skipping CapEx reserves or vacancy. Here&apos;s the formula, three worked examples (good deal / bad deal / cash purchase), and when cap rate is the wrong metric.";
 const PUBLISHED_AT = "2026-06-07";
@@ -32,7 +36,7 @@ const MODIFIED_AT = "2026-06-07";
 const READING_TIME_MIN = 7;
 
 export const metadata: Metadata = {
-  title: TITLE,
+  title: SERP_TITLE,
   description: DESCRIPTION,
   keywords: [
     "how to calculate cap rate",
@@ -46,7 +50,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `/blog/${SLUG}` },
   openGraph: {
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     url: `/blog/${SLUG}`,
     type: "article",
@@ -56,7 +60,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: TITLE,
+    title: SERP_TITLE,
     description: DESCRIPTION,
     images: ["/home.jpg"],
   },

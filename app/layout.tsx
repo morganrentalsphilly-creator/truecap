@@ -259,6 +259,15 @@ gtag('config', '${GOOGLE_ADS_ID}');`,
                   // Person @graph) — referencing it here ties the org
                   // to a real, findable founder for E-E-A-T.
                   founder: { "@id": `${siteUrl}/about#morgan` },
+                  // Moved here from the homepage's (now removed)
+                  // duplicate Organization node so the single canonical
+                  // entity keeps the support-contact signal.
+                  contactPoint: {
+                    "@type": "ContactPoint",
+                    contactType: "customer support",
+                    email: "hello@usetruecap.com",
+                    availableLanguage: "English",
+                  },
                 },
                 {
                   "@type": "WebSite",

@@ -26,7 +26,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 
 export const metadata: Metadata = {
-  title: "TrueCap vs Excel for rental property analysis",
+  title: "Excel vs TrueCap for Rental Analysis (2026)",
   description:
     "Honest comparison of TrueCap vs Excel/Google Sheets for rental property analysis. Speed, accuracy, mobile, sharing — and when a spreadsheet still wins.",
   keywords: [
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/vs/excel" },
   openGraph: {
-    title: "TrueCap vs Excel for rental property analysis",
+    title: "Excel vs TrueCap for Rental Analysis (2026)",
     description: "Side-by-side: speed, accuracy, mobile, sharing, what each does best.",
     url: "/vs/excel",
     type: "website",
@@ -76,7 +76,7 @@ export default function VsExcelPage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: "TrueCap vs Excel for rental property analysis",
+    name: "Excel vs TrueCap for Rental Analysis (2026)",
     url: `${siteUrl}/vs/excel`,
     description: "Side-by-side comparison of TrueCap and Excel/Google Sheets for rental analysis.",
     dateModified: "2026-06-01",
