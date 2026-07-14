@@ -2,8 +2,11 @@ import { describe, it, expect } from "vitest";
 import {
   selectDueLifecycleEmail,
   selectDueLifecycleEmails,
+  expiredDripKeys,
   contentKeyFor,
   daysBetween,
+  DRIP_CATCH_UP_GRACE_DAYS,
+  MAX_DRIP_DAY,
   type LifecycleUserState,
 } from "@/lib/lifecycle-emails";
 
@@ -108,6 +111,147 @@ describe("selectDueLifecycleEmail", () => {
       NOW
     );
     expect(due).toBeNull();
+  });
+});
+
+describe("drip catch-up guard (window = day + grace)", () => {
+  const drips = (n: number) => Array.from({ length: n }, (_, i) => `drip_${i + 1}`);
+
+  it("fresh user: day 1 is in-window and sends", () => {
+    const due = selectDueLifecycleEmail(
+      user({ signupAt: daysAgo(1), sentKeys: ["welcome"] }),
+      NOW
+    );
+    expect(due?.kind).toBe("drip");
+    expect(due?.dripDay).toBe(1);
+  });
+
+  it("mid-window user on cadence keeps advancing day by day", () => {
+    const due = selectDueLifecycleEmail(
+      user({ signupAt: daysAgo(10), sentKeys: ["welcome", ...drips(9)] }),
+      NOW
+    );
+    expect(due?.dripDay).toBe(10);
+  });
+
+  it("day N still sends at the window boundary (age = N + grace)…", () => {
+    const due = selectDueLifecycleEmail(
+      user({
+        signupAt: daysAgo(1 + DRIP_CATCH_UP_GRACE_DAYS),
+        sentKeys: ["welcome"],
+      }),
+      NOW
+    );
+    expect(due?.dripDay).toBe(1);
+  });
+
+  it("…and one day past the boundary it skips to the next in-window day", () => {
+    const due = selectDueLifecycleEmail(
+      user({
+        signupAt: daysAgo(2 + DRIP_CATCH_UP_GRACE_DAYS),
+        sentKeys: ["welcome"],
+      }),
+      NOW
+    );
+    // day 1 expired (age > 1 + grace); day 2 is the earliest in-window day.
+    expect(due?.dripDay).toBe(2);
+  });
+
+  it("a user who completed the drip on cadence still gets the final day", () => {
+    const due = selectDueLifecycleEmail(
+      user({ signupAt: daysAgo(MAX_DRIP_DAY), sentKeys: ["welcome", ...drips(29)] }),
+      NOW
+    );
+    expect(due?.dripDay).toBe(MAX_DRIP_DAY);
+  });
+
+  it("past-window April-style user (mid-drip, age 85) receives NO further drip days", () => {
+    // Signed up long before the drip went live; days 1..24 were already
+    // blasted daily. Every remaining day is past-window: the next email
+    // must not be a drip (free users fall through to the one-time nudge).
+    const due = selectDueLifecycleEmail(
+      user({ signupAt: daysAgo(85), sentKeys: ["welcome", ...drips(24)] }),
+      NOW
+    );
+    expect(due?.kind).toBe("pro_nudge");
+  });
+
+  it("past-window PAID April-style user gets nothing at all", () => {
+    const due = selectDueLifecycleEmail(
+      user({ plan: "paid", signupAt: daysAgo(85), sentKeys: ["welcome", ...drips(24)] }),
+      NOW
+    );
+    expect(due).toBeNull();
+  });
+
+  it("paid users never receive drip days even in-window (Pro-conversion drip)", () => {
+    const due = selectDueLifecycleEmail(
+      user({ plan: "paid", signupAt: daysAgo(3), sentKeys: ["welcome"] }),
+      NOW
+    );
+    expect(due).toBeNull();
+  });
+
+  it("welcome still goes to paid users", () => {
+    const due = selectDueLifecycleEmail(user({ plan: "paid" }), NOW);
+    expect(due?.kind).toBe("welcome");
+  });
+});
+
+describe("expiredDripKeys", () => {
+  const drips = (n: number) => Array.from({ length: n }, (_, i) => `drip_${i + 1}`);
+
+  it("is empty for a fresh user (nothing expired yet)", () => {
+    expect(expiredDripKeys(user({ signupAt: daysAgo(3) }), NOW)).toEqual([]);
+    expect(
+      expiredDripKeys(user({ signupAt: daysAgo(1 + DRIP_CATCH_UP_GRACE_DAYS) }), NOW)
+    ).toEqual([]);
+  });
+
+  it("reports day 1 once its window has passed", () => {
+    expect(
+      expiredDripKeys(
+        user({ signupAt: daysAgo(2 + DRIP_CATCH_UP_GRACE_DAYS), sentKeys: ["welcome"] }),
+        NOW
+      )
+    ).toEqual(["drip_1"]);
+  });
+
+  it("April-style user: every unsent day is expired, sent days are excluded", () => {
+    const expired = expiredDripKeys(
+      user({ signupAt: daysAgo(85), sentKeys: ["welcome", ...drips(24)] }),
+      NOW
+    );
+    expect(expired).toEqual(["drip_25", "drip_26", "drip_27", "drip_28", "drip_29", "drip_30"]);
+  });
+
+  it("very old account with no drips sent expires all 30 days", () => {
+    expect(expiredDripKeys(user({ signupAt: daysAgo(400) }), NOW)).toHaveLength(MAX_DRIP_DAY);
+  });
+
+  it("applies to paid users too (time-based, so a downgrade can't resurrect stale days)", () => {
+    const expired = expiredDripKeys(
+      user({ plan: "paid", signupAt: daysAgo(85), sentKeys: ["welcome", ...drips(24)] }),
+      NOW
+    );
+    expect(expired).toEqual(["drip_25", "drip_26", "drip_27", "drip_28", "drip_29", "drip_30"]);
+  });
+
+  it("is empty for unconfirmed users", () => {
+    expect(
+      expiredDripKeys(user({ confirmed: false, signupAt: daysAgo(85) }), NOW)
+    ).toEqual([]);
+  });
+
+  it("already-retired keys (present in sentKeys) are not reported again", () => {
+    const expired = expiredDripKeys(
+      user({
+        signupAt: daysAgo(85),
+        sentKeys: ["welcome", ...drips(24), "drip_25", "drip_26", "drip_27", "drip_28", "drip_29", "drip_30"],
+      }),
+      NOW
+    );
+    expect(expired).toEqual([]);
   });
 });
 

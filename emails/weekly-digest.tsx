@@ -479,9 +479,10 @@ export function WeeklyDigestEmail({
                 fontSize: "13px",
               }}
             >
-              TrueCap Pro: sensitivity grids, 10-year projections, MAO calculator,
-              PDF reports. Underwrite a property in less time than it takes to
-              open Excel.
+              Deal Score and the verdict are free. TrueCap Pro adds your buy box
+              (every deal pass/failed against YOUR criteria), sensitivity grids,
+              10-year projections, MAO calculator, and PDF reports. Underwrite a
+              property in less time than it takes to open Excel.
             </Text>
             <Link href={`${SITE_URL}/pricing`} style={styles.ctaButton}>
               Start with TrueCap Pro →

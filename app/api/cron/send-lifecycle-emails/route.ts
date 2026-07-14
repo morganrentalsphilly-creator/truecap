@@ -15,7 +15,12 @@
  *     Flip off -> dry -> live after reviewing a dry run.
  *  3. Idempotency: lifecycle_email_log (unique on user_id+email_key) means
  *     each email goes out at most once per user, even across overlapping runs.
- *  4. Failures → Sentry.captureMessage tagged feature: lifecycle-emails;
+ *  4. Catch-up guard: drip day N only sends while the account is at most
+ *     N + DRIP_CATCH_UP_GRACE_DAYS days old (lib/lifecycle-emails.ts).
+ *     Past-window days are RETIRED — logged with
+ *     resend_id = DRIP_SKIPPED_RESEND_ID instead of sent — so accounts
+ *     older than the drip never receive it as a daily catch-up blast.
+ *  5. Failures → Sentry.captureMessage tagged feature: lifecycle-emails;
  *     a single bad send never aborts the batch.
  *
  * Requires the lifecycle_email_log migration
@@ -26,6 +31,8 @@ import { NextResponse } from "next/server";
 import * as Sentry from "@sentry/nextjs";
 import {
   selectDueLifecycleEmail,
+  expiredDripKeys,
+  DRIP_SKIPPED_RESEND_ID,
   type LifecycleUserState,
 } from "@/lib/lifecycle-emails";
 import { renderLifecycleEmail } from "@/lib/email/render-lifecycle";
@@ -149,29 +156,69 @@ export async function GET(request: Request) {
     }
     const PROMO_KINDS = new Set<string>(["pro_nudge", "winback"]);
 
-    // Build per-user state + compute the one due email each.
+    // Build per-user state once; both the due-email selection and the
+    // catch-up guard read from it.
     const users = await listAllUsers(admin);
     const now = new Date();
-    const due = users
-      .map((u) => {
-        const state: LifecycleUserState = {
-          userId: u.id,
-          email: u.email,
-          signupAt: u.created_at,
-          confirmed: u.confirmed,
-          lastActivityAt: lastActivity.get(u.id) ?? null,
-          plan: paid.has(u.id) ? "paid" : "free",
-          sentKeys: sentByUser.get(u.id) ?? [],
-        };
-        return selectDueLifecycleEmail(state, now);
-      })
+    const states: LifecycleUserState[] = users.map((u) => ({
+      userId: u.id,
+      email: u.email,
+      signupAt: u.created_at,
+      confirmed: u.confirmed,
+      lastActivityAt: lastActivity.get(u.id) ?? null,
+      plan: paid.has(u.id) ? "paid" : "free",
+      sentKeys: sentByUser.get(u.id) ?? [],
+    }));
+
+    // CATCH-UP GUARD: retire drip days whose onboarding window has passed
+    // (never sent, never will be). The selection window below already
+    // refuses to send them, so this write is hygiene, not the safety net —
+    // a failed upsert can't cause a send. Rows reuse the log table with
+    // resend_id = DRIP_SKIPPED_RESEND_ID (the prod schema has no status
+    // column; sent_at records when the day was retired). ignoreDuplicates
+    // keeps this idempotent against real sends and concurrent runs.
+    const skipRows = states.flatMap((s) =>
+      expiredDripKeys(s, now).map((key) => ({
+        user_id: s.userId,
+        email_key: key,
+        resend_id: DRIP_SKIPPED_RESEND_ID,
+      }))
+    );
+    let dripDaysRetired = 0;
+    if (mode === "live" && skipRows.length > 0) {
+      for (let i = 0; i < skipRows.length; i += 500) {
+        const chunk = skipRows.slice(i, i + 500);
+        const { error: skipErr } = await admin
+          .from("lifecycle_email_log")
+          .upsert(chunk, { onConflict: "user_id,email_key", ignoreDuplicates: true });
+        if (skipErr) {
+          Sentry.captureMessage("lifecycle cron: past-window skip-mark failed", {
+            level: "warning",
+            tags: { feature: "lifecycle-emails" },
+            extra: { code: skipErr.code, message: skipErr.message },
+          });
+        } else {
+          dripDaysRetired += chunk.length;
+        }
+      }
+    }
+
+    const due = states
+      .map((state) => selectDueLifecycleEmail(state, now))
       .filter((d): d is NonNullable<typeof d> => d !== null)
       // Drop promotional kinds for users who haven't opted into marketing.
       .filter((d) => !PROMO_KINDS.has(d.kind) || marketingConsent.has(d.userId))
       .slice(0, MAX_SENDS_PER_RUN);
 
     if (due.length === 0) {
-      return NextResponse.json({ mode, skipped: true, reason: "nothing_due" });
+      return NextResponse.json({
+        mode,
+        skipped: true,
+        reason: "nothing_due",
+        ...(mode === "dry"
+          ? { wouldRetireDripDays: skipRows.length }
+          : { dripDaysRetired }),
+      });
     }
 
     const siteUrl = getSiteUrl();
@@ -285,17 +332,22 @@ export async function GET(request: Request) {
     }
 
     if (mode === "dry") {
-      console.log(`[lifecycle] DRY RUN — ${preview.length} emails would send`);
+      console.log(
+        `[lifecycle] DRY RUN — ${preview.length} emails would send, ${skipRows.length} past-window drip days would be retired`
+      );
       return NextResponse.json({
         mode: "dry",
         wouldSendCount: preview.length,
         wouldSend: preview,
+        wouldRetireDripDays: skipRows.length,
         firstEmailHtml: firstHtml,
       });
     }
 
-    console.log(`[lifecycle] LIVE — sent ${sent}/${due.length}`);
-    return NextResponse.json({ mode: "live", sent, due: due.length });
+    console.log(
+      `[lifecycle] LIVE — sent ${sent}/${due.length}, retired ${dripDaysRetired} past-window drip days`
+    );
+    return NextResponse.json({ mode: "live", sent, due: due.length, dripDaysRetired });
   } catch (error) {
     Sentry.captureMessage("lifecycle cron: unhandled failure", {
       level: "error",

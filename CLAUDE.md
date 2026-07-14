@@ -15,10 +15,12 @@ tax strategy, exit scenarios, plus a plain-English verdict and a
 shareable read-only link.
 
 - **Audience**: solo / small-portfolio buy-and-hold investors and house-hackers.
-- **Business model**: free tier (run analyses, no save) + Pro at **$29/mo**
-  or an annual plan (saved deals, dashboard, compare, templates, tax
-  strategy, exit scenarios, PDF export, Deal Score, etc.). Pricing logic
-  lives in the `plans.entitlements` JSON column — see `lib/entitlements.ts`.
+- **Business model**: free tier (run analyses, no save; Deal Score is
+  FREE for every user — see `app/actions/deal-score.ts`) + Pro at
+  **$29.99/mo** or **$300/yr** (saved deals, dashboard, compare,
+  templates, tax strategy, exit scenarios, PDF export, buy box, etc.).
+  Pricing logic lives in the `plans.entitlements` JSON column — see
+  `lib/entitlements.ts`.
 - **Stack**: Next.js 16 (App Router, `--webpack` for prod), React 19,
   TypeScript 5.7 (strict), Supabase (Auth + Postgres + Storage), Stripe
   (subscriptions), Resend (Broadcasts API), Sentry, Tailwind v4,
@@ -59,7 +61,7 @@ final_source_code/
 │   │   ├── auth.ts
 │   │   ├── billing.ts            # Stripe checkout + portal
 │   │   ├── compare.ts
-│   │   ├── deal-score.ts         # Pro deal-score scoring
+│   │   ├── deal-score.ts         # Deal Score scoring (FREE-tier feature)
 │   │   ├── enrich-property.ts    # FRED rate + HUD FMR + state property tax
 │   │   ├── exit-scenarios.ts     # Snapshot-cached
 │   │   ├── newsletter.ts
@@ -157,7 +159,7 @@ final_source_code/
 │   └── …
 ├── emails/
 │   ├── weekly-digest.tsx                  # React Email template
-│   ├── content/YYYY-MM-DD.json            # One file per Monday's digest
+│   ├── content/YYYY-MM-DD.json            # One file per Tuesday's digest
 │   └── daily-campaign-content/day-NN.json # 30-day onboarding drip
 ├── lib/                          # Server + shared utilities (see §4)
 │   ├── supabase/{admin,server,client,middleware}.ts
@@ -396,12 +398,12 @@ export type SharePayload = {
 
 ### 3.8 Email — Resend Broadcasts API, idempotent cron, kill switch
 
-`app/api/cron/send-weekly-digest/route.ts` runs Mondays at 13:00 UTC
-(schedule lives in `vercel.json`). It:
+`app/api/cron/send-weekly-digest/route.ts` runs Tuesdays at 13:00 UTC
+(schedule `0 13 * * 2` in `vercel.json`). It:
 
 1. **Auth-gates** on `Authorization: Bearer ${CRON_SECRET}`. No secret env var → 500 + Sentry alert. Bad bearer → 401 (silent).
 2. **Kill switch**: `NEWSLETTER_PAUSED=1|true|yes` → skip with a logged no-op. Use this to pause sends without a redeploy. Does **not** cancel broadcasts already pre-scheduled in Resend (cancel those in the Resend dashboard).
-3. Looks up `/emails/content/YYYY-MM-DD.json` for "this Monday". Missing file → 200 no-op (off-weeks are fine).
+3. Looks up `/emails/content/YYYY-MM-DD.json` for "this Tuesday" (files are named for their Tuesday send date). Missing file → 200 no-op (off-weeks are fine).
 4. **Idempotency check** — lists Resend broadcasts; if one with name `Weekly digest · ${today}` already exists (any status), skip. Prevents duplicate sends when `npm run schedule-broadcasts` has pre-scheduled into the 28-day window.
 5. Renders via `lib/email/render-weekly.ts`, then `POST /broadcasts` + `POST /broadcasts/:id/send`. Resend substitutes the per-recipient unsubscribe URL via the `{{{RESEND_UNSUBSCRIBE_URL}}}` placeholder we drop into the template.
 6. Failures → `Sentry.captureMessage` with tags `feature: newsletter-cron`.
@@ -489,7 +491,7 @@ When adding a fourth such feature, replicate this layout. Shared shells
 - `lib/verdict.ts` — `buildAutoVerdict()` + headline classifier (Strong / Solid / Mixed / Marginal / Negative). Cash-purchase branch handled explicitly.
 - `lib/investcalc-schema.ts` — Zod schema + `INVESTCALC_SCHEMA_VERSION` (currently `9`). Bump the version when the shape changes; persisted snapshots key on it.
 - `lib/ten-year-projections.ts`, `lib/tax-strategy.ts`, `lib/exit-scenarios.ts` — projection engines, each with a snapshot version constant + input-hash helper used by the matching server action for cache invalidation.
-- `lib/deal-score.ts` — Pro Deal Score (the deal-score server action wraps this).
+- `lib/deal-score.ts` — Deal Score, a FREE-tier feature (the deal-score server action wraps this).
 - `lib/sensitivity-analysis.ts`, `lib/max-allowable-offer.ts`, `lib/rehab-estimator.ts`, `lib/brrrr-analysis.ts`, `lib/fix-flip-analysis.ts` — strategy/analysis side modules.
 - `lib/compare-metrics.ts`, `lib/compare-assumptions.ts`, `lib/compare-result-snapshot.ts` — deal compare engine.
 
@@ -510,7 +512,7 @@ When adding a fourth such feature, replicate this layout. Shared shells
 - `billing.ts` — Stripe checkout session + customer portal.
 - `saved-analyses.ts` — save / load / list / archive / PDF export. The canonical reference for the full `Result` union shape.
 - `compare.ts` — Pro compare deals.
-- `deal-score.ts` — Pro Deal Score computation.
+- `deal-score.ts` — Deal Score computation (free tier).
 - `exit-scenarios.ts`, `tax-strategy.ts`, `ten-year-projections.ts` — snapshot-cached projection actions (see §3.12 trio pattern).
 - `analysis-templates.ts` — saved analysis templates.
 - `enrich-property.ts` — calls FRED (rate), HUD (FMR), state property tax to pre-fill the form.
@@ -550,7 +552,7 @@ When adding a fourth such feature, replicate this layout. Shared shells
 - `emails/weekly-digest.tsx` — React Email template (rendered by `lib/email/render-weekly.ts`).
 
 ### Data + content
-- `emails/content/YYYY-MM-DD.json` — one per Monday's send.
+- `emails/content/YYYY-MM-DD.json` — one per Tuesday's send.
 - `emails/daily-campaign-content/day-NN.json` — 30-day drip days.
 - `supabase/migrations/*.sql` — timestamped, run in order. Don't edit existing migrations; add a new one.
 - `lib/glossary.ts`, `lib/states.ts`, `lib/city-strategy-combos.ts`, `lib/starter-templates.ts` — static reference data.
@@ -675,7 +677,7 @@ Operational dry-runs:
 Don't autonomously do any of the following. Surface a proposal first
 and let Morgan say yes.
 
-1. **Change pricing** — the `$29/mo` figure, the annual discount, or
+1. **Change pricing** — the `$29.99/mo` / `$300/yr` figures, the annual discount, or
    anything that changes what a user sees on the pricing page or in
    the Stripe checkout amount.
 

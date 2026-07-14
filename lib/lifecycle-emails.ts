@@ -17,6 +17,17 @@
  *   "drip_<n>"       — onboarding drip day n (1..MAX_DRIP_DAY)
  *   "pro_nudge"      — once, free users still on free after the drip
  *   "winback_21d"    — once, users inactive >= WINBACK_AFTER_INACTIVE_DAYS
+ *
+ * Drip catch-up guard: drip day N is an ONBOARDING email — it only makes
+ * sense while the account is actually ~N days old. Day N is sendable only
+ * while account age <= N + DRIP_CATCH_UP_GRACE_DAYS; once the window has
+ * passed the day is expired and must be retired (logged as skipped by the
+ * cron via expiredDripKeys), never sent as a late "catch-up". Without this,
+ * a user who signed up long before the feature went live receives the
+ * entire 30-day sequence as consecutive daily emails.
+ *
+ * The drip is also free-users-only: it is a Pro-conversion sequence, so
+ * paid users never receive drip days (they still get "welcome").
  */
 
 export type LifecyclePlan = "free" | "paid";
@@ -52,6 +63,23 @@ export const MAX_DRIP_DAY = 30;
 // lands just after onboarding finishes — a "you're still free" upgrade ask.
 export const PRO_NUDGE_AFTER_DAYS = 31;
 export const WINBACK_AFTER_INACTIVE_DAYS = 21;
+/**
+ * How many days past its scheduled position a drip day may still send.
+ * Day N is in-window while account age <= N + grace — enough slack to
+ * absorb a few missed cron runs without ever turning into a daily
+ * catch-up blast for accounts older than the drip.
+ */
+export const DRIP_CATCH_UP_GRACE_DAYS = 4;
+/**
+ * Marker stored in lifecycle_email_log.resend_id when a drip day is
+ * retired as past-window instead of sent. The prod table has no status
+ * column (id / user_id / email_key / sent_at / resend_id — see
+ * supabase/migrations/20260620170000_lifecycle_email_log.sql), and
+ * resend_id is free-form tracing text nothing parses, so a distinct
+ * value there is how a skipped row stays distinguishable from a real
+ * send (real Resend ids never contain ":").
+ */
+export const DRIP_SKIPPED_RESEND_ID = "skipped:past_window";
 
 const DAY_MS = 86_400_000;
 
@@ -78,11 +106,19 @@ export function selectDueLifecycleEmail(
     return { userId: user.userId, email: user.email, kind: "welcome", key: "welcome" };
   }
 
-  // 2) Onboarding drip — the earliest unsent day that is now due.
-  if (user.confirmed) {
+  // 2) Onboarding drip — the earliest unsent day that is due AND still
+  //    inside its onboarding window (age <= day + grace). Past-window days
+  //    are never sent from here; the cron retires them via expiredDripKeys.
+  //    Free users only: the drip is a Pro-conversion sequence, so pitching
+  //    "upgrade to Pro" at users who already pay is wrong.
+  if (user.confirmed && user.plan === "free") {
     const daysSinceSignup = daysBetween(user.signupAt, now);
     for (let d = 1; d <= MAX_DRIP_DAY; d++) {
-      if (d <= daysSinceSignup && !sent.has(`drip_${d}`)) {
+      if (
+        d <= daysSinceSignup &&
+        daysSinceSignup <= d + DRIP_CATCH_UP_GRACE_DAYS &&
+        !sent.has(`drip_${d}`)
+      ) {
         return {
           userId: user.userId,
           email: user.email,
@@ -115,6 +151,28 @@ export function selectDueLifecycleEmail(
   }
 
   return null;
+}
+
+/**
+ * Drip-day keys whose onboarding window has already passed for this user
+ * and that were never sent: they must be RETIRED (logged with
+ * DRIP_SKIPPED_RESEND_ID), not queued. Time-based only — applies to free
+ * and paid users alike, so a later plan change can never resurrect a
+ * stale day. Once a key is retired it shows up in sentKeys and stops
+ * being reported here, so the cron's mark-skipped write is idempotent.
+ */
+export function expiredDripKeys(user: LifecycleUserState, now: Date = new Date()): string[] {
+  if (!user.confirmed) return [];
+  const sent = new Set(user.sentKeys);
+  const daysSinceSignup = daysBetween(user.signupAt, now);
+  const expired: string[] = [];
+  for (let d = 1; d <= MAX_DRIP_DAY; d++) {
+    const key = `drip_${d}`;
+    if (daysSinceSignup > d + DRIP_CATCH_UP_GRACE_DAYS && !sent.has(key)) {
+      expired.push(key);
+    }
+  }
+  return expired;
 }
 
 /** Map a batch of users to the lifecycle emails due this run (skips users with none). */

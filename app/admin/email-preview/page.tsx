@@ -151,7 +151,7 @@ export default async function EmailPreviewPage({
           <p className="mt-4 text-sm text-muted-foreground">
             No content files found in <code className="rounded bg-muted px-1.5 py-0.5">/emails/content/</code>.
             Create a file named <code className="rounded bg-muted px-1.5 py-0.5">YYYY-MM-DD.json</code>{" "}
-            (where the date is the Monday it should send) and refresh this page.
+            (where the date is the Tuesday it should send) and refresh this page.
           </p>
         </div>
       </div>

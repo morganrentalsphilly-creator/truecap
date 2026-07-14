@@ -51,11 +51,11 @@
     "answer": "Three steps that work in 90% of counties. (1) Pull 3-5 sales comparables of similar properties (same bedroom count, similar age, within 1 mile, sold in the last 12 months). Most county assessor sites have a comparable-sales lookup tool; if not, your realtor can pull this in 5 minutes. (2) Calculate the median price per square foot from those comps. Multiply by your property's square footage to get a comp-supported value. (3) File the appeal through your county's online portal (look for 'tax assessment appeal' on the assessor's site). Attach the comp list and your calculation. Most counties charge $25-100 to file. Hearings are usually in writing; some require a 10-minute call. Decisions come back in 60-120 days. If you win, the savings start immediately and recur every year you own the property. Set a calendar reminder for next year's assessment notice — the savings only persist if you defend them again when assessments roll forward."
   },
   "shipNote": {
-    "title": "TrueCap flags likely over-assessments",
+    "title": "Just shipped: honest after-tax math",
     "items": [
-      "Free: property details panel shows assessed value vs comp-supported value",
-      "Pro: portfolio rollup shows total annual tax savings across your saved properties if you appeal each",
-      "Check your portfolio in TrueCap →"
+      "Free: paste an address and TrueCap pre-fills a property-tax estimate for the state — so a tax appeal win shows up in your numbers the moment you drop in the lower bill",
+      "Pro: the tax strategy panel got an honesty overhaul — depreciation, deductions, and after-tax cash flow now modeled year by year with no optimistic hand-waving",
+      "See your deal after-tax →"
     ]
   }
 }

@@ -54,7 +54,7 @@
     "title": "Stress-test voucher math in TrueCap",
     "items": [
       "Free: model the rent as FMR vs market and see the cap rate spread",
-      "Pro: sensitivity grid — what happens if voucher tenants turn over annually vs every 3 years",
+      "Pro: sensitivity grid — stress the deal with higher vacancy if voucher turnover runs annual instead of every 3 years",
       "Underwrite a voucher deal honestly →"
     ]
   }

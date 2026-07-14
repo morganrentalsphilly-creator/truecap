@@ -53,8 +53,8 @@
   "shipNote": {
     "title": "Price the inspection findings before re-negotiating",
     "items": [
-      "Free: rehab cost estimator built in — model how a $15k roof or $8k electrical changes the deal",
-      "Pro: sensitivity grid — see exact cap rate impact of accepting vs walking",
+      "Free: drop the renegotiated price into the analyzer and re-run the verdict in 60 seconds",
+      "Pro: rehab estimator with line-item costs — model how a $15k roof or $8k electrical changes the deal before you counter",
       "Re-underwrite after inspection in 60 seconds →"
     ]
   }
