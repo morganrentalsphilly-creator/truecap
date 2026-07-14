@@ -1,5 +1,6 @@
 "use server";
 
+import * as Sentry from "@sentry/nextjs";
 import { captureServerEvent } from "@/lib/posthog-server";
 
 /**
@@ -140,11 +141,21 @@ export async function subscribeToNewsletterAction(
       };
     }
 
-    // Any other non-OK: log and return generic error.
+    // Any other non-OK: page via Sentry, not just console (console.error
+    // is invisible in prod — pitfall #6). A 404 here means the configured
+    // audience no longer exists (exactly what happened when the Resend
+    // account switched: every signup was failing and only Vercel's
+    // unwatched logs knew). No PII: status + message only, never the email.
     console.error(
       "[newsletter] Resend API returned %d: %s",
       response.status,
       body.message ?? "(no message)"
+    );
+    Sentry.captureMessage(
+      `[newsletter] signup failed — Resend ${response.status}: ${body.message ?? "(no message)"}${
+        response.status === 404 ? " (audience missing — check RESEND_AUDIENCE_ID)" : ""
+      }`,
+      { level: "error", tags: { feature: "newsletter" } }
     );
     return {
       ok: false,
