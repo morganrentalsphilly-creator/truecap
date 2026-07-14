@@ -196,6 +196,23 @@ export function initAnalytics(): Promise<PostHog | null> {
     if (!key) {
       disabled = true;
       queue = [];
+      // The safe-no-op design let a fully-instrumented funnel run BLIND in
+      // prod for months (the key was never added to Vercel env) with zero
+      // symptoms — same silent-config-drift class as the Resend-audience
+      // and Stripe-price incidents. In production this is a config bug,
+      // not a valid state: page once per session via Sentry (identical
+      // messages dedupe into one issue with a counter).
+      if (process.env.NODE_ENV === "production") {
+        try {
+          const Sentry = await import("@sentry/nextjs");
+          Sentry.captureMessage(
+            "[analytics] NEXT_PUBLIC_POSTHOG_KEY missing from the production build — funnel is blind",
+            { level: "warning", tags: { feature: "analytics" } }
+          );
+        } catch {
+          /* Sentry unavailable — nothing more we can do quietly */
+        }
+      }
       return null;
     }
     try {

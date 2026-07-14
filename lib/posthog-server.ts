@@ -17,8 +17,12 @@ import "server-only";
  * Use this for events that fire from the server, never from the
  * browser (the browser uses lib/analytics.ts instead).
  *
- * Required env var: POSTHOG_API_KEY (the "personal API key" from
- * PostHog → Settings → Personal API Keys, starts with phx_...).
+ * Required env var: POSTHOG_API_KEY — the PROJECT API token (starts
+ * with phc_..., same value as NEXT_PUBLIC_POSTHOG_KEY). posthog-node's
+ * capture API authenticates with the project token, NOT a personal key.
+ * (A phx_ personal key is only for the PostHog Query API — keep one
+ * locally for analysis if needed, but never deploy it and never put it
+ * in this variable: capture would silently stop working.)
  *
  * Optional env var: NEXT_PUBLIC_POSTHOG_HOST (defaults to
  * https://us.i.posthog.com — US Cloud).
