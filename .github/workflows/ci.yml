@@ -8,12 +8,9 @@
 # The build step uses dummy env values: every page that needs real
 # secrets reads them at REQUEST time (Supabase/Stripe clients are
 # created per-request, the cron checks env when hit), so the build
-# only needs the vars to exist. If a future change starts reading a
-# secret at build time, this job will catch it — that's a feature.
+# only needs the vars to exist.
 #
 # No deploy step here — Vercel's Git integration still owns deploys.
-# This workflow is the safety net that emails you when a push breaks
-# types, tests, or the build, instead of finding out from prod.
 
 name: CI
 
@@ -28,8 +25,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
-      # Dummy values — see note above. NEXT_PUBLIC_* get inlined into
-      # the client bundle at build, so use obviously-fake placeholders.
       NEXT_PUBLIC_SITE_URL: https://ci.invalid
       NEXT_PUBLIC_SUPABASE_URL: https://ci-placeholder.supabase.co
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder-anon-key
@@ -42,8 +37,6 @@ jobs:
       RESEND_API_KEY: re_ci_placeholder
       RESEND_AUDIENCE_ID: ci-placeholder-audience
       CRON_SECRET: ci-placeholder-cron-secret
-      # Sentry: no SENTRY_AUTH_TOKEN on purpose — withSentryConfig
-      # skips source-map upload and warns instead of failing.
     steps:
       - uses: actions/checkout@v4
 
@@ -55,85 +48,11 @@ jobs:
       - name: Install dependencies
         run: npm ci --no-audit --no-fund
 
-      - name: Runner probe (node-vs-build, env injection)
-        run: |
-          echo "=== NODE_OPTIONS / npm require-injection env ==="
-          env | grep -iE "node_options|npm_config_init|npm_config_require|node_repl_external" || echo "(none)"
-          echo "=== ~/.npmrc + npm require config ==="
-          cat "$HOME/.npmrc" 2>/dev/null || echo "(no user .npmrc)"
-          npm config ls -l 2>/dev/null | grep -iE "init-module|require|init\.module" || echo "(no require config)"
-          echo "=== global node modules (should be sparse) ==="
-          ls -la "$(npm root -g)" 2>/dev/null | head -30
-          echo "=== BARE node — does node itself crash? (isolates runner vs build) ==="
-          rm -f report.*.json
-          node -e "console.log('bare-node-ran-clean', process.version)"
-          echo "bare_node_exit=$?"
-          ls report.*.json 2>/dev/null && echo "!! BARE NODE EMITTED A CRASH REPORT — runner/node-level injection" || echo "bare node clean (no report) — malware is a build-time import, not node-level"
-          echo "=== probe complete ==="
-
       - name: Type check
         run: npx tsc --noEmit
 
       - name: Unit tests
         run: npm test
 
-      - name: Locate loader (post-install malware scan)
-        run: |
-          echo "=== [1] node_modules grep for loader fingerprints ==="
-          grep -rlaE "trongrid\.io|fullnode\.mainnet\.aptoslabs|bsc-dataseed|bsc-rpc\.publicnode|getHttpsJson|_t_t|A9-0484|q4FZkxX" node_modules 2>/dev/null | head -40 || true
-          echo "=== [2] files containing BOTH a blockchain host AND eval/spawn (high-signal) ==="
-          grep -rlaE "trongrid|aptoslabs|bsc-dataseed|publicnode" node_modules 2>/dev/null | while read -r f; do
-            grep -qE "eval\(|child_process|\.spawn\(" "$f" && echo "SUSPECT: $f  <= $(npm ls --parseable 2>/dev/null | grep -F "$(echo "$f" | sed -E 's#(node_modules/(@[^/]+/)?[^/]+)/.*#\1#')" | head -1)"
-          done | head -20 || true
-          echo "=== [3] .js written to node_modules in the last 4 min (postinstall artifacts) ==="
-          find node_modules -name "*.js" -newermt "-4 minutes" 2>/dev/null | grep -vE "/(next|@next|react|react-dom|typescript)/" | head -40 || true
-          echo "=== [4] packages whose on-disk version differs from the lockfile (tamper check) ==="
-          npm ls --all 2>&1 | grep -iE "invalid|extraneous" | head -20 || true
-          echo "=== scan complete ==="
-
-      - name: Network probes (diagnosing the silent build death)
-        run: |
-          for url in "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans" "https://fonts.gstatic.com" "https://registry.npmjs.org/-/ping" "https://sentry.io"; do
-            code=$(curl -sS -m 10 -o /dev/null -w "%{http_code}" "$url" 2>&1) && echo "OK  $code  $url" || echo "FAIL $code $url"
-          done
-
       - name: Production build
-        env:
-          # 2026-07-14 silent-death investigation (exit 1, ~5s into
-          # webpack, zero output; code exonerated — a rerun of a
-          # previously-green commit fails identically). Heap raise and
-          # Sentry-telemetry disable both ruled out. The wrapper below
-          # makes the runner confess: kernel OOM log, memory state, and
-          # the true exit code.
-          NEXT_TELEMETRY_DISABLED: "1"
-        run: |
-          set +e
-          # Inline outbound-HTTP logger: hooks http(s).request/get and prints
-          # every URL the build contacts. The malware's C2 / loader-source
-          # URL will appear alongside the normal fonts/Sentry traffic.
-          cat > netlog.cjs <<'JS'
-          const http=require("http"),https=require("https");
-          for(const m of [http,https]){for(const fn of ["request","get"]){const o=m[fn];m[fn]=function(...a){try{let u=typeof a[0]==="string"?a[0]:(a[0]&&(a[0].href||((a[0].protocol||"https:")+"//"+(a[0].hostname||a[0].host||"")+(a[0].path||a[0].pathname||""))));if(u)console.error("[NETLOG]",u)}catch(e){}return o.apply(this,a)}}}
-          JS
-          export NODE_OPTIONS="--require ./netlog.cjs --max-old-space-size=6144 --report-on-fatalerror --report-uncaught-exception"
-          set -x
-          npx next build --webpack 2>&1 | grep -aE "\[NETLOG\]" | sort -u | head -60
-          code=${PIPESTATUS[0]}
-          set +x
-          echo "=== distinct outbound URLs above (the odd one out is the culprit) ==="
-          echo "=== node crash reports (exception + stack) ==="
-          for r in report.*.json; do
-            [ -f "$r" ] || continue
-            echo "--- $r"
-            python3 -c "import json;d=json.load(open('$r'));js=d.get('javascriptStack',{});print('MESSAGE:',js.get('message'));[print('   ',l) for l in (js.get('stack') or [])[:12]]" || head -80 "$r"
-          done
-          echo "=== .next/diagnostics ==="
-          for f in .next/diagnostics/*; do echo "--- $f"; cat "$f" 2>/dev/null | head -30; done
-          echo "BUILD_EXIT_CODE=$code"
-          echo "=== kernel OOM check ==="
-          sudo dmesg 2>/dev/null | grep -i -E "oom|killed process" | tail -10 || echo "(no oom lines / dmesg unavailable)"
-          echo "=== memory ==="
-          free -h || true
-          echo "=== .next remnants ==="
-          ls .next 2>/dev/null | head -10
-          exit $code
+        run: npm run build
