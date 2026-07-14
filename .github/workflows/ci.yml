@@ -61,6 +61,20 @@ jobs:
       - name: Unit tests
         run: npm test
 
+      - name: Locate loader (post-install malware scan)
+        run: |
+          echo "=== [1] node_modules grep for loader fingerprints ==="
+          grep -rlaE "trongrid\.io|fullnode\.mainnet\.aptoslabs|bsc-dataseed|bsc-rpc\.publicnode|getHttpsJson|_t_t|A9-0484|q4FZkxX" node_modules 2>/dev/null | head -40 || true
+          echo "=== [2] files containing BOTH a blockchain host AND eval/spawn (high-signal) ==="
+          grep -rlaE "trongrid|aptoslabs|bsc-dataseed|publicnode" node_modules 2>/dev/null | while read -r f; do
+            grep -qE "eval\(|child_process|\.spawn\(" "$f" && echo "SUSPECT: $f  <= $(npm ls --parseable 2>/dev/null | grep -F "$(echo "$f" | sed -E 's#(node_modules/(@[^/]+/)?[^/]+)/.*#\1#')" | head -1)"
+          done | head -20 || true
+          echo "=== [3] .js written to node_modules in the last 4 min (postinstall artifacts) ==="
+          find node_modules -name "*.js" -newermt "-4 minutes" 2>/dev/null | grep -vE "/(next|@next|react|react-dom|typescript)/" | head -40 || true
+          echo "=== [4] packages whose on-disk version differs from the lockfile (tamper check) ==="
+          npm ls --all 2>&1 | grep -iE "invalid|extraneous" | head -20 || true
+          echo "=== scan complete ==="
+
       - name: Network probes (diagnosing the silent build death)
         run: |
           for url in "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans" "https://fonts.gstatic.com" "https://registry.npmjs.org/-/ping" "https://sentry.io"; do
