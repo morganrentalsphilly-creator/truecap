@@ -49,6 +49,16 @@ export type BlogPost = {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: "how-to-calculate-rental-property-depreciation",
+    title:
+      "How to calculate depreciation on a rental property: the 27.5-year math, step by step (2026)",
+    excerpt:
+      "The largest deduction on Schedule E — and the only one that costs no cash. The three-step calculation worked on a $250K duplex: depreciable basis with closing costs ($256,000), the assessor's land split (25% → $192,000 building), and the 27.5-year schedule with the mid-month convention ($6,982/yr, $5,528 in a March year one). Plus the paper-loss bridge where +$200/mo of cash flow reports a $2,682 loss, the 20%-vs-30% land ratio that swings $931 a year, and the allowed-or-allowable trap that bills you at sale for deductions you never claimed.",
+    readingTimeMinutes: 11,
+    publishedAt: "2026-07-14",
+    available: true,
+  },
+  {
     slug: "buying-rental-property-with-tenants",
     title:
       "Buying a rental property with tenants in place: the lease, the estoppel, and the below-market rent math (2026)",
