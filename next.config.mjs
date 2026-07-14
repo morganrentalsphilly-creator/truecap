@@ -222,6 +222,16 @@ export default withSentryConfig(nextConfig, {
   // Only print logs for uploading source maps in CI
   silent: !process.env.CI,
 
+  // Sentry's own build-plugin telemetry (a network call to sentry.io that
+  // only engages in CI-like environments). 2026-07-14: every GitHub CI
+  // build died SILENTLY (~5s in, exit 1, zero output) with this telemetry
+  // announcement as the last line — on trees that built fine locally and
+  // had passed CI hours earlier. Local builds never even engage the
+  // telemetry path. Opting out costs nothing (it's Sentry's usage stats,
+  // not our error reporting) and removes the only network-dependent step
+  // between compile start and the crash point.
+  telemetry: false,
+
   // Sentry auth token controls source-map upload at build time. Without
   // an auth token, the upload step throws "No auth token provided"
   // warnings on every build. In newer @sentry/nextjs versions Vercel
