@@ -75,12 +75,17 @@ jobs:
           # Sentry-telemetry disable both ruled out. The wrapper below
           # makes the runner confess: kernel OOM log, memory state, and
           # the true exit code.
-          NODE_OPTIONS: --max-old-space-size=6144 --trace-uncaught
+          NODE_OPTIONS: --max-old-space-size=6144 --report-on-fatalerror --report-uncaught-exception
           NEXT_TELEMETRY_DISABLED: "1"
         run: |
           set +e
-          npm run build
+          set -x
+          npx next build --webpack
           code=$?
+          set +x
+          echo "=== node crash reports ==="
+          ls report.*.json 2>/dev/null && head -60 report.*.json || echo "(no node crash report)"
+          find . -maxdepth 2 -name "report.*.json" -not -path "./node_modules/*" 2>/dev/null | head -3
           echo "BUILD_EXIT_CODE=$code"
           echo "=== kernel OOM check ==="
           sudo dmesg 2>/dev/null | grep -i -E "oom|killed process" | tail -10 || echo "(no oom lines / dmesg unavailable)"
