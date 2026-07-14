@@ -398,8 +398,19 @@ export type SharePayload = {
 
 ### 3.8 Email — Resend Broadcasts API, idempotent cron, kill switch
 
-`app/api/cron/send-weekly-digest/route.ts` runs Tuesdays at 13:00 UTC
-(schedule `0 13 * * 2` in `vercel.json`). It:
+> **⚠️ NEWSLETTER CANCELED — founder decision 2026-07-15.** The Resend
+> account switch deleted the audience (subscribers unrecoverable) and
+> Morgan chose to kill the newsletter rather than rebuild it. The
+> weekly-digest cron is REMOVED from `vercel.json`, and
+> `NewsletterSignup` renders `null` (all ~70 mounts dark). Do NOT
+> re-add signup surfaces, re-schedule broadcasts, or recreate the
+> audience without Morgan's explicit word. The machinery below is
+> documented for potential revival only. Lifecycle onboarding emails,
+> rate/rent alerts, and the weekly summary are SEPARATE per-user sends
+> and remain active/dormant as configured.
+
+The (retired) `app/api/cron/send-weekly-digest/route.ts` ran Tuesdays at
+13:00 UTC (schedule `0 13 * * 2`, now removed from `vercel.json`). It:
 
 1. **Auth-gates** on `Authorization: Bearer ${CRON_SECRET}`. No secret env var → 500 + Sentry alert. Bad bearer → 401 (silent).
 2. **Kill switch**: `NEWSLETTER_PAUSED=1|true|yes` → skip with a logged no-op. Use this to pause sends without a redeploy. Does **not** cancel broadcasts already pre-scheduled in Resend (cancel those in the Resend dashboard).

@@ -52,6 +52,18 @@ export function NewsletterSignup({
     });
   };
 
+  // NEWSLETTER CANCELED — founder decision 2026-07-15. The Resend account
+  // switch deleted the audience (subscribers unrecoverable) and Morgan
+  // chose to kill the newsletter rather than rebuild it. Rendering null
+  // here darkens all ~70 mounts (footer band + inline blog embeds) in one
+  // place — do NOT collect emails for a product that doesn't exist. Placed
+  // AFTER the hooks so the rules-of-hooks contract holds. To revive:
+  // recreate a Resend audience, set RESEND_AUDIENCE_ID, restore the
+  // weekly-digest cron in vercel.json, and delete this early return.
+  // Do not resurrect without Morgan's word.
+  const NEWSLETTER_CANCELED: boolean = true; // widened so tsc doesn't flag the preserved code as unreachable
+  if (NEWSLETTER_CANCELED) return null;
+
   if (successMessage) {
     const successPadding =
       variant === "compact"
