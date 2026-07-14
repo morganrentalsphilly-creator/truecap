@@ -83,9 +83,14 @@ jobs:
           npx next build --webpack
           code=$?
           set +x
-          echo "=== node crash reports ==="
-          ls report.*.json 2>/dev/null && head -60 report.*.json || echo "(no node crash report)"
-          find . -maxdepth 2 -name "report.*.json" -not -path "./node_modules/*" 2>/dev/null | head -3
+          echo "=== node crash reports (exception + stack) ==="
+          for r in report.*.json; do
+            [ -f "$r" ] || continue
+            echo "--- $r"
+            python3 -c "import json;d=json.load(open('$r'));js=d.get('javascriptStack',{});print('MESSAGE:',js.get('message'));[print('   ',l) for l in (js.get('stack') or [])[:12]]" || head -80 "$r"
+          done
+          echo "=== .next/diagnostics ==="
+          for f in .next/diagnostics/*; do echo "--- $f"; cat "$f" 2>/dev/null | head -30; done
           echo "BUILD_EXIT_CODE=$code"
           echo "=== kernel OOM check ==="
           sudo dmesg 2>/dev/null | grep -i -E "oom|killed process" | tail -10 || echo "(no oom lines / dmesg unavailable)"
