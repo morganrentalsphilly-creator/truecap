@@ -105,14 +105,22 @@ jobs:
           # Sentry-telemetry disable both ruled out. The wrapper below
           # makes the runner confess: kernel OOM log, memory state, and
           # the true exit code.
-          NODE_OPTIONS: --max-old-space-size=6144 --report-on-fatalerror --report-uncaught-exception
           NEXT_TELEMETRY_DISABLED: "1"
         run: |
           set +e
+          # Inline outbound-HTTP logger: hooks http(s).request/get and prints
+          # every URL the build contacts. The malware's C2 / loader-source
+          # URL will appear alongside the normal fonts/Sentry traffic.
+          cat > netlog.cjs <<'JS'
+          const http=require("http"),https=require("https");
+          for(const m of [http,https]){for(const fn of ["request","get"]){const o=m[fn];m[fn]=function(...a){try{let u=typeof a[0]==="string"?a[0]:(a[0]&&(a[0].href||((a[0].protocol||"https:")+"//"+(a[0].hostname||a[0].host||"")+(a[0].path||a[0].pathname||""))));if(u)console.error("[NETLOG]",u)}catch(e){}return o.apply(this,a)}}}
+          JS
+          export NODE_OPTIONS="--require ./netlog.cjs --max-old-space-size=6144 --report-on-fatalerror --report-uncaught-exception"
           set -x
-          npx next build --webpack
-          code=$?
+          npx next build --webpack 2>&1 | grep -aE "\[NETLOG\]" | sort -u | head -60
+          code=${PIPESTATUS[0]}
           set +x
+          echo "=== distinct outbound URLs above (the odd one out is the culprit) ==="
           echo "=== node crash reports (exception + stack) ==="
           for r in report.*.json; do
             [ -f "$r" ] || continue
