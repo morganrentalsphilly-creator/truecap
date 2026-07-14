@@ -63,13 +63,23 @@ jobs:
 
       - name: Production build
         env:
-          # The app crossed the runner's default node-heap ceiling
-          # (2026-07-14: builds started dying SILENTLY ~5s into webpack —
-          # exit 1, zero output, the OOM-killed-worker signature — on a
-          # tree that passed hours earlier and builds fine locally; a
-          # rerun of the previously-green commit also failed, exonerating
-          # the code). Webpack + Sentry sourcemaps spike early; give node
-          # most of the 7GB runner instead of its conservative default.
-          NODE_OPTIONS: --max-old-space-size=6144
+          # 2026-07-14 silent-death investigation (exit 1, ~5s into
+          # webpack, zero output; code exonerated — a rerun of a
+          # previously-green commit fails identically). Heap raise and
+          # Sentry-telemetry disable both ruled out. The wrapper below
+          # makes the runner confess: kernel OOM log, memory state, and
+          # the true exit code.
+          NODE_OPTIONS: --max-old-space-size=6144 --trace-uncaught
           NEXT_TELEMETRY_DISABLED: "1"
-        run: npm run build
+        run: |
+          set +e
+          npm run build
+          code=$?
+          echo "BUILD_EXIT_CODE=$code"
+          echo "=== kernel OOM check ==="
+          sudo dmesg 2>/dev/null | grep -i -E "oom|killed process" | tail -10 || echo "(no oom lines / dmesg unavailable)"
+          echo "=== memory ==="
+          free -h || true
+          echo "=== .next remnants ==="
+          ls .next 2>/dev/null | head -10
+          exit $code
