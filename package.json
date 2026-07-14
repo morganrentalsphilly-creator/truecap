@@ -21,7 +21,9 @@
     "preview-daily-campaign": "npx -y tsx scripts/preview-daily-campaign.ts",
     "count-audiences": "npx -y tsx scripts/count-audience-contacts.ts",
     "build-market-rents": "npx -y tsx scripts/build-market-rents.ts",
-    "build-market-rents:dry": "npx -y tsx scripts/build-market-rents.ts --dry-run"
+    "build-market-rents:dry": "npx -y tsx scripts/build-market-rents.ts --dry-run",
+    "build-market-safmr": "npx -y tsx scripts/build-market-safmr.ts",
+    "build-market-safmr:dry": "npx -y tsx scripts/build-market-safmr.ts --dry-run"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",

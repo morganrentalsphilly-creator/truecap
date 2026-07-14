@@ -27,6 +27,11 @@ import {
   getMarketCityParams,
 } from "@/lib/markets/cities";
 import { HUD_RENTS } from "@/lib/markets/hud-rents";
+import { SAFMR_RENTS } from "@/lib/markets/safmr-rents";
+import {
+  buildMarketCityDescription,
+  buildMarketCityTitle,
+} from "@/lib/markets/market-city-seo";
 import { getCapRateBenchmark } from "@/lib/market-benchmarks";
 import { marketStrategyFit } from "@/lib/market-strategy-fit";
 import { getStatePropertyTaxPct } from "@/lib/property-enrichment/state-property-tax";
@@ -55,14 +60,17 @@ export async function generateMetadata({
   const data = getMarketCity(city);
   if (!data) return { title: "Market not found" };
 
-  // Keyword-first + year, and short enough (city name maxes at 16
-  // chars → ≤44 + the layout's " | TrueCap") that nothing gets clipped
-  // in the SERP window. Cap-rate / rent detail lives in the description.
-  const title = `${data.name} Rental Market Analysis 2026`;
+  // Question-first title targeting "Is [City] a good place to buy rental
+  // property in 2026?" (the SERP moving companies currently win). The
+  // helper guarantees ≤50 chars pre-template — unit-tested in
+  // lib/__tests__/markets-data-bar.test.ts. Detail lives in the description.
+  const title = buildMarketCityTitle(data.name);
   // Built from fixed-width parts so it always lands under ~160 chars —
   // the old `.slice(0, 300)` shipped over-length, mid-word-truncated
   // descriptions. The blurb still leads og:description below.
-  const description = `Run a ${data.name}, ${data.stateCode} rental deal in 60 seconds — typical rent ${data.typicalRent}, prices ${data.typicalPrice}, plus 2026 cap-rate and rent benchmarks.`;
+  const benchmark = getCapRateBenchmark(`${data.name}, ${data.stateCode}`);
+  const tone = benchmark ? marketStrategyFit(benchmark.median).tone : null;
+  const description = buildMarketCityDescription(data.name, tone);
 
   return {
     title,
@@ -134,6 +142,31 @@ export default async function MarketCityPage({
     : data.typicalRent;
   const rentSub = hud ? `HUD FMR · 2–3BR · ${hud.year}` : "est., SFR / small multi";
 
+  // ZIP-level Small Area FMR table (build-market-safmr) — only ~1/3 of
+  // market cities sit in a HUD SAFMR entity; the section renders nothing
+  // for the rest (invisible until useful).
+  const safmr = SAFMR_RENTS[data.slug];
+
+  // Verdict-first answer to the H1 question, built from the same data the
+  // rest of the page shows (cap-rate benchmark, HUD rent, state tax).
+  // The ~6.5% national-median reference mirrors lib/market-strategy-fit.ts.
+  const verdictLead =
+    fit?.tone === "cashflow"
+      ? "Short answer: yes — for cash-flow investors."
+      : fit?.tone === "appreciation"
+        ? "Short answer: it depends on your strategy."
+        : fit
+          ? "Short answer: yes — for balanced buy-and-hold."
+          : "Short answer: run the numbers.";
+  const verdictDetail =
+    fit?.tone === "cashflow"
+      ? `${data.name}'s median cap rate runs about ${capMedian} (${capScope} median), above the ~6.5% national median, with typical rent at ${rentDisplay} and ${data.stateName} property tax near ${taxPct}.`
+      : fit?.tone === "appreciation"
+        ? `${data.name} is an appreciation-first market — its ~${capMedian} median cap rate (${capScope}) sits below the ~6.5% national median, so the play is long-term price growth more than day-one cash flow. Typical rent runs ${rentDisplay}; ${data.stateName} property tax is about ${taxPct}.`
+        : fit
+          ? `${data.name}'s median cap rate of about ${capMedian} (${capScope} median) sits near the ~6.5% national median, with typical rent at ${rentDisplay} and ${data.stateName} property tax near ${taxPct}.`
+          : `Typical rent runs ${rentDisplay} and ${data.stateName} property tax is about ${taxPct} — whether ${data.name} works depends on the specific deal.`;
+
   // Internal links: any existing city+strategy combos for this city.
   const cityCombos = CITY_STRATEGY_COMBOS.filter((c) => c.citySlug === data.slug);
 
@@ -173,7 +206,8 @@ export default async function MarketCityPage({
     name: `${data.name} rental property analysis`,
     description: data.blurb,
     url: canonicalUrl,
-    dateModified: "2026-06-20",
+    // Real last-substantive-change date (2026 retarget + SAFMR tables).
+    dateModified: "2026-07-14",
     inLanguage: "en-US",
     isPartOf: { "@id": `${siteUrl}/#website` },
   };
@@ -182,6 +216,14 @@ export default async function MarketCityPage({
     "@context": "https://schema.org",
     "@type": "FAQPage",
     mainEntity: [
+      {
+        "@type": "Question",
+        name: `Is ${data.name} a good place to buy rental property in 2026?`,
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: `${verdictLead} ${verdictDetail} Run any specific ${data.name} address through TrueCap for a full verdict — cap rate, cash flow, DSCR, and a 10-year projection — in about 60 seconds.`,
+        },
+      },
       {
         "@type": "Question",
         name: `What's a good cap rate in ${data.name}?`,
@@ -243,9 +285,12 @@ export default async function MarketCityPage({
           <MapPin className="size-3.5" /> {data.name}, {data.stateCode}
         </p>
         <h1 className="mt-2 text-3xl sm:text-5xl font-extrabold text-foreground leading-[1.05] tracking-tight">
-          {data.name} rental property analysis
+          Is {data.name} a good place to buy rental property in 2026?
         </h1>
-        <p className="mt-5 text-lg leading-relaxed text-muted-foreground">{data.blurb}</p>
+        <p className="mt-5 text-lg leading-relaxed text-foreground">
+          <strong>{verdictLead}</strong> {verdictDetail}
+        </p>
+        <p className="mt-3 text-base leading-relaxed text-muted-foreground">{data.blurb}</p>
 
         {/* Market snapshot */}
         <section className="mt-10 rounded-2xl border border-border bg-card p-6">
@@ -291,13 +336,66 @@ export default async function MarketCityPage({
           <SourceMethodologyBox
             className="mt-4"
             sources={["HUD Fair Market Rent", "FRED 30-yr mortgage rate", "Tax Foundation (property tax)"]}
-            updated="June 2026"
+            updated="July 2026"
           />
         </section>
 
+        {/* Rent-by-ZIP (HUD Small Area FMR) — only for cities in a SAFMR entity */}
+        {safmr ? (
+          <section className="mt-12">
+            <h2 className="text-2xl font-extrabold text-foreground mb-3">
+              What rents actually look like in {data.name}
+            </h2>
+            <p className="text-base leading-relaxed text-muted-foreground">
+              One number never tells the story — HUD publishes ZIP-level Small Area Fair Market
+              Rents for the {safmr.areaName}, the metro-wide FMR region that includes
+              {" "}{data.name}, and the spread across its ZIP codes is where deals are won or
+              lost. Same purchase price, different ZIP, very different rent.
+            </p>
+            <div className="mt-4 overflow-x-auto rounded-xl border border-border">
+              <table className="w-full min-w-[24rem] text-sm">
+                <caption className="sr-only">
+                  HUD Small Area Fair Market Rent by ZIP code, {safmr.areaName}, FY{safmr.year}
+                </caption>
+                <thead>
+                  <tr className="border-b border-border bg-muted/50 text-left">
+                    <th scope="col" className="px-4 py-2.5 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">ZIP code</th>
+                    <th scope="col" className="px-4 py-2.5 text-right text-[11px] font-bold uppercase tracking-widest text-muted-foreground">2BR rent</th>
+                    <th scope="col" className="px-4 py-2.5 text-right text-[11px] font-bold uppercase tracking-widest text-muted-foreground">3BR rent</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {safmr.rows.map((r) => (
+                    <tr key={r.zip} className="border-b border-border last:border-b-0">
+                      <td className="px-4 py-2.5 font-semibold text-foreground">{r.zip}</td>
+                      <td className="px-4 py-2.5 text-right text-foreground">${r.rent2br.toLocaleString("en-US")}/mo</td>
+                      <td className="px-4 py-2.5 text-right text-foreground">${r.rent3br.toLocaleString("en-US")}/mo</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
+              {safmr.rows.length < safmr.zipCount
+                ? `Showing ${safmr.rows.length} of ${safmr.zipCount} ZIP codes in the ${safmr.areaName} — the HUD FMR region that includes ${data.name} — sampled highest to lowest across the rent range. `
+                : `All ${safmr.zipCount} ZIP codes in the ${safmr.areaName}, highest rent first. `}
+              Source:{" "}
+              <a
+                href="https://www.huduser.gov/portal/datasets/fmr/smallarea/index.html"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-primary hover:underline"
+              >
+                HUD FY{safmr.year} Small Area Fair Market Rents
+              </a>
+              . TrueCap auto-fills the exact ZIP-level figure when you enter a {data.name} address.
+            </p>
+          </section>
+        ) : null}
+
         {/* Why invest here */}
         <section className="mt-12">
-          <h2 className="text-2xl font-extrabold text-foreground mb-3">Is {data.name} a good place to buy rentals?</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mb-3">Why {data.name} works for rental investors</h2>
           <p className="text-base leading-relaxed text-foreground">{data.investorAngle}</p>
           {stateSlug ? (
             <p className="mt-4 text-sm">
@@ -305,7 +403,7 @@ export default async function MarketCityPage({
                 href={`/states/${stateSlug}`}
                 className="font-semibold text-primary hover:underline"
               >
-                See the full {data.stateName} investing guide — taxes, landlord law &amp; top metros →
+                See the full {data.stateName}{" "}investing guide — taxes, landlord law &amp; top metros →
               </Link>
             </p>
           ) : null}
