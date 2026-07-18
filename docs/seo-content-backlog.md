@@ -43,10 +43,11 @@ skip beats a post that cannot rank.
 
 ## Backlog (work top-down)
 
-- [ ] "What is a good DSCR for a rental property?" — the question SERP
+- [x] "What is a good DSCR for a rental property?" — the question SERP
       is all lenders doing loan lead-gen; the investor-analysis angle
       (what 1.25 means for YOUR offer price, max-loan-at-1.25 worked
       example) is unowned. Link: /tools/dscr-calculator, dscr-loans post.
+      → Shipped 2026-07-18 as /blog/what-is-a-good-dscr.
 - [ ] "Down payment for investment property (2026)" — 15% vs 20% vs 25%
       conventional tiers, house-hack FHA/5% exception, PMI math at each
       tier (use the engine's 0.8%/yr figure). Link: house-hacking calc,
