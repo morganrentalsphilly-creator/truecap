@@ -49,6 +49,26 @@ export type BlogPost = {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: "cap-rate-vs-gross-yield",
+    title:
+      "Cap rate vs gross yield vs GRM: three quotes for the same building — and when each one lies",
+    excerpt:
+      "Gross yield, GRM, and cap rate measure the same income at different depths — two are literally the same fraction flipped. All three worked on a $250K duplex (11.5% gross, 8.7 GRM, 6.4% cap), the bridge formula that converts any quote into any other, a conversion table from 6% to 24% gross, and the identical-twin trap where two properties with the same gross yield sit $54,000 apart on income value.",
+    readingTimeMinutes: 10,
+    publishedAt: "2026-07-21",
+    available: true,
+  },
+  {
+    slug: "2-percent-rule-vs-1-percent-rule",
+    title:
+      "2% rule vs 1% rule: which rental screen actually applies in 2026?",
+    excerpt:
+      "The 1% and 2% rules are the same rent-to-price screen with the bar at two heights — and knowing that tells you when each applies. The GRM and cap-rate math underneath (1% ≈ a 6% cap at the 50% rule; 2% ≈ 12%), a same-dollar comparison where a textbook 1% duplex cash-flows $3/month while a $75K 2% house returns 16.4% cash-on-cash, why the 2% niche carries the risk the spreadsheet doesn't price, and the 0.76% break-even line that turned the 1% rule from a buy signal into a keep-looking line.",
+    readingTimeMinutes: 10,
+    publishedAt: "2026-07-20",
+    available: true,
+  },
+  {
     slug: "what-is-a-good-dscr",
     title:
       "What is a good DSCR for a rental property? (And what 1.25 means for your offer)",

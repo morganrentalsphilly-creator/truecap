@@ -48,22 +48,38 @@ skip beats a post that cannot rank.
       (what 1.25 means for YOUR offer price, max-loan-at-1.25 worked
       example) is unowned. Link: /tools/dscr-calculator, dscr-loans post.
       → Shipped 2026-07-18 as /blog/what-is-a-good-dscr.
-- [ ] "Down payment for investment property (2026)" — 15% vs 20% vs 25%
+- [x] "Down payment for investment property (2026)" — 15% vs 20% vs 25%
       conventional tiers, house-hack FHA/5% exception, PMI math at each
       tier (use the engine's 0.8%/yr figure). Link: house-hacking calc,
       mortgage-payment calc.
-- [ ] "2% rule vs 1% rule" — when each rule of thumb applies by price
+      → NOT shipped as a new post (2026-07-20 run): the query is already
+      covered by /blog/how-much-down-payment-investment-property
+      (2026-06-18) — a second post would cannibalize. Follow-up: refresh
+      that post with the PMI-per-tier math instead.
+- [x] "2% rule vs 1% rule" — when each rule of thumb applies by price
       tier and metro type; both tools now exist to link.
-- [ ] "What vacancy rate should I assume?" — by market tier with HUD
+      → Shipped 2026-07-20 as /blog/2-percent-rule-vs-1-percent-rule.
+- [x] "What vacancy rate should I assume?" — by market tier with HUD
       context; link vacancy-rate-calculator + markets pages.
-- [ ] "Closing costs on an investment property" — full line-item
+      → NOT shipped as a new post (2026-07-21 run): already covered by
+      /blog/vacancy-rate-rental-property ("Vacancy rate for rentals:
+      what to assume in 2026") — a second post would cannibalize.
+- [x] "Closing costs on an investment property" — full line-item
       breakdown with a $300k worked example; link closing-cost-calculator.
-- [ ] "Section 8 rental analysis" — FMR-based underwriting pros/cons;
+      → NOT shipped as a new post (2026-07-21 run): already covered by
+      /blog/closing-costs-investment-property — exact-query match.
+- [x] "Section 8 rental analysis" — FMR-based underwriting pros/cons;
       links markets pages (real HUD data) + cash-flow calculator.
-- [ ] "Cap rate vs gross yield (vs GRM)" — when to use each; links
+      → NOT shipped as a new post (2026-07-21 run): already covered by
+      /blog/section-8-rental-property-investing.
+- [x] "Cap rate vs gross yield (vs GRM)" — when to use each; links
       cap-rate + gross-rent-multiplier calculators.
-- [ ] "How to read a Schedule E" — tax-adjacent, links tax-deductions
+      → Shipped 2026-07-21 as /blog/cap-rate-vs-gross-yield.
+- [x] "How to read a Schedule E" — tax-adjacent, links tax-deductions
       post + property-tax calculator.
+      → NOT shipped as a new post (2026-07-21 run): already covered by
+      /blog/schedule-e-rental-property ("Schedule E for rental
+      property, line by line").
 - [ ] "Rental yield calculator / what is a good rental yield" — SERP is
       weak (an AI-built site ranks #1); consider a tool later, post first.
 - [ ] "How much money do you need to buy a rental property?" — all-in
