@@ -80,8 +80,10 @@ skip beats a post that cannot rank.
       → NOT shipped as a new post (2026-07-21 run): already covered by
       /blog/schedule-e-rental-property ("Schedule E for rental
       property, line by line").
-- [ ] "Rental yield calculator / what is a good rental yield" — SERP is
+- [x] "Rental yield calculator / what is a good rental yield" — SERP is
       weak (an AI-built site ranks #1); consider a tool later, post first.
+      → Shipped 2026-07-22 as /blog/what-is-a-good-rental-yield (post;
+      the rental-yield tool remains a follow-up).
 - [ ] "How much money do you need to buy a rental property?" — all-in
       cash-to-close worked examples at 3 price tiers; links spreadsheet
       + cash-flow calculator.

@@ -49,6 +49,16 @@ export type BlogPost = {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: "what-is-a-good-rental-yield",
+    title:
+      "What is a good rental yield? 2026 benchmarks, the gross-vs-net trap, and the financed test that actually decides",
+    excerpt:
+      "In most 2026 US markets, 8-12% gross yield ($667-$1,000 of monthly rent per $100K of price) is where leveraged deals start to pencil — but the number alone can't clear a deal. Gross and net yield worked on a $220K house (10.1% gross, 5.4% net), benchmark ranges from coastal 4-6% to cash-flow-market 13%, and the financed test where that 'good' 10.1% yield loses $102/month at 25% down and 7% — with the rent it takes to hit DSCR 1.25.",
+    readingTimeMinutes: 10,
+    publishedAt: "2026-07-22",
+    available: true,
+  },
+  {
     slug: "cap-rate-vs-gross-yield",
     title:
       "Cap rate vs gross yield vs GRM: three quotes for the same building — and when each one lies",
