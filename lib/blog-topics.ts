@@ -115,6 +115,7 @@ export const BLOG_TOPICS: BlogTopic[] = [
     postSlugs: [
       "brrrr-method-explained",
       "house-hacking-explained",
+      "is-a-duplex-a-good-investment",
       "section-8-rental-property-investing",
       "single-family-vs-multi-family-rental",
       "how-to-estimate-rehab-costs",

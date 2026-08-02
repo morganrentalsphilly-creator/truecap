@@ -49,6 +49,16 @@ export type BlogPost = {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: "is-a-duplex-a-good-investment",
+    title:
+      "Is a duplex a good investment? The same $400,000 building, underwritten as a rental and as a house hack",
+    excerpt:
+      "A duplex is not one investment, it is two, and the loan application decides which you get. Conventional financing wants 25% down on a 2-4 unit investment purchase and 5% owner-occupied — $138,140 of cash for a $277-a-month loss, or $44,990 to live there at $389 a month above rent while building $4,050 of equity. Includes the year-2 problem (the 5%-down duplex loses $974 a month once you move out), the head-to-head against a same-priced single-family the duplex wins on cap rate 5.31% to 4.09%, and the $1,840 a year that two units under one roof genuinely save.",
+    readingTimeMinutes: 13,
+    publishedAt: "2026-08-05",
+    available: true,
+  },
+  {
     slug: "how-much-money-to-buy-a-rental-property",
     title:
       "How much money do you need to buy a rental property? Cash-to-close worked at $150K, $300K, and $500K",
