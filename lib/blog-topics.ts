@@ -69,6 +69,7 @@ export const BLOG_TOPICS: BlogTopic[] = [
       "Financing decides whether a good property is a good deal. Down payment, rate, PITI, DSCR-loan qualification, and the refi exit all move your returns. These guides cover the choices; the calculators size the payment and the cash to close.",
     postSlugs: [
       "piti-explained-rental-property",
+      "how-much-money-to-buy-a-rental-property",
       "how-much-down-payment-investment-property",
       "mortgage-points-investment-property",
       "dscr-loans-explained",

@@ -84,9 +84,15 @@ skip beats a post that cannot rank.
       weak (an AI-built site ranks #1); consider a tool later, post first.
       → Shipped 2026-07-22 as /blog/what-is-a-good-rental-yield (post;
       the rental-yield tool remains a follow-up).
-- [ ] "How much money do you need to buy a rental property?" — all-in
+- [x] "How much money do you need to buy a rental property?" — all-in
       cash-to-close worked examples at 3 price tiers; links spreadsheet
       + cash-flow calculator.
+      → Shipped 2026-08-02 as /blog/how-much-money-to-buy-a-rental-property.
+      SERP was bloggers (investfourmore), a lender (LendingTree), a
+      competitor blog (Mashvisor), and a turnkey seller — all stop at
+      "down payment + 2-5% closing costs". Angle: the full five-bucket
+      total including prepaids/escrow setup and lender reserves, the
+      1.4-1.7x-of-down-payment rule, and what the cash actually earns.
 - [ ] "Is a duplex a good investment?" — owner-occupant vs pure rental
       math side by side; links house-hacking calc.
 - [ ] "DSCR calculator no personal info / max loan at 1.25 DSCR" —
