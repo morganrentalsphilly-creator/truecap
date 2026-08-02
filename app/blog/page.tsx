@@ -49,6 +49,16 @@ export type BlogPost = {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: "how-much-money-to-buy-a-rental-property",
+    title:
+      "How much money do you need to buy a rental property? Cash-to-close worked at $150K, $300K, and $500K",
+    excerpt:
+      "Total cash is 1.4-1.7x the down payment, not 20% plus a bit — $50,744 for a $150K rental, $89,388 for a $300K, $142,231 for a $500K, itemised down to the tax escrow cushion. Includes the two buckets everyone omits (prepaids and lender reserves), the 2% reserve escalator on other financed properties, the 5%-down duplex that costs less cash than a $150K house, and what $50,744 actually earns: $881 a year.",
+    readingTimeMinutes: 12,
+    publishedAt: "2026-08-02",
+    available: true,
+  },
+  {
     slug: "what-is-a-good-rental-yield",
     title:
       "What is a good rental yield? 2026 benchmarks, the gross-vs-net trap, and the financed test that actually decides",
