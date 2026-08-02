@@ -93,8 +93,17 @@ skip beats a post that cannot rank.
       "down payment + 2-5% closing costs". Angle: the full five-bucket
       total including prepaids/escrow setup and lender reserves, the
       1.4-1.7x-of-down-payment rule, and what the cash actually earns.
-- [ ] "Is a duplex a good investment?" — owner-occupant vs pure rental
+- [x] "Is a duplex a good investment?" — owner-occupant vs pure rental
       math side by side; links house-hacking calc.
+      → Shipped 2026-08-05 as /blog/is-a-duplex-a-good-investment. SERP
+      was an insurance agency, a turnkey seller (RealWealth), a fintech
+      lender (SoFi), and two agent blogs — all generic pros-and-cons
+      prose, none with a dollar figure. Angle: the question has two
+      answers because conventional wants 25% down on a 2-4 unit
+      investment purchase and 5% owner-occupied, so one $400K duplex is
+      $138,140 for −$277/mo or $44,990 to live in. Plus the year-2
+      problem (5%-down duplex loses $974/mo after move-out) and the
+      head-to-head vs a same-priced single-family.
 - [ ] "DSCR calculator no personal info / max loan at 1.25 DSCR" —
       refresh the EXISTING dscr post/tool copy with the max-loan angle
       (lenders monetize the query; investors want the analysis).
