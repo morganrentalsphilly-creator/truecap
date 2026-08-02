@@ -20,8 +20,17 @@ name: SEO visibility
 
 on:
   schedule:
-    # Wednesdays 15:00 UTC — mid-week, clear of the Tue/Fri content runs.
-    - cron: "0 15 * * 3"
+    # Monthly, 1st at 15:00 UTC. Was weekly; moved for two reasons.
+    #
+    # The first run's own report made the case: search indexes do not move in
+    # hours, and it flagged that a same-day re-run showed a page-one result
+    # disappearing purely as result-set volatility rather than a real drop.
+    # Weekly snapshots of a slow-moving signal mostly record noise, and noise
+    # in a trend file is worse than no entry — it invites acting on nothing.
+    #
+    # The second reason is cost. This job is ~$1-3 per run; monthly is ~4x
+    # cheaper than weekly for a signal that changes on a monthly timescale.
+    - cron: "0 15 1 * *"
   workflow_dispatch:
 
 permissions:
@@ -46,7 +55,8 @@ jobs:
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           claude_args: |
-            --max-turns 50
+            --model claude-haiku-4-5
+            --max-turns 30
             --allowedTools "Read,Write,Glob,Grep,WebSearch,WebFetch,Bash(git:*),Bash(gh pr:*)"
           prompt: |
             Produce this week's SEO visibility snapshot for TrueCap

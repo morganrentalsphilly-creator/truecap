@@ -9,7 +9,39 @@ merge.
 | 1 | `lib/__tests__/seo-guards.test.ts` | every push + PR (inside `npm test`) | CI pass/fail | no |
 | 2 | `.github/workflows/seo-healthcheck.yml` | Mondays 13:00 UTC | one GitHub issue, updated in place | no |
 | 3 | `.github/workflows/seo-content.yml` | Tuesdays + Fridays 14:00 UTC | a draft blog post as a PR | yes |
-| 4 | `.github/workflows/seo-visibility.yml` | Wednesdays 15:00 UTC | a dated snapshot in `docs/seo/visibility/` as a PR | yes |
+| 4 | `.github/workflows/seo-visibility.yml` | 1st of the month, 15:00 UTC | a dated snapshot in `docs/seo/visibility/` as a PR | yes |
+
+## Cost
+
+The two model-backed jobs are the only things here that cost money. First
+measured runs came in around **$3.50 each on the action's default model**, which
+at the original cadence (2 content + 1 visibility per week) extrapolated to
+roughly $45/month.
+
+What changed on 2026-08-02, after that first bill:
+
+| Lever | Before | After | Why |
+|---|---|---|---|
+| Content model | action default (Opus-class, $5/$25 per MTok) | `claude-sonnet-5` ($2/$10 intro, $3/$15 after) | ~2.5x cheaper for prose the guards already gate |
+| Content max-turns | 60 | 40 | The first successful run finished well inside 40 |
+| Visibility model | action default | `claude-haiku-4-5` ($1/$5) | Ten fixed searches and a templated diff — mechanical work |
+| Visibility max-turns | 50 | 30 | Same reason |
+| Visibility cadence | weekly | monthly | See the schedule comment in the workflow — its own first report argued weekly snapshots of a slow signal record noise |
+
+Expected after: roughly **$10-15/month**, dominated by the two weekly content
+runs. Treat that as an estimate with wide error bars — it comes from a
+two-run sample.
+
+**Set a hard spend limit.** Estimates are not a control. Anthropic Console →
+Settings → Limits → set a monthly cap. That is the only thing that actually
+stops a runaway bill; everything in the table above just makes a runaway less
+likely.
+
+If content quality drops noticeably on Sonnet, put `--model claude-opus-5`
+back in `seo-content.yml` and drop to one post a week instead — same spend,
+and one good post beats two thin ones. If the monthly visibility report gets
+noticeably worse on Haiku, move that one to `claude-sonnet-5`; it is a cheap
+change because the job runs twelve times a year.
 
 ---
 
