@@ -153,6 +153,31 @@ The run must pass `npx tsc --noEmit` and `npm test` before opening the PR, and
 CI runs them again. The internal-linking and title-length guards apply to new
 posts with no ratchet relief.
 
+### Hands-off mode (auto-merge)
+
+Off by default. To enable, both of:
+
+1. Settings → General → Pull Requests → tick **Allow auto-merge**
+2. Settings → Secrets and variables → Actions → **Variables** tab → New
+   repository variable → `SEO_AUTOMERGE` = `true`
+
+Each content PR is then queued to merge **once every required check passes** —
+tsc, the full test suite including the SEO guards, and the production build.
+It is not an immediate merge; a post that trips a guard sits as an open PR
+until someone deals with it. Draft PRs are skipped, because the prompt tells
+the run to open a draft when it isn't confident, and that signal shouldn't be
+merged past you.
+
+**Read the first two or three PRs before turning this on.** CI can prove a post
+compiles, links to pages that exist, and fits the SERP window. It cannot tell
+you whether the worked example is arithmetically right, whether a claim about
+lender behaviour is true, or whether it sounds like you. Those are the failure
+modes that matter on a site whose whole pitch is that the numbers are honest,
+and no test catches them.
+
+Off again in one click: delete the `SEO_AUTOMERGE` variable, or set it to
+anything other than `true`.
+
 ---
 
 ## 4. Visibility — `.github/workflows/seo-visibility.yml`

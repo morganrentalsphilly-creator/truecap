@@ -56,16 +56,22 @@ jobs:
 
       # No `npm ci`: healthcheck.mjs is dependency-free by design so this job
       # stays a ~30s crawl rather than a 2-minute install.
+      # `set -e` is on by default in Actions' bash, so a non-zero node exit
+      # aborted the step before the next line ran — meaning the original
+      # `echo "exit_code=$?"` never executed on exactly the runs it existed to
+      # report. The job then read an empty output and finished GREEN while
+      # sitting on high-severity findings (observed on run #1, 2026-08-02).
+      # `|| code=$?` keeps the step alive and captures the real exit code.
       - name: Crawl production
         id: crawl
-        continue-on-error: true
         run: |
+          code=0
           node scripts/seo/healthcheck.mjs \
             --base "${{ inputs.base || 'https://usetruecap.com' }}" \
             --limit "${{ inputs.limit || '0' }}" \
             --json seo-healthcheck.json \
-            > seo-healthcheck.md
-          echo "exit_code=$?" >> "$GITHUB_OUTPUT"
+            > seo-healthcheck.md || code=$?
+          echo "exit_code=$code" >> "$GITHUB_OUTPUT"
 
       - name: Show report in the run log
         run: cat seo-healthcheck.md
