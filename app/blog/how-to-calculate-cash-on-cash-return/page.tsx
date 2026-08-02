@@ -29,7 +29,7 @@ const TITLE = "How to calculate cash-on-cash return on a rental property — 202
 // window. The on-page <h1> keeps the longer editorial TITLE.
 const SERP_TITLE = "How to calculate cash-on-cash return (2026)";
 const DESCRIPTION =
-  "Cash-on-cash return = annual cash flow ÷ total cash invested. It&apos;s the only metric that tells you the return on the dollars you actually put in. Here&apos;s the formula, what counts as &lsquo;total cash invested,&rsquo; three worked examples, and the trap most calculators fall into.";
+  "Cash-on-cash return = annual cash flow ÷ total cash invested. It's the only metric that tells you the return on the dollars you actually put in. Here's the formula, what counts as “total cash invested,” three worked examples, and the trap most calculators fall into.";
 const PUBLISHED_AT = "2026-06-07";
 const MODIFIED_AT = "2026-06-07";
 const READING_TIME_MIN = 7;

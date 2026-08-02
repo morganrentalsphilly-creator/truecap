@@ -1,0 +1,117 @@
+# Weekly rank + AI-visibility tracking.
+#
+# Answers one question you cannot answer from the codebase: is any of this
+# working? Checks a fixed panel of target queries in search, and separately
+# checks whether TrueCap is discoverable as a recommended tool in the kind of
+# content AI assistants draw on (listicles, aggregators, forum threads).
+#
+# The AI half matters as much as the SERP half here. The 2026-08-02 baseline
+# found TrueCap had ZERO third-party mentions anywhere — no listicle, no
+# aggregator, no Reddit thread — while smaller and newer competitors were
+# already listed on the AlternativeTo DealCheck page. Assistants recommend
+# what independent sources corroborate, so off-domain mentions are a tracked
+# metric, not a nice-to-have.
+#
+# Output is a dated markdown file committed to docs/seo/visibility/ so the
+# trend is readable in git history, plus a PR so a bad week is visible rather
+# than silently landing on main.
+
+name: SEO visibility
+
+on:
+  schedule:
+    # Wednesdays 15:00 UTC — mid-week, clear of the Tue/Fri content runs.
+    - cron: "0 15 * * 3"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
+
+concurrency:
+  group: seo-visibility
+  cancel-in-progress: false
+
+jobs:
+  track:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          claude_args: |
+            --max-turns 50
+            --allowedTools "Read,Write,Glob,Grep,WebSearch,WebFetch,Bash(git:*),Bash(gh pr:*)"
+          prompt: |
+            Produce this week's SEO visibility snapshot for TrueCap
+            (https://usetruecap.com) — a free rental-property investment
+            analyzer (cap rate, cash flow, DSCR, cash-on-cash, BRRRR,
+            house hacking). Repo: ${{ github.repository }}.
+
+            ## First, read the previous snapshot
+            List `docs/seo/visibility/` and read the most recent file. Your job
+            is a DIFF against it, not a fresh report. If the directory is empty,
+            read `docs/seo/2026-08-02-baseline.md` — that is the baseline.
+
+            ## Part A — the tracked query panel
+            WebSearch each of these and record whether a usetruecap.com URL
+            appears, which URL, and the top 3 domains that do rank:
+
+            - free rental property calculator
+            - rental property cash flow calculator
+            - cap rate calculator
+            - DSCR calculator rental property
+            - house hacking calculator
+            - BRRRR calculator
+            - best rental property analysis tool 2026
+            - DealCheck alternative
+            - how to calculate cap rate
+            - what is a good DSCR for a rental property
+
+            Keep this panel FIXED week to week. Changing the queries makes the
+            trend meaningless. If you think the panel needs a new query, add it
+            in a clearly marked "new this week" section and leave the ten alone.
+
+            ## Part B — off-domain mentions
+            Search for `usetruecap`, `"TrueCap" rental calculator`, and
+            TrueCap on Reddit / listicles / aggregators (AlternativeTo, G2,
+            Software Advice, Capterra, "best rental property calculator"
+            roundups). List every third-party page that mentions TrueCap, with
+            its URL. If there are none, say exactly that — do not pad the
+            section with near-misses or brand-collision hits (truecapcre.com,
+            true-cap.com, truecap.io and TrueCap Advisory are DIFFERENT
+            companies; note them only if they are actively outranking the real
+            site on a brand query).
+
+            ## Part C — what changed
+            Against the previous snapshot: new rankings gained, rankings lost,
+            new mentions, new competitors appearing. If nothing moved, say
+            nothing moved. A flat week reported honestly is more useful than a
+            flat week dressed up.
+
+            ## Part D — this week's single highest-leverage action
+            Exactly one recommendation, specific enough to act on today, chosen
+            on evidence from THIS run. Not a list. Not "keep publishing content".
+
+            ## Write it
+            Save to `docs/seo/visibility/<YYYY-MM-DD>.md` using today's real
+            date. Front the file with a small summary table (queries ranking:
+            N/10 · off-domain mentions: N · change vs last week).
+
+            Then: branch `seo/visibility-<YYYY-MM-DD>`, commit, and open a PR
+            titled `seo: visibility snapshot <YYYY-MM-DD>` whose body is Part C
+            and Part D inline, so the whole point is readable without opening
+            the file.
+
+            ## Rules
+            - Cite a URL for every claim about a third-party page. If you did not
+              fetch it, do not assert it.
+            - A WebSearch result set is a proxy for page one, not a rank-tracker
+              reading. Say "not present in results" — never invent a position number.
+            - Report losses as plainly as gains.

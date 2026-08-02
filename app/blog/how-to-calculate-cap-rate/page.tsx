@@ -30,7 +30,7 @@ const TITLE = "How to calculate cap rate (with worked examples) — 2026 guide";
 // window. The on-page <h1> keeps the longer editorial TITLE.
 const SERP_TITLE = "How to calculate cap rate: worked examples (2026)";
 const DESCRIPTION =
-  "Cap rate = NOI ÷ purchase price. Sounds simple, but most investors get NOI wrong by skipping CapEx reserves or vacancy. Here&apos;s the formula, three worked examples (good deal / bad deal / cash purchase), and when cap rate is the wrong metric.";
+  "Cap rate = NOI ÷ purchase price. Sounds simple, but most investors get NOI wrong by skipping CapEx reserves or vacancy. Here's the formula, three worked examples (good deal / bad deal / cash purchase), and when cap rate is the wrong metric.";
 const PUBLISHED_AT = "2026-06-07";
 const MODIFIED_AT = "2026-06-07";
 const READING_TIME_MIN = 7;

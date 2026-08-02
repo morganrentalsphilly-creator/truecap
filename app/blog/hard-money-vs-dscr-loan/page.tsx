@@ -29,7 +29,7 @@ const TITLE = "Hard money vs DSCR: which loan product is right for your next dea
 // window. The on-page <h1> keeps the longer editorial TITLE.
 const SERP_TITLE = "Hard money vs DSCR loan: which to use in 2026";
 const DESCRIPTION =
-  "Hard money and DSCR loans solve different problems. Hard money is short-term capital for a deal you&apos;ll rehab and exit; DSCR is long-term capital for a rental you&apos;ll hold. Picking the wrong one costs you 4-6 points and 18 months of friction. Here&apos;s how to choose.";
+  "Hard money and DSCR loans solve different problems. Hard money is short-term capital for a deal you'll rehab and exit; DSCR is long-term capital for a rental you'll hold. Picking the wrong one costs you 4-6 points and 18 months of friction. Here's how to choose.";
 const PUBLISHED_AT = "2026-06-07";
 const MODIFIED_AT = "2026-06-07";
 const READING_TIME_MIN = 11;

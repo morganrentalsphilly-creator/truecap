@@ -1,0 +1,142 @@
+# Automated SEO content — two posts a week, each as a PR you review.
+#
+# CADENCE, AND WHY IT'S TWO
+# -------------------------
+# Google does not penalise publishing frequency; it penalises thin, templated,
+# low-value pages. Two posts a week is a rate a single site can sustain at
+# genuine depth (worked numbers, real internal links, a real FAQ) — which is
+# the thing that actually protects you. Pushing to daily is how sites end up
+# with 300 near-duplicate pages and a scaled-content problem, which IS a
+# policy violation. If you want more volume, add breadth (new /tools, /vs, or
+# market+strategy pages) rather than more blog posts per week.
+#
+# NOTHING PUBLISHES ITSELF. Every run opens a PR. Merging is your call, and
+# CI (tsc + vitest + next build, including the SEO guards) has to pass first.
+#
+# TOPIC SELECTION is not the model's to invent: it works top-down through
+# docs/seo-content-backlog.md, which the 2026-07-15 audit built from queries
+# with observed demand. That file exists specifically because ~30-40% of
+# earlier posts targeted phrasings nobody searches.
+
+name: SEO content
+
+on:
+  schedule:
+    # Tuesday and Friday, 14:00 UTC (10:00 America/New_York in EDT).
+    - cron: "0 14 * * 2,5"
+  workflow_dispatch:
+    inputs:
+      topic:
+        description: "Override the backlog and write this topic instead"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
+
+concurrency:
+  # Never let Tuesday's and a manual run collide on the same branch space.
+  group: seo-content
+  cancel-in-progress: false
+
+jobs:
+  write:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          claude_args: |
+            --max-turns 60
+            --allowedTools "Read,Write,Edit,Glob,Grep,WebSearch,WebFetch,Bash(npm test),Bash(npx tsc:*),Bash(npx vitest:*),Bash(node scripts/seo/*),Bash(git:*),Bash(gh pr:*)"
+          prompt: |
+            You are writing one SEO blog post for TrueCap (https://usetruecap.com),
+            a free rental-property investment analyzer. Repo: ${{ github.repository }}.
+
+            ## Read these first, in this order
+            1. `CLAUDE.md` — codebase conventions. Section 8 lists things you must
+               never do autonomously. Respect it.
+            2. `docs/seo-content-backlog.md` — the topic queue and the content rules.
+            3. `docs/seo/AUTOMATION.md` — how this job fits with the guards.
+            4. Two recent posts under `app/blog/` for structure. Pick ones whose
+               `PUBLISHED_AT` is most recent. Match their file shape exactly:
+               SLUG / TITLE / SERP_TITLE / DESCRIPTION / PUBLISHED_AT /
+               MODIFIED_AT / READING_TIME_MIN consts, `export const metadata`,
+               FAQS array, JSON-LD blocks, and an `opengraph-image.tsx` sibling.
+
+            ## Pick the topic
+            ${{ inputs.topic && format('The operator has overridden the backlog. Write: {0}', inputs.topic) || 'Take the TOPMOST unchecked `- [ ]` item in docs/seo-content-backlog.md.' }}
+
+            Before writing, verify the topic is still worth doing: WebSearch the
+            target query, read who currently ranks, and confirm there is an angle
+            TrueCap can actually own. If the SERP is entirely lender lead-gen or
+            proprietary-data plays that a calculator site cannot beat, SKIP that
+            item — check it off with a one-line note saying why, and move to the
+            next one. Recording an honest skip is a better outcome than shipping
+            a post that cannot rank.
+
+            ## Non-negotiables for the post
+            - **Worked numbers.** Real dollar figures carried through a real
+              example. No "let's say your property generates some income".
+            - **SERP_TITLE ≤ 50 characters.** The layout appends " | TrueCap"
+              and the guard test enforces 60 rendered. Keep the longer editorial
+              headline in TITLE for the h1.
+            - **DESCRIPTION ≤ 165 characters**, and written as a real sentence,
+              not a keyword list. Plain apostrophes and quotes — NEVER HTML
+              entities like `&apos;` in metadata strings; it is not JSX there and
+              Google renders the literal characters. There is a hard CI gate on this.
+            - **Internal links, meeting the docs/SEO-ROADMAP.md §8 standard:**
+              ≥3 `/glossary/*`, ≥1 `/markets/*`, ≥1 `/tools/*`, ≥2 sibling
+              `/blog/*`. Every link must resolve — check the target exists.
+              Use `lib/calculator-registry.ts` for tool slugs; do NOT hardcode a
+              list. New posts are held to this outright, not ratcheted.
+            - **FAQ section + FAQPage JSON-LD**, plus BlogPosting and
+              BreadcrumbList like every other post.
+            - Register the post wherever the existing ones are registered
+              (`BLOG_POSTS`, `lib/blog-topics.ts` — put it in the right topic hub,
+              and link back to that hub from the post body).
+            - Add the `opengraph-image.tsx` sibling.
+            - 1,500+ words of substance. Length is a byproduct of covering the
+              question properly, not a target to pad toward.
+
+            ## Voice
+            Direct and numerate, addressed to an investor who can read a
+            spreadsheet. State the trade-off rather than hedging. No "in today's
+            fast-paced market", no "unlock the power of". Where TrueCap genuinely
+            helps, say so once, concretely; this is a useful article that happens
+            to be published by a tool company, not an ad.
+
+            ## Before you open the PR
+            Run, and fix anything that fails:
+              npx tsc --noEmit
+              npm test
+            `npm test` includes lib/__tests__/seo-guards.test.ts. Do NOT edit
+            docs/seo/guard-baseline.json to make a failure go away — the baseline
+            records pre-existing debt and a new post must meet the standard on its
+            own. If a guard fails on your post, the post is what's wrong.
+
+            ## Ship it
+            - Branch: `seo/post-<slug>`
+            - Check the backlog item off in the SAME commit, per the file's own rule.
+            - Open a PR titled `content: <SERP_TITLE>` whose body states: the target
+              query, who currently ranks for it and what your angle is against them,
+              the internal links added, and anything you were unsure about.
+            - Be honest in the PR body about weaknesses. A flagged soft spot gets
+              fixed in review; a hidden one gets published.
+            - If you could not produce something you'd defend, open the PR as a
+              DRAFT and say why in the body. Do not pad to the word count.
