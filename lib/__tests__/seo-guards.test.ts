@@ -190,6 +190,50 @@ describe("HARD GATE: legacy route stubs redirect permanently", () => {
   });
 });
 
+describe("HARD GATE: every blog post is registered in BLOG_POSTS", () => {
+  /**
+   * A post that ships as a folder but never lands in BLOG_POSTS is live at its
+   * URL and invisible everywhere else — absent from /blog, from the sitemap
+   * (app/sitemap.ts derives blogUrls from this array), and from feed.xml. It
+   * looks published and earns nothing.
+   *
+   * The sitemap gate above cannot catch this: blog URLs are derived
+   * generically, so `/blog/<anything>` matches whether or not the specific
+   * slug is registered. This closes that hole. It matters most for the
+   * automated content workflow, where "add it to BLOG_POSTS" is an
+   * instruction to a model rather than something the compiler enforces.
+   */
+  const blogIndex = readFileSync(path.join(APP_DIR, "blog", "page.tsx"), "utf8");
+  const registered = new Set(
+    [...blogIndex.matchAll(/slug:\s*"([a-z0-9-]+)"/g)].map((m) => m[1]),
+  );
+
+  it("BLOG_POSTS parsed successfully", () => {
+    // Tripwire: if this regex stops matching the file's shape, every per-slug
+    // assertion below would fail confusingly. Fail here with a clear cause.
+    expect(registered.size).toBeGreaterThan(60);
+  });
+
+  it.each(blogSlugs())("%s is listed in app/blog/page.tsx", (slug) => {
+    expect(
+      registered.has(slug),
+      `app/blog/${slug}/page.tsx exists but "${slug}" is not in BLOG_POSTS ` +
+        `(app/blog/page.tsx). The post would be live at its URL but missing ` +
+        `from the /blog index, sitemap.xml, and feed.xml. Add an entry.`,
+    ).toBe(true);
+  });
+
+  it("has no BLOG_POSTS entry without a matching page", () => {
+    const slugs = blogSlugs();
+    const orphaned = [...registered].filter((slug) => !slugs.includes(slug));
+    expect(
+      orphaned,
+      `BLOG_POSTS lists slugs with no app/blog/<slug>/page.tsx: ` +
+        `${orphaned.join(", ")}. These become 404s in the sitemap.`,
+    ).toEqual([]);
+  });
+});
+
 describe("RATCHET: SERP title length", () => {
   const pages = indexablePages();
 

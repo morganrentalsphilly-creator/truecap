@@ -140,3 +140,36 @@ jobs:
               fixed in review; a hidden one gets published.
             - If you could not produce something you'd defend, open the PR as a
               DRAFT and say why in the body. Do not pad to the word count.
+
+      # ---------------------------------------------------------------
+      # Optional hands-off mode. OFF unless BOTH are true:
+      #   - Settings → General → Pull Requests → "Allow auto-merge" is ticked
+      #   - Settings → Secrets and variables → Actions → Variables tab →
+      #     SEO_AUTOMERGE = true   (a VARIABLE, not a secret)
+      #
+      # This does not merge anything immediately. It queues the PR to merge
+      # only once every required check passes — tsc, the full test suite
+      # including the SEO guards, and the production build. A post that trips
+      # a guard just sits there as an open PR.
+      #
+      # Draft PRs are skipped deliberately: the prompt tells the run to open a
+      # draft when it isn't confident in what it wrote, and that signal should
+      # not be auto-merged past you.
+      - name: Queue the PR to auto-merge once checks pass
+        if: vars.SEO_AUTOMERGE == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          branch=$(git branch --show-current)
+          pr=$(gh pr list --head "$branch" --state open --json number,isDraft --jq '.[0] // empty')
+          if [ -z "$pr" ]; then
+            echo "No open PR for $branch — the run may have skipped its backlog item. Nothing to queue."
+            exit 0
+          fi
+          number=$(echo "$pr" | jq -r .number)
+          if [ "$(echo "$pr" | jq -r .isDraft)" = "true" ]; then
+            echo "PR #$number is a draft — the run flagged low confidence. Leaving it for review."
+            exit 0
+          fi
+          echo "Queueing PR #$number to auto-merge after checks pass."
+          gh pr merge "$number" --auto --squash
