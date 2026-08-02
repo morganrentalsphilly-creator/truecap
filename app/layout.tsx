@@ -5,6 +5,7 @@ import { Toaster } from '@/components/ui/toaster'
 import { CookieConsentBanner } from '@/components/marketing/cookie-consent-banner'
 import { AnnualPromoBanner } from '@/components/marketing/annual-promo-banner'
 import { PostHogProvider } from '@/components/analytics/posthog-provider'
+import { OverlayRecovery } from '@/components/ui/overlay-recovery'
 import { getSiteUrl } from '@/lib/site-url'
 import './globals.css'
 
@@ -310,6 +311,11 @@ gtag('config', '${GOOGLE_ADS_ID}');`,
             actual init call that makes all client-side trackEvent() in
             lib/analytics.ts work. */}
         <PostHogProvider />
+        {/* Self-heals a stranded Radix body lock (pointer-events:none /
+            scroll-lock left behind when a modal overlay unmounts during a
+            route change) — the "page scrolls but nothing is clickable"
+            freeze. No-op unless a lock is actually stranded. */}
+        <OverlayRecovery />
         {children}
         <Toaster />
         {/* Cookie consent banner — pairs with the Consent Mode v2

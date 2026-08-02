@@ -6,10 +6,31 @@ import { CheckIcon, ChevronRightIcon, CircleIcon } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 
+/**
+ * `modal` defaults to FALSE here (Radix's own default is true).
+ *
+ * A modal Radix menu sets `pointer-events: none` on <body> while open and
+ * restores it in a cleanup effect on close. Every DropdownMenu in this app
+ * is a navigation/action menu whose items route (UserMenu → /profile,
+ * /settings, /dashboard; My Deals + Templates row menus → deal pages). With
+ * App Router client navigation, the route transition can unmount the menu
+ * before that cleanup runs — leaving `pointer-events: none` stranded on the
+ * body. The page still scrolls but NOTHING is clickable: a total freeze that
+ * only a reload clears. (Founder hit exactly this in production 2026-07-15:
+ * "clicked the top, screen froze.")
+ *
+ * Non-modal is also the semantically right choice for these menus: they
+ * don't need to trap focus or block the page, outside-click still closes
+ * them, and Esc still works. Pass `modal` explicitly if a future menu
+ * genuinely needs modal behavior — but then it must not navigate on select.
+ */
 function DropdownMenu({
+  modal = false,
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Root>) {
-  return <DropdownMenuPrimitive.Root data-slot="dropdown-menu" {...props} />
+  return (
+    <DropdownMenuPrimitive.Root data-slot="dropdown-menu" modal={modal} {...props} />
+  )
 }
 
 function DropdownMenuPortal({
