@@ -1,0 +1,140 @@
+# Weekly live-site SEO health check.
+#
+# Crawls production and reports anything that only exists after render or
+# deploy: broken sitemap URLs, canonicals pointing at a preview hostname,
+# missing JSON-LD, duplicate FAQ blocks, temporary redirects, an indexable
+# *.vercel.app alias competing with the real domain.
+#
+# Source-side checks (title/description length, internal linking, HTML
+# entities in metadata) do NOT run here — they run on every PR via
+# `npm test` → lib/__tests__/seo-guards.test.ts, which is where they belong:
+# cheaper, and they block the regression instead of reporting it a week later.
+#
+# Findings land in ONE issue that gets updated in place, rather than a new
+# issue every Monday. A weekly job that opens a fresh issue every run trains
+# you to close them unread.
+
+name: SEO health check
+
+on:
+  schedule:
+    # Mondays 13:00 UTC (09:00 America/New_York in EDT, 08:00 in EST).
+    # Ahead of the week's content runs, so a broken deploy surfaces before
+    # Tuesday's post gets written against it.
+    - cron: "0 13 * * 1"
+  workflow_dispatch:
+    inputs:
+      base:
+        description: "Base URL to crawl"
+        required: false
+        default: "https://usetruecap.com"
+      limit:
+        description: "Max URLs to crawl (0 = all)"
+        required: false
+        default: "0"
+
+# Least privilege: this job reads the repo and writes one issue. It has no
+# reason to touch code, so it can't.
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: seo-healthcheck
+  cancel-in-progress: false
+
+jobs:
+  crawl:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # No `npm ci`: healthcheck.mjs is dependency-free by design so this job
+      # stays a ~30s crawl rather than a 2-minute install.
+      - name: Crawl production
+        id: crawl
+        continue-on-error: true
+        run: |
+          node scripts/seo/healthcheck.mjs \
+            --base "${{ inputs.base || 'https://usetruecap.com' }}" \
+            --limit "${{ inputs.limit || '0' }}" \
+            --json seo-healthcheck.json \
+            > seo-healthcheck.md
+          echo "exit_code=$?" >> "$GITHUB_OUTPUT"
+
+      - name: Show report in the run log
+        run: cat seo-healthcheck.md
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: seo-healthcheck
+          path: |
+            seo-healthcheck.md
+            seo-healthcheck.json
+          retention-days: 90
+
+      - name: Open or update the findings issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const body = fs.readFileSync('seo-healthcheck.md', 'utf8');
+            const report = JSON.parse(fs.readFileSync('seo-healthcheck.json', 'utf8'));
+            const highs = report.findings.filter(f => f.severity === 'high').length;
+            const TITLE = 'SEO health check — live site findings';
+            const LABEL = 'seo';
+
+            // Make sure the label exists; ignore "already exists".
+            try {
+              await github.rest.issues.createLabel({
+                ...context.repo, name: LABEL, color: '0e8a16',
+                description: 'Automated SEO guards',
+              });
+            } catch (e) { if (e.status !== 422) throw e; }
+
+            const existing = await github.rest.issues.listForRepo({
+              ...context.repo, state: 'open', labels: LABEL, per_page: 50,
+            });
+            const issue = existing.data.find(i => i.title === TITLE);
+
+            const stamp = new Date().toISOString().slice(0, 16).replace('T', ' ');
+            const header = highs > 0
+              ? `> **${highs} high-severity finding(s)** as of ${stamp} UTC.\n\n`
+              : `> No high-severity findings as of ${stamp} UTC.\n\n`;
+            const footer = `\n\n<sub>Updated in place by \`.github/workflows/seo-healthcheck.yml\` ` +
+              `([run](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})). ` +
+              `Re-run any time from the Actions tab.</sub>`;
+            const full = header + body + footer;
+
+            if (issue) {
+              // Clean run and an open issue → close it rather than leaving a
+              // stale "findings" issue sitting there saying nothing is wrong.
+              if (report.findings.length === 0) {
+                await github.rest.issues.createComment({
+                  ...context.repo, issue_number: issue.number,
+                  body: `Clean run at ${stamp} UTC — closing. Will reopen automatically if anything regresses.`,
+                });
+                await github.rest.issues.update({
+                  ...context.repo, issue_number: issue.number, state: 'closed',
+                });
+              } else {
+                await github.rest.issues.update({
+                  ...context.repo, issue_number: issue.number, body: full,
+                });
+              }
+            } else if (report.findings.length > 0) {
+              await github.rest.issues.create({
+                ...context.repo, title: TITLE, body: full, labels: [LABEL],
+              });
+            }
+
+      - name: Fail the run on high-severity findings
+        if: steps.crawl.outputs.exit_code != '0'
+        run: |
+          echo "High-severity SEO findings — see the issue and the report above."
+          exit 1

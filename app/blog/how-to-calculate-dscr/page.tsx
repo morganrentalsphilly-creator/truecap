@@ -29,7 +29,7 @@ const TITLE = "How to calculate DSCR (debt service coverage ratio) — 2026 guid
 // window. The on-page <h1> keeps the longer editorial TITLE.
 const SERP_TITLE = "How to calculate DSCR — 2026 guide";
 const DESCRIPTION =
-  "DSCR = NOI ÷ annual debt service. It&apos;s the metric DSCR lenders use to qualify your loan. Here&apos;s the formula, what lenders include and exclude, three worked examples, and the difference between your DSCR and the lender&apos;s DSCR (which is usually lower).";
+  "DSCR = NOI ÷ annual debt service. It's the metric DSCR lenders use to qualify your loan. Here's the formula, what lenders include and exclude, three worked examples, and the difference between your DSCR and the lender's DSCR (which is usually lower).";
 const PUBLISHED_AT = "2026-06-07";
 const MODIFIED_AT = "2026-06-07";
 const READING_TIME_MIN = 8;

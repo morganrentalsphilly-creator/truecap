@@ -29,7 +29,7 @@ const TITLE = "House hack underwriting: how to know if a duplex, triplex, or fou
 // window. The on-page <h1> keeps the longer editorial TITLE.
 const SERP_TITLE = "House hack underwriting: does it beat renting?";
 const DESCRIPTION =
-  "House hacking sounds great in a podcast and confusing in a spreadsheet. The honest math: your housing cost vs. renting the equivalent, factoring in down payment, mortgage paydown, appreciation, and the very real cost of being your tenants&apos; landlord.";
+  "House hacking sounds great in a podcast and confusing in a spreadsheet. The honest math: your housing cost vs. renting the equivalent, factoring in down payment, mortgage paydown, appreciation, and the very real cost of being your tenants' landlord.";
 const PUBLISHED_AT = "2026-06-07";
 const MODIFIED_AT = "2026-06-07";
 const READING_TIME_MIN = 12;

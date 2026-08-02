@@ -29,7 +29,7 @@ const TITLE = "Short-term rental underwriting playbook: how to model an Airbnb i
 // window. The on-page <h1> keeps the longer editorial TITLE.
 const SERP_TITLE = "Short-term rental underwriting playbook (2026)";
 const DESCRIPTION =
-  "STR cash flow lives or dies on three numbers: ADR, occupancy, and operating expenses. Here&apos;s the full playbook for underwriting a short-term rental in 2026 — what data sources to use, what hidden costs everyone forgets, and how to stress-test for a bad off-season.";
+  "STR cash flow lives or dies on three numbers: ADR, occupancy, and operating expenses. Here's the full playbook for underwriting a short-term rental in 2026 — what data sources to use, what hidden costs everyone forgets, and how to stress-test for a bad off-season.";
 const PUBLISHED_AT = "2026-06-07";
 const MODIFIED_AT = "2026-06-07";
 const READING_TIME_MIN = 14;

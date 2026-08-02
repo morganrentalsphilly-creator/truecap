@@ -1,11 +1,28 @@
 # SEO content backlog — query-mapped
 
-Source of truth for the daily blog automation's topic selection (its
-SKILL.md reads this file). Every entry maps to a REAL query with
-observed search demand from the 2026-07-15 SEO growth audit — the
-audit found ~30-40% of prior posts targeted invented phrasings with
-zero volume. Work TOP-DOWN; check an item off in the same commit that
-ships its post.
+Source of truth for topic selection in
+`.github/workflows/seo-content.yml` (Tue + Fri). Every entry maps to a
+REAL query with observed search demand from the 2026-07-15 SEO growth
+audit — that audit found ~30-40% of prior posts targeted invented
+phrasings with zero volume. Work TOP-DOWN; check an item off in the
+same commit that ships its post.
+
+**Keep this list stocked.** At two posts a week it drains in about six
+weeks. An empty backlog is worse than a paused workflow: the run starts
+inventing topics, which is precisely the failure this file exists to
+prevent. Top it up from Search Console query data, not from
+brainstorming.
+
+**Skipping is allowed and encouraged.** If checking the SERP shows it is
+all lender lead-gen or a proprietary-data moat a calculator site cannot
+beat, check the item off with a one-line note saying why. A recorded
+skip beats a post that cannot rank.
+
+> Context from the 2026-08-02 baseline (`docs/seo/2026-08-02-baseline.md`):
+> the site ranks for 0 of 10 target head terms despite 413 indexable URLs.
+> More posts is not obviously the binding constraint — authority and
+> off-domain corroboration are. See `docs/seo/off-domain-outreach.md`
+> before assuming volume is the answer.
 
 ## Rules (from the audit — do not violate)
 

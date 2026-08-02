@@ -23,123 +23,142 @@
  * Caching: same as llms.txt — public, 1-hour cache.
  */
 
+import { CALCULATOR_REGISTRY } from "@/lib/calculator-registry";
 import { GLOSSARY, GLOSSARY_CATEGORY_LABELS } from "@/lib/glossary";
 import { getSiteUrl } from "@/lib/site-url";
 
 export const dynamic = "force-static";
 export const revalidate = 3600;
 
-/** Calculator descriptions paired with the formula they implement. */
-const TOOL_REFERENCE: Array<{
-  slug: string;
-  name: string;
-  formula: string;
-  description: string;
-}> = [
-  {
-    slug: "cap-rate-calculator",
-    name: "Cap rate calculator",
+/**
+ * Formula + reference blurb for each calculator, keyed by the SAME slug
+ * CALCULATOR_REGISTRY uses.
+ *
+ * This used to be a standalone array of 14 hand-listed tools while the
+ * registry carried 20 — so 6 calculators (2% rule, 50% rule, 70% rule, ARV,
+ * house hacking, cash flow) were invisible to every LLM ingesting this file,
+ * including the cash-flow calculator that is one of the site's primary
+ * ranking targets. The 2026-08-02 SEO audit caught the drift.
+ *
+ * The shape is now a Record keyed by slug rather than a free-standing list,
+ * so the render loop walks CALCULATOR_REGISTRY (the source of truth for which
+ * tools exist and what they're called) and looks the formula up here. Adding a
+ * calculator without adding its formula is a type error at the lookup site and
+ * a unit-test failure in lib/__tests__/seo-guards.test.ts — the drift can't
+ * silently come back.
+ *
+ * Rule (docs/seo-content-backlog.md): do NOT hardcode the tool list.
+ */
+const TOOL_FORMULAS: Record<string, { formula: string; description: string }> = {
+  "cap-rate-calculator": {
     formula: "Cap rate = NOI ÷ Property value",
     description:
       "Capitalization rate. The unleveraged annual return a rental property generates, independent of financing. Tier-1 coastal markets typically 5-6%, Midwest/Sun Belt 6-8%, cash-flow markets 8-10%.",
   },
-  {
-    slug: "cash-on-cash-calculator",
-    name: "Cash-on-cash return calculator",
+  "cash-on-cash-calculator": {
     formula: "CoC = Annual cash flow ÷ Total cash invested",
     description:
       "Pre-tax annual return on the actual cash invested (down payment + closing costs + initial rehab). Most buy-and-hold investors target 8-12%.",
   },
-  {
-    slug: "dscr-calculator",
-    name: "DSCR calculator",
+  "dscr-calculator": {
     formula: "DSCR = NOI ÷ Annual debt service",
     description:
       "Debt Service Coverage Ratio. The metric every commercial and investment-property lender uses to qualify a deal. 1.20-1.25 minimum for most lenders; 1.30+ preferred.",
   },
-  {
-    slug: "noi-calculator",
-    name: "NOI calculator",
+  "noi-calculator": {
     formula: "NOI = Gross rent - Vacancy - Operating expenses",
     description:
       "Net Operating Income. Annual rental income after vacancy and all operating expenses (property tax, insurance, maintenance, PM, utilities, capex reserves), but before mortgage interest, depreciation, and income tax.",
   },
-  {
-    slug: "brrrr-calculator",
-    name: "BRRRR calculator",
+  "brrrr-calculator": {
     formula: "Cash out = Refi LTV × ARV - Existing debt - Closing costs",
     description:
       "Buy, Rehab, Rent, Refinance, Repeat strategy modeling. Calculates all-in cost (purchase + rehab + holding), after-repair value (ARV), refinance cash-out at typical 75% LTV, and whether the strategy recycles capital efficiently.",
   },
-  {
-    slug: "1-percent-rule-calculator",
-    name: "1% rule calculator",
+  "1-percent-rule-calculator": {
     formula: "Monthly rent ≥ 1% × Purchase price",
     description:
       "Quick screening filter. The property's monthly rent should equal or exceed 1% of the purchase price. A pass/fail triage; not a complete underwrite.",
   },
-  {
-    slug: "rehab-cost-estimator",
-    name: "Rehab cost estimator",
+  "2-percent-rule-calculator": {
+    formula: "Monthly rent ÷ Purchase price ≥ 2%",
+    description:
+      "The strict cash-flow screen. Rent-to-price measured against both the 2% and 1% bars. In 2026 almost nothing clears 2% outside low-priced Midwest and Rust Belt markets — treat a pass as a prompt to check why the price is that low, not as a green light.",
+  },
+  "50-percent-rule-calculator": {
+    formula: "Operating expenses ≈ 50% × Gross rent; NOI = Gross rent × 50%",
+    description:
+      "Three-second expense triage. Assumes operating expenses (excluding mortgage) run about half of gross rent, then derives NOI and cash flow. Useful when a seller pro forma shows a 25% expense ratio and you want a sanity check before spending time on a full underwrite.",
+  },
+  "70-percent-rule-calculator": {
+    formula: "Max offer = (0.70 × ARV) - Repair costs",
+    description:
+      "The flip and BRRRR screen. Caps the offer at 70% of after-repair value minus the rehab budget, leaving room for holding costs, selling costs, and profit. Supports the other common multipliers (65%, 75%, 80%) since the right number varies by market heat and deal size.",
+  },
+  "arv-calculator": {
+    formula:
+      "ARV = Median comp price per sq ft × Subject sq ft; Max offer = (0.70 × ARV) - Repairs",
+    description:
+      "Comps-based after-repair value plus the 70%-rule max offer. ARV is the number every flip and BRRRR decision hangs on — get it wrong by 10% and the whole deal inverts.",
+  },
+  "house-hacking-calculator": {
+    formula:
+      "Effective housing cost = PITI - Tenant rent received (net of that unit's share of expenses)",
+    description:
+      "Live in one unit, rent the rest. Models effective monthly housing cost after tenant rent, compares it against renting the same space, and shows what the property looks like as a pure rental once you move out.",
+  },
+  "rental-cash-flow-calculator": {
+    formula:
+      "Monthly cash flow = Gross rent - Vacancy - Operating expenses - Mortgage P&I",
+    description:
+      "Monthly cash flow after every operating expense and the mortgage, with the NOI and debt-service split shown separately. The single number most buy-and-hold investors screen on. TrueCap defaults to conservative reserves (vacancy 8%, maintenance 8%, capex 8%, PM 9%) rather than the 5% seller pro formas quote.",
+  },
+  "rehab-cost-estimator": {
     formula: "Total rehab = Σ (Sq ft × Rate per sq ft) per work category",
     description:
       "Square-foot-based defaults for cosmetic, kitchen, bath, and systems work. Mid-market 2024-25 contractor pricing. Recommended 25% contingency on top of base estimate.",
   },
-  {
-    slug: "mortgage-payment-calculator",
-    name: "Mortgage payment calculator",
+  "mortgage-payment-calculator": {
     formula:
       "P&I = Loan × (r × (1+r)^n) / ((1+r)^n - 1), where r = monthly rate, n = months",
     description:
       "PITI breakdown: Principal, Interest, Taxes, Insurance. Investment-property rates and amortization. Investment-property loans typically 0.5-1.0% higher rates than owner-occupant loans.",
   },
-  {
-    slug: "gross-rent-multiplier-calculator",
-    name: "Gross Rent Multiplier calculator",
+  "gross-rent-multiplier-calculator": {
     formula: "GRM = Property price ÷ Annual gross rent",
     description:
       "10-second screening ratio. Lower is better. Used for triaging deals before a full underwrite. Doesn't account for expenses — only useful with comparable properties in the same market.",
   },
-  {
-    slug: "break-even-calculator",
-    name: "Break-even calculator",
+  "break-even-calculator": {
     formula: "Break-even months = Total cash invested ÷ Monthly net cash flow",
     description:
       "How many months until rental cash flow returns the initial investment. Compares deals on payback speed.",
   },
-  {
-    slug: "roi-calculator",
-    name: "ROI calculator",
+  "roi-calculator": {
     formula:
       "Total return = Annual cash flow + Principal paydown + Appreciation",
     description:
       "Total annualized return on a rental — cash flow plus principal paydown plus appreciation in one composite number.",
   },
-  {
-    slug: "closing-cost-calculator",
-    name: "Closing cost calculator",
+  "closing-cost-calculator": {
     formula:
       "Total = Origination + Title + Recording + Transfer tax + Insurance prepay + Tax escrow + Appraisal + Inspection",
     description:
       "Line-item breakdown of closing costs on a rental purchase. Investment-property closing typically runs 2-5% of purchase price.",
   },
-  {
-    slug: "vacancy-rate-calculator",
-    name: "Vacancy rate calculator",
+  "vacancy-rate-calculator": {
     formula:
       "Vacancy rate = (Vacant days × Daily rent + Turnover cost) ÷ Annual gross rent",
     description:
       "Effective vacancy rate from vacant days + turnover cost. National average on residential rentals runs 7-9%; most seller pro formas quote 5%, which is aggressive.",
   },
-  {
-    slug: "rental-property-tax-calculator",
-    name: "Rental property tax calculator",
+  "rental-property-tax-calculator": {
     formula:
       "Schedule E income = Gross rent - Operating expenses - Mortgage interest - Depreciation (Building basis ÷ 27.5)",
     description:
       "Models Schedule E taxable income, 27.5-year residential depreciation, after-tax cash flow, and the depreciation tax-shield value.",
   },
-];
+};
 
 const METHODOLOGY_SUMMARY = [
   "How TrueCap computes the numbers:",
@@ -186,13 +205,28 @@ export async function GET() {
     "",
     "## Calculators with formulas",
     "",
-    ...TOOL_REFERENCE.flatMap((tool) => [
-      `### ${tool.name}`,
-      `URL: ${siteUrl}/tools/${tool.slug}`,
-      `Formula: ${tool.formula}`,
-      tool.description,
-      "",
-    ]),
+    // Walk the registry, not a local list — see TOOL_FORMULAS above.
+    ...CALCULATOR_REGISTRY.flatMap((tool) => {
+      const reference = TOOL_FORMULAS[tool.slug];
+      if (!reference) {
+        // Unreachable in CI (lib/__tests__/seo-guards.test.ts asserts parity),
+        // but degrade to a link rather than crashing the route if a
+        // calculator ships before its formula does.
+        return [
+          `### ${tool.title}`,
+          `URL: ${siteUrl}/tools/${tool.slug}`,
+          tool.description,
+          "",
+        ];
+      }
+      return [
+        `### ${tool.title}`,
+        `URL: ${siteUrl}/tools/${tool.slug}`,
+        `Formula: ${reference.formula}`,
+        reference.description,
+        "",
+      ];
+    }),
   ].join("\n");
 
   // ── Glossary (full content) ──

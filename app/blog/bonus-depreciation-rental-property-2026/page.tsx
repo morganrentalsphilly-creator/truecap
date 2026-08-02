@@ -29,7 +29,7 @@ const TITLE = "Bonus depreciation on rental property in 2026: what changed, what
 // window. The on-page <h1> keeps the longer editorial TITLE.
 const SERP_TITLE = "Bonus depreciation on rental property in 2026";
 const DESCRIPTION =
-  "Bonus depreciation phased down from 100% in 2022 to 40% in 2025 and 20% in 2026. But cost segregation studies, the short-term rental loophole, and the real-estate professional designation still create real tax savings. Here&apos;s the current playbook.";
+  "Bonus depreciation phased down from 100% in 2022 to 40% in 2025 and 20% in 2026. But cost segregation studies, the short-term rental loophole, and the real-estate professional designation still create real tax savings. Here's the current playbook.";
 const PUBLISHED_AT = "2026-06-07";
 const MODIFIED_AT = "2026-06-07";
 const READING_TIME_MIN = 13;

@@ -16,11 +16,32 @@
  */
 import { NextResponse, type NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
+import { isCanonicalHost } from "@/lib/site-url";
 
 function hasSupabaseAuthCookie(request: NextRequest): boolean {
   return request.cookies
     .getAll()
     .some((c) => /^sb-.*-auth-token/.test(c.name) && c.value.length > 0);
+}
+
+/**
+ * Stamp `X-Robots-Tag: noindex, nofollow` on anything served from a hostname
+ * that isn't usetruecap.com.
+ *
+ * Every *.vercel.app alias serves the same HTML with a self-referencing
+ * canonical, so each is a full duplicate of the site. The 2026-08-02 SEO
+ * baseline found `truecap-iota.vercel.app` indexed and outranking the real
+ * domain on brand queries. See isCanonicalHost in lib/site-url.ts.
+ *
+ * A response header (not a meta tag) so it also covers /sitemap.xml,
+ * /robots.txt, /feed.xml, /llms.txt and the OG image routes, which never pass
+ * through Next's metadata layer.
+ */
+function applyHostGuard(response: NextResponse, request: NextRequest): NextResponse {
+  if (!isCanonicalHost(request.headers.get("host"))) {
+    response.headers.set("X-Robots-Tag", "noindex, nofollow");
+  }
+  return response;
 }
 
 export async function proxy(request: NextRequest) {
@@ -43,10 +64,10 @@ export async function proxy(request: NextRequest) {
     for (const cookie of sessionResponse.cookies.getAll()) {
       rewritten.cookies.set(cookie);
     }
-    return rewritten;
+    return applyHostGuard(rewritten, request);
   }
 
-  return sessionResponse;
+  return applyHostGuard(sessionResponse, request);
 }
 
 export const config = {
