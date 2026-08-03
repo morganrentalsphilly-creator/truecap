@@ -7,7 +7,7 @@
  * than just asking for the final two numbers.
  */
 
-import { useMemo, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowUpRight, Sparkles } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -134,12 +134,14 @@ export function CocCalculatorWidget() {
 }
 
 function FieldMoney({ label, value, setValue }: { label: string; value: string; setValue: (v: string) => void }) {
+  const id = useId();
   return (
     <div>
-      <Label className="text-sm font-medium text-foreground mb-1.5 block">{label}</Label>
+      <Label htmlFor={id} className="text-sm font-medium text-foreground mb-1.5 block">{label}</Label>
       <div className="relative">
         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
         <Input
+          id={id}
           type="number"
           inputMode="numeric"
           value={value}
@@ -152,11 +154,13 @@ function FieldMoney({ label, value, setValue }: { label: string; value: string; 
 }
 
 function FieldPct({ label, value, setValue, step = "0.5" }: { label: string; value: string; setValue: (v: string) => void; step?: string }) {
+  const id = useId();
   return (
     <div>
-      <Label className="text-sm font-medium text-foreground mb-1.5 block">{label}</Label>
+      <Label htmlFor={id} className="text-sm font-medium text-foreground mb-1.5 block">{label}</Label>
       <div className="relative">
         <Input
+          id={id}
           type="number"
           inputMode="decimal"
           step={step}
@@ -171,10 +175,12 @@ function FieldPct({ label, value, setValue, step = "0.5" }: { label: string; val
 }
 
 function FieldNum({ label, value, setValue }: { label: string; value: string; setValue: (v: string) => void }) {
+  const id = useId();
   return (
     <div>
-      <Label className="text-sm font-medium text-foreground mb-1.5 block">{label}</Label>
+      <Label htmlFor={id} className="text-sm font-medium text-foreground mb-1.5 block">{label}</Label>
       <Input
+        id={id}
         type="number"
         inputMode="numeric"
         value={value}

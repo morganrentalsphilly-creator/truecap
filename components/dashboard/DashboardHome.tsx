@@ -19,8 +19,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Topbar } from "@/components/dashboard/Topbar";
 import { StatCard } from "@/components/dashboard/StatCard";
-import { TopDeals, type DashboardTopDeal } from "@/components/dashboard/TopDeals";
+import { REVEAL_DEAL_EVENT, TopDeals, type DashboardTopDeal } from "@/components/dashboard/TopDeals";
 import { AIInsights } from "@/components/dashboard/AIInsights";
+import { dealAnchorSelector, pickRenderedAnchor } from "@/lib/deal-anchor";
 
 // The two recharts-heavy panels load as their own chunks so the
 // dashboard's initial JS ships without the ~100KB charting library —
@@ -342,16 +343,57 @@ function getDealAnchorId(deal: DashboardDeal | undefined, index = 0) {
   return (deal.id ?? `${deal.address}-${index}`).replace(/[^a-zA-Z0-9_-]/g, "-");
 }
 
-function scrollToDeal(deal: DashboardDeal | undefined, index = 0) {
-  const id = getDealAnchorId(deal, index);
-  if (!id) return;
-  const el = document.getElementById(`deal-${id}`);
-  if (!el) return;
+function revealDealAnchor(el: Element) {
   el.scrollIntoView({ behavior: scrollBehavior(), block: "center" });
   // Move focus to the target so SR / keyboard users land on the deal instead
   // of being stranded while the viewport scrolls away (the row is tabIndex=-1
   // in TopDeals). preventScroll: our own smooth scroll owns the motion.
   if (el instanceof HTMLElement) el.focus({ preventScroll: true });
+}
+
+/**
+ * The RENDERED `deal-<id>` anchor, or null if the deal isn't laid out anywhere.
+ *
+ * NOT getElementById: TopDeals emits the same id twice (mobile <article> in a
+ * `md:hidden` stack, desktop <tr> in a `hidden … md:block` table) and both
+ * copies stay in the DOM at every width, so getElementById returned the first
+ * in document order — the mobile article, which is display:none from 768px up.
+ * scrollIntoView/focus on a node with no layout box are silent no-ops, so
+ * "Best Score" was a dead button on DESKTOP, and below md the hidden <tr>
+ * masked the missing card and suppressed the REVEAL_DEAL_EVENT fallback
+ * entirely. See lib/deal-anchor.ts.
+ */
+function findRenderedDealAnchor(id: string): HTMLElement | null {
+  if (!id) return null;
+  return pickRenderedAnchor(
+    Array.from(document.querySelectorAll<HTMLElement>(dealAnchorSelector(id))),
+  );
+}
+
+function scrollToDeal(deal: DashboardDeal | undefined, index = 0) {
+  const id = getDealAnchorId(deal, index);
+  if (!id) return;
+  const el = findRenderedDealAnchor(id);
+  if (el) {
+    revealDealAnchor(el);
+    return;
+  }
+  // Nothing rendered for this deal. Between sm and md (this section is
+  // sm:block, the deal TABLE is md:block) the visible list is TopDeals' mobile
+  // card stack, which renders only its top 3 — so a Cash-Flow / ROI winner
+  // ranked 4th-6th by score has no laid-out anchor and the row was a dead
+  // button. Ask TopDeals to expand, then retry once it has re-rendered (two
+  // frames: the listener's setState is batched, the second frame runs after
+  // the commit). The retry must use the same rendered-anchor lookup — the
+  // collapsed deal's desktop <tr> is present-but-hidden the whole time, so
+  // getElementById would "succeed" on it and scroll nowhere.
+  window.dispatchEvent(new CustomEvent(REVEAL_DEAL_EVENT, { detail: { anchorId: id } }));
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      const revealed = findRenderedDealAnchor(id);
+      if (revealed) revealDealAnchor(revealed);
+    });
+  });
 }
 
 function getDecisionHighlights(data: DashboardHomeData) {

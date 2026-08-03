@@ -100,7 +100,9 @@ export function FixFlipCard({ values, defaultRehab }: FixFlipCardProps) {
         <button
           type="button"
           onClick={() => setExpanded((e) => !e)}
-          className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
+          /* 44px tap band on phones, desktop box unchanged — same fix as the
+             BRRRR card's toggle (both ship publicly on /d/ share pages). */
+          className="text-xs text-muted-foreground hover:text-foreground flex min-h-11 items-center gap-1 -mr-2 px-2 py-2 sm:min-h-0 sm:py-0"
         >
           {expanded ? <>Collapse <ChevronUp className="w-3.5 h-3.5" /></> : <>Expand <ChevronDown className="w-3.5 h-3.5" /></>}
         </button>

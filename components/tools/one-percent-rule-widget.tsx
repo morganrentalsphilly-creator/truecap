@@ -44,12 +44,13 @@ export function OnePercentRuleWidget() {
           </h2>
 
           <div>
-            <Label className="text-sm font-medium text-foreground mb-1.5 block">
+            <Label htmlFor="onepct-price" className="text-sm font-medium text-foreground mb-1.5 block">
               Purchase Price
             </Label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
               <Input
+                id="onepct-price"
                 type="number"
                 inputMode="numeric"
                 value={price}
@@ -60,12 +61,13 @@ export function OnePercentRuleWidget() {
           </div>
 
           <div>
-            <Label className="text-sm font-medium text-foreground mb-1.5 block">
+            <Label htmlFor="onepct-rent" className="text-sm font-medium text-foreground mb-1.5 block">
               Monthly Rent
             </Label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
               <Input
+                id="onepct-rent"
                 type="number"
                 inputMode="numeric"
                 value={rent}

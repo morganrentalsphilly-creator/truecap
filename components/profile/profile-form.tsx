@@ -488,46 +488,53 @@ export function ProfileForm({
       </div>
 
       <Dialog open={cropOpen} onOpenChange={setCropOpen}>
-        <DialogContent className="sm:max-w-3xl p-0 overflow-hidden">
-          <DialogHeader className="px-6 pt-6">
-            <DialogTitle className="text-center sm:text-center text-4xl font-bold">
-              Crop profile photo
-            </DialogTitle>
-            <DialogDescription className="text-center text-xl">
-              Adjust the circle to choose the area for your avatar.
-            </DialogDescription>
-          </DialogHeader>
+        {/* Column + inner scroller (same shape as template-form-dialog): the
+            header/cropper/zoom block scrolls and the footer stays pinned, so
+            Cancel + Save photo are reachable on a short viewport. `p-0
+            overflow-hidden` deletes the Dialog primitive's own overflow-y-auto
+            via tailwind-merge, so this dialog has to supply its own. */}
+        <DialogContent className="sm:max-w-3xl p-0 overflow-hidden flex flex-col">
+          <div className="flex-1 min-h-0 overflow-y-auto space-y-4">
+            <DialogHeader className="px-6 pt-6">
+              <DialogTitle className="text-center sm:text-center text-4xl font-bold">
+                Crop profile photo
+              </DialogTitle>
+              <DialogDescription className="text-center text-xl">
+                Adjust the circle to choose the area for your avatar.
+              </DialogDescription>
+            </DialogHeader>
 
-          <div className="px-6">
-            <div className="relative h-[340px] sm:h-[420px] bg-black rounded-3xl overflow-hidden">
-              {rawImage ? (
-                <Cropper
-                  image={rawImage}
-                  crop={crop}
-                  zoom={zoom}
-                  aspect={1}
-                  cropShape="round"
-                  showGrid={true}
-                  onCropChange={setCrop}
-                  onZoomChange={setZoom}
-                  onCropComplete={(_, areaPixels) => setCroppedAreaPixels(areaPixels as AreaPixels)}
+            <div className="px-6">
+              <div className="relative h-[340px] sm:h-[420px] bg-black rounded-3xl overflow-hidden">
+                {rawImage ? (
+                  <Cropper
+                    image={rawImage}
+                    crop={crop}
+                    zoom={zoom}
+                    aspect={1}
+                    cropShape="round"
+                    showGrid={true}
+                    onCropChange={setCrop}
+                    onZoomChange={setZoom}
+                    onCropComplete={(_, areaPixels) => setCroppedAreaPixels(areaPixels as AreaPixels)}
+                  />
+                ) : null}
+              </div>
+
+              <div className="py-6 px-1">
+                <Slider
+                  value={[zoom]}
+                  min={1}
+                  max={3}
+                  step={0.01}
+                  onValueChange={(values) => setZoom(values[0])}
                 />
-              ) : null}
-            </div>
-
-            <div className="py-6 px-1">
-              <Slider
-                value={[zoom]}
-                min={1}
-                max={3}
-                step={0.01}
-                onValueChange={(values) => setZoom(values[0])}
-              />
-              <p className="text-xs text-muted-foreground mt-2">Zoom</p>
+                <p className="text-xs text-muted-foreground mt-2">Zoom</p>
+              </div>
             </div>
           </div>
 
-          <DialogFooter className="px-6 pb-6 sm:justify-center gap-3">
+          <DialogFooter className="shrink-0 px-6 pb-6 sm:justify-center gap-3">
             <Button
               type="button"
               variant="outline"

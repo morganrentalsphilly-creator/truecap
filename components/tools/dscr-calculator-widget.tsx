@@ -91,12 +91,13 @@ export function DscrCalculatorWidget() {
           </h2>
 
           <div>
-            <Label className="text-sm font-medium text-foreground mb-1.5 block">
+            <Label htmlFor="dscr-noi" className="text-sm font-medium text-foreground mb-1.5 block">
               Annual NOI (Net Operating Income)
             </Label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
               <Input
+                id="dscr-noi"
                 type="number"
                 inputMode="numeric"
                 value={noiInput}
@@ -111,12 +112,13 @@ export function DscrCalculatorWidget() {
           </div>
 
           <div>
-            <Label className="text-sm font-medium text-foreground mb-1.5 block">
+            <Label htmlFor="dscr-debt" className="text-sm font-medium text-foreground mb-1.5 block">
               Annual Debt Service
             </Label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
               <Input
+                id="dscr-debt"
                 type="number"
                 inputMode="numeric"
                 value={debtInput}

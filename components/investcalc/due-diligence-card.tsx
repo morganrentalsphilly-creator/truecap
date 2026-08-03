@@ -65,8 +65,26 @@ export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
     };
   }, [savedDealId]);
 
-  const persist = (next: DueDiligenceItem[]) => {
+  /**
+   * Every mutator commits to local state first (optimistic - the checklist
+   * has to feel instant), so a rejected write leaves the card asserting
+   * something the server never stored. On failure we reconcile back to
+   * server truth: re-read the stored checklist, falling back to the
+   * pre-mutation snapshot if even the re-read fails. `onFailure` lets the
+   * caller put back anything it cleared outside `items` (the new-item input,
+   * the note baseline) AND re-apply text the user typed that the reconcile
+   * would otherwise wipe — it runs after the reconciling setItems, so it must
+   * use a FUNCTIONAL update to land on top of it. `failureHint` keeps the
+   * toast honest when a caller preserves what the user typed. Same
+   * rollback-on-error contract as deal-stage-select.tsx.
+   */
+  const persist = (
+    next: DueDiligenceItem[],
+    onFailure?: () => void,
+    failureHint = "Your last change was undone."
+  ) => {
     const dealIdAtSubmit = savedDealId;
+    const previous = items;
     startSaving(async () => {
       const r = await updateDealDueDiligenceAction(dealIdAtSubmit, next);
       if (dealIdAtSubmit !== savedDealId) return; // user switched deals mid-save
@@ -75,7 +93,15 @@ export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
           setMigrationPending(true);
           return;
         }
-        toast({ title: "Could not save checklist", description: r.message, variant: "destructive" });
+        const fresh = await getDealDueDiligenceAction(dealIdAtSubmit).catch(() => null);
+        if (dealIdAtSubmit !== savedDealId) return;
+        setItems(fresh?.ok ? fresh.items : previous);
+        onFailure?.();
+        toast({
+          title: "Could not save checklist",
+          description: `${r.message} ${failureHint}`,
+          variant: "destructive",
+        });
       }
     });
   };
@@ -96,7 +122,9 @@ export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
     const next = [...items, { id: makeDueDiligenceItemId(label, items), label, done: false }];
     setItems(next);
     setNewLabel("");
-    persist(next);
+    // A failed add rolls the row back out, so the typed label goes back in
+    // the input rather than disappearing with it.
+    persist(next, () => setNewLabel(label));
   };
   const setDueDate = (id: string, value: string) => {
     // Empty string clears the deadline; otherwise store the YYYY-MM-DD the
@@ -134,8 +162,31 @@ export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
     });
     setItems(next);
     if (trimmed !== noteAtOpenRef.current.trim()) {
+      // Restore the baseline if the save fails, otherwise the retry looks
+      // like "nothing changed" and silently skips the write.
+      const noteBeforeSave = noteAtOpenRef.current;
       noteAtOpenRef.current = trimmed;
-      persist(next);
+      persist(
+        next,
+        () => {
+          noteAtOpenRef.current = noteBeforeSave;
+          // Reconciling to server truth would revert the textarea to the
+          // OLDER stored note — silently destroying up to 500 chars the user
+          // just typed, with no undo. Put the typed text back on top of the
+          // reconciled state (functional update, so it lands AFTER persist's
+          // queued setItems). Same reason `add` re-seeds setNewLabel.
+          setItems((cur) =>
+            cur.map((i) => {
+              if (i.id !== id) return i;
+              const { note: _note, ...rest } = i;
+              return trimmed ? { ...rest, note: trimmed } : rest;
+            })
+          );
+        },
+        // The rest of the change was rolled back, but the note itself is
+        // still on screen — don't claim it was undone.
+        "Your note is still here — try again."
+      );
     }
   };
 

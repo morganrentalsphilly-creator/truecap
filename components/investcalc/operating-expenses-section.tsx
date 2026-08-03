@@ -685,7 +685,10 @@ export function OperatingExpensesSection({
                 aria-invalid={!!errors.depreciationYears}
                 aria-describedby={errors.depreciationYears ? "depreciationYears-error" : undefined}
                 className={cn(
-                  "h-10 w-full rounded-lg border border-[var(--brand-orange)]/15 bg-background px-3 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-orange)]/25",
+                  // text-base below md: iOS Safari zooms the whole page in on
+                  // any form control under 16px and never zooms back out.
+                  // Same rule the Input primitive already encodes.
+                  "h-10 w-full rounded-lg border border-[var(--brand-orange)]/15 bg-background px-3 text-base shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-orange)]/25 md:text-sm",
                   errors.depreciationYears && "border-destructive"
                 )}
               >

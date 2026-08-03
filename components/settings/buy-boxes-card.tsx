@@ -33,6 +33,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 const RETURN_FIELDS = [
   { key: "minCapRatePct", label: "Min cap rate", suffix: "%", step: "0.1", placeholder: "6" },
@@ -133,6 +134,11 @@ export function BuyBoxesCard() {
   const [editor, setEditor] = useState<EditorState | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [isSaving, startSaving] = useTransition();
+  // Which row's delete-confirm popover is open. Deleting a box is a hard
+  // row delete server-side (no soft delete, no undo) and it sits right next
+  // to Edit, so it gets the same confirm-first treatment as every other
+  // destructive action in the app.
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   // "X of your N active deals pass this box" feedback from the last save.
   // Rendered only while the editor is closed (opening it again hides the
   // line, since it describes the previous save, not the in-progress edit).
@@ -215,13 +221,16 @@ export function BuyBoxesCard() {
   }
 
   function handleDelete(id: string) {
+    const name = boxes.find((b) => b.id === id)?.name ?? "";
+    setConfirmDeleteId(null);
     setBusyId(id);
     // The fit line describes the last-saved box, which may be the one
     // being deleted — drop it rather than risk a stale claim.
     setSaveFit(null);
     startSaving(async () => {
       const result = await deleteBuyBoxAction(id);
-      applyResult(result);
+      // Say it happened: the row just vanishing was the only feedback.
+      if (applyResult(result)) toast({ title: "Buy box deleted", description: name });
       setBusyId(null);
     });
   }
@@ -348,17 +357,51 @@ export function BuyBoxesCard() {
                 >
                   Edit
                 </Button>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="ghost"
-                  aria-label={`Delete ${box.name}`}
-                  disabled={isSaving}
-                  onClick={() => handleDelete(box.id)}
-                  className="h-8 px-2 text-muted-foreground hover:text-destructive"
+                <Popover
+                  open={confirmDeleteId === box.id}
+                  onOpenChange={(open) => setConfirmDeleteId(open ? box.id : null)}
                 >
-                  <Trash2 className="size-3.5" />
-                </Button>
+                  <PopoverTrigger asChild>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      aria-label={`Delete ${box.name}`}
+                      disabled={isSaving}
+                      // ml-1: put a gap between Edit and the one control in
+                      // this row that destroys work.
+                      className="ml-1 h-8 px-2 text-muted-foreground hover:text-destructive"
+                    >
+                      <Trash2 className="size-3.5" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent align="end" className="w-72">
+                    <p className="text-sm font-semibold text-foreground">Delete this buy box?</p>
+                    <p className="mt-1 text-xs leading-snug text-muted-foreground">
+                      <span className="font-semibold text-foreground">{box.name}</span>{" "}
+                      and its criteria are removed for good — there&apos;s no undo, and deals stop
+                      being screened against it.
+                    </p>
+                    <div className="mt-3 flex justify-end gap-2">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setConfirmDeleteId(null)}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => handleDelete(box.id)}
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </div>
             </li>
           ))}
@@ -468,7 +511,9 @@ function BoxEditorForm({
             id="bb-strategy"
             value={editor.strategyKind}
             onChange={(e) => update({ strategyKind: e.target.value })}
-            className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+            /* text-base below md: iOS Safari zooms the page in on sub-16px
+               form controls (the Input primitive encodes the same rule). */
+            className="h-10 w-full rounded-md border border-input bg-background px-3 text-base md:text-sm"
           >
             <option value="">Any strategy</option>
             {STRATEGY_KINDS.map((k) => (

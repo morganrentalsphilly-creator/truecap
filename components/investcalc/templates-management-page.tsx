@@ -948,7 +948,9 @@ export function TemplatesManagementPage({
                 id="apply-deal-select"
                 value={selectedDealId}
                 onChange={(e) => setSelectedDealId(e.target.value)}
-                className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm"
+                /* text-base below md: iOS Safari zooms the page in on sub-16px
+                   form controls (the Input primitive encodes the same rule). */
+                className="h-10 w-full rounded-md border border-border bg-background px-3 text-base md:text-sm"
               >
                 <option value="">Select a deal…</option>
                 {dealOptions.map((d) => (

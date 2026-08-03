@@ -66,12 +66,13 @@ export function CapRateCalculatorWidget() {
           </h2>
 
           <div>
-            <Label className="text-sm font-medium text-foreground mb-1.5 block">
+            <Label htmlFor="caprate-price" className="text-sm font-medium text-foreground mb-1.5 block">
               Property Purchase Price
             </Label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
               <Input
+                id="caprate-price"
                 type="number"
                 inputMode="numeric"
                 value={priceInput}
@@ -83,12 +84,13 @@ export function CapRateCalculatorWidget() {
           </div>
 
           <div>
-            <Label className="text-sm font-medium text-foreground mb-1.5 block">
+            <Label htmlFor="caprate-rent" className="text-sm font-medium text-foreground mb-1.5 block">
               Monthly Rent
             </Label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
               <Input
+                id="caprate-rent"
                 type="number"
                 inputMode="numeric"
                 value={rentInput}
@@ -100,11 +102,12 @@ export function CapRateCalculatorWidget() {
           </div>
 
           <div>
-            <Label className="text-sm font-medium text-foreground mb-1.5 block">
+            <Label htmlFor="caprate-opex" className="text-sm font-medium text-foreground mb-1.5 block">
               Operating Expenses (% of rent)
             </Label>
             <div className="relative">
               <Input
+                id="caprate-opex"
                 type="number"
                 inputMode="decimal"
                 step="1"

@@ -107,7 +107,12 @@ export function BrrrrCard({ values, result, defaultRehab }: BrrrrCardProps) {
         <button
           type="button"
           onClick={() => setExpanded((e) => !e)}
-          className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
+          /* Bare text ran to a 16px-tall hit box — half a comfortable touch
+             target, on the /d/ share pages where this card is public. Padding
+             + min-h-11 give it a 44px band on phones; -mr-2 keeps the label
+             optically flush with the card edge and sm: restores the exact
+             desktop box. */
+          className="text-xs text-muted-foreground hover:text-foreground flex min-h-11 items-center gap-1 -mr-2 px-2 py-2 sm:min-h-0 sm:py-0"
         >
           {expanded ? <>Collapse <ChevronUp className="w-3.5 h-3.5" /></> : <>Expand <ChevronDown className="w-3.5 h-3.5" /></>}
         </button>

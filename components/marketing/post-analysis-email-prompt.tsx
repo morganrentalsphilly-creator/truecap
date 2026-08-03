@@ -12,9 +12,19 @@
  *   - After the user's first analysis_completed signal, appears when they
  *     SCROLL PAST the results ledger (they've read the answer) or on
  *     desktop exit-intent (mouse leaves through the top of the viewport)
- *   - Dismissable; remembers dismissal via localStorage so it never
- *     re-fires on subsequent analyses within the same browser
+ *   - Dismissable (Close button or Escape); remembers dismissal via
+ *     localStorage so it never re-fires on subsequent analyses within
+ *     the same browser
  *   - Submits via capturePostAnalysisEmail server action
+ *
+ * Why it is NOT a dialog (a11y): this is an ambient upsell that must
+ * never trap the user (product principle §1.4) — it sits at z-30 under
+ * the product chrome, the page behind stays fully interactive, and
+ * focus is deliberately left where the user put it. So it is a labelled
+ * complementary landmark, not a modal: claiming role="dialog"
+ * aria-modal="true" told assistive tech the rest of the page was inert,
+ * which in WebKit/VoiceOver dropped the whole analysis out of the
+ * accessibility tree the moment this card appeared.
  *
  * Why not a flat timer (BROWSER-6): the redesign's answer-first mobile
  * ordering put the Deal Score exactly where the old 5s overlay landed —
@@ -23,7 +33,7 @@
  * "about to leave" moment instead of mid-read.
  */
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { CheckCircle2, X } from "lucide-react";
 import { capturePostAnalysisEmail } from "@/app/actions/post-analysis-email-capture";
 import { trackEvent } from "@/lib/analytics";
@@ -96,7 +106,7 @@ export function PostAnalysisEmailPrompt({ hasCompletedAnalysis, propertyAddress 
     return removeListeners;
   }, [hasCompletedAnalysis, propertyAddress]);
 
-  const dismiss = () => {
+  const dismiss = useCallback(() => {
     setOpen(false);
     trackEvent("email_capture_dismissed");
     try {
@@ -104,7 +114,34 @@ export function PostAnalysisEmailPrompt({ hasCompletedAnalysis, propertyAddress 
     } catch {
       // Ignore — private mode etc.
     }
-  };
+  }, []);
+
+  // Escape closes it from anywhere on the page — the card never takes
+  // focus, so without this a keyboard user has to Tab all the way to the
+  // Close button. It is NOT modal, so it must not steal Escape from a
+  // real (Radix) dialog layered above it.
+  useEffect(() => {
+    // Not while the "Checklist sent!" confirmation is up: it closes itself,
+    // and routing that through dismiss() would log a dismissal against a
+    // capture that succeeded.
+    if (!open || status === "success") return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      if (document.querySelector('[role="dialog"][data-state="open"]')) return;
+      // Only claim an Escape that is addressed to the PAGE. If it came from
+      // inside a control/layer that owns Escape — an open combobox listbox
+      // (the address autocomplete sets aria-expanded on its input and closes
+      // its dropdown on Escape WITHOUT stopPropagation), a Radix
+      // Select/DropdownMenu/Popover (data-state="open") — that keypress is
+      // theirs. Without this the same Escape also permanently dismisses this
+      // prompt in localStorage and logs a bogus email_capture_dismissed.
+      const target = event.target instanceof Element ? event.target : null;
+      if (target?.closest('[aria-expanded="true"], [data-state="open"]')) return;
+      dismiss();
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [open, status, dismiss]);
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -138,9 +175,9 @@ export function PostAnalysisEmailPrompt({ hasCompletedAnalysis, propertyAddress 
 
   return (
     <div
-      role="dialog"
-      aria-modal="true"
+      role="complementary"
       aria-label="Get the underwriting checklist"
+      aria-live="polite"
       // z-30, deliberately BELOW the sticky Run bar / verdict dock (z-40):
       // if the user scrolls back into the form, the product action wins the
       // bottom edge — the capture card must never block Run (BROWSER-6).

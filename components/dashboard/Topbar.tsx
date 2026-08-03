@@ -3,7 +3,7 @@
 import { Menu, Search, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState, type FormEvent, type KeyboardEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import { UserMenu } from "@/components/auth/user-menu";
 import { Button } from "@/components/ui/button";
 import { SheetTrigger } from "@/components/ui/sheet";
@@ -31,12 +31,16 @@ export function Topbar({
   canAccessDashboard = true,
 }: TopbarProps) {
   const router = useRouter();
+  const searchFormRef = useRef<HTMLFormElement | null>(null);
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   // -1 = nothing actively highlighted (keyboard arrow navigation).
   const [activeIndex, setActiveIndex] = useState(-1);
+  // Closed by Escape / an outside click / focus leaving the form, without
+  // throwing away the fetched matches — typing again reopens the panel.
+  const [isPanelDismissed, setIsPanelDismissed] = useState(false);
   const normalizedQuery = useMemo(() => query.trim(), [query]);
 
   useEffect(() => {
@@ -93,6 +97,7 @@ export function Topbar({
     setPendingSavedListSearch(trimmed);
     setSuggestions([]);
     setActiveIndex(-1);
+    setIsPanelDismissed(true);
     // Route to the dashboard-shell variant so the sidebar + topbar stay
     // mounted. The bare `/saved-analyses` route uses the marketing layout
     // and would visually kick the user out of the dashboard.
@@ -106,25 +111,62 @@ export function Topbar({
 
   const showNoResults =
     debouncedQuery.length >= 2 && !isLoadingSuggestions && suggestions.length === 0;
-  const isOpen = suggestions.length > 0 || showNoResults || isLoadingSuggestions;
+  const isOpen =
+    !isPanelDismissed && (suggestions.length > 0 || showNoResults || isLoadingSuggestions);
+
+  // The panel is a hand-rolled listbox, not a Radix popover, so it inherits
+  // no dismiss behaviour — without this it stays pinned over the dashboard
+  // until the user edits the query. pointerdown (capture) closes it before
+  // the tap resolves; the containment check keeps selecting a suggestion
+  // working, since the listbox lives inside the form. focusin covers the
+  // keyboard path (Tab away). Deliberately NOT a modal layer: that would
+  // put `pointer-events: none` on <body> and freeze the page behind it.
+  useEffect(() => {
+    if (!isOpen) return;
+    const closeIfOutside = (event: Event) => {
+      const target = event.target as Node | null;
+      if (target && searchFormRef.current?.contains(target)) return;
+      setIsPanelDismissed(true);
+      setActiveIndex(-1);
+    };
+    document.addEventListener("pointerdown", closeIfOutside, true);
+    document.addEventListener("focusin", closeIfOutside);
+    return () => {
+      document.removeEventListener("pointerdown", closeIfOutside, true);
+      document.removeEventListener("focusin", closeIfOutside);
+    };
+  }, [isOpen]);
 
   const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Escape") {
+      // Closes the panel but keeps the query — standard combobox behaviour.
+      // Handled before the empty-suggestions bail-out so Escape also
+      // dismisses the "No saved deals match" / "Searching…" states.
+      setIsPanelDismissed(true);
+      setActiveIndex(-1);
+      return;
+    }
     if (suggestions.length === 0) return;
+    // The arrows RE-OPEN a panel closed by Escape / an outside click (standard
+    // combobox: Down opens the list). Without this the highlight would move
+    // inside a listbox that isn't rendered — an invisible selection that Enter
+    // could then act on, and an aria-activedescendant pointing at nothing.
     if (event.key === "ArrowDown") {
       event.preventDefault();
+      setIsPanelDismissed(false);
       setActiveIndex((i) => (i + 1) % suggestions.length);
     } else if (event.key === "ArrowUp") {
       event.preventDefault();
+      setIsPanelDismissed(false);
       setActiveIndex((i) => (i <= 0 ? suggestions.length - 1 : i - 1));
-    } else if (event.key === "Enter" && activeIndex >= 0) {
+      // Enter only picks a suggestion while the list is actually VISIBLE;
+      // otherwise it submits the query the user typed.
+    } else if (event.key === "Enter" && isOpen && activeIndex >= 0) {
       // A suggestion is highlighted — select it instead of submitting the
       // raw query. Prevent the form submit so both don't fire.
       event.preventDefault();
       const picked = suggestions[activeIndex];
       if (picked) goToSearch(picked.address);
-    } else if (event.key === "Escape") {
-      setSuggestions([]);
-      setActiveIndex(-1);
     }
   };
 
@@ -141,12 +183,17 @@ export function Topbar({
             <Menu className="h-5 w-5" />
           </Button>
         </SheetTrigger>
-        <form className="relative flex-1 max-w-xl" onSubmit={handleSearchSubmit} role="search">
+        <form ref={searchFormRef} className="relative flex-1 max-w-xl" onSubmit={handleSearchSubmit} role="search">
         <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
         <input
           name="dashboard-saved-search"
           value={query}
-          onChange={(event) => setQuery(event.target.value)}
+          onChange={(event) => {
+            setQuery(event.target.value);
+            // Editing the query reopens a panel closed by Escape / an
+            // outside click.
+            setIsPanelDismissed(false);
+          }}
           onKeyDown={handleKeyDown}
           placeholder="Search your saved deals by address…"
           aria-label="Search saved deals"
@@ -154,7 +201,10 @@ export function Topbar({
           aria-expanded={isOpen}
           aria-controls={SUGGESTIONS_LISTBOX_ID}
           aria-autocomplete="list"
-          aria-activedescendant={activeIndex >= 0 && suggestions[activeIndex] ? `sugg-${suggestions[activeIndex]!.id}` : undefined}
+          // Gated on isOpen as well: when the panel is closed the option
+          // elements are unmounted, so pointing at one would be a dangling
+          // IDREF on a combobox reporting aria-expanded={false}.
+          aria-activedescendant={isOpen && activeIndex >= 0 && suggestions[activeIndex] ? `sugg-${suggestions[activeIndex]!.id}` : undefined}
           autoComplete="off"
           className="w-full h-10 pl-10 pr-4 rounded-lg bg-muted/60 border border-transparent focus:border-primary focus:bg-background outline-none text-base sm:text-sm transition"
         />
@@ -164,6 +214,11 @@ export function Topbar({
             id={SUGGESTIONS_LISTBOX_ID}
             role="listbox"
             aria-label="Saved deal matches"
+            // Keep focus in the input while picking with the mouse (the
+            // aria-activedescendant pattern). Without this, Safari moves
+            // focus to <body> on mousedown, the focus-out dismiss unmounts
+            // the row, and the click never lands on the suggestion.
+            onMouseDown={(event) => event.preventDefault()}
             className="absolute top-[calc(100%+0.4rem)] left-0 right-0 max-h-[60vh] overflow-y-auto rounded-lg border border-border bg-card shadow-lg z-30"
           >
             {suggestions.map((item, index) => (

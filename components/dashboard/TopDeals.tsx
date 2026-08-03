@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { Building2, Home, KeyRound } from "lucide-react";
 import { recommendationLabel, type DealScoreBreakdown } from "@/lib/deal-score";
@@ -84,6 +84,14 @@ function getDealId(deal: DashboardTopDeal) {
   return (deal.id ?? `${deal.name}-${deal.address}`).replace(/[^a-zA-Z0-9_-]/g, "-");
 }
 
+/**
+ * "Jump to this deal" request from a deep-link entry point (the Top performers
+ * rows in DashboardHome). Detail carries the anchor id WITHOUT the `deal-`
+ * prefix. Only meaningful while the mobile stack is collapsed — see the
+ * listener below.
+ */
+export const REVEAL_DEAL_EVENT = "tc-dashboard-reveal-deal";
+
 function getSortValue(deal: DashboardTopDeal, sortBy: SortMetric) {
   if (sortBy === "roi") return deal.roi;
   if (sortBy === "cashFlow") return deal.cashFlow;
@@ -126,6 +134,24 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
       .map(({ deal }) => deal);
   }, [data, sortBy]);
 
+  // Deep links from "Top performers" can name a deal ranked 4th-6th by score,
+  // which the collapsed top-3 stack hasn't rendered. Between sm and md that
+  // stack is the ONLY place deal anchors exist (the table below is md:block),
+  // so the jump used to die silently. Expand on request so the anchor mounts;
+  // DashboardHome retries the scroll on the next frames.
+  useEffect(() => {
+    const onReveal = (event: Event) => {
+      const anchorId = (event as CustomEvent<{ anchorId?: string }>).detail?.anchorId;
+      if (!anchorId) return;
+      // Only expand for a deal we actually hold — an unrelated anchor must not
+      // pop the list open for nothing.
+      if (!sortedData.some((deal) => getDealId(deal) === anchorId)) return;
+      setShowAllMobile(true);
+    };
+    window.addEventListener(REVEAL_DEAL_EVENT, onReveal);
+    return () => window.removeEventListener(REVEAL_DEAL_EVENT, onReveal);
+  }, [sortedData]);
+
   return (
     <div className="rounded-2xl bg-card border border-border overflow-hidden">
       <div className="flex flex-col gap-4 p-4 pb-3 sm:flex-row sm:items-start sm:justify-between sm:p-6 sm:pb-4">
@@ -154,9 +180,14 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
 
       <div className="space-y-3 p-4 pt-0 md:hidden">
         {/* Top 3 by default on phones — six ~300px cards was ~1,800px of
-            re-scannable stack (mobile density audit DH-5). Deep-link
-            scrolls to a collapsed deal no-op gracefully (scrollToDeal
-            guards on the element existing). */}
+            re-scannable stack (mobile density audit DH-5). A deep link to a
+            collapsed deal is NOT a no-op: DashboardHome's scrollToDeal finds
+            no LAID-OUT anchor and dispatches REVEAL_DEAL_EVENT, which the
+            effect above turns into showAllMobile. NOTE: `id="deal-…"` is
+            deliberately duplicated between this stack and the desktop table
+            below — both copies stay mounted at every width, so consumers must
+            resolve the one with a layout box (lib/deal-anchor.ts), never
+            document.getElementById. */}
         {(showAllMobile ? sortedData : sortedData.slice(0, 3)).map((d) => {
           const Icon = typeIcon[d.type] ?? Building2;
           const dealId = getDealId(d);

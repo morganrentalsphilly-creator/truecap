@@ -433,7 +433,10 @@ export function TemplateFormDialog({
                           </FormLabel>
                           <FormControl>
                             <select
-                              className="mt-1.5 w-full h-10 rounded-md border border-border px-3 text-sm bg-background"
+                              /* text-base below md: iOS Safari zooms the page
+                                 in on sub-16px form controls (same rule the
+                                 Input primitive encodes). */
+                              className="mt-1.5 w-full h-10 rounded-md border border-border px-3 text-base bg-background md:text-sm"
                               value={field.value}
                               onChange={(e) => field.onChange(Number(e.target.value))}
                             >

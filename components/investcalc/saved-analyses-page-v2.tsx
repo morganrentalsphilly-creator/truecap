@@ -60,6 +60,7 @@ import {
 } from "@/app/actions/saved-analyses";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { useCookieBannerOpen } from "@/lib/use-cookie-banner";
 import type { StoredRiskLevel } from "@/lib/compare-metrics";
 import { PIPELINE_STAGES, pipelineStageLabel, type PipelineStage } from "@/lib/pipeline";
 import { nextActionFromVerdict } from "@/lib/next-action";
@@ -761,6 +762,13 @@ export function SavedAnalysesPage({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { toast } = useToast();
+  // The cookie-consent banner is fixed bottom-0 at z-50 and renders over the
+  // dashboard too (it's mounted in the ROOT layout), so on a first visit it
+  // paints straight over this page's floating bulk-action bar (z-40) and
+  // Archive/Delete stop being clickable at every viewport. The three
+  // marketing bars answer this by hiding themselves; this bar can't — bulk
+  // Delete has no other entry point — so it lifts above the banner instead.
+  const cookieBannerOpen = useCookieBannerOpen();
   const [isStartingCompare, startCompareTransition] = useTransition();
   const [isUpdatingStatus, startUpdateStatusTransition] = useTransition();
   const [openingDealId, setOpeningDealId] = useState<string | null>(null);
@@ -1813,7 +1821,16 @@ export function SavedAnalysesPage({
   }, [pageCount, safeCurrentPage]);
 
   return (
-    <main id="main" className="min-h-[calc(100vh-5rem)] bg-muted/30 pb-12">
+    <main
+      id="main"
+      className={cn(
+        "min-h-[calc(100vh-5rem)] bg-muted/30",
+        // The floating bulk bar occupies the bottom ~76px of the viewport
+        // while a selection is active, so reserve that instead of letting it
+        // clip the last row / pagination at maximum scroll.
+        selectedIds.length > 0 ? "pb-28" : "pb-12"
+      )}
+    >
       <section className="w-full px-4 sm:px-6 pt-6 sm:pt-8 space-y-6">
       <div className="mb-6 flex flex-wrap items-center gap-3">
           <Button variant="ghost" size="sm" className="mt-1 px-1.5 text-muted-foreground bg-primary/10 sm:bg-transparent" asChild>
@@ -2664,7 +2681,17 @@ export function SavedAnalysesPage({
         <div
           role="region"
           aria-label="Bulk actions"
-          className="fixed inset-x-0 bottom-4 z-40 mx-auto flex w-[min(680px,calc(100vw-32px))] items-center justify-between gap-3 rounded-2xl border border-border bg-card/95 px-4 py-3 shadow-2xl backdrop-blur"
+          className={cn(
+            "fixed inset-x-0 z-40 mx-auto flex w-[min(680px,calc(100vw-32px))] items-center justify-between gap-3 rounded-2xl border border-border bg-card/95 px-4 py-3 shadow-2xl backdrop-blur",
+            // While consent is still pending, sit ABOVE the banner instead of
+            // behind it. The banner measures ~96px below sm (its one-line copy
+            // wraps to two on the narrowest phones) and ~78px from sm; the
+            // offsets clear both, and env() tracks the home indicator the
+            // banner's own safe-area bottom padding grows by.
+            cookieBannerOpen
+              ? "bottom-[calc(7.5rem+env(safe-area-inset-bottom))] sm:bottom-[calc(5.5rem+env(safe-area-inset-bottom))]"
+              : "bottom-4"
+          )}
         >
           <div className="flex items-center gap-3">
             <span className="inline-flex h-7 min-w-[28px] items-center justify-center rounded-full bg-primary px-2 text-xs font-bold text-primary-foreground">

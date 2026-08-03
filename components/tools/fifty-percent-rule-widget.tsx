@@ -66,12 +66,13 @@ export function FiftyPercentRuleWidget() {
           </h2>
 
           <div>
-            <Label className="text-sm font-medium text-foreground mb-1.5 block">
+            <Label htmlFor="fiftypct-rent" className="text-sm font-medium text-foreground mb-1.5 block">
               Monthly Rent
             </Label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
               <Input
+                id="fiftypct-rent"
                 type="number"
                 inputMode="numeric"
                 value={rent}
@@ -82,11 +83,12 @@ export function FiftyPercentRuleWidget() {
           </div>
 
           <div>
-            <Label className="text-sm font-medium text-foreground mb-1.5 block">
+            <Label htmlFor="fiftypct-expense-ratio" className="text-sm font-medium text-foreground mb-1.5 block">
               Expense Ratio
             </Label>
             <div className="relative">
               <Input
+                id="fiftypct-expense-ratio"
                 type="number"
                 inputMode="decimal"
                 step="5"
@@ -104,12 +106,13 @@ export function FiftyPercentRuleWidget() {
           </div>
 
           <div>
-            <Label className="text-sm font-medium text-foreground mb-1.5 block">
+            <Label htmlFor="fiftypct-pi" className="text-sm font-medium text-foreground mb-1.5 block">
               Monthly Mortgage Payment (P&amp;I)
             </Label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
               <Input
+                id="fiftypct-pi"
                 type="number"
                 inputMode="numeric"
                 value={monthlyPI}

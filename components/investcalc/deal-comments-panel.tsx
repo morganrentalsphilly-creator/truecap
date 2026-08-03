@@ -59,12 +59,32 @@ export function DealCommentsPanel({ savedDealId }: { savedDealId: string }) {
 
   const add = () => {
     const body = draft.trim();
-    if (!body) return;
+    if (!body || isBusy) return; // isBusy: ⌘/Ctrl+Enter bypasses the disabled Send
     const dealAtSubmit = savedDealId;
-    setDraft("");
     startBusy(async () => {
-      const r = await addDealCommentAction(dealAtSubmit, body);
-      if (dealAtSubmit === savedDealId) apply(r);
+      // The draft is the only copy of what was typed, so it survives until
+      // the server confirms the row. Clearing before the await meant any
+      // failure (session expiry, archived deal, dropped connection) silently
+      // destroyed the entry. A rejected promise gets its own toast, since
+      // apply() never runs in that case.
+      const r = await addDealCommentAction(dealAtSubmit, body).catch(() => null);
+      if (dealAtSubmit !== savedDealId) return;
+      if (!r) {
+        toast({
+          title: "Could not save comment",
+          description: "We couldn't reach the server. Your entry is still in the box - try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+      if (!r.ok) {
+        apply(r);
+        return;
+      }
+      // Only drop what we actually sent - anything typed while the save was
+      // in flight stays put.
+      setDraft((current) => (current.trim() === body ? "" : current));
+      apply(r);
     });
   };
   const remove = (commentId: string) => {

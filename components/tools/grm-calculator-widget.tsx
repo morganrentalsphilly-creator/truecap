@@ -95,12 +95,13 @@ export function GrmCalculatorWidget() {
           </h2>
 
           <div>
-            <Label className="text-sm font-medium text-foreground mb-1.5 block">
+            <Label htmlFor="grm-price" className="text-sm font-medium text-foreground mb-1.5 block">
               Property Price
             </Label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
               <Input
+                id="grm-price"
                 type="number"
                 inputMode="numeric"
                 value={priceInput}
@@ -111,12 +112,13 @@ export function GrmCalculatorWidget() {
           </div>
 
           <div>
-            <Label className="text-sm font-medium text-foreground mb-1.5 block">
+            <Label htmlFor="grm-rent" className="text-sm font-medium text-foreground mb-1.5 block">
               Monthly Gross Rent
             </Label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
               <Input
+                id="grm-rent"
                 type="number"
                 inputMode="numeric"
                 value={rentInput}

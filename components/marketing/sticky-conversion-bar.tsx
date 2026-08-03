@@ -79,8 +79,12 @@ export function StickyConversionBar() {
     // product action outranks the funnel CTA inside the form. The calc bar
     // retires itself outside the form / while the submit button or results
     // are on screen, so this bar still owns the marketing sections.
+    // data-sticky-bottom-bar: globals.css reserves the bar's height under the
+    // site footer while this is mounted, so the footer's legal row isn't
+    // stranded underneath it at maximum scroll.
     <div
       data-conversion-bar-root=""
+      data-sticky-bottom-bar=""
       className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 px-3 pt-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] shadow-[0_-12px_28px_rgba(15,23,42,0.10)] backdrop-blur supports-[backdrop-filter]:bg-card/85 sm:px-4 sm:pt-3 sm:pb-[max(env(safe-area-inset-bottom),0.75rem)]">
       <div className="mx-auto flex max-w-5xl items-center gap-3">
         <div className="min-w-0 flex-1">

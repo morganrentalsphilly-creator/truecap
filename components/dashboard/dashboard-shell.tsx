@@ -35,10 +35,14 @@ export function DashboardShell({
     <div className="dashboard-shell flex min-h-screen w-full overflow-x-clip bg-background text-foreground">
       {/* Skip link — first focusable element, so keyboard/switch users can
           bypass the persistent sidebar nav on every page (the shell stays
-          mounted across navigations). Targets the <main id="main"> in the page. */}
+          mounted across navigations). Targets the <main id="main"> in the page
+          (globals.css gives it a scroll-margin so the landing spot clears the
+          fixed mobile Topbar). focus:fixed, matching the root-layout skip
+          link: .dashboard-shell is not positioned, so focus:absolute pinned
+          the link to the DOCUMENT top and it scrolled out of sight. */}
       <a
         href="#main"
-        className="sr-only z-50 rounded-lg bg-primary px-4 py-2 font-semibold text-primary-foreground shadow-lg focus:not-sr-only focus:absolute focus:left-4 focus:top-4"
+        className="sr-only z-50 rounded-lg bg-primary px-4 py-2 font-semibold text-primary-foreground shadow-lg focus:not-sr-only focus:fixed focus:left-4 focus:top-4"
       >
         Skip to content
       </a>

@@ -79,12 +79,12 @@ export function SeventyPercentRuleWidget() {
           </h2>
 
           <div>
-            <Label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block">
+            <Label htmlFor="seventypct-arv" className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block">
               After-repair value (ARV)
             </Label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">$</span>
-              <Input type="number" inputMode="numeric" value={arv} onChange={(e) => setArv(e.target.value)} className="pl-7 border-input bg-background" />
+              <Input id="seventypct-arv" type="number" inputMode="numeric" value={arv} onChange={(e) => setArv(e.target.value)} className="pl-7 border-input bg-background" />
             </div>
             <p className="text-xs text-muted-foreground mt-1.5">
               What the property sells for <em>after</em>{" "}the rehab. Don&apos;t
@@ -97,21 +97,21 @@ export function SeventyPercentRuleWidget() {
           </div>
 
           <div>
-            <Label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block">
+            <Label htmlFor="seventypct-repairs" className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block">
               Repair costs
             </Label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">$</span>
-              <Input type="number" inputMode="numeric" value={repairs} onChange={(e) => setRepairs(e.target.value)} className="pl-7 border-input bg-background" />
+              <Input id="seventypct-repairs" type="number" inputMode="numeric" value={repairs} onChange={(e) => setRepairs(e.target.value)} className="pl-7 border-input bg-background" />
             </div>
           </div>
 
           <div>
-            <Label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block">
+            <Label htmlFor="seventypct-multiplier" className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block">
               Rule multiplier
             </Label>
             <div className="relative">
-              <Input type="number" inputMode="decimal" step="1" value={multiplier} onChange={(e) => setMultiplier(e.target.value)} className="pr-8 border-input bg-background" />
+              <Input id="seventypct-multiplier" type="number" inputMode="decimal" step="1" value={multiplier} onChange={(e) => setMultiplier(e.target.value)} className="pr-8 border-input bg-background" />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">%</span>
             </div>
             <p className="text-xs text-muted-foreground mt-1.5">

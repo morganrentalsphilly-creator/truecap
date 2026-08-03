@@ -9,7 +9,7 @@
  */
 
 import { useState } from "react";
-import { Share2, Copy, Check } from "lucide-react";
+import { Share2, Copy, Check, Loader2 } from "lucide-react";
 import * as Sentry from "@sentry/nextjs";
 import { Button } from "@/components/ui/button";
 import {
@@ -38,10 +38,15 @@ export function ShareLinkButton({ values, className, savedDealId }: ShareLinkBut
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [shareUrl, setShareUrl] = useState<string>("");
+  // The signed-attribution round-trip below runs BEFORE the dialog opens, so
+  // without this the click gets no answer at all — same in-flight treatment as
+  // the Save / Export / Compare buttons next to it in the toolbar.
+  const [isPreparing, setIsPreparing] = useState(false);
   const { toast } = useToast();
 
   const openShare = async () => {
     if (!values) return;
+    setIsPreparing(true);
     try {
       // Mint a SIGNED owner attribution server-side (the only place that holds
       // SHARE_LINK_SECRET). It lets the public viewer co-brand the page + route
@@ -85,6 +90,8 @@ export function ShareLinkButton({ values, className, savedDealId }: ShareLinkBut
         description: "Try again - if it persists let us know.",
         variant: "destructive",
       });
+    } finally {
+      setIsPreparing(false);
     }
   };
 
@@ -110,12 +117,21 @@ export function ShareLinkButton({ values, className, savedDealId }: ShareLinkBut
         type="button"
         variant="outline"
         onClick={openShare}
-        disabled={disabled}
+        disabled={disabled || isPreparing}
         className={cn("h-9 gap-1.5 rounded-xl text-xs sm:text-sm", className)}
         title={disabled ? "Enter an address and price first" : "Share a read-only view of this deal"}
       >
-        <Share2 className="w-3.5 h-3.5" />
-        <span className="hidden sm:inline">Share</span>
+        {isPreparing ? (
+          <>
+            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            <span className="hidden sm:inline">Preparing…</span>
+          </>
+        ) : (
+          <>
+            <Share2 className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Share</span>
+          </>
+        )}
       </Button>
 
       {/* Dialog primitive (was a hand-rolled fixed overlay): inherits the
@@ -123,7 +139,10 @@ export function ShareLinkButton({ values, className, savedDealId }: ShareLinkBut
           overlay-click dismiss, and a built-in close button. Controlled open
           because openShare mints the signed link before showing. */}
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-lg">
+        {/* sm:-prefixed, so the primitive's `max-w-[calc(100%-2rem)]` phone
+            gutter survives tailwind-merge (an unprefixed max-w-* deletes it
+            and the dialog goes edge-to-edge). */}
+        <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Share this analysis</DialogTitle>
             <DialogDescription>

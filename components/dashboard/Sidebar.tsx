@@ -19,9 +19,12 @@ type SidebarProps = {
   savedDealCount: number;
   navAccess: DashboardNavAccess;
   mobile?: boolean;
+  /** Mobile drawer: fired when any nav link is tapped, so the drawer can close
+   *  even when the tap doesn't change the route (the already-active item). */
+  onNavigate?: () => void;
 };
 
-export function Sidebar({ savedDealCount, navAccess, mobile = false }: SidebarProps) {
+export function Sidebar({ savedDealCount, navAccess, mobile = false, onNavigate }: SidebarProps) {
   // Live route — drives the `active` highlight on whichever nav item
   // matches. Previously `Dashboard` was hardcoded `active: true`, which
   // left the sidebar lying about the current route on every other page
@@ -56,7 +59,11 @@ export function Sidebar({ savedDealCount, navAccess, mobile = false }: SidebarPr
     <aside
       className={
         mobile
-          ? "flex h-full w-64 max-w-full shrink-0 flex-col text-sidebar-foreground"
+          ? // The drawer host is position:fixed and full-height, so the column
+            // has to own its overflow (min-h-0 lets the flex column actually
+            // shrink). Without it, Manage Templates / Settings / Profile fall
+            // off the bottom on a landscape phone with nothing to scroll.
+            "flex h-full min-h-0 w-64 max-w-full shrink-0 flex-col overflow-y-auto overscroll-contain text-sidebar-foreground"
           : // Natural-scroll dashboard: the sidebar pins to the viewport
             // (sticky, self-start so the flex row doesn't stretch it) and owns
             // its own overflow, while the page scrolls the main content.
@@ -92,6 +99,7 @@ export function Sidebar({ savedDealCount, navAccess, mobile = false }: SidebarPr
                 aria-disabled={!item.enabled}
                 aria-current={item.active ? "page" : undefined}
                 tabIndex={item.enabled ? undefined : -1}
+                onClick={onNavigate}
                 className={`group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
                   item.active
                     ? "bg-sidebar-accent text-white shadow-[inset_0_1px_0_oklch(1_0_0_/_0.06)]"
@@ -118,6 +126,7 @@ export function Sidebar({ savedDealCount, navAccess, mobile = false }: SidebarPr
         <Link
           href="/profile"
           prefetch={false}
+          onClick={onNavigate}
           className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-sidebar-foreground/70 hover:text-white hover:bg-sidebar-accent/50 transition"
         >
           <CircleUserRound className="h-[18px] w-[18px]" />

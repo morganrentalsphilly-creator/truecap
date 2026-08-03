@@ -189,7 +189,9 @@ export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
                 id="scenario-strategy"
                 value={strategy}
                 onChange={(e) => setStrategy(e.target.value)}
-                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                /* text-base below md: iOS Safari zooms the page in on sub-16px
+                   form controls (the Input primitive encodes the same rule). */
+                className="h-10 w-full rounded-md border border-input bg-background px-3 text-base md:text-sm"
               >
                 <option value="">No strategy</option>
                 {STRATEGY_KINDS.map((k) => (

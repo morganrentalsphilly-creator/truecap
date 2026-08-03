@@ -89,7 +89,10 @@ const FOOTER_COLS: Array<{
 export function SiteFooter() {
   const year = new Date().getFullYear();
   return (
-    <footer className="mt-12 border-t border-border bg-card/40">
+    // data-site-footer: globals.css pads the footer's bottom while a sticky
+    // bottom bar is mounted, so the legal row below stays tappable instead of
+    // sitting permanently under the bar at maximum scroll.
+    <footer data-site-footer="" className="mt-12 border-t border-border bg-card/40">
       <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-12">
         {/* Newsletter band — full-width hero at the top of the footer.
             Lives in its own row above the brand+sitemap grid so it

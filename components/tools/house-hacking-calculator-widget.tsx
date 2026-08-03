@@ -29,7 +29,7 @@
  * number for the underwritten one.
  */
 
-import { useMemo, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowUpRight, Sparkles } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -70,6 +70,7 @@ const UNIT_OPTIONS = [
 ] as const;
 
 export function HouseHackingCalculatorWidget() {
+  const unitGroupLabelId = useId();
   const [unitCount, setUnitCount] = useState(2);
   const [price, setPrice] = useState("400000");
   const [downPct, setDownPct] = useState("5");
@@ -136,10 +137,12 @@ export function HouseHackingCalculatorWidget() {
           </h2>
 
           <div>
-            <Label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
+            {/* Not a <Label>: this names a group of buttons, not a form
+                control, so it wires up via aria-labelledby instead. */}
+            <p id={unitGroupLabelId} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5">
               Property — you live in one unit
-            </Label>
-            <div className="flex gap-2" role="group" aria-label="Number of units">
+            </p>
+            <div className="flex gap-2" role="group" aria-labelledby={unitGroupLabelId}>
               {UNIT_OPTIONS.map((opt) => (
                 <button
                   key={opt.units}
@@ -268,32 +271,35 @@ export function HouseHackingCalculatorWidget() {
 }
 
 function FieldMoney({ label, value, setValue }: { label: string; value: string; setValue: (v: string) => void }) {
+  const id = useId();
   return (
     <div>
-      <Label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block">{label}</Label>
+      <Label htmlFor={id} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block">{label}</Label>
       <div className="relative">
         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">$</span>
-        <Input type="number" inputMode="numeric" value={value} onChange={(e) => setValue(e.target.value)} className="pl-7 border-input bg-background" />
+        <Input id={id} type="number" inputMode="numeric" value={value} onChange={(e) => setValue(e.target.value)} className="pl-7 border-input bg-background" />
       </div>
     </div>
   );
 }
 function FieldPct({ label, value, setValue, step = "0.5" }: { label: string; value: string; setValue: (v: string) => void; step?: string }) {
+  const id = useId();
   return (
     <div>
-      <Label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block">{label}</Label>
+      <Label htmlFor={id} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block">{label}</Label>
       <div className="relative">
-        <Input type="number" inputMode="decimal" step={step} value={value} onChange={(e) => setValue(e.target.value)} className="pr-8 border-input bg-background" />
+        <Input id={id} type="number" inputMode="decimal" step={step} value={value} onChange={(e) => setValue(e.target.value)} className="pr-8 border-input bg-background" />
         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">%</span>
       </div>
     </div>
   );
 }
 function FieldNum({ label, value, setValue }: { label: string; value: string; setValue: (v: string) => void }) {
+  const id = useId();
   return (
     <div>
-      <Label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block">{label}</Label>
-      <Input type="number" inputMode="numeric" value={value} onChange={(e) => setValue(e.target.value)} className="border-input bg-background" />
+      <Label htmlFor={id} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block">{label}</Label>
+      <Input id={id} type="number" inputMode="numeric" value={value} onChange={(e) => setValue(e.target.value)} className="border-input bg-background" />
     </div>
   );
 }

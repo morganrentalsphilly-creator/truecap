@@ -58,6 +58,14 @@ import {
   type AssumptionChipTarget,
   type StrategyAppliedSnapshot,
 } from "@/lib/assumption-chips";
+import {
+  STRATEGY_REVERTABLE_FIELDS,
+  planPropertyTypeSwitch,
+  planStrategyRevert,
+  planStrategySnapshot,
+  type PropertyTypeStash,
+  type StrategyRevertSnapshot,
+} from "@/lib/investcalc-form-preservation";
 import { STARTER_TEMPLATES, type StarterTemplate } from "@/lib/starter-templates";
 import { buildTemplateFormPatch, type TemplateFormPatchEntry } from "@/lib/template-form-patch";
 import type { AnalysisTemplateOption } from "@/app/actions/analysis-templates";
@@ -659,6 +667,14 @@ export function InvestCalcPage({
   // the set the moment its current value diverges from what the starter
   // wrote (the enrichment "overridden" pattern), i.e. on a real user edit.
   const strategyAppliedRef = useRef<StrategyAppliedSnapshot | null>(null);
+  // What the form held BEFORE the first play of this lens was applied, plus
+  // what the play left behind (STRATEGY-CLEAR-RESTORES). "Clear" reads this
+  // to put the pre-play values back — a control labelled Clear that only
+  // dropped the label left the user on the play's property type, financing
+  // and tax with no way back to their address-derived numbers. Set once per
+  // lens (switching plays keeps the ORIGINAL before-values, refreshes the
+  // after-values) and dropped on Clear / New Analysis.
+  const strategyRevertRef = useRef<StrategyRevertSnapshot | null>(null);
   // Pre-run live verdict gating (LIVE-VERDICT-VS-STRATEGY-FRAMING): while a
   // solve-oriented play is active (Wholesale/BRRRR/Flip — primaryTab !==
   // "cash-flow"), the generic asking-price verdict directly contradicts the
@@ -854,6 +870,13 @@ export function InvestCalcPage({
   const [isLoadingDealScore, setIsLoadingDealScore] = useState(false);
   const { toast } = useToast();
   const prevPropertyTypeRef = useRef<InvestmentFormValues["propertyType"]>("single-family");
+  // Parking lot for the income + physical facts a property-type switch has
+  // to unmount (TYPE-SWITCH-PRESERVES-INPUT). Switching type must never be
+  // a delete: the outgoing type's rent roll / single-family facts are
+  // parked here and restored if the user comes back to that type. Cleared
+  // whenever the whole form is replaced (reset, draft/saved-deal load,
+  // fork) — a parked rent roll belongs to the deal it came from.
+  const propertyTypeStashRef = useRef<PropertyTypeStash>({});
   const isProgrammaticResetRef = useRef(false);
   const pendingResultsScrollRef = useRef(false);
   const formElementRef = useRef<HTMLFormElement | null>(null);
@@ -1070,6 +1093,10 @@ export function InvestCalcPage({
       setIsCalculating(false);
       isCalculatingRef.current = false;
       prevPropertyTypeRef.current = nextPropertyType;
+      // The parked rent roll / single-family facts belong to the deal this
+      // reset just cleared — carrying them forward would resurrect the old
+      // property's numbers the first time the user touches Property Type.
+      propertyTypeStashRef.current = {};
       // Re-assert critical blank fields explicitly to avoid stale values after reset
       // in browser autofill/uncontrolled edge-cases.
       form.setValue("address", "", { shouldDirty: false, shouldValidate: false });
@@ -1115,6 +1142,7 @@ export function InvestCalcPage({
       // reflect (BROWSER-3).
       setActiveStrategyKey(null);
       strategyAppliedRef.current = null;
+      strategyRevertRef.current = null;
       form.setValue("units", getDefaultUnitsForPropertyType(nextPropertyType), {
         shouldDirty: false,
         shouldValidate: false,
@@ -1994,7 +2022,8 @@ export function InvestCalcPage({
    * "What's your play?" chip handler. Tailors the form to the chosen investor
    * strategy: sets property type, applies that play's assumption defaults, and
    * points the results view at the tab that leads with its key number. null
-   * clears back to the default full flow (values left as-is).
+   * ("Clear") exits the lens AND puts back the pre-play values of every field
+   * the play wrote that the user hasn't edited since (STRATEGY-CLEAR-RESTORES).
    */
   const handleSelectStrategy = useCallback(
     // `source` separates real chip clicks from link-seeded landings
@@ -2003,8 +2032,38 @@ export function InvestCalcPage({
     (key: string | null, source: "chip" | "link" = "chip") => {
       const strategy = getStrategyByKey(key);
       const strOpts = { shouldDirty: true, shouldValidate: false } as const;
+      const snapshotRevertFields = (): Record<string, unknown> => {
+        const values = form.getValues() as unknown as Record<string, unknown>;
+        const snapshot: Record<string, unknown> = {};
+        for (const field of STRATEGY_REVERTABLE_FIELDS) snapshot[field] = values[field];
+        return snapshot;
+      };
       if (!strategy) {
         setActiveStrategyKey(null);
+        // "Clear" has to mean clear. Put back what the play overwrote:
+        // property type (whose restore hands the parked rent / beds / baths
+        // / sq ft back through the type-switch stash), financing, tax and
+        // the rest of the starter set — but never a field the user has
+        // edited since, because that number is theirs now.
+        const revert = planStrategyRevert(
+          strategyRevertRef.current,
+          form.getValues() as unknown as Record<string, unknown>
+        );
+        strategyRevertRef.current = null;
+        // BROWSER-2 kept the play's provenance badges after Clear on the
+        // grounds that "the values ARE still the play's". After a real
+        // revert they aren't, so the badges must go with them — the rule
+        // (badge the value's true owner) is unchanged.
+        strategyAppliedRef.current = null;
+        // Same options as the auto-apply Undo: an undo restores values, it
+        // doesn't pretend the user typed them.
+        for (const { field, value } of revert) {
+          form.setValue(field, value as never, {
+            shouldDirty: false,
+            shouldTouch: false,
+            shouldValidate: false,
+          });
+        }
         // Clear STR income fields so a derived ADR×occupancy income can't leak
         // into the default (monthly-rent) flow after the chip is cleared.
         form.setValue("avgDailyRate", undefined, strOpts);
@@ -2012,17 +2071,28 @@ export function InvestCalcPage({
         form.setValue("strFurnishingCost", undefined, strOpts);
         return;
       }
+      // Captured BEFORE the first write of THIS invocation. It is both the
+      // pre-lens `before` on the first play and — on every later play — the
+      // evidence of what the user typed since the last one, which is what
+      // stops a second chip from claiming (and Clear from destroying) a
+      // value the play never wrote.
+      const preWrite = snapshotRevertFields();
+      // Exactly what this invocation writes. Only these may refresh `after`.
+      const written = new Set<string>();
       if (form.getValues("propertyType") !== strategy.propertyType) {
         form.setValue("propertyType", strategy.propertyType, {
           shouldDirty: true,
           shouldValidate: false,
         });
+        written.add("propertyType");
       }
       const applied = applyStarterAssumptions(strategy.starterKey);
+      if (applied) for (const field of Object.keys(applied)) written.add(field);
       // Record what the play wrote so the assumption chips badge those
-      // values as "<play>" defaults, not "yours" (BROWSER-2). Kept after
-      // Clear too — the values ARE still the play's until the user edits
-      // them (a divergent value drops the field from the owned set).
+      // values as "<play>" defaults, not "yours" (BROWSER-2). A field drops
+      // out of the owned set the moment its value diverges (a real user
+      // edit); the whole set drops on Clear, which now restores the values
+      // the badges were describing.
       strategyAppliedRef.current = applied
         ? { label: strategy.label, fields: applied }
         : null;
@@ -2033,6 +2103,7 @@ export function InvestCalcPage({
       // (TEMPLATE-CHIP-STALE-AFTER-STRATEGY).
       if (form.getValues("templateId")) {
         form.setValue("templateId", undefined, { shouldDirty: true, shouldValidate: false });
+        written.add("templateId");
       }
       // Keep the income data model aligned with the inputs the chip shows. STR
       // collects nightly rate + occupancy (income is derived from them), so seed
@@ -2040,6 +2111,7 @@ export function InvestCalcPage({
       // collects monthly rent, so clear any STR fields left from a prior STR run.
       if (strategy.incomeMode === "str") {
         form.setValue("monthlyRent", undefined, strOpts);
+        written.add("monthlyRent");
         if (form.getValues("occupancyPct") == null) {
           form.setValue("occupancyPct", 65, strOpts); // ~US STR average; user-editable
         }
@@ -2048,6 +2120,21 @@ export function InvestCalcPage({
         form.setValue("occupancyPct", undefined, strOpts);
         form.setValue("strFurnishingCost", undefined, strOpts);
       }
+      // Both halves of the undo, now that every write has landed. Rolling it
+      // forward (rather than re-capturing `after` wholesale) is what keeps a
+      // second chip from adopting a value the user typed BETWEEN plays and
+      // handing it to Clear to destroy — see planStrategySnapshot.
+      // monthlyRent is the one field a play clears only INDIRECTLY on a
+      // property-type change: the reactive effect parks it after this
+      // handler returns, so it reads as unwritten here and the type-switch
+      // stash owns restoring it. That's the same value either way; the stash
+      // just has the whole rent roll, not one number.
+      strategyRevertRef.current = planStrategySnapshot({
+        previous: strategyRevertRef.current,
+        preWrite,
+        postWrite: snapshotRevertFields(),
+        written,
+      });
       setActiveStrategyKey(strategy.key);
       // BRRRR/Flip render their model inline as the results hero, so don't also
       // lead the Details tabs with the (duplicate) Strategies tab - default to
@@ -2725,6 +2812,10 @@ export function InvestCalcPage({
   useEffect(() => {
     if (isProgrammaticResetRef.current) {
       prevPropertyTypeRef.current = propertyType;
+      // A programmatic type change means the whole form was just replaced
+      // (reset / draft restore / saved-deal load / hero handoff), so the
+      // parked facts describe a property that is no longer on screen.
+      propertyTypeStashRef.current = {};
       return;
     }
 
@@ -2732,18 +2823,45 @@ export function InvestCalcPage({
     if (prevType === propertyType) return;
     prevPropertyTypeRef.current = propertyType;
     isProgrammaticResetRef.current = true;
-    // Clear single-family-only fields so stale NaN from unmounted inputs cannot fail
-    // validation while Multi-Family / Owner-Occupant sections are shown.
-    form.setValue("bedrooms", undefined, { shouldValidate: false, shouldDirty: false });
-    form.setValue("bathrooms", undefined, { shouldValidate: false, shouldDirty: false });
-    form.setValue("sqft", undefined, { shouldValidate: false, shouldDirty: false });
-    form.setValue("monthlyRent", undefined, { shouldValidate: false, shouldDirty: false });
-    form.setValue("units", getDefaultUnitsForPropertyType(propertyType), {
+    // A type switch UNMOUNTS the other model's inputs — it must never DELETE
+    // what the user (or auto-fill) put in them (TYPE-SWITCH-PRESERVES-INPUT).
+    // The plan parks the outgoing type's rent roll + single-family facts,
+    // restores whatever this type held last time, and carries the rent
+    // across the shapes that have a slot for it. Multi-Family ↔ Owner
+    // Occupant is the same rent roll under a different label, so it now
+    // survives the switch outright instead of being replaced by empty rows.
+    // Single-family-only fields still land as undefined while a multi-unit
+    // section is shown — stale NaN from an unmounted input must not fail
+    // validation — but the values wait in the stash instead of being gone.
+    const plan = planPropertyTypeSwitch({
+      prevType,
+      nextType: propertyType,
+      units: form.getValues("units"),
+      singleFamily: {
+        bedrooms: form.getValues("bedrooms"),
+        bathrooms: form.getValues("bathrooms"),
+        sqft: form.getValues("sqft"),
+        monthlyRent: form.getValues("monthlyRent"),
+      },
+      stash: propertyTypeStashRef.current,
+    });
+    propertyTypeStashRef.current = plan.stash;
+    const factOpts = { shouldValidate: false, shouldDirty: false } as const;
+    form.setValue("bedrooms", plan.singleFamily.bedrooms, factOpts);
+    form.setValue("bathrooms", plan.singleFamily.bathrooms, factOpts);
+    form.setValue("sqft", plan.singleFamily.sqft, factOpts);
+    form.setValue("monthlyRent", plan.singleFamily.monthlyRent, factOpts);
+    form.setValue("units", plan.units, {
       shouldDirty: true,
       shouldValidate: true,
     });
     queueMicrotask(() => {
       isProgrammaticResetRef.current = false;
+      // Restored income has to reach the live verdict: the writes above all
+      // fired while the programmatic flag suppressed the watch subscription,
+      // so without this the preview keeps the pre-switch numbers until the
+      // next keystroke (same reasoning as RESTORED-DRAFT-NO-LIVE-VERDICT).
+      recomputeOutputsFromFormRef.current();
     });
   }, [form, propertyType]);
 
@@ -3942,6 +4060,11 @@ export function InvestCalcPage({
     // the NEXT deal's save into an overwrite of the source (verifier
     // should-fix). The generation is re-checked after the save's await.
     forkGenerationRef.current += 1;
+    // The fork blanks property identity + income, so anything parked by an
+    // earlier property-type switch belongs to the property being left
+    // behind — keeping it would let a type toggle re-fill the NEXT deal
+    // with the previous one's rents.
+    propertyTypeStashRef.current = {};
     const clearOpts = { shouldDirty: false, shouldValidate: false } as const;
     // Property identity — the Duplicate-fork clear list PLUS yearBuilt /
     // beds / baths / sqft (this in-flow fork deliberately clears more than

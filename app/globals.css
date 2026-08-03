@@ -219,6 +219,51 @@ textarea,
       display: none;
     }
   }
+  /* Every sticky bottom bar is `fixed inset-x-0 bottom-0`, so it overlays
+     whatever the page ENDS with. Fully scrolled on a phone that is the
+     footer's last row (About · Privacy · Terms · hello@usetruecap.com) —
+     there is no scroll left, so those links can never be tapped until the
+     bar is dismissed. Reserve the bar's height under the footer, but only
+     WHILE a bar is actually mounted, so pages without one (and every
+     desktop viewport once the bar is dismissed) grow no dead space.
+     4.5rem clears the tallest bar (the 65px calc bar; the blog/tools/home
+     bars are 53-57px) and env() adds the home indicator, which the bars'
+     own safe-area bottom padding grows by too.
+     The three data-sticky-bottom-bar bars (blog CTA, homepage conversion bar,
+     tools CTA) are CONDITIONALLY RENDERED — mounted means visible, at every
+     width — so their branch is unconditional. */
+  body:has([data-sticky-bottom-bar]) [data-site-footer] {
+    padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
+  }
+  /* The calculator's submit bar is different: it is `sm:hidden fixed …`, so
+     from 640px up it stays MOUNTED with display:none and :has() still matches
+     it. Unscoped, this rule pinned 72px of dead footer space onto the
+     homepage at desktop widths and toggled the document height mid-scroll as
+     the bar mounted/unmounted. Scope it below sm, exactly like the
+     html[data-calc-bar="1"] rule two blocks above, which is scoped for the
+     same reason. Phones — where the bar really does overlay the footer's
+     legal row — are unaffected. */
+  @media (max-width: 639.9px) {
+    body:has([data-sticky-calc-bar]) [data-site-footer] {
+      padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
+    }
+  }
+  /* "Skip to content" (root layout + DashboardShell) targets <main id="main">,
+     and fragment navigation aligns the target's block-start with the viewport
+     top — it knows nothing about the dashboard Topbar, which is `fixed h-16`
+     below lg. Without a scroll margin the skip link drops the user with the
+     page heading hidden behind that translucent bar. One rule rather than a
+     class per page: every /dashboard page renders its own <main id="main">
+     AND its own Topbar, all inside .dashboard-shell. */
+  .dashboard-shell #main {
+    scroll-margin-top: 4rem;
+  }
+  @media (min-width: 1024px) {
+    /* lg: the Topbar is sticky in flow, not an overlay — nothing to clear. */
+    .dashboard-shell #main {
+      scroll-margin-top: 0;
+    }
+  }
   /* What-if sliders: appearance-none strips the native thumb, leaving nothing to
      grab on touch. Restore a 22px branded thumb so the marquee "watch the verdict
      move" control is actually draggable on mobile (WCAG 2.5.5). */

@@ -15,6 +15,7 @@ import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import { friendlyToastError } from "@/lib/friendly-error";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 const BUCKET = "deal-documents";
 const MAX_BYTES = 10 * 1024 * 1024; // 10 MB - matches the bucket limit
@@ -47,7 +48,13 @@ export function DealDocumentsCard({ savedDealId }: { savedDealId: string }) {
   const [loaded, setLoaded] = useState(false);
   const [unavailable, setUnavailable] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [busyPath, setBusyPath] = useState<string | null>(null);
+  // Which row is mid-flight AND which action, so the spinner replaces the
+  // icon that was actually pressed (a slow delete used to show nothing).
+  const [busy, setBusy] = useState<{ path: string; kind: "download" | "delete" } | null>(null);
+  // Which row's delete-confirm popover is open. storage.remove() is a hard
+  // object delete with no versioning, so it is confirm-first like every
+  // other irreversible action in the app.
+  const [confirmPath, setConfirmPath] = useState<string | null>(null);
 
   const prefixFor = (uid: string) => `${uid}/${savedDealId}`;
 
@@ -126,7 +133,7 @@ export function DealDocumentsCard({ savedDealId }: { savedDealId: string }) {
   };
 
   const handleDownload = async (path: string) => {
-    setBusyPath(path);
+    setBusy({ path, kind: "download" });
     try {
       const { data, error } = await supabase.storage.from(BUCKET).createSignedUrl(path, 60);
       if (error || !data?.signedUrl) {
@@ -142,13 +149,14 @@ export function DealDocumentsCard({ savedDealId }: { savedDealId: string }) {
       }
       window.open(data.signedUrl, "_blank", "noopener,noreferrer");
     } finally {
-      setBusyPath(null);
+      setBusy(null);
     }
   };
 
-  const handleDelete = async (path: string) => {
+  const handleDelete = async (path: string, label: string) => {
     if (!userId) return;
-    setBusyPath(path);
+    setConfirmPath(null);
+    setBusy({ path, kind: "delete" });
     try {
       const { error } = await supabase.storage.from(BUCKET).remove([path]);
       if (error) {
@@ -163,8 +171,10 @@ export function DealDocumentsCard({ savedDealId }: { savedDealId: string }) {
         return;
       }
       await refresh(userId);
+      // Mirrors the upload toast — the row vanishing was the only signal.
+      toast({ title: "Document deleted", description: label });
     } finally {
-      setBusyPath(null);
+      setBusy(null);
     }
   };
 
@@ -208,32 +218,81 @@ export function DealDocumentsCard({ savedDealId }: { savedDealId: string }) {
         </p>
       ) : (
         <ul className="divide-y divide-border/70">
-          {docs.map((doc) => (
-            <li key={doc.path} className="flex items-center gap-2 py-2">
-              <span className="min-w-0 flex-1 truncate text-sm text-foreground" title={displayName(doc.name)}>
-                {displayName(doc.name)}
-              </span>
-              <span className="shrink-0 text-[11px] text-muted-foreground">{formatSize(doc.size)}</span>
-              <button
-                type="button"
-                aria-label={`Download ${displayName(doc.name)}`}
-                onClick={() => handleDownload(doc.path)}
-                disabled={busyPath === doc.path}
-                className="shrink-0 text-muted-foreground hover:text-foreground disabled:opacity-50"
-              >
-                {busyPath === doc.path ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
-              </button>
-              <button
-                type="button"
-                aria-label={`Delete ${displayName(doc.name)}`}
-                onClick={() => handleDelete(doc.path)}
-                disabled={busyPath === doc.path}
-                className="shrink-0 text-muted-foreground/60 hover:text-destructive disabled:opacity-50"
-              >
-                <Trash2 className="size-4" />
-              </button>
-            </li>
-          ))}
+          {docs.map((doc) => {
+            const label = displayName(doc.name);
+            const isBusy = busy?.path === doc.path;
+            return (
+              <li key={doc.path} className="flex items-center gap-2 py-0.5">
+                <span className="min-w-0 flex-1 truncate text-sm text-foreground" title={label}>
+                  {label}
+                </span>
+                <span className="shrink-0 text-[11px] text-muted-foreground">{formatSize(doc.size)}</span>
+                {/* Both icons were bare 16px glyphs 8px apart, so a fat-finger
+                    tap aimed at Download landed on a permanent delete.
+                    min-h-11/min-w-11 gives each a real 44px target; the row's
+                    py drops to 0.5 so the 44px band sets the row pitch and
+                    neighbouring rows' targets never overlap. */}
+                <button
+                  type="button"
+                  aria-label={`Download ${label}`}
+                  onClick={() => handleDownload(doc.path)}
+                  disabled={isBusy}
+                  className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center text-muted-foreground hover:text-foreground disabled:opacity-50"
+                >
+                  {isBusy && busy.kind === "download" ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <Download className="size-4" />
+                  )}
+                </button>
+                <Popover
+                  open={confirmPath === doc.path}
+                  onOpenChange={(open) => setConfirmPath(open ? doc.path : null)}
+                >
+                  <PopoverTrigger asChild>
+                    <button
+                      type="button"
+                      aria-label={`Delete ${label}`}
+                      disabled={isBusy}
+                      className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center text-muted-foreground/60 hover:text-destructive disabled:opacity-50"
+                    >
+                      {isBusy && busy.kind === "delete" ? (
+                        <Loader2 className="size-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="size-4" />
+                      )}
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent align="end" className="w-72">
+                    <p className="text-sm font-semibold text-foreground">Delete this document?</p>
+                    <p className="mt-1 break-words text-xs leading-snug text-muted-foreground">
+                      <span className="font-semibold text-foreground">{label}</span>{" "}
+                      is deleted from this deal for good — there&apos;s no undo, so you&apos;d have
+                      to upload the file again.
+                    </p>
+                    <div className="mt-3 flex justify-end gap-2">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setConfirmPath(null)}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => void handleDelete(doc.path, label)}
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </li>
+            );
+          })}
         </ul>
       )}
     </section>
