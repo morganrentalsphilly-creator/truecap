@@ -2,8 +2,28 @@
 #
 # Why this is safe to run unattended: every PR it opens triggers the CI
 # workflow (tsc + vitest + production build), so a breaking bump shows
-# up as a red check instead of a broken deploy. Morgan merges green PRs
-# when convenient; nothing auto-merges.
+# up as a red check instead of a broken deploy. Nothing auto-merges.
+#
+# ⚠️ SINCE 2026-08-03, A DEPENDABOT PR CAN NEVER GO GREEN, BY DESIGN.
+# `build-chain-guard` allows a non-owner to touch only app/blog/**,
+# lib/blog-topics.ts and docs/**, and package-lock.json is hash-pinned in
+# scripts/build-integrity-manifest.json. dependabot[bot] is not an owner
+# and must not be added to OWNER_LOGINS — a lockfile is arbitrary code on
+# the Vercel builder, which is the whole reason the guard exists. Pushing
+# to the bot's branch does not help either: the PR stays authored by
+# dependabot, and the guard checks the PR author as well as the pusher.
+#
+# So treat these PRs as SIGNAL, not as something to merge. To take a bump:
+#
+#   gh pr diff <n> | less                 # read it
+#   git switch -c deps-YYYY-MM-DD main
+#   npm install <pkg>@<version> ...       # or: git checkout <bot-branch> -- package.json package-lock.json && npm install
+#   npm run build && npm test             # capture the exit code, don't pipe it
+#   node scripts/verify-build-integrity.mjs --update
+#   git add -A && git commit && git push  # opened by Morgan → both gates pass
+#
+# Then close the bot's PR. Do NOT admin-bypass the required checks: that
+# trains the exact reflex the guard exists to prevent.
 #
 # Majors are excluded — those (Next, React, Stripe SDK, Sentry) need a
 # human reading the changelog per CLAUDE.md. Security advisories still

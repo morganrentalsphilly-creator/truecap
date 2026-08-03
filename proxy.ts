@@ -28,10 +28,16 @@ function hasSupabaseAuthCookie(request: NextRequest): boolean {
  * Stamp `X-Robots-Tag: noindex, nofollow` on anything served from a hostname
  * that isn't usetruecap.com.
  *
- * Every *.vercel.app alias serves the same HTML with a self-referencing
- * canonical, so each is a full duplicate of the site. The 2026-08-02 SEO
- * baseline found `truecap-iota.vercel.app` indexed and outranking the real
- * domain on brand queries. See isCanonicalHost in lib/site-url.ts.
+ * Every *.vercel.app alias OF THIS PROJECT serves the same HTML with a
+ * self-referencing canonical, so each is a full duplicate of the site. The
+ * 2026-08-02 SEO baseline found `truecap-iota.vercel.app` indexed and
+ * outranking the real domain on brand queries.
+ *
+ * That one is NOT covered by this function: iota belongs to a different
+ * Vercel project (verified 2026-08-03 — 200, no X-Robots-Tag, different
+ * deployment id), so it never runs this code no matter how often main is
+ * redeployed. It has to be deleted in the old Vercel account. See the note on
+ * isCanonicalHost in lib/site-url.ts before assuming a redeploy handles it.
  *
  * A response header (not a meta tag) so it also covers /sitemap.xml,
  * /robots.txt, /feed.xml, /llms.txt and the OG image routes, which never pass

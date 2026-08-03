@@ -28,6 +28,18 @@ export function getSiteUrl(): string {
  * queries ("TrueCap rental calculator"). It served `robots: index, follow`
  * with a canonical pointing at itself.
  *
+ * ⚠️ THIS GUARD DOES NOT FIX truecap-iota.vercel.app, and no redeploy will.
+ * That host is served by a deployment OUTSIDE this Vercel project — almost
+ * certainly the pre-account-switch project — so it never receives this code.
+ * Verified 2026-08-03: it returns 200 with NO `X-Robots-Tag` at all, from a
+ * different deployment id than production, while this project's own alias
+ * (truecap-pink.vercel.app) correctly serves `noindex`. So the guard works;
+ * iota is simply out of its reach. Closing it is a Vercel-dashboard action in
+ * the OLD account (delete the project), plus a GSC removal request — and it
+ * is also a frozen PRE-security-fix copy of the whole app wired to whatever
+ * env vars that account holds, which is a second reason to rotate secrets.
+ * Do not read a green host-guard check as iota being handled.
+ *
  * `isCanonicalHost` is the predicate `proxy.ts` uses to stamp
  * `X-Robots-Tag: noindex` on every response served from any other hostname.
  * Header-level rather than metadata-level on purpose: it covers /sitemap.xml,

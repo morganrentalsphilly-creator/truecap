@@ -135,11 +135,17 @@ jobs:
             'package-lock.json'         # what `npm ci` actually installs
             'pnpm-lock.yaml'            # ditto, if the toolchain ever switches
             '.npmrc'                    # registry + script-running behaviour
-            'instrumentation*.ts'       # loaded at server/client boot
-            'instrumentation*.js'
-            'sentry.*.config.ts'        # loaded at boot, holds DSN/auth handling
-            'proxy.ts'                  # Next 16 request interceptor (was middleware)
-            'proxy.js'
+            'instrumentation*'          # loaded at server/client boot. Bare `*`,
+                                        # not `*.ts`: Next resolves these root
+                                        # conventions over `pageExtensions`
+                                        # (tsx|ts|jsx|js) and the LAST match
+                                        # wins, so `instrumentation.tsx` shadows
+                                        # the pinned `instrumentation.ts`
+                                        # silently. `instrumentation*.ts` cannot
+                                        # match it — the pattern ends in a
+                                        # literal `.ts`. Same for proxy below.
+            'sentry.*.config.*'         # loaded at boot, holds DSN/auth handling
+            'proxy.*'                   # Next 16 request interceptor (was middleware)
             'middleware.*'              # in case one is reintroduced
             'vitest.config.*'           # decides whether the tests mean anything
             'eslint.config.*'
@@ -385,6 +391,113 @@ jobs:
             exit 1
           fi
 
+          # -- Gate 1a: what a non-owner is allowed to touch AT ALL ------------
+          #
+          # This is an ALLOW-list, and it runs before the GUARDED deny-list
+          # below. The deny-list alone was not a boundary: it enumerated the
+          # paths we had thought of, and everything nobody had thought of was
+          # implicitly permitted. Reproduced, not theorised — as a non-owner,
+          # each of these exited 0 against the deny-list:
+          #
+          #   · `proxy.tsx` / `instrumentation.tsx` — Next resolves the root
+          #     conventions over pageExtensions and the LAST match wins, so
+          #     these SHADOW the hash-pinned `.ts` files. The request
+          #     interceptor for every production request, and a server-boot
+          #     hook holding the service-role key, both replaced; the manifest
+          #     kept reporting green on the files Next had stopped loading.
+          #   · `app/actions/**` — Server Actions are POST endpoints reachable
+          #     from any browser, and the deny-list covered only `app/api/*`.
+          #   · `lib/entitlements.ts` — `hasPlanFeature` is the ONLY paywall
+          #     enforcement in the app. One line returning true hands every
+          #     anonymous visitor the Pro feature set.
+          #   · `app/sitemap.ts`, `app/markets/**`, `app/tools/**`, and any
+          #     `lib/**` or `components/**` module a statically rendered route
+          #     imports — all execute on the Vercel builder with production
+          #     secrets, exactly like the June 2026 postcss.config.mjs did.
+          #
+          # So the question is inverted. Not "did this touch something we
+          # listed as dangerous" but "is every path in this diff something the
+          # content pipeline legitimately produces". Adding a new file type to
+          # the repo can no longer silently widen an automated writer's reach.
+          #
+          # Derived from what the pipeline actually commits (see the
+          # claude[bot] commits: app/blog/<slug>/{page,opengraph-image}.tsx,
+          # app/blog/page.tsx, lib/blog-topics.ts, docs/seo*). If a legitimate
+          # run needs a path that is not here, this job fails loudly naming
+          # that path — which is the right way to find out.
+          #
+          # Case-SENSITIVE on purpose, unlike the deny-list loop below. There,
+          # matching more than intended fails the job (safe). Here, matching
+          # more than intended ALLOWS a path (unsafe), so `nocasematch` must
+          # stay off: `App/Blog/../proxy.tsx` must not be read as allowed.
+          ALLOWED=(
+            'app/blog/*'                # the posts themselves, incl. their OG images
+            'lib/blog-topics.ts'        # the post registry the prompt tells it to update
+            'docs/*'                    # backlog, visibility snapshots, notes — not executed
+          )
+
+          if [ "$TRUSTED" != "1" ]; then
+            OUTSIDE=()
+            for f in "${CHANGED[@]}"; do
+              ALLOW=0
+              for p in "${ALLOWED[@]}"; do
+                # Unquoted $p on the right-hand side of == is a glob pattern.
+                if [[ "$f" == $p ]]; then ALLOW=1; break; fi
+              done
+              [ "$ALLOW" = "1" ] || OUTSIDE+=("$f")
+            done
+
+            if [ "${#OUTSIDE[@]}" -gt 0 ]; then
+              echo ""
+              echo "=================================================================="
+              echo "  BUILD-CHAIN GUARD FAILED (outside the allow-list)"
+              echo "=================================================================="
+              echo "  This change was not authored by the repo owner, and it touches"
+              echo "  paths the content pipeline does not produce."
+              echo ""
+              echo "  actor:      $ACTOR"
+              if [ "$EVENT_NAME" = "pull_request" ]; then
+                echo "  PR author:  ${PR_AUTHOR:-unknown}"
+              fi
+              echo "  allowed:    $OWNER_LOGINS"
+              echo ""
+              echo "  Paths outside the allow-list (${#OUTSIDE[@]}):"
+              printf '    %s\n' "${OUTSIDE[@]}"
+              echo ""
+              echo "  A non-owner change may only touch:"
+              printf '    %s\n' "${ALLOWED[@]}"
+              echo ""
+              echo "  $INCIDENT"
+              echo ""
+              echo "  Almost everything under app/ and lib/ executes on the Vercel"
+              echo "  builder with SUPABASE_SERVICE_ROLE_KEY, STRIPE_SECRET_KEY,"
+              echo "  STRIPE_WEBHOOK_SECRET, RESEND_API_KEY, CRON_SECRET and"
+              echo "  SENTRY_AUTH_TOKEN in the environment. That is why this is an"
+              echo "  allow-list and not a list of known-bad paths."
+              echo ""
+              echo "  If this is legitimate, the repo owner opens it as their own"
+              echo "  PR and reads the diff. Widening ALLOWED is a deliberate act:"
+              echo "  every path added here is handed to an automated writer."
+              echo "  See docs/SECURITY-HARDENING.md."
+              echo "=================================================================="
+              {
+                echo "### build-chain-guard: FAILED (outside the allow-list)"
+                echo ""
+                echo "\`$ACTOR\` changed **${#OUTSIDE[@]}** path(s) the content pipeline does not produce:"
+                echo ""
+                printf -- '- `%s`\n' "${OUTSIDE[@]}"
+                echo ""
+                echo "> $INCIDENT"
+                echo ""
+                echo "See \`docs/SECURITY-HARDENING.md\`."
+              } >> "$GITHUB_STEP_SUMMARY"
+              exit 1
+            fi
+
+            echo ""
+            echo "OK — every changed path is inside the non-owner allow-list."
+          fi
+
           # -- Gate 1b: content of agent-authored build-executed modules -------
           #
           # The GUARDED list above deliberately lets `app/blog/**` and
@@ -430,15 +543,36 @@ jobs:
             # "contentScanned" in the integrity manifest must appear HERE, not
             # merely somewhere in this file. Deleting the markers fails that
             # check too. Do not move the selection out from between them.
+            # Selection is BY EXTENSION over everything gate 1a already
+            # allowed, not by a second hardcoded path list. The old form named
+            # `app/blog/**` and `lib/blog-topics.ts` explicitly, which meant a
+            # post could import a helper the agent wrote in the same PR — the
+            # post scanned clean, the helper was never scanned at all, and the
+            # helper is what ran on the builder. Reproduced end-to-end.
+            #
+            # Because gate 1a runs first and fails closed, every path still in
+            # LIVE here is inside ALLOWED. So "every executable module in the
+            # diff" is the complete set, and widening ALLOWED later cannot
+            # quietly leave the new paths unscanned.
+            #
+            # The two explicit arms are kept as belt-and-braces (and because
+            # scripts/verify-build-integrity.mjs checks that every path listed
+            # under "contentScanned" in the integrity manifest is named in this
+            # marked region — see lib/blog-topics.ts below).
             BLOG_MODULES=()
-            shopt -s nocasematch   # same reason as the guarded-path loop below:
-                                   # a case-insensitive checkout must not be able
+            shopt -s nocasematch   # a case-insensitive checkout must not be able
                                    # to opt a module out of being scanned. Over-
                                    # matching here only means scanning one extra
                                    # file, which is the safe direction.
             for f in ${LIVE[@]+"${LIVE[@]}"}; do
               case "$f" in
-                app/blog/*.ts|app/blog/*.tsx|app/blog/*.js|app/blog/*.jsx|app/blog/*.mjs|app/blog/*.cjs|lib/blog-topics.ts)
+                app/blog/*|lib/blog-topics.ts)
+                  # Explicitly named so the coverage check in the integrity
+                  # manifest has something to match on.
+                  case "$f" in
+                    *.ts|*.tsx|*.js|*.jsx|*.mjs|*.cjs) BLOG_MODULES+=("$f") ;;
+                  esac ;;
+                *.ts|*.tsx|*.js|*.jsx|*.mjs|*.cjs)
                   BLOG_MODULES+=("$f") ;;
               esac
             done

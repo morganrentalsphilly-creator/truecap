@@ -238,13 +238,68 @@ for (const rel of trackedFiles) {
   }
 }
 
-for (const rel of manifest.mustNotExist || []) {
+// --- shadow filenames, derived rather than listed ---------------------------
+//
+// Next resolves its root conventions (proxy, instrumentation, middleware …)
+// over `pageExtensions` — default ['tsx','ts','jsx','js'] — sorts the matches,
+// and the LAST one wins (next/dist/build/sort-by-page-exts.js: "reversed so
+// preferred comes last and overrides prior"). So `proxy.tsx` sitting beside the
+// hash-pinned `proxy.ts` means Next loads the .tsx and NEVER loads the file
+// this manifest is pinning. No error is raised: the "both middleware and proxy"
+// check does not fire for two spellings of the same convention.
+//
+// A hand-written `mustNotExist` list missed exactly that — it had
+// `instrumentation.js` and `proxy.js` but no `.tsx`/`.jsx` variant, so a
+// non-owner PR adding `proxy.tsx` passed all three controls while replacing the
+// request interceptor for every production request. Verified against this
+// repo's own next 16.2.7: the build emitted the shadow file's code and none of
+// the pinned file's.
+//
+// Derived, therefore, not enumerated. Adding an extension to `pageExtensions`
+// or a new convention root cannot reopen the hole by omission.
+const SHADOW_ROOTS = [
+  'proxy',
+  'middleware',
+  'instrumentation',
+  'instrumentation-client',
+  'postcss.config',
+  'next.config',
+  'vitest.config',
+  'eslint.config',
+  'sentry.server.config',
+  'sentry.edge.config',
+  'sentry.client.config',
+]
+const SHADOW_EXTS = ['ts', 'tsx', 'js', 'jsx', 'mjs', 'cjs', 'mts', 'cts', 'json']
+
+const pinned = new Set(Object.keys(manifest.files || {}))
+const derivedShadows = []
+for (const root of SHADOW_ROOTS) {
+  for (const ext of SHADOW_EXTS) {
+    const name = `${root}.${ext}`
+    // The spelling we actually use is pinned by hash above and must exist.
+    // Every OTHER spelling of the same convention must not.
+    if (!pinned.has(name)) derivedShadows.push(name)
+  }
+}
+
+const forbidden = [...new Set([...(manifest.mustNotExist || []), ...derivedShadows])].sort()
+
+for (const rel of forbidden) {
   if (existsSync(join(ROOT, rel))) {
+    const shadows = SHADOW_ROOTS.filter((r) => rel.startsWith(`${r}.`))
+      .map((r) => [...pinned].find((p) => p.startsWith(`${r}.`)))
+      .filter(Boolean)
     problems.push(`ADDED     ${rel}`)
     detail.push(
       `  ${rel}: this filename is picked up automatically by the toolchain and is not` +
         '\n      part of the reviewed build chain. Adding it silently changes what runs' +
-        '\n      at build time.',
+        '\n      at build time.' +
+        (shadows.length
+          ? `\n      It also SHADOWS ${shadows[0]}: Next resolves this convention over` +
+            '\n      pageExtensions and the last match wins, so the hash pinned above stops' +
+            '\n      describing what the build actually loads.'
+          : ''),
     )
   }
 }
@@ -360,8 +415,12 @@ if (problems.length > 0) {
 }
 
 console.log(`Build-chain integrity OK — ${trackedFiles.length} files match ${MANIFEST_REL}.`)
-if ((manifest.mustNotExist || []).length > 0) {
-  console.log(`Also confirmed absent: ${(manifest.mustNotExist || []).length} shadow build-config filenames.`)
+if (forbidden.length > 0) {
+  console.log(
+    `Also confirmed absent: ${forbidden.length} shadow build-config filenames ` +
+      `(${(manifest.mustNotExist || []).length} listed, the rest derived from the ` +
+      'pinned root conventions × the extensions Next resolves them over).',
+  )
 }
 if (contentScannedPaths.length > 0) {
   console.log(

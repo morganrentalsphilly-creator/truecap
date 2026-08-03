@@ -1,9 +1,23 @@
 # Security hardening — settings Morgan has to change by hand
 
-**Status: NOT DONE until you do these.** Everything in this file is a
-GitHub or Vercel *settings* change. Code cannot do them, and the code half of
-the fix (the `build-chain-guard` CI job + `scripts/verify-build-integrity.mjs`)
-is inert until step 1 is complete — an unrequired status check blocks nothing.
+Everything in this file is a GitHub, Vercel or Supabase *settings* change.
+Code cannot do them.
+
+**Status as of 2026-08-03:**
+
+| # | Step | Status |
+|---|------|--------|
+| 1 | Branch protection on `main` requiring `build-chain-guard` + `check` | ✅ **DONE 2026-08-03.** Classic protection, `enforce_admins: false` (owner direct pushes to `main` still work, which is how this repo deploys), force-push and deletion blocked. Verified: `contexts` = `["build-chain-guard","check"]`. It is demonstrably binding — Dependabot PRs #10 and #18 sit unmergeable with `build-chain-guard` red. |
+| 2 | `SEO_AUTOMERGE` | ⛔️ **DECLINED — automerge stays ON by founder decision.** See §2, rewritten. |
+| 3 | Review the `esaleci` account | ⏳ **OWED.** |
+| 4 | Narrow the agent's tool scope | ⏳ **OWED** (4a/4c); 4b shipped. |
+| 5 | Vercel | ⏳ **OWED**, and the important part changed — see §5. The control that matters is **scoping secret env vars to Production only**, not the Ignored Build Step. |
+| 6 | Pin `claude-code-action` to a SHA | ⏳ **OWED.** |
+| — | **Rotate every secret** | 🚨 **OWED, still the top item.** Verified 2026-08-03: the old `SUPABASE_SERVICE_ROLE_KEY` still authenticates. |
+| — | Apply `docs/apply-pending-migrations-2026-08-03.sql` | 🚨 **OWED.** Verified 2026-08-03: anon can still LIST the `analysis-pdfs` bucket. (The bucket itself is private — downloads and signed URLs are denied.) |
+
+Step 1 being done is what makes the code half mean anything: an unrequired
+status check blocks nothing, and until 2026-08-03 that is what these were.
 
 Owner: `morganrentalsphilly-creator` · Repo: `morganrentalsphilly-creator/truecap` (public)
 
@@ -193,22 +207,58 @@ in descending order of how much it is worth:
 
 | | Control | What it actually buys |
 | --- | --- | --- |
-| 1 | **You read the diff before it merges** (step 2 — auto-merge OFF) | The only control that does not depend on predicting the payload's shape. Load-bearing. |
+| 1 | **You read the diff before it merges** | The only control that does not depend on predicting the payload's shape. Load-bearing — and *deliberately not in force*: automerge stays on (§2), so nothing below is backed by a human read. |
 | 2 | **Required checks** (step 1) | Makes CI able to block at all. Necessary, not sufficient — `tsc`, `vitest` and `next build` all pass on a malicious blog post, by construction, exactly as they did for six weeks on `postcss.config.mjs`. |
-| 3 | **Gate 1b content check** (shipped, `scripts/check-agent-blog-content.mjs`) | Fails CI when an `app/blog/**` module or `lib/blog-topics.ts` changed by a non-owner contains `process.env`, `child_process`, `eval`, `require(`, `fetch(`, a dynamic `import()`, `globalThis`, a node builtin import, or base64/charcode obfuscation — anywhere in the file, module scope or component body. A raw-text token deny-list. It stops a naive payload and raises the cost of a careful one. **It is not a parse and not a proof:** computed property access, string concatenation or an innocuous-looking helper import can express the same payload without any listed token. |
-| 4 | **The integrity manifest** (`scripts/verify-build-integrity.mjs`) | Runs unconditionally, needs no diff, so it is the layer that survives a guard that could not work out what changed. It pins the 16 hash-pinned build-chain files and asserts that `lib/blog-topics.ts` — deliberately *not* pinned, because the agent writes it — has not silently dropped out of gate 1b's scan. It says nothing about the contents of a blog post. |
+| 3a | **Gate 1a allow-list** (shipped, `.github/workflows/ci.yml`) | A non-owner change may touch ONLY `app/blog/**`, `lib/blog-topics.ts` and `docs/**`; anything else fails the job. This is the layer that stopped being a guess. The deny-list it replaced enumerated the paths we had thought of, and a 2026-08-03 review walked past it four ways — `proxy.tsx`/`instrumentation.tsx` shadowing the hash-pinned `.ts` files, `app/actions/**`, `lib/entitlements.ts`, `app/sitemap.ts`. Adding a new file type to the repo can no longer silently widen an automated writer's reach. |
+| 3b | **Gate 1b content check** (shipped, `scripts/check-agent-blog-content.mjs`) | Fails CI when any executable module a non-owner touched contains `process.env`, `child_process`, `eval`, `require(`, `fetch(`, a dynamic `import()`, `globalThis`, a node builtin import, base64/charcode obfuscation — or **rebinds** one of those globals (`const { env } = process`, `const send = fetch`), which defeated every other rule here until 2026-08-03. Selection is by extension over whatever gate 1a allowed, so a helper imported by a post is scanned too; naming `app/blog/**` explicitly used to leave exactly that gap. Still a raw-text deny-list: **not a parse and not a proof.** Computed property access or string concatenation can express the same payload without a listed token. || 4 | **The integrity manifest** (`scripts/verify-build-integrity.mjs`) | Runs unconditionally, needs no diff, so it is the layer that survives a guard that could not work out what changed. It pins the 16 hash-pinned build-chain files, **derives** the forbidden shadow filenames from those root conventions crossed with the extensions Next resolves them over (so a `proxy.tsx` twin cannot pass by being absent from a hand-written list), and asserts that `lib/blog-topics.ts` — deliberately *not* pinned, because the agent writes it — has not silently dropped out of gate 1b's scan. It says nothing about the contents of a blog post. |
 
 There is no configuration in this repo that makes an *unread* agent-authored
 blog post safe. Plan accordingly.
 
 ---
 
-## 2. Turn `SEO_AUTOMERGE` off
+## 2. `SEO_AUTOMERGE` stays ON — accepted risk, and what carries it
 
-Auto-merge is only ever as strong as the required checks. You have just added
-required checks, so auto-merge is now genuinely gated — but "gated" means "gated
-on `tsc`, `vitest` and `next build` passing", and all three pass on a malicious
-blog post. Nothing agent-authored should reach `main` without your eyes.
+**Founder decision, 2026-08-03.** The autonomous SEO pipeline is the point of
+the system; a merge gate that needs Morgan every time makes it not autonomous.
+This section used to say "turn it off". It now records the decision that was
+actually made, and what has to be true for that decision to be survivable.
+
+Auto-merge is only ever as strong as the required checks — and until step 1 was
+applied there were none, which is how PR #17 merged **19 seconds** after CI
+started. Step 1 is now done, so `gh pr merge --auto` genuinely waits. But
+"waits" means "waits for `tsc`, `vitest`, `next build` and `build-chain-guard`",
+and the first three pass on a malicious blog post. Only the guard is looking.
+
+**What carries the risk (all shipped):**
+
+- **Gate 1a — an allow-list, not a deny-list.** A non-owner change may touch
+  only `app/blog/**`, `lib/blog-topics.ts` and `docs/**`. Everything else fails
+  the job. This replaced a deny-list of paths-we-thought-of, which a fresh
+  review walked past four different ways on 2026-08-03: `proxy.tsx` /
+  `instrumentation.tsx` (Next resolves root conventions over `pageExtensions`
+  and the **last** match wins, so a `.tsx` twin silently shadows the hash-pinned
+  `.ts` and becomes the request interceptor for every production request);
+  `app/actions/**` (Server Actions are POST endpoints); `lib/entitlements.ts`
+  (one line returning `true` hands every anonymous visitor the Pro feature set);
+  and `app/sitemap.ts`. All four now fail.
+- **Gate 1b — content scan over every executable module in the diff**, selected
+  by extension rather than by a second hardcoded path list. The old form named
+  `app/blog/**` and `lib/blog-topics.ts` explicitly, so a post could import a
+  helper written in the same PR: the post scanned clean, the helper was never
+  scanned, and the helper is what ran on the builder.
+- **The manifest derives its own shadow filenames** from the pinned root
+  conventions × the extensions Next resolves them over, so the `.tsx`-twin hole
+  cannot be reopened by an omission in a hand-written list.
+
+**What still is not covered, and you should hold this in mind:** gate 1b is a
+heuristic token scan over raw text, not a parse. It now catches aliasing
+(`const { env } = process`, `const send = fetch` — both of which defeated every
+rule until 2026-08-03), but a determined payload built from tokens it does not
+list still passes. **A pass means "no obvious payload", never "reviewed".**
+With automerge on, no human reads an SEO PR before it is in production.
+
+If you ever want the stricter posture, this is the switch:
 
 1. **https://github.com/morganrentalsphilly-creator/truecap/settings/variables/actions**
 2. **Variables** tab → find `SEO_AUTOMERGE` → **Edit** (pencil icon)
@@ -216,43 +266,15 @@ blog post. Nothing agent-authored should reach `main` without your eyes.
    (Or **Remove** it outright — `seo-content.yml:161` is
    `if: vars.SEO_AUTOMERGE == 'true'`, so an absent variable is off.)
 
-CLI equivalent:
-
 ```bash
 gh variable set SEO_AUTOMERGE --body false \
   --repo morganrentalsphilly-creator/truecap
-# or
-gh variable delete SEO_AUTOMERGE --repo morganrentalsphilly-creator/truecap
 ```
 
-Then, belt and braces, take away the mechanism as well:
+### The preconditions this decision assumes
 
-4. **https://github.com/morganrentalsphilly-creator/truecap/settings**
-5. Scroll to **Pull Requests** → untick **Allow auto-merge** → the page saves
-   itself.
-
-Verify:
-
-```bash
-gh variable list --repo morganrentalsphilly-creator/truecap
-gh api repos/morganrentalsphilly-creator/truecap --jq '.allow_auto_merge'   # false
-```
-
-### Leave it off — and why the previous advice here was wrong
-
-An earlier version of this document said "turn it back on only after step 4 is
-done and you have watched a few runs." **That was wrong, and it was the most
-dangerous sentence in the file.** Step 4 narrows the agent's write scope to
-`app/blog/**` — and `app/blog/**` is build-executed (see the section above), so
-the narrowing relocates the payload instead of removing it. Doing step 4 and
-then re-enabling auto-merge would have handed an injected run an unattended path
-to the production build environment, which is precisely the thing this document
-exists to stop.
-
-The recommendation is: **auto-merge stays off.** Reviewing ~2 SEO PRs a week is
-the cost of an agent with a write bit. `gh pr diff <n>` takes a minute.
-
-If you decide to re-enable it anyway, the *minimum* preconditions are all of:
+Keeping automerge on is defensible only while all of these hold. They are worth
+re-checking after any change to the workflows:
 
 - [ ] Step 1 done and verified (required checks actually required).
 - [ ] Step 4a done (`Bash(git:*)` gone, `Write`/`Edit` path-scoped) — so the
@@ -547,11 +569,43 @@ merged in 19 seconds without anyone noticing.
 
 ## 5. Vercel
 
+> **Read this first — the ordering here changed on 2026-08-03.** Everything
+> else in this document gates what lands on `main`. Vercel also builds **PR
+> preview branches**, and that happens *before* any gate's verdict matters. A
+> preview build runs `npm ci` — including every install-time lifecycle script
+> in the PR author's own lockfile — on Vercel's builder. If the secret env vars
+> are scoped "All Environments" (the dashboard default when you add a variable),
+> that untrusted code runs with `SUPABASE_SERVICE_ROLE_KEY`, both Stripe
+> secrets, `RESEND_API_KEY` and `CRON_SECRET` in the environment, with no human
+> action at all — just a PR being opened.
+>
+> Step 2 below (Ignored Build Step) **does not** close this. On a PR branch that
+> script runs from the PR's own checkout, so a tampered branch simply ships a
+> tampered verifier. Guarding `scripts/**` blocks the *merge*, not the branch.
+>
+> **The control that actually closes it is step 0.** Do that one even if you do
+> nothing else on this page.
+
+0. **Scope the secrets to Production only.** ← the important one
+   Vercel → project → **Settings → Environment Variables**. For each of
+   `SUPABASE_SERVICE_ROLE_KEY`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`,
+   `RESEND_API_KEY`, `CRON_SECRET`, `SENTRY_AUTH_TOKEN`: untick **Preview** and
+   **Development**, leave **Production** ticked, save.
+
+   Preview builds do not need real keys, and CI already proves the build works
+   without them — the `check` job builds the whole app against
+   `ci-placeholder-*` values. After this, a hostile preview build has nothing
+   worth stealing.
+
+   Optionally also **Settings → Git → Deployment Protection** → limit preview
+   deployments from bot / non-member branches.
+
 1. **Confirm the production branch.**
    Vercel → project → **Settings → Git → Production Branch** = `main`.
    Everything above assumes production only ever builds from `main`.
 
-2. **Refuse to build a tampered build chain.**
+2. **Refuse to build a tampered build chain** (production path only — see the
+   note above about why this does not protect previews).
    Vercel → **Settings → Git → Ignored Build Step** → choose **Custom** and
    enter exactly:
 
@@ -758,9 +812,21 @@ production build". Bots do not belong on it.
 
 ## Checklist
 
-- [ ] 1. Ruleset (or classic protection) on `main`, requiring `build-chain-guard` + `check`
-- [ ] 1b. Verified with `gh api .../branches/main/protection --jq '.required_status_checks.contexts'`
-- [ ] 2. `SEO_AUTOMERGE=false` (or deleted) **and** repo "Allow auto-merge" unticked
+- [x] 1. Ruleset (or classic protection) on `main`, requiring `build-chain-guard` + `check` — **done 2026-08-03**
+- [x] 1b. Verified with `gh api .../branches/main/protection --jq '.required_status_checks.contexts'` → `["build-chain-guard","check"]`
+- [ ] 0. **Vercel: scope the secret env vars to Production only** (§5 step 0) — the
+      one that stops an untrusted PR's preview build from running with production
+      secrets. Not optional, and not covered by anything in the repo.
+- [ ] 🚨 Rotate every secret exposed to the June build environment (verified
+      2026-08-03: the old service-role key still works)
+- [ ] 🚨 Apply `docs/apply-pending-migrations-2026-08-03.sql` (verified
+      2026-08-03: anon can still LIST the `analysis-pdfs` bucket)
+- [ ] 🚨 Delete the `truecap-iota` project in the OLD Vercel account — it is a
+      frozen pre-security-fix copy of the whole app, serving 200 with no
+      `X-Robots-Tag`, outranking usetruecap.com on brand queries. No redeploy of
+      this project can reach it.
+- [~] 2. `SEO_AUTOMERGE` — **declined, stays ON by founder decision.** See §2 for
+      what carries the risk and what it does not cover.
 - [ ] 2b. Read "What step 1 does *not* close" — you know that `app/blog/**` **and
       `lib/blog-topics.ts`** run during `next build` with production secrets,
       that gate 1b over them is a heuristic, and that finishing step 4 is
@@ -772,4 +838,6 @@ production build". Bots do not belong on it.
       possible is already shipped; before it, `git add` skipped the file silently)
 - [ ] 4c. False "nothing merges without a human" claims corrected in `seo-content.yml` and `docs/seo/AUTOMATION.md`
 - [ ] 5. Vercel production branch confirmed; Ignored Build Step set to `! node scripts/verify-build-integrity.mjs`
+      (production path only — it cannot refuse a tampered *preview* build, which
+      is what §5 step 0 is for)
 - [ ] 6. `anthropics/claude-code-action` pinned to a SHA; default workflow permissions set to read
