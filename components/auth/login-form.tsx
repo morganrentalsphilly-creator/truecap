@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react";
 import { resendConfirmationAction, signInAction } from "@/app/actions/auth";
-import { loginSchema, type LoginInput } from "@/lib/auth-schema";
+import { internalNextPathOrNull, loginSchema, safeInternalNextPath, type LoginInput } from "@/lib/auth-schema";
 import { GoogleAuthButton } from "@/components/auth/google-auth-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,9 +42,7 @@ export function LoginForm() {
   // Thread ?next through the sign-up cross-link so a gated action's return
   // address (e.g. the calculator's pending save) survives the login → sign-up
   // hop. Same internal-paths-only validation as the post-auth redirect below.
-  const rawNext = searchParams.get("next");
-  const safeNextPath =
-    rawNext && rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : null;
+  const safeNextPath = internalNextPathOrNull(searchParams.get("next"));
 
   useEffect(() => {
     if (searchParams.get("error") === "auth") {
@@ -105,11 +103,12 @@ export function LoginForm() {
     });
     // Honor ?next so a gated action (Save, a Pro CTA, the share viewer) returns
     // the user to where they were instead of dumping them on the homepage.
-    // Only internal paths are allowed (no open redirects).
-    const nextParam = searchParams.get("next");
-    router.push(
-      nextParam && nextParam.startsWith("/") && !nextParam.startsWith("//") ? nextParam : "/"
-    );
+    // Only internal paths are allowed. safeInternalNextPath is the single
+    // validator (shape + dot-segment normalization + re-check of the value it
+    // returns), so `?next=/%5Cevil.com`, `?next=/..//evil.com` and friends fall
+    // back to "/" instead of handing the browser a hard navigation off-site
+    // right after a password entry. Never re-implement that check here.
+    router.push(safeInternalNextPath(searchParams.get("next")));
     router.refresh();
   }
 

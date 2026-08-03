@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, after, type NextRequest } from "next/server";
 import type { EmailOtpType } from "@supabase/supabase-js";
+import { safeInternalNextPath } from "@/lib/auth-schema";
 import { sendLifecycleEmailNow } from "@/lib/email/send-lifecycle";
 import { getSiteUrl } from "@/lib/site-url";
 
@@ -48,8 +49,10 @@ export async function GET(request: NextRequest) {
   const code = searchParams.get("code");
   const tokenHash = searchParams.get("token_hash");
   const type = searchParams.get("type") as EmailOtpType | null;
-  const nextRaw = searchParams.get("next") ?? "/";
-  const next = nextRaw.startsWith("/") ? nextRaw : "/";
+  // Same-origin only. Concatenating onto `origin` already kept the host, but
+  // route it through the shared origin-comparing validator so every ?next
+  // consumer applies one rule (and `//evil.com` can't ride along as a path).
+  const next = safeInternalNextPath(searchParams.get("next"));
 
   // Build the canonical redirect response upfront. Any cookies Supabase
   // sets while exchanging the code or verifying the OTP get re-applied

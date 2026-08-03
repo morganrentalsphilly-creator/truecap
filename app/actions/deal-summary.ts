@@ -15,6 +15,8 @@
  *  - Cache misses are rate-limited per caller (in-memory, best-effort) —
  *    DEAL_SUMMARY_LIMITS.free/day for visitors + free accounts, .pro/day for
  *    paid. Worst case under instance churn is a few extra Haiku calls (pennies).
+ *    That bucket bounds a visitor, not the bill (IP-keyed, per instance), so a
+ *    shared daily spend ceiling backstops it — lib/ai-spend-guard.ts.
  *  - No ANTHROPIC_API_KEY → UNAVAILABLE. The UI hides the card when the
  *    page-level flag says the key is absent (same gate as Deal Q&A).
  */
@@ -32,6 +34,7 @@ import {
   dealQaExtraContextSchema,
 } from "@/lib/deal-qa-context";
 import { hasPaidPlanSubscription } from "@/lib/entitlements";
+import { reserveAnthropicCall } from "@/lib/ai-spend-guard";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { headers } from "next/headers";
 
@@ -147,6 +150,16 @@ export async function generateDealSummaryAction(input: unknown): Promise<DealSum
       message: caller.isPaid
         ? "Daily fair-use limit reached. Try again tomorrow."
         : "You've used today's free AI summaries. Pro includes unlimited summaries.",
+    };
+  }
+
+  // Shared outer spend ceiling (see lib/ai-spend-guard.ts) — the in-memory
+  // per-caller bucket above bounds one visitor per instance, not the bill.
+  if (!(await reserveAnthropicCall())) {
+    return {
+      ok: false,
+      code: "RATE_LIMITED",
+      message: "AI summaries have hit today's usage limit. Please try again tomorrow.",
     };
   }
 

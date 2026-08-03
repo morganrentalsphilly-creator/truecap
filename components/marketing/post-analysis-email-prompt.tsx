@@ -55,6 +55,9 @@ type Props = {
 export function PostAnalysisEmailPrompt({ hasCompletedAnalysis, propertyAddress }: Props) {
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
+  /** Honeypot — hidden from real users; only bots fill it. Server treats a
+   *  non-empty value as a silent no-op (no email is scheduled). */
+  const [website, setWebsite] = useState("");
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -151,6 +154,7 @@ export function PostAnalysisEmailPrompt({ hasCompletedAnalysis, propertyAddress 
     const result = await capturePostAnalysisEmail({
       email: email.trim(),
       address: propertyAddress,
+      website,
     });
     if (result.ok) {
       setStatus("success");
@@ -219,6 +223,19 @@ export function PostAnalysisEmailPrompt({ hasCompletedAnalysis, propertyAddress 
               Drop your email — I&apos;ll send the underwriting checklist I run before every offer, plus a few short notes on the numbers most investors miss.
             </p>
             <form onSubmit={onSubmit} className="mt-4 flex flex-col gap-2">
+              {/* Honeypot: display:none, out of the tab order and hidden from
+                  assistive tech, so no real user can fill it. Form-filling
+                  bots do, and the server then silently drops the submission. */}
+              <input
+                type="text"
+                name="website"
+                tabIndex={-1}
+                autoComplete="off"
+                aria-hidden="true"
+                value={website}
+                onChange={(e) => setWebsite(e.target.value)}
+                className="hidden"
+              />
               <input
                 type="email"
                 autoComplete="email"

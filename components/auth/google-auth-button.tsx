@@ -28,6 +28,7 @@
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
+import { safeInternalNextPath } from "@/lib/auth-schema";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import { friendlyToastError } from "@/lib/friendly-error";
 import { useToast } from "@/hooks/use-toast";
@@ -59,8 +60,10 @@ export function GoogleAuthButton({ label = "Continue with Google", disabled = fa
     // land back on the page they were trying to reach (pricing checkout,
     // a deal they were viewing, etc). Sanitize to same-origin paths only
     // — never accept an absolute URL from the query string.
-    const nextRaw = searchParams.get("next") ?? "/";
-    const next = nextRaw.startsWith("/") && !nextRaw.startsWith("//") ? nextRaw : "/";
+    // (One shared validator: a prefix check would let `/\evil.com` through and
+    // a bare origin comparison would let `/..//evil.com` through — both resolve
+    // to an off-site origin once the browser re-resolves them.)
+    const next = safeInternalNextPath(searchParams.get("next"));
 
     // window.location.origin is only available in the browser, but this
     // is a "use client" component called from an onClick — we're safe.

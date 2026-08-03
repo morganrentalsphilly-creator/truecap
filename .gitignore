@@ -66,7 +66,39 @@ mcps/
 /.cursor
 # Editor + tooling metadata (PostHog wizard, Claude session artifacts).
 # Not source — local-only tooling state. Treat like .vscode / .idea.
-.claude/
+#
+# ONE EXCEPTION: `.claude/settings.json` is the repo-wide Claude Code
+# permission deny-list (docs/SECURITY-HARDENING.md step 4b). It is a security
+# control, so it has to be tracked and present in every CI checkout — the old
+# blanket `.claude/` rule made `git add` skip it *silently* (`git add -A` no-ops,
+# `git add .claude/settings.json` exits 1), which is the worst possible failure
+# mode for a control someone believes they installed.
+#
+# Git cannot re-include a file inside an *excluded directory* — once a parent
+# directory is ignored, git never descends into it, so a bare `!.claude/settings.json`
+# under `.claude/` would do nothing. The rule therefore has to exclude the
+# directory's *contents* (`.claude/*`) and then negate the one file.
+# Do not collapse this back to `.claude/`.
+#
+# Verify. `git check-ignore` exit codes are inverted from the intuition, and
+# `-v` additionally changes behaviour once the file is tracked, so use both:
+#
+#   git check-ignore .claude/settings.json
+#     -> no output, exit 1 = NOT ignored. This is the state we want, and it
+#        reads the same whether the file is tracked, untracked or absent.
+#
+#   git check-ignore --no-index -v .claude/settings.json
+#     -> ".gitignore:<n>:!.claude/settings.json", exit 0. The leading `!` is the
+#        point: -v reports the matching RULE, and a negation rule means the path
+#        is re-included. Do not read that exit 0 as "still ignored".
+#        (--no-index matters: without it, -v goes quiet and exits 1 once the
+#        file is tracked, because git skips ignore rules for tracked paths.)
+#
+#   git ls-files .claude/   -> must list .claude/settings.json once committed.
+#                              This is the check that actually proves the point:
+#                              it asks the index, not the rules.
+.claude/*
+!.claude/settings.json
 /.pdf_review
 # `/scripts` removed: that directory holds tracked utility scripts
 # (schedule-all-broadcasts, schedule-daily-campaign, preview-daily-campaign,

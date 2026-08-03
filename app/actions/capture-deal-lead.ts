@@ -9,6 +9,18 @@
  * service-role admin client because the viewer has no session; deal_leads has
  * no anon insert policy, so this action is the only write path.
  *
+ * BECAUSE it is the only write path, it must carry the authorization the table
+ * delegates to it. `ownerId` arrives in the request body, so it is verified
+ * against the share link's HMAC ({ownerId, dealId, valuesHash} signed with
+ * SHARE_LINK_SECRET — lib/share-attribution.ts) exactly as /d/[encoded]/page.tsx
+ * does before it co-brands. Previously the render path enforced the signature
+ * and the write path did not, so an anonymous caller could post any Pro user's
+ * uuid and (a) inject forged leads into that user's private inbox, plus mail
+ * them attacker-authored text once LEAD_NOTIFICATIONS_MODE goes live, and
+ * (b) use the distinguishable OWNER_NOT_ELIGIBLE reply as an oracle for which
+ * accounts are paying. Unverified attribution now gets the same generic
+ * response as an ineligible owner, so neither is distinguishable.
+ *
  * Result follows the codebase discriminated-union convention (CLAUDE.md §3.2);
  * never throws to the client.
  */
@@ -18,6 +30,7 @@ import { headers } from "next/headers";
 import * as Sentry from "@sentry/nextjs";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { getEntitlementsForUser, hasPlanFeature } from "@/lib/entitlements";
+import { verifyShareAttribution } from "@/lib/share-attribution";
 
 export type CaptureLeadResult =
   | { ok: true }
@@ -29,6 +42,11 @@ export type CaptureLeadResult =
 
 const leadSchema = z.object({
   ownerId: z.string().uuid("This share link can't receive messages."),
+  /** Signed attribution copied from the share payload — see the note above.
+   *  `sig` is an HMAC-SHA256 hex digest over {ownerId, dealId, valuesHash}. */
+  dealId: z.string().uuid().optional(),
+  valuesHash: z.string().trim().max(128).optional(),
+  sig: z.string().trim().max(256).optional(),
   email: z.string().email("Please enter a valid email."),
   name: z.string().trim().max(100).optional(),
   message: z.string().trim().max(1000).optional(),
@@ -77,7 +95,23 @@ export async function captureDealLeadAction(input: unknown): Promise<CaptureLead
   if (parsed.data.website && parsed.data.website.trim().length > 0) {
     return { ok: true };
   }
-  const { ownerId, email, name, message, dealAddress } = parsed.data;
+  const { ownerId, dealId, valuesHash, sig, email, name, message, dealAddress } = parsed.data;
+
+  // Authorization: the caller must present the share link's signature over this
+  // exact {ownerId, dealId, valuesHash}. A legitimate viewer always has it — the
+  // /d page only renders the form after verifying the same tuple, and forwards
+  // it. A forged/absent signature (or an unset SHARE_LINK_SECRET, in which case
+  // co-branding is off entirely and no form exists) is refused with the SAME
+  // code + message an ineligible owner gets, so the response leaks nothing.
+  const attributionOk = verifyShareAttribution({
+    ownerId,
+    dealId: dealId ?? null,
+    valuesHash: valuesHash ?? "",
+    sig: sig ?? null,
+  });
+  if (!attributionOk) {
+    return { ok: false, code: "OWNER_NOT_ELIGIBLE", message: "This deal isn't accepting messages." };
+  }
 
   // Per-IP rate limit (best-effort). Returns a soft error rather than silently
   // dropping a legit user's message.

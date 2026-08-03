@@ -30,6 +30,13 @@ const MONTHLY_ENRICHMENT_CAP = Number.parseInt(process.env.RENTCAST_MONTHLY_ENRI
 // lifetime lookup (profiles.comps_free_used). Tunable via env.
 const PER_USER_MONTHLY_CAP = Number.parseInt(process.env.RENTCAST_PER_USER_MONTHLY_CAP ?? "50", 10);
 
+// How many "no data / provider error" lookups per user per month still hand the
+// free user's one-shot freebie back. Without a ceiling the refund path is an
+// unlimited free-lookup generator (junk address → miss → refund → repeat), each
+// iteration still costing real RentCast calls. Tunable via env.
+const MISS_REFUND_CAP_RAW = Number.parseInt(process.env.RENTCAST_MISS_REFUND_CAP ?? "3", 10);
+const MISS_REFUND_CAP = Number.isFinite(MISS_REFUND_CAP_RAW) && MISS_REFUND_CAP_RAW > 0 ? MISS_REFUND_CAP_RAW : 3;
+
 const inputSchema = z.object({
   address: z.string().trim().min(5).max(300),
   propertyType: z.enum(["single-family", "multi-family", "owner-occupant"]).optional(),
@@ -288,7 +295,14 @@ export async function getPropertyCompsAction(input: unknown): Promise<PropertyCo
   // both clear the earlier read-gate and spend two live RentCast calls on one
   // freebie (protects the monthly API budget).
   if (freeUser) {
-    const { data: claimed } = await supabase
+    // Claimed with the ADMIN client on purpose: `comps_free_used` is an
+    // entitlement ledger, not user data. The `profiles_update_own` RLS policy
+    // is whole-row, so a signed-in free user could PATCH the column back to
+    // false through PostgREST and mint unlimited "one lifetime" lookups. The
+    // matching DB-side lock lives in
+    // supabase/migrations/20260802130000_profiles_lock_comps_free_used.sql —
+    // this action (service role) is the only writer.
+    const { data: claimed } = await admin
       .from("profiles")
       .update({ comps_free_used: true })
       .eq("id", user.id)
@@ -314,18 +328,32 @@ export async function getPropertyCompsAction(input: unknown): Promise<PropertyCo
   // Give the freebie back when the live lookup yields nothing billable (an
   // un-indexed address or a provider outage). RentCast doesn't charge for a
   // null result, so a free user shouldn't lose their one shot on empty data.
+  //
+  // The GLOBAL budget unit is deliberately NOT refunded here. That counter is a
+  // spend/rate guard, and the request left the building either way — it consumed
+  // provider rate whether or not RentCast billed it. Refunding it made the cap
+  // self-defeating: a loop of junk addresses issued unbounded RentCast calls
+  // while the counter never advanced (every gate variable was restored).
+  // The upfront reservation IS still refunded on paths where no HTTP request was
+  // made at all (per-user cap hit, lost freebie race) — see above.
+  //
+  // The freebie refund is itself bounded: each miss burns one unit of a small
+  // per-user monthly allowance, so the refund can't be used as an unlimited
+  // free-lookup generator.
   const refundUnbilledLookup = async () => {
-    // The live lookup yielded nothing billable — undo what we charged upfront:
-    // the reserved global budget unit(s)…
-    if (reservedGlobal > 0) {
-      await admin
-        .rpc("decrement_app_counter", { counter_key: monthKey, amount: reservedGlobal })
-        .then(() => undefined, () => undefined);
-      reservedGlobal = 0;
-    }
-    // …and a free user's one-shot freebie.
+    // (reservedGlobal stays spent — no decrement here, by design.)
     if (!freeUser) return;
-    await supabase
+    // Bounded: only refund while the caller is under their monthly miss
+    // allowance. `increment_app_counter_if_under` returns null once the cap is
+    // reached (atomic). If the RPC isn't deployed, `error` is set and we fall
+    // back to refunding — the pre-existing behaviour.
+    const { data: missAllowed, error: missErr } = await admin.rpc("increment_app_counter_if_under", {
+      counter_key: `comps_miss_${user.id}_${month}`,
+      max_value: MISS_REFUND_CAP,
+      amount: 1,
+    });
+    if (!missErr && missAllowed == null) return; // allowance exhausted — freebie stays spent
+    await admin
       .from("profiles")
       .update({ comps_free_used: false })
       .eq("id", user.id)

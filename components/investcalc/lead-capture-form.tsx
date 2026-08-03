@@ -16,11 +16,21 @@ import { trackEvent } from "@/lib/analytics";
 
 export function LeadCaptureForm({
   ownerId,
+  dealId,
+  valuesHash,
+  sig,
   agentName,
   dealAddress,
   accentColor,
 }: {
   ownerId: string;
+  /** Signed attribution from the share payload ({ownerId, dealId, valuesHash}
+   *  HMAC'd with SHARE_LINK_SECRET). The /d page verifies it before rendering
+   *  this form; we forward it so the server action can verify it again on the
+   *  write path instead of trusting a bare ownerId from the request body. */
+  dealId?: string | null;
+  valuesHash: string;
+  sig?: string | null;
   agentName: string;
   dealAddress?: string;
   accentColor?: string | null;
@@ -49,6 +59,9 @@ export function LeadCaptureForm({
     setError("");
     const res = await captureDealLeadAction({
       ownerId,
+      dealId: dealId ?? undefined,
+      valuesHash,
+      sig: sig ?? undefined,
       email,
       name: name || undefined,
       message: message || undefined,

@@ -8,7 +8,12 @@ import { useForm } from "react-hook-form";
 import { Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react";
 import { signUpAction } from "@/app/actions/auth";
 import { trackConversion } from "@/lib/analytics/track-conversion";
-import { signUpSchema, type SignUpInput } from "@/lib/auth-schema";
+import {
+  internalNextPathOrNull,
+  safeInternalNextPath,
+  signUpSchema,
+  type SignUpInput,
+} from "@/lib/auth-schema";
 import { GoogleAuthButton } from "@/components/auth/google-auth-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,9 +48,7 @@ export function SignUpForm() {
   // Thread ?next through the "Sign in" cross-link so a gated action's return
   // address (e.g. the calculator's pending save) survives the sign-up → login
   // hop. Same internal-paths-only validation as the post-auth redirect below.
-  const rawNext = searchParams.get("next");
-  const safeNextPath =
-    rawNext && rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : null;
+  const safeNextPath = internalNextPathOrNull(searchParams.get("next"));
 
   async function onSubmit(values: SignUpInput) {
     setIsSubmitting(true);
@@ -92,11 +95,10 @@ export function SignUpForm() {
     }
     form.reset();
     // Honor ?next (internal paths only) so a gated action returns the user to
-    // where they were instead of the homepage.
-    const nextParam = searchParams.get("next");
-    router.push(
-      nextParam && nextParam.startsWith("/") && !nextParam.startsWith("//") ? nextParam : "/"
-    );
+    // where they were instead of the homepage. The shared validator rejects the
+    // whole open-redirect family (`/\evil.com`, `/..//evil.com`, `/%2F%2F…`),
+    // falling back to "/" — don't add a local check alongside it.
+    router.push(safeInternalNextPath(searchParams.get("next")));
     router.refresh();
   }
 

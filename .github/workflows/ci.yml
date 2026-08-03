@@ -1,6 +1,7 @@
 # Continuous integration — runs on every push and PR to main.
 #
-# Three gates, cheapest first:
+# Four gates, cheapest first:
+#   0. build-chain-guard — see below; runs in parallel, blocks the build chain
 #   1. tsc --noEmit   — type errors (fast, catches most AI/human slips)
 #   2. vitest         — the lib/ math tests (calc-analysis, templates, …)
 #   3. next build     — full production build, same as Vercel runs
@@ -10,7 +11,14 @@
 # created per-request, the cron checks env when hit), so the build
 # only needs the vars to exist.
 #
-# No deploy step here — Vercel's Git integration still owns deploys.
+# No deploy step here — Vercel's Git integration still owns deploys. That is
+# exactly why `build-chain-guard` has to exist: nothing between a commit landing
+# on main and Vercel building it with production secrets is under our control,
+# so the gate has to be on what is allowed to land.
+#
+# NOTE: these jobs only *block* anything once they are marked as REQUIRED status
+# checks on the `main` branch. As of 2026-08-02 main had no protection at all and
+# a PR merged 19 seconds after its CI started. See docs/SECURITY-HARDENING.md.
 
 name: CI
 
@@ -20,7 +28,569 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
+  # ===========================================================================
+  # build-chain-guard — who is allowed to change the files that execute at
+  # build time.
+  #
+  # 2026-06-01: commit 15eb1b5 landed on main as a 34-file "distribution batch".
+  # Thirty-three files were what the message said. The thirty-fourth was
+  # postcss.config.mjs, carrying a blockchain-C2 loader that ran inside
+  # `next build` on every Vercel production deploy — with the Supabase service
+  # role key, both Stripe secrets, the Resend key, CRON_SECRET and the Sentry
+  # auth token in the environment. It survived six weeks and every gate below,
+  # because tsc/vitest/next build all pass fine on a malicious build config.
+  # It was removed on 2026-07-14 in ab02311.
+  #
+  # Since then the same write surface has been handed to an automated agent:
+  # .github/workflows/seo-content.yml runs Claude with Write/Edit and no path
+  # allowlist, plus Bash(git:*) and contents:write, and the prompt tells it to
+  # go read third-party web pages. Any page it fetches is untrusted input that
+  # reaches the same file. This job is the technical control that CLAUDE.md §8
+  # is not: §8 is a paragraph inside the same context window as the injection.
+  #
+  # Rule: touching a build-executed or security-sensitive path is allowed only
+  # when the change comes from the repo owner. Everything else — blog posts,
+  # docs, lib/blog-topics.ts, components — passes the *path* rule, so the
+  # legitimate SEO content pipeline is unaffected.
+  #
+  # IMPORTANT — the path rule is not the whole story. `app/blog/**/page.tsx`
+  # files are TSX server component MODULES. `next build` statically renders
+  # them, so their top-level code and their component bodies execute on the
+  # Vercel builder with the same production secrets as postcss.config.mjs.
+  # `lib/blog-topics.ts` is the same shape of problem: the agent is told to
+  # register every post in it, and it is imported by `app/blog/page.tsx`,
+  # `app/blog/topics/**` and `app/sitemap.ts`, all of which `next build`
+  # renders statically. Letting the agent write either is therefore letting it
+  # write a build-executed file. Gate 1b below is the content check that makes
+  # that allowance defensible; it is a heuristic, not a proof. See
+  # docs/SECURITY-HARDENING.md, "What step 1 does not close".
+  #
+  # FAIL-CLOSED IS THE WHOLE POINT (2026-08-03). Every step below has to fail
+  # the job when it cannot do its work — an unparsable diff, an unreadable
+  # file, a missing checker. The attacker picks the filename, so anything that
+  # "skips what it could not handle" is a bypass with a one-character cost.
+  # Three such bypasses were found by review and are closed here:
+  #   * `git diff --name-only` C-quotes non-ASCII paths under git's default
+  #     core.quotePath=true (`"app/api/exf\303\255l/route.ts"`). The leading
+  #     quote matched no glob, so an accent in a directory name walked past
+  #     BOTH gates. The diff is now read `--raw -z` with quoting disabled into
+  #     bash ARRAYS, and every path test is against an array element.
+  #   * the blog module list was passed to node unquoted, so a slug with a
+  #     space word-split into fragments the checker then skipped. It is an
+  #     array now, expanded quoted, and the checker errors on anything it
+  #     cannot read.
+  #   * `lib/blog-topics.ts` was agent-writable and build-executed but scanned
+  #     by nothing. It is in gate 1b's selection now.
+  # ===========================================================================
+  build-chain-guard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Full history so the base commit of a PR (or of a push that moved
+          # main by more than one commit) is present locally to diff against.
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # -- Gate 1: who changed what -----------------------------------------
+      #
+      # Everything the workflow context provides is passed through `env` rather
+      # than interpolated into the script body; `${{ }}` inside a run: block is
+      # textual substitution and is its own injection surface.
+      - name: Guarded paths — only the repo owner may touch the build chain
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          ACTOR: ${{ github.actor }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PUSH_BEFORE: ${{ github.event.before }}
+          # Logins allowed to change build-executed files. Space separated.
+          # Adding a login here is equivalent to handing that account the
+          # production build environment. Do not add bots. Do not add agents.
+          OWNER_LOGINS: "morganrentalsphilly-creator"
+        run: |
+          set -uo pipefail
+
+          INCIDENT="Ref 2026-06-01: a blockchain-C2 loader was smuggled into postcss.config.mjs inside a 34-file 'distribution batch' commit (15eb1b5) and ran on every production build for six weeks (removed in ab02311)."
+          ZERO="0000000000000000000000000000000000000000"
+
+          # Paths that execute during a build, decide what executes during a
+          # build, or hold the security boundary of the running app.
+          # Shell glob semantics: `*` matches `/` here, so `app/api/*` covers
+          # the whole subtree.
+          GUARDED=(
+            'postcss.config.*'          # runs inside `next build` — THE June 2026 file
+            'next.config.*'             # runs inside `next build`
+            'vercel.json'               # picks the build command
+            'package.json'              # scripts, deps, install-time lifecycle hooks
+            'package-lock.json'         # what `npm ci` actually installs
+            'pnpm-lock.yaml'            # ditto, if the toolchain ever switches
+            '.npmrc'                    # registry + script-running behaviour
+            'instrumentation*.ts'       # loaded at server/client boot
+            'instrumentation*.js'
+            'sentry.*.config.ts'        # loaded at boot, holds DSN/auth handling
+            'proxy.ts'                  # Next 16 request interceptor (was middleware)
+            'proxy.js'
+            'middleware.*'              # in case one is reintroduced
+            'vitest.config.*'           # decides whether the tests mean anything
+            'eslint.config.*'
+            'tsconfig*.json'            # strictness + path mapping
+            '.github/*'                 # workflows, actions, permissions
+            '.claude/*'                 # the agent's OWN permission deny-list —
+                                        # without this an agent run can edit the
+                                        # rules that are supposed to bind it and
+                                        # this job still exits 0
+            'supabase/migrations/*'     # schema + RLS
+            'lib/supabase/*'            # service-role client, RLS bypass surface
+            'app/api/*'                 # webhooks, cron, auth callbacks
+            '.gitmodules'               # a gitlink pulls in a whole other repo
+            '.gitattributes'            # filters/diff drivers, and export-subst
+            'scripts/*'                 # includes this control's own three files
+                                        # (verify-build-integrity.mjs, its
+                                        # manifest, check-agent-blog-content.mjs)
+                                        # and everything `node scripts/...` can
+                                        # reach on the runner. Nothing the SEO
+                                        # agent legitimately produces lives here.
+          )
+
+          is_owner() {
+            local who="${1:-}"
+            [ -n "$who" ] || return 1
+            local o
+            for o in $OWNER_LOGINS; do
+              [ "$who" = "$o" ] && return 0
+            done
+            return 1
+          }
+
+          # A change is owner-authored only if the account that pushed it is an
+          # owner AND — on a PR — the PR was opened by an owner too. Without the
+          # second half, an agent could open the PR and any later owner push to
+          # that branch would launder the whole diff.
+          TRUSTED=0
+          if is_owner "$ACTOR"; then
+            if [ "$EVENT_NAME" = "pull_request" ]; then
+              is_owner "$PR_AUTHOR" && TRUSTED=1
+            else
+              TRUSTED=1
+            fi
+          fi
+
+          echo "event=$EVENT_NAME actor=$ACTOR pr_author=${PR_AUTHOR:-n/a} trusted=$TRUSTED"
+
+          have_commit() { git cat-file -e "${1}^{commit}" 2>/dev/null; }
+
+          # --- resolve the base commit to diff against ------------------------
+          BASE=""
+          BASIS=""
+          case "$EVENT_NAME" in
+            pull_request) CAND="${PR_BASE_SHA:-}" ; BASIS="pull_request.base.sha" ;;
+            push)         CAND="${PUSH_BEFORE:-}" ; BASIS="push.before" ;;
+            *)            CAND=""                 ; BASIS="" ;;
+          esac
+
+          if [ -n "$CAND" ] && [ "$CAND" != "$ZERO" ]; then
+            have_commit "$CAND" || git fetch --no-tags --depth=1 origin "$CAND" >/dev/null 2>&1 || true
+            if have_commit "$CAND"; then BASE="$CAND"; fi
+          fi
+
+          # Fallback 1: branch point from main. Covers a force-pushed base, a
+          # first push to a new branch (push.before is all-zeros), and a shallow
+          # or rewritten history.
+          if [ -z "$BASE" ]; then
+            git fetch --no-tags origin main >/dev/null 2>&1 || true
+            MB="$(git merge-base FETCH_HEAD HEAD 2>/dev/null || git merge-base origin/main HEAD 2>/dev/null || true)"
+            if [ -n "$MB" ] && [ "$MB" != "$(git rev-parse HEAD)" ]; then
+              BASE="$MB"; BASIS="merge-base with origin/main (fallback)"
+            fi
+          fi
+
+          # Fallback 2: the tip commit only. Weaker — it can miss earlier commits
+          # in a multi-commit push — which is precisely why the integrity manifest
+          # step below runs unconditionally and does not depend on any diff.
+          if [ -z "$BASE" ] && git rev-parse -q --verify "HEAD^" >/dev/null 2>&1; then
+            BASE="$(git rev-parse HEAD^)"; BASIS="HEAD^ (fallback, tip commit only)"
+          fi
+
+          if [ -z "$BASE" ]; then
+            if [ "$TRUSTED" = "1" ]; then
+              echo "Could not resolve a base commit to diff against, but the actor is the repo owner. Deferring to the integrity manifest step."
+              exit 0
+            fi
+            echo ""
+            echo "=================================================================="
+            echo "  BUILD-CHAIN GUARD FAILED (fail-closed)"
+            echo "=================================================================="
+            echo "  Could not determine which files this change touches, and the"
+            echo "  change was not authored by the repo owner (actor: $ACTOR)."
+            echo "  An unreviewable diff from a non-owner is refused by default."
+            echo ""
+            echo "  $INCIDENT"
+            echo "=================================================================="
+            exit 1
+          fi
+
+          echo "Diffing $BASE..HEAD  (base from: $BASIS)"
+
+          # --- read the diff into arrays -------------------------------------
+          #
+          # Three flags, each load-bearing:
+          #
+          #   -c core.quotePath=false  git's DEFAULT is quotePath=true, which
+          #       renders any path with a byte >0x7f in C-quoted form —
+          #       `"app/api/exf\303\255l/route.ts"`, leading double-quote
+          #       included. That string matches none of the GUARDED globs and
+          #       does not match `app/blog/*` either, so before 2026-08-03 one
+          #       accented character in a directory name made a new
+          #       `.github/workflows/*.yml` invisible to this job. Proven, not
+          #       theorised.
+          #   -z  NUL-separated output, so a newline, tab, quote or space in a
+          #       filename cannot split one path into two (or two into one).
+          #       Everything downstream is an ARRAY ELEMENT, never a line of a
+          #       joined string. The only joined form left in this step is the
+          #       human-readable echo below.
+          #   --raw  carries the file MODE and the status letter alongside the
+          #       name. That is how a symlink (120000) or a submodule gitlink
+          #       (160000) gets caught, and how a deletion is told apart from a
+          #       file that exists but could not be read — the difference
+          #       between "nothing to scan" and "fail closed".
+          #
+          # --no-renames so that moving a guarded file OUT of its path is caught
+          # as a change to the old path, not silently folded into a rename.
+          # (Verified: with rename detection on, `git mv app/api/x/route.ts
+          # docs/route.ts` reports only the destination and the guard exits 0.)
+          RAW_FILE="$(mktemp)" || { echo "mktemp failed — failing closed."; exit 1; }
+          trap 'rm -f "$RAW_FILE"' EXIT
+
+          if ! git -c core.quotePath=false diff --raw --no-renames -z "$BASE" HEAD > "$RAW_FILE"; then
+            echo ""
+            echo "=================================================================="
+            echo "  BUILD-CHAIN GUARD FAILED (fail-closed)"
+            echo "=================================================================="
+            echo "  \`git diff\` against $BASE failed, so the set of changed files"
+            echo "  is unknown. An unreviewable diff is refused, whoever pushed it."
+            echo ""
+            echo "  $INCIDENT"
+            echo "=================================================================="
+            exit 1
+          fi
+
+          # CHANGED — every path in the diff, old paths included (--no-renames).
+          # LIVE    — the subset that still exists in HEAD, i.e. is readable.
+          # SPECIAL — symlinks and gitlinks introduced or left by this diff.
+          CHANGED=()
+          LIVE=()
+          SPECIAL=()
+
+          # `git diff --raw -z` emits alternating NUL-terminated records:
+          #   ":<srcmode> <dstmode> <srcsha> <dstsha> <status>" then "<path>".
+          # A `while read -r -d ''` loop is the portable spelling of
+          # `mapfile -d '' -t` — it behaves identically on the runner's bash 5
+          # and still works on the bash 3.2 that ships with macOS, so this step
+          # can be exercised locally. What matters is that it is NUL-delimited
+          # and lands in an array; do not "simplify" it back to a line loop.
+          STATE="meta"
+          META=""
+          while IFS= read -r -d '' REC; do
+            if [ "$STATE" = "meta" ]; then
+              case "$REC" in
+                ::*)
+                  # A combined (merge) diff. `git diff <tree> <tree>` should
+                  # never produce one; if it does, this parser is wrong about
+                  # its own input and must not guess.
+                  echo "Unexpected combined-diff record from git: $REC"
+                  echo "Failing closed — the changed-file list cannot be trusted."
+                  exit 1 ;;
+                :*) META="$REC"; STATE="path" ;;
+                *)
+                  echo "Unparsable git diff --raw record: $REC"
+                  echo "Failing closed — the changed-file list cannot be trusted."
+                  exit 1 ;;
+              esac
+              continue
+            fi
+
+            STATE="meta"
+            [ -n "$REC" ] || { echo "Empty path in git diff output — failing closed."; exit 1; }
+            CHANGED+=("$REC")
+
+            read -r _SRCMODE DSTMODE _SRCSHA _DSTSHA STATUS <<< "${META#:}"
+            case "$STATUS" in
+              R*|C*)
+                # --no-renames is set above precisely so these never appear; a
+                # rename record carries two paths and would desynchronise this
+                # parser by one field.
+                echo "Rename/copy record despite --no-renames ($STATUS) — failing closed."
+                exit 1 ;;
+              D) ;;                       # gone from HEAD; nothing to read
+              *) LIVE+=("$REC") ;;
+            esac
+            case "$DSTMODE" in
+              120000) SPECIAL+=("$REC (symlink)") ;;
+              160000) SPECIAL+=("$REC (submodule gitlink)") ;;
+            esac
+          done < "$RAW_FILE"
+
+          if [ "$STATE" != "meta" ]; then
+            echo "Truncated git diff --raw output (metadata with no path) — failing closed."
+            exit 1
+          fi
+
+          if [ "${#CHANGED[@]}" -eq 0 ]; then
+            echo "No file changes detected. Nothing to guard."
+            exit 0
+          fi
+
+          # Joined only to be looked at by a human. Nothing matches on it.
+          echo "Changed files:"
+          printf '  %s\n' "${CHANGED[@]}"
+
+          # -- Symlinks and submodules ----------------------------------------
+          #
+          # Neither is something the SEO pipeline produces. A symlink lets the
+          # bytes that `next build` executes live somewhere other than the path
+          # this job matched, and a gitlink imports an entire foreign history
+          # that no gate here reads. Refuse both from a non-owner rather than
+          # reason about them.
+          if [ "$TRUSTED" != "1" ] && [ "${#SPECIAL[@]}" -gt 0 ]; then
+            echo ""
+            echo "=================================================================="
+            echo "  BUILD-CHAIN GUARD FAILED"
+            echo "=================================================================="
+            echo "  This change introduces a symlink or a submodule, and it was"
+            echo "  NOT authored by the repo owner (actor: $ACTOR)."
+            echo ""
+            printf '    %s\n' "${SPECIAL[@]}"
+            echo ""
+            echo "  A symlink decouples the path this job checked from the bytes"
+            echo "  the build executes. A submodule brings in a history nothing"
+            echo "  here reads at all."
+            echo ""
+            echo "  $INCIDENT"
+            echo "=================================================================="
+            {
+              echo "### build-chain-guard: FAILED (symlink / submodule)"
+              echo ""
+              printf -- '- `%s`\n' "${SPECIAL[@]}"
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+
+          # -- Gate 1b: content of agent-authored build-executed modules -------
+          #
+          # The GUARDED list above deliberately lets `app/blog/**` and
+          # `lib/blog-topics.ts` through — they are the SEO agent's legitimate
+          # output, and the step-4a tool allowlist in docs/SECURITY-HARDENING.md
+          # grants exactly those. But a blog post here is a TSX server component
+          # module that `next build` renders on the Vercel builder with
+          # SUPABASE_SERVICE_ROLE_KEY, STRIPE_SECRET_KEY, RESEND_API_KEY et al.
+          # in the environment; both the module's top-level code and its
+          # component body run there. `lib/blog-topics.ts` is imported by
+          # `app/blog/page.tsx`, `app/blog/topics/**` and `app/sitemap.ts`, so
+          # it executes on the same builder for the same reason. So the path
+          # allowlist alone puts an untrusted writer one file away from exactly
+          # the terminus of the June 2026 postcss.config.mjs incident.
+          #
+          # SELECTION IS BY ARRAY ELEMENT, and the list is handed to node
+          # QUOTED. Before 2026-08-03 it was a grep over a joined string passed
+          # unquoted, so `app/blog/best rental tool/page.tsx` word-split into
+          # three nonexistent fragments, the checker skipped all three, and the
+          # gate reported a pass on a post that exfiltrated process.env.
+          #
+          # Only paths that still exist in HEAD are sent (status != D). Anything
+          # sent must therefore be readable, and the checker exits 1 if it is
+          # not — a path it cannot read is a failure, never a skip.
+          #
+          # This runs only for non-owner changes; the owner's own posts are
+          # never scanned. It is a token deny-list over the raw file text — a
+          # heuristic that catches a naive payload, NOT a proof of safety. The
+          # only control that does not depend on guessing the payload's shape is
+          # a human reading the diff, which is why docs/SECURITY-HARDENING.md
+          # says to leave SEO_AUTOMERGE off.
+          #
+          # Runs before the guarded-path loop only so that a content finding is
+          # not buried under an unrelated path finding. Both are blocking, so
+          # the order changes which message you read first, nothing else — with
+          # one exception, handled explicitly below: if the same diff touched
+          # `scripts/**`, the checker is not run at all, because running it
+          # would mean executing the diff's own version of it.
+          if [ "$TRUSTED" != "1" ]; then
+            # gate-1b-selection-start
+            # Everything between these two markers is read by
+            # scripts/verify-build-integrity.mjs: every path listed under
+            # "contentScanned" in the integrity manifest must appear HERE, not
+            # merely somewhere in this file. Deleting the markers fails that
+            # check too. Do not move the selection out from between them.
+            BLOG_MODULES=()
+            shopt -s nocasematch   # same reason as the guarded-path loop below:
+                                   # a case-insensitive checkout must not be able
+                                   # to opt a module out of being scanned. Over-
+                                   # matching here only means scanning one extra
+                                   # file, which is the safe direction.
+            for f in ${LIVE[@]+"${LIVE[@]}"}; do
+              case "$f" in
+                app/blog/*.ts|app/blog/*.tsx|app/blog/*.js|app/blog/*.jsx|app/blog/*.mjs|app/blog/*.cjs|lib/blog-topics.ts)
+                  BLOG_MODULES+=("$f") ;;
+              esac
+            done
+            shopt -u nocasematch
+            # gate-1b-selection-end
+
+            if [ "${#BLOG_MODULES[@]}" -gt 0 ]; then
+              SCRIPTS_TOUCHED=0
+              for f in "${CHANGED[@]}"; do
+                case "$f" in scripts/*) SCRIPTS_TOUCHED=1 ;; esac
+              done
+              if [ "$SCRIPTS_TOUCHED" = "1" ]; then
+                echo ""
+                echo "=================================================================="
+                echo "  BUILD-CHAIN GUARD FAILED"
+                echo "=================================================================="
+                echo "  This non-owner change edits scripts/** AND build-executed"
+                echo "  content modules in the same diff. The content checker lives"
+                echo "  in scripts/, so running it would mean executing this diff's"
+                echo "  own copy of the check that is supposed to judge it."
+                echo ""
+                echo "  Refusing to run it. scripts/** is guarded regardless."
+                echo ""
+                echo "  $INCIDENT"
+                echo "=================================================================="
+                exit 1
+              fi
+
+              if [ ! -f scripts/check-agent-blog-content.mjs ]; then
+                echo ""
+                echo "gate 1b checker scripts/check-agent-blog-content.mjs is missing."
+                echo "Failing closed — a deleted tripwire is a finding, not a pass."
+                exit 1
+              fi
+
+              echo ""
+              echo "Non-owner change touches build-executed content modules — running content check."
+              if ! node scripts/check-agent-blog-content.mjs "${BLOG_MODULES[@]}"; then
+                echo ""
+                echo "  $INCIDENT"
+                echo "  See docs/SECURITY-HARDENING.md."
+                exit 1
+              fi
+            fi
+          fi
+
+          # -- Guarded paths ---------------------------------------------------
+          #
+          # Iterates ARRAY ELEMENTS, so a path is compared whole however exotic
+          # its bytes. nocasematch because a checkout can be case-insensitive
+          # (macOS, and Windows runners if one is ever added) while the glob
+          # list is written in the canonical lower case: `.GitHub/workflows/x`
+          # is the same file to the toolchain and must be the same file here.
+          # Matching more than intended fails the job, which is the safe
+          # direction; nothing the SEO pipeline produces collides with these.
+          OFFENDING=()
+          shopt -s nocasematch
+          for f in "${CHANGED[@]}"; do
+            for p in "${GUARDED[@]}"; do
+              # Unquoted $p on the right-hand side of == is a glob pattern.
+              if [[ "$f" == $p ]]; then
+                OFFENDING+=("$f")
+                break
+              fi
+            done
+          done
+          shopt -u nocasematch
+
+          if [ "${#OFFENDING[@]}" -eq 0 ]; then
+            echo ""
+            echo "OK — no build-executed or security-sensitive path touched."
+            {
+              echo "### build-chain-guard: pass"
+              echo ""
+              echo "No guarded path touched by this change."
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          if [ "$TRUSTED" = "1" ]; then
+            echo ""
+            echo "The following guarded files were changed by the repo owner ($ACTOR) — allowed:"
+            printf '  %s\n' "${OFFENDING[@]}"
+            echo ""
+            echo "$INCIDENT"
+            echo "Read the diff of each of these yourself. The June commit passed review too."
+            {
+              echo "### build-chain-guard: allowed (repo owner)"
+              echo ""
+              echo "Guarded files changed by \`$ACTOR\`:"
+              echo ""
+              printf -- '- `%s`\n' "${OFFENDING[@]}"
+              echo ""
+              echo "> $INCIDENT"
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          echo ""
+          echo "=================================================================="
+          echo "  BUILD-CHAIN GUARD FAILED"
+          echo "=================================================================="
+          echo "  This change touches files that execute during a production"
+          echo "  build, and it was NOT authored by the repo owner."
+          echo ""
+          echo "  actor:      $ACTOR"
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            echo "  PR author:  ${PR_AUTHOR:-unknown}"
+          fi
+          echo "  allowed:    $OWNER_LOGINS"
+          echo ""
+          echo "  Offending files (${#OFFENDING[@]}):"
+          printf '    %s\n' "${OFFENDING[@]}"
+          echo ""
+          echo "  $INCIDENT"
+          echo ""
+          echo "  Anything in these paths reaches Vercel production with"
+          echo "  SUPABASE_SERVICE_ROLE_KEY, STRIPE_SECRET_KEY,"
+          echo "  STRIPE_WEBHOOK_SECRET, RESEND_API_KEY, CRON_SECRET and"
+          echo "  SENTRY_AUTH_TOKEN in the environment. An automated content run"
+          echo "  has no business there."
+          echo ""
+          echo "  If this is legitimate: split the guarded files into a separate"
+          echo "  PR opened by the repo owner, and leave this one to the content"
+          echo "  change. Do not widen OWNER_LOGINS to make this pass."
+          echo "  See docs/SECURITY-HARDENING.md."
+          echo "=================================================================="
+
+          {
+            echo "### build-chain-guard: FAILED"
+            echo ""
+            echo "\`$ACTOR\` changed **${#OFFENDING[@]}** build-executed / security-sensitive file(s):"
+            echo ""
+            printf -- '- `%s`\n' "${OFFENDING[@]}"
+            echo ""
+            echo "> $INCIDENT"
+            echo ""
+            echo "See \`docs/SECURITY-HARDENING.md\`."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          exit 1
+
+      # -- Gate 2: what the build chain actually contains ---------------------
+      #
+      # Runs unconditionally, including for the repo owner and including when
+      # the diff above could not be computed. Byte-for-byte comparison against
+      # scripts/build-integrity-manifest.json, so any edit to a build-executed
+      # file fails until the manifest is deliberately regenerated and committed.
+      - name: Build-chain integrity manifest
+        shell: bash
+        run: node scripts/verify-build-integrity.mjs
+
   check:
     runs-on: ubuntu-latest
     timeout-minutes: 20

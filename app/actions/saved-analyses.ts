@@ -28,7 +28,14 @@ import {
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { DEFAULT_APPRECIATION_RATE, DEFAULT_SELLING_COST_PCT } from "@/lib/exit-scenarios";
 import { buildCompareSnapshotPayload } from "@/lib/compare-result-snapshot";
-import { PDF_CACHE_VERSION, PDF_CACHE_VERSION_UNCACHEABLE } from "@/lib/pdf-export-constants";
+import {
+  ANALYSIS_PDF_BUCKET,
+  ANALYSIS_PDF_SIGNED_URL_TTL_SECONDS,
+  buildAnalysisPdfObjectPath,
+  PDF_CACHE_VERSION,
+  PDF_CACHE_VERSION_UNCACHEABLE,
+  resolveAnalysisPdfObjectPath,
+} from "@/lib/pdf-export-constants";
 import {
   buyBoxHasCriteria,
   deriveStateFromAddress,
@@ -95,6 +102,9 @@ export type UpdateSavedDealLifecycleResult =
     };
 
 export type GetSavedAnalysisPdfExportResult =
+  // `pdfUrl` on a cache hit is a SHORT-LIVED SIGNED url
+  // (ANALYSIS_PDF_SIGNED_URL_TTL_SECONDS), not a public one — use it
+  // immediately, never persist or share it.
   | { ok: true; source: "cache"; pdfUrl: string }
   | {
       ok: true;
@@ -112,7 +122,10 @@ export type GetSavedAnalysisPdfExportResult =
     };
 
 export type CompleteSavedAnalysisPdfExportResult =
-  | { ok: true; pdfUrl: string }
+  // The storage object path that was recorded — NOT a URL. The bucket is
+  // private; downloadable URLs are minted (short-lived, owner-scoped) only
+  // on the read path.
+  | { ok: true; pdfPath: string }
   | {
       ok: false;
       code: "SIGN_IN_REQUIRED" | "ENTITLEMENT_REQUIRED" | "NOT_FOUND" | "VALIDATION_ERROR" | "SERVER_ERROR";
@@ -915,7 +928,29 @@ export async function getSavedAnalysisPdfExportAction(
     // path so the regenerate path pays no extra query.
     const hasUsableBuyBox = await userHasUsableBuyBox(supabase, user.id, entitlements);
     if (!hasUsableBuyBox) {
-      return { ok: true, source: "cache", pdfUrl: cachedPdfUrl };
+      // The bucket is PRIVATE (migration 20260802120000) — it used to be
+      // public, which made every user's underwrite anonymously listable and
+      // downloadable. Never hand back a durable URL: mint a short-lived
+      // signed one, scoped by RLS to the caller's own folder. `supabase` here
+      // is the cookie-bound user client, so signing an object outside
+      // `<user.id>/` fails at the policy — a non-owner cannot mint a URL.
+      const objectPath = resolveAnalysisPdfObjectPath(cachedPdfUrl, user.id);
+      if (objectPath) {
+        const { data: signed, error: signError } = await supabase.storage
+          .from(ANALYSIS_PDF_BUCKET)
+          .createSignedUrl(objectPath, ANALYSIS_PDF_SIGNED_URL_TTL_SECONDS);
+        if (signed?.signedUrl) {
+          return { ok: true, source: "cache", pdfUrl: signed.signedUrl };
+        }
+        // Object gone / policy denied / storage hiccup: fall through to the
+        // regenerate path so the export still works, and leave a breadcrumb
+        // so a systemic failure (e.g. the migration not applied) is visible.
+        Sentry.captureMessage("pdf-cache-sign failed", {
+          level: "warning",
+          tags: { feature: "pdf-cache-sign" },
+          extra: { message: signError?.message },
+        });
+      }
     }
   }
 
@@ -932,9 +967,19 @@ export async function getSavedAnalysisPdfExportAction(
   };
 }
 
+/**
+ * Record that a cached PDF was written for this deal.
+ *
+ * Takes no URL and no path: the object path is DERIVED server-side from the
+ * authenticated user id + deal id + cache version, the same way the client
+ * derives the upload path. Nothing about the storage location is
+ * client-controlled, and what lands in `saved_analyses.pdf_url` is an
+ * owner-scoped object path — never a durable public URL (the bucket is
+ * private as of migration 20260802120000; reads mint a short-lived signed URL
+ * in getSavedAnalysisPdfExportAction).
+ */
 export async function completeSavedAnalysisPdfExportAction(
-  id: string,
-  pdfUrl: string
+  id: string
 ): Promise<CompleteSavedAnalysisPdfExportResult> {
   const supabase = await createServerSupabaseClient();
   const {
@@ -951,10 +996,11 @@ export async function completeSavedAnalysisPdfExportAction(
   }
 
   const savedDealId = id.trim();
-  const cleanPdfUrl = pdfUrl.trim();
-  if (!savedDealId || !cleanPdfUrl) {
+  if (!savedDealId) {
     return { ok: false, code: "VALIDATION_ERROR", message: "Invalid PDF export payload." };
   }
+
+  const pdfPath = buildAnalysisPdfObjectPath(user.id, savedDealId, PDF_CACHE_VERSION);
 
   // A PDF generated while the user has a usable buy box carries the
   // "Your buy box" block, whose content the version composite can't see.
@@ -966,7 +1012,7 @@ export async function completeSavedAnalysisPdfExportAction(
   const { data, error } = await supabase
     .from("saved_analyses")
     .update({
-      pdf_url: cleanPdfUrl,
+      pdf_url: pdfPath,
       pdf_generated_at: new Date().toISOString(),
       pdf_snapshot_version: hasUsableBuyBox ? PDF_CACHE_VERSION_UNCACHEABLE : PDF_CACHE_VERSION,
       last_activity_at: new Date().toISOString(),
@@ -985,7 +1031,7 @@ export async function completeSavedAnalysisPdfExportAction(
     return { ok: false, code: "NOT_FOUND", message: "Deal was not found." };
   }
 
-  return { ok: true, pdfUrl: cleanPdfUrl };
+  return { ok: true, pdfPath };
 }
 
 /**

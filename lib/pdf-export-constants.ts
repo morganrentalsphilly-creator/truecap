@@ -39,6 +39,95 @@ export const PDF_SNAPSHOT_VERSION = 5;
 export const ANALYSIS_PDF_BUCKET = "analysis-pdfs";
 
 /**
+ * TTL for the signed download URL minted for a cached PDF. The bucket is
+ * PRIVATE (migration 20260802120000) — it used to be public, which made every
+ * user's underwrite anonymously listable and downloadable. Long enough for a
+ * click-to-download round trip on a slow connection, short enough that a URL
+ * leaked through history / a shared screenshot dies quickly.
+ */
+export const ANALYSIS_PDF_SIGNED_URL_TTL_SECONDS = 120;
+
+/**
+ * THE object path for a cached export. Single source of truth — the client
+ * uploads to exactly this path and the server re-derives it when it records
+ * the export, so no caller ever hands a storage path across the wire (a
+ * client-supplied path is a write-anywhere primitive waiting to happen).
+ *
+ * The first segment MUST be the owner's user id: every `analysis-pdfs` RLS
+ * policy is a `(storage.foldername(name))[1] = auth.uid()::text` check.
+ * The version is embedded so an engine/template bump writes a NEW object
+ * instead of upserting over the old one (a CDN-cached copy of the old path
+ * can never be re-served as the "fresh" PDF).
+ */
+export function buildAnalysisPdfObjectPath(
+  userId: string,
+  analysisId: string,
+  cacheVersion: number
+): string {
+  return `${userId}/${analysisId}/investment-analysis-v${cacheVersion}.pdf`;
+}
+
+/**
+ * Normalize whatever `saved_analyses.pdf_url` holds into an owner-scoped
+ * storage OBJECT PATH, or null if it can't be trusted.
+ *
+ * Two shapes exist in the column:
+ *   - new rows: the bare object path (`<user_id>/<analysis_id>/…​.pdf`);
+ *   - legacy rows: a full public URL, from back when the bucket was public
+ *     (`https://<ref>.supabase.co/storage/v1/object/public/analysis-pdfs/…`).
+ * Legacy rows are parsed back to the path so applying the private-bucket
+ * migration doesn't invalidate everyone's cached export.
+ *
+ * Returns null — i.e. "regenerate" — rather than throwing for anything
+ * suspicious: a foreign host's URL, a different bucket, path traversal, or a
+ * first segment that isn't `userId`. That last check is the important one:
+ * it means a tampered/mis-migrated row can never be used to mint a signed URL
+ * for another tenant's object.
+ */
+export function resolveAnalysisPdfObjectPath(
+  stored: string | null | undefined,
+  userId: string
+): string | null {
+  if (!stored || !userId) return null;
+
+  let candidate = stored.trim();
+  if (!candidate) return null;
+
+  if (/^https?:\/\//i.test(candidate)) {
+    let pathname: string;
+    try {
+      pathname = new URL(candidate).pathname;
+    } catch {
+      return null;
+    }
+    // Both the legacy public shape (/object/public/<bucket>/…) and the signed
+    // shape (/object/sign/<bucket>/…) contain the bucket segment; anything
+    // that doesn't name this bucket is not ours to sign.
+    const marker = `/${ANALYSIS_PDF_BUCKET}/`;
+    const at = pathname.indexOf(marker);
+    if (at === -1) return null;
+    candidate = pathname.slice(at + marker.length);
+    try {
+      candidate = decodeURIComponent(candidate);
+    } catch {
+      return null;
+    }
+  }
+
+  candidate = candidate.replace(/^\/+/, "");
+  if (!candidate) return null;
+
+  const segments = candidate.split("/");
+  if (segments.length < 2) return null;
+  if (segments.some((segment) => segment === "" || segment === "." || segment === "..")) {
+    return null;
+  }
+  if (segments[0] !== userId) return null;
+
+  return candidate;
+}
+
+/**
  * Sentinel stored in `pdf_snapshot_version` for PDFs that must never be
  * served from the cache again. Used for exports that carried the owner's
  * "Your buy box" block: the block reflects buy-box state at generation

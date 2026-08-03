@@ -81,10 +81,11 @@ export default async function PublicDealPage({ params }: Props) {
   // only honored when its HMAC verifies against {ownerId, dealId, valuesHash} —
   // otherwise a hand-edited payload could wrap this deal in any user's brand and
   // harvest leads to them. Unsigned/forged/secret-unset → generic TrueCap view.
+  const valuesHash = hashShareValues(parsed.data);
   const attributionVerified = verifyShareAttribution({
     ownerId: payload.meta?.ownerId,
     dealId: payload.meta?.dealId,
-    valuesHash: hashShareValues(parsed.data),
+    valuesHash,
     sig: payload.meta?.sig,
   });
   const verifiedOwnerId = attributionVerified ? payload.meta?.ownerId : undefined;
@@ -149,6 +150,13 @@ export default async function PublicDealPage({ params }: Props) {
         {agent && verifiedOwnerId ? (
           <LeadCaptureForm
             ownerId={verifiedOwnerId}
+            /* The same signed attribution this page just verified, forwarded so
+               the WRITE path can re-verify it. Without it captureDealLeadAction
+               trusted a bare ownerId from the request body — anyone could post
+               a Pro user's uuid and land rows in their private lead inbox. */
+            dealId={verifiedDealId}
+            valuesHash={valuesHash}
+            sig={payload.meta?.sig}
             agentName={agent.displayName}
             dealAddress={parsed.data.address}
             accentColor={agent.primaryColor}

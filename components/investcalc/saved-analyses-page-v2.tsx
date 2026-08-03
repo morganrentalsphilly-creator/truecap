@@ -80,7 +80,11 @@ import {
 } from "@/lib/deal-score";
 import type { ReportData } from "@/lib/pdf-generator";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
-import { ANALYSIS_PDF_BUCKET, PDF_CACHE_VERSION } from "@/lib/pdf-export-constants";
+import {
+  ANALYSIS_PDF_BUCKET,
+  buildAnalysisPdfObjectPath,
+  PDF_CACHE_VERSION,
+} from "@/lib/pdf-export-constants";
 import {
   buildExitScenarios,
   resolveExitScenarioRates,
@@ -1717,10 +1721,15 @@ export function SavedAnalysesPage({
             } = await supabase.auth.getUser();
             if (!user) return;
             // Path embeds the composite cache version so an engine bump writes
-            // a NEW object (fresh public URL) instead of upserting over the old
-            // path — a CDN-cached copy of the old URL can never be re-served as
-            // the "fresh" PDF.
-            const filePath = `${user.id}/${exportResult.id}/investment-analysis-v${PDF_CACHE_VERSION}.pdf`;
+            // a NEW object instead of upserting over the old path — a cached
+            // copy of the old object can never be re-served as the "fresh"
+            // PDF. Built by the shared helper because the server re-derives
+            // the identical path when it records the export.
+            const filePath = buildAnalysisPdfObjectPath(
+              user.id,
+              exportResult.id,
+              PDF_CACHE_VERSION
+            );
             const { error: uploadError } = await supabase.storage
               .from(ANALYSIS_PDF_BUCKET)
               .upload(filePath, pdfBlob, {
@@ -1735,12 +1744,11 @@ export function SavedAnalysesPage({
               });
               return;
             }
-            const { data: publicData } = supabase.storage
-              .from(ANALYSIS_PDF_BUCKET)
-              .getPublicUrl(filePath);
+            // No getPublicUrl: the bucket is private (migration
+            // 20260802120000). The server records the object path and mints a
+            // short-lived signed URL at read time.
             const completeResult = await completeSavedAnalysisPdfExportAction(
-              exportResult.id,
-              publicData.publicUrl
+              exportResult.id
             );
             if (!completeResult.ok) {
               Sentry.captureMessage("pdf-cache-write complete action failed", {

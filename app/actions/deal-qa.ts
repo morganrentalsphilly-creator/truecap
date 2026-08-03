@@ -19,9 +19,14 @@
  *  - Anonymous + free users get DEAL_QA_LIMITS.free questions/day
  *    (taste of Pro — mirrors the sample-deal preview philosophy).
  *    Paid plans get DEAL_QA_LIMITS.pro/day as a fair-use cap.
- *  - Rate limiting is in-memory per serverless instance (best effort).
- *    Worst case under instance churn a determined user gets a few
+ *  - Per-caller rate limiting is in-memory per serverless instance (best
+ *    effort). Worst case under instance churn a determined USER gets a few
  *    extra Haiku calls — pennies. Don't add a DB table for this.
+ *  - That per-caller bucket is NOT a spend ceiling though: it is keyed on the
+ *    caller's IP, so an anonymous scripted attacker rotating IPs mints a fresh
+ *    allowance each time and the effective ceiling becomes Anthropic's own
+ *    account limit. The dollar bound is a shared daily counter in app_counters
+ *    — see lib/ai-spend-guard.ts (reserveAnthropicCall), applied below.
  *  - No ANTHROPIC_API_KEY → UNAVAILABLE. The UI hides the panel when
  *    the page-level flag says the key is absent, so users only see
  *    this code path during a key rotation gone wrong.
@@ -36,6 +41,7 @@ import {
   dealQaExtraContextSchema,
 } from "@/lib/deal-qa-context";
 import { hasPaidPlanSubscription } from "@/lib/entitlements";
+import { reserveAnthropicCall } from "@/lib/ai-spend-guard";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { headers } from "next/headers";
 
@@ -127,6 +133,18 @@ export async function askDealQuestionAction(input: unknown): Promise<DealQaResul
       message: caller.isPaid
         ? "Daily fair-use limit reached. Try again tomorrow."
         : "You've used today's free questions. Pro includes unlimited Deal Q&A.",
+    };
+  }
+
+  // Outer spend ceiling. The per-caller bucket above is per serverless instance
+  // and keyed on the caller's IP, so it bounds one visitor, not the bill — an
+  // anonymous scripted caller rotating IPs gets a fresh allowance each time.
+  // This shared daily counter is the dollar bound. Fails open on DB trouble.
+  if (!(await reserveAnthropicCall())) {
+    return {
+      ok: false,
+      code: "RATE_LIMITED",
+      message: "Deal Q&A has hit today's usage limit. Please try again tomorrow.",
     };
   }
 
