@@ -35,7 +35,7 @@ import {
 import { getCapRateBenchmark } from "@/lib/market-benchmarks";
 import { marketStrategyFit } from "@/lib/market-strategy-fit";
 import { getStatePropertyTaxPct } from "@/lib/property-enrichment/state-property-tax";
-import { CITY_STRATEGY_COMBOS } from "@/lib/city-strategy-combos";
+import { CityStrategyGuides } from "@/components/marketing/city-strategy-guides";
 import { getSiteUrl } from "@/lib/site-url";
 import { STATES } from "@/lib/states";
 
@@ -166,9 +166,6 @@ export default async function MarketCityPage({
         : fit
           ? `${data.name}'s median cap rate of about ${capMedian} (${capScope} median) sits near the ~6.5% national median, with typical rent at ${rentDisplay} and ${data.stateName} property tax near ${taxPct}.`
           : `Typical rent runs ${rentDisplay} and ${data.stateName} property tax is about ${taxPct} — whether ${data.name} works depends on the specific deal.`;
-
-  // Internal links: any existing city+strategy combos for this city.
-  const cityCombos = CITY_STRATEGY_COMBOS.filter((c) => c.citySlug === data.slug);
 
   // Cross-link to other programmatic markets + a few bespoke flagship markets.
   const otherMarkets = MARKET_CITIES.filter((c) => c.slug !== data.slug).slice(0, 6);
@@ -438,19 +435,9 @@ export default async function MarketCityPage({
           </Link>
         </section>
 
-        {/* City strategy guides (if any) */}
-        {cityCombos.length > 0 ? (
-          <section className="mt-12 border-t border-border pt-6">
-            <p className="text-xs uppercase tracking-widest text-muted-foreground font-bold mb-3">{data.name} strategy guides</p>
-            <div className="flex flex-wrap gap-2 text-sm">
-              {cityCombos.map((c) => (
-                <Link key={c.strategy} href={`/markets/${c.citySlug}/${c.strategy}`} className="rounded-full border border-border bg-card px-3 py-1.5 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary">
-                  {c.strategyLabel} in {c.cityName}
-                </Link>
-              ))}
-            </div>
-          </section>
-        ) : null}
+        {/* City strategy guides (if any) — shared with the bespoke city
+            pages via CityStrategyGuides so the two can't drift. */}
+        <CityStrategyGuides citySlug={data.slug} cityName={data.name} />
 
         {/* Related calculators */}
         <section className="mt-12 border-t border-border pt-6">

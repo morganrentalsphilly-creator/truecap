@@ -244,9 +244,17 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 0.7,
     },
-    // /vs hub intentionally omitted — noindex (per user request to
-    // hide the comparison hub from internal nav). Individual
-    // /vs/<competitor> pages remain in the sitemap below.
+    // /vs hub intentionally omitted, and it must STAY omitted: the hub
+    // is `robots: { index: false, follow: true }` (app/vs/page.tsx) per
+    // Morgan's request that the comparison hub not be indexed, and
+    // listing a noindex URL in a sitemap is a contradictory signal.
+    //
+    // The individual /vs/<competitor> pages below are indexable and are
+    // reached THROUGH the hub — `follow: true` is what makes that work.
+    // Note that until 2026-08-03 nothing on the site linked to /vs at
+    // all, so the crawler never arrived at the hub and 24 of the 40
+    // comparison pages had no inbound link from anywhere; a footer link
+    // to the hub now restores that path without indexing the hub itself.
     {
       url: `${siteUrl}/vs/dealcheck`,
       changeFrequency: "monthly",

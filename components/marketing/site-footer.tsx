@@ -16,7 +16,6 @@
 
 import Link from "next/link";
 import { Lock, ShieldCheck, CreditCard } from "lucide-react";
-import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { FOOTER_CALCULATORS } from "@/lib/calculator-registry";
 
 const FOOTER_COLS: Array<{
@@ -40,12 +39,21 @@ const FOOTER_COLS: Array<{
       { label: "Blog", href: "/blog" },
       { label: "Rental markets", href: "/markets" },
       { label: "Investing by state", href: "/states" },
-      // NOTE: "Compare TrueCap" link to /vs hub intentionally removed.
-      // The 20+ /vs/<competitor> pages still exist as SEO landing
-      // surfaces (visitors arrive directly from Google), but the
-      // hub itself is not surfaced in nav. Comparison-shopping users
-      // can still find the individual /vs pages via Google or the
-      // cross-references between them.
+      // RESTORED 2026-08-03, reversing a deliberate removal. The note
+      // that used to sit here said the /vs pages "still exist as SEO
+      // landing surfaces (visitors arrive directly from Google)" and
+      // that comparison shoppers "can still find the individual /vs
+      // pages via Google or the cross-references between them."
+      //
+      // Measured, both halves are false. A BFS crawl of the live site
+      // from `/` reaches 370 of the 419 URLs in the sitemap; 24 of the
+      // 40 /vs pages are among the 49 it cannot reach at all, because
+      // nothing linked to /vs and the cross-references only cover 16 of
+      // them. And nobody arrives from Google: the site ranks for 0 of
+      // 10 target queries with roughly 2% of pages indexed — the /vs
+      // library is bottom-funnel inventory that Google has never seen.
+      // A page with no inbound link cannot be a landing surface.
+      { label: "Compare TrueCap", href: "/vs" },
       // Embed hub — quiet link. Bloggers/agents who care will find it;
       // casual visitors won't notice. Each embed adoption = a permanent
       // backlink, so even one or two clicks per month compound nicely.
@@ -94,14 +102,14 @@ export function SiteFooter() {
     // sitting permanently under the bar at maximum scroll.
     <footer data-site-footer="" className="mt-12 border-t border-border bg-card/40">
       <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-12">
-        {/* Newsletter band — full-width hero at the top of the footer.
-            Lives in its own row above the brand+sitemap grid so it
-            doesn't stretch the brand column taller than the sitemap
-            cols next to it. Email infrastructure powered by Resend
-            (env vars required: see docs/NEWSLETTER-SETUP.md). */}
-        <div className="mb-10 pb-10 border-b border-border">
-          <NewsletterSignup variant="footer-band" source="footer" />
-        </div>
+        {/* The newsletter band used to live here. The newsletter was
+            canceled (founder decision, 2026-07-15) and NewsletterSignup
+            now returns null — but the WRAPPER stayed, so every page on
+            the site rendered an empty <div> carrying mb-10 pb-10 and a
+            bottom border: a stray horizontal rule with ~80px of dead
+            space above the footer sitemap, sitewide. Removing the
+            wrapper, not just the component, is what actually deletes it.
+            Do not re-add a signup surface here — see CLAUDE.md §3.8. */}
 
         {/* Brand + sitemap row.
             Grid: 5 cols at lg so brand takes 1 wide column + 4 sitemap

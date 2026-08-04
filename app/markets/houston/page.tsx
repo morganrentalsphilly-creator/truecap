@@ -18,6 +18,7 @@ import Link from "next/link";
 import { ArrowUpRight, Calculator, MapPin } from "lucide-react";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { CityStrategyGuides } from "@/components/marketing/city-strategy-guides";
 import { SourceMethodologyBox } from "@/components/marketing/source-methodology-box";
 import { getCapRateBenchmark } from "@/lib/market-benchmarks";
 import { marketStrategyFit } from "@/lib/market-strategy-fit";
@@ -349,6 +350,13 @@ export default function HoustonMarketPage() {
           ·{" "}
           <Link href="/markets/atlanta" className="font-bold text-foreground hover:underline">Atlanta →</Link>
         </footer>
+
+        {/* City strategy guides — the crawl path down to this city's
+            /markets/<city>/<strategy> combo pages. Shared with the
+            dynamic /markets/[city] route; renders nothing if this city
+            has no combos. */}
+        <CityStrategyGuides citySlug={SLUG} cityName={CITY} />
+
       </main>
       <SiteFooter />
       <ScrollDepthTracker />

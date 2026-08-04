@@ -16,6 +16,12 @@ import Link from "next/link";
 import { ArrowUpRight, BookOpen } from "lucide-react";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import {
+  GLOSSARY,
+  GLOSSARY_CATEGORY_LABELS,
+  type GlossaryCategory,
+  type GlossaryEntry,
+} from "@/lib/glossary";
 import { getSiteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
@@ -59,7 +65,24 @@ type Term = {
   postPath?: string;
 };
 
-const TERMS: Term[] = [
+/**
+ * Hand-written hub copy for the terms that have it.
+ *
+ * This used to BE the glossary — a hardcoded array that decided which
+ * terms the hub linked to. It drifted: lib/glossary.ts grew to 36
+ * entries (34 of which render their own /glossary/<slug> page and sit
+ * in the sitemap) while this list stayed at 23, so six term pages had
+ * no inbound link from anywhere on the site and Google could not reach
+ * them at all. A hub that is also a source of truth will always drift
+ * from the real source of truth eventually.
+ *
+ * So it is now an OVERRIDE map, not the list. lib/glossary.ts decides
+ * which terms exist; this decides how the richest 23 read on the hub,
+ * where there is room for 2-4 sentences and a benchmark gloss. A term
+ * without an entry here falls back to its lib definition, which is
+ * correct and one sentence — never missing.
+ */
+const CURATED: Term[] = [
   {
     slug: "cap-rate",
     term: "Cap rate",
@@ -238,6 +261,78 @@ const TERMS: Term[] = [
       "The portion of each mortgage payment that reduces the loan balance (vs. paying interest). On a typical 30-year mortgage, year 1 is ~80% interest / 20% principal; year 25 is the inverse. Principal paydown is real wealth building — your tenant is paying off your loan — but it doesn't show up in cash flow.",
   },
 ];
+
+/**
+ * Curated slug → the slug lib/glossary.ts actually publishes.
+ *
+ * These six were written here under friendlier names than the data
+ * source uses, and because this array WAS the hub, nothing ever
+ * checked them. The result was live for months: 16 of the 23 links on
+ * /glossary pointed at pages that do not exist — /glossary/cash-on-cash
+ * and /glossary/one-percent-rule both returned 404 to real readers, and
+ * to Googlebot. Ten of those sixteen are fixed by lib/glossary.ts
+ * having gained the missing entries; these six needed a name mapping.
+ *
+ * lib/__tests__/glossary-hub.test.ts asserts every curated slug still
+ * resolves, so a rename on either side fails the suite instead of
+ * quietly dropping a term off the hub again.
+ */
+const CURATED_SLUG_ALIASES: Record<string, string> = {
+  "cash-on-cash": "cash-on-cash-return",
+  "one-percent-rule": "1-percent-rule",
+  "loan-to-value": "ltv",
+  "vacancy-rate": "vacancy",
+  depreciation: "depreciation-period",
+  appreciation: "appreciation-rate",
+};
+
+/**
+ * Every glossary term, derived from lib/glossary.ts so the hub can
+ * never again link to fewer terms than the site actually publishes.
+ *
+ * Ordering: curated terms first, in their hand-picked order (cap rate
+ * before appreciation rate — the sequence a new investor should read
+ * them in, which alphabetical would destroy), then everything else
+ * grouped by category so the tail still reads as sections rather than
+ * as a dump.
+ */
+const TERMS: Term[] = (() => {
+  const entries = Object.values(GLOSSARY);
+  const bySlug = new Map(entries.map((e) => [e.slug, e]));
+
+  const fromEntry = (e: GlossaryEntry): Term => ({
+    slug: e.slug,
+    term: e.term,
+    also: e.also,
+    // The lib definition is deliberately one sentence; whyItMatters is
+    // the natural second paragraph, so the hub reads at roughly the
+    // same depth as a curated entry when one is joined to the other.
+    definition: e.whyItMatters ? `${e.definition} ${e.whyItMatters}` : e.definition,
+    benchmark: e.benchmark,
+    toolPath: e.toolUrl,
+    postPath: e.postUrl,
+  });
+
+  const curated = CURATED.map((t) => {
+    const realSlug = CURATED_SLUG_ALIASES[t.slug] ?? t.slug;
+    const e = bySlug.get(realSlug);
+    if (!e) return null;
+    // Curated copy wins for the prose; the SLUG always comes from the
+    // data source, because that is what decides whether the link
+    // resolves to a real page.
+    return { ...fromEntry(e), ...t, slug: e.slug };
+  }).filter((t): t is Term => t !== null);
+
+  const seen = new Set(curated.map((t) => t.slug));
+  const categories = Object.keys(GLOSSARY_CATEGORY_LABELS) as GlossaryCategory[];
+  const rest = categories.flatMap((cat) =>
+    entries
+      .filter((e) => e.category === cat && !seen.has(e.slug))
+      .map(fromEntry),
+  );
+
+  return [...curated, ...rest];
+})();
 
 export default function GlossaryPage() {
   const siteUrl = getSiteUrl();

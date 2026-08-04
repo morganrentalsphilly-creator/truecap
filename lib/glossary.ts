@@ -28,6 +28,13 @@ export type GlossaryEntry = {
   category: GlossaryCategory;
   /** Plain-English one-sentence definition. */
   definition: string;
+  /**
+   * Common synonyms / aliases the definition still covers ("CoC",
+   * "Debt Service Coverage Ratio"). Rendered as "Also called: …" on the
+   * /glossary hub so a reader scanning for the abbreviation they know
+   * lands on the right term.
+   */
+  also?: string[];
   /** Optional "what's a good number" benchmark. */
   benchmark?: string;
   /** Optional formula (math expression as plain text). */
@@ -40,6 +47,8 @@ export type GlossaryEntry = {
   related?: string[];
   /** Optional link to a related calculator on /tools/*. */
   toolUrl?: string;
+  /** Optional link to the long-form blog post that covers this term. */
+  postUrl?: string;
 };
 
 export const GLOSSARY: Record<string, GlossaryEntry> = {
@@ -47,6 +56,7 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
   capRate: {
     term: "Cap Rate",
     slug: "cap-rate",
+    also: ["Capitalization rate"],
     category: "metric",
     definition:
       "Net Operating Income ÷ property value. The unleveraged return a property generates, independent of financing.",
@@ -59,10 +69,12 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
       "Cap rate lets you compare properties on an apples-to-apples basis regardless of financing. It's also how commercial properties (5+ units) are valued — buyers price them on NOI ÷ market cap rate.",
     related: ["noi", "coc", "dscr", "onePercentRule"],
     toolUrl: "/tools/cap-rate-calculator",
+    postUrl: "/blog/what-is-a-good-cap-rate",
   },
   coc: {
     term: "Cash-on-Cash Return",
     slug: "cash-on-cash-return",
+    also: ["CoC", "Cash on cash"],
     category: "metric",
     definition:
       "Annual cash flow ÷ total cash invested (down payment + closing + rehab). Tells you how hard your money is working.",
@@ -74,6 +86,7 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
       "Cash-on-cash is the metric leveraged investors should optimize for. It captures the actual return on YOUR money — cap rate doesn't, because it ignores financing.",
     related: ["capRate", "cashFlow", "irr", "dscr"],
     toolUrl: "/tools/cash-on-cash-calculator",
+    postUrl: "/blog/cap-rate-vs-cash-on-cash-vs-dscr",
   },
   cashFlow: {
     term: "Monthly Cash Flow",
@@ -92,6 +105,7 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
   dscr: {
     term: "DSCR (Debt Service Coverage Ratio)",
     slug: "dscr",
+    also: ["Debt Service Coverage Ratio"],
     category: "metric",
     definition:
       "Net Operating Income ÷ mortgage payment. Measures whether the property's income comfortably covers debt service.",
@@ -104,10 +118,12 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
       "DSCR is the constraint metric on every investment-property loan. Below 1.20–1.25, most lenders won't fund the deal at all. DSCR also tells you how much safety margin the property has.",
     related: ["noi", "capRate", "ltv"],
     toolUrl: "/tools/dscr-calculator",
+    postUrl: "/blog/dscr-loans-explained",
   },
   noi: {
     term: "NOI (Net Operating Income)",
     slug: "noi",
+    also: ["Net Operating Income"],
     category: "metric",
     definition:
       "Gross annual rent minus all operating expenses, before debt service and income tax.",
@@ -163,6 +179,7 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
   mao: {
     term: "Maximum Allowable Offer (MAO)",
     slug: "max-allowable-offer",
+    also: ["MAO"],
     category: "metric",
     definition:
       "The highest price you should pay to still hit your target cap rate, cash-on-cash, and cash flow thresholds.",
@@ -205,10 +222,44 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     related: ["cashFlow", "taxSavings", "depreciationYears"],
   },
 
+  grm: {
+    term: "GRM (Gross Rent Multiplier)",
+    slug: "grm",
+    also: ["Gross Rent Multiplier"],
+    category: "metric",
+    definition:
+      "Property price ÷ annual gross rent. The simplest screening ratio in real estate — no expense data required.",
+    benchmark:
+      "6–10 is healthy in cash-flow markets. 10–14 is balanced. 14–20 is appreciation territory. 20+ is luxury / ultra-coastal.",
+    formula: "GRM = Property Price ÷ Annual Gross Rent",
+    example:
+      "A $300,000 property renting for $2,500/mo ($30,000/yr) has a GRM of $300,000 ÷ $30,000 = 10.0.",
+    whyItMatters:
+      "GRM is the fastest triage filter there is — you can compute it from a listing price and a rent estimate alone, with zero expense data. Lower is better. Use it to shrink a 200-listing search down to the 20 worth underwriting properly.",
+    related: ["capRate", "onePercentRule", "noi"],
+    toolUrl: "/tools/gross-rent-multiplier-calculator",
+  },
+  oer: {
+    term: "Operating Expense Ratio",
+    slug: "operating-expense-ratio",
+    also: ["OER"],
+    category: "metric",
+    definition:
+      "Operating expenses ÷ effective gross income. The inverse of NOI margin.",
+    benchmark:
+      "35–50% is typical for residential rentals. Newer and professionally managed runs lower; older, self-managed with deferred maintenance runs higher.",
+    formula: "OER = Operating Expenses ÷ Effective Gross Income",
+    example:
+      "A property collecting $60,000 of effective gross income against $24,000 of operating expenses has an OER of 40% — 40 cents of every rent dollar goes to running the property.",
+    whyItMatters:
+      "OER is the fastest sanity check on someone else's pro forma. A seller claiming a 20% OER on a 1960s duplex is not counting CapEx, management, or realistic vacancy — recompute NOI yourself before believing the cap rate.",
+    related: ["noi", "capex", "maintenance", "management"],
+  },
   // ─── STRATEGY ───
   brrrr: {
     term: "BRRRR",
     slug: "brrrr",
+    also: ["Buy Rehab Rent Refinance Repeat"],
     category: "strategy",
     definition:
       "Buy, Rehab, Rent, Refinance, Repeat. A strategy that recycles capital across deals by refinancing based on the post-rehab value.",
@@ -218,10 +269,12 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
       "BRRRR is the highest-leverage strategy in real estate when conditions are right (cheap distressed properties + appraisable rehab gains + capital-friendly refi rates). The trap: most deals fail at the refi step because the appraised ARV doesn't support the planned cash-out.",
     related: ["arv", "ltv", "capRate"],
     toolUrl: "/tools/brrrr-calculator",
+    postUrl: "/blog/brrrr-method-explained",
   },
   onePercentRule: {
     term: "1% Rule",
     slug: "1-percent-rule",
+    also: ["The one percent rule"],
     category: "strategy",
     definition:
       "Rule of thumb: monthly rent should equal at least 1% of purchase price. A 5-second screening filter, not a verdict.",
@@ -233,10 +286,34 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     toolUrl: "/tools/1-percent-rule-calculator",
   },
 
+  houseHack: {
+    term: "House Hack",
+    slug: "house-hack",
+    category: "strategy",
+    definition:
+      "Buying a 2–4 unit property, living in one unit, and renting out the others.",
+    whyItMatters:
+      "The advantage is financing, not rent: owner-occupied conventional loans go down to 3–5% down versus 20–25% for an investment property, so the barrier to entry drops dramatically. After 12 months you can move out and it becomes a normal rental.",
+    related: ["downPayment", "cashFlow", "brrrr"],
+    toolUrl: "/tools/house-hacking-calculator",
+    postUrl: "/blog/house-hacking-explained",
+  },
+  exchange1031: {
+    term: "1031 Exchange",
+    slug: "1031-exchange",
+    category: "strategy",
+    definition:
+      "A tax-deferred swap of one investment property for another, deferring the capital gains tax you'd otherwise owe on the sale.",
+    whyItMatters:
+      "A 1031 lets you defer capital gains indefinitely as long as you roll the proceeds into a like-kind investment property — but the deadlines are strict and unforgiving: 45 days to identify the replacement and 180 days to close.",
+    related: ["taxSavings", "sellingCost", "appreciation"],
+    postUrl: "/blog/1031-exchange-basics",
+  },
   // ─── FINANCING ───
   ltv: {
     term: "LTV (Loan-to-Value)",
     slug: "ltv",
+    also: ["Loan to Value"],
     category: "financing",
     definition:
       "Loan amount divided by property value. Most cash-out refi lenders cap LTV at 75% for investment properties.",
@@ -295,6 +372,29 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     related: ["coc", "downPayment"],
   },
 
+  dti: {
+    term: "DTI (Debt-to-Income)",
+    slug: "debt-to-income",
+    also: ["Debt to Income"],
+    category: "financing",
+    definition:
+      "Personal monthly debt obligations ÷ personal gross monthly income.",
+    benchmark: "Conventional residential lenders cap DTI around 43–50% to approve a loan.",
+    whyItMatters:
+      "DTI is the constraint that stops most investors from buying their third or fourth rental on conventional financing. DSCR loans bypass it entirely — they qualify on the property's DSCR instead, which is why portfolio investors migrate to them.",
+    related: ["dscr", "ltv", "interestRate"],
+  },
+  negativeLeverage: {
+    term: "Negative Leverage",
+    slug: "negative-leverage",
+    category: "financing",
+    definition:
+      "When your borrowing rate exceeds the property's cap rate, so every borrowed dollar costs more than the property earns.",
+    whyItMatters:
+      "This is 2026's dominant trap: a 6% cap rate financed at 7% loses 1% on every borrowed dollar, which is why adding leverage can push cash-on-cash BELOW cap rate. Deals can still pencil on appreciation, tax savings, and principal paydown — but you should know that's what you're signing up for.",
+    related: ["capRate", "interestRate", "coc", "ltv"],
+    postUrl: "/blog/cap-rate-vs-cash-on-cash-vs-dscr",
+  },
   // ─── EXPENSES ───
   propertyTax: {
     term: "Property Tax",
@@ -339,6 +439,7 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
   capex: {
     term: "CapEx (Capital Expenditures)",
     slug: "capex",
+    also: ["Capital expenditures"],
     category: "expense",
     definition:
       "Reserves for large infrequent repairs — roof, HVAC, water heater. Typically 5–10% of rent set aside each month.",
@@ -349,12 +450,14 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
   vacancy: {
     term: "Vacancy Reserve",
     slug: "vacancy",
+    also: ["Vacancy rate"],
     category: "expense",
     definition:
       "Reserve for months without a paying tenant. Typically 5–8% of gross rent, depending on the market.",
     whyItMatters:
       "Vacancy is the most-under-budgeted line item in new-investor underwrites. Real vacancy is 6-10% in most markets, NOT the 3% the listing pro-forma shows. Even a single 30-day turnover = 8.3% vacancy for that year.",
     related: ["noi", "maintenance"],
+    postUrl: "/blog/vacancy-rate-rental-property",
   },
   hoa: {
     term: "HOA Fees",
@@ -381,6 +484,7 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
   arv: {
     term: "ARV (After-Repair Value)",
     slug: "arv",
+    also: ["After Repair Value"],
     category: "fundamental",
     definition:
       "What the property would sell for once rehab is complete. The most important — and most-mis-estimated — input in any BRRRR or flip.",
@@ -411,6 +515,51 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     related: ["taxSavings", "buildingValue"],
   },
 
+  proForma: {
+    term: "Pro Forma",
+    slug: "pro-forma",
+    category: "fundamental",
+    definition:
+      "A projection of a property's future operating performance, as opposed to the seller's trailing actuals.",
+    whyItMatters:
+      "Brokers always pitch pro-forma cap rates built on optimistic rent bumps and thin expense assumptions. Use pro forma for triage; for the actual offer, recompute with trailing actuals plus your own conservative growth assumptions.",
+    related: ["noi", "capRate", "rentGrowth", "expenseGrowth"],
+    postUrl: "/blog/rental-property-pro-forma-explained",
+  },
+  rehab: {
+    term: "Rehab",
+    slug: "rehab",
+    also: ["Renovation"],
+    category: "fundamental",
+    definition:
+      "Repairs and updates to a property — cosmetic (paint, flooring, fixtures), systems (HVAC, electrical, plumbing), or structural.",
+    whyItMatters:
+      "BRRRR investors deliberately buy properties that need rehab so the post-renovation appraisal supports pulling most of their cash back out. Underestimating rehab is the single most common way a BRRRR deal fails.",
+    related: ["brrrr", "arv", "capex", "mao"],
+    toolUrl: "/tools/rehab-cost-estimator",
+    postUrl: "/blog/how-to-estimate-rehab-costs",
+  },
+  fairMarketRent: {
+    term: "Fair Market Rent",
+    slug: "fair-market-rent",
+    also: ["FMR"],
+    category: "fundamental",
+    definition:
+      "HUD's annual estimate of typical rent for a given county and bedroom count, used to set Section 8 voucher payment standards.",
+    whyItMatters:
+      "FMR is a useful \u201cis this asking rent realistic?\u201d floor — actual market rent in most areas runs slightly above it. TrueCap auto-fills FMR from the HUD API when you enter an address.",
+    related: ["vacancy", "rentGrowth"],
+  },
+  principalPaydown: {
+    term: "Principal Paydown",
+    slug: "principal-paydown",
+    category: "fundamental",
+    definition:
+      "The portion of each mortgage payment that reduces the loan balance rather than paying interest.",
+    whyItMatters:
+      "Principal paydown is real wealth building — your tenant retires your loan — but it never shows up in cash flow. On a typical 30-year mortgage, year 1 is ~80% interest / 20% principal; year 25 is the inverse.",
+    related: ["loanTerm", "interestRate", "ltv", "equityMultiple"],
+  },
   // ─── PROJECTION ASSUMPTIONS ───
   rentGrowth: {
     term: "Rent Growth %",
