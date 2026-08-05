@@ -18,6 +18,7 @@ import { ArrowUpRight, Check } from "lucide-react";
 import { getSiteUrl } from "@/lib/site-url";
 import { FiftyPercentRuleWidget } from "@/components/tools/fifty-percent-rule-widget";
 import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta";
+import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
 
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
@@ -344,6 +345,10 @@ export default function FiftyPercentRuleCalculatorPage() {
           </section>
 
           {/* Footer */}
+          {/* Backlink engine — quiet, collapsed, renders nothing if this
+              tool has no embeddable widget. See the component header. */}
+          <ToolEmbedInvite slug="50-percent-rule-calculator" />
+
           <ToolsConversionCta calculatorName="50% rule calculator" hook="The 50% rule is a 3-second triage. TrueCap's full analyzer replaces the guess with real expense lines — tax, insurance, vacancy, CapEx — and a verdict. It's free." />
 
           <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">

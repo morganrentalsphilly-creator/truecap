@@ -19,6 +19,7 @@ import { ArrowUpRight, Check } from "lucide-react";
 import { getSiteUrl } from "@/lib/site-url";
 import { SeventyPercentRuleWidget } from "@/components/tools/seventy-percent-rule-widget";
 import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta";
+import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
 
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
@@ -407,6 +408,10 @@ export default function SeventyPercentRuleCalculatorPage() {
           </section>
 
           {/* Footer */}
+          {/* Backlink engine — quiet, collapsed, renders nothing if this
+              tool has no embeddable widget. See the component header. */}
+          <ToolEmbedInvite slug="70-percent-rule-calculator" />
+
           <ToolsConversionCta calculatorName="70% rule calculator" hook="The 70% rule is the screen. TrueCap's full analyzer is the underwrite — max offer from your actual costs and return target, plus rehab, refi, and cash flow on the same deal." />
 
           <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">

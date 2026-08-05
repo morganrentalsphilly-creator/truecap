@@ -10,6 +10,7 @@ import Link from "next/link";
 import { getSiteUrl } from "@/lib/site-url";
 import { BreakEvenCalculatorWidget } from "@/components/tools/break-even-calculator-widget";
 import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta";
+import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 
@@ -175,6 +176,13 @@ export default function BreakEvenCalculatorPage() {
             <Link href="/tools/cap-rate-calculator" className="rounded-full border border-border bg-card px-3 py-1.5 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary">Cap rate calculator</Link>
           </div>
         </section>
+
+        {/* Backlink engine — quiet, collapsed, renders nothing if this
+
+            tool has no embeddable widget. See the component header. */}
+
+        <ToolEmbedInvite slug="break-even-calculator" />
+
 
         <ToolsConversionCta calculatorName="Break-even calculator" />
       </main>

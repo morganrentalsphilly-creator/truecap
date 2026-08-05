@@ -23,6 +23,7 @@ import { ArrowUpRight, Check } from "lucide-react";
 import { getSiteUrl } from "@/lib/site-url";
 import { ArvCalculatorWidget } from "@/components/tools/arv-calculator-widget";
 import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta";
+import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
 
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
@@ -532,6 +533,10 @@ export default function ArvCalculatorPage() {
           </section>
 
           {/* Footer */}
+          {/* Backlink engine — quiet, collapsed, renders nothing if this
+              tool has no embeddable widget. See the component header. */}
+          <ToolEmbedInvite slug="arv-calculator" />
+
           <ToolsConversionCta calculatorName="ARV calculator" hook="TrueCap's full analyzer takes the max offer further — rehab budget, BRRRR refinance, fix-and-flip profit, cash flow, and a Max Offer solver for rentals — all on the same deal. Save your work, compare deals, share a link." />
 
           <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">

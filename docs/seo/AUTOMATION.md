@@ -1,6 +1,6 @@
 # SEO automation — what runs, when, and what it can't do
 
-Four moving parts. Two are deterministic scripts with no model in the loop;
+Five moving parts. Three are deterministic scripts with no model in the loop;
 two are scheduled Claude runs that open PRs. Nothing publishes without a human
 merge.
 
@@ -10,6 +10,7 @@ merge.
 | 2 | `.github/workflows/seo-healthcheck.yml` | Mondays 13:00 UTC | one GitHub issue, updated in place | no |
 | 3 | `.github/workflows/seo-content.yml` | Tuesdays + Fridays 14:00 UTC | a draft blog post as a PR | yes |
 | 4 | `.github/workflows/seo-visibility.yml` | 1st of the month, 15:00 UTC | a dated snapshot in `docs/seo/visibility/` as a PR | yes |
+| 5 | `.github/workflows/seo-scoreboard.yml` | Mondays 14:00 UTC | one GitHub issue + `docs/seo/telemetry/<date>.json` as one long-lived PR | no |
 
 ## Cost
 
@@ -45,7 +46,7 @@ change because the job runs twelve times a year.
 
 ---
 
-## Setup (one secret, one time)
+## Setup (two secrets, one time)
 
 Workflows 3 and 4 need an Anthropic API key:
 
@@ -56,8 +57,19 @@ Value: sk-ant-…
 ```
 
 Until that secret exists those two workflows fail on their first step and the
-other two keep working. That's deliberate — the deterministic guards should
-never depend on an API key.
+others keep working. That's deliberate — the deterministic guards should never
+depend on an API key.
+
+Workflow 5 needs a Google service-account key:
+
+```
+Name:  GSC_SERVICE_ACCOUNT_JSON
+Value: the entire contents of the downloaded service-account .json file
+```
+
+Full instructions — including which Google Cloud APIs to enable and the
+**Full**-not-**Restricted** permission trap — are in §5 below, and the script
+prints them verbatim into its GitHub issue when the secret is missing.
 
 Rough cost: 8–10 content runs plus 4 visibility runs a month. Each content run
 is a long agentic session (research, write, run the test suite, iterate).
@@ -227,18 +239,102 @@ independent sources corroborate, so mention count is a tracked metric.
 
 ---
 
+## 5. Scoreboard — `.github/workflows/seo-scoreboard.yml`
+
+Mondays, an hour after the health check. This is the instrument panel: every
+other job here tells you something about the pages we publish, and only this
+one tells you what Google did with them.
+
+It produces two numbers nothing else can:
+
+1. **Indexed ratio per route family** (`/blog`, `/markets`, `/tools`, `/vs`,
+   `/glossary`, `/states`), with week-over-week deltas. Not "is the site
+   indexed" but "is `/markets` indexed and `/blog` not" — the difference
+   between a technical problem and a scaled-content problem.
+2. **Queries with impressions and no page targeting them.** This is the field
+   the content pipeline should consume instead of guessing: a query Google is
+   already showing us for is demand we have *measured*, not invented. It is a
+   token-overlap heuristic against sitemap slugs, and every row carries the
+   page it came closest to so a wrong call is visible rather than acted on.
+
+Plus totals (clicks / impressions / CTR / average position), the full
+"Crawled – currently not indexed" list, a coverage-state census, top queries,
+and top movers including queries that disappeared entirely.
+
+### Setup — and the Restricted trap
+
+1. Google Cloud Console → APIs & Services → enable **Google Search Console
+   API** and **Search Console API** (URL Inspection lives in the latter).
+2. IAM & Admin → Service Accounts → create one → Keys → Add key → JSON.
+3. Search Console → the `usetruecap.com` property → Settings → Users and
+   permissions → Add user → the service account's `client_email` →
+   permission **Full** or **Owner**.
+4. GitHub → Settings → Secrets and variables → Actions → new secret
+   `GSC_SERVICE_ACCOUNT_JSON`, value = the entire JSON file.
+
+Step 3 is the one that bites. A **Restricted** service account still reads
+Search Analytics perfectly while URL Inspection returns 403 on every call — so
+a naive scoreboard looks like it works and reports **0% indexed**, which is
+also exactly what a genuinely deindexed site looks like. Two opposite
+diagnoses, one number. The script detects that combination specifically and
+refuses to produce a figure at all. It never writes a telemetry file on a
+failed run, because a run that measured nothing must not leave a record that
+looks like a measurement.
+
+### Output
+
+- One issue, *"SEO scoreboard — Search Console telemetry"*, updated in place.
+- `docs/seo/telemetry/<YYYY-MM-DD>.json` — the full record. It goes into git
+  rather than an artifact because artifacts expire and the file *is* the trend.
+- `docs/seo/telemetry/latest.json` — a byte-identical copy at a stable path,
+  so downstream consumers never have to guess a date.
+
+The files arrive as **one long-lived PR** from the `seo/telemetry` branch, not
+a direct push: `main` requires status checks, which blocks direct pushes from
+anything that is not an admin, and `github-actions[bot]` is not one. Unmerged
+weeks are carried forward onto that branch each run, so the deltas keep working
+whether or not you merge promptly — but nothing reading `main` sees the numbers
+until you do. **Merge it.**
+
+The report opens with the sitemap URL count and its change since last run. A
+shrinking sitemap raises the indexed ratio for free, so that number has to be
+read before anything below it.
+
+If the daily URL Inspection quota (2000; the sitemap is ~429) runs out, the
+report says exactly how many URLs went uninspected and marks itself a PARTIAL
+SWEEP. Ratios are computed over inspected URLs only — folding uninspected ones
+into the denominator would report a quota shortfall as a de-indexing event.
+
+Run it yourself:
+
+```bash
+GSC_SERVICE_ACCOUNT_JSON="$(cat key.json)" node scripts/seo/gsc-scoreboard.mjs
+node scripts/seo/gsc-scoreboard.mjs --skip-inspection     # analytics only, no quota spend
+node scripts/seo/gsc-scoreboard.mjs --max-inspections 50  # fast sample
+```
+
+---
+
 ## What this does not cover
 
 Be clear-eyed about the gaps:
 
-- **Google Search Console data.** Impressions, clicks, average position, and
-  the "Crawled – currently not indexed" ratio are the real scoreboard, and none
-  of it is reachable without wiring up the GSC API. The visibility job's
-  WebSearch panel is a proxy, not a rank tracker — it can tell you "not in the
-  first page of results", never "position 14".
+- **Why a page is not indexed.** The scoreboard reports Google's own
+  `coverageState` for every sitemap URL, which tells you *which* bucket a page
+  is in — "Crawled – currently not indexed" means Google fetched it, read it,
+  and declined, so more internal links will not fix it. It does not tell you
+  what about the page failed. That is still a human reading the page.
+- **Anything at all, until `GSC_SERVICE_ACCOUNT_JSON` exists.** Workflow 5
+  fails loudly with setup instructions rather than reporting zeros, so the
+  absence is visible — but it is still an absence.
 - **Whether 150 programmatic `/markets` pages trip scaled-content policy.**
-  That's a judgment call. The mechanical proxy is the GSC indexed ratio for
-  `/markets/*`, which needs the API above.
+  Still a judgment call. The indexed ratio for `/markets/*` over time is the
+  mechanical proxy, and the scoreboard now measures it — a proxy that moves is
+  evidence, not a verdict.
+- **Rank on a specific SERP.** GSC average position is an average across every
+  impression, blended over locations and devices; the visibility job's
+  WebSearch panel is what shows you the actual result page. Neither is a rank
+  tracker. Keep both.
 - **Backlinks and off-domain placement.** The visibility job counts mentions;
   it does not go get them. Submitting TrueCap to AlternativeTo, G2, and the
   "best rental calculator" roundups is manual work, and on current evidence

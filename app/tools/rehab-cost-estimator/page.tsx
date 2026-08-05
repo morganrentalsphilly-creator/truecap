@@ -4,6 +4,7 @@ import { ArrowUpRight, Check } from "lucide-react";
 import { getSiteUrl } from "@/lib/site-url";
 import { RehabEstimatorCard } from "@/components/investcalc/rehab-estimator-card";
 import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta";
+import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
 
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
@@ -288,6 +289,13 @@ export default function RehabEstimatorPage() {
               <ArrowUpRight className="w-4 h-4" />
             </Link>
           </section>
+
+          {/* Backlink engine — quiet, collapsed, renders nothing if this
+
+              tool has no embeddable widget. See the component header. */}
+
+          <ToolEmbedInvite slug="rehab-cost-estimator" />
+
 
           <ToolsConversionCta calculatorName="Rehab estimator" hook="TrueCap connects rehab budget straight into the BRRRR + fix-and-flip analyzers — so you can see whether the rehab pays for itself after refi or sale." />
 

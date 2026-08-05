@@ -4,6 +4,7 @@ import { ArrowUpRight, Check } from "lucide-react";
 import { getSiteUrl } from "@/lib/site-url";
 import { CocCalculatorWidget } from "@/components/tools/coc-calculator-widget";
 import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta";
+import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
 
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
@@ -308,6 +309,13 @@ export default function CoCCalculatorPage() {
               <ArrowUpRight className="w-4 h-4" />
             </Link>
           </section>
+
+          {/* Backlink engine — quiet, collapsed, renders nothing if this
+
+              tool has no embeddable widget. See the component header. */}
+
+          <ToolEmbedInvite slug="cash-on-cash-calculator" />
+
 
           <ToolsConversionCta calculatorName="Cash-on-cash calculator" hook="The TrueCap analyzer adds 10-year cash flow projection, tax savings, and exit scenarios on top of cash-on-cash — so you can see whether the modest year-1 return becomes a great long-term play." />
 

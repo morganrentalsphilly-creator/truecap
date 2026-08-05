@@ -22,6 +22,7 @@ import { ArrowUpRight, Check } from "lucide-react";
 import { getSiteUrl } from "@/lib/site-url";
 import { RentalCashFlowCalculatorWidget } from "@/components/tools/rental-cash-flow-calculator-widget";
 import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta";
+import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
 
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
@@ -508,6 +509,10 @@ export default function RentalCashFlowCalculatorPage() {
           </section>
 
           {/* Footer */}
+          {/* Backlink engine — quiet, collapsed, renders nothing if this
+              tool has no embeddable widget. See the component header. */}
+          <ToolEmbedInvite slug="rental-cash-flow-calculator" />
+
           <ToolsConversionCta calculatorName="Rental cash flow calculator" hook="TrueCap's full analyzer runs the same cash-flow math plus cap rate, cash-on-cash, DSCR, PMI, 10-year projections, tax savings, and exit scenarios — all on the same deal. Save your work, compare deals, share a link." />
 
           <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">

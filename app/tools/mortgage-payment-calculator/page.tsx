@@ -9,6 +9,7 @@ import Link from "next/link";
 import { getSiteUrl } from "@/lib/site-url";
 import { MortgagePaymentWidget } from "@/components/tools/mortgage-payment-widget";
 import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta";
+import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 
@@ -212,6 +213,13 @@ export default function MortgagePaymentPage() {
               card required.
             </p>
           </article>
+
+          {/* Backlink engine — quiet, collapsed, renders nothing if this
+
+              tool has no embeddable widget. See the component header. */}
+
+          <ToolEmbedInvite slug="mortgage-payment-calculator" />
+
 
           <ToolsConversionCta
             calculatorName="Mortgage payment calculator"

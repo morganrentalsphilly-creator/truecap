@@ -4,6 +4,7 @@ import { ArrowUpRight, Check } from "lucide-react";
 import { getSiteUrl } from "@/lib/site-url";
 import { BrrrrCalculatorWidget } from "@/components/tools/brrrr-calculator-widget";
 import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta";
+import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
 
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
@@ -277,6 +278,13 @@ export default function BrrrrCalculatorPage() {
               <ArrowUpRight className="w-4 h-4" />
             </Link>
           </section>
+
+          {/* Backlink engine — quiet, collapsed, renders nothing if this
+
+              tool has no embeddable widget. See the component header. */}
+
+          <ToolEmbedInvite slug="brrrr-calculator" />
+
 
           <ToolsConversionCta calculatorName="BRRRR calculator" hook="In TrueCap, the BRRRR analyzer plugs into your real numbers (rent, op-ex, financing) and shows post-refi cash flow + cash-left-in-deal + infinite-return alerts. Save and share." />
 

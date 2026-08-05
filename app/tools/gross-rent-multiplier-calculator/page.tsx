@@ -12,6 +12,7 @@ import Link from "next/link";
 import { getSiteUrl } from "@/lib/site-url";
 import { GrmCalculatorWidget } from "@/components/tools/grm-calculator-widget";
 import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta";
+import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 
@@ -259,6 +260,13 @@ export default function GrmCalculatorPage() {
               with a condition assessment.
             </p>
           </article>
+
+          {/* Backlink engine — quiet, collapsed, renders nothing if this
+
+              tool has no embeddable widget. See the component header. */}
+
+          <ToolEmbedInvite slug="gross-rent-multiplier-calculator" />
+
 
           <ToolsConversionCta
             calculatorName="GRM calculator"

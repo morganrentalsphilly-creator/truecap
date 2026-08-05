@@ -14,6 +14,7 @@ import { ArrowUpRight, Check } from "lucide-react";
 import { getSiteUrl } from "@/lib/site-url";
 import { CapRateCalculatorWidget } from "@/components/tools/cap-rate-calculator-widget";
 import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta";
+import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
 
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
@@ -408,6 +409,10 @@ export default function CapRateCalculatorPage() {
           </section>
 
           {/* Footer */}
+          {/* Backlink engine — quiet, collapsed, renders nothing if this
+              tool has no embeddable widget. See the component header. */}
+          <ToolEmbedInvite slug="cap-rate-calculator" />
+
           <ToolsConversionCta calculatorName="Cap rate calculator" hook="TrueCap's full analyzer runs cap rate plus cash-on-cash, DSCR, 10-year projection, tax savings, and exit scenarios — all on the same deal. Save your work, compare deals, share a link." />
 
           <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">

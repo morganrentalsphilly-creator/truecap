@@ -109,15 +109,71 @@ jobs:
             Exactly one recommendation, specific enough to act on today, chosen
             on evidence from THIS run. Not a list. Not "keep publishing content".
 
+            KNOWN NON-FIXES — do not recommend these, they have each been
+            proposed and are settled:
+            - Any `proxy.ts` change, 308 redirect, `X-Robots-Tag` or middleware
+              tweak aimed at `truecap-iota.vercel.app`. That host is a DIFFERENT
+              Vercel project and never executes this repo's code. The only fix
+              is Morgan deleting that project. Read
+              `docs/seo/foreign-deployment-truecap-iota.md` before writing Part D
+              and do not re-litigate it. You may state that it is still live.
+            - "Publish more blog posts." 75 posts rank for 0 of 10 panel
+              queries; volume is the disproven lever here.
+            - Google Indexing API submission. It is JobPosting/BroadcastEvent
+              only and this site has no eligible content.
+
+            ## Part E — keep the submission packets current
+            Referring domains are the one input Google demands that this site
+            has zero of, and it is the one thing no unattended machine can
+            ethically supply — someone has to create accounts and fill in forms
+            as themselves. So your job is to make that as close to copy-paste as
+            possible.
+
+            Maintain `docs/seo/submissions/` — one markdown file per target,
+            each a packet Morgan can paste without thinking:
+
+            - `alternativeto.md` — AlternativeTo, submitted against its
+              **DealCheck** page (that page is already page one for "DealCheck
+              alternative", a query 40 in-house /vs pages have failed to touch).
+            - `saashub.md`, `slashdot.md`, `producthunt.md`, `g2-capterra.md`
+            - `roundups.md` — the "best rental property calculator" roundups and
+              tool directories that surfaced in THIS run's searches, each with
+              its URL, whether it accepts submissions, and how.
+
+            Each packet contains: the exact submission URL, the category to pick,
+            a 1-line pitch, a ~50-word short description, a ~150-word long
+            description, the tagline, pricing stated as **Free tier + Pro
+            $29.99/mo or $300/yr** (never invent or round pricing — check
+            `/pricing` if unsure), the logo/screenshot paths from `public/`, and
+            a plain-English "what to click" list.
+
+            Refresh a packet only when something changed — a new target, a dead
+            link, changed submission rules. Say at the top of each file when it
+            was last verified and against what.
+
+            **You never submit anything.** No account creation, no form
+            submission, no outreach email, no posting to Reddit or any forum.
+            Drafts in `docs/seo/submissions/` only. Morgan executes them under
+            his own identity. This boundary is not negotiable — automated
+            submission is spam, and it would put the brand at risk for a handful
+            of links.
+
             ## Write it
             Save to `docs/seo/visibility/<YYYY-MM-DD>.md` using today's real
             date. Front the file with a small summary table (queries ranking:
             N/10 · off-domain mentions: N · change vs last week).
 
+            Commit any Part E packet changes in the SAME branch.
+
             Then: branch `seo/visibility-<YYYY-MM-DD>`, commit, and open a PR
             titled `seo: visibility snapshot <YYYY-MM-DD>` whose body is Part C
             and Part D inline, so the whole point is readable without opening
-            the file.
+            the file. If any submission packet is new or changed, list it in the
+            PR body under "Ready to submit" — that list is Morgan's to-do.
+
+            You may only write under `docs/**`. The `build-chain-guard` CI job
+            enforces this for every non-owner commit and will fail the PR
+            otherwise; do not reach for a file outside it.
 
             ## Rules
             - Cite a URL for every claim about a third-party page. If you did not

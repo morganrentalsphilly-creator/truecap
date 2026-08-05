@@ -30,6 +30,7 @@ import Link from "next/link";
 import { ArrowUpRight, Check, Download, FileSpreadsheet } from "lucide-react";
 import { getSiteUrl } from "@/lib/site-url";
 import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta";
+import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
 
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
@@ -429,6 +430,10 @@ export default function RentalPropertySpreadsheetPage() {
           </section>
 
           {/* Footer */}
+          {/* Backlink engine — quiet, collapsed, renders nothing if this
+              tool has no embeddable widget. See the component header. */}
+          <ToolEmbedInvite slug="rental-property-spreadsheet" />
+
           <ToolsConversionCta calculatorName="Rental property spreadsheet" hook="TrueCap's full analyzer runs the same spreadsheet math from just an address — market rent and property tax pre-filled, plus PMI, 10-year projections, tax savings, and exit scenarios. Save your work, compare deals, share a link." />
 
           <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">

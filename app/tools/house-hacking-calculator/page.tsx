@@ -18,6 +18,7 @@ import { ArrowUpRight, Check } from "lucide-react";
 import { getSiteUrl } from "@/lib/site-url";
 import { HouseHackingCalculatorWidget } from "@/components/tools/house-hacking-calculator-widget";
 import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta";
+import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
 
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
@@ -412,6 +413,10 @@ export default function HouseHackingCalculatorPage() {
           </section>
 
           {/* Footer */}
+          {/* Backlink engine — quiet, collapsed, renders nothing if this
+              tool has no embeddable widget. See the component header. */}
+          <ToolEmbedInvite slug="house-hacking-calculator" />
+
           <ToolsConversionCta calculatorName="House hacking calculator" hook="TrueCap's full analyzer has a House Hack mode: per-unit rents, owner-occupant math, year-2 move-out modeling, and a verdict — all from the same inputs you used here." />
 
           <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">

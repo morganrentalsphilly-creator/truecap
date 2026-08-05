@@ -1,22 +1,50 @@
-# Automated SEO content — two posts a week, each as a PR you review.
+# Automated SEO maintenance — twice a week, driven by Search Console data.
 #
-# CADENCE, AND WHY IT'S TWO
-# -------------------------
-# Google does not penalise publishing frequency; it penalises thin, templated,
-# low-value pages. Two posts a week is a rate a single site can sustain at
-# genuine depth (worked numbers, real internal links, a real FAQ) — which is
-# the thing that actually protects you. Pushing to daily is how sites end up
-# with 300 near-duplicate pages and a scaled-content problem, which IS a
-# policy violation. If you want more volume, add breadth (new /tools, /vs, or
-# market+strategy pages) rather than more blog posts per week.
+# WHAT CHANGED, 2026-08-03, AND WHY
+# ---------------------------------
+# This job used to write two NET-NEW blog posts a week. That was measured and
+# it does not work for this site:
 #
-# NOTHING PUBLISHES ITSELF. Every run opens a PR. Merging is your call, and
-# CI (tsc + vitest + next build, including the SEO guards) has to pass first.
+#   · 75 published posts rank for 0 of 10 target queries.
+#   · Roughly 2% of the site's 429 URLs are indexed at all.
+#   · The counterfactual already ran — 69 posts existed before this job was
+#     automated, with the same result. Post #78 into an index Google is not
+#     reading has an expected marginal return of approximately zero.
 #
-# TOPIC SELECTION is not the model's to invent: it works top-down through
-# docs/seo-content-backlog.md, which the 2026-07-15 audit built from queries
-# with observed demand. That file exists specifically because ~30-40% of
-# earlier posts targeted phrasings nobody searches.
+# The diagnosed bottlenecks are indexation, internal links, and zero
+# third-party links — none of which another post addresses. So the schedule,
+# the cost envelope and the pipeline stay; the JOB changes. See
+# docs/seo/AUTOMATION.md.
+#
+# The other forcing reason: docs/seo-content-backlog.md is down to its last
+# couple of items, and this workflow's documented failure mode on an empty
+# backlog is inventing topics — which is exactly how a site ends up with
+# scaled, near-duplicate content, a real policy violation.
+#
+# PRIORITY ORDER (the run picks the highest one with work available):
+#   P1 REFRESH   — pages GSC shows with impressions at position 11-30. Real
+#                  demand, nearly ranking. The cheapest wins on the board.
+#   P2 LINK DEBT — internal links to pages that need them. The blog is the
+#                  only part of this site with meaningful inbound links, so
+#                  it is the equity source; 68 of 69 posts sit under the
+#                  repo's own linking standard.
+#   P3 NEW POST  — ONLY when telemetry shows an impression cluster with no
+#                  matching page. Never from a brainstormed backlog.
+#
+# WHAT MERGES BY ITSELF
+# ---------------------
+# An earlier version of this header claimed "NOTHING PUBLISHES ITSELF." That
+# was false: SEO_AUTOMERGE has been on since the day this shipped, and a
+# post has already reached production with no human read. Auto-merge is a
+# deliberate founder decision and it STAYS ON — but it is now tiered:
+#
+#   · P1/P2 maintenance runs (bounded edits to pages that already exist,
+#     ratchet-gated by the SEO guards) auto-merge exactly as before.
+#   · A P3 net-new PAGE opens a PR and waits for you. One click, and only
+#     for genuinely new URLs.
+#
+# The tier is carried in the PR title prefix and enforced in the auto-merge
+# step at the bottom of this file.
 
 name: SEO content
 
@@ -80,16 +108,51 @@ jobs:
                MODIFIED_AT / READING_TIME_MIN consts, `export const metadata`,
                FAQS array, JSON-LD blocks, and an `opengraph-image.tsx` sibling.
 
-            ## Pick the topic
-            ${{ inputs.topic && format('The operator has overridden the backlog. Write: {0}', inputs.topic) || 'Take the TOPMOST unchecked `- [ ]` item in docs/seo-content-backlog.md.' }}
+            ## Pick the work — in this order, highest priority with work available
+            ${{ inputs.topic && format('The operator has overridden the priority order. Write this net-new post: {0} — and follow the P3 rules below, including the PR title prefix.', inputs.topic) || 'Work the priority order below. Do NOT skip to P3 because it is more interesting.' }}
 
-            Before writing, verify the topic is still worth doing: WebSearch the
-            target query, read who currently ranks, and confirm there is an angle
-            TrueCap can actually own. If the SERP is entirely lender lead-gen or
-            proprietary-data plays that a calculator site cannot beat, SKIP that
-            item — check it off with a one-line note saying why, and move to the
-            next one. Recording an honest skip is a better outcome than shipping
-            a post that cannot rank.
+            Read `docs/seo/telemetry/latest.json` first — it is written by the
+            weekly GSC scoreboard and is the ONLY legitimate source of demand
+            evidence here. If that file does not exist yet, say so plainly in
+            the PR body and work P2, which needs no telemetry.
+
+            ### P1 — REFRESH what is nearly ranking
+            From telemetry, take pages with impressions at average position
+            11-30. These have proven demand and are one page short of the first
+            page; nothing else on this list is that cheap. For the best
+            candidate: read the page, find what the currently-ranking results
+            answer that it does not, and fix that. Add internal links pointing
+            AT the page from related posts. Update MODIFIED_AT. Do not rewrite
+            a page that is already fine just to have made a change — if the gap
+            is not real, say so and drop to P2.
+
+            ### P2 — PAY DOWN INTERNAL-LINK DEBT
+            The blog is the only part of this site with meaningful inbound
+            links, so it is where link equity enters. Bring posts up to the
+            docs/SEO-ROADMAP.md §8 standard (the repo records 68 of 69 posts
+            under it) and add contextual links to pages that are thin on them.
+            Run `node scripts/seo/guard-baseline.mjs --write` to bank the
+            progress so the ratchet cannot slip backwards.
+            Prefer links that a reader would actually click in context. A link
+            block bolted to the bottom of a post is link-stuffing; it helps
+            nothing and it reads as spam to both humans and Google.
+
+            ### P3 — A NET-NEW POST, only on evidence
+            Write one ONLY when telemetry shows a query cluster with real
+            impressions and NO page that targets it (`queriesWithoutPage` in
+            latest.json). Never invent a topic, and never take one from the
+            backlog just because the backlog has an item left — the backlog was
+            built from a 2026-07-15 audit and its remaining items have not been
+            re-validated against current data.
+
+            If P1 and P2 have no work and telemetry shows no gap, DO NOTHING
+            and say so. A run that correctly does nothing is a good run. Open
+            no PR rather than manufacturing work.
+
+            Whatever you pick, WebSearch the target query first and confirm
+            there is an angle TrueCap can own. If the SERP is entirely lender
+            lead-gen or proprietary-data plays a calculator site cannot beat,
+            record that honestly and move on.
 
             ## Non-negotiables for the post
             - **Worked numbers.** Real dollar figures carried through a real
@@ -131,46 +194,96 @@ jobs:
             records pre-existing debt and a new post must meet the standard on its
             own. If a guard fails on your post, the post is what's wrong.
 
-            ## Ship it
-            - Branch: `seo/post-<slug>`
-            - Check the backlog item off in the SAME commit, per the file's own rule.
-            - Open a PR titled `content: <SERP_TITLE>` whose body states: the target
-              query, who currently ranks for it and what your angle is against them,
-              the internal links added, and anything you were unsure about.
-            - Be honest in the PR body about weaknesses. A flagged soft spot gets
-              fixed in review; a hidden one gets published.
+            ## Ship it — THE PR TITLE PREFIX DECIDES WHETHER IT AUTO-MERGES
+            This is load-bearing. The auto-merge step reads the title prefix:
+
+            - **P1 or P2 (maintenance — editing pages that already exist)**
+              Branch `seo/maintain-<short-slug>`, PR title
+              `seo-maintenance: <what you did>`. This AUTO-MERGES once every
+              required check passes. That is intended: these are bounded edits
+              to existing pages, gated by tsc, the full test suite including
+              the SEO guards, and the production build.
+
+            - **P3 (a net-new page)** Branch `seo/post-<slug>`, PR title
+              `content: <SERP_TITLE>`. This does NOT auto-merge. A brand-new
+              URL gets one human read before it is public. Do not use the
+              `seo-maintenance:` prefix for a new page to get it merged faster
+              — that is the one thing here that would be genuinely dishonest.
+
+            - You may not change paths outside `app/blog/**`,
+              `lib/blog-topics.ts` and `docs/**`. The `build-chain-guard` CI job
+              enforces this and will fail the PR. If the work seems to need a
+              file outside those paths, stop and explain it in the PR body
+              instead of reaching for it.
+
+            - PR body states: which priority you worked and why, the evidence
+              from telemetry that justified it (quote the numbers), what you
+              changed, and anything you were unsure about. Be honest about
+              weaknesses — a flagged soft spot gets fixed, a hidden one ships.
             - If you could not produce something you'd defend, open the PR as a
-              DRAFT and say why in the body. Do not pad to the word count.
+              DRAFT and say why. Do not pad to a word count.
 
       # ---------------------------------------------------------------
-      # Optional hands-off mode. OFF unless BOTH are true:
-      #   - Settings → General → Pull Requests → "Allow auto-merge" is ticked
+      # TIERED AUTO-MERGE. Requires BOTH:
+      #   - Settings → General → Pull Requests → "Allow auto-merge" ticked
       #   - Settings → Secrets and variables → Actions → Variables tab →
       #     SEO_AUTOMERGE = true   (a VARIABLE, not a secret)
       #
-      # This does not merge anything immediately. It queues the PR to merge
-      # only once every required check passes — tsc, the full test suite
-      # including the SEO guards, and the production build. A post that trips
-      # a guard just sits there as an open PR.
+      # This never merges immediately. It queues the PR to merge once every
+      # REQUIRED check passes — `build-chain-guard` and `check` (tsc, the full
+      # test suite including the SEO guards, and the production build). Those
+      # are required on main via branch protection, applied 2026-08-03; before
+      # that they were required on nothing and a PR merged 19 SECONDS after CI
+      # started, which is the incident this tiering answers.
       #
-      # Draft PRs are skipped deliberately: the prompt tells the run to open a
-      # draft when it isn't confident in what it wrote, and that signal should
-      # not be auto-merged past you.
+      # THE TIER:
+      #   `seo-maintenance:` → queued. Bounded edits to pages that already
+      #                        exist, ratchet-gated by the SEO guards.
+      #   `content:`         → NOT queued. A net-new public URL waits for
+      #                        Morgan. One click, only for genuinely new pages.
+      #   anything else      → NOT queued, and says so loudly. An unrecognised
+      #                        prefix means the run did something this file
+      #                        does not model; failing closed is the only safe
+      #                        reading of that.
+      #
+      # Drafts are skipped at every tier: the prompt opens a draft when the run
+      # is not confident, and that signal must not be merged past you.
       - name: Queue the PR to auto-merge once checks pass
         if: vars.SEO_AUTOMERGE == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          set -uo pipefail
           branch=$(git branch --show-current)
-          pr=$(gh pr list --head "$branch" --state open --json number,isDraft --jq '.[0] // empty')
+          pr=$(gh pr list --head "$branch" --state open --json number,isDraft,title --jq '.[0] // empty')
           if [ -z "$pr" ]; then
-            echo "No open PR for $branch — the run may have skipped its backlog item. Nothing to queue."
+            echo "No open PR for $branch — the run may have correctly decided there was nothing to do. Nothing to queue."
             exit 0
           fi
           number=$(echo "$pr" | jq -r .number)
+          title=$(echo "$pr" | jq -r .title)
+
           if [ "$(echo "$pr" | jq -r .isDraft)" = "true" ]; then
             echo "PR #$number is a draft — the run flagged low confidence. Leaving it for review."
             exit 0
           fi
-          echo "Queueing PR #$number to auto-merge after checks pass."
-          gh pr merge "$number" --auto --squash
+
+          # Case-sensitive on purpose. The prefix is a machine contract, not
+          # prose, and a loose match is how "Content: ..." would slip into the
+          # maintenance tier.
+          case "$title" in
+            "seo-maintenance: "*)
+              echo "Maintenance PR #$number — queueing auto-merge after required checks."
+              gh pr merge "$number" --auto --squash
+              ;;
+            "content: "*)
+              echo "PR #$number is a NET-NEW page (\"$title\")."
+              echo "Not auto-merging: a brand-new public URL gets one human read."
+              echo "Review and merge it yourself: $(gh pr view "$number" --json url --jq .url)"
+              ;;
+            *)
+              echo "PR #$number has an unrecognised title prefix: \"$title\""
+              echo "Expected 'seo-maintenance: ' or 'content: '. Not auto-merging."
+              echo "This means the run did something this workflow does not model — read the diff."
+              ;;
+          esac

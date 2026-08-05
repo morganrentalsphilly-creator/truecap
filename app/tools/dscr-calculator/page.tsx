@@ -13,6 +13,7 @@ import Link from "next/link";
 import { getSiteUrl } from "@/lib/site-url";
 import { DscrCalculatorWidget } from "@/components/tools/dscr-calculator-widget";
 import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta";
+import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 
@@ -229,6 +230,13 @@ export default function DscrCalculatorPage() {
               free to start.
             </p>
           </article>
+
+          {/* Backlink engine — quiet, collapsed, renders nothing if this
+
+              tool has no embeddable widget. See the component header. */}
+
+          <ToolEmbedInvite slug="dscr-calculator" />
+
 
           <ToolsConversionCta
             calculatorName="DSCR calculator"

@@ -10,6 +10,7 @@ import Link from "next/link";
 import { getSiteUrl } from "@/lib/site-url";
 import { RentalPropertyTaxCalculatorWidget } from "@/components/tools/rental-property-tax-calculator-widget";
 import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta";
+import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 
@@ -318,6 +319,13 @@ export default function RentalPropertyTaxCalculatorPage() {
             </Link>
           </div>
         </section>
+
+        {/* Backlink engine — quiet, collapsed, renders nothing if this
+
+            tool has no embeddable widget. See the component header. */}
+
+        <ToolEmbedInvite slug="rental-property-tax-calculator" />
+
 
         <ToolsConversionCta calculatorName="Rental property tax calculator" />
       </main>

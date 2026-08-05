@@ -1,0 +1,357 @@
+# Weekly Google Search Console scoreboard — the instrument panel.
+#
+# `docs/seo/AUTOMATION.md` has said since the first automation pass that GSC
+# data is "the real scoreboard, and none of it is reachable without wiring up
+# the GSC API". This is that wiring. Until it runs, every other job in the SEO
+# program is steering blind: the healthcheck proves pages return 200, the
+# visibility job proves we are not on page one, and neither can tell you
+# whether Google indexed the page at all.
+#
+# What it produces each week:
+#   · indexed ratio per route family (/blog, /markets, /tools, /vs, /glossary,
+#     /states) with week-over-week deltas — the mechanical proxy for "do 150
+#     programmatic /markets pages trip scaled-content policy"
+#   · the "Crawled – currently not indexed" list — thin/duplicative, not
+#     undiscovered; more internal links do not fix that bucket
+#   · queries with impressions and NO page targeting them, which is the field
+#     the content agent consumes instead of guessing at topics
+#
+# Conventions cloned from seo-healthcheck.yml on purpose: dependency-free node
+# (no `npm ci`), one issue upserted in place rather than a fresh issue every
+# week, and a loud failure with setup instructions rather than a green run
+# sitting on no data.
+#
+# ---------------------------------------------------------------------------
+# PERMISSIONS — a deliberate, narrow deviation from seo-healthcheck.yml
+# ---------------------------------------------------------------------------
+# The healthcheck runs `contents: read`. This job needs `contents: write` plus
+# `pull-requests: write` for one reason: week-over-week deltas require last
+# week's numbers to still exist, and an artifact expires. The telemetry file IS
+# the trend, so it has to land in git.
+#
+# It lands via a BRANCH AND A PR, never a direct push to `main`. That is not
+# taste, it is the only thing that works: `main` carries classic branch
+# protection with `required_status_checks.contexts = [build-chain-guard,
+# check]` and `enforce_admins: false` (docs/SECURITY-HARDENING.md §1, applied
+# 2026-08-03). Required status checks block direct pushes for anyone who is not
+# an admin, and `github-actions[bot]` is not one — a `git push origin main` here
+# would be rejected every single Monday, and the trend this job exists to build
+# would never accumulate a second data point. seo-visibility.yml already lands
+# its dated `docs/seo/visibility/<date>.md` snapshots as a PR for the same
+# reason; this clones that.
+#
+# The escalation is fenced four ways:
+#   1. The commit step stages ONLY `docs/seo/telemetry/` and then re-reads the
+#      staged path list, failing the job if anything else appears. A
+#      compromised script cannot widen its own blast radius.
+#   2. `docs/**` is inside the `build-chain-guard` allow-list in ci.yml, so
+#      even a non-owner commit from this job cannot reach a build-executed
+#      path. Nothing here is imported by `next build`.
+#   3. Nothing reaches `main` without the same required checks and a merge that
+#      a human (or the existing SEO_AUTOMERGE opt-in) performs.
+#   4. The job has no `id-token: write`.
+#
+# WHY A STABLE BRANCH, NOT A DATED ONE
+# ------------------------------------
+# `seo/telemetry` is long-lived and each run rebases it onto `main`, carrying
+# forward every telemetry file that has not been merged yet. A dated branch per
+# week — the obvious clone of seo-visibility.yml — would make the deltas
+# depend on merge latency: three unmerged weeks would be three PRs, each
+# reporting "—" for every week-over-week figure, because each run would diff
+# against whatever `main` last had. The trend is the product here, so it must
+# not be hostage to how promptly a PR gets merged. One branch, one PR, updated
+# in place — the same contract as the issue.
+# ---------------------------------------------------------------------------
+
+name: SEO scoreboard (GSC)
+
+on:
+  schedule:
+    # Mondays 14:00 UTC — one hour after seo-healthcheck.yml. Deliberately
+    # after it: if a deploy broke the sitemap, the healthcheck issue is already
+    # open when this run reports a sitemap count that dropped, and the two read
+    # as one story rather than two mysteries.
+    - cron: "0 14 * * 1"
+  workflow_dispatch:
+    inputs:
+      site:
+        description: "Search Console property (sc-domain:usetruecap.com or https://usetruecap.com/)"
+        required: false
+        default: "sc-domain:usetruecap.com"
+      max_inspections:
+        description: "Cap on URL Inspection calls (daily quota is 2000)"
+        required: false
+        default: "2000"
+      skip_inspection:
+        description: "Search Analytics only — skip URL Inspection entirely"
+        type: boolean
+        required: false
+        default: false
+      commit:
+        description: "Commit the telemetry file (uncheck for a read-only trial run)"
+        type: boolean
+        required: false
+        default: true
+
+permissions:
+  contents: write # telemetry files only — see the fence in the commit step
+  pull-requests: write # to open/update the single telemetry PR
+  issues: write
+
+concurrency:
+  group: seo-scoreboard
+  cancel-in-progress: false
+
+jobs:
+  scoreboard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # Pull forward any telemetry that is sitting on the `seo/telemetry`
+      # branch but has not been merged to `main` yet. Without this the script's
+      # `previousTelemetryPath` only ever sees what `main` has, so an unmerged
+      # week would silently reset every week-over-week delta to "—" — the run
+      # would look healthy while reporting nothing about the trend, which is
+      # the one thing it is for.
+      #
+      # Restore-only (`git restore --source`), scoped to the one directory:
+      # this must not move HEAD or bring any other file across from a branch a
+      # bot can write.
+      - name: Carry forward unmerged telemetry
+        run: |
+          set -uo pipefail
+          if git fetch --no-tags --depth=1 origin seo/telemetry 2>/dev/null; then
+            git restore --source=FETCH_HEAD --worktree -- docs/seo/telemetry 2>/dev/null \
+              || echo "Branch exists but carries no docs/seo/telemetry — nothing to carry forward."
+            echo "Telemetry files now present:"
+            ls -1 docs/seo/telemetry 2>/dev/null || echo "  (none)"
+          else
+            echo "No seo/telemetry branch yet — first run, or everything is already on main."
+          fi
+
+      # IndexNow runs HERE — after the carry-forward, BEFORE the scoreboard.
+      # Ordering is load-bearing: the submitter diffs the live sitemap against
+      # the PREVIOUS telemetry snapshot on disk, so once "Pull the scoreboard"
+      # has overwritten latest.json with today's URLs the diff is empty by
+      # construction and nothing would ever be submitted.
+      #
+      # Sold honestly (see the script header): GOOGLE IGNORES INDEXNOW. This is
+      # the Bing / Copilot / ChatGPT-Search / Perplexity surface only, and it is
+      # worth the twenty lines here precisely because this site has zero
+      # third-party corroboration anywhere those systems retrieve.
+      #
+      # Never fails the job. A missing key file, a 403, or a Bing outage is not
+      # a reason to lose the week's Search Console measurement — the real
+      # product of this workflow.
+      - name: Ping IndexNow with changed URLs (Bing/Copilot/Perplexity surface)
+        continue-on-error: true
+        run: |
+          node scripts/seo/indexnow.mjs || \
+            echo "IndexNow submission did not complete — see above. Not failing the scoreboard."
+
+      # No `npm ci`: gsc-scoreboard.mjs signs its own RS256 JWT with
+      # node:crypto rather than pulling in `googleapis`, so this job is a few
+      # hundred HTTPS calls and nothing else.
+      #
+      # `|| code=$?` and not a bare invocation: Actions' bash runs with `set -e`,
+      # so a non-zero node exit aborts the step before the next line. The
+      # healthcheck workflow shipped exactly that bug and finished GREEN while
+      # sitting on high-severity findings (run #1, 2026-08-02). Capture the
+      # code, keep going, decide at the end.
+      - name: Pull the scoreboard
+        id: run
+        env:
+          GSC_SERVICE_ACCOUNT_JSON: ${{ secrets.GSC_SERVICE_ACCOUNT_JSON }}
+          SITE: ${{ inputs.site || 'sc-domain:usetruecap.com' }}
+          MAX_INSPECTIONS: ${{ inputs.max_inspections || '2000' }}
+        run: |
+          EXTRA=()
+          if [ "${{ inputs.skip_inspection }}" = "true" ]; then
+            EXTRA+=(--skip-inspection)
+          fi
+          code=0
+          node scripts/seo/gsc-scoreboard.mjs \
+            --site "$SITE" \
+            --max-inspections "$MAX_INSPECTIONS" \
+            "${EXTRA[@]}" \
+            > seo-scoreboard.md || code=$?
+          echo "exit_code=$code" >> "$GITHUB_OUTPUT"
+
+      - name: Show the report in the run log
+        if: always()
+        run: cat seo-scoreboard.md || echo "(no report produced)"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: seo-scoreboard
+          path: |
+            seo-scoreboard.md
+            docs/seo/telemetry/
+          retention-days: 90
+
+      # ---------------------------------------------------------------------
+      # Land the telemetry on the `seo/telemetry` branch and keep ONE PR open.
+      # This is the only reason the job holds contents/pull-requests write, and
+      # the staged-path check below is what keeps that honest — `git add` is
+      # scoped to one directory and then VERIFIED, because a scoped add is a
+      # convention and a verified add is a control.
+      # ---------------------------------------------------------------------
+      # The condition is spelled out rather than written `inputs.commit != false`
+      # because that shorter form is broken on the branch that matters. On a
+      # `schedule` event the `inputs` context is empty, so `inputs.commit` is
+      # null — and GitHub's loose equality casts null AND false to 0 before
+      # comparing, making `inputs.commit != false` evaluate to FALSE on every
+      # cron run. The weekly job would have skipped this step forever, silently
+      # persisting no telemetry, and week-over-week deltas (the whole reason
+      # this job holds contents: write) would have stayed "—" week after week
+      # while the run reported green. Gate on the event first; only consult the
+      # checkbox when there is a checkbox to consult.
+      - name: Publish the telemetry branch and PR
+        if: steps.run.outputs.exit_code == '0' && (github.event_name != 'workflow_dispatch' || inputs.commit)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: seo/telemetry
+        run: |
+          set -euo pipefail
+
+          if [ ! -f docs/seo/telemetry/latest.json ]; then
+            echo "No telemetry file was written despite a clean exit — refusing to commit nothing."
+            exit 1
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # Branch off the checked-out main so the PR diff is telemetry and
+          # nothing else. `-B` resets it every week: the carried-forward files
+          # from the old branch are already in the working tree, so no history
+          # is lost, and the diff never accumulates a stale merge base.
+          git checkout -B "$BRANCH"
+
+          git add docs/seo/telemetry
+
+          # Fence: nothing outside docs/seo/telemetry/ may be in this commit.
+          STAGED="$(git diff --cached --name-only)"
+          if [ -z "$STAGED" ]; then
+            echo "Telemetry is byte-identical to what is already committed — nothing to do."
+            exit 0
+          fi
+          OUTSIDE="$(printf '%s\n' "$STAGED" | grep -v '^docs/seo/telemetry/' || true)"
+          if [ -n "$OUTSIDE" ]; then
+            echo "REFUSING TO COMMIT — staged paths outside docs/seo/telemetry/:"
+            printf '  %s\n' $OUTSIDE
+            echo ""
+            echo "This job holds write access solely to persist the telemetry trend."
+            echo "Anything else in the diff means the script wrote somewhere it should not."
+            exit 1
+          fi
+
+          printf '%s\n' "$STAGED" | sed 's/^/  /'
+          git commit -m "chore(seo): GSC telemetry $(date -u +%F)"
+
+          # Force-push is safe here and nowhere else: `seo/telemetry` is a
+          # bot-owned branch that is rebuilt from main every run, and the
+          # workflow `concurrency:` group means two runs cannot race for it.
+          # `main` itself blocks force-pushes (allow_force_pushes: false).
+          git push --force origin "$BRANCH"
+
+          # One PR, reused. Same contract as the issue: a fresh PR every Monday
+          # is a PR you learn to close unread.
+          # `// empty` matters: with no open PR, `.[0].number` is null and jq
+          # prints the four characters "null", which is a non-empty string and
+          # would make the check below think a PR already exists — so the very
+          # first run would report "Updated PR #null" and never open one.
+          EXISTING="$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number // empty' || true)"
+          if [ -n "$EXISTING" ]; then
+            echo "Updated PR #$EXISTING (the force-push is the update)."
+          else
+            gh pr create \
+              --head "$BRANCH" \
+              --base main \
+              --title "chore(seo): GSC telemetry" \
+              --body "$(printf '%s\n' \
+                "Weekly Search Console telemetry from \`.github/workflows/seo-scoreboard.yml\`." \
+                "" \
+                "Data only — \`docs/seo/telemetry/**\` is never imported by the app and never runs during a build." \
+                "The readable version of this run is in the issue *SEO scoreboard — Search Console telemetry*." \
+                "" \
+                "**Merge it.** Week-over-week deltas diff against the newest telemetry file the next run can see." \
+                "Unmerged weeks are carried forward on this branch so the trend survives, but the numbers are only" \
+                "visible to anything reading \`main\` — including the content pipeline, which consumes" \
+                "\`docs/seo/telemetry/latest.json\` — once this lands.")"
+          fi
+
+      # Same upsert-in-place contract as seo-healthcheck.yml. A weekly job that
+      # opens a fresh issue every Monday trains you to close them unread — and
+      # on a FAILED run the script emits its setup instructions as the report
+      # body, so the "you must add the service account to the property" message
+      # lands in the issue instead of dying in a collapsed log group.
+      - name: Open or update the scoreboard issue
+        if: always()
+        uses: actions/github-script@v7
+        env:
+          EXIT_CODE: ${{ steps.run.outputs.exit_code }}
+        with:
+          script: |
+            const fs = require('fs');
+            const TITLE = 'SEO scoreboard — Search Console telemetry';
+            const LABEL = 'seo';
+
+            let body = '';
+            try {
+              body = fs.readFileSync('seo-scoreboard.md', 'utf8');
+            } catch {
+              body = '_The scoreboard produced no report at all — the job died before it could ' +
+                     'write one. Check the run log._';
+            }
+            const failed = (process.env.EXIT_CODE || '1') !== '0';
+
+            try {
+              await github.rest.issues.createLabel({
+                ...context.repo, name: LABEL, color: '0e8a16',
+                description: 'Automated SEO guards',
+              });
+            } catch (e) { if (e.status !== 422) throw e; }
+
+            const stamp = new Date().toISOString().slice(0, 16).replace('T', ' ');
+            const header = failed
+              ? `> ⚠️ **Setup required — no measurement was taken** (${stamp} UTC).\n\n`
+              : `> Measured ${stamp} UTC.\n\n`;
+            const footer = `\n\n<sub>Updated in place by \`.github/workflows/seo-scoreboard.yml\` ` +
+              `([run](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})). ` +
+              `Weekly, Mondays 14:00 UTC. Re-run any time from the Actions tab.</sub>`;
+            const full = header + body + footer;
+
+            // Search open AND closed: the issue is closed once nothing needs
+            // attention, and a later run must reopen that same issue rather
+            // than start a second thread on the same subject.
+            const existing = await github.rest.issues.listForRepo({
+              ...context.repo, state: 'all', labels: LABEL, per_page: 100,
+            });
+            const issue = existing.data.find(i => i.title === TITLE);
+
+            if (issue) {
+              await github.rest.issues.update({
+                ...context.repo, issue_number: issue.number, body: full, state: 'open',
+              });
+            } else {
+              await github.rest.issues.create({
+                ...context.repo, title: TITLE, body: full, labels: [LABEL],
+              });
+            }
+
+      - name: Fail the run when the scoreboard could not measure anything
+        if: steps.run.outputs.exit_code != '0'
+        run: |
+          echo "The GSC scoreboard exited ${{ steps.run.outputs.exit_code }}."
+          echo "Read the issue titled 'SEO scoreboard — Search Console telemetry' — it"
+          echo "names exactly what is missing. Common first-run cause: the"
+          echo "GSC_SERVICE_ACCOUNT_JSON secret does not exist yet."
+          exit 1

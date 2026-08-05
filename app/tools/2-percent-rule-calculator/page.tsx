@@ -18,6 +18,7 @@ import { ArrowUpRight, Check } from "lucide-react";
 import { getSiteUrl } from "@/lib/site-url";
 import { TwoPercentRuleWidget } from "@/components/tools/two-percent-rule-widget";
 import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta";
+import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
 
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
@@ -351,6 +352,10 @@ export default function TwoPercentRuleCalculatorPage() {
           </section>
 
           {/* Footer */}
+          {/* Backlink engine — quiet, collapsed, renders nothing if this
+              tool has no embeddable widget. See the component header. */}
+          <ToolEmbedInvite slug="2-percent-rule-calculator" />
+
           <ToolsConversionCta calculatorName="2% rule calculator" hook="A 2% ratio is a reason to look harder, not a verdict. TrueCap's full analyzer replaces the screen with a real underwrite — expenses, financing, and a plain-English verdict. It's free." />
 
           <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">

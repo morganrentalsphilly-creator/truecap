@@ -4,6 +4,7 @@ import { ArrowUpRight, Check } from "lucide-react";
 import { getSiteUrl } from "@/lib/site-url";
 import { OnePercentRuleWidget } from "@/components/tools/one-percent-rule-widget";
 import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta";
+import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
 
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
@@ -290,6 +291,13 @@ export default function OnePercentRulePage() {
               <ArrowUpRight className="w-4 h-4" />
             </Link>
           </section>
+
+          {/* Backlink engine — quiet, collapsed, renders nothing if this
+
+              tool has no embeddable widget. See the component header. */}
+
+          <ToolEmbedInvite slug="1-percent-rule-calculator" />
+
 
           <ToolsConversionCta calculatorName="1% rule calculator" hook="The 1% rule is a 5-second screener. When you want a real underwrite — DSCR, cap rate, projections, tax — open the full TrueCap analyzer. It's free." />
 
