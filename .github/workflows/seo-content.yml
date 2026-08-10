@@ -91,7 +91,23 @@ jobs:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           claude_args: |
             --model claude-sonnet-5
-            --max-turns 40
+            # Was 40. Every run since 2026-08-02 died on
+            # "Reached maximum number of turns (40)" — 2026-08-04 and
+            # 2026-08-07 both, on the old prompt AND the new one. A run that
+            # exhausts its turns produces NOTHING, opens no PR, and still bills
+            # the full model spend, twice a week. It also emails Morgan a
+            # failure every time, which is how a real failure later gets
+            # ignored.
+            #
+            # Two changes, together: this ceiling goes up, and the prompt below
+            # now bounds the WORK per run (one page, one lane) instead of
+            # bounding it by luck. A maintenance run that reads telemetry,
+            # edits one post, runs tsc + vitest, and opens a PR is comfortably
+            # inside 70; the old prompt's "write a 1,500-word post, verify every
+            # internal link resolves, run the suite, fix what fails" was not
+            # inside 40 and never had been — the two successes on 2026-08-02
+            # were smaller jobs against a stocked backlog.
+            --max-turns 70
             --allowedTools "Read,Write,Edit,Glob,Grep,WebSearch,WebFetch,Bash(npm test),Bash(npx tsc:*),Bash(npx vitest:*),Bash(node scripts/seo/*),Bash(git:*),Bash(gh pr:*)"
           prompt: |
             You are writing one SEO blog post for TrueCap (https://usetruecap.com),
@@ -107,6 +123,23 @@ jobs:
                SLUG / TITLE / SERP_TITLE / DESCRIPTION / PUBLISHED_AT /
                MODIFIED_AT / READING_TIME_MIN consts, `export const metadata`,
                FAQS array, JSON-LD blocks, and an `opengraph-image.tsx` sibling.
+
+            ## Scope — read this before you plan anything
+            You have a hard turn ceiling. A run that hits it produces NOTHING:
+            no PR, no partial credit, and the full model spend is billed anyway.
+            Every run from 2026-08-04 onward died exactly that way. So:
+
+            - **ONE lane per run, ONE page.** Refresh one page, or pay down link
+              debt on one post, or write one new post. Never two. Never "while
+              I'm here".
+            - **Budget your reads.** Read only what you need for the lane you
+              picked. Do not read every recent post to decide.
+            - **Stop and ship at two-thirds.** If you are around turn 45 and not
+              yet committing, stop adding and commit what is genuinely finished.
+              A small correct PR beats an ambitious run that dies.
+            - If a check fails and the fix is not obvious within a few turns,
+              revert your change, open the PR as a DRAFT explaining what you hit,
+              and stop. Do not grind on it until the ceiling kills the run.
 
             ## Pick the work — in this order, highest priority with work available
             ${{ inputs.topic && format('The operator has overridden the priority order. Write this net-new post: {0} — and follow the P3 rules below, including the PR title prefix.', inputs.topic) || 'Work the priority order below. Do NOT skip to P3 because it is more interesting.' }}
@@ -126,13 +159,18 @@ jobs:
             a page that is already fine just to have made a change — if the gap
             is not real, say so and drop to P2.
 
-            ### P2 — PAY DOWN INTERNAL-LINK DEBT
-            The blog is the only part of this site with meaningful inbound
-            links, so it is where link equity enters. Bring posts up to the
-            docs/SEO-ROADMAP.md §8 standard (the repo records 68 of 69 posts
-            under it) and add contextual links to pages that are thin on them.
-            Run `node scripts/seo/guard-baseline.mjs --write` to bank the
-            progress so the ratchet cannot slip backwards.
+            ### P2 — PAY DOWN INTERNAL-LINK DEBT  ← the default lane
+            This is what most runs should do, and it needs no telemetry, so it
+            is also the fallback when `latest.json` does not exist yet.
+
+            Pick exactly ONE post that is under the docs/SEO-ROADMAP.md §8
+            standard (the repo records 68 of 69 under it — `node
+            scripts/seo/guard-baseline.mjs` tells you which, so use it rather
+            than reading posts to find out). Bring that ONE post up to
+            standard, then run `node scripts/seo/guard-baseline.mjs --write` to
+            bank the progress so the ratchet cannot slip backwards. Stop there.
+            Sixty-eight posts at one per run is nine months of useful work; you
+            do not need to finish it today.
             Prefer links that a reader would actually click in context. A link
             block bolted to the bottom of a post is link-stuffing; it helps
             nothing and it reads as spam to both humans and Google.
