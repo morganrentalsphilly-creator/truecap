@@ -12,7 +12,7 @@ import * as Sentry from "@sentry/nextjs";
 import { Building2, Loader2 } from "lucide-react";
 import { getPropertyCompsAction, getSavedDealCompsAction } from "@/app/actions/property-comps";
 import type { EnrichmentComp, PropertyEnrichment } from "@/lib/property-enrichment/rentcast";
-import { checkCompRange } from "@/lib/comp-range-check";
+import { buildCompWarnings } from "@/lib/comps-summary";
 import { getCompsFreshness } from "@/lib/comps-freshness";
 import type { PipelineStage } from "@/lib/pipeline";
 import { useToast } from "@/hooks/use-toast";
@@ -50,36 +50,6 @@ function CompList({ title, comps, suffix }: { title: string; comps: EnrichmentCo
       </ul>
     </div>
   );
-}
-
-/** Build actionable warnings when the analyzer's rent/price sit outside the
- *  pulled comp ranges - the "make comps actionable" layer. */
-function buildCompWarnings(
-  data: PropertyEnrichment,
-  currentRent: number | null | undefined,
-  currentPrice: number | null | undefined
-): { tone: "warn" | "info"; text: string }[] {
-  const out: { tone: "warn" | "info"; text: string }[] = [];
-  const rent = checkCompRange(currentRent, data.rentRange);
-  if (rent.status === "above" && rent.pctOutside >= 5) {
-    out.push({
-      tone: "warn",
-      text: `Your ${money(currentRent ?? null)}/mo rent is ${rent.pctOutside}% above the comp range (${money(rent.low)}–${money(rent.high)}). Cash flow may be optimistic - comps support up to about ${money(rent.high)}.`,
-    });
-  } else if (rent.status === "below" && rent.pctOutside >= 8) {
-    out.push({
-      tone: "info",
-      text: `Your ${money(currentRent ?? null)}/mo rent is ${rent.pctOutside}% below the comp range (${money(rent.low)}–${money(rent.high)}) - you may be under-renting.`,
-    });
-  }
-  const price = checkCompRange(currentPrice, data.valueRange);
-  if (price.status === "above" && price.pctOutside >= 5) {
-    out.push({
-      tone: "warn",
-      text: `Your ${money(currentPrice ?? null)} price is ${price.pctOutside}% above the comp value range (${money(price.low)}–${money(price.high)}) - you may be paying above recent sales.`,
-    });
-  }
-  return out;
 }
 
 export function PropertyCompsCard({

@@ -100,6 +100,7 @@ import {
 import { calculateMaxAllowableOffer } from "@/lib/max-allowable-offer";
 import { PropertyCompsCard } from "@/components/investcalc/property-comps-card";
 import type { PropertyEnrichment } from "@/lib/property-enrichment/rentcast";
+import { buildCompsRowSummary } from "@/lib/comps-summary";
 import type { DataConfidence } from "@/lib/data-confidence";
 import { REPORT_MODES, type ReportMode } from "@/lib/pdf-export-constants";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -446,6 +447,20 @@ export function AnalysisDashboard({
   // an empty row). Sticky for the session — the provider won't appear
   // mid-session.
   const [compsUnavailable, setCompsUnavailable] = useState(false);
+  // Comps already on screen shouldn't stay hidden behind a click. When a saved
+  // deal loads its previously-saved comp set — free, no RentCast quota (see the
+  // mount effect in property-comps-card) — open the row once so the finding is
+  // visible instead of collapsed behind "Comps pulled".
+  //
+  // Deliberately fires AT MOST ONCE, so it can never re-open a row the user
+  // collapsed on purpose. The live-pull path is unaffected: the user is already
+  // inside the open row when they click Run comps.
+  const compsAutoOpenedRef = useRef(false);
+  useEffect(() => {
+    if (!compsQaData || compsAutoOpenedRef.current) return;
+    compsAutoOpenedRef.current = true;
+    openRow("comps");
+  }, [compsQaData, openRow]);
   // Comps belong to ONE address. The card clears itself on address change
   // while mounted, but New Analysis empties the address and UNMOUNTS it —
   // an unmounted card can't report null, so the dashboard clears too or a
@@ -750,9 +765,7 @@ export function AnalysisDashboard({
           deferredWhatIfState.vacancyPp
         )}: ${fmtSignedMonthly(deferredWhatIfState.result.netCashFlow)}`
       : "Stress it — find your max offer and worst case",
-    comps: compsQaData
-      ? "Comps pulled — see how your rent & price compare"
-      : "Not run yet — pull comps for this address",
+    comps: buildCompsRowSummary(compsQaData, values?.monthlyRent ?? null, values?.purchasePrice ?? null),
     assumptions: "Every source behind these numbers — and how to change them",
     "deal-qa": "Ask anything about this deal",
     notes: "Your private notes on this deal",
