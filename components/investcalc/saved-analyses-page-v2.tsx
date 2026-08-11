@@ -105,6 +105,7 @@ import {
   type BuyBoxFitSummary,
   type NamedBuyBox,
 } from "@/lib/buy-box";
+import type { DealOfferLine } from "@/lib/deal-offer-line";
 import type { OwnedEquitySummary } from "@/lib/owned-equity";
 import { setSavedDealCloseDateAction } from "@/app/actions/saved-analyses";
 import { recomputeSavedDealVerdict } from "@/lib/recompute-saved-deal-verdict";
@@ -150,6 +151,15 @@ export type SavedAnalysisListItem = {
   pipelineStage?: PipelineStage;
   tags?: string[];
   dataConfidence?: DataConfidence | null;
+  /**
+   * "Your number" for a shopping-stage deal — computed SERVER-side in
+   * app/dashboard/saved-analyses/page.tsx via lib/deal-offer-line, because it
+   * needs the deal's form_snapshot (too heavy to ship to the client for every
+   * row) plus the user's buy boxes. Undefined when the user has no usable buy
+   * box, the deal is owned/closed, or the snapshot doesn't parse — the row
+   * then renders exactly as before.
+   */
+  offerLine?: DealOfferLine | null;
   /** Optional investor labels (Phase 2 #11). nickname displays in place of
    *  the address; market/neighborhood are optional columns. */
   nickname?: string | null;
@@ -190,6 +200,54 @@ function toBuyBoxMetrics(item: SavedAnalysisListItem): BuyBoxDealMetrics {
 
 function fmtMoney0(n: number): string {
   return `$${Math.round(n).toLocaleString("en-US")}`;
+}
+
+/**
+ * The Deal Watchlist line — "your number" for a shopping-stage deal, so a
+ * saved deal reads as a live object at a glance instead of a static row.
+ *
+ *   misses:  Your number: $297,400 · asking $329,000 (−$31,600)
+ *   clears:  Clears your buy box · ceiling $412,000
+ *
+ * Solved server-side (lib/deal-offer-line) from the deal's own snapshot and
+ * the user's buy boxes; renders nothing when there is no line, which is the
+ * common case for free users and owned deals.
+ */
+function OfferLineRow({ offer }: { offer?: DealOfferLine | null }) {
+  if (!offer) return null;
+
+  if (offer.kind === "clears") {
+    return (
+      <p className="mt-1.5 text-xs text-muted-foreground">
+        <span className="font-semibold text-success">Clears your buy box</span>
+        {offer.maxPrice != null ? (
+          <>
+            {" · "}up to <span className="tabular-nums">{fmtMoney0(offer.maxPrice)}</span>
+          </>
+        ) : null}
+      </p>
+    );
+  }
+
+  const gap =
+    offer.asking != null && offer.asking > offer.maxPrice ? offer.asking - offer.maxPrice : null;
+  return (
+    <p className="mt-1.5 text-xs text-muted-foreground">
+      <span className="font-semibold text-foreground">
+        Your number: <span className="tabular-nums">{fmtMoney0(offer.maxPrice)}</span>
+      </span>
+      {gap != null ? (
+        <>
+          {" · "}
+          <span className="tabular-nums text-[var(--metric-negative)]">
+            −{fmtMoney0(gap)}
+            {offer.discountPct != null && offer.discountPct > 0 ? ` (−${offer.discountPct}%)` : ""}
+          </span>{" "}
+          to pass
+        </>
+      ) : null}
+    </p>
+  );
 }
 
 function fmtCloseDate(iso: string): string {
@@ -2218,6 +2276,7 @@ export function SavedAnalysesPage({
                         ) : null}
                       </div>
                       <p className="mt-1 text-xs text-muted-foreground">{getTypeLabel(item.propertyType)}</p>
+                      <OfferLineRow offer={item.offerLine} />
                       <NextActionLine recommendation={item.recommendation} netCashFlow={item.netCashFlowMonthly} stage={item.status === "completed" ? "closed" : item.pipelineStage} meetsBuyBox={buyBoxFitById?.get(item.id)?.anyPass ?? null} hasCloseDate={item.closeDate != null} className="mt-1.5" />
                       <OwnedEquityCell item={item} enabled={ownedEquityEnabled} />
                     </div>

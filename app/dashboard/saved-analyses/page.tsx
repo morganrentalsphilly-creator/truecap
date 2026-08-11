@@ -23,7 +23,11 @@ import {
 } from "@/lib/entitlements";
 import { recomputeSavedDealVerdict } from "@/lib/recompute-saved-deal-verdict";
 import { computeRowEquity } from "@/lib/owned-equity-series";
-import { DEFAULT_PIPELINE_STAGE, isPipelineStage } from "@/lib/pipeline";
+import { DEFAULT_PIPELINE_STAGE, isActiveStage, isPipelineStage } from "@/lib/pipeline";
+import { computeDealOfferLine, type DealOfferLine } from "@/lib/deal-offer-line";
+import { investmentFormSchema } from "@/lib/investcalc-schema";
+import { buyBoxHasCriteria, type NamedBuyBox } from "@/lib/buy-box";
+import { listBuyBoxesAction } from "@/app/actions/user-buy-boxes";
 import { normalizeDataConfidence } from "@/lib/data-confidence";
 import { getRequestUser, getRequestEntitlements } from "@/lib/request-auth";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
@@ -88,7 +92,32 @@ function getInitials(displayName: string, email: string): string {
   return (displayName || email || "U").slice(0, 2).toUpperCase();
 }
 
-function mapSavedRow(row: SavedAnalysisRow): SavedAnalysisListItem | null {
+/**
+ * Compute the "your number is $X" offer line for one row.
+ *
+ * Server-side on purpose: it needs the deal's form_snapshot (recomputing from
+ * the snapshot is the canon — see recomputeSavedDealVerdict above) and the
+ * user's buy boxes. Shipping every row's full snapshot to the client just to
+ * render one line would bloat the payload; only the small result crosses.
+ *
+ * Returns null (line hidden) when the user has no usable buy box, the snapshot
+ * doesn't validate, or the deal is no longer shopping — never throws.
+ */
+function offerLineForRow(
+  row: SavedAnalysisRow,
+  activeBuyBoxes: NamedBuyBox[],
+  isShoppingStage: boolean
+): DealOfferLine | null {
+  if (activeBuyBoxes.length === 0) return null;
+  const parsed = investmentFormSchema.safeParse(row.form_snapshot);
+  if (!parsed.success) return null;
+  return computeDealOfferLine(parsed.data, activeBuyBoxes, { isShoppingStage }).offer;
+}
+
+function mapSavedRow(
+  row: SavedAnalysisRow,
+  activeBuyBoxes: NamedBuyBox[] = []
+): SavedAnalysisListItem | null {
   const capRateRaw = row.result_snapshot?.capRate;
   const parsedCapRate =
     typeof capRateRaw === "number"
@@ -150,6 +179,15 @@ function mapSavedRow(row: SavedAnalysisRow): SavedAnalysisListItem | null {
     status: row.is_completed ? "completed" : row.is_archived ? "archived" : "active",
     closeDate: row.close_date ?? null,
     ownedEquity: computeRowEquity(row),
+    // Shopping stages only: an owned/closed/passed deal has no offer left to
+    // make. Mirrors the same guard the deal workspace applies.
+    offerLine: offerLineForRow(
+      row,
+      activeBuyBoxes,
+      !row.is_completed && !row.is_archived && isActiveStage(
+        isPipelineStage(row.pipeline_stage) ? row.pipeline_stage : DEFAULT_PIPELINE_STAGE
+      )
+    ),
   };
 }
 
@@ -261,10 +299,24 @@ export default async function DashboardSavedAnalysesPage({
   if (isMissingColumn(error)) {
     ({ data: rows, error } = await buildSavedQuery(BASE_SELECT));
   }
+  // The user's active buy boxes, fetched ONCE for the whole list so each row's
+  // offer line ("your number is $X") can be solved server-side. Failure or a
+  // free user (canUse false) simply yields no boxes → no offer lines, and the
+  // list renders exactly as it did before. Never throws.
+  let activeBuyBoxes: NamedBuyBox[] = [];
+  try {
+    const boxesResult = await listBuyBoxesAction();
+    if (boxesResult.ok && boxesResult.canUse) {
+      activeBuyBoxes = boxesResult.boxes.filter((b) => b.isActive && buyBoxHasCriteria(b));
+    }
+  } catch {
+    // Offer lines are an enhancement, never a reason to fail the deals list.
+  }
+
   // Dynamic string selects (for the labels fallback) defeat Supabase's row-type
   // inference, so the rows come back loosely typed — cast through unknown.
   const mappedItems = ((rows ?? []) as unknown[])
-    .map((row) => mapSavedRow(row as SavedAnalysisRow))
+    .map((row) => mapSavedRow(row as SavedAnalysisRow, activeBuyBoxes))
     .filter((row): row is SavedAnalysisListItem => Boolean(row));
   const displayName = getDisplayName((profile as ProfileRow | null) ?? null, user.email);
   const initials = getInitials(displayName, user.email ?? "");
