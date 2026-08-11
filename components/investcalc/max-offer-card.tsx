@@ -12,7 +12,7 @@
  * the solvers in lib/max-allowable-offer.ts so the math stays consistent.
  */
 
-import { useEffect, useMemo, useState, type ChangeEvent } from "react";
+import { useEffect, useId, useMemo, useState, type ChangeEvent } from "react";
 import { Target } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -135,6 +135,18 @@ export function MaxOfferCard({ values, buyBoxThresholds }: MaxOfferCardProps) {
   const currentPrice = values ? Number(values.purchasePrice) : null;
   const currentMeets = reqRent?.alreadyMet ?? reqRate?.alreadyMet ?? false;
 
+  // A11Y: the target labels were bare <Label>s with no htmlFor, so clicking a
+  // label did nothing and each <Input> had no accessible name (screen readers
+  // announced "edit text" with no context). useId() gives stable, collision-
+  // safe ids so multiple instances (e.g. compare view) never share an id.
+  // This card also ships on the public /d/ share viewer, so the fields must be
+  // usable on assistive tech.
+  const uid = useId();
+  const capRateId = `${uid}-cap-rate`;
+  const cocId = `${uid}-coc`;
+  const cashFlowId = `${uid}-cash-flow`;
+  const dscrId = `${uid}-dscr`;
+
   return (
     <div className="bg-card rounded-2xl border border-border shadow-sm p-5 sm:p-6">
       <div className="flex items-center gap-2 mb-1.5">
@@ -153,40 +165,40 @@ export function MaxOfferCard({ values, buyBoxThresholds }: MaxOfferCardProps) {
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
         <div>
-          <Label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
+          <Label htmlFor={capRateId} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
             Target Cap Rate <span className="font-normal lowercase tracking-normal">(opt)</span>
           </Label>
           <div className="relative">
-            <Input type="number" inputMode="decimal" step="0.1" value={capRateInput} onChange={edit(setCapRateInput)} placeholder="Any" className="pr-7 border-input bg-background" />
+            <Input id={capRateId} type="number" inputMode="decimal" step="0.1" value={capRateInput} onChange={edit(setCapRateInput)} placeholder="Any" className="pr-7 border-input bg-background" />
             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">%</span>
           </div>
         </div>
         <div>
-          <Label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
+          <Label htmlFor={cocId} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
             Target Cash-on-Cash <span className="font-normal lowercase tracking-normal">(opt)</span>
           </Label>
           <div className="relative">
-            <Input type="number" inputMode="decimal" step="0.1" value={cocInput} onChange={edit(setCocInput)} placeholder="Any" className="pr-7 border-input bg-background" />
+            <Input id={cocId} type="number" inputMode="decimal" step="0.1" value={cocInput} onChange={edit(setCocInput)} placeholder="Any" className="pr-7 border-input bg-background" />
             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">%</span>
           </div>
         </div>
         <div>
-          <Label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
+          <Label htmlFor={cashFlowId} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
             Min Cash Flow
           </Label>
           <div className="relative">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">$</span>
-            <Input type="number" inputMode="numeric" step="50" value={cashFlowInput} onChange={edit(setCashFlowInput)} placeholder="0" className="pl-7 border-input bg-background" />
+            <Input id={cashFlowId} type="number" inputMode="numeric" step="50" value={cashFlowInput} onChange={edit(setCashFlowInput)} placeholder="0" className="pl-7 border-input bg-background" />
           </div>
         </div>
         <div>
-          <Label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
+          <Label htmlFor={dscrId} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
             Min DSCR{" "}
             <span className="font-normal lowercase tracking-normal">
               {isCashDeal ? "(n/a — cash purchase)" : "(opt)"}
             </span>
           </Label>
-          <Input type="number" inputMode="decimal" step="0.05" value={dscrInput} onChange={edit(setDscrInput)} placeholder="1.25" disabled={isCashDeal} className="border-input bg-background" />
+          <Input id={dscrId} type="number" inputMode="decimal" step="0.05" value={dscrInput} onChange={edit(setDscrInput)} placeholder="1.25" disabled={isCashDeal} className="border-input bg-background" />
         </div>
       </div>
 

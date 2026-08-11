@@ -9,7 +9,7 @@
  * profit-per-day, and the break-even ARV.
  */
 
-import { useMemo, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import { TrendingUp, ChevronDown, ChevronUp } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -56,6 +56,17 @@ export function FixFlipCard({ values, defaultRehab }: FixFlipCardProps) {
   const [dpInput, setDpInput] = useState<string>(String(defaultDp));
   const [carryOverride, setCarryOverride] = useState<string>("");
   const [expanded, setExpanded] = useState(true);
+
+  // A11Y: labels lacked htmlFor and inputs lacked id, so labels weren't
+  // clickable and the fields had no accessible name. useId() namespaces the
+  // ids so multiple card instances never collide.
+  const uid = useId();
+  const rehabId = `${uid}-rehab`;
+  const arvId = `${uid}-arv`;
+  const holdId = `${uid}-hold`;
+  const sellPctId = `${uid}-sell-pct`;
+  const dpId = `${uid}-down-payment`;
+  const carryId = `${uid}-carry`;
 
   const effectiveRehab = (() => {
     const typed = Number(rehabInput);
@@ -115,12 +126,13 @@ export function FixFlipCard({ values, defaultRehab }: FixFlipCardProps) {
       {expanded && (
         <div className="grid grid-cols-1 min-[400px]:grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 mb-4">
           <div>
-            <Label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
+            <Label htmlFor={rehabId} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
               Rehab Budget
             </Label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">$</span>
               <Input
+                id={rehabId}
                 type="number"
                 inputMode="decimal"
                 value={rehabInput}
@@ -134,12 +146,13 @@ export function FixFlipCard({ values, defaultRehab }: FixFlipCardProps) {
             )}
           </div>
           <div>
-            <Label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
+            <Label htmlFor={arvId} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
               ARV
             </Label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">$</span>
               <Input
+                id={arvId}
                 type="number"
                 inputMode="decimal"
                 value={arvInput}
@@ -150,11 +163,12 @@ export function FixFlipCard({ values, defaultRehab }: FixFlipCardProps) {
             </div>
           </div>
           <div>
-            <Label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
+            <Label htmlFor={holdId} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
               Hold Time
             </Label>
             <div className="relative">
               <Input
+                id={holdId}
                 type="number"
                 inputMode="decimal"
                 value={holdInput}
@@ -165,11 +179,12 @@ export function FixFlipCard({ values, defaultRehab }: FixFlipCardProps) {
             </div>
           </div>
           <div>
-            <Label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
+            <Label htmlFor={sellPctId} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
               Selling Costs
             </Label>
             <div className="relative">
               <Input
+                id={sellPctId}
                 type="number"
                 inputMode="decimal"
                 step="0.5"
@@ -181,11 +196,12 @@ export function FixFlipCard({ values, defaultRehab }: FixFlipCardProps) {
             </div>
           </div>
           <div>
-            <Label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
+            <Label htmlFor={dpId} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
               Down Payment
             </Label>
             <div className="relative">
               <Input
+                id={dpId}
                 type="number"
                 inputMode="decimal"
                 value={dpInput}
@@ -197,12 +213,13 @@ export function FixFlipCard({ values, defaultRehab }: FixFlipCardProps) {
             <p className="text-[10px] text-muted-foreground mt-1">100 for cash buy</p>
           </div>
           <div>
-            <Label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
+            <Label htmlFor={carryId} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
               Carry / mo (optional)
             </Label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">$</span>
               <Input
+                id={carryId}
                 type="number"
                 inputMode="decimal"
                 value={carryOverride}

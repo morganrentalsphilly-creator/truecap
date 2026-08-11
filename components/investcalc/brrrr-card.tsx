@@ -10,7 +10,7 @@
  * when the BRRRR pulls all the original capital back out.
  */
 
-import { useMemo, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import { Repeat, ChevronDown, ChevronUp } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -54,6 +54,19 @@ export function BrrrrCard({ values, result, defaultRehab }: BrrrrCardProps) {
   const [holdMonthsInput, setHoldMonthsInput] = useState<string>("6");
   const [refiCloseInput, setRefiCloseInput] = useState<string>("2");
   const [expanded, setExpanded] = useState(true);
+
+  // A11Y: each field's <Label> had no htmlFor and the <Input> no id, so the
+  // labels weren't clickable and had no programmatic association (no
+  // accessible name for screen readers). useId() keeps ids unique per
+  // instance.
+  const uid = useId();
+  const rehabId = `${uid}-rehab`;
+  const arvId = `${uid}-arv`;
+  const refiLtvId = `${uid}-refi-ltv`;
+  const refiRateId = `${uid}-refi-rate`;
+  const refiTermId = `${uid}-refi-term`;
+  const holdId = `${uid}-hold`;
+  const refiCloseId = `${uid}-refi-close`;
 
   // Default the rehab budget from the rehab estimator's total whenever it
   // changes - but only if the user hasn't typed their own value.
@@ -126,12 +139,13 @@ export function BrrrrCard({ values, result, defaultRehab }: BrrrrCardProps) {
       {expanded && (
         <div className="grid grid-cols-1 min-[400px]:grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 mb-4">
           <div>
-            <Label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
+            <Label htmlFor={rehabId} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
               Rehab Budget
             </Label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">$</span>
               <Input
+                id={rehabId}
                 type="number"
                 inputMode="decimal"
                 value={rehabInput}
@@ -147,12 +161,13 @@ export function BrrrrCard({ values, result, defaultRehab }: BrrrrCardProps) {
             )}
           </div>
           <div>
-            <Label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
+            <Label htmlFor={arvId} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
               ARV
             </Label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">$</span>
               <Input
+                id={arvId}
                 type="number"
                 inputMode="decimal"
                 value={arvInput}
@@ -163,11 +178,12 @@ export function BrrrrCard({ values, result, defaultRehab }: BrrrrCardProps) {
             </div>
           </div>
           <div>
-            <Label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
+            <Label htmlFor={refiLtvId} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
               Refi LTV
             </Label>
             <div className="relative">
               <Input
+                id={refiLtvId}
                 type="number"
                 inputMode="decimal"
                 step="1"
@@ -179,11 +195,12 @@ export function BrrrrCard({ values, result, defaultRehab }: BrrrrCardProps) {
             </div>
           </div>
           <div>
-            <Label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
+            <Label htmlFor={refiRateId} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
               Refi Rate
             </Label>
             <div className="relative">
               <Input
+                id={refiRateId}
                 type="number"
                 inputMode="decimal"
                 step="0.125"
@@ -195,11 +212,12 @@ export function BrrrrCard({ values, result, defaultRehab }: BrrrrCardProps) {
             </div>
           </div>
           <div>
-            <Label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
+            <Label htmlFor={refiTermId} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
               Refi Term
             </Label>
             <div className="relative">
               <Input
+                id={refiTermId}
                 type="number"
                 inputMode="decimal"
                 step="1"
@@ -211,11 +229,12 @@ export function BrrrrCard({ values, result, defaultRehab }: BrrrrCardProps) {
             </div>
           </div>
           <div>
-            <Label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
+            <Label htmlFor={holdId} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
               Hold (rehab → refi)
             </Label>
             <div className="relative">
               <Input
+                id={holdId}
                 type="number"
                 inputMode="decimal"
                 step="1"
@@ -227,11 +246,12 @@ export function BrrrrCard({ values, result, defaultRehab }: BrrrrCardProps) {
             </div>
           </div>
           <div>
-            <Label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
+            <Label htmlFor={refiCloseId} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
               Refi Closing
             </Label>
             <div className="relative">
               <Input
+                id={refiCloseId}
                 type="number"
                 inputMode="decimal"
                 step="0.25"

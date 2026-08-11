@@ -3620,6 +3620,19 @@ export function InvestCalcPage({
         description: result.message ?? "Something went wrong. Try again.",
         variant: "destructive",
       });
+    } catch {
+      // The action REJECTED rather than returning {ok:false} — a network blip
+      // mid-save, a cold-start 500, or a tab one deploy behind main (Next 16
+      // throws on an unrecognized Server Action). The finally below already
+      // frees the button, but without this catch the throw was UNHANDLED and
+      // the user got no signal at all: their deal silently didn't save while
+      // the UI looked idle. Toast a retryable message; the "Unsaved changes"
+      // badge stays armed so a retry is one click away. Mirrors login-form.tsx.
+      toast({
+        title: "Could not save",
+        description: "Something interrupted the save. Check your connection and try again.",
+        variant: "destructive",
+      });
     } finally {
       setIsSavingDeal(false);
     }

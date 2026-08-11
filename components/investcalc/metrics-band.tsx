@@ -22,7 +22,7 @@
  * stays in analysis-dashboard.tsx.
  */
 
-import type { ReactNode } from "react";
+import { useRef, type KeyboardEvent, type ReactNode } from "react";
 import { ChevronRight } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
@@ -424,6 +424,41 @@ function DealStrategyToggle({
   strategy: DealStrategy;
   onChange: (next: DealStrategy) => void;
 }) {
+  // A11Y (ARIA radiogroup keyboard pattern): the three lens buttons were each
+  // a tab stop with no arrow-key handling, so keyboard users had to Tab
+  // through all of them and Space/Enter to pick. A proper radiogroup is ONE
+  // tab stop (roving tabindex: only the checked radio is tabbable) with
+  // Arrow/Home/End moving focus AND selecting. Refs let us move focus to the
+  // newly selected radio.
+  const btnRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const selectedIndex = Math.max(
+    0,
+    DEAL_STRATEGIES.findIndex((s) => s.value === strategy)
+  );
+  const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    let next = selectedIndex;
+    switch (e.key) {
+      case "ArrowRight":
+      case "ArrowDown":
+        next = (selectedIndex + 1) % DEAL_STRATEGIES.length;
+        break;
+      case "ArrowLeft":
+      case "ArrowUp":
+        next = (selectedIndex - 1 + DEAL_STRATEGIES.length) % DEAL_STRATEGIES.length;
+        break;
+      case "Home":
+        next = 0;
+        break;
+      case "End":
+        next = DEAL_STRATEGIES.length - 1;
+        break;
+      default:
+        return;
+    }
+    e.preventDefault();
+    onChange(DEAL_STRATEGIES[next]!.value);
+    btnRefs.current[next]?.focus();
+  };
   return (
     <div className="mb-3">
       <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
@@ -433,15 +468,21 @@ function DealStrategyToggle({
         role="radiogroup"
         aria-label="Investor lens - reorders which metrics lead"
         className="grid grid-cols-3 gap-0.5 rounded-lg bg-muted/60 p-0.5"
+        onKeyDown={handleKeyDown}
       >
-        {DEAL_STRATEGIES.map((s) => {
+        {DEAL_STRATEGIES.map((s, i) => {
           const active = strategy === s.value;
           return (
             <button
               key={s.value}
+              ref={(el) => {
+                btnRefs.current[i] = el;
+              }}
               type="button"
               role="radio"
               aria-checked={active}
+              // Roving tabindex: only the selected radio is in the tab order.
+              tabIndex={i === selectedIndex ? 0 : -1}
               title={s.hint}
               onClick={() => onChange(s.value)}
               className={cn(

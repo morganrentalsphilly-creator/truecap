@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef, type KeyboardEvent } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { Home, Building2, KeyRound, Target } from "lucide-react";
 import { InvestmentFormValues, PROPERTY_TYPES } from "@/lib/investcalc-schema";
@@ -33,6 +34,43 @@ export function PropertyTypeSection({
 }: PropertyTypeSectionProps) {
   const selected = form.watch("propertyType");
 
+  // A11Y (ARIA radiogroup keyboard pattern): the type buttons were each a tab
+  // stop with no arrow-key handling. A radiogroup should be ONE tab stop
+  // (roving tabindex) with Arrow/Home/End moving focus AND changing the
+  // selection. Refs let us move focus onto the newly selected radio.
+  const btnRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const selectedIndex = Math.max(
+    0,
+    PROPERTY_TYPES.findIndex((t) => t.value === selected)
+  );
+  const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    let next = selectedIndex;
+    switch (e.key) {
+      case "ArrowRight":
+      case "ArrowDown":
+        next = (selectedIndex + 1) % PROPERTY_TYPES.length;
+        break;
+      case "ArrowLeft":
+      case "ArrowUp":
+        next = (selectedIndex - 1 + PROPERTY_TYPES.length) % PROPERTY_TYPES.length;
+        break;
+      case "Home":
+        next = 0;
+        break;
+      case "End":
+        next = PROPERTY_TYPES.length - 1;
+        break;
+      default:
+        return;
+    }
+    e.preventDefault();
+    form.setValue(
+      "propertyType",
+      PROPERTY_TYPES[next]!.value as InvestmentFormValues["propertyType"]
+    );
+    btnRefs.current[next]?.focus();
+  };
+
   return (
     <div className="bg-card rounded-2xl border border-border shadow-sm p-6">
       <div className="flex items-center gap-2 mb-4">
@@ -47,16 +85,26 @@ export function PropertyTypeSection({
         <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
           Property Type
         </p>
-        <div role="radiogroup" aria-label="Property type" className="grid grid-cols-3 gap-2">
-          {PROPERTY_TYPES.map((type) => {
+        <div
+          role="radiogroup"
+          aria-label="Property type"
+          className="grid grid-cols-3 gap-2"
+          onKeyDown={handleKeyDown}
+        >
+          {PROPERTY_TYPES.map((type, i) => {
             const Icon = ICONS[type.icon];
             const isSelected = selected === type.value;
             return (
               <button
                 key={type.value}
+                ref={(el) => {
+                  btnRefs.current[i] = el;
+                }}
                 type="button"
                 role="radio"
                 aria-checked={isSelected}
+                // Roving tabindex: only the selected radio is in the tab order.
+                tabIndex={i === selectedIndex ? 0 : -1}
                 aria-label={`${type.label} - ${type.description}`}
                 title={type.description}
                 onClick={() =>

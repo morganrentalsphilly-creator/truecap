@@ -12,7 +12,7 @@
  * onTotalChange callback so the BRRRR / Flip cards can consume it.
  */
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 import { Hammer, ChevronDown, ChevronUp } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -57,6 +57,14 @@ export function RehabEstimatorCard({
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [contingency, setContingency] = useState<string>("10");
   const [expanded, setExpanded] = useState(false);
+
+  // A11Y: labels had no htmlFor and inputs no id — clicking a label did
+  // nothing and screen readers announced the fields with no name. useId()
+  // keeps the ids unique across instances.
+  const uid = useId();
+  const sqftId = `${uid}-sqft`;
+  const bathId = `${uid}-baths`;
+  const contingencyId = `${uid}-contingency`;
 
   // Keep sqft / bath inputs in sync if the form values change after mount.
   useEffect(() => {
@@ -147,10 +155,11 @@ export function RehabEstimatorCard({
 
       <div className="grid grid-cols-3 gap-3 mb-3">
         <div>
-          <Label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
+          <Label htmlFor={sqftId} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
             Sq ft
           </Label>
           <Input
+            id={sqftId}
             type="number"
             inputMode="numeric"
             step="50"
@@ -161,10 +170,11 @@ export function RehabEstimatorCard({
           />
         </div>
         <div>
-          <Label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
+          <Label htmlFor={bathId} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
             Baths
           </Label>
           <Input
+            id={bathId}
             type="number"
             inputMode="decimal"
             step="0.5"
@@ -175,11 +185,12 @@ export function RehabEstimatorCard({
           />
         </div>
         <div>
-          <Label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
+          <Label htmlFor={contingencyId} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
             Contingency
           </Label>
           <div className="relative">
             <Input
+              id={contingencyId}
               type="number"
               inputMode="numeric"
               step="1"
