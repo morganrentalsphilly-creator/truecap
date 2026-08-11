@@ -787,10 +787,22 @@ const LADDER_ROWS: { label: string; cells: (boolean | string)[] }[] = [
   { label: "Cap rate · CoC · DSCR · cash flow", cells: [true, true, true] },
   { label: "0-100 Deal Score + plain-English verdict", cells: [true, true, true] },
   { label: "Lender-ready PDF export", cells: [false, "One deal", "Unlimited"] },
-  { label: "Save & revisit deals", cells: [false, false, true] },
+  // Free CAN save + revisit up to 5 deals (lib/entitlements.ts: free plan has
+  // save_deal + max_saved_deals:5); Pro adds editing + unlimited. This row
+  // previously showed [false,false,true] — a flat "Free can't save" — which
+  // contradicted the homepage FAQ two sections down AND the /pricing matrix,
+  // at the exact moment someone decides to pay. The $5 PDF is a one-time
+  // export, not an account, so it genuinely has no save capability.
+  { label: "Save & revisit deals", cells: ["Up to 5", false, "Unlimited"] },
   { label: "Compare deals side-by-side", cells: [false, false, true] },
   { label: "Buy box: personal pass/fail on every deal", cells: [false, false, true] },
-  { label: "10-year projections · tax · exit", cells: [false, false, true] },
+  // The $5 PDF is byte-identical to a Pro export minus custom branding — it
+  // DOES contain the 10-year projection, tax strategy and exit sections (see
+  // lib/pdf-generator.ts; the homepage FAQ and /pricing both say so). This
+  // row previously showed the $5 column as false, contradicting them. Free
+  // stays false: these sections are Pro-only IN-APP; the $5 path delivers
+  // them only inside the one exported PDF, hence the qualifier not a check.
+  { label: "10-year projections · tax · exit", cells: [false, "In the PDF", true] },
   { label: "BRRRR · fix & flip · sensitivity", cells: [false, false, true] },
 ];
 

@@ -8,7 +8,8 @@
  *
  * Agents are a high-LTV segment: each agent analyzes dozens of deals
  * per year for buyer clients, recommends tools to other agents, and
- * is naturally drawn to the share-deal-link Pro feature.
+ * is naturally drawn to the co-branded share-link Pro feature (plain
+ * read-only share links are free for everyone; branding is the Pro part).
  */
 
 import type { Metadata } from "next";
@@ -49,7 +50,7 @@ const USE_CASES: { icon: typeof Calculator; title: string; body: string }[] = [
   {
     icon: Share2,
     title: "Share a read-only analysis link instead of a PDF email",
-    body: "Pro generates a clean public link with the deal's metrics + your branding. Send it in a text. Clients can open on their phone, no signup.",
+    body: "Every analysis gets a clean public link free — send it in a text, clients open it on their phone with no signup. Pro adds your logo, colors and lead capture to it.",
   },
   {
     icon: FileDown,
@@ -155,7 +156,7 @@ export default function ForAgentsPage() {
               "Paste the listing address. Rent, mortgage rate, and property tax auto-fill from HUD, FRED, and state data.",
               "Adjust the financing for your specific client (different down payment, DSCR-loan rate, etc).",
               "Hit Calculate. Cap rate, cash-on-cash, DSCR, and 10-year cash flow appear in 1 second.",
-              "Pro: hit Share to generate a branded read-only link. Text it to your client before you leave the property.",
+              "Hit Share for a read-only link (free) — text it to your client before you leave the property. On Pro it carries your branding.",
             ].map((step, i) => (
               <li key={i} className="flex items-start gap-3">
                 <span className="inline-flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-extrabold tabular-nums">
@@ -219,7 +220,7 @@ export default function ForAgentsPage() {
             Free to start. Pro pays for itself on the first deal you don&apos;t lose.
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
-            Free covers cash-flow analysis (cap rate, CoC, DSCR, monthly cash flow) — enough to underwrite at the showing. Pro unlocks share links, PDF export, 10-year projections, tax strategy, and the strategy analyzers. Cancel anytime.
+            Free covers cash-flow analysis (cap rate, CoC, DSCR, monthly cash flow) and read-only share links — enough to underwrite at the showing and send it to a client. Pro unlocks co-branded share links, PDF export, 10-year projections, tax strategy, and the strategy analyzers. Cancel anytime.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link

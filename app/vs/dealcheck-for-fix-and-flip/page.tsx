@@ -188,7 +188,7 @@ export default function VsDealcheckForFixAndFlipPage() {
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
                 <li>You flip on mobile at properties all day and need a native app.</li>
                 <li>You already have a DealCheck Plus or Pro subscription.</li>
-                <li>You want listing-import-from-Zillow as part of the workflow.</li>
+                <li>You want full property detail imported from a Zillow listing (TrueCap accepts a pasted listing link but pulls only the address).</li>
               </ul>
             </div>
           </div>

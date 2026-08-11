@@ -158,7 +158,7 @@ export default function ThreeWayComparisonPost() {
             </h2>
             <p
               className="text-sm sm:text-base leading-relaxed text-foreground"
-              dangerouslySetInnerHTML={{ __html: `They&apos;re the three calculators most rental investors evaluate. <strong>DealCheck</strong> is the established competitor with native mobile apps and a tighter listing-import workflow. <strong>BiggerPockets Calculator</strong> is the household name that bundles with a \$390/year community subscription. <strong>TrueCap</strong> is the modern alternative with a deeper free tier, address auto-fill from HUD + FRED + state property tax, and a single \$29.99/mo Pro tier that bundles features the other two split across multiple plans. Pick TrueCap if you want the strongest free tier and simplest pricing. Pick DealCheck if you need native iOS / Android apps. Pick BiggerPockets if you&apos;re already paying for the community.` }}
+              dangerouslySetInnerHTML={{ __html: `They&apos;re the three calculators most rental investors evaluate. <strong>DealCheck</strong> is the established competitor with native mobile apps and a deeper listing-import workflow (full property detail, where TrueCap&apos;s link paste pulls the address only). <strong>BiggerPockets Calculator</strong> is the household name that bundles with a \$390/year community subscription. <strong>TrueCap</strong> is the modern alternative with a deeper free tier, address auto-fill from HUD + FRED + state property tax, and a single \$29.99/mo Pro tier that bundles features the other two split across multiple plans. Pick TrueCap if you want the strongest free tier and simplest pricing. Pick DealCheck if you need native iOS / Android apps. Pick BiggerPockets if you&apos;re already paying for the community.` }}
             />
           </section>
 
@@ -195,7 +195,7 @@ export default function ThreeWayComparisonPost() {
             <h2>What each does better</h2>
             <div dangerouslySetInnerHTML={{ __html: `<ul>
               <li><strong>TrueCap wins</strong>: deepest free tier, simplest pricing, address auto-fill from authoritative open data (HUD + FRED + state tax), plain-English verdict (Strong / Solid / Mixed / Marginal / Negative), portfolio rollup across saved deals, deal score with subscore breakdown, MAO solver, sensitivity grid, tax-strategy modeling with bracket-aware after-tax cash flow.</li>
-              <li><strong>DealCheck wins</strong>: native iOS + Android apps, listing-import-from-Zillow workflow, longer track record in the BRRRR community, broader brand recognition among investors.</li>
+              <li><strong>DealCheck wins</strong>: native iOS + Android apps, deeper listing import (full property detail from Zillow, where TrueCap&apos;s link paste pulls only the address), longer track record in the BRRRR community, broader brand recognition among investors.</li>
               <li><strong>BiggerPockets wins</strong>: bundled with the largest real-estate community on the internet, books + courses + forums + podcasts all in one subscription, calculator output format is the one your private-money lender or syndicate partner has already seen.</li>
             </ul>` }} />
 
@@ -206,7 +206,7 @@ export default function ThreeWayComparisonPost() {
               <li><strong>&quot;I underwrite on my phone at every showing.&quot;</strong> DealCheck — native apps.</li>
               <li><strong>&quot;I already pay for BiggerPockets for the community.&quot;</strong> Stay with BiggerPockets&apos; calculator; you&apos;re already paying.</li>
               <li><strong>&quot;I want a plain-English verdict, not just metrics.&quot;</strong> TrueCap — Strong / Solid / Mixed / Marginal / Negative with subscore breakdown.</li>
-              <li><strong>&quot;I want listing import from Zillow / Redfin.&quot;</strong> DealCheck.</li>
+              <li><strong>&quot;I want full property detail imported from a Zillow / Redfin listing.&quot;</strong> DealCheck. (TrueCap takes a pasted listing link too, but pulls only the address — not the listing&apos;s price, taxes and photos.)</li>
               <li><strong>&quot;I want a portfolio rollup across saved deals.&quot;</strong> TrueCap.</li>
             </ul>` }} />
 

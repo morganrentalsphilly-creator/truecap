@@ -53,7 +53,7 @@ type Row = { feature: string; truecap: string; dealcheck: string; winner: Verdic
 
 const MATRIX: Row[] = [
   { feature: "Free tier depth",                   truecap: "Full underwriting (cap rate, CoC, DSCR, NCF, monthly cash flow) — no signup",        dealcheck: "Free Starter capped at 15 saved properties; signup required",          winner: "truecap" },
-  { feature: "Address auto-fill",                 truecap: "HUD rent + FRED rate + state property tax, live",                                    dealcheck: "Property auto-import from listing sites",                              winner: "tie" },
+  { feature: "Address auto-fill",                 truecap: "Paste a Zillow/Redfin link or address → HUD rent + FRED rate + state property tax, live", dealcheck: "Full property auto-import from listing sites (price, taxes, photos)",   winner: "tie" },
   { feature: "10-year projection",                truecap: "Pro — full rent + expense + appreciation compounding",                              dealcheck: "Built-in; one of the strongest views",                                 winner: "dealcheck" },
   { feature: "Tax strategy modeling",             truecap: "Pro — depreciation, interest deduction, after-tax CF, bracket-aware",               dealcheck: "Basic tax view",                                                       winner: "truecap" },
   { feature: "Exit scenarios",                    truecap: "Pro — sell-at-year-N modeling with equity + IRR",                                   dealcheck: "Available",                                                            winner: "tie" },
@@ -385,17 +385,19 @@ const DEALCHECK_FAQ: FaqItem[] = [
     question: "Can I import properties from Zillow or Redfin with TrueCap?",
     answer: (
       <>
-        Not directly via a listing scrape — TrueCap uses authoritative
-        data sources (HUD Fair Market Rent, FRED 30-year mortgage rate,
-        state-level property tax rates) to pre-fill your form when you
-        paste an address. DealCheck&apos;s property-import-from-listing
-        is faster for adjusting comparable rent, but TrueCap&apos;s
-        approach gives you defensible numbers when a lender asks where
-        the rent estimate came from.
+        Partly. You can paste a Zillow, Redfin, Realtor.com, Homes.com or
+        Trulia link and TrueCap pulls the <strong>address</strong> out of
+        it, then pre-fills your form from authoritative sources (HUD Fair
+        Market Rent, FRED 30-year mortgage rate, state-level property tax
+        rates). What it does <em>not</em> do is scrape the listing page
+        for price, taxes and photos — DealCheck&apos;s full
+        property-detail import is deeper there. The trade-off is
+        deliberate: TrueCap&apos;s numbers come from sources you can cite
+        when a lender asks where the rent estimate came from.
       </>
     ),
     plainTextAnswer:
-      "Not via listing scrape. TrueCap pre-fills the form from authoritative sources (HUD Fair Market Rent, FRED 30-year mortgage rate, state property tax). DealCheck imports directly from listing sites. TrueCap's approach gives defensible numbers for lenders.",
+      "Partly. Paste a Zillow/Redfin/Realtor link and TrueCap extracts the address, then pre-fills from authoritative sources (HUD Fair Market Rent, FRED 30-year mortgage rate, state property tax). It does not scrape the listing for price/taxes — DealCheck's full property-detail import is deeper there. TrueCap's approach gives defensible numbers for lenders.",
   },
   {
     question: "When should I pick DealCheck over TrueCap?",

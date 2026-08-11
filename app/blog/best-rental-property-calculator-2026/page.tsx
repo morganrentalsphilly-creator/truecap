@@ -75,7 +75,7 @@ const RANKED_CALCULATORS = [
     ],
     cons: [
       "PWA, not native iOS/Android apps (DealCheck wins on pure mobile)",
-      "No listing import — you paste the address rather than import from Zillow",
+      "Listing import is address-only — paste a Zillow/Redfin link and TrueCap pulls the address, not the listing's price, taxes or photos",
     ],
     pickIf: "You want the deepest free tier and the most capable Pro tier at the cheapest single price.",
   },

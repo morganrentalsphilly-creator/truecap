@@ -91,7 +91,7 @@ const TOOLS: Tool[] = [
       "Sensitivity grid, BRRRR + fix-and-flip analyzers, MAO solver, tax strategy on Pro",
     ],
     tradeoffs: [
-      "No property import from listing sites (auto-fill uses public data sources instead)",
+      "No full property import from listing sites — a pasted Zillow/Redfin link yields the address, then auto-fill uses public data sources",
       "PWA rather than native iOS/Android apps",
       "Saving, comparing, share links, and PDF export are Pro features",
     ],
