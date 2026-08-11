@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import { CheckCircle2, Loader2, Mail } from "lucide-react";
 import { requestPasswordResetAction } from "@/app/actions/auth";
 import { forgotPasswordSchema, type ForgotPasswordInput } from "@/lib/auth-schema";
+import { CaptchaWidget, captchaEnabled } from "@/components/auth/captcha-widget";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -22,6 +23,7 @@ import { useToast } from "@/hooks/use-toast";
 export function ForgotPasswordForm() {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
 
   const form = useForm<ForgotPasswordInput>({
@@ -33,7 +35,7 @@ export function ForgotPasswordForm() {
   async function onSubmit(values: ForgotPasswordInput) {
     setIsSubmitting(true);
     try {
-      const result = await requestPasswordResetAction(values);
+      const result = await requestPasswordResetAction({ ...values, captchaToken: captchaToken ?? undefined });
 
       if (!result.ok) {
         toast({
@@ -105,10 +107,12 @@ export function ForgotPasswordForm() {
             </FormItem>
           )}
         />
+        <CaptchaWidget onToken={setCaptchaToken} />
+
         <Button
           type="submit"
           className="h-12 w-full rounded-xl bg-primary text-sm font-semibold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.22)] hover:bg-primary/95"
-          disabled={isSubmitting}
+          disabled={isSubmitting || (captchaEnabled && !captchaToken)}
         >
           {isSubmitting ? (
             <>

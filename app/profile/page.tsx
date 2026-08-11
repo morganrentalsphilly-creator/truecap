@@ -196,12 +196,10 @@ export default async function ProfilePage({
           : "Full Pro access billed monthly.",
       features: slug.startsWith("agent_pro")
         ? [
-            // Only ship-verified agent features — the client portal and
-            // white-label embeds are entitlements without an implementation
-            // yet (catalog `shipped: false`), so advertising them here would
-            // repeat the pricing card's vapor. Add them back when they ship.
             "Everything in Pro",
             "Client rosters + per-client buy boxes",
+            "Client portal — a co-branded shortlist per buyer",
+            "White-label embeds on your own site",
           ]
         : [
             "Save and compare deals",

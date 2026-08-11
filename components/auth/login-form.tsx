@@ -9,6 +9,7 @@ import { Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react";
 import { resendConfirmationAction, signInAction } from "@/app/actions/auth";
 import { internalNextPathOrNull, loginSchema, safeInternalNextPath, type LoginInput } from "@/lib/auth-schema";
 import { GoogleAuthButton } from "@/components/auth/google-auth-button";
+import { CaptchaWidget, captchaEnabled } from "@/components/auth/captcha-widget";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -26,6 +27,7 @@ export function LoginForm() {
   const searchParams = useSearchParams();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   // When a sign-in fails because the email isn't confirmed, surface a
   // one-click "Resend confirmation" affordance. We stash the email
@@ -77,7 +79,7 @@ export function LoginForm() {
   async function onSubmit(values: LoginInput) {
     setIsSubmitting(true);
     try {
-      const result = await signInAction(values);
+      const result = await signInAction({ ...values, captchaToken: captchaToken ?? undefined });
 
       if (!result.ok) {
         // Auth action maps the Supabase "email not confirmed" code to a
@@ -273,10 +275,12 @@ export function LoginForm() {
           </div>
         ) : null}
 
+        <CaptchaWidget onToken={setCaptchaToken} />
+
         <Button
           type="submit"
           className="h-12 w-full rounded-xl bg-primary text-sm font-semibold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.22)] hover:bg-primary/95"
-          disabled={isSubmitting}
+          disabled={isSubmitting || (captchaEnabled && !captchaToken)}
         >
           {isSubmitting ? (
             <>

@@ -41,6 +41,9 @@ export async function signInAction(input: unknown): Promise<AuthActionResult> {
   const { error } = await supabase.auth.signInWithPassword({
     email: parsed.data.email.trim(),
     password: parsed.data.password,
+    // Forwarded only when the captcha widget produced one; Supabase ignores it
+    // until captcha is enabled on the project, then requires it.
+    ...(parsed.data.captchaToken ? { options: { captchaToken: parsed.data.captchaToken } } : {}),
   });
 
   if (error) {
@@ -78,6 +81,7 @@ export async function signUpAction(
     password: parsed.data.password,
     options: {
       emailRedirectTo: `${siteUrl}/auth/callback?next=${encodeURIComponent(next)}`,
+      ...(parsed.data.captchaToken ? { captchaToken: parsed.data.captchaToken } : {}),
     },
   });
 
@@ -109,6 +113,7 @@ export async function requestPasswordResetAction(
   const supabase = await createServerSupabaseClient();
   const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email.trim(), {
     redirectTo: `${siteUrl}/auth/callback?next=/auth/update-password`,
+    ...(parsed.data.captchaToken ? { captchaToken: parsed.data.captchaToken } : {}),
   });
 
   if (error) {

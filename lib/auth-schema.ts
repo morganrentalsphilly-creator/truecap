@@ -3,6 +3,10 @@ import { z } from "zod";
 export const loginSchema = z.object({
   email: z.string().min(1, "Enter your email").email("Enter a valid email"),
   password: z.string().min(1, "Enter your password"),
+  /** Turnstile token — present only when the deployment has captcha configured
+   *  (components/auth/captcha-widget). Passed through to Supabase Auth, which
+   *  ignores it while its captcha setting is off. */
+  captchaToken: z.string().max(4096).optional(),
 });
 
 export const signUpSchema = z
@@ -13,6 +17,7 @@ export const signUpSchema = z
       .min(8, "Password must be at least 8 characters")
       .max(72, "Password is too long"),
     confirmPassword: z.string().min(1, "Confirm your password"),
+    captchaToken: z.string().max(4096).optional(),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",
@@ -21,6 +26,7 @@ export const signUpSchema = z
 
 export const forgotPasswordSchema = z.object({
   email: z.string().min(1, "Enter your email").email("Enter a valid email"),
+  captchaToken: z.string().max(4096).optional(),
 });
 
 export const updatePasswordSchema = z

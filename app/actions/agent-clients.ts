@@ -18,6 +18,9 @@ import { z } from "zod";
 import * as Sentry from "@sentry/nextjs";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getEntitlementsForUser, hasPlanFeature } from "@/lib/entitlements";
+import { mintSignedToken } from "@/lib/signed-token";
+import { PORTAL_SCOPE } from "@/lib/client-portal";
+import { getSiteUrl } from "@/lib/site-url";
 
 export type AgentClient = {
   id: string;
@@ -209,4 +212,51 @@ export async function deleteAgentClientAction(input: unknown): Promise<AgentClie
     return { ok: false, code: "SERVER_ERROR", message: "Couldn't delete the client. Please try again." };
   }
   return fetchClients(supabase, userId);
+}
+
+/**
+ * Mint the public portal link for one client. Gated on `agent_portal` (a
+ * strict superset gate over the roster's `client_buy_box`, so a plan that
+ * somehow had rosters but not the portal can't leak one). The token is signed
+ * (lib/signed-token) so the public page can trust {agentUserId, clientId}
+ * without a session; SHARE_LINK_SECRET unset → NOT_CONFIGURED, not a bad link.
+ */
+export async function getClientPortalLinkAction(
+  input: unknown
+): Promise<
+  | { ok: true; url: string }
+  | { ok: false; code: "SIGN_IN_REQUIRED" | "ENTITLEMENT_REQUIRED" | "VALIDATION_ERROR" | "NOT_FOUND" | "NOT_CONFIGURED" | "SERVER_ERROR"; message: string }
+> {
+  const parsed = z.object({ clientId: z.string().uuid() }).safeParse(input);
+  if (!parsed.success) return { ok: false, code: "VALIDATION_ERROR", message: "Invalid client." };
+
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in." };
+
+  const entitlements = await getEntitlementsForUser(supabase, user.id);
+  if (!hasPlanFeature(entitlements, "agent_portal")) {
+    return { ok: false, code: "ENTITLEMENT_REQUIRED", message: "The client portal is an Agent Pro feature." };
+  }
+
+  // Confirm the client is on THIS agent's roster before minting a link to it.
+  const { data: client, error } = await supabase
+    .from("agent_clients")
+    .select("id")
+    .eq("id", parsed.data.clientId)
+    .eq("agent_user_id", user.id)
+    .maybeSingle();
+  if (error) {
+    Sentry.captureException(error, { tags: { feature: "agent-clients-portal" } });
+    return { ok: false, code: "SERVER_ERROR", message: "Couldn't create the link. Please try again." };
+  }
+  if (!client) return { ok: false, code: "NOT_FOUND", message: "That client no longer exists." };
+
+  const token = mintSignedToken(PORTAL_SCOPE, { a: user.id, c: parsed.data.clientId });
+  if (!token) {
+    return { ok: false, code: "NOT_CONFIGURED", message: "Portal links aren't configured on this deployment yet." };
+  }
+  return { ok: true, url: `${getSiteUrl()}/portal/${token}` };
 }

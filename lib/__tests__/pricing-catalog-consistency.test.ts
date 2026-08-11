@@ -19,8 +19,7 @@
  * behaves that way.
  */
 import { describe, expect, it } from "vitest";
-import { execSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { FEATURE_CATALOG, tierHas, type FeatureKey } from "@/lib/entitlements-catalog";
 
@@ -112,10 +111,23 @@ describe("unshipped entitlements never reach a marketing surface", () => {
     // The contract: an agent feature may only be advertised once something
     // actually gates on it. If a future change flips shipped:true (or removes
     // the flag) without wiring hasPlanFeature("<key>") anywhere, this fails.
-    const sources = execSync("git ls-files app components", { cwd: ROOT, encoding: "utf8" })
-      .split("\n")
-      .filter((f) => /\.(ts|tsx)$/.test(f))
-      .map((f) => readFileSync(join(ROOT, f), "utf8"))
+    // Walk the filesystem (not `git ls-files`) so a brand-new, not-yet-tracked
+    // consumer still counts — the whole point of this guard is to run BEFORE a
+    // commit that ships the feature.
+    const walk = (dir: string): string[] => {
+      const out: string[] = [];
+      for (const ent of readdirSync(dir, { withFileTypes: true })) {
+        if (ent.name === "node_modules" || ent.name === ".next" || ent.name.startsWith(".")) continue;
+        const full = join(dir, ent.name);
+        if (ent.isDirectory()) out.push(...walk(full));
+        else if (/\.(ts|tsx)$/.test(ent.name)) out.push(full);
+      }
+      return out;
+    };
+    const sources = ["app", "components", "lib"]
+      .flatMap((d) => walk(join(ROOT, d)))
+      .filter((f) => !f.includes("__tests__"))
+      .map((f) => readFileSync(f, "utf8"))
       .join("\n");
     for (const key of ["agent_portal", "embed_whitelabel"] as const) {
       const flaggedUnshipped = FEATURE_CATALOG[key].shipped === false;

@@ -15,6 +15,7 @@ import {
   type SignUpInput,
 } from "@/lib/auth-schema";
 import { GoogleAuthButton } from "@/components/auth/google-auth-button";
+import { CaptchaWidget, captchaEnabled } from "@/components/auth/captcha-widget";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -32,6 +33,7 @@ export function SignUpForm() {
   const searchParams = useSearchParams();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -57,7 +59,7 @@ export function SignUpForm() {
     // returns here (the action threads it into emailRedirectTo). Without
     // it, an email-confirmation signup dropped the return path — a started
     // Pro checkout or pending save never resumed after the confirm hop.
-    const result = await signUpAction(values, safeNextPath ?? undefined);
+    const result = await signUpAction({ ...values, captchaToken: captchaToken ?? undefined }, safeNextPath ?? undefined);
 
     if (!result.ok) {
       toast({
@@ -222,10 +224,12 @@ export function SignUpForm() {
           )}
         />
 
+        <CaptchaWidget onToken={setCaptchaToken} />
+
         <Button
           type="submit"
           className="h-12 w-full rounded-xl bg-primary text-sm font-semibold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.22)] hover:bg-primary/95"
-          disabled={isSubmitting}
+          disabled={isSubmitting || (captchaEnabled && !captchaToken)}
         >
           {isSubmitting ? (
             <>

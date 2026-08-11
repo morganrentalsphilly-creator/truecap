@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { UserDefaultsCard } from "@/components/settings/user-defaults-card";
 import { BuyBoxesCard } from "@/components/settings/buy-boxes-card";
 import { AgentClientsCard } from "@/components/settings/agent-clients-card";
+import { WhitelabelEmbedCard } from "@/components/settings/whitelabel-embed-card";
 import { RateAlertsToggle } from "@/components/settings/rate-alerts-toggle";
 import { WeeklySummaryToggle } from "@/components/settings/weekly-summary-toggle";
 import { getEntitlementsForUser, hasPlanFeature } from "@/lib/entitlements";
@@ -46,6 +47,10 @@ export default async function SettingsPage() {
         {/* Agent Pro client roster — self-hides for everyone without the
             client_buy_box entitlement (and while its migration is pending). */}
         <AgentClientsCard />
+
+        {/* Agent Pro white-label embed generator — self-hides for everyone
+            without the embed_whitelabel entitlement. */}
+        <WhitelabelEmbedCard />
 
         {/* Deal rate alerts — opt-in for the weekly rate-alert email.
             Self-hides until the schema migration is applied. */}
