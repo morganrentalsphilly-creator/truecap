@@ -137,17 +137,37 @@ export function confidenceLabel(level: ConfidenceLevel): string {
  * high while both are sourced can only have failed the completeness check —
  * which is why that case advises filling in rent/price rather than re-fetching.
  */
-export function describeConfidenceGap(confidence: DataConfidence): string | null {
+export function describeConfidenceGap(
+  confidence: DataConfidence,
+  opts?: { propertyType?: string | null }
+): string | null {
   if (confidence.level === "high") return null;
 
   const hasRentSource = confidence.fields.monthlyRent != null;
   const hasRateSource = confidence.fields.interestRate != null;
 
+  /**
+   * HUD rent auto-fill runs ONLY on the single-family branch
+   * (investcalc-page.tsx gates it on isSingleFamily), because multi-unit rent
+   * lives per-unit and a single county FMR figure can't stand in for it. So on
+   * a multi-family / owner-occupant deal, rent provenance is unobtainable — and
+   * telling those users to pick their address again would be advice that can
+   * never work, repeated on every deal they own.
+   */
+  const rentSourceAttainable =
+    opts?.propertyType == null || opts.propertyType === "single-family";
+
   if (!hasRentSource && !hasRateSource) {
-    return "Pick your address from the suggestions to pull live HUD market rent and FRED mortgage rates.";
+    return rentSourceAttainable
+      ? "Pick your address from the suggestions to pull live HUD market rent and FRED mortgage rates."
+      : "Pick your address from the suggestions to pull the current FRED mortgage rate.";
   }
   if (!hasRentSource) {
-    return "Pick your address from the suggestions to pull live HUD market rent for this area.";
+    // Nothing actionable for a multi-unit deal: the rate is already sourced and
+    // rent never can be. Stay silent rather than nag.
+    return rentSourceAttainable
+      ? "Pick your address from the suggestions to pull live HUD market rent for this area."
+      : null;
   }
   if (!hasRateSource) {
     return "Pick your address from the suggestions to pull the current FRED mortgage rate.";

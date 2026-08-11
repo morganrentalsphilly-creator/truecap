@@ -25,7 +25,7 @@ import { recomputeSavedDealVerdict } from "@/lib/recompute-saved-deal-verdict";
 import { computeRowEquity } from "@/lib/owned-equity-series";
 import { DEFAULT_PIPELINE_STAGE, isActiveStage, isPipelineStage } from "@/lib/pipeline";
 import { computeDealOfferLine, type DealOfferLine } from "@/lib/deal-offer-line";
-import { investmentFormSchema } from "@/lib/investcalc-schema";
+import { normalizeInvestmentFormSnapshot } from "@/lib/investcalc-schema";
 import { buyBoxHasCriteria, type NamedBuyBox } from "@/lib/buy-box";
 import { listBuyBoxesAction } from "@/app/actions/user-buy-boxes";
 import { normalizeDataConfidence } from "@/lib/data-confidence";
@@ -109,9 +109,15 @@ function offerLineForRow(
   isShoppingStage: boolean
 ): DealOfferLine | null {
   if (activeBuyBoxes.length === 0) return null;
-  const parsed = investmentFormSchema.safeParse(row.form_snapshot);
-  if (!parsed.success) return null;
-  return computeDealOfferLine(parsed.data, activeBuyBoxes, { isShoppingStage }).offer;
+  // The RESILIENT normalizer, not a raw safeParse — the same one
+  // recomputeSavedDealVerdict uses 30 lines below on this very row, and the
+  // one the deal workspace uses. insuranceInputMode is a required enum with no
+  // default, so a strict parse rejects every pre-v9 snapshot: the row's metrics
+  // would recompute fine while "your number" silently never appeared on
+  // exactly the older deals a long-time user has most of.
+  const values = normalizeInvestmentFormSnapshot(row.form_snapshot);
+  if (!values) return null;
+  return computeDealOfferLine(values, activeBuyBoxes, { isShoppingStage }).offer;
 }
 
 function mapSavedRow(
@@ -224,7 +230,7 @@ export default async function DashboardSavedAnalysesPage({
   }
   const navAccess = getDashboardNavAccess(entitlements);
 
-  const [{ data: profile }, compareIds, isPremium] = await Promise.all([
+  const [{ data: profile }, compareIds, isPremium, buyBoxesResult] = await Promise.all([
     supabase
       .from("profiles")
       .select("first_name, last_name, display_name, avatar_url")
@@ -232,7 +238,19 @@ export default async function DashboardSavedAnalysesPage({
       .maybeSingle(),
     getCompareIdsFromCookie(),
     hasPaidPlanSubscription(supabase, user.id),
+    // Batched here rather than awaited after the deals query: the offer lines
+    // need it, but nothing about it depends on the deals, so it must not sit
+    // serially on the render path. Offer lines are an enhancement — a failure
+    // resolves to null and the list renders exactly as it did before.
+    hasPlanFeature(entitlements, "buy_box")
+      ? listBuyBoxesAction().catch(() => null)
+      : Promise.resolve(null),
   ]);
+
+  const activeBuyBoxes: NamedBuyBox[] =
+    buyBoxesResult && buyBoxesResult.ok && buyBoxesResult.canUse
+      ? buyBoxesResult.boxes.filter((b) => b.isActive && buyBoxHasCriteria(b))
+      : [];
 
   const resolvedSearchParams = (await searchParams) ?? {};
   const sortField = normalizeSortField(resolvedSearchParams.sort) ?? "saved";
@@ -299,20 +317,6 @@ export default async function DashboardSavedAnalysesPage({
   if (isMissingColumn(error)) {
     ({ data: rows, error } = await buildSavedQuery(BASE_SELECT));
   }
-  // The user's active buy boxes, fetched ONCE for the whole list so each row's
-  // offer line ("your number is $X") can be solved server-side. Failure or a
-  // free user (canUse false) simply yields no boxes → no offer lines, and the
-  // list renders exactly as it did before. Never throws.
-  let activeBuyBoxes: NamedBuyBox[] = [];
-  try {
-    const boxesResult = await listBuyBoxesAction();
-    if (boxesResult.ok && boxesResult.canUse) {
-      activeBuyBoxes = boxesResult.boxes.filter((b) => b.isActive && buyBoxHasCriteria(b));
-    }
-  } catch {
-    // Offer lines are an enhancement, never a reason to fail the deals list.
-  }
-
   // Dynamic string selects (for the labels fallback) defeat Supabase's row-type
   // inference, so the rows come back loosely typed — cast through unknown.
   const mappedItems = ((rows ?? []) as unknown[])

@@ -576,6 +576,7 @@ export function MetricsBand({
   strategy,
   onStrategyChange,
   dataConfidence,
+  dealPropertyType,
   returnSummary,
   onMetricSelect,
 }: {
@@ -585,6 +586,9 @@ export function MetricsBand({
   strategy: DealStrategy;
   onStrategyChange: (next: DealStrategy) => void;
   dataConfidence: DataConfidence | null;
+  /** The analyzed deal's property type, so the confidence hint can suppress
+   *  advice that cannot work for multi-unit deals (no HUD rent auto-fill). */
+  dealPropertyType?: string | null;
   /** Exit-engine return summary; null hides the folded-in return members. */
   returnSummary: ReturnSummary | null;
   onMetricSelect?: (tab: AnalysisDashboardTab) => void;
@@ -598,7 +602,7 @@ export function MetricsBand({
           Overview
         </span>
         <span className="h-px flex-1 bg-border" />
-        {dataConfidence ? <DataConfidenceBadge confidence={dataConfidence} /> : null}
+        {dataConfidence ? <DataConfidenceBadge confidence={dataConfidence} propertyType={dealPropertyType} /> : null}
       </div>
 
       {/* Investor lens — moved from the Deal Score card into the band header

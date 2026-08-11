@@ -765,7 +765,9 @@ export function AnalysisDashboard({
           deferredWhatIfState.vacancyPp
         )}: ${fmtSignedMonthly(deferredWhatIfState.result.netCashFlow)}`
       : "Stress it — find your max offer and worst case",
-    comps: buildCompsRowSummary(compsQaData, values?.monthlyRent ?? null, values?.purchasePrice ?? null),
+    comps: buildCompsRowSummary(compsQaData, values?.monthlyRent ?? null, values?.purchasePrice ?? null, {
+      propertyType: values?.propertyType,
+    }),
     assumptions: "Every source behind these numbers — and how to change them",
     "deal-qa": "Ask anything about this deal",
     notes: "Your private notes on this deal",
@@ -1254,6 +1256,7 @@ export function AnalysisDashboard({
           strategy={strategy}
           onStrategyChange={pickStrategy}
           dataConfidence={dataConfidence}
+          dealPropertyType={values?.propertyType}
           returnSummary={returnSummary}
           onMetricSelect={handleMetricJump}
         />

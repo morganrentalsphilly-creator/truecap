@@ -24,9 +24,13 @@ const FIELD_ORDER: DataConfidenceField[] = ["monthlyRent", "interestRate", "prop
 export function DataConfidenceBadge({
   confidence,
   size = "sm",
+  propertyType,
 }: {
   confidence: DataConfidence | null | undefined;
   size?: "sm" | "xs";
+  /** Lets the "to raise this" hint suppress advice that can't work for
+   *  multi-unit deals, where HUD rent auto-fill never runs. */
+  propertyType?: string | null;
 }) {
   if (!confidence) return null;
   const { level } = confidence;
@@ -38,7 +42,7 @@ export function DataConfidenceBadge({
         : "border-border bg-muted/40 text-muted-foreground";
   const Icon = level === "high" ? ShieldCheck : level === "medium" ? Shield : ShieldAlert;
   const tracked = FIELD_ORDER.filter((f) => confidence.fields[f]);
-  const gap = describeConfidenceGap(confidence);
+  const gap = describeConfidenceGap(confidence, { propertyType });
 
   return (
     <Popover>

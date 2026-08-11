@@ -168,3 +168,33 @@ describe("describeConfidenceGap", () => {
     }
   });
 });
+
+describe("describeConfidenceGap — never advises the impossible (audit regression)", () => {
+  const conf = (
+    level: "high" | "medium" | "low",
+    fields: Parameters<typeof describeConfidenceGap>[0]["fields"]
+  ) => ({ level, fields, computedAt: "2026-08-10T00:00:00.000Z" });
+  const rateSrc = { source: "fred" as const, verified: false };
+
+  // HUD rent auto-fill runs only on the single-family branch, so a multi-unit
+  // deal can NEVER obtain rent provenance. Telling those users to re-pick their
+  // address is advice that cannot work — on every deal, forever.
+  for (const propertyType of ["multi-family", "owner-occupant"]) {
+    it(`${propertyType}: never tells the user to pull HUD rent`, () => {
+      const gap = describeConfidenceGap(conf("medium", {}), { propertyType });
+      expect(gap).not.toMatch(/HUD/i);
+      expect(gap).toMatch(/FRED/i); // the rate IS still attainable
+    });
+
+    it(`${propertyType}: stays silent when only the unobtainable rent is missing`, () => {
+      expect(describeConfidenceGap(conf("medium", { interestRate: rateSrc }), { propertyType })).toBeNull();
+    });
+  }
+
+  it("single-family still gets the full rent advice", () => {
+    const gap = describeConfidenceGap(conf("medium", { interestRate: rateSrc }), {
+      propertyType: "single-family",
+    });
+    expect(gap).toMatch(/HUD market rent/i);
+  });
+});

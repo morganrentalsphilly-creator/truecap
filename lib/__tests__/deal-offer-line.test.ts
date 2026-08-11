@@ -79,3 +79,74 @@ describe("computeDealOfferLine", () => {
     expect(r.fit).toBeNull();
   });
 });
+
+describe("the offer line never contradicts the buy-box verdict (audit regressions)", () => {
+  // These are the cases the first version of this module got WRONG: it solved
+  // against return thresholds only, so a deal that missed on market, property
+  // type or budget could still be reported as clearing "your buy box".
+
+  it("a deal in the WRONG STATE is never reported as clearing the box", () => {
+    // Lenient returns (easily met) but the box only buys in Ohio; the sample
+    // deal is not in Ohio.
+    const b = box({ minCapRatePct: 1, minCashFlowMonthly: -9999, targetStates: ["OH"] });
+    const r = computeDealOfferLine(deal, [b]);
+    expect(r.fit?.anyPass).toBe(false);
+    expect(r.offer?.kind).not.toBe("clears");
+    // …and price can't fix a market miss, so no dollar figure is quoted.
+    expect(r.offer?.kind).toBe("blocked");
+    if (r.offer?.kind === "blocked") expect(r.offer.reasons.join()).toMatch(/market/i);
+  });
+
+  it("a deal of the WRONG PROPERTY TYPE reports blocked, not a price", () => {
+    const b = box({
+      minCapRatePct: 1,
+      minCashFlowMonthly: -9999,
+      propertyTypes: ["multi-family"],
+    });
+    const r = computeDealOfferLine(deal, [b]);
+    expect(r.fit?.anyPass).toBe(false);
+    expect(r.offer?.kind).toBe("blocked");
+    if (r.offer?.kind === "blocked") expect(r.offer.reasons.join()).toMatch(/property type/i);
+  });
+
+  it("a box with NO return thresholds is never attributed as 'your buy box' math", () => {
+    // Budget-only box the deal blows past. The number must be the box's own
+    // cap, and it must NOT be silently solved from TrueCap's default target.
+    const budget = (deal.purchasePrice as number) - 50_000;
+    const b = box({ maxPurchasePrice: budget });
+    const r = computeDealOfferLine(deal, [b]);
+    expect(r.offer?.kind).toBe("cut");
+    if (r.offer?.kind === "cut") {
+      expect(r.offer.basis).toBe("buy-box");
+      expect(r.offer.maxPrice).toBe(budget); // the user's cap, not a DSCR-1.25 solve
+    }
+  });
+
+  it("the quoted number never exceeds the box's own budget cap", () => {
+    // Returns are trivially satisfiable, so an uncapped solve would land far
+    // above the budget. The budget must bind.
+    const budget = 100_000;
+    const b = box({ minCapRatePct: 1, maxPurchasePrice: budget });
+    const r = computeDealOfferLine(deal, [b]);
+    if (r.offer?.kind === "cut") expect(r.offer.maxPrice).toBeLessThanOrEqual(budget);
+    if (r.offer?.kind === "clears" && r.offer.maxPrice != null) {
+      expect(r.offer.maxPrice).toBeLessThanOrEqual(budget);
+    }
+  });
+
+  it("whenever it says 'clears', the fit really does pass", () => {
+    const boxes: NamedBuyBox[] = [
+      box({ minCapRatePct: 1, minCashFlowMonthly: -9999 }),
+      box({ minCapRatePct: 20 }),
+      box({ maxPurchasePrice: 10_000 }),
+      box({ minCapRatePct: 1, targetStates: ["OH"] }),
+      box({ minCapRatePct: 1, propertyTypes: ["multi-family"] }),
+    ];
+    for (const b of boxes) {
+      const r = computeDealOfferLine(deal, [b]);
+      if (r.offer?.kind === "clears" && r.offer.basis === "buy-box") {
+        expect(r.fit?.anyPass).toBe(true);
+      }
+    }
+  });
+});

@@ -77,11 +77,24 @@ export function buildCompWarnings(
 export function buildCompsRowSummary(
   data: PropertyEnrichment | null,
   currentRent: number | null | undefined,
-  currentPrice: number | null | undefined
+  currentPrice: number | null | undefined,
+  opts?: { propertyType?: string | null }
 ): string {
   if (!data) return "Not run yet — pull comps for this address";
 
-  const rent = checkCompRange(currentRent, data.rentRange);
+  /**
+   * On multi-unit deals the analysis takes rental income from units[], not from
+   * the top-level monthlyRent field (lib/calc-analysis.ts). That field can still
+   * hold a stale value — applying comps writes it on owner-occupant deals — so
+   * comparing it to the comp range would vouch for, or warn about, a number the
+   * verdict never used. Only the price check is meaningful there.
+   */
+  const rentIsMeaningful =
+    opts?.propertyType == null || opts.propertyType === "single-family";
+
+  const rent = rentIsMeaningful
+    ? checkCompRange(currentRent, data.rentRange)
+    : ({ status: "unknown", pctOutside: 0, low: null, high: null } as const);
   const price = checkCompRange(currentPrice, data.valueRange);
 
   const rentHigh = rent.status === "above" && rent.pctOutside >= COMP_RENT_ABOVE_PCT;

@@ -148,3 +148,30 @@ describe("row summary agrees with the card it fronts", () => {
     expect(COMP_RENT_ABOVE_PCT).toBeLessThan(COMP_RENT_BELOW_PCT);
   });
 });
+
+describe("comps summary respects where rental income actually comes from (audit regression)", () => {
+  // Multi-unit deals take rent from units[], not the top-level monthlyRent
+  // field — which can still hold a stale value. Judging that field against the
+  // comp range would vouch for a number the verdict never used.
+  const data = enrichment({
+    rentRange: { low: 1800, high: 2000 },
+    valueRange: { low: 250_000, high: 320_000 },
+  });
+
+  for (const propertyType of ["multi-family", "owner-occupant"]) {
+    it(`${propertyType}: a stale monthlyRent never produces a rent claim`, () => {
+      const s = buildCompsRowSummary(data, 2400, 300_000, { propertyType });
+      expect(s).not.toMatch(/rent/i);
+    });
+
+    it(`${propertyType}: the PRICE check still works`, () => {
+      const s = buildCompsRowSummary(data, 2400, 400_000, { propertyType });
+      expect(s).toMatch(/Price .* above recent sales/i);
+    });
+  }
+
+  it("single-family is unchanged — the rent check still applies", () => {
+    expect(buildCompsRowSummary(data, 2400, 300_000, { propertyType: "single-family" }))
+      .toMatch(/Rent 20% above comps/);
+  });
+});

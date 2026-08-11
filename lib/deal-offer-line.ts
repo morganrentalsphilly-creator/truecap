@@ -29,15 +29,16 @@ import {
   type BuyBoxFitSummary,
   type BuyBoxPropertyType,
   type NamedBuyBox,
+  type NamedBuyBoxResult,
   deriveStateFromAddress,
   evaluateBuyBoxes,
   summarizeBuyBoxFit,
 } from "@/lib/buy-box";
 import {
   buildMaoTarget,
-  buyBoxContributesToMaoTarget,
-  buyBoxHasReturnTargets,
+  chooseMaoTargetFromBuyBox,
   describeMaoTarget,
+  solveBuyBoxClearingPrice,
 } from "@/lib/mao-targets";
 import { calculateMaxAllowableOffer, meetsTarget } from "@/lib/max-allowable-offer";
 
@@ -50,9 +51,24 @@ import { calculateMaxAllowableOffer, meetsTarget } from "@/lib/max-allowable-off
  * `null` when there is no offer to make (owned/closed/passed deal, no usable
  * buy box + no numeric target, or an unparseable snapshot).
  */
+/**
+ * What the number is measured against. The distinction is load-bearing: the
+ * UI may only say "your buy box" when it really IS the user's box.
+ *   - "buy-box" — solved against the user's own criteria.
+ *   - "default" — solved against TrueCap's canonical bar (break-even cash flow
+ *     + DSCR 1.25) because the user's boxes set no price-solvable target.
+ */
+export type DealOfferBasis = "buy-box" | "default";
+
 export type DealOfferLine =
-  | { kind: "cut"; maxPrice: number; asking: number | null; discountPct: number | null }
-  | { kind: "clears"; maxPrice: number | null };
+  | { kind: "cut"; maxPrice: number; asking: number | null; discountPct: number | null; basis: DealOfferBasis }
+  | { kind: "clears"; maxPrice: number | null; basis: DealOfferBasis }
+  /**
+   * The deal misses on criteria NO price can fix (wrong market, wrong property
+   * type). Quoting a dollar figure here would be a lie — a $1 house in the
+   * wrong state still fails. `reasons` are the failing check labels.
+   */
+  | { kind: "blocked"; reasons: string[] };
 
 export type DealOfferResult = {
   offer: DealOfferLine | null;
@@ -97,7 +113,14 @@ export function computeDealOfferLine(
 
   let fit: BuyBoxFitSummary | null = null;
   let personalLine: string | null = null;
-  let maoBasisBox: NamedBuyBox | null = null;
+  /**
+   * The box the offer line speaks for: the one the deal PASSES when it passes
+   * any (that is the box the "clears" claim refers to), otherwise the
+   * highest-priority active box it misses. Solving against a different box
+   * than the verdict describes is what produced the contradiction this
+   * function now guards against.
+   */
+  let decidingBox: NamedBuyBoxResult | null = null;
 
   if (activeBuyBoxes.length > 0) {
     const metrics: BuyBoxDealMetrics = {
@@ -113,39 +136,77 @@ export function computeDealOfferLine(
     const boxResults = evaluateBuyBoxes(activeBuyBoxes, metrics).filter((r) => r.result.active);
     if (boxResults.length > 0) {
       fit = summarizeBuyBoxFit(boxResults);
-      const lead = boxResults.find((r) => r.result.passes) ?? boxResults[0];
-      personalLine = lead?.result.personalLine ?? null;
-      maoBasisBox = boxResults.map((r) => r.box).find(buyBoxHasReturnTargets) ?? null;
+      // evaluateBuyBoxes returns priority order, so the first passing box (or
+      // the first box overall) is the one the user would reason about.
+      decidingBox = boxResults.find((r) => r.result.passes) ?? boxResults[0] ?? null;
+      personalLine = decidingBox?.result.personalLine ?? null;
     }
   }
 
   let offer: DealOfferLine | null = null;
   let basisLabel = "";
   if (opts.isShoppingStage) {
-    const maoTarget = buildMaoTarget(maoBasisBox, { isCashPurchase });
-    basisLabel = buyBoxContributesToMaoTarget(maoBasisBox, { isCashPurchase })
-      ? `your “${maoBasisBox!.name}” buy box — ${describeMaoTarget(maoTarget)}`
-      : describeMaoTarget(maoTarget);
+    const asking =
+      typeof formValues.purchasePrice === "number" && formValues.purchasePrice > 0
+        ? formValues.purchasePrice
+        : null;
 
-    let clearsAtAsking = false;
-    try {
-      clearsAtAsking = meetsTarget(analysis, maoTarget);
-    } catch {
-      // fall through to the solver alone
-    }
-    const mao = calculateMaxAllowableOffer(formValues, maoTarget);
-    if (clearsAtAsking) {
-      offer = { kind: "clears", maxPrice: mao?.maxPrice ?? null };
-    } else if (mao) {
-      const asking =
-        typeof formValues.purchasePrice === "number" && formValues.purchasePrice > 0
-          ? formValues.purchasePrice
-          : null;
-      const discountPct =
-        asking != null && asking > mao.maxPrice
-          ? Math.round(((asking - mao.maxPrice) / asking) * 100)
-          : null;
-      offer = { kind: "cut", maxPrice: mao.maxPrice, asking, discountPct };
+    // THE VERDICT COMES FROM THE REAL FIT, not from the MAO target. A MaoTarget
+    // can only carry return thresholds (cap rate / CoC / cash flow / DSCR), so
+    // deciding "clears" from meetsTarget() would ignore the box's own budget
+    // cap, property types and markets — and cheerfully report "clears your buy
+    // box" on a deal the very same card marks as missing it.
+    if (fit && decidingBox) {
+      const target = chooseMaoTargetFromBuyBox(decidingBox.box, { isCashPurchase });
+      basisLabel = target
+        ? `your “${decidingBox.box.name}” buy box — ${describeMaoTarget(target)}`
+        : `your “${decidingBox.box.name}” buy box`;
+
+      if (fit.anyPass) {
+        // Genuinely passes a box. The ceiling is that box's clearing price
+        // (budget-capped), so headroom can never exceed what the user allows.
+        const ceiling = solveBuyBoxClearingPrice(formValues, decidingBox.box, { isCashPurchase });
+        offer = { kind: "clears", maxPrice: ceiling, basis: "buy-box" };
+      } else {
+        // Misses. Is price even the blocker? A wrong market or property type
+        // is not fixable at ANY price, so we must not quote one.
+        const failedUnsolvable = decidingBox.result.checks.filter(
+          (c) => c.pass === false && (c.id === "propertyType" || c.id === "state")
+        );
+        if (failedUnsolvable.length > 0) {
+          offer = { kind: "blocked", reasons: failedUnsolvable.map((c) => c.label) };
+        } else {
+          const clearing = solveBuyBoxClearingPrice(formValues, decidingBox.box, { isCashPurchase });
+          if (clearing != null) {
+            const discountPct =
+              asking != null && asking > clearing
+                ? Math.round(((asking - clearing) / asking) * 100)
+                : null;
+            offer = { kind: "cut", maxPrice: clearing, asking, discountPct, basis: "buy-box" };
+          }
+        }
+      }
+    } else {
+      // No usable box shaped a target — fall back to TrueCap's canonical bar,
+      // and mark the basis so the UI never calls this "your buy box".
+      const maoTarget = buildMaoTarget(null, { isCashPurchase });
+      basisLabel = describeMaoTarget(maoTarget);
+      let clearsAtAsking = false;
+      try {
+        clearsAtAsking = meetsTarget(analysis, maoTarget);
+      } catch {
+        // fall through to the solver alone
+      }
+      const mao = calculateMaxAllowableOffer(formValues, maoTarget);
+      if (clearsAtAsking) {
+        offer = { kind: "clears", maxPrice: mao?.maxPrice ?? null, basis: "default" };
+      } else if (mao) {
+        const discountPct =
+          asking != null && asking > mao.maxPrice
+            ? Math.round(((asking - mao.maxPrice) / asking) * 100)
+            : null;
+        offer = { kind: "cut", maxPrice: mao.maxPrice, asking, discountPct, basis: "default" };
+      }
     }
   }
 

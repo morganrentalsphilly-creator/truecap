@@ -206,20 +206,39 @@ function fmtMoney0(n: number): string {
  * The Deal Watchlist line — "your number" for a shopping-stage deal, so a
  * saved deal reads as a live object at a glance instead of a static row.
  *
- *   misses:  Your number: $297,400 · asking $329,000 (−$31,600)
- *   clears:  Clears your buy box · ceiling $412,000
+ *   misses:   Your number: $297,400 · −$31,600 (−10%) to pass your buy box
+ *   clears:   Clears your buy box · up to $412,000
+ *   blocked:  Price can't fix this — misses on Market
+ *   default:  Your number: $283,000 · −$46,000 (−14%) to break even
  *
  * Solved server-side (lib/deal-offer-line) from the deal's own snapshot and
  * the user's buy boxes; renders nothing when there is no line, which is the
  * common case for free users and owned deals.
+ *
+ * The wording tracks offer.basis deliberately. "your buy box" may ONLY appear
+ * when the number really came from the user's criteria — when their boxes set
+ * no price-solvable bar we fall back to TrueCap's default target, and saying
+ * "your buy box" there would attribute our number to their rules.
  */
 function OfferLineRow({ offer }: { offer?: DealOfferLine | null }) {
   if (!offer) return null;
 
+  // No price fixes a wrong market or property type — so don't quote one.
+  if (offer.kind === "blocked") {
+    return (
+      <p className="mt-1.5 text-xs text-muted-foreground">
+        <span className="font-semibold text-foreground">Price can’t fix this</span>
+        {offer.reasons.length > 0 ? ` — misses on ${offer.reasons.join(" and ")}` : null}
+      </p>
+    );
+  }
+
   if (offer.kind === "clears") {
     return (
       <p className="mt-1.5 text-xs text-muted-foreground">
-        <span className="font-semibold text-success">Clears your buy box</span>
+        <span className="font-semibold text-success">
+          {offer.basis === "buy-box" ? "Clears your buy box" : "Cash-flows at asking"}
+        </span>
         {offer.maxPrice != null ? (
           <>
             {" · "}up to <span className="tabular-nums">{fmtMoney0(offer.maxPrice)}</span>
@@ -243,7 +262,7 @@ function OfferLineRow({ offer }: { offer?: DealOfferLine | null }) {
             −{fmtMoney0(gap)}
             {offer.discountPct != null && offer.discountPct > 0 ? ` (−${offer.discountPct}%)` : ""}
           </span>{" "}
-          to pass
+          {offer.basis === "buy-box" ? "to pass your buy box" : "to break even"}
         </>
       ) : null}
     </p>
@@ -2264,7 +2283,7 @@ export function SavedAnalysesPage({
                                 <div className="flex flex-wrap items-center gap-1.5">
                                   {statusBadge}
                                   {item.dataConfidence ? (
-                                    <DataConfidenceBadge confidence={item.dataConfidence} size="xs" />
+                                    <DataConfidenceBadge confidence={item.dataConfidence} size="xs" propertyType={item.propertyType} />
                                   ) : null}
                                 </div>
                               ) : null}
@@ -2533,6 +2552,7 @@ export function SavedAnalysesPage({
                             <p className="text-xs text-muted-foreground truncate">
                               {getTypeLabel(item.propertyType)}
                             </p>
+                            <OfferLineRow offer={item.offerLine} />
                             <NextActionLine recommendation={item.recommendation} netCashFlow={item.netCashFlowMonthly} stage={item.status === "completed" ? "closed" : item.pipelineStage} meetsBuyBox={buyBoxFitById?.get(item.id)?.anyPass ?? null} hasCloseDate={item.closeDate != null} className="mt-0.5" />
                             <OwnedEquityCell item={item} enabled={ownedEquityEnabled} />
                           </div>
@@ -2558,7 +2578,7 @@ export function SavedAnalysesPage({
                           </span>
                           <BuyBoxFitBadge fit={buyBoxFitById?.get(item.id)} />
                           {item.dataConfidence ? (
-                            <DataConfidenceBadge confidence={item.dataConfidence} size="xs" />
+                            <DataConfidenceBadge confidence={item.dataConfidence} size="xs" propertyType={item.propertyType} />
                           ) : null}
                         </div>
                       </td>
