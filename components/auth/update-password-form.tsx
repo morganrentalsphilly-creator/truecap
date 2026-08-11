@@ -44,24 +44,35 @@ export function UpdatePasswordForm() {
 
   async function onSubmit(values: UpdatePasswordInput) {
     setIsSubmitting(true);
-    const result = await updatePasswordAction(values);
-    setIsSubmitting(false);
+    try {
+      const result = await updatePasswordAction(values);
 
-    if (!result.ok) {
+      if (!result.ok) {
+        toast({
+          title: "Could not update password",
+          description: result.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      toast({
+        title: "Password updated",
+        description: "You can sign in with your new password.",
+      });
+      router.push("/auth/login");
+      router.refresh();
+    } catch {
+      // A thrown action here strands the user mid-reset on a one-time link
+      // they'd then have to re-request. Keep it retryable in place.
       toast({
         title: "Could not update password",
-        description: result.message,
+        description: "Something interrupted the request. Check your connection and try again.",
         variant: "destructive",
       });
-      return;
+    } finally {
+      setIsSubmitting(false);
     }
-
-    toast({
-      title: "Password updated",
-      description: "You can sign in with your new password.",
-    });
-    router.push("/auth/login");
-    router.refresh();
   }
 
   if (sessionReady === false) {
@@ -98,9 +109,9 @@ export function UpdatePasswordForm() {
           render={({ field }) => (
             <FormItem className="space-y-2">
               <FormLabel className="text-xs font-semibold text-foreground">New password</FormLabel>
-              <FormControl>
-                <div className="relative">
-                  <Lock className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <div className="relative">
+                <Lock className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <FormControl>
                   <Input
                     type={showPassword ? "text" : "password"}
                     autoComplete="new-password"
@@ -109,16 +120,16 @@ export function UpdatePasswordForm() {
                     className="h-12 rounded-xl border-border bg-background px-11 text-base sm:text-sm shadow-sm placeholder:text-muted-foreground/70"
                     {...field}
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword((value) => !value)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
-                    aria-label={showPassword ? "Hide password" : "Show password"}
-                  >
-                    {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                  </button>
-                </div>
-              </FormControl>
+                </FormControl>
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((value) => !value)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                </button>
+              </div>
               <FormMessage />
             </FormItem>
           )}
@@ -130,9 +141,9 @@ export function UpdatePasswordForm() {
           render={({ field }) => (
             <FormItem className="space-y-2">
               <FormLabel className="text-xs font-semibold text-foreground">Confirm password</FormLabel>
-              <FormControl>
-                <div className="relative">
-                  <Lock className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <div className="relative">
+                <Lock className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <FormControl>
                   <Input
                     type={showConfirmPassword ? "text" : "password"}
                     autoComplete="new-password"
@@ -141,16 +152,16 @@ export function UpdatePasswordForm() {
                     className="h-12 rounded-xl border-border bg-background px-11 text-base sm:text-sm shadow-sm placeholder:text-muted-foreground/70"
                     {...field}
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword((value) => !value)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
-                    aria-label={showConfirmPassword ? "Hide password" : "Show password"}
-                  >
-                    {showConfirmPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                  </button>
-                </div>
-              </FormControl>
+                </FormControl>
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword((value) => !value)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
+                  aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                >
+                  {showConfirmPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                </button>
+              </div>
               <FormMessage />
             </FormItem>
           )}

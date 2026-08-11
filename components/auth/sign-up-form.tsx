@@ -52,12 +52,12 @@ export function SignUpForm() {
 
   async function onSubmit(values: SignUpInput) {
     setIsSubmitting(true);
+    try {
     // Pass the validated ?next so the confirmation EMAIL's link also
     // returns here (the action threads it into emailRedirectTo). Without
     // it, an email-confirmation signup dropped the return path — a started
     // Pro checkout or pending save never resumed after the confirm hop.
     const result = await signUpAction(values, safeNextPath ?? undefined);
-    setIsSubmitting(false);
 
     if (!result.ok) {
       toast({
@@ -100,6 +100,18 @@ export function SignUpForm() {
     // falling back to "/" — don't add a local check alongside it.
     router.push(safeInternalNextPath(searchParams.get("next")));
     router.refresh();
+    } catch {
+      // A thrown action (network blip, cold-start 500, stale-deploy Server
+      // Action) would otherwise leave the form disabled forever with no
+      // signal — this is the top of the acquisition funnel. Make it retryable.
+      toast({
+        title: "Sign up failed",
+        description: "Something interrupted the request. Check your connection and try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -128,9 +140,9 @@ export function SignUpForm() {
           render={({ field }) => (
             <FormItem className="space-y-2">
               <FormLabel className="text-xs font-semibold text-foreground">Email</FormLabel>
-              <FormControl>
-                <div className="relative">
-                  <Mail className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <div className="relative">
+                <Mail className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <FormControl>
                   <Input
                     type="email"
                     autoComplete="email"
@@ -139,8 +151,8 @@ export function SignUpForm() {
                     className="h-12 rounded-xl border-border bg-background pl-11 text-base sm:text-sm shadow-sm placeholder:text-muted-foreground/70"
                     {...field}
                   />
-                </div>
-              </FormControl>
+                </FormControl>
+              </div>
               <FormMessage />
             </FormItem>
           )}
@@ -152,9 +164,9 @@ export function SignUpForm() {
           render={({ field }) => (
             <FormItem className="space-y-2">
               <FormLabel className="text-xs font-semibold text-foreground">Password</FormLabel>
-              <FormControl>
-                <div className="relative">
-                  <Lock className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <div className="relative">
+                <Lock className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <FormControl>
                   <Input
                     type={showPassword ? "text" : "password"}
                     autoComplete="new-password"
@@ -163,16 +175,16 @@ export function SignUpForm() {
                     className="h-12 rounded-xl border-border bg-background px-11 text-base sm:text-sm shadow-sm placeholder:text-muted-foreground/70"
                     {...field}
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword((value) => !value)}
-                    className="absolute right-2 top-1/2 flex size-9 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                    aria-label={showPassword ? "Hide password" : "Show password"}
-                  >
-                    {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                  </button>
-                </div>
-              </FormControl>
+                </FormControl>
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((value) => !value)}
+                  className="absolute right-2 top-1/2 flex size-9 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                </button>
+              </div>
               <FormMessage />
             </FormItem>
           )}
@@ -184,9 +196,9 @@ export function SignUpForm() {
           render={({ field }) => (
             <FormItem className="space-y-2">
               <FormLabel className="text-xs font-semibold text-foreground">Confirm password</FormLabel>
-              <FormControl>
-                <div className="relative">
-                  <Lock className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <div className="relative">
+                <Lock className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <FormControl>
                   <Input
                     type={showConfirmPassword ? "text" : "password"}
                     autoComplete="new-password"
@@ -195,16 +207,16 @@ export function SignUpForm() {
                     className="h-12 rounded-xl border-border bg-background px-11 text-base sm:text-sm shadow-sm placeholder:text-muted-foreground/70"
                     {...field}
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword((value) => !value)}
-                    className="absolute right-2 top-1/2 flex size-9 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                    aria-label={showConfirmPassword ? "Hide password" : "Show password"}
-                  >
-                    {showConfirmPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                  </button>
-                </div>
-              </FormControl>
+                </FormControl>
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword((value) => !value)}
+                  className="absolute right-2 top-1/2 flex size-9 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                  aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                >
+                  {showConfirmPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                </button>
+              </div>
               <FormMessage />
             </FormItem>
           )}

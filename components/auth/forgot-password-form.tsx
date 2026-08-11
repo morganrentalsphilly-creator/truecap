@@ -32,23 +32,34 @@ export function ForgotPasswordForm() {
 
   async function onSubmit(values: ForgotPasswordInput) {
     setIsSubmitting(true);
-    const result = await requestPasswordResetAction(values);
-    setIsSubmitting(false);
+    try {
+      const result = await requestPasswordResetAction(values);
 
-    if (!result.ok) {
+      if (!result.ok) {
+        toast({
+          title: "Request failed",
+          description: result.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setSent(true);
+      toast({
+        title: "Check your email",
+        description: "If an account exists for that address, you will receive a reset link shortly.",
+      });
+    } catch {
+      // This is the ONLY account-recovery path; a thrown action must not
+      // leave it stuck on "Sending link..." with no way forward.
       toast({
         title: "Request failed",
-        description: result.message,
+        description: "Something interrupted the request. Check your connection and try again.",
         variant: "destructive",
       });
-      return;
+    } finally {
+      setIsSubmitting(false);
     }
-
-    setSent(true);
-    toast({
-      title: "Check your email",
-      description: "If an account exists for that address, you will receive a reset link shortly.",
-    });
   }
 
   if (sent) {
@@ -77,9 +88,9 @@ export function ForgotPasswordForm() {
           render={({ field }) => (
             <FormItem className="space-y-2">
               <FormLabel className="text-xs font-semibold text-foreground">Email</FormLabel>
-              <FormControl>
-                <div className="relative">
-                  <Mail className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <div className="relative">
+                <Mail className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <FormControl>
                   <Input
                     type="email"
                     autoComplete="email"
@@ -88,8 +99,8 @@ export function ForgotPasswordForm() {
                     className="h-12 rounded-xl border-border bg-background pl-11 text-base sm:text-sm shadow-sm placeholder:text-muted-foreground/70"
                     {...field}
                   />
-                </div>
-              </FormControl>
+                </FormControl>
+              </div>
               <FormMessage />
             </FormItem>
           )}

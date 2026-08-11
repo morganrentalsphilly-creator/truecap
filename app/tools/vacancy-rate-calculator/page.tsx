@@ -203,7 +203,7 @@ export default function VacancyRateCalculatorPage() {
           <p className="mt-3 text-base leading-relaxed text-foreground">
             Vacancy is part of your{" "}
             <Link
-              href="/glossary/operating-expenses"
+              href="/glossary/operating-expense-ratio"
               className="text-primary font-semibold hover:underline"
             >
               effective gross income calculation
@@ -269,7 +269,7 @@ export default function VacancyRateCalculatorPage() {
               Cash-on-cash
             </Link>
             <Link
-              href="/glossary/vacancy-rate"
+              href="/glossary/vacancy"
               className="rounded-full border border-border bg-card px-3 py-1.5 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary"
             >
               Vacancy rate

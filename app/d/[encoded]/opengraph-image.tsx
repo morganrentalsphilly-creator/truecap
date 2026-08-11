@@ -74,7 +74,15 @@ function Fallback({ headline }: { headline: string }) {
           fontFamily: "system-ui",
         }}
       >
-        <div style={{ fontSize: 28, fontWeight: 700, opacity: 0.75, letterSpacing: "0.04em" }}>
+        {/* display:flex is REQUIRED, not cosmetic. Satori (next/og) throws
+            "Expected <div> to have explicit display: flex" for any element
+            with more than one child — and this div has two: the "TrueCap"
+            text node and the "." span. Without it `new ImageResponse` rejects,
+            the route returns an empty 0-byte body, and EVERY malformed or
+            schema-stale /d/ share link gets a broken social card. The main
+            card below already sets display:flex on its identical brand divs;
+            this fallback (the exact path a bad link takes) was missed. */}
+        <div style={{ fontSize: 28, fontWeight: 700, opacity: 0.75, letterSpacing: "0.04em", display: "flex" }}>
           TrueCap<span style={{ color: BRAND_BLUE }}>.</span>
         </div>
         <div style={{ fontSize: 48, fontWeight: 800, marginTop: 16 }}>{headline}</div>

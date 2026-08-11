@@ -259,7 +259,7 @@ export default function RentalPropertyTaxCalculatorPage() {
             </Link>{" "}
             ignores financing + tax;{" "}
             <Link
-              href="/glossary/roi"
+              href="/glossary/cash-on-cash-return"
               className="text-primary font-semibold hover:underline"
             >
               ROI

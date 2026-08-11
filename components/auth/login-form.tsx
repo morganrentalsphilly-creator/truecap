@@ -76,65 +76,90 @@ export function LoginForm() {
 
   async function onSubmit(values: LoginInput) {
     setIsSubmitting(true);
-    const result = await signInAction(values);
-    setIsSubmitting(false);
+    try {
+      const result = await signInAction(values);
 
-    if (!result.ok) {
-      // Auth action maps the Supabase "email not confirmed" code to a
-      // specific message — detect that and offer to resend.
-      const isUnconfirmed = /confirm your email/i.test(result.message);
-      if (isUnconfirmed) {
-        setUnconfirmedEmail(values.email.trim());
-      } else {
-        setUnconfirmedEmail(null);
+      if (!result.ok) {
+        // Auth action maps the Supabase "email not confirmed" code to a
+        // specific message — detect that and offer to resend.
+        const isUnconfirmed = /confirm your email/i.test(result.message);
+        if (isUnconfirmed) {
+          setUnconfirmedEmail(values.email.trim());
+        } else {
+          setUnconfirmedEmail(null);
+        }
+        toast({
+          title: "Sign in failed",
+          description: result.message,
+          variant: "destructive",
+        });
+        return;
       }
+
+      setUnconfirmedEmail(null);
+      toast({
+        title: "Welcome back",
+        description: "You are signed in.",
+      });
+      // Honor ?next so a gated action (Save, a Pro CTA, the share viewer) returns
+      // the user to where they were instead of dumping them on the homepage.
+      // Only internal paths are allowed. safeInternalNextPath is the single
+      // validator (shape + dot-segment normalization + re-check of the value it
+      // returns), so `?next=/%5Cevil.com`, `?next=/..//evil.com` and friends fall
+      // back to "/" instead of handing the browser a hard navigation off-site
+      // right after a password entry. Never re-implement that check here.
+      router.push(safeInternalNextPath(searchParams.get("next")));
+      router.refresh();
+    } catch {
+      // The action REJECTED rather than returning {ok:false}: a network blip
+      // at submit time, a cold-start 500, or a tab one deploy behind main
+      // (Next throws on an unrecognized Server Action). Without this catch the
+      // finally still frees the form, but the user got no signal — so tell
+      // them it's retryable. Mirrors the guard in investcalc-page.tsx.
       toast({
         title: "Sign in failed",
-        description: result.message,
+        description: "Something interrupted the request. Check your connection and try again.",
         variant: "destructive",
       });
-      return;
+    } finally {
+      // ALWAYS re-enable the form. The bug this replaces left the button and
+      // both inputs disabled forever whenever the await threw.
+      setIsSubmitting(false);
     }
-
-    setUnconfirmedEmail(null);
-    toast({
-      title: "Welcome back",
-      description: "You are signed in.",
-    });
-    // Honor ?next so a gated action (Save, a Pro CTA, the share viewer) returns
-    // the user to where they were instead of dumping them on the homepage.
-    // Only internal paths are allowed. safeInternalNextPath is the single
-    // validator (shape + dot-segment normalization + re-check of the value it
-    // returns), so `?next=/%5Cevil.com`, `?next=/..//evil.com` and friends fall
-    // back to "/" instead of handing the browser a hard navigation off-site
-    // right after a password entry. Never re-implement that check here.
-    router.push(safeInternalNextPath(searchParams.get("next")));
-    router.refresh();
   }
 
   async function handleResendConfirmation() {
     if (!unconfirmedEmail || isResending) return;
     setIsResending(true);
-    // Keep the caller's return path on the resent link too — the resent
-    // confirmation email should land the user where they were headed
-    // (?next), matching the original sign-up email.
-    const result = await resendConfirmationAction(
-      { email: unconfirmedEmail },
-      safeNextPath ?? undefined
-    );
-    setIsResending(false);
-    if (!result.ok) {
+    try {
+      // Keep the caller's return path on the resent link too — the resent
+      // confirmation email should land the user where they were headed
+      // (?next), matching the original sign-up email.
+      const result = await resendConfirmationAction(
+        { email: unconfirmedEmail },
+        safeNextPath ?? undefined
+      );
+      if (!result.ok) {
+        toast({
+          title: "Couldn't resend",
+          description: result.message,
+          variant: "destructive",
+        });
+        return;
+      }
+      toast({
+        title: "Confirmation email sent",
+        description: `Check the inbox for ${unconfirmedEmail} (and your spam folder).`,
+      });
+    } catch {
       toast({
         title: "Couldn't resend",
-        description: result.message,
+        description: "Something interrupted the request. Check your connection and try again.",
         variant: "destructive",
       });
-      return;
+    } finally {
+      setIsResending(false);
     }
-    toast({
-      title: "Confirmation email sent",
-      description: `Check the inbox for ${unconfirmedEmail} (and your spam folder).`,
-    });
   }
 
   return (
@@ -164,9 +189,9 @@ export function LoginForm() {
           render={({ field }) => (
             <FormItem className="space-y-2">
               <FormLabel className="text-xs font-semibold text-foreground">Email</FormLabel>
-              <FormControl>
-                <div className="relative">
-                  <Mail className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <div className="relative">
+                <Mail className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <FormControl>
                   <Input
                     type="email"
                     autoComplete="email"
@@ -175,8 +200,8 @@ export function LoginForm() {
                     className="h-12 rounded-xl border-border bg-background pl-11 text-base sm:text-sm shadow-sm placeholder:text-muted-foreground/70"
                     {...field}
                   />
-                </div>
-              </FormControl>
+                </FormControl>
+              </div>
               <FormMessage />
             </FormItem>
           )}
@@ -196,9 +221,9 @@ export function LoginForm() {
                   Forgot password?
                 </Link>
               </div>
-              <FormControl>
-                <div className="relative">
-                  <Lock className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <div className="relative">
+                <Lock className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <FormControl>
                   <Input
                     type={showPassword ? "text" : "password"}
                     autoComplete="current-password"
@@ -207,16 +232,16 @@ export function LoginForm() {
                     className="h-12 rounded-xl border-border bg-background px-11 text-base sm:text-sm shadow-sm placeholder:text-muted-foreground/70"
                     {...field}
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword((value) => !value)}
-                    className="absolute right-2 top-1/2 flex size-9 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                    aria-label={showPassword ? "Hide password" : "Show password"}
-                  >
-                    {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                  </button>
-                </div>
-              </FormControl>
+                </FormControl>
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((value) => !value)}
+                  className="absolute right-2 top-1/2 flex size-9 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                </button>
+              </div>
               <FormMessage />
             </FormItem>
           )}
