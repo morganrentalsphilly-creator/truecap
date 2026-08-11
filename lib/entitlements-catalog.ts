@@ -61,6 +61,8 @@ export interface FeatureSpec {
   freeLimit?: string;
   /** Limit qualifier shown on the pro tier (e.g. "unlimited", "50/mo"). */
   proLimit?: string;
+  /** Limit qualifier shown on the $5 one-time tier (e.g. "One deal", "In the PDF"). */
+  oneTimeLimit?: string;
   category: FeatureCategory;
   /** How it's gated at runtime — "flag" = plans.entitlements feature string; "paid" = paid-plan status only; "always" = everyone; "stripe_one_time" = $5 checkout. */
   gate: "flag" | "paid" | "always" | "stripe_one_time";
@@ -84,10 +86,10 @@ export const FEATURE_CATALOG: Record<FeatureKey, FeatureSpec> = {
   mao: { key: "mao", label: "MAO solver — max offer for your targets", tiers: ["pro"], category: "analysis", gate: "paid" },
   sensitivity: { key: "sensitivity", label: "Sensitivity grid — stress-test the deal", tiers: ["pro"], category: "analysis", gate: "paid" },
   strategies: { key: "strategies", label: "BRRRR + fix-and-flip + rehab estimator", tiers: ["pro"], category: "analysis", gate: "paid" },
-  projections: { key: "projections", label: "10-year cash flow & equity projection", tiers: ["pro"], category: "analysis", gate: "flag" },
-  tax_strategy: { key: "tax_strategy", label: "Tax strategy — depreciation & interest", tiers: ["pro"], category: "analysis", gate: "flag" },
-  exit_scenarios: { key: "exit_scenarios", label: "Exit scenarios — best year to sell", tiers: ["pro"], category: "analysis", gate: "flag" },
-  pdf_export: { key: "pdf_export", label: "Lender-ready PDF report with sale + rent comps", tiers: ["one_time_pdf", "pro"], freeLimit: "$5 one-time per deal", proLimit: "unlimited", category: "reporting", gate: "flag" },
+  projections: { key: "projections", label: "10-year cash flow & equity projection", tiers: ["one_time_pdf", "pro"], oneTimeLimit: "In the PDF", category: "analysis", gate: "flag" },
+  tax_strategy: { key: "tax_strategy", label: "Tax strategy — depreciation & interest", tiers: ["one_time_pdf", "pro"], oneTimeLimit: "In the PDF", category: "analysis", gate: "flag" },
+  exit_scenarios: { key: "exit_scenarios", label: "Exit scenarios — best year to sell", tiers: ["one_time_pdf", "pro"], oneTimeLimit: "In the PDF", category: "analysis", gate: "flag" },
+  pdf_export: { key: "pdf_export", label: "Lender-ready PDF report with sale + rent comps", tiers: ["one_time_pdf", "pro"], freeLimit: "$5 one-time per deal", oneTimeLimit: "One deal", proLimit: "unlimited", category: "reporting", gate: "flag" },
   custom_branding: { key: "custom_branding", label: "Custom branding — PDFs + co-branded lead-capture share pages", tiers: ["pro"], category: "reporting", gate: "flag" },
   // Sharing is FREE for everyone (the growth loop): basic links are TrueCap-branded.
   // Pro adds co-branded share pages + lead capture via `custom_branding` (separate key).
@@ -120,4 +122,32 @@ export function featureLimit(key: FeatureKey, tier: Tier): string | undefined {
   if (tier === "free") return f.freeLimit;
   if (tier === "pro") return f.proLimit;
   return undefined;
+}
+
+/** Tier order as the marketing ladder and /pricing table render them. */
+export const LADDER_TIERS: readonly Tier[] = ["free", "one_time_pdf", "pro"] as const;
+
+function capitalize(s: string): string {
+  return s.length === 0 ? s : s[0]!.toUpperCase() + s.slice(1);
+}
+
+/**
+ * One feature's row of ladder cells, in LADDER_TIERS order: `true` when the
+ * tier includes it outright, the qualifier string when it includes it with a
+ * limit ("Up to 5", "In the PDF"), and `false` when it doesn't.
+ *
+ * This is what makes the pricing matrices single-sourced. The rendered rows
+ * used to hand-type these three cells, and that is precisely how the homepage
+ * came to claim Free couldn't save deals (it can — 5) and that the $5 PDF
+ * omitted projections (it doesn't) — both contradicting /pricing at the exact
+ * moment someone decides to pay.
+ */
+export function ladderCellsForFeature(key: FeatureKey): (boolean | string)[] {
+  const spec = FEATURE_CATALOG[key];
+  return LADDER_TIERS.map((tier) => {
+    if (!spec.tiers.includes(tier)) return false;
+    const limit =
+      tier === "free" ? spec.freeLimit : tier === "one_time_pdf" ? spec.oneTimeLimit : spec.proLimit;
+    return limit ? capitalize(limit) : true;
+  });
 }

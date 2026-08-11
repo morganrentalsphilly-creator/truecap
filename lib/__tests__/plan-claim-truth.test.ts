@@ -20,6 +20,7 @@
  * Phase 4 makes the surfaces render from the catalog.
  */
 import { describe, expect, it } from "vitest";
+import { ladderCellsForFeature } from "@/lib/entitlements-catalog";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { execFileSync } from "node:child_process";
@@ -44,16 +45,24 @@ const EXCLUDE = /^app\/changelog\//;
 describe("homepage value ladder matches the real entitlements", () => {
   const src = read("components/marketing/landing-sections.tsx");
 
+  // The ladder now DERIVES its cells from lib/entitlements-catalog, so these
+  // assert the derived truth rather than a source literal — the same two
+  // revenue-bug claims, checked against the value the page actually renders.
   it("does not claim Free cannot save deals", () => {
-    const row = src.match(/\{\s*label:\s*"Save & revisit deals",\s*cells:\s*\[([^\]]+)\]/);
-    expect(row, "Save & revisit deals row not found").not.toBeNull();
-    expect(row![1].split(",")[0].trim()).toMatch(/Up to 5/);
+    const [free] = ladderCellsForFeature("save_deal");
+    expect(free).not.toBe(false);
+    expect(String(free)).toMatch(/5/);
   });
 
   it("does not claim the $5 PDF excludes projections / tax / exit", () => {
-    const row = src.match(/\{\s*label:\s*"10-year projections · tax · exit",\s*cells:\s*\[([^\]]+)\]/);
-    expect(row, "projections row not found").not.toBeNull();
-    expect(row![1].split(",")[1].trim()).not.toBe("false");
+    for (const key of ["projections", "tax_strategy", "exit_scenarios"] as const) {
+      const [, oneTime] = ladderCellsForFeature(key);
+      expect(oneTime, `${key} in the $5 column`).not.toBe(false);
+    }
+  });
+
+  it("still reads its cells from the catalog (derivation not reverted)", () => {
+    expect(src).toMatch(/ladderCellsForFeature/);
   });
 });
 

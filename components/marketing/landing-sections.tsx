@@ -21,6 +21,7 @@
 // new interactive piece should be its own small island, not a reason to
 // flip this whole file back to client.
 import { TRIAL_LABEL } from "@/lib/trial";
+import { ladderCellsForFeature, type FeatureKey } from "@/lib/entitlements-catalog";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -786,29 +787,35 @@ export function DataSourcesSection() {
 // never drift. "true" → included, "false" → not, string → a qualifier.
 const LADDER_HEADERS = ["Free", "$5 PDF", "Pro"] as const;
 const LADDER_SUBHEADERS = ["Free forever", "One-time", TRIAL_LABEL] as const;
-const LADDER_ROWS: { label: string; cells: (boolean | string)[] }[] = [
-  { label: "Analyze unlimited deals", cells: [true, true, true] },
-  { label: "Cap rate · CoC · DSCR · cash flow", cells: [true, true, true] },
-  { label: "0-100 Deal Score + plain-English verdict", cells: [true, true, true] },
-  { label: "Lender-ready PDF export", cells: [false, "One deal", "Unlimited"] },
-  // Free CAN save + revisit up to 5 deals (lib/entitlements.ts: free plan has
-  // save_deal + max_saved_deals:5); Pro adds editing + unlimited. This row
-  // previously showed [false,false,true] — a flat "Free can't save" — which
-  // contradicted the homepage FAQ two sections down AND the /pricing matrix,
-  // at the exact moment someone decides to pay. The $5 PDF is a one-time
-  // export, not an account, so it genuinely has no save capability.
-  { label: "Save & revisit deals", cells: ["Up to 5", false, "Unlimited"] },
-  { label: "Compare deals side-by-side", cells: [false, false, true] },
-  { label: "Buy box: personal pass/fail on every deal", cells: [false, false, true] },
-  // The $5 PDF is byte-identical to a Pro export minus custom branding — it
-  // DOES contain the 10-year projection, tax strategy and exit sections (see
-  // lib/pdf-generator.ts; the homepage FAQ and /pricing both say so). This
-  // row previously showed the $5 column as false, contradicting them. Free
-  // stays false: these sections are Pro-only IN-APP; the $5 path delivers
-  // them only inside the one exported PDF, hence the qualifier not a check.
-  { label: "10-year projections · tax · exit", cells: [false, "In the PDF", true] },
-  { label: "BRRRR · fix & flip · sensitivity", cells: [false, false, true] },
-];
+/**
+ * The Free / $5 / Pro ladder.
+ *
+ * The LABEL is marketing copy and lives here. The three TIER CELLS are derived
+ * from lib/entitlements-catalog — never hand-typed — because hand-typing them
+ * is exactly how this table came to claim Free couldn't save deals (it can:
+ * five) and that the $5 PDF omitted projections (it doesn't), each
+ * contradicting /pricing at the moment someone decides to pay. Change what a
+ * tier includes in the catalog and every surface follows.
+ *
+ * `key: null` marks a row that is a policy statement rather than an
+ * entitlement flag, so there is nothing in the catalog to derive it from.
+ */
+const LADDER_ROWS: { label: string; cells: (boolean | string)[] }[] = (
+  [
+    { label: "Analyze unlimited deals", key: null, cells: [true, true, true] },
+    { label: "Cap rate · CoC · DSCR · cash flow", key: "cash_flow" },
+    { label: "0-100 Deal Score + plain-English verdict", key: "deal_score" },
+    { label: "Lender-ready PDF export", key: "pdf_export" },
+    { label: "Save & revisit deals", key: "save_deal" },
+    { label: "Compare deals side-by-side", key: "compare_deals" },
+    { label: "Buy box: personal pass/fail on every deal", key: "buy_box" },
+    { label: "10-year projections · tax · exit", key: "projections" },
+    { label: "BRRRR · fix & flip · sensitivity", key: "strategies" },
+  ] as { label: string; key: FeatureKey | null; cells?: (boolean | string)[] }[]
+).map(({ label, key, cells }) => ({
+  label,
+  cells: cells ?? ladderCellsForFeature(key!),
+}));
 
 /**
  * The acquisition-pipeline section — TrueCap's real commercial story.
