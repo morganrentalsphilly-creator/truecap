@@ -22,12 +22,27 @@
  * NEXT_PUBLIC prefix), so every caller runs on the server.
  */
 
-export type PaidPlanSlug = "pro_monthly" | "pro_annual";
+export type PaidPlanSlug = "pro_monthly" | "pro_annual" | "agent_pro_monthly" | "agent_pro_annual";
+
+/** Every paid slug, checkout-display order. Single list so no resolver can forget one. */
+export const PAID_PLAN_SLUGS: readonly PaidPlanSlug[] = [
+  "pro_monthly",
+  "pro_annual",
+  "agent_pro_monthly",
+  "agent_pro_annual",
+] as const;
 
 function envForSlug(slug: PaidPlanSlug): string | undefined {
-  return slug === "pro_monthly"
-    ? process.env.STRIPE_PRICE_PRO_MONTHLY
-    : process.env.STRIPE_PRICE_PRO_ANNUAL;
+  switch (slug) {
+    case "pro_monthly":
+      return process.env.STRIPE_PRICE_PRO_MONTHLY;
+    case "pro_annual":
+      return process.env.STRIPE_PRICE_PRO_ANNUAL;
+    case "agent_pro_monthly":
+      return process.env.STRIPE_PRICE_AGENT_PRO_MONTHLY;
+    case "agent_pro_annual":
+      return process.env.STRIPE_PRICE_AGENT_PRO_ANNUAL;
+  }
 }
 
 /** All configured price ids for a plan (order preserved; primary first). */
@@ -54,7 +69,21 @@ export function getPrimaryPlanPriceId(slug: PaidPlanSlug): string | null {
  */
 export function planSlugFromPriceId(priceId: string | null | undefined): PaidPlanSlug | null {
   if (!priceId) return null;
-  if (getAllPlanPriceIds("pro_monthly").includes(priceId)) return "pro_monthly";
-  if (getAllPlanPriceIds("pro_annual").includes(priceId)) return "pro_annual";
+  // Iterate the canonical slug list so a future tier CANNOT be forgotten here —
+  // this resolver falling through to null is exactly how the 2026-07 incident
+  // downgraded paying subscribers to Free.
+  for (const slug of PAID_PLAN_SLUGS) {
+    if (getAllPlanPriceIds(slug).includes(priceId)) return slug;
+  }
   return null;
+}
+
+/**
+ * Is the Agent Pro tier configured on this deployment? True only when a
+ * checkout-able price exists. The tier ships fully plumbed but INERT: until
+ * STRIPE_PRICE_AGENT_PRO_MONTHLY is set (and the plans rows are migrated),
+ * no pricing surface shows it and checkout rejects it as PLAN_NOT_FOUND.
+ */
+export function isAgentProConfigured(): boolean {
+  return getPrimaryPlanPriceId("agent_pro_monthly") != null;
 }

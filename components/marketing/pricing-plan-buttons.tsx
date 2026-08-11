@@ -31,7 +31,7 @@ import {
 } from "@/lib/pricing-checkout-resume";
 import { TRIAL_LABEL, willCheckoutGrantTrial } from "@/lib/trial";
 
-type Slot = "free" | "pro_monthly" | "pro_annual";
+type Slot = "free" | "pro_monthly" | "pro_annual" | "agent_pro_monthly" | "agent_pro_annual";
 
 export function PricingPlanButtons({
   slot,

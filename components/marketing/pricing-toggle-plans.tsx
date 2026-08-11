@@ -19,12 +19,17 @@ import { Check, Sparkles, X } from "lucide-react";
 import { PricingPlanButtons } from "@/components/marketing/pricing-plan-buttons";
 import { trackEvent } from "@/lib/analytics";
 import { TRIAL_LABEL, willCheckoutGrantTrial } from "@/lib/trial";
+import { featuresForTier } from "@/lib/entitlements-catalog";
 
 type ResolvedPrice = { amountLabel: string; period: string } | null;
 
 interface PricingTogglePlansProps {
   monthly: ResolvedPrice;
   annual: ResolvedPrice;
+  /** Agent Pro prices — null until STRIPE_PRICE_AGENT_PRO_* is configured,
+   *  which keeps the tier fully plumbed but invisible (two-card layout). */
+  agentMonthly?: ResolvedPrice;
+  agentAnnual?: ResolvedPrice;
   isAuthenticated: boolean;
   isPaid: boolean;
   /**
@@ -68,6 +73,18 @@ const FREE_FEATURES: { label: string; included: boolean }[] = [
   { label: "Custom PDF branding (logo, color, contact)", included: false },
 ];
 
+/**
+ * Derived from the entitlement catalog — the labels of exactly the features
+ * only agent_pro includes. Hand-typing this list is how pricing surfaces
+ * historically drifted from the gates (see lib/entitlements-catalog.ts).
+ */
+const AGENT_PRO_FEATURES: string[] = [
+  "Everything in Pro, plus —",
+  ...featuresForTier("agent_pro")
+    .filter((f) => !f.tiers.includes("pro"))
+    .map((f) => f.label),
+];
+
 const PRO_FEATURES = [
   "Everything in Free, plus —",
   "Sale + rent comps from the address (50/mo)",
@@ -98,6 +115,8 @@ function parsePriceAmount(p: ResolvedPrice): number | null {
 export function PricingTogglePlans({
   monthly,
   annual,
+  agentMonthly = null,
+  agentAnnual = null,
   isAuthenticated,
   isPaid,
   hadPriorSubscription,
@@ -147,6 +166,30 @@ export function PricingTogglePlans({
       ? Math.max(0, Math.round(monthlyAmount * 12 - annualAmount))
       : null;
 
+  // Agent Pro exists on the page only when its price resolved (env configured).
+  const showAgentPro = agentMonthly != null || agentAnnual != null;
+  const agentMonthlyAmount = parsePriceAmount(agentMonthly);
+  const agentAnnualAmount = parsePriceAmount(agentAnnual);
+  const agentAnnualMonthlyEquivalent = agentAnnualAmount != null ? agentAnnualAmount / 12 : null;
+  const agentCard =
+    period === "monthly" || agentAnnual == null
+      ? {
+          priceTop: agentMonthly?.amountLabel ?? "Agent Pro",
+          priceSub: agentMonthly ? `/${agentMonthly.period}` : "/month",
+          subline: "billed monthly",
+          slot: "agent_pro_monthly" as const,
+        }
+      : {
+          priceTop:
+            agentAnnualMonthlyEquivalent != null
+              ? `$${agentAnnualMonthlyEquivalent.toFixed(agentAnnualMonthlyEquivalent % 1 === 0 ? 0 : 2)}`
+              : (agentAnnual?.amountLabel ?? "Agent Pro"),
+          priceSub: "/month",
+          subline: agentAnnual?.amountLabel ? `billed annually (${agentAnnual.amountLabel})` : "billed annually",
+          slot: "agent_pro_annual" as const,
+        };
+  void agentMonthlyAmount;
+
   const proCard =
     period === "monthly"
       ? {
@@ -172,7 +215,7 @@ export function PricingTogglePlans({
 
   return (
     <>
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-5">
+      <div className={showAgentPro ? "grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-5" : "grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-5"}>
         {/* FREE */}
         <div className="relative rounded-3xl border border-border bg-card p-6 shadow-sm">
           <div className="flex items-baseline justify-between">
@@ -352,6 +395,47 @@ export function PricingTogglePlans({
             ))}
           </ul>
         </div>
+
+        {/* AGENT PRO — rendered only when its Stripe price is configured.
+            Feature list derives from lib/entitlements-catalog (the SSOT):
+            "Everything in Pro" + exactly the agent_pro-only feature labels,
+            so this card can never promise something the tier doesn't gate. */}
+        {showAgentPro ? (
+          <div className="relative rounded-3xl border border-border bg-card p-6 shadow-sm">
+            <div className="flex items-baseline justify-between">
+              <h3 className="text-lg font-extrabold text-foreground">Agent Pro</h3>
+              <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-primary">
+                For agents
+              </span>
+            </div>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Run every client&rsquo;s buy box. Send co-branded deals that come back to you.
+            </p>
+            <div className="mt-5 flex items-baseline gap-1.5">
+              <span className="font-mono text-4xl font-extrabold tabular-nums tracking-tight text-foreground sm:text-5xl">
+                {agentCard.priceTop}
+              </span>
+              <span className="text-sm text-muted-foreground">{agentCard.priceSub}</span>
+            </div>
+            <div className="mt-1 text-xs text-muted-foreground">{agentCard.subline}</div>
+            <div className="mt-5">
+              <PricingPlanButtons
+                slot={agentCard.slot}
+                isAuthenticated={isAuthenticated}
+                isPaid={isPaid}
+                hadPriorSubscription={hadPriorSubscription}
+              />
+            </div>
+            <ul className="mt-6 space-y-2.5">
+              {AGENT_PRO_FEATURES.map((f) => (
+                <li key={f} className="flex items-start gap-2 text-sm">
+                  <Sparkles className="mt-0.5 size-4 shrink-0 text-primary" />
+                  <span className="text-foreground">{f}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
       </div>
     </>
   );

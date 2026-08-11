@@ -25,7 +25,14 @@
  * flags is a tracked P2 cleanup (does not change what a user sees).
  */
 
-export type Tier = "free" | "one_time_pdf" | "pro";
+/**
+ * "agent_pro" (2026-08, Morgan-approved at $59/mo): everything in Pro plus the
+ * agent toolkit — client rosters, client-scoped buy boxes, the client portal,
+ * and white-label embeds (the Phase 6 decision: embed white-labeling ships as
+ * an Agent Pro entitlement rather than a standalone subscription, because only
+ * one subscription can be active per user).
+ */
+export type Tier = "free" | "one_time_pdf" | "pro" | "agent_pro";
 
 export type FeatureKey =
   | "cash_flow"
@@ -48,7 +55,10 @@ export type FeatureKey =
   | "share_links"
   | "template_manage"
   | "buy_box"
-  | "pipeline";
+  | "pipeline"
+  | "client_buy_box"
+  | "agent_portal"
+  | "embed_whitelabel";
 
 export type FeatureCategory = "core" | "analysis" | "reporting" | "pipeline" | "data";
 
@@ -74,29 +84,32 @@ export interface FeatureSpec {
  * 20260621250000 adds `deal_score` to the free plan JSON so the data matches.
  */
 export const FEATURE_CATALOG: Record<FeatureKey, FeatureSpec> = {
-  cash_flow: { key: "cash_flow", label: "Cap rate · CoC · DSCR · cash flow", tiers: ["free", "one_time_pdf", "pro"], category: "core", gate: "flag" },
-  address_autofill: { key: "address_autofill", label: "Auto-fill defaults from the address (HUD rent · FRED rate · state tax)", tiers: ["free", "one_time_pdf", "pro"], category: "data", gate: "always" },
-  deal_score: { key: "deal_score", label: "Deal Score 0–100 with subscore breakdown", tiers: ["free", "one_time_pdf", "pro"], category: "core", gate: "flag" },
-  verdict: { key: "verdict", label: "Plain-English deal verdict", tiers: ["free", "one_time_pdf", "pro"], category: "core", gate: "always" },
-  comps: { key: "comps", label: "Sale + rent comps from the address", tiers: ["free", "pro"], freeLimit: "1 lifetime lookup", proLimit: "50/mo", category: "data", gate: "flag" },
-  save_deal: { key: "save_deal", label: "Save deals", tiers: ["free", "pro"], freeLimit: "up to 5", proLimit: "unlimited", category: "pipeline", gate: "flag" },
-  dashboard_access: { key: "dashboard_access", label: "Dashboard access", tiers: ["free", "pro"], category: "pipeline", gate: "flag" },
-  dashboard_insights: { key: "dashboard_insights", label: "Portfolio insights & analytics", tiers: ["pro"], category: "pipeline", gate: "flag" },
-  compare_deals: { key: "compare_deals", label: "Compare deals side-by-side", tiers: ["pro"], proLimit: "up to 4", category: "analysis", gate: "flag" },
-  mao: { key: "mao", label: "MAO solver — max offer for your targets", tiers: ["pro"], category: "analysis", gate: "paid" },
-  sensitivity: { key: "sensitivity", label: "Sensitivity grid — stress-test the deal", tiers: ["pro"], category: "analysis", gate: "paid" },
-  strategies: { key: "strategies", label: "BRRRR + fix-and-flip + rehab estimator", tiers: ["pro"], category: "analysis", gate: "paid" },
-  projections: { key: "projections", label: "10-year cash flow & equity projection", tiers: ["one_time_pdf", "pro"], oneTimeLimit: "In the PDF", category: "analysis", gate: "flag" },
-  tax_strategy: { key: "tax_strategy", label: "Tax strategy — depreciation & interest", tiers: ["one_time_pdf", "pro"], oneTimeLimit: "In the PDF", category: "analysis", gate: "flag" },
-  exit_scenarios: { key: "exit_scenarios", label: "Exit scenarios — best year to sell", tiers: ["one_time_pdf", "pro"], oneTimeLimit: "In the PDF", category: "analysis", gate: "flag" },
-  pdf_export: { key: "pdf_export", label: "Lender-ready PDF report with sale + rent comps", tiers: ["one_time_pdf", "pro"], freeLimit: "$5 one-time per deal", oneTimeLimit: "One deal", proLimit: "unlimited", category: "reporting", gate: "flag" },
-  custom_branding: { key: "custom_branding", label: "Custom branding — PDFs + co-branded lead-capture share pages", tiers: ["pro"], category: "reporting", gate: "flag" },
+  cash_flow: { key: "cash_flow", label: "Cap rate · CoC · DSCR · cash flow", tiers: ["free", "one_time_pdf", "pro", "agent_pro"], category: "core", gate: "flag" },
+  address_autofill: { key: "address_autofill", label: "Auto-fill defaults from the address (HUD rent · FRED rate · state tax)", tiers: ["free", "one_time_pdf", "pro", "agent_pro"], category: "data", gate: "always" },
+  deal_score: { key: "deal_score", label: "Deal Score 0–100 with subscore breakdown", tiers: ["free", "one_time_pdf", "pro", "agent_pro"], category: "core", gate: "flag" },
+  verdict: { key: "verdict", label: "Plain-English deal verdict", tiers: ["free", "one_time_pdf", "pro", "agent_pro"], category: "core", gate: "always" },
+  comps: { key: "comps", label: "Sale + rent comps from the address", tiers: ["free", "pro", "agent_pro"], freeLimit: "1 lifetime lookup", proLimit: "50/mo", category: "data", gate: "flag" },
+  save_deal: { key: "save_deal", label: "Save deals", tiers: ["free", "pro", "agent_pro"], freeLimit: "up to 5", proLimit: "unlimited", category: "pipeline", gate: "flag" },
+  dashboard_access: { key: "dashboard_access", label: "Dashboard access", tiers: ["free", "pro", "agent_pro"], category: "pipeline", gate: "flag" },
+  dashboard_insights: { key: "dashboard_insights", label: "Portfolio insights & analytics", tiers: ["pro", "agent_pro"], category: "pipeline", gate: "flag" },
+  compare_deals: { key: "compare_deals", label: "Compare deals side-by-side", tiers: ["pro", "agent_pro"], proLimit: "up to 4", category: "analysis", gate: "flag" },
+  mao: { key: "mao", label: "MAO solver — max offer for your targets", tiers: ["pro", "agent_pro"], category: "analysis", gate: "paid" },
+  sensitivity: { key: "sensitivity", label: "Sensitivity grid — stress-test the deal", tiers: ["pro", "agent_pro"], category: "analysis", gate: "paid" },
+  strategies: { key: "strategies", label: "BRRRR + fix-and-flip + rehab estimator", tiers: ["pro", "agent_pro"], category: "analysis", gate: "paid" },
+  projections: { key: "projections", label: "10-year cash flow & equity projection", tiers: ["one_time_pdf", "pro", "agent_pro"], oneTimeLimit: "In the PDF", category: "analysis", gate: "flag" },
+  tax_strategy: { key: "tax_strategy", label: "Tax strategy — depreciation & interest", tiers: ["one_time_pdf", "pro", "agent_pro"], oneTimeLimit: "In the PDF", category: "analysis", gate: "flag" },
+  exit_scenarios: { key: "exit_scenarios", label: "Exit scenarios — best year to sell", tiers: ["one_time_pdf", "pro", "agent_pro"], oneTimeLimit: "In the PDF", category: "analysis", gate: "flag" },
+  pdf_export: { key: "pdf_export", label: "Lender-ready PDF report with sale + rent comps", tiers: ["one_time_pdf", "pro", "agent_pro"], freeLimit: "$5 one-time per deal", oneTimeLimit: "One deal", proLimit: "unlimited", category: "reporting", gate: "flag" },
+  custom_branding: { key: "custom_branding", label: "Custom branding — PDFs + co-branded lead-capture share pages", tiers: ["pro", "agent_pro"], category: "reporting", gate: "flag" },
   // Sharing is FREE for everyone (the growth loop): basic links are TrueCap-branded.
   // Pro adds co-branded share pages + lead capture via `custom_branding` (separate key).
-  share_links: { key: "share_links", label: "Shareable read-only deal links", tiers: ["free", "pro"], category: "reporting", gate: "always" },
-  template_manage: { key: "template_manage", label: "Strategy Profiles (saved assumption sets)", tiers: ["pro"], category: "pipeline", gate: "flag" },
-  buy_box: { key: "buy_box", label: "Buy Box — auto-screen every deal to your criteria", tiers: ["pro"], category: "pipeline", gate: "flag" },
-  pipeline: { key: "pipeline", label: "Deal pipeline + tags (CRM)", tiers: ["pro"], category: "pipeline", gate: "flag" },
+  share_links: { key: "share_links", label: "Shareable read-only deal links", tiers: ["free", "pro", "agent_pro"], category: "reporting", gate: "always" },
+  template_manage: { key: "template_manage", label: "Strategy Profiles (saved assumption sets)", tiers: ["pro", "agent_pro"], category: "pipeline", gate: "flag" },
+  buy_box: { key: "buy_box", label: "Buy Box — auto-screen every deal to your criteria", tiers: ["pro", "agent_pro"], category: "pipeline", gate: "flag" },
+  pipeline: { key: "pipeline", label: "Deal pipeline + tags (CRM)", tiers: ["pro", "agent_pro"], category: "pipeline", gate: "flag" },
+  client_buy_box: { key: "client_buy_box", label: "Client rosters — buy boxes per buyer, deals screened to each client's criteria", tiers: ["agent_pro"], category: "pipeline", gate: "flag" },
+  agent_portal: { key: "agent_portal", label: "Client portal — co-branded deal pages your buyers revisit", tiers: ["agent_pro"], category: "reporting", gate: "flag" },
+  embed_whitelabel: { key: "embed_whitelabel", label: "White-label embeds — calculators on your site, your brand only", tiers: ["agent_pro"], category: "reporting", gate: "flag" },
 };
 
 /** Does a tier include a feature? Use for marketing AND as a cross-check in tests. */

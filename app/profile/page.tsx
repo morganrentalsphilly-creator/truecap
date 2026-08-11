@@ -7,7 +7,7 @@ import { ProfileForm } from "@/components/profile/profile-form";
 import { getEntitlementsForUser } from "@/lib/entitlements";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getStripe } from "@/lib/stripe/client";
-import { getPrimaryPlanPriceId } from "@/lib/stripe/plan-prices";
+import { getPrimaryPlanPriceId, isAgentProConfigured, PAID_PLAN_SLUGS, type PaidPlanSlug } from "@/lib/stripe/plan-prices";
 
 export const metadata: Metadata = {
   title: "Profile & Billing",
@@ -51,13 +51,14 @@ function formatCurrency(cents: number, currency: string): string {
   }).format(cents / 100);
 }
 
-function formatPrice(planSlug: "pro_monthly" | "pro_annual", stripePrice?: StripePriceDisplay): string {
+function formatPrice(planSlug: PaidPlanSlug, stripePrice?: StripePriceDisplay): string {
   if (stripePrice) return stripePrice.priceLabel;
   if (planSlug === "pro_annual") return "25% off";
+  if (planSlug.startsWith("agent_pro")) return "Agent Pro";
   return "Pro";
 }
 
-function getPlanPriceId(planSlug: "pro_monthly" | "pro_annual", dbPriceId?: string | null): string | undefined {
+function getPlanPriceId(planSlug: PaidPlanSlug, dbPriceId?: string | null): string | undefined {
   // Primary (first) configured price — mirrors billing.ts getPlanPriceId.
   // Additional comma-listed prices are grandfathered ids for webhook
   // resolution only (see lib/stripe/plan-prices).
@@ -66,13 +67,13 @@ function getPlanPriceId(planSlug: "pro_monthly" | "pro_annual", dbPriceId?: stri
 
 async function getStripePriceDisplays(
   plans: PlanRow[] | null
-): Promise<Record<"pro_monthly" | "pro_annual", StripePriceDisplay>> {
-  const fallback = { pro_monthly: null, pro_annual: null };
+): Promise<Record<PaidPlanSlug, StripePriceDisplay>> {
+  const fallback = { pro_monthly: null, pro_annual: null, agent_pro_monthly: null, agent_pro_annual: null };
   if (!process.env.STRIPE_SECRET_KEY) return fallback;
 
   const stripe = getStripe();
   const entries = await Promise.all(
-    (["pro_monthly", "pro_annual"] as const).map(async (slug) => {
+    PAID_PLAN_SLUGS.map(async (slug) => {
       const dbPriceId = plans?.find((plan) => plan.slug === slug)?.stripe_price_id ?? null;
       const priceId = getPlanPriceId(slug, dbPriceId);
       if (!priceId) return [slug, null] as const;
@@ -85,7 +86,7 @@ async function getStripePriceDisplays(
           slug,
           {
             priceLabel: formatCurrency(price.unit_amount, price.currency),
-            intervalLabel: price.recurring?.interval ?? (slug === "pro_annual" ? "year" : "month"),
+            intervalLabel: price.recurring?.interval ?? (slug.endsWith("_annual") ? "year" : "month"),
             currency: price.currency,
           },
         ] as const;
@@ -99,12 +100,20 @@ async function getStripePriceDisplays(
     })
   );
 
-  return Object.fromEntries(entries) as Record<"pro_monthly" | "pro_annual", StripePriceDisplay>;
+  return Object.fromEntries(entries) as Record<PaidPlanSlug, StripePriceDisplay>;
 }
 
-function getPlanTitle(slug: "pro_monthly" | "pro_annual"): string {
-  if (slug === "pro_annual") return "Pro Annual";
-  return "Pro Monthly";
+function getPlanTitle(slug: PaidPlanSlug): string {
+  switch (slug) {
+    case "pro_annual":
+      return "Pro Annual";
+    case "agent_pro_monthly":
+      return "Agent Pro Monthly";
+    case "agent_pro_annual":
+      return "Agent Pro Annual";
+    default:
+      return "Pro Monthly";
+  }
 }
 
 function getPlanObject(sub: SubscriptionRow | null): { slug: string | null } | null {
@@ -143,7 +152,7 @@ export default async function ProfilePage({
     supabase
       .from("plans")
       .select("slug, stripe_price_id")
-      .in("slug", ["pro_monthly", "pro_annual"])
+      .in("slug", ["pro_monthly", "pro_annual", "agent_pro_monthly", "agent_pro_annual"])
       .eq("is_active", true)
       .order("slug", { ascending: true }),
   ]);
@@ -165,32 +174,45 @@ export default async function ProfilePage({
   const availablePlanSlugs = new Set(
     ((planRows as PlanRow[] | null) ?? [])
       .map((plan) => plan.slug)
-      .filter((slug): slug is "pro_monthly" | "pro_annual" => slug === "pro_monthly" || slug === "pro_annual")
+      .filter((slug): slug is PaidPlanSlug => (PAID_PLAN_SLUGS as readonly string[]).includes(slug))
   );
-  const billingPlans = (["pro_monthly", "pro_annual"] as const)
+  const billingPlans = PAID_PLAN_SLUGS
     .filter((slug) => availablePlanSlugs.size === 0 || availablePlanSlugs.has(slug))
+    // Agent Pro needs BOTH its plan row (migration) and a configured price:
+    // showing a switch target checkout would reject just invites a dead end.
+    .filter((slug) => !slug.startsWith("agent_pro") || (isAgentProConfigured() && availablePlanSlugs.has(slug)))
     .map((slug) => ({
       slug,
       title: getPlanTitle(slug),
-      intervalLabel: stripePriceDisplays[slug]?.intervalLabel ?? (slug === "pro_annual" ? "year" : "month"),
+      intervalLabel: stripePriceDisplays[slug]?.intervalLabel ?? (slug.endsWith("_annual") ? "year" : "month"),
       priceLabel: formatPrice(slug, stripePriceDisplays[slug]),
       badge: slug === "pro_annual" ? "25% off" : undefined,
-      description:
-        slug === "pro_annual"
+      description: slug.startsWith("agent_pro")
+        ? slug.endsWith("_annual")
+          ? "Everything in Pro + the agent toolkit, billed yearly."
+          : "Everything in Pro + the agent toolkit, billed monthly."
+        : slug === "pro_annual"
           ? "Full Pro access billed yearly."
           : "Full Pro access billed monthly.",
-      features: [
-        "Save and compare deals",
-        "10-year projections",
-        "Tax strategy and exit scenarios",
-        "Professional PDF exports",
-      ],
+      features: slug.startsWith("agent_pro")
+        ? [
+            "Everything in Pro",
+            "Client rosters + per-client buy boxes",
+            "Co-branded client deal pages",
+            "White-label embeds",
+          ]
+        : [
+            "Save and compare deals",
+            "10-year projections",
+            "Tax strategy and exit scenarios",
+            "Professional PDF exports",
+          ],
     }));
 
   // Pull the matching plan price so the Google Ads conversion event
   // carries a meaningful value for value-based bidding strategies.
   const justSubscribedSlug = (subscriptionRow?.status === "active" || subscriptionRow?.status === "trialing")
-    ? (currentPlan?.slug as "pro_monthly" | "pro_annual" | undefined)
+    ? (currentPlan?.slug as PaidPlanSlug | undefined)
     : undefined;
   const subscriptionValue = justSubscribedSlug
     ? (() => {

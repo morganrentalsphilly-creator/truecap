@@ -8,7 +8,7 @@
  * unit-tested without dragging the "use server" billing action into vitest.
  */
 
-export const CHECKOUT_PLAN_SLUGS = ["pro_monthly", "pro_annual"] as const;
+export const CHECKOUT_PLAN_SLUGS = ["pro_monthly", "pro_annual", "agent_pro_monthly", "agent_pro_annual"] as const;
 
 export type CheckoutPlanSlug = (typeof CHECKOUT_PLAN_SLUGS)[number];
 

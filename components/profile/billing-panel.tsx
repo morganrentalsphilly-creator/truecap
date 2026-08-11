@@ -23,7 +23,7 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
 type BillingPlan = {
-  slug: "pro_monthly" | "pro_annual";
+  slug: "pro_monthly" | "pro_annual" | "agent_pro_monthly" | "agent_pro_annual";
   title: string;
   intervalLabel: string;
   priceLabel: string;

@@ -27,7 +27,7 @@ import {
 } from "@/lib/entitlements";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getStripe } from "@/lib/stripe/client";
-import { getPrimaryPlanPriceId } from "@/lib/stripe/plan-prices";
+import { getPrimaryPlanPriceId, isAgentProConfigured, type PaidPlanSlug } from "@/lib/stripe/plan-prices";
 
 import { RoiCalculatorWidget } from "@/components/marketing/roi-calculator-widget";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
@@ -50,7 +50,7 @@ export const metadata: Metadata = {
 
 type StripePrice = { amountLabel: string; period: string; unitAmount: number } | null;
 
-async function loadStripePrice(slug: "pro_monthly" | "pro_annual"): Promise<StripePrice> {
+async function loadStripePrice(slug: PaidPlanSlug): Promise<StripePrice> {
   // Display the CURRENT/primary price (first configured id); later comma-listed
   // ids are grandfathered prices for webhook resolution only.
   const priceId = getPrimaryPlanPriceId(slug);
@@ -64,7 +64,7 @@ async function loadStripePrice(slug: "pro_monthly" | "pro_annual"): Promise<Stri
       currency: price.currency,
       maximumFractionDigits: price.unit_amount % 100 === 0 ? 0 : 2,
     }).format(price.unit_amount / 100);
-    const period = price.recurring?.interval ?? (slug === "pro_annual" ? "year" : "month");
+    const period = price.recurring?.interval ?? (slug.endsWith("_annual") ? "year" : "month");
     // unitAmount returned in dollars (not cents) so downstream consumers
     // like the ROI calculator can use it for breakeven math without
     // dividing themselves.
@@ -131,9 +131,14 @@ export default async function PricingPage() {
   // their trial-promising copy for a "Welcome back" variant when the trial
   // won't be granted. Anonymous visitors keep the trial copy — they're
   // overwhelmingly first-time, and checkout re-checks after signup anyway.
-  const [monthly, annual, isPaid, hadPriorSubscription] = await Promise.all([
+  // Agent Pro renders ONLY when its Stripe price env is configured — until
+  // then the tier is fully plumbed but invisible (nothing to sell yet).
+  const agentProConfigured = isAgentProConfigured();
+  const [monthly, annual, agentMonthly, agentAnnual, isPaid, hadPriorSubscription] = await Promise.all([
     loadStripePrice("pro_monthly"),
     loadStripePrice("pro_annual"),
+    agentProConfigured ? loadStripePrice("agent_pro_monthly") : Promise.resolve(null),
+    agentProConfigured ? loadStripePrice("agent_pro_annual") : Promise.resolve(null),
     user ? hasPaidPlanSubscription(supabase, user.id) : Promise.resolve(false),
     user ? hasAnySubscriptionHistory(supabase, user.id) : Promise.resolve(false),
   ]);
@@ -198,6 +203,8 @@ export default async function PricingPage() {
           <PricingTogglePlans
             monthly={monthly}
             annual={annual}
+            agentMonthly={agentMonthly}
+            agentAnnual={agentAnnual}
             isAuthenticated={Boolean(user)}
             isPaid={isPaid}
             hadPriorSubscription={hadPriorSubscription}

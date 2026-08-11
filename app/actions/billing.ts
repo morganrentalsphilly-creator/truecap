@@ -6,12 +6,12 @@ import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { hasPaidPlanSubscription } from "@/lib/entitlements";
 import { getStripe } from "@/lib/stripe/client";
-import { getPrimaryPlanPriceId } from "@/lib/stripe/plan-prices";
+import { getPrimaryPlanPriceId, type PaidPlanSlug } from "@/lib/stripe/plan-prices";
 import { captureServerEvent } from "@/lib/posthog-server";
 import { TRIAL_DAYS } from "@/lib/trial";
 
 const checkoutSchema = z.object({
-  planSlug: z.enum(["pro_monthly", "pro_annual"]),
+  planSlug: z.enum(["pro_monthly", "pro_annual", "agent_pro_monthly", "agent_pro_annual"]),
   // Optional campaign code from the URL (?coupon=…). Resolved SERVER-SIDE
   // against a whitelist → env coupon id, so a client can never inject an
   // arbitrary Stripe coupon into checkout.
@@ -19,7 +19,7 @@ const checkoutSchema = z.object({
 });
 
 const switchPlanSchema = z.object({
-  targetPlanSlug: z.enum(["pro_monthly", "pro_annual"]),
+  targetPlanSlug: z.enum(["pro_monthly", "pro_annual", "agent_pro_monthly", "agent_pro_annual"]),
 });
 
 export type BillingActionResult =
@@ -39,7 +39,7 @@ function getSiteUrl(): string {
   return (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, "");
 }
 
-function getPlanPriceId(planSlug: "pro_monthly" | "pro_annual", dbPriceId?: string | null): string | null {
+function getPlanPriceId(planSlug: PaidPlanSlug, dbPriceId?: string | null): string | null {
   // Checkout sells the PRIMARY (first) configured price; the env may list
   // additional grandfathered prices after it (see lib/stripe/plan-prices),
   // which are for webhook resolution only, never for new checkouts.
@@ -284,6 +284,9 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
     // precedence over the standard annual coupon, and applies to monthly OR
     // annual. Both resolve to a Stripe coupon id we control.
     const offerCoupon = resolveOfferCouponId(parsed.data.offer);
+    // STRIPE_ANNUAL_DISCOUNT_COUPON_ID exists for the Pro annual price only.
+    // agent_pro_annual must be created in Stripe at its final (already
+    // discounted) amount — stacking this coupon on it would double-discount.
     const annualCoupon =
       parsed.data.planSlug === "pro_annual" ? process.env.STRIPE_ANNUAL_DISCOUNT_COUPON_ID : undefined;
     const appliedCoupon = offerCoupon ?? annualCoupon;
