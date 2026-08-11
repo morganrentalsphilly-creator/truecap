@@ -25,7 +25,7 @@
  * compliance purposes, since not actively granting = denied.
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Cookie, X } from "lucide-react";
@@ -89,9 +89,24 @@ export function CookieConsentBanner() {
   // for users who already decided previously.
   const [decision, setDecision] = useState<ConsentValue | "pending" | null>(null);
 
+  const bannerRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     setDecision(readStoredConsent() ?? "pending");
   }, []);
+
+  // Focus the banner the moment it becomes visible. It's a role="dialog"
+  // appended at the END of the DOM (it renders after the footer), so without
+  // this a keyboard/screen-reader user had to tab through the entire page —
+  // footer legal links and all — before ever reaching Reject/Accept: the
+  // consent control was the LAST stop in tab order. Focusing the container
+  // (tabIndex={-1}) makes it the first stop instead, so the next Tab lands on
+  // Reject. preventScroll keeps the fixed bar from yanking the viewport.
+  useEffect(() => {
+    if (decision === "pending") {
+      bannerRef.current?.focus({ preventScroll: true });
+    }
+  }, [decision]);
 
   const handleAccept = () => {
     writeStoredConsent("granted");
@@ -122,10 +137,12 @@ export function CookieConsentBanner() {
 
   return (
     <div
+      ref={bannerRef}
       role="dialog"
       aria-label="Cookie consent"
       aria-live="polite"
-      className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-card/95 px-3 pt-3 pb-[max(env(safe-area-inset-bottom),0.75rem)] shadow-[0_-12px_28px_rgba(15,23,42,0.10)] backdrop-blur supports-[backdrop-filter]:bg-card/90 sm:px-4 sm:pt-4 sm:pb-[max(env(safe-area-inset-bottom),1rem)]"
+      tabIndex={-1}
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-card/95 px-3 pt-3 pb-[max(env(safe-area-inset-bottom),0.75rem)] shadow-[0_-12px_28px_rgba(15,23,42,0.10)] outline-none backdrop-blur supports-[backdrop-filter]:bg-card/90 sm:px-4 sm:pt-4 sm:pb-[max(env(safe-area-inset-bottom),1rem)]"
     >
       <div className="mx-auto flex max-w-5xl flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
         <div className="flex min-w-0 flex-1 items-start gap-2.5 sm:items-center">
@@ -167,11 +184,16 @@ export function CookieConsentBanner() {
           >
             Accept all
           </button>
+          {/* Explicit dismiss on EVERY breakpoint (counts as reject). The bar
+              is fixed to the bottom of the viewport, so on a phone it sits on
+              top of the footer's legal links (privacy / terms) and would
+              otherwise obscure them until a choice was made. A visible close
+              control lets a mobile user clear it and reach those links. */}
           <button
             type="button"
             onClick={handleReject}
             aria-label="Dismiss (counts as reject)"
-            className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-lg text-muted-foreground/60 hover:bg-muted hover:text-foreground sm:inline-flex"
+            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-muted-foreground/60 hover:bg-muted hover:text-foreground"
           >
             <X className="size-4" />
           </button>

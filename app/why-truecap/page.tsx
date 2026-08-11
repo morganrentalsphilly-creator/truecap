@@ -45,6 +45,13 @@ export default function WhyTrueCapPage() {
   return (
     <>
       <Header initialUser={null} initialEntitlements={null} />
+      {/* Single page-level H1 for the document outline. The visual lede is the
+          VsCompetitors eyebrow ("Why TrueCap") + its H2, which reads well but
+          left this page opening on an H2 with NO H1 — an a11y/SEO gap (screen
+          readers and crawlers use the H1 as the page's name). Rendered sr-only
+          so the existing layout is untouched; every section heading below stays
+          an H2 nested under it. Mirrors the page <title>. */}
+      <h1 className="sr-only">Why TrueCap — vs spreadsheets, DealCheck &amp; BiggerPockets</h1>
       <VsCompetitors />
       <HomepageFaq />
       <section className="border-t border-border bg-background">

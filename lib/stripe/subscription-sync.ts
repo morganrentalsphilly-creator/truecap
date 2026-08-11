@@ -213,6 +213,21 @@ function isSubscriptionScheduledToCancel(subscription: Stripe.Subscription): boo
   return Boolean(subscription.cancel_at_period_end || subscriptionWithCancelAt.cancel_at);
 }
 
+async function resolvePlanIdBySlug(admin: SupabaseClient, slug: string | null): Promise<string | null> {
+  if (!slug) return null;
+
+  // Throw on query errors instead of falling through to null (see
+  // resolvePlanIdForPrice) — a DB blip must 500, not silently downgrade.
+  const { data: planBySlug, error: slugLookupError } = await admin
+    .from("plans")
+    .select("id")
+    .eq("slug", slug)
+    .maybeSingle();
+  if (slugLookupError) throw slugLookupError;
+
+  return planBySlug?.id ?? null;
+}
+
 async function resolvePlanIdForPrice(admin: SupabaseClient, priceId: string | null): Promise<string | null> {
   if (!priceId) return null;
 
@@ -230,17 +245,28 @@ async function resolvePlanIdForPrice(admin: SupabaseClient, priceId: string | nu
 
   if (planByPrice?.id) return planByPrice.id;
 
-  const slug = planSlugFromPriceId(priceId);
-  if (!slug) return null;
+  return resolvePlanIdBySlug(admin, planSlugFromPriceId(priceId));
+}
 
-  const { data: planBySlug, error: slugLookupError } = await admin
-    .from("plans")
-    .select("id")
-    .eq("slug", slug)
+/**
+ * The plan_id currently stored on this subscription's row, or null if we've
+ * never synced it. Used as the last rung of the unmapped-price recovery
+ * ladder: if a still-active subscription's price can't be resolved to a plan
+ * by price OR by plan_slug metadata, we PRESERVE whatever plan the user
+ * already has rather than overwriting it with null (→ FREE). Throws on query
+ * errors so a DB blip 500s + retries instead of downgrading.
+ */
+async function getExistingSubscriptionPlanId(
+  admin: SupabaseClient,
+  stripeSubscriptionId: string
+): Promise<string | null> {
+  const { data, error } = await admin
+    .from("subscriptions")
+    .select("plan_id")
+    .eq("stripe_subscription_id", stripeSubscriptionId)
     .maybeSingle();
-  if (slugLookupError) throw slugLookupError;
-
-  return planBySlug?.id ?? null;
+  if (error) throw error;
+  return (data as { plan_id: string | null } | null)?.plan_id ?? null;
 }
 
 export async function upsertSubscriptionFromStripe(
@@ -267,29 +293,49 @@ export async function upsertSubscriptionFromStripe(
         ? primaryItem.price
         : null;
 
-  const planId = await resolvePlanIdForPrice(admin, priceId);
+  let planId = await resolvePlanIdForPrice(admin, priceId);
 
-  // ENTITLEMENT-MISMATCH ALARM: a paying subscription whose price maps to no
-  // plan row upserts with plan_id=null, and getEntitlementsForUser then
-  // silently resolves the PAYING user to the FREE plan. This is exactly how
-  // the 2026-07 Stripe-account switch locked two paid accounts out of Pro
-  // for days with zero signal — plans.stripe_price_id was never populated
-  // for the new account and the env fallback was stale. Page someone
-  // instead: ids only, no PII (pitfall #4).
-  if (planId === null && ["active", "trialing", "past_due"].includes(subscription.status)) {
-    Sentry.captureMessage(
-      "Paid subscription upserted with UNMAPPED plan — user will resolve to FREE entitlements",
-      {
-        level: "error",
-        tags: { feature: "billing", kind: "entitlement-mismatch" },
-        extra: {
-          stripe_subscription_id: subscription.id,
-          stripe_price_id: priceId,
-          subscription_status: subscription.status,
-          hint: "Populate plans.stripe_price_id for this price (and verify STRIPE_PRICE_PRO_MONTHLY/ANNUAL env).",
-        },
-      }
-    );
+  // UNMAPPED-PRICE RECOVERY LADDER for a still-paying subscription. A price
+  // that maps to no plan row would upsert plan_id=null, and
+  // getEntitlementsForUser then silently resolves the PAYING user to the FREE
+  // plan. This is exactly how the 2026-07 Stripe-account switch locked two
+  // paid accounts out of Pro for days with zero signal — plans.stripe_price_id
+  // was never populated for the new account and the env fallback was stale.
+  // Before EVER accepting that downgrade on an active/trialing/past_due sub:
+  //   1. Recover the plan from the subscription's plan_slug metadata, which
+  //      checkout stamps on subscription_data.metadata (app/actions/billing.ts)
+  //      and which matches plans.slug 1:1. This rescues brand-new subs whose
+  //      price row simply isn't wired up yet.
+  //   2. If that still fails, PRESERVE the plan already stored on this
+  //      subscription's row rather than overwriting it with null — never strip
+  //      Pro from someone actively paying — and page LOUD (ids only, no PII,
+  //      pitfall #4). Only genuinely unresolvable first-time syncs fall
+  //      through to null here, which is the correct FREE result for those.
+  // A canceled/incomplete/etc. sub legitimately resolves to null (→ FREE) and
+  // needs no rescue — the guard is scoped to the paid status set.
+  const isActivePaidStatus = ["active", "trialing", "past_due"].includes(subscription.status);
+  if (planId === null && isActivePaidStatus) {
+    planId = await resolvePlanIdBySlug(admin, subscription.metadata?.plan_slug ?? null);
+
+    if (planId === null) {
+      const preservedPlanId = await getExistingSubscriptionPlanId(admin, subscription.id);
+      Sentry.captureMessage(
+        "Paid subscription has UNMAPPED price — preserving existing plan to avoid FREE downgrade",
+        {
+          level: "error",
+          tags: { feature: "billing", kind: "entitlement-mismatch" },
+          extra: {
+            stripe_subscription_id: subscription.id,
+            stripe_price_id: priceId,
+            subscription_status: subscription.status,
+            plan_slug_metadata: subscription.metadata?.plan_slug ?? null,
+            preserved_plan_id: preservedPlanId,
+            hint: "Populate plans.stripe_price_id for this price (and verify STRIPE_PRICE_PRO_MONTHLY/ANNUAL env).",
+          },
+        }
+      );
+      planId = preservedPlanId;
+    }
   }
 
   const subscriptionWithPeriods = subscription as Stripe.Subscription & {
