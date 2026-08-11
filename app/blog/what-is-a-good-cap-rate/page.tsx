@@ -33,7 +33,7 @@ const SERP_TITLE = "What's a good cap rate for rental property in 2026";
 const DESCRIPTION =
   "There's no single answer — cap rate benchmarks shift by market, property type, and the prevailing risk-free rate. Plain-English guide to what's good in cash-flow markets, appreciation markets, and the negative-leverage rate environment of 2026.";
 const PUBLISHED_AT = "2026-05-24";
-const MODIFIED_AT = "2026-06-01";
+const MODIFIED_AT = "2026-08-11";
 const READING_TIME_MIN = 9;
 
 export const metadata: Metadata = {
@@ -174,7 +174,7 @@ export default function BlogPost() {
           <p>By tier:</p>
           <ul>
             <li>
-              <strong>Cash-flow markets</strong> (Cleveland, Indianapolis,
+              <strong>Cash-flow markets</strong> (<Link href="/markets/cleveland" className="text-primary font-semibold hover:underline">Cleveland</Link>, Indianapolis,
               Memphis, Birmingham, older Sun Belt multifamily): <strong>6-10%</strong>
               is healthy. Above 10% requires scrutiny.
             </li>
