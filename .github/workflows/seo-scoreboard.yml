@@ -268,11 +268,23 @@ jobs:
           # prints the four characters "null", which is a non-empty string and
           # would make the check below think a PR already exists — so the very
           # first run would report "Updated PR #null" and never open one.
-          EXISTING="$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number // empty' || true)"
+          # The telemetry is ALREADY SAFE at this point — it is on the
+          # seo/telemetry branch via the force-push above, and the
+          # carry-forward step restores it next week regardless of what
+          # happens below. The PR is only a convenience: a one-click way for
+          # Morgan to land it on main so the content pipeline can read it.
+          #
+          # So PR creation must NEVER fail the run. `gh pr create` with the
+          # default GITHUB_TOKEN needs "Allow GitHub Actions to create and
+          # approve pull requests" (Settings → Actions → General → Workflow
+          # permissions), which is OFF by default — a fresh repo would 403
+          # here and turn a successful measurement into a red run plus a
+          # failure email. If it fails, say exactly which setting to flip and
+          # move on; the data is not lost.
+          EXISTING="$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number // empty' 2>/dev/null || true)"
           if [ -n "$EXISTING" ]; then
             echo "Updated PR #$EXISTING (the force-push is the update)."
-          else
-            gh pr create \
+          elif gh pr create \
               --head "$BRANCH" \
               --base main \
               --title "chore(seo): GSC telemetry" \
@@ -285,7 +297,15 @@ jobs:
                 "**Merge it.** Week-over-week deltas diff against the newest telemetry file the next run can see." \
                 "Unmerged weeks are carried forward on this branch so the trend survives, but the numbers are only" \
                 "visible to anything reading \`main\` — including the content pipeline, which consumes" \
-                "\`docs/seo/telemetry/latest.json\` — once this lands.")"
+                "\`docs/seo/telemetry/latest.json\` — once this lands.")" 2>/tmp/pr_err; then
+            echo "Opened the telemetry PR."
+          else
+            echo "::warning::Could not open the telemetry PR — the data is safe on the '$BRANCH' branch, but it is not on main yet."
+            echo "Most likely cause: repo Settings → Actions → General → Workflow permissions →"
+            echo "  'Allow GitHub Actions to create and approve pull requests' is unchecked. Enable it,"
+            echo "  or merge the '$BRANCH' branch into main by hand. The content pipeline reads"
+            echo "  docs/seo/telemetry/latest.json from main."
+            sed 's/^/  gh: /' /tmp/pr_err || true
           fi
 
       # Same upsert-in-place contract as seo-healthcheck.yml. A weekly job that

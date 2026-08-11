@@ -108,7 +108,14 @@ jobs:
             # inside 40 and never had been — the two successes on 2026-08-02
             # were smaller jobs against a stocked backlog.
             --max-turns 70
-            --allowedTools "Read,Write,Edit,Glob,Grep,WebSearch,WebFetch,Bash(npm test),Bash(npx tsc:*),Bash(npx vitest:*),Bash(node scripts/seo/*),Bash(git:*),Bash(gh pr:*)"
+            # gh is scoped to create/view/diff ONLY — NOT `gh pr merge`. The
+            # tiered auto-merge below is the whole point: a P3 net-new page
+            # opens a PR and waits for a human. `Bash(gh pr:*)` would have
+            # included `gh pr merge --auto`, letting the agent queue its own
+            # net-new PR for merge and walk straight past that gate. A
+            # production audit caught it. Keep this list tight; widening it
+            # back to `gh pr:*` re-opens the hole.
+            --allowedTools "Read,Write,Edit,Glob,Grep,WebSearch,WebFetch,Bash(npm test),Bash(npx tsc:*),Bash(npx vitest:*),Bash(node scripts/seo/*),Bash(git:*),Bash(gh pr create:*),Bash(gh pr view:*),Bash(gh pr diff:*)"
           prompt: |
             You are writing one SEO blog post for TrueCap (https://usetruecap.com),
             a free rental-property investment analyzer. Repo: ${{ github.repository }}.
