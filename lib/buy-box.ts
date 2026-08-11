@@ -408,6 +408,10 @@ export type NamedBuyBox = BuyBoxCriteria & {
   strategyKind: string | null;
   isDefault: boolean;
   sortOrder: number;
+  /** Agent Pro: the client this box screens for; null/undefined = the
+   *  agent's own box. Optional so pre-migration rows and non-agent callers
+   *  never see the field. */
+  clientId?: string | null;
 };
 
 export type NamedBuyBoxResult = {

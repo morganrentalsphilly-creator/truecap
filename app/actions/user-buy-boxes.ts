@@ -46,6 +46,14 @@ const FIT_FEEDBACK_DEALS_LIMIT = 200;
 
 const SELECT_COLS =
   "id, name, strategy_kind, min_cap_rate_pct, min_coc_pct, min_dscr, min_cash_flow_monthly, max_purchase_price, property_types, target_states, is_active, is_default, sort_order";
+/** + client_id (Agent Pro, migration 20260811120000). Selected via a
+ *  fallback ladder: try WITH the column, retry legacy on 42703 — so a
+ *  pre-migration database keeps working untouched. */
+const SELECT_COLS_WITH_CLIENT = `${SELECT_COLS}, client_id`;
+
+function isMissingColumn(error: { code?: string; message?: string } | null): boolean {
+  return !!error && (error.code === "42703" || /column .* does not exist/i.test(error.message ?? ""));
+}
 
 function nullableNumber(min: number, max: number) {
   return z.preprocess(
@@ -75,6 +83,9 @@ const boxSchema = z
     targetStates: z.array(z.string()).max(60).default([]),
     isActive: z.boolean().default(true),
     isDefault: z.boolean().default(false),
+    /** Agent Pro: scope this box to a roster client. Silently dropped when
+     *  the client_id column doesn't exist yet (pre-migration). */
+    clientId: z.string().uuid().nullable().optional(),
   })
   .strict();
 
@@ -119,6 +130,7 @@ type BuyBoxesRow = {
   is_active: boolean | null;
   is_default: boolean | null;
   sort_order: number | null;
+  client_id?: string | null;
 };
 
 function toNum(value: number | string | null): number | null {
@@ -141,6 +153,7 @@ function rowToNamedBuyBox(row: BuyBoxesRow): NamedBuyBox {
     strategyKind: isStrategyKind(row.strategy_kind) ? row.strategy_kind : null,
     isDefault: row.is_default ?? false,
     sortOrder: row.sort_order ?? 0,
+    clientId: row.client_id ?? null,
     minCapRatePct: toNum(row.min_cap_rate_pct),
     minCocPct: toNum(row.min_coc_pct),
     minDscr: toNum(row.min_dscr),
@@ -185,13 +198,19 @@ async function fetchBoxes(
   supabase: SupabaseClient,
   userId: string
 ): Promise<{ ok: true; boxes: NamedBuyBox[] } | { ok: false; result: BuyBoxesActionResult }> {
-  const { data, error } = await supabase
-    .from("user_buy_boxes")
-    .select(SELECT_COLS)
-    .eq("user_id", userId)
-    .order("is_default", { ascending: false })
-    .order("sort_order", { ascending: true })
-    .order("created_at", { ascending: true });
+  const buildQuery = (cols: string) =>
+    supabase
+      .from("user_buy_boxes")
+      .select(cols)
+      .eq("user_id", userId)
+      .order("is_default", { ascending: false })
+      .order("sort_order", { ascending: true })
+      .order("created_at", { ascending: true });
+
+  let { data, error } = await buildQuery(SELECT_COLS_WITH_CLIENT);
+  if (isMissingColumn(error)) {
+    ({ data, error } = await buildQuery(SELECT_COLS));
+  }
 
   if (error) {
     return {
@@ -201,7 +220,7 @@ async function fetchBoxes(
         : toServerErrorResult(error, "user-buy-boxes"),
     };
   }
-  return { ok: true, boxes: (data ?? []).map((r) => rowToNamedBuyBox(r as BuyBoxesRow)) };
+  return { ok: true, boxes: ((data ?? []) as unknown[]).map((r) => rowToNamedBuyBox(r as BuyBoxesRow)) };
 }
 
 /**
@@ -354,6 +373,10 @@ export async function upsertBuyBoxAction(input: unknown): Promise<BuyBoxesAction
     is_active: parsed.data.isActive,
     is_default: shouldBeDefault,
     updated_at: new Date().toISOString(),
+    // Only when the caller sent it — the client selector renders solely for
+    // Agent Pro users, who cannot exist before the migration, so ordinary
+    // saves never touch the column.
+    ...(parsed.data.clientId !== undefined ? { client_id: parsed.data.clientId } : {}),
   };
 
   if (isCreate) {

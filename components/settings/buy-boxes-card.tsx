@@ -31,6 +31,7 @@ import {
 import { STRATEGY_KINDS, strategyLabel } from "@/lib/strategy-kinds";
 import { trackEvent } from "@/lib/analytics";
 import { useToast } from "@/hooks/use-toast";
+import { listAgentClientsAction, type AgentClient } from "@/app/actions/agent-clients";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -87,6 +88,8 @@ type EditorState = {
   id?: string;
   name: string;
   strategyKind: string;
+  /** Agent Pro: roster client this box screens for ("" = the agent's own). */
+  clientId: string;
   fields: Record<NumericKey, string>;
   propertyTypes: BuyBoxPropertyType[];
   targetStates: string[];
@@ -100,6 +103,7 @@ function boxToEditor(box: NamedBuyBox): EditorState {
     id: box.id,
     name: box.name,
     strategyKind: box.strategyKind ?? "",
+    clientId: box.clientId ?? "",
     fields: {
       minCapRatePct: s(box.minCapRatePct),
       minCocPct: s(box.minCocPct),
@@ -118,6 +122,7 @@ function emptyEditor(makeDefault: boolean): EditorState {
   return {
     name: "",
     strategyKind: "",
+    clientId: "",
     fields: { minCapRatePct: "", minCocPct: "", minDscr: "", minCashFlowMonthly: "", maxPurchasePrice: "" },
     propertyTypes: [],
     targetStates: [],
@@ -132,6 +137,22 @@ export function BuyBoxesCard() {
   const [canUse, setCanUse] = useState(false);
   const [migrationPending, setMigrationPending] = useState(false);
   const [boxes, setBoxes] = useState<NamedBuyBox[]>([]);
+  // Agent Pro roster for the per-client selector. null = not an Agent Pro
+  // user (or migration pending) — the selector simply doesn't render.
+  const [clients, setClients] = useState<AgentClient[] | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    void listAgentClientsAction()
+      .then((r) => {
+        if (!cancelled && r.ok) setClients(r.clients.filter((c) => !c.isArchived));
+      })
+      .catch(() => {
+        /* roster is an enhancement — a failed load just hides the selector */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   const [editor, setEditor] = useState<EditorState | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [isSaving, startSaving] = useTransition();
@@ -196,6 +217,9 @@ export function BuyBoxesCard() {
           id: editor.id,
           name,
           strategyKind: editor.strategyKind || null,
+          // Sent ONLY when the roster loaded (Agent Pro) — otherwise the key
+          // is omitted and the action never touches the client_id column.
+          ...(clients ? { clientId: editor.clientId || null } : {}),
           minCapRatePct: parseNum(editor.fields.minCapRatePct),
           minCocPct: parseNum(editor.fields.minCocPct),
           minDscr: parseNum(editor.fields.minDscr),
@@ -495,6 +519,7 @@ export function BuyBoxesCard() {
           isSaving={isSaving}
           onSave={handleSave}
           isOnlyBox={boxes.length === 0}
+          clients={clients}
         />
       )}
     </section>
@@ -508,6 +533,7 @@ function BoxEditorForm({
   isSaving,
   onSave,
   isOnlyBox,
+  clients,
 }: {
   editor: EditorState;
   setEditor: (e: EditorState | null) => void;
@@ -515,6 +541,8 @@ function BoxEditorForm({
   isSaving: boolean;
   onSave: () => void;
   isOnlyBox: boolean;
+  /** Agent Pro roster; null hides the per-client selector. */
+  clients: AgentClient[] | null;
 }) {
   const [stateInput, setStateInput] = useState("");
 
@@ -565,6 +593,27 @@ function BoxEditorForm({
             ))}
           </select>
         </div>
+
+        {clients && clients.length > 0 ? (
+          <div className="space-y-1">
+            <Label htmlFor="bb-client" className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+              For client (optional)
+            </Label>
+            <select
+              id="bb-client"
+              value={editor.clientId}
+              onChange={(e) => update({ clientId: e.target.value })}
+              className="h-10 w-full rounded-md border border-input bg-background px-3 text-base md:text-sm"
+            >
+              <option value="">My own criteria</option>
+              {clients.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        ) : null}
       </div>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
