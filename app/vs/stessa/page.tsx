@@ -8,6 +8,7 @@
  * investors end up using both, but the searcher is asking us which.
  */
 
+import { TRIAL_LABEL } from "@/lib/trial";
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
@@ -249,7 +250,7 @@ export default function VsStessaPage() {
           </p>
           <div className="flex flex-wrap gap-3">
             <Link href="/pricing" className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity">
-              Start a 3-day free trial
+              Start a {TRIAL_LABEL}
               <ArrowUpRight className="w-4 h-4" />
             </Link>
             <Link href="/" className="inline-flex items-center gap-2 border border-primary-foreground/40 bg-primary-foreground/10 text-primary-foreground px-4 py-2.5 rounded-xl font-bold hover:bg-primary-foreground/20 transition-colors">

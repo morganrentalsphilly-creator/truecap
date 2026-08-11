@@ -7,7 +7,7 @@
  * env var. If you change the trial length, change TRIAL_DAYS here too so the
  * copy matches what checkout actually grants.
  */
-export const TRIAL_DAYS = 3;
+export const TRIAL_DAYS = 14;
 export const TRIAL_LABEL = `${TRIAL_DAYS}-day free trial`;
 
 /**

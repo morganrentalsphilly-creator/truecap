@@ -5,6 +5,7 @@
  * Arrived (formerly Arrived Homes) is a fractional rental investing platform — buy shares of rental properties starting at $100. Different model than TrueCap entirely; investors evaluate both when deciding whether to own real estate directly.
  */
 
+import { TRIAL_LABEL } from "@/lib/trial";
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
@@ -268,7 +269,7 @@ export default function VsArrivedPage() {
               href="/pricing"
               className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
             >
-              Start a 3-day free trial
+              Start a {TRIAL_LABEL}
               <ArrowUpRight className="w-4 h-4" />
             </Link>
             <Link

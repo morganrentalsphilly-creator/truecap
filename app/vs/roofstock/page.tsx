@@ -13,6 +13,7 @@
  * marketing collateral; TrueCap is the second opinion.
  */
 
+import { TRIAL_LABEL } from "@/lib/trial";
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
@@ -316,7 +317,7 @@ export default function VsRoofstockPage() {
               href="/pricing"
               className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
             >
-              Start a 3-day free trial
+              Start a {TRIAL_LABEL}
               <ArrowUpRight className="w-4 h-4" />
             </Link>
             <Link

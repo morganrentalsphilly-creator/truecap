@@ -6,6 +6,7 @@
  * search volume — Excel is the default tool most new investors start with.
  */
 
+import { TRIAL_LABEL } from "@/lib/trial";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import Link from "next/link";
@@ -203,7 +204,7 @@ export default function VsExcelPage() {
               <Calculator className="w-4 h-4" />Run a deal now
             </Link>
             <Link href="/pricing" className="inline-flex items-center gap-2 border border-primary-foreground/40 bg-primary-foreground/10 text-primary-foreground px-4 py-2.5 rounded-xl font-bold hover:bg-primary-foreground/20 transition-colors">
-              Start a 3-day free trial<ArrowUpRight className="w-4 h-4" />
+              Start a {TRIAL_LABEL}<ArrowUpRight className="w-4 h-4" />
             </Link>
           </div>
         </section>

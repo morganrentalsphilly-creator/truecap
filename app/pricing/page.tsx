@@ -11,6 +11,7 @@
  * the auto-resume treats as mutually exclusive — it never re-fires.
  */
 
+import { TRIAL_DAYS, TRIAL_LABEL } from "@/lib/trial";
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -35,7 +36,7 @@ import { DealsAnalyzedTicker } from "@/components/marketing/deals-analyzed-ticke
 export const metadata: Metadata = {
   title: "Pricing — Free + Pro plans for rental analysis",
   description:
-    "TrueCap is free to start — no card required, and the 0–100 Deal Score is free for everyone. Try Pro free for 3 days: 10-year projections, tax strategy, exit scenarios, PDF export, and unlimited saved deals.",
+    `TrueCap is free to start — no card required, and the 0–100 Deal Score is free for everyone. Try Pro free for ${TRIAL_DAYS} days: 10-year projections, tax strategy, exit scenarios, PDF export, and unlimited saved deals.`,
   alternates: { canonical: "/pricing" },
   openGraph: {
     title: "TrueCap pricing — free + Pro",
@@ -126,7 +127,7 @@ export default async function PricingPage() {
 
   // hadPriorSubscription mirrors the repeat-trial guard in
   // app/actions/billing.ts (any subscription row, any status): checkout only
-  // grants the 3-day trial to first-time subscribers, so the plan cards swap
+  // grants the free trial to first-time subscribers, so the plan cards swap
   // their trial-promising copy for a "Welcome back" variant when the trial
   // won't be granted. Anonymous visitors keep the trial copy — they're
   // overwhelmingly first-time, and checkout re-checks after signup anyway.
@@ -170,7 +171,7 @@ export default async function PricingPage() {
                   checkout won't grant. */}
               {hadPriorSubscription
                 ? "Start free. Unlimited analyses, every core metric, auto-fill from the address. Or go Pro when you need projections, tax modeling, lender-ready PDFs, and a buy box that pass/fails every deal against your own criteria."
-                : "Start free. Unlimited analyses, every core metric, auto-fill from the address. Or start a 3-day free trial of Pro when you need projections, tax modeling, lender-ready PDFs, and a buy box that pass/fails every deal against your own criteria."}
+                : `Start free. Unlimited analyses, every core metric, auto-fill from the address. Or start a ${TRIAL_LABEL} of Pro when you need projections, tax modeling, lender-ready PDFs, and a buy box that pass/fails every deal against your own criteria.`}
             </p>
             {/* Real-data social proof — investors arriving at /pricing
                 are evaluating credibility. A live count of recent

@@ -596,7 +596,7 @@ export function AnalysisDashboard({
   // Auth-aware upgrade routing (BROWSER-1 / STRATEGY-UPSELL-LOGIN-DEADEND):
   // /profile is auth-gated and server-redirects anonymous users to
   // /auth/login with NO ?next param, so an anon "Get Pro" / "Start your
-  // 3-day free trial" tap dead-ended at a login wall with the billing
+  // free-trial" tap dead-ended at a login wall with the billing
   // intent dropped. Anonymous users go to /pricing instead (matching
   // ProInlineGate — the sibling gate that always did this right);
   // authenticated users keep the direct billing deep link.

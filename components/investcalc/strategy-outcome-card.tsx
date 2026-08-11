@@ -17,6 +17,7 @@
  * here instead of being dumped on a paywall tab.
  */
 
+import { TRIAL_LABEL } from "@/lib/trial";
 import type { ReactNode } from "react";
 import { ArrowUpRight, Hammer, Target, Wrench, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -84,7 +85,7 @@ export function StrategyOutcomeCard({
           </p>
           {onUpgrade ? (
             <Button onClick={onUpgrade} className="mt-3 rounded-xl">
-              Start your 3-day free trial
+              Start your {TRIAL_LABEL}
             </Button>
           ) : null}
         </OutcomeShell>
@@ -169,7 +170,7 @@ export function StrategyOutcomeCard({
         </p>
         {onUpgrade ? (
           <Button onClick={onUpgrade} className="mt-3 rounded-xl">
-            Start your 3-day free trial
+            Start your {TRIAL_LABEL}
           </Button>
         ) : null}
       </OutcomeShell>

@@ -1,5 +1,6 @@
 "use client";
 
+import { TRIAL_LABEL } from "@/lib/trial";
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import {
@@ -367,7 +368,7 @@ export function Header({
                 Pro
               </span>
               <span className="text-[11px] font-bold text-[var(--brand-orange)] tracking-[0.01em]">
-                3-day free trial
+                {TRIAL_LABEL}
               </span>
               <span className="text-muted-foreground/40 text-[11px]">&bull;</span>
               <span className="text-[11px] text-muted-foreground font-medium tracking-[0.01em]">

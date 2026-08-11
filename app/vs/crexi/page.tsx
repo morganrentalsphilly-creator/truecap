@@ -5,6 +5,7 @@
  * Crexi is a commercial real estate marketplace + intelligence platform — the LoopNet alternative for CRE listings, comps, and analytics. Different category than TrueCap (we're SFR/multifamily-focused) but investors evaluating CRE consider both.
  */
 
+import { TRIAL_LABEL } from "@/lib/trial";
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
@@ -268,7 +269,7 @@ export default function VsCrexiPage() {
               href="/pricing"
               className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
             >
-              Start a 3-day free trial
+              Start a {TRIAL_LABEL}
               <ArrowUpRight className="w-4 h-4" />
             </Link>
             <Link

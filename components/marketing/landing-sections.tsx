@@ -20,6 +20,7 @@
 // the hydration cost for all the static markup. Keep it that way - any
 // new interactive piece should be its own small island, not a reason to
 // flip this whole file back to client.
+import { TRIAL_LABEL } from "@/lib/trial";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -784,7 +785,7 @@ export function DataSourcesSection() {
 // from Stripe on /pricing); the Pro card below links out so the two can
 // never drift. "true" → included, "false" → not, string → a qualifier.
 const LADDER_HEADERS = ["Free", "$5 PDF", "Pro"] as const;
-const LADDER_SUBHEADERS = ["Free forever", "One-time", "3-day free trial"] as const;
+const LADDER_SUBHEADERS = ["Free forever", "One-time", TRIAL_LABEL] as const;
 const LADDER_ROWS: { label: string; cells: (boolean | string)[] }[] = [
   { label: "Analyze unlimited deals", cells: [true, true, true] },
   { label: "Cap rate · CoC · DSCR · cash flow", cells: [true, true, true] },
@@ -1067,7 +1068,7 @@ export function PdfProUpsell() {
                 href="/pricing"
                 className="group inline-flex h-11 items-center gap-1.5 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-[0_10px_24px_rgba(0,112,196,0.28)] hover:-translate-y-0.5 transition-transform"
               >
-                Start your 3-day free trial
+                Start your {TRIAL_LABEL}
                 <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
               </Link>
               <p className="mt-2 text-xs text-muted-foreground">Cancel anytime - no commitment.</p>

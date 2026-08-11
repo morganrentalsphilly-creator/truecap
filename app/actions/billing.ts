@@ -289,7 +289,7 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
     const appliedCoupon = offerCoupon ?? annualCoupon;
     // Free Pro trial on new subscriptions. Card is collected at checkout and
     // auto-charges when the trial ends. Env-adjustable; PRO_TRIAL_DAYS=0 turns
-    // trials off without a deploy. Default 3 days.
+    // trials off without a deploy. Default TRIAL_DAYS (14).
     const proTrialDays = Math.max(0, Number.parseInt(process.env.PRO_TRIAL_DAYS ?? String(TRIAL_DAYS), 10) || 0);
     const stripe = getStripe();
     const session = await stripe.checkout.sessions.create({

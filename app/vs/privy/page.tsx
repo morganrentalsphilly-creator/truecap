@@ -5,6 +5,7 @@
  * Privy is an investor-focused MLS data + property search tool — built specifically for real estate investors who want to filter MLS data with investor criteria (cash-on-cash, rehab potential, motivated seller signals). Sister product positioning to TrueCap on the sourcing side.
  */
 
+import { TRIAL_LABEL } from "@/lib/trial";
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
@@ -274,7 +275,7 @@ export default function VsPrivyPage() {
               href="/pricing"
               className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
             >
-              Start a 3-day free trial
+              Start a {TRIAL_LABEL}
               <ArrowUpRight className="w-4 h-4" />
             </Link>
             <Link
