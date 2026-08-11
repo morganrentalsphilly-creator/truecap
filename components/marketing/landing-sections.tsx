@@ -29,11 +29,13 @@ import {
   FileText,
   HelpCircle,
   Home,
+  ListChecks,
   MapPin,
   Percent,
   Quote,
   ShieldCheck,
   Sparkles,
+  Target,
   TrendingUp,
   Type,
   Users,
@@ -805,6 +807,119 @@ const LADDER_ROWS: { label: string; cells: (boolean | string)[] }[] = [
   { label: "10-year projections · tax · exit", cells: [false, "In the PDF", true] },
   { label: "BRRRR · fix & flip · sensitivity", cells: [false, false, true] },
 ];
+
+/**
+ * The acquisition-pipeline section — TrueCap's real commercial story.
+ *
+ * WHY THIS EXISTS (Phase 1, 2026-08-11): the two features that most justify
+ * a $29.99/mo subscription were invisible to anyone who wasn't already
+ * paying. "Screen Listings" (app/dashboard/triage — paste a shortlist, the
+ * numbers get extracted, every property is scored against YOUR buy box)
+ * was reachable only from the Pro sidebar: no homepage mention, no pricing
+ * row, nothing. And the MAO solver — which answers "don't buy at $325k,
+ * your number is $283k" — appeared on /pricing and two persona pages but
+ * never on the homepage.
+ *
+ * Those are the two things a spreadsheet genuinely cannot do, and they are
+ * what makes TrueCap a decision layer rather than a calculator. This sits
+ * immediately above the Free/$5/Pro ladder so the ladder reads as "here is
+ * what that costs" rather than "here are more metrics".
+ *
+ * The features themselves stay behind their existing entitlement gates
+ * (Screen Listings = compare_deals; MAO = paid plan). This is marketing
+ * only — it grants nothing.
+ */
+const PIPELINE_ROWS: { old: string; truecap: string }[] = [
+  { old: "Open 20 Zillow tabs", truecap: "Paste your shortlist" },
+  { old: "Rebuild the same spreadsheet 20 times", truecap: "Screen every listing at once" },
+  { old: "Eyeball which ones look promising", truecap: "Buy-box score on every property" },
+  { old: "Re-do the math to find your offer price", truecap: "TrueCap reverse-solves your number" },
+  { old: "Check back manually when rates move", truecap: "Saved deals re-underwrite themselves" },
+];
+
+export function AcquisitionPipeline() {
+  return (
+    <section className="border-t border-border bg-background">
+      <div className="mx-auto max-w-5xl px-4 py-14 sm:px-6 sm:py-20">
+        <div className="mb-10 text-center sm:mb-12">
+          <p className="text-[11px] font-bold uppercase tracking-widest text-primary">
+            From listing to offer
+          </p>
+          <h2 className="mt-2 text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">
+            Screening ten listings shouldn&apos;t take{" "}
+            <span className="text-primary">ten spreadsheets.</span>
+          </h2>
+          <p className="mx-auto mt-3 max-w-2xl text-balance text-sm leading-relaxed text-muted-foreground sm:text-base">
+            Most calculators price one deal at a time. TrueCap runs your whole
+            shortlist against your own criteria and tells you which ones deserve
+            a second look, and what to pay for them.
+          </p>
+        </div>
+
+        {/* Old workflow vs TrueCap — two columns, same visual language as
+            WhyNotSpreadsheet so the page reads as one system. */}
+        <div className="grid gap-4 sm:grid-cols-2 sm:gap-5">
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-7">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-muted px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+              <Clock className="size-3.5" />
+              Your Saturday now
+            </div>
+            <ul className="space-y-3">
+              {PIPELINE_ROWS.map((r) => (
+                <li
+                  key={r.old}
+                  className="flex items-start gap-2.5 text-sm leading-relaxed text-muted-foreground"
+                >
+                  <X aria-hidden className="mt-0.5 size-4 shrink-0 text-muted-foreground/50" />
+                  <span>{r.old}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="rounded-2xl border-2 border-primary/30 bg-card p-6 shadow-[0_16px_40px_rgba(0,112,196,0.10)] sm:p-7">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-primary">
+              <ListChecks className="size-3.5" />
+              With TrueCap Pro
+            </div>
+            <ul className="space-y-3">
+              {PIPELINE_ROWS.map((r) => (
+                <li
+                  key={r.truecap}
+                  className="flex items-start gap-2.5 text-sm leading-relaxed text-foreground"
+                >
+                  <Check aria-hidden className="mt-0.5 size-4 shrink-0 text-[var(--metric-positive)]" />
+                  <span>{r.truecap}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        {/* The max-offer differentiator, stated as a number. Every calculator
+            computes cap rate; this is the sentence a spreadsheet won't say. */}
+        <div className="mt-5 rounded-2xl border border-border bg-card p-6 shadow-sm sm:mt-6 sm:p-7">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-7">
+            <div className="inline-flex shrink-0 items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-primary">
+              <Target className="size-3.5" />
+              Max offer
+            </div>
+            <div className="min-w-0">
+              <p className="text-base font-extrabold leading-snug text-foreground sm:text-lg">
+                &ldquo;Don&apos;t buy it at $325,000. Your number is $283,000.&rdquo;
+              </p>
+              <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+                When a deal misses your buy box, TrueCap reverse-solves the
+                highest price that would clear it, so you walk into the offer
+                knowing your ceiling instead of guessing at it.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
 
 export function PdfProUpsell() {
   return (

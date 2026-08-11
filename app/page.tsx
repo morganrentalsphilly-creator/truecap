@@ -29,6 +29,7 @@ import { InvestCalcPage } from "@/components/investcalc/investcalc-page";
 import { BillingSuccessBanner } from "@/components/marketing/billing-success-banner";
 import { MarketingHero } from "@/components/marketing/marketing-hero";
 import {
+  AcquisitionPipeline,
   DataSourcesSection,
   FeaturedIn,
   HomepageFaq,
@@ -219,6 +220,12 @@ export default function Home() {
       <HowItWorks />
       <DataSourcesSection />
       <SocialProof />
+      {/* The commercial story — Screen Listings + the max-offer solver, the
+          two things that make this a decision layer rather than a calculator.
+          Sits immediately above the value ladder so the ladder reads as
+          "here's what that costs". Must stay in lockstep with
+          app/home-authed/page.tsx. */}
+      <AcquisitionPipeline />
       {/* Post-value monetization — the $5 lender PDF / Pro value ladder,
           then persona self-ID, then the objection-handling FAQ. */}
       <PdfProUpsell />

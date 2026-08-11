@@ -23,6 +23,7 @@ import { InvestCalcPage } from "@/components/investcalc/investcalc-page";
 import { BillingSuccessBanner } from "@/components/marketing/billing-success-banner";
 import { MarketingHero } from "@/components/marketing/marketing-hero";
 import {
+  AcquisitionPipeline,
   DataSourcesSection,
   FeaturedIn,
   HomepageFaq,
@@ -224,6 +225,8 @@ export default async function AuthedHome({
           <HowItWorks />
           <DataSourcesSection />
           <SocialProof />
+          {/* Lockstep with app/page.tsx — see the note there. */}
+          <AcquisitionPipeline />
           <PdfProUpsell />
           <Personas />
           <HomepageFaq />

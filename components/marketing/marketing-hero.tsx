@@ -49,15 +49,26 @@ export function MarketingHero() {
             </div>
 
             {/* Headline: 2 lines max, hierarchy by weight + accent color,
-                not runaway scale. Left-aligned (anti-center bias). */}
+                not runaway scale. Left-aligned (anti-center bias).
+                REPOSITIONING (Phase 1, 2026-08-11): leads with the DECISION
+                + the max-offer differentiator ("what to offer") instead of
+                "cash-flows in 60 seconds" — every calculator computes cap
+                rate; far fewer answer "don't buy at $325k, your number is
+                $283k." Kept the "60 seconds" hook and the SEO metadata.title
+                (in app/page.tsx) unchanged so rankings are unaffected.
+                Alternate headlines considered (swap here to change site-wide,
+                this is the only hero):
+                  B: "Don't overpay. Know your number in 60 seconds."
+                  C: "Should you buy it? And at what price?" */}
             <h1 className="text-balance text-4xl font-extrabold leading-[1.04] tracking-tight text-foreground sm:text-5xl lg:text-[2.4rem]">
-              Know if a rental deal{" "}
-              <span className="text-primary">cash-flows in 60 seconds.</span>
+              Know whether to buy it, and{" "}
+              <span className="text-primary">what to offer, in 60 seconds.</span>
             </h1>
-            {/* Subtext: 20 words, no em-dash. */}
+            {/* Subtext: keep it tight, no em-dash (house style). */}
             <p className="mt-4 max-w-xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg">
-              Enter an address. TrueCap auto-fills rent, rate, and tax, then
-              returns cap rate, cash flow, DSCR, and a plain-English verdict.
+              Enter an address. TrueCap auto-fills rent, rate, and tax, checks
+              the deal against your numbers, and reverse-solves the maximum
+              price that still works.
             </p>
 
             {/* Primary action — the address input. Hands off to the
