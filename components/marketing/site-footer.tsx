@@ -22,42 +22,54 @@ const FOOTER_COLS: Array<{
   title: string;
   links: Array<{ label: string; href: string; external?: boolean }>;
 }> = [
+  // The Product column used to carry ELEVEN links doing three unrelated
+  // jobs — the product itself, the content library, and trust pages — which
+  // read as a dump rather than navigation. Split into "Product" (what you
+  // buy / how it works) and "Learn" (the content library) below, so each
+  // column is scannable and the crawl paths that matter are still one click
+  // from every page. Changelog was removed entirely at Morgan's request
+  // (2026-08-11): it is a public "is this actively shipped?" signal that
+  // mostly advertises release cadence, and he does not want it front-facing.
+  // Its route still exists and is still in the sitemap — only the sitewide
+  // footer link is gone.
   {
     title: "Product",
     links: [
       { label: "Free analyzer", href: "/" },
       { label: "Pricing", href: "/pricing" },
       { label: "Why TrueCap", href: "/why-truecap" },
-      // Methodology + Changelog restored (trust-polish audit, Jul 2026):
-      // both pages were orphaned — /methodology (every formula + data
-      // source) had zero inbound links from the product itself, and
-      // /changelog is the "is this actively shipped?" signal prospects
-      // look for. Quiet footer rows, not top-level nav.
+      // /methodology (every formula + data source) had zero inbound links
+      // from the product itself before the Jul 2026 trust-polish audit —
+      // it is the page a skeptical investor wants, so it stays.
       { label: "Methodology", href: "/methodology" },
-      { label: "Changelog", href: "/changelog" },
-      { label: "All free tools", href: "/tools" },
-      { label: "Blog", href: "/blog" },
-      { label: "Rental markets", href: "/markets" },
-      { label: "Investing by state", href: "/states" },
-      // RESTORED 2026-08-03, reversing a deliberate removal. The note
-      // that used to sit here said the /vs pages "still exist as SEO
-      // landing surfaces (visitors arrive directly from Google)" and
-      // that comparison shoppers "can still find the individual /vs
-      // pages via Google or the cross-references between them."
+      // RESTORED 2026-08-03, reversing a deliberate removal. The note that
+      // used to sit here said the /vs pages "still exist as SEO landing
+      // surfaces (visitors arrive directly from Google)".
       //
-      // Measured, both halves are false. A BFS crawl of the live site
-      // from `/` reaches 370 of the 419 URLs in the sitemap; 24 of the
-      // 40 /vs pages are among the 49 it cannot reach at all, because
-      // nothing linked to /vs and the cross-references only cover 16 of
-      // them. And nobody arrives from Google: the site ranks for 0 of
-      // 10 target queries with roughly 2% of pages indexed — the /vs
-      // library is bottom-funnel inventory that Google has never seen.
-      // A page with no inbound link cannot be a landing surface.
+      // Measured, that was false. A BFS crawl from `/` reached 370 of 419
+      // sitemap URLs; 24 of the 40 /vs pages were unreachable because
+      // nothing linked to /vs. And nobody arrived from Google — the site
+      // ranked for 0 of 10 target queries. A page with no inbound link
+      // cannot be a landing surface. This one link restores the crawl path
+      // to the whole comparison library, so it must stay.
       { label: "Compare TrueCap", href: "/vs" },
       // Embed hub — quiet link. Bloggers/agents who care will find it;
       // casual visitors won't notice. Each embed adoption = a permanent
       // backlink, so even one or two clicks per month compound nicely.
       { label: "Embed our calculators", href: "/embed" },
+    ],
+  },
+  {
+    title: "Learn",
+    links: [
+      { label: "All free tools", href: "/tools" },
+      { label: "Blog", href: "/blog" },
+      { label: "Rental markets", href: "/markets" },
+      { label: "Investing by state", href: "/states" },
+      // Glossary was reachable only from its own hub; surfacing it here
+      // gives the 44 term pages a sitewide crawl path, the same fix the
+      // /vs link above made for the comparison library.
+      { label: "Glossary", href: "/glossary" },
     ],
   },
   {
@@ -117,7 +129,12 @@ export function SiteFooter() {
             is now intentionally compact (logo + one-line tagline only —
             newsletter moved to its own band above, badges to the bottom
             strip below). */}
-        <div className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-3 lg:grid-cols-5">
+        {/* 6 cols at lg: the brand block takes 1, the five sitemap columns
+            take the rest. Was grid-cols-5 when there were four sitemap
+            columns — splitting Product into Product + Learn added a fifth,
+            and leaving the count at 5 would have wrapped the last column
+            under the brand on desktop. */}
+        <div className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-3 lg:grid-cols-6">
           {/* Brand block — intentionally short. Logo + one-line tagline. */}
           <div className="col-span-2 sm:col-span-3 lg:col-span-1">
             <Link
