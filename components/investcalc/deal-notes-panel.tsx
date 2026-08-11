@@ -19,6 +19,7 @@
  * been applied yet - shows a quiet inline notice instead of crashing.
  */
 import { useEffect, useState, useTransition } from "react";
+import * as Sentry from "@sentry/nextjs";
 import { Loader2, NotebookPen } from "lucide-react";
 import {
   getSavedDealNotesAction,
@@ -101,13 +102,14 @@ export function DealNotesPanel({ savedDealId }: { savedDealId: string }) {
         }
         setLastSavedNotes(notesAtSubmit);
         setSavedTick(Date.now());
-      } catch {
+      } catch (err) {
         // The action REJECTED (network blip, cold-start 500, stale-deploy
         // Server Action) rather than returning {ok:false}. Without this the
         // save silently no-ops: lastSavedNotes never advances, so the panel
         // just falls back to "Auto-saves" as if nothing happened. Tell the
         // user it's retryable — the typed text is untouched, so re-blurring
         // retries. Same stale-deal guard as the success path.
+        Sentry.captureException(err, { tags: { feature: "deal-notes" } });
         if (dealIdAtSubmit !== savedDealId) return;
         toast({
           title: "Could not save notes",

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import * as Sentry from "@sentry/nextjs";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Check, Loader2 } from "lucide-react";
 import { startCompareAction } from "@/app/actions/compare";
@@ -69,11 +70,12 @@ export function CompareDealPicker({ deals }: { deals: ComparePickerDeal[] }) {
             variant: "destructive",
           });
         }
-      } catch {
+      } catch (err) {
         // The action REJECTED rather than returning {ok:false} (network blip,
         // cold-start 500, stale-deploy Server Action). Without this the Compare
         // button spinner clears with nothing happening. Tell the user it's
         // retryable — the selection is preserved.
+        Sentry.captureException(err, { tags: { feature: "compare" } });
         toast({
           title: "Could not start comparison",
           description: "Something interrupted the request. Check your connection and try again.",

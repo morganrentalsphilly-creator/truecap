@@ -80,9 +80,8 @@ export default function Image() {
               display: "flex",
             }}
           >
-            Underwrite investor-client deals in 60 seconds. Share a branded
-            read-only link instead of a spreadsheet. Free to start — no
-            signup needed.
+            Underwrite investor-client deals in 60 seconds. Share a read-only
+            analysis link (free); add your branding on Pro. No signup needed.
           </div>
         </div>
 

@@ -173,7 +173,7 @@ export default function ThreeWayComparisonPost() {
             <h2>Free tier comparison</h2>
             <div dangerouslySetInnerHTML={{ __html: `<p>This is where they diverge most. The free tier sets expectations for the paid one — if free feels gated, you&apos;re skeptical of Pro.</p>
             <ul>
-              <li><strong>TrueCap free</strong> — unlimited analyses, cap rate, CoC, DSCR, NCF, monthly cash flow, plain-English verdict, address auto-fill. No signup required to use the calculator.</li>
+              <li><strong>TrueCap free</strong> — unlimited analyses, cap rate, CoC, DSCR, NCF, monthly cash flow, plain-English verdict, address auto-fill, save up to 5 deals, dashboard access, and read-only share links. No signup required to use the calculator.</li>
               <li><strong>DealCheck free</strong> — signup required, capped at 15 saved properties at a time (plus limits on photos, comps, and templates). The core calculators are included. Listing-import works on free.</li>
               <li><strong>BiggerPockets calculator free</strong> — a few free reports per month, then gated behind BiggerPockets Pro (\$390/year).</li>
             </ul>
@@ -181,7 +181,7 @@ export default function ThreeWayComparisonPost() {
 
             <h2>Pricing (paid tier comparison)</h2>
             <div dangerouslySetInnerHTML={{ __html: `<ul>
-              <li><strong>TrueCap Pro</strong> — \$29.99/month (or \$300/year on the annual plan, ~\$25/mo). Single tier. Everything included: 10-year projections, tax strategy, sensitivity grid, exit scenarios, MAO solver, BRRRR + fix-and-flip analyzers, share links, PDF exports, branded reports, save / compare / template deals.</li>
+              <li><strong>TrueCap Pro</strong> — \$29.99/month (or \$300/year on the annual plan, ~\$25/mo). Single tier. Everything included: 10-year projections, tax strategy, sensitivity grid, exit scenarios, MAO solver, BRRRR + fix-and-flip analyzers, PDF exports, branded reports, co-branded share links, editing + unlimited saves, compare, and templates.</li>
               <li><strong>DealCheck Plus</strong> — \$10/month. Raises caps: 50 saved properties, more photos, comps, and templates.</li>
               <li><strong>DealCheck Pro</strong> — \$20/month. Unlimited saved properties, photos, comps, and templates.</li>
               <li><strong>BiggerPockets Pro</strong> — ~\$32.50/month (annual). Bundles the calculator with community, courses, forums, podcasts, books. Calculator alone isn&apos;t cheaper.</li>

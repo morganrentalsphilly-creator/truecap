@@ -15,11 +15,14 @@ tax strategy, exit scenarios, plus a plain-English verdict and a
 shareable read-only link.
 
 - **Audience**: solo / small-portfolio buy-and-hold investors and house-hackers.
-- **Business model**: free tier (run analyses, no save; Deal Score is
-  FREE for every user — see `app/actions/deal-score.ts`) + Pro at
-  **$29.99/mo** or **$300/yr** (saved deals, dashboard, compare,
-  templates, tax strategy, exit scenarios, PDF export, buy box, etc.).
-  Pricing logic lives in the `plans.entitlements` JSON column — see
+- **Business model**: free tier (run analyses, save up to 5 deals;
+  Deal Score is FREE for every user — see `app/actions/deal-score.ts`)
+  + Pro at **$29.99/mo** or **$300/yr** (editing + unlimited saved
+  deals, dashboard, compare, templates, tax strategy, exit scenarios,
+  PDF export, buy box, etc.). Note: plain read-only share links are
+  free for everyone; only the co-branded variant is Pro. The canonical
+  tier/gate map for every feature is `lib/entitlements-catalog.ts`;
+  pricing logic lives in the `plans.entitlements` JSON column — see
   `lib/entitlements.ts`.
 - **Stack**: Next.js 16 (App Router, `--webpack` for prod), React 19,
   TypeScript 5.7 (strict), Supabase (Auth + Postgres + Storage), Stripe

@@ -64,7 +64,7 @@ const MATRIX: Row[] = [
   { feature: "Free tier", truecap: "Yes — full underwriting math", buildium: "No — trial only", winner: "truecap" },
   { feature: "Pricing (entry tier)", truecap: "Free; Pro $29.99/mo", buildium: "Essential ~$55/mo + per-unit fees (as of 2026)", winner: "truecap" },
   { feature: "Built for landlords scaling beyond 30 units", truecap: "No — TrueCap targets 1-30 doors", buildium: "Yes — built for property management companies", winner: "buildium" },
-  { feature: "Shareable read-only deal link", truecap: "Pro — public URL + branding", buildium: "Internal portal only", winner: "truecap" },
+  { feature: "Shareable read-only deal link", truecap: "Free — read-only public link; Pro adds co-branding", buildium: "Internal portal only", winner: "truecap" },
 ];
 
 export default function VsBuildiumPage() {
@@ -266,7 +266,7 @@ export default function VsBuildiumPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
             Pro unlocks projections, sensitivity, tax strategy, exit scenarios,
-            MAO, PDF exports, and shareable read-only deal links.
+            MAO, PDF exports, and co-branded share links.
             No card to start.
           </p>
           <div className="flex flex-wrap gap-3">

@@ -55,8 +55,8 @@ const MATRIX: Row[] = [
   { feature: "Mobile usable",                    truecap: "Mobile-first responsive",                                                        zillow: "Strong mobile app",                                                      winner: "tie" },
   { feature: "Listing data integration",         truecap: "Address auto-fill pulls tax + rent estimates",                                   zillow: "Full listing database — strongest in industry",                          winner: "zillow" },
   { feature: "Photo / virtual tour",             truecap: "Not in scope — TrueCap is analysis, not browsing",                              zillow: "Yes — extensive photos + tours",                                         winner: "zillow" },
-  { feature: "Save deals + portfolio rollup",    truecap: "Pro — saved deals, portfolio rollup, comparison",                               zillow: "Save listings but no portfolio analysis",                                winner: "truecap" },
-  { feature: "Shareable analysis URL",           truecap: "Pro — clean public URL with full underwrite",                                    zillow: "Share listing URL only",                                                 winner: "truecap" },
+  { feature: "Save deals + portfolio rollup",    truecap: "Free saves up to 5 deals; Pro adds unlimited saves, portfolio rollup + comparison",                               zillow: "Save listings but no portfolio analysis",                                winner: "truecap" },
+  { feature: "Shareable analysis URL",           truecap: "Free — clean read-only public URL with full underwrite",                                    zillow: "Share listing URL only",                                                 winner: "truecap" },
   { feature: "Verdict / decision support",       truecap: "Free — deal score + verdict (Strong / Decent / Marginal / Skip)",                zillow: "No analytical verdict",                                                  winner: "truecap" },
 ];
 

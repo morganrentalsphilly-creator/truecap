@@ -13,6 +13,7 @@
  * pipeline entitlement, mirroring My Deals' canUsePipeline gate.
  */
 import { useEffect, useState, useTransition } from "react";
+import * as Sentry from "@sentry/nextjs";
 import { useRouter } from "next/navigation";
 import { updateSavedDealStageAction } from "@/app/actions/saved-analyses";
 import { useToast } from "@/hooks/use-toast";
@@ -64,11 +65,12 @@ export function DealStageSelect({
           variant: "success",
         });
         router.refresh();
-      } catch {
+      } catch (err) {
         // The action REJECTED rather than returning {ok:false} (network blip,
         // cold-start 500, stale-deploy Server Action). The optimistic display
         // still shows the NEW stage — a lie the server never stored — so roll
         // it back to the server-truth prop and tell the user it's retryable.
+        Sentry.captureException(err, { tags: { feature: "deal-stage" } });
         setDisplayStage(stage);
         toast({
           title: "Could not update stage",

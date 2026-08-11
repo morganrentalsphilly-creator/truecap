@@ -64,7 +64,7 @@ const MATRIX: Row[] = [
   { feature: "Free tier", truecap: "Yes — full underwriting math", appfolio: "No — paid only", winner: "truecap" },
   { feature: "Pricing (entry tier)", truecap: "Free; Pro $29.99/mo", appfolio: "Core plan ~$1.40/unit/mo with $250 minimum (as of 2026)", winner: "truecap" },
   { feature: "Built for solo investors", truecap: "Yes — 1-30 doors", appfolio: "No — minimum spend assumes 200+ units", winner: "truecap" },
-  { feature: "Shareable read-only deal link", truecap: "Pro — public URL + branding", appfolio: "Internal portal only", winner: "truecap" },
+  { feature: "Shareable read-only deal link", truecap: "Free — read-only public link; Pro adds co-branding", appfolio: "Internal portal only", winner: "truecap" },
 ];
 
 export default function VsAppfolioPage() {
@@ -266,7 +266,7 @@ export default function VsAppfolioPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
             Pro unlocks projections, sensitivity, tax strategy, exit scenarios,
-            MAO, PDF exports, and shareable read-only deal links.
+            MAO, PDF exports, and co-branded share links.
             No card to start.
           </p>
           <div className="flex flex-wrap gap-3">

@@ -18,6 +18,7 @@
  * deal-specific.
  */
 import { useEffect, useState, useTransition } from "react";
+import * as Sentry from "@sentry/nextjs";
 import { Loader2, Save, Sliders } from "lucide-react";
 import {
   getUserAnalysisDefaultsAction,
@@ -125,7 +126,7 @@ export function UserDefaultsCard() {
         // The action REJECTED rather than returning {ok:false} (network blip,
         // cold-start 500, deploy skew). Without this the Save click is silent
         // — no toast, no signal it failed. Surface a retryable error.
-        console.warn("[user-defaults] save failed:", err);
+        Sentry.captureException(err, { tags: { feature: "user-defaults" } });
         toast({
           title: "Could not save defaults",
           description: "Something interrupted the request. Check your connection and try again.",

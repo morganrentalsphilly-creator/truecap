@@ -311,7 +311,7 @@ export default function VsAvailPage() {
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly
             cash flow. Pro unlocks projections, sensitivity, tax
             strategy, exit scenarios, MAO, PDF exports, and
-            shareable read-only deal links. No card to start.
+            co-branded share links. No card to start.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link
@@ -390,7 +390,7 @@ const AVAIL_FAQ: FaqItem[] = [
         &quot;Unlimited Plus&quot; is ~$7/unit/month (as of 2026) for
         advanced features. TrueCap is free for the underwriting math;
         Pro is $29.99/month for projections, sensitivity, tax strategy,
-        deal score, and share/PDF features. Both have legitimately
+        co-branded share links, and PDF export. Both have legitimately
         useful free tiers.
       </>
     ),

@@ -63,7 +63,7 @@ const MATRIX: Row[] = [
   { feature: "Address auto-fill (rent/rate/tax)", truecap: "Yes — HUD + FRED + state property tax", baselane: "Not applicable", winner: "truecap" },
   { feature: "Pricing (entry tier)", truecap: "Free for underwriting; Pro $29.99/mo", baselane: "Banking + bookkeeping free; advanced ~$22/mo (as of 2026)", winner: "tie" },
   { feature: "Free tier", truecap: "Yes — full underwriting math", baselane: "Yes — banking + basic bookkeeping", winner: "tie" },
-  { feature: "Shareable read-only deal link", truecap: "Pro — public URL + branding", baselane: "Not the use case", winner: "truecap" },
+  { feature: "Shareable read-only deal link", truecap: "Free — read-only public link; Pro adds co-branding", baselane: "Not the use case", winner: "truecap" },
   { feature: "Lender-ready PDF", truecap: "Pro — multi-page projection", baselane: "Schedule E reports for tax filing", winner: "tie" },
 ];
 
@@ -269,7 +269,7 @@ export default function VsBaselanePage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
             Pro unlocks projections, sensitivity, tax strategy, exit scenarios,
-            MAO, PDF exports, and shareable read-only deal links.
+            MAO, PDF exports, and co-branded share links.
             No card to start.
           </p>
           <div className="flex flex-wrap gap-3">
@@ -350,11 +350,11 @@ const BASELANE_FAQ: FaqItem[] = [
     question: "Can I share a TrueCap analysis with my CPA via Baselane?",
     answer: (
       <>
-        Not directly — they&apos;re separate tools. But TrueCap Pro generates a multi-page PDF and shareable read-only link that you can email your CPA alongside Baselane&apos;s Schedule E report at tax time. CPAs typically want both: forward projection (TrueCap) and actuals (Baselane).
+        Not directly — they&apos;re separate tools. But TrueCap generates a read-only share link (free for everyone), and Pro adds a multi-page PDF, that you can email your CPA alongside Baselane&apos;s Schedule E report at tax time. CPAs typically want both: forward projection (TrueCap) and actuals (Baselane).
       </>
     ),
     plainTextAnswer:
-      "Not directly — separate tools. TrueCap Pro generates a PDF + shareable link you can email your CPA alongside Baselane&apos;s Schedule E report. CPAs want both: forward projection (TrueCap) + actuals (Baselane).",
+      "Not directly — separate tools. TrueCap generates a free read-only share link, and Pro adds a multi-page PDF, to email your CPA alongside Baselane's Schedule E report. CPAs want both: forward projection (TrueCap) + actuals (Baselane).",
   },
 ];
 

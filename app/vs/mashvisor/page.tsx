@@ -64,7 +64,7 @@ const MATRIX: Row[] = [
   { feature: "Max allowable offer (MAO) solver",  truecap: "Pro — works backward from target return",                                         mashvisor: "Not a primary feature",                                                  winner: "truecap" },
   { feature: "Deal score + breakdown",            truecap: "Free — 0–100 score with per-subscore explanation",                                 mashvisor: "Their own metric",                                                       winner: "tie" },
   { feature: "Free address auto-fill",            truecap: "HUD FMR + FRED + state tax — free, no signup",                                    mashvisor: "Behind paywall",                                                         winner: "truecap" },
-  { feature: "Sharable read-only deal links",     truecap: "Pro — clean public URL",                                                          mashvisor: "Account-gated views",                                                    winner: "truecap" },
+  { feature: "Sharable read-only deal links",     truecap: "Free — read-only public link; Pro adds co-branding",                              mashvisor: "Account-gated views",                                                    winner: "truecap" },
   { feature: "PDF lender report",                 truecap: "Pro — multi-page report",                                                         mashvisor: "Available",                                                              winner: "tie" },
   { feature: "Pricing",                           truecap: "Free + monthly Pro on /pricing, no card to start",                                mashvisor: "Tiered paid plans, generally $$$ at scale",                              winner: "truecap" },
 ];
@@ -225,7 +225,7 @@ export default function VsMashvisorPage() {
             Underwriting the next deal? Start free.
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
-            TrueCap free covers cap rate, CoC, DSCR, NCF, monthly cash flow — enough to underwrite. Pro unlocks share links, PDF exports, 10-year projections, tax strategy, sensitivity grid, MAO, and the strategy analyzers. No card to start.
+            TrueCap free covers cap rate, CoC, DSCR, NCF, monthly cash flow — enough to underwrite. Pro unlocks co-branded share links, PDF exports, 10-year projections, tax strategy, sensitivity grid, MAO, and the strategy analyzers. No card to start.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link href="/pricing" className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity">

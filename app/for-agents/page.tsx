@@ -22,7 +22,7 @@ import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button
 export const metadata: Metadata = {
   title: "For Real Estate Agents",
   description:
-    "Underwrite investor-client deals in 60 seconds. Share a branded analysis link instead of a spreadsheet. Free to start — no signup needed.",
+    "Underwrite investor-client deals in 60 seconds. Share a read-only analysis link (free); add your branding on Pro. No signup needed.",
   keywords: [
     "real estate agent calculator",
     "rental analysis for agents",
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "For Real Estate Agents — TrueCap",
     description:
-      "Underwrite investor-client deals in 60 seconds. Share a branded analysis link instead of a spreadsheet.",
+      "Underwrite investor-client deals in 60 seconds. Share a read-only analysis link (free); add your branding on Pro.",
     url: "/for-agents",
     type: "website",
     images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap for real estate agents" }],
@@ -90,8 +90,9 @@ export default function ForAgentsPage() {
           </h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
             TrueCap turns the &ldquo;does this cash flow?&rdquo; question
-            into a 60-second answer with a defensible, branded analysis
-            link you can share before you leave the parking lot.
+            into a 60-second answer with a read-only analysis link (free)
+            you can share before you leave the parking lot. Add your
+            branding on Pro.
           </p>
 
           {/* CTAs */}

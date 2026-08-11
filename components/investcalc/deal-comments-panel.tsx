@@ -8,6 +8,7 @@
  * until the deal_comments migration is applied.
  */
 import { useEffect, useState, useTransition } from "react";
+import * as Sentry from "@sentry/nextjs";
 import { Loader2, MessageSquare, Send, X } from "lucide-react";
 import {
   addDealCommentAction,
@@ -93,11 +94,12 @@ export function DealCommentsPanel({ savedDealId }: { savedDealId: string }) {
       try {
         const r = await deleteDealCommentAction(dealAtSubmit, commentId);
         if (dealAtSubmit === savedDealId) apply(r);
-      } catch {
+      } catch (err) {
         // The action REJECTED rather than returning {ok:false} (network blip,
         // cold-start 500, stale-deploy Server Action). Without this the delete
         // silently no-ops — the row stays on screen with no signal. Mirror the
         // add() path: a retryable toast, and honor the stale-deal guard.
+        Sentry.captureException(err, { tags: { feature: "deal-comments" } });
         if (dealAtSubmit === savedDealId) {
           toast({
             title: "Could not delete comment",

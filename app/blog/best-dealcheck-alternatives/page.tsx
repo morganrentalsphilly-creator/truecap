@@ -93,10 +93,10 @@ const TOOLS: Tool[] = [
     tradeoffs: [
       "No full property import from listing sites — a pasted Zillow/Redfin link yields the address, then auto-fill uses public data sources",
       "PWA rather than native iOS/Android apps",
-      "Saving, comparing, share links, and PDF export are Pro features",
+      "Free saves up to 5 deals; editing + unlimited saves, comparing, co-branded share links, and PDF export are Pro",
     ],
     pickIf:
-      "You mostly want to run numbers on individual listings and don't want a signup wall or a saved-property cap in the way.",
+      "You mostly want to run numbers on individual listings and don't want a signup wall in the way.",
   },
   {
     rank: 2,

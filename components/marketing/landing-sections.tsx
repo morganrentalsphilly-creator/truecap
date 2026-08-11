@@ -29,6 +29,7 @@ import {
   FileText,
   HelpCircle,
   Home,
+  Layers,
   ListChecks,
   MapPin,
   Percent,
@@ -830,11 +831,11 @@ const LADDER_ROWS: { label: string; cells: (boolean | string)[] }[] = [
  * only — it grants nothing.
  */
 const PIPELINE_ROWS: { old: string; truecap: string }[] = [
-  { old: "Open 20 Zillow tabs", truecap: "Paste your shortlist" },
-  { old: "Rebuild the same spreadsheet 20 times", truecap: "Screen every listing at once" },
+  { old: "Open 10 Zillow tabs", truecap: "Paste address + price for up to 10" },
+  { old: "Rebuild the same spreadsheet 10 times", truecap: "Screen up to 10 at once" },
   { old: "Eyeball which ones look promising", truecap: "Buy-box score on every property" },
   { old: "Re-do the math to find your offer price", truecap: "TrueCap reverse-solves your number" },
-  { old: "Check back manually when rates move", truecap: "Saved deals re-underwrite themselves" },
+  { old: "Check back manually when rates move", truecap: "Saved deals re-scored at today's rate" },
 ];
 
 export function AcquisitionPipeline() {
@@ -861,7 +862,7 @@ export function AcquisitionPipeline() {
         <div className="grid gap-4 sm:grid-cols-2 sm:gap-5">
           <div className="rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-7">
             <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-muted px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
-              <Clock className="size-3.5" />
+              <Layers className="size-3.5" />
               Your Saturday now
             </div>
             <ul className="space-y-3">
@@ -915,6 +916,18 @@ export function AcquisitionPipeline() {
               </p>
             </div>
           </div>
+        </div>
+
+        {/* One quiet CTA to the plan that unlocks this, matching the sibling
+            sections' single-action pattern. */}
+        <div className="mt-6 text-center sm:mt-7">
+          <Link
+            href="/pricing"
+            className="group inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline"
+          >
+            See how Pro screens a shortlist
+            <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+          </Link>
         </div>
       </div>
     </section>

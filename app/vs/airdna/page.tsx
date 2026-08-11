@@ -62,7 +62,7 @@ const MATRIX: Row[] = [
   { feature: "Address auto-fill (rent/rate/tax)", truecap: "Yes — HUD + FRED + state property tax", airdna: "STR-specific data only", winner: "truecap" },
   { feature: "Free tier", truecap: "Yes — full underwriting math", airdna: "Free MarketMinder dashboard with limited data", winner: "tie" },
   { feature: "Pricing (paid tier)", truecap: "Pro $29.99/mo", airdna: "Rentalizer ~$20-40 per property; Markets subscription $50-200+/mo (as of 2026)", winner: "truecap" },
-  { feature: "Shareable read-only analysis", truecap: "Pro — public URL + branding", airdna: "PDF reports on paid tier", winner: "tie" },
+  { feature: "Shareable read-only analysis", truecap: "Free — read-only public link; Pro adds co-branding", airdna: "PDF reports on paid tier", winner: "tie" },
 ];
 
 export default function VsAirdnaPage() {
@@ -267,7 +267,7 @@ export default function VsAirdnaPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
             Pro unlocks projections, sensitivity, tax strategy, exit scenarios,
-            MAO, PDF exports, and shareable read-only deal links.
+            MAO, PDF exports, and co-branded share links.
             No card to start.
           </p>
           <div className="flex flex-wrap gap-3">

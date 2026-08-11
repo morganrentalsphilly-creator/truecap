@@ -353,7 +353,7 @@ export default function BestRentalPropertyCalculator2026Post() {
               </li>
               <li>
                 <strong>Pro feature depth</strong> — projections, tax strategy,
-                sensitivity, share links, PDF export.
+                sensitivity, co-branded share links, PDF export.
               </li>
               <li>
                 <strong>Audience fit</strong> — is the tool built for solo

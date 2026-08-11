@@ -11,6 +11,7 @@
  */
 
 import { useEffect, useMemo, useState, useTransition } from "react";
+import * as Sentry from "@sentry/nextjs";
 import Link from "next/link";
 import { Loader2, Lock, Plus, Save, Star, Target, Trash2, X } from "lucide-react";
 import {
@@ -223,7 +224,7 @@ export function BuyBoxesCard() {
         // cold-start 500, deploy skew). applyResult never runs, so without
         // this the click is silent — the editor stays open with no feedback.
         // Surface a retryable error, matching applyResult's own error title.
-        console.warn("[buy-boxes] save failed:", err);
+        Sentry.captureException(err, { tags: { feature: "buy-boxes" } });
         toast({
           title: "Buy box error",
           description: "Something interrupted the request. Check your connection and try again.",
@@ -248,7 +249,7 @@ export function BuyBoxesCard() {
       } catch (err) {
         // Action rejected rather than returning {ok:false} — surface a
         // retryable error instead of leaving the row spinning silently.
-        console.warn("[buy-boxes] delete failed:", err);
+        Sentry.captureException(err, { tags: { feature: "buy-boxes" } });
         toast({
           title: "Buy box error",
           description: "Something interrupted the request. Check your connection and try again.",
@@ -271,7 +272,7 @@ export function BuyBoxesCard() {
       } catch (err) {
         // Action rejected rather than returning {ok:false} — surface a
         // retryable error instead of leaving the row spinning silently.
-        console.warn("[buy-boxes] set-default failed:", err);
+        Sentry.captureException(err, { tags: { feature: "buy-boxes" } });
         toast({
           title: "Buy box error",
           description: "Something interrupted the request. Check your connection and try again.",

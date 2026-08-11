@@ -65,7 +65,7 @@ const MATRIX: Row[] = [
   { feature: "Portfolio rollup",                  truecap: "Across saved deals (pre-purchase)",                                                stessa: "Across owned properties (post-purchase) — their strongest view",          winner: "stessa" },
   { feature: "Document storage",                  truecap: "No",                                                                               stessa: "Yes — leases, receipts, statements",                                      winner: "stessa" },
   { feature: "Rent collection",                   truecap: "No",                                                                               stessa: "Yes — built-in rent collection in some plans",                            winner: "stessa" },
-  { feature: "Shareable deal links",              truecap: "Pro — public read-only URL with metrics + branding",                               stessa: "Not the primary use case",                                                winner: "truecap" },
+  { feature: "Shareable deal links",              truecap: "Free — read-only public link; Pro adds co-branding",                               stessa: "Not the primary use case",                                                winner: "truecap" },
   { feature: "PDF lender report",                 truecap: "Pro — multi-page report for loan officer",                                          stessa: "Year-end accounting reports (different purpose)",                         winner: "tie" },
 ];
 
@@ -245,7 +245,7 @@ export default function VsStessaPage() {
             Underwriting the next deal? Start free.
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
-            TrueCap free covers cap rate, CoC, DSCR, NCF, monthly cash flow — enough to underwrite. Pro unlocks share links, PDF exports, 10-year projections, tax strategy, sensitivity grid, MAO, and the strategy analyzers. No card to start.
+            TrueCap free covers cap rate, CoC, DSCR, NCF, monthly cash flow — enough to underwrite. Pro unlocks co-branded share links, PDF exports, 10-year projections, tax strategy, sensitivity grid, MAO, and the strategy analyzers. No card to start.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link href="/pricing" className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity">
@@ -337,16 +337,16 @@ const STESSA_FAQ: FaqItem[] = [
     question: "Can I share a TrueCap analysis with my accountant?",
     answer: (
       <>
-        Yes — TrueCap Pro lets you export a full multi-page PDF report
-        and generate a public read-only share link with optional
-        custom branding. Both formats include the projection, tax
-        strategy view, and deal score, which gives your accountant
-        what they need to validate the after-tax cash flow assumptions
-        before you buy.
+        Yes — every TrueCap user can generate a public read-only share
+        link for free; Pro adds a full multi-page PDF report and
+        optional custom co-branding on the link. Both formats include
+        the projection, tax strategy view, and deal score, which gives
+        your accountant what they need to validate the after-tax cash
+        flow assumptions before you buy.
       </>
     ),
     plainTextAnswer:
-      "Yes — TrueCap Pro exports a multi-page PDF and generates a public read-only share link with optional branding. Both include the projection and tax strategy view so your accountant can validate after-tax cash flow assumptions.",
+      "Yes — read-only share links are free for everyone; Pro adds a multi-page PDF and optional co-branding. Both include the projection and tax strategy view so your accountant can validate after-tax cash flow assumptions.",
   },
 ];
 

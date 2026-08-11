@@ -15,6 +15,7 @@
  */
 
 import { useMemo, useState } from "react";
+import * as Sentry from "@sentry/nextjs";
 import { ArrowUp, Loader2, MessageCircleQuestion, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { askDealQuestionAction } from "@/app/actions/deal-qa";
@@ -91,7 +92,8 @@ export function DealQaPanel({
       } else {
         setNotice(result.message);
       }
-    } catch {
+    } catch (err) {
+      Sentry.captureException(err, { tags: { feature: "deal-qa" } });
       setNotice("Couldn't get an answer right now. Please try again.");
     } finally {
       setIsAsking(false);

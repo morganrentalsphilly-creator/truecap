@@ -69,7 +69,7 @@ const MATRIX: Row[] = [
   // (verified dealcheck.io/pricing June 2026) — its tiers gate saved-
   // property caps, not the calculators. Don't claim otherwise.
   { feature: "Free tier covers BRRRR analyzer",      truecap: "No — Pro feature ($29.99/mo) but full underwriting math is free",          dealcheck: "Yes — included on all plans (free tier caps saved deals)", winner: "dealcheck" },
-  { feature: "Shareable BRRRR analysis link",        truecap: "Pro — public read-only link with branding",                              dealcheck: "Pro — PDF export",                                    winner: "truecap" },
+  { feature: "Shareable BRRRR analysis link",        truecap: "Free — read-only public link; Pro adds co-branding",                              dealcheck: "Pro — PDF export",                                    winner: "truecap" },
   { feature: "PDF export of BRRRR analysis",         truecap: "Pro — multi-page lender-ready report",                                   dealcheck: "Pro",                                                 winner: "tie" },
 ];
 

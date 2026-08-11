@@ -384,11 +384,7 @@ export default function MethodologyPage() {
 
         <footer className="mt-12 pt-8 border-t border-border text-sm text-muted-foreground leading-relaxed">
           Last updated: July 13, 2026. We update this page whenever the
-          methodology materially changes — track shipments at{" "}
-          <Link href="/changelog" className="font-bold text-foreground hover:underline">
-            /changelog
-          </Link>
-          .
+          methodology materially changes.
         </footer>
       </main>
       <SiteFooter />

@@ -13,6 +13,7 @@
  */
 
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import * as Sentry from "@sentry/nextjs";
 import Link from "next/link";
 import { ArrowUpRight, ListChecks, Loader2, SlidersHorizontal, Sparkles } from "lucide-react";
 import { screenBatchAction, extractTriageListingsAction, type BatchTriageResult } from "@/app/actions/batch-triage";
@@ -139,11 +140,12 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
         setResult(r);
         setSort(r.sort);
         setPassersOnly(false);
-      } catch {
+      } catch (err) {
         // The action REJECTED rather than returning {ok:false} (network blip,
         // cold-start 500, stale-deploy Server Action). Without this the Screen
         // spinner clears with no result and no signal. The pasted text is
         // preserved, so a retry just re-clicks Screen.
+        Sentry.captureException(err, { tags: { feature: "batch-triage" } });
         toast({
           title: "Couldn't screen",
           description: "Something interrupted the request. Check your connection and try again.",
@@ -174,11 +176,12 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
           description: "Review the rows, then Screen deals.",
           variant: "success",
         });
-      } catch {
+      } catch (err) {
         // The action REJECTED rather than returning {ok:false} (network blip,
         // cold-start 500, stale-deploy Server Action). Without this the Extract
         // spinner clears with no change and no signal. The pasted text is left
         // as-is, so a retry just re-clicks Extract.
+        Sentry.captureException(err, { tags: { feature: "batch-triage" } });
         toast({
           title: "Couldn't extract",
           description: "Something interrupted the request. Check your connection and try again.",

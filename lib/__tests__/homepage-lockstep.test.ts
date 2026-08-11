@@ -17,13 +17,41 @@ import { join } from "node:path";
 
 const ROOT = process.cwd();
 
-/** Marketing sections that must appear on both homepages, in order. */
-const SECTION_RE =
-  /<(MarketingHero|FeaturedIn|WhyNotSpreadsheet|HowItWorks|DataSourcesSection|SocialProof|AcquisitionPipeline|PdfProUpsell|Personas|HomepageFaq)\s*\/>/g;
+/**
+ * The set of marketing components to compare is DERIVED, not hardcoded: it is
+ * every symbol app/page.tsx imports from the marketing modules
+ * (landing-sections + marketing-hero). An earlier version enumerated the
+ * section names in a regex, which meant a NEW section added to one homepage
+ * but not the allow-list was invisible to this guard — the exact drift it
+ * exists to catch. Deriving from the imports closes that hole: add a section
+ * and it is automatically compared.
+ */
+function marketingComponents(): string[] {
+  const src = readFileSync(join(ROOT, "app/page.tsx"), "utf8");
+  const names = new Set<string>();
+  const importRe =
+    /import\s+(?:\{([^}]+)\}|(\w+))\s+from\s+"@\/components\/marketing\/(?:landing-sections|marketing-hero)"/g;
+  for (const m of src.matchAll(importRe)) {
+    const body = m[1] ?? m[2] ?? "";
+    for (const raw of body.split(",")) {
+      const name = raw.replace(/\bas\b.*$/, "").trim();
+      if (/^[A-Z]\w+$/.test(name)) names.add(name);
+    }
+  }
+  return [...names];
+}
 
 function sections(rel: string): string[] {
   const src = readFileSync(join(ROOT, rel), "utf8");
-  return [...src.matchAll(SECTION_RE)].map((m) => m[1]);
+  const known = marketingComponents();
+  // Preserve render order by scanning the file for each known component's
+  // self-closing tag.
+  const found: { name: string; at: number }[] = [];
+  for (const name of known) {
+    const at = src.search(new RegExp(`<${name}\\s*/>`));
+    if (at >= 0) found.push({ name, at });
+  }
+  return found.sort((a, b) => a.at - b.at).map((x) => x.name);
 }
 
 describe("both homepages stay in lockstep", () => {

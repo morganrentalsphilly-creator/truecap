@@ -150,6 +150,36 @@ describe("upsertSubscriptionFromStripe — unmapped price on an active subscript
     expect(Sentry.captureMessage).not.toHaveBeenCalled();
   });
 
+  it("ignores STALE plan_slug metadata on an existing sub (Customer-Portal plan switch) and preserves the existing plan", async () => {
+    // A subscriber on annual switches plans through the Customer Portal. The
+    // checkout-time metadata.plan_slug stamp still says "pro_monthly" (the
+    // portal never refreshes it), and the new price isn't wired to a plan row
+    // yet. Trusting the stale stamp would MIS-map them to the monthly plan;
+    // the price-derived slug is the source of truth, and failing that we must
+    // preserve the plan already on their subscription row — not the stamp.
+    const { admin, upserts } = makeAdmin({
+      profileByCustomer: { id: "user-1", stripe_customer_id: "cus_1" },
+      planByPrice: null, // new price not yet mapped
+      plansBySlug: { pro_monthly: { id: "plan-pro-monthly-STALE" } }, // stamp WOULD resolve here
+      existingSubscription: { plan_id: "plan-pro-annual-current" },
+    });
+
+    const subscription = makeSubscription({
+      status: "active",
+      metadata: { user_id: "user-1", plan_slug: "pro_monthly" }, // stale checkout stamp
+    });
+
+    const result = await upsertSubscriptionFromStripe(admin, subscription, "user-1");
+
+    expect(result).toEqual({ synced: true });
+    expect(upserts).toHaveLength(1);
+    // Preserve the existing plan; do NOT trust the stale checkout stamp.
+    expect(upserts[0].row.plan_id).toBe("plan-pro-annual-current");
+    expect(upserts[0].row.plan_id).not.toBe("plan-pro-monthly-STALE");
+    // Truly-unmapped price on an existing sub still pages LOUD.
+    expect(Sentry.captureMessage).toHaveBeenCalledTimes(1);
+  });
+
   it("preserves the existing plan and pages LOUD when the price is unmapped and metadata can't recover it", async () => {
     const { admin, upserts } = makeAdmin({
       profileByCustomer: { id: "user-1", stripe_customer_id: "cus_1" },

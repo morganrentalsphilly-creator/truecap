@@ -17,6 +17,7 @@
  * MIGRATION_PENDING — toast, never crash.
  */
 import { useState, useTransition } from "react";
+import * as Sentry from "@sentry/nextjs";
 import { useRouter } from "next/navigation";
 import { Landmark } from "lucide-react";
 import { setSavedDealCloseDateAction } from "@/app/actions/saved-analyses";
@@ -62,11 +63,12 @@ export function OwnedEquityCard({
         } else {
           toast({ title: "Couldn't save close date", description: r.message, variant: "destructive" });
         }
-      } catch {
+      } catch (err) {
         // The action REJECTED rather than returning {ok:false} (network blip,
         // cold-start 500, stale-deploy Server Action). Without this the date
         // input's spinner clears with no signal and the date never persists.
         // Tell the user it's retryable.
+        Sentry.captureException(err, { tags: { feature: "owned-equity" } });
         toast({
           title: "Couldn't save close date",
           description: "Something interrupted the request. Check your connection and try again.",

@@ -8,6 +8,7 @@
  * cards. Renders a graceful notice until the labels migration is applied.
  */
 import { useEffect, useState, useTransition } from "react";
+import * as Sentry from "@sentry/nextjs";
 import { useRouter } from "next/navigation";
 import { Loader2, MapPin } from "lucide-react";
 import { getDealLabelsAction, updateDealLabelsAction, type DealLabels } from "@/app/actions/deal-labels";
@@ -61,12 +62,13 @@ export function DealDetailsCard({ savedDealId }: { savedDealId: string }) {
         // server-rendered, so without a refresh the Router Cache keeps serving
         // the old name on back-navigation until some other mutation purges it.
         router.refresh();
-      } catch {
+      } catch (err) {
         // The action REJECTED rather than returning {ok:false} (network blip,
         // cold-start 500, stale-deploy Server Action). The blurred input still
         // shows the typed value, so without this the change silently vanishes
         // on the next server render with no signal. Tell the user it's
         // retryable; the stale-deal guard mirrors the success path.
+        Sentry.captureException(err, { tags: { feature: "deal-details" } });
         if (dealAtSubmit !== savedDealId) return;
         toast({
           title: "Could not save deal details",

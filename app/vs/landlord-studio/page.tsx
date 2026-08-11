@@ -61,7 +61,7 @@ const MATRIX: Row[] = [
   { feature: "Rent tracking", truecap: "No", landlordstudio: "Yes — payment logging (no ACH collection itself)", winner: "landlordstudio" },
   { feature: "Mobile app", truecap: "PWA", landlordstudio: "Native iOS + Android", winner: "tie" },
   { feature: "Free tier", truecap: "Yes — full underwriting math", landlordstudio: "Yes — limited properties", winner: "tie" },
-  { feature: "Pricing (paid tier)", truecap: "Pro $29.99/mo for projections + tax + share + PDF", landlordstudio: "Starter ~$12/mo, Premium ~$30/mo (as of 2026)", winner: "tie" },
+  { feature: "Pricing (paid tier)", truecap: "Pro $29.99/mo for projections + tax + co-branded share + PDF", landlordstudio: "Starter ~$12/mo, Premium ~$30/mo (as of 2026)", winner: "tie" },
 ];
 
 export default function VsLandlordStudioPage() {
@@ -263,7 +263,7 @@ export default function VsLandlordStudioPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
             Pro unlocks projections, sensitivity, tax strategy, exit scenarios,
-            MAO, PDF exports, and shareable read-only deal links.
+            MAO, PDF exports, and co-branded share links.
             No card to start.
           </p>
           <div className="flex flex-wrap gap-3">

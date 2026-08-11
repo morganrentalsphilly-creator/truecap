@@ -87,11 +87,12 @@ const TOOLS: Tool[] = [
       "Address auto-fill: HUD rent + FRED mortgage rate + state property tax",
       "Plain-English verdict (Strong / Solid / Mixed / Marginal / Negative)",
       "Every operating expense line the BP form collects",
+      "Save up to 5 deals + dashboard access",
     ],
     freeGates: [
-      "Saving and comparing deals (Pro)",
+      "Editing + unlimited saves + comparing deals (Pro)",
       "10-year projections, tax strategy, sensitivity (Pro)",
-      "Share links + PDF export (Pro)",
+      "PDF export + co-branded share links (Pro)",
     ],
     pickIf:
       "You want the BP rental-calculator workflow without the 5-report ceiling — and prefer the data filled in for you.",

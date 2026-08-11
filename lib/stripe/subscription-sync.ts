@@ -301,24 +301,40 @@ export async function upsertSubscriptionFromStripe(
   // plan. This is exactly how the 2026-07 Stripe-account switch locked two
   // paid accounts out of Pro for days with zero signal — plans.stripe_price_id
   // was never populated for the new account and the env fallback was stale.
-  // Before EVER accepting that downgrade on an active/trialing/past_due sub:
-  //   1. Recover the plan from the subscription's plan_slug metadata, which
-  //      checkout stamps on subscription_data.metadata (app/actions/billing.ts)
-  //      and which matches plans.slug 1:1. This rescues brand-new subs whose
-  //      price row simply isn't wired up yet.
-  //   2. If that still fails, PRESERVE the plan already stored on this
+  //
+  // resolvePlanIdForPrice already tried the two PRICE-derived paths above
+  // (plans.stripe_price_id, then plans.slug via planSlugFromPriceId). Before
+  // EVER accepting a FREE downgrade on an active/trialing/past_due sub:
+  //   1. FIRST SYNC ONLY — recover from the subscription's plan_slug metadata,
+  //      which checkout stamps on subscription_data.metadata
+  //      (app/actions/billing.ts) and which matches plans.slug 1:1. This
+  //      rescues a brand-new sub whose price row simply isn't wired up yet.
+  //      CRUCIAL SCOPE: that stamp is written once at checkout and is NOT
+  //      refreshed when a subscriber changes plans through the Customer Portal,
+  //      so on an already-synced sub it can still name the OLD plan and would
+  //      MIS-map a portal plan switch. We therefore consult it only when there
+  //      is NO existing subscription row; for an existing sub the price-derived
+  //      slug (the rung above) is the source of truth.
+  //   2. If we still have no plan, PRESERVE the plan already stored on this
   //      subscription's row rather than overwriting it with null — never strip
   //      Pro from someone actively paying — and page LOUD (ids only, no PII,
-  //      pitfall #4). Only genuinely unresolvable first-time syncs fall
-  //      through to null here, which is the correct FREE result for those.
+  //      pitfall #4). A genuinely unresolvable FIRST sync has no row to
+  //      preserve and correctly falls through to null (the FREE result).
   // A canceled/incomplete/etc. sub legitimately resolves to null (→ FREE) and
   // needs no rescue — the guard is scoped to the paid status set.
   const isActivePaidStatus = ["active", "trialing", "past_due"].includes(subscription.status);
   if (planId === null && isActivePaidStatus) {
-    planId = await resolvePlanIdBySlug(admin, subscription.metadata?.plan_slug ?? null);
+    const existingPlanId = await getExistingSubscriptionPlanId(admin, subscription.id);
+
+    // Trust the checkout-time plan_slug stamp ONLY on a first sync (no row yet).
+    // A Customer-Portal plan switch never updates it, so for an existing sub it
+    // can point at the old plan — prefer the price-derived slug and, failing
+    // that, the preserved existing plan below.
+    if (existingPlanId === null) {
+      planId = await resolvePlanIdBySlug(admin, subscription.metadata?.plan_slug ?? null);
+    }
 
     if (planId === null) {
-      const preservedPlanId = await getExistingSubscriptionPlanId(admin, subscription.id);
       Sentry.captureMessage(
         "Paid subscription has UNMAPPED price — preserving existing plan to avoid FREE downgrade",
         {
@@ -329,12 +345,12 @@ export async function upsertSubscriptionFromStripe(
             stripe_price_id: priceId,
             subscription_status: subscription.status,
             plan_slug_metadata: subscription.metadata?.plan_slug ?? null,
-            preserved_plan_id: preservedPlanId,
+            preserved_plan_id: existingPlanId,
             hint: "Populate plans.stripe_price_id for this price (and verify STRIPE_PRICE_PRO_MONTHLY/ANNUAL env).",
           },
         }
       );
-      planId = preservedPlanId;
+      planId = existingPlanId;
     }
   }
 

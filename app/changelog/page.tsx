@@ -26,6 +26,13 @@ export const metadata: Metadata = {
   title: "Changelog",
   description:
     "What's new in TrueCap — features, improvements, fixes, and content. Updated as we ship.",
+  // De-surfaced from the front-facing site (founder decision 2026-08-11): the
+  // footer link, the sitemap entry, and the /methodology inbound link were all
+  // removed, and the page is noindexed here. The route still resolves so old
+  // links don't 404, but it is no longer promoted to users or to search. This
+  // also takes its historical "share links moved to Pro" entries (now false —
+  // plain read-only links are free) out of the indexable surface.
+  robots: { index: false, follow: true },
   alternates: { canonical: "/changelog" },
   openGraph: {
     title: "TrueCap Changelog",

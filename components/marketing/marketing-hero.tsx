@@ -64,11 +64,21 @@ export function MarketingHero() {
               Know whether to buy it, and{" "}
               <span className="text-primary">what to offer, in 60 seconds.</span>
             </h1>
-            {/* Subtext: keep it tight, no em-dash (house style). */}
-            <p className="mt-4 max-w-xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg">
-              Enter an address. TrueCap auto-fills rent, rate, and tax, checks
-              the deal against your numbers, and reverse-solves the maximum
-              price that still works.
+            {/* Subtext: keep it tight, no em-dash (house style). The H1 leads
+                with the decision and drops the head-term keywords; the desktop
+                tail below restores them ("rental property calculator", cap
+                rate, cash flow, DSCR) so the page keeps the on-page relevance
+                app/page.tsx metadata.title already ranks for. The tail is
+                hidden on phones (and the mt tightened) so the address form +
+                primary button still clear the first-visit cookie banner on
+                short (≤667px) screens. */}
+            <p className="mt-3 max-w-xl text-pretty text-base leading-relaxed text-muted-foreground sm:mt-4 sm:text-lg">
+              Enter an address. TrueCap auto-fills rent, rate, and tax and
+              reverse-solves the maximum price that still works.{" "}
+              <span className="hidden sm:inline">
+                A rental property calculator that checks the deal against your
+                numbers, with cap rate, cash flow, and DSCR computed live.
+              </span>
             </p>
 
             {/* Primary action — the address input. Hands off to the

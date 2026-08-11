@@ -12,6 +12,7 @@
  * Free per-deal annotation (no entitlement), like Deal Notes.
  */
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import * as Sentry from "@sentry/nextjs";
 import { ChevronDown, ClipboardCheck, Loader2, Plus, X } from "lucide-react";
 import {
   getDealDueDiligenceAction,
@@ -104,13 +105,14 @@ export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
             variant: "destructive",
           });
         }
-      } catch {
+      } catch (err) {
         // The action REJECTED rather than returning {ok:false} (network blip,
         // cold-start 500, stale-deploy Server Action). The optimistic setItems
         // already ran, so the card is asserting a change the server never
         // stored. Reconcile the same way the !r.ok branch does — roll back to
         // the pre-mutation snapshot (a re-read might also be down), let the
         // caller restore anything it cleared, and surface a retryable toast.
+        Sentry.captureException(err, { tags: { feature: "due-diligence" } });
         if (dealIdAtSubmit !== savedDealId) return;
         setItems(previous);
         onFailure?.();

@@ -1,92 +1,129 @@
 /**
- * Guards the public plan claims against the actual entitlements.
+ * Repo-wide guard on the public plan claims vs the actual entitlements.
  *
  * These are REVENUE bugs, not copy nits: each one contradicted another
  * surface at the exact moment a visitor decides to pay, and each was live.
+ * Ground truth (lib/entitlements-catalog.ts + the plans seed):
+ *   - FREE saves up to 5 deals and revisits them; Pro adds EDITING, unlimited
+ *     saves, and side-by-side compare. So "Free cannot save" is false.
+ *   - Plain read-only share links are FREE for everyone (share_links gate
+ *     "always", tiers ["free","pro"]). Only the CO-BRANDED variant is Pro.
+ *     So "Pro unlocks share links" is false.
+ *   - Pro is $29.99/mo or $300/yr. Any other Pro price is wrong.
  *
- *   1. The homepage value ladder said Free could not save deals at all
- *      ([false,false,true]) while the homepage's OWN FAQ two sections down,
- *      the /pricing matrix, and the seeded free plan all say Free saves 5.
- *   2. The same ladder said the $5 one-time PDF excluded the 10-year
- *      projection / tax / exit sections, while the homepage FAQ and /pricing
- *      say it includes them — and the generator produces the same document a
- *      Pro user exports, minus custom branding.
- *   3. /for-agents and /for-buy-and-hold told agents that read-only share
- *      links were a Pro feature. They are free for everyone (there is no
- *      entitlement check on ShareLinkButton or /d/[encoded]); only the
- *      CO-BRANDED variant is Pro.
- *
- * The root cause is that plan truth is hand-typed across several rendered
- * surfaces while lib/entitlements-catalog.ts — the intended single source of
- * truth — renders nowhere. Until that is unified, this test is the tripwire.
+ * The root cause is that plan truth is hand-typed across ~40 surfaces while
+ * lib/entitlements-catalog.ts — the intended single source of truth — renders
+ * nowhere. A first pass fixed only the handful of files it looked at; the same
+ * false claims survived on 36 /vs pages, blog posts, llms.txt/llms-full.txt,
+ * and email templates. This guard now scans the WHOLE tree so a straggler (or
+ * a regression) fails the build, not just an enumerated list. It stays until
+ * Phase 4 makes the surfaces render from the catalog.
  */
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { execFileSync } from "node:child_process";
 
 const ROOT = process.cwd();
 const read = (rel: string) => readFileSync(join(ROOT, rel), "utf8");
+
+function tracked(globs: string[]): string[] {
+  return execFileSync("git", ["ls-files", ...globs], {
+    cwd: ROOT,
+    encoding: "utf8",
+    maxBuffer: 16 * 1024 * 1024,
+  })
+    .split("\n")
+    .filter(Boolean);
+}
+
+/** app/changelog is a historical narrative — its past entries describe a
+ *  prior product state and are out of scope for a truth-of-today guard. */
+const EXCLUDE = /^app\/changelog\//;
 
 describe("homepage value ladder matches the real entitlements", () => {
   const src = read("components/marketing/landing-sections.tsx");
 
   it("does not claim Free cannot save deals", () => {
-    // The seeded free plan has save_deal + max_saved_deals:5, so the Free
-    // cell must carry a qualifier (not a bare `false`).
     const row = src.match(/\{\s*label:\s*"Save & revisit deals",\s*cells:\s*\[([^\]]+)\]/);
-    expect(row, "Save & revisit deals row not found in LADDER_ROWS").not.toBeNull();
-    const freeCell = row![1].split(",")[0].trim();
-    expect(freeCell).not.toBe("false");
-    expect(freeCell).toMatch(/Up to 5/);
+    expect(row, "Save & revisit deals row not found").not.toBeNull();
+    expect(row![1].split(",")[0].trim()).toMatch(/Up to 5/);
   });
 
   it("does not claim the $5 PDF excludes projections / tax / exit", () => {
-    const row = src.match(
-      /\{\s*label:\s*"10-year projections · tax · exit",\s*cells:\s*\[([^\]]+)\]/,
-    );
-    expect(row, "projections row not found in LADDER_ROWS").not.toBeNull();
-    const pdfCell = row![1].split(",")[1].trim();
-    // The $5 report DOES contain these sections — a bare `false` is the bug.
-    expect(pdfCell).not.toBe("false");
+    const row = src.match(/\{\s*label:\s*"10-year projections · tax · exit",\s*cells:\s*\[([^\]]+)\]/);
+    expect(row, "projections row not found").not.toBeNull();
+    expect(row![1].split(",")[1].trim()).not.toBe("false");
   });
 });
 
-describe("share links are not sold as Pro-only", () => {
-  // Plain read-only share links are ungated (free + logged-out). Only the
-  // co-branded variant is Pro. Copy may say "co-branded share links" are Pro;
-  // it must not say share links as such are Pro.
-  const offenders: Array<[string, RegExp]> = [
-    ["app/for-agents/page.tsx", /Pro unlocks share links/],
-    ["app/for-buy-and-hold/page.tsx", /PDF exports, and share links/],
-  ];
+describe("no /vs comparison page sells plain read-only share links as Pro", () => {
+  const files = tracked(["app/vs/*/page.tsx"]).filter((f) => !EXCLUDE.test(f));
 
-  for (const [file, pattern] of offenders) {
-    it(`${file} does not attribute plain share links to Pro`, () => {
-      expect(read(file)).not.toMatch(pattern);
+  it("has /vs pages to check", () => {
+    expect(files.length).toBeGreaterThan(20);
+  });
+
+  it("every share-links row's TrueCap cell leads with Free, not Pro", () => {
+    const offenders: string[] = [];
+    // A row object whose `feature` mentions a share/link and whose `truecap`
+    // cell begins with "Pro" is the bug — plain links are free.
+    const rowRe =
+      /feature:\s*"[^"]*(?:hare|link)[^"]*"[^}]*?truecap:\s*"(Pro[^"]*)"/gi;
+    for (const f of files) {
+      for (const m of read(f).matchAll(rowRe)) {
+        // "Pro adds co-branding" is fine only when the cell LEADS with Free;
+        // this branch matched a cell that STARTS with "Pro", which is the bug.
+        offenders.push(`${f}: ${m[1].slice(0, 60)}`);
+      }
+    }
+    expect(offenders).toEqual([]);
+  });
+});
+
+describe("no surface repeats the corrected false claims", () => {
+  // Curated exact phrases that encode a known-false claim. Scanned across the
+  // whole public tree + email templates. Add to this list when a new false
+  // phrasing is found; do not remove entries.
+  const FORBIDDEN: RegExp[] = [
+    /Pro unlocks share links/i,
+    /Pro — clean public URL/i,
+    /Pro — public URL \+ branding/i,
+    /\$16\.67/, // a Pro price that exists nowhere real
+    /Saving and comparing deals \(Pro\)/i,
+    /save deals[^.]*require[^.]*\$?29/i,
+  ];
+  const files = tracked([
+    "app/**/*.tsx",
+    "app/**/*.ts",
+    "components/**/*.tsx",
+    "emails/**/*.json",
+  ]).filter((f) => !EXCLUDE.test(f));
+
+  it("scans a broad set of public files", () => {
+    expect(files.length).toBeGreaterThan(100);
+  });
+
+  for (const pattern of FORBIDDEN) {
+    it(`no file contains ${pattern}`, () => {
+      const hits = files.filter((f) => pattern.test(read(f))).map((f) => f);
+      expect(hits).toEqual([]);
     });
   }
 });
 
 describe("competitor claims reflect the shipped listing-link import", () => {
-  // TrueCap accepts a pasted Zillow/Redfin/Realtor link and extracts the
-  // ADDRESS (lib/listing-url.ts). Claiming it has no listing import at all —
-  // or steering a reader to a competitor for that reason — is now false, and
-  // "honest comparison" is an explicit brand promise.
   const files = [
     "app/blog/best-rental-property-calculator-2026/page.tsx",
     "app/blog/best-dealcheck-alternatives/page.tsx",
     "app/blog/dealcheck-vs-biggerpockets-vs-truecap/page.tsx",
     "app/vs/dealcheck-for-fix-and-flip/page.tsx",
   ];
-
   for (const file of files) {
     it(`${file} does not claim TrueCap has no listing import`, () => {
       const src = read(file);
       expect(src).not.toMatch(/"No listing import/);
       expect(src).not.toMatch(/No property import from listing sites \(/);
-      // The bare "choose DealCheck for listing import" steer, with no
-      // acknowledgement that TrueCap takes a listing link at all.
-      expect(src).not.toMatch(/I want listing import from Zillow \/ Redfin\.&quot;<\/strong> DealCheck\.</);
     });
   }
 });

@@ -53,7 +53,7 @@ const MATRIX: Row[] = [
   // (verified dealcheck.io/pricing June 2026) — tiers gate saved-
   // property caps, not the calculators.
   { feature: "Free tier covers flip math", truecap: "No — Pro feature ($29.99/mo)", dealcheck: "Yes — included on all plans (free tier caps saved deals)", winner: "dealcheck" },
-  { feature: "Shareable flip analysis", truecap: "Pro — public read-only link + branding", dealcheck: "Pro — PDF export", winner: "truecap" },
+  { feature: "Shareable flip analysis", truecap: "Free — read-only public link; Pro adds co-branding", dealcheck: "Pro — PDF export", winner: "truecap" },
 ];
 
 const NICHE_FAQ: FaqItem[] = [

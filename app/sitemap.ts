@@ -199,11 +199,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 0.8,
     },
-    {
-      url: `${siteUrl}/changelog`,
-      changeFrequency: "weekly",
-      priority: 0.4,
-    },
+    // /changelog intentionally omitted — de-surfaced from the front-facing
+    // site (2026-08-11). It is noindexed (app/changelog/page.tsx robots) and
+    // has no inbound internal link; listing a noindex URL in the sitemap is a
+    // contradictory signal. The route still resolves for old links.
     {
       url: `${siteUrl}/glossary`,
       changeFrequency: "monthly",

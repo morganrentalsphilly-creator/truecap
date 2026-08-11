@@ -62,7 +62,7 @@ const MATRIX: Row[] = [
   { feature: "Agent / brokerage workflow", truecap: "Yes — agent persona page exists", rentspree: "Yes — built for realtor-managed rentals", winner: "tie" },
   { feature: "Free tier", truecap: "Yes — full underwriting math", rentspree: "Yes — tenant pays for screening (typical)", winner: "tie" },
   { feature: "Pricing model", truecap: "Free; Pro $29.99/mo", rentspree: "Tenant typically pays $30-40 per application", winner: "tie" },
-  { feature: "Shareable read-only analysis", truecap: "Pro — public URL + branding", rentspree: "N/A", winner: "truecap" },
+  { feature: "Shareable read-only analysis", truecap: "Free — read-only public link; Pro adds co-branding", rentspree: "N/A", winner: "truecap" },
 ];
 
 export default function VsRentspreePage() {
@@ -267,7 +267,7 @@ export default function VsRentspreePage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
             Pro unlocks projections, sensitivity, tax strategy, exit scenarios,
-            MAO, PDF exports, and shareable read-only deal links.
+            MAO, PDF exports, and co-branded share links.
             No card to start.
           </p>
           <div className="flex flex-wrap gap-3">

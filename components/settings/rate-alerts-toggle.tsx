@@ -7,6 +7,7 @@
  * self-hides if the schema migration isn't applied yet.
  */
 import { useEffect, useState, useTransition } from "react";
+import * as Sentry from "@sentry/nextjs";
 import { BellRing } from "lucide-react";
 import { getEmailPreferencesAction, setRateAlertEmailsAction } from "@/app/actions/email-preferences";
 import { Switch } from "@/components/ui/switch";
@@ -59,13 +60,14 @@ export function RateAlertsToggle({
           setEnabled(!next); // rollback
           toast({ title: "Couldn't update preference", description: r.message, variant: "destructive" });
         }
-      } catch {
+      } catch (err) {
         // The action REJECTED rather than returning {ok:false}: a network
         // blip, a cold-start 500, or a tab one deploy behind main (Next
         // throws on an unrecognized Server Action). Without this the
         // optimistic flip sticks — the switch sits "on" while the DB stayed
         // off, a silent lie. Roll back to the real value and tell them it's
         // retryable. Mirrors the guard in login-form.tsx.
+        Sentry.captureException(err, { tags: { feature: "rate-alerts" } });
         setEnabled(!next); // rollback
         toast({
           title: "Couldn't update preference",
@@ -111,10 +113,11 @@ export function RateAlertsToggle({
                   }
             );
           }
-        } catch {
+        } catch (err) {
           // Action rejected rather than returning {ok:false} — roll the
           // optimistic enable back off so the nudge doesn't vanish claiming
           // success, and surface a retryable error. Mirrors login-form.tsx.
+          Sentry.captureException(err, { tags: { feature: "rate-alerts" } });
           setEnabled(false);
           toast({
             title: "Couldn't enable alerts",

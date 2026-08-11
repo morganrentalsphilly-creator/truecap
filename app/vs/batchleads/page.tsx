@@ -61,7 +61,7 @@ const MATRIX: Row[] = [
   { feature: "Stacked / multi-criteria lists", truecap: "No", batchleads: "Yes — overlay multiple filters", winner: "batchleads" },
   { feature: "Free tier", truecap: "Yes — full underwriting math", batchleads: "Trial; paid from ~$99/mo (as of 2026)", winner: "truecap" },
   { feature: "Pricing (entry tier)", truecap: "Free; Pro $29.99/mo", batchleads: "Standard ~$99/mo + per-skiptrace fees", winner: "truecap" },
-  { feature: "Shareable read-only deal link", truecap: "Pro — public URL + branding", batchleads: "Internal-only", winner: "truecap" },
+  { feature: "Shareable read-only deal link", truecap: "Free — read-only public link; Pro adds co-branding", batchleads: "Internal-only", winner: "truecap" },
 ];
 
 export default function VsBatchleadsPage() {
@@ -266,7 +266,7 @@ export default function VsBatchleadsPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
             Pro unlocks projections, sensitivity, tax strategy, exit scenarios,
-            MAO, PDF exports, and shareable read-only deal links.
+            MAO, PDF exports, and co-branded share links.
             No card to start.
           </p>
           <div className="flex flex-wrap gap-3">

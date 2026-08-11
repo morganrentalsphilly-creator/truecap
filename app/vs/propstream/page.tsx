@@ -63,7 +63,7 @@ const MATRIX: Row[] = [
   { feature: "Mobile-first UX", truecap: "Yes — PWA installable", propstream: "Mobile app exists", winner: "tie" },
   { feature: "Pricing (entry tier)", truecap: "Free for underwriting; Pro $29.99/mo", propstream: "~$99/mo (as of 2026), no real free tier", winner: "truecap" },
   { feature: "Free tier", truecap: "Yes — full underwriting math", propstream: "No — paid only", winner: "truecap" },
-  { feature: "Shareable read-only deal link", truecap: "Pro — public URL + branding", propstream: "Internal-only data", winner: "truecap" },
+  { feature: "Shareable read-only deal link", truecap: "Free — read-only public link; Pro adds co-branding", propstream: "Internal-only data", winner: "truecap" },
   { feature: "Lender-ready PDF", truecap: "Pro — multi-page report", propstream: "Not the use case", winner: "truecap" },
 ];
 
@@ -269,7 +269,7 @@ export default function VsPropstreamPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
             Pro unlocks projections, sensitivity, tax strategy, exit scenarios,
-            MAO, PDF exports, and shareable read-only deal links.
+            MAO, PDF exports, and co-branded share links.
             No card to start.
           </p>
           <div className="flex flex-wrap gap-3">

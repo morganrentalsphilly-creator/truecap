@@ -229,10 +229,11 @@ function OwnedEquityCell({ item, enabled }: { item: SavedAnalysisListItem; enabl
           // Ghost row (deleted elsewhere) — refresh so it disappears.
           if (r.code === "NOT_FOUND") router.refresh();
         }
-      } catch {
+      } catch (err) {
         // The action REJECTED rather than returning {ok:false} (network blip,
         // cold-start 500, stale-deploy Server Action). Without this the date
         // input's spinner clears with no signal and nothing persisted.
+        Sentry.captureException(err, { tags: { feature: "saved-analyses" } });
         toast({
           title: "Couldn't save close date",
           description: "Something interrupted the request. Check your connection and try again.",
@@ -1109,12 +1110,13 @@ export function SavedAnalysesPage({
           variant: "success",
         });
         router.refresh();
-      } catch {
+      } catch (err) {
         // The action REJECTED rather than returning {ok:false} (network blip,
         // cold-start 500, stale-deploy Server Action). Without a catch the
         // toast never fired; without the finally the row's spinner stuck on
         // forever (setUpdatingDealStatusId was cleared only on the resolved
         // paths).
+        Sentry.captureException(err, { tags: { feature: "saved-analyses" } });
         toast({
           title: "Could not update deal status",
           description: "Something interrupted the request. Check your connection and try again.",
@@ -1139,10 +1141,11 @@ export function SavedAnalysesPage({
         }
         toast({ title: "Stage updated", description: `Moved to ${pipelineStageLabel(stage)}.`, variant: "success" });
         router.refresh();
-      } catch {
+      } catch (err) {
         // A thrown action would otherwise strand the row's "updating" spinner
         // (cleared only on the resolved paths) and give no signal. finally
         // clears it on every path.
+        Sentry.captureException(err, { tags: { feature: "saved-analyses" } });
         toast({
           title: "Could not update stage",
           description: "Something interrupted the request. Check your connection and try again.",
@@ -1166,10 +1169,11 @@ export function SavedAnalysesPage({
           return;
         }
         router.refresh();
-      } catch {
+      } catch (err) {
         // A thrown action would otherwise strand the row's "updating" spinner
         // (cleared only on the resolved paths) and give no signal. finally
         // clears it on every path.
+        Sentry.captureException(err, { tags: { feature: "saved-analyses" } });
         toast({
           title: "Could not update tags",
           description: "Something interrupted the request. Check your connection and try again.",
@@ -1210,10 +1214,11 @@ export function SavedAnalysesPage({
         });
         setSelectedIds([]);
         router.refresh();
-      } catch {
+      } catch (err) {
         // The action REJECTED rather than returning {ok:false} (network blip,
         // cold-start 500, stale-deploy Server Action). Without this the bulk bar
         // spinner clears with no signal and the selection appears untouched.
+        Sentry.captureException(err, { tags: { feature: "saved-analyses" } });
         toast({
           title: "Could not archive selected deals",
           description: "Something interrupted the request. Check your connection and try again.",
@@ -1249,10 +1254,11 @@ export function SavedAnalysesPage({
         });
         setSelectedIds([]);
         router.refresh();
-      } catch {
+      } catch (err) {
         // The action REJECTED rather than returning {ok:false} (network blip,
         // cold-start 500, stale-deploy Server Action). Without this the bulk bar
         // spinner clears with no signal and the selection appears untouched.
+        Sentry.captureException(err, { tags: { feature: "saved-analyses" } });
         toast({
           title: "Could not delete selected deals",
           description: "Something interrupted the request. Check your connection and try again.",
@@ -1521,10 +1527,11 @@ export function SavedAnalysesPage({
           return;
         }
         router.push("/dashboard/compare");
-      } catch {
+      } catch (err) {
         // The action REJECTED rather than returning {ok:false} (network blip,
         // cold-start 500, stale-deploy Server Action). Without this the Compare
         // button spinner clears with no navigation and no signal.
+        Sentry.captureException(err, { tags: { feature: "saved-analyses" } });
         toast({
           title: "Could not start comparison",
           description: "Something interrupted the request. Check your connection and try again.",

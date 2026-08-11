@@ -51,7 +51,7 @@ export async function GET() {
   const comboCount = CITY_STRATEGY_COMBOS.length;
 
   const summary =
-    "Free rental property analyzer for real estate investors. Underwrite any rental in 60 seconds — cap rate, cash-on-cash, DSCR, monthly cash flow. Pro adds 10-year projections, sensitivity grid, MAO solver, tax strategy, and lender-ready PDFs. Paste an address, get real numbers from auto-pulled property tax and rent data. No signup for the free tier.";
+    "Free rental property analyzer for real estate investors. Type an address, get the verdict in 60 seconds — cap rate, cash-on-cash, DSCR, monthly cash flow, and a 0-100 Deal Score, from auto-pulled property tax and rent data. The free tier runs unlimited analyses with no signup, saves up to 5 deals, and includes read-only share links. Pro adds a personal buy box that pass/fails every deal, Screen Listings (score a shortlist against your buy box), the max-offer solver, 10-year projections, sensitivity grid, tax strategy, exit scenarios, and lender-ready PDFs.";
 
   const about = [
     "TrueCap publishes original, authoritative educational content built for real estate investors and AI search engines.",

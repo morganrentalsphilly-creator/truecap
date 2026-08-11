@@ -60,7 +60,7 @@ type Row = { feature: string; truecap: string; roofstock: string; winner: Verdic
 
 const MATRIX: Row[] = [
   { feature: "Primary purpose",                   truecap: "Per-deal underwriting calculator",                                       roofstock: "Marketplace + brokerage for turnkey SFR",                          winner: "tie" },
-  { feature: "Cost to use",                       truecap: "Free to underwrite; Pro $29.99/mo for projections + share + PDF",          roofstock: "Free to browse; 0.5% buyer fee at close (typically $1k–$3k)",      winner: "truecap" },
+  { feature: "Cost to use",                       truecap: "Free to underwrite; Pro $29.99/mo for projections + co-branded share + PDF",          roofstock: "Free to browse; 0.5% buyer fee at close (typically $1k–$3k)",      winner: "truecap" },
   { feature: "Independent underwriting",           truecap: "Yes — our engine, your assumptions",                                     roofstock: "Listing pro-formas authored by the seller / Roofstock",            winner: "truecap" },
   { feature: "Cap rate / CoC / DSCR",              truecap: "All standard, plus benchmarks per metric",                                roofstock: "Cap rate + cash flow on listing card",                              winner: "truecap" },
   { feature: "Editable assumptions",               truecap: "Every input — vacancy, mgmt %, capex, taxes, etc.",                      roofstock: "Limited override of listing pro-forma",                             winner: "truecap" },
@@ -74,7 +74,7 @@ const MATRIX: Row[] = [
   { feature: "Listing inventory",                   truecap: "None — analyze anything by address",                                      roofstock: "Curated SFR inventory, primarily turnkey",                          winner: "roofstock" },
   { feature: "Property management connection",      truecap: "Not included",                                                            roofstock: "Pre-vetted PM partners for most markets",                           winner: "roofstock" },
   { feature: "Works on any property",                truecap: "Yes — any US address, any condition, any strategy",                       roofstock: "Only Roofstock-listed properties",                                  winner: "truecap" },
-  { feature: "Shareable read-only deal link",       truecap: "Pro — public URL + optional branding",                                    roofstock: "Listing URL (their pro-forma, not yours)",                          winner: "truecap" },
+  { feature: "Shareable read-only deal link",       truecap: "Free — read-only public link; Pro adds co-branding",                                    roofstock: "Listing URL (their pro-forma, not yours)",                          winner: "truecap" },
   { feature: "PDF report export",                    truecap: "Pro — lender-ready multi-page report",                                    roofstock: "PDF of listing pro-forma",                                          winner: "truecap" },
   { feature: "Mobile-first UX",                      truecap: "PWA — install to home screen",                                            roofstock: "Mobile-friendly web app",                                           winner: "tie" },
 ];
@@ -309,7 +309,7 @@ export default function VsRoofstockPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             Free covers the underwrite. Pro unlocks 10-year projections,
             sensitivity, tax strategy, exit scenarios, PDF
-            exports, and shareable read-only deal links. No card to start.
+            exports, and co-branded share links. No card to start.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link

@@ -63,7 +63,7 @@ const MATRIX: Row[] = [
   { feature: "Mobile-first UX", truecap: "PWA installable", dealmachine: "Native app (built for mobile)", winner: "dealmachine" },
   { feature: "Free tier", truecap: "Yes — full underwriting math", dealmachine: "Trial only ($59-99/mo paid)", winner: "truecap" },
   { feature: "Pricing (entry tier)", truecap: "Free; Pro $29.99/mo", dealmachine: "Starter ~$59/mo, Pro ~$99/mo (as of 2026)", winner: "truecap" },
-  { feature: "Shareable read-only deal link", truecap: "Pro — public URL + branding", dealmachine: "Internal-only data", winner: "truecap" },
+  { feature: "Shareable read-only deal link", truecap: "Free — read-only public link; Pro adds co-branding", dealmachine: "Internal-only data", winner: "truecap" },
   { feature: "Lender-ready PDF", truecap: "Pro — multi-page report", dealmachine: "Not the use case", winner: "truecap" },
 ];
 
@@ -269,7 +269,7 @@ export default function VsDealmachinePage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
             Pro unlocks projections, sensitivity, tax strategy, exit scenarios,
-            MAO, PDF exports, and shareable read-only deal links.
+            MAO, PDF exports, and co-branded share links.
             No card to start.
           </p>
           <div className="flex flex-wrap gap-3">

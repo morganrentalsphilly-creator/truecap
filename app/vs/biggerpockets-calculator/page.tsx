@@ -65,7 +65,7 @@ const MATRIX: Row[] = [
   { feature: "Tax strategy / depreciation",           truecap: "Pro — bracket-aware depreciation + interest deduction + after-tax CF",                     bp: "Basic tax info; no bracket-aware modeling",                          winner: "truecap" },
   { feature: "Sensitivity grid (stress test)",        truecap: "Pro — rent ±10%, vacancy ±5pp, rates ±1pp in a single view",                                bp: "Not a primary feature",                                              winner: "truecap" },
   { feature: "Max Allowable Offer (MAO) solver",      truecap: "Pro — works backward from target return automatically",                                    bp: "Available in Pro tier",                                              winner: "tie" },
-  { feature: "Shareable read-only deal links",        truecap: "Pro — clean public URL with metrics + branding",                                            bp: "PDF export only; no shareable link",                                 winner: "truecap" },
+  { feature: "Shareable read-only deal links",        truecap: "Free — read-only public link; Pro adds co-branding",                                            bp: "PDF export only; no shareable link",                                 winner: "truecap" },
   { feature: "PDF report export",                     truecap: "Pro — multi-page lender-ready report with verdict",                                        bp: "PDF export available in Pro",                                        winner: "tie" },
   { feature: "Deal score + verdict explanation",      truecap: "Free — 0–100 score with subscore breakdown + plain-English why",                            bp: "Color indicators; no composite score",                               winner: "truecap" },
   { feature: "Portfolio rollup across saved deals",   truecap: "Yes — total CF + weighted cap rate + blended CoC across portfolio",                         bp: "List view; no portfolio aggregate metrics",                          winner: "truecap" },
@@ -246,7 +246,7 @@ export default function VsBiggerPocketsCalculatorPage() {
             When BiggerPockets users actually switch
           </h2>
           <ul className="space-y-2 text-sm sm:text-base leading-relaxed text-foreground">
-            <li><strong>&quot;The 5-free-uses-then-paywall thing is annoying.&quot;</strong> TrueCap&apos;s free tier is unlimited. Run as many analyses as you want. Pro unlocks projections, sensitivity, share links, PDFs — but the core underwriting (cap rate, CoC, DSCR, NCF) is always free.</li>
+            <li><strong>&quot;The 5-free-uses-then-paywall thing is annoying.&quot;</strong> TrueCap&apos;s free tier is unlimited. Run as many analyses as you want. Pro unlocks projections, sensitivity, co-branded share links, PDFs — but the core underwriting (cap rate, CoC, DSCR, NCF) is always free.</li>
             <li><strong>&quot;The manual entry is slow.&quot;</strong> Paste an address. TrueCap pulls property tax from the county, rent from HUD, mortgage rate from FRED. You start with 60-70% of the underwrite done. BP has you typing everything.</li>
             <li><strong>&quot;I just want a calculator, not another community to manage.&quot;</strong> BP&apos;s value is the ecosystem (forums + podcast + courses). TrueCap is just the tool. Some investors want the bundle; others want focus.</li>
             <li><strong>&quot;I&apos;m paying $390/yr for the BP membership and use 10% of what comes with it.&quot;</strong> If you&apos;re a BP member primarily for the calculator, TrueCap Pro at $25/mo annual ($300/yr) costs less — and it is built around the deal analysis you actually use.</li>
@@ -301,7 +301,7 @@ export default function VsBiggerPocketsCalculatorPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             Free includes full cap rate, CoC, DSCR, and monthly cash flow
             analysis with address auto-fill — enough to underwrite. Pro at
-            $25/mo annual unlocks share links, PDF exports, 10-year
+            $25/mo annual unlocks co-branded share links, PDF exports, 10-year
             projections, tax strategy, sensitivity, MAO, and the
             strategy analyzers. No card to start.
           </p>
@@ -410,16 +410,17 @@ const BP_FAQ: FaqItem[] = [
     question: "Can I share a TrueCap analysis without making the viewer sign up?",
     answer: (
       <>
-        Yes — TrueCap Pro generates a public read-only share link for
-        any saved deal. The full analysis is encoded into the URL, no
-        login required for the recipient, and it includes your custom
-        branding (logo, color, company name) if you&apos;ve configured
-        it. BiggerPockets PDF reports are downloadable but the
-        free-form share-link workflow is a TrueCap-specific feature.
+        Yes — and you don&apos;t need Pro for it. TrueCap generates a
+        public read-only share link for any deal on the free tier: the
+        full analysis is encoded into the URL, no login required for the
+        recipient. Pro adds custom co-branding (logo, color, company
+        name) to the link. BiggerPockets PDF reports are downloadable
+        but the free-form share-link workflow is a TrueCap-specific
+        feature.
       </>
     ),
     plainTextAnswer:
-      "Yes — TrueCap Pro generates a public read-only share link for any saved deal. No login required for the recipient, branded with your logo/color/company name if configured.",
+      "Yes — read-only share links are free for everyone (no Pro needed): a public link for any deal, no login required for the recipient. Pro adds co-branding with your logo/color/company name.",
   },
   {
     question: "When should I stick with BiggerPockets?",

@@ -10,6 +10,7 @@
  * components/settings/rate-alerts-toggle.tsx exactly.
  */
 import { useEffect, useState, useTransition } from "react";
+import * as Sentry from "@sentry/nextjs";
 import { CalendarClock } from "lucide-react";
 import {
   getEmailPreferencesAction,
@@ -65,12 +66,13 @@ export function WeeklySummaryToggle() {
           setEnabled(!next); // rollback
           toast({ title: "Couldn't update preference", description: r.message, variant: "destructive" });
         }
-      } catch {
+      } catch (err) {
         // The action REJECTED rather than returning {ok:false}: a network
         // blip, a cold-start 500, or a tab one deploy behind main. Without
         // this the optimistic flip sticks — the switch sits "on" while the DB
         // stayed off, a silent lie. Roll back and tell them it's retryable.
         // Mirrors login-form.tsx and rate-alerts-toggle.tsx.
+        Sentry.captureException(err, { tags: { feature: "weekly-summary" } });
         setEnabled(!next); // rollback
         toast({
           title: "Couldn't update preference",

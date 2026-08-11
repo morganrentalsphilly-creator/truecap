@@ -72,7 +72,7 @@ const MATRIX: Row[] = [
   { feature: "Try without signup", truecap: "Yes — full analysis, no account", bricked: "No — account + 3-day trial", winner: "truecap" },
   { feature: "Free tier", truecap: "Yes — unlimited core underwriting", bricked: "No — trial only", winner: "truecap" },
   { feature: "Entry pricing", truecap: "Free; Pro $29.99/mo unlimited; $5 one-time PDF", bricked: "$49/mo for 100 comps, metered up to $199/mo (as of June 2026)", winner: "truecap" },
-  { feature: "Lender-ready PDF + share links", truecap: "Pro — multi-page report + read-only links", bricked: "Not the focus", winner: "truecap" },
+  { feature: "Lender-ready PDF + share links", truecap: "Read-only share links free; Pro adds multi-page PDF", bricked: "Not the focus", winner: "truecap" },
   { feature: "API access", truecap: "No", bricked: "Yes — Growth tier and up", winner: "bricked" },
 ];
 

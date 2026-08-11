@@ -52,7 +52,7 @@ type Verdict = "truecap" | "dealcheck" | "tie";
 type Row = { feature: string; truecap: string; dealcheck: string; winner: Verdict };
 
 const MATRIX: Row[] = [
-  { feature: "Free tier depth",                   truecap: "Full underwriting (cap rate, CoC, DSCR, NCF, monthly cash flow) — no signup",        dealcheck: "Free Starter capped at 15 saved properties; signup required",          winner: "truecap" },
+  { feature: "Free tier depth",                   truecap: "Full underwriting (cap rate, CoC, DSCR, NCF, monthly cash flow) — no signup; save up to 5 deals free (Pro unlimited)",        dealcheck: "Free Starter capped at 15 saved properties; signup required",          winner: "truecap" },
   { feature: "Address auto-fill",                 truecap: "Paste a Zillow/Redfin link or address → HUD rent + FRED rate + state property tax, live", dealcheck: "Full property auto-import from listing sites (price, taxes, photos)",   winner: "tie" },
   { feature: "10-year projection",                truecap: "Pro — full rent + expense + appreciation compounding",                              dealcheck: "Built-in; one of the strongest views",                                 winner: "dealcheck" },
   { feature: "Tax strategy modeling",             truecap: "Pro — depreciation, interest deduction, after-tax CF, bracket-aware",               dealcheck: "Basic tax view",                                                       winner: "truecap" },
@@ -61,10 +61,10 @@ const MATRIX: Row[] = [
   { feature: "Max allowable offer (MAO) solver",  truecap: "Pro — works backward from target return",                                           dealcheck: "Available",                                                            winner: "tie" },
   { feature: "BRRRR analyzer",                    truecap: "Yes — capital-recovered focus + ARV-driven refi math",                              dealcheck: "Yes — long-standing BRRRR support",                                    winner: "tie" },
   { feature: "Fix-and-flip analyzer",             truecap: "Yes — ARV, holding cost, profit modeling",                                          dealcheck: "Yes",                                                                  winner: "tie" },
-  { feature: "Shareable read-only deal links",    truecap: "Pro — clean public URL with metrics + branding",                                    dealcheck: "Available in some tiers",                                              winner: "tie" },
+  { feature: "Shareable read-only deal links",    truecap: "Free — read-only public link; Pro adds co-branding",                                    dealcheck: "Available in some tiers",                                              winner: "tie" },
   { feature: "PDF report export",                 truecap: "Pro — multi-page lender-ready report",                                              dealcheck: "Yes — long-standing PDF feature",                                      winner: "tie" },
   { feature: "Mobile-first UX",                   truecap: "Designed mobile-first — works great at the showing",                                dealcheck: "Has mobile apps (iOS + Android)",                                      winner: "dealcheck" },
-  { feature: "Saved deal portfolio rollup",       truecap: "Yes — total CF, weighted cap rate across saved deals",                              dealcheck: "List view; no portfolio aggregate",                                    winner: "truecap" },
+  { feature: "Saved deal portfolio rollup",       truecap: "Free saves up to 5; Pro unlimited — total CF, weighted cap rate across saved deals",                              dealcheck: "List view; no portfolio aggregate",                                    winner: "truecap" },
   { feature: "Cash flow waterfall visualization", truecap: "Yes — see where every rent dollar goes",                                            dealcheck: "Standard line-item breakdown",                                         winner: "truecap" },
   { feature: "Deal score + plain-English verdict", truecap: "Free — 0-100 score with subscore breakdown + explanation",                          dealcheck: "Color-coded indicators",                                               winner: "truecap" },
   { feature: "Open data sources cited",           truecap: "HUD FMR + FRED + state tax — every assumption traceable",                           dealcheck: "Listing-import + custom data",                                         winner: "truecap" },
@@ -241,7 +241,7 @@ export default function VsDealCheckPage() {
             When investors actually switch to TrueCap
           </h2>
           <ul className="space-y-2 text-sm sm:text-base leading-relaxed text-foreground">
-            <li><strong>&quot;I want the free tier to actually be useful.&quot;</strong> TrueCap&apos;s free analyzer is the full thing — cap rate, CoC, DSCR, NCF, address auto-fill, every operating expense, all of it. No signup wall, no analysis count limit. Pro adds power (sensitivity, exit scenarios, tax strategy, share links, PDFs) but the underwriting itself is free.</li>
+            <li><strong>&quot;I want the free tier to actually be useful.&quot;</strong> TrueCap&apos;s free analyzer is the full thing — cap rate, CoC, DSCR, NCF, address auto-fill, every operating expense, all of it. No signup wall, no analysis count limit. Pro adds power (sensitivity, exit scenarios, tax strategy, co-branded share links, PDFs) but the underwriting itself is free.</li>
             <li><strong>&quot;I want benchmarks inline, not in a separate doc.&quot;</strong> Every metric tile shows you what tier you&apos;re in (&quot;Above 8% — top quartile&quot;) without leaving the analysis. Pulls from the same engine that drives the score.</li>
             <li><strong>&quot;I run a portfolio.&quot;</strong> Saved deals get a rollup header (total cash flow / weighted cap rate / weighted CoC) — feels like running a book, not a notebook.</li>
             <li><strong>&quot;I want to understand the score, not just trust it.&quot;</strong> Click &quot;Why this verdict?&quot; on any analysis and see the contribution from each subscore plus what would move the number.</li>
@@ -277,7 +277,7 @@ export default function VsDealCheckPage() {
             Try TrueCap free — see if it fits your workflow.
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
-            Free covers cash-flow analysis (cap rate, CoC, DSCR, NCF) — enough to underwrite. Pro unlocks share links, PDF exports, 10-year projections, tax strategy, sensitivity, MAO, and the strategy analyzers. No card to start. Cancel anytime.
+            Free covers cash-flow analysis (cap rate, CoC, DSCR, NCF) — enough to underwrite. Pro unlocks co-branded share links, PDF exports, 10-year projections, tax strategy, sensitivity, MAO, and the strategy analyzers. No card to start. Cancel anytime.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link
@@ -321,7 +321,8 @@ const DEALCHECK_FAQ: FaqItem[] = [
       <>
         Yes. TrueCap&apos;s free tier gives you a complete underwrite — cap
         rate, cash-on-cash, DSCR, monthly cash flow, NOI — with no signup
-        required and no monthly limit on analyses. DealCheck&apos;s free
+        required and no monthly limit on analyses. You can save up to 5
+        deals on the free tier (Pro removes the cap). DealCheck&apos;s free
         tier requires signup and caps you at 15 saved properties at a
         time. If you only need to run numbers on individual listings,
         the free tier of TrueCap covers the same job DealCheck Plus
@@ -329,7 +330,7 @@ const DEALCHECK_FAQ: FaqItem[] = [
       </>
     ),
     plainTextAnswer:
-      "Yes. TrueCap's free tier covers cap rate, cash-on-cash, DSCR, monthly cash flow, and NOI with no signup and no monthly limit. DealCheck's free tier requires signup and caps saved properties at 15 at a time.",
+      "Yes. TrueCap's free tier covers cap rate, cash-on-cash, DSCR, monthly cash flow, and NOI with no signup and no monthly limit; you can save up to 5 deals free (Pro unlimited). DealCheck's free tier requires signup and caps saved properties at 15 at a time.",
   },
   {
     question: "How much does TrueCap cost compared to DealCheck?",
@@ -339,13 +340,13 @@ const DEALCHECK_FAQ: FaqItem[] = [
         (~$25/mo). DealCheck&apos;s Plus tier is $10/month and Pro is
         $20/month (as of June 2026) — but those tiers mostly raise
         saved-property caps. TrueCap&apos;s single tier is about analysis
-        depth: share links, PDF export, tax strategy, exit scenarios,
+        depth: co-branded share links, PDF export, tax strategy, exit scenarios,
         sensitivity, and MAO all included — no
         &quot;upgrade for X&quot; gating.
       </>
     ),
     plainTextAnswer:
-      "TrueCap Pro is $29.99/month (or $300/year annual, ~$25/mo). DealCheck Plus is $10/month and Pro $20/month (as of June 2026), but those tiers mostly raise saved-property caps. TrueCap's single tier includes share links, PDF export, tax strategy, exit scenarios, sensitivity, and MAO.",
+      "TrueCap Pro is $29.99/month (or $300/year annual, ~$25/mo). DealCheck Plus is $10/month and Pro $20/month (as of June 2026), but those tiers mostly raise saved-property caps. TrueCap's single tier includes co-branded share links, PDF export, tax strategy, exit scenarios, sensitivity, and MAO.",
   },
   {
     question: "Which tool is better for new investors?",
@@ -408,13 +409,13 @@ const DEALCHECK_FAQ: FaqItem[] = [
         property import is your top workflow. Pick TrueCap if you want
         the deepest free tier on the market, plain-English verdicts,
         tax-strategy modeling, sensitivity analysis, MAO,
-        portfolio rollup across saved deals, and shareable read-only
-        deal links — all in a single Pro tier without per-feature
+        portfolio rollup across saved deals, and co-branded share
+        links — all in a single Pro tier without per-feature
         upcharges.
       </>
     ),
     plainTextAnswer:
-      "Pick DealCheck if you're mobile-first, want a native app, and listing-import is your top workflow. Pick TrueCap if you want the deepest free tier, plain-English verdicts, tax modeling, sensitivity, MAO, portfolio rollup, and share links — all in one Pro tier.",
+      "Pick DealCheck if you're mobile-first, want a native app, and listing-import is your top workflow. Pick TrueCap if you want the deepest free tier, plain-English verdicts, tax modeling, sensitivity, MAO, portfolio rollup, and co-branded share links — all in one Pro tier.",
   },
 ];
 

@@ -8,6 +8,7 @@
  * (NOT_CONFIGURED), keeping it invisible until actually enabled.
  */
 import { useEffect, useRef, useState, useTransition } from "react";
+import * as Sentry from "@sentry/nextjs";
 import { Building2, Loader2 } from "lucide-react";
 import { getPropertyCompsAction, getSavedDealCompsAction } from "@/app/actions/property-comps";
 import type { EnrichmentComp, PropertyEnrichment } from "@/lib/property-enrichment/rentcast";
@@ -209,11 +210,12 @@ export function PropertyCompsCard({
         setData(r.enrichment);
         setSource(r.source);
         onDataChange?.(r.enrichment);
-      } catch {
+      } catch (err) {
         // The action REJECTED rather than returning {ok:false} (network blip,
         // cold-start 500, stale-deploy Server Action). Without this the button
         // spinner clears with no result and no signal. Honor the same stale-
         // address guard, then surface a retryable toast.
+        Sentry.captureException(err, { tags: { feature: "property-comps" } });
         if (lastAddressRef.current !== pulledAddress) return;
         toast({
           title: "Couldn't pull comps",

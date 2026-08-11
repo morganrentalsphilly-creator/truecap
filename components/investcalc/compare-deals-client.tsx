@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, useTransition } from "react";
+import * as Sentry from "@sentry/nextjs";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -655,12 +656,13 @@ function WinnerActions({
         // Passed deals drop out of the active compare set on refresh; the
         // winner stays, ready to open.
         router.refresh();
-      } catch {
+      } catch (err) {
         // One of the stage updates REJECTED rather than returning {ok:false}
         // (network blip, cold-start 500, stale-deploy Server Action), so
         // Promise.all rejected and the whole batch fell through with no signal.
         // Tell the user it's retryable; a refresh reconciles which deals (if
         // any) actually moved before the failure.
+        Sentry.captureException(err, { tags: { feature: "compare" } });
         toast({
           title: "Could not mark deals as Passed",
           description: "Something interrupted the request. Check your connection and try again.",

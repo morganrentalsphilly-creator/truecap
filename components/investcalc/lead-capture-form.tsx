@@ -10,6 +10,7 @@
  */
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
+import * as Sentry from "@sentry/nextjs";
 import { Loader2, Check, Send } from "lucide-react";
 import { captureDealLeadAction } from "@/app/actions/capture-deal-lead";
 import { trackEvent } from "@/lib/analytics";
@@ -76,13 +77,14 @@ export function LeadCaptureForm({
         setStatus("error");
         setError(res.message);
       }
-    } catch {
+    } catch (err) {
       // The action REJECTED rather than returning {ok:false}: a network blip,
       // a cold-start 500, or a tab one deploy behind main (Next throws on an
       // unrecognized Server Action). Without this the form stuck on "sending"
       // forever and the agent silently lost the lead. Surface it through the
       // same inline error affordance as a returned failure, and free the
       // button so the viewer can retry. Mirrors login-form.tsx's catch.
+      Sentry.captureException(err, { tags: { feature: "lead-capture" } });
       setStatus("error");
       setError("Something interrupted the request. Check your connection and try again.");
     }

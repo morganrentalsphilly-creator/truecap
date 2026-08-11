@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
+import * as Sentry from "@sentry/nextjs";
 import { Check, CreditCard, Loader2, ShieldCheck, Sparkles, XCircle } from "lucide-react";
 import {
   createBillingPortalSessionAction,
@@ -106,11 +107,12 @@ export function BillingPanel({ currentSubscription, plans }: BillingPanelProps) 
           return;
         }
         window.location.href = result.url;
-      } catch {
+      } catch (err) {
         // The action REJECTED rather than returning {ok:false} (network blip,
         // cold-start 500, a tab a deploy behind main). Without this the button
         // stays stuck on its spinner forever — setPendingPlan(null) only ran
         // on the {ok:false} path. Reset it and tell them it's retryable.
+        Sentry.captureException(err, { tags: { feature: "billing" } });
         setPendingPlan(null);
         toast({
           title: "Could not switch plans",
@@ -151,12 +153,13 @@ export function BillingPanel({ currentSubscription, plans }: BillingPanelProps) 
           return;
         }
         window.location.href = result.url;
-      } catch {
+      } catch (err) {
         // The action REJECTED rather than returning {ok:false} (network blip,
         // cold-start 500, a tab a deploy behind main). Without this the
         // Subscribe button stays stuck on its spinner forever —
         // setPendingPlan(null) sat after the throwing await. Reset it and
         // tell them it's retryable.
+        Sentry.captureException(err, { tags: { feature: "billing" } });
         setPendingPlan(null);
         toast({
           title: "Could not start checkout",
@@ -180,10 +183,11 @@ export function BillingPanel({ currentSubscription, plans }: BillingPanelProps) 
           return;
         }
         window.location.href = result.url;
-      } catch {
+      } catch (err) {
         // Action rejected rather than returning {ok:false} — the transition
         // clears isPortalPending, but without this the click is silent.
         // Surface a retryable error.
+        Sentry.captureException(err, { tags: { feature: "billing" } });
         toast({
           title: "Could not open billing portal",
           description: "Something interrupted the request. Check your connection and try again.",
@@ -206,10 +210,11 @@ export function BillingPanel({ currentSubscription, plans }: BillingPanelProps) 
           return;
         }
         window.location.href = result.url;
-      } catch {
+      } catch (err) {
         // Action rejected rather than returning {ok:false} — the transition
         // clears isCancelPending, but without this the click is silent.
         // Surface a retryable error.
+        Sentry.captureException(err, { tags: { feature: "billing" } });
         toast({
           title: "Could not open cancellation flow",
           description: "Something interrupted the request. Check your connection and try again.",

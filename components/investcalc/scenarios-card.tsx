@@ -12,6 +12,7 @@
  */
 
 import { useEffect, useMemo, useState, useTransition } from "react";
+import * as Sentry from "@sentry/nextjs";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { GitCompare, Layers, Loader2, Plus } from "lucide-react";
@@ -89,11 +90,12 @@ export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
         // A scenario is a new saved_analyses row: the persistent dashboard
         // layout's My Deals count badge only updates via a server refetch.
         router.refresh();
-      } catch {
+      } catch (err) {
         // The action REJECTED rather than returning {ok:false} (network blip,
         // cold-start 500, stale-deploy Server Action). Without this the form
         // stays open with the spinner already gone but no signal — the typed
         // name/strategy are preserved, so a retry just re-clicks Add.
+        Sentry.captureException(err, { tags: { feature: "scenarios" } });
         toast({
           title: "Couldn't add scenario",
           description: "Something interrupted the request. Check your connection and try again.",
@@ -112,10 +114,11 @@ export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
         if (result && !result.ok) {
           toast({ title: "Couldn't compare scenarios", description: result.message, variant: "destructive" });
         }
-      } catch {
+      } catch (err) {
         // The action REJECTED rather than returning {ok:false} (network blip,
         // cold-start 500, stale-deploy Server Action). Without this the Compare
         // click silently does nothing. Tell the user it's retryable.
+        Sentry.captureException(err, { tags: { feature: "scenarios" } });
         toast({
           title: "Couldn't compare scenarios",
           description: "Something interrupted the request. Check your connection and try again.",
