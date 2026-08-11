@@ -123,6 +123,38 @@ export function confidenceLabel(level: ConfidenceLevel): string {
   return level === "high" ? "High" : level === "medium" ? "Medium" : "Low";
 }
 
+/**
+ * The concrete next step that would raise this deal's confidence — or null when
+ * it is already High and there is nothing to do.
+ *
+ * The badge could always say WHERE a number came from, but never what to do
+ * about a Medium/Low rating, which left the most actionable part of the feature
+ * unspoken. This closes that loop.
+ *
+ * Derived from the SAME rule as computeConfidenceLevel above, so the advice can
+ * never contradict the rating it explains. In particular: that rule returns
+ * "high" whenever rent and rate both carry provenance, so a deal that is NOT
+ * high while both are sourced can only have failed the completeness check —
+ * which is why that case advises filling in rent/price rather than re-fetching.
+ */
+export function describeConfidenceGap(confidence: DataConfidence): string | null {
+  if (confidence.level === "high") return null;
+
+  const hasRentSource = confidence.fields.monthlyRent != null;
+  const hasRateSource = confidence.fields.interestRate != null;
+
+  if (!hasRentSource && !hasRateSource) {
+    return "Pick your address from the suggestions to pull live HUD market rent and FRED mortgage rates.";
+  }
+  if (!hasRentSource) {
+    return "Pick your address from the suggestions to pull live HUD market rent for this area.";
+  }
+  if (!hasRateSource) {
+    return "Pick your address from the suggestions to pull the current FRED mortgage rate.";
+  }
+  return "Add a monthly rent and a purchase price to complete this analysis.";
+}
+
 /** Tolerant parse of a persisted data_confidence jsonb. Returns null if unusable. */
 export function normalizeDataConfidence(raw: unknown): DataConfidence | null {
   if (!raw || typeof raw !== "object") return null;

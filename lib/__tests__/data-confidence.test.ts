@@ -3,6 +3,7 @@ import {
   buildDataConfidence,
   computeConfidenceLevel,
   confidenceLabel,
+  describeConfidenceGap,
   normalizeDataConfidence,
   type EnrichmentProvenanceInput,
 } from "@/lib/data-confidence";
@@ -117,5 +118,53 @@ describe("confidenceLabel", () => {
     expect(confidenceLabel("high")).toBe("High");
     expect(confidenceLabel("medium")).toBe("Medium");
     expect(confidenceLabel("low")).toBe("Low");
+  });
+});
+
+describe("describeConfidenceGap", () => {
+  const conf = (
+    level: "high" | "medium" | "low",
+    fields: Parameters<typeof describeConfidenceGap>[0]["fields"]
+  ) => ({ level, fields, computedAt: "2026-08-10T00:00:00.000Z" });
+
+  const rentSrc = { source: "hud-fmr" as const, verified: false };
+  const rateSrc = { source: "fred" as const, verified: false };
+
+  it("says nothing at High — there is no next step", () => {
+    expect(describeConfidenceGap(conf("high", { monthlyRent: rentSrc, interestRate: rateSrc }))).toBeNull();
+  });
+
+  it("no sourced fields at all → points at address autocomplete for BOTH feeds", () => {
+    const gap = describeConfidenceGap(conf("medium", {}));
+    expect(gap).toMatch(/HUD market rent and FRED/i);
+  });
+
+  it("names the ONE missing feed rather than both", () => {
+    expect(describeConfidenceGap(conf("medium", { interestRate: rateSrc }))).toMatch(/HUD market rent/i);
+    expect(describeConfidenceGap(conf("medium", { interestRate: rateSrc }))).not.toMatch(/FRED/i);
+
+    expect(describeConfidenceGap(conf("medium", { monthlyRent: rentSrc }))).toMatch(/FRED mortgage rate/i);
+    expect(describeConfidenceGap(conf("medium", { monthlyRent: rentSrc }))).not.toMatch(/HUD/i);
+  });
+
+  it("both feeds sourced but still not High ⇒ a completeness gap, so it asks for rent/price", () => {
+    // computeConfidenceLevel returns "high" whenever BOTH carry provenance, so
+    // this state is only reachable via the completeness check failing.
+    const gap = describeConfidenceGap(conf("low", { monthlyRent: rentSrc, interestRate: rateSrc }));
+    expect(gap).toMatch(/monthly rent and a purchase price/i);
+  });
+
+  it("never contradicts computeConfidenceLevel: advice appears iff the level is not High", () => {
+    const cases: { fields: Parameters<typeof describeConfidenceGap>[0]["fields"] }[] = [
+      { fields: {} },
+      { fields: { monthlyRent: rentSrc } },
+      { fields: { interestRate: rateSrc } },
+      { fields: { monthlyRent: rentSrc, interestRate: rateSrc } },
+    ];
+    for (const { fields } of cases) {
+      const level = computeConfidenceLevel(fields, complete);
+      const gap = describeConfidenceGap(conf(level, fields));
+      expect(gap == null).toBe(level === "high");
+    }
   });
 });

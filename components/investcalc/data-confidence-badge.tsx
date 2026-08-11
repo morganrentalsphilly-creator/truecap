@@ -12,6 +12,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import {
   confidenceLabel,
   dataConfidenceFieldLabel,
+  describeConfidenceGap,
   dataConfidenceSourceLabel,
   type DataConfidence,
   type DataConfidenceField,
@@ -37,6 +38,7 @@ export function DataConfidenceBadge({
         : "border-border bg-muted/40 text-muted-foreground";
   const Icon = level === "high" ? ShieldCheck : level === "medium" ? Shield : ShieldAlert;
   const tracked = FIELD_ORDER.filter((f) => confidence.fields[f]);
+  const gap = describeConfidenceGap(confidence);
 
   return (
     <Popover>
@@ -81,6 +83,15 @@ export function DataConfidenceBadge({
             and FRED rates for higher confidence.
           </p>
         )}
+        {/* What would actually raise this rating. Suppressed at High (nothing
+            to do) and when there are no tracked fields — the empty state above
+            already gives the same instruction. */}
+        {gap && tracked.length > 0 ? (
+          <p className="mt-2 border-t border-border pt-2 text-[11px] text-muted-foreground">
+            <span className="font-semibold text-foreground">To raise this: </span>
+            {gap}
+          </p>
+        ) : null}
       </PopoverContent>
     </Popover>
   );
