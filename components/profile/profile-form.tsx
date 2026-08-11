@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Cropper from "react-easy-crop";
+import type { MediaSize, Size } from "react-easy-crop";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -51,6 +52,16 @@ type ProfileFormProps = {
 
 type AreaPixels = { x: number; y: number; width: number; height: number };
 const AVATAR_BUCKET = "profile-avatars";
+// The stored avatar is a fixed-size square. Avatars render at ~96px on screen,
+// so 512px is plenty for retina without bloating the upload. Fixing the output
+// size also normalizes the file regardless of how far the user zoomed out — a
+// full-image "fit" crop and a tight face crop both land as a 512×512 webp.
+const AVATAR_OUTPUT_SIZE = 512;
+// Accepted input types. `image/*` on the <input> is permissive; we still guard
+// explicitly so an odd file (HEIC the browser can't decode, an SVG, etc.) gets
+// a friendly message instead of a broken canvas later.
+const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif"];
+const MAX_UPLOAD_BYTES = 15 * 1024 * 1024;
 
 function getInitials(firstName: string, lastName: string, email: string): string {
   const full = `${firstName} ${lastName}`.trim();
@@ -78,14 +89,21 @@ async function imageToCanvas(imageSrc: string, area: AreaPixels): Promise<HTMLCa
   image.src = imageSrc;
   await new Promise((resolve, reject) => {
     image.onload = resolve;
-    image.onerror = reject;
+    image.onerror = () => reject(new Error("Could not read this image."));
   });
 
   const canvas = document.createElement("canvas");
-  canvas.width = area.width;
-  canvas.height = area.height;
+  // Always emit a fixed square. The source rectangle (`area`) is in the image's
+  // natural pixel space; when the user has zoomed OUT to fit the whole photo,
+  // `area` extends past the image bounds (negative x/y, width > naturalWidth) so
+  // the parts outside the image draw as transparent — the honest result of
+  // "capture the whole thing," and the corners are clipped by the circular
+  // avatar mask anyway.
+  canvas.width = AVATAR_OUTPUT_SIZE;
+  canvas.height = AVATAR_OUTPUT_SIZE;
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Canvas is not available.");
+  ctx.imageSmoothingQuality = "high";
 
   ctx.drawImage(
     image,
@@ -95,8 +113,8 @@ async function imageToCanvas(imageSrc: string, area: AreaPixels): Promise<HTMLCa
     area.height,
     0,
     0,
-    area.width,
-    area.height
+    AVATAR_OUTPUT_SIZE,
+    AVATAR_OUTPUT_SIZE
   );
 
   return canvas;
@@ -138,8 +156,22 @@ export function ProfileForm({
   const [rawImage, setRawImage] = useState<string | null>(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
+  // minZoom is computed per image once the media + crop area are measured, so it
+  // can drop BELOW 1 for a photo that isn't already square — that's what lets the
+  // user zoom out until the whole wide/tall image fits inside the crop circle.
+  const [minZoom, setMinZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<AreaPixels | null>(null);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [isDraggingOver, setIsDraggingOver] = useState(false);
+  // The crop source is an object URL (cheaper than a base64 data URL for big
+  // photos). We hold it in a ref so we can revoke it on cancel / replace /
+  // unmount and never leak. Latest media + crop dimensions feed the minZoom calc.
+  const objectUrlRef = useRef<string | null>(null);
+  const mediaSizeRef = useRef<MediaSize | null>(null);
+  const cropSizeRef = useRef<Size | null>(null);
+  // Guards the one-time "open showing the whole image" snap per selected file,
+  // so later re-measures (e.g. container resize) don't yank the user's zoom.
+  const didInitZoomRef = useRef(false);
   // "Send password reset link" — reuses the existing forgot-password
   // flow so we don't have to add a separate "change password" page.
   // The reset email funnels through the same hardened /auth/callback
@@ -162,19 +194,72 @@ export function ProfileForm({
     [form, initialEmail]
   );
 
-  const handleFileSelected = async (file?: File) => {
+  // Revoke the current crop object URL (if any) and forget it. Safe to call
+  // repeatedly — the leak guard for cancel / replace / unmount / save.
+  const revokeObjectUrl = () => {
+    if (objectUrlRef.current) {
+      URL.revokeObjectURL(objectUrlRef.current);
+      objectUrlRef.current = null;
+    }
+  };
+
+  // Recompute the fit-to-image zoom whenever the media or crop area is measured.
+  // fitZoom = the zoom at which the ENTIRE image fits inside the crop box; for a
+  // non-square photo it is < 1, so we expose it as the slider's floor and open
+  // the dialog already zoomed out to show the whole picture (the thing Morgan
+  // could never reach before). restrictPosition is off, so panning past the
+  // edges works and the crop can extend beyond the image when fully zoomed out.
+  const recomputeMinZoom = () => {
+    const media = mediaSizeRef.current;
+    const cropSize = cropSizeRef.current;
+    if (!media || !cropSize || media.width === 0 || media.height === 0) return;
+    const fitZoom = Math.min(cropSize.width / media.width, cropSize.height / media.height);
+    // Never let the floor exceed 1 (a square image fits at zoom 1), and keep a
+    // small hard floor so an extreme panorama can't collapse the slider to ~0.
+    const nextMin = Math.max(0.05, Math.min(fitZoom, 1));
+    setMinZoom(nextMin);
+    if (!didInitZoomRef.current) {
+      // First measure for this image: open at the fit zoom so the WHOLE photo is
+      // visible inside the circle straight away (a square image → fit is 1, i.e.
+      // unchanged). The user can then zoom in for a tighter crop.
+      didInitZoomRef.current = true;
+      setZoom(nextMin);
+    } else {
+      // Later re-measures (resize): only nudge up if the floor rose past current.
+      setZoom((current) => (current < nextMin ? nextMin : current));
+    }
+  };
+
+  // Tear down the crop dialog. `revoke` is false only when we've just consumed
+  // the image into an upload and already revoked it explicitly.
+  const closeCropDialog = (revoke = true) => {
+    setCropOpen(false);
+    setRawImage(null);
+    setCroppedAreaPixels(null);
+    setCrop({ x: 0, y: 0 });
+    setZoom(1);
+    setMinZoom(1);
+    mediaSizeRef.current = null;
+    cropSizeRef.current = null;
+    didInitZoomRef.current = false;
+    if (revoke) revokeObjectUrl();
+  };
+
+  const handleFileSelected = (file?: File) => {
     if (!file) return;
-    if (!file.type.startsWith("image/")) {
+    const typeOk = file.type
+      ? ACCEPTED_IMAGE_TYPES.includes(file.type) || file.type.startsWith("image/")
+      : false;
+    if (!typeOk) {
       toast({
         title: "Unsupported file",
-        description: "Please select an image file.",
+        description: "Please choose a JPG, PNG, WEBP, or GIF image.",
         variant: "destructive",
       });
       return;
     }
 
-    const maxUploadBytes = 15 * 1024 * 1024;
-    if (file.size > maxUploadBytes) {
+    if (file.size > MAX_UPLOAD_BYTES) {
       toast({
         title: "Image too large",
         description: "Please use an image smaller than 15MB before cropping.",
@@ -183,22 +268,27 @@ export function ProfileForm({
       return;
     }
 
-    const fileReader = new FileReader();
-    fileReader.onload = () => {
-      setRawImage(fileReader.result as string);
-      setCrop({ x: 0, y: 0 });
-      setZoom(1);
-      setCropOpen(true);
-    };
-    fileReader.onerror = () => {
-      toast({
-        title: "Could not read image",
-        description: "Please try another image.",
-        variant: "destructive",
-      });
-    };
-    fileReader.readAsDataURL(file);
+    // Replace any in-flight crop source before starting a new one (leak guard).
+    revokeObjectUrl();
+    const url = URL.createObjectURL(file);
+    objectUrlRef.current = url;
+    mediaSizeRef.current = null;
+    cropSizeRef.current = null;
+    didInitZoomRef.current = false;
+    setCrop({ x: 0, y: 0 });
+    setZoom(1);
+    setMinZoom(1);
+    setCroppedAreaPixels(null);
+    setRawImage(url);
+    setCropOpen(true);
   };
+
+  // Revoke any lingering crop object URL if the page unmounts mid-crop.
+  useEffect(() => {
+    return () => {
+      revokeObjectUrl();
+    };
+  }, []);
 
   const uploadCroppedAvatar = async () => {
     if (!rawImage || !croppedAreaPixels) return;
@@ -237,8 +327,9 @@ export function ProfileForm({
         pendingDeletePathRef.current = getStoragePathFromPublicUrl(previousUrl);
       }
 
-      setCropOpen(false);
-      setRawImage(null);
+      // The blob has been drawn to canvas and uploaded — safe to revoke now.
+      revokeObjectUrl();
+      closeCropDialog(false);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Could not upload avatar.";
       toast({
@@ -324,7 +415,25 @@ export function ProfileForm({
 
         <Form {...form}>
           <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)} noValidate>
-            <div className="rounded-3xl border border-border bg-card/80 p-4 shadow-sm sm:p-5">
+            <div
+              className={`rounded-3xl border bg-card/80 p-4 shadow-sm transition-colors sm:p-5 ${
+                isDraggingOver ? "border-primary ring-2 ring-primary/40 bg-primary/5" : "border-border"
+              }`}
+              onDragOver={(event) => {
+                event.preventDefault();
+                if (!isDraggingOver) setIsDraggingOver(true);
+              }}
+              onDragLeave={(event) => {
+                // Ignore drag-leave bubbling up from child elements.
+                if (event.currentTarget.contains(event.relatedTarget as Node | null)) return;
+                setIsDraggingOver(false);
+              }}
+              onDrop={(event) => {
+                event.preventDefault();
+                setIsDraggingOver(false);
+                handleFileSelected(event.dataTransfer.files?.[0]);
+              }}
+            >
               <div className="flex items-center gap-4 sm:gap-5">
                 <button
                   type="button"
@@ -349,7 +458,9 @@ export function ProfileForm({
                   </p>
                   <p className="truncate text-sm text-muted-foreground sm:text-base">{initialEmail}</p>
                   <p className="max-w-xl text-xs leading-relaxed text-muted-foreground sm:text-sm">
-                    Tap the photo to update your profile picture and crop it in a circle.
+                    Tap the photo{" "}
+                    <span className="hidden sm:inline">or drag an image here</span> to update your
+                    profile picture and crop it in a circle. JPG, PNG, WEBP, or GIF up to 15MB.
                   </p>
                 </div>
               </div>
@@ -361,7 +472,7 @@ export function ProfileForm({
               accept="image/*"
               className="hidden"
               onChange={(event) => {
-                void handleFileSelected(event.target.files?.[0]);
+                handleFileSelected(event.target.files?.[0]);
                 event.currentTarget.value = "";
               }}
             />
@@ -487,7 +598,19 @@ export function ProfileForm({
         </div>
       </div>
 
-      <Dialog open={cropOpen} onOpenChange={setCropOpen}>
+      <Dialog
+        open={cropOpen}
+        onOpenChange={(open) => {
+          // Backdrop click / Esc closes → treat as cancel (revoke + reset),
+          // but never yank the dialog out from under an in-progress upload.
+          if (!open) {
+            if (isUploadingAvatar) return;
+            closeCropDialog(true);
+            return;
+          }
+          setCropOpen(open);
+        }}
+      >
         {/* Column + inner scroller (same shape as template-form-dialog): the
             header/cropper/zoom block scrolls and the footer stays pinned, so
             Cancel + Save photo are reachable on a short viewport. `p-0
@@ -511,11 +634,27 @@ export function ProfileForm({
                     image={rawImage}
                     crop={crop}
                     zoom={zoom}
+                    minZoom={minZoom}
+                    maxZoom={4}
                     aspect={1}
                     cropShape="round"
                     showGrid={true}
+                    // restrictPosition off is what lets the user zoom OUT below
+                    // "cover" to fit the whole image and pan all the way to the
+                    // edges — with it on (the default) the image is pinned to
+                    // cover the crop and you can never reach a wide/tall edge.
+                    restrictPosition={false}
+                    zoomWithScroll
                     onCropChange={setCrop}
                     onZoomChange={setZoom}
+                    onMediaLoaded={(mediaSize) => {
+                      mediaSizeRef.current = mediaSize;
+                      recomputeMinZoom();
+                    }}
+                    onCropSizeChange={(cropSize) => {
+                      cropSizeRef.current = cropSize;
+                      recomputeMinZoom();
+                    }}
                     onCropComplete={(_, areaPixels) => setCroppedAreaPixels(areaPixels as AreaPixels)}
                   />
                 ) : null}
@@ -524,12 +663,15 @@ export function ProfileForm({
               <div className="py-6 px-1">
                 <Slider
                   value={[zoom]}
-                  min={1}
-                  max={3}
+                  min={minZoom}
+                  max={4}
                   step={0.01}
+                  aria-label="Zoom"
                   onValueChange={(values) => setZoom(values[0])}
                 />
-                <p className="text-xs text-muted-foreground mt-2">Zoom</p>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Drag the photo to reposition. Slide left to fit the whole image, right to zoom in.
+                </p>
               </div>
             </div>
           </div>
@@ -539,10 +681,7 @@ export function ProfileForm({
               type="button"
               variant="outline"
               className="rounded-2xl min-w-36"
-              onClick={() => {
-                setCropOpen(false);
-                setRawImage(null);
-              }}
+              onClick={() => closeCropDialog(true)}
               disabled={isUploadingAvatar}
             >
               <X />

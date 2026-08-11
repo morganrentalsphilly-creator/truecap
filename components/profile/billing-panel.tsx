@@ -6,7 +6,9 @@ import {
   createBillingPortalSessionAction,
   createCancelSubscriptionPortalSessionAction,
   createCheckoutSessionAction,
+  createSwitchPlanPortalSessionAction,
 } from "@/app/actions/billing";
+import { decidePlanCta } from "@/lib/billing-plan-cta";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -84,20 +86,34 @@ export function BillingPanel({ currentSubscription, plans }: BillingPanelProps) 
     return currentSubscription.planName;
   }, [activePlanSlug, currentSubscription]);
 
+  // Subscribers clicking the OTHER plan are switching, not buying — a fresh
+  // checkout would create a second parallel subscription (double billing).
+  // Deep-link straight to Stripe's change-plan confirmation screen (correct
+  // proration) instead of the generic portal home the user had to hunt
+  // through. Fails LOUD on any error rather than pretending the switch worked.
+  const handleSwitchPlan = (targetPlanSlug: BillingPlan["slug"]) => {
+    setPendingPlan(targetPlanSlug);
+    void (async () => {
+      const result = await createSwitchPlanPortalSessionAction({ targetPlanSlug });
+      if (!result.ok) {
+        setPendingPlan(null);
+        toast({
+          title: "Could not switch plans",
+          description: result.message,
+          variant: "destructive",
+        });
+        return;
+      }
+      window.location.href = result.url;
+    })();
+  };
+
   const handleCheckout = (planSlug: BillingPlan["slug"]) => {
-    // Subscribers clicking the OTHER plan are switching, not buying —
-    // a fresh checkout would create a second parallel subscription
-    // (double billing). Stripe's billing portal handles the switch
-    // with correct proration, so route there. The server action has a
-    // matching ALREADY_SUBSCRIBED guard as the enforcement layer; this
-    // branch just makes the happy path one redirect instead of an error.
-    if (activePlanSlug && activePlanSlug !== planSlug) {
-      toast({
-        title: "Switching plans via Stripe",
-        description:
-          "Opening the billing portal — pick your new plan there and Stripe prorates automatically.",
-      });
-      handlePortal();
+    // The switch-vs-checkout fork: a live subscriber picking the other plan
+    // switches (proration), everyone else starts a checkout. The server
+    // action has a matching ALREADY_SUBSCRIBED guard as the enforcement layer.
+    if (decidePlanCta(activePlanSlug, planSlug) === "switch") {
+      handleSwitchPlan(planSlug);
       return;
     }
     setPendingPlan(planSlug);

@@ -93,9 +93,15 @@ function deriveAccessState(features: string[]) {
     features.includes("tax_strategy") ||
     features.includes("projections") ||
     features.includes("exit_scenarios");
+  const hasDashboardAccess = features.includes("dashboard_access") && features.includes("save_deal");
   return {
     isPremium: hasPremiumFeatures,
-    hasDashboardAccess: features.includes("dashboard_access") && features.includes("save_deal"),
+    hasDashboardAccess,
+    // The /dashboard Overview (portfolio insights) is Pro-only; free users
+    // land on My Deals. We route the header link accordingly so a free user's
+    // "Dashboard" click goes STRAIGHT to My Deals instead of hitting /dashboard
+    // and being bounced by the server redirect (the soft dead-end, finding C).
+    hasDashboardInsights: hasDashboardAccess && features.includes("dashboard_insights"),
   };
 }
 
@@ -112,6 +118,7 @@ export function Header({
   const initialAccess = deriveAccessState(initialFeatures);
   const [isPremium, setIsPremium] = useState(initialAccess.isPremium);
   const [hasDashboardAccess, setHasDashboardAccess] = useState(initialAccess.hasDashboardAccess);
+  const [hasDashboardInsights, setHasDashboardInsights] = useState(initialAccess.hasDashboardInsights);
   /** Avoid showing free-tier upsell UI until subscription check finishes for signed-in users. */
   const [isPremiumStatusReady, setIsPremiumStatusReady] = useState(false);
   const [profileData, setProfileData] = useState<ProfileHeaderData | null>(null);
@@ -217,6 +224,7 @@ export function Header({
           setUser(null);
           setIsPremium(false);
           setHasDashboardAccess(false);
+          setHasDashboardInsights(false);
           setIsPremiumStatusReady(true);
           void loadProfileById(undefined);
           void loadSavedCountById(undefined);
@@ -238,6 +246,7 @@ export function Header({
         if (!nextUser) {
           setIsPremium(false);
           setHasDashboardAccess(false);
+          setHasDashboardInsights(false);
         }
         setIsPremiumStatusReady(true);
         setAuthLoaded(true);
@@ -387,7 +396,10 @@ export function Header({
 
             {user && hasDashboardAccess && (
               <div className="flex items-center gap-2 sm:mr-1">
-                <Link href="/dashboard" prefetch={false}>
+                {/* Insights holders → the Overview home; everyone else with
+                    dashboard access (free) → straight to My Deals, since
+                    /dashboard would only redirect them there anyway. */}
+                <Link href={hasDashboardInsights ? "/dashboard" : "/dashboard/saved-analyses"} prefetch={false}>
               <Button
                 variant="ghost"
                 size="icon"

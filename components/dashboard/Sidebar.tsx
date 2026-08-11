@@ -41,7 +41,12 @@ export function Sidebar({ savedDealCount, navAccess, mobile = false, onNavigate 
   };
 
   const nav = [
-    { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard", enabled: navAccess.dashboard },
+    // Gated on `overview` (insights), NOT `dashboard` (area access): /dashboard
+    // is the Pro-only portfolio Overview, so for free users this item shows
+    // locked/greyed (like Compare & Templates below) instead of an enabled
+    // link that /dashboard would immediately redirect to My Deals. Free users
+    // still reach the dashboard area via the "My Deals" item just below.
+    { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard", enabled: navAccess.overview },
     { icon: PlusCircle, label: "New Analysis", href: "/", enabled: true },
     { icon: Briefcase, label: "My Deals", href: "/dashboard/saved-analyses", badge: String(savedDealCount), enabled: navAccess.myDeals },
     { icon: ListTodo, label: "Compare Deals", href: "/dashboard/compare", enabled: navAccess.compareDeals },

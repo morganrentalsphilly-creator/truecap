@@ -18,6 +18,10 @@ const checkoutSchema = z.object({
   offer: z.string().max(40).optional(),
 });
 
+const switchPlanSchema = z.object({
+  targetPlanSlug: z.enum(["pro_monthly", "pro_annual"]),
+});
+
 export type BillingActionResult =
   | { ok: true; url: string }
   | {
@@ -525,6 +529,172 @@ export async function createCancelSubscriptionPortalSessionAction(): Promise<Bil
       ok: false,
       code: "SERVER_ERROR",
       message: "Unable to open cancellation flow right now.",
+    };
+  }
+}
+
+/**
+ * Deep-link a plan SWITCH (monthly ↔ annual) straight to Stripe's
+ * change-plan confirmation screen — NOT the generic billing-portal home.
+ *
+ * The old switch path routed through createBillingPortalSessionAction, which
+ * opens the portal HOME: the user then had to hunt for the plan, and if the
+ * portal wasn't configured for subscription updates it was a silent dead end
+ * that still *looked* like success (we returned {ok:true,url} and redirected).
+ * This action instead opens a `subscription_update_confirm` flow pre-filled
+ * with the target price, so the user lands on the confirm-proration screen and
+ * one click applies the switch. Mirrors the deep-link approach already used by
+ * createCancelSubscriptionPortalSessionAction (subscription_cancel flow).
+ *
+ * Fails LOUD (discriminated-union code + message) at every step where we can't
+ * build a correct switch — unknown target price, no live subscription, already
+ * on the target plan, or Stripe rejecting the flow (e.g. the portal
+ * Configuration doesn't have subscription_update enabled with both prices in
+ * its product list). It NEVER silently drops to the generic portal in a way
+ * that looks like a successful switch.
+ *
+ * Prerequisite Morgan owns: the Stripe Customer Portal Configuration must have
+ * "Customers can switch plans" enabled and list BOTH the monthly and annual
+ * products/prices under features.subscription_update.products — otherwise
+ * Stripe returns an invalid_request_error here and the user sees the loud
+ * error toast (correct) rather than a dead-end generic portal.
+ */
+export async function createSwitchPlanPortalSessionAction(input: unknown): Promise<BillingActionResult> {
+  const parsed = switchPlanSchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, code: "PLAN_NOT_FOUND", message: "Invalid target plan." };
+  }
+  const targetPlanSlug = parsed.data.targetPlanSlug;
+
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in to manage billing." };
+  }
+
+  // Resolve the target price BEFORE touching Stripe. A switch to a plan with
+  // no configured price id can never succeed — fail loud here rather than
+  // opening a flow that would error (or, worse, appear to work). Uses the
+  // PRIMARY (current) price, same as checkout — never a grandfathered id.
+  const targetPriceId = getPrimaryPlanPriceId(targetPlanSlug);
+  if (!targetPriceId) {
+    console.error(`[billing] Missing Stripe price id for switch target ${targetPlanSlug}`);
+    Sentry.captureMessage(`billing: missing Stripe price id for switch target ${targetPlanSlug}`, {
+      level: "error",
+      tags: { feature: "billing-switch" },
+      extra: { targetPlanSlug },
+    });
+    return {
+      ok: false,
+      code: "MISSING_PRICE",
+      message: "That plan is temporarily unavailable. Please try again shortly.",
+    };
+  }
+
+  const [{ data: profile, error: profileError }, { data: subscription, error: subscriptionError }] =
+    await Promise.all([
+      supabase
+        .from("profiles")
+        .select("stripe_customer_id")
+        .eq("id", user.id)
+        .maybeSingle(),
+      supabase
+        .from("subscriptions")
+        // Only a LIVE subscription can be switched. Match the same active set
+        // getEntitlementsForUser treats as Pro (active/trialing/past_due) —
+        // canceled/unpaid/paused have nothing to prorate.
+        .select("stripe_subscription_id, plans(slug)")
+        .eq("user_id", user.id)
+        .in("status", ["active", "trialing", "past_due"])
+        .order("updated_at", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+    ]);
+
+  if (profileError || subscriptionError) {
+    console.error("[billing] Failed to load switch prerequisites:", profileError ?? subscriptionError);
+    return { ok: false, code: "SERVER_ERROR", message: "Unable to load billing details right now." };
+  }
+
+  if (!profile?.stripe_customer_id || !subscription?.stripe_subscription_id) {
+    // No live subscription to switch — this is the checkout path, not a switch.
+    // (The UI only shows "Switch" when a live plan exists, so this is the
+    // stale-props / direct-call case.)
+    return {
+      ok: false,
+      code: "MISSING_PRICE",
+      message: "No active subscription to switch. Start a subscription first.",
+    };
+  }
+
+  // Guard: already on the requested plan → nothing to prorate. Keeps parity
+  // with the checkout ALREADY_SUBSCRIBED guard and stops a no-op portal open.
+  const currentPlan = Array.isArray(subscription.plans)
+    ? subscription.plans[0] ?? null
+    : subscription.plans;
+  if (currentPlan?.slug === targetPlanSlug) {
+    return {
+      ok: false,
+      code: "ALREADY_SUBSCRIBED",
+      message: "You're already on this plan.",
+    };
+  }
+
+  try {
+    const stripe = getStripe();
+    // subscription_update_confirm needs the SUBSCRIPTION ITEM id, which only
+    // Stripe has — the DB stores the subscription id, not its item id. A
+    // single-item subscription is the only shape we sell.
+    const stripeSubscription = await stripe.subscriptions.retrieve(subscription.stripe_subscription_id);
+    const item = stripeSubscription.items.data[0];
+    if (!item) {
+      console.error(
+        `[billing] Subscription ${subscription.stripe_subscription_id} has no items — cannot build switch flow`
+      );
+      Sentry.captureMessage("billing: switch target subscription has no items", {
+        level: "error",
+        tags: { feature: "billing-switch" },
+        extra: { userId: user.id },
+      });
+      return { ok: false, code: "SERVER_ERROR", message: "Unable to switch plans right now." };
+    }
+
+    const siteUrl = getSiteUrl();
+    const portal = await stripe.billingPortal.sessions.create({
+      customer: profile.stripe_customer_id,
+      return_url: `${siteUrl}/profile?billing=plan_switched#billing`,
+      flow_data: {
+        type: "subscription_update_confirm",
+        subscription_update_confirm: {
+          subscription: subscription.stripe_subscription_id,
+          items: [{ id: item.id, price: targetPriceId, quantity: 1 }],
+        },
+        after_completion: {
+          type: "redirect",
+          redirect: {
+            return_url: `${siteUrl}/profile?billing=plan_switched#billing`,
+          },
+        },
+      },
+    });
+    return { ok: true, url: portal.url };
+  } catch (error) {
+    console.error("[billing] createSwitchPlanPortalSessionAction failed:", error);
+    // A failure here is usually a portal Configuration that doesn't allow
+    // subscription updates (or omits the target price from its product list).
+    // Page on it — this blocks every plan switch — and surface a loud error
+    // to the user rather than pretending the switch worked.
+    Sentry.captureException(error, {
+      tags: { feature: "billing-switch" },
+      extra: { userId: user.id, targetPlanSlug },
+    });
+    return {
+      ok: false,
+      code: "SERVER_ERROR",
+      message: "Unable to open the plan-switch flow right now.",
     };
   }
 }

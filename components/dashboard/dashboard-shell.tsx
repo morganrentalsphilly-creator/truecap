@@ -12,6 +12,10 @@ import { DashboardSheet } from "@/components/dashboard/dashboard-sheet";
 
 export type DashboardNavAccess = {
   dashboard: boolean;
+  /** The Pro-only Overview home at /dashboard (portfolio insights). Distinct
+   *  from `dashboard` (area access): free users have `dashboard` but not
+   *  `overview`, so the Overview nav link only appears for insights holders. */
+  overview: boolean;
   myDeals: boolean;
   compareDeals: boolean;
   templates: boolean;
@@ -21,6 +25,7 @@ export function DashboardShell({
   savedDealCount,
   navAccess = {
     dashboard: true,
+    overview: true,
     myDeals: true,
     compareDeals: true,
     templates: true,

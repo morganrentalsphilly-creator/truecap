@@ -103,7 +103,18 @@ export function hasDashboardInsightsAccess(entitlements: Pick<PlanEntitlements, 
 
 export function getDashboardNavAccess(entitlements: Pick<PlanEntitlements, "features">) {
   return {
+    // `dashboard` = "can enter the dashboard AREA at all" (My Deals + shell).
+    // Free users have this (dashboard_access + save_deal), so it must stay
+    // broad — it drives the shell's canAccessDashboard, not the Overview link.
     dashboard: hasDashboardAccess(entitlements),
+    // `overview` = the portfolio-insights home at /dashboard. That page is
+    // Pro-only (it redirects anyone without dashboard_insights to My Deals),
+    // so the Overview NAV entry must gate on insights too. Gating it on
+    // `dashboard` instead left free users an "enabled" Overview link that
+    // /dashboard immediately bounced to My Deals — a soft dead-end sitting
+    // right next to the real My Deals item. Insights-gating makes the link's
+    // presence agree with where the route will actually land the user.
+    overview: hasDashboardInsightsAccess(entitlements),
     myDeals: hasPlanFeature(entitlements, "save_deal"),
     compareDeals: hasPlanFeature(entitlements, "compare_deals"),
     templates: hasPlanFeature(entitlements, "template_manage"),
