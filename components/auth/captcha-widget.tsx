@@ -38,7 +38,7 @@ type TurnstileApi = {
       callback: (token: string) => void;
       "expired-callback": () => void;
       "error-callback": () => void;
-      theme: "auto";
+      theme: "light";
       size: "flexible";
     }
   ) => string;
@@ -91,7 +91,10 @@ export function CaptchaWidget({ onToken }: { onToken: (token: string | null) => 
         callback: (token) => onTokenRef.current(token),
         "expired-callback": () => onTokenRef.current(null),
         "error-callback": () => onTokenRef.current(null),
-        theme: "auto",
+        // Pinned light, not "auto": the auth card is hard-coded white
+        // (auth-shell bg-white) and the site ships light-only, so an OS-dark
+        // visitor got a jarring black box in the middle of a white form.
+        theme: "light",
         size: "flexible",
       });
     });
