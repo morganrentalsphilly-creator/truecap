@@ -42,13 +42,22 @@ export function NewsletterSignup({
     setError(null);
     setSuccessMessage(null);
     startTransition(async () => {
-      const result = await subscribeToNewsletterAction({ email, source });
-      if (result.ok) {
-        setSuccessMessage(result.message);
-        setEmail("");
-        return;
+      try {
+        const result = await subscribeToNewsletterAction({ email, source });
+        if (result.ok) {
+          setSuccessMessage(result.message);
+          setEmail("");
+          return;
+        }
+        setError(result.message);
+      } catch {
+        // The action REJECTED rather than returning {ok:false} (network blip,
+        // cold-start 500, deploy skew) — show a retryable error instead of
+        // leaving the form silent. (Signup is canceled and this component
+        // renders null below; the handler stays correct for any revival —
+        // this does NOT re-enable any signup surface.)
+        setError("Something interrupted the request. Check your connection and try again.");
       }
-      setError(result.message);
     });
   };
 

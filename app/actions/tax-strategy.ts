@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getEntitlementsForUser } from "@/lib/entitlements";
+import { toServerErrorResult } from "@/lib/db-error";
 import {
   buildTaxStrategyInputHash,
   buildTaxStrategyProjection,
@@ -87,7 +88,7 @@ export async function getTaxStrategySnapshotAction(
     .maybeSingle();
 
   if (savedAnalysisError) {
-    return { ok: false, code: "SERVER_ERROR", message: savedAnalysisError.message };
+    return toServerErrorResult(savedAnalysisError, "tax-strategy");
   }
 
   if (!savedAnalysis) {
@@ -107,7 +108,7 @@ export async function getTaxStrategySnapshotAction(
     .maybeSingle();
 
   if (existingSnapshotError) {
-    return { ok: false, code: "SERVER_ERROR", message: existingSnapshotError.message };
+    return toServerErrorResult(existingSnapshotError, "tax-strategy");
   }
 
   if (
@@ -140,7 +141,7 @@ export async function getTaxStrategySnapshotAction(
     .single();
 
   if (savedSnapshotError) {
-    return { ok: false, code: "SERVER_ERROR", message: savedSnapshotError.message };
+    return toServerErrorResult(savedSnapshotError, "tax-strategy");
   }
 
   return {

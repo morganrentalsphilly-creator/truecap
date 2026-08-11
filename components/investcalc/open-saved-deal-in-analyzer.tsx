@@ -113,7 +113,17 @@ export async function duplicateSavedDealInAnalyzer(
   id: string,
   targetWindow: Window | null
 ): Promise<{ ok: true } | { ok: false; message: string }> {
-  const result = await getSavedDealForEditingAction(id);
+  let result: Awaited<ReturnType<typeof getSavedDealForEditingAction>>;
+  try {
+    result = await getSavedDealForEditingAction(id);
+  } catch {
+    // The action REJECTED rather than returning {ok:false} (network blip,
+    // cold-start 500, stale-deploy Server Action). Close the pre-opened tab and
+    // hand the caller a normal failure so its existing !ok toast fires, instead
+    // of leaking an unhandled rejection and stranding the blank tab.
+    targetWindow?.close();
+    return { ok: false, message: "Something interrupted the request. Please try again." };
+  }
   if (!result.ok) {
     targetWindow?.close();
     return { ok: false, message: result.message };
@@ -142,7 +152,17 @@ export async function openSavedDealInAnalysisTab(
   id: string,
   targetWindow: Window | null
 ): Promise<{ ok: true } | { ok: false; message: string }> {
-  const result = await getSavedDealForEditingAction(id);
+  let result: Awaited<ReturnType<typeof getSavedDealForEditingAction>>;
+  try {
+    result = await getSavedDealForEditingAction(id);
+  } catch {
+    // The action REJECTED rather than returning {ok:false} (network blip,
+    // cold-start 500, stale-deploy Server Action). Close the pre-opened tab and
+    // hand the caller a normal failure so its existing !ok toast fires, instead
+    // of leaking an unhandled rejection and stranding the blank tab.
+    targetWindow?.close();
+    return { ok: false, message: "Something interrupted the request. Please try again." };
+  }
   if (!result.ok) {
     targetWindow?.close();
     return { ok: false, message: result.message };

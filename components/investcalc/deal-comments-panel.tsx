@@ -90,8 +90,22 @@ export function DealCommentsPanel({ savedDealId }: { savedDealId: string }) {
   const remove = (commentId: string) => {
     const dealAtSubmit = savedDealId;
     startBusy(async () => {
-      const r = await deleteDealCommentAction(dealAtSubmit, commentId);
-      if (dealAtSubmit === savedDealId) apply(r);
+      try {
+        const r = await deleteDealCommentAction(dealAtSubmit, commentId);
+        if (dealAtSubmit === savedDealId) apply(r);
+      } catch {
+        // The action REJECTED rather than returning {ok:false} (network blip,
+        // cold-start 500, stale-deploy Server Action). Without this the delete
+        // silently no-ops — the row stays on screen with no signal. Mirror the
+        // add() path: a retryable toast, and honor the stale-deal guard.
+        if (dealAtSubmit === savedDealId) {
+          toast({
+            title: "Could not delete comment",
+            description: "We couldn't reach the server. Try again.",
+            variant: "destructive",
+          });
+        }
+      }
     });
   };
 

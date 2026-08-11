@@ -217,16 +217,27 @@ function OwnedEquityCell({ item, enabled }: { item: SavedAnalysisListItem; enabl
 
   const save = (value: string | null) => {
     startSaving(async () => {
-      const r = await setSavedDealCloseDateAction(item.id, value);
-      if (r.ok) {
-        setEditing(false);
-        router.refresh();
-      } else if (r.code === "MIGRATION_PENDING") {
-        toast({ title: "Rolling out", description: "Owned-deal equity tracking isn't enabled yet." });
-      } else {
-        toast({ title: "Couldn't save close date", description: r.message, variant: "destructive" });
-        // Ghost row (deleted elsewhere) — refresh so it disappears.
-        if (r.code === "NOT_FOUND") router.refresh();
+      try {
+        const r = await setSavedDealCloseDateAction(item.id, value);
+        if (r.ok) {
+          setEditing(false);
+          router.refresh();
+        } else if (r.code === "MIGRATION_PENDING") {
+          toast({ title: "Rolling out", description: "Owned-deal equity tracking isn't enabled yet." });
+        } else {
+          toast({ title: "Couldn't save close date", description: r.message, variant: "destructive" });
+          // Ghost row (deleted elsewhere) — refresh so it disappears.
+          if (r.code === "NOT_FOUND") router.refresh();
+        }
+      } catch {
+        // The action REJECTED rather than returning {ok:false} (network blip,
+        // cold-start 500, stale-deploy Server Action). Without this the date
+        // input's spinner clears with no signal and nothing persisted.
+        toast({
+          title: "Couldn't save close date",
+          description: "Something interrupted the request. Check your connection and try again.",
+          variant: "destructive",
+        });
       }
     });
   };
@@ -1079,59 +1090,94 @@ export function SavedAnalysesPage({
   const handleDealStatusChange = (id: string, state: SavedAnalysisListItem["status"]) => {
     setUpdatingDealStatusId(id);
     startUpdateStatusTransition(async () => {
-      const result = await updateSavedDealLifecycleStateAction(id, state);
-      if (!result.ok) {
+      try {
+        const result = await updateSavedDealLifecycleStateAction(id, state);
+        if (!result.ok) {
+          toast({
+            title: "Could not update deal status",
+            description: result.message,
+            variant: "destructive",
+          });
+          // Deleted in another tab → clear the ghost row alongside the toast,
+          // or every retry re-errors on a deal that no longer exists.
+          if (result.code === "NOT_FOUND") router.refresh();
+          return;
+        }
+        toast({
+          title: "Deal status updated",
+          description: "The deal lifecycle status was updated.",
+          variant: "success",
+        });
+        router.refresh();
+      } catch {
+        // The action REJECTED rather than returning {ok:false} (network blip,
+        // cold-start 500, stale-deploy Server Action). Without a catch the
+        // toast never fired; without the finally the row's spinner stuck on
+        // forever (setUpdatingDealStatusId was cleared only on the resolved
+        // paths).
         toast({
           title: "Could not update deal status",
-          description: result.message,
+          description: "Something interrupted the request. Check your connection and try again.",
           variant: "destructive",
         });
-        // Deleted in another tab → clear the ghost row alongside the toast,
-        // or every retry re-errors on a deal that no longer exists.
-        if (result.code === "NOT_FOUND") router.refresh();
+      } finally {
         setUpdatingDealStatusId(null);
-        return;
       }
-      toast({
-        title: "Deal status updated",
-        description: "The deal lifecycle status was updated.",
-        variant: "success",
-      });
-      router.refresh();
-      setUpdatingDealStatusId(null);
     });
   };
 
   const handleDealStageChange = (id: string, stage: PipelineStage) => {
     setUpdatingDealStatusId(id);
     startUpdateStatusTransition(async () => {
-      const result = await updateSavedDealStageAction(id, stage);
-      if (!result.ok) {
-        toast({ title: "Could not update stage", description: result.message, variant: "destructive" });
-        // Ghost row (deleted elsewhere) — refresh so it disappears.
-        if (result.code === "NOT_FOUND") router.refresh();
+      try {
+        const result = await updateSavedDealStageAction(id, stage);
+        if (!result.ok) {
+          toast({ title: "Could not update stage", description: result.message, variant: "destructive" });
+          // Ghost row (deleted elsewhere) — refresh so it disappears.
+          if (result.code === "NOT_FOUND") router.refresh();
+          return;
+        }
+        toast({ title: "Stage updated", description: `Moved to ${pipelineStageLabel(stage)}.`, variant: "success" });
+        router.refresh();
+      } catch {
+        // A thrown action would otherwise strand the row's "updating" spinner
+        // (cleared only on the resolved paths) and give no signal. finally
+        // clears it on every path.
+        toast({
+          title: "Could not update stage",
+          description: "Something interrupted the request. Check your connection and try again.",
+          variant: "destructive",
+        });
+      } finally {
         setUpdatingDealStatusId(null);
-        return;
       }
-      toast({ title: "Stage updated", description: `Moved to ${pipelineStageLabel(stage)}.`, variant: "success" });
-      router.refresh();
-      setUpdatingDealStatusId(null);
     });
   };
 
   const handleDealTagsChange = (id: string, tags: string[]) => {
     setUpdatingDealStatusId(id);
     startUpdateStatusTransition(async () => {
-      const result = await updateSavedDealTagsAction(id, tags);
-      if (!result.ok) {
-        toast({ title: "Could not update tags", description: result.message, variant: "destructive" });
-        // Ghost row (deleted elsewhere) — refresh so it disappears.
-        if (result.code === "NOT_FOUND") router.refresh();
+      try {
+        const result = await updateSavedDealTagsAction(id, tags);
+        if (!result.ok) {
+          toast({ title: "Could not update tags", description: result.message, variant: "destructive" });
+          // Ghost row (deleted elsewhere) — refresh so it disappears.
+          if (result.code === "NOT_FOUND") router.refresh();
+          return;
+        }
+        router.refresh();
+      } catch {
+        // A thrown action would otherwise strand the row's "updating" spinner
+        // (cleared only on the resolved paths) and give no signal. finally
+        // clears it on every path.
+        toast({
+          title: "Could not update tags",
+          description: "Something interrupted the request. Check your connection and try again.",
+          variant: "destructive",
+        });
+      } finally {
         setUpdatingDealStatusId(null);
-        return;
       }
-      router.refresh();
-      setUpdatingDealStatusId(null);
     });
   };
 
@@ -1147,22 +1193,33 @@ export function SavedAnalysesPage({
   const handleBulkArchive = () => {
     if (selectedIds.length === 0 || bulkRunning) return;
     startBulkArchiveTransition(async () => {
-      const result = await bulkUpdateSavedDealsAction(selectedIds, "archive");
-      if (!result.ok) {
+      try {
+        const result = await bulkUpdateSavedDealsAction(selectedIds, "archive");
+        if (!result.ok) {
+          toast({
+            title: "Could not archive selected deals",
+            description: result.message,
+            variant: "destructive",
+          });
+          return;
+        }
+        toast({
+          title: `Archived ${result.affectedCount} deal${result.affectedCount === 1 ? "" : "s"}`,
+          description: "Find them under the Archived filter.",
+          variant: "success",
+        });
+        setSelectedIds([]);
+        router.refresh();
+      } catch {
+        // The action REJECTED rather than returning {ok:false} (network blip,
+        // cold-start 500, stale-deploy Server Action). Without this the bulk bar
+        // spinner clears with no signal and the selection appears untouched.
         toast({
           title: "Could not archive selected deals",
-          description: result.message,
+          description: "Something interrupted the request. Check your connection and try again.",
           variant: "destructive",
         });
-        return;
       }
-      toast({
-        title: `Archived ${result.affectedCount} deal${result.affectedCount === 1 ? "" : "s"}`,
-        description: "Find them under the Archived filter.",
-        variant: "success",
-      });
-      setSelectedIds([]);
-      router.refresh();
     });
   };
 
@@ -1175,22 +1232,33 @@ export function SavedAnalysesPage({
     );
     if (!confirmed) return;
     startBulkDeleteTransition(async () => {
-      const result = await bulkUpdateSavedDealsAction(selectedIds, "delete");
-      if (!result.ok) {
+      try {
+        const result = await bulkUpdateSavedDealsAction(selectedIds, "delete");
+        if (!result.ok) {
+          toast({
+            title: "Could not delete selected deals",
+            description: result.message,
+            variant: "destructive",
+          });
+          return;
+        }
+        toast({
+          title: `Deleted ${result.affectedCount} deal${result.affectedCount === 1 ? "" : "s"}`,
+          description: "Removed from your saved analyses.",
+          variant: "success",
+        });
+        setSelectedIds([]);
+        router.refresh();
+      } catch {
+        // The action REJECTED rather than returning {ok:false} (network blip,
+        // cold-start 500, stale-deploy Server Action). Without this the bulk bar
+        // spinner clears with no signal and the selection appears untouched.
         toast({
           title: "Could not delete selected deals",
-          description: result.message,
+          description: "Something interrupted the request. Check your connection and try again.",
           variant: "destructive",
         });
-        return;
       }
-      toast({
-        title: `Deleted ${result.affectedCount} deal${result.affectedCount === 1 ? "" : "s"}`,
-        description: "Removed from your saved analyses.",
-        variant: "success",
-      });
-      setSelectedIds([]);
-      router.refresh();
     });
   };
 
@@ -1442,16 +1510,27 @@ export function SavedAnalysesPage({
       return;
     }
     startCompareTransition(async () => {
-      const result = await startCompareAction(selectedIds);
-      if (!result.ok) {
+      try {
+        const result = await startCompareAction(selectedIds);
+        if (!result.ok) {
+          toast({
+            title: result.code === "LIMIT_EXCEEDED" ? "Compare limit reached" : "Could not start comparison",
+            description: result.message,
+            variant: result.code === "LIMIT_EXCEEDED" ? "warning" : "destructive",
+          });
+          return;
+        }
+        router.push("/dashboard/compare");
+      } catch {
+        // The action REJECTED rather than returning {ok:false} (network blip,
+        // cold-start 500, stale-deploy Server Action). Without this the Compare
+        // button spinner clears with no navigation and no signal.
         toast({
-          title: result.code === "LIMIT_EXCEEDED" ? "Compare limit reached" : "Could not start comparison",
-          description: result.message,
-          variant: result.code === "LIMIT_EXCEEDED" ? "warning" : "destructive",
+          title: "Could not start comparison",
+          description: "Something interrupted the request. Check your connection and try again.",
+          variant: "destructive",
         });
-        return;
       }
-      router.push("/dashboard/compare");
     });
   };
 

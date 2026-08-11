@@ -63,41 +63,64 @@ export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
 
   function handleAdd() {
     startSaving(async () => {
-      const result = await addScenarioAction({
-        sourceDealId: savedDealId,
-        scenarioName: name.trim() || undefined,
-        strategyKind: strategy || null,
-      });
-      if (!result.ok) {
-        if (result.code === "MIGRATION_PENDING") {
-          setHidden(true);
+      try {
+        const result = await addScenarioAction({
+          sourceDealId: savedDealId,
+          scenarioName: name.trim() || undefined,
+          strategyKind: strategy || null,
+        });
+        if (!result.ok) {
+          if (result.code === "MIGRATION_PENDING") {
+            setHidden(true);
+            return;
+          }
+          toast({ title: "Couldn't add scenario", description: result.message, variant: "destructive" });
           return;
         }
-        toast({ title: "Couldn't add scenario", description: result.message, variant: "destructive" });
-        return;
+        trackEvent("scenario_added", {
+          has_strategy: Boolean(strategy),
+          strategy_kind: strategy || null,
+        });
+        setName("");
+        setStrategy("");
+        setAdding(false);
+        toast({ title: "Scenario added", description: "Open it to adjust assumptions for that strategy." });
+        refresh();
+        // A scenario is a new saved_analyses row: the persistent dashboard
+        // layout's My Deals count badge only updates via a server refetch.
+        router.refresh();
+      } catch {
+        // The action REJECTED rather than returning {ok:false} (network blip,
+        // cold-start 500, stale-deploy Server Action). Without this the form
+        // stays open with the spinner already gone but no signal — the typed
+        // name/strategy are preserved, so a retry just re-clicks Add.
+        toast({
+          title: "Couldn't add scenario",
+          description: "Something interrupted the request. Check your connection and try again.",
+          variant: "destructive",
+        });
       }
-      trackEvent("scenario_added", {
-        has_strategy: Boolean(strategy),
-        strategy_kind: strategy || null,
-      });
-      setName("");
-      setStrategy("");
-      setAdding(false);
-      toast({ title: "Scenario added", description: "Open it to adjust assumptions for that strategy." });
-      refresh();
-      // A scenario is a new saved_analyses row: the persistent dashboard
-      // layout's My Deals count badge only updates via a server refetch.
-      router.refresh();
     });
   }
 
   function handleCompare() {
     trackEvent("scenarios_compared", { count: scenarios.length });
     startSaving(async () => {
-      const result = await compareScenariosAction(savedDealId);
-      // Success redirects to /dashboard/compare; only an error returns here.
-      if (result && !result.ok) {
-        toast({ title: "Couldn't compare scenarios", description: result.message, variant: "destructive" });
+      try {
+        const result = await compareScenariosAction(savedDealId);
+        // Success redirects to /dashboard/compare; only an error returns here.
+        if (result && !result.ok) {
+          toast({ title: "Couldn't compare scenarios", description: result.message, variant: "destructive" });
+        }
+      } catch {
+        // The action REJECTED rather than returning {ok:false} (network blip,
+        // cold-start 500, stale-deploy Server Action). Without this the Compare
+        // click silently does nothing. Tell the user it's retryable.
+        toast({
+          title: "Couldn't compare scenarios",
+          description: "Something interrupted the request. Check your connection and try again.",
+          variant: "destructive",
+        });
       }
     });
   }

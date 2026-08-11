@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getEntitlementsForUser } from "@/lib/entitlements";
+import { toServerErrorResult } from "@/lib/db-error";
 import {
   buildTenYearProjection,
   buildTenYearProjectionInputHash,
@@ -87,7 +88,7 @@ export async function getTenYearProjectionSnapshotAction(
     .maybeSingle();
 
   if (savedAnalysisError) {
-    return { ok: false, code: "SERVER_ERROR", message: savedAnalysisError.message };
+    return toServerErrorResult(savedAnalysisError, "ten-year-projections");
   }
 
   if (!savedAnalysis) {
@@ -107,7 +108,7 @@ export async function getTenYearProjectionSnapshotAction(
     .maybeSingle();
 
   if (existingSnapshotError) {
-    return { ok: false, code: "SERVER_ERROR", message: existingSnapshotError.message };
+    return toServerErrorResult(existingSnapshotError, "ten-year-projections");
   }
 
   if (
@@ -140,7 +141,7 @@ export async function getTenYearProjectionSnapshotAction(
     .single();
 
   if (savedSnapshotError) {
-    return { ok: false, code: "SERVER_ERROR", message: savedSnapshotError.message };
+    return toServerErrorResult(savedSnapshotError, "ten-year-projections");
   }
 
   return {

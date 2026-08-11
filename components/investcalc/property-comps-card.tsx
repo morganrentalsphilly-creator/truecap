@@ -150,17 +150,24 @@ export function PropertyCompsCard({
     if (!enabled || !savedDealId) return;
     let active = true;
     void (async () => {
-      const r = await getSavedDealCompsAction(savedDealId);
-      if (active && r.ok && r.enrichment) {
-        // Legacy payloads can predate fetchedAt in the enrichment itself —
-        // backfill from the row's fetched_at so the freshness hint still works.
-        const enrichment =
-          !r.enrichment.fetchedAt && r.fetchedAt
-            ? { ...r.enrichment, fetchedAt: r.fetchedAt }
-            : r.enrichment;
-        setData(enrichment);
-        setSource("saved");
-        onDataChange?.(enrichment);
+      try {
+        const r = await getSavedDealCompsAction(savedDealId);
+        if (active && r.ok && r.enrichment) {
+          // Legacy payloads can predate fetchedAt in the enrichment itself —
+          // backfill from the row's fetched_at so the freshness hint still works.
+          const enrichment =
+            !r.enrichment.fetchedAt && r.fetchedAt
+              ? { ...r.enrichment, fetchedAt: r.fetchedAt }
+              : r.enrichment;
+          setData(enrichment);
+          setSource("saved");
+          onDataChange?.(enrichment);
+        }
+      } catch {
+        // Best-effort load of a previously-saved comp set — a thrown action
+        // (transient outage, stale-deploy Server Action) just leaves the card
+        // in its "Run comps" state rather than surfacing an unhandled promise
+        // rejection to Sentry. The user can still pull fresh comps on demand.
       }
     })();
     return () => {
@@ -177,30 +184,43 @@ export function PropertyCompsCard({
     // (comps ground Deal Q&A answers, so a mismatch is confidently wrong).
     const pulledAddress = address;
     startLoading(async () => {
-      const r = await getPropertyCompsAction({
-        address: pulledAddress,
-        propertyType,
-        bedrooms: bedrooms ?? undefined,
-        bathrooms: bathrooms ?? undefined,
-        squareFootage: squareFootage ?? undefined,
-        dealId: savedDealId ?? undefined,
-      });
-      // Address changed while the pull was in flight → the result (or its
-      // error) belongs to the previous deal; drop it silently — the
-      // address-change effect above already cleared the display.
-      if (lastAddressRef.current !== pulledAddress) return;
-      if (!r.ok) {
-        if (r.code === "NOT_CONFIGURED") {
-          setUnavailable(true);
-          onUnavailableChange?.(true);
+      try {
+        const r = await getPropertyCompsAction({
+          address: pulledAddress,
+          propertyType,
+          bedrooms: bedrooms ?? undefined,
+          bathrooms: bathrooms ?? undefined,
+          squareFootage: squareFootage ?? undefined,
+          dealId: savedDealId ?? undefined,
+        });
+        // Address changed while the pull was in flight → the result (or its
+        // error) belongs to the previous deal; drop it silently — the
+        // address-change effect above already cleared the display.
+        if (lastAddressRef.current !== pulledAddress) return;
+        if (!r.ok) {
+          if (r.code === "NOT_CONFIGURED") {
+            setUnavailable(true);
+            onUnavailableChange?.(true);
+            return;
+          }
+          toast({ title: "Couldn't pull comps", description: r.message, variant: "destructive" });
           return;
         }
-        toast({ title: "Couldn't pull comps", description: r.message, variant: "destructive" });
-        return;
+        setData(r.enrichment);
+        setSource(r.source);
+        onDataChange?.(r.enrichment);
+      } catch {
+        // The action REJECTED rather than returning {ok:false} (network blip,
+        // cold-start 500, stale-deploy Server Action). Without this the button
+        // spinner clears with no result and no signal. Honor the same stale-
+        // address guard, then surface a retryable toast.
+        if (lastAddressRef.current !== pulledAddress) return;
+        toast({
+          title: "Couldn't pull comps",
+          description: "Something interrupted the request. Check your connection and try again.",
+          variant: "destructive",
+        });
       }
-      setData(r.enrichment);
-      setSource(r.source);
-      onDataChange?.(r.enrichment);
     });
   };
 

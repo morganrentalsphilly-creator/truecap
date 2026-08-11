@@ -68,11 +68,16 @@ export function DealQaPanel({
     if (!trimmed || isAsking) return;
     setIsAsking(true);
     setNotice(null);
-    setQuestion("");
     trackEvent("deal_qa_asked", { question_length: trimmed.length });
     try {
       const result = await askDealQuestionAction({ question: trimmed, values, context });
       if (result.ok) {
+        // Clear the input only once an answer is in hand. Clearing before the
+        // await meant any failure (rate limit, server error, a thrown/rejected
+        // action) wiped the typed question with nothing to show for it — the
+        // user had to retype to retry, and a failed answer effectively burned
+        // their attempt. On every non-success path below the question stays put.
+        setQuestion("");
         setTurns((prev) => [...prev.slice(-7), { question: trimmed, answer: result.answer }]);
         if (result.remainingToday !== null && result.remainingToday <= 1) {
           setNotice(

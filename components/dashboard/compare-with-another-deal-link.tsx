@@ -28,16 +28,28 @@ export function CompareWithAnotherDealLink({ savedDealId }: { savedDealId: strin
 
   function handleCompare() {
     startTransition(async () => {
-      const result = await startCompareAction([savedDealId]);
-      if (!result.ok) {
+      try {
+        const result = await startCompareAction([savedDealId]);
+        if (!result.ok) {
+          toast({
+            title: "Couldn't start compare",
+            description: result.message,
+            variant: "destructive",
+          });
+          return;
+        }
+        router.push("/dashboard/compare");
+      } catch {
+        // The action REJECTED rather than returning {ok:false} (network blip,
+        // cold-start 500, deploy skew). Without this the click is silent —
+        // the button just re-enables with no redirect and no signal. Surface
+        // a retryable error, matching the {ok:false} branch's copy.
         toast({
           title: "Couldn't start compare",
-          description: result.message,
+          description: "Something interrupted the request. Check your connection and try again.",
           variant: "destructive",
         });
-        return;
       }
-      router.push("/dashboard/compare");
     });
   }
 

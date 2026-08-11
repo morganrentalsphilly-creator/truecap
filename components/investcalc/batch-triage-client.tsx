@@ -130,14 +130,26 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
 
   const screen = () => {
     startScreening(async () => {
-      const r = await screenBatchAction({ text });
-      if (!r.ok) {
-        toast({ title: "Couldn't screen", description: r.message, variant: "destructive" });
-        return;
+      try {
+        const r = await screenBatchAction({ text });
+        if (!r.ok) {
+          toast({ title: "Couldn't screen", description: r.message, variant: "destructive" });
+          return;
+        }
+        setResult(r);
+        setSort(r.sort);
+        setPassersOnly(false);
+      } catch {
+        // The action REJECTED rather than returning {ok:false} (network blip,
+        // cold-start 500, stale-deploy Server Action). Without this the Screen
+        // spinner clears with no result and no signal. The pasted text is
+        // preserved, so a retry just re-clicks Screen.
+        toast({
+          title: "Couldn't screen",
+          description: "Something interrupted the request. Check your connection and try again.",
+          variant: "destructive",
+        });
       }
-      setResult(r);
-      setSort(r.sort);
-      setPassersOnly(false);
     });
   };
 
@@ -146,21 +158,33 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
   // auto-screens (extraction can misread).
   const extract = () => {
     startExtracting(async () => {
-      const r = await extractTriageListingsAction({ text });
-      if (!r.ok) {
-        toast({ title: "Couldn't extract", description: r.message, variant: "destructive" });
-        return;
+      try {
+        const r = await extractTriageListingsAction({ text });
+        if (!r.ok) {
+          toast({ title: "Couldn't extract", description: r.message, variant: "destructive" });
+          return;
+        }
+        if (r.count === 0) {
+          toast({ title: "No listings found", description: "Couldn't spot any property listings in that text." });
+          return;
+        }
+        setText(r.text);
+        toast({
+          title: `Extracted ${r.count} ${r.count === 1 ? "listing" : "listings"}`,
+          description: "Review the rows, then Screen deals.",
+          variant: "success",
+        });
+      } catch {
+        // The action REJECTED rather than returning {ok:false} (network blip,
+        // cold-start 500, stale-deploy Server Action). Without this the Extract
+        // spinner clears with no change and no signal. The pasted text is left
+        // as-is, so a retry just re-clicks Extract.
+        toast({
+          title: "Couldn't extract",
+          description: "Something interrupted the request. Check your connection and try again.",
+          variant: "destructive",
+        });
       }
-      if (r.count === 0) {
-        toast({ title: "No listings found", description: "Couldn't spot any property listings in that text." });
-        return;
-      }
-      setText(r.text);
-      toast({
-        title: `Extracted ${r.count} ${r.count === 1 ? "listing" : "listings"}`,
-        description: "Review the rows, then Screen deals.",
-        variant: "success",
-      });
     });
   };
 

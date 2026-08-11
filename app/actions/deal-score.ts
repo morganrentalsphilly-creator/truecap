@@ -1,6 +1,7 @@
 "use server";
 
 import { computeDealScore, dealScoreInputSchema, DealScoreResult } from "@/lib/deal-score";
+import { toServerErrorResult } from "@/lib/db-error";
 
 export type DealScoreActionResult =
   | { ok: true; tier: "pro"; data: DealScoreResult }
@@ -31,10 +32,6 @@ export async function getDealScoreAction(input: unknown): Promise<DealScoreActio
   try {
     return { ok: true, tier: "pro", data: computeDealScore(parsed.data) };
   } catch (error) {
-    return {
-      ok: false,
-      code: "SERVER_ERROR",
-      message: error instanceof Error ? error.message : "Could not calculate deal score.",
-    };
+    return toServerErrorResult(error, "deal-score");
   }
 }

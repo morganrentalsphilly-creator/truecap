@@ -48,18 +48,32 @@ export function DealDetailsCard({ savedDealId }: { savedDealId: string }) {
   const save = (patch: Partial<DealLabels>) => {
     const dealAtSubmit = savedDealId;
     startSaving(async () => {
-      const r = await updateDealLabelsAction(dealAtSubmit, patch);
-      if (dealAtSubmit !== savedDealId) return;
-      if (!r.ok) {
-        if (r.code === "MIGRATION_PENDING") setMigrationPending(true);
-        else toast({ title: "Could not save deal details", description: r.message, variant: "destructive" });
-        return;
+      try {
+        const r = await updateDealLabelsAction(dealAtSubmit, patch);
+        if (dealAtSubmit !== savedDealId) return;
+        if (!r.ok) {
+          if (r.code === "MIGRATION_PENDING") setMigrationPending(true);
+          else toast({ title: "Could not save deal details", description: r.message, variant: "destructive" });
+          return;
+        }
+        setLabels(r.labels);
+        // The nickname leads the workspace h1 and the My Deals rows — both are
+        // server-rendered, so without a refresh the Router Cache keeps serving
+        // the old name on back-navigation until some other mutation purges it.
+        router.refresh();
+      } catch {
+        // The action REJECTED rather than returning {ok:false} (network blip,
+        // cold-start 500, stale-deploy Server Action). The blurred input still
+        // shows the typed value, so without this the change silently vanishes
+        // on the next server render with no signal. Tell the user it's
+        // retryable; the stale-deal guard mirrors the success path.
+        if (dealAtSubmit !== savedDealId) return;
+        toast({
+          title: "Could not save deal details",
+          description: "Something interrupted the request. Check your connection and try again.",
+          variant: "destructive",
+        });
       }
-      setLabels(r.labels);
-      // The nickname leads the workspace h1 and the My Deals rows — both are
-      // server-rendered, so without a refresh the Router Cache keeps serving
-      // the old name on back-navigation until some other mutation purges it.
-      router.refresh();
     });
   };
 

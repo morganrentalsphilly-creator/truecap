@@ -94,17 +94,30 @@ export function BillingPanel({ currentSubscription, plans }: BillingPanelProps) 
   const handleSwitchPlan = (targetPlanSlug: BillingPlan["slug"]) => {
     setPendingPlan(targetPlanSlug);
     void (async () => {
-      const result = await createSwitchPlanPortalSessionAction({ targetPlanSlug });
-      if (!result.ok) {
+      try {
+        const result = await createSwitchPlanPortalSessionAction({ targetPlanSlug });
+        if (!result.ok) {
+          setPendingPlan(null);
+          toast({
+            title: "Could not switch plans",
+            description: result.message,
+            variant: "destructive",
+          });
+          return;
+        }
+        window.location.href = result.url;
+      } catch {
+        // The action REJECTED rather than returning {ok:false} (network blip,
+        // cold-start 500, a tab a deploy behind main). Without this the button
+        // stays stuck on its spinner forever — setPendingPlan(null) only ran
+        // on the {ok:false} path. Reset it and tell them it's retryable.
         setPendingPlan(null);
         toast({
           title: "Could not switch plans",
-          description: result.message,
+          description: "Something interrupted the request. Check your connection and try again.",
           variant: "destructive",
         });
-        return;
       }
-      window.location.href = result.url;
     })();
   };
 
@@ -118,55 +131,91 @@ export function BillingPanel({ currentSubscription, plans }: BillingPanelProps) 
     }
     setPendingPlan(planSlug);
     void (async () => {
-      const result = await createCheckoutSessionAction({ planSlug });
-      setPendingPlan(null);
-      if (!result.ok) {
-        // Server-side guard tripped (e.g. subscription exists but this
-        // component's props were stale) — route to the portal rather
-        // than dead-ending with an error toast.
-        if (result.code === "ALREADY_SUBSCRIBED") {
-          toast({ title: "You already have a plan", description: result.message });
-          handlePortal();
+      try {
+        const result = await createCheckoutSessionAction({ planSlug });
+        setPendingPlan(null);
+        if (!result.ok) {
+          // Server-side guard tripped (e.g. subscription exists but this
+          // component's props were stale) — route to the portal rather
+          // than dead-ending with an error toast.
+          if (result.code === "ALREADY_SUBSCRIBED") {
+            toast({ title: "You already have a plan", description: result.message });
+            handlePortal();
+            return;
+          }
+          toast({
+            title: "Could not start checkout",
+            description: result.message,
+            variant: "destructive",
+          });
           return;
         }
+        window.location.href = result.url;
+      } catch {
+        // The action REJECTED rather than returning {ok:false} (network blip,
+        // cold-start 500, a tab a deploy behind main). Without this the
+        // Subscribe button stays stuck on its spinner forever —
+        // setPendingPlan(null) sat after the throwing await. Reset it and
+        // tell them it's retryable.
+        setPendingPlan(null);
         toast({
           title: "Could not start checkout",
-          description: result.message,
+          description: "Something interrupted the request. Check your connection and try again.",
           variant: "destructive",
         });
-        return;
       }
-      window.location.href = result.url;
     })();
   };
 
   const handlePortal = () => {
     startPortalTransition(async () => {
-      const result = await createBillingPortalSessionAction();
-      if (!result.ok) {
+      try {
+        const result = await createBillingPortalSessionAction();
+        if (!result.ok) {
+          toast({
+            title: "Could not open billing portal",
+            description: result.message,
+            variant: "destructive",
+          });
+          return;
+        }
+        window.location.href = result.url;
+      } catch {
+        // Action rejected rather than returning {ok:false} — the transition
+        // clears isPortalPending, but without this the click is silent.
+        // Surface a retryable error.
         toast({
           title: "Could not open billing portal",
-          description: result.message,
+          description: "Something interrupted the request. Check your connection and try again.",
           variant: "destructive",
         });
-        return;
       }
-      window.location.href = result.url;
     });
   };
 
   const handleCancelPortal = () => {
     startCancelTransition(async () => {
-      const result = await createCancelSubscriptionPortalSessionAction();
-      if (!result.ok) {
+      try {
+        const result = await createCancelSubscriptionPortalSessionAction();
+        if (!result.ok) {
+          toast({
+            title: "Could not open cancellation flow",
+            description: result.message,
+            variant: "destructive",
+          });
+          return;
+        }
+        window.location.href = result.url;
+      } catch {
+        // Action rejected rather than returning {ok:false} — the transition
+        // clears isCancelPending, but without this the click is silent.
+        // Surface a retryable error.
         toast({
           title: "Could not open cancellation flow",
-          description: result.message,
+          description: "Something interrupted the request. Check your connection and try again.",
           variant: "destructive",
         });
-        return;
       }
-      window.location.href = result.url;
     });
   };
 

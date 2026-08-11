@@ -47,22 +47,35 @@ export function DealStageSelect({
     if (next === stage) return;
     setDisplayStage(next);
     startSaving(async () => {
-      const result = await updateSavedDealStageAction(savedDealId, next);
-      if (!result.ok) {
+      try {
+        const result = await updateSavedDealStageAction(savedDealId, next);
+        if (!result.ok) {
+          setDisplayStage(stage);
+          toast({
+            title: "Could not update stage",
+            description: result.message,
+            variant: "destructive",
+          });
+          return;
+        }
+        toast({
+          title: "Stage updated",
+          description: `Moved to ${pipelineStageLabel(next)}.`,
+          variant: "success",
+        });
+        router.refresh();
+      } catch {
+        // The action REJECTED rather than returning {ok:false} (network blip,
+        // cold-start 500, stale-deploy Server Action). The optimistic display
+        // still shows the NEW stage — a lie the server never stored — so roll
+        // it back to the server-truth prop and tell the user it's retryable.
         setDisplayStage(stage);
         toast({
           title: "Could not update stage",
-          description: result.message,
+          description: "Something interrupted the request. Check your connection and try again.",
           variant: "destructive",
         });
-        return;
       }
-      toast({
-        title: "Stage updated",
-        description: `Moved to ${pipelineStageLabel(next)}.`,
-        variant: "success",
-      });
-      router.refresh();
     });
   };
 

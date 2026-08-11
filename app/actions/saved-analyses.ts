@@ -421,7 +421,7 @@ export async function saveDealAction(
       .maybeSingle();
 
     if (existingErr) {
-      return { ok: false, code: "SERVER_ERROR", message: existingErr.message };
+      return toServerErrorResult(existingErr, "saved-analyses");
     }
 
     if (!existing) {
@@ -482,7 +482,7 @@ export async function saveDealAction(
         }
       );
       if (dupErr) {
-        return { ok: false, code: "SERVER_ERROR", message: dupErr.message };
+        return toServerErrorResult(dupErr, "saved-analyses");
       }
       if (addressTaken === true) {
         const collision = (await findSavedAnalysesByAddress(supabase, user.id, addressTrimmed))[0];
@@ -546,7 +546,7 @@ export async function saveDealAction(
       p_address: addressTrimmed,
     });
     if (dupErr) {
-      return { ok: false, code: "SERVER_ERROR", message: dupErr.message };
+      return toServerErrorResult(dupErr, "saved-analyses");
     }
     if (addressTaken === true) {
       // Surface the colliding row so the client can offer a real choice
@@ -572,7 +572,7 @@ export async function saveDealAction(
     .is("deleted_at", null);
 
   if (countErr) {
-    return { ok: false, code: "SERVER_ERROR", message: countErr.message };
+    return toServerErrorResult(countErr, "saved-analyses");
   }
 
   if (!hasSavedDealCapacity(entitlements, count ?? 0)) {
@@ -1424,7 +1424,7 @@ export async function getDealDueDiligenceAction(id: string): Promise<DealDueDili
     .is("deleted_at", null)
     .maybeSingle();
   if (dealErr) {
-    return { ok: false, code: "SERVER_ERROR", message: dealErr.message };
+    return toServerErrorResult(dealErr, "saved-analyses");
   }
   if (!deal) {
     return { ok: false, code: "NOT_FOUND", message: "Deal was not found." };
@@ -1472,7 +1472,7 @@ export async function updateDealDueDiligenceAction(
     .is("deleted_at", null)
     .maybeSingle();
   if (dealErr) {
-    return { ok: false, code: "SERVER_ERROR", message: dealErr.message };
+    return toServerErrorResult(dealErr, "saved-analyses");
   }
   if (!deal) {
     return { ok: false, code: "NOT_FOUND", message: "Deal was not found." };

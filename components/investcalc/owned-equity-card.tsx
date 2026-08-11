@@ -52,14 +52,26 @@ export function OwnedEquityCard({
 
   const save = (value: string | null) => {
     startSaving(async () => {
-      const r = await setSavedDealCloseDateAction(savedDealId, value);
-      if (r.ok) {
-        setEditing(false);
-        router.refresh();
-      } else if (r.code === "MIGRATION_PENDING") {
-        toast({ title: "Rolling out", description: "Owned-deal equity tracking isn't enabled yet." });
-      } else {
-        toast({ title: "Couldn't save close date", description: r.message, variant: "destructive" });
+      try {
+        const r = await setSavedDealCloseDateAction(savedDealId, value);
+        if (r.ok) {
+          setEditing(false);
+          router.refresh();
+        } else if (r.code === "MIGRATION_PENDING") {
+          toast({ title: "Rolling out", description: "Owned-deal equity tracking isn't enabled yet." });
+        } else {
+          toast({ title: "Couldn't save close date", description: r.message, variant: "destructive" });
+        }
+      } catch {
+        // The action REJECTED rather than returning {ok:false} (network blip,
+        // cold-start 500, stale-deploy Server Action). Without this the date
+        // input's spinner clears with no signal and the date never persists.
+        // Tell the user it's retryable.
+        toast({
+          title: "Couldn't save close date",
+          description: "Something interrupted the request. Check your connection and try again.",
+          variant: "destructive",
+        });
       }
     });
   };

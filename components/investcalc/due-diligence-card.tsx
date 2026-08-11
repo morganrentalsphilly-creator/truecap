@@ -86,20 +86,37 @@ export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
     const dealIdAtSubmit = savedDealId;
     const previous = items;
     startSaving(async () => {
-      const r = await updateDealDueDiligenceAction(dealIdAtSubmit, next);
-      if (dealIdAtSubmit !== savedDealId) return; // user switched deals mid-save
-      if (!r.ok) {
-        if (r.code === "MIGRATION_PENDING") {
-          setMigrationPending(true);
-          return;
+      try {
+        const r = await updateDealDueDiligenceAction(dealIdAtSubmit, next);
+        if (dealIdAtSubmit !== savedDealId) return; // user switched deals mid-save
+        if (!r.ok) {
+          if (r.code === "MIGRATION_PENDING") {
+            setMigrationPending(true);
+            return;
+          }
+          const fresh = await getDealDueDiligenceAction(dealIdAtSubmit).catch(() => null);
+          if (dealIdAtSubmit !== savedDealId) return;
+          setItems(fresh?.ok ? fresh.items : previous);
+          onFailure?.();
+          toast({
+            title: "Could not save checklist",
+            description: `${r.message} ${failureHint}`,
+            variant: "destructive",
+          });
         }
-        const fresh = await getDealDueDiligenceAction(dealIdAtSubmit).catch(() => null);
+      } catch {
+        // The action REJECTED rather than returning {ok:false} (network blip,
+        // cold-start 500, stale-deploy Server Action). The optimistic setItems
+        // already ran, so the card is asserting a change the server never
+        // stored. Reconcile the same way the !r.ok branch does — roll back to
+        // the pre-mutation snapshot (a re-read might also be down), let the
+        // caller restore anything it cleared, and surface a retryable toast.
         if (dealIdAtSubmit !== savedDealId) return;
-        setItems(fresh?.ok ? fresh.items : previous);
+        setItems(previous);
         onFailure?.();
         toast({
           title: "Could not save checklist",
-          description: `${r.message} ${failureHint}`,
+          description: `Something interrupted the request. ${failureHint}`,
           variant: "destructive",
         });
       }

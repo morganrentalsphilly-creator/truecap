@@ -359,7 +359,7 @@ export async function createAnalysisTemplateAction(
     .eq("is_system", false);
 
   if (listNameErr) {
-    return { ok: false, code: "SERVER_ERROR", message: listNameErr.message };
+    return toServerErrorResult(listNameErr, "analysis-templates");
   }
   const hasDuplicateName = (existingNames ?? []).some(
     (row) => normalizeTemplateName(row.template_name) === targetName
@@ -478,7 +478,7 @@ export async function updateAnalysisTemplateAction(
     .maybeSingle();
 
   if (existingErr) {
-    return { ok: false, code: "SERVER_ERROR", message: existingErr.message };
+    return toServerErrorResult(existingErr, "analysis-templates");
   }
 
   if (!existingRow || existingRow.is_system) {
@@ -496,7 +496,7 @@ export async function updateAnalysisTemplateAction(
     .eq("is_system", false);
 
   if (listNameErr) {
-    return { ok: false, code: "SERVER_ERROR", message: listNameErr.message };
+    return toServerErrorResult(listNameErr, "analysis-templates");
   }
 
   const hasDuplicateName = (existingNames ?? []).some(
@@ -595,7 +595,7 @@ export async function deleteAnalysisTemplateAction(
     .maybeSingle();
 
   if (existingErr) {
-    return { ok: false, code: "SERVER_ERROR", message: existingErr.message };
+    return toServerErrorResult(existingErr, "analysis-templates");
   }
 
   if (!existingRow || existingRow.is_system) {
@@ -653,7 +653,7 @@ export async function setDefaultTemplateAction(templateId: string): Promise<SetD
     .eq("user_id", user.id)
     .maybeSingle();
   if (rowErr) {
-    return { ok: false, code: "SERVER_ERROR", message: rowErr.message };
+    return toServerErrorResult(rowErr, "analysis-templates");
   }
   if (!row || row.is_system) {
     return { ok: false, code: "NOT_FOUND", message: "Template not found." };
@@ -666,7 +666,7 @@ export async function setDefaultTemplateAction(templateId: string): Promise<SetD
     .eq("user_id", user.id)
     .eq("is_default", true);
   if (clearErr) {
-    return { ok: false, code: "SERVER_ERROR", message: clearErr.message };
+    return toServerErrorResult(clearErr, "analysis-templates");
   }
 
   const { error: setErr } = await supabase
@@ -676,7 +676,7 @@ export async function setDefaultTemplateAction(templateId: string): Promise<SetD
     .eq("user_id", user.id)
     .eq("is_system", false);
   if (setErr) {
-    return { ok: false, code: "SERVER_ERROR", message: setErr.message };
+    return toServerErrorResult(setErr, "analysis-templates");
   }
 
   return { ok: true };
@@ -707,7 +707,7 @@ export async function duplicateTemplateAction(templateId: string): Promise<Updat
     .eq("id", templateId)
     .maybeSingle();
   if (srcErr) {
-    return { ok: false, code: "SERVER_ERROR", message: srcErr.message };
+    return toServerErrorResult(srcErr, "analysis-templates");
   }
   if (!srcRow) {
     return { ok: false, code: "NOT_FOUND", message: "Template not found." };
@@ -834,7 +834,7 @@ export async function applyTemplateToDealAction(
     .is("deleted_at", null)
     .maybeSingle();
   if (dealErr) {
-    return { ok: false, code: "SERVER_ERROR", message: dealErr.message };
+    return toServerErrorResult(dealErr, "analysis-templates");
   }
   if (!dealRow) {
     return { ok: false, code: "NOT_FOUND", message: "Deal not found." };
@@ -846,7 +846,7 @@ export async function applyTemplateToDealAction(
     .eq("id", templateId)
     .maybeSingle();
   if (tplErr) {
-    return { ok: false, code: "SERVER_ERROR", message: tplErr.message };
+    return toServerErrorResult(tplErr, "analysis-templates");
   }
   if (!tplRow) {
     return { ok: false, code: "NOT_FOUND", message: "Template not found." };
@@ -912,7 +912,7 @@ export async function listTemplateVersionsAction(templateId: string): Promise<Li
     .eq("user_id", user.id)
     .maybeSingle();
   if (tplErr) {
-    return { ok: false, code: "SERVER_ERROR", message: tplErr.message };
+    return toServerErrorResult(tplErr, "analysis-templates");
   }
   if (!tpl) {
     return { ok: false, code: "NOT_FOUND", message: "Template not found." };
@@ -979,7 +979,7 @@ export async function restoreTemplateVersionAction(
     .eq("user_id", user.id)
     .maybeSingle();
   if (tplErr) {
-    return { ok: false, code: "SERVER_ERROR", message: tplErr.message };
+    return toServerErrorResult(tplErr, "analysis-templates");
   }
   if (!tpl || tpl.is_system) {
     return { ok: false, code: "NOT_FOUND", message: "Template not found." };
@@ -992,7 +992,7 @@ export async function restoreTemplateVersionAction(
     .eq("template_id", templateId)
     .maybeSingle();
   if (verErr) {
-    return { ok: false, code: "SERVER_ERROR", message: verErr.message };
+    return toServerErrorResult(verErr, "analysis-templates");
   }
   if (!ver) {
     return { ok: false, code: "NOT_FOUND", message: "Version not found." };

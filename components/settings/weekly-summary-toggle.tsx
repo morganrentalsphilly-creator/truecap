@@ -59,10 +59,24 @@ export function WeeklySummaryToggle() {
   const toggle = (next: boolean) => {
     setEnabled(next); // optimistic
     startTransition(async () => {
-      const r = await setWeeklySummaryEmailsAction(next);
-      if (!r.ok) {
+      try {
+        const r = await setWeeklySummaryEmailsAction(next);
+        if (!r.ok) {
+          setEnabled(!next); // rollback
+          toast({ title: "Couldn't update preference", description: r.message, variant: "destructive" });
+        }
+      } catch {
+        // The action REJECTED rather than returning {ok:false}: a network
+        // blip, a cold-start 500, or a tab one deploy behind main. Without
+        // this the optimistic flip sticks — the switch sits "on" while the DB
+        // stayed off, a silent lie. Roll back and tell them it's retryable.
+        // Mirrors login-form.tsx and rate-alerts-toggle.tsx.
         setEnabled(!next); // rollback
-        toast({ title: "Couldn't update preference", description: r.message, variant: "destructive" });
+        toast({
+          title: "Couldn't update preference",
+          description: "Something interrupted the request. Check your connection and try again.",
+          variant: "destructive",
+        });
       }
     });
   };

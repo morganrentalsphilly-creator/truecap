@@ -628,32 +628,46 @@ function WinnerActions({
   const markOthersPassed = () => {
     setConfirmOpen(false);
     startPassing(async () => {
-      const results = await Promise.all(
-        others.map(async (deal) => ({
-          deal,
-          result: await updateSavedDealStageAction(deal.id, "passed"),
-        }))
-      );
-      const failures = results.filter(({ result }) => !result.ok);
-      const passedCount = results.length - failures.length;
-      if (passedCount > 0) {
+      try {
+        const results = await Promise.all(
+          others.map(async (deal) => ({
+            deal,
+            result: await updateSavedDealStageAction(deal.id, "passed"),
+          }))
+        );
+        const failures = results.filter(({ result }) => !result.ok);
+        const passedCount = results.length - failures.length;
+        if (passedCount > 0) {
+          toast({
+            title: `Marked ${passedCount} deal${passedCount === 1 ? "" : "s"} as Passed`,
+            description: "They leave this comparison — find them under Passed in My Deals.",
+            variant: "success",
+          });
+        }
+        for (const { deal, result } of failures) {
+          if (result.ok) continue;
+          toast({
+            title: `Could not mark ${getShortAddress(deal.address)} as Passed`,
+            description: result.message,
+            variant: "destructive",
+          });
+        }
+        // Passed deals drop out of the active compare set on refresh; the
+        // winner stays, ready to open.
+        router.refresh();
+      } catch {
+        // One of the stage updates REJECTED rather than returning {ok:false}
+        // (network blip, cold-start 500, stale-deploy Server Action), so
+        // Promise.all rejected and the whole batch fell through with no signal.
+        // Tell the user it's retryable; a refresh reconciles which deals (if
+        // any) actually moved before the failure.
         toast({
-          title: `Marked ${passedCount} deal${passedCount === 1 ? "" : "s"} as Passed`,
-          description: "They leave this comparison — find them under Passed in My Deals.",
-          variant: "success",
-        });
-      }
-      for (const { deal, result } of failures) {
-        if (result.ok) continue;
-        toast({
-          title: `Could not mark ${getShortAddress(deal.address)} as Passed`,
-          description: result.message,
+          title: "Could not mark deals as Passed",
+          description: "Something interrupted the request. Check your connection and try again.",
           variant: "destructive",
         });
+        router.refresh();
       }
-      // Passed deals drop out of the active compare set on refresh; the
-      // winner stays, ready to open.
-      router.refresh();
     });
   };
 

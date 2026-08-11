@@ -117,7 +117,7 @@ async function resolvePropertyId(
       ok: false,
       result: isMissingSchema(findErr)
         ? { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." }
-        : { ok: false, code: "SERVER_ERROR", message: findErr.message },
+        : toServerErrorResult(findErr, "scenarios"),
     };
   }
 
@@ -133,7 +133,7 @@ async function resolvePropertyId(
         ok: false,
         result: isMissingSchema(createErr ?? {})
           ? { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." }
-          : { ok: false, code: "SERVER_ERROR", message: createErr?.message ?? "Could not create property." },
+          : toServerErrorResult(createErr, "scenarios"),
       };
     }
     propertyId = created.id as string;
@@ -187,7 +187,7 @@ export async function listScenariosAction(dealId: unknown): Promise<ScenariosLis
   if (listErr) {
     return isMissingSchema(listErr)
       ? { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." }
-      : { ok: false, code: "SERVER_ERROR", message: listErr.message };
+      : toServerErrorResult(listErr, "scenarios");
   }
 
   const scenarios: ScenarioSummary[] = (rows ?? []).map((r) => {
@@ -243,7 +243,7 @@ export async function addScenarioAction(input: unknown): Promise<AddScenarioResu
   if (loadErr) {
     return isMissingSchema(loadErr)
       ? { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." }
-      : { ok: false, code: "SERVER_ERROR", message: loadErr.message };
+      : toServerErrorResult(loadErr, "scenarios");
   }
   if (!source) return { ok: false, code: "NOT_FOUND", message: "Source deal not found." };
 
@@ -265,7 +265,7 @@ export async function addScenarioAction(input: unknown): Promise<AddScenarioResu
   if (clashErr) {
     return isMissingSchema(clashErr)
       ? { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." }
-      : { ok: false, code: "SERVER_ERROR", message: clashErr.message };
+      : toServerErrorResult(clashErr, "scenarios");
   }
   const nameTaken = (clash ?? []).some(
     (r) => ((r as { scenario_name: string | null }).scenario_name ?? "Base case").trim().toLowerCase() === scenarioName.toLowerCase()
@@ -282,7 +282,7 @@ export async function addScenarioAction(input: unknown): Promise<AddScenarioResu
     .eq("user_id", user.id)
     .is("deleted_at", null);
   if (countErr) {
-    return { ok: false, code: "SERVER_ERROR", message: countErr.message };
+    return toServerErrorResult(countErr, "scenarios");
   }
   if (!hasSavedDealCapacity(entitlements, count ?? 0)) {
     return {
@@ -334,7 +334,7 @@ export async function addScenarioAction(input: unknown): Promise<AddScenarioResu
   if (insertErr || !inserted) {
     return isMissingSchema(insertErr ?? {})
       ? { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." }
-      : { ok: false, code: "SERVER_ERROR", message: insertErr?.message ?? "Could not create scenario." };
+      : toServerErrorResult(insertErr, "scenarios");
   }
 
   return { ok: true, scenarioId: inserted.id as string };

@@ -24,8 +24,10 @@
  * bypass this action.
  */
 
+import * as Sentry from "@sentry/nextjs";
 import { z } from "zod";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { toServerErrorResult } from "@/lib/db-error";
 import {
   getEntitlementsForUser,
   hasPlanFeature,
@@ -195,11 +197,7 @@ export async function saveBranding(
     .single();
 
   if (error || !data) {
-    return {
-      ok: false,
-      code: "SERVER_ERROR",
-      message: error?.message ?? "Couldn't save branding.",
-    };
+    return toServerErrorResult(error, "branding");
   }
   return { ok: true, branding: data as BrandingRow };
 }
@@ -280,10 +278,14 @@ export async function uploadBrandingLogo(
     });
 
   if (uploadError) {
+    // Storage upload errors can carry bucket/policy internals — don't hand the
+    // raw message to the client. Capture for triage and keep the distinct
+    // UPLOAD_FAILED code (callers branch on it) with a generic message.
+    Sentry.captureException(uploadError, { tags: { feature: "branding" } });
     return {
       ok: false,
       code: "UPLOAD_FAILED",
-      message: uploadError.message || "Upload failed.",
+      message: "Upload failed. Please try again.",
     };
   }
 

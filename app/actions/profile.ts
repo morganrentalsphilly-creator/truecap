@@ -80,7 +80,10 @@ export async function updateProfileAction(input: unknown): Promise<UpdateProfile
   });
 
   if (authUpdateError) {
-    return { ok: false, code: "SERVER", message: authUpdateError.message };
+    // Same reasoning as the profiles UPDATE above: don't leak the raw auth/
+    // Postgres error.message to the client; capture it for triage instead.
+    Sentry.captureException(authUpdateError, { tags: { feature: "profile" } });
+    return { ok: false, code: "SERVER", message: "We couldn't update your profile. Please try again." };
   }
 
   return { ok: true };

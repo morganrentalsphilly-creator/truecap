@@ -57,23 +57,34 @@ export function LeadCaptureForm({
     if (status === "sending") return;
     setStatus("sending");
     setError("");
-    const res = await captureDealLeadAction({
-      ownerId,
-      dealId: dealId ?? undefined,
-      valuesHash,
-      sig: sig ?? undefined,
-      email,
-      name: name || undefined,
-      message: message || undefined,
-      dealAddress,
-      website: website || undefined,
-    });
-    if (res.ok) {
-      setStatus("done");
-      trackEvent("lead_captured", { has_message: Boolean(message.trim()) });
-    } else {
+    try {
+      const res = await captureDealLeadAction({
+        ownerId,
+        dealId: dealId ?? undefined,
+        valuesHash,
+        sig: sig ?? undefined,
+        email,
+        name: name || undefined,
+        message: message || undefined,
+        dealAddress,
+        website: website || undefined,
+      });
+      if (res.ok) {
+        setStatus("done");
+        trackEvent("lead_captured", { has_message: Boolean(message.trim()) });
+      } else {
+        setStatus("error");
+        setError(res.message);
+      }
+    } catch {
+      // The action REJECTED rather than returning {ok:false}: a network blip,
+      // a cold-start 500, or a tab one deploy behind main (Next throws on an
+      // unrecognized Server Action). Without this the form stuck on "sending"
+      // forever and the agent silently lost the lead. Surface it through the
+      // same inline error affordance as a returned failure, and free the
+      // button so the viewer can retry. Mirrors login-form.tsx's catch.
       setStatus("error");
-      setError(res.message);
+      setError("Something interrupted the request. Check your connection and try again.");
     }
   }
 

@@ -61,24 +61,36 @@ export function RateAlertReUnderwriteBanner({
 
   const handleApply = () => {
     startApplying(async () => {
-      const result = await saveDealAction({ ...values, interestRate: alertRatePct }, savedDealId);
-      if (!result.ok) {
+      try {
+        const result = await saveDealAction({ ...values, interestRate: alertRatePct }, savedDealId);
+        if (!result.ok) {
+          toast({
+            title: "Could not apply the rate",
+            description: result.message ?? "Please try again.",
+            variant: "destructive",
+          });
+          return;
+        }
+        toast({
+          title: "Rate applied",
+          description: `This deal now underwrites at ${alertRatePct.toFixed(2)}%.`,
+          variant: "success",
+        });
+        // Strip the ?rate= param (the banner's only mount condition) and
+        // re-render the workspace from the just-updated snapshot.
+        router.replace(`/dashboard/saved-analyses/${savedDealId}`, { scroll: false });
+        router.refresh();
+      } catch {
+        // The action REJECTED rather than returning {ok:false} (network blip,
+        // cold-start 500, stale-deploy Server Action). Without this the "Apply"
+        // button clears its "Applying…" label with no signal and the saved deal
+        // is untouched. Tell the user it's retryable — nothing was mutated.
         toast({
           title: "Could not apply the rate",
-          description: result.message ?? "Please try again.",
+          description: "Something interrupted the request. Check your connection and try again.",
           variant: "destructive",
         });
-        return;
       }
-      toast({
-        title: "Rate applied",
-        description: `This deal now underwrites at ${alertRatePct.toFixed(2)}%.`,
-        variant: "success",
-      });
-      // Strip the ?rate= param (the banner's only mount condition) and
-      // re-render the workspace from the just-updated snapshot.
-      router.replace(`/dashboard/saved-analyses/${savedDealId}`, { scroll: false });
-      router.refresh();
     });
   };
 

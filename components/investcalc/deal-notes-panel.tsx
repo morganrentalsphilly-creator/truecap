@@ -80,26 +80,41 @@ export function DealNotesPanel({ savedDealId }: { savedDealId: string }) {
     const dealIdAtSubmit = savedDealId;
     const notesAtSubmit = notes;
     startTransition(async () => {
-      const result = await updateSavedDealNotesAction(dealIdAtSubmit, notesAtSubmit);
-      if (dealIdAtSubmit !== savedDealId) {
-        // User switched deals while this save was in flight - its
-        // result is no longer relevant. Discard silently.
-        return;
-      }
-      if (!result.ok) {
-        if (result.code === "MIGRATION_PENDING") {
-          setMigrationPending(true);
+      try {
+        const result = await updateSavedDealNotesAction(dealIdAtSubmit, notesAtSubmit);
+        if (dealIdAtSubmit !== savedDealId) {
+          // User switched deals while this save was in flight - its
+          // result is no longer relevant. Discard silently.
           return;
         }
+        if (!result.ok) {
+          if (result.code === "MIGRATION_PENDING") {
+            setMigrationPending(true);
+            return;
+          }
+          toast({
+            title: "Could not save notes",
+            description: result.message,
+            variant: "destructive",
+          });
+          return;
+        }
+        setLastSavedNotes(notesAtSubmit);
+        setSavedTick(Date.now());
+      } catch {
+        // The action REJECTED (network blip, cold-start 500, stale-deploy
+        // Server Action) rather than returning {ok:false}. Without this the
+        // save silently no-ops: lastSavedNotes never advances, so the panel
+        // just falls back to "Auto-saves" as if nothing happened. Tell the
+        // user it's retryable — the typed text is untouched, so re-blurring
+        // retries. Same stale-deal guard as the success path.
+        if (dealIdAtSubmit !== savedDealId) return;
         toast({
           title: "Could not save notes",
-          description: result.message,
+          description: "Something interrupted the request. Check your connection and try again.",
           variant: "destructive",
         });
-        return;
       }
-      setLastSavedNotes(notesAtSubmit);
-      setSavedTick(Date.now());
     });
   };
 

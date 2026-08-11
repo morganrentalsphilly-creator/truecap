@@ -103,23 +103,35 @@ export function UserDefaultsCard() {
       (payload as Record<string, number>)[f.key] = num;
     }
     startSaving(async () => {
-      const result = await saveUserAnalysisDefaultsAction(payload);
-      if (!result.ok) {
-        if (result.code === "MIGRATION_PENDING") {
-          setMigrationPending(true);
+      try {
+        const result = await saveUserAnalysisDefaultsAction(payload);
+        if (!result.ok) {
+          if (result.code === "MIGRATION_PENDING") {
+            setMigrationPending(true);
+            return;
+          }
+          toast({
+            title: "Could not save defaults",
+            description: result.message,
+            variant: "destructive",
+          });
           return;
         }
         toast({
+          title: "Defaults saved",
+          description: "New analyses will pre-fill with these values.",
+        });
+      } catch (err) {
+        // The action REJECTED rather than returning {ok:false} (network blip,
+        // cold-start 500, deploy skew). Without this the Save click is silent
+        // — no toast, no signal it failed. Surface a retryable error.
+        console.warn("[user-defaults] save failed:", err);
+        toast({
           title: "Could not save defaults",
-          description: result.message,
+          description: "Something interrupted the request. Check your connection and try again.",
           variant: "destructive",
         });
-        return;
       }
-      toast({
-        title: "Defaults saved",
-        description: "New analyses will pre-fill with these values.",
-      });
     });
   };
 

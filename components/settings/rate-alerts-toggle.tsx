@@ -53,10 +53,25 @@ export function RateAlertsToggle({
   const toggle = (next: boolean) => {
     setEnabled(next); // optimistic
     startTransition(async () => {
-      const r = await setRateAlertEmailsAction(next);
-      if (!r.ok) {
+      try {
+        const r = await setRateAlertEmailsAction(next);
+        if (!r.ok) {
+          setEnabled(!next); // rollback
+          toast({ title: "Couldn't update preference", description: r.message, variant: "destructive" });
+        }
+      } catch {
+        // The action REJECTED rather than returning {ok:false}: a network
+        // blip, a cold-start 500, or a tab one deploy behind main (Next
+        // throws on an unrecognized Server Action). Without this the
+        // optimistic flip sticks — the switch sits "on" while the DB stayed
+        // off, a silent lie. Roll back to the real value and tell them it's
+        // retryable. Mirrors the guard in login-form.tsx.
         setEnabled(!next); // rollback
-        toast({ title: "Couldn't update preference", description: r.message, variant: "destructive" });
+        toast({
+          title: "Couldn't update preference",
+          description: "Something interrupted the request. Check your connection and try again.",
+          variant: "destructive",
+        });
       }
     });
   };
@@ -72,28 +87,40 @@ export function RateAlertsToggle({
     const enableInline = () => {
       setEnabled(true); // optimistic
       startTransition(async () => {
-        const r = await setRateAlertEmailsAction(true);
-        if (!r.ok) {
+        try {
+          const r = await setRateAlertEmailsAction(true);
+          if (!r.ok) {
+            setEnabled(false);
+            toast({
+              title: "Couldn't enable alerts",
+              description: r.message,
+              variant: "destructive",
+            });
+          } else {
+            toast(
+              alertsLive
+                ? {
+                    title: "Rate alerts on",
+                    description:
+                      "We'll email you only when a rate move flips a saved deal's verdict.",
+                  }
+                : {
+                    title: "You're on the list",
+                    description:
+                      "Email alerts are launching soon — you'll hear about rate moves that flip a saved deal's verdict.",
+                  }
+            );
+          }
+        } catch {
+          // Action rejected rather than returning {ok:false} — roll the
+          // optimistic enable back off so the nudge doesn't vanish claiming
+          // success, and surface a retryable error. Mirrors login-form.tsx.
           setEnabled(false);
           toast({
             title: "Couldn't enable alerts",
-            description: r.message,
+            description: "Something interrupted the request. Check your connection and try again.",
             variant: "destructive",
           });
-        } else {
-          toast(
-            alertsLive
-              ? {
-                  title: "Rate alerts on",
-                  description:
-                    "We'll email you only when a rate move flips a saved deal's verdict.",
-                }
-              : {
-                  title: "You're on the list",
-                  description:
-                    "Email alerts are launching soon — you'll hear about rate moves that flip a saved deal's verdict.",
-                }
-          );
         }
       });
     };

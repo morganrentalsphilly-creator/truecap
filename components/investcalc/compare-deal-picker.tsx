@@ -56,15 +56,27 @@ export function CompareDealPicker({ deals }: { deals: ComparePickerDeal[] }) {
   const onCompare = () => {
     if (!canCompare || isPending) return;
     startTransition(async () => {
-      const result = await startCompareAction(selected);
-      if (result.ok) {
-        // Cookie is now set server-side; re-run the page's server component so
-        // it reads the new selection and renders the comparison in place.
-        router.refresh();
-      } else {
+      try {
+        const result = await startCompareAction(selected);
+        if (result.ok) {
+          // Cookie is now set server-side; re-run the page's server component so
+          // it reads the new selection and renders the comparison in place.
+          router.refresh();
+        } else {
+          toast({
+            title: "Could not start comparison",
+            description: result.message,
+            variant: "destructive",
+          });
+        }
+      } catch {
+        // The action REJECTED rather than returning {ok:false} (network blip,
+        // cold-start 500, stale-deploy Server Action). Without this the Compare
+        // button spinner clears with nothing happening. Tell the user it's
+        // retryable — the selection is preserved.
         toast({
           title: "Could not start comparison",
-          description: result.message,
+          description: "Something interrupted the request. Check your connection and try again.",
           variant: "destructive",
         });
       }

@@ -190,32 +190,45 @@ export function BuyBoxesCard() {
     if (!editor) return;
     const name = editor.name.trim() || "My Buy Box";
     startSaving(async () => {
-      const result = await upsertBuyBoxAction({
-        id: editor.id,
-        name,
-        strategyKind: editor.strategyKind || null,
-        minCapRatePct: parseNum(editor.fields.minCapRatePct),
-        minCocPct: parseNum(editor.fields.minCocPct),
-        minDscr: parseNum(editor.fields.minDscr),
-        minCashFlowMonthly: parseNum(editor.fields.minCashFlowMonthly),
-        maxPurchasePrice: parseNum(editor.fields.maxPurchasePrice),
-        propertyTypes: editor.propertyTypes,
-        targetStates: editor.targetStates,
-        isActive: editor.isActive,
-        isDefault: editor.isDefault,
-      });
-      if (applyResult(result)) {
-        trackEvent("buy_box_saved", {
-          source: "settings",
-          is_new: !editor.id,
-          is_default: editor.isDefault,
-          has_strategy: Boolean(editor.strategyKind),
+      try {
+        const result = await upsertBuyBoxAction({
+          id: editor.id,
+          name,
+          strategyKind: editor.strategyKind || null,
+          minCapRatePct: parseNum(editor.fields.minCapRatePct),
+          minCocPct: parseNum(editor.fields.minCocPct),
+          minDscr: parseNum(editor.fields.minDscr),
+          minCashFlowMonthly: parseNum(editor.fields.minCashFlowMonthly),
+          maxPurchasePrice: parseNum(editor.fields.maxPurchasePrice),
+          propertyTypes: editor.propertyTypes,
+          targetStates: editor.targetStates,
+          isActive: editor.isActive,
+          isDefault: editor.isDefault,
         });
-        // Evaluation is best-effort server-side — no fit means no line,
-        // never a failed save.
-        setSaveFit(result.ok && result.fit ? result.fit : null);
-        setEditor(null);
-        toast({ title: editor.id ? "Buy box updated" : "Buy box added" });
+        if (applyResult(result)) {
+          trackEvent("buy_box_saved", {
+            source: "settings",
+            is_new: !editor.id,
+            is_default: editor.isDefault,
+            has_strategy: Boolean(editor.strategyKind),
+          });
+          // Evaluation is best-effort server-side — no fit means no line,
+          // never a failed save.
+          setSaveFit(result.ok && result.fit ? result.fit : null);
+          setEditor(null);
+          toast({ title: editor.id ? "Buy box updated" : "Buy box added" });
+        }
+      } catch (err) {
+        // The action REJECTED rather than returning {ok:false} (network blip,
+        // cold-start 500, deploy skew). applyResult never runs, so without
+        // this the click is silent — the editor stays open with no feedback.
+        // Surface a retryable error, matching applyResult's own error title.
+        console.warn("[buy-boxes] save failed:", err);
+        toast({
+          title: "Buy box error",
+          description: "Something interrupted the request. Check your connection and try again.",
+          variant: "destructive",
+        });
       }
     });
   }
@@ -228,19 +241,47 @@ export function BuyBoxesCard() {
     // being deleted — drop it rather than risk a stale claim.
     setSaveFit(null);
     startSaving(async () => {
-      const result = await deleteBuyBoxAction(id);
-      // Say it happened: the row just vanishing was the only feedback.
-      if (applyResult(result)) toast({ title: "Buy box deleted", description: name });
-      setBusyId(null);
+      try {
+        const result = await deleteBuyBoxAction(id);
+        // Say it happened: the row just vanishing was the only feedback.
+        if (applyResult(result)) toast({ title: "Buy box deleted", description: name });
+      } catch (err) {
+        // Action rejected rather than returning {ok:false} — surface a
+        // retryable error instead of leaving the row spinning silently.
+        console.warn("[buy-boxes] delete failed:", err);
+        toast({
+          title: "Buy box error",
+          description: "Something interrupted the request. Check your connection and try again.",
+          variant: "destructive",
+        });
+      } finally {
+        // ALWAYS clear the row's busy state — a throw before this left the
+        // delete button spinning forever.
+        setBusyId(null);
+      }
     });
   }
 
   function handleSetDefault(id: string) {
     setBusyId(id);
     startSaving(async () => {
-      const result = await setDefaultBuyBoxAction(id);
-      applyResult(result);
-      setBusyId(null);
+      try {
+        const result = await setDefaultBuyBoxAction(id);
+        applyResult(result);
+      } catch (err) {
+        // Action rejected rather than returning {ok:false} — surface a
+        // retryable error instead of leaving the row spinning silently.
+        console.warn("[buy-boxes] set-default failed:", err);
+        toast({
+          title: "Buy box error",
+          description: "Something interrupted the request. Check your connection and try again.",
+          variant: "destructive",
+        });
+      } finally {
+        // ALWAYS clear the row's busy state — a throw before this left the
+        // "Make default" button spinning forever.
+        setBusyId(null);
+      }
     });
   }
 
