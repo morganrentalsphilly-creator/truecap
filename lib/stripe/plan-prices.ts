@@ -32,6 +32,11 @@ export const PAID_PLAN_SLUGS: readonly PaidPlanSlug[] = [
   "agent_pro_annual",
 ] as const;
 
+/** Type guard for the canonical paid-slug list. */
+export function isPaidPlanSlug(s: string | null | undefined): s is PaidPlanSlug {
+  return typeof s === "string" && (PAID_PLAN_SLUGS as readonly string[]).includes(s);
+}
+
 function envForSlug(slug: PaidPlanSlug): string | undefined {
   switch (slug) {
     case "pro_monthly":

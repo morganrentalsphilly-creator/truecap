@@ -198,7 +198,7 @@ export default async function PricingPage() {
               points back here with ?billing=checkout_cancelled. Suspense keeps
               the page's rendering unaffected by the banner's useSearchParams. */}
           <Suspense fallback={null}>
-            <CheckoutCancelledBanner />
+            <CheckoutCancelledBanner hadPriorSubscription={hadPriorSubscription} />
           </Suspense>
           <PricingTogglePlans
             monthly={monthly}

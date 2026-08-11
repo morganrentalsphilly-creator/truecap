@@ -66,9 +66,15 @@ export function BillingSuccessBanner({
   /** Plan list price (dollars) resolved server-side on /home-authed; the
    *  static-page mount omits it and the conversion fires with value 0. */
   conversionValue,
+  purchasedPlanSlug,
 }: {
   conversionValue?: number;
+  /** Which tier the checkout bought (resolved server-side from the session).
+   *  Absent on the static mount or when resolution fails — copy then stays
+   *  tier-neutral rather than guessing. */
+  purchasedPlanSlug?: string;
 }) {
+  const boughtAgentPro = purchasedPlanSlug?.startsWith("agent_pro") ?? false;
   const router = useRouter();
   const searchParams = useSearchParams();
   // Capture the params ONCE via a lazy useState initializer — the cleanup
@@ -232,12 +238,17 @@ export function BillingSuccessBanner({
                 {proLive ? (
                   <>
                     <p className="leading-relaxed text-foreground">
-                      <strong className="font-bold">Pro is live —</strong>{" "}
+                      <strong className="font-bold">{boughtAgentPro ? "Agent Pro is live —" : "Pro is live —"}</strong>{" "}
                       <span className="text-muted-foreground">
                         {`here's what you unlocked:`}
                       </span>
                     </p>
                     <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1">
+                      {boughtAgentPro ? (
+                        <a href="/settings" className={unlockLinkClass}>
+                          Set up your client roster
+                        </a>
+                      ) : null}
                       <button type="button" onClick={goToSaveDeal} className={unlockLinkClass}>
                         Save this deal
                       </button>
@@ -251,7 +262,7 @@ export function BillingSuccessBanner({
                   </>
                 ) : (
                   <p className="leading-relaxed text-foreground">
-                    <strong className="font-bold">Pro unlocked —</strong>{" "}
+                    <strong className="font-bold">{boughtAgentPro ? "Agent Pro unlocked —" : "Pro unlocked —"}</strong>{" "}
                     <span className="text-muted-foreground">
                       your subscription is confirmed and Pro is activating on your account (this
                       can take a few seconds). Pick up where you left off below and save your

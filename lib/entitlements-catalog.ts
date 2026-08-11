@@ -76,6 +76,13 @@ export interface FeatureSpec {
   category: FeatureCategory;
   /** How it's gated at runtime — "flag" = plans.entitlements feature string; "paid" = paid-plan status only; "always" = everyone; "stripe_one_time" = $5 checkout. */
   gate: "flag" | "paid" | "always" | "stripe_one_time";
+  /**
+   * false = the entitlement exists in the plan JSON but the FEATURE isn't built
+   * yet, so marketing must NOT advertise it. Keeps the tier's entitlement bag
+   * forward-compatible (flip to true when the feature ships — no migration)
+   * without selling vapor on the pricing card. Defaults to shipped.
+   */
+  shipped?: boolean;
 }
 
 /**
@@ -108,8 +115,8 @@ export const FEATURE_CATALOG: Record<FeatureKey, FeatureSpec> = {
   buy_box: { key: "buy_box", label: "Buy Box — auto-screen every deal to your criteria", tiers: ["pro", "agent_pro"], category: "pipeline", gate: "flag" },
   pipeline: { key: "pipeline", label: "Deal pipeline + tags (CRM)", tiers: ["pro", "agent_pro"], category: "pipeline", gate: "flag" },
   client_buy_box: { key: "client_buy_box", label: "Client rosters — buy boxes per buyer, deals screened to each client's criteria", tiers: ["agent_pro"], category: "pipeline", gate: "flag" },
-  agent_portal: { key: "agent_portal", label: "Client portal — co-branded deal pages your buyers revisit", tiers: ["agent_pro"], category: "reporting", gate: "flag" },
-  embed_whitelabel: { key: "embed_whitelabel", label: "White-label embeds — calculators on your site, your brand only", tiers: ["agent_pro"], category: "reporting", gate: "flag" },
+  agent_portal: { key: "agent_portal", label: "Client portal — co-branded deal pages your buyers revisit", tiers: ["agent_pro"], category: "reporting", gate: "flag", shipped: false },
+  embed_whitelabel: { key: "embed_whitelabel", label: "White-label embeds — calculators on your site, your brand only", tiers: ["agent_pro"], category: "reporting", gate: "flag", shipped: false },
 };
 
 /** Does a tier include a feature? Use for marketing AND as a cross-check in tests. */

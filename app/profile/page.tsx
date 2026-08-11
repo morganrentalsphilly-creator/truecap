@@ -7,7 +7,7 @@ import { ProfileForm } from "@/components/profile/profile-form";
 import { getEntitlementsForUser } from "@/lib/entitlements";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getStripe } from "@/lib/stripe/client";
-import { getPrimaryPlanPriceId, isAgentProConfigured, PAID_PLAN_SLUGS, type PaidPlanSlug } from "@/lib/stripe/plan-prices";
+import { getPrimaryPlanPriceId, isAgentProConfigured, isPaidPlanSlug, PAID_PLAN_SLUGS, type PaidPlanSlug } from "@/lib/stripe/plan-prices";
 
 export const metadata: Metadata = {
   title: "Profile & Billing",
@@ -53,7 +53,7 @@ function formatCurrency(cents: number, currency: string): string {
 
 function formatPrice(planSlug: PaidPlanSlug, stripePrice?: StripePriceDisplay): string {
   if (stripePrice) return stripePrice.priceLabel;
-  if (planSlug === "pro_annual") return "25% off";
+  if (planSlug === "pro_annual") return "17% off";
   if (planSlug.startsWith("agent_pro")) return "Agent Pro";
   return "Pro";
 }
@@ -186,7 +186,7 @@ export default async function ProfilePage({
       title: getPlanTitle(slug),
       intervalLabel: stripePriceDisplays[slug]?.intervalLabel ?? (slug.endsWith("_annual") ? "year" : "month"),
       priceLabel: formatPrice(slug, stripePriceDisplays[slug]),
-      badge: slug === "pro_annual" ? "25% off" : undefined,
+      badge: slug === "pro_annual" ? "17% off" : undefined,
       description: slug.startsWith("agent_pro")
         ? slug.endsWith("_annual")
           ? "Everything in Pro + the agent toolkit, billed yearly."
@@ -196,10 +196,12 @@ export default async function ProfilePage({
           : "Full Pro access billed monthly.",
       features: slug.startsWith("agent_pro")
         ? [
+            // Only ship-verified agent features — the client portal and
+            // white-label embeds are entitlements without an implementation
+            // yet (catalog `shipped: false`), so advertising them here would
+            // repeat the pricing card's vapor. Add them back when they ship.
             "Everything in Pro",
             "Client rosters + per-client buy boxes",
-            "Co-branded client deal pages",
-            "White-label embeds",
           ]
         : [
             "Save and compare deals",
@@ -254,12 +256,13 @@ export default async function ProfilePage({
               ? {
                   status: String(subscription.status),
                   planSlug: currentPlan?.slug ?? null,
-                  planName:
-                    currentPlan?.slug === "pro_annual"
-                      ? "Pro Annual"
-                      : currentPlan?.slug === "pro_monthly"
-                        ? "Pro Monthly"
-                        : "Pro",
+                  // getPlanTitle knows every paid slug — the old inline ternary
+                  // only knew the two pro_* slugs, so the first Agent Pro
+                  // subscriber saw their $59.99 plan labeled "Pro" ($29.99's
+                  // name) right next to the switcher card that knew better.
+                  planName: isPaidPlanSlug(currentPlan?.slug)
+                    ? getPlanTitle(currentPlan.slug)
+                    : "Pro",
                   currentPeriodStart: subscription.current_period_start,
                   currentPeriodEnd: subscription.current_period_end,
                   cancelAtPeriodEnd: Boolean(subscription.cancel_at_period_end) || isSubscriptionCancelReturn,
@@ -287,9 +290,9 @@ export default async function ProfilePage({
                     slug: "pro_annual",
                     title: "Pro Annual",
                     intervalLabel: "year",
-                    priceLabel: "25% off",
-                    badge: "25% off",
-                    description: "Full Pro access billed yearly with 25% savings.",
+                    priceLabel: "17% off",
+                    badge: "17% off",
+                    description: "Full Pro access billed yearly with 17% savings.",
                     features: [
                       "Save and compare deals",
                       "10-year projections",

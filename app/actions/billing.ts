@@ -283,7 +283,14 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
     // A campaign coupon from the URL (e.g. the post-analysis ANALYZE20) takes
     // precedence over the standard annual coupon, and applies to monthly OR
     // annual. Both resolve to a Stripe coupon id we control.
-    const offerCoupon = resolveOfferCouponId(parsed.data.offer);
+    //
+    // PRO TIER ONLY: every campaign coupon was priced against the $29.99 Pro
+    // tier. Without this scope, a drip recipient carrying ?coupon=ANALYZE20
+    // who clicked the Agent Pro card got 20% off $59.99 — and stacked the
+    // discount onto the already-pre-discounted $590 annual. (2026-08-11 audit.)
+    const offerCoupon = parsed.data.planSlug.startsWith("agent_pro")
+      ? null
+      : resolveOfferCouponId(parsed.data.offer);
     // STRIPE_ANNUAL_DISCOUNT_COUPON_ID exists for the Pro annual price only.
     // agent_pro_annual must be created in Stripe at its final (already
     // discounted) amount — stacking this coupon on it would double-discount.

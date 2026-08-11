@@ -19,6 +19,7 @@
  * behaves that way.
  */
 import { describe, expect, it } from "vitest";
+import { execSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { FEATURE_CATALOG, tierHas, type FeatureKey } from "@/lib/entitlements-catalog";
@@ -96,5 +97,45 @@ describe("catalog matches what the product actually does", () => {
   it("free-tier saving stays freemium (5 deals), matching lib/entitlements", () => {
     expect(tierHas("free", "save_deal")).toBe(true);
     expect(FEATURE_CATALOG.save_deal.freeLimit).toMatch(/5/);
+  });
+});
+
+describe("unshipped entitlements never reach a marketing surface", () => {
+  // agent_portal + embed_whitelabel exist in the plan JSON (forward-compat)
+  // but have NO implementation — a 2026-08-11 audit found the live Agent Pro
+  // card selling both. `shipped: false` is the contract that keeps an
+  // entitlement string out of marketing until the feature exists.
+  const unshipped = (Object.values(FEATURE_CATALOG) as { key: string; shipped?: boolean; label: string }[])
+    .filter((f) => f.shipped === false);
+
+  it("flipping one to shipped requires a real runtime consumer", () => {
+    // The contract: an agent feature may only be advertised once something
+    // actually gates on it. If a future change flips shipped:true (or removes
+    // the flag) without wiring hasPlanFeature("<key>") anywhere, this fails.
+    const sources = execSync("git ls-files app components", { cwd: ROOT, encoding: "utf8" })
+      .split("\n")
+      .filter((f) => /\.(ts|tsx)$/.test(f))
+      .map((f) => readFileSync(join(ROOT, f), "utf8"))
+      .join("\n");
+    for (const key of ["agent_portal", "embed_whitelabel"] as const) {
+      const flaggedUnshipped = FEATURE_CATALOG[key].shipped === false;
+      const hasConsumer = sources.includes(`hasPlanFeature(entitlements, "${key}")`) ||
+        sources.includes(`hasPlanFeature(ent, "${key}")`);
+      expect(
+        flaggedUnshipped || hasConsumer,
+        `${key} is marked shipped but nothing consumes it — build the feature before advertising it`
+      ).toBe(true);
+    }
+  });
+
+  it("pricing card + profile switcher render no unshipped feature label", () => {
+    const toggleSrc = readFileSync(join(ROOT, "components/marketing/pricing-toggle-plans.tsx"), "utf8");
+    const profileSrc = readFileSync(join(ROOT, "app/profile/page.tsx"), "utf8");
+    expect(toggleSrc).toMatch(/f\.shipped !== false/);
+    for (const f of unshipped) {
+      // The literal label must not be hand-typed on either surface (comments
+      // mentioning the concept are fine — we match the exact marketing label).
+      expect(profileSrc).not.toContain(f.label);
+    }
   });
 });

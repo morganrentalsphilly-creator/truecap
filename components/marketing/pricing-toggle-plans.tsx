@@ -82,6 +82,10 @@ const AGENT_PRO_FEATURES: string[] = [
   "Everything in Pro, plus —",
   ...featuresForTier("agent_pro")
     .filter((f) => !f.tiers.includes("pro"))
+    // Don't advertise an entitlement whose feature isn't built yet (client
+    // portal, white-label embeds). The strings stay in the plan JSON so the
+    // day they ship it's a one-line flip — but the card must not sell vapor.
+    .filter((f) => f.shipped !== false)
     .map((f) => f.label),
 ];
 

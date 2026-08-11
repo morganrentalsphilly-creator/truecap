@@ -337,6 +337,22 @@ export async function upsertBuyBoxAction(input: unknown): Promise<BuyBoxesAction
   if (!auth.ok) return auth.result;
   const userId = auth.userId;
 
+  // A box may only be scoped to a client the CALLER owns. The FK alone can't
+  // enforce that (constraint checks bypass RLS), so without this a caller
+  // could attach their box to another agent's client UUID — harmless to the
+  // other agent's data but a silent cross-tenant reference we never want.
+  if (parsed.data.clientId != null) {
+    const { data: ownedClient } = await supabase
+      .from("agent_clients")
+      .select("id")
+      .eq("id", parsed.data.clientId)
+      .eq("agent_user_id", userId)
+      .maybeSingle();
+    if (!ownedClient) {
+      return { ok: false, code: "VALIDATION_ERROR", message: "That client doesn't exist on your roster." };
+    }
+  }
+
   const targetStates = parsed.data.targetStates
     .map((s) => s.toUpperCase())
     .filter((s) => KNOWN_STATE_ABBRS.has(s));

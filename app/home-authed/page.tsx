@@ -46,6 +46,7 @@ import {
 } from "@/lib/entitlements";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getStripe } from "@/lib/stripe/client";
+import { planSlugFromPriceId, type PaidPlanSlug } from "@/lib/stripe/plan-prices";
 
 export const metadata: Metadata = {
   // Same title/description as the static homepage (this IS the homepage
@@ -87,6 +88,7 @@ export default async function AuthedHome({
   // client-side from the URL params and NEVER depends on this lookup.
   const resolvedSearchParams = (await searchParams) ?? {};
   let billingConversionValue: number | undefined;
+  let billingPurchasedPlan: PaidPlanSlug | null = null;
   if (
     resolvedSearchParams.billing === "success" &&
     user &&
@@ -102,8 +104,12 @@ export default async function AuthedHome({
         });
         // Only trust a session this user actually started.
         if (session.client_reference_id === user.id) {
-          const unitAmount = session.line_items?.data?.[0]?.price?.unit_amount;
-          if (unitAmount != null) billingConversionValue = unitAmount / 100;
+          const purchasedPrice = session.line_items?.data?.[0]?.price;
+          if (purchasedPrice?.unit_amount != null) billingConversionValue = purchasedPrice.unit_amount / 100;
+          // Which tier did they buy? The success banner used to hardcode
+          // "Pro is live" — an Agent Pro buyer's first post-payment words
+          // named the cheaper tier and pointed at none of the agent tools.
+          billingPurchasedPlan = planSlugFromPriceId(purchasedPrice?.id);
         }
       } catch (error) {
         console.warn(
@@ -186,7 +192,7 @@ export default async function AuthedHome({
           pull the new subscriber toward completing the save. Renders
           nothing without the billing param. */}
       <Suspense fallback={null}>
-        <BillingSuccessBanner conversionValue={billingConversionValue} />
+        <BillingSuccessBanner conversionValue={billingConversionValue} purchasedPlanSlug={billingPurchasedPlan ?? undefined} />
       </Suspense>
       {/* Full landing experience ONLY for cold visitors (anon fallback —
           the canonical anon homepage is the static app/page.tsx, and this

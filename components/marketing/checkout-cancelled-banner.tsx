@@ -16,7 +16,18 @@ import { useSearchParams } from "next/navigation";
 import { Info, X } from "lucide-react";
 import { TRIAL_LABEL } from "@/lib/trial";
 
-export function CheckoutCancelledBanner() {
+export function CheckoutCancelledBanner({
+  hadPriorSubscription = false,
+}: {
+  /**
+   * Mirrors the checkout repeat-trial guard (billing.ts grants the trial only
+   * to first-time subscribers). Without it this banner promised a returning
+   * ex-subscriber their "14-day free trial is still here" seconds after they
+   * bailed from a checkout showing an immediate charge — the exact
+   * promise-vs-behavior contradiction the trial copy elsewhere avoids.
+   */
+  hadPriorSubscription?: boolean;
+}) {
   const searchParams = useSearchParams();
   const [dismissed, setDismissed] = useState(false);
 
@@ -36,7 +47,9 @@ export function CheckoutCancelledBanner() {
           {/* One template string, not `{TRIAL_LABEL} is…` JSX segments — the
               SSR comment separators between segments ate the space after the
               expression in prod ("trialis"). */}
-          {`Your ${TRIAL_LABEL} is still here whenever you're ready.`}
+          {hadPriorSubscription
+            ? "Your plan is here whenever you're ready to pick it back up."
+            : `Your ${TRIAL_LABEL} is still here whenever you're ready.`}
         </span>
       </p>
       <button
