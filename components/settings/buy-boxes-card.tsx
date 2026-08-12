@@ -10,10 +10,10 @@
  * applied (MIGRATION_PENDING). Free users see the Pro upsell.
  */
 
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import * as Sentry from "@sentry/nextjs";
 import Link from "next/link";
-import { Loader2, Lock, Plus, Save, Star, Target, Trash2, X } from "lucide-react";
+import { Loader2, Lock, Plus, Save, Star, Target, Trash2, UserRound, X } from "lucide-react";
 import {
   deleteBuyBoxAction,
   listBuyBoxesAction,
@@ -154,6 +154,27 @@ export function BuyBoxesCard() {
     };
   }, []);
   const [editor, setEditor] = useState<EditorState | null>(null);
+  // Deep link from /dashboard/clients ("Set their buy box"). Landing on a
+  // generic list left the agent to discover that the client selector lives
+  // inside the editor — so arrive with the editor already open and scoped to
+  // that buyer. Runs once, after the roster resolves so the name is available.
+  const seededClientRef = useRef(false);
+  useEffect(() => {
+    if (seededClientRef.current || !canUse || !clients) return;
+    const params = new URLSearchParams(window.location.search);
+    const requested = params.get("buyBoxFor");
+    if (!requested) return;
+    const client = clients.find((c) => c.id === requested);
+    if (!client) return; // not on this agent's roster — ignore silently
+    seededClientRef.current = true;
+    // Reuse an existing box for this client rather than creating a duplicate.
+    const existing = boxes.find((b) => b.clientId === client.id);
+    if (existing) {
+      setEditor(boxToEditor(existing));
+    } else {
+      setEditor({ ...emptyEditor(boxes.length === 0), name: `${client.name}'s criteria`, clientId: client.id });
+    }
+  }, [canUse, clients, boxes]);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [isSaving, startSaving] = useTransition();
   // Which row's delete-confirm popover is open. Deleting a box is a hard
@@ -389,6 +410,15 @@ export function BuyBoxesCard() {
                   {!box.isActive ? (
                     <span className="rounded-full border border-border px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
                       Off
+                    </span>
+                  ) : null}
+                  {/* Agent Pro: whose criteria is this? Without it, an agent
+                      running boxes for several buyers cannot tell their rows
+                      apart — the client was only visible inside the editor. */}
+                  {box.clientId && clients ? (
+                    <span className="inline-flex items-center gap-1 rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
+                      <UserRound className="size-2.5" />
+                      {clients.find((c) => c.id === box.clientId)?.name ?? "Client"}
                     </span>
                   ) : null}
                 </div>

@@ -284,7 +284,7 @@ export function ClientsWorkspace({
                   </span>
                 )}
                 <Link
-                  href="/settings#buy-boxes"
+                  href={`/settings?buyBoxFor=${c.id}#buy-boxes`}
                   className="ml-auto text-xs font-semibold text-primary hover:underline"
                 >
                   Set their buy box

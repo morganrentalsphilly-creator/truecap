@@ -154,7 +154,7 @@ function Metric({
 }
 
 const DEAL_SELECT =
-  "id, address, title, property_type, purchase_price, form_snapshot, result_snapshot, net_cash_flow_monthly, pipeline_stage, is_completed, created_at, client_id";
+  "id, address, title, property_type, purchase_price, form_snapshot, result_snapshot, net_cash_flow_monthly, pipeline_stage, is_completed, created_at";
 
 /**
  * Load the deal with the optional investor nickname (labels migration) and the
@@ -180,8 +180,16 @@ async function fetchDeal(
     !!error && (error.code === "42703" || /column .* does not exist/i.test(error.message ?? ""));
 
   const WITH_LABELS_SELECT = `${DEAL_SELECT}, nickname`;
-  const full = await run(`${WITH_LABELS_SELECT}, close_date`);
+  // client_id ships in the NEWEST migration (20260811120000, Agent Pro), so it
+  // is the first column dropped. It must never live in DEAL_SELECT: that is
+  // this ladder's floor, and a deployment without the Agent Pro migration would
+  // fail EVERY rung — 500ing the deal workspace for every user, not just agents.
+  const full = await run(`${WITH_LABELS_SELECT}, close_date, client_id`);
   if (!isMissingColumn(full.error)) return { data: full.data, ownedEquityEnabled: true };
+  // client_id missing → retry the same columns without it. agentClients is
+  // already empty on such a deployment, so the picker stays hidden anyway.
+  const fullNoClient = await run(`${WITH_LABELS_SELECT}, close_date`);
+  if (!isMissingColumn(fullNoClient.error)) return { data: fullNoClient.data, ownedEquityEnabled: true };
   // T2 succeeding pins T1's 42703 on close_date (equity stays off). T2
   // failing means NICKNAME is the missing one — close_date may still exist
   // (migrations applied out of order), so probe it alone before giving up

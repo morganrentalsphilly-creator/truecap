@@ -86,6 +86,23 @@ describe("a client-scoped deal list isn't narrowed by the default state filter",
 });
 
 describe("client_id never sits in the select-fallback floor", () => {
+  // This bug was made TWICE during the build — once per page. Both ladders are
+  // pinned here. The rule: a column from the newest migration goes on the
+  // FULLEST select (dropped first), never on the base (which would make every
+  // rung fail on an un-migrated deployment and take the page down for all users).
+  it("the deal WORKSPACE's DEAL_SELECT omits client_id", () => {
+    const src = read("app/dashboard/saved-analyses/[id]/page.tsx");
+    const base = src.slice(src.indexOf("const DEAL_SELECT"), src.indexOf("/**", src.indexOf("const DEAL_SELECT")));
+    expect(base).not.toContain("client_id");
+  });
+
+  it("the deal WORKSPACE requests client_id only on its fullest select", () => {
+    const src = read("app/dashboard/saved-analyses/[id]/page.tsx");
+    expect(src).toMatch(/close_date, client_id/);
+    // …and falls back to the same columns without it.
+    expect(src).toMatch(/const fullNoClient = await run\(`\$\{WITH_LABELS_SELECT\}, close_date`\)/);
+  });
+
   it("BASE_SELECT omits client_id so an un-migrated deployment still lists deals", () => {
     // BASE_SELECT is the last rung of the isMissingColumn ladder. Putting a
     // newest-migration column there makes EVERY rung fail — taking the deals
