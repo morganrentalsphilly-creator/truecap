@@ -24,6 +24,11 @@ export function ForgotPasswordForm() {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  // Turnstile could not run (blocked/timed out). Stop waiting for a token —
+  // a captcha the user cannot solve must not be a permanent lockout. Supabase
+  // still enforces server-side, so this only changes the failure MODE from a
+  // dead button to a real error message.
+  const [captchaUnavailable, setCaptchaUnavailable] = useState(false);
   const [sent, setSent] = useState(false);
 
   const form = useForm<ForgotPasswordInput>({
@@ -107,12 +112,12 @@ export function ForgotPasswordForm() {
             </FormItem>
           )}
         />
-        <CaptchaWidget onToken={setCaptchaToken} />
+        <CaptchaWidget onToken={setCaptchaToken} onUnavailable={() => setCaptchaUnavailable(true)} />
 
         <Button
           type="submit"
           className="h-12 w-full rounded-xl bg-primary text-sm font-semibold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.22)] hover:bg-primary/95"
-          disabled={isSubmitting || (captchaEnabled && !captchaToken)}
+          disabled={isSubmitting || (captchaEnabled && !captchaUnavailable && !captchaToken)}
         >
           {isSubmitting ? (
             <>

@@ -146,8 +146,16 @@ export async function loadClientPortal(input: {
     } catch {
       clientBoxes = []; // fit is an enhancement; never fail the portal for it
     }
-    const criteriaSummary =
-      clientBoxes.length > 0 ? summarizeBuyBoxCriteria(clientBoxes[0]!) : null;
+    // Grade against ONE box so the stated criteria and the verdict describe the
+    // same bar. Showing box A's criteria while a deal could pass on box B made
+    // "Meets your criteria" unexplainable to the buyer. Default box first, then
+    // priority order — the same box the agent sees as primary.
+    const primaryBox =
+      clientBoxes.find((b) => b.isDefault) ??
+      [...clientBoxes].sort((a, b) => a.sortOrder - b.sortOrder)[0] ??
+      null;
+    if (primaryBox) clientBoxes = [primaryBox];
+    const criteriaSummary = primaryBox ? summarizeBuyBoxCriteria(primaryBox) : null;
 
     const deals: PortalDeal[] = [];
     for (const row of (rows ?? []) as DealRow[]) {

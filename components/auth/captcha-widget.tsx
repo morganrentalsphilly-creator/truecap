@@ -53,14 +53,38 @@ declare global {
 
 const SCRIPT_SRC = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
 
+/** Give up on Cloudflare after this long. Without a ceiling a blocked or slow
+ *  request to challenges.cloudflare.com never settles, and the submit button —
+ *  which waits on a token — stays disabled forever. */
+const SCRIPT_TIMEOUT_MS = 8000;
+
 function loadScript(): Promise<TurnstileApi | null> {
   if (window.turnstile) return Promise.resolve(window.turnstile);
   return new Promise((resolve) => {
+    let settled = false;
+    const finish = (api: TurnstileApi | null) => {
+      if (settled) return;
+      settled = true;
+      resolve(api);
+    };
+    // Corporate proxies, ad blockers and network blips all produce a request
+    // that simply never completes; treat that as "no captcha available".
+    const timer = setTimeout(() => finish(null), SCRIPT_TIMEOUT_MS);
     const existing = document.querySelector<HTMLScriptElement>(`script[src="${SCRIPT_SRC}"]`);
     const script = existing ?? document.createElement("script");
-    const done = () => resolve(window.turnstile ?? null);
+    const done = () => {
+      clearTimeout(timer);
+      finish(window.turnstile ?? null);
+    };
     script.addEventListener("load", done, { once: true });
-    script.addEventListener("error", () => resolve(null), { once: true });
+    script.addEventListener(
+      "error",
+      () => {
+        clearTimeout(timer);
+        finish(null);
+      },
+      { once: true }
+    );
     if (!existing) {
       script.src = SCRIPT_SRC;
       script.async = true;
@@ -71,7 +95,21 @@ function loadScript(): Promise<TurnstileApi | null> {
   });
 }
 
-export function CaptchaWidget({ onToken }: { onToken: (token: string | null) => void }) {
+export function CaptchaWidget({
+  onToken,
+  onUnavailable,
+}: {
+  onToken: (token: string | null) => void;
+  /**
+   * Fired when Turnstile cannot run at all (script blocked, timed out, or the
+   * widget errored). The form uses this to STOP gating submit on a token:
+   * a captcha the user cannot solve must not become a permanent lockout.
+   * Supabase still enforces server-side, so this cannot be used to bypass —
+   * the request simply fails there with a clear message instead of the button
+   * being dead with no explanation.
+   */
+  onUnavailable?: () => void;
+}) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   // Keep the latest callback without re-rendering the widget on parent renders
   // (updated in an effect — writing a ref during render breaks React's rules).
@@ -79,18 +117,29 @@ export function CaptchaWidget({ onToken }: { onToken: (token: string | null) => 
   useEffect(() => {
     onTokenRef.current = onToken;
   }, [onToken]);
+  const onUnavailableRef = useRef(onUnavailable);
+  useEffect(() => {
+    onUnavailableRef.current = onUnavailable;
+  }, [onUnavailable]);
 
   useEffect(() => {
     if (!captchaEnabled) return;
     let widgetId: string | null = null;
     let cancelled = false;
     void loadScript().then((api) => {
-      if (cancelled || !api || !containerRef.current) return;
+      if (cancelled) return;
+      if (!api || !containerRef.current) {
+        onUnavailableRef.current?.();
+        return;
+      }
       widgetId = api.render(containerRef.current, {
         sitekey: CAPTCHA_SITE_KEY,
         callback: (token) => onTokenRef.current(token),
         "expired-callback": () => onTokenRef.current(null),
-        "error-callback": () => onTokenRef.current(null),
+        "error-callback": () => {
+          onTokenRef.current(null);
+          onUnavailableRef.current?.();
+        },
         // Pinned light, not "auto": the auth card is hard-coded white
         // (auth-shell bg-white) and the site ships light-only, so an OS-dark
         // visitor got a jarring black box in the middle of a white form.

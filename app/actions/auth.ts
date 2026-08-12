@@ -190,8 +190,22 @@ export async function resendConfirmationAction(
     email: parsed.data.email.trim(),
     options: {
       emailRedirectTo: `${siteUrl}/auth/callback?next=${encodeURIComponent(next)}`,
+      // Captcha is enforced project-wide, so resend needs a token too. Without
+      // it Supabase rejects the call and the swallow-errors branch below
+      // reported SUCCESS — the user was told to check an inbox nothing was
+      // sent to.
+      ...(parsed.data.captchaToken ? { captchaToken: parsed.data.captchaToken } : {}),
     },
   });
+
+  // A captcha rejection is NOT an account-existence signal, so it must be
+  // surfaced rather than swallowed with the "don't leak accounts" errors.
+  if (error && /captcha/i.test(error.message)) {
+    return {
+      ok: false,
+      message: "Couldn't verify you're human. Refresh the page and try again.",
+    };
+  }
 
   // Supabase rate-limits resends; surface that case clearly. All other
   // errors are intentionally swallowed (don't leak account existence).

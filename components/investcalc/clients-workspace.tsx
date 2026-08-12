@@ -13,6 +13,7 @@
  */
 
 import { useMemo, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import * as Sentry from "@sentry/nextjs";
 import Link from "next/link";
 import { Check, ExternalLink, Link as LinkIcon, Plus, Trash2, Users } from "lucide-react";
@@ -48,6 +49,7 @@ export function ClientsWorkspace({
   portalUrlByClient?: Record<string, string>;
   loadError: string | null;
 }) {
+  const router = useRouter();
   const { toast } = useToast();
   const [clients, setClients] = useState<AgentClient[]>(initialClients);
   const [editor, setEditor] = useState<Editor | null>(null);
@@ -77,6 +79,11 @@ export function ClientsWorkspace({
         if (r.ok) {
           setClients(r.clients);
           setEditor(null);
+          // Portal URLs are minted server-side, so a client added since this
+          // render has no entry in that map. Without this refresh their copy
+          // button reported "SHARE_LINK_SECRET is missing" — a false
+          // infrastructure error on the first step of the workflow.
+          router.refresh();
           toast({ title: editor.id ? "Client updated" : "Client added" });
         } else {
           toast({ title: "Couldn't save", description: r.message, variant: "destructive" });
@@ -101,6 +108,7 @@ export function ClientsWorkspace({
         const r = await deleteAgentClientAction({ id });
         if (r.ok) {
           setClients(r.clients);
+          router.refresh();
           toast({ title: `${name} removed`, description: "Their deals and buy boxes stay — just unassigned." });
         } else {
           toast({ title: "Couldn't remove", description: r.message, variant: "destructive" });
@@ -128,15 +136,27 @@ export function ClientsWorkspace({
       });
       return;
     }
+    // Called WITHOUT await so the write stays inside the click's user
+    // activation; the promise is still handled, because a rejected write used
+    // to be swallowed by `void` and reported as success.
     try {
-      // No await before this call — that is the whole point.
-      void navigator.clipboard.writeText(url);
-      setCopiedId(id);
-      toast({ title: "Portal link copied", description: "Send it to your client — it updates as you assign deals." });
-      setTimeout(() => setCopiedId((cur) => (cur === id ? null : cur)), 2500);
+      const p = navigator.clipboard?.writeText(url);
+      if (p && typeof p.then === "function") {
+        p.then(
+          () => {
+            setCopiedId(id);
+            toast({
+              title: "Portal link copied",
+              description: "Send it to your client — it updates as you assign deals.",
+            });
+            setTimeout(() => setCopiedId((cur) => (cur === id ? null : cur)), 2500);
+          },
+          () => setRevealedId(id)
+        );
+      } else {
+        setRevealedId(id); // no Clipboard API at all
+      }
     } catch {
-      // Clipboard blocked entirely (permissions, insecure context): reveal the
-      // URL in a selectable field rather than leaving the agent with nothing.
       setRevealedId(id);
     }
   };

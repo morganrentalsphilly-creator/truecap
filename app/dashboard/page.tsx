@@ -36,6 +36,7 @@ import {
 } from "@/lib/owned-equity-series";
 import { listBuyBoxesAction } from "@/app/actions/user-buy-boxes";
 import {
+  boxesForDealClient,
   buyBoxHasCriteria,
   deriveStateFromAddress,
   evaluateBuyBoxes,
@@ -458,6 +459,7 @@ export default async function DashboardPage() {
     buyBoxesResult && buyBoxesResult.ok && buyBoxesResult.canUse
       ? buyBoxesResult.boxes.filter((b) => b.isActive && buyBoxHasCriteria(b))
       : [];
+  const ownBuyBoxes = boxesForDealClient(activeBuyBoxes, null);
   if (activeBuyBoxes.length > 0 && dashboardData.allDeals.length > 0) {
     const fitByDealId: Record<string, BuyBoxFitSummary> = {};
     let passingCount = 0;
@@ -475,7 +477,11 @@ export default async function DashboardPage() {
         // as getRiskReturn / getPortfolioKpis.
         isCashPurchase: deal.monthlyPayment != null && deal.monthlyPayment <= 0,
       };
-      const results = evaluateBuyBoxes(activeBuyBoxes, metrics).filter((r) => r.result.active);
+      // The dashboard is the agent's OWN portfolio. Passing null scopes to
+      // boxes with no client (lib/buy-box boxesForDealClient) — otherwise one
+      // buyer's criteria drove the "N of M pass your buy box" headline for
+      // every deal the agent owns.
+      const results = evaluateBuyBoxes(ownBuyBoxes, metrics).filter((r) => r.result.active);
       if (results.length === 0) continue;
       const summary = summarizeBuyBoxFit(results);
       fitByDealId[deal.id] = summary;

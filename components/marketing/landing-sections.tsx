@@ -129,6 +129,9 @@ const SPINE_STEPS = [
     title: "Know your number",
     body:
       "TrueCap reverse-solves the highest price that still hits your targets. Don't buy at $325,000 because it's listed there. Offer $283,000 because that's where the deal works.",
+    // The section this replaced disclosed that the max-offer solver is Pro.
+    // Dropping that made the homepage sell a paid feature as the free product.
+    proNote: "The max-offer solver is part of Pro",
   },
 ] as const;
 
@@ -163,6 +166,11 @@ export function HowTrueCapWorks() {
                 </span>
                 <h3 className="mt-1 text-lg font-bold tracking-tight text-foreground">{step.title}</h3>
                 <p className="mt-1.5 max-w-[42ch] text-sm leading-relaxed text-muted-foreground">{step.body}</p>
+                {"proNote" in step && step.proNote ? (
+                  <p className="mt-2 inline-flex items-center gap-1 rounded-full border border-[var(--brand-orange)]/30 bg-[var(--brand-orange)]/10 px-2 py-0.5 text-[11px] font-semibold text-[var(--brand-orange)]">
+                    {step.proNote}
+                  </p>
+                ) : null}
               </div>
             </li>
           ))}
@@ -192,7 +200,8 @@ export function FinalCta() {
           <span className="text-primary">Know what to offer.</span>
         </h2>
         <p className="mx-auto mt-3 max-w-[52ch] text-balance text-sm leading-relaxed text-muted-foreground">
-          The full analyzer is free and needs no account.
+          Cash flow, cap rate, CoC, DSCR and your Deal Score are free, with no account
+          needed. Projections, tax, exit scenarios and the max-offer solver are Pro.
         </p>
         <ScrollToFormButton className="group mt-6 inline-flex h-12 items-center gap-1.5 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] hover:-translate-y-0.5 transition-transform">
           Analyze a property

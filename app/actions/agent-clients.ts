@@ -343,8 +343,14 @@ export async function listClientDealCountsAction(): Promise<
       byClient.get(row.client_id) ??
       { clientId: row.client_id, dealCount: 0, meetingCount: null, recentAddresses: [] };
     // Cap at what the portal will actually show — the count and the buyer's
-    // page must not disagree above the limit.
-    if (entry.dealCount < PORTAL_DEAL_LIMIT) entry.dealCount += 1;
+    // page must not disagree above the limit. Rows BEYOND the cap are skipped
+    // entirely (not just uncounted): scoring them inflated meetingCount past
+    // dealCount and produced "80 of 50 meet their criteria".
+    if (entry.dealCount >= PORTAL_DEAL_LIMIT) {
+      byClient.set(row.client_id, entry);
+      continue;
+    }
+    entry.dealCount += 1;
     if (entry.recentAddresses.length < 3 && row.address) entry.recentAddresses.push(row.address);
 
     const clientBoxes = boxesByClient.get(row.client_id);

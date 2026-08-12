@@ -225,8 +225,13 @@ describe("the portal copy button works (Safari clipboard regression)", () => {
     const src = read("components/investcalc/clients-workspace.tsx");
     const start = src.indexOf("const copyPortal");
     expect(start).toBeGreaterThan(-1);
-    const body = src.slice(start, src.indexOf("\n  };", start));
-    expect(body).toContain("navigator.clipboard.writeText");
+    // Bound the slice at the NEXT top-level declaration, not a brittle "\n  };"
+    // marker — the handler's shape changes as it is hardened.
+    const after = src.slice(start + 10);
+    const nextDecl = after.search(/\n  (?:const|function|return) /);
+    const body = nextDecl === -1 ? after : after.slice(0, nextDecl);
+    // Optional-chained (navigator.clipboard?.writeText) — match either form.
+    expect(body).toMatch(/navigator\.clipboard\??\.writeText/);
     // An await anywhere before the write reintroduces the bug. Strip comments
     // first — the code carries a comment that says the word "await".
     const code = body

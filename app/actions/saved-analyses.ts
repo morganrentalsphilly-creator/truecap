@@ -37,6 +37,7 @@ import {
   resolveAnalysisPdfObjectPath,
 } from "@/lib/pdf-export-constants";
 import {
+  boxesForDealClient,
   buyBoxHasCriteria,
   deriveStateFromAddress,
   type BuyBoxCriteria,
@@ -796,6 +797,14 @@ export async function getBuyBoxPdfVerdictAction(
   if (!listed.ok || !listed.canUse || listed.boxes.length === 0) {
     return { ok: true, verdict: null };
   }
+  // Scope to the agent's OWN boxes. This verdict is printed into a PDF the
+  // agent hands to a buyer or lender, and the payload carries no client id —
+  // so another client's box NAME and criteria could otherwise appear in a
+  // document sent to a different person.
+  const ownBoxes = boxesForDealClient(listed.boxes, null);
+  if (ownBoxes.length === 0) {
+    return { ok: true, verdict: null };
+  }
 
   const metrics: BuyBoxDealMetrics = {
     capRatePct: parsed.data.capRatePct,
@@ -808,7 +817,7 @@ export async function getBuyBoxPdfVerdictAction(
     isCashPurchase: parsed.data.isCashPurchase,
   };
 
-  return { ok: true, verdict: buildBuyBoxPdfVerdict(listed.boxes, metrics) };
+  return { ok: true, verdict: buildBuyBoxPdfVerdict(ownBoxes, metrics) };
 }
 
 export async function getSavedAnalysisPdfExportAction(

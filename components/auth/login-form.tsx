@@ -28,6 +28,11 @@ export function LoginForm() {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  // Turnstile could not run (blocked/timed out). Stop waiting for a token —
+  // a captcha the user cannot solve must not be a permanent lockout. Supabase
+  // still enforces server-side, so this only changes the failure MODE from a
+  // dead button to a real error message.
+  const [captchaUnavailable, setCaptchaUnavailable] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   // When a sign-in fails because the email isn't confirmed, surface a
   // one-click "Resend confirmation" affordance. We stash the email
@@ -138,7 +143,9 @@ export function LoginForm() {
       // confirmation email should land the user where they were headed
       // (?next), matching the original sign-up email.
       const result = await resendConfirmationAction(
-        { email: unconfirmedEmail },
+        // Carry the captcha token — Supabase enforces captcha on resend too,
+        // and without it the send is rejected while the UI claims success.
+        { email: unconfirmedEmail, captchaToken: captchaToken ?? undefined },
         safeNextPath ?? undefined
       );
       if (!result.ok) {
@@ -275,12 +282,12 @@ export function LoginForm() {
           </div>
         ) : null}
 
-        <CaptchaWidget onToken={setCaptchaToken} />
+        <CaptchaWidget onToken={setCaptchaToken} onUnavailable={() => setCaptchaUnavailable(true)} />
 
         <Button
           type="submit"
           className="h-12 w-full rounded-xl bg-primary text-sm font-semibold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.22)] hover:bg-primary/95"
-          disabled={isSubmitting || (captchaEnabled && !captchaToken)}
+          disabled={isSubmitting || (captchaEnabled && !captchaUnavailable && !captchaToken)}
         >
           {isSubmitting ? (
             <>
