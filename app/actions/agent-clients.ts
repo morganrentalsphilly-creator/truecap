@@ -220,7 +220,15 @@ export async function deleteAgentClientAction(input: unknown): Promise<AgentClie
 }
 
 /**
- * Mint the public portal link for one client. Gated on `agent_portal` (a
+ * Mint the public portal link for one client.
+ *
+ * NOTE: the Clients page mints the SAME url server-side at render time so its
+ * copy button can run synchronously (a clipboard write after an awaited action
+ * is refused by Safari — the click's user activation has lapsed by then). This
+ * action remains the canonical definition of the url shape and the gate; keep
+ * the two in step if either changes.
+ *
+ * Gated on `agent_portal` (a
  * strict superset gate over the roster's `client_buy_box`, so a plan that
  * somehow had rosters but not the portal can't leak one). The token is signed
  * (lib/signed-token) so the public page can trust {agentUserId, clientId}

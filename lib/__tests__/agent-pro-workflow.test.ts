@@ -209,3 +209,38 @@ describe("setting a client's buy box has a visible payoff (the $59.99 case)", ()
     expect(read("components/settings/buy-boxes-card.tsx")).toContain("summarizeBuyBoxCriteria");
   });
 });
+
+describe("the portal copy button works (Safari clipboard regression)", () => {
+  // The button awaited a server action and THEN wrote to the clipboard. By that
+  // point the click's transient user activation had lapsed, so Safari refused
+  // the write and the button silently did nothing. The URL must therefore be
+  // resolved BEFORE the click.
+  it("the Clients page mints portal urls server-side", () => {
+    const src = read("app/dashboard/clients/page.tsx");
+    expect(src).toContain("mintSignedToken");
+    expect(src).toContain("portalUrlByClient");
+  });
+
+  it("the copy handler never awaits before writing to the clipboard", () => {
+    const src = read("components/investcalc/clients-workspace.tsx");
+    const start = src.indexOf("const copyPortal");
+    expect(start).toBeGreaterThan(-1);
+    const body = src.slice(start, src.indexOf("\n  };", start));
+    expect(body).toContain("navigator.clipboard.writeText");
+    // An await anywhere before the write reintroduces the bug. Strip comments
+    // first — the code carries a comment that says the word "await".
+    const code = body
+      .split("\n")
+      .map((l) => l.replace(/\/\/.*$/, ""))
+      .join("\n");
+    expect(code).not.toContain("await");
+  });
+
+  it("a blocked clipboard still surfaces the url instead of failing silently", () => {
+    expect(read("components/investcalc/clients-workspace.tsx")).toContain("setRevealedId");
+  });
+
+  it("the settings card no longer ships a second, broken copy button", () => {
+    expect(read("components/settings/agent-clients-card.tsx")).not.toContain("clipboard");
+  });
+});

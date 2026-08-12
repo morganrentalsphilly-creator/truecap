@@ -14,10 +14,9 @@
 
 import { useEffect, useState, useTransition } from "react";
 import * as Sentry from "@sentry/nextjs";
-import { Check, Link as LinkIcon, Plus, Trash2, Users } from "lucide-react";
+import { Plus, Trash2, Users } from "lucide-react";
 import {
   deleteAgentClientAction,
-  getClientPortalLinkAction,
   listAgentClientsAction,
   upsertAgentClientAction,
   type AgentClient,
@@ -34,8 +33,6 @@ export function AgentClientsCard() {
   const [clients, setClients] = useState<AgentClient[] | null>(null);
   const [editor, setEditor] = useState<Editor | null>(null);
   const [isSaving, startSaving] = useTransition();
-  const [copyingId, setCopyingId] = useState<string | null>(null);
-  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -78,27 +75,6 @@ export function AgentClientsCard() {
         toast({ title: "Couldn't save", description: "Try again in a moment.", variant: "destructive" });
       }
     });
-  };
-
-  const copyPortalLink = (id: string) => {
-    setCopyingId(id);
-    void (async () => {
-      try {
-        const r = await getClientPortalLinkAction({ clientId: id });
-        if (r.ok) {
-          await navigator.clipboard.writeText(r.url);
-          setCopiedId(id);
-          toast({ title: "Portal link copied", description: "Send it to your client — it stays live and updates as you screen deals." });
-          setTimeout(() => setCopiedId((cur) => (cur === id ? null : cur)), 2500);
-        } else {
-          toast({ title: "Couldn't create the link", description: r.message, variant: "destructive" });
-        }
-      } catch {
-        toast({ title: "Couldn't copy the link", description: "Try again in a moment.", variant: "destructive" });
-      } finally {
-        setCopyingId(null);
-      }
-    })();
   };
 
   const remove = (id: string, name: string) => {
@@ -161,21 +137,6 @@ export function AgentClientsCard() {
                 {c.name}
                 {c.email ? <span className="ml-2 font-normal text-muted-foreground">{c.email}</span> : null}
               </button>
-              <Button
-                type="button"
-                size="icon"
-                variant="ghost"
-                aria-label={`Copy ${c.name}'s portal link`}
-                title="Copy portal link"
-                onClick={() => copyPortalLink(c.id)}
-                disabled={isSaving || copyingId === c.id}
-              >
-                {copiedId === c.id ? (
-                  <Check className="size-4 text-success" />
-                ) : (
-                  <LinkIcon className="size-4 text-muted-foreground" />
-                )}
-              </Button>
               <Button
                 type="button"
                 size="icon"

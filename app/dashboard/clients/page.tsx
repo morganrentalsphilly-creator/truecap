@@ -3,6 +3,9 @@ import { redirect } from "next/navigation";
 import { Topbar } from "@/components/dashboard/Topbar";
 import { ClientsWorkspace } from "@/components/investcalc/clients-workspace";
 import { listAgentClientsAction, listClientDealCountsAction } from "@/app/actions/agent-clients";
+import { mintSignedToken } from "@/lib/signed-token";
+import { PORTAL_SCOPE } from "@/lib/client-portal";
+import { getSiteUrl } from "@/lib/site-url";
 import {
   getDashboardNavAccess,
   hasDashboardAccess,
@@ -66,6 +69,29 @@ export default async function DashboardClientsPage() {
   const displayName = getDisplayName((profile as ProfileRow | null) ?? null, user.email);
   const initials = getInitials(displayName, user.email ?? "");
 
+  /**
+   * Portal URLs are minted HERE, not on click.
+   *
+   * The copy button used to await a server action and THEN call
+   * navigator.clipboard.writeText — but the browser's transient user
+   * activation from the click has expired by the time that await resolves, so
+   * Safari denies the write outright and the button silently did nothing.
+   * Resolving the URLs up front makes the click handler synchronous, which is
+   * the only reliable way to write to the clipboard.
+   *
+   * The token is deterministic (lib/signed-token sorts its keys), so this is
+   * the SAME url the action would have returned — stable across renders and
+   * across the link the client already bookmarked.
+   */
+  const siteUrl = getSiteUrl();
+  const portalUrlByClient: Record<string, string> = {};
+  if (clientsResult.ok) {
+    for (const c of clientsResult.clients) {
+      const token = mintSignedToken(PORTAL_SCOPE, { a: user.id, c: c.id });
+      if (token) portalUrlByClient[c.id] = `${siteUrl}/portal/${token}`;
+    }
+  }
+
   return (
     <div className="flex-1 min-w-0 flex flex-col">
       <Topbar
@@ -82,6 +108,7 @@ export default async function DashboardClientsPage() {
         // A failed COUNT would otherwise render every card as "No deals yet" —
         // a confident falsehood. Surface it as a load error instead.
         countsFailed={!countsResult.ok}
+        portalUrlByClient={portalUrlByClient}
         loadError={clientsResult.ok ? null : clientsResult.message}
       />
     </div>

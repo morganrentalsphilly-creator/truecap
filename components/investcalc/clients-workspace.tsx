@@ -18,7 +18,6 @@ import Link from "next/link";
 import { Check, ExternalLink, Link as LinkIcon, Plus, Trash2, Users } from "lucide-react";
 import {
   deleteAgentClientAction,
-  getClientPortalLinkAction,
   upsertAgentClientAction,
   type AgentClient,
   type ClientDealSummary,
@@ -34,6 +33,7 @@ export function ClientsWorkspace({
   initialClients,
   initialCounts,
   countsFailed = false,
+  portalUrlByClient = {},
   loadError,
 }: {
   initialClients: AgentClient[];
@@ -41,6 +41,11 @@ export function ClientsWorkspace({
   /** True when the deal-count query failed — cards must not claim "No deals
    *  yet", which reads as fact rather than a load failure. */
   countsFailed?: boolean;
+  /** Portal URL per client, minted server-side so the copy click can be
+   *  SYNCHRONOUS — see the note on the page that builds these. Missing entries
+   *  mean SHARE_LINK_SECRET isn't configured; the button then explains that
+   *  instead of failing silently. */
+  portalUrlByClient?: Record<string, string>;
   loadError: string | null;
 }) {
   const { toast } = useToast();
@@ -48,6 +53,8 @@ export function ClientsWorkspace({
   const [editor, setEditor] = useState<Editor | null>(null);
   const [isSaving, startSaving] = useTransition();
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  /** Client whose URL is shown as selectable text (clipboard unavailable). */
+  const [revealedId, setRevealedId] = useState<string | null>(null);
 
   const countsById = useMemo(() => {
     const m = new Map<string, ClientDealSummary>();
@@ -105,29 +112,33 @@ export function ClientsWorkspace({
     });
   };
 
+  /**
+   * SYNCHRONOUS by design. The previous version awaited a server action and
+   * then wrote to the clipboard, by which point the click's user activation
+   * had lapsed — Safari refused the write and the button appeared dead. The
+   * URL is resolved before render, so this runs entirely inside the gesture.
+   */
   const copyPortal = (id: string) => {
-    startSaving(async () => {
-      try {
-        const r = await getClientPortalLinkAction({ clientId: id });
-        if (!r.ok) {
-          toast({ title: "Couldn't create the link", description: r.message, variant: "destructive" });
-          return;
-        }
-        try {
-          await navigator.clipboard.writeText(r.url);
-          setCopiedId(id);
-          toast({ title: "Portal link copied", description: "Send it to your client — it updates as you assign deals." });
-          setTimeout(() => setCopiedId((cur) => (cur === id ? null : cur)), 2500);
-        } catch {
-          // Clipboard denied (Safari without a user gesture, permissions) —
-          // show the URL so the agent can still copy it by hand.
-          toast({ title: "Copy the link manually", description: r.url });
-        }
-      } catch (err) {
-        Sentry.captureException(err, { tags: { feature: "agent-clients" } });
-        toast({ title: "Couldn't create the link", description: "Try again in a moment.", variant: "destructive" });
-      }
-    });
+    const url = portalUrlByClient[id];
+    if (!url) {
+      toast({
+        title: "Portal links aren't configured yet",
+        description: "SHARE_LINK_SECRET is missing on this deployment.",
+        variant: "destructive",
+      });
+      return;
+    }
+    try {
+      // No await before this call — that is the whole point.
+      void navigator.clipboard.writeText(url);
+      setCopiedId(id);
+      toast({ title: "Portal link copied", description: "Send it to your client — it updates as you assign deals." });
+      setTimeout(() => setCopiedId((cur) => (cur === id ? null : cur)), 2500);
+    } catch {
+      // Clipboard blocked entirely (permissions, insecure context): reveal the
+      // URL in a selectable field rather than leaving the agent with nothing.
+      setRevealedId(id);
+    }
   };
 
   return (
@@ -300,6 +311,23 @@ export function ClientsWorkspace({
                   {summary?.meetingCount != null ? "Edit their buy box" : "Set their buy box"}
                 </Link>
               </div>
+
+              {/* Clipboard-blocked fallback: the URL, selectable, so the agent
+                  can always get it out by hand. */}
+              {revealedId === c.id && portalUrlByClient[c.id] ? (
+                <div className="mt-2">
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                    Portal link — select and copy
+                  </label>
+                  <input
+                    readOnly
+                    value={portalUrlByClient[c.id]}
+                    onFocus={(e) => e.currentTarget.select()}
+                    autoFocus
+                    className="mt-1 w-full rounded-md border border-border bg-muted/30 px-2 py-1.5 text-xs text-foreground"
+                  />
+                </div>
+              ) : null}
 
               {summary && summary.recentAddresses.length > 0 ? (
                 <p className="mt-2 truncate text-xs text-muted-foreground">
