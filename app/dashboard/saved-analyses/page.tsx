@@ -110,6 +110,9 @@ function offerLineForRow(
   activeBuyBoxes: NamedBuyBox[],
   isShoppingStage: boolean
 ): DealOfferLine | null {
+  // The deal's own client scopes which boxes may screen it (lib/buy-box
+  // boxesForDealClient) — another buyer's criteria must never drive this
+  // deal's number.
   if (activeBuyBoxes.length === 0) return null;
   // The RESILIENT normalizer, not a raw safeParse — the same one
   // recomputeSavedDealVerdict uses 30 lines below on this very row, and the
@@ -119,7 +122,10 @@ function offerLineForRow(
   // exactly the older deals a long-time user has most of.
   const values = normalizeInvestmentFormSnapshot(row.form_snapshot);
   if (!values) return null;
-  return computeDealOfferLine(values, activeBuyBoxes, { isShoppingStage }).offer;
+  return computeDealOfferLine(values, activeBuyBoxes, {
+    isShoppingStage,
+    dealClientId: row.client_id ?? null,
+  }).offer;
 }
 
 function mapSavedRow(
@@ -408,7 +414,10 @@ export default async function DashboardSavedAnalysesPage({
           {/* Portfolio rollup — one-glance summary across the filtered
               set. Self-hides when fewer than 2 deals are in scope, so
               it never competes with empty-state UX. */}
-          <PortfolioRollupStrip items={mappedItems} scope={activeDealStateFilter} />
+          {/* Scope "all" when filtered to a client: the set includes completed and
+              archived deals, so labeling it the ACTIVE pipeline (and summing
+              closed deals into it) would misstate what is on screen. */}
+          <PortfolioRollupStrip items={mappedItems} scope={clientFilterId ? "all" : activeDealStateFilter} />
           <SavedAnalysesPage
             initialItems={mappedItems}
             initialSelectedIds={compareIds}

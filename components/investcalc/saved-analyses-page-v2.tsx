@@ -106,6 +106,7 @@ import {
   type BuyBoxDealMetrics,
   type BuyBoxFitSummary,
   type NamedBuyBox,
+  boxesForDealClient,
 } from "@/lib/buy-box";
 import type { DealOfferLine } from "@/lib/deal-offer-line";
 import { setSavedDealClientAction } from "@/app/actions/saved-analyses";
@@ -1004,6 +1005,15 @@ export function SavedAnalysesPage({
   // hydration correctness; the primary round-trip (name-click → workspace →
   // Back) is a client navigation and restores without any flash.
   useEffect(() => {
+    // Arriving scoped to a client (?client=) is a FRESH intent — "show me
+    // Dana's deals". Replaying a persisted search/signal/type filter on top of
+    // it silently re-creates the very bug this scope was added to fix: the
+    // roster says "3 deals assigned", the list shows one or none, and the
+    // reason is an invisible filter set on a different visit.
+    if (clientFilterId) {
+      setViewHydrated(true);
+      return;
+    }
     const persisted = readPersistedListView();
     if (persisted) {
       setSearchQuery(persisted.searchQuery);
@@ -1106,7 +1116,12 @@ export function SavedAnalysesPage({
     if (!buyBoxes || buyBoxes.length === 0) return null;
     const map = new Map<string, BuyBoxFitSummary>();
     for (const item of enrichedItems) {
-      const results = evaluateBuyBoxes(buyBoxes, toBuyBoxMetrics(item)).filter((r) => r.result.active);
+      // Scope to the deal's own client: another buyer's box must not drive
+      // this row's fit badge or the buy-box filter count.
+      const results = evaluateBuyBoxes(
+        boxesForDealClient(buyBoxes, item.clientId ?? null),
+        toBuyBoxMetrics(item)
+      ).filter((r) => r.result.active);
       if (results.length > 0) map.set(item.id, summarizeBuyBoxFit(results));
     }
     return map.size > 0 ? map : null;
@@ -2271,7 +2286,16 @@ export function SavedAnalysesPage({
               </TabsList>
             </Tabs>
 
-            <Tabs value={activeDealStateFilter} onValueChange={(value) => handleStateFilterChange(value as DealStateFilter)} className="gap-0">
+            {/* Hidden while scoped to a client: the server deliberately shows
+                ALL of that client's deals (so the roster count, this list and
+                the buyer's portal agree), which made these tabs inert — they
+                still highlighted "Active" while archived rows were on screen,
+                so the control both did nothing and misdescribed the list. */}
+            <Tabs
+              value={activeDealStateFilter}
+              onValueChange={(value) => handleStateFilterChange(value as DealStateFilter)}
+              className={cn("gap-0", clientFilterId ? "hidden" : undefined)}
+            >
               <TabsList className="bg-muted/60 h-9 rounded-full p-1">
                 <TabsTrigger value="active" className="h-9 sm:h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background">Active</TabsTrigger>
                 <TabsTrigger value="completed" className="h-9 sm:h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background">Completed</TabsTrigger>

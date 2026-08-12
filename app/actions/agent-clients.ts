@@ -21,6 +21,7 @@ import { getEntitlementsForUser, hasPlanFeature } from "@/lib/entitlements";
 import { mintSignedToken } from "@/lib/signed-token";
 import { PORTAL_SCOPE } from "@/lib/client-portal";
 import { getSiteUrl } from "@/lib/site-url";
+import { PORTAL_DEAL_LIMIT } from "@/lib/client-portal";
 
 export type AgentClient = {
   id: string;
@@ -293,7 +294,10 @@ export async function listClientDealCountsAction(): Promise<
     // here made the card say "2 deals" while the portal showed 3, or say
     // "No deals yet" right after a successful assignment.
     .not("client_id", "is", null)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    // Bounded like the portal itself so a roster card can never promise more
+    // deals than the buyer's page will render.
+    .limit(PORTAL_DEAL_LIMIT * 20);
 
   if (error) {
     if (isMissingTable(error)) return { ok: true, counts: [] };
@@ -305,7 +309,9 @@ export async function listClientDealCountsAction(): Promise<
   for (const row of (data ?? []) as { client_id: string | null; address: string | null }[]) {
     if (!row.client_id) continue;
     const entry = byClient.get(row.client_id) ?? { clientId: row.client_id, dealCount: 0, recentAddresses: [] };
-    entry.dealCount += 1;
+    // Cap at what the portal will actually show — the count and the buyer's
+    // page must not disagree above the limit.
+    if (entry.dealCount < PORTAL_DEAL_LIMIT) entry.dealCount += 1;
     if (entry.recentAddresses.length < 3 && row.address) entry.recentAddresses.push(row.address);
     byClient.set(row.client_id, entry);
   }

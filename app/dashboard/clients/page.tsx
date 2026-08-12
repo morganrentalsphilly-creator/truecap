@@ -79,6 +79,9 @@ export default async function DashboardClientsPage() {
       <ClientsWorkspace
         initialClients={clientsResult.ok ? clientsResult.clients : []}
         initialCounts={countsResult.ok ? countsResult.counts : []}
+        // A failed COUNT would otherwise render every card as "No deals yet" —
+        // a confident falsehood. Surface it as a load error instead.
+        countsFailed={!countsResult.ok}
         loadError={clientsResult.ok ? null : clientsResult.message}
       />
     </div>

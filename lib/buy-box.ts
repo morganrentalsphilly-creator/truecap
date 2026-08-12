@@ -420,6 +420,29 @@ export type NamedBuyBoxResult = {
 };
 
 /**
+ * The boxes that legitimately screen ONE deal.
+ *
+ * Agent Pro lets a box carry a clientId ("The Nguyens' criteria"). Without this
+ * filter every such box screened every deal the agent owned, so one buyer's
+ * criteria drove the verdict, the fit badge and the MAO "your number" on
+ * unrelated deals — and the tier's headline promise ("deals screened to each
+ * client's criteria") did nothing at all.
+ *
+ * The rule:
+ *   - clientId null/undefined  → the agent's OWN box; screens every deal.
+ *   - clientId set             → screens ONLY deals assigned to that client.
+ *
+ * Callers with no deal-client context (batch triage of pasted listings, the
+ * dashboard rollup) pass null and correctly get just the agent's own boxes.
+ */
+export function boxesForDealClient(
+  boxes: NamedBuyBox[],
+  dealClientId: string | null | undefined
+): NamedBuyBox[] {
+  return boxes.filter((b) => b.clientId == null || b.clientId === dealClientId);
+}
+
+/**
  * Evaluate a deal against every box, returned default-first then by sort
  * order so the highest-priority box leads. Pure — reuses evaluateBuyBox.
  */

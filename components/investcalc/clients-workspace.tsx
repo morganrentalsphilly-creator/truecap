@@ -33,10 +33,14 @@ type Editor = { id?: string; name: string; email: string; phone: string };
 export function ClientsWorkspace({
   initialClients,
   initialCounts,
+  countsFailed = false,
   loadError,
 }: {
   initialClients: AgentClient[];
   initialCounts: ClientDealSummary[];
+  /** True when the deal-count query failed — cards must not claim "No deals
+   *  yet", which reads as fact rather than a load failure. */
+  countsFailed?: boolean;
   loadError: string | null;
 }) {
   const { toast } = useToast();
@@ -272,6 +276,10 @@ export function ClientsWorkspace({
                       View their deals <ExternalLink className="size-3" />
                     </Link>
                   </>
+                ) : countsFailed ? (
+                  <span className="text-xs text-muted-foreground">
+                    Couldn&rsquo;t load this client&rsquo;s deal count — refresh to try again.
+                  </span>
                 ) : (
                   // The empty state names the exact next action — this is the
                   // step that used to have no UI at all.

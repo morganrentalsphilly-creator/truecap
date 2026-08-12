@@ -49,6 +49,7 @@ import { computeRowEquity } from "@/lib/owned-equity-series";
 import type { DealRecommendation } from "@/lib/deal-score";
 import { listBuyBoxesAction } from "@/app/actions/user-buy-boxes";
 import {
+  boxesForDealClient,
   buyBoxHasCriteria,
   deriveStateFromAddress,
   evaluateBuyBoxes,
@@ -399,7 +400,12 @@ export default async function DealWorkspacePage({
   // personal line then behave exactly as before.
   const activeBuyBoxes =
     buyBoxesResult && buyBoxesResult.ok && buyBoxesResult.canUse
-      ? buyBoxesResult.boxes.filter((b) => b.isActive && buyBoxHasCriteria(b))
+      ? boxesForDealClient(
+          buyBoxesResult.boxes.filter((b) => b.isActive && buyBoxHasCriteria(b)),
+          // Scope to THIS deal's client — a box belonging to another buyer must
+          // not drive this deal's fit, personal line, or MAO basis.
+          dealRow.client_id ?? null
+        )
       : [];
   let buyBoxFit: BuyBoxFitSummary | null = null;
   // The fit's one personal, number-carrying line ("Biggest gap — Cap rate:

@@ -32,6 +32,10 @@ import type { DealRecommendation, DealRiskLevel } from "@/lib/deal-score";
 
 export const PORTAL_SCOPE = "client-portal.v1";
 
+/** Max deals rendered on one portal page. The roster count uses the SAME cap
+ *  so "N deals assigned" can never exceed what the buyer actually sees. */
+export const PORTAL_DEAL_LIMIT = 50;
+
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export type PortalDeal = {
@@ -103,7 +107,7 @@ export async function loadClientPortal(input: {
       .eq("client_id", clientId)
       .is("deleted_at", null)
       .order("created_at", { ascending: false })
-      .limit(50);
+      .limit(PORTAL_DEAL_LIMIT);
 
     const branding = await getPublicAgentBranding(agentUserId);
 

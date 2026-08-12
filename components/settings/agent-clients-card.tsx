@@ -13,6 +13,7 @@
  */
 
 import { useEffect, useState, useTransition } from "react";
+import * as Sentry from "@sentry/nextjs";
 import { Check, Link as LinkIcon, Plus, Trash2, Users } from "lucide-react";
 import {
   deleteAgentClientAction,
@@ -56,6 +57,7 @@ export function AgentClientsCard() {
   const save = () => {
     if (!editor) return;
     startSaving(async () => {
+      try {
       const r = await upsertAgentClientAction({
         id: editor.id,
         name: editor.name,
@@ -70,6 +72,10 @@ export function AgentClientsCard() {
         toast({ title: editor.id ? "Client updated" : "Client added" });
       } else {
         toast({ title: "Couldn't save", description: r.message, variant: "destructive" });
+      }
+      } catch (err) {
+        Sentry.captureException(err, { tags: { feature: "agent-clients" } });
+        toast({ title: "Couldn't save", description: "Try again in a moment.", variant: "destructive" });
       }
     });
   };
@@ -95,14 +101,22 @@ export function AgentClientsCard() {
     })();
   };
 
-  const remove = (id: string) => {
+  const remove = (id: string, name: string) => {
+    // Same guard as the Clients workspace: an unconfirmed hard delete sitting
+    // beside Edit silently unassigns every deal and kills the portal link.
+    if (!window.confirm(`Remove ${name}? Their portal link stops working and any assigned deals are unassigned. The deals themselves are kept.`)) return;
     startSaving(async () => {
-      const r = await deleteAgentClientAction({ id });
-      if (r.ok) {
-        setClients(r.clients);
-        toast({ title: "Client removed", description: "Their buy boxes stay, unscoped." });
-      } else {
-        toast({ title: "Couldn't remove", description: r.message, variant: "destructive" });
+      try {
+        const r = await deleteAgentClientAction({ id });
+        if (r.ok) {
+          setClients(r.clients);
+          toast({ title: "Client removed", description: "Their deals and buy boxes stay — just unassigned." });
+        } else {
+          toast({ title: "Couldn't remove", description: r.message, variant: "destructive" });
+        }
+      } catch (err) {
+        Sentry.captureException(err, { tags: { feature: "agent-clients" } });
+        toast({ title: "Couldn't remove", description: "Try again in a moment.", variant: "destructive" });
       }
     });
   };
@@ -167,7 +181,7 @@ export function AgentClientsCard() {
                 size="icon"
                 variant="ghost"
                 aria-label={`Remove ${c.name}`}
-                onClick={() => remove(c.id)}
+                onClick={() => remove(c.id, c.name)}
                 disabled={isSaving}
               >
                 <Trash2 className="size-4 text-muted-foreground" />

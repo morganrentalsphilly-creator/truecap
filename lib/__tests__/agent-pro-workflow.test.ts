@@ -129,3 +129,52 @@ describe("assignment is reachable from both surfaces an agent works in", () => {
     expect(src).toContain("client_id");
   });
 });
+
+describe("per-client buy boxes actually scope screening (audit regression)", () => {
+  // The tier is SOLD on "deals screened to each client's criteria". Before this,
+  // user_buy_boxes.client_id was written by two UI paths and read by ZERO
+  // evaluation sites — so every buyer's box screened every deal, and one
+  // client's criteria drove the verdict and MAO on unrelated deals.
+  it("lib/buy-box exports the scoping helper", () => {
+    const src = read("lib/buy-box.ts");
+    expect(src).toContain("export function boxesForDealClient");
+    // An unassigned box is the agent's own and applies everywhere.
+    expect(src).toMatch(/b\.clientId == null \|\| b\.clientId === dealClientId/);
+  });
+
+  it.each([
+    ["the deal list offer line", "lib/deal-offer-line.ts"],
+    ["the deal workspace", "app/dashboard/saved-analyses/[id]/page.tsx"],
+    ["the list fit badge + filter", "components/investcalc/saved-analyses-page-v2.tsx"],
+  ])("%s scopes boxes to the deal's client", (_label, file) => {
+    expect(read(file)).toContain("boxesForDealClient");
+  });
+
+  it("the list page passes the deal's client into the offer line", () => {
+    expect(read("app/dashboard/saved-analyses/page.tsx")).toMatch(/dealClientId: row\.client_id/);
+  });
+});
+
+describe("client-scoped list and portal cannot disagree (audit regression)", () => {
+  it("the roster count is capped by the portal's own limit", () => {
+    const src = read("app/actions/agent-clients.ts");
+    expect(src).toContain("PORTAL_DEAL_LIMIT");
+  });
+
+  it("a client-scoped list ignores persisted session filters", () => {
+    // Replaying a stale search on a fresh "show me Dana's deals" intent
+    // silently re-created the empty-list bug.
+    expect(read("components/investcalc/saved-analyses-page-v2.tsx")).toMatch(
+      /if \(clientFilterId\) \{\s*\n\s*setViewHydrated\(true\);\s*\n\s*return;/
+    );
+  });
+});
+
+describe("destructive client delete is confirmed on BOTH roster surfaces", () => {
+  it.each([
+    ["clients workspace", "components/investcalc/clients-workspace.tsx"],
+    ["settings card", "components/settings/agent-clients-card.tsx"],
+  ])("%s confirms before deleting", (_label, file) => {
+    expect(read(file)).toContain("window.confirm");
+  });
+});

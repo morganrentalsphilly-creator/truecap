@@ -30,6 +30,7 @@ import {
   type BuyBoxPropertyType,
   type NamedBuyBox,
   type NamedBuyBoxResult,
+  boxesForDealClient,
   deriveStateFromAddress,
   evaluateBuyBoxes,
   summarizeBuyBoxFit,
@@ -99,7 +100,7 @@ function toBuyBoxPropertyType(pt: unknown): BuyBoxPropertyType | null {
 export function computeDealOfferLine(
   formValues: InvestmentFormValues,
   activeBuyBoxes: NamedBuyBox[],
-  opts: { isShoppingStage: boolean } = { isShoppingStage: true },
+  opts: { isShoppingStage: boolean; dealClientId?: string | null } = { isShoppingStage: true },
 ): DealOfferResult {
   let analysis;
   try {
@@ -122,7 +123,10 @@ export function computeDealOfferLine(
    */
   let decidingBox: NamedBuyBoxResult | null = null;
 
-  if (activeBuyBoxes.length > 0) {
+  // Agent Pro: a box tied to another client must not screen this deal.
+  const scopedBoxes = boxesForDealClient(activeBuyBoxes, opts.dealClientId ?? null);
+
+  if (scopedBoxes.length > 0) {
     const metrics: BuyBoxDealMetrics = {
       capRatePct: analysis.capRate,
       cocPct: analysis.cocReturn,
@@ -133,7 +137,7 @@ export function computeDealOfferLine(
       state: deriveStateFromAddress(formValues.address),
       isCashPurchase,
     };
-    const boxResults = evaluateBuyBoxes(activeBuyBoxes, metrics).filter((r) => r.result.active);
+    const boxResults = evaluateBuyBoxes(scopedBoxes, metrics).filter((r) => r.result.active);
     if (boxResults.length > 0) {
       fit = summarizeBuyBoxFit(boxResults);
       // evaluateBuyBoxes returns priority order, so the first passing box (or
