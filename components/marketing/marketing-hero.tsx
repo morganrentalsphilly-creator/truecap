@@ -73,8 +73,9 @@ export function MarketingHero() {
                 primary button still clear the first-visit cookie banner on
                 short (≤667px) screens. */}
             <p className="mt-3 max-w-xl text-pretty text-base leading-relaxed text-muted-foreground sm:mt-4 sm:text-lg">
-              Enter an address. TrueCap auto-fills rent, rate, and tax and
-              reverse-solves the maximum price that still works.{" "}
+              Enter an address, see the real economics, know your number. TrueCap
+              auto-fills rent, rate, and tax, then reverse-solves the highest
+              price that still works.{" "}
               <span className="hidden sm:inline">
                 A rental property calculator that checks the deal against your
                 numbers, with cap rate, cash flow, and DSCR computed live.

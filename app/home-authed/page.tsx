@@ -23,15 +23,13 @@ import { InvestCalcPage } from "@/components/investcalc/investcalc-page";
 import { BillingSuccessBanner } from "@/components/marketing/billing-success-banner";
 import { MarketingHero } from "@/components/marketing/marketing-hero";
 import {
-  AcquisitionPipeline,
   DataSourcesSection,
-  FeaturedIn,
+  FinalCta,
   HomepageFaq,
-  HowItWorks,
+  HowTrueCapWorks,
   PdfProUpsell,
   Personas,
   SocialProof,
-  WhyNotSpreadsheet,
 } from "@/components/marketing/landing-sections";
 import { OnboardingTour } from "@/components/marketing/onboarding-tour";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
@@ -220,21 +218,18 @@ export default async function AuthedHome({
         userAnalysisDefaults={userAnalysisDefaults}
         dealQaEnabled={Boolean(process.env.ANTHROPIC_API_KEY)}
       />
-      {/* Persuasion + monetization — anon fallback only, mirrors the
-          tool-first order in app/page.tsx (all surfaced after the
-          calculator): spreadsheet-pain → how it works → data sources →
-          social proof → $5/Pro value ladder → personas → FAQ. */}
+      {/* Anon fallback only — the SAME seven-block story as app/page.tsx:
+          how it works → trust → who it's for → pricing → closing ask → FAQ
+          (the live analyzer above is the product proof). Lockstep is enforced
+          by lib/__tests__/homepage-lockstep.test.ts. */}
       {!user && (
         <>
-          <FeaturedIn />
-          <WhyNotSpreadsheet />
-          <HowItWorks />
+          <HowTrueCapWorks />
           <DataSourcesSection />
           <SocialProof />
-          {/* Lockstep with app/page.tsx — see the note there. */}
-          <AcquisitionPipeline />
-          <PdfProUpsell />
           <Personas />
+          <PdfProUpsell />
+          <FinalCta />
           <HomepageFaq />
         </>
       )}

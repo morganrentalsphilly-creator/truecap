@@ -27,95 +27,24 @@ import {
   ArrowRight,
   Building2,
   Check,
-  Clock,
   FileText,
+  Gauge,
   HelpCircle,
   Home,
-  Layers,
-  ListChecks,
-  MapPin,
   Percent,
   Quote,
-  ShieldCheck,
+  Search,
   Sparkles,
   Target,
   TrendingUp,
-  Type,
   Users,
-  Wand2,
   X,
-  Zap,
 } from "lucide-react";
 import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
 import { PersonaSeedLink } from "@/components/marketing/persona-seed-link";
 import type { HandoffStrategyKey } from "@/lib/analyzer-handoff";
 
 // ─────────────────────────────────────────────────────── How It Works
-const HOW_STEPS = [
-  {
-    icon: MapPin,
-    step: "01",
-    title: "Type the address",
-    body: "Google Places suggests the property as you start typing. Pick it, and TrueCap knows exactly where it is.",
-  },
-  {
-    icon: Wand2,
-    step: "02",
-    title: "We fill in the data",
-    body: "Rent comes from HUD Fair Market Rent. Mortgage rate from FRED. Property tax from your state's effective rate. All editable.",
-  },
-  {
-    icon: TrendingUp,
-    step: "03",
-    title: "Get the verdict",
-    body: "Cap rate, CoC, DSCR, cash flow, projection, tax, exit - live. Plus a plain-English summary you can show a partner, client, or lender.",
-  },
-];
-
-export function HowItWorks() {
-  return (
-    <section className="border-t border-border bg-card/40">
-      <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
-        <div className="mb-10 text-center sm:mb-12">
-          <p className="text-[11px] font-bold uppercase tracking-widest text-primary">How it works</p>
-          <h2 className="mt-2 text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-            From the listing to a defensible answer in <span className="text-primary">three steps.</span>
-          </h2>
-        </div>
-        {/* Process timeline - connected steps, not boxed cards (Rule 4:
-            logic-grouping over card overuse). A dashed rule links the
-            step badges on desktop; mobile collapses to a railed stack. */}
-        <ol className="tc-reveal relative grid gap-10 sm:grid-cols-3 sm:gap-8">
-          <span
-            aria-hidden
-            className="pointer-events-none absolute inset-x-0 top-6 hidden border-t border-dashed border-border sm:block"
-          />
-          {HOW_STEPS.map((step) => (
-            <li key={step.step} className="relative flex gap-4 sm:block">
-              <span className="relative z-10 flex size-12 shrink-0 items-center justify-center rounded-full border border-primary/20 bg-card text-primary shadow-sm">
-                <step.icon className="size-5" strokeWidth={2} />
-              </span>
-              <div className="min-w-0">
-                <span className="font-mono text-[11px] font-bold uppercase tracking-widest text-primary sm:mt-4 sm:block">
-                  Step {step.step}
-                </span>
-                <h3 className="mt-1 text-lg font-bold tracking-tight text-foreground">{step.title}</h3>
-                <p className="mt-1.5 max-w-[42ch] text-sm leading-relaxed text-muted-foreground">{step.body}</p>
-              </div>
-            </li>
-          ))}
-        </ol>
-        <div className="mt-10 text-center">
-          <ScrollToFormButton className="group inline-flex h-11 items-center gap-1.5 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-[0_10px_24px_rgba(0,112,196,0.28)] hover:-translate-y-0.5 transition-transform">
-            Analyze a deal free
-            <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-          </ScrollToFormButton>
-        </div>
-      </div>
-    </section>
-  );
-}
-
 // ───────────────────────────────────────── Why not a spreadsheet
 // NOTE: rows are now consolidated into the merged WhyTrueCap table below
 // (alongside DealCheck / BiggerPockets). Kept exported as a no-op for
@@ -133,104 +62,6 @@ const COMPARISON_ROWS: { label: string; spreadsheet: string | false; truecap: st
 ];
 // Reference to satisfy TS unused-var linting if it ever flips on.
 void COMPARISON_ROWS;
-
-/**
- * Spreadsheet-pain section (CRO, Jun 2026). Re-activated from the old
- * no-op: a cold visitor comparing alternatives doesn't feel the pain of
- * the status quo unless we name it. This is a tight before/after that
- * leads with the cost of NOT changing - loss aversion ("one bad rental
- * can cost tens of thousands") and opportunity cost ("analyze 20 deals
- * in the time it took to underwrite one") - then hands straight to the
- * one dominant action. Deliberately NOT a second comparison matrix (the
- * full DealCheck/BiggerPockets table still lives on /why-truecap); two
- * tables back-to-back was the reason this was retired the first time.
- *
- * Rendered on the homepage right before <HowItWorks /> (see app/page.tsx
- * and the anon branch of app/home-authed/page.tsx - keep them in lockstep).
- */
-const SPREADSHEET_PAINS = [
-  "Two-plus hours building a model for every property",
-  "Good deals gone while you're still wiring up formulas",
-  "Rent and rate guesses that are already out of date",
-  "Re-keying the same math, deal after deal",
-];
-const TRUECAP_WINS = [
-  "A defensible answer in about 60 seconds",
-  "HUD rent, FRED rate & property tax auto-filled",
-  "Cap rate, CoC, DSCR & cash flow, computed live",
-  "A plain-English verdict you can hand a lender",
-];
-
-export function WhyNotSpreadsheet() {
-  return (
-    <section className="border-t border-border bg-background">
-      <div className="mx-auto max-w-5xl px-4 py-14 sm:px-6 sm:py-20">
-        <div className="mb-10 text-center sm:mb-12">
-          <p className="text-[11px] font-bold uppercase tracking-widest text-primary">The old way</p>
-          <h2 className="mt-2 text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-            Still underwriting deals in a <span className="text-primary">spreadsheet?</span>
-          </h2>
-          <p className="mx-auto mt-3 max-w-2xl text-balance text-sm leading-relaxed text-muted-foreground sm:text-base">
-            One bad rental can cost you tens of thousands. The math is the part that
-            should slow you down the least - not the most.
-          </p>
-        </div>
-
-        <div className="grid gap-4 sm:grid-cols-2 sm:gap-5">
-          {/* Pain column - the status-quo cost. */}
-          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-7">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-muted px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
-              <Clock className="size-3.5" />
-              The spreadsheet grind
-            </div>
-            <ul className="space-y-3">
-              {SPREADSHEET_PAINS.map((p) => (
-                <li
-                  key={p}
-                  className="flex items-start gap-2.5 text-sm leading-relaxed text-muted-foreground"
-                >
-                  <X aria-hidden className="mt-0.5 size-4 shrink-0 text-muted-foreground/50" />
-                  <span>{p}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Win column - the same jobs, done for you. */}
-          <div className="rounded-2xl border-2 border-primary/30 bg-card p-6 shadow-[0_16px_40px_rgba(0,112,196,0.10)] sm:p-7">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-primary">
-              <Zap className="size-3.5" />
-              With TrueCap
-            </div>
-            <ul className="space-y-3">
-              {TRUECAP_WINS.map((w) => (
-                <li
-                  key={w}
-                  className="flex items-start gap-2.5 text-sm leading-relaxed text-foreground"
-                >
-                  <Check aria-hidden className="mt-0.5 size-4 shrink-0 text-[var(--metric-positive)]" />
-                  <span>{w}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-
-        {/* Opportunity-cost payoff line + the one dominant action. */}
-        <div className="mt-8 flex flex-col items-center gap-4 text-center">
-          <p className="max-w-2xl text-balance text-sm font-medium text-foreground sm:text-base">
-            Analyze 20 deals in the time it used to take to underwrite one - and stop
-            losing the good ones while a spreadsheet catches up.
-          </p>
-          <ScrollToFormButton className="group inline-flex h-11 items-center gap-1.5 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-[0_10px_24px_rgba(0,112,196,0.28)] hover:-translate-y-0.5 transition-transform">
-            Analyze a deal free
-            <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-          </ScrollToFormButton>
-        </div>
-      </div>
-    </section>
-  );
-}
 
 // ───────────────────────────────────────── Social proof
 /**
@@ -264,6 +95,113 @@ const PROOF_QUOTES = [
     role: "Investment real estate agent",
   },
 ];
+
+/**
+ * THE SPINE — "Analyze the deal. Know your number. Make the offer."
+ *
+ * Replaces three sections that each explained a slice of the same progression
+ * (HowItWorks, WhyNotSpreadsheet, AcquisitionPipeline). The site kept selling
+ * capabilities individually — a calculator here, an underwriting suite there,
+ * deal management somewhere else — so a visitor had to assemble the story
+ * themselves. One section, three steps, in the order the work actually happens.
+ */
+const SPINE_STEPS = [
+  {
+    key: "analyze",
+    label: "Analyze",
+    icon: Search,
+    title: "Start with an address",
+    body:
+      "Rent, mortgage rate and property tax auto-fill from HUD, FRED and your state's rates. Financing, vacancy and every expense stay yours to change — nothing is hidden or hard-coded.",
+  },
+  {
+    key: "decide",
+    label: "Decide",
+    icon: Gauge,
+    title: "See the real economics",
+    body:
+      "Cash flow, cap rate, cash-on-cash and DSCR, plus a 0-100 Deal Score and a plain-English verdict that says what the numbers mean, not just what they are.",
+  },
+  {
+    key: "offer",
+    label: "Offer",
+    icon: Target,
+    title: "Know your number",
+    body:
+      "TrueCap reverse-solves the highest price that still hits your targets. Don't buy at $325,000 because it's listed there. Offer $283,000 because that's where the deal works.",
+  },
+] as const;
+
+export function HowTrueCapWorks() {
+  return (
+    <section className="border-t border-border bg-card/40">
+      <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
+        <div className="mb-10 text-center sm:mb-12">
+          <p className="text-[11px] font-bold uppercase tracking-widest text-primary">How TrueCap works</p>
+          <h2 className="mt-2 text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">
+            Analyze the deal. Know your number.{" "}
+            <span className="text-primary">Make the offer.</span>
+          </h2>
+          <p className="mx-auto mt-3 max-w-[60ch] text-balance text-sm leading-relaxed text-muted-foreground sm:text-base">
+            Three steps, in the order you actually work: from a listing you&rsquo;re curious about to a
+            number you can put in writing.
+          </p>
+        </div>
+        <ol className="tc-reveal relative grid gap-10 sm:grid-cols-3 sm:gap-8">
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 top-6 hidden border-t border-dashed border-border sm:block"
+          />
+          {SPINE_STEPS.map((step) => (
+            <li key={step.key} className="relative flex gap-4 sm:block">
+              <span className="relative z-10 flex size-12 shrink-0 items-center justify-center rounded-full border border-primary/20 bg-card text-primary shadow-sm">
+                <step.icon className="size-5" strokeWidth={2} />
+              </span>
+              <div className="min-w-0">
+                <span className="font-mono text-[11px] font-bold uppercase tracking-widest text-primary sm:mt-4 sm:block">
+                  {step.label}
+                </span>
+                <h3 className="mt-1 text-lg font-bold tracking-tight text-foreground">{step.title}</h3>
+                <p className="mt-1.5 max-w-[42ch] text-sm leading-relaxed text-muted-foreground">{step.body}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+        <div className="mt-10 text-center">
+          <ScrollToFormButton className="group inline-flex h-11 items-center gap-1.5 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-[0_10px_24px_rgba(0,112,196,0.28)] hover:-translate-y-0.5 transition-transform">
+            Analyze a property
+            <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+          </ScrollToFormButton>
+          <p className="mt-2 text-xs text-muted-foreground">Free · no card · no signup</p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/**
+ * Closing ask. The page has made its case by here; this is the one job left —
+ * send them back to the address field they scrolled past.
+ */
+export function FinalCta() {
+  return (
+    <section className="border-t border-border">
+      <div className="mx-auto max-w-3xl px-4 py-14 text-center sm:px-6 sm:py-20">
+        <h2 className="text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
+          Put in an address. Understand the deal.{" "}
+          <span className="text-primary">Know what to offer.</span>
+        </h2>
+        <p className="mx-auto mt-3 max-w-[52ch] text-balance text-sm leading-relaxed text-muted-foreground">
+          The full analyzer is free and needs no account.
+        </p>
+        <ScrollToFormButton className="group mt-6 inline-flex h-12 items-center gap-1.5 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] hover:-translate-y-0.5 transition-transform">
+          Analyze a property
+          <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+        </ScrollToFormButton>
+      </div>
+    </section>
+  );
+}
 
 export function SocialProof() {
   // Feature the most detailed quote; stack the rest beside it. Auto-picks
@@ -365,71 +303,6 @@ const COMPETITORS_ROWS: Array<{ label: string; values: (string | boolean)[]; hig
 ];
 
 // ───────────────────────────────────────── Press / "As featured in"
-/**
- * Third-party press credibility for cold visitors. Both features lead with
- * TrueCap's own "60-second, address → analysis" hook, so they reinforce the
- * value prop rather than distract. Styled text wordmarks (not image logos) keep
- * it zero-weight on the critical path; links open the articles. Placed AFTER the
- * calculator, matching the page's "let them feel the value, then persuade" IA.
- */
-const PRESS_FEATURES = [
-  {
-    name: "Insider Weekly",
-    href: "https://theinsiderweekly.com/the-60-second-underwrite-how-one-tool-wants-to-eliminate-deal-analysis-paralysis-in-real-estate/",
-    wordmark: (
-      <span className="text-lg font-black uppercase tracking-tight sm:text-xl">
-        Insider<span className="font-medium">Weekly</span>
-      </span>
-    ),
-  },
-  {
-    name: "International Business Journal",
-    href: "https://ibjournal.net/how-a-60-second-analysis-tool-is-helping-real-estate-investors-beat-spreadsheet-fatigue/",
-    wordmark: (
-      <span className="font-serif text-sm font-semibold uppercase tracking-[0.14em] sm:text-base">
-        International Business Journal
-      </span>
-    ),
-  },
-];
-
-export function FeaturedIn() {
-  return (
-    <section className="border-t border-border bg-background">
-      <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 sm:py-14">
-        <p className="text-center text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
-          As featured in
-        </p>
-        <div className="mt-5 flex flex-wrap items-center justify-center gap-x-10 gap-y-4 sm:mt-6 sm:gap-x-16">
-          {PRESS_FEATURES.map((p) => (
-            <a
-              key={p.name}
-              href={p.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              title={`Read the ${p.name} feature on TrueCap`}
-              className="text-muted-foreground/70 transition-colors hover:text-foreground"
-            >
-              {p.wordmark}
-              <span className="sr-only"> — read the feature on TrueCap</span>
-            </a>
-          ))}
-        </div>
-        <figure className="mt-7 text-center">
-          <blockquote className="mx-auto max-w-2xl text-balance text-base italic leading-relaxed text-foreground/90 sm:text-lg">
-            &ldquo;Takes a property address and returns a complete investment analysis in
-            about 60 seconds &mdash; auto-filling the data points that typically require a
-            dozen open browser tabs.&rdquo;
-          </blockquote>
-          <figcaption className="mt-3 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
-            Insider Weekly
-          </figcaption>
-        </figure>
-      </div>
-    </section>
-  );
-}
-
 export function VsCompetitors() {
   return (
     <section className="border-t border-border bg-background">
@@ -650,57 +523,6 @@ export function HomepageFaq() {
 }
 
 // ───────────────────────────────────────── Final pre-calculator CTA
-export function PreCalculatorCta() {
-  return (
-    <section className="border-t border-border bg-gradient-to-b from-background via-[var(--brand-blue-light)] to-background">
-      <div className="mx-auto max-w-4xl px-4 py-14 sm:px-6 sm:py-20">
-        <div className="rounded-3xl border-2 border-primary/25 bg-card p-7 text-center shadow-[0_24px_70px_rgba(0,112,196,0.12)] sm:p-10">
-          <p className="text-[11px] font-bold uppercase tracking-widest text-primary">Your move</p>
-          <h2 className="mt-2 text-balance text-3xl font-extrabold tracking-tight text-foreground sm:text-5xl">
-            Run a deal right now. <span className="text-primary">Free.</span>
-          </h2>
-          <p className="mx-auto mt-3 max-w-xl text-balance text-sm leading-relaxed text-muted-foreground sm:text-base">
-            No card. No signup. Type the address, see if it cash-flows. The
-            calculator is right below - give it 60 seconds.
-          </p>
-
-          <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
-            <ScrollToFormButton className="group inline-flex h-12 items-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_14px_32px_rgba(0,112,196,0.32)] hover:-translate-y-0.5 transition-transform sm:h-14 sm:text-base">
-              <Zap className="size-4 sm:size-5" />
-              Analyze a deal free
-              <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5 sm:size-5" />
-            </ScrollToFormButton>
-            <Link
-              href="/pricing"
-              className="inline-flex h-12 items-center gap-1.5 rounded-xl border border-border bg-card px-5 text-sm font-semibold text-foreground hover:bg-muted sm:h-14 sm:text-base"
-            >
-              See Pro features
-            </Link>
-          </div>
-
-          {/* trust strip */}
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
-            <span className="inline-flex items-center gap-1.5">
-              <ShieldCheck className="size-4 text-[var(--metric-positive)]" />
-              <strong className="text-foreground">Secured by Stripe</strong>
-            </span>
-            <span aria-hidden className="text-muted-foreground/40">·</span>
-            <span className="inline-flex items-center gap-1.5">
-              <Clock className="size-4 text-primary" />
-              60-second analysis
-            </span>
-            <span aria-hidden className="text-muted-foreground/40">·</span>
-            <span className="inline-flex items-center gap-1.5">
-              <Type className="size-4 text-muted-foreground" />
-              Free forever
-            </span>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
 // ───────────────────────────────────────── Data sources / accuracy
 /**
  * #6 - investors care deeply about where the numbers come from. This
@@ -817,130 +639,6 @@ const LADDER_ROWS: { label: string; cells: (boolean | string)[] }[] = (
   cells: cells ?? ladderCellsForFeature(key!),
 }));
 
-/**
- * The acquisition-pipeline section — TrueCap's real commercial story.
- *
- * WHY THIS EXISTS (Phase 1, 2026-08-11): the two features that most justify
- * a $29.99/mo subscription were invisible to anyone who wasn't already
- * paying. "Screen Listings" (app/dashboard/triage — paste a shortlist, the
- * numbers get extracted, every property is scored against YOUR buy box)
- * was reachable only from the Pro sidebar: no homepage mention, no pricing
- * row, nothing. And the MAO solver — which answers "don't buy at $325k,
- * your number is $283k" — appeared on /pricing and two persona pages but
- * never on the homepage.
- *
- * Those are the two things a spreadsheet genuinely cannot do, and they are
- * what makes TrueCap a decision layer rather than a calculator. This sits
- * immediately above the Free/$5/Pro ladder so the ladder reads as "here is
- * what that costs" rather than "here are more metrics".
- *
- * The features themselves stay behind their existing entitlement gates
- * (Screen Listings = compare_deals; MAO = paid plan). This is marketing
- * only — it grants nothing.
- */
-const PIPELINE_ROWS: { old: string; truecap: string }[] = [
-  { old: "Open 10 Zillow tabs", truecap: "Paste address + price for up to 10" },
-  { old: "Rebuild the same spreadsheet 10 times", truecap: "Screen up to 10 at once" },
-  { old: "Eyeball which ones look promising", truecap: "Buy-box score on every property" },
-  { old: "Re-do the math to find your offer price", truecap: "TrueCap reverse-solves your number" },
-  { old: "Check back manually when rates move", truecap: "Saved deals re-scored at today's rate" },
-];
-
-export function AcquisitionPipeline() {
-  return (
-    <section className="border-t border-border bg-background">
-      <div className="mx-auto max-w-5xl px-4 py-14 sm:px-6 sm:py-20">
-        <div className="mb-10 text-center sm:mb-12">
-          <p className="text-[11px] font-bold uppercase tracking-widest text-primary">
-            From listing to offer
-          </p>
-          <h2 className="mt-2 text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-            Screening ten listings shouldn&apos;t take{" "}
-            <span className="text-primary">ten spreadsheets.</span>
-          </h2>
-          <p className="mx-auto mt-3 max-w-2xl text-balance text-sm leading-relaxed text-muted-foreground sm:text-base">
-            Most calculators price one deal at a time. TrueCap runs your whole
-            shortlist against your own criteria and tells you which ones deserve
-            a second look, and what to pay for them.
-          </p>
-        </div>
-
-        {/* Old workflow vs TrueCap — two columns, same visual language as
-            WhyNotSpreadsheet so the page reads as one system. */}
-        <div className="grid gap-4 sm:grid-cols-2 sm:gap-5">
-          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-7">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-muted px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
-              <Layers className="size-3.5" />
-              Your Saturday now
-            </div>
-            <ul className="space-y-3">
-              {PIPELINE_ROWS.map((r) => (
-                <li
-                  key={r.old}
-                  className="flex items-start gap-2.5 text-sm leading-relaxed text-muted-foreground"
-                >
-                  <X aria-hidden className="mt-0.5 size-4 shrink-0 text-muted-foreground/50" />
-                  <span>{r.old}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="rounded-2xl border-2 border-primary/30 bg-card p-6 shadow-[0_16px_40px_rgba(0,112,196,0.10)] sm:p-7">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-primary">
-              <ListChecks className="size-3.5" />
-              With TrueCap Pro
-            </div>
-            <ul className="space-y-3">
-              {PIPELINE_ROWS.map((r) => (
-                <li
-                  key={r.truecap}
-                  className="flex items-start gap-2.5 text-sm leading-relaxed text-foreground"
-                >
-                  <Check aria-hidden className="mt-0.5 size-4 shrink-0 text-[var(--metric-positive)]" />
-                  <span>{r.truecap}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-
-        {/* The max-offer differentiator, stated as a number. Every calculator
-            computes cap rate; this is the sentence a spreadsheet won't say. */}
-        <div className="mt-5 rounded-2xl border border-border bg-card p-6 shadow-sm sm:mt-6 sm:p-7">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-7">
-            <div className="inline-flex shrink-0 items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-primary">
-              <Target className="size-3.5" />
-              Max offer
-            </div>
-            <div className="min-w-0">
-              <p className="text-base font-extrabold leading-snug text-foreground sm:text-lg">
-                &ldquo;Don&apos;t buy it at $325,000. Your number is $283,000.&rdquo;
-              </p>
-              <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-                When a deal misses your buy box, TrueCap reverse-solves the
-                highest price that would clear it, so you walk into the offer
-                knowing your ceiling instead of guessing at it.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* One quiet CTA to the plan that unlocks this, matching the sibling
-            sections' single-action pattern. */}
-        <div className="mt-6 text-center sm:mt-7">
-          <Link
-            href="/pricing"
-            className="group inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline"
-          >
-            See how Pro screens a shortlist
-            <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-          </Link>
-        </div>
-      </div>
-    </section>
-  );
-}
 
 export function PdfProUpsell() {
   return (

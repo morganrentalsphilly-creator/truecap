@@ -29,15 +29,13 @@ import { InvestCalcPage } from "@/components/investcalc/investcalc-page";
 import { BillingSuccessBanner } from "@/components/marketing/billing-success-banner";
 import { MarketingHero } from "@/components/marketing/marketing-hero";
 import {
-  AcquisitionPipeline,
   DataSourcesSection,
-  FeaturedIn,
+  FinalCta,
   HomepageFaq,
-  HowItWorks,
+  HowTrueCapWorks,
   PdfProUpsell,
   Personas,
   SocialProof,
-  WhyNotSpreadsheet,
 } from "@/components/marketing/landing-sections";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { TrackLandingView } from "@/components/analytics/track-landing-view";
@@ -210,26 +208,26 @@ export default function Home() {
         // build; the key VALUE never reaches the client).
         dealQaEnabled={Boolean(process.env.ANTHROPIC_API_KEY)}
       />
-      {/* Third-party press credibility — the first trust beat after the
-          visitor has felt the value in the calculator above. */}
-      <FeaturedIn />
-      {/* Persuasion + objection-handling — surfaced AFTER the calculator
-          (the visitor has now felt the value): name the spreadsheet pain,
-          show how it works, then prove the data sources and social proof. */}
-      <WhyNotSpreadsheet />
-      <HowItWorks />
+      {/* ONE STORY: Analyze the deal → Know your number → Make the offer.
+          The page used to run eleven sections that each sold a capability
+          (spreadsheet pain, how it works, the acquisition pipeline, a press
+          bar, a PDF upsell), leaving the visitor to assemble the product
+          themselves. It is now seven blocks that follow the spine:
+          hero → proof (the live analyzer above) → how it works → trust →
+          who it's for → pricing → closing ask. The FAQ stays last: it
+          emits FAQPage JSON-LD for rich results.
+          MUST stay in lockstep with app/home-authed/page.tsx. */}
+      <HowTrueCapWorks />
+      {/* Trust: transparent methodology, editable assumptions, sources shown —
+          then the customer evidence that backs it. */}
       <DataSourcesSection />
       <SocialProof />
-      {/* The commercial story — Screen Listings + the max-offer solver, the
-          two things that make this a decision layer rather than a calculator.
-          Sits immediately above the value ladder so the ladder reads as
-          "here's what that costs". Must stay in lockstep with
-          app/home-authed/page.tsx. */}
-      <AcquisitionPipeline />
-      {/* Post-value monetization — the $5 lender PDF / Pro value ladder,
-          then persona self-ID, then the objection-handling FAQ. */}
-      <PdfProUpsell />
+      {/* Who it's for — investor vs agent self-ID. */}
       <Personas />
+      {/* Pricing: Free → $5 report → Pro → Agent Pro. */}
+      <PdfProUpsell />
+      {/* Closing ask — back to the address field. */}
+      <FinalCta />
       <HomepageFaq />
       {/* Sticky scroll-activated CTA bar — cold visitors only, and this
           page only serves cold visitors. */}
