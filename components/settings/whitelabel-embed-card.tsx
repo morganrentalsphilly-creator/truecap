@@ -27,6 +27,7 @@ export function WhitelabelEmbedCard() {
   const [options, setOptions] = useState<EmbedOption[]>([]);
   const [slug, setSlug] = useState<string>("");
   const [snippet, setSnippet] = useState<string | null>(null);
+  const [notConfigured, setNotConfigured] = useState(false);
   const [copied, setCopied] = useState(false);
   const [isBusy, startBusy] = useTransition();
 
@@ -48,13 +49,22 @@ export function WhitelabelEmbedCard() {
           setOptions(opts);
           setSlug(opts[0]!.slug);
           setSnippet(probe.snippet);
-        } else if (probe.code === "BRANDING_REQUIRED" || probe.code === "NOT_CONFIGURED") {
+        } else if (probe.code === "BRANDING_REQUIRED") {
           // Entitled, but not ready — still show the card so the user knows the
           // feature exists and what's missing.
           setEligible(true);
           setOptions(opts);
           setSlug(opts[0]!.slug);
           setSnippet(null);
+        } else if (probe.code === "NOT_CONFIGURED") {
+          // Distinct from BRANDING_REQUIRED: the agent's branding is fine, the
+          // DEPLOYMENT is missing SHARE_LINK_SECRET. Telling them to "add your
+          // company name" would send them to fix something that isn't broken.
+          setEligible(true);
+          setOptions(opts);
+          setSlug(opts[0]!.slug);
+          setSnippet(null);
+          setNotConfigured(true);
         } else {
           setEligible(false); // ENTITLEMENT_REQUIRED / SIGN_IN_REQUIRED / error
         }
@@ -137,6 +147,12 @@ export function WhitelabelEmbedCard() {
             </Button>
           </div>
         ) : (
+          notConfigured ? (
+          <p className="rounded-lg border border-dashed border-border bg-muted/20 p-3 text-xs text-muted-foreground">
+            White-label embeds aren&rsquo;t configured on this deployment yet
+            (SHARE_LINK_SECRET is missing). Your branding is fine — nothing to do here.
+          </p>
+        ) : (
           <p className="rounded-lg border border-dashed border-border bg-muted/20 p-3 text-xs text-muted-foreground">
             Add your company or contact name on the{" "}
             <a href="/settings/branding" className="font-semibold text-primary hover:underline">
@@ -144,6 +160,7 @@ export function WhitelabelEmbedCard() {
             </a>{" "}
             first — that&rsquo;s the brand your embed will wear.
           </p>
+          )
         )}
       </div>
     </section>

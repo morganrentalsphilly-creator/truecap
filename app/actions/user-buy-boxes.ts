@@ -225,11 +225,15 @@ type FitDealRow = {
 async function computeSavedBoxFit(
   supabase: SupabaseClient,
   userId: string,
-  criteria: BuyBoxCriteria
+  criteria: BuyBoxCriteria,
+  /** Agent Pro: when the box is scoped to a client, only THAT client's deals
+   *  are the honest denominator. Measuring one buyer's criteria against every
+   *  deal the agent owns made "3 of 40 pass" meaningless. */
+  clientId?: string | null
 ): Promise<BuyBoxFitCount | null> {
   if (!criteria.isActive || !buyBoxHasCriteria(criteria)) return null;
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from("saved_analyses")
       .select(
         "address, property_type, purchase_price, net_cash_flow_monthly, coc_return_pct, cap_rate_raw:result_snapshot->>capRate, form_snapshot"
@@ -237,7 +241,9 @@ async function computeSavedBoxFit(
       .eq("user_id", userId)
       .is("deleted_at", null)
       .eq("is_completed", false)
-      .eq("is_archived", false)
+      .eq("is_archived", false);
+    if (clientId) query = query.eq("client_id", clientId);
+    const { data, error } = await query
       .order("created_at", { ascending: false })
       .limit(FIT_FEEDBACK_DEALS_LIMIT);
     if (error || !data || data.length === 0) return null;
@@ -400,7 +406,7 @@ export async function upsertBuyBoxAction(input: unknown): Promise<BuyBoxesAction
     propertyTypes: parsed.data.propertyTypes,
     targetStates,
     isActive: parsed.data.isActive,
-  });
+  }, parsed.data.clientId ?? null);
   return fit
     ? { ok: true, boxes: final.boxes, canUse: true, fit }
     : { ok: true, boxes: final.boxes, canUse: true };

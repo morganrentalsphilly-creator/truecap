@@ -1172,9 +1172,11 @@ export function AnalysisDashboard({
                   gates the sidebar item - so anon/free users see nothing. */}
               {/* Save-limit notice - the disabled Save button's title tooltip
                   is desktop-hover-only, so this is the ALWAYS-VISIBLE (mobile
-                  included) explanation + the path to act: archive/delete in
-                  My Deals frees capacity. Muted one-line text, same quiet
-                  register as the triage cross-link below. */}
+                  included) explanation + the path to act. NOTE: only DELETING
+                  frees a slot — the capacity count in saveDealAction counts
+                  every non-deleted row, archived included — so the copy must
+                  not promise that archiving helps. Muted one-line text, same
+                  quiet register as the triage cross-link below. */}
               {isSaveLimitLockedByPlan ? (
                 <p className="col-span-full px-1 pt-0.5 text-xs text-muted-foreground">
                   Saved-deal limit reached
@@ -1186,7 +1188,7 @@ export function AnalysisDashboard({
                     href="/dashboard/saved-analyses"
                     className="inline-flex items-center gap-0.5 font-semibold text-primary hover:underline"
                   >
-                    manage deals
+                    delete one to free a slot
                     <ArrowUpRight aria-hidden className="size-3" />
                   </Link>
                 </p>

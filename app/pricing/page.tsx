@@ -133,6 +133,10 @@ export default async function PricingPage() {
   // overwhelmingly first-time, and checkout re-checks after signup anyway.
   // Agent Pro renders ONLY when its Stripe price env is configured — until
   // then the tier is fully plumbed but invisible (nothing to sell yet).
+  // Whether Agent Pro EXISTS is a configuration fact (env + plan rows), not a
+  // function of whether Stripe answered this request. Deriving visibility from
+  // the fetched price meant one transient Stripe error deleted a live tier from
+  // the pricing page for that visitor.
   const agentProConfigured = isAgentProConfigured();
   const [monthly, annual, agentMonthly, agentAnnual, isPaid, hadPriorSubscription] = await Promise.all([
     loadStripePrice("pro_monthly"),
@@ -208,6 +212,7 @@ export default async function PricingPage() {
             isAuthenticated={Boolean(user)}
             isPaid={isPaid}
             hadPriorSubscription={hadPriorSubscription}
+            agentProConfigured={agentProConfigured}
           />
 
           {/* One outcome quote at the money ask — the same revenue-tied proof

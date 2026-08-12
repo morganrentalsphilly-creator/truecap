@@ -10,6 +10,7 @@ import { z } from "zod";
 import { Camera, Check, KeyRound, Loader2, Mail, Upload, X } from "lucide-react";
 import "react-easy-crop/react-easy-crop.css";
 import { updateProfileAction } from "@/app/actions/profile";
+import { CaptchaWidget, captchaEnabled } from "@/components/auth/captcha-widget";
 import { requestPasswordResetAction } from "@/app/actions/auth";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -178,6 +179,8 @@ export function ProfileForm({
   // route + branded template.
   const [isSendingReset, setIsSendingReset] = useState(false);
   const [resetSent, setResetSent] = useState(false);
+  const [resetCaptchaToken, setResetCaptchaToken] = useState<string | null>(null);
+  const [resetCaptchaUnavailable, setResetCaptchaUnavailable] = useState(false);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
@@ -345,7 +348,13 @@ export function ProfileForm({
   const handleSendPasswordReset = async () => {
     if (!initialEmail || isSendingReset) return;
     setIsSendingReset(true);
-    const result = await requestPasswordResetAction({ email: initialEmail });
+    // Supabase enforces captcha on resetPasswordForEmail project-wide, so this
+    // signed-in surface needs a token too. Without one the send was rejected
+    // and the user saw a raw "no captcha_token found" error.
+    const result = await requestPasswordResetAction({
+      email: initialEmail,
+      captchaToken: resetCaptchaToken ?? undefined,
+    });
     setIsSendingReset(false);
     if (!result.ok) {
       toast({
@@ -570,12 +579,23 @@ export function ProfileForm({
                 </p>
               </div>
             </div>
+            <div className="flex shrink-0 flex-col items-stretch gap-2 sm:items-end">
+            {!resetSent ? (
+              <CaptchaWidget
+                onToken={setResetCaptchaToken}
+                onUnavailable={() => setResetCaptchaUnavailable(true)}
+              />
+            ) : null}
             <Button
               type="button"
               variant="outline"
               className="rounded-xl shrink-0"
               onClick={() => void handleSendPasswordReset()}
-              disabled={isSendingReset || resetSent}
+              disabled={
+                isSendingReset ||
+                resetSent ||
+                (captchaEnabled && !resetCaptchaUnavailable && !resetCaptchaToken)
+              }
             >
               {isSendingReset ? (
                 <>
@@ -594,6 +614,7 @@ export function ProfileForm({
                 </>
               )}
             </Button>
+            </div>
           </div>
         </div>
       </div>

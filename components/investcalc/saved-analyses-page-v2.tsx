@@ -1676,7 +1676,7 @@ export function SavedAnalysesPage({
         <Switch
           id="template-include-interest-deduction-mobile"
           checked={showcompare ?? false}
-          disabled={!canCompareDeals}
+          
           onCheckedChange={(value) => canCompareDeals && setShowcompare(value ?? false)}
           aria-label="Show selected analyses only"
         />
@@ -1766,17 +1766,13 @@ export function SavedAnalysesPage({
   };
 
   const toggleOne = (id: string) => {
-    if (!canCompareDeals) {
-      toast({
-        title: "Upgrade required",
-        description: "Compare deals is not available for your current plan.",
-        variant: "destructive",
-      });
-      return;
-    }
     setSelectedIds((prev) => {
       if (prev.includes(id)) return prev.filter((current) => current !== id);
-      if (prev.length >= 4) {
+      // The 4-deal ceiling is a COMPARE constraint, so it only applies to users
+      // who can compare. Free users select to archive/delete — and delete is
+      // their only way to free a slot at the 5-deal cap, so capping their
+      // selection at 4 (or blocking it outright, as this did) left them stuck.
+      if (canCompareDeals && prev.length >= 4) {
         showCompareLimit();
         return prev;
       }
@@ -2085,14 +2081,6 @@ export function SavedAnalysesPage({
   };
 
   const toggleAllVisible = () => {
-    if (!canCompareDeals) {
-      toast({
-        title: "Upgrade required",
-        description: "Compare deals is not available for your current plan.",
-        variant: "destructive",
-      });
-      return;
-    }
     if (allVisibleSelected) {
       setSelectedIds((prev) => prev.filter((id) => !pagedItems.some((item) => item.id === id)));
       return;
@@ -2367,7 +2355,7 @@ export function SavedAnalysesPage({
               <Switch
                 id="template-include-interest-deduction"
                 checked={showcompare ?? false}
-                disabled={!canCompareDeals}
+                
                 onCheckedChange={(value)=> canCompareDeals && setShowcompare(value ?? false)}
                 aria-label="Show selected analyses only"
               />
@@ -2460,9 +2448,9 @@ export function SavedAnalysesPage({
                     </div>
                     <input
                       type="checkbox"
-                      checked={canCompareDeals && isSelected}
+                      checked={isSelected}
                       onChange={() => toggleOne(item.id)}
-                      disabled={!canCompareDeals}
+                      
                       aria-label={`Select analysis ${address.main}`}
                       className="mt-1 h-4 w-4 shrink-0 rounded border-border disabled:cursor-not-allowed disabled:opacity-40"
                     />
@@ -2645,9 +2633,9 @@ export function SavedAnalysesPage({
                   <th className="w-10 px-3">
                     <input
                       type="checkbox"
-                      checked={canCompareDeals && allVisibleSelected}
+                      checked={allVisibleSelected}
                       onChange={toggleAllVisible}
-                      disabled={!canCompareDeals}
+                      
                       aria-label="Select all visible analyses"
                       className="h-4 w-4 rounded border-border disabled:cursor-not-allowed disabled:opacity-40"
                     />
@@ -2686,9 +2674,9 @@ export function SavedAnalysesPage({
                       <td className="px-3 align-middle">
                         <input
                           type="checkbox"
-                          checked={canCompareDeals && isSelected}
+                          checked={isSelected}
                           onChange={() => toggleOne(item.id)}
-                          disabled={!canCompareDeals}
+                          
                           aria-label={`Select analysis ${address.main}`}
                           className="h-4 w-4 rounded border-border disabled:cursor-not-allowed disabled:opacity-40"
                         />
@@ -2916,6 +2904,25 @@ export function SavedAnalysesPage({
                     <Link href="/dashboard/saved-analyses">Show all deals</Link>
                   </Button>
                 </>
+              ) : initialItems.length === 0 && activeDealStateFilter !== "all" ? (
+                /* Empty because of the LIFECYCLE TAB, not because the account is
+                   empty — initialItems is already server-filtered. Telling a
+                   user with archived deals to "save your first deal" is simply
+                   false. */
+                <>
+                  <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-2xl bg-muted">
+                    <Search className="w-5 h-5 text-muted-foreground" />
+                  </div>
+                  <p className="text-sm font-semibold text-foreground">
+                    No {activeDealStateFilter} deals
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Your other deals may be under a different tab.
+                  </p>
+                  <Button asChild variant="outline" className="mt-4 rounded-full">
+                    <Link href="/dashboard/saved-analyses?state=all">Show all deals</Link>
+                  </Button>
+                </>
               ) : initialItems.length === 0 ? (
                 /* Brand-new user - never saved a deal. Welcome them
                    instead of showing a search-y "no results" state. */
@@ -2939,8 +2946,22 @@ export function SavedAnalysesPage({
                   </div>
                   <p className="text-sm font-semibold text-foreground">No deals match your filters</p>
                   <p className="text-xs text-muted-foreground mt-1">Try clearing the search or switching the deal-state tab.</p>
-                  <Button asChild variant="outline" className="rounded-full mt-4">
-                    <Link href="/dashboard/saved-analyses">Reset filters</Link>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="rounded-full mt-4"
+                    onClick={() => {
+                      // These live in React state + sessionStorage, so the old
+                      // <Link> to this same route cleared nothing at all.
+                      setSearchQuery("");
+                      setSelectedSignal("all");
+                      setSelectedType("all");
+                      setBuyBoxOnly(false);
+                      setShowcompare(false);
+                      setCurrentPage(1);
+                    }}
+                  >
+                    Reset filters
                   </Button>
                 </>
               )}

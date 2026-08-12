@@ -40,6 +40,12 @@ interface PricingTogglePlansProps {
    * false for anonymous visitors.
    */
   hadPriorSubscription: boolean;
+  /**
+   * Agent Pro is configured (env + plan rows). Distinct from "its price
+   * resolved this request" — a transient Stripe failure must not delete a live
+   * tier from the page.
+   */
+  agentProConfigured?: boolean;
 }
 
 const FREE_FEATURES: { label: string; included: boolean }[] = [
@@ -156,6 +162,7 @@ export function PricingTogglePlans({
   isAuthenticated,
   isPaid,
   hadPriorSubscription,
+  agentProConfigured = false,
 }: PricingTogglePlansProps) {
   // One decision for every trial mention on this card — must match what
   // checkout actually grants (billing.ts denies the trial to anyone with
@@ -203,7 +210,7 @@ export function PricingTogglePlans({
       : null;
 
   // Agent Pro exists on the page only when its price resolved (env configured).
-  const showAgentPro = agentMonthly != null || agentAnnual != null;
+  const showAgentPro = agentProConfigured || agentMonthly != null || agentAnnual != null;
   const agentMonthlyAmount = parsePriceAmount(agentMonthly);
   const agentAnnualAmount = parsePriceAmount(agentAnnual);
   const agentAnnualMonthlyEquivalent = agentAnnualAmount != null ? agentAnnualAmount / 12 : null;
