@@ -24,6 +24,14 @@ import "server-only";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { getEntitlementsForUser, hasPlanFeature } from "@/lib/entitlements";
 import { getPublicAgentBranding, type PublicAgentBranding } from "@/lib/agent-share";
+import {
+  buyBoxHasCriteria,
+  rowToNamedBuyBox,
+  summarizeBuyBoxCriteria,
+  type BuyBoxesRow,
+  type NamedBuyBox,
+} from "@/lib/buy-box";
+import { computeDealOfferLine } from "@/lib/deal-offer-line";
 import { recomputeSavedDealVerdict } from "@/lib/recompute-saved-deal-verdict";
 import { normalizeInvestmentFormSnapshot } from "@/lib/investcalc-schema";
 import { encodeShareLink } from "@/lib/share-link";
@@ -41,6 +49,11 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 export type PortalDeal = {
   id: string;
   address: string;
+  /** Does this deal meet the buyer's own criteria? null when they have no buy
+   *  box set — the portal then simply omits fit rather than implying a pass. */
+  meetsCriteria: boolean | null;
+  /** The one number-carrying reason when it misses ("Cap rate: 5.2% vs ≥ 6%"). */
+  gapLine: string | null;
   recommendation: DealRecommendation;
   riskLevel: DealRiskLevel;
   score: number;
@@ -56,6 +69,11 @@ export type ClientPortalData = {
   clientName: string;
   branding: PublicAgentBranding | null;
   deals: PortalDeal[];
+  /** The buyer's own criteria, in words. Null when the agent hasn't set a box
+   *  for them — "screened to your criteria" must not appear without them. */
+  criteriaSummary: string | null;
+  /** How many of the listed deals meet those criteria. */
+  meetingCount: number;
 };
 
 type DealRow = {
@@ -111,6 +129,26 @@ export async function loadClientPortal(input: {
 
     const branding = await getPublicAgentBranding(agentUserId);
 
+    // The buyer's OWN criteria — the boxes this agent scoped to this client.
+    // This is what makes "deals screened to your criteria" true rather than a
+    // slogan: the buyer sees the bar and whether each deal clears it.
+    let clientBoxes: NamedBuyBox[] = [];
+    try {
+      const { data: boxRows } = await admin
+        .from("user_buy_boxes")
+        .select("*")
+        .eq("user_id", agentUserId)
+        .eq("client_id", clientId)
+        .eq("is_active", true);
+      clientBoxes = ((boxRows ?? []) as unknown[])
+        .map((r) => rowToNamedBuyBox(r as BuyBoxesRow))
+        .filter((b): b is NamedBuyBox => b != null && buyBoxHasCriteria(b));
+    } catch {
+      clientBoxes = []; // fit is an enhancement; never fail the portal for it
+    }
+    const criteriaSummary =
+      clientBoxes.length > 0 ? summarizeBuyBoxCriteria(clientBoxes[0]!) : null;
+
     const deals: PortalDeal[] = [];
     for (const row of (rows ?? []) as DealRow[]) {
       const verdict = recomputeSavedDealVerdict(row.form_snapshot);
@@ -137,9 +175,30 @@ export async function loadClientPortal(input: {
           sharePath = null; // a card without a deep link is still useful
         }
       }
+      // Evaluate against the buyer's own criteria (never the agent's other
+      // clients' — computeDealOfferLine scopes by client internally).
+      let meetsCriteria: boolean | null = null;
+      let gapLine: string | null = null;
+      if (clientBoxes.length > 0 && values) {
+        try {
+          const scoped = computeDealOfferLine(values, clientBoxes, {
+            isShoppingStage: true,
+            dealClientId: clientId,
+          });
+          if (scoped.fit) {
+            meetsCriteria = scoped.fit.anyPass;
+            gapLine = scoped.fit.anyPass ? null : scoped.personalLine;
+          }
+        } catch {
+          /* fit stays null — the card still renders its numbers */
+        }
+      }
+
       deals.push({
         id: row.id,
         address: (values?.address || row.address || "Saved deal").toString(),
+        meetsCriteria,
+        gapLine,
         recommendation: verdict.recommendation,
         riskLevel: verdict.riskLevel,
         score: verdict.score,
@@ -150,7 +209,13 @@ export async function loadClientPortal(input: {
       });
     }
 
-    return { clientName: client.name, branding, deals };
+    return {
+      clientName: client.name,
+      branding,
+      deals,
+      criteriaSummary,
+      meetingCount: deals.filter((d) => d.meetsCriteria === true).length,
+    };
   } catch {
     return null;
   }

@@ -178,3 +178,34 @@ describe("destructive client delete is confirmed on BOTH roster surfaces", () =>
     expect(read(file)).toContain("window.confirm");
   });
 });
+
+describe("setting a client's buy box has a visible payoff (the $59.99 case)", () => {
+  // Before this, an agent could set per-client criteria and NOTHING anywhere
+  // reflected it — not the portal the buyer opens, not the roster the agent
+  // manages. The feature was unjustifiable at any price.
+  it("the portal tells the buyer WHAT they were screened against", () => {
+    const src = read("lib/client-portal.ts");
+    expect(src).toContain("criteriaSummary");
+    expect(src).toContain("summarizeBuyBoxCriteria");
+  });
+
+  it("the portal marks each deal as meeting or missing those criteria", () => {
+    const portal = read("lib/client-portal.ts");
+    expect(portal).toContain("meetsCriteria");
+    // …scoped to THIS client, never the agent's other buyers.
+    expect(portal).toMatch(/dealClientId: clientId/);
+    const page = read("app/portal/[token]/page.tsx");
+    expect(page).toContain("Meets your criteria");
+  });
+
+  it("the roster tells the agent how many of each client's deals clear the bar", () => {
+    expect(read("app/actions/agent-clients.ts")).toContain("meetingCount");
+    expect(read("components/investcalc/clients-workspace.tsx")).toMatch(/meet their criteria/);
+  });
+
+  it("criteria are summarized from the shared lib, not duplicated per surface", () => {
+    // The settings card and the public portal must describe a box identically.
+    expect(read("lib/buy-box.ts")).toContain("export function summarizeBuyBoxCriteria");
+    expect(read("components/settings/buy-boxes-card.tsx")).toContain("summarizeBuyBoxCriteria");
+  });
+});

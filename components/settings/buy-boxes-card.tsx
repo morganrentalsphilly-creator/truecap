@@ -24,6 +24,7 @@ import {
 import {
   US_STATE_OPTIONS,
   buyBoxPropertyTypeLabel,
+  summarizeBuyBoxCriteria,
   type BuyBoxFitCount,
   type BuyBoxPropertyType,
   type NamedBuyBox,
@@ -70,18 +71,6 @@ function matchState(raw: string): string | null {
   if (US_STATE_OPTIONS.some((s) => s.abbr === head)) return head;
   const byName = US_STATE_OPTIONS.find((s) => s.name.toLowerCase() === trimmed.toLowerCase());
   return byName ? byName.abbr : null;
-}
-
-function summarizeBox(box: NamedBuyBox): string {
-  const parts: string[] = [];
-  if (box.minCapRatePct != null) parts.push(`Cap ≥ ${box.minCapRatePct}%`);
-  if (box.minCocPct != null) parts.push(`CoC ≥ ${box.minCocPct}%`);
-  if (box.minDscr != null) parts.push(`DSCR ≥ ${box.minDscr}`);
-  if (box.minCashFlowMonthly != null) parts.push(`CF ≥ $${box.minCashFlowMonthly}/mo`);
-  if (box.maxPurchasePrice != null) parts.push(`≤ $${Math.round(box.maxPurchasePrice).toLocaleString("en-US")}`);
-  if (box.propertyTypes.length) parts.push(box.propertyTypes.map(buyBoxPropertyTypeLabel).join("/"));
-  if (box.targetStates.length) parts.push(box.targetStates.join(", "));
-  return parts.length ? parts.join(" · ") : "No criteria set yet";
 }
 
 type EditorState = {
@@ -422,7 +411,7 @@ export function BuyBoxesCard() {
                     </span>
                   ) : null}
                 </div>
-                <p className="mt-0.5 truncate text-xs text-muted-foreground">{summarizeBox(box)}</p>
+                <p className="mt-0.5 truncate text-xs text-muted-foreground">{summarizeBuyBoxCriteria(box)}</p>
               </div>
               <div className="flex shrink-0 items-center gap-1">
                 {!box.isDefault ? (

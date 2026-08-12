@@ -435,6 +435,83 @@ export type NamedBuyBoxResult = {
  * Callers with no deal-client context (batch triage of pasted listings, the
  * dashboard rollup) pass null and correctly get just the agent's own boxes.
  */
+/**
+ * One-line, human summary of a box's criteria ("Cap ≥ 6% · CF ≥ $200/mo").
+ * Lives here (not in the settings card) so the client portal can tell a buyer
+ * exactly what their agent screened against — "screened to your criteria" is
+ * only credible if the criteria are visible.
+ */
+
+const KNOWN_STATE_ABBRS = new Set(US_STATE_OPTIONS.map((s) => s.abbr));
+
+/** Raw user_buy_boxes row shape (client_id optional — pre-migration rows). */
+export type BuyBoxesRow = {
+  id: string;
+  name: string | null;
+  strategy_kind: string | null;
+  min_cap_rate_pct: number | string | null;
+  min_coc_pct: number | string | null;
+  min_dscr: number | string | null;
+  min_cash_flow_monthly: number | string | null;
+  max_purchase_price: number | string | null;
+  property_types: string[] | null;
+  target_states: string[] | null;
+  is_active: boolean | null;
+  is_default: boolean | null;
+  sort_order: number | null;
+  client_id?: string | null;
+};
+
+function toNumOrNull(value: number | string | null | undefined): number | null {
+  if (value == null || value === "") return null;
+  const n = typeof value === "number" ? value : Number(value);
+  return Number.isFinite(n) ? n : null;
+}
+
+/**
+ * Map a raw user_buy_boxes row to the model. Exported from the shared lib (not
+ * the "use server" action) so server-side READERS outside that module — notably
+ * the public client portal — can load a client's criteria directly.
+ */
+export function rowToNamedBuyBox(row: BuyBoxesRow): NamedBuyBox {
+  const propertyTypes = (row.property_types ?? []).filter(
+    (t): t is BuyBoxPropertyType =>
+      t === "single-family" || t === "multi-family" || t === "owner-occupant"
+  );
+  const targetStates = (row.target_states ?? [])
+    .map((s) => s.toUpperCase())
+    .filter((s) => KNOWN_STATE_ABBRS.has(s));
+  return {
+    id: row.id,
+    name: row.name ?? "My Buy Box",
+    strategyKind: typeof row.strategy_kind === "string" ? row.strategy_kind : null,
+    isDefault: row.is_default ?? false,
+    sortOrder: row.sort_order ?? 0,
+    clientId: row.client_id ?? null,
+    minCapRatePct: toNumOrNull(row.min_cap_rate_pct),
+    minCocPct: toNumOrNull(row.min_coc_pct),
+    minDscr: toNumOrNull(row.min_dscr),
+    minCashFlowMonthly: toNumOrNull(row.min_cash_flow_monthly),
+    maxPurchasePrice: toNumOrNull(row.max_purchase_price),
+    propertyTypes,
+    targetStates,
+    isActive: row.is_active ?? true,
+  };
+}
+
+export function summarizeBuyBoxCriteria(box: NamedBuyBox): string {
+  const parts: string[] = [];
+  if (box.minCapRatePct != null) parts.push(`Cap ≥ ${box.minCapRatePct}%`);
+  if (box.minCocPct != null) parts.push(`CoC ≥ ${box.minCocPct}%`);
+  if (box.minDscr != null) parts.push(`DSCR ≥ ${box.minDscr}`);
+  if (box.minCashFlowMonthly != null) parts.push(`CF ≥ $${box.minCashFlowMonthly}/mo`);
+  if (box.maxPurchasePrice != null)
+    parts.push(`≤ $${Math.round(box.maxPurchasePrice).toLocaleString("en-US")}`);
+  if (box.propertyTypes.length) parts.push(box.propertyTypes.map(buyBoxPropertyTypeLabel).join("/"));
+  if (box.targetStates.length) parts.push(box.targetStates.join(", "));
+  return parts.length ? parts.join(" · ") : "No criteria set yet";
+}
+
 export function boxesForDealClient(
   boxes: NamedBuyBox[],
   dealClientId: string | null | undefined

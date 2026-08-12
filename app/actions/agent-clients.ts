@@ -22,6 +22,10 @@ import { mintSignedToken } from "@/lib/signed-token";
 import { PORTAL_SCOPE } from "@/lib/client-portal";
 import { getSiteUrl } from "@/lib/site-url";
 import { PORTAL_DEAL_LIMIT } from "@/lib/client-portal";
+import { buyBoxHasCriteria, type NamedBuyBox } from "@/lib/buy-box";
+import { normalizeInvestmentFormSnapshot } from "@/lib/investcalc-schema";
+import { computeDealOfferLine } from "@/lib/deal-offer-line";
+import { listBuyBoxesAction } from "@/app/actions/user-buy-boxes";
 
 export type AgentClient = {
   id: string;
@@ -265,6 +269,9 @@ export async function getClientPortalLinkAction(
 export type ClientDealSummary = {
   clientId: string;
   dealCount: number;
+  /** How many of those deals clear this client's own buy box. null = the
+   *  client has no criteria set yet (the card then prompts for one). */
+  meetingCount: number | null;
   /** Addresses of the most recent few, for an at-a-glance roster card. */
   recentAddresses: string[];
 };
@@ -286,7 +293,7 @@ export async function listClientDealCountsAction(): Promise<
 
   const { data, error } = await supabase
     .from("saved_analyses")
-    .select("client_id, address, form_snapshot->>address")
+    .select("client_id, address, form_snapshot")
     .eq("user_id", userId)
     .is("deleted_at", null)
     // Same scope as the portal (lib/client-portal) on purpose: the count on
@@ -305,14 +312,48 @@ export async function listClientDealCountsAction(): Promise<
     return { ok: false, code: "SERVER_ERROR", message: "Couldn't load client deals." };
   }
 
+  // Each client's own active criteria, so the roster can report how many of
+  // their deals actually clear the bar — the payoff that makes setting a
+  // per-client buy box worth doing.
+  const boxesByClient = new Map<string, NamedBuyBox[]>();
+  try {
+    const boxes = await listBuyBoxesAction();
+    if (boxes.ok) {
+      for (const b of boxes.boxes) {
+        if (!b.clientId || !b.isActive || !buyBoxHasCriteria(b)) continue;
+        boxesByClient.set(b.clientId, [...(boxesByClient.get(b.clientId) ?? []), b]);
+      }
+    }
+  } catch {
+    /* fit is an enhancement — a failure just omits it */
+  }
+
   const byClient = new Map<string, ClientDealSummary>();
-  for (const row of (data ?? []) as { client_id: string | null; address: string | null }[]) {
+  for (const row of (data ?? []) as { client_id: string | null; address: string | null; form_snapshot: unknown }[]) {
     if (!row.client_id) continue;
-    const entry = byClient.get(row.client_id) ?? { clientId: row.client_id, dealCount: 0, recentAddresses: [] };
+    const entry =
+      byClient.get(row.client_id) ??
+      { clientId: row.client_id, dealCount: 0, meetingCount: null, recentAddresses: [] };
     // Cap at what the portal will actually show — the count and the buyer's
     // page must not disagree above the limit.
     if (entry.dealCount < PORTAL_DEAL_LIMIT) entry.dealCount += 1;
     if (entry.recentAddresses.length < 3 && row.address) entry.recentAddresses.push(row.address);
+
+    const clientBoxes = boxesByClient.get(row.client_id);
+    if (clientBoxes && clientBoxes.length > 0) {
+      const values = normalizeInvestmentFormSnapshot(row.form_snapshot);
+      if (values) {
+        try {
+          const fit = computeDealOfferLine(values, clientBoxes, {
+            isShoppingStage: true,
+            dealClientId: row.client_id,
+          }).fit;
+          if (fit) entry.meetingCount = (entry.meetingCount ?? 0) + (fit.anyPass ? 1 : 0);
+        } catch {
+          /* skip this row's fit */
+        }
+      }
+    }
     byClient.set(row.client_id, entry);
   }
   return { ok: true, counts: [...byClient.values()] };

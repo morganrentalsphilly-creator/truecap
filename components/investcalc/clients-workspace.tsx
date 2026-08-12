@@ -267,7 +267,9 @@ export function ClientsWorkspace({
                 {dealCount > 0 ? (
                   <>
                     <span className="font-semibold text-foreground">
-                      {dealCount} {dealCount === 1 ? "deal" : "deals"} assigned
+                      {summary?.meetingCount != null
+                        ? `${summary.meetingCount} of ${dealCount} meet their criteria`
+                        : `${dealCount} ${dealCount === 1 ? "deal" : "deals"} assigned`}
                     </span>
                     <Link
                       href={`/dashboard/saved-analyses?client=${c.id}`}
@@ -295,7 +297,7 @@ export function ClientsWorkspace({
                   href={`/settings?buyBoxFor=${c.id}#buy-boxes`}
                   className="ml-auto text-xs font-semibold text-primary hover:underline"
                 >
-                  Set their buy box
+                  {summary?.meetingCount != null ? "Edit their buy box" : "Set their buy box"}
                 </Link>
               </div>
 

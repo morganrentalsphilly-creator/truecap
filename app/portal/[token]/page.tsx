@@ -49,7 +49,7 @@ export default async function ClientPortalPage({
   const data = await loadClientPortal({ agentUserId: decoded.a, clientId: decoded.c });
   if (!data) notFound();
 
-  const { clientName, branding, deals } = data;
+  const { clientName, branding, deals, criteriaSummary, meetingCount } = data;
   const brandColor = branding?.primaryColor ?? "var(--primary)";
   const brandName = branding?.displayName ?? "TrueCap";
 
@@ -89,8 +89,20 @@ export default async function ClientPortalPage({
           <p className="mt-1 text-sm text-muted-foreground">
             {deals.length === 0
               ? "No deals have been shared with you yet — check back soon."
-              : `${deals.length} ${deals.length === 1 ? "property" : "properties"}, each fully underwritten.`}
+              : criteriaSummary
+                ? `${deals.length} ${deals.length === 1 ? "property" : "properties"} underwritten — ${meetingCount} meet your criteria.`
+                : `${deals.length} ${deals.length === 1 ? "property" : "properties"}, each fully underwritten.`}
           </p>
+          {/* The criteria themselves. "Screened to your criteria" is only
+              credible if the buyer can see what the bar actually is. */}
+          {criteriaSummary ? (
+            <div className="mt-3 rounded-xl border border-border bg-muted/30 px-3 py-2">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                Your criteria
+              </p>
+              <p className="mt-0.5 text-sm font-semibold text-foreground">{criteriaSummary}</p>
+            </div>
+          ) : null}
         </div>
 
         <ul className="space-y-3">
@@ -102,11 +114,25 @@ export default async function ClientPortalPage({
                     <p className="truncate font-bold text-foreground" title={deal.address}>
                       {deal.address}
                     </p>
-                    <span
-                      className={`mt-1 inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold ${recTone(deal.recommendation)}`}
-                    >
-                      {deal.recommendation} · Score {Math.round(deal.score)}
-                    </span>
+                    <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                      <span
+                        className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold ${recTone(deal.recommendation)}`}
+                      >
+                        {deal.recommendation} · Score {Math.round(deal.score)}
+                      </span>
+                      {deal.meetsCriteria === true ? (
+                        <span className="inline-flex items-center rounded-full border border-[var(--brand-green)]/30 bg-[var(--brand-green-light)] px-2 py-0.5 text-[11px] font-semibold text-[var(--brand-green)]">
+                          Meets your criteria
+                        </span>
+                      ) : deal.meetsCriteria === false ? (
+                        <span className="inline-flex items-center rounded-full border border-border bg-muted/50 px-2 py-0.5 text-[11px] font-semibold text-muted-foreground">
+                          Below your criteria
+                        </span>
+                      ) : null}
+                    </div>
+                    {deal.gapLine ? (
+                      <p className="mt-1 text-[11px] text-muted-foreground">{deal.gapLine}</p>
+                    ) : null}
                   </div>
                   {deal.sharePath ? (
                     <ArrowUpRight className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />

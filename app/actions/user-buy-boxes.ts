@@ -26,6 +26,8 @@ import {
   US_STATE_OPTIONS,
   buyBoxHasCriteria,
   countBuyBoxFit,
+  rowToNamedBuyBox,
+  type BuyBoxesRow,
   deriveStateFromAddress,
   type BuyBoxCriteria,
   type BuyBoxDealMetrics,
@@ -116,54 +118,12 @@ export type BuyBoxesActionResult =
       message: string;
     };
 
-type BuyBoxesRow = {
-  id: string;
-  name: string | null;
-  strategy_kind: string | null;
-  min_cap_rate_pct: number | string | null;
-  min_coc_pct: number | string | null;
-  min_dscr: number | string | null;
-  min_cash_flow_monthly: number | string | null;
-  max_purchase_price: number | string | null;
-  property_types: string[] | null;
-  target_states: string[] | null;
-  is_active: boolean | null;
-  is_default: boolean | null;
-  sort_order: number | null;
-  client_id?: string | null;
-};
-
 function toNum(value: number | string | null): number | null {
   if (value == null || value === "") return null;
   const n = typeof value === "number" ? value : Number(value);
   return Number.isFinite(n) ? n : null;
 }
 
-function rowToNamedBuyBox(row: BuyBoxesRow): NamedBuyBox {
-  const propertyTypes = (row.property_types ?? []).filter(
-    (t): t is BuyBoxPropertyType =>
-      t === "single-family" || t === "multi-family" || t === "owner-occupant"
-  );
-  const targetStates = (row.target_states ?? [])
-    .map((s) => s.toUpperCase())
-    .filter((s) => KNOWN_STATE_ABBRS.has(s));
-  return {
-    id: row.id,
-    name: row.name ?? "My Buy Box",
-    strategyKind: isStrategyKind(row.strategy_kind) ? row.strategy_kind : null,
-    isDefault: row.is_default ?? false,
-    sortOrder: row.sort_order ?? 0,
-    clientId: row.client_id ?? null,
-    minCapRatePct: toNum(row.min_cap_rate_pct),
-    minCocPct: toNum(row.min_coc_pct),
-    minDscr: toNum(row.min_dscr),
-    minCashFlowMonthly: toNum(row.min_cash_flow_monthly),
-    maxPurchasePrice: toNum(row.max_purchase_price),
-    propertyTypes,
-    targetStates,
-    isActive: row.is_active ?? true,
-  };
-}
 
 function isMissingTable(error: { code?: string; message?: string }): boolean {
   return error.code === "42P01" || /relation .* does not exist/i.test(error.message ?? "");
