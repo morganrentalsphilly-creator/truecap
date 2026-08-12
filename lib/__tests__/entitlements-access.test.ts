@@ -110,10 +110,11 @@ describe("getDashboardNavAccess — nav presence agrees with route landing", () 
       myDeals: true,
       compareDeals: false,
       templates: false,
+      clients: false,
     });
   });
 
-  it("pro: everything on", () => {
+  it("pro: everything on EXCEPT the Agent-Pro-only Clients nav", () => {
     const nav = getDashboardNavAccess(PRO);
     expect(nav).toEqual({
       dashboard: true,
@@ -121,7 +122,19 @@ describe("getDashboardNavAccess — nav presence agrees with route landing", () 
       myDeals: true,
       compareDeals: true,
       templates: true,
+      // Clients is agent_pro's client_buy_box — a $29.99 Pro user must never
+      // see a nav item for a tier they aren't on.
+      clients: false,
     });
+  });
+
+  it("agent pro: the Clients nav lights up", () => {
+    const nav = getDashboardNavAccess({ features: [...PRO.features, "client_buy_box"] });
+    expect(nav.clients).toBe(true);
+    // …and every Pro item still holds (agent_pro is a superset of pro).
+    expect(nav.myDeals).toBe(true);
+    expect(nav.compareDeals).toBe(true);
+    expect(nav.templates).toBe(true);
   });
 
   it("logged-out / cash-flow-only: nothing on", () => {
@@ -132,6 +145,7 @@ describe("getDashboardNavAccess — nav presence agrees with route landing", () 
       myDeals: false,
       compareDeals: false,
       templates: false,
+      clients: false,
     });
   });
 

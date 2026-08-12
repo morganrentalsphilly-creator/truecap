@@ -12,7 +12,8 @@ import "server-only";
  *     view time, like getPublicAgentBranding — a downgraded agent's links go
  *     dark rather than serving a paid surface for free);
  *   - the client must still belong to that agent;
- *   - only that client's non-archived, non-deleted deals are listed, each
+ *   - every deal ASSIGNED to that client (and not deleted) is listed — see the
+ *     query below for why archived deals are deliberately included — each
  *     recomputed on read (never a stale stored snapshot) and given a signed
  *     /d/ share link so the buyer can open the full analysis.
  *
@@ -85,13 +86,22 @@ export async function loadClientPortal(input: {
       .maybeSingle();
     if (!client || client.is_archived) return null;
 
+    // ASSIGNMENT IS THE SINGLE SOURCE OF TRUTH for what a buyer sees.
+    //
+    // Deliberately NOT filtered on is_archived. That flag is the agent's own
+    // pipeline bookkeeping, and it gets set by things the agent never chose:
+    // archive_stale_saved_analyses() flips it on any deal untouched for 60
+    // days. Filtering on it meant a buyer's bookmarked portal could silently
+    // empty itself two months after it was sent — and that assigning an
+    // already-archived deal did nothing while the UI said it worked.
+    // An agent removes a deal from a portal by unassigning it; that is the one
+    // lever, and it is the one the UI offers.
     const { data: rows } = await admin
       .from("saved_analyses")
       .select("id, form_snapshot, address")
       .eq("user_id", agentUserId)
       .eq("client_id", clientId)
       .is("deleted_at", null)
-      .eq("is_archived", false)
       .order("created_at", { ascending: false })
       .limit(50);
 

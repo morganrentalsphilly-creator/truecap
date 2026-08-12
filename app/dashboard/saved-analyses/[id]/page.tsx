@@ -24,6 +24,8 @@ import { ScenariosCard } from "@/components/investcalc/scenarios-card";
 import { NextActionBanner } from "@/components/investcalc/next-action-banner";
 import { DealAgingNudge } from "@/components/investcalc/deal-aging-nudge";
 import { DealStageSelect } from "@/components/investcalc/deal-stage-select";
+import { DealClientSelect } from "@/components/investcalc/deal-client-select";
+import { listAgentClientsAction } from "@/app/actions/agent-clients";
 import { OpenFullAnalysisButton } from "@/components/investcalc/open-saved-deal-in-analyzer";
 import { RefreshOnReturn } from "@/components/investcalc/refresh-on-return";
 import { DealWorkspaceAnchorChips } from "@/components/investcalc/deal-workspace-anchor-chips";
@@ -152,7 +154,7 @@ function Metric({
 }
 
 const DEAL_SELECT =
-  "id, address, title, property_type, purchase_price, form_snapshot, result_snapshot, net_cash_flow_monthly, pipeline_stage, is_completed, created_at";
+  "id, address, title, property_type, purchase_price, form_snapshot, result_snapshot, net_cash_flow_monthly, pipeline_stage, is_completed, created_at, client_id";
 
 /**
  * Load the deal with the optional investor nickname (labels migration) and the
@@ -270,6 +272,7 @@ export default async function DealWorkspacePage({
     result_snapshot: Record<string, unknown> | null;
     net_cash_flow_monthly: number | null;
     pipeline_stage: string | null;
+    client_id?: string | null;
     is_completed: boolean | null;
     created_at: string | null;
     /** Investor nickname — absent until the labels migration is applied. */
@@ -289,6 +292,13 @@ export default async function DealWorkspacePage({
   // page agrees with the My Deals row for the same deal.
   const isClosedDeal = stage === "closed" || dealRow.is_completed === true;
   const canUsePipeline = hasPlanFeature(entitlements, "pipeline");
+  // Agent Pro roster for the "For client" control. Skipped (and failure-safe)
+  // for every other tier, which leaves the control hidden.
+  const agentClients = hasPlanFeature(entitlements, "client_buy_box")
+    ? await listAgentClientsAction()
+        .then((r) => (r.ok ? r.clients.filter((c) => !c.isArchived).map((c) => ({ id: c.id, name: c.name })) : []))
+        .catch(() => [])
+    : [];
   // Workspace → Compare cross-link: only when comparing can actually work —
   // compare entitlement, ≥2 active deals to line up, and THIS deal still
   // active (startCompareAction validates active-only, so a closed/passed
@@ -526,6 +536,14 @@ export default async function DealWorkspacePage({
                     stage={stage ?? DEFAULT_PIPELINE_STAGE}
                   />
                 ) : null}
+                {/* Agent Pro: assign this deal to a buyer right here — the
+                    screen where the agent decides it fits. Self-hides when the
+                    roster is empty (i.e. every non-Agent-Pro user). */}
+                <DealClientSelect
+                  savedDealId={dealRow.id}
+                  clients={agentClients}
+                  clientId={dealRow.client_id ?? null}
+                />
                 <OpenFullAnalysisButton savedDealId={dealRow.id} />
               </div>
             </div>

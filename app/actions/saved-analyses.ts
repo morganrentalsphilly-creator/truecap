@@ -1337,6 +1337,78 @@ export async function updateSavedDealTagsAction(
   return { ok: true, tags: normalized };
 }
 
+export type SetSavedDealClientResult =
+  | { ok: true; clientId: string | null }
+  | {
+      ok: false;
+      code: "SIGN_IN_REQUIRED" | "ENTITLEMENT_REQUIRED" | "VALIDATION_ERROR" | "NOT_FOUND" | "SERVER_ERROR";
+      message: string;
+    };
+
+/**
+ * Assign a saved deal to one of the agent's clients (or clear it with null) —
+ * the write the whole Agent Pro loop hinges on: a deal appears on a client's
+ * portal ONLY once its client_id points at them. Mirrors
+ * updateSavedDealTagsAction's shape; gated on the roster entitlement, and the
+ * client must be on the CALLER'S roster (RLS-scoped lookup — the FK alone
+ * can't check ownership).
+ */
+export async function setSavedDealClientAction(
+  id: string,
+  clientId: string | null
+): Promise<SetSavedDealClientResult> {
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in." };
+  }
+
+  const savedDealId = id.trim();
+  if (!savedDealId) {
+    return { ok: false, code: "VALIDATION_ERROR", message: "Invalid deal id." };
+  }
+  if (clientId !== null && !/^[0-9a-f-]{36}$/i.test(clientId)) {
+    return { ok: false, code: "VALIDATION_ERROR", message: "Invalid client." };
+  }
+
+  const entitlements = await getEntitlementsForUser(supabase, user.id);
+  if (!hasPlanFeature(entitlements, "client_buy_box")) {
+    return { ok: false, code: "ENTITLEMENT_REQUIRED", message: "Client assignment is an Agent Pro feature." };
+  }
+
+  if (clientId !== null) {
+    const { data: ownedClient } = await supabase
+      .from("agent_clients")
+      .select("id")
+      .eq("id", clientId)
+      .eq("agent_user_id", user.id)
+      .maybeSingle();
+    if (!ownedClient) {
+      return { ok: false, code: "VALIDATION_ERROR", message: "That client isn't on your roster." };
+    }
+  }
+
+  const { data, error } = await supabase
+    .from("saved_analyses")
+    .update({ client_id: clientId, last_activity_at: new Date().toISOString() })
+    .eq("id", savedDealId)
+    .eq("user_id", user.id)
+    .is("deleted_at", null)
+    .select("id")
+    .maybeSingle();
+
+  if (error) {
+    return toServerErrorResult(error, "saved-analyses");
+  }
+  if (!data) {
+    return { ok: false, code: "NOT_FOUND", message: "Deal was not found." };
+  }
+  return { ok: true, clientId };
+}
+
 export type SavedDealBrief = { id: string; label: string; pipelineStage: string | null };
 export type ListSavedDealsBriefResult =
   | { ok: true; deals: SavedDealBrief[] }

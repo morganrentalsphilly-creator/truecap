@@ -19,6 +19,8 @@ export type DashboardNavAccess = {
   myDeals: boolean;
   compareDeals: boolean;
   templates: boolean;
+  /** Agent Pro: the client roster + portal page at /dashboard/clients. */
+  clients: boolean;
 };
 
 export function DashboardShell({
@@ -29,6 +31,9 @@ export function DashboardShell({
     myDeals: true,
     compareDeals: true,
     templates: true,
+    // Default-closed: this fallback is used where no entitlements were
+    // resolved, and an Agent-Pro-only link must never appear speculatively.
+    clients: false,
   },
   children,
 }: {

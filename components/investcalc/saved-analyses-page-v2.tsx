@@ -29,6 +29,8 @@ import {
   X,
   ClipboardList,
   CopyPlus,
+  UserRound,
+  Check,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -106,6 +108,10 @@ import {
   type NamedBuyBox,
 } from "@/lib/buy-box";
 import type { DealOfferLine } from "@/lib/deal-offer-line";
+import { setSavedDealClientAction } from "@/app/actions/saved-analyses";
+
+/** Minimal client shape the list needs for the assign picker. */
+export type AgentClientOption = { id: string; name: string };
 import type { OwnedEquitySummary } from "@/lib/owned-equity";
 import { setSavedDealCloseDateAction } from "@/app/actions/saved-analyses";
 import { recomputeSavedDealVerdict } from "@/lib/recompute-saved-deal-verdict";
@@ -160,6 +166,8 @@ export type SavedAnalysisListItem = {
    * then renders exactly as before.
    */
   offerLine?: DealOfferLine | null;
+  /** Agent Pro: which client this deal is assigned to (drives their portal). */
+  clientId?: string | null;
   /** Optional investor labels (Phase 2 #11). nickname displays in place of
    *  the address; market/neighborhood are optional columns. */
   nickname?: string | null;
@@ -266,6 +274,79 @@ function OfferLineRow({ offer }: { offer?: DealOfferLine | null }) {
         </>
       ) : null}
     </p>
+  );
+}
+
+/**
+ * Assign a deal to one of the agent's clients — the write that makes the whole
+ * Agent Pro loop work. A deal reaches a client's portal ONLY through this.
+ *
+ * Renders only for Agent Pro users with a roster (clients prop non-empty), so
+ * every other user's row is untouched.
+ */
+function DealClientPicker({
+  clients,
+  clientId,
+  onChange,
+  disabled,
+}: {
+  clients: AgentClientOption[];
+  clientId: string | null;
+  onChange: (clientId: string | null) => void;
+  disabled?: boolean;
+}) {
+  const current = clients.find((c) => c.id === clientId) ?? null;
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          disabled={disabled}
+          title={current ? `For ${current.name} — click to change` : "Assign this deal to a client"}
+          className={cn(
+            "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium disabled:opacity-50",
+            current
+              ? "border-primary/30 bg-primary/10 text-primary"
+              : "border-dashed border-border text-muted-foreground hover:text-foreground"
+          )}
+        >
+          <UserRound className="size-3" />
+          {current ? current.name : "Assign client"}
+        </button>
+      </PopoverTrigger>
+      <PopoverContent align="start" className="w-56 p-1.5">
+        <p className="px-1.5 pb-1 pt-0.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+          Show on portal for
+        </p>
+        <div className="max-h-56 overflow-y-auto">
+          {clients.map((c) => (
+            <button
+              key={c.id}
+              type="button"
+              disabled={disabled}
+              onClick={() => onChange(c.id === clientId ? null : c.id)}
+              className={cn(
+                "flex w-full items-center justify-between rounded-md px-2 py-1.5 text-left text-xs hover:bg-muted disabled:opacity-50",
+                c.id === clientId ? "font-semibold text-primary" : "text-foreground"
+              )}
+            >
+              {c.name}
+              {c.id === clientId ? <Check className="size-3.5" /> : null}
+            </button>
+          ))}
+        </div>
+        {clientId ? (
+          <button
+            type="button"
+            disabled={disabled}
+            onClick={() => onChange(null)}
+            className="mt-1 w-full rounded-md border-t border-border px-2 py-1.5 text-left text-xs text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-50"
+          >
+            Remove from client
+          </button>
+        ) : null}
+      </PopoverContent>
+    </Popover>
   );
 }
 
@@ -838,6 +919,9 @@ export function SavedAnalysesPage({
   canExportPdf = false,
   canUsePipeline = false,
   ownedEquityEnabled = false,
+  agentClients = [],
+  clientFilterId = null,
+  clientFilterName = null,
 }: {
   initialItems: SavedAnalysisListItem[];
   initialSelectedIds?: string[];
@@ -850,6 +934,13 @@ export function SavedAnalysesPage({
   /** True once the close_date column exists — gates the owned-equity capture so
    *  the prompt stays invisible until the migration is applied. */
   ownedEquityEnabled?: boolean;
+  /** Agent Pro roster. Empty for everyone else, which hides the assign
+   *  control entirely — no other tier sees client chrome. */
+  agentClients?: AgentClientOption[];
+  /** Set when the list is scoped to one client (arrived from /dashboard/clients).
+   *  Server-validated against the caller's roster. */
+  clientFilterId?: string | null;
+  clientFilterName?: string | null;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -1228,6 +1319,33 @@ export function SavedAnalysesPage({
           description: "Something interrupted the request. Check your connection and try again.",
           variant: "destructive",
         });
+      } finally {
+        setUpdatingDealStatusId(null);
+      }
+    });
+  };
+
+  const handleDealClientChange = (id: string, clientId: string | null) => {
+    setUpdatingDealStatusId(id);
+    startUpdateStatusTransition(async () => {
+      try {
+        const result = await setSavedDealClientAction(id, clientId);
+        if (!result.ok) {
+          toast({ title: "Could not assign client", description: result.message, variant: "destructive" });
+          if (result.code === "NOT_FOUND") router.refresh();
+          return;
+        }
+        const name = agentClients.find((c) => c.id === clientId)?.name;
+        toast({
+          title: clientId ? `Assigned to ${name ?? "client"}` : "Removed from client",
+          description: clientId
+            ? "It now shows on their portal — archived or not."
+            : "It no longer shows on their portal.",
+        });
+        router.refresh();
+      } catch (err) {
+        Sentry.captureException(err, { tags: { feature: "saved-analyses" } });
+        toast({ title: "Could not assign client", variant: "destructive" });
       } finally {
         setUpdatingDealStatusId(null);
       }
@@ -2016,6 +2134,23 @@ export function SavedAnalysesPage({
             <p className="text-sm text-muted-foreground">{filteredItems.length} deals in your portfolio</p>
           </div>
         </div>
+        {/* Scoped-to-one-client banner. Without it, arriving from the Clients
+            page silently hides most of the agent's deals with no explanation
+            and no way back. */}
+        {clientFilterName ? (
+          <div className="flex flex-wrap items-center gap-2 rounded-xl border border-primary/25 bg-primary/5 px-3 py-2 text-sm">
+            <UserRound className="size-4 text-primary" aria-hidden />
+            <span className="text-foreground">
+              Showing deals for <strong className="font-semibold">{clientFilterName}</strong>
+            </span>
+            <Link
+              href="/dashboard/saved-analyses"
+              className="ml-auto text-xs font-semibold text-primary hover:underline"
+            >
+              Show all deals
+            </Link>
+          </div>
+        ) : null}
         <div className="rounded-2xl border border-border bg-card p-3 sm:p-4 space-y-4">
           <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
             <div className="relative flex-1 max-w-xl">
@@ -2338,6 +2473,14 @@ export function SavedAnalysesPage({
                       chips so the card keeps its context without the expanded
                       editor + selects that used to add ~190px per card. */}
                   <div className="mt-4 grid gap-3">
+                    {agentClients.length > 0 ? (
+                      <DealClientPicker
+                        clients={agentClients}
+                        clientId={item.clientId ?? null}
+                        disabled={isUpdatingStatus && updatingDealStatusId === item.id}
+                        onChange={(cid) => handleDealClientChange(item.id, cid)}
+                      />
+                    ) : null}
                     {canUsePipeline && editingTagsDealId === item.id ? (
                       <DealTags
                         tags={item.tags ?? []}
@@ -2637,6 +2780,14 @@ export function SavedAnalysesPage({
                               </SelectContent>
                             </Select>
                           )}
+                          {agentClients.length > 0 ? (
+                            <DealClientPicker
+                              clients={agentClients}
+                              clientId={item.clientId ?? null}
+                              disabled={isUpdatingStatus && updatingDealStatusId === item.id}
+                              onChange={(cid) => handleDealClientChange(item.id, cid)}
+                            />
+                          ) : null}
                           {canUsePipeline ? (
                             <DealTags
                               tags={item.tags ?? []}
@@ -2721,7 +2872,27 @@ export function SavedAnalysesPage({
 
           {displayItems.length === 0 && (
             <div className="py-16 px-6 text-center">
-              {initialItems.length === 0 ? (
+              {clientFilterName && initialItems.length === 0 ? (
+                /* Scoped to a client who has nothing assigned yet. WITHOUT this
+                   branch an agent with 300 deals saw "Save your first deal" —
+                   the brand-new-user welcome — purely because the filter
+                   returned nothing. Name the real situation and the next step. */
+                <>
+                  <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                    <UserRound className="w-5 h-5" />
+                  </div>
+                  <p className="text-base font-bold text-foreground">
+                    No deals assigned to {clientFilterName} yet
+                  </p>
+                  <p className="mx-auto mt-1 max-w-md text-xs text-muted-foreground">
+                    Open any deal below and set its client to {clientFilterName} — it appears on their
+                    portal straight away.
+                  </p>
+                  <Button asChild variant="outline" className="mt-4 rounded-full">
+                    <Link href="/dashboard/saved-analyses">Show all deals</Link>
+                  </Button>
+                </>
+              ) : initialItems.length === 0 ? (
                 /* Brand-new user - never saved a deal. Welcome them
                    instead of showing a search-y "no results" state. */
                 <>

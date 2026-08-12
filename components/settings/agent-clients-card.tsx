@@ -128,7 +128,11 @@ export function AgentClientsCard() {
       </div>
       <p className="mt-1 text-xs text-muted-foreground">
         Each client can carry their own buy box — set it under Buy Boxes with the &ldquo;For
-        client&rdquo; selector, and every deal you analyze is screened against their criteria.
+        client&rdquo; selector, and every deal you analyze is screened against their criteria.{" "}
+        <a href="/dashboard/clients" className="font-semibold text-primary hover:underline">
+          Open the Clients workspace
+        </a>{" "}
+        to assign deals and copy portal links.
       </p>
 
       {clients.length > 0 ? (

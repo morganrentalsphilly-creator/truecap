@@ -260,3 +260,54 @@ export async function getClientPortalLinkAction(
   }
   return { ok: true, url: `${getSiteUrl()}/portal/${token}` };
 }
+
+export type ClientDealSummary = {
+  clientId: string;
+  dealCount: number;
+  /** Addresses of the most recent few, for an at-a-glance roster card. */
+  recentAddresses: string[];
+};
+
+/**
+ * How many deals each client currently has assigned, for the roster page.
+ * One query for the whole roster — the page must not N+1 per client.
+ */
+export async function listClientDealCountsAction(): Promise<
+  { ok: true; counts: ClientDealSummary[] } | { ok: false; code: string; message: string }
+> {
+  const gate = await requireAgentPro();
+  if (!gate.ok) {
+    // gate.result is the error variant by construction; narrow for TS.
+    const r = gate.result as { ok: false; code: string; message: string };
+    return { ok: false, code: r.code, message: r.message };
+  }
+  const { supabase, userId } = gate;
+
+  const { data, error } = await supabase
+    .from("saved_analyses")
+    .select("client_id, address, form_snapshot->>address")
+    .eq("user_id", userId)
+    .is("deleted_at", null)
+    // Same scope as the portal (lib/client-portal) on purpose: the count on
+    // this card must equal what the buyer actually sees. Filtering archived
+    // here made the card say "2 deals" while the portal showed 3, or say
+    // "No deals yet" right after a successful assignment.
+    .not("client_id", "is", null)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    if (isMissingTable(error)) return { ok: true, counts: [] };
+    Sentry.captureException(error, { tags: { feature: "agent-clients" } });
+    return { ok: false, code: "SERVER_ERROR", message: "Couldn't load client deals." };
+  }
+
+  const byClient = new Map<string, ClientDealSummary>();
+  for (const row of (data ?? []) as { client_id: string | null; address: string | null }[]) {
+    if (!row.client_id) continue;
+    const entry = byClient.get(row.client_id) ?? { clientId: row.client_id, dealCount: 0, recentAddresses: [] };
+    entry.dealCount += 1;
+    if (entry.recentAddresses.length < 3 && row.address) entry.recentAddresses.push(row.address);
+    byClient.set(row.client_id, entry);
+  }
+  return { ok: true, counts: [...byClient.values()] };
+}

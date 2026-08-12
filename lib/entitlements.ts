@@ -118,6 +118,10 @@ export function getDashboardNavAccess(entitlements: Pick<PlanEntitlements, "feat
     myDeals: hasPlanFeature(entitlements, "save_deal"),
     compareDeals: hasPlanFeature(entitlements, "compare_deals"),
     templates: hasPlanFeature(entitlements, "template_manage"),
+    // Agent Pro only. The client roster + portal links live on their own page
+    // because an agent's whole job is client-centric — burying the roster in
+    // Settings made the tier's core workflow undiscoverable.
+    clients: hasPlanFeature(entitlements, "client_buy_box"),
   };
 }
 

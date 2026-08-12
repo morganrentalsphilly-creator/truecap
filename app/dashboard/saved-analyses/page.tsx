@@ -28,6 +28,7 @@ import { computeDealOfferLine, type DealOfferLine } from "@/lib/deal-offer-line"
 import { normalizeInvestmentFormSnapshot } from "@/lib/investcalc-schema";
 import { buyBoxHasCriteria, type NamedBuyBox } from "@/lib/buy-box";
 import { listBuyBoxesAction } from "@/app/actions/user-buy-boxes";
+import { listAgentClientsAction } from "@/app/actions/agent-clients";
 import { normalizeDataConfidence } from "@/lib/data-confidence";
 import { getRequestUser, getRequestEntitlements } from "@/lib/request-auth";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
@@ -65,6 +66,7 @@ type SavedAnalysisRow = {
   pipeline_stage?: string | null;
   tags?: string[] | null;
   data_confidence?: unknown;
+  client_id?: string | null;
   nickname?: string | null;
   market?: string | null;
   neighborhood?: string | null;
@@ -174,6 +176,7 @@ function mapSavedRow(
     breakdown: fresh ? fresh.breakdown : null,
     pipelineStage: isPipelineStage(row.pipeline_stage) ? row.pipeline_stage : DEFAULT_PIPELINE_STAGE,
     tags: Array.isArray(row.tags) ? row.tags.filter((t): t is string => typeof t === "string") : [],
+    clientId: row.client_id ?? null,
     dataConfidence: normalizeDataConfidence(row.data_confidence),
     nickname: typeof row.nickname === "string" && row.nickname.trim() ? row.nickname.trim() : null,
     scenarioName:
@@ -215,7 +218,7 @@ function normalizeDealStateFilter(value: string | undefined): DealStateFilter {
 export default async function DashboardSavedAnalysesPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ sort?: string; dir?: string; state?: string }>;
+  searchParams?: Promise<{ sort?: string; dir?: string; state?: string; client?: string }>;
 }) {
   const supabase = await createServerSupabaseClient();
   const user = await getRequestUser();
@@ -230,7 +233,7 @@ export default async function DashboardSavedAnalysesPage({
   }
   const navAccess = getDashboardNavAccess(entitlements);
 
-  const [{ data: profile }, compareIds, isPremium, buyBoxesResult] = await Promise.all([
+  const [{ data: profile }, compareIds, isPremium, buyBoxesResult, clientsResult] = await Promise.all([
     supabase
       .from("profiles")
       .select("first_name, last_name, display_name, avatar_url")
@@ -245,7 +248,18 @@ export default async function DashboardSavedAnalysesPage({
     hasPlanFeature(entitlements, "buy_box")
       ? listBuyBoxesAction().catch(() => null)
       : Promise.resolve(null),
+    // Agent Pro roster — powers the per-deal "assign client" control. Batched
+    // here so it costs no extra round-trip, and skipped entirely for the tiers
+    // that would only get an empty list.
+    hasPlanFeature(entitlements, "client_buy_box")
+      ? listAgentClientsAction().catch(() => null)
+      : Promise.resolve(null),
   ]);
+
+  const agentClients =
+    clientsResult && clientsResult.ok
+      ? clientsResult.clients.filter((c) => !c.isArchived).map((c) => ({ id: c.id, name: c.name }))
+      : [];
 
   const activeBuyBoxes: NamedBuyBox[] =
     buyBoxesResult && buyBoxesResult.ok && buyBoxesResult.canUse
@@ -256,6 +270,9 @@ export default async function DashboardSavedAnalysesPage({
   const sortField = normalizeSortField(resolvedSearchParams.sort) ?? "saved";
   const sortDirection = normalizeDirection(resolvedSearchParams.dir ?? "desc");
   const activeDealStateFilter = normalizeDealStateFilter(resolvedSearchParams.state);
+  const requestedClient = typeof resolvedSearchParams.client === "string" ? resolvedSearchParams.client : null;
+  const clientFilterId = requestedClient && agentClients.some((c) => c.id === requestedClient) ? requestedClient : null;
+  const clientFilterName = clientFilterId ? agentClients.find((c) => c.id === clientFilterId)?.name ?? null : null;
 
   const BASE_SELECT =
     "id, address, title, property_type, purchase_price, net_cash_flow_monthly, coc_return_pct, created_at, is_completed, is_archived, result_snapshot, form_snapshot, pipeline_stage, tags, data_confidence";
@@ -267,7 +284,12 @@ export default async function DashboardSavedAnalysesPage({
   // close_date (20260628120000).
   const WITH_SCENARIO_SELECT = `${BASE_SELECT}, scenario_name`;
   const WITH_LABELS_SELECT = `${WITH_SCENARIO_SELECT}, nickname, market, neighborhood`;
-  const FULL_SELECT = `${WITH_LABELS_SELECT}, close_date`;
+  const WITH_CLOSE_DATE_SELECT = `${WITH_LABELS_SELECT}, close_date`;
+  // client_id ships in the NEWEST migration (20260811120000, Agent Pro), so it
+  // is the first column dropped. It must never live in BASE_SELECT: that is the
+  // ladder's floor, and a deployment without the Agent Pro migration would fail
+  // EVERY rung — taking the deals list down for every user, not just agents.
+  const FULL_SELECT = `${WITH_CLOSE_DATE_SELECT}, client_id`;
 
   const buildSavedQuery = (select: string) => {
     let q = supabase
@@ -275,7 +297,17 @@ export default async function DashboardSavedAnalysesPage({
       .select(select)
       .eq("user_id", user.id)
       .is("deleted_at", null);
-    if (activeDealStateFilter === "active") {
+    // Scope to one client when arriving from the Clients page. Validated
+    // against the caller's own roster first, so a guessed/foreign uuid
+    // narrows to nothing rather than reaching the query.
+    if (clientFilterId) q = q.eq("client_id", clientFilterId);
+    // When scoped to a client, show everything assigned to them — the roster
+    // count and the buyer's portal both use that scope, so applying the
+    // default active-only filter here made "3 deals assigned" open a list
+    // showing 1 (or an empty page).
+    if (clientFilterId) {
+      // no lifecycle narrowing
+    } else if (activeDealStateFilter === "active") {
       q = q.eq("is_completed", false).eq("is_archived", false);
     } else if (activeDealStateFilter === "completed") {
       q = q.eq("is_completed", true);
@@ -307,6 +339,11 @@ export default async function DashboardSavedAnalysesPage({
   // Owned-equity tracking is live only once close_date exists (FULL_SELECT wins).
   let ownedEquityEnabled = true;
   let { data: rows, error } = await buildSavedQuery(FULL_SELECT);
+  if (isMissingColumn(error)) {
+    // client_id missing (Agent Pro migration not applied) — everything else
+    // still selects, and agentClients is already empty on such a deployment.
+    ({ data: rows, error } = await buildSavedQuery(WITH_CLOSE_DATE_SELECT));
+  }
   if (isMissingColumn(error)) {
     ownedEquityEnabled = false;
     ({ data: rows, error } = await buildSavedQuery(WITH_LABELS_SELECT));
@@ -382,6 +419,9 @@ export default async function DashboardSavedAnalysesPage({
             canCompareDeals={hasPlanFeature(entitlements, "compare_deals")}
             canExportPdf={hasPlanFeature(entitlements, "pdf_export")}
             canUsePipeline={hasPlanFeature(entitlements, "pipeline")}
+            agentClients={agentClients}
+            clientFilterId={clientFilterId}
+            clientFilterName={clientFilterName}
           />
         </div>
       </div>

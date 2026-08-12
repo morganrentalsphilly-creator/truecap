@@ -42,7 +42,12 @@ export default async function SettingsPage() {
         {/* Buy Boxes — self-gates: shows a Pro upsell to free users, the
             multi-box manager to Pro. Drives the inline buy-box verdict on
             analyses (each deal is screened against every active box). */}
-        <BuyBoxesCard />
+        {/* id anchors /dashboard/clients' "Set their buy box" link. On the
+            wrapper, not inside the card, so it resolves for every branch the
+            card can render (and scrolls correctly on mobile). */}
+        <div id="buy-boxes" className="scroll-mt-20">
+          <BuyBoxesCard />
+        </div>
 
         {/* Agent Pro client roster — self-hides for everyone without the
             client_buy_box entitlement (and while its migration is pending). */}

@@ -11,6 +11,7 @@ import {
   ListChecks,
   ListTodo,
   CircleUserRound,
+  Users,
 } from "lucide-react";
 import { AppLogo } from "@/components/brand/app-logo";
 import type { DashboardNavAccess } from "@/components/dashboard/dashboard-shell";
@@ -53,6 +54,7 @@ export function Sidebar({ savedDealCount, navAccess, mobile = false, onNavigate 
     // Batch triage — the power-tool tier, same gate as Compare.
     { icon: ListChecks, label: "Screen Listings", href: "/dashboard/triage", enabled: navAccess.compareDeals },
     { icon: FileBarChart, label: "Manage Templates", href: "/dashboard/templates", enabled: navAccess.templates },
+    { icon: Users, label: "Clients", href: "/dashboard/clients", enabled: navAccess.clients },
     // Settings promoted from the avatar dropdown into the main sidebar.
     // Pro users pay for Branding (configured at /settings/branding); it
     // shouldn't be 3 clicks deep in a Topbar dropdown. /settings is the
@@ -88,7 +90,15 @@ export function Sidebar({ savedDealCount, navAccess, mobile = false, onNavigate 
       <div className="px-3 py-5">
         <div className="px-3 mb-2 text-[10px] font-semibold tracking-[0.18em] text-sidebar-foreground/40">MAIN MENU</div>
         <nav aria-label={mobile ? "Dashboard (mobile)" : "Dashboard"} className="space-y-1">
-          {nav.map((item) => {
+          {nav
+            // Disabled items normally render greyed as a one-tier-up upsell
+            // (Compare Deals to a Free user). Clients is different: it is an
+            // Agent-Pro-only surface, so greying it for every $29.99 Pro user
+            // adds a permanently dead row with no explanation — exactly the
+            // "confusing" chrome this workflow pass is removing. Hide it
+            // instead; every other item keeps the existing upsell behavior.
+            .filter((item) => item.enabled || item.label !== "Clients")
+            .map((item) => {
             const Icon = item.icon;
             return (
               <Link
