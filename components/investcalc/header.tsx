@@ -14,6 +14,7 @@ import type { User } from "@supabase/supabase-js";
 import { cn } from "@/lib/utils";
 import { AppLogo } from "@/components/brand/app-logo";
 import { UserMenu } from "@/components/auth/user-menu";
+import { MarketingNav, MarketingNavMobile } from "@/components/marketing/marketing-nav";
 
 type HeaderUser = Pick<User, "id" | "email" | "user_metadata">;
 
@@ -355,6 +356,9 @@ export function Header({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 sm:h-16 flex items-center justify-between gap-3">
         <div className="flex items-center justify-start gap-0 sm:gap-3 min-w-0">
           <AppLogo priority subtitleClassName="hidden sm:block" />
+          {/* Primary nav — anon visitors only. Signed-in users navigate via the
+              dashboard sidebar, so marketing chrome would just crowd the app. */}
+          {!user ? <MarketingNav /> : null}
         </div>
 
 
@@ -458,6 +462,7 @@ export function Header({
           )}
         </div>
       </div>
+      {!user ? <MarketingNavMobile /> : null}
     </header>
     </div>
   );
