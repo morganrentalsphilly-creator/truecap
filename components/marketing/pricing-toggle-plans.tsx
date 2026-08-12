@@ -89,26 +89,58 @@ const AGENT_PRO_FEATURES: string[] = [
     .map((f) => f.label),
 ];
 
-const PRO_FEATURES = [
-  "Everything in Free, plus —",
-  "Sale + rent comps from the address (50/mo)",
-  "MAO solver — reverse-solve your max offer",
-  "Sensitivity grid — stress-test the deal",
-  "Strategies — BRRRR + fix-and-flip + rehab estimator",
-  "Co-branded share links (your logo, color + lead capture)",
-  "10-year cash flow + equity projection",
-  "Tax strategy: depreciation + interest modeling",
-  "Exit scenarios: best year to sell",
-  "Personal Verdict — every deal scored pass/fail against YOUR buy box",
-  "Deal pipeline + tags (lightweight CRM)",
-  "Saved analysis templates",
-  "Due-diligence checklist + document vault",
-  "Rate-drop alerts on your saved deals",
-  "Lender · partner · personal PDF reports — now with sale + rent comps",
-  "Custom PDF branding — your logo, color, and contact on every export",
-  "Save unlimited deals · compare up to 4",
-  "Priority email support",
+/**
+ * Pro sold as OUTCOMES, not a pile of upgrades.
+ *
+ * This was eighteen flat bullets, which made Pro read as a feature dump and
+ * left the buyer to work out what it was FOR. Grouping them into the four jobs
+ * Pro actually does makes the upgrade logic legible at a glance:
+ *   Free = screen deals · Pro = underwrite + make offers ·
+ *   Agent Pro = do that for clients.
+ *
+ * Every item still names a real, shipped capability — the grouping changed,
+ * not the claims.
+ */
+const PRO_OUTCOMES: { outcome: string; items: string[] }[] = [
+  {
+    outcome: "Find the right price",
+    items: [
+      "MAO solver — reverse-solve your max offer",
+      "Sale + rent comps from the address (50/mo)",
+      "Sensitivity grid — stress-test the deal",
+      "Personal Verdict — every deal pass/failed against YOUR buy box",
+    ],
+  },
+  {
+    outcome: "Underwrite deeper",
+    items: [
+      "10-year cash flow + equity projection",
+      "Tax strategy: depreciation + interest modeling",
+      "Exit scenarios: best year to sell",
+      "Strategies — BRRRR, fix-and-flip, rehab estimator",
+    ],
+  },
+  {
+    outcome: "Save your work",
+    items: [
+      "Save unlimited deals · compare up to 4",
+      "Deal pipeline + tags (lightweight CRM)",
+      "Saved analysis templates",
+      "Due-diligence checklist + document vault",
+      "Rate-drop alerts on your saved deals",
+    ],
+  },
+  {
+    outcome: "Share the deal",
+    items: [
+      "Lender · partner · personal PDF reports, with comps",
+      "Custom PDF branding — your logo, color, contact",
+      "Co-branded share links with lead capture",
+      "Priority email support",
+    ],
+  },
 ];
+
 
 function parsePriceAmount(p: ResolvedPrice): number | null {
   if (!p) return null;
@@ -219,6 +251,25 @@ export function PricingTogglePlans({
 
   return (
     <>
+      {/* The upgrade logic in one line, before the cards. Without it a visitor
+          has to infer the difference between the tiers from the feature lists;
+          with it, the cards below are just the detail. */}
+      <div className="mb-5 grid gap-2 rounded-2xl border border-border bg-muted/30 p-4 sm:grid-cols-3 sm:gap-4">
+        <p className="text-sm">
+          <span className="font-bold text-foreground">Free</span>{" "}
+          <span className="text-muted-foreground">— screen deals</span>
+        </p>
+        <p className="text-sm">
+          <span className="font-bold text-foreground">Pro</span>{" "}
+          <span className="text-muted-foreground">— underwrite and make offers</span>
+        </p>
+        {showAgentPro ? (
+          <p className="text-sm">
+            <span className="font-bold text-foreground">Agent Pro</span>{" "}
+            <span className="text-muted-foreground">— underwrite for your clients</span>
+          </p>
+        ) : null}
+      </div>
       <div className={showAgentPro ? "grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-5" : "grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-5"}>
         {/* FREE */}
         <div className="relative rounded-3xl border border-border bg-card p-6 shadow-sm">
@@ -390,14 +441,24 @@ export function PricingTogglePlans({
               saved deals + reports stay in your account.
             </p>
           )}
-          <ul className="mt-6 space-y-2.5">
-            {PRO_FEATURES.map((f) => (
-              <li key={f} className="flex items-start gap-2 text-sm">
-                <Sparkles className="mt-0.5 size-4 shrink-0 text-primary" />
-                <span className="text-foreground">{f}</span>
-              </li>
+          <p className="mt-6 text-sm font-semibold text-foreground">Everything in Free, plus —</p>
+          <div className="mt-3 space-y-4">
+            {PRO_OUTCOMES.map((group) => (
+              <div key={group.outcome}>
+                <p className="text-[11px] font-bold uppercase tracking-widest text-primary">
+                  {group.outcome}
+                </p>
+                <ul className="mt-1.5 space-y-1.5">
+                  {group.items.map((f) => (
+                    <li key={f} className="flex items-start gap-2 text-sm">
+                      <Sparkles className="mt-0.5 size-4 shrink-0 text-primary" />
+                      <span className="text-foreground">{f}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             ))}
-          </ul>
+          </div>
         </div>
 
         {/* AGENT PRO — rendered only when its Stripe price is configured.
