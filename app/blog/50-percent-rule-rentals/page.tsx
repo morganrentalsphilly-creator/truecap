@@ -24,7 +24,7 @@ const SERP_TITLE = "The 50% rule for rentals: still useful in 2026?";
 const DESCRIPTION =
   "The classic 50% rule says operating expenses run ~half of gross rent. Honest take on when it actually works as a triage tool, when it lies, and what to do instead for the deals it can't handle.";
 const PUBLISHED_AT = "2026-05-25";
-const MODIFIED_AT = "2026-06-01";
+const MODIFIED_AT = "2026-08-14";
 const READING_TIME = 6;
 
 export const metadata: Metadata = {
@@ -86,7 +86,7 @@ export default function FiftyPercentRulePost() {
         <div className="prose prose-neutral max-w-none text-foreground space-y-6 leading-relaxed">
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">What the rule actually says</h2>
           <p>
-            The 50% rule, popularized in BiggerPockets-era investor communities, is a shorthand for estimating <Link href="/glossary/noi" className="text-primary font-semibold hover:underline">Net Operating Income (NOI)</Link> without itemizing every expense. The math:
+            The 50% rule, popularized in BiggerPockets-era investor communities, is a shorthand for estimating <Link href="/glossary/noi" className="text-primary font-semibold hover:underline">Net Operating Income (NOI)</Link> without itemizing every expense — see our <Link href="/blog/how-to-calculate-noi-rental-property" className="text-primary font-semibold hover:underline">line-by-line NOI walkthrough</Link> for the version that doesn't guess. The math:
           </p>
           <p>
             <strong>Estimated NOI = Gross Annual Rent × 50%</strong>
