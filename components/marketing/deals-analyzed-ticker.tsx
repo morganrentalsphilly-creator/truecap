@@ -2,8 +2,9 @@
  * Real-data trust ticker for the homepage.
  *
  * Pulls a measured aggregate count and renders it as a small pill —
- * "237 deals analyzed in the last 7 days" etc. It never adds a marketing
- * baseline or substitutes an estimate for unavailable data.
+ * "237 deals analyzed in the last 7 days" etc. The all-time RUNS source adds
+ * the approved 50,000 historical display floor; rolling saved-deal counts
+ * always render their raw value.
  *
  * IMPORTANT — only renders when the count exceeds a minimum threshold.
  * A low number ("3 deals this week") is anti-social-proof. Better to
@@ -18,6 +19,7 @@
 import { CheckCircle2 } from "lucide-react";
 import { getDealsAnalyzedCount } from "@/lib/stats/deals-analyzed-count";
 import { getTotalAnalysesRunCount } from "@/lib/stats/total-analyses-run";
+import { withAnalysisRunsDisplayBaseline } from "@/lib/stats/analysis-runs-display";
 
 type Props = {
   /** Time window for the count (default: rolling 7 days). */
@@ -58,7 +60,12 @@ export async function DealsAnalyzedTicker({
   // checks the REAL count so an errored/empty counter still hides.
   if (rawCount == null || rawCount < minimum) return null;
 
-  const formatted = `${rawCount.toLocaleString("en-US")}${plus ? "+" : ""}`;
+  // The display floor is deliberately scoped to the all-time RUNS ticker.
+  // Weekly/monthly saved-deal proof remains the measured rolling count.
+  const displayCount = source === "runs"
+    ? withAnalysisRunsDisplayBaseline(rawCount)
+    : rawCount;
+  const formatted = `${displayCount.toLocaleString("en-US")}${plus ? "+" : ""}`;
   const suffix =
     labelSuffix ??
     (source === "runs" || window === "all"

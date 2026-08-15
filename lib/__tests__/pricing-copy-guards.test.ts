@@ -82,4 +82,16 @@ describe("trial copy — mirrors the checkout repeat-trial guard", () => {
     expect(buttons).toContain("willCheckoutGrantTrial");
     expect(buttons).toContain("hadPriorSubscription");
   });
+
+  it("states the card, billing, cancellation, and repeat-trial terms before checkout", () => {
+    const page = read("../../app/pricing/page.tsx");
+    const plans = read("../../components/marketing/pricing-toggle-plans.tsx");
+    const landing = read("../../components/marketing/landing-sections.tsx");
+
+    expect(plans).toContain("Card required at checkout");
+    expect(plans).toContain("Subscription billing starts after");
+    expect(plans).toContain("unless you cancel first");
+    expect(page).toContain("Returning subscribers start paid access immediately");
+    expect(landing).toContain("not eligible for another free trial");
+  });
 });

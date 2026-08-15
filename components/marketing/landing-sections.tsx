@@ -20,7 +20,7 @@
 // the hydration cost for all the static markup. Keep it that way - any
 // new interactive piece should be its own small island, not a reason to
 // flip this whole file back to client.
-import { TRIAL_LABEL } from "@/lib/trial";
+import { TRIAL_DAYS, TRIAL_LABEL } from "@/lib/trial";
 import { ladderCellsForFeature, type FeatureKey } from "@/lib/entitlements-catalog";
 import Link from "next/link";
 import {
@@ -506,7 +506,7 @@ export function VsCompetitors() {
 
 // ───────────────────────────────────────── FAQ
 /**
- * Homepage FAQ - handles the 8 most common cold-paid-traffic objections
+ * Homepage FAQ - handles the most common cold-paid-traffic objections
  * and outputs FAQPage JSON-LD for Google rich results (the expandable
  * Q&A snippets that show under the listing). Materially boosts CTR
  * from organic AND paid for the keywords we rank for.
@@ -540,6 +540,10 @@ const HOMEPAGE_FAQS: { q: string; a: string }[] = [
   {
     q: "When should I upgrade to Pro?",
     a: "Use Free to screen unlimited deals. Use a Single-Deal Underwrite when you need one complete report without a subscription. Upgrade to Pro for Max Offer, Buy Box screening, downside testing, unlimited saves, comparisons, reusable assumptions, branded reports, and unlimited exports. Pro is month-to-month - cancel anytime.",
+  },
+  {
+    q: "How does the Pro trial work?",
+    a: `Stripe collects a card at checkout. Eligible first-time subscribers get full Pro access for ${TRIAL_DAYS} days. Subscription billing starts after the trial unless you cancel first. Returning subscribers start paid access immediately and are not eligible for another free trial.`,
   },
   {
     q: "Does this work for BRRRR or fix-and-flip deals?",
@@ -738,13 +742,14 @@ export function PdfProUpsell() {
         <div className="mb-8 text-center sm:mb-10">
           <p className="text-[11px] font-bold uppercase tracking-widest text-primary">What you get</p>
           <h2 className="mt-2 text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-            Free to screen. <span className="text-primary">{singleDeal.priceLabel}</span> for one complete deal.{" "}
-            <span className="text-primary">{proOfferName}</span> to decide and act repeatedly.
+            Analyze free. Unlock one complete deal for{" "}
+            <span className="text-primary">{singleDeal.priceLabel}</span>. Use{" "}
+            <span className="text-primary">{proOfferName}</span> to know exactly what to offer—every time.
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-balance text-sm leading-relaxed text-muted-foreground sm:text-base">
-            Use Free for the first screen. Unlock a complete Single-Deal Underwrite
-            once, or use Pro for Max Offer, Buy Box screening, downside testing,
-            comparisons, saved deals, and unlimited reports.
+            Start with a 60-second screen. Unlock a complete Single-Deal Underwrite
+            once, or use Pro to turn every address into four answers: pursue or pass,
+            what to offer, what could break, and how to present the decision.
           </p>
         </div>
 
@@ -852,21 +857,24 @@ export function PdfProUpsell() {
             <span className="w-fit rounded-full bg-primary/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-primary">
               {proOfferName}
             </span>
-            <h3 className="mt-2 text-lg font-bold text-foreground">Know your number before you make the offer</h3>
+            <h3 className="mt-2 text-lg font-bold text-foreground">One address. Four acquisition answers.</h3>
             <p className="mt-1.5 flex-1 text-sm leading-relaxed text-muted-foreground">
-              Set your Buy Box once, solve Max Offer, stress-test the downside,
-              compare opportunities, model long-term outcomes, and move the
-              strongest deals through your acquisition workflow.
+              Get your Buy Box verdict, Max Offer, downside stress test, and an
+              offer-ready report—then compare, save, and move the strongest deals
+              through your acquisition workflow.
             </p>
             <div className="mt-5">
               <Link
                 href="/pricing"
                 className="group inline-flex h-11 items-center gap-1.5 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-[0_10px_24px_rgba(0,112,196,0.28)] hover:-translate-y-0.5 transition-transform"
               >
-                Start your {TRIAL_LABEL}
+                Start {TRIAL_DAYS}-Day Pro Trial
                 <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
               </Link>
-              <p className="mt-2 text-xs text-muted-foreground">Cancel anytime - no commitment.</p>
+              <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+                Eligible first-time subscribers get full Pro access. Card required
+                at checkout; cancel before the trial ends to avoid a subscription charge.
+              </p>
             </div>
           </div>
         </div>

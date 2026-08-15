@@ -18,7 +18,7 @@ import { useEffect, useRef, useState } from "react";
 import { Check, Sparkles, X } from "lucide-react";
 import { PricingPlanButtons } from "@/components/marketing/pricing-plan-buttons";
 import { trackEvent } from "@/lib/analytics";
-import { TRIAL_LABEL, willCheckoutGrantTrial } from "@/lib/trial";
+import { TRIAL_DAYS, willCheckoutGrantTrial } from "@/lib/trial";
 import { featuresForTier } from "@/lib/entitlements-catalog";
 
 type ResolvedPrice = { amountLabel: string; period: string } | null;
@@ -150,6 +150,13 @@ const PRO_OUTCOMES: { outcome: string; items: string[] }[] = [
     ],
   },
 ];
+
+const PRO_DECISION_ANSWERS = [
+  { answer: "Pursue or pass", proof: "Buy Box verdict" },
+  { answer: "What to offer", proof: "Max Offer solver" },
+  { answer: "What could break", proof: "Downside stress test" },
+  { answer: "How to present it", proof: "Offer-ready report" },
+] as const;
 
 
 function parsePriceAmount(p: ResolvedPrice): number | null {
@@ -298,7 +305,7 @@ export function PricingTogglePlans({
             )}
           </div>
           <p className="mt-1 text-sm text-muted-foreground">
-            Everything you need to triage a deal in 60 seconds.
+            Get a clear first-pass answer in 60 seconds. No card required.
           </p>
           <div className="mt-5 flex items-baseline gap-1.5">
             <span className="font-mono text-4xl font-extrabold tabular-nums tracking-tight text-foreground sm:text-5xl">$0</span>
@@ -379,7 +386,7 @@ export function PricingTogglePlans({
             ) : null}
           </div>
           <p className="mt-1 text-sm text-muted-foreground">
-            Full toolkit, lender-ready PDFs, save unlimited deals.
+            Turn every address into a defensible acquisition decision.
           </p>
 
           {/* Monthly ↔ Annual toggle */}
@@ -433,8 +440,22 @@ export function PricingTogglePlans({
           <div className="mt-1 text-xs text-muted-foreground">{proCard.subline}</div>
           <div className="mt-3 flex justify-center">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--metric-positive)]/12 px-3 py-1 text-xs font-extrabold uppercase tracking-wide text-[var(--metric-positive)]">
-              <Sparkles className="size-3" /> {offersTrial ? TRIAL_LABEL : "Welcome back"}
+              <Sparkles className="size-3" /> {offersTrial ? `Full Pro · ${TRIAL_DAYS} days free` : "Full Pro access"}
             </span>
+          </div>
+
+          <div className="mt-4 rounded-2xl border border-primary/20 bg-primary/[0.045] p-4">
+            <p className="text-xs font-extrabold uppercase tracking-widest text-primary">
+              One address. Four answers.
+            </p>
+            <div className="mt-3 grid grid-cols-2 gap-3">
+              {PRO_DECISION_ANSWERS.map((item) => (
+                <div key={item.answer}>
+                  <p className="text-sm font-bold leading-tight text-foreground">{item.answer}</p>
+                  <p className="mt-0.5 text-[11px] leading-tight text-muted-foreground">{item.proof}</p>
+                </div>
+              ))}
+            </div>
           </div>
           <div className="mt-5">
             <PricingPlanButtons
@@ -446,14 +467,15 @@ export function PricingTogglePlans({
           </div>
           {offersTrial ? (
             <p className="mt-2.5 text-center text-xs text-muted-foreground">
-              Start with a <strong className="text-foreground">{TRIAL_LABEL}</strong> — cancel anytime, no
-              contract. Downgrade and your saved deals + reports stay in your account.
+              <strong className="text-foreground">Full Pro access now.</strong> Card required at checkout.
+              Subscription billing starts after {TRIAL_DAYS} days unless you cancel first. Your saved
+              work stays in your account if you downgrade.
             </p>
           ) : (
             <p className="mt-2.5 text-center text-xs text-muted-foreground">
-              <strong className="text-foreground">Welcome back</strong> — {proOfferName} starts as soon as you check
-              out (the free trial is a first-time offer). Cancel anytime, no contract. Downgrade and your
-              saved deals + reports stay in your account.
+              <strong className="text-foreground">Full Pro access starts immediately.</strong> The
+              free trial is a first-time offer. Cancel online anytime; no contract. Your saved work
+              stays in your account if you downgrade.
             </p>
           )}
           <p className="mt-6 text-sm font-semibold text-foreground">Everything in Free, plus —</p>

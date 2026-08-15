@@ -29,3 +29,11 @@ when an experimental Price id is missing.
 Subscription prices and product ids are unchanged. They continue to come from
 `STRIPE_PRICE_PRO_MONTHLY` and `STRIPE_PRICE_PRO_ANNUAL`; changing the Pro name
 only changes marketing copy.
+
+## Public deal counter
+
+The homepage all-time run counter displays the live
+`app_counters.analysis_runs` value plus the approved 50,000 historical floor.
+The database value is not changed. Rolling 7-day and 30-day saved-deal counters
+continue to display their raw measured values. The display rule and regression
+guard live in `lib/stats/analysis-runs-display.ts`.

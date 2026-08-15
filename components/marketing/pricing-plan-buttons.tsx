@@ -29,7 +29,7 @@ import {
   resolveCheckoutResume,
   type CheckoutPlanSlug,
 } from "@/lib/pricing-checkout-resume";
-import { TRIAL_LABEL, willCheckoutGrantTrial } from "@/lib/trial";
+import { TRIAL_DAYS, willCheckoutGrantTrial } from "@/lib/trial";
 
 type Slot = "free" | "pro_monthly" | "pro_annual" | "agent_pro_monthly" | "agent_pro_annual";
 
@@ -164,7 +164,7 @@ export function PricingPlanButtons({
         href={`/auth/sign-up?next=${encodeURIComponent(nextPath)}`}
         className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground shadow-[0_8px_22px_rgba(0,112,196,0.30)] hover:bg-primary/95"
       >
-        <Sparkles className="size-4" /> Start your {TRIAL_LABEL}
+        <Sparkles className="size-4" /> Start {TRIAL_DAYS}-Day Pro Trial
       </Link>
     );
   }
@@ -187,7 +187,7 @@ export function PricingPlanButtons({
           {/* Returning ex-subscribers are excluded from the trial by the
               repeat-trial guard in billing.ts — don't promise one. */}
           <Sparkles className="size-4" />{" "}
-          {willCheckoutGrantTrial(hadPriorSubscription) ? `Start ${TRIAL_LABEL}` : "Get Pro"}
+          {willCheckoutGrantTrial(hadPriorSubscription) ? `Start ${TRIAL_DAYS}-Day Pro Trial` : "Unlock Pro Now"}
         </>
       )}
     </button>

@@ -45,10 +45,11 @@ export function MarketingHero() {
         <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,30rem)] lg:gap-14">
           {/* ── Left: value prop + the primary action ─────────────── */}
           <div className="tc-rise-in max-w-2xl">
-            {/* Risk-reversal eyebrow — value chip, not a version label. */}
+            {/* Friction-removal eyebrow: answers cost, signup, and card
+                objections before the visitor reaches the address field. */}
             <div className="mb-5 inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-card/70 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-primary shadow-sm backdrop-blur">
               <Sparkles className="size-3 shrink-0" />
-              <span>TrueCap · Rental Deal Decision Engine</span>
+              <span>Free analysis · No signup · No card</span>
             </div>
 
             {/* Headline: 2 lines max, hierarchy by weight + accent color,
@@ -72,7 +73,7 @@ export function MarketingHero() {
                 density audit LAND-3). */}
             <p className="mt-3 hidden flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground sm:flex">
               <Check className="size-3.5 shrink-0 text-[var(--metric-positive)]" />
-              <span>No credit card required. Screen deals free. Upgrade when you&apos;re ready to act.</span>
+              <span>Start with an address. Every assumption stays editable. Upgrade only when you need Max Offer and action tools.</span>
             </p>
           </div>
 

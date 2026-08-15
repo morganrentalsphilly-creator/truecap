@@ -7,12 +7,11 @@ import { createAdminSupabaseClient } from "@/lib/supabase/admin";
  * Total number of analyses RUN across all users, all time — the count behind
  * the homepage "deals analyzed on TrueCap" ticker.
  *
- * This is the HONEST "deals analyzed" figure: it counts every time someone
- * clicks Run analysis (incremented once per run via the increment_analysis_runs
- * RPC — see app/actions/track-analysis-run.ts), seeded from a real floor (the
- * existing saved-analyses count, in the migration). The saved-deals count alone
- * (lib/stats/deals-analyzed-count) only reflects the small fraction of runs a
- * user chose to save, so it dramatically undercounts usage.
+ * This returns the raw stored figure: it counts every time someone clicks Run
+ * analysis (incremented once per run via the increment_analysis_runs RPC — see
+ * app/actions/track-analysis-run.ts). The public all-time ticker applies its
+ * approved historical display floor separately, leaving this data helper and
+ * the stored counter unchanged.
  *
  * Reads a single counter row via the service-role client (RLS-bypassing,
  * count-only — no row data or PII leaves this function). On the static homepage

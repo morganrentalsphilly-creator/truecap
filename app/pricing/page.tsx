@@ -103,6 +103,10 @@ const FAQS: { q: string; a: string }[] = [
     a: "Yes. Cancel from your profile in one click. Your Pro features stay active until the end of the period you've paid for, then automatically downgrade to Free.",
   },
   {
+    q: "How does the Pro trial work?",
+    a: `Stripe collects a card at checkout. Eligible first-time subscribers get full Pro access for ${TRIAL_DAYS} days. Subscription billing starts after the trial unless you cancel first. Returning subscribers start paid access immediately and are not eligible for another free trial.`,
+  },
+  {
     q: "Do I keep my saved deals if I downgrade?",
     // Runtime truth (app/actions/saved-analyses.ts): Free CAN create saves up
     // to its 5-deal cap; only UPDATING a saved deal is Pro-gated. A previous
@@ -171,10 +175,10 @@ export default async function PricingPage() {
           <div className="mx-auto max-w-5xl px-4 pb-10 pt-12 sm:px-6 sm:pb-14 sm:pt-16 text-center">
             <div className="mx-auto mb-5 flex w-fit items-center gap-2 rounded-full border border-primary/20 bg-card/70 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-primary shadow-sm backdrop-blur">
               <Sparkles className="size-3" />
-              Free to start · No card
+              Analyze free · No card required
             </div>
             <h1 className="text-balance text-3xl font-extrabold leading-[1.1] tracking-tight text-foreground sm:text-5xl">
-              Screen deals free. <span className="text-primary">Pay when you&apos;re ready to decide and act.</span>
+              From listing to confident offer. <span className="text-primary">One decision workflow.</span>
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-balance text-[15px] leading-relaxed text-muted-foreground sm:text-lg">
               {/* Trial-promising hero variant must mirror the checkout guard
@@ -182,8 +186,8 @@ export default async function PricingPage() {
                   below — an ex-subscriber sees "go Pro", not a trial that
                   checkout won't grant. */}
               {hadPriorSubscription
-                ? `Use Free for the first screen. Use ${proOfferName} to solve your Max Offer, stress-test downside, compare opportunities, and move the right deals forward.`
-                : `Use Free for the first screen. Start a ${TRIAL_LABEL} of ${proOfferName} when you need to solve your Max Offer, stress-test downside, compare opportunities, and move the right deals forward.`}
+                ? `Screen any deal free. Use ${proOfferName} to get four acquisition answers: pursue or pass, what to offer, what could break, and how to present the decision.`
+                : `Screen any deal free, then use a ${TRIAL_LABEL} of ${proOfferName} to get four acquisition answers: pursue or pass, what to offer, what could break, and how to present the decision.`}
             </p>
             {/* Real-data social proof — investors arriving at /pricing
                 are evaluating credibility. A live count of recent
@@ -243,7 +247,10 @@ export default async function PricingPage() {
               Stripe-loaded price passed in so the breakeven math matches
               what the user sees in the plan card right above. */}
           <div className="mx-auto mt-8 max-w-2xl">
-            <RoiCalculatorWidget proMonthlyPrice={monthly?.unitAmount} />
+            <RoiCalculatorWidget
+              proMonthlyPrice={monthly?.unitAmount}
+              singleDealPriceLabel={singleDeal.priceLabel}
+            />
           </div>
 
           {/* Trust strip */}
@@ -253,7 +260,15 @@ export default async function PricingPage() {
               <strong className="text-foreground">Free to start — no card</strong>
             </span>
             <span aria-hidden className="text-muted-foreground/40">·</span>
-            <span><strong className="text-foreground">Cancel anytime</strong> from your profile</span>
+            <span>
+              {hadPriorSubscription ? (
+                <><strong className="text-foreground">Full access immediately</strong></>
+              ) : (
+                <><strong className="text-foreground">{TRIAL_DAYS} days of full Pro</strong> before subscription billing</>
+              )}
+            </span>
+            <span aria-hidden className="text-muted-foreground/40">·</span>
+            <span><strong className="text-foreground">Cancel online anytime</strong> from your profile</span>
             <span aria-hidden className="text-muted-foreground/40">·</span>
             <span>Powered by <strong className="text-foreground">Stripe</strong></span>
           </div>

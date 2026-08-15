@@ -3,27 +3,22 @@
 /**
  * Interactive ROI calculator for /pricing.
  *
- * Defangs the universal SaaS objection — "is it worth $X/mo?" — by
- * turning it into the visitor's own math. They input their deal flow
- * and hourly rate; the widget shows time saved per month, dollar
- * value of that time at their rate, and how quickly Pro pays for
- * itself.
+ * Answers "is it worth $X/mo?" with prospect-controlled inputs. They enter
+ * deal flow, hourly time value, and minutes saved versus their current
+ * workflow; the widget estimates monthly time value and price breakeven.
  *
  * Key honesty constraints:
- *   - Conservative assumption: 90 minutes saved per deal vs manual
- *     spreadsheet underwriting. Defensible — a full underwrite from
- *     scratch (cap rate, CoC, DSCR, projection, tax math) takes 1-2+
- *     hours; TrueCap collapses it to 1-2 minutes.
- *   - We don't claim "value beyond time saved" (avoided bad deals,
- *     better negotiating position, lender-ready PDFs) — those are
- *     real but unquantifiable in a generic calculator.
- *   - Pro monthly price is hardcoded to $29 here as a placeholder;
- *     wire the real Stripe-fetched price from /pricing in a follow-up.
+ *   - Time saved is editable; the UI does not present a universal saving as
+ *     fact.
+ *   - No speculative value is assigned to avoided losses, negotiated price,
+ *     financing, or investment returns.
+ *   - The live Stripe price is preferred, with a dev-safe fallback.
  */
 
 import { useMemo, useState } from "react";
 import { Clock, DollarSign, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { calculateOfferValueEstimate } from "@/lib/offer-value-estimate";
 
 const num = (s: string) => {
   const n = Number(s);
@@ -44,8 +39,8 @@ const fmtHours = (n: number) => {
  */
 const DEFAULT_DEALS_PER_MONTH = "5";
 const DEFAULT_HOURLY_RATE = "75";
-/** Minutes saved per deal vs manual spreadsheet underwriting. */
-const MINUTES_SAVED_PER_DEAL = 90;
+/** Editable starting point, not a promised saving. */
+const DEFAULT_MINUTES_SAVED_PER_DEAL = "60";
 /** Placeholder Pro monthly price for the breakeven math. */
 const PRO_MONTHLY_PRICE = 29;
 
@@ -69,31 +64,37 @@ type Props = {
    * or Stripe API hiccup). Always passed in dollars, never cents.
    */
   proMonthlyPrice?: number;
+  /** Current configured one-time underwrite label for the low-volume verdict. */
+  singleDealPriceLabel?: string;
 };
 
-export function RoiCalculatorWidget({ proMonthlyPrice }: Props) {
+export function RoiCalculatorWidget({ proMonthlyPrice, singleDealPriceLabel = "$5" }: Props) {
   // Coalesce: prefer the real Stripe price, fall back to the hardcoded
   // placeholder so the widget never displays "$0" or NaN math when the
   // Stripe load returned null for any reason.
   const effectivePrice = proMonthlyPrice && proMonthlyPrice > 0 ? proMonthlyPrice : PRO_MONTHLY_PRICE;
   const [dealsInput, setDealsInput] = useState(DEFAULT_DEALS_PER_MONTH);
   const [rateInput, setRateInput] = useState(DEFAULT_HOURLY_RATE);
+  const [minutesInput, setMinutesInput] = useState(DEFAULT_MINUTES_SAVED_PER_DEAL);
 
   const result = useMemo(() => {
     const deals = num(dealsInput);
     const rate = num(rateInput);
-    const hoursSaved = (deals * MINUTES_SAVED_PER_DEAL) / 60;
-    const dollarValue = hoursSaved * rate;
-    const breakevenDeals = dollarValue > 0 ? effectivePrice / (rate * (MINUTES_SAVED_PER_DEAL / 60)) : Infinity;
-    const roiMultiplier = effectivePrice > 0 ? dollarValue / effectivePrice : 0;
-    return { deals, rate, hoursSaved, dollarValue, breakevenDeals, roiMultiplier };
-  }, [dealsInput, rateInput, effectivePrice]);
+    const minutesSavedPerDeal = num(minutesInput);
+    const estimate = calculateOfferValueEstimate({
+      dealsPerMonth: deals,
+      hourlyRate: rate,
+      minutesSavedPerDeal,
+      monthlyPrice: effectivePrice,
+    });
+    return { deals, rate, minutesSavedPerDeal, ...estimate };
+  }, [dealsInput, rateInput, minutesInput, effectivePrice]);
 
   return (
     <div className="rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-6">
       <div className="flex items-center justify-between gap-3">
         <h3 className="text-base font-extrabold uppercase tracking-widest text-muted-foreground sm:text-sm">
-          What you save with TrueCap Pro
+          Estimate the time value of TrueCap Pro
         </h3>
         <span className="hidden rounded-full bg-[var(--brand-green-light)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-[var(--brand-green)] sm:inline-flex">
           Your numbers
@@ -132,8 +133,8 @@ export function RoiCalculatorWidget({ proMonthlyPrice }: Props) {
         </div>
       </div>
 
-      {/* Inputs — stacked on mobile, side-by-side on sm+ */}
-      <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
+      {/* Inputs — stacked on mobile, three-up on sm+ */}
+      <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
         <label className="block">
           <span className="mb-1.5 block text-xs font-semibold text-foreground">
             Deals you analyze per month
@@ -168,6 +169,22 @@ export function RoiCalculatorWidget({ proMonthlyPrice }: Props) {
             />
           </div>
         </label>
+
+        <label className="block">
+          <span className="mb-1.5 block text-xs font-semibold text-foreground">
+            Minutes saved per deal
+          </span>
+          <input
+            type="number"
+            inputMode="numeric"
+            min={0}
+            step={5}
+            value={minutesInput}
+            onChange={(e) => setMinutesInput(e.target.value)}
+            className="block h-11 w-full rounded-xl border border-border bg-background px-3 text-base tabular-nums shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
+            aria-label="Estimated minutes saved per deal"
+          />
+        </label>
       </div>
 
       {/* Results — 3-up on sm+, stacked on mobile */}
@@ -181,42 +198,39 @@ export function RoiCalculatorWidget({ proMonthlyPrice }: Props) {
         <ResultTile
           icon={DollarSign}
           label="Value at your rate"
-          value={fmtMoney(result.dollarValue)}
+          value={fmtMoney(result.timeValue)}
           tone="success"
         />
         <ResultTile
           icon={TrendingUp}
           label="ROI vs Pro"
-          value={result.roiMultiplier >= 1 ? `${result.roiMultiplier.toFixed(1)}×` : "—"}
-          tone={result.roiMultiplier >= 5 ? "success" : "primary"}
+          value={result.valueMultiple >= 1 ? `${result.valueMultiple.toFixed(1)}×` : "—"}
+          tone={result.valueMultiple >= 5 ? "success" : "primary"}
         />
       </div>
 
       {/* Verdict line — only renders meaningfully when inputs are non-zero */}
-      {result.deals > 0 && result.rate > 0 ? (
+      {result.deals > 0 && result.rate > 0 && result.minutesSavedPerDeal > 0 ? (
         <div className="mt-5 rounded-xl border border-[var(--brand-green)]/25 bg-[var(--brand-green-light)] p-4 text-sm text-foreground">
-          {result.dollarValue >= effectivePrice ? (
+          {result.timeValue >= effectivePrice ? (
             <p className="leading-relaxed">
-              At {result.deals} {result.deals === 1 ? "deal" : "deals"} per month, TrueCap Pro pays for
-              itself <strong>after {result.breakevenDeals < 1 ? "less than 1" : Math.ceil(result.breakevenDeals)} {Math.ceil(result.breakevenDeals) === 1 ? "deal" : "deals"}</strong>.
-              The rest of the month is pure return.
+              With your inputs, the estimated time value covers Pro&apos;s monthly price after{" "}
+              <strong>{result.breakevenDeals < 1 ? "less than 1" : Math.ceil(result.breakevenDeals)} {Math.ceil(result.breakevenDeals) === 1 ? "deal" : "deals"}</strong>.
             </p>
           ) : (
             <p className="leading-relaxed">
-              Pro costs ${effectivePrice}/mo. At your inputs that&apos;s break-even territory —
-              the bigger win for low-volume investors is avoiding a single bad deal, which TrueCap&apos;s
-              red-flag detection helps with even before time savings.
+              At your inputs, Free or a {singleDealPriceLabel} Single-Deal Underwrite may be the better fit today.
+              Move to Pro when Max Offer, repeat underwriting, comparison, and saved workflows become valuable.
             </p>
           )}
         </div>
       ) : null}
 
       <p className="mt-4 text-[11px] text-muted-foreground leading-relaxed">
-        Assumes <strong>90 minutes saved per deal</strong> vs. building the
-        same analysis manually in a spreadsheet (cap rate, CoC, DSCR,
-        10-yr projection, tax math, exit scenarios). Conservative — most
-        investors save more. Pro price shown is the monthly tier; annual
-        works out to even better ROI.
+        Illustrative estimate based only on the inputs above. Change the time
+        saving to match your current workflow. It does not estimate investment
+        returns, negotiated savings, or avoided losses. Annual billing may
+        lower the effective monthly price.
       </p>
     </div>
   );
