@@ -216,17 +216,16 @@ export default function VsBiggerPocketsCalculatorPage() {
           </p>
         </section>
 
-        {/* When investors switch */}
+        {/* Workflow fit */}
         <section className="mb-12 sm:mb-16 rounded-2xl border border-[var(--brand-green)]/25 bg-[var(--brand-green-light)] p-6 sm:p-8">
           <h2 className="text-xl sm:text-2xl font-extrabold text-[var(--brand-green)] mb-3">
-            When BiggerPockets users actually switch
+            Choose TrueCap when you want a focused decision workflow
           </h2>
           <ul className="space-y-2 text-sm sm:text-base leading-relaxed text-foreground">
-            <li><strong>&quot;I want to screen without creating an account.&quot;</strong> TrueCap&apos;s core analyzer is available before signup. Pro unlocks projections, sensitivity, co-branded share links, PDFs, and reusable decision tools.</li>
-            <li><strong>&quot;The manual entry is slow.&quot;</strong> Paste an address. TrueCap pulls property tax from the county, rent from HUD, mortgage rate from FRED. You start with 60-70% of the underwrite done. BP has you typing everything.</li>
-            <li><strong>&quot;I just want a calculator, not another community to manage.&quot;</strong> BP&apos;s value is the ecosystem (forums + podcast + courses). TrueCap is just the tool. Some investors want the bundle; others want focus.</li>
-            <li><strong>&quot;I&apos;m paying $390/yr for the BP membership and use 10% of what comes with it.&quot;</strong> If you&apos;re a BP member primarily for the calculator, TrueCap Pro at $25/mo annual ($300/yr) costs less — and it is built around the deal analysis you actually use.</li>
-            <li><strong>&quot;The deal score on TrueCap actually helps me decide.&quot;</strong> 0-100 composite with a subscore breakdown — you see WHY a deal scored 67 (e.g., cap rate strong, DSCR weak, rents above market), not just a color.</li>
+            <li><strong>Screen before creating an account.</strong> TrueCap&apos;s core analyzer is available before signup.</li>
+            <li><strong>Start from labeled assumptions.</strong> TrueCap can pre-fill HUD rent, the FRED mortgage rate, and a state property-tax benchmark, then lets you replace each value.</li>
+            <li><strong>Keep the product focused.</strong> TrueCap centers on screening, offer price, downside, and presenting the decision; BiggerPockets pairs its calculator with a much broader investor ecosystem.</li>
+            <li><strong>Connect the outputs.</strong> TrueCap&apos;s verdict leads into Buy Box, Max Offer, downside, and reporting instead of treating each as a separate destination.</li>
           </ul>
         </section>
 
@@ -267,7 +266,7 @@ export default function VsBiggerPocketsCalculatorPage() {
           </p>
         </section>
 
-        <ComparisonFaq competitorName="BiggerPockets Calculator" items={BP_FAQ} />
+        <ComparisonFaq competitorName="BiggerPockets Calculator" items={BP_FAQ} reviewedDate="August 15, 2026" />
 
         {/* Pricing CTA */}
         <section className="mb-12 sm:mb-16 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
@@ -275,11 +274,9 @@ export default function VsBiggerPocketsCalculatorPage() {
             Try TrueCap free — see if the address-to-decision workflow fits.
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
-            Free includes full cap rate, CoC, DSCR, and monthly cash flow
-            analysis with address auto-fill — enough to underwrite. Pro at
-            $25/mo annual unlocks co-branded share links, PDF exports, 10-year
-            projections, tax strategy, sensitivity, MAO, and the
-            strategy analyzers. No card to start.
+            Screen a property without a card, inspect the assumptions and verdict,
+            then decide whether TrueCap&apos;s connected Buy Box, Max Offer, downside,
+            and reporting workflow fits how you acquire rentals.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link
@@ -365,27 +362,23 @@ const BP_FAQ: FaqItem[] = [
     question: "Does TrueCap have a 10-year projection like BiggerPockets?",
     answer: (
       <>
-        Yes — TrueCap Pro&apos;s 10-year projection includes rent
-        growth, expense growth, appreciation, and amortization
-        compounding into per-year cash flow + equity. The output is
-        cached as a snapshot so it&apos;s fast to revisit, and it
-        renders cleanly to PDF.
+        Yes. TrueCap Pro&apos;s 10-year projection models user-editable rent
+        growth, expense growth, appreciation, and amortization into annual
+        cash flow and equity scenarios. These are estimates, not forecasts or
+        guarantees, and they can be included in a report.
       </>
     ),
     plainTextAnswer:
-      "Yes — TrueCap Pro's 10-year projection includes rent growth, expense growth, appreciation, and amortization compounding into per-year cash flow + equity. Snapshot-cached and PDF-exportable.",
+      "Yes. TrueCap Pro models editable rent growth, expense growth, appreciation, and amortization into annual cash-flow and equity scenarios that can be included in a report.",
   },
   {
     question: "Can I share a TrueCap analysis without making the viewer sign up?",
     answer: (
       <>
         Yes — and you don&apos;t need Pro for it. TrueCap generates a
-        public read-only share link for any deal on the free tier: the
-        full analysis is encoded into the URL, no login required for the
-        recipient. Pro adds custom co-branding (logo, color, company
-        name) to the link. BiggerPockets PDF reports are downloadable
-        but the free-form share-link workflow is a TrueCap-specific
-        feature.
+        public read-only share link for a deal on the free tier, with no
+        login required for the recipient. Pro adds custom co-branding such as
+        logo, color, and company name.
       </>
     ),
     plainTextAnswer:
@@ -395,13 +388,11 @@ const BP_FAQ: FaqItem[] = [
     question: "When should I stick with BiggerPockets?",
     answer: (
       <>
-        Stick with BiggerPockets if you&apos;re already paying for Pro
-        for the community access (forums, courses, books, podcasts),
-        you trust the brand, and the calculator&apos;s output format is
-        the one your private-money lender or partners already accept.
-        Choose TrueCap if you want a focused address-to-decision experience
-        with labeled starting assumptions, a verdict, Max Offer, downside,
-        and presentation in one sequence.
+        Stick with BiggerPockets if its community, education, and existing
+        calculator workflow are central to how you invest. Choose TrueCap if
+        you want a focused address-to-decision experience with labeled
+        starting assumptions, a verdict, Max Offer, downside, and presentation
+        in one sequence.
       </>
     ),
     plainTextAnswer:

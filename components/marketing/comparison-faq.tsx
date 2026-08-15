@@ -52,10 +52,13 @@ export type FaqItem = {
 export function ComparisonFaq({
   competitorName,
   items,
+  reviewedDate = COMPARISON_REVIEWED,
 }: {
   /** "DealCheck", "Stessa", "Excel", etc. Used in the section heading. */
   competitorName: string;
   items: FaqItem[];
+  /** Date this page's competitor claims were actually checked. */
+  reviewedDate?: string;
 }) {
   const schema = {
     "@context": "https://schema.org",
@@ -112,7 +115,7 @@ export function ComparisonFaq({
       <p className="mt-6 max-w-2xl text-xs leading-relaxed text-muted-foreground">
         <span className="font-semibold text-foreground/80">Sources &amp; methodology:</span>{" "}
         Feature and pricing rows reflect {competitorName}&apos;s publicly listed
-        information, last reviewed {COMPARISON_REVIEWED}. Vendors change features
+        information, last reviewed {reviewedDate}. Vendors change features
         and prices often — verify current details on {competitorName}&apos;s own
         site. Where TrueCap claims &ldquo;sourced defaults,&rdquo; that refers
         specifically to auto-filled HUD Fair Market Rent, the FRED 30-year

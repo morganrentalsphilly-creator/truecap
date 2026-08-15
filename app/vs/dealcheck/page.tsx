@@ -135,11 +135,11 @@ export default function VsDealCheckPage() {
                 Pick TrueCap if
               </p>
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
-                <li>You want a fully usable free tier with no analysis limits.</li>
-                <li>You want explicit benchmarks (&quot;Above 8% — top quartile&quot;) inline with each metric.</li>
-                <li>You want a portfolio rollup across saved deals.</li>
-                <li>You want a deal score with a plain-English breakdown.</li>
-                <li>You prefer transparent open-data sources (HUD, FRED, state tax) you can audit.</li>
+                <li>You want a fast address-to-decision sequence.</li>
+                <li>You want labeled HUD, FRED, and state-tax starting assumptions.</li>
+                <li>You want an opinionated verdict with the supporting math visible.</li>
+                <li>You want Buy Box evaluation inside the analysis flow.</li>
+                <li>You want Max Offer, downside, and decision packaging connected.</li>
               </ul>
             </div>
             <div>
@@ -212,16 +212,16 @@ export default function VsDealCheckPage() {
           </p>
         </section>
 
-        {/* When to switch */}
+        {/* Workflow fit */}
         <section className="mb-12 sm:mb-16 rounded-2xl border border-[var(--brand-green)]/25 bg-[var(--brand-green-light)] p-6 sm:p-8">
           <h2 className="text-xl sm:text-2xl font-extrabold text-[var(--brand-green)] mb-3">
-            When investors actually switch to TrueCap
+            Choose TrueCap when the decision sequence matters most
           </h2>
           <ul className="space-y-2 text-sm sm:text-base leading-relaxed text-foreground">
-            <li><strong>&quot;I want the free tier to actually be useful.&quot;</strong> TrueCap&apos;s free analyzer is the full thing — cap rate, CoC, DSCR, NCF, address auto-fill, every operating expense, all of it. No signup wall, no analysis count limit. Pro adds power (sensitivity, exit scenarios, tax strategy, co-branded share links, PDFs) but the underwriting itself is free.</li>
-            <li><strong>&quot;I want benchmarks inline, not in a separate doc.&quot;</strong> Every metric tile shows you what tier you&apos;re in (&quot;Above 8% — top quartile&quot;) without leaving the analysis. Pulls from the same engine that drives the score.</li>
-            <li><strong>&quot;I run a portfolio.&quot;</strong> Saved deals get a rollup header (total cash flow / weighted cap rate / weighted CoC) — feels like running a book, not a notebook.</li>
-            <li><strong>&quot;I want to understand the score, not just trust it.&quot;</strong> Click &quot;Why this verdict?&quot; on any analysis and see the contribution from each subscore plus what would move the number.</li>
+            <li><strong>Start with less setup.</strong> Enter an address for a first-pass screen, then refine the assumptions that matter.</li>
+            <li><strong>See where the inputs came from.</strong> TrueCap labels sourced starting points and keeps them editable.</li>
+            <li><strong>Move from result to action.</strong> The verdict leads to Max Offer, downside, and next-step tools instead of stopping at a metric summary.</li>
+            <li><strong>Reuse your own criteria.</strong> Buy Box targets stay connected to the verdict and offer calculation.</li>
           </ul>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
             Prefer to kick the tires on a single metric first? Try the
@@ -246,7 +246,7 @@ export default function VsDealCheckPage() {
           </p>
         </section>
 
-        <ComparisonFaq competitorName="DealCheck" items={DEALCHECK_FAQ} />
+        <ComparisonFaq competitorName="DealCheck" items={DEALCHECK_FAQ} reviewedDate="August 15, 2026" />
 
         {/* Pricing CTA */}
         <section className="mb-12 sm:mb-16 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
@@ -254,7 +254,9 @@ export default function VsDealCheckPage() {
             Try TrueCap free — see if it fits your workflow.
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
-            Free covers cash-flow analysis (cap rate, CoC, DSCR, NCF) — enough to underwrite. Pro unlocks co-branded share links, PDF exports, 10-year projections, tax strategy, sensitivity, MAO, and the strategy analyzers. No card to start. Cancel anytime.
+            Screen a property without a card, inspect the assumptions and verdict,
+            then decide whether TrueCap&apos;s connected Buy Box, Max Offer, downside,
+            and reporting workflow fits how you acquire rentals.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link
@@ -296,18 +298,17 @@ const DEALCHECK_FAQ: FaqItem[] = [
     question: "Is TrueCap a free alternative to DealCheck?",
     answer: (
       <>
-        Yes. TrueCap&apos;s free tier gives you a complete underwrite — cap
-        rate, cash-on-cash, DSCR, monthly cash flow, NOI — with no signup
-        required and no monthly limit on analyses. You can save up to 5
-        deals on the free tier (Pro removes the cap). DealCheck&apos;s free
-        tier requires signup and caps you at 15 saved properties at a
-        time. If you only need to run numbers on individual listings,
-        the free tier of TrueCap covers the same job DealCheck Plus
-        would.
+        TrueCap offers a no-signup first-pass screen with cap rate,
+        cash-on-cash return, DSCR, monthly cash flow, and a verdict. DealCheck
+        also publishes a free plan; check its official{" "}
+        <a href="https://dealcheck.io/pricing/" target="_blank" rel="noopener noreferrer" className="underline">pricing page</a>{" "}
+        for current limits. The better fit depends on whether you prefer
+        TrueCap&apos;s address-to-decision sequence or DealCheck&apos;s established
+        analysis and import workflow.
       </>
     ),
     plainTextAnswer:
-      "Yes. TrueCap's free tier covers cap rate, cash-on-cash, DSCR, monthly cash flow, and NOI with no signup and no monthly limit; you can save up to 5 deals free (Pro unlimited). DealCheck's free tier requires signup and caps saved properties at 15 at a time.",
+      "TrueCap offers a no-signup first-pass screen. DealCheck also publishes a free plan; verify its current limits on the official pricing page and choose the workflow that fits.",
   },
   {
     question: "How much does TrueCap cost compared to DealCheck?",
@@ -327,15 +328,10 @@ const DEALCHECK_FAQ: FaqItem[] = [
     question: "Which tool is better for new investors?",
     answer: (
       <>
-        TrueCap can fit a newer investor who values an address-first screen and a plain-English
-        verdict (Strong / Solid / Mixed / Marginal / Negative) is built
-        for someone learning to read a deal, not someone already fluent
-        in commercial real-estate math. DealCheck is more powerful once
-        you know what every input means, but new investors often spend
-        their first session staring at a form trying to figure out which
-        fields matter. TrueCap pre-fills HUD rent + FRED rate + state
-        property tax from the address, so a first-time user can get a
-        first-pass screen without knowing every starting number to type.
+        TrueCap can fit a newer investor who values an address-first screen,
+        labeled starting assumptions, and a plain-English verdict. DealCheck
+        can fit someone who wants its established property-import and native
+        mobile workflow. Neither tool replaces verification or due diligence.
       </>
     ),
     plainTextAnswer:
@@ -380,12 +376,9 @@ const DEALCHECK_FAQ: FaqItem[] = [
       <>
         Pick DealCheck if you&apos;re primarily mobile-first walking
         many properties a day, you want a native app, and listing-site
-        property import is your top workflow. Pick TrueCap if you want
-        an address-first free screen, plain-English verdicts,
-        tax-strategy modeling, sensitivity analysis, MAO,
-        portfolio rollup across saved deals, and co-branded share
-        links — all in a single Pro tier without per-feature
-        upcharges.
+        property import is your top workflow. Pick TrueCap if you want an
+        address-first screen connected to a verdict, Buy Box, Max Offer,
+        downside analysis, and presentation tools.
       </>
     ),
     plainTextAnswer:
