@@ -291,8 +291,10 @@ export function PricingTogglePlans({
         ) : null}
       </div>
       <div className={showAgentPro ? "grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-5" : "grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-5"}>
-        {/* FREE */}
-        <div className="relative rounded-3xl border border-border bg-card p-6 shadow-sm">
+        {/* FREE — follows Pro on narrow screens so a high-intent visitor sees
+            the paid offer immediately; returns to the left column on desktop
+            where side-by-side comparison is visible without scrolling. */}
+        <div className="relative order-2 rounded-3xl border border-border bg-card p-6 shadow-sm lg:order-1">
           <div className="flex items-baseline justify-between">
             <h3 className="text-lg font-extrabold text-foreground">Free</h3>
             {/* "Current" only means something for a signed-in free user.
@@ -354,7 +356,7 @@ export function PricingTogglePlans({
         </div>
 
         {/* PRO (with toggle) */}
-        <div className="relative -mt-2 rounded-3xl border-2 border-primary bg-card p-6 shadow-[0_24px_70px_rgba(0,112,196,0.18)] lg:scale-[1.03]">
+        <div className="relative order-1 -mt-2 rounded-3xl border-2 border-primary bg-card p-6 shadow-[0_24px_70px_rgba(0,112,196,0.18)] lg:order-2 lg:scale-[1.03]">
           {/* Savings badge — prefer the dollar-amount savings when
               available because concrete numbers convert better than
               percentages. Falls back to "X months free" or % savings. */}
@@ -503,7 +505,7 @@ export function PricingTogglePlans({
             "Everything in Pro" + exactly the agent_pro-only feature labels,
             so this card can never promise something the tier doesn't gate. */}
         {showAgentPro ? (
-          <div className="relative rounded-3xl border border-border bg-card p-6 shadow-sm">
+          <div className="relative order-3 rounded-3xl border border-border bg-card p-6 shadow-sm">
             <div className="flex items-baseline justify-between">
               <h3 className="text-lg font-extrabold text-foreground">Agent Pro</h3>
               <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-primary">

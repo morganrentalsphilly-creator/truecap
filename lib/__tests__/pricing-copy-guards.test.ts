@@ -95,3 +95,13 @@ describe("trial copy — mirrors the checkout repeat-trial guard", () => {
     expect(landing).toContain("not eligible for another free trial");
   });
 });
+
+describe("pricing offer hierarchy", () => {
+  it("puts Pro before the long Free card on narrow screens", () => {
+    const plans = read("../../components/marketing/pricing-toggle-plans.tsx");
+    expect(plans).toContain("order-2 rounded-3xl");
+    expect(plans).toContain("lg:order-1");
+    expect(plans).toContain("order-1 -mt-2");
+    expect(plans).toContain("lg:order-2");
+  });
+});
