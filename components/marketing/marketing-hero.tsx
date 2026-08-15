@@ -146,7 +146,7 @@ export function MarketingHero() {
  *
  * Defines:
  *   - .tc-hero-pulse-dot — 1.5s blink for the LIVE indicator.
- *   - .tc-hero-step-1 .. .tc-hero-step-6 — 5s sequential reveal loop
+ *   - .tc-hero-step-1 .. .tc-hero-step-6 — one sequential reveal
  *     (address → tile 1 → tile 2 → tile 3 → pills → verdict line).
  *
  * Honors prefers-reduced-motion to disable for a11y compliance.
@@ -158,41 +158,35 @@ const HERO_ANIM_CSS = `
 }
 @keyframes tc-hero-step-1 {
   0%, 4%    { opacity: 0; transform: translateY(6px); }
-  12%, 94%  { opacity: 1; transform: translateY(0); }
-  100%      { opacity: 0; transform: translateY(6px); }
+  12%, 100% { opacity: 1; transform: translateY(0); }
 }
 @keyframes tc-hero-step-2 {
   0%, 12%   { opacity: 0; transform: translateY(6px); }
-  20%, 94%  { opacity: 1; transform: translateY(0); }
-  100%      { opacity: 0; transform: translateY(6px); }
+  20%, 100% { opacity: 1; transform: translateY(0); }
 }
 @keyframes tc-hero-step-3 {
   0%, 20%   { opacity: 0; transform: translateY(6px); }
-  28%, 94%  { opacity: 1; transform: translateY(0); }
-  100%      { opacity: 0; transform: translateY(6px); }
+  28%, 100% { opacity: 1; transform: translateY(0); }
 }
 @keyframes tc-hero-step-4 {
   0%, 28%   { opacity: 0; transform: translateY(6px); }
-  36%, 94%  { opacity: 1; transform: translateY(0); }
-  100%      { opacity: 0; transform: translateY(6px); }
+  36%, 100% { opacity: 1; transform: translateY(0); }
 }
 @keyframes tc-hero-step-5 {
   0%, 36%   { opacity: 0; transform: translateY(6px); }
-  44%, 94%  { opacity: 1; transform: translateY(0); }
-  100%      { opacity: 0; transform: translateY(6px); }
+  44%, 100% { opacity: 1; transform: translateY(0); }
 }
 @keyframes tc-hero-step-6 {
   0%, 44%   { opacity: 0; transform: translateY(6px); }
-  52%, 94%  { opacity: 1; transform: translateY(0); }
-  100%      { opacity: 0; transform: translateY(6px); }
+  52%, 100% { opacity: 1; transform: translateY(0); }
 }
 .tc-hero-pulse-dot { animation: tc-hero-pulse-dot 1.5s ease-in-out infinite; }
-.tc-hero-step-1 { animation: tc-hero-step-1 5s ease-in-out infinite; }
-.tc-hero-step-2 { animation: tc-hero-step-2 5s ease-in-out infinite; }
-.tc-hero-step-3 { animation: tc-hero-step-3 5s ease-in-out infinite; }
-.tc-hero-step-4 { animation: tc-hero-step-4 5s ease-in-out infinite; }
-.tc-hero-step-5 { animation: tc-hero-step-5 5s ease-in-out infinite; }
-.tc-hero-step-6 { animation: tc-hero-step-6 5s ease-in-out infinite; }
+.tc-hero-step-1 { animation: tc-hero-step-1 3s ease-out both; }
+.tc-hero-step-2 { animation: tc-hero-step-2 3s ease-out both; }
+.tc-hero-step-3 { animation: tc-hero-step-3 3s ease-out both; }
+.tc-hero-step-4 { animation: tc-hero-step-4 3s ease-out both; }
+.tc-hero-step-5 { animation: tc-hero-step-5 3s ease-out both; }
+.tc-hero-step-6 { animation: tc-hero-step-6 3s ease-out both; }
 @media (prefers-reduced-motion: reduce) {
   .tc-hero-pulse-dot,
   .tc-hero-step-1, .tc-hero-step-2, .tc-hero-step-3,
