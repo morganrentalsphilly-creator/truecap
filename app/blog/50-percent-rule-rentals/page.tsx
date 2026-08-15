@@ -86,7 +86,7 @@ export default function FiftyPercentRulePost() {
         <div className="prose prose-neutral max-w-none text-foreground space-y-6 leading-relaxed">
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">What the rule actually says</h2>
           <p>
-            The 50% rule, popularized in BiggerPockets-era investor communities, is a shorthand for estimating <Link href="/glossary/noi" className="text-primary font-semibold hover:underline">Net Operating Income (NOI)</Link> without itemizing every expense — see our <Link href="/blog/how-to-calculate-noi-rental-property" className="text-primary font-semibold hover:underline">line-by-line NOI walkthrough</Link> for the version that doesn't guess. The math:
+            The 50% rule, popularized in BiggerPockets-era investor communities, is a shorthand for estimating <Link href="/glossary/noi" className="text-primary font-semibold hover:underline">Net Operating Income (NOI)</Link> without itemizing every expense — see our <Link href="/blog/how-to-calculate-noi-rental-property" className="text-primary font-semibold hover:underline">line-by-line NOI walkthrough</Link> for the version that doesn&apos;t guess. The math:
           </p>
           <p>
             <strong>Estimated NOI = Gross Annual Rent × 50%</strong>

@@ -83,6 +83,15 @@ export interface ReportData {
     taxSavings: number;
     afterTaxCF: number;
   };
+  downsideScenario: {
+    /** Reproducible input change, e.g. rent -10% · vacancy +5pp · rate +1pp. */
+    label: string;
+    verdict: string;
+    monthlyCashFlow: number;
+    cocReturn: number;
+    capRate: number;
+    dscr: number;
+  };
   projection10y: {
     cumulativeCF: number;
     bestAnnualAfterTax: number;
@@ -1783,6 +1792,93 @@ async function pageProjection(
   });
 }
 
+function pageDownside(
+  doc: jsPDF,
+  d: ReportData,
+  branding?: BrandingConfig | null
+) {
+  let y = M.top + 12;
+  const themeColor = resolveThemeColor(branding);
+  y = sectionTitle(doc, "Downside Scenario", y, undefined, themeColor);
+
+  setText(doc, COLOR.sub);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9.5);
+  const intro = doc.splitTextToSize(
+    `A reproducible operating stress: ${d.downsideScenario.label}. This is not a forecast; it shows how the underwrite responds if several assumptions move against you at once.`,
+    SAFE.w
+  );
+  doc.text(intro, M.left, y);
+  y += intro.length * 12 + 18;
+
+  const stressed = d.downsideScenario;
+  const financed = d.performance.dscr > 0 || stressed.dscr > 0;
+  const survives = stressed.monthlyCashFlow >= 0 && (!financed || stressed.dscr >= 1);
+  const verdictTone = survives ? "success" : "danger";
+
+  const cw = (SAFE.w - 36) / 4;
+  statCard(doc, M.left, y, cw, 64, "Stressed Cash Flow", `${fmtCurrency(stressed.monthlyCashFlow, true)}/mo`, {
+    tone: stressed.monthlyCashFlow >= 0 ? "success" : "danger",
+    themeColor,
+  });
+  statCard(doc, M.left + cw + 12, y, cw, 64, "Stressed Cap Rate", fmtPct(stressed.capRate), {
+    tone: "primary",
+    themeColor,
+  });
+  statCard(doc, M.left + 2 * (cw + 12), y, cw, 64, "Stressed CoC", fmtPct(stressed.cocReturn), {
+    tone: stressed.cocReturn >= 0 ? "success" : "danger",
+    themeColor,
+  });
+  statCard(doc, M.left + 3 * (cw + 12), y, cw, 64, "Stressed DSCR", financed ? stressed.dscr.toFixed(2) : "Cash", {
+    tone: financed && stressed.dscr < 1 ? "danger" : "neutral",
+    themeColor,
+  });
+  y += 88;
+
+  card(doc, M.left, y, SAFE.w, 78, { soft: true });
+  setText(doc, survives ? COLOR.success : COLOR.danger);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(15);
+  doc.text(
+    survives ? "The deal remains cash-flow positive under this stress." : "The deal does not fully survive this stress.",
+    M.left + 16,
+    y + 27
+  );
+  setText(doc, COLOR.sub);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  const verdictText = doc.splitTextToSize(
+    `Stressed verdict: ${stressed.verdict}. Verify achievable rent, vacancy history, current financing quotes, taxes, insurance, and major repairs before relying on either case.`,
+    SAFE.w - 32
+  );
+  doc.text(verdictText, M.left + 16, y + 47);
+  y += 102;
+
+  const deltaMoney = stressed.monthlyCashFlow - d.performance.monthlyCashFlow;
+  const deltaCap = stressed.capRate - d.performance.capRate;
+  const deltaCoc = stressed.cocReturn - d.performance.cocReturn;
+  const deltaDscr = stressed.dscr - d.performance.dscr;
+  autoTable(doc, {
+    startY: y,
+    margin: { left: M.left, right: M.right },
+    head: [["Metric", "Base case", "Downside case", "Change"]],
+    body: [
+      ["Monthly cash flow", `${fmtCurrency(d.performance.monthlyCashFlow, true)}/mo`, `${fmtCurrency(stressed.monthlyCashFlow, true)}/mo`, `${fmtCurrency(deltaMoney, true)}/mo`],
+      ["Cap rate", fmtPct(d.performance.capRate), fmtPct(stressed.capRate), `${deltaCap >= 0 ? "+" : ""}${deltaCap.toFixed(1)}pp`],
+      ["Cash-on-cash", fmtPct(d.performance.cocReturn), fmtPct(stressed.cocReturn), `${deltaCoc >= 0 ? "+" : ""}${deltaCoc.toFixed(1)}pp`],
+      ["DSCR", financed ? d.performance.dscr.toFixed(2) : "Cash purchase", financed ? stressed.dscr.toFixed(2) : "Cash purchase", financed ? `${deltaDscr >= 0 ? "+" : ""}${deltaDscr.toFixed(2)}` : "—"],
+    ],
+    theme: "plain",
+    styles: { font: "helvetica", fontSize: 9, cellPadding: 6, lineColor: hexToRgb(COLOR.line), lineWidth: 0.3 },
+    headStyles: { fillColor: hexToRgb(COLOR.cardSoft), textColor: hexToRgb(themeColor), fontStyle: "bold", fontSize: 8, lineWidth: { bottom: 0.6, top: 0, left: 0, right: 0 }, lineColor: hexToRgb(themeColor) },
+    columnStyles: {
+      0: { fontStyle: "bold", textColor: hexToRgb(COLOR.ink) },
+      2: { textColor: hexToRgb(verdictTone === "success" ? COLOR.success : COLOR.danger), fontStyle: "bold" },
+    },
+    alternateRowStyles: { fillColor: [252, 253, 255] },
+  });
+}
+
 function drawChartCard(doc: jsPDF, x: number, y: number, w: number, h: number, title: string, dataUrl: string) {
   card(doc, x, y, w, h);
   setText(doc, COLOR.ink);
@@ -2256,6 +2352,8 @@ async function buildInvestmentPDFDocument(
   pageCover(doc, d, branding ?? null, logoData);
   doc.addPage();
   pageInputs(doc, d, branding ?? null, buyBoxVerdict);
+  doc.addPage();
+  pageDownside(doc, d, branding ?? null);
   doc.addPage();
   await pageProjection(doc, d, branding ?? null);
   // Tax Strategy is a personal-tax view — only the full personal report.

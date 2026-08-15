@@ -89,6 +89,7 @@ export function HeroAddressForm() {
     const sameAsPicked = picked && picked.formattedAddress.trim() === address;
     // Funnel: top of the hero-start path. No address string sent (PII).
     trackEvent("hero_address_submit", { has_components: Boolean(sameAsPicked) });
+    trackEvent("homepage_primary_cta", { source: "hero_address" });
     dispatchHeroAnalyze({
       token: newToken(),
       address,
@@ -133,12 +134,14 @@ export function HeroAddressForm() {
           className="group inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] disabled:opacity-70 sm:h-14"
         >
           <Calculator className="size-4" />
-          Analyze this property
+          Analyze a Deal Free
           <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
         </button>
       </form>
 
-      {/* Secondary actions. The sample report is elevated from a quiet
+      {/* Secondary actions. The process link answers the explicit "how does
+          this work?" objection while the sample remains a no-address path.
+          The sample report is elevated from a quiet
           text link to a clear outline button because a large share of
           cold/paid traffic lands WITHOUT a specific property to type — for
           them the address input is a dead end, and the one-click sample
@@ -148,10 +151,17 @@ export function HeroAddressForm() {
           pricing remains the quietest link so the emphasis is on
           experiencing a deal, not evaluating cost. */}
       <div className="mt-3 flex flex-wrap items-center justify-start gap-x-4 gap-y-2 text-sm">
+        <a
+          href="#how-it-works"
+          className="group inline-flex items-center gap-1.5 rounded-xl border border-primary/30 bg-card px-4 py-2 font-semibold text-primary shadow-sm transition-colors hover:border-primary/60 hover:bg-[var(--brand-blue-light)]"
+        >
+          See How It Works
+          <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+        </a>
         <button
           type="button"
           onClick={handleTrySample}
-          className="group inline-flex items-center gap-1.5 rounded-xl border border-primary/30 bg-card px-4 py-2 font-semibold text-primary shadow-sm transition-colors hover:border-primary/60 hover:bg-[var(--brand-blue-light)]"
+          className="group inline-flex items-center gap-1.5 rounded-xl border border-border bg-card px-4 py-2 font-medium text-muted-foreground shadow-sm transition-colors hover:border-primary/40 hover:text-foreground"
         >
           <Sparkles className="size-4" />
           No address yet? See a sample report

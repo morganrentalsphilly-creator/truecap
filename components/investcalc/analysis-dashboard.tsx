@@ -106,6 +106,7 @@ import { REPORT_MODES, type ReportMode } from "@/lib/pdf-export-constants";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Activity, Target } from "lucide-react";
 import { MomentOfValueUpsell } from "@/components/marketing/moment-of-value-upsell";
+import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
 import { SignupPromptCard } from "@/components/marketing/signup-prompt-card";
 import { RateAlertsToggle } from "@/components/settings/rate-alerts-toggle";
 import { CashFlowWaterfall } from "@/components/investcalc/cash-flow-waterfall";
@@ -377,6 +378,7 @@ export function AnalysisDashboard({
   persistedActionsBlockHint,
   assumptionsSlot,
 }: AnalysisDashboardProps) {
+  const singleDealPriceLabel = getMarketingOfferConfig().singleDeal.priceLabel;
   // Ledger open state (Phase 5) - replaces the single activeTab. Rows are
   // INDEPENDENT multi-open accordions: opening one never closes a sibling
   // (single-open enforcement was explicitly rejected). The lead row (the
@@ -519,6 +521,7 @@ export function AnalysisDashboard({
       maxOffer: mao.maxPrice,
       basis: describeMaoTarget(target),
       fromBuyBox: buyBoxContributesToMaoTarget(thresholds, { isCashPurchase }),
+      achieved: mao.achieved,
     };
   }, [values, result, canUseMaxOffer, buyBoxQaReport]);
   // Exit-engine return summary - feeds BOTH the metrics band's folded-in
@@ -859,6 +862,20 @@ export function AnalysisDashboard({
         />
       ) : null}
 
+      {/* The upgrade moment belongs immediately after the answer, while the
+          acquisition decision is still top-of-mind. It exposes the exact
+          missing outcome (Max Offer) without inventing a number for Free. */}
+      {result && values && !isLoading && isAuthenticated && !canUseMaxOffer ? (
+        <MomentOfValueUpsell
+          purchasePrice={Number(values.purchasePrice ?? 0)}
+          netCashFlow={result.netCashFlow}
+          capRate={result.capRate}
+          cocReturn={result.cocReturn}
+          isPaid={canUseMaxOffer}
+          onExportPdf={onExportPdf}
+        />
+      ) : null}
+
       {/* Action bar - split into two visually distinct elements:
           a lightweight identity strip ("what is this?") and a
           chunkier Quick Actions panel ("what can I do with it?").
@@ -981,7 +998,7 @@ export function AnalysisDashboard({
                   canExportPdf && !isSaved
                     ? persistedActionsBlockHint ?? "Save this analysis before exporting PDF."
                     : !canExportPdf
-                      ? "Get the lender-ready PDF - included with Pro, or $5 one-time."
+                      ? `Get the lender-ready PDF - included with Pro, or ${singleDealPriceLabel} one-time.`
                       : undefined
                 }
               >
@@ -1216,6 +1233,13 @@ export function AnalysisDashboard({
         <DealDriverInsight values={values} result={result} marketRentEstimate={marketRentEstimate} />
       ) : null}
 
+      {/* Existing deterministic breakpoint solver, promoted out of the
+          collapsed what-if drawer. On a weak or marginal deal this answers
+          the next acquisition question: what has to change for it to work? */}
+      {result && values && !isLoading && !strategyLeadsOutput ? (
+        <BreakpointSuggestionCard values={values} result={result} />
+      ) : null}
+
       {/* Buy Box verdict - personalized "meets your buy box" line that
           complements the Deal Score above. Self-gates: only authenticated
           Pro users with an active Buy Box (≥1 criterion) ever see it.
@@ -1238,6 +1262,57 @@ export function AnalysisDashboard({
           onFitChange={setBuyBoxAnyPass}
           onQaContextChange={setBuyBoxQaReport}
         />
+      ) : null}
+
+      {/* Max Offer is a first-class acquisition answer, not just another
+          metric. This compact summary uses the exact same deterministic
+          engine and Buy Box target basis as the editable solver below. */}
+      {maoQaContext && values && !strategyLeadsOutput ? (
+        <section
+          aria-labelledby="max-offer-summary-title"
+          className="rounded-2xl border-2 border-primary/30 bg-[var(--brand-blue-light)] p-5 sm:p-6"
+        >
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <div className="flex items-center gap-2 text-primary">
+                <Target className="size-4" aria-hidden />
+                <h2 id="max-offer-summary-title" className="text-xs font-extrabold uppercase tracking-widest">
+                  Your TrueCap Max Offer
+                </h2>
+                {maoQaContext.fromBuyBox ? (
+                  <span className="rounded-full border border-primary/25 bg-card px-2 py-0.5 text-[10px] font-semibold">
+                    From your Buy Box
+                  </span>
+                ) : null}
+              </div>
+              <p className="mt-2 font-mono text-4xl font-extrabold tabular-nums tracking-tight text-primary sm:text-5xl">
+                ${Math.round(maoQaContext.maxOffer).toLocaleString("en-US")}
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Highest price that clears {maoQaContext.basis}.
+              </p>
+            </div>
+            <div className="text-sm sm:text-right">
+              {Number(values.purchasePrice) > maoQaContext.maxOffer ? (
+                <p className="font-bold text-foreground">
+                  ${Math.round(Number(values.purchasePrice) - maoQaContext.maxOffer).toLocaleString("en-US")} below the current price
+                </p>
+              ) : (
+                <p className="font-bold text-[var(--brand-green)]">Current price clears these targets</p>
+              )}
+              <p className="mt-1 text-xs text-muted-foreground">
+                At max: ${Math.round(maoQaContext.achieved.netCashFlow).toLocaleString("en-US")}/mo · {maoQaContext.achieved.capRate.toFixed(1)}% cap · {maoQaContext.achieved.dscr > 0 ? maoQaContext.achieved.dscr.toFixed(2) : "—"} DSCR
+              </p>
+              <button
+                type="button"
+                onClick={() => setActiveTab("stress-test")}
+                className="mt-3 inline-flex items-center gap-1 font-semibold text-primary underline-offset-2 hover:underline"
+              >
+                Tune your targets <ArrowUpRight className="size-4" aria-hidden />
+              </button>
+            </div>
+          </div>
+        </section>
       ) : null}
 
       {/* Metrics band (Phase 2: metrics-band.tsx) - the lens-curated primary
@@ -1411,7 +1486,6 @@ export function AnalysisDashboard({
                   )}
                 />
               ) : null}
-              <BreakpointSuggestionCard values={values} result={result} />
             </div>
           </details>
         ) : null}
@@ -1427,9 +1501,8 @@ export function AnalysisDashboard({
             - Anonymous user → SignupPromptCard (cheap "save this" ask).
               Signing up is the lower-friction win; we don't double-up
               with a Pro pitch on top of it.
-            - Signed-in free user → MomentOfValueUpsell (deal-specific
-              Pro pitch - they've already cleared signup, so it's time
-              to monetize).
+            - Signed-in free users already saw the deal-specific Max Offer
+              upgrade moment directly after the answer above.
             - Pro user → nothing renders here.
           Previously both rendered for anonymous users, which buried
           the Pro pitch under the signup ask. */}
@@ -1437,16 +1510,6 @@ export function AnalysisDashboard({
         <SignupPromptCard
           address={values?.address}
           isAuthenticated={isAuthenticated}
-        />
-      )}
-      {result && !isLoading && isAuthenticated && !canUseProjections && (
-        <MomentOfValueUpsell
-          netCashFlow={result.netCashFlow}
-          capRate={result.capRate}
-          cocReturn={result.cocReturn}
-          estimatedAnnualTaxSavings={Math.round((result.taxSavingsMonthly ?? 0) * 12)}
-          isPaid={canUseProjections}
-          onExportPdf={onExportPdf}
         />
       )}
       {/* Retention: when a signed-in user has a saved deal on screen, offer
@@ -1849,8 +1912,8 @@ function ProFeaturePreview({
  *
  * Solves a real product gap: the headline NCF only shows month-1 cash
  * flow. But rent grows ~3%/yr and expenses ~2%/yr - so a deal that
- * cash-flows $749/mo today might be $1,420/mo by year 5 and $2,100/mo
- * by year 10. Most investors think in 10-year terms, not month 1, and
+ * year-1 cash flow can change materially as rent and expenses grow over
+ * time. Most investors think in 10-year terms, not month 1, and
  * burying that progression inside the Pro 10-Year Projections tab
  * meant free-tier users never saw it.
  *

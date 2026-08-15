@@ -12,6 +12,7 @@
 
 import type { ReactNode } from "react";
 import { scrollBehavior } from "@/lib/utils";
+import { trackEvent } from "@/lib/analytics";
 
 type Props = {
   /** Element ID to scroll to (defaults to "main"). */
@@ -22,6 +23,8 @@ type Props = {
   className?: string;
   /** Accessible label. */
   "aria-label"?: string;
+  /** Optional homepage CTA attribution label. */
+  analyticsSource?: string;
   children: ReactNode;
 };
 
@@ -30,9 +33,13 @@ export function ScrollToFormButton({
   offsetPx = 64,
   className,
   "aria-label": ariaLabel,
+  analyticsSource,
   children,
 }: Props) {
   const handleClick = () => {
+    if (analyticsSource) {
+      trackEvent("homepage_primary_cta", { source: analyticsSource });
+    }
     // Safe-guard — server-rendered first paint may briefly render this
     // before hydration; window is always defined by the time onClick can
     // actually fire, but the typeof check costs nothing and protects

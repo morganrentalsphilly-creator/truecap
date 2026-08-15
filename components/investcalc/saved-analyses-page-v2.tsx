@@ -92,7 +92,8 @@ import {
   resolveExitScenarioRates,
   type ExitScenarioYear,
 } from "@/lib/exit-scenarios";
-import { buildAutoVerdict } from "@/lib/verdict";
+import { buildAutoVerdict, getDealTier } from "@/lib/verdict";
+import { applyWhatIfAdjustments, WORST_CASE_PRESET } from "@/components/investcalc/what-if-sliders";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ScoreBreakdown } from "@/components/investcalc/score-breakdown";
 import { listBuyBoxesAction } from "@/app/actions/user-buy-boxes";
@@ -743,6 +744,23 @@ function buildReportDataFromSavedSnapshot(args: {
       purchasePrice: values.purchasePrice,
     });
 
+  const downsideRatePp = result.monthlyPayment > 0 ? WORST_CASE_PRESET.ratePp : 0;
+  let downsideResult: AnalysisResult = result;
+  try {
+    downsideResult = calculateAnalysis(
+      applyWhatIfAdjustments(
+        values,
+        WORST_CASE_PRESET.rentPct,
+        0,
+        downsideRatePp,
+        WORST_CASE_PRESET.vacancyPp
+      )
+    );
+  } catch {
+    // Preserve export for legacy snapshots even if the stress case cannot
+    // be derived; the base values make that limitation explicit in the PDF.
+  }
+
   return {
     generatedAt: new Date(),
     property: {
@@ -795,6 +813,16 @@ function buildReportDataFromSavedSnapshot(args: {
       dscr: result.dscr,
       taxSavings: result.taxSavingsMonthly,
       afterTaxCF: result.afterTaxCF,
+    },
+    downsideScenario: {
+      label: `Rent ${WORST_CASE_PRESET.rentPct}% · vacancy +${WORST_CASE_PRESET.vacancyPp}pp${
+        downsideRatePp > 0 ? ` · rate +${downsideRatePp}pp` : ""
+      }`,
+      verdict: getDealTier(downsideResult),
+      monthlyCashFlow: downsideResult.netCashFlow,
+      cocReturn: downsideResult.cocReturn,
+      capRate: downsideResult.capRate,
+      dscr: downsideResult.dscr,
     },
     projection10y: {
       cumulativeCF: projectionRows[projectionRows.length - 1]?.cum ?? 0,

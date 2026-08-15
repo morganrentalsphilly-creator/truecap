@@ -60,7 +60,7 @@ export function BreakpointSuggestionCard({ values, result }: Props) {
       <div className="mb-2 flex items-center gap-1.5">
         <Target className="size-3.5 text-primary" />
         <span className="text-[10px] font-bold uppercase tracking-widest text-primary">
-          What would make it {targetTier}
+          Deal Doctor · What would make it {targetTier}
         </span>
         <span className="text-[10px] text-muted-foreground">
           · currently {currentTier}

@@ -334,6 +334,7 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
       metadata: {
         user_id: user.id,
         plan_slug: parsed.data.planSlug,
+        trial_granted: String(grantTrial && proTrialDays > 0),
       },
       subscription_data: {
         metadata: {

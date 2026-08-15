@@ -1,8 +1,9 @@
 /**
  * Real-data trust ticker for the homepage.
  *
- * Pulls the aggregate `saved_analyses` count from Supabase and renders
- * it as a small pill — "237 deals analyzed in the last 7 days" etc.
+ * Pulls a measured aggregate count and renders it as a small pill —
+ * "237 deals analyzed in the last 7 days" etc. It never adds a marketing
+ * baseline or substitutes an estimate for unavailable data.
  *
  * IMPORTANT — only renders when the count exceeds a minimum threshold.
  * A low number ("3 deals this week") is anti-social-proof. Better to
@@ -17,18 +18,6 @@
 import { CheckCircle2 } from "lucide-react";
 import { getDealsAnalyzedCount } from "@/lib/stats/deals-analyzed-count";
 import { getTotalAnalysesRunCount } from "@/lib/stats/total-analyses-run";
-
-/**
- * Marketing display baseline for the all-time RUNS ticker (founder decision,
- * Morgan · 2026-07). The RENDERED figure adds this fixed floor on top of the
- * real run counter; the counter keeps incrementing underneath, so the number
- * still climbs with real usage. The underlying data stays truthful — the DB
- * counter (app_counters.analysis_runs) and getTotalAnalysesRunCount() are
- * untouched; only this presentation layer adds the floor. Applies to
- * source="runs" ONLY (never the weekly "saved" ticker). Set to 0 to show the
- * raw count.
- */
-const RUNS_DISPLAY_BASELINE = 50_000;
 
 type Props = {
   /** Time window for the count (default: rolling 7 days). */
@@ -69,10 +58,7 @@ export async function DealsAnalyzedTicker({
   // checks the REAL count so an errored/empty counter still hides.
   if (rawCount == null || rawCount < minimum) return null;
 
-  // Add the marketing baseline to the runs figure only (see RUNS_DISPLAY_BASELINE).
-  const count = source === "runs" ? rawCount + RUNS_DISPLAY_BASELINE : rawCount;
-
-  const formatted = `${count.toLocaleString("en-US")}${plus ? "+" : ""}`;
+  const formatted = `${rawCount.toLocaleString("en-US")}${plus ? "+" : ""}`;
   const suffix =
     labelSuffix ??
     (source === "runs" || window === "all"

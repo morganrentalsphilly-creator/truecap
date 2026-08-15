@@ -33,14 +33,16 @@ import { RoiCalculatorWidget } from "@/components/marketing/roi-calculator-widge
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { DealsAnalyzedTicker } from "@/components/marketing/deals-analyzed-ticker";
+import { FiveDealGuarantee } from "@/components/marketing/landing-sections";
+import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
 export const metadata: Metadata = {
-  title: "Pricing — Free + Pro plans for rental analysis",
+  title: "Pricing — Screen Free, Decide & Act with Pro",
   description:
-    `TrueCap is free to start — no card required, and the 0–100 Deal Score is free for everyone. Try Pro free for ${TRIAL_DAYS} days: 10-year projections, tax strategy, exit scenarios, PDF export, and unlimited saved deals.`,
+    `Screen rental deals free. Try Pro free for ${TRIAL_DAYS} days to solve Max Offer, apply your Buy Box, stress-test downside, compare opportunities, and generate reports.`,
   alternates: { canonical: "/pricing" },
   openGraph: {
-    title: "TrueCap pricing — free + Pro",
-    description: "Free to start. Pro unlocks projections, tax, exit, PDF, and unlimited saves.",
+    title: "TrueCap pricing — Free to screen, Pro to decide",
+    description: "Screen deals free. Use Pro to know your Max Offer, stress-test downside, compare opportunities, and act.",
     url: "/pricing",
     type: "website",
     images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap pricing" }],
@@ -120,6 +122,7 @@ const FAQS: { q: string; a: string }[] = [
 ];
 
 export default async function PricingPage() {
+  const { proOfferName, singleDeal } = getMarketingOfferConfig();
   const supabase = await createServerSupabaseClient();
   const {
     data: { user },
@@ -171,7 +174,7 @@ export default async function PricingPage() {
               Free to start · No card
             </div>
             <h1 className="text-balance text-3xl font-extrabold leading-[1.1] tracking-tight text-foreground sm:text-5xl">
-              Pricing that pays for itself <span className="text-primary">on the first deal.</span>
+              Screen deals free. <span className="text-primary">Pay when you&apos;re ready to decide and act.</span>
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-balance text-[15px] leading-relaxed text-muted-foreground sm:text-lg">
               {/* Trial-promising hero variant must mirror the checkout guard
@@ -179,8 +182,8 @@ export default async function PricingPage() {
                   below — an ex-subscriber sees "go Pro", not a trial that
                   checkout won't grant. */}
               {hadPriorSubscription
-                ? "Start free. Unlimited analyses, every core metric, auto-fill from the address. Or go Pro when you need projections, tax modeling, lender-ready PDFs, and a buy box that pass/fails every deal against your own criteria."
-                : `Start free. Unlimited analyses, every core metric, auto-fill from the address. Or start a ${TRIAL_LABEL} of Pro when you need projections, tax modeling, lender-ready PDFs, and a buy box that pass/fails every deal against your own criteria.`}
+                ? `Use Free for the first screen. Use ${proOfferName} to solve your Max Offer, stress-test downside, compare opportunities, and move the right deals forward.`
+                : `Use Free for the first screen. Start a ${TRIAL_LABEL} of ${proOfferName} when you need to solve your Max Offer, stress-test downside, compare opportunities, and move the right deals forward.`}
             </p>
             {/* Real-data social proof — investors arriving at /pricing
                 are evaluating credibility. A live count of recent
@@ -213,6 +216,8 @@ export default async function PricingPage() {
             isPaid={isPaid}
             hadPriorSubscription={hadPriorSubscription}
             agentProConfigured={agentProConfigured}
+            proOfferName={proOfferName}
+            singleDealPriceLabel={singleDeal.priceLabel}
           />
 
           {/* One outcome quote at the money ask — the same revenue-tied proof
@@ -260,7 +265,8 @@ export default async function PricingPage() {
             What you get
           </h2>
           <p className="mx-auto mt-2 max-w-xl text-center text-sm text-muted-foreground sm:text-base">
-            Free is generous on purpose. Pro is for when you want the full picture.
+            Free answers whether the deal deserves attention. Pro answers what
+            to offer, what could break, and what to do next.
           </p>
           {/* overflow-x-auto so narrow viewports scroll horizontally
               instead of clipping columns. The inner min-w-[520px] keeps
@@ -293,7 +299,7 @@ export default async function PricingPage() {
                   ["Saved analysis templates", false, true],
                   ["Due-diligence checklist + document vault", false, true],
                   ["Rate-drop alerts on saved deals", false, true],
-                  ["Lender · partner · personal PDF reports", "$5 one-time", true],
+                  ["Lender · partner · personal PDF reports", `${singleDeal.priceLabel} one-time`, true],
                   ["Save deals", "Up to 5", "Unlimited"],
                   ["Compare deals side-by-side", false, "Up to 4"],
                   ["Priority support", false, true],
@@ -309,10 +315,10 @@ export default async function PricingPage() {
           </div>
         </section>
 
-        {/* One-time PDF — alternative for non-subscribers who just
-            want one lender package without committing to a plan.
+        {/* Single-Deal Underwrite — one complete acquisition decision
+            package without committing to a subscription.
             Fully automated since Jun 2026: run a free analysis, click
-            Export PDF, pay $5 via Stripe Checkout, and the full report
+            Export PDF, complete Stripe Checkout, and the full report
             downloads instantly (see app/actions/one-time-pdf.ts +
             PdfPurchaseDialog). Replaced the old mailto + "1 business
             day" manual flow. */}
@@ -322,28 +328,29 @@ export default async function PricingPage() {
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
                   <span className="rounded-full bg-[var(--brand-green)]/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-[var(--brand-green)]">
-                    One-time · $5
+                    One-time · {singleDeal.priceLabel}
                   </span>
                   <span className="text-[11px] text-muted-foreground">No subscription · No account</span>
                 </div>
-                <h3 className="text-xl font-extrabold text-foreground">Just need one lender PDF?</h3>
+                <h3 className="text-xl font-extrabold text-foreground">Need one complete underwrite?</h3>
                 <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                  Run your analysis free, then click Export PDF and pay $5 once. The full
-                  multi-page report — verdict, 10-year projection, tax strategy, exit
-                  scenarios, Deal Score — downloads instantly. No subscription, no commitment.
-                  Doing this for every deal? Pro saves and compares your deals and exports
-                  unlimited branded reports.
+                  Run your analysis free, then unlock the Single-Deal Underwrite once.
+                  The report packages your assumptions, verdict, Deal Score, downside
+                  scenario, 10-year projection, tax view, and exit scenarios. No
+                  subscription. Use Pro for the repeat decision workflow.
                 </p>
               </div>
               <Link
                 href="/#main"
                 className="shrink-0 inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 text-sm font-bold text-foreground transition-transform hover:bg-muted hover:-translate-y-0.5 active:scale-[0.98]"
               >
-                Run a deal → get the PDF
+                Analyze a property
               </Link>
             </div>
           </div>
         </section>
+
+        <FiveDealGuarantee />
 
         {/* FAQ */}
         <section className="mx-auto max-w-3xl px-4 pb-16 sm:px-6 sm:pb-24">

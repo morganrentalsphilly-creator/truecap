@@ -5,7 +5,7 @@
  * Two paths, clearly priced:
  *
  *   - Pro ($29/mo)  → /pricing (unlimited PDFs + everything else)
- *   - One-time $5   → Stripe Checkout for just this report
+ *   - Single Deal   → Stripe Checkout for one complete report
  *
  * The one-time path is the conversion-rescue: visitors who will never
  * subscribe but want this one lender package. Anonymous purchase is
@@ -22,6 +22,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { TRIAL_LABEL } from "@/lib/trial";
+import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
 
 interface PdfPurchaseDialogProps {
   open: boolean;
@@ -36,25 +37,24 @@ export function PdfPurchaseDialog({
   onBuyOneTime,
   isStartingCheckout,
 }: PdfPurchaseDialogProps) {
+  const { singleDeal, proOfferName } = getMarketingOfferConfig();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       {/* Short-viewport max-h + scroll comes from the DialogContent base
-          (components/ui/dialog.tsx) so the $5 option can never render
+          (components/ui/dialog.tsx) so the one-time option can never render
           below the fold unreachable. */}
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Get the lender-ready PDF</DialogTitle>
+          <DialogTitle>Complete this acquisition decision</DialogTitle>
           <DialogDescription>
-            Multi-page report for this deal - verdict, 10-year projection, tax
-            strategy, and exit scenarios. Two ways to get it:
+            Get the complete underwrite for this property, including the
+            decision package and lender-ready report. Two ways to unlock it:
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3">
-          {/* Pro - preferred option, listed first and framed as best value
-              at the moment of intent: a warm buyer who wants a lender PDF is
-              the most likely person to convert, so anchor on the free trial
-              and "pays for itself after one extra report". */}
+          {/* Pro - preferred option, listed first and framed as the repeat
+              acquisition workflow at the moment of report intent. */}
           <Link
             href="/pricing"
             className="group relative flex items-start justify-between gap-3 rounded-2xl border-2 border-primary bg-gradient-to-br from-[var(--brand-blue-light)] via-card to-card p-4 transition hover:border-primary/70"
@@ -65,12 +65,12 @@ export function PdfPurchaseDialog({
             <div>
               <p className="flex items-center gap-1.5 text-sm font-bold text-foreground">
                 <Sparkles className="size-4 text-primary" />
-                TrueCap Pro
+                {proOfferName}
               </p>
               <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                Unlimited branded PDFs, plus saved deals, projections, tax
-                strategy, and exit scenarios on every analysis. Send more than
-                one report and Pro already pays for itself.
+                Decide and act across every opportunity: Max Offer, Buy Box,
+                downside testing, saved deals, comparisons, projections, and
+                unlimited branded reports.
               </p>
             </div>
             <span className="mt-0.5 inline-flex shrink-0 items-center gap-1 text-right text-sm font-bold text-primary">
@@ -89,11 +89,12 @@ export function PdfPurchaseDialog({
             <div>
               <p className="flex items-center gap-1.5 text-sm font-bold text-foreground">
                 <FileDown className="size-4 text-muted-foreground" />
-                Just this report
+                Single-Deal Underwrite
               </p>
               <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                One-time payment, no account, no subscription. Instant download
-                after checkout.
+                The complete TrueCap decision package for this property. One
+                payment, no account, no subscription. Includes assumptions,
+                Deal Score, downside scenario, 10-year, tax, and exit views.
               </p>
             </div>
             <span className="mt-0.5 inline-flex shrink-0 items-center gap-1.5 text-sm font-bold text-foreground">
@@ -103,15 +104,15 @@ export function PdfPurchaseDialog({
                   Starting…
                 </>
               ) : (
-                "$5"
+                singleDeal.priceLabel
               )}
             </span>
           </button>
         </div>
 
         <p className="text-[11px] leading-relaxed text-muted-foreground">
-          Payments are processed by Stripe. The PDF generates from your current
-          form values the moment you return from checkout.
+          Payments are processed by Stripe. Calculations are estimates based on
+          your current inputs; verify assumptions independently before acting.
         </p>
       </DialogContent>
     </Dialog>

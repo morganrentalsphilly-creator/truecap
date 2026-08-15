@@ -7,7 +7,7 @@
  * /pricing with a fully automated path:
  *
  *   1. User runs a (free) analysis, clicks Export PDF without Pro.
- *   2. PdfPurchaseDialog offers Pro or this $5 one-time purchase.
+ *   2. PdfPurchaseDialog offers Pro or this one-time purchase.
  *   3. createOneTimePdfCheckoutAction() → Stripe Checkout redirect.
  *      The form values are stashed in localStorage by the client
  *      before redirecting (no DB involved — anonymous buyers welcome).
@@ -27,6 +27,7 @@
 import { z } from "zod";
 import * as Sentry from "@sentry/nextjs";
 import { getStripe } from "@/lib/stripe/client";
+import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
 
 /**
  * Live $5 one-time price (product prod_UfuK45gdTuqmxw, created
@@ -36,8 +37,14 @@ import { getStripe } from "@/lib/stripe/client";
  */
 const ONE_TIME_PDF_PRICE_FALLBACK = "price_1TgYY33yTn6y2v95pIAe2ABs";
 
-function getOneTimePdfPriceId(): string {
-  return process.env.STRIPE_PRICE_PDF_ONE_TIME ?? ONE_TIME_PDF_PRICE_FALLBACK;
+function getOneTimePdfPriceId(): string | null {
+  const { singleDealPriceVariant, singleDeal } = getMarketingOfferConfig();
+  const configured = process.env[singleDeal.stripeEnvKey]?.trim();
+  if (configured) return configured;
+  // The known production fallback belongs ONLY to the existing $5 price.
+  // An experiment with a missing Stripe Price must fail closed instead of
+  // displaying $9/$19 and then charging $5.
+  return singleDealPriceVariant === "current" ? ONE_TIME_PDF_PRICE_FALLBACK : null;
 }
 
 function getSiteUrl(): string {
@@ -46,21 +53,39 @@ function getSiteUrl(): string {
 
 export type OneTimePdfCheckoutResult =
   | { ok: true; url: string }
-  | { ok: false; code: "SERVER_ERROR"; message: string };
+  | { ok: false; code: "MISSING_PRICE" | "SERVER_ERROR"; message: string };
 
 export async function createOneTimePdfCheckoutAction(): Promise<OneTimePdfCheckoutResult> {
   try {
     const stripe = getStripe();
     const siteUrl = getSiteUrl();
+    const offer = getMarketingOfferConfig();
+    const priceId = getOneTimePdfPriceId();
+    if (!priceId) {
+      Sentry.captureMessage("single-deal underwrite experiment is missing its Stripe Price", {
+        level: "error",
+        tags: { feature: "billing-checkout" },
+        extra: { variant: offer.singleDealPriceVariant },
+      });
+      return {
+        ok: false,
+        code: "MISSING_PRICE",
+        message: "This single-deal offer is temporarily unavailable. Please try Pro or contact support.",
+      };
+    }
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
-      line_items: [{ price: getOneTimePdfPriceId(), quantity: 1 }],
+      line_items: [{ price: priceId, quantity: 1 }],
       // {CHECKOUT_SESSION_ID} is substituted by Stripe on redirect.
       success_url: `${siteUrl}/?pdf_purchase={CHECKOUT_SESSION_ID}`,
       cancel_url: `${siteUrl}/?pdf_purchase=cancelled`,
       // The purpose marker is what verifyOneTimePdfPaymentAction checks,
       // so a session id from some other checkout flow can't unlock a PDF.
-      metadata: { purpose: "one_time_pdf" },
+      metadata: {
+        purpose: "one_time_pdf",
+        offer: "single_deal_underwrite",
+        price_variant: offer.singleDealPriceVariant,
+      },
     });
     if (!session.url) {
       console.error("[one-time-pdf] Stripe checkout session missing URL");
@@ -85,7 +110,7 @@ const verifySchema = z.object({
 });
 
 export type OneTimePdfVerifyResult =
-  | { ok: true }
+  | { ok: true; priceVariant?: "current" | "p9" | "p19" }
   | {
       ok: false;
       code: "VALIDATION_ERROR" | "NOT_PAID" | "SERVER_ERROR";
@@ -113,7 +138,13 @@ export async function verifyOneTimePdfPaymentAction(
         message: "Payment not completed. If you were charged, contact hello@usetruecap.com.",
       };
     }
-    return { ok: true };
+    const priceVariant = session.metadata?.price_variant;
+    return {
+      ok: true,
+      ...(priceVariant === "current" || priceVariant === "p9" || priceVariant === "p19"
+        ? { priceVariant }
+        : {}),
+    };
   } catch (error) {
     console.error("[one-time-pdf] verifyOneTimePdfPaymentAction failed:", error);
     return {

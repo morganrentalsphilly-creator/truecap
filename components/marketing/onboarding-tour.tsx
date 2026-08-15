@@ -29,7 +29,7 @@ import Link from "next/link";
 const STORAGE_KEY = "truecap_onboarding_dismissed_v1";
 
 type Step = {
-  id: "run-deal" | "save-deal" | "explore-pro";
+  id: "run-deal" | "save-deal" | "explore-pro" | "set-buy-box";
   icon: typeof Calculator;
   title: string;
   body: string;
@@ -71,14 +71,43 @@ const STEPS: Step[] = [
   },
 ];
 
+const PRO_STEPS: Step[] = [
+  {
+    id: "set-buy-box",
+    icon: CheckCircle2,
+    title: "1. Define what passes",
+    body: "Create a Buy Box with the strategy and minimum cash flow, cash-on-cash, DSCR, cap-rate, price, property-type, or market criteria that matter to you. Every field is optional and editable.",
+    ctaLabel: "Set my Buy Box",
+    ctaHref: "/settings#buy-boxes",
+  },
+  {
+    id: "run-deal",
+    icon: Calculator,
+    title: "2. Screen a real property",
+    body: "Paste an address, review the sourced starting assumptions, and run the analysis. TrueCap will evaluate it against the Buy Box you just set.",
+    ctaLabel: "Open the analyzer",
+    ctaHref: "/",
+  },
+  {
+    id: "save-deal",
+    icon: Save,
+    title: "3. Turn the result into a decision",
+    body: "Review why the deal passes or misses, solve Max Offer, stress-test the downside, then save, compare, report, or pass.",
+    ctaLabel: "Open my deals",
+    ctaHref: "/dashboard/saved-analyses",
+  },
+];
+
 type Props = {
   /** True when an authenticated user. Tour skipped for anonymous visitors. */
   isAuthenticated: boolean;
   /** Number of saved deals the user has. Tour skipped if > 0 (they're already active). */
   savedDealCount: number;
+  /** Pro Buy Box entitlement. Paid users start by defining the screen. */
+  canUseBuyBox?: boolean;
 };
 
-export function OnboardingTour({ isAuthenticated, savedDealCount }: Props) {
+export function OnboardingTour({ isAuthenticated, savedDealCount, canUseBuyBox = false }: Props) {
   // Track which step is being shown. Start at 0 (the first step).
   const [activeStep, setActiveStep] = useState(0);
   // Until we've checked storage, render nothing — prevents a flash for
@@ -114,8 +143,9 @@ export function OnboardingTour({ isAuthenticated, savedDealCount }: Props) {
     setDecision("dismissed");
   };
 
+  const steps = canUseBuyBox ? PRO_STEPS : STEPS;
   const nextStep = () => {
-    if (activeStep < STEPS.length - 1) {
+    if (activeStep < steps.length - 1) {
       setActiveStep((s) => s + 1);
     } else {
       // Last step — dismiss entirely.
@@ -125,21 +155,21 @@ export function OnboardingTour({ isAuthenticated, savedDealCount }: Props) {
 
   if (decision !== "active") return null;
 
-  const step = STEPS[activeStep];
+  const step = steps[activeStep];
   const Icon = step.icon;
-  const isLast = activeStep === STEPS.length - 1;
+  const isLast = activeStep === steps.length - 1;
 
   return (
     <div
       role="dialog"
-      aria-label={`Onboarding step ${activeStep + 1} of ${STEPS.length}: ${step.title}`}
+      aria-label={`Onboarding step ${activeStep + 1} of ${steps.length}: ${step.title}`}
       className="fixed bottom-3 left-3 right-3 z-40 sm:bottom-5 sm:left-auto sm:right-5 sm:max-w-sm"
     >
       <div className="rounded-2xl border border-primary/25 bg-card p-4 shadow-[0_18px_44px_rgba(15,23,42,0.15)] sm:p-5">
         {/* Top: progress + dismiss */}
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-1.5">
-            {STEPS.map((s, i) => (
+            {steps.map((s, i) => (
               <span
                 key={s.id}
                 className={
@@ -154,7 +184,7 @@ export function OnboardingTour({ isAuthenticated, savedDealCount }: Props) {
               />
             ))}
             <span className="ml-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-              {activeStep + 1} / {STEPS.length}
+              {activeStep + 1} / {steps.length}
             </span>
           </div>
           <button

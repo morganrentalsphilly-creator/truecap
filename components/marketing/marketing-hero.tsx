@@ -17,14 +17,17 @@
  * <DealsAnalyzedTicker />, so the rest of this tree ships zero JS.
  */
 
-import { Check, Quote, Sparkles, TrendingUp } from "lucide-react";
+import { Check, Quote, Sparkles, Target, TrendingUp } from "lucide-react";
 import { HeroAddressForm } from "@/components/marketing/hero-address-form";
 import { DealsAnalyzedTicker } from "@/components/marketing/deals-analyzed-ticker";
 import { calculateAnalysis } from "@/lib/calc-analysis";
 import { buildDealScoreInputFromAnalysis, computeDealScore, recommendationLabel } from "@/lib/deal-score";
 import { SAMPLE_DEAL_DISPLAY, SAMPLE_DEAL_VALUES } from "@/lib/sample-deal";
+import { calculateMaxAllowableOffer } from "@/lib/max-allowable-offer";
+import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
 
 export function MarketingHero() {
+  const { homepageHeadline } = getMarketingOfferConfig();
   return (
     <section className="relative overflow-hidden border-b border-border bg-gradient-to-b from-[var(--brand-blue-light)] via-background to-background">
       {/* Soft ambient accent behind the preview — a single tinted blob,
@@ -45,41 +48,19 @@ export function MarketingHero() {
             {/* Risk-reversal eyebrow — value chip, not a version label. */}
             <div className="mb-5 inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-card/70 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-primary shadow-sm backdrop-blur">
               <Sparkles className="size-3 shrink-0" />
-              <span>Free analyzer · No card · No signup</span>
+              <span>TrueCap · Rental Deal Decision Engine</span>
             </div>
 
             {/* Headline: 2 lines max, hierarchy by weight + accent color,
-                not runaway scale. Left-aligned (anti-center bias).
-                REPOSITIONING (Phase 1, 2026-08-11): leads with the DECISION
-                + the max-offer differentiator ("what to offer") instead of
-                "cash-flows in 60 seconds" — every calculator computes cap
-                rate; far fewer answer "don't buy at $325k, your number is
-                $283k." Kept the "60 seconds" hook and the SEO metadata.title
-                (in app/page.tsx) unchanged so rankings are unaffected.
-                Alternate headlines considered (swap here to change site-wide,
-                this is the only hero):
-                  B: "Don't overpay. Know your number in 60 seconds."
-                  C: "Should you buy it? And at what price?" */}
+                not runaway scale. Left-aligned (anti-center bias). */}
             <h1 className="text-balance text-4xl font-extrabold leading-[1.04] tracking-tight text-foreground sm:text-5xl lg:text-[2.4rem]">
-              Know whether to buy it, and{" "}
-              <span className="text-primary">what to offer, in 60 seconds.</span>
+              {homepageHeadline}
             </h1>
-            {/* Subtext: keep it tight, no em-dash (house style). The H1 leads
-                with the decision and drops the head-term keywords; the desktop
-                tail below restores them ("rental property calculator", cap
-                rate, cash flow, DSCR) so the page keeps the on-page relevance
-                app/page.tsx metadata.title already ranks for. The tail is
-                hidden on phones (and the mt tightened) so the address form +
-                primary button still clear the first-visit cookie banner on
-                short (≤667px) screens. */}
-            <p className="mt-3 max-w-xl text-pretty text-base leading-relaxed text-muted-foreground sm:mt-4 sm:text-lg">
-              Enter an address, see the real economics, know your number. TrueCap
-              auto-fills rent, rate, and tax, then reverse-solves the highest
-              price that still works.{" "}
-              <span className="hidden sm:inline">
-                A rental property calculator that checks the deal against your
-                numbers, with cap rate, cash flow, and DSCR computed live.
-              </span>
+            <p className="mt-4 max-w-xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg">
+              Paste an address and TrueCap pulls the key assumptions, checks
+              the property against your Buy Box, stress-tests the downside,
+              and calculates the highest price you can pay while still hitting
+              your investment targets.
             </p>
 
             {/* Primary action — the address input. Hands off to the
@@ -91,16 +72,13 @@ export function MarketingHero() {
                 density audit LAND-3). */}
             <p className="mt-3 hidden flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground sm:flex">
               <Check className="size-3.5 shrink-0 text-[var(--metric-positive)]" />
-              <span>Free forever · No card · No signup required</span>
+              <span>No credit card required. Screen deals free. Upgrade when you&apos;re ready to act.</span>
             </p>
           </div>
 
-          {/* ── Right: live, computed preview (the hero asset) ──────
-              Desktop-only: on phones the ~380px mock sat between the
-              hero form and the REAL calculator — a screenshot of the
-              thing directly below it (mobile density audit LAND-2; the
-              sample-report button already gives phones a live demo). */}
-          <div className="tc-rise-in tc-delay-2 hidden w-full lg:block lg:justify-self-end">
+          {/* This is an acquisition answer, not a duplicate calculator, so it
+              remains useful proof on mobile as well as desktop. */}
+          <div className="tc-rise-in tc-delay-2 w-full lg:justify-self-end">
             <HeroProductMock />
           </div>
         </div>
@@ -235,8 +213,19 @@ function HeroProductMock() {
   const cf = Math.round(result.netCashFlow);
   const cfLabel = `${cf >= 0 ? "+" : "-"}$${Math.abs(cf).toLocaleString("en-US")}`;
   const capLabel = `${result.capRate.toFixed(1)}%`;
-  const dscrLabel = result.dscr.toFixed(2);
-  const dscrClears = result.dscr >= 1.25;
+  // Clearly labeled example targets, solved by the same deterministic MAO
+  // engine used in the product. The target is intentionally above the
+  // sample's list-price cash flow so the card demonstrates the decision.
+  const targetCashFlow = 750;
+  const maxOffer = calculateMaxAllowableOffer(SAMPLE_DEAL_VALUES, {
+    monthlyCashFlow: targetCashFlow,
+    dscr: 1.25,
+  });
+  const maxOfferLabel = maxOffer
+    ? `$${maxOffer.maxPrice.toLocaleString("en-US")}`
+    : "Not reachable";
+  const listPrice = Number(SAMPLE_DEAL_VALUES.purchasePrice);
+  const gap = maxOffer ? listPrice - maxOffer.maxPrice : null;
 
   return (
     <div className="relative mx-auto w-full max-w-lg">
@@ -256,11 +245,11 @@ function HeroProductMock() {
             <span className="hidden sm:inline">usetruecap.com / {SAMPLE_DEAL_DISPLAY.shortAddress}</span>
           </span>
           <span
-            aria-label="Live demo"
+            aria-label="Example analysis"
             className="ml-1 inline-flex shrink-0 items-center gap-1 rounded-full border border-[var(--brand-green)]/30 bg-[var(--brand-green-light)] px-1.5 py-0.5 text-[9px] font-extrabold uppercase tracking-widest text-[var(--brand-green)]"
           >
             <span className="tc-hero-pulse-dot animate-pulse size-1.5 rounded-full bg-[var(--brand-green)]" />
-            Live
+            Example
           </span>
         </div>
 
@@ -283,25 +272,47 @@ function HeroProductMock() {
           </div>
         </div>
 
-        {/* Metric tiles — sequential reveal steps 2 → 3 → 4 (cash flow,
-            cap rate, DSCR). Live engine output (see computed values above). */}
-        <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-3">
-          <MockTile label="Cash flow" value={cfLabel} tone="success" stepClass="tc-hero-step-2" />
-          <MockTile label="Cap rate" value={capLabel} tone="success" stepClass="tc-hero-step-3" />
-          <MockTile label="DSCR" value={dscrLabel} tone="success" sub={dscrClears ? "Bankable" : "Tight"} stepClass="tc-hero-step-4" />
+        {/* Acquisition answer first; supporting metrics stay subordinate. */}
+        <div className="tc-hero-step-2 mt-4 rounded-xl border-2 border-primary/30 bg-[var(--brand-blue-light)] p-4">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-widest text-primary">
+                <Target className="size-3.5" /> TrueCap Max Offer
+              </div>
+              <div className="mt-1 font-mono text-3xl font-extrabold tabular-nums tracking-tight text-primary">
+                {maxOfferLabel}
+              </div>
+              {gap != null && gap > 0 ? (
+                <div className="mt-0.5 text-xs font-semibold text-muted-foreground">
+                  ${gap.toLocaleString("en-US")} below the ${listPrice.toLocaleString("en-US")} list price
+                </div>
+              ) : null}
+            </div>
+            <span className="rounded-full bg-[var(--brand-green)] px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-white">
+              Example targets
+            </span>
+          </div>
+        </div>
+
+        <div className="mt-3 grid grid-cols-3 gap-2 sm:gap-3">
+          <MockTile label="Target cash flow" value={`$${targetCashFlow}`} tone="primary" sub="per month" stepClass="tc-hero-step-3" />
+          <MockTile label="DSCR at max" value={maxOffer ? maxOffer.achieved.dscr.toFixed(2) : "—"} tone="success" sub="target ≥ 1.25" stepClass="tc-hero-step-4" />
+          <MockTile label="At list" value={cfLabel} tone="success" sub={`${capLabel} cap`} stepClass="tc-hero-step-5" />
         </div>
 
         {/* Verdict line — final step 6, one concise sentence. */}
         <div className="tc-hero-step-6 mt-4 flex items-start gap-2 rounded-xl border border-[var(--brand-green)]/25 bg-[var(--brand-green-light)] p-3 text-xs text-foreground">
           <TrendingUp className="mt-0.5 size-4 shrink-0 text-[var(--brand-green)]" />
           <span>
-            <strong>1700 W Erie: strong fundamentals.</strong>{" "}
-            {cfLabel}/mo cash flow, {capLabel} cap, DSCR {dscrLabel}
-            {dscrClears
-              ? ". Clears the typical ≥1.25 lender bar. Worth a deeper underwrite."
-              : ". Below the typical ≥1.25 lender bar; stress-test before offering."}
+            <strong>Decision:</strong>{" "}
+            {maxOffer && gap != null && gap > 0
+              ? `Works at ${maxOfferLabel}. At list, it misses the example $${targetCashFlow}/mo cash-flow target.`
+              : "The list price clears the example targets. Stress-test the assumptions before offering."}
           </span>
         </div>
+        <p className="mt-3 text-[10px] leading-relaxed text-muted-foreground">
+          Example analysis using editable sample inputs. Estimates are not an appraisal or investment guarantee.
+        </p>
       </div>
       {/* edge fade */}
       <div className="pointer-events-none absolute inset-x-0 -bottom-6 h-12 bg-gradient-to-t from-background to-transparent" />

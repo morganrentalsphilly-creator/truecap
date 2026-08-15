@@ -40,6 +40,7 @@ import type { PostHog } from "posthog-js";
  */
 export type FunnelEvent =
   | "landing_view"
+  | "homepage_primary_cta" // properties: source (hero_address | sticky | final)
   | "analyzer_started"
   | "analysis_completed"
   | "pro_checkout_started"
@@ -67,6 +68,8 @@ export type FunnelEvent =
   // The gap between the two = one-time checkout drop-off.
   | "one_time_pdf_checkout_started" // properties: property_type
   | "one_time_pdf_purchased"
+  | "single_deal_checkout_started" // properties: property_type, price_variant
+  | "single_deal_purchased"        // properties: price_variant
   // Deal Q&A (AI panel under the recommendation card).
   | "deal_qa_asked" // properties: question_length
   // AI deal summary (one-tap grounded summary card).
@@ -87,6 +90,7 @@ export type FunnelEvent =
   // strategies investors model as scenarios. No PII — only coarse
   // signals (source, default flag, strategy kind, counts).
   | "buy_box_saved"      // properties: source ("settings" | "template"), is_new?, is_default, has_strategy
+  | "buy_box_created"    // properties: source, is_default, has_strategy
   | "scenario_added"     // properties: has_strategy, strategy_kind (kind | null)
   | "scenarios_compared" // properties: count
   // ── Upsell + pricing + share-loop attribution (T3) ─────────────
@@ -95,6 +99,8 @@ export type FunnelEvent =
   // loop's reach (a shared deal viewed = the K-factor numerator). PII-free.
   | "upsell_prompt_shown"   // properties: feature, placement
   | "upsell_prompt_clicked" // properties: feature, placement
+  | "max_offer_view_attempted" // properties: placement
+  | "upgrade_modal_viewed"     // properties: feature, placement
   | "pricing_view"          // properties: path
   | "shared_deal_viewed"    // properties: has_address
   // ── Agent Loop: co-branded share lead capture (T6) ─────────────
@@ -104,6 +110,9 @@ export type FunnelEvent =
   // Which plays investors pick — measures adoption + which strategy
   // converts to Pro. PII-free; just the strategy key.
   | "strategy_selected"     // properties: strategy (e.g. "wholesale-mao"), source ("chip" click vs "link" seed)
+  | "comparison_started"    // properties: source
+  | "report_generated"      // properties: report_type
+  | "agent_pro_cta_clicked"; // properties: placement
 
 // ── Lazy init + pre-init call buffering ─────────────────────────────
 

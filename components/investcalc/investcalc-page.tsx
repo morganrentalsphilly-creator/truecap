@@ -40,6 +40,7 @@ import {
 } from "@/lib/investcalc-schema";
 import { calculateAnalysis, AnalysisResult } from "@/lib/calc-analysis";
 import { getDealTier, type DealTier } from "@/lib/verdict";
+import { applyWhatIfAdjustments, WORST_CASE_PRESET } from "./what-if-sliders";
 import { PropertyTypeSection } from "./property-type-section";
 import { PropertyDetailsSection, YearBuiltField } from "./property-details-section";
 import { SingleFamilyUnitSection } from "./single-family-unit-section";
@@ -152,6 +153,7 @@ import {
 } from "@/lib/exit-scenarios";
 import { trackConversion } from "@/lib/analytics/track-conversion";
 import { trackEvent } from "@/lib/analytics";
+import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
 import { consumePendingSaveIntent, setPendingSaveIntent } from "@/lib/save-intent";
 import dynamic from "next/dynamic";
 
@@ -455,6 +457,26 @@ function toPdfReportData(args: {
   const year5Exit = exitYears.find((row) => row.year === 5);
   const year10Exit = exitYears.find((row) => row.year === 10) ?? exitYears[exitYears.length - 1];
 
+  // The report's downside page must use the same coherent preset and the
+  // same calculateAnalysis path as the on-screen stress tool. Cash deals
+  // omit the rate leg because it cannot affect a zero-debt analysis.
+  const downsideRatePp = result.monthlyPayment > 0 ? WORST_CASE_PRESET.ratePp : 0;
+  let downsideResult = result;
+  try {
+    downsideResult = calculateAnalysis(
+      applyWhatIfAdjustments(
+        values,
+        WORST_CASE_PRESET.rentPct,
+        0,
+        downsideRatePp,
+        WORST_CASE_PRESET.vacancyPp
+      )
+    );
+  } catch {
+    // Fail soft for legacy/malformed drafts: the report can still export,
+    // and the explicit unchanged values make the scenario limitation visible.
+  }
+
   return {
     generatedAt: new Date(),
     property: {
@@ -505,6 +527,16 @@ function toPdfReportData(args: {
       dscr: result.dscr,
       taxSavings: result.taxSavingsMonthly,
       afterTaxCF: result.afterTaxCF,
+    },
+    downsideScenario: {
+      label: `Rent ${WORST_CASE_PRESET.rentPct}% · vacancy +${WORST_CASE_PRESET.vacancyPp}pp${
+        downsideRatePp > 0 ? ` · rate +${downsideRatePp}pp` : ""
+      }`,
+      verdict: getDealTier(downsideResult),
+      monthlyCashFlow: downsideResult.netCashFlow,
+      cocReturn: downsideResult.cocReturn,
+      capRate: downsideResult.capRate,
+      dscr: downsideResult.dscr,
     },
     projection10y: {
       cumulativeCF: projectionRows[projectionRows.length - 1]?.cum ?? 0,
@@ -3820,6 +3852,7 @@ export function InvestCalcPage({
         purchase_price: values.purchasePrice,
         has_deal_score: Boolean(dealScoreResult?.ok && dealScoreResult.tier === "pro"),
       });
+      trackEvent("report_generated", { report_type: mode });
       // If the user hasn't configured branding yet, the toast nudges
       // them to do so. The link routes to /settings/branding, which
       // gates by entitlement: Pro users see the form, free users see
@@ -3862,7 +3895,7 @@ export function InvestCalcPage({
   };
 
   /**
-   * Start the $5 one-time PDF checkout. Stashes the current form values
+   * Start the one-time Single-Deal Underwrite checkout. Stashes the current form values
    * in localStorage first so the deal survives the Stripe redirect.
    */
   const handleBuyOneTimePdf = async () => {
@@ -3883,6 +3916,10 @@ export function InvestCalcPage({
       });
       const result = await createOneTimePdfCheckoutAction();
       if (result.ok) {
+        trackEvent("single_deal_checkout_started", {
+          property_type: form.getValues().propertyType,
+          price_variant: getMarketingOfferConfig().singleDealPriceVariant,
+        });
         window.location.assign(result.url);
         return; // navigating away; leave the spinner on
       }
@@ -3973,6 +4010,10 @@ export function InvestCalcPage({
       stripPurchaseParam();
       oneTimePdfUnlockedRef.current = true;
       trackEvent("one_time_pdf_purchased", {});
+      trackEvent("single_deal_purchased", {
+        price_variant:
+          verified.priceVariant ?? getMarketingOfferConfig().singleDealPriceVariant,
+      });
 
       // Restore the stashed deal and auto-run analysis → auto-export.
       let restoredValues: InvestmentFormValues | null = null;
@@ -4258,6 +4299,7 @@ export function InvestCalcPage({
   }, [isAuthenticated, savedDealId, hasUnsavedChanges]);
 
   const handleCompareDeals = async () => {
+    trackEvent("comparison_started", { source: "analysis_result" });
     if (!isAuthenticated) {
       toast({
         title: "Sign in required",

@@ -152,7 +152,7 @@ export async function POST(req: Request) {
         // One-time PDF purchases (anonymous `payment`-mode sessions, see
         // app/actions/one-time-pdf.ts) have no user/customer binding and
         // nothing to sync — the client verifies payment directly via
-        // verifyOneTimePdfPaymentAction. Without this skip, every $5
+        // verifyOneTimePdfPaymentAction. Without this skip, every one-time
         // sale logged a spurious "[billing] checkout.session.completed
         // missing customer id" ERROR from the subscription handler.
         if (session.metadata?.purpose === "one_time_pdf") {
@@ -190,6 +190,27 @@ export async function POST(req: Request) {
                 typeof session.customer === "string" ? session.customer : undefined,
             },
           });
+          await captureServerEvent({
+            distinctId,
+            event: "pro_subscription_started",
+            properties: {
+              plan_slug: session.metadata?.plan_slug ?? undefined,
+              trial_granted: session.metadata?.trial_granted === "true",
+              amount_total: session.amount_total ?? undefined,
+              currency: session.currency ?? undefined,
+              stripe_session_id: session.id,
+            },
+          });
+          if (session.metadata?.trial_granted === "true") {
+            await captureServerEvent({
+              distinctId,
+              event: "pro_trial_started",
+              properties: {
+                plan_slug: session.metadata?.plan_slug ?? undefined,
+                stripe_session_id: session.id,
+              },
+            });
+          }
         }
         break;
       }
@@ -268,7 +289,7 @@ export async function POST(req: Request) {
         // analytics so the drop-off stays measurable.
         const session = event.data.object as Stripe.Checkout.Session;
         // One-time PDF checkouts (mode: "payment", see app/actions/
-        // one-time-pdf.ts) are $5 one-offs from possibly-anonymous users —
+        // one-time-pdf.ts) are one-offs from possibly-anonymous users —
         // their abandonment would pollute the subscription funnel.
         // Mirrors the same guard in checkout.session.completed above.
         if (session.metadata?.purpose === "one_time_pdf") {

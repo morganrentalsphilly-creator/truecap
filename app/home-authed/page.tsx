@@ -25,12 +25,15 @@ import { MarketingHero } from "@/components/marketing/marketing-hero";
 import {
   DataSourcesSection,
   FinalCta,
+  FiveDealGuarantee,
   HomepageFaq,
   HowTrueCapWorks,
+  OfferEngineSection,
   PdfProUpsell,
   Personas,
   SocialProof,
 } from "@/components/marketing/landing-sections";
+import { CaseStudiesSection } from "@/components/marketing/case-study";
 import { OnboardingTour } from "@/components/marketing/onboarding-tour";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { TrackLandingView } from "@/components/analytics/track-landing-view";
@@ -45,6 +48,7 @@ import {
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getStripe } from "@/lib/stripe/client";
 import { planSlugFromPriceId, type PaidPlanSlug } from "@/lib/stripe/plan-prices";
+import { VERIFIED_CASE_STUDIES } from "@/lib/verified-case-studies";
 
 export const metadata: Metadata = {
   // Same title/description as the static homepage (this IS the homepage
@@ -173,6 +177,7 @@ export default async function AuthedHome({
   const canUseMaxOffer = isPaidPlan;
   const canUseSensitivity = isPaidPlan;
   const canUseStrategies = isPaidPlan;
+  const canUseBuyBox = entitlements ? hasPlanFeature(entitlements, "buy_box") : false;
   // (canUseShareLinks was removed: share links are deliberately FREE for
   // everyone — the /d/[encoded] growth loop — and the prop was dead all the
   // way down to ShareLinkButton.)
@@ -225,10 +230,13 @@ export default async function AuthedHome({
       {!user && (
         <>
           <HowTrueCapWorks />
+          <OfferEngineSection />
           <DataSourcesSection />
           <SocialProof />
+          <CaseStudiesSection studies={VERIFIED_CASE_STUDIES} />
           <Personas />
           <PdfProUpsell />
+          <FiveDealGuarantee />
           <FinalCta />
           <HomepageFaq />
         </>
@@ -244,6 +252,7 @@ export default async function AuthedHome({
         <OnboardingTour
           isAuthenticated={true}
           savedDealCount={savedDealCount ?? 0}
+          canUseBuyBox={canUseBuyBox}
         />
       )}
       {/* Engagement signal pump for Google Ads — fires dataLayer scroll

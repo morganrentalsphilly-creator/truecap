@@ -31,17 +31,21 @@ import { MarketingHero } from "@/components/marketing/marketing-hero";
 import {
   DataSourcesSection,
   FinalCta,
+  FiveDealGuarantee,
   HomepageFaq,
   HowTrueCapWorks,
+  OfferEngineSection,
   PdfProUpsell,
   Personas,
   SocialProof,
 } from "@/components/marketing/landing-sections";
+import { CaseStudiesSection } from "@/components/marketing/case-study";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { TrackLandingView } from "@/components/analytics/track-landing-view";
 import { StickyConversionBar } from "@/components/marketing/sticky-conversion-bar";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
+import { VERIFIED_CASE_STUDIES } from "@/lib/verified-case-studies";
 
 // ISR: prerendered at build, regenerated in the background at most
 // hourly. Keeps the DealsAnalyzedTicker count and any content edits
@@ -57,7 +61,7 @@ export const metadata: Metadata = {
     absolute: "Free Rental Property Calculator — Cash Flow, Cap Rate & DSCR",
   },
   description:
-    "Analyze any rental in 60 seconds — cap rate, cash flow, DSCR auto-filled from the address. Set your buy box and every deal gets a personal pass/fail.",
+    "Screen any rental in 60 seconds, review the assumptions, check your Buy Box, stress-test downside, and solve the highest price that meets your targets.",
   keywords: [
     "rental property analysis",
     "investment property calculator",
@@ -76,7 +80,7 @@ export const metadata: Metadata = {
     // resurfaces stale phrasing on brand queries.
     title: "Free Rental Property Calculator — Cash Flow, Cap Rate & DSCR",
     description:
-      "Type an address, get the verdict — cap rate, cash flow, DSCR in 60 seconds. Set your buy box and every deal gets a personal pass/fail.",
+      "Screen the property, check it against your criteria, stress-test the downside, and know the highest price that still works.",
     url: "/",
     type: "website",
     // Re-declare images because page-level openGraph fully replaces the
@@ -95,7 +99,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Free Rental Property Calculator — Cash Flow, Cap Rate & DSCR",
     description:
-      "Type an address, get the verdict — cap rate, cash flow, DSCR in 60 seconds. Set your buy box and every deal gets a personal pass/fail.",
+      "Screen the property, check it against your criteria, stress-test the downside, and know the highest price that still works.",
     images: ["/home.jpg"],
   },
 };
@@ -119,7 +123,7 @@ export default function Home() {
         operatingSystem: "Web",
         url: siteUrl,
         description:
-          "A real estate investment calculator for rental property analysis, cash flow forecasting, and ROI evaluation.",
+          "A rental acquisition decision engine for property screening, editable underwriting, Buy Box evaluation, downside analysis, and Max Offer calculations.",
         offers: {
           "@type": "Offer",
           price: "0",
@@ -218,14 +222,17 @@ export default function Home() {
           emits FAQPage JSON-LD for rich results.
           MUST stay in lockstep with app/home-authed/page.tsx. */}
       <HowTrueCapWorks />
+      <OfferEngineSection />
       {/* Trust: transparent methodology, editable assumptions, sources shown —
           then the customer evidence that backs it. */}
       <DataSourcesSection />
       <SocialProof />
+      <CaseStudiesSection studies={VERIFIED_CASE_STUDIES} />
       {/* Who it's for — investor vs agent self-ID. */}
       <Personas />
       {/* Pricing: Free → $5 report → Pro → Agent Pro. */}
       <PdfProUpsell />
+      <FiveDealGuarantee />
       {/* Closing ask — back to the address field. */}
       <FinalCta />
       <HomepageFaq />

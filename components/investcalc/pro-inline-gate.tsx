@@ -45,6 +45,10 @@ export function ProInlineGate({ icon: Icon, title, description, previewBullets }
     if (suppressed || fired.current) return;
     fired.current = true;
     trackEvent("upsell_prompt_shown", { feature: title, placement: "analysis_dashboard" });
+    trackEvent("upgrade_modal_viewed", { feature: title, placement: "analysis_dashboard" });
+    if (title.toLowerCase().includes("max")) {
+      trackEvent("max_offer_view_attempted", { placement: "analysis_dashboard" });
+    }
   }, [title, suppressed]);
 
   if (suppressed) return null;

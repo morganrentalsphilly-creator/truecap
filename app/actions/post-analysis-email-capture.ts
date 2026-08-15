@@ -11,7 +11,7 @@
  *   Day 0:  Underwriting checklist (the 7 numbers) — instant, delivers value
  *   Day 2:  "5 metrics most investors forget"
  *   Day 5:  "What does year 10 look like?" (Pro 10-year projection)
- *   Day 8:  "$5 lender PDF" — lowest-friction paid step
+ *   Day 8:  Single-Deal Underwrite — lowest-friction paid step
  *   Day 12: "20% off your first month" (final nudge)
  *
  * Result shape follows the codebase convention from CLAUDE.md (§3.2):
@@ -37,6 +37,9 @@ import {
   claimEmailCaptureSlot,
   releaseEmailCaptureSlot,
 } from "@/lib/email-capture-guard";
+import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
+
+const SINGLE_DEAL_PRICE_LABEL = getMarketingOfferConfig().singleDeal.priceLabel;
 
 export type CaptureResult =
   | { ok: true; scheduledCount: number }
@@ -148,9 +151,9 @@ const SEQUENCE: SequenceEmail[] = [
 <div style="max-width:560px;margin:32px auto;padding:32px 24px;background:#fff;border-radius:16px;border:1px solid #e5e7eb;">
   <h1 style="margin:0 0 12px 0;font-size:22px;font-weight:800;line-height:1.2;">What does year 10 actually look like?</h1>
   <p style="margin:0 0 16px 0;color:#374151;line-height:1.6;font-size:15px;">
-    A deal that cash-flows <strong style="color:#16a34a;">+$749/mo</strong> today is probably
-    <strong style="color:#16a34a;">+$2,100/mo</strong> by year 10. Rent grows. Your mortgage doesn't.
-    That's the whole game.
+    Year-one cash flow is only one part of the acquisition decision. Rent and
+    expenses can change, debt pays down, and the exit assumption can dominate
+    the long-term result.
   </p>
   <p style="margin:0 0 20px 0;color:#374151;line-height:1.6;font-size:15px;">
     TrueCap Pro shows you the full 10-year projection — cash flow, equity, after-tax dollars, and a recommended exit year.
@@ -164,27 +167,27 @@ const SEQUENCE: SequenceEmail[] = [
   },
   {
     delayDays: 8,
-    subject: "Just need the lender PDF? $5, no subscription",
+    subject: `One complete deal underwrite for ${SINGLE_DEAL_PRICE_LABEL}, no subscription`,
     build: ({ addressHtml, siteUrlHtml }) => `<!DOCTYPE html>
 <html><body style="margin:0;padding:0;background:#f6f7fb;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#111827;">
 <div style="max-width:560px;margin:32px auto;padding:32px 24px;background:#fff;border-radius:16px;border:1px solid #e5e7eb;">
-  <h1 style="margin:0 0 12px 0;font-size:22px;font-weight:800;line-height:1.2;">Just need the report? $5.</h1>
+  <h1 style="margin:0 0 12px 0;font-size:22px;font-weight:800;line-height:1.2;">Need one complete underwrite? ${SINGLE_DEAL_PRICE_LABEL}.</h1>
   <p style="margin:0 0 16px 0;color:#374151;line-height:1.6;font-size:15px;">
-    Taking ${addressHtml ? `<strong>${addressHtml}</strong>` : "a deal"} to a lender, partner, or seller? You can download the full multi-page report — verdict, 10-year projection, tax strategy, exit scenarios, and deal score — as a polished, lender-ready PDF for a one-time <strong>$5</strong>. No account, no subscription.
+    Taking ${addressHtml ? `<strong>${addressHtml}</strong>` : "a deal"} to a lender, partner, or seller? The Single-Deal Underwrite packages the verdict, downside scenario, 10-year projection, tax strategy, exit scenarios, and Deal Score into a polished report for a one-time <strong>${SINGLE_DEAL_PRICE_LABEL}</strong>. No account, no subscription.
   </p>
   <p style="margin:0 0 20px 0;color:#374151;line-height:1.6;font-size:15px;">
-    Re-run your deal, click <strong>Export PDF</strong>, and choose the $5 one-time option.
+    Re-run your deal, click <strong>Export PDF</strong>, and choose the Single-Deal Underwrite option.
   </p>
   <div style="text-align:center;margin:24px 0;">
     <a href="${siteUrlHtml}" style="display:inline-block;background:#0070c4;color:#fff;text-decoration:none;padding:12px 24px;border-radius:10px;font-weight:700;font-size:14px;">Get your PDF</a>
   </div>
-  <p style="margin:0 0 0 0;color:#6b7280;line-height:1.6;font-size:13px;text-align:center;">Want the full toolkit instead? Pro is $29/mo — unlimited PDFs, saved deals, and side-by-side compare.</p>
+  <p style="margin:0 0 0 0;color:#6b7280;line-height:1.6;font-size:13px;text-align:center;">Want the full decision workflow instead? Pro adds Max Offer, Buy Box screening, stress testing, unlimited reports, saved deals, and comparison.</p>
   <p style="margin:12px 0 0 0;color:#9ca3af;font-size:12px;line-height:1.5;text-align:center;">— Morgan · usetruecap.com</p>
 </div></body></html>`,
   },
   {
     delayDays: 12,
-    subject: "20% off your first month — ends soon",
+    subject: "A first-month TrueCap Pro offer",
     build: ({ siteUrlHtml, couponCodeHtml, couponCodeUrl }) => `<!DOCTYPE html>
 <html><body style="margin:0;padding:0;background:#f6f7fb;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#111827;">
 <div style="max-width:560px;margin:32px auto;padding:32px 24px;background:#fff;border-radius:16px;border:1px solid #e5e7eb;">

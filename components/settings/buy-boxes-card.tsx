@@ -241,12 +241,20 @@ export function BuyBoxesCard() {
           isDefault: editor.isDefault,
         });
         if (applyResult(result)) {
+          const isNew = !editor.id;
           trackEvent("buy_box_saved", {
             source: "settings",
-            is_new: !editor.id,
+            is_new: isNew,
             is_default: editor.isDefault,
             has_strategy: Boolean(editor.strategyKind),
           });
+          if (isNew) {
+            trackEvent("buy_box_created", {
+              source: "settings",
+              is_default: editor.isDefault,
+              has_strategy: Boolean(editor.strategyKind),
+            });
+          }
           // Evaluation is best-effort server-side — no fit means no line,
           // never a failed save.
           setSaveFit(result.ok && result.fit ? result.fit : null);

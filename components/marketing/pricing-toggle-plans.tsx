@@ -46,6 +46,10 @@ interface PricingTogglePlansProps {
    * tier from the page.
    */
   agentProConfigured?: boolean;
+  /** Marketing-only Pro name experiment; billing slots stay unchanged. */
+  proOfferName?: string;
+  /** Marketing-only one-time price label resolved by the server config. */
+  singleDealPriceLabel?: string;
 }
 
 const FREE_FEATURES: { label: string; included: boolean }[] = [
@@ -163,6 +167,8 @@ export function PricingTogglePlans({
   isPaid,
   hadPriorSubscription,
   agentProConfigured = false,
+  proOfferName = "TrueCap Pro",
+  singleDealPriceLabel = "$5",
 }: PricingTogglePlansProps) {
   // One decision for every trial mention on this card — must match what
   // checkout actually grants (billing.ts denies the trial to anyone with
@@ -236,7 +242,7 @@ export function PricingTogglePlans({
   const proCard =
     period === "monthly"
       ? {
-          priceTop: monthly?.amountLabel ?? "Pro",
+          priceTop: monthly?.amountLabel ?? proOfferName,
           priceSub: monthly ? `/${monthly.period}` : "/month",
           subline: monthly ? "billed monthly" : "monthly billing",
           slot: "pro_monthly" as const,
@@ -247,7 +253,7 @@ export function PricingTogglePlans({
               ? `$${annualMonthlyEquivalent.toFixed(
                   annualMonthlyEquivalent % 1 === 0 ? 0 : 2
                 )}`
-              : (annual?.amountLabel ?? "Pro"),
+              : (annual?.amountLabel ?? proOfferName),
           priceSub: "/month",
           subline:
             annual?.amountLabel
@@ -267,7 +273,7 @@ export function PricingTogglePlans({
           <span className="text-muted-foreground">— screen deals</span>
         </p>
         <p className="text-sm">
-          <span className="font-bold text-foreground">Pro</span>{" "}
+          <span className="font-bold text-foreground">{proOfferName}</span>{" "}
           <span className="text-muted-foreground">— underwrite and make offers</span>
         </p>
         {showAgentPro ? (
@@ -331,7 +337,9 @@ export function PricingTogglePlans({
                       : "text-muted-foreground/60 line-through"
                   }
                 >
-                  {f.label}
+                  {f.label.startsWith("Lender-ready PDF export")
+                    ? `Single-Deal Underwrite — ${singleDealPriceLabel} one-time`
+                    : f.label}
                 </span>
               </li>
             ))}
@@ -363,7 +371,7 @@ export function PricingTogglePlans({
           ) : null}
 
           <div className="flex items-baseline justify-between">
-            <h3 className="text-lg font-extrabold text-foreground">Pro</h3>
+            <h3 className="text-lg font-extrabold text-foreground">{proOfferName}</h3>
             {isPaid ? (
               <span className="rounded-full bg-[var(--metric-positive)]/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-[var(--metric-positive)]">
                 Current
@@ -443,7 +451,7 @@ export function PricingTogglePlans({
             </p>
           ) : (
             <p className="mt-2.5 text-center text-xs text-muted-foreground">
-              <strong className="text-foreground">Welcome back</strong> — Pro starts as soon as you check
+              <strong className="text-foreground">Welcome back</strong> — {proOfferName} starts as soon as you check
               out (the free trial is a first-time offer). Cancel anytime, no contract. Downgrade and your
               saved deals + reports stay in your account.
             </p>

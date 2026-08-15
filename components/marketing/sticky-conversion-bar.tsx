@@ -14,6 +14,7 @@ import { useEffect, useState } from "react";
 import { ArrowRight, Calculator, X } from "lucide-react";
 import { useCookieBannerOpen } from "@/lib/use-cookie-banner";
 import { scrollBehavior } from "@/lib/utils";
+import { trackEvent } from "@/lib/analytics";
 
 const STORAGE_KEY = "truecap_home_sticky_dismissed";
 
@@ -21,6 +22,7 @@ function scrollToForm() {
   if (typeof window === "undefined") return;
   const el = document.getElementById("main");
   if (!el) return;
+  trackEvent("homepage_primary_cta", { source: "sticky_bar" });
   // Document-absolute position, NOT el.offsetTop — offsetTop is measured
   // from the nearest positioned ancestor, so it's only correct while that
   // ancestor sits at the document top (same hardening as the hero's
@@ -89,7 +91,7 @@ export function StickyConversionBar() {
       <div className="mx-auto flex max-w-5xl items-center gap-3">
         <div className="min-w-0 flex-1">
           <p className="truncate text-xs font-bold text-foreground sm:text-sm">
-            Ready to underwrite a deal? It&apos;s free.
+            The property is active. Know whether it deserves a closer look.
           </p>
           <p className="hidden truncate text-[11px] text-muted-foreground sm:block">
             No card · No signup · 60 seconds to first answer
@@ -104,7 +106,7 @@ export function StickyConversionBar() {
           {/* Standardized to "Analyze free" to match the homepage's
               primary CTA. Sub-380px tiny phones fall back to "Try it"
               because the full label wraps. */}
-          <span className="hidden min-[380px]:inline">Analyze free</span>
+          <span className="hidden min-[380px]:inline">Analyze a Deal Free</span>
           <span className="min-[380px]:hidden">Try it</span>
           <ArrowRight className="size-3.5 sm:size-4" />
         </button>

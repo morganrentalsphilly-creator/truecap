@@ -13,22 +13,21 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Lock, X, FileDown, Calculator, TrendingUp } from "lucide-react";
+import { ArrowRight, Lock, X, FileDown, Calculator, Target, TrendingUp } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
-import { TRIAL_LABEL } from "@/lib/trial";
+import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
 import { scrollBehavior } from "@/lib/utils";
 import { usePostCheckoutUpsellSuppression } from "@/hooks/use-post-checkout-upsell-suppression";
 
 interface MomentOfValueUpsellProps {
+  purchasePrice: number;
   netCashFlow: number;
   capRate: number;
   cocReturn: number;
-  /** Approximate annual depreciation savings — used as the Pro hook. */
-  estimatedAnnualTaxSavings: number;
   /** True when the viewer is already on a paid plan; if so we render nothing. */
   isPaid: boolean;
-  /** Triggers the PDF export flow (the $5 one-time chooser for free users).
-   *  When provided, the "Export this PDF — $5" next-step is shown so the
+  /** Triggers the one-time Single-Deal Underwrite chooser for free users.
+   *  When provided, the one-time next-step is shown so the
    *  visitor isn't funneled only toward Pro. */
   onExportPdf?: () => void;
 }
@@ -39,14 +38,15 @@ const fmtMoney = (n: number) => {
 };
 
 export function MomentOfValueUpsell({
+  purchasePrice,
   netCashFlow,
   capRate,
   cocReturn,
-  estimatedAnnualTaxSavings,
   isPaid,
   onExportPdf,
 }: MomentOfValueUpsellProps) {
   const [dismissed, setDismissed] = useState(false);
+  const { proOfferName, singleDeal } = getMarketingOfferConfig();
 
   // Post-checkout suppression: while BillingSuccessBanner is confirming a
   // fresh purchase (billing=success poll pending), render nothing — a buyer
@@ -63,6 +63,7 @@ export function MomentOfValueUpsell({
     if (isPaid || suppressed || fired.current) return;
     fired.current = true;
     trackEvent("upsell_prompt_shown", { feature: "moment_of_value", placement: "post_analysis" });
+    trackEvent("upgrade_modal_viewed", { feature: "max_offer", placement: "post_analysis" });
   }, [isPaid, suppressed]);
 
   if (isPaid || dismissed || suppressed) return null;
@@ -75,25 +76,16 @@ export function MomentOfValueUpsell({
     if (el) window.scrollTo({ top: el.offsetTop - 64, behavior: scrollBehavior() });
   };
 
-  // Choose a personalized hook based on the actual numbers
-  const positiveCF = netCashFlow >= 0;
-  const strongCap = capRate >= 7;
-  const headline = positiveCF
-    ? strongCap
-      ? "This deal looks strong. See the full 10-year picture."
-      : "Solid cash flow today. How does it compound over 10 years?"
-    : "Tight on cash flow today — does the tax shield close the gap?";
-
   return (
     <div className="rounded-2xl border-2 border-primary/30 bg-gradient-to-br from-[var(--brand-blue-light)] via-card to-card p-5 shadow-[0_12px_36px_rgba(0,112,196,0.10)] sm:p-6">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-2">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-primary px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-widest text-primary-foreground">
             <TrendingUp className="size-3" />
-            Next steps
+            Free screen complete
           </span>
           <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-            for this deal
+            decide + act with Pro
           </span>
         </div>
         <button
@@ -107,36 +99,55 @@ export function MomentOfValueUpsell({
       </div>
 
       <h3 className="mt-3 text-lg font-extrabold leading-tight tracking-tight text-foreground sm:text-2xl">
-        {headline}
+        You&apos;ve screened the deal. Now find the price that makes it work.
       </h3>
 
-      {/* Pro feature preview row — uses this deal's numbers */}
+      {/* Everything here is a value already visible in the free analysis.
+          The gated result itself is never approximated or leaked. */}
       <div className="mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-3 sm:gap-3">
         <FeatureChip
-          icon={TrendingUp}
-          label="10-Year cumulative"
-          value={positiveCF ? `≈ ${fmtMoney(netCashFlow * 12 * 10 * 1.18)}` : "Live projection"}
-          sub="modeled with rent growth"
-        />
-        {/* The tax hook only makes sense as a hook when it's a benefit —
-            since the after-tax fix the estimate is a SIGNED net effect and
-            a healthy deal can owe tax. Pitch the breakdown instead then. */}
-        <FeatureChip
           icon={Calculator}
-          label={estimatedAnnualTaxSavings > 0 ? "Est. annual tax savings" : "Tax strategy breakdown"}
-          value={estimatedAnnualTaxSavings > 0 ? `≈ ${fmtMoney(estimatedAnnualTaxSavings)}/yr` : "Year by year"}
-          sub={estimatedAnnualTaxSavings > 0 ? "year-1 net effect" : "depreciation + deductions"}
+          label="List price"
+          value={fmtMoney(purchasePrice)}
+          sub="current asking price"
+        />
+        <FeatureChip
+          icon={TrendingUp}
+          label="Screened cash flow"
+          value={`${fmtMoney(netCashFlow)}/mo`}
+          sub={`${capRate.toFixed(1)}% cap · ${cocReturn.toFixed(1)}% CoC`}
         />
         <FeatureChip
           icon={FileDown}
-          label="Lender-ready PDF"
-          value="1 click"
-          sub="verdict + charts + tables"
+          label="Decision package"
+          value="Ready to unlock"
+          sub="offer · downside · report"
         />
       </div>
 
+      <div className="mt-4 rounded-2xl border-2 border-primary/35 bg-card p-4 sm:p-5">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-widest text-primary">
+              <Target className="size-3.5" /> Your Max Offer
+            </div>
+            <div className="mt-1 flex items-center gap-2 text-2xl font-extrabold text-foreground">
+              <Lock className="size-5 text-primary" aria-hidden /> Unlock
+            </div>
+          </div>
+          <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-primary">
+            Pro decision
+          </span>
+        </div>
+        <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+          What is the highest price you can pay and still hit your cash-flow,
+          cash-on-cash, cap-rate, or DSCR target? TrueCap solves it from the
+          assumptions you just reviewed.
+        </p>
+      </div>
+
       {/* Next steps — three clear paths so the visitor isn't funneled only
-          toward Pro: keep refining (free), send one $5 report, or upgrade
+          toward Pro: keep refining (free), buy one decision package, or upgrade
           for the repeat workflow. */}
       <div className="mt-5 space-y-2.5">
         <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
@@ -162,23 +173,24 @@ export function MomentOfValueUpsell({
           >
             <FileDown className="mt-0.5 size-4 shrink-0 text-[var(--brand-green)]" />
             <span className="text-foreground">
-              <strong>Export this PDF — $5</strong> — a lender-ready report for this one
-              deal. No subscription.
+              <strong>Single-Deal Underwrite — {singleDeal.priceLabel}</strong> — unlock the
+              complete report for this property. No subscription.
             </span>
           </button>
         ) : null}
 
         <Link
           href="/pricing"
-          onClick={() =>
-            trackEvent("upsell_prompt_clicked", { feature: "moment_of_value", placement: "post_analysis" })
-          }
+          onClick={() => {
+            trackEvent("max_offer_view_attempted", { placement: "post_analysis" });
+            trackEvent("upsell_prompt_clicked", { feature: "max_offer", placement: "post_analysis" });
+          }}
           className="group flex w-full items-start gap-2.5 rounded-xl border-2 border-primary/40 bg-primary/5 p-3 text-left text-sm transition-colors hover:bg-primary/10"
         >
           <Lock className="mt-0.5 size-4 shrink-0 text-primary" />
           <span className="flex-1 text-foreground">
-            <strong>Start your {TRIAL_LABEL} — Pro</strong> — save, compare &amp; export
-            unlimited, reuse assumptions, brand reports. Cancel anytime.
+            <strong>Unlock Your Max Offer with {proOfferName}</strong> — set your Buy Box,
+            stress-test downside, compare opportunities, and act on the best ones.
           </span>
           <ArrowRight className="mt-0.5 size-4 shrink-0 text-primary transition-transform group-hover:translate-x-0.5" />
         </Link>
@@ -186,8 +198,8 @@ export function MomentOfValueUpsell({
 
       {/* Inline note — softens the upsell */}
       <p className="mt-4 border-t border-border/60 pt-3 text-[11px] text-muted-foreground">
-        Cash flow {fmtMoney(netCashFlow)}/mo · cap {capRate.toFixed(1)}% · CoC {cocReturn.toFixed(1)}% — the
-        numbers above are estimates for this specific deal based on standard 27.5-yr depreciation and 2.5% rent growth.
+        Cash flow {fmtMoney(netCashFlow)}/mo · cap {capRate.toFixed(1)}% · CoC {cocReturn.toFixed(1)}%.
+        Calculations are estimates based on your inputs. Verify assumptions independently before making an offer.
       </p>
     </div>
   );

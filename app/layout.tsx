@@ -64,11 +64,11 @@ const siteUrl = getSiteUrl();
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "TrueCap | Real Estate Investment Calculator",
+    default: "TrueCap | Rental Deal Decision Engine",
     template: "%s | TrueCap",
   },
   description:
-    "Analyze rental properties with cash flow projections, ROI insights, tax strategy support, and risk-aware real estate metrics.",
+    "Screen rental properties, test them against your investment criteria, stress the downside, and calculate the price that makes the deal work.",
   keywords: [
     "real estate investment calculator",
     "rental property calculator",
@@ -94,9 +94,9 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    title: "TrueCap | Real Estate Investment Calculator",
+    title: "TrueCap | Rental Deal Decision Engine",
     description:
-      "Analyze rental properties with cash flow projections, ROI insights, tax strategy support, and risk-aware real estate metrics.",
+      "Know whether a rental fits your strategy and the highest price you can offer before the numbers stop working.",
     siteName: "TrueCap",
     locale: "en_US",
     url: siteUrl,
@@ -111,9 +111,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "TrueCap | Real Estate Investment Calculator",
+    title: "TrueCap | Rental Deal Decision Engine",
     description:
-      "Analyze rental properties with cash flow projections, ROI insights, tax strategy support, and risk-aware real estate metrics.",
+      "Know whether a rental fits your strategy and the highest price you can offer before the numbers stop working.",
     images: ["/home.jpg"],
   },
   robots: {
@@ -254,7 +254,7 @@ gtag('config', '${GOOGLE_ADS_ID}');`,
                   url: siteUrl,
                   logo: `${siteUrl}/icon-512x512.png`,
                   description:
-                    "Rental property investment analyzer — cash flow, cap rate, DSCR, deal score, plain-English verdict in 60 seconds.",
+                    "Rental acquisition decision engine — screen a property, review the assumptions, stress-test the downside, and solve the price that meets an investor's targets.",
                   sameAs: [],
                   // Person entity is defined on /about (AboutPage +
                   // Person @graph) — referencing it here ties the org
