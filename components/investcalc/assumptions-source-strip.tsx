@@ -30,6 +30,8 @@ type StripEntry = {
   short: string;
   /** True when the value is the user's own entry (styled neutrally). */
   manual: boolean;
+  /** Source vintage when the upstream feed supplies one. */
+  freshness?: string;
 };
 
 const MANUAL: Pick<StripEntry, "source" | "short" | "manual"> = {
@@ -54,19 +56,20 @@ export function buildAssumptionEntries(
             source: rent.source === "hud-safmr" ? "HUD Fair Market Rent (ZIP)" : "HUD Fair Market Rent",
             short: "HUD",
             manual: false,
+            ...(rent.fetchedAt ? { freshness: /^\d{4}$/.test(rent.fetchedAt) ? `HUD ${rent.fetchedAt}` : `As of ${rent.fetchedAt}` } : {}),
           }
         : MANUAL),
     },
     {
       label: "Mortgage rate",
       ...(rate && !rate.overridden
-        ? { source: "FRED 30-yr fixed", short: "FRED", manual: false }
+        ? { source: "FRED 30-yr fixed", short: "FRED", manual: false, ...(rate.fetchedAt ? { freshness: `As of ${rate.fetchedAt}` } : {}) }
         : MANUAL),
     },
     {
       label: "Property tax",
       ...(tax && !tax.overridden
-        ? { source: "State effective rate", short: "state", manual: false }
+        ? { source: "State effective rate", short: "state", manual: false, freshness: "State benchmark" }
         : MANUAL),
     },
     {
@@ -159,6 +162,11 @@ export function AssumptionsSourceStrip({
             >
               {s.source}
             </div>
+            {s.freshness ? (
+              <div className="truncate text-[10px] text-muted-foreground" title={s.freshness}>
+                {s.freshness}
+              </div>
+            ) : null}
           </li>
         ))}
       </ul>

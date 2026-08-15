@@ -18,7 +18,7 @@ import { HomepageFaq, VsCompetitors } from "@/components/marketing/landing-secti
 export const metadata: Metadata = {
   title: "Why TrueCap — vs Spreadsheets, DealCheck & BiggerPockets",
   description:
-    "See how TrueCap compares to spreadsheets, DealCheck, and BiggerPockets on speed, address auto-fill, and analysis depth — plus the questions every investor asks first.",
+    "Compare the workflows behind spreadsheets, traditional rental-analysis software, and TrueCap—then choose the approach that fits how you invest.",
   alternates: { canonical: "/why-truecap" },
   // Own OG/Twitter card so shares of this "vs competitor" money page show the
   // comparison intent, not the generic homepage card from layout.tsx. Mirrors
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Why TrueCap — vs Spreadsheets, DealCheck & BiggerPockets",
     description:
-      "See how TrueCap compares to spreadsheets, DealCheck, and BiggerPockets on speed, address auto-fill, and analysis depth.",
+      "A fair workflow comparison of spreadsheets, traditional rental-analysis software, and TrueCap.",
     url: "/why-truecap",
     type: "website",
     images: [

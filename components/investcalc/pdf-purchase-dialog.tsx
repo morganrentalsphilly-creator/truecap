@@ -94,7 +94,8 @@ export function PdfPurchaseDialog({
               <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
                 The complete TrueCap decision package for this property. One
                 payment, no account, no subscription. Includes assumptions,
-                Deal Score, downside scenario, 10-year, tax, and exit views.
+                Max Offer, Deal Doctor rent/rate thresholds, Deal Score,
+                downside scenario, 10-year, tax, and exit views.
               </p>
             </div>
             <span className="mt-0.5 inline-flex shrink-0 items-center gap-1.5 text-sm font-bold text-foreground">

@@ -50,6 +50,8 @@ import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button
 import { PersonaSeedLink } from "@/components/marketing/persona-seed-link";
 import type { HandoffStrategyKey } from "@/lib/analyzer-handoff";
 import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
+import { VERIFIED_TESTIMONIALS, isPublicationReady } from "@/lib/proof-records";
+import { GuaranteeViewTracker } from "@/components/analytics/guarantee-view-tracker";
 
 // ─────────────────────────────────────────────────────── How It Works
 // ───────────────────────────────────────── Why not a spreadsheet
@@ -69,39 +71,6 @@ const COMPARISON_ROWS: { label: string; spreadsheet: string | false; truecap: st
 ];
 // Reference to satisfy TS unused-var linting if it ever flips on.
 void COMPARISON_ROWS;
-
-// ───────────────────────────────────────── Social proof
-/**
- * Real user testimonials shown with first-name + last-initial attribution
- * - honest social proof. Real role and portfolio numbers from user
- * interviews and unsolicited Pro-tier feedback. First-name-only
- * convention respects privacy without reading as fabricated like
- * unattributed quotes do.
- *
- * When swapping in fresh quotes: name must be consented for use here.
- * If a user only gave permission for a role label, keep `name` empty —
- * the figcaption falls back to the role line.
- */
-const PROOF_QUOTES = [
-  {
-    quote:
-      "I used to spend 2 hours per deal in a spreadsheet. Now I underwrite at the showing.",
-    name: "Jordan M.",
-    role: "Buy-and-hold investor · 18 doors",
-  },
-  {
-    quote:
-      "TrueCap has completely changed the way I evaluate rental properties. What used to take me over an hour in spreadsheets now takes less than a minute. The cash flow, cap rate, and DSCR calculations are accurate, easy to understand, and help me make decisions with confidence.",
-    name: "David R.",
-    role: "Real estate investor",
-  },
-  {
-    quote:
-      "As an agent working with investors, speed matters. TrueCap lets me analyze deals during property tours and instantly share professional reports with clients and lenders. It's become an essential part of my workflow.",
-    name: "Amanda S.",
-    role: "Investment real estate agent",
-  },
-];
 
 /**
  * THE SPINE — "Analyze the deal. Know your number. Make the offer."
@@ -294,10 +263,15 @@ export function FinalCta() {
 }
 
 export function SocialProof() {
+  const proof = VERIFIED_TESTIMONIALS.filter((record) => isPublicationReady(record, "homepage"));
+  // Usage proof, sourced assumptions, the computed sample, and the working
+  // analyzer remain on the page. Customer quotes do not render until the
+  // evidence + approval fields in lib/proof-records.ts are complete.
+  if (proof.length === 0) return null;
   // Feature the most detailed quote; stack the rest beside it. Auto-picks
   // the longest quote so this stays correct if the array is reordered.
-  const featured = PROOF_QUOTES.reduce((a, b) => (b.quote.length > a.quote.length ? b : a));
-  const rest = PROOF_QUOTES.filter((p) => p !== featured);
+  const featured = proof.reduce((a, b) => (b.quote.length > a.quote.length ? b : a));
+  const rest = proof.filter((p) => p !== featured);
   return (
     <section className="border-t border-border bg-card/40">
       <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
@@ -315,21 +289,17 @@ export function SocialProof() {
               &ldquo;{featured.quote}&rdquo;
             </blockquote>
             <figcaption className="mt-5 border-t border-border pt-4 text-sm">
-              {featured.name ? (
-                <>
-                  <div className="font-bold text-foreground">{featured.name}</div>
-                  <div className="mt-0.5 font-semibold text-muted-foreground">{featured.role}</div>
-                </>
-              ) : (
-                <div className="font-semibold text-muted-foreground">{featured.role}</div>
-              )}
+              <div className="font-bold text-foreground">{featured.customerName}</div>
+              <div className="mt-0.5 font-semibold text-muted-foreground">
+                {featured.customerType}{featured.portfolioSize ? ` · ${featured.portfolioSize}` : ""}
+              </div>
             </figcaption>
           </figure>
           {/* Supporting quotes - stacked beside the feature. */}
           <div className="grid gap-4 sm:gap-5 lg:col-span-2">
             {rest.map((p) => (
               <figure
-                key={p.role}
+                key={p.id}
                 className="flex h-full flex-col rounded-2xl border border-border bg-card p-6"
               >
                 <Quote className="size-5 text-primary/30" />
@@ -337,14 +307,10 @@ export function SocialProof() {
                   &ldquo;{p.quote}&rdquo;
                 </blockquote>
                 <figcaption className="mt-4 border-t border-border pt-3 text-xs">
-                  {p.name ? (
-                    <>
-                      <div className="font-bold text-foreground">{p.name}</div>
-                      <div className="mt-0.5 font-semibold text-muted-foreground">{p.role}</div>
-                    </>
-                  ) : (
-                    <div className="font-semibold text-muted-foreground">{p.role}</div>
-                  )}
+                  <div className="font-bold text-foreground">{p.customerName}</div>
+                  <div className="mt-0.5 font-semibold text-muted-foreground">
+                    {p.customerType}{p.portfolioSize ? ` · ${p.portfolioSize}` : ""}
+                  </div>
                 </figcaption>
               </figure>
             ))}
@@ -372,25 +338,26 @@ export function SocialProof() {
  * context. The "highlight" flag bolds rows where TrueCap is uniquely
  * differentiated against ALL three alternatives.
  */
-const COMPETITORS_HEADERS = ["", "TrueCap", "Spreadsheet", "DealCheck", "BiggerPockets"];
-const COMPETITORS_ROWS: Array<{ label: string; values: (string | boolean)[]; highlight?: boolean }> = [
-  { label: "Time to first answer",                        values: ["60 seconds", "2-4 hours", "5-10 min", "5-10 min"], highlight: true },
-  { label: "Free tier",                                   values: [true, "DIY only", "Limited", true] },
-  { label: "Sourced underwriting defaults (HUD rent · FRED rate · state tax)", values: [true, false, false, false], highlight: true },
-  { label: "Cap rate · CoC · DSCR · cash flow",           values: [true, "If you built it", true, true] },
-  { label: "10-year projection",                          values: ["Pro", "Manual, error-prone", true, false] },
-  { label: "Tax strategy + depreciation",                 values: ["Pro", "Manual, error-prone", "Pro", false] },
-  { label: "Sensitivity grid + MAO solver",               values: ["Pro", false, false, false], highlight: true },
-  { label: "BRRRR + fix-and-flip + rehab estimator",      values: ["Pro", "Separate sheet", "Partial", "Separate calc"] },
-  { label: "Mobile / at the showing",                     values: [true, false, "Desktop-leaning", "Desktop-leaning"], highlight: true },
-  { label: "Share with lender",                           values: ["Pro · 1-click PDF + link", "Email the .xlsx", true, false] },
-  { label: "Compare 4 deals side-by-side",                values: ["Pro", "Manual copy/paste", true, false] },
-  // DealCheck pricing verified against dealcheck.io/pricing June 2026:
-  // Starter $0, Plus $10/mo, Pro $20/mo. A previous version claimed
-  // $35/mo - inflating a competitor's price in a table titled "honest,
-  // side-by-side" is exactly the credibility hit we can't afford.
-  { label: "Starting Pro price",                          values: ["From $25/mo", "n/a", "$20/mo", "n/a"] },
-];
+const WORKFLOW_COMPARISONS = [
+  {
+    name: "Spreadsheet",
+    thesis: "You build the model.",
+    bestFor: "Full control over formulas, layouts, and one-off deal structures.",
+    tradeoff: "You own the setup, data entry, formula maintenance, and interpretation.",
+  },
+  {
+    name: "Traditional analysis software",
+    thesis: "It calculates the deal.",
+    bestFor: "Mature calculators, listing imports, mobile apps, and established workflows.",
+    tradeoff: "The user may still need more setup and interpretation before choosing a next step.",
+  },
+  {
+    name: "TrueCap",
+    thesis: "It turns the deal into a decision.",
+    bestFor: "An address-first screen connected to Buy Box, Max Offer, downside, and presentation.",
+    tradeoff: "It is intentionally opinionated and is a first-pass decision tool, not a replacement for due diligence.",
+  },
+] as const;
 
 // ───────────────────────────────────────── Press / "As featured in"
 export function VsCompetitors() {
@@ -402,103 +369,74 @@ export function VsCompetitors() {
             Why TrueCap
           </p>
           <h2 className="mt-2 text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-            Honest, side-by-side. <span className="text-primary">No hand-waving.</span>
+            Choose the workflow that fits how you invest.
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-            Whether you&apos;re currently using a spreadsheet, DealCheck, or BiggerPockets&apos; calculator,
-            here&apos;s the row-by-row truth on what each tool actually does well.
+            These tools overlap. The meaningful difference is how they move you
+            from a listing to a decision—not whether one can win every feature row.
           </p>
         </div>
-        {/* Mobile scroll affordance - the 4-column table overflows on phones
-            (most ad traffic), and without a cue many visitors never scroll to
-            the DealCheck / BiggerPockets columns and miss the comparison. */}
-        <p className="mb-2 text-center text-xs font-medium text-muted-foreground sm:hidden">
-          Swipe the table to compare all four →
-        </p>
-        <div className="overflow-x-auto rounded-2xl border border-border bg-card shadow-sm">
-          <table className="w-full min-w-[640px] text-sm">
-            <thead>
-              <tr className="border-b border-border bg-muted/30">
-                {COMPETITORS_HEADERS.map((h, i) => (
-                  <th
-                    key={h || `col-${i}`}
-                    className={
-                      i === 1
-                        ? "px-4 py-3 text-center font-extrabold text-primary sm:px-6"
-                        : "px-4 py-3 text-center font-bold text-muted-foreground sm:px-6"
-                    }
-                  >
-                    {h || <span className="sr-only">Feature</span>}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {COMPETITORS_ROWS.map((row, ri) => (
-                <tr
-                  key={row.label}
-                  className={ri % 2 === 0 ? "bg-card" : "bg-muted/20"}
-                >
-                  <td className="px-4 py-3 font-medium text-foreground sm:px-6">{row.label}</td>
-                  {row.values.map((v, ci) => (
-                    <td
-                      key={`${row.label}-${ci}`}
-                      className={
-                        ci === 0
-                          ? "px-4 py-3 text-center sm:px-6"
-                          : "px-4 py-3 text-center text-muted-foreground sm:px-6"
-                      }
-                    >
-                      {/* Icon cells carry sr-only text so the table is
-                          readable by screen readers AND by crawlers /
-                          AI assistants. Without it, every check/cross
-                          cell reads as empty - Google and LLMs answering
-                          "best rental calculator" couldn't tell which
-                          features each tool includes. */}
-                      {v === true ? (
-                        <>
-                          <Check
-                            aria-hidden
-                            className={
-                              ci === 0
-                                ? "mx-auto size-4 text-[var(--metric-positive)]"
-                                : "mx-auto size-4 text-muted-foreground/60"
-                            }
-                          />
-                          <span className="sr-only">Included</span>
-                        </>
-                      ) : v === false ? (
-                        <>
-                          <X aria-hidden className="mx-auto size-4 text-muted-foreground/40" />
-                          <span className="sr-only">Not included</span>
-                        </>
-                      ) : (
-                        <span
-                          className={
-                            ci === 0
-                              ? row.highlight
-                                ? "font-bold text-primary"
-                                : "font-semibold text-foreground"
-                              : "italic"
-                          }
-                        >
-                          {String(v)}
-                        </span>
-                      )}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="grid gap-4 lg:grid-cols-3">
+          {WORKFLOW_COMPARISONS.map((item) => (
+            <article
+              key={item.name}
+              className={`rounded-2xl border p-6 ${
+                item.name === "TrueCap"
+                  ? "border-primary/35 bg-primary/[0.04]"
+                  : "border-border bg-card"
+              }`}
+            >
+              <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+                {item.name}
+              </p>
+              <h3 className="mt-2 text-xl font-extrabold tracking-tight text-foreground">
+                {item.thesis}
+              </h3>
+              <dl className="mt-5 space-y-4 text-sm leading-relaxed">
+                <div>
+                  <dt className="font-bold text-foreground">Best when</dt>
+                  <dd className="mt-1 text-muted-foreground">{item.bestFor}</dd>
+                </div>
+                <div>
+                  <dt className="font-bold text-foreground">Tradeoff</dt>
+                  <dd className="mt-1 text-muted-foreground">{item.tradeoff}</dd>
+                </div>
+              </dl>
+            </article>
+          ))}
         </div>
-        <p className="mx-auto mt-4 max-w-2xl text-center text-[11px] leading-relaxed text-muted-foreground">
-          Feature and pricing rows reflect each tool&apos;s publicly listed
-          information, last reviewed June 2026 - verify current details on each
-          vendor&apos;s site. &ldquo;Sourced underwriting defaults&rdquo; means
-          auto-filled HUD rent, the FRED 30-year rate, and state average property
-          tax specifically; some competitors offer other property-data imports.
-        </p>
+        <div className="mt-6 rounded-2xl border border-border bg-card p-6 sm:p-8">
+          <h3 className="text-lg font-extrabold text-foreground">A deliberately fair comparison</h3>
+          <div className="mt-4 grid gap-6 text-sm leading-relaxed md:grid-cols-2">
+            <div>
+              <p className="font-bold text-foreground">DealCheck may fit better if you want</p>
+              <ul className="mt-2 space-y-1.5 text-muted-foreground">
+                <li>Native iOS and Android apps.</li>
+                <li>Established listing-import and property-comparison workflows.</li>
+                <li>Its Offer Calculator and custom purchase-criteria workflow.</li>
+              </ul>
+              <p className="mt-3 text-xs text-muted-foreground">
+                Verify on DealCheck&apos;s official{" "}
+                <a className="underline hover:text-foreground" href="https://dealcheck.io/pricing/" target="_blank" rel="noopener noreferrer">pricing</a>,{" "}
+                <a className="underline hover:text-foreground" href="https://help.dealcheck.io/en/articles/2047630-using-the-offer-calculator-to-calculate-offers-to-sellers" target="_blank" rel="noopener noreferrer">Offer Calculator</a>, and{" "}
+                <a className="underline hover:text-foreground" href="https://help.dealcheck.io/en/articles/2259844-screening-properties-with-custom-investment-criteria" target="_blank" rel="noopener noreferrer">criteria</a> pages.
+              </p>
+            </div>
+            <div>
+              <p className="font-bold text-foreground">TrueCap may fit better if you want</p>
+              <ul className="mt-2 space-y-1.5 text-muted-foreground">
+                <li>A no-signup, address-first screen with editable sourced assumptions.</li>
+                <li>An opinionated verdict tied to your Buy Box.</li>
+                <li>Max Offer, downside, and an offer-ready decision package in one sequence.</li>
+              </ul>
+              <p className="mt-3 text-xs text-muted-foreground">
+                BiggerPockets may fit better for its community and education ecosystem;
+                see its official{" "}
+                <a className="underline hover:text-foreground" href="https://www.biggerpockets.com/rental-property-calculator" target="_blank" rel="noopener noreferrer">Rental Property Calculator</a>.
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );
@@ -535,11 +473,11 @@ const HOMEPAGE_FAQS: { q: string; a: string }[] = [
   },
   {
     q: "What do I get with a Single-Deal Underwrite?",
-    a: "A complete one-property underwriting report: assumptions, verdict, cash flow, cap rate, DSCR, downside scenario, 10-year projection, tax strategy, exit scenarios, and Deal Score. No account or subscription.",
+    a: "A complete one-property decision report: deterministic Max Offer, Deal Doctor rent/rate thresholds, assumptions, verdict, cash flow, cap rate, DSCR, downside scenario, 10-year projection, tax strategy, exit scenarios, and Deal Score. No account or subscription.",
   },
   {
     q: "When should I upgrade to Pro?",
-    a: "Use Free to screen unlimited deals. Use a Single-Deal Underwrite when you need one complete report without a subscription. Upgrade to Pro for Max Offer, Buy Box screening, downside testing, unlimited saves, comparisons, reusable assumptions, branded reports, and unlimited exports. Pro is month-to-month - cancel anytime.",
+    a: "Use Free to screen unlimited deals. Use a Single-Deal Underwrite when you need Max Offer and the complete decision report for one property without a subscription. Upgrade to Pro for an interactive Max Offer workflow, Buy Box screening, downside testing, unlimited saves, comparisons, reusable assumptions, branded reports, and unlimited exports. Pro is month-to-month - cancel anytime.",
   },
   {
     q: "How does the Pro trial work?",
@@ -631,13 +569,13 @@ const DATA_SOURCES: { icon: typeof Home; label: string; source: string; body: st
     icon: Home,
     label: "Rent",
     source: "HUD Fair Market Rent",
-    body: "Pulled for the property's county and bedroom count - a real market baseline, not a guess.",
+    body: "Pulled for the property's county or ZIP and bedroom count where available—a starting benchmark to compare with local rent comps.",
   },
   {
     icon: Percent,
     label: "Mortgage rate",
     source: "FRED 30-year fixed",
-    body: "The current national average rate, fetched automatically so your financing starts realistic.",
+    body: "The latest available national series value, with its date shown. Replace it with an actual lender quote before deciding.",
   },
   {
     icon: Building2,
@@ -654,11 +592,12 @@ export function DataSourcesSection() {
         <div className="mb-10 text-center sm:mb-12">
           <p className="text-[11px] font-bold uppercase tracking-widest text-primary">Built on real data</p>
           <h2 className="mt-2 text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-            Defensible numbers, <span className="text-primary">not guesses.</span>
+            Visible sources. <span className="text-primary">Editable assumptions.</span>
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-            TrueCap pre-fills every deal from primary sources, so you start from a real
-            baseline - then change anything to match your own comps and terms.
+            TrueCap labels each auto-filled value with its source and keeps every
+            assumption editable. Start fast, then replace benchmarks with verified
+            property facts, local comps, and lender terms.
           </p>
         </div>
         {/* Divided list - one surface with internal rules (Rule 4)
@@ -681,7 +620,7 @@ export function DataSourcesSection() {
           ))}
         </div>
         <p className="mt-6 text-center text-xs text-muted-foreground">
-          Every field is editable - these are sensible market defaults, not absolutes.
+          Fast starting point. Transparent assumptions. Final control stays with you.
         </p>
       </div>
     </section>
@@ -721,6 +660,7 @@ const LADDER_ROWS: { label: string; cells: (boolean | string)[] }[] = (
     { label: "Cap rate · CoC · DSCR · cash flow", key: "cash_flow" },
     { label: "0-100 Deal Score + plain-English verdict", key: "deal_score" },
     { label: "Lender-ready PDF export", key: "pdf_export" },
+    { label: "Max Offer + Deal Doctor thresholds", key: "mao" },
     { label: "Save & revisit deals", key: "save_deal" },
     { label: "Compare deals side-by-side", key: "compare_deals" },
     { label: "Buy box: personal pass/fail on every deal", key: "buy_box" },
@@ -837,9 +777,10 @@ export function PdfProUpsell() {
             </span>
             <h3 className="mt-2 text-lg font-bold text-foreground">Single-Deal Underwrite</h3>
             <p className="mt-1.5 flex-1 text-sm leading-relaxed text-muted-foreground">
-              Get the complete decision package for one property: assumptions,
-              verdict, Deal Score, downside scenario, long-term projection, tax
-              view, exit scenarios, and a polished report. No subscription.
+              Get the complete decision package for one property: Max Offer,
+              Deal Doctor thresholds, assumptions, verdict, downside scenario,
+              long-term projection, tax view, exit scenarios, and a polished
+              report. No subscription.
             </p>
             <div className="mt-5">
               <ScrollToFormButton className="group inline-flex h-11 items-center gap-1.5 rounded-xl border border-border bg-background px-5 text-sm font-bold text-foreground hover:bg-muted">
@@ -894,6 +835,7 @@ export function FiveDealGuarantee() {
 
   return (
     <section className="border-t border-border bg-background">
+      <GuaranteeViewTracker />
       <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 sm:py-16">
         <div className="rounded-3xl border-2 border-[var(--brand-green)]/30 bg-[var(--brand-green-light)] p-6 sm:p-8">
           <div className="flex items-start gap-4">

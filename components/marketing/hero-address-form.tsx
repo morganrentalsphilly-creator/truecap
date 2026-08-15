@@ -89,6 +89,7 @@ export function HeroAddressForm() {
     const sameAsPicked = picked && picked.formattedAddress.trim() === address;
     // Funnel: top of the hero-start path. No address string sent (PII).
     trackEvent("hero_address_submit", { has_components: Boolean(sameAsPicked) });
+    trackEvent("address_submitted", { has_components: Boolean(sameAsPicked) });
     trackEvent("homepage_primary_cta", { source: "hero_address" });
     dispatchHeroAnalyze({
       token: newToken(),

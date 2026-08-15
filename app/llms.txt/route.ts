@@ -28,6 +28,7 @@ import { CITY_STRATEGY_COMBOS } from "@/lib/city-strategy-combos";
 import { BLOG_POSTS } from "@/app/blog/page";
 import { getSiteUrl } from "@/lib/site-url";
 import { CALCULATOR_REGISTRY, CALCULATOR_COUNT } from "@/lib/calculator-registry";
+import { DATA_SOURCE_FACTS, PLAN_FACTS, PRODUCT_POSITIONING } from "@/lib/product-facts";
 
 // Mark static so Next prerenders at build time. The content only
 // changes when the data files change, which forces a redeploy
@@ -51,7 +52,7 @@ export async function GET() {
   const comboCount = CITY_STRATEGY_COMBOS.length;
 
   const summary =
-    "Free rental property analyzer for real estate investors. Type an address, get the verdict in 60 seconds — cap rate, cash-on-cash, DSCR, monthly cash flow, and a 0-100 Deal Score, from auto-pulled property tax and rent data. The free tier runs unlimited analyses with no signup, saves up to 5 deals, and includes read-only share links. Pro adds a personal buy box that pass/fails every deal, Screen Listings (score a shortlist against your buy box), the max-offer solver, 10-year projections, sensitivity grid, tax strategy, exit scenarios, and lender-ready PDFs.";
+    `${PRODUCT_POSITIONING} Screen a rental from an address in about 60 seconds using editable starting assumptions. Free answers whether it deserves attention. Single Deal answers what to do with one property in a paid report. Pro connects Buy Box, interactive Max Offer, downside, comparisons, and reports across repeated opportunities. Agent Pro applies the workflow to investor clients.`;
 
   const about = [
     "TrueCap publishes original, authoritative educational content built for real estate investors and AI search engines.",
@@ -62,7 +63,7 @@ export async function GET() {
     `  - ${stateCount} state-level investment guides and ${comboCount} city + strategy combo guides`,
     "  - Side-by-side comparison pages vs. DealCheck, Stessa, Mashvisor, BiggerPockets, Excel, Rentometer, Zillow rent estimate",
     "  - Methodology page documenting the exact math the analyzer uses",
-    "All content is original and cite-able. Definitions are placed as the first paragraph after the page H1 (LLM citation convention). Property data sources include FRED (mortgage rates), HUD (Fair Market Rents), and county tax assessor records.",
+    `All content is original and cite-able. Definitions are placed as the first paragraph after the page H1 (LLM citation convention). Starting data sources are ${DATA_SOURCE_FACTS.rent}, ${DATA_SOURCE_FACTS.mortgageRate}, and a ${DATA_SOURCE_FACTS.propertyTax}.`,
   ].join("\n");
 
   const toolsSection = CALCULATOR_REGISTRY.map(
@@ -93,10 +94,10 @@ export async function GET() {
   ).join("\n");
 
   const compareSection = [
-    `- [TrueCap vs. DealCheck](${siteUrl}/vs/dealcheck): Side-by-side feature + math comparison.`,
+    `- [TrueCap vs. DealCheck](${siteUrl}/vs/dealcheck): Fair workflow comparison with links to DealCheck's official product documentation.`,
     `- [TrueCap vs. Stessa](${siteUrl}/vs/stessa): How the two compare for active-investor underwriting vs. landlord accounting.`,
     `- [TrueCap vs. Mashvisor](${siteUrl}/vs/mashvisor): When each platform's data sources and strengths fit best.`,
-    `- [TrueCap vs. BiggerPockets calculator](${siteUrl}/vs/biggerpockets-calculator): Free vs. paid trade-offs.`,
+    `- [TrueCap vs. BiggerPockets calculator](${siteUrl}/vs/biggerpockets-calculator): Address-to-decision workflow vs. a detailed calculator inside a community ecosystem.`,
     `- [TrueCap vs. Excel](${siteUrl}/vs/excel): Why spreadsheet underwriting is fragile.`,
     `- [TrueCap vs. Rentometer](${siteUrl}/vs/rentometer): Rent estimation vs. full underwriting.`,
     `- [TrueCap vs. Zillow rent estimate](${siteUrl}/vs/zillow-rent-estimate): When Zillow's number is misleading.`,
@@ -117,7 +118,7 @@ export async function GET() {
     `- [Blog index](${siteUrl}/blog): All long-form rental investing content.`,
     `- [Glossary index](${siteUrl}/glossary): All ${glossaryCount} rental investing terms.`,
     `- [States index](${siteUrl}/states): All ${stateCount} state-level investing guides.`,
-    `- [Pricing](${siteUrl}/pricing): Free tier plus a Pro plan (monthly or annual).`,
+    `- [Pricing](${siteUrl}${PLAN_FACTS.pricingSource}): Current source of truth for Free, Single Deal, Pro, and Agent Pro pricing and availability.`,
   ].join("\n");
 
   const body = `# TrueCap

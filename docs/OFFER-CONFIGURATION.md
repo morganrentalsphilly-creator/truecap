@@ -6,7 +6,7 @@ copy test cannot silently reprice a customer.
 ## Marketing experiments
 
 - `NEXT_PUBLIC_TRUECAP_HOMEPAGE_HEADLINE=a|b`
-  - `a` (default): “Screen any rental in 60 seconds. Know your max offer before you make one.”
+  - `a` (default): “Screen any rental in 60 seconds. Know the highest price that still works.”
   - `b`: “Know exactly what a rental is worth to you.”
 - `NEXT_PUBLIC_TRUECAP_PRO_NAME=pro|offer_engine`
   - `pro` (default): “TrueCap Pro”
@@ -18,6 +18,21 @@ copy test cannot silently reprice a customer.
 - `NEXT_PUBLIC_FIVE_DEAL_GUARANTEE=true|false`
   - Off by default. Enable only after the refund policy and support workflow
     have been approved. It never guarantees investment performance.
+
+### Guarantee activation gate
+
+All of the following require business/operations approval before the flag can
+be enabled:
+
+1. Terms and refund-policy language matching the visible guarantee copy.
+2. A support owner and a documented way to verify three/five real analyses
+   during the first 30 paid days without asking for sensitive property data.
+3. A Stripe first-month refund runbook, including partial/annual-plan handling.
+4. Fraud/abuse rules and an escalation path for edge cases.
+5. Monitoring for `guarantee_viewed`, claims, approvals, denials, and churn.
+
+Until all five are in place, the component renders nothing and the existing
+non-refundable Terms remain controlling.
 
 ## Safe pricing activation
 

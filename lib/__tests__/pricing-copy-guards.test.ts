@@ -104,4 +104,10 @@ describe("pricing offer hierarchy", () => {
     expect(plans).toContain("order-1 -mt-2");
     expect(plans).toContain("lg:order-2");
   });
+
+  it("does not manufacture scarcity around the permanent annual plan", () => {
+    const banner = read("../../components/marketing/annual-promo-banner.tsx");
+    expect(banner).toContain("Annual plan");
+    expect(banner).not.toMatch(/limited|expires|countdown/i);
+  });
 });

@@ -44,8 +44,10 @@ describe("entitlements catalog — policy guards", () => {
     expect(tierHas("pro", "share_links")).toBe(true);
   });
 
-  it("$5 one-time PDF unlocks pdf_export but not custom branding", () => {
+  it("$5 one-time report includes Max Offer and export, but not custom branding", () => {
     expect(tierHas("one_time_pdf", "pdf_export")).toBe(true);
+    expect(tierHas("one_time_pdf", "mao")).toBe(true);
+    expect(featureLimit("mao", "one_time_pdf")).toBe("In the PDF");
     expect(tierHas("one_time_pdf", "custom_branding")).toBe(false);
   });
 

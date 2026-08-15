@@ -171,15 +171,15 @@ export function MortgageScenarioCompare({
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Lock className="size-4 shrink-0 text-muted-foreground" />
             <span>
-              <strong className="text-foreground">Compare financing scenarios</strong> - 25% down,
-              15-year term, DSCR loans, side-by-side. Pro feature.
+              <strong className="text-foreground">See how financing changes this deal.</strong>{" "}
+              Compare 25% down, a 15-year term, and DSCR loans without rebuilding the model.
             </span>
           </div>
           <Link
             href="/pricing"
             className="inline-flex h-8 items-center justify-center rounded-lg bg-primary px-3 text-xs font-bold text-primary-foreground hover:opacity-90"
           >
-            See Pro
+            Compare loan structures
           </Link>
         </div>
       </div>

@@ -23,13 +23,14 @@
  */
 
 import { useEffect, useState } from "react";
-import { ArrowRight, Calculator, CheckCircle2, Save, X } from "lucide-react";
+import { ArrowRight, Calculator, CheckCircle2, FileDown, Save, ShieldAlert, Target, X } from "lucide-react";
 import Link from "next/link";
+import { trackEvent } from "@/lib/analytics";
 
 const STORAGE_KEY = "truecap_onboarding_dismissed_v1";
 
 type Step = {
-  id: "run-deal" | "save-deal" | "explore-pro" | "set-buy-box";
+  id: "run-deal" | "save-deal" | "explore-pro" | "set-buy-box" | "review-max-offer" | "stress-downside" | "package-decision";
   icon: typeof Calculator;
   title: string;
   body: string;
@@ -89,10 +90,26 @@ const PRO_STEPS: Step[] = [
     ctaHref: "/",
   },
   {
-    id: "save-deal",
-    icon: Save,
-    title: "3. Turn the result into a decision",
-    body: "Review why the deal passes or misses, solve Max Offer, stress-test the downside, then save, compare, report, or pass.",
+    id: "review-max-offer",
+    icon: Target,
+    title: "3. Know your offer ceiling",
+    body: "Open Max Offer to see the highest purchase price that still clears the selected targets—and the rent or rate that could fix a miss.",
+    ctaLabel: "Analyze a property",
+    ctaHref: "/",
+  },
+  {
+    id: "stress-downside",
+    icon: ShieldAlert,
+    title: "4. Stress-test the downside",
+    body: "Lower rent, raise vacancy, or worsen financing. See whether the decision still holds before you rely on the base case.",
+    ctaLabel: "Open the analyzer",
+    ctaHref: "/",
+  },
+  {
+    id: "package-decision",
+    icon: FileDown,
+    title: "5. Save and present the decision",
+    body: "Save the property, compare it with the next opportunity, and generate a report when a partner, lender, or client needs the rationale.",
     ctaLabel: "Open my deals",
     ctaHref: "/dashboard/saved-analyses",
   },
@@ -145,6 +162,13 @@ export function OnboardingTour({ isAuthenticated, savedDealCount, canUseBuyBox =
 
   const steps = canUseBuyBox ? PRO_STEPS : STEPS;
   const nextStep = () => {
+    const completed = steps[activeStep];
+    trackEvent("onboarding_step_completed", {
+      step_id: completed.id,
+      step_number: activeStep + 1,
+      track: canUseBuyBox ? "pro" : "free",
+      completion_source: "tour_acknowledged",
+    });
     if (activeStep < steps.length - 1) {
       setActiveStep((s) => s + 1);
     } else {

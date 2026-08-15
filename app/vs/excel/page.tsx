@@ -127,7 +127,7 @@ export default function VsExcelPage() {
                 <li>You need a tool that works on your phone at a showing.</li>
                 <li>You share analyses with partners / lenders / clients.</li>
                 <li>You don&apos;t want to debug formulas — you want validated math.</li>
-                <li>You want auto-fill from address (HUD rent, FRED rate, county tax).</li>
+                <li>You want address-first starting values (HUD rent, FRED rate, state tax benchmark).</li>
                 <li>You want PDF reports without manual print-to-PDF formatting.</li>
               </ul>
             </div>

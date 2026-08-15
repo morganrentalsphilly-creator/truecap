@@ -24,6 +24,7 @@ interface MomentOfValueUpsellProps {
   netCashFlow: number;
   capRate: number;
   cocReturn: number;
+  decisionTone: "blocked" | "review" | "ready";
   /** True when the viewer is already on a paid plan; if so we render nothing. */
   isPaid: boolean;
   /** Triggers the one-time Single-Deal Underwrite chooser for free users.
@@ -42,6 +43,7 @@ export function MomentOfValueUpsell({
   netCashFlow,
   capRate,
   cocReturn,
+  decisionTone,
   isPaid,
   onExportPdf,
 }: MomentOfValueUpsellProps) {
@@ -64,7 +66,8 @@ export function MomentOfValueUpsell({
     fired.current = true;
     trackEvent("upsell_prompt_shown", { feature: "moment_of_value", placement: "post_analysis" });
     trackEvent("upgrade_modal_viewed", { feature: "max_offer", placement: "post_analysis" });
-  }, [isPaid, suppressed]);
+    trackEvent("max_offer_teaser_viewed", { placement: "post_analysis", decision_tone: decisionTone });
+  }, [decisionTone, isPaid, suppressed]);
 
   if (isPaid || dismissed || suppressed) return null;
 
@@ -99,8 +102,15 @@ export function MomentOfValueUpsell({
       </div>
 
       <h3 className="mt-3 text-lg font-extrabold leading-tight tracking-tight text-foreground sm:text-2xl">
-        You&apos;ve screened the deal. Now find the price that makes it work.
+        {decisionTone === "blocked"
+          ? "This deal misses at the current price. Find the price where it starts working."
+          : decisionTone === "review"
+            ? "This deal is close. Find the exact price that clears your targets."
+            : "This deal clears the first screen. Protect the upside with a hard offer ceiling."}
       </h3>
+      <p className="mt-2 text-sm text-muted-foreground">
+        Decide before you negotiate—not after the list price anchors you.
+      </p>
 
       {/* Everything here is a value already visible in the free analysis.
           The gated result itself is never approximated or leaked. */}
@@ -168,13 +178,17 @@ export function MomentOfValueUpsell({
         {onExportPdf ? (
           <button
             type="button"
-            onClick={onExportPdf}
+            onClick={() => {
+              trackEvent("max_offer_unlock_clicked", { placement: "post_analysis", offer: "single_deal" });
+              onExportPdf();
+            }}
             className="flex w-full items-start gap-2.5 rounded-xl border border-border bg-card p-3 text-left text-sm transition-colors hover:bg-muted"
           >
             <FileDown className="mt-0.5 size-4 shrink-0 text-[var(--brand-green)]" />
             <span className="text-foreground">
-              <strong>Single-Deal Underwrite — {singleDeal.priceLabel}</strong> — unlock the
-              complete report for this property. No subscription.
+              <strong>Single-Deal Underwrite — {singleDeal.priceLabel}</strong> — get this
+              property&apos;s Max Offer, Deal Doctor thresholds, downside, projections,
+              and complete report. No subscription.
             </span>
           </button>
         ) : null}
@@ -183,6 +197,7 @@ export function MomentOfValueUpsell({
           href="/pricing"
           onClick={() => {
             trackEvent("max_offer_view_attempted", { placement: "post_analysis" });
+            trackEvent("max_offer_unlock_clicked", { placement: "post_analysis", offer: "pro" });
             trackEvent("upsell_prompt_clicked", { feature: "max_offer", placement: "post_analysis" });
           }}
           className="group flex w-full items-start gap-2.5 rounded-xl border-2 border-primary/40 bg-primary/5 p-3 text-left text-sm transition-colors hover:bg-primary/10"

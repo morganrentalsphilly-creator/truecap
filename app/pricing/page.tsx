@@ -15,8 +15,7 @@ import { TRIAL_DAYS, TRIAL_LABEL } from "@/lib/trial";
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
-import * as Sentry from "@sentry/nextjs";
-import { Check, Quote, ShieldCheck, Sparkles, X } from "lucide-react";
+import { Check, ShieldCheck, Sparkles, X } from "lucide-react";
 import { Header } from "@/components/investcalc/header";
 import { CheckoutCancelledBanner } from "@/components/marketing/checkout-cancelled-banner";
 import { PricingTogglePlans } from "@/components/marketing/pricing-toggle-plans";
@@ -26,8 +25,8 @@ import {
   hasPaidPlanSubscription,
 } from "@/lib/entitlements";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { getStripe } from "@/lib/stripe/client";
-import { getPrimaryPlanPriceId, isAgentProConfigured, type PaidPlanSlug } from "@/lib/stripe/plan-prices";
+import { isAgentProConfigured } from "@/lib/stripe/plan-prices";
+import { loadStripeDisplayPrice } from "@/lib/stripe/display-prices";
 
 import { RoiCalculatorWidget } from "@/components/marketing/roi-calculator-widget";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
@@ -35,6 +34,7 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { DealsAnalyzedTicker } from "@/components/marketing/deals-analyzed-ticker";
 import { FiveDealGuarantee } from "@/components/marketing/landing-sections";
 import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
+import { getSiteUrl } from "@/lib/site-url";
 export const metadata: Metadata = {
   title: "Pricing — Screen Free, Decide & Act with Pro",
   description:
@@ -49,39 +49,6 @@ export const metadata: Metadata = {
   },
   twitter: { card: "summary_large_image", images: ["/home.jpg"] },
 };
-
-type StripePrice = { amountLabel: string; period: string; unitAmount: number } | null;
-
-async function loadStripePrice(slug: PaidPlanSlug): Promise<StripePrice> {
-  // Display the CURRENT/primary price (first configured id); later comma-listed
-  // ids are grandfathered prices for webhook resolution only.
-  const priceId = getPrimaryPlanPriceId(slug);
-  if (!priceId || !process.env.STRIPE_SECRET_KEY) return null;
-  try {
-    const stripe = getStripe();
-    const price = await stripe.prices.retrieve(priceId);
-    if (price.unit_amount == null) return null;
-    const amountLabel = new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: price.currency,
-      maximumFractionDigits: price.unit_amount % 100 === 0 ? 0 : 2,
-    }).format(price.unit_amount / 100);
-    const period = price.recurring?.interval ?? (slug.endsWith("_annual") ? "year" : "month");
-    // unitAmount returned in dollars (not cents) so downstream consumers
-    // like the ROI calculator can use it for breakeven math without
-    // dividing themselves.
-    return { amountLabel, period, unitAmount: price.unit_amount / 100 };
-  } catch (error) {
-    // A silent null here degrades the pricing page's displayed price with
-    // zero telemetry — and the same broken STRIPE_PRICE_PRO_* env that
-    // causes it also breaks checkout. Surface it.
-    Sentry.captureException(error, {
-      tags: { feature: "billing-checkout" },
-      extra: { planSlug: slug, priceId },
-    });
-    return null;
-  }
-}
 
 // FREE_FEATURES + PRO_FEATURES lists were lifted into the toggle
 // component (components/marketing/pricing-toggle-plans.tsx) so they
@@ -146,14 +113,38 @@ export default async function PricingPage() {
   // the pricing page for that visitor.
   const agentProConfigured = isAgentProConfigured();
   const [monthly, annual, agentMonthly, agentAnnual, isPaid, hadPriorSubscription] = await Promise.all([
-    loadStripePrice("pro_monthly"),
-    loadStripePrice("pro_annual"),
-    agentProConfigured ? loadStripePrice("agent_pro_monthly") : Promise.resolve(null),
-    agentProConfigured ? loadStripePrice("agent_pro_annual") : Promise.resolve(null),
+    loadStripeDisplayPrice("pro_monthly"),
+    loadStripeDisplayPrice("pro_annual"),
+    agentProConfigured ? loadStripeDisplayPrice("agent_pro_monthly") : Promise.resolve(null),
+    agentProConfigured ? loadStripeDisplayPrice("agent_pro_annual") : Promise.resolve(null),
     user ? hasPaidPlanSubscription(supabase, user.id) : Promise.resolve(false),
     user ? hasAnySubscriptionHistory(supabase, user.id) : Promise.resolve(false),
   ]);
   const entitlements = user ? await getEntitlementsForUser(supabase, user.id) : null;
+  const siteUrl = getSiteUrl();
+  const recurringOffers = [
+    ["TrueCap Pro Monthly", monthly],
+    ["TrueCap Pro Annual", annual],
+    ["TrueCap Agent Pro Monthly", agentMonthly],
+    ["TrueCap Agent Pro Annual", agentAnnual],
+  ] as const;
+  const pricingSchema = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "TrueCap",
+    applicationCategory: "FinanceApplication",
+    operatingSystem: "Web",
+    url: `${siteUrl}/pricing`,
+    offers: [
+      { "@type": "Offer", name: "TrueCap Free", price: 0, priceCurrency: "USD", url: `${siteUrl}/` },
+      { "@type": "Offer", name: "Single-Deal Underwrite", price: singleDeal.amount, priceCurrency: "USD", url: `${siteUrl}/pricing` },
+      ...recurringOffers.flatMap(([name, price]) =>
+        price
+          ? [{ "@type": "Offer", name, price: price.unitAmount, priceCurrency: price.currency, url: `${siteUrl}/pricing` }]
+          : []
+      ),
+    ],
+  };
   // The Monthly ↔ Annual savings math is now done inside
   // <PricingTogglePlans> so it can react to the user's toggle state.
   // We just hand it both Stripe prices.
@@ -166,6 +157,10 @@ export default async function PricingPage() {
       <Header initialUser={user} initialEntitlements={entitlements} />
 
       <main id="main" className="min-h-screen bg-background">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(pricingSchema) }}
+        />
         {/* Hero */}
         <section className="relative overflow-hidden border-b border-border bg-gradient-to-b from-[var(--brand-blue-light)] via-background to-background">
           <div
@@ -223,24 +218,6 @@ export default async function PricingPage() {
             proOfferName={proOfferName}
             singleDealPriceLabel={singleDeal.priceLabel}
           />
-
-          {/* One outcome quote at the money ask — the same revenue-tied proof
-              the homepage hero places beside its CTA (marketing-hero.tsx: the
-              strongest proof sits near the decision point). The live ticker
-              above stays the primary credibility signal; this adds the human
-              beat for cold traffic that never scrolled the homepage's
-              SocialProof section. Kept visually quiet on purpose. */}
-          <figure className="mx-auto mt-6 flex max-w-2xl items-start justify-center gap-2.5 px-2">
-            <Quote aria-hidden className="mt-0.5 size-4 shrink-0 text-primary/40" />
-            <figcaption className="text-sm leading-relaxed text-muted-foreground">
-              <span className="text-foreground">
-                &ldquo;Closed three more deals this quarter because I could move faster.&rdquo;
-              </span>
-              <span className="mt-1 block text-xs font-semibold text-foreground/70">
-                Jordan M., buy-and-hold investor (18 doors)
-              </span>
-            </figcaption>
-          </figure>
 
           {/* Interactive ROI calculator — defangs the 'is it worth $X/mo'
               objection by turning it into the visitor's own math. Real
@@ -347,12 +324,13 @@ export default async function PricingPage() {
                   </span>
                   <span className="text-[11px] text-muted-foreground">No subscription · No account</span>
                 </div>
-                <h3 className="text-xl font-extrabold text-foreground">Need one complete underwrite?</h3>
+                <h3 className="text-xl font-extrabold text-foreground">Know your number on this property.</h3>
                 <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
                   Run your analysis free, then unlock the Single-Deal Underwrite once.
-                  The report packages your assumptions, verdict, Deal Score, downside
-                  scenario, 10-year projection, tax view, and exit scenarios. No
-                  subscription. Use Pro for the repeat decision workflow.
+                  The report includes your deterministic Max Offer, Deal Doctor
+                  rent/rate thresholds, assumptions, verdict, downside scenario,
+                  10-year projection, tax view, and exit scenarios. No subscription.
+                  Use Pro for the repeat decision workflow.
                 </p>
               </div>
               <Link

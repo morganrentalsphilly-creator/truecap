@@ -14,10 +14,7 @@ import {
   ArrowRight,
   ArrowUpRight,
   Calculator,
-  Check,
-  Minus,
   Sparkles,
-  X,
 } from "lucide-react";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -29,7 +26,7 @@ import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema"
 export const metadata: Metadata = {
   title: "Free BiggerPockets Calculator Alternative (2026)",
   description:
-    "Honest TrueCap vs BiggerPockets calculator: free tier depth, modern UX, address auto-fill, sharing — what each does best and when to pick which.",
+    "A fair TrueCap vs BiggerPockets calculator workflow comparison: address-first screening, detailed analysis, decision packaging, and ecosystem tradeoffs.",
   keywords: [
     "biggerpockets calculator alternative",
     "biggerpockets calculator vs truecap",
@@ -43,7 +40,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Free BiggerPockets Calculator Alternative (2026)",
     description:
-      "Free-tier depth, modern UX, address auto-fill, mobile, sharing — what each tool is built for.",
+      "Address-first decision workflow vs a detailed calculator inside a broader investor ecosystem.",
     url: "/vs/biggerpockets-calculator",
     type: "website",
     images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap vs BiggerPockets Calculator" }],
@@ -51,30 +48,15 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", images: ["/home.jpg"] },
 };
 
-type Verdict = "truecap" | "biggerpockets" | "tie";
-type Row = { feature: string; truecap: string; bp: string; winner: Verdict };
+type Row = { workflow: string; truecap: string; bp: string };
 
 const MATRIX: Row[] = [
-  { feature: "Free tier — full analysis depth",      truecap: "Unlimited cap rate, CoC, DSCR, NCF, monthly cash flow — no signup",                        bp: "5 free uses, then Pro required ($39/mo)",                            winner: "truecap" },
-  { feature: "Pricing — entry point",                 truecap: "$25/mo annual Pro · 100% free underwriting tier",                                       bp: "$390/yr Pro ($39/mo) · limited free",                                winner: "truecap" },
-  { feature: "Address auto-fill",                     truecap: "Paste address → HUD rent + FRED rate + county tax populate live",                          bp: "Manual entry; no live data integrations",                            winner: "truecap" },
-  { feature: "Modern UI / mobile UX",                 truecap: "Built 2024-2026, designed mobile-first — works at the showing",                            bp: "Long-established interface; functional but dated",                   winner: "truecap" },
-  { feature: "BRRRR analyzer",                        truecap: "Yes — ARV-driven refi math + capital-recovery focus",                                      bp: "Yes — long-standing BRRRR support",                                  winner: "tie" },
-  { feature: "Fix-and-flip analyzer",                 truecap: "Yes — ARV, holding cost, profit modeling",                                                bp: "Yes — separate Flip Calculator product",                             winner: "tie" },
-  { feature: "Rental Property Calculator",            truecap: "Core product — used by every TrueCap session",                                            bp: "Their flagship calculator",                                          winner: "tie" },
-  { feature: "10-year projection",                    truecap: "Pro — rent + expense + appreciation compounding, one view",                                bp: "Pro — long-range projections built in",                              winner: "tie" },
-  { feature: "Tax strategy / depreciation",           truecap: "Pro — bracket-aware depreciation + interest deduction + after-tax CF",                     bp: "Basic tax info; no bracket-aware modeling",                          winner: "truecap" },
-  { feature: "Sensitivity grid (stress test)",        truecap: "Pro — rent ±10%, vacancy ±5pp, rates ±1pp in a single view",                                bp: "Not a primary feature",                                              winner: "truecap" },
-  { feature: "Max Allowable Offer (MAO) solver",      truecap: "Pro — works backward from target return automatically",                                    bp: "Available in Pro tier",                                              winner: "tie" },
-  { feature: "Shareable read-only deal links",        truecap: "Free — read-only public link; Pro adds co-branding",                                            bp: "PDF export only; no shareable link",                                 winner: "truecap" },
-  { feature: "PDF report export",                     truecap: "Pro — multi-page lender-ready report with verdict",                                        bp: "PDF export available in Pro",                                        winner: "tie" },
-  { feature: "Deal score + verdict explanation",      truecap: "Free — 0–100 score with subscore breakdown + plain-English why",                            bp: "Color indicators; no composite score",                               winner: "truecap" },
-  { feature: "Portfolio rollup across saved deals",   truecap: "Yes — total CF + weighted cap rate + blended CoC across portfolio",                         bp: "List view; no portfolio aggregate metrics",                          winner: "truecap" },
-  { feature: "Cash flow waterfall visualization",     truecap: "Yes — see exactly where every rent dollar goes",                                            bp: "Standard line-item breakdown only",                                  winner: "truecap" },
-  { feature: "Bundled with content / forums",         truecap: "Has standalone blog + glossary; not a forum",                                              bp: "Forums + podcast + books + community — massive ecosystem",           winner: "biggerpockets" },
-  { feature: "Brand recognition / track record",      truecap: "New entrant (2025-2026), modern, growing",                                                  bp: "Industry standard since 2004",                                       winner: "biggerpockets" },
-  { feature: "Education + courses",                   truecap: "Free educational content (blog + glossary + methodology)",                                  bp: "Paid courses + bootcamps + books",                                   winner: "biggerpockets" },
-  { feature: "Open data sources cited",               truecap: "HUD FMR + FRED + state tax — every assumption traceable",                                   bp: "Manual entry; no published data sources",                            winner: "truecap" },
+  { workflow: "First screen", truecap: "Address-first screen with editable starting assumptions and a verdict.", bp: "Detailed rental-property input workflow with report-style results." },
+  { workflow: "Decision sequence", truecap: "Connects verdict, Buy Box, Max Offer, downside, and presentation.", bp: "Centers on a detailed calculator and the investor's interpretation of its report." },
+  { workflow: "Scenario depth", truecap: "Includes long-term projection, exit, tax, and downside modules in paid decisions.", bp: "Its rental calculator captures purchase, loan, income, expense, and projection inputs." },
+  { workflow: "Offer price", truecap: "Max Offer works backward from the selected target and shows threshold alternatives.", bp: "The calculator supports an offer-price input inside a broader rental analysis." },
+  { workflow: "Ecosystem", truecap: "Focused product, methodology, blog, and glossary.", bp: "Calculator inside a large community, education, media, and marketplace ecosystem." },
+  { workflow: "Best fit", truecap: "Investors who want a guided address-to-decision sequence.", bp: "Investors who value a detailed calculator inside the BiggerPockets ecosystem." },
 ];
 
 export default function VsBiggerPocketsCalculatorPage() {
@@ -86,7 +68,7 @@ export default function VsBiggerPocketsCalculatorPage() {
     url: `${siteUrl}/vs/biggerpockets-calculator`,
     description:
       "Side-by-side comparison of TrueCap and the BiggerPockets Rental Property Calculator for rental underwriting.",
-    dateModified: "2026-06-01",
+    dateModified: "2026-08-15",
     publisher: { "@id": `${siteUrl}/#organization` },
   };
 
@@ -120,9 +102,10 @@ export default function VsBiggerPocketsCalculatorPage() {
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
             BiggerPockets has been the default real estate analysis tool for two
             decades. Their calculator is solid. We built TrueCap because we
-            wanted something cheaper, faster to use, and honest about what the
-            free tier actually does — without you joining yet another community.
-            Here&apos;s the honest comparison.
+            wanted an address-first workflow that connects the initial screen to
+            a verdict, Max Offer, downside, and presentation. BiggerPockets may
+            be the better choice when its community and education ecosystem are
+            part of what you value. Here is the workflow comparison.
           </p>
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
             <ScrollToFormButton
@@ -156,12 +139,9 @@ export default function VsBiggerPocketsCalculatorPage() {
               </p>
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
                 <li>You want a fully usable free tier with no per-analysis limits.</li>
-                <li>You want the calculator to feel modern — mobile-first, instant, designed in this decade.</li>
-                <li>You want address auto-fill (HUD rent, FRED rates, county tax) instead of manual entry.</li>
+                <li>You want an address-first screen with labeled starting assumptions.</li>
                 <li>You want a deal score with plain-English breakdown.</li>
                 <li>You want a portfolio rollup across saved deals.</li>
-                <li>You don&apos;t need to be part of yet another real estate community.</li>
-                <li>You want to spend $300/yr instead of $390/yr.</li>
               </ul>
             </div>
             <div>
@@ -188,17 +168,17 @@ export default function VsBiggerPocketsCalculatorPage() {
         {/* Matrix */}
         <section className="mb-12 sm:mb-16">
           <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground mb-2">
-            Feature-by-feature
+            Workflow-by-workflow
           </h2>
           <p className="text-base text-muted-foreground mb-6 leading-relaxed">
-            Where each tool wins, where it&apos;s a wash.
+            Both tools analyze rentals. The difference is how the analysis becomes a decision.
           </p>
           <div className="overflow-x-auto rounded-2xl border border-border bg-card">
             <table className="w-full text-sm">
               <thead className="bg-muted/40">
                 <tr className="text-left">
                   <th className="py-3 px-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                    Feature
+                    Workflow
                   </th>
                   <th className="py-3 px-3 text-[10px] font-bold uppercase tracking-widest text-primary">
                     TrueCap
@@ -210,21 +190,15 @@ export default function VsBiggerPocketsCalculatorPage() {
               </thead>
               <tbody>
                 {MATRIX.map((row) => (
-                  <tr key={row.feature} className="border-t border-border align-top">
+                  <tr key={row.workflow} className="border-t border-border align-top">
                     <td className="py-3 px-3 text-sm font-semibold text-foreground">
-                      {row.feature}
+                      {row.workflow}
                     </td>
                     <td className="py-3 px-3 text-xs leading-relaxed text-foreground/85">
-                      <div className="flex items-start gap-2">
-                        <WinnerBadge winner={row.winner} side="truecap" />
-                        <span>{row.truecap}</span>
-                      </div>
+                      {row.truecap}
                     </td>
                     <td className="py-3 px-3 text-xs leading-relaxed text-foreground/85">
-                      <div className="flex items-start gap-2">
-                        <WinnerBadge winner={row.winner} side="biggerpockets" />
-                        <span>{row.bp}</span>
-                      </div>
+                      {row.bp}
                     </td>
                   </tr>
                 ))}
@@ -233,11 +207,12 @@ export default function VsBiggerPocketsCalculatorPage() {
           </div>
           <p className="mt-3 text-[11px] text-muted-foreground">
             Pricing and feature availability change. BiggerPockets Calculator
-            details based on publicly available product info as of 2026. See{" "}
-            <a href="https://www.biggerpockets.com/calculators" target="_blank" rel="noopener" className="underline">
-              biggerpockets.com/calculators
+            details were reviewed against its official product pages on August
+            15, 2026. See{" "}
+            <a href="https://www.biggerpockets.com/rental-property-calculator" target="_blank" rel="noopener noreferrer" className="underline">
+              BiggerPockets Rental Property Calculator
             </a>{" "}
-            for their current state.
+            for its current state.
           </p>
         </section>
 
@@ -247,7 +222,7 @@ export default function VsBiggerPocketsCalculatorPage() {
             When BiggerPockets users actually switch
           </h2>
           <ul className="space-y-2 text-sm sm:text-base leading-relaxed text-foreground">
-            <li><strong>&quot;The 5-free-uses-then-paywall thing is annoying.&quot;</strong> TrueCap&apos;s free tier is unlimited. Run as many analyses as you want. Pro unlocks projections, sensitivity, co-branded share links, PDFs — but the core underwriting (cap rate, CoC, DSCR, NCF) is always free.</li>
+            <li><strong>&quot;I want to screen without creating an account.&quot;</strong> TrueCap&apos;s core analyzer is available before signup. Pro unlocks projections, sensitivity, co-branded share links, PDFs, and reusable decision tools.</li>
             <li><strong>&quot;The manual entry is slow.&quot;</strong> Paste an address. TrueCap pulls property tax from the county, rent from HUD, mortgage rate from FRED. You start with 60-70% of the underwrite done. BP has you typing everything.</li>
             <li><strong>&quot;I just want a calculator, not another community to manage.&quot;</strong> BP&apos;s value is the ecosystem (forums + podcast + courses). TrueCap is just the tool. Some investors want the bundle; others want focus.</li>
             <li><strong>&quot;I&apos;m paying $390/yr for the BP membership and use 10% of what comes with it.&quot;</strong> If you&apos;re a BP member primarily for the calculator, TrueCap Pro at $25/mo annual ($300/yr) costs less — and it is built around the deal analysis you actually use.</li>
@@ -297,7 +272,7 @@ export default function VsBiggerPocketsCalculatorPage() {
         {/* Pricing CTA */}
         <section className="mb-12 sm:mb-16 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
           <h2 className="text-2xl sm:text-3xl font-extrabold mb-2">
-            Try TrueCap free — see if the modern version fits your workflow.
+            Try TrueCap free — see if the address-to-decision workflow fits.
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             Free includes full cap rate, CoC, DSCR, and monthly cash flow
@@ -350,48 +325,41 @@ const BP_FAQ: FaqItem[] = [
     question: "Is the BiggerPockets calculator free?",
     answer: (
       <>
-        The BiggerPockets rental property calculator gives you a few
-        free reports, then gates the full version behind a BiggerPockets
-        Pro subscription (~$390/year). TrueCap&apos;s calculator is free
-        with no monthly limit — cap rate, cash-on-cash, DSCR, and
-        monthly cash flow on every analysis, no signup required.
+        BiggerPockets can change calculator access and membership terms, so
+        check its official <a href="https://www.biggerpockets.com/rental-property-calculator" target="_blank" rel="noopener noreferrer" className="underline">calculator page</a> for the current offer.
+        TrueCap&apos;s core screen is available without signup or a monthly analysis limit.
       </>
     ),
     plainTextAnswer:
-      "The BiggerPockets calculator gives a few free reports then gates the rest behind BiggerPockets Pro (~$390/year). TrueCap is free with no monthly limit — cap rate, cash-on-cash, DSCR, and monthly cash flow on every analysis, no signup.",
+      "Check BiggerPockets' official calculator page for current access and membership terms. TrueCap's core screen is available without signup or a monthly analysis limit.",
   },
   {
     question: "What's the best alternative to the BiggerPockets rental calculator?",
     answer: (
       <>
-        TrueCap is the modern alternative — it&apos;s designed
-        mobile-first, pre-fills HUD rent + FRED mortgage rate + state
+        TrueCap is an address-first alternative: it pre-fills HUD rent + FRED mortgage rate + state
         property tax from the property address, and outputs a
         plain-English verdict (Strong / Solid / Mixed / Marginal /
         Negative) on top of the standard metrics. BiggerPockets&apos;
-        calculator is the most well-known but the UX hasn&apos;t evolved
-        much in years and there&apos;s no portfolio view across saved
-        deals.
+        calculator is a detailed analysis workflow inside a much larger
+        community and education ecosystem.
       </>
     ),
     plainTextAnswer:
-      "TrueCap is the modern alternative — mobile-first, pre-fills HUD rent, FRED mortgage rate, and state property tax from the address, and outputs a plain-English verdict (Strong/Solid/Mixed/Marginal/Negative) alongside standard metrics.",
+      "TrueCap is an address-first alternative that labels HUD rent, the FRED mortgage rate, and a state property-tax benchmark, then adds a plain-English verdict alongside standard metrics.",
   },
   {
     question: "How much is TrueCap vs BiggerPockets Pro?",
     answer: (
       <>
-        TrueCap Pro is $29.99/month (or ~$25/month billed annually).
-        BiggerPockets Pro is ~$390/year (~$32.50/month). For the
-        calculator alone, TrueCap has a deeper free tier and bundles everything in one Pro tier. BiggerPockets
-        Pro of course bundles forums, courses, and other community
-        access — if that&apos;s what you&apos;re buying, the calculator
-        is a bonus. If you want the calculator itself, TrueCap is the
-        cheaper and more capable choice.
+        See TrueCap&apos;s <Link href="/pricing" className="underline">live pricing page</Link>{" "}
+        and BiggerPockets&apos; official membership and calculator pages for
+        current prices. BiggerPockets bundles a broader community and education
+        ecosystem, so price alone is not an apples-to-apples comparison.
       </>
     ),
     plainTextAnswer:
-      "TrueCap Pro is $29.99/month or ~$25/month annual. BiggerPockets Pro is ~$390/year (~$32.50/month). For the calculator alone, TrueCap has a deeper free tier and bundles everything in one Pro tier.",
+      "See TrueCap's live pricing page and BiggerPockets' official membership and calculator pages for current prices and access.",
   },
   {
     question: "Does TrueCap have a 10-year projection like BiggerPockets?",
@@ -431,28 +399,12 @@ const BP_FAQ: FaqItem[] = [
         for the community access (forums, courses, books, podcasts),
         you trust the brand, and the calculator&apos;s output format is
         the one your private-money lender or partners already accept.
-        Switch to TrueCap if you want a calculator-first experience,
-        sharper UX, address auto-fill, a verdict engine, a portfolio
-        rollup, and a Pro tier that costs about half as much.
+        Choose TrueCap if you want a focused address-to-decision experience
+        with labeled starting assumptions, a verdict, Max Offer, downside,
+        and presentation in one sequence.
       </>
     ),
     plainTextAnswer:
-      "Stick with BiggerPockets if you're already paying Pro for community access. Switch to TrueCap if you want a calculator-first experience, sharper UX, address auto-fill, a verdict engine, a portfolio rollup, and a Pro tier that costs about half as much.",
+      "Stick with BiggerPockets if its community and education ecosystem are central to your workflow. Choose TrueCap for a focused address-to-decision sequence with labeled assumptions, verdict, Max Offer, downside, and presentation.",
   },
 ];
-
-function WinnerBadge({
-  winner,
-  side,
-}: {
-  winner: Verdict;
-  side: "truecap" | "biggerpockets";
-}) {
-  if (winner === "tie") {
-    return <Minus className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/60" />;
-  }
-  if (winner === side) {
-    return <Check className="mt-0.5 size-3.5 shrink-0 text-[var(--brand-green)]" />;
-  }
-  return <X className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/50" />;
-}

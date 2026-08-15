@@ -92,7 +92,7 @@ export function ProInlineGate({ icon: Icon, title, description, previewBullets }
         className="group mt-4 inline-flex items-center gap-1.5 text-sm font-bold text-primary hover:underline"
       >
         <Sparkles className="size-4" />
-        Start your {TRIAL_LABEL}
+        See {title} for this deal · {TRIAL_LABEL}
         <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
       </Link>
     </div>

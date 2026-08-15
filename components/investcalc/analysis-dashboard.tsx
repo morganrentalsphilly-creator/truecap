@@ -107,6 +107,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Activity, Target } from "lucide-react";
 import { MomentOfValueUpsell } from "@/components/marketing/moment-of-value-upsell";
 import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
+import { trackEvent } from "@/lib/analytics";
 import { SignupPromptCard } from "@/components/marketing/signup-prompt-card";
 import { RateAlertsToggle } from "@/components/settings/rate-alerts-toggle";
 import { CashFlowWaterfall } from "@/components/investcalc/cash-flow-waterfall";
@@ -393,6 +394,10 @@ export function AnalysisDashboard({
   }, []);
   const setRowOpen = useCallback((id: AnalysisLedgerRowId, open: boolean) => {
     setOpenRows((prev) => (prev[id] === open ? prev : { ...prev, [id]: open }));
+    if (open && id === "stress-test") {
+      trackEvent("stress_test_opened", { placement: "analysis_ledger" });
+      trackEvent("downside_viewed", { placement: "analysis_ledger" });
+    }
   }, []);
   // KEPT NAME + SIGNATURE from the tab era so no caller churns:
   // "switch to tab X" is now "open row X and scroll it into view".
@@ -404,11 +409,11 @@ export function AnalysisDashboard({
       openRow(id);
       requestAnimationFrame(() => {
         document
-          .getElementById(`analysis-tab-${id}`)
+          .getElementById(id === "stress-test" && canUseMaxOffer ? "max-offer-result" : `analysis-tab-${id}`)
           ?.scrollIntoView({ behavior: scrollBehavior(), block: "start" });
       });
     },
-    [openRow]
+    [canUseMaxOffer, openRow]
   );
   // When a non-cash-flow strategy is active (Wholesale/BRRRR/Flip), lead the
   // results with that play's real answer instead of the generic buy-box verdict.
@@ -691,6 +696,33 @@ export function AnalysisDashboard({
         })
       : null;
 
+  // Canonical Grand Slam funnel milestones. Object-identity guards keep
+  // React Strict Mode and buy-box state updates from double-counting a single
+  // result while still recording a genuinely new calculation.
+  const trackedVerdictResultRef = useRef<AnalysisResult | null>(null);
+  useEffect(() => {
+    if (!result || isLoading || trackedVerdictResultRef.current === result) return;
+    trackedVerdictResultRef.current = result;
+    trackEvent("verdict_viewed", {
+      decision_tone: nextAction?.tone ?? "review",
+      is_cash_purchase: result.monthlyPayment <= 0,
+    });
+    if (canUseMaxOffer) {
+      trackEvent("max_offer_unlocked", { placement: "analysis_result" });
+    }
+  }, [canUseMaxOffer, isLoading, nextAction?.tone, result]);
+
+  const trackedBuyBoxResultRef = useRef<{ result: AnalysisResult; passes: boolean } | null>(null);
+  useEffect(() => {
+    if (!result || buyBoxAnyPass == null) return;
+    if (
+      trackedBuyBoxResultRef.current?.result === result &&
+      trackedBuyBoxResultRef.current.passes === buyBoxAnyPass
+    ) return;
+    trackedBuyBoxResultRef.current = { result, passes: buyBoxAnyPass };
+    trackEvent("buy_box_result_viewed", { passes: buyBoxAnyPass });
+  }, [buyBoxAnyPass, result]);
+
   // Plain-English "why this verdict" - the per-deal narrative (cash flow,
   // cap rate, DSCR, CoC) that the PDF/share already use but free users never
   // saw on screen. Free-tier safe and per-deal; rendered with progressive
@@ -767,7 +799,7 @@ export function AnalysisDashboard({
           deferredWhatIfState.ratePp,
           deferredWhatIfState.vacancyPp
         )}: ${fmtSignedMonthly(deferredWhatIfState.result.netCashFlow)}`
-      : "Stress it — find your max offer and worst case",
+      : "Stress it — see what happens when assumptions get worse",
     comps: buildCompsRowSummary(compsQaData, values?.monthlyRent ?? null, values?.purchasePrice ?? null, {
       propertyType: values?.propertyType,
     }),
@@ -865,12 +897,20 @@ export function AnalysisDashboard({
       {/* The upgrade moment belongs immediately after the answer, while the
           acquisition decision is still top-of-mind. It exposes the exact
           missing outcome (Max Offer) without inventing a number for Free. */}
-      {result && values && !isLoading && isAuthenticated && !canUseMaxOffer ? (
+      {result && values && !isLoading && canUseMaxOffer ? (
+        <section id="max-offer-result" className="scroll-mt-20 space-y-4" aria-label="Max Offer decision">
+          <MaxOfferCard values={values} buyBoxThresholds={buyBoxQaReport?.maoThresholds ?? null} />
+          <AssumptionImpactCard values={values} />
+        </section>
+      ) : null}
+
+      {result && values && !isLoading && !canUseMaxOffer ? (
         <MomentOfValueUpsell
           purchasePrice={Number(values.purchasePrice ?? 0)}
           netCashFlow={result.netCashFlow}
           capRate={result.capRate}
           cocReturn={result.cocReturn}
+          decisionTone={nextAction?.tone ?? "review"}
           isPaid={canUseMaxOffer}
           onExportPdf={onExportPdf}
         />
@@ -1595,32 +1635,11 @@ export function AnalysisDashboard({
               {tab.id === "strategies" && canUseStrategies && (
                 <StrategiesPanel values={values} result={result} onApplyRehab={onApplyRehab} currentRehabBudget={currentRehabBudget} />
               )}
-              {/* Stress Test row - Max Allowable Offer + Sensitivity Grid.
-                  Each card independently respects its own entitlement: a
-                  user could have unlocked one without the other (rare, but
-                  possible if entitlements drift). Cards render as full
-                  tools when entitled, or as ProInlineGate teasers when not. */}
+              {/* Stress Test row — the paid Max Offer is promoted directly
+                  beneath the verdict above. This row now focuses on downside
+                  sensitivity so the same answer never renders twice. */}
               {tab.id === "stress-test" && (
                 <div className="space-y-4">
-                  {canUseMaxOffer ? (
-                    // Seeded from the same primary-box thresholds the Q&A
-                    // MAO context uses (reported up by BuyBoxVerdictCard),
-                    // so the solver's first number matches the verdict
-                    // card's "your number" basis. Null = canonical defaults.
-                    <MaxOfferCard values={values} buyBoxThresholds={buyBoxQaReport?.maoThresholds ?? null} />
-                  ) : (
-                    <ProInlineGate
-                      icon={Target}
-                      title="Max Allowable Offer"
-                      description="Reverse-solve the highest price that still hits your return thresholds."
-                      previewBullets={[
-                        "Set targets for cap rate, CoC, or cash flow",
-                        "Binary-search solver runs in <1s",
-                        "'At this price you'd get…' readout",
-                      ]}
-                    />
-                  )}
-                  {canUseMaxOffer ? <AssumptionImpactCard values={values} /> : null}
                   {canUseSensitivity ? (
                     <SensitivityGrid values={values} />
                   ) : (
@@ -1896,10 +1915,18 @@ function ProFeaturePreview({
           <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
             <Sparkles className="size-6" />
           </div>
-          <h3 className="text-lg font-extrabold text-foreground">{copy.title} is a Pro feature</h3>
+          <h3 className="text-lg font-extrabold text-foreground">
+            {kind === "projections"
+              ? "See what this deal could produce over 10 years"
+              : kind === "tax-strategy"
+                ? "See the estimated after-tax picture"
+                : kind === "exit-scenarios"
+                  ? "Know when the exit changes the outcome"
+                  : "Test the strategy before committing rehab capital"}
+          </h3>
           <p className="mt-2 text-sm text-muted-foreground">{copy.description}</p>
           <Button className="mt-4 rounded-full font-semibold" onClick={onUpgrade}>
-            Upgrade to Pro
+            Unlock this decision view
           </Button>
         </div>
       </div>

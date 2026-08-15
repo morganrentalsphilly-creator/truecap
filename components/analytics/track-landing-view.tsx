@@ -27,12 +27,14 @@ export function TrackLandingView() {
   useEffect(() => {
     if (fired.current) return;
     fired.current = true;
-    trackEvent("landing_view", {
+    const properties = {
       // Useful for the funnel UI to filter by traffic source. Other
       // attribution-relevant props (utm_*, referrer) are captured by
       // PostHog's autocapture so we don't duplicate them here.
       path: typeof window !== "undefined" ? window.location.pathname : "/",
-    });
+    };
+    trackEvent("landing_view", properties);
+    trackEvent("homepage_viewed", properties);
   }, []);
   return null;
 }

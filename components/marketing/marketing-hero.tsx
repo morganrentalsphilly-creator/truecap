@@ -17,7 +17,7 @@
  * <DealsAnalyzedTicker />, so the rest of this tree ships zero JS.
  */
 
-import { Check, Quote, Sparkles, Target, TrendingUp } from "lucide-react";
+import { Check, Database, Sparkles, Target, TrendingUp } from "lucide-react";
 import { HeroAddressForm } from "@/components/marketing/hero-address-form";
 import { DealsAnalyzedTicker } from "@/components/marketing/deals-analyzed-ticker";
 import { calculateAnalysis } from "@/lib/calc-analysis";
@@ -58,10 +58,10 @@ export function MarketingHero() {
               {homepageHeadline}
             </h1>
             <p className="mt-4 max-w-xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg">
-              Paste an address and TrueCap pulls the key assumptions, checks
-              the property against your Buy Box, stress-tests the downside,
-              and calculates the highest price you can pay while still hitting
-              your investment targets.
+              Enter an address and TrueCap builds your first-pass underwrite
+              from sourced assumptions. See whether the property deserves your
+              attention, then use your Buy Box, Max Offer, and downside analysis
+              to decide what to do next.
             </p>
 
             {/* Primary action — the address input. Hands off to the
@@ -73,7 +73,7 @@ export function MarketingHero() {
                 density audit LAND-3). */}
             <p className="mt-3 hidden flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground sm:flex">
               <Check className="size-3.5 shrink-0 text-[var(--metric-positive)]" />
-              <span>Start with an address. Every assumption stays editable. Upgrade only when you need Max Offer and action tools.</span>
+              <span>No signup required. No credit card. Screen deals free.</span>
             </p>
           </div>
 
@@ -114,19 +114,19 @@ export function MarketingHero() {
                 />
               </div>
             </div>
-            {/* One outcome-specific quote — the strongest, revenue-tied
-                proof sits near the CTA; the rest live in SocialProof below. */}
-            <figure className="flex items-start gap-2.5 border-t border-border pt-4 sm:border-l sm:border-t-0 sm:pl-6 sm:pt-0">
-              <Quote className="mt-0.5 size-4 shrink-0 text-primary/40" />
-              <figcaption className="text-xs leading-relaxed text-muted-foreground">
-                <span className="text-foreground">
-                  &ldquo;Closed three more deals this quarter because I could move faster.&rdquo;
-                </span>
-                <span className="mt-1 block font-semibold text-foreground/70">
-                  Jordan M., buy-and-hold investor (18 doors)
-                </span>
-              </figcaption>
-            </figure>
+            {/* Proof that cannot drift or be overstated: the product labels
+                each starting assumption as sourced, user-entered, or a smart
+                default, and exposes the date/year when the source provides it.
+                Customer quotes render only from the verified proof registry
+                further down the page. */}
+            <div className="flex items-start gap-2.5 border-t border-border pt-4 sm:border-l sm:border-t-0 sm:pl-6 sm:pt-0">
+              <Database className="mt-0.5 size-4 shrink-0 text-primary/50" aria-hidden />
+              <p className="text-xs leading-relaxed text-muted-foreground">
+                <strong className="text-foreground">No black-box inputs.</strong>{" "}
+                Every starting assumption is labeled with its source or as your
+                input, stays editable, and carries a clear verification step.
+              </p>
+            </div>
           </div>
         </div>
       </div>

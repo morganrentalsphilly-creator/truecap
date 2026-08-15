@@ -40,9 +40,23 @@ import type { PostHog } from "posthog-js";
  */
 export type FunnelEvent =
   | "landing_view"
+  | "homepage_viewed"
   | "homepage_primary_cta" // properties: source (hero_address | sticky | final)
   | "analyzer_started"
+  | "address_submitted"
+  | "instant_screen_generated"
+  | "assumptions_opened"
+  | "assumptions_updated"
   | "analysis_completed"
+  | "analyzer_completed"
+  | "verdict_viewed"
+  | "buy_box_result_viewed"
+  | "max_offer_teaser_viewed"
+  | "max_offer_unlock_clicked"
+  | "max_offer_unlocked"
+  | "stress_test_opened"
+  | "downside_viewed"
+  | "deal_compared"
   | "pro_checkout_started"
   | "pro_subscribed"
   | "deal_saved"        // properties: property_type, purchase_price, cap_rate, monthly_cash_flow
@@ -70,6 +84,7 @@ export type FunnelEvent =
   | "one_time_pdf_purchased"
   | "single_deal_checkout_started" // properties: property_type, price_variant
   | "single_deal_purchased"        // properties: price_variant
+  | "single_deal_checkout_completed"
   // Deal Q&A (AI panel under the recommendation card).
   | "deal_qa_asked" // properties: question_length
   // AI deal summary (one-tap grounded summary card).
@@ -102,6 +117,7 @@ export type FunnelEvent =
   | "max_offer_view_attempted" // properties: placement
   | "upgrade_modal_viewed"     // properties: feature, placement
   | "pricing_view"          // properties: path
+  | "pricing_viewed"
   | "shared_deal_viewed"    // properties: has_address
   // ── Agent Loop: co-branded share lead capture (T6) ─────────────
   | "lead_form_shown"       // properties: owner_present
@@ -112,7 +128,11 @@ export type FunnelEvent =
   | "strategy_selected"     // properties: strategy (e.g. "wholesale-mao"), source ("chip" click vs "link" seed)
   | "comparison_started"    // properties: source
   | "report_generated"      // properties: report_type
-  | "agent_pro_cta_clicked"; // properties: placement
+  | "agent_pro_cta_clicked" // properties: placement
+  | "agent_pro_checkout_started"
+  | "agent_pro_page_viewed"
+  | "guarantee_viewed"
+  | "onboarding_step_completed";
 
 // ── Lazy init + pre-init call buffering ─────────────────────────────
 

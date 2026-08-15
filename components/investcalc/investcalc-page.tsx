@@ -105,7 +105,12 @@ import {
   buildDealScoreInputFromAnalysis,
   computeDealScore,
 } from "@/lib/deal-score";
-import { calculateMaxAllowableOffer } from "@/lib/max-allowable-offer";
+import {
+  calculateMaxAllowableOffer,
+  solveRequiredInterestRate,
+  solveRequiredMonthlyRent,
+} from "@/lib/max-allowable-offer";
+import { buildMaoTarget, describeMaoTarget } from "@/lib/mao-targets";
 import { getLimitingFactor } from "@/lib/limiting-factor";
 import {
   createOneTimePdfCheckoutAction,
@@ -477,6 +482,16 @@ function toPdfReportData(args: {
     // and the explicit unchanged values make the scenario limitation visible.
   }
 
+  // Single-Deal Underwrite must answer the acquisition question, not merely
+  // export the same free metrics. Resolve the canonical deterministic Max
+  // Offer and Deal Doctor thresholds into the report payload. This does not
+  // grant a persistent Pro entitlement or expose a hidden number on screen.
+  const isCashPurchase = result.monthlyPayment <= 0;
+  const maxOfferTarget = buildMaoTarget(null, { isCashPurchase });
+  const maxOfferResult = calculateMaxAllowableOffer(values, maxOfferTarget);
+  const requiredMonthlyRent = solveRequiredMonthlyRent(values, maxOfferTarget);
+  const requiredInterestRate = solveRequiredInterestRate(values, maxOfferTarget);
+
   return {
     generatedAt: new Date(),
     property: {
@@ -528,6 +543,33 @@ function toPdfReportData(args: {
       taxSavings: result.taxSavingsMonthly,
       afterTaxCF: result.afterTaxCF,
     },
+    maxOffer: maxOfferResult
+      ? {
+          maxPrice: maxOfferResult.maxPrice,
+          basis: describeMaoTarget(maxOfferTarget),
+          currentPriceGap: maxOfferResult.maxPrice - values.purchasePrice,
+          achieved: {
+            monthlyCashFlow: maxOfferResult.achieved.netCashFlow,
+            cocReturn: maxOfferResult.achieved.cocReturn,
+            capRate: maxOfferResult.achieved.capRate,
+            dscr: maxOfferResult.achieved.dscr,
+          },
+          requiredMonthlyRent: requiredMonthlyRent
+            ? {
+                value: requiredMonthlyRent.value,
+                alreadyMet: requiredMonthlyRent.alreadyMet,
+                unreachable: requiredMonthlyRent.unreachable,
+              }
+            : null,
+          requiredInterestRate: requiredInterestRate
+            ? {
+                value: requiredInterestRate.value,
+                alreadyMet: requiredInterestRate.alreadyMet,
+                unreachable: requiredInterestRate.unreachable,
+              }
+            : null,
+        }
+      : null,
     downsideScenario: {
       label: `Rent ${WORST_CASE_PRESET.rentPct}% · vacancy +${WORST_CASE_PRESET.vacancyPp}pp${
         downsideRatePp > 0 ? ` · rate +${downsideRatePp}pp` : ""
@@ -3074,6 +3116,26 @@ export function InvestCalcPage({
       is_cash_purchase: !values.downPaymentPct || values.downPaymentPct >= 100,
       input_tab: activeInputTab,
     });
+    const dirty = form.formState.dirtyFields as Record<string, unknown>;
+    const assumptionsChanged =
+      computeExpensesEdited(dirty) ||
+      [
+        "downPaymentPct",
+        "interestRate",
+        "loanTermYears",
+        "monthlyRent",
+        "propertyTaxPct",
+        "propertyTaxAnnual",
+        "insurancePct",
+        "insuranceMonthly",
+        "rentGrowthPct",
+        "expenseGrowthPct",
+        "appreciationRatePct",
+        "sellingCostPct",
+      ].some((field) => Boolean(dirty[field]));
+    if (assumptionsChanged) {
+      trackEvent("assumptions_updated", { source: "analyzer_run" });
+    }
 
     // Increment the global "analyses run" counter behind the homepage
     // social-proof ticker. Fires only here - on a real Run click, not on
@@ -3144,6 +3206,15 @@ export function InvestCalcPage({
         monthly_cash_flow: Math.round(result.netCashFlow),
         is_cash_purchase: result.monthlyPayment <= 0,
         input_tab: activeInputTab,
+      });
+      trackEvent("analyzer_completed", {
+        property_type: values.propertyType,
+        verdict: getDealTier(result),
+        is_cash_purchase: result.monthlyPayment <= 0,
+      });
+      trackEvent("instant_screen_generated", {
+        property_type: values.propertyType,
+        verdict: getDealTier(result),
       });
       setProjectionSource(builtProjectionSource);
       setTaxStrategySource(builtTaxStrategySource);
@@ -4014,6 +4085,10 @@ export function InvestCalcPage({
         price_variant:
           verified.priceVariant ?? getMarketingOfferConfig().singleDealPriceVariant,
       });
+      trackEvent("single_deal_checkout_completed", {
+        price_variant:
+          verified.priceVariant ?? getMarketingOfferConfig().singleDealPriceVariant,
+      });
 
       // Restore the stashed deal and auto-run analysis → auto-export.
       let restoredValues: InvestmentFormValues | null = null;
@@ -4342,6 +4417,7 @@ export function InvestCalcPage({
         description: "Your saved analysis was added to the compare workspace.",
         variant: "success",
       });
+      trackEvent("deal_compared", { source: "analysis_result" });
       router.push("/dashboard/compare");
     } finally {
       setIsComparingDeals(false);
@@ -4587,7 +4663,10 @@ export function InvestCalcPage({
 
   const toggleAdvanced = () => {
     const next = !advancedOpen;
-    if (next) trackEvent("optional_section_opened", { source: "toggle" });
+    if (next) {
+      trackEvent("optional_section_opened", { source: "toggle" });
+      trackEvent("assumptions_opened", { source: "toggle" });
+    }
     setAdvancedOpen(next);
     try {
       window.localStorage.setItem(CALC_ADVANCED_OPEN_KEY, next ? "1" : "0");
@@ -4630,6 +4709,7 @@ export function InvestCalcPage({
     }
     trackEvent("result_assumptions_edited", {});
     trackEvent("optional_section_opened", { source: "edit_link" });
+    trackEvent("assumptions_opened", { source: "edit_link" });
     if (typeof window !== "undefined") {
       const el = document.getElementById("main");
       if (el) window.scrollTo({ top: el.offsetTop - 64, behavior: scrollBehavior() });

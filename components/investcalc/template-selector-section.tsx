@@ -66,7 +66,7 @@ export function TemplateSelectorSection({
   const [dialogInitialValues, setDialogInitialValues] = useState<AnalysisTemplateInput | null>(null);
   const [isTemplateLocked, setIsTemplateLocked] = useState(true);
   const [templateLockMessage, setTemplateLockMessage] = useState(
-    "Upgrade to Pro to unlock template management."
+    "Save your assumptions once and apply them to every future deal with Pro."
   );
 
   const templateId = form.watch("templateId");

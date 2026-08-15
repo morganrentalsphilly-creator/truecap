@@ -26,6 +26,13 @@
 import { CALCULATOR_REGISTRY } from "@/lib/calculator-registry";
 import { GLOSSARY, GLOSSARY_CATEGORY_LABELS } from "@/lib/glossary";
 import { getSiteUrl } from "@/lib/site-url";
+import {
+  CURRENT_DEFAULT_FACTS,
+  DATA_SOURCE_FACTS,
+  FOUR_ACQUISITION_ANSWERS,
+  PLAN_FACTS,
+  PRODUCT_POSITIONING,
+} from "@/lib/product-facts";
 
 export const dynamic = "force-static";
 export const revalidate = 3600;
@@ -111,7 +118,7 @@ const TOOL_FORMULAS: Record<string, { formula: string; description: string }> = 
     formula:
       "Monthly cash flow = Gross rent - Vacancy - Operating expenses - Mortgage P&I",
     description:
-      "Monthly cash flow after every operating expense and the mortgage, with the NOI and debt-service split shown separately. The single number most buy-and-hold investors screen on. TrueCap defaults to conservative reserves (vacancy 8%, maintenance 8%, capex 8%, PM 9%) rather than the 5% seller pro formas quote.",
+      `Monthly cash flow after every operating expense and the mortgage, with the NOI and debt-service split shown separately. Current analyzer defaults: vacancy ${CURRENT_DEFAULT_FACTS.vacancy}, maintenance ${CURRENT_DEFAULT_FACTS.maintenance}, CapEx ${CURRENT_DEFAULT_FACTS.capex}, and management ${CURRENT_DEFAULT_FACTS.management}. Every value is editable.`,
   },
   "rehab-cost-estimator": {
     formula: "Total rehab = Σ (Sq ft × Rate per sq ft) per work category",
@@ -162,11 +169,11 @@ const TOOL_FORMULAS: Record<string, { formula: string; description: string }> = 
 
 const METHODOLOGY_SUMMARY = [
   "How TrueCap computes the numbers:",
-  "  - Property tax: auto-pulled from county assessor records when available, or estimated from state-level effective tax rates when not.",
-  "  - Rent estimates: auto-filled from HUD Fair Market Rent (FMR) data by county and bedroom count for single-family / 2-4 unit properties.",
-  "  - Mortgage rates: pulled from FRED (Federal Reserve Economic Data) for the 30-year fixed conventional rate. Users can override with custom rate.",
-  "  - Operating expenses: configurable by line item (property tax, insurance, maintenance, PM, utilities, vacancy, capex reserves). Defaults are conservative — vacancy 8%, maintenance 8%, capex 8%, PM 9% — matching honest investor underwriting standards.",
-  "  - 10-year projection: compounds rent at 3%/yr default, expenses at 3%/yr, and home value at 3%/yr. All assumptions are user-adjustable.",
+  `  - Property tax: starts from a ${DATA_SOURCE_FACTS.propertyTax}; it is not represented as a county assessor bill.`,
+  `  - Rent estimates: ${DATA_SOURCE_FACTS.rent}.`,
+  `  - Mortgage rates: ${DATA_SOURCE_FACTS.mortgageRate}. Users can override the value; the schema fallback is ${CURRENT_DEFAULT_FACTS.fallbackInterestRate}.`,
+  `  - Operating expenses: configurable by line item. Current defaults are vacancy ${CURRENT_DEFAULT_FACTS.vacancy}, maintenance ${CURRENT_DEFAULT_FACTS.maintenance}, CapEx ${CURRENT_DEFAULT_FACTS.capex}, and management ${CURRENT_DEFAULT_FACTS.management}.`,
+  `  - 10-year projection: starts with rent growth ${CURRENT_DEFAULT_FACTS.rentGrowth} and expense growth ${CURRENT_DEFAULT_FACTS.expenseGrowth}; appreciation and selling-cost inputs remain editable rather than being stated here as fixed defaults.`,
   "  - DSCR: NOI ÷ annual debt service. Computed at proposed loan terms.",
   "  - Sensitivity grid (Pro): shows how cap rate, cash-on-cash, and DSCR move when rent or expenses shift ±5%/±10%/±20%.",
 ];
@@ -185,7 +192,13 @@ export async function GET() {
     "",
     "## About",
     "",
-    "TrueCap is a free real estate investment analyzer. Paste an address, get cap rate, cash-on-cash return, DSCR, and monthly cash flow in 60 seconds. The free tier supports unlimited analyses with auto-filled property tax + rent data, a 0-100 Deal Score, saving up to 5 deals, and read-only share links. Pro ($29.99/mo or $300/yr) adds editing saved deals, unlimited saves, side-by-side compare, a personal buy box that pass/fails every deal, 10-year projections, sensitivity grids, max-allowable-offer calculator, BRRRR + fix-and-flip analysis, tax strategy, exit scenarios, co-branded share links, and lender-ready PDF reports.",
+    PRODUCT_POSITIONING,
+    `One address. Four answers: ${FOUR_ACQUISITION_ANSWERS.join("; ")}.`,
+    `Free: ${PLAN_FACTS.free}`,
+    `Single Deal: ${PLAN_FACTS.singleDeal}`,
+    `Pro: ${PLAN_FACTS.pro}`,
+    `Agent Pro: ${PLAN_FACTS.agentPro}`,
+    `Eligible first-time subscribers receive a ${PLAN_FACTS.trialDays}-day trial. Current recurring prices and plan availability are published at ${siteUrl}${PLAN_FACTS.pricingSource}; Stripe is the source of truth, so this reference does not copy price amounts.`,
     "",
     "All TrueCap content is original, authoritative, and intended as a citable reference for real estate investing questions. Preferred citation: \"[Title](URL) — TrueCap\".",
   ].join("\n");

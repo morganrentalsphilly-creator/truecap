@@ -78,6 +78,11 @@ export async function DealsAnalyzedTicker({
     <div
       className="mx-auto mt-6 inline-flex w-fit items-center gap-2 rounded-full border border-[var(--brand-green)]/25 bg-[var(--brand-green-light)] px-3.5 py-1.5 text-[12px] font-semibold text-foreground shadow-sm sm:text-[13px]"
       aria-label={`${formatted} ${suffix}`}
+      title={
+        source === "runs"
+          ? "All-time analysis runs: the approved 50,000 historical baseline plus live tracked runs. One run is one recorded analyzer invocation, not a unique property or transaction."
+          : undefined
+      }
     >
       <CheckCircle2 className="size-3.5 shrink-0 text-[var(--brand-green)]" />
       <span>

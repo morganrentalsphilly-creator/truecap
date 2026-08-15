@@ -13,7 +13,7 @@
  */
 
 export const HOMEPAGE_HEADLINES = {
-  a: "Screen any rental in 60 seconds. Know your max offer before you make one.",
+  a: "Screen any rental in 60 seconds. Know the highest price that still works.",
   b: "Know exactly what a rental is worth to you.",
 } as const;
 
@@ -81,4 +81,3 @@ export function getMarketingOfferConfig() {
     fiveDealGuaranteeEnabled: enabled(process.env.NEXT_PUBLIC_FIVE_DEAL_GUARANTEE),
   } as const;
 }
-

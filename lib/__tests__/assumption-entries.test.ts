@@ -46,6 +46,18 @@ describe("buildAssumptionEntries (truthful assumptions strip)", () => {
     expect(e[0]!.source).toBe("HUD Fair Market Rent (ZIP)");
   });
 
+  it("carries source freshness when the feed provides it", () => {
+    const e = buildAssumptionEntries(
+      {
+        monthlyRent: { source: "hud-fmr", fetchedAt: "2026" },
+        interestRate: { source: "fred", fetchedAt: "2026-06-25" },
+      },
+      false
+    );
+    expect(e[0]).toMatchObject({ freshness: "HUD 2026" });
+    expect(e[1]).toMatchObject({ freshness: "As of 2026-06-25" });
+  });
+
   it("flips Expenses to the user once any expense field is dirty", () => {
     const e = buildAssumptionEntries(fullEnrichment, true);
     expect(e[3]).toMatchObject({ label: "Expenses", source: "You entered it", manual: true });

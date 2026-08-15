@@ -18,6 +18,10 @@ import { ArrowRight, ArrowUpRight, Calculator, FileDown, Share2, ShieldCheck, Sp
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { TrackedMarketingLink } from "@/components/marketing/tracked-marketing-link";
+import { loadStripeDisplayPrice } from "@/lib/stripe/display-prices";
+import { isAgentProConfigured } from "@/lib/stripe/plan-prices";
+import { TRIAL_DAYS } from "@/lib/trial";
+import { AgentProPageTracker } from "@/components/analytics/agent-pro-page-tracker";
 
 export const metadata: Metadata = {
   title: "Agent Pro — Rental Deal Analysis for Clients",
@@ -64,9 +68,21 @@ const USE_CASES: { icon: typeof Calculator; title: string; body: string }[] = [
   },
 ];
 
-export default function ForAgentsPage() {
+export default async function ForAgentsPage() {
+  const agentProConfigured = isAgentProConfigured();
+  const [agentMonthly, agentAnnual] = agentProConfigured
+    ? await Promise.all([
+        loadStripeDisplayPrice("agent_pro_monthly"),
+        loadStripeDisplayPrice("agent_pro_annual"),
+      ])
+    : [null, null];
+  const agentCheckoutHref = agentProConfigured
+    ? "/pricing?checkout=agent_pro_monthly#plans"
+    : "/pricing#plans";
+
   return (
     <div className="min-h-screen bg-background">
+      <AgentProPageTracker />
       <main id="main" className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         {/* Eyebrow + back link */}
         <div className="mb-2">
@@ -93,11 +109,27 @@ export default function ForAgentsPage() {
             client&apos;s Buy Box, and send a co-branded investment analysis
             before you leave.
           </p>
+          <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 rounded-2xl border border-border bg-card px-4 py-3 text-sm sm:w-fit">
+            <span className="font-bold text-foreground">
+              {agentMonthly
+                ? `${agentMonthly.amountLabel}/${agentMonthly.period}`
+                : agentProConfigured
+                  ? "Live price temporarily unavailable"
+                  : "See current availability"}
+            </span>
+            {agentAnnual ? (
+              <span className="text-muted-foreground">
+                {agentAnnual.amountLabel}/{agentAnnual.period}
+              </span>
+            ) : null}
+            <span className="text-muted-foreground">{TRIAL_DAYS}-day trial for eligible first-time subscribers</span>
+            <span className="text-muted-foreground">Client roster included · no software-enforced roster cap</span>
+          </div>
 
           {/* CTAs */}
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
             <TrackedMarketingLink
-              href="/pricing?checkout=agent_pro_monthly#plans"
+              href={agentCheckoutHref}
               event="agent_pro_cta_clicked"
               properties={{ placement: "agent_hero" }}
               className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5"
@@ -225,9 +257,14 @@ export default function ForAgentsPage() {
             per-client Buy Boxes, deal assignment, co-branded analysis,
             client portals, white-label embeds, and the full Pro decision workflow.
           </p>
+          <p className="mb-5 text-sm font-bold">
+            {agentMonthly ? `${agentMonthly.amountLabel}/${agentMonthly.period}` : "See live pricing"}
+            {agentAnnual ? ` · ${agentAnnual.amountLabel}/${agentAnnual.period}` : ""}
+            {` · ${TRIAL_DAYS}-day trial for eligible first-time subscribers · client roster included`}
+          </p>
           <div className="flex flex-wrap gap-3">
             <TrackedMarketingLink
-              href="/pricing?checkout=agent_pro_monthly#plans"
+              href={agentCheckoutHref}
               event="agent_pro_cta_clicked"
               properties={{ placement: "agent_final" }}
               className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"

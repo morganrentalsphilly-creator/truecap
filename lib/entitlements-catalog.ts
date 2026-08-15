@@ -100,7 +100,7 @@ export const FEATURE_CATALOG: Record<FeatureKey, FeatureSpec> = {
   dashboard_access: { key: "dashboard_access", label: "Dashboard access", tiers: ["free", "pro", "agent_pro"], category: "pipeline", gate: "flag" },
   dashboard_insights: { key: "dashboard_insights", label: "Portfolio insights & analytics", tiers: ["pro", "agent_pro"], category: "pipeline", gate: "flag" },
   compare_deals: { key: "compare_deals", label: "Compare deals side-by-side", tiers: ["pro", "agent_pro"], proLimit: "up to 4", category: "analysis", gate: "flag" },
-  mao: { key: "mao", label: "MAO solver — max offer for your targets", tiers: ["pro", "agent_pro"], category: "analysis", gate: "paid" },
+  mao: { key: "mao", label: "MAO solver — max offer for your targets", tiers: ["one_time_pdf", "pro", "agent_pro"], oneTimeLimit: "In the PDF", category: "analysis", gate: "paid" },
   sensitivity: { key: "sensitivity", label: "Sensitivity grid — stress-test the deal", tiers: ["pro", "agent_pro"], category: "analysis", gate: "paid" },
   strategies: { key: "strategies", label: "BRRRR + fix-and-flip + rehab estimator", tiers: ["pro", "agent_pro"], category: "analysis", gate: "paid" },
   projections: { key: "projections", label: "10-year cash flow & equity projection", tiers: ["one_time_pdf", "pro", "agent_pro"], oneTimeLimit: "In the PDF", category: "analysis", gate: "flag" },
@@ -140,6 +140,7 @@ export function featuresForTier(tier: Tier): FeatureSpec[] {
 export function featureLimit(key: FeatureKey, tier: Tier): string | undefined {
   const f = FEATURE_CATALOG[key];
   if (tier === "free") return f.freeLimit;
+  if (tier === "one_time_pdf") return f.oneTimeLimit;
   if (tier === "pro") return f.proLimit;
   return undefined;
 }

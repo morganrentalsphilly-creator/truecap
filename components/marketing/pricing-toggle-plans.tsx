@@ -195,9 +195,11 @@ export function PricingTogglePlans({
   useEffect(() => {
     if (viewFired.current) return;
     viewFired.current = true;
-    trackEvent("pricing_view", {
+    const properties = {
       path: typeof window !== "undefined" ? window.location.pathname : "/pricing",
-    });
+    };
+    trackEvent("pricing_view", properties);
+    trackEvent("pricing_viewed", properties);
   }, []);
 
   const monthlyAmount = parsePriceAmount(monthly);

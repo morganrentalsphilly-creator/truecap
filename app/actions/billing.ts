@@ -368,6 +368,15 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
         stripe_session_id: session.id,
       },
     });
+    if (parsed.data.planSlug.startsWith("agent_pro")) {
+      await captureServerEvent({
+        distinctId: user.id,
+        event: "agent_pro_checkout_started",
+        properties: {
+          plan_slug: parsed.data.planSlug,
+        },
+      });
+    }
 
     return { ok: true, url: session.url };
   } catch (error) {

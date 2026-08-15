@@ -83,6 +83,22 @@ export interface ReportData {
     taxSavings: number;
     afterTaxCF: number;
   };
+  /** Deterministic acquisition threshold included in every complete report.
+   *  A null value means the canonical target was unreachable inside the
+   *  solver's supported price range; the report must never invent a number. */
+  maxOffer?: {
+    maxPrice: number;
+    basis: string;
+    currentPriceGap: number;
+    achieved: {
+      monthlyCashFlow: number;
+      cocReturn: number;
+      capRate: number;
+      dscr: number;
+    };
+    requiredMonthlyRent: { value: number; alreadyMet: boolean; unreachable: boolean } | null;
+    requiredInterestRate: { value: number; alreadyMet: boolean; unreachable: boolean } | null;
+  } | null;
   downsideScenario: {
     /** Reproducible input change, e.g. rent -10% · vacancy +5pp · rate +1pp. */
     label: string;
@@ -977,13 +993,15 @@ function pageCover(
   doc.text(thesisLines, panelX + 20, py, { lineHeightFactor: 1.4 });
   py += thesisH + 22;
 
-  // Three headline numbers across the foot of the panel.
+  // Four acquisition answers across the foot of the panel. Max Offer belongs
+  // on the cover of the paid decision package—not buried as a small metric.
   const metrics: Array<[string, string]> = [
     ["MONTHLY CASH FLOW", fmtCurrency(d.performance.monthlyCashFlow, true)],
     ["CAP RATE", fmtPct(d.performance.capRate)],
     ["CASH-ON-CASH", fmtPct(d.performance.cocReturn)],
+    ["MAX OFFER", d.maxOffer ? fmtCurrency(d.maxOffer.maxPrice) : "Not solvable"],
   ];
-  const mColW = (panelW - 40) / 3;
+  const mColW = (panelW - 40) / 4;
   metrics.forEach((m, i) => {
     const mx = panelX + 20 + i * mColW;
     setText(doc, COLOR.sub);
@@ -992,7 +1010,7 @@ function pageCover(
     doc.setCharSpace(0.6);
     doc.text(m[0], mx, py);
     doc.setCharSpace(0);
-    setText(doc, i === 0 ? (d.performance.monthlyCashFlow >= 0 ? COLOR.success : COLOR.danger) : COLOR.ink);
+    setText(doc, i === 0 ? (d.performance.monthlyCashFlow >= 0 ? COLOR.success : COLOR.danger) : i === 3 ? COLOR.primary : COLOR.ink);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(16);
     doc.text(m[1], mx, py + 18);
@@ -1332,11 +1350,11 @@ function pageInputs(
     isCashPurchase ? "neutral" : d.performance.dscr >= 1.2 ? "success" : "warn";
   const dscrSub = isCashPurchase ? "cash purchase" : "debt cover";
   const cards: Array<[string, string, "primary" | "success" | "danger" | "neutral" | "violet" | "warn", string?]> = [
+    ["Max Offer", d.maxOffer ? fmtCurrency(d.maxOffer.maxPrice) : "Not solvable", "primary", d.maxOffer ? "canonical target" : "review inputs"],
     ["Monthly Cash Flow", fmtCurrency(d.performance.monthlyCashFlow), d.performance.monthlyCashFlow >= 0 ? "success" : "danger", "/month"],
     ["CoC Return", fmtPct(d.performance.cocReturn, true), "primary", "year 1"],
     ["Cap Rate", fmtPct(d.performance.capRate, true), "violet", "gross"],
     ["DSCR", dscrValue, dscrTone, dscrSub],
-    ["Tax Savings", fmtCurrency(d.performance.taxSavings), d.performance.taxSavings >= 0 ? "success" : "danger", "/month est."],
     ["After-Tax CF", fmtCurrency(d.performance.afterTaxCF), "primary", "/month"],
   ];
   cards.forEach((c, i) => {
@@ -1834,6 +1852,37 @@ function pageDownside(
     themeColor,
   });
   y += 88;
+
+  if (d.maxOffer) {
+    card(doc, M.left, y, SAFE.w, 92, { soft: true });
+    setText(doc, COLOR.primary);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8);
+    doc.setCharSpace(0.7);
+    doc.text("DEAL DOCTOR", M.left + 16, y + 20);
+    doc.setCharSpace(0);
+    setText(doc, COLOR.ink);
+    doc.setFontSize(14);
+    doc.text(`Max Offer ${fmtCurrency(d.maxOffer.maxPrice)}`, M.left + 16, y + 42);
+    setText(doc, COLOR.sub);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8.5);
+    const rentFix = d.maxOffer.requiredMonthlyRent;
+    const rateFix = d.maxOffer.requiredInterestRate;
+    const alternatives = [
+      rentFix && !rentFix.alreadyMet && !rentFix.unreachable
+        ? `rent at least ${fmtCurrency(rentFix.value)}/mo`
+        : null,
+      rateFix && !rateFix.alreadyMet && !rateFix.unreachable
+        ? `interest rate at or below ${rateFix.value.toFixed(2)}%`
+        : null,
+    ].filter((value): value is string => Boolean(value));
+    const doctorText = `${d.maxOffer.basis}. At the current asking price${
+      alternatives.length ? `, the same target could also be reached with ${alternatives.join(" or ")}.` : ", review the verified inputs before negotiating."
+    }`;
+    doc.text(doc.splitTextToSize(doctorText, SAFE.w - 32), M.left + 16, y + 61);
+    y += 116;
+  }
 
   card(doc, M.left, y, SAFE.w, 78, { soft: true });
   setText(doc, survives ? COLOR.success : COLOR.danger);

@@ -85,12 +85,13 @@ describe("catalog matches what the product actually does", () => {
     // them — claiming otherwise under-sells a paid product and contradicts the
     // homepage FAQ.
     const pdf = readFileSync(join(ROOT, "lib/pdf-generator.ts"), "utf8");
-    for (const key of ["projections", "tax_strategy", "exit_scenarios"] as const) {
+    for (const key of ["projections", "tax_strategy", "exit_scenarios", "mao"] as const) {
       expect(tierHas("one_time_pdf", key), `${key} in the $5 PDF`).toBe(true);
     }
     expect(pdf).toMatch(/projection10y/);
     expect(pdf).toMatch(/taxStrategy/);
     expect(pdf).toMatch(/exitScenarios/);
+    expect(pdf).toMatch(/maxOffer/);
   });
 
   it("free-tier saving stays freemium (5 deals), matching lib/entitlements", () => {

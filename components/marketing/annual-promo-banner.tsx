@@ -75,7 +75,7 @@ export function AnnualPromoBanner() {
     >
       <div className="mx-auto flex max-w-6xl items-center justify-center gap-3 px-4 py-2 text-center text-xs font-semibold text-foreground sm:gap-4 sm:text-sm">
         <span className="hidden sm:inline text-[10px] font-bold uppercase tracking-widest text-primary">
-          Limited
+          Annual plan
         </span>
         <p>
           Save <span className="text-primary">2 months free</span> on annual Pro.

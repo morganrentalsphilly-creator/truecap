@@ -14,10 +14,7 @@ import {
   ArrowRight,
   ArrowUpRight,
   Calculator,
-  Check,
-  Minus,
   Sparkles,
-  X,
 } from "lucide-react";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -29,7 +26,7 @@ import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema"
 export const metadata: Metadata = {
   title: "DealCheck Alternative for Rental Analysis (2026)",
   description:
-    "Honest TrueCap vs DealCheck for rental analysis: pricing, free tier depth, features, mobile, sharing — what each does best and when to pick which.",
+    "A fair TrueCap vs DealCheck workflow comparison: first screen, assumptions, purchase criteria, offer calculation, downside, and mobile access.",
   keywords: [
     "dealcheck alternative",
     "dealcheck vs truecap",
@@ -41,7 +38,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "DealCheck Alternative for Rental Analysis (2026)",
     description:
-      "Side-by-side feature matrix. Pricing, free tier, mobile, sharing, depth — what each tool is built for.",
+      "Address-to-decision workflow vs a mature rental-analysis and native mobile ecosystem.",
     url: "/vs/dealcheck",
     type: "website",
     images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap vs DealCheck" }],
@@ -49,28 +46,16 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", images: ["/home.jpg"] },
 };
 
-type Verdict = "truecap" | "dealcheck" | "tie";
-type Row = { feature: string; truecap: string; dealcheck: string; winner: Verdict };
+type Row = { workflow: string; truecap: string; dealcheck: string };
 
 const MATRIX: Row[] = [
-  { feature: "Free tier depth",                   truecap: "Full underwriting (cap rate, CoC, DSCR, NCF, monthly cash flow) — no signup; save up to 5 deals free (Pro unlimited)",        dealcheck: "Free Starter capped at 15 saved properties; signup required",          winner: "truecap" },
-  { feature: "Address auto-fill",                 truecap: "Paste a Zillow/Redfin link or address → HUD rent + FRED rate + state property tax, live", dealcheck: "Full property auto-import from listing sites (price, taxes, photos)",   winner: "tie" },
-  { feature: "10-year projection",                truecap: "Pro — full rent + expense + appreciation compounding",                              dealcheck: "Built-in; one of the strongest views",                                 winner: "dealcheck" },
-  { feature: "Tax strategy modeling",             truecap: "Pro — depreciation, interest deduction, after-tax CF, bracket-aware",               dealcheck: "Basic tax view",                                                       winner: "truecap" },
-  { feature: "Exit scenarios",                    truecap: "Pro — sell-at-year-N modeling with equity + IRR",                                   dealcheck: "Available",                                                            winner: "tie" },
-  { feature: "Sensitivity grid (stress test)",    truecap: "Pro — rent ±10%, vacancy ±5pp, rates ±1pp in one view",                              dealcheck: "Not a primary feature",                                                winner: "truecap" },
-  { feature: "Max allowable offer (MAO) solver",  truecap: "Pro — works backward from target return",                                           dealcheck: "Available",                                                            winner: "tie" },
-  { feature: "BRRRR analyzer",                    truecap: "Yes — capital-recovered focus + ARV-driven refi math",                              dealcheck: "Yes — long-standing BRRRR support",                                    winner: "tie" },
-  { feature: "Fix-and-flip analyzer",             truecap: "Yes — ARV, holding cost, profit modeling",                                          dealcheck: "Yes",                                                                  winner: "tie" },
-  { feature: "Shareable read-only deal links",    truecap: "Free — read-only public link; Pro adds co-branding",                                    dealcheck: "Available in some tiers",                                              winner: "tie" },
-  { feature: "PDF report export",                 truecap: "Pro — multi-page lender-ready report",                                              dealcheck: "Yes — long-standing PDF feature",                                      winner: "tie" },
-  { feature: "Mobile-first UX",                   truecap: "Designed mobile-first — works great at the showing",                                dealcheck: "Has mobile apps (iOS + Android)",                                      winner: "dealcheck" },
-  { feature: "Saved deal portfolio rollup",       truecap: "Free saves up to 5; Pro unlimited — total CF, weighted cap rate across saved deals",                              dealcheck: "List view; no portfolio aggregate",                                    winner: "truecap" },
-  { feature: "Cash flow waterfall visualization", truecap: "Yes — see where every rent dollar goes",                                            dealcheck: "Standard line-item breakdown",                                         winner: "truecap" },
-  { feature: "Deal score + plain-English verdict", truecap: "Free — 0-100 score with subscore breakdown + explanation",                          dealcheck: "Color-coded indicators",                                               winner: "truecap" },
-  { feature: "Open data sources cited",           truecap: "HUD FMR + FRED + state tax — every assumption traceable",                           dealcheck: "Listing-import + custom data",                                         winner: "truecap" },
-  { feature: "Pricing transparency",              truecap: "Free + monthly Pro on /pricing, no card to start",                                  dealcheck: "Tiered plans (free Starter / Plus $10 / Pro $20)",                              winner: "tie" },
-  { feature: "Native iOS/Android apps",           truecap: "PWA — installable to home screen, no app-store delay",                              dealcheck: "Native apps",                                                          winner: "dealcheck" },
+  { workflow: "First screen", truecap: "Address-first, no-signup screen with an opinionated verdict.", dealcheck: "Account-based analysis with listing and property-data import workflows." },
+  { workflow: "Starting assumptions", truecap: "Labels HUD rent, FRED rate, state tax benchmark, smart defaults, and user edits.", dealcheck: "Imports available property data and supports user-entered assumptions." },
+  { workflow: "Purchase criteria", truecap: "Buy Box checks the analysis inside the decision flow.", dealcheck: "Custom purchase criteria screen properties against saved thresholds." },
+  { workflow: "Offer price", truecap: "Max Offer is connected to Buy Box targets and Deal Doctor thresholds.", dealcheck: "Its Offer Calculator calculates offers from configurable buying criteria." },
+  { workflow: "Downside", truecap: "Sensitivity and downside scenarios sit directly after the verdict and Max Offer.", dealcheck: "Long-range analysis and editable assumptions support scenario evaluation." },
+  { workflow: "Mobile", truecap: "Responsive web app that can be installed as a PWA.", dealcheck: "Native iOS and Android apps plus web access." },
+  { workflow: "Best fit", truecap: "Investors who want a guided address-to-decision sequence.", dealcheck: "Investors who want a mature analysis ecosystem and native mobile workflow." },
 ];
 
 export default function VsDealCheckPage() {
@@ -82,7 +67,7 @@ export default function VsDealCheckPage() {
     url: `${siteUrl}/vs/dealcheck`,
     description:
       "Side-by-side comparison of TrueCap and DealCheck for rental property underwriting.",
-    dateModified: "2026-06-01",
+    dateModified: "2026-08-15",
     publisher: { "@id": `${siteUrl}/#organization` },
   };
 
@@ -114,11 +99,10 @@ export default function VsDealCheckPage() {
             <span className="text-primary">which rental analyzer fits you?</span>
           </h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
-            DealCheck has been a great option for investors for years. We built
-            TrueCap because we wanted some things DealCheck doesn&apos;t do — and
-            because we believe the free tier should be honestly useful, not a
-            trial wall. Here&apos;s the honest comparison so you can pick the
-            right tool for your style.
+            DealCheck has served investors for years. TrueCap uses a different
+            sequence: start with an address, inspect the assumptions, see a
+            verdict, then connect Buy Box, Max Offer, downside, and presentation.
+            Here is the comparison so you can pick the workflow that fits.
           </p>
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
             <ScrollToFormButton
@@ -152,7 +136,6 @@ export default function VsDealCheckPage() {
               </p>
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
                 <li>You want a fully usable free tier with no analysis limits.</li>
-                <li>Your free analyses should feel like the real product, not a teaser.</li>
                 <li>You want explicit benchmarks (&quot;Above 8% — top quartile&quot;) inline with each metric.</li>
                 <li>You want a portfolio rollup across saved deals.</li>
                 <li>You want a deal score with a plain-English breakdown.</li>
@@ -182,17 +165,17 @@ export default function VsDealCheckPage() {
         {/* Matrix */}
         <section className="mb-12 sm:mb-16">
           <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground mb-2">
-            Feature-by-feature
+            Workflow-by-workflow
           </h2>
           <p className="text-base text-muted-foreground mb-6 leading-relaxed">
-            Where we have one, where they have one, where it&apos;s a wash.
+            Both products analyze rentals. The difference is how each gets you from inputs to action.
           </p>
           <div className="overflow-x-auto rounded-2xl border border-border bg-card">
             <table className="w-full text-sm">
               <thead className="bg-muted/40">
                 <tr className="text-left">
                   <th className="py-3 px-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                    Feature
+                    Workflow
                   </th>
                   <th className="py-3 px-3 text-[10px] font-bold uppercase tracking-widest text-primary">
                     TrueCap
@@ -204,24 +187,15 @@ export default function VsDealCheckPage() {
               </thead>
               <tbody>
                 {MATRIX.map((row) => (
-                  <tr key={row.feature} className="border-t border-border align-top">
+                  <tr key={row.workflow} className="border-t border-border align-top">
                     <td className="py-3 px-3 text-sm font-semibold text-foreground">
-                      <div className="flex items-center gap-2">
-                        <WinnerBadge winner={row.winner} side="row" />
-                        {row.feature}
-                      </div>
+                      {row.workflow}
                     </td>
                     <td className="py-3 px-3 text-xs leading-relaxed text-foreground/85">
-                      <div className="flex items-start gap-2">
-                        <WinnerBadge winner={row.winner} side="truecap" />
-                        <span>{row.truecap}</span>
-                      </div>
+                      {row.truecap}
                     </td>
                     <td className="py-3 px-3 text-xs leading-relaxed text-foreground/85">
-                      <div className="flex items-start gap-2">
-                        <WinnerBadge winner={row.winner} side="dealcheck" />
-                        <span>{row.dealcheck}</span>
-                      </div>
+                      {row.dealcheck}
                     </td>
                   </tr>
                 ))}
@@ -230,9 +204,11 @@ export default function VsDealCheckPage() {
           </div>
           <p className="mt-3 text-[11px] text-muted-foreground">
             Pricing, plan limits, and exact feature availability change.
-            DealCheck details based on publicly available product info as of 2026.
-            See <a href="https://dealcheck.io" target="_blank" rel="noopener" className="underline">dealcheck.io</a>{" "}
-            for their current state.
+            DealCheck details were reviewed against its official{" "}
+            <a href="https://dealcheck.io/pricing/" target="_blank" rel="noopener noreferrer" className="underline">pricing</a>,{" "}
+            <a href="https://help.dealcheck.io/en/articles/2047630-using-the-offer-calculator-to-calculate-offers-to-sellers" target="_blank" rel="noopener noreferrer" className="underline">Offer Calculator</a>, and{" "}
+            <a href="https://help.dealcheck.io/en/articles/2259844-screening-properties-with-custom-investment-criteria" target="_blank" rel="noopener noreferrer" className="underline">custom criteria</a>{" "}
+            documentation on August 15, 2026. Features and prices can change.
           </p>
         </section>
 
@@ -337,23 +313,21 @@ const DEALCHECK_FAQ: FaqItem[] = [
     question: "How much does TrueCap cost compared to DealCheck?",
     answer: (
       <>
-        TrueCap Pro is $29.99/month or $300/year on the annual plan
-        (~$25/mo). DealCheck&apos;s Plus tier is $10/month and Pro is
-        $20/month (as of June 2026) — but those tiers mostly raise
-        saved-property caps. TrueCap&apos;s single tier is about analysis
-        depth: co-branded share links, PDF export, tax strategy, exit scenarios,
-        sensitivity, and MAO all included — no
-        &quot;upgrade for X&quot; gating.
+        See TrueCap&apos;s <Link href="/pricing" className="underline">live pricing page</Link>{" "}
+        and DealCheck&apos;s official{" "}
+        <a href="https://dealcheck.io/pricing/" target="_blank" rel="noopener noreferrer" className="underline">pricing page</a>.
+        Comparing the current pages is safer than relying on copied prices
+        because either company can change plans.
       </>
     ),
     plainTextAnswer:
-      "TrueCap Pro is $29.99/month (or $300/year annual, ~$25/mo). DealCheck Plus is $10/month and Pro $20/month (as of June 2026), but those tiers mostly raise saved-property caps. TrueCap's single tier includes co-branded share links, PDF export, tax strategy, exit scenarios, sensitivity, and MAO.",
+      "See TrueCap's live pricing page and DealCheck's official pricing page for current prices and plan limits.",
   },
   {
     question: "Which tool is better for new investors?",
     answer: (
       <>
-        TrueCap. The 60-second underwrite flow plus a plain-English
+        TrueCap can fit a newer investor who values an address-first screen and a plain-English
         verdict (Strong / Solid / Mixed / Marginal / Negative) is built
         for someone learning to read a deal, not someone already fluent
         in commercial real-estate math. DealCheck is more powerful once
@@ -361,19 +335,18 @@ const DEALCHECK_FAQ: FaqItem[] = [
         their first session staring at a form trying to figure out which
         fields matter. TrueCap pre-fills HUD rent + FRED rate + state
         property tax from the address, so a first-time user can get a
-        real underwrite without knowing the right numbers to type.
+        first-pass screen without knowing every starting number to type.
       </>
     ),
     plainTextAnswer:
-      "TrueCap. The 60-second underwrite flow with a plain-English verdict (Strong/Solid/Mixed/Marginal/Negative) is designed for someone learning to read a deal. TrueCap also pre-fills HUD rent, FRED rate, and state property tax from the address so first-time users get a real underwrite without knowing what to type.",
+      "TrueCap can fit newer investors who value an address-first screen, transparent starting assumptions, and a plain-English verdict; DealCheck can fit users who prefer its established guided tools and ecosystem.",
   },
   {
     question: "Does TrueCap have a mobile app like DealCheck?",
     answer: (
       <>
         TrueCap is a Progressive Web App (PWA) — you install it from the
-        browser to your home screen and it works offline-ish, like a
-        native app, without going through the App Store. DealCheck has
+        browser to your home screen. DealCheck has
         true native iOS and Android apps, which is the right call if
         you&apos;re heavy on mobile-first workflows like walking
         properties and analyzing on the spot. Both work on phones; the
@@ -394,12 +367,12 @@ const DEALCHECK_FAQ: FaqItem[] = [
         rates). What it does <em>not</em> do is scrape the listing page
         for price, taxes and photos — DealCheck&apos;s full
         property-detail import is deeper there. The trade-off is
-        deliberate: TrueCap&apos;s numbers come from sources you can cite
-        when a lender asks where the rent estimate came from.
+        deliberate: TrueCap labels the source beside each starting value
+        so you can review and replace it.
       </>
     ),
     plainTextAnswer:
-      "Partly. Paste a Zillow/Redfin/Realtor link and TrueCap extracts the address, then pre-fills from authoritative sources (HUD Fair Market Rent, FRED 30-year mortgage rate, state property tax). It does not scrape the listing for price/taxes — DealCheck's full property-detail import is deeper there. TrueCap's approach gives defensible numbers for lenders.",
+      "Partly. Paste a Zillow/Redfin/Realtor link and TrueCap extracts the address, then pre-fills HUD Fair Market Rent, the FRED 30-year mortgage rate, and a state property-tax benchmark. It does not scrape listing price, taxes, or photos.",
   },
   {
     question: "When should I pick DealCheck over TrueCap?",
@@ -408,7 +381,7 @@ const DEALCHECK_FAQ: FaqItem[] = [
         Pick DealCheck if you&apos;re primarily mobile-first walking
         many properties a day, you want a native app, and listing-site
         property import is your top workflow. Pick TrueCap if you want
-        the deepest free tier on the market, plain-English verdicts,
+        an address-first free screen, plain-English verdicts,
         tax-strategy modeling, sensitivity analysis, MAO,
         portfolio rollup across saved deals, and co-branded share
         links — all in a single Pro tier without per-feature
@@ -416,36 +389,6 @@ const DEALCHECK_FAQ: FaqItem[] = [
       </>
     ),
     plainTextAnswer:
-      "Pick DealCheck if you're mobile-first, want a native app, and listing-import is your top workflow. Pick TrueCap if you want the deepest free tier, plain-English verdicts, tax modeling, sensitivity, MAO, portfolio rollup, and co-branded share links — all in one Pro tier.",
+      "Pick DealCheck if you want a native mobile app and listing-import workflow. Pick TrueCap if you want an address-first screen connected to verdicts, Buy Box, Max Offer, downside, and presentation.",
   },
 ];
-
-function WinnerBadge({
-  winner,
-  side,
-}: {
-  winner: Verdict;
-  side: "row" | "truecap" | "dealcheck";
-}) {
-  if (side === "row") return null;
-  if (winner === "tie") {
-    return side === "truecap" ? (
-      <Minus className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/60" />
-    ) : (
-      <Minus className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/60" />
-    );
-  }
-  if (winner === "truecap" && side === "truecap") {
-    return <Check className="mt-0.5 size-3.5 shrink-0 text-[var(--brand-green)]" />;
-  }
-  if (winner === "dealcheck" && side === "dealcheck") {
-    return <Check className="mt-0.5 size-3.5 shrink-0 text-[var(--brand-green)]" />;
-  }
-  if (winner === "truecap" && side === "dealcheck") {
-    return <X className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/50" />;
-  }
-  if (winner === "dealcheck" && side === "truecap") {
-    return <X className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/50" />;
-  }
-  return null;
-}

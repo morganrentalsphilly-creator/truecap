@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 import { Quote } from "lucide-react";
+import type { ProofVerification, PublicationApproval } from "@/lib/proof-records";
+import { isPublicationReady } from "@/lib/proof-records";
 
 export type CaseStudyData = {
   id: string;
@@ -11,6 +13,10 @@ export type CaseStudyData = {
   trueCapWorkflow: string;
   quantitativeResult?: string;
   quote?: string;
+  sourceChannel: "interview" | "email" | "support" | "survey";
+  observedAt: string;
+  verification: ProofVerification;
+  approval: PublicationApproval;
   /** Pass a consented customer image, product screenshot, or analysis view. */
   media?: ReactNode;
 };
@@ -61,7 +67,8 @@ export function CaseStudy({ study }: { study: CaseStudyData }) {
 export function CaseStudiesSection({ studies }: { studies: readonly CaseStudyData[] }) {
   // Never put a visible "coming soon" placeholder on a proof surface. The
   // section appears only after verified, permissioned data is supplied.
-  if (studies.length === 0) return null;
+  const publishable = studies.filter((study) => isPublicationReady(study, "caseStudy"));
+  if (publishable.length === 0) return null;
   return (
     <section className="border-t border-border bg-background">
       <div className="mx-auto max-w-6xl space-y-5 px-4 py-14 sm:px-6 sm:py-20">
@@ -69,7 +76,7 @@ export function CaseStudiesSection({ studies }: { studies: readonly CaseStudyDat
           <p className="text-[11px] font-bold uppercase tracking-widest text-primary">Customer workflows</p>
           <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">From listing to decision.</h2>
         </div>
-        {studies.map((study) => <CaseStudy key={study.id} study={study} />)}
+        {publishable.map((study) => <CaseStudy key={study.id} study={study} />)}
       </div>
     </section>
   );
