@@ -7,7 +7,6 @@
  * "should I buy THIS property?" question (per-deal underwriting).
  */
 
-import { TRIAL_LABEL } from "@/lib/trial";
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
@@ -53,12 +52,12 @@ type Row = { feature: string; truecap: string; mashvisor: string; winner: Verdic
 
 const MATRIX: Row[] = [
   { feature: "Primary job",                       truecap: "Per-deal underwriting — should I buy THIS property?",                              mashvisor: "Market research — WHERE should I invest?",                              winner: "tie" },
-  { feature: "Free tier depth",                   truecap: "Full underwriting, no signup, no analysis limit",                                 mashvisor: "Limited free preview; most data requires paid plan",                    winner: "truecap" },
+  { feature: "Free tier depth",                   truecap: "Core cap rate, CoC, DSCR, cash flow, score, and verdict",                        mashvisor: "Limited free preview; most data requires paid plan",                    winner: "truecap" },
   { feature: "Per-deal cap rate / CoC / DSCR",    truecap: "Yes — live as you type, with inline benchmarks",                                  mashvisor: "Yes — alongside market data",                                            winner: "tie" },
   { feature: "10-year projection",                truecap: "Pro — full compounding with depreciation",                                        mashvisor: "Available",                                                              winner: "tie" },
   { feature: "Market-level heatmaps",             truecap: "No — focused on the property in front of you",                                    mashvisor: "Yes — neighborhood-level cap rate + rent heatmaps",                      winner: "mashvisor" },
   { feature: "Airbnb / STR market data",          truecap: "Long-term focus; STR-specific fields coming",                                    mashvisor: "Strong — pulls Airbnb occupancy + ADR data by ZIP",                      winner: "mashvisor" },
-  { feature: "Comparable sales (comps)",          truecap: "No",                                                                              mashvisor: "Yes — included in their data layer",                                     winner: "mashvisor" },
+  { feature: "Sale + rent comps",                truecap: "One free lookup; Pro includes 50 per month; no AVM",                            mashvisor: "Yes — included in their data layer",                                     winner: "mashvisor" },
   { feature: "Property listings discovery",       truecap: "Not the focus — start with an address you found elsewhere",                       mashvisor: "Yes — investment-property marketplace",                                  winner: "mashvisor" },
   { feature: "Illustrative tax impact",           truecap: "Pro — depreciation + interest + modeled after-tax CF",                            mashvisor: "Basic tax view",                                                         winner: "truecap" },
   { feature: "Sensitivity / stress test",         truecap: "Pro — rent ±10%, vacancy ±5pp, rates ±1pp",                                       mashvisor: "Not the primary use case",                                               winner: "truecap" },
@@ -66,7 +65,7 @@ const MATRIX: Row[] = [
   { feature: "Deal score + breakdown",            truecap: "Free — 0–100 score with per-subscore explanation",                                 mashvisor: "Their own metric",                                                       winner: "tie" },
   { feature: "Free address auto-fill",            truecap: "HUD FMR + FRED + state tax — free, no signup",                                    mashvisor: "Behind paywall",                                                         winner: "truecap" },
   { feature: "Sharable read-only deal links",     truecap: "Free — read-only public link; Pro adds co-branding",                              mashvisor: "Account-gated views",                                                    winner: "truecap" },
-  { feature: "PDF lender report",                 truecap: "Pro — multi-page report",                                                         mashvisor: "Available",                                                              winner: "tie" },
+  { feature: "PDF deal report",                   truecap: "One-time Deal Decision Pack or included with Pro",                              mashvisor: "Available",                                                              winner: "tie" },
   { feature: "Pricing",                           truecap: "Free + monthly Pro on /pricing, no card to start",                                mashvisor: "Tiered paid plans, generally $$$ at scale",                              winner: "truecap" },
 ];
 
@@ -119,7 +118,7 @@ export default function VsMashvisorPage() {
             </Link>
           </div>
           <p className="mt-3 text-xs text-muted-foreground">
-            No card · No signup needed to use the analyzer · Cancel anytime
+            Free analyzer: no card or signup
           </p>
         </section>
 
@@ -130,7 +129,7 @@ export default function VsMashvisorPage() {
               <p className="text-[11px] font-bold uppercase tracking-widest text-primary mb-2">Pick TrueCap if</p>
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
                 <li>You&apos;ve found a specific property and need to decide if it pencils.</li>
-                <li>You want a free tier that does the full underwriting math.</li>
+                <li>You want free core cap rate, CoC, DSCR, and cash-flow analysis.</li>
                 <li>You want stress-test sensitivity + illustrative tax impact + exit modeling.</li>
                 <li>You prefer transparent open-data sources (HUD, FRED, state tax) you can audit.</li>
                 <li>You don&apos;t want to pay $$$/mo for market data you may not need.</li>
@@ -226,11 +225,11 @@ export default function VsMashvisorPage() {
             Underwriting the next deal? Start free.
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
-            TrueCap free covers cap rate, CoC, DSCR, NCF, monthly cash flow — enough to underwrite. Pro unlocks co-branded share links, PDF exports, 10-year projections, illustrative tax impact, sensitivity grid, MAO, and the strategy analyzers. No card to start.
+            TrueCap free covers cap rate, CoC, DSCR, NCF, monthly cash flow, and plain read-only share links. Pro adds co-branding, 10-year projections, illustrative tax impact, sensitivity, MAO, strategy analyzers, and included PDFs. A one-time PDF option is also available. No card to start.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link href="/pricing" className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity">
-              Start a {TRIAL_LABEL}
+              See Pro pricing
               <ArrowUpRight className="w-4 h-4" />
             </Link>
             <Link href="/" className="inline-flex items-center gap-2 border border-primary-foreground/40 bg-primary-foreground/10 text-primary-foreground px-4 py-2.5 rounded-xl font-bold hover:bg-primary-foreground/20 transition-colors">
@@ -287,16 +286,15 @@ const MASHVISOR_FAQ: FaqItem[] = [
     question: "Is Mashvisor or TrueCap cheaper?",
     answer: (
       <>
-        TrueCap is cheaper. TrueCap Pro is $29.99/month. Mashvisor&apos;s
-        plans range from ~$70/month to ~$300/month depending on
-        feature access and market data depth (as of 2026). TrueCap
-        doesn&apos;t carry market-data subscription costs because the
-        product scope is narrower (per-deal underwriting, not
-        nationwide neighborhood data).
+        The products have different scopes and changing plan terms.
+        TrueCap has a free core analyzer plus paid Pro and one-time PDF
+        options. Mashvisor publishes tiered market-data plans. Compare
+        both official pricing pages for the features and current rates
+        you need.
       </>
     ),
     plainTextAnswer:
-      "TrueCap is cheaper. TrueCap Pro is $29.99/month. Mashvisor's plans range from ~$70/month to ~$300/month depending on feature access (as of 2026). TrueCap's scope is narrower (per-deal underwriting, not nationwide neighborhood data).",
+      "The products have different scopes and changing terms. TrueCap has free core, paid Pro, and one-time PDF options; Mashvisor publishes tiered market-data plans. Compare both official pricing pages for current rates and features.",
   },
   {
     question: "Does TrueCap have neighborhood heatmaps like Mashvisor?",

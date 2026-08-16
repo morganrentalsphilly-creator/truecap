@@ -24,8 +24,51 @@ const SENSITIVE_QUERY_PARAMETER_SET = new Set<string>(
 /** Stripe Checkout Session ids are bearer-like even when embedded in a path. */
 const STRIPE_CHECKOUT_SESSION_PATTERN = /\bcs_(?:test|live)_[A-Za-z0-9_]+\b/gi;
 
+/** Shared snapshots and bearer-token pages must never use DOM autocapture. */
+export const SENSITIVE_PUBLIC_SHARE_ROUTE_PATTERN =
+  /\/(?:d|portal)\/[^/?#\s]+|\/embed\/brand\/[^/?#\s]+/i;
+
+/**
+ * Once a document has rendered a sensitive public route, third-party scripts
+ * stay off for the rest of that SPA document. They cannot be reliably
+ * unloaded before browser-history listeners observe a later route change.
+ */
+export function shouldKeepThirdPartyTelemetryDisabled(
+  pathname: string,
+  wasDisabled: boolean
+): boolean {
+  return wasDisabled || SENSITIVE_PUBLIC_SHARE_ROUTE_PATTERN.test(pathname);
+}
+
+/**
+ * Public share routes carry either an encoded analysis snapshot or a bearer
+ * token in the path. The browser still needs the original route to render the
+ * page, but analytics and error telemetry must only receive the route shape.
+ */
+const SENSITIVE_ROUTE_SEGMENTS = Object.freeze([
+  {
+    pattern: /\/d\/[^/?#\s]+/gi,
+    replacement: "/d/[shared-analysis]",
+  },
+  {
+    pattern: /\/portal\/[^/?#\s]+/gi,
+    replacement: "/portal/[token]",
+  },
+  {
+    pattern: /\/embed\/brand\/[^/?#\s]+/gi,
+    replacement: "/embed/brand/[token]",
+  },
+] as const);
+
 export function redactSensitiveOpaqueIdentifiers(value: string): string {
-  return value.replace(STRIPE_CHECKOUT_SESSION_PATTERN, "cs_[redacted]");
+  let sanitized = value.replace(
+    STRIPE_CHECKOUT_SESSION_PATTERN,
+    "cs_[redacted]"
+  );
+  for (const { pattern, replacement } of SENSITIVE_ROUTE_SEGMENTS) {
+    sanitized = sanitized.replace(pattern, replacement);
+  }
+  return sanitized;
 }
 
 function removeSensitiveParameters(params: URLSearchParams): void {
@@ -123,7 +166,8 @@ export function redactSensitiveQueryValuesInText(value: string): string {
   return sanitized;
 }
 
-const URL_PROPERTY_PATTERN = /(?:^|[_$])(?:url|referrer|href)$/i;
+const URL_PROPERTY_PATTERN =
+  /(?:^|[_$])(?:url|referrer|href|path|pathname|landing_page)$/i;
 
 /**
  * Scrub URL-bearing PostHog properties, including SDK-generated

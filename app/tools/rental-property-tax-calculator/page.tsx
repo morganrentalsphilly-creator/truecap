@@ -49,27 +49,27 @@ export const metadata: Metadata = {
 const FAQS: { q: string; a: string }[] = [
   {
     q: "How is rental property income taxed?",
-    a: "Rental income flows through Schedule E of your personal tax return. The math: gross rent minus operating expenses minus mortgage interest minus depreciation = Schedule E taxable income. That number is then taxed at your marginal income tax rate. Importantly, principal paydown is NOT a deduction — only interest is.",
+    a: "Many directly owned rentals are reported on Schedule E, but entity, services, mixed-use, ownership, and activity facts can change the form and treatment. TrueCap's gross rent minus modeled expenses, interest, and depreciation is a simplified illustration—not taxable income or tax due. Principal is generally not an expense; interest deductibility and allocation remain fact-specific.",
   },
   {
     q: "What is rental property depreciation?",
-    a: "The IRS lets you deduct 1/27.5th of the building's value every year for residential rental property — pretending the building wears out over 27.5 years even when it doesn't. On a $300,000 property with 80% building basis, that's $8,727/year of paper deduction. Most rental properties show a Schedule E tax loss even when they generate positive cash flow — because of depreciation.",
+    a: "Eligible residential rental buildings generally use a 27.5-year GDS recovery period, but land is excluded and basis allocation, placed-in-service date, conventions, personal use, prior depreciation, elections, and other rules affect the deduction. An 80% building allocation and full-year straight-line amount are editable examples, not a filing position or promise of a tax loss.",
   },
   {
     q: "Can I deduct mortgage payments on rental property?",
-    a: "Only the interest portion, not the principal. Principal paydown is treated as equity build, not an expense. This is why year-1 of a financed rental shows much bigger tax deductions than year-30 — early-year payments are 80%+ interest, late-year payments are 80%+ principal.",
+    a: "Principal is generally not a rental expense. Interest allocable to a rental activity may be deductible subject to use, allocation, tracing, limitation, timing, and other rules. Use the lender's tax statement and a qualified preparer rather than a generic amortization percentage.",
   },
   {
     q: "How much of purchase price is land vs building?",
-    a: "Land is non-depreciable. Most CPAs use 15-25% land allocation as a default — actual ratio depends on the local property tax assessor's split, comparable land sales in the area, or a formal appraisal. Higher land % = lower depreciation deduction. Get your CPA's view before filing; the IRS scrutinizes outlier ratios.",
+    a: "Land is generally not depreciable, but there is no universal land percentage. Support the allocation from the property's facts and appropriate valuation evidence, then have a qualified tax professional review it before filing; TrueCap's default is only a scenario input.",
   },
   {
     q: "What's the depreciation recapture issue?",
-    a: "When you sell, the IRS 'recaptures' the depreciation you took — taxed at up to 25%. So depreciation isn't free money; it's a tax deferral. Two ways to defer the recapture: (1) hold forever and step up basis at death, or (2) 1031 exchange into another rental. Both push the tax liability indefinitely.",
+    a: "A sale can create unrecaptured section 1250 gain and other gain whose character, rate, and amount depend on basis, depreciation allowed or allowable, use, transaction costs, entity, and taxpayer facts. A qualifying 1031 exchange may postpone recognition, and basis-at-death rules depend on then-current law and facts; neither path automatically or indefinitely removes tax.",
   },
   {
     q: "Are passive losses always deductible?",
-    a: "Not always. The IRS limits rental losses against ordinary income. If your AGI is under $100k, you can deduct up to $25k/yr of rental losses against ordinary income (phases out at $150k AGI). Above $150k, losses become 'suspended' — carried forward until you have rental income OR sell the property. Real estate professional status (REPS) bypasses this limit.",
+    a: "No. Passive-activity, active-participation special-allowance, material-participation, real-estate-professional, basis, at-risk, excess-business-loss, and disposition rules can all matter. Real-estate-professional status alone does not make every loss currently deductible. TrueCap does not determine eligibility; consult a qualified tax professional.",
   },
 ];
 
@@ -117,7 +117,7 @@ export default function RentalPropertyTaxCalculatorPage() {
     },
     featureList: [
       "Schedule E taxable income modeling",
-      "27.5-year depreciation tax shield",
+      "Illustrative 27.5-year depreciation scenario",
       "Mortgage interest deduction included",
       "After-tax cash flow",
     ],
@@ -188,7 +188,10 @@ export default function RentalPropertyTaxCalculatorPage() {
             <li>
               <strong>Operating expenses.</strong> Property tax, insurance,
               repairs, property management, utilities you pay, HOA, legal,
-              advertising, supplies. All deductible in the year paid.
+              advertising, and supplies may be deductible when they are ordinary,
+              necessary, properly allocated, and otherwise allowed. Timing and
+              treatment vary; improvements generally must be capitalized rather
+              than deducted as repairs.
             </li>
             <li>
               <strong>Mortgage interest.</strong> The interest portion of
@@ -197,9 +200,9 @@ export default function RentalPropertyTaxCalculatorPage() {
             </li>
             <li>
               <strong>Depreciation.</strong> 1/27.5th of the building basis
-              per year. The single most powerful tax deduction in residential
-              real estate — turns most cash-flow-positive rentals into
-              tax-loss reporters.
+              per year in a simplified full-year residential-rental example.
+              Basis allocation, placed-in-service timing, personal use, and
+              passive-activity rules can materially change the result.
             </li>
             <li>
               <strong>Travel + home office (limited).</strong> Real estate

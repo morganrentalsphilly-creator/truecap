@@ -92,9 +92,11 @@ export function AnnualPromoBanner() {
         type="button"
         onClick={handleDismiss}
         aria-label="Dismiss annual plan promo"
-        className="absolute right-2 top-1/2 -translate-y-1/2 inline-flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground"
+        className="group absolute right-0 top-1/2 inline-flex size-11 -translate-y-1/2 items-center justify-center text-muted-foreground"
       >
-        <X className="size-3.5" />
+        <span className="inline-flex size-7 items-center justify-center rounded-full transition-colors group-hover:bg-muted group-hover:text-foreground">
+          <X className="size-3.5" />
+        </span>
       </button>
     </div>
   );

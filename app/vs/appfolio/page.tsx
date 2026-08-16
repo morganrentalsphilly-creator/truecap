@@ -2,10 +2,10 @@
  * /vs/appfolio — competitor comparison landing page.
  *
  * Target queries: "appfolio alternative", "appfolio vs", "appfolio pricing", "appfolio review", "enterprise property management".
- * AppFolio is enterprise PM software for large operators (1000+ units). Public company. TrueCap users are typically way too small for it but search the comparison for context.
+ * AppFolio is post-purchase property-management software with quote-based
+ * plans; its current Core pricing page states a 50-unit minimum.
  */
 
-import { TRIAL_LABEL } from "@/lib/trial";
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
@@ -27,7 +27,7 @@ import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema"
 export const metadata: Metadata = {
   title: "AppFolio vs TrueCap (2026): PM vs Underwriting",
   description:
-    "AppFolio is enterprise property management software for 1000+ unit operators. TrueCap is pre-purchase underwriting for solo investors. Different worlds.",
+    "AppFolio is post-purchase property management software with quote-based plans. TrueCap is pre-purchase rental underwriting.",
   keywords: [
     "appfolio alternative",
     "appfolio vs",
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "AppFolio vs TrueCap (2026): PM vs Underwriting",
     description:
-      "AppFolio is enterprise PM software (1000+ units). TrueCap is solo-investor underwriting. Different worlds.",
+      "AppFolio is post-purchase property management software. TrueCap is pre-purchase rental underwriting.",
     url: "/vs/appfolio",
     type: "website",
     images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap vs AppFolio" }],
@@ -51,20 +51,20 @@ type Verdict = "truecap" | "appfolio" | "tie";
 type Row = { feature: string; truecap: string; appfolio: string; winner: Verdict };
 
 const MATRIX: Row[] = [
-  { feature: "Primary audience", truecap: "Solo / small-portfolio investors (1-30 doors)", appfolio: "Enterprise PM companies (1000+ units)", winner: "tie" },
-  { feature: "Lifecycle stage", truecap: "Pre-purchase — underwrite the deal", appfolio: "Post-purchase — operate at enterprise scale", winner: "tie" },
+  { feature: "Primary audience", truecap: "Solo / small-portfolio investors (1-30 doors)", appfolio: "Property managers and investment managers; Core states a 50-unit minimum", winner: "tie" },
+  { feature: "Lifecycle stage", truecap: "Pre-purchase — underwrite the deal", appfolio: "Post-purchase — manage properties and residents", winner: "tie" },
   { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", appfolio: "Not modeled", winner: "truecap" },
   { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", appfolio: "Not modeled", winner: "truecap" },
   { feature: "Illustrative tax impact", truecap: "Pro — depreciation + interest + modeled after-tax CF", appfolio: "Not modeled", winner: "truecap" },
   { feature: "Deal score + verdict", truecap: "Free — 0-100 score + plain-English verdict", appfolio: "Not applicable", winner: "truecap" },
   { feature: "Address auto-fill (rent/rate/tax)", truecap: "Yes — HUD + FRED + state property tax", appfolio: "Not applicable", winner: "truecap" },
-  { feature: "Enterprise PM workflow", truecap: "No", appfolio: "Yes — 1000+ unit support, multi-property", winner: "appfolio" },
+  { feature: "Property-management workflow", truecap: "No", appfolio: "Yes — multi-property operations", winner: "appfolio" },
   { feature: "Accounting + reporting at scale", truecap: "No", appfolio: "Yes — full GL, P&L, owner statements", winner: "appfolio" },
   { feature: "Resident services + utilities", truecap: "No", appfolio: "Yes — bundled smart-home, utility billing", winner: "appfolio" },
   { feature: "AI assistant for renters", truecap: "No", appfolio: "Yes — AI leasing assistant", winner: "appfolio" },
-  { feature: "Free tier", truecap: "Yes — full underwriting math", appfolio: "No — paid only", winner: "truecap" },
-  { feature: "Pricing (entry tier)", truecap: "Free; Pro $29.99/mo", appfolio: "Core plan ~$1.40/unit/mo with $250 minimum (as of 2026)", winner: "truecap" },
-  { feature: "Built for solo investors", truecap: "Yes — 1-30 doors", appfolio: "No — minimum spend assumes 200+ units", winner: "truecap" },
+  { feature: "Free tier", truecap: "Yes — core cap rate, CoC, DSCR, and cash flow", appfolio: "No — paid only", winner: "truecap" },
+  { feature: "Pricing (entry tier)", truecap: "Free core; paid Pro — see live pricing", appfolio: "Quote-based; Core states a minimum spend and 50-unit minimum", winner: "truecap" },
+  { feature: "Smallest published portfolio", truecap: "Designed for 1-30 doors", appfolio: "Core states a 50-unit minimum", winner: "truecap" },
   { feature: "Shareable read-only deal link", truecap: "Free — read-only public link; Pro adds co-branding", appfolio: "Internal portal only", winner: "truecap" },
 ];
 
@@ -76,8 +76,8 @@ export default function VsAppfolioPage() {
     name: "AppFolio vs TrueCap (2026): PM vs Underwriting",
     url: `${siteUrl}/vs/appfolio`,
     description:
-      "AppFolio is enterprise property management software for 1000+ unit operators. TrueCap is pre-purchase underwriting for solo investors. Different worlds.",
-    dateModified: "2026-06-07",
+      "AppFolio is post-purchase property management software with quote-based plans. TrueCap is pre-purchase rental underwriting.",
+    dateModified: "2026-08-16",
     publisher: { "@id": `${siteUrl}/#organization` },
   };
 
@@ -106,10 +106,10 @@ export default function VsAppfolioPage() {
           </div>
           <h1 className="text-3xl sm:text-5xl font-extrabold text-foreground leading-[1.05] tracking-tight text-balance">
             TrueCap vs AppFolio:{" "}
-            <span className="text-primary">solo investor underwriting vs enterprise PM software</span>
+            <span className="text-primary">pre-purchase underwriting vs property management</span>
           </h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
-            AppFolio is enterprise property management software — built for large property management companies running 1000+ units. TrueCap is a pre-purchase underwriting calculator built for solo investors evaluating 1-30 doors. Functionally different products for functionally different audiences.
+            AppFolio is post-purchase property management software for property managers and investment managers. Its current Core pricing page states a 50-unit minimum and minimum spend. TrueCap is a pre-purchase underwriting calculator for evaluating acquisitions. The products address different stages.
           </p>
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
             <ScrollToFormButton
@@ -127,7 +127,7 @@ export default function VsAppfolioPage() {
             </Link>
           </div>
           <p className="mt-3 text-xs text-muted-foreground">
-            No card · No signup · Cancel anytime
+            Free analyzer: no card or signup
           </p>
         </section>
 
@@ -153,7 +153,7 @@ export default function VsAppfolioPage() {
                 Use AppFolio when
               </p>
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
-                <li>You&apos;re a property management company managing 200+ units.</li>
+                <li>You manage at least 50 units and need AppFolio&apos;s operational workflow.</li>
                 <li>You need PM-grade accounting, owner portals, vendor workflows at scale.</li>
                 <li>You have multiple staff who need login access.</li>
                 <li>You&apos;re managing for other owners as a fee-for-service business.</li>
@@ -214,8 +214,8 @@ export default function VsAppfolioPage() {
           <p className="mt-3 text-[11px] text-muted-foreground">
             AppFolio details based on publicly available product info as of 2026.
             See{" "}
-            <a href="https://appfolio.com" target="_blank" rel="noopener" className="underline">
-              appfolio.com
+            <a href="https://www.appfolio.com/pricing" target="_blank" rel="noopener" className="underline">
+              AppFolio&apos;s official pricing page
             </a>{" "}
             for their current state.
           </p>
@@ -234,7 +234,7 @@ export default function VsAppfolioPage() {
               <strong>Scale to 30+ doors and use TurboTenant / Buildium / Stessa for ops.</strong> Mid-market tools that fit 30-200 units.
             </li>
             <li>
-              <strong>Reach 200+ units (and the $250/mo AppFolio minimum makes sense).</strong> Usually 5-10 years into investing for solo operators.
+              <strong>Evaluate AppFolio once its published minimums fit.</strong> Core currently states a 50-unit minimum and minimum spend; request a current quote.
             </li>
             <li>
               <strong>Keep TrueCap for new acquisitions.</strong> AppFolio doesn&apos;t underwrite. Still need TrueCap or a similar calculator for new deals.
@@ -267,7 +267,8 @@ export default function VsAppfolioPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
             Pro unlocks projections, sensitivity, illustrative tax impact, modeled exit comparisons,
-            MAO, PDF exports, and co-branded share links.
+            MAO, and co-branded share links. Pro includes PDFs, and a one-time
+            PDF option is available; see live pricing for current terms.
             No card to start.
           </p>
           <div className="flex flex-wrap gap-3">
@@ -275,7 +276,7 @@ export default function VsAppfolioPage() {
               href="/pricing"
               className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
             >
-              Start a {TRIAL_LABEL}
+              See Pro pricing
               <ArrowUpRight className="w-4 h-4" />
             </Link>
             <Link
@@ -308,21 +309,21 @@ const APPFOLIO_FAQ: FaqItem[] = [
     question: "Is TrueCap an AppFolio alternative?",
     answer: (
       <>
-        No — completely different products. AppFolio is enterprise property management software for large PM companies. TrueCap is pre-purchase underwriting for solo investors. The audiences don&apos;t overlap.
+        Not directly. AppFolio handles post-purchase property management, while TrueCap handles pre-purchase acquisition underwriting. A manager may use both at different stages.
       </>
     ),
     plainTextAnswer:
-      "No — completely different products. AppFolio is enterprise PM for large PM companies. TrueCap is pre-purchase underwriting for solo investors. Audiences don&apos;t overlap.",
+      "Not directly. AppFolio handles post-purchase property management, while TrueCap handles pre-purchase acquisition underwriting. A manager may use both at different stages.",
   },
   {
     question: "Is AppFolio worth it for a small landlord?",
     answer: (
       <>
-        No. AppFolio&apos;s pricing structure has a $250/month minimum (as of 2026) which assumes 200+ units. Small landlords are massively overpaying and using &lt;5% of the feature set. Look at TurboTenant, Avail, Baselane, or Buildium instead.
+        AppFolio&apos;s current Core pricing page states a 50-unit minimum and minimum spend, with quote-based pricing. A smaller landlord should confirm eligibility, obtain the current quote, and compare the operational features with alternatives rather than assume a published per-unit rate.
       </>
     ),
     plainTextAnswer:
-      "No. AppFolio&apos;s $250/mo minimum (2026) assumes 200+ units. Small landlords overpay using &lt;5% of features. Look at TurboTenant, Avail, Baselane, or Buildium instead.",
+      "AppFolio's current Core pricing page states a 50-unit minimum and minimum spend, with quote-based pricing. Confirm eligibility, obtain a current quote, and compare the operational features with alternatives.",
   },
   {
     question: "Does AppFolio underwrite deals?",
@@ -338,11 +339,11 @@ const APPFOLIO_FAQ: FaqItem[] = [
     question: "AppFolio vs Buildium — which is the easier upgrade from spreadsheets?",
     answer: (
       <>
-        Buildium. AppFolio is built for property management companies; Buildium is more reachable for landlords scaling from 10-50 doors. Most TrueCap users who outgrow simple ops tools land at Buildium, not AppFolio.
+        Compare each vendor&apos;s current minimums, quote, accounting, resident, owner, maintenance, support, and implementation features. AppFolio&apos;s Core plan currently states a 50-unit minimum; Buildium publishes tiered entry pricing on its own pricing page.
       </>
     ),
     plainTextAnswer:
-      "Buildium. AppFolio is for PM companies; Buildium reaches landlords at 10-50 doors. Most TrueCap users land at Buildium.",
+      "Compare current minimums, quotes, accounting, resident, owner, maintenance, support, and implementation features. AppFolio Core currently states a 50-unit minimum; Buildium publishes tiered entry pricing.",
   },
   {
     question: "What does TrueCap not do that AppFolio does?",

@@ -14,10 +14,11 @@ import {
 } from "@/lib/entitlements";
 import { getRequestUser, getRequestEntitlements } from "@/lib/request-auth";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { isFeatureReleased } from "@/lib/entitlements-catalog";
 
 export const metadata: Metadata = {
   title: "Clients",
-  description: "Manage your buyer roster, their buy boxes, and their deal portals.",
+  description: "Manage your buyer roster, their buy boxes, and assigned deals.",
   alternates: { canonical: "/dashboard/clients" },
   robots: { index: false, follow: false },
 };
@@ -84,8 +85,9 @@ export default async function DashboardClientsPage() {
    * across the link the client already bookmarked.
    */
   const siteUrl = getSiteUrl();
+  const portalsAvailable = isFeatureReleased("agent_portal");
   const portalUrlByClient: Record<string, string> = {};
-  if (clientsResult.ok) {
+  if (portalsAvailable && clientsResult.ok) {
     for (const c of clientsResult.clients) {
       const token = mintSignedToken(PORTAL_SCOPE, { a: user.id, c: c.id });
       if (token) portalUrlByClient[c.id] = `${siteUrl}/portal/${token}`;
@@ -108,6 +110,7 @@ export default async function DashboardClientsPage() {
         // A failed COUNT would otherwise render every card as "No deals yet" —
         // a confident falsehood. Surface it as a load error instead.
         countsFailed={!countsResult.ok}
+        portalsAvailable={portalsAvailable}
         portalUrlByClient={portalUrlByClient}
         loadError={clientsResult.ok ? null : clientsResult.message}
       />

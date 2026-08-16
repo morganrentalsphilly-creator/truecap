@@ -4,15 +4,15 @@
  * Post-analysis email capture + drip scheduler.
  *
  * Triggered when a free user runs an analysis and submits their email.
- * Schedules a 5-email sequence via Resend's transactional API using its
- * `scheduled_at` field — no cron needed, Resend handles timing.
+ * Schedules a 4-email core sequence plus one configuration-gated offer via
+ * Resend's transactional API using `scheduled_at` — no cron needed.
  *
  * Sequence (calibrated to the first ~12 days — the hottest conversion window):
  *   Day 0:  Underwriting checklist (the 7 numbers) — instant, delivers value
  *   Day 2:  "5 metrics most investors forget"
  *   Day 5:  "What does year 10 look like?" (Pro 10-year projection)
  *   Day 8:  Deal Decision Pack — lowest-friction paid step
- *   Day 12: "20% off your first month" (final nudge)
+ *   Day 12: configured promotional offer (only when code + Stripe coupon exist)
  *
  * Result shape follows the codebase convention from CLAUDE.md (§3.2):
  * discriminated union with ok: true/false. Never throws to the client.
@@ -38,6 +38,7 @@ import {
   releaseEmailCaptureSlot,
 } from "@/lib/email-capture-guard";
 import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
+import { getPostAnalysisOfferConfig } from "@/lib/post-analysis-offer";
 
 const SINGLE_DEAL_PRICE_LABEL = getMarketingOfferConfig().singleDeal.priceLabel;
 
@@ -75,6 +76,8 @@ const captureSchema = z.object({
 type SequenceEmail = {
   delayDays: number;
   subject: string;
+  /** Never promise a campaign offer unless checkout can actually apply it. */
+  requiresConfiguredOffer?: boolean;
   /**
    * NOTE: every field on this context is ALREADY HTML-escaped (or URL-encoded
    * for `couponCodeUrl`). Templates interpolate them directly — do not add a
@@ -109,7 +112,7 @@ const SEQUENCE: SequenceEmail[] = [
     <li><strong>The exit</strong> — modeled profit across hold years, after assumed selling costs and taxes.</li>
   </ol>
   <p style="margin:0 0 20px 0;color:#374151;line-height:1.6;font-size:15px;">
-    TrueCap runs all seven from a single address — free. Over the next few days I'll send a couple of short notes on the ones investors miss most.
+    The free screen covers cap rate, cash-on-cash, DSCR, cash flow, Deal Score, and a plain-English verdict. Pro adds sensitivity, 10-year projections, and modeled exits. Review every starting assumption before relying on the result.
   </p>
   <div style="text-align:center;margin:24px 0;">
     <a href="${siteUrlHtml}" style="display:inline-block;background:#0070c4;color:#fff;text-decoration:none;padding:12px 24px;border-radius:10px;font-weight:700;font-size:14px;">Run a deal in 60 seconds</a>
@@ -132,10 +135,10 @@ const SEQUENCE: SequenceEmail[] = [
     <li><strong>CapEx reserve</strong> — 5–10% of rent. Roof, HVAC, water heater compound.</li>
     <li><strong>Real maintenance</strong> — 5–10%, more on older properties.</li>
     <li><strong>Property management</strong> — 8–10% even if you self-manage (your time isn't free).</li>
-    <li><strong>Property tax reassessment</strong> — many counties bump it on sale.</li>
+    <li><strong>Property-tax changes</strong> — reassessment rules vary by jurisdiction and transfer.</li>
   </ol>
   <p style="margin:0 0 20px 0;color:#374151;line-height:1.6;font-size:15px;">
-    TrueCap bakes all five in automatically. Re-run your deal and look at the real cash flow.
+    TrueCap starts with editable reserve assumptions and a state-level tax estimate. Replace them with property-specific figures before making an offer.
   </p>
   <div style="text-align:center;margin:24px 0;">
     <a href="${siteUrlHtml}" style="display:inline-block;background:#0070c4;color:#fff;text-decoration:none;padding:12px 24px;border-radius:10px;font-weight:700;font-size:14px;">Re-run your deal</a>
@@ -187,20 +190,20 @@ const SEQUENCE: SequenceEmail[] = [
   },
   {
     delayDays: 12,
-    subject: "A first-month TrueCap Pro offer",
+    subject: "A TrueCap Pro offer",
+    requiresConfiguredOffer: true,
     build: ({ siteUrlHtml, couponCodeHtml, couponCodeUrl }) => `<!DOCTYPE html>
 <html><body style="margin:0;padding:0;background:#f6f7fb;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#111827;">
 <div style="max-width:560px;margin:32px auto;padding:32px 24px;background:#fff;border-radius:16px;border:1px solid #e5e7eb;">
-  <h1 style="margin:0 0 12px 0;font-size:22px;font-weight:800;line-height:1.2;">Last nudge — 20% off your first month</h1>
+  <h1 style="margin:0 0 12px 0;font-size:22px;font-weight:800;line-height:1.2;">A TrueCap Pro offer</h1>
   <p style="margin:0 0 16px 0;color:#374151;line-height:1.6;font-size:15px;">
     You ran an analysis recently and never came back. No worries — here's a small thank-you for trying TrueCap.
   </p>
   <p style="margin:0 0 20px 0;color:#374151;line-height:1.6;font-size:15px;">
-    Code <strong style="color:#0070c4;">${couponCodeHtml}</strong> takes <strong>20% off</strong> your first month of Pro.
-    Auto-applies at checkout. Cancel anytime.
+    Code <strong style="color:#0070c4;">${couponCodeHtml}</strong> applies the configured promotional offer at checkout. Review the discounted total before paying.
   </p>
   <div style="text-align:center;margin:24px 0;">
-    <a href="${siteUrlHtml}/pricing?coupon=${couponCodeUrl}" style="display:inline-block;background:#0070c4;color:#fff;text-decoration:none;padding:14px 28px;border-radius:10px;font-weight:700;font-size:14px;">Claim 20% off</a>
+    <a href="${siteUrlHtml}/pricing?coupon=${couponCodeUrl}" style="display:inline-block;background:#0070c4;color:#fff;text-decoration:none;padding:14px 28px;border-radius:10px;font-weight:700;font-size:14px;">Review your offer</a>
   </div>
   <p style="margin:0;color:#9ca3af;font-size:12px;line-height:1.5;text-align:center;">
     Not interested? Just ignore this — no follow-up.<br>— Morgan · usetruecap.com
@@ -309,7 +312,8 @@ export async function capturePostAnalysisEmail(input: {
   // List-Unsubscribe mailto: needs the bare address.
   const unsubscribeMailbox = (replyTo.match(/<([^>]+)>/)?.[1] ?? replyTo).trim();
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://usetruecap.com";
-  const couponCode = process.env.POST_ANALYSIS_COUPON_CODE || "ANALYZE20";
+  const postAnalysisOffer = getPostAnalysisOfferConfig();
+  const couponCode = postAnalysisOffer.code;
   // Env values are trusted, but escape them anyway — a template author reading
   // the ctx type should never have to ask which fields are safe.
   const buildCtx = {
@@ -325,7 +329,11 @@ export async function capturePostAnalysisEmail(input: {
   let day0Sent = false;
   const failures: Array<{ delayDays: number; status: number | "thrown"; body: string }> = [];
 
-  for (const item of SEQUENCE) {
+  const enabledSequence = SEQUENCE.filter(
+    (item) => !item.requiresConfiguredOffer || postAnalysisOffer.canSendPromotion
+  );
+
+  for (const item of enabledSequence) {
     const payload: Record<string, unknown> = {
       from,
       to: [email],
@@ -380,7 +388,7 @@ export async function capturePostAnalysisEmail(input: {
   // have zero visibility into what Resend actually rejected.
   if (failures.length > 0) {
     Sentry.captureMessage(
-      `post-analysis-email-capture: ${failures.length}/${SEQUENCE.length} email(s) failed`,
+      `post-analysis-email-capture: ${failures.length}/${enabledSequence.length} email(s) failed`,
       {
         level: scheduledCount === 0 ? "error" : "warning",
         tags: {
@@ -391,7 +399,7 @@ export async function capturePostAnalysisEmail(input: {
         extra: {
           failures,
           scheduledCount,
-          totalAttempts: SEQUENCE.length,
+          totalAttempts: enabledSequence.length,
           fromAddress: from,
           // Email + address intentionally omitted to keep PII out of
           // Sentry; the failure pattern (status code + body) is what

@@ -21,8 +21,8 @@ import { CheckoutCancelledBanner } from "@/components/marketing/checkout-cancell
 import { PricingTogglePlans } from "@/components/marketing/pricing-toggle-plans";
 import {
   getEntitlementsForUser,
+  getActivePaidPlanSlug,
   hasAnySubscriptionHistory,
-  hasPaidPlanSubscription,
 } from "@/lib/entitlements";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { isAgentProConfigured } from "@/lib/stripe/plan-prices";
@@ -39,7 +39,7 @@ import { getSiteUrl } from "@/lib/site-url";
 export const metadata: Metadata = {
   title: "Pricing — Screen Free, Decide & Act with Pro",
   description:
-    `Screen rental deals free. Try Pro free for ${TRIAL_DAYS} days to solve Max Offer, apply your Buy Box, stress-test downside, compare opportunities, and generate reports.`,
+    `Screen rental deals free. Eligible first-time subscribers can try Pro free for ${TRIAL_DAYS} days to solve Max Offer, apply a Buy Box, stress-test downside, compare opportunities, and generate reports.`,
   alternates: { canonical: "/pricing" },
   openGraph: {
     title: "TrueCap pricing — Free to screen, Pro to decide",
@@ -64,7 +64,7 @@ const FAQS: { q: string; a: string }[] = [
     // app/page.tsx. MAO, sensitivity, BRRRR/fix-and-flip, and share
     // links are PRO features — a previous version of this answer
     // claimed they were free, contradicting every other surface.
-    a: "Yes. The cash-flow analyzer — cap rate, CoC, DSCR, monthly cash flow, address auto-fill, the 0–100 Deal Score, and a plain-English verdict — is free forever and unlimited. No card required to start. Pro adds a personal buy box (your criteria, pass/failed on every deal), MAO solver, sensitivity grid, BRRRR + fix-and-flip, 10-year projections, illustrative tax impact, modeled exit comparisons, co-branded shareable links, and Deal Decision Pack PDFs.",
+    a: "Yes. The cash-flow analyzer — cap rate, CoC, DSCR, monthly cash flow, address auto-fill, the 0–100 Deal Score, and a plain-English verdict — is free forever and unlimited. No card required to start. Pro adds a personal buy box (your criteria, checked on every deal), MAO solver, sensitivity grid, BRRRR + fix-and-flip, 10-year projections, illustrative tax impact, modeled exit comparisons, co-branded shareable links, and Deal Decision Pack PDFs.",
   },
   {
     q: "Can I cancel anytime?",
@@ -114,12 +114,12 @@ export default async function PricingPage() {
   // the fetched price meant one transient Stripe error deleted a live tier from
   // the pricing page for that visitor.
   const agentProConfigured = isAgentProConfigured();
-  const [monthly, annual, agentMonthly, agentAnnual, isPaid, hadPriorSubscription] = await Promise.all([
+  const [monthly, annual, agentMonthly, agentAnnual, activePaidPlanSlug, hadPriorSubscription] = await Promise.all([
     loadStripeDisplayPrice("pro_monthly"),
     loadStripeDisplayPrice("pro_annual"),
     agentProConfigured ? loadStripeDisplayPrice("agent_pro_monthly") : Promise.resolve(null),
     agentProConfigured ? loadStripeDisplayPrice("agent_pro_annual") : Promise.resolve(null),
-    user ? hasPaidPlanSubscription(supabase, user.id) : Promise.resolve(false),
+    user ? getActivePaidPlanSlug(supabase, user.id) : Promise.resolve(null),
     user ? hasAnySubscriptionHistory(supabase, user.id) : Promise.resolve(false),
   ]);
   const entitlements = user ? await getEntitlementsForUser(supabase, user.id) : null;
@@ -182,10 +182,26 @@ export default async function PricingPage() {
                   (billing.ts repeat-trial check) exactly like the plan cards
                   below — an ex-subscriber sees "go Pro", not a trial that
                   checkout won't grant. */}
-              {hadPriorSubscription
-                ? `Screen any deal free. Use ${proOfferName} to get four acquisition answers: pursue or pass, what to offer, what could break, and how to present the decision.`
-                : `Screen any deal free, then use a ${TRIAL_LABEL} of ${proOfferName} to get four acquisition answers: pursue or pass, what to offer, what could break, and how to present the decision.`}
+              {!user
+                ? `Screen any deal free. Eligible first-time subscribers get a ${TRIAL_DAYS}-day trial of ${proOfferName}; returning subscribers start paid access immediately.`
+                : hadPriorSubscription
+                  ? `Screen any deal free. Use ${proOfferName} to get four acquisition answers: pursue or pass, what to offer, what could break, and how to present the decision.`
+                  : `Screen any deal free, then use a ${TRIAL_LABEL} of ${proOfferName} to get four acquisition answers: pursue or pass, what to offer, what could break, and how to present the decision.`}
             </p>
+            <div className="mt-6 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
+              <Link
+                href="/#main"
+                className="inline-flex min-h-11 items-center justify-center rounded-xl bg-primary px-5 py-3 text-sm font-bold text-primary-foreground shadow-[0_8px_22px_rgba(0,112,196,0.24)] transition hover:bg-primary/95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              >
+                Analyze a deal free
+              </Link>
+              <Link
+                href="#plans"
+                className="inline-flex min-h-11 items-center justify-center rounded-xl border border-border bg-card px-5 py-3 text-sm font-bold text-foreground transition hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              >
+                See Pro plans
+              </Link>
+            </div>
             {/* Real-data social proof — investors arriving at /pricing
                 are evaluating credibility. A live count of recent
                 analyses converts skepticism faster than testimonials. */}
@@ -239,7 +255,7 @@ export default async function PricingPage() {
             agentMonthly={agentMonthly}
             agentAnnual={agentAnnual}
             isAuthenticated={Boolean(user)}
-            isPaid={isPaid}
+            activePaidPlanSlug={activePaidPlanSlug}
             hadPriorSubscription={hadPriorSubscription}
             agentProConfigured={agentProConfigured}
             proOfferName={proOfferName}
@@ -265,7 +281,14 @@ export default async function PricingPage() {
             </span>
             <span aria-hidden className="text-muted-foreground/40">·</span>
             <span>
-              {hadPriorSubscription ? (
+              {!user ? (
+                <>
+                  <strong className="text-foreground">
+                    Eligible first-time subscribers get {TRIAL_DAYS} days
+                  </strong>
+                  ; returning subscribers start paid access immediately
+                </>
+              ) : hadPriorSubscription ? (
                 <><strong className="text-foreground">Full access immediately</strong></>
               ) : (
                 <><strong className="text-foreground">{TRIAL_DAYS} days of full Pro</strong> before subscription billing</>

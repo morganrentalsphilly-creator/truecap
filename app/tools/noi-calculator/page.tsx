@@ -230,7 +230,8 @@ export default function NoiCalculatorPage() {
               <Link href="/blog/50-percent-rule-rentals" className="text-primary font-semibold hover:underline">50% rule for rentals</Link>{" "}
               is a useful sanity check — if your assumed operating
               expenses are far below 50% of rent on a small residential
-              property, you&apos;re almost certainly missing something.
+              property, verify each expense line against current property
+              evidence rather than assuming the shortcut proves an omission.
             </p>
           </article>
 
@@ -251,7 +252,7 @@ export default function NoiCalculatorPage() {
             <Link href="/" className="font-bold text-foreground hover:underline">
               TrueCap
             </Link>{" "}
-            — institutional-grade rental analysis, free to start.
+            — transparent, editable rental analysis, free to start.
           </footer>
         </main>
         <SiteFooter />

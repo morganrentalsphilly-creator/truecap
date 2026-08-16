@@ -15,7 +15,6 @@
  * platform, so each card frames the comparison correctly.
  */
 
-import { TRIAL_LABEL } from "@/lib/trial";
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
@@ -77,7 +76,7 @@ const COMPARISONS: ComparisonCard[] = [
     tagline: "The household name. We're newer, faster, with a deeper free tier and everything bundled in one Pro tier.",
     group: "Direct alternative" },
   { slug: "excel", competitor: "Excel / Google Sheets",
-    tagline: "Your spreadsheet is brittle, mobile-hostile, and quietly wrong. Validated math, every device, no formulas to break.",
+    tagline: "A structured, mobile-friendly workflow with one documented engine; keep spreadsheets for custom models that need their flexibility.",
     group: "Direct alternative" },
 
   // Complementary tools — post-purchase ops, accounting, banking
@@ -109,15 +108,15 @@ const COMPARISONS: ComparisonCard[] = [
     tagline: "RentSpree screens tenants. TrueCap underwrites the property. Agents use both.",
     group: "Complementary tool" },
   { slug: "buildium", competitor: "Buildium",
-    tagline: "Buildium is enterprise property management (50+ units). TrueCap is solo-investor underwriting.",
+    tagline: "Buildium manages rentals after purchase. TrueCap underwrites potential acquisitions before purchase.",
     group: "Complementary tool" },
   { slug: "appfolio", competitor: "AppFolio",
-    tagline: "AppFolio is enterprise PM for 1000+ unit operators. TrueCap is solo-investor underwriting.",
+    tagline: "AppFolio is post-purchase property management with a published 50-unit Core minimum. TrueCap is pre-purchase underwriting.",
     group: "Complementary tool" },
 
   // Specialized tools — single-slice tools (rent, market, listings)
   { slug: "roofstock", competitor: "Roofstock",
-    tagline: "Roofstock sells the property. TrueCap is the independent second opinion on any turnkey listing.",
+    tagline: "Roofstock offers individual-investor real-estate services. TrueCap provides a separate, assumption-driven underwrite.",
     group: "Specialized tool" },
   { slug: "mashvisor", competitor: "Mashvisor",
     tagline: "Mashvisor is market discovery (heatmaps, neighborhood scores). TrueCap is per-deal underwriting once you've picked an address.",
@@ -132,7 +131,7 @@ const COMPARISONS: ComparisonCard[] = [
     tagline: "RentCast estimates rent + property value with an API. TrueCap underwrites the full deal.",
     group: "Specialized tool" },
   { slug: "zillow-rent-estimate", competitor: "Zillow Rent Estimate",
-    tagline: "Zillow's Rent Zestimate is fast but often 10-25% off market. TrueCap uses HUD Fair Market Rent plus full underwriting.",
+    tagline: "Compare Zillow's property-specific Rent Zestimate with TrueCap's editable HUD area benchmark and full underwriting workflow.",
     group: "Specialized tool" },
   { slug: "hostfully", competitor: "Hostfully",
     tagline: "Hostfully manages short-term rentals after closing. TrueCap underwrites the STR deal before.",
@@ -163,7 +162,7 @@ const COMPARISONS: ComparisonCard[] = [
     tagline: "Lodgify is small-operator STR software (1-10 STRs). TrueCap underwrites the STR deal before.",
     group: "Specialized tool" },
   { slug: "guesty", competitor: "Guesty",
-    tagline: "Guesty is enterprise STR PM for 50+ properties / multi-owner managers. TrueCap is solo STR underwriting.",
+    tagline: "Guesty manages STR operations across Lite, Pro, and Enterprise plans. TrueCap handles pre-purchase underwriting.",
     group: "Specialized tool" },
   { slug: "crexi", competitor: "Crexi",
     tagline: "Crexi is the commercial RE marketplace (LoopNet alternative). TrueCap is residential underwriting.",
@@ -342,7 +341,7 @@ export default function VsHubPage() {
               href="/pricing"
               className="inline-flex items-center gap-2 border border-primary-foreground/40 bg-primary-foreground/10 text-primary-foreground px-4 py-2.5 rounded-xl font-bold hover:bg-primary-foreground/20 transition-colors"
             >
-              Start a {TRIAL_LABEL}
+              See Pro pricing
               <ArrowUpRight className="w-4 h-4" />
             </Link>
           </div>

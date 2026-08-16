@@ -1,44 +1,44 @@
 {
-  "subject": "Your property tax bill is probably wrong — here's the 30-min fix",
-  "preheader": "30-40% of rental properties over-assessed · $400-1,800/yr saved per property · 62% appeal success rate",
+  "subject": "Before appealing a property-tax assessment, verify these five things",
+  "preheader": "Deadlines, evidence, fees, reassessment risk, and local rules all vary.",
   "publishedAt": "2026-08-04",
   "weekLabel": "Topic: Property tax appeals",
   "marketSnapshot": {
-    "headline": "Property tax appeals — the under-used profit lever",
-    "body": "Counties over-assess about 30-40% of rental properties relative to actual sale-comp values. Most investors glance at the assessment notice, file it, and move on — that's a mistake. The appeal process exists specifically to correct over-assessments and the average successful appeal saves $400-1,800 per year, in perpetuity. On a 5-property portfolio, that's $2,000-9,000/yr of free NOI for ~30 minutes per property of paperwork.",
+    "headline": "Property-tax appeals are evidence- and jurisdiction-specific",
+    "body": "An assessment can differ from your view of market value, but that does not make it incorrect or guarantee that an appeal will reduce the bill. Before filing, check the jurisdiction's valuation date, assessment ratio, appeal deadline, eligible evidence, fees, hearing process, and whether review can leave the value unchanged or increase it. This is general education, not legal or tax advice.",
     "stats": [
       {
-        "label": "Avg over-assessment rate",
-        "value": "33%"
+        "label": "Appeal deadline",
+        "value": "Varies locally"
       },
       {
-        "label": "Avg appeal success rate",
-        "value": "62%"
+        "label": "Evidence standard",
+        "value": "Jurisdiction-specific"
       },
       {
-        "label": "Time to file appeal",
-        "value": "~30 min"
+        "label": "Outcome",
+        "value": "Not guaranteed"
       }
     ]
   },
   "dealSpotter": [
     {
       "address": "Example: tax bill $4,200 · comp-supported value 12% lower",
-      "headlineNumber": "Appeal saves $1,250/yr · cap rate +0.4pp",
-      "verdict": "Strong (appeal)",
-      "body": "$285k purchase. Current assessed value $268k = $4,200 tax bill. Recent sales of comparable properties in the area: $245-262k. Filing a formal appeal with three recent comps has a 65-75% success rate in most counties. If granted, the tax bill drops to ~$2,950, which adds $1,250/yr to NOI. Cap rate moves from 7.4% to 7.8% on that single piece of paperwork."
+      "headlineNumber": "Illustration only · verify the local assessment method",
+      "verdict": "Review locally",
+      "body": "If recent comparable sales appear lower than the assessed value, first confirm that they match the jurisdiction's valuation date, assessment ratio, property class, and required adjustments. Ask the assessor or a qualified local professional what evidence is admissible and model any potential change as a scenario—not expected savings."
     },
     {
       "address": "Example: assessment matches comps · skip the appeal",
-      "headlineNumber": "Tax $1,950 — assessed fairly · don't risk reassessment",
-      "verdict": "Skip (the appeal)",
-      "body": "Don't appeal a fair assessment — the county can reassess upward and you'll cost yourself money. Only appeal when comps clearly support a LOWER value. Default to 'assess your assessment' before deciding."
+      "headlineNumber": "Comparable evidence supports the current value",
+      "verdict": "Verify before filing",
+      "body": "If the assessment appears consistent with the jurisdiction's rules and admissible evidence, an appeal may not be worthwhile. Confirm possible fees, review scope, and downside with the assessor's published guidance or a qualified local professional."
     },
     {
       "address": "Example: hearing-required jurisdiction",
-      "headlineNumber": "Appeal saves $650/yr · 70%+ success rate when armed with comps",
-      "verdict": "Strong (appeal)",
-      "body": "Some counties (Davidson TN, parts of NY, parts of CA) require a formal hearing rather than paper-only appeal. Slightly more work — 10-15 min hearing typically by phone or video. The success rate when you show up with three solid comparable sales is high. Most investors don't bother. The ones who do compound this advantage over years of ownership."
+      "headlineNumber": "A hearing or local form may be required",
+      "verdict": "Check the procedure",
+      "body": "Some jurisdictions use written review; others require forms, fees, evidence deadlines, or a hearing. Use the assessor's current instructions for the property and tax year. Do not assume that another county's process, timing, or evidence rules apply."
     }
   ],
   "blogFeature": {
@@ -48,7 +48,7 @@
   },
   "qa": {
     "question": "Step by step: how do I actually appeal a property tax assessment?",
-    "answer": "Three steps that work in 90% of counties. (1) Pull 3-5 sales comparables of similar properties (same bedroom count, similar age, within 1 mile, sold in the last 12 months). Most county assessor sites have a comparable-sales lookup tool; if not, your realtor can pull this in 5 minutes. (2) Calculate the median price per square foot from those comps. Multiply by your property's square footage to get a comp-supported value. (3) File the appeal through your county's online portal (look for 'tax assessment appeal' on the assessor's site). Attach the comp list and your calculation. Most counties charge $25-100 to file. Hearings are usually in writing; some require a 10-minute call. Decisions come back in 60-120 days. If you win, the savings start immediately and recur every year you own the property. Set a calendar reminder for next year's assessment notice — the savings only persist if you defend them again when assessments roll forward."
+    "answer": "Start with the assessor or tax appeal body's instructions for the property's jurisdiction and tax year. Confirm the filing deadline, who may file, the valuation date and assessment ratio, required forms, admissible evidence, fees, hearing procedure, review scope, and further appeal rights. Gather evidence that follows those rules; raw price-per-square-foot comparisons may not be sufficient. Consider a qualified local attorney, appraiser, tax professional, or appeal specialist when the amount or procedure is material. Model a reduction only as a scenario until a final decision is issued."
   },
   "shipNote": {
     "title": "Just shipped: honest after-tax math",

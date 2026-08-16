@@ -203,7 +203,7 @@ export function RoiCalculatorWidget({ proMonthlyPrice, singleDealPriceLabel = "$
         />
         <ResultTile
           icon={TrendingUp}
-          label="ROI vs Pro"
+          label="ROI vs monthly Pro"
           value={result.valueMultiple >= 1 ? `${result.valueMultiple.toFixed(1)}×` : "—"}
           tone={result.valueMultiple >= 5 ? "success" : "primary"}
         />

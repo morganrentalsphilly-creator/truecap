@@ -65,7 +65,7 @@ export const metadata: Metadata = {
 const FAQS: { q: string; a: string }[] = [
   {
     q: "Is subject-to investing legal?",
-    a: "Yes, buying a property 'subject to' the existing mortgage is legal. The catch is the due-on-sale clause: transferring title while the seller's loan stays in place gives the lender the contractual right to call the full balance due. The Garn-St. Germain Act's exemptions don't cover an arm's-length investor purchase, so that risk is real and ongoing — it doesn't make the deal illegal, it makes it a risk you have to price and manage.",
+    a: "A subject-to transfer is not automatically lawful or compliant merely because the parties agree to it. The result depends on the loan documents, disclosures, servicing and insurance arrangements, state law, licensing and consumer-credit rules, and the facts of the transaction. Federal law generally permits enforcement of due-on-sale clauses, and the listed exemptions do not include an ordinary arm's-length investor purchase. Use transaction-specific real-estate counsel and the title and insurance professionals before proceeding.",
   },
   {
     q: "What's the difference between seller financing and subject-to?",
@@ -73,7 +73,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Does Dodd-Frank apply to seller-financed deals?",
-    a: "Mostly not for investors. Dodd-Frank's seller-financing restrictions (ability-to-repay, balloon limits, rate caps, loan-originator rules) apply to residential loans where the buyer intends to occupy the home. They generally don't apply to investment or rental property, or to investor-buyers who won't live there. Sellers financing more than three properties in 12 months face more rules even so — confirm with counsel.",
+    a: "Applicability depends on the property, buyer's intended occupancy, transaction structure, seller activity, state law, and federal definitions and exemptions. Do not assume an 'investor' label removes ability-to-repay, loan-originator, licensing, disclosure, usury, servicing, or other requirements. Have qualified counsel review the specific deal.",
   },
   {
     q: "What happens if the lender calls a subject-to loan?",
@@ -152,8 +152,8 @@ export default function BlogPost() {
             financing</strong> — structures where the seller, not a bank,
             provides some or all of the financing. The two you&apos;ll hear most are
             <strong> seller financing</strong> and <strong>subject-to</strong>.
-            Both are legitimate and both are genuinely useful in 2026. Both also
-            carry risks that the YouTube version conveniently skips, so here&apos;s
+            Either can be available in a properly structured transaction. Both
+            carry legal and financial risks that the YouTube version conveniently skips, so here&apos;s
             the honest walkthrough.
           </p>
 
@@ -180,26 +180,27 @@ export default function BlogPost() {
           <p>
             In a subject-to deal, you take <strong>title</strong> to the property,
             but the seller&apos;s existing mortgage <strong>stays in the
-            seller&apos;s name</strong> and you make the payments on it. The 2026
-            appeal is obvious: you effectively &quot;inherit&quot; the seller&apos;s
-            2020-2021 mortgage at 3-4% instead of taking out a new loan at ~7%.
-            On a $300k balance, that rate gap is worth hundreds of dollars a month
-            in cash flow.
+            seller&apos;s name</strong> and you make the payments on it. A lower
+            existing note rate can create a payment difference versus a current
+            quote, but use the actual statement, payoff, arrears, escrow,
+            insurance, servicing, maturity, balloon, and default terms. A rate
+            gap alone does not establish savings or cash flow.
           </p>
           <p>
-            The catch is the <strong>due-on-sale clause</strong>. Almost every
-            mortgage gives the lender the right to demand the full balance when
-            the property&apos;s title transfers — and a subject-to purchase is
-            exactly that transfer. The Garn-St. Germain Act exempts certain
+            The catch is the <strong>due-on-sale clause</strong>. If the loan
+            documents contain one, federal law generally permits the lender to
+            enforce it when title transfers, subject to listed exceptions and the
+            contract. The Garn-St. Germain Act exempts certain
             transfers (into a living trust, to relatives) but <strong>not</strong>
             an arm&apos;s-length sale to an investor. So the lender <em>can</em> call
-            the loan. In practice they rarely call a loan that&apos;s paid on time,
-            but as rates rose the incentive to call cheap loans went up, and the
-            risk never fully goes away.
+            the loan. Whether and when the lender exercises that option is
+            lender- and fact-specific; timely payments do not waive it.
           </p>
           <p>
-            That risk doesn&apos;t make subject-to illegal — it makes it a risk you
-            price and manage. Serious subject-to buyers keep the payments current,
+            Due-on-sale exposure is only one issue; it does not determine whether
+            the overall transaction complies with applicable law, loan terms,
+            disclosures, licensing, servicing, title, and insurance requirements.
+            Buyers commonly plan to keep payments current,
             hold reserves, keep insurance properly arranged, and plan an exit (a
             refinance or sale) so a call wouldn&apos;t be catastrophic. Treat anyone
             who tells you the due-on-sale clause &quot;never gets enforced, don&apos;t
@@ -216,22 +217,18 @@ export default function BlogPost() {
 
           <h2 className="text-2xl sm:text-3xl">Where Dodd-Frank fits (and where it doesn&apos;t)</h2>
           <p>
-            People often cite Dodd-Frank as a reason seller financing is &quot;dead.&quot;
-            For investors, it mostly isn&apos;t a factor. Dodd-Frank&apos;s
-            seller-financing rules — ability-to-repay, balloon limits, rate caps,
-            and loan-originator requirements — apply to <strong>residential loans
-            where the buyer intends to occupy the home</strong>. They generally{" "}
-            <strong>do not apply to investment or rental property</strong>, or to
-            an investor-buyer who won&apos;t live there.
+            Federal mortgage rules include definitions and exemptions that can
+            turn on occupancy, property type, the seller&apos;s activity, and the
+            transaction structure. An investment purpose can change which rules
+            apply, but it is not a blanket exemption from federal or state
+            lending, licensing, disclosure, servicing, usury, or consumer laws.
           </p>
           <p>
-            Where it does bite: if you&apos;re the <em>seller</em> financing
-            owner-occupant buyers, a limited exemption covers selling up to three
-            properties in a 12-month period if you follow the terms (fixed or a
-            5+ year ARM with rate caps, no negative amortization). Finance more
-            than three to owner-occupants and the full ability-to-repay and
-            loan-originator rules kick in. None of this is legal advice — loop in
-            a real-estate attorney and a title company on any creative deal.
+            Seller-financer exclusions and exemptions are technical and
+            conditional; a property count alone does not establish compliance.
+            Have a real-estate attorney and, where appropriate, a licensed
+            mortgage professional and servicer review the actual documents before
+            offering or accepting terms.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">The 2026 rate arbitrage, with eyes open</h2>

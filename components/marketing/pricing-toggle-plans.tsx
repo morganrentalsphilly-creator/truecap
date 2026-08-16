@@ -18,6 +18,7 @@ import { useEffect, useRef, useState } from "react";
 import { Check, Sparkles, X } from "lucide-react";
 import { PricingPlanButtons } from "@/components/marketing/pricing-plan-buttons";
 import { trackEvent } from "@/lib/analytics";
+import { decidePricingCardCta } from "@/lib/billing-plan-cta";
 import { TRIAL_DAYS, willCheckoutGrantTrial } from "@/lib/trial";
 import { featuresForTier } from "@/lib/entitlements-catalog";
 
@@ -31,7 +32,8 @@ interface PricingTogglePlansProps {
   agentMonthly?: ResolvedPrice;
   agentAnnual?: ResolvedPrice;
   isAuthenticated: boolean;
-  isPaid: boolean;
+  /** Exact newest live paid plan, or null for Free. */
+  activePaidPlanSlug: string | null;
   /**
    * Server-computed mirror of the checkout repeat-trial guard (see
    * hasAnySubscriptionHistory in lib/entitlements.ts): true when the user has
@@ -92,9 +94,9 @@ const AGENT_PRO_FEATURES: string[] = [
   "Everything in Pro, plus —",
   ...featuresForTier("agent_pro")
     .filter((f) => !f.tiers.includes("pro"))
-    // Don't advertise an entitlement whose feature isn't built yet (client
-    // portal, white-label embeds). The strings stay in the plan JSON so the
-    // day they ship it's a one-line flip — but the card must not sell vapor.
+    // Don't advertise an entitlement that is not marketable yet. This covers
+    // implementation readiness as well as legal/operational approval; the
+    // runtime entitlement can remain forward-compatible without being sold.
     .filter((f) => f.shipped !== false)
     .map((f) => f.label),
 ];
@@ -118,7 +120,7 @@ const PRO_OUTCOMES: { outcome: string; items: string[] }[] = [
       "MAO solver — reverse-solve your max offer",
       "Sale + rent comps from the address (50/mo)",
       "Sensitivity grid — stress-test the deal",
-      "Personal Verdict — every deal pass/failed against YOUR buy box",
+      "Personal Verdict — pass/fail against YOUR buy box on every deal",
     ],
   },
   {
@@ -143,7 +145,7 @@ const PRO_OUTCOMES: { outcome: string; items: string[] }[] = [
   {
     outcome: "Share the deal",
     items: [
-      "Lender · partner · personal PDF reports, with comps",
+      "Lender · partner · personal PDF reports that can include saved comps",
       "Custom PDF branding — your logo, color, contact",
       "Co-branded share links with lead capture",
     ],
@@ -170,22 +172,25 @@ export function PricingTogglePlans({
   agentMonthly = null,
   agentAnnual = null,
   isAuthenticated,
-  isPaid,
+  activePaidPlanSlug,
   hadPriorSubscription,
   agentProConfigured = false,
   proOfferName = "TrueCap Pro",
   rateAlertsLive = false,
 }: PricingTogglePlansProps) {
-  // One decision for every trial mention on this card — must match what
-  // checkout actually grants (billing.ts denies the trial to anyone with
-  // prior subscription history, any status).
-  const offersTrial = willCheckoutGrantTrial(hadPriorSubscription);
-  // Monthly-first: visitors arrive primed on the advertised monthly price
-  // ($29.99) from ads/FAQ/marketing copy — the annual-first default led with
-  // "$25/mo billed annually", a different number they had to reconcile
-  // before trusting the page (UX walkthrough P2-9). The annual toggle still
-  // carries its savings chip, so the discount stays one tap away.
-  const [period, setPeriod] = useState<"monthly" | "annual">("monthly");
+  const isPaid = activePaidPlanSlug != null;
+  // An explicit trial promise requires BOTH authenticated identity and a clean
+  // subscription-history check. Anonymous visitors may be signed-out returning
+  // customers, so their copy stays conditional until signup confirms identity.
+  const verifiedTrialEligible =
+    isAuthenticated && willCheckoutGrantTrial(hadPriorSubscription);
+  // Monthly-first for visitors and Free users: they arrive primed on the
+  // advertised monthly price ($29.99) from ads/FAQ/marketing copy. A current
+  // annual subscriber instead opens on Annual so their exact card is visibly
+  // marked Current; the toggle remains under their control.
+  const [period, setPeriod] = useState<"monthly" | "annual">(
+    activePaidPlanSlug?.endsWith("_annual") ? "annual" : "monthly"
+  );
 
   // Top of the pricing-page funnel — fire once on mount so we can measure
   // pricing_view → pro_checkout_started (checkout fires server-side in
@@ -269,6 +274,8 @@ export function PricingTogglePlans({
               : "billed annually",
           slot: "pro_annual" as const,
         };
+  const proCardDecision = decidePricingCardCta(activePaidPlanSlug, proCard.slot);
+  const agentCardDecision = decidePricingCardCta(activePaidPlanSlug, agentCard.slot);
 
   return (
     <>
@@ -318,7 +325,7 @@ export function PricingTogglePlans({
             <PricingPlanButtons
               slot="free"
               isAuthenticated={isAuthenticated}
-              isPaid={isPaid}
+              activePaidPlanSlug={activePaidPlanSlug}
               hadPriorSubscription={hadPriorSubscription}
             />
           </div>
@@ -380,7 +387,7 @@ export function PricingTogglePlans({
 
           <div className="flex items-baseline justify-between">
             <h3 className="text-lg font-extrabold text-foreground">{proOfferName}</h3>
-            {isPaid ? (
+            {proCardDecision.kind === "current" ? (
               <span className="rounded-full bg-[var(--metric-positive)]/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-[var(--metric-positive)]">
                 Current
               </span>
@@ -439,7 +446,13 @@ export function PricingTogglePlans({
           <div className="mt-1 text-xs text-muted-foreground">{proCard.subline}</div>
           <div className="mt-3 flex justify-center">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--metric-positive)]/12 px-3 py-1 text-xs font-extrabold uppercase tracking-wide text-[var(--metric-positive)]">
-              <Sparkles className="size-3" /> {offersTrial ? `Full Pro · ${TRIAL_DAYS} days free` : "Full Pro access"}
+              <Sparkles className="size-3" />{
+                verifiedTrialEligible
+                  ? `Full Pro · ${TRIAL_DAYS} days free`
+                  : !isAuthenticated
+                    ? `Full Pro · ${TRIAL_DAYS}-day trial if eligible`
+                    : "Full Pro access"
+              }
             </span>
           </div>
 
@@ -460,23 +473,16 @@ export function PricingTogglePlans({
             <PricingPlanButtons
               slot={proCard.slot}
               isAuthenticated={isAuthenticated}
-              isPaid={isPaid}
+              activePaidPlanSlug={activePaidPlanSlug}
               hadPriorSubscription={hadPriorSubscription}
             />
           </div>
-          {offersTrial ? (
-            <p className="mt-2.5 text-center text-xs text-muted-foreground">
-              <strong className="text-foreground">Full Pro access now.</strong> Card required at checkout.
-              Subscription billing starts after {TRIAL_DAYS} days unless you cancel first. Your saved
-              work stays in your account if you downgrade.
-            </p>
-          ) : (
-            <p className="mt-2.5 text-center text-xs text-muted-foreground">
-              <strong className="text-foreground">Full Pro access starts immediately.</strong> The
-              free trial is a first-time offer. Cancel online anytime; no contract. Your saved work
-              stays in your account if you downgrade.
-            </p>
-          )}
+          {!isPaid ? (
+            <PricingTrialTerms
+              isAuthenticated={isAuthenticated}
+              verifiedTrialEligible={verifiedTrialEligible}
+            />
+          ) : null}
           <p className="mt-6 text-sm font-semibold text-foreground">Everything in Free, plus —</p>
           <div className="mt-3 space-y-4">
             {PRO_OUTCOMES.map((group) => ({
@@ -508,11 +514,18 @@ export function PricingTogglePlans({
             so this card can never promise something the tier doesn't gate. */}
         {showAgentPro ? (
           <div className="relative order-3 rounded-3xl border border-border bg-card p-6 shadow-sm">
-            <div className="flex items-baseline justify-between">
+            <div className="flex items-start justify-between gap-3">
               <h3 className="text-lg font-extrabold text-foreground">Agent Pro</h3>
-              <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-primary">
-                For agents
-              </span>
+              <div className="flex flex-wrap justify-end gap-1.5">
+                {agentCardDecision.kind === "current" ? (
+                  <span className="rounded-full bg-[var(--metric-positive)]/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-[var(--metric-positive)]">
+                    Current
+                  </span>
+                ) : null}
+                <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-primary">
+                  For agents
+                </span>
+              </div>
             </div>
             <p className="mt-1 text-sm text-muted-foreground">
               Run every client&rsquo;s buy box. Send co-branded deals that come back to you.
@@ -524,14 +537,31 @@ export function PricingTogglePlans({
               <span className="text-sm text-muted-foreground">{agentCard.priceSub}</span>
             </div>
             <div className="mt-1 text-xs text-muted-foreground">{agentCard.subline}</div>
+            <div className="mt-3 flex justify-center">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-extrabold uppercase tracking-wide text-primary">
+                <Sparkles className="size-3" />{
+                  verifiedTrialEligible
+                    ? `Agent Pro · ${TRIAL_DAYS} days free`
+                    : !isAuthenticated
+                      ? `${TRIAL_DAYS}-day trial if eligible`
+                      : "Agent Pro access"
+                }
+              </span>
+            </div>
             <div className="mt-5">
               <PricingPlanButtons
                 slot={agentCard.slot}
                 isAuthenticated={isAuthenticated}
-                isPaid={isPaid}
+                activePaidPlanSlug={activePaidPlanSlug}
                 hadPriorSubscription={hadPriorSubscription}
               />
             </div>
+            {!isPaid ? (
+              <PricingTrialTerms
+                isAuthenticated={isAuthenticated}
+                verifiedTrialEligible={verifiedTrialEligible}
+              />
+            ) : null}
             <ul className="mt-6 space-y-2.5">
               {AGENT_PRO_FEATURES.map((f) => (
                 <li key={f} className="flex items-start gap-2 text-sm">
@@ -544,5 +574,43 @@ export function PricingTogglePlans({
         ) : null}
       </div>
     </>
+  );
+}
+
+function PricingTrialTerms({
+  isAuthenticated,
+  verifiedTrialEligible,
+}: {
+  isAuthenticated: boolean;
+  verifiedTrialEligible: boolean;
+}) {
+  if (!isAuthenticated) {
+    return (
+      <p className="mt-2.5 text-center text-xs text-muted-foreground">
+        <strong className="text-foreground">
+          Eligible first-time subscribers get {TRIAL_DAYS} days.
+        </strong>{" "}
+        Card required at checkout. Returning subscribers start paid access immediately.
+        Cancel online anytime; no contract.
+      </p>
+    );
+  }
+
+  if (verifiedTrialEligible) {
+    return (
+      <p className="mt-2.5 text-center text-xs text-muted-foreground">
+        <strong className="text-foreground">Full access now.</strong> Card required at checkout.
+        Subscription billing starts after {TRIAL_DAYS} days unless you cancel first. Your saved
+        work stays in your account if you downgrade.
+      </p>
+    );
+  }
+
+  return (
+    <p className="mt-2.5 text-center text-xs text-muted-foreground">
+      <strong className="text-foreground">Paid access starts immediately.</strong> The free trial
+      is a first-time offer. Cancel online anytime; no contract. Your saved work stays in your
+      account if you downgrade.
+    </p>
   );
 }

@@ -168,7 +168,7 @@ export function ShareLinkButton({
             </DialogTitle>
             <DialogDescription>
               {context === "client-report"
-                ? "Send this read-only analysis to the assigned client. Saved public branding is included when configured; no account is needed to open it."
+                ? "Send this read-only analysis to the assigned client. Anyone with the link can view the snapshot; saved public branding is included when configured, and no account is needed to open it."
                 : "Anyone with the link can view a read-only version — the details are encoded in the URL, no account needed to open it."}
             </DialogDescription>
           </DialogHeader>
@@ -202,7 +202,8 @@ export function ShareLinkButton({
           <p className="text-[11px] text-muted-foreground">
             Note: the link contains a snapshot of the analysis at this moment. If
             you change inputs later and want viewers to see updates, generate a
-            new share link.
+            new share link. Links do not currently expire or revoke, so treat one
+            like a document you chose to share.
           </p>
         </DialogContent>
       </Dialog>

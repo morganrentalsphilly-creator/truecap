@@ -9,7 +9,6 @@
  * standard rental-analyzer often models it wrong.
  */
 
-import { TRIAL_LABEL } from "@/lib/trial";
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
@@ -116,11 +115,11 @@ export default function ForHouseHackersPage() {
               href="/pricing"
               className="inline-flex h-12 items-center justify-center gap-1.5 rounded-xl border border-border bg-card px-5 text-sm font-semibold text-foreground hover:bg-muted"
             >
-              Start a {TRIAL_LABEL}
+              See Pro pricing
             </Link>
           </div>
           <p className="mt-3 text-xs text-muted-foreground">
-            No card · No signup needed to use the analyzer · Cancel anytime
+            Free screen: no card or signup
           </p>
         </section>
 
@@ -232,17 +231,17 @@ export default function ForHouseHackersPage() {
 
         <section className="mb-12 sm:mb-16 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
           <h2 className="text-2xl sm:text-3xl font-extrabold mb-2">
-            Free analyzer is enough to pick the property.
+            Free screens the live-in year. Pro models the year-2 transition.
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
-            Free covers monthly out-of-pocket, cap rate, CoC for your live-in year. Pro unlocks the 10-year projection (essential for modeling the year-2 transition), Illustrative Tax Impact, and the saved-analyses portfolio view.
+            Free covers monthly out-of-pocket, cap rate, and CoC for a first-pass live-in-year screen. Pro adds the 10-year projection for exploring the year-2 rental transition, Illustrative Tax Impact, and the saved-deal portfolio view.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link
               href="/pricing"
               className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
             >
-              Start a {TRIAL_LABEL}
+              See Pro pricing
               <ArrowUpRight className="w-4 h-4" />
             </Link>
             <Link

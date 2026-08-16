@@ -19,7 +19,7 @@ export default function Image() {
   return renderVsOgImage({
     competitor: "Zillow Rent",
     tagline:
-      "Zillow's Rent Zestimate is fast but often 10-25% off market. TrueCap uses HUD FMR plus full underwriting.",
+      "Compare Zillow's property-specific starting estimate with TrueCap's editable HUD area benchmark and underwriting workflow.",
     slug: "zillow-rent-estimate",
   });
 }

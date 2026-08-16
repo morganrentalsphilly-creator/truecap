@@ -5,7 +5,6 @@
  * RentCast (formerly Realtyna RentCast / often confused with rentcast.com.au) is a property data + rent estimation API + dashboard. Newer entrant competing with Rentometer for rent comps, plus adds property value estimation. Investors evaluate it as a Rentometer alternative or for API access.
  */
 
-import { TRIAL_LABEL } from "@/lib/trial";
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
@@ -61,10 +60,10 @@ const MATRIX: Row[] = [
   { feature: "API access for developers", truecap: "No", rentcast: "Yes — REST API for rent + value", winner: "rentcast" },
   { feature: "Address auto-fill (multi-source)", truecap: "Yes — HUD + FRED + state property tax", rentcast: "Property data only", winner: "truecap" },
   { feature: "Mortgage + financing math", truecap: "Yes — full PITI + DSCR + amortization", rentcast: "Not included", winner: "truecap" },
-  { feature: "Pricing (entry tier)", truecap: "Free; Pro $29.99/mo", rentcast: "Free + paid tiers ~$15-$74/mo (as of 2026)", winner: "tie" },
-  { feature: "Free tier", truecap: "Yes — full underwriting math", rentcast: "Limited free lookups", winner: "truecap" },
+  { feature: "Pricing (entry tier)", truecap: "Free core; paid Pro — see live pricing", rentcast: "Free + paid tiers ~$15-$74/mo (as of 2026)", winner: "tie" },
+  { feature: "Free tier", truecap: "Yes — core cap rate, CoC, DSCR, and cash flow", rentcast: "Limited free lookups", winner: "truecap" },
   { feature: "Shareable read-only deal link", truecap: "Free — read-only public link; Pro adds co-branding", rentcast: "Not the use case", winner: "truecap" },
-  { feature: "Lender-facing PDF", truecap: "Pro — multi-page report", rentcast: "PDF reports available on paid", winner: "tie" },
+  { feature: "PDF deal report", truecap: "One-time Deal Decision Pack or included with Pro", rentcast: "PDF reports available on paid", winner: "tie" },
   { feature: "Investor dashboard (saved deals)", truecap: "Free — dashboard + save up to 5 deals; Pro adds unlimited saves + portfolio rollup", rentcast: "Property-list dashboard", winner: "tie" },
 ];
 
@@ -127,7 +126,7 @@ export default function VsRentcastPage() {
             </Link>
           </div>
           <p className="mt-3 text-xs text-muted-foreground">
-            No card · No signup · Cancel anytime
+            Free analyzer: no card or signup
           </p>
         </section>
 
@@ -267,7 +266,8 @@ export default function VsRentcastPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
             Pro unlocks projections, sensitivity, illustrative tax impact, modeled exit comparisons,
-            MAO, PDF exports, and co-branded share links.
+            MAO, and co-branded share links. Pro includes PDFs, and a one-time
+            PDF option is available; see live pricing for current terms.
             No card to start.
           </p>
           <div className="flex flex-wrap gap-3">
@@ -275,7 +275,7 @@ export default function VsRentcastPage() {
               href="/pricing"
               className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
             >
-              Start a {TRIAL_LABEL}
+              See Pro pricing
               <ArrowUpRight className="w-4 h-4" />
             </Link>
             <Link
@@ -308,21 +308,21 @@ const RENTCAST_FAQ: FaqItem[] = [
     question: "Is TrueCap a RentCast alternative?",
     answer: (
       <>
-        Not directly — they overlap on rent estimates but TrueCap is full underwriting. RentCast is best-in-class for listings-based rent comps and AVM-style property value estimates. TrueCap pre-fills rent from HUD FMR (county-level baseline) and then runs the full underwrite (cap rate, DSCR, projection). Many investors use RentCast for the tightest rent number and TrueCap for everything else.
+        Not directly — they overlap on rent estimates but TrueCap is full underwriting. RentCast provides listings-based rent comps and AVM-style property value estimates. TrueCap pre-fills an editable HUD area benchmark and then runs the full underwrite. You can use RentCast as one evidence source and TrueCap for the downstream model.
       </>
     ),
     plainTextAnswer:
-      "Not directly — they overlap on rent estimates but TrueCap is full underwriting. RentCast does listings-based rent comps and AVM. TrueCap uses HUD FMR baseline then runs cap rate, DSCR, projection. Investors use RentCast for tight rent, TrueCap for everything else.",
+      "Not directly — they overlap on rent estimates but TrueCap is full underwriting. RentCast provides listings-based rent comps and AVM estimates. TrueCap starts with an editable HUD area benchmark and runs the downstream model.",
   },
   {
     question: "How accurate is RentCast vs TrueCap&apos;s HUD-based rent estimate?",
     answer: (
       <>
-        RentCast is typically tighter in major metros because they aggregate active listings. HUD Fair Market Rent (TrueCap&apos;s default) is conservative and works as a defensible lender-friendly baseline. In hot markets where listings exceed FMR, RentCast may give a more realistic number. In stable Midwest cash-flow markets, the two are usually within 5-10% of each other.
+        There is no universal accuracy winner. RentCast uses listings-based data, while HUD FMR is an area-level housing-program benchmark. Coverage and fit vary by property and market. Compare both with current subject-property comps or lease evidence and test a reasonable range.
       </>
     ),
     plainTextAnswer:
-      "RentCast is typically tighter in major metros (active listings). HUD FMR (TrueCap default) is conservative + defensible. In hot markets, RentCast may be more realistic. In Midwest cash-flow markets, they&apos;re usually within 5-10%.",
+      "There is no universal accuracy winner. RentCast uses listings-based data, while HUD FMR is an area-level housing-program benchmark. Compare both with subject-property comps or lease evidence and test a reasonable range.",
   },
   {
     question: "Does RentCast do cap rate or DSCR calculations?",

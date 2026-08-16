@@ -5,7 +5,6 @@
  * Privy is an investor-focused MLS data + property search tool — built specifically for real estate investors who want to filter MLS data with investor criteria (cash-on-cash, rehab potential, motivated seller signals). Sister product positioning to TrueCap on the sourcing side.
  */
 
-import { TRIAL_LABEL } from "@/lib/trial";
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
@@ -57,12 +56,12 @@ const MATRIX: Row[] = [
   { feature: "Illustrative tax impact", truecap: "Pro — depreciation + interest + modeled after-tax CF", privy: "Not modeled", winner: "truecap" },
   { feature: "Address auto-fill (rent/rate/tax)", truecap: "Yes — HUD + FRED + state property tax", privy: "MLS-pulled property data", winner: "truecap" },
   { feature: "Investor-filtered MLS search", truecap: "No", privy: "Yes — cash flow, rehab, motivated", winner: "privy" },
-  { feature: "Comparable sales (comps)", truecap: "No", privy: "Yes — MLS-derived comp set", winner: "privy" },
+  { feature: "Sale + rent comps", truecap: "One free lookup; Pro includes 50 per month; no AVM", privy: "Yes — MLS-derived comp set", winner: "privy" },
   { feature: "Motivated-seller flagging on MLS", truecap: "No", privy: "Yes — DOM + price reduction signals", winner: "privy" },
   { feature: "Off-market lead generation", truecap: "No", privy: "Limited (MLS-focused)", winner: "privy" },
   { feature: "Mortgage + financing math", truecap: "Yes — PITI + DSCR + amortization", privy: "Not included", winner: "truecap" },
-  { feature: "Free tier", truecap: "Yes — full underwriting math", privy: "Trial only; paid from ~$99/mo (as of 2026)", winner: "truecap" },
-  { feature: "Pricing (entry tier)", truecap: "Free; Pro $29.99/mo", privy: "~$99/mo + setup fees", winner: "truecap" },
+  { feature: "Free tier", truecap: "Yes — core cap rate, CoC, DSCR, and cash flow", privy: "Trial only; paid from ~$99/mo (as of 2026)", winner: "truecap" },
+  { feature: "Pricing (entry tier)", truecap: "Free core; paid Pro — see live pricing", privy: "~$99/mo + setup fees", winner: "truecap" },
 ];
 
 export default function VsPrivyPage() {
@@ -124,7 +123,7 @@ export default function VsPrivyPage() {
             </Link>
           </div>
           <p className="mt-3 text-xs text-muted-foreground">
-            No card · No signup · Cancel anytime
+            Free analyzer: no card or signup
           </p>
         </section>
 
@@ -211,8 +210,8 @@ export default function VsPrivyPage() {
           <p className="mt-3 text-[11px] text-muted-foreground">
             Privy details based on publicly available product info as of 2026.
             See{" "}
-            <a href="https://getprivy.com" target="_blank" rel="noopener" className="underline">
-              getprivy.com
+            <a href="https://www.privy.pro/" target="_blank" rel="noopener" className="underline">
+              privy.pro
             </a>{" "}
             for their current state.
           </p>
@@ -267,7 +266,8 @@ export default function VsPrivyPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
             Pro unlocks projections, sensitivity, illustrative tax impact, modeled exit comparisons,
-            MAO, PDF exports, and co-branded share links.
+            MAO, and co-branded share links. Pro includes PDFs, and a one-time
+            PDF option is available; see live pricing for current terms.
             No card to start.
           </p>
           <div className="flex flex-wrap gap-3">
@@ -275,7 +275,7 @@ export default function VsPrivyPage() {
               href="/pricing"
               className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
             >
-              Start a {TRIAL_LABEL}
+              See Pro pricing
               <ArrowUpRight className="w-4 h-4" />
             </Link>
             <Link

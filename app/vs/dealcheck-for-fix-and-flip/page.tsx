@@ -4,7 +4,6 @@
  * Target queries: "dealcheck fix and flip", "dealcheck flip calculator", "best fix and flip calculator", "flip deal analyzer", "fix and flip analysis tool". Long-tail audience-slicing comparison.
  */
 
-import { TRIAL_LABEL } from "@/lib/trial";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, ArrowUpRight, Calculator, Check, Minus, Sparkles, X } from "lucide-react";
@@ -53,8 +52,8 @@ const MATRIX: Row[] = [
   // DealCheck's house-flipping calculator is included on every plan
   // (verified dealcheck.io/pricing June 2026) — tiers gate saved-
   // property caps, not the calculators.
-  { feature: "Free tier covers flip math", truecap: "No — Pro feature ($29.99/mo)", dealcheck: "Yes — included on all plans (free tier caps saved deals)", winner: "dealcheck" },
-  { feature: "Shareable flip analysis", truecap: "Free — read-only public link; Pro adds co-branding", dealcheck: "Pro — PDF export", winner: "truecap" },
+  { feature: "Free tier covers flip math", truecap: "No — dedicated flip workflow is Pro", dealcheck: "Yes — included on Starter, subject to published caps", winner: "dealcheck" },
+  { feature: "Shareable flip analysis", truecap: "Available for Pro-created flip analyses; Pro adds co-branding", dealcheck: "Interactive and PDF reports included on Starter", winner: "tie" },
 ];
 
 const NICHE_FAQ: FaqItem[] = [
@@ -62,7 +61,7 @@ const NICHE_FAQ: FaqItem[] = [
     question: "Which is better for fix-and-flippers — TrueCap or DealCheck?",
     answer: (
       <>
-        Both work. TrueCap edges out on break-even ARV math (you see the lowest ARV at which the deal still profits in one view) and Pro sensitivity on ARV (single biggest flip risk). DealCheck has native iOS/Android apps which is the cleaner mobile experience at showings. Both have rehab + holding-cost + ARV modeling.
+        Both work. TrueCap emphasizes break-even ARV in one view and Pro sensitivity on ARV, a material flip risk. DealCheck has native iOS/Android apps for a different mobile workflow. Both include rehab, holding-cost, and ARV modeling.
       </>
     ),
     plainTextAnswer:
@@ -92,17 +91,17 @@ const NICHE_FAQ: FaqItem[] = [
     question: "Can I use TrueCap free for flip analysis?",
     answer: (
       <>
-        The standard cap rate / cash flow / DSCR underwriting is free on any property. The dedicated flip analyzer (ARV math, holding costs, break-even ARV, profit) is a Pro feature ($29.99/mo). For your first flip evaluation, free TrueCap + a spreadsheet covers the basics; if you do flips repeatedly, Pro pays for itself fast.
+        The standard cap rate, cash flow, and DSCR screening is free on any property. The dedicated flip analyzer (ARV math, holding costs, break-even ARV, and profit) is a Pro feature. See TrueCap&apos;s live pricing page for current rates and terms.
       </>
     ),
     plainTextAnswer:
-      "Standard underwriting free. Dedicated flip analyzer (ARV math, holding, break-even ARV, profit) is Pro $29.99/mo. One flip pays for Pro.",
+      "Standard cap rate, cash flow, and DSCR screening is free. The dedicated flip analyzer is Pro; see TrueCap's live pricing page for current rates and terms.",
   },
   {
     question: "How accurate are ARV estimates in flip analysis?",
     answer: (
       <>
-        ARV is the single biggest unknown in any flip. TrueCap&apos;s role isn&apos;t to predict ARV (that&apos;s your CMA&apos;s job) — it&apos;s to stress-test what happens if your ARV is wrong. Pro&apos;s sensitivity grid varies ARV ±10% in one view so you can see whether the deal still works on the downside.
+        ARV is a material unknown in a flip. TrueCap does not predict ARV; it stress-tests the value you enter. Pro&apos;s sensitivity grid varies ARV ±10% in one view so you can review a lower-value scenario.
       </>
     ),
     plainTextAnswer:
@@ -149,7 +148,7 @@ export default function VsDealcheckForFixAndFlipPage() {
             <span className="text-primary">which fits the buy → rehab → flip workflow?</span>
           </h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
-            Both calculators support fix-and-flip underwriting. This is the flipper&apos;s cut: which one models After Repair Value (ARV), rehab budgets, holding costs, and break-even ARV more cleanly. Both run identical core math; differences are in flip-specific workflow polish.
+            Both calculators support fix-and-flip underwriting. This is the flipper&apos;s cut: how each handles After Repair Value (ARV), rehab budgets, holding costs, and break-even ARV. The implementations and workflows differ, so verify the outputs against your own assumptions.
           </p>
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
             <ScrollToFormButton className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5">
@@ -179,7 +178,7 @@ export default function VsDealcheckForFixAndFlipPage() {
                 <li>You&apos;re evaluating a flip before making an offer.</li>
                 <li>You want break-even ARV math + sensitivity on ARV assumptions.</li>
                 <li>You want holding-cost detail (per-month).</li>
-                <li>You want the deepest analysis bundled in one Pro tier ($29.99/mo all-in).</li>
+                <li>You want TrueCap&apos;s flip and sensitivity tools in one Pro plan; see live pricing.</li>
               </ul>
             </div>
             <div>
@@ -244,6 +243,14 @@ export default function VsDealcheckForFixAndFlipPage() {
               </tbody>
             </table>
           </div>
+          <p className="mt-3 text-[11px] text-muted-foreground">
+            DealCheck publishes its core flip calculator and professional reports on Starter,
+            subject to plan limits. See{" "}
+            <a href="https://dealcheck.io/pricing/" target="_blank" rel="noopener" className="underline">
+              DealCheck&apos;s official pricing page
+            </a>{" "}
+            for current terms.
+          </p>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
             Most flips live or die on the rehab budget. Pin yours down with the standalone{" "}
             <Link href="/tools/rehab-cost-estimator" className="font-semibold text-primary hover:underline">rehab cost estimator</Link>
@@ -259,19 +266,20 @@ export default function VsDealcheckForFixAndFlipPage() {
 
         <section className="mb-12 sm:mb-16 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
           <h2 className="text-2xl sm:text-3xl font-extrabold mb-2">
-            Underwrite your next Fix & Flip deal — free.
+            Screen the property free. Model the flip workflow in Pro.
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
-            Free covers the standard cap rate, CoC, DSCR, and cash flow. Pro unlocks
-            projections, sensitivity, illustrative tax impact, modeled exit comparisons, MAO,
-            and PDF exports.
+            Free covers the standard cap rate, CoC, DSCR, and cash flow. Pro adds
+            the dedicated flip workflow, sensitivity, projections, illustrative tax impact,
+            modeled exit comparisons, and included PDFs. A one-time PDF option is also
+            available for a single core deal; see live pricing for current terms.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link
               href="/pricing"
               className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
             >
-              Start a {TRIAL_LABEL}
+              See Pro pricing
               <ArrowUpRight className="w-4 h-4" />
             </Link>
             <Link

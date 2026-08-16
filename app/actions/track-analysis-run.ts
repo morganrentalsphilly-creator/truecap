@@ -23,8 +23,8 @@ import { createAdminSupabaseClient } from "@/lib/supabase/admin";
  * homepage bundle. It is therefore an unauthenticated write into production
  * Postgres, and the RLS lockdown protects the route nobody was using. The
  * per-IP bucket below is the actual brake: it keeps a scripted loop from
- * running the public social-proof number (and Morgan's read of real usage,
- * which is the displayed figure minus the 50k baseline) away from reality.
+ * running the public social-proof number (and Morgan's read of real usage)
+ * away from reality.
  * A real person clicking Run cannot reach this ceiling.
  */
 

@@ -85,6 +85,7 @@ type SavedAnalysisRow = {
   /** Workspace-scenario label (optional; ships with the properties/scenarios
    *  migration). Distinguishes sibling rows that share one address. */
   scenario_name?: string | null;
+  pdf_url?: string | null;
 };
 
 // computeRowEquity (owned-deal equity from close_date + saved assumptions)
@@ -218,6 +219,7 @@ function mapSavedRow(
     createdAt: row.created_at,
     status: row.is_completed ? "completed" : row.is_archived ? "archived" : "active",
     closeDate: row.close_date ?? null,
+    hasSavedPdf: typeof row.pdf_url === "string" && row.pdf_url.trim().length > 0,
     ownedEquity: resolution.shouldFreeze ? null : computeRowEquity(row),
     // Shopping stages only: an owned/closed/passed deal has no offer left to
     // make. Mirrors the same guard the deal workspace applies.
@@ -306,7 +308,7 @@ export default async function DashboardSavedAnalysesPage({
   const clientFilterName = clientFilterId ? agentClients.find((c) => c.id === clientFilterId)?.name ?? null : null;
 
   const BASE_SELECT =
-    "id, address, title, property_type, purchase_price, net_cash_flow_monthly, coc_return_pct, created_at, is_completed, is_archived, methodology_version, result_snapshot, form_snapshot, pipeline_stage, tags, data_confidence";
+    "id, address, title, property_type, purchase_price, net_cash_flow_monthly, coc_return_pct, created_at, is_completed, is_archived, methodology_version, result_snapshot, form_snapshot, pipeline_stage, tags, data_confidence, pdf_url";
   // Three optional column sets each ship in their own migration; until
   // applied, selecting them 42703s. The tiered fallback drops columns
   // NEWEST-MIGRATION-FIRST so every partial-application state (migrations

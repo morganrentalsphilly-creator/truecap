@@ -26,7 +26,7 @@ import { AgentProPageTracker } from "@/components/analytics/agent-pro-page-track
 export const metadata: Metadata = {
   title: "Agent Pro — Rental Deal Analysis for Clients",
   description:
-    "Underwrite at the showing, maintain client Buy Boxes, and send co-branded investment analyses and portals with TrueCap Agent Pro.",
+    "Underwrite at the showing, maintain client Buy Boxes, and send co-branded investment analyses with TrueCap Agent Pro.",
   keywords: [
     "real estate agent calculator",
     "rental analysis for agents",
@@ -58,8 +58,8 @@ const USE_CASES: { icon: typeof Calculator; title: string; body: string }[] = [
   },
   {
     icon: FileDown,
-    title: "Send a co-branded analysis or client portal",
-    body: "Share a polished report, co-branded deal link, or live client portal with the assumptions, verdict, projections, and opportunities assigned to that buyer.",
+    title: "Send a co-branded analysis clients can review",
+    body: "Share a polished PDF or co-branded deal link with the assumptions, verdict, projections, and context for that buyer.",
   },
   {
     icon: ShieldCheck,
@@ -123,7 +123,7 @@ export default async function ForAgentsPage() {
               </span>
             ) : null}
             <span className="text-muted-foreground">{TRIAL_DAYS}-day trial for eligible first-time subscribers</span>
-            <span className="text-muted-foreground">Client roster included · no software-enforced roster cap</span>
+            <span className="text-muted-foreground">Client roster included · up to 100 clients</span>
           </div>
 
           {/* CTAs */}
@@ -189,7 +189,7 @@ export default async function ForAgentsPage() {
               "Paste the listing address. Rent, mortgage rate, and property tax auto-fill from HUD, FRED, and state data.",
               "Adjust the financing for your specific client (different down payment, DSCR-loan rate, etc).",
               "Run the analysis, then review the verdict, Max Offer, and downside before presenting the result.",
-              "Assign the opportunity to the right client, then send a co-branded link, report, or live portal.",
+              "Assign the opportunity to the right client, then send a co-branded link or report.",
             ].map((step, i) => (
               <li key={i} className="flex items-start gap-3">
                 <span className="inline-flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-extrabold tabular-nums">
@@ -215,7 +215,7 @@ export default async function ForAgentsPage() {
             <li><strong>Speed.</strong> Build the first-pass underwrite from the address while the property is still being discussed.</li>
             <li><strong>Defensibility.</strong> Show the source and assumption behind each starting number, then edit it for the client&apos;s financing.</li>
             <li><strong>Client context.</strong> Maintain per-client Buy Boxes and show the specific reason a property passes or misses.</li>
-            <li><strong>Brand presence.</strong> Put your logo, colors, and contact details on share links, reports, and the client portal.</li>
+            <li><strong>Brand presence.</strong> Put your logo, colors, and contact details on share links and reports.</li>
             <li><strong>Continuity.</strong> Assign opportunities to a client and keep the investment conversation organized.</li>
           </ul>
         </section>
@@ -255,7 +255,7 @@ export default async function ForAgentsPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             Free covers the first screen. Agent Pro adds client rosters,
             per-client Buy Boxes, deal assignment, co-branded analysis,
-            client portals, white-label embeds, and the full Pro decision workflow.
+            and the full Pro decision workflow.
           </p>
           <p className="mb-5 text-sm font-bold">
             {agentMonthly ? `${agentMonthly.amountLabel}/${agentMonthly.period}` : "See live pricing"}

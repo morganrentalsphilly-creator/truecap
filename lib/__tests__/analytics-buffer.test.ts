@@ -14,16 +14,32 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 type LoadedCallback = (ph: typeof posthogMock) => void;
+type InitOptions = {
+  loaded?: LoadedCallback;
+  autocapture?: boolean | { url_ignorelist?: RegExp[] };
+  mask_all_text?: boolean;
+  mask_all_element_attributes?: boolean;
+  save_campaign_params?: boolean;
+  save_referrer?: boolean;
+  persistence?: string;
+  property_denylist?: string[];
+  advanced_disable_flags?: boolean;
+  before_send?: (event: {
+    event: string;
+    properties?: Record<string, unknown>;
+  }) => { event: string; properties?: Record<string, unknown> } | null;
+};
 
 const posthogMock = vi.hoisted(() => {
   const ph = {
     __loaded: false,
-    init: vi.fn((_key: string, opts?: { loaded?: LoadedCallback }) => {
+    init: vi.fn((_key: string, opts?: InitOptions) => {
       ph.__loaded = true;
       opts?.loaded?.(ph);
     }),
     capture: vi.fn(),
     identify: vi.fn(),
+    unregister: vi.fn(),
     reset: vi.fn(),
     opt_in_capturing: vi.fn(),
     opt_out_capturing: vi.fn(),
@@ -34,6 +50,8 @@ const posthogMock = vi.hoisted(() => {
 vi.mock("posthog-js", () => ({ default: posthogMock }));
 
 let storedConsent: string | null = null;
+let storedSession = new Map<string, string>();
+let storedLocal = new Map<string, string>();
 
 async function importAnalytics() {
   vi.resetModules();
@@ -42,10 +60,13 @@ async function importAnalytics() {
 
 beforeEach(() => {
   storedConsent = null;
+  storedSession = new Map();
+  storedLocal = new Map();
   posthogMock.__loaded = false;
   posthogMock.init.mockClear();
   posthogMock.capture.mockClear();
   posthogMock.identify.mockClear();
+  posthogMock.unregister.mockClear();
   posthogMock.reset.mockClear();
   posthogMock.opt_in_capturing.mockClear();
   posthogMock.opt_out_capturing.mockClear();
@@ -54,7 +75,15 @@ beforeEach(() => {
   vi.stubGlobal("window", {
     localStorage: {
       getItem: (key: string) =>
-        key === "truecap_cookie_consent_v1" ? storedConsent : null,
+        key === "truecap_cookie_consent_v1"
+          ? storedConsent
+          : storedLocal.get(key) ?? null,
+      setItem: (key: string, value: string) => storedLocal.set(key, value),
+      removeItem: (key: string) => storedLocal.delete(key),
+    },
+    sessionStorage: {
+      getItem: (key: string) => storedSession.get(key) ?? null,
+      setItem: (key: string, value: string) => storedSession.set(key, value),
     },
   });
   vi.stubEnv("NEXT_PUBLIC_POSTHOG_KEY", "phc_test_key");
@@ -92,6 +121,87 @@ describe("pre-init buffering", () => {
     );
   });
 
+  it("masks DOM content and blocks autocapture on public share routes", async () => {
+    const analytics = await importAnalytics();
+    await analytics.initAnalytics();
+
+    const options = posthogMock.init.mock.calls[0]?.[1];
+    expect(options?.mask_all_text).toBe(true);
+    expect(options?.mask_all_element_attributes).toBe(true);
+    expect(options?.save_campaign_params).toBe(false);
+    expect(options?.save_referrer).toBe(false);
+    expect(options?.persistence).toBe("localStorage");
+    expect(options?.property_denylist).toContain("title");
+    expect(options?.advanced_disable_flags).toBe(true);
+    const ignorelist =
+      typeof options?.autocapture === "object"
+        ? options.autocapture.url_ignorelist ?? []
+        : [];
+    expect(
+      ignorelist.some((pattern) =>
+        pattern.test("https://usetruecap.com/d/private-snapshot")
+      )
+    ).toBe(true);
+    expect(
+      ignorelist.some((pattern) =>
+        pattern.test("https://usetruecap.com/portal/private-token")
+      )
+    ).toBe(true);
+    expect(
+      ignorelist.some((pattern) =>
+        pattern.test("https://usetruecap.com/embed/brand/private-token")
+      )
+    ).toBe(true);
+
+    const beforeSend = options?.before_send;
+    expect(beforeSend).toBeTypeOf("function");
+    expect(
+      beforeSend?.({
+        event: "$pageview",
+        properties: {
+          title: "123 Main Street",
+          $current_url: "https://usetruecap.com/d/private-snapshot",
+        },
+      })
+    ).toEqual({
+      event: "$pageview",
+      properties: {
+        $current_url: "https://usetruecap.com/d/[shared-analysis]",
+      },
+    });
+  });
+
+  it("sanitizes legacy PostHog persistence before SDK initialization", async () => {
+    const analytics = await importAnalytics();
+    const storageKey = "ph_phc_test_key_posthog";
+    storedLocal.set(
+      storageKey,
+      JSON.stringify({
+        distinct_id: "anonymous-1",
+        $initial_person_info: {
+          r: "https://usetruecap.com/d/private-snapshot",
+        },
+        nested: { url: "/portal/private-token" },
+      })
+    );
+
+    await analytics.initAnalytics();
+
+    expect(JSON.parse(storedLocal.get(storageKey) ?? "{}")).toEqual({
+      distinct_id: "anonymous-1",
+      nested: { url: "/portal/[token]" },
+    });
+    expect(posthogMock.unregister).toHaveBeenCalledWith(
+      "$initial_person_info"
+    );
+    expect(posthogMock.unregister).toHaveBeenCalledWith(
+      "$initial_campaign_params"
+    );
+    expect(posthogMock.unregister).toHaveBeenCalledWith(
+      "$initial_referrer_info"
+    );
+  });
+
   it("replays buffered calls FIFO so consent-before-capture ordering holds", async () => {
     const analytics = await importAnalytics();
     const order: string[] = [];
@@ -124,6 +234,30 @@ describe("pre-init buffering", () => {
 
     expect(posthogMock.capture).toHaveBeenCalledWith("$pageview", {
       $current_url: "https://usetruecap.com/pricing",
+    });
+  });
+
+  it("never stores or replays an encoded shared-analysis landing path", async () => {
+    const analytics = await importAnalytics();
+
+    analytics.setOrganicAttribution({
+      landing_page: "/d/private-address-and-financial-snapshot",
+      referrer_host: "google.com",
+      attribution_medium: "organic_search",
+    });
+    expect(
+      JSON.parse(
+        storedSession.get("truecap_organic_attribution_v1") ?? "{}"
+      ).landing_page
+    ).toBe("/d/[shared-analysis]");
+
+    analytics.trackEvent("landing_view");
+    await analytics.initAnalytics();
+
+    expect(posthogMock.capture).toHaveBeenCalledWith("landing_view", {
+      landing_page: "/d/[shared-analysis]",
+      referrer_host: "google.com",
+      attribution_medium: "organic_search",
     });
   });
 

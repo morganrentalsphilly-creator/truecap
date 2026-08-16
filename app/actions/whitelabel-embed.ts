@@ -17,6 +17,7 @@ import { mintSignedToken } from "@/lib/signed-token";
 import { EMBED_SCOPE } from "@/lib/whitelabel-embed";
 import { getEmbedEntry, EMBED_LIST } from "@/lib/embed-registry";
 import { getSiteUrl } from "@/lib/site-url";
+import { isFeatureReleased } from "@/lib/entitlements-catalog";
 
 export type EmbedOption = { slug: string; title: string; defaultHeight: number };
 
@@ -37,10 +38,18 @@ export type WhitelabelEmbedResult =
 /** The embeddable calculators an agent can white-label. Safe to call from a
  *  client component; it exposes only public registry metadata. */
 export async function listWhitelabelEmbedOptions(): Promise<EmbedOption[]> {
+  if (!isFeatureReleased("embed_whitelabel")) return [];
   return EMBED_LIST.map((e) => ({ slug: e.slug, title: e.title, defaultHeight: e.defaultHeight }));
 }
 
 export async function getWhitelabelEmbedSnippetAction(input: unknown): Promise<WhitelabelEmbedResult> {
+  if (!isFeatureReleased("embed_whitelabel")) {
+    return {
+      ok: false,
+      code: "ENTITLEMENT_REQUIRED",
+      message: "White-label embeds aren't available yet.",
+    };
+  }
   const parsed = z.object({ slug: z.string().min(1).max(80) }).safeParse(input);
   if (!parsed.success) return { ok: false, code: "VALIDATION_ERROR", message: "Pick a calculator." };
 

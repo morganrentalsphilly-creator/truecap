@@ -5428,7 +5428,7 @@ export function InvestCalcPage({
                     setRestoredAddress(null);
                     resetToNewAnalysis("single-family");
                   }}
-                  className="font-semibold text-primary underline-offset-2 hover:underline"
+                  className="font-semibold text-[var(--brand-blue-text)] underline-offset-2 hover:underline"
                 >
                   start fresh
                 </button>

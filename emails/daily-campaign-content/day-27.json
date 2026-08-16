@@ -1,15 +1,14 @@
 {
   "day": 27,
   "send_date": "2026-06-27",
-  "subject": "$29.99 vs the alternatives",
-  "preheader": "what underwriting actually costs when truecap isn't doing it.",
-  "headline": "Pro is $29.99/mo. Here's what the same job costs everywhere else.",
+  "subject": "which truecap option fits your next deal?",
+  "preheader": "free screen, one-time report, or pro workflow—choose by the job.",
+  "headline": "Choose the smallest TrueCap option that does the job.",
   "body": [
-    "A single hour of a real estate analyst's time runs $150-300. A custom underwriting model from a freelance modeler on Upwork: $400-1,200 one-time. A single appraisal: $500-700. A bad inspector who misses something on a deal you actually bought: easily $10,000+. Underwriting isn't free anywhere. It's just usually invisible.",
-    "TrueCap Pro is $29.99/month or $300/year. Annual is roughly two months free. No flash sale, no expiring discount, no fake urgency timer — the price on the pricing page is the price everyone pays.",
-    "What you get: unlimited address analyses, MAO calculator, sensitivity grids, BRRRR analyzer, fix-and-flip analyzer, PDF reports with your branding, saved deals across devices, mortgage scenario A/B compare, rehab estimator. Cancel anytime — you keep access through the end of the period you've paid for.",
-    "Most people underestimate the per-deal cost of doing nothing. Every 30-minute spreadsheet underwrite costs you 30 minutes you could've spent finding three more deals to filter. Over a year of active analysis, that's a hundred hours of opportunity cost. $300 to get those hundred hours back is the trade.",
-    "If you've gotten value from the free tier, Pro is the same tool with the locks off. The pricing page lists everything."
+    "Use Free when you need a fast first-pass screen: cap rate, cash-on-cash, DSCR, cash flow, Deal Score, verdict, and up to 5 saved deals.",
+    "Use the one-time Deal Decision Pack when one property needs Max Offer and a complete decision report without a subscription.",
+    "Use Pro when you repeatedly need editing, unlimited saves, Buy Box screening, Max Offer, sensitivity, BRRRR and flip models, projections, comparison, and branded reports. Whether the time savings justify it depends on your volume and workflow.",
+    "The pricing page is the source of truth for current prices, trial eligibility, billing terms, and any configured campaign offer. Review the checkout total before paying."
   ],
   "cta_text": "See what Pro unlocks",
   "cta_url": "https://usetruecap.com/pricing",

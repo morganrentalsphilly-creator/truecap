@@ -6,7 +6,6 @@
  * search volume — Excel is the default tool most new investors start with.
  */
 
-import { TRIAL_LABEL } from "@/lib/trial";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import Link from "next/link";
@@ -53,23 +52,23 @@ type Verdict = "truecap" | "excel" | "tie";
 type Row = { feature: string; truecap: ReactNode; excel: string; winner: Verdict };
 
 const MATRIX: Row[] = [
-  { feature: "Time to first underwrite",          truecap: "60 seconds — paste address, auto-fills everything",                      excel: "30-60 minutes — gather data, type formulas, debug",                       winner: "truecap" },
-  { feature: "Auto-fill from address",            truecap: "HUD rent + FRED rate + county property tax populate live",                excel: "Manual entry — copy/paste from Zillow/county sites",                      winner: "truecap" },
-  { feature: "Formula error risk",                truecap: "Engine validated; same math runs across all sessions",                    excel: "High — one cell break + you trust the wrong number",                      winner: "truecap" },
-  { feature: "Mobile usable",                     truecap: "Mobile-first responsive — works at the showing on your phone",            excel: "Spreadsheet on mobile = pinch-zoom misery",                                winner: "truecap" },
-  { feature: "Shareable with team / client",      truecap: "Free — read-only public link; Pro adds co-branding",                              excel: "Email a .xlsx file + hope they open it correctly",                          winner: "truecap" },
+  { feature: "Time to first underwrite",          truecap: "Address-first form with editable benchmark defaults",                     excel: "Depends on template setup and the evidence already gathered",              winner: "truecap" },
+  { feature: "Auto-fill from address",            truecap: "Editable HUD rent, FRED rate, and state tax estimates",                    excel: "Manual entry or a custom data integration",                               winner: "truecap" },
+  { feature: "Formula consistency",               truecap: "One documented calculation engine; inputs still require review",          excel: "Depends on the template, formulas, protections, and review process",       winner: "tie" },
+  { feature: "Mobile usable",                     truecap: "Mobile-first responsive web app",                                        excel: "Mobile apps available; complex sheets may require more navigation",        winner: "truecap" },
+  { feature: "Shareable with team / client",      truecap: "Free read-only public link; Pro adds co-branding",                         excel: "Share a workbook or controlled cloud-sheet link",                         winner: "tie" },
   { feature: "Live updates as you change inputs", truecap: "Instant recalc, visual indicators of impact",                             excel: "Recalc works but you have to track which cells you changed",              winner: "truecap" },
-  { feature: "10-year projection visualization",  truecap: "Built-in chart, side-by-side scenarios",                                  excel: "Possible with chart wizard but takes 20+ min of setup",                    winner: "truecap" },
+  { feature: "10-year projection visualization",  truecap: "Pro built-in chart; Pro also compares up to four saved deals",             excel: "Available when the workbook is built for projections and comparison",      winner: "truecap" },
   { feature: "Sensitivity analysis (stress test)",truecap: "Pro — rent ±10%, vacancy ±5pp, rates ±1pp in one view",                   excel: "Possible with Data Table feature but most users don't",                    winner: "truecap" },
-  { feature: "Customization to weird scenarios",  truecap: "Standard inputs cover 95%; one-off scenarios harder to model",            excel: "Fully customizable — you can model anything you can think of",            winner: "excel" },
+  { feature: "Customization to unusual scenarios",truecap: "Structured inputs; unsupported scenarios may need another model",         excel: "Highly customizable when the author can build and review the formulas",    winner: "excel" },
   { feature: "Free to start",                     truecap: "Yes — unlimited free analyses, no signup",                                 excel: "Yes if you have Excel/Sheets",                                            winner: "tie" },
   { feature: "Offline use",                       truecap: "Requires internet",                                                        excel: "Works offline once file is open",                                          winner: "excel" },
-  { feature: "Audit trail / version history",     truecap: "Pro saves history of saved deals",                                         excel: "Manual file naming or Google Sheets version history",                     winner: "tie" },
+  { feature: "Audit trail / version history",     truecap: "No per-deal revision history; Pro can edit saved deals",                   excel: "Cloud sheets may provide version history; local files need a process",     winner: "excel" },
   { feature: "Glossary / explanation of metrics", truecap: (<>Inline tooltips + a <Link href="/glossary" className="font-semibold text-primary hover:underline">real estate glossary</Link> with full definitions per term</>),              excel: "Whatever you remember from your last research session",                    winner: "truecap" },
-  { feature: "PDF export for lenders / partners", truecap: "Pro — branded multi-page report",                                          excel: "Print → PDF, manual formatting",                                          winner: "truecap" },
+  { feature: "PDF export for review",             truecap: "One-time Deal Decision Pack or included with Pro",                        excel: "Print or export to PDF with workbook-defined formatting",                 winner: "truecap" },
   { feature: "Illustrative tax impact",           truecap: "Pro — depreciation at entered marginal rate + modeled after-tax CF",     excel: "Possible if you build the formulas",                                       winner: "truecap" },
-  { feature: "BRRRR / fix-and-flip analyzers",    truecap: "Built-in dedicated workflows",                                             excel: "Custom build per deal type",                                              winner: "truecap" },
-  { feature: "Cost",                              truecap: "Free or $25/mo annual Pro",                                            excel: "$0 (if you have Office or Google Workspace)",                              winner: "tie" },
+  { feature: "BRRRR / fix-and-flip analyzers",    truecap: "Dedicated Pro workflows",                                                  excel: "Custom build per deal type",                                              winner: "truecap" },
+  { feature: "Cost",                              truecap: "Free core; paid Pro and one-time PDF options — see live pricing",         excel: "$0 if already licensed; otherwise plan-dependent",                       winner: "tie" },
 ];
 
 export default function VsExcelPage() {
@@ -102,7 +101,7 @@ export default function VsExcelPage() {
             TrueCap vs Excel: <span className="text-primary">when is a spreadsheet still the right tool?</span>
           </h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
-            Most investors start with an Excel template — usually a BiggerPockets template, sometimes one they built themselves. We built TrueCap because spreadsheets break, take forever, and don&apos;t survive contact with a real deal at a showing. But Excel still wins in certain cases.
+            Many investors start with an Excel or Google Sheets template. TrueCap offers a structured, mobile-friendly workflow with consistent calculations and editable screening benchmarks. A well-built, reviewed spreadsheet can still be the right tool for custom models.
           </p>
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
             <ScrollToFormButton className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5">
@@ -114,7 +113,7 @@ export default function VsExcelPage() {
               See pricing
             </Link>
           </div>
-          <p className="mt-3 text-xs text-muted-foreground">No card · No signup · Cancel anytime</p>
+          <p className="mt-3 text-xs text-muted-foreground">Free analyzer: no card or signup</p>
         </section>
 
         <section className="mb-12 sm:mb-16 rounded-2xl border border-border bg-card p-6 sm:p-8">
@@ -126,7 +125,7 @@ export default function VsExcelPage() {
                 <li>You want to underwrite 5+ deals/week without losing your evening to spreadsheet maintenance.</li>
                 <li>You need a tool that works on your phone at a showing.</li>
                 <li>You share analyses with partners / lenders / clients.</li>
-                <li>You don&apos;t want to debug formulas — you want validated math.</li>
+                <li>You want one documented calculation engine instead of maintaining formulas.</li>
                 <li>You want address-first starting values (HUD rent, FRED rate, state tax benchmark).</li>
                 <li>You want PDF reports without manual print-to-PDF formatting.</li>
               </ul>
@@ -174,19 +173,19 @@ export default function VsExcelPage() {
         </section>
 
         <section className="mb-12 sm:mb-16 rounded-2xl border border-[var(--brand-green)]/25 bg-[var(--brand-green-light)] p-6 sm:p-8">
-          <h2 className="text-xl sm:text-2xl font-extrabold text-[var(--brand-green)] mb-3">When investors actually switch from Excel</h2>
+          <h2 className="text-xl sm:text-2xl font-extrabold text-[var(--brand-green)] mb-3">When a structured workflow may fit better</h2>
           <ul className="space-y-2 text-sm sm:text-base leading-relaxed text-foreground">
-            <li><strong>&quot;I&apos;m analyzing 3+ deals per week.&quot;</strong> At that pace, the per-deal time savings from TrueCap (29 min/deal vs 60 sec) saves you 12+ hours a month. Pro pays for itself in week one.</li>
-            <li><strong>&quot;I shared my spreadsheet with a partner and they broke it.&quot;</strong> Classic. Spreadsheets are fragile. TrueCap saved deals get a clean shareable URL — partners see the analysis, can&apos;t accidentally break the formula.</li>
-            <li><strong>&quot;I lost a deal because I couldn&apos;t pull up numbers at the showing.&quot;</strong> Mobile is where deals are made now. Excel on mobile is unusable; TrueCap works in your pocket.</li>
-            <li><strong>&quot;I realized I&apos;d been using the wrong cap rate formula for 6 months.&quot;</strong> This happens. Engine-based tools validate the math once; spreadsheet errors compound across every deal until you find them.</li>
+            <li><strong>You repeat the same underwriting workflow.</strong> Structured inputs can reduce template maintenance while preserving editable assumptions.</li>
+            <li><strong>You share results without sharing formulas.</strong> TrueCap&apos;s free read-only link separates review access from model editing.</li>
+            <li><strong>You work from a phone.</strong> The responsive interface is designed for smaller screens; spreadsheet usability depends on the workbook.</li>
+            <li><strong>You want one calculation definition.</strong> TrueCap applies the same documented engine each time, while a spreadsheet remains as reliable as its formulas, inputs, and review process.</li>
           </ul>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
             Want to sanity-check one formula before you trust a whole sheet? Run the standalone{" "}
             <Link href="/tools/cap-rate-calculator" className="font-semibold text-primary hover:underline">cap rate calculator</Link>
             {" "}or{" "}
             <Link href="/tools/dscr-calculator" className="font-semibold text-primary hover:underline">DSCR calculator</Link>
-            {" "}— same validated engine as the full analyzer. And if you&apos;re building the income statement by hand, our guide to a{" "}
+            {" "}— same documented engine as the full analyzer. And if you&apos;re building the income statement by hand, our guide to a{" "}
             <Link href="/blog/rental-property-pro-forma-explained" className="font-semibold text-primary hover:underline">rental property pro forma</Link>
             {" "}walks through every line a spreadsheet should have.
           </p>
@@ -197,14 +196,14 @@ export default function VsExcelPage() {
         <section className="mb-12 sm:mb-16 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
           <h2 className="text-2xl sm:text-3xl font-extrabold mb-2">Try TrueCap free.</h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
-            Underwrite your next deal in 60 seconds. If you still prefer Excel after that, no harm done — keep your spreadsheet. But most investors who try TrueCap once stop opening their template.
+            Try the structured workflow with one property, review every assumption, and keep Excel for any custom modeling that TrueCap does not support.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link href="/" className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity">
               <Calculator className="w-4 h-4" />Run a deal now
             </Link>
             <Link href="/pricing" className="inline-flex items-center gap-2 border border-primary-foreground/40 bg-primary-foreground/10 text-primary-foreground px-4 py-2.5 rounded-xl font-bold hover:bg-primary-foreground/20 transition-colors">
-              Start a {TRIAL_LABEL}<ArrowUpRight className="w-4 h-4" />
+              See Pro pricing<ArrowUpRight className="w-4 h-4" />
             </Link>
           </div>
         </section>
@@ -227,56 +226,48 @@ const EXCEL_FAQ: FaqItem[] = [
     question: "Is TrueCap better than an Excel rental analysis template?",
     answer: (
       <>
-        For most investors, yes — TrueCap removes the three big risks
-        spreadsheets carry: formula errors, broken sharing, and bad
-        mobile UX. A calc engine validates the math once and reuses it
-        on every deal. Spreadsheets compound errors silently across
-        deals until you find them. That said, if you have a specific
-        workflow Excel handles better (heavy custom acquisition
-        modeling, joint-venture splits), keep your sheet for that and
-        use TrueCap for the standard underwrite.
+        It depends on the workflow. TrueCap provides structured inputs,
+        a documented calculation engine, read-only sharing, and a
+        mobile-responsive interface. A reviewed spreadsheet can be more
+        flexible for custom acquisition models, partnership waterfalls,
+        or financing structures TrueCap does not support.
       </>
     ),
     plainTextAnswer:
-      "Yes — TrueCap removes Excel's three big risks: formula errors, broken sharing, and bad mobile UX. The calc engine is validated once and reused on every deal. Spreadsheets compound errors silently. Keep Excel for heavy custom modeling; use TrueCap for the standard underwrite.",
+      "It depends. TrueCap provides structured inputs, one documented calculation engine, read-only sharing, and a mobile-responsive interface. A reviewed spreadsheet can be more flexible for custom models TrueCap does not support.",
   },
   {
     question: "Why is a spreadsheet risky for underwriting rental deals?",
     answer: (
       <>
-        Three reasons. First, formula errors — a wrong cap rate
-        formula compounds across every deal you analyze with that
-        sheet, sometimes for months. Second, version drift — partners,
-        agents, and lenders all get slightly different copies and
-        accidentally overwrite formulas. Third, mobile is unusable —
-        the moment you&apos;re at a showing trying to run numbers on
-        your phone, the spreadsheet is dead weight.
+        A spreadsheet requires its own controls. Review formulas and
+        named ranges, protect calculation cells, document assumptions,
+        manage versions, and test the workbook after changes. Mobile
+        usability also depends on the workbook&apos;s complexity and layout.
       </>
     ),
     plainTextAnswer:
-      "Three reasons: formula errors that compound silently across deals; version drift when partners/agents/lenders overwrite formulas in shared copies; and mobile is unusable for live underwriting at showings.",
+      "A spreadsheet requires controls: review formulas, protect calculation cells, document assumptions, manage versions, and test after changes. Mobile usability depends on workbook complexity and layout.",
   },
   {
     question: "Can I import my Excel rental template into TrueCap?",
     answer: (
       <>
         Not directly — TrueCap uses a structured form so the inputs
-        match the engine. But the metrics that matter (price, rent,
-        rate, term, vacancy, mgmt %, tax, insurance) take about 60
-        seconds to type in, and the address auto-fill via HUD + FRED +
-        state property tax handles the &quot;what number do I use?&quot;
-        problem for you. Most spreadsheet users end up faster on
-        TrueCap after the first 3–4 deals.
+        match the engine. Enter price, rent, financing, vacancy,
+        management, tax, and insurance in the structured form. Address
+        lookup supplies editable HUD rent, FRED rate, and state tax
+        screening estimates; replace them with property-specific evidence.
       </>
     ),
     plainTextAnswer:
-      "Not directly — TrueCap uses a structured form. Inputs take about 60 seconds to type in, and address auto-fill (HUD rent, FRED rate, state property tax) handles the 'what number do I use?' problem. Most spreadsheet users are faster on TrueCap after 3–4 deals.",
+      "Not directly. TrueCap uses a structured form and supplies editable HUD rent, FRED rate, and state tax screening estimates. Replace them with property-specific evidence.",
   },
   {
     question: "Does TrueCap handle BRRRR and fix-and-flip like my spreadsheet does?",
     answer: (
       <>
-        Yes — TrueCap has dedicated BRRRR and fix-and-flip analyzers
+        Yes — TrueCap Pro has dedicated BRRRR and fix-and-flip analyzers
         with their own input forms, ARV-driven refi math, holding cost
         modeling, and profit/cash-out summaries. The Pro tier also
         includes a sensitivity grid (rent ±10%, vacancy ±5pp, rate
@@ -291,16 +282,16 @@ const EXCEL_FAQ: FaqItem[] = [
     question: "What if I still want to use Excel after trying TrueCap?",
     answer: (
       <>
-        Totally fine. Most TrueCap users keep one Excel template for
-        edge cases — partnership splits, syndication waterfalls, custom
+        That can be the right choice. Keep a reviewed Excel template for
+        edge cases such as partnership splits, syndication waterfalls, or custom
         debt structures the underwriting engine doesn&apos;t model. You
-        can also export TrueCap analyses as PDF if you need a polished
-        summary to share with a lender or partner while keeping the
-        spreadsheet as your back-of-house model.
+        TrueCap also offers a one-time Deal Decision Pack or PDFs included
+        with Pro for sharing a review snapshot while keeping the
+        spreadsheet as the custom back-office model.
       </>
     ),
     plainTextAnswer:
-      "Fine. Most TrueCap users keep one Excel template for edge cases like partnership splits, syndication waterfalls, or custom debt structures. TrueCap analyses also export to PDF for sharing with lenders or partners.",
+      "That can be the right choice for edge cases such as partnership splits, syndication waterfalls, or custom debt. TrueCap offers a one-time Deal Decision Pack or PDFs included with Pro for sharing a review snapshot.",
   },
 ];
 

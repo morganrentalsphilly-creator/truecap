@@ -1,17 +1,15 @@
 import type { Metadata } from 'next'
 import { Plus_Jakarta_Sans, DM_Mono } from 'next/font/google'
-import { Analytics } from '@vercel/analytics/next'
 import { Toaster } from '@/components/ui/toaster'
 import { CookieConsentBanner } from '@/components/marketing/cookie-consent-banner'
 import { AnnualPromoBanner } from '@/components/marketing/annual-promo-banner'
 import { PostHogProvider } from '@/components/analytics/posthog-provider'
+import { GoogleMeasurement } from '@/components/analytics/google-measurement'
+import { TrueCapVercelAnalytics } from '@/components/analytics/vercel-analytics'
 import { OverlayRecovery } from '@/components/ui/overlay-recovery'
 import { getSiteUrl } from '@/lib/site-url'
 import { oneTimePdfReturnBootstrapScript } from '@/lib/one-time-pdf-return'
 import './globals.css'
-
-const GOOGLE_ADS_ID = 'AW-8236119484'
-const GTM_ID = 'GTM-TCBNRMBG'
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -177,74 +175,13 @@ export default function RootLayout({
               address field, which is on the calculator's first paint. */}
           <link rel="preconnect" href="https://maps.googleapis.com" crossOrigin="" />
           <link rel="dns-prefetch" href="https://maps.gstatic.com" />
-          {/* Google Consent Mode v2 defaults — MUST run before gtag.js
-              loads, so the bidding/measurement pixels boot in a privacy-
-              safe state (no tracking cookies set until user consents).
-              The CookieConsentBanner client component calls
-              gtag('consent', 'update', ...) once the user makes a choice.
-              Wait_for_update gives Google 500ms to receive the update
-              before sending the first pageview, so an immediate Accept
-              click doesn't lose attribution. */}
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}
-gtag('consent', 'default', {
-  ad_storage: 'denied',
-  analytics_storage: 'denied',
-  ad_user_data: 'denied',
-  ad_personalization: 'denied',
-  wait_for_update: 500
-});`,
-            }}
-          />
-          {/* Google Tag Manager — loaded AFTER the Consent Mode v2 defaults
-              above so GTM tags inherit the same privacy-safe consent state
-              (denied until the cookie banner grants it). GTM shares the
-              window.dataLayer defined by the consent block, so the tc_*
-              events trackConversion() pushes are available as GTM triggers.
-              NOTE: the Google Ads Purchase conversion (AW-8236119484) already
-              fires from code — do NOT recreate it inside the GTM UI or it
-              double-counts. Use GTM for OTHER pixels/tags. */}
-          <script
-            id="gtm-loader"
-            dangerouslySetInnerHTML={{
-              __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','${GTM_ID}');`,
-            }}
-          />
-          {/* Google Ads gtag — emitted as raw script tags so it shows up
-              in the server-rendered HTML for Google's tag verifier. */}
-          <script
-            async
-            src={`https://www.googletagmanager.com/gtag/js?id=${GOOGLE_ADS_ID}`}
-          />
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `gtag('js', new Date());
-gtag('config', '${GOOGLE_ADS_ID}');`,
-            }}
-          />
           </>
         )}
       </head>
       <body className="font-sans antialiased bg-background text-foreground">
-        {/* Google Tag Manager (noscript) — JS-disabled fallback for the
-            loader above. Production-gated to match. */}
-        {process.env.NODE_ENV === 'production' && (
-          <noscript>
-            <iframe
-              src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}
-              height="0"
-              width="0"
-              style={{ display: 'none', visibility: 'hidden' }}
-              title="Google Tag Manager"
-            />
-          </noscript>
-        )}
+        {/* Google measurement self-suppresses on encoded/bearer share routes
+            before any third-party script is loaded. */}
+        <GoogleMeasurement />
         {/* Site-wide structured data — Organization + WebSite. Many child
             pages (especially /vs/* and blog posts) reference the
             Organization by @id (publisher.@id = `${siteUrl}/#organization`).
@@ -339,7 +276,7 @@ gtag('config', '${GOOGLE_ADS_ID}');`,
             so we don't gate on NODE_ENV. The earlier gate was preventing
             events from being sent on Vercel deploys where NODE_ENV
             wasn't being read as expected. */}
-        <Analytics />
+        <TrueCapVercelAnalytics />
       </body>
     </html>
   )

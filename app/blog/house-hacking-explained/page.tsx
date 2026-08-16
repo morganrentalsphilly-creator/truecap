@@ -91,25 +91,30 @@ export default function HouseHackingPost() {
             The leverage advantage is enormous. Compare:
           </p>
           <ul>
-            <li><strong>Investment property:</strong> 20-25% <Link href="/glossary/down-payment" className="text-primary font-semibold hover:underline">down payment</Link> ($60-75k on a $300k purchase), DSCR-loan rates, no living-cost offset</li>
-            <li><strong>House hack:</strong> 3.5% FHA ($10.5k on the same $300k purchase), owner-occupant rates (lower), your tenants partially pay your housing cost</li>
+            <li><strong>Investment property:</strong> use a current written quote and include <Link href="/glossary/down-payment" className="text-primary font-semibold hover:underline">down payment</Link>, reserves, rate, points, insurance, and closing costs</li>
+            <li><strong>Owner-occupant scenario:</strong> eligible borrowers may have lower-down-payment options, but rent is unverified and does not guarantee a housing-cost offset</li>
           </ul>
           <p>
-            $10.5k vs $60-75k to control the same property. That capital efficiency is why house hacking is the most-recommended first step in serious investor communities.
+            Compare actual quotes on the same property. A generic down-payment
+            example cannot establish eligibility, cash to close, or capital
+            efficiency for a borrower.
           </p>
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">The rules — what counts as a &quot;house hack&quot;</h2>
           <p>
-            FHA + Fannie/Freddie owner-occupant loans require:
+            Owner-occupant requirements vary by program and loan documents. For
+            example, current FHA policy generally includes:
           </p>
           <ul>
             <li><strong>You must occupy the property as your primary residence</strong> within 60 days of closing</li>
-            <li><strong>You must live there at least 1 year</strong> before converting to a pure rental (per the standard owner-occupant clause)</li>
-            <li><strong>1-4 units only</strong> (5+ unit properties are commercial, no owner-occupant loans)</li>
-            <li><strong>FHA self-sufficiency rule</strong> on 3-4 unit properties: the property&apos;s rental income must independently support the mortgage. This excludes some otherwise-attractive deals.</li>
+            <li><strong>Intent to continue principal-residence occupancy for at least one year</strong>, subject to Handbook exceptions and the facts</li>
+            <li><strong>Eligible property and unit-count rules</strong> that the lender must verify</li>
+            <li><strong>FHA Net Self-Sufficiency Rental Income Eligibility</strong> on 3-4 unit properties, calculated by the lender under the current Handbook</li>
           </ul>
           <p>
-            Conventional 5% owner-occupant loans (Fannie Mae HomeReady, Freddie Mac Home Possible) don&apos;t have the self-sufficiency rule and can be easier to qualify in expensive markets. Worth running both loan options against the same property.
+            Conventional programs use different eligibility and underwriting.
+            Ask lenders for current written scenarios; the absence of FHA&apos;s
+            calculation does not imply approval.
           </p>
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">The actual math — does it pencil?</h2>
@@ -137,21 +142,40 @@ export default function HouseHackingPost() {
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">FHA MIP — the catch nobody mentions</h2>
           <p>
-            FHA loans require Mortgage Insurance Premium (MIP) for the life of the loan (or 11 years if you put 10%+ down). MIP runs ~0.55-0.85% of the loan annually. On a $300k loan that&apos;s $1,650-2,550/year ($138-213/month). It&apos;s a real recurring cost that conventional 5% down doesn&apos;t have (conventional has PMI which falls off at 80% LTV, typically 5-7 years in).
+            Mortgage-insurance amount and duration depend on the current program,
+            loan terms, origination date, LTV, and payment history. Use the
+            lender&apos;s written FHA and conventional quotes rather than a generic
+            annual percentage or cancellation timeline.
           </p>
           <p>
-            Translation: FHA is the lowest-down-payment path but you pay for it forever. Running both FHA 3.5% AND conventional 5% scenarios through the calculator usually shows that 5% conventional has better long-term economics — if you can come up with the extra $4-5k down.
+            Translation: compare the complete written scenarios, including APR,
+            points, mortgage insurance, reserves, cash to close, property
+            requirements, and occupancy terms. Neither FHA nor conventional is
+            universally cheaper or more available.
           </p>
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">The year-2 transition — when you move out</h2>
           <p>
-            The full power of house hacking shows up in year 2. You&apos;ve satisfied the owner-occupant residency requirement; you move out, rent your unit at market rate, and the property converts from break-even owner-occupied to cash-flowing pure rental.
+            A year-2 move-out is a scenario, not an entitlement or a cash-flow
+            promise. Before changing use, review the occupancy representations
+            and loan documents, insurance, local rental rules, lawful unit status,
+            and current rent evidence.
           </p>
           <p>
-            Example: A Philadelphia triplex you bought at $400k with 5% down ($20k). Year 1: you live in unit 1, units 2 + 3 rent for $1,400 each. You pay ~$300/mo true out-of-pocket. Year 2: you move out, rent unit 1 at $1,500. Now you collect $4,300/mo, pay maybe $3,400/mo all-in. <strong>+$900/mo cash flow on a $20k investment — that&apos;s 54% <Link href="/glossary/cash-on-cash-return" className="text-primary font-semibold hover:underline">cash-on-cash</Link>.</strong>
+            Example scenario: a Philadelphia triplex at $400,000 with 5% down,
+            two modeled rents of $1,400 in year 1, and a third modeled rent of
+            $1,500 after a permitted move-out. If verified income and all modeled
+            costs produced $900 per month, the simple <Link href="/glossary/cash-on-cash-return" className="text-primary font-semibold hover:underline">cash-on-cash calculation</Link>
+            against only the $20,000 down payment would be 54%. That is not a
+            forecast: include closing costs, reserves, vacancy, maintenance,
+            capital work, taxes, insurance, utilities, management, loan terms,
+            and lawful achievable rent before using the result.
           </p>
           <p>
-            Pro tip: model both years before you commit. TrueCap&apos;s 10-year projection (Pro) shows year-1 break-even followed by year-2+ cash flow. The post-transition numbers are usually what justifies the strategy on paper; year-1 is the cost of admission.
+            Model both years before you commit. TrueCap&apos;s 10-year projection
+            shows entered scenarios; it does not establish that year 1 breaks
+            even, a move-out is permitted, or later years produce positive cash
+            flow.
           </p>
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">What to look for in a house-hack property</h2>
@@ -185,7 +209,7 @@ export default function HouseHackingPost() {
           <p>
             The deals that pencil are out there in most US markets — Philadelphia, Cleveland, Indianapolis, Memphis, Pittsburgh, and the Midwest in general have the highest hit rate. Coastal markets are harder but not impossible (Sacramento, Oakland, parts of Boston). Run any specific property through{" "}
             <Link href="/" className="text-primary font-semibold hover:underline">TrueCap with property type = owner-occupant</Link> to see whether the math works before you commit. The starter template &quot;Starter — House hack&quot; on{" "}
-            <Link href="/dashboard/templates" className="text-primary font-semibold hover:underline">Templates</Link> pre-seeds the right defaults. To find the kinds of motivated-seller 2-4 unit deals that make house hacking work, read <Link href="/blog/how-to-find-off-market-rental-properties" className="text-primary font-semibold hover:underline">how to find off-market rental properties</Link>.
+            <Link href="/auth/sign-up?next=%2Fpricing%3Fcheckout%3Dpro_monthly%23plans" className="text-primary font-semibold hover:underline">Pro templates</Link> pre-seeds the right defaults. To find the kinds of motivated-seller 2-4 unit deals that make house hacking work, read <Link href="/blog/how-to-find-off-market-rental-properties" className="text-primary font-semibold hover:underline">how to find off-market rental properties</Link>.
           </p>
         </div>
         </article>

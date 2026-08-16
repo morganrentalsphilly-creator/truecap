@@ -20,7 +20,7 @@
 // the hydration cost for all the static markup. Keep it that way - any
 // new interactive piece should be its own small island, not a reason to
 // flip this whole file back to client.
-import { TRIAL_DAYS, TRIAL_LABEL } from "@/lib/trial";
+import { TRIAL_DAYS } from "@/lib/trial";
 import { ladderCellsForFeature, type FeatureKey } from "@/lib/entitlements-catalog";
 import Link from "next/link";
 import {
@@ -113,7 +113,7 @@ const SPINE_STEPS = [
 
 export function HowTrueCapWorks() {
   return (
-    <section className="border-t border-border bg-card/40">
+    <section id="how-it-works" className="scroll-mt-24 border-t border-border bg-card/40">
       <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
         <div className="mb-10 text-center sm:mb-12">
           <p className="text-[11px] font-bold uppercase tracking-widest text-primary">The decision gap</p>
@@ -143,7 +143,7 @@ export function HowTrueCapWorks() {
                 <h3 className="mt-1 text-lg font-bold tracking-tight text-foreground">{step.title}</h3>
                 <p className="mt-1.5 max-w-[42ch] text-sm leading-relaxed text-muted-foreground">{step.body}</p>
                 {"proNote" in step && step.proNote ? (
-                  <p className="mt-2 inline-flex items-center gap-1 rounded-full border border-[var(--brand-orange)]/30 bg-[var(--brand-orange)]/10 px-2 py-0.5 text-[11px] font-semibold text-[var(--brand-orange)]">
+                  <p className="mt-2 inline-flex items-center gap-1 rounded-full border border-[var(--brand-orange)]/30 bg-[var(--brand-orange)]/10 px-2 py-0.5 text-[11px] font-semibold text-[var(--brand-orange-text)]">
                     {step.proNote}
                   </p>
                 ) : null}
@@ -207,7 +207,7 @@ export function OfferEngineSection() {
                 <h3 className="mt-4 font-extrabold text-foreground">{name}</h3>
                 <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{outcome}</p>
                 {featured ? (
-                  <p className="mt-4 border-t border-primary/20 pt-3 text-xs font-semibold text-primary">
+                  <p className="mt-4 border-t border-primary/20 pt-3 text-xs font-semibold text-[var(--brand-blue-text)]">
                     The central Pro decision: know your number before you make the offer.
                   </p>
                 ) : null}
@@ -642,7 +642,7 @@ export function DataSourcesSection() {
 // Pro's monthly price is deliberately NOT printed here (it's loaded live
 // from Stripe on /pricing); the Pro card below links out so the two can
 // never drift. "true" → included, "false" → not, string → a qualifier.
-const LADDER_SUBHEADERS = ["Free forever", "One-time", TRIAL_LABEL] as const;
+const LADDER_SUBHEADERS = ["Free forever", "One-time", "Pro plans"] as const;
 /**
  * The Free / $5 / Pro ladder.
  *
@@ -686,7 +686,7 @@ export function PdfProUpsell() {
           <h2 className="mt-2 text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">
             Analyze free. Unlock one complete deal for{" "}
             <span className="text-primary">{singleDeal.priceLabel}</span>. Use{" "}
-            <span className="text-primary">{proOfferName}</span> to know exactly what to offer—every time.
+            <span className="text-primary">{proOfferName}</span> to solve the offer ceiling that fits your targets—deal after deal.
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-balance text-sm leading-relaxed text-muted-foreground sm:text-base">
             Start with a 60-second screen. Unlock a complete Deal Decision Pack
@@ -819,7 +819,7 @@ export function PdfProUpsell() {
                 href="/pricing"
                 className="group inline-flex h-11 items-center gap-1.5 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-[0_10px_24px_rgba(0,112,196,0.28)] hover:-translate-y-0.5 transition-transform"
               >
-                Start {TRIAL_DAYS}-Day Pro Trial
+                See Pro pricing
                 <ArrowRight aria-hidden className="size-4 transition-transform group-hover:translate-x-0.5" />
               </Link>
               <p className="mt-2 text-xs leading-relaxed text-muted-foreground">

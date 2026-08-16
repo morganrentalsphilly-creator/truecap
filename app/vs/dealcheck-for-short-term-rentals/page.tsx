@@ -4,7 +4,6 @@
  * Target queries: "dealcheck short term rental", "dealcheck airbnb calculator", "best str calculator", "short term rental analysis tool", "airbnb deal analyzer". Long-tail audience-slicing comparison.
  */
 
-import { TRIAL_LABEL } from "@/lib/trial";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, ArrowUpRight, Calculator, Check, Minus, Sparkles, X } from "lucide-react";
@@ -42,16 +41,16 @@ type Verdict = "truecap" | "dealcheck" | "tie";
 type Row = { feature: string; truecap: string; dealcheck: string; winner: Verdict };
 
 const MATRIX: Row[] = [
-  { feature: "LTR + STR scenario comparison", truecap: "Yes — run two scenarios on same property in one workspace", dealcheck: "Manual — duplicate the deal and override rent", winner: "truecap" },
+  { feature: "LTR + STR scenario comparison", truecap: "Save separate scenarios; side-by-side comparison is Pro", dealcheck: "Duplicate the deal and compare, subject to plan caps", winner: "tie" },
   { feature: "ADR + occupancy input model", truecap: "Editable rent field — plug AirDNA monthly projection", dealcheck: "Editable rent field — same approach", winner: "tie" },
   { feature: "Seasonal occupancy curve modeling", truecap: "Single blended ADR + occupancy; compare manual scenarios", dealcheck: "Annualized only", winner: "tie" },
   { feature: "AirDNA / Mashvisor data integration", truecap: "Manual — paste AirDNA's projected monthly revenue into rent field", dealcheck: "Same approach", winner: "tie" },
   { feature: "Bonus depreciation / STR tax eligibility", truecap: "Not determined — review with a CPA", dealcheck: "Standard tax view", winner: "tie" },
   { feature: "Cost-segregation component modeling", truecap: "Not modeled", dealcheck: "Manual", winner: "tie" },
-  { feature: "Property management at 25% (typical STR PM rate)", truecap: "Yes — adjustable management %", dealcheck: "Yes", winner: "tie" },
+  { feature: "Editable property-management rate", truecap: "Yes — adjustable management %", dealcheck: "Yes", winner: "tie" },
   { feature: "Higher utilities + cleaning fees", truecap: "Yes — utilities + maintenance fields handle the STR overhead", dealcheck: "Yes", winner: "tie" },
   { feature: "Mobile UX", truecap: "PWA installable", dealcheck: "Native iOS + Android", winner: "dealcheck" },
-  { feature: "Free tier covers STR underwriting", truecap: "Yes — full cap rate / CoC / DSCR / cash flow on free", dealcheck: "Limited free; full STR needs paid tier", winner: "truecap" },
+  { feature: "Free tier covers STR underwriting", truecap: "Yes — core cap rate / CoC / DSCR / cash flow", dealcheck: "Yes — Rental Cash Flow for Airbnbs is included on Starter", winner: "tie" },
 ];
 
 const NICHE_FAQ: FaqItem[] = [
@@ -59,11 +58,11 @@ const NICHE_FAQ: FaqItem[] = [
     question: "Which is better for short-term rentals — TrueCap or DealCheck?",
     answer: (
       <>
-        Both work. TrueCap models a blended ADR + occupancy input and offers a deeper free underwriting tier; model separate seasonal cases as saved scenarios. Neither TrueCap&apos;s simplified tax illustration nor a deal calculator determines STR-loophole eligibility; model cost segregation and bonus depreciation with a CPA. DealCheck has native iOS/Android apps, which is the cleaner mobile experience.
+        Both work. TrueCap models a blended ADR + occupancy input; model separate seasonal cases as saved scenarios, with side-by-side comparison on Pro. DealCheck Starter includes its Rental Cash Flow for Airbnbs calculator and professional reports, subject to published caps. Neither calculator determines STR-loophole eligibility; model cost segregation and bonus depreciation with a qualified tax professional.
       </>
     ),
     plainTextAnswer:
-      "Both work. TrueCap: blended ADR plus occupancy underwriting and a deeper free tier; seasonal cases require separate scenarios. Its simplified tax illustration does not determine STR-loophole eligibility or model cost-segregation components. DealCheck: native iOS/Android for mobile-heavy operators.",
+      "Both work. TrueCap uses blended ADR and occupancy inputs; seasonal cases require separate saved scenarios and Pro for side-by-side comparison. DealCheck Starter includes its Airbnb rental calculator and professional reports, subject to caps. Neither determines STR-loophole eligibility.",
   },
   {
     question: "Can TrueCap model AirDNA revenue projections?",
@@ -89,21 +88,21 @@ const NICHE_FAQ: FaqItem[] = [
     question: "What management rate should I use for STR analysis?",
     answer: (
       <>
-        Long-term rentals usually run 8-10% management. STRs run 20-25% management when using a full-service PM (channel management + guest comms + cleaning coordination). If you self-manage, you can drop it to 0-5% (just covering software + occasional cleaning coordinator) but be honest about your time. TrueCap&apos;s management field is editable to whatever you set.
+        Use a current quote for the property and service scope. STR management fees vary by market, channel coverage, guest communication, cleaning coordination, and included services. If you self-manage, still model software, labor, and coordination costs. TrueCap&apos;s management field is editable.
       </>
     ),
     plainTextAnswer:
-      "LTR: 8-10% management. STR: 20-25% with full-service PM. Self-managed: 0-5% but value your time. TrueCap&apos;s mgmt field is editable to whatever you set.",
+      "Use a current property-specific quote. STR management fees vary by market and service scope. If self-managing, still model software, labor, and coordination costs. TrueCap's management field is editable.",
   },
   {
     question: "Can I run LTR and STR scenarios on the same property?",
     answer: (
       <>
-        Yes — that&apos;s the smartest STR workflow. Run TrueCap once with HUD long-term rent (LTR scenario), then again with your AirDNA-derived monthly STR revenue (STR scenario). Compare cap rate, cash flow, DSCR side-by-side. Some properties pencil better as LTR; some only work as STRs. The cap-rate gap tells you the answer.
+        Yes. Save one scenario with the editable HUD long-term-rent benchmark and another with your independently verified STR revenue assumption. Pro can compare saved deals side-by-side. Review cap rate, cash flow, DSCR, expenses, and sensitivity together rather than treating one metric as the answer.
       </>
     ),
     plainTextAnswer:
-      "Yes — smartest STR workflow. Run TrueCap once with HUD LTR rent, then again with AirDNA STR revenue. Compare cap rate, cash flow, DSCR side-by-side. Some pencil better as LTR; some only as STRs.",
+      "Yes. Save separate LTR and STR scenarios using independently verified inputs. Pro can compare saved deals side-by-side. Review returns, expenses, financing, and sensitivity together.",
   },
 ];
 
@@ -241,6 +240,14 @@ export default function VsDealcheckForShortTermRentalsPage() {
               </tbody>
             </table>
           </div>
+          <p className="mt-3 text-[11px] text-muted-foreground">
+            DealCheck publishes Rental Cash Flow for Airbnbs and professional reports on
+            Starter, subject to plan limits. See{" "}
+            <a href="https://dealcheck.io/pricing/" target="_blank" rel="noopener" className="underline">
+              DealCheck&apos;s official pricing page
+            </a>{" "}
+            for current terms.
+          </p>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
             Whichever calculator you land on, the STR underwrite is the same job. Our{" "}
             <Link href="/blog/short-term-rental-underwriting-playbook" className="font-semibold text-primary hover:underline">short-term rental underwriting playbook</Link>
@@ -259,16 +266,17 @@ export default function VsDealcheckForShortTermRentalsPage() {
             Underwrite your next Short-term rentals deal — free.
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
-            Free covers the standard cap rate, CoC, DSCR, and cash flow. Pro unlocks
+            Free covers the standard cap rate, CoC, DSCR, and cash flow. Pro adds
             projections, sensitivity, illustrative tax impact, modeled exit comparisons, MAO,
-            and PDF exports.
+            and included PDFs. A one-time PDF option is also available for one deal; see live
+            pricing for current terms.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link
               href="/pricing"
               className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
             >
-              Start a {TRIAL_LABEL}
+              See Pro pricing
               <ArrowUpRight className="w-4 h-4" />
             </Link>
             <Link

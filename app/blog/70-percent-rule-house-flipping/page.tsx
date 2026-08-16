@@ -74,7 +74,7 @@ const FAQS = [
   },
   {
     q: "Does the 70% rule work for BRRRR?",
-    a: "Yes, with a twist. BRRRR investors refinance instead of selling, and a cash-out refinance on a single-family investment property typically maxes out at 75% of ARV in 2026. Keeping purchase-plus-rehab at or under 70% of ARV leaves roughly a five-point cushion for closing and holding costs, so a 75% refinance can return most or all of your invested cash. If the finished property won't cash-flow as a rental, though, it isn't a BRRRR — check cap rate and DSCR first.",
+    a: "It can be an initial screen, not a refinance rule. Cash-out LTV, eligible value, seasoning, appraisal treatment, costs, and approval vary by lender, program, borrower, and property. A 75% case is only a planning scenario and does not promise that most or all cash returns; verify the completed rental's income, expenses, coverage, appraisal downside, and written loan terms.",
   },
   {
     q: "Is the 70% rule outdated in 2026?",
@@ -532,20 +532,22 @@ export default function SeventyPercentRulePost() {
               </Link>{" "}
               you&apos;re not selling — you refinance the finished rental and pull
               your cash back out to do it again. The binding constraint is the
-              refinance: a cash-out refinance on a single-family investment
-              property tops out around <strong>75% of appraised value</strong> in
-              2026. That ceiling is why BRRRR investors aim to keep everything
-              they put into the property — purchase plus rehab — at or under 75%
-              of ARV.
+              refinance. There is no universal cash-out ceiling: maximum LTV,
+              eligible value, seasoning, appraisal treatment, and approval vary
+              by lender, program, borrower, and property. The 75% case below is
+              an editable planning scenario, not a loan quote, appraisal, or
+              promise that capital can be recovered.
             </p>
             <p>
               Run our house as a BRRRR. ARV $300,000, so a 75% cash-out refinance
               funds a new loan of $225,000. Buy at the 70%-rule price of $165,000
               and add $45,000 of rehab, and your all-in on the property is
-              $210,000. The $225,000 refinance pays that off and returns about
-              $15,000 toward the closing and holding costs you racked up along the
-              way — so you walk away owning a rental with little or none of your
-              own cash still trapped in it. That is the whole appeal of BRRRR, and
+              $210,000. In the simplified scenario, a $225,000 gross new loan
+              exceeds that purchase-plus-rehab amount by $15,000 before payoff,
+              lender, closing, holding, and other costs. Actual proceeds depend
+              on approval, eligible value, payoff, fees, and closing figures; the
+              scenario does not promise that little or no cash remains invested.
+              That potential capital recycling is the appeal of BRRRR, and
               it&apos;s why the 70% purchase cap fits so naturally: the roughly
               five-point gap between the 70% you paid and the 75% you can
               refinance is about the room the transaction costs need. Miss high on

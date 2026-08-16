@@ -35,7 +35,7 @@ const SERP_TITLE = "DealCheck vs Stessa vs TrueCap (2026)";
 const DESCRIPTION =
   "An honest 3-way comparison of DealCheck, Stessa, and TrueCap. Different tools for different stages — pre-purchase underwriting vs post-purchase ops — with concrete recommendations.";
 const PUBLISHED_AT = "2026-06-07";
-const MODIFIED_AT = "2026-06-07";
+const MODIFIED_AT: string = "2026-08-16";
 const READING_TIME_MIN = 11;
 
 export const metadata: Metadata = {
@@ -75,19 +75,19 @@ const FAQ_ITEMS = [
   },
   {
     q: "Do I need both DealCheck (or TrueCap) and Stessa?",
-    a: "If you only run analyses occasionally, you can get by with just an underwriting tool. If you own multiple rentals and want bank-feed accounting plus Schedule E reports, Stessa earns its place alongside whatever calculator you use. Most active buy-and-hold investors end up with both an underwriting calculator and a property-accounting tool.",
+    a: "It depends on your workflow. DealCheck and TrueCap help evaluate a potential purchase; Stessa focuses on accounting and operations after purchase. Investors who want both acquisition analysis and ongoing bookkeeping may use one underwriting tool alongside Stessa.",
   },
   {
     q: "Is TrueCap a DealCheck alternative?",
-    a: "Yes. Both are per-deal underwriting calculators with cap rate, cash-on-cash, DSCR, and cash flow analysis. TrueCap has a deeper free tier (no analysis cap, full metrics), plain-English verdicts, address auto-fill via HUD + FRED + state property tax, and a Pro tier that bundles features DealCheck splits across plans. DealCheck has native iOS/Android apps and longer market presence; TrueCap is a PWA installable to your home screen.",
+    a: "Yes. Both are per-deal underwriting calculators with cap rate, cash-on-cash, DSCR, and cash flow analysis. TrueCap's free core analyzer supports unlimited analyses without signup, with plain-English verdicts and editable starting assumptions from HUD, FRED, and a state effective property-tax estimate. DealCheck Starter includes its core calculators and professional reports, subject to published usage limits. DealCheck has native iOS/Android apps; TrueCap is an installable PWA.",
   },
   {
     q: "Is Stessa free?",
-    a: "Stessa's base tier is free for accounting and bank-feed tracking on unlimited properties. Stessa Pro is around $12/month and adds advanced reporting, document organization, and rent collection features.",
+    a: "Stessa currently lists Essentials as its free plan, with Manage and Pro as paid plans. Features, prices, and billing terms can change, so confirm them on Stessa's official pricing page.",
   },
   {
     q: "What's the cheapest stack for a serious rental investor?",
-    a: "TrueCap free for underwriting + Stessa free for accounting covers a lot of ground at $0/month. TrueCap Pro ($29.99/month) adds projections, illustrative tax impact, and sensitivity — together with Stessa Pro that's about $42/month for a pre-purchase + post-purchase software stack.",
+    a: "TrueCap's free core analyzer plus Stessa Essentials can cover basic pre-purchase analysis and post-purchase accounting without a paid subscription. If you need advanced features, compare the current TrueCap Pro and Stessa Manage or Pro terms on their official pricing pages.",
   },
 ];
 
@@ -186,8 +186,8 @@ export default function DealCheckVsStessaVsTrueCapPost() {
             <h2>The three tools, in one sentence each</h2>
             <p>
               Before getting into pricing or feature matrices, get the
-              positioning right. Every comparison post on the internet
-              fudges this — these are not three competing products.
+              positioning right. These products overlap in places, but
+              they are not all designed for the same stage of ownership.
             </p>
             <ul>
               <li>
@@ -199,8 +199,8 @@ export default function DealCheckVsStessaVsTrueCapPost() {
               <li>
                 <strong>TrueCap</strong> is the same kind of tool — a
                 per-deal rental underwriting calculator — built newer
-                with a deeper free tier, address auto-fill, and a
-                plain-English verdict engine.
+                with unlimited free core analyses, editable screening
+                assumptions, and a plain-English verdict engine.
               </li>
               <li>
                 <strong>Stessa</strong> is a property accounting and
@@ -240,41 +240,58 @@ export default function DealCheckVsStessaVsTrueCapPost() {
               <strong>TrueCap free</strong> gives you the full
               underwriting engine — cap rate, CoC, DSCR, NCF, monthly
               cash flow — on every analysis, with no monthly limit and
-              no signup wall. Address auto-fill pre-fills HUD rent,
-              FRED 30-year mortgage rate, and state property tax for
-              you.
+              no signup wall. Address auto-fill starts with a HUD area
+              rent benchmark, a FRED owner-occupied 30-year rate
+              benchmark, and a state effective property-tax estimate.
             </p>
             <p>
-              <strong>DealCheck free</strong> limits the number of
-              analyses per month and gates most outputs behind a paid
-              plan. Their property-import-from-listing-site flow is
-              tighter than TrueCap&apos;s address auto-fill if you
-              prefer pulling from Zillow / Redfin / MLS listings
-              directly.
+              <strong>DealCheck Starter</strong> includes its core rental,
+              BRRRR, Airbnb, and flip calculators plus professional
+              interactive and PDF reports. Its free plan allows up to 15
+              saved properties and applies published limits to items such
+              as photos, comps, and templates. An account is required.
             </p>
 
             <h3>Pricing</h3>
             <p>
-              <strong>TrueCap Pro</strong> is a single $29.99/month tier
-              (or $300/year annually). Everything is included —
-              co-branded share links, PDF exports, 10-year projections, tax
-              strategy, sensitivity, MAO, BRRRR, and
-              fix-and-flip analyzers.
+              <strong>TrueCap</strong> offers a free core analyzer and paid
+              Pro plans. Free includes read-only share links and one sale
+              and rent comps lookup; Pro includes 50 comps lookups per
+              month plus 10-year projections, illustrative tax impact,
+              sensitivity, MAO, and dedicated BRRRR and fix-and-flip
+              analyzers. A PDF is available as a one-time purchase or with
+              Pro. See the live pricing page for current rates and limits.
             </p>
             <p>
-              <strong>DealCheck</strong> uses a three-tier ladder
-              (free Starter, Plus $10/mo, Pro $20/mo as of June 2026).
-              Its calculators are included on every plan — the paid
-              tiers mostly raise saved-property, photo, and comp caps.
+              <strong>DealCheck</strong> currently offers Starter, Plus,
+              and Pro plans. Its core calculators and professional reports
+              are included on Starter; paid plans raise published limits
+              for saved properties, photos, comps, and templates.
+            </p>
+            <p>
+              Pricing and plan terms can change. Verify the current details
+              on the official{" "}
+              <a href="https://dealcheck.io/pricing/" target="_blank" rel="noreferrer">
+                DealCheck pricing page
+              </a>
+              ,{" "}
+              <a href="https://www.stessa.com/pricing/" target="_blank" rel="noreferrer">
+                Stessa pricing page
+              </a>
+              , and{" "}
+              <a href="https://usetruecap.com/pricing" target="_blank" rel="noreferrer">
+                TrueCap pricing page
+              </a>
+              .
             </p>
 
             <h3>What each does better</h3>
             <ul>
               <li>
-                <strong>TrueCap</strong>: deeper free tier, plain-English
+                <strong>TrueCap</strong>: unlimited no-signup core analyses, plain-English
                 verdict (Strong / Solid / Mixed / Marginal / Negative),
-                portfolio rollup across saved deals, tax-strategy
-                modeling with depreciation and bracket-aware after-tax
+                portfolio rollup across saved deals, illustrative tax-impact
+                modeling with depreciation and estimated after-tax
                 cash flow, sensitivity grid (rent ±10%, vacancy ±5pp,
                 rate ±1pp), max allowable offer solver, Deal Score
                 (0-100) with subscore breakdown, address auto-fill via
@@ -289,9 +306,9 @@ export default function DealCheckVsStessaVsTrueCapPost() {
             </ul>
 
             <p>
-              For most investors evaluating today, TrueCap is the
-              modern choice — better free tier, simpler pricing,
-              richer analytical features in one tier.{" "}
+              For investors who prioritize unlimited no-signup core
+              analyses, editable screening assumptions, and a
+              plain-English verdict, TrueCap may be the better fit.{" "}
               <Link href="/vs/dealcheck">
                 The full TrueCap vs DealCheck comparison page
               </Link>{" "}
@@ -309,11 +326,9 @@ export default function DealCheckVsStessaVsTrueCapPost() {
               Schedule E painless at tax time.
             </p>
             <p>
-              What Stessa does <em>not</em> do: per-deal underwriting.
-              You can&apos;t paste an address into Stessa and get a
-              cap rate / DSCR / cash flow analysis on a property
-              you&apos;re considering buying. Their dashboards are for
-              the property after you own it.
+              Stessa is primarily designed for property accounting and
+              operations after purchase, rather than the same acquisition-
+              underwriting workflow offered by TrueCap and DealCheck.
             </p>
             <p>
               So:
@@ -333,9 +348,9 @@ export default function DealCheckVsStessaVsTrueCapPost() {
               </li>
             </ul>
             <p>
-              For most serious investors,{" "}
+              For investors who want both workflows,{" "}
               <strong>TrueCap (or DealCheck) + Stessa</strong> is the
-              complete software stack:
+              complementary two-tool approach:
             </p>
             <ul>
               <li>
@@ -357,10 +372,10 @@ export default function DealCheckVsStessaVsTrueCapPost() {
               page goes deeper on the boundaries.
             </p>
 
-            <h2>The cheapest stack that actually works</h2>
+            <h2>A low-cost starting stack</h2>
             <p>
               If you&apos;re cost-conscious and own 1-3 rentals, this
-              stack runs $0/month to start and scales naturally:
+              stack can start without a paid subscription:
             </p>
             <ul>
               <li>
@@ -374,20 +389,18 @@ export default function DealCheckVsStessaVsTrueCapPost() {
               </li>
             </ul>
             <p>
-              When you start running into limits — typically the moment
-              you want 10-year projections, sensitivity, illustrative tax impact,
-              co-branded share links, or PDF reports for partners /
-              lenders — TrueCap Pro at $29.99/month unlocks them all in
-              one tier. If your Stessa accounting volume grows and you
-              want their advanced reporting, Stessa Pro adds another
-              ~$12/month. Together that&apos;s about $31/month for a
-              complete pre-purchase + post-purchase rental software
-              stack.
+              TrueCap&apos;s read-only share links remain free. If you need
+              10-year projections, sensitivity, illustrative tax impact,
+              more comps, or the dedicated BRRRR and flip workflows,
+              compare the current Pro plans. PDF reports are available as
+              a one-time purchase or with Pro. If you need more from
+              Stessa, compare its current Manage and Pro plans as well.
             </p>
             <p>
-              By comparison, DealCheck&apos;s Plus or Pro tier runs
-              $10-$20/month (mostly lifting saved-property caps), and
-              you&apos;d still want Stessa alongside it.
+              DealCheck Starter includes the core calculators and
+              professional reports; its paid Plus and Pro plans mainly
+              raise published usage limits. You may still pair it with an
+              accounting platform if you want post-purchase bookkeeping.
             </p>
 
             <h2>Quick decision matrix</h2>
@@ -407,9 +420,8 @@ export default function DealCheckVsStessaVsTrueCapPost() {
                 you&apos;re fine installing from the browser.
               </li>
               <li>
-                <strong>&quot;I want the deepest free tier so I can
-                run unlimited analyses.&quot;</strong> TrueCap, hands
-                down.
+                <strong>&quot;I want unlimited core analyses without
+                signup.&quot;</strong> TrueCap is designed for that workflow.
               </li>
               <li>
                 <strong>&quot;I want a plain-English verdict, not just
@@ -420,15 +432,14 @@ export default function DealCheckVsStessaVsTrueCapPost() {
               <li>
                 <strong>&quot;I own 5+ rentals and want clean
                 Schedule E reporting at tax time.&quot;</strong>{" "}
-                Stessa, period. Pair with TrueCap or DealCheck for the
-                next acquisition.
+                Consider Stessa, then pair it with TrueCap or DealCheck
+                when evaluating the next acquisition.
               </li>
               <li>
                 <strong>&quot;I want everything in one tool.&quot;</strong>{" "}
-                Not possible today — pre-purchase calculator and
-                post-purchase accounting are different software
-                problems. Don&apos;t trust a marketing page that
-                claims otherwise.
+                Compare the acquisition-analysis and post-purchase
+                accounting depth carefully; these products specialize in
+                different stages of the workflow.
               </li>
             </ul>
 

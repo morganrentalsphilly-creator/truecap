@@ -5,7 +5,6 @@
  * DealMachine is a mobile-first 'driving for dollars' lead generation app — snap a photo of a distressed property, instantly get owner contact info, send direct mail or skip-trace. Strong with wholesalers and active off-market buyers.
  */
 
-import { TRIAL_LABEL } from "@/lib/trial";
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
@@ -62,10 +61,10 @@ const MATRIX: Row[] = [
   { feature: "Direct mail campaigns", truecap: "No", dealmachine: "Yes — automated postcards", winner: "dealmachine" },
   { feature: "Property data + lists", truecap: "Limited (HUD FMR + FRED)", dealmachine: "Yes — 150M+ properties, motivated lists", winner: "dealmachine" },
   { feature: "Mobile-first UX", truecap: "PWA installable", dealmachine: "Native app (built for mobile)", winner: "dealmachine" },
-  { feature: "Free tier", truecap: "Yes — full underwriting math", dealmachine: "Trial only ($59-99/mo paid)", winner: "truecap" },
-  { feature: "Pricing (entry tier)", truecap: "Free; Pro $29.99/mo", dealmachine: "Starter ~$59/mo, Pro ~$99/mo (as of 2026)", winner: "truecap" },
+  { feature: "Free tier", truecap: "Yes — core cap rate, CoC, DSCR, and cash flow", dealmachine: "Trial only ($59-99/mo paid)", winner: "truecap" },
+  { feature: "Pricing (entry tier)", truecap: "Free core; paid Pro — see live pricing", dealmachine: "Starter ~$59/mo, Pro ~$99/mo (as of 2026)", winner: "truecap" },
   { feature: "Shareable read-only deal link", truecap: "Free — read-only public link; Pro adds co-branding", dealmachine: "Internal-only data", winner: "truecap" },
-  { feature: "Lender-facing PDF", truecap: "Pro — multi-page report", dealmachine: "Not the use case", winner: "truecap" },
+  { feature: "PDF deal report", truecap: "One-time Deal Decision Pack or included with Pro", dealmachine: "Not the use case", winner: "truecap" },
 ];
 
 export default function VsDealmachinePage() {
@@ -127,7 +126,7 @@ export default function VsDealmachinePage() {
             </Link>
           </div>
           <p className="mt-3 text-xs text-muted-foreground">
-            No card · No signup · Cancel anytime
+            Free analyzer: no card or signup
           </p>
         </section>
 
@@ -270,7 +269,8 @@ export default function VsDealmachinePage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
             Pro unlocks projections, sensitivity, illustrative tax impact, modeled exit comparisons,
-            MAO, PDF exports, and co-branded share links.
+            MAO, and co-branded share links. Pro includes PDFs, and a one-time
+            PDF option is available; see live pricing for current terms.
             No card to start.
           </p>
           <div className="flex flex-wrap gap-3">
@@ -278,7 +278,7 @@ export default function VsDealmachinePage() {
               href="/pricing"
               className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
             >
-              Start a {TRIAL_LABEL}
+              See Pro pricing
               <ArrowUpRight className="w-4 h-4" />
             </Link>
             <Link
@@ -331,11 +331,11 @@ const DEALMACHINE_FAQ: FaqItem[] = [
     question: "Is DealMachine worth $59-99/month?",
     answer: (
       <>
-        Depends on volume. If you&apos;re sending 200+ postcards a month or actively driving for dollars several days a week, DealMachine&apos;s all-in workflow pays back quickly. If you buy 1-3 properties a year through MLS, both DealMachine and PropStream are overkill. TrueCap&apos;s $29.99/mo Pro is the right spend bracket for solo buy-and-hold investors.
+        It depends on volume. DealMachine&apos;s all-in acquisition workflow may fit frequent driving-for-dollars and direct-mail campaigns. If you buy only a few properties through listed channels, evaluate whether you need that workflow. TrueCap&apos;s free and paid underwriting options are listed on its live pricing page.
       </>
     ),
     plainTextAnswer:
-      "Depends on volume. 200+ postcards/month or active driving for dollars? Pays back. 1-3 properties/year via MLS? Overkill. TrueCap&apos;s $29.99/mo Pro is the right bracket for solo buy-and-hold.",
+      "It depends on volume. DealMachine may fit frequent driving-for-dollars and direct-mail campaigns. For occasional listed acquisitions, compare the workflow against your actual needs. TrueCap's current underwriting options are on its live pricing page.",
   },
   {
     question: "Does DealMachine do underwriting?",

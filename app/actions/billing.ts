@@ -9,6 +9,7 @@ import { getStripe } from "@/lib/stripe/client";
 import { getPrimaryPlanPriceId, type PaidPlanSlug } from "@/lib/stripe/plan-prices";
 import { captureServerEvent } from "@/lib/posthog-server";
 import { TRIAL_DAYS } from "@/lib/trial";
+import { resolvePostAnalysisOfferCoupon } from "@/lib/post-analysis-offer";
 
 const checkoutSchema = z.object({
   planSlug: z.enum(["pro_monthly", "pro_annual", "agent_pro_monthly", "agent_pro_annual"]),
@@ -44,35 +45,6 @@ function getPlanPriceId(planSlug: PaidPlanSlug, dbPriceId?: string | null): stri
   // additional grandfathered prices after it (see lib/stripe/plan-prices),
   // which are for webhook resolution only, never for new checkouts.
   return getPrimaryPlanPriceId(planSlug) ?? dbPriceId ?? null;
-}
-
-/**
- * Resolve a campaign code (?coupon=…) to a configured Stripe COUPON id.
- * Whitelisted server-side so clients can't pass arbitrary coupon ids; an
- * unknown code or an unset env var yields null (checkout proceeds at full
- * price — fail-safe). Morgan owns the coupon + env var in Stripe/Vercel.
- */
-function resolveOfferCouponId(offer: string | undefined): string | null {
-  if (!offer) return null;
-  const code = offer.trim().toUpperCase();
-  // The post-analysis drip's final nudge links ?coupon=<POST_ANALYSIS_COUPON_CODE>
-  // (default ANALYZE20). EXIT50 (the exit-intent 50% offer) was removed
-  // entirely — founder decision, 2026-07: no 50% discounts anywhere. A stale
-  // ?coupon=EXIT50 link now falls through to full price, fail-safe.
-  const postAnalysisCode = (process.env.POST_ANALYSIS_COUPON_CODE || "ANALYZE20").trim().toUpperCase();
-  const map: Record<string, string | undefined> = {
-    [postAnalysisCode]: process.env.POST_ANALYSIS_COUPON_ID,
-  };
-  const resolved = map[code] ?? null;
-  // A KNOWN offer code with no configured coupon id = a promo we promised but
-  // can't honor. Surface it loudly instead of silently charging full price.
-  if (resolved == null && code in map) {
-    Sentry.captureMessage(`offer coupon '${code}' has no configured Stripe coupon id`, {
-      level: "warning",
-      tags: { feature: "billing-offer-coupon" },
-    });
-  }
-  return resolved;
 }
 
 function getDisplayName(profile: {
@@ -272,6 +244,27 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
     };
   }
 
+  // Campaign links must fail CLOSED. A recognized code with a missing Stripe
+  // coupon is a discount we cannot honor; creating a full-price session would
+  // charge more than the email promised.
+  const offerResolution = parsed.data.planSlug.startsWith("agent_pro")
+    ? ({ kind: "none" } as const)
+    : resolvePostAnalysisOfferCoupon(parsed.data.offer);
+  if (offerResolution.kind === "misconfigured") {
+    Sentry.captureMessage(
+      `offer coupon '${offerResolution.code}' has no configured Stripe coupon id`,
+      {
+        level: "error",
+        tags: { feature: "billing-offer-coupon" },
+      }
+    );
+    return {
+      ok: false,
+      code: "SERVER_ERROR",
+      message: "This promotional offer is temporarily unavailable. Please try again later.",
+    };
+  }
+
   try {
     const customerId = await getOrCreateStripeCustomer({
       userId: user.id,
@@ -288,19 +281,20 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
     // tier. Without this scope, a drip recipient carrying ?coupon=ANALYZE20
     // who clicked the Agent Pro card got 20% off $59.99 — and stacked the
     // discount onto the already-pre-discounted $590 annual. (2026-08-11 audit.)
-    const offerCoupon = parsed.data.planSlug.startsWith("agent_pro")
-      ? null
-      : resolveOfferCouponId(parsed.data.offer);
+    const offerCoupon =
+      offerResolution.kind === "configured" ? offerResolution.couponId : null;
     // STRIPE_ANNUAL_DISCOUNT_COUPON_ID exists for the Pro annual price only.
     // agent_pro_annual must be created in Stripe at its final (already
     // discounted) amount — stacking this coupon on it would double-discount.
     const annualCoupon =
       parsed.data.planSlug === "pro_annual" ? process.env.STRIPE_ANNUAL_DISCOUNT_COUPON_ID : undefined;
     const appliedCoupon = offerCoupon ?? annualCoupon;
-    // Free Pro trial on new subscriptions. Card is collected at checkout and
-    // auto-charges when the trial ends. Env-adjustable; PRO_TRIAL_DAYS=0 turns
-    // trials off without a deploy. Default TRIAL_DAYS (14).
-    const proTrialDays = Math.max(0, Number.parseInt(process.env.PRO_TRIAL_DAYS ?? String(TRIAL_DAYS), 10) || 0);
+    // Free trial on eligible first subscriptions. Card is collected at
+    // checkout and auto-charges when the trial ends. The duration is the same
+    // imported constant every public surface renders; a hidden environment
+    // override previously allowed checkout and the offer to contradict each
+    // other.
+    const proTrialDays = TRIAL_DAYS;
     const stripe = getStripe();
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",

@@ -238,8 +238,9 @@ export default function VacancyRatePost() {
             </li>
             <li>
               <strong>Student rental on a strict August calendar:</strong>{" "}
-              often 1 month guaranteed-empty per year — 8.3% floor before
-              anything goes wrong
+              model an explicit turn and lease-up gap based on the property&apos;s
+              academic calendar and leasing history; one empty month would equal
+              8.3%, but it is not a universal floor
             </li>
           </ul>
           <p>
@@ -356,9 +357,9 @@ export default function VacancyRatePost() {
               the difference.
             </li>
             <li>
-              <strong>Student rentals:</strong> 8.3% structural floor (one
-              guaranteed turn per year) plus whatever the summer market
-              doesn&apos;t absorb.
+              <strong>Student rentals:</strong> derive turnover and summer
+              lease-up assumptions from the property&apos;s calendar and history;
+              do not impose a universal 8.3% floor.
             </li>
           </ul>
           <p>
@@ -442,18 +443,17 @@ export default function VacancyRatePost() {
             How operators actually push vacancy down
           </h2>
           <p>
-            <strong>Price 3-5% under top-of-market.</strong> The spreadsheet
-            says squeeze every dollar; the turnover math says otherwise. On a
-            $1,400 unit, holding out for $1,460 while the unit sits an extra
-            three weeks costs more than the annual difference — and
-            under-market tenants renew more.
+            <strong>Test price against current comps and lease-up evidence.</strong>{" "}
+            A lower asking rent can reduce lease-up time in some cases, but the
+            relationship and renewal outcome are property- and market-specific.
+            Compare multiple rent and downtime scenarios rather than prescribing
+            a fixed discount.
           </p>
           <p>
-            <strong>Start renewal conversations at day 90.</strong> A signed
-            renewal 60 days out converts your single biggest vacancy driver
-            (turnover) to zero for another year. Modest renewal increases
-            beat market-rate re-leases net of turn costs in almost every
-            case.
+            <strong>Plan lawful renewal outreach early.</strong> Timing, notice,
+            rent-change, screening, and lease rules vary. Compare the verified
+            renewal offer with expected re-lease rent, downtime, turn cost, and
+            tenant-specific collection risk; neither path wins almost every case.
           </p>
           <p>
             <strong>Pre-lease during the notice period.</strong> Showing the
@@ -463,10 +463,10 @@ export default function VacancyRatePost() {
           </p>
           <p>
             <strong>Screen for tenure, not just credit.</strong> A 680-score
-            applicant with five years at their last address is a better
-            vacancy bet than a 740 who moves every year. The score protects
-            against non-payment; the history protects against turnover. Both
-            are vacancy.
+            applicant with five years at their last address may present a
+            different turnover profile from a 740 who moves every year. Apply
+            lawful, written, consistently administered screening criteria;
+            neither a score nor address history guarantees payment or renewal.
           </p>
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">

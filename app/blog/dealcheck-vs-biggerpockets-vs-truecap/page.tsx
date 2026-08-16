@@ -28,7 +28,7 @@ const SERP_TITLE = "DealCheck vs BiggerPockets vs TrueCap (2026)";
 const DESCRIPTION =
   "Honest 3-way comparison of DealCheck, BiggerPockets Calculator, and TrueCap. Free tier depth, pricing, projections, mobile, and which fits which investor.";
 const PUBLISHED_AT = "2026-06-07";
-const MODIFIED_AT = "2026-06-07";
+const MODIFIED_AT = "2026-08-16";
 const READING_TIME_MIN = 11;
 
 export const metadata: Metadata = {
@@ -62,23 +62,23 @@ export const metadata: Metadata = {
 const FAQ_ITEMS = [
   {
     q: `Which is cheapest — DealCheck, BiggerPockets, or TrueCap?`,
-    a: `For headline price, DealCheck Plus is cheapest at \$10/month, with DealCheck Pro at \$20/month and TrueCap Pro at \$29.99/month (\$25/mo on the annual plan, as of June 2026). DealCheck's tiers mostly raise saved-property caps, while TrueCap's single tier bundles the deep analysis (projections, illustrative tax impact, sensitivity, modeled exit comparisons). BiggerPockets Pro is ~\$32.50/month (annual, \$390/year), bundled with forums, courses, and community access.`,
+    a: `TrueCap's core analyzer and DealCheck Starter can both be used without a paid subscription, although their features and usage limits differ. BiggerPockets currently presents its rental-calculator results as a Pro feature. Paid prices change, so compare each official pricing page for the current total and included features.`,
   },
   {
     q: `Which has the best free tier?`,
-    a: `TrueCap, hands down. TrueCap free covers cap rate, cash-on-cash, DSCR, NCF, monthly cash flow, and address auto-fill on unlimited analyses with no signup. DealCheck free requires signup and caps you at 15 saved properties at a time. BiggerPockets free gives a few reports per month before gating to the \$390/year Pro tier.`,
+    a: `TrueCap is a strong fit when the priority is unlimited core analyses without signup: cap rate, cash-on-cash, DSCR, NCF, monthly cash flow, and editable starting assumptions are included. DealCheck Starter requires an account and includes its core calculators and professional reports, with up to 15 saved properties and other published limits. BiggerPockets currently presents calculator results as a Pro feature.`,
   },
   {
     q: `Does TrueCap have native iOS and Android apps like DealCheck?`,
-    a: `No — TrueCap is a Progressive Web App (PWA). Install from the browser to your home screen and it works like a native app, but it isn't distributed through the App Store. DealCheck has true native apps with offline support, which is the better choice if you underwrite at showings all day on mobile.`,
+    a: `No — TrueCap is a Progressive Web App (PWA). You can install it from the browser to your home screen, but it isn't distributed through the App Store. DealCheck offers native iOS and Android apps, which may fit investors who prefer an app-store workflow.`,
   },
   {
     q: `Should I keep paying for BiggerPockets just for the calculator?`,
-    a: `Probably not. BiggerPockets Pro is ~\$390/year and bundles forums, courses, books, podcasts, and community. If you actively use the community, it's worth it. If you're paying for the calculator specifically, TrueCap (\$300/year on annual) is cheaper and has a more capable calculator.`,
+    a: `It depends on whether you use the broader BiggerPockets Pro membership. If your need is limited to underwriting, compare the current calculator access, workflow, and pricing against TrueCap and DealCheck. If you also use BiggerPockets' community and educational resources, evaluate the membership as a bundle.`,
   },
   {
     q: `Is BiggerPockets calculator more accurate than DealCheck or TrueCap?`,
-    a: `No — all three use the same standard rental-property formulas (cap rate, CoC, DSCR, NCF). The math is identical. The differences are in what data they auto-fill (TrueCap uses HUD FMR + FRED + state tax; DealCheck imports from listing sites), what they project (10-year, tax, exit), and how they present results.`,
+    a: `The tools report many of the same standard metrics, but their results can differ because of input defaults, metric definitions, rounding, and projection assumptions. Compare them with the same verified rent, financing, tax, insurance, vacancy, maintenance, management, and capital-expenditure inputs.`,
   },
 ];
 
@@ -158,51 +158,70 @@ export default function ThreeWayComparisonPost() {
             </h2>
             <p
               className="text-sm sm:text-base leading-relaxed text-foreground"
-              dangerouslySetInnerHTML={{ __html: `They&apos;re the three calculators most rental investors evaluate. <strong>DealCheck</strong> is the established competitor with native mobile apps and a deeper listing-import workflow (full property detail, where TrueCap&apos;s link paste pulls the address only). <strong>BiggerPockets Calculator</strong> is the household name that bundles with a \$390/year community subscription. <strong>TrueCap</strong> is the modern alternative with a deeper free tier, address auto-fill from HUD + FRED + state property tax, and a single \$29.99/mo Pro tier that bundles features the other two split across multiple plans. Pick TrueCap if you want the strongest free tier and simplest pricing. Pick DealCheck if you need native iOS / Android apps. Pick BiggerPockets if you&apos;re already paying for the community.` }}
+              dangerouslySetInnerHTML={{ __html: `<strong>DealCheck</strong> combines core rental, BRRRR, Airbnb, and flip calculators with native mobile apps and listing imports; Starter includes professional interactive and PDF reports with published usage limits. <strong>BiggerPockets Calculator</strong> currently presents its results as a BiggerPockets Pro feature. <strong>TrueCap</strong> offers unlimited no-signup core analyses, editable screening assumptions, one free comps lookup, and free read-only share links. Pro adds 50 comps lookups per month and the dedicated projection, BRRRR, and flip workflows. Choose based on the workflow you need, then verify current plan terms before subscribing.` }}
             />
           </section>
+
+          <p className="mb-10 text-sm text-muted-foreground">
+            Access and pricing change. Check the official{" "}
+            <a href="https://dealcheck.io/pricing/" target="_blank" rel="noreferrer" className="text-primary hover:underline">
+              DealCheck pricing
+            </a>
+            ,{" "}
+            <a href="https://www.biggerpockets.com/rental-property-calculator" target="_blank" rel="noreferrer" className="text-primary hover:underline">
+              BiggerPockets calculator
+            </a>
+            ,{" "}
+            <a href="https://www.biggerpockets.com/pro" target="_blank" rel="noreferrer" className="text-primary hover:underline">
+              BiggerPockets Pro
+            </a>
+            , and{" "}
+            <a href="https://usetruecap.com/pricing" target="_blank" rel="noreferrer" className="text-primary hover:underline">
+              TrueCap pricing
+            </a>{" "}
+            pages for current terms.
+          </p>
 
           <div className="prose prose-neutral max-w-none prose-headings:font-extrabold prose-headings:text-foreground prose-p:text-foreground prose-p:leading-relaxed prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-li:text-foreground prose-li:leading-relaxed">
             <h2>The three calculators in one sentence each</h2>
             <div dangerouslySetInnerHTML={{ __html: `<ul>
-              <li><strong>DealCheck</strong> — per-deal rental underwriting calculator with a 3-tier plan ladder (free Starter, Plus \$10/mo, Pro \$20/mo as of June 2026). Native iOS and Android apps. Strong listing-import workflow that pulls property details from Zillow / Redfin.</li>
-              <li><strong>BiggerPockets Calculator</strong> — bundled with a BiggerPockets Pro subscription (~\$390/year ≈ \$32.50/mo). Big brand, decade+ of trust. Calculator UX hasn&apos;t evolved much in years; no portfolio rollup.</li>
-              <li><strong>TrueCap</strong> — newer calculator with a deeper free tier (full cap rate, CoC, DSCR, NCF, monthly cash flow with no monthly cap). Pro is a single \$29.99/mo tier bundling everything. PWA installable to home screen (no native apps). Address auto-fill via HUD Fair Market Rent + FRED 30-year rate + state property tax — none of the others do this.</li>
+              <li><strong>DealCheck</strong> — per-deal underwriting across rental, BRRRR, Airbnb, and flip strategies, with free Starter and paid Plus and Pro plans. It offers native iOS and Android apps and listing-import tools.</li>
+              <li><strong>BiggerPockets Calculator</strong> — a rental-property calculator whose results are currently presented as a BiggerPockets Pro membership feature alongside broader community and educational resources.</li>
+              <li><strong>TrueCap</strong> — an installable PWA with unlimited free core analyses, labeled HUD and FRED screening benchmarks, a state effective property-tax estimate, and a plain-English verdict. Pro adds longer-range and strategy-specific workflows.</li>
             </ul>` }} />
 
             <h2>Free tier comparison</h2>
             <div dangerouslySetInnerHTML={{ __html: `<p>This is where they diverge most. The free tier sets expectations for the paid one — if free feels gated, you&apos;re skeptical of Pro.</p>
             <ul>
               <li><strong>TrueCap free</strong> — unlimited analyses, cap rate, CoC, DSCR, NCF, monthly cash flow, plain-English verdict, address auto-fill, save up to 5 deals, dashboard access, and read-only share links. No signup required to use the calculator.</li>
-              <li><strong>DealCheck free</strong> — signup required, capped at 15 saved properties at a time (plus limits on photos, comps, and templates). The core calculators are included. Listing-import works on free.</li>
-              <li><strong>BiggerPockets calculator free</strong> — a few free reports per month, then gated behind BiggerPockets Pro (\$390/year).</li>
+              <li><strong>DealCheck Starter</strong> — account required; core rental, BRRRR, Airbnb, and flip calculators plus professional interactive and PDF reports are included. Starter supports up to 15 saved properties and has published limits on photos, comps, and templates.</li>
+              <li><strong>BiggerPockets calculator</strong> — the current official page presents calculator results as a BiggerPockets Pro feature. Check the official calculator and Pro pages because access terms can change.</li>
             </ul>
-            <p>If you want to underwrite a deal right now without paying or signing up, TrueCap is the only one of the three that lets you. That&apos;s the wedge.</p>` }} />
+            <p>If you want to underwrite a deal immediately without paying or creating an account, TrueCap supports that workflow.</p>` }} />
 
             <h2>Pricing (paid tier comparison)</h2>
             <div dangerouslySetInnerHTML={{ __html: `<ul>
-              <li><strong>TrueCap Pro</strong> — \$29.99/month (or \$300/year on the annual plan, ~\$25/mo). Single tier. Everything included: 10-year projections, illustrative tax impact, sensitivity grid, modeled exit comparisons, MAO solver, BRRRR + fix-and-flip analyzers, PDF exports, branded reports, co-branded share links, editing + unlimited saves, compare, and templates.</li>
-              <li><strong>DealCheck Plus</strong> — \$10/month. Raises caps: 50 saved properties, more photos, comps, and templates.</li>
-              <li><strong>DealCheck Pro</strong> — \$20/month. Unlimited saved properties, photos, comps, and templates.</li>
-              <li><strong>BiggerPockets Pro</strong> — ~\$32.50/month (annual). Bundles the calculator with community, courses, forums, podcasts, books. Calculator alone isn&apos;t cheaper.</li>
+              <li><strong>TrueCap</strong> — free core analyzer with paid Pro plans. Read-only share links remain free; PDF export is available as a one-time purchase or with Pro. Pro adds 50 comps lookups per month, 10-year projections, illustrative tax impact, sensitivity, modeled exits, MAO, dedicated BRRRR and fix-and-flip analyzers, editing, unlimited saves, and comparison tools.</li>
+              <li><strong>DealCheck</strong> — free Starter plus paid Plus and Pro plans. The core calculators and professional reports are on Starter; paid plans raise saved-property, photo, comp, and template limits.</li>
+              <li><strong>BiggerPockets Pro</strong> — bundles rental-calculator access with its broader membership benefits. Check the official Pro page for current price, trial, and renewal terms.</li>
             </ul>
-            <p>DealCheck Pro is \$20/month and TrueCap Pro is \$29.99/month — close, and the difference is what the dollar buys. DealCheck&apos;s paid tiers mostly raise saved-property caps; TrueCap&apos;s single tier bundles the analysis depth (projections, illustrative tax impact, sensitivity, modeled exit comparisons). Versus BiggerPockets, TrueCap&apos;s calculator runs ~20% less on the annual plan — and if you&apos;re paying BiggerPockets mainly for the community, you&apos;re overpaying for the calculator alone.</p>` }} />
+            <p>Compare the current total price against the features you will use. DealCheck&apos;s paid plans primarily raise published limits, TrueCap Pro adds advanced analysis workflows, and BiggerPockets Pro combines calculator access with a broader membership.</p>` }} />
 
             <h2>Mobile + at the showing</h2>
-            <div dangerouslySetInnerHTML={{ __html: `<p>The honest one. TrueCap is a Progressive Web App — install it from the browser to your home screen and it works like a native app without going through the App Store. DealCheck has true native iOS and Android apps with offline support and better camera-tied workflows. BiggerPockets has a mobile-optimized web view and a separate forum app, but the calculator is mostly desktop-leaning.</p>
-            <p>If you underwrite at showings on your phone all day, DealCheck&apos;s native apps are the most polished mobile experience. If you sometimes underwrite on mobile but mostly at a desk, TrueCap&apos;s PWA is enough. If you live in BiggerPockets and don&apos;t mind the desktop-leaning calculator, you&apos;re already there.</p>` }} />
+            <div dangerouslySetInnerHTML={{ __html: `<p>TrueCap is a Progressive Web App that can be installed from the browser to a home screen. DealCheck offers native iOS and Android apps. BiggerPockets provides its calculator through the web.</p>
+            <p>Choose DealCheck if app-store distribution is important. Choose TrueCap if an installable browser app fits your workflow. Test the interface you plan to use at showings before committing to a paid plan.</p>` }} />
 
             <h2>What each does better</h2>
             <div dangerouslySetInnerHTML={{ __html: `<ul>
-              <li><strong>TrueCap wins</strong>: deepest free tier, simplest pricing, address auto-fill from authoritative open data (HUD + FRED + state tax), plain-English verdict (Strong / Solid / Mixed / Marginal / Negative), portfolio rollup across saved deals, deal score with subscore breakdown, MAO solver, sensitivity grid, tax-strategy modeling with bracket-aware after-tax cash flow.</li>
-              <li><strong>DealCheck wins</strong>: native iOS + Android apps, deeper listing import (full property detail from Zillow, where TrueCap&apos;s link paste pulls only the address), longer track record in the BRRRR community, broader brand recognition among investors.</li>
-              <li><strong>BiggerPockets wins</strong>: bundled with the largest real-estate community on the internet, books + courses + forums + podcasts all in one subscription, calculator output format is the one your private-money lender or syndicate partner has already seen.</li>
+              <li><strong>TrueCap stands out for</strong>: unlimited no-signup core analyses, labeled public-data screening assumptions, a plain-English verdict, portfolio rollup, Deal Score, MAO, sensitivity, and illustrative tax-impact modeling.</li>
+              <li><strong>DealCheck stands out for</strong>: native iOS and Android apps, listing imports, calculators for several investment strategies on Starter, and a longer product history.</li>
+              <li><strong>BiggerPockets stands out for</strong>: combining calculator access with its broader investor community and educational membership resources.</li>
             </ul>` }} />
 
             <h2>Quick decision matrix</h2>
             <div dangerouslySetInnerHTML={{ __html: `<ul>
-              <li><strong>&quot;I want to underwrite a deal right now, no signup.&quot;</strong> TrueCap. Only one that lets you.</li>
-              <li><strong>&quot;I want the most analysis bundled in one Pro tier.&quot;</strong> TrueCap (\$29.99/mo, \$25/mo annual).</li>
+              <li><strong>&quot;I want to underwrite a deal right now, no signup.&quot;</strong> TrueCap supports that flow.</li>
+              <li><strong>&quot;I want projections, sensitivity, and dedicated BRRRR and flip workflows.&quot;</strong> Compare TrueCap&apos;s current Pro plans.</li>
               <li><strong>&quot;I underwrite on my phone at every showing.&quot;</strong> DealCheck — native apps.</li>
               <li><strong>&quot;I already pay for BiggerPockets for the community.&quot;</strong> Stay with BiggerPockets&apos; calculator; you&apos;re already paying.</li>
               <li><strong>&quot;I want a plain-English verdict, not just metrics.&quot;</strong> TrueCap — Strong / Solid / Mixed / Marginal / Negative with subscore breakdown.</li>
@@ -234,7 +253,7 @@ export default function ThreeWayComparisonPost() {
             </div>
 
             <h2>Try TrueCap free</h2>
-            <p>Run a deal in all three calculators (DealCheck free analysis, BiggerPockets free report, TrueCap free analyzer) and you&apos;ll know within an hour which UI you actually want to live in. The math is identical; the UX, free-tier depth, and pricing structure are what differ.</p>
+            <p>Run the same verified inputs through the tools you are considering. Their metric labels overlap, but defaults, definitions, and projections can produce different results; compare both the outputs and the workflow before choosing.</p>
             <p className="not-prose">
               <Link
                 href="/"

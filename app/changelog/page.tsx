@@ -492,9 +492,9 @@ const ENTRIES: Entry[] = [
   {
     date: "2026-05-24",
     category: "Feature",
-    title: "Real 'deals analyzed this week' trust ticker",
+    title: "Measured saved-analysis activity ticker",
     description:
-      "Aggregate count from Supabase rendered as a small badge in the hero. Threshold-gated so low numbers don't anti-prove — only shows when count exceeds 25. Cached server-side, refreshes every 5 minutes.",
+      "Aggregate saved-analysis row count from Supabase rendered as a small badge. It is not a unique property, user, purchase, or transaction count. Threshold-gated below 25 and cached server-side for 5 minutes.",
   },
   {
     date: "2026-05-24",

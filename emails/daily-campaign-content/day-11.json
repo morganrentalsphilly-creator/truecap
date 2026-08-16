@@ -3,13 +3,13 @@
   "send_date": "2026-06-11",
   "subject": "brrrr math when refi fails",
   "preheader": "the moment a brrrr stops being a brrrr.",
-  "headline": "BRRRR only works when the refinance pulls you out. Most don't.",
+  "headline": "A BRRRR screen needs an appraisal and refinance downside case.",
   "body": [
-    "BRRRR is Buy, Rehab, Rent, Refinance, Repeat. The whole strategy depends on step four — refinancing at 70-75% LTV of the after-repair value and pulling most of your cash back out.",
-    "The math: you need ARV × 0.75 to be greater than (or at least equal to) your all-in cost. All-in = purchase + rehab + closing + holding. If that's not true, the refinance leaves cash stuck in the deal, and it stops being a BRRRR — it's just a leveraged rental.",
-    "Example: buy at $200,000, rehab $40,000, $10,000 in closing and holding. All-in is $250,000. ARV needs to be $250,000 / 0.75 = $333,333 minimum just to break even on the refi. If your appraiser comes in at $310,000, you get $232,500 back at 75% LTV. You've left $17,500 stuck in the deal.",
-    "Most BRRRRs that 'fail' don't fail at the rent step. They fail because the ARV came in under expectations or the rehab ran 20% over. Model both before you buy.",
-    "TrueCap Pro includes a BRRRR analyzer that runs this exact math, with sensitivity on both ARV and rehab. If you do BRRRRs, the $29.99/mo pays for itself the first time a refi appraisal comes in light and you knew about it before you bought."
+    "BRRRR is Buy, Rehab, Rent, Refinance, Repeat. The strategy's capital-recovery result depends on the appraised value, eligible value basis, program LTV, seasoning, coverage, credit, reserves, property, and lender approval—not ARV alone.",
+    "A useful scenario is refinance proceeds = entered ARV × an assumed LTV, compared with all-in cash. Treat the LTV as an input to verify with a lender; there is no universal 70-75% cash-out limit.",
+    "Illustration only: buy at $200,000, enter $40,000 rehab and $10,000 closing and holding, for $250,000 all-in. At an assumed $310,000 appraisal and 75% LTV, modeled gross proceeds are $232,500 before refinance costs and lender adjustments, leaving at least $17,500 in the deal.",
+    "Stress both ARV and rehab, then also test lower eligible proceeds, longer timing, refinance costs, and the stabilized payment. Meeting a modeled threshold does not guarantee an appraisal or loan approval.",
+    "TrueCap Pro provides an interactive BRRRR model and sensitivity views using the assumptions you enter. See the pricing page for current plan details."
   ],
   "cta_text": "See the BRRRR analyzer",
   "cta_url": "https://usetruecap.com/pricing",

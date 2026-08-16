@@ -5,7 +5,6 @@
  * QuickBooks (Self-Employed and Online) is general-purpose small-business accounting. Many landlords default to it for rental bookkeeping. Stessa / Baselane / Landlord Studio are rental-specific competitors; TrueCap is upstream of all of them.
  */
 
-import { TRIAL_LABEL } from "@/lib/trial";
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
@@ -61,7 +60,7 @@ const MATRIX: Row[] = [
   { feature: "Per-property P&L", truecap: "Forward projection per deal", quickbooksrental: "Class / Location tracking (manual)", winner: "tie" },
   { feature: "Schedule E export", truecap: "Forward tax projection", quickbooksrental: "Yes — but requires Schedule E mapping", winner: "tie" },
   { feature: "Rental rent collection", truecap: "No", quickbooksrental: "Yes — invoicing + ACH (Online only)", winner: "quickbooksrental" },
-  { feature: "Free tier", truecap: "Yes — full underwriting math", quickbooksrental: "Trial only; from ~$15-90/mo (as of 2026)", winner: "truecap" },
+  { feature: "Free tier", truecap: "Yes — core cap rate, CoC, DSCR, and cash flow", quickbooksrental: "Trial only; from ~$15-90/mo (as of 2026)", winner: "truecap" },
   { feature: "Built specifically for landlords", truecap: "Yes", quickbooksrental: "No — general business accounting", winner: "truecap" },
 ];
 
@@ -124,7 +123,7 @@ export default function VsQuickbooksRentalPage() {
             </Link>
           </div>
           <p className="mt-3 text-xs text-muted-foreground">
-            No card · No signup · Cancel anytime
+            Free analyzer: no card or signup
           </p>
         </section>
 
@@ -264,7 +263,8 @@ export default function VsQuickbooksRentalPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
             Pro unlocks projections, sensitivity, illustrative tax impact, modeled exit comparisons,
-            MAO, PDF exports, and co-branded share links.
+            MAO, and co-branded share links. Pro includes PDFs, and a one-time
+            PDF option is available; see live pricing for current terms.
             No card to start.
           </p>
           <div className="flex flex-wrap gap-3">
@@ -272,7 +272,7 @@ export default function VsQuickbooksRentalPage() {
               href="/pricing"
               className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
             >
-              Start a {TRIAL_LABEL}
+              See Pro pricing
               <ArrowUpRight className="w-4 h-4" />
             </Link>
             <Link

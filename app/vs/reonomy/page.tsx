@@ -5,7 +5,6 @@
  * Reonomy is commercial real estate property + owner intelligence — pull CRE data (owner, debt, transactions, tenants) at the property level. Subsidiary of Altus Group. Different audience than TrueCap (commercial-focused) but appears in investor searches.
  */
 
-import { TRIAL_LABEL } from "@/lib/trial";
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
@@ -61,7 +60,7 @@ const MATRIX: Row[] = [
   { feature: "Debt + transaction history", truecap: "No", reonomy: "Yes — mortgage + sale history", winner: "reonomy" },
   { feature: "Tenant rosters (CRE)", truecap: "No", reonomy: "Yes — tenant lookup", winner: "reonomy" },
   { feature: "Free tier", truecap: "Yes — full residential underwriting", reonomy: "Paid only (enterprise pricing)", winner: "truecap" },
-  { feature: "Pricing", truecap: "Free; Pro $29.99/mo", reonomy: "Custom (typically $300+/mo enterprise)", winner: "truecap" },
+  { feature: "Pricing", truecap: "Free core; paid Pro — see live pricing", reonomy: "Custom (typically $300+/mo enterprise)", winner: "truecap" },
 ];
 
 export default function VsReonomyPage() {
@@ -123,7 +122,7 @@ export default function VsReonomyPage() {
             </Link>
           </div>
           <p className="mt-3 text-xs text-muted-foreground">
-            No card · No signup · Cancel anytime
+            Free analyzer: no card or signup
           </p>
         </section>
 
@@ -260,7 +259,8 @@ export default function VsReonomyPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
             Pro unlocks projections, sensitivity, illustrative tax impact, modeled exit comparisons,
-            MAO, PDF exports, and co-branded share links.
+            MAO, and co-branded share links. Pro includes PDFs, and a one-time
+            PDF option is available; see live pricing for current terms.
             No card to start.
           </p>
           <div className="flex flex-wrap gap-3">
@@ -268,7 +268,7 @@ export default function VsReonomyPage() {
               href="/pricing"
               className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
             >
-              Start a {TRIAL_LABEL}
+              See Pro pricing
               <ArrowUpRight className="w-4 h-4" />
             </Link>
             <Link

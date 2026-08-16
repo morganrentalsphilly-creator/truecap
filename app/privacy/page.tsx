@@ -3,9 +3,9 @@
  *
  * Two purposes:
  *
- *   1. Compliance — Google OAuth verification, Stripe, Vercel
- *      Analytics, HUD/FRED API terms-of-use all require a public
- *      privacy policy URL.
+ *   1. Compliance — Google OAuth, Stripe, analytics, diagnostics, email,
+ *      and property-data processors all require an accurate public privacy
+ *      policy URL.
  *
  *   2. Trust — paid traffic visitors who care about privacy can
  *      verify we don't sell their data before signing up.
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", images: ["/home.jpg"] },
 };
 
-const LAST_UPDATED = "May 24, 2026";
+const LAST_UPDATED = "August 16, 2026";
 
 export default function PrivacyPage() {
   return (
@@ -71,7 +71,7 @@ export default function PrivacyPage() {
           <h2 className="text-2xl">The short version</h2>
           <ul>
             <li>We do <strong>not</strong> sell, rent, or trade your personal information.</li>
-            <li>We collect what you give us (account email, deals you save) plus standard analytics.</li>
+            <li>We collect what you give us (account info, deals, forms, and optional client-roster data) plus the limited analytics described below.</li>
             <li>Payments are processed by Stripe — we never see your card number.</li>
             <li>You can delete your account anytime by emailing us.</li>
           </ul>
@@ -89,6 +89,15 @@ export default function PrivacyPage() {
               expenses, and any notes you save against a deal.
             </li>
             <li>
+              <strong>Agent workspace data</strong> — client names and any optional email,
+              phone, Buy Box criteria, or deal assignments an Agent Pro user chooses to save.
+            </li>
+            <li>
+              <strong>Forms and branding</strong> — contact details, messages, logos, and
+              business information you submit through lead, support, newsletter, or branding
+              forms.
+            </li>
+            <li>
               <strong>Communications</strong> — anything you email us at hello@usetruecap.com.
             </li>
           </ul>
@@ -98,11 +107,22 @@ export default function PrivacyPage() {
             <li>
               <strong>Usage data</strong> — pages visited, calculator actions, broad referrer
               (e.g. &ldquo;came from Google Ads&rdquo;), browser type, approximate location based
-              on IP. Collected via Vercel Analytics and Google Analytics.
+              on IP. Nonessential browser analytics through Google and PostHog follows your
+              cookie choice; Vercel also provides limited operational analytics. When you are
+              signed in, necessary product, account, and billing lifecycle events may be
+              associated with your account ID and email so we can deliver the Service,
+              understand activation, and troubleshoot account-specific issues.
             </li>
             <li>
               <strong>Cookies</strong> — session cookie for keeping you signed in (set by
-              Supabase Auth), and Google Analytics / Google Ads cookies for measurement.
+              Supabase Auth), plus analytics and advertising storage only according to the
+              choice you make in our cookie banner. You can reject nonessential analytics.
+            </li>
+            <li>
+              <strong>Diagnostics</strong> — error, performance, device, and request context
+              used to detect failures and security incidents. Sensitive purchase tokens and
+              encoded share-link paths are scrubbed from diagnostic URLs and event text before
+              events are sent.
             </li>
           </ul>
 
@@ -110,7 +130,11 @@ export default function PrivacyPage() {
           <ul>
             <li>Payment card details — Stripe handles those directly.</li>
             <li>Government-issued ID, SSN, or any KYC data.</li>
-            <li>Property records or transaction history not entered by you.</li>
+            <li>
+              Property enrichment is retrieved only as part of an address-based analysis or
+              lookup you initiate; we do not continuously monitor unrelated property or
+              transaction records.
+            </li>
           </ul>
 
           <h2 className="text-2xl">2. How we use information</h2>
@@ -124,6 +148,12 @@ export default function PrivacyPage() {
           <p>
             We do not use your saved deal data to train AI models, build resale datasets, or
             share with third-party advertisers.
+          </p>
+          <p>
+            If you choose to create a deal share link, the analysis snapshot — including the
+            property address and financial assumptions — is encoded in that URL. Anyone with
+            the link can view it without an account, and the current share-link format does not
+            expire or revoke. Share it only with people you intend to receive the analysis.
           </p>
 
           <h2 className="text-2xl">3. Third-party services</h2>
@@ -142,21 +172,45 @@ export default function PrivacyPage() {
               <a href="https://stripe.com/privacy" className="text-primary hover:underline">Privacy</a>
             </li>
             <li>
-              <strong>Google</strong> — Analytics, Ads, optional sign-in.{" "}
+              <strong>Google</strong> — Places address suggestions, Analytics, Ads, and
+              optional sign-in. Text entered into the address autocomplete and the selected
+              place are processed by Google Places.{" "}
               <a href="https://policies.google.com/privacy" className="text-primary hover:underline">Privacy</a>
             </li>
             <li>
-              <strong>HUD &amp; FRED</strong> — public government data sources we query to
-              auto-fill market rent and mortgage rate. We send only the property address /
-              county; we do not transmit your account identity.
+              <strong>PostHog</strong> — product analytics and account-lifecycle measurement;
+              nonessential browser tracking follows your cookie choice.{" "}
+              <a href="https://posthog.com/privacy" className="text-primary hover:underline">Privacy</a>
+            </li>
+            <li>
+              <strong>Sentry</strong> — error reporting, performance monitoring, and security
+              diagnostics.{" "}
+              <a href="https://sentry.io/privacy/" className="text-primary hover:underline">Privacy</a>
+            </li>
+            <li>
+              <strong>Resend</strong> — transactional and marketing email delivery, including
+              the recipient address and the content needed to send the message.{" "}
+              <a href="https://resend.com/legal/privacy-policy" className="text-primary hover:underline">Privacy</a>
+            </li>
+            <li>
+              <strong>RentCast</strong> — optional property, sale-comparable, and
+              rent-comparable lookups. The full property address is sent for a requested
+              lookup; your TrueCap account identity is not.{" "}
+              <a href="https://www.rentcast.io/privacy" className="text-primary hover:underline">Privacy</a>
+            </li>
+            <li>
+              <strong>HUD &amp; FRED</strong> — public government data sources queried for area
+              rent and national mortgage-rate benchmarks. Requests use the relevant public
+              geography or economic-series identifier, not your TrueCap account identity.
             </li>
           </ul>
 
           <h2 className="text-2xl">4. How long we keep your data</h2>
           <p>
             Account data and saved deals are kept until you delete your account or request
-            deletion. Server logs are kept for ~30 days. Analytics data follows Google&apos;s
-            and Vercel&apos;s default retention. Backups may persist for up to 30 days after
+            deletion. Server logs are generally kept for about 30 days. Analytics,
+            diagnostic, payment, and email-delivery records follow the applicable processor
+            settings and legal requirements. Backups may persist for up to 30 days after
             deletion.
           </p>
 

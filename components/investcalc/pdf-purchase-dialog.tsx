@@ -4,7 +4,7 @@
  * Shown when a user without PDF entitlement clicks Export PDF.
  * Two paths, clearly priced:
  *
- *   - Pro ($29/mo)  → /pricing (unlimited PDFs + everything else)
+ *   - Pro subscription → /pricing (current price, terms, and plan details)
  *   - Single Deal   → Stripe Checkout for one complete report
  *
  * The one-time path is the conversion-rescue: visitors who will never
@@ -21,7 +21,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { TRIAL_LABEL } from "@/lib/trial";
 import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
 
 interface PdfPurchaseDialogProps {
@@ -45,10 +44,10 @@ export function PdfPurchaseDialog({
           below the fold unreachable. */}
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Complete this acquisition decision</DialogTitle>
+          <DialogTitle>Choose how to unlock this report</DialogTitle>
           <DialogDescription>
-            Get the complete underwrite for this property, including the
-            decision package and lender-facing report. Two ways to unlock it:
+            Buy the Deal Decision Pack for this property once, or compare Pro
+            plans for repeat analysis and reports.
           </DialogDescription>
         </DialogHeader>
 
@@ -60,7 +59,7 @@ export function PdfPurchaseDialog({
             className="group relative flex items-start justify-between gap-3 rounded-2xl border-2 border-primary bg-gradient-to-br from-[var(--brand-blue-light)] via-card to-card p-4 transition hover:border-primary/70"
           >
             <span className="absolute -top-2.5 left-4 rounded-full bg-primary px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-widest text-primary-foreground shadow-sm">
-              Best value
+              For repeat analysis
             </span>
             <div>
               <p className="flex items-center gap-1.5 text-sm font-bold text-foreground">
@@ -70,11 +69,12 @@ export function PdfPurchaseDialog({
               <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
                 Decide and act across every opportunity: Max Offer, Buy Box,
                 downside testing, saved deals, comparisons, projections, and
-                unlimited branded reports.
+                unlimited branded reports. Pricing, trial eligibility, and
+                billing terms are shown before checkout.
               </p>
             </div>
             <span className="mt-0.5 inline-flex shrink-0 items-center gap-1 text-right text-sm font-bold text-primary">
-              {TRIAL_LABEL}
+              Compare plans
               <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
             </span>
           </Link>
@@ -94,7 +94,7 @@ export function PdfPurchaseDialog({
               <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
                 The complete TrueCap decision package for this property. One
                 payment, no account, no subscription. Includes assumptions,
-                Max Offer, Deal Doctor rent/rate thresholds, Deal Score,
+                Max Offer, What Needs to Be True rent/rate thresholds, Deal Score,
                 downside scenario, 10-year, tax, and exit views.
               </p>
             </div>
@@ -109,6 +109,26 @@ export function PdfPurchaseDialog({
               )}
             </span>
           </button>
+
+          <div className="rounded-xl border border-border/70 bg-muted/35 px-3 py-2.5 text-[11px] leading-relaxed text-muted-foreground">
+            <p>
+              <strong className="text-foreground">One-deal access:</strong> unlocks one PDF
+              generation for these exact analysis inputs. Complete checkout and return to this
+              same browser tab within 30 days. If delivery fails after redemption, this bound
+              tab can retry for 24 hours. The purchase does not create an account or cloud copy.
+            </p>
+            <p className="mt-1.5">
+              Need help? Email{" "}
+              <a href="mailto:hello@usetruecap.com" className="font-semibold text-primary hover:underline">
+                hello@usetruecap.com
+              </a>
+              . Purchase is subject to our{" "}
+              <Link href="/terms" className="font-semibold text-primary hover:underline">
+                Terms
+              </Link>
+              .
+            </p>
+          </div>
         </div>
 
         <p className="text-[11px] leading-relaxed text-muted-foreground">

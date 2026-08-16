@@ -27,10 +27,10 @@
 
 /**
  * "agent_pro" (2026-08, Morgan-approved at $59/mo): everything in Pro plus the
- * agent toolkit — client rosters, client-scoped buy boxes, the client portal,
- * and white-label embeds (the Phase 6 decision: embed white-labeling ships as
- * an Agent Pro entitlement rather than a standalone subscription, because only
- * one subscription can be active per user).
+ * agent toolkit — client rosters, client-scoped buy boxes, and co-branded
+ * client reports. Portal and white-label code remain entitlement-gated but are
+ * intentionally unavailable until their public-link controls and license terms
+ * are ready.
  */
 export type Tier = "free" | "one_time_pdf" | "pro" | "agent_pro";
 
@@ -77,10 +77,10 @@ export interface FeatureSpec {
   /** How it's gated at runtime — "flag" = plans.entitlements feature string; "paid" = paid-plan status only; "always" = everyone; "stripe_one_time" = $5 checkout. */
   gate: "flag" | "paid" | "always" | "stripe_one_time";
   /**
-   * false = the entitlement exists in the plan JSON but the FEATURE isn't built
-   * yet, so marketing must NOT advertise it. Keeps the tier's entitlement bag
-   * forward-compatible (flip to true when the feature ships — no migration)
-   * without selling vapor on the pricing card. Defaults to shipped.
+   * false = the entitlement exists in the plan JSON but marketing must NOT
+   * advertise it yet (for example, implementation or legal/operational approval
+   * is incomplete). Keeps runtime gates forward-compatible without selling a
+   * promise that is not ready to offer. Defaults to marketable/shipped.
    */
   shipped?: boolean;
 }
@@ -118,8 +118,14 @@ export const FEATURE_CATALOG: Record<FeatureKey, FeatureSpec> = {
   buy_box: { key: "buy_box", label: "Buy Box — auto-screen every deal to your criteria", tiers: ["pro", "agent_pro"], category: "pipeline", gate: "flag" },
   pipeline: { key: "pipeline", label: "Deal pipeline + tags (CRM)", tiers: ["pro", "agent_pro"], category: "pipeline", gate: "flag" },
   client_buy_box: { key: "client_buy_box", label: "Client rosters — buy boxes per buyer, deals screened to each client's criteria", tiers: ["agent_pro"], category: "pipeline", gate: "flag" },
-  agent_portal: { key: "agent_portal", label: "Client portal — co-branded deal pages your buyers revisit", tiers: ["agent_pro"], category: "reporting", gate: "flag" },
-  embed_whitelabel: { key: "embed_whitelabel", label: "White-label embeds — calculators on your site, your brand only", tiers: ["agent_pro"], category: "reporting", gate: "flag" },
+  // The current bearer-link implementation has no per-link expiry or revoke
+  // control. Keep both marketing and runtime entry points dark until that
+  // privacy boundary is fixed and reviewed.
+  agent_portal: { key: "agent_portal", label: "Client portal — co-branded deal pages your buyers revisit", tiers: ["agent_pro"], category: "reporting", gate: "flag", shipped: false },
+  // Runtime support exists, but the current Terms prohibit white-labeling
+  // without separate written consent. Hide this from every catalog-derived
+  // pricing surface until counsel-approved terms expressly license it.
+  embed_whitelabel: { key: "embed_whitelabel", label: "White-label embeds — calculators on your site, your brand only", tiers: ["agent_pro"], category: "reporting", gate: "flag", shipped: false },
 };
 
 /** Does a tier include a feature? Use for marketing AND as a cross-check in tests. */
@@ -130,6 +136,16 @@ export function tierHas(tier: Tier, key: FeatureKey): boolean {
 /** The ONE marketing label for a feature. */
 export function featureLabel(key: FeatureKey): string {
   return FEATURE_CATALOG[key].label;
+}
+
+/**
+ * Release/readiness gate shared by marketing and runtime entry points.
+ * Entitlement JSON can be provisioned ahead of launch; `shipped: false` must
+ * still fail closed so an old or pre-provisioned plan cannot expose a feature
+ * whose legal, privacy, or operational controls are incomplete.
+ */
+export function isFeatureReleased(key: FeatureKey): boolean {
+  return FEATURE_CATALOG[key].shipped !== false;
 }
 
 /** All features a tier includes, in catalog order. */

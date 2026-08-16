@@ -207,6 +207,21 @@ const nextConfig = {
           },
         ],
       },
+      // Encoded analyses and bearer-token routes must not propagate their
+      // full path even to same-origin telemetry endpoints. These entries come
+      // after the general/embed policies so their stricter value wins.
+      {
+        source: "/d/:path+",
+        headers: [{ key: "Referrer-Policy", value: "no-referrer" }],
+      },
+      {
+        source: "/portal/:path+",
+        headers: [{ key: "Referrer-Policy", value: "no-referrer" }],
+      },
+      {
+        source: "/embed/brand/:path+",
+        headers: [{ key: "Referrer-Policy", value: "no-referrer" }],
+      },
     ];
   },
 }

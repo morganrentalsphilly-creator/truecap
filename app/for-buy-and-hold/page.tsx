@@ -9,7 +9,6 @@
  * vacancy ticks up?", "year 7 sell vs hold?"
  */
 
-import { TRIAL_LABEL } from "@/lib/trial";
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
@@ -96,9 +95,9 @@ export default function ForBuyAndHoldPage() {
             <span className="text-primary">in one screen.</span>
           </h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
-            Cap rate, cash-on-cash, DSCR, 10-year cash flow, depreciation,
-            exit scenarios. Every metric a long-term rental investor uses
-            — already wired to live HUD rent + FRED rate + state tax data.
+            Screen cap rate, cash-on-cash, DSCR, and cash flow free. Pro adds
+            Max Offer, sensitivity, 10-year projections, Illustrative Tax
+            Impact, and modeled exits using labeled, editable starting data.
           </p>
 
           {/* CTAs */}
@@ -119,11 +118,11 @@ export default function ForBuyAndHoldPage() {
               href="/pricing"
               className="inline-flex h-12 items-center justify-center gap-1.5 rounded-xl border border-border bg-card px-5 text-sm font-semibold text-foreground hover:bg-muted"
             >
-              Start a {TRIAL_LABEL}
+              See Pro pricing
             </Link>
           </div>
           <p className="mt-3 text-xs text-muted-foreground">
-            No card · No signup needed to use the analyzer · Cancel anytime
+            Free screen: no card or signup
           </p>
         </section>
 
@@ -233,17 +232,17 @@ export default function ForBuyAndHoldPage() {
         {/* Pricing */}
         <section className="mb-12 sm:mb-16 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
           <h2 className="text-2xl sm:text-3xl font-extrabold mb-2">
-            Free covers the offer. Pro covers the hold.
+            Free screens the purchase. Pro solves and stress-tests the offer and hold.
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
-            Free analyzer gives you cap rate, CoC, DSCR, monthly cash flow, the 0–100 Deal Score, and read-only share links — enough to underwrite the buy. Pro unlocks the 10-year projection, Illustrative Tax Impact, modeled exit comparisons, sensitivity grid, max-allowable-offer calculator, PDF exports, and co-branded share links. Built for serious buy-and-hold operators.
+            Free gives you cap rate, CoC, DSCR, monthly cash flow, the 0–100 Deal Score, and read-only share links for a first-pass screen. Pro adds 10-year projections, Illustrative Tax Impact, modeled exits, sensitivity, Max Offer, PDF exports, and co-branded share links.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link
               href="/pricing"
               className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
             >
-              Start a {TRIAL_LABEL}
+              See Pro pricing
               <ArrowUpRight className="w-4 h-4" />
             </Link>
             <Link

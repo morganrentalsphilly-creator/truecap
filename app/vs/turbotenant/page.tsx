@@ -5,7 +5,6 @@
  * TurboTenant is landlord ops — listing, screening, leases, rent collection. Direct competitor to Avail and RentRedi. Strong free tier, popular with small landlords.
  */
 
-import { TRIAL_LABEL } from "@/lib/trial";
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
@@ -63,10 +62,10 @@ const MATRIX: Row[] = [
   { feature: "Online lease signing", truecap: "No", turbotenant: "Yes — state-specific templates", winner: "turbotenant" },
   { feature: "Online rent collection", truecap: "No", turbotenant: "Yes — ACH free, card fee", winner: "turbotenant" },
   { feature: "Maintenance request workflow", truecap: "No", turbotenant: "Yes — tenant portal", winner: "turbotenant" },
-  { feature: "Free tier", truecap: "Yes — full underwriting math", turbotenant: "Yes — listings + lease + ACH rent collection", winner: "tie" },
+  { feature: "Free tier", truecap: "Yes — core cap rate, CoC, DSCR, and cash flow", turbotenant: "Yes — listings + lease + ACH rent collection", winner: "tie" },
   { feature: "Address auto-fill (rent/rate/tax)", truecap: "Yes — HUD + FRED + state property tax", turbotenant: "Not applicable", winner: "truecap" },
   { feature: "Multi-property dashboard", truecap: "Yes — portfolio rollup of saved deals", turbotenant: "Yes — multi-unit ops dashboard", winner: "tie" },
-  { feature: "Pricing (paid tier)", truecap: "Pro $29.99/mo for projections + tax + co-branded share + PDF", turbotenant: "Premium ~$8-12/mo per unit (as of 2026)", winner: "tie" },
+  { feature: "Pricing (paid tier)", truecap: "Paid Pro; see live pricing for current rates and limits", turbotenant: "Premium ~$8-12/mo per unit (as of 2026)", winner: "tie" },
 ];
 
 export default function VsTurbotenantPage() {
@@ -128,7 +127,7 @@ export default function VsTurbotenantPage() {
             </Link>
           </div>
           <p className="mt-3 text-xs text-muted-foreground">
-            No card · No signup · Cancel anytime
+            Free analyzer: no card or signup
           </p>
         </section>
 
@@ -274,7 +273,8 @@ export default function VsTurbotenantPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
             Pro unlocks projections, sensitivity, illustrative tax impact, modeled exit comparisons,
-            MAO, PDF exports, and co-branded share links.
+            MAO, and co-branded share links. Pro includes PDFs, and a one-time
+            PDF option is available; see live pricing for current terms.
             No card to start.
           </p>
           <div className="flex flex-wrap gap-3">
@@ -282,7 +282,7 @@ export default function VsTurbotenantPage() {
               href="/pricing"
               className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
             >
-              Start a {TRIAL_LABEL}
+              See Pro pricing
               <ArrowUpRight className="w-4 h-4" />
             </Link>
             <Link
@@ -355,11 +355,11 @@ const TURBOTENANT_FAQ: FaqItem[] = [
     question: "Can I afford TrueCap + TurboTenant?",
     answer: (
       <>
-        Yes. TurboTenant free + TrueCap free covers a lot. When you need TrueCap Pro features ($29.99/month) and TurboTenant Premium (~$8-12/unit/month), one property runs about $38-42/month total. That&apos;s less than a single hour of property management.
+        The free tiers can cover portions of underwriting and operations. If you need TrueCap Pro or TurboTenant Premium, compare both live pricing pages and add the current rates for the units and features you actually need.
       </>
     ),
     plainTextAnswer:
-      "Yes. TurboTenant free + TrueCap free covers a lot. TurboTenant Premium + TrueCap Pro runs ~$27-31/month for one property — less than an hour of property management.",
+      "The free tiers can cover portions of underwriting and operations. If you need paid features, compare both live pricing pages and add the current rates for the units and features you need.",
   },
 ];
 

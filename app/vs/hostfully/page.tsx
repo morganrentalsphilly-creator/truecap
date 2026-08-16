@@ -5,7 +5,6 @@
  * Hostfully is short-term rental / Airbnb property management software — channel manager, guest messaging, dynamic pricing. STR-only. TrueCap users evaluate it once they own an STR.
  */
 
-import { TRIAL_LABEL } from "@/lib/trial";
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
@@ -60,9 +59,9 @@ const MATRIX: Row[] = [
   { feature: "Dynamic pricing", truecap: "No", hostfully: "Yes — integrations with PriceLabs etc.", winner: "hostfully" },
   { feature: "Guest messaging automation", truecap: "No", hostfully: "Yes — automated booking + check-in flows", winner: "hostfully" },
   { feature: "Cleaning / vendor scheduling", truecap: "No", hostfully: "Yes — turn-over automation", winner: "hostfully" },
-  { feature: "Free tier", truecap: "Yes — full underwriting math", hostfully: "No — trial only, $109+/mo (as of 2026)", winner: "truecap" },
+  { feature: "Free tier", truecap: "Yes — core cap rate, CoC, DSCR, and cash flow", hostfully: "No — trial only, $109+/mo (as of 2026)", winner: "truecap" },
   { feature: "STR-specific underwriting (ADR, occupancy)", truecap: "Inputs editable; not auto-pulled", hostfully: "Not the use case", winner: "truecap" },
-  { feature: "Pricing model", truecap: "Free; Pro $29.99/mo", hostfully: "$109+/mo for STR managers (as of 2026)", winner: "truecap" },
+  { feature: "Pricing model", truecap: "Free core; paid Pro — see live pricing", hostfully: "$109+/mo for STR managers (as of 2026)", winner: "truecap" },
 ];
 
 export default function VsHostfullyPage() {
@@ -124,7 +123,7 @@ export default function VsHostfullyPage() {
             </Link>
           </div>
           <p className="mt-3 text-xs text-muted-foreground">
-            No card · No signup · Cancel anytime
+            Free analyzer: no card or signup
           </p>
         </section>
 
@@ -267,7 +266,8 @@ export default function VsHostfullyPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
             Pro unlocks projections, sensitivity, illustrative tax impact, modeled exit comparisons,
-            MAO, PDF exports, and co-branded share links.
+            MAO, and co-branded share links. Pro includes PDFs, and a one-time
+            PDF option is available; see live pricing for current terms.
             No card to start.
           </p>
           <div className="flex flex-wrap gap-3">
@@ -275,7 +275,7 @@ export default function VsHostfullyPage() {
               href="/pricing"
               className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
             >
-              Start a {TRIAL_LABEL}
+              See Pro pricing
               <ArrowUpRight className="w-4 h-4" />
             </Link>
             <Link
@@ -328,11 +328,11 @@ const HOSTFULLY_FAQ: FaqItem[] = [
     question: "Hostfully vs Guesty — which one?",
     answer: (
       <>
-        Both are leading STR PMS platforms. Hostfully is generally favored by small-to-mid STR operators (1-50 properties), Guesty leans larger (50+ properties and full property-management businesses). For solo STR investors, Hostfully is typically the more accessible starting point. TrueCap is upstream of both.
+        Both are STR property-management platforms. Guesty currently publishes Lite for 1-3 listings, Pro for 4-199, and Enterprise for 200+. Compare Hostfully&apos;s and Guesty&apos;s current features, quotes, and terms for the portfolio; TrueCap remains the pre-purchase underwriting layer.
       </>
     ),
     plainTextAnswer:
-      "Both are leading STR PMS platforms. Hostfully favored by small-to-mid operators (1-50 properties), Guesty leans larger (50+). For solo STR investors, Hostfully is more accessible. TrueCap is upstream of both.",
+      "Both are STR property-management platforms. Guesty currently publishes Lite for 1-3 listings, Pro for 4-199, and Enterprise for 200+. Compare current features, quotes, and terms; TrueCap is the pre-purchase underwriting layer.",
   },
   {
     question: "Does TrueCap support the STR tax loophole?",

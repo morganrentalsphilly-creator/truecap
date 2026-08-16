@@ -268,7 +268,7 @@ export default function ExchangePost() {
             <li>Have your CPA model the tax cost of NOT exchanging vs. the constraint cost of identifying within 45 days.</li>
             <li>Start screening replacement properties through{" "}
               <Link href="/" className="text-primary font-semibold hover:underline">TrueCap</Link> before you close the sale. Use the{" "}
-              <Link href="/dashboard/saved-analyses" className="text-primary font-semibold hover:underline">saved-deals dashboard</Link> + portfolio rollup to track candidates against your replacement criteria. Pair this with our broader guide on <Link href="/blog/rental-property-tax-deductions" className="text-primary font-semibold hover:underline">rental property tax deductions</Link> to discuss depreciation and basis with your tax adviser.</li>
+              <Link href="/auth/sign-up?next=%2Fdashboard%2Fsaved-analyses" className="text-primary font-semibold hover:underline">saved-deals dashboard</Link> + portfolio rollup to track candidates against your replacement criteria. Pair this with our broader guide on <Link href="/blog/rental-property-tax-deductions" className="text-primary font-semibold hover:underline">rental property tax deductions</Link> to discuss depreciation and basis with your tax adviser.</li>
             <li>Identify at day 30-35, not day 44. Give yourself buffer in case identified properties fall through during diligence.</li>
             <li>Close as early as possible inside the 180-day window — don&apos;t let it run to day 179 unless you&apos;ve already pre-cleared inspection + appraisal + financing.</li>
           </ol>

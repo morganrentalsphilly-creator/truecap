@@ -5,7 +5,6 @@
  * Yardi Breeze is the small-business version of Yardi's enterprise property management suite — designed for 1-100 residential units. Direct competitor to Buildium and Rentec Direct.
  */
 
-import { TRIAL_LABEL } from "@/lib/trial";
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
@@ -61,8 +60,8 @@ const MATRIX: Row[] = [
   { feature: "Maintenance request workflow", truecap: "No", yardibreeze: "Yes — work-order tracking + vendor mgmt", winner: "yardibreeze" },
   { feature: "Owner / partner portals", truecap: "No", yardibreeze: "Yes — multi-owner statements", winner: "yardibreeze" },
   { feature: "Full GL accounting", truecap: "Forward projection only", yardibreeze: "Yes — chart of accounts, balance sheet, 1099s", winner: "yardibreeze" },
-  { feature: "Free tier", truecap: "Yes — full underwriting math", yardibreeze: "No — paid only (demo available)", winner: "truecap" },
-  { feature: "Pricing (entry tier)", truecap: "Free; Pro $29.99/mo", yardibreeze: "~$1-2/unit/month with $100 minimum (as of 2026)", winner: "tie" },
+  { feature: "Free tier", truecap: "Yes — core cap rate, CoC, DSCR, and cash flow", yardibreeze: "No — paid only (demo available)", winner: "truecap" },
+  { feature: "Pricing (entry tier)", truecap: "Free core; paid Pro — see live pricing", yardibreeze: "~$1-2/unit/month with $100 minimum (as of 2026)", winner: "tie" },
   { feature: "Built for solo investors (1-30 doors)", truecap: "Yes", yardibreeze: "Yes — 1-100 sweet spot", winner: "tie" },
 ];
 
@@ -125,7 +124,7 @@ export default function VsYardiBreezePage() {
             </Link>
           </div>
           <p className="mt-3 text-xs text-muted-foreground">
-            No card · No signup · Cancel anytime
+            Free analyzer: no card or signup
           </p>
         </section>
 
@@ -265,7 +264,8 @@ export default function VsYardiBreezePage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
             Pro unlocks projections, sensitivity, illustrative tax impact, modeled exit comparisons,
-            MAO, PDF exports, and co-branded share links.
+            MAO, and co-branded share links. Pro includes PDFs, and a one-time
+            PDF option is available; see live pricing for current terms.
             No card to start.
           </p>
           <div className="flex flex-wrap gap-3">
@@ -273,7 +273,7 @@ export default function VsYardiBreezePage() {
               href="/pricing"
               className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
             >
-              Start a {TRIAL_LABEL}
+              See Pro pricing
               <ArrowUpRight className="w-4 h-4" />
             </Link>
             <Link

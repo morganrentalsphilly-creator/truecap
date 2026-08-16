@@ -8,7 +8,6 @@
  * house-hackers (owner-occupant 2-4 unit deals).
  */
 
-import { TRIAL_LABEL } from "@/lib/trial";
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
@@ -59,15 +58,15 @@ const MATRIX: Row[] = [
   { feature: "Per-unit rent + status modeling",         truecap: "Yes — mark which unit YOU live in; other units' rent counted",      biggerpockets: "Manual — you adjust the rent calculation yourself", winner: "truecap" },
   { feature: "Effective 'rent saved' calculation",      truecap: "Yes — surfaces what your monthly housing cost actually is",         biggerpockets: "You compute it yourself from the spreadsheet",  winner: "truecap" },
   { feature: "FHA financing assumptions (3.5% down)",   truecap: "Yes — configurable down payment goes as low as 3.5%",               biggerpockets: "Yes — configurable",                            winner: "tie" },
-  { feature: "House-hack-specific cap rate framing",    truecap: "Excludes owner-occupied unit from cap rate denominator (Pro)",      biggerpockets: "Standard cap rate (you adjust manually)",       winner: "truecap" },
+  { feature: "Cap rate framing",                       truecap: "Standard property-level cap rate; no full-vs-rental-only toggle",   biggerpockets: "Standard cap rate; adjust inputs for each scenario", winner: "tie" },
   { feature: "Address auto-fill (rent/rate/tax)",       truecap: "Yes — HUD FMR per unit + FRED rate + state property tax",          biggerpockets: "Manual entry",                                  winner: "truecap" },
-  { feature: "DSCR + lender approval modeling",         truecap: "Yes — DSCR calculation accounts for rental units only",              biggerpockets: "Yes — basic DSCR",                              winner: "tie" },
-  { feature: "10-year projection (post-house-hack exit)", truecap: "Pro — model what happens after you move out and rent your unit", biggerpockets: "Pro — projection available",                    winner: "tie" },
+  { feature: "DSCR screening ratio",                    truecap: "Yes — screening output, not a lender approval model",               biggerpockets: "Available in its calculator; not lender approval", winner: "tie" },
+  { feature: "Post-move-out scenario",                  truecap: "Save a separate fully rented scenario; no move-out-year switch",     biggerpockets: "Adjust and save a separate scenario",             winner: "tie" },
   { feature: "Illustrative tax impact", truecap: "General rental illustration; mixed-use allocation not modeled",     biggerpockets: "Pro — standard tax view",                       winner: "tie" },
   { feature: "Sensitivity grid (vacancy on rental units)", truecap: "Pro — rent ±10%, vacancy ±5pp on rental units only",             biggerpockets: "Manual re-runs",                                winner: "truecap" },
   { feature: "Mobile UX at the showing",                truecap: "PWA installable",                                                    biggerpockets: "Desktop-leaning calculator + separate mobile app", winner: "tie" },
-  { feature: "Free tier covers house hacking",          truecap: "Yes — full owner-occupant underwriting on free tier",                biggerpockets: "Free calc covers basic; Pro ($390/yr) for projections", winner: "truecap" },
-  { feature: "Standalone calculator pricing",            truecap: "Pro $29.99/mo (or $300/yr annual)",                                   biggerpockets: "Bundled with $390/yr BiggerPockets Pro",        winner: "truecap" },
+  { feature: "Free tier covers house hacking",          truecap: "Yes — core owner-occupant underwriting on free tier",                biggerpockets: "Current calculator presents results as a Pro feature", winner: "truecap" },
+  { feature: "Pricing",                                 truecap: "Free core; paid Pro — see live pricing",                              biggerpockets: "Calculator bundled with Pro — see live pricing", winner: "tie" },
 ];
 
 const BP_HOUSE_HACK_FAQ: FaqItem[] = [
@@ -75,7 +74,7 @@ const BP_HOUSE_HACK_FAQ: FaqItem[] = [
     question: "Which is better for house hackers — TrueCap or BiggerPockets?",
     answer: (
       <>
-        TrueCap, for house-hacking specifically. The big difference is
+        TrueCap provides a more explicit house-hack setup. The main difference is
         the explicit &quot;owner-occupant&quot; property type — you mark
         which unit you&apos;ll live in, and TrueCap automatically
         excludes that unit&apos;s &quot;rent&quot; from the income side
@@ -114,7 +113,7 @@ const BP_HOUSE_HACK_FAQ: FaqItem[] = [
         bring in. That gap is your &quot;effective rent saved&quot; vs
         a regular apartment lease. TrueCap surfaces this number
         explicitly so you can compare house-hacking vs renting an
-        apartment at apples-to-apples. BiggerPockets&apos; calculator
+        apartment using the same assumptions. BiggerPockets&apos; calculator
         requires you to compute it from the cash-flow line yourself.
       </>
     ),
@@ -125,32 +124,29 @@ const BP_HOUSE_HACK_FAQ: FaqItem[] = [
     question: "Does the cap rate apply differently to a house hack?",
     answer: (
       <>
-        Technically yes — strict cap rate uses NOI ÷ purchase price, but
-        with house-hacking the &quot;NOI&quot; should arguably only
-        count the rental units (not your owner-occupied one). TrueCap
-        Pro can frame the cap rate either way (full property vs
-        rental-units-only) so you see what the deal looks like both as
-        you&apos;re living there and as a pure investment after you
-        move out. Most house-hackers care more about the
-        effective-rent-saved number and the post-move-out cap rate.
+        Cap rate remains property-level NOI divided by purchase price.
+        TrueCap does not provide a dedicated full-property versus
+        rental-units-only cap-rate toggle. Model the current owner-occupied
+        case, then save a separate fully rented scenario to review the
+        post-move-out case.
       </>
     ),
     plainTextAnswer:
-      "Yes — strict cap rate is NOI ÷ price, but house-hack 'NOI' should arguably only count rental units (not your owner-occupied one). TrueCap Pro frames cap rate both ways (full vs rental-only). Most house-hackers care more about effective-rent-saved + post-move-out cap rate.",
+      "Cap rate remains property-level NOI divided by purchase price. TrueCap has no full-property versus rental-only cap-rate toggle. Save a separate fully rented scenario to review the post-move-out case.",
   },
   {
-    question: "BiggerPockets calculator is bundled with Pro at $390/yr — is the calculator alone worth it?",
+    question: "Is BiggerPockets Pro worth it for the calculator alone?",
     answer: (
       <>
-        For house-hacking specifically, no — TrueCap Pro at $29.99/month
-        ($300/year) covers the owner-occupant workflow more cleanly
-        with a deeper free tier. BiggerPockets Pro at $390/year makes sense
-        if you also use the community, courses, books, and podcasts;
-        for the calculator alone, you&apos;re overpaying by ~$90/year.
+        It depends on which membership benefits you use. BiggerPockets
+        currently presents calculator results as a Pro feature, and its
+        membership includes benefits beyond the calculator. TrueCap has
+        free core owner-occupant underwriting and paid Pro analysis tools.
+        Compare both live pricing pages and the features you actually need.
       </>
     ),
     plainTextAnswer:
-      "For house-hacking specifically, no — TrueCap Pro at $29.99/mo ($300/yr) covers the owner-occupant workflow more cleanly with a deeper free tier. BiggerPockets Pro at $390/yr makes sense for community + courses + podcasts; for the calculator alone, you're overpaying ~$90/yr.",
+      "It depends on which membership benefits you use. BiggerPockets currently presents calculator results as a Pro feature and includes benefits beyond the calculator. Compare both live pricing pages and the features you need.",
   },
   {
     question: "What changes when I model the post-move-out scenario?",
@@ -159,14 +155,14 @@ const BP_HOUSE_HACK_FAQ: FaqItem[] = [
         When you move out of the owner-occupied unit and rent it to a
         third tenant, you&apos;re back to a standard rental underwrite —
         all units producing rent, your housing cost moves elsewhere.
-        TrueCap Pro&apos;s 10-year projection lets you model a
-        &quot;year you move out&quot; assumption so the cash flow ramps
-        from house-hack mode (one unit owner-occupied) to pure rental
-        mode (all units rented) at the right inflection point.
+        TrueCap does not have a dedicated &quot;year you move out&quot;
+        switch. Save a separate fully rented multi-family scenario and
+        compare it with the current owner-occupied case. Pro can compare
+        saved deals side-by-side and add 10-year projections to each.
       </>
     ),
     plainTextAnswer:
-      "After move-out, all units produce rent and your housing cost moves elsewhere — back to standard rental underwrite. TrueCap Pro's 10-year projection lets you set a 'year you move out' assumption so cash flow ramps from house-hack mode to pure rental mode at the right inflection point.",
+      "TrueCap has no dedicated move-out-year switch. Save a separate fully rented multi-family scenario and compare it with the current owner-occupied case; Pro adds side-by-side comparison and 10-year projections.",
   },
 ];
 
@@ -244,13 +240,13 @@ export default function VsBiggerPocketsForHouseHackingPage() {
             specifically — the explicit &quot;owner-occupant&quot;
             property type auto-excludes your unit from the rent income
             side, surfaces an &quot;effective rent saved&quot; metric,
-            and properly frames cap rate around the rental units only.
+            while keeping every rent and expense input editable.
             <strong> BiggerPockets&apos;</strong> calculator treats the
             property as generic multifamily and requires you to
             mentally adjust the math for your owner-occupied unit. For
-            the calculator alone, TrueCap Pro ($29.99/month) is half the
-            price of BiggerPockets Pro ($390/year) and better-fitted to
-            the house-hack workflow.
+            TrueCap has a free core owner-occupant workflow, while
+            BiggerPockets currently presents calculator results as a Pro
+            membership feature. Compare both live pricing pages.
           </p>
         </section>
 
@@ -313,8 +309,8 @@ export default function VsBiggerPocketsForHouseHackingPage() {
           <p className="mt-3 text-[11px] text-muted-foreground">
             BiggerPockets calculator details based on publicly available
             product info as of 2026. See{" "}
-            <a href="https://www.biggerpockets.com/calculators" target="_blank" rel="noopener" className="underline">
-              biggerpockets.com/calculators
+            <a href="https://www.biggerpockets.com/rental-property-calculator" target="_blank" rel="noopener" className="underline">
+              BiggerPockets&apos; official rental calculator page
             </a>{" "}
             for their current state.
           </p>
@@ -339,9 +335,10 @@ export default function VsBiggerPocketsForHouseHackingPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap&apos;s free tier covers owner-occupant property
             types, per-unit rent + status, FHA financing, and
-            effective-rent-saved math. Pro ($29.99/mo) adds projections,
-            illustrative tax impact, sensitivity, and the post-move-out scenario
-            modeling — start with a {TRIAL_LABEL}, cancel anytime.
+            effective-rent-saved math. Pro adds projections, illustrative
+            tax impact, sensitivity, and side-by-side saved-deal comparison.
+            Model post-move-out as a separate fully rented scenario; see live
+            pricing and check trial eligibility.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link

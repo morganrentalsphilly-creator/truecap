@@ -7,7 +7,6 @@
  * suspect Zillow's rent is off but don't have a better source.
  */
 
-import { TRIAL_LABEL } from "@/lib/trial";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, ArrowUpRight, Calculator, Check, Minus, Sparkles, X } from "lucide-react";
@@ -21,7 +20,7 @@ import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema"
 export const metadata: Metadata = {
   title: "Zillow Rent Estimate vs TrueCap (2026): Accuracy",
   description:
-    "Zillow's Rent Zestimate is fast but often 10-25% off market. TrueCap uses HUD Fair Market Rent plus full underwriting. Honest comparison of both.",
+    "Compare Zillow's property-specific Rent Zestimate with TrueCap's editable HUD area benchmark and full rental underwriting workflow.",
   keywords: [
     "zillow rent estimate accuracy",
     "zillow rent vs market",
@@ -34,7 +33,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/vs/zillow-rent-estimate" },
   openGraph: {
     title: "Zillow Rent Estimate vs TrueCap (2026): Accuracy",
-    description: "Why HUD Fair Market Rent + full underwriting beats Zillow's algorithm-only Zestimate.",
+    description: "How an editable HUD area benchmark and full underwriting differ from Zillow's property-specific Rent Zestimate.",
     url: "/vs/zillow-rent-estimate",
     type: "website",
     images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap vs Zillow Rent Estimate" }],
@@ -46,18 +45,18 @@ type Verdict = "truecap" | "zillow" | "tie";
 type Row = { feature: string; truecap: string; zillow: string; winner: Verdict };
 
 const MATRIX: Row[] = [
-  { feature: "Rent estimate source",            truecap: "HUD Fair Market Rent (federal data) + local comp adjustment",                    zillow: "Proprietary algorithm based on listing prices",                          winner: "truecap" },
-  { feature: "Estimate accuracy",                truecap: "Within ~5% of asking rent in most zip codes",                                    zillow: "Often 10-25% off market — biased toward optimistic listing prices",     winner: "truecap" },
-  { feature: "Useful for investor underwriting", truecap: "Yes — the rent number IS the underwrite input",                                  zillow: "Use as a sanity check; verify before trusting",                          winner: "truecap" },
-  { feature: "Full deal underwrite",             truecap: "Yes — cap rate, CoC, DSCR, NCF, 10-yr projection in 60 sec",                    zillow: "No — Zillow shows rent + price only, no full underwrite",                winner: "truecap" },
-  { feature: "Property tax accuracy",            truecap: "Pulls actual county appraisal district data",                                    zillow: "Often outdated; reflects last reassessment, not next bill",              winner: "truecap" },
+  { feature: "Rent estimate source",            truecap: "Editable HUD area benchmark; add property-specific rent evidence",               zillow: "Property-specific estimate using public data and similar local listings", winner: "tie" },
+  { feature: "Estimate accuracy",                truecap: "Depends on the benchmark and property-specific evidence you enter",              zillow: "Varies with the available data, property, and market",                    winner: "tie" },
+  { feature: "Useful for investor underwriting", truecap: "Yes — rent remains editable inside the full expense and financing model",         zillow: "Useful starting point; verify with current local evidence",               winner: "truecap" },
+  { feature: "Full deal underwrite",             truecap: "Free core metrics; Pro adds 10-year projections and advanced scenarios",          zillow: "No — rent and listing context, not a full acquisition underwrite",        winner: "truecap" },
+  { feature: "Property tax input",               truecap: "Editable state effective-rate estimate; replace with the actual or reassessed bill", zillow: "Listing/public-record context; verify the post-sale tax basis",          winner: "tie" },
   { feature: "Cap rate / CoC / DSCR computation",truecap: "Computed live with editable assumptions",                                        zillow: "Not in scope",                                                           winner: "truecap" },
   { feature: "Free to use",                      truecap: "Yes — unlimited free analyses",                                                  zillow: "Yes — free",                                                             winner: "tie" },
   { feature: "Mobile usable",                    truecap: "Mobile-first responsive",                                                        zillow: "Strong mobile app",                                                      winner: "tie" },
-  { feature: "Listing data integration",         truecap: "Address auto-fill pulls tax + rent estimates",                                   zillow: "Full listing database — strongest in industry",                          winner: "zillow" },
+  { feature: "Listing data integration",         truecap: "Address lookup plus editable rent, rate, and tax benchmark inputs",                zillow: "Full consumer listing database with property details",                   winner: "zillow" },
   { feature: "Photo / virtual tour",             truecap: "Not in scope — TrueCap is analysis, not browsing",                              zillow: "Yes — extensive photos + tours",                                         winner: "zillow" },
   { feature: "Save deals + portfolio rollup",    truecap: "Free saves up to 5 deals; Pro adds unlimited saves, portfolio rollup + comparison",                               zillow: "Save listings but no portfolio analysis",                                winner: "truecap" },
-  { feature: "Shareable analysis URL",           truecap: "Free — clean read-only public URL with full underwrite",                                    zillow: "Share listing URL only",                                                 winner: "truecap" },
+  { feature: "Shareable analysis URL",           truecap: "Free — read-only public URL for the available analysis",                                   zillow: "Share listing URL only",                                                 winner: "truecap" },
   { feature: "Verdict / decision support",       truecap: "Free — deal score + verdict (Strong / Decent / Marginal / Skip)",                zillow: "No analytical verdict",                                                  winner: "truecap" },
 ];
 
@@ -69,7 +68,7 @@ export default function VsZillowRentPage() {
     name: "Zillow Rent Estimate vs TrueCap (2026): Accuracy",
     url: `${siteUrl}/vs/zillow-rent-estimate`,
     description: "Side-by-side comparison of TrueCap and Zillow's Rent Estimate.",
-    dateModified: "2026-06-01",
+    dateModified: "2026-08-16",
     publisher: { "@id": `${siteUrl}/#organization` },
   };
 
@@ -91,7 +90,7 @@ export default function VsZillowRentPage() {
             TrueCap vs Zillow Rent Estimate: <span className="text-primary">why the &quot;Zestimate Rent&quot; isn&apos;t enough for investors</span>
           </h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
-            Zillow&apos;s Rent Zestimate is free, fast, and famously inaccurate for investor underwriting. The number is often 10-25% off market rent — and even when right, it&apos;s only one input. Real underwriting needs operating expenses, mortgage modeling, cap rate, DSCR, the full picture. Here&apos;s the honest comparison.
+            Zillow&apos;s Rent Zestimate is a fast, property-specific starting estimate. It is still only one input: acquisition underwriting also needs verified expenses, financing terms, vacancy, reserves, and sensitivity testing. Here&apos;s how the two tools differ.
           </p>
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
             <ScrollToFormButton className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5">
@@ -103,21 +102,21 @@ export default function VsZillowRentPage() {
               See pricing
             </Link>
           </div>
-          <p className="mt-3 text-xs text-muted-foreground">No card · No signup · Cancel anytime</p>
+          <p className="mt-3 text-xs text-muted-foreground">Free analyzer: no card or signup</p>
         </section>
 
         <section className="mb-12 sm:mb-16 rounded-2xl border border-amber-500/30 bg-amber-50/30 p-6 sm:p-8">
-          <h2 className="text-xl sm:text-2xl font-extrabold text-foreground mb-3">Why Zillow Rent estimates are unreliable</h2>
+          <h2 className="text-xl sm:text-2xl font-extrabold text-foreground mb-3">Where a Rent Zestimate stops short of an underwrite</h2>
           <p className="text-base leading-relaxed text-foreground mb-3">
-            Zillow&apos;s Rent Zestimate is generated by their proprietary algorithm trained on active listings, not on closed lease prices. Three problems with that:
+            Zillow says its Rent Zestimate uses public data and similar local rental listings. That can be useful for orientation, but an acquisition decision still needs additional evidence:
           </p>
           <ul className="space-y-2 text-sm sm:text-base leading-relaxed text-foreground">
-            <li><strong>Listing prices ≠ actual rent paid.</strong> Landlords list aspirationally; tenants negotiate down. Zillow sees the listing, not the lease.</li>
-            <li><strong>Algorithm doesn&apos;t see seasonal or local nuance.</strong> A summer rent in a college town isn&apos;t the same as winter in the same property. Zillow averages it.</li>
-            <li><strong>No accountability when wrong.</strong> Investors who underwrite at Zillow&apos;s rent and find real rent 15% lower discover the gap after they&apos;ve already bought.</li>
+            <li><strong>An estimate is not an executed lease.</strong> Verify the subject property&apos;s achievable rent with current comps, lease records, or a local professional.</li>
+            <li><strong>Property and market coverage vary.</strong> Renovation quality, concessions, seasonality, and block-level differences may not be fully represented.</li>
+            <li><strong>Rent is only one assumption.</strong> Taxes, insurance, financing, vacancy, management, maintenance, and capital reserves can change the decision.</li>
           </ul>
           <p className="mt-3 text-sm leading-relaxed text-foreground">
-            <strong>HUD Fair Market Rent</strong> (what TrueCap uses) is federal data based on the 40th percentile of recent rentals in a zip code, updated annually. It&apos;s grounded in what tenants actually pay, not what landlords hope to charge.
+            <strong>HUD Fair Market Rent</strong>, which TrueCap uses as an editable area benchmark, estimates gross rent for standard-quality units at the 40th percentile within HUD-defined areas. It is not a property-specific rent opinion, appraisal, or lender approval input; replace it when you have stronger local evidence.
           </p>
         </section>
 
@@ -128,7 +127,7 @@ export default function VsZillowRentPage() {
               <p className="text-[11px] font-bold uppercase tracking-widest text-primary mb-2">Use TrueCap if</p>
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
                 <li>You&apos;re an investor underwriting a deal — the rent estimate is going into a real money decision.</li>
-                <li>You want HUD-grounded rent estimates rather than algorithm-only.</li>
+                <li>You want an editable HUD area benchmark inside a full underwriting workflow.</li>
                 <li>You need the rent number + everything else (cap rate, DSCR, cash flow, projection).</li>
                 <li>You want a verdict on whether to buy, not just &quot;here&apos;s the rent.&quot;</li>
               </ul>
@@ -138,7 +137,7 @@ export default function VsZillowRentPage() {
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
                 <li>You&apos;re just casually browsing for inspiration.</li>
                 <li>You&apos;re a tenant trying to gauge what rent in an area looks like.</li>
-                <li>You want a quick second-opinion sanity check (with the asterisk that Zillow&apos;s rent is often optimistic).</li>
+                <li>You want a quick property-specific estimate to compare with other rent evidence.</li>
               </ul>
             </div>
           </div>
@@ -170,6 +169,19 @@ export default function VsZillowRentPage() {
               </tbody>
             </table>
           </div>
+          <p className="mt-3 text-[11px] text-muted-foreground">
+            Source definitions: Zillow describes Rent Zestimate as a starting point based on
+            public data and similar local listings; HUD defines FMR as an area-level gross-rent
+            benchmark. Review{" "}
+            <a href="https://www.zillow.com/rent/what-is-a-rent-zestimate/" target="_blank" rel="noopener" className="underline">
+              Zillow&apos;s official explanation
+            </a>{" "}
+            and{" "}
+            <a href="https://www.huduser.gov/portal/datasets/fmr.html" target="_blank" rel="noopener" className="underline">
+              HUD&apos;s official FMR documentation
+            </a>
+            .
+          </p>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
             A rent estimate is just the first input — the decision lives downstream. Push your number through the standalone{" "}
             <Link href="/tools/cap-rate-calculator" className="font-semibold text-primary hover:underline">cap rate calculator</Link>
@@ -184,16 +196,16 @@ export default function VsZillowRentPage() {
         <ComparisonFaq competitorName="Zillow Rent Estimate" items={ZILLOW_FAQ} />
 
         <section className="mb-12 sm:mb-16 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
-          <h2 className="text-2xl sm:text-3xl font-extrabold mb-2">Investor-grade rent estimates, free.</h2>
+          <h2 className="text-2xl sm:text-3xl font-extrabold mb-2">Start with a rent benchmark, then underwrite the deal.</h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
-            Paste an address. TrueCap pulls HUD Fair Market Rent + county property tax + current mortgage rates, then computes the full underwrite. 60 seconds. No spreadsheet. No Zestimate guesswork.
+            Paste an address. TrueCap starts with an editable HUD area rent benchmark, a state effective-rate tax estimate, and a mortgage-rate benchmark, then computes the underwrite. Replace those starting assumptions with property-specific evidence before relying on the result.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link href="/" className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity">
               <Calculator className="w-4 h-4" />Run a deal now
             </Link>
             <Link href="/pricing" className="inline-flex items-center gap-2 border border-primary-foreground/40 bg-primary-foreground/10 text-primary-foreground px-4 py-2.5 rounded-xl font-bold hover:bg-primary-foreground/20 transition-colors">
-              Start a {TRIAL_LABEL}<ArrowUpRight className="w-4 h-4" />
+              See Pro pricing<ArrowUpRight className="w-4 h-4" />
             </Link>
           </div>
         </section>
@@ -216,63 +228,58 @@ const ZILLOW_FAQ: FaqItem[] = [
     question: "Is the Zillow Rent Estimate accurate for investors?",
     answer: (
       <>
-        Zillow&apos;s Rent Zestimate is calibrated for consumer
-        listings — what a typical landlord would post for a typical
-        property in a typical market. For an investor making a buying
-        decision, it can swing 10–20% high or low because the model
-        favors comparable rentals on Zillow&apos;s feed (which skews
-        toward newer / managed listings). For underwriting, use a
-        more conservative baseline like HUD Fair Market Rent, then
-        sensitize ±10% to see if the deal still works.
+        Zillow describes its Rent Zestimate as a starting point based
+        on public data and similar local listings. Accuracy depends on
+        the available data, property, and market. For underwriting,
+        compare it with current rent comps, lease evidence, and local
+        professional input, then stress-test a reasonable range.
       </>
     ),
     plainTextAnswer:
-      "Zillow's Rent Zestimate is calibrated for consumer listings and can swing 10–20% high or low for investors because it favors newer/managed listings on Zillow's feed. For underwriting, use a conservative baseline like HUD Fair Market Rent and sensitize ±10%.",
+      "Zillow describes its Rent Zestimate as a starting point based on public data and similar local listings. Accuracy depends on the available data, property, and market. Verify it with current comps or lease evidence and stress-test a reasonable range.",
   },
   {
     question: "What rent data does TrueCap use instead of Zillow?",
     answer: (
       <>
-        TrueCap uses HUD Fair Market Rent — government-published,
-        40th-percentile rent for every county in the US, broken down
-        by bedroom count, refreshed annually. It&apos;s what Section 8
-        vouchers use, so it&apos;s a conservative baseline that holds
-        up under lender scrutiny. You can override the value if you
-        have better local data.
+        TrueCap starts from an editable HUD Fair Market Rent area
+        benchmark for the relevant bedroom count, using ZIP-level
+        Small Area FMR where available and a broader-area fallback.
+        HUD publishes FMRs for housing-program administration; they
+        are not property-specific rent opinions or lender approvals.
+        Replace the value when you have stronger local evidence.
       </>
     ),
     plainTextAnswer:
-      "TrueCap uses HUD Fair Market Rent — government-published, 40th-percentile rent per US county by bedroom count, refreshed annually. It's what Section 8 vouchers use and holds up under lender scrutiny. You can override if you have better local data.",
+      "TrueCap starts from an editable HUD Fair Market Rent area benchmark for the relevant bedroom count, using ZIP-level Small Area FMR where available and a broader-area fallback. It is not a property-specific rent opinion or lender approval; replace it when you have stronger local evidence.",
   },
   {
     question: "Can I check rent on a specific Zillow listing in TrueCap?",
     answer: (
       <>
         Yes — paste the property address into TrueCap and you get the
-        HUD baseline rent for that county + bedroom count instantly.
+        editable HUD area benchmark for that location and bedroom count.
         The rent field is editable, so if you see a Zillow Zestimate
         you trust more for that specific listing, type it in and the
         full underwrite updates in real time.
       </>
     ),
     plainTextAnswer:
-      "Yes — paste the address into TrueCap and you get the HUD baseline rent for that county + bedroom count. The rent field is editable, so override with the Zillow Zestimate if you trust it more for that specific listing.",
+      "Yes — paste the address into TrueCap and you get an editable HUD area benchmark for that location and bedroom count. Replace it with a Zillow estimate, current comps, or lease evidence when those better fit the property.",
   },
   {
     question: "Does TrueCap give a more accurate rent estimate than Zillow?",
     answer: (
       <>
-        &quot;Accurate&quot; depends on use case. For an investor
-        underwrite, TrueCap&apos;s HUD-based baseline is more
-        defensible because it&apos;s conservative — a deal that pencils
-        at HUD will almost certainly pencil at real-world Zillow. For
-        a landlord trying to set the actual listing price, Zillow may
-        be more current. TrueCap is built for the former, Zillow for
-        the latter.
+        Neither source is guaranteed to be more accurate for every
+        property. Zillow offers a property-specific starting estimate;
+        TrueCap places an editable HUD area benchmark inside a full
+        expense and financing model. Compare both with current local
+        evidence and use a sensitivity range before deciding.
       </>
     ),
     plainTextAnswer:
-      "Depends. For investor underwriting, TrueCap's HUD-based baseline is more defensible — conservative — a deal that pencils at HUD will pencil at real Zillow rents. For setting an actual listing price, Zillow may be more current.",
+      "Neither source is guaranteed to be more accurate for every property. Zillow offers a property-specific starting estimate; TrueCap places an editable HUD area benchmark inside a full underwrite. Compare both with current local evidence and test a range.",
   },
   {
     question: "How does TrueCap turn a rent estimate into a deal verdict?",
@@ -281,8 +288,8 @@ const ZILLOW_FAQ: FaqItem[] = [
         TrueCap takes rent, expenses, financing, and tax assumptions
         and runs cap rate, cash-on-cash, DSCR, and monthly cash flow,
         then classifies the deal as Strong / Solid / Mixed / Marginal
-        / Negative based on transparent thresholds. Pro adds a Deal
-        Score (0–100) with subscore breakdown. Zillow stops at the
+        / Negative based on transparent thresholds. The free analyzer
+        also includes a Deal Score (0–100) with subscore breakdown. Zillow stops at the
         rent number — you have to do everything downstream by hand.
       </>
     ),

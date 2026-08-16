@@ -327,11 +327,13 @@ export default function DepreciationRecapturePost() {
             decade came home to roost.
           </p>
           <p>
-            And it isn&apos;t finished. A household with this kind of
-            income almost certainly owes the <strong>3.8% net investment
-            income tax</strong> on the full $157,727 gain, adding another{" "}
-            <strong>$5,994</strong> and pushing the federal total to about{" "}
-            <strong>$36,926</strong>. State income tax — anywhere from zero
+            And it may not be finished. Depending on filing status, modified
+            adjusted gross income, the character of the gain, allocable
+            deductions, and whether an applicable trade-or-business exception
+            applies, some or all of the example may be subject to the
+            <strong> 3.8% net investment income tax</strong>. Applying 3.8% to
+            the full $157,727 would add <strong>$5,994</strong>, but that is a
+            sensitivity case—not this household&apos;s tax determination. State income tax — anywhere from zero
             in Texas or Florida to 13%+ in California — stacks on top of
             that. Run your own numbers through the{" "}
             <Link

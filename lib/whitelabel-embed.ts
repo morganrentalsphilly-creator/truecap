@@ -18,6 +18,7 @@ import { getEmbedEntry, type EmbedEntry } from "@/lib/embed-registry";
 import { getEntitlementsForUser, hasPlanFeature } from "@/lib/entitlements";
 import { getPublicAgentBranding, type PublicAgentBranding } from "@/lib/agent-share";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
+import { isFeatureReleased } from "@/lib/entitlements-catalog";
 
 export const EMBED_SCOPE = "whitelabel-embed.v1";
 
@@ -32,6 +33,7 @@ export async function loadWhitelabelEmbed(input: {
   agentUserId: string;
   slug: string;
 }): Promise<WhitelabelEmbed | null> {
+  if (!isFeatureReleased("embed_whitelabel")) return null;
   const { agentUserId, slug } = input;
   if (!UUID_RE.test(agentUserId)) return null;
 

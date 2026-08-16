@@ -29,6 +29,8 @@
 
 import type { PostHog } from "posthog-js";
 import {
+  SENSITIVE_PUBLIC_SHARE_ROUTE_PATTERN,
+  redactSensitiveQueryValuesInText,
   sanitizeAnalyticsUrlProperties,
   sanitizeSensitiveUrl,
 } from "@/lib/sensitive-url";
@@ -174,6 +176,79 @@ const POSTHOG_HOST =
 /** Same key components/marketing/cookie-consent-banner.tsx writes. */
 const CONSENT_STORAGE_KEY = "truecap_cookie_consent_v1";
 const ORGANIC_ATTRIBUTION_KEY = "truecap_organic_attribution_v1";
+const LEGACY_POSTHOG_INITIAL_KEYS = new Set([
+  "$initial_person_info",
+  "$initial_campaign_params",
+  "$initial_referrer_info",
+]);
+
+function sanitizePersistedPostHogNode(value: unknown): unknown {
+  if (typeof value === "string") {
+    return redactSensitiveQueryValuesInText(value);
+  }
+  if (Array.isArray(value)) return value.map(sanitizePersistedPostHogNode);
+  if (!value || typeof value !== "object") return value;
+
+  return Object.fromEntries(
+    Object.entries(value as Record<string, unknown>)
+      .filter(([key]) => !LEGACY_POSTHOG_INITIAL_KEYS.has(key))
+      .map(([key, child]) => [key, sanitizePersistedPostHogNode(child)])
+  );
+}
+
+/**
+ * Older SDK defaults stored the full initial URL in PostHog persistence.
+ * Preserve the anonymous id and other non-sensitive state while deleting
+ * initial-person blobs and redacting any share route/query token recursively.
+ */
+export function sanitizeLegacyPostHogPersistenceValue(
+  raw: string | null
+): string | null {
+  if (!raw) return raw;
+  try {
+    return JSON.stringify(sanitizePersistedPostHogNode(JSON.parse(raw)));
+  } catch {
+    // A malformed legacy blob is not worth retaining at the telemetry
+    // boundary. PostHog will mint fresh anonymous state after initialization.
+    return null;
+  }
+}
+
+function preparePostHogPersistence(projectKey: string): void {
+  if (typeof window === "undefined") return;
+  const storageKey = `ph_${projectKey}_posthog`;
+
+  for (const storage of [window.localStorage, window.sessionStorage]) {
+    try {
+      const current = storage.getItem(storageKey);
+      const sanitized = sanitizeLegacyPostHogPersistenceValue(current);
+      if (sanitized == null) {
+        if (current != null) storage.removeItem(storageKey);
+      } else if (sanitized !== current) {
+        storage.setItem(storageKey, sanitized);
+      }
+    } catch {
+      /* storage unavailable — SDK remains opted out by default */
+    }
+  }
+
+  // Previous `localStorage+cookie` persistence may have mirrored the raw
+  // initial URL into a cookie. The new configuration is localStorage-only;
+  // expire both host and registrable-domain variants before importing the SDK.
+  try {
+    const host = window.location.hostname;
+    const labels = host.split(".").filter(Boolean);
+    const rootDomain = labels.length >= 2 ? labels.slice(-2).join(".") : host;
+    const domains = new Set(["", host, rootDomain]);
+    for (const domain of domains) {
+      document.cookie = `${storageKey}=; Max-Age=0; Path=/${
+        domain ? `; Domain=${domain}` : ""
+      }; SameSite=Lax`;
+    }
+  } catch {
+    /* cookie access unavailable */
+  }
+}
 
 export type OrganicAttribution = {
   landing_page: string;
@@ -185,7 +260,13 @@ export function setOrganicAttribution(attribution: OrganicAttribution): void {
   if (typeof window === "undefined") return;
   try {
     if (!window.sessionStorage.getItem(ORGANIC_ATTRIBUTION_KEY)) {
-      window.sessionStorage.setItem(ORGANIC_ATTRIBUTION_KEY, JSON.stringify(attribution));
+      window.sessionStorage.setItem(
+        ORGANIC_ATTRIBUTION_KEY,
+        JSON.stringify({
+          ...attribution,
+          landing_page: sanitizeSensitiveUrl(attribution.landing_page),
+        })
+      );
     }
   } catch {
     /* storage unavailable — the event still records without session attribution */
@@ -196,7 +277,12 @@ function organicAttribution(): OrganicAttribution | null {
   if (typeof window === "undefined") return null;
   try {
     const raw = window.sessionStorage.getItem(ORGANIC_ATTRIBUTION_KEY);
-    return raw ? (JSON.parse(raw) as OrganicAttribution) : null;
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as OrganicAttribution;
+    return {
+      ...parsed,
+      landing_page: sanitizeSensitiveUrl(parsed.landing_page),
+    };
   } catch {
     return null;
   }
@@ -305,12 +391,30 @@ export function initAnalytics(): Promise<PostHog | null> {
       return null;
     }
     try {
+      preparePostHogPersistence(key);
       const { default: posthog } = await import("posthog-js");
       if (!posthog.__loaded) {
         posthog.init(key, {
           api_host: POSTHOG_HOST,
           person_profiles: "identified_only",
-          autocapture: true,
+          // Explicit typed funnel events cover the decisions we need. DOM
+          // autocapture stays available for coarse interaction analysis, but
+          // never on a URL-encoded report/bearer-link route. Text and element
+          // attributes are masked globally so addresses, client details, and
+          // deal values rendered elsewhere cannot become event properties.
+          autocapture: {
+            url_ignorelist: [SENSITIVE_PUBLIC_SHARE_ROUTE_PATTERN],
+          },
+          mask_all_text: true,
+          mask_all_element_attributes: true,
+          // The app owns attribution explicitly (landing path + coarse host)
+          // and sanitizes it before sessionStorage. SDK defaults otherwise
+          // persist the full initial URL outside before_send.
+          save_campaign_params: false,
+          save_referrer: false,
+          persistence: "localStorage",
+          property_denylist: ["title"],
+          ip: false,
           // We synthesize pageviews manually (trackPageview) on App
           // Router transitions — Next doesn't fire native pageviews
           // between routes, only on first load.
@@ -327,9 +431,14 @@ export function initAnalytics(): Promise<PostHog | null> {
               properties:
                 sanitizeAnalyticsUrlProperties(event.properties) ?? event.properties,
             };
-            if (event.$set) sanitized.$set = sanitizeAnalyticsUrlProperties(event.$set);
+            if (sanitized.properties) delete sanitized.properties.title;
+            if (event.$set) {
+              sanitized.$set = sanitizeAnalyticsUrlProperties(event.$set);
+              if (sanitized.$set) delete sanitized.$set.title;
+            }
             if (event.$set_once) {
               sanitized.$set_once = sanitizeAnalyticsUrlProperties(event.$set_once);
+              if (sanitized.$set_once) delete sanitized.$set_once.title;
             }
             return sanitized;
           },
@@ -345,7 +454,14 @@ export function initAnalytics(): Promise<PostHog | null> {
           // funnel analysis. Toggle on later from the PostHog dashboard
           // if you want to debug a specific drop-off.
           disable_session_recording: true,
+          disable_external_dependency_loading: true,
+          disable_surveys: true,
+          advanced_disable_flags: true,
+          advanced_disable_feature_flags: true,
         });
+      }
+      for (const legacyKey of LEGACY_POSTHOG_INITIAL_KEYS) {
+        posthog.unregister(legacyKey);
       }
       client = posthog;
       flushQueue(posthog);

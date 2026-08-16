@@ -21,7 +21,7 @@
 
 import { Suspense, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Bookmark, FileDown, History, Loader2, Smartphone, X } from "lucide-react";
+import { ArrowRight, Bookmark, History, Loader2, Share2, Smartphone, X } from "lucide-react";
 import { GoogleAuthButton } from "@/components/auth/google-auth-button";
 
 interface SignupPromptCardProps {
@@ -36,9 +36,9 @@ export function SignupPromptCard({ address, isAuthenticated }: SignupPromptCardP
   if (isAuthenticated || dismissed) return null;
 
   const cleanAddress = (address ?? "").trim();
-  const headlineSuffix = cleanAddress
-    ? `Save ${cleanAddress.length > 36 ? `${cleanAddress.slice(0, 36)}…` : cleanAddress}`
-    : "Save this analysis";
+  const dealLabel = cleanAddress
+    ? cleanAddress.length > 36 ? `${cleanAddress.slice(0, 36)}…` : cleanAddress
+    : "this analysis";
 
   return (
     <div className="rounded-2xl border border-[var(--brand-green)]/25 bg-gradient-to-br from-[var(--brand-green-light)] via-card to-card p-5 shadow-[0_12px_36px_rgba(22,163,74,0.10)] sm:p-6">
@@ -60,29 +60,29 @@ export function SignupPromptCard({ address, isAuthenticated }: SignupPromptCardP
 
       {/* Headline */}
       <h3 className="mt-3 text-lg font-extrabold leading-tight tracking-tight text-foreground sm:text-2xl">
-        {headlineSuffix} for later
+        Create an account to save {dealLabel}
       </h3>
       <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-        Create a free account in one tap and we&apos;ll remember this deal,
-        plus every future one. Works on any device.
+        After signup, return here and select Save. You can save up to 5 deals
+        free and reopen them on any device. Pro adds editing and comparison.
       </p>
 
       {/* Benefit bullets — stacked on mobile, 3-up on sm+ */}
       <ul className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-3">
         <BenefitChip
           icon={History}
-          label="Saved deals"
-          sub="Compare across analyses"
-        />
-        <BenefitChip
-          icon={FileDown}
-          label="PDF export"
-          sub="Lender-facing report"
+          label="Save up to 5"
+          sub="Reopen them later"
         />
         <BenefitChip
           icon={Smartphone}
           label="Any device"
-          sub="Phone, laptop, iPad"
+          sub="After you save"
+        />
+        <BenefitChip
+          icon={Share2}
+          label="Read-only links"
+          sub="Share a saved deal"
         />
       </ul>
 
@@ -120,7 +120,7 @@ export function SignupPromptCard({ address, isAuthenticated }: SignupPromptCardP
 
       {/* Risk-reversal */}
       <p className="mt-4 border-t border-border/60 pt-3 text-[11px] text-muted-foreground">
-        Always free · No card · Already have an account?{" "}
+        Free account · No card · Already have an account?{" "}
         <Link href="/auth/login" className="font-semibold text-foreground hover:underline">
           Sign in
         </Link>

@@ -2,10 +2,10 @@
  * /vs/guesty — competitor comparison landing page.
  *
  * Target queries: "guesty alternative", "guesty vs hostaway", "guesty pricing", "guesty review", "enterprise str software".
- * Guesty is enterprise short-term rental property management software — built for STR managers running 50-5000+ properties. Two product lines: Guesty Lite (smaller) and Guesty for Pros (large operators).
+ * Guesty is short-term rental property management software with published
+ * plan ranges from 1 listing through enterprise portfolios.
  */
 
-import { TRIAL_LABEL } from "@/lib/trial";
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
@@ -27,7 +27,7 @@ import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema"
 export const metadata: Metadata = {
   title: "Guesty vs TrueCap (2026): STR PM vs Underwriting",
   description:
-    "Guesty is enterprise STR management for 50+ property operators. TrueCap is the pre-purchase underwrite for solo and small-portfolio STR investors. Different worlds.",
+    "Guesty manages short-term rentals after purchase across Lite, Pro, and Enterprise plans. TrueCap handles pre-purchase underwriting.",
   keywords: [
     "guesty alternative",
     "guesty vs hostaway",
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Guesty vs TrueCap (2026): STR PM vs Underwriting",
     description:
-      "Guesty is enterprise STR PM for 50+ properties. TrueCap is solo STR underwriting. Different worlds.",
+      "Guesty manages short-term rentals after purchase across multiple portfolio sizes. TrueCap handles pre-purchase underwriting.",
     url: "/vs/guesty",
     type: "website",
     images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap vs Guesty" }],
@@ -51,19 +51,19 @@ type Verdict = "truecap" | "guesty" | "tie";
 type Row = { feature: string; truecap: string; guesty: string; winner: Verdict };
 
 const MATRIX: Row[] = [
-  { feature: "Primary audience", truecap: "Solo / small-portfolio STR investors (1-30 doors)", guesty: "Enterprise STR managers (50-5000+ properties)", winner: "tie" },
-  { feature: "Lifecycle stage", truecap: "Pre-purchase — underwrite the STR deal", guesty: "Post-purchase — operate at enterprise scale", winner: "tie" },
+  { feature: "Primary audience", truecap: "Solo / small-portfolio STR investors (1-30 doors)", guesty: "Lite: 1-3 listings; Pro: 4-199; Enterprise: 200+", winner: "tie" },
+  { feature: "Lifecycle stage", truecap: "Pre-purchase — underwrite the STR deal", guesty: "Post-purchase — operate STR listings", winner: "tie" },
   { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", guesty: "Not modeled", winner: "truecap" },
   { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", guesty: "Not modeled", winner: "truecap" },
   { feature: "Address auto-fill (rent/rate/tax)", truecap: "Yes — HUD + FRED + state property tax", guesty: "Not applicable", winner: "truecap" },
-  { feature: "Channel manager (Airbnb/Vrbo/Booking)", truecap: "No", guesty: "Yes — enterprise-grade", winner: "guesty" },
+  { feature: "Channel manager (Airbnb/Vrbo/Booking)", truecap: "No", guesty: "Yes — plan-specific capabilities", winner: "guesty" },
   { feature: "Multi-owner portal + accounting", truecap: "No", guesty: "Yes — owner statements + revenue splits", winner: "guesty" },
   { feature: "Open API for custom integrations", truecap: "No", guesty: "Yes — full REST API", winner: "guesty" },
   { feature: "AI assistant + automation", truecap: "No", guesty: "Yes — Guesty AI for guest messaging", winner: "guesty" },
   { feature: "Dynamic pricing integrations", truecap: "No", guesty: "Yes — full ecosystem", winner: "guesty" },
-  { feature: "Free tier", truecap: "Yes — full underwriting math", guesty: "No — custom pricing only", winner: "truecap" },
-  { feature: "Pricing (entry tier)", truecap: "Free; Pro $29.99/mo", guesty: "Custom pricing (typically $50-200+/mo per listing)", winner: "truecap" },
-  { feature: "Built for solo investors", truecap: "Yes — 1-30 doors", guesty: "No — minimum spend assumes 30+ properties", winner: "truecap" },
+  { feature: "Free tier", truecap: "Yes — core cap rate, CoC, DSCR, and cash flow", guesty: "No permanent free tier; Lite trial available", winner: "truecap" },
+  { feature: "Pricing (entry tier)", truecap: "Free core; paid Pro — see live pricing", guesty: "Plan and portfolio dependent — see Guesty's live pricing", winner: "tie" },
+  { feature: "Built for small operators", truecap: "Yes — 1-30 doors", guesty: "Yes — Lite is published for 1-3 listings", winner: "tie" },
 ];
 
 export default function VsGuestyPage() {
@@ -74,8 +74,8 @@ export default function VsGuestyPage() {
     name: "Guesty vs TrueCap (2026): STR PM vs Underwriting",
     url: `${siteUrl}/vs/guesty`,
     description:
-      "Guesty is enterprise STR management for 50+ property operators. TrueCap is the pre-purchase underwrite for solo and small-portfolio STR investors. Different worlds.",
-    dateModified: "2026-06-07",
+      "Guesty manages short-term rentals after purchase across Lite, Pro, and Enterprise plans. TrueCap handles pre-purchase underwriting.",
+    dateModified: "2026-08-16",
     publisher: { "@id": `${siteUrl}/#organization` },
   };
 
@@ -104,10 +104,10 @@ export default function VsGuestyPage() {
           </div>
           <h1 className="text-3xl sm:text-5xl font-extrabold text-foreground leading-[1.05] tracking-tight text-balance">
             TrueCap vs Guesty:{" "}
-            <span className="text-primary">underwrite the STR vs enterprise STR management</span>
+            <span className="text-primary">underwrite the STR vs manage it</span>
           </h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
-            Guesty is enterprise short-term rental property management software — built for professional STR managers running 50-5000+ properties, including multi-owner portfolios. Two product lines: Guesty Lite (smaller operators) and Guesty for Pros (large managers). TrueCap is the pre-purchase underwriting calculator for solo and small-portfolio STR investors. Functionally different products for functionally different audiences.
+            Guesty is short-term rental property management software for post-purchase operations. Its published plan ranges include Lite for 1-3 listings, Pro for 4-199, and Enterprise for 200+. TrueCap is a pre-purchase underwriting calculator. The products address different stages of the lifecycle.
           </p>
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
             <ScrollToFormButton
@@ -125,7 +125,7 @@ export default function VsGuestyPage() {
             </Link>
           </div>
           <p className="mt-3 text-xs text-muted-foreground">
-            No card · No signup · Cancel anytime
+            Free analyzer: no card or signup
           </p>
         </section>
 
@@ -142,7 +142,7 @@ export default function VsGuestyPage() {
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
                 <li>You own 1-30 STR properties and want to underwrite the next one.</li>
                 <li>You want cap rate, DSCR, cash flow before buying.</li>
-                <li>You want a free tier — no enterprise contract.</li>
+                <li>You want a free core underwriting tier.</li>
                 <li>You&apos;re not running an STR property management business.</li>
               </ul>
             </div>
@@ -151,9 +151,9 @@ export default function VsGuestyPage() {
                 Use Guesty when
               </p>
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
-                <li>You&apos;re an STR property management company running 50+ properties.</li>
+                <li>You need post-purchase STR operations for one or more listings.</li>
                 <li>You manage STRs for other owners and need multi-owner accounting.</li>
-                <li>You need enterprise-grade channel management + API access.</li>
+                <li>You need channel management, automation, or plan-specific API access.</li>
                 <li>You have a team that needs role-based access control.</li>
               </ul>
             </div>
@@ -212,8 +212,8 @@ export default function VsGuestyPage() {
           <p className="mt-3 text-[11px] text-muted-foreground">
             Guesty details based on publicly available product info as of 2026.
             See{" "}
-            <a href="https://guesty.com" target="_blank" rel="noopener" className="underline">
-              guesty.com
+            <a href="https://www.guesty.com/pricing/" target="_blank" rel="noopener" className="underline">
+              Guesty&apos;s official pricing page
             </a>{" "}
             for their current state.
           </p>
@@ -232,7 +232,7 @@ export default function VsGuestyPage() {
               <strong>Use Lodgify / Hostfully / Hostaway for ops as you scale.</strong> Mid-market tools that fit 1-50 STRs.
             </li>
             <li>
-              <strong>Reach 50+ STRs as a manager.</strong> Now Guesty&apos;s enterprise features (multi-owner accounting, AI assistant, API) justify the cost.
+              <strong>Choose the Guesty plan that matches the portfolio.</strong> Lite, Pro, and Enterprise publish different listing ranges and capabilities.
             </li>
             <li>
               <strong>Keep TrueCap for new acquisitions.</strong> Guesty doesn&apos;t underwrite. Still need TrueCap or similar for the next property.
@@ -265,7 +265,8 @@ export default function VsGuestyPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
             Pro unlocks projections, sensitivity, illustrative tax impact, modeled exit comparisons,
-            MAO, PDF exports, and co-branded share links.
+            MAO, and co-branded share links. Pro includes PDFs, and a one-time
+            PDF option is available; see live pricing for current terms.
             No card to start.
           </p>
           <div className="flex flex-wrap gap-3">
@@ -273,7 +274,7 @@ export default function VsGuestyPage() {
               href="/pricing"
               className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
             >
-              Start a {TRIAL_LABEL}
+              See Pro pricing
               <ArrowUpRight className="w-4 h-4" />
             </Link>
             <Link
@@ -306,31 +307,31 @@ const GUESTY_FAQ: FaqItem[] = [
     question: "Is TrueCap a Guesty alternative?",
     answer: (
       <>
-        No — completely different audiences. Guesty is enterprise STR property management for managers running 50+ properties (often for multiple owners). TrueCap is pre-purchase underwriting for solo STR investors. Most TrueCap users are too small for Guesty.
+        Not directly. Guesty handles post-purchase STR operations across portfolio sizes, including a Lite plan published for 1-3 listings. TrueCap handles pre-purchase underwriting. Some operators may use both at different stages.
       </>
     ),
     plainTextAnswer:
-      "No — different audiences. Guesty is enterprise STR PM for 50+ properties. TrueCap is solo STR underwriting. Most TrueCap users are too small for Guesty.",
+      "Not directly. Guesty handles post-purchase STR operations across portfolio sizes, including a Lite plan for 1-3 listings. TrueCap handles pre-purchase underwriting. Some operators may use both.",
   },
   {
     question: "Is Guesty worth it for a small STR operator?",
     answer: (
       <>
-        No. Guesty&apos;s pricing model is per-listing custom-quoted, typically $50-200+ per listing per month depending on features. For 1-5 STRs, you&apos;d be massively overpaying for unused features. Lodgify, Hostfully, or Hostaway are all more practical entry points.
+        It depends on the workflow. Guesty publishes Lite for 1-3 listings and offers a Lite trial. Compare its current features, rates, and terms with other STR operations tools before choosing; TrueCap does not replace those operational features.
       </>
     ),
     plainTextAnswer:
-      "No. Guesty is $50-200+/listing/mo custom-quoted. For 1-5 STRs you&apos;d overpay for unused features. Lodgify, Hostfully, or Hostaway are more practical entry points.",
+      "It depends on the workflow. Guesty publishes Lite for 1-3 listings and offers a Lite trial. Compare its current features, rates, and terms with other STR operations tools before choosing.",
   },
   {
     question: "Guesty vs Hostaway — which one for a 50+ STR portfolio?",
     answer: (
       <>
-        Close call. Hostaway scales well into the 100-200 range and is generally cheaper per listing. Guesty&apos;s edge is at the enterprise end (200+ properties, multi-owner accounting, AI features, API). For a manager scaling from 50→100 properties, Hostaway is usually the more practical choice; for a manager scaling 200+ or managing for many owners, Guesty&apos;s features start to earn their price.
+        Compare each vendor&apos;s current quote, channel coverage, accounting, owner-management, automation, API, support, and implementation terms. Guesty publishes Pro for 4-199 listings and Enterprise for 200+; confirm Hostaway&apos;s current fit directly with that vendor.
       </>
     ),
     plainTextAnswer:
-      "Close. Hostaway scales well to 100-200 and is cheaper per listing. Guesty&apos;s edge: 200+ properties, multi-owner accounting, AI, API. Scaling 50→100: Hostaway. 200+ or many owners: Guesty.",
+      "Compare current quotes, channel coverage, accounting, owner-management, automation, API, support, and implementation terms. Guesty publishes Pro for 4-199 listings and Enterprise for 200+.",
   },
   {
     question: "Does Guesty underwrite deals?",
@@ -343,14 +344,14 @@ const GUESTY_FAQ: FaqItem[] = [
       "No — purely operational. Use TrueCap or a spreadsheet for pre-purchase underwriting, then ingest into Guesty post-closing.",
   },
   {
-    question: "Guesty Lite vs Guesty for Pros?",
+    question: "How do Guesty's published plans scale?",
     answer: (
       <>
-        Guesty Lite is the simplified product for smaller operators with simpler needs (channel management + basic automation). Guesty for Pros is the full enterprise platform (multi-owner accounting, AI, API, role-based access). The price difference is significant. If you&apos;re not running an STR business as a company, Lite is closer to your needs.
+        Guesty currently publishes Lite for 1-3 listings, Pro for 4-199, and Enterprise for 200+. Features and commercial terms vary by plan, so use Guesty&apos;s live pricing page as the source of truth.
       </>
     ),
     plainTextAnswer:
-      "Lite: simplified for smaller operators (channel mgmt + basic automation). Pros: full enterprise (multi-owner accounting, AI, API, RBAC). Significant price diff. Not running as a company: Lite.",
+      "Guesty currently publishes Lite for 1-3 listings, Pro for 4-199, and Enterprise for 200+. Features and terms vary by plan; check Guesty's live pricing page.",
   },
 ];
 

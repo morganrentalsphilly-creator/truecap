@@ -39,7 +39,7 @@ const SYNCED: SubscriptionSyncResult = { synced: true };
  * lands pages someone instead of vanishing.
  *
  * `extra` must contain opaque Stripe/user ids ONLY — never emails or
- * addresses (sendDefaultPii is on, CLAUDE.md pitfall #4).
+ * addresses (CLAUDE.md pitfall #4).
  */
 function reportUserBindingSkip(
   context: "subscription_sync" | "checkout_completed",

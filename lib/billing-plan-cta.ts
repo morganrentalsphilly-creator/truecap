@@ -26,3 +26,50 @@ export function decidePlanCta(
   if (activePlanSlug === targetPlanSlug) return "current";
   return "switch";
 }
+
+export type PricingCardCtaDecision =
+  | { kind: "checkout"; label: null }
+  | { kind: "current"; label: "Manage current plan" }
+  | { kind: "billing"; label: string };
+
+function pricingTier(slug: string | null | undefined): "pro" | "agent_pro" | null {
+  if (slug?.startsWith("agent_pro_")) return "agent_pro";
+  if (slug?.startsWith("pro_")) return "pro";
+  return null;
+}
+
+/**
+ * Subscriber-safe CTA presentation for public pricing cards.
+ *
+ * Any live subscription—recognized or not—routes to Billing. Only a user with
+ * no live paid plan may start Checkout. That keeps an Agent Pro customer from
+ * seeing Pro marked current and prevents every non-current card from becoming
+ * a second-subscription path.
+ */
+export function decidePricingCardCta(
+  activePlanSlug: string | null | undefined,
+  targetPlanSlug: string
+): PricingCardCtaDecision {
+  if (!activePlanSlug) return { kind: "checkout", label: null };
+  if (activePlanSlug === targetPlanSlug) {
+    return { kind: "current", label: "Manage current plan" };
+  }
+
+  const activeTier = pricingTier(activePlanSlug);
+  const targetTier = pricingTier(targetPlanSlug);
+  if (!activeTier || !targetTier) {
+    return { kind: "billing", label: "Manage subscription" };
+  }
+  if (activeTier === targetTier) {
+    return {
+      kind: "billing",
+      label: targetPlanSlug.endsWith("_annual")
+        ? "Switch to annual billing"
+        : "Switch to monthly billing",
+    };
+  }
+  if (activeTier === "pro" && targetTier === "agent_pro") {
+    return { kind: "billing", label: "Upgrade to Agent Pro" };
+  }
+  return { kind: "billing", label: "Switch to TrueCap Pro" };
+}

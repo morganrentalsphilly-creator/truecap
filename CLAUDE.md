@@ -594,8 +594,9 @@ When adding a fourth such feature, replicate this layout. Shared shells
    cover some of this — extend them when you touch the math.
 
 4. **Adding new properties to Sentry events without checking for PII.**
-   `sendDefaultPii: true` is on. Don't `extra: { user_email, address, … }`
-   without thinking about it. Use opaque IDs where possible.
+   Default PII collection is off and shared URLs are scrubbed, but explicit
+   `extra` values still leave the app. Never attach email, address, financial
+   inputs, or bearer links; use opaque IDs where possible.
 
 5. **Changing the OG image schema without updating every social card.**
    `/d/[encoded]/opengraph-image.tsx`, the per-tool OG images under

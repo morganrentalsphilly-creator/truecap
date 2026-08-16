@@ -79,7 +79,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Does the 70% rule work for BRRRR?",
-    a: "Yes, with a twist. BRRRR investors refinance instead of selling, and a cash-out refinance on a single-family investment property typically maxes out at 75% of the appraised value in 2026. Keeping purchase-plus-rehab at or under 70% of ARV leaves roughly a five-point cushion for closing and holding costs, so a 75% refinance can return most or all of your invested cash. If the finished property won't cash-flow as a rental, though, it isn't a BRRRR — check cap rate and DSCR first.",
+    a: "It can be an initial screen, not a refinance rule. Cash-out LTV, eligible value, seasoning, appraisal treatment, costs, and approval vary by lender, program, borrower, and property. A 75% case is only a planning scenario and does not promise that most or all cash returns; verify the completed rental's income, expenses, coverage, appraisal downside, and written loan terms.",
   },
   {
     q: "When is 70% the wrong number?",
@@ -412,10 +412,11 @@ export default function ArvCalculatorPage() {
               destination. On a{" "}
               <Link href="/blog/brrrr-method-explained" className="text-primary font-semibold hover:underline">BRRRR</Link>,
               you refinance the finished rental instead of selling it, and a
-              cash-out refinance on a single-family investment property
-              typically tops out around <strong>75% of appraised value</strong>{" "}in
-              2026 — that&apos;s the &ldquo;75% LTV refi loan&rdquo; line in the
-              calculator. On the worked deal: negotiate to $150,000, spend the
+              cash-out refinance limit on a single-family investment property
+              depends on the lender, program, borrower, property, seasoning,
+              eligible value basis, and appraisal. The calculator&apos;s
+              &ldquo;75% LTV refi loan&rdquo; line is an editable scenario assumption,
+              not a quote or approval. On the worked deal: negotiate to $150,000, spend the
               $45,000 rehab, carry $8,000 of closing and holding costs —
               $203,000 all-in. A 75% refinance against the $255,000 appraisal
               produces a $191,250 loan; net of about $4,000 in refi costs you
@@ -427,8 +428,8 @@ export default function ArvCalculatorPage() {
             </p>
             <p>
               One caution before you count on that refinance: the appraisal is
-              the referee&apos;s call, and appraisers often come in 3–7% below
-              an investor&apos;s ARV. A 10% miss more than doubles the cash
+              independent, and its supported value can differ materially from
+              an investor&apos;s ARV. In this illustration, a 10% miss more than doubles the cash
               trapped in this BRRRR and cuts the equivalent flip&apos;s profit
               by roughly three quarters — which is why disciplined investors
               underwrite at their comp-supported number and confirm the deal
@@ -544,7 +545,7 @@ export default function ArvCalculatorPage() {
             <Link href="/" className="font-bold text-foreground hover:underline">
               TrueCap
             </Link>{" "}
-            — institutional-grade rental analysis, free to start.
+            — transparent, editable rental analysis, free to start.
           </footer>
         </main>
         <SiteFooter />

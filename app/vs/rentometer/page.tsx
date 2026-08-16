@@ -7,7 +7,6 @@
  * estimates rent. Different scope; reposition accordingly.
  */
 
-import { TRIAL_LABEL } from "@/lib/trial";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, ArrowUpRight, Calculator, Check, Minus, Sparkles, X } from "lucide-react";
@@ -46,18 +45,18 @@ type Verdict = "truecap" | "rentometer" | "tie";
 type Row = { feature: string; truecap: string; rentometer: string; winner: Verdict };
 
 const MATRIX: Row[] = [
-  { feature: "Rent estimate from address",      truecap: "HUD Fair Market Rent + comp-driven estimate",                            rentometer: "Comp-driven rent estimate (their core product)",                  winner: "rentometer" },
-  { feature: "Comp data depth",                  truecap: "Pulls from HUD + market comps",                                          rentometer: "Deep comp database — their core moat",                            winner: "rentometer" },
-  { feature: "Full deal underwrite",             truecap: "Yes — cap rate, CoC, DSCR, NCF, 10-yr projection in 60 sec",            rentometer: "No — rent estimation only",                                       winner: "truecap" },
-  { feature: "Operating expense modeling",       truecap: "Auto-fills property tax + insurance + maintenance + management",         rentometer: "Not in scope",                                                    winner: "truecap" },
-  { feature: "Mortgage / financing analysis",    truecap: "Full mortgage modeling with current FRED rates",                         rentometer: "Not in scope",                                                    winner: "truecap" },
+  { feature: "Rent estimate from address",      truecap: "Editable HUD area benchmark; optional rent-comp lookup",                 rentometer: "Comp-driven rent estimate (their core product)",                  winner: "rentometer" },
+  { feature: "Comp data access",                 truecap: "One free sale/rent comp lookup; Pro includes 50 per month",               rentometer: "Rental-comp product with plan-specific limits",                    winner: "rentometer" },
+  { feature: "Full deal underwrite",             truecap: "Free core metrics; Pro adds 10-year projections",                         rentometer: "No — rent estimation only",                                       winner: "truecap" },
+  { feature: "Operating expense modeling",       truecap: "Editable tax, insurance, maintenance, management, and reserve inputs",    rentometer: "Not in scope",                                                    winner: "truecap" },
+  { feature: "Mortgage / financing analysis",    truecap: "Full mortgage model with an editable FRED rate benchmark",               rentometer: "Not in scope",                                                    winner: "truecap" },
   { feature: "Cap rate / CoC / DSCR",            truecap: "All three computed live",                                                rentometer: "Not in scope",                                                    winner: "truecap" },
   { feature: "10-year projection",               truecap: "Pro — rent + expense + appreciation compounding",                        rentometer: "Not in scope",                                                    winner: "truecap" },
-  { feature: "Free use limit",                   truecap: "Unlimited",                                                              rentometer: "Limited free; Pro $29-49/mo",                                     winner: "truecap" },
+  { feature: "Free use limit",                   truecap: "Unlimited core analyses; comp-lookup limits apply",                       rentometer: "Limited free; Pro $29-49/mo",                                     winner: "truecap" },
   { feature: "Verdict / decision support",       truecap: "Free — deal score + verdict (Strong / Decent / Marginal / Skip)",         rentometer: "Rent comp only — you make the decision",                          winner: "truecap" },
-  { feature: "Branded PDF report",               truecap: "Pro — multi-page lender-facing report",                                   rentometer: "PDF of rent comp data",                                           winner: "tie" },
+  { feature: "PDF report",                       truecap: "One-time Deal Decision Pack or included with Pro",                        rentometer: "PDF of rent comp data",                                           winner: "tie" },
   { feature: "Use case",                          truecap: "Full investor underwriting workflow",                                    rentometer: "Quick rent comp lookup",                                          winner: "tie" },
-  { feature: "Pricing — Pro tier",                truecap: "$25/mo annual",                                                       rentometer: "$29-49/mo depending on plan",                                     winner: "truecap" },
+  { feature: "Pricing — paid tier",               truecap: "See TrueCap's live pricing page",                                        rentometer: "$29-49/mo depending on plan",                                     winner: "truecap" },
 ];
 
 export default function VsRentometerPage() {
@@ -102,7 +101,7 @@ export default function VsRentometerPage() {
               See pricing
             </Link>
           </div>
-          <p className="mt-3 text-xs text-muted-foreground">No card · No signup · Cancel anytime</p>
+          <p className="mt-3 text-xs text-muted-foreground">Free analyzer: no card or signup</p>
         </section>
 
         <section className="mb-12 sm:mb-16 rounded-2xl border border-border bg-card p-6 sm:p-8">
@@ -173,7 +172,7 @@ export default function VsRentometerPage() {
         <ComparisonFaq competitorName="Rentometer" items={RENTOMETER_FAQ} />
 
         <section className="mb-12 sm:mb-16 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
-          <h2 className="text-2xl sm:text-3xl font-extrabold mb-2">Get the full underwrite, free.</h2>
+          <h2 className="text-2xl sm:text-3xl font-extrabold mb-2">Get the core underwrite free.</h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             If you&apos;ve been using Rentometer for rent and a spreadsheet for everything else, TrueCap collapses both into one workflow. Try a deal in 60 seconds.
           </p>
@@ -182,7 +181,7 @@ export default function VsRentometerPage() {
               <Calculator className="w-4 h-4" />Run a deal now
             </Link>
             <Link href="/pricing" className="inline-flex items-center gap-2 border border-primary-foreground/40 bg-primary-foreground/10 text-primary-foreground px-4 py-2.5 rounded-xl font-bold hover:bg-primary-foreground/20 transition-colors">
-              Start a {TRIAL_LABEL}<ArrowUpRight className="w-4 h-4" />
+              See Pro pricing<ArrowUpRight className="w-4 h-4" />
             </Link>
           </div>
         </section>
@@ -207,47 +206,43 @@ const RENTOMETER_FAQ: FaqItem[] = [
       <>
         Not exactly — they solve different problems. Rentometer
         specializes in rent estimates pulled from rental-listing comps.
-        TrueCap is a full underwriting calculator that uses HUD Fair
-        Market Rent as a rent baseline and runs all the downstream
+        TrueCap is a full underwriting calculator that starts from an
+        editable HUD Fair Market Rent area benchmark and runs the downstream
         math (cap rate, CoC, DSCR, cash flow). If you want a tight
-        rent estimate from active listings, Rentometer is still
-        useful. If you want a complete underwrite from one address,
-        TrueCap is enough on its own.
+        rent estimate from active listings, Rentometer can complement
+        the underwrite. Verify either source with property-specific evidence.
       </>
     ),
     plainTextAnswer:
-      "They solve different problems. Rentometer specializes in rent estimates from rental-listing comps. TrueCap is a full underwriting calculator using HUD Fair Market Rent as the rent baseline plus all downstream math (cap rate, CoC, DSCR, cash flow).",
+      "They solve different problems. Rentometer specializes in rent estimates from rental-listing comps. TrueCap starts from an editable HUD Fair Market Rent area benchmark and adds downstream underwriting math. Verify either source with property-specific evidence.",
   },
   {
     question: "Does TrueCap give me a rent estimate like Rentometer?",
     answer: (
       <>
-        Yes — TrueCap pre-fills rent using HUD&apos;s Fair Market Rent
-        (county-level, broken down by bedroom count). It&apos;s an
-        authoritative baseline rather than a comp-driven estimate, so
-        you get something defensible to show a lender. For tight
-        neighborhood-level comps in hot markets, Rentometer is still
-        the more granular tool.
+        Yes — TrueCap pre-fills rent using an editable HUD Fair Market
+        Rent area benchmark for the relevant bedroom count. It is a
+        housing-program benchmark, not a property-specific rent opinion
+        or lender approval input. Rentometer&apos;s listing-based comps can
+        provide a separate source to evaluate.
       </>
     ),
     plainTextAnswer:
-      "Yes — TrueCap pre-fills rent using HUD Fair Market Rent (county-level by bedroom count). It's an authoritative baseline rather than a comp-driven estimate. For tight neighborhood-level comps, Rentometer is still more granular.",
+      "Yes — TrueCap pre-fills an editable HUD Fair Market Rent area benchmark for the relevant bedroom count. It is not a property-specific rent opinion or lender approval input. Rentometer's listing-based comps provide a separate source to evaluate.",
   },
   {
     question: "What's the difference between HUD FMR and Rentometer?",
     answer: (
       <>
-        HUD Fair Market Rent is a government-published 40th-percentile
-        rent for every county in the US, refreshed annually. It&apos;s
-        what Section 8 vouchers use. Rentometer aggregates current
-        rental listings and shows you a comp range. HUD is more
-        conservative and defensible; Rentometer is more current and
-        granular. Many investors use both: HUD for the underwrite,
-        Rentometer for the listing-price decision.
+        HUD Fair Market Rent is a government-published estimate of
+        40th-percentile gross rent for standard-quality units within
+        HUD-defined areas. Rentometer uses rental-listing comps and
+        shows a comp range. They answer different questions, and
+        neither replaces subject-property lease evidence or local diligence.
       </>
     ),
     plainTextAnswer:
-      "HUD Fair Market Rent is a government-published 40th-percentile rent per county, refreshed annually — what Section 8 vouchers use. Rentometer aggregates current rental listings. HUD is more conservative and defensible; Rentometer is more current and granular.",
+      "HUD Fair Market Rent estimates 40th-percentile gross rent for standard-quality units within HUD-defined areas. Rentometer uses rental-listing comps. They answer different questions, and neither replaces subject-property lease evidence or local diligence.",
   },
   {
     question: "Can I use Rentometer's rent in TrueCap?",
@@ -267,16 +262,15 @@ const RENTOMETER_FAQ: FaqItem[] = [
     question: "Do I need both Rentometer and TrueCap?",
     answer: (
       <>
-        Most investors don&apos;t. TrueCap&apos;s HUD baseline is
-        accurate enough for the underwriting decision in most markets.
-        Where Rentometer earns its keep: hot markets where current
-        listings significantly exceed FMR (you want the upside in your
-        projection) or sub-market neighborhoods where county-level FMR
-        is too coarse. Otherwise TrueCap alone covers the full job.
+        It depends on the evidence available for the property. TrueCap
+        provides the underwriting model and an editable HUD area
+        benchmark; Rentometer can add listing-based comp context. Use
+        the sources that fit the property, verify them independently,
+        and sensitivity-test a reasonable rent range.
       </>
     ),
     plainTextAnswer:
-      "Most don't. TrueCap's HUD baseline is accurate enough in most markets. Rentometer earns its keep in hot markets where listings exceed FMR or sub-markets where county-level FMR is too coarse. Otherwise TrueCap covers the full job.",
+      "It depends on the property. TrueCap provides the underwriting model and an editable HUD area benchmark; Rentometer can add listing-based comp context. Verify the sources independently and sensitivity-test a reasonable rent range.",
   },
 ];
 

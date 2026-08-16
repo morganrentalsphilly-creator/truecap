@@ -68,7 +68,7 @@ export const metadata: Metadata = {
 const FAQS: { q: string; a: string }[] = [
   {
     q: "What is house hacking in one sentence?",
-    a: "Buying a 2-4 unit property (or a single-family with an ADU or rentable rooms), living in one unit, and renting the others to cover most or all of your housing cost. The structural advantage: you can use a 3.5% down FHA or 5% down conventional owner-occupant loan instead of 20-25% down investor financing.",
+    a: "Buying a 2-4 unit property (or a single-family with a lawful rentable configuration), living in part of it, and renting the rest to offset some housing cost. Eligible owner-occupants may have lower-down-payment options, but the borrower, property, occupancy, reserves, insurance, and program terms determine financing.",
   },
   {
     q: "What's the right benchmark — cash flow or housing savings?",
@@ -76,15 +76,15 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Do I need to count the property as a rental for tax purposes?",
-    a: "Mostly yes. The portion of the property you rent out (typically expressed as % of square footage) is rental property — that share of expenses, depreciation, and mortgage interest is deductible on Schedule E. Your owner-occupied share follows primary residence rules (mortgage interest deductible on Schedule A; no depreciation; no rental income to declare). Allocating these is a CPA conversation, not a DIY job.",
+    a: "Mixed personal and rental use requires a supported allocation, and reporting depends on the facts, ownership, services provided, use days, basis, and current tax rules. Do not assume every allocated expense or loss is currently deductible, or that the owner-occupied share produces an itemized deduction. Have a qualified tax professional determine the treatment.",
   },
   {
     q: "Can I refinance out of the owner-occupant loan after I move out?",
-    a: "Yes, and most house hackers do. FHA and owner-occupant conventional loans require you to live in the property for one year after closing as your primary residence. After that, you can move out, rent the unit you were living in, and the loan continues at the original rate and terms. To unlock the equity for the next deal you'd typically refi at that point — into a DSCR or conventional investment loan, which means losing the owner-occupant rate.",
+    a: "A later move, lease, or refinance depends on the occupancy representations, loan documents, program rules, lender requirements, local rental law, insurance, and facts at that time. FHA generally requires intent to occupy as a principal residence within 60 days and for at least one year, but that rule is not blanket permission to convert the property or a promise that a refinance will be available.",
   },
   {
     q: "What's the catch with FHA 3.5% down?",
-    a: "Three things. (1) Mortgage insurance for the life of the loan on most FHA loans (cancellable only by refi); MIP runs ~0.55-0.85% of loan balance annually. (2) Stricter property condition standards — appraiser flags peeling paint, missing handrails, etc., which slow closing on older properties. (3) Self-sufficiency test for 3-4 unit properties: the property's projected rents must cover the entire PITIA payment. Many 3-4 unit FHA deals fail this test in higher-cost markets. Conventional 5% owner-occupant has no self-sufficiency test and PMI is cancellable at 80% LTV.",
+    a: "FHA eligibility, mortgage insurance, property standards, occupancy, reserves, and 3-4 unit Net Self-Sufficiency Rental Income Eligibility are governed by current HUD and lender requirements. Conventional alternatives use different, program-specific underwriting. Compare current written loan estimates and requirements; no generic percentage or TrueCap rent estimate implies approval.",
   },
   {
     q: "Should I house hack a duplex or a fourplex?",
@@ -201,25 +201,24 @@ export default function BlogPost() {
               $2,100 − $1,900 = <strong>−$200/month</strong></li>
           </ul>
           <p>
-            On the surface that looks like house hacking is $200/month
-            <em> worse</em> than renting. It isn&apos;t — because
-            you&apos;re also:
+            On the surface, this modeled cash outflow is $200/month higher than
+            the comparison rent. Other scenario components to display separately
+            include:
           </p>
           <ul>
-            <li>Paying down ~$500/month of mortgage principal (forced
-              savings).</li>
-            <li>Capturing appreciation on a $500K asset (at 3%/yr
-              that&apos;s $1,250/month long-term).</li>
-            <li>Getting depreciation deductions on the rental portion
-              (50% of building, 27.5 year SL = ~$500/month of paper
-              losses that shelter the rental income).</li>
+            <li>Modeled principal reduction, which builds equity but is not
+              spendable cash and depends on the actual amortization.</li>
+            <li>Flat, upside, and downside property-value cases; appreciation
+              is not earned monthly or guaranteed.</li>
+            <li>An illustrative depreciation calculation based on a supported
+              building basis and placed-in-service facts; current tax benefit
+              depends on the taxpayer and applicable limits.</li>
           </ul>
           <p>
-            Real economic position vs. renting: $200/month worse on cash
-            flow + $500 forced savings + $1,250 expected appreciation +
-            tax shield ≈ <strong>$1,500/month better</strong> than
-            renting, assuming you stay 3+ years for transaction costs to
-            amortize.
+            Do not add projected appreciation, principal reduction, and a
+            hypothetical tax effect to cash flow and call the total a monthly
+            saving. Compare cash, equity, tax, liquidity, and exit scenarios
+            separately, including buying and selling costs and downside cases.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">The five-bucket model</h2>
@@ -266,67 +265,44 @@ export default function BlogPost() {
             The rental portion of the property gets Schedule E treatment.
             That means depreciation, mortgage interest allocation, and
             operating expense deductions on the rented unit(s). Your
-            occupied portion still gets primary residence mortgage
-            interest deduction on Schedule A. Net effect: a meaningful
-            annual tax shield even if the rental side shows breakeven
-            cash flow.
+            occupied portion may receive different treatment. Allocation,
+            deductibility, passive-loss limits, basis, and personal-use rules
+            are taxpayer-specific; the model does not promise a tax shield.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">The FHA self-sufficiency test (3-4 unit only)</h2>
           <p>
             FHA loans are the most-celebrated house hack vehicle — 3.5%
             down, lower credit score thresholds, owner-occupant rates.
-            But for 3-4 unit properties, FHA imposes a
-            <strong> self-sufficiency test</strong>: the property&apos;s
-            projected market rents on <em>all</em> units (including the
-            one you&apos;ll live in) must cover the entire PITI + MIP +
-            association dues.
+            But for 3-4 unit properties, HUD applies a
+            <strong> Net Self-Sufficiency Rental Income Eligibility</strong>{" "}
+            calculation. The lender performs it using the current Handbook and
+            appraisal inputs; a TrueCap rent scenario does not establish the
+            eligible rent, denominator, result, or loan approval.
           </p>
           <p>
-            In expensive markets, most 3-4 unit deals fail this test —
-            the rents just don&apos;t support the price. Workarounds:
+            If the FHA calculation does not support a proposed loan, possible
+            next questions—not guaranteed workarounds—include:
           </p>
           <ul>
-            <li><strong>Conventional 5% owner-occupant loan</strong>:
-              no self-sufficiency requirement. Higher rate than FHA but
-              no MIP for life and PMI cancels at 80% LTV.</li>
-            <li><strong>Bigger down payment</strong>: even on FHA, the
-              self-sufficiency math improves as your loan balance
-              shrinks. Sometimes 10-15% down salvages a deal that fails
-              at 3.5%.</li>
-            <li><strong>Different property</strong>: a duplex (not
-              subject to the test) often pencils where a
-              triplex/fourplex doesn&apos;t.</li>
+            <li><strong>A conventional owner-occupant quote</strong>:
+              separate program, borrower, property, mortgage-insurance, and
+              occupancy underwriting applies.</li>
+            <li><strong>A different down payment</strong>: ask the lender to
+              recalculate using verified terms; more equity does not by itself
+              guarantee eligibility.</li>
+            <li><strong>A different property</strong>: ask the lender whether a
+              different eligible unit count changes the applicable underwriting;
+              it still requires a complete property and borrower review.</li>
           </ul>
 
-          <h2 className="text-2xl sm:text-3xl">FHA vs conventional owner-occupant — the real comparison</h2>
-          <div className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
-            <table className="w-full min-w-[640px] text-sm">
-              <thead>
-                <tr className="border-b border-border bg-muted/40">
-                  <th className="text-left p-3 font-bold text-foreground">Feature</th>
-                  <th className="text-left p-3 font-bold text-foreground">FHA 3.5% down</th>
-                  <th className="text-left p-3 font-bold text-foreground">Conventional 5% OO</th>
-                </tr>
-              </thead>
-              <tbody className="[&_td]:p-3 [&_td]:border-b [&_td]:border-border [&_tr:last-child_td]:border-0">
-                <tr><td className="text-muted-foreground">Down payment</td><td>3.5%</td><td>5%</td></tr>
-                <tr><td className="text-muted-foreground">Min credit score</td><td>580 (500 with 10% down)</td><td>620-680 typically</td></tr>
-                <tr><td className="text-muted-foreground">Rate (2026)</td><td>~6.5-7.0%</td><td>~6.75-7.25%</td></tr>
-                <tr><td className="text-muted-foreground">Upfront MI</td><td>1.75% of loan (financed)</td><td>None</td></tr>
-                <tr><td className="text-muted-foreground">Annual MI</td><td>0.55-0.85% for life of loan</td><td>~0.4-1.0% PMI, cancellable at 80% LTV</td></tr>
-                <tr><td className="text-muted-foreground">Self-sufficiency test (3-4 unit)</td><td>Yes</td><td>No</td></tr>
-                <tr><td className="text-muted-foreground">Appraisal standards</td><td>Stricter (HUD requirements)</td><td>Standard</td></tr>
-                <tr><td className="text-muted-foreground">Owner-occupy requirement</td><td>1 year</td><td>1 year</td></tr>
-                <tr><td className="text-muted-foreground">Reserve requirement (4-unit)</td><td>3 months PITI</td><td>6 months PITI</td></tr>
-              </tbody>
-            </table>
-          </div>
+          <h2 className="text-2xl sm:text-3xl">FHA vs conventional owner-occupant — compare actual quotes</h2>
           <p>
-            FHA wins on raw entry cost and credit accessibility.
-            Conventional wins on long-term economics if you&apos;re going
-            to refinance or sell within 7-10 years (no lifetime MIP) and
-            on flexibility (no self-sufficiency test).
+            Compare lender-confirmed down payment, rate, APR, points, mortgage
+            insurance, reserves, occupancy, eligible unit count, appraisal and
+            property standards, self-sufficiency treatment, prepayment terms,
+            and cash to close. Program rules and lender overlays change; neither
+            label is automatically cheaper or easier for a specific borrower.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">What to actually model</h2>

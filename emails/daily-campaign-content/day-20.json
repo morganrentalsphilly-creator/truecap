@@ -2,16 +2,15 @@
   "day": 20,
   "send_date": "2026-06-20",
   "subject": "what pro actually unlocks",
-  "preheader": "free is great. here's what $29.99 a month buys you.",
-  "headline": "The free tier handles most rentals. Pro is for everything else.",
+  "preheader": "free screens the purchase. pro adds repeatable decision workflows.",
+  "headline": "Free screens a rental. Pro solves and stress-tests the decision.",
   "body": [
-    "Free tier covers the basics: paste an address, get cap rate, cash-on-cash, DSCR, NOI, and a verdict. For most single-family rental decisions, that's enough. Use it forever, no card required.",
-    "Pro is $29.99/mo or $300/yr. What it adds: 10-year projections with rent and expense growth. MAO calculator for flips. Sensitivity grids across rent and expense scenarios. BRRRR analyzer with ARV and refi modeling. Fix-and-flip analyzer with holding costs and timeline. PDF reports you can send to lenders, partners, or clients. Saved deal history. Mortgage scenario A/B compare (75% LTV vs 80% LTV, 30-yr vs 25-yr, etc). Rehab estimator with line-item costs.",
-    "If you only do straightforward buy-and-hold, free is fine. If you do BRRRR, flips, or you analyze enough deals that PDFs and saved scenarios matter, Pro pays for itself the first time it catches something you would've missed.",
-    "$300/yr works out to $25/mo. That's less than one hour of a junior analyst, less than a cheap dinner out, and less than a single hour of an inspector you'd hire on a bad deal you didn't catch.",
-    "There's a 14-day Pro trial for first-time subscribers if you want to test the upgraded features against a real deal you're working before deciding. Cancel before it ends and you won't be charged."
+    "Free covers a first-pass screen: cap rate, cash-on-cash, DSCR, NOI, cash flow, Deal Score, and a verdict. It also saves up to 5 deals. No card is required for the free analyzer.",
+    "Pro adds editing and unlimited saves, Max Offer, sensitivity, BRRRR and fix-and-flip models, 10-year projections, Illustrative Tax Impact, modeled exits, comparison, mortgage scenarios, detailed rehab inputs, Buy Box screening, and Deal Decision Pack reports. See the pricing page for the current price and complete feature list.",
+    "Pro is designed for repeat analysis and deeper scenarios. Whether it is worth upgrading depends on your workflow and how often you need those features; no software can guarantee that it will catch every issue or improve an investment outcome.",
+    "Eligible first-time subscribers can review the current trial and billing terms on the pricing page. Returning subscribers start paid access immediately."
   ],
-  "cta_text": "Try Pro free for 14 days",
+  "cta_text": "See Pro plans and terms",
   "cta_url": "https://usetruecap.com/pricing",
   "signature_note": null
 }

@@ -165,7 +165,7 @@ export function HeroAddressForm() {
           className="group inline-flex items-center gap-1.5 rounded-xl border border-border bg-card px-4 py-2 font-medium text-muted-foreground shadow-sm transition-colors hover:border-primary/40 hover:text-foreground"
         >
           <Sparkles className="size-4" />
-          No address yet? See a sample report
+          No address yet? See a sample analysis
           <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
         </button>
         {/* Pill treatment (was a bare text link): sitting beside two real

@@ -86,7 +86,7 @@ export const CITY_STRATEGY_COMBOS: CombinedCityStrategy[] = [
     pitch:
       "Philly's 2-4 unit rowhouse inventory gives owner-occupants house-hack candidates to screen. Financing eligibility and the owner's housing cost depend on the property, supported rents, borrower, occupancy, insurance, taxes, and current program terms.",
     whyHereWhyNow:
-      "Philadelphia has more 2-4 unit residential properties per capita than nearly any major US city. Combined with FHA-financeable entry points ($300-450k for solid duplexes/triplexes in livable neighborhoods) and PA's relatively flat 3.07% state income tax, the house-hack math works particularly well here for first-time investors building their portfolio.",
+      "Philadelphia's 2-4 unit inventory can create owner-occupant candidates, but listing price, legal unit count, condition, supported rents, borrower eligibility, taxes, insurance, and current program terms determine whether any property is financeable or improves the owner's housing cost.",
     typicalNumbers: {
       purchasePrice: "$300-450k for 2-3 unit",
       monthlyRent: "$1,400-1,950 per unit",
@@ -100,7 +100,7 @@ export const CITY_STRATEGY_COMBOS: CombinedCityStrategy[] = [
       { name: "Mt. Airy / Germantown", why: "Larger 2-4 unit properties at lower entry prices; less walkable but more space" },
     ],
     pitfalls: [
-      "FHA self-sufficiency rule on 3-4 unit properties: rental income must independently cover mortgage — excludes some otherwise-attractive deals",
+      "HUD applies a lender-calculated Net Self-Sufficiency Rental Income Eligibility test to FHA 3-4 unit properties; TrueCap's rent scenario does not determine the result",
       "Living next to tenants requires temperament — noise, maintenance calls, awkward boundary moments",
       "Lead paint + asbestos disclosure on pre-1978 properties (most of Philly's housing stock)",
       "Year-1 cash flow is usually break-even to slightly negative — your balance sheet must carry that for 12 months",
@@ -463,7 +463,7 @@ export const CITY_STRATEGY_COMBOS: CombinedCityStrategy[] = [
       "Older housing stock (pre-1940) carries asbestos + knob-and-tube electrical risk",
       "Landlord-tenant procedure and timing are case-specific — use current local counsel or official court guidance",
       "Some Pittsburgh neighborhoods have steep hills affecting parking + access — walk before buying",
-      "Allegheny County tax appeals worth filing on most purchases",
+      "Do not assume a tax appeal is warranted or beneficial; review the current assessment, appeal rules, evidence, deadlines, costs, and downside with a qualified local professional",
     ],
     relatedPosts: ["spot-bad-rental-in-60-seconds"],
   },
@@ -540,14 +540,14 @@ export const CITY_STRATEGY_COMBOS: CombinedCityStrategy[] = [
     strategy: "house-hack",
     strategyLabel: "house hacking",
     pitch:
-      "Sacramento is the most workable major-California market for house-hacking. Entry prices are 30-40% lower than the Bay Area, ADU laws are permissive, and FHA owner-occupant financing works on duplexes and ADU-equipped SFRs.",
+      "Sacramento offers house-hack candidates to screen, including some duplex and ADU configurations. Legal use, permits, insurance, supported rent, borrower and property eligibility, and current loan terms must be verified for each address.",
     whyHereWhyNow:
-      "California's ADU laws (SB 9, SB 10) plus Sacramento's relatively reasonable entry prices ($400-550k for SFR with ADU potential, $500-700k for duplexes) create unusual house-hacking opportunities for CA investors who'd be priced out of Bay Area or LA. FHA 3.5% on the right deal makes year-1 true out-of-pocket comparable to renting a single unit elsewhere.",
+      "State and local rules may allow some ADU or lot-development paths, but zoning, ministerial eligibility, permits, utilities, rent restrictions, construction cost, and timing are property-specific. Compare verified purchase and build scenarios with current rent comps and written financing terms; neither an FHA scenario nor an ADU concept promises eligibility or housing savings.",
     typicalNumbers: {
       purchasePrice: "$450-650k for SFR + ADU or 2-unit",
       monthlyRent: "$1,400-2,000 per unit",
       capRate: "True out-of-pocket: $800-1,500/mo for your unit (vs $2,200+ market rent)",
-      notes: "FHA 3.5% ($15.75-22.75k down) or conventional 5% ($22.5-32.5k). High insurance + CA tax requires careful underwriting.",
+      notes: "Illustrative orientation only. Confirm legal unit count, ADU status, occupancy, down payment, reserves, mortgage insurance, carrier quote, taxes, supported rent, and program eligibility in writing.",
     },
     neighborhoods: [
       { name: "Tahoe Park", why: "Walkable, university-adjacent, ADU-friendly, family-renter demand" },
@@ -657,7 +657,7 @@ export const CITY_STRATEGY_COMBOS: CombinedCityStrategy[] = [
     pitfalls: [
       "Pre-WW2 housing stock means real year-1 capex even on owner-occupant deals",
       "Lead paint disclosure required on pre-1978 properties",
-      "FHA self-sufficiency rule on 3-4 unit properties: rental income must independently cover mortgage",
+      "HUD applies a lender-calculated Net Self-Sufficiency Rental Income Eligibility test to FHA 3-4 unit properties; a modeled rent does not establish eligibility",
       "Some Cleveland neighborhoods have block-by-block variation — walk before buying",
       "Living next to tenants requires temperament — noise, maintenance calls, awkward moments",
     ],

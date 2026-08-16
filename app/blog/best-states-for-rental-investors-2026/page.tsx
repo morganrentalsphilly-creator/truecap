@@ -211,16 +211,30 @@ export default function BestStatesPost() {
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">States to be cautious about</h2>
           <p>
-            <strong>California</strong> — appreciation has been historic but cap rates compress to 2-4% in most metros, statewide rent control caps annual increases, eviction process is notoriously long (90+ days typical, often 120+). Works if you have decades to hold and don&apos;t need cash flow. Doesn&apos;t work for active cash-flow investors.
+            <strong>California</strong> — state and local rent, termination,
+            notice, registration, and just-cause rules can depend on the property,
+            exemption status, tenancy, and city. Verify current official guidance
+            and local counsel; do not use a statewide cap-rate or eviction-time
+            generalization as underwriting evidence.
           </p>
           <p>
-            <strong>New York</strong> — high property tax, high state income tax, rent regulation in NYC + tenant-friendly eviction in entire state. Outside NYC (Hudson Valley, Buffalo, Rochester) the math can work but you&apos;re still operating in a tenant-favorable legal climate.
+            <strong>New York</strong> — tax and landlord-tenant rules vary sharply
+            by locality, property, regulatory status, and proceeding. Obtain the
+            current assessment, insurance quote, applicable rent-regulation
+            status, and local legal process before modeling a deal.
           </p>
           <p>
-            <strong>Illinois (especially Cook County / Chicago)</strong> — Cook County effective property tax can hit 2.3-3.5%+, eviction process is among the slowest in the US, and post-2022 changes to landlord-tenant law have further tilted toward tenants. Downstate Illinois (Springfield, Peoria) is functionally a different market and works better.
+            <strong>Illinois</strong> — assessment, taxes, licensing, tenant
+            protections, and court procedure vary materially between Chicago,
+            Cook County, and other municipalities. Use property-specific bills
+            and current local legal guidance rather than a statewide ranking or
+            fixed timeline.
           </p>
           <p>
-            <strong>New Jersey</strong> — among the highest effective property tax rates in the US (~2.2-2.5%) and a tenant-favorable legal climate.
+            <strong>New Jersey</strong> — verify the actual assessment, municipal
+            tax bill, permitted rent and lease terms, registration requirements,
+            and current possession process for the property. A statewide label
+            does not establish expense or legal risk.
           </p>
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">How to actually pick</h2>

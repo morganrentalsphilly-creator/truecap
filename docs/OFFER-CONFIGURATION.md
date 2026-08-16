@@ -52,8 +52,10 @@ only changes marketing copy.
 
 ## Public deal counter
 
-The homepage all-time run counter displays the live
-`app_counters.analysis_runs` value plus the approved 50,000 historical floor.
-The database value is not changed. Rolling 7-day and 30-day saved-deal counters
-continue to display their raw measured values. The display rule and regression
-guard live in `lib/stats/analysis-runs-display.ts`.
+The homepage all-time run counter displays the measured
+`app_counters.analysis_runs` value plus the owner-attested 50,000 historical
+analysis-run baseline. The baseline is presentation-only; it does not modify
+the stored counter. Rolling 7-day and 30-day saved-deal counters continue to
+display their raw measured values. One run is one analyzer invocation, not a
+unique property, user, customer, offer, or transaction. The display rule and
+regression guard live in `lib/stats/analysis-runs-display.ts`.

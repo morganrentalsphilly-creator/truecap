@@ -5,7 +5,6 @@
  * RentSpree is tenant screening + rental applications, popular with realtors who run rentals for clients. TransUnion-backed screening reports. Different audience than TrueCap but agents look at both.
  */
 
-import { TRIAL_LABEL } from "@/lib/trial";
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
@@ -61,8 +60,8 @@ const MATRIX: Row[] = [
   { feature: "Online rental applications", truecap: "No", rentspree: "Yes — customizable", winner: "rentspree" },
   { feature: "Eviction records check", truecap: "No", rentspree: "Yes — court records", winner: "rentspree" },
   { feature: "Agent / brokerage workflow", truecap: "Yes — agent persona page exists", rentspree: "Yes — built for realtor-managed rentals", winner: "tie" },
-  { feature: "Free tier", truecap: "Yes — full underwriting math", rentspree: "Yes — tenant pays for screening (typical)", winner: "tie" },
-  { feature: "Pricing model", truecap: "Free; Pro $29.99/mo", rentspree: "Tenant typically pays $30-40 per application", winner: "tie" },
+  { feature: "Free tier", truecap: "Yes — core cap rate, CoC, DSCR, and cash flow", rentspree: "Yes — tenant pays for screening (typical)", winner: "tie" },
+  { feature: "Pricing model", truecap: "Free core; paid Pro — see live pricing", rentspree: "Tenant typically pays $30-40 per application", winner: "tie" },
   { feature: "Shareable read-only analysis", truecap: "Free — read-only public link; Pro adds co-branding", rentspree: "N/A", winner: "truecap" },
 ];
 
@@ -125,7 +124,7 @@ export default function VsRentspreePage() {
             </Link>
           </div>
           <p className="mt-3 text-xs text-muted-foreground">
-            No card · No signup · Cancel anytime
+            Free analyzer: no card or signup
           </p>
         </section>
 
@@ -268,7 +267,8 @@ export default function VsRentspreePage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
             Pro unlocks projections, sensitivity, illustrative tax impact, modeled exit comparisons,
-            MAO, PDF exports, and co-branded share links.
+            MAO, and co-branded share links. Pro includes PDFs, and a one-time
+            PDF option is available; see live pricing for current terms.
             No card to start.
           </p>
           <div className="flex flex-wrap gap-3">
@@ -276,7 +276,7 @@ export default function VsRentspreePage() {
               href="/pricing"
               className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
             >
-              Start a {TRIAL_LABEL}
+              See Pro pricing
               <ArrowUpRight className="w-4 h-4" />
             </Link>
             <Link

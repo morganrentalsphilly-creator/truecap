@@ -4,7 +4,6 @@
  * Target queries: "mashvisor short term rental", "mashvisor airbnb", "best str market tool", "airbnb investment calculator", "mashvisor alternative for str". Long-tail audience-slicing comparison.
  */
 
-import { TRIAL_LABEL } from "@/lib/trial";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, ArrowUpRight, Calculator, Check, Minus, Sparkles, X } from "lucide-react";
@@ -50,8 +49,8 @@ const MATRIX: Row[] = [
   { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", mashvisor: "Forward STR revenue forecast", winner: "tie" },
   { feature: "Deal score + verdict", truecap: "Free — 0-100 score + plain-English verdict", mashvisor: "Investibility score per property", winner: "tie" },
   { feature: "Address auto-fill (rent/rate/tax)", truecap: "Yes — HUD + FRED + state property tax", mashvisor: "STR-focused; LTR rent estimates included", winner: "tie" },
-  { feature: "Free tier", truecap: "Yes — full underwriting math", mashvisor: "Limited free dashboard; full data paid", winner: "truecap" },
-  { feature: "Pricing (paid tier)", truecap: "Pro $29.99/mo", mashvisor: "$70-300/mo depending on plan (as of 2026)", winner: "truecap" },
+  { feature: "Free tier", truecap: "Yes — core cap rate, CoC, DSCR, and cash flow", mashvisor: "Limited free dashboard; full data paid", winner: "truecap" },
+  { feature: "Pricing (paid tier)", truecap: "Paid Pro; see live pricing for current rates", mashvisor: "$70-300/mo depending on plan (as of 2026)", winner: "truecap" },
 ];
 
 const NICHE_FAQ: FaqItem[] = [
@@ -259,16 +258,17 @@ export default function VsMashvisorForShortTermRentalsPage() {
             Underwrite your next Short-term rentals deal — free.
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
-            Free covers the standard cap rate, CoC, DSCR, and cash flow. Pro unlocks
-            projections, sensitivity, illustrative tax impact, modeled exit comparisons, MAO,
-            and PDF exports.
+            Free covers the standard cap rate, CoC, DSCR, cash flow, and plain
+            read-only share links. Pro adds projections, sensitivity, illustrative
+            tax impact, modeled exit comparisons, MAO, co-branding, and included
+            PDFs. A one-time PDF option is also available.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link
               href="/pricing"
               className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
             >
-              Start a {TRIAL_LABEL}
+              See Pro pricing
               <ArrowUpRight className="w-4 h-4" />
             </Link>
             <Link

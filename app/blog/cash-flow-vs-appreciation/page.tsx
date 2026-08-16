@@ -85,7 +85,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Does 2026's high-rate environment change the answer?",
-    a: "Yes — significantly. With mortgage rates at 6.5-7.5% and cap rates in many markets at 5-7%, leverage is now NEGATIVE on most cash-flow deals — every borrowed dollar costs more than the property earns. That makes appreciation-pure strategies even more dependent on actually realizing the appreciation (a bet, not a guarantee). The 'safe' cash-flow play is harder to find in 2026 than it was 2010-2022.",
+    a: "Financing cost changes leverage, but there is no single current rate, cap rate, or market-wide result. Compare a property-specific loan quote with verified NOI, and run flat, upside, and downside rent, expense, rate, and exit scenarios. Neither a cash-flow label nor an appreciation thesis is inherently safe.",
   },
   {
     q: "Can a single deal do both?",
@@ -305,18 +305,20 @@ export default function BlogPost() {
             The appreciation-heavy row has -$24k cash flow over 10 years
             — you&apos;re feeding the property out of pocket every month.
             If life changes (job loss, market dip, forced sale), you
-            don&apos;t have the cushion. The cash-flow row is bulletproof
-            in the same scenarios.
+            don&apos;t have the same modeled cushion. Positive modeled cash flow
+            can improve resilience, but it is not bulletproof: rent, vacancy,
+            collections, expenses, capital work, financing, and sale proceeds
+            can all differ from the scenario.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">The 2026 plot twist</h2>
           <p>
             All of the above assumes appreciation actually happens. From
-            2010 to 2022 it did, reliably, in most markets — but that was
-            the longest bull run in U.S. real estate history with
-            interest rates near zero. In 2026 with rates at 6.5-7.5%,
-            appreciation is no longer guaranteed. Many markets have flat
-            or slightly down YoY growth.
+            historical periods produced different results by market, but none
+            establishes a future path. Current rates and year-over-year price
+            changes also move continuously. Underwrite flat, upside, and
+            downside appreciation cases using current local evidence rather
+            than treating a national narrative as a forecast.
           </p>
           <p>
             If you&apos;re betting on appreciation in 2026, you&apos;re

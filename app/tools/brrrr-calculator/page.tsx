@@ -46,15 +46,15 @@ const FAQS = [
   },
   {
     q: "What's a 'good' BRRRR — when do I get my money back?",
-    a: "A successful BRRRR pulls 80-100% of your invested cash back at the refi. The refi loan amount = ARV × refi LTV (typically 75%). Cash returned = refi loan − original loan paid off − refi closing costs. If your total invested (down + closing + rehab + carrying) is below or equal to that cash returned, you've achieved 'infinite return' — you own a cash-flowing property with little or none of your money in it.",
+    a: "Capital returned is an outcome, not a definition of success. Model gross new loan proceeds from an assumed eligible value and LTV, then subtract the actual payoff, lender and closing costs, carrying costs, and all cash invested. Appraisal, eligible value, LTV, approval, costs, and rental cash flow are not guaranteed; 'infinite return' language can hide the debt, risk, and remaining obligations.",
   },
   {
     q: "What refi LTV should I expect?",
-    a: "Most cash-out refi lenders for investment properties cap at 75% LTV (some at 70% or 80%). Conventional non-owner-occupant cash-out is generally 75%. DSCR loan products may go to 80%. Plan for 75% in your underwrite — if you get 80% it's a bonus.",
+    a: "There is no universal investment-property cash-out LTV. Ask each lender to confirm its current maximum, eligible value basis, seasoning, property and borrower requirements, costs, and pricing in writing. If you model 75%, label it as a scenario and stress a lower value and LTV; it is not a quote or approval.",
   },
   {
     q: "How long until I can refinance — what's the seasoning period?",
-    a: "Most conventional cash-out refi lenders require 6 months of seasoning (you've owned the property for 6 months). Some DSCR lenders allow refis at 3 months. Plan for 6 months unless you've confirmed a specific lender will go shorter. Carrying costs during this period — taxes, insurance, utilities, loan interest — eat into your returns.",
+    a: "Seasoning and eligible value basis vary by lender, program, acquisition method, property, and loan purpose. Obtain the current written rule for the proposed file and model carrying costs through a delayed-closing case; a generic month count does not establish eligibility or timing.",
   },
   {
     q: "What can go wrong with a BRRRR?",
@@ -163,31 +163,32 @@ export default function BrrrrCalculatorPage() {
             <p>
               The rehab forces equity. Your rehab needs to deliver enough
               ARV bump to make the refi math work. Track every expense.
-              Build in 10-20% contingency on top of your contractor bid —
-              surprises happen on every project.
+              Set a contingency from scope, inspections, bids, property age,
+              and downside cases rather than assuming one percentage fits every
+              project.
             </p>
             <h3>Rent</h3>
             <p>
               The post-rehab rent matters in two ways: it has to support
               the new mortgage payment after refi ({" "}
               <Link href="/tools/dscr-calculator" className="text-primary font-semibold hover:underline">DSCR</Link>{" "}
-              ≥ 1.0 minimum, 1.25+ for most lenders), and it determines
-              whether the property is worth holding long-term once your
-              capital is out.
+              using the proposed lender&apos;s formula), and it affects the
+              long-term hold scenario. A TrueCap ratio does not establish the
+              lender&apos;s rent, coverage, eligibility, approval, or whether any
+              capital is returned.
             </p>
             <h3>Refinance</h3>
             <p>
-              The refi turns paper equity into real cash you can deploy.
-              Most cash-out refi lenders require 6 months of seasoning and
-              cap LTV at 75%. The refi loan amount = ARV × 75% (or whatever
-              your LTV cap is). Subtract the original loan you&apos;re
-              paying off plus refi closing costs to get the cash returned.
+              A funded refi may convert some equity into proceeds. Use the
+              lender-confirmed eligible value, LTV, seasoning, payoff, fees, and
+              closing figures; an ARV multiplied by 75% is only a planning
+              scenario and does not establish approval or net proceeds.
             </p>
             <h3>Repeat</h3>
             <p>
-              With your capital recycled, you can start the cycle on
-              another property. Done well, this lets you scale from one
-              property to many without continually saving new capital.
+              If the refinance closes with net proceeds, those funds may be
+              available for another project. Scaling still depends on approval,
+              liquidity, reserves, performance, and risk capacity.
             </p>
 
             <h2 className="text-2xl sm:text-3xl">What &ldquo;infinite return&rdquo; means</h2>
@@ -291,7 +292,7 @@ export default function BrrrrCalculatorPage() {
           <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">
             Built with{" "}
             <Link href="/" className="font-bold text-foreground hover:underline">TrueCap</Link>{" "}
-            — institutional-grade rental analysis, free to start.
+            — transparent, editable rental analysis, free to start.
           </footer>
         </main>
         <SiteFooter />

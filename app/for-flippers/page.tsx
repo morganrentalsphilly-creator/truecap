@@ -10,7 +10,6 @@
  * answer questions flippers ask on every deal.
  */
 
-import { TRIAL_LABEL } from "@/lib/trial";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, ArrowUpRight, Calculator, Hammer, ShieldCheck, Sparkles, TrendingUp, Wrench } from "lucide-react";
@@ -83,12 +82,11 @@ export default function ForFlippersPage() {
             For fix &amp; flippers
           </div>
           <h1 className="text-3xl sm:text-5xl font-extrabold text-foreground leading-[1.05] tracking-tight text-balance">
-            Underwrite a flip in <span className="text-primary">60 seconds.</span>
+            Screen the acquisition free. <span className="text-primary">Model the full flip with Pro.</span>
           </h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
-            ARV, rehab, holding cost, net profit, break-even ARV,
-            annualized ROI, and Max Allowable Offer — all live as you
-            type. No spreadsheet. Stress-test before you commit.
+            Run the rental fallback screen free. Pro adds ARV, rehab, holding
+            costs, profit, break-even ARV, sensitivity, and Max Offer.
           </p>
 
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
@@ -101,7 +99,7 @@ export default function ForFlippersPage() {
               className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5"
             >
               <Calculator className="size-4" />
-              Run a free flip analysis
+              Screen this property free
               <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
             </Link>
             <Link
@@ -112,7 +110,7 @@ export default function ForFlippersPage() {
             </Link>
           </div>
           <p className="mt-3 text-xs text-muted-foreground">
-            No card · No signup needed to use the analyzer · Cancel anytime
+            Free screen: no card or signup
           </p>
         </section>
 
@@ -215,12 +213,12 @@ export default function ForFlippersPage() {
         {/* CTA */}
         <section className="mb-12 sm:mb-16 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
           <h2 className="text-2xl sm:text-3xl font-extrabold mb-2">
-            Try it on your next deal. Free, no signup.
+            Screen the acquisition free. Unlock the flip model when you need it.
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
-            Free covers the basics. Pro unlocks the Fix &amp; Flip
-            analyzer, MAO solver, sensitivity grid, BRRRR analyzer, and
-            the full rehab estimator. Cancel anytime.
+            Free shows the rental fallback metrics for the property. Pro unlocks
+            the Fix &amp; Flip analyzer, Max Offer, sensitivity, BRRRR modeling,
+            and the full rehab estimator.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link
@@ -235,7 +233,7 @@ export default function ForFlippersPage() {
               href="/pricing"
               className="inline-flex items-center gap-2 border border-primary-foreground/40 bg-primary-foreground/10 text-primary-foreground px-4 py-2.5 rounded-xl font-bold hover:bg-primary-foreground/20 transition-colors"
             >
-              Start a {TRIAL_LABEL}
+              See Pro pricing
               <ArrowUpRight className="w-4 h-4" />
             </Link>
           </div>

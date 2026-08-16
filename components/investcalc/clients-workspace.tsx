@@ -45,6 +45,7 @@ export function ClientsWorkspace({
   initialClients,
   initialCounts,
   countsFailed = false,
+  portalsAvailable = false,
   portalUrlByClient = {},
   loadError,
 }: {
@@ -53,6 +54,9 @@ export function ClientsWorkspace({
   /** True when the deal-count query failed — cards must not claim "No deals
    *  yet", which reads as fact rather than a load failure. */
   countsFailed?: boolean;
+  /** Public client portals stay unavailable until links have expiry and
+   *  per-link revocation. Client rosters/reports remain usable without them. */
+  portalsAvailable?: boolean;
   /** Portal URL per client, minted server-side so the copy click can be
    *  SYNCHRONOUS — see the note on the page that builds these. Missing entries
    *  mean SHARE_LINK_SECRET isn't configured; the button then explains that
@@ -113,10 +117,9 @@ export function ClientsWorkspace({
   const remove = (id: string, name: string, dealCount: number) => {
     // Hard delete sitting 2px from Edit, wiping every assignment. Confirm names
     // what is actually lost — the codebase confirms far smaller destructions.
-    const warning =
-      dealCount > 0
-        ? `Remove ${name}? Their ${dealCount} assigned ${dealCount === 1 ? "deal" : "deals"} will be unassigned and their portal link will stop working. The deals themselves are kept.`
-        : `Remove ${name}? Their portal link will stop working. Any deals you later assign are unaffected.`;
+    const warning = dealCount > 0
+      ? `Remove ${name}? Their ${dealCount} assigned ${dealCount === 1 ? "deal" : "deals"} will be unassigned. The deals themselves are kept.`
+      : `Remove ${name}? Their roster record will be deleted. Any deals you later assign are unaffected.`;
     if (!window.confirm(warning)) return;
     startSaving(async () => {
       try {
@@ -183,7 +186,7 @@ export function ClientsWorkspace({
         <div>
           <h1 className="text-2xl font-extrabold tracking-tight text-foreground">Clients</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Give each buyer their own criteria and a live deal portal you can send them.
+            Give each buyer their own criteria, assign opportunities, and share a client-ready report.
           </p>
         </div>
         {!editor ? (
@@ -315,17 +318,19 @@ export function ClientsWorkspace({
                   </p>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    className="gap-1.5"
-                    onClick={() => copyPortal(c.id)}
-                    disabled={isSaving}
-                  >
-                    {copiedId === c.id ? <Check className="size-4 text-success" /> : <LinkIcon className="size-4" />}
-                    {copiedId === c.id ? "Copied" : "Copy portal link"}
-                  </Button>
+                  {portalsAvailable ? (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      className="gap-1.5"
+                      onClick={() => copyPortal(c.id)}
+                      disabled={isSaving}
+                    >
+                      {copiedId === c.id ? <Check className="size-4 text-success" /> : <LinkIcon className="size-4" />}
+                      {copiedId === c.id ? "Copied" : "Copy portal link"}
+                    </Button>
+                  ) : null}
                   <Button
                     type="button"
                     size="sm"

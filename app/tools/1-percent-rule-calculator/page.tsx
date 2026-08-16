@@ -304,7 +304,7 @@ export default function OnePercentRulePage() {
           <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">
             Built with{" "}
             <Link href="/" className="font-bold text-foreground hover:underline">TrueCap</Link>{" "}
-            — institutional-grade rental analysis, free to start.
+            — transparent, editable rental analysis, free to start.
           </footer>
         </main>
         <SiteFooter />
