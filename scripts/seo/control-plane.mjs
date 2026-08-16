@@ -373,7 +373,10 @@ try {
       risk_class: kind.riskClass,
       indexable: true,
       in_sitemap: true,
-      ...(kind.pageType === "state" ? { status: "STALE_REVIEW_REQUIRED" } : {}),
+      // PostgREST requires every object in a bulk upsert to expose the same
+      // keys. Keep the explicit ACTIVE value here instead of relying on the
+      // database default for non-state rows.
+      status: kind.pageType === "state" ? "STALE_REVIEW_REQUIRED" : "ACTIVE",
       metadata: kind.pageType === "state"
         ? { sourceCoverage: "official state-law and property-tax dependencies required before autonomous factual refresh" }
         : {},
