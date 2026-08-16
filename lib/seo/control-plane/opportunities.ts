@@ -1,6 +1,8 @@
 import type { GscMetric, SeoOpportunity } from "./types";
 
 const clamp = (value: number, min = 0, max = 100) => Math.min(max, Math.max(min, value));
+const compositeKey = (...parts: Array<string | null | undefined>) =>
+  JSON.stringify(parts.map((part) => part ?? ""));
 
 export function opportunityScore(input: {
   relevance: number;
@@ -43,10 +45,10 @@ export function findPerformanceOpportunities(
   previous: GscMetric[] = [],
 ): SeoOpportunity[] {
   const out: SeoOpportunity[] = [];
-  const prior = new Map(previous.map((metric) => [`${metric.query}\u0000${metric.page ?? ""}`, metric]));
+  const prior = new Map(previous.map((metric) => [compositeKey(metric.query, metric.page), metric]));
 
   for (const metric of current) {
-    const key = `${metric.query}\u0000${metric.page ?? ""}`;
+    const key = compositeKey(metric.query, metric.page);
     if (metric.page && metric.impressions >= 20 && metric.position !== null && metric.position >= 4 && metric.position <= 15) {
       out.push({
         type: "STRIKING_DISTANCE",
@@ -131,7 +133,7 @@ export function findCannibalization(metrics: GscMetric[]): SeoOpportunity[] {
   const groups = new Map<string, GscMetric[]>();
   for (const metric of metrics) {
     if (!metric.page || metric.impressions < 10) continue;
-    const key = `${metric.query.trim().toLowerCase()}\u0000${metric.intentClass}`;
+    const key = compositeKey(metric.query.trim().toLowerCase(), metric.intentClass);
     const items = groups.get(key) ?? [];
     items.push(metric);
     groups.set(key, items);
@@ -141,7 +143,7 @@ export function findCannibalization(metrics: GscMetric[]): SeoOpportunity[] {
   for (const [key, items] of groups) {
     const uniquePages = [...new Set(items.map((item) => item.page!))];
     if (uniquePages.length < 2) continue;
-    const [query, intentClass] = key.split("\u0000");
+    const [query, intentClass] = JSON.parse(key) as [string, string];
     const impressions = items.reduce((sum, item) => sum + item.impressions, 0);
     out.push({
       type: "CANNIBALIZATION",

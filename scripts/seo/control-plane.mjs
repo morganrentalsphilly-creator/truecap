@@ -33,6 +33,9 @@ const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const DAY = 86_400_000;
 const dateDaysAgo = (days) => new Date(now.getTime() - days * DAY).toISOString().slice(0, 10);
 const clamp = (value, min = 0, max = 100) => Math.min(max, Math.max(min, value));
+// JSON tuples are collision-safe without embedding NUL bytes, which PostgreSQL
+// text columns reject when opportunity keys are persisted through PostgREST.
+const metricKey = (query, page) => JSON.stringify([String(query), String(page ?? "")]);
 const tokens = (value) => new Set(
   String(value).toLowerCase().split(/[^a-z0-9]+/).filter((token) => token.length > 2 && !["the", "and", "for", "with", "truecap"].includes(token)),
 );
@@ -140,7 +143,7 @@ function aggregateGsc(rows, from, to) {
   const map = new Map();
   for (const row of rows) {
     if (row.date < from || row.date > to) continue;
-    const key = `${row.query}\u0000${row.page}`;
+    const key = metricKey(row.query, row.page);
     const item = map.get(key) ?? { query: row.query, page: new URL(row.page).pathname, clicks: 0, impressions: 0, positionWeight: 0 };
     item.clicks += row.clicks;
     item.impressions += row.impressions;
@@ -166,10 +169,10 @@ function score(metric, probability, effort = 0.5) {
 
 function opportunities(current, previous, urls) {
   const out = [];
-  const prior = new Map(previous.map((item) => [`${item.query}\u0000${item.page}`, item]));
+  const prior = new Map(previous.map((item) => [metricKey(item.query, item.page), item]));
   const queryPages = new Map();
   for (const metric of current) {
-    const key = `${metric.query}\u0000${metric.page}`;
+    const key = metricKey(metric.query, metric.page);
     if (metric.impressions >= 20 && metric.position >= 4 && metric.position <= 15) {
       out.push({ type: "STRIKING_DISTANCE", key: `striking:${key}`, ...metric, score: score(metric, 0.85, 0.45), risk: "medium", action: "Refresh the existing winner and strengthen contextual authority before creating a new URL." });
     }

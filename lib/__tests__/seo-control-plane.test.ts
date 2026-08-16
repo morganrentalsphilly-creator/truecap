@@ -69,8 +69,10 @@ describe("opportunity engine", () => {
     const previous = [
       { query: "rental property analyzer", page: "/blog/analyze", intentClass: "guide", clicks: 10, impressions: 400, ctr: 0.025, position: 4 },
     ];
-    const types = new Set(findPerformanceOpportunities(current, previous).map((item) => item.type));
+    const opportunities = findPerformanceOpportunities(current, previous);
+    const types = new Set(opportunities.map((item) => item.type));
     expect(types).toEqual(new Set(["STRIKING_DISTANCE", "HIGH_IMPRESSION_LOW_CTR", "CONTENT_DECAY", "QUERY_GAP"]));
+    expect(opportunities.every((item) => !item.key.includes("\u0000"))).toBe(true);
     expect(opportunityScore({ relevance: 1, existingAuthority: 1, searchEvidence: 1, businessValue: 1, conversionPotential: 1, probabilityOfImprovement: 1, effort: 1, contentRisk: 1, cannibalizationRisk: 1 })).toBe(100);
   });
 
@@ -82,6 +84,7 @@ describe("opportunity engine", () => {
     ]);
     expect(collision).toHaveLength(1);
     expect(collision[0].evidence.pages).toEqual(["/glossary/cap-rate", "/blog/cap-rate"]);
+    expect(collision[0].key).not.toContain("\u0000");
   });
 });
 
