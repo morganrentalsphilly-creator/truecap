@@ -218,7 +218,7 @@ export default async function MarketCityPage({
         name: `Is ${data.name} a good place to buy rental property in 2026?`,
         acceptedAnswer: {
           "@type": "Answer",
-          text: `${verdictLead} ${verdictDetail} Run any specific ${data.name} address through TrueCap for a full verdict — cap rate, cash flow, DSCR, and a 10-year projection — in about 60 seconds.`,
+          text: `${verdictLead} ${verdictDetail} Run a specific ${data.name} address through TrueCap's free core screen for cap rate, cash flow, DSCR, Deal Score, and a plain-English verdict. Pro adds the 10-year projection and other advanced outputs.`,
         },
       },
       {
@@ -234,7 +234,7 @@ export default async function MarketCityPage({
         name: `What's the average rent for a rental in ${data.name}?`,
         acceptedAnswer: {
           "@type": "Answer",
-          text: `A typical rental in ${data.name} runs about ${rentDisplay}${hud ? " (HUD Fair Market Rent, 2–3BR)" : " (estimate; varies by neighborhood, size, and condition)"}. TrueCap auto-fills HUD Fair Market Rent for the exact address you enter.`,
+          text: `A typical rental in ${data.name} runs about ${rentDisplay}${hud ? " (HUD Fair Market Rent, 2–3BR)" : " (estimate; varies by neighborhood, size, and condition)"}. When available, TrueCap uses the address to select the applicable HUD ZIP- or area-level rent benchmark; it is not a property-specific rent comp.`,
         },
       },
       {
@@ -328,12 +328,13 @@ export default async function MarketCityPage({
             </div>
           </div>
           <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
-            Rent is HUD Fair Market Rent where available, otherwise a market estimate; price is a market estimate. Cap-rate and tax are the defaults TrueCap applies — enter a specific address for exact, auto-filled numbers.
+            Rent is HUD Fair Market Rent where available, otherwise a market estimate; price is a market estimate. These are screening benchmarks, not parcel-level facts. Enter an address to load editable starting assumptions, then replace them with property-specific evidence.
           </p>
           <SourceMethodologyBox
             className="mt-4"
             sources={["HUD Fair Market Rent", "FRED 30-yr mortgage rate", "Tax Foundation (property tax)"]}
             updated="July 2026"
+            confidence="Market-level screening estimates; address entry selects applicable public benchmarks, not parcel-level facts. Replace them with property-specific evidence."
           />
         </section>
 
@@ -385,7 +386,7 @@ export default async function MarketCityPage({
               >
                 HUD FY{safmr.year} Small Area Fair Market Rents
               </a>
-              . TrueCap auto-fills the exact ZIP-level figure when you enter a {data.name} address.
+              . When an address maps to a covered ZIP, TrueCap uses its published ZIP-level benchmark as an editable starting point; it is not a property-specific rent comp.
             </p>
           </section>
         ) : null}
@@ -428,10 +429,10 @@ export default async function MarketCityPage({
             <TrendingUp className="size-6" /> Run a {data.name} deal in 60 seconds
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5">
-            Paste a {data.name} address into TrueCap and get cap rate, cash-on-cash, DSCR, cash flow, and a 10-year projection — auto-filled with {data.stateName} tax and HUD rent so you start from the right assumptions.
+            Enter a {data.name} address for TrueCap&apos;s free core screen: cap rate, cash-on-cash, DSCR, cash flow, Deal Score, and a plain-English verdict from editable screening assumptions. Pro adds the 10-year projection, illustrative tax impact, modeled exits, sensitivity, comparisons, and PDFs.
           </p>
-          <Link href="/" className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity">
-            Try TrueCap free <ArrowRight className="size-4" />
+          <Link href="/#main" className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity">
+            Open the free core screen <ArrowRight className="size-4" />
           </Link>
         </section>
 

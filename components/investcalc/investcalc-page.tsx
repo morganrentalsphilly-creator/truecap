@@ -71,6 +71,7 @@ import { STARTER_TEMPLATES, type StarterTemplate } from "@/lib/starter-templates
 import { buildTemplateFormPatch, type TemplateFormPatchEntry } from "@/lib/template-form-patch";
 import type { AnalysisTemplateOption } from "@/app/actions/analysis-templates";
 import { getStrategyByKey } from "@/lib/investor-strategies";
+import type { StrategyKind } from "@/lib/strategy-kinds";
 import { AnalyzerStepRail } from "./analyzer-step-rail";
 import {
   computeAnalyzerSteps,
@@ -80,6 +81,8 @@ import {
 import {
   ANALYZER_STRATEGY_EVENT,
   HANDOFF_STRATEGY_KEYS,
+  consumeEarlyAnalyzerHandoff,
+  mergeAnalyzerHandoffSearch,
   readAnalyzerHandoff,
   type AnalyzerStrategyEventDetail,
 } from "@/lib/analyzer-handoff";
@@ -211,6 +214,25 @@ const AnalysisDashboard = dynamic(
   }
 );
 let analysisDashboardPreloaded = false;
+
+function scenarioKindFromAnalyzerStrategy(key: string | null): StrategyKind | null {
+  switch (key) {
+    case "buy-hold":
+      return "buy_hold";
+    case "house-hack":
+      return "house_hack";
+    case "brrrr":
+      return "brrrr";
+    case "fix-flip":
+      return "flip";
+    case "short-term":
+      return "str";
+    default:
+      // Wholesale/MAO has no matching scenario vocabulary; never invent one.
+      return null;
+  }
+}
+
 function preloadAnalysisDashboard() {
   if (analysisDashboardPreloaded) return;
   analysisDashboardPreloaded = true;
@@ -922,6 +944,7 @@ export function InvestCalcPage({
    */
   const [restoredAddress, setRestoredAddress] = useState<string | null>(null);
   const [isSavingDeal, setIsSavingDeal] = useState(false);
+  const autoSaveAfterAuthRef = useRef(false);
   // Duplicate-address collision from the save flow. Non-null opens the
   // chooser dialog with the user's own colliding saved deal so they can
   // overwrite it or keep both as scenarios.
@@ -1117,6 +1140,14 @@ export function InvestCalcPage({
     defaultValues: buildNewAnalysisDefaults("single-family", userAnalysisDefaults),
     mode: "onChange",
   });
+
+  const persistDisplayedFormDraft = useCallback(() => {
+    try {
+      writeCalcDraftRaw(JSON.stringify(form.getValues()));
+    } catch {
+      /* Draft persistence is best-effort; auth navigation must remain available. */
+    }
+  }, [form]);
 
   const handleAppliedFinancingProfileChange = useCallback(
     (profile: FinancingProfileSnapshot | null) => {
@@ -2013,6 +2044,20 @@ export function InvestCalcPage({
       toast({ title: "Enter an address first", description: "Add the property address, then tap Autofill." });
       return;
     }
+    if (!isAuthenticated) {
+      // Preserve the exact in-progress property across the auth boundary.
+      // The normal draft watcher is debounced, so write synchronously before
+      // navigating and return with a non-sensitive intent flag.
+      try {
+        writeCalcDraftRaw(JSON.stringify(form.getValues()));
+      } catch {
+        /* storage unavailable — signup still works, only the draft may not */
+      }
+      router.push(
+        `/auth/sign-up?next=${encodeURIComponent("/?intent=autofill")}`
+      );
+      return;
+    }
     setIsAutofilling(true);
     try {
       const r = await getPropertyCompsAction({
@@ -2043,7 +2088,7 @@ export function InvestCalcPage({
     } finally {
       setIsAutofilling(false);
     }
-  }, [form, applyComps, toast]);
+  }, [form, applyComps, isAuthenticated, router, toast]);
 
   // Paste a Zillow/Redfin/Realtor link → parse the address from the URL slug
   // (we never fetch the page — those sites block bots with a captcha) and run it
@@ -2684,6 +2729,19 @@ export function InvestCalcPage({
     // Initialize from a one-time saved-analysis handoff when present; otherwise
     // start with a clean new-analysis state.
     isProgrammaticResetRef.current = true;
+    const initParams = new URLSearchParams(window.location.search);
+    const shouldResumeAutofill =
+      isAuthenticated && initParams.get("intent") === "autofill";
+    if (initParams.has("intent")) {
+      initParams.delete("intent");
+      window.history.replaceState(
+        window.history.state,
+        "",
+        `${window.location.pathname}${
+          initParams.toString() ? `?${initParams.toString()}` : ""
+        }${window.location.hash}`
+      );
+    }
     // Nonce-keyed handoff (see consumeSavedDealHandoffPayload): the opener
     // passes the payload's localStorage key nonce in the URL. Strip the
     // one-time params immediately so a reload (or a copied URL) never
@@ -3014,7 +3072,10 @@ export function InvestCalcPage({
     // Higher priority than a stale anon draft; prefills ONLY the provided
     // fields on top of defaults (partial handoffs like price+rent are
     // expected) and returns so the draft restore doesn't clobber them.
-    const handoff = readAnalyzerHandoff(window.location.search);
+    const earlyHandoffSearch = consumeEarlyAnalyzerHandoff(window);
+    const handoff = readAnalyzerHandoff(
+      mergeAnalyzerHandoffSearch(earlyHandoffSearch, window.location.search)
+    );
     if (handoff) {
       persistedInputConfidenceSourceContextRef.current = null;
       persistedInputConfidenceAddressRef.current = null;
@@ -3098,6 +3159,23 @@ export function InvestCalcPage({
           // pathologically long address can't blow out the layout.
           const addr = (normalized.address ?? "").trim();
           setRestoredAddress(addr ? addr.slice(0, 60) : null);
+          if (shouldResumeAutofill && addr) {
+            toast({
+              title: "Welcome back — getting property data",
+              description:
+                "Your draft is restored. We’re pulling property facts and rent comps now.",
+              variant: "success",
+            });
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => {
+                void handleAutofillFromAddress();
+              });
+            });
+            queueMicrotask(() => {
+              isProgrammaticResetRef.current = false;
+            });
+            return;
+          }
           // EXCEPTION to the no-auto-calculate contract below: the user
           // clicked SAVE while anonymous and just returned from auth
           // (pending-save-intent flag, set by the Save button's goToLogin).
@@ -3108,11 +3186,12 @@ export function InvestCalcPage({
           // conversion leak at the moment of highest intent. Double-RAF
           // mirrors the PDF-return flow: let RHF flush before submitting.
           if (isAuthenticated && consumePendingSaveIntent()) {
+            autoSaveAfterAuthRef.current = true;
             toast({
               title: "Welcome back — your deal is ready",
               description: addr
-                ? `Re-running your analysis for ${addr.slice(0, 60)}. Hit Save to keep it.`
-                : "Re-running your analysis. Hit Save to keep it.",
+                ? `Re-running and saving your analysis for ${addr.slice(0, 60)}.`
+                : "Re-running and saving your analysis now.",
               variant: "success",
             });
             requestAnimationFrame(() => {
@@ -3150,6 +3229,13 @@ export function InvestCalcPage({
 
     resetToNewAnalysis("single-family");
     setSavedTemplateFallback(null);
+    if (shouldResumeAutofill) {
+      toast({
+        title: "You’re signed in",
+        description:
+          "Choose a property address, then select Get property facts + rent comps.",
+      });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional one-time mount reset
   }, []);
 
@@ -3694,6 +3780,7 @@ export function InvestCalcPage({
     options: {
       existingIdOverride?: string;
       saveAsNewScenario?: boolean;
+      strategyKind?: StrategyKind | null;
       /** Ignore the attached savedDealId and insert a fresh deal — the
        *  loaded saved deal stays untouched. */
       forceInsert?: boolean;
@@ -3733,7 +3820,12 @@ export function InvestCalcPage({
         targetExistingId,
         confidenceContext.provenance,
         {
-          ...(options.saveAsNewScenario ? { saveAsNewScenario: true } : {}),
+          ...(options.saveAsNewScenario
+            ? {
+                saveAsNewScenario: true,
+                strategyKind: options.strategyKind ?? null,
+              }
+            : {}),
           ...(options.allowAddressChange ? { allowAddressChange: true } : {}),
           inputVerification,
           touchedInputFields: confidenceContext.touchedInputFields,
@@ -3852,7 +3944,7 @@ export function InvestCalcPage({
           description:
             result.mode === "updated"
               ? "Your saved analysis was updated with the latest inputs."
-              : "Saved — checklist, docs and notes now live in its workspace.",
+              : "Saved to My Deals. Open its workspace to review the analysis and notes.",
           variant: "success",
           // First save is the moment a user can learn the workspace
           // (checklist / docs / notes / scenarios) exists — don't dead-end
@@ -3887,6 +3979,7 @@ export function InvestCalcPage({
             <ToastAction
               altText="Create a free account and come back to this deal"
               onClick={() => {
+                persistDisplayedFormDraft();
                 setPendingSaveIntent();
                 // Sign-up, not login — anon savers are mostly first-timers;
                 // the sign-up page has a "Sign in" cross-link that keeps ?next.
@@ -4025,12 +4118,31 @@ export function InvestCalcPage({
 
   const handleSaveDeal = async () => performSaveDeal();
 
+  // The visitor already clicked Save before signup. Once the restored draft
+  // has successfully re-run, complete that exact intent without asking for a
+  // second Save click. Server-side limits and duplicate checks still apply.
+  useEffect(() => {
+    if (
+      !autoSaveAfterAuthRef.current ||
+      !analysisResult ||
+      isCalculating ||
+      isSavingDeal
+    ) {
+      return;
+    }
+    autoSaveAfterAuthRef.current = false;
+    void performSaveDeal();
+    // performSaveDeal intentionally uses the current render's validated form
+    // and result; this one-shot ref is armed only by the auth return flow.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [analysisResult, isCalculating, isSavingDeal]);
+
   /** A choice made in the duplicate-address dialog. "update" overwrites the
    *  colliding saved deal in place; "scenario" inserts a second analysis for
    *  the same address. Success closes the dialog inside performSaveDeal;
    *  failures surface as toasts and leave the dialog open to retry/cancel. */
   const handleDuplicateChoice = async (choice: DuplicateAddressChoice) => {
-    if (!duplicateCollision) return;
+    if (!duplicateCollision || !canUpdateSavedDeals) return;
     setDuplicateChoiceBusy(choice);
     try {
       await performSaveDeal(
@@ -4044,7 +4156,11 @@ export function InvestCalcPage({
             // path (which ignores saveAsNewScenario), and bounce back into
             // the ADDRESS_CHANGED dialog — a chooser loop. When no deal is
             // attached (the plain duplicate flow), forceInsert is a no-op.
-            { saveAsNewScenario: true, forceInsert: true }
+            {
+              saveAsNewScenario: true,
+              forceInsert: true,
+              strategyKind: scenarioKindFromAnalyzerStrategy(activeStrategyKey),
+            }
       );
     } finally {
       setDuplicateChoiceBusy(null);
@@ -5369,7 +5485,7 @@ export function InvestCalcPage({
                 "institutional-grade analysis…" subtitle collapsed into the
                 card's one-line signpost so the page reads as a single door. */}
             <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
-              Type an address — we fill the rest.
+              Choose an address for public rent, rate, and tax benchmarks. Sign in for property facts and rent comps.
             </p>
           </div>
           {/* Sample-deal button - anonymous visitors only, before any
@@ -5390,7 +5506,7 @@ export function InvestCalcPage({
                 <Sparkles className="size-4" />
                 Try a sample rental
               </span>
-              <span className="text-[11px] font-medium text-primary-foreground/80">
+              <span className="text-[11px] font-medium text-primary-foreground">
                 Preview a sample Pro report
               </span>
             </button>
@@ -5622,10 +5738,13 @@ export function InvestCalcPage({
                   onAddressSelected={handleAddressSelected}
                   onAutofillFromAddress={handleAutofillFromAddress}
                   isAutofilling={isAutofilling}
-                  // Show Autofill to anonymous users too — it's the clearest
-                  // expression of the core promise. The handler already returns a
-                  // graceful "Sign in to autofill" toast for signed-out users, so
-                  // the button becomes a sign-in CTA instead of being hidden.
+                  autofillLabel={
+                    isAuthenticated
+                      ? "Get property facts + rent comps"
+                      : "Sign up for property facts + rent comps"
+                  }
+                  // Anonymous visitors see a real signup handoff that preserves
+                  // their draft and resumes the lookup, never a dead error toast.
                   showAutofill={!autofillUnavailable}
                   // Year built is out of the hero for every mode (Phase 4) —
                   // it renders in the "Property extras" panel instead
@@ -6048,6 +6167,7 @@ export function InvestCalcPage({
               taxStrategySource={taxStrategySource}
               exitScenarioSource={exitScenarioSource}
               onSaveDeal={handleSaveDeal}
+              onPersistAnonymousDraft={persistDisplayedFormDraft}
               onCompareDeals={handleCompareDeals}
               onExportPdf={handleExportPdf}
               onNewAnalysis={handleNewAnalysis}
@@ -6123,6 +6243,7 @@ export function InvestCalcPage({
         }}
         existingTitle={duplicateCollision?.existingTitle}
         busyChoice={duplicateChoiceBusy}
+        canUpdateSavedDeals={canUpdateSavedDeals}
         onUpdateExisting={() => void handleDuplicateChoice("update")}
         onSaveAsScenario={() => void handleDuplicateChoice("scenario")}
       />

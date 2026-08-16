@@ -18,13 +18,16 @@ import { toServerErrorResult } from "@/lib/db-error";
  *
  * Tolerant of the migration (20260622130000_properties_scenarios) not being
  * applied: a missing table/column (42P01 / 42703) returns MIGRATION_PENDING.
- * Pro/paid not required beyond the existing save_deal entitlement.
+ * Saved scenario clones and strategy presets are Pro features. Every action
+ * checks the canonical paid-subscription entitlement before reading or
+ * mutating scenario data.
  */
 
 import { z } from "zod";
 import {
   getEntitlementsForUser,
   getSavedDealLimitLabel,
+  hasPaidPlanSubscription,
   hasPlanFeature,
   hasSavedDealCapacity,
 } from "@/lib/entitlements";
@@ -33,7 +36,7 @@ import { defaultScenarioName, isStrategyKind } from "@/lib/strategy-kinds";
 import { applyStrategyPreset } from "@/lib/scenario-presets";
 import { calculateAnalysis } from "@/lib/calc-analysis";
 import { normalizeInvestmentFormSnapshot } from "@/lib/investcalc-schema";
-import type { SupabaseClient } from "@supabase/supabase-js";
+import { resolveOwnedScenarioPropertyGroup } from "@/lib/scenario-property-group";
 
 export type ScenarioSummary = {
   id: string;
@@ -91,59 +94,6 @@ function dealAddress(row: { address?: string | null; form_snapshot?: Record<stri
   return typeof fromSnap === "string" && fromSnap.trim() ? fromSnap.trim() : null;
 }
 
-/** Ensure the source deal has a property, creating + linking one if needed. */
-async function resolvePropertyId(
-  supabase: SupabaseClient,
-  userId: string,
-  deal: DealRow
-): Promise<{ ok: true; propertyId: string } | { ok: false; result: AddScenarioResult }> {
-  if (deal.property_id) return { ok: true, propertyId: deal.property_id };
-
-  const address = dealAddress(deal);
-  if (!address) {
-    return { ok: false, result: { ok: false, code: "VALIDATION_ERROR", message: "This deal has no address to group scenarios under." } };
-  }
-
-  // Reuse an existing property at this address, else create one.
-  const { data: existing, error: findErr } = await supabase
-    .from("properties")
-    .select("id")
-    .eq("user_id", userId)
-    .eq("address", address)
-    .limit(1)
-    .maybeSingle();
-  if (findErr) {
-    return {
-      ok: false,
-      result: isMissingSchema(findErr)
-        ? { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." }
-        : toServerErrorResult(findErr, "scenarios"),
-    };
-  }
-
-  let propertyId = existing?.id as string | undefined;
-  if (!propertyId) {
-    const { data: created, error: createErr } = await supabase
-      .from("properties")
-      .insert({ user_id: userId, address })
-      .select("id")
-      .single();
-    if (createErr || !created) {
-      return {
-        ok: false,
-        result: isMissingSchema(createErr ?? {})
-          ? { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." }
-          : toServerErrorResult(createErr, "scenarios"),
-      };
-    }
-    propertyId = created.id as string;
-  }
-
-  // Link the source deal to the property (best-effort).
-  await supabase.from("saved_analyses").update({ property_id: propertyId }).eq("id", deal.id).eq("user_id", userId);
-  return { ok: true, propertyId };
-}
-
 /** List the scenarios that share a deal's property (including the deal itself). */
 export async function listScenariosAction(dealId: unknown): Promise<ScenariosListResult> {
   const parsed = z.string().uuid().safeParse(dealId);
@@ -154,6 +104,13 @@ export async function listScenariosAction(dealId: unknown): Promise<ScenariosLis
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in." };
+  if (!(await hasPaidPlanSubscription(supabase, user.id))) {
+    return {
+      ok: false,
+      code: "ENTITLEMENT_REQUIRED",
+      message: "Saved scenarios are available with TrueCap Pro.",
+    };
+  }
 
   const { data: deal, error } = await supabase
     .from("saved_analyses")
@@ -226,6 +183,13 @@ export async function addScenarioAction(input: unknown): Promise<AddScenarioResu
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in." };
+  if (!(await hasPaidPlanSubscription(supabase, user.id))) {
+    return {
+      ok: false,
+      code: "ENTITLEMENT_REQUIRED",
+      message: "Saved scenarios are available with TrueCap Pro.",
+    };
+  }
 
   const entitlements = await getEntitlementsForUser(supabase, user.id);
   if (!hasPlanFeature(entitlements, "save_deal")) {
@@ -248,9 +212,18 @@ export async function addScenarioAction(input: unknown): Promise<AddScenarioResu
   if (!source) return { ok: false, code: "NOT_FOUND", message: "Source deal not found." };
 
   const deal = source as DealRow;
-  const resolved = await resolvePropertyId(supabase, user.id, deal);
-  if (!resolved.ok) return resolved.result;
-  const propertyId = resolved.propertyId;
+  let propertyId: string;
+  try {
+    propertyId = await resolveOwnedScenarioPropertyGroup({
+      supabase,
+      userId: user.id,
+      source: deal,
+    });
+  } catch (error) {
+    return isMissingSchema(error as { code?: string; message?: string })
+      ? { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." }
+      : toServerErrorResult(error, "scenarios");
+  }
 
   const strategyKind = isStrategyKind(parsed.data.strategyKind) ? parsed.data.strategyKind : null;
   const scenarioName = (parsed.data.scenarioName?.trim() || defaultScenarioName(strategyKind)).slice(0, 80);
@@ -301,6 +274,21 @@ export async function addScenarioAction(input: unknown): Promise<AddScenarioResu
   clone.property_id = propertyId;
   clone.scenario_name = scenarioName;
   clone.strategy_kind = strategyKind;
+  // A clone is a fresh, active underwriting scenario. Source lifecycle state
+  // must not make it closed, archived, or stale the instant it is created.
+  clone.is_completed = false;
+  clone.is_archived = false;
+  clone.close_date = null;
+  clone.last_activity_at = new Date().toISOString();
+  // A scenario starts as an underwriting alternative, not as a second copy
+  // of the source deal's CRM state. Never inherit paid workflow metadata —
+  // especially client ownership, which could expose an Agent Pro buyer after
+  // a downgrade or tier change. The user can deliberately apply these fields
+  // to the new row through their independently gated actions.
+  clone.pipeline_stage = null;
+  clone.tags = [];
+  clone.template_id = null;
+  clone.client_id = null;
   // Never inherit the source deal's cached PDF: the export cache checks only
   // pdf_url presence + version (no input hash), so a carried-over URL would
   // serve the BASE case's report for this scenario. Same reset saveDealAction

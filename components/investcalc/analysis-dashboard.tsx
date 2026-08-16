@@ -174,6 +174,8 @@ interface AnalysisDashboardProps {
     initialYears: ExitScenarioYear[];
   } | null;
   onSaveDeal: () => void | Promise<void>;
+  /** Persist the parent's live form synchronously before anonymous auth navigation. */
+  onPersistAnonymousDraft: () => void;
   onCompareDeals: () => void | Promise<void>;
   onExportPdf: (mode?: ReportMode) => void | Promise<void>;
   onNewAnalysis: () => void | Promise<void>;
@@ -356,6 +358,7 @@ export function AnalysisDashboard({
   taxStrategySource,
   exitScenarioSource,
   onSaveDeal,
+  onPersistAnonymousDraft,
   onCompareDeals,
   onExportPdf,
   onNewAnalysis,
@@ -610,15 +613,19 @@ export function AnalysisDashboard({
   // auto-saved form draft restores their analysis instead of landing them on
   // a blank homepage with their work seemingly gone. The pending-save-intent
   // flag upgrades that restore: because the user explicitly clicked SAVE
-  // before auth, the calculator auto-runs their analysis on return and points
-  // them back at Save — completing the click they already made instead of
-  // asking them to redo it (goToLogin's only caller is the Save button).
+  // before auth, the calculator auto-runs and saves their analysis on return —
+  // completing the click they already made instead of asking them to redo it
+  // (goToLogin's only caller is the Save button).
   // Route to SIGN-UP, not login: an anonymous saver is overwhelmingly a
   // first-time visitor, and the login page's "Welcome back" framing was
   // a wall at their highest-intent moment. Sign-up leads with one-tap
   // Google OAuth and keeps a "Sign in" cross-link (which threads ?next)
   // for the rare returning user.
   const goToLogin = () => {
+    // Programmatic handoffs intentionally suppress the parent's debounced
+    // draft watcher. Snapshot the values visible right now before the intent
+    // flag or navigation can cross the auth boundary.
+    onPersistAnonymousDraft();
     setPendingSaveIntent();
     router.push("/auth/sign-up?next=/");
   };

@@ -21,14 +21,18 @@ import { trackEvent } from "@/lib/analytics";
 import { decidePricingCardCta } from "@/lib/billing-plan-cta";
 import { TRIAL_DAYS, willCheckoutGrantTrial } from "@/lib/trial";
 import { featuresForTier } from "@/lib/entitlements-catalog";
+import {
+  buildPricingPriceAvailability,
+  parseDisplayPriceAmount,
+} from "@/lib/pricing-price-availability";
 
 type ResolvedPrice = { amountLabel: string; period: string } | null;
 
 interface PricingTogglePlansProps {
   monthly: ResolvedPrice;
   annual: ResolvedPrice;
-  /** Agent Pro prices — null until STRIPE_PRICE_AGENT_PRO_* is configured,
-   *  which keeps the tier fully plumbed but invisible (two-card layout). */
+  /** Agent Pro prices can be null when unconfigured or temporarily unavailable;
+   *  agentProConfigured distinguishes those cases for tier visibility. */
   agentMonthly?: ResolvedPrice;
   agentAnnual?: ResolvedPrice;
   isAuthenticated: boolean;
@@ -160,12 +164,6 @@ const PRO_DECISION_ANSWERS = [
 ] as const;
 
 
-function parsePriceAmount(p: ResolvedPrice): number | null {
-  if (!p) return null;
-  const match = p.amountLabel.match(/[\d.]+/);
-  return match ? Number(match[0]) : null;
-}
-
 export function PricingTogglePlans({
   monthly,
   annual,
@@ -206,8 +204,14 @@ export function PricingTogglePlans({
     trackEvent("pricing_viewed", properties);
   }, []);
 
-  const monthlyAmount = parsePriceAmount(monthly);
-  const annualAmount = parsePriceAmount(annual);
+  const monthlyAmount = parseDisplayPriceAmount(monthly);
+  const annualAmount = parseDisplayPriceAmount(annual);
+  const priceAvailability = buildPricingPriceAvailability({
+    pro_monthly: monthly,
+    pro_annual: annual,
+    agent_pro_monthly: agentMonthly,
+    agent_pro_annual: agentAnnual,
+  });
 
   // Derived display values
   const annualMonthlyEquivalent =
@@ -228,37 +232,40 @@ export function PricingTogglePlans({
       ? Math.max(0, Math.round(monthlyAmount * 12 - annualAmount))
       : null;
 
-  // Agent Pro exists on the page only when its price resolved (env configured).
+  // A configured Agent Pro tier stays visible through a transient price-load
+  // failure; the selected slot then renders the explicit unavailable state.
   const showAgentPro = agentProConfigured || agentMonthly != null || agentAnnual != null;
-  const agentMonthlyAmount = parsePriceAmount(agentMonthly);
-  const agentAnnualAmount = parsePriceAmount(agentAnnual);
+  const agentMonthlyAmount = parseDisplayPriceAmount(agentMonthly);
+  const agentAnnualAmount = parseDisplayPriceAmount(agentAnnual);
   const agentAnnualMonthlyEquivalent = agentAnnualAmount != null ? agentAnnualAmount / 12 : null;
   const agentCard =
-    period === "monthly" || agentAnnual == null
+    period === "monthly"
       ? {
-          priceTop: agentMonthly?.amountLabel ?? "Agent Pro",
-          priceSub: agentMonthly ? `/${agentMonthly.period}` : "/month",
-          subline: "billed monthly",
+          priceTop: agentMonthlyAmount != null ? agentMonthly!.amountLabel : null,
+          priceSub: agentMonthlyAmount != null ? `/${agentMonthly!.period}` : null,
+          subline: agentMonthlyAmount != null ? "billed monthly" : null,
           slot: "agent_pro_monthly" as const,
+          available: agentMonthlyAmount != null,
         }
       : {
           priceTop:
             agentAnnualMonthlyEquivalent != null
               ? `$${agentAnnualMonthlyEquivalent.toFixed(agentAnnualMonthlyEquivalent % 1 === 0 ? 0 : 2)}`
-              : (agentAnnual?.amountLabel ?? "Agent Pro"),
-          priceSub: "/month",
-          subline: agentAnnual?.amountLabel ? `billed annually (${agentAnnual.amountLabel})` : "billed annually",
+              : null,
+          priceSub: agentAnnualMonthlyEquivalent != null ? "/month" : null,
+          subline: agentAnnualMonthlyEquivalent != null ? `billed annually (${agentAnnual!.amountLabel})` : null,
           slot: "agent_pro_annual" as const,
+          available: agentAnnualMonthlyEquivalent != null,
         };
-  void agentMonthlyAmount;
 
   const proCard =
     period === "monthly"
       ? {
-          priceTop: monthly?.amountLabel ?? proOfferName,
-          priceSub: monthly ? `/${monthly.period}` : "/month",
-          subline: monthly ? "billed monthly" : "monthly billing",
+          priceTop: monthlyAmount != null ? monthly!.amountLabel : null,
+          priceSub: monthlyAmount != null ? `/${monthly!.period}` : null,
+          subline: monthlyAmount != null ? "billed monthly" : null,
           slot: "pro_monthly" as const,
+          available: monthlyAmount != null,
         }
       : {
           priceTop:
@@ -266,13 +273,14 @@ export function PricingTogglePlans({
               ? `$${annualMonthlyEquivalent.toFixed(
                   annualMonthlyEquivalent % 1 === 0 ? 0 : 2
                 )}`
-              : (annual?.amountLabel ?? proOfferName),
-          priceSub: "/month",
+              : null,
+          priceSub: annualMonthlyEquivalent != null ? "/month" : null,
           subline:
-            annual?.amountLabel
-              ? `billed annually (${annual.amountLabel})`
-              : "billed annually",
+            annualMonthlyEquivalent != null
+              ? `billed annually (${annual!.amountLabel})`
+              : null,
           slot: "pro_annual" as const,
+          available: annualMonthlyEquivalent != null,
         };
   const proCardDecision = decidePricingCardCta(activePaidPlanSlug, proCard.slot);
   const agentCardDecision = decidePricingCardCta(activePaidPlanSlug, agentCard.slot);
@@ -327,6 +335,7 @@ export function PricingTogglePlans({
               isAuthenticated={isAuthenticated}
               activePaidPlanSlug={activePaidPlanSlug}
               hadPriorSubscription={hadPriorSubscription}
+              priceAvailability={priceAvailability}
             />
           </div>
           <ul className="mt-6 space-y-2.5">
@@ -351,7 +360,7 @@ export function PricingTogglePlans({
                   className={
                     f.included
                       ? "text-foreground"
-                      : "text-muted-foreground/60 line-through"
+                      : "text-muted-foreground line-through"
                   }
                 >
                   {f.label}
@@ -379,7 +388,7 @@ export function PricingTogglePlans({
               recommended option visually obvious. The default-selected
               annual + this ribbon together do the work of telling the
               user which to pick. */}
-          {period === "annual" ? (
+          {period === "annual" && proCard.available ? (
             <span className="absolute right-4 top-4 rounded-full bg-[var(--brand-green,#16a34a)]/10 px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-widest text-[var(--brand-green,#16a34a)]">
               ★ Best value
             </span>
@@ -437,14 +446,25 @@ export function PricingTogglePlans({
             </button>
           </div>
 
-          <div className="mt-5 flex items-baseline gap-1.5">
-            <span className="font-mono text-4xl font-extrabold tabular-nums tracking-tight text-foreground sm:text-5xl">
-              {proCard.priceTop}
-            </span>
-            <span className="text-sm text-muted-foreground">{proCard.priceSub}</span>
-          </div>
-          <div className="mt-1 text-xs text-muted-foreground">{proCard.subline}</div>
-          <div className="mt-3 flex justify-center">
+          {proCard.available ? (
+            <>
+              <div className="mt-5 flex items-baseline gap-1.5">
+                <span className="font-mono text-4xl font-extrabold tabular-nums tracking-tight text-foreground sm:text-5xl">
+                  {proCard.priceTop}
+                </span>
+                <span className="text-sm text-muted-foreground">{proCard.priceSub}</span>
+              </div>
+              <div className="mt-1 text-xs text-muted-foreground">{proCard.subline}</div>
+            </>
+          ) : (
+            <div role="status" className="mt-5 rounded-xl border border-border bg-muted/35 p-3">
+              <p className="text-sm font-bold text-foreground">Price temporarily unavailable</p>
+              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                We couldn&apos;t load the selected Stripe price. Retry below before checkout.
+              </p>
+            </div>
+          )}
+          {proCard.available ? <div className="mt-3 flex justify-center">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--metric-positive)]/12 px-3 py-1 text-xs font-extrabold uppercase tracking-wide text-[var(--metric-positive)]">
               <Sparkles className="size-3" />{
                 verifiedTrialEligible
@@ -454,7 +474,7 @@ export function PricingTogglePlans({
                     : "Full Pro access"
               }
             </span>
-          </div>
+          </div> : null}
 
           <div className="mt-4 rounded-2xl border border-primary/20 bg-primary/[0.045] p-4">
             <p className="text-xs font-extrabold uppercase tracking-widest text-primary">
@@ -471,13 +491,15 @@ export function PricingTogglePlans({
           </div>
           <div className="mt-5">
             <PricingPlanButtons
+              key={proCard.slot}
               slot={proCard.slot}
               isAuthenticated={isAuthenticated}
               activePaidPlanSlug={activePaidPlanSlug}
               hadPriorSubscription={hadPriorSubscription}
+              priceAvailability={priceAvailability}
             />
           </div>
-          {!isPaid ? (
+          {!isPaid && proCard.available ? (
             <PricingTrialTerms
               isAuthenticated={isAuthenticated}
               verifiedTrialEligible={verifiedTrialEligible}
@@ -530,14 +552,25 @@ export function PricingTogglePlans({
             <p className="mt-1 text-sm text-muted-foreground">
               Run every client&rsquo;s buy box. Send co-branded deals that come back to you.
             </p>
-            <div className="mt-5 flex items-baseline gap-1.5">
-              <span className="font-mono text-4xl font-extrabold tabular-nums tracking-tight text-foreground sm:text-5xl">
-                {agentCard.priceTop}
-              </span>
-              <span className="text-sm text-muted-foreground">{agentCard.priceSub}</span>
-            </div>
-            <div className="mt-1 text-xs text-muted-foreground">{agentCard.subline}</div>
-            <div className="mt-3 flex justify-center">
+            {agentCard.available ? (
+              <>
+                <div className="mt-5 flex items-baseline gap-1.5">
+                  <span className="font-mono text-4xl font-extrabold tabular-nums tracking-tight text-foreground sm:text-5xl">
+                    {agentCard.priceTop}
+                  </span>
+                  <span className="text-sm text-muted-foreground">{agentCard.priceSub}</span>
+                </div>
+                <div className="mt-1 text-xs text-muted-foreground">{agentCard.subline}</div>
+              </>
+            ) : (
+              <div role="status" className="mt-5 rounded-xl border border-border bg-muted/35 p-3">
+                <p className="text-sm font-bold text-foreground">Price temporarily unavailable</p>
+                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                  We couldn&apos;t load the selected Stripe price. Retry below before checkout.
+                </p>
+              </div>
+            )}
+            {agentCard.available ? <div className="mt-3 flex justify-center">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-extrabold uppercase tracking-wide text-primary">
                 <Sparkles className="size-3" />{
                   verifiedTrialEligible
@@ -547,16 +580,18 @@ export function PricingTogglePlans({
                       : "Agent Pro access"
                 }
               </span>
-            </div>
+            </div> : null}
             <div className="mt-5">
               <PricingPlanButtons
+                key={agentCard.slot}
                 slot={agentCard.slot}
                 isAuthenticated={isAuthenticated}
                 activePaidPlanSlug={activePaidPlanSlug}
                 hadPriorSubscription={hadPriorSubscription}
+                priceAvailability={priceAvailability}
               />
             </div>
-            {!isPaid ? (
+            {!isPaid && agentCard.available ? (
               <PricingTrialTerms
                 isAuthenticated={isAuthenticated}
                 verifiedTrialEligible={verifiedTrialEligible}

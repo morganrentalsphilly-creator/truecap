@@ -380,13 +380,13 @@ export default function CapRateCalculatorPage() {
             <h2 className="text-xl sm:text-2xl font-extrabold mb-2">
               Run the full analysis — free
             </h2>
-            <p className="text-sm sm:text-base opacity-90 mb-4">
+            <p className="text-sm sm:text-base mb-4">
               Cap rate is a great filter, but real underwriting needs cash
               flow, cash-on-cash, DSCR, 10-year projections, tax savings,
               exit scenarios, and a Deal Score. TrueCap does all of it from
               the same property inputs you used here.
             </p>
-            <ul className="text-sm space-y-1.5 mb-5 opacity-90">
+            <ul className="text-sm space-y-1.5 mb-5">
               {[
                 "Cash flow, cap rate, CoC, DSCR — auto-calculated",
                 "10-year projection with rent + expense growth (Pro)",

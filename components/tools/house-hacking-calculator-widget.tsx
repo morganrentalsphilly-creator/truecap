@@ -263,7 +263,7 @@ export function HouseHackingCalculatorWidget() {
         className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline"
       >
         <Sparkles className="w-4 h-4" />
-        Run the full house-hack underwrite — per-unit rents, cash flow, year-2 move-out — free in TrueCap
+        Open the free core deal screen — Pro adds the dedicated house-hack workflow and year-2 move-out model
         <ArrowUpRight className="w-4 h-4" />
       </Link>
     </div>

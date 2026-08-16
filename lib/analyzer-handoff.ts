@@ -3,8 +3,10 @@
  *
  * A /tools calculator (or an embed of one) can carry the numbers the user
  * already typed into the full TrueCap analyzer, so they don't re-enter them.
- * We pass them as URL query params (?price=&rent=&beds=&address=) rather than
- * localStorage so the handoff works cross-origin from embeds too.
+ * Links may initially carry URL query params (?price=&rent=&beds=&address=)
+ * so handoffs work cross-origin from embeds. A synchronous head bootstrap
+ * captures those values and removes them before telemetry loads; the analyzer
+ * consumes the short-lived same-tab copy below.
  *
  * Pure + dependency-free so it's unit-testable and safe to import on both the
  * client widgets (build the URL) and the analyzer (read the params).
@@ -42,6 +44,80 @@ export const HANDOFF_STRATEGY_KEYS: readonly HandoffStrategyKey[] = [
   "fix-flip",
   "short-term",
 ];
+
+export const ANALYZER_HANDOFF_PRIVATE_QUERY_NAMES = Object.freeze([
+  "price",
+  "rent",
+  "beds",
+  "address",
+] as const);
+
+export const EARLY_ANALYZER_HANDOFF_KEY = "truecap:analyzer-handoff-v1";
+const EARLY_ANALYZER_HANDOFF_MAX_AGE_MS = 10 * 60 * 1000;
+
+type EarlyAnalyzerHandoffState = {
+  v: 1;
+  search: string;
+  capturedAt: number;
+};
+
+type AnalyzerHandoffWindow = Pick<Window, "sessionStorage"> & {
+  __truecapAnalyzerHandoffSearch?: string;
+};
+
+/**
+ * Runs while the document head is parsed, before analytics components mount.
+ * Private deal inputs are copied to same-tab storage and immediately removed
+ * from browser history/referrers. Campaign + strategy parameters remain.
+ */
+export function analyzerHandoffBootstrapScript(): string {
+  return `(function(){var n=${JSON.stringify(ANALYZER_HANDOFF_PRIVATE_QUERY_NAMES)},k=${JSON.stringify(EARLY_ANALYZER_HANDOFF_KEY)};try{var u=new URL(window.location.href);if(u.pathname!=='/')return;var q=new URLSearchParams(),f=false;n.forEach(function(x){u.searchParams.getAll(x).forEach(function(v){q.append(x,v);f=true;});u.searchParams.delete(x);});if(!f)return;var s=q.toString(),p={v:1,search:s,capturedAt:Date.now()};window.__truecapAnalyzerHandoffSearch=s;try{window.sessionStorage.setItem(k,JSON.stringify(p));}catch(_storageError){}window.history.replaceState(window.history.state,'',u.pathname+u.search+u.hash);}catch(_error){try{if(window.location.pathname!=='/')return;var p2=new URLSearchParams(window.location.search);n.forEach(function(x){p2.delete(x);});window.history.replaceState(window.history.state,'',window.location.pathname+(p2.toString()?'?'+p2.toString():'')+window.location.hash);}catch(_ignored){}}})();`;
+}
+
+/** Consume the bootstrap payload once; stale/corrupt storage fails closed. */
+export function consumeEarlyAnalyzerHandoff(
+  target: AnalyzerHandoffWindow,
+  now = Date.now()
+): string {
+  const inMemory = target.__truecapAnalyzerHandoffSearch;
+  delete target.__truecapAnalyzerHandoffSearch;
+
+  let stored: string | null = null;
+  try {
+    stored = target.sessionStorage.getItem(EARLY_ANALYZER_HANDOFF_KEY);
+    target.sessionStorage.removeItem(EARLY_ANALYZER_HANDOFF_KEY);
+  } catch {
+    // The head bootstrap also keeps an in-memory copy for storage-blocked tabs.
+  }
+
+  if (inMemory) return inMemory;
+  if (!stored) return "";
+  try {
+    const parsed = JSON.parse(stored) as Partial<EarlyAnalyzerHandoffState>;
+    if (
+      parsed.v !== 1 ||
+      typeof parsed.search !== "string" ||
+      typeof parsed.capturedAt !== "number" ||
+      now - parsed.capturedAt < 0 ||
+      now - parsed.capturedAt > EARLY_ANALYZER_HANDOFF_MAX_AGE_MS
+    ) {
+      return "";
+    }
+    return parsed.search;
+  } catch {
+    return "";
+  }
+}
+
+export function mergeAnalyzerHandoffSearch(
+  earlySearch: string,
+  currentSearch: string
+): string {
+  const merged = new URLSearchParams(earlySearch);
+  const current = new URLSearchParams(currentSearch);
+  for (const [key, value] of current.entries()) merged.set(key, value);
+  return merged.toString();
+}
 
 export interface AnalyzerHandoff {
   /** Maps to purchasePrice. */

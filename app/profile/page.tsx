@@ -133,7 +133,7 @@ export default async function ProfilePage({
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/auth/login");
+    redirect("/auth/login?next=%2Fprofile");
   }
 
   const [{ data: profile }, { data: subscription }, { data: planRows }] = await Promise.all([

@@ -9,6 +9,8 @@ import { TrueCapVercelAnalytics } from '@/components/analytics/vercel-analytics'
 import { OverlayRecovery } from '@/components/ui/overlay-recovery'
 import { getSiteUrl } from '@/lib/site-url'
 import { oneTimePdfReturnBootstrapScript } from '@/lib/one-time-pdf-return'
+import { analyzerHandoffBootstrapScript } from '@/lib/analyzer-handoff'
+import { subscriptionCheckoutReturnBootstrapScript } from '@/lib/subscription-checkout-return'
 import './globals.css'
 
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -160,6 +162,20 @@ export default function RootLayout({
         <script
           id="one-time-pdf-return-bootstrap"
           dangerouslySetInnerHTML={{ __html: oneTimePdfReturnBootstrapScript() }}
+        />
+        {/* Calculator/batch handoffs can arrive with a property address and
+            underwriting inputs. Capture them for this tab and remove them
+            from history/referrers before any measurement script executes. */}
+        <script
+          id="analyzer-handoff-bootstrap"
+          dangerouslySetInnerHTML={{ __html: analyzerHandoffBootstrapScript() }}
+        />
+        {/* Stripe subscription returns include a Checkout Session id. The
+            server may use it while rendering, then this head bootstrap moves
+            it to same-tab memory before Google or any pageview can read it. */}
+        <script
+          id="subscription-checkout-return-bootstrap"
+          dangerouslySetInnerHTML={{ __html: subscriptionCheckoutReturnBootstrapScript() }}
         />
         {process.env.NODE_ENV === 'production' && (
           <>

@@ -81,7 +81,7 @@ const FAQS: { q: string; a: string }[] = [
     // version claimed downgraded users lose both creating AND updating — the
     // creating half was false while under the cap
     // (pricing-copy-guards.test.ts locks this).
-    a: "Yes. Your saved deals and PDF exports never leave your account. On Free you'll lose the ability to edit them — and new saves cap at Free's 5-deal limit — but everything is still readable.",
+    a: "Yes. Your saved deals and PDF exports never leave your account. On Free you can open a saved deal and test changes, but saving updates to that existing deal requires Pro. You can still create new saves until you reach Free's 5-deal limit, and everything remains readable.",
   },
   {
     q: "How accurate is the auto-fill?",
@@ -388,6 +388,9 @@ export default async function PricingPage() {
                   rent/rate thresholds, assumptions, verdict, downside scenario,
                   10-year projection, illustrative tax-impact view, and modeled exit comparisons. No subscription.
                   Use Pro for the repeat decision workflow.
+                </p>
+                <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+                  One generation for these exact inputs. Complete checkout and return in this same browser tab within 30 days. No account or cloud copy is created.
                 </p>
               </div>
               <Link

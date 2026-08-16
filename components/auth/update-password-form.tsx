@@ -1,14 +1,18 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Eye, EyeOff, Loader2, Lock } from "lucide-react";
 import { updatePasswordAction } from "@/app/actions/auth";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
-import { updatePasswordSchema, type UpdatePasswordInput } from "@/lib/auth-schema";
+import {
+  internalNextPathOrNull,
+  updatePasswordSchema,
+  type UpdatePasswordInput,
+} from "@/lib/auth-schema";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -23,6 +27,7 @@ import { useToast } from "@/hooks/use-toast";
 
 export function UpdatePasswordForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [sessionReady, setSessionReady] = useState<boolean | null>(null);
@@ -35,11 +40,26 @@ export function UpdatePasswordForm() {
     mode: "onTouched",
   });
 
+  // The recovery callback has already established a real Supabase session.
+  // Validate its nested return path again at the last consumer and use the
+  // dashboard as the recovery-specific fallback (rather than the homepage).
+  const safeNextPath = internalNextPathOrNull(searchParams.get("next")) ?? "/dashboard";
+  const encodedNextPath = encodeURIComponent(safeNextPath);
+
   useEffect(() => {
     const supabase = createBrowserSupabaseClient();
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setSessionReady(!!user);
-    });
+    let cancelled = false;
+    void supabase.auth
+      .getUser()
+      .then(({ data: { user } }) => {
+        if (!cancelled) setSessionReady(!!user);
+      })
+      .catch(() => {
+        if (!cancelled) setSessionReady(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   async function onSubmit(values: UpdatePasswordInput) {
@@ -58,9 +78,9 @@ export function UpdatePasswordForm() {
 
       toast({
         title: "Password updated",
-        description: "You can sign in with your new password.",
+        description: "You're signed in. Continuing where you left off.",
       });
-      router.push("/auth/login");
+      router.replace(safeNextPath);
       router.refresh();
     } catch {
       // A thrown action here strands the user mid-reset on a one-time link
@@ -83,10 +103,10 @@ export function UpdatePasswordForm() {
           password page.
         </p>
         <Button variant="outline" className="h-12 w-full rounded-xl" asChild>
-          <Link href="/auth/forgot-password">Forgot password</Link>
+          <Link href={`/auth/forgot-password?next=${encodedNextPath}`}>Forgot password</Link>
         </Button>
         <Button variant="ghost" className="h-12 w-full rounded-xl" asChild>
-          <Link href="/auth/login">Sign in</Link>
+          <Link href={`/auth/login?next=${encodedNextPath}`}>Sign in</Link>
         </Button>
       </div>
     );
@@ -124,7 +144,7 @@ export function UpdatePasswordForm() {
                 <button
                   type="button"
                   onClick={() => setShowPassword((value) => !value)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
+                  className="absolute right-0.5 top-1/2 flex size-11 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
@@ -156,7 +176,7 @@ export function UpdatePasswordForm() {
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword((value) => !value)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
+                  className="absolute right-0.5 top-1/2 flex size-11 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                   aria-label={showConfirmPassword ? "Hide password" : "Show password"}
                 >
                   {showConfirmPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}

@@ -30,7 +30,7 @@ export default async function SettingsPage() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/auth/login");
+    redirect("/auth/login?next=%2Fsettings");
   }
 
   const entitlements = await getEntitlementsForUser(supabase, user.id);

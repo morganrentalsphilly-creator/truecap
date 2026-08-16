@@ -55,6 +55,7 @@ import { BillingConversionTracker } from "@/components/marketing/billing-convers
 import { isProActiveAction } from "@/app/actions/billing";
 import { setPostCheckoutUpsellSuppression } from "@/hooks/use-post-checkout-upsell-suppression";
 import { scrollBehavior } from "@/lib/utils";
+import { consumeSubscriptionCheckoutReturn } from "@/lib/subscription-checkout-return";
 
 /** First check fires immediately, then ~2s apart up to 10 total ≈ an 18s
  *  window — generous next to the webhook's typical 1-2s, cheap enough not
@@ -82,10 +83,16 @@ export function BillingSuccessBanner({
   // history.replaceState), and the tracker/banner must not see them vanish
   // mid-flight. State (not a ref) so reading the captured values during
   // render is legal (react-hooks/refs).
-  const [{ billing, sessionId }] = useState(() => ({
-    billing: searchParams.get("billing"),
-    sessionId: searchParams.get("session_id"),
-  }));
+  const [{ billing, sessionId }] = useState(() => {
+    const captured =
+      typeof window === "undefined"
+        ? null
+        : consumeSubscriptionCheckoutReturn(window);
+    return {
+      billing: captured?.billing ?? searchParams.get("billing"),
+      sessionId: captured?.sessionId ?? searchParams.get("session_id"),
+    };
+  });
 
   const [showBanner, setShowBanner] = useState(false);
   // Flips true the moment the poll sees the subscription row — upgrades the

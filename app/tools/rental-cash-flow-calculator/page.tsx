@@ -81,7 +81,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Why does my lender's DSCR look different from my cash flow?",
-    a: "DSCR is NOI divided by debt service — it excludes the CapEx reserve and doesn't care about your down payment beyond how it sizes the loan. A deal can have positive cash flow but a DSCR below the 1.25 most lenders want, or vice versa. This calculator shows both so you can see the deal the way you'll experience it (cash flow) and the way a lender will underwrite it (DSCR).",
+    a: "DSCR is NOI divided by debt service. This calculator excludes the CapEx reserve from NOI, while a specific lender may use a different rent, vacancy, expense, and debt-service formula. Down payment still changes loan size and therefore debt service. Compare the result with the lender's current written method and threshold.",
   },
 ];
 

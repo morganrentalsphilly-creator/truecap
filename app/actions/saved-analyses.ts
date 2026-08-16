@@ -61,6 +61,8 @@ import {
   snapshotFinancingProfile,
   type FinancingProfileSnapshot,
 } from "@/lib/financing-profiles";
+import { resolveOwnedScenarioPropertyGroup } from "@/lib/scenario-property-group";
+import { isStrategyKind } from "@/lib/strategy-kinds";
 
 export type SaveDealResult =
   | { ok: true; id: string; mode: "inserted" | "updated" }
@@ -239,27 +241,49 @@ function buildEditFormSnapshotFromRow(row: Record<string, unknown>): Record<stri
  * expression the `saved_analyses_address_taken` RPC checks
  * (lower/trim of form_snapshot->>'address') so the rows surfaced here are
  * exactly the rows the duplicate guard flagged. RLS-scoped via the caller's
- * client + explicit user_id filter; a query error degrades to "no match".
+ * client + explicit user_id filter. Ordinary chooser lookups may degrade to
+ * "no match"; scenario writes opt into throwing so database errors fail closed.
  */
 async function findSavedAnalysesByAddress(
   supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>,
   userId: string,
-  address: string
-): Promise<Array<{ id: string; title: string | null }>> {
+  address: string,
+  options: { throwOnError?: boolean } = {}
+): Promise<
+  Array<{
+    id: string;
+    title: string | null;
+    propertyId: string | null;
+    scenarioName: string | null;
+    address: string | null;
+    formSnapshot: Record<string, unknown> | null;
+  }>
+> {
   const { data, error } = await supabase
     .from("saved_analyses")
-    .select("id, title, form_address:form_snapshot->>address")
+    .select("id, title, address, property_id, scenario_name, form_snapshot, form_address:form_snapshot->>address")
     .eq("user_id", userId)
     .is("deleted_at", null)
     // Oldest first so [0] is the original deal when scenarios already exist.
     .order("created_at", { ascending: true });
 
-  if (error || !data) return [];
+  if (error) {
+    if (options.throwOnError) throw error;
+    return [];
+  }
+  if (!data) return [];
 
   const needle = address.trim().toLowerCase();
   return (data as Array<Record<string, unknown>>)
     .filter((row) => (dbString(row.form_address) ?? "").trim().toLowerCase() === needle)
-    .map((row) => ({ id: String(row.id), title: dbString(row.title) ?? null }));
+    .map((row) => ({
+      id: String(row.id),
+      title: dbString(row.title) ?? null,
+      propertyId: dbString(row.property_id) ?? null,
+      scenarioName: dbString(row.scenario_name) ?? null,
+      address: dbString(row.address) ?? dbString(row.form_address) ?? null,
+      formSnapshot: asRecord(row.form_snapshot),
+    }));
 }
 
 const provenanceFieldSchema = z.object({
@@ -358,8 +382,8 @@ export async function saveDealAction(
   existingId?: string | null,
   provenanceInput?: unknown,
   // saveAsNewScenario: explicit choice from the duplicate-address dialog -
-  // skip the duplicate gate and insert a second analysis for the same
-  // address, titled "<address> — Scenario 2" (3, 4, …).
+  // resolve the existing owned deal's property group and insert the current
+  // form as its sibling, titled "<address> — Scenario 2" (3, 4, …).
   // allowAddressChange: explicit choice from the address-changed dialog -
   // the update proceeds even though the form's address differs from the
   // saved deal's, moving the row (address column included) to the new
@@ -367,6 +391,8 @@ export async function saveDealAction(
   // omit them are unchanged.
   options?: {
     saveAsNewScenario?: boolean;
+    /** Optional analyzer strategy, allowlisted server-side before persistence. */
+    strategyKind?: string | null;
     allowAddressChange?: boolean;
     /** Explicit user attestations. Fingerprints are rechecked server-side so
      * changing a value automatically invalidates its prior verification. */
@@ -392,6 +418,21 @@ export async function saveDealAction(
 
   if (!user) {
     return { ok: false, code: "SIGN_IN_REQUIRED" };
+  }
+
+  // Saving a second analysis for the same address is the paid Scenarios
+  // workflow, even though Free users can save their first deal. Enforce that
+  // distinction before validation can reach any duplicate lookup or insert;
+  // the browser flag is presentation only and must never be the authority.
+  if (
+    options?.saveAsNewScenario === true &&
+    !(await hasPaidPlanSubscription(supabase, user.id))
+  ) {
+    return {
+      ok: false,
+      code: "ENTITLEMENT_SAVE",
+      message: "Upgrade to TrueCap Pro to save multiple scenarios for one property.",
+    };
   }
 
   const parsed = investmentFormSchema.safeParse(input);
@@ -777,14 +818,32 @@ export async function saveDealAction(
   }
 
   let insertTitle = title;
+  let scenarioSource:
+    | Awaited<ReturnType<typeof findSavedAnalysesByAddress>>[number]
+    | null = null;
+  let scenarioName: string | null = null;
   if (options?.saveAsNewScenario === true) {
     // Explicit choice from the duplicate dialog: keep both. Number the title
     // off the current count of same-address analyses so dashboard rows stay
     // distinguishable (original = plain address, then Scenario 2, 3, …).
-    const sameAddress = await findSavedAnalysesByAddress(supabase, user.id, addressTrimmed);
-    if (sameAddress.length > 0) {
-      insertTitle = `${title.slice(0, 180)} — Scenario ${sameAddress.length + 1}`;
+    let sameAddress: Awaited<ReturnType<typeof findSavedAnalysesByAddress>>;
+    try {
+      sameAddress = await findSavedAnalysesByAddress(supabase, user.id, addressTrimmed, {
+        throwOnError: true,
+      });
+    } catch (error) {
+      return toServerErrorResult(error, "saved-analyses-scenarios");
     }
+    scenarioSource = sameAddress[0] ?? null;
+    if (!scenarioSource) {
+      return {
+        ok: false,
+        code: "VALIDATION_ERROR",
+        message: "The saved deal for this scenario could not be found. Please retry from Save.",
+      };
+    }
+    scenarioName = `Scenario ${sameAddress.length + 1}`;
+    insertTitle = `${title.slice(0, 180)} — ${scenarioName}`;
   } else {
     const { data: addressTaken, error: dupErr } = await supabase.rpc("saved_analyses_address_taken", {
       p_user_id: user.id,
@@ -828,12 +887,41 @@ export async function saveDealAction(
     };
   }
 
+  let scenarioFields: {
+    property_id?: string;
+    scenario_name?: string;
+    strategy_kind?: string | null;
+  } = {};
+  if (scenarioSource && scenarioName) {
+    try {
+      const propertyId = await resolveOwnedScenarioPropertyGroup({
+        supabase,
+        userId: user.id,
+        source: {
+          id: scenarioSource.id,
+          property_id: scenarioSource.propertyId,
+          scenario_name: scenarioSource.scenarioName,
+          address: scenarioSource.address,
+          form_snapshot: scenarioSource.formSnapshot,
+        },
+      });
+      scenarioFields = {
+        property_id: propertyId,
+        scenario_name: scenarioName,
+        strategy_kind: isStrategyKind(options?.strategyKind) ? options.strategyKind : null,
+      };
+    } catch (error) {
+      return toServerErrorResult(error, "saved-analyses-scenarios");
+    }
+  }
+
   const { data, error } = await supabase
     .from("saved_analyses")
     .insert({
       user_id: user.id,
       ...payload,
       title: insertTitle,
+      ...scenarioFields,
     })
     .select("id")
     .single();
@@ -1764,7 +1852,13 @@ export type DealDueDiligenceResult =
   | { ok: true; items: DueDiligenceItem[] }
   | {
       ok: false;
-      code: "SIGN_IN_REQUIRED" | "MIGRATION_PENDING" | "NOT_FOUND" | "VALIDATION_ERROR" | "SERVER_ERROR";
+      code:
+        | "SIGN_IN_REQUIRED"
+        | "ENTITLEMENT_REQUIRED"
+        | "MIGRATION_PENDING"
+        | "NOT_FOUND"
+        | "VALIDATION_ERROR"
+        | "SERVER_ERROR";
       message: string;
     };
 
@@ -1781,6 +1875,13 @@ export async function getDealDueDiligenceAction(id: string): Promise<DealDueDili
   } = await supabase.auth.getUser();
   if (!user) {
     return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in." };
+  }
+  if (!(await hasPaidPlanSubscription(supabase, user.id))) {
+    return {
+      ok: false,
+      code: "ENTITLEMENT_REQUIRED",
+      message: "Due diligence and deal documents are available with TrueCap Pro.",
+    };
   }
   const dealId = id.trim();
   if (!dealId) {
@@ -1827,6 +1928,13 @@ export async function updateDealDueDiligenceAction(
   } = await supabase.auth.getUser();
   if (!user) {
     return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in." };
+  }
+  if (!(await hasPaidPlanSubscription(supabase, user.id))) {
+    return {
+      ok: false,
+      code: "ENTITLEMENT_REQUIRED",
+      message: "Due diligence and deal documents are available with TrueCap Pro.",
+    };
   }
   const dealId = id.trim();
   if (!dealId) {

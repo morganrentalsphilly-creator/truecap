@@ -21,7 +21,7 @@ export default async function BrandingSettingsPage() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/auth/login");
+    redirect("/auth/login?next=%2Fsettings%2Fbranding");
   }
 
   const entitlements = await getEntitlementsForUser(supabase, user.id);

@@ -46,7 +46,7 @@ import {
 } from "@/lib/saved-analysis-methodology";
 import { TRUECAP_UNDERWRITING_STANDARD_VERSION } from "@/lib/underwriting-methodology";
 import { normalizeInvestmentFormSnapshot } from "@/lib/investcalc-schema";
-import { encodeShareLink } from "@/lib/share-link";
+import { encodeShareLink, sanitizeShareValues } from "@/lib/share-link";
 import { signShareAttribution, hashShareValues } from "@/lib/share-attribution";
 import type { DealRecommendation, DealRiskLevel } from "@/lib/deal-score";
 import { isFeatureReleased } from "@/lib/entitlements-catalog";
@@ -215,7 +215,8 @@ export async function loadClientPortal(input: {
       ) {
         continue; // incomplete stored output — skip, never mix in current math
       }
-      const values = normalizeInvestmentFormSnapshot(row.form_snapshot);
+      const normalizedValues = normalizeInvestmentFormSnapshot(row.form_snapshot);
+      const values = normalizedValues ? sanitizeShareValues(normalizedValues) : null;
       let sharePath: string | null = null;
       // v1 share links contain assumptions only and always run today's engine.
       // Suppress that deep link for a frozen result so the buyer never opens a

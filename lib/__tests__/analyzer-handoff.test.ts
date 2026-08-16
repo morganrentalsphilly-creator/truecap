@@ -3,6 +3,10 @@ import {
   readAnalyzerHandoff,
   buildAnalyzerHandoffUrl,
   HANDOFF_STRATEGY_KEYS,
+  analyzerHandoffBootstrapScript,
+  consumeEarlyAnalyzerHandoff,
+  EARLY_ANALYZER_HANDOFF_KEY,
+  mergeAnalyzerHandoffSearch,
 } from "@/lib/analyzer-handoff";
 import { INVESTOR_STRATEGIES } from "@/lib/investor-strategies";
 
@@ -111,5 +115,69 @@ describe("buildAnalyzerHandoffUrl", () => {
     const url = buildAnalyzerHandoffUrl({ strategy: "fix-flip" });
     expect(url).toContain("strategy=fix-flip");
     expect(readAnalyzerHandoff(url.slice(url.indexOf("?")))).toEqual({ strategy: "fix-flip" });
+  });
+});
+
+describe("private handoff capture", () => {
+  function storage(initial: string | null = null) {
+    let value = initial;
+    return {
+      getItem: () => value,
+      setItem: (_key: string, next: string) => {
+        value = next;
+      },
+      removeItem: () => {
+        value = null;
+      },
+      clear: () => {
+        value = null;
+      },
+      key: () => null,
+      get length() {
+        return value == null ? 0 : 1;
+      },
+    } as Storage;
+  }
+
+  it("head bootstrap removes every private input before telemetry", () => {
+    const script = analyzerHandoffBootstrapScript();
+    for (const name of ["address", "price", "rent", "beds"]) {
+      expect(script).toContain(name);
+    }
+    expect(script).toContain("window.history.replaceState");
+    expect(script).toContain("if(u.pathname!=='/')return");
+    expect(script).toContain(EARLY_ANALYZER_HANDOFF_KEY);
+  });
+
+  it("consumes an in-memory payload once when storage is blocked", () => {
+    const target = {
+      sessionStorage: storage(),
+      __truecapAnalyzerHandoffSearch: "address=123+Main+St&price=250000",
+    };
+    expect(consumeEarlyAnalyzerHandoff(target)).toBe(
+      "address=123+Main+St&price=250000"
+    );
+    expect(consumeEarlyAnalyzerHandoff(target)).toBe("");
+  });
+
+  it("rejects stale stored inputs and merges a fresh payload with safe params", () => {
+    const now = 2_000_000;
+    const stale = JSON.stringify({
+      v: 1,
+      search: "address=Old",
+      capturedAt: now - 11 * 60 * 1000,
+    });
+    expect(
+      consumeEarlyAnalyzerHandoff({ sessionStorage: storage(stale) }, now)
+    ).toBe("");
+
+    expect(
+      mergeAnalyzerHandoffSearch(
+        "address=123+Main+St&price=250000",
+        "?strategy=brrrr&utm_source=batch"
+      )
+    ).toBe(
+      "address=123+Main+St&price=250000&strategy=brrrr&utm_source=batch"
+    );
   });
 });

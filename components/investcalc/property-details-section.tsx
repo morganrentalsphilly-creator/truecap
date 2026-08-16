@@ -19,6 +19,8 @@ interface PropertyDetailsSectionProps {
   isAutofilling?: boolean;
   /** Show the autofill button (signed-in + provider configured). */
   showAutofill?: boolean;
+  /** Honest auth-aware label for the on-demand property-data lookup. */
+  autofillLabel?: string;
   /** Show the (optional) Year Built field. Hidden in strategy-focus mode. */
   showYearBuilt?: boolean;
   /** Override the "Purchase Price" label (e.g. "Asking price" for wholesale). */
@@ -55,6 +57,7 @@ export function PropertyDetailsSection({
   onAutofillFromAddress,
   isAutofilling,
   showAutofill,
+  autofillLabel = "Get property facts + rent comps",
   showYearBuilt = true,
   priceLabel,
   chrome = "card",
@@ -102,7 +105,7 @@ export function PropertyDetailsSection({
           type="button"
           variant="outline"
           size="sm"
-          className="mt-2 h-8 gap-1.5"
+          className="mt-2 min-h-11 gap-1.5"
           onClick={onAutofillFromAddress}
           disabled={isAutofilling}
         >
@@ -111,7 +114,7 @@ export function PropertyDetailsSection({
           ) : (
             <Sparkles className="size-3.5" />
           )}
-          {isAutofilling ? "Pulling property data…" : "Autofill from address"}
+          {isAutofilling ? "Pulling property data…" : autofillLabel}
         </Button>
       ) : null}
     </div>

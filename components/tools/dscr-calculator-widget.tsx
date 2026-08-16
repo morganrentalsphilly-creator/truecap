@@ -40,24 +40,24 @@ function classify(dscr: number): { label: string; color: string; note: string } 
     return {
       label: "Tight",
       color: "text-[var(--metric-negative)]",
-      note: "Above break-even but below most lender thresholds.",
+      note: "Above break-even but below many lender screening thresholds; programs vary.",
     };
   if (dscr < 1.25)
     return {
       label: "Marginal",
       color: "text-foreground",
-      note: "Acceptable for some products; most conventional lenders want ≥1.25.",
+      note: "May clear some programs; 1.25× is a common screen, not a universal minimum.",
     };
   if (dscr < 1.5)
     return {
-      label: "Bankable",
+      label: "Above 1.25×",
       color: "text-[var(--metric-positive)]",
-      note: "Clears the typical ≥1.25 conventional / DSCR-loan threshold.",
+      note: "Clears a commonly used 1.25× screen; verify the lender's actual program.",
     };
   return {
-    label: "Strong",
+    label: "Higher coverage",
     color: "text-[var(--metric-positive)]",
-    note: "Well above lender minimums — the property comfortably covers debt.",
+    note: "The modeled NOI has a wider cushion over debt service; approval still depends on the lender.",
   };
 }
 
@@ -159,7 +159,7 @@ export function DscrCalculatorWidget() {
         className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline"
       >
         <Sparkles className="w-4 h-4" />
-        Run a full property analysis — DSCR, cash flow, projections, exit — free
+        Open the free core deal screen for DSCR and cash flow — Pro adds projections and modeled exits
         <ArrowUpRight className="w-4 h-4" />
       </Link>
     </div>

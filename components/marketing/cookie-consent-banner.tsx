@@ -173,14 +173,14 @@ export function CookieConsentBanner() {
           <button
             type="button"
             onClick={handleReject}
-            className="inline-flex h-10 items-center justify-center rounded-lg border border-border bg-background px-4 text-xs font-semibold text-foreground transition-colors hover:bg-muted sm:text-sm"
+            className="inline-flex h-11 items-center justify-center rounded-lg border border-border bg-background px-4 text-xs font-semibold text-foreground transition-colors hover:bg-muted sm:text-sm"
           >
             Reject
           </button>
           <button
             type="button"
             onClick={handleAccept}
-            className="inline-flex h-10 items-center justify-center rounded-lg bg-primary px-4 text-xs font-bold text-primary-foreground shadow-sm transition-transform hover:-translate-y-0.5 sm:text-sm"
+            className="inline-flex h-11 items-center justify-center rounded-lg bg-primary px-4 text-xs font-bold text-primary-foreground shadow-sm transition-transform hover:-translate-y-0.5 sm:text-sm"
           >
             Accept all
           </button>
@@ -193,7 +193,7 @@ export function CookieConsentBanner() {
             type="button"
             onClick={handleReject}
             aria-label="Dismiss (counts as reject)"
-            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-muted-foreground/60 hover:bg-muted hover:text-foreground"
+            className="inline-flex size-11 shrink-0 items-center justify-center rounded-lg text-muted-foreground/60 hover:bg-muted hover:text-foreground"
           >
             <X className="size-4" />
           </button>

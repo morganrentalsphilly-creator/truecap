@@ -226,7 +226,12 @@ export default function PhiladelphiaMarketPage() {
             you didn&apos;t underwrite for.
           </p>
 
-          <div className="not-prose mt-4 overflow-x-auto rounded-2xl border border-border bg-card">
+          <div
+            className="not-prose mt-4 overflow-x-auto rounded-2xl border border-border bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+            tabIndex={0}
+            role="region"
+            aria-label="Philadelphia cap rate benchmarks by neighborhood"
+          >
             <table className="w-full min-w-[640px] text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/40">
@@ -345,7 +350,7 @@ export default function PhiladelphiaMarketPage() {
           <h2 className="text-xl sm:text-2xl font-extrabold mb-2">
             Run your next Philly deal in 60 seconds.
           </h2>
-          <p className="text-sm sm:text-base opacity-90 mb-4">
+          <p className="text-sm sm:text-base mb-4">
             Address autocomplete is restricted to U.S. results. Paste a
             Philadelphia address and TrueCap auto-fills the PA property
             tax rate, HUD market rent for your county + bedroom count,

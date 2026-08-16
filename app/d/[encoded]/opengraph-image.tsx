@@ -255,7 +255,7 @@ export default async function Image({ params }: { params: Promise<Params> }) {
           <MetricTile
             label="DSCR"
             value={isCash ? "—" : dscr.toFixed(2)}
-            sub={isCash ? "Cash" : dscr >= 1.25 ? "Bankable" : "Tight"}
+            sub={isCash ? "Cash" : dscr >= 1.25 ? "Clears 1.25 benchmark" : "Below 1.25"}
             tone={isCash ? "neutral" : dscr >= 1.25 ? "good" : "bad"}
           />
         </div>

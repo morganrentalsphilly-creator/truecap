@@ -288,10 +288,10 @@ export default async function StatePage({
         <section className="mt-12 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
           <h2 className="text-xl sm:text-2xl font-extrabold mb-2">Run the math on a {state.name} deal</h2>
           <p className="text-sm sm:text-base opacity-90 mb-5">
-            Paste an address into TrueCap and get cap rate, cash-on-cash, DSCR, and 10-year projection in 60 seconds. State-specific property tax + insurance estimates included.
+            Enter an address for TrueCap&apos;s free core screen: cap rate, cash-on-cash, DSCR, cash flow, Deal Score, and a plain-English verdict from editable state-level screening estimates. Pro adds the 10-year projection, illustrative tax impact, modeled exits, sensitivity, comparisons, and PDFs.
           </p>
-          <Link href="/" className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity">
-            Try TrueCap free <ArrowRight className="size-4" />
+          <Link href="/#main" className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity">
+            Open the free core screen <ArrowRight className="size-4" />
           </Link>
         </section>
 

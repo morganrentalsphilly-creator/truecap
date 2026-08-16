@@ -4,6 +4,7 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getSiteUrl } from "@/lib/site-url";
 import {
   forgotPasswordSchema,
+  internalNextPathOrNull,
   loginSchema,
   safeInternalNextPath,
   signUpSchema,
@@ -101,7 +102,11 @@ export async function signUpAction(
 }
 
 export async function requestPasswordResetAction(
-  input: unknown
+  input: unknown,
+  // The page the user originally intended to reach before recovery began.
+  // It is nested inside the update-password URL and re-validated at every
+  // consumer. Missing or unsafe values resume at the signed-in dashboard.
+  nextPath?: unknown
 ): Promise<AuthActionResult> {
   const parsed = forgotPasswordSchema.safeParse(input);
   if (!parsed.success) {
@@ -110,9 +115,11 @@ export async function requestPasswordResetAction(
   }
 
   const siteUrl = getSiteUrl();
+  const next = internalNextPathOrNull(nextPath) ?? "/dashboard";
+  const updatePasswordPath = `/auth/update-password?next=${encodeURIComponent(next)}`;
   const supabase = await createServerSupabaseClient();
   const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email.trim(), {
-    redirectTo: `${siteUrl}/auth/callback?next=/auth/update-password`,
+    redirectTo: `${siteUrl}/auth/callback?next=${encodeURIComponent(updatePasswordPath)}`,
     ...(parsed.data.captchaToken ? { captchaToken: parsed.data.captchaToken } : {}),
   });
 

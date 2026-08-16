@@ -22,7 +22,7 @@
 
 import { useEffect, useRef, useState, useTransition } from "react";
 import Link from "next/link";
-import { ArrowRight, Loader2, Sparkles } from "lucide-react";
+import { ArrowRight, Loader2, RefreshCw, Sparkles } from "lucide-react";
 import { createCheckoutSessionAction } from "@/app/actions/billing";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -32,14 +32,19 @@ import {
 } from "@/lib/pricing-checkout-resume";
 import { decidePricingCardCta } from "@/lib/billing-plan-cta";
 import { TRIAL_DAYS, willCheckoutGrantTrial } from "@/lib/trial";
+import {
+  decideCheckoutResumeAvailability,
+  type PricingPriceAvailability,
+} from "@/lib/pricing-price-availability";
 
-type Slot = "free" | "pro_monthly" | "pro_annual" | "agent_pro_monthly" | "agent_pro_annual";
+type Slot = "free" | CheckoutPlanSlug;
 
 export function PricingPlanButtons({
   slot,
   isAuthenticated,
   activePaidPlanSlug,
   hadPriorSubscription,
+  priceAvailability,
 }: {
   slot: Slot;
   isAuthenticated: boolean;
@@ -49,10 +54,13 @@ export function PricingPlanButtons({
   /** True when checkout will NOT grant the trial (prior subscription row,
    * any status — see hasAnySubscriptionHistory). Swaps trial CTA copy. */
   hadPriorSubscription: boolean;
+  /** Server-resolved live Stripe display-price status for every paid slot. */
+  priceAvailability: PricingPriceAvailability;
 }) {
   const { toast } = useToast();
   const [, startTransition] = useTransition();
   const [pending, setPending] = useState(false);
+  const [unavailablePlan, setUnavailablePlan] = useState<CheckoutPlanSlug | null>(null);
   // Carry a campaign code from the URL (?coupon=ANALYZE20) into checkout + the
   // signup hand-off, so the exit-intent's 50%-off offer survives the click.
   const [couponCode, setCouponCode] = useState("");
@@ -70,6 +78,10 @@ export function PricingPlanButtons({
   // toggle, so the mounted pro button's slot may differ from the plan they
   // actually started checkout for.
   const startCheckout = (planSlug: CheckoutPlanSlug, offer?: string) => {
+    if (!priceAvailability[planSlug]) {
+      setUnavailablePlan(planSlug);
+      return;
+    }
     setPending(true);
     startTransition(async () => {
       try {
@@ -112,13 +124,32 @@ export function PricingPlanButtons({
     const resume = resolveCheckoutResumeForSlot(window.location.search, slot);
     if (!resume) return;
     autoResumedRef.current = true;
-    // Strip the param BEFORE firing so refresh / bfcache / a re-mount can
-    // never loop the auto-redirect to Stripe. Preserve Next's history state.
+    // Consume the one-shot intent before either checkout OR the unavailable
+    // state. Otherwise toggling cadence/remounting or Retry would keep reading
+    // the same failed annual/monthly intent and poison the healthy alternative.
     window.history.replaceState(
       window.history.state,
       "",
       `${window.location.pathname}${resume.strippedSearch}${window.location.hash}`
     );
+    const availabilityDecision = decideCheckoutResumeAvailability(
+      slot,
+      resume.plan,
+      priceAvailability
+    );
+    if (availabilityDecision !== "resume") {
+      if (availabilityDecision === "disable_current") {
+        setUnavailablePlan(resume.plan);
+      } else {
+        toast({
+          title: "Selected billing cadence unavailable",
+          description:
+            "That Stripe price could not be loaded. The available cadence remains ready to choose.",
+          variant: "destructive",
+        });
+      }
+      return;
+    }
     startCheckout(resume.plan, resume.coupon);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- one-shot resume on mount
   }, []);
@@ -158,6 +189,39 @@ export function PricingPlanButtons({
       >
         {paidCardDecision.label}
       </Link>
+    );
+  }
+
+  const checkoutUnavailablePlan = unavailablePlan ?? (!priceAvailability[slot] ? slot : null);
+  if (checkoutUnavailablePlan) {
+    const unavailableTier = checkoutUnavailablePlan.startsWith("agent_pro_")
+      ? "Agent Pro"
+      : "Pro";
+    const unavailablePeriod = checkoutUnavailablePlan.endsWith("_annual")
+      ? "annual"
+      : "monthly";
+    return (
+      <div className="space-y-2 text-center">
+        <button
+          type="button"
+          disabled
+          aria-disabled="true"
+          className="inline-flex w-full cursor-not-allowed items-center justify-center gap-1.5 rounded-xl border border-border bg-muted px-4 py-2.5 text-sm font-bold text-muted-foreground opacity-80"
+        >
+          Checkout temporarily unavailable
+        </button>
+        <button
+          type="button"
+          onClick={() => window.location.reload()}
+          className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg px-3 text-xs font-bold text-primary hover:bg-primary/5 hover:underline"
+        >
+          <RefreshCw className="size-3.5" /> Retry price
+        </button>
+        <p role="status" className="text-xs leading-relaxed text-muted-foreground">
+          The {unavailableTier} {unavailablePeriod} Stripe price could not be loaded.
+          Refresh to retry; no checkout was started.
+        </p>
+      </div>
     );
   }
 

@@ -6,8 +6,9 @@
  * Today every /tools page ends with a small "Run the full analysis"
  * link, and most visitors leave. This is the moment-of-value pitch:
  * they just got the answer they came for, so the offer is small,
- * specific, and high-trust — "save this calculation to your free
- * account and unlock the full picture."
+ * specific, and high-trust — move from the single-purpose calculator
+ * into TrueCap's genuinely free core screen, with a clear boundary
+ * around the advanced outputs that require Pro.
  *
  * Behaviors:
  *  - Inline card at the bottom of the page (always visible)
@@ -23,13 +24,16 @@ import { useCookieBannerOpen } from "@/lib/use-cookie-banner";
 interface ToolsConversionCtaProps {
   /** Name of the calculator the user just used — shown in the pitch. */
   calculatorName: string;
-  /** Optional one-liner that ties the pitch to this specific tool. */
+  /**
+   * Legacy caller copy retained for source compatibility. It is deliberately
+   * not rendered because older hooks blurred the Free / Pro boundary.
+   */
   hook?: string;
 }
 
 const STORAGE_KEY = "truecap_tools_cta_dismissed";
 
-export function ToolsConversionCta({ calculatorName, hook }: ToolsConversionCtaProps) {
+export function ToolsConversionCta({ calculatorName }: ToolsConversionCtaProps) {
   const [dismissed, setDismissed] = useState(true); // start hidden, then check storage
   const [stickyVisible, setStickyVisible] = useState(false);
   const cookieBannerOpen = useCookieBannerOpen();
@@ -73,32 +77,34 @@ export function ToolsConversionCta({ calculatorName, hook }: ToolsConversionCtaP
         <div className="flex items-center gap-2">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-primary px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-widest text-primary-foreground">
             <Sparkles className="size-3" />
-            Free upgrade
+            Free core screen
           </span>
           <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
             no card required
           </span>
         </div>
         <h2 className="mt-3 text-xl font-extrabold leading-tight tracking-tight text-foreground sm:text-3xl">
-          Like the {calculatorName.toLowerCase()}? Save it to your free TrueCap account.
+          Put the {calculatorName.toLowerCase()} in the context of the whole deal.
         </h2>
         <p className="mt-2 text-sm leading-relaxed text-muted-foreground sm:text-base">
-          {hook ??
-            "The full TrueCap analyzer runs every metric at once — cap rate, CoC, DSCR, cash flow, 10-year projection, tax savings, exit scenarios. Save your deal, run sensitivity, share it. Always free to start."}
+          Run cap rate, cash-on-cash return, DSCR, monthly cash flow, the 0–100 Deal
+          Score, and a plain-English verdict in TrueCap&apos;s free core screen. Create
+          a free account to save up to 5 deals. Pro adds 10-year projections,
+          illustrative tax impact, modeled exits, sensitivity, comparisons, and PDFs.
         </p>
         <div className="mt-5 flex flex-wrap items-center gap-3">
           <Link
-            href="/auth/sign-up"
+            href="/#main"
             className="group inline-flex h-11 items-center gap-1.5 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-[0_10px_24px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5"
           >
-            Start free
+            Open the free core screen
             <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
           </Link>
           <Link
-            href="/"
+            href="/auth/sign-up"
             className="inline-flex h-11 items-center gap-1.5 rounded-xl border border-border bg-card px-5 text-sm font-semibold text-foreground hover:bg-muted"
           >
-            Try the full analyzer first
+            Save up to 5 deals
           </Link>
         </div>
       </section>
@@ -115,17 +121,17 @@ export function ToolsConversionCta({ calculatorName, hook }: ToolsConversionCtaP
           <div className="mx-auto flex max-w-3xl items-center gap-3">
             <div className="min-w-0 flex-1">
               <p className="truncate text-xs font-bold text-foreground sm:text-sm">
-                Save this {calculatorName.toLowerCase()} to TrueCap — free.
+                Run the whole deal in TrueCap&apos;s free core screen.
               </p>
               <p className="hidden truncate text-[11px] text-muted-foreground sm:block">
-                Full analyzer + 10-yr projection + PDF export. No card.
+                Cap rate + CoC + DSCR + cash flow + Deal Score. Pro adds advanced outputs.
               </p>
             </div>
             <Link
-              href="/auth/sign-up"
+              href="/#main"
               className="inline-flex h-9 shrink-0 items-center gap-1 rounded-lg bg-primary px-3 text-xs font-bold text-primary-foreground hover:bg-primary/95 sm:h-10 sm:px-4 sm:text-sm"
             >
-              Start free
+              Open free
               <ArrowRight className="size-3.5" />
             </Link>
             <button

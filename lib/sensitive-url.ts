@@ -15,6 +15,13 @@ export const SENSITIVE_QUERY_PARAMETER_NAMES = Object.freeze([
   "token_hash",
   "auth_token",
   "code",
+  // Calculator/batch handoffs may contain a full property address and private
+  // underwriting inputs. A head bootstrap removes them from the address bar;
+  // telemetry scrubbing remains the fail-safe for legacy/external links.
+  "address",
+  "price",
+  "rent",
+  "beds",
 ] as const);
 
 const SENSITIVE_QUERY_PARAMETER_SET = new Set<string>(

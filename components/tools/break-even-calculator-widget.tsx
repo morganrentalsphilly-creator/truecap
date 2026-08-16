@@ -150,7 +150,7 @@ export function BreakEvenCalculatorWidget() {
         className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline"
       >
         <Sparkles className="w-4 h-4" />
-        Run a full property analysis — cash flow, break-even, 10-year projections — free
+        Open the free core deal screen for cash flow and Deal Score — Pro adds 10-year projections
         <ArrowUpRight className="w-4 h-4" />
       </Link>
     </div>

@@ -34,7 +34,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Free DSCR Calculator — Debt Service Coverage Ratio",
     description:
-      "Compute DSCR in seconds. Plus what counts as bankable, what lenders require, and how DSCR loans work.",
+      "Compute DSCR in seconds. See common lender screening ranges, what programs may require, and how DSCR loans work.",
     url: "/tools/dscr-calculator",
     type: "website",
     images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap DSCR calculator" }],
@@ -52,7 +52,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "What's a good DSCR?",
-    a: "Most conventional and DSCR-loan lenders want at least 1.25. Below 1.0 the property loses money each month (you're subsidizing it). Between 1.0 and 1.25 is acceptable for some products but tight. Above 1.5 is comfortable; above 2.0 is very strong but rare in markets with normal cap rates.",
+    a: "A 1.25 DSCR is a commonly used screening benchmark, not a universal approval line. Below 1.0, modeled NOI does not cover modeled debt service. Some programs accept ratios below 1.25, while others require more coverage or impose different pricing, leverage, reserve, credit, property, and documentation rules. Verify the lender's current program before relying on any threshold.",
   },
   {
     q: "How is DSCR different from cash-on-cash return?",
@@ -117,7 +117,7 @@ export default function DscrCalculatorPage() {
     },
     featureList: [
       "Compute DSCR from NOI + debt service",
-      "1.20/1.25 lender threshold check",
+      "1.20/1.25 lender screening context",
       "Single + multi-family support",
     ],
   };
@@ -139,9 +139,9 @@ export default function DscrCalculatorPage() {
               DSCR Calculator
             </h1>
             <p className="text-base sm:text-lg text-muted-foreground mt-2 leading-relaxed">
-              Debt Service Coverage Ratio — the single metric every lender
-              wants to see for an investment loan. Compute it in seconds and
-              know whether your deal is bankable before you submit.
+              Debt Service Coverage Ratio is a common lender screen for an
+              investment property. Compute it in seconds and compare the result
+              with common ranges before verifying a lender&apos;s current program.
             </p>
           </header>
 
@@ -150,14 +150,13 @@ export default function DscrCalculatorPage() {
           <article className="prose prose-slate max-w-none mt-10 sm:mt-12 [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground">
             <h2 className="text-2xl sm:text-3xl">What DSCR actually measures</h2>
             <p>
-              DSCR answers one question lenders care about above all
-              others: <em>if the property runs the way you say it will,
+              DSCR answers an important lender-screening question: <em>if the property runs the way you say it will,
               can it cover the mortgage?</em> A DSCR of 1.0 means
               break-even. A DSCR of 1.25 means the property generates
-              25% more in{" "}
+              25% more modeled{" "}
               <Link href="/glossary/noi" className="text-primary font-semibold hover:underline">NOI</Link>{" "}
-              than the mortgage needs — a comfortable cushion that covers
-              a bad month, a brief vacancy, or a surprise expense.
+              than modeled debt service. That is a screening cushion, not a
+              guarantee against vacancy, repairs, or other forecast error.
             </p>
 
             <h3>The formula</h3>
@@ -172,17 +171,18 @@ export default function DscrCalculatorPage() {
 
             <h2 className="text-2xl sm:text-3xl">What lenders look for</h2>
             <ul>
-              <li><strong>Conventional investment loan:</strong> ≥1.25, typically</li>
-              <li><strong>DSCR loan (no income docs):</strong> 1.0 to 1.25 minimum, with rate / LTV penalties below 1.25</li>
-              <li><strong>Commercial multifamily (5+ unit):</strong> ≥1.20 to ≥1.40 depending on lender</li>
-              <li><strong>Hard money / bridge:</strong> DSCR not always required, but lenders glance at it</li>
+              <li><strong>Conventional investment loan:</strong> 1.25 is a common screening benchmark; underwriting varies</li>
+              <li><strong>DSCR loan:</strong> some programs screen near 1.0 to 1.25 and may change pricing or leverage with coverage</li>
+              <li><strong>Commercial multifamily (5+ unit):</strong> required coverage varies by lender, property, and deal</li>
+              <li><strong>Hard money / bridge:</strong> coverage may be secondary to collateral and exit, depending on the program</li>
             </ul>
             <p>
-              Most conventional lenders also have a debt-to-income (DTI)
+              Conventional lenders may also use a debt-to-income (DTI)
               calculation that mixes the property&apos;s DSCR with your
-              personal income. DSCR-only loan products skip the personal
-              side — your tax returns, W-2, and DTI don&apos;t matter as
-              long as the property covers itself. For a full walkthrough
+              personal income. DSCR-loan programs can qualify primarily on
+              property coverage instead of personal DTI, but credit, reserves,
+              entity, appraisal, insurance, documentation, pricing, and leverage
+              requirements still vary. For a full walkthrough
               of how these loans price, qualify, and close, see our{" "}
               <Link href="/blog/dscr-loans-explained" className="text-primary font-semibold hover:underline">DSCR loans explained</Link>{" "}
               guide.
@@ -225,9 +225,11 @@ export default function DscrCalculatorPage() {
               (the unleveraged return),{" "}
               <Link href="/glossary/cash-on-cash-return" className="text-primary font-semibold hover:underline">cash-on-cash</Link>{" "}
               (the leveraged return on your money), cash flow (the dollars
-              per month), and projection (the 10-year picture). TrueCap&apos;s
-              full analyzer runs all of those at once on the same deal —
-              free to start.
+              per month), and a longer-term projection. TrueCap&apos;s free core
+              screen runs DSCR, cap rate, cash-on-cash, cash flow, Deal Score,
+              and a plain-English verdict on the same deal. Pro adds the 10-year
+              projection, illustrative tax impact, modeled exits, sensitivity,
+              comparisons, and PDFs.
             </p>
           </article>
 
@@ -238,10 +240,7 @@ export default function DscrCalculatorPage() {
           <ToolEmbedInvite slug="dscr-calculator" />
 
 
-          <ToolsConversionCta
-            calculatorName="DSCR calculator"
-            hook="The full TrueCap analyzer connects DSCR to cap rate, CoC, cash flow, 10-year projection, tax savings, and exit scenarios — all on the same deal. Save your work, compare deals, share a link with your lender."
-          />
+          <ToolsConversionCta calculatorName="DSCR calculator" />
 
           <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">
             Built with{" "}

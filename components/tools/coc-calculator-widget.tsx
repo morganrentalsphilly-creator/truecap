@@ -126,7 +126,7 @@ export function CocCalculatorWidget() {
         className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline"
       >
         <Sparkles className="w-4 h-4" />
-        Run the full analysis with these numbers — cap rate, DSCR, projections, tax, exit — free
+        Open the free core deal screen for cap rate and DSCR — Pro adds projections, tax, and modeled exits
         <ArrowUpRight className="w-4 h-4" />
       </Link>
     </div>

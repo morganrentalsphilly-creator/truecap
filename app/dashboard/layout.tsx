@@ -17,6 +17,7 @@
  */
 
 import type { ReactNode } from "react";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import {
@@ -26,13 +27,18 @@ import {
 import { getRequestUser, getRequestEntitlements } from "@/lib/request-auth";
 import { getSavedAnalysesTotalCount } from "@/lib/saved-analyses-count";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { TRUECAP_RETURN_PATH_HEADER } from "@/lib/auth-return-path";
+import { safeInternalNextPath } from "@/lib/auth-schema";
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
   const supabase = await createServerSupabaseClient();
   const user = await getRequestUser();
 
   if (!user) {
-    redirect("/auth/login");
+    const returnPath = safeInternalNextPath(
+      (await headers()).get(TRUECAP_RETURN_PATH_HEADER)
+    );
+    redirect(`/auth/login?next=${encodeURIComponent(returnPath)}`);
   }
 
   const entitlements = await getRequestEntitlements(user.id);

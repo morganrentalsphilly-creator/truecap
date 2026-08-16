@@ -6,9 +6,10 @@
  * scenarios. Lists the property's scenarios and adds a new one (clone of this
  * deal with a name + strategy), via app/actions/scenarios.ts.
  *
- * Self-contained + invisible-until-useful: it self-hides while the schema
+ * Paid workspace feature: Free sees a concise upgrade state, while paid users
+ * get the self-contained scenario manager. It self-hides while the schema
  * migration is pending. A new scenario is a normal saved deal, so it opens in
- * its own deal view.
+ * its own deal view. Server actions enforce the paid gate independently.
  */
 
 import { useEffect, useMemo, useState, useTransition } from "react";
@@ -30,11 +31,47 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
+function ScenarioUpgradeState() {
+  return (
+    <section className="rounded-2xl border border-primary/20 bg-primary/5 p-5 sm:p-6">
+      <div className="flex flex-wrap items-center gap-2">
+        <Layers className="size-4 text-primary" />
+        <h2 className="text-base font-bold text-foreground">Saved scenarios</h2>
+        <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary">
+          Pro
+        </span>
+      </div>
+      <p className="mt-1.5 max-w-xl text-sm leading-relaxed text-muted-foreground">
+        Clone this deal into buy-and-hold, BRRRR, or fix-and-flip scenarios and compare the
+        strategies side by side.
+      </p>
+      <Link
+        href="/pricing#plans"
+        className="mt-3 inline-flex text-sm font-semibold text-primary hover:underline"
+      >
+        Unlock scenarios with Pro
+      </Link>
+    </section>
+  );
+}
+
+export function ScenariosCard({
+  savedDealId,
+  isPremium,
+}: {
+  savedDealId: string;
+  isPremium: boolean;
+}) {
+  if (!isPremium) return <ScenarioUpgradeState />;
+  return <PaidScenariosCard savedDealId={savedDealId} />;
+}
+
+function PaidScenariosCard({ savedDealId }: { savedDealId: string }) {
   const router = useRouter();
   const { toast } = useToast();
   const [loaded, setLoaded] = useState(false);
   const [hidden, setHidden] = useState(false);
+  const [upgradeRequired, setUpgradeRequired] = useState(false);
   const [scenarios, setScenarios] = useState<ScenarioSummary[]>([]);
   const [adding, setAdding] = useState(false);
   const [name, setName] = useState("");
@@ -48,6 +85,8 @@ export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
           .then((result) => {
             if (result.ok) {
               setScenarios(result.scenarios);
+            } else if (result.code === "ENTITLEMENT_REQUIRED") {
+              setUpgradeRequired(true);
             } else if (result.code === "MIGRATION_PENDING" || result.code === "NOT_FOUND") {
               setHidden(true);
             }
@@ -71,6 +110,10 @@ export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
           strategyKind: strategy || null,
         });
         if (!result.ok) {
+          if (result.code === "ENTITLEMENT_REQUIRED") {
+            setUpgradeRequired(true);
+            return;
+          }
           if (result.code === "MIGRATION_PENDING") {
             setHidden(true);
             return;
@@ -112,6 +155,10 @@ export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
         const result = await compareScenariosAction(savedDealId);
         // Success redirects to /dashboard/compare; only an error returns here.
         if (result && !result.ok) {
+          if (result.code === "ENTITLEMENT_REQUIRED") {
+            setUpgradeRequired(true);
+            return;
+          }
           toast({ title: "Couldn't compare scenarios", description: result.message, variant: "destructive" });
         }
       } catch (err) {
@@ -128,6 +175,7 @@ export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
     });
   }
 
+  if (upgradeRequired) return <ScenarioUpgradeState />;
   if (!loaded || hidden) return null;
 
   // Show the deal itself as a scenario row even before any siblings exist.

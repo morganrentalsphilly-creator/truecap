@@ -2,11 +2,16 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { CheckCircle2, Loader2, Mail } from "lucide-react";
 import { requestPasswordResetAction } from "@/app/actions/auth";
-import { forgotPasswordSchema, type ForgotPasswordInput } from "@/lib/auth-schema";
+import {
+  forgotPasswordSchema,
+  internalNextPathOrNull,
+  type ForgotPasswordInput,
+} from "@/lib/auth-schema";
 import { CaptchaWidget, captchaEnabled } from "@/components/auth/captcha-widget";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,6 +26,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 
 export function ForgotPasswordForm() {
+  const searchParams = useSearchParams();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
@@ -37,10 +43,21 @@ export function ForgotPasswordForm() {
     mode: "onTouched",
   });
 
+  // Keep the user's original destination through the entire recovery chain.
+  // Unsafe or missing values are omitted here and the server action applies
+  // the recovery-specific /dashboard fallback.
+  const safeNextPath = internalNextPathOrNull(searchParams.get("next"));
+  const loginHref = safeNextPath
+    ? `/auth/login?next=${encodeURIComponent(safeNextPath)}`
+    : "/auth/login";
+
   async function onSubmit(values: ForgotPasswordInput) {
     setIsSubmitting(true);
     try {
-      const result = await requestPasswordResetAction({ ...values, captchaToken: captchaToken ?? undefined });
+      const result = await requestPasswordResetAction(
+        { ...values, captchaToken: captchaToken ?? undefined },
+        safeNextPath ?? undefined
+      );
 
       if (!result.ok) {
         toast({
@@ -80,7 +97,7 @@ export function ForgotPasswordForm() {
           reset link. Check your inbox and spam folder.
         </p>
         <Button variant="outline" className="h-12 w-full rounded-xl" asChild>
-          <Link href="/auth/login">Back to sign in</Link>
+          <Link href={loginHref}>Back to sign in</Link>
         </Button>
       </div>
     );
@@ -130,7 +147,7 @@ export function ForgotPasswordForm() {
         </Button>
         <p className="text-center text-sm text-muted-foreground">
           Remembered it?{" "}
-          <Link href="/auth/login" className="font-medium text-primary hover:underline">
+          <Link href={loginHref} className="font-medium text-primary hover:underline">
             Sign in
           </Link>
         </p>

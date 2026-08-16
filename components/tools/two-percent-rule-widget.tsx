@@ -131,7 +131,7 @@ export function TwoPercentRuleWidget() {
         className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline"
       >
         <Sparkles className="w-4 h-4" />
-        Run the full analysis with these numbers — cap rate, CoC, DSCR, cash flow — free in TrueCap
+        Open the free core deal screen with these numbers — cap rate, CoC, DSCR, cash flow, and Deal Score
         <ArrowUpRight className="w-4 h-4" />
       </Link>
     </div>

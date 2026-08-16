@@ -1,9 +1,8 @@
 /**
- * Per-deal workspace in the Pro dashboard: the due-diligence checklist +
- * documents for one saved deal. These were moved out of the analyzer's
- * underwrite output (analysis-dashboard) so the deal output stays focused on
- * the numbers, and live here in the dashboard instead. Reuses the same
- * self-contained cards (each fetches its own data given just the deal id).
+ * Per-deal workspace: paid subscribers also get the due-diligence checklist
+ * and document vault for one saved deal. These were moved out of the
+ * analyzer's underwrite output (analysis-dashboard) so the deal output stays
+ * focused on the numbers, and live here in the dashboard instead.
  *
  * Guard mirrors /dashboard/saved-analyses exactly: signed in + dashboard
  * access + save_deal entitlement, else redirect. The deal is loaded
@@ -488,7 +487,7 @@ export default async function DealWorkspacePage({
     | { kind: "clears"; maxPrice: number | null };
   let maoLine: MaoLine | null = null;
   let maoBasisLabel = "";
-  if (formValues && !isClosedDeal && (stage == null || isActiveStage(stage))) {
+  if (isPremium && formValues && !isClosedDeal && (stage == null || isActiveStage(stage))) {
     const maoTarget = buildMaoTarget(maoBasisBox, { isCashPurchase });
     // Credit the buy box only when it actually shaped the target — a
     // DSCR-only box on a cash deal falls back to the default floor, and
@@ -771,14 +770,40 @@ export default async function DealWorkspacePage({
           {/* Anchor targets for the header's contents chips. scroll-mt clears
               the fixed/sticky Topbar (h-16), same as the analyzer's drill rows. */}
           <div id="deal-scenarios" className="scroll-mt-24">
-            <ScenariosCard savedDealId={dealRow.id} />
+            <ScenariosCard savedDealId={dealRow.id} isPremium={isPremium} />
           </div>
-          <div id="deal-due-diligence" className="scroll-mt-24">
-            <DueDiligenceCard savedDealId={dealRow.id} />
-          </div>
-          <div id="deal-documents" className="scroll-mt-24">
-            <DealDocumentsCard savedDealId={dealRow.id} />
-          </div>
+          {isPremium ? (
+            <>
+              <div id="deal-due-diligence" className="scroll-mt-24">
+                <DueDiligenceCard savedDealId={dealRow.id} />
+              </div>
+              <div id="deal-documents" className="scroll-mt-24">
+                <DealDocumentsCard savedDealId={dealRow.id} />
+              </div>
+            </>
+          ) : (
+            <section
+              id="deal-due-diligence"
+              className="scroll-mt-24 rounded-2xl border border-primary/20 bg-primary/5 p-5"
+            >
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="text-sm font-bold text-foreground">Due diligence &amp; documents</h2>
+                <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary">
+                  Pro
+                </span>
+              </div>
+              <p className="mt-1.5 max-w-xl text-sm text-muted-foreground">
+                Run every deal through a reusable closing checklist and keep its supporting files
+                together in one workspace.
+              </p>
+              <Link
+                href="/pricing#plans"
+                className="mt-3 inline-flex text-sm font-semibold text-primary hover:underline"
+              >
+                Unlock with Pro
+              </Link>
+            </section>
+          )}
           {/* Notes + comments side by side (WS-4): the free-text deal file no
               longer lives only in the analyzer view. Same blob, saves on blur,
               last-write-wins with the analyzer copy. */}

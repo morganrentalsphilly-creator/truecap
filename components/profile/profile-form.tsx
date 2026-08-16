@@ -351,67 +351,93 @@ export function ProfileForm({
     // Supabase enforces captcha on resetPasswordForEmail project-wide, so this
     // signed-in surface needs a token too. Without one the send was rejected
     // and the user saw a raw "no captcha_token found" error.
-    const result = await requestPasswordResetAction({
-      email: initialEmail,
-      captchaToken: resetCaptchaToken ?? undefined,
-    });
-    setIsSendingReset(false);
-    if (!result.ok) {
+    try {
+      const result = await requestPasswordResetAction(
+        {
+          email: initialEmail,
+          captchaToken: resetCaptchaToken ?? undefined,
+        },
+        "/profile"
+      );
+      if (!result.ok) {
+        toast({
+          title: "Couldn't send reset link",
+          description: result.message,
+          variant: "destructive",
+        });
+        return;
+      }
+      setResetSent(true);
+      toast({
+        title: "Reset link sent",
+        description: `Check ${initialEmail} for the link to set a new password.`,
+      });
+    } catch {
       toast({
         title: "Couldn't send reset link",
-        description: result.message,
+        description: "The request was interrupted. Check your connection and try again.",
         variant: "destructive",
       });
-      return;
+    } finally {
+      setIsSendingReset(false);
     }
-    setResetSent(true);
-    toast({
-      title: "Reset link sent",
-      description: `Check ${initialEmail} for the link to set a new password.`,
-    });
   };
 
   const onSubmit = async (values: ProfileFormValues) => {
     setIsSaving(true);
-    const cleanAvatarUrl = avatarUrl ? avatarUrl.split("?")[0] : null;
-    const result = await updateProfileAction({
-      firstName: values.firstName,
-      lastName: values.lastName ?? "",
-      avatarUrl: cleanAvatarUrl,
-    });
-    setIsSaving(false);
+    try {
+      const cleanAvatarUrl = avatarUrl ? avatarUrl.split("?")[0] : null;
+      const result = await updateProfileAction({
+        firstName: values.firstName,
+        lastName: values.lastName ?? "",
+        avatarUrl: cleanAvatarUrl,
+      });
 
-    if (!result.ok) {
+      if (!result.ok) {
+        toast({
+          title: "Could not save profile",
+          description: result.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (cleanAvatarUrl && cleanAvatarUrl !== initialAvatarUrlRef.current && pendingDeletePathRef.current) {
+        const supabase = createBrowserSupabaseClient();
+        try {
+          await supabase.storage.from(AVATAR_BUCKET).remove([pendingDeletePathRef.current]);
+          pendingDeletePathRef.current = null;
+        } catch {
+          // The profile itself is already saved. Old-avatar cleanup is
+          // best-effort and must not turn a successful save into an error.
+        }
+      }
+
+      initialAvatarUrlRef.current = cleanAvatarUrl ?? undefined;
+      setAvatarUrl(cleanAvatarUrl ? `${cleanAvatarUrl}?v=${Date.now()}` : undefined);
+      window.dispatchEvent(
+        new CustomEvent("profile-updated", {
+          detail: {
+            firstName: values.firstName,
+            lastName: values.lastName ?? "",
+            avatarUrl: cleanAvatarUrl,
+          },
+        })
+      );
+      router.refresh();
+      toast({
+        title: "Profile updated",
+        description: "Your profile changes have been saved successfully.",
+      });
+    } catch {
       toast({
         title: "Could not save profile",
-        description: result.message,
+        description: "The request was interrupted. Check your connection and try again.",
         variant: "destructive",
       });
-      return;
+    } finally {
+      setIsSaving(false);
     }
-
-    if (cleanAvatarUrl && cleanAvatarUrl !== initialAvatarUrlRef.current && pendingDeletePathRef.current) {
-      const supabase = createBrowserSupabaseClient();
-      await supabase.storage.from(AVATAR_BUCKET).remove([pendingDeletePathRef.current]);
-      pendingDeletePathRef.current = null;
-    }
-
-    initialAvatarUrlRef.current = cleanAvatarUrl ?? undefined;
-    setAvatarUrl(cleanAvatarUrl ? `${cleanAvatarUrl}?v=${Date.now()}` : undefined);
-    window.dispatchEvent(
-      new CustomEvent("profile-updated", {
-        detail: {
-          firstName: values.firstName,
-          lastName: values.lastName ?? "",
-          avatarUrl: cleanAvatarUrl,
-        },
-      })
-    );
-    router.refresh();
-    toast({
-      title: "Profile updated",
-      description: "Your profile changes have been saved successfully.",
-    });
   };
 
   return (

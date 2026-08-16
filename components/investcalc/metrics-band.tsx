@@ -313,12 +313,12 @@ export function buildMetricTiles({
             ? displayResult.monthlyPayment <= 0
               ? "Cash purchase"
               : displayResult.dscr >= 1.25
-                ? "Bankable (≥1.25)"
+                ? "Clears 1.25 benchmark"
                 : displayResult.dscr >= 1.0
-                  ? "Tight (≥1.0)"
+                  ? "Below 1.25 benchmark"
                   : propertyType === "owner-occupant"
                     ? "Below 1.0 — normal for a house-hack"
-                    : "Underwater"
+                    : "Below 1.0"
             : undefined
         }
         color={

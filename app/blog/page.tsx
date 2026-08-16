@@ -105,7 +105,7 @@ export const BLOG_POSTS: BlogPost[] = [
     title:
       "What is a good DSCR for a rental property? (And what 1.25 means for your offer)",
     excerpt:
-      "Every lender's answer is 1.25 — but that's the lender's bar, not the investor's. What a good DSCR actually is band by band, a worked $250K duplex that scores a marginal 1.12 on real NOI yet sails past the lender at 1.54, and the negotiating math a 1.25 target really gives you: about $168K of max loan, ~33% down, or a $224,500 ceiling on a $250K asking price.",
+      "Why 1.25 is a common screening benchmark rather than a universal approval rule. See DSCR band by band, a worked $250K duplex under two expense methods, and the negotiating math a 1.25 target gives you under the stated assumptions.",
     readingTimeMinutes: 10,
     publishedAt: "2026-07-18",
     available: true,

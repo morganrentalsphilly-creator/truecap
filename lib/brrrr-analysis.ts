@@ -55,7 +55,9 @@ export type BrrrrResult = {
   newMonthlyPayment: number;
   postRefiMonthlyCashFlow: number;
   postRefiAnnualCashFlow: number;
-  postRefiCashOnCashPct: number; // infinite if cashLeftInDeal <= 0
+  /** Finite numeric percentage. When all cash is returned, use
+   *  isInfiniteReturn for display and this remains 0. */
+  postRefiCashOnCashPct: number;
   isInfiniteReturn: boolean;
 
   // Sanity / value-add
@@ -63,12 +65,104 @@ export type BrrrrResult = {
   valueAddRatio: number; // equityCreated / (purchase + rehab)
 };
 
+export type BrrrrValidationIssue = {
+  field: keyof BrrrrInputs;
+  message: string;
+};
+
+const MAX_PROPERTY_VALUE = 100_000_000;
+const MAX_MONTHLY_VALUE = 1_000_000;
+
+const INPUT_RULES: ReadonlyArray<{
+  field: keyof BrrrrInputs;
+  label: string;
+  min: number;
+  max: number;
+  integer?: boolean;
+}> = [
+  { field: "purchasePrice", label: "Purchase price", min: 1, max: MAX_PROPERTY_VALUE },
+  { field: "rehabBudget", label: "Rehab budget", min: 0, max: MAX_PROPERTY_VALUE },
+  { field: "arv", label: "ARV", min: 1, max: MAX_PROPERTY_VALUE },
+  { field: "refiLtvPct", label: "Refi LTV", min: 0.1, max: 100 },
+  { field: "refiRatePct", label: "Refi rate", min: 0, max: 50 },
+  { field: "refiTermYears", label: "Refi term", min: 1, max: 50, integer: true },
+  { field: "closingCostsPctAcq", label: "Acquisition closing costs", min: 0, max: 25 },
+  { field: "closingCostsRefiPct", label: "Refi closing costs", min: 0, max: 25 },
+  { field: "downPaymentPct", label: "Down payment", min: 0, max: 100 },
+  { field: "holdMonths", label: "Hold months", min: 0, max: 120, integer: true },
+  { field: "monthlyCarryingCost", label: "Monthly carrying cost", min: 0, max: MAX_MONTHLY_VALUE },
+  { field: "postRefiMonthlyOpEx", label: "Monthly operating expenses", min: 0, max: MAX_MONTHLY_VALUE },
+  { field: "postRefiMonthlyRent", label: "Monthly rent", min: 1, max: MAX_MONTHLY_VALUE },
+];
+
+/** Public-tool validation: callers can stop before showing misleading output. */
+export function validateBrrrrInputs(inputs: BrrrrInputs): BrrrrValidationIssue[] {
+  const issues: BrrrrValidationIssue[] = [];
+  for (const rule of INPUT_RULES) {
+    const value = inputs[rule.field];
+    if (!Number.isFinite(value)) {
+      issues.push({ field: rule.field, message: `${rule.label} is required.` });
+      continue;
+    }
+    if (rule.integer && !Number.isInteger(value)) {
+      issues.push({ field: rule.field, message: `${rule.label} must be a whole number.` });
+      continue;
+    }
+    if (value < rule.min) {
+      issues.push({
+        field: rule.field,
+        message: `${rule.label} must be at least ${rule.min}.`,
+      });
+      continue;
+    }
+    if (value > rule.max) {
+      issues.push({ field: rule.field, message: `${rule.label} must be ${rule.max} or less.` });
+    }
+  }
+  return issues;
+}
+
+function finiteOrZero(value: number): number {
+  return Number.isFinite(value) ? value : 0;
+}
+
+function bounded(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, finiteOrZero(value)));
+}
+
+function roundedFinite(value: number): number {
+  return Number.isFinite(value) ? Math.round(value) : 0;
+}
+
+/** Defense in depth for non-widget callers. The public widget validates and
+ *  explains bad fields; the engine still bounds everything so it never emits
+ *  NaN/Infinity if another caller supplies malformed numbers. */
+function normalizeBrrrrInputs(inputs: BrrrrInputs): BrrrrInputs {
+  return {
+    purchasePrice: bounded(inputs.purchasePrice, 0, MAX_PROPERTY_VALUE),
+    rehabBudget: bounded(inputs.rehabBudget, 0, MAX_PROPERTY_VALUE),
+    arv: bounded(inputs.arv, 0, MAX_PROPERTY_VALUE),
+    refiLtvPct: bounded(inputs.refiLtvPct, 0, 100),
+    refiRatePct: bounded(inputs.refiRatePct, 0, 50),
+    refiTermYears: Math.max(1, Math.round(bounded(inputs.refiTermYears, 1, 50))),
+    closingCostsPctAcq: bounded(inputs.closingCostsPctAcq, 0, 25),
+    closingCostsRefiPct: bounded(inputs.closingCostsRefiPct, 0, 25),
+    downPaymentPct: bounded(inputs.downPaymentPct, 0, 100),
+    holdMonths: Math.round(bounded(inputs.holdMonths, 0, 120)),
+    monthlyCarryingCost: bounded(inputs.monthlyCarryingCost, 0, MAX_MONTHLY_VALUE),
+    postRefiMonthlyOpEx: bounded(inputs.postRefiMonthlyOpEx, 0, MAX_MONTHLY_VALUE),
+    postRefiMonthlyRent: bounded(inputs.postRefiMonthlyRent, 0, MAX_MONTHLY_VALUE),
+  };
+}
+
 function monthlyPayment(principal: number, annualRatePct: number, years: number): number {
-  if (principal <= 0) return 0;
+  if (!Number.isFinite(principal) || !Number.isFinite(annualRatePct) || !Number.isFinite(years)) return 0;
+  if (principal <= 0 || annualRatePct < 0 || years <= 0) return 0;
   const r = annualRatePct / 100 / 12;
   const n = years * 12;
   if (r === 0) return principal / n;
-  return (principal * r) / (1 - Math.pow(1 + r, -n));
+  const payment = (principal * r) / (1 - Math.pow(1 + r, -n));
+  return Number.isFinite(payment) ? payment : 0;
 }
 
 export function analyzeBrrrr(inputs: BrrrrInputs): BrrrrResult {
@@ -86,7 +180,7 @@ export function analyzeBrrrr(inputs: BrrrrInputs): BrrrrResult {
     monthlyCarryingCost,
     postRefiMonthlyOpEx,
     postRefiMonthlyRent,
-  } = inputs;
+  } = normalizeBrrrrInputs(inputs);
 
   // Acquisition side
   const originalDownPayment = (purchasePrice * downPaymentPct) / 100;
@@ -117,7 +211,7 @@ export function analyzeBrrrr(inputs: BrrrrInputs): BrrrrResult {
   const postRefiAnnualCashFlow = postRefiMonthlyCashFlow * 12;
   const isInfiniteReturn = cashLeftInDeal <= 0 && postRefiAnnualCashFlow > 0;
   const postRefiCashOnCashPct = isInfiniteReturn
-    ? Infinity
+    ? 0
     : cashLeftInDeal > 0
     ? (postRefiAnnualCashFlow / cashLeftInDeal) * 100
     : 0;
@@ -127,26 +221,27 @@ export function analyzeBrrrr(inputs: BrrrrInputs): BrrrrResult {
   const valueAddRatio = allInBasis > 0 ? equityCreated / allInBasis : 0;
 
   return {
-    originalDownPayment: Math.round(originalDownPayment),
-    originalClosingCosts: Math.round(originalClosingCosts),
-    carryingCostsTotal: Math.round(carryingCostsTotal),
-    rehabBudget: Math.round(rehabBudget),
-    totalCashInvested: Math.round(totalCashInvested),
+    originalDownPayment: roundedFinite(originalDownPayment),
+    originalClosingCosts: roundedFinite(originalClosingCosts),
+    carryingCostsTotal: roundedFinite(carryingCostsTotal),
+    rehabBudget: roundedFinite(rehabBudget),
+    totalCashInvested: roundedFinite(totalCashInvested),
 
-    newLoanAmount: Math.round(newLoanAmount),
-    refiClosingCosts: Math.round(refiClosingCosts),
-    cashReturnedAtRefi: Math.round(cashReturnedAtRefi),
-    cashNeededAtRefi: Math.round(cashNeededAtRefi),
-    cashLeftInDeal: Math.round(cashLeftInDeal),
+    newLoanAmount: roundedFinite(newLoanAmount),
+    refiClosingCosts: roundedFinite(refiClosingCosts),
+    cashReturnedAtRefi: roundedFinite(cashReturnedAtRefi),
+    cashNeededAtRefi: roundedFinite(cashNeededAtRefi),
+    cashLeftInDeal: roundedFinite(cashLeftInDeal),
 
-    newMonthlyPayment: Math.round(newMonthlyPayment),
-    postRefiMonthlyCashFlow: Math.round(postRefiMonthlyCashFlow),
-    postRefiAnnualCashFlow: Math.round(postRefiAnnualCashFlow),
-    postRefiCashOnCashPct: isInfiniteReturn ? Infinity : Math.round(postRefiCashOnCashPct * 10) / 10,
+    newMonthlyPayment: roundedFinite(newMonthlyPayment),
+    postRefiMonthlyCashFlow: roundedFinite(postRefiMonthlyCashFlow),
+    postRefiAnnualCashFlow: roundedFinite(postRefiAnnualCashFlow),
+    postRefiCashOnCashPct: Number.isFinite(postRefiCashOnCashPct)
+      ? Math.round(postRefiCashOnCashPct * 10) / 10
+      : 0,
     isInfiniteReturn,
 
-    equityCreated: Math.round(equityCreated),
-    valueAddRatio,
+    equityCreated: roundedFinite(equityCreated),
+    valueAddRatio: finiteOrZero(valueAddRatio),
   };
 }
-

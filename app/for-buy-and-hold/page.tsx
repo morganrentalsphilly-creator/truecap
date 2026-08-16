@@ -193,7 +193,7 @@ export default function ForBuyAndHoldPage() {
             <li><strong>Multi-year assumptions stay visible.</strong> See depreciation, declining mortgage interest, and rent + expense growth in one reproducible model.</li>
             <li><strong>Exit modeling matters.</strong> Compare modeled equity, cash flow, and after-tax proceeds across hold years under the same assumptions.</li>
             <li><strong>Sensitivity is built in.</strong> Hard to do thoroughly in a spreadsheet — trivial here.</li>
-            <li><strong>Portfolio view.</strong> Save 10 deals, see total cash flow + weighted cap rate across the book.</li>
+            <li><strong>Portfolio view.</strong> Free saves up to 5 deals; Pro adds unlimited saves, editing, comparison, and the portfolio rollup.</li>
             <li><strong>Traceable screening defaults.</strong> HUD/FRED/state estimates show where the first-pass inputs came from; replace them with property-specific evidence before offering.</li>
           </ul>
         </section>

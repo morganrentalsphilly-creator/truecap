@@ -53,12 +53,19 @@ describe("marketing small-text contrast", () => {
 
   it("keeps the narrow text variants above WCAG AA's 4.5:1 threshold", () => {
     const white: LinearRgb = [1, 1, 1];
+    expect(contrast(cssToken(globals, "muted-foreground"), white)).toBeGreaterThanOrEqual(4.5);
+    expect(
+      contrast(cssToken(globals, "primary-foreground"), cssToken(globals, "primary"))
+    ).toBeGreaterThanOrEqual(4.5);
     expect(contrast(cssToken(globals, "brand-orange-solid"), white)).toBeGreaterThanOrEqual(4.5);
     expect(
       contrast(cssToken(globals, "brand-orange-text"), cssToken(globals, "brand-orange-light"))
     ).toBeGreaterThanOrEqual(4.5);
     expect(
       contrast(cssToken(globals, "brand-blue-text"), cssToken(globals, "brand-blue-light"))
+    ).toBeGreaterThanOrEqual(4.5);
+    expect(
+      contrast(cssToken(globals, "foreground"), cssToken(globals, "brand-green-light"))
     ).toBeGreaterThanOrEqual(4.5);
   });
 
@@ -70,6 +77,32 @@ describe("marketing small-text contrast", () => {
     const landing = read("components/marketing/landing-sections.tsx");
     expect(landing).toContain("text-[var(--brand-orange-text)]");
     expect(landing).toContain("text-[var(--brand-blue-text)]");
+    expect(landing).toContain(
+      'featured ? "text-[var(--brand-blue-text)]" : "text-muted-foreground"'
+    );
+    expect(landing).toContain(
+      'bg-primary/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-[var(--brand-blue-text)]'
+    );
+
+    const pricing = read("components/marketing/pricing-toggle-plans.tsx");
+    expect(pricing).toContain(': "text-muted-foreground line-through"');
+    expect(pricing).not.toContain('"text-muted-foreground/60 line-through"');
+
+    const ticker = read("components/marketing/deals-analyzed-ticker.tsx");
+    expect(ticker).toContain(
+      'text-[10px] font-medium text-foreground sm:text-[11px]'
+    );
+    expect(ticker).toContain("(50,000 historical + live measured)");
+    expect(ticker).toContain("(50,000 historical; live counter unavailable)");
+
+    const philadelphia = read("app/markets/philadelphia/page.tsx");
+    expect(philadelphia).toContain('className="text-sm sm:text-base mb-4"');
+    expect(philadelphia).not.toContain('className="text-sm sm:text-base opacity-90 mb-4"');
+
+    const capRateTool = read("app/tools/cap-rate-calculator/page.tsx");
+    expect(capRateTool).toContain('className="text-sm sm:text-base mb-4"');
+    expect(capRateTool).toContain('className="text-sm space-y-1.5 mb-5"');
+    expect(capRateTool).not.toContain('className="text-sm space-y-1.5 mb-5 opacity-90"');
 
     expect(read("components/investcalc/investcalc-page.tsx")).toContain(
       "text-[var(--brand-blue-text)] underline-offset-2"
@@ -110,6 +143,38 @@ describe("marketing landmarks and mobile targets", () => {
     );
   });
 
+  it("removes the hidden mobile pricing link from keyboard navigation", () => {
+    const source = read("components/investcalc/header.tsx");
+    expect(source).toMatch(
+      /<Link href="\/pricing" className="hidden xl:block">\s*<div className="flex items-center gap-2/
+    );
+    expect(source).not.toContain(
+      '<Link href="/pricing">\n            <div className="hidden xl:flex'
+    );
+  });
+
+  it("makes the wide Philadelphia benchmark table an identified keyboard-scroll region", () => {
+    const source = read("app/markets/philadelphia/page.tsx");
+    const regionAt = source.indexOf(
+      'aria-label="Philadelphia cap rate benchmarks by neighborhood"'
+    );
+    const region = source.slice(Math.max(0, regionAt - 500), regionAt + 100);
+
+    expect(regionAt).toBeGreaterThan(-1);
+    expect(region).toContain("overflow-x-auto");
+    expect(region).toContain("focus-visible:ring-2");
+    expect(region).toContain("tabIndex={0}");
+    expect(region).toContain('role="region"');
+  });
+
+  it("gives the homepage address field a persistent explicit label", () => {
+    const source = read("components/marketing/hero-address-form.tsx");
+    expect(source).toContain(
+      '<label htmlFor="hero-property-address" className="sr-only">'
+    );
+    expect(source).toContain('inputId="hero-property-address"');
+  });
+
   it("keeps centralized primary inputs and buttons at least 44px tall on mobile", () => {
     const input = read("components/ui/input.tsx");
     expect(input).toMatch(/border-input h-11 .* md:h-9 md:text-sm/);
@@ -121,6 +186,19 @@ describe("marketing landmarks and mobile targets", () => {
     const header = read("components/investcalc/header.tsx");
     expect(header).toContain('className="h-11 px-3 sm:h-9 sm:px-4');
     expect(header).toContain('"h-11 px-4 sm:h-9 sm:px-5 rounded-full');
+
+    const listingLink = read("components/investcalc/listing-link-input.tsx");
+    expect(listingLink.match(/inline-flex min-h-11 items-center/g)).toHaveLength(2);
+    expect(listingLink).toContain(
+      'className="min-h-11 min-w-0 flex-1 rounded-lg border border-input'
+    );
+    expect(listingLink).toContain(
+      'className="min-h-11 shrink-0 rounded-lg bg-primary'
+    );
+
+    const cookieBanner = read("components/marketing/cookie-consent-banner.tsx");
+    expect(cookieBanner.match(/className="inline-flex h-11 items-center/g)).toHaveLength(2);
+    expect(cookieBanner).toContain('className="inline-flex size-11 shrink-0');
   });
 });
 

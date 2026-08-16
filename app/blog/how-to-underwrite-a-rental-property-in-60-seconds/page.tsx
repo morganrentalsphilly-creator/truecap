@@ -378,10 +378,11 @@ export default function BlogPost() {
 
           <h2 className="text-2xl sm:text-3xl">Metric 4: DSCR (10 seconds)</h2>
           <p>
-            Debt Service Coverage Ratio — the metric every lender pulls before
-            approving a mortgage. DSCR is annual NOI divided by annual mortgage
-            payments. It tells you (and your lender) whether the property can
-            service its debt with operating income alone.
+            Debt Service Coverage Ratio is annual NOI divided by annual debt
+            service. It estimates whether modeled operating income covers the
+            modeled loan payments. Lenders that use DSCR can apply different
+            rent, expense, reserve, leverage, and documentation rules, so verify
+            the specific program&apos;s written formula.
           </p>
           <div className="bg-card border border-border rounded-xl p-5 sm:p-6 my-4 text-center">
             <div className="text-sm sm:text-base font-mono">

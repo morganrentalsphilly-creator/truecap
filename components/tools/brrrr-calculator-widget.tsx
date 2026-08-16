@@ -12,17 +12,20 @@ import { ArrowUpRight, Sparkles } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
-import { analyzeBrrrr } from "@/lib/brrrr-analysis";
+import {
+  analyzeBrrrr,
+  validateBrrrrInputs,
+  type BrrrrInputs,
+} from "@/lib/brrrr-analysis";
 import { buildAnalyzerHandoffUrl } from "@/lib/analyzer-handoff";
 
-const num = (s: string) => {
-  const n = Number(s);
-  return Number.isFinite(n) ? n : 0;
-};
+const parseInput = (s: string) => (s.trim() === "" ? Number.NaN : Number(s));
 
 const fmt = (n: number) =>
-  n === Infinity ? "∞" : `${n < 0 ? "-" : ""}$${Math.abs(Math.round(n)).toLocaleString("en-US")}`;
-const fmtPct = (n: number) => (n === Infinity ? "∞" : `${n.toFixed(1)}%`);
+  Number.isFinite(n)
+    ? `${n < 0 ? "-" : ""}$${Math.abs(Math.round(n)).toLocaleString("en-US")}`
+    : "—";
+const fmtPct = (n: number) => (Number.isFinite(n) ? `${n.toFixed(1)}%` : "—");
 
 export function BrrrrCalculatorWidget() {
   const [price, setPrice] = useState("180000");
@@ -39,27 +42,41 @@ export function BrrrrCalculatorWidget() {
   const [rent, setRent] = useState("2400");
   const [opex, setOpex] = useState("960"); // 40% of rent default
 
-  const result = useMemo(() => {
-    return analyzeBrrrr({
-      purchasePrice: num(price),
-      rehabBudget: num(rehab),
-      arv: num(arv),
-      refiLtvPct: num(refiLtv),
-      refiRatePct: num(refiRate),
-      refiTermYears: num(refiTerm),
-      closingCostsPctAcq: num(closeAcq),
-      closingCostsRefiPct: num(closeRefi),
-      downPaymentPct: num(downPct),
-      holdMonths: num(hold),
-      monthlyCarryingCost: num(carry),
-      postRefiMonthlyOpEx: num(opex),
-      postRefiMonthlyRent: num(rent),
-    });
+  const calculation = useMemo(() => {
+    const inputs: BrrrrInputs = {
+      purchasePrice: parseInput(price),
+      rehabBudget: parseInput(rehab),
+      arv: parseInput(arv),
+      refiLtvPct: parseInput(refiLtv),
+      refiRatePct: parseInput(refiRate),
+      refiTermYears: parseInput(refiTerm),
+      closingCostsPctAcq: parseInput(closeAcq),
+      closingCostsRefiPct: parseInput(closeRefi),
+      downPaymentPct: parseInput(downPct),
+      holdMonths: parseInput(hold),
+      monthlyCarryingCost: parseInput(carry),
+      postRefiMonthlyOpEx: parseInput(opex),
+      postRefiMonthlyRent: parseInput(rent),
+    };
+    const issues = validateBrrrrInputs(inputs);
+    return {
+      inputs,
+      issues,
+      result: issues.length === 0 ? analyzeBrrrr(inputs) : null,
+    };
   }, [price, rehab, arv, refiLtv, refiRate, refiTerm, closeAcq, closeRefi, downPct, hold, carry, rent, opex]);
+
+  const invalidFields = new Set(calculation.issues.map((issue) => issue.field));
 
   // Carry the user's purchase price + post-refi rent into the full analyzer (P2-2 handoff).
   const handoffHref = buildAnalyzerHandoffUrl(
-    { purchasePrice: num(price), monthlyRent: num(rent) },
+    calculation.result
+      ? {
+          purchasePrice: calculation.inputs.purchasePrice,
+          monthlyRent: calculation.inputs.postRefiMonthlyRent,
+          strategy: "brrrr",
+        }
+      : { strategy: "brrrr" },
     { utmSource: "brrrr-calculator" }
   );
 
@@ -70,45 +87,46 @@ export function BrrrrCalculatorWidget() {
       </h2>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 mb-4">
-        <Money label="Purchase price" value={price} setValue={setPrice} />
-        <Money label="Rehab budget" value={rehab} setValue={setRehab} />
-        <Money label="ARV (after-repair value)" value={arv} setValue={setArv} />
-        <Pct label="Down payment" value={downPct} setValue={setDownPct} />
-        <Pct label="Closing costs (acq)" value={closeAcq} setValue={setCloseAcq} />
-        <Plain label="Hold months" value={hold} setValue={setHold} />
-        <Pct label="Refi LTV" value={refiLtv} setValue={setRefiLtv} />
-        <Pct label="Refi rate" value={refiRate} setValue={setRefiRate} step="0.125" />
-        <Plain label="Refi term (yrs)" value={refiTerm} setValue={setRefiTerm} />
-        <Pct label="Refi closing %" value={closeRefi} setValue={setCloseRefi} />
-        <Money label="Monthly carry (rehab)" value={carry} setValue={setCarry} />
-        <Money label="Monthly rent (after)" value={rent} setValue={setRent} />
-        <Money label="Monthly op-ex (after)" value={opex} setValue={setOpex} />
+        <Money label="Purchase price" value={price} setValue={setPrice} min={1} max={100_000_000} invalid={invalidFields.has("purchasePrice")} />
+        <Money label="Rehab budget" value={rehab} setValue={setRehab} min={0} max={100_000_000} invalid={invalidFields.has("rehabBudget")} />
+        <Money label="ARV (after-repair value)" value={arv} setValue={setArv} min={1} max={100_000_000} invalid={invalidFields.has("arv")} />
+        <Pct label="Down payment" value={downPct} setValue={setDownPct} min={0} max={100} invalid={invalidFields.has("downPaymentPct")} />
+        <Pct label="Closing costs (acq)" value={closeAcq} setValue={setCloseAcq} min={0} max={25} invalid={invalidFields.has("closingCostsPctAcq")} />
+        <Plain label="Hold months" value={hold} setValue={setHold} min={0} max={120} invalid={invalidFields.has("holdMonths")} />
+        <Pct label="Refi LTV" value={refiLtv} setValue={setRefiLtv} min={0.1} max={100} invalid={invalidFields.has("refiLtvPct")} />
+        <Pct label="Refi rate" value={refiRate} setValue={setRefiRate} step="0.125" min={0} max={50} invalid={invalidFields.has("refiRatePct")} />
+        <Plain label="Refi term (yrs)" value={refiTerm} setValue={setRefiTerm} min={1} max={50} invalid={invalidFields.has("refiTermYears")} />
+        <Pct label="Refi closing %" value={closeRefi} setValue={setCloseRefi} min={0} max={25} invalid={invalidFields.has("closingCostsRefiPct")} />
+        <Money label="Monthly carry (rehab)" value={carry} setValue={setCarry} min={0} max={1_000_000} invalid={invalidFields.has("monthlyCarryingCost")} />
+        <Money label="Monthly rent (after)" value={rent} setValue={setRent} min={1} max={1_000_000} invalid={invalidFields.has("postRefiMonthlyRent")} />
+        <Money label="Monthly op-ex (after)" value={opex} setValue={setOpex} min={0} max={1_000_000} invalid={invalidFields.has("postRefiMonthlyOpEx")} />
       </div>
 
+      {calculation.result ? (
       <div className="rounded-xl border border-border bg-[var(--background)] p-5 sm:p-6 space-y-4">
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-          <Metric label="Cash left in deal" value={fmt(result.cashLeftInDeal)}
-            positive={result.cashLeftInDeal === 0}
-            negative={result.cashLeftInDeal > 0 && result.cashLeftInDeal >= result.totalCashInvested}
+          <Metric label="Cash left in deal" value={fmt(calculation.result.cashLeftInDeal)}
+            positive={calculation.result.cashLeftInDeal === 0}
+            negative={calculation.result.cashLeftInDeal > 0 && calculation.result.cashLeftInDeal >= calculation.result.totalCashInvested}
           />
-          <Metric label="Cash returned at refi" value={fmt(result.cashReturnedAtRefi)} positive={result.cashReturnedAtRefi > 0} />
-          <Metric label="Post-refi CF" value={`${fmt(result.postRefiMonthlyCashFlow)}/mo`}
-            positive={result.postRefiMonthlyCashFlow > 0}
-            negative={result.postRefiMonthlyCashFlow < 0}
+          <Metric label="Cash returned at refi" value={fmt(calculation.result.cashReturnedAtRefi)} positive={calculation.result.cashReturnedAtRefi > 0} />
+          <Metric label="Post-refi CF" value={`${fmt(calculation.result.postRefiMonthlyCashFlow)}/mo`}
+            positive={calculation.result.postRefiMonthlyCashFlow > 0}
+            negative={calculation.result.postRefiMonthlyCashFlow < 0}
           />
           <Metric label="Post-refi CoC"
-            value={result.isInfiniteReturn ? "∞ Infinite" : fmtPct(result.postRefiCashOnCashPct)}
-            positive={result.isInfiniteReturn || result.postRefiCashOnCashPct > 10}
-            negative={!result.isInfiniteReturn && result.postRefiCashOnCashPct < 0}
+            value={calculation.result.isInfiniteReturn ? "∞ Infinite" : fmtPct(calculation.result.postRefiCashOnCashPct)}
+            positive={calculation.result.isInfiniteReturn || calculation.result.postRefiCashOnCashPct > 10}
+            negative={!calculation.result.isInfiniteReturn && calculation.result.postRefiCashOnCashPct < 0}
           />
         </div>
 
         {/* Refi shortfall: new loan < payoff + refi costs. The shortfall is
             already counted in "Cash left in deal" — this names it. */}
-        {result.cashNeededAtRefi > 0 && (
+        {calculation.result.cashNeededAtRefi > 0 && (
           <p className="text-xs font-semibold text-[var(--metric-negative)]">
             Refi shortfall: the new loan doesn&apos;t cover the original loan payoff plus
-            refi closing costs — you&apos;d bring {fmt(result.cashNeededAtRefi)} to the refi
+            refi closing costs — you&apos;d bring {fmt(calculation.result.cashNeededAtRefi)} to the refi
             table (included in cash left in deal).
           </p>
         )}
@@ -116,66 +134,95 @@ export function BrrrrCalculatorWidget() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
           <div>
             <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold mb-1.5">Cash going in</div>
-            <Row label="Down payment" value={fmt(result.originalDownPayment)} />
-            <Row label="Closing costs" value={fmt(result.originalClosingCosts)} />
-            <Row label="Rehab budget" value={fmt(result.rehabBudget)} />
-            <Row label="Carrying costs" value={fmt(result.carryingCostsTotal)} />
-            <Row label="Total cash invested" value={fmt(result.totalCashInvested)} bold />
+            <Row label="Down payment" value={fmt(calculation.result.originalDownPayment)} />
+            <Row label="Closing costs" value={fmt(calculation.result.originalClosingCosts)} />
+            <Row label="Rehab budget" value={fmt(calculation.result.rehabBudget)} />
+            <Row label="Carrying costs" value={fmt(calculation.result.carryingCostsTotal)} />
+            <Row label="Total cash invested" value={fmt(calculation.result.totalCashInvested)} bold />
           </div>
           <div>
             <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold mb-1.5">Refi</div>
-            <Row label="New loan amount" value={fmt(result.newLoanAmount)} />
-            <Row label="Refi closing costs" value={fmt(result.refiClosingCosts)} />
-            {result.cashNeededAtRefi > 0 ? (
-              <Row label="Cash needed at refi" value={fmt(result.cashNeededAtRefi)} bold />
+            <Row label="New loan amount" value={fmt(calculation.result.newLoanAmount)} />
+            <Row label="Refi closing costs" value={fmt(calculation.result.refiClosingCosts)} />
+            {calculation.result.cashNeededAtRefi > 0 ? (
+              <Row label="Cash needed at refi" value={fmt(calculation.result.cashNeededAtRefi)} bold />
             ) : (
-              <Row label="Cash returned" value={fmt(result.cashReturnedAtRefi)} bold />
+              <Row label="Cash returned" value={fmt(calculation.result.cashReturnedAtRefi)} bold />
             )}
-            <Row label="New monthly payment" value={fmt(result.newMonthlyPayment)} />
-            <Row label="Equity created" value={fmt(result.equityCreated)} bold />
+            <Row label="New monthly payment" value={fmt(calculation.result.newMonthlyPayment)} />
+            <Row label="Equity created" value={fmt(calculation.result.equityCreated)} bold />
           </div>
         </div>
       </div>
+      ) : (
+        <div
+          role="status"
+          aria-live="polite"
+          className="rounded-xl border border-[var(--metric-negative)]/35 bg-[var(--metric-negative)]/5 p-5"
+        >
+          <p className="text-sm font-bold text-foreground">Check the highlighted inputs.</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            The calculator will resume when every required value is within its supported range.
+          </p>
+          <ul className="mt-3 list-disc space-y-1 pl-5 text-xs text-[var(--metric-negative)]">
+            {calculation.issues.slice(0, 4).map((issue) => (
+              <li key={issue.field}>{issue.message}</li>
+            ))}
+            {calculation.issues.length > 4 ? (
+              <li>Correct {calculation.issues.length - 4} more highlighted fields.</li>
+            ) : null}
+          </ul>
+        </div>
+      )}
 
       <Link href={handoffHref} target="_top" className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline">
         <Sparkles className="w-4 h-4" />
-        Run the full analysis with these numbers — save BRRRRs, compare them, export PDFs — free in TrueCap
+        Open the free core deal screen with these numbers — Pro adds BRRRR, comparisons, and PDFs
         <ArrowUpRight className="w-4 h-4" />
       </Link>
     </div>
   );
 }
 
-function Money({ label, value, setValue }: { label: string; value: string; setValue: (v: string) => void }) {
+type NumericFieldProps = {
+  label: string;
+  value: string;
+  setValue: (v: string) => void;
+  min: number;
+  max: number;
+  invalid: boolean;
+};
+
+function Money({ label, value, setValue, min, max, invalid }: NumericFieldProps) {
   const id = useId();
   return (
     <div>
       <Label htmlFor={id} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block">{label}</Label>
       <div className="relative">
         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">$</span>
-        <Input id={id} type="number" inputMode="numeric" value={value} onChange={(e) => setValue(e.target.value)} className="pl-7 border-input bg-background" />
+        <Input id={id} type="number" inputMode="decimal" min={min} max={max} aria-invalid={invalid || undefined} value={value} onChange={(e) => setValue(e.target.value)} className="pl-7 border-input bg-background" />
       </div>
     </div>
   );
 }
-function Pct({ label, value, setValue, step = "0.5" }: { label: string; value: string; setValue: (v: string) => void; step?: string }) {
+function Pct({ label, value, setValue, min, max, invalid, step = "0.5" }: NumericFieldProps & { step?: string }) {
   const id = useId();
   return (
     <div>
       <Label htmlFor={id} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block">{label}</Label>
       <div className="relative">
-        <Input id={id} type="number" inputMode="decimal" step={step} value={value} onChange={(e) => setValue(e.target.value)} className="pr-8 border-input bg-background" />
+        <Input id={id} type="number" inputMode="decimal" min={min} max={max} step={step} aria-invalid={invalid || undefined} value={value} onChange={(e) => setValue(e.target.value)} className="pr-8 border-input bg-background" />
         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">%</span>
       </div>
     </div>
   );
 }
-function Plain({ label, value, setValue }: { label: string; value: string; setValue: (v: string) => void }) {
+function Plain({ label, value, setValue, min, max, invalid }: NumericFieldProps) {
   const id = useId();
   return (
     <div>
       <Label htmlFor={id} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block">{label}</Label>
-      <Input id={id} type="number" inputMode="numeric" value={value} onChange={(e) => setValue(e.target.value)} className="border-input bg-background" />
+      <Input id={id} type="number" inputMode="numeric" min={min} max={max} step="1" aria-invalid={invalid || undefined} value={value} onChange={(e) => setValue(e.target.value)} className="border-input bg-background" />
     </div>
   );
 }

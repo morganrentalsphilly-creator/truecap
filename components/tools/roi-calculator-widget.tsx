@@ -149,7 +149,7 @@ export function RoiCalculatorWidget() {
         className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline"
       >
         <Sparkles className="w-4 h-4" />
-        Run the full analysis with these numbers — cash flow, DSCR, 10-year projections, tax, exit — free
+        Open the free core deal screen for cash flow and DSCR — Pro adds 10-year, tax, and exit outputs
         <ArrowUpRight className="w-4 h-4" />
       </Link>
     </div>

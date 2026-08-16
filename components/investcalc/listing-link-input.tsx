@@ -69,7 +69,7 @@ export function ListingLinkInput({
       <button
         type="button"
         onClick={() => onOpenChange(true)}
-        className="mt-2 block text-xs font-semibold text-primary underline-offset-2 hover:underline"
+        className="mt-2 inline-flex min-h-11 items-center text-xs font-semibold text-primary underline-offset-2 hover:underline"
       >
         or paste a Zillow/Redfin link
       </button>
@@ -99,13 +99,13 @@ export function ListingLinkInput({
             }
           }}
           placeholder="https://www.zillow.com/homedetails/…"
-          className="min-w-0 flex-1 rounded-lg border border-input bg-background px-3 py-2 text-sm"
+          className="min-h-11 min-w-0 flex-1 rounded-lg border border-input bg-background px-3 py-2 text-sm"
         />
         <button
           type="button"
           onClick={onSubmit}
           disabled={!value.trim()}
-          className="shrink-0 rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
+          className="min-h-11 shrink-0 rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
         >
           Pull it in
         </button>
@@ -118,7 +118,7 @@ export function ListingLinkInput({
       <button
         type="button"
         onClick={() => onOpenChange(false)}
-        className="mt-2 block text-xs font-semibold text-primary underline-offset-2 hover:underline"
+        className="mt-2 inline-flex min-h-11 items-center text-xs font-semibold text-primary underline-offset-2 hover:underline"
       >
         type the address instead
       </button>

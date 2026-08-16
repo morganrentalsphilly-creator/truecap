@@ -39,6 +39,18 @@ export type SharePayload = {
   };
 };
 
+/**
+ * Keep account-owned workflow references out of a public, reversible payload.
+ * A template id belongs to the sharer; carrying it into a recipient's cloned
+ * draft both exposes an internal identifier and makes a Free recipient's next
+ * Save fail the template entitlement/ownership guard.
+ */
+export function sanitizeShareValues(
+  values: InvestmentFormValues
+): InvestmentFormValues {
+  return { ...values, templateId: undefined };
+}
+
 /** URL-safe base64 (RFC 4648 §5): "+" → "-", "/" → "_", strip padding. */
 function toBase64Url(input: string): string {
   if (typeof window !== "undefined" && window.btoa) {

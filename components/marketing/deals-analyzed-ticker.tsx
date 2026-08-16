@@ -106,7 +106,7 @@ export async function DealsAnalyzedTicker({
         <span className="text-muted-foreground">{suffix}</span>
       </span>
       {source === "runs" ? (
-        <span className="text-[10px] font-medium text-muted-foreground/90 sm:text-[11px]">
+        <span className="text-[10px] font-medium text-foreground sm:text-[11px]">
           {liveCountAvailable
             ? "(50,000 historical + live measured)"
             : "(50,000 historical; live counter unavailable)"}

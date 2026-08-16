@@ -205,7 +205,13 @@ export function OfferEngineSection() {
                   <Icon className="size-5" />
                 </span>
                 <h3 className="mt-4 font-extrabold text-foreground">{name}</h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{outcome}</p>
+                <p
+                  className={`mt-1.5 text-sm leading-relaxed ${
+                    featured ? "text-[var(--brand-blue-text)]" : "text-muted-foreground"
+                  }`}
+                >
+                  {outcome}
+                </p>
                 {featured ? (
                   <p className="mt-4 border-t border-primary/20 pt-3 text-xs font-semibold text-[var(--brand-blue-text)]">
                     The central Pro decision: know your number before you make the offer.
@@ -805,7 +811,7 @@ export function PdfProUpsell() {
             <div className="mb-4 flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
               <Sparkles aria-hidden className="size-5" />
             </div>
-            <span className="w-fit rounded-full bg-primary/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-primary">
+            <span className="w-fit rounded-full bg-primary/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-[var(--brand-blue-text)]">
               {proOfferName}
             </span>
             <h3 className="mt-2 text-lg font-bold text-foreground">One address. Four acquisition answers.</h3>

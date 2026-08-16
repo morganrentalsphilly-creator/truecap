@@ -151,27 +151,32 @@ export function PostAnalysisEmailPrompt({ hasCompletedAnalysis, propertyAddress 
     if (status === "submitting") return;
     setStatus("submitting");
     setErrorMsg(null);
-    const result = await capturePostAnalysisEmail({
-      email: email.trim(),
-      address: propertyAddress,
-      website,
-    });
-    if (result.ok) {
-      setStatus("success");
-      trackEvent("email_capture_submitted", {
-        address_present: Boolean(propertyAddress?.trim()),
-        scheduled_count: result.scheduledCount,
+    try {
+      const result = await capturePostAnalysisEmail({
+        email: email.trim(),
+        address: propertyAddress,
+        website,
       });
-      try {
-        window.localStorage.setItem(CAPTURED_KEY, "1");
-      } catch {
-        // ignore
+      if (result.ok) {
+        setStatus("success");
+        trackEvent("email_capture_submitted", {
+          address_present: Boolean(propertyAddress?.trim()),
+          scheduled_count: result.scheduledCount,
+        });
+        try {
+          window.localStorage.setItem(CAPTURED_KEY, "1");
+        } catch {
+          // ignore
+        }
+        // Auto-close after 3.5s so the success message has time to land.
+        window.setTimeout(() => setOpen(false), 3500);
+      } else {
+        setStatus("error");
+        setErrorMsg(result.message);
       }
-      // Auto-close after 3.5s so the success message has time to land.
-      window.setTimeout(() => setOpen(false), 3500);
-    } else {
+    } catch {
       setStatus("error");
-      setErrorMsg(result.message);
+      setErrorMsg("The request was interrupted. Check your connection and try again.");
     }
   };
 
@@ -192,7 +197,7 @@ export function PostAnalysisEmailPrompt({ hasCompletedAnalysis, propertyAddress 
           type="button"
           aria-label="Close"
           onClick={dismiss}
-          className="absolute right-2 top-2 inline-flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground"
+          className="absolute right-1 top-1 inline-flex size-11 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground"
         >
           <X className="h-4 w-4" />
         </button>

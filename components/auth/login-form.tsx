@@ -58,14 +58,19 @@ export function LoginForm() {
       // surfaces a specific `reason` query param when it can.
       const reason = searchParams.get("reason") ?? "";
       const isMissing = reason === "missing_token";
+      const isOauthCancelled = reason === "oauth_cancelled";
       const isExpired = /expire|otp|token/i.test(reason);
       toast({
-        title: isMissing
+        title: isOauthCancelled
+          ? "Google sign-in canceled"
+          : isMissing
           ? "Link is missing required info"
           : isExpired
             ? "Link expired or already used"
             : "Link invalid or expired",
-        description: isMissing
+        description: isOauthCancelled
+          ? "Nothing changed. You can try Google again or sign in with email."
+          : isMissing
           ? "Open the link directly from the email, or request a new one."
           : "Reset and confirmation links work once and expire after a short time. Request a new email below.",
         variant: "destructive",
@@ -224,7 +229,11 @@ export function LoginForm() {
               <div className="flex items-center justify-between gap-2">
                 <FormLabel className="text-xs font-semibold text-foreground">Password</FormLabel>
                 <Link
-                  href="/auth/forgot-password"
+                  href={
+                    safeNextPath
+                      ? `/auth/forgot-password?next=${encodeURIComponent(safeNextPath)}`
+                      : "/auth/forgot-password"
+                  }
                   className="text-xs font-medium text-primary hover:underline"
                 >
                   Forgot password?
@@ -245,7 +254,7 @@ export function LoginForm() {
                 <button
                   type="button"
                   onClick={() => setShowPassword((value) => !value)}
-                  className="absolute right-2 top-1/2 flex size-9 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                  className="absolute right-0.5 top-1/2 flex size-11 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}

@@ -9,7 +9,8 @@
  *   - Persists every toggle / add / remove via the server action
  *   - Graceful migration-pending notice
  *
- * Free per-deal annotation (no entitlement), like Deal Notes.
+ * Pro workspace feature. Both reads and writes are entitlement-gated by the
+ * server actions; the saved-deal page also keeps this card out of Free UI.
  */
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import * as Sentry from "@sentry/nextjs";

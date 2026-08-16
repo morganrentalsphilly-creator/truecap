@@ -5,8 +5,8 @@
  * Flow: anon user runs an analysis → clicks Save → we set this flag and send
  * them to /auth/login?next=/ → they sign up/in and return to the calculator →
  * the mount-time draft restore sees the flag, auto-runs their analysis, and
- * points them back at Save. Without it the user lands on a pre-filled but
- * inert form and has to re-Calculate + re-Save manually — a conversion leak
+ * completes the save. Without it the user lands on a pre-filled but inert
+ * form and has to re-Calculate + re-Save manually — a conversion leak
  * at the exact moment they demonstrated the highest intent.
  *
  * localStorage (not the URL) so the flag survives OAuth round-trips and

@@ -57,6 +57,15 @@ function getDisplayName(profile: {
   return profileName || undefined;
 }
 
+function isStripeResourceMissing(error: unknown): boolean {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    error.code === "resource_missing"
+  );
+}
+
 async function getOrCreateStripeCustomer(args: {
   userId: string;
   email: string | null;
@@ -92,8 +101,7 @@ async function getOrCreateStripeCustomer(args: {
       if (err instanceof Error && err.message.includes("belongs to a different user")) {
         throw err;
       }
-      const stripeCode = (err as { code?: string } | null)?.code;
-      if (stripeCode !== "resource_missing") throw err;
+      if (!isStripeResourceMissing(err)) throw err;
       console.warn(
         `[billing] stored Stripe customer ${args.existingCustomerId} missing in Stripe — creating a replacement`
       );
@@ -138,13 +146,20 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
   // subscription and double-bill them. Plan changes (monthly ↔ annual)
   // go through the billing portal, which prorates correctly. Callers
   // route ALREADY_SUBSCRIBED to the portal.
-  const { data: existingSubscription } = await supabase
+  const { data: existingSubscription, error: existingSubscriptionError } = await supabase
     .from("subscriptions")
     .select("id")
     .eq("user_id", user.id)
     .in("status", ["active", "trialing", "past_due"])
     .limit(1)
     .maybeSingle();
+  if (existingSubscriptionError) {
+    Sentry.captureException(existingSubscriptionError, {
+      tags: { feature: "billing-checkout" },
+      extra: { userId: user.id, guard: "local_live_subscription" },
+    });
+    return { ok: false, code: "SERVER_ERROR", message: "Unable to start checkout. Please try again." };
+  }
   if (existingSubscription) {
     return {
       ok: false,
@@ -158,15 +173,25 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
   // who ever subscribed before (any status, incl. canceled/incomplete) does NOT
   // get it again — otherwise cancel-and-resubscribe farms a fresh trial each
   // cycle. Only grant the trial when there's no prior subscription row at all.
-  const { data: priorSubscription } = await supabase
+  const { data: priorSubscription, error: priorSubscriptionError } = await supabase
     .from("subscriptions")
     .select("id")
     .eq("user_id", user.id)
     .limit(1)
     .maybeSingle();
+  if (priorSubscriptionError) {
+    Sentry.captureException(priorSubscriptionError, {
+      tags: { feature: "billing-checkout" },
+      extra: { userId: user.id, guard: "prior_subscription_history" },
+    });
+    return { ok: false, code: "SERVER_ERROR", message: "Unable to start checkout. Please try again." };
+  }
   const grantTrial = !priorSubscription;
 
-  const [{ data: profile }, { data: plan, error: planError }] = await Promise.all([
+  const [
+    { data: profile, error: profileError },
+    { data: plan, error: planError },
+  ] = await Promise.all([
     supabase
       .from("profiles")
       .select("stripe_customer_id, display_name, first_name, last_name")
@@ -179,6 +204,14 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
       .eq("is_active", true)
       .maybeSingle(),
   ]);
+
+  if (profileError || !profile) {
+    Sentry.captureException(profileError ?? new Error("Billing profile was not found"), {
+      tags: { feature: "billing-checkout" },
+      extra: { userId: user.id, guard: "billing_profile_lookup" },
+    });
+    return { ok: false, code: "SERVER_ERROR", message: "Unable to start checkout. Please try again." };
+  }
 
   if (planError) {
     console.error("[billing] Failed to load plan:", planError);
@@ -196,7 +229,7 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
   // create a SECOND live subscription — and re-grant the trial. When we
   // already know the Stripe customer, ask Stripe directly before creating
   // a new session.
-  if (profile?.stripe_customer_id) {
+  if (profile.stripe_customer_id) {
     try {
       const stripe = getStripe();
       const stripeSubs = await stripe.subscriptions.list({
@@ -216,14 +249,24 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
         };
       }
     } catch (error) {
-      // Don't block checkout on a Stripe API blip — the local-row check
-      // above already passed, so fall through to it. But a degraded guard
-      // must be visible: if this fires alongside checkout traffic, the
-      // double-billing backstop is off.
-      Sentry.captureException(error, {
-        tags: { feature: "billing-checkout" },
-        extra: { userId: user.id, guard: "stripe_subscriptions_list" },
-      });
+      if (!isStripeResourceMissing(error)) {
+        Sentry.captureException(error, {
+          tags: { feature: "billing-checkout" },
+          extra: { userId: user.id, guard: "stripe_subscriptions_list" },
+        });
+        return {
+          ok: false,
+          code: "SERVER_ERROR",
+          message: "Unable to start checkout. Please try again.",
+        };
+      }
+
+      // A confirmed missing customer is not a degraded verification guard:
+      // getOrCreateStripeCustomer below will verify the stale id again,
+      // replace it, and persist the replacement before Checkout is created.
+      console.warn(
+        `[billing] stored Stripe customer ${profile.stripe_customer_id} missing during subscription verification — attempting repair`
+      );
     }
   }
 
@@ -270,7 +313,7 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
       userId: user.id,
       email: user.email ?? null,
       name: getDisplayName(profile),
-      existingCustomerId: profile?.stripe_customer_id ?? null,
+      existingCustomerId: profile.stripe_customer_id ?? null,
     });
     const siteUrl = getSiteUrl();
     // A campaign coupon from the URL (e.g. the post-analysis ANALYZE20) takes

@@ -61,7 +61,7 @@ export function MarketingHero() {
             </h1>
             <p className="mt-4 max-w-xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg">
               {newHomepagePositioningEnabled
-                ? "Paste a rental listing. Free shows whether it deserves attention; Pro checks it against your Buy Box, solves what must be true, and calculates the highest price that meets your selected targets."
+                ? "Enter a rental address. Free shows whether it deserves attention; Pro checks it against your Buy Box, solves what must be true, and calculates the highest price that meets your selected targets."
                 : "Enter an address and TrueCap builds your first-pass underwrite from sourced assumptions. See whether the property deserves your attention, then use your Buy Box, Max Offer, and downside analysis to decide what to do next."}
             </p>
 

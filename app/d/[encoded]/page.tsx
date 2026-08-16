@@ -3,12 +3,13 @@
  *
  * Anyone with the link can view a snapshot of an analysis. No auth,
  * no DB lookup — the entire form snapshot is encoded in the URL.
- * Hidden Pro-only sections (10-year projections, tax strategy,
- * exit scenarios, deal score) act as upgrade prompts.
+ * Pro-only sections stay out of the public snapshot. Anonymous/free visitors
+ * can generate these URLs, so the route must not expose paid calculations.
  */
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { ArrowUpRight, Lock } from "lucide-react";
 import { decodeShareLink } from "@/lib/share-link";
 import { calculateAnalysis } from "@/lib/calc-analysis";
@@ -57,7 +58,7 @@ export default async function PublicDealPage({ params }: Props) {
   const payload = decodeShareLink(encoded);
 
   if (!payload) {
-    return <InvalidLink />;
+    notFound();
   }
 
   // The snapshot may have come from any time — re-validate against the
@@ -65,14 +66,14 @@ export default async function PublicDealPage({ params }: Props) {
   // newer required field.
   const parsed = investmentFormSchema.safeParse(payload.values);
   if (!parsed.success) {
-    return <InvalidLink reason="This shared analysis was saved in an older format we can no longer render." />;
+    notFound();
   }
 
   let result;
   try {
     result = calculateAnalysis(parsed.data);
   } catch {
-    return <InvalidLink reason="We couldn't recompute the analysis from this share link." />;
+    notFound();
   }
 
   // Co-branding (T6): if a Pro owner shared this, surface their brand + a lead
@@ -169,19 +170,19 @@ export default async function PublicDealPage({ params }: Props) {
               <Lock className="w-5 h-5 text-primary mt-0.5 shrink-0" />
               <div className="min-w-0 flex-1">
                 <div className="font-bold text-foreground">
-                  See 10-year projections, illustrative tax impact, modeled exit comparisons, and Deal Score
+                  Take the decision beyond the free screen
                 </div>
                 <p className="text-sm text-muted-foreground mt-1">
-                  The full analysis with multi-year cash flow projections,
-                  illustrative depreciation tax modeling, and exit-year comparison is free
-                  to start. Run this property in your own account — your edits
-                  stay private.
+                  Clone the property into the free analyzer to edit its core
+                  assumptions and Deal Score. Pro adds Max Offer, downside
+                  testing, multi-year projections, illustrative tax impact,
+                  modeled exits, and reusable decision workflows.
                 </p>
                 <Link
-                  href="/"
+                  href="/pricing"
                   className="inline-flex items-center gap-1.5 mt-3 text-sm font-bold text-primary hover:underline"
                 >
-                  Start free at usetruecap.com
+                  Compare Free, Pack, and Pro
                   <ArrowUpRight className="w-4 h-4" />
                 </Link>
               </div>
@@ -206,30 +207,6 @@ export default async function PublicDealPage({ params }: Props) {
           </p>
         </footer>
       </main>
-    </div>
-  );
-}
-
-function InvalidLink({ reason }: { reason?: string }) {
-  return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center px-4 text-center">
-      <div className="text-xs uppercase tracking-widest text-muted-foreground font-bold mb-2">
-        TrueCap
-      </div>
-      <h1 className="text-xl sm:text-2xl font-bold text-foreground">
-        Link couldn&apos;t be opened
-      </h1>
-      <p className="text-sm text-muted-foreground mt-2 max-w-md">
-        {reason ??
-          "This share link looks broken or malformed. Ask whoever sent it to re-send."}
-      </p>
-      <Link
-        href="/"
-        className="mt-6 inline-flex items-center gap-1.5 text-sm font-bold text-primary hover:underline"
-      >
-        Go to TrueCap
-        <ArrowUpRight className="w-4 h-4" />
-      </Link>
     </div>
   );
 }

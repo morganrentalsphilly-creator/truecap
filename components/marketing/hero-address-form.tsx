@@ -117,8 +117,12 @@ export function HeroAddressForm() {
         className="flex flex-col items-stretch gap-2.5 sm:flex-row"
       >
         <div className="min-w-0 flex-1">
+          <label htmlFor="hero-property-address" className="sr-only">
+            Property address
+          </label>
           <AddressAutocomplete
             form={form}
+            inputId="hero-property-address"
             placeholder="Enter a property address"
             inputClassName="h-12 rounded-xl px-4 text-base shadow-sm sm:h-14"
             onPlaceSelected={(place) => {

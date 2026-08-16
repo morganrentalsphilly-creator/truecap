@@ -18,6 +18,6 @@ export const contentType = "image/png";
 export default function Image() {
   return renderToolOgImage({
     name: "DSCR calculator",
-    tagline: "NOI ÷ debt service. The metric every lender pulls before approving a mortgage. 1.25+ is bankable.",
+    tagline: "NOI ÷ debt service. Compare a common 1.25 screening benchmark with your lender's written formula and threshold.",
   });
 }

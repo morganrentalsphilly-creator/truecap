@@ -10,16 +10,17 @@
  * possible client surface.
  */
 
-import type { ReactNode } from "react";
+import type { MouseEvent, ReactNode } from "react";
 import { scrollBehavior } from "@/lib/utils";
 import { trackEvent } from "@/lib/analytics";
+import { containsAnalyzerForm } from "@/lib/analyzer-cta";
 
 type Props = {
   /** Element ID to scroll to (defaults to "main"). */
   targetId?: string;
   /** Sticky-nav offset compensation in pixels. */
   offsetPx?: number;
-  /** Pass-through className for styling parity with the prior <button>. */
+  /** Pass-through className for styling. */
   className?: string;
   /** Accessible label. */
   "aria-label"?: string;
@@ -36,7 +37,7 @@ export function ScrollToFormButton({
   analyticsSource,
   children,
 }: Props) {
-  const handleClick = () => {
+  const handleClick = (event: MouseEvent<HTMLAnchorElement>) => {
     if (analyticsSource) {
       trackEvent("homepage_primary_cta", { source: analyticsSource });
     }
@@ -46,13 +47,18 @@ export function ScrollToFormButton({
     // future SSR scenarios.
     if (typeof window === "undefined") return;
     const el = document.getElementById(targetId);
-    if (!el) return;
+
+    // Marketing and comparison pages also have a generic <main id="main">.
+    // Only intercept the link when this document actually contains the analyzer;
+    // otherwise the real href takes the visitor to the homepage analyzer.
+    if (!el || !containsAnalyzerForm(el)) return;
+    event.preventDefault();
     window.scrollTo({ top: el.offsetTop - offsetPx, behavior: scrollBehavior() });
   };
 
   return (
-    <button type="button" onClick={handleClick} className={className} aria-label={ariaLabel}>
+    <a href={`/#${targetId}`} onClick={handleClick} className={className} aria-label={ariaLabel}>
       {children}
-    </button>
+    </a>
   );
 }

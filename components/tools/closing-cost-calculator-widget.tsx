@@ -144,7 +144,7 @@ export function ClosingCostCalculatorWidget() {
         className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline"
       >
         <Sparkles className="w-4 h-4" />
-        Run the full analysis with these numbers — cash flow, cash-to-close, returns — free
+        Open the free core deal screen with these numbers — Pro adds advanced decision outputs
         <ArrowUpRight className="w-4 h-4" />
       </Link>
     </div>

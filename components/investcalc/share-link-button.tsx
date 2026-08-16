@@ -21,7 +21,11 @@ import {
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
-import { encodeShareLink, buildShareUrl } from "@/lib/share-link";
+import {
+  encodeShareLink,
+  buildShareUrl,
+  sanitizeShareValues,
+} from "@/lib/share-link";
 import { getSignedShareAttribution } from "@/app/actions/share-attribution";
 import { trackEvent } from "@/lib/analytics";
 import { useToast } from "@/hooks/use-toast";
@@ -56,6 +60,7 @@ export function ShareLinkButton({
     if (!values) return;
     setIsPreparing(true);
     try {
+      const shareValues = sanitizeShareValues(values);
       // Mint a SIGNED owner attribution server-side (the only place that holds
       // SHARE_LINK_SECRET). It lets the public viewer co-brand the page + route
       // a captured lead back to the owner — but only because the signature
@@ -63,16 +68,19 @@ export function ShareLinkButton({
       // server without the secret, get null and the page stays generic.
       let attribution: Awaited<ReturnType<typeof getSignedShareAttribution>> = null;
       try {
-        attribution = await getSignedShareAttribution({ values, savedDealId: savedDealId ?? undefined });
+        attribution = await getSignedShareAttribution({
+          values: shareValues,
+          savedDealId: savedDealId ?? undefined,
+        });
       } catch {
         /* signing failed → share stays generic */
       }
       const encoded = encodeShareLink({
         v: 1,
-        values,
+        values: shareValues,
         meta: {
           sharedAt: new Date().toISOString(),
-          title: values.address || "Shared deal",
+          title: shareValues.address || "Shared deal",
           ...(attribution
             ? {
                 ownerId: attribution.ownerId,

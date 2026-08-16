@@ -4,6 +4,10 @@ import type { EmailOtpType } from "@supabase/supabase-js";
 import { safeInternalNextPath } from "@/lib/auth-schema";
 import { sendLifecycleEmailNow } from "@/lib/email/send-lifecycle";
 import { getSiteUrl } from "@/lib/site-url";
+import {
+  authCallbackFailureReason,
+  buildAuthErrorRedirectUrl,
+} from "@/lib/auth-callback";
 
 /**
  * Fire the instant welcome email after a confirmation establishes a
@@ -49,10 +53,25 @@ export async function GET(request: NextRequest) {
   const code = searchParams.get("code");
   const tokenHash = searchParams.get("token_hash");
   const type = searchParams.get("type") as EmailOtpType | null;
+  const providerError = searchParams.get("error");
+  const providerErrorDescription = searchParams.get("error_description");
   // Same-origin only. Concatenating onto `origin` already kept the host, but
   // route it through the shared origin-comparing validator so every ?next
   // consumer applies one rule (and `//evil.com` can't ride along as a path).
   const next = safeInternalNextPath(searchParams.get("next"));
+
+  // OAuth providers return a structured error when the visitor cancels or
+  // denies access. Handle it before the generic missing-token branch, retain
+  // the intended destination, and avoid telling them to reopen an email link.
+  if (providerError) {
+    return NextResponse.redirect(
+      buildAuthErrorRedirectUrl(
+        origin,
+        authCallbackFailureReason(providerError, providerErrorDescription),
+        next
+      )
+    );
+  }
 
   // Build the canonical redirect response upfront. Any cookies Supabase
   // sets while exchanging the code or verifying the OTP get re-applied
@@ -86,7 +105,7 @@ export async function GET(request: NextRequest) {
       return redirectResponse;
     }
     return NextResponse.redirect(
-      `${origin}/auth/login?error=auth&reason=${encodeURIComponent(error.message)}`
+      buildAuthErrorRedirectUrl(origin, error.message, next)
     );
   }
 
@@ -99,12 +118,14 @@ export async function GET(request: NextRequest) {
       return redirectResponse;
     }
     return NextResponse.redirect(
-      `${origin}/auth/login?error=auth&reason=${encodeURIComponent(error.message)}`
+      buildAuthErrorRedirectUrl(origin, error.message, next)
     );
   }
 
   // No code and no token_hash — the link is malformed or stale. Drop the
   // user on the login page with a specific reason so we can show useful
   // guidance instead of a generic error toast.
-  return NextResponse.redirect(`${origin}/auth/login?error=auth&reason=missing_token`);
+  return NextResponse.redirect(
+    buildAuthErrorRedirectUrl(origin, "missing_token", next)
+  );
 }
