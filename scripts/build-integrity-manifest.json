@@ -1,11 +1,11 @@
 {
   "_readme": "Pinned sha256 of every file that executes during a build (or decides what does). Verified by scripts/verify-build-integrity.mjs in the build-chain-guard CI job. Any drift fails CI until someone regenerates this file on purpose: `node scripts/verify-build-integrity.mjs --update`. Exists because of the 2026-06-01 incident — see the header of that script.",
   "algorithm": "sha256",
-  "generatedAt": "2026-08-15T23:46:34.107Z",
+  "generatedAt": "2026-08-16T03:55:28.805Z",
   "files": {
     ".github/workflows/ci.yml": "3d9ae61da0ebb6c0619400b15610bc9d23c744b65f8d421caa76dd2bd7fc0b94",
     "eslint.config.mjs": "50ef27101a8f02892b83d543ae9be26afa81e2fe4f0a87f1bfeebda77b8e22fc",
-    "instrumentation-client.ts": "5308abbcfdb52d9b971d4f34bacf42464e7351629413a81ab71740a65026cff5",
+    "instrumentation-client.ts": "2e1997c374d7f6733f533664c46aee61edcd9478cc43e7e55def44411111e64d",
     "instrumentation.ts": "158fe4c748f1599b56a1681e417ceddcda7ce40b988f95fca298c5ab548ca38c",
     "next.config.mjs": "7f05cb4bed3fbfb0caa9b9c1f1bcc85a4798ad0e849a6e3284587f60c2a7eea6",
     "package-lock.json": "a4c614deedaa076bf7ed2c6ae4fba39e90710f673242d621362f3db379ff432f",
@@ -14,8 +14,8 @@
     "proxy.ts": "6f27ea9f2ffe27aae6fb7426eafe56998abc98e74bb6a15195568d13e533064f",
     "scripts/check-agent-blog-content.mjs": "a18480b403ca419192791f167a712cc789af741a7335670c4299e5ce6c94ae4f",
     "scripts/verify-build-integrity.mjs": "6378f59189a32b5737eaee6287d899c314178e7b3f5b676a825646d3cbd2d470",
-    "sentry.edge.config.ts": "77bde3616e07dfaedc0fdbf454c72f354c04982d4e28e22d1d6fc434a2a62590",
-    "sentry.server.config.ts": "6549cc5402dd4388e72fb6feef9e2a1872102dcd1b366beff87bb2fdbe47439c",
+    "sentry.edge.config.ts": "7265a894b427b326600d7f2a8011d85172dc34478b6fa619308169f557abc548",
+    "sentry.server.config.ts": "64c5209bfc97ef24c19aad0d428a1602129ff8750b26a86ecccb2ca901a05f11",
     "tsconfig.json": "3793702e98a6da2c82b03ecfca1a48a25c79b170abacb97f23937784550e206b",
     "vercel.json": "be8b5dde330ce13e82e100158817395902a9e8a4d0c1b18342689e0ce3bc1bbe",
     "vitest.config.ts": "2d1334b02146540e5201e65632de8fc5c699173eb89db956d31c14cc19d6c4b8"
