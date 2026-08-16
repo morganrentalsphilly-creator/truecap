@@ -187,7 +187,7 @@ jobs:
         if: always()
         run: cat seo-scoreboard.md || echo "(no report produced)"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: seo-scoreboard
