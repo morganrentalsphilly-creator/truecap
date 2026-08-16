@@ -35,6 +35,8 @@ import {
   identifyUser,
   initAnalytics,
   resetAnalytics,
+  setOrganicAttribution,
+  trackEvent,
   trackPageview,
 } from "@/lib/analytics";
 
@@ -58,6 +60,7 @@ function hasSupabaseAuthCookie(): boolean {
 function PostHogTracker() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const organicLandingFired = useRef(false);
 
   // ── Deferred init: idle-schedule the SDK load ──────
   useEffect(() => {
@@ -92,6 +95,65 @@ function PostHogTracker() {
     // Buffered pre-init, so the landing pageview is delayed, not lost.
     trackPageview(`${window.location.origin}${url}`);
   }, [pathname, searchParams]);
+
+  // First-party organic attribution. Store only the landing path and referrer
+  // hostname; never retain the search query or full referrer URL.
+  useEffect(() => {
+    if (organicLandingFired.current || typeof window === "undefined") return;
+    organicLandingFired.current = true;
+    let host = "";
+    try {
+      host = document.referrer ? new URL(document.referrer).hostname.toLowerCase() : "";
+    } catch {
+      host = "";
+    }
+    const medium = searchParams?.get("utm_medium")?.toLowerCase();
+    const searchReferrer = /(^|\.)(google|bing|yahoo|duckduckgo|ecosia|brave)\./.test(host);
+    const aiReferrer = /(^|\.)(perplexity|chatgpt|openai|copilot|claude)\./.test(host);
+    if (!searchReferrer && !aiReferrer && medium !== "organic") return;
+    const attribution = {
+      landing_page: pathname,
+      referrer_host: host || "utm",
+      attribution_medium: aiReferrer ? "organic_ai" as const : "organic_search" as const,
+    };
+    setOrganicAttribution(attribution);
+    trackEvent("organic_landing", attribution);
+  }, [pathname, searchParams]);
+
+  // Tool-level intent instrumentation without touching 20 independent widget
+  // implementations. Start = first interaction. Completion = first form
+  // submit or explicit calculate/analyze/run action.
+  useEffect(() => {
+    if (!pathname.startsWith("/tools/")) return;
+    const calculator = pathname.slice("/tools/".length);
+    let started = false;
+    let completed = false;
+    const start = () => {
+      if (started) return;
+      started = true;
+      trackEvent("calculator_started", { calculator });
+    };
+    const complete = (event: Event) => {
+      start();
+      if (completed) return;
+      const target = event.target as HTMLElement | null;
+      const isSubmit = event.type === "submit";
+      const isExplicitAction = event.type === "click" && /calculate|analyze|run|estimate|see result/i.test(target?.textContent ?? "");
+      if (!isSubmit && !isExplicitAction) return;
+      completed = true;
+      trackEvent("calculator_completed", { calculator });
+    };
+    document.addEventListener("input", start, true);
+    document.addEventListener("change", start, true);
+    document.addEventListener("submit", complete, true);
+    document.addEventListener("click", complete, true);
+    return () => {
+      document.removeEventListener("input", start, true);
+      document.removeEventListener("change", start, true);
+      document.removeEventListener("submit", complete, true);
+      document.removeEventListener("click", complete, true);
+    };
+  }, [pathname]);
 
   // ── Identify on auth state change (cookie-gated) ───
   // Keyed on pathname (not mount-once) so a client-side sign-in — the

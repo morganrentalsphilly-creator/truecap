@@ -9,6 +9,9 @@
  */
 import { defaultValues } from "@/lib/investcalc-schema";
 import { TRIAL_DAYS } from "@/lib/trial";
+import { CALCULATOR_COUNT, EMBEDDABLE_COUNT } from "@/lib/calculator-registry";
+import { MARKET_COUNT } from "@/lib/markets/cities";
+import { STATE_COUNT } from "@/lib/states";
 
 const pct = (value: unknown) => `${Number(value)}%`;
 
@@ -39,6 +42,13 @@ export const PLAN_FACTS = {
   agentPro: "Investor Client Operating System with client rosters, per-client Buy Boxes, deal assignment, co-branding, portals, and Pro tools.",
   trialDays: TRIAL_DAYS,
   pricingSource: "/pricing",
+} as const;
+
+export const PUBLIC_CATALOG_FACTS = {
+  calculators: CALCULATOR_COUNT,
+  embeddableCalculators: EMBEDDABLE_COUNT,
+  markets: MARKET_COUNT,
+  states: STATE_COUNT,
 } as const;
 
 export const DATA_SOURCE_FACTS = {

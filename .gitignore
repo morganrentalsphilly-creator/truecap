@@ -100,6 +100,9 @@ mcps/
 .claude/*
 !.claude/settings.json
 /.pdf_review
+# Regenerable SEO job output. Audited baseline snapshots that belong in the
+# repository live under docs/seo instead.
+/artifacts/seo/
 # `/scripts` removed: that directory holds tracked utility scripts
 # (schedule-all-broadcasts, schedule-daily-campaign, preview-daily-campaign,
 # count-audience-contacts, polish-emails). Ignoring the whole directory

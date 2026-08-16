@@ -3924,6 +3924,7 @@ export function InvestCalcPage({
         has_deal_score: Boolean(dealScoreResult?.ok && dealScoreResult.tier === "pro"),
       });
       trackEvent("report_generated", { report_type: mode });
+      trackEvent("report_viewed", { report_type: mode, surface: "pdf_export" });
       // If the user hasn't configured branding yet, the toast nudges
       // them to do so. The link routes to /settings/branding, which
       // gates by entitlement: Pro users see the form, free users see

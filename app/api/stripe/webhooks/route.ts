@@ -210,6 +210,25 @@ export async function POST(req: Request) {
                 stripe_session_id: session.id,
               },
             });
+            await captureServerEvent({
+              distinctId,
+              event: "trial_started",
+              properties: {
+                plan_slug: session.metadata?.plan_slug ?? undefined,
+                attribution_source: "stripe_checkout",
+              },
+            });
+          } else {
+            await captureServerEvent({
+              distinctId,
+              event: "paid_conversion",
+              properties: {
+                plan_slug: session.metadata?.plan_slug ?? undefined,
+                amount_total: session.amount_total ?? undefined,
+                currency: session.currency ?? undefined,
+                attribution_source: "stripe_checkout",
+              },
+            });
           }
         }
         break;

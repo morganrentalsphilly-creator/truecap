@@ -1,5 +1,11 @@
 # SEO automation — what runs, when, and what it can't do
 
+> The continuous control plane added on 2026-08-15 is documented in
+> [`docs/seo/CONTROL-PLANE.md`](./CONTROL-PLANE.md). This file preserves the
+> original guard/content-agent operating detail; the control plane adds daily
+> normalized GSC ingestion, source dependency monitoring, crawl/link storage,
+> opportunity scoring, admin observability, and fail-closed modes.
+
 Five moving parts. Three are deterministic scripts with no model in the loop;
 two are scheduled Claude runs that open PRs. Nothing publishes without a human
 merge.

@@ -11,13 +11,13 @@ import Link from "next/link";
 import { Header } from "@/components/investcalc/header";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
-import { STATES } from "@/lib/states";
+import { STATES, STATE_COUNT } from "@/lib/states";
 import { getSiteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
   title: "Rental property investing by state — 2026",
   description:
-    "The 15 best states for rental investing in 2026, side-by-side. Property tax, landlord laws, eviction timelines, top cities, strategies that fit each.",
+    `${STATE_COUNT} state guides for rental investors in 2026. Compare property tax, landlord laws, eviction timelines, top cities, and strategy fit.`,
   keywords: [
     "best states for rental property investors",
     "rental property by state",
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/states" },
   openGraph: {
     title: "Rental property investing by state",
-    description: "15-state comparison for rental property investors.",
+    description: `${STATE_COUNT} state guides for rental property investors.`,
     url: "/states",
     type: "website",
     images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap state-by-state investing guide" }],
@@ -41,7 +41,7 @@ export default function StatesIndexPage() {
   const itemListLd = {
     "@context": "https://schema.org",
     "@type": "ItemList",
-    name: "Rental property investing by state — 15-state comparison",
+    name: `Rental property investing by state — ${STATE_COUNT} guides`,
     itemListElement: Object.values(STATES).map((s, i) => ({
       "@type": "ListItem",
       position: i + 1,
@@ -61,7 +61,7 @@ export default function StatesIndexPage() {
           Rental property investing by state
         </h1>
         <p className="mt-5 text-lg leading-relaxed text-muted-foreground max-w-2xl">
-          Fifteen states ranked across the variables that actually matter — property tax burden, landlord-friendliness, eviction speed, insurance volatility, and the cities where the math currently works.
+          {STATE_COUNT} state guides across the variables that actually matter — property tax burden, landlord-friendliness, eviction speed, insurance volatility, and the cities where the math currently works.
         </p>
 
         <div className="tc-reveal mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

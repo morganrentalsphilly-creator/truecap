@@ -39,6 +39,17 @@ import type { PostHog } from "posthog-js";
  * lib/posthog-server.ts and don't need to appear here.
  */
 export type FunnelEvent =
+  | "organic_landing" // properties: landing_page, referrer_host, attribution_medium
+  | "calculator_started" // properties: calculator, landing_page?
+  | "calculator_completed" // properties: calculator, landing_page?
+  | "report_viewed"
+  | "signup_started"
+  | "signup_completed"
+  | "trial_started"
+  | "paid_conversion"
+  | "embed_code_copied" // properties: calculator
+  | "embed_loaded" // properties: calculator, referring_domain
+  | "embed_attribution_clicked" // properties: calculator, referring_domain
   | "landing_view"
   | "homepage_viewed"
   | "homepage_primary_cta" // properties: source (hero_address | sticky | final)
@@ -141,6 +152,34 @@ const POSTHOG_HOST =
 
 /** Same key components/marketing/cookie-consent-banner.tsx writes. */
 const CONSENT_STORAGE_KEY = "truecap_cookie_consent_v1";
+const ORGANIC_ATTRIBUTION_KEY = "truecap_organic_attribution_v1";
+
+export type OrganicAttribution = {
+  landing_page: string;
+  referrer_host: string;
+  attribution_medium: "organic_search" | "organic_ai";
+};
+
+export function setOrganicAttribution(attribution: OrganicAttribution): void {
+  if (typeof window === "undefined") return;
+  try {
+    if (!window.sessionStorage.getItem(ORGANIC_ATTRIBUTION_KEY)) {
+      window.sessionStorage.setItem(ORGANIC_ATTRIBUTION_KEY, JSON.stringify(attribution));
+    }
+  } catch {
+    /* storage unavailable — the event still records without session attribution */
+  }
+}
+
+function organicAttribution(): OrganicAttribution | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.sessionStorage.getItem(ORGANIC_ATTRIBUTION_KEY);
+    return raw ? (JSON.parse(raw) as OrganicAttribution) : null;
+  } catch {
+    return null;
+  }
+}
 
 type QueuedCall =
   | { kind: "capture"; event: string; properties?: Record<string, unknown> }
@@ -291,11 +330,13 @@ function captureRaw(
 ): boolean {
   if (typeof window === "undefined") return false;
   try {
+    const attribution = organicAttribution();
+    const attributedProperties = attribution ? { ...attribution, ...properties } : properties;
     if (client) {
-      client.capture(event, properties);
+      client.capture(event, attributedProperties);
       return true;
     }
-    enqueue({ kind: "capture", event, properties });
+    enqueue({ kind: "capture", event, properties: attributedProperties });
     return false;
   } catch (err) {
     // Analytics must never break user-facing flows. Console-warn only.

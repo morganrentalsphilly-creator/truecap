@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form";
 import { Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react";
 import { signUpAction } from "@/app/actions/auth";
 import { trackConversion } from "@/lib/analytics/track-conversion";
+import { trackEvent } from "@/lib/analytics";
 import {
   internalNextPathOrNull,
   safeInternalNextPath,
@@ -58,6 +59,7 @@ export function SignUpForm() {
   const safeNextPath = internalNextPathOrNull(searchParams.get("next"));
 
   async function onSubmit(values: SignUpInput) {
+    trackEvent("signup_started", { method: "email" });
     setIsSubmitting(true);
     try {
     // Pass the validated ?next so the confirmation EMAIL's link also
@@ -79,6 +81,10 @@ export function SignUpForm() {
     // to call from anywhere; no-ops if gtag isn't loaded or the
     // conversion label hasn't been wired up in lib/analytics yet.
     trackConversion("signup");
+    trackEvent("signup_completed", {
+      method: "email",
+      needs_email_confirmation: result.needsEmailConfirmation,
+    });
     // Conversion-friendly post-signup flow:
     //  - If Supabase auto-signed the user in (email confirmation OFF):
     //    send them straight to the calculator so they get to value

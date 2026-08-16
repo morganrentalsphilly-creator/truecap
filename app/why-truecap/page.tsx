@@ -53,7 +53,7 @@ export default function WhyTrueCapPage() {
           an H2 nested under it. Mirrors the page <title>. */}
       <h1 className="sr-only">Why TrueCap — vs spreadsheets, DealCheck &amp; BiggerPockets</h1>
       <VsCompetitors />
-      <HomepageFaq />
+      <HomepageFaq structuredData={false} />
       <section className="border-t border-border bg-background">
         <div className="mx-auto max-w-3xl px-4 py-14 text-center sm:px-6 sm:py-20">
           <h2 className="text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">

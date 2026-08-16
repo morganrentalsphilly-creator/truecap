@@ -3,7 +3,8 @@
  *
  * Each entry powers a dedicated state landing page targeting queries
  * like "investing in [state]", "[state] rental properties", "best
- * cities to invest in [state]". 15 states = 15 new ranking pages.
+ * cities to invest in [state]". The rendered count is derived from this
+ * registry; do not copy it into page prose.
  *
  * Data is illustrative + sourced from publicly available aggregates.
  * Numbers reflect mid-2026 typical conditions; refresh annually.
@@ -1272,6 +1273,7 @@ export const STATES: Record<string, StateData> = {
 
 /** Convenience helpers */
 export const ALL_STATE_SLUGS: string[] = Object.values(STATES).map((s) => s.slug);
+export const STATE_COUNT = ALL_STATE_SLUGS.length;
 
 export function getStateBySlug(slug: string): StateData | null {
   return STATES[slug] ?? null;

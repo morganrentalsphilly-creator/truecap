@@ -39,7 +39,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     })
   );
 
-  // Per-state investing pages — 15 URLs ranking for "investing in [state]"
+  // Per-state investing pages — count derives from STATES, never copied into prose.
   // and related state-level queries.
   const stateUrls: MetadataRoute.Sitemap = Object.values(STATES).map((s) => ({
     url: `${siteUrl}/states/${s.slug}`,
@@ -84,13 +84,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Blog posts — derived from BLOG_POSTS (app/blog/page.tsx), the single
   // source of truth that /blog and llms.txt already render from. Deriving
   // here (not a hardcoded list) means new posts appear in the sitemap
-  // automatically; the two can never drift again. publishedAt → lastModified
+  // automatically; the two can never drift again. `modifiedAt` is set only
+  // for a material reviewed change and otherwise falls back to `publishedAt`
   // (Google ignores sitemap priority/changefreq).
   const blogUrls: MetadataRoute.Sitemap = BLOG_POSTS.filter(
     (p) => p.available
   ).map((p) => ({
     url: `${siteUrl}/blog/${p.slug}`,
-    lastModified: new Date(p.publishedAt),
+    lastModified: new Date(p.modifiedAt ?? p.publishedAt),
     changeFrequency: "monthly" as const,
     priority: 0.8,
   }));

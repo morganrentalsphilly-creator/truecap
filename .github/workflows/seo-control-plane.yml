@@ -1,0 +1,160 @@
+# Continuous deterministic SEO measurement and decision cycle.
+name: SEO control plane
+
+on:
+  schedule:
+    - cron: "20 10 * * *"       # daily: GSC, sources, crawler, contradictions
+    - cron: "20 11 * * 1"       # weekly: opportunity and link graph review
+    - cron: "20 12 1 * *"       # monthly: full health/performance/coverage
+    - cron: "20 13 2 1,4,7,10 *" # quarterly: original-data readiness review
+  workflow_dispatch:
+    inputs:
+      cadence:
+        description: "Cycle to run"
+        type: choice
+        options: [daily, weekly, monthly, quarterly, manual]
+        default: manual
+      gsc_backfill_days:
+        description: "Finalized GSC days to upsert (1-480)"
+        required: false
+        default: "7"
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: seo-control-plane
+  cancel-in-progress: false
+
+jobs:
+  cycle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      GSC_SERVICE_ACCOUNT_JSON: ${{ secrets.GSC_SERVICE_ACCOUNT_JSON }}
+      GSC_SITE: sc-domain:usetruecap.com
+      SUPABASE_URL: ${{ secrets.SEO_SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SEO_SUPABASE_SERVICE_ROLE_KEY }}
+      PAGESPEED_API_KEY: ${{ secrets.PAGESPEED_API_KEY }}
+      SEO_AUTOPILOT_ENABLED: ${{ vars.SEO_AUTOPILOT_ENABLED || 'false' }}
+      SEO_AUTOPUBLISH_ENABLED: ${{ vars.SEO_AUTOPUBLISH_ENABLED || 'false' }}
+      SEO_AUTOPILOT_MODE: ${{ vars.SEO_AUTOPILOT_MODE || 'observe' }}
+      SEO_DAILY_MUTATION_CAP: ${{ vars.SEO_DAILY_MUTATION_CAP || '3' }}
+      SEO_WEEKLY_PUBLICATION_CAP: ${{ vars.SEO_WEEKLY_PUBLICATION_CAP || '1' }}
+      SEO_DAILY_LLM_USD_CAP: ${{ vars.SEO_DAILY_LLM_USD_CAP || '5' }}
+      SEO_HALT_ON_SOURCE_FAILURE: ${{ vars.SEO_HALT_ON_SOURCE_FAILURE || 'true' }}
+      SEO_HALT_ON_QUALITY_FAILURE: ${{ vars.SEO_HALT_ON_QUALITY_FAILURE || 'true' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Resolve cadence
+        id: cadence
+        shell: bash
+        run: |
+          schedule='${{ github.event.schedule }}'
+          cadence='${{ inputs.cadence }}'
+          if [ -z "$cadence" ]; then
+            case "$schedule" in
+              '20 11 * * 1') cadence=weekly ;;
+              '20 12 1 * *') cadence=monthly ;;
+              '20 13 2 1,4,7,10 *') cadence=quarterly ;;
+              *) cadence=daily ;;
+            esac
+          fi
+          echo "cadence=$cadence" >> "$GITHUB_OUTPUT"
+
+      - name: Ingest finalised Search Console rows
+        if: steps.cadence.outputs.cadence == 'daily' || steps.cadence.outputs.cadence == 'manual'
+        run: node scripts/seo/gsc-ingest.mjs --days "${{ inputs.gsc_backfill_days || '7' }}"
+
+      - name: Verify authoritative sources
+        id: sources
+        continue-on-error: true
+        run: node scripts/seo/source-monitor.mjs
+
+      - name: Crawl production and build internal-link graph
+        id: crawl
+        shell: bash
+        run: |
+          code=0
+          mkdir -p artifacts/seo
+          node scripts/seo/healthcheck.mjs --json artifacts/seo/healthcheck.json > artifacts/seo/healthcheck.md || code=$?
+          echo "exit_code=$code" >> "$GITHUB_OUTPUT"
+
+      - name: Persist crawl and graph
+        if: always()
+        shell: bash
+        env:
+          CADENCE: ${{ steps.cadence.outputs.cadence }}
+        run: |
+          if [ "$CADENCE" = "daily" ]; then
+            node scripts/seo/persist-health.mjs artifacts/seo/healthcheck.json --skip-links
+          else
+            node scripts/seo/persist-health.mjs artifacts/seo/healthcheck.json
+          fi
+
+      - name: Run deterministic decision cycle
+        if: always()
+        run: node scripts/seo/control-plane.mjs --cadence "${{ steps.cadence.outputs.cadence }}"
+
+      - name: Run monthly performance templates
+        if: steps.cadence.outputs.cadence == 'monthly' || steps.cadence.outputs.cadence == 'quarterly'
+        run: node scripts/seo/pagespeed.mjs
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: seo-control-plane-${{ steps.cadence.outputs.cadence }}
+          path: artifacts/seo/
+          retention-days: 90
+
+      - name: Update one control-plane issue
+        if: always()
+        uses: actions/github-script@v7
+        env:
+          CADENCE: ${{ steps.cadence.outputs.cadence }}
+          CRAWL_EXIT: ${{ steps.crawl.outputs.exit_code }}
+          SOURCE_OUTCOME: ${{ steps.sources.outcome }}
+        with:
+          script: |
+            const fs = require('fs');
+            const read = (p) => { try { return JSON.parse(fs.readFileSync(p, 'utf8')); } catch { return null; } };
+            const cycle = read(`artifacts/seo/control-plane-${process.env.CADENCE}.json`);
+            const sources = read('artifacts/seo/source-health.json');
+            const gsc = read('artifacts/seo/gsc-ingest.json');
+            const health = read('artifacts/seo/healthcheck.json');
+            const alerts = [
+              ...(health?.findings || []).filter(f => ['critical','high'].includes(f.severity)),
+              ...(sources?.changed || []).map(s => ({ severity: 'high', check: 'source changed', detail: s.id })),
+              ...(sources?.failed || []).map(s => ({ severity: 'high', check: 'source failed', detail: s.id })),
+            ];
+            const body = [
+              `# SEO control plane — ${process.env.CADENCE}`,
+              '',
+              `- Cycle: **${cycle?.status || 'missing'}** in **${cycle?.effectiveMode || 'unknown'}** mode`,
+              `- Inventory: **${cycle?.inventory?.total ?? '—'}** sitemap URLs`,
+              `- GSC: **${gsc?.status || (cycle?.performance?.available ? 'available' : 'not run')}**`,
+              `- Opportunities: **${cycle?.opportunities?.length ?? 0}** scored`,
+              `- Source changes: **${sources?.changed?.length ?? 0}**; failures: **${sources?.failed?.length ?? 0}**`,
+              `- Critical/high crawl findings: **${(health?.findings || []).filter(f => ['critical','high'].includes(f.severity)).length}**`,
+              '',
+              alerts.length ? '## Needs attention' : 'No critical or high-severity alert.',
+              ...alerts.slice(0, 30).map(a => `- **${a.check}** — ${a.detail}`),
+              '',
+              `<sub>Run: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}</sub>`,
+            ].join('\n');
+            const title = 'SEO control plane — current status';
+            const existing = await github.rest.issues.listForRepo({ ...context.repo, state: 'all', per_page: 100 });
+            const issue = existing.data.find(item => item.title === title);
+            if (issue) await github.rest.issues.update({ ...context.repo, issue_number: issue.number, body, state: alerts.length ? 'open' : 'closed' });
+            else if (alerts.length) await github.rest.issues.create({ ...context.repo, title, body });
+
+      - name: Fail on severe crawler/source safety alerts
+        if: steps.crawl.outputs.exit_code != '0' || steps.sources.outcome == 'failure'
+        run: |
+          echo "SEO control-plane safety alert. Inspect the uploaded artifacts and status issue."
+          exit 1

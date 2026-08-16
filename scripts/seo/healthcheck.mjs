@@ -148,7 +148,8 @@ const FOREIGN_DEPLOYMENT = "https://truecap-iota.vercel.app/";
  * report becomes something nobody opens.
  */
 const REQUIRED_SCHEMA = [
-  { pattern: /^\/blog\/[^/]+$/, types: [["BlogPosting", "Article"], ["BreadcrumbList"]], label: "blog post" },
+  { pattern: /^\/blog\/topics$/, types: [["CollectionPage"], ["BreadcrumbList"]], label: "topic directory" },
+  { pattern: /^\/blog\/(?!topics$)[^/]+$/, types: [["BlogPosting", "Article"], ["BreadcrumbList"]], label: "blog post" },
   { pattern: /^\/tools\/[^/]+$/, types: [["BreadcrumbList"]], label: "tool page" },
   { pattern: /^\/vs\/[^/]+$/, types: [["BreadcrumbList"]], label: "comparison page" },
   { pattern: /^\/glossary\/[^/]+$/, types: [["DefinedTerm"], ["BreadcrumbList"]], label: "glossary term" },
@@ -275,10 +276,10 @@ const isDisallowed = (path) => DISALLOWED_PREFIXES.some((p) => path.startsWith(p
  * make a page discoverable, and counting them would let the orphan check pass
  * on a graph Googlebot cannot actually walk.
  */
-function extractLinks(html, pageUrl, origin) {
-  const out = new Set();
-  for (const m of html.matchAll(/<a\b[^>]*\shref=["']([^"']+)["']/gi)) {
-    const raw = m[1].trim();
+function extractLinkRecords(html, pageUrl, origin) {
+  const out = new Map();
+  for (const m of html.matchAll(/<a\b([^>]*)\shref=["']([^"']+)["']([^>]*)>([\s\S]*?)<\/a>/gi)) {
+    const raw = m[2].trim();
     if (!raw || raw.startsWith("#") || /^(?:mailto|tel|javascript):/i.test(raw)) continue;
     let resolved;
     try {
@@ -290,9 +291,15 @@ function extractLinks(html, pageUrl, origin) {
     const path = toPath(resolved.href);
     if (!path) continue;
     if (NON_HTML.test(path)) continue;
-    out.add(path);
+    const index = m.index ?? 0;
+    const inOpenElement = (name) =>
+      html.lastIndexOf(`<${name}`, index) > html.lastIndexOf(`</${name}`, index);
+    const placement = inOpenElement("footer") ? "footer" : inOpenElement("nav") ? "navigation" : "contextual";
+    const anchor = m[4].replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().slice(0, 240);
+    const key = `${path}\u0000${anchor}\u0000${placement}`;
+    out.set(key, { target: path, anchor, placement });
   }
-  return out;
+  return [...out.values()];
 }
 
 // ------------------------------------------------------------------- checks
@@ -350,7 +357,7 @@ try {
 // the foreign deployment has nothing to do with which base URL we are
 // checking, and a sampled run is exactly when someone is most likely to be
 // looking. See the header for why there is no off switch.
-let foreignDeployment = { url: FOREIGN_DEPLOYMENT, status: null, live: null, note: null };
+const foreignDeployment = { url: FOREIGN_DEPLOYMENT, status: null, live: null, note: null };
 try {
   const response = await fetch(FOREIGN_DEPLOYMENT, {
     redirect: "manual",
@@ -656,7 +663,18 @@ function checkPage(path, page) {
     add("high", "entity in meta", `${path} meta description contains a literal HTML entity`);
   }
 
-  return { path, ok: true };
+  const title = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]?.replace(/\s+/g, " ").trim() ?? null;
+  const h1 = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i)?.[1]?.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim() ?? null;
+  return {
+    path,
+    ok: true,
+    httpStatus: page.status,
+    canonical: canonical ?? null,
+    noindex: /<meta[^>]+name=["']robots["'][^>]+content=["'][^"']*noindex/i.test(html),
+    title,
+    h1,
+    schemaTypes: [...types].sort(),
+  };
 }
 
 // --- phase 1: BFS from the seeds -----------------------------------------
@@ -665,6 +683,8 @@ const ORPHANS_POSSIBLE = !SKIP_ORPHANS && !LIMIT && urls.length > 0;
 const reached = new Set();          // paths seen as the TARGET of an <a href>
 const visited = new Set();          // paths fetched in phase 1
 const inboundFrom = new Map();      // path -> first page that linked to it
+const crawlDepth = new Map(CRAWL_SEEDS.map((path) => [path, 0]));
+const internalLinkEdges = new Map();
 let crawlBudgetHit = false;
 let homepageOk = true;
 let bfsFetches = 0;
@@ -702,9 +722,16 @@ if (ORPHANS_POSSIBLE) {
         if (bfsFetches % 50 === 0) console.error(`  …${bfsFetches} pages walked`);
         if (path === "/" && page.status !== 200) homepageOk = false;
         if (page.status === 200 && page.body) {
-          for (const target of extractLinks(page.body, `${BASE}${path}`, new URL(BASE).origin)) {
+          for (const link of extractLinkRecords(page.body, `${BASE}${path}`, new URL(BASE).origin)) {
+            const target = link.target;
             reached.add(target);
             if (!inboundFrom.has(target)) inboundFrom.set(target, path);
+            const edgeKey = `${path}\u0000${target}\u0000${link.anchor}\u0000${link.placement}`;
+            internalLinkEdges.set(edgeKey, { source: path, ...link });
+            const candidateDepth = (crawlDepth.get(path) ?? 0) + 1;
+            if (!crawlDepth.has(target) || candidateDepth < crawlDepth.get(target)) {
+              crawlDepth.set(target, candidateDepth);
+            }
             enqueue(target);
           }
           // Sitemap pages fetched here are checked now, so phase 2 does not
@@ -749,7 +776,15 @@ for (const r of sweepResults) if (r?.ok) pageResults.push(r);
 const okCount = pageResults.filter((r) => r?.ok).length;
 
 // --- the orphan verdict ---------------------------------------------------
-let linkGraph = { ran: false, reason: null, sitemapUrls: sitemapPaths.length, reachable: null, orphans: [] };
+const linkGraph = {
+  ran: false,
+  reason: null,
+  sitemapUrls: sitemapPaths.length,
+  reachable: null,
+  orphans: [],
+  edges: [],
+  depth: {},
+};
 
 if (!ORPHANS_POSSIBLE) {
   linkGraph.reason = SKIP_ORPHANS
@@ -777,6 +812,8 @@ if (!ORPHANS_POSSIBLE) {
   const orphans = sitemapPaths.filter((p) => !reached.has(p));
   linkGraph.reachable = sitemapPaths.length - orphans.length;
   linkGraph.orphans = orphans;
+  linkGraph.edges = [...internalLinkEdges.values()];
+  linkGraph.depth = Object.fromEntries(sitemapPaths.map((path) => [path, crawlDepth.get(path) ?? null]));
   if (orphans.length) {
     const shown = orphans.slice(0, 25);
     add(
@@ -906,12 +943,18 @@ if (JSON_OUT) {
     JSON_OUT,
     `${JSON.stringify(
       {
+        generatedAt: new Date().toISOString(),
         base: BASE,
         crawled: okCount,
         total: toCrawl.length,
         foreignDeployment,
         crons: cronResults,
         linkGraph,
+        pages: pageResults.map((page) => ({
+          ...page,
+          inSitemap: sitemapPathSet.has(page.path),
+          crawlDepth: crawlDepth.get(page.path) ?? null,
+        })),
         findings,
       },
       null,

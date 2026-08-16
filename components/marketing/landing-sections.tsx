@@ -493,7 +493,7 @@ const HOMEPAGE_FAQS: { q: string; a: string }[] = [
   },
 ];
 
-export function HomepageFaq() {
+export function HomepageFaq({ structuredData = true }: { structuredData?: boolean } = {}) {
   return (
     <>
       <section className="border-t border-border bg-background">
@@ -535,21 +535,23 @@ export function HomepageFaq() {
           </p>
         </div>
       </section>
-      {/* JSON-LD for rich-result FAQ snippets in Google. */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "FAQPage",
-            mainEntity: HOMEPAGE_FAQS.map((f) => ({
-              "@type": "Question",
-              name: f.q,
-              acceptedAnswer: { "@type": "Answer", text: f.a },
-            })),
-          }),
-        }}
-      />
+      {/* Only one URL should claim this exact FAQ block in structured data. */}
+      {structuredData ? (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "FAQPage",
+              mainEntity: HOMEPAGE_FAQS.map((f) => ({
+                "@type": "Question",
+                name: f.q,
+                acceptedAnswer: { "@type": "Answer", text: f.a },
+              })),
+            }),
+          }}
+        />
+      ) : null}
     </>
   );
 }

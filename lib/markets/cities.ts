@@ -2719,6 +2719,9 @@ export const MARKET_CITIES: MarketCity[] = [
 
 const MARKET_CITY_BY_SLUG = new Map(MARKET_CITIES.map((c) => [c.slug, c]));
 
+/** All city-level market pages: hand-built plus programmatic. */
+export const MARKET_COUNT = BESPOKE_MARKET_SLUGS.size + MARKET_CITIES.length;
+
 /** Look up a programmatic market city by slug (returns undefined for bespoke or unknown slugs). */
 export function getMarketCity(slug: string): MarketCity | undefined {
   return MARKET_CITY_BY_SLUG.get(slug);

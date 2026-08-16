@@ -9,6 +9,7 @@ import { ArrowUpRight } from "lucide-react";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { BLOG_TOPICS } from "@/lib/blog-topics";
+import { getSiteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
   title: "Blog Topics",
@@ -27,8 +28,31 @@ export const metadata: Metadata = {
 };
 
 export default function BlogTopicsIndexPage() {
+  const siteUrl = getSiteUrl();
+  const schema = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "CollectionPage",
+        "@id": `${siteUrl}/blog/topics#page`,
+        url: `${siteUrl}/blog/topics`,
+        name: "TrueCap blog topics",
+        description: metadata.description,
+        isPartOf: { "@id": `${siteUrl}/#website` },
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "TrueCap", item: `${siteUrl}/` },
+          { "@type": "ListItem", position: 2, name: "Blog", item: `${siteUrl}/blog` },
+          { "@type": "ListItem", position: 3, name: "Topics", item: `${siteUrl}/blog/topics` },
+        ],
+      },
+    ],
+  };
   return (
     <div className="min-h-screen bg-background">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
       <main id="main" className="mx-auto max-w-4xl px-4 sm:px-6 py-8 sm:py-12">
         <nav aria-label="Breadcrumb" className="mb-6 text-xs">
           <ol className="flex flex-wrap items-center gap-2 text-muted-foreground">

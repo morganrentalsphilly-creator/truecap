@@ -44,6 +44,8 @@ export type BlogPost = {
   excerpt: string;
   readingTimeMinutes: number;
   publishedAt: string; // ISO date
+  /** Only set after a material, reviewed update; never a deploy timestamp. */
+  modifiedAt?: string; // ISO date
   available: boolean;
 };
 
@@ -494,11 +496,12 @@ export const BLOG_POSTS: BlogPost[] = [
   },
   {
     slug: "bonus-depreciation-rental-property-2026",
-    title: "Bonus depreciation on rental property in 2026: what changed, what's left, and how to use it",
+    title: "Bonus depreciation on rental property in 2026: the restored 100% deduction and what qualifies",
     excerpt:
-      "Bonus depreciation phased down from 100% in 2022 to 40% in 2025 and 20% in 2026. But cost segregation studies, the short-term rental loophole, and the real-estate professional designation still create real tax savings. Here's the current playbook.",
-    readingTimeMinutes: 13,
+      "Current IRS guidance restored 100% bonus depreciation for eligible property acquired and placed in service after January 19, 2025. The rental building itself usually does not qualify; certain shorter-life components can.",
+    readingTimeMinutes: 10,
     publishedAt: "2026-06-07",
+    modifiedAt: "2026-08-15",
     available: true,
   },
   {

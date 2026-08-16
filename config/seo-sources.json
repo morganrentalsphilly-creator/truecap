@@ -1,0 +1,134 @@
+[
+  {
+    "id": "irs-bonus-depreciation-2026",
+    "url": "https://www.irs.gov/newsroom/treasury-irs-issue-guidance-on-the-additional-first-year-depreciation-deduction-amended-as-part-of-the-one-big-beautiful-bill",
+    "organization": "Internal Revenue Service",
+    "category": "TAX",
+    "refreshIntervalDays": 30,
+    "authorityLevel": "PRIMARY",
+    "affectedPaths": ["/blog/bonus-depreciation-rental-property-2026", "/blog/how-to-calculate-rental-property-depreciation"],
+    "expectedFacts": ["100% additional first-year deduction for eligible property acquired after January 19, 2025", "property acquired before January 20, 2025 can remain under the earlier phase-down"],
+    "riskClass": "high"
+  },
+  {
+    "id": "irs-publication-946",
+    "url": "https://www.irs.gov/publications/p946",
+    "organization": "Internal Revenue Service",
+    "category": "TAX",
+    "refreshIntervalDays": 30,
+    "authorityLevel": "PRIMARY",
+    "affectedPaths": ["/blog/bonus-depreciation-rental-property-2026", "/blog/how-to-calculate-rental-property-depreciation", "/tools/rental-property-tax-calculator"],
+    "expectedFacts": ["qualified property recovery period and acquisition rules", "MACRS recovery periods"],
+    "riskClass": "high"
+  },
+  {
+    "id": "irs-publication-925",
+    "url": "https://www.irs.gov/publications/p925",
+    "organization": "Internal Revenue Service",
+    "category": "TAX",
+    "refreshIntervalDays": 30,
+    "authorityLevel": "PRIMARY",
+    "affectedPaths": ["/blog/bonus-depreciation-rental-property-2026", "/blog/rental-property-tax-deductions"],
+    "expectedFacts": ["passive activity", "material participation", "real estate professional tests"],
+    "riskClass": "high"
+  },
+  {
+    "id": "irs-publication-527",
+    "url": "https://www.irs.gov/publications/p527",
+    "organization": "Internal Revenue Service",
+    "category": "TAX",
+    "refreshIntervalDays": 30,
+    "authorityLevel": "PRIMARY",
+    "affectedPaths": ["/blog/how-to-calculate-rental-property-depreciation", "/tools/rental-property-tax-calculator"],
+    "expectedFacts": ["residential rental depreciation"],
+    "riskClass": "high"
+  },
+  {
+    "id": "irs-publication-544",
+    "url": "https://www.irs.gov/publications/p544",
+    "organization": "Internal Revenue Service",
+    "category": "TAX",
+    "refreshIntervalDays": 30,
+    "authorityLevel": "PRIMARY",
+    "affectedPaths": ["/blog/bonus-depreciation-rental-property-2026", "/blog/depreciation-recapture-rental-property"],
+    "expectedFacts": ["depreciation recapture", "section 1245 and section 1250 disposition rules"],
+    "riskClass": "high"
+  },
+  {
+    "id": "fred-mortgage-rate-30y",
+    "url": "https://fred.stlouisfed.org/series/MORTGAGE30US",
+    "organization": "Federal Reserve Bank of St. Louis",
+    "category": "RATES",
+    "refreshIntervalDays": 7,
+    "authorityLevel": "OFFICIAL",
+    "affectedPaths": ["/", "/methodology", "/tools/mortgage-payment-calculator"],
+    "expectedFacts": ["30-year fixed mortgage rate series"],
+    "riskClass": "medium"
+  },
+  {
+    "id": "hud-user-data",
+    "url": "https://www.huduser.gov/portal/datasets/fmr.html",
+    "organization": "U.S. Department of Housing and Urban Development",
+    "category": "HUD",
+    "refreshIntervalDays": 365,
+    "authorityLevel": "PRIMARY",
+    "affectedPaths": ["/markets", "/states", "/methodology"],
+    "expectedFacts": ["Fair Market Rent and Small Area Fair Market Rent datasets"],
+    "riskClass": "medium"
+  },
+  {
+    "id": "fannie-selling-guide",
+    "url": "https://selling-guide.fanniemae.com/",
+    "organization": "Fannie Mae",
+    "category": "LENDING",
+    "refreshIntervalDays": 30,
+    "authorityLevel": "PRIMARY",
+    "affectedPaths": ["/blog/how-much-down-payment-investment-property", "/blog/debt-to-income-ratio-investment-property"],
+    "expectedFacts": ["conventional mortgage eligibility and underwriting"],
+    "riskClass": "high"
+  },
+  {
+    "id": "freddie-guide",
+    "url": "https://guide.freddiemac.com/",
+    "organization": "Freddie Mac",
+    "category": "LENDING",
+    "refreshIntervalDays": 30,
+    "authorityLevel": "PRIMARY",
+    "affectedPaths": ["/blog/how-much-down-payment-investment-property", "/blog/debt-to-income-ratio-investment-property"],
+    "expectedFacts": ["conventional mortgage eligibility and underwriting"],
+    "riskClass": "high"
+  },
+  {
+    "id": "hud-fha-handbook",
+    "url": "https://www.hud.gov/hud-partners/single-family-handbook-4000-1",
+    "organization": "U.S. Department of Housing and Urban Development",
+    "category": "LENDING",
+    "refreshIntervalDays": 30,
+    "authorityLevel": "PRIMARY",
+    "affectedPaths": ["/blog/house-hacking-explained", "/tools/house-hacking-calculator"],
+    "expectedFacts": ["FHA single-family housing policy"],
+    "riskClass": "high"
+  },
+  {
+    "id": "va-lenders-handbook",
+    "url": "https://benefits.va.gov/WARMS/pam26_7.asp",
+    "organization": "U.S. Department of Veterans Affairs",
+    "category": "LENDING",
+    "refreshIntervalDays": 30,
+    "authorityLevel": "PRIMARY",
+    "affectedPaths": ["/blog/house-hacking-explained"],
+    "expectedFacts": ["VA home-loan guaranty guidance"],
+    "riskClass": "high"
+  },
+  {
+    "id": "truecap-product-pricing",
+    "url": "https://usetruecap.com/pricing",
+    "organization": "TrueCap",
+    "category": "TRUECAP_PRODUCT",
+    "refreshIntervalDays": 7,
+    "authorityLevel": "PRIMARY",
+    "affectedPaths": ["/pricing", "/why-truecap", "/llms.txt", "/llms-full.txt"],
+    "expectedFacts": ["current plan availability, pricing, trial, and entitlements"],
+    "riskClass": "medium"
+  }
+]

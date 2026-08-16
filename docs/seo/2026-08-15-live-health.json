@@ -1,0 +1,52 @@
+{
+  "base": "https://usetruecap.com",
+  "crawled": 428,
+  "total": 428,
+  "foreignDeployment": {
+    "url": "https://truecap-iota.vercel.app/",
+    "status": 404,
+    "live": false,
+    "note": "gone"
+  },
+  "crons": [
+    {
+      "path": "/api/cron/send-rate-alerts",
+      "status": 401
+    },
+    {
+      "path": "/api/cron/send-rent-alerts",
+      "status": 401
+    },
+    {
+      "path": "/api/cron/send-lifecycle-emails",
+      "status": 401
+    },
+    {
+      "path": "/api/cron/send-weekly-summary",
+      "status": 401
+    },
+    {
+      "path": "/api/cron/reconcile-stripe",
+      "status": 401
+    }
+  ],
+  "linkGraph": {
+    "ran": true,
+    "reason": null,
+    "sitemapUrls": 428,
+    "reachable": 428,
+    "orphans": []
+  },
+  "findings": [
+    {
+      "severity": "medium",
+      "check": "duplicate FAQPage",
+      "detail": "/why-truecap ships the same FAQPage block as / — Google will pick one for the rich result and discount the other."
+    },
+    {
+      "severity": "medium",
+      "check": "missing schema",
+      "detail": "/blog/topics (blog post) is missing JSON-LD @type: BlogPosting or Article, BreadcrumbList"
+    }
+  ]
+}

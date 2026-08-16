@@ -14,6 +14,7 @@
 
 import { useState } from "react";
 import { Check, Copy } from "lucide-react";
+import { trackEvent } from "@/lib/analytics";
 
 type Props = {
   slug: string;
@@ -55,6 +56,7 @@ export function EmbedCodeBlock({ slug, siteUrl, defaultHeight }: Props) {
   async function handleCopy() {
     try {
       await navigator.clipboard.writeText(snippet);
+      trackEvent("embed_code_copied", { calculator: slug });
       setCopied(true);
       setTimeout(() => setCopied(false), 1800);
     } catch {

@@ -336,7 +336,8 @@ export default function RentalPropertyDepreciationPost() {
               fridge is a same-year deduction, not a 5-year schedule), and
               those shorter-life components are exactly what a cost
               segregation study accelerates — the strategy, and what&apos;s
-              left of bonus depreciation at 20% in 2026, is covered in the{" "}
+              restored 100% bonus deduction for qualifying property acquired
+              and placed in service after January 19, 2025, is covered in the{" "}
               <Link
                 href="/blog/bonus-depreciation-rental-property-2026"
                 className="text-primary font-semibold hover:underline"

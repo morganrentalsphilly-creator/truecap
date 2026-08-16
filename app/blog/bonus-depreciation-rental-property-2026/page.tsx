@@ -23,16 +23,23 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
 
 const SLUG = "bonus-depreciation-rental-property-2026";
-const TITLE = "Bonus depreciation on rental property in 2026: what changed, what's left, and how to use it";
+const TITLE = "Bonus depreciation on rental property in 2026: the restored 100% deduction and what qualifies";
 // SERP-facing title (metadata/og only): kept ≤50 chars so the root
 // layout's "%s | TrueCap" template stays inside the ~60-char SERP
 // window. The on-page <h1> keeps the longer editorial TITLE.
 const SERP_TITLE = "Bonus depreciation on rental property in 2026";
 const DESCRIPTION =
-  "Bonus depreciation phased down from 100% in 2022 to 40% in 2025 and 20% in 2026. But cost segregation studies, the short-term rental loophole, and the real-estate professional designation still create real tax savings. Here's the current playbook.";
+  "The 2026 bonus depreciation rate is 100% for eligible property acquired and placed in service after January 19, 2025. Learn what rental assets qualify.";
 const PUBLISHED_AT = "2026-06-07";
-const MODIFIED_AT = "2026-06-07";
-const READING_TIME_MIN = 13;
+const MODIFIED_AT = "2026-08-15";
+const FACT_CHECKED_AT = "2026-08-15";
+const READING_TIME_MIN = 10;
+
+const IRS_BONUS_GUIDANCE =
+  "https://www.irs.gov/newsroom/treasury-irs-issue-guidance-on-the-additional-first-year-depreciation-deduction-amended-as-part-of-the-one-big-beautiful-bill";
+const IRS_PUBLICATION_946 = "https://www.irs.gov/publications/p946";
+const IRS_PUBLICATION_925 = "https://www.irs.gov/publications/p925";
+const IRS_PUBLICATION_544 = "https://www.irs.gov/publications/p544";
 
 export const metadata: Metadata = {
   title: SERP_TITLE,
@@ -68,31 +75,31 @@ export const metadata: Metadata = {
 const FAQS: { q: string; a: string }[] = [
   {
     q: "What is bonus depreciation in plain English?",
-    a: "Normal depreciation lets you deduct a building's cost over 27.5 years (residential) or 39 years (commercial) — about 3.6%/year. Bonus depreciation lets you deduct certain shorter-life components (5/7/15-year life: appliances, carpet, fencing, landscaping, etc.) immediately in year 1 instead of stretching over their life. From 2018-2022 bonus depreciation was 100%. The TCJA phase-down took it to 80% (2023), 60% (2024), 40% (2025), 20% (2026), 0% (2027) — unless Congress extends it.",
+    a: "Bonus depreciation is an additional first-year deduction for eligible property. The restored rate is 100% for qualifying property acquired and placed in service after January 19, 2025. A residential rental building itself generally has a 27.5-year recovery period and does not qualify, but certain properly classified shorter-life components may qualify.",
   },
   {
     q: "Is bonus depreciation gone in 2026?",
-    a: "Not yet. The 2026 rate is 20% — meaning if a cost segregation study identifies $80K of 5/15-year property, you can deduct $16K immediately (20% × $80K) and depreciate the remaining $64K over its normal 5-15 year schedule. The phase-down continues to 0% in 2027 unless Congress acts. Several bills have proposed extending or restoring 100% bonus depreciation — watch the news cycle.",
+    a: "No. Current IRS guidance applies a permanent 100% bonus-depreciation rate to eligible property acquired and placed in service after January 19, 2025. Property acquired before January 20, 2025 can remain subject to the earlier phase-down rules, so contract, acquisition, and placed-in-service dates matter.",
   },
   {
     q: "What is a cost segregation study and is it worth it in 2026?",
-    a: "A cost seg study is an engineering analysis that breaks down a building's cost into its components: structure (27.5/39 year), 15-year land improvements (landscaping, fencing, parking), 5-year personal property (appliances, carpet, decorative lighting). Without a study, everything gets lumped into 27.5/39-year depreciation. With one, you accelerate 20-35% of the building cost into shorter-life buckets that can take bonus depreciation. Cost: $3-8K for residential, $7-15K for small commercial. Worth it any time the net present value of the accelerated deduction exceeds the study cost — usually true on properties $400K+.",
+    a: "A cost segregation study documents whether parts of a building should be classified separately from the 27.5- or 39-year structure. Properly classified 5-, 7-, or 15-year property can fall within the recovery-period test for bonus depreciation. Whether a study is worthwhile depends on the supported allocation, timing, tax rate, passive-loss limits, future sale plans, and study cost; there is no universal property-price threshold.",
   },
   {
-    q: "What is the short-term rental tax loophole?",
-    a: "STR rental losses can offset W-2 / active income if (a) the average stay is 7 days or less, AND (b) you materially participate (100+ hours/year and more than anyone else, or 500+ hours). Most long-term rental losses are passive and can only offset passive income, but STR losses meeting these tests are non-passive — they offset your W-2. Combined with bonus depreciation, this is how high-earners zero out W-2 income with rental real estate.",
+    q: "Can short-term-rental losses offset non-passive income?",
+    a: "Sometimes, but not because every short-term rental is automatically non-passive. IRS Publication 925 has exceptions to the rental-activity definition, including an average customer-use period of seven days or less, and separate material-participation tests. The facts, participation records, grouping, and other limitations determine treatment. A tax professional should evaluate the complete return.",
   },
   {
     q: "What is real estate professional status (REPS)?",
-    a: "REPS is an IRS designation that lets all your rental losses offset W-2 / active income (not just STR). Requirements: (a) more than 50% of your total working time in real property trades or businesses, AND (b) more than 750 hours/year. For most W-2 employees with rentals on the side, this is unattainable. For full-time real estate investors, agents, contractors, and property managers, it's the most powerful tax planning tool in the code.",
+    a: "For the passive-activity rules, a qualifying taxpayer must perform more than half of their personal services and more than 750 hours in real-property trades or businesses in which they materially participate. Qualifying does not by itself make every rental loss non-passive; material participation, activity grouping, basis, at-risk, and other limits can still matter.",
   },
   {
-    q: "How does the IRS know what hours I worked?",
-    a: "They don't — until they audit. Then they ask for contemporaneous time logs. Calendar entries, project management software, dated photos, emails, contractor invoices that show your involvement. Reconstructing hours from memory after the fact is a losing audit defense. If you're claiming REPS or STR material participation, log hours weekly in a spreadsheet or app. Cheap insurance.",
+    q: "What records support material participation?",
+    a: "Keep reasonable, credible records of the work performed and time spent, such as calendars, appointment books, or narrative summaries supported by contemporaneous documents. The relevant test and the taxpayer's facts determine what must be shown. Do not rely on an unsupported after-the-fact estimate.",
   },
   {
     q: "What happens to depreciation when I sell?",
-    a: "It's recaptured. Depreciation reduces your tax basis in the property; on sale, the IRS taxes the gain attributable to depreciation at the depreciation recapture rate (max 25%) — separate from the long-term capital gains rate on appreciation. A 1031 exchange defers both indefinitely. Holding until death and passing to heirs eliminates both via stepped-up basis. So depreciation is a tax deferral, not always an elimination — but deferral with proper exit planning becomes elimination.",
+    a: "Depreciation reduces adjusted basis and can change the character and amount of gain on sale. Different rules can apply to the building and to shorter-life property reclassified by a cost segregation study, including section 1245 recapture and unrecaptured section 1250 gain. Model the exit with a tax professional instead of assuming one flat 25% rate.",
   },
 ];
 
@@ -108,7 +115,7 @@ export default function BlogPost() {
     description: DESCRIPTION,
     datePublished: PUBLISHED_AT,
     dateModified: MODIFIED_AT,
-    author: { "@type": "Person", name: "Morgan Page", url: siteUrl },
+    author: { "@type": "Person", "@id": `${siteUrl}/about#morgan`, name: "Morgan Page", url: `${siteUrl}/about` },
     publisher: { "@id": `${siteUrl}/#organization` },
     mainEntityOfPage: canonicalUrl,
     image: [`${siteUrl}/home.jpg`],
@@ -148,27 +155,33 @@ export default function BlogPost() {
             {TITLE}
           </h1>
           <p className="text-[11px] uppercase tracking-widest text-muted-foreground font-bold mt-3">
-            {new Date(PUBLISHED_AT).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}{" "}
+            Published {new Date(PUBLISHED_AT).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}{" "}
+            · materially updated {new Date(MODIFIED_AT).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
             · {READING_TIME_MIN} min read
           </p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            By{" "}
+            <Link href="/about" rel="author" className="font-semibold text-foreground hover:underline">
+              Morgan Page
+            </Link>
+            {" · "}IRS sources verified {FACT_CHECKED_AT}
+          </p>
           <p className="text-base sm:text-lg text-muted-foreground mt-4 leading-relaxed">
-            Bonus depreciation phased down from 100% in 2022 to 40% in
-            2025 and 20% in 2026. But cost segregation studies, the
-            short-term rental loophole, and the real-estate professional
-            designation still create real tax savings. Here&apos;s the
-            current playbook.
+            Current IRS guidance restored 100% bonus depreciation for
+            eligible property acquired and placed in service after January
+            19, 2025. The building itself usually does not qualify; certain
+            shorter-life components can. Dates, classification, and loss
+            limitations all matter.
           </p>
         </header>
 
         <article className="prose prose-slate max-w-none [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground [&_li]:leading-relaxed [&_strong]:text-foreground">
           <p>
-            Bonus depreciation is the most powerful tax tool in
-            residential real estate investing — and 2026 is the
-            second-to-last year you can use it before the current
-            phase-down hits zero in 2027. This post walks through what
-            changed, what&apos;s still available, and the three
-            strategies that actually move the needle: cost segregation,
-            the STR loophole, and real estate professional status.
+            The 2026 federal bonus-depreciation rate is <strong>100%</strong>
+            for eligible property acquired and placed in service after
+            January 19, 2025. That is a material change from the prior
+            phase-down schedule. It does not mean an investor can deduct the
+            full purchase price of a rental building.
           </p>
           <p>
             This is educational content, not tax advice — every strategy
@@ -177,52 +190,58 @@ export default function BlogPost() {
             investors before you act on it.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">What changed and what&apos;s the 2026 rate</h2>
+          <div className="not-prose my-6 rounded-xl border border-primary/25 bg-primary/5 p-4 text-sm leading-relaxed text-foreground">
+            <strong>Source verification:</strong> factual rules on this page
+            were checked on {FACT_CHECKED_AT} against current IRS guidance and
+            Publications 946, 925, and 544. This is educational information,
+            not individualized tax advice.
+          </div>
+
+          <h2 className="text-2xl sm:text-3xl">What changed: 100% was restored</h2>
           <p>
-            From 2018 through 2022, the Tax Cuts and Jobs Act let
-            investors take <strong>100% bonus depreciation</strong> on
-            qualifying short-life property in year 1. That created the
-            golden era of accelerated depreciation: cost seg studies on
-            $500K rentals were producing $100K+ first-year deductions.
+            The earlier law was phasing bonus depreciation down. New
+            legislation changed that rule, and the IRS now says the additional
+            first-year deduction is permanently 100% for eligible property
+            acquired and placed in service after January 19, 2025. See the IRS
+            <a href={IRS_BONUS_GUIDANCE} className="text-primary font-semibold hover:underline"> implementation guidance</a>.
           </p>
-          <p>The TCJA built in a phase-down. Current schedule:</p>
+          <p>The date boundary is essential:</p>
           <div className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
             <table className="w-full min-w-[400px] text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/40">
-                  <th className="text-left p-3 font-bold text-foreground">Year</th>
-                  <th className="text-left p-3 font-bold text-foreground">Bonus depreciation rate</th>
+                  <th className="text-left p-3 font-bold text-foreground">Property timing</th>
+                  <th className="text-left p-3 font-bold text-foreground">General federal rule</th>
                 </tr>
               </thead>
               <tbody className="[&_td]:p-3 [&_td]:border-b [&_td]:border-border [&_tr:last-child_td]:border-0">
-                <tr><td>2022 and earlier</td><td>100%</td></tr>
-                <tr><td>2023</td><td>80%</td></tr>
-                <tr><td>2024</td><td>60%</td></tr>
-                <tr><td>2025</td><td>40%</td></tr>
-                <tr><td className="font-bold text-foreground">2026</td><td className="font-bold text-foreground">20%</td></tr>
-                <tr><td>2027+</td><td>0% (unless extended)</td></tr>
+                <tr><td>Acquired before Jan. 20, 2025</td><td>Prior phase-down rules can still apply</td></tr>
+                <tr><td className="font-bold text-foreground">Acquired and placed in service after Jan. 19, 2025</td><td className="font-bold text-foreground">100% for eligible property</td></tr>
               </tbody>
             </table>
           </div>
           <p>
-            Several bills in 2025-2026 have proposed extending or
-            restoring 100% bonus depreciation. None have passed at the
-            time of writing. Assume 20% for 2026 planning; revisit if
-            Congress acts.
+            Acquisition can involve binding-contract and related rules, and
+            &ldquo;placed in service&rdquo; generally means ready and available
+            for its assigned use—not simply purchased. Have a qualified tax
+            adviser resolve borderline dates.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">How depreciation works (and why bonus matters)</h2>
           <p>
             Residential rental buildings depreciate straight-line over
-            <strong> 27.5 years</strong>. So a $400K rental (excluding
-            land) deducts $14,545/year regardless of what you do. Bonus
-            depreciation doesn&apos;t change that for the building shell.
+            <strong> 27.5 years</strong>. A full straight-line year on a
+            $400K residential-building basis is about $14,545 before
+            placed-in-service conventions; the first-year amount and the
+            amount left in the building class can differ. Bonus depreciation
+            does not apply to the 27.5-year building shell itself.
           </p>
           <p>
             What it changes is the treatment of shorter-life property
-            embedded in the building. Without a cost segregation study,
-            the entire $400K is depreciated at 27.5 years. With a study,
-            an engineer might break it down as:
+            embedded in the building. If the entire $400K basis is reported in
+            the residential-rental-building class, it stays on the 27.5-year
+            schedule. A supportable component classification—often documented
+            through a cost segregation study—might instead break it down as:
           </p>
           <ul>
             <li><strong>$280K</strong> — 27.5-year structure (shell,
@@ -233,98 +252,88 @@ export default function BlogPost() {
               (appliances, carpet, decorative lighting, blinds).</li>
           </ul>
           <p>
-            The $120K of 5/15-year property is eligible for bonus
-            depreciation. At the 2026 rate of 20%, that&apos;s
-            <strong> $24K of immediate first-year deduction</strong> on
-            top of the normal depreciation. The remaining $96K depreciates
-            over its 5-15 year life on a normal schedule.
+            If the $120K classification is supportable and every eligibility
+            rule is met, the restored 100% rate could produce up to a
+            <strong> $120K additional first-year deduction</strong>. The
+            $280K building shell remains on its applicable recovery schedule.
+            This is an illustration, not a default allocation or tax result.
+          </p>
+
+          <h3>What generally qualifies</h3>
+          <p>
+            <a href={IRS_PUBLICATION_946} className="text-primary font-semibold hover:underline">IRS Publication 946</a>{" "}
+            describes qualified property as including depreciable tangible
+            property under MACRS with a recovery period of 20 years or less,
+            certain computer software, and several other statutory categories.
+            Eligible used property can qualify, subject to acquisition rules.
+            Land is not depreciable, and a residential rental building&apos;s
+            27.5-year recovery period generally puts the building itself
+            outside the 20-year test.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">Strategy 1: Cost segregation</h2>
           <p>
-            A cost seg study is an engineering analysis (usually 4-8
-            weeks turnaround) that produces an IRS-defensible breakdown
-            of your building cost into its components.
+            A cost segregation study analyzes whether parts of a property
+            should be classified separately from the building. A sound study
+            documents the facts, legal classification, and allocation method;
+            it does not make an otherwise ineligible asset qualify.
           </p>
-          <p>Economics in 2026:</p>
+          <p>Evaluate the economics with these inputs:</p>
           <ul>
-            <li><strong>Study cost:</strong> $3-8K for typical
-              residential ($300K-1M building cost); $7-15K for small
-              commercial.</li>
-            <li><strong>Typical reclassification:</strong> 20-35% of
-              building cost moves into 5/15-year buckets.</li>
-            <li><strong>First-year bonus deduction (2026, 20%):</strong>
-              on a $400K building, ~$24K immediate deduction.</li>
-            <li><strong>Tax savings at 32% marginal bracket:</strong>
-              ~$7.7K in actual cash kept.</li>
-            <li><strong>Plus accelerated regular depreciation</strong>
-              on the remaining 5/15-year property over the next 5-15
-              years.</li>
+            <li><strong>Supported allocation:</strong> how much basis can
+              actually be classified into eligible shorter-life property.</li>
+            <li><strong>Timing:</strong> whether acquisition and placed-in-service
+              dates satisfy the restored rule.</li>
+            <li><strong>Ability to use the deduction:</strong> basis, at-risk,
+              passive-activity, and excess-business-loss rules can limit the
+              current benefit.</li>
+            <li><strong>Exit cost:</strong> accelerated deductions reduce basis
+              and can increase taxable gain or recapture later.</li>
+            <li><strong>Professional cost:</strong> study, return preparation,
+              and possible Form 3115 work for property already in service.</li>
           </ul>
           <p>
-            Rule of thumb: cost seg pays off when net present value of
-            accelerated depreciation exceeds 1.5x the study cost. That
-            usually means properties of $400K+ in building cost (i.e.
-            excluding land value).
-          </p>
-          <p>
-            <strong>The catch:</strong> if the depreciation creates a
-            passive loss and you don&apos;t have passive income to
-            offset it, the loss is suspended — it carries forward but
-            doesn&apos;t save you cash this year. Which is where the
-            next two strategies come in.
+            There is no reliable universal price threshold. Compare the
+            present value of tax timing after all limitations and exit effects
+            with the cost of obtaining and defending the classification.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">Strategy 2: The STR loophole</h2>
+          <h2 className="text-2xl sm:text-3xl">Strategy 2: Short-term-rental activity rules</h2>
           <p>
             Most rental real estate is &ldquo;passive activity&rdquo;
             under IRC §469. Passive losses can only offset passive
-            income. So a $40K depreciation loss on a long-term rental
-            usually just suspends — it can&apos;t reduce your $300K W-2
-            salary&apos;s tax bill.
+            income unless an exception and the other applicable rules are
+            satisfied. An unused loss may be suspended rather than produce a
+            current cash benefit.
           </p>
           <p>
-            Short-term rentals are different. If the property meets
-            <strong> both</strong>:
+            Short stays can be treated differently for the passive-activity
+            rules. <a href={IRS_PUBLICATION_925} className="text-primary font-semibold hover:underline">IRS Publication 925</a>{" "}
+            lists circumstances in which an activity is not treated as a
+            rental activity, including when the average period of customer use
+            is seven days or less. That is only the first step. The taxpayer
+            must also satisfy a material-participation test for non-passive
+            treatment.
           </p>
           <ul>
-            <li><strong>Average stay of 7 days or less</strong> (the
-              &ldquo;hotel&rdquo; test), AND</li>
-            <li><strong>You materially participate</strong> — meet one
-              of seven IRS tests, most commonly: (a) 500+ hours/year on
-              the activity, or (b) 100+ hours and more than anyone else.</li>
+            <li>One test is more than 500 hours of participation.</li>
+            <li>Another is more than 100 hours and at least as much
+              participation as any other individual.</li>
+            <li>Other tests and aggregation rules may apply to the facts.</li>
           </ul>
           <p>
-            ...then the activity is non-passive and losses offset your
-            W-2 income. This is the &ldquo;STR loophole&rdquo; that&apos;s
-            powered an entire micro-industry of high-earners buying Smoky
-            Mountains cabins.
-          </p>
-          <p>
-            Combined with cost seg + bonus depreciation, a $500K STR can
-            generate $80-100K of first-year losses that wipe out W-2
-            income in your top tax bracket — a $25-35K real cash tax
-            savings in year 1. After year 1 the tax benefit drops sharply
-            (the big accelerated deduction is gone), but the cumulative
-            impact over 5-10 years is large.
-          </p>
-          <p>
-            <strong>The audit risk:</strong> the IRS knows this strategy
-            cold and audits it. Material participation hours need to be
-            logged contemporaneously, not reconstructed from memory after
-            the audit notice arrives. Use a calendar app or spreadsheet
-            and log hours weekly. The &ldquo;more than anyone
-            else&rdquo; test specifically requires that you spend more
-            time than your cleaner, your handyman, and your co-host
-            combined — usually meaning self-managed STRs only.
+            Keep records that identify the work and time involved. Do not
+            assume a booking platform&apos;s stay length or a large deduction
+            alone proves non-passive treatment, and do not market the rule as
+            an automatic way to erase salary income.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">Strategy 3: Real estate professional status (REPS)</h2>
           <p>
-            REPS is the heavy artillery: it makes <em>all</em> your
-            rental losses non-passive, not just STR. So a portfolio of
-            long-term rentals with cost seg studies can wipe out W-2
-            income at scale.
+            Real-estate-professional status changes how rental activities are
+            analyzed under the passive-activity rules. It does not
+            automatically turn every rental loss into a currently deductible
+            non-passive loss.
           </p>
           <p>
             Eligibility — you must meet <strong>both</strong>:
@@ -338,70 +347,66 @@ export default function BlogPost() {
               in those real property trades or businesses.</li>
           </ul>
           <p>
-            For a W-2 employee working 2,000 hours/year at a day job,
-            REPS is unreachable (you&apos;d need 2,001 hours of real
-            estate work). For a spouse who doesn&apos;t work outside the
-            home and manages the rental portfolio, it&apos;s a real
-            option. For full-time real estate agents, contractors, and
-            property managers, it&apos;s often automatic.
+            The taxpayer must also materially participate in the rental
+            activity or activities under the applicable grouping rules. Basis,
+            at-risk, and other deduction limitations remain separate tests.
           </p>
           <p>Common audit failures:</p>
           <ul>
-            <li>No contemporaneous time log.</li>
-            <li>Brokerage license alone doesn&apos;t qualify — you must
-              <em> materially participate</em> in the real estate
-              activity, not just hold the license.</li>
+            <li>Records that do not credibly substantiate the work performed
+              and time spent.</li>
+            <li>A job title or license alone does not establish the hours or
+              material participation required.</li>
             <li>Married filing jointly — only ONE spouse needs to meet
               the test, but that spouse must individually meet both 50%
-              and 750-hour tests (you can&apos;t aggregate spousal
-              hours).</li>
+              and 750-hour real-estate-professional tests. Spousal
+              participation can be treated differently when applying the
+              separate material-participation rules.</li>
           </ul>
 
           <h2 className="text-2xl sm:text-3xl">Depreciation recapture — the back end</h2>
           <p>
-            Bonus depreciation is a deferral tool, not a free deduction.
-            When you sell, the IRS &ldquo;recaptures&rdquo; the
-            depreciation: the gain attributable to depreciation is taxed
-            at up to 25% (Section 1250 recapture), separate from the
-            long-term capital gains rate on actual appreciation.
+            Accelerated depreciation is not evaluated in isolation. It reduces
+            adjusted basis, which can increase gain when the asset is sold.
+            The building and reclassified shorter-life assets can be subject to
+            different gain-character and recapture rules.
           </p>
-          <p>Three exit strategies that preserve the deferred-tax benefit:</p>
+          <p>
+            <a href={IRS_PUBLICATION_544} className="text-primary font-semibold hover:underline">IRS Publication 544</a>{" "}
+            explains dispositions and recapture. In a cost-segregated property,
+            some personal-property gain may be ordinary income under section
+            1245, while unrecaptured section 1250 gain can apply to depreciable
+            real property. A single &ldquo;25% recapture rate&rdquo; does not
+            accurately model every component.
+          </p>
+          <p>Plan the exit before claiming the deduction:</p>
           <ul>
             <li><strong>1031 exchange.</strong> Roll the gain into a
-              like-kind replacement property; depreciation recapture is
-              deferred along with capital gains. <Link href="/blog/1031-exchange-basics" className="text-primary font-semibold hover:underline">Full 1031 walkthrough here</Link>.</li>
-            <li><strong>Hold until death.</strong> Heirs receive
-              stepped-up basis — depreciation recapture is eliminated
-              entirely.</li>
-            <li><strong>Opportunity zone fund.</strong> Defer and
-              partially eliminate capital gains by reinvesting in QOFs
-              (current program through 2026).</li>
+              qualifying like-kind replacement property. Eligibility,
+              timing, boot, and reclassified assets require transaction-specific
+              review. <Link href="/blog/1031-exchange-basics" className="text-primary font-semibold hover:underline">Read the 1031 overview</Link>.</li>
+            <li><strong>Taxable sale.</strong> Model adjusted basis and the
+              character of gain for each asset class, not just the headline
+              sale price.</li>
+            <li><strong>Estate planning.</strong> Basis rules depend on how
+              property is owned and transferred; get individualized advice
+              rather than assuming a particular result.</li>
           </ul>
-          <p>
-            Without an exit strategy, depreciation is just a 10-30 year
-            zero-interest loan from the IRS. With one, it can become
-            permanent tax-free wealth.
-          </p>
 
           <h2 className="text-2xl sm:text-3xl">Bottom-line decision tree</h2>
-          <p>For 2026:</p>
+          <p>For property placed in service in 2026:</p>
           <ol>
-            <li>Buying a long-term rental for under $400K building cost?
-              Skip cost seg. The study cost rarely pencils at that scale
-              with 20% bonus.</li>
-            <li>Buying a long-term rental for $400K+? Consider cost seg.
-              Most cost seg firms will run a free preliminary ROI
-              estimate from photos and the closing statement before you
-              commit.</li>
-            <li>Buying an STR you&apos;ll self-manage? Cost seg + STR
-              loophole is usually a big win for W-2 earners. Make
-              contemporaneous hour logging your day-one habit.</li>
-            <li>You or your spouse can plausibly qualify for REPS? Cost
-              seg on every property in your portfolio is usually a win.
-              Hire a REPS-specialist CPA.</li>
-            <li>2027 planning: assume bonus depreciation goes to zero
-              unless Congress acts. Acquisitions you can close before
-              year-end 2026 capture the last 20% bonus year.</li>
+            <li>Confirm the acquisition and placed-in-service dates.</li>
+            <li>Separate nondepreciable land and the 27.5-year building from
+              any shorter-life assets using supportable allocations.</li>
+            <li>Confirm each asset meets the qualified-property and used-property
+              rules in Publication 946.</li>
+            <li>Estimate the deduction, then apply basis, at-risk,
+              passive-activity, and other limitations.</li>
+            <li>Model later disposition and recapture before deciding whether
+              acceleration improves the full investment outcome.</li>
+            <li>Have a real-estate tax professional review the classifications,
+              dates, elections, and return reporting.</li>
           </ol>
 
           <div className="not-prose">
@@ -410,7 +415,7 @@ export default function BlogPost() {
               className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-5 py-3 rounded-xl font-bold hover:opacity-95 transition-opacity"
             >
               <Calculator className="w-4 h-4" />
-              Model the tax impact on a specific deal
+              Model the base deal and straight-line tax scenario
               <ArrowUpRight className="w-4 h-4" />
             </Link>
           </div>
@@ -438,9 +443,9 @@ export default function BlogPost() {
         <footer className="mt-12 pt-8 border-t border-border">
           <p className="text-sm text-muted-foreground leading-relaxed">
             Curious what depreciation could actually save you on a
-            specific deal? TrueCap models 10-year tax strategy scenarios
-            (including cost seg + bonus depreciation) so you can see the
-            cash impact before you buy.{" "}
+            specific deal? TrueCap models a 10-year straight-line depreciation
+            scenario alongside cash flow, financing, and exit assumptions. It
+            does not replace a cost-segregation study or tax return model.{" "}
             <Link href="/" className="font-bold text-foreground hover:underline">
               Open the analyzer →
             </Link>
