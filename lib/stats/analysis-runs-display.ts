@@ -1,17 +1,14 @@
 /**
- * Historical display floor for the public all-time analysis counter.
+ * Normalize the measured all-time run counter for public display.
  *
- * Product decision (Morgan, 2026-08-15): the public counter starts at 50,000
- * and continues climbing with the live `app_counters.analysis_runs` value.
- * This is presentation-only: the stored counter is never mutated, and saved
- * deal / rolling-window counters never receive this baseline.
+ * This intentionally returns only the stored measurement. Public proof must
+ * never add a presentation baseline or otherwise imply analyses that were not
+ * recorded by `app_counters.analysis_runs`.
  */
-export const ANALYSIS_RUNS_DISPLAY_BASELINE = 50_000;
-
-export function withAnalysisRunsDisplayBaseline(rawCount: number): number {
+export function measuredAnalysisRunsDisplayCount(rawCount: number): number {
   if (!Number.isFinite(rawCount) || rawCount < 0) {
     throw new RangeError("Analysis run count must be a finite, non-negative number.");
   }
 
-  return Math.floor(rawCount) + ANALYSIS_RUNS_DISPLAY_BASELINE;
+  return Math.floor(rawCount);
 }

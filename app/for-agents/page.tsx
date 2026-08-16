@@ -255,7 +255,7 @@ export default async function ForAgentsPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             Free covers the first screen. Agent Pro adds client rosters,
             per-client Buy Boxes, deal assignment, co-branded analysis,
-            client portals, white-label embeds, and the full Pro decision workflow.
+            client portals, and the full Pro decision workflow.
           </p>
           <p className="mb-5 text-sm font-bold">
             {agentMonthly ? `${agentMonthly.amountLabel}/${agentMonthly.period}` : "See live pricing"}

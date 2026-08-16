@@ -251,7 +251,7 @@ export default function NoiCalculatorPage() {
             <Link href="/" className="font-bold text-foreground hover:underline">
               TrueCap
             </Link>{" "}
-            — institutional-grade rental analysis, free to start.
+            — transparent, editable rental analysis, free to start.
           </footer>
         </main>
         <SiteFooter />

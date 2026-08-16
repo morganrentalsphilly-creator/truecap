@@ -15,7 +15,6 @@ import { ArrowRight, Lock, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { trackEvent } from "@/lib/analytics";
-import { TRIAL_LABEL } from "@/lib/trial";
 import { usePostCheckoutUpsellSuppression } from "@/hooks/use-post-checkout-upsell-suppression";
 
 interface ProInlineGateProps {
@@ -92,7 +91,7 @@ export function ProInlineGate({ icon: Icon, title, description, previewBullets }
         className="group mt-4 inline-flex items-center gap-1.5 text-sm font-bold text-primary hover:underline"
       >
         <Sparkles className="size-4" />
-        See {title} for this deal · {TRIAL_LABEL}
+        See {title} for this deal · Compare Pro plans
         <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
       </Link>
     </div>

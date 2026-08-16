@@ -5,9 +5,9 @@
   "preheader": "i hear the same three things. here are honest answers.",
   "headline": "Three honest pushbacks on TrueCap, and what I'd say back.",
   "body": [
-    "\"I already have a spreadsheet.\" Sure — most serious investors do, and a good one is genuinely powerful. The question is how long it takes. If your spreadsheet does cap rate, DSCR, NOI, 10-year projection, sensitivity, and pulls rent comps, you spent 30-45 minutes on it per deal. TrueCap Pro does that in 60 seconds. Use both. Use the spreadsheet for the deals that survive the 60-second pass.",
-    "\"I trust my gut.\" Gut works for location, condition, and tenant quality. Gut does not work for DSCR. I've seen experienced investors miss DSCR by 0.15+ in their head because they didn't model real lender rates against real NOI. The numbers don't argue with you. They just are.",
-    "\"$29.99 a month is too expensive.\" If you're buying one rental every two years, fair — use the free tier. If you analyze five deals a week, you spend at least an hour a day on underwriting. $29.99/mo to compress that to 30 minutes a day is hourly math that always works.",
+    "\"I already have a spreadsheet.\" A good spreadsheet is genuinely powerful. TrueCap is useful as a faster first pass with labeled assumptions; keep using your detailed model for the properties that survive the screen and reconcile any differences.",
+    "\"I trust my gut.\" Experience matters for questions a model cannot answer, such as condition and local operations. Standardized cash-flow and DSCR calculations add a second check, but they are only as reliable as the inputs and lender-specific definitions you verify.",
+    "\"Pro costs too much for my workflow.\" That may be true. Use Free or the one-time Deal Decision Pack if they fit better. Pro is intended for people who repeatedly need editing, scenarios, comparison, Max Offer, strategy models, and reports; compare the current price with your own usage before upgrading.",
     "Free tier is free forever, no card, no trial. Pro is month-to-month, cancel anytime. There's no lock-in to be skeptical about."
   ],
   "cta_text": "See pricing",

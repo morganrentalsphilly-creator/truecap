@@ -5,20 +5,19 @@ import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 
 /**
  * Total number of analyses RUN across all users, all time — the count behind
- * the homepage "deals analyzed on TrueCap" ticker.
+ * the homepage "analysis runs recorded on TrueCap" ticker.
  *
  * This returns the raw stored figure: it counts every time someone clicks Run
  * analysis (incremented once per run via the increment_analysis_runs RPC — see
- * app/actions/track-analysis-run.ts). The public all-time ticker applies its
- * approved historical display floor separately, leaving this data helper and
- * the stored counter unchanged.
+ * app/actions/track-analysis-run.ts). The public all-time ticker shows this
+ * measured count without adding a presentation baseline.
  *
  * Reads a single counter row via the service-role client (RLS-bypassing,
  * count-only — no row data or PII leaves this function). On the static homepage
- * this runs at build / hourly revalidation, never per visitor. Returns null on
- * ANY error or if the counter row is absent (e.g. the migration hasn't been
- * applied yet) so the ticker hides gracefully rather than showing a fabricated
- * or stale number.
+ * this runs at build / hourly revalidation, never per visitor. The public
+ * ticker displays this measured value directly. Returns null on ANY error or
+ * if the counter row is absent (e.g. the migration hasn't been applied yet) so
+ * the ticker hides gracefully rather than showing a fabricated or stale number.
  */
 async function fetchTotalAnalysesRun(): Promise<number | null> {
   try {

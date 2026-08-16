@@ -83,6 +83,36 @@ describe("trial copy — mirrors the checkout repeat-trial guard", () => {
     expect(buttons).toContain("hadPriorSubscription");
   });
 
+  it("treats anonymous and unverifiable trial eligibility as unknown", () => {
+    const page = read("../../app/pricing/page.tsx");
+    const plans = read("../../components/marketing/pricing-toggle-plans.tsx");
+    const buttons = read("../../components/marketing/pricing-plan-buttons.tsx");
+    const entitlements = read("../../lib/entitlements.ts");
+
+    // Anonymous visitors may be signed-out returning subscribers. Their CTA is
+    // neutral and the card/hero state the first-time eligibility condition.
+    const anonymousBranch = buttons.slice(
+      buttons.indexOf("if (!isAuthenticated)"),
+      buttons.indexOf("// Authenticated free user")
+    );
+    expect(anonymousBranch).toContain("Continue to {tierName}");
+    expect(anonymousBranch).not.toContain("Start");
+    expect(plans).toContain("verifiedTrialEligible");
+    expect(plans).toContain("Eligible first-time subscribers get");
+    expect(page).toContain("Eligible first-time subscribers get");
+    expect(page).toMatch(
+      /\{!user \? \([\s\S]*Eligible first-time subscribers get[\s\S]*\) : hadPriorSubscription \? \(/
+    );
+
+    // A failed history query is not verified eligibility; marketing fails
+    // closed and checkout remains the billing authority.
+    const historyHelper = entitlements.slice(
+      entitlements.indexOf("export async function hasAnySubscriptionHistory"),
+      entitlements.length
+    );
+    expect(historyHelper).toMatch(/if \(error\)[\s\S]*return true;/);
+  });
+
   it("states the card, billing, cancellation, and repeat-trial terms before checkout", () => {
     const page = read("../../app/pricing/page.tsx");
     const plans = read("../../components/marketing/pricing-toggle-plans.tsx");
@@ -97,6 +127,17 @@ describe("trial copy — mirrors the checkout repeat-trial guard", () => {
 });
 
 describe("pricing offer hierarchy", () => {
+  it("describes comps as conditional on a saved comp set", () => {
+    const plans = read("../../components/marketing/pricing-toggle-plans.tsx");
+    expect(plans).toContain("PDF reports that can include saved comps");
+    expect(plans).not.toContain("PDF reports, with comps");
+  });
+
+  it("does not market white-label embeds while that license is on hold", () => {
+    const agentPage = read("../../app/for-agents/page.tsx");
+    expect(agentPage).not.toMatch(/white-label embeds/i);
+  });
+
   it("puts Pro before the long Free card on narrow screens", () => {
     const plans = read("../../components/marketing/pricing-toggle-plans.tsx");
     expect(plans).toContain("order-2 rounded-3xl");

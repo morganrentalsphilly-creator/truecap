@@ -27,10 +27,9 @@
 
 /**
  * "agent_pro" (2026-08, Morgan-approved at $59/mo): everything in Pro plus the
- * agent toolkit — client rosters, client-scoped buy boxes, the client portal,
- * and white-label embeds (the Phase 6 decision: embed white-labeling ships as
- * an Agent Pro entitlement rather than a standalone subscription, because only
- * one subscription can be active per user).
+ * agent toolkit — client rosters, client-scoped buy boxes, and the client
+ * portal. White-label embed code remains entitlement-gated but is intentionally
+ * hidden from marketing until the Terms expressly authorize that license.
  */
 export type Tier = "free" | "one_time_pdf" | "pro" | "agent_pro";
 
@@ -77,10 +76,10 @@ export interface FeatureSpec {
   /** How it's gated at runtime — "flag" = plans.entitlements feature string; "paid" = paid-plan status only; "always" = everyone; "stripe_one_time" = $5 checkout. */
   gate: "flag" | "paid" | "always" | "stripe_one_time";
   /**
-   * false = the entitlement exists in the plan JSON but the FEATURE isn't built
-   * yet, so marketing must NOT advertise it. Keeps the tier's entitlement bag
-   * forward-compatible (flip to true when the feature ships — no migration)
-   * without selling vapor on the pricing card. Defaults to shipped.
+   * false = the entitlement exists in the plan JSON but marketing must NOT
+   * advertise it yet (for example, implementation or legal/operational approval
+   * is incomplete). Keeps runtime gates forward-compatible without selling a
+   * promise that is not ready to offer. Defaults to marketable/shipped.
    */
   shipped?: boolean;
 }
@@ -119,7 +118,10 @@ export const FEATURE_CATALOG: Record<FeatureKey, FeatureSpec> = {
   pipeline: { key: "pipeline", label: "Deal pipeline + tags (CRM)", tiers: ["pro", "agent_pro"], category: "pipeline", gate: "flag" },
   client_buy_box: { key: "client_buy_box", label: "Client rosters — buy boxes per buyer, deals screened to each client's criteria", tiers: ["agent_pro"], category: "pipeline", gate: "flag" },
   agent_portal: { key: "agent_portal", label: "Client portal — co-branded deal pages your buyers revisit", tiers: ["agent_pro"], category: "reporting", gate: "flag" },
-  embed_whitelabel: { key: "embed_whitelabel", label: "White-label embeds — calculators on your site, your brand only", tiers: ["agent_pro"], category: "reporting", gate: "flag" },
+  // Runtime support exists, but the current Terms prohibit white-labeling
+  // without separate written consent. Hide this from every catalog-derived
+  // pricing surface until counsel-approved terms expressly license it.
+  embed_whitelabel: { key: "embed_whitelabel", label: "White-label embeds — calculators on your site, your brand only", tiers: ["agent_pro"], category: "reporting", gate: "flag", shipped: false },
 };
 
 /** Does a tier include a feature? Use for marketing AND as a cross-check in tests. */

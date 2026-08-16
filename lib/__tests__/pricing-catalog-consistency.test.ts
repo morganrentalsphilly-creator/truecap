@@ -101,10 +101,9 @@ describe("catalog matches what the product actually does", () => {
 });
 
 describe("unshipped entitlements never reach a marketing surface", () => {
-  // agent_portal + embed_whitelabel exist in the plan JSON (forward-compat)
-  // but have NO implementation — a 2026-08-11 audit found the live Agent Pro
-  // card selling both. `shipped: false` is the contract that keeps an
-  // entitlement string out of marketing until the feature exists.
+  // Runtime entitlement strings can exist before a feature is marketable.
+  // `shipped: false` is the fail-closed contract for implementation, legal, or
+  // operational readiness; catalog-derived pricing must filter those entries.
   const unshipped = (Object.values(FEATURE_CATALOG) as { key: string; shipped?: boolean; label: string }[])
     .filter((f) => f.shipped === false);
 
@@ -145,10 +144,19 @@ describe("unshipped entitlements never reach a marketing surface", () => {
     const toggleSrc = readFileSync(join(ROOT, "components/marketing/pricing-toggle-plans.tsx"), "utf8");
     const profileSrc = readFileSync(join(ROOT, "app/profile/page.tsx"), "utf8");
     expect(toggleSrc).toMatch(/f\.shipped !== false/);
+    expect(profileSrc).toMatch(/feature\.shipped !== false/);
     for (const f of unshipped) {
       // The literal label must not be hand-typed on either surface (comments
       // mentioning the concept are fine — we match the exact marketing label).
       expect(profileSrc).not.toContain(f.label);
     }
+  });
+
+  it("keeps white-label embeds out of the offer until the Terms license them", () => {
+    expect(FEATURE_CATALOG.embed_whitelabel.shipped).toBe(false);
+    const marketedAgentKeys = Object.values(FEATURE_CATALOG)
+      .filter((feature) => feature.tiers.includes("agent_pro") && feature.shipped !== false)
+      .map((feature) => feature.key);
+    expect(marketedAgentKeys).not.toContain("embed_whitelabel");
   });
 });

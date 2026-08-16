@@ -5,6 +5,7 @@ import { BillingConversionTracker } from "@/components/marketing/billing-convers
 import { BillingPanel } from "@/components/profile/billing-panel";
 import { ProfileForm } from "@/components/profile/profile-form";
 import { getEntitlementsForUser } from "@/lib/entitlements";
+import { featuresForTier } from "@/lib/entitlements-catalog";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getStripe } from "@/lib/stripe/client";
 import { getPrimaryPlanPriceId, isAgentProConfigured, isPaidPlanSlug, PAID_PLAN_SLUGS, type PaidPlanSlug } from "@/lib/stripe/plan-prices";
@@ -176,6 +177,12 @@ export default async function ProfilePage({
       .map((plan) => plan.slug)
       .filter((slug): slug is PaidPlanSlug => (PAID_PLAN_SLUGS as readonly string[]).includes(slug))
   );
+  const agentProOnlyMarketableFeatures = [
+    "Everything in Pro",
+    ...featuresForTier("agent_pro")
+      .filter((feature) => !feature.tiers.includes("pro") && feature.shipped !== false)
+      .map((feature) => feature.label),
+  ];
   const billingPlans = PAID_PLAN_SLUGS
     .filter((slug) => availablePlanSlugs.size === 0 || availablePlanSlugs.has(slug))
     // Agent Pro needs BOTH its plan row (migration) and a configured price:
@@ -195,12 +202,7 @@ export default async function ProfilePage({
           ? "Full Pro access billed yearly."
           : "Full Pro access billed monthly.",
       features: slug.startsWith("agent_pro")
-        ? [
-            "Everything in Pro",
-            "Client rosters + per-client buy boxes",
-            "Client portal — a co-branded shortlist per buyer",
-            "White-label embeds on your own site",
-          ]
+        ? agentProOnlyMarketableFeatures
         : [
             "Save and compare deals",
             "10-year projections",

@@ -3,12 +3,15 @@ import {
   buildCheckoutReturnPath,
   isCheckoutPlanSlug,
   resolveCheckoutResume,
+  resolveCheckoutResumeForSlot,
 } from "../pricing-checkout-resume";
 
 describe("isCheckoutPlanSlug", () => {
-  it("accepts exactly the two known plan keys", () => {
+  it("accepts exactly the four known plan keys", () => {
     expect(isCheckoutPlanSlug("pro_monthly")).toBe(true);
     expect(isCheckoutPlanSlug("pro_annual")).toBe(true);
+    expect(isCheckoutPlanSlug("agent_pro_monthly")).toBe(true);
+    expect(isCheckoutPlanSlug("agent_pro_annual")).toBe(true);
   });
 
   it("rejects anything else", () => {
@@ -18,6 +21,31 @@ describe("isCheckoutPlanSlug", () => {
     expect(isCheckoutPlanSlug("")).toBe(false);
     expect(isCheckoutPlanSlug(null)).toBe(false);
   });
+});
+
+describe("resolveCheckoutResumeForSlot", () => {
+  it.each([
+    ["pro_monthly", "pro_monthly"],
+    ["pro_annual", "pro_monthly"],
+    ["agent_pro_monthly", "agent_pro_monthly"],
+    ["agent_pro_annual", "agent_pro_monthly"],
+  ] as const)(
+    "lets exactly one of the simultaneously mounted tier cards claim %s",
+    (requestedPlan, expectedOwner) => {
+      // /pricing defaults both cards back to Monthly after signup. The owning
+      // tier card must still resume an Annual choice, while the other card must
+      // not start a second Stripe session.
+      const mountedSlots = ["pro_monthly", "agent_pro_monthly"] as const;
+      const claimants = mountedSlots.filter((slot) =>
+        resolveCheckoutResumeForSlot(`?checkout=${requestedPlan}`, slot)
+      );
+
+      expect(claimants).toEqual([expectedOwner]);
+      expect(
+        resolveCheckoutResumeForSlot(`?checkout=${requestedPlan}`, expectedOwner)?.plan
+      ).toBe(requestedPlan);
+    }
+  );
 });
 
 describe("buildCheckoutReturnPath", () => {

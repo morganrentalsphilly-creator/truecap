@@ -7,7 +7,6 @@
  * suspect Zillow's rent is off but don't have a better source.
  */
 
-import { TRIAL_LABEL } from "@/lib/trial";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, ArrowUpRight, Calculator, Check, Minus, Sparkles, X } from "lucide-react";
@@ -103,7 +102,7 @@ export default function VsZillowRentPage() {
               See pricing
             </Link>
           </div>
-          <p className="mt-3 text-xs text-muted-foreground">No card · No signup · Cancel anytime</p>
+          <p className="mt-3 text-xs text-muted-foreground">Free analyzer: no card or signup</p>
         </section>
 
         <section className="mb-12 sm:mb-16 rounded-2xl border border-amber-500/30 bg-amber-50/30 p-6 sm:p-8">
@@ -193,7 +192,7 @@ export default function VsZillowRentPage() {
               <Calculator className="w-4 h-4" />Run a deal now
             </Link>
             <Link href="/pricing" className="inline-flex items-center gap-2 border border-primary-foreground/40 bg-primary-foreground/10 text-primary-foreground px-4 py-2.5 rounded-xl font-bold hover:bg-primary-foreground/20 transition-colors">
-              Start a {TRIAL_LABEL}<ArrowUpRight className="w-4 h-4" />
+              See Pro pricing<ArrowUpRight className="w-4 h-4" />
             </Link>
           </div>
         </section>

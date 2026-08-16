@@ -34,6 +34,10 @@ export type CheckoutResume = {
   strippedSearch: string;
 };
 
+function checkoutPlanFamily(plan: CheckoutPlanSlug): "pro" | "agent_pro" {
+  return plan.startsWith("agent_pro_") ? "agent_pro" : "pro";
+}
+
 /**
  * Decide whether a just-mounted, authenticated-free /pricing visit should
  * auto-resume checkout. Returns null (silently) for absent/unknown plan
@@ -60,4 +64,23 @@ export function resolveCheckoutResume(search: string): CheckoutResume | null {
     coupon: params.get("coupon") ?? undefined,
     strippedSearch: remaining ? `?${remaining}` : "",
   };
+}
+
+/**
+ * Claim a pending checkout only from the plan card that owns its tier.
+ *
+ * /pricing can render the Pro and Agent Pro cards at the same time. Each card
+ * mounts its own PricingPlanButtons instance, so letting every instance consume
+ * the same `?checkout=` value races two Stripe Checkout sessions after signup.
+ * Match by tier family rather than the currently displayed billing period: the
+ * page defaults back to Monthly after signup, but it must still resume an
+ * Annual checkout selected before signup.
+ */
+export function resolveCheckoutResumeForSlot(
+  search: string,
+  slot: CheckoutPlanSlug
+): CheckoutResume | null {
+  const resume = resolveCheckoutResume(search);
+  if (!resume) return null;
+  return checkoutPlanFamily(resume.plan) === checkoutPlanFamily(slot) ? resume : null;
 }

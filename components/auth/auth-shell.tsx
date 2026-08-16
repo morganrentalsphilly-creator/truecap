@@ -1,4 +1,4 @@
-import { Building2, Calculator, ShieldCheck, TrendingUp } from "lucide-react";
+import { Building2, Calculator, Database, ShieldCheck } from "lucide-react";
 import { AppLogo } from "@/components/brand/app-logo";
 import { cn } from "@/lib/utils";
 
@@ -15,18 +15,18 @@ type AuthShellProps = {
 const trustItems = [
   {
     icon: Calculator,
-    title: "Analyze with confidence",
-    description: "Advanced calculators for ROI, cash flow and more.",
+    title: "Screen the deal",
+    description: "See cash flow, cap rate, CoC, DSCR, Deal Score and a plain-English verdict.",
   },
   {
-    icon: TrendingUp,
-    title: "Market intelligence",
-    description: "Access real-time data and investment trends.",
+    icon: Database,
+    title: "Transparent starting data",
+    description: "HUD rent benchmarks, FRED rate benchmarks and state tax estimates—labeled and editable.",
   },
   {
     icon: ShieldCheck,
-    title: "Secure & private",
-    description: "Your data, deals and insights are always protected.",
+    title: "Private saved work",
+    description: "Authenticated access, owner-scoped saved data and privacy controls.",
   },
 ];
 
@@ -35,8 +35,8 @@ export function AuthShell({
   description,
   children,
   footer,
-  panelTitle = "Smarter property investment decisions.",
-  panelDescription = "Powerful analysis. Real market insights. Stronger returns.",
+  panelTitle = "Know what the deal needs before you make an offer.",
+  panelDescription = "Transparent assumptions. Clear acquisition decisions. Your work saved securely.",
   className,
 }: AuthShellProps) {
   return (
@@ -47,7 +47,6 @@ export function AuthShell({
             priority
             className="items-center"
             imageClassName="object-center"
-            subtitle="Professional real estate investment analysis platform"
             subtitleClassName="mt-2 text-sm sm:text-base"
           />
         </div>

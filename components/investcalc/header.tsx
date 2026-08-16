@@ -1,6 +1,5 @@
 "use client";
 
-import { TRIAL_LABEL } from "@/lib/trial";
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import {
@@ -125,7 +124,7 @@ export function Header({
   const [isPremiumStatusReady, setIsPremiumStatusReady] = useState(false);
   const [profileData, setProfileData] = useState<ProfileHeaderData | null>(null);
   const [avatarVersion, setAvatarVersion] = useState(0);
-  const [savedDealCount, setSavedDealCount] = useState(0);
+  const [, setSavedDealCount] = useState(0);
   const currentUserIdRef = useRef<string | undefined>(initialUser?.id);
   const savedAnalysesChannelInstanceIdRef = useRef(
     `saved-analyses-count-instance:${Math.random().toString(36).slice(2)}`
@@ -336,7 +335,7 @@ export function Header({
             Pro
           </span>
           </Link>
-          <span className="hidden sm:inline opacity-70">for institutional-grade analysis in seconds.</span>
+          <span className="hidden sm:inline opacity-70">for deeper scenarios with transparent, editable assumptions.</span>
         </div>
         <button
           onClick={() => setBannerDismissed(true)}
@@ -367,12 +366,12 @@ export function Header({
              <Link href="/pricing"
             >
             <div className="hidden xl:flex items-center gap-2 bg-muted/60 border border-border/70 rounded-full px-3.5 py-1.5">
-              <span className="inline-flex items-center gap-1 bg-[var(--brand-orange)] text-white text-[10px] font-bold px-2 py-[3px] rounded-full uppercase tracking-wider">
+              <span className="inline-flex items-center gap-1 bg-[var(--brand-orange-solid)] text-white text-[10px] font-bold px-2 py-[3px] rounded-full uppercase tracking-wider">
                 <Crown className="w-2.5 h-2.5" />
                 Pro
               </span>
-              <span className="text-[11px] font-bold text-[var(--brand-orange)] tracking-[0.01em]">
-                {TRIAL_LABEL}
+              <span className="text-[11px] font-bold text-[var(--brand-orange-text)] tracking-[0.01em]">
+                See Pro pricing
               </span>
               <span className="text-muted-foreground/40 text-[11px]">&bull;</span>
               <span className="text-[11px] text-muted-foreground font-medium tracking-[0.01em]">
@@ -436,7 +435,7 @@ export function Header({
           ) : (
             <>
               <Button variant="ghost" 
-              className="h-9 px-3 sm:px-4 rounded-full text-[13px] font-semibold text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
+              className="h-11 px-3 sm:h-9 sm:px-4 rounded-full text-[13px] font-semibold text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
              asChild>
                 <Link href="/auth/login">
                   <LogIn className="w-4 h-4 sm:mr-1" />
@@ -447,7 +446,7 @@ export function Header({
               <Button
                 asChild
                 className={cn(
-                  "h-9 px-4 sm:px-5 rounded-full text-[13px] font-semibold",
+                  "h-11 px-4 sm:h-9 sm:px-5 rounded-full text-[13px] font-semibold",
                   "bg-primary hover:bg-primary/90 text-primary-foreground",
                   "shadow-[0_2px_8px_0_rgba(0,112,196,0.35)] hover:shadow-[0_4px_12px_0_rgba(0,112,196,0.45)]",
                   "transition-all duration-200 active:scale-[0.98]",

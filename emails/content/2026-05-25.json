@@ -1,11 +1,11 @@
 {
   "subject": "Underwrite any rental in 60 seconds — without the spreadsheet",
-  "preheader": "Paste an address. Get cap rate, cash flow, DSCR, 10-year projection. Free, no signup.",
+  "preheader": "Paste an address. Get a free cap rate, cash flow, DSCR, Deal Score, and verdict screen.",
   "publishedAt": "2026-05-25",
   "weekLabel": "Launch",
   "marketSnapshot": {
     "headline": "Underwrite any rental in 60 seconds — without the spreadsheet.",
-    "body": "TrueCap was built to replace the 30-minute spreadsheet underwrite with something that takes a minute. Paste an address, get real numbers: cap rate, cash-on-cash, DSCR, 10-year projection, sensitivity grid, max allowable offer. Below are three deal examples that took 60 seconds each to analyze — then a quick walk-through of what you get if you try it.",
+    "body": "TrueCap was built for a fast first-pass screen with editable assumptions. Paste an address to review cap rate, cash-on-cash, DSCR, cash flow, Deal Score, and a verdict. Pro adds Max Offer, sensitivity, projections, and modeled exits. The examples below are illustrations, not verified properties or investment recommendations.",
     "stats": [
       {
         "label": "Avg time to underwrite",
@@ -16,8 +16,8 @@
         "value": "Unlimited"
       },
       {
-        "label": "Pro starts at",
-        "value": "$25/mo"
+        "label": "Current Pro terms",
+        "value": "See pricing"
       }
     ]
   },
@@ -26,19 +26,19 @@
       "address": "Philadelphia, PA — Fishtown duplex example",
       "headlineNumber": "8.2% cap · $1,650 NCF/mo · Strong buy",
       "verdict": "Strong",
-      "body": "$420k duplex with both units rented at $1,950 each. TrueCap pulled the property tax bill from Philly's records, calculated cap rate, cash-on-cash, monthly net cash flow, DSCR, and flagged the 1925 build year as a year-1 capex risk. The full underwrite — including 10-year projection and sensitivity grid — took 47 seconds. This is the kind of deal where the verdict isn't 'buy or walk' but 'understand the trade-offs.'"
+      "body": "Illustrative $420k duplex with both units entered at $1,950 rent. TrueCap calculates cap rate, cash-on-cash, monthly cash flow, and DSCR from the entered and benchmark assumptions. Pro can add a 10-year projection and sensitivity view. Replace taxes, rent, condition, and expenses with property-specific evidence before relying on the result."
     },
     {
       "address": "Indianapolis, IN — Mars Hill SFR example",
       "headlineNumber": "7.4% cap · $480 NCF/mo · Decent",
       "verdict": "Decent",
-      "body": "$185k 3/1.5 ranch at $1,475 rent. Working-class neighborhood, school rating C+. TrueCap auto-filled the rent estimate from HUD data, pulled local property taxes, and surfaced this as a yield play with limited appreciation tailwind. The kind of nuance that takes 20 minutes to develop manually in a spreadsheet — and that you can miss entirely if you're rushing."
+      "body": "Illustrative $185k 3/1.5 ranch at $1,475 entered rent. TrueCap can start with a HUD area-rent benchmark, an owner-occupied FRED rate benchmark, and a state tax estimate; those are not property comps, a loan quote, or a local tax bill. Verify each assumption before deciding whether the property deserves deeper review."
     },
     {
       "address": "Memphis, TN — Berclair triplex example",
       "headlineNumber": "9.1% cap on paper · DSCR 1.04 · Marginal",
       "verdict": "Marginal",
-      "body": "$245k 3-unit listed at headline cap rate of 9.1%. TrueCap recalculates with realistic vacancy + capex reserves at investor-loan rates — DSCR drops to 1.04, which is below most lenders' funding threshold. This is the gap between listing-page math and real underwriting that costs investors money. The numbers TrueCap surfaces are the ones you'd compute yourself in a spreadsheet — just in 60 seconds instead of 30 minutes."
+      "body": "Illustrative $245k 3-unit with a 9.1% seller headline cap rate. Recalculate using explicit vacancy, CapEx, expense, and financing assumptions. A modeled 1.04 DSCR may miss some program targets, but lender definitions and requirements vary and clearing any threshold does not guarantee approval."
     }
   ],
   "blogFeature": {
@@ -48,13 +48,13 @@
   },
   "qa": {
     "question": "Why should I use TrueCap instead of my spreadsheet (or BiggerPockets, or DealCheck, or Mashvisor)?",
-    "answer": "Three reasons. (1) Speed. Pasting an address auto-fills property taxes, rent estimates from HUD, year-built, building age, square footage. You start with 60-70% of the underwrite done before you type a single number. The competition makes you enter everything manually. (2) Honest math. TrueCap shows you cap rate, cash-on-cash, AND DSCR — not just one. It flags when the headline numbers diverge from the financed reality. Most calculators show you the answer you want; TrueCap shows you the answer that's true. (3) Pro tools (sensitivity grids, 10-year projections, MAO calculator, PDF reports, portfolio rollup) that actually help you DECIDE — not just calculate. You'll know whether to buy, walk, or negotiate within 60 seconds, every time. The free tier is enough to run unlimited basic analyses. Try it on a deal you're considering and see how it compares to what you'd do in Excel."
+    "answer": "Three reasons to test it against your current workflow. (1) Speed: address lookup can provide property details plus labeled HUD, FRED, and state-level starting benchmarks, subject to coverage. (2) Transparent math: cap rate, cash-on-cash, DSCR, cash flow, and assumptions stay visible and editable. (3) Paid decision tools: Max Offer, sensitivity, projections, modeled exits, reports, and repeat-deal workflows. TrueCap is an estimate and screening aid, not a source of property-specific truth or a substitute for your spreadsheet, inspection, lender, appraiser, CPA, or attorney."
   },
   "shipNote": {
     "title": "Start with the free TrueCap analyzer",
     "items": [
       "Free: unlimited cap rate, cash-on-cash, DSCR, monthly cash flow — auto-filled with property tax + rent",
-      "Pro at $25/mo billed annually ($29.99 month-to-month): 10-year projection, sensitivity grid, MAO calculator, A/B mortgage compare, PDF reports, saved-deals portfolio",
+      "Pro: see the pricing page for current price, trial eligibility, and the complete feature list",
       "Open the analyzer →"
     ]
   }

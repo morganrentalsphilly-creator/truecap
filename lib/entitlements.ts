@@ -125,10 +125,18 @@ export function getDashboardNavAccess(entitlements: Pick<PlanEntitlements, "feat
   };
 }
 
-export async function hasPaidPlanSubscription(
+/**
+ * Slug of the user's newest live paid plan, or null when they are Free.
+ *
+ * Pricing surfaces need the slug—not just a boolean—so Pro and Agent Pro can
+ * label the exact current card and route every other paid-plan choice through
+ * the existing switch/proration flow instead of opening a second checkout.
+ * Keep this status/query logic shared with hasPaidPlanSubscription.
+ */
+export async function getActivePaidPlanSlug(
   supabase: SupabaseClient,
   userId: string
-): Promise<boolean> {
+): Promise<string | null> {
   const { data: sub, error: subError } = await supabase
     .from("subscriptions")
     .select("plans(slug)")
@@ -142,13 +150,27 @@ export async function hasPaidPlanSubscription(
   if (subError) {
     Sentry.captureException(subError, {
       tags: { feature: "entitlements" },
-      extra: { userId, query: "has_paid_plan_subscription" },
+      extra: { userId, query: "get_active_paid_plan_slug" },
     });
   }
 
-  const plansRow = sub?.plans as { slug?: unknown } | null | undefined;
+  const plansRelation = sub?.plans as
+    | { slug?: unknown }
+    | { slug?: unknown }[]
+    | null
+    | undefined;
+  const plansRow = Array.isArray(plansRelation)
+    ? plansRelation[0]
+    : plansRelation;
   const slug = typeof plansRow?.slug === "string" ? plansRow.slug : null;
-  return Boolean(slug && slug !== "free");
+  return slug && slug !== "free" ? slug : null;
+}
+
+export async function hasPaidPlanSubscription(
+  supabase: SupabaseClient,
+  userId: string
+): Promise<boolean> {
+  return Boolean(await getActivePaidPlanSlug(supabase, userId));
 }
 
 /**
@@ -169,16 +191,16 @@ export async function hasAnySubscriptionHistory(
     .from("subscriptions")
     .select("id", { count: "exact", head: true })
     .eq("user_id", userId);
-  // Fail open to "no history": worst case the trial copy shows and the
-  // checkout guard in billing.ts (the authority) still withholds the trial —
-  // the status-quo behavior. Failing closed would hide a real first-time
-  // offer from a new subscriber. Surface the query failure either way.
+  // Fail closed for marketing copy: if history cannot be verified, treat the
+  // user as returning and do NOT promise a trial. Checkout remains the billing
+  // authority, but a DB blip must never turn unknown eligibility into an
+  // explicit "Start Trial" claim.
   if (error) {
     Sentry.captureException(error, {
       tags: { feature: "entitlements" },
       extra: { userId, query: "has_any_subscription_history" },
     });
+    return true;
   }
   return (count ?? 0) > 0;
 }
-

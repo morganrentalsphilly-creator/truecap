@@ -3,10 +3,11 @@
 /**
  * Plan CTAs for /pricing. Three behaviors:
  *
- *  - slot=free      → "Start free" → /auth/sign-up (or /dashboard if already in)
+ *  - slot=free      → "Analyze a deal free" → the no-signup homepage analyzer
  *  - slot=pro_*     → cold visitor: "Get Pro" → /auth/sign-up?next=/pricing?checkout=<slot>#plans
  *                     authed free:  "Upgrade"  → triggers Stripe checkout
- *                     authed paid:  "Manage subscription" → /profile
+ *                     authed paid:  exact-plan manage / period switch /
+ *                                   tier upgrade copy → /profile#billing
  *
  * Checkout resume: the cold-visitor CTA encodes the chosen plan in the
  * signup return path. When this component mounts back on /pricing
@@ -15,8 +16,8 @@
  * redirect so refresh / back-forward can never loop it) — mirroring the
  * pending-save-intent auto-resume in investcalc-page.tsx.
  *
- * Keeps the /pricing page free of auth branching — server passes
- * isAuthenticated + isPaid, this component owns the click handler.
+ * Keeps the /pricing page free of click-handler branching — the server passes
+ * auth plus the exact live plan slug, and this component owns the safe action.
  */
 
 import { useEffect, useRef, useState, useTransition } from "react";
@@ -26,9 +27,10 @@ import { createCheckoutSessionAction } from "@/app/actions/billing";
 import { useToast } from "@/hooks/use-toast";
 import {
   buildCheckoutReturnPath,
-  resolveCheckoutResume,
+  resolveCheckoutResumeForSlot,
   type CheckoutPlanSlug,
 } from "@/lib/pricing-checkout-resume";
+import { decidePricingCardCta } from "@/lib/billing-plan-cta";
 import { TRIAL_DAYS, willCheckoutGrantTrial } from "@/lib/trial";
 
 type Slot = "free" | "pro_monthly" | "pro_annual" | "agent_pro_monthly" | "agent_pro_annual";
@@ -36,12 +38,14 @@ type Slot = "free" | "pro_monthly" | "pro_annual" | "agent_pro_monthly" | "agent
 export function PricingPlanButtons({
   slot,
   isAuthenticated,
-  isPaid,
+  activePaidPlanSlug,
   hadPriorSubscription,
 }: {
   slot: Slot;
   isAuthenticated: boolean;
-  isPaid: boolean;
+  /** Exact live plan slug, or null for Free. Any non-null value is treated as
+   * paid and routed through Billing rather than a new checkout. */
+  activePaidPlanSlug: string | null;
   /** True when checkout will NOT grant the trial (prior subscription row,
    * any status — see hasAnySubscriptionHistory). Swaps trial CTA copy. */
   hadPriorSubscription: boolean;
@@ -96,14 +100,16 @@ export function PricingPlanButtons({
   // /auth/sign-up?next=/pricing?checkout=<plan>…#plans, so mounting back
   // here authenticated with a valid ?checkout= means the Stripe redirect
   // should continue without a re-find-and-re-click step. Mirrors the
-  // pending-save-intent auto-resume in investcalc-page.tsx. Only the pro
-  // instance runs it (one mounts at a time via the Monthly/Annual toggle);
-  // resolveCheckoutResume ignores unknown plan values silently and refuses
-  // to fire on a Stripe cancel return (?billing=checkout_cancelled).
+  // pending-save-intent auto-resume in investcalc-page.tsx. Pro and Agent Pro
+  // can now mount side by side, so only the card that owns the requested tier
+  // may claim the resume. The tier-level match intentionally ignores billing
+  // period: a visitor who chose Annual returns to the Monthly-defaulted card,
+  // but checkout must still resume the exact Annual plan encoded in the URL.
+  // Unknown plan values and Stripe-cancel returns are ignored silently.
   const autoResumedRef = useRef(false);
   useEffect(() => {
-    if (slot === "free" || !isAuthenticated || isPaid || autoResumedRef.current) return;
-    const resume = resolveCheckoutResume(window.location.search);
+    if (slot === "free" || !isAuthenticated || activePaidPlanSlug || autoResumedRef.current) return;
+    const resume = resolveCheckoutResumeForSlot(window.location.search, slot);
     if (!resume) return;
     autoResumedRef.current = true;
     // Strip the param BEFORE firing so refresh / bfcache / a re-mount can
@@ -131,22 +137,26 @@ export function PricingPlanButtons({
     }
     return (
       <Link
-        href="/auth/sign-up"
+        href="/#main"
         className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-bold text-foreground hover:bg-muted"
       >
-        Start free <ArrowRight className="size-4" />
+        Analyze a deal free <ArrowRight className="size-4" />
       </Link>
     );
   }
 
-  // Paid user — show manage instead of upgrade
-  if (isPaid) {
+  const paidCardDecision = decidePricingCardCta(activePaidPlanSlug, slot);
+
+  // A live subscriber never starts a fresh Checkout session from /pricing.
+  // Current-plan management, cadence changes, and tier changes all continue in
+  // Billing, whose switch flow applies proration and guards double billing.
+  if (paidCardDecision.kind !== "checkout") {
     return (
       <Link
         href="/profile#billing"
         className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-bold text-foreground hover:bg-muted"
       >
-        Manage subscription
+        {paidCardDecision.label}
       </Link>
     );
   }
@@ -154,22 +164,24 @@ export function PricingPlanButtons({
   // Cold visitor — funnel to signup; the return path encodes the chosen
   // plan (?checkout=<slot>) so the auto-resume effect above continues the
   // purchase after auth. `slot` is a pro plan here — free returned earlier.
-  // Trial copy stays here on purpose: anonymous visitors are overwhelmingly
-  // first-time (hadPriorSubscription is always false without a session), and
-  // checkout re-runs the repeat-trial guard after signup regardless.
+  // Identity is unknown here: an anonymous visitor can be a returning customer
+  // who signed out. Continue neutrally to signup; only an authenticated user
+  // whose history check confirms eligibility gets an explicit Start Trial CTA.
   if (!isAuthenticated) {
     const nextPath = buildCheckoutReturnPath(slot, couponCode);
+    const tierName = slot.startsWith("agent_pro_") ? "Agent Pro" : "Pro";
     return (
       <Link
         href={`/auth/sign-up?next=${encodeURIComponent(nextPath)}`}
         className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground shadow-[0_8px_22px_rgba(0,112,196,0.30)] hover:bg-primary/95"
       >
-        <Sparkles className="size-4" /> Start {TRIAL_DAYS}-Day Pro Trial
+        <Sparkles className="size-4" /> Continue to {tierName}
       </Link>
     );
   }
 
   // Authenticated free user — direct checkout
+  const tierName = slot.startsWith("agent_pro_") ? "Agent Pro" : "Pro";
   return (
     <button
       type="button"
@@ -187,7 +199,9 @@ export function PricingPlanButtons({
           {/* Returning ex-subscribers are excluded from the trial by the
               repeat-trial guard in billing.ts — don't promise one. */}
           <Sparkles className="size-4" />{" "}
-          {willCheckoutGrantTrial(hadPriorSubscription) ? `Start ${TRIAL_DAYS}-Day Pro Trial` : "Unlock Pro Now"}
+          {willCheckoutGrantTrial(hadPriorSubscription)
+            ? `Start ${TRIAL_DAYS}-Day ${tierName} Trial`
+            : `Unlock ${tierName} Now`}
         </>
       )}
     </button>

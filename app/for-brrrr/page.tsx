@@ -9,7 +9,6 @@
  * dedicated BRRRR analyzer does.
  */
 
-import { TRIAL_LABEL } from "@/lib/trial";
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
@@ -90,14 +89,13 @@ export default function ForBrrrrPage() {
             For BRRRR operators
           </div>
           <h1 className="text-3xl sm:text-5xl font-extrabold text-foreground leading-[1.05] tracking-tight text-balance">
-            Buy, Rehab, Rent, Refinance —{" "}
-            <span className="text-primary">see how much capital comes back.</span>
+            Screen the buy free.{" "}
+            <span className="text-primary">Model the rehab-to-refi loop with Pro.</span>
           </h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
-            BRRRR isn&apos;t buy-and-hold. The whole game is the cash
-            recycle at refi. TrueCap models the full loop: acquisition,
-            rehab, ARV-based refi, and your stabilized cash flow against
-            the new debt.
+            Free screens the acquisition and rental fallback. Pro models rehab,
+            ARV-based refinancing, recovered capital, cash left in the deal,
+            and stabilized cash flow against the new debt.
           </p>
 
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
@@ -110,7 +108,7 @@ export default function ForBrrrrPage() {
               className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5"
             >
               <Calculator className="size-4" />
-              Run a free BRRRR analysis
+              Screen this property free
               <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
             </Link>
             <Link
@@ -121,7 +119,7 @@ export default function ForBrrrrPage() {
             </Link>
           </div>
           <p className="mt-3 text-xs text-muted-foreground">
-            No card · No signup needed to use the analyzer · Cancel anytime
+            Free screen: no card or signup
           </p>
         </section>
 
@@ -225,17 +223,17 @@ export default function ForBrrrrPage() {
 
         <section className="mb-12 sm:mb-16 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
           <h2 className="text-2xl sm:text-3xl font-extrabold mb-2">
-            Free covers the buy. Pro covers the refi.
+            Free screens the buy. Pro models the refi.
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
-            Free analyzer + the standalone BRRRR + rehab tools at /tools/* give you the acquisition math. Pro unlocks the full BRRRR analyzer (post-rehab refi modeling, ARV-driven cash recovery), 10-year projection, Illustrative Tax Impact, and compare-deals across strategies. Built for value-add operators doing multiple deals a year.
+            Free analyzer and standalone BRRRR and rehab tools provide a first-pass acquisition screen. Pro unlocks the interactive BRRRR model, including post-rehab refinancing and ARV-driven cash recovery, plus 10-year projections, Illustrative Tax Impact, and deal comparison.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link
               href="/pricing"
               className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
             >
-              Start a {TRIAL_LABEL}
+              See Pro pricing
               <ArrowUpRight className="w-4 h-4" />
             </Link>
             <Link

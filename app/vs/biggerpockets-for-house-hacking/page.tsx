@@ -8,7 +8,6 @@
  * house-hackers (owner-occupant 2-4 unit deals).
  */
 
-import { TRIAL_LABEL } from "@/lib/trial";
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
@@ -341,7 +340,7 @@ export default function VsBiggerPocketsForHouseHackingPage() {
             types, per-unit rent + status, FHA financing, and
             effective-rent-saved math. Pro ($29.99/mo) adds projections,
             illustrative tax impact, sensitivity, and the post-move-out scenario
-            modeling — start with a {TRIAL_LABEL}, cancel anytime.
+            modeling — see Pro pricing and check trial eligibility.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link

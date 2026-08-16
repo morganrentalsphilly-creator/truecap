@@ -14,7 +14,7 @@
 
 export const HOMEPAGE_HEADLINES = {
   a: "Screen any rental in 60 seconds. Know the highest price that still works.",
-  b: "Know exactly what a rental is worth to you.",
+  b: "Know what a rental is worth under your assumptions.",
   walkaway: "Know your walk-away price before you make the offer.",
 } as const;
 

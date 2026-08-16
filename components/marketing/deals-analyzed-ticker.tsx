@@ -2,9 +2,9 @@
  * Real-data trust ticker for the homepage.
  *
  * Pulls a measured aggregate count and renders it as a small pill —
- * "237 deals analyzed in the last 7 days" etc. The all-time RUNS source adds
- * the approved 50,000 historical display floor; rolling saved-deal counts
- * always render their raw value.
+ * "237 deals analyzed in the last 7 days" etc. The all-time RUNS source shows
+ * only the measured `app_counters.analysis_runs` value; it never adds a
+ * presentation baseline.
  *
  * IMPORTANT — only renders when the count exceeds a minimum threshold.
  * A low number ("3 deals this week") is anti-social-proof. Better to
@@ -19,7 +19,7 @@
 import { CheckCircle2 } from "lucide-react";
 import { getDealsAnalyzedCount } from "@/lib/stats/deals-analyzed-count";
 import { getTotalAnalysesRunCount } from "@/lib/stats/total-analyses-run";
-import { withAnalysisRunsDisplayBaseline } from "@/lib/stats/analysis-runs-display";
+import { measuredAnalysisRunsDisplayCount } from "@/lib/stats/analysis-runs-display";
 
 type Props = {
   /** Time window for the count (default: rolling 7 days). */
@@ -36,8 +36,8 @@ type Props = {
   plus?: boolean;
   /**
    * Count source. "saved" = saved_analyses rows (a fraction of usage).
-   * "runs" = total analyses RUN (PostHog analyzer_started) — the honest, much
-   * larger figure; needs POSTHOG_API_KEY + POSTHOG_PROJECT_ID configured.
+   * "runs" = measured total Run-analysis invocations from
+   * app_counters.analysis_runs.
    */
   source?: "saved" | "runs";
 };
@@ -60,15 +60,18 @@ export async function DealsAnalyzedTicker({
   // checks the REAL count so an errored/empty counter still hides.
   if (rawCount == null || rawCount < minimum) return null;
 
-  // The display floor is deliberately scoped to the all-time RUNS ticker.
-  // Weekly/monthly saved-deal proof remains the measured rolling count.
+  // Both sources display only their measured value. The pure normalizer keeps
+  // a malformed or fractional run value out of public proof without inventing
+  // an offset.
   const displayCount = source === "runs"
-    ? withAnalysisRunsDisplayBaseline(rawCount)
+    ? measuredAnalysisRunsDisplayCount(rawCount)
     : rawCount;
   const formatted = `${displayCount.toLocaleString("en-US")}${plus ? "+" : ""}`;
   const suffix =
     labelSuffix ??
-    (source === "runs" || window === "all"
+    (source === "runs"
+      ? "analysis runs recorded on TrueCap"
+      : window === "all"
       ? "deals analyzed on TrueCap"
       : window === "30d"
         ? "deals analyzed in the last 30 days"
@@ -80,7 +83,7 @@ export async function DealsAnalyzedTicker({
       aria-label={`${formatted} ${suffix}`}
       title={
         source === "runs"
-          ? "All-time analysis runs: the approved 50,000 historical baseline plus live tracked runs. One run is one recorded analyzer invocation, not a unique property or transaction."
+          ? "Measured all-time analysis runs. One run is one recorded analyzer invocation, not a unique property, user, or transaction."
           : undefined
       }
     >

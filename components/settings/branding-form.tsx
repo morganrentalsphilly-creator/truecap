@@ -38,8 +38,10 @@ export function BrandingForm({ initial }: { initial: BrandingRow | null }) {
   const [primaryColor, setPrimaryColor] = useState(
     initial?.primary_color_hex ?? ""
   );
-  // Contact state vars removed — the UI no longer exposes a Contact
-  // block (no "Prepared by" rendering anywhere in the PDF anymore).
+  const [contactName, setContactName] = useState(initial?.contact_name ?? "");
+  const [contactEmail, setContactEmail] = useState(initial?.contact_email ?? "");
+  const [contactPhone, setContactPhone] = useState(initial?.contact_phone ?? "");
+  const [contactWebsite, setContactWebsite] = useState(initial?.contact_website ?? "");
   const [logoUrl, setLogoUrl] = useState<string | null>(initial?.logo_url ?? null);
 
   const [isPending, startTransition] = useTransition();
@@ -84,12 +86,10 @@ export function BrandingForm({ initial }: { initial: BrandingRow | null }) {
       company_name: companyName || null,
       tagline: tagline || null,
       primary_color_hex: primaryColor || null,
-      // Contact fields removed from the UI — saved as null to clear
-      // any previously-set values on existing branding rows.
-      contact_name: null,
-      contact_email: null,
-      contact_phone: null,
-      contact_website: null,
+      contact_name: contactName || null,
+      contact_email: contactEmail || null,
+      contact_phone: contactPhone || null,
+      contact_website: contactWebsite || null,
       logo_url: logoUrl,
     };
     startTransition(async () => {
@@ -213,6 +213,9 @@ export function BrandingForm({ initial }: { initial: BrandingRow | null }) {
               onChange={setCompanyName}
               placeholder="e.g. Page Realty"
               maxLength={120}
+              name="company_name"
+              autoComplete="organization"
+              ariaLabel="Company name"
             />
           </Field>
 
@@ -225,15 +228,75 @@ export function BrandingForm({ initial }: { initial: BrandingRow | null }) {
               onChange={setTagline}
               placeholder="e.g. Philadelphia&rsquo;s rental investment specialists"
               maxLength={160}
+              name="tagline"
+              ariaLabel="Company tagline"
             />
           </Field>
         </section>
 
-        {/* Contact block section removed per design direction. The PDF
-            no longer renders "Prepared by [Name]" anywhere (header,
-            footer, or page-1 card), so collecting contact fields here
-            served no purpose. The DB columns remain so existing saved
-            data isn't lost, but they're no longer exposed in the UI. */}
+        {/* Contact details render in the PDF cover's PREPARED BY block. The
+            same fields also support the co-branded client/embedded surfaces,
+            so saving here must preserve—not clear—existing values. */}
+        <section className="space-y-4 rounded-2xl border border-border bg-card p-5 sm:p-6">
+          <div>
+            <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
+              Contact details
+            </h2>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Optional. These appear in the Prepared by block on every branded PDF.
+            </p>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Contact name">
+              <TextInput
+                value={contactName}
+                onChange={setContactName}
+                placeholder="e.g. Morgan Page"
+                maxLength={120}
+                name="contact_name"
+                autoComplete="name"
+                ariaLabel="Contact name"
+              />
+            </Field>
+            <Field label="Email">
+              <TextInput
+                type="email"
+                value={contactEmail}
+                onChange={setContactEmail}
+                placeholder="morgan@example.com"
+                maxLength={180}
+                name="contact_email"
+                autoComplete="email"
+                ariaLabel="Contact email"
+              />
+            </Field>
+            <Field label="Phone">
+              <TextInput
+                type="tel"
+                value={contactPhone}
+                onChange={setContactPhone}
+                placeholder="(215) 555-0100"
+                maxLength={40}
+                name="contact_phone"
+                autoComplete="tel"
+                ariaLabel="Contact phone"
+              />
+            </Field>
+            <Field label="Website" hint="Include https:// so the link is valid.">
+              <TextInput
+                type="url"
+                value={contactWebsite}
+                onChange={setContactWebsite}
+                placeholder="https://example.com"
+                maxLength={240}
+                name="contact_website"
+                autoComplete="url"
+                ariaLabel="Contact website"
+              />
+            </Field>
+          </div>
+        </section>
 
         {/* Save bar */}
         <div className="sticky bottom-0 -mx-4 flex items-center justify-end gap-3 border-t border-border bg-background/95 px-4 py-3 backdrop-blur sm:mx-0 sm:rounded-2xl sm:border">
@@ -301,8 +364,21 @@ export function BrandingForm({ initial }: { initial: BrandingRow | null }) {
               <p>123 Sample Street, Philadelphia PA</p>
               <p className="mt-1 text-[10px]">Prepared {todayShort()}</p>
             </div>
-            {/* Contact / "Prepared by" preview block removed — the
-                actual PDF no longer renders this. */}
+            <div className="border-t border-border pt-3">
+              <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">
+                Prepared by
+              </p>
+              <p className="mt-1 text-xs font-bold text-foreground">
+                {companyName || contactName || "TrueCap"}
+              </p>
+              {[contactName, contactEmail, contactPhone, contactWebsite].some(Boolean) ? (
+                <p className="mt-1 break-words text-[10px] leading-relaxed text-muted-foreground">
+                  {[contactName, contactEmail, contactPhone, contactWebsite]
+                    .filter(Boolean)
+                    .join(" · ")}
+                </p>
+              ) : null}
+            </div>
           </div>
         </div>
         <p className="mt-3 text-xs text-muted-foreground">
@@ -339,12 +415,18 @@ function TextInput({
   placeholder,
   maxLength,
   type = "text",
+  name,
+  autoComplete,
+  ariaLabel,
 }: {
   value: string;
   onChange: (v: string) => void;
   placeholder?: string;
   maxLength?: number;
-  type?: string;
+  type?: React.HTMLInputTypeAttribute;
+  name?: string;
+  autoComplete?: string;
+  ariaLabel: string;
 }) {
   return (
     <input
@@ -353,6 +435,9 @@ function TextInput({
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
       maxLength={maxLength}
+      name={name}
+      autoComplete={autoComplete}
+      aria-label={ariaLabel}
       className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none"
     />
   );

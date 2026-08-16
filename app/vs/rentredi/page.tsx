@@ -11,7 +11,6 @@
  * which is honest and converts better than a phony head-to-head.
  */
 
-import { TRIAL_LABEL } from "@/lib/trial";
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
@@ -140,7 +139,7 @@ export default function VsRentRediPage() {
             </Link>
           </div>
           <p className="mt-3 text-xs text-muted-foreground">
-            No card · No signup needed · Cancel anytime
+            Free analyzer: no card or signup
           </p>
         </section>
 
@@ -309,7 +308,7 @@ export default function VsRentRediPage() {
               href="/pricing"
               className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
             >
-              Start a {TRIAL_LABEL}
+              See Pro pricing
               <ArrowUpRight className="w-4 h-4" />
             </Link>
             <Link

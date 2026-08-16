@@ -4,7 +4,6 @@
  * Target queries: "mashvisor short term rental", "mashvisor airbnb", "best str market tool", "airbnb investment calculator", "mashvisor alternative for str". Long-tail audience-slicing comparison.
  */
 
-import { TRIAL_LABEL } from "@/lib/trial";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, ArrowUpRight, Calculator, Check, Minus, Sparkles, X } from "lucide-react";
@@ -268,7 +267,7 @@ export default function VsMashvisorForShortTermRentalsPage() {
               href="/pricing"
               className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
             >
-              Start a {TRIAL_LABEL}
+              See Pro pricing
               <ArrowUpRight className="w-4 h-4" />
             </Link>
             <Link

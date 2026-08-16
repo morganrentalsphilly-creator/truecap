@@ -5,7 +5,6 @@
  * Cozy.co was a popular landlord ops platform (rent collection, listings, applications). Acquired by Apartments.com in 2018, shut down + migrated users to Apartments.com in 2022. Still searched ~5k/mo by ex-users looking for alternatives.
  */
 
-import { TRIAL_LABEL } from "@/lib/trial";
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
@@ -123,7 +122,7 @@ export default function VsCozyPage() {
             </Link>
           </div>
           <p className="mt-3 text-xs text-muted-foreground">
-            No card · No signup · Cancel anytime
+            Free analyzer: no card or signup
           </p>
         </section>
 
@@ -269,7 +268,7 @@ export default function VsCozyPage() {
               href="/pricing"
               className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
             >
-              Start a {TRIAL_LABEL}
+              See Pro pricing
               <ArrowUpRight className="w-4 h-4" />
             </Link>
             <Link
