@@ -56,6 +56,5 @@ export default function robots(): MetadataRoute.Robots {
     // log a fetch-and-fail on every crawl. AI crawlers find /llms.txt by
     // the llmstxt.org convention + the explicit Allow rules above.
     sitemap: [`${siteUrl}/sitemap.xml`],
-    host: siteUrl,
   };
 }
