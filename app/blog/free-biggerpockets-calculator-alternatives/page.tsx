@@ -91,7 +91,7 @@ const TOOLS: Tool[] = [
     ],
     freeGates: [
       "Editing + unlimited saves + comparing deals (Pro)",
-      "10-year projections, tax strategy, sensitivity (Pro)",
+      "10-year projections, illustrative tax impact, sensitivity (Pro)",
       "PDF export + co-branded share links (Pro)",
     ],
     pickIf:

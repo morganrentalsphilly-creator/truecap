@@ -30,9 +30,9 @@ const TITLE = "How to calculate cap rate (with worked examples) — 2026 guide";
 // window. The on-page <h1> keeps the longer editorial TITLE.
 const SERP_TITLE = "How to calculate cap rate: worked examples (2026)";
 const DESCRIPTION =
-  "Cap rate = NOI ÷ purchase price. Sounds simple, but most investors get NOI wrong by skipping CapEx reserves or vacancy. Here's the formula, three worked examples (good deal / bad deal / cash purchase), and when cap rate is the wrong metric.";
+  "Cap rate = NOI ÷ purchase price. Learn the lender-style NOI convention, how vacancy and operating costs work, where CapEx belongs, and see three worked examples.";
 const PUBLISHED_AT = "2026-06-07";
-const MODIFIED_AT = "2026-06-07";
+const MODIFIED_AT = "2026-08-15";
 const READING_TIME_MIN = 7;
 
 export const metadata: Metadata = {
@@ -73,7 +73,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "What counts as an operating expense in NOI?",
-    a: "Property taxes, insurance, property management (typically 8-10% of rent), maintenance reserve (typically 1-1.5% of property value/year), CapEx reserve (typically 1% of property value/year), vacancy allowance (typically 5-8% of gross rents), utilities you pay (water, trash, sewer in many areas), HOA fees, and lawn/snow service. NOT: mortgage principal, mortgage interest, depreciation, or income tax.",
+    a: "Property taxes, insurance, property management, recurring maintenance, vacancy allowance, owner-paid utilities, HOA fees, and lawn/snow service. Under the lender-style convention TrueCap uses, the CapEx reserve sits below NOI but still reduces cash flow. Mortgage debt service, depreciation, and income tax are also outside NOI.",
   },
   {
     q: "What's a good cap rate in 2026?",
@@ -138,7 +138,7 @@ export default function BlogPost() {
     step: [
       { "@type": "HowToStep", name: "Gather gross annual rent", text: "Multiply monthly market rent by 12. Use actual rent if leased, market rent if not." },
       { "@type": "HowToStep", name: "Subtract vacancy allowance", text: "Typical 5-8% of gross rents to account for turnover periods." },
-      { "@type": "HowToStep", name: "Subtract operating expenses", text: "Property tax, insurance, management, maintenance reserve, CapEx reserve, utilities you pay, HOA. NOT mortgage." },
+      { "@type": "HowToStep", name: "Subtract operating expenses", text: "Property tax, insurance, management, recurring maintenance, utilities you pay, and HOA. Keep CapEx as a separate below-NOI reserve under the lender-style convention. Do not subtract the mortgage from NOI." },
       { "@type": "HowToStep", name: "Calculate NOI", text: "What's left after vacancy and operating expenses. This is net operating income." },
       { "@type": "HowToStep", name: "Divide NOI by price", text: "Cap rate = NOI / purchase price. Express as percentage." },
     ],
@@ -166,8 +166,8 @@ export default function BlogPost() {
           <BlogByline />
           <p className="text-base sm:text-lg text-muted-foreground mt-4 leading-relaxed">
             Cap rate = NOI ÷ purchase price. Sounds simple, but most
-            investors get NOI wrong by skipping CapEx reserves or
-            vacancy. Here&apos;s the formula, three worked examples
+            investors mix lender-style NOI with investor cash reserves or
+            skip vacancy. Here&apos;s the formula, three worked examples
             (good deal / bad deal / cash purchase), and when cap rate
             is the wrong metric.
           </p>
@@ -221,9 +221,6 @@ export default function BlogPost() {
               include even if self-managing — your time has a real cost).</li>
             <li><strong>Maintenance reserve</strong> (1-1.5% of property
               value annually).</li>
-            <li><strong>CapEx reserve</strong> (1% of property value
-              annually for roof, HVAC, water heater, kitchen renovations,
-              etc.).</li>
             <li><strong>Utilities you pay</strong> (water, trash, sewer
               in many areas; everything for multi-family common areas).</li>
             <li><strong>HOA fees</strong>, lawn/snow service, pest
@@ -231,8 +228,11 @@ export default function BlogPost() {
           </ul>
           <p>
             <strong>NOT</strong> in operating expenses: mortgage principal,
-            mortgage interest, depreciation, or income tax. These are
-            financing and tax items, not operating costs.
+            mortgage interest, depreciation, income tax, or the CapEx
+            reserve. Under the lender/appraiser-style convention TrueCap
+            uses, CapEx is a below-NOI capital reserve. Still subtract a
+            realistic reserve (often modeled around 5-10% of rent or from a
+            component schedule) before judging spendable cash flow.
           </p>
 
           <h3>Step 4: Calculate NOI</h3>
@@ -260,10 +260,11 @@ export default function BlogPost() {
             <li>Insurance: −$1,200</li>
             <li>Management (8%): −$2,166</li>
             <li>Maintenance (1.2%): −$3,600</li>
-            <li>CapEx reserve (1%): −$3,000</li>
             <li>Utilities + HOA: −$600</li>
-            <li><strong>NOI:</strong> $27,072 − $14,166 = <strong>$12,906</strong></li>
-            <li><strong>Cap rate:</strong> $12,906 ÷ $300,000 = <strong>4.3%</strong></li>
+            <li><strong>NOI:</strong> $27,072 − $11,166 = <strong>$15,906</strong></li>
+            <li><strong>Cap rate:</strong> $15,906 ÷ $300,000 = <strong>5.3%</strong></li>
+            <li>CapEx reserve (below NOI): −$3,000</li>
+            <li>Cash after CapEx, before debt: <strong>$12,906</strong></li>
           </ul>
           <p>
             That cap rate is low for a Tier 2 city — the seller&apos;s
@@ -285,9 +286,10 @@ export default function BlogPost() {
             <li>Broker&apos;s cap rate: $24,000 ÷ $300,000 = <strong>8%</strong></li>
           </ul>
           <p>
-            The broker skipped vacancy, management, maintenance, CapEx,
-            and utilities. The cap rate looks like 8% but the real one
-            is 4.3%. This is the most common cap rate manipulation in
+            The broker skipped vacancy, management, recurring maintenance,
+            and utilities. The cap rate looks like 8% but the lender-style
+            result is 5.3%. The separate CapEx reserve then reduces pre-debt
+            cash to $12,906. This is the most common cap rate manipulation in
             broker pro formas — be ruthless about adding back every
             expense before trusting the number.
           </p>
@@ -296,7 +298,7 @@ export default function BlogPost() {
           <p>
             Cap rate is identical regardless of financing — that&apos;s
             the whole point of using NOI (pre-debt service). A cash
-            buyer of the property in example #1 gets the same 4.3% cap
+            buyer of the property in example #1 gets the same 5.3% cap
             rate as a buyer using 75% leverage. Their cash-on-cash
             returns are very different; their cap rates are the same.
           </p>

@@ -60,7 +60,7 @@ const MATRIX: Row[] = [
   { feature: "CRE sale + lease comps", truecap: "No", crexi: "Yes — national CRE comp database", winner: "crexi" },
   { feature: "Broker tools (offer management)", truecap: "No", crexi: "Yes — built for CRE brokers", winner: "crexi" },
   { feature: "Tenant info (CRE)", truecap: "Not applicable", crexi: "Yes — public-record tenant data", winner: "crexi" },
-  { feature: "Tax strategy modeling (residential)", truecap: "Pro — depreciation + interest + after-tax CF", crexi: "Not the focus", winner: "truecap" },
+  { feature: "Illustrative tax impact (residential)", truecap: "Pro — depreciation + interest + modeled after-tax CF", crexi: "Not the focus", winner: "truecap" },
   { feature: "Free tier", truecap: "Yes — full residential underwriting", crexi: "Free to browse listings; paid for intelligence", winner: "tie" },
   { feature: "Pricing (entry tier)", truecap: "Free; Pro $29.99/mo", crexi: "Free for buyers/browsers; Intelligence ~$100+/mo", winner: "tie" },
 ];
@@ -141,7 +141,7 @@ export default function VsCrexiPage() {
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
                 <li>You&apos;re underwriting residential rentals (SFR, 2-4 unit multifamily, owner-occupant).</li>
                 <li>You want cap rate, CoC, DSCR, cash flow on a specific residential address.</li>
-                <li>You want financing math + tax strategy modeling.</li>
+                <li>You want financing math + an illustrative tax-impact model.</li>
                 <li>You&apos;re not evaluating commercial deals.</li>
               </ul>
             </div>
@@ -260,7 +260,7 @@ export default function VsCrexiPage() {
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
-            Pro unlocks projections, sensitivity, tax strategy, exit scenarios,
+            Pro unlocks projections, sensitivity, illustrative tax impact, modeled exit comparisons,
             MAO, PDF exports, and co-branded share links.
             No card to start.
           </p>

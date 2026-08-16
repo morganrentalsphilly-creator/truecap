@@ -121,7 +121,7 @@ export async function getPropertyCompsAction(input: unknown): Promise<PropertyCo
       return {
         ok: false,
         code: "ENTITLEMENT_REQUIRED",
-        message: "You've used your free comps lookup. Upgrade to Pro for unlimited sale + rent comps.",
+        message: "You've used your free comps lookup. Upgrade to Pro for up to 50 sale + rent comp lookups per month.",
       };
     }
   }
@@ -320,7 +320,7 @@ export async function getPropertyCompsAction(input: unknown): Promise<PropertyCo
       return {
         ok: false,
         code: "ENTITLEMENT_REQUIRED",
-        message: "You've used your free comps lookup. Upgrade to Pro for unlimited sale + rent comps.",
+        message: "You've used your free comps lookup. Upgrade to Pro for up to 50 sale + rent comp lookups per month.",
       };
     }
   }

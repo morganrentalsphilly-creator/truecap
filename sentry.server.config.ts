@@ -3,6 +3,11 @@
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
 import * as Sentry from "@sentry/nextjs";
+import {
+  scrubSentryBreadcrumbUrl,
+  scrubSentryEventSensitiveData,
+  scrubSentrySpanUrl,
+} from "@/lib/sentry-url-scrubber";
 
 Sentry.init({
   dsn: "https://273531778de80e317ca3e8cc6e1bf4ba@o4511448368480257.ingest.us.sentry.io/4511448369528832",
@@ -17,6 +22,18 @@ Sentry.init({
   // https://docs.sentry.io/platforms/javascript/guides/nextjs/configuration/options/#sendDefaultPii
   sendDefaultPii: true,
 
+  beforeBreadcrumb(breadcrumb) {
+    return scrubSentryBreadcrumbUrl(breadcrumb);
+  },
+
+  beforeSendSpan(span) {
+    return scrubSentrySpanUrl(span);
+  },
+
+  beforeSendTransaction(event) {
+    return scrubSentryEventSensitiveData(event);
+  },
+
   // PII scrubbing — same pattern as instrumentation-client.ts. Strips
   // Supabase session cookies + Authorization headers + Stripe webhook
   // signatures from event payloads so a future Sentry data export
@@ -24,6 +41,10 @@ Sentry.init({
   // attacks. Applies to all server-side events including API routes,
   // server actions, and the Stripe webhook.
   beforeSend(event) {
+    // The initial request reaches the server before the browser's head
+    // bootstrap can clean its address bar. Scrub here so a legacy
+    // pdf_purchase=cs_... value can never enter server-side Sentry.
+    scrubSentryEventSensitiveData(event);
     const reqCookies = event.request?.cookies as
       | Record<string, string>
       | undefined;

@@ -60,7 +60,7 @@ const MATRIX: Row[] = [
   { feature: "Airbnb / STR market data",          truecap: "Long-term focus; STR-specific fields coming",                                    mashvisor: "Strong — pulls Airbnb occupancy + ADR data by ZIP",                      winner: "mashvisor" },
   { feature: "Comparable sales (comps)",          truecap: "No",                                                                              mashvisor: "Yes — included in their data layer",                                     winner: "mashvisor" },
   { feature: "Property listings discovery",       truecap: "Not the focus — start with an address you found elsewhere",                       mashvisor: "Yes — investment-property marketplace",                                  winner: "mashvisor" },
-  { feature: "Tax strategy modeling",             truecap: "Pro — depreciation + interest + bracket-aware after-tax CF",                      mashvisor: "Basic tax view",                                                         winner: "truecap" },
+  { feature: "Illustrative tax impact",           truecap: "Pro — depreciation + interest + modeled after-tax CF",                            mashvisor: "Basic tax view",                                                         winner: "truecap" },
   { feature: "Sensitivity / stress test",         truecap: "Pro — rent ±10%, vacancy ±5pp, rates ±1pp",                                       mashvisor: "Not the primary use case",                                               winner: "truecap" },
   { feature: "Max allowable offer (MAO) solver",  truecap: "Pro — works backward from target return",                                         mashvisor: "Not a primary feature",                                                  winner: "truecap" },
   { feature: "Deal score + breakdown",            truecap: "Free — 0–100 score with per-subscore explanation",                                 mashvisor: "Their own metric",                                                       winner: "tie" },
@@ -131,7 +131,7 @@ export default function VsMashvisorPage() {
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
                 <li>You&apos;ve found a specific property and need to decide if it pencils.</li>
                 <li>You want a free tier that does the full underwriting math.</li>
-                <li>You want stress-test sensitivity + tax strategy + exit modeling.</li>
+                <li>You want stress-test sensitivity + illustrative tax impact + exit modeling.</li>
                 <li>You prefer transparent open-data sources (HUD, FRED, state tax) you can audit.</li>
                 <li>You don&apos;t want to pay $$$/mo for market data you may not need.</li>
               </ul>
@@ -226,7 +226,7 @@ export default function VsMashvisorPage() {
             Underwriting the next deal? Start free.
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
-            TrueCap free covers cap rate, CoC, DSCR, NCF, monthly cash flow — enough to underwrite. Pro unlocks co-branded share links, PDF exports, 10-year projections, tax strategy, sensitivity grid, MAO, and the strategy analyzers. No card to start.
+            TrueCap free covers cap rate, CoC, DSCR, NCF, monthly cash flow — enough to underwrite. Pro unlocks co-branded share links, PDF exports, 10-year projections, illustrative tax impact, sensitivity grid, MAO, and the strategy analyzers. No card to start.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link href="/pricing" className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity">
@@ -318,13 +318,14 @@ const MASHVISOR_FAQ: FaqItem[] = [
       <>
         Yes. TrueCap pulls HUD Fair Market Rent (county-level), FRED
         30-year mortgage rate (national), and state-level effective
-        property tax rate from authoritative public sources, so the
-        address auto-fill works for any address in the US. The
-        per-deal underwriting math is market-agnostic.
+        property tax estimate from public datasets. These are screening
+        assumptions—not a property rent quote, mortgage offer, or parcel tax
+        verification—so users should replace them with deal-specific evidence.
+        The per-deal underwriting math itself is market-agnostic.
       </>
     ),
     plainTextAnswer:
-      "Yes. TrueCap pulls HUD Fair Market Rent (county-level), FRED 30-year mortgage rate (national), and state-level effective property tax from authoritative public sources. The address auto-fill works for any US address.",
+      "Yes. TrueCap can prefill a HUD area rent benchmark, FRED's national owner-occupied mortgage benchmark, and a state-level property-tax estimate from public datasets. They are screening assumptions and must be replaced with property-, borrower-, and parcel-specific evidence.",
   },
 ];
 

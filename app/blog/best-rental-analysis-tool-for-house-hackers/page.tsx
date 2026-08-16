@@ -59,7 +59,7 @@ const TOOLS = [
     ],
     freeGates: [
       "10-year projection with post-move-out scenario (Pro)",
-      "Tax strategy on house-hack interest deduction (Pro)"
+      "General illustrative tax view (Pro; mixed-use allocation is not modeled)"
     ],
     pickIf: "You want a calculator built for house-hacking, not a multifamily calculator you adjust manually.",
   },

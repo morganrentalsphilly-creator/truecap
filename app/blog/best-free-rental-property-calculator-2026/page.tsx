@@ -57,14 +57,14 @@ const TOOLS = [
     pricing: "Free; Pro $29.99/mo",
     freeCovers: [
       "Cap rate, CoC, DSCR, NCF, monthly cash flow",
-      "Address auto-fill (HUD rent + FRED rate + state property tax)",
+      "Address auto-fill (HUD rent benchmark + FRED owner-occupied rate benchmark + state property-tax estimate)",
       "Plain-English verdict (Strong / Solid / Mixed / Marginal / Negative)",
       "Unlimited analyses, no signup, no cap",
       "Save up to 5 deals + dashboard access"
     ],
     freeGates: [
       "10-year projection (Pro)",
-      "Tax strategy + sensitivity (Pro)",
+      "Illustrative tax impact + sensitivity (Pro)",
       "MAO solver, BRRRR & fix-flip analyzer (Pro)",
       "Editing + unlimited saves + compare (Pro)",
       "PDF export + co-branded share links (Pro)"
@@ -142,9 +142,9 @@ const TOOLS = [
 ];
 
 const FAQ_ITEMS = [
-  { q: "Is TrueCap really 100% free for rental analysis?", a: "Yes. TrueCap's free tier covers cap rate, cash-on-cash, DSCR, NCF, monthly cash flow on unlimited analyses with no signup — plus saving up to 5 deals and dashboard access. Address auto-fill (HUD rent + FRED rate + state tax) is also free. Pro features (10-year projections, tax strategy, sensitivity, editing + unlimited saves, PDF export) require $29.99/month — but the core underwriting math doesn't." },
+  { q: "Is TrueCap really 100% free for rental analysis?", a: "Yes. TrueCap's free tier covers cap rate, cash-on-cash, DSCR, NCF, monthly cash flow on unlimited analyses with no signup — plus saving up to 5 deals and dashboard access. Address auto-fill (HUD rent benchmark + FRED owner-occupied rate benchmark + state tax estimate) is also free. Pro features (10-year projections, illustrative tax impact, sensitivity, editing + unlimited saves, PDF export) require $29.99/month — but the core underwriting math doesn't." },
   { q: "Why is BiggerPockets' calculator capped on the free tier?", a: "BiggerPockets monetizes via BiggerPockets Pro (~$390/year), which bundles forums, courses, podcasts, books, and the unlimited calculator. The free tier is a sample. If you're already paying for community access, the calculator is essentially free; if you only want the calculator, TrueCap is the cheaper unrestricted alternative." },
-  { q: "What's the catch with TrueCap's free tier?", a: "Honestly, there isn't one for basic underwriting. The catch is that you'll eventually want Pro features (10-year projection, tax strategy, sensitivity grid, co-branded share links, PDF export) at $29.99/month — which is normal SaaS pricing. The free tier itself is fully functional for cap rate / CoC / DSCR / cash flow on unlimited deals." },
+  { q: "What's the catch with TrueCap's free tier?", a: "The core underwriting is free. Pro adds the repeat-deal workflow and advanced modules: 10-year projection, illustrative tax impact, sensitivity grid, co-branded share links, and PDF export at $29.99/month. Free remains fully functional for cap rate / CoC / DSCR / cash flow on unlimited deals." },
   { q: "Can I underwrite a BRRRR or flip on a free calculator?", a: "TrueCap's free tier handles the standard cap rate / DSCR / cash flow on any property, including BRRRR and flip candidates. The dedicated BRRRR + Fix-and-Flip analyzers (with cash-out refi math, ARV solver, break-even ARV) are Pro features. BiggerPockets' free tier supports basic BRRRR. Most flippers use a spreadsheet or Pro tier eventually." },
   { q: "Are there ad-supported free rental calculators?", a: "A few exist (RentRedi's free calculator on their site, BiggerPockets' free reports). They're real but limited. TrueCap doesn't run ads and isn't lead-gen for a CRM — the free tier is the actual product, with Pro features as an upgrade path. That's an unusual model for a free SaaS calculator and it's intentional." },
 ];

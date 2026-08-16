@@ -53,7 +53,7 @@ export function buildAssumptionEntries(
       label: "Rent",
       ...(rent && !rent.overridden
         ? {
-            source: rent.source === "hud-safmr" ? "HUD Fair Market Rent (ZIP)" : "HUD Fair Market Rent",
+            source: rent.source === "hud-safmr" ? "HUD rent benchmark (ZIP)" : "HUD rent benchmark (county)",
             short: "HUD",
             manual: false,
             ...(rent.fetchedAt ? { freshness: /^\d{4}$/.test(rent.fetchedAt) ? `HUD ${rent.fetchedAt}` : `As of ${rent.fetchedAt}` } : {}),
@@ -63,13 +63,13 @@ export function buildAssumptionEntries(
     {
       label: "Mortgage rate",
       ...(rate && !rate.overridden
-        ? { source: "FRED 30-yr fixed", short: "FRED", manual: false, ...(rate.fetchedAt ? { freshness: `As of ${rate.fetchedAt}` } : {}) }
+        ? { source: "FRED owner-occupied benchmark", short: "FRED", manual: false, ...(rate.fetchedAt ? { freshness: `As of ${rate.fetchedAt}` } : {}) }
         : MANUAL),
     },
     {
       label: "Property tax",
       ...(tax && !tax.overridden
-        ? { source: "State effective rate", short: "state", manual: false, freshness: "State benchmark" }
+        ? { source: "State tax benchmark", short: "state", manual: false, freshness: "State benchmark" }
         : MANUAL),
     },
     {
@@ -176,7 +176,7 @@ export function AssumptionsSourceStrip({
           expanded ? "block" : "hidden sm:block"
         )}
       >
-        Estimates for planning, not financial advice — verify rent, taxes, and the asking price before you offer.{" "}
+        Planning benchmarks, not property facts or financial advice — verify rent, financing, taxes, insurance, and condition before you offer.{" "}
         {/* Quiet provenance link (trust-polish audit): the skeptical-investor
             "is this math real?" path used to dead-end here — /methodology
             documents every formula + data source but had no inbound link

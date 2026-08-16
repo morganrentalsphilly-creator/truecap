@@ -34,6 +34,7 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { DealsAnalyzedTicker } from "@/components/marketing/deals-analyzed-ticker";
 import { FiveDealGuarantee } from "@/components/marketing/landing-sections";
 import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
+import { rateAlertEmailsLive } from "@/lib/rate-alerts-mode";
 import { getSiteUrl } from "@/lib/site-url";
 export const metadata: Metadata = {
   title: "Pricing — Screen Free, Decide & Act with Pro",
@@ -63,7 +64,7 @@ const FAQS: { q: string; a: string }[] = [
     // app/page.tsx. MAO, sensitivity, BRRRR/fix-and-flip, and share
     // links are PRO features — a previous version of this answer
     // claimed they were free, contradicting every other surface.
-    a: "Yes. The cash-flow analyzer — cap rate, CoC, DSCR, monthly cash flow, address auto-fill, the 0–100 Deal Score, and a plain-English verdict — is free forever and unlimited. No card required to start. Pro adds a personal buy box (your criteria, pass/failed on every deal), MAO solver, sensitivity grid, BRRRR + fix-and-flip, 10-year projections, tax strategy, exit scenarios, co-branded shareable links, and lender-ready PDFs.",
+    a: "Yes. The cash-flow analyzer — cap rate, CoC, DSCR, monthly cash flow, address auto-fill, the 0–100 Deal Score, and a plain-English verdict — is free forever and unlimited. No card required to start. Pro adds a personal buy box (your criteria, pass/failed on every deal), MAO solver, sensitivity grid, BRRRR + fix-and-flip, 10-year projections, illustrative tax impact, modeled exit comparisons, co-branded shareable links, and Deal Decision Pack PDFs.",
   },
   {
     q: "Can I cancel anytime?",
@@ -84,7 +85,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "How accurate is the auto-fill?",
-    a: "Rent is pulled from HUD Fair Market Rent for your county. Mortgage rate comes from the FRED 30-year fixed series. Property tax uses your state's effective rate. All editable — these are sensible defaults, not absolutes.",
+    a: "Rent uses a HUD area benchmark (ZIP-level when available, otherwise county-level), not a property-specific rent comp. The rate uses FRED's national owner-occupied 30-year benchmark, not an investor lender quote. Property tax starts from a state effective-rate estimate. Every field is editable — replace these screening defaults with local comps, the actual tax bill, insurance, and written loan terms before making an offer.",
   },
   {
     q: "Is this for agents, investors, or both?",
@@ -94,6 +95,7 @@ const FAQS: { q: string; a: string }[] = [
 
 export default async function PricingPage() {
   const { proOfferName, singleDeal } = getMarketingOfferConfig();
+  const alertsLive = rateAlertEmailsLive();
   const supabase = await createServerSupabaseClient();
   const {
     data: { user },
@@ -137,7 +139,7 @@ export default async function PricingPage() {
     url: `${siteUrl}/pricing`,
     offers: [
       { "@type": "Offer", name: "TrueCap Free", price: 0, priceCurrency: "USD", url: `${siteUrl}/` },
-      { "@type": "Offer", name: "Single-Deal Underwrite", price: singleDeal.amount, priceCurrency: "USD", url: `${siteUrl}/pricing` },
+      { "@type": "Offer", name: "TrueCap Deal Decision Pack", price: singleDeal.amount, priceCurrency: "USD", url: `${siteUrl}/pricing` },
       ...recurringOffers.flatMap(([name, price]) =>
         price
           ? [{ "@type": "Offer", name, price: price.unitAmount, priceCurrency: price.currency, url: `${siteUrl}/pricing` }]
@@ -193,6 +195,31 @@ export default async function PricingPage() {
           </div>
         </section>
 
+        <section aria-labelledby="pricing-stage-title" className="mx-auto max-w-5xl px-4 py-10 sm:px-6 sm:py-12">
+          <div className="text-center">
+            <p className="text-[11px] font-bold uppercase tracking-widest text-primary">Choose the job</p>
+            <h2 id="pricing-stage-title" className="mt-2 text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
+              Which stage are you at?
+            </h2>
+          </div>
+          <div className={`mt-7 grid gap-3 ${agentProConfigured ? "sm:grid-cols-2 lg:grid-cols-4" : "sm:grid-cols-3"}`}>
+            {[
+              { job: "Screen", product: "Free", answer: "Is this worth investigating?" },
+              { job: "Decide", product: `Deal Decision Pack · ${singleDeal.priceLabel}`, answer: "Should I offer, and what should I offer?" },
+              { job: "Acquire", product: proOfferName, answer: "Repeat the decision workflow across every deal." },
+              ...(agentProConfigured
+                ? [{ job: "Win investor clients", product: "Agent Pro", answer: "Match, present, and follow up professionally." }]
+                : []),
+            ].map((item) => (
+              <div key={item.job} className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-primary">{item.product}</p>
+                <h3 className="mt-1 text-lg font-extrabold text-foreground">{item.job}</h3>
+                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{item.answer}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
         {/* Plans — 2-card layout with Monthly ↔ Annual toggle on Pro
             (replaced the previous 3-card side-by-side). The toggle
             consistently outperforms separate cards because users
@@ -216,7 +243,7 @@ export default async function PricingPage() {
             hadPriorSubscription={hadPriorSubscription}
             agentProConfigured={agentProConfigured}
             proOfferName={proOfferName}
-            singleDealPriceLabel={singleDeal.priceLabel}
+            rateAlertsLive={alertsLive}
           />
 
           {/* Interactive ROI calculator — defangs the 'is it worth $X/mo'
@@ -264,8 +291,14 @@ export default async function PricingPage() {
               instead of clipping columns. The inner min-w-[520px] keeps
               the column widths legible at the smallest phones — without
               it, three columns squeezed into 320px is unreadable. */}
-          <div className="tc-reveal mt-8 overflow-x-auto rounded-2xl border border-border bg-card">
+          <div
+            role="region"
+            aria-label="Free and Pro feature comparison"
+            tabIndex={0}
+            className="tc-reveal mt-8 overflow-x-auto rounded-2xl border border-border bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
             <table className="w-full min-w-[520px] text-sm">
+              <caption className="sr-only">Features included with TrueCap Free and TrueCap Pro</caption>
               <thead>
                 <tr className="border-b border-border bg-muted/30">
                   <th className="px-4 py-3 text-left font-bold text-foreground sm:px-6">Feature</th>
@@ -277,24 +310,25 @@ export default async function PricingPage() {
                 {[
                   ["Unlimited analyses", true, true],
                   ["Cap rate · CoC · DSCR · cash flow", true, true],
-                  ["Auto-fill (HUD rent · FRED rate · state tax)", true, true],
+                  ["Auto-fill screening benchmarks (HUD rent · FRED owner-occupied rate · state tax)", true, true],
                   ["Deal Score (0–100) with breakdown", true, true],
                   ["Sale + rent comps from the address", "1 free", "50 / mo"],
                   ["MAO solver · Sensitivity grid", false, true],
                   ["BRRRR + fix-and-flip + rehab estimator", false, true],
                   ["Shareable read-only deal links", true, true],
                   ["10-year cash flow projection", false, true],
-                  ["Tax strategy + depreciation", false, true],
-                  ["Exit scenarios (best year to sell)", false, true],
+                  ["Illustrative tax impact + depreciation", false, true],
+                  ["Modeled exit-year comparison", false, true],
                   ["Buy Box auto-screening", false, true],
                   ["Deal pipeline + tags (CRM)", false, true],
                   ["Saved analysis templates", false, true],
                   ["Due-diligence checklist + document vault", false, true],
-                  ["Rate-drop alerts on saved deals", false, true],
+                  ...(alertsLive
+                    ? [["Rate-drop alerts on saved deals", false, true] as const]
+                    : []),
                   ["Lender · partner · personal PDF reports", `${singleDeal.priceLabel} one-time`, true],
                   ["Save deals", "Up to 5", "Unlimited"],
                   ["Compare deals side-by-side", false, "Up to 4"],
-                  ["Priority support", false, true],
                 ].map(([label, free, pro], i) => (
                   <tr key={String(label)} className={i % 2 === 0 ? "bg-card" : "bg-muted/20"}>
                     <td className="px-4 py-3 text-foreground sm:px-6">{String(label)}</td>
@@ -307,7 +341,7 @@ export default async function PricingPage() {
           </div>
         </section>
 
-        {/* Single-Deal Underwrite — one complete acquisition decision
+        {/* Deal Decision Pack — one complete acquisition decision
             package without committing to a subscription.
             Fully automated since Jun 2026: run a free analysis, click
             Export PDF, complete Stripe Checkout, and the full report
@@ -326,16 +360,16 @@ export default async function PricingPage() {
                 </div>
                 <h3 className="text-xl font-extrabold text-foreground">Know your number on this property.</h3>
                 <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                  Run your analysis free, then unlock the Single-Deal Underwrite once.
+                  Run your analysis free, then unlock the Deal Decision Pack once.
                   The report includes your deterministic Max Offer, Deal Doctor
                   rent/rate thresholds, assumptions, verdict, downside scenario,
-                  10-year projection, tax view, and exit scenarios. No subscription.
+                  10-year projection, illustrative tax-impact view, and modeled exit comparisons. No subscription.
                   Use Pro for the repeat decision workflow.
                 </p>
               </div>
               <Link
                 href="/#main"
-                className="shrink-0 inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 text-sm font-bold text-foreground transition-transform hover:bg-muted hover:-translate-y-0.5 active:scale-[0.98]"
+                className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 text-sm font-bold text-foreground transition-transform hover:-translate-y-0.5 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98]"
               >
                 Analyze a property
               </Link>
@@ -353,7 +387,7 @@ export default async function PricingPage() {
           <div className="tc-reveal mt-8 divide-y divide-border rounded-2xl border border-border bg-card">
             {FAQS.map((faq) => (
               <details key={faq.q} className="group px-5 py-4 sm:px-6 sm:py-5">
-                <summary className="flex cursor-pointer items-center justify-between gap-3 list-none">
+                <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                   <span className="font-semibold text-foreground">{faq.q}</span>
                   <span
                     aria-hidden
@@ -371,7 +405,7 @@ export default async function PricingPage() {
             <p className="text-sm text-muted-foreground">Still have questions?</p>
             <Link
               href="/"
-              className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
+              className="inline-flex min-h-11 items-center gap-1.5 rounded text-sm font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               Try the calculator first — it&apos;s free →
             </Link>

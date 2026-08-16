@@ -62,7 +62,7 @@ export const metadata: Metadata = {
 const FAQ_ITEMS = [
   {
     q: `Which is cheapest — DealCheck, BiggerPockets, or TrueCap?`,
-    a: `For headline price, DealCheck Plus is cheapest at \$10/month, with DealCheck Pro at \$20/month and TrueCap Pro at \$29.99/month (\$25/mo on the annual plan, as of June 2026). DealCheck's tiers mostly raise saved-property caps, while TrueCap's single tier bundles the deep analysis (projections, tax strategy, sensitivity, exit scenarios). BiggerPockets Pro is ~\$32.50/month (annual, \$390/year), bundled with forums, courses, and community access.`,
+    a: `For headline price, DealCheck Plus is cheapest at \$10/month, with DealCheck Pro at \$20/month and TrueCap Pro at \$29.99/month (\$25/mo on the annual plan, as of June 2026). DealCheck's tiers mostly raise saved-property caps, while TrueCap's single tier bundles the deep analysis (projections, illustrative tax impact, sensitivity, modeled exit comparisons). BiggerPockets Pro is ~\$32.50/month (annual, \$390/year), bundled with forums, courses, and community access.`,
   },
   {
     q: `Which has the best free tier?`,
@@ -181,12 +181,12 @@ export default function ThreeWayComparisonPost() {
 
             <h2>Pricing (paid tier comparison)</h2>
             <div dangerouslySetInnerHTML={{ __html: `<ul>
-              <li><strong>TrueCap Pro</strong> — \$29.99/month (or \$300/year on the annual plan, ~\$25/mo). Single tier. Everything included: 10-year projections, tax strategy, sensitivity grid, exit scenarios, MAO solver, BRRRR + fix-and-flip analyzers, PDF exports, branded reports, co-branded share links, editing + unlimited saves, compare, and templates.</li>
+              <li><strong>TrueCap Pro</strong> — \$29.99/month (or \$300/year on the annual plan, ~\$25/mo). Single tier. Everything included: 10-year projections, illustrative tax impact, sensitivity grid, modeled exit comparisons, MAO solver, BRRRR + fix-and-flip analyzers, PDF exports, branded reports, co-branded share links, editing + unlimited saves, compare, and templates.</li>
               <li><strong>DealCheck Plus</strong> — \$10/month. Raises caps: 50 saved properties, more photos, comps, and templates.</li>
               <li><strong>DealCheck Pro</strong> — \$20/month. Unlimited saved properties, photos, comps, and templates.</li>
               <li><strong>BiggerPockets Pro</strong> — ~\$32.50/month (annual). Bundles the calculator with community, courses, forums, podcasts, books. Calculator alone isn&apos;t cheaper.</li>
             </ul>
-            <p>DealCheck Pro is \$20/month and TrueCap Pro is \$29.99/month — close, and the difference is what the dollar buys. DealCheck&apos;s paid tiers mostly raise saved-property caps; TrueCap&apos;s single tier bundles the analysis depth (projections, tax strategy, sensitivity, exit scenarios). Versus BiggerPockets, TrueCap&apos;s calculator runs ~20% less on the annual plan — and if you&apos;re paying BiggerPockets mainly for the community, you&apos;re overpaying for the calculator alone.</p>` }} />
+            <p>DealCheck Pro is \$20/month and TrueCap Pro is \$29.99/month — close, and the difference is what the dollar buys. DealCheck&apos;s paid tiers mostly raise saved-property caps; TrueCap&apos;s single tier bundles the analysis depth (projections, illustrative tax impact, sensitivity, modeled exit comparisons). Versus BiggerPockets, TrueCap&apos;s calculator runs ~20% less on the annual plan — and if you&apos;re paying BiggerPockets mainly for the community, you&apos;re overpaying for the calculator alone.</p>` }} />
 
             <h2>Mobile + at the showing</h2>
             <div dangerouslySetInnerHTML={{ __html: `<p>The honest one. TrueCap is a Progressive Web App — install it from the browser to your home screen and it works like a native app without going through the App Store. DealCheck has true native iOS and Android apps with offline support and better camera-tied workflows. BiggerPockets has a mobile-optimized web view and a separate forum app, but the calculator is mostly desktop-leaning.</p>

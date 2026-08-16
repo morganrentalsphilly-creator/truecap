@@ -55,7 +55,7 @@ const MATRIX: Row[] = [
   { feature: "Lifecycle stage", truecap: "Pre-purchase — underwrite the deal", appfolio: "Post-purchase — operate at enterprise scale", winner: "tie" },
   { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", appfolio: "Not modeled", winner: "truecap" },
   { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", appfolio: "Not modeled", winner: "truecap" },
-  { feature: "Tax strategy modeling", truecap: "Pro — depreciation + interest + after-tax CF", appfolio: "Not modeled", winner: "truecap" },
+  { feature: "Illustrative tax impact", truecap: "Pro — depreciation + interest + modeled after-tax CF", appfolio: "Not modeled", winner: "truecap" },
   { feature: "Deal score + verdict", truecap: "Free — 0-100 score + plain-English verdict", appfolio: "Not applicable", winner: "truecap" },
   { feature: "Address auto-fill (rent/rate/tax)", truecap: "Yes — HUD + FRED + state property tax", appfolio: "Not applicable", winner: "truecap" },
   { feature: "Enterprise PM workflow", truecap: "No", appfolio: "Yes — 1000+ unit support, multi-property", winner: "appfolio" },
@@ -266,7 +266,7 @@ export default function VsAppfolioPage() {
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
-            Pro unlocks projections, sensitivity, tax strategy, exit scenarios,
+            Pro unlocks projections, sensitivity, illustrative tax impact, modeled exit comparisons,
             MAO, PDF exports, and co-branded share links.
             No card to start.
           </p>

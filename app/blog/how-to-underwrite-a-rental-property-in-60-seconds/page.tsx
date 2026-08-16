@@ -29,7 +29,7 @@ const TITLE = "How to underwrite a rental property in 60 seconds";
 const DESCRIPTION =
   "The five numbers, four metrics, and two sanity checks every real estate investor uses to triage a rental deal in under a minute — no spreadsheet required.";
 const PUBLISHED_AT = "2026-05-24";
-const MODIFIED_AT = "2026-06-01";
+const MODIFIED_AT = "2026-08-15";
 const READING_TIME_MIN = 9;
 
 export const metadata: Metadata = {
@@ -389,12 +389,11 @@ export default function BlogPost() {
             </div>
           </div>
           <p>
-            Most DSCR lenders won&apos;t fund anything below 1.0 — the property
-            doesn&apos;t even cover its own mortgage. 1.0-1.2 is tight (small
-            buffer, hard to get rate breaks). 1.2-1.5 is bankable. 1.5+ is
-            strong, and you&apos;ll qualify for better rate tiers. If your DSCR
-            on a 25%-down conventional pencils above 1.25, you have meaningful
-            room to negotiate or absorb a rent dip.
+            DSCR definitions, minimums, rent evidence, expense treatment,
+            leverage, and pricing tiers vary by lender and program. Use this
+            ratio to test coverage and downside, then obtain the lender&apos;s
+            written formula and quote; a modeled band does not establish
+            approval or pricing.
           </p>
           <p>
             <Link href="/tools/dscr-calculator" className="text-primary font-semibold hover:underline">
@@ -445,7 +444,7 @@ export default function BlogPost() {
           <p>
             Pass all six and the deal is worth a real underwrite — comping rent
             in person, pulling actual tax records, inspecting the property,
-            modeling out a 10-year hold with tax strategy and exit scenarios.
+            modeling out a 10-year hold with illustrative tax impact and exit scenarios.
             Fail any of them and you&apos;ve just saved yourself a wasted weekend.
           </p>
 

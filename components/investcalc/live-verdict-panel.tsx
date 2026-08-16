@@ -171,7 +171,7 @@ export function LiveVerdictPanel({ active, livePreview, livePreviewMsg }: Props)
             </p>
           ) : null}
           <p className="mt-2.5 text-[11px] leading-snug text-muted-foreground">
-            Updating as you type — run the full analysis for projections, tax strategy &amp; exit scenarios.
+            Updating as you type — run the full analysis for projections, illustrative tax impact &amp; modeled exits.
           </p>
         </div>
       ) : null}

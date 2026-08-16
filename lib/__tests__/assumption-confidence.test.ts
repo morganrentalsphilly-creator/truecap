@@ -54,9 +54,9 @@ describe("assumption confidence", () => {
     }
   });
 
-  it("rates entered/current figures high and rough estimates low", () => {
+  it("rates property facts high, benchmarks medium, and rough estimates low", () => {
     expect(assumptionMeta("purchasePrice")?.confidence).toBe("high");
-    expect(assumptionMeta("interestRate")?.confidence).toBe("high");
+    expect(assumptionMeta("interestRate")?.confidence).toBe("medium");
     expect(assumptionMeta("rent")?.confidence).toBe("medium");
     expect(assumptionMeta("insurance")?.confidence).toBe("low");
   });

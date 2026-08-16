@@ -24,6 +24,7 @@ export type ComparePickerDeal = {
   signal: string | null;
   netCashFlow: number | null;
   capRate: number | null;
+  methodologyLabel?: string;
 };
 
 const MAX_COMPARE_ITEMS = 4;
@@ -121,6 +122,11 @@ export function CompareDealPicker({ deals }: { deals: ComparePickerDeal[] }) {
                     {fmtMoney(deal.netCashFlow)} · {fmtPct(deal.capRate)}
                     {deal.signal ? ` · ${deal.signal}` : ""}
                   </span>
+                  {deal.methodologyLabel ? (
+                    <span className="mt-0.5 block text-[10px] text-muted-foreground">
+                      {deal.methodologyLabel}
+                    </span>
+                  ) : null}
                 </span>
                 {deal.score != null ? (
                   <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-xs font-bold text-foreground">

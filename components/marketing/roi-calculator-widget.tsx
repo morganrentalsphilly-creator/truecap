@@ -219,7 +219,7 @@ export function RoiCalculatorWidget({ proMonthlyPrice, singleDealPriceLabel = "$
             </p>
           ) : (
             <p className="leading-relaxed">
-              At your inputs, Free or a {singleDealPriceLabel} Single-Deal Underwrite may be the better fit today.
+              At your inputs, Free or a {singleDealPriceLabel} Deal Decision Pack may be the better fit today.
               Move to Pro when Max Offer, repeat underwriting, comparison, and saved workflows become valuable.
             </p>
           )}

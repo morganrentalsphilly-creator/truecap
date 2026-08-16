@@ -435,7 +435,7 @@ export const BLOG_POSTS: BlogPost[] = [
     slug: "how-to-calculate-cap-rate",
     title: "How to calculate cap rate (with worked examples) — 2026 guide",
     excerpt:
-      "Cap rate = NOI ÷ purchase price. Sounds simple, but most investors get NOI wrong by skipping CapEx reserves or vacancy. Here's the formula, three worked examples (good deal / bad deal / cash purchase), and when cap rate is the wrong metric.",
+      "Cap rate = NOI ÷ purchase price. Learn the lender-style NOI convention, how vacancy and operating costs work, where CapEx belongs, and see three worked examples.",
     readingTimeMinutes: 7,
     publishedAt: "2026-06-07",
     available: true,
@@ -733,7 +733,7 @@ export const BLOG_POSTS: BlogPost[] = [
     slug: "dscr-loans-explained",
     title: "DSCR loans explained: what they are, when they make sense, what they cost in 2026",
     excerpt:
-      "DSCR loans approve based on the property's economics, not your personal income. Who they're for, what rates and ratios look like in 2026, and the trade-offs vs. conventional financing.",
+      "DSCR programs primarily use property coverage instead of personal DTI as the main ratio, while borrower and property checks still apply. Learn the costs and trade-offs.",
     readingTimeMinutes: 10,
     publishedAt: "2026-05-24",
     available: true,

@@ -103,7 +103,7 @@ export function CapRateCalculatorWidget() {
 
           <div>
             <Label htmlFor="caprate-opex" className="text-sm font-medium text-foreground mb-1.5 block">
-              Operating Expenses (% of rent)
+              NOI Operating Expenses (% of rent)
             </Label>
             <div className="relative">
               <Input
@@ -119,8 +119,9 @@ export function CapRateCalculatorWidget() {
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">%</span>
             </div>
             <p className="text-xs text-muted-foreground mt-1.5">
-              Default 40% is a rough rule-of-thumb for SFR — taxes, insurance,
-              maintenance, vacancy, management, CapEx. Real expenses vary.
+              Default 40% is a rough SFR screen for taxes, insurance,
+              maintenance, vacancy, and management. It excludes debt service
+              and the below-NOI CapEx reserve. Real expenses vary.
             </p>
           </div>
         </div>

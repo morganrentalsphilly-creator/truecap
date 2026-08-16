@@ -73,7 +73,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Which metric matters most when actually buying a property?",
-    a: "All three, in this order: DSCR (will you get approved?), cash-on-cash (will the deal grow your net worth at the rate you want?), then cap rate (is the property fairly priced for its market?). Skip any and you're missing critical risk you'll regret.",
+    a: "All three answer different questions: DSCR tests modeled debt coverage, cash-on-cash measures modeled annual cash return on your invested cash, and cap rate compares unlevered operating yield. A DSCR result does not guarantee loan approval, and none of the three establishes future wealth or fair value on its own.",
   },
   {
     q: "What's the relationship between cap rate and cash-on-cash?",
@@ -81,7 +81,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "What's a 'good' value for each metric?",
-    a: "Cap rate: 6-10% in cash-flow markets, 3-5% in appreciation markets. Cash-on-cash: 8-10%+ is strong, 5-7% is acceptable, below 5% needs an appreciation or tax story. DSCR: 1.25+ is bankable, 1.5+ unlocks better rate tiers, below 1.2 most lenders won't fund.",
+    a: "There is no universal good value. Compare cap rate and cash-on-cash with verified local alternatives and your risk target. Compare DSCR with your own operating cushion and the lender's written formula and threshold; a ratio alone does not make a file bankable.",
   },
   {
     q: "Can a deal have a great cap rate and terrible DSCR?",
@@ -89,7 +89,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Which metric do lenders care about?",
-    a: "DSCR, by far. Cap rate matters for property valuation in some commercial loan products (the lender wants to know the property's standalone value if they had to foreclose), but the loan-approval gate is DSCR. Almost every commercial / DSCR loan product requires 1.0-1.25 minimum, with rate tier improvements at 1.25 and 1.5.",
+    a: "It depends on the product. DSCR is a primary coverage metric in many commercial and DSCR programs, while valuation, LTV, credit, reserves, guarantor strength, property eligibility, and other conditions also matter. Formula, threshold, and pricing tiers vary by lender and program.",
   },
 ];
 
@@ -307,24 +307,24 @@ export default function BlogPost() {
             of mortgage payment.
           </p>
           <p>
-            <strong>Why it matters:</strong> DSCR is what lenders care about.
-            DSCR loan products — non-QM loans that approve based on the
-            property&apos;s economics instead of your personal income — have
-            exploded in popularity. They almost always require minimum DSCR of
-            1.0-1.25 with better rate tiers at 1.25 and 1.5.
+            <strong>Why it matters:</strong> DSCR is a primary coverage metric
+            in many commercial and non-QM DSCR programs. Those programs often
+            use property coverage instead of personal DTI as the main ratio,
+            while still applying borrower, credit, reserve, appraisal,
+            insurance, and property requirements.
           </p>
           <p>
-            <strong>The benchmark rule:</strong> 1.25+ is bankable, 1.5+ unlocks
-            better rate tiers, below 1.2 most DSCR lenders won&apos;t fund.
-            Conventional Fannie/Freddie investment-property loans don&apos;t
-            check DSCR explicitly but use your personal DTI, which has a similar
-            gating effect.
+            <strong>The benchmark rule:</strong> there is no market-wide
+            approval threshold. Ask the lender for its current formula,
+            accepted rent evidence, payment components, rounding, minimum,
+            and pricing tiers. Use a separate, more conservative operating
+            DSCR for your own risk decision.
           </p>
           <p>
             <strong>Where it breaks:</strong> DSCR tells you nothing about
-            return. A property could have DSCR of 2.0 (lender loves it) and CoC
-            of 2% (you should hate it). DSCR is a financing gate, not a
-            return metric.
+            return. A property could have high modeled DSCR and low modeled
+            CoC because of a large equity contribution. DSCR is one financing
+            input, not a return metric or approval promise.
           </p>
           <p>
             <Link href="/tools/dscr-calculator" className="text-primary font-semibold hover:underline">
@@ -424,7 +424,7 @@ export default function BlogPost() {
           <p>
             All three numbers live next to each other in TrueCap&apos;s main
             analyzer, alongside the rest of the underwriting math (10-year
-            projection, tax strategy, exit scenarios). Run a real deal in 60
+            projection, illustrative tax impact, exit scenarios). Run a real deal in 60
             seconds.
           </p>
 
@@ -458,7 +458,7 @@ export default function BlogPost() {
         <footer className="mt-12 pt-8 border-t border-border">
           <p className="text-sm text-muted-foreground leading-relaxed">
             Want the full underwriting workflow? TrueCap turns each of these
-            metrics — plus 10-year projection, tax strategy, exit scenarios —
+            metrics — plus 10-year projection, illustrative tax impact, exit scenarios —
             into a single live analyzer.{" "}
             <Link href="/" className="font-bold text-foreground hover:underline">
               Open the analyzer →

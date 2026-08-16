@@ -48,7 +48,7 @@ export function PdfPurchaseDialog({
           <DialogTitle>Complete this acquisition decision</DialogTitle>
           <DialogDescription>
             Get the complete underwrite for this property, including the
-            decision package and lender-ready report. Two ways to unlock it:
+            decision package and lender-facing report. Two ways to unlock it:
           </DialogDescription>
         </DialogHeader>
 
@@ -89,7 +89,7 @@ export function PdfPurchaseDialog({
             <div>
               <p className="flex items-center gap-1.5 text-sm font-bold text-foreground">
                 <FileDown className="size-4 text-muted-foreground" />
-                Single-Deal Underwrite
+                Deal Decision Pack
               </p>
               <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
                 The complete TrueCap decision package for this property. One

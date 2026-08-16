@@ -54,14 +54,14 @@ const MATRIX: Row[] = [
   { feature: "Ownership model", truecap: "Direct ownership of whole property", fundrise: "Shares in diversified REIT funds", winner: "tie" },
   { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", fundrise: "Not applicable (no individual property)", winner: "truecap" },
   { feature: "10-year projection", truecap: "Pro — per-property rent + expense + appreciation", fundrise: "Fund-level forward returns (historical 8-12%)", winner: "tie" },
-  { feature: "Tax strategy modeling", truecap: "Pro — depreciation + interest + after-tax CF + 1031", fundrise: "K-1 / 1099 distributions; some depreciation pass-through", winner: "truecap" },
+  { feature: "Illustrative tax impact", truecap: "Pro — straight-line depreciation + interest + modeled after-tax CF; no 1031 modeling", fundrise: "K-1 / 1099 distributions; some depreciation pass-through", winner: "tie" },
   { feature: "Deal score + verdict", truecap: "Free — 0-100 score + plain-English verdict", fundrise: "Not applicable", winner: "truecap" },
   { feature: "Minimum to start", truecap: "Down payment on a whole property (~$20-50k)", fundrise: "$10 (Starter), $1k+ for higher tiers", winner: "fundrise" },
   { feature: "Time commitment", truecap: "Active — you source, underwrite, close, manage (or hire)", fundrise: "Passive — Fundrise allocates capital", winner: "fundrise" },
   { feature: "Liquidity", truecap: "Low — sale takes months", fundrise: "Limited — quarterly redemption windows with potential gates", winner: "fundrise" },
   { feature: "Diversification", truecap: "One property at a time", fundrise: "Across many properties + asset types", winner: "fundrise" },
   { feature: "Control over property choice", truecap: "Total", fundrise: "None — Fundrise picks deals", winner: "truecap" },
-  { feature: "Tax benefits", truecap: "Full depreciation + interest + 1031", fundrise: "Some depreciation pass-through (K-1 funds); no 1031 from shares", winner: "truecap" },
+  { feature: "Ownership tax treatment", truecap: "Direct-property rules may allow depreciation, interest, or 1031; TrueCap does not determine eligibility", fundrise: "Some depreciation pass-through (K-1 funds); no 1031 from shares", winner: "tie" },
   { feature: "Cash flow model", truecap: "You design — fixed-rate mortgage, your CF goes to you", fundrise: "Quarterly distributions from fund returns", winner: "tie" },
   { feature: "Pricing / fees", truecap: "Free; Pro $29.99/mo (analysis tools only)", fundrise: "0.15% advisory + 0.85% fund management (1% all-in, plus expense ratios)", winner: "tie" },
   { feature: "Free tier (for analysis)", truecap: "Yes — full underwriting math", fundrise: "Not applicable", winner: "truecap" },
@@ -142,7 +142,7 @@ export default function VsFundrisePage() {
               </p>
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
                 <li>You want direct control of the property and the financing.</li>
-                <li>You want full depreciation + interest deduction + 1031 eligibility.</li>
+                <li>You want direct-property control and will verify depreciation, interest, and any 1031 eligibility with tax professionals.</li>
                 <li>You have $20k+ to deploy in one property at a time.</li>
                 <li>You&apos;re willing to do the underwriting + management work yourself.</li>
               </ul>
@@ -262,7 +262,7 @@ export default function VsFundrisePage() {
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
-            Pro unlocks projections, sensitivity, tax strategy, exit scenarios,
+            Pro unlocks projections, sensitivity, illustrative tax impact, modeled exit comparisons,
             MAO, PDF exports, and co-branded share links.
             No card to start.
           </p>
@@ -334,11 +334,11 @@ const FUNDRISE_FAQ: FaqItem[] = [
     question: "Why would I buy a rental directly when I could just put money in Fundrise?",
     answer: (
       <>
-        Three reasons: control (you pick the property + financing), tax benefits (full depreciation, interest deduction, 1031 eligibility — Fundrise&apos;s pass-through is limited), and cash-flow scale (100% of a direct rental&apos;s cash flow goes to you, not split across fund LPs or eaten by management fees). Tradeoff: real work or paying a PM.
+        Three reasons: control (you pick the property + financing), potentially different direct-ownership tax treatment, and cash-flow control. Direct ownership does not guarantee that every deduction or a 1031 exchange applies; eligibility depends on the property, transaction, and taxpayer, so verify it with licensed tax and legal professionals. Tradeoff: real work or paying a PM.
       </>
     ),
     plainTextAnswer:
-      "Three reasons: control over property + financing, tax benefits (full depreciation + 1031 vs Fundrise&apos;s limited pass-through), cash-flow scale (100% to you vs split + fees). Tradeoff: work or PM.",
+      "Three reasons: control over property and financing, potentially different direct-ownership tax treatment, and cash-flow control. Depreciation, interest, and 1031 eligibility depend on the property, transaction, and taxpayer; verify them with licensed professionals. Tradeoff: work or PM.",
   },
   {
     question: "Can I use Fundrise&apos;s projected returns in TrueCap?",

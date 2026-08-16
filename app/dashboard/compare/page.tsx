@@ -20,7 +20,16 @@ import {
   recomputeCompareSnapshotFromForm,
   type CompareSnapshotV1,
 } from "@/lib/compare-result-snapshot";
-import { recomputeSavedDealVerdict } from "@/lib/recompute-saved-deal-verdict";
+import {
+  recomputeSavedDealVerdict,
+  toRecomputedSavedAnalysisSnapshot,
+} from "@/lib/recompute-saved-deal-verdict";
+import {
+  isLegacySavedMethodologyVersion,
+  parseFrozenDealScore,
+  resolveSavedAnalysisSnapshot,
+} from "@/lib/saved-analysis-methodology";
+import { TRUECAP_UNDERWRITING_STANDARD_VERSION } from "@/lib/underwriting-methodology";
 import { recommendationToSignal, type PropertyType, type StoredRecommendation, type StoredRiskLevel } from "@/lib/compare-metrics";
 import {
   getDashboardNavAccess,
@@ -78,6 +87,7 @@ type SavedAnalysisRow = {
   vacancy_pct: number | string | null;
   year_built: number | string | null;
   result_snapshot: ResultSnapshot | null;
+  methodology_version?: string | null;
   form_snapshot: unknown;
   interest_rate_pct?: number | string | null;
   loan_term_years?: number | string | null;
@@ -115,8 +125,28 @@ function getInitials(displayName: string, email: string): string {
   return (displayName || email || "U").slice(0, 2).toUpperCase();
 }
 
+function methodologyLabel(resolution: ReturnType<typeof resolveSavedAnalysisSnapshot>): string {
+  if (resolution.shouldFreeze) {
+    return `Frozen Standard v${resolution.storedMethodologyVersion}`;
+  }
+  if (isLegacySavedMethodologyVersion(resolution.storedMethodologyVersion)) {
+    return resolution.didRecompute
+      ? `Legacy analysis · recomputed with current v${TRUECAP_UNDERWRITING_STANDARD_VERSION}`
+      : `Legacy analysis · stored snapshot (current v${TRUECAP_UNDERWRITING_STANDARD_VERSION} recompute unavailable)`;
+  }
+  return `Standard v${resolution.storedMethodologyVersion}`;
+}
+
 function mapDeal(row: SavedAnalysisRow): CompareDealViewModel {
-  const snapshot = row.result_snapshot ?? {};
+  const recomputed = recomputeSavedDealVerdict(row.form_snapshot);
+  const resolution = resolveSavedAnalysisSnapshot({
+    methodologyVersion: row.methodology_version,
+    resultSnapshot: row.result_snapshot,
+    recomputedSnapshot: recomputed
+      ? toRecomputedSavedAnalysisSnapshot(recomputed)
+      : undefined,
+  });
+  const snapshot = resolution.snapshot as ResultSnapshot;
   const purchasePrice = toNumber(row.purchase_price);
   // Recompute the verdict AND the decision metrics from the form snapshot with
   // the CURRENT engine (Balanced lens) so Compare matches the Dashboard and My
@@ -124,20 +154,23 @@ function mapDeal(row: SavedAnalysisRow): CompareDealViewModel {
   // the stored snapshot verbatim showed STALE numbers here while those surfaces
   // showed the fresh ones: the same deal reading two different values (the
   // 52-vs-78 P0). Falls back to stored values if the snapshot can't be reparsed.
-  const recomputed = recomputeSavedDealVerdict(row.form_snapshot);
-  const netCashFlow = recomputed
-    ? recomputed.netCashFlowMonthly
+  const resolvedCurrent = resolution.didRecompute ? recomputed : null;
+  const frozenScore = resolution.shouldFreeze
+    ? parseFrozenDealScore(snapshot)
+    : null;
+  const netCashFlow = resolvedCurrent
+    ? resolvedCurrent.netCashFlowMonthly
     : (toNumber(snapshot.netCashFlow) ?? toNumber(row.net_cash_flow_monthly));
-  const cocReturn = recomputed
-    ? recomputed.cocReturnPct
+  const cocReturn = resolvedCurrent
+    ? resolvedCurrent.cocReturnPct
     : (toNumber(snapshot.cocReturn) ?? toNumber(row.coc_return_pct));
-  const capRate = recomputed ? recomputed.capRatePct : toNumber(snapshot.capRate);
-  const score = recomputed ? recomputed.score : toNumber(snapshot.score);
-  const recommendation: StoredRecommendation | null = recomputed
-    ? recomputed.recommendation
+  const capRate = resolvedCurrent ? resolvedCurrent.capRatePct : toNumber(snapshot.capRate);
+  const score = resolvedCurrent ? resolvedCurrent.score : toNumber(snapshot.score);
+  const recommendation: StoredRecommendation | null = resolvedCurrent
+    ? resolvedCurrent.recommendation
     : (snapshot.recommendation ?? null);
-  const riskLevel: StoredRiskLevel | null = recomputed
-    ? recomputed.riskLevel
+  const riskLevel: StoredRiskLevel | null = resolvedCurrent
+    ? resolvedCurrent.riskLevel
     : (snapshot.riskLevel ?? null);
   const scoringComplete = score != null && !!recommendation && !!riskLevel;
   const signal = scoringComplete && recommendation ? recommendationToSignal(recommendation) : null;
@@ -151,20 +184,20 @@ function mapDeal(row: SavedAnalysisRow): CompareDealViewModel {
     // snapshot predates the PMI/CapEx-taxable corrections for older deals and
     // could crown the wrong deal on the after-tax winner highlight. Falls back
     // to the stored values for legacy/unparseable forms.
-    afterTaxCF: recomputed ? recomputed.afterTaxCF : toNumber(snapshot.afterTaxCF),
-    annualCashFlow: recomputed ? recomputed.netCashFlowMonthly * 12 : toNumber(snapshot.annualCashFlow),
-    dscr: recomputed ? recomputed.dscr : toNumber(snapshot.dscr),
+    afterTaxCF: resolvedCurrent ? resolvedCurrent.afterTaxCF : toNumber(snapshot.afterTaxCF),
+    annualCashFlow: resolvedCurrent ? resolvedCurrent.netCashFlowMonthly * 12 : toNumber(snapshot.annualCashFlow),
+    dscr: resolvedCurrent ? resolvedCurrent.dscr : toNumber(snapshot.dscr),
     // Bridge components from the SAME recompute as netCashFlow so the tooltip
     // reconciles (rent − opex − P&I − PMI = NCF); fall back to the stored snapshot.
-    monthlyRentalIncome: recomputed ? recomputed.monthlyRentalIncome : toNumber(snapshot.monthlyRentalIncome),
-    totalOperatingExpenses: recomputed ? recomputed.totalOperatingExpenses : toNumber(snapshot.totalOperatingExpenses),
+    monthlyRentalIncome: resolvedCurrent ? resolvedCurrent.monthlyRentalIncome : toNumber(snapshot.monthlyRentalIncome),
+    totalOperatingExpenses: resolvedCurrent ? resolvedCurrent.totalOperatingExpenses : toNumber(snapshot.totalOperatingExpenses),
     purchasePrice,
-    totalCashRequired: recomputed ? recomputed.cashToClose : toNumber(snapshot.totalCashRequired),
-    monthlyPayment: recomputed ? recomputed.monthlyPayment : toNumber(snapshot.monthlyPayment),
-    pmiMonthly: recomputed
-      ? recomputed.pmiMonthly
+    totalCashRequired: resolvedCurrent ? resolvedCurrent.cashToClose : toNumber(snapshot.totalCashRequired),
+    monthlyPayment: resolvedCurrent ? resolvedCurrent.monthlyPayment : toNumber(snapshot.monthlyPayment),
+    pmiMonthly: resolvedCurrent
+      ? resolvedCurrent.pmiMonthly
       : toNumber((snapshot as Record<string, number | null | undefined>).pmiMonthly),
-    taxSavingsMonthly: recomputed ? recomputed.taxSavingsMonthly : toNumber(snapshot.taxSavingsMonthly),
+    taxSavingsMonthly: resolvedCurrent ? resolvedCurrent.taxSavingsMonthly : toNumber(snapshot.taxSavingsMonthly),
   };
 
   const assumptions = buildDealAssumptions(row.form_snapshot, row);
@@ -174,8 +207,10 @@ function mapDeal(row: SavedAnalysisRow): CompareDealViewModel {
   // before the exit-tax change would show pre-tax ROI next to post-tax ones.
   // Falls back to the persisted snapshot for legacy/unparseable forms.
   const compareSnapshot: CompareSnapshotV1 | null =
-    recomputeCompareSnapshotFromForm(row.form_snapshot) ??
-    parseCompareSnapshotV1(snapshot.compareSnapshot);
+    resolution.shouldFreeze
+      ? parseCompareSnapshotV1(snapshot.compareSnapshot)
+      : recomputeCompareSnapshotFromForm(row.form_snapshot) ??
+        parseCompareSnapshotV1(snapshot.compareSnapshot);
 
   return {
     id: row.id,
@@ -196,12 +231,13 @@ function mapDeal(row: SavedAnalysisRow): CompareDealViewModel {
     recommendation,
     riskLevel,
     scoringComplete,
-    breakdown: recomputed ? recomputed.breakdown : null,
+    breakdown: resolvedCurrent?.breakdown ?? frozenScore?.breakdown ?? null,
     metrics,
     signal,
     assumptions,
     compareSnapshotVersion,
     compareSnapshot,
+    methodologyLabel: methodologyLabel(resolution),
   };
 }
 
@@ -235,7 +271,7 @@ export default async function DashboardComparePage() {
     // Inline picker: load the user's saved deals so they can choose 2-4 to
     // compare right here, instead of being bounced to Saved Analyses and back.
     // scenario_name ships in its own migration — retry without it on 42703.
-    const PICKER_SELECT = "id, address, title, net_cash_flow_monthly, result_snapshot, form_snapshot";
+    const PICKER_SELECT = "id, address, title, net_cash_flow_monthly, methodology_version, result_snapshot, form_snapshot";
     const runPickerQuery = (select: string) =>
       supabase
         .from("saved_analyses")
@@ -252,13 +288,21 @@ export default async function DashboardComparePage() {
 
     const pickerDeals: ComparePickerDeal[] = ((pickerRows ?? []) as unknown[]).map((row) => {
       const r = row as SavedAnalysisRow;
-      const snap = (r.result_snapshot ?? {}) as ResultSnapshot;
+      const recomputed = recomputeSavedDealVerdict(r.form_snapshot);
+      const resolution = resolveSavedAnalysisSnapshot({
+        methodologyVersion: r.methodology_version,
+        resultSnapshot: r.result_snapshot,
+        recomputedSnapshot: recomputed
+          ? toRecomputedSavedAnalysisSnapshot(recomputed)
+          : undefined,
+      });
+      const snap = resolution.snapshot as ResultSnapshot;
       // Recompute with the current engine so the picker score matches the
       // Compare results + Dashboard (not the stale stored snapshot).
-      const recomputed = recomputeSavedDealVerdict(r.form_snapshot);
-      const score = recomputed ? recomputed.score : toNumber(snap.score);
-      const rec: StoredRecommendation | null = recomputed
-        ? recomputed.recommendation
+      const resolvedCurrent = resolution.didRecompute ? recomputed : null;
+      const score = resolvedCurrent ? resolvedCurrent.score : toNumber(snap.score);
+      const rec: StoredRecommendation | null = resolvedCurrent
+        ? resolvedCurrent.recommendation
         : (snap.recommendation ?? null);
       const baseLabel = r.address?.trim() || r.title?.trim() || "Untitled Property";
       const scenario =
@@ -270,10 +314,11 @@ export default async function DashboardComparePage() {
         label: scenario ? `${baseLabel} — ${scenario}` : baseLabel,
         score,
         signal: score != null && rec ? recommendationToSignal(rec) : null,
-        netCashFlow: recomputed
-          ? recomputed.netCashFlowMonthly
+        netCashFlow: resolvedCurrent
+          ? resolvedCurrent.netCashFlowMonthly
           : (toNumber(snap.netCashFlow) ?? toNumber(r.net_cash_flow_monthly)),
-        capRate: recomputed ? recomputed.capRatePct : toNumber(snap.capRate),
+        capRate: resolvedCurrent ? resolvedCurrent.capRatePct : toNumber(snap.capRate),
+        methodologyLabel: methodologyLabel(resolution),
       };
     });
 
@@ -324,7 +369,7 @@ export default async function DashboardComparePage() {
 
   // scenario_name ships in its own migration — retry without it on 42703.
   const COMPARE_SELECT =
-    "id, created_at, address, title, property_type, purchase_price, net_cash_flow_monthly, coc_return_pct, property_tax_pct, maintenance_pct, capex_pct, vacancy_pct, year_built, result_snapshot, form_snapshot, interest_rate_pct, loan_term_years, down_payment_pct, management_pct, monthly_rent, insurance_input_mode, insurance_pct, insurance_mo";
+    "id, created_at, address, title, property_type, purchase_price, net_cash_flow_monthly, coc_return_pct, property_tax_pct, maintenance_pct, capex_pct, vacancy_pct, year_built, methodology_version, result_snapshot, form_snapshot, interest_rate_pct, loan_term_years, down_payment_pct, management_pct, monthly_rent, insurance_input_mode, insurance_pct, insurance_mo";
   const runCompareQuery = (select: string) =>
     supabase
       .from("saved_analyses")

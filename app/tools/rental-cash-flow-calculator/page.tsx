@@ -448,7 +448,7 @@ export default function RentalCashFlowCalculatorPage() {
               When a deal survives this screen, run the full analysis at
               TrueCap — the analyzer starts from the same inputs, adds
               PMI, closing costs, and after-tax effects, and layers on cap
-              rate, cash-on-cash, DSCR, 10-year projections, tax strategy,
+              rate, cash-on-cash, DSCR, 10-year projections, illustrative tax impact,
               exit scenarios, and a plain-English verdict.
             </p>
 

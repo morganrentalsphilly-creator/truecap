@@ -60,7 +60,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "What's a DSCR loan?",
-    a: "A DSCR loan is an investment property loan that qualifies you based on the property's DSCR, not your personal income or W-2. You don't need to provide tax returns or employment verification. Rates are typically 0.5-1.5% higher than conventional, with LTV caps of 75-80% and a DSCR requirement of 1.0-1.25 minimum (sometimes lower for higher-rate / lower-LTV terms).",
+    a: "A DSCR loan is generally a business-purpose investment-property loan that uses the property's coverage as a primary qualifying metric instead of personal DTI. Many programs do not use tax returns or W-2s to calculate that ratio, but documentation, credit, reserves, entity, property, appraisal, insurance, pricing, and leverage requirements vary by lender and program. Clearing a stated DSCR threshold does not guarantee approval.",
   },
   {
     q: "What's NOT included in NOI?",
@@ -80,7 +80,7 @@ export default function DscrCalculatorPage() {
     name: "TrueCap DSCR Calculator",
     applicationCategory: "FinanceApplication",
     operatingSystem: "Web",
-    dateModified: "2026-06-01",
+    dateModified: "2026-08-15",
     url: `${siteUrl}/tools/dscr-calculator`,
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
   };

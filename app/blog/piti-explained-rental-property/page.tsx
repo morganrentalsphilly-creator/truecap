@@ -25,7 +25,7 @@ const SERP_TITLE = "PITI explained: a rental's real payment (2026)";
 const DESCRIPTION =
   "PITI — principal, interest, taxes, insurance — is a rental's real monthly payment. How to estimate each part, handle escrow, and turn it into DSCR.";
 const PUBLISHED_AT = "2026-06-20";
-const MODIFIED_AT = "2026-06-20";
+const MODIFIED_AT = "2026-08-15";
 const READING_TIME = 11;
 
 export const metadata: Metadata = {
@@ -349,7 +349,8 @@ export default function PitiExplainedPost() {
               From PITI to DSCR
             </h2>
             <p>
-              Debt-service coverage ratio is just rent divided by PITIA. Our
+              Some DSCR programs use a rent-to-PITIA ratio, while other
+              lender and investor formulas differ. In this illustration, our
               rental brings $2,100/month and carries $1,647 of PITI (no HOA, so
               PITIA is the same $1,647):
             </p>
@@ -357,12 +358,11 @@ export default function PitiExplainedPost() {
               <strong>DSCR = $2,100 ÷ $1,647 = 1.27.</strong>
             </p>
             <p>
-              That clears the 1.20–1.25 floor most DSCR lenders set, with a
-              little room. Had you fed the lender only the $1,247 P&amp;I, you
-              would have computed a fantasy DSCR of 1.68 and been shocked when
-              the lender&apos;s number came back at 1.27 — the gap is entirely
-              the taxes and insurance. This is why PITI is the load-bearing input
-              for financing a rental. Walk through the full mechanics in{" "}
+              That produces 1.27 under this formula. It does not establish a
+              lender threshold, approval, or pricing. If you used only the
+              $1,247 P&amp;I, the ratio would be 1.68; adding the stated taxes
+              and insurance changes it to 1.27. Ask the lender for its exact
+              formula and current requirements. Walk through the full mechanics in{" "}
               <Link
                 href="/blog/how-to-calculate-dscr"
                 className="text-primary font-semibold hover:underline"

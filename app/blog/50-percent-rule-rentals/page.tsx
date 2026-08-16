@@ -24,7 +24,7 @@ const SERP_TITLE = "The 50% rule for rentals: still useful in 2026?";
 const DESCRIPTION =
   "The classic 50% rule says operating expenses run ~half of gross rent. Honest take on when it actually works as a triage tool, when it lies, and what to do instead for the deals it can't handle.";
 const PUBLISHED_AT = "2026-05-25";
-const MODIFIED_AT = "2026-08-14";
+const MODIFIED_AT = "2026-08-15";
 const READING_TIME = 6;
 
 export const metadata: Metadata = {
@@ -127,7 +127,12 @@ export default function FiftyPercentRulePost() {
 
           <h3 className="text-xl font-extrabold text-foreground mt-8 mb-2">Florida — insurance</h3>
           <p>
-            Post-2022 Florida insurance crisis: typical inland Tampa single-family insurance runs $2,500-4,500/yr, coastal can be $6-12k+. On a $1,900/mo rental, insurance alone hits 11-25% of gross rent. The 50% rule was calibrated for $1-2k annual insurance; FL routinely 3-5x that.
+            Florida premiums can vary sharply by exact location, roof and
+            building characteristics, coverage, wind mitigation, flood
+            exposure, carrier, and renewal date. A statewide or inland-versus-
+            coastal range is not a substitute for an insurable quote. Replace
+            the 50% rule&apos;s implicit insurance allowance with a current quote
+            for the subject property before relying on the screen.
           </p>
           <p>
             See the{" "}

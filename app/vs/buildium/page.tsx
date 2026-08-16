@@ -55,7 +55,7 @@ const MATRIX: Row[] = [
   { feature: "Lifecycle stage", truecap: "Pre-purchase — underwrite the deal", buildium: "Post-purchase — operate at scale", winner: "tie" },
   { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", buildium: "Not modeled", winner: "truecap" },
   { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", buildium: "Not modeled", winner: "truecap" },
-  { feature: "Tax strategy modeling", truecap: "Pro — depreciation + interest + after-tax CF", buildium: "Not modeled", winner: "truecap" },
+  { feature: "Illustrative tax impact", truecap: "Pro — depreciation + interest + modeled after-tax CF", buildium: "Not modeled", winner: "truecap" },
   { feature: "Deal score + verdict", truecap: "Free — 0-100 score + plain-English verdict", buildium: "Not applicable", winner: "truecap" },
   { feature: "Address auto-fill (rent/rate/tax)", truecap: "Yes — HUD + FRED + state property tax", buildium: "Not applicable", winner: "truecap" },
   { feature: "Tenant + lease management at scale", truecap: "No", buildium: "Yes — 50-5000 unit support", winner: "buildium" },
@@ -266,7 +266,7 @@ export default function VsBuildiumPage() {
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
-            Pro unlocks projections, sensitivity, tax strategy, exit scenarios,
+            Pro unlocks projections, sensitivity, illustrative tax impact, modeled exit comparisons,
             MAO, PDF exports, and co-branded share links.
             No card to start.
           </p>

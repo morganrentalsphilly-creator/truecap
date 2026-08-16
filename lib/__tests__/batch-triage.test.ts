@@ -5,12 +5,30 @@ import {
   rankTriageRows,
   buildTriageSnapshot,
   formatTriageRowsAsText,
+  BATCH_UNDERWRITING_MAX_TRIAGE_ROWS,
+  MAX_TRIAGE_ROWS,
+  resolveMaxTriageRows,
   type TriageRowResult,
 } from "@/lib/batch-triage";
 import { EMPTY_BUY_BOX, type NamedBuyBox } from "@/lib/buy-box";
+import { resolveFeatureFlags } from "@/lib/feature-flags";
 
 // ── Parsing ──────────────────────────────────────────────────────────────────
 describe("parseTriageInput", () => {
+  it("supports 50 rows behind the batch-underwriting rollout flag", () => {
+    expect(MAX_TRIAGE_ROWS).toBe(10);
+    expect(
+      resolveMaxTriageRows(resolveFeatureFlags({ batch_underwriting: true }))
+    ).toBe(50);
+    const text = Array.from(
+      { length: BATCH_UNDERWRITING_MAX_TRIAGE_ROWS },
+      (_, i) => `${100 + i} Main St, Philadelphia, PA\t${200_000 + i}\t2000\t3`
+    ).join("\n");
+    const parsed = parseTriageInput(text);
+    expect(parsed.errors).toEqual([]);
+    expect(parsed.rows).toHaveLength(BATCH_UNDERWRITING_MAX_TRIAGE_ROWS);
+  });
+
   it("parses tab-separated rows (spreadsheet paste), $ and thousands commas intact", () => {
     const { rows, errors } = parseTriageInput(
       "1700 W Erie Ave, Philadelphia, PA 19140\t$265,000\t$2,100\t3"

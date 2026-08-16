@@ -48,14 +48,15 @@ interface PricingTogglePlansProps {
   agentProConfigured?: boolean;
   /** Marketing-only Pro name experiment; billing slots stay unchanged. */
   proOfferName?: string;
-  /** Marketing-only one-time price label resolved by the server config. */
-  singleDealPriceLabel?: string;
+  /** Server truth from RATE_ALERTS_MODE. Dormant alert infrastructure must
+   * never appear in the list of benefits a visitor is buying today. */
+  rateAlertsLive?: boolean;
 }
 
 const FREE_FEATURES: { label: string; included: boolean }[] = [
   { label: "Unlimited cash-flow analyses", included: true },
   { label: "Cap rate, CoC, DSCR, monthly cash flow", included: true },
-  { label: "Auto-fill rent + rate + tax from address", included: true },
+  { label: "Auto-fill rent benchmark + owner-occupied rate benchmark + tax estimate", included: true },
   // The personalization wedge, free tier: the strategy lens tunes the
   // verdict/score to the investor's play, and saved defaults pre-fill every
   // new deal. Both are free (signed-in) — claimed here, inherited by Pro
@@ -70,15 +71,14 @@ const FREE_FEATURES: { label: string; included: boolean }[] = [
   // drop the parenthetical without changing that gate — the bare bullet
   // promised editing the product doesn't deliver.
   { label: "Save up to 5 deals (editing saved deals is Pro)", included: true },
-  { label: "Lender-ready PDF export — $5 one-time per deal", included: true },
   { label: "MAO solver", included: false },
   { label: "Sensitivity grid", included: false },
   { label: "Strategies (BRRRR + flip + rehab)", included: false },
   { label: "Shareable read-only deal links", included: true },
   { label: "Personal Verdict — pass/fail against your buy box", included: false },
   { label: "10-year projections", included: false },
-  { label: "Tax strategy", included: false },
-  { label: "Exit scenarios", included: false },
+  { label: "Illustrative tax impact", included: false },
+  { label: "Modeled exit comparisons", included: false },
   { label: "Compare deals", included: false },
   { label: "Custom PDF branding (logo, color, contact)", included: false },
 ];
@@ -125,8 +125,8 @@ const PRO_OUTCOMES: { outcome: string; items: string[] }[] = [
     outcome: "Underwrite deeper",
     items: [
       "10-year cash flow + equity projection",
-      "Tax strategy: depreciation + interest modeling",
-      "Exit scenarios: best year to sell",
+      "Illustrative tax impact: depreciation + interest modeling",
+      "Modeled exit comparison: highest profit under your assumptions",
       "Strategies — BRRRR, fix-and-flip, rehab estimator",
     ],
   },
@@ -146,7 +146,6 @@ const PRO_OUTCOMES: { outcome: string; items: string[] }[] = [
       "Lender · partner · personal PDF reports, with comps",
       "Custom PDF branding — your logo, color, contact",
       "Co-branded share links with lead capture",
-      "Priority email support",
     ],
   },
 ];
@@ -175,7 +174,7 @@ export function PricingTogglePlans({
   hadPriorSubscription,
   agentProConfigured = false,
   proOfferName = "TrueCap Pro",
-  singleDealPriceLabel = "$5",
+  rateAlertsLive = false,
 }: PricingTogglePlansProps) {
   // One decision for every trial mention on this card — must match what
   // checkout actually grants (billing.ts denies the trial to anyone with
@@ -348,9 +347,7 @@ export function PricingTogglePlans({
                       : "text-muted-foreground/60 line-through"
                   }
                 >
-                  {f.label.startsWith("Lender-ready PDF export")
-                    ? `Single-Deal Underwrite — ${singleDealPriceLabel} one-time`
-                    : f.label}
+                  {f.label}
                 </span>
               </li>
             ))}
@@ -395,7 +392,7 @@ export function PricingTogglePlans({
 
           {/* Monthly ↔ Annual toggle */}
           <div
-            role="tablist"
+            role="group"
             aria-label="Billing period"
             className="mt-4 inline-flex rounded-full border border-border bg-muted/40 p-1"
           >
@@ -403,27 +400,25 @@ export function PricingTogglePlans({
                 total height. Was py-1.5 text-xs (~24pt) which was
                 undersized for a key conversion CTA. */}
             <button
-              role="tab"
               type="button"
-              aria-selected={period === "monthly"}
+              aria-pressed={period === "monthly"}
               onClick={() => setPeriod("monthly")}
               className={
                 period === "monthly"
-                  ? "rounded-full bg-card px-4 py-2.5 text-sm font-bold text-foreground shadow-sm"
-                  : "rounded-full px-4 py-2.5 text-sm font-semibold text-muted-foreground hover:text-foreground"
+                  ? "min-h-11 rounded-full bg-card px-4 py-2.5 text-sm font-bold text-foreground shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  : "min-h-11 rounded-full px-4 py-2.5 text-sm font-semibold text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               }
             >
               Monthly
             </button>
             <button
-              role="tab"
               type="button"
-              aria-selected={period === "annual"}
+              aria-pressed={period === "annual"}
               onClick={() => setPeriod("annual")}
               className={
                 period === "annual"
-                  ? "inline-flex items-center gap-1.5 rounded-full bg-card px-4 py-2.5 text-sm font-bold text-foreground shadow-sm"
-                  : "inline-flex items-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-semibold text-muted-foreground hover:text-foreground"
+                  ? "inline-flex min-h-11 items-center gap-1.5 rounded-full bg-card px-4 py-2.5 text-sm font-bold text-foreground shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  : "inline-flex min-h-11 items-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-semibold text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               }
             >
               Annual
@@ -484,7 +479,12 @@ export function PricingTogglePlans({
           )}
           <p className="mt-6 text-sm font-semibold text-foreground">Everything in Free, plus —</p>
           <div className="mt-3 space-y-4">
-            {PRO_OUTCOMES.map((group) => (
+            {PRO_OUTCOMES.map((group) => ({
+              ...group,
+              items: group.items.filter(
+                (item) => rateAlertsLive || !item.startsWith("Rate-drop alerts")
+              ),
+            })).map((group) => (
               <div key={group.outcome}>
                 <p className="text-[11px] font-bold uppercase tracking-widest text-primary">
                   {group.outcome}

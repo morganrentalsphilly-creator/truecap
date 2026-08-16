@@ -2,7 +2,7 @@
 
 /**
  * Batch triage UI (Phase 4, batch 3) — paste listings → a screened
- * shortlist. Pro power tool: the 10-deals/week workflow. Underwriting +
+ * shortlist. Pro power tool: up to 50 opportunities in one workflow. Underwriting +
  * ranking live in the pure lib/batch-triage engine (client-safe), reached
  * through the Pro-gated screenBatchAction. Re-sorting is instant + local
  * (rankTriageRows is pure) — no server round-trip once the batch is screened.

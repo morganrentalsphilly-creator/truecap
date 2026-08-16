@@ -38,7 +38,7 @@ const SERP_TITLE = "How Much Money to Buy a Rental Property (2026)";
 const DESCRIPTION =
   "A $150K, $300K, and $500K rental need about $50,700, $89,400, and $142,200 in cash — 1.4 to 1.7x the down payment. Full line-item math for each tier.";
 const PUBLISHED_AT = "2026-08-02";
-const MODIFIED_AT = "2026-08-02";
+const MODIFIED_AT = "2026-08-15";
 const READING_TIME_MIN = 12;
 
 export const metadata: Metadata = {
@@ -605,14 +605,13 @@ export default function BlogPost() {
 
           <h2 className="text-2xl sm:text-3xl">DSCR loans and all-cash: how the number moves</h2>
           <p>
-            <strong>DSCR loans</strong> qualify the property rather than your
-            income, which is why investors reach for them when personal DTI is
-            tapped out. They do not reduce the cash requirement — usually the
-            opposite. Expect 20-25% down, six months of reserves (sometimes
-            three at lower LTV), origination of 1-2% rather than 1%, and a rate
-            0.75-1.5 points above conventional. On the Tier 2 house at 25% down
-            with a 1.5% origination fee, that pushes total cash past $105,000
-            and the DSCR down further.{" "}
+            <strong>DSCR loans</strong> use property coverage instead of
+            personal DTI as the primary ratio under many programs, while still
+            applying borrower and property requirements. They do not
+            necessarily reduce the cash requirement: leverage, reserves,
+            points, rate, and prepayment terms are quote- and program-specific.
+            Run the Tier 2 house with the actual written term sheet rather than
+            assuming a standard premium or reserve requirement.{" "}
             <Link href="/blog/dscr-loans-explained" className="text-primary font-semibold hover:underline">
               The DSCR-loan mechanics
             </Link>{" "}

@@ -313,10 +313,10 @@ describe("buildDealScoreInputFromAnalysis — end-to-end wiring", () => {
     expect(["Risky", "Avoid"]).toContain(r.recommendation);
   });
 
-  it("still rescues an appreciation play that genuinely covers itself after tax", () => {
-    // Same low-money-down shape with rent at the after-tax break-even:
-    // pre-tax slightly negative, SIGNED after-tax positive, strong 10-year
-    // return — the exact case the appreciation-play floor exists for.
+  it("does not let an illustrative tax benefit rescue negative pre-tax carry", () => {
+    // Passive-loss usability is taxpayer-specific. The production builder
+    // deliberately feeds pre-tax carry into Deal Fit even when the separate
+    // illustrative view happens to show a positive signed tax effect.
     const values = baseSingleFamily({
       downPaymentPct: 3,
       mgmtPct: 8,
@@ -329,12 +329,10 @@ describe("buildDealScoreInputFromAnalysis — end-to-end wiring", () => {
 
     expect(result.netCashFlow).toBeLessThan(0);
     expect(result.afterTaxCF).toBeGreaterThanOrEqual(0);
-    expect(scoreInput.tenYearAnnualizedReturnPct ?? 0).toBeGreaterThan(12);
+    expect(scoreInput.afterTaxMonthlyCashFlow).toBe(result.netCashFlow);
 
     const r = computeDealScore(scoreInput);
-    expect(r.recommendation).not.toBe("Avoid");
-    expect(r.recommendation).not.toBe("Risky");
-    expect(r.score).toBeGreaterThanOrEqual(35);
+    expect(["Risky", "Avoid"]).toContain(r.recommendation);
   });
 });
 

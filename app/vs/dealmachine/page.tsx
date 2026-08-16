@@ -54,7 +54,7 @@ const MATRIX: Row[] = [
   { feature: "Primary purpose", truecap: "Per-deal underwriting calculator", dealmachine: "Mobile lead generation + skip-tracing", winner: "tie" },
   { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", dealmachine: "Not modeled", winner: "truecap" },
   { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", dealmachine: "Not modeled", winner: "truecap" },
-  { feature: "Tax strategy modeling", truecap: "Pro — depreciation + interest + after-tax CF", dealmachine: "Not modeled", winner: "truecap" },
+  { feature: "Illustrative tax impact", truecap: "Pro — depreciation + interest + modeled after-tax CF", dealmachine: "Not modeled", winner: "truecap" },
   { feature: "Deal score + verdict", truecap: "Free — 0-100 score + plain-English verdict", dealmachine: "Not applicable", winner: "truecap" },
   { feature: "Address auto-fill (rent/rate/tax)", truecap: "Yes — HUD + FRED + state property tax", dealmachine: "Property data only", winner: "truecap" },
   { feature: "Driving for dollars / mobile lead capture", truecap: "No", dealmachine: "Yes — photo + instant owner lookup", winner: "dealmachine" },
@@ -65,7 +65,7 @@ const MATRIX: Row[] = [
   { feature: "Free tier", truecap: "Yes — full underwriting math", dealmachine: "Trial only ($59-99/mo paid)", winner: "truecap" },
   { feature: "Pricing (entry tier)", truecap: "Free; Pro $29.99/mo", dealmachine: "Starter ~$59/mo, Pro ~$99/mo (as of 2026)", winner: "truecap" },
   { feature: "Shareable read-only deal link", truecap: "Free — read-only public link; Pro adds co-branding", dealmachine: "Internal-only data", winner: "truecap" },
-  { feature: "Lender-ready PDF", truecap: "Pro — multi-page report", dealmachine: "Not the use case", winner: "truecap" },
+  { feature: "Lender-facing PDF", truecap: "Pro — multi-page report", dealmachine: "Not the use case", winner: "truecap" },
 ];
 
 export default function VsDealmachinePage() {
@@ -269,7 +269,7 @@ export default function VsDealmachinePage() {
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
-            Pro unlocks projections, sensitivity, tax strategy, exit scenarios,
+            Pro unlocks projections, sensitivity, illustrative tax impact, modeled exit comparisons,
             MAO, PDF exports, and co-branded share links.
             No card to start.
           </p>

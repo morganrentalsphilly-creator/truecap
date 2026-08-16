@@ -144,7 +144,7 @@ export default function AboutPage() {
               paid plan
             </Link>{" "}
             adds saved deals, a portfolio dashboard, deal comparison, and
-            lender-ready PDF exports.
+            lender-facing Deal Decision Pack exports.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">Get in touch</h2>

@@ -171,6 +171,7 @@ export async function openSavedDealInAnalysisTab(
   const nonce = writeNonceKeyedHandoffPayload(SAVED_ANALYSIS_EDIT_DRAFT_KEY, {
     id: result.id,
     schemaVersion: result.schemaVersion,
+    methodologyVersion: result.methodologyVersion,
     formSnapshot: result.formSnapshot,
     templateFallback: result.templateFallback,
     resultSnapshot: result.resultSnapshot,

@@ -29,7 +29,7 @@ export type CombinedCityStrategy = {
   pitch: string;
   /** Why this strategy specifically fits THIS city right now. */
   whyHereWhyNow: string;
-  /** Realistic numbers for a typical deal in this combo. */
+  /** Illustrative orientation ranges that require property-specific verification. */
   typicalNumbers: {
     purchasePrice: string;
     monthlyRent: string;
@@ -53,14 +53,14 @@ export const CITY_STRATEGY_COMBOS: CombinedCityStrategy[] = [
     strategy: "brrrr",
     strategyLabel: "BRRRR",
     pitch:
-      "Philadelphia is one of the best BRRRR markets in the country — old housing stock, plentiful distressed inventory, and a refinance market that supports ARV-driven cash-outs in gentrifying neighborhoods.",
+      "Philadelphia's older housing stock and distressed inventory can create BRRRR candidates, but the completed value and refinance proceeds depend on the property, rehab, closed comps, seasoning, appraisal, and lender terms.",
     whyHereWhyNow:
-      "Philly's pre-WW2 rowhouse inventory creates constant BRRRR opportunities. Distressed acquisition prices in B-class neighborhoods range $80-180k, rehab budgets $30-70k, and ARVs in gentrifying zones like Fishtown, Brewerytown, and Point Breeze support 75% LTV cash-out refis that recycle most of your capital. The post-rehab cash flow + appreciation tailwind in these neighborhoods makes Philly one of the few BRRRR markets where the math still pencils consistently.",
+      "Philly's pre-WW2 rowhouse inventory gives investors many properties to screen. Treat acquisition, rehab, rent, ARV, and refinance ranges as hypotheses: verify the address with current closed comps, contractor bids, permit timing, and a written lender scenario before committing.",
     typicalNumbers: {
       purchasePrice: "$95-165k acquisition",
       monthlyRent: "$1,400-2,200 post-rehab",
       capRate: "7.5-9.5% post-rehab",
-      notes: "All-in (purchase + rehab + holding) typically $145-225k. ARV in gentrifying zones: $185-275k. Cash-out refi at 75% LTV recycles 80-100% of capital.",
+      notes: "Illustrative orientation only. Model purchase, rehab, holding time, supported ARV, lender LTV, seasoning, and an appraisal downside; capital returned at refinance can be materially lower than modeled.",
     },
     neighborhoods: [
       { name: "Fishtown", why: "Gentrified core — appreciation strong but acquisition prices already up. BRRRR works on remaining un-renovated stock." },
@@ -71,9 +71,9 @@ export const CITY_STRATEGY_COMBOS: CombinedCityStrategy[] = [
     pitfalls: [
       "Lead paint disclosure on pre-1978 properties — required and adds compliance work",
       "Older systems (knob-and-tube electrical, galvanized supply lines, cast-iron drains) inflate rehab budgets — budget 20-30% over your initial estimate",
-      "Appraisals in some Philly zip codes lag comps by 5-7% — build a haircut into your ARV assumption",
-      "Long permitting process for major rehabs — budget 6-9 months from purchase to refi, not 3-4",
-      "Eviction process slower than landlord-friendly states (45-75 days) — affects holding-cost math",
+      "Do not assume the planned ARV will appraise; support it with relevant closed comps and explicit downside values",
+      "Permit and inspection timing varies by scope and agency workload — confirm the current process and carry a delay scenario",
+      "Landlord-tenant procedure and timing are case-specific — use current local counsel or official court guidance rather than a fixed eviction timeline",
     ],
     relatedPosts: ["house-hacking-explained", "spot-bad-rental-in-60-seconds"],
   },
@@ -84,14 +84,14 @@ export const CITY_STRATEGY_COMBOS: CombinedCityStrategy[] = [
     strategy: "house-hack",
     strategyLabel: "house hacking",
     pitch:
-      "Philly's 2-4 unit rowhouse inventory makes it one of the top house-hacking markets in the country. FHA 3.5% down on a $300-450k triplex covers most of your housing cost from day one — and converts to a full cash-flowing rental when you move out.",
+      "Philly's 2-4 unit rowhouse inventory gives owner-occupants house-hack candidates to screen. Financing eligibility and the owner's housing cost depend on the property, supported rents, borrower, occupancy, insurance, taxes, and current program terms.",
     whyHereWhyNow:
       "Philadelphia has more 2-4 unit residential properties per capita than nearly any major US city. Combined with FHA-financeable entry points ($300-450k for solid duplexes/triplexes in livable neighborhoods) and PA's relatively flat 3.07% state income tax, the house-hack math works particularly well here for first-time investors building their portfolio.",
     typicalNumbers: {
       purchasePrice: "$300-450k for 2-3 unit",
       monthlyRent: "$1,400-1,950 per unit",
       capRate: "True out-of-pocket: $200-600/mo for your unit (vs ~$1,500/mo market rent)",
-      notes: "FHA 3.5% down ($10.5-15.75k) or conventional 5% ($15-22.5k). Year 2: move out, rent your unit, cash flow flips positive.",
+      notes: "Illustrative financing screen only. Confirm occupancy, property eligibility, down payment, reserves, mortgage insurance, supported rents, and post-move cash flow with the lender and current property evidence.",
     },
     neighborhoods: [
       { name: "Fishtown / Northern Liberties", why: "Walkable, livable, strong rental demand — premium house-hack neighborhood" },
@@ -117,14 +117,14 @@ export const CITY_STRATEGY_COMBOS: CombinedCityStrategy[] = [
     strategy: "cash-flow",
     strategyLabel: "cash flow",
     pitch:
-      "Cleveland is the gold standard cash-flow market in the US. Entry prices of $80-150k combined with rents of $1,100-1,500 produce cap rates of 8-11% that simply don't exist in most other major metros.",
+      "Cleveland's lower entry prices can produce cash-flow candidates, but cap rate and cash flow vary substantially by block, property condition, tenant profile, taxes, insurance, vacancy, and management execution.",
     whyHereWhyNow:
-      "Cleveland's housing market never recovered the way coastal markets did — meaning entry prices stayed accessible while rental demand stayed real. The 1% rule clears regularly here (rent ≥ 1% of price). Insurance is among the most stable in the country. Property tax is reasonable. The combination produces the most reliable buy-and-hold cash flow in the country — for investors who can stomach modest appreciation and the operational nuances of older urban housing stock.",
+      "Cleveland's accessible prices and older rental stock make it a frequent cash-flow screen. Do not infer a reliable return from city-level price-to-rent ranges: verify achievable rent, tax, insurance, condition, vacancy, management, and near-term capital work for the address.",
     typicalNumbers: {
       purchasePrice: "$85-145k typical",
       monthlyRent: "$1,100-1,550",
       capRate: "8-11% in B+ neighborhoods, higher in C-class",
-      notes: "Monthly NCF of $400-800 common on financed deals. Insurance ~$70-100/mo. Property tax ~$130-200/mo. Modest appreciation (1-2.5%/yr).",
+      notes: "Illustrative orientation only. Replace the rent, tax, insurance, financing, vacancy, management, capex, and appreciation assumptions with current property-specific evidence.",
     },
     neighborhoods: [
       { name: "Old Brooklyn", why: "B+ stable neighborhood, owner-occupant friendly, low turnover — investor sweet spot" },
@@ -134,10 +134,10 @@ export const CITY_STRATEGY_COMBOS: CombinedCityStrategy[] = [
     ],
     pitfalls: [
       "Pre-WW2 housing stock means year-1 capex is real — budget 4-6% of purchase price for the first year",
-      "Cleveland appraisals run 3-7% under-comp on rehabbed properties (affects BRRRR but also resale)",
+      "A rehabbed property's appraisal can differ from the planned ARV; support the assumption with independent closed comps and downside scenarios",
       "Some neighborhoods have block-by-block quality variation — walk before you buy",
-      "Property tax appeals in Cuyahoga County require a hearing — but the success rate is high when armed with comps",
-      "Out-of-state investors should ALWAYS use a vetted PM — Cleveland's nuances are not Florida's",
+      "Do not assume a property-tax appeal will succeed; verify the current county procedure and support any filing with property-specific evidence",
+      "Out-of-state owners should price and vet local management rather than assume remote operations will be passive",
     ],
     relatedPosts: ["50-percent-rule-rentals", "what-is-a-good-cap-rate"],
   },
@@ -148,27 +148,27 @@ export const CITY_STRATEGY_COMBOS: CombinedCityStrategy[] = [
     strategy: "brrrr",
     strategyLabel: "BRRRR",
     pitch:
-      "Cleveland BRRRR works if you build a 5-7% appraisal haircut into your ARV planning. Distressed inventory is plentiful; the challenge is getting refi appraisers to value the rehab at full comp.",
+      "Cleveland BRRRR outcomes depend on acquisition basis, rehab execution, rent, lender terms, and the independent appraisal. Do not assume a standard market-wide appraisal haircut; test multiple ARV and refinance scenarios.",
     whyHereWhyNow:
-      "Cleveland has the distressed inventory + rehab labor cost structure that supports BRRRR economics. The catch unique to Cleveland: appraisers consistently come in 5-7% below recent comps on freshly-rehabbed properties. If you plan for ARV $145k and the appraisal comes in at $135k, your 75% LTV refi pulls out $7,500 less than you modeled. Investors who succeed here build that haircut into the underwrite from day one.",
+      "Cleveland has older housing stock and distressed inventory that can create BRRRR candidates, but neither the completed value nor refinance proceeds are guaranteed. Build the ARV from relevant closed comps, document the rehab scope, ask the lender how value and seasoning will be handled, and run explicit appraisal-downside cases before committing.",
     typicalNumbers: {
       purchasePrice: "$45-80k distressed acquisition",
       monthlyRent: "$1,200-1,500 post-rehab",
       capRate: "9-12% on the BRRRR-completed property",
-      notes: "Rehab $25-50k. All-in $80-130k. ARV (with 5-7% haircut) $125-150k. Refi at 75% pulls $95-115k — recycles 90-100% of capital on well-executed deals.",
+      notes: "Illustrative screening ranges only. Verify the purchase, scope, rent, closed comps, seasoning, lender LTV, and appraisal; a BRRRR refinance may return less capital than modeled.",
     },
     neighborhoods: [
-      { name: "Detroit-Shoreway", why: "Gentrifying — appraisals more accurate, ARV less haircut" },
-      { name: "Old Brooklyn", why: "Stable comps, predictable ARV, lower upside but lower risk" },
+      { name: "Detroit-Shoreway", why: "Research current closed comps, rehab demand, and block-level variation" },
+      { name: "Old Brooklyn", why: "Research closed-comp depth, property condition, and rent support" },
       { name: "Tremont", why: "Already gentrified — fewer distressed deals but cleaner appraisals" },
       { name: "Cudell / Edgewater", why: "Earlier gentrification cycle; risk-reward higher" },
     ],
     pitfalls: [
-      "5-7% appraisal haircut on rehabbed properties — build into underwrite from day one",
+      "Do not assume the planned ARV will appraise; run explicit downside values and size refinance proceeds from each case",
       "Rehab cost variance higher than newer-stock markets (older systems mean surprises)",
       "Foundation issues common in pre-1940 Cleveland houses — get a structural opinion before buying",
       "Some lenders require 6+ months of seasoning before cash-out refi — affects capital recycling speed",
-      "Cleveland inspectors are thorough — code-compliance costs in older homes can add $3-8k",
+      "Code-compliance scope and cost are property-specific — verify permits, inspection history, and required work before closing",
     ],
     relatedPosts: ["spot-bad-rental-in-60-seconds"],
   },
@@ -181,14 +181,14 @@ export const CITY_STRATEGY_COMBOS: CombinedCityStrategy[] = [
     strategy: "cash-flow",
     strategyLabel: "cash flow",
     pitch:
-      "Indianapolis is the most consistent buy-and-hold cash flow market in the Midwest — boring, reliable, and rarely surprising. The 1% rule clears in many neighborhoods, and the operational nuances are less than Cleveland.",
+      "Indianapolis is often screened for buy-and-hold cash flow because of its entry prices and rental stock, but address-level rent, condition, taxes, insurance, and operations determine whether a deal works.",
     whyHereWhyNow:
-      "Indianapolis combines lower entry prices, stable demographics, low insurance volatility, and a flat 3.05% state income tax to produce reliable cash flow without the operational complexity of Cleveland or Detroit. Cap rates of 7-9% are achievable in B+ neighborhoods. Indianapolis is the market most experienced investors recommend for first-time out-of-state buyers learning cash flow.",
+      "Indianapolis combines relatively accessible entry prices with a sizable rental market. Treat citywide cap-rate and insurance descriptions as screening context only, and verify current rent, property tax, insurance, management, condition, and owner-specific tax treatment.",
     typicalNumbers: {
       purchasePrice: "$150-225k typical",
       monthlyRent: "$1,400-1,800",
       capRate: "7-9% in B+ neighborhoods",
-      notes: "Monthly NCF $400-700 common. Property tax ~$150-200/mo. Modest 2-3%/yr appreciation. Lower management overhead than Cleveland.",
+      notes: "Illustrative orientation only. Replace cash flow, tax, appreciation, and management assumptions with current property- and operator-specific evidence.",
     },
     neighborhoods: [
       { name: "Mars Hill", why: "Working-class neighborhood, strong rental demand, cap rates in the 7-8% range" },
@@ -212,27 +212,27 @@ export const CITY_STRATEGY_COMBOS: CombinedCityStrategy[] = [
     strategy: "section-8",
     strategyLabel: "Section 8",
     pitch:
-      "Indianapolis has multiple zip codes where Section 8 Fair Market Rent meaningfully exceeds market rent — making voucher tenants more profitable than market-rate tenants for properly-positioned properties.",
+      "Indianapolis voucher economics are property- and program-specific. Compare the applicable payment standard, utility allowance, rent-reasonableness decision, tenant portion, inspection timing, and achievable unassisted rent before choosing a lease strategy.",
     whyHereWhyNow:
-      "The Indianapolis Housing Agency administers the local Section 8 program with reasonable processes and reliable payment. In specific zones (parts of Mars Hill, Crown Hill, Lee-Harvard) FMR runs 10-18% above market rent. Combined with the HUD-paid guaranteed portion of rent and reasonable inspection requirements, voucher rentals can produce more stable returns than market-rate equivalents.",
+      "HUD FMR is a benchmark, not an approved rent or a promise of collections. Obtain the current local payment standard and utility allowance, ask the administering housing authority about timing and inspections, and support requested rent with current unassisted comps. Model the housing-assistance and tenant portions separately, including abatement and collection risk.",
     typicalNumbers: {
       purchasePrice: "$120-180k",
-      monthlyRent: "$1,300-1,650 (FMR rate)",
-      capRate: "8-10% with voucher premium",
-      notes: "Market rent in same property: $1,150-1,400. FMR premium: $150-250/mo. Voucher portion paid by housing authority direct deposit.",
+      monthlyRent: "Property-specific approved contract rent",
+      capRate: "Scenario-based after verified rent and costs",
+      notes: "Do not treat FMR as market rent or approved contract rent. Verify the current PHA inputs, unassisted comps, tenant portion, inspection timing, payment terms, and property expenses.",
     },
     neighborhoods: [
-      { name: "Mars Hill", why: "FMR premium ~15% over market rent; strong voucher demand" },
-      { name: "Crown Hill", why: "Working-class, voucher-friendly zoning, decent stock" },
-      { name: "Eagle Ledge", why: "Newer construction option for voucher tenants, lower capex" },
-      { name: "Far Eastside (Lawrence)", why: "Lower entry prices, voucher-supported demand" },
+      { name: "Mars Hill", why: "Compare current payment standards, unassisted comps, inspection condition, and demand" },
+      { name: "Crown Hill", why: "Verify current payment standards, property condition, and block-level rent support" },
+      { name: "Eagle Ledge", why: "Research property age, inspection readiness, expenses, and current program demand" },
+      { name: "Far Eastside (Lawrence)", why: "Verify entry price, unassisted comps, payment standard, and management capacity" },
     ],
     pitfalls: [
-      "Annual Housing Quality Standards (HQS) inspections require prep work — budget $200-500/yr per unit",
-      "Initial lease-up takes 30-60 days for housing authority paperwork — vs 14-30 for market-rate",
-      "Cannot raise rent mid-lease — limits responsiveness to market changes",
-      "Some voucher tenants have higher turnover (life-stage instability) — budget vacancy realistically",
-      "Tenant screening rules differ from market-rate — you can't reject for some standard reasons",
+      "Inspection standards, frequency, cure periods, and preparation cost vary — confirm the current PHA process",
+      "Lease-up timing varies with paperwork, inspection, rent approval, and agency workload — carry a delay scenario",
+      "Rent changes require contract and program compliance — confirm timing and approval rules with the PHA",
+      "Use property and manager history to set vacancy and collection assumptions; do not infer them from voucher status",
+      "Screening and source-of-income rules vary by jurisdiction and program — use current written policy and local legal guidance",
     ],
     relatedPosts: ["50-percent-rule-rentals"],
   },
@@ -245,14 +245,14 @@ export const CITY_STRATEGY_COMBOS: CombinedCityStrategy[] = [
     strategy: "turnkey",
     strategyLabel: "turnkey",
     pitch:
-      "Memphis has the deepest turnkey rental market in the country — rehabbed properties with tenants in place, ready for absentee owners. Done right, it's a hands-off cash-flow play. Done wrong, it's a magnet for the seller-friendly turnkey trap.",
+      "Memphis has an established turnkey-rental ecosystem, but 'turnkey' describes a sales model, not rehab quality, tenant performance, management quality, or a passive return.",
     whyHereWhyNow:
-      "Memphis has more dedicated turnkey operators than any other US market. The combination of low entry prices ($90-160k), tenant-friendly demand, no state income tax, and an established PM ecosystem makes it the default destination for first-time out-of-state cash-flow investors. The catch: 'turnkey' is a sales category, not a quality guarantee. The good operators produce reliable 8-10% cash-on-cash returns; the bad ones overprice rehabs and place marginal tenants in cosmetically-painted properties.",
+      "Memphis gives out-of-state buyers many operators and properties to compare. Independently verify the purchase price, completed scope, permits, inspection, lease, payment history, rent support, manager agreement, reserves, and current insurance; operator projections are not evidence of an achievable return.",
     typicalNumbers: {
       purchasePrice: "$95-160k turnkey priced",
       monthlyRent: "$1,000-1,400",
-      capRate: "7-9% true cap rate (after honest vacancy + capex)",
-      notes: "Paper cap rates often quoted at 10-12% but real cap drops 2-4 points after honest assumptions. CoC 8-10% on financed deals.",
+      capRate: "Scenario-based after verified expenses",
+      notes: "Treat seller cap-rate and cash-on-cash figures as marketing until every income, expense, financing, vacancy, management, and capex input is independently supported.",
     },
     neighborhoods: [
       { name: "Berclair", why: "Working-class, strong rental demand, voucher-friendly" },
@@ -261,10 +261,10 @@ export const CITY_STRATEGY_COMBOS: CombinedCityStrategy[] = [
       { name: "High Point Terrace", why: "Stable middle-class neighborhood, lower turnover" },
     ],
     pitfalls: [
-      "Real Memphis vacancy runs 8-12%, not the 5% turnkey sellers quote — verify in your underwrite",
-      "Verify EVERY claim about tenant payment history (some turnkey operators place marginal tenants to inflate occupancy)",
+      "Do not substitute a citywide vacancy percentage for the property's and manager's records; verify collections, turnover, and downtime",
+      "Verify every claim about the current lease and payment history against source documents and collected funds",
       "Rehab quality varies dramatically — pay for an independent inspection BEFORE closing, never rely on the operator's",
-      "PM selection is the entire game in Memphis — vet 3+ before signing",
+      "Management materially affects the result — compare scope, fees, controls, references, and termination terms before signing",
       "Some zip codes have insurance-disqualifying issues (vacancy/arson history) — quote insurance independently",
     ],
     relatedPosts: ["spot-bad-rental-in-60-seconds", "property-management-yes-or-no"],
@@ -278,14 +278,14 @@ export const CITY_STRATEGY_COMBOS: CombinedCityStrategy[] = [
     strategy: "brrrr",
     strategyLabel: "BRRRR",
     pitch:
-      "Atlanta BRRRR works in gentrifying intown neighborhoods where ARV appreciation has run for 3-5 years. East Atlanta Village, Kirkwood, and parts of West End offer real BRRRR upside when executed with conservative ARV assumptions.",
+      "Atlanta's changing intown neighborhoods can contain BRRRR candidates, but acquisition basis, rehab execution, supported ARV, seasoning, appraisal, rent, and lender terms decide the result.",
     whyHereWhyNow:
-      "Atlanta's intown gentrification has been steady through 2020-2025, creating a continuous flow of BRRRR opportunities in neighborhoods that haven't yet fully gentrified. Combined with GA's landlord-friendly law, fast eviction process, and diverse economic base, Atlanta is one of the more reliable BRRRR markets in the Sun Belt. The challenge: appraisals in actively-gentrifying neighborhoods can lag rapid comp growth — build a buffer.",
+      "Atlanta's older stock and changing neighborhoods give investors properties to screen, but neither neighborhood momentum nor legal labels establish an outcome. Use current closed comps, contractor bids, permit timing, rent evidence, local legal guidance, and appraisal-downside cases.",
     typicalNumbers: {
       purchasePrice: "$140-220k distressed acquisition",
       monthlyRent: "$1,800-2,400 post-rehab",
       capRate: "6-8% post-rehab",
-      notes: "Rehab $40-80k. All-in $200-300k. ARV in gentrifying intown $260-360k. Refi at 75% pulls $195-270k.",
+      notes: "Illustrative orientation only. Verify rehab, holding time, supported ARV, seasoning, lender LTV, appraisal, rent, and expenses before estimating refinance proceeds.",
     },
     neighborhoods: [
       { name: "East Atlanta Village", why: "Gentrified core — appreciation real, distressed inventory still available" },
@@ -294,7 +294,7 @@ export const CITY_STRATEGY_COMBOS: CombinedCityStrategy[] = [
       { name: "Decatur (East Lake)", why: "Adjacent to Decatur city, school-district premium" },
     ],
     pitfalls: [
-      "Atlanta appraisals in fast-gentrifying neighborhoods can lag 3-6 months — build a 5% ARV haircut",
+      "Fast-changing neighborhoods can have thin or stale closed comps; support ARV with current evidence and downside cases",
       "Property crime higher in some BRRRR-target neighborhoods — verify on walks before committing",
       "Rehab labor cost up 20-30% in Atlanta since 2020 — budget current pricing not 2022 numbers",
       "Long-tail school district effects on resale — verify before committing in family-target neighborhoods",
@@ -311,14 +311,14 @@ export const CITY_STRATEGY_COMBOS: CombinedCityStrategy[] = [
     strategy: "house-hack",
     strategyLabel: "house hacking",
     pitch:
-      "Kansas City offers some of the best house-hacking economics in the country — moderate entry prices, strong rental demand in walkable neighborhoods, and a market where the 'live free' math actually works in year 1, not just year 2.",
+      "Kansas City has duplexes and small multifamily properties that owner-occupants can screen for house hacking. The owner's housing cost and later rental result depend on the address, supported rents, financing, expenses, condition, and occupancy rules.",
     whyHereWhyNow:
-      "KC's combination of $200-380k duplexes in livable urban neighborhoods (Brookside, Waldo, Volker, Westport) and rental demand from young professionals + university students makes house-hacking unusually accessible. FHA 3.5% or conventional 5% down covers a duplex with rental income that often produces near-zero true out-of-pocket housing cost from month one. Year 2 (when you move out) the property converts to strong cash-flow rental.",
+      "KC's duplex inventory and renter demand make house hacking worth modeling. Confirm property and borrower eligibility, supported rent, owner-occupancy requirements, taxes, insurance, reserves, condition, and the full payment before estimating an out-of-pocket housing cost.",
     typicalNumbers: {
       purchasePrice: "$280-420k for 2-3 unit",
       monthlyRent: "$1,200-1,700 per unit",
       capRate: "True out-of-pocket: $0-400/mo for your unit",
-      notes: "FHA 3.5% ($9.8-14.7k down) or conventional 5% ($14-21k). Year 2 conversion to pure rental yields ~$600-900/mo NCF.",
+      notes: "Illustrative financing screen only. Obtain current loan terms and verify rent and every expense; moving out later does not guarantee positive rental cash flow.",
     },
     neighborhoods: [
       { name: "Brookside", why: "Walkable, university-adjacent, premium house-hack neighborhood" },
@@ -330,7 +330,7 @@ export const CITY_STRATEGY_COMBOS: CombinedCityStrategy[] = [
       "Jackson County tax appeals have been heavily filed since 2023 reassessment — budget for appeal process",
       "Older 2-4 unit properties often have shared utility metering — fix before tenant placement or live with the negotiation",
       "Some KC neighborhoods have block-by-block variation — walk before buying",
-      "Tornado risk is real but stable — insurance accounts for it; no surprises",
+      "Weather exposure and coverage terms are property- and carrier-specific — obtain a current quote and review exclusions",
       "Conversion to pure rental in year 2 requires PM selection — start vetting before year 1 ends",
     ],
     relatedPosts: ["house-hacking-explained"],
@@ -344,23 +344,23 @@ export const CITY_STRATEGY_COMBOS: CombinedCityStrategy[] = [
     strategy: "brrrr",
     strategyLabel: "BRRRR",
     pitch:
-      "Detroit has the largest distressed-property inventory in the country and the biggest BRRRR upside — for investors who can manage extreme block-by-block neighborhood variation and budget for appraisals that consistently lag rehabbed-property comps.",
+      "Detroit's distressed inventory creates BRRRR candidates, but extreme block-by-block variation, title, rehab execution, rent support, appraisal, and lender terms make property-level verification essential.",
     whyHereWhyNow:
-      "Detroit's housing recovery has been real but uneven. East English Village, Bagley, Boston-Edison, and Sherwood Forest neighborhoods have appreciated 8-12%/yr since 2018, with distressed inventory still available at $30-80k entry prices. Rehab budgets of $30-60k produce ARVs of $130-180k in gentrifying zones. The two persistent challenges: appraisers value rehabbed Detroit properties 5-10% below comp prices, AND block-by-block neighborhood quality variation is extreme.",
+      "Detroit's recovery has been uneven, so citywide appreciation or appraisal-haircut claims are not safe underwriting inputs. Build the acquisition, scope, rent, ARV, title, tax, and refinance cases from current address-level evidence and run meaningful downside scenarios.",
     typicalNumbers: {
       purchasePrice: "$35-85k distressed acquisition",
       monthlyRent: "$1,200-1,650 post-rehab",
       capRate: "9-12% post-rehab",
-      notes: "Rehab $30-65k. All-in $75-130k. ARV in gentrifying zones (with 5-10% haircut) $130-170k. Refi at 75% LTV pulls $95-130k.",
+      notes: "Illustrative orientation only. Verify title, taxes, scope, closed comps, rent, seasoning, lender LTV, and appraisal; refinance proceeds can be materially lower than modeled.",
     },
     neighborhoods: [
-      { name: "East English Village", why: "Most stable gentrifying neighborhood; cleanest comps; lowest haircut on appraisal" },
+      { name: "East English Village", why: "Research current closed comps, title, condition, taxes, and block-level demand" },
       { name: "Bagley", why: "Strong stable neighborhood, family demand, lower BRRRR risk" },
       { name: "Boston-Edison", why: "Historic district, premium appreciation upside, fewer distressed deals" },
       { name: "Cornerstone Village", why: "Affordable entry, gentrifying, higher execution risk" },
     ],
     pitfalls: [
-      "Appraisals lag comps by 5-10% in most Detroit neighborhoods — build this into your ARV planning",
+      "Do not assume a citywide appraisal haircut; use relevant closed comps and test multiple supported ARV outcomes",
       "Block-by-block variation extreme — drive every street before committing to an offer",
       "Wayne County tax assessments often over-assessed — appeal early and often",
       "Insurance options limited for some neighborhoods — quote BEFORE closing",
@@ -379,12 +379,12 @@ export const CITY_STRATEGY_COMBOS: CombinedCityStrategy[] = [
     pitch:
       "Tampa cash flow plays are harder than they were in 2021 — insurance pricing has reshaped which deals pencil. But for investors who properly model insurance volatility, Tampa's population inflow + no state income tax + reasonable property prices in inland zones still produce solid returns.",
     whyHereWhyNow:
-      "Tampa's population growth is real — among the fastest-growing major metros in the US. The challenge is insurance: premiums up 35-50% since 2020, with some carriers exiting entirely. Inland Tampa (Seminole Heights, Temple Terrace, parts of Brandon) has more manageable insurance pricing than coastal zones, making cash-flow plays more workable. Investors who model insurance at the renewal rate (not the seller's current rate) find Tampa still pencils.",
+      "Tampa's population and housing demand make it a frequent screen, but insurance availability and pricing can materially change a result. Obtain a current property-specific quote, flood determination, roof and wind-mitigation details, taxes, and rent comps rather than extrapolating from a seller policy or citywide trend.",
     typicalNumbers: {
       purchasePrice: "$310-475k typical SFR",
       monthlyRent: "$1,950-2,700",
-      capRate: "5.5-7% after honest insurance modeling",
-      notes: "Insurance can be $3,500-7,500/yr depending on zone + property age. Property tax modest (~0.9%). Strong rental demand year-round.",
+      capRate: "Scenario-based after a current insurance quote",
+      notes: "Illustrative orientation only. Replace insurance, flood coverage, tax, rent, vacancy, maintenance, and financing inputs with address-level evidence.",
     },
     neighborhoods: [
       { name: "Seminole Heights", why: "Inland, walkable, gentrifying — best balance of insurance manageability + appreciation" },
@@ -393,11 +393,11 @@ export const CITY_STRATEGY_COMBOS: CombinedCityStrategy[] = [
       { name: "Westchase", why: "Newer construction = better insurance pricing, lower capex risk" },
     ],
     pitfalls: [
-      "Insurance is the dealbreaker — always quote it yourself before signing a contract",
-      "Sun Belt overbuilding has flattened Tampa rent growth — don't model 4-6% rent growth",
+      "Insurance can be decisive — obtain a current subject-property quote and review deductibles and exclusions before relying on the deal",
+      "Do not assume a citywide rent-growth rate; use current submarket evidence and flat/downside scenarios",
       "Older properties (1970s-1980s) often have insurance-disqualifying roof issues — verify roof age in inspection",
       "Flood zone designation matters — even some non-coastal Tampa zones require flood insurance",
-      "Condos face post-Surfside reserve requirements — 20-40% HOA hikes coming for many buildings",
+      "For condos, review current reserve studies, milestone-inspection status, budgets, assessments, and meeting minutes",
     ],
     relatedPosts: ["50-percent-rule-rentals"],
   },
@@ -410,14 +410,14 @@ export const CITY_STRATEGY_COMBOS: CombinedCityStrategy[] = [
     strategy: "cash-flow",
     strategyLabel: "cash flow",
     pitch:
-      "Cincinnati is the quietly outperforming Ohio cash-flow market — more stable than Cleveland, less overhead than Detroit, and consistently undersupplied for investor inventory. Cap rates 7-9% in B+ neighborhoods are reliably available.",
+      "Cincinnati is often screened for cash flow, but cap rate and operating effort depend on the specific property, block, condition, rent, taxes, insurance, and management.",
     whyHereWhyNow:
       "Cincinnati's two healthcare anchors (Mercy + UC Health) plus diverse manufacturing + finance employers keep rental demand stable. Insurance is among the most predictable in the country. Property taxes are reasonable. Compared to Cleveland, Cincinnati has fewer block-by-block neighborhood variation issues and the housing stock is somewhat newer on average, lowering year-1 capex risk.",
     typicalNumbers: {
       purchasePrice: "$130-200k typical",
       monthlyRent: "$1,300-1,700",
       capRate: "7-9% in B+ neighborhoods",
-      notes: "Monthly NCF $400-700 common. Insurance ~$70-100/mo. Taxes ~$150-220/mo. Modest 2-3%/yr appreciation. Fewer operational surprises than Cleveland.",
+      notes: "Illustrative orientation only. Verify rent, tax, insurance, condition, vacancy, management, financing, and appreciation assumptions for the address.",
     },
     neighborhoods: [
       { name: "College Hill", why: "B+ stable neighborhood with strong owner-occupant + tenant mix" },
@@ -429,8 +429,8 @@ export const CITY_STRATEGY_COMBOS: CombinedCityStrategy[] = [
       "Older housing stock (pre-WW2) carries year-1 capex risk — budget 4-6% of purchase price for the first year",
       "Some Cincinnati neighborhoods have block-by-block quality variation — walk before you buy",
       "Hamilton County property tax appeals available — budget time for the process",
-      "Cincinnati appraisals modestly under-comp on rehabbed properties (3-5% haircut)",
-      "Out-of-state investors should ALWAYS use a vetted local PM — Cincinnati's nuances aren't Florida's",
+      "Do not assume a standard appraisal haircut; support value with relevant closed comps and downside cases",
+      "Out-of-state owners should price and vet local management rather than assume remote operations will be passive",
     ],
     relatedPosts: ["what-is-a-good-cap-rate", "50-percent-rule-rentals"],
   },
@@ -443,14 +443,14 @@ export const CITY_STRATEGY_COMBOS: CombinedCityStrategy[] = [
     strategy: "brrrr",
     strategyLabel: "BRRRR",
     pitch:
-      "Pittsburgh BRRRR works in the gentrifying neighborhoods — Lawrenceville, Garfield, parts of Northside. Distressed inventory + ARV-supporting comps + reasonable refi appraisals make this one of the cleaner BRRRR markets in the Northeast.",
+      "Pittsburgh's older stock and changing neighborhoods can contain BRRRR candidates, but property-specific acquisition, scope, comps, appraisal, seasoning, rent, and lender terms determine the result.",
     whyHereWhyNow:
-      "Pittsburgh's gentrification has been steady through 2018-2025, anchored by Carnegie Mellon + UPMC + a growing tech ecosystem (Duolingo, Aurora, autonomous vehicle startups). Distressed inventory remains available at $60-120k in gentrifying zones, rehab budgets $30-55k produce ARVs of $160-220k. Unlike Cleveland or Detroit, Pittsburgh appraisals on rehabbed properties tend to match comps more closely — better refi math.",
+      "Pittsburgh has education, healthcare, and technology employment anchors, alongside older housing stock and some distressed inventory. A rehabbed property's value and refinance proceeds still depend on property-specific closed comps, execution, seasoning, and the independent appraisal; do not assume a citywide appraisal advantage.",
     typicalNumbers: {
       purchasePrice: "$55-110k distressed acquisition",
       monthlyRent: "$1,300-1,700 post-rehab",
       capRate: "7.5-9.5% post-rehab",
-      notes: "Rehab $30-55k. All-in $90-170k. ARV $170-225k in gentrifying zones. Refi at 75% pulls $128-170k. Capital recycled 85-100% on clean executions.",
+      notes: "Illustrative orientation only. Verify scope, holding time, supported ARV, seasoning, lender LTV, appraisal, rent, and expenses before estimating capital returned.",
     },
     neighborhoods: [
       { name: "Lawrenceville", why: "Gentrified core — strong ARV upside, premium acquisition prices" },
@@ -461,7 +461,7 @@ export const CITY_STRATEGY_COMBOS: CombinedCityStrategy[] = [
     pitfalls: [
       "Steep terrain in Pittsburgh means foundation + drainage issues common — get structural review",
       "Older housing stock (pre-1940) carries asbestos + knob-and-tube electrical risk",
-      "PA eviction process slower than landlord-friendly states (45-75 days)",
+      "Landlord-tenant procedure and timing are case-specific — use current local counsel or official court guidance",
       "Some Pittsburgh neighborhoods have steep hills affecting parking + access — walk before buying",
       "Allegheny County tax appeals worth filing on most purchases",
     ],
@@ -476,12 +476,12 @@ export const CITY_STRATEGY_COMBOS: CombinedCityStrategy[] = [
     pitch:
       "Pittsburgh house hacking economics are among the best in the country — duplexes and triplexes in walkable neighborhoods at $200-350k entry prices, with rental demand from CMU + Pitt + UPMC students and young professionals.",
     whyHereWhyNow:
-      "Pittsburgh's combination of moderate housing prices + walkable urban neighborhoods + young-professional and student rental demand makes it ideal for FHA 3.5% / conventional 5% house-hacks. Year-1 true out-of-pocket is often $200-500/mo (vs $1,200-1,600 market rent for comparable housing). Year-2 conversion to pure rental yields meaningful cash flow.",
+      "Pittsburgh's small-multifamily stock and renter demand make house hacking worth modeling. Confirm financing and property eligibility, supported rent, occupancy rules, taxes, insurance, condition, reserves, and the full payment before estimating owner cost or later rental cash flow.",
     typicalNumbers: {
       purchasePrice: "$200-350k for 2-3 unit",
       monthlyRent: "$1,000-1,500 per unit",
       capRate: "True out-of-pocket: $200-500/mo for your unit",
-      notes: "FHA 3.5% ($7-12.25k down) or conventional 5% ($10-17.5k). Year 2: move out, full rental conversion yields $400-700/mo NCF.",
+      notes: "Illustrative financing screen only. Obtain current loan terms and verify rent and every expense; later rental conversion does not guarantee positive cash flow.",
     },
     neighborhoods: [
       { name: "Lawrenceville", why: "Walkable, young-professional demand, premium house-hack neighborhood" },
@@ -492,7 +492,7 @@ export const CITY_STRATEGY_COMBOS: CombinedCityStrategy[] = [
     pitfalls: [
       "Steep Pittsburgh terrain creates parking challenges + foundation issues",
       "Older housing stock = real year-1 capex even on owner-occupant FHA financing",
-      "PA's flat 3.07% state income tax modest but still affects after-tax math",
+      "State income tax can affect the owner-specific result; model it separately from property cash flow",
       "Allegheny County reassessments affect tax bills periodically",
       "Living next to college-aged tenants requires temperament — noise, turnover, awkward moments",
     ],
@@ -507,14 +507,14 @@ export const CITY_STRATEGY_COMBOS: CombinedCityStrategy[] = [
     strategy: "cash-flow",
     strategyLabel: "cash flow",
     pitch:
-      "Birmingham is the most underrated cash-flow market in the Southeast. Property tax of just 0.42% (among lowest in US), fast 7-21 day eviction process, and B-class neighborhood inventory at $130-200k make this a steady buy-and-hold market.",
+      "Birmingham's relatively accessible inventory makes it a cash-flow market to screen, but the property, current tax bill, insurance, condition, rent, operations, and local legal process determine the result.",
     whyHereWhyNow:
-      "Birmingham's combination of UAB Medicine, manufacturing, and banking employers supports steady rental demand. Alabama's landlord-friendly law and fast eviction process reduce operational risk. Property tax of 0.42% is the lowest of any major US metro. Cap rates of 8-10% in B+ neighborhoods are reliably available, with less operational overhead than Memphis or Detroit.",
+      "Birmingham's employment base and entry prices provide screening context, not a promised return or legal timeline. Verify current parcel taxes, insurance, rent, condition, management, and landlord-tenant requirements for the address.",
     typicalNumbers: {
       purchasePrice: "$130-200k typical",
       monthlyRent: "$1,250-1,650",
       capRate: "8-10% in B+ neighborhoods",
-      notes: "Property tax ~$50-80/mo (the AL advantage). Insurance ~$80-110/mo. Monthly NCF $450-750 common.",
+      notes: "Illustrative orientation only. Replace tax, insurance, rent, vacancy, management, capex, financing, and cash-flow inputs with current property-specific evidence.",
     },
     neighborhoods: [
       { name: "Crestwood", why: "B+ stable neighborhood with strong family demand" },
@@ -526,7 +526,7 @@ export const CITY_STRATEGY_COMBOS: CombinedCityStrategy[] = [
       "Tornado risk modest but real — insurance accounts for it; storm damage occasional",
       "Some Birmingham neighborhoods have crime concentration in specific zones — walk before buying",
       "Older urban core stock may need year-1 capex (older HVAC, plumbing)",
-      "Property tax appeals available but rarely needed at such low rates",
+      "Verify the current assessment and appeal process rather than assuming an appeal is unnecessary",
       "5% AL state income tax modestly higher than peer cash-flow states (TN, FL)",
     ],
     relatedPosts: ["what-is-a-good-cap-rate", "50-percent-rule-rentals"],
@@ -557,9 +557,9 @@ export const CITY_STRATEGY_COMBOS: CombinedCityStrategy[] = [
     ],
     pitfalls: [
       "California insurance volatility — Tahoe Park is reasonable but verify carrier availability",
-      "13.3% top CA state income tax compresses after-tax returns severely",
-      "Tenant-leaning law: 60-120 day eviction process",
-      "Statewide AB 1482 rent caps limit pricing flexibility on renewals",
+      "California tax treatment is taxpayer-specific; a top marginal rate is not a property-level return assumption",
+      "Landlord-tenant procedure and timing vary by facts and jurisdiction — obtain current California-specific guidance",
+      "Confirm whether current state and local rent rules apply to the property before modeling renewal increases",
       "ADU construction can take 6-12 months with permits — factor into year-1 plans",
     ],
     relatedPosts: ["house-hacking-explained"],
@@ -573,14 +573,14 @@ export const CITY_STRATEGY_COMBOS: CombinedCityStrategy[] = [
     strategy: "appreciation",
     strategyLabel: "appreciation",
     pitch:
-      "Charlotte is one of the most consistent appreciation markets in the Southeast — banking (Bank of America, Wells Fargo, Truist) + healthcare (Atrium, Novant) + tech growth drive consistent rent + price growth. Cap rates are compressed but 10-year IRR math is strong.",
+      "Charlotte's employment and population history create an appreciation thesis, not a forecast. Test lower-cap-rate deals under flat and downside rent and value growth.",
     whyHereWhyNow:
-      "Charlotte's population growth has been among the fastest in the US for 15+ years. Banking + tech + healthcare anchors create reliable rental demand from young professionals. The trade-off: cap rates are 4.5-6% on most SFRs, monthly cash flow modest. Long-hold appreciation strategy is the dominant play. Strong landlord law + fast eviction (14-30 days) reduces operational risk.",
+      "Charlotte's banking, technology, and healthcare employers support an investment thesis, but rent, appreciation, and legal timelines are not guaranteed. Verify property-specific demand and expenses, model flat/downside growth, and use current local guidance for landlord-tenant assumptions.",
     typicalNumbers: {
       purchasePrice: "$325-475k typical SFR",
       monthlyRent: "$2,100-2,800",
       capRate: "4.5-6% after honest underwriting",
-      notes: "Year-1 cash flow modest ($100-400/mo). 10-year IRR typically 12-16% on leveraged deals with strong appreciation. NC's low 0.77% property tax helps the math.",
+      notes: "Illustrative orientation only. Model current parcel tax, rent, expenses, financing, and multiple appreciation scenarios; do not treat a projected IRR as achievable performance.",
     },
     neighborhoods: [
       { name: "Plaza Midwood", why: "Walkable, gentrified, premium appreciation upside" },
@@ -606,14 +606,14 @@ export const CITY_STRATEGY_COMBOS: CombinedCityStrategy[] = [
     strategy: "appreciation",
     strategyLabel: "appreciation",
     pitch:
-      "Dallas-Fort Worth has been one of the most consistent appreciation markets in the country for 15 years and the underlying drivers (corporate relocations, population growth, no state income tax) remain in place. Cap rates are compressed but long-term IRR is strong.",
+      "Dallas-Fort Worth has had a long period of population and employment growth, but past appreciation does not establish future rent growth, value growth, or IRR. Lower-cap-rate deals should be tested under flat and downside appreciation scenarios.",
     whyHereWhyNow:
-      "DFW's corporate-relocation economy keeps producing population inflow that supports rent growth + appreciation. The trade-off vs cash-flow markets: cap rates of 5-6% are typical, monthly cash flow modest, but the 10-year wealth-build math is strong. The Texas property tax burden (often 2-2.8% effective, higher in MUD zones) requires careful underwriting — many deals look strong on pro forma but fail on after-tax cash flow.",
+      "DFW's corporate-relocation economy has supported rental demand, but appreciation and rent growth are not guaranteed. The Texas property-tax burden, especially in MUD zones, requires parcel-level verification because an understated bill can materially reduce NOI and cash flow.",
     typicalNumbers: {
       purchasePrice: "$285-425k typical SFR",
       monthlyRent: "$2,100-2,800",
       capRate: "5-6.5% after honest property tax modeling",
-      notes: "Property tax often $5-9k/yr (1.7-2.5% effective). 10-year IRR typically 11-15% on leveraged deals with strong appreciation assumption.",
+      notes: "Illustrative orientation only. Verify the current parcel tax, insurance, rent, expenses, financing, and flat/downside appreciation scenarios; projected IRR is not achievable-performance evidence.",
     },
     neighborhoods: [
       { name: "Oak Cliff (Bishop Arts adjacent)", why: "Gentrifying, walkable, appreciation upside" },
@@ -622,10 +622,10 @@ export const CITY_STRATEGY_COMBOS: CombinedCityStrategy[] = [
       { name: "McKinney / Frisco", why: "Suburban appreciation plays, school-district premiums" },
     ],
     pitfalls: [
-      "MUD (Municipal Utility District) zones push effective property tax to 2.8-3.2% — always pull the actual tax bill, never trust Zillow",
+      "MUD and other special-district charges can materially affect the bill — pull the parcel's current tax record and proposed-payment estimate",
       "Cap rate compression means cash flow is tight — small underwriting errors swing deals to negative",
-      "Insurance up 20-30% in DFW hail belt over 5 years",
-      "Property tax appeals are essentially required in TX — budget time annually",
+      "Hail exposure, roof condition, deductibles, and carrier rules can materially affect insurance — obtain a current quote",
+      "Do not assume a property-tax appeal is required or will succeed; verify the assessment and current appeal process",
       "Some Dallas zip codes have undergone rapid gentrification — buying at top of cycle is real risk",
     ],
     relatedPosts: ["cash-flow-vs-appreciation"],
@@ -639,14 +639,14 @@ export const CITY_STRATEGY_COMBOS: CombinedCityStrategy[] = [
     strategy: "house-hack",
     strategyLabel: "house hacking",
     pitch:
-      "Cleveland is one of the most accessible house-hacking markets in the country — duplexes and triplexes at $150-260k FHA-eligible entry prices, with rental demand from CWRU + Cleveland Clinic + university students.",
+      "Cleveland's duplex and triplex inventory gives owner-occupants house-hack candidates to screen. Property and borrower eligibility, supported rents, condition, taxes, insurance, and current program terms determine the result.",
     whyHereWhyNow:
-      "Cleveland's 2-4 unit inventory in walkable neighborhoods like Detroit-Shoreway, Tremont, and Ohio City clears at FHA-friendly prices. Combined with strong rental demand from Cleveland Clinic + CWRU + university students, year-1 true out-of-pocket housing cost often runs $0-300/mo. Year-2 conversion to pure rental produces some of the strongest cash-flow yields in the country.",
+      "Cleveland's 2-4 unit stock and renter demand make house hacking worth modeling. Confirm occupancy and property eligibility, supported rent, financing, taxes, insurance, reserves, condition, and the full payment before estimating owner cost or later rental cash flow.",
     typicalNumbers: {
       purchasePrice: "$150-260k for 2-3 unit",
       monthlyRent: "$900-1,300 per unit",
       capRate: "True out-of-pocket: $0-300/mo for your unit",
-      notes: "FHA 3.5% ($5.25-9.1k down) or conventional 5% ($7.5-13k). Year 2 conversion: pure rental yields $500-900/mo NCF.",
+      notes: "Illustrative financing screen only. Obtain current loan terms and verify rent and every expense; moving out later does not guarantee positive rental cash flow.",
     },
     neighborhoods: [
       { name: "Tremont", why: "Walkable, gentrified, premium house-hack neighborhood" },
@@ -672,14 +672,14 @@ export const CITY_STRATEGY_COMBOS: CombinedCityStrategy[] = [
     strategy: "brrrr",
     strategyLabel: "BRRRR",
     pitch:
-      "Memphis BRRRR works when you partner with the right local team and avoid the turnkey-operator markup. Distressed inventory + no state income tax + landlord-friendly law produce some of the strongest BRRRR economics in the country — for investors with boots on the ground.",
+      "Memphis has distressed inventory and a mature contractor and manager ecosystem, but BRRRR results depend on sourcing, scope, title, rent, appraisal, seasoning, lender terms, and local execution.",
     whyHereWhyNow:
-      "Memphis has the deepest distressed inventory in the Southeast and a mature contractor + PM ecosystem. The BRRRR challenge here is sourcing: most Memphis investors buy turnkey-priced (already-rehabbed) properties at 10-15% above true ARV. Direct distressed acquisition + your own rehab management produces the real BRRRR math — but requires either local presence or a trusted partner.",
+      "Memphis gives investors distressed and operator-sourced properties to compare. Independently verify acquisition price, title, scope, permits, contractor capacity, closed comps, rent, manager terms, seasoning, appraisal, and lender conditions rather than relying on an operator markup or return narrative.",
     typicalNumbers: {
       purchasePrice: "$40-85k distressed acquisition",
       monthlyRent: "$1,000-1,400 post-rehab",
       capRate: "9-12% post-rehab",
-      notes: "Rehab $25-50k. All-in $75-130k. ARV $115-160k. Refi at 75% LTV pulls $86-120k — recycles 80-95% of capital on clean executions.",
+      notes: "Illustrative orientation only. Verify title, scope, holding time, supported ARV, rent, seasoning, lender LTV, and appraisal before estimating refinance proceeds or capital returned.",
     },
     neighborhoods: [
       { name: "Berclair", why: "Working-class, voucher-friendly, distressed inventory available" },
@@ -688,11 +688,11 @@ export const CITY_STRATEGY_COMBOS: CombinedCityStrategy[] = [
       { name: "Frayser", why: "Deep distress, lowest entry, requires experienced PM" },
     ],
     pitfalls: [
-      "Memphis appraisals lag comps by 5-8% on rehabbed properties — build into ARV planning",
+      "Rehabbed-property appraisals can differ from planned ARV; use relevant closed comps and test downside values",
       "Block-by-block variation extreme — drive every street before committing",
       "Some Memphis zip codes have insurance-disqualifying vacancy/arson history",
       "Foundation issues common in pre-1960 Memphis homes — get structural opinion",
-      "PM selection is the entire game in Memphis — vet 3+ operators before signing",
+      "Management materially affects the result — compare scope, fees, controls, references, and termination terms before signing",
     ],
     relatedPosts: ["spot-bad-rental-in-60-seconds", "property-management-yes-or-no"],
   },
@@ -705,14 +705,14 @@ export const CITY_STRATEGY_COMBOS: CombinedCityStrategy[] = [
     strategy: "cash-flow",
     strategyLabel: "cash flow",
     pitch:
-      "Atlanta cash flow has gotten harder as intown prices ran 50-70% since 2018, but suburban submarkets (South Fulton, Clayton County, parts of Gwinnett) still produce 7-9% cap rates on SFRs with reliable rental demand from corporate-relocation tailwind.",
+      "Atlanta suburban properties can screen better for cash flow than some intown properties, but current rent, tax, insurance, vacancy, condition, management, and financing determine the address-level cap rate.",
     whyHereWhyNow:
-      "Atlanta's population growth + corporate relocations (Microsoft, Visa, NCR, BlackRock) drive consistent rental demand. Intown gentrification has compressed cap rates to 4-5%, but suburban submarkets within 30 minutes of the perimeter still pencil. GA's landlord-friendly law + fast eviction (30-60 days) reduces operational risk vs the Northeast.",
+      "Atlanta's population and employment history provide screening context, not a guaranteed demand or legal outcome. Verify current submarket rent and supply, property expenses, school and municipal boundaries, and applicable landlord-tenant procedure.",
     typicalNumbers: {
       purchasePrice: "$210-310k typical suburban SFR",
       monthlyRent: "$1,750-2,300",
       capRate: "7-9% in suburban submarkets",
-      notes: "Property tax $200-300/mo. Insurance $80-120/mo. Monthly NCF $300-600 common. Modest 3-4%/yr appreciation in suburban zones.",
+      notes: "Illustrative orientation only. Replace property tax, insurance, rent, vacancy, maintenance, management, financing, cash flow, and appreciation with current address-level evidence.",
     },
     neighborhoods: [
       { name: "South Fulton", why: "Suburban cash flow with appreciation tailwind from intown overflow" },
@@ -738,14 +738,14 @@ export const CITY_STRATEGY_COMBOS: CombinedCityStrategy[] = [
     strategy: "brrrr",
     strategyLabel: "BRRRR",
     pitch:
-      "Phoenix BRRRR works in older neighborhoods (Maryvale, parts of Glendale, South Phoenix) where 1950s-1970s ranch homes can be acquired distressed + rehabbed for solid ARVs. The challenge: insurance + cooling system replacement costs higher than most BRRRR markets.",
+      "Phoenix's older ranch inventory can contain BRRRR candidates, but acquisition, cooling and envelope scope, insurance, supported ARV, appraisal, rent, and lender terms determine the result.",
     whyHereWhyNow:
-      "Phoenix's population growth has been steady and the older housing stock (1950s-1970s ranches) provides continuous distressed inventory. Rehab + cosmetic updates produce strong ARVs in gentrifying neighborhoods. The Phoenix-specific challenges: HVAC + insulation upgrades are non-optional (summers brutal), insurance costs creeping up, and water/heat-stress on older properties requires capex reserves.",
+      "Phoenix's older housing stock gives investors properties to screen. Obtain contractor bids for cooling, roof, envelope, and water-related work; verify current insurance, rent, closed comps, seasoning, appraisal, and lender terms instead of assuming cosmetic work creates a particular ARV.",
     typicalNumbers: {
       purchasePrice: "$200-285k distressed acquisition",
       monthlyRent: "$1,650-2,200 post-rehab",
       capRate: "6-8% post-rehab",
-      notes: "Rehab $40-70k (HVAC + insulation critical). All-in $250-360k. ARV $315-440k in gentrifying zones. Refi at 75% pulls $236-330k.",
+      notes: "Illustrative orientation only. Verify scope, insurance, holding time, supported ARV, rent, seasoning, lender LTV, and appraisal before estimating refinance proceeds.",
     },
     neighborhoods: [
       { name: "Maryvale", why: "Older ranch inventory, gentrifying, BRRRR-friendly entry prices" },
@@ -754,10 +754,10 @@ export const CITY_STRATEGY_COMBOS: CombinedCityStrategy[] = [
       { name: "Coronado Historic District", why: "Already gentrified, premium ARV but tighter acquisition" },
     ],
     pitfalls: [
-      "HVAC replacement non-negotiable in Phoenix — budget $8-15k in rehab even on 'functional' systems",
-      "Insurance up 20-30% over 5 years and some carriers exiting — quote yourself",
+      "Do not assume every HVAC system requires replacement or a fixed budget; obtain condition evidence and current bids",
+      "Insurance availability and price are property- and carrier-specific — obtain a current quote and review exclusions",
       "Water-stress + monsoon damage on older properties — verify roof + foundation",
-      "Phoenix appraisals lag comps by 3-5% in fast-gentrifying neighborhoods",
+      "Fast-changing neighborhoods can have thin or stale closed comps; test multiple supported ARV scenarios",
       "AZ tax rates modest but insurance + utilities offset the savings",
     ],
     relatedPosts: ["spot-bad-rental-in-60-seconds"],
@@ -771,14 +771,14 @@ export const CITY_STRATEGY_COMBOS: CombinedCityStrategy[] = [
     strategy: "cash-flow",
     strategyLabel: "cash flow",
     pitch:
-      "Pure cash-flow plays in Dallas are tighter than they used to be, but mid-tier suburbs (Mesquite, Garland, parts of Arlington) still produce 6.5-8% cap rates on SFRs — with the Texas no-income-tax advantage offsetting some of the cap rate compression.",
+      "Pure cash-flow plays in Dallas are tighter than they used to be. Some mid-tier suburban SFRs may screen at higher cap rates, but parcel-level property tax, insurance, vacancy, and maintenance must be verified before treating the range as achievable.",
     whyHereWhyNow:
-      "Dallas-Fort Worth's population inflow keeps rental demand strong. While intown cap rates compressed to 4-5%, mid-tier suburbs 20-30 minutes from city centers still pencil. TX no state income tax + landlord-friendly law improve after-tax math. The persistent challenge: 2-2.8% effective property tax requires careful underwriting, never trust Zillow's estimate.",
+      "Dallas-Fort Worth's population growth has supported rental demand, while some mid-tier suburbs screen better for cash flow than the urban core. Texas has no individual state income tax, but the owner-specific tax effect is not a property return assumption. Verify the parcel's current property-tax bill, insurance, rent, and expenses before deciding that a deal pencils.",
     typicalNumbers: {
       purchasePrice: "$245-325k typical suburban SFR",
       monthlyRent: "$1,950-2,500",
       capRate: "6.5-8% in mid-tier suburbs after honest tax modeling",
-      notes: "Property tax $5-8k/yr. Insurance $90-140/mo. Monthly NCF $250-500 common. Modest 3-5%/yr appreciation in growth corridors.",
+      notes: "Illustrative orientation only. Replace parcel tax, insurance, rent, vacancy, maintenance, management, financing, cash flow, and appreciation with current address-level evidence.",
     },
     neighborhoods: [
       { name: "Mesquite", why: "Lower entry than Dallas proper, strong rental demand, family-renter base" },
@@ -787,10 +787,10 @@ export const CITY_STRATEGY_COMBOS: CombinedCityStrategy[] = [
       { name: "Grand Prairie", why: "Mid-suburb, balanced cash flow + slow appreciation" },
     ],
     pitfalls: [
-      "MUD (Municipal Utility District) zones push effective property tax to 2.8-3.2% — always pull the actual bill",
-      "Insurance up 20-30% in DFW hail belt — quote yourself, never trust seller's number",
+      "MUD and other special-district charges can materially affect the bill — pull the parcel's current tax record and proposed-payment estimate",
+      "Hail exposure, roof condition, deductibles, and carrier rules can materially affect insurance — obtain a current quote",
       "Sun Belt overbuilding flattening some suburban submarkets — verify rent comps current",
-      "Property tax appeals essentially required annually in TX — budget the time",
+      "Do not assume a property-tax appeal is required or will succeed; verify the assessment and current appeal process",
       "School district variation within Dallas suburbs significant — affects family-renter pricing",
     ],
     relatedPosts: ["what-is-a-good-cap-rate", "50-percent-rule-rentals"],
@@ -804,14 +804,14 @@ export const CITY_STRATEGY_COMBOS: CombinedCityStrategy[] = [
     strategy: "cash-flow",
     strategyLabel: "cash flow",
     pitch:
-      "Houston is the largest Texas cash-flow market by inventory — 4th largest US city, no state income tax, and diverse energy + medical + port-logistics employers. Cap rates of 7-9% in mid-tier neighborhoods are achievable with disciplined underwriting.",
+      "Houston's large rental inventory gives investors many properties to screen, but flood exposure, parcel tax, insurance, rent, condition, vacancy, management, and financing determine whether a deal cash-flows.",
     whyHereWhyNow:
-      "Houston's diverse economy (energy, Texas Medical Center, port logistics, Johnson Space Center) keeps rental demand stable through energy-price cycles. Mid-tier neighborhoods (Spring Branch, parts of Pasadena, Sunnyside transition zones) offer real cash flow at $190-280k entry prices. The Houston-specific challenges: flood zones (verify on every deal), insurance costs, and 2-2.5% effective property tax.",
+      "Houston's employment base and inventory provide screening context, not guaranteed demand or returns. Verify current submarket rent, flood and drainage history, parcel taxes, insurance, condition, and expenses for the address.",
     typicalNumbers: {
       purchasePrice: "$190-285k typical SFR",
       monthlyRent: "$1,750-2,300",
       capRate: "7-9% in mid-tier neighborhoods",
-      notes: "Property tax $400-600/mo (2-2.5% effective). Insurance $90-160/mo (higher in flood zones). Monthly NCF $300-600 common.",
+      notes: "Illustrative orientation only. Replace parcel tax, insurance and flood coverage, rent, vacancy, maintenance, management, financing, and cash flow with current property-specific evidence.",
     },
     neighborhoods: [
       { name: "Spring Branch", why: "Diverse demographics, family-renter demand, stable cash flow" },
@@ -820,11 +820,11 @@ export const CITY_STRATEGY_COMBOS: CombinedCityStrategy[] = [
       { name: "Independence Heights", why: "Gentrifying inside-the-loop, balanced cash flow + appreciation" },
     ],
     pitfalls: [
-      "Flood zone designation matters — pull the FEMA map for EVERY Houston property, even outside Harvey-affected zones",
-      "Insurance + flood insurance combined can run $200-300/mo in marginal zones",
-      "Property tax appeals essentially required annually — budget the time",
-      "Harris County reassessments can swing tax bills 8-15% year-over-year — model conservatively",
-      "Foundation issues common in clay-soil zones — get structural review on every deal",
+      "Flood-zone maps are only one input — verify current maps, prior losses, drainage, elevation, and coverage needs for the property",
+      "Obtain current property-specific insurance and flood-coverage quotes rather than using a citywide monthly range",
+      "Do not assume a property-tax appeal is required or will succeed; verify the assessment and current appeal process",
+      "Use the parcel's current record and a sale-price reassessment scenario rather than assuming a fixed annual tax swing",
+      "Foundation risk is property-specific — use inspection findings and specialist review when evidence warrants it",
     ],
     relatedPosts: ["what-is-a-good-cap-rate", "50-percent-rule-rentals"],
   },
@@ -837,14 +837,14 @@ export const CITY_STRATEGY_COMBOS: CombinedCityStrategy[] = [
     strategy: "cash-flow",
     strategyLabel: "cash flow",
     pitch:
-      "St. Louis is one of the most undersupplied investor markets in the Midwest — entry prices of $80-140k with rents of $1,000-1,400 produce cap rates of 8-11% in B+ neighborhoods. Operational nuances less than Cleveland or Detroit.",
+      "St. Louis's entry prices make it a frequent cash-flow screen, but rent, condition, vacancy, taxes, insurance, management, and block-level variation determine the address-level result.",
     whyHereWhyNow:
-      "St. Louis has Washington University + Barnes-Jewish + Boeing as employment anchors, producing stable rental demand. Housing costs never recovered to coastal levels, leaving entry prices accessible. Missouri's modest 4.95% state income tax + reasonable property taxes + landlord-friendly law combine to produce reliable cash flow returns. The market is undersupplied with serious out-of-state investors — meaning less PM competition + more available inventory.",
+      "St. Louis's employment anchors and accessible inventory provide screening context, not guaranteed demand or reliable returns. Verify current rent, condition, parcel tax, insurance, management capacity, local legal rules, and owner-specific tax treatment.",
     typicalNumbers: {
       purchasePrice: "$85-145k typical",
       monthlyRent: "$1,000-1,400",
       capRate: "8-11% in B+ neighborhoods",
-      notes: "Monthly NCF $350-650 common. Property tax ~$120-180/mo. Insurance ~$70-100/mo. Modest 2-3%/yr appreciation.",
+      notes: "Illustrative orientation only. Replace tax, insurance, rent, vacancy, condition, management, financing, cash flow, and appreciation with current address-level evidence.",
     },
     neighborhoods: [
       { name: "Tower Grove South", why: "Walkable, gentrifying, premium for the area; balanced cash flow + appreciation" },
@@ -853,11 +853,11 @@ export const CITY_STRATEGY_COMBOS: CombinedCityStrategy[] = [
       { name: "Maplewood", why: "Suburban-feeling, school-district premium, lower turnover" },
     ],
     pitfalls: [
-      "St. Louis appraisals run 3-6% under-comp on rehabbed properties — affects BRRRR and resale",
+      "Do not assume a rehabbed property's planned ARV will appraise; support it with relevant closed comps and downside scenarios",
       "Block-by-block variation pronounced in some neighborhoods — walk before buying",
       "Older housing stock means year-1 capex real — budget 4-6% of purchase price",
-      "Tornado risk modest but real — insurance accounts for it",
-      "Property tax appeals available in St. Louis County — worth filing on most purchases",
+      "Weather exposure and coverage terms are property- and carrier-specific — obtain a current quote and review exclusions",
+      "Verify the current assessment and appeal process; do not assume an appeal is appropriate or successful",
     ],
     relatedPosts: ["what-is-a-good-cap-rate", "50-percent-rule-rentals"],
   },
@@ -870,14 +870,14 @@ export const CITY_STRATEGY_COMBOS: CombinedCityStrategy[] = [
     strategy: "appreciation",
     strategyLabel: "appreciation",
     pitch:
-      "Greenville is the quietly outperforming small-metro appreciation market in the Southeast — BMW + Michelin + GE anchored manufacturing, downtown revitalization, and consistent population inflow have produced 6-9%/yr appreciation through 2019-2025.",
+      "Greenville's employment and population history create an appreciation thesis, not a forecast. Test any lower-cap-rate deal under flat and downside rent and value growth.",
     whyHereWhyNow:
-      "Greenville's transformation from textile-town to corporate-relocation magnet has been one of the cleaner small-metro stories of the past decade. BMW Spartanburg + Michelin US headquarters + GE Power anchor a diversified manufacturing economy. Combined with SC's landlord-friendly law, fast eviction process, and downtown walkable revitalization, Greenville produces strong long-hold appreciation math with reasonable cash flow.",
+      "Greenville's manufacturing employers and redevelopment provide screening context, but employer concentration, rent, appreciation, and legal timelines are not guaranteed. Verify property-specific demand and expenses, model flat/downside growth, and use current local guidance for landlord-tenant assumptions.",
     typicalNumbers: {
       purchasePrice: "$245-355k typical SFR",
       monthlyRent: "$1,700-2,200",
       capRate: "5.5-7% after honest underwriting",
-      notes: "Year-1 cash flow modest ($150-400/mo). 10-year IRR typically 12-15% on leveraged deals with appreciation assumption. SC's 0.55% property tax helps.",
+      notes: "Illustrative orientation only. Model current parcel tax, rent, expenses, financing, employer downside, and multiple appreciation scenarios; projected IRR is not achievable-performance evidence.",
     },
     neighborhoods: [
       { name: "West End", why: "Walkable to downtown, gentrified, premium appreciation upside" },
@@ -890,7 +890,7 @@ export const CITY_STRATEGY_COMBOS: CombinedCityStrategy[] = [
       "Cap rate compression means cash flow tight — small underwriting errors swing deals negative",
       "Some Greenville zip codes have undergone rapid gentrification — buying at top of cycle real risk",
       "Limited PM ecosystem vs larger metros — vet carefully before out-of-state purchase",
-      "Storm risk modest but real (hurricane remnants, hail) — insurance accounts for it",
+      "Weather exposure and coverage terms are property- and carrier-specific — obtain a current quote and review exclusions",
     ],
     relatedPosts: ["cash-flow-vs-appreciation"],
   },

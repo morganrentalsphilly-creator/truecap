@@ -37,7 +37,11 @@ import {
 } from "@/lib/buy-box";
 import { isStrategyKind } from "@/lib/strategy-kinds";
 import { getEntitlementsForUser, hasPlanFeature } from "@/lib/entitlements";
-import { recomputeSavedDealVerdict } from "@/lib/recompute-saved-deal-verdict";
+import {
+  recomputeSavedDealVerdict,
+  toRecomputedSavedAnalysisSnapshot,
+} from "@/lib/recompute-saved-deal-verdict";
+import { resolveSavedAnalysisSnapshot } from "@/lib/saved-analysis-methodology";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -209,6 +213,8 @@ type FitDealRow = {
   net_cash_flow_monthly: number | null;
   coc_return_pct: number | null;
   cap_rate_raw: string | null;
+  methodology_version: string | null;
+  result_snapshot: Record<string, unknown> | null;
   form_snapshot: unknown;
 };
 
@@ -236,7 +242,7 @@ async function computeSavedBoxFit(
     let query = supabase
       .from("saved_analyses")
       .select(
-        "address, property_type, purchase_price, net_cash_flow_monthly, coc_return_pct, cap_rate_raw:result_snapshot->>capRate, form_snapshot"
+        "address, property_type, purchase_price, net_cash_flow_monthly, coc_return_pct, cap_rate_raw:result_snapshot->>capRate, methodology_version, result_snapshot, form_snapshot"
       )
       .eq("user_id", userId)
       .is("deleted_at", null)
@@ -249,12 +255,23 @@ async function computeSavedBoxFit(
     if (error || !data || data.length === 0) return null;
 
     const metricsList = (data as unknown as FitDealRow[]).map((row): BuyBoxDealMetrics => {
-      const fresh = recomputeSavedDealVerdict(row.form_snapshot);
+      const recomputed = recomputeSavedDealVerdict(row.form_snapshot);
+      const resolution = resolveSavedAnalysisSnapshot({
+        methodologyVersion: row.methodology_version,
+        resultSnapshot: row.result_snapshot,
+        recomputedSnapshot: recomputed
+          ? toRecomputedSavedAnalysisSnapshot(recomputed)
+          : undefined,
+      });
+      const fresh = resolution.didRecompute ? recomputed : null;
+      const snapshot = resolution.snapshot;
       const capSnap = row.cap_rate_raw != null ? Number(row.cap_rate_raw) : NaN;
+      const dscrSnap = Number(snapshot.dscr);
+      const monthlyPaymentSnap = Number(snapshot.monthlyPayment);
       return {
         capRatePct: fresh ? fresh.capRatePct : Number.isFinite(capSnap) ? capSnap : null,
         cocPct: fresh ? fresh.cocReturnPct : row.coc_return_pct,
-        dscr: fresh ? fresh.dscr : null,
+        dscr: fresh ? fresh.dscr : Number.isFinite(dscrSnap) ? dscrSnap : null,
         cashFlowMonthly: fresh ? fresh.netCashFlowMonthly : row.net_cash_flow_monthly,
         purchasePrice: row.purchase_price,
         propertyType:
@@ -267,7 +284,9 @@ async function computeSavedBoxFit(
         // Explicit cash flag from the recompute (canonical monthlyPayment<=0);
         // fall back to not-cash so a legacy deal still gets its DSCR criterion
         // applied rather than silently skipped — mirrors toBuyBoxMetrics.
-        isCashPurchase: fresh ? fresh.isCashPurchase : false,
+        isCashPurchase: fresh
+          ? fresh.isCashPurchase
+          : Number.isFinite(monthlyPaymentSnap) && monthlyPaymentSnap <= 0,
       };
     });
     return countBuyBoxFit(criteria, metricsList);

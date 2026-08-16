@@ -26,7 +26,7 @@ const SERP_TITLE = "Schedule E for rental property, line by line";
 const DESCRIPTION =
   "Every Schedule E line that matters, a full worked example on a $250K rental, and why a property can cash flow +$139/month while reporting a $3,703 tax loss.";
 const PUBLISHED_AT = "2026-06-12";
-const MODIFIED_AT = "2026-06-12";
+const MODIFIED_AT = "2026-08-15";
 const READING_TIME = 10;
 
 export const metadata: Metadata = {
@@ -193,7 +193,8 @@ export default function ScheduleEPost() {
             >
               DSCR loans
             </Link>{" "}
-            qualify the property on its own rent instead).
+            often use property coverage instead of personal DTI as the primary
+            ratio, but documentation and borrower review still vary).
           </p>
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
@@ -266,9 +267,10 @@ export default function ScheduleEPost() {
             </li>
             <li>
               <strong>Line 16 — taxes:</strong> property taxes. Note these
-              are fully deductible against rental income — the $10,000
-              SALT-style cap that applies to your personal residence does
-              not apply to rentals.
+              are generally reported as rental expenses when allocable to the
+              rental activity. Personal-use allocation and other limitations
+              can apply; do not treat the personal-itemized SALT cap as the
+              rule that decides Schedule E treatment.
             </li>
             <li>
               <strong>Line 18 — depreciation:</strong> the line that
@@ -530,7 +532,7 @@ export default function ScheduleEPost() {
             <Link href="/" className="text-primary font-semibold hover:underline">
               TrueCap analyzer
             </Link>{" "}
-            models the tax strategy alongside cash flow so you can see
+            shows the illustrative tax impact alongside cash flow so you can see
             both stories — the bank&apos;s and the IRS&apos;s — before you
             write an offer. Related reading:{" "}
             <Link

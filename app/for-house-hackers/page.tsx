@@ -190,7 +190,7 @@ export default function ForHouseHackersPage() {
             <li><strong>FHA 3.5% template ready to clone.</strong> One click pre-fills the down %, MIP, term, vacancy assumption.</li>
             <li><strong>Per-unit rent.</strong> Multi-family mode lets you model each unit independently — the only way to get house-hack math right.</li>
             <li><strong>Transition modeling.</strong> See what happens when you move out and rent your unit at market.</li>
-            <li><strong>Tax treatment of owner-occupant.</strong> The Pro Tax Strategy tab handles the depreciation-on-rental-portion math correctly.</li>
+            <li><strong>Mixed-use tax caveat.</strong> The Pro view is a general rental illustration; it does not allocate basis, depreciation, or interest between personal and rental use. Replace it with a CPA&apos;s mixed-use calculation.</li>
           </ul>
         </section>
 
@@ -235,7 +235,7 @@ export default function ForHouseHackersPage() {
             Free analyzer is enough to pick the property.
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
-            Free covers monthly out-of-pocket, cap rate, CoC for your live-in year. Pro unlocks the 10-year projection (essential for modeling the year-2 transition), tax strategy, and the saved-analyses portfolio view.
+            Free covers monthly out-of-pocket, cap rate, CoC for your live-in year. Pro unlocks the 10-year projection (essential for modeling the year-2 transition), Illustrative Tax Impact, and the saved-analyses portfolio view.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link

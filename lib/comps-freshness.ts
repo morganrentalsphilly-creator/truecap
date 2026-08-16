@@ -19,7 +19,12 @@ import type { PipelineStage } from "@/lib/pipeline";
  */
 export const COMPS_FRESHNESS_WINDOW_DAYS: Record<PipelineStage, number> = {
   researching: 90,
+  watching: 90,
+  screening: 60,
   analyzing: 45,
+  verifying: 45,
+  offer_ready: 45,
+  negotiating: 45,
   offer: 45,
   under_contract: 21,
   closed: 90,

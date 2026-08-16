@@ -59,7 +59,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Does NOI include CapEx?",
-    a: "Conventionally, no — true GAAP NOI excludes capital expenditures (treats them as below-the-line investments). But for rental property underwriting most investors treat CapEx as an operating expense reserve because it smooths the lumpy reality of needing a new roof every 20 years. Either approach is fine as long as you're consistent.",
+    a: "Under the lender/appraiser-style convention used by TrueCap, no. CapEx is a below-NOI reserve because replacements are capital items rather than recurring operating expenses. TrueCap still subtracts the reserve from cash flow and cash-on-cash return, so the economic cost is never ignored.",
   },
   {
     q: "What's the difference between NOI and EBITDA?",
@@ -179,7 +179,7 @@ export default function NoiCalculatorPage() {
               <li>HOA dues</li>
               <li>Owner-paid utilities (water, sewer, trash, sometimes gas)</li>
               <li>Vacancy &amp; credit loss (subtracted from gross rent, not added as opex)</li>
-              <li>CapEx reserves (some investors include, some don&apos;t — be consistent)</li>
+              <li>CapEx reserves (shown below NOI under the TrueCap standard)</li>
               <li>Make-ready / leasing fees (annualized)</li>
             </ul>
             <p>
@@ -214,9 +214,10 @@ export default function NoiCalculatorPage() {
             <h3>2. Forgetting CapEx reserves</h3>
             <p>
               The roof, HVAC, water heater, and flooring all wear out.
-              Setting aside 5-10% of rent monthly as a CapEx reserve
-              keeps NOI honest — otherwise you&apos;re showing a great NOI
-              this year and getting hit with $15k of replacements in year 7.
+              Setting aside 5-10% of rent monthly as a CapEx reserve keeps
+              cash-flow expectations honest. TrueCap shows that reserve below
+              lender-style NOI, then subtracts it before cash-on-cash return —
+              otherwise a strong NOI can still hide a $15k replacement in year 7.
             </p>
             <h3>3. Excluding management fees on self-managed properties</h3>
             <p>

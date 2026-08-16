@@ -62,4 +62,23 @@ describe("computeReturnSummaryFromExitYears", () => {
     expect(s!.roiPct).toBeNull();
     expect(s!.irrPct).toBeNull();
   });
+
+  it("adds exit tax back when recovering the cash-invested ROI basis", () => {
+    const years = makeYears().map((year) => ({
+      ...year,
+      exitTax: 20_000,
+      // $150k sale + cumulative CF - $100k cash in - $20k exit tax.
+      totalProfit:
+        year.netSaleProceeds +
+        year.cumulativeCashFlow +
+        year.cumulativeTaxBenefit -
+        100_000 -
+        20_000,
+    }));
+    const summary = computeReturnSummaryFromExitYears(years);
+    expect(summary).not.toBeNull();
+    expect(summary?.cashInvested).toBe(100_000);
+    expect(summary?.totalProfit).toBe(40_000);
+    expect(summary?.roiPct).toBeCloseTo(40, 6);
+  });
 });

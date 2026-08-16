@@ -65,7 +65,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "How do I calculate NOI?",
-    a: "Start with annual gross rental income, then subtract all operating expenses: property tax, insurance, HOA, utilities (if owner-paid), management, vacancy reserves, maintenance reserves, and CapEx reserves. Do not subtract mortgage payment, depreciation, or income tax. The result is NOI.",
+    a: "Start with annual gross rental income, subtract vacancy, then subtract recurring operating expenses: property tax, insurance, HOA, owner-paid utilities, management, and maintenance. Under the lender-style convention used by TrueCap, the CapEx reserve sits below NOI but still reduces investor cash flow. Do not subtract mortgage payments, depreciation, or income tax from NOI.",
   },
   {
     q: "Is a higher cap rate always better?",
@@ -319,11 +319,13 @@ export default function CapRateCalculatorPage() {
               that&apos;s the gross rent multiplier inverted. Real cap rate
               subtracts operating expenses first. Always recompute.
             </p>
-            <h3>2. Forgetting vacancy and CapEx reserves</h3>
+            <h3>2. Forgetting vacancy and below-NOI CapEx reserves</h3>
             <p>
               A property doesn&apos;t actually generate 100% of its asking
               rent. Vacancies happen. Roofs need replacing. The cap rate that
-              ignores 5–10% vacancy and 5–10% CapEx reserves is a fiction.
+              ignores 5–10% vacancy is a fiction. TrueCap keeps CapEx below
+              lender-style NOI, but you should still subtract a realistic
+              reserve when judging spendable cash flow.
             </p>
             <h3>3. Comparing across markets</h3>
             <p>
@@ -347,7 +349,7 @@ export default function CapRateCalculatorPage() {
             </p>
             <p>
               When you&apos;re ready to go deeper — cash-on-cash, DSCR,
-              monthly cash flow, 10-year projections, tax strategy, exit
+              monthly cash flow, 10-year projections, illustrative tax impact, modeled exit
               scenarios, and a deal score — you can run the full analysis
               free at TrueCap.
             </p>

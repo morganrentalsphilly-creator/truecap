@@ -208,7 +208,7 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     definition:
       "Estimated monthly year-1 tax effect at your marginal rate: deductions (operating expenses, depreciation, and optionally mortgage interest) netted against tax owed on the rental income. Positive means the deal shelters income; negative means it owes tax.",
     whyItMatters:
-      "Depreciation is the secret weapon of rental investing — a $400k property with 80% building value depreciates ~$11,600/yr (over 27.5 years). But the estimate is honest both ways: once deductions no longer cover the rental income, a profitable deal owes tax, so this figure can be negative on strong cash-flowers.",
+      "Depreciation can materially change modeled taxable rental income. TrueCap's figure is deliberately simplified: it applies the entered marginal rate and does not decide whether a loss is currently usable under passive-activity, at-risk, or material-participation rules. The estimate also runs both ways, so positive taxable rental income can produce a negative net tax impact.",
     related: ["afterTaxCF", "depreciationYears", "buildingValue"],
   },
   afterTaxCF: {
@@ -216,7 +216,7 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     slug: "after-tax-cash-flow",
     category: "metric",
     definition:
-      "Monthly cash flow plus the estimated year-1 net tax effect — deductions (depreciation, deductible interest, operating expenses) netted against tax owed on the rental income. The same math as the Tax Strategy panel's year-1 line.",
+      "Monthly cash flow plus the estimated year-1 net tax effect — deductions (depreciation, deductible interest, operating expenses) netted against tax owed on the rental income. The same simplified math as the Illustrative Tax Impact panel's year-1 line.",
     whyItMatters:
       "Most investors compare deals on pre-tax cash flow, but the post-tax number can shift the picture in both directions: a leveraged deal's deductions can turn a small pre-tax loss into an after-tax positive, while a strong cash-flower can owe tax on its rental income. TrueCap nets the two rather than counting deductions as a one-way bonus.",
     related: ["cashFlow", "taxSavings", "depreciationYears"],
@@ -303,9 +303,9 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     slug: "1031-exchange",
     category: "strategy",
     definition:
-      "A tax-deferred swap of one investment property for another, deferring the capital gains tax you'd otherwise owe on the sale.",
+      "A qualifying exchange of eligible real property that may postpone recognition of gain by carrying basis into like-kind replacement real property.",
     whyItMatters:
-      "A 1031 lets you defer capital gains indefinitely as long as you roll the proceeds into a like-kind investment property — but the deadlines are strict and unforgiving: 45 days to identify the replacement and 180 days to close.",
+      "A qualifying 1031 exchange may postpone recognition of gain by carrying basis into eligible replacement real property. It does not erase tax. Identification is generally due within 45 days, and receipt is generally due by the earlier of day 180 or the applicable return due date, subject to detailed rules and limited relief.",
     related: ["taxSavings", "sellingCost", "appreciation"],
     postUrl: "/blog/1031-exchange-basics",
   },
@@ -381,7 +381,7 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
       "Personal monthly debt obligations ÷ personal gross monthly income.",
     benchmark: "Conventional residential lenders cap DTI around 43–50% to approve a loan.",
     whyItMatters:
-      "DTI is the constraint that stops most investors from buying their third or fourth rental on conventional financing. DSCR loans bypass it entirely — they qualify on the property's DSCR instead, which is why portfolio investors migrate to them.",
+      "DTI can constrain conventional financing as a portfolio grows. Some DSCR programs use property coverage instead of personal DTI as the primary ratio, but they still apply borrower, credit, reserve, property, and program-specific requirements.",
     related: ["dscr", "ltv", "interestRate"],
   },
   negativeLeverage: {
@@ -421,9 +421,9 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     slug: "maintenance-reserve",
     category: "expense",
     definition:
-      "Monthly reserve for routine repairs. Typical: 5-8% of rent for newer properties, 10-15% for older.",
+      "A planning reserve for routine repairs; the appropriate amount depends on the property's systems, condition, service history, and operating plan.",
     whyItMatters:
-      "Under-reserving maintenance is the #1 reason new investors get blindsided by year-1 capex surprises. A 1925 building needs 3-5x more reserve than a 2018 build. Don't use 'national average' assumptions — adjust for your specific property's age.",
+      "Building age is only a screening signal, not a reserve multiplier. Size maintenance and capital reserves from the inspection, remaining useful life of major systems, service history, quotes, warranties, and an explicit contingency for unknowns.",
     related: ["capex", "noi"],
   },
   management: {
@@ -491,7 +491,7 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     example:
       "A $80,000 distressed property with $30,000 of rehab and an ARV of $150,000 has equity creation of $40,000 ($150k − $80k − $30k).",
     whyItMatters:
-      "ARV is where most BRRRR plans fall apart. Investors plan for the optimistic ARV; appraisers often come in 3-7% lower. Build a 5% ARV haircut into your underwrite for safety.",
+      "ARV is a high-sensitivity assumption in BRRRR and flip plans. Build it from relevant closed comps and test multiple downside values; there is no reliable market-wide appraisal haircut that substitutes for property-specific evidence.",
     related: ["brrrr", "ltv"],
   },
   buildingValue: {
@@ -501,7 +501,7 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     definition:
       "Portion of purchase price allocated to depreciable building (not land). Defaults to 80% for SFR; land value varies by market.",
     whyItMatters:
-      "Higher building % = more annual depreciation = more tax savings. In land-cheap markets (Cleveland, Memphis), building can be 85-90% of value. In land-expensive coastal markets (LA, SF), it can be 50-60%. The tax outcome differs meaningfully.",
+      "A supported allocation to depreciable building affects the modeled depreciation deduction. The allocation must be grounded in the property's facts; a default percentage is only an input assumption, and passive-loss and other limits determine the actual tax effect.",
     related: ["depreciationYears", "taxSavings"],
   },
   depreciationYears: {
@@ -511,7 +511,7 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     definition:
       "27.5 years for residential rentals (IRS standard); 39 years for commercial. Determines annual non-cash depreciation deduction.",
     whyItMatters:
-      "Depreciation is the 'phantom expense' that creates tax savings without affecting cash. A $400k property at 80% building = $11,636/yr depreciation deduction, every year for 27.5 years. For a 32%-bracket investor, that's ~$3,700/yr of tax savings = real money.",
+      "Depreciation is a non-cash deduction, not a promised current tax saving. Basis allocation, placed-in-service conventions, personal use, passive-activity, basis, at-risk, and sale rules can change when or whether the modeled deduction reduces tax.",
     related: ["taxSavings", "buildingValue"],
   },
 

@@ -29,9 +29,9 @@ const TITLE = "How to calculate DSCR (debt service coverage ratio) — 2026 guid
 // window. The on-page <h1> keeps the longer editorial TITLE.
 const SERP_TITLE = "How to calculate DSCR — 2026 guide";
 const DESCRIPTION =
-  "DSCR = NOI ÷ annual debt service. It's the metric DSCR lenders use to qualify your loan. Here's the formula, what lenders include and exclude, three worked examples, and the difference between your DSCR and the lender's DSCR (which is usually lower).";
+  "DSCR compares income with debt service. Learn the formula, worked examples, and why each lender's program-specific calculation and requirements must be confirmed.";
 const PUBLISHED_AT = "2026-06-07";
-const MODIFIED_AT = "2026-06-07";
+const MODIFIED_AT = "2026-08-15";
 const READING_TIME_MIN = 8;
 
 export const metadata: Metadata = {
@@ -72,19 +72,19 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "What DSCR do most lenders require?",
-    a: "Most DSCR loan programs require 1.0-1.25 minimum, with rate tier improvements at 1.25 and 1.5. Some 'no-DSCR' or 'sub-1.0' products exist but they carry meaningful rate premiums (1.5-2.5 percentage points above market) and tighter LTVs (65-70% instead of 75-80%). Above 1.25 is comfortable; below 1.0 means the property doesn't generate enough to cover its mortgage and is bleeding cash monthly.",
+    a: "There is no universal minimum or pricing tier. Ask the specific lender for its current written formula, rent evidence, expense treatment, threshold, leverage, pricing, reserve, borrower, property, and state requirements. A ratio below 1.0 under a given formula indicates modeled income is below modeled debt service; it does not by itself describe every cash-flow line or every lender decision.",
   },
   {
     q: "How is the lender's DSCR calculation different from mine?",
-    a: "Three usual differences. (1) Most DSCR lenders use the 1007/1025 form 'market rent' from the appraiser — NOT your lease rent. If the appraiser comes in below your number, the lender's DSCR is lower than yours. (2) Many lenders use PITIA (principal + interest + taxes + insurance + association dues) as debt service, not just P&I. This makes the denominator bigger and DSCR lower. (3) Lenders often haircut your NOI by adding a vacancy and management deduction even if you self-manage. Net effect: the lender's DSCR is usually 5-15% lower than what you calculated.",
+    a: "Lenders can differ on rent evidence, lease treatment, appraisal forms, PITIA versus other debt-service definitions, vacancy or management adjustments, and rounding. Obtain the exact written calculation before comparing it with your operating DSCR; the lender result can be higher or lower depending on the inputs.",
   },
   {
     q: "What's a 1.25 DSCR loan in plain English?",
-    a: "A loan where the property must produce $1.25 of net operating income for every $1 of debt service, i.e. 25% margin. If the mortgage payment is $2,000/month ($24,000/year), the property must produce at least $30,000 of NOI annually to clear the 1.25 threshold. If NOI is lower, the loan either gets denied at 1.25 or shifts to a 1.0-tier product with worse rate and LTV.",
+    a: "Mathematically, 1.25 means the numerator is 1.25 times the denominator under the formula being used. In a hypothetical NOI-based calculation, $30,000 of NOI divided by $24,000 of debt service equals 1.25. Approval, pricing, and leverage still depend on the lender's formula and full program requirements.",
   },
   {
     q: "Can DSCR be negative?",
-    a: "Mathematically yes if NOI is negative (operating expenses exceed gross rent), but no DSCR lender will fund a deal with negative DSCR — it means the property loses money before the mortgage payment, which is a non-starter. If your DSCR calculation goes negative, you either have operating expenses wildly out of line or unrealistically low rents — re-check both before going further.",
+    a: "Mathematically yes if the numerator is negative. Re-check the income, vacancy, and operating-expense inputs and treat the result as a serious coverage warning. Do not infer a universal credit decision; ask the lender about its formula and program requirements.",
   },
   {
     q: "What happens if my DSCR is right at the lender's minimum?",
@@ -137,7 +137,7 @@ export default function BlogPost() {
       { "@type": "HowToStep", name: "Compute NOI", text: "Gross rent minus vacancy minus all operating expenses. Excludes mortgage payment." },
       { "@type": "HowToStep", name: "Compute annual debt service", text: "Monthly P&I × 12. Some lenders include taxes and insurance (PITIA)." },
       { "@type": "HowToStep", name: "Divide NOI by debt service", text: "Result is DSCR. Express to 2 decimals." },
-      { "@type": "HowToStep", name: "Compare to lender minimum", text: "Most lenders require 1.0-1.25. Higher DSCR unlocks better rate tiers." },
+      { "@type": "HowToStep", name: "Compare with the written program", text: "Confirm the lender's current formula, minimum, rent evidence, leverage, and pricing; modeled DSCR does not guarantee approval or a rate tier." },
     ],
   };
 
@@ -215,9 +215,10 @@ export default function BlogPost() {
 
           <h3>Step 4: Compare to lender minimum</h3>
           <p>
-            Most DSCR programs require 1.0-1.25. Rate tier improvements
-            at 1.25 and 1.5. Below 1.0 either denies or moves you to a
-            more expensive sub-1.0 product with worse LTV.
+            Confirm the specific program&apos;s current formula, minimum,
+            rent evidence, leverage, pricing, reserves, and other
+            eligibility rules in writing. A modeled DSCR does not
+            guarantee approval or a particular rate tier.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">Worked example #1: comfortable DSCR</h2>
@@ -280,42 +281,41 @@ export default function BlogPost() {
 
           <h2 className="text-2xl sm:text-3xl">Your DSCR vs the lender&apos;s DSCR</h2>
           <p>
-            Your spreadsheet says 1.30. The lender comes back with 1.08
-            and a different rate tier. Three usual reasons:
+            Your spreadsheet may differ from the lender&apos;s result because
+            the inputs and formula can differ. Common questions include:
           </p>
           <ul>
-            <li><strong>Appraiser rent &lt; your rent.</strong> The
-              lender uses the 1007/1025 form &ldquo;market rent.&rdquo;
-              If the appraiser comes in 10% below your number, NOI drops
-              ~10% and DSCR drops proportionally.</li>
+            <li><strong>Appraisal or program rent &lt; your rent.</strong> Some
+              programs use an appraisal rent form or other specified evidence.
+              Ask which lease or appraisal rent the program accepts and
+              test any supported downside.</li>
             <li><strong>PITIA vs P&amp;I.</strong> If you computed on
-              P&amp;I and the lender uses PITIA, expect 0.10-0.20 lower
-              DSCR.</li>
+              P&amp;I and the lender uses PITIA, recompute with the exact
+              taxes, insurance, and association dues.</li>
             <li><strong>Lender-imposed vacancy / management add-back.</strong>
-              Some lenders deduct 5-10% for vacancy and 8% for
-              management even if you self-manage — to underwrite the
-              property without assuming free labor.</li>
+              Ask whether and how the program applies vacancy,
+              management, or other adjustments.</li>
           </ul>
           <p>
-            Defense: ask the lender exactly which methodology they use,
-            then build your model that way. If you&apos;re targeting a
-            1.25 DSCR program, underwrite to 1.4+ to absorb the
-            appraisal and methodology haircut without dropping below
-            their minimum.
+            Ask the lender exactly which methodology and evidence it
+            uses, then reproduce that calculation separately from your
+            operating model. Choose a downside cushion based on the
+            property and written program rather than a universal target.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">Stress-test your DSCR</h2>
           <p>Before applying, run three scenarios:</p>
           <ul>
             <li><strong>Base case</strong> with your rent and rate.</li>
-            <li><strong>Appraiser comes in 10% under rent</strong> —
-              does DSCR still clear the lender&apos;s minimum?</li>
-            <li><strong>Rate +0.5pp</strong> — does DSCR still hold up
-              if rates spike before you lock?</li>
+            <li><strong>Supported rent is lower</strong> — test a meaningful
+              downside based on the available evidence.</li>
+            <li><strong>Rate or costs increase</strong> — test the written
+              quote&apos;s expiration and a realistic pre-lock downside.</li>
           </ul>
           <p>
-            If all three pencil, you&apos;re bankable. If only the base
-            case works, you have no margin for the surprises that happen
+            If all three pencil, the scenario has more modeled cushion;
+            it still does not establish approval. If only the base case
+            works, you have little modeled margin for surprises that happen
             on every other closing.
           </p>
 
@@ -354,7 +354,7 @@ export default function BlogPost() {
           <p className="text-sm text-muted-foreground leading-relaxed">
             TrueCap computes DSCR live as you type — P&amp;I and PITIA
             both — alongside cap rate, cash flow, and a stress-test grid
-            for appraised-rent and rate sensitivities. Lender-ready
+            for appraised-rent and rate sensitivities. Lender-facing
             numbers before you make the call.{" "}
             <Link href="/" className="font-bold text-foreground hover:underline">
               Open the analyzer →

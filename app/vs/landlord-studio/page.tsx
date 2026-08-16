@@ -53,7 +53,7 @@ const MATRIX: Row[] = [
   { feature: "Lifecycle stage", truecap: "Pre-purchase — underwrite the deal", landlordstudio: "Post-purchase — accounting + tracking", winner: "tie" },
   { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", landlordstudio: "Not modeled", winner: "truecap" },
   { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", landlordstudio: "Not modeled", winner: "truecap" },
-  { feature: "Tax strategy modeling", truecap: "Pro — depreciation + interest + after-tax CF (projection)", landlordstudio: "Yes — actuals for Schedule E", winner: "tie" },
+  { feature: "Illustrative tax impact", truecap: "Pro — depreciation + interest + modeled after-tax CF", landlordstudio: "Yes — actuals for Schedule E", winner: "tie" },
   { feature: "Deal score + verdict", truecap: "Free — 0-100 score + plain-English verdict", landlordstudio: "Not applicable", winner: "truecap" },
   { feature: "Address auto-fill (rent/rate/tax)", truecap: "Yes — HUD + FRED + state property tax", landlordstudio: "Not applicable", winner: "truecap" },
   { feature: "Receipt scanning", truecap: "No", landlordstudio: "Yes — mobile camera + OCR", winner: "landlordstudio" },
@@ -263,7 +263,7 @@ export default function VsLandlordStudioPage() {
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
-            Pro unlocks projections, sensitivity, tax strategy, exit scenarios,
+            Pro unlocks projections, sensitivity, illustrative tax impact, modeled exit comparisons,
             MAO, PDF exports, and co-branded share links.
             No card to start.
           </p>

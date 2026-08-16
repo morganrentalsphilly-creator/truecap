@@ -66,7 +66,7 @@ const STEPS: Step[] = [
     id: "explore-pro",
     icon: CheckCircle2,
     title: "3. Make it yours",
-    body: "Set your buy box — target cash flow, cash-on-cash, price range — and every deal you run gets a personal pass/fail against YOUR criteria. Plus 10-year projections, tax strategy, and the BRRRR + flip analyzers with Pro.",
+    body: "Set your buy box — target cash flow, cash-on-cash, price range — and every deal you run gets a personal pass/fail against YOUR criteria. Plus 10-year projections, illustrative tax impact, and the BRRRR + flip analyzers with Pro.",
     ctaLabel: "See pricing",
     ctaHref: "/pricing",
   },

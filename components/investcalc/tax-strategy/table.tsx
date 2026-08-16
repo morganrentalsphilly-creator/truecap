@@ -14,10 +14,10 @@ const COLUMNS = [
   "Depreciation Deduction",
   "Total Deductions",
   "Taxable Rental Income",
-  "Tax Savings",
-  "Tax Liability",
-  "Net Tax Benefit",
-  "Cumulative Tax Benefit",
+  "Modeled Tax Savings",
+  "Modeled Tax Liability",
+  "Net Modeled Tax Impact",
+  "Cumulative Modeled Tax Impact",
 ];
 
 export function TaxStrategyTable({
@@ -64,10 +64,10 @@ export function TaxStrategyTable({
                     ["Depreciation Deduction", formatCurrency(year.depreciationDeductionAnnual)],
                     ["Total Deductions", formatCurrency(year.totalDeductionsAnnual)],
                     ["Taxable Rental Income", formatCurrency(year.taxableRentalIncomeAnnual), -year.taxableRentalIncomeAnnual],
-                    ["Tax Savings", formatCurrency(year.taxSavingsAnnual), year.taxSavingsAnnual],
-                    ["Tax Liability", formatCurrency(year.taxLiabilityAnnual), -year.taxLiabilityAnnual],
-                    ["Net Tax Benefit", formatCurrency(year.netTaxBenefitAnnual), year.netTaxBenefitAnnual],
-                    ["Cumulative Tax Benefit", formatCurrency(year.cumulativeTaxBenefitAnnual), year.cumulativeTaxBenefitAnnual],
+                    ["Modeled Tax Savings", formatCurrency(year.taxSavingsAnnual), year.taxSavingsAnnual],
+                    ["Modeled Tax Liability", formatCurrency(year.taxLiabilityAnnual), -year.taxLiabilityAnnual],
+                    ["Net Modeled Tax Impact", formatCurrency(year.netTaxBenefitAnnual), year.netTaxBenefitAnnual],
+                    ["Cumulative Modeled Tax Impact", formatCurrency(year.cumulativeTaxBenefitAnnual), year.cumulativeTaxBenefitAnnual],
                   ].map(([label, value, numericValue]) => (
                     <div key={String(label)} className="flex items-center justify-between gap-3 border-b border-border/70 py-2 last:border-b-0">
                       <span className="text-xs font-medium text-muted-foreground">{label}</span>

@@ -12,14 +12,29 @@ import {
 } from "@/lib/pipeline";
 
 describe("pipeline stages", () => {
-  it("has 6 ordered stages ending in passed", () => {
-    expect(PIPELINE_STAGES).toHaveLength(6);
-    expect(PIPELINE_STAGES.map((s) => s.order)).toEqual([1, 2, 3, 4, 5, 6]);
+  it("has the expanded ordered acquisition stages while retaining legacy researching", () => {
+    expect(PIPELINE_STAGES.map((s) => s.id)).toEqual([
+      "researching",
+      "watching",
+      "screening",
+      "analyzing",
+      "verifying",
+      "offer_ready",
+      "negotiating",
+      "offer",
+      "under_contract",
+      "closed",
+      "passed",
+    ]);
+    expect(PIPELINE_STAGES.map((s) => s.order)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
     expect(PIPELINE_STAGES[PIPELINE_STAGES.length - 1]!.id).toBe("passed");
   });
 
   it("validates stage ids", () => {
     expect(isPipelineStage("under_contract")).toBe(true);
+    expect(isPipelineStage("watching")).toBe(true);
+    expect(isPipelineStage("offer_ready")).toBe(true);
+    expect(isPipelineStage("negotiating")).toBe(true);
     expect(isPipelineStage("closed")).toBe(true);
     expect(isPipelineStage("sold")).toBe(false);
     expect(isPipelineStage(null)).toBe(false);
@@ -27,11 +42,15 @@ describe("pipeline stages", () => {
 
   it("labels stages", () => {
     expect(pipelineStageLabel("offer")).toBe("Offer made");
+    expect(pipelineStageLabel("offer_ready")).toBe("Offer ready");
     expect(pipelineStageLabel(null)).toBe("");
   });
 
   it("treats only closed/passed as inactive", () => {
     expect(isActiveStage("researching")).toBe(true);
+    expect(isActiveStage("watching")).toBe(true);
+    expect(isActiveStage("verifying")).toBe(true);
+    expect(isActiveStage("negotiating")).toBe(true);
     expect(isActiveStage("under_contract")).toBe(true);
     expect(isActiveStage("closed")).toBe(false);
     expect(isActiveStage("passed")).toBe(false);

@@ -41,7 +41,11 @@ export function meetsTarget(r: AnalysisResult, target: MaoTarget): boolean {
   if (target.capRate !== undefined && r.capRate < target.capRate) return false;
   if (target.cocReturn !== undefined && r.cocReturn < target.cocReturn) return false;
   if (target.monthlyCashFlow !== undefined && r.netCashFlow < target.monthlyCashFlow) return false;
-  if (target.dscr !== undefined && r.dscr < target.dscr) return false;
+  // DSCR has no economic meaning when there is no debt service. The public
+  // MaoTarget contract says the target is ignored for cash purchases, so do
+  // that here as well as at the UI target-building layer. Otherwise a cash
+  // deal's sentinel dscr=0 makes an otherwise-solvable target unreachable.
+  if (target.dscr !== undefined && r.monthlyPayment > 0 && r.dscr < target.dscr) return false;
   return true;
 }
 
@@ -164,29 +168,48 @@ export function solveRequiredMonthlyRent(
   }
 
   const iterations = opts?.iterations ?? 28;
-  const hi = opts?.maxRent ?? Math.max(current * 4, current + 10_000, 50_000);
-  const hiResult = safeCalc({ ...values, monthlyRent: hi });
-  if (!hiResult || !meetsTarget(hiResult, target)) {
-    return { value: hi, alreadyMet: false, unreachable: true, achieved: hiResult ?? (base as AnalysisResult) };
+  const rawCeiling = opts?.maxRent ?? Math.max(current * 4, current + 10_000, 50_000);
+  if (!Number.isFinite(rawCeiling) || rawCeiling < 0) return null;
+  // Rent is displayed in whole dollars. Search and report the same whole-$
+  // ceiling so an unreachable result's `achieved` value is not from a
+  // different, hidden decimal input.
+  const rentCeiling = Math.ceil(rawCeiling);
+  const hiResult = safeCalc({ ...values, monthlyRent: rentCeiling });
+  if (!hiResult) return null;
+  if (!meetsTarget(hiResult, target)) {
+    return {
+      value: rentCeiling,
+      alreadyMet: false,
+      unreachable: true,
+      achieved: hiResult,
+    };
   }
 
   // Higher rent always helps — binary-search the LOWEST rent that still meets.
   let lo = 0;
-  let hiB = hi;
-  let best = hiResult;
-  let bestV = hi;
+  let hiB = rentCeiling;
+  let bestV = rentCeiling;
   for (let i = 0; i < iterations; i++) {
     const mid = (lo + hiB) / 2;
     const r = safeCalc({ ...values, monthlyRent: mid });
     if (r && meetsTarget(r, target)) {
-      best = r;
       bestV = mid;
       hiB = mid;
     } else {
       lo = mid;
     }
   }
-  return { value: Math.round(bestV), alreadyMet: false, unreachable: false, achieved: best };
+  // Required rent is a minimum: round UP, never to nearest. Rounding down can
+  // put the displayed threshold back on the failing side of the boundary.
+  const displayedRent = Math.ceil(bestV);
+  const achievedAtDisplayed = safeCalc({ ...values, monthlyRent: displayedRent });
+  if (!achievedAtDisplayed || !meetsTarget(achievedAtDisplayed, target)) return null;
+  return {
+    value: displayedRent,
+    alreadyMet: false,
+    unreachable: false,
+    achieved: achievedAtDisplayed,
+  };
 }
 
 /**
@@ -213,25 +236,35 @@ export function solveRequiredInterestRate(
   // The lowest rate (0%) gives the strongest returns; if even that fails, no
   // rate can fix it.
   const loResult = safeCalc({ ...values, interestRate: 0 });
-  if (!loResult || !meetsTarget(loResult, target)) {
-    return { value: 0, alreadyMet: false, unreachable: true, achieved: loResult ?? (base as AnalysisResult) };
+  if (!loResult) return null;
+  if (!meetsTarget(loResult, target)) {
+    return { value: 0, alreadyMet: false, unreachable: true, achieved: loResult };
   }
 
   // Lower rate always helps — binary-search the HIGHEST rate that still meets.
   let lo = 0;
   let hi = maxRate;
-  let best = loResult;
   let bestV = 0;
   for (let i = 0; i < iterations; i++) {
     const mid = (lo + hi) / 2;
     const r = safeCalc({ ...values, interestRate: mid });
     if (r && meetsTarget(r, target)) {
-      best = r;
       bestV = mid;
       lo = mid;
     } else {
       hi = mid;
     }
   }
-  return { value: Math.round(bestV * 100) / 100, alreadyMet: false, unreachable: false, achieved: best };
+  // Affordable rate is a maximum: round DOWN to the displayed 0.01pp step.
+  // Recompute at that exact displayed rate so the readout and threshold can
+  // never describe two different scenarios.
+  const displayedRate = Math.floor(bestV * 100) / 100;
+  const achievedAtDisplayed = safeCalc({ ...values, interestRate: displayedRate });
+  if (!achievedAtDisplayed || !meetsTarget(achievedAtDisplayed, target)) return null;
+  return {
+    value: displayedRate,
+    alreadyMet: false,
+    unreachable: false,
+    achieved: achievedAtDisplayed,
+  };
 }

@@ -117,6 +117,12 @@ export type AgentClientOption = { id: string; name: string };
 import type { OwnedEquitySummary } from "@/lib/owned-equity";
 import { setSavedDealCloseDateAction } from "@/app/actions/saved-analyses";
 import { recomputeSavedDealVerdict } from "@/lib/recompute-saved-deal-verdict";
+import {
+  isLegacySavedMethodologyVersion,
+  resolveSavedAnalysisResult,
+} from "@/lib/saved-analysis-methodology";
+import { TRUECAP_UNDERWRITING_STANDARD_VERSION } from "@/lib/underwriting-methodology";
+import { parseCompareSnapshotV1 } from "@/lib/compare-result-snapshot";
 import { buildDealsCsv, dealsCsvFilename, type DealsCsvItem } from "@/lib/deals-csv";
 import {
   openSavedDealInAnalysisTab as openSavedDealInAnalysisTabShared,
@@ -156,6 +162,8 @@ export type SavedAnalysisListItem = {
   riskLevel: StoredRiskLevel;
   /** Per-factor score breakdown for the "Why this score" popover. */
   breakdown?: DealScoreBreakdown | null;
+  /** Honest saved-methodology provenance from the canonical server resolver. */
+  methodologyLabel?: string;
   pipelineStage?: PipelineStage;
   tags?: string[];
   dataConfidence?: DataConfidence | null;
@@ -672,8 +680,17 @@ function buildReportDataFromSavedSnapshot(args: {
   result: AnalysisResult & Record<string, unknown>;
   templateFallback: { templateName: string } | null;
   exitYears: ExitScenarioYear[];
+  includeDerivedScenarios?: boolean;
+  methodologyLabel?: string;
 }): ReportData {
-  const { values, result, templateFallback, exitYears } = args;
+  const {
+    values,
+    result,
+    templateFallback,
+    exitYears,
+    includeDerivedScenarios = true,
+    methodologyLabel,
+  } = args;
   const projectionYears = Array.isArray(result.tenYearProjection) ? result.tenYearProjection : [];
   const taxYears = Array.isArray(result.taxStrategyYears) ? result.taxStrategyYears : [];
 
@@ -745,24 +762,39 @@ function buildReportDataFromSavedSnapshot(args: {
     });
 
   const downsideRatePp = result.monthlyPayment > 0 ? WORST_CASE_PRESET.ratePp : 0;
-  let downsideResult: AnalysisResult = result;
-  try {
-    downsideResult = calculateAnalysis(
-      applyWhatIfAdjustments(
-        values,
-        WORST_CASE_PRESET.rentPct,
-        0,
-        downsideRatePp,
-        WORST_CASE_PRESET.vacancyPp
-      )
-    );
-  } catch {
-    // Preserve export for legacy snapshots even if the stress case cannot
-    // be derived; the base values make that limitation explicit in the PDF.
+  let downsideScenario: ReportData["downsideScenario"] | undefined;
+  if (includeDerivedScenarios) {
+    let downsideResult: AnalysisResult = result;
+    try {
+      downsideResult = calculateAnalysis(
+        applyWhatIfAdjustments(
+          values,
+          WORST_CASE_PRESET.rentPct,
+          0,
+          downsideRatePp,
+          WORST_CASE_PRESET.vacancyPp
+        )
+      );
+    } catch {
+      // Preserve export for legacy snapshots even if the stress case cannot
+      // be derived; the base values make that limitation explicit in the PDF.
+    }
+    downsideScenario = {
+      label: `Rent ${WORST_CASE_PRESET.rentPct}% · vacancy +${WORST_CASE_PRESET.vacancyPp}pp${
+        downsideRatePp > 0 ? ` · rate +${downsideRatePp}pp` : ""
+      }`,
+      verdict: getDealTier(downsideResult),
+      monthlyCashFlow: downsideResult.netCashFlow,
+      cocReturn: downsideResult.cocReturn,
+      capRate: downsideResult.capRate,
+      dscr: downsideResult.dscr,
+    };
   }
 
   return {
     generatedAt: new Date(),
+    methodologyVersion: result.methodologyVersion,
+    methodologyLabel,
     property: {
       address: values.address,
       type: values.propertyType,
@@ -814,16 +846,7 @@ function buildReportDataFromSavedSnapshot(args: {
       taxSavings: result.taxSavingsMonthly,
       afterTaxCF: result.afterTaxCF,
     },
-    downsideScenario: {
-      label: `Rent ${WORST_CASE_PRESET.rentPct}% · vacancy +${WORST_CASE_PRESET.vacancyPp}pp${
-        downsideRatePp > 0 ? ` · rate +${downsideRatePp}pp` : ""
-      }`,
-      verdict: getDealTier(downsideResult),
-      monthlyCashFlow: downsideResult.netCashFlow,
-      cocReturn: downsideResult.cocReturn,
-      capRate: downsideResult.capRate,
-      dscr: downsideResult.dscr,
-    },
+    downsideScenario,
     projection10y: {
       cumulativeCF: projectionRows[projectionRows.length - 1]?.cum ?? 0,
       bestAnnualAfterTax: projectionRows.length
@@ -1932,47 +1955,99 @@ export function SavedAnalysesPage({
         }
 
         const computedResult = calculateAnalysis(parsed.data);
-        // The lender-facing PDF must show the SAME live numbers every other
-        // surface recomputes — not the stored snapshot. Spread computedResult
-        // LAST so fresh headline metrics + projection/tax arrays win; keep the
-        // stored snapshot only for any extra fields, and inject the fresh
-        // score/recommendation/risk from the canonical verdict recompute.
+        // Resolve base financial outputs and Deal Score under one methodology
+        // decision. The top-level database version is authoritative; a future
+        // mismatch stays frozen instead of being overwritten by this client.
         const freshVerdict = recomputeSavedDealVerdict(exportResult.formSnapshot);
-        const resultSnapshot = {
-          ...((exportResult.resultSnapshot ?? {}) as Record<string, unknown>),
-          ...computedResult,
-          ...(freshVerdict
-            ? {
-                score: freshVerdict.score,
-                recommendation: freshVerdict.recommendation,
-                riskLevel: freshVerdict.riskLevel,
-              }
-            : {}),
-        } as AnalysisResult & Record<string, unknown>;
+        if (!freshVerdict) {
+          toast({
+            title: "Could not export PDF",
+            description: "The saved analysis data could not be recomputed safely.",
+            variant: "destructive",
+          });
+          return;
+        }
+        const resolved = resolveSavedAnalysisResult({
+          methodologyVersion: exportResult.methodologyVersion,
+          resultSnapshot: exportResult.resultSnapshot,
+          recomputedResult: computedResult,
+          recomputedExtras: {
+            score: freshVerdict.score,
+            recommendation: freshVerdict.recommendation,
+            riskLevel: freshVerdict.riskLevel,
+            breakdown: freshVerdict.breakdown,
+            explanation: freshVerdict.explanation,
+          },
+        });
+        if (!resolved.result) {
+          toast({
+            title: "Could not export frozen PDF",
+            description:
+              "This newer-methodology snapshot is incomplete for this report version. Open the deal and explicitly re-underwrite it before exporting.",
+            variant: "destructive",
+          });
+          return;
+        }
+        const resultSnapshot = resolved.result as AnalysisResult & Record<string, unknown>;
         const projectionYears = Array.isArray(resultSnapshot.tenYearProjection)
           ? resultSnapshot.tenYearProjection
           : computedResult.tenYearProjection;
         const taxYears = Array.isArray(resultSnapshot.taxStrategyYears)
           ? resultSnapshot.taxStrategyYears
           : computedResult.taxStrategyYears;
-        const exitYears = buildExitScenarios({
-          purchasePrice: parsed.data.purchasePrice,
-          ...resolveExitScenarioRates(parsed.data),
-          loanAmount: resultSnapshot.loanAmount,
-          interestRate: parsed.data.interestRate,
-          loanTermYears: parsed.data.loanTermYears,
-          monthlyPayment: resultSnapshot.monthlyPayment,
-          downPayment: resultSnapshot.downPayment,
-          closingCosts: resultSnapshot.closingCosts,
-          initialCashInvested: resultSnapshot.totalCashRequired,
-          cumulativeCashFlowByYear: projectionYears.map((row) => row.cumulativeCashFlowAnnual),
-          cumulativeTaxBenefitByYear: taxYears.map((row) => row.cumulativeTaxBenefitAnnual),
-        });
+        let exitYears: ExitScenarioYear[];
+        if (resolved.shouldFreeze) {
+          const compareSnapshot = parseCompareSnapshotV1(resultSnapshot.compareSnapshot);
+          if (!compareSnapshot || compareSnapshot.exitScenarios.years.length === 0) {
+            toast({
+              title: "Could not export frozen PDF",
+              description:
+                "This saved standard does not include a compatible frozen exit table. Explicitly re-underwrite the deal before exporting.",
+              variant: "destructive",
+            });
+            return;
+          }
+          exitYears = compareSnapshot.exitScenarios.years.map((row, index) => ({
+            year: row.year,
+            propertyValue: row.propertyValue,
+            remainingLoanBalance: row.loanBalance,
+            equity: row.equity,
+            sellingCost: row.sellingCost,
+            netSaleProceeds: row.netSaleProceeds,
+            cumulativeCashFlow:
+              projectionYears[index]?.cumulativeCashFlowAnnual ?? 0,
+            cumulativeTaxBenefit:
+              taxYears[index]?.cumulativeTaxBenefitAnnual ?? 0,
+            totalProfit: row.totalProfit,
+          }));
+        } else {
+          exitYears = buildExitScenarios({
+            purchasePrice: parsed.data.purchasePrice,
+            ...resolveExitScenarioRates(parsed.data),
+            loanAmount: resultSnapshot.loanAmount,
+            interestRate: parsed.data.interestRate,
+            loanTermYears: parsed.data.loanTermYears,
+            monthlyPayment: resultSnapshot.monthlyPayment,
+            downPayment: resultSnapshot.downPayment,
+            closingCosts: resultSnapshot.closingCosts,
+            initialCashInvested: resultSnapshot.totalCashRequired,
+            cumulativeCashFlowByYear: projectionYears.map((row) => row.cumulativeCashFlowAnnual),
+            cumulativeTaxBenefitByYear: taxYears.map((row) => row.cumulativeTaxBenefitAnnual),
+          });
+        }
         const reportData = buildReportDataFromSavedSnapshot({
           values: parsed.data,
           result: resultSnapshot,
           templateFallback: exportResult.templateFallback,
           exitYears,
+          // A stress case was not frozen in historical snapshots. Omitting it
+          // is honest; recomputing it would mix methodology versions.
+          includeDerivedScenarios: !resolved.shouldFreeze,
+          methodologyLabel: resolved.shouldFreeze
+            ? `Frozen TrueCap Underwriting Standard v${resolved.storedMethodologyVersion}`
+            : isLegacySavedMethodologyVersion(resolved.storedMethodologyVersion)
+              ? `Legacy analysis · recomputed with current v${TRUECAP_UNDERWRITING_STANDARD_VERSION}`
+              : `TrueCap Underwriting Standard v${resolved.storedMethodologyVersion}`,
         });
         // Attach this deal's stored RentCast comps (no API call - reads the
         // saved set) so the report includes the sale + rent comp tables.
@@ -2171,15 +2246,22 @@ export function SavedAnalysesPage({
         {clientFilterName ? (
           <div className="flex flex-wrap items-center gap-2 rounded-xl border border-primary/25 bg-primary/5 px-3 py-2 text-sm">
             <UserRound className="size-4 text-primary" aria-hidden />
-            <span className="text-foreground">
-              Showing deals for <strong className="font-semibold">{clientFilterName}</strong>
-            </span>
-            <Link
-              href="/dashboard/saved-analyses"
-              className="ml-auto text-xs font-semibold text-primary hover:underline"
-            >
-              Show all deals
-            </Link>
+            <div className="min-w-0 flex-1">
+              <p className="text-foreground">
+                Showing deals for <strong className="font-semibold">{clientFilterName}</strong>
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Open a deal to share its client report, capture follow-up in Notes, and move it to Offer made.
+              </p>
+            </div>
+            <div className="ml-auto flex items-center gap-3 text-xs font-semibold">
+              <Link href="/dashboard/clients" className="text-primary hover:underline">
+                Back to Clients
+              </Link>
+              <Link href="/dashboard/saved-analyses" className="text-primary hover:underline">
+                Show all deals
+              </Link>
+            </div>
           </div>
         ) : null}
         <div className="rounded-2xl border border-border bg-card p-3 sm:p-4 space-y-4">
@@ -2469,6 +2551,11 @@ export function SavedAnalysesPage({
                           </Popover>
                         ) : null}
                       </div>
+                      {item.methodologyLabel ? (
+                        <p className="mt-1 text-[10px] text-muted-foreground">
+                          {item.methodologyLabel}
+                        </p>
+                      ) : null}
                       <p className="mt-1 text-xs text-muted-foreground">{getTypeLabel(item.propertyType)}</p>
                       <OfferLineRow offer={item.offerLine} />
                       <NextActionLine recommendation={item.recommendation} netCashFlow={item.netCashFlowMonthly} stage={item.status === "completed" ? "closed" : item.pipelineStage} meetsBuyBox={buyBoxFitById?.get(item.id)?.anyPass ?? null} hasCloseDate={item.closeDate != null} className="mt-1.5" />
@@ -2735,6 +2822,11 @@ export function SavedAnalysesPage({
                             <p className="text-xs text-muted-foreground truncate">
                               {getTypeLabel(item.propertyType)}
                             </p>
+                            {item.methodologyLabel ? (
+                              <p className="text-[10px] text-muted-foreground">
+                                {item.methodologyLabel}
+                              </p>
+                            ) : null}
                             <OfferLineRow offer={item.offerLine} />
                             <NextActionLine recommendation={item.recommendation} netCashFlow={item.netCashFlowMonthly} stage={item.status === "completed" ? "closed" : item.pipelineStage} meetsBuyBox={buyBoxFitById?.get(item.id)?.anyPass ?? null} hasCloseDate={item.closeDate != null} className="mt-0.5" />
                             <OwnedEquityCell item={item} enabled={ownedEquityEnabled} />

@@ -167,11 +167,11 @@ export default async function PublicDealPage({ params }: Props) {
               <Lock className="w-5 h-5 text-primary mt-0.5 shrink-0" />
               <div className="min-w-0 flex-1">
                 <div className="font-bold text-foreground">
-                  See 10-year projections, tax strategy, exit scenarios, and Deal Score
+                  See 10-year projections, illustrative tax impact, modeled exit comparisons, and Deal Score
                 </div>
                 <p className="text-sm text-muted-foreground mt-1">
                   The full analysis with multi-year cash flow projections,
-                  depreciation tax modeling, and exit scenario comparison is free
+                  illustrative depreciation tax modeling, and exit-year comparison is free
                   to start. Run this property in your own account — your edits
                   stay private.
                 </p>

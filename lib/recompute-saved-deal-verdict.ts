@@ -1,4 +1,5 @@
 import { calculateAnalysis } from "@/lib/calc-analysis";
+import type { AnalysisResult } from "@/lib/calc-analysis";
 import {
   buildDealScoreInputFromAnalysis,
   computeDealScore,
@@ -24,7 +25,7 @@ import { normalizeInvestmentFormSnapshot } from "@/lib/investcalc-schema";
  * Component. Returns null when the snapshot doesn't validate (legacy/garbage
  * shape), in which case the caller falls back to the stored values.
  */
-export function recomputeSavedDealVerdict(formSnapshot: unknown): {
+export type RecomputedSavedDealVerdict = {
   score: number;
   recommendation: DealRecommendation;
   riskLevel: DealRiskLevel;
@@ -58,7 +59,29 @@ export function recomputeSavedDealVerdict(formSnapshot: unknown): {
    *  SAME recompute so the row reconciles with the fresh Net CF + Tax Savings
    *  rows instead of reading a stale stored snapshot. */
   afterTaxCF: number;
-} | null {
+  /** Full current-standard result. Canonical saved resolvers use this to make
+   * every financial output and the score switch versions atomically. */
+  analysisResult: AnalysisResult;
+  explanation: string;
+};
+
+/** Convert the recompute into the same JSON shape persisted at save time. */
+export function toRecomputedSavedAnalysisSnapshot(
+  verdict: RecomputedSavedDealVerdict
+): Record<string, unknown> {
+  return {
+    ...verdict.analysisResult,
+    score: verdict.score,
+    recommendation: verdict.recommendation,
+    riskLevel: verdict.riskLevel,
+    breakdown: verdict.breakdown,
+    explanation: verdict.explanation,
+  };
+}
+
+export function recomputeSavedDealVerdict(
+  formSnapshot: unknown
+): RecomputedSavedDealVerdict | null {
   // Use the resilient normalizer (same as the editor) rather than a raw
   // safeParse, so legacy snapshots that open fine in the editor recompute
   // here too instead of silently falling back to a stale stored score.
@@ -84,6 +107,8 @@ export function recomputeSavedDealVerdict(formSnapshot: unknown): {
       pmiMonthly: result.pmiMonthly,
       taxSavingsMonthly: result.taxSavingsMonthly,
       afterTaxCF: result.afterTaxCF,
+      analysisResult: result,
+      explanation: scored.explanation,
     };
   } catch {
     return null;

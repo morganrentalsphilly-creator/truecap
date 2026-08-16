@@ -55,7 +55,7 @@ const MATRIX: Row[] = [
   { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine (long-term rental model)", hostfully: "Not modeled", winner: "truecap" },
   { feature: "Underwriting math (purchase decision)", truecap: "Yes — full engine + Pro projections", hostfully: "Not modeled", winner: "truecap" },
   { feature: "Address auto-fill (rent/rate/tax)", truecap: "Yes — HUD + FRED + state property tax", hostfully: "Not applicable", winner: "truecap" },
-  { feature: "Tax strategy + STR loophole", truecap: "Pro — depreciation + interest + after-tax CF", hostfully: "Not modeled", winner: "truecap" },
+  { feature: "Illustrative tax impact", truecap: "Pro — straight-line depreciation + interest + modeled after-tax CF", hostfully: "Not modeled", winner: "truecap" },
   { feature: "Channel manager (Airbnb, Vrbo)", truecap: "No", hostfully: "Yes — unified inbox + calendar", winner: "hostfully" },
   { feature: "Dynamic pricing", truecap: "No", hostfully: "Yes — integrations with PriceLabs etc.", winner: "hostfully" },
   { feature: "Guest messaging automation", truecap: "No", hostfully: "Yes — automated booking + check-in flows", winner: "hostfully" },
@@ -266,7 +266,7 @@ export default function VsHostfullyPage() {
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
-            Pro unlocks projections, sensitivity, tax strategy, exit scenarios,
+            Pro unlocks projections, sensitivity, illustrative tax impact, modeled exit comparisons,
             MAO, PDF exports, and co-branded share links.
             No card to start.
           </p>
@@ -338,11 +338,11 @@ const HOSTFULLY_FAQ: FaqItem[] = [
     question: "Does TrueCap support the STR tax loophole?",
     answer: (
       <>
-        Yes — Pro&apos;s tax strategy modeling includes depreciation acceleration scenarios, and the rental real-estate professional + STR loophole framework can be incorporated into the projection. Consult your CPA for the specific math; TrueCap provides the cash flow + depreciation timeline they need.
+        TrueCap provides a simplified Illustrative Tax Impact view, not an STR-loophole eligibility or cost-segregation engine. It models rental income, entered expenses, straight-line depreciation, and optional mortgage interest at the marginal rate you enter. Use a CPA to determine material participation or REPS and to model cost segregation or bonus depreciation.
       </>
     ),
     plainTextAnswer:
-      "Yes — Pro tax modeling includes depreciation acceleration, and STR-loophole / REPS frameworks can be incorporated. Consult your CPA for specifics; TrueCap provides the cash flow + depreciation timeline.",
+      "TrueCap provides a simplified Illustrative Tax Impact view, not an STR-loophole eligibility or cost-segregation engine. Use a CPA for material-participation, REPS, cost-segregation, and bonus-depreciation modeling.",
   },
   {
     question: "How much does Hostfully cost?",

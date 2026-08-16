@@ -27,7 +27,7 @@ interface MomentOfValueUpsellProps {
   decisionTone: "blocked" | "review" | "ready";
   /** True when the viewer is already on a paid plan; if so we render nothing. */
   isPaid: boolean;
-  /** Triggers the one-time Single-Deal Underwrite chooser for free users.
+  /** Triggers the one-time Deal Decision Pack chooser for free users.
    *  When provided, the one-time next-step is shown so the
    *  visitor isn't funneled only toward Pro. */
   onExportPdf?: () => void;
@@ -186,7 +186,7 @@ export function MomentOfValueUpsell({
           >
             <FileDown className="mt-0.5 size-4 shrink-0 text-[var(--brand-green)]" />
             <span className="text-foreground">
-              <strong>Single-Deal Underwrite — {singleDeal.priceLabel}</strong> — get this
+              <strong>Deal Decision Pack — {singleDeal.priceLabel}</strong> — get this
               property&apos;s Max Offer, Deal Doctor thresholds, downside, projections,
               and complete report. No subscription.
             </span>

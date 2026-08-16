@@ -32,9 +32,17 @@ interface ShareLinkButtonProps {
   /** Saved deal id, when sharing a saved analysis. Lets the public viewer pull
    *  this deal's stored sale/rent comps (verified against the owner). */
   savedDealId?: string | null;
+  /** Agent Pro deal workspace context. This changes only the user-facing label
+   *  and emits the already-declared, PII-safe client-report funnel event. */
+  context?: "analysis" | "client-report";
 }
 
-export function ShareLinkButton({ values, className, savedDealId }: ShareLinkButtonProps) {
+export function ShareLinkButton({
+  values,
+  className,
+  savedDealId,
+  context = "analysis",
+}: ShareLinkButtonProps) {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [shareUrl, setShareUrl] = useState<string>("");
@@ -102,6 +110,9 @@ export function ShareLinkButton({ values, className, savedDealId }: ShareLinkBut
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
       trackEvent("share_link_copied", { has_address: Boolean(values?.address) });
+      if (context === "client-report") {
+        trackEvent("client_report_shared", { report_type: "analysis_link" });
+      }
     } catch {
       // Fallback for browsers without clipboard API: select the input.
       const el = document.getElementById("share-link-url") as HTMLInputElement | null;
@@ -119,7 +130,13 @@ export function ShareLinkButton({ values, className, savedDealId }: ShareLinkBut
         onClick={openShare}
         disabled={disabled || isPreparing}
         className={cn("h-9 gap-1.5 rounded-xl text-xs sm:text-sm", className)}
-        title={disabled ? "Enter an address and price first" : "Share a read-only view of this deal"}
+        title={
+          disabled
+            ? "Enter an address and price first"
+            : context === "client-report"
+              ? "Share a read-only client report"
+              : "Share a read-only view of this deal"
+        }
       >
         {isPreparing ? (
           <>
@@ -129,7 +146,9 @@ export function ShareLinkButton({ values, className, savedDealId }: ShareLinkBut
         ) : (
           <>
             <Share2 className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Share</span>
+            <span className="hidden sm:inline">
+              {context === "client-report" ? "Client report" : "Share"}
+            </span>
           </>
         )}
       </Button>
@@ -144,10 +163,13 @@ export function ShareLinkButton({ values, className, savedDealId }: ShareLinkBut
             and the dialog goes edge-to-edge). */}
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Share this analysis</DialogTitle>
+            <DialogTitle>
+              {context === "client-report" ? "Share client report" : "Share this analysis"}
+            </DialogTitle>
             <DialogDescription>
-              Anyone with the link can view a read-only version — the details are
-              encoded in the URL, no account needed to open it.
+              {context === "client-report"
+                ? "Send this read-only analysis to the assigned client. Saved public branding is included when configured; no account is needed to open it."
+                : "Anyone with the link can view a read-only version — the details are encoded in the URL, no account needed to open it."}
             </DialogDescription>
           </DialogHeader>
 

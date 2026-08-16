@@ -29,9 +29,9 @@ const STATE = "TX";
 const SLUG = "houston";
 const TITLE = "Houston Rental Market Analysis 2026 — Cap Rates";
 const DESCRIPTION =
-  "The no-income-tax + landlord-friendly trade-offs of Houston's Sun Belt play. Run a Houston rental in 60 seconds — TX tax and HUD rent auto-filled.";
+  "Houston rental screening benchmarks with editable tax and HUD area-rent inputs. Verify flood, insurance, rent, and legal assumptions for the property.";
 const PUBLISHED_AT = "2026-05-24";
-const MODIFIED_AT = "2026-06-01";
+const MODIFIED_AT = "2026-08-15";
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -72,19 +72,19 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Why is Texas property tax so high?",
-    a: "Texas has no state income tax — the budget shortfall is filled by some of the highest property tax rates in the U.S. Harris County (Houston) effective rate runs 2.0-2.3% of market value once you include school district + MUD (Municipal Utility District) levies. Sugar Land, Katy, and other master-planned suburbs often hit 2.3-2.8% effective because of higher MUD rates. This is the single biggest reason Houston cap rates look attractive on paper but compress after tax — always include the full effective rate when underwriting.",
+    a: "Texas relies heavily on local property taxes, and a Houston-area bill can vary by parcel, school district, city, exemptions, and MUD (Municipal Utility District) levies. Broad metro ranges are only screening assumptions. A missing or understated parcel bill overstates NOI and cap rate, so verify the current appraisal-district record and taxing units before underwriting.",
   },
   {
     q: "Does no state income tax matter for rental property investors?",
-    a: "Significantly, for in-state residents. Your rental income gets federal tax + depreciation deduction treatment same as any state — but Texas residency means you don't pay GA / CA / NY-style state income tax on the rental income. For out-of-state investors, this matters less (you pay your home state's income tax on rental income regardless of where the property is). For in-state Texas residents, expect ~3-7% higher after-tax cash flow vs the same deal in a state-income-tax state.",
+    a: "It can, but the impact is taxpayer-specific rather than a fixed cash-flow lift. Texas does not levy an individual state income tax. A resident of another state may still have filing or tax obligations under that state's rules, while entity structure, passive-loss limits, credits, and sale timing can change the comparison. Model the parcel's full property-tax burden separately and ask a tax professional to compare the state-income-tax scenarios for your residency and ownership structure.",
   },
   {
     q: "What about hurricane / flood risk in Houston?",
-    a: "Real and material. Post-Harvey (2017), insurance rates in Houston have risen 40-100% in many areas. Flood insurance for properties in or near FEMA flood zones can run $2,000-6,000/year — easily enough to flip a cash-flow deal negative. Always pull the FEMA flood map for the specific address (msc.fema.gov) before underwriting. Properties OUTSIDE the 500-year floodplain in Houston have meaningfully different insurance economics than properties inside it.",
+    a: "Flood and wind exposure can materially change the deal, but a citywide premium range is not a quote. Review current flood maps plus prior-loss, drainage, elevation, roof, and property-condition evidence; obtain subject-property insurance and flood-coverage quotes with limits, deductibles, and exclusions before relying on the cash flow.",
   },
   {
-    q: "Is Houston landlord-friendly?",
-    a: "Texas is one of the most landlord-friendly states in the U.S. for evictions. From notice-to-vacate to lockout typically runs 21-45 days uncontested. No state-level rent control. Lease enforcement is reliable. This materially affects underwriting: vacancy assumption can be lower than in tenant-friendly markets, bad-debt allowance is smaller. Houston specifically has streamlined Justice of the Peace courts that move evictions efficiently.",
+    q: "How should I model Houston landlord-tenant risk?",
+    a: "Do not convert a state label into a fixed eviction timeline, vacancy rate, or bad-debt allowance. Procedure and timing depend on the lease, notices, facts, court, defenses, appeals, and current law. Use property and manager history for operating assumptions and current official guidance or qualified local counsel for legal procedure.",
   },
   {
     q: "How does the energy sector affect Houston real estate?",
@@ -262,25 +262,22 @@ export default function HoustonMarketPage() {
             unusually-low-MUD area.
           </p>
 
-          <h3>No state income tax = real cash-flow advantage for residents</h3>
+          <h3>No individual state income tax — a taxpayer-specific consideration</h3>
           <p>
-            For <Link href="/states/texas" className="font-semibold text-primary hover:underline">Texas</Link> residents, rental income flows through to the
-            federal return without state income tax on top.
-            Comparable to other no-tax states (FL, NV, WA, TN, NH).
-            For out-of-state investors, your home-state income tax
-            still applies — the advantage only accrues to TX
-            residents.
+            <Link href="/states/texas" className="font-semibold text-primary hover:underline">Texas</Link> does not levy an individual state income tax,
+            but that fact alone does not establish an after-tax return.
+            Residency, entity structure, passive-loss rules, other-state
+            filing rules, and the eventual sale all affect the result.
+            Treat state income tax as a scenario to verify with a tax
+            professional, not as a fixed underwriting premium.
           </p>
 
           <h3>FEMA flood zone status changes the deal</h3>
           <p>
-            Post-Harvey (2017), flood insurance for properties in or
-            near FEMA-designated flood zones in Houston has gotten
-            expensive. Mandatory flood insurance can run $1,500-$5,000+
-            per year — easily enough to break a marginal cash-flow
-            deal. Always pull the FEMA flood map for the specific
-            address before locking in numbers. Outside the 500-year
-            zone is meaningfully different from inside.
+            Flood maps are a starting point, not a complete risk or cost
+            estimate. Review the property&apos;s current map status, prior
+            losses, drainage and elevation evidence, then obtain
+            subject-property flood and hazard quotes before underwriting.
           </p>
 
           <h3>No zoning + ADU / lot-split opportunities</h3>
@@ -294,14 +291,14 @@ export default function HoustonMarketPage() {
             land-use attorney on any larger-lot deal.
           </p>
 
-          <h3>Landlord-friendly eviction climate</h3>
+          <h3>Verify landlord-tenant procedure and operating history</h3>
           <p>
-            Texas evictions move fast (21-45 days uncontested). No
-            state rent control. Lease enforcement is reliable. These
-            factors compress your <Link href="/glossary/vacancy" className="font-semibold text-primary hover:underline">vacancy</Link> + bad-debt assumption
-            relative to tenant-friendly markets. Realistic vacancy in
-            mid-tier Houston SFR rentals runs 4-6%; bad debt under
-            1.5% with proper tenant screening.
+            Do not assign a fixed legal timeline, <Link href="/glossary/vacancy" className="font-semibold text-primary hover:underline">vacancy</Link>,
+            or bad-debt rate from a &quot;landlord-friendly&quot; label. Use the
+            property&apos;s collections and turnover history, manager
+            records, lease terms, and explicit downside cases. Confirm
+            current procedure with official local guidance or qualified
+            counsel.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">FAQ</h2>

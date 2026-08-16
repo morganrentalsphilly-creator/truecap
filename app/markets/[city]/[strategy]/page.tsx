@@ -98,7 +98,7 @@ export default async function CityStrategyPage({
     name: `${combo.strategyLabel} investing in ${combo.cityName}`,
     description: combo.pitch,
     url: canonicalUrl,
-    dateModified: "2026-06-01",
+    dateModified: "2026-08-15",
     inLanguage: "en-US",
     isPartOf: { "@id": `${siteUrl}/#website` },
   };
@@ -109,23 +109,23 @@ export default async function CityStrategyPage({
     mainEntity: [
       {
         "@type": "Question",
-        name: `Does ${combo.strategyLabel} work in ${combo.cityName}?`,
+        name: `What should I verify before using ${combo.strategyLabel} in ${combo.cityName}?`,
         acceptedAnswer: { "@type": "Answer", text: combo.pitch },
       },
       {
         "@type": "Question",
-        name: `What neighborhoods in ${combo.cityName} are best for ${combo.strategyLabel}?`,
+        name: `What areas in ${combo.cityName} should I research for ${combo.strategyLabel}?`,
         acceptedAnswer: {
           "@type": "Answer",
-          text: `Top neighborhoods for ${combo.strategyLabel} in ${combo.cityName}: ${combo.neighborhoods.map((n) => n.name).join(", ")}.`,
+          text: `Areas to research for ${combo.strategyLabel} in ${combo.cityName}: ${combo.neighborhoods.map((n) => n.name).join(", ")}. Verify the block, property, rent, expenses, and local rules before relying on any area-level description.`,
         },
       },
       {
         "@type": "Question",
-        name: `What's a typical ${combo.strategyLabel} deal in ${combo.cityName} look like?`,
+        name: `What illustrative screening ranges are shown for ${combo.strategyLabel} in ${combo.cityName}?`,
         acceptedAnswer: {
           "@type": "Answer",
-          text: `Purchase: ${combo.typicalNumbers.purchasePrice}. Monthly rent: ${combo.typicalNumbers.monthlyRent}. Cap rate: ${combo.typicalNumbers.capRate}. ${combo.typicalNumbers.notes}`,
+          text: `Illustrative screen only. Purchase: ${combo.typicalNumbers.purchasePrice}. Monthly rent: ${combo.typicalNumbers.monthlyRent}. Cap rate: ${combo.typicalNumbers.capRate}. ${combo.typicalNumbers.notes} Replace every range with current property-specific evidence before making an investment or financing decision.`,
         },
       },
     ],
@@ -160,13 +160,13 @@ export default async function CityStrategyPage({
 
         {/* Why here, why now */}
         <section className="mt-12">
-          <h2 className="text-2xl font-extrabold text-foreground mb-3">Why {combo.strategyLabel} works in {combo.cityName} right now</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mb-3">Why investors screen {combo.strategyLabel} in {combo.cityName}</h2>
           <p className="text-base leading-relaxed text-foreground">{combo.whyHereWhyNow}</p>
         </section>
 
         {/* Typical numbers */}
         <section className="mt-10 rounded-2xl border border-border bg-card p-6">
-          <p className="text-[11px] uppercase tracking-widest text-primary font-bold mb-3">Typical {combo.strategyLabel} deal in {combo.cityName}</p>
+          <p className="text-[11px] uppercase tracking-widest text-primary font-bold mb-3">Illustrative {combo.strategyLabel} screening ranges in {combo.cityName}</p>
           <div className="grid gap-4 sm:grid-cols-3">
             <div>
               <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Purchase price</p>
@@ -181,12 +181,16 @@ export default async function CityStrategyPage({
               <p className="mt-1 text-lg font-extrabold text-foreground">{combo.typicalNumbers.capRate}</p>
             </div>
           </div>
-          <p className="mt-4 text-sm leading-relaxed text-muted-foreground">{combo.typicalNumbers.notes}</p>
+          <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+            {combo.typicalNumbers.notes} These are orientation ranges, not a forecast, appraisal,
+            quote, or promise of achievable performance. Replace them with current address-level
+            rent comps, taxes, insurance, condition, financing terms, and local requirements.
+          </p>
         </section>
 
         {/* Neighborhoods */}
         <section className="mt-12">
-          <h2 className="text-2xl font-extrabold text-foreground mb-4">Best neighborhoods for {combo.strategyLabel} in {combo.cityName}</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mb-4">Areas to research for {combo.strategyLabel} in {combo.cityName}</h2>
           <div className="grid gap-3 sm:grid-cols-2">
             {combo.neighborhoods.map((n) => (
               <article key={n.name} className="rounded-xl border border-border bg-card p-5">
@@ -214,7 +218,7 @@ export default async function CityStrategyPage({
         <section className="mt-12 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
           <h2 className="text-xl sm:text-2xl font-extrabold mb-2">Run a {combo.cityName} {combo.strategyLabel} deal in 60 seconds</h2>
           <p className="text-sm sm:text-base opacity-90 mb-5">
-            Paste an address into TrueCap and get cap rate, cash-on-cash, DSCR, and 10-year projection — pre-loaded with {combo.cityName}-area defaults so you start with the right assumptions.
+            Paste an address into TrueCap and get cap rate, cash-on-cash, DSCR, and a 10-year scenario — pre-loaded with {combo.cityName}-area screening defaults that you can replace with property-specific evidence.
           </p>
           <Link href="/" className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity">
             Try TrueCap free <ArrowRight className="size-4" />

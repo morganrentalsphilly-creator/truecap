@@ -296,13 +296,15 @@ export default function BlogPost() {
             articulate which one in two sentences, walk.
           </p>
 
-          <h3>Cap rate that doesn&apos;t include CapEx reserves</h3>
+          <h3>Cap rate without a matching cash-flow reserve</h3>
           <p>
             Many cap-rate quotes leave out <Link href="/glossary/capex" className="text-primary font-semibold hover:underline">capital expenditure reserves</Link> (the
             5-10% of rent you&apos;ll need for roof, HVAC, water heater
-            replacements over time). Honest <Link href="/glossary/noi" className="text-primary font-semibold hover:underline">NOI</Link> includes a CapEx reserve. If
-            yours doesn&apos;t, you&apos;re overstating cap rate by 50-100
-            basis points. (Full breakdown in our <Link href="/blog/rental-property-pro-forma-explained" className="text-primary font-semibold hover:underline">rental property pro forma guide</Link>.)
+            replacements over time). Lender-style <Link href="/glossary/noi" className="text-primary font-semibold hover:underline">NOI</Link> leaves CapEx below the line;
+            TrueCap follows that convention for cap rate and DSCR, then
+            subtracts the reserve from cash flow and cash-on-cash return. If
+            a quoted cap rate omits the reserve, compare it on the same NOI
+            basis but still fund CapEx before judging spendable returns. (Full breakdown in our <Link href="/blog/rental-property-pro-forma-explained" className="text-primary font-semibold hover:underline">rental property pro forma guide</Link>.)
           </p>
 
           <h2 className="text-2xl sm:text-3xl">The simplest way to check</h2>

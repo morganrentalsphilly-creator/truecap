@@ -116,6 +116,13 @@ import { LoanAmortizationView } from "@/components/investcalc/loan-amortization-
 import { DealNotesPanel } from "@/components/investcalc/deal-notes-panel";
 import { ShareLinkButton } from "@/components/investcalc/share-link-button";
 import { AnswerHeroCard } from "@/components/investcalc/answer-hero-card";
+import { InputConfidenceCard } from "@/components/investcalc/input-confidence-card";
+import type { ApplicableDecisionThreshold } from "@/components/investcalc/what-needs-to-be-true-card";
+import { PrepareOfferCard } from "@/components/investcalc/prepare-offer-card";
+import type {
+  InputConfidenceFieldKey,
+  InputConfidenceResult,
+} from "@/lib/input-confidence";
 import { DrillRow } from "@/components/investcalc/drill-row";
 import { DrillLedger } from "@/components/investcalc/drill-ledger";
 import {
@@ -131,6 +138,7 @@ import type { TaxStrategyInput, TaxStrategyYear } from "@/lib/tax-strategy";
 import type { ExitScenarioInput, ExitScenarioYear } from "@/lib/exit-scenarios";
 import { computeReturnSummaryFromExitYears } from "@/lib/returns";
 import { isExtremeAnnualizedRoi } from "@/lib/extreme-value-format";
+import { isFeatureEnabled } from "@/lib/feature-flags";
 import { cn, scrollBehavior } from "@/lib/utils";
 import type { DealScoreActionResult } from "@/app/actions/deal-score";
 import {
@@ -227,6 +235,11 @@ interface AnalysisDashboardProps {
   /** Live data-confidence for the current analysis (computed in the analyzer
    *  from enrich-property provenance). Null hides the badge. */
   dataConfidence?: DataConfidence | null;
+  /** Deterministic 15-field data-readiness assessment. Separate from Deal Fit. */
+  inputConfidence?: InputConfidenceResult | null;
+  onEditAssumptions?: () => void;
+  onToggleInputVerified?: (key: InputConfidenceFieldKey, verified: boolean) => void;
+  onApplyDecisionThreshold?: (change: ApplicableDecisionThreshold) => void;
   activeTab?: AnalysisDashboardTab;
   /** Bumped by the caller on every point-at-tab intent, so a SAME-VALUE
    *  re-point (user closed the row, then re-clicked the input tab or
@@ -276,7 +289,7 @@ export type AnalysisLedgerRowId =
 const TABS: { id: AnalysisDashboardTab; label: string; icon: LucideIcon; isPro: boolean }[] = [
   { id: "cash-flow", label: "Cash Flow", icon: TrendingUp, isPro: false },
   { id: "projections", label: "10-Year Projections", icon: ArrowUpRight, isPro: true },
-  { id: "tax-strategy", label: "Tax Strategy", icon: FileText, isPro: true },
+  { id: "tax-strategy", label: "Illustrative Tax Impact", icon: FileText, isPro: true },
   { id: "exit-scenarios", label: "Exit Scenarios", icon: Building2, isPro: true },
   // Renamed from "Strategies" (Jun 2026 UX pass) - vague label for the
   // not-Excel-power-user audience; the row IS the BRRRR + fix-and-flip
@@ -373,12 +386,20 @@ export function AnalysisDashboard({
   savedDealCount = null,
   savedDealLimit = null,
   dataConfidence = null,
+  inputConfidence = null,
+  onEditAssumptions,
+  onToggleInputVerified,
+  onApplyDecisionThreshold,
   activeTab: activeTabProp,
   activeTabNonce = 0,
   activeStrategy = null,
   persistedActionsBlockHint,
   assumptionsSlot,
 }: AnalysisDashboardProps) {
+  const showInputConfidence = isFeatureEnabled("input_confidence");
+  const showOfferReadyStatus = isFeatureEnabled("offer_ready_status");
+  const showDecisionThresholds = isFeatureEnabled("what_needs_to_be_true_v2");
+  const showDealDecisionPack = isFeatureEnabled("deal_decision_pack");
   const singleDealPriceLabel = getMarketingOfferConfig().singleDeal.priceLabel;
   // Ledger open state (Phase 5) - replaces the single activeTab. Rows are
   // INDEPENDENT multi-open accordions: opening one never closes a sibling
@@ -482,7 +503,7 @@ export function AnalysisDashboard({
   // What-if slider state. When the user drags rent / rate, this holds
   // the adjusted result; otherwise null and we render the base `result`
   // unchanged. SCOPED: only the 4 Overview tier metric cards consume
-  // this - projections, tax strategy, exit scenarios, deal score, and
+  // this - projections, illustrative tax impact, exit scenarios, deal score, and
   // every Pro panel stay anchored to the saved/base analysis. Sliders
   // are a "what-if peek" on headline numbers, not a full reanalysis.
   const [whatIfState, setWhatIfState] = useState<WhatIfState | null>(null);
@@ -658,6 +679,16 @@ export function AnalysisDashboard({
     }
     void onSaveDeal();
   };
+  const handlePrepareOffer = () => {
+    trackEvent("prepare_my_offer_clicked", {
+      offer_ready_stage: inputConfidence?.stage ?? "unknown",
+    });
+    trackEvent("deal_decision_pack_started", {
+      source: "analysis_result",
+      methodology_version: result?.methodologyVersion ?? "unknown",
+    });
+    void onExportPdf("personal");
+  };
 
   // Metric tap → jump to the ledger row that explains it (Phase 2 wiring,
   // Phase 5 target). Same ids (METRIC_JUMP_TARGETS map to the old tab ids,
@@ -711,6 +742,44 @@ export function AnalysisDashboard({
       trackEvent("max_offer_unlocked", { placement: "analysis_result" });
     }
   }, [canUseMaxOffer, isLoading, nextAction?.tone, result]);
+
+  const trackedDealFitResultRef = useRef<AnalysisResult | null>(null);
+  const trackedInputConfidenceResultRef = useRef<AnalysisResult | null>(null);
+  useEffect(() => {
+    if (!result || isLoading) return;
+    if (
+      trackedDealFitResultRef.current !== result &&
+      dealScoreResult?.ok &&
+      dealScoreResult.tier === "pro"
+    ) {
+      trackedDealFitResultRef.current = result;
+      const score = dealScoreResult.data.score;
+      trackEvent("deal_fit_viewed", {
+        score_band: score >= 80 ? "80-100" : score >= 60 ? "60-79" : score >= 40 ? "40-59" : "0-39",
+        methodology_version: result.methodologyVersion,
+      });
+    }
+    if (
+      trackedInputConfidenceResultRef.current !== result &&
+      showInputConfidence &&
+      inputConfidence
+    ) {
+      trackedInputConfidenceResultRef.current = result;
+      trackEvent("input_confidence_viewed", {
+        score_band:
+          inputConfidence.score >= 80
+            ? "80-100"
+            : inputConfidence.score >= 55
+              ? "55-79"
+              : inputConfidence.score >= 30
+                ? "30-54"
+                : "0-29",
+        stage: inputConfidence.stage,
+        sensitivity_risk: inputConfidence.sensitivityRisk,
+        method_version: inputConfidence.methodVersion,
+      });
+    }
+  }, [dealScoreResult, inputConfidence, isLoading, result, showInputConfidence]);
 
   const trackedBuyBoxResultRef = useRef<{ result: AnalysisResult; passes: boolean } | null>(null);
   useEffect(() => {
@@ -785,8 +854,8 @@ export function AnalysisDashboard({
         : "See year-by-year cash flow, equity & returns",
     "tax-strategy":
       result && annualTaxSavings > 0
-        ? `~$${annualTaxSavings.toLocaleString()}/yr in tax savings on paper`
-        : "See depreciation, interest & what you'd keep",
+        ? `~$${annualTaxSavings.toLocaleString()}/yr modeled tax impact at the entered rate`
+        : "See the modeled effect of depreciation and interest",
     "exit-scenarios":
       returnSummary?.irrPct != null
         ? `IRR ${returnSummary.irrPct.toFixed(1)}% over ${returnSummary.years} yrs`
@@ -899,7 +968,11 @@ export function AnalysisDashboard({
           missing outcome (Max Offer) without inventing a number for Free. */}
       {result && values && !isLoading && canUseMaxOffer ? (
         <section id="max-offer-result" className="scroll-mt-20 space-y-4" aria-label="Max Offer decision">
-          <MaxOfferCard values={values} buyBoxThresholds={buyBoxQaReport?.maoThresholds ?? null} />
+          <MaxOfferCard
+            values={values}
+            buyBoxThresholds={buyBoxQaReport?.maoThresholds ?? null}
+            onApplyThreshold={onApplyDecisionThreshold}
+          />
           <AssumptionImpactCard values={values} />
         </section>
       ) : null}
@@ -913,6 +986,29 @@ export function AnalysisDashboard({
           decisionTone={nextAction?.tone ?? "review"}
           isPaid={canUseMaxOffer}
           onExportPdf={onExportPdf}
+        />
+      ) : null}
+
+      {showInputConfidence && result && !isLoading && inputConfidence && onEditAssumptions && onToggleInputVerified ? (
+        <InputConfidenceCard
+          confidence={inputConfidence}
+          showOfferReadyStatus={showOfferReadyStatus}
+          dealFitScore={
+            dealScoreResult?.ok && dealScoreResult.tier === "pro"
+              ? dealScoreResult.data.score
+              : null
+          }
+          onEditAssumptions={onEditAssumptions}
+          onToggleVerified={onToggleInputVerified}
+        />
+      ) : null}
+
+      {showDealDecisionPack && result && !isLoading ? (
+        <PrepareOfferCard
+          stage={inputConfidence?.stage ?? null}
+          remainingVerificationCount={inputConfidence?.offerReadyRemaining.length ?? null}
+          isPreparing={isExporting}
+          onPrepare={handlePrepareOffer}
         />
       ) : null}
 
@@ -1038,7 +1134,7 @@ export function AnalysisDashboard({
                   canExportPdf && !isSaved
                     ? persistedActionsBlockHint ?? "Save this analysis before exporting PDF."
                     : !canExportPdf
-                      ? `Get the lender-ready PDF - included with Pro, or ${singleDealPriceLabel} one-time.`
+                      ? `Get the Deal Decision Pack - included with Pro, or ${singleDealPriceLabel} one-time.`
                       : undefined
                 }
               >
@@ -1276,7 +1372,7 @@ export function AnalysisDashboard({
       {/* Existing deterministic breakpoint solver, promoted out of the
           collapsed what-if drawer. On a weak or marginal deal this answers
           the next acquisition question: what has to change for it to work? */}
-      {result && values && !isLoading && !strategyLeadsOutput ? (
+      {result && values && !isLoading && !strategyLeadsOutput && !showDecisionThresholds ? (
         <BreakpointSuggestionCard values={values} result={result} />
       ) : null}
 
@@ -1307,7 +1403,7 @@ export function AnalysisDashboard({
       {/* Max Offer is a first-class acquisition answer, not just another
           metric. This compact summary uses the exact same deterministic
           engine and Buy Box target basis as the editable solver below. */}
-      {maoQaContext && values && !strategyLeadsOutput ? (
+      {maoQaContext && values && !strategyLeadsOutput && !showDecisionThresholds ? (
         <section
           aria-labelledby="max-offer-summary-title"
           className="rounded-2xl border-2 border-primary/30 bg-[var(--brand-blue-light)] p-5 sm:p-6"
@@ -1615,7 +1711,7 @@ export function AnalysisDashboard({
               )}
               {tab.id === "tax-strategy" && canUseTaxStrategy && !taxStrategySource && (
                 <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
-                  Run the analysis to see the tax strategy view.
+                  Run the analysis to see the illustrative tax-impact view.
                 </div>
               )}
               {tab.id === "exit-scenarios" && !canUseExitScenarios && (
@@ -1780,14 +1876,14 @@ const proPreviewCopy: Record<ProPreviewKind, { title: string; description: strin
     metrics: ["Year 10 Cumulative CF", "Best Annual After-Tax CF", "10-Year After-Tax Cash Flow"],
   },
   "tax-strategy": {
-    title: "Tax Strategy",
-    description: "Unlock taxable income trends, depreciation, mortgage interest, and tax savings.",
-    metrics: ["Year 1 Taxable Income", "Year 1 Tax Savings", "10-Year Tax Benefit"],
+    title: "Illustrative Tax Impact",
+    description: "Unlock modeled taxable rental income, depreciation, mortgage interest, and tax impact at the entered marginal rate.",
+    metrics: ["Year 1 Taxable Rental Income", "Year 1 Modeled Tax Impact", "10-Year Modeled Tax Impact"],
   },
   "exit-scenarios": {
     title: "Exit Scenarios",
     description: "Unlock equity growth, sale timing, profit breakdowns, and ROI scenarios.",
-    metrics: ["Best Year to Sell", "Year 5 Profit", "Total ROI"],
+    metrics: ["Highest Modeled Profit", "Year 5 Profit", "Total ROI"],
   },
   strategies: {
     title: "Strategies",

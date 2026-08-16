@@ -12,7 +12,12 @@
 
 export type PipelineStage =
   | "researching"
+  | "watching"
+  | "screening"
   | "analyzing"
+  | "verifying"
+  | "offer_ready"
+  | "negotiating"
   | "offer"
   | "under_contract"
   | "closed"
@@ -31,12 +36,20 @@ export type PipelineStageMeta = {
 
 /** Ordered funnel. `passed` is the terminal "no" and sorts last. */
 export const PIPELINE_STAGES: PipelineStageMeta[] = [
+  // `researching` is retained for every persisted legacy row and remains
+  // selectable. New workflows can use the more precise Watching/Screening
+  // stages without rewriting a user's history behind their back.
   { id: "researching", label: "Researching", short: "Research", order: 1, tone: "neutral", description: "Early look — gathering the numbers." },
-  { id: "analyzing", label: "Analyzing", short: "Analyzing", order: 2, tone: "active", description: "Underwriting the deal." },
-  { id: "offer", label: "Offer made", short: "Offer", order: 3, tone: "progress", description: "Offer submitted to the seller." },
-  { id: "under_contract", label: "Under contract", short: "Contract", order: 4, tone: "progress", description: "Accepted — in due diligence." },
-  { id: "closed", label: "Closed", short: "Closed", order: 5, tone: "success", description: "Owned — the deal closed." },
-  { id: "passed", label: "Passed", short: "Passed", order: 6, tone: "muted", description: "Not pursuing this one." },
+  { id: "watching", label: "Watching", short: "Watch", order: 2, tone: "neutral", description: "Monitoring the opportunity for a price or assumption change." },
+  { id: "screening", label: "Screening", short: "Screen", order: 3, tone: "neutral", description: "Checking the listing against the first-pass criteria." },
+  { id: "analyzing", label: "Analyzing", short: "Analyze", order: 4, tone: "active", description: "Underwriting the deal and its downside." },
+  { id: "verifying", label: "Verifying", short: "Verify", order: 5, tone: "active", description: "Replacing estimates with property-specific evidence." },
+  { id: "offer_ready", label: "Offer ready", short: "Ready", order: 6, tone: "progress", description: "The underwrite is ready to support an offer decision." },
+  { id: "negotiating", label: "Negotiating", short: "Negotiate", order: 7, tone: "progress", description: "Working toward acceptable seller terms." },
+  { id: "offer", label: "Offer made", short: "Offer", order: 8, tone: "progress", description: "Offer submitted to the seller." },
+  { id: "under_contract", label: "Under contract", short: "Contract", order: 9, tone: "progress", description: "Accepted — in due diligence." },
+  { id: "closed", label: "Closed", short: "Closed", order: 10, tone: "success", description: "Owned — the deal closed." },
+  { id: "passed", label: "Passed", short: "Passed", order: 11, tone: "muted", description: "Not pursuing this one." },
 ];
 
 export const DEFAULT_PIPELINE_STAGE: PipelineStage = "analyzing";

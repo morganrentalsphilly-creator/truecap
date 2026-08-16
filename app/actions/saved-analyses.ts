@@ -19,7 +19,15 @@ import {
   type InvestmentFormValues,
 } from "@/lib/investcalc-schema";
 import { flagsForStage, isPipelineStage, normalizeTags, type PipelineStage } from "@/lib/pipeline";
-import { buildDataConfidence, type EnrichmentProvenanceInput } from "@/lib/data-confidence";
+import {
+  buildDataConfidence,
+  shouldPreserveStoredDataConfidence,
+  type EnrichmentProvenanceInput,
+} from "@/lib/data-confidence";
+import {
+  buildInputConfidence,
+  normalizeInputVerificationEvidence,
+} from "@/lib/input-confidence";
 import {
   defaultDueDiligenceItems,
   normalizeDueDiligenceItems,
@@ -45,6 +53,14 @@ import {
 } from "@/lib/buy-box";
 import { buildBuyBoxPdfVerdict, type BuyBoxPdfVerdict } from "@/lib/pdf-buy-box";
 import { listBuyBoxesAction } from "@/app/actions/user-buy-boxes";
+import { isFeatureEnabled } from "@/lib/feature-flags";
+import {
+  financingProfileMatchesAnalysis,
+  financingProfileSnapshotSchema,
+  rowToFinancingProfile,
+  snapshotFinancingProfile,
+  type FinancingProfileSnapshot,
+} from "@/lib/financing-profiles";
 
 export type SaveDealResult =
   | { ok: true; id: string; mode: "inserted" | "updated" }
@@ -80,6 +96,7 @@ export type GetSavedDealForEditingResult =
       ok: true;
       id: string;
       schemaVersion: number;
+      methodologyVersion: string | null;
       formSnapshot: Record<string, unknown>;
       templateFallback: {
         id: string;
@@ -112,6 +129,7 @@ export type GetSavedAnalysisPdfExportResult =
       source: "regenerate";
       id: string;
       schemaVersion: number;
+      methodologyVersion: string | null;
       formSnapshot: Record<string, unknown>;
       templateFallback: SavedTemplateFallback | null;
       resultSnapshot: Record<string, unknown>;
@@ -258,6 +276,83 @@ const saveProvenanceSchema = z
   })
   .optional();
 
+const FINANCING_PROFILE_SNAPSHOT_COLUMNS =
+  "id, name, loan_type, interest_rate_pct, down_payment_pct, ltv_pct, amortization_years, loan_term_years, points_pct, lender_fees, closing_costs_pct, interest_only_months, pmi_annual_rate_pct, pmi_no_cancel, lender_name, notes, last_verified_at, is_active, is_default, terms_version, created_at, updated_at";
+
+async function resolveAppliedFinancingProfile(
+  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>,
+  userId: string,
+  rawSnapshot: unknown,
+  values: InvestmentFormValues
+): Promise<
+  | { ok: true; snapshot: FinancingProfileSnapshot | null }
+  | { ok: false; error: unknown }
+> {
+  const parsed = financingProfileSnapshotSchema.safeParse(rawSnapshot);
+  if (!parsed.success || !financingProfileMatchesAnalysis(parsed.data, values)) {
+    return { ok: true, snapshot: null };
+  }
+
+  // Explicit ownership scope supplements RLS and makes the tenant boundary
+  // obvious at the mutation site. A foreign/deleted id becomes no profile;
+  // it is never linked to the saved analysis.
+  const { data, error } = await supabase
+    .from("financing_profiles")
+    .select(FINANCING_PROFILE_SNAPSHOT_COLUMNS)
+    .eq("id", parsed.data.profileId)
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (error) return { ok: false, error };
+  if (!data) return { ok: true, snapshot: null };
+
+  const current = rowToFinancingProfile(data as unknown as Record<string, unknown>);
+  if (parsed.data.termsVersion !== current.termsVersion) {
+    return { ok: true, snapshot: null };
+  }
+
+  const appliedAt = new Date().toISOString();
+  const canonical = snapshotFinancingProfile(current, appliedAt);
+  return financingProfileMatchesAnalysis(canonical, values)
+    ? { ok: true, snapshot: canonical }
+    : { ok: true, snapshot: null };
+}
+
+function parseStoredFinancingProfileSnapshot(
+  row: Record<string, unknown>
+): FinancingProfileSnapshot | null {
+  const parsed = financingProfileSnapshotSchema.safeParse(row.financing_profile_snapshot);
+  if (!parsed.success) return null;
+
+  const storedVersion = dbNumber(row.financing_profile_version);
+  const storedProfileId = dbString(row.financing_profile_id);
+  if (storedVersion !== parsed.data.termsVersion) return null;
+  // ON DELETE SET NULL intentionally removes only the live link. A non-null
+  // link, however, must agree with the identity frozen inside the snapshot.
+  if (storedProfileId && storedProfileId !== parsed.data.profileId) return null;
+  return parsed.data;
+}
+
+/** Never trust the mutable embedded financingProfile object on a read. Its
+ * canonical identity/version/snapshot live in dedicated top-level columns and
+ * are validated together before crossing the server-action boundary. */
+function buildTrustedResultSnapshot(row: Record<string, unknown>): Record<string, unknown> {
+  const snapshot = { ...(asRecord(row.result_snapshot) ?? {}) };
+  const financingProfile = parseStoredFinancingProfileSnapshot(row);
+  if (financingProfile) snapshot.financingProfile = financingProfile;
+  else delete snapshot.financingProfile;
+  return snapshot;
+}
+
+function sameFinancingProfileSnapshot(
+  left: FinancingProfileSnapshot,
+  right: FinancingProfileSnapshot
+): boolean {
+  // Both values have passed the same strict Zod schema, which also emits
+  // their keys in the same deterministic order. This compares every frozen
+  // term, label and timestamp; identity/version equality alone is not enough.
+  return JSON.stringify(left) === JSON.stringify(right);
+}
+
 export async function saveDealAction(
   input: unknown,
   existingId?: string | null,
@@ -270,7 +365,25 @@ export async function saveDealAction(
   // saved deal's, moving the row (address column included) to the new
   // address. Both default to the pre-existing behavior, so callers that
   // omit them are unchanged.
-  options?: { saveAsNewScenario?: boolean; allowAddressChange?: boolean }
+  options?: {
+    saveAsNewScenario?: boolean;
+    allowAddressChange?: boolean;
+    /** Explicit user attestations. Fingerprints are rechecked server-side so
+     * changing a value automatically invalidates its prior verification. */
+    inputVerification?: unknown;
+    /** UI edit provenance only; this can raise a generic default to a user
+     * estimate, never to Verified. */
+    touchedInputFields?: string[];
+    /** Sentinel from context-aware analyzer clients. When true, an empty
+     * provenance object means prior value-bound sources were rechecked and
+     * invalidated; older callers omit this and retain the legacy preserve-on-
+     * missing behavior. */
+    inputSourceContextProvided?: boolean;
+    /** Exact reusable financing revision applied to these values. The server
+     * rechecks ownership, version bounds, and every modeled term before it
+     * writes the origin link plus frozen snapshot. */
+    financingProfileSnapshot?: unknown;
+  }
 ): Promise<SaveDealResult> {
   const supabase = await createServerSupabaseClient();
   const {
@@ -305,6 +418,24 @@ export async function saveDealAction(
     ...values,
     units: sanitizedUnits,
   };
+  const financingProfileOptionProvided = Boolean(
+    isFeatureEnabled("financing_profiles") &&
+      options &&
+      Object.prototype.hasOwnProperty.call(options, "financingProfileSnapshot")
+  );
+  let appliedFinancingProfile: FinancingProfileSnapshot | null = null;
+  if (financingProfileOptionProvided && options?.financingProfileSnapshot != null) {
+    const resolvedProfile = await resolveAppliedFinancingProfile(
+      supabase,
+      user.id,
+      options.financingProfileSnapshot,
+      sanitizedValues
+    );
+    if (!resolvedProfile.ok) {
+      return toServerErrorResult(resolvedProfile.error, "saved-analyses-financing-profile");
+    }
+    appliedFinancingProfile = resolvedProfile.snapshot;
+  }
   const addressTrimmed = values.address.trim();
   const result = calculateAnalysis(sanitizedValues);
   // Holistic (total-return-aware) score — computed server-side from the real
@@ -319,6 +450,8 @@ export async function saveDealAction(
     score: dealScore.score,
     recommendation: dealScore.recommendation,
     riskLevel: dealScore.riskLevel,
+    breakdown: dealScore.breakdown,
+    explanation: dealScore.explanation,
     snapshotVersion,
     compareSnapshot,
   } as Record<string, unknown>;
@@ -360,10 +493,28 @@ export async function saveDealAction(
       hasBeds: (sanitizedValues.bedrooms ?? 0) > 0,
     }
   );
+  const inputConfidence = buildInputConfidence({
+    values: sanitizedValues,
+    provenance: provenanceFields as EnrichmentProvenanceInput | undefined,
+    touchedFields: new Set(
+      (options?.touchedInputFields ?? [])
+        .filter((key): key is string => typeof key === "string")
+        .slice(0, 64)
+    ),
+    verified: normalizeInputVerificationEvidence(options?.inputVerification),
+  });
+  resultSnapshotWithScore.inputConfidence = inputConfidence;
+  if (financingProfileOptionProvided) {
+    resultSnapshotWithScore.financingProfile = appliedFinancingProfile;
+  }
 
   const payload = {
     title,
     schema_version: INVESTCALC_SCHEMA_VERSION,
+    // Persist the engine standard beside the frozen result snapshot. The
+    // additive product-foundations migration backfills pre-version rows as
+    // `legacy-unversioned`; never attribute today's math to older analyses.
+    methodology_version: result.methodologyVersion,
     form_snapshot: formSnapshotPersisted as unknown as Record<string, unknown>,
     result_snapshot: resultSnapshotWithScore,
     property_type: sanitizedValues.propertyType,
@@ -408,14 +559,27 @@ export async function saveDealAction(
     pdf_generated_at: null,
     pdf_snapshot_version: 0,
     last_activity_at: new Date().toISOString(),
-    data_confidence: dataConfidence as unknown as Record<string, unknown>,
+    data_confidence: {
+      ...dataConfidence,
+      inputConfidence,
+    } as unknown as Record<string, unknown>,
+    ...(financingProfileOptionProvided
+      ? {
+          financing_profile_id: appliedFinancingProfile?.profileId ?? null,
+          financing_profile_version: appliedFinancingProfile?.termsVersion ?? null,
+          financing_profile_snapshot:
+            (appliedFinancingProfile as unknown as Record<string, unknown> | null) ?? null,
+        }
+      : {}),
   };
 
   const candidateExistingId = existingId?.trim();
   if (candidateExistingId) {
     const { data: existing, error: existingErr } = await supabase
       .from("saved_analyses")
-      .select("id, address, title, data_confidence")
+      .select(
+        "id, address, title, data_confidence, financing_profile_id, financing_profile_version, financing_profile_snapshot"
+      )
       .eq("id", candidateExistingId)
       .eq("user_id", user.id)
       .is("deleted_at", null)
@@ -505,17 +669,97 @@ export async function saveDealAction(
     // instead - preserving the old-address title would misname the deal
     // in My Deals.
     const preservedTitle = addressChanged ? undefined : dbString(existing.title)?.trim();
-    // Keep the stored data_confidence when this save carries no provenance:
-    // the recompute would only ever downgrade (all sources read as manual),
-    // erasing the HUD/FRED attribution the deal earned at first save. A save
-    // that DOES attribute fields re-earns its level the normal way.
+    // Older callers cannot resend a reopened deal's source context, so their
+    // absent provenance keeps the stored legacy summary. The current analyzer
+    // sends an explicit sentinel after fingerprint revalidation; its empty
+    // provenance is authoritative and clears sources invalidated by edits.
     const existingDataConfidence = asRecord(
       (existing as Record<string, unknown>).data_confidence
     );
+    let trustedProfileFieldsForUpdate: {
+      financing_profile_id: string | null;
+      financing_profile_version: number | null;
+      financing_profile_snapshot: Record<string, unknown> | null;
+    } | null = null;
+
+    // New saves may attach only the current database revision. On an update,
+    // a profile can legitimately have changed (or been deleted) since this
+    // deal was first saved. Preserve that historical basis only from the
+    // exact snapshot already stored on this owned row — never from the
+    // browser's older blob — and only while its modeled terms still match
+    // the form being saved.
+    if (
+      financingProfileOptionProvided &&
+      options?.financingProfileSnapshot != null
+    ) {
+      const submitted = financingProfileSnapshotSchema.safeParse(
+        options.financingProfileSnapshot
+      );
+      const existingRecord = existing as Record<string, unknown>;
+      const stored = parseStoredFinancingProfileSnapshot(existingRecord);
+      if (
+        submitted.success &&
+        stored &&
+        sameFinancingProfileSnapshot(submitted.data, stored) &&
+        financingProfileMatchesAnalysis(stored, sanitizedValues)
+      ) {
+        const storedRecord = asRecord(existingRecord.financing_profile_snapshot);
+        if (storedRecord) {
+          appliedFinancingProfile = stored;
+          resultSnapshotWithScore.financingProfile = stored;
+          trustedProfileFieldsForUpdate = {
+            financing_profile_id: dbString(existingRecord.financing_profile_id) ?? null,
+            financing_profile_version: stored.termsVersion,
+            financing_profile_snapshot: storedRecord,
+          };
+        }
+      }
+    }
+    // A kill-switch rollback must not erase a valid frozen revision on an
+    // unrelated edit, but an old client must not leave provenance attached
+    // after changing one of its modeled terms. The top-level database value
+    // is the source of truth; never copy the embedded result JSON here.
+    if (!financingProfileOptionProvided) {
+      const existingRecord = existing as Record<string, unknown>;
+      const stored = parseStoredFinancingProfileSnapshot(existingRecord);
+      const storedRecord = asRecord(existingRecord.financing_profile_snapshot);
+      if (
+        stored &&
+        storedRecord &&
+        financingProfileMatchesAnalysis(stored, sanitizedValues)
+      ) {
+        resultSnapshotWithScore.financingProfile = stored;
+        trustedProfileFieldsForUpdate = {
+          financing_profile_id: dbString(existingRecord.financing_profile_id) ?? null,
+          financing_profile_version: stored.termsVersion,
+          financing_profile_snapshot: storedRecord,
+        };
+      } else {
+        delete resultSnapshotWithScore.financingProfile;
+        trustedProfileFieldsForUpdate = {
+          financing_profile_id: null,
+          financing_profile_version: null,
+          financing_profile_snapshot: null,
+        };
+      }
+    }
+    const payloadWithTrustedProfile = trustedProfileFieldsForUpdate
+      ? { ...payload, ...trustedProfileFieldsForUpdate }
+      : payload;
     const updatePayload =
-      !provenanceProvided && existingDataConfidence
-        ? { ...payload, data_confidence: existingDataConfidence }
-        : payload;
+      shouldPreserveStoredDataConfidence({
+        sourceContextProvided: options?.inputSourceContextProvided === true,
+        provenanceProvided,
+        hasStoredDataConfidence: Boolean(existingDataConfidence),
+      }) && existingDataConfidence
+        ? {
+            ...payloadWithTrustedProfile,
+            data_confidence: {
+              ...existingDataConfidence,
+              inputConfidence,
+            },
+          }
+        : payloadWithTrustedProfile;
     const { data, error } = await supabase
       .from("saved_analyses")
       .update(preservedTitle ? { ...updatePayload, title: preservedTitle } : updatePayload)
@@ -618,7 +862,7 @@ export async function getSavedDealForEditingAction(id: string): Promise<GetSaved
   const { data, error } = await supabase
     .from("saved_analyses")
     .select(
-      "id, schema_version, form_snapshot, result_snapshot, property_type, address, purchase_price, year_built, loan_term_years, interest_rate_pct, down_payment_pct, closing_costs_pct, bedrooms, bathrooms, sqft, monthly_rent, property_tax_pct, insurance_input_mode, insurance_pct, insurance_mo, hoa_mo, utilities_mo, maintenance_pct, vacancy_pct, management_pct, capex_pct, building_value_pct, depreciation_years, include_interest_deduction, tax_rate_pct, expense_growth_pct, rent_growth_pct, template_id, appreciation_rate_pct, selling_cost_pct"
+      "id, schema_version, methodology_version, form_snapshot, result_snapshot, financing_profile_id, financing_profile_version, financing_profile_snapshot, property_type, address, purchase_price, year_built, loan_term_years, interest_rate_pct, down_payment_pct, closing_costs_pct, bedrooms, bathrooms, sqft, monthly_rent, property_tax_pct, insurance_input_mode, insurance_pct, insurance_mo, hoa_mo, utilities_mo, maintenance_pct, vacancy_pct, management_pct, capex_pct, building_value_pct, depreciation_years, include_interest_deduction, tax_rate_pct, expense_growth_pct, rent_growth_pct, template_id, appreciation_rate_pct, selling_cost_pct"
     )
     .eq("id", id.trim())
     .eq("user_id", user.id)
@@ -670,12 +914,10 @@ export async function getSavedDealForEditingAction(id: string): Promise<GetSaved
     ok: true,
     id: String(data.id),
     schemaVersion: Number(data.schema_version ?? 1),
+    methodologyVersion: dbString((data as Record<string, unknown>).methodology_version) ?? null,
     formSnapshot: buildEditFormSnapshotFromRow(data as Record<string, unknown>),
     templateFallback,
-    resultSnapshot: (asRecord((data as Record<string, unknown>).result_snapshot) ?? {}) as Record<
-      string,
-      unknown
-    >,
+    resultSnapshot: buildTrustedResultSnapshot(data as Record<string, unknown>),
   };
 }
 
@@ -849,7 +1091,7 @@ export async function getSavedAnalysisPdfExportAction(
   const { data, error } = await supabase
     .from("saved_analyses")
     .select(
-      "id, schema_version, form_snapshot, result_snapshot, property_type, address, purchase_price, year_built, loan_term_years, interest_rate_pct, down_payment_pct, closing_costs_pct, bedrooms, bathrooms, sqft, monthly_rent, property_tax_pct, insurance_input_mode, insurance_pct, insurance_mo, hoa_mo, utilities_mo, maintenance_pct, vacancy_pct, management_pct, capex_pct, building_value_pct, depreciation_years, include_interest_deduction, tax_rate_pct, expense_growth_pct, rent_growth_pct, template_id, appreciation_rate_pct, selling_cost_pct, pdf_url, pdf_snapshot_version"
+      "id, schema_version, methodology_version, form_snapshot, result_snapshot, financing_profile_id, financing_profile_version, financing_profile_snapshot, property_type, address, purchase_price, year_built, loan_term_years, interest_rate_pct, down_payment_pct, closing_costs_pct, bedrooms, bathrooms, sqft, monthly_rent, property_tax_pct, insurance_input_mode, insurance_pct, insurance_mo, hoa_mo, utilities_mo, maintenance_pct, vacancy_pct, management_pct, capex_pct, building_value_pct, depreciation_years, include_interest_deduction, tax_rate_pct, expense_growth_pct, rent_growth_pct, template_id, appreciation_rate_pct, selling_cost_pct, pdf_url, pdf_snapshot_version"
     )
     .eq("id", savedDealId)
     .eq("user_id", user.id)
@@ -927,7 +1169,11 @@ export async function getSavedAnalysisPdfExportAction(
   if (
     cachedPdfUrl &&
     cachedVersion === PDF_CACHE_VERSION &&
-    !hasUserBranding
+    !hasUserBranding &&
+    // Input confirmations can change without any financial-engine version
+    // changing. A cached Decision Readiness page would then retain stale
+    // "verified" evidence, so this report shape is intentionally regenerated.
+    !isFeatureEnabled("input_confidence")
   ) {
     // Buy-box exports bypass the cache for the same reason branded ones do:
     // cached PDFs don't track the buy-box state they were generated with.
@@ -970,9 +1216,10 @@ export async function getSavedAnalysisPdfExportAction(
     source: "regenerate",
     id: String(row.id),
     schemaVersion: Number(row.schema_version ?? 1),
+    methodologyVersion: dbString(row.methodology_version) ?? null,
     formSnapshot: buildEditFormSnapshotFromRow(row),
     templateFallback,
-    resultSnapshot: (asRecord(row.result_snapshot) ?? {}) as Record<string, unknown>,
+    resultSnapshot: buildTrustedResultSnapshot(row),
   };
 }
 
@@ -1011,19 +1258,22 @@ export async function completeSavedAnalysisPdfExportAction(
 
   const pdfPath = buildAnalysisPdfObjectPath(user.id, savedDealId, PDF_CACHE_VERSION);
 
-  // A PDF generated while the user has a usable buy box carries the
-  // "Your buy box" block, whose content the version composite can't see.
-  // Store it uncacheable so that if the user later deletes their last box
-  // (or loses the entitlement) the cache can't re-serve the stale block —
-  // the read-time bypass above only fires while boxes still exist.
+  // A PDF generated while the user has a usable buy box or Decision
+  // Readiness evidence carries mutable state the version composite cannot
+  // see. Store it uncacheable so later edits cannot re-serve stale criteria
+  // or confirmations.
   const hasUsableBuyBox = await userHasUsableBuyBox(supabase, user.id, entitlements);
+  const hasMutableDecisionReadiness = isFeatureEnabled("input_confidence");
 
   const { data, error } = await supabase
     .from("saved_analyses")
     .update({
       pdf_url: pdfPath,
       pdf_generated_at: new Date().toISOString(),
-      pdf_snapshot_version: hasUsableBuyBox ? PDF_CACHE_VERSION_UNCACHEABLE : PDF_CACHE_VERSION,
+      pdf_snapshot_version:
+        hasUsableBuyBox || hasMutableDecisionReadiness
+          ? PDF_CACHE_VERSION_UNCACHEABLE
+          : PDF_CACHE_VERSION,
       last_activity_at: new Date().toISOString(),
     })
     .eq("id", savedDealId)

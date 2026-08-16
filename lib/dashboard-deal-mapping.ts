@@ -62,6 +62,8 @@ export type SavedAnalysisDashboardRow = {
   coc_return_pct: NumericLike;
   created_at: string;
   result_snapshot: ResultSnapshot;
+  /** Authoritative saved_analyses methodology contract. */
+  methodology_version?: string | null;
   /** Stored form values — lets callers re-score with the current engine so a
    *  pre-upgrade stored score isn't shown stale. Optional/back-compatible. */
   form_snapshot?: unknown;
@@ -105,6 +107,8 @@ export type DashboardDeal = {
   tags: string[];
   /** Per-input data confidence (optional; null when unknown). */
   dataConfidence?: DataConfidence | null;
+  /** Visible provenance for legacy/frozen saved decisions. */
+  methodologyLabel?: string;
 };
 
 export function toNumber(value: NumericLike): number | null {

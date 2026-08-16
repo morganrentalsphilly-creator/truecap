@@ -20,7 +20,15 @@ import {
 } from "@/lib/entitlements";
 import { getRequestUser, getRequestEntitlements } from "@/lib/request-auth";
 import { buildDashboardDeal, type SavedAnalysisDashboardRow } from "@/lib/dashboard-deal-mapping";
-import { recomputeSavedDealVerdict } from "@/lib/recompute-saved-deal-verdict";
+import {
+  recomputeSavedDealVerdict,
+  toRecomputedSavedAnalysisSnapshot,
+} from "@/lib/recompute-saved-deal-verdict";
+import {
+  isLegacySavedMethodologyVersion,
+  resolveSavedAnalysisSnapshot,
+} from "@/lib/saved-analysis-methodology";
+import { TRUECAP_UNDERWRITING_STANDARD_VERSION } from "@/lib/underwriting-methodology";
 import { recomputeCompareSnapshotFromForm } from "@/lib/compare-result-snapshot";
 import { getSavedAnalysesTotalCount } from "@/lib/saved-analyses-count";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
@@ -108,14 +116,34 @@ function buildDashboardData(
   // a deal the analyzer now scores "Neutral / 40"). Falls back to the stored
   // score when the snapshot doesn't validate.
   const deals = rows.map((row) => {
-    const deal = buildDashboardDeal(row);
-    const fresh = recomputeSavedDealVerdict(row.form_snapshot);
+    const baseDeal = buildDashboardDeal(row);
+    const recomputed = recomputeSavedDealVerdict(row.form_snapshot);
+    const resolution = resolveSavedAnalysisSnapshot({
+      methodologyVersion: row.methodology_version,
+      resultSnapshot: row.result_snapshot,
+      recomputedSnapshot: recomputed
+        ? toRecomputedSavedAnalysisSnapshot(recomputed)
+        : undefined,
+    });
+    const fresh = resolution.didRecompute ? recomputed : null;
+    const deal = {
+      ...baseDeal,
+      methodologyLabel: resolution.shouldFreeze
+        ? `Frozen Standard v${resolution.storedMethodologyVersion}`
+        : isLegacySavedMethodologyVersion(resolution.storedMethodologyVersion)
+          ? resolution.didRecompute
+            ? `Legacy analysis · recomputed with current v${TRUECAP_UNDERWRITING_STANDARD_VERSION}`
+            : `Legacy analysis · stored snapshot (current v${TRUECAP_UNDERWRITING_STANDARD_VERSION} recompute unavailable)`
+          : `Standard v${resolution.storedMethodologyVersion}`,
+    };
     // Recompute-on-read: score AND the headline financials (cash flow / CoC /
     // cap) come from the live engine, so the dashboard never shows numbers that
     // drifted from the stored snapshot after a calc change. The 10-yr ROI is
     // recomputed too (exit-tax-aware) so it never shows a stale pre-exit-tax
     // figure next to freshly-saved post-tax deals.
-    const freshRoi = recomputeCompareSnapshotFromForm(row.form_snapshot)?.longTermSummary?.totalROI;
+    const freshRoi = resolution.didRecompute
+      ? recomputeCompareSnapshotFromForm(row.form_snapshot)?.longTermSummary?.totalROI
+      : null;
     return fresh
       ? {
           ...deal,
@@ -196,7 +224,7 @@ export default async function DashboardPage() {
     supabase
       .from("saved_analyses")
       .select(
-        "id, address, title, property_type, purchase_price, net_cash_flow_monthly, coc_return_pct, created_at, result_snapshot, form_snapshot, pipeline_stage, tags, data_confidence"
+        "id, address, title, property_type, purchase_price, net_cash_flow_monthly, coc_return_pct, created_at, methodology_version, result_snapshot, form_snapshot, pipeline_stage, tags, data_confidence"
       )
       .eq("user_id", user.id)
       .is("deleted_at", null)
@@ -214,7 +242,7 @@ export default async function DashboardPage() {
     supabase
       .from("saved_analyses")
       .select(
-        "id, title, address, purchase_price, net_cash_flow_monthly, cap_rate_raw:result_snapshot->>capRate, ncf_snapshot:result_snapshot->>netCashFlow, form_snapshot, created_at, pipeline_stage"
+        "id, title, address, purchase_price, net_cash_flow_monthly, methodology_version, cap_rate_raw:result_snapshot->>capRate, ncf_snapshot:result_snapshot->>netCashFlow, score_raw:result_snapshot->>score, recommendation_raw:result_snapshot->>recommendation, roi_raw:result_snapshot->compareSnapshot->longTermSummary->>totalROI, form_snapshot, created_at, pipeline_stage"
       )
       .eq("user_id", user.id)
       .is("deleted_at", null)
@@ -253,7 +281,7 @@ export default async function DashboardPage() {
     // My Deals' ?state=completed filter (is_completed only, RLS-scoped).
     supabase
       .from("saved_analyses")
-      .select("id, is_completed, net_cash_flow_monthly, form_snapshot, close_date")
+      .select("id, is_completed, net_cash_flow_monthly, methodology_version, result_snapshot, form_snapshot, close_date")
       .eq("user_id", user.id)
       .is("deleted_at", null)
       .eq("is_completed", true),
@@ -279,6 +307,10 @@ export default async function DashboardPage() {
     net_cash_flow_monthly: number | null;
     cap_rate_raw: string | null;
     ncf_snapshot: string | null;
+    score_raw: string | null;
+    recommendation_raw: string | null;
+    roi_raw: string | null;
+    methodology_version: string | null;
     form_snapshot: unknown;
     // Scalar ride-alongs for the deal-aging line — aging deals are by
     // definition OLD, so the 20-row recency sample below is exactly the
@@ -323,7 +355,20 @@ export default async function DashboardPage() {
       // Recompute-on-read so the portfolio totals stay in lockstep with the
       // per-deal cards (which now recompute too) and the live engine. Falls
       // back to the snapshot/denormalized values for legacy snapshots.
-      const fresh = recomputeSavedDealVerdict(r.form_snapshot);
+      const recomputed = recomputeSavedDealVerdict(r.form_snapshot);
+      const resolution = resolveSavedAnalysisSnapshot({
+        methodologyVersion: r.methodology_version,
+        resultSnapshot: {
+          capRate: r.cap_rate_raw,
+          netCashFlow: r.ncf_snapshot,
+          score: r.score_raw,
+          recommendation: r.recommendation_raw,
+        },
+        recomputedSnapshot: recomputed
+          ? toRecomputedSavedAnalysisSnapshot(recomputed)
+          : undefined,
+      });
+      const fresh = resolution.didRecompute ? recomputed : null;
       const label = aggregateRowLabel(r);
       if (r.purchase_price != null) {
         totalValue += r.purchase_price;
@@ -352,8 +397,20 @@ export default async function DashboardPage() {
             : r.net_cash_flow_monthly;
       }
       totalCashFlow += ncf ?? 0;
-      if (fresh && (bestByScore == null || fresh.score > bestByScore.score)) {
-        bestByScore = { id: r.id, address: label, score: fresh.score, recommendation: fresh.recommendation };
+      const resolvedScore = fresh?.score ?? (r.score_raw != null ? Number(r.score_raw) : null);
+      const resolvedRecommendation = fresh?.recommendation ?? r.recommendation_raw;
+      if (
+        resolvedScore != null &&
+        Number.isFinite(resolvedScore) &&
+        resolvedRecommendation &&
+        (bestByScore == null || resolvedScore > bestByScore.score)
+      ) {
+        bestByScore = {
+          id: r.id,
+          address: label,
+          score: resolvedScore,
+          recommendation: resolvedRecommendation,
+        };
       }
       if (ncf != null && ncf < 0) {
         negativeCount += 1;
@@ -362,7 +419,11 @@ export default async function DashboardPage() {
         }
       }
       // 10-yr ROI from the same exit-tax-aware recompute the sample cards use.
-      const roi = recomputeCompareSnapshotFromForm(r.form_snapshot)?.longTermSummary?.totalROI;
+      const roi = resolution.didRecompute
+        ? recomputeCompareSnapshotFromForm(r.form_snapshot)?.longTermSummary?.totalROI
+        : r.roi_raw != null
+          ? Number(r.roi_raw)
+          : null;
       if (typeof roi === "number" && Number.isFinite(roi) && (bestRoi == null || roi > bestRoi.roiPct)) {
         bestRoi = { id: r.id, address: label, roiPct: roi };
       }
@@ -412,7 +473,7 @@ export default async function DashboardPage() {
   dashboardData.savedTotalCount = savedTotalCount;
 
   // Deal aging — the workspace DealAgingNudge's signal (deals sitting ≥7 days
-  // in Offer / Under contract), surfaced on the home action lane so the user
+  // in Negotiating / Offer / Under contract), surfaced on the home action lane so the user
   // doesn't have to already open the deal to learn it's going cold. Same
   // thresholds via lib/deal-aging; created_at + pipeline_stage ride the
   // queries already on the page, so this costs no extra IO. Computed over the
@@ -575,6 +636,8 @@ export default async function DashboardPage() {
     id: string;
     is_completed: boolean | null;
     net_cash_flow_monthly: number | null;
+    methodology_version?: string | null;
+    result_snapshot?: Record<string, unknown> | null;
     form_snapshot: unknown;
     close_date?: string | null;
   };
@@ -588,7 +651,7 @@ export default async function DashboardPage() {
     // owned COUNT (and the false-header fix) still work; equity stays hidden.
     const fallback = await supabase
       .from("saved_analyses")
-      .select("id, is_completed, net_cash_flow_monthly, form_snapshot")
+      .select("id, is_completed, net_cash_flow_monthly, methodology_version, result_snapshot, form_snapshot")
       .eq("user_id", user.id)
       .is("deleted_at", null)
       .eq("is_completed", true);
@@ -610,9 +673,22 @@ export default async function DashboardPage() {
     let datedCount = 0;
     const equityBases: OwnedDealEquityBasis[] = [];
     for (const r of ownedRows) {
-      const fresh = recomputeSavedDealVerdict(r.form_snapshot);
-      ownedCashFlow += fresh ? fresh.netCashFlowMonthly : (r.net_cash_flow_monthly ?? 0);
-      const basis = resolveOwnedEquityBasis(r);
+      const recomputed = recomputeSavedDealVerdict(r.form_snapshot);
+      const resolution = resolveSavedAnalysisSnapshot({
+        methodologyVersion: r.methodology_version,
+        resultSnapshot: r.result_snapshot,
+        recomputedSnapshot: recomputed
+          ? toRecomputedSavedAnalysisSnapshot(recomputed)
+          : undefined,
+      });
+      const fresh = resolution.didRecompute ? recomputed : null;
+      const frozenCashFlow = Number(resolution.snapshot.netCashFlow);
+      ownedCashFlow += fresh
+        ? fresh.netCashFlowMonthly
+        : Number.isFinite(frozenCashFlow)
+          ? frozenCashFlow
+          : (r.net_cash_flow_monthly ?? 0);
+      const basis = resolution.shouldFreeze ? null : resolveOwnedEquityBasis(r);
       const summary = basis
         ? computeOwnedEquity(basis.input, monthsOwnedBetween(basis.closeDate, now))
         : null;

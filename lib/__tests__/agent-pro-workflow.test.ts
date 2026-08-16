@@ -193,7 +193,8 @@ describe("setting a client's buy box has a visible payoff (the $59.99 case)", ()
     const portal = read("lib/client-portal.ts");
     expect(portal).toContain("meetsCriteria");
     // …scoped to THIS client, never the agent's other buyers.
-    expect(portal).toMatch(/dealClientId: clientId/);
+    expect(portal).toContain('.eq("client_id", clientId)');
+    expect(portal).toContain("evaluateBuyBoxes(clientBoxes, metrics)");
     const page = read("app/portal/[token]/page.tsx");
     expect(page).toContain("Meets your criteria");
   });
@@ -247,5 +248,40 @@ describe("the portal copy button works (Safari clipboard regression)", () => {
 
   it("the settings card no longer ships a second, broken copy button", () => {
     expect(read("components/settings/agent-clients-card.tsx")).not.toContain("clipboard");
+  });
+});
+
+describe("the paid Agent Pro loop is explicit and measurable", () => {
+  it("shows the complete client-to-offer workflow in the Clients workspace", () => {
+    const src = read("components/investcalc/clients-workspace.tsx");
+    for (const step of [
+      "Client",
+      "Buy Box",
+      "Property",
+      "Analysis",
+      "Client Report",
+      "Follow-Up",
+      "Offer",
+    ]) {
+      expect(src).toContain(`\"${step}\"`);
+    }
+  });
+
+  it("lets an assigned deal share a client report without returning to the analyzer", () => {
+    const src = read("app/dashboard/saved-analyses/[id]/page.tsx");
+    expect(src).toContain("ShareLinkButton");
+    expect(src).toContain('"client-report"');
+  });
+
+  it("fires only coarse, already-declared funnel events for roster and report actions", () => {
+    expect(read("components/investcalc/clients-workspace.tsx")).toContain(
+      'trackEvent("agent_client_created", { source: "clients_workspace" })'
+    );
+    expect(read("components/settings/agent-clients-card.tsx")).toContain(
+      'trackEvent("agent_client_created", { source: "settings" })'
+    );
+    expect(read("components/investcalc/share-link-button.tsx")).toContain(
+      'trackEvent("client_report_shared", { report_type: "analysis_link" })'
+    );
   });
 });

@@ -63,7 +63,7 @@ export const STATES: Record<string, StateData> = {
     medianHomePrice: 295000,
     medianRent: 1850,
     pros: [
-      "No state income tax — keeps more of every rent dollar",
+      "No individual state income tax; the owner-specific impact depends on residency and tax profile",
       "Population + job growth among highest in US",
       "Landlord-friendly law: fast eviction, strong lease enforceability",
       "Strong rental demand in major metros (Dallas, Houston, Austin, San Antonio)",
@@ -220,7 +220,7 @@ export const STATES: Record<string, StateData> = {
     cons: [
       "Some Atlanta neighborhoods have gentrified rapidly — cap rates compressed",
       "Insurance increases meaningful in coastal GA (Savannah, Brunswick)",
-      "5.75% state income tax eats into after-tax cash flow vs no-tax states",
+      "State income tax may affect the owner-specific result; do not apply the top rate directly to property cash flow",
       "Lease-up timelines vary widely across Atlanta sub-metros",
       "Property crime higher in select Atlanta zip codes — neighborhood research matters",
     ],
@@ -424,7 +424,7 @@ export const STATES: Record<string, StateData> = {
     name: "Arizona",
     abbr: "AZ",
     pitch:
-      "Phoenix-led growth story is real but 2022-2024 overbuilding has flattened rents. Strong long-term demographic tailwind + landlord-friendly law + no state income tax above modest thresholds make AZ attractive once supply absorbs.",
+      "Phoenix-led population growth and recent apartment supply are important but competing signals. Arizona has an individual state income tax, so any after-tax comparison must be modeled for the owner rather than inferred from the market alone.",
     tier: "Appreciation",
     landlord: "Strong",
     propertyTaxRatePct: 0.66,
@@ -481,7 +481,7 @@ export const STATES: Record<string, StateData> = {
       "Cook County reassessment cycle creates tax-bill volatility",
       "Eviction process slower than most states (45-90 days)",
       "Chicago-specific landlord ordinances add compliance overhead",
-      "State income tax compresses after-tax returns vs no-tax peer states",
+      "State income tax can affect owner returns; the actual impact depends on the taxpayer and holding structure",
     ],
     topCities: [
       { name: "Chicago", note: "Cap rates achievable but property tax is THE underwriting variable" },
@@ -625,7 +625,7 @@ export const STATES: Record<string, StateData> = {
       "Diverse economic base — tech, entertainment, agriculture, ports",
     ],
     cons: [
-      "13.3% top state income tax compresses after-tax returns severely",
+      "A high top marginal state rate may apply to some owners, but it is not a property-level return assumption",
       "Tenant-leaning law: longer eviction process (60-120 days), rent control in some cities",
       "Statewide rent caps (AB 1482) limit pricing flexibility",
       "Entry prices in coastal metros price out most cash-flow strategies",
@@ -702,7 +702,7 @@ export const STATES: Record<string, StateData> = {
       "Boston entry prices price out most cash-flow strategies",
       "Tenant-leaning law: eviction process 45-90 days",
       "Cambridge + Boston have rent control discussions ongoing — regulatory risk",
-      "1.04% effective property tax + 5% state income tax = real after-tax drag",
+      "Property tax belongs in NOI; state income tax should be modeled separately for the specific owner",
       "Older housing stock common — capex risk meaningful",
     ],
     topCities: [
@@ -810,7 +810,7 @@ export const STATES: Record<string, StateData> = {
       "Newer neighborhood gentrification in Northeast Minneapolis offers BRRRR upside",
     ],
     cons: [
-      "9.85% top state income tax compresses after-tax returns",
+      "The top marginal state rate may apply to some owners; model taxpayer-specific state tax separately",
       "Older housing stock common in Twin Cities urban core — capex risk",
       "Winter weather adds capex overhead (HVAC, snow removal, ice damage)",
       "St. Paul + Minneapolis have rent stabilization in select neighborhoods",
@@ -848,7 +848,7 @@ export const STATES: Record<string, StateData> = {
     ],
     cons: [
       "Highest effective property tax in US (~2.21%) — THE underwriting variable",
-      "10.75% top state income tax + property tax = brutal after-tax drag",
+      "Verify parcel property tax in NOI and model state income tax separately for the owner's situation",
       "Tenant-leaning law: 75-150 day eviction process",
       "Some cities (Newark) have rent control",
       "Coastal NJ properties face flood + hurricane insurance issues",
@@ -959,7 +959,7 @@ export const STATES: Record<string, StateData> = {
     ],
     cons: [
       "Second-highest property tax in country (~2.14%) — THE underwriting variable",
-      "6.99% top state income tax + 2.14% property tax = brutal after-tax drag",
+      "Verify parcel property tax in NOI and model state income tax separately for the owner's situation",
       "Tenant-leaning law: 45-75 day eviction process",
       "Older housing stock common — capex risk meaningful",
       "Slow population growth statewide outside Fairfield County",

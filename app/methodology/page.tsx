@@ -19,11 +19,16 @@ import { ArrowUpRight, Calculator, Database, ShieldCheck } from "lucide-react";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
+import {
+  TRUECAP_UNDERWRITING_STANDARD_NAME,
+  TRUECAP_UNDERWRITING_STANDARD_VERSION,
+  UNDERWRITING_STANDARD_RELEASE_NOTES,
+} from "@/lib/underwriting-methodology";
 
 export const metadata: Metadata = {
   title: "Methodology",
   description:
-    "How TrueCap computes cap rate, CoC, DSCR, 10-year projections, tax savings, and exit scenarios. Plus the data sources behind auto-fill (HUD, FRED, state tax).",
+    "How TrueCap computes cap rate, CoC, DSCR, Max Offer, 10-year projections, illustrative tax impact, and exit scenarios, plus its benchmark data sources.",
   keywords: [
     "truecap methodology",
     "how is cap rate calculated",
@@ -55,10 +60,10 @@ export default function MethodologyPage() {
     "@id": `${siteUrl}/methodology#article`,
     headline: "TrueCap Methodology",
     description:
-      "How TrueCap computes cap rate, cash-on-cash, DSCR, 10-year projections, tax savings, exit scenarios. Plus data sources and conventions.",
+      "How TrueCap computes cap rate, cash-on-cash, DSCR, Max Offer, 10-year projections, illustrative tax impact, and modeled exit scenarios.",
     url: `${siteUrl}/methodology`,
     datePublished: "2026-05-24",
-    dateModified: "2026-07-13",
+    dateModified: "2026-08-15",
     author: { "@type": "Organization", name: "TrueCap", url: siteUrl },
     publisher: { "@id": `${siteUrl}/#organization` },
     inLanguage: "en-US",
@@ -87,6 +92,9 @@ export default function MethodologyPage() {
             uses to underwrite a rental deal. Read this if you want to
             verify the math before trusting the output.
           </p>
+          <p className="mt-3 inline-flex rounded-full border border-primary/25 bg-primary/5 px-3 py-1 text-xs font-bold text-primary">
+            {TRUECAP_UNDERWRITING_STANDARD_NAME} v{TRUECAP_UNDERWRITING_STANDARD_VERSION}
+          </p>
         </header>
 
         {/* TL;DR card — for visitors who want the gist before scrolling */}
@@ -99,20 +107,22 @@ export default function MethodologyPage() {
           </div>
           <ul className="space-y-2 text-sm text-foreground sm:text-base">
             <li>
-              <strong>Math is standard.</strong> We use the same formulas
-              every CRE textbook, lender, and broker uses. No proprietary
-              tricks.
+              <strong>Math is published and versioned.</strong> We use common
+              rental-underwriting formulas and state our conventions where
+              lenders or investors may differ. No hidden score arithmetic.
             </li>
             <li>
-              <strong>Data sources are public.</strong> HUD Fair Market
-              Rent, FRED 30-yr fixed mortgage series, state-level
-              effective property tax rates. All editable.
+              <strong>Benchmarks are labeled as benchmarks.</strong> HUD Fair
+              Market Rent, the FRED 30-year owner-occupied mortgage series,
+              and state-level effective tax rates are starting points, not
+              property-specific comps, lender quotes, or parcel bills.
             </li>
             <li>
-              <strong>Defaults are conservative.</strong> 5% vacancy, 10%
-              maintenance, 8% management, 5% CapEx reserve, 27.5-yr
-              depreciation — within standard industry ranges, biased
-              toward realism over optimism.
+              <strong>Defaults are visible starting assumptions.</strong> 5%
+              vacancy, 10% maintenance, 8% management, 5% CapEx reserve,
+              and 27.5-year residential depreciation. They are not facts
+              about a property and must be replaced when better evidence is
+              available.
             </li>
             <li>
               <strong>You can override everything.</strong> Every
@@ -135,15 +145,21 @@ export default function MethodologyPage() {
             income minus operating expenses, BEFORE mortgage P&amp;I and
             income tax. Effective gross = gross rent × (1 − vacancy %).
             Operating expenses include property tax, insurance,
-            maintenance, management, HOA, owner-paid utilities, and CapEx
-            reserves.
+            maintenance, management, HOA, and owner-paid utilities. The
+            vacancy allowance is shown above NOI as a reduction to scheduled
+            income. The CapEx reserve is shown below NOI.
           </p>
           <p>
-            <strong>What we deliberately include in opex:</strong> a
-            CapEx reserve (default 5% of rent). Many calculators omit
-            this to inflate cap rate; we include it because the roof,
-            HVAC, water heater, and flooring DO wear out, and an honest
-            NOI accounts for the smoothed replacement cost.
+            <strong>Other income:</strong> Standard v1.0 does not have a
+            separate laundry, parking, pet, or utility-income line. Do not
+            bury those amounts inside rent without documenting the choice in
+            your own records.
+          </p>
+          <p>
+            <strong>How we handle CapEx:</strong> the default 5% reserve does
+            not reduce lender-style NOI, cap rate, or DSCR. It does reduce
+            before-tax cash flow and cash-on-cash return because roofs, HVAC,
+            water heaters, and flooring still consume real investor cash.
           </p>
 
           <h3>Cash-on-cash return</h3>
@@ -151,9 +167,10 @@ export default function MethodologyPage() {
             CoC = Annual cash flow ÷ Total cash invested
           </div>
           <p>
-            Cash flow = NOI − annual mortgage P&amp;I. Total cash
-            invested = down payment + closing costs + initial repairs
-            (the actual dollars out of your pocket at close, not the
+            Cash flow = NOI − CapEx reserve − annual mortgage P&amp;I −
+            estimated PMI/MIP. Total cash invested = down payment + closing
+            costs + entered rehab + entered short-term-rental furnishing or
+            startup costs (the actual dollars out of your pocket, not the
             loan amount).
           </p>
 
@@ -178,45 +195,127 @@ export default function MethodologyPage() {
           </div>
           <p>
             Where L = loan amount, r = monthly interest rate (annual
-            rate ÷ 12), n = total payments (loan term × 12). Same
-            formula your lender uses. If you want a standalone version,
-            see the{" "}
+            rate ÷ 12), n = total payments (loan term × 12). Lender-specific
+            rounding and non-standard payment structures can differ. If you
+            want a standalone version, see the{" "}
             <Link href="/tools/mortgage-payment-calculator" className="text-primary font-semibold hover:underline">
               mortgage payment calculator
             </Link>
             .
           </p>
 
+          <h2 className="text-2xl sm:text-3xl">Decision thresholds and Max Offer</h2>
+          <h3>Deal Score (Balanced)</h3>
+          <div className="not-prose bg-card border border-border rounded-xl p-4 sm:p-5 my-3 text-center font-mono text-xs sm:text-sm">
+            Score = round(clamp(component points + risk penalty, 0, 100))
+          </div>
+          <p>
+            For investment properties, the default Balanced score combines five
+            tiered components: monthly cash flow (up to 22 points), cash-on-cash
+            return (20), cap rate (16), DSCR (17), and projected 10-year
+            annualized total return (25). Owner-occupant deals replace the
+            cash-flow component with a 0/25/30-point house-hack scale, so their
+            component sum can exceed 100 before the final clamp. A risk modifier
+            for vacancy, negative cash flow, property age, reserve assumptions,
+            and property-tax burden can subtract at most 30 points. The result is
+            rounded to a whole number and clamped from 0 to 100.
+          </p>
+          <p>
+            The projected-return component uses pre-tax operating cash flow,
+            appreciation, and loan paydown through a modeled year-10 sale, net
+            selling costs and the exit engine&apos;s federal capital-gain and
+            depreciation-recapture defaults. It excludes the separate
+            illustrative annual personal-tax benefit from Deal Score.
+          </p>
+          <p>
+            Recommendation bands are 75+ Excellent fit, 55–74 Buy, 35–54
+            Watchlist, 18–34 Needs work, and below 18 Pass. Cash purchases get
+            full DSCR-component credit because there is no debt service.
+            Owner-occupant deals use a separate near-break-even cash-flow rule.
+            A Balanced or Appreciation score may be held at 40 when a
+            non-owner-occupant deal has more than 8% modeled annualized 10-year
+            return and non-negative before-tax cash flow; that floor is
+            never used by the Cash Flow lens. The score is a deterministic
+            screening model, not a probability of profit, appraisal, or lending
+            decision.
+          </p>
+          <p>
+            Saved Deal Score and financial outputs share the same top-level
+            Underwriting Standard version. A future-version saved decision is
+            displayed from its frozen result snapshot until the owner
+            explicitly re-underwrites it; legacy unversioned rows retain the
+            labeled current-engine compatibility behavior.
+          </p>
+
+          <p>
+            Max Offer is not a price prediction or appraisal. TrueCap runs
+            the complete underwriting engine repeatedly and finds the highest
+            tested purchase price that still clears every selected return or
+            Buy Box threshold. The displayed walk-away price is rounded
+            <strong> down</strong> to a $500 step and rechecked at that exact
+            displayed value, so rounding cannot move the answer onto the
+            failing side of the threshold.
+          </p>
+          <p>
+            Required rent is rounded up to the next whole dollar; a maximum
+            affordable interest rate is rounded down to 0.01 percentage
+            point. Seller-credit language appears only when the modeled cash
+            constraint supports it and still requires lender/program
+            confirmation. Each solver changes one input at a time and holds
+            the rest fixed.
+          </p>
+
+          <h2 className="text-2xl sm:text-3xl">BRRRR and fix-and-flip models</h2>
+          <p>
+            The BRRRR view models acquisition cash, rehab and carrying costs,
+            then a refinance loan equal to entered ARV × entered refinance
+            LTV. Net refinance cash subtracts the modeled original-loan payoff
+            and refinance closing costs; a shortfall increases cash left in
+            the deal instead of disappearing. ARV, timing, lender terms, and
+            post-refinance rent remain user assumptions.
+          </p>
+          <p>
+            The fix-and-flip view calculates modeled profit as ARV minus the
+            purchase price, acquisition closing costs, rehab, carrying costs,
+            and selling costs. It excludes income tax and assumes financing
+            interest is included in the entered monthly carrying cost. Its
+            annualized ROI is a simple hold-period annualization, not IRR.
+          </p>
+
           <h2 className="text-2xl sm:text-3xl">Where the auto-fill data comes from</h2>
 
-          <h3>Rent — HUD Fair Market Rent</h3>
+          <h3>Rent benchmark — HUD Fair Market Rent</h3>
           <p>
             HUD (the U.S. Department of Housing and Urban Development)
             publishes county-level rent estimates annually for setting
             Section 8 voucher payment standards. We query the HUD API
-            with your property&apos;s county + bedroom count and use the
-            returned FMR as the rent default. Actual market rent in
-            most areas runs slightly above FMR — treat it as a floor,
-            then check Zillow / Rentometer for comps before locking in.
+            with your property&apos;s county or ZIP + bedroom count and use the
+            returned FMR as an editable benchmark. FMR is a program-market
+            statistic, not a comp for this property. Actual achievable rent
+            can be above or below it; verify with recent, comparable local
+            leases before making an offer.
           </p>
           <p>
             <strong>Why HUD instead of Zillow Rent Zestimate?</strong>{" "}
             HUD is methodologically transparent, public, and free. Zillow
             doesn&apos;t publish their per-property algorithm and rate-
             limits aggressive querying. We trade off some precision for
-            transparency and rate-limit headroom.
+            transparency and rate-limit headroom. That tradeoff is why the
+            result labels HUD as a market benchmark rather than a verified
+            property rent.
           </p>
 
-          <h3>Mortgage rate — FRED 30-year fixed</h3>
+          <h3>Mortgage benchmark — FRED 30-year fixed</h3>
           <p>
             The Federal Reserve Bank of St. Louis (FRED) publishes the
             weekly 30-year fixed mortgage rate series (MORTGAGE30US,
             sourced from Freddie Mac&apos;s Primary Mortgage Market
             Survey). We pull the latest week&apos;s reading and use it
-            as the interest-rate default. Investment-property rates run
-            typically 0.5-1.0 percentage points above this owner-
-            occupied benchmark — adjust upward if you want to model
-            non-owner-occupied financing more accurately.
+            as the editable interest-rate benchmark. This series represents
+            owner-occupied conforming mortgages; it is not an investor loan
+            quote and does not know your points, credit profile, property,
+            lender fees, or debt-service-coverage product. Replace it with a
+            current lender quote before treating a deal as offer ready.
           </p>
 
           <h3>Property tax — state effective rate</h3>
@@ -237,10 +336,10 @@ export default function MethodologyPage() {
             year. Defaults:
           </p>
           <ul>
-            <li><strong>Rent growth:</strong> 2.5% annually (long-term U.S. average)</li>
-            <li><strong>Expense growth:</strong> 2.5% annually (matched to rent so opex ratio stays stable)</li>
+            <li><strong>Rent growth:</strong> 2.5% annual planning assumption, not a forecast</li>
+            <li><strong>Expense growth:</strong> 2.5% annual planning assumption, editable independently</li>
             <li><strong>Mortgage:</strong> fully amortized — principal and interest portions recomputed each year</li>
-            <li><strong>Appreciation:</strong> 3% annually (long-term U.S. average; varies wildly by market)</li>
+            <li><strong>Appreciation:</strong> 3% annual scenario assumption, not an appraisal or forecast</li>
           </ul>
           <p>
             All four assumptions are editable on the Pro plan. The
@@ -248,15 +347,17 @@ export default function MethodologyPage() {
             principal paydown, and ending equity year-by-year.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">Tax strategy</h2>
+          <h2 className="text-2xl sm:text-3xl">Illustrative tax impact</h2>
           <h3>Depreciation</h3>
           <p>
             Residential rentals depreciate over 27.5 years straight-line
             (IRS schedule). We default the building portion to 85% of
             purchase price (land = 15%, non-depreciable). Annual
             depreciation = (purchase price × 0.85) ÷ 27.5. This is a
-            paper deduction — it doesn&apos;t affect cash flow but
-            shelters cash flow from income tax.
+            paper deduction — it doesn&apos;t affect before-tax cash flow. Its
+            actual availability and value depend on basis allocation,
+            placed-in-service timing, passive-loss rules, participation,
+            income, entity structure, and your tax professional&apos;s advice.
           </p>
           <h3>Mortgage interest deduction</h3>
           <p>
@@ -264,11 +365,15 @@ export default function MethodologyPage() {
             payments from the amortization schedule and add it to total
             deductions.
           </p>
-          <h3>Tax savings</h3>
+          <h3>Estimated tax effect</h3>
           <p>
-            Tax savings = (depreciation + mortgage interest) × your
-            marginal tax rate. Default marginal rate is 24%. Override on
-            the Tax Strategy panel if your bracket is different.
+            Taxable rental income = rental income − deductible operating
+            expenses − eligible mortgage interest − straight-line
+            depreciation. We multiply the signed taxable amount by the
+            entered marginal rate (24% default): a loss produces an
+            illustrative benefit and positive taxable income produces an
+            illustrative liability. TrueCap does not assume every paper loss
+            can offset other income. This is planning math, not tax advice.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">Exit scenarios</h2>
@@ -277,10 +382,23 @@ export default function MethodologyPage() {
             Each year: projected sale price = current value × (1 +
             appreciation rate)<sup>years</sup>. Net sale proceeds = sale
             price − selling costs (default 6%) − remaining loan balance.
-            Total profit = net proceeds + cumulative cash flow received
-            during the hold − initial cash invested. This drives the
-            &ldquo;best year to exit&rdquo; recommendation.
+            Total profit = net proceeds + cumulative cash flow + cumulative
+            illustrative tax effect − initial cash invested − estimated exit
+            tax. The optimizer compares hold years under the assumptions you
+            entered; it does not predict the best future sale date. A 1031
+            exchange, primary-residence exclusion, local taxes, improvements,
+            and your actual bracket can materially change the result.
           </p>
+
+          <h2 className="text-2xl sm:text-3xl">Methodology version history</h2>
+          <ul>
+            {UNDERWRITING_STANDARD_RELEASE_NOTES.map((release) => (
+              <li key={release.version}>
+                <strong>v{release.version} · {release.effectiveDate}:</strong>{" "}
+                {release.summary}
+              </li>
+            ))}
+          </ul>
 
           <h2 className="text-2xl sm:text-3xl">Edge cases we handle explicitly</h2>
           <ul>
@@ -383,7 +501,7 @@ export default function MethodologyPage() {
         </article>
 
         <footer className="mt-12 pt-8 border-t border-border text-sm text-muted-foreground leading-relaxed">
-          Last updated: July 13, 2026. We update this page whenever the
+          Last updated: August 15, 2026. We update this page whenever the
           methodology materially changes.
         </footer>
       </main>

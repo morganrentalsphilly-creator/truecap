@@ -60,7 +60,7 @@ export async function getTaxStrategySnapshotAction(
     return {
       ok: false,
       code: "SIGN_IN_REQUIRED",
-      message: "Please sign in to load saved tax strategy projections.",
+      message: "Please sign in to load saved illustrative tax projections.",
     };
   }
 
@@ -69,7 +69,7 @@ export async function getTaxStrategySnapshotAction(
     return {
       ok: false,
       code: "ENTITLEMENT_REQUIRED",
-      message: "Upgrade to Pro to load tax strategy projections.",
+      message: "Upgrade to Pro to load illustrative tax projections.",
     };
   }
 

@@ -66,7 +66,7 @@ const MATRIX: Row[] = [
   { feature: "Cap rate / CoC / DSCR",              truecap: "All standard, plus benchmarks per metric",                                roofstock: "Cap rate + cash flow on listing card",                              winner: "truecap" },
   { feature: "Editable assumptions",               truecap: "Every input — vacancy, mgmt %, capex, taxes, etc.",                      roofstock: "Limited override of listing pro-forma",                             winner: "truecap" },
   { feature: "10-year projection",                  truecap: "Pro — rent growth, expense growth, appreciation, equity compounding",   roofstock: "Static pro-forma year-one only",                                    winner: "truecap" },
-  { feature: "Tax strategy modeling",               truecap: "Pro — depreciation, interest deduction, after-tax CF, bracket-aware",    roofstock: "Not modeled",                                                       winner: "truecap" },
+  { feature: "Illustrative tax impact",             truecap: "Pro — depreciation, interest deduction, modeled after-tax CF",           roofstock: "Not modeled",                                                       winner: "truecap" },
   { feature: "Exit scenarios",                      truecap: "Pro — sell-at-year-N with equity + IRR",                                  roofstock: "Not modeled",                                                       winner: "truecap" },
   { feature: "Sensitivity grid (stress test)",      truecap: "Pro — rent ±10%, vacancy ±5pp, rate ±1pp",                                roofstock: "Not modeled",                                                       winner: "truecap" },
   { feature: "Deal score with breakdown",           truecap: "Free — 0-100 with subscore drill-down",                                    roofstock: "Curated 'Neighborhood Rating' (qualitative)",                       winner: "truecap" },
@@ -76,7 +76,7 @@ const MATRIX: Row[] = [
   { feature: "Property management connection",      truecap: "Not included",                                                            roofstock: "Pre-vetted PM partners for most markets",                           winner: "roofstock" },
   { feature: "Works on any property",                truecap: "Yes — any US address, any condition, any strategy",                       roofstock: "Only Roofstock-listed properties",                                  winner: "truecap" },
   { feature: "Shareable read-only deal link",       truecap: "Free — read-only public link; Pro adds co-branding",                                    roofstock: "Listing URL (their pro-forma, not yours)",                          winner: "truecap" },
-  { feature: "PDF report export",                    truecap: "Pro — lender-ready multi-page report",                                    roofstock: "PDF of listing pro-forma",                                          winner: "truecap" },
+  { feature: "PDF report export",                    truecap: "Pro — lender-facing multi-page report",                                    roofstock: "PDF of listing pro-forma",                                          winner: "truecap" },
   { feature: "Mobile-first UX",                      truecap: "PWA — install to home screen",                                            roofstock: "Mobile-friendly web app",                                           winner: "tie" },
 ];
 
@@ -309,7 +309,7 @@ export default function VsRoofstockPage() {
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             Free covers the underwrite. Pro unlocks 10-year projections,
-            sensitivity, tax strategy, exit scenarios, PDF
+            sensitivity, illustrative tax impact, modeled exit comparisons, PDF
             exports, and co-branded share links. No card to start.
           </p>
           <div className="flex flex-wrap gap-3">

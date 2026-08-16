@@ -6,6 +6,9 @@
  * still yields a profit after all costs.
  */
 
+import type { AnalysisResult } from "./calc-analysis";
+import type { InvestmentFormValues } from "./investcalc-schema";
+
 export type FixFlipInputs = {
   purchasePrice: number;
   rehabBudget: number;
@@ -22,13 +25,14 @@ export type FixFlipInputs = {
 export type FixFlipResult = {
   // Cash going in (excludes financed portion)
   cashAtClose: number;
+  acquisitionClosingCosts: number;
   rehabBudget: number;
   carryingCostsTotal: number;
   sellingCosts: number;
   totalCashInvested: number;
 
   // Sale side
-  grossProfit: number; // ARV - (purchase + rehab + carrying + selling)
+  grossProfit: number; // ARV - (purchase + acquisition closing + rehab + carrying + selling)
   netProfit: number; // same as gross here; broken out for future tax-aware accounting
   roiOnCashPct: number;
   annualizedRoiPct: number;
@@ -37,6 +41,43 @@ export type FixFlipResult = {
   // Sensitivity
   breakEvenArv: number; // ARV that yields exactly $0 net profit
 };
+
+/**
+ * Canonical screening carry shared by the flip UI and tests. It reuses the
+ * base underwrite's modeled tax/insurance/utilities when available, so annual
+ * tax bills and monthly insurance inputs cannot silently fall back to an
+ * unrelated percentage. Acquisition interest remains intentionally
+ * interest-only because this is a short hold-period screen, not a lender
+ * amortization schedule.
+ */
+export function estimateFixFlipCarryingCost(
+  values: InvestmentFormValues | null,
+  result: AnalysisResult | null | undefined,
+  downPaymentPct: number
+): number {
+  if (!values) return 0;
+  const price = Number(values.purchasePrice) || 0;
+  const ratePct = Number(values.interestRate) || 7;
+  const loan = price * (1 - downPaymentPct / 100);
+  const monthlyInterest = (loan * (ratePct / 100)) / 12;
+  const monthlyTax =
+    result?.propertyTax ??
+    (values.propertyTaxInputMode === "annual" && values.propertyTaxAnnual != null
+      ? values.propertyTaxAnnual / 12
+      : (price * ((values.propertyTaxPct ?? 1.1) / 100)) / 12);
+  const monthlyInsurance =
+    result?.insurance ??
+    (values.insuranceInputMode === "monthly"
+      ? (values.insuranceMonthly ??
+        (price * ((values.insurancePct ?? 0.5) / 100)) / 12)
+      : (price * ((values.insurancePct ?? 0.5) / 100)) / 12);
+  const monthlyUtilities =
+    result?.utilities ?? (Number(values.utilitiesMonthly) || 0);
+
+  return Math.round(
+    monthlyInterest + monthlyTax + monthlyInsurance + monthlyUtilities
+  );
+}
 
 export function analyzeFixFlip(inputs: FixFlipInputs): FixFlipResult {
   const {
@@ -57,7 +98,7 @@ export function analyzeFixFlip(inputs: FixFlipInputs): FixFlipResult {
   const sellingCosts = (arv * sellingCostsPct) / 100;
 
   const totalCost =
-    purchasePrice + rehabBudget + carryingTotal + sellingCosts;
+    purchasePrice + closingAcq + rehabBudget + carryingTotal + sellingCosts;
   const grossProfit = arv - totalCost;
   const netProfit = grossProfit;
   const totalCashInvested = cashAtClose + rehabBudget + carryingTotal;
@@ -72,7 +113,7 @@ export function analyzeFixFlip(inputs: FixFlipInputs): FixFlipResult {
   // Break-even ARV: net profit = 0 → ARV − (totalCostExclSelling) − ARV*sellPct/100 = 0
   // → ARV * (1 − sellPct/100) = totalCostExclSelling
   const totalCostExclSelling =
-    purchasePrice + rehabBudget + carryingTotal;
+    purchasePrice + closingAcq + rehabBudget + carryingTotal;
   const breakEvenArv =
     sellingCostsPct < 100
       ? totalCostExclSelling / (1 - sellingCostsPct / 100)
@@ -80,6 +121,7 @@ export function analyzeFixFlip(inputs: FixFlipInputs): FixFlipResult {
 
   return {
     cashAtClose: Math.round(cashAtClose),
+    acquisitionClosingCosts: Math.round(closingAcq),
     rehabBudget: Math.round(rehabBudget),
     carryingCostsTotal: Math.round(carryingTotal),
     sellingCosts: Math.round(sellingCosts),

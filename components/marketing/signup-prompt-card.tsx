@@ -77,7 +77,7 @@ export function SignupPromptCard({ address, isAuthenticated }: SignupPromptCardP
         <BenefitChip
           icon={FileDown}
           label="PDF export"
-          sub="Lender-ready report"
+          sub="Lender-facing report"
         />
         <BenefitChip
           icon={Smartphone}

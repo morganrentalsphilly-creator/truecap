@@ -55,7 +55,7 @@ const MATRIX: Row[] = [
   { feature: "10-year projection",               truecap: "Pro — rent + expense + appreciation compounding",                        rentometer: "Not in scope",                                                    winner: "truecap" },
   { feature: "Free use limit",                   truecap: "Unlimited",                                                              rentometer: "Limited free; Pro $29-49/mo",                                     winner: "truecap" },
   { feature: "Verdict / decision support",       truecap: "Free — deal score + verdict (Strong / Decent / Marginal / Skip)",         rentometer: "Rent comp only — you make the decision",                          winner: "truecap" },
-  { feature: "Branded PDF report",               truecap: "Pro — multi-page lender-ready report",                                   rentometer: "PDF of rent comp data",                                           winner: "tie" },
+  { feature: "Branded PDF report",               truecap: "Pro — multi-page lender-facing report",                                   rentometer: "PDF of rent comp data",                                           winner: "tie" },
   { feature: "Use case",                          truecap: "Full investor underwriting workflow",                                    rentometer: "Quick rent comp lookup",                                          winner: "tie" },
   { feature: "Pricing — Pro tier",                truecap: "$25/mo annual",                                                       rentometer: "$29-49/mo depending on plan",                                     winner: "truecap" },
 ];

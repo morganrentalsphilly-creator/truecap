@@ -63,7 +63,7 @@ const MATRIX: Row[] = [
   { feature: "Address auto-fill (rent/rate/tax)",       truecap: "Yes — HUD FMR per unit + FRED rate + state property tax",          biggerpockets: "Manual entry",                                  winner: "truecap" },
   { feature: "DSCR + lender approval modeling",         truecap: "Yes — DSCR calculation accounts for rental units only",              biggerpockets: "Yes — basic DSCR",                              winner: "tie" },
   { feature: "10-year projection (post-house-hack exit)", truecap: "Pro — model what happens after you move out and rent your unit", biggerpockets: "Pro — projection available",                    winner: "tie" },
-  { feature: "Tax strategy (mortgage interest deduction)", truecap: "Pro — handles owner-occupant interest deduction separately",     biggerpockets: "Pro — standard tax view",                       winner: "truecap" },
+  { feature: "Illustrative tax impact", truecap: "General rental illustration; mixed-use allocation not modeled",     biggerpockets: "Pro — standard tax view",                       winner: "tie" },
   { feature: "Sensitivity grid (vacancy on rental units)", truecap: "Pro — rent ±10%, vacancy ±5pp on rental units only",             biggerpockets: "Manual re-runs",                                winner: "truecap" },
   { feature: "Mobile UX at the showing",                truecap: "PWA installable",                                                    biggerpockets: "Desktop-leaning calculator + separate mobile app", winner: "tie" },
   { feature: "Free tier covers house hacking",          truecap: "Yes — full owner-occupant underwriting on free tier",                biggerpockets: "Free calc covers basic; Pro ($390/yr) for projections", winner: "truecap" },
@@ -340,7 +340,7 @@ export default function VsBiggerPocketsForHouseHackingPage() {
             TrueCap&apos;s free tier covers owner-occupant property
             types, per-unit rent + status, FHA financing, and
             effective-rent-saved math. Pro ($29.99/mo) adds projections,
-            tax strategy, sensitivity, and the post-move-out scenario
+            illustrative tax impact, sensitivity, and the post-move-out scenario
             modeling — start with a {TRIAL_LABEL}, cancel anytime.
           </p>
           <div className="flex flex-wrap gap-3">

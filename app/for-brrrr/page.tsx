@@ -228,7 +228,7 @@ export default function ForBrrrrPage() {
             Free covers the buy. Pro covers the refi.
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
-            Free analyzer + the standalone BRRRR + rehab tools at /tools/* give you the acquisition math. Pro unlocks the full BRRRR analyzer (post-rehab refi modeling, ARV-driven cash recovery), 10-year projection, tax strategy, and compare-deals across strategies. Built for value-add operators doing multiple deals a year.
+            Free analyzer + the standalone BRRRR + rehab tools at /tools/* give you the acquisition math. Pro unlocks the full BRRRR analyzer (post-rehab refi modeling, ARV-driven cash recovery), 10-year projection, Illustrative Tax Impact, and compare-deals across strategies. Built for value-add operators doing multiple deals a year.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link

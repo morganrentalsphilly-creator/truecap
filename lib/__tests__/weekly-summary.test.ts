@@ -120,6 +120,9 @@ describe("buildWeeklySummary — active pipeline", () => {
     expect(payload!.pipeline!.monthlyCashFlow).toBe(
       Math.round(fresh!.netCashFlowMonthly * 2)
     );
+    expect(payload!.methodologyNotes).toContain(
+      "Legacy analysis · recomputed with current v1.0."
+    );
   });
 
   it("falls back to the stored net_cash_flow_monthly when the snapshot is garbage", () => {

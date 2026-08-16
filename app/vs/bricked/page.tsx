@@ -62,8 +62,8 @@ const MATRIX: Row[] = [
   { feature: "Primary purpose", truecap: "Rental returns calculator — is this a good investment?", bricked: "AI valuation — what's it worth, what do repairs cost?", winner: "tie" },
   { feature: "Built for", truecap: "Buy-and-hold investors, house-hackers, agents", bricked: "Flippers, wholesalers, acquisition teams", winner: "tie" },
   { feature: "Cash flow / cap rate / CoC / DSCR", truecap: "Yes — full engine, free tier", bricked: "Not modeled", winner: "truecap" },
-  { feature: "10-year projection + exit scenarios", truecap: "Pro — rent/expense growth, best year to sell", bricked: "Not modeled", winner: "truecap" },
-  { feature: "Tax strategy (depreciation, after-tax CF)", truecap: "Pro — bracket-aware modeling", bricked: "Not modeled", winner: "truecap" },
+  { feature: "10-year projection + exit scenarios", truecap: "Pro — rent/expense growth, modeled hold-year comparison", bricked: "Not modeled", winner: "truecap" },
+  { feature: "Illustrative tax impact", truecap: "Pro — entered marginal rate + modeled after-tax CF", bricked: "Not modeled", winner: "truecap" },
   { feature: "Financing math (PITI, amortization, DSCR)", truecap: "Yes — full loan modeling", bricked: "Not included", winner: "truecap" },
   { feature: "Comps + ARV / market value", truecap: "Purchase price is user input — no AVM", bricked: "Yes — AI-selected comps from MLS + county data, ARV + CMV", winner: "bricked" },
   { feature: "Repair cost estimates", truecap: "Rehab estimator with sq-ft-based defaults", bricked: "Itemized, ZIP-localized material + labor costs", winner: "bricked" },
@@ -73,7 +73,7 @@ const MATRIX: Row[] = [
   { feature: "Try without signup", truecap: "Yes — full analysis, no account", bricked: "No — account + 3-day trial", winner: "truecap" },
   { feature: "Free tier", truecap: "Yes — unlimited core underwriting", bricked: "No — trial only", winner: "truecap" },
   { feature: "Entry pricing", truecap: "Free; Pro $29.99/mo unlimited; $5 one-time PDF", bricked: "$49/mo for 100 comps, metered up to $199/mo (as of June 2026)", winner: "truecap" },
-  { feature: "Lender-ready PDF + share links", truecap: "Read-only share links free; Pro adds multi-page PDF", bricked: "Not the focus", winner: "truecap" },
+  { feature: "Lender-facing PDF + share links", truecap: "Read-only share links free; Pro adds multi-page PDF", bricked: "Not the focus", winner: "truecap" },
   { feature: "API access", truecap: "No", bricked: "Yes — Growth tier and up", winner: "bricked" },
 ];
 
@@ -121,7 +121,7 @@ export default function VsBrickedPage() {
             Bricked is an AI valuation tool — it finds comps, estimates repairs, and
             prices cash offers for flippers and wholesalers working at volume. TrueCap
             is a returns calculator — it tells a rental investor what a property will
-            actually earn: cash flow, DSCR, taxes, and the best year to sell. Both say
+            actually earn: cash flow, DSCR, illustrative taxes, and modeled exit outcomes. Both say
             &quot;underwrite in seconds.&quot; They mean different things by it.
           </p>
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
@@ -157,7 +157,7 @@ export default function VsBrickedPage() {
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
                 <li>You&apos;re deciding whether a rental deserves your down payment.</li>
                 <li>You want cash flow, DSCR, cap rate, and CoC — with financing math baked in.</li>
-                <li>You want 10-year projections, tax strategy, and exit timing on every deal.</li>
+                <li>You want 10-year projections, illustrative tax impact, and modeled exit comparisons on every deal.</li>
                 <li>You analyze a few deals a month and don&apos;t want a $49+ metered plan.</li>
               </ul>
             </div>
@@ -281,8 +281,8 @@ export default function VsBrickedPage() {
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, and monthly cash flow with no
-            account and no analysis cap. Pro adds projections, tax strategy, exit
-            scenarios, BRRRR + flip analyzers, and lender-ready PDFs —
+            account and no analysis cap. Pro adds projections, illustrative tax impact, modeled exit
+            scenarios, BRRRR + flip analyzers, and Deal Decision Pack PDFs —
             $29.99/mo flat, never metered.
           </p>
           <div className="flex flex-wrap gap-3">
@@ -326,7 +326,7 @@ const BRICKED_FAQ: FaqItem[] = [
         For rental investors, yes — for wholesalers, not really. Bricked is an AI
         valuation tool: comps, ARV, and repair estimates for people making cash
         offers at volume. TrueCap is a returns calculator: cash flow, DSCR, cap
-        rate, 10-year projections, and tax strategy for people deciding whether to
+        rate, 10-year projections, and illustrative tax impact for people deciding whether to
         own a rental. If you searched &quot;Bricked alternative&quot; because you
         wanted to know whether a property is a good <em>investment</em>, TrueCap is
         the tool for that question — and it&apos;s free to start.
@@ -357,7 +357,7 @@ const BRICKED_FAQ: FaqItem[] = [
         (metered, with a 3-day trial and no free tier) — priced for acquisition
         teams running volume. TrueCap&apos;s core analyzer is free with no analysis
         cap and no account required; Pro is $29.99/month flat with everything
-        unlimited, and there&apos;s a $5 one-time option for a single lender-ready
+        unlimited, and there&apos;s a $5 one-time option for a single lender-facing
         PDF. For a solo investor analyzing a few deals a month, the pricing models
         aren&apos;t really comparable.
       </>

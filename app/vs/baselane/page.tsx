@@ -54,7 +54,7 @@ const MATRIX: Row[] = [
   { feature: "Lifecycle stage", truecap: "Pre-purchase — underwrite the deal", baselane: "Post-purchase — banking + bookkeeping + ops", winner: "tie" },
   { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", baselane: "Not modeled", winner: "truecap" },
   { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", baselane: "Not modeled", winner: "truecap" },
-  { feature: "Tax strategy modeling", truecap: "Pro — depreciation + interest + after-tax CF (forward-looking)", baselane: "Yes — actuals tracking for Schedule E", winner: "tie" },
+  { feature: "Illustrative tax impact", truecap: "Pro — depreciation + interest + modeled after-tax CF", baselane: "Yes — actuals tracking for Schedule E", winner: "tie" },
   { feature: "Deal score + verdict", truecap: "Free — 0-100 score + plain-English verdict", baselane: "Not applicable", winner: "truecap" },
   { feature: "Sensitivity grid", truecap: "Pro — rent ±10%, vacancy ±5pp, rate ±1pp", baselane: "Not modeled", winner: "truecap" },
   { feature: "Rental business banking", truecap: "No", baselane: "Yes — FDIC-insured business checking", winner: "baselane" },
@@ -65,7 +65,7 @@ const MATRIX: Row[] = [
   { feature: "Pricing (entry tier)", truecap: "Free for underwriting; Pro $29.99/mo", baselane: "Banking + bookkeeping free; advanced ~$22/mo (as of 2026)", winner: "tie" },
   { feature: "Free tier", truecap: "Yes — full underwriting math", baselane: "Yes — banking + basic bookkeeping", winner: "tie" },
   { feature: "Shareable read-only deal link", truecap: "Free — read-only public link; Pro adds co-branding", baselane: "Not the use case", winner: "truecap" },
-  { feature: "Lender-ready PDF", truecap: "Pro — multi-page projection", baselane: "Schedule E reports for tax filing", winner: "tie" },
+  { feature: "Lender-facing PDF", truecap: "Pro — multi-page projection", baselane: "Schedule E reports for tax filing", winner: "tie" },
 ];
 
 export default function VsBaselanePage() {
@@ -269,7 +269,7 @@ export default function VsBaselanePage() {
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
-            Pro unlocks projections, sensitivity, tax strategy, exit scenarios,
+            Pro unlocks projections, sensitivity, illustrative tax impact, modeled exit comparisons,
             MAO, PDF exports, and co-branded share links.
             No card to start.
           </p>

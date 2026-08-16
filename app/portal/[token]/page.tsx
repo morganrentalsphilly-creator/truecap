@@ -133,6 +133,9 @@ export default async function ClientPortalPage({
                     {deal.gapLine ? (
                       <p className="mt-1 text-[11px] text-muted-foreground">{deal.gapLine}</p>
                     ) : null}
+                    <p className="mt-1 text-[10px] text-muted-foreground">
+                      {deal.methodologyLabel}
+                    </p>
                   </div>
                   {deal.sharePath ? (
                     <ArrowUpRight className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />

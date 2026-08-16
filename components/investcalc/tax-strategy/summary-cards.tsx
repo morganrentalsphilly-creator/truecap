@@ -27,10 +27,11 @@ export function TaxStrategySummaryCards({
           tone: (yearOne?.taxSavingsAnnual ?? 0) > 0 ? "positive" : "neutral",
         },
         {
-          label: "10-Year Tax Benefit",
+          label: "10-Year Illustrative Tax Impact",
           value: formatCurrency(totalTaxBenefit),
           tone: totalTaxBenefit >= 0 ? "positive" : "negative",
-          labelTooltip: "Represents tax impact from depreciation and mortgage interest deductions",
+          labelTooltip:
+            "Modeled net impact from rental income and entered deductions at the assumed marginal rate; actual tax treatment varies.",
         },
         {
           label: "Annual Depreciation",

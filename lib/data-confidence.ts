@@ -12,8 +12,10 @@
  *   - Low    = a key input is missing (no rent or no price).
  *   - Medium = key inputs present but not live-sourced/verified (defaults
  *              or plain manual entry we can't attribute).
- *   - High   = the two biggest value drivers (rent + rate) are each either
- *              live-sourced or user-verified.
+ *   - High   = the two biggest value drivers (rent + rate) are explicitly
+ *              verified. A benchmark or hand-entered estimate alone is not
+ *              verification. New surfaces use Input Confidence v1.0; this
+ *              object remains as a backward-compatible three-field summary.
  */
 
 export type DataConfidenceSource = "hud-fmr" | "hud-safmr" | "fred" | "state-static" | "manual";
@@ -44,7 +46,7 @@ export type EnrichmentProvenanceInput = Partial<
       source: DataConfidenceSource;
       fetchedAt?: string | null;
       detail?: string;
-      /** User changed the value after auto-fill → becomes a verified manual entry. */
+      /** User changed the value after auto-fill → becomes an unverified manual estimate. */
       overridden?: boolean;
     }
   >
@@ -63,10 +65,10 @@ const FIELD_LABELS: Record<DataConfidenceField, string> = {
 };
 
 const SOURCE_LABELS: Record<DataConfidenceSource, string> = {
-  "hud-fmr": "HUD FMR (county)",
-  "hud-safmr": "HUD FMR (ZIP)",
-  fred: "FRED 30-yr avg",
-  "state-static": "State effective rate",
+  "hud-fmr": "HUD rent benchmark (county)",
+  "hud-safmr": "HUD rent benchmark (ZIP)",
+  fred: "FRED owner-occupied rate benchmark",
+  "state-static": "State tax benchmark",
   manual: "You entered it",
 };
 
@@ -78,9 +80,9 @@ export function dataConfidenceSourceLabel(s: DataConfidenceSource): string {
   return SOURCE_LABELS[s] ?? s;
 }
 
-/** A tracked field is trusted: either live-sourced or user-verified. */
+/** A tracked field is trusted only after explicit verification. */
 function isTrusted(f: FieldProvenance | undefined): boolean {
-  return f != null;
+  return f?.verified === true;
 }
 
 export function computeConfidenceLevel(
@@ -103,7 +105,7 @@ export function buildDataConfidence(
       const entry = input[key];
       if (!entry) continue;
       fields[key] = entry.overridden
-        ? { source: "manual", verified: true, detail: "You changed it after auto-fill" }
+        ? { source: "manual", verified: false, detail: "You changed it after auto-fill; not yet verified" }
         : {
             source: entry.source,
             fetchedAt: entry.fetchedAt ?? null,
@@ -117,6 +119,25 @@ export function buildDataConfidence(
     level: computeConfidenceLevel(fields, completeness),
     computedAt: now.toISOString(),
   };
+}
+
+/**
+ * Backward-compatible update policy for the legacy Data Confidence summary.
+ * Older clients cannot resend persisted enrichment context, so an absent
+ * payload must keep the stored summary. Context-aware clients explicitly say
+ * they revalidated the context; for them, an empty payload is meaningful and
+ * must clear sources whose value binding no longer matches.
+ */
+export function shouldPreserveStoredDataConfidence(args: {
+  sourceContextProvided: boolean;
+  provenanceProvided: boolean;
+  hasStoredDataConfidence: boolean;
+}): boolean {
+  return (
+    args.hasStoredDataConfidence &&
+    !args.sourceContextProvided &&
+    !args.provenanceProvided
+  );
 }
 
 export function confidenceLabel(level: ConfidenceLevel): string {
@@ -159,20 +180,20 @@ export function describeConfidenceGap(
 
   if (!hasRentSource && !hasRateSource) {
     return rentSourceAttainable
-      ? "Pick your address from the suggestions to pull live HUD market rent and FRED mortgage rates."
-      : "Pick your address from the suggestions to pull the current FRED mortgage rate.";
+      ? "Pick your address from the suggestions to pull HUD and FRED planning benchmarks."
+      : "Pick your address from the suggestions to pull the latest FRED rate benchmark.";
   }
   if (!hasRentSource) {
     // Nothing actionable for a multi-unit deal: the rate is already sourced and
     // rent never can be. Stay silent rather than nag.
     return rentSourceAttainable
-      ? "Pick your address from the suggestions to pull live HUD market rent for this area."
+      ? "Pick your address from the suggestions to pull the HUD rent benchmark for this area."
       : null;
   }
   if (!hasRateSource) {
-    return "Pick your address from the suggestions to pull the current FRED mortgage rate.";
+    return "Pick your address from the suggestions to pull the latest FRED rate benchmark.";
   }
-  return "Add a monthly rent and a purchase price to complete this analysis.";
+  return "Verify rent with recent local comps and replace the rate benchmark with a current lender quote.";
 }
 
 /** Tolerant parse of a persisted data_confidence jsonb. Returns null if unusable. */

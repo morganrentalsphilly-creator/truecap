@@ -18,7 +18,7 @@ import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema"
 export const metadata: Metadata = {
   title: "DealCheck vs TrueCap for STR Deals (2026)",
   description:
-    "Both calculators can model STRs. Which one handles seasonal ADR, occupancy curves, AirDNA inputs, and STR tax loophole cleaner? Honest STR-specific comparison.",
+    "Both calculators can model STRs. Compare seasonal ADR, occupancy, AirDNA-input workflows, and the limits of each tool's tax modeling.",
   keywords: [
     "dealcheck short term rental",
     "dealcheck airbnb calculator",
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "DealCheck vs TrueCap for STR Deals (2026)",
     description:
-      "STR-specific TrueCap vs DealCheck: ADR + occupancy modeling, AirDNA integration, STR tax loophole.",
+      "STR-specific TrueCap vs DealCheck: ADR + occupancy modeling, AirDNA-input workflow, and tax-model limitations.",
     url: "/vs/dealcheck-for-short-term-rentals",
     type: "website",
     images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap vs DealCheck for Short-Term Rentals — honest comparison" }],
@@ -44,10 +44,10 @@ type Row = { feature: string; truecap: string; dealcheck: string; winner: Verdic
 const MATRIX: Row[] = [
   { feature: "LTR + STR scenario comparison", truecap: "Yes — run two scenarios on same property in one workspace", dealcheck: "Manual — duplicate the deal and override rent", winner: "truecap" },
   { feature: "ADR + occupancy input model", truecap: "Editable rent field — plug AirDNA monthly projection", dealcheck: "Editable rent field — same approach", winner: "tie" },
-  { feature: "Seasonal occupancy curve modeling", truecap: "Pro — 12-month seasonal income breakdown", dealcheck: "Annualized only", winner: "truecap" },
+  { feature: "Seasonal occupancy curve modeling", truecap: "Single blended ADR + occupancy; compare manual scenarios", dealcheck: "Annualized only", winner: "tie" },
   { feature: "AirDNA / Mashvisor data integration", truecap: "Manual — paste AirDNA's projected monthly revenue into rent field", dealcheck: "Same approach", winner: "tie" },
-  { feature: "STR tax loophole (bonus depreciation)", truecap: "Pro tax strategy — supports accelerated depreciation modeling", dealcheck: "Standard tax view", winner: "truecap" },
-  { feature: "Cost segregation impact modeling", truecap: "Pro — accelerated depreciation in year 1-5", dealcheck: "Manual", winner: "truecap" },
+  { feature: "Bonus depreciation / STR tax eligibility", truecap: "Not determined — review with a CPA", dealcheck: "Standard tax view", winner: "tie" },
+  { feature: "Cost-segregation component modeling", truecap: "Not modeled", dealcheck: "Manual", winner: "tie" },
   { feature: "Property management at 25% (typical STR PM rate)", truecap: "Yes — adjustable management %", dealcheck: "Yes", winner: "tie" },
   { feature: "Higher utilities + cleaning fees", truecap: "Yes — utilities + maintenance fields handle the STR overhead", dealcheck: "Yes", winner: "tie" },
   { feature: "Mobile UX", truecap: "PWA installable", dealcheck: "Native iOS + Android", winner: "dealcheck" },
@@ -59,11 +59,11 @@ const NICHE_FAQ: FaqItem[] = [
     question: "Which is better for short-term rentals — TrueCap or DealCheck?",
     answer: (
       <>
-        Both work. TrueCap edges out on three STR-specific things: a 12-month seasonal income breakdown (Pro), accelerated-depreciation modeling for the STR tax loophole, and a deeper free tier. DealCheck has native iOS/Android apps which is the cleaner mobile experience.
+        Both work. TrueCap models a blended ADR + occupancy input and offers a deeper free underwriting tier; model separate seasonal cases as saved scenarios. Neither TrueCap&apos;s simplified tax illustration nor a deal calculator determines STR-loophole eligibility; model cost segregation and bonus depreciation with a CPA. DealCheck has native iOS/Android apps, which is the cleaner mobile experience.
       </>
     ),
     plainTextAnswer:
-      "Both work. TrueCap: 12-month seasonal income breakdown, accelerated depreciation for STR tax loophole, deeper free tier. DealCheck: native iOS/Android for mobile-heavy operators.",
+      "Both work. TrueCap: blended ADR plus occupancy underwriting and a deeper free tier; seasonal cases require separate scenarios. Its simplified tax illustration does not determine STR-loophole eligibility or model cost-segregation components. DealCheck: native iOS/Android for mobile-heavy operators.",
   },
   {
     question: "Can TrueCap model AirDNA revenue projections?",
@@ -79,11 +79,11 @@ const NICHE_FAQ: FaqItem[] = [
     question: "Does TrueCap support the STR tax loophole?",
     answer: (
       <>
-        Yes — Pro tax strategy modeling supports accelerated depreciation scenarios, including bonus depreciation and cost segregation for STRs. The REPS / STR loophole framework can be incorporated into the projection. Always consult your CPA for the specific math; TrueCap provides the cash flow + depreciation timeline they need.
+        Not as a tax-eligibility or cost-segregation engine. TrueCap&apos;s Illustrative Tax Impact view models rental income, entered operating expenses, straight-line depreciation, and optional mortgage interest at the marginal rate you enter. It does not determine material participation or REPS, classify cost-segregation components, or calculate bonus depreciation. Use a CPA&apos;s model for those items.
       </>
     ),
     plainTextAnswer:
-      "Yes — Pro tax modeling supports accelerated depreciation incl. bonus depreciation + cost seg for STRs. STR loophole / REPS frameworks fit. Consult CPA for specifics; TrueCap provides cash flow + depreciation timeline.",
+      "No — TrueCap does not determine STR-loophole eligibility or model cost-segregation components and bonus depreciation. Its Illustrative Tax Impact view models rental income, entered expenses, straight-line depreciation, and optional mortgage interest at an entered marginal rate. Use a CPA for tax-specific modeling.",
   },
   {
     question: "What management rate should I use for STR analysis?",
@@ -114,7 +114,7 @@ export default function VsDealcheckForShortTermRentalsPage() {
     "@type": "WebPage",
     name: "DealCheck vs TrueCap for STR Deals (2026)",
     url: `${siteUrl}/vs/dealcheck-for-short-term-rentals`,
-    description: "Both calculators can model STRs. Which one handles seasonal ADR, occupancy curves, AirDNA inputs, and STR tax loophole cleaner? Honest STR-specific comparison.",
+    description: "Both calculators can model STRs. Compare seasonal ADR, occupancy, AirDNA-input workflows, and the limits of each tool's tax modeling.",
     dateModified: "2026-06-07",
     publisher: { "@id": `${siteUrl}/#organization` },
   };
@@ -143,10 +143,10 @@ export default function VsDealcheckForShortTermRentalsPage() {
           </div>
           <h1 className="text-3xl sm:text-5xl font-extrabold text-foreground leading-[1.05] tracking-tight text-balance">
             TrueCap vs DealCheck for Short-term rentals:{" "}
-            <span className="text-primary">which models seasonal ADR, occupancy, and STR tax loophole better?</span>
+            <span className="text-primary">which supports the underwriting workflow better?</span>
           </h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
-            Both calculators were built for long-term rentals first. Both let you model short-term rentals by overriding rent with a projected monthly STR revenue. This is the STR-investor cut: which one handles seasonal ADR + occupancy, supports AirDNA inputs cleanly, and models the STR tax loophole (cost segregation + bonus depreciation) properly.
+            Both calculators were built for long-term rentals first. Both let you model short-term rentals with projected revenue inputs. This comparison covers seasonal ADR + occupancy, AirDNA-input workflow, and where tax-specific work must move to a CPA model.
           </p>
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
             <ScrollToFormButton className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5">
@@ -175,7 +175,7 @@ export default function VsDealcheckForShortTermRentalsPage() {
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
                 <li>You&apos;re underwriting a property as a potential STR.</li>
                 <li>You want to compare LTR vs STR scenarios side-by-side.</li>
-                <li>You want the STR tax loophole (cost seg + bonus depreciation) modeled.</li>
+                <li>You want rental cash flow and a clearly labeled illustrative tax view.</li>
                 <li>You want a free tier that covers basic STR underwriting.</li>
               </ul>
             </div>
@@ -260,7 +260,7 @@ export default function VsDealcheckForShortTermRentalsPage() {
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             Free covers the standard cap rate, CoC, DSCR, and cash flow. Pro unlocks
-            projections, sensitivity, tax strategy, exit scenarios, MAO,
+            projections, sensitivity, illustrative tax impact, modeled exit comparisons, MAO,
             and PDF exports.
           </p>
           <div className="flex flex-wrap gap-3">
