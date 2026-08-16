@@ -60,8 +60,8 @@ const MATRIX: Row[] = [
   { feature: "Long-term rent baseline", truecap: "HUD Fair Market Rent", airdna: "Not the focus", winner: "truecap" },
   { feature: "Mortgage + financing math", truecap: "Yes — PITI + DSCR + amortization", airdna: "Not included", winner: "truecap" },
   { feature: "Address auto-fill (rent/rate/tax)", truecap: "Yes — HUD + FRED + state property tax", airdna: "STR-specific data only", winner: "truecap" },
-  { feature: "Free tier", truecap: "Yes — full underwriting math", airdna: "Free MarketMinder dashboard with limited data", winner: "tie" },
-  { feature: "Pricing (paid tier)", truecap: "Pro $29.99/mo", airdna: "Rentalizer ~$20-40 per property; Markets subscription $50-200+/mo (as of 2026)", winner: "truecap" },
+  { feature: "Free tier", truecap: "Yes — core cap rate, CoC, DSCR, and cash flow", airdna: "Free MarketMinder dashboard with limited data", winner: "tie" },
+  { feature: "Pricing (paid tier)", truecap: "Paid Pro; see live pricing for current rates", airdna: "Rentalizer ~$20-40 per property; Markets subscription $50-200+/mo (as of 2026)", winner: "truecap" },
   { feature: "Shareable read-only analysis", truecap: "Free — read-only public link; Pro adds co-branding", airdna: "PDF reports on paid tier", winner: "tie" },
 ];
 
@@ -267,7 +267,8 @@ export default function VsAirdnaPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
             Pro unlocks projections, sensitivity, illustrative tax impact, modeled exit comparisons,
-            MAO, PDF exports, and co-branded share links.
+            MAO, and co-branded share links. Pro includes PDFs, and a one-time
+            PDF option is available; see live pricing for current terms.
             No card to start.
           </p>
           <div className="flex flex-wrap gap-3">
@@ -348,7 +349,7 @@ const AIRDNA_FAQ: FaqItem[] = [
     question: "Can I use TrueCap free with AirDNA?",
     answer: (
       <>
-        Yes — TrueCap&apos;s free tier covers the full underwriting math (cap rate, CoC, DSCR, cash flow). Pull AirDNA&apos;s monthly revenue projection, override TrueCap&apos;s HUD rent field with it, run the analysis. You don&apos;t need TrueCap Pro for the basic combined workflow.
+        Yes — TrueCap&apos;s free tier covers core cap rate, CoC, DSCR, and cash-flow math. Pull AirDNA&apos;s monthly revenue projection, override TrueCap&apos;s HUD rent field with it, and run the analysis. You don&apos;t need TrueCap Pro for that basic combined workflow.
       </>
     ),
     plainTextAnswer:

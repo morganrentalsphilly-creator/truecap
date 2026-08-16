@@ -62,8 +62,8 @@ const MATRIX: Row[] = [
   { feature: "Control over property choice", truecap: "Total", fundrise: "None — Fundrise picks deals", winner: "truecap" },
   { feature: "Ownership tax treatment", truecap: "Direct-property rules may allow depreciation, interest, or 1031; TrueCap does not determine eligibility", fundrise: "Some depreciation pass-through (K-1 funds); no 1031 from shares", winner: "tie" },
   { feature: "Cash flow model", truecap: "You design — fixed-rate mortgage, your CF goes to you", fundrise: "Quarterly distributions from fund returns", winner: "tie" },
-  { feature: "Pricing / fees", truecap: "Free; Pro $29.99/mo (analysis tools only)", fundrise: "0.15% advisory + 0.85% fund management (1% all-in, plus expense ratios)", winner: "tie" },
-  { feature: "Free tier (for analysis)", truecap: "Yes — full underwriting math", fundrise: "Not applicable", winner: "truecap" },
+  { feature: "Pricing / fees", truecap: "Free core; paid Pro — see live pricing", fundrise: "0.15% advisory + 0.85% fund management (1% all-in, plus expense ratios)", winner: "tie" },
+  { feature: "Free tier (for analysis)", truecap: "Yes — core cap rate, CoC, DSCR, and cash flow", fundrise: "Not applicable", winner: "truecap" },
 ];
 
 export default function VsFundrisePage() {
@@ -262,7 +262,8 @@ export default function VsFundrisePage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
             Pro unlocks projections, sensitivity, illustrative tax impact, modeled exit comparisons,
-            MAO, PDF exports, and co-branded share links.
+            MAO, and co-branded share links. Pro includes PDFs, and a one-time
+            PDF option is available; see live pricing for current terms.
             No card to start.
           </p>
           <div className="flex flex-wrap gap-3">

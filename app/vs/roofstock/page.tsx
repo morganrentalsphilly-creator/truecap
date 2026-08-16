@@ -3,14 +3,9 @@
  *
  * Target queries: "Roofstock alternative", "Roofstock vs ...",
  * "Roofstock fees", "Roofstock analyzer", "is Roofstock worth it".
- * Roofstock is a marketplace for single-family turnkey rentals — they
- * brokerage the deal. TrueCap is the underwriting layer you'd use to
- * decide whether a Roofstock listing actually pencils.
- *
- * Positioning angle: don't fight Roofstock — frame TrueCap as the
- * independent due-diligence tool you bring to any deal, including
- * Roofstock listings. The pro-formas on Roofstock listings are
- * marketing collateral; TrueCap is the second opinion.
+ * Roofstock's individual-investor offering and transaction terms can change.
+ * TrueCap is a separate underwriting model investors can use to review a
+ * property with their own assumptions.
  */
 
 import type { Metadata } from "next";
@@ -34,7 +29,7 @@ import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema"
 export const metadata: Metadata = {
   title: "Roofstock vs TrueCap (2026): Verify the Numbers",
   description:
-    "TrueCap is the independent underwrite for any Roofstock listing — cap rate, cash flow, DSCR, projection from one address. When to use each tool.",
+    "Compare Roofstock's current individual-investor services with TrueCap's separate, assumption-driven rental underwriting workflow.",
   keywords: [
     "roofstock alternative",
     "roofstock vs truecap",
@@ -47,7 +42,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Roofstock vs TrueCap (2026): Verify the Numbers",
     description:
-      "Roofstock sells the property. TrueCap underwrites it. The independent second opinion on any turnkey listing.",
+      "Roofstock offers services for individual real-estate investors. TrueCap provides a separate, assumption-driven underwrite.",
     url: "/vs/roofstock",
     type: "website",
     images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap vs Roofstock" }],
@@ -59,23 +54,23 @@ type Verdict = "truecap" | "roofstock" | "tie";
 type Row = { feature: string; truecap: string; roofstock: string; winner: Verdict };
 
 const MATRIX: Row[] = [
-  { feature: "Primary purpose",                   truecap: "Per-deal underwriting calculator",                                       roofstock: "Marketplace + brokerage for turnkey SFR",                          winner: "tie" },
-  { feature: "Cost to use",                       truecap: "Free to underwrite; Pro $29.99/mo for projections + co-branded share + PDF",          roofstock: "Free to browse; 0.5% buyer fee at close (typically $1k–$3k)",      winner: "truecap" },
-  { feature: "Independent underwriting",           truecap: "Yes — our engine, your assumptions",                                     roofstock: "Listing pro-formas authored by the seller / Roofstock",            winner: "truecap" },
-  { feature: "Cap rate / CoC / DSCR",              truecap: "All standard, plus benchmarks per metric",                                roofstock: "Cap rate + cash flow on listing card",                              winner: "truecap" },
-  { feature: "Editable assumptions",               truecap: "Every input — vacancy, mgmt %, capex, taxes, etc.",                      roofstock: "Limited override of listing pro-forma",                             winner: "truecap" },
-  { feature: "10-year projection",                  truecap: "Pro — rent growth, expense growth, appreciation, equity compounding",   roofstock: "Static pro-forma year-one only",                                    winner: "truecap" },
+  { feature: "Primary purpose",                   truecap: "Per-deal underwriting calculator",                                       roofstock: "Individual-investor real-estate services; confirm current offering", winner: "tie" },
+  { feature: "Cost to use",                       truecap: "Free core; paid Pro and one-time PDF options — see live pricing",           roofstock: "Service and transaction dependent — confirm current terms",        winner: "tie" },
+  { feature: "Underwriting perspective",           truecap: "Separate model using editable assumptions",                              roofstock: "Materials and analysis vary by current service",                    winner: "tie" },
+  { feature: "Cap rate / CoC / DSCR",              truecap: "Calculated from the assumptions entered",                                roofstock: "Confirm the metrics included in the current offering",              winner: "truecap" },
+  { feature: "Editable assumptions",               truecap: "Rent, vacancy, management, reserves, taxes, financing, and more",         roofstock: "Depends on the current product or transaction workflow",            winner: "truecap" },
+  { feature: "10-year projection",                  truecap: "Pro — rent, expense, appreciation, and equity scenarios",                roofstock: "Confirm the analysis included in the current offering",              winner: "truecap" },
   { feature: "Illustrative tax impact",             truecap: "Pro — depreciation, interest deduction, modeled after-tax CF",           roofstock: "Not modeled",                                                       winner: "truecap" },
   { feature: "Exit scenarios",                      truecap: "Pro — sell-at-year-N with equity + IRR",                                  roofstock: "Not modeled",                                                       winner: "truecap" },
   { feature: "Sensitivity grid (stress test)",      truecap: "Pro — rent ±10%, vacancy ±5pp, rate ±1pp",                                roofstock: "Not modeled",                                                       winner: "truecap" },
-  { feature: "Deal score with breakdown",           truecap: "Free — 0-100 with subscore drill-down",                                    roofstock: "Curated 'Neighborhood Rating' (qualitative)",                       winner: "truecap" },
-  { feature: "Open data sources cited",             truecap: "HUD FMR + FRED rate + state tax — auditable",                              roofstock: "Internal estimates",                                                winner: "truecap" },
-  { feature: "Actually buys you a property",        truecap: "No — you bring your own deal",                                            roofstock: "Yes — full marketplace + escrow + brokerage",                       winner: "roofstock" },
-  { feature: "Listing inventory",                   truecap: "None — analyze anything by address",                                      roofstock: "Curated SFR inventory, primarily turnkey",                          winner: "roofstock" },
-  { feature: "Property management connection",      truecap: "Not included",                                                            roofstock: "Pre-vetted PM partners for most markets",                           winner: "roofstock" },
-  { feature: "Works on any property",                truecap: "Yes — any US address, any condition, any strategy",                       roofstock: "Only Roofstock-listed properties",                                  winner: "truecap" },
-  { feature: "Shareable read-only deal link",       truecap: "Free — read-only public link; Pro adds co-branding",                                    roofstock: "Listing URL (their pro-forma, not yours)",                          winner: "truecap" },
-  { feature: "PDF report export",                    truecap: "Pro — lender-facing multi-page report",                                    roofstock: "PDF of listing pro-forma",                                          winner: "truecap" },
+  { feature: "Deal score with breakdown",           truecap: "Free — 0-100 screening score with subscore drill-down",                    roofstock: "Confirm any rating methodology in the current offering",            winner: "truecap" },
+  { feature: "Starting data sources",                truecap: "Editable HUD, FRED, and state-tax screening estimates",                    roofstock: "Review the sources and dates in the relevant materials",             winner: "tie" },
+  { feature: "Transaction services",                 truecap: "No — analysis only",                                                       roofstock: "Depends on the current individual-investor service",                winner: "roofstock" },
+  { feature: "Property discovery",                   truecap: "No inventory; analyze a supported address or enter inputs manually",       roofstock: "Depends on the current individual-investor service",                winner: "roofstock" },
+  { feature: "Property management connection",      truecap: "Not included",                                                            roofstock: "Confirm availability and terms for the property",                   winner: "roofstock" },
+  { feature: "Property coverage",                    truecap: "Supported U.S. addresses with manual input fallback",                       roofstock: "Service and property dependent",                                    winner: "truecap" },
+  { feature: "Shareable read-only deal link",       truecap: "Free read-only public link; Pro adds co-branding",                          roofstock: "Confirm what can be shared from the current service",               winner: "truecap" },
+  { feature: "PDF report export",                    truecap: "One-time Deal Decision Pack or included with Pro",                        roofstock: "Confirm available documents for the current service",               winner: "truecap" },
   { feature: "Mobile-first UX",                      truecap: "PWA — install to home screen",                                            roofstock: "Mobile-friendly web app",                                           winner: "tie" },
 ];
 
@@ -88,7 +83,7 @@ export default function VsRoofstockPage() {
     url: `${siteUrl}/vs/roofstock`,
     description:
       "Side-by-side comparison of TrueCap (underwriting calculator) and Roofstock (turnkey rental marketplace).",
-    dateModified: "2026-06-07",
+    dateModified: "2026-08-16",
     publisher: { "@id": `${siteUrl}/#organization` },
   };
 
@@ -120,12 +115,11 @@ export default function VsRoofstockPage() {
             <span className="text-primary">marketplace vs independent underwrite</span>
           </h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
-            Roofstock is a marketplace — they list, broker, and pre-curate
-            turnkey single-family rentals. TrueCap is a calculator — we
-            don&apos;t sell you a property, we help you decide if the one
-            you&apos;re looking at actually pencils. The two tools complement
-            each other, but if you&apos;re asking <em>&quot;is this Roofstock
-            deal real?&quot;</em>, you want TrueCap as the second opinion.
+            Roofstock&apos;s current site offers services for individual real-estate
+            investors. TrueCap is a separate calculator: it does not sell or
+            certify a property, but it lets you model a potential acquisition
+            using assumptions you can inspect and replace. Confirm Roofstock&apos;s
+            current service and transaction terms directly.
           </p>
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
             <ScrollToFormButton
@@ -160,7 +154,7 @@ export default function VsRoofstockPage() {
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
                 <li>You want an independent underwrite of a Roofstock listing.</li>
                 <li>You want to compare a Roofstock deal to a non-Roofstock deal head-to-head.</li>
-                <li>The listing pro-forma assumes optimistic vacancy / mgmt / capex and you want to sensitize.</li>
+                <li>You want to replace third-party assumptions with property-specific evidence and test a range.</li>
                 <li>You want a 10-year projection with exit scenarios, not a year-one snapshot.</li>
                 <li>You want a deal score with a transparent breakdown.</li>
               </ul>
@@ -170,19 +164,18 @@ export default function VsRoofstockPage() {
                 Use Roofstock when
               </p>
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
-                <li>You want a curated inventory of turnkey SFRs in markets you don&apos;t live in.</li>
-                <li>You need a brokerage + escrow + PM partner in one place.</li>
-                <li>You&apos;re scaling beyond your home market and don&apos;t want to source individually.</li>
-                <li>You value the &quot;Roofstock-certified&quot; inspection + lease validation.</li>
+                <li>Its current individual-investor service matches the transaction or ownership support you need.</li>
+                <li>You have reviewed the current fees, agreements, diligence materials, and service providers.</li>
+                <li>You understand which work Roofstock performs and which remains your responsibility.</li>
+                <li>You have independently verified the property-specific financial assumptions.</li>
               </ul>
             </div>
           </div>
           <p className="mt-5 text-sm leading-relaxed text-foreground">
-            The honest take: most serious Roofstock buyers use TrueCap (or
-            something like it) to pressure-test the listing pro-forma before
-            committing. The marketplace pro-forma is marketing collateral —
-            optimistic on rent, conservative on capex, missing a real
-            sensitivity. That&apos;s the gap we fill.
+            Treat any seller, marketplace, manager, or calculator pro forma as
+            a model rather than a promise. Verify the evidence behind rent,
+            taxes, insurance, financing, vacancy, management, maintenance, and
+            capital reserves, then sensitivity-test the assumptions before deciding.
           </p>
         </section>
 
@@ -192,8 +185,8 @@ export default function VsRoofstockPage() {
             Feature-by-feature
           </h2>
           <p className="text-base text-muted-foreground mb-6 leading-relaxed">
-            Roofstock is built for the buy-the-deal stage. TrueCap is built
-            for the decide-if-it&apos;s-a-deal stage.
+            TrueCap provides an underwriting model; Roofstock&apos;s current
+            individual-investor services should be confirmed on its official site.
           </p>
           <div className="overflow-x-auto rounded-2xl border border-border bg-card">
             <table className="w-full text-sm">
@@ -239,8 +232,8 @@ export default function VsRoofstockPage() {
           <p className="mt-3 text-[11px] text-muted-foreground">
             Roofstock details based on publicly available product info as of
             2026. See{" "}
-            <a href="https://www.roofstock.com" target="_blank" rel="noopener" className="underline">
-              roofstock.com
+            <a href="https://www.roofstock.com/investment-solutions/individual-investors" target="_blank" rel="noopener" className="underline">
+              Roofstock&apos;s official individual-investor page
             </a>{" "}
             for their current state.
           </p>
@@ -249,37 +242,35 @@ export default function VsRoofstockPage() {
         {/* The pressure-test angle */}
         <section className="mb-12 sm:mb-16 rounded-2xl border border-[var(--brand-green)]/25 bg-[var(--brand-green-light)] p-6 sm:p-8">
           <h2 className="text-xl sm:text-2xl font-extrabold text-[var(--brand-green)] mb-3">
-            How to pressure-test a Roofstock listing in TrueCap
+            How to review a property with your own assumptions
           </h2>
           <ol className="space-y-2.5 text-sm sm:text-base leading-relaxed text-foreground list-decimal pl-5">
             <li>
               <strong>Copy the listing address into the TrueCap analyzer.</strong>{" "}
-              HUD FMR pre-fills the rent, FRED pre-fills the current 30-year
-              rate, state property tax pre-fills the tax line. That&apos;s
-              your honest baseline before the listing&apos;s own assumptions
-              touch it.
+              TrueCap starts with editable HUD rent, FRED rate, and state-tax
+              screening estimates. They are starting assumptions, not
+              property-specific quotes or guarantees.
             </li>
             <li>
-              <strong>Replace the rent with the listing&apos;s pro-forma rent.</strong>{" "}
-              Compare to HUD FMR for that county + bedroom count. If
-              listing rent is more than ~10% above FMR, that&apos;s your
-              first warning sign.
+              <strong>Replace rent with property-specific evidence.</strong>{" "}
+              Compare current local comps, executed leases where available,
+              concessions, condition, and seasonality. Test a range rather
+              than using a universal percentage threshold.
             </li>
             <li>
-              <strong>Set vacancy to 8% (not 5%) and management to 10%.</strong>{" "}
-              Turnkey listings often understate both. Real-world long-term
-              vacancy for out-of-state SFR runs closer to 8% once you factor
-              in turnover.
+              <strong>Use property- and market-specific expense evidence.</strong>{" "}
+              Obtain current tax, insurance, management, maintenance, leasing,
+              utility, and capital-reserve estimates, then model a reasonable range.
             </li>
             <li>
               <strong>Run the sensitivity grid (Pro).</strong> If the deal
-              breaks at rent −5% or rate +0.5pp, that&apos;s not a
-              cash-flowing rental, that&apos;s a speculation on rate cuts.
+              changes across lower rent, higher vacancy, and higher-rate
+              scenarios. The grid is decision support, not a forecast.
             </li>
             <li>
-              <strong>Check the deal score.</strong> Below 60 is a
-              decline. 60-75 is &quot;maybe if you love the location.&quot;
-              Above 75 is a real deal.
+              <strong>Review the Deal Score and its inputs.</strong> The score
+              is a screening aid, not a buy, decline, appraisal, or investment
+              recommendation. Apply your own criteria and complete diligence.
             </li>
           </ol>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
@@ -307,9 +298,10 @@ export default function VsRoofstockPage() {
             Pressure-test your next Roofstock deal — free.
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
-            Free covers the underwrite. Pro unlocks 10-year projections,
-            sensitivity, illustrative tax impact, modeled exit comparisons, PDF
-            exports, and co-branded share links. No card to start.
+            Free covers the core underwrite and plain read-only share links. Pro adds
+            10-year projections, sensitivity, illustrative tax impact, modeled exit
+            comparisons, co-branding, and included PDFs. A one-time PDF option is
+            also available. No card to start.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link
@@ -356,94 +348,82 @@ const ROOFSTOCK_FAQ: FaqItem[] = [
     answer: (
       <>
         Not directly — they solve different problems. Roofstock is a
-        marketplace that lists and brokers turnkey single-family rentals.
-        TrueCap is a calculator that underwrites any property you point
-        it at. Most experienced Roofstock buyers use TrueCap as the
-        independent second opinion on listing pro-formas before
-        committing.
+        current individual-investor services vary by offering. TrueCap
+        is a separate calculator for supported properties and manually
+        entered assumptions. The tools may complement each other, but
+        neither replaces property-specific diligence.
       </>
     ),
     plainTextAnswer:
-      "Not directly — they solve different problems. Roofstock is a marketplace that lists and brokers turnkey SFR. TrueCap is a calculator that underwrites any property. Experienced Roofstock buyers use TrueCap as the independent second opinion on listing pro-formas.",
+      "Not directly. Roofstock's current individual-investor services vary by offering. TrueCap is a separate calculator for supported properties and manually entered assumptions. Neither replaces property-specific diligence.",
   },
   {
     question: "Are Roofstock listings actually good deals?",
     answer: (
       <>
-        Sometimes — but the pro-formas on listing cards are marketing
-        material. They tend to assume optimistic rent, conservative
-        vacancy (often 5% on out-of-state turnkey), light capex reserves,
-        and don&apos;t sensitize for rate changes. Run any listing
-        through TrueCap with realistic assumptions (8% vacancy, 10%
-        management, 8% capex reserves) and you&apos;ll filter the real
-        deals from the marketing.
+        That cannot be determined from the platform name. Review the
+        property, agreement, current service terms, rent evidence, taxes,
+        insurance, financing, vacancy, management, maintenance, reserves,
+        title, inspection, and local rules. Sensitivity-test a range;
+        TrueCap does not certify a property as a good or bad investment.
       </>
     ),
     plainTextAnswer:
-      "Sometimes — listing pro-formas are marketing material. They assume optimistic rent, often 5% vacancy on out-of-state turnkey, light capex reserves, and don't sensitize for rate changes. Run through TrueCap with realistic assumptions (8% vacancy, 10% mgmt, 8% capex) to filter real deals from marketing.",
+      "That cannot be determined from the platform name. Verify property-specific rent, expenses, financing, title, inspection, and local rules, then sensitivity-test a range. TrueCap does not certify an investment.",
   },
   {
     question: "What is Roofstock's fee compared to using TrueCap?",
     answer: (
       <>
-        Roofstock charges a 0.5% buyer marketplace fee at close — on a
-        $200k property that&apos;s ~$1,000. TrueCap is free to
-        underwrite and $29.99/month for Pro features. They&apos;re not
-        substitutes — Roofstock&apos;s fee buys you a brokered
-        transaction, TrueCap&apos;s subscription gives you the
-        analytical tooling to decide which transactions are worth doing.
+        Roofstock&apos;s offering and transaction terms can change, so use
+        the relevant agreement and official site for the current fees.
+        TrueCap has a free core analyzer plus paid Pro and one-time PDF
+        options; its live pricing page is the source of truth.
       </>
     ),
     plainTextAnswer:
-      "Roofstock charges 0.5% buyer marketplace fee at close (~$1,000 on a $200k property). TrueCap is free to underwrite, $29.99/month for Pro. Not substitutes — Roofstock fee buys you a brokered transaction, TrueCap subscription gives you the analytical tools.",
+      "Roofstock's offering and transaction terms can change; confirm current fees in the relevant agreement and official site. TrueCap has free core, paid Pro, and one-time PDF options; see live pricing.",
   },
   {
     question: "Can TrueCap analyze any Roofstock listing?",
     answer: (
       <>
-        Yes — just take the property address from the Roofstock listing
-        and paste it into the TrueCap analyzer. The HUD baseline rent,
-        FRED rate, and state property tax pre-fill automatically. You
-        can then override any input with the listing&apos;s assumptions
-        to compare side-by-side.
+        For supported U.S. addresses, paste the address into TrueCap.
+        If lookup data is unavailable, enter the property inputs manually.
+        HUD rent, FRED rate, and state-tax estimates are editable screening
+        defaults; replace them with property-specific evidence.
       </>
     ),
     plainTextAnswer:
-      "Yes — paste the address from any Roofstock listing into TrueCap. HUD rent, FRED rate, and state property tax pre-fill automatically. Override inputs with the listing's assumptions to compare side-by-side.",
+      "For supported U.S. addresses, paste the address into TrueCap; otherwise enter inputs manually. HUD rent, FRED rate, and state-tax estimates are editable screening defaults, not property-specific evidence.",
   },
   {
     question: "Should I trust the Roofstock pro-forma cap rate?",
     answer: (
       <>
-        Trust but verify. Roofstock&apos;s cap rate is mathematically
-        correct given their assumptions, but those assumptions are
-        optimized for the listing&apos;s appeal. Specifically check:
-        their vacancy assumption (often 5% — should be 8%+ for
-        out-of-state SFR), management (often 8% — most realistic PMs
-        charge 10% plus a leasing fee), and capex reserves (often
-        understated). TrueCap lets you override all three and see how
-        the cap rate moves.
+        Recalculate it from the documented inputs. Confirm how income,
+        vacancy, taxes, insurance, management, maintenance, utilities,
+        and reserves are defined, then replace them with current evidence
+        and test a range. TrueCap&apos;s result is also only as reliable as
+        the assumptions entered.
       </>
     ),
     plainTextAnswer:
-      "Trust but verify. Roofstock's cap rate is math-correct given their assumptions, but those assumptions are optimized for listing appeal. Check vacancy (often 5%, should be 8%+ out-of-state), mgmt (often 8%, realistic is 10% + leasing fee), and capex reserves (often understated).",
+      "Recalculate the cap rate from documented inputs. Confirm how every income and expense line is defined, replace assumptions with current evidence, and test a range. TrueCap is also only as reliable as its inputs.",
   },
   {
     question: "When should I skip Roofstock and find deals elsewhere?",
     answer: (
       <>
-        Skip Roofstock if you live in a market with enough deal flow
-        that you can source locally — you&apos;ll usually find better
-        margins without the 0.5% buyer fee. Skip it if the Roofstock
-        inventory in your target market is thin (it&apos;s strong in
-        some Midwest + Southeast markets, weaker elsewhere). Use
-        Roofstock if you&apos;re scaling beyond markets where you have
-        boots on the ground — the brokered + PM-included workflow is
-        their real value-add.
+        Compare Roofstock&apos;s current service, property availability,
+        agreements, fees, diligence materials, providers, and support
+        with direct sourcing and other alternatives. Choose based on
+        the specific transaction and your ability to complete local,
+        legal, financial, and physical diligence.
       </>
     ),
     plainTextAnswer:
-      "Skip Roofstock if local sourcing works for you — better margins without the 0.5% fee. Skip if inventory in your target market is thin (strongest in Midwest/Southeast). Use it when scaling beyond your home market — brokered + PM-included is the value-add.",
+      "Compare Roofstock's current service, availability, agreements, fees, diligence materials, providers, and support with direct sourcing and alternatives. Decide based on the specific transaction and your diligence capacity.",
   },
 ];
 

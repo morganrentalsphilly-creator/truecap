@@ -75,7 +75,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "What DSCR is required for TrueCap's Strong verdict?",
-    a: "1.25 or higher. That's the threshold most investment-property lenders require, so a DSCR ≥ 1.25 means the deal would likely qualify for a standard DSCR loan. 1.15-1.25 is the Solid range. 1.0-1.15 is Mixed/Marginal (above breakeven but lender-tight). Below 1.0 means operating income doesn't cover debt service and we classify the deal as Negative.",
+    a: "TrueCap uses 1.25 or higher as its Strong score-band threshold; 1.15-1.25 is Solid, 1.0-1.15 is Mixed/Marginal, and below 1.0 means the modeled operating income does not cover modeled debt service. These are TrueCap heuristics, not lender rules. Lenders calculate DSCR differently and apply separate borrower, property, documentation, reserve, rate, and LTV requirements, so no TrueCap band establishes loan eligibility or approval.",
   },
   {
     q: "How does TrueCap handle all-cash purchases for DSCR?",
@@ -241,15 +241,13 @@ export default function HowVerdictEngineWorksPost() {
               <li>Cash-on-cash ≥ <strong>10%</strong></li>
             </ul>
             <p>
-              The $400/month cash flow floor is the equivalent of about
-              $5,000/year in real money — enough to absorb a vacancy or
-              minor capex without going underwater. 1.25 DSCR is the
-              standard non-QM and DSCR lender threshold; clearing it
-              means the deal would qualify for normal investor
-              financing. 10% CoC is well above typical alternatives
-              (savings, indexed equity ETFs, money-market funds), which
-              is the bar a real-estate deal should beat to justify the
-              illiquidity.
+              These are TrueCap score-band heuristics. A $400 monthly
+              scenario creates more modeled room than $100, but it does not
+              guarantee coverage of a vacancy or capital event. A 1.25 modeled
+              DSCR does not establish lender DSCR, eligibility, pricing, or
+              approval. Compare the modeled CoC with current, like-for-like
+              alternatives using the same horizon, liquidity, risk, taxes, and
+              transaction costs.
             </p>
 
             <h3>Solid</h3>
@@ -263,11 +261,10 @@ export default function HowVerdictEngineWorksPost() {
               Solid is &quot;works on paper, no cushion.&quot; A $100/month
               cash flow buffer disappears the moment vacancy ticks up
               or a major appliance breaks. 1.15 DSCR is above breakeven
-              but below the 1.25 most lenders want, which is a common
-              spot for deals where you bring extra down to qualify. 6%
-              CoC is roughly in line with the long-run S&amp;P 500
-              dividend yield plus a modest premium — fair compensation
-              for the operational work of being a landlord.
+              but leaves limited modeled coverage. It does not show whether a
+              lender would accept its own calculated ratio or whether more
+              equity changes eligibility. The 6% CoC band is an internal
+              classification, not a required return or market comparison.
             </p>
 
             <h3>Mixed</h3>
@@ -381,14 +378,14 @@ export default function HowVerdictEngineWorksPost() {
                 applicable for an all-cash purchase.&quot;
               </li>
               <li>
-                <strong>≥ 1.25</strong> — &quot;clears the typical ≥
-                1.25 lender threshold; the property comfortably covers
-                debt service.&quot;
+                <strong>≥ 1.25</strong> — &quot;clears TrueCap&apos;s Strong
+                modeled-coverage band; this is not a lender calculation or
+                approval.&quot;
               </li>
               <li>
-                <strong>1.0 - 1.25</strong> — &quot;in tight territory
-                (above breakeven but below the ≥ 1.25 most lenders
-                require for investment loans).&quot;
+                <strong>1.0 - 1.25</strong> — &quot;modeled income covers
+                modeled debt service with less room; verify the proposed
+                lender&apos;s formula and complete requirements.&quot;
               </li>
               <li>
                 <strong>&lt; 1.0</strong> — &quot;below 1.0 —

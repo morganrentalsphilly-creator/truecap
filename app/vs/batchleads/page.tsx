@@ -59,8 +59,8 @@ const MATRIX: Row[] = [
   { feature: "Skip tracing", truecap: "No", batchleads: "Yes — owner phone + email", winner: "batchleads" },
   { feature: "Direct mail + SMS campaigns", truecap: "No", batchleads: "Yes — built-in outreach", winner: "batchleads" },
   { feature: "Stacked / multi-criteria lists", truecap: "No", batchleads: "Yes — overlay multiple filters", winner: "batchleads" },
-  { feature: "Free tier", truecap: "Yes — full underwriting math", batchleads: "Trial; paid from ~$99/mo (as of 2026)", winner: "truecap" },
-  { feature: "Pricing (entry tier)", truecap: "Free; Pro $29.99/mo", batchleads: "Standard ~$99/mo + per-skiptrace fees", winner: "truecap" },
+  { feature: "Free tier", truecap: "Yes — core cap rate, CoC, DSCR, and cash flow", batchleads: "Trial; paid from ~$99/mo (as of 2026)", winner: "truecap" },
+  { feature: "Pricing (entry tier)", truecap: "Free core; paid Pro — see live pricing", batchleads: "Standard ~$99/mo + per-skiptrace fees", winner: "truecap" },
   { feature: "Shareable read-only deal link", truecap: "Free — read-only public link; Pro adds co-branding", batchleads: "Internal-only", winner: "truecap" },
 ];
 
@@ -266,7 +266,8 @@ export default function VsBatchleadsPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
             Pro unlocks projections, sensitivity, illustrative tax impact, modeled exit comparisons,
-            MAO, PDF exports, and co-branded share links.
+            MAO, and co-branded share links. Pro includes PDFs, and a one-time
+            PDF option is available; see live pricing for current terms.
             No card to start.
           </p>
           <div className="flex flex-wrap gap-3">

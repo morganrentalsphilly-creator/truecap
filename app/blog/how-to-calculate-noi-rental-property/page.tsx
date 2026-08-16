@@ -89,7 +89,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "What is a good NOI?",
-    a: "NOI is an absolute dollar figure, not a ratio, so there is no universal 'good' number — a $14,000 NOI is excellent on a $180,000 house and thin on a $400,000 one. Judge it by dividing into price (that is the cap rate) and by the operating expense ratio: well-run small rentals typically run 35–50% of effective gross income in operating expenses, so an NOI that implies a 15% expense ratio is almost certainly missing line items.",
+    a: "NOI is an absolute dollar figure, not a ratio, so there is no universal 'good' number. Relate it to price through cap rate and review the operating-expense ratio, but do not use a generic expense band as proof. An unusually low modeled expense ratio is a prompt to verify taxes, insurance, utilities, management, maintenance, vacancy, and capital needs against property evidence.",
   },
   {
     q: "How does NOI set the value of a small apartment building?",
@@ -395,8 +395,7 @@ export default function BlogPost() {
           <h2 className="text-2xl sm:text-3xl">Three ways people get NOI wrong</h2>
           <ul>
             <li><strong>Starting from gross rent, not EGI.</strong> Skipping vacancy and collection loss inflates NOI before the first expense is even subtracted.</li>
-            <li><strong>Omitting the boring lines.</strong> Management (especially when self-managing), reserves, and owner-paid utilities are the usual casualties. A pro forma showing a 25–30% expense ratio on a small rental is almost always missing something — the honest band is{" "}
-              <Link href="/blog/rental-property-pro-forma-explained" className="text-primary font-semibold hover:underline">35–50% of EGI</Link>.</li>
+            <li><strong>Omitting the boring lines.</strong> Management (especially when self-managing), reserves, and owner-paid utilities are common omissions. An unusually low expense ratio is a prompt to verify every property-specific line; no generic band proves the pro forma is complete.</li>
             <li><strong>Sneaking the mortgage in.</strong> The most common beginner error. The moment debt service is inside &ldquo;NOI,&rdquo; you have computed something else — and your cap rate and any value derived from it are garbage.</li>
           </ul>
 

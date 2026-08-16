@@ -2,7 +2,8 @@
  * /vs/buildium — competitor comparison landing page.
  *
  * Target queries: "buildium alternative", "buildium vs", "buildium pricing", "buildium review", "property management software".
- * Buildium is enterprise property management software — professional property managers managing 50-5000 units. Different audience than TrueCap (we serve solo investors), but DIY landlords scaling up to 10-30 units consider it.
+ * Buildium is post-purchase property-management software for landlords and
+ * property managers. TrueCap covers pre-purchase underwriting.
  */
 
 import type { Metadata } from "next";
@@ -26,7 +27,7 @@ import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema"
 export const metadata: Metadata = {
   title: "Buildium vs TrueCap (2026): PM vs Deal Analysis",
   description:
-    "Buildium is enterprise property management for 50+ unit operators. TrueCap is the pre-purchase underwrite for solo investors. Honest comparison.",
+    "Buildium manages rentals after purchase. TrueCap underwrites potential acquisitions before purchase. Compare the distinct workflows.",
   keywords: [
     "buildium alternative",
     "buildium vs",
@@ -38,7 +39,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Buildium vs TrueCap (2026): PM vs Deal Analysis",
     description:
-      "Buildium is for professional property managers (50+ units). TrueCap is for solo investors underwriting deals. Different audiences.",
+      "Buildium manages rentals after purchase. TrueCap underwrites potential acquisitions before purchase.",
     url: "/vs/buildium",
     type: "website",
     images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap vs Buildium" }],
@@ -50,20 +51,20 @@ type Verdict = "truecap" | "buildium" | "tie";
 type Row = { feature: string; truecap: string; buildium: string; winner: Verdict };
 
 const MATRIX: Row[] = [
-  { feature: "Primary audience", truecap: "Solo / small-portfolio investors (1-30 doors)", buildium: "Professional property managers (50+ units)", winner: "tie" },
+  { feature: "Primary audience", truecap: "Solo / small-portfolio investors (1-30 doors)", buildium: "Landlords and professional property managers", winner: "tie" },
   { feature: "Lifecycle stage", truecap: "Pre-purchase — underwrite the deal", buildium: "Post-purchase — operate at scale", winner: "tie" },
   { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", buildium: "Not modeled", winner: "truecap" },
   { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", buildium: "Not modeled", winner: "truecap" },
   { feature: "Illustrative tax impact", truecap: "Pro — depreciation + interest + modeled after-tax CF", buildium: "Not modeled", winner: "truecap" },
   { feature: "Deal score + verdict", truecap: "Free — 0-100 score + plain-English verdict", buildium: "Not applicable", winner: "truecap" },
   { feature: "Address auto-fill (rent/rate/tax)", truecap: "Yes — HUD + FRED + state property tax", buildium: "Not applicable", winner: "truecap" },
-  { feature: "Tenant + lease management at scale", truecap: "No", buildium: "Yes — 50-5000 unit support", winner: "buildium" },
+  { feature: "Tenant + lease management", truecap: "No", buildium: "Yes — portfolio operations", winner: "buildium" },
   { feature: "Accounting (GL, P&L, balance sheet)", truecap: "No", buildium: "Yes — full PM-grade accounting", winner: "buildium" },
   { feature: "Owner reports + portals", truecap: "No", buildium: "Yes — multi-owner statement generation", winner: "buildium" },
   { feature: "Maintenance vendor management", truecap: "No", buildium: "Yes — full work-order workflow", winner: "buildium" },
-  { feature: "Free tier", truecap: "Yes — full underwriting math", buildium: "No — trial only", winner: "truecap" },
-  { feature: "Pricing (entry tier)", truecap: "Free; Pro $29.99/mo", buildium: "Essential ~$55/mo + per-unit fees (as of 2026)", winner: "truecap" },
-  { feature: "Built for landlords scaling beyond 30 units", truecap: "No — TrueCap targets 1-30 doors", buildium: "Yes — built for property management companies", winner: "buildium" },
+  { feature: "Free tier", truecap: "Yes — core cap rate, CoC, DSCR, and cash flow", buildium: "No permanent free tier; 14-day trial", winner: "truecap" },
+  { feature: "Pricing (entry tier)", truecap: "Free core; paid Pro — see live pricing", buildium: "Paid Essential, Growth, and Premium tiers — see live pricing", winner: "truecap" },
+  { feature: "Post-purchase portfolio operations", truecap: "No", buildium: "Yes — landlord and property-manager workflows", winner: "buildium" },
   { feature: "Shareable read-only deal link", truecap: "Free — read-only public link; Pro adds co-branding", buildium: "Internal portal only", winner: "truecap" },
 ];
 
@@ -75,8 +76,8 @@ export default function VsBuildiumPage() {
     name: "Buildium vs TrueCap (2026): PM vs Deal Analysis",
     url: `${siteUrl}/vs/buildium`,
     description:
-      "Buildium is enterprise property management for 50+ unit operators. TrueCap is the pre-purchase underwrite for solo investors. Honest comparison.",
-    dateModified: "2026-06-07",
+      "Buildium manages rentals after purchase. TrueCap underwrites potential acquisitions before purchase.",
+    dateModified: "2026-08-16",
     publisher: { "@id": `${siteUrl}/#organization` },
   };
 
@@ -105,10 +106,10 @@ export default function VsBuildiumPage() {
           </div>
           <h1 className="text-3xl sm:text-5xl font-extrabold text-foreground leading-[1.05] tracking-tight text-balance">
             TrueCap vs Buildium:{" "}
-            <span className="text-primary">solo investor underwriting vs enterprise property management</span>
+            <span className="text-primary">pre-purchase underwriting vs property management</span>
           </h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
-            Buildium is enterprise property management software — built for professional property managers and large landlords running 50-5000 units. TrueCap is a pre-purchase underwriting calculator built for solo and small-portfolio investors. Different audiences, different jobs. Most TrueCap users are not the target Buildium customer.
+            Buildium is property management software for landlords and professional managers operating rentals after purchase. TrueCap is a pre-purchase underwriting calculator for evaluating acquisitions. Different stages, different jobs.
           </p>
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
             <ScrollToFormButton
@@ -152,7 +153,7 @@ export default function VsBuildiumPage() {
                 Use Buildium when
               </p>
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
-                <li>You manage 50+ units (yours or other people&apos;s).</li>
+                <li>You need tenant, lease, accounting, and maintenance operations.</li>
                 <li>You run a property management company and need owner portals.</li>
                 <li>You need PM-grade accounting (GL, balance sheet, owner statements).</li>
                 <li>You&apos;re scaling from a few rentals into a PM business.</li>
@@ -213,8 +214,8 @@ export default function VsBuildiumPage() {
           <p className="mt-3 text-[11px] text-muted-foreground">
             Buildium details based on publicly available product info as of 2026.
             See{" "}
-            <a href="https://buildium.com" target="_blank" rel="noopener" className="underline">
-              buildium.com
+            <a href="https://www.buildium.com/pricing/" target="_blank" rel="noopener" className="underline">
+              Buildium&apos;s official pricing page
             </a>{" "}
             for their current state.
           </p>
@@ -230,10 +231,10 @@ export default function VsBuildiumPage() {
               <strong>Underwrite + buy 1-10 properties with TrueCap.</strong> Free or Pro tier — solo investor workflow.
             </li>
             <li>
-              <strong>Scale to 30+ doors and feel the ops strain.</strong> Spreadsheets break, manual rent collection slows down, you need owner reporting if you have partners.
+              <strong>Identify the operational bottleneck.</strong> Tenant, lease, accounting, maintenance, or owner-reporting needs may justify a dedicated platform.
             </li>
             <li>
-              <strong>Add a PM-grade ops platform (Buildium / AppFolio).</strong> This is where Buildium starts to earn its keep. For most TrueCap users, this is years 3-5 of investing.
+              <strong>Compare current operations platforms.</strong> Review pricing, implementation, accounting, payments, support, and portfolio fit before choosing Buildium or an alternative.
             </li>
             <li>
               <strong>Keep TrueCap for new acquisitions.</strong> Buildium doesn&apos;t underwrite. You&apos;ll still want TrueCap (or DealCheck) for the next property — they&apos;re complementary.
@@ -266,7 +267,8 @@ export default function VsBuildiumPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
             Pro unlocks projections, sensitivity, illustrative tax impact, modeled exit comparisons,
-            MAO, PDF exports, and co-branded share links.
+            MAO, and co-branded share links. Pro includes PDFs, and a one-time
+            PDF option is available; see live pricing for current terms.
             No card to start.
           </p>
           <div className="flex flex-wrap gap-3">
@@ -307,21 +309,21 @@ const BUILDIUM_FAQ: FaqItem[] = [
     question: "Is TrueCap a Buildium alternative?",
     answer: (
       <>
-        No — different audiences and different jobs. Buildium is enterprise property management for professional managers running 50-5000 units. TrueCap is pre-purchase underwriting for solo investors with 1-30 doors. Most TrueCap users are too small for Buildium.
+        Not directly. Buildium manages rentals after purchase; TrueCap underwrites potential acquisitions before purchase. A landlord or manager may use both at different stages.
       </>
     ),
     plainTextAnswer:
-      "No — different audiences. Buildium is enterprise PM for 50-5000 units. TrueCap is pre-purchase underwriting for 1-30 doors. Most TrueCap users are too small for Buildium.",
+      "Not directly. Buildium manages rentals after purchase; TrueCap underwrites potential acquisitions before purchase. A landlord or manager may use both.",
   },
   {
     question: "Is Buildium worth it for a small landlord?",
     answer: (
       <>
-        Usually no. Buildium starts around $55/month plus per-unit fees, and the feature set (owner portals, vendor management, multi-property accounting) assumes you&apos;re running a PM business or managing dozens of units. Small landlords (1-10 doors) are better served by TurboTenant, Avail, or Baselane — and TrueCap upstream.
+        It depends on the operational workflow. Buildium publishes Essential, Growth, and Premium paid tiers plus a 14-day trial. Compare the current rate and included accounting, tenant, maintenance, and owner features with the alternatives that fit your portfolio.
       </>
     ),
     plainTextAnswer:
-      "Usually no. Buildium starts ~$55/mo + per-unit fees and assumes PM-business workflows. Small landlords (1-10 doors) are better with TurboTenant, Avail, or Baselane — and TrueCap upstream.",
+      "It depends on the operational workflow. Buildium publishes Essential, Growth, and Premium paid tiers plus a 14-day trial. Compare current pricing and included features with alternatives that fit your portfolio.",
   },
   {
     question: "Does Buildium underwrite deals?",
@@ -337,21 +339,21 @@ const BUILDIUM_FAQ: FaqItem[] = [
     question: "When should I upgrade from solo tools to Buildium?",
     answer: (
       <>
-        Typical signal: you&apos;re at 30+ units, you have partners or LPs who need owner reporting, and your ops are taking 10+ hours/week. Below that threshold, the price + complexity of Buildium aren&apos;t worth it.
+        Consider a dedicated platform when tenant, lease, accounting, maintenance, payment, or owner-reporting work justifies its cost and implementation effort. There is no universal unit-count threshold; compare current plans against your actual workflow.
       </>
     ),
     plainTextAnswer:
-      "Typical signal: 30+ units, partners/LPs need owner reporting, ops taking 10+ hours/week. Below that, Buildium&apos;s price + complexity aren&apos;t worth it.",
+      "Consider a dedicated platform when tenant, lease, accounting, maintenance, payment, or owner-reporting work justifies its cost and implementation effort. There is no universal unit-count threshold.",
   },
   {
     question: "Buildium vs AppFolio — which one?",
     answer: (
       <>
-        AppFolio is generally more enterprise (1000+ unit operators), Buildium spans mid-market (50-1000). For most landlords scaling past 30 units, Buildium is the more practical starting point. Both massively overshoot what TrueCap users need.
+        Compare the vendors&apos; current pricing, minimums, accounting, resident, owner, maintenance, support, and implementation features. AppFolio&apos;s Core plan currently states a 50-unit minimum; Buildium publishes tiered entry pricing without that comparison-page assumption.
       </>
     ),
     plainTextAnswer:
-      "AppFolio is more enterprise (1000+ units), Buildium spans mid-market (50-1000). For landlords scaling past 30 units, Buildium is the more practical start. Both overshoot TrueCap users.",
+      "Compare current pricing, minimums, accounting, resident, owner, maintenance, support, and implementation features. AppFolio Core currently states a 50-unit minimum; Buildium publishes tiered entry pricing.",
   },
 ];
 

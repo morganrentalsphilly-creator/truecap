@@ -60,7 +60,7 @@ const MATRIX: Row[] = [
   { feature: "Per-property P&L", truecap: "Forward projection per deal", quickbooksrental: "Class / Location tracking (manual)", winner: "tie" },
   { feature: "Schedule E export", truecap: "Forward tax projection", quickbooksrental: "Yes — but requires Schedule E mapping", winner: "tie" },
   { feature: "Rental rent collection", truecap: "No", quickbooksrental: "Yes — invoicing + ACH (Online only)", winner: "quickbooksrental" },
-  { feature: "Free tier", truecap: "Yes — full underwriting math", quickbooksrental: "Trial only; from ~$15-90/mo (as of 2026)", winner: "truecap" },
+  { feature: "Free tier", truecap: "Yes — core cap rate, CoC, DSCR, and cash flow", quickbooksrental: "Trial only; from ~$15-90/mo (as of 2026)", winner: "truecap" },
   { feature: "Built specifically for landlords", truecap: "Yes", quickbooksrental: "No — general business accounting", winner: "truecap" },
 ];
 
@@ -263,7 +263,8 @@ export default function VsQuickbooksRentalPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
             Pro unlocks projections, sensitivity, illustrative tax impact, modeled exit comparisons,
-            MAO, PDF exports, and co-branded share links.
+            MAO, and co-branded share links. Pro includes PDFs, and a one-time
+            PDF option is available; see live pricing for current terms.
             No card to start.
           </p>
           <div className="flex flex-wrap gap-3">

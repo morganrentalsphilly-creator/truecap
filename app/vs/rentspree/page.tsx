@@ -60,8 +60,8 @@ const MATRIX: Row[] = [
   { feature: "Online rental applications", truecap: "No", rentspree: "Yes — customizable", winner: "rentspree" },
   { feature: "Eviction records check", truecap: "No", rentspree: "Yes — court records", winner: "rentspree" },
   { feature: "Agent / brokerage workflow", truecap: "Yes — agent persona page exists", rentspree: "Yes — built for realtor-managed rentals", winner: "tie" },
-  { feature: "Free tier", truecap: "Yes — full underwriting math", rentspree: "Yes — tenant pays for screening (typical)", winner: "tie" },
-  { feature: "Pricing model", truecap: "Free; Pro $29.99/mo", rentspree: "Tenant typically pays $30-40 per application", winner: "tie" },
+  { feature: "Free tier", truecap: "Yes — core cap rate, CoC, DSCR, and cash flow", rentspree: "Yes — tenant pays for screening (typical)", winner: "tie" },
+  { feature: "Pricing model", truecap: "Free core; paid Pro — see live pricing", rentspree: "Tenant typically pays $30-40 per application", winner: "tie" },
   { feature: "Shareable read-only analysis", truecap: "Free — read-only public link; Pro adds co-branding", rentspree: "N/A", winner: "truecap" },
 ];
 
@@ -267,7 +267,8 @@ export default function VsRentspreePage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
             Pro unlocks projections, sensitivity, illustrative tax impact, modeled exit comparisons,
-            MAO, PDF exports, and co-branded share links.
+            MAO, and co-branded share links. Pro includes PDFs, and a one-time
+            PDF option is available; see live pricing for current terms.
             No card to start.
           </p>
           <div className="flex flex-wrap gap-3">

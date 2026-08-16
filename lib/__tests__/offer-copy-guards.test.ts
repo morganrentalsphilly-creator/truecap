@@ -77,6 +77,42 @@ describe("free and paid offer boundary", () => {
 });
 
 describe("offer trust language", () => {
+  it("keeps Agent Pro roster copy aligned with the enforced 100-client cap", () => {
+    const agentPage = read("app/for-agents/page.tsx");
+    const actions = read("app/actions/agent-clients.ts");
+
+    expect(agentPage).toContain("up to 100 clients");
+    expect(agentPage).not.toMatch(/no software-enforced roster cap/i);
+    expect(actions).toContain("const MAX_CLIENTS = 100");
+  });
+
+  it("discloses every live data processor and optional third-party client data", () => {
+    const privacy = read("app/privacy/page.tsx");
+    for (const disclosure of [
+      "Agent workspace data",
+      "PostHog",
+      "Sentry",
+      "Resend",
+      "RentCast",
+      "Google Places",
+      "full property address",
+      "account ID and email",
+    ]) {
+      expect(privacy).toContain(disclosure);
+    }
+    expect(privacy).not.toContain("Collected via Vercel Analytics and Google Analytics.");
+    expect(privacy).not.toContain("we send only the property address / county");
+  });
+
+  it("warns that read-only deal links are bearer snapshots without expiry", () => {
+    const share = read("components/investcalc/share-link-button.tsx");
+    const privacy = read("app/privacy/page.tsx");
+    expect(share).toContain("Anyone with the link can view the snapshot");
+    expect(share).toContain("Links do not currently expire or revoke");
+    expect(privacy).toMatch(/Anyone with\s+the link can view it without an account/);
+    expect(privacy).toMatch(/does not\s+expire or revoke/);
+  });
+
   it("keeps auth and homepage promises benchmark-based and non-absolute", () => {
     const auth = read("components/auth/auth-shell.tsx");
     const logo = read("components/brand/app-logo.tsx");

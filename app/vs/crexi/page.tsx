@@ -61,7 +61,7 @@ const MATRIX: Row[] = [
   { feature: "Tenant info (CRE)", truecap: "Not applicable", crexi: "Yes — public-record tenant data", winner: "crexi" },
   { feature: "Illustrative tax impact (residential)", truecap: "Pro — depreciation + interest + modeled after-tax CF", crexi: "Not the focus", winner: "truecap" },
   { feature: "Free tier", truecap: "Yes — full residential underwriting", crexi: "Free to browse listings; paid for intelligence", winner: "tie" },
-  { feature: "Pricing (entry tier)", truecap: "Free; Pro $29.99/mo", crexi: "Free for buyers/browsers; Intelligence ~$100+/mo", winner: "tie" },
+  { feature: "Pricing (entry tier)", truecap: "Free core; paid Pro — see live pricing", crexi: "Free for buyers/browsers; Intelligence ~$100+/mo", winner: "tie" },
 ];
 
 export default function VsCrexiPage() {
@@ -260,7 +260,8 @@ export default function VsCrexiPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
             Pro unlocks projections, sensitivity, illustrative tax impact, modeled exit comparisons,
-            MAO, PDF exports, and co-branded share links.
+            MAO, and co-branded share links. Pro includes PDFs, and a one-time
+            PDF option is available; see live pricing for current terms.
             No card to start.
           </p>
           <div className="flex flex-wrap gap-3">

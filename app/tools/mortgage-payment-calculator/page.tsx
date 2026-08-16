@@ -49,15 +49,15 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "How do investment property rates compare to primary residence rates?",
-    a: "Investment property loans typically run 0.5-1.5% higher than owner-occupant rates. Lenders price in the higher default risk (investors default more often than people losing their primary home). Plan for ~7-8% range when underwriting today.",
+    a: "Pricing varies by lender, market, occupancy, loan type, points, credit, leverage, property, and lock date. Use a current investment-property quote for the proposed file and stress a higher-rate case; a generic spread or today's range is not a quote.",
   },
   {
     q: "What's a typical down payment for investment property?",
-    a: "20-25% for conventional financing on a 1-4 unit investment. 25-30% for 5+ unit multifamily. Some DSCR loan products allow as little as 15% down with rate / DSCR penalties. 100% down (all-cash) eliminates the financing component entirely — TrueCap's full analyzer handles that case too.",
+    a: "Required equity varies by occupancy, borrower, units, property, lender, and program. Obtain written terms for the proposed file, including reserves, mortgage insurance, points, and closing costs. An all-cash purchase removes loan debt service but not property, liquidity, or market risk.",
   },
   {
     q: "Should I pay off my mortgage early?",
-    a: "Depends on the spread between your mortgage rate and what you'd earn investing the same cash. At today's investment-property rates (7%+) paying off early often makes sense, especially as part of a debt-paydown wealth strategy. At low rates (3-4%), most investors keep the cheap debt and deploy capital elsewhere.",
+    a: "It depends on the note and prepayment terms, taxes, liquidity, reserves, risk tolerance, and the uncertain after-cost return of alternatives. Compare scenarios rather than using a current-rate threshold or assuming capital deployed elsewhere earns more.",
   },
   {
     q: "How does this differ from a standard mortgage calculator?",

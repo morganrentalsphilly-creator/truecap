@@ -46,6 +46,17 @@ describe("saved-analysis methodology surface contract", () => {
     }
   });
 
+  it("keeps already-generated owner PDFs downloadable after downgrade without allowing regeneration", () => {
+    const action = read("app/actions/saved-analyses.ts");
+    const page = read("components/investcalc/saved-analyses-page-v2.tsx");
+    expect(action).toContain("const canGeneratePdf");
+    expect(action).toContain("if (!canGeneratePdf)");
+    expect(action).toContain('source: "cache"');
+    expect(action).toContain("Creating a new report requires Pro");
+    expect(page).toContain('exportResult.code === "ENTITLEMENT_REQUIRED"');
+    expect(page).not.toMatch(/if \(!canExportPdf\) \{[\s\S]{0,250}router\.push\("\/profile#billing"\);[\s\S]{0,80}return;/);
+  });
+
   it("labels every user-visible legacy saved-deal view as a current-version recomputation", () => {
     for (const path of [
       "app/dashboard/saved-analyses/page.tsx",

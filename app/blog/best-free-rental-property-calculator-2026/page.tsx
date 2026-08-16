@@ -20,9 +20,9 @@ const TITLE = "Best free rental property calculator 2026: 5 tools that actually 
 // window. The on-page <h1> keeps the longer editorial TITLE.
 const SERP_TITLE = "Best free rental property calculator 2026: 5 tools";
 const DESCRIPTION =
-  "Honest 2026 ranking of the 5 best truly-free rental property calculators — TrueCap, BiggerPockets' free reports, Stessa's calculator, Excel templates, and Zillow's mortgage calculator. What each free tier covers and where the gates kick in.";
+  "A criteria-based 2026 ranking of five free rental-analysis options: TrueCap, DealCheck Starter, Stessa's calculator, spreadsheet templates, and Zillow's mortgage calculator.";
 const PUBLISHED_AT = "2026-06-07";
-const MODIFIED_AT = "2026-06-07";
+const MODIFIED_AT = "2026-08-16";
 const READING_TIME_MIN = 9;
 
 export const metadata: Metadata = {
@@ -52,57 +52,60 @@ const TOOLS = [
   {
     rank: 1,
     name: "TrueCap",
-    bestFor: "Best truly free tier — unlimited analyses, no signup",
+    bestFor: "Unlimited no-signup core rental analysis",
     url: "/",
-    pricing: "Free; Pro $29.99/mo",
+    pricing: "Free core analyzer; paid Pro plans on the live pricing page",
     freeCovers: [
       "Cap rate, CoC, DSCR, NCF, monthly cash flow",
       "Address auto-fill (HUD rent benchmark + FRED owner-occupied rate benchmark + state property-tax estimate)",
       "Plain-English verdict (Strong / Solid / Mixed / Marginal / Negative)",
       "Unlimited analyses, no signup, no cap",
-      "Save up to 5 deals + dashboard access"
+      "Save up to 5 deals + dashboard access",
+      "One sale and rent comps lookup",
+      "Read-only share links"
     ],
     freeGates: [
       "10-year projection (Pro)",
       "Illustrative tax impact + sensitivity (Pro)",
       "MAO solver, BRRRR & fix-flip analyzer (Pro)",
-      "Editing + unlimited saves + compare (Pro)",
-      "PDF export + co-branded share links (Pro)"
+      "Editing, unlimited saves, and comparison of up to 4 deals (Pro)",
+      "Additional comps lookups: Pro includes 50 per month",
+      "PDF export: one-time purchase or Pro"
     ],
-    pickIf: "You want a free tier that actually does the underwriting work without gating cap rate or DSCR.",
+    pickIf: "You want unlimited core rental metrics without paying or creating an account.",
   },
   {
     rank: 2,
-    name: "BiggerPockets Free Calculator",
-    bestFor: "Best if you'll eventually pay for BP Pro anyway",
-    url: "/vs/biggerpockets-calculator",
-    pricing: "Free with limits; full access via BP Pro ~$390/yr",
+    name: "DealCheck Starter",
+    bestFor: "Free multi-strategy calculators and professional reports",
+    url: "/vs/dealcheck",
+    pricing: "Starter is free; paid Plus and Pro plans raise usage limits",
     freeCovers: [
-      "A few free reports per month",
-      "Standard cap rate + cash flow + CoC",
-      "BRRRR-style underwriting on free tier"
+      "Rental, BRRRR, Airbnb, and flip calculators",
+      "Professional interactive and PDF reports",
+      "Up to 15 saved properties"
     ],
     freeGates: [
-      "Most outputs after the monthly report cap",
-      "10-year projection (Pro)",
-      "Tax + advanced features (Pro)"
+      "Published limits on photos, comps, and templates",
+      "Paid plans raise or remove usage limits",
+      "Account required"
     ],
-    pickIf: "You're going to subscribe to BiggerPockets Pro for the community anyway and don't mind the calculator's monthly cap.",
+    pickIf: "You want several strategy calculators and professional reports on a free account.",
   },
   {
     rank: 3,
     name: "Stessa's Free Calculator",
-    bestFor: "Free cap rate widget bundled with free accounting",
+    bestFor: "Accounting-first workflow with a free cap-rate tool",
     url: "/vs/stessa",
-    pricing: "Free; Stessa Pro ~$12/mo",
+    pricing: "Essentials is free; Manage and Pro are paid — verify current terms",
     freeCovers: [
       "Basic cap rate calculator widget",
       "Free bookkeeping for unlimited properties",
       "Schedule E export"
     ],
     freeGates: [
-      "Stessa isn't really an underwriting tool — the calculator widget is rudimentary",
-      "No DSCR or detailed cash flow underwriting"
+      "Primarily designed for owned-property accounting and operations",
+      "Not the same acquisition-underwriting workflow as TrueCap or DealCheck"
     ],
     pickIf: "You already own rentals and want free accounting. Pair with TrueCap free for actual pre-purchase underwriting.",
   },
@@ -117,9 +120,9 @@ const TOOLS = [
       "BiggerPockets and various REI bloggers offer free templates"
     ],
     freeGates: [
-      "You do all the data lookups (rent, rate, tax) manually",
-      "Formula errors compound silently",
-      "Mobile UX is broken at showings"
+      "Most templates require manual rent, rate, and tax lookups",
+      "Formulas and inputs require independent review",
+      "Large spreadsheets can be cumbersome on mobile"
     ],
     pickIf: "You have a battle-tested Excel template and use mobile rarely.",
   },
@@ -142,16 +145,16 @@ const TOOLS = [
 ];
 
 const FAQ_ITEMS = [
-  { q: "Is TrueCap really 100% free for rental analysis?", a: "Yes. TrueCap's free tier covers cap rate, cash-on-cash, DSCR, NCF, monthly cash flow on unlimited analyses with no signup — plus saving up to 5 deals and dashboard access. Address auto-fill (HUD rent benchmark + FRED owner-occupied rate benchmark + state tax estimate) is also free. Pro features (10-year projections, illustrative tax impact, sensitivity, editing + unlimited saves, PDF export) require $29.99/month — but the core underwriting math doesn't." },
-  { q: "Why is BiggerPockets' calculator capped on the free tier?", a: "BiggerPockets monetizes via BiggerPockets Pro (~$390/year), which bundles forums, courses, podcasts, books, and the unlimited calculator. The free tier is a sample. If you're already paying for community access, the calculator is essentially free; if you only want the calculator, TrueCap is the cheaper unrestricted alternative." },
-  { q: "What's the catch with TrueCap's free tier?", a: "The core underwriting is free. Pro adds the repeat-deal workflow and advanced modules: 10-year projection, illustrative tax impact, sensitivity grid, co-branded share links, and PDF export at $29.99/month. Free remains fully functional for cap rate / CoC / DSCR / cash flow on unlimited deals." },
-  { q: "Can I underwrite a BRRRR or flip on a free calculator?", a: "TrueCap's free tier handles the standard cap rate / DSCR / cash flow on any property, including BRRRR and flip candidates. The dedicated BRRRR + Fix-and-Flip analyzers (with cash-out refi math, ARV solver, break-even ARV) are Pro features. BiggerPockets' free tier supports basic BRRRR. Most flippers use a spreadsheet or Pro tier eventually." },
-  { q: "Are there ad-supported free rental calculators?", a: "A few exist (RentRedi's free calculator on their site, BiggerPockets' free reports). They're real but limited. TrueCap doesn't run ads and isn't lead-gen for a CRM — the free tier is the actual product, with Pro features as an upgrade path. That's an unusual model for a free SaaS calculator and it's intentional." },
+  { q: "Is TrueCap really free for core rental analysis?", a: "Yes. TrueCap's free tier covers cap rate, cash-on-cash, DSCR, NCF, and monthly cash flow on unlimited analyses without signup. It also includes editable HUD, FRED, and state-tax screening assumptions, up to 5 saved deals, one comps lookup, and read-only share links. Pro adds advanced workflows and 50 comps lookups per month; PDF export is available as a one-time purchase or with Pro. Check live pricing for current terms." },
+  { q: "Is BiggerPockets' rental property calculator free?", a: "The current official BiggerPockets rental-property-calculator page presents calculator results as a Pro feature. Access, trial, and membership terms can change, so verify both the official calculator page and Pro page before choosing it as a free option." },
+  { q: "What's the catch with TrueCap's free tier?", a: "The core underwriting metrics, unlimited analyses, one comps lookup, and read-only share links are free. Pro adds 10-year projections, illustrative tax impact, sensitivity, editing, unlimited saves, comparison tools, 50 comps lookups per month, and dedicated BRRRR and flip analyzers. PDF export is available through a one-time purchase or Pro." },
+  { q: "Can I underwrite a BRRRR or flip on a free calculator?", a: "DealCheck Starter currently includes its BRRRR and flip calculators plus professional reports, subject to published usage limits. TrueCap's free core analyzer can screen a property's standard rental metrics, while its dedicated BRRRR and Fix-and-Flip analyzers are Pro workflows." },
+  { q: "How should I compare free calculator plans?", a: "Check which metrics, strategy calculators, reports, saved-property limits, comps, and sharing tools are included before entering a deal. Product access and pricing change, so verify current terms on each provider's official page and confirm every starting assumption with property-specific evidence." },
 ];
 
 const DECISION_LINES: Array<{ q: string; a: string }> = [
-  { q: "You want the deepest free tier with no signup or cap.", a: "TrueCap" },
-  { q: "You're already subscribing to BiggerPockets for the community.", a: "BiggerPockets calculator (bundled)" },
+  { q: "You want unlimited core analysis without signup.", a: "TrueCap" },
+  { q: "You want free BRRRR and flip calculators with professional reports.", a: "DealCheck Starter" },
   { q: "You already use Excel and have a template that works.", a: "Excel" },
   { q: "You want free accounting for properties you already own.", a: "Stessa (not for underwriting)" },
   { q: "You only need PITI math.", a: "Zillow's mortgage calculator" },
@@ -230,13 +233,40 @@ export default function BestFreeRentalPropertyCalculator2026Post() {
             <p className="mt-4 text-base sm:text-lg leading-relaxed text-muted-foreground">
               {DESCRIPTION}
             </p>
-            <p className="mt-4 text-xs text-muted-foreground">Published {PUBLISHED_AT}</p>
+            <p className="mt-4 text-xs text-muted-foreground">
+              Published {PUBLISHED_AT} · Updated {MODIFIED_AT}
+            </p>
           </header>
 
           <section className="mb-10 rounded-2xl border border-border bg-card p-5 sm:p-6">
             <h2 className="text-sm font-bold uppercase tracking-widest text-primary mb-3">Quick answer</h2>
-            <p className="text-sm sm:text-base leading-relaxed text-foreground" dangerouslySetInnerHTML={{ __html: `<strong>TrueCap</strong> has the deepest free tier — full cap rate, CoC, DSCR, NCF, monthly cash flow on unlimited analyses with no signup, no analysis cap, plus address auto-fill from HUD + FRED + state tax. <strong>BiggerPockets&apos; free calculator</strong> gives a few reports per month then gates to its \$390/yr Pro tier. <strong>Stessa</strong> has a basic free cap rate calculator but it&apos;s really an accounting tool. <strong>Excel templates</strong> work but require you to do all the lookups yourself. <strong>Zillow&apos;s mortgage calculator</strong> covers PITI math only — not rental underwriting.` }} />
+            <p className="text-sm sm:text-base leading-relaxed text-foreground" dangerouslySetInnerHTML={{ __html: `<strong>TrueCap</strong> offers unlimited core rental analyses without signup, plus one free comps lookup and read-only share links. <strong>DealCheck Starter</strong> includes rental, BRRRR, Airbnb, and flip calculators plus professional interactive and PDF reports, with published usage limits. <strong>Stessa</strong> combines a basic cap-rate tool with an accounting-first product. <strong>Spreadsheet templates</strong> offer flexibility but require formula and input review. <strong>Zillow&apos;s mortgage calculator</strong> covers payment math rather than a full rental underwrite.` }} />
           </section>
+
+          <p className="mb-10 text-sm text-muted-foreground">
+            This ranking uses the published free access available at review
+            time. Verify current terms on the official{" "}
+            <a href="https://dealcheck.io/pricing/" target="_blank" rel="noreferrer" className="text-primary hover:underline">
+              DealCheck pricing
+            </a>
+            ,{" "}
+            <a href="https://www.stessa.com/pricing/" target="_blank" rel="noreferrer" className="text-primary hover:underline">
+              Stessa pricing
+            </a>
+            ,{" "}
+            <a href="https://www.biggerpockets.com/rental-property-calculator" target="_blank" rel="noreferrer" className="text-primary hover:underline">
+              BiggerPockets calculator
+            </a>
+            ,{" "}
+            <a href="https://www.biggerpockets.com/pro" target="_blank" rel="noreferrer" className="text-primary hover:underline">
+              BiggerPockets Pro
+            </a>
+            , and{" "}
+            <a href="https://usetruecap.com/pricing" target="_blank" rel="noreferrer" className="text-primary hover:underline">
+              TrueCap pricing
+            </a>{" "}
+            pages.
+          </p>
 
           <div className="prose prose-neutral max-w-none prose-headings:font-extrabold prose-headings:text-foreground prose-p:text-foreground prose-p:leading-relaxed prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-li:text-foreground prose-li:leading-relaxed">
             <h2>The tools, ranked for free-only investors</h2>

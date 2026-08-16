@@ -56,12 +56,12 @@ const MATRIX: Row[] = [
   { feature: "Illustrative tax impact", truecap: "Pro — depreciation + interest + modeled after-tax CF", privy: "Not modeled", winner: "truecap" },
   { feature: "Address auto-fill (rent/rate/tax)", truecap: "Yes — HUD + FRED + state property tax", privy: "MLS-pulled property data", winner: "truecap" },
   { feature: "Investor-filtered MLS search", truecap: "No", privy: "Yes — cash flow, rehab, motivated", winner: "privy" },
-  { feature: "Comparable sales (comps)", truecap: "No", privy: "Yes — MLS-derived comp set", winner: "privy" },
+  { feature: "Sale + rent comps", truecap: "One free lookup; Pro includes 50 per month; no AVM", privy: "Yes — MLS-derived comp set", winner: "privy" },
   { feature: "Motivated-seller flagging on MLS", truecap: "No", privy: "Yes — DOM + price reduction signals", winner: "privy" },
   { feature: "Off-market lead generation", truecap: "No", privy: "Limited (MLS-focused)", winner: "privy" },
   { feature: "Mortgage + financing math", truecap: "Yes — PITI + DSCR + amortization", privy: "Not included", winner: "truecap" },
-  { feature: "Free tier", truecap: "Yes — full underwriting math", privy: "Trial only; paid from ~$99/mo (as of 2026)", winner: "truecap" },
-  { feature: "Pricing (entry tier)", truecap: "Free; Pro $29.99/mo", privy: "~$99/mo + setup fees", winner: "truecap" },
+  { feature: "Free tier", truecap: "Yes — core cap rate, CoC, DSCR, and cash flow", privy: "Trial only; paid from ~$99/mo (as of 2026)", winner: "truecap" },
+  { feature: "Pricing (entry tier)", truecap: "Free core; paid Pro — see live pricing", privy: "~$99/mo + setup fees", winner: "truecap" },
 ];
 
 export default function VsPrivyPage() {
@@ -266,7 +266,8 @@ export default function VsPrivyPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
             Pro unlocks projections, sensitivity, illustrative tax impact, modeled exit comparisons,
-            MAO, PDF exports, and co-branded share links.
+            MAO, and co-branded share links. Pro includes PDFs, and a one-time
+            PDF option is available; see live pricing for current terms.
             No card to start.
           </p>
           <div className="flex flex-wrap gap-3">

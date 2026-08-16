@@ -69,7 +69,7 @@ const MATRIX: Row[] = [
   { feature: "Online rent collection",               truecap: "No",                                                                      avail: "Yes — ACH (free) and card",                                              winner: "avail" },
   { feature: "Maintenance request workflow",         truecap: "No",                                                                      avail: "Yes — tenant portal",                                                    winner: "avail" },
   { feature: "Pricing (entry tier)",                 truecap: "Free for underwriting",                                                  avail: "Free Unlimited tier + Unlimited Plus ~$7/unit/mo (as of 2026)",          winner: "tie" },
-  { feature: "Free tier covers core job",            truecap: "Yes — full underwriting math",                                            avail: "Yes — listing, basic lease, ACH rent collection",                         winner: "tie" },
+  { feature: "Free tier covers core job",            truecap: "Yes — core cap rate, CoC, DSCR, and cash flow",                                            avail: "Yes — listing, basic lease, ACH rent collection",                         winner: "tie" },
   { feature: "Address auto-fill (rent, rate, tax)",   truecap: "Yes — HUD + FRED + state property tax",                                  avail: "Not applicable",                                                          winner: "truecap" },
   { feature: "Multi-property dashboard",              truecap: "Yes — portfolio rollup of saved deals",                                  avail: "Yes — multi-unit ops dashboard",                                          winner: "tie" },
   { feature: "Owned by Realtor.com",                  truecap: "No (independent)",                                                       avail: "Yes (since 2020)",                                                       winner: "tie" },
@@ -309,9 +309,10 @@ export default function VsAvailPage() {
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly
-            cash flow. Pro unlocks projections, sensitivity, tax
-            strategy, exit scenarios, MAO, PDF exports, and
-            co-branded share links. No card to start.
+            cash flow and plain read-only share links. Pro adds projections,
+            sensitivity, illustrative tax impact, exit scenarios, MAO,
+            co-branding, and included PDFs. A one-time PDF option is also
+            available. No card to start.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link
@@ -388,14 +389,14 @@ const AVAIL_FAQ: FaqItem[] = [
         Avail&apos;s &quot;Unlimited&quot; tier is free for landlords
         and includes listings, lease signing, and ACH rent collection.
         &quot;Unlimited Plus&quot; is ~$7/unit/month (as of 2026) for
-        advanced features. TrueCap is free for the underwriting math;
-        Pro is $29.99/month for projections, sensitivity, illustrative tax impact,
-        co-branded share links, and PDF export. Both have legitimately
-        useful free tiers.
+        advanced features. TrueCap is free for core underwriting math;
+        Pro adds projections, sensitivity, illustrative tax impact,
+        co-branded share links, and included PDFs. A one-time PDF option
+        is also available; see TrueCap&apos;s live pricing page for current terms.
       </>
     ),
     plainTextAnswer:
-      "Avail Unlimited is free (listings, lease signing, ACH rent collection). Avail Unlimited Plus is ~$7/unit/month (2026). TrueCap free covers underwriting; TrueCap Pro is $29.99/month. Both have useful free tiers.",
+      "Avail publishes free and paid operations plans. TrueCap free covers core underwriting, while Pro adds advanced analysis and included PDFs; a one-time PDF option is also available. Check both live pricing pages for current rates and terms.",
   },
   {
     question: "Does Avail's calculator replace TrueCap?",

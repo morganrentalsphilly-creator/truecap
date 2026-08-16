@@ -171,7 +171,7 @@ export default function FiftyPercentRulePost() {
             <li>Halve it: that&apos;s rough NOI</li>
             <li>Subtract annual P&amp;I at your rate: that&apos;s rough cash flow</li>
             <li>If cash flow is positive: the deal MIGHT pencil — open the full underwrite</li>
-            <li>If cash flow is negative or zero AND you&apos;re in a non-high-tax non-high-insurance state: the deal almost certainly does NOT pencil — pass</li>
+            <li>If the rough cash flow is negative or zero: flag the listing for a property-specific underwrite; do not treat the shortcut as a pass decision</li>
           </ol>
           <p>
             Above all: <strong>do not commit to a deal based on the 50% rule.</strong> Use it to filter out the bottom 80% of listings so you only spend serious time on the top 20%. As a middle step, the free{" "}
@@ -190,7 +190,7 @@ export default function FiftyPercentRulePost() {
             <strong>For high-insurance states (FL, parts of LA + coastal NC/SC):</strong> Pull a binding insurance quote BEFORE you do any other math. That single number is more diagnostic than any rule of thumb.
           </p>
           <p>
-            <strong>For Midwest workforce SFR:</strong> The 50% rule is genuinely accurate. Trust it for triage. For a faster gut-check, see our walkthrough of <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="text-primary font-semibold hover:underline">underwriting a rental in 60 seconds</Link>.
+            <strong>For Midwest workforce SFR:</strong> The 50% rule may be a useful triage assumption when it is calibrated against that property&apos;s actual tax, insurance, utilities, condition, management, vacancy, and capital needs. For a faster gut-check, see our walkthrough of <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="text-primary font-semibold hover:underline">underwriting a rental in 60 seconds</Link>.
           </p>
           <p>
             <strong>For appreciation-leaning coastal Tier-1 (CA, parts of WA, NYC):</strong> No rule of thumb works because expense ratios are dominated by individual property quirks (rent control, parking, parking, parking, special assessments). Always do the full underwrite.
@@ -198,7 +198,7 @@ export default function FiftyPercentRulePost() {
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">The bottom line</h2>
           <p>
-            The 50% rule was calibrated for a specific era + property type — pre-2010, Midwest SFR, mid-tax states, conventional financing, long-term tenants. It still works for that exact archetype. For everything else, use it as a directional sanity check, not a verdict.
+            The 50% rule is commonly associated with older workforce-rental heuristics, but its accuracy is property-specific. Use it only as a directional sanity check and replace it with verified expense lines before making a decision.
           </p>
           <p>
             The investors who use it best treat it as a &quot;10-second listing filter&quot; while keeping the actual decision math separate. The investors who lose money on it use it as the actual underwriting calculation in markets where it&apos;s wrong by 15-25 percentage points.

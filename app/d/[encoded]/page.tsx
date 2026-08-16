@@ -32,7 +32,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: title,
     description:
       "A rental property analysis shared with you via TrueCap — transparent rental math, no spreadsheet required.",
-    alternates: { canonical: `/d/${encoded}` },
+    // Do not repeat the encoded analysis snapshot in a canonical tag. The
+    // request path is intentionally shareable, but metadata should not create
+    // another copy for crawlers, browser extensions, or downstream tooling.
     robots: { index: false, follow: false }, // share links shouldn't be indexed
     openGraph: {
       title: `${title} — Rental property analysis`,

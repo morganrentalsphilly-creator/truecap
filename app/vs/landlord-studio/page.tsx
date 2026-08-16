@@ -60,8 +60,8 @@ const MATRIX: Row[] = [
   { feature: "Schedule E P&L reports", truecap: "Forward projection only", landlordstudio: "Yes — actuals export", winner: "landlordstudio" },
   { feature: "Rent tracking", truecap: "No", landlordstudio: "Yes — payment logging (no ACH collection itself)", winner: "landlordstudio" },
   { feature: "Mobile app", truecap: "PWA", landlordstudio: "Native iOS + Android", winner: "tie" },
-  { feature: "Free tier", truecap: "Yes — full underwriting math", landlordstudio: "Yes — limited properties", winner: "tie" },
-  { feature: "Pricing (paid tier)", truecap: "Pro $29.99/mo for projections + tax + co-branded share + PDF", landlordstudio: "Starter ~$12/mo, Premium ~$30/mo (as of 2026)", winner: "tie" },
+  { feature: "Free tier", truecap: "Yes — core cap rate, CoC, DSCR, and cash flow", landlordstudio: "Yes — limited properties", winner: "tie" },
+  { feature: "Pricing (paid tier)", truecap: "Paid Pro; see live pricing for current rates", landlordstudio: "Starter ~$12/mo, Premium ~$30/mo (as of 2026)", winner: "tie" },
 ];
 
 export default function VsLandlordStudioPage() {
@@ -105,7 +105,7 @@ export default function VsLandlordStudioPage() {
             <span className="text-primary">underwrite before, track receipts after</span>
           </h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
-            Landlord Studio is mobile-first accounting + expense tracking for small landlords — snap a receipt, categorize it, generate a Schedule E. TrueCap is the pre-purchase underwriting calculator that decides whether to buy the property in the first place. Different stages, complementary tools.
+            Landlord Studio is mobile-first accounting + expense tracking for small landlords — snap a receipt, categorize it, generate a Schedule E. TrueCap is a pre-purchase underwriting calculator that helps screen an acquisition. Different stages, potentially complementary tools.
           </p>
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
             <ScrollToFormButton
@@ -263,7 +263,8 @@ export default function VsLandlordStudioPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
             Pro unlocks projections, sensitivity, illustrative tax impact, modeled exit comparisons,
-            MAO, PDF exports, and co-branded share links.
+            MAO, and co-branded share links. Pro includes PDFs, and a one-time
+            PDF option is available; see live pricing for current terms.
             No card to start.
           </p>
           <div className="flex flex-wrap gap-3">

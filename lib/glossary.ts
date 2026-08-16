@@ -206,7 +206,7 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     slug: "tax-savings",
     category: "metric",
     definition:
-      "Estimated monthly year-1 tax effect at your marginal rate: deductions (operating expenses, depreciation, and optionally mortgage interest) netted against tax owed on the rental income. Positive means the deal shelters income; negative means it owes tax.",
+      "Illustrative monthly year-1 tax effect at the entered marginal rate: modeled deductions netted against modeled taxable rental income. A positive or negative result is a scenario output, not a determination of the taxpayer's liability or current ability to use a loss.",
     whyItMatters:
       "Depreciation can materially change modeled taxable rental income. TrueCap's figure is deliberately simplified: it applies the entered marginal rate and does not decide whether a loss is currently usable under passive-activity, at-risk, or material-participation rules. The estimate also runs both ways, so positive taxable rental income can produce a negative net tax impact.",
     related: ["afterTaxCF", "depreciationYears", "buildingValue"],
@@ -293,7 +293,7 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     definition:
       "Buying a 2–4 unit property, living in one unit, and renting out the others.",
     whyItMatters:
-      "The advantage is financing, not rent: owner-occupied conventional loans go down to 3–5% down versus 20–25% for an investment property, so the barrier to entry drops dramatically. After 12 months you can move out and it becomes a normal rental.",
+      "Eligible owner-occupants may have lower-down-payment financing options than investors. Down payment, occupancy certification, unit-count eligibility, reserves, mortgage insurance, and any later change in use depend on the specific loan documents and program; a 12-month scenario does not itself authorize conversion to a rental.",
     related: ["downPayment", "cashFlow", "brrrr"],
     toolUrl: "/tools/house-hacking-calculator",
     postUrl: "/blog/house-hacking-explained",
@@ -316,12 +316,12 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     also: ["Loan to Value"],
     category: "financing",
     definition:
-      "Loan amount divided by property value. Most cash-out refi lenders cap LTV at 75% for investment properties.",
+      "Loan amount divided by the lender's eligible value basis. Investment-property cash-out limits vary by lender, program, property, borrower, seasoning, and appraisal.",
     formula: "LTV = Loan Amount ÷ Property Value",
     example:
       "A $300,000 loan on a $400,000 property = 75% LTV.",
     whyItMatters:
-      "LTV is the lender's risk gauge. Lower LTV = more equity buffer = lower lender risk = better rate for you. Above 75% LTV on investment properties, your options narrow to higher-rate non-QM lenders.",
+      "LTV is one lender risk input. Lower leverage generally creates more equity buffer, but rate, approval, eligible value, and maximum LTV remain program- and borrower-specific.",
     related: ["downPayment", "dscr", "brrrr"],
   },
   downPayment: {
@@ -329,11 +329,11 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     slug: "down-payment",
     category: "financing",
     definition:
-      "Share of the purchase price you pay in cash. Investment-property lenders typically require 20-25% down for conventional loans.",
+      "Share of the purchase price you pay in cash. Required investment-property down payment varies by occupancy, borrower, property, lender, and loan program.",
     example:
       "On a $400,000 property at 25% down, you bring $100,000 to closing (before closing costs).",
     whyItMatters:
-      "Down payment is the inverse of LTV and the biggest driver of capital efficiency. Lower down = higher leverage = more deals = more risk. The sweet spot for most investors is 20-25% down on stable markets, 25-30% on higher-risk plays.",
+      "Down payment is the inverse of LTV and a major driver of leverage and liquidity. Compare written loan quotes and stress-test reserves instead of treating a percentage range as a universal sweet spot.",
     related: ["ltv", "coc", "closingCosts"],
   },
   interestRate: {
@@ -341,9 +341,9 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     slug: "interest-rate",
     category: "financing",
     definition:
-      "Annual mortgage rate. Investment-property rates run ~0.5-1% above primary-residence rates because lenders price the higher default risk.",
+      "Annual mortgage rate. Pricing varies by occupancy, program, borrower, property, leverage, points, lender, and lock date.",
     whyItMatters:
-      "Interest rate has more impact on monthly cash flow than almost any other variable. A 1% rate change on a $300k loan = ~$170/mo of cash flow difference. Shop 3+ lenders on every deal — the spread between best and worst quote is usually 30-50bp.",
+      "Rate materially changes payment and modeled cash flow. Compare current written quotes on the same terms and stress a higher-rate case; a generic market spread is not a quote or approval.",
     related: ["loanTerm", "dscr", "cashFlow"],
     toolUrl: "/tools/mortgage-payment-calculator",
   },
@@ -545,9 +545,9 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     also: ["FMR"],
     category: "fundamental",
     definition:
-      "HUD's annual estimate of typical rent for a given county and bedroom count, used to set Section 8 voucher payment standards.",
+      "HUD's annual estimate of 40th-percentile gross rent for a standard-quality unit in an FMR area and bedroom count. FMRs are used in several housing programs, including as an input to Housing Choice Voucher payment standards.",
     whyItMatters:
-      "FMR is a useful \u201cis this asking rent realistic?\u201d floor — actual market rent in most areas runs slightly above it. TrueCap auto-fills FMR from the HUD API when you enter an address.",
+      "FMR is an area benchmark, not an address-level market comp, rent floor, payment standard, approved contract rent, or collection promise. TrueCap can prefill it from HUD, but you should replace it with current comparable leases and property-specific program figures where applicable.",
     related: ["vacancy", "rentGrowth"],
   },
   principalPaydown: {
@@ -566,9 +566,9 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     slug: "rent-growth",
     category: "projection",
     definition:
-      "Annual rent increase assumption. National average ~3%; high-growth markets 4-6%. Used in 10-year projection.",
+      "Editable annual rent-change assumption used in the 10-year projection; it is not a forecast or permitted increase.",
     whyItMatters:
-      "Rent growth compounds powerfully in long-hold strategies. A property with 4% rent growth vs 2% over 10 years has 22% higher year-10 rent. This is where the appreciation-tier markets win on IRR even with weaker initial cash flow.",
+      "Different assumptions compound into materially different year-10 results. Use current property and submarket evidence, verify applicable rent rules, and run flat and downside cases.",
     related: ["irr", "appreciation"],
   },
   expenseGrowth: {
@@ -576,9 +576,9 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     slug: "expense-growth",
     category: "projection",
     definition:
-      "Annual operating-expense inflation. National average ~2-3%; tracks CPI more closely than rent.",
+      "Editable annual operating-expense change assumption used in the projection.",
     whyItMatters:
-      "Expense growth almost always lags rent growth in healthy markets — that's how NOI compounds. But in inflation-shock periods (2021-2023), expenses (especially insurance + property tax) outpaced rent, eating NOI. Don't assume expense growth < rent growth blindly.",
+      "Taxes, insurance, utilities, labor, repairs, and other expenses can move differently from rent and from one another. Use current evidence and model expense growth that equals or exceeds rent growth as a downside case.",
     related: ["rentGrowth", "noi"],
   },
   appreciation: {
@@ -586,9 +586,9 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     slug: "appreciation-rate",
     category: "projection",
     definition:
-      "Annual property value increase. Historical US average ~3.5%; varies dramatically by market.",
+      "Editable annual property-value change assumption; it is not an appraisal or forecast.",
     whyItMatters:
-      "Appreciation compounds enormously over 10+ years and is the lever wealth-builders pull. A 5% appreciation property over 10 years builds 63% more equity than a 2% one. The trade-off: appreciation markets usually have weaker current cash flow.",
+      "Small assumed rates compound into large modeled exit differences. Build the base case from current local evidence and include flat and declining-value scenarios; no market tier guarantees appreciation.",
     related: ["irr", "rentGrowth"],
   },
   sellingCost: {

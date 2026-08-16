@@ -1079,13 +1079,7 @@ export async function getSavedAnalysisPdfExportAction(
   }
 
   const entitlements = await getEntitlementsForUser(supabase, user.id);
-  if (!hasPlanFeature(entitlements, "pdf_export")) {
-    return {
-      ok: false,
-      code: "ENTITLEMENT_REQUIRED",
-      message: "PDF export is not available for your current plan.",
-    };
-  }
+  const canGeneratePdf = hasPlanFeature(entitlements, "pdf_export");
 
   const savedDealId = id.trim();
   const { data, error } = await supabase
@@ -1120,6 +1114,51 @@ export async function getSavedAnalysisPdfExportAction(
     .eq("id", savedDealId)
     .eq("user_id", user.id)
     .is("deleted_at", null);
+
+  // Cancellation/downgrade does not erase a report the owner already
+  // generated. That is the read-only access promised in the Terms: Free can
+  // download the stored artifact, but cannot regenerate it from changed
+  // inputs, branding, methodology, or report templates.
+  if (!canGeneratePdf) {
+    if (!cachedPdfUrl) {
+      return {
+        ok: false,
+        code: "ENTITLEMENT_REQUIRED",
+        message: "No saved PDF exists for this deal. Creating a new report requires Pro.",
+      };
+    }
+
+    const objectPath = resolveAnalysisPdfObjectPath(cachedPdfUrl, user.id);
+    if (!objectPath) {
+      Sentry.captureMessage("retained-pdf path invalid", {
+        level: "warning",
+        tags: { feature: "retained-pdf-access" },
+        extra: { savedDealId },
+      });
+      return {
+        ok: false,
+        code: "SERVER_ERROR",
+        message: "Your saved PDF couldn't be opened. Contact hello@usetruecap.com and we'll help recover it.",
+      };
+    }
+
+    const { data: signed, error: signError } = await supabase.storage
+      .from(ANALYSIS_PDF_BUCKET)
+      .createSignedUrl(objectPath, ANALYSIS_PDF_SIGNED_URL_TTL_SECONDS);
+    if (signed?.signedUrl) {
+      return { ok: true, source: "cache", pdfUrl: signed.signedUrl };
+    }
+    Sentry.captureMessage("retained-pdf sign failed", {
+      level: "warning",
+      tags: { feature: "retained-pdf-access" },
+      extra: { savedDealId, message: signError?.message },
+    });
+    return {
+      ok: false,
+      code: "SERVER_ERROR",
+      message: "Your saved PDF couldn't be opened. Contact hello@usetruecap.com and we'll help recover it.",
+    };
+  }
 
   // Cache check — only serve cached PDF if:
   //   1) it exists,

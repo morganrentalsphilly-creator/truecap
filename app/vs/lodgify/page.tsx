@@ -54,14 +54,14 @@ const MATRIX: Row[] = [
   { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, editable rent input", lodgify: "Not modeled", winner: "truecap" },
   { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", lodgify: "Not modeled", winner: "truecap" },
   { feature: "Illustrative tax impact", truecap: "Pro — straight-line depreciation + interest + modeled after-tax CF", lodgify: "Not modeled", winner: "truecap" },
-  { feature: "Address auto-fill (rent/rate/tax)", truecap: "Yes — HUD + FRED + state property tax", lodgify: "Not applicable", winner: "truecap" },
+  { feature: "Address auto-fill (rent/rate/tax)", truecap: "Editable HUD, FRED, and state effective-rate starting estimates", lodgify: "Not applicable", winner: "truecap" },
   { feature: "Direct-booking website builder", truecap: "No", lodgify: "Yes — branded site builder", winner: "lodgify" },
   { feature: "Channel manager (Airbnb, Vrbo, Booking)", truecap: "No", lodgify: "Yes — unified inbox + calendar", winner: "lodgify" },
   { feature: "Guest messaging", truecap: "No", lodgify: "Yes — automated messages", winner: "lodgify" },
   { feature: "Reservation system", truecap: "No", lodgify: "Yes — built-in calendar + payments", winner: "lodgify" },
   { feature: "Sweet spot", truecap: "1-30 doors, solo investor underwriting", lodgify: "1-10 STRs, solo operator", winner: "tie" },
-  { feature: "Free tier", truecap: "Yes — full underwriting math", lodgify: "Trial only; paid from ~$13/mo (as of 2026)", winner: "truecap" },
-  { feature: "Pricing (entry tier)", truecap: "Free; Pro $29.99/mo", lodgify: "~$13/mo Starter + per-booking fees on lower tiers", winner: "truecap" },
+  { feature: "Free tier", truecap: "Yes — core cap rate, CoC, DSCR, and cash flow", lodgify: "No permanent free tier; time-limited trial — confirm current terms", winner: "truecap" },
+  { feature: "Pricing (entry tier)", truecap: "Free core; paid Pro — see live pricing", lodgify: "Paid Basic, Starter, Professional, and Ultimate plans — see live pricing", winner: "truecap" },
 ];
 
 export default function VsLodgifyPage() {
@@ -105,7 +105,7 @@ export default function VsLodgifyPage() {
             <span className="text-primary">underwrite the STR, then run it</span>
           </h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
-            Lodgify is short-term rental software targeted at solo and small-operator STR hosts (1-10 properties) — direct-booking website, channel manager across Airbnb / Vrbo / Booking, reservation calendar. Cheaper and more accessible than Hostfully or Hostaway. TrueCap is the pre-purchase underwriting calculator that decides whether to buy the property as an STR in the first place. Different stages, complementary tools.
+            Lodgify is short-term rental software for hosts and property managers — direct-booking website, channel manager across Airbnb / Vrbo / Booking, and reservation tools. TrueCap is a pre-purchase underwriting calculator that helps investors screen an STR acquisition. Different stages, potentially complementary tools.
           </p>
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
             <ScrollToFormButton
@@ -149,10 +149,10 @@ export default function VsLodgifyPage() {
                 Use Lodgify when
               </p>
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
-                <li>You own 1-10 STRs and need a website + channel manager.</li>
-                <li>You want direct bookings to avoid Airbnb&apos;s fees.</li>
-                <li>You want simpler pricing than Hostfully / Hostaway / Guesty.</li>
-                <li>You&apos;re a hands-on solo STR host without a property-management business.</li>
+                <li>You operate STRs and need a website + channel manager.</li>
+                <li>You want to add a direct-booking channel.</li>
+                <li>You have compared its current plan, payment, and channel costs.</li>
+                <li>Its hosting workflow fits your team and listing count.</li>
               </ul>
             </div>
           </div>
@@ -208,12 +208,11 @@ export default function VsLodgifyPage() {
             </table>
           </div>
           <p className="mt-3 text-[11px] text-muted-foreground">
-            Lodgify details based on publicly available product info as of 2026.
-            See{" "}
-            <a href="https://lodgify.com" target="_blank" rel="noopener" className="underline">
-              lodgify.com
+            Lodgify plan and trial details can change. See{" "}
+            <a href="https://www.lodgify.com/pricing/" target="_blank" rel="noopener" className="underline">
+              Lodgify&apos;s official pricing page
             </a>{" "}
-            for their current state.
+            for current terms.
           </p>
         </section>
 
@@ -227,13 +226,13 @@ export default function VsLodgifyPage() {
               <strong>Find an STR-friendly property.</strong> MLS, off-market, or existing STR for sale.
             </li>
             <li>
-              <strong>Pull an STR revenue projection.</strong> AirDNA Rentalizer report ($20-40).
+              <strong>Build an STR revenue range.</strong> Use current market evidence or a third-party STR data source, then verify the assumptions.
             </li>
             <li>
               <strong>Underwrite in TrueCap.</strong> Plug AirDNA&apos;s monthly revenue into the rent field. Run cap rate, DSCR, cash flow.
             </li>
             <li>
-              <strong>If the deal pencils, close.</strong> Take ownership.
+              <strong>Continue due diligence.</strong> Verify local STR rules, insurance, financing, taxes, expenses, and revenue evidence before deciding.
             </li>
             <li>
               <strong>Set up Lodgify.</strong> Build your direct-booking site, connect Airbnb / Vrbo / Booking, configure your calendar.
@@ -266,7 +265,8 @@ export default function VsLodgifyPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
             Pro unlocks projections, sensitivity, illustrative tax impact, modeled exit comparisons,
-            MAO, PDF exports, and co-branded share links.
+            MAO, and co-branded share links. Pro includes PDFs, and a one-time
+            PDF option is available; see live pricing for current terms.
             No card to start.
           </p>
           <div className="flex flex-wrap gap-3">
@@ -317,21 +317,21 @@ const LODGIFY_FAQ: FaqItem[] = [
     question: "Lodgify vs Hostaway — which one?",
     answer: (
       <>
-        Lodgify is more accessible for solo hosts and 1-10 STR operators — simpler UX, cheaper entry point, strong direct-booking website builder. Hostaway is stronger at scale (3-100 STRs) with deeper channel manager and pricing integrations. Solo hosts often start with Lodgify and graduate to Hostaway when they cross ~10 properties.
+        Compare each vendor&apos;s current quote, listing requirements, channel coverage, direct-booking tools, automation, integrations, support, and implementation terms. The better fit depends on the portfolio and workflow; neither has a universal size cutoff.
       </>
     ),
     plainTextAnswer:
-      "Lodgify is more accessible for solo / 1-10 STR hosts. Hostaway is stronger at 3-100 scale with deeper channel + pricing integrations. Solo hosts often start with Lodgify; graduate to Hostaway at ~10 properties.",
+      "Compare current quotes, listing requirements, channel coverage, direct-booking tools, automation, integrations, support, and implementation terms. The better fit depends on the portfolio and workflow; neither has a universal size cutoff.",
   },
   {
     question: "Does Lodgify have a free tier?",
     answer: (
       <>
-        No — paid only with a trial. Pricing starts around $13/month on the Starter tier with per-booking fees, scaling up to flat-fee plans on higher tiers. For very small operators with 1-3 STRs, the Starter tier with per-booking fees is often the cheapest entry point.
+        Lodgify does not currently publish a permanent free tier. It publishes a time-limited trial and paid Basic, Starter, Professional, and Ultimate plans. Check its official pricing page for the current rate, trial, property-count rules, and included features.
       </>
     ),
     plainTextAnswer:
-      "No — paid only with trial. ~$13/mo Starter + per-booking fees; flat-fee plans on higher tiers. For 1-3 STRs, Starter is often cheapest entry.",
+      "Lodgify does not currently publish a permanent free tier. It publishes a time-limited trial and paid Basic, Starter, Professional, and Ultimate plans. Check its official pricing page for current terms.",
   },
   {
     question: "Can TrueCap model STR revenue?",
@@ -347,11 +347,11 @@ const LODGIFY_FAQ: FaqItem[] = [
     question: "Should I get a Lodgify direct-booking site?",
     answer: (
       <>
-        If you&apos;re scaling beyond 1-2 STRs and want to capture repeat guests without paying Airbnb&apos;s 15-20% service fees on each booking, yes — a direct-booking site pays for itself fast. For your first STR while you&apos;re learning the business, the Airbnb/Vrbo distribution is probably enough.
+        It can be useful when you can generate direct demand and the net economics work for your portfolio. Compare Lodgify&apos;s current subscription, payment, marketing, support, and operating costs with the channel mix you actually use. <a href="https://www.airbnb.com/help/article/1857" target="_blank" rel="noopener" className="underline">Airbnb publishes multiple service-fee structures</a>, so use your account&apos;s current terms instead of assuming one percentage or guaranteed payback.
       </>
     ),
     plainTextAnswer:
-      "If you&apos;re scaling past 1-2 STRs and want repeat guests without Airbnb&apos;s 15-20% fees: yes — pays back fast. First STR while learning: Airbnb/Vrbo distribution is probably enough.",
+      "A direct-booking site can be useful when you can generate demand and its net economics work for your portfolio. Compare current subscription, payment, marketing, support, and operating costs with your actual channel terms; do not assume one fee percentage or guaranteed payback.",
   },
 ];
 

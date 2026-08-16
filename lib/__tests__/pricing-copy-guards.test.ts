@@ -68,6 +68,12 @@ describe("trial copy — mirrors the checkout repeat-trial guard", () => {
     expect(TRIAL_LABEL).toBe(`${TRIAL_DAYS}-day free trial`);
   });
 
+  it("checkout has no hidden trial-length override that can contradict public copy", () => {
+    const billing = read("../../app/actions/billing.ts");
+    expect(billing).toContain("const proTrialDays = TRIAL_DAYS");
+    expect(billing).not.toContain("process.env.PRO_TRIAL_DAYS");
+  });
+
   it("/pricing conditions its trial promises on the guard mirror", () => {
     // The server page computes prior-subscription history…
     const page = read("../../app/pricing/page.tsx");

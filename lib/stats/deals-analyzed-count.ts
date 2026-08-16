@@ -6,9 +6,10 @@ import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 /**
  * Aggregate count of saved analyses across all users.
  *
- * Used as a real-data social-proof signal on marketing surfaces
- * ("X deals analyzed this week"). Returns ONLY an aggregate count —
- * no user IDs, no addresses, no anything PII-adjacent.
+ * Used as a measured activity signal on marketing surfaces
+ * ("X analyses saved this week"). This counts saved rows, not unique
+ * properties, users, purchases, or transactions. Returns ONLY an aggregate
+ * count — no user IDs, addresses, or anything PII-adjacent.
  *
  * Uses the service-role client to bypass RLS for the count-only query.
  * Safe because:

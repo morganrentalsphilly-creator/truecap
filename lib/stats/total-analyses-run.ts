@@ -9,13 +9,14 @@ import { createAdminSupabaseClient } from "@/lib/supabase/admin";
  *
  * This returns the raw stored figure: it counts every time someone clicks Run
  * analysis (incremented once per run via the increment_analysis_runs RPC — see
- * app/actions/track-analysis-run.ts). The public all-time ticker shows this
- * measured count without adding a presentation baseline.
+ * app/actions/track-analysis-run.ts). The public all-time ticker separately
+ * adds the owner-attested 50,000 historical-run display baseline.
  *
  * Reads a single counter row via the service-role client (RLS-bypassing,
  * count-only — no row data or PII leaves this function). On the static homepage
  * this runs at build / hourly revalidation, never per visitor. The public
- * ticker displays this measured value directly. Returns null on ANY error or
+ * ticker combines this measured value with the historical display baseline.
+ * Returns null on ANY error or
  * if the counter row is absent (e.g. the migration hasn't been applied yet) so
  * the ticker hides gracefully rather than showing a fabricated or stale number.
  */

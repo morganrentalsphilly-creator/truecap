@@ -26,6 +26,7 @@ import { buyBoxHasCriteria, type NamedBuyBox } from "@/lib/buy-box";
 import { normalizeInvestmentFormSnapshot } from "@/lib/investcalc-schema";
 import { computeDealOfferLine } from "@/lib/deal-offer-line";
 import { listBuyBoxesAction } from "@/app/actions/user-buy-boxes";
+import { isFeatureReleased } from "@/lib/entitlements-catalog";
 
 export type AgentClient = {
   id: string;
@@ -240,6 +241,13 @@ export async function getClientPortalLinkAction(
   | { ok: true; url: string }
   | { ok: false; code: "SIGN_IN_REQUIRED" | "ENTITLEMENT_REQUIRED" | "VALIDATION_ERROR" | "NOT_FOUND" | "NOT_CONFIGURED" | "SERVER_ERROR"; message: string }
 > {
+  if (!isFeatureReleased("agent_portal")) {
+    return {
+      ok: false,
+      code: "ENTITLEMENT_REQUIRED",
+      message: "Client portal links aren't available yet.",
+    };
+  }
   const parsed = z.object({ clientId: z.string().uuid() }).safeParse(input);
   if (!parsed.success) return { ok: false, code: "VALIDATION_ERROR", message: "Invalid client." };
 

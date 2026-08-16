@@ -53,7 +53,7 @@ export const metadata: Metadata = {
 const FAQS: { q: string; a: string }[] = [
   {
     q: "What is house hacking?",
-    a: "Buying a 2-4 unit property (or a single-family with rentable rooms or an ADU), living in one unit, and renting the others so tenant rent covers most or all of your housing cost. The structural advantage is financing: owner-occupants qualify for 3.5% down FHA or 5% down conventional loans instead of the 20-25% down investor loans a pure rental requires.",
+    a: "Buying a 2-4 unit property (or a single-family with rentable rooms or an ADU), living in one unit, and renting the others to offset part of your housing cost. Eligible owner-occupants may have lower-down-payment options than an investor purchase, but borrower, property, occupancy, reserve, insurance, and program requirements still determine eligibility and terms.",
   },
   {
     q: "How does this calculator work?",
@@ -61,15 +61,15 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Should a house hack cash flow?",
-    a: "Usually not, and that's fine. The right benchmark is housing savings, not cash flow: compare your effective housing cost to what you'd pay to rent a comparable place. If renting would cost you $2,200/month and the house hack nets you out at $800/month, you're saving $1,400/month even though the property doesn't 'cash flow' the way a pure rental would. Cash flow matters at year 2, when you move out and rent your unit at market.",
+    a: "There is no universal target. Compare the owner-occupant scenario's verified payment, rent, utilities, reserves, maintenance, capital work, and transaction costs with a genuinely comparable rental. Also model any later move-out separately, subject to the loan documents, insurance, local law, lawful unit status, and then-current achievable rent; year 2 is not guaranteed cash flow.",
   },
   {
     q: "What down payment do I need to house hack?",
-    a: "As an owner-occupant, typically 3.5% down with an FHA loan or 5% down with a conventional owner-occupant loan — on 2-4 unit properties, not just single-family. Both require you to live in the property for one year after closing as your primary residence. Compare that with 20-25% down for the same building bought as a pure investment.",
+    a: "FHA can permit a 3.5% minimum down payment for an eligible borrower and property; some conventional owner-occupant programs also offer low-down-payment options. Those figures are not universal quotes or approvals. FHA and conventional occupancy certifications, eligible unit counts, reserves, mortgage insurance, and lender overlays differ, so obtain the proposed program's written terms before underwriting.",
   },
   {
     q: "What is the FHA self-sufficiency test?",
-    a: "For 3-4 unit properties, FHA requires the property's projected rents to cover the entire PITIA payment. Many 3-4 unit FHA deals fail this test in higher-cost markets. Conventional 5% owner-occupant financing has no self-sufficiency test — sometimes 5% down conventional salvages a deal that fails at FHA's 3.5%.",
+    a: "HUD applies a Net Self-Sufficiency Rental Income Eligibility calculation to FHA-financed 3-4 unit properties. The lender performs that calculation using Handbook 4000.1 inputs; TrueCap's projected rents do not establish eligibility. Conventional alternatives use separate program and lender underwriting, so the absence of this FHA calculation does not imply approval.",
   },
   {
     q: "Does my own unit count as income?",
@@ -181,19 +181,17 @@ export default function HouseHackingCalculatorPage() {
             <p>
               House hacking is buying a small multifamily property — a
               duplex, triplex, or fourplex — living in one unit, and
-              renting out the rest so your tenants pay most (or all) of
-              your mortgage. It&apos;s one of the highest-leverage moves in
-              residential real estate for one structural reason:{" "}
-              <strong>owner-occupant financing</strong>. Because you live
-              there, you can buy a 2&ndash;4 unit building with 3.5% down
-              (FHA) or 5% down (conventional owner-occupant) instead of the
-              20&ndash;25% down an investor loan requires for the very same
-              building.
+              renting out the rest to offset part of your housing cost.
+              Eligible borrowers may have lower-down-payment
+              <strong> owner-occupant financing</strong> options, but lawful
+              unit count, occupancy, borrower, reserves, mortgage insurance,
+              property standards, and program terms determine eligibility and
+              cash to close.
             </p>
             <p>
-              The result: a first property, a landlording apprenticeship,
-              and a dramatically lower housing bill — all funded with a
-              fraction of the cash a traditional rental takes. For the
+              Potential results include ownership experience and a modeled
+              housing-cost offset; neither a lower bill nor lower cash to close
+              is guaranteed. For the
               full strategy walkthrough, start with{" "}
               <Link href="/blog/house-hacking-explained" className="text-primary font-semibold hover:underline">house hacking explained</Link>{" "}
               or the persona page for{" "}
@@ -228,16 +226,16 @@ export default function HouseHackingCalculatorPage() {
               cash-on-cash return. A house hack is different: while you
               occupy a unit, the property is producing housing first and
               income second. Judging it as a rental will talk you out of
-              great deals, because most house hacks don&apos;t
-              &ldquo;cash flow&rdquo; in year 1 — and don&apos;t need to.
+              some candidates if you ignore the housing provided, but neither
+              benchmark alone makes a deal good.
             </p>
             <p>
               The comparison that matters is{" "}
               <strong>your effective housing cost vs. renting the
               equivalent</strong>. If a comparable one-bed rents for
-              $2,200/month and your duplex nets you out at $800/month for
-              the same quality of housing, the house hack is saving you
-              $1,400/month — even though a spreadsheet that treats it as a
+              $2,200/month and a verified duplex scenario nets to $800/month for
+              comparable housing, the modeled difference is $1,400/month before
+              transaction costs, reserves, capital work, and risk — even though a spreadsheet that treats it as a
               rental would show negative cash flow. The{" "}
               <Link href="/blog/house-hack-underwriting-guide" className="text-primary font-semibold hover:underline">house-hack underwriting guide</Link>{" "}
               walks through this benchmark in detail, including the
@@ -248,34 +246,31 @@ export default function HouseHackingCalculatorPage() {
               Financing: why 2&ndash;4 units is the sweet spot
             </h2>
             <p>
-              Residential owner-occupant financing covers 1&ndash;4 unit
-              properties. That means the same low-down loans that buy a
-              starter home can buy a fourplex — as long as you live in one
-              of the units for at least a year after closing. The two
-              common routes:
+              Some residential owner-occupant programs cover eligible 1&ndash;4
+              unit properties. Occupancy intent and duration, borrower and
+              property eligibility, unit count, reserves, and all other terms
+              must be confirmed in the program and loan documents. Two routes
+              to ask lenders about are:
             </p>
             <ul>
               <li>
-                <strong>FHA, 3.5% down.</strong>{" "}The most-celebrated house
-                hack vehicle. The catches: mortgage insurance for the life
-                of the loan on most FHA loans (cancellable only by
-                refinancing), stricter property-condition standards at
-                appraisal, and — on 3&ndash;4 unit properties — the{" "}
-                <em>self-sufficiency test</em>: projected rents must cover
-                the entire payment. Many 3&ndash;4 unit FHA deals fail
-                that test in higher-cost markets.
+                <strong>FHA.</strong>{" "}Eligible borrowers may be offered a
+                3.5% minimum down payment. Current mortgage insurance,
+                property-condition, occupancy, reserve, and 3&ndash;4 unit Net
+                Self-Sufficiency Rental Income Eligibility requirements apply;
+                the lender, not this calculator, determines the result.
               </li>
               <li>
-                <strong>Conventional owner-occupant, 5% down.</strong>{" "}No
-                self-sufficiency test, and PMI is cancellable at 80% LTV.
-                Sometimes the extra 1.5% of down payment salvages a deal
-                FHA can&apos;t close.
+                <strong>Conventional owner-occupant.</strong>{" "}Some programs
+                offer low-down-payment options. Eligibility, mortgage insurance,
+                occupancy, reserves, appraisal, unit count, and lender overlays
+                are product-specific; a conventional scenario is not a fallback
+                approval.
               </li>
             </ul>
             <p>
-              The calculator&apos;s default is 5% down at a conventional
-              owner-occupant profile — edit the down payment to 3.5% to
-              model the FHA route. Either way, run the mortgage line items
+              The calculator&apos;s percentages are editable scenario inputs, not
+              program recommendations or quotes. Run the mortgage line items
               through the{" "}
               <Link href="/tools/mortgage-payment-calculator" className="text-primary font-semibold hover:underline">mortgage payment calculator</Link>{" "}
               if you want the P&amp;I, tax, and insurance breakdown on its

@@ -68,9 +68,9 @@ const MATRIX: Row[] = [
   { feature: "Online rental application",          truecap: "No",                                                                     rentredi: "Yes — customizable forms",                                          winner: "rentredi" },
   { feature: "Maintenance request workflow",       truecap: "No",                                                                     rentredi: "Yes — tenant portal + tracker",                                     winner: "rentredi" },
   { feature: "Listing distribution",               truecap: "No",                                                                     rentredi: "Yes — syndicated to Realtor.com, Zillow, etc.",                     winner: "rentredi" },
-  { feature: "Pricing (entry tier)",               truecap: "Free for underwriting",                                                  rentredi: "~$29.99/month or ~$120/year (as of 2026)",                              winner: "truecap" },
-  { feature: "Per-property cost",                  truecap: "Unlimited deals analyzed",                                               rentredi: "Per-unit pricing typically applies above a base",                    winner: "truecap" },
-  { feature: "Free tier exists",                   truecap: "Yes — full underwriting",                                                rentredi: "Trial only",                                                        winner: "truecap" },
+  { feature: "Pricing (entry tier)",               truecap: "Free core; paid Pro — see live pricing",                                 rentredi: "Flat-rate paid plans — see live pricing",                             winner: "truecap" },
+  { feature: "Per-property cost",                  truecap: "Unlimited core analyses; feature limits may apply",                       rentredi: "Unlimited properties and units on published plans",                  winner: "tie" },
+  { feature: "Free tier or trial",                 truecap: "Free core underwriting tier",                                            rentredi: "No free trial; 30-day money-back guarantee",                          winner: "truecap" },
   { feature: "Address auto-fill (rent, rate, tax)", truecap: "Yes — HUD + FRED + state property tax",                                  rentredi: "Not applicable",                                                    winner: "truecap" },
   { feature: "Multi-property dashboard",           truecap: "Yes — portfolio rollup of saved deals",                                  rentredi: "Yes — operations dashboard across all units",                       winner: "tie" },
 ];
@@ -121,7 +121,7 @@ export default function VsRentRediPage() {
             TrueCap is what you use before closing — underwriting the
             deal, modeling cash flow, deciding if the numbers work. They
             don&apos;t replace each other; they cover different halves
-            of the lifecycle. Most landlords end up using both.
+            of the lifecycle. A landlord may use both.
           </p>
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
             <ScrollToFormButton
@@ -234,8 +234,8 @@ export default function VsRentRediPage() {
           <p className="mt-3 text-[11px] text-muted-foreground">
             RentRedi details based on publicly available product info as
             of 2026. See{" "}
-            <a href="https://www.rentredi.com" target="_blank" rel="noopener" className="underline">
-              rentredi.com
+            <a href="https://rentredi.com/pricing" target="_blank" rel="noopener" className="underline">
+              RentRedi&apos;s official pricing page
             </a>{" "}
             for their current state.
           </p>
@@ -299,9 +299,10 @@ export default function VsRentRediPage() {
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly
-            cash flow — enough to underwrite. Pro unlocks co-branded share
-            links, PDF exports, 10-year projections, illustrative tax impact, sensitivity,
-            MAO, and strategy analyzers. No card to start.
+            cash flow and plain read-only share links. Pro adds co-branding,
+            10-year projections, illustrative tax impact, sensitivity, MAO,
+            strategy analyzers, and included PDFs. A one-time PDF option is
+            also available. No card to start.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link
@@ -356,7 +357,7 @@ const RENTREDI_FAQ: FaqItem[] = [
       </>
     ),
     plainTextAnswer:
-      "No — different tools for different stages. RentRedi manages property you own (rent collection, screening, maintenance). TrueCap decides whether to buy (underwriting, cap rate, cash flow, projection). Most landlords use both.",
+      "No — different tools for different stages. RentRedi manages property you own (rent collection, screening, maintenance). TrueCap supports pre-purchase underwriting (cap rate, cash flow, and projections). The tools can be used together.",
   },
   {
     question: "Does TrueCap collect rent like RentRedi?",
@@ -376,15 +377,15 @@ const RENTREDI_FAQ: FaqItem[] = [
     question: "Is RentRedi cheaper than TrueCap?",
     answer: (
       <>
-        TrueCap and RentRedi do different jobs. TrueCap free covers a full underwrite at no
-        cost; TrueCap Pro is $29.99/month. RentRedi is ~$20/month or
-        ~$120/year for landlords (as of 2026). The pricing isn&apos;t
-        really comparable though — you&apos;d pay for both because they
-        do different things.
+        TrueCap and RentRedi do different jobs. TrueCap has a free core
+        underwriting tier and paid Pro options. RentRedi publishes
+        flat-rate paid plans for unlimited properties and units, with
+        a money-back guarantee rather than a free trial. Check both
+        live pricing pages for current rates and terms.
       </>
     ),
     plainTextAnswer:
-      "TrueCap and RentRedi do different jobs. TrueCap free covers underwriting; TrueCap Pro is $29.99/month. RentRedi is ~$20/month or ~$120/year (2026). Pricing isn't really comparable — they do different things.",
+      "TrueCap has a free core underwriting tier and paid Pro options. RentRedi publishes flat-rate paid plans for unlimited properties and units, with a money-back guarantee rather than a free trial. Check both live pricing pages for current rates and terms.",
   },
   {
     question: "What do I need before I use RentRedi?",

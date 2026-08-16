@@ -13,6 +13,7 @@ import { WeeklySummaryToggle } from "@/components/settings/weekly-summary-toggle
 import { FinancingProfilesCard } from "@/components/settings/financing-profiles-card";
 import { getEntitlementsForUser, hasPlanFeature } from "@/lib/entitlements";
 import { isFeatureEnabled } from "@/lib/feature-flags";
+import { isFeatureReleased } from "@/lib/entitlements-catalog";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
@@ -60,9 +61,10 @@ export default async function SettingsPage() {
             client_buy_box entitlement (and while its migration is pending). */}
         <AgentClientsCard />
 
-        {/* Agent Pro white-label embed generator — self-hides for everyone
-            without the embed_whitelabel entitlement. */}
-        <WhitelabelEmbedCard />
+        {/* Provisioning can lead launch readiness. The catalog release gate
+            keeps this runtime entry point dark until the embed license is
+            expressly approved, even if a plan already carries the flag. */}
+        {isFeatureReleased("embed_whitelabel") ? <WhitelabelEmbedCard /> : null}
 
         {/* Deal rate alerts — opt-in for the weekly rate-alert email.
             Self-hides until the schema migration is applied. */}

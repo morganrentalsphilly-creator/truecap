@@ -49,6 +49,7 @@ import { normalizeInvestmentFormSnapshot } from "@/lib/investcalc-schema";
 import { encodeShareLink } from "@/lib/share-link";
 import { signShareAttribution, hashShareValues } from "@/lib/share-attribution";
 import type { DealRecommendation, DealRiskLevel } from "@/lib/deal-score";
+import { isFeatureReleased } from "@/lib/entitlements-catalog";
 
 export const PORTAL_SCOPE = "client-portal.v1";
 
@@ -106,6 +107,7 @@ export async function loadClientPortal(input: {
   agentUserId: string;
   clientId: string;
 }): Promise<ClientPortalData | null> {
+  if (!isFeatureReleased("agent_portal")) return null;
   const { agentUserId, clientId } = input;
   // Both ids are URL-controlled (via the token payload). Reject anything not a
   // UUID before any admin round-trip.

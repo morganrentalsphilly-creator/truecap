@@ -65,11 +65,11 @@ export const metadata: Metadata = {
 const FAQS: { q: string; a: string }[] = [
   {
     q: "Does an LLC save you money on taxes?",
-    a: "Generally no. A single-member LLC is a 'disregarded entity' — the rental income and expenses flow to your personal return on Schedule E exactly as they would without it. A multi-member LLC files a partnership return but still passes income through to the owners. The reason to use an LLC is liability protection and ownership structure, not a lower tax bill.",
+    a: "An LLC classification alone does not create a universal tax saving. Federal and state treatment depends on members, elections, activities, ownership, and jurisdiction. Entity choice also affects administration, liability analysis, financing, and state fees; have qualified legal and tax advisers review the proposed structure.",
   },
   {
     q: "Will my lender call the loan if I move the property into an LLC?",
-    a: "It's a real risk. The Garn-St. Germain Act protects certain transfers — notably into a revocable living trust where you remain a beneficiary — but it does NOT exempt a transfer to an LLC. Moving a mortgaged property into an LLC can trigger the due-on-sale clause, letting the lender demand the full balance. Lenders rarely call performing loans, but the right is theirs. Get written lender consent, or buy in the LLC from the start with a commercial/DSCR loan.",
+    a: "It is a real contractual risk. Federal law lists protected transfers but does not list an ordinary transfer to an LLC; the loan documents and facts control whether a due-on-sale option exists and can be exercised. Payment status does not waive it. Obtain lender consent and transaction-specific legal, title, tax, and insurance advice before transferring or selecting a purchase structure.",
   },
   {
     q: "Do I have to file a BOI report for my rental LLC in 2026?",
@@ -77,7 +77,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Can I get a conventional mortgage in an LLC?",
-    a: "Not the standard owner-occupant conventional loan — Fannie Mae and Freddie Mac lend to individuals, not LLCs. To hold a property in an LLC you typically use a DSCR loan, a commercial/portfolio loan, or a small-bank product, often at a slightly higher rate and with a personal guarantee. That's why buying in the LLC from day one is cleaner than transferring later.",
+    a: "Borrower and vesting eligibility are program-specific. Many owner-occupant programs require an eligible natural-person borrower, while entity products have different terms and may involve guarantees. Obtain current written lender and counsel guidance before choosing the borrower or title holder; do not transfer later based on a generic financing rule.",
   },
   {
     q: "Do I need a separate LLC for each property?",
@@ -151,18 +151,20 @@ export default function BlogPost() {
             question new investors have after their first deal — and most of the
             answers online are either &quot;always yes&quot; (usually from someone
             selling LLC formations) or &quot;don&apos;t bother.&quot; The honest answer is
-            that an LLC does one job well, doesn&apos;t do the job people think it
-            does, and has a financing trap that catches investors who transfer a
-            property they already mortgaged.
+            that an LLC&apos;s effect depends on state law, separateness, contracts,
+            insurance, financing, and the facts of a claim. Transferring a
+            mortgaged property also creates a loan-document issue that must be
+            reviewed before recording a deed.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">What an LLC actually does</h2>
           <p>
-            An LLC is a <strong>liability shield</strong>. If a tenant or visitor
-            is injured and sues over something tied to the property, a properly
-            run LLC keeps the claim contained to the assets inside that LLC —
-            your personal home, savings, and other properties are walled off.
-            That separation is the entire point.
+            An LLC can provide a <strong>liability-separation layer</strong>, but
+            it does not guarantee that a claim stays inside the entity. State
+            law, personal conduct or guarantees, capitalization, formalities,
+            commingling, insurance, and the pleaded claims all matter. Treat the
+            entity as one risk-control layer, not a substitute for counsel or
+            appropriate coverage.
           </p>
           <p>
             What an LLC is <strong>not</strong> is a tax strategy. A single-member
@@ -195,9 +197,9 @@ export default function BlogPost() {
             paper, a transfer the lender can act on.
           </p>
           <p>
-            In practice, lenders rarely call a loan that&apos;s being paid on time —
-            but &quot;rarely&quot; isn&apos;t &quot;never,&quot; and the incentive to call a cheap
-            2020-2021 loan rises as rates rise. The clean ways to handle it:
+            Whether and when a lender enforces the clause is lender- and
+            fact-specific; payment status does not waive the contractual option.
+            Safer review steps include:
           </p>
           <ul>
             <li><strong>Buy in the LLC from day one</strong> with a DSCR or commercial loan — no transfer, no trigger.</li>
@@ -254,7 +256,8 @@ export default function BlogPost() {
             keep it legitimate. A separate bank account, no commingling of
             personal and rental money, the property actually titled in the LLC,
             and proper leases in the LLC&apos;s name. Skip that and a court can
-            &quot;pierce the veil,&quot; erasing the protection you paid for.
+            support a veil-piercing or direct-liability argument, depending on
+            state law and the facts.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">So when is it worth it?</h2>
@@ -268,8 +271,9 @@ export default function BlogPost() {
           <p>
             Think of it as layers: your first line of defense is a solid{" "}
             <Link href="/blog/rental-property-insurance" className="text-primary font-semibold hover:underline">landlord and umbrella insurance</Link>{" "}
-            policy; the LLC is the second layer that protects everything outside
-            that property. Most serious investors end up with both.
+            policy; an LLC may add a second layer whose scope depends on state law
+            and how it is maintained. Confirm the structure and coverage with
+            qualified local professionals.
           </p>
 
           <div className="not-prose">

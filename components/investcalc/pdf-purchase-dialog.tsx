@@ -109,6 +109,26 @@ export function PdfPurchaseDialog({
               )}
             </span>
           </button>
+
+          <div className="rounded-xl border border-border/70 bg-muted/35 px-3 py-2.5 text-[11px] leading-relaxed text-muted-foreground">
+            <p>
+              <strong className="text-foreground">One-deal access:</strong> unlocks one PDF
+              generation for these exact analysis inputs. Complete checkout and return to this
+              same browser tab within 30 days. If delivery fails after redemption, this bound
+              tab can retry for 24 hours. The purchase does not create an account or cloud copy.
+            </p>
+            <p className="mt-1.5">
+              Need help? Email{" "}
+              <a href="mailto:hello@usetruecap.com" className="font-semibold text-primary hover:underline">
+                hello@usetruecap.com
+              </a>
+              . Purchase is subject to our{" "}
+              <Link href="/terms" className="font-semibold text-primary hover:underline">
+                Terms
+              </Link>
+              .
+            </p>
+          </div>
         </div>
 
         <p className="text-[11px] leading-relaxed text-muted-foreground">

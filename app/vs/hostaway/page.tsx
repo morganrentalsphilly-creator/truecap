@@ -61,8 +61,8 @@ const MATRIX: Row[] = [
   { feature: "Dynamic pricing integrations", truecap: "No", hostaway: "Yes — PriceLabs, Wheelhouse, Beyond Pricing", winner: "hostaway" },
   { feature: "Cleaning + vendor scheduling", truecap: "No", hostaway: "Yes — turnover automation", winner: "hostaway" },
   { feature: "Mobile app", truecap: "PWA", hostaway: "Native iOS + Android", winner: "tie" },
-  { feature: "Free tier", truecap: "Yes — full underwriting math", hostaway: "No — paid only (~$10-15 per listing/mo as of 2026)", winner: "truecap" },
-  { feature: "Pricing model", truecap: "Free; Pro $29.99/mo", hostaway: "Per-listing pricing, custom enterprise tiers", winner: "tie" },
+  { feature: "Free tier", truecap: "Yes — core cap rate, CoC, DSCR, and cash flow", hostaway: "No — paid only (~$10-15 per listing/mo as of 2026)", winner: "truecap" },
+  { feature: "Pricing model", truecap: "Free core; paid Pro — see live pricing", hostaway: "Per-listing pricing, custom enterprise tiers", winner: "tie" },
 ];
 
 export default function VsHostawayPage() {
@@ -267,7 +267,8 @@ export default function VsHostawayPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
             Pro unlocks projections, sensitivity, illustrative tax impact, modeled exit comparisons,
-            MAO, PDF exports, and co-branded share links.
+            MAO, and co-branded share links. Pro includes PDFs, and a one-time
+            PDF option is available; see live pricing for current terms.
             No card to start.
           </p>
           <div className="flex flex-wrap gap-3">
@@ -318,11 +319,11 @@ const HOSTAWAY_FAQ: FaqItem[] = [
     question: "Hostaway vs Hostfully vs Guesty — which one?",
     answer: (
       <>
-        Hostaway is a strong mid-market choice (3-100 STRs) with a robust channel manager and pricing integrations. Hostfully favors small-to-mid operators. Guesty leans larger / enterprise (50+ properties). For a solo STR investor with 1-3 properties, all three are likely overkill until you scale. TrueCap is upstream of all three.
+        Compare Hostaway, Hostfully, and Guesty on current channel coverage, automation, accounting, API, support, implementation, and pricing. Guesty currently publishes Lite for 1-3 listings, Pro for 4-199, and Enterprise for 200+. TrueCap remains the pre-purchase underwriting layer.
       </>
     ),
     plainTextAnswer:
-      "Hostaway: mid-market 3-100 STRs, strong channel manager + pricing. Hostfully: small-to-mid. Guesty: 50+ enterprise. Solo STR investors with 1-3 properties: all three are likely overkill. TrueCap is upstream.",
+      "Compare Hostaway, Hostfully, and Guesty on current operations features and pricing. Guesty publishes Lite for 1-3 listings, Pro for 4-199, and Enterprise for 200+. TrueCap is the pre-purchase underwriting layer.",
   },
   {
     question: "Does TrueCap have STR-specific data?",

@@ -49,7 +49,7 @@ export async function getEntitlementsForUser(
   // blip here downgrades a paying Pro user to free for the request, which
   // is indistinguishable from a webhook-sync bug when triaging. A burst of
   // these in Sentry says "DB problem", not "sync problem". IDs only —
-  // never emails/addresses (sendDefaultPii is on).
+  // never emails/addresses (explicit Sentry extras still leave the app).
   if (subError) {
     Sentry.captureException(subError, {
       tags: { feature: "entitlements" },

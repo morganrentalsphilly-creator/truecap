@@ -66,7 +66,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Does the 70% rule work for BRRRR?",
-    a: "Yes, with a twist. BRRRR investors refinance instead of selling, and a cash-out refinance on a single-family investment property typically maxes out at 75% of ARV in 2026. Keeping purchase-plus-rehab at or under 70% of ARV leaves roughly a five-point cushion for closing and holding costs, so a 75% refinance can return most or all of your invested cash. If the finished property won't cash-flow as a rental, though, it isn't a BRRRR — check cap rate and DSCR first.",
+    a: "It can be an initial screen, not a refinance rule. Cash-out LTV, eligible value, seasoning, appraisal treatment, costs, and approval vary by lender, program, borrower, and property. A 75% case is only a planning scenario and does not promise that most or all cash returns; verify the completed rental's income, expenses, coverage, appraisal downside, and written loan terms.",
   },
   {
     q: "Is the 70% rule outdated in 2026?",
@@ -294,12 +294,11 @@ export default function SeventyPercentRuleCalculatorPage() {
 
             <h2 className="text-2xl sm:text-3xl">The 70% rule for BRRRR</h2>
             <p>
-              BRRRR investors don&apos;t sell — they refinance. A cash-out
-              refinance on a single-family investment property typically
-              maxes out at 75% of ARV in 2026, so keeping purchase plus
-              rehab at or under 70% of ARV leaves roughly a five-point
-              cushion for closing and holding costs. Hit that, and the
-              refinance can return most or all of the cash you put in.
+              A BRRRR plan uses a future refinance rather than a sale. Maximum
+              LTV, eligible value, seasoning, appraisal treatment, costs, and
+              approval vary by lender, program, borrower, and property. A 75%
+              refinance case is an editable scenario—not a ceiling, quote, or
+              promise that capital returns.
             </p>
             <p>
               But a BRRRR has a second gate a flip doesn&apos;t: the

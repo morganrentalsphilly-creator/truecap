@@ -17,6 +17,10 @@ const layout = read("app/layout.tsx");
 const sentryClient = read("instrumentation-client.ts");
 const sentryServer = read("sentry.server.config.ts");
 const sentryEdge = read("sentry.edge.config.ts");
+const googleMeasurement = read(
+  "components/analytics/google-measurement.tsx"
+);
+const purchaseDialog = read("components/investcalc/pdf-purchase-dialog.tsx");
 
 describe("one-time PDF security contract", () => {
   it("never puts a Stripe Checkout Session id or claim secret in the return URL", () => {
@@ -68,8 +72,13 @@ describe("one-time PDF security contract", () => {
     expect(bootstrap).toContain("searchParams.delete('pdf_purchase')");
     expect(bootstrap).not.toContain("legacySessionId");
     expect(layout.indexOf("one-time-pdf-return-bootstrap")).toBeLessThan(
-      layout.indexOf("gtm-loader")
+      layout.indexOf("<GoogleMeasurement />")
     );
+    expect(googleMeasurement).toContain('id="gtm-loader"');
+    expect(googleMeasurement).toContain(
+      "shouldKeepThirdPartyTelemetryDisabled"
+    );
+    expect(googleMeasurement).toContain('referrerPolicy="no-referrer"');
     expect(client).toContain('returnState.kind === "legacy"');
     expect(client).toContain("cannot be auto-redeemed safely");
   });
@@ -99,5 +108,16 @@ describe("one-time PDF security contract", () => {
     expect(migration).toContain("pro_credit_applied_at");
     expect(migration).toContain("pro_credit_reference");
     expect(action).toContain('pro_credit_status: "not_configured"');
+  });
+
+  it("discloses the browser-bound one-deal delivery limits before checkout", () => {
+    expect(purchaseDialog).toContain("one PDF");
+    expect(purchaseDialog).toContain("exact analysis inputs");
+    expect(purchaseDialog).toContain("same browser tab within 30 days");
+    expect(purchaseDialog).toContain("retry for 24 hours");
+    expect(purchaseDialog).toContain("does not create an account or cloud copy");
+    expect(purchaseDialog).toContain('href="/terms"');
+    expect(purchaseDialog).toContain("Terms");
+    expect(purchaseDialog).toContain("hello@usetruecap.com");
   });
 });

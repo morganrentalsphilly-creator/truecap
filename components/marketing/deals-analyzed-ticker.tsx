@@ -2,12 +2,12 @@
  * Real-data trust ticker for the homepage.
  *
  * Pulls a measured aggregate count and renders it as a small pill —
- * "237 deals analyzed in the last 7 days" etc. The all-time RUNS source shows
- * only the measured `app_counters.analysis_runs` value; it never adds a
- * presentation baseline.
+ * "237 analyses saved in the last 7 days" etc. The all-time RUNS source adds
+ * the owner-attested 50,000 historical-run baseline to the measured live
+ * `app_counters.analysis_runs` value.
  *
  * IMPORTANT — only renders when the count exceeds a minimum threshold.
- * A low number ("3 deals this week") is anti-social-proof. Better to
+ * A low number ("3 saved analyses this week") is anti-social-proof. Better to
  * show nothing until we cross the threshold than to advertise low
  * volume. Threshold defaults to 25 but is configurable.
  *
@@ -19,7 +19,10 @@
 import { CheckCircle2 } from "lucide-react";
 import { getDealsAnalyzedCount } from "@/lib/stats/deals-analyzed-count";
 import { getTotalAnalysesRunCount } from "@/lib/stats/total-analyses-run";
-import { measuredAnalysisRunsDisplayCount } from "@/lib/stats/analysis-runs-display";
+import {
+  ANALYSIS_RUNS_DISPLAY_BASELINE,
+  withAnalysisRunsDisplayBaseline,
+} from "@/lib/stats/analysis-runs-display";
 
 type Props = {
   /** Time window for the count (default: rolling 7 days). */
@@ -30,14 +33,14 @@ type Props = {
    * Default: 25.
    */
   minimum?: number;
-  /** Override the label suffix (default: 'deals analyzed this week'). */
+  /** Override the label suffix (default: 'analyses saved this week'). */
   labelSuffix?: string;
   /** Append a "+" after the number ("1,500+") to read as "at least". */
   plus?: boolean;
   /**
    * Count source. "saved" = saved_analyses rows (a fraction of usage).
-   * "runs" = measured total Run-analysis invocations from
-   * app_counters.analysis_runs.
+   * "runs" = owner-attested historical baseline plus measured live
+   * Run-analysis invocations from app_counters.analysis_runs.
    */
   source?: "saved" | "runs";
 };
@@ -54,36 +57,46 @@ export async function DealsAnalyzedTicker({
       ? await getTotalAnalysesRunCount()
       : await getDealsAnalyzedCount(window);
 
-  // Hide on error or below-threshold. Caller renders no fallback —
-  // the homepage already has 4 static trust stat tiles, so a missing
-  // dynamic ticker just means one less row; no visible hole. Threshold
-  // checks the REAL count so an errored/empty counter still hides.
-  if (rawCount == null || rawCount < minimum) return null;
+  // Saved-row proof stays fail-closed on an unavailable count. The all-time
+  // runs ticker is different: its owner-attested historical baseline is
+  // independently valid, so it remains visible even if the live counter is
+  // temporarily unavailable.
+  if (rawCount == null && source === "saved") return null;
+  const liveCountAvailable = rawCount != null;
 
-  // Both sources display only their measured value. The pure normalizer keeps
-  // a malformed or fractional run value out of public proof without inventing
-  // an offset.
+  // The all-time runs source always includes the historical baseline. Apply
+  // the visibility threshold to what is actually rendered so a valid live
+  // counter value of zero still shows the attested historical total.
   const displayCount = source === "runs"
-    ? measuredAnalysisRunsDisplayCount(rawCount)
-    : rawCount;
+    ? withAnalysisRunsDisplayBaseline(rawCount ?? 0)
+    : rawCount ?? 0;
+  if (displayCount < minimum) return null;
   const formatted = `${displayCount.toLocaleString("en-US")}${plus ? "+" : ""}`;
   const suffix =
     labelSuffix ??
     (source === "runs"
       ? "analysis runs recorded on TrueCap"
       : window === "all"
-      ? "deals analyzed on TrueCap"
+      ? "analyses saved on TrueCap"
       : window === "30d"
-        ? "deals analyzed in the last 30 days"
-        : "deals analyzed this week");
+        ? "analyses saved in the last 30 days"
+        : "analyses saved this week");
 
   return (
     <div
-      className="mx-auto mt-6 inline-flex w-fit items-center gap-2 rounded-full border border-[var(--brand-green)]/25 bg-[var(--brand-green-light)] px-3.5 py-1.5 text-[12px] font-semibold text-foreground shadow-sm sm:text-[13px]"
-      aria-label={`${formatted} ${suffix}`}
+      className="mx-auto mt-6 inline-flex w-fit max-w-full flex-wrap items-center justify-center gap-x-2 gap-y-0.5 rounded-full border border-[var(--brand-green)]/25 bg-[var(--brand-green-light)] px-3.5 py-1.5 text-[12px] font-semibold text-foreground shadow-sm sm:text-[13px]"
+      aria-label={
+        source === "runs"
+          ? liveCountAvailable
+            ? `${formatted} ${suffix}, including ${ANALYSIS_RUNS_DISPLAY_BASELINE.toLocaleString("en-US")} historical runs attested by TrueCap plus measured live Run analysis clicks`
+            : `${formatted} ${suffix}, representing ${ANALYSIS_RUNS_DISPLAY_BASELINE.toLocaleString("en-US")} historical runs attested by TrueCap; the live measured counter is temporarily unavailable`
+          : `${formatted} ${suffix}`
+      }
       title={
         source === "runs"
-          ? "Measured all-time analysis runs. One run is one recorded analyzer invocation, not a unique property, user, or transaction."
+          ? liveCountAvailable
+            ? "Includes 50,000 historical analysis runs attested by TrueCap plus measured live Run analysis clicks; refreshed hourly. This is not a unique property, user, report, purchase, or transaction count."
+            : "Includes 50,000 historical analysis runs attested by TrueCap. The live measured counter is temporarily unavailable. This is not a unique property, user, report, purchase, or transaction count."
           : undefined
       }
     >
@@ -92,6 +105,13 @@ export async function DealsAnalyzedTicker({
         <strong className="font-extrabold tabular-nums">{formatted}</strong>{" "}
         <span className="text-muted-foreground">{suffix}</span>
       </span>
+      {source === "runs" ? (
+        <span className="text-[10px] font-medium text-muted-foreground/90 sm:text-[11px]">
+          {liveCountAvailable
+            ? "(50,000 historical + live measured)"
+            : "(50,000 historical; live counter unavailable)"}
+        </span>
+      ) : null}
     </div>
   );
 }

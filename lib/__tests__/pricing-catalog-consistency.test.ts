@@ -152,11 +152,30 @@ describe("unshipped entitlements never reach a marketing surface", () => {
     }
   });
 
-  it("keeps white-label embeds out of the offer until the Terms license them", () => {
+  it("keeps unsafe public-link features out of the offer until their controls are ready", () => {
+    expect(FEATURE_CATALOG.agent_portal.shipped).toBe(false);
     expect(FEATURE_CATALOG.embed_whitelabel.shipped).toBe(false);
     const marketedAgentKeys = Object.values(FEATURE_CATALOG)
       .filter((feature) => feature.tiers.includes("agent_pro") && feature.shipped !== false)
       .map((feature) => feature.key);
+    expect(marketedAgentKeys).not.toContain("agent_portal");
     expect(marketedAgentKeys).not.toContain("embed_whitelabel");
+  });
+
+  it("also enforces unshipped status at every public runtime entry point", () => {
+    const releaseGatedSources = [
+      "app/settings/page.tsx",
+      "app/actions/whitelabel-embed.ts",
+      "lib/whitelabel-embed.ts",
+      "app/dashboard/clients/page.tsx",
+      "app/actions/agent-clients.ts",
+      "lib/client-portal.ts",
+    ];
+    for (const path of releaseGatedSources) {
+      expect(readFileSync(join(ROOT, path), "utf8"), path).toContain("isFeatureReleased");
+    }
+
+    const agentsPage = readFileSync(join(ROOT, "app/for-agents/page.tsx"), "utf8");
+    expect(agentsPage).not.toMatch(/client portal|white-label embed/i);
   });
 });

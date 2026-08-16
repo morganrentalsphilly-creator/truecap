@@ -6,21 +6,16 @@ import * as Sentry from "@sentry/nextjs";
 import {
   scrubSentryBreadcrumbUrl,
   scrubSentryEventSensitiveData,
+  scrubSentryRequestCookies,
+  scrubSentryRequestHeaders,
   scrubSentrySpanUrl,
 } from "@/lib/sentry-url-scrubber";
 
 Sentry.init({
   dsn: "https://273531778de80e317ca3e8cc6e1bf4ba@o4511448368480257.ingest.us.sentry.io/4511448369528832",
 
-  // Replay integration is loaded lazily — the Replay package adds
-  // ~45-55 KB gzipped to every page even at 10% session sampling
-  // (the integration JS has to ship before it can decide whether to
-  // record). Deferring to the next idle callback shaves that off the
-  // initial bundle without losing replay-on-error data: errors caught
-  // before Replay loads still report normally, they just don't include
-  // a session recording. By the time a real user encounters one of the
-  // rare errors that does warrant a replay, the integration has long
-  // since loaded in the background.
+  // Keep optional integrations explicit. Replay is deliberately absent; see
+  // the zero sampling policy below.
   integrations: [],
 
   // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
@@ -31,23 +26,26 @@ Sentry.init({
   // signal high while preserving the local-debugging value.
   enableLogs: process.env.NODE_ENV !== "production",
 
-  // Define how likely Replay events are sampled.
-  // This sets the sample rate to be 10%. You may want this to be 100% while
-  // in development and sample at a lower rate in production
-  replaysSessionSampleRate: 0.1,
+  // Replay records rrweb metadata and DOM snapshots outside the normal
+  // beforeSend event boundary. Public share routes carry encoded analyses or
+  // bearer tokens in the path, so Replay remains fully disabled until Sentry
+  // provides a verified route-aware transport scrub.
+  replaysSessionSampleRate: 0,
+  replaysOnErrorSampleRate: 0,
 
-  // Define how likely Replay events are sampled when an error occurs.
-  replaysOnErrorSampleRate: 1.0,
-
-  // Enable sending user PII (Personally Identifiable Information)
+  // Default request/user PII is disabled. The final scrub remains in place
+  // for integrations or explicit contexts that attach data independently.
   // https://docs.sentry.io/platforms/javascript/guides/nextjs/configuration/options/#sendDefaultPii
-  sendDefaultPii: true,
+  sendDefaultPii: false,
 
   // Navigation/fetch/xhr breadcrumbs can carry the raw pre-cleanup URL even
   // when event.request has already been scrubbed. Sanitize at breadcrumb
   // creation and again in beforeSend below for defense in depth.
   beforeBreadcrumb(breadcrumb) {
-    return scrubSentryBreadcrumbUrl(breadcrumb);
+    return scrubSentryBreadcrumbUrl(
+      breadcrumb,
+      typeof window === "undefined" ? undefined : window.location.pathname
+    );
   },
 
   beforeSendSpan(span) {
@@ -58,55 +56,27 @@ Sentry.init({
     return scrubSentryEventSensitiveData(event);
   },
 
-  // PII scrubbing — sendDefaultPii includes cookies in event payloads,
-  // which means the Supabase session cookie (`sb-*-auth-token`) would
-  // be sent to Sentry on every event. If a Sentry data export were
-  // ever compromised, those tokens could be used for account
-  // impersonation. beforeSend hooks the event right before transport
-  // and strips the auth cookie + any Authorization header.
+  // Final privacy boundary for anything an integration or explicit capture
+  // attaches despite default PII collection being disabled.
   beforeSend(event) {
     // Checkout/OAuth capabilities must not survive in an error event's URL or
     // parsed query string. This runs before transport even if React never
     // mounted (for example, an early hydration exception).
     scrubSentryEventSensitiveData(event);
-    // Cookies arrive as the raw `cookie` header string in
-    // event.request.cookies. Scrub anything that looks like a
-    // Supabase auth token.
-    const reqCookies = event.request?.cookies as
-      | Record<string, string>
-      | undefined;
-    if (reqCookies) {
-      for (const key of Object.keys(reqCookies)) {
-        if (/^sb-.*-auth-token/i.test(key)) {
-          reqCookies[key] = "[scrubbed]";
-        }
-      }
-    }
-    // Authorization headers can also carry tokens (CRON_SECRET on
-    // server-side cron requests, etc.). Scrub.
-    const reqHeaders = event.request?.headers as
-      | Record<string, string>
-      | undefined;
-    if (reqHeaders) {
-      for (const key of Object.keys(reqHeaders)) {
-        if (/^authorization$/i.test(key)) {
-          reqHeaders[key] = "[scrubbed]";
-        }
-      }
-    }
-    // sendDefaultPii also attaches the signed-in user's email + IP to
-    // every event. Keep the opaque Supabase user id (needed to count
-    // affected users / dedupe) but strip direct identifiers — error
-    // triage never needs the actual email address.
+    // Scrub parsed cookies, the raw Cookie header, secrets, and referrers.
+    scrubSentryRequestCookies(
+      event.request?.cookies as Record<string, string> | undefined
+    );
+    scrubSentryRequestHeaders(
+      event.request?.headers as Record<string, string> | undefined
+    );
+    // Keep an explicitly attached opaque user id, but strip direct IDs.
     if (event.user) {
       delete event.user.email;
       delete event.user.username;
       delete event.user.ip_address;
     }
-    // sendDefaultPii also populates event.request.data with the request body —
-    // for our forms that's property prices, rents, and financial assumptions.
-    // Error triage never needs the raw body, so scrub it to shrink the PII
-    // blast radius if a Sentry token/export is ever compromised.
+    // Error triage never needs request bodies containing deal inputs.
     if (event.request && "data" in event.request) {
       event.request.data = "[scrubbed]";
     }
@@ -159,37 +129,5 @@ Sentry.init({
     /Non-Error promise rejection captured with value:/,
   ],
 });
-
-// Lazy-load Sentry Replay after first paint so it doesn't compete with
-// LCP / hydration. requestIdleCallback fires once the main thread is
-// quiet (typically <500ms after the page becomes interactive on a
-// fast connection, 1-3s on slow mobile). When `addIntegration` runs,
-// Sentry attaches Replay to the existing client — sampling rules from
-// `Sentry.init` above (10% session, 100% on error) are honored.
-//
-// Safari doesn't support `requestIdleCallback`, so we fall back to a
-// 2-second setTimeout — far less precise but still well after first
-// paint and hydration on any reasonable connection.
-if (typeof window !== "undefined") {
-  const loadReplay = () => {
-    void import("@sentry/nextjs").then(({ replayIntegration }) => {
-      Sentry.addIntegration(replayIntegration());
-    });
-  };
-  // `requestIdleCallback` isn't in TS's lib.dom.d.ts (still considered
-  // experimental even though every modern browser except Safari ships
-  // it), so we resolve it through `globalThis` with a structural cast
-  // and fall back to setTimeout otherwise.
-  const ric = (
-    globalThis as typeof globalThis & {
-      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => void;
-    }
-  ).requestIdleCallback;
-  if (typeof ric === "function") {
-    ric(loadReplay, { timeout: 4000 });
-  } else {
-    setTimeout(loadReplay, 2000);
-  }
-}
 
 export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;

@@ -61,10 +61,10 @@ const MATRIX: Row[] = [
   { feature: "Schedule E P&L reports", truecap: "Forward projection only", baselane: "Yes — actuals from bank feed", winner: "baselane" },
   { feature: "Rent collection (ACH)", truecap: "No", baselane: "Yes — ACH free", winner: "baselane" },
   { feature: "Address auto-fill (rent/rate/tax)", truecap: "Yes — HUD + FRED + state property tax", baselane: "Not applicable", winner: "truecap" },
-  { feature: "Pricing (entry tier)", truecap: "Free for underwriting; Pro $29.99/mo", baselane: "Banking + bookkeeping free; advanced ~$22/mo (as of 2026)", winner: "tie" },
-  { feature: "Free tier", truecap: "Yes — full underwriting math", baselane: "Yes — banking + basic bookkeeping", winner: "tie" },
+  { feature: "Pricing (entry tier)", truecap: "Free core; paid Pro — see live pricing", baselane: "Banking + bookkeeping free; advanced ~$22/mo (as of 2026)", winner: "tie" },
+  { feature: "Free tier", truecap: "Yes — core cap rate, CoC, DSCR, and cash flow", baselane: "Yes — banking + basic bookkeeping", winner: "tie" },
   { feature: "Shareable read-only deal link", truecap: "Free — read-only public link; Pro adds co-branding", baselane: "Not the use case", winner: "truecap" },
-  { feature: "Lender-facing PDF", truecap: "Pro — multi-page projection", baselane: "Schedule E reports for tax filing", winner: "tie" },
+  { feature: "PDF deal report", truecap: "One-time Deal Decision Pack or included with Pro", baselane: "Schedule E reports for tax filing", winner: "tie" },
 ];
 
 export default function VsBaselanePage() {
@@ -108,7 +108,7 @@ export default function VsBaselanePage() {
             <span className="text-primary">underwrite before, bank + book after</span>
           </h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
-            Baselane is a rental-property banking + bookkeeping + rent collection platform — FDIC-insured business banking, auto-categorized expenses, Schedule E reports, ACH rent collection. TrueCap is the pre-purchase underwriting calculator that decides whether to buy the property in the first place. We don&apos;t compete; we cover different halves of the rental lifecycle.
+            Baselane is a rental-property banking + bookkeeping + rent collection platform — FDIC-insured business banking, auto-categorized expenses, Schedule E reports, ACH rent collection. TrueCap is a pre-purchase underwriting calculator that helps screen an acquisition. We don&apos;t compete; we cover different halves of the rental lifecycle.
           </p>
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
             <ScrollToFormButton
@@ -269,7 +269,8 @@ export default function VsBaselanePage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
             Pro unlocks projections, sensitivity, illustrative tax impact, modeled exit comparisons,
-            MAO, PDF exports, and co-branded share links.
+            MAO, and co-branded share links. Pro includes PDFs, and a one-time
+            PDF option is available; see live pricing for current terms.
             No card to start.
           </p>
           <div className="flex flex-wrap gap-3">
@@ -350,11 +351,11 @@ const BASELANE_FAQ: FaqItem[] = [
     question: "Can I share a TrueCap analysis with my CPA via Baselane?",
     answer: (
       <>
-        Not directly — they&apos;re separate tools. But TrueCap generates a read-only share link (free for everyone), and Pro adds a multi-page PDF, that you can email your CPA alongside Baselane&apos;s Schedule E report at tax time. CPAs typically want both: forward projection (TrueCap) and actuals (Baselane).
+        Not directly — they&apos;re separate tools. TrueCap generates a free read-only share link and offers a one-time Deal Decision Pack or PDFs included with Pro. You can provide the review snapshot alongside Baselane&apos;s historical reports, subject to your CPA&apos;s requested documentation.
       </>
     ),
     plainTextAnswer:
-      "Not directly — separate tools. TrueCap generates a free read-only share link, and Pro adds a multi-page PDF, to email your CPA alongside Baselane's Schedule E report. CPAs want both: forward projection (TrueCap) + actuals (Baselane).",
+      "Not directly. TrueCap generates a free read-only share link and offers a one-time Deal Decision Pack or PDFs included with Pro. Provide it alongside Baselane's historical reports when your CPA requests that documentation.",
   },
 ];
 

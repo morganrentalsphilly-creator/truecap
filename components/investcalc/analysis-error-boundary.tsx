@@ -62,8 +62,8 @@ export class AnalysisErrorBoundary extends React.Component<Props, State> {
       componentStack: errorInfo.componentStack,
     });
     // Report to Sentry so a prod crash on the dashboard alerts the team.
-    // PII-safe: sendDefaultPii is on, so deliberately do NOT attach the
-    // AnalysisResult or address — only the React component stack.
+    // PII-safe: deliberately do NOT attach the AnalysisResult or address —
+    // explicit Sentry extras still leave the app even with default PII off.
     Sentry.captureException(error, {
       tags: { feature: "analysis-dashboard" },
       extra: { componentStack: errorInfo.componentStack },

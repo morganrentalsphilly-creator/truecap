@@ -60,8 +60,8 @@ const MATRIX: Row[] = [
   { feature: "Maintenance request workflow", truecap: "No", rentecdirect: "Yes — work order tracking", winner: "rentecdirect" },
   { feature: "Accounting + Schedule E", truecap: "Forward projection only", rentecdirect: "Yes — full GL + 1099 + Schedule E", winner: "rentecdirect" },
   { feature: "Owner portals (for partnerships)", truecap: "No", rentecdirect: "Yes — multi-owner statements", winner: "rentecdirect" },
-  { feature: "Free tier", truecap: "Yes — full underwriting math", rentecdirect: "No — paid only (trial available)", winner: "truecap" },
-  { feature: "Pricing (entry tier)", truecap: "Free; Pro $29.99/mo", rentecdirect: "~$45/mo for landlords, ~$60+/mo for PMs (as of 2026)", winner: "truecap" },
+  { feature: "Free tier", truecap: "Yes — core cap rate, CoC, DSCR, and cash flow", rentecdirect: "No — paid only (trial available)", winner: "truecap" },
+  { feature: "Pricing (entry tier)", truecap: "Free core; paid Pro — see live pricing", rentecdirect: "~$45/mo for landlords, ~$60+/mo for PMs (as of 2026)", winner: "truecap" },
   { feature: "Sweet spot", truecap: "1-30 doors, solo investor", rentecdirect: "5-100 units, small PM or scaling landlord", winner: "tie" },
 ];
 
@@ -264,7 +264,8 @@ export default function VsRentecDirectPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
             Pro unlocks projections, sensitivity, illustrative tax impact, modeled exit comparisons,
-            MAO, PDF exports, and co-branded share links.
+            MAO, and co-branded share links. Pro includes PDFs, and a one-time
+            PDF option is available; see live pricing for current terms.
             No card to start.
           </p>
           <div className="flex flex-wrap gap-3">

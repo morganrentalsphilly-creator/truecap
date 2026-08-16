@@ -192,6 +192,8 @@ export type SavedAnalysisListItem = {
    *  completed deals once the close_date migration is applied + a date is set. */
   closeDate?: string | null;
   ownedEquity?: OwnedEquitySummary | null;
+  /** A previously generated owner-scoped PDF remains downloadable on Free. */
+  hasSavedPdf?: boolean;
 };
 
 /**
@@ -1878,25 +1880,19 @@ export function SavedAnalysesPage({
   };
 
   const handleExportPdfClick = (id: string) => {
-    if (!canExportPdf) {
-      toast({
-        title: "Upgrade required",
-        description: "PDF export is not available for your current plan.",
-        variant: "destructive",
-      });
-      router.push("/profile#billing");
-      return;
-    }
     setExportingPdfDealId(id);
     void (async () => {
       try {
         const exportResult = await getSavedAnalysisPdfExportAction(id);
         if (!exportResult.ok) {
           toast({
-            title: "Could not export PDF",
+            title: exportResult.code === "ENTITLEMENT_REQUIRED" ? "Upgrade required" : "Could not export PDF",
             description: exportResult.message,
             variant: "destructive",
           });
+          if (exportResult.code === "ENTITLEMENT_REQUIRED") {
+            router.push("/profile#billing");
+          }
           return;
         }
 
@@ -2664,8 +2660,8 @@ export function SavedAnalysesPage({
                             ) : (
                               <FileDown className="mr-2 h-3.5 w-3.5" />
                             )}
-                            Export PDF
-                            {!canExportPdf ? (
+                            {!canExportPdf && item.hasSavedPdf ? "Download saved PDF" : "Export PDF"}
+                            {!canExportPdf && !item.hasSavedPdf ? (
                               <span className="ml-auto rounded-full bg-primary/10 px-1.5 py-0 text-[9px] font-bold text-primary">
                                 PRO
                               </span>
@@ -2965,8 +2961,8 @@ export function SavedAnalysesPage({
                             <DropdownMenuContent align="end" className="w-44">
                               <DropdownMenuItem onSelect={() => handleExportPdfClick(item.id)}>
                                 <FileDown className="mr-2 h-3.5 w-3.5" />
-                                Export PDF
-                                {!canExportPdf ? (
+                                {!canExportPdf && item.hasSavedPdf ? "Download saved PDF" : "Export PDF"}
+                                {!canExportPdf && !item.hasSavedPdf ? (
                                   <span className="ml-auto rounded-full bg-primary/10 px-1.5 py-0 text-[9px] font-bold text-primary">
                                     PRO
                                   </span>

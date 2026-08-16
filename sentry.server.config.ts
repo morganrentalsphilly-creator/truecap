@@ -6,6 +6,8 @@ import * as Sentry from "@sentry/nextjs";
 import {
   scrubSentryBreadcrumbUrl,
   scrubSentryEventSensitiveData,
+  scrubSentryRequestCookies,
+  scrubSentryRequestHeaders,
   scrubSentrySpanUrl,
 } from "@/lib/sentry-url-scrubber";
 
@@ -18,9 +20,10 @@ Sentry.init({
   // Enable logs to be sent to Sentry
   enableLogs: true,
 
-  // Enable sending user PII (Personally Identifiable Information)
+  // Default request/user PII is off; beforeSend still scrubs any fields an
+  // integration or explicit capture attaches.
   // https://docs.sentry.io/platforms/javascript/guides/nextjs/configuration/options/#sendDefaultPii
-  sendDefaultPii: true,
+  sendDefaultPii: false,
 
   beforeBreadcrumb(breadcrumb) {
     return scrubSentryBreadcrumbUrl(breadcrumb);
@@ -45,41 +48,20 @@ Sentry.init({
     // bootstrap can clean its address bar. Scrub here so a legacy
     // pdf_purchase=cs_... value can never enter server-side Sentry.
     scrubSentryEventSensitiveData(event);
-    const reqCookies = event.request?.cookies as
-      | Record<string, string>
-      | undefined;
-    if (reqCookies) {
-      for (const key of Object.keys(reqCookies)) {
-        if (/^sb-.*-auth-token/i.test(key)) {
-          reqCookies[key] = "[scrubbed]";
-        }
-      }
-    }
-    const reqHeaders = event.request?.headers as
-      | Record<string, string>
-      | undefined;
-    if (reqHeaders) {
-      for (const key of Object.keys(reqHeaders)) {
-        if (/^(authorization|stripe-signature)$/i.test(key)) {
-          reqHeaders[key] = "[scrubbed]";
-        }
-      }
-    }
-    // sendDefaultPii also attaches the signed-in user's email + IP to
-    // every event. Keep the opaque Supabase user id (needed to count
-    // affected users / dedupe) but strip direct identifiers — error
-    // triage never needs the actual email address.
+    scrubSentryRequestCookies(
+      event.request?.cookies as Record<string, string> | undefined
+    );
+    scrubSentryRequestHeaders(
+      event.request?.headers as Record<string, string> | undefined
+    );
+    // Keep an explicitly attached opaque user id, but strip direct IDs.
     if (event.user) {
       delete event.user.email;
       delete event.user.username;
       delete event.user.ip_address;
     }
-    // sendDefaultPii also populates event.request.data with the request body —
-    // for our forms that's property prices, rents, and financial assumptions.
-    // Error triage never needs the raw body, so scrub it to shrink the PII
-    // blast radius if a Sentry token/export is ever compromised. (The Stripe
-    // webhook is unaffected: constructEvent runs on the raw body before any
-    // capture, and stripe-signature is already scrubbed above.)
+    // Error triage never needs request bodies containing deal inputs. The
+    // Stripe webhook is unaffected: constructEvent runs before any capture.
     if (event.request && "data" in event.request) {
       event.request.data = "[scrubbed]";
     }

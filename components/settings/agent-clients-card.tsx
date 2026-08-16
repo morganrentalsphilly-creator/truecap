@@ -84,8 +84,8 @@ export function AgentClientsCard() {
 
   const remove = (id: string, name: string) => {
     // Same guard as the Clients workspace: an unconfirmed hard delete sitting
-    // beside Edit silently unassigns every deal and kills the portal link.
-    if (!window.confirm(`Remove ${name}? Their portal link stops working and any assigned deals are unassigned. The deals themselves are kept.`)) return;
+    // beside Edit silently unassigns every deal.
+    if (!window.confirm(`Remove ${name}? Any assigned deals will be unassigned. The deals themselves are kept.`)) return;
     startSaving(async () => {
       try {
         const r = await deleteAgentClientAction({ id });

@@ -4,8 +4,8 @@
  * Stessa positioning: free rental property accounting/bookkeeping +
  * portfolio dashboards. They're strongest AFTER you own the property
  * (track income, expenses, generate Schedule E). TrueCap is strongest
- * BEFORE — underwriting the deal so you don't overpay. Most serious
- * investors end up using both, but the searcher is asking us which.
+ * BEFORE — underwriting the acquisition. Investors may use both, but the
+ * searcher is asking how the workflows differ.
  */
 
 import type { Metadata } from "next";
@@ -53,7 +53,7 @@ type Row = { feature: string; truecap: string; stessa: string; winner: Verdict }
 
 const MATRIX: Row[] = [
   { feature: "Primary job",                       truecap: "Underwrite a deal before you buy",                                                  stessa: "Track income/expenses after you own",                                     winner: "tie" },
-  { feature: "Pre-purchase analysis",             truecap: "Full analyzer — cap rate, CoC, DSCR, NCF, 10-yr, tax, exit, sensitivity",            stessa: "Limited — has a basic rental calculator",                                 winner: "truecap" },
+  { feature: "Pre-purchase analysis",             truecap: "Free core metrics; Pro adds projection, tax, exit, and sensitivity views",           stessa: "Limited — has a basic rental calculator",                                 winner: "truecap" },
   { feature: "Post-purchase bookkeeping",         truecap: "Not a focus",                                                                       stessa: "Yes — bank-connected income/expense tracking, Schedule E ready",          winner: "stessa" },
   { feature: "Free tier",                         truecap: "Free analyzer with no signup",                                                     stessa: "Free bookkeeping (their core product is free)",                           winner: "tie" },
   { feature: "10-year projection (pre-purchase)", truecap: "Pro — rent + expense + appreciation compounding modeled",                          stessa: "Not the primary use case",                                                winner: "truecap" },
@@ -61,12 +61,12 @@ const MATRIX: Row[] = [
   { feature: "Bank account connections",          truecap: "No",                                                                                stessa: "Yes — Plaid integrations to pull transactions",                           winner: "stessa" },
   { feature: "Sensitivity / stress test",         truecap: "Pro — rent ±10%, vacancy ±5pp, rates ±1pp",                                         stessa: "No",                                                                      winner: "truecap" },
   { feature: "Address auto-fill (rent/rate/tax)", truecap: "HUD FMR + FRED + state tax dataset",                                               stessa: "Not the primary use case",                                                winner: "truecap" },
-  { feature: "BRRRR + fix-and-flip analyzers",    truecap: "Yes",                                                                              stessa: "No — not a value-add tool",                                                winner: "truecap" },
+  { feature: "BRRRR + fix-and-flip analyzers",    truecap: "Pro",                                                                               stessa: "No — not a value-add tool",                                                winner: "truecap" },
   { feature: "Portfolio rollup",                  truecap: "Across saved deals (pre-purchase)",                                                stessa: "Across owned properties (post-purchase) — their strongest view",          winner: "stessa" },
-  { feature: "Document storage",                  truecap: "No",                                                                               stessa: "Yes — leases, receipts, statements",                                      winner: "stessa" },
+  { feature: "Document storage",                  truecap: "Pro — acquisition due-diligence vault",                                             stessa: "Yes — operational leases, receipts, and statements",                      winner: "tie" },
   { feature: "Rent collection",                   truecap: "No",                                                                               stessa: "Yes — built-in rent collection in some plans",                            winner: "stessa" },
   { feature: "Shareable deal links",              truecap: "Free — read-only public link; Pro adds co-branding",                               stessa: "Not the primary use case",                                                winner: "truecap" },
-  { feature: "PDF lender report",                 truecap: "Pro — multi-page report for loan officer",                                          stessa: "Year-end accounting reports (different purpose)",                         winner: "tie" },
+  { feature: "PDF deal report",                   truecap: "One-time Deal Decision Pack or included with Pro",                                  stessa: "Year-end accounting reports (different purpose)",                         winner: "tie" },
 ];
 
 export default function VsStessaPage() {
@@ -134,7 +134,7 @@ export default function VsStessaPage() {
                 <li>You&apos;re evaluating new deals to potentially buy.</li>
                 <li>You need cap rate, CoC, DSCR, 10-year projections, tax modeling, exit scenarios.</li>
                 <li>You want stress-test sensitivity (rent / vacancy / rate moves).</li>
-                <li>You want a Pro PDF report to share with a lender.</li>
+                <li>You want a one-time or Pro PDF report for review.</li>
                 <li>You want BRRRR or fix-and-flip strategy modeling.</li>
               </ul>
             </div>
@@ -196,7 +196,7 @@ export default function VsStessaPage() {
           </div>
           <p className="mt-3 text-[11px] text-muted-foreground">
             Stessa details based on publicly available product info as of 2026. See{" "}
-            <a href="https://stessa.com" target="_blank" rel="noopener" className="underline">stessa.com</a>{" "}
+            <a href="https://www.stessa.com/pricing/" target="_blank" rel="noopener" className="underline">Stessa&apos;s official pricing page</a>{" "}
             for their current state.
           </p>
         </section>
@@ -206,8 +206,8 @@ export default function VsStessaPage() {
             The actual recommendation
           </h2>
           <p className="text-sm sm:text-base leading-relaxed text-foreground">
-            If you&apos;re shopping for properties: use TrueCap. Free analyzer, no
-            signup, full cap rate / CoC / DSCR / projections.
+            If you&apos;re shopping for properties: TrueCap&apos;s free analyzer covers
+            cap rate, CoC, DSCR, and cash flow; Pro adds projections and advanced scenarios.
           </p>
           <p className="mt-3 text-sm sm:text-base leading-relaxed text-foreground">
             If you own properties and want to track ops: use Stessa. Their core
@@ -245,7 +245,7 @@ export default function VsStessaPage() {
             Underwriting the next deal? Start free.
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
-            TrueCap free covers cap rate, CoC, DSCR, NCF, monthly cash flow — enough to underwrite. Pro unlocks co-branded share links, PDF exports, 10-year projections, illustrative tax impact, sensitivity grid, MAO, and the strategy analyzers. No card to start.
+            TrueCap free covers cap rate, CoC, DSCR, NCF, monthly cash flow, and plain read-only share links. Pro adds co-branding, 10-year projections, illustrative tax impact, sensitivity, MAO, strategy analyzers, and a due-diligence document vault. A one-time PDF option is also available; see live pricing for current terms.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link href="/pricing" className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity">
@@ -280,12 +280,12 @@ const STESSA_FAQ: FaqItem[] = [
         platform — bank-feed reconciliation, expense categorization,
         tax-ready P&amp;L, document storage for leases. TrueCap is a
         pre-purchase underwriting calculator — should I buy this deal?
-        Most serious investors end up using both: TrueCap to decide
-        whether to buy, Stessa to operate the property after closing.
+        Some investors use both: TrueCap to evaluate an acquisition
+        and Stessa to operate the property after closing.
       </>
     ),
     plainTextAnswer:
-      "No. Stessa is a rental-property accounting + operations platform (bank feeds, expense categorization, tax-ready P&L, document storage). TrueCap is a pre-purchase underwriting calculator. Most serious investors use both — TrueCap to decide, Stessa to operate.",
+      "No. Stessa is a rental-property accounting and operations platform. TrueCap is a pre-purchase underwriting calculator. Some investors use both at different lifecycle stages.",
   },
   {
     question: "Should I use Stessa or TrueCap?",
@@ -306,17 +306,15 @@ const STESSA_FAQ: FaqItem[] = [
     question: "Is Stessa free?",
     answer: (
       <>
-        Stessa&apos;s base tier is free for accounting + bank-feed
-        tracking on unlimited properties. Their paid tier (Stessa Pro,
-        ~$12/month) adds advanced reporting, document organization,
-        and rent collection features. TrueCap free covers the
-        underwriting math; TrueCap Pro ($29.99/month) adds projections,
-        illustrative tax impact, sensitivity, and MAO. So free Stessa
-        + free TrueCap covers a lot of the workflow already.
+        Stessa currently publishes a free Essentials tier plus paid
+        Manage and Pro tiers with different feature sets. TrueCap free
+        covers core underwriting math, while paid Pro adds projections,
+        illustrative tax impact, sensitivity, and MAO. Check both live
+        pricing pages for current rates and terms.
       </>
     ),
     plainTextAnswer:
-      "Stessa's base tier is free for accounting + bank feeds on unlimited properties. Stessa Pro is ~$12/month. TrueCap free covers underwriting math; TrueCap Pro is $29.99/month for projections, tax, sensitivity, and MAO.",
+      "Stessa publishes a free Essentials tier plus paid Manage and Pro tiers. TrueCap free covers core underwriting; paid Pro adds projections, illustrative tax impact, sensitivity, and MAO. Check both live pricing pages for current rates and terms.",
   },
   {
     question: "Does TrueCap track expenses like Stessa?",
@@ -338,15 +336,14 @@ const STESSA_FAQ: FaqItem[] = [
     answer: (
       <>
         Yes — every TrueCap user can generate a public read-only share
-        link for free; Pro adds a full multi-page PDF report and
-        optional custom co-branding on the link. Both formats include
-        the projection, Illustrative Tax Impact view, and deal score, which gives
-        your accountant what they need to validate the after-tax cash
-        flow assumptions before you buy.
+        link for free; Pro adds co-branding and includes the multi-page
+        PDF, while a one-time PDF option is also available. Reports
+        reflect the analysis fields available for that deal and can
+        support an accountant&apos;s independent review; they are not tax advice.
       </>
     ),
     plainTextAnswer:
-      "Yes — read-only share links are free for everyone; Pro adds a multi-page PDF and optional co-branding. Both include the projection and Illustrative Tax Impact view so your accountant can review the after-tax assumptions.",
+      "Yes — read-only share links are free. Pro adds co-branding and includes the multi-page PDF; a one-time PDF option is also available. Reports can support independent review but are not tax advice.",
   },
 ];
 

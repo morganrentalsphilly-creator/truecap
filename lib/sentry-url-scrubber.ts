@@ -1,5 +1,6 @@
 import type { Breadcrumb, Event } from "@sentry/nextjs";
 import {
+  SENSITIVE_PUBLIC_SHARE_ROUTE_PATTERN,
   redactSensitiveQueryValuesInText,
   sanitizeSensitiveQuery,
   sanitizeSensitiveUrl,
@@ -8,7 +9,42 @@ import {
 type RequestWithUrl = {
   url?: string;
   query_string?: string | Record<string, string> | Array<[string, string]>;
+  headers?: Record<string, string>;
+  cookies?: Record<string, string>;
 };
+
+const SECRET_HEADER_KEY = /^(?:authorization|stripe-signature)$/i;
+const URL_HEADER_KEY =
+  /^(?:referer|referrer|location|content-location|x-original-url|x-rewrite-url|x-forwarded-uri|next-url)$/i;
+
+/**
+ * Request headers are independent of `event.request.url`. In particular, a
+ * same-origin Referer can contain an encoded analysis snapshot even after the
+ * destination URL has been scrubbed. Cookies are never useful for error
+ * triage, so the raw Cookie header is removed wholesale.
+ */
+export function scrubSentryRequestHeaders(
+  headers: Record<string, string> | undefined
+): void {
+  if (!headers) return;
+  for (const [key, value] of Object.entries(headers)) {
+    if (SECRET_HEADER_KEY.test(key) || /^cookie$/i.test(key)) {
+      headers[key] = "[scrubbed]";
+    } else if (URL_HEADER_KEY.test(key)) {
+      headers[key] = sanitizeSensitiveUrl(value);
+    } else {
+      headers[key] = redactSensitiveQueryValuesInText(value);
+    }
+  }
+}
+
+/** Parsed cookie maps can be attached separately from the Cookie header. */
+export function scrubSentryRequestCookies(
+  cookies: Record<string, string> | undefined
+): void {
+  if (!cookies) return;
+  for (const key of Object.keys(cookies)) cookies[key] = "[scrubbed]";
+}
 
 /** Mutate the event request at Sentry's final beforeSend boundary. */
 export function scrubSentryRequestUrl(request: RequestWithUrl | undefined): void {
@@ -21,15 +57,55 @@ export function scrubSentryRequestUrl(request: RequestWithUrl | undefined): void
     | Record<string, string>
     | Array<[string, string]>
     | undefined;
+  scrubSentryRequestHeaders(request.headers);
+  scrubSentryRequestCookies(request.cookies);
 }
 
 const BREADCRUMB_URL_KEY = /^(?:url|href|from|to|referrer|request_url)$/i;
+const STRUCTURED_URL_KEY =
+  /(?:^|[_.$-])(?:url|uri|href|referrer|referer|path|pathname|location|route)$/i;
+
+function scrubStructuredTelemetryValue(
+  value: unknown,
+  key = "",
+  seen = new WeakSet<object>()
+): unknown {
+  if (typeof value === "string") {
+    return STRUCTURED_URL_KEY.test(key)
+      ? sanitizeSensitiveUrl(value)
+      : redactSensitiveQueryValuesInText(value);
+  }
+  if (!value || typeof value !== "object") return value;
+  if (seen.has(value)) return "[scrubbed-cycle]";
+  seen.add(value);
+  if (Array.isArray(value)) {
+    return value.map((entry) =>
+      scrubStructuredTelemetryValue(entry, key, seen)
+    );
+  }
+  return Object.fromEntries(
+    Object.entries(value as Record<string, unknown>).map(([childKey, child]) => [
+      childKey,
+      scrubStructuredTelemetryValue(child, childKey, seen),
+    ])
+  );
+}
 
 /**
  * Scrub navigation/fetch/xhr breadcrumbs. Return a fresh object so Sentry
  * integrations retaining the original hint cannot reattach the raw URL.
  */
-export function scrubSentryBreadcrumbUrl(breadcrumb: Breadcrumb): Breadcrumb {
+export function scrubSentryBreadcrumbUrl(
+  breadcrumb: Breadcrumb,
+  currentUrl?: string
+): Breadcrumb | null {
+  if (
+    typeof currentUrl === "string" &&
+    SENSITIVE_PUBLIC_SHARE_ROUTE_PATTERN.test(currentUrl) &&
+    /^ui(?:\.|$)/i.test(breadcrumb.category ?? "")
+  ) {
+    return null;
+  }
   const data = breadcrumb.data ? { ...breadcrumb.data } : undefined;
   if (data) {
     for (const [key, value] of Object.entries(data)) {
@@ -88,7 +164,13 @@ export function scrubSentrySpanUrl<T extends SentrySpanWithUrlData>(span: T): T 
 export function scrubSentryEventSensitiveData<T extends Event>(event: T): T {
   scrubSentryRequestUrl(event.request);
   if (event.breadcrumbs) {
-    event.breadcrumbs = event.breadcrumbs.map(scrubSentryBreadcrumbUrl);
+    event.breadcrumbs = event.breadcrumbs.flatMap((breadcrumb) => {
+      const scrubbed = scrubSentryBreadcrumbUrl(
+        breadcrumb,
+        event.request?.url
+      );
+      return scrubbed ? [scrubbed] : [];
+    });
   }
   if (typeof event.message === "string") {
     event.message = redactSensitiveQueryValuesInText(event.message);
@@ -110,6 +192,17 @@ export function scrubSentryEventSensitiveData<T extends Event>(event: T): T {
     if (typeof exception.value === "string") {
       exception.value = redactSensitiveQueryValuesInText(exception.value);
     }
+  }
+  if (event.extra) {
+    event.extra = scrubStructuredTelemetryValue(event.extra) as typeof event.extra;
+  }
+  if (event.contexts) {
+    event.contexts = scrubStructuredTelemetryValue(
+      event.contexts
+    ) as typeof event.contexts;
+  }
+  if (event.tags) {
+    event.tags = scrubStructuredTelemetryValue(event.tags) as typeof event.tags;
   }
   if (event.spans) event.spans = event.spans.map(scrubSentrySpanUrl);
   return event;

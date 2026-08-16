@@ -59,8 +59,8 @@ const MATRIX: Row[] = [
   { feature: "Online rental application", truecap: "No", cozy: "Was customizable", winner: "cozy" },
   { feature: "Online rent collection", truecap: "No", cozy: "Was ACH free", winner: "cozy" },
   { feature: "Tenant screening", truecap: "No", cozy: "Was TransUnion-backed", winner: "cozy" },
-  { feature: "Free tier", truecap: "Yes — full underwriting math", cozy: "Was free", winner: "tie" },
-  { feature: "Pricing", truecap: "Free; Pro $29.99/mo", cozy: "Was free (shut down)", winner: "truecap" },
+  { feature: "Free tier", truecap: "Yes — core cap rate, CoC, DSCR, and cash flow", cozy: "Was free", winner: "tie" },
+  { feature: "Pricing", truecap: "Free core; paid Pro — see live pricing", cozy: "Was free (shut down)", winner: "truecap" },
 ];
 
 export default function VsCozyPage() {
@@ -260,7 +260,8 @@ export default function VsCozyPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
             Pro unlocks projections, sensitivity, illustrative tax impact, modeled exit comparisons,
-            MAO, PDF exports, and co-branded share links.
+            MAO, and co-branded share links. Pro includes PDFs, and a one-time
+            PDF option is available; see live pricing for current terms.
             No card to start.
           </p>
           <div className="flex flex-wrap gap-3">
@@ -321,11 +322,11 @@ const COZY_FAQ: FaqItem[] = [
     question: "What&apos;s the best free Cozy alternative for rent collection?",
     answer: (
       <>
-        TurboTenant has the strongest free tier (free ACH rent collection, free basic lease, free listings). Avail also has a free tier with free ACH. RentRedi is more feature-rich but charges (~$20/month). For most ex-Cozy users, TurboTenant is the closest free replacement.
+        TurboTenant and Avail publish free operational features, while RentRedi publishes flat-rate paid plans for unlimited properties and units. Compare current rent collection, lease, listing, screening, support, and payment terms on each official pricing page before choosing a Cozy replacement.
       </>
     ),
     plainTextAnswer:
-      "TurboTenant has the strongest free tier (free ACH rent collection, basic lease, listings). Avail also has a free tier with free ACH. RentRedi charges ~$20/mo. Closest free replacement for ex-Cozy users: TurboTenant.",
+      "TurboTenant and Avail publish free operational features, while RentRedi publishes flat-rate paid plans for unlimited properties and units. Compare current features and payment terms on each official pricing page before choosing a Cozy replacement.",
   },
   {
     question: "Did Apartments.com replace Cozy?",

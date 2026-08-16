@@ -60,7 +60,7 @@ const MATRIX: Row[] = [
   { feature: "Debt + transaction history", truecap: "No", reonomy: "Yes — mortgage + sale history", winner: "reonomy" },
   { feature: "Tenant rosters (CRE)", truecap: "No", reonomy: "Yes — tenant lookup", winner: "reonomy" },
   { feature: "Free tier", truecap: "Yes — full residential underwriting", reonomy: "Paid only (enterprise pricing)", winner: "truecap" },
-  { feature: "Pricing", truecap: "Free; Pro $29.99/mo", reonomy: "Custom (typically $300+/mo enterprise)", winner: "truecap" },
+  { feature: "Pricing", truecap: "Free core; paid Pro — see live pricing", reonomy: "Custom (typically $300+/mo enterprise)", winner: "truecap" },
 ];
 
 export default function VsReonomyPage() {
@@ -259,7 +259,8 @@ export default function VsReonomyPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
             Pro unlocks projections, sensitivity, illustrative tax impact, modeled exit comparisons,
-            MAO, PDF exports, and co-branded share links.
+            MAO, and co-branded share links. Pro includes PDFs, and a one-time
+            PDF option is available; see live pricing for current terms.
             No card to start.
           </p>
           <div className="flex flex-wrap gap-3">

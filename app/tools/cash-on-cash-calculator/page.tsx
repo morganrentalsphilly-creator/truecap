@@ -42,7 +42,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "What's a good cash-on-cash return?",
-    a: "Most buy-and-hold investors target 8–12% as a healthy range. Below 4% you're probably under-leveraged or overpaying. 12%+ is strong cash flow — common in Midwest and Southern markets. Above 20% deserves a sanity-check: verify rents are realistic and expenses are fully reserved.",
+    a: "There is no universal good cash-on-cash return. Compare property-specific scenarios with your required return, liquidity needs, risk, financing, reserves, taxes, and realistic alternatives. Any unusually high modeled result deserves a rent, expense, leverage, and capital-work sanity check.",
   },
   {
     q: "What's the difference between cash-on-cash and cap rate?",
@@ -203,7 +203,7 @@ export default function CoCCalculatorPage() {
                 <tbody>
                   <tr className="border-b border-border">
                     <td className="py-2 px-3 font-mono">&lt; 4%</td>
-                    <td className="py-2 px-3">Under-leveraged or overpaying. Money would work harder elsewhere.</td>
+                    <td className="py-2 px-3">Low modeled current yield; compare the property&apos;s risk and full return case with your alternatives.</td>
                   </tr>
                   <tr className="border-b border-border">
                     <td className="py-2 px-3 font-mono">4–8%</td>
@@ -211,11 +211,11 @@ export default function CoCCalculatorPage() {
                   </tr>
                   <tr className="border-b border-border">
                     <td className="py-2 px-3 font-mono">8–12%</td>
-                    <td className="py-2 px-3">Healthy target for most buy-and-hold investors.</td>
+                    <td className="py-2 px-3">Illustrative range only; whether it is adequate depends on the investor and deal.</td>
                   </tr>
                   <tr className="border-b border-border">
                     <td className="py-2 px-3 font-mono">12–20%</td>
-                    <td className="py-2 px-3">Strong — typical of Midwest / Sun Belt cash-flow markets.</td>
+                    <td className="py-2 px-3">Higher modeled current yield; verify rent, expenses, leverage, and risks.</td>
                   </tr>
                   <tr>
                     <td className="py-2 px-3 font-mono">20%+</td>
@@ -225,11 +225,11 @@ export default function CoCCalculatorPage() {
               </table>
             </div>
             <p>
-              Compare your CoC to what the cash would do somewhere else: 5%
-              in a high-yield savings account, ~10% historical S&amp;P 500
-              return, or another deal. If your CoC is well below those, you
-              need appreciation, tax savings, and principal paydown to
-              justify the deal.
+              Compare CoC with current, like-for-like alternatives using the
+              same horizon, liquidity, volatility, taxes, and transaction-cost
+              assumptions. Do not use a stale savings rate, historical index
+              average, forecast appreciation, tax effect, or principal paydown
+              as a guaranteed hurdle or offset.
             </p>
 
             <h2 className="text-2xl sm:text-3xl">CoC isn&apos;t the whole story</h2>
