@@ -90,13 +90,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           # Full history so the base commit of a PR (or of a push that moved
           # main by more than one commit) is present locally to diff against.
           fetch-depth: 0
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
 
@@ -742,9 +742,9 @@ jobs:
       RESEND_AUDIENCE_ID: ci-placeholder-audience
       CRON_SECRET: ci-placeholder-cron-secret
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
