@@ -17,7 +17,16 @@
  * never disagree with the product.
  */
 
-import { recomputeSavedDealVerdict } from "@/lib/recompute-saved-deal-verdict";
+import {
+  recomputeSavedDealVerdict,
+  toRecomputedSavedAnalysisSnapshot,
+} from "@/lib/recompute-saved-deal-verdict";
+import {
+  isLegacySavedMethodologyVersion,
+  resolveSavedAnalysisSnapshot,
+  type SavedAnalysisSnapshotResolution,
+} from "@/lib/saved-analysis-methodology";
+import { TRUECAP_UNDERWRITING_STANDARD_VERSION } from "@/lib/underwriting-methodology";
 import { resolveOwnedEquityBasis } from "@/lib/owned-equity-series";
 import { computeOwnedEquity, monthsOwnedBetween } from "@/lib/owned-equity";
 import { buildRateWatch } from "@/lib/rate-watch";
@@ -62,6 +71,8 @@ export type WeeklySummaryDealRow = {
   /** Owned-deal close date; ships in its own migration — may be absent. */
   close_date?: string | null;
   form_snapshot: unknown;
+  methodology_version?: string | null;
+  result_snapshot?: Record<string, unknown> | null;
 };
 
 export type WeeklySummaryDueDiligenceRow = {
@@ -137,6 +148,8 @@ export type WeeklySummaryPayload = {
   rateMover: WeeklySummaryRateMover | null;
   dueItems: WeeklySummaryDueItem[];
   buyBox: WeeklySummaryBuyBox | null;
+  /** Visible provenance for legacy/frozen rows included in aggregate numbers. */
+  methodologyNotes: string[];
 };
 
 /** Same display-label fallback the rate-alert email uses. */
@@ -158,8 +171,14 @@ function stageForRow(row: WeeklySummaryDealRow): PipelineStage {
 function cashFlowForRow(
   row: WeeklySummaryDealRow,
   fresh: ReturnType<typeof recomputeSavedDealVerdict>,
+  resolution: SavedAnalysisSnapshotResolution,
 ): number {
-  return fresh ? fresh.netCashFlowMonthly : (row.net_cash_flow_monthly ?? 0);
+  const stored = Number(resolution.snapshot.netCashFlow);
+  return fresh
+    ? fresh.netCashFlowMonthly
+    : Number.isFinite(stored)
+      ? stored
+      : (row.net_cash_flow_monthly ?? 0);
 }
 
 function isBuyBoxPropertyType(t: unknown): t is BuyBoxPropertyType {
@@ -195,8 +214,18 @@ export function buildWeeklySummary(
   // One recompute per row, shared by every section (pipeline totals, buy-box
   // metrics, owned cash flow) so the sections can't disagree with each other.
   const freshById = new Map<string, ReturnType<typeof recomputeSavedDealVerdict>>();
+  const resolutionById = new Map<string, SavedAnalysisSnapshotResolution>();
   for (const row of userDeals) {
-    freshById.set(row.id, recomputeSavedDealVerdict(row.form_snapshot));
+    const recomputed = recomputeSavedDealVerdict(row.form_snapshot);
+    const resolution = resolveSavedAnalysisSnapshot({
+      methodologyVersion: row.methodology_version,
+      resultSnapshot: row.result_snapshot,
+      recomputedSnapshot: recomputed
+        ? toRecomputedSavedAnalysisSnapshot(recomputed)
+        : undefined,
+    });
+    resolutionById.set(row.id, resolution);
+    freshById.set(row.id, resolution.didRecompute ? recomputed : null);
   }
 
   const activeRows = userDeals.filter((r) => isActiveStage(stageForRow(r)));
@@ -206,7 +235,13 @@ export function buildWeeklySummary(
   let pipeline: WeeklySummaryPipeline | null = null;
   if (activeRows.length > 0) {
     let cashFlow = 0;
-    for (const row of activeRows) cashFlow += cashFlowForRow(row, freshById.get(row.id) ?? null);
+    for (const row of activeRows) {
+      cashFlow += cashFlowForRow(
+        row,
+        freshById.get(row.id) ?? null,
+        resolutionById.get(row.id)!
+      );
+    }
     pipeline = { count: activeRows.length, monthlyCashFlow: Math.round(cashFlow) };
   }
 
@@ -218,8 +253,9 @@ export function buildWeeklySummary(
     let equityGain = 0;
     let datedCount = 0;
     for (const row of ownedRows) {
-      cashFlow += cashFlowForRow(row, freshById.get(row.id) ?? null);
-      const basis = resolveOwnedEquityBasis({
+      const resolution = resolutionById.get(row.id)!;
+      cashFlow += cashFlowForRow(row, freshById.get(row.id) ?? null, resolution);
+      const basis = resolution.shouldFreeze ? null : resolveOwnedEquityBasis({
         is_completed: true, // owned by stage; the legacy flag may lag pipeline_stage
         close_date: row.close_date ?? null,
         form_snapshot: row.form_snapshot,
@@ -245,6 +281,49 @@ export function buildWeeklySummary(
   // A user with only passed deals has nothing worth emailing about.
   if (!pipeline && !owned) return null;
 
+  // Aggregate email totals can combine several saved rows, so surface the
+  // methodology policy explicitly instead of claiming every value was
+  // recomputed. This keeps legacy compatibility honest across future bumps.
+  const methodologyNotes: string[] = [];
+  const resolutions = [...resolutionById.values()];
+  if (
+    resolutions.some(
+      (resolution) =>
+        isLegacySavedMethodologyVersion(resolution.storedMethodologyVersion) &&
+        resolution.didRecompute
+    )
+  ) {
+    methodologyNotes.push(
+      `Legacy analysis · recomputed with current v${TRUECAP_UNDERWRITING_STANDARD_VERSION}.`
+    );
+  }
+  if (
+    resolutions.some(
+      (resolution) =>
+        isLegacySavedMethodologyVersion(resolution.storedMethodologyVersion) &&
+        !resolution.didRecompute
+    )
+  ) {
+    methodologyNotes.push(
+      `Legacy analysis · stored snapshot where current v${TRUECAP_UNDERWRITING_STANDARD_VERSION} could not recompute.`
+    );
+  }
+  const frozenVersions = [
+    ...new Set(
+      resolutions
+        .filter((resolution) => resolution.shouldFreeze)
+        .map((resolution) => resolution.storedMethodologyVersion)
+        .filter((version): version is string => Boolean(version))
+    ),
+  ];
+  if (frozenVersions.length > 0) {
+    methodologyNotes.push(
+      `Frozen analyses retain their saved Standard ${frozenVersions
+        .map((version) => `v${version}`)
+        .join(", ")}; they were not recomputed.`
+    );
+  }
+
   // ── Biggest rate mover (SHARED rate-watch, vs the FRED pair) ─────────
   let rateMover: WeeklySummaryRateMover | null = null;
   const pair = context.ratePair;
@@ -255,7 +334,7 @@ export function buildWeeklySummary(
     activeRows.length > 0
   ) {
     const watch = buildRateWatch(
-      activeRows.map((r) => ({
+      activeRows.filter((r) => !resolutionById.get(r.id)?.shouldFreeze).map((r) => ({
         id: r.id,
         title: r.title,
         address: r.address,
@@ -319,16 +398,27 @@ export function buildWeeklySummary(
     let passingCount = 0;
     for (const row of activeRows) {
       const fresh = freshById.get(row.id) ?? null;
+      const snapshot = resolutionById.get(row.id)?.snapshot ?? {};
+      const storedCapRate = Number(snapshot.capRate);
+      const storedCoc = Number(snapshot.cocReturn);
+      const storedDscr = Number(snapshot.dscr);
+      const storedPayment = Number(snapshot.monthlyPayment);
       const metrics: BuyBoxDealMetrics = {
-        capRatePct: fresh ? fresh.capRatePct : null,
-        cocPct: fresh ? fresh.cocReturnPct : null,
-        dscr: fresh ? fresh.dscr : null,
-        cashFlowMonthly: fresh ? fresh.netCashFlowMonthly : (row.net_cash_flow_monthly ?? null),
+        capRatePct: fresh ? fresh.capRatePct : Number.isFinite(storedCapRate) ? storedCapRate : null,
+        cocPct: fresh ? fresh.cocReturnPct : Number.isFinite(storedCoc) ? storedCoc : null,
+        dscr: fresh ? fresh.dscr : Number.isFinite(storedDscr) ? storedDscr : null,
+        cashFlowMonthly: cashFlowForRow(
+          row,
+          fresh,
+          resolutionById.get(row.id)!
+        ),
         purchasePrice: row.purchase_price ?? null,
         propertyType: isBuyBoxPropertyType(row.property_type) ? row.property_type : null,
         state: deriveStateFromAddress(row.address),
         // calc-analysis canon: monthlyPayment <= 0 = cash purchase → DSCR N/A.
-        isCashPurchase: fresh ? fresh.isCashPurchase : false,
+        isCashPurchase: fresh
+          ? fresh.isCashPurchase
+          : Number.isFinite(storedPayment) && storedPayment <= 0,
       };
       const results = evaluateBuyBoxes(activeBoxes, metrics).filter((r) => r.result.active);
       if (results.length === 0) continue;
@@ -341,7 +431,14 @@ export function buildWeeklySummary(
     };
   }
 
-  return { pipeline, owned, rateMover, dueItems: cappedDueItems, buyBox };
+  return {
+    pipeline,
+    owned,
+    rateMover,
+    dueItems: cappedDueItems,
+    buyBox,
+    methodologyNotes,
+  };
 }
 
 const fmtMoney = (n: number) =>

@@ -33,6 +33,7 @@ export type DashboardTopDeal = {
   /** Buy-box fit (PV-6) — null/undefined for users without an active box, so
    *  the badge and the Fit sort stay invisible for them. */
   fit?: BuyBoxFitSummary | null;
+  methodologyLabel?: string;
 };
 
 const typeIcon: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -208,6 +209,11 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
                     )}
                   </h4>
                   <p className="mt-1 text-xs text-muted-foreground">{d.address}</p>
+                  {d.methodologyLabel ? (
+                    <p className="mt-0.5 text-[10px] text-muted-foreground">
+                      {d.methodologyLabel}
+                    </p>
+                  ) : null}
                 </div>
                 <div className="relative h-11 w-11 shrink-0">
                   <svg aria-hidden className="h-11 w-11 -rotate-90" viewBox="0 0 36 36">
@@ -335,6 +341,11 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
                           )}
                         </div>
                         <div className="text-xs text-muted-foreground">{d.address}</div>
+                        {d.methodologyLabel ? (
+                          <div className="text-[10px] text-muted-foreground">
+                            {d.methodologyLabel}
+                          </div>
+                        ) : null}
                         {d.tags?.length ? (
                           <div className="mt-2 flex flex-wrap gap-1">
                             {d.tags.map((tag) => (

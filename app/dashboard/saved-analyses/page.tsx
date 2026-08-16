@@ -21,7 +21,16 @@ import {
   hasPaidPlanSubscription,
   hasPlanFeature,
 } from "@/lib/entitlements";
-import { recomputeSavedDealVerdict } from "@/lib/recompute-saved-deal-verdict";
+import {
+  recomputeSavedDealVerdict,
+  toRecomputedSavedAnalysisSnapshot,
+} from "@/lib/recompute-saved-deal-verdict";
+import {
+  isLegacySavedMethodologyVersion,
+  parseFrozenDealScore,
+  resolveSavedAnalysisSnapshot,
+} from "@/lib/saved-analysis-methodology";
+import { TRUECAP_UNDERWRITING_STANDARD_VERSION } from "@/lib/underwriting-methodology";
 import { computeRowEquity } from "@/lib/owned-equity-series";
 import { DEFAULT_PIPELINE_STAGE, isActiveStage, isPipelineStage } from "@/lib/pipeline";
 import { computeDealOfferLine, type DealOfferLine } from "@/lib/deal-offer-line";
@@ -62,6 +71,7 @@ type SavedAnalysisRow = {
     recommendation?: StoredRecommendation | null;
     riskLevel?: StoredRiskLevel | null;
   } | null;
+  methodology_version?: string | null;
   form_snapshot?: unknown;
   pipeline_stage?: string | null;
   tags?: string[] | null;
@@ -132,7 +142,20 @@ function mapSavedRow(
   row: SavedAnalysisRow,
   activeBuyBoxes: NamedBuyBox[] = []
 ): SavedAnalysisListItem | null {
-  const capRateRaw = row.result_snapshot?.capRate;
+  const recomputed = recomputeSavedDealVerdict(row.form_snapshot);
+  const resolution = resolveSavedAnalysisSnapshot({
+    methodologyVersion: row.methodology_version,
+    resultSnapshot: row.result_snapshot,
+    recomputedSnapshot: recomputed
+      ? toRecomputedSavedAnalysisSnapshot(recomputed)
+      : undefined,
+  });
+  const snapshot = resolution.snapshot as NonNullable<SavedAnalysisRow["result_snapshot"]>;
+  const fresh = resolution.didRecompute ? recomputed : null;
+  const frozenScore = resolution.shouldFreeze
+    ? parseFrozenDealScore(snapshot)
+    : null;
+  const capRateRaw = snapshot.capRate;
   const parsedCapRate =
     typeof capRateRaw === "number"
       ? capRateRaw
@@ -140,10 +163,10 @@ function mapSavedRow(
         ? Number(capRateRaw)
         : null;
   const parsedScore =
-    typeof row.result_snapshot?.score === "number"
-      ? row.result_snapshot.score
-      : typeof row.result_snapshot?.score === "string"
-        ? Number(row.result_snapshot.score)
+    typeof snapshot.score === "number"
+      ? snapshot.score
+      : typeof snapshot.score === "string"
+        ? Number(snapshot.score)
         : null;
   // Deals saved before the Deal Score feature (or whose snapshot is
   // partial) previously made this function return null — and the
@@ -152,13 +175,8 @@ function mapSavedRow(
   // missing display fields instead, matching the convention the
   // saved-analyses detail view already uses (Neutral / Medium Risk /
   // null score → renders as a neutral row, data intact and clickable).
-  const storedRecommendation = row.result_snapshot?.recommendation ?? "Neutral";
-  const storedRiskLevel = row.result_snapshot?.riskLevel ?? "Medium Risk";
-
-  // Re-score with the current engine from the saved form values so a deal saved
-  // before the holistic-score upgrade doesn't show a stale "Avoid / 0" signal.
-  // Falls back to the stored verdict when the snapshot doesn't validate.
-  const fresh = recomputeSavedDealVerdict(row.form_snapshot);
+  const storedRecommendation = snapshot.recommendation ?? "Neutral";
+  const storedRiskLevel = snapshot.riskLevel ?? "Medium Risk";
 
   return {
     id: row.id,
@@ -179,7 +197,14 @@ function mapSavedRow(
     score: fresh ? fresh.score : Number.isFinite(parsedScore) ? parsedScore : null,
     recommendation: fresh ? fresh.recommendation : storedRecommendation,
     riskLevel: fresh ? fresh.riskLevel : storedRiskLevel,
-    breakdown: fresh ? fresh.breakdown : null,
+    breakdown: fresh?.breakdown ?? frozenScore?.breakdown ?? null,
+    methodologyLabel: resolution.shouldFreeze
+      ? `Frozen Standard v${resolution.storedMethodologyVersion}`
+      : isLegacySavedMethodologyVersion(resolution.storedMethodologyVersion)
+        ? resolution.didRecompute
+          ? `Legacy analysis · recomputed with current v${TRUECAP_UNDERWRITING_STANDARD_VERSION}`
+          : `Legacy analysis · stored snapshot (current v${TRUECAP_UNDERWRITING_STANDARD_VERSION} recompute unavailable)`
+        : `Standard v${resolution.storedMethodologyVersion}`,
     pipelineStage: isPipelineStage(row.pipeline_stage) ? row.pipeline_stage : DEFAULT_PIPELINE_STAGE,
     tags: Array.isArray(row.tags) ? row.tags.filter((t): t is string => typeof t === "string") : [],
     clientId: row.client_id ?? null,
@@ -193,13 +218,13 @@ function mapSavedRow(
     createdAt: row.created_at,
     status: row.is_completed ? "completed" : row.is_archived ? "archived" : "active",
     closeDate: row.close_date ?? null,
-    ownedEquity: computeRowEquity(row),
+    ownedEquity: resolution.shouldFreeze ? null : computeRowEquity(row),
     // Shopping stages only: an owned/closed/passed deal has no offer left to
     // make. Mirrors the same guard the deal workspace applies.
     offerLine: offerLineForRow(
       row,
       activeBuyBoxes,
-      !row.is_completed && !row.is_archived && isActiveStage(
+      !resolution.shouldFreeze && !row.is_completed && !row.is_archived && isActiveStage(
         isPipelineStage(row.pipeline_stage) ? row.pipeline_stage : DEFAULT_PIPELINE_STAGE
       )
     ),
@@ -281,7 +306,7 @@ export default async function DashboardSavedAnalysesPage({
   const clientFilterName = clientFilterId ? agentClients.find((c) => c.id === clientFilterId)?.name ?? null : null;
 
   const BASE_SELECT =
-    "id, address, title, property_type, purchase_price, net_cash_flow_monthly, coc_return_pct, created_at, is_completed, is_archived, result_snapshot, form_snapshot, pipeline_stage, tags, data_confidence";
+    "id, address, title, property_type, purchase_price, net_cash_flow_monthly, coc_return_pct, created_at, is_completed, is_archived, methodology_version, result_snapshot, form_snapshot, pipeline_stage, tags, data_confidence";
   // Three optional column sets each ship in their own migration; until
   // applied, selecting them 42703s. The tiered fallback drops columns
   // NEWEST-MIGRATION-FIRST so every partial-application state (migrations

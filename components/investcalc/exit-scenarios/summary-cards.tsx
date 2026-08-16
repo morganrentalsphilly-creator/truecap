@@ -4,6 +4,7 @@ import { SummaryCardGrid } from "@/components/investcalc/analysis-panels/shared/
 import { formatCurrency } from "@/components/investcalc/analysis-panels/shared/formatters";
 import { formatRoiHeadline } from "@/lib/extreme-value-format";
 import type { ExitScenarioYear } from "@/lib/exit-scenarios";
+import { computeReturnSummaryFromExitYears } from "@/lib/returns";
 
 export function ExitScenarioSummaryCards({
   years,
@@ -16,23 +17,32 @@ export function ExitScenarioSummaryCards({
   );
   const year5 = years.find((year) => year.year === 5) ?? null;
   const year10 = years.find((year) => year.year === 10) ?? years[years.length - 1] ?? null;
-  const initialInvestment = year10
-    ? year10.netSaleProceeds + year10.cumulativeCashFlow + year10.cumulativeTaxBenefit - year10.totalProfit
-    : 0;
-  const totalRoi = initialInvestment > 0 && year10 ? (year10.totalProfit / initialInvestment) * 100 : 0;
+  // One return basis everywhere. This helper correctly adds exit tax back
+  // when recovering cash invested; the former inline identity omitted it and
+  // understated the denominator whenever tax was owed at sale.
+  const returnSummary = computeReturnSummaryFromExitYears(years);
+  const totalRoi = returnSummary?.roiPct ?? null;
   // Extreme cumulative ROI (finding 5): the card shows the framed band in
   // a neutral tone (no green celebration); the raw figure stays one hover
   // away on the label tooltip. Sane values keep today's exact formatting.
-  const roiHeadline = formatRoiHeadline(totalRoi, { decimals: 1, signed: true, compact: true });
+  const roiHeadline =
+    totalRoi == null
+      ? null
+      : formatRoiHeadline(totalRoi, { decimals: 1, signed: true, compact: true });
 
   return (
     <SummaryCardGrid
       columnsClassName="md:grid-cols-2 xl:grid-cols-4"
       items={[
         {
-          label: "Best Year to Sell",
-          value: bestYear ? `Year ${bestYear.year}` : "—",
+          label: "Highest Modeled Profit",
+          value: bestYear
+            ? `${formatCurrency(bestYear.totalProfit)} · Y${bestYear.year}`
+            : "—",
           tone: bestYear && bestYear.totalProfit >= 0 ? "positive" : "negative",
+          labelTooltip: bestYear
+            ? `Highest modeled profit among the exits shown (Year ${bestYear.year}); not a risk-adjusted recommendation to sell in that year.`
+            : undefined,
         },
         {
           label: "Year 5 Profit",
@@ -46,11 +56,19 @@ export function ExitScenarioSummaryCards({
         },
         {
           label: "Total ROI",
-          value: roiHeadline.extreme
-            ? roiHeadline.text
-            : `${totalRoi >= 0 ? "+" : ""}${totalRoi.toFixed(1)}%`,
-          tone: roiHeadline.extreme ? "neutral" : totalRoi >= 0 ? "positive" : "negative",
-          labelTooltip: roiHeadline.title,
+          value:
+            totalRoi == null
+              ? "—"
+              : roiHeadline?.extreme
+                ? roiHeadline.text
+                : `${totalRoi >= 0 ? "+" : ""}${totalRoi.toFixed(1)}%`,
+          tone:
+            totalRoi == null || roiHeadline?.extreme
+              ? "neutral"
+              : totalRoi >= 0
+                ? "positive"
+                : "negative",
+          labelTooltip: roiHeadline?.title,
         },
       ]}
     />

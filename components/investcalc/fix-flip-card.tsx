@@ -14,11 +14,16 @@ import { TrendingUp, ChevronDown, ChevronUp } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
-import { analyzeFixFlip } from "@/lib/fix-flip-analysis";
+import type { AnalysisResult } from "@/lib/calc-analysis";
+import {
+  analyzeFixFlip,
+  estimateFixFlipCarryingCost,
+} from "@/lib/fix-flip-analysis";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 
 interface FixFlipCardProps {
   values: InvestmentFormValues | null;
+  result?: AnalysisResult | null;
   defaultRehab?: number;
 }
 
@@ -26,25 +31,7 @@ const fmt = (n: number) =>
   n === Infinity ? "∞" : `${n < 0 ? "-" : ""}$${Math.round(Math.abs(n)).toLocaleString("en-US")}`;
 const fmtPct = (n: number) => (Number.isFinite(n) ? `${n.toFixed(1)}%` : "—");
 
-/** Approximate monthly carrying cost = property tax + insurance + utilities
- *  + monthly loan interest while held. We don't have direct fields for tax
- *  and insurance dollars, so estimate from property tax % and a default
- *  insurance assumption. */
-function estimateCarryingCost(values: InvestmentFormValues | null, downPaymentPct: number): number {
-  if (!values) return 0;
-  const price = Number(values.purchasePrice) || 0;
-  const taxPct = Number(values.propertyTaxPct) || 1.2;
-  const insurancePct = Number(values.insurancePct) || 0.5;
-  const ratePct = Number(values.interestRate) || 7;
-  const loan = price * (1 - downPaymentPct / 100);
-  const monthlyInterest = (loan * (ratePct / 100)) / 12; // interest-only approx
-  const monthlyTax = (price * (taxPct / 100)) / 12;
-  const monthlyIns = (price * (insurancePct / 100)) / 12;
-  const monthlyUtil = Number(values.utilitiesMonthly) || 100;
-  return Math.round(monthlyInterest + monthlyTax + monthlyIns + monthlyUtil);
-}
-
-export function FixFlipCard({ values, defaultRehab }: FixFlipCardProps) {
+export function FixFlipCard({ values, result, defaultRehab }: FixFlipCardProps) {
   const purchasePrice = Number(values?.purchasePrice) || 0;
   const defaultDp = Number(values?.downPaymentPct) || 20;
   const defaultCloseAcq = Number(values?.closingCostsPct) || 3;
@@ -79,7 +66,7 @@ export function FixFlipCard({ values, defaultRehab }: FixFlipCardProps) {
     const arv = Number(arvInput);
     if (!arv || arv <= 0) return null;
     const dpPct = Number(dpInput) || defaultDp;
-    const carryAuto = estimateCarryingCost(values, dpPct);
+    const carryAuto = estimateFixFlipCarryingCost(values, result, dpPct);
     const carry = carryOverride !== "" && Number.isFinite(Number(carryOverride))
       ? Number(carryOverride)
       : carryAuto;
@@ -96,7 +83,7 @@ export function FixFlipCard({ values, defaultRehab }: FixFlipCardProps) {
     });
   }, [
     purchasePrice, defaultDp, defaultCloseAcq,
-    effectiveRehab, arvInput, sellPctInput, holdInput, dpInput, carryOverride, values,
+    effectiveRehab, arvInput, sellPctInput, holdInput, dpInput, carryOverride, values, result,
   ]);
 
   return (
@@ -161,6 +148,9 @@ export function FixFlipCard({ values, defaultRehab }: FixFlipCardProps) {
                 className="pl-7 border-input bg-background"
               />
             </div>
+            <p className="mt-1 text-[10px] leading-relaxed text-muted-foreground">
+              Your estimate · verify with relevant sold comps or an appraisal.
+            </p>
           </div>
           <div>
             <Label htmlFor={holdId} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
@@ -226,13 +216,22 @@ export function FixFlipCard({ values, defaultRehab }: FixFlipCardProps) {
                 onChange={(e) => setCarryOverride(e.target.value)}
                 placeholder={
                   values
-                    ? String(estimateCarryingCost(values, Number(dpInput) || defaultDp))
+                    ? String(
+                        estimateFixFlipCarryingCost(
+                          values,
+                          result,
+                          Number(dpInput) || defaultDp
+                        )
+                      )
                     : "auto"
                 }
                 className="pl-7 border-input bg-background"
               />
             </div>
-            <p className="text-[10px] text-muted-foreground mt-1">Auto from form</p>
+            <p className="text-[10px] leading-relaxed text-muted-foreground mt-1">
+              Screening estimate from modeled tax, insurance, utilities, and
+              interest-only debt. Verify actual holding costs and loan terms.
+            </p>
           </div>
         </div>
       )}
@@ -258,7 +257,7 @@ export function FixFlipCard({ values, defaultRehab }: FixFlipCardProps) {
               negative={analysis.roiOnCashPct < 0}
             />
             <Metric
-              label="Annualized ROI"
+              label="Simple annualized ROI"
               value={fmtPct(analysis.annualizedRoiPct)}
               positive={analysis.annualizedRoiPct > 20}
               negative={analysis.annualizedRoiPct < 0}
@@ -288,6 +287,7 @@ export function FixFlipCard({ values, defaultRehab }: FixFlipCardProps) {
               </div>
               <Row label="Selling costs" value={fmt(analysis.sellingCosts)} />
               <Row label="Gross profit" value={fmt(analysis.grossProfit)} />
+              <Row label="Acquisition closing costs" value={`-${fmt(analysis.acquisitionClosingCosts)}`} />
               <Row label="Break-even ARV" value={fmt(analysis.breakEvenArv)} bold />
             </div>
           </div>

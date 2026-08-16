@@ -25,6 +25,7 @@ import { NextActionBanner } from "@/components/investcalc/next-action-banner";
 import { DealAgingNudge } from "@/components/investcalc/deal-aging-nudge";
 import { DealStageSelect } from "@/components/investcalc/deal-stage-select";
 import { DealClientSelect } from "@/components/investcalc/deal-client-select";
+import { ShareLinkButton } from "@/components/investcalc/share-link-button";
 import { listAgentClientsAction } from "@/app/actions/agent-clients";
 import { OpenFullAnalysisButton } from "@/components/investcalc/open-saved-deal-in-analyzer";
 import { RefreshOnReturn } from "@/components/investcalc/refresh-on-return";
@@ -32,9 +33,13 @@ import { DealWorkspaceAnchorChips } from "@/components/investcalc/deal-workspace
 import { OwnedEquityCard } from "@/components/investcalc/owned-equity-card";
 import { CompareWithAnotherDealLink } from "@/components/dashboard/compare-with-another-deal-link";
 import { RateAlertReUnderwriteBanner } from "@/components/investcalc/rate-alert-reunderwrite-banner";
+import { SavedDealWatchCard } from "@/components/investcalc/saved-deal-watch-card";
 import { buildRateReUnderwrite, parseRateAlertRateParam } from "@/lib/rate-alerts";
 import { nextActionForDeal } from "@/lib/next-action";
-import { recomputeSavedDealVerdict } from "@/lib/recompute-saved-deal-verdict";
+import {
+  recomputeSavedDealVerdict,
+  toRecomputedSavedAnalysisSnapshot,
+} from "@/lib/recompute-saved-deal-verdict";
 import { calculateAnalysis } from "@/lib/calc-analysis";
 import { calculateMaxAllowableOffer, meetsTarget } from "@/lib/max-allowable-offer";
 import {
@@ -68,6 +73,12 @@ import {
 } from "@/lib/entitlements";
 import { getRequestUser, getRequestEntitlements } from "@/lib/request-auth";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { TRUECAP_UNDERWRITING_STANDARD_VERSION } from "@/lib/underwriting-methodology";
+import {
+  isLegacySavedMethodologyVersion,
+  resolveSavedAnalysisSnapshot,
+} from "@/lib/saved-analysis-methodology";
+import { isFeatureEnabled } from "@/lib/feature-flags";
 
 export const metadata: Metadata = {
   title: "Deal workspace",
@@ -155,7 +166,7 @@ function Metric({
 }
 
 const DEAL_SELECT =
-  "id, address, title, property_type, purchase_price, form_snapshot, result_snapshot, net_cash_flow_monthly, pipeline_stage, is_completed, created_at";
+  "id, address, title, property_type, purchase_price, form_snapshot, result_snapshot, methodology_version, net_cash_flow_monthly, pipeline_stage, is_completed, created_at";
 
 /**
  * Load the deal with the optional investor nickname (labels migration) and the
@@ -279,6 +290,7 @@ export default async function DealWorkspacePage({
     purchase_price: number | null;
     form_snapshot: unknown;
     result_snapshot: Record<string, unknown> | null;
+    methodology_version: string | null;
     net_cash_flow_monthly: number | null;
     pipeline_stage: string | null;
     client_id?: string | null;
@@ -301,9 +313,10 @@ export default async function DealWorkspacePage({
   // page agrees with the My Deals row for the same deal.
   const isClosedDeal = stage === "closed" || dealRow.is_completed === true;
   const canUsePipeline = hasPlanFeature(entitlements, "pipeline");
+  const canUseClientWorkflow = hasPlanFeature(entitlements, "client_buy_box");
   // Agent Pro roster for the "For client" control. Skipped (and failure-safe)
   // for every other tier, which leaves the control hidden.
-  const agentClients = hasPlanFeature(entitlements, "client_buy_box")
+  const agentClients = canUseClientWorkflow
     ? await listAgentClientsAction()
         .then((r) => (r.ok ? r.clients.filter((c) => !c.isArchived).map((c) => ({ id: c.id, name: c.name })) : []))
         .catch(() => [])
@@ -329,7 +342,17 @@ export default async function DealWorkspacePage({
   // recomputed "cash-flow negative" warning that deep-links here. Falls back
   // to the stored snapshot for legacy forms that don't validate (exact same
   // pattern as app/dashboard/saved-analyses/page.tsx mapSavedRow).
-  const snap = dealRow.result_snapshot ?? {};
+  const recomputed = recomputeSavedDealVerdict(dealRow.form_snapshot);
+  const methodologyResolution = resolveSavedAnalysisSnapshot({
+    methodologyVersion: dealRow.methodology_version,
+    resultSnapshot: dealRow.result_snapshot,
+    recomputedSnapshot: recomputed
+      ? toRecomputedSavedAnalysisSnapshot(recomputed)
+      : undefined,
+  });
+  const snap = methodologyResolution.snapshot;
+  const storedMethodologyVersion = methodologyResolution.storedMethodologyVersion;
+  const isFrozenMethodologySnapshot = methodologyResolution.shouldFreeze;
   const num = (v: unknown): number => {
     const n = typeof v === "number" ? v : Number(v);
     return Number.isFinite(n) ? n : 0;
@@ -337,7 +360,11 @@ export default async function DealWorkspacePage({
   // null (criterion skipped) — NOT 0 (criterion failed) — for metrics the
   // legacy snapshot may simply not carry.
   const numOrNull = (v: unknown): number | null => (v == null ? null : num(v));
-  const fresh = recomputeSavedDealVerdict(dealRow.form_snapshot);
+  // A future material standard must not silently rewrite an old acquisition
+  // decision. Version-mismatched rows use their frozen output until the user
+  // explicitly re-underwrites; same-version and legacy rows preserve the
+  // existing, clearly labeled recompute-on-read behavior.
+  const fresh = methodologyResolution.didRecompute ? recomputed : null;
   const netCashFlow = fresh
     ? fresh.netCashFlowMonthly
     : num(snap["netCashFlow"] ?? dealRow.net_cash_flow_monthly);
@@ -349,7 +376,9 @@ export default async function DealWorkspacePage({
   const isCashPurchase = fresh ? fresh.isCashPurchase : monthlyPayment <= 0;
   // Current-engine form values — reused by the max-offer solver and the
   // owned-equity estimate. Null for legacy snapshots that don't validate.
-  const formValues = normalizeInvestmentFormSnapshot(dealRow.form_snapshot);
+  const formValues = isFrozenMethodologySnapshot
+    ? null
+    : normalizeInvestmentFormSnapshot(dealRow.form_snapshot);
 
   // Rate-alert deep link: re-underwrite at the alert's rate (pure preview —
   // the saved deal is NOT mutated by opening the link; the banner's one
@@ -386,7 +415,7 @@ export default async function DealWorkspacePage({
   const closeDate =
     ownedEquityEnabled && typeof dealRow.close_date === "string" ? dealRow.close_date : null;
   const ownedEquity: OwnedEquitySummary | null =
-    isClosedDeal && closeDate
+    isClosedDeal && closeDate && !isFrozenMethodologySnapshot
       ? computeRowEquity({
           is_completed: true,
           close_date: closeDate,
@@ -537,8 +566,35 @@ export default async function DealWorkspacePage({
                 {nickname ? (
                   <p className="truncate text-xs text-muted-foreground">{addressLabel}</p>
                 ) : null}
-                <p className="text-xs text-muted-foreground">
-                  Everything for this deal — checklist, documents, notes &amp; scenarios.
+                {canUseClientWorkflow ? (
+                  <p className="text-xs text-muted-foreground">
+                    Analysis → Client Report → Follow-Up → Offer: assign the buyer, share the report,
+                    capture follow-up in Notes, then move the stage when the offer is submitted.
+                  </p>
+                ) : (
+                  <p className="text-xs text-muted-foreground">
+                    Everything for this deal — checklist, documents, notes &amp; scenarios.
+                  </p>
+                )}
+                <p className="mt-1 text-[10px] text-muted-foreground">
+                  {!isLegacySavedMethodologyVersion(storedMethodologyVersion) ? (
+                    <>
+                      TrueCap Underwriting Standard v{storedMethodologyVersion}
+                      {storedMethodologyVersion !== TRUECAP_UNDERWRITING_STANDARD_VERSION
+                        ? ` · frozen snapshot; current standard is v${TRUECAP_UNDERWRITING_STANDARD_VERSION}`
+                        : ""}
+                    </>
+                  ) : (
+                    <>
+                      {methodologyResolution.didRecompute
+                        ? `Legacy analysis · recomputed with current v${TRUECAP_UNDERWRITING_STANDARD_VERSION}`
+                        : `Legacy analysis · stored snapshot (current v${TRUECAP_UNDERWRITING_STANDARD_VERSION} recompute unavailable)`}
+                    </>
+                  )}{" "}
+                  ·{" "}
+                  <Link href="/methodology" className="font-semibold text-primary hover:underline">
+                    methodology
+                  </Link>
                 </p>
               </div>
               <div className="flex shrink-0 items-center gap-2 pt-0.5">
@@ -558,6 +614,17 @@ export default async function DealWorkspacePage({
                   clients={agentClients}
                   clientId={dealRow.client_id ?? null}
                 />
+                {formValues ? (
+                  <ShareLinkButton
+                    values={formValues}
+                    savedDealId={dealRow.id}
+                    context={
+                      canUseClientWorkflow && dealRow.client_id
+                        ? "client-report"
+                        : "analysis"
+                    }
+                  />
+                ) : null}
                 <OpenFullAnalysisButton savedDealId={dealRow.id} />
               </div>
             </div>
@@ -693,6 +760,13 @@ export default async function DealWorkspacePage({
             createdAt={dealRow.created_at}
             address={heading}
           />
+          {/* Dormant Saved Deal Watch setup. Both this server render and all
+              actions fail closed behind the flag. The card persists explicit
+              opt-in while truthfully stating that no provider, polling, or
+              delivery is active. */}
+          {isFeatureEnabled("saved_deal_watch") && isPremium ? (
+            <SavedDealWatchCard savedDealId={dealRow.id} />
+          ) : null}
           <DealDetailsCard savedDealId={dealRow.id} />
           {/* Anchor targets for the header's contents chips. scroll-mt clears
               the fixed/sticky Topbar (h-16), same as the analyzer's drill rows. */}

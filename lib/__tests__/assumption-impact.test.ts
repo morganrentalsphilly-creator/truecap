@@ -70,4 +70,34 @@ describe("assumption impact", () => {
     );
     expect(rate === undefined || rate.cashFlowSwing < 1).toBe(true);
   });
+
+  it("perturbs nightly rate for an STR instead of the inactive monthly-rent field", () => {
+    const drivers = computeAssumptionImpact(
+      baseSingleFamily({
+        monthlyRent: undefined,
+        avgDailyRate: 185,
+        occupancyPct: 62,
+        strFurnishingCost: 25_000,
+      })
+    );
+    const rent = drivers.find((driver) => driver.key === "rent");
+    expect(rent).toBeDefined();
+    expect(rent?.cashFlowSwing).toBeGreaterThan(0);
+    expect(rent?.dscrSwing).toBeGreaterThan(0);
+  });
+
+  it("perturbs the active annual property-tax bill by an equivalent ±0.25pp", () => {
+    const drivers = computeAssumptionImpact(
+      baseSingleFamily({
+        propertyTaxInputMode: "annual",
+        propertyTaxAnnual: 4_200,
+        // Deliberately absurd inactive value: the driver must not touch this.
+        propertyTaxPct: 99,
+      })
+    );
+    const propertyTax = drivers.find((driver) => driver.key === "propertyTaxPct");
+    expect(propertyTax).toBeDefined();
+    expect(propertyTax?.cashFlowSwing).toBeGreaterThan(0);
+    expect(propertyTax?.deltaLabel).toBe("±0.25pp");
+  });
 });

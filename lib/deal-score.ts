@@ -26,18 +26,18 @@ export const dealScoreInputSchema = z.object({
    */
   isCashPurchase: z.boolean().optional().default(false),
   /**
-   * Year-1 AFTER-TAX monthly cash flow. A deal can be negative pre-tax but
-   * positive after the depreciation + interest shield — that's not a deal
-   * "bleeding" each month. When present, the engine softens the negative
-   * cash-flow penalty and unlocks the appreciation-play path. Optional so
-   * older/serialized callers still parse (falls back to pre-tax cash flow).
+   * Legacy optional field retained for serialized callers. Production score
+   * builders pass pre-tax cash flow here: illustrative tax losses are not
+   * guaranteed usable cash and must not rescue a recommendation.
    */
   afterTaxMonthlyCashFlow: z.number().optional(),
   /**
    * Projected 10-year ANNUALIZED total return on invested cash — the blend
-   * of operating cash flow, tax shield, appreciation, and loan paydown
-   * realized at a year-10 sale (computed by the same exit-scenario engine
-   * the Exit Scenarios panel + PDF use). This is the "wealth-building"
+   * of pre-tax operating cash flow, appreciation, and loan paydown realized
+   * at a year-10 sale, net modeled selling costs and federal exit-tax
+   * defaults (computed by the same exit-scenario engine the Exit Scenarios
+   * panel + PDF use). Annual personal tax benefits are deliberately excluded.
+   * This is the "wealth-building"
    * dimension a year-1-only score is blind to. Optional; when absent the
    * total-return component scores 0 (graceful degradation to the prior
    * income-only behaviour).
@@ -54,8 +54,7 @@ export type DealScoreInput = z.infer<typeof dealScoreInputSchema>;
  * sees elsewhere in the product.
  *
  * Total return blends all four real-estate return sources:
- *   - operating cash flow + the tax shield  → result.tenYearProjection /
- *     result.taxStrategyYears (already embedded in every AnalysisResult)
+ *   - pre-tax operating cash flow             → result.tenYearProjection
  *   - appreciation + loan paydown at sale    → buildExitScenarios()
  *
  * year-10 totalProfit / total cash invested = cumulative ROI; we annualize
@@ -98,7 +97,10 @@ export function computeTenYearAnnualizedReturnPct(
     // cumulativeRoi numerator + the totalCashRequired denominator below agree.
     initialCashInvested: result.totalCashRequired,
     cumulativeCashFlowByYear: result.tenYearProjection.map((y) => y.cumulativeCashFlowAnnual),
-    cumulativeTaxBenefitByYear: result.taxStrategyYears.map((y) => y.cumulativeTaxBenefitAnnual),
+    // Deal Fit must remain taxpayer-agnostic. The separate Illustrative Tax
+    // Impact view can show the signed estimate, but assumed passive-loss
+    // usability must never rescue or inflate the recommendation score.
+    cumulativeTaxBenefitByYear: result.taxStrategyYears.map(() => 0),
     annualDepreciation: result.taxStrategyYears[0]?.depreciationDeductionAnnual ?? 0,
   });
 
@@ -166,7 +168,9 @@ export function buildDealScoreInputFromAnalysis(
     monthlyPropertyTax: result.propertyTax,
     monthlyRentIncome: result.monthlyRentalIncome,
     isCashPurchase: result.monthlyPayment <= 0,
-    afterTaxMonthlyCashFlow: result.afterTaxCF,
+    // Deliberately pre-tax: tax-loss usability is taxpayer-specific and the
+    // current engine does not model passive-activity limitations.
+    afterTaxMonthlyCashFlow: result.netCashFlow,
     tenYearAnnualizedReturnPct: tenYearAnnualizedReturnPct ?? undefined,
   });
 }
@@ -212,7 +216,7 @@ export interface DealScoreBreakdown {
   cocScore: number;
   capRateScore: number;
   dscrScore: number;
-  /** Projected 10-year total return (appreciation + paydown + cash flow + tax). 0–25. */
+  /** Projected 10-year total return (pre-tax cash flow + appreciation + paydown, net modeled sale costs and exit tax). 0–25. */
   totalReturnScore: number;
   riskPenalty: number;
 }
@@ -638,8 +642,9 @@ export function computeDealScore(
     : 0;
 
   // Total return — the wealth-building dimension a year-1-only score is
-  // blind to. Annualized 10-year total return on invested cash (cash flow +
-  // tax shield + appreciation + loan paydown). 0-25 max. Absent → 0.
+  // blind to. Annualized 10-year total return on invested cash (pre-tax cash
+  // flow + appreciation + loan paydown, net modeled sale costs and exit tax).
+  // Annual personal tax benefits are excluded. 0-25 max. Absent → 0.
   const annual = input.tenYearAnnualizedReturnPct;
   const totalReturnScore =
     annual == null ? 0

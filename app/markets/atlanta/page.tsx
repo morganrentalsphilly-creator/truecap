@@ -29,7 +29,7 @@ const TITLE = "Atlanta Rental Market Analysis 2026 — Cap Rates";
 const DESCRIPTION =
   "2026 cap-rate ranges by Atlanta submarket + the Southeast's balanced-growth play. Run an Atlanta rental in 60 seconds — GA tax and HUD rent auto-filled.";
 const PUBLISHED_AT = "2026-05-24";
-const MODIFIED_AT = "2026-06-01";
+const MODIFIED_AT = "2026-08-15";
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -74,15 +74,15 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Is Atlanta good for cash flow or appreciation?",
-    a: "Primarily appreciation, with meaningful cash flow available in the right submarkets. Atlanta metro has averaged 5-6% annual appreciation over the last decade — significantly above the U.S. average of ~3%. The Sun Belt growth story (population in-migration, corporate HQ relocations, BeltLine + transit investment) makes appreciation a more reliable bet here than in flat-population markets. For pure cash flow, smaller secondary metros like Birmingham or Memphis are better; for total return (cash flow + appreciation combined), Atlanta is hard to beat.",
+    a: "Atlanta is often evaluated with an appreciation thesis, but historical metro growth does not establish future rent, value, or total return for an address. Verify current rent and expenses, then compare flat, base, and downside growth scenarios rather than treating appreciation as the reliable part of the deal.",
   },
   {
     q: "Are there any Atlanta-specific rental regulations?",
-    a: "City of Atlanta requires a business license for landlords and an annual rental inspection certificate. Cost is modest (~$50-150/yr/property). Some Atlanta suburbs (Decatur, Avondale) have stricter rental occupancy or zoning rules — check the specific municipality. Georgia is broadly a landlord-friendly state for evictions and lease enforcement, which materially affects underwriting (faster turnover recovery, lower bad-debt assumption).",
+    a: "Licensing, inspection, occupancy, zoning, and landlord-tenant requirements depend on the property's municipality and current law. Verify the address with official local sources or qualified counsel; do not lower vacancy, bad debt, or legal-cost assumptions solely because of a state label.",
   },
   {
     q: "What about BRRRR in Atlanta?",
-    a: "Possible but tougher than Cleveland or Philly because the spread between purchase + rehab and ARV is smaller. ATL distressed properties in transitioning neighborhoods (West End, Capitol View, parts of South Atlanta) sell at $120-200k with ARVs of $200-280k after $40-70k rehab. The all-in vs. 75%-of-ARV-refi math works, but tighter than the classic Midwest BRRRR setups. Atlanta BRRRR investors increasingly focus on adding ADUs or converting SFR to legal 2-units to expand the ARV spread.",
+    a: "Atlanta contains BRRRR candidates, but a neighborhood range does not establish purchase price, rehab, legal unit count, ARV, appraisal, or refinance proceeds. Verify the address with current closed comps, contractor bids, permits and zoning, rent support, seasoning, appraisal downside, and written lender terms.",
   },
   {
     q: "What about short-term rentals (Airbnb) in Atlanta?",
@@ -245,24 +245,20 @@ export default function AtlantaMarketPage() {
 
           <h2 className="text-2xl sm:text-3xl">The appreciation-vs-cash-flow trade-off in Atlanta</h2>
           <p>
-            More than most markets, Atlanta forces investors to pick a
-            lane. Premium intown caps in the 3-5% range only pencil if
-            you believe Atlanta&apos;s growth thesis continues (which
-            it has, decisively, for 25+ years). South Atlanta cash-flow
-            plays at 8-11% caps look great until tenant quality + capex
-            on aging stock catches you.
+            Lower-cap-rate intown deals depend more heavily on future
+            rent and value assumptions, while higher-screening-cap-rate
+            properties may carry different condition, vacancy, and
+            management risks. Verify both at the address level.
           </p>
           <p>
-            <strong>The boring-but-correct ATL play:</strong> balanced
-            submarkets at 5-7%{" "}
-            <Link href="/glossary/cap-rate" className="font-semibold text-primary hover:underline">cap rates</Link>{" "}
-            with 3-4% expected appreciation, combined with principal
-            paydown and{" "}
-            <Link href="/glossary/tax-savings" className="font-semibold text-primary hover:underline">tax savings</Link>.
-            Total levered return in the 14-18% range with
-            real downside protection. Grant Park, East Atlanta Village,
-            parts of West End, parts of Smyrna/Marietta all fit this
-            profile.
+            <strong>A scenario worth testing:</strong> a balanced
+            submarket screen with a supported range of{" "}
+            <Link href="/glossary/cap-rate" className="font-semibold text-primary hover:underline">cap rates</Link>,
+            property-specific financing, and flat, base, and downside
+            rent and appreciation cases. Principal paydown and any
+            taxpayer-specific tax effect should be modeled separately;
+            no neighborhood range guarantees total return or downside
+            protection.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">Atlanta-specific underwriting notes</h2>
@@ -290,13 +286,13 @@ export default function AtlantaMarketPage() {
             are worth watching.
           </p>
 
-          <h3>Landlord-friendly eviction law</h3>
+          <h3>Verify landlord-tenant procedure</h3>
           <p>
-            Georgia evictions move faster than most blue states — 30-45
-            days from non-payment to lockout if uncontested. This
-            materially affects underwriting: assume lower vacancy
-            recovery time + lower bad debt than you would in tenant-
-            friendly markets like NJ or CA.
+            Procedure and timing depend on the lease, notices, facts,
+            court, defenses, appeals, municipality, and current law.
+            Use property and manager history for vacancy and bad debt,
+            and consult current official guidance or qualified local
+            counsel instead of applying a state-level timeline.
           </p>
 
           <h3>Schools matter more than usual</h3>

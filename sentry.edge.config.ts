@@ -4,6 +4,11 @@
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
 import * as Sentry from "@sentry/nextjs";
+import {
+  scrubSentryBreadcrumbUrl,
+  scrubSentryEventSensitiveData,
+  scrubSentrySpanUrl,
+} from "@/lib/sentry-url-scrubber";
 
 Sentry.init({
   dsn: "https://273531778de80e317ca3e8cc6e1bf4ba@o4511448368480257.ingest.us.sentry.io/4511448369528832",
@@ -18,11 +23,26 @@ Sentry.init({
   // https://docs.sentry.io/platforms/javascript/guides/nextjs/configuration/options/#sendDefaultPii
   sendDefaultPii: true,
 
+  beforeBreadcrumb(breadcrumb) {
+    return scrubSentryBreadcrumbUrl(breadcrumb);
+  },
+
+  beforeSendSpan(span) {
+    return scrubSentrySpanUrl(span);
+  },
+
+  beforeSendTransaction(event) {
+    return scrubSentryEventSensitiveData(event);
+  },
+
   // PII scrubbing — mirrors sentry.server.config.ts. The edge layer
   // runs proxy.ts (every request's Supabase session refresh), so an
   // unscrubbed event here could carry the auth cookie or the user's
   // email. This config previously had NO beforeSend at all.
   beforeSend(event) {
+    // proxy/edge instrumentation observes the raw incoming URL before any
+    // browser code runs, so this is a required token-scrubbing boundary.
+    scrubSentryEventSensitiveData(event);
     const reqCookies = event.request?.cookies as
       | Record<string, string>
       | undefined;

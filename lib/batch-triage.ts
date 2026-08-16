@@ -27,6 +27,11 @@ import {
   type NamedBuyBox,
 } from "@/lib/buy-box";
 import type { DealRecommendation } from "@/lib/deal-score";
+import {
+  featureFlags,
+  isFeatureEnabled,
+  type FeatureFlagState,
+} from "@/lib/feature-flags";
 
 /** A single parsed listing (single-family v1). */
 export interface TriageListingInput {
@@ -71,9 +76,19 @@ export interface TriageRowResult {
 
 export type TriageSort = "score" | "cashFlow" | "fit";
 
-/** Max listings screened per batch — bounds enrichment cost + keeps the
- *  shortlist scannable. Enforced again server-side. */
-export const MAX_TRIAGE_ROWS = 10;
+/** Preserve the proven live limit until the expanded workflow is enabled. */
+export const LEGACY_MAX_TRIAGE_ROWS = 10;
+/** Expanded batch-underwriting release limit requested for v2. */
+export const BATCH_UNDERWRITING_MAX_TRIAGE_ROWS = 50;
+
+export function resolveMaxTriageRows(flags: FeatureFlagState = featureFlags): number {
+  return isFeatureEnabled("batch_underwriting", flags)
+    ? BATCH_UNDERWRITING_MAX_TRIAGE_ROWS
+    : LEGACY_MAX_TRIAGE_ROWS;
+}
+
+/** Build-time row cap, enforced again in the authenticated server action. */
+export const MAX_TRIAGE_ROWS = resolveMaxTriageRows();
 
 // ── Parsing ────────────────────────────────────────────────────────────────
 

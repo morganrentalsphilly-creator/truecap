@@ -74,11 +74,11 @@ const TOOLS = [
     freeCovers: [
       "Plug AirDNA monthly revenue into rent field; run full cap rate / DSCR / cash flow",
       "Compare LTR vs STR scenarios on same property",
-      "STR-aware tax strategy (Pro — bonus depreciation, cost seg)"
+      "Illustrative tax impact (Pro — straight-line depreciation + interest)"
     ],
     freeGates: [
-      "12-month seasonal income breakdown (Pro)",
-      "Sensitivity grid stress-tests STR revenue ±10% (Pro)"
+      "Sensitivity grid stress-tests STR revenue ±10% (Pro)",
+      "Seasonal months require separate saved scenarios"
     ],
     pickIf: "You have AirDNA's revenue projection and need to turn it into a buy/no-buy decision.",
   },
@@ -153,7 +153,7 @@ const FAQ_ITEMS = [
   { q: "AirDNA vs Mashvisor for STR — which one?", a: "AirDNA is more STR-specific and considered the gold standard for ADR / occupancy / RevPAR data. Mashvisor covers both STR and LTR plus broader market analysis. STR-primary investors lean AirDNA. Investors toggling between LTR and STR on the same property lean Mashvisor's broader scope." },
   { q: "Can TrueCap model short-term rental revenue?", a: "Yes, indirectly — every input in TrueCap is editable. Plug AirDNA's projected monthly STR revenue (gross income ÷ 12, discounted for vacancy + cleaning) into the rent field, run the full underwrite. TrueCap doesn't pull AirDNA data automatically; you copy the number across." },
   { q: "What management rate should I use for STR underwriting?", a: "Long-term rentals: 8-10%. Short-term rentals: 20-25% with a full-service PM (channel management + guest comms + cleaning coordination). If you self-manage, 0-5% (just covering software + cleaner coordination) but be honest about your time. TrueCap's management field is editable." },
-  { q: "Does TrueCap support the STR tax loophole?", a: "Yes — Pro tax strategy supports accelerated depreciation scenarios including bonus depreciation and cost segregation for STRs. The REPS / STR loophole framework can be incorporated. Always consult your CPA for the specific math; TrueCap provides the cash flow + depreciation timeline they need." },
+  { q: "Does TrueCap support the STR tax loophole?", a: "TrueCap does not determine STR-loophole eligibility or model cost-segregation components and bonus depreciation. Pro's Illustrative Tax Impact view models rental income, entered expenses, straight-line depreciation, and optional mortgage interest at your entered marginal rate. Use a CPA for material-participation, REPS, cost-segregation, and bonus-depreciation modeling." },
 ];
 
 const DECISION_LINES: Array<{ q: string; a: string }> = [

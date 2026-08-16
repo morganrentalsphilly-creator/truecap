@@ -46,7 +46,7 @@ const MATRIX: Row[] = [
   { feature: "STR revenue projection (ADR + occupancy)", truecap: "Manual — plug monthly revenue into rent field", mashvisor: "Yes — automated from Airbnb data", winner: "mashvisor" },
   { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", mashvisor: "Listing-level cap rate based on assumed inputs", winner: "truecap" },
   { feature: "Mortgage + financing math (PITI + amortization)", truecap: "Yes — full", mashvisor: "Limited", winner: "truecap" },
-  { feature: "Tax strategy modeling", truecap: "Pro — depreciation + interest + after-tax CF (incl. STR loophole)", mashvisor: "Not modeled", winner: "truecap" },
+  { feature: "Illustrative tax impact", truecap: "Pro — straight-line depreciation + interest + modeled after-tax CF; no STR-eligibility determination", mashvisor: "Not modeled", winner: "truecap" },
   { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", mashvisor: "Forward STR revenue forecast", winner: "tie" },
   { feature: "Deal score + verdict", truecap: "Free — 0-100 score + plain-English verdict", mashvisor: "Investibility score per property", winner: "tie" },
   { feature: "Address auto-fill (rent/rate/tax)", truecap: "Yes — HUD + FRED + state property tax", mashvisor: "STR-focused; LTR rent estimates included", winner: "tie" },
@@ -79,17 +79,17 @@ const NICHE_FAQ: FaqItem[] = [
     question: "Does Mashvisor do underwriting?",
     answer: (
       <>
-        Sort of — Mashvisor shows listing-level cap rate estimates based on its assumed inputs (rent, vacancy, expenses). It doesn&apos;t do per-deal underwriting at TrueCap&apos;s depth (DSCR, sensitivity, projection, tax strategy). Mashvisor narrows the field; TrueCap turns the shortlist into decisions.
+        Sort of — Mashvisor shows listing-level cap rate estimates based on its assumed inputs (rent, vacancy, expenses). It doesn&apos;t do per-deal underwriting at TrueCap&apos;s depth (DSCR, sensitivity, projection, and illustrative tax impact). Mashvisor narrows the field; TrueCap turns the shortlist into decisions.
       </>
     ),
     plainTextAnswer:
-      "Sort of — listing-level cap rate from assumed inputs. Not deep per-deal underwriting (no DSCR, sensitivity, projection, tax strategy). Mashvisor narrows; TrueCap decides.",
+      "Sort of — listing-level cap rate from assumed inputs. Not deep per-deal underwriting (no DSCR, sensitivity, projection, or tax-impact view). Mashvisor narrows; TrueCap decides.",
   },
   {
     question: "Can I use TrueCap free with Mashvisor data?",
     answer: (
       <>
-        Yes. TrueCap free covers cap rate, CoC, DSCR, cash flow on every analysis. Pull Mashvisor&apos;s projected monthly STR revenue, override TrueCap&apos;s HUD rent field with it, run the analysis. Pro adds projections + tax strategy + sensitivity if you need them.
+        Yes. TrueCap free covers cap rate, CoC, DSCR, cash flow on every analysis. Pull Mashvisor&apos;s projected monthly STR revenue, override TrueCap&apos;s HUD rent benchmark with it, run the analysis. Pro adds projections + illustrative tax impact + sensitivity if you need them.
       </>
     ),
     plainTextAnswer:
@@ -174,7 +174,7 @@ export default function VsMashvisorForShortTermRentalsPage() {
               </p>
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
                 <li>You want a full underwriting analysis with cap rate, DSCR, cash flow on a specific STR.</li>
-                <li>You want financing math (PITI, amortization) and tax strategy modeling.</li>
+                <li>You want financing math (PITI, amortization) and an illustrative tax-impact model.</li>
                 <li>You&apos;re comparing LTR vs STR scenarios on the same property.</li>
                 <li>You want a free tier that doesn&apos;t cap analyses.</li>
               </ul>
@@ -260,7 +260,7 @@ export default function VsMashvisorForShortTermRentalsPage() {
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             Free covers the standard cap rate, CoC, DSCR, and cash flow. Pro unlocks
-            projections, sensitivity, tax strategy, exit scenarios, MAO,
+            projections, sensitivity, illustrative tax impact, modeled exit comparisons, MAO,
             and PDF exports.
           </p>
           <div className="flex flex-wrap gap-3">

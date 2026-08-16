@@ -119,6 +119,24 @@ describe("nextActionForDeal", () => {
       expect(a.label).toBe("Follow up on your offer");
     });
 
+    it("negotiating stage keeps the advice aligned with the live terms", () => {
+      const blocked = nextActionForDeal({ netCashFlow: -120, stage: "negotiating" });
+      expect(blocked).toEqual({
+        label: "Renegotiate or walk away",
+        reason: "cash flow is negative at these assumptions",
+        tone: "blocked",
+      });
+      const ready = nextActionForDeal({
+        netCashFlow: 400,
+        dscr: 1.5,
+        monthlyPayment: 1400,
+        meetsBuyBox: true,
+        stage: "negotiating",
+      });
+      expect(ready.label).toBe("Finalize the negotiated terms");
+      expect(ready.tone).toBe("ready");
+    });
+
     it("under contract rephrases a blocker around the contingency window", () => {
       const a = nextActionForDeal({ netCashFlow: 50, dscr: 0.95, monthlyPayment: 1400, stage: "under_contract" });
       expect(a.tone).toBe("blocked");
@@ -216,6 +234,13 @@ describe("nextActionFromVerdict", () => {
       const ready = nextActionFromVerdict({ recommendation: "Strong Buy", netCashFlow: 400, stage: "offer" });
       expect(ready.tone).toBe("ready");
       expect(ready.label).toBe("Follow up on your offer");
+    });
+
+    it("negotiating stage rephrases blockers and the ready path", () => {
+      const blocked = nextActionFromVerdict({ recommendation: "Avoid", netCashFlow: 100, stage: "negotiating" });
+      expect(blocked.label).toBe("Renegotiate or walk away");
+      const ready = nextActionFromVerdict({ recommendation: "Strong Buy", netCashFlow: 400, stage: "negotiating" });
+      expect(ready.label).toBe("Finalize the negotiated terms");
     });
 
     it("under contract rephrases blockers and routes ready deals to due diligence", () => {

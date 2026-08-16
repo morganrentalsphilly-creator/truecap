@@ -26,7 +26,7 @@ const SERP_TITLE = "Vacancy rate for rentals: what to assume in 2026";
 const DESCRIPTION =
   "How to pick a vacancy assumption that matches reality: physical vs economic vacancy, the turnover math behind the number, and what 5 points does to DSCR.";
 const PUBLISHED_AT = "2026-06-07";
-const MODIFIED_AT = "2026-06-07";
+const MODIFIED_AT = "2026-08-15";
 const READING_TIME = 10;
 
 export const metadata: Metadata = {
@@ -65,7 +65,7 @@ const FAQS = [
   },
   {
     q: "How does vacancy affect DSCR?",
-    a: "Two ways. In your own underwrite, vacancy reduces effective income, which reduces NOI dollar-for-dollar — and because NOI sits on top of fixed debt service, a 5-point vacancy swing can move DSCR by 0.10 or more, often across a lender's 1.20-1.25 floor. At the loan desk, most DSCR lenders qualify on gross market rent ÷ PITIA without a vacancy haircut — which means the lender may approve a loan the property's real collected income can't comfortably service. Passing the lender's test is not the same as the deal working.",
+    a: "In an NOI-based operating model, higher vacancy reduces effective income and DSCR. Lender formulas vary: some programs use specified rent evidence and PITIA with different adjustments. Obtain the exact written formula and requirements, and keep a separate operating calculation that includes vacancy and expenses. Approval is not validation of the deal's cash flow.",
   },
   {
     q: "What is the average rental vacancy rate in the US?",
@@ -315,18 +315,18 @@ export default function VacancyRatePost() {
             >
               DSCR loans
             </Link>
-            : most DSCR lenders qualify the loan on <strong>gross market
-            rent ÷ PITIA</strong> — no vacancy haircut at all. The appraiser
-            fills out a rent schedule (the 1007 form), the lender divides by
-            your payment, and if the ratio clears 1.0-1.25 the loan works.
+            : some programs use specified rent evidence divided by
+            <strong> PITIA</strong>, while others apply different adjustments.
+            Ask for the exact written formula, accepted rent evidence,
+            threshold, and full eligibility rules.
           </p>
           <p>
             On the duplex above: $2,800 gross rent against roughly $1,922 of
-            PITIA is a 1.46 lender DSCR — comfortably approved. But your
+            PITIA is 1.46 under that illustrative formula. But your
             own NOI-based coverage at 10% economic vacancy was 1.06. The
-            lender&apos;s test says yes; the property&apos;s actual collected
-            income barely covers the payment after real-world expenses. The
-            gap between those two numbers is risk you carry, not the bank.
+            operating scenario has much less coverage after expenses. The
+            gap between those two formulas is risk to investigate; neither
+            number guarantees approval or future collections.
             Run both versions in the{" "}
             <Link
               href="/tools/dscr-calculator"

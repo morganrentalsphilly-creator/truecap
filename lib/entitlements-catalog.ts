@@ -92,7 +92,7 @@ export interface FeatureSpec {
  */
 export const FEATURE_CATALOG: Record<FeatureKey, FeatureSpec> = {
   cash_flow: { key: "cash_flow", label: "Cap rate · CoC · DSCR · cash flow", tiers: ["free", "one_time_pdf", "pro", "agent_pro"], category: "core", gate: "flag" },
-  address_autofill: { key: "address_autofill", label: "Auto-fill defaults from the address (HUD rent · FRED rate · state tax)", tiers: ["free", "one_time_pdf", "pro", "agent_pro"], category: "data", gate: "always" },
+  address_autofill: { key: "address_autofill", label: "Auto-fill screening defaults (HUD rent benchmark · FRED owner-occupied rate benchmark · state tax estimate)", tiers: ["free", "one_time_pdf", "pro", "agent_pro"], category: "data", gate: "always" },
   deal_score: { key: "deal_score", label: "Deal Score 0–100 with subscore breakdown", tiers: ["free", "one_time_pdf", "pro", "agent_pro"], category: "core", gate: "flag" },
   verdict: { key: "verdict", label: "Plain-English deal verdict", tiers: ["free", "one_time_pdf", "pro", "agent_pro"], category: "core", gate: "always" },
   comps: { key: "comps", label: "Sale + rent comps from the address", tiers: ["free", "pro", "agent_pro"], freeLimit: "1 lifetime lookup", proLimit: "50/mo", category: "data", gate: "flag" },
@@ -104,9 +104,12 @@ export const FEATURE_CATALOG: Record<FeatureKey, FeatureSpec> = {
   sensitivity: { key: "sensitivity", label: "Sensitivity grid — stress-test the deal", tiers: ["pro", "agent_pro"], category: "analysis", gate: "paid" },
   strategies: { key: "strategies", label: "BRRRR + fix-and-flip + rehab estimator", tiers: ["pro", "agent_pro"], category: "analysis", gate: "paid" },
   projections: { key: "projections", label: "10-year cash flow & equity projection", tiers: ["one_time_pdf", "pro", "agent_pro"], oneTimeLimit: "In the PDF", category: "analysis", gate: "flag" },
-  tax_strategy: { key: "tax_strategy", label: "Tax strategy — depreciation & interest", tiers: ["one_time_pdf", "pro", "agent_pro"], oneTimeLimit: "In the PDF", category: "analysis", gate: "flag" },
-  exit_scenarios: { key: "exit_scenarios", label: "Exit scenarios — best year to sell", tiers: ["one_time_pdf", "pro", "agent_pro"], oneTimeLimit: "In the PDF", category: "analysis", gate: "flag" },
-  pdf_export: { key: "pdf_export", label: "Lender-ready PDF report with sale + rent comps", tiers: ["one_time_pdf", "pro", "agent_pro"], freeLimit: "$5 one-time per deal", oneTimeLimit: "One deal", proLimit: "unlimited", category: "reporting", gate: "flag" },
+  tax_strategy: { key: "tax_strategy", label: "Illustrative tax impact — depreciation & interest", tiers: ["one_time_pdf", "pro", "agent_pro"], oneTimeLimit: "In the PDF", category: "analysis", gate: "flag" },
+  exit_scenarios: { key: "exit_scenarios", label: "Exit scenarios — modeled hold-year comparison", tiers: ["one_time_pdf", "pro", "agent_pro"], oneTimeLimit: "In the PDF", category: "analysis", gate: "flag" },
+  // Comps are a separate entitlement above. An anonymous one-time buyer can
+  // purchase the Pack without an account or saved comp set, so bundling comps
+  // into this label would promise content the generated report may not have.
+  pdf_export: { key: "pdf_export", label: "Deal Decision Pack PDF", tiers: ["one_time_pdf", "pro", "agent_pro"], freeLimit: "one-time per deal", oneTimeLimit: "One deal", proLimit: "unlimited", category: "reporting", gate: "flag" },
   custom_branding: { key: "custom_branding", label: "Custom branding — PDFs + co-branded lead-capture share pages", tiers: ["pro", "agent_pro"], category: "reporting", gate: "flag" },
   // Sharing is FREE for everyone (the growth loop): basic links are TrueCap-branded.
   // Pro adds co-branded share pages + lead capture via `custom_branding` (separate key).

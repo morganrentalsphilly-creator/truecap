@@ -22,9 +22,9 @@ const TITLE = "How to refinance a rental property — rate-and-term, cash-out, a
 // window. The on-page <h1> keeps the longer editorial TITLE.
 const SERP_TITLE = "How to refinance a rental property (2026)";
 const DESCRIPTION =
-  "Step-by-step on refinancing a rental property: when refi makes sense, rate-and-term vs cash-out, LTV limits, DSCR loans, the break-even math, and the 5 mistakes most investors make.";
+  "Step-by-step on refinancing a rental property: rate-and-term vs cash-out, program-specific LTV and DSCR considerations, illustrative break-even math, and five mistakes to avoid.";
 const PUBLISHED_AT = "2026-05-26";
-const MODIFIED_AT = "2026-06-01";
+const MODIFIED_AT = "2026-08-15";
 const READING_TIME = 10;
 
 export const metadata: Metadata = {
@@ -55,23 +55,23 @@ export const metadata: Metadata = {
 const FAQS = [
   {
     q: "When does it make sense to refinance a rental property?",
-    a: "Three scenarios. (1) Rate drop of 0.75% or more from your current rate, with a holding plan past the break-even (typically 24-36 months). (2) You need to pull equity for the next deal — cash-out refi recycles capital. (3) You want to remove a co-borrower or restructure terms (interest-only to amortizing, ARM to fixed). If none of those apply, the closing costs ($4-8k typical on an investment property) usually outweigh the savings.",
+    a: "There is no universal rate-drop or break-even threshold. A refinance may be considered to change rate or term, seek cash out, remove a borrower, or restructure debt. Compare the current payoff and complete written loan estimate — including points, lender fees, third-party costs, prepayment terms, and expected holding period — with the projected savings and risks.",
   },
   {
     q: "What's the difference between rate-and-term and cash-out refi?",
-    a: "Rate-and-term refi: you replace your existing loan with a new loan of the same balance at a better rate (or different term). No cash comes out. Closing costs are paid from savings or rolled into the loan. Cash-out refi: the new loan is LARGER than the existing balance, and you take the difference in cash at closing. Cash-out has slightly higher rates (10-25bp typically) and lower max LTV (usually 75% on investment property, vs 80% for rate-and-term).",
+    a: "A rate-and-term refinance primarily changes the existing debt's rate, term, or structure; a cash-out refinance seeks a larger new balance and returns eligible net proceeds after payoff and costs. Programs can treat pricing, leverage, and financed costs differently. Available cash depends on appraisal and full underwriting, so verify the current written terms rather than assuming a fixed premium or LTV.",
   },
   {
     q: "What's the maximum LTV on an investment property refi?",
-    a: "Conventional rate-and-term: typically 75-80% LTV. Conventional cash-out: 75% LTV. DSCR (non-QM) cash-out: typically 70-75% LTV depending on the lender. Most cash-out refis on investment properties cap at 75% — that's the practical ceiling. Above that, you're either in primary-residence territory or paying significant rate premium.",
+    a: "There is no universal maximum. LTV varies by program, units, occupancy, property type, loan purpose, seasoning and value basis, credit, coverage or DTI, and lender overlays. Ask each lender to confirm the current cap and eligible appraised-value basis for your file; an LTV calculation alone is not an approval.",
   },
   {
     q: "Do I need to season the property before refinancing?",
-    a: "Yes, in most cases. Conventional lenders typically require 6 months from purchase before allowing a cash-out refi. The 'delayed financing' rule lets you avoid the 6-month seasoning IF you bought cash AND meet certain other criteria. DSCR lenders often allow 0-3 month seasoning but at lower max LTV. Plan the timing carefully — a BRRRR that requires fast cash-out refi needs DSCR financing or the delayed-financing route.",
+    a: "Seasoning and the eligible value basis vary by loan program, transaction history, property type, and lender. Conventional, delayed-financing, portfolio, and DSCR rules are not interchangeable. Before relying on a refinance timeline, ask the lender to confirm in writing the required ownership period, value basis, documentation, and maximum leverage for this property.",
   },
   {
     q: "Are DSCR refis a good option?",
-    a: "Depends on your situation. DSCR (Debt Service Coverage Ratio) loans qualify the property, not you — useful when your personal DTI doesn't pencil conventional, or when you've maxed out conventional loan slots (Fannie/Freddie cap individual borrowers at 10 financed properties). DSCR rates run 100-200bp higher than conventional. Use DSCR when conventional isn't available; default to conventional when it is.",
+    a: "It depends on your situation and current quotes. DSCR programs primarily use property coverage rather than personal DTI, but still apply borrower, credit, reserve, entity, appraisal, insurance, and program requirements. Compare DSCR, conventional, and portfolio options on total cost, leverage, recourse, prepayment terms, documentation, and exit plan; no fixed rate premium applies to every file.",
   },
 ];
 
@@ -125,7 +125,9 @@ export default function RefinancePost() {
             {new Date(PUBLISHED_AT).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })} · {READING_TIME} min read
           </p>
           <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
-            Refinancing a rental property is one of the most underused levers in real estate investing. Done right, it recycles capital, lowers your monthly payment, or both. Done wrong, it costs $4-8k in closing fees with little to show for it. Here&apos;s how to know which case you&apos;re in.
+            Refinancing can change a rental&apos;s payment, term, risk, or available
+            equity, but it also adds quote-specific costs and underwriting risk.
+            Here&apos;s how to compare the structures without assuming approval.
           </p>
         </header>
 
@@ -137,13 +139,21 @@ export default function RefinancePost() {
 
           <h3 className="text-xl font-bold text-foreground mt-6 mb-2">Reason 1: Rate-and-term refi to lower the payment</h3>
           <p>
-            You currently pay X% rate. Current market rate is meaningfully lower. You refi to the lower rate, same loan balance, and your monthly payment drops by $100-500.
+            If a current written quote is meaningfully better than the existing
+            note, a rate-and-term refinance may lower the payment. The result
+            depends on balance, rate, amortization, fees, and term.
           </p>
           <p>
-            <strong>The math:</strong> closing costs ($4-8k typical on investment property) divided by monthly savings = break-even months. If you&apos;ll hold past the break-even, refi. If you&apos;ll sell or refi again before, skip.
+            <strong>The math:</strong> complete quoted closing costs divided by
+            modeled monthly savings = simple break-even months. Include points,
+            lender and third-party fees, any existing prepayment cost, changed
+            amortization, and omitted tax effects before deciding.
           </p>
           <p>
-            Example: $300k loan. Current rate 7.5%, payment $2,098. Refi to 6.5%, payment $1,896. Savings $202/mo. Closing costs $5,500. Break-even = 27 months. If you&apos;ll hold past 27 months, refi.
+            Illustration only: $300k loan. Current rate 7.5%, payment $2,098.
+            Refi to 6.5%, payment $1,896. Savings $202/mo. Closing costs $5,500.
+            Simple break-even = 27 months. Actual quotes, payments, costs, and
+            the appropriate decision may differ.
           </p>
           <p>
             See our <Link href="/glossary/interest-rate" className="text-primary font-semibold hover:underline">interest rate</Link> and <Link href="/glossary/loan-term" className="text-primary font-semibold hover:underline">loan term</Link> glossary entries for more on how rate + term interact.
@@ -151,16 +161,26 @@ export default function RefinancePost() {
 
           <h3 className="text-xl font-bold text-foreground mt-6 mb-2">Reason 2: Cash-out refi to recycle capital</h3>
           <p>
-            The property has appreciated since you bought. You refi at the new higher value, pulling out the equity in cash to fund your next deal.
+            If the lender accepts a higher appraised value and approves a
+            cash-out loan, some eligible equity may become net proceeds after
+            the existing payoff, fees, reserves, and closing costs.
           </p>
           <p>
-            <strong>The math:</strong> new loan = 75% of current value. Existing loan gets paid off. Difference (minus closing costs) = cash to you. The cost: higher monthly payment on the larger loan + higher rate (cash-out typically 10-25bp above rate-and-term).
+            <strong>Illustrative math:</strong> assume the selected program
+            permits a new loan at 75% of lender-accepted value. Existing debt
+            gets paid off; the remainder after all costs is modeled cash to the
+            borrower. Actual pricing and leverage are quote-specific.
           </p>
           <p>
-            Example: Bought property for $300k with $225k loan. Value now $400k. Cash-out refi at 75% LTV = $300k new loan. After paying off $225k existing balance and $6k closing, $69k of cash to you. Now you have $69k to deploy on the next deal.
+            Example: bought property for $300k with a $225k loan. Assume the
+            lender accepts a $400k appraisal and approves 75% LTV: $300k modeled
+            gross principal. After a $225k payoff and $6k assumed closing costs,
+            the illustration produces $69k; neither the value, approval, nor net
+            proceeds are guaranteed.
           </p>
           <p>
-            Cash-out is the engine of the <Link href="/blog/how-to-find-off-market-rental-properties" className="text-primary font-semibold hover:underline">BRRRR strategy</Link> and any portfolio-scaling plan that doesn&apos;t rely on adding outside capital.
+            Cash-out refinancing is one possible capital-recycling step in a{" "}
+            <Link href="/blog/how-to-find-off-market-rental-properties" className="text-primary font-semibold hover:underline">BRRRR strategy</Link>, subject to appraisal, proceeds, and approval.
           </p>
 
           <h3 className="text-xl font-bold text-foreground mt-6 mb-2">Reason 3: Restructure terms</h3>
@@ -171,70 +191,114 @@ export default function RefinancePost() {
             <li><strong>ARM to fixed</strong> — locking in a fixed rate before your ARM resets</li>
             <li><strong>Interest-only to amortizing</strong> — your IO period is ending and you want to refi rather than face the payment shock</li>
             <li><strong>Removing a co-borrower</strong> — partnership dissolution, divorce, family arrangement changes</li>
-            <li><strong>Changing entity</strong> — moving the loan into an LLC structure for asset protection</li>
+            <li><strong>Changing borrower or entity</strong> — some products permit entity borrowing, but title, existing-loan, insurance, tax, guaranty, and legal consequences require lender and professional review</li>
           </ul>
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">The loan types available</h2>
           <h3 className="text-xl font-bold text-foreground mt-6 mb-2">Conventional (Fannie Mae / Freddie Mac)</h3>
           <p>
-            The default. Best rates (typically 50-100bp lower than DSCR), strongest terms, but stricter qualification (DTI, income docs, asset reserves). Investment property cash-out cap: typically 75% LTV. Individual borrowers limited to 10 financed properties total.
+            Eligible conventional agency programs may offer competitive
+            pricing, but DTI, documentation, reserves, appraisal, occupancy,
+            financed-property, and lender-overlay rules apply. Pricing,
+            leverage, and eligibility are file-specific; verify the current
+            program guide and written quote.
           </p>
 
           <h3 className="text-xl font-bold text-foreground mt-6 mb-2">DSCR (non-QM)</h3>
           <p>
-            See our <Link href="/blog/dscr-loans-explained" className="text-primary font-semibold hover:underline">DSCR loans deep dive</Link> for the full picture. DSCR loans qualify on the property&apos;s cash flow, not your income. Useful when conventional doesn&apos;t work — high-DTI buyers, self-employed without easy income docs, investors past the 10-property conventional cap. Rate premium: 100-200bp. Lower max LTV than conventional. See the <Link href="/glossary/dscr" className="text-primary font-semibold hover:underline">DSCR</Link> glossary entry for the math.
+            See our <Link href="/blog/dscr-loans-explained" className="text-primary font-semibold hover:underline">DSCR loans deep dive</Link> for the full picture. These programs primarily underwrite the property&apos;s coverage rather than using personal DTI as the main ratio, while still reviewing borrower and property risks. They can be useful when conventional income rules or financed-property limits constrain a file. Pricing, leverage, documentation, recourse, and prepayment terms vary, so compare current written quotes. See the <Link href="/glossary/dscr" className="text-primary font-semibold hover:underline">DSCR</Link> glossary entry for the math.
           </p>
 
           <h3 className="text-xl font-bold text-foreground mt-6 mb-2">Commercial / portfolio loans</h3>
           <p>
-            For 5+ unit properties or investors with portfolios above conventional limits. Rates typically 50-150bp above conventional. Terms vary widely (5/1 ARM with 25-year amortization is common). LTV often 70-75%. Faster underwriting than conventional but more expensive long-term.
+            Commercial and portfolio structures may address properties or
+            borrower situations outside a selected conventional program, but
+            rate, term, amortization, leverage, documentation, recourse, and
+            timing vary widely. Obtain current written proposals and compare
+            total cost and exit risk.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">The refi process — typical timeline</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">The refi process — stages to plan for</h2>
+          <p>
+            This is a process outline, not a promised timeline. Lender workload,
+            appraisal availability, property complexity, title, insurance,
+            borrower responsiveness, and underwriting conditions can materially
+            change timing and cost. An application or appraisal does not
+            guarantee clear-to-close.
+          </p>
           <ol>
-            <li><strong>Day 1-7:</strong> shop 3-5 lenders (the spread is wider than you think — often 30-50bp from worst to best quote)</li>
-            <li><strong>Day 7-14:</strong> formally apply with chosen lender; submit income docs, asset statements, current mortgage statement, insurance declarations, rent rolls (for multi-unit)</li>
-            <li><strong>Day 14-30:</strong> appraisal ordered (typically $500-700 for SFR, $1,000-2,000 for multi-unit)</li>
-            <li><strong>Day 30-45:</strong> underwriting review; expect to provide 2-5 rounds of additional documentation</li>
-            <li><strong>Day 45-60:</strong> clear to close, schedule closing</li>
-            <li><strong>Day 60-65:</strong> closing — sign documents, new loan funds, old loan paid off, any cash-out proceeds wired</li>
+            <li><strong>Compare:</strong> request same-day written quotes using the same lock period, loan purpose, value, and assumptions.</li>
+            <li><strong>Apply:</strong> submit the documents required for the chosen borrower, property, and program.</li>
+            <li><strong>Validate collateral:</strong> complete appraisal, title, insurance, payoff, and any lease or rent review.</li>
+            <li><strong>Clear underwriting:</strong> answer conditions and review final rate, points, fees, cash to close, recourse, and prepayment terms.</li>
+            <li><strong>Close only after approval:</strong> sign final documents; funding, payoff, and any proceeds follow the lender&apos;s closing process.</li>
           </ol>
           <p>
-            Total: 45-65 days from application to close on most rate-and-term refis. Cash-out refis sometimes faster (45-50 days) because lenders process them frequently.
+            Ask the lender and settlement provider for a file-specific schedule
+            and preserve contingency time; do not tie a purchase or bridge-loan
+            maturity to an advertised turnaround.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">The 5 most common mistakes</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">Five refinance mistakes to avoid</h2>
           <h3 className="text-xl font-bold text-foreground mt-6 mb-2">1. Refi-ing too early (before break-even works)</h3>
           <p>
-            If you&apos;ll sell or refi again before the break-even, the math doesn&apos;t work. The closing costs eat the savings. Always run break-even before committing.
+            If you&apos;ll sell or refinance again before the modeled break-even,
+            quoted costs may exceed the projected savings. Run the complete
+            break-even comparison before committing.
           </p>
 
           <h3 className="text-xl font-bold text-foreground mt-6 mb-2">2. Not shopping 3+ lenders</h3>
           <p>
-            The spread between best and worst lender quote on the same deal is typically 30-50bp. On a $300k loan over 30 years, 30bp of difference is $50/mo or $18k of lifetime interest. Always shop — the 2 hours of work returns thousands.
+            Shop multiple same-day quotes using identical assumptions and
+            compare rate, points, lender credits, fees, prepayment terms,
+            recourse, and cash to close. As an illustration, if otherwise
+            comparable $300k, 30-year quotes differ by 30bp, the modeled
+            difference is about $50/month or $18k over the full term; actual
+            quote spreads and realized savings vary.
           </p>
 
           <h3 className="text-xl font-bold text-foreground mt-6 mb-2">3. Pulling too much cash out at the top of the market</h3>
           <p>
-            Cash-out refis at peak market value feel great until the next downturn. If you cash-out 75% LTV and values drop 15%, you&apos;re at 88% LTV with limited refi options. Build a buffer — don&apos;t cash out to the absolute max unless you have a specific high-confidence deployment for the cash.
+            In a simplified illustration that ignores principal paydown, a loan
+            initially at 75% LTV would be about 88% LTV after a 15% value
+            decline. Actual value and future refinance options may differ.
+            Stress-test a lower appraisal and leave a liquidity buffer.
           </p>
 
           <h3 className="text-xl font-bold text-foreground mt-6 mb-2">4. Ignoring DSCR options when conventional won&apos;t fit</h3>
           <p>
-            Investors who&apos;ve hit their conventional loan cap (10 properties) often think they can&apos;t refi at all. DSCR refis exist for exactly this case. The rate is higher but the refi is still doable.
+            When a file does not fit a selected conventional program, a DSCR or
+            portfolio program may be another option. Eligibility, pricing,
+            leverage, appraisal, reserves, property rules, documentation, and
+            approval remain lender- and file-specific.
           </p>
 
           <h3 className="text-xl font-bold text-foreground mt-6 mb-2">5. Refusing to refi for &quot;just&quot; 50bp</h3>
           <p>
-            On a $400k loan held 10 years, a 50bp rate difference is ~$120/mo and ~$36k of lifetime interest. Even with $6k of closing costs, the break-even is 50 months and you keep collecting savings for 5+ years after. &quot;Only&quot; 50bp is often worth doing.
+            In this stated illustration, a $400k loan held 10 years with a 50bp
+            rate difference changes the modeled payment by about $120/month and
+            interest by about $36k over the stated comparison. With $6k of
+            assumed costs, the simple break-even is 50 months before omitted
+            costs or tax effects. Use the actual quote and expected hold period
+            rather than treating 50bp as an automatic refinance signal.
           </p>
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">Run the math before you commit</h2>
           <p>
-            Refi decisions hinge on rate, term, closing costs, and hold period. Run the scenarios in <Link href="/" className="text-primary font-semibold hover:underline">TrueCap</Link> — it&apos;ll show you current-rate vs refi-rate cash flow + break-even + total interest paid side-by-side. Pro&apos;s A/B mortgage compare puts both scenarios in one view so you can decide in 60 seconds whether the refi is worth doing.
+            Refi decisions hinge on rate, term, closing costs, and hold period.
+            Run user-entered scenarios in <Link href="/" className="text-primary font-semibold hover:underline">TrueCap</Link> to compare modeled cash flow,
+            break-even, and interest. TrueCap is not a lender quote, appraisal,
+            underwriting decision, or approval; replace every assumption with
+            the current written terms for your file.
           </p>
           <p>
             Related reading: <Link href="/blog/cap-rate-vs-cash-on-cash-vs-dscr" className="text-primary font-semibold hover:underline">cap rate vs CoC vs DSCR</Link> for how refi changes each metric, and <Link href="/blog/dscr-loans-explained" className="text-primary font-semibold hover:underline">DSCR loans explained</Link> for when DSCR refi is the right choice.
+          </p>
+          <p className="text-sm text-muted-foreground">
+            General educational information, not a loan quote or approval.
+            Verify current written pricing, leverage, seasoning, value basis,
+            appraisal, DSCR or DTI treatment, credit, reserves, documentation,
+            recourse, prepayment terms, costs, and timing with the lender.
           </p>
         </div>
         </article>

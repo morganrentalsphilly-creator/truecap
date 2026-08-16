@@ -3,6 +3,11 @@
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
 import * as Sentry from "@sentry/nextjs";
+import {
+  scrubSentryBreadcrumbUrl,
+  scrubSentryEventSensitiveData,
+  scrubSentrySpanUrl,
+} from "@/lib/sentry-url-scrubber";
 
 Sentry.init({
   dsn: "https://273531778de80e317ca3e8cc6e1bf4ba@o4511448368480257.ingest.us.sentry.io/4511448369528832",
@@ -38,6 +43,21 @@ Sentry.init({
   // https://docs.sentry.io/platforms/javascript/guides/nextjs/configuration/options/#sendDefaultPii
   sendDefaultPii: true,
 
+  // Navigation/fetch/xhr breadcrumbs can carry the raw pre-cleanup URL even
+  // when event.request has already been scrubbed. Sanitize at breadcrumb
+  // creation and again in beforeSend below for defense in depth.
+  beforeBreadcrumb(breadcrumb) {
+    return scrubSentryBreadcrumbUrl(breadcrumb);
+  },
+
+  beforeSendSpan(span) {
+    return scrubSentrySpanUrl(span);
+  },
+
+  beforeSendTransaction(event) {
+    return scrubSentryEventSensitiveData(event);
+  },
+
   // PII scrubbing — sendDefaultPii includes cookies in event payloads,
   // which means the Supabase session cookie (`sb-*-auth-token`) would
   // be sent to Sentry on every event. If a Sentry data export were
@@ -45,6 +65,10 @@ Sentry.init({
   // impersonation. beforeSend hooks the event right before transport
   // and strips the auth cookie + any Authorization header.
   beforeSend(event) {
+    // Checkout/OAuth capabilities must not survive in an error event's URL or
+    // parsed query string. This runs before transport even if React never
+    // mounted (for example, an early hydration exception).
+    scrubSentryEventSensitiveData(event);
     // Cookies arrive as the raw `cookie` header string in
     // event.request.cookies. Scrub anything that looks like a
     // Supabase auth token.

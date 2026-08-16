@@ -11,13 +11,18 @@ copy test cannot silently reprice a customer.
 - `NEXT_PUBLIC_TRUECAP_PRO_NAME=pro|offer_engine`
   - `pro` (default): “TrueCap Pro”
   - `offer_engine`: “TrueCap Offer Engine”
-- `NEXT_PUBLIC_SINGLE_DEAL_PRICE_VARIANT=current|p9|p19`
+- `NEXT_PUBLIC_SINGLE_DEAL_PRICE_VARIANT=current|p9|p15|p19`
   - `current` (default) keeps the production $5 Stripe Price.
   - `p9` requires `STRIPE_PRICE_SINGLE_DEAL_9`.
+  - `p15` requires `STRIPE_PRICE_SINGLE_DEAL_15`.
   - `p19` requires `STRIPE_PRICE_SINGLE_DEAL_19`.
-- `NEXT_PUBLIC_FIVE_DEAL_GUARANTEE=true|false`
-  - Off by default. Enable only after the refund policy and support workflow
-    have been approved. It never guarantees investment performance.
+- `NEXT_PUBLIC_TRUECAP_THREE_DEAL_GUARANTEE=true|false`
+  - Off by default and still renders nothing unless
+    `NEXT_PUBLIC_TRUECAP_GUARANTEE_TERMS_URL` is a valid HTTPS or local URL.
+  - Enable only after the refund policy and support workflow have been
+    approved. It never guarantees investment performance.
+- `NEXT_PUBLIC_FIVE_DEAL_GUARANTEE` remains a disabled legacy compatibility
+  switch; do not activate both offers.
 
 ### Guarantee activation gate
 

@@ -25,7 +25,7 @@ const TITLE = "Phoenix Rental Market Analysis 2026 — Cap Rates";
 const DESCRIPTION =
   "Neighborhood cap-rate map + Phoenix notes on STR rules and water/HOA risk. Run a Phoenix rental in 60 seconds — AZ tax and HUD rent auto-filled.";
 const PUBLISHED_AT = "2026-05-24";
-const MODIFIED_AT = "2026-06-01";
+const MODIFIED_AT = "2026-08-15";
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -59,7 +59,7 @@ const FAQS: { q: string; a: string }[] = [
   { q: "What about Phoenix water risk?", a: "Real but often overstated for short-to-medium-term rental investing. Arizona is in a long-term drought; CAP (Colorado River) allocations have been reduced multiple times in recent years. For a 5-10 year rental hold, this is unlikely to materially affect your property value or tenancy. For a 20-30 year hold, do your own research — some far-suburban developments (Pinal County, far West Valley) face higher water-allocation risk than core Phoenix metro." },
   { q: "Is Phoenix STR (Airbnb) still viable?", a: "Mixed. Arizona state law currently preempts most local STR bans, so cities CAN'T outright prohibit STRs — but they can require permits + collect taxes. Scottsdale, Sedona-adjacent properties, and pool-equipped SFR near major events (Spring Training, Phoenix Open) still produce strong STR economics. The economics rely heavily on the winter snowbird season (Nov-April); summer months are very slow. Underwrite STR with seasonal occupancy curves, not flat annual numbers." },
   { q: "Are HOAs an issue in Phoenix rentals?", a: "Bigger issue than in most markets. A significant share of post-2000 Phoenix construction is in HOAs (planned subdivisions with monthly fees + rental restrictions). Some HOAs cap rental percentages or require minimum lease terms. Always pull the HOA's CC&Rs and current financials BEFORE committing — both for the rental restrictions and the special-assessment risk (HOA reserves are often underfunded). Avoid any HOA whose financials you can't get quickly." },
-  { q: "How does Arizona's no-state-income-tax (low-tax) compare to TX or FL?", a: "Arizona has a flat 2.5% state income tax — among the lowest in the US, but not zero like TX or FL. For an investor in the 24-32% federal bracket, that's a small additional drag on after-tax cash flow vs. TX/FL. Combined with Arizona's very low property tax (~0.6% vs TX's 1.6-2.5%), Arizona often beats Texas on net carrying cost despite TX having no income tax. Run both states through TrueCap's tax model to compare." },
+  { q: "How does Arizona's state tax structure compare with Texas or Florida?", a: "Arizona levies an individual state income tax, while Texas and Florida do not. Arizona property-tax rates are often lower than Texas rates, but neither fact produces a universal winner: parcel assessments, residency, entity structure, passive-loss limits, insurance, and sale taxes all affect the result. Compare the properties with parcel-level operating costs, then ask a tax professional to review the taxpayer-specific state-tax treatment." },
 ];
 
 export default function PhoenixMarketPage() {

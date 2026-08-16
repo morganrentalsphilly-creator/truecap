@@ -7,6 +7,7 @@ import { AnnualPromoBanner } from '@/components/marketing/annual-promo-banner'
 import { PostHogProvider } from '@/components/analytics/posthog-provider'
 import { OverlayRecovery } from '@/components/ui/overlay-recovery'
 import { getSiteUrl } from '@/lib/site-url'
+import { oneTimePdfReturnBootstrapScript } from '@/lib/one-time-pdf-return'
 import './globals.css'
 
 const GOOGLE_ADS_ID = 'AW-8236119484'
@@ -153,8 +154,17 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${plusJakartaSans.variable} ${dmMono.variable} font-sans`}>
-      {process.env.NODE_ENV === 'production' && (
-        <head>
+      <head>
+        {/* Runs before every analytics/error-reporting script. It removes the
+            new non-secret PDF claim id — and destroys any legacy reusable
+            Checkout Session id — before a pageview or referrer can capture
+            either value. The claim binding secret never enters the URL. */}
+        <script
+          id="one-time-pdf-return-bootstrap"
+          dangerouslySetInnerHTML={{ __html: oneTimePdfReturnBootstrapScript() }}
+        />
+        {process.env.NODE_ENV === 'production' && (
+          <>
           {/* Preconnect to the slowest third-party we load — saves
               ~80-200ms on first paint by warming DNS + TLS to gtag's
               CDN before the actual <script src> evaluation starts.
@@ -218,8 +228,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 gtag('config', '${GOOGLE_ADS_ID}');`,
             }}
           />
-        </head>
-      )}
+          </>
+        )}
+      </head>
       <body className="font-sans antialiased bg-background text-foreground">
         {/* Google Tag Manager (noscript) — JS-disabled fallback for the
             loader above. Production-gated to match. */}

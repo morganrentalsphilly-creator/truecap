@@ -27,6 +27,8 @@ import { TEN_YEAR_PROJECTION_SNAPSHOT_VERSION } from "@/lib/ten-year-projections
 //       out of taxable income). Those bumped the in-app panel snapshot
 //       versions but not this constant, so cached PDFs kept re-serving
 //       over-sheltered after-tax numbers the dashboard no longer shows.
+//   6 - Trust-language pass: versioned underwriting-standard stamp plus
+//       explicit HUD/FRED, illustrative-tax, and modeled-exit disclosures.
 //
 // NOT bumped for the July 2026 "Your buy box" block: that block renders
 // ONLY for users with an active buy box, and those users' exports bypass
@@ -35,7 +37,7 @@ import { TEN_YEAR_PROJECTION_SNAPSHOT_VERSION } from "@/lib/ten-year-projections
 // block-carrying PDFs are stored uncacheable (see
 // PDF_CACHE_VERSION_UNCACHEABLE). Box-less users' PDFs stay byte-identical,
 // so flushing their caches with a bump would be pure regeneration waste.
-export const PDF_SNAPSHOT_VERSION = 5;
+export const PDF_SNAPSHOT_VERSION = 6;
 export const ANALYSIS_PDF_BUCKET = "analysis-pdfs";
 
 /**
@@ -199,8 +201,8 @@ export const PDF_CACHE_VERSION = encodePdfCacheVersion([
 export type ReportMode = "personal" | "lender" | "partner" | "agent";
 
 export const REPORT_MODES: ReadonlyArray<{ id: ReportMode; label: string; description: string }> = [
-  { id: "personal", label: "Personal", description: "Full report — cash flow, projection, tax strategy, and exit scenarios." },
-  { id: "lender", label: "Lender", description: "Debt-service focus — performance, property, and the 10-year projection. No personal tax or exit speculation." },
-  { id: "partner", label: "Partner", description: "Returns focus — performance, projection, and exit scenarios. No personal tax." },
-  { id: "agent", label: "Agent / client", description: "Client-facing returns summary to send branded to a buyer — performance, projection, and exit scenarios. No personal tax." },
+  { id: "personal", label: "Personal", description: "Full report — cash flow, projection, illustrative tax impact, and modeled exit comparisons." },
+  { id: "lender", label: "Lender", description: "Debt-service focus — performance, property, and the 10-year projection. Excludes personal tax and modeled exits." },
+  { id: "partner", label: "Partner", description: "Returns focus — performance, projection, and modeled exit comparisons. Excludes personal tax." },
+  { id: "agent", label: "Agent / client", description: "Client-facing returns summary to send branded to a buyer — performance, projection, and modeled exit comparisons. Excludes personal tax." },
 ];

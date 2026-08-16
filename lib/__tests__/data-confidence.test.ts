@@ -5,6 +5,7 @@ import {
   confidenceLabel,
   describeConfidenceGap,
   normalizeDataConfidence,
+  shouldPreserveStoredDataConfidence,
   type EnrichmentProvenanceInput,
 } from "@/lib/data-confidence";
 
@@ -23,12 +24,12 @@ describe("computeConfidenceLevel", () => {
     ).toBe("medium");
   });
 
-  it("is high when rent and rate are both tracked (live-sourced or verified)", () => {
+  it("is high only when rent and rate are explicitly verified", () => {
     expect(
       computeConfidenceLevel(
         {
-          monthlyRent: { source: "hud-safmr", verified: false },
-          interestRate: { source: "fred", verified: false },
+          monthlyRent: { source: "manual", verified: true },
+          interestRate: { source: "manual", verified: true },
         },
         complete
       )
@@ -39,14 +40,14 @@ describe("computeConfidenceLevel", () => {
 describe("buildDataConfidence", () => {
   const now = new Date("2026-06-21T12:00:00Z");
 
-  it("records live sources and reaches High", () => {
+  it("records benchmark sources without calling them High", () => {
     const input: EnrichmentProvenanceInput = {
       monthlyRent: { source: "hud-safmr", fetchedAt: "2026", detail: "Philadelphia County" },
       interestRate: { source: "fred", fetchedAt: "2026-06-19" },
       propertyTaxPct: { source: "state-static" },
     };
     const dc = buildDataConfidence(input, complete, now);
-    expect(dc.level).toBe("high");
+    expect(dc.level).toBe("medium");
     expect(dc.fields.monthlyRent).toEqual({
       source: "hud-safmr",
       fetchedAt: "2026",
@@ -57,15 +58,14 @@ describe("buildDataConfidence", () => {
     expect(dc.computedAt).toBe("2026-06-21T12:00:00.000Z");
   });
 
-  it("marks overridden fields as verified manual entries", () => {
+  it("keeps overridden fields as unverified manual estimates", () => {
     const input: EnrichmentProvenanceInput = {
       monthlyRent: { source: "hud-safmr", overridden: true },
       interestRate: { source: "fred" },
     };
     const dc = buildDataConfidence(input, complete, now);
-    expect(dc.fields.monthlyRent).toMatchObject({ source: "manual", verified: true });
-    // Still High: an overridden field is "verified", which counts as trusted.
-    expect(dc.level).toBe("high");
+    expect(dc.fields.monthlyRent).toMatchObject({ source: "manual", verified: false });
+    expect(dc.level).toBe("medium");
   });
 
   it("is medium for a fully-manual complete deal (no enrichment tracked)", () => {
@@ -84,11 +84,43 @@ describe("buildDataConfidence", () => {
   });
 });
 
+describe("saved legacy Data Confidence update policy", () => {
+  it("preserves stored sources for older callers that cannot resend context", () => {
+    expect(
+      shouldPreserveStoredDataConfidence({
+        sourceContextProvided: false,
+        provenanceProvided: false,
+        hasStoredDataConfidence: true,
+      })
+    ).toBe(true);
+  });
+
+  it("clears invalidated sources when a context-aware caller explicitly sends empty context", () => {
+    expect(
+      shouldPreserveStoredDataConfidence({
+        sourceContextProvided: true,
+        provenanceProvided: false,
+        hasStoredDataConfidence: true,
+      })
+    ).toBe(false);
+  });
+
+  it("recomputes whenever current provenance is present", () => {
+    expect(
+      shouldPreserveStoredDataConfidence({
+        sourceContextProvided: false,
+        provenanceProvided: true,
+        hasStoredDataConfidence: true,
+      })
+    ).toBe(false);
+  });
+});
+
 describe("normalizeDataConfidence", () => {
   it("round-trips a built object", () => {
     const dc = buildDataConfidence({ monthlyRent: { source: "hud-fmr" }, interestRate: { source: "fred" } }, complete);
     const parsed = normalizeDataConfidence(JSON.parse(JSON.stringify(dc)));
-    expect(parsed?.level).toBe("high");
+    expect(parsed?.level).toBe("medium");
     expect(parsed?.fields.monthlyRent?.source).toBe("hud-fmr");
   });
 
@@ -136,22 +168,20 @@ describe("describeConfidenceGap", () => {
 
   it("no sourced fields at all → points at address autocomplete for BOTH feeds", () => {
     const gap = describeConfidenceGap(conf("medium", {}));
-    expect(gap).toMatch(/HUD market rent and FRED/i);
+    expect(gap).toMatch(/HUD and FRED planning benchmarks/i);
   });
 
   it("names the ONE missing feed rather than both", () => {
-    expect(describeConfidenceGap(conf("medium", { interestRate: rateSrc }))).toMatch(/HUD market rent/i);
+    expect(describeConfidenceGap(conf("medium", { interestRate: rateSrc }))).toMatch(/HUD rent benchmark/i);
     expect(describeConfidenceGap(conf("medium", { interestRate: rateSrc }))).not.toMatch(/FRED/i);
 
-    expect(describeConfidenceGap(conf("medium", { monthlyRent: rentSrc }))).toMatch(/FRED mortgage rate/i);
+    expect(describeConfidenceGap(conf("medium", { monthlyRent: rentSrc }))).toMatch(/FRED rate benchmark/i);
     expect(describeConfidenceGap(conf("medium", { monthlyRent: rentSrc }))).not.toMatch(/HUD/i);
   });
 
-  it("both feeds sourced but still not High ⇒ a completeness gap, so it asks for rent/price", () => {
-    // computeConfidenceLevel returns "high" whenever BOTH carry provenance, so
-    // this state is only reachable via the completeness check failing.
+  it("both benchmark feeds sourced still asks for property-specific verification", () => {
     const gap = describeConfidenceGap(conf("low", { monthlyRent: rentSrc, interestRate: rateSrc }));
-    expect(gap).toMatch(/monthly rent and a purchase price/i);
+    expect(gap).toMatch(/recent local comps/i);
   });
 
   it("never contradicts computeConfidenceLevel: advice appears iff the level is not High", () => {
@@ -195,6 +225,6 @@ describe("describeConfidenceGap — never advises the impossible (audit regressi
     const gap = describeConfidenceGap(conf("medium", { interestRate: rateSrc }), {
       propertyType: "single-family",
     });
-    expect(gap).toMatch(/HUD market rent/i);
+    expect(gap).toMatch(/HUD rent benchmark/i);
   });
 });

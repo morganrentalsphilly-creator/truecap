@@ -15,6 +15,7 @@
 export const HOMEPAGE_HEADLINES = {
   a: "Screen any rental in 60 seconds. Know the highest price that still works.",
   b: "Know exactly what a rental is worth to you.",
+  walkaway: "Know your walk-away price before you make the offer.",
 } as const;
 
 export type HomepageHeadlineVariant = keyof typeof HOMEPAGE_HEADLINES;
@@ -37,6 +38,11 @@ export const SINGLE_DEAL_PRICE_OPTIONS = {
     priceLabel: "$9",
     stripeEnvKey: "STRIPE_PRICE_SINGLE_DEAL_9",
   },
+  p15: {
+    amount: 15,
+    priceLabel: "$15",
+    stripeEnvKey: "STRIPE_PRICE_SINGLE_DEAL_15",
+  },
   p19: {
     amount: 19,
     priceLabel: "$19",
@@ -54,12 +60,29 @@ function enabled(value: string | undefined): boolean {
   return ["1", "true", "yes", "on"].includes((value ?? "").trim().toLowerCase());
 }
 
+function safePublicUrl(value: string | undefined): string | null {
+  const trimmed = value?.trim();
+  if (!trimmed) return null;
+  if (trimmed.startsWith("/") && !trimmed.startsWith("//")) return trimmed;
+  try {
+    const parsed = new URL(trimmed);
+    return parsed.protocol === "https:" ? parsed.toString() : null;
+  } catch {
+    return null;
+  }
+}
+
 export function getMarketingOfferConfig() {
-  const homepageHeadlineVariant = pickVariant(
-    process.env.NEXT_PUBLIC_TRUECAP_HOMEPAGE_HEADLINE,
-    ["a", "b"] as const,
-    "a"
+  const newHomepagePositioningEnabled = enabled(
+    process.env.NEXT_PUBLIC_TRUECAP_NEW_HOMEPAGE_POSITIONING
   );
+  const homepageHeadlineVariant = newHomepagePositioningEnabled
+    ? "walkaway"
+    : pickVariant(
+        process.env.NEXT_PUBLIC_TRUECAP_HOMEPAGE_HEADLINE,
+        ["a", "b"] as const,
+        "a"
+      );
   const proOfferNameVariant = pickVariant(
     process.env.NEXT_PUBLIC_TRUECAP_PRO_NAME,
     ["pro", "offer_engine"] as const,
@@ -67,17 +90,30 @@ export function getMarketingOfferConfig() {
   );
   const singleDealPriceVariant = pickVariant(
     process.env.NEXT_PUBLIC_SINGLE_DEAL_PRICE_VARIANT,
-    ["current", "p9", "p19"] as const,
+    ["current", "p9", "p15", "p19"] as const,
     "current"
   );
+
+  const threeDealGuaranteeTermsUrl = safePublicUrl(
+    process.env.NEXT_PUBLIC_TRUECAP_GUARANTEE_TERMS_URL
+  );
+  // The satisfaction guarantee cannot render from a copy switch alone. A
+  // published terms URL is a second fail-closed activation requirement so a
+  // deploy can never invent policy at runtime.
+  const threeDealGuaranteeEnabled =
+    enabled(process.env.NEXT_PUBLIC_TRUECAP_THREE_DEAL_GUARANTEE) &&
+    threeDealGuaranteeTermsUrl !== null;
 
   return {
     homepageHeadlineVariant,
     homepageHeadline: HOMEPAGE_HEADLINES[homepageHeadlineVariant],
+    newHomepagePositioningEnabled,
     proOfferNameVariant,
     proOfferName: PRO_OFFER_NAMES[proOfferNameVariant],
     singleDealPriceVariant,
     singleDeal: SINGLE_DEAL_PRICE_OPTIONS[singleDealPriceVariant],
     fiveDealGuaranteeEnabled: enabled(process.env.NEXT_PUBLIC_FIVE_DEAL_GUARANTEE),
+    threeDealGuaranteeEnabled,
+    threeDealGuaranteeTermsUrl,
   } as const;
 }

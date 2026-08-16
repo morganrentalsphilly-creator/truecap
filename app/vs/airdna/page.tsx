@@ -54,7 +54,7 @@ const MATRIX: Row[] = [
   { feature: "Primary purpose", truecap: "Per-deal underwriting calculator", airdna: "STR market + property revenue data", winner: "tie" },
   { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", airdna: "Not modeled", winner: "truecap" },
   { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", airdna: "Forward STR revenue forecast", winner: "tie" },
-  { feature: "Tax strategy modeling", truecap: "Pro — depreciation + interest + after-tax CF", airdna: "Not modeled", winner: "truecap" },
+  { feature: "Illustrative tax impact", truecap: "Pro — depreciation + interest + modeled after-tax CF", airdna: "Not modeled", winner: "truecap" },
   { feature: "Deal score + verdict", truecap: "Free — 0-100 score + plain-English verdict", airdna: "Property-level investibility score", winner: "tie" },
   { feature: "STR revenue projection (ADR + occupancy)", truecap: "Editable input only", airdna: "Yes — best-in-class market data", winner: "airdna" },
   { feature: "Comparable STR listings nearby", truecap: "No", airdna: "Yes — Airbnb + Vrbo comp set", winner: "airdna" },
@@ -235,7 +235,7 @@ export default function VsAirdnaPage() {
               <strong>Plug AirDNA&apos;s projected monthly revenue into TrueCap.</strong> Override the HUD long-term rent field with AirDNA&apos;s STR estimate (e.g. annual revenue ÷ 12, discounted for vacancy + cleaning).
             </li>
             <li>
-              <strong>Run the full underwrite in TrueCap.</strong> Cap rate, DSCR, cash flow, 10-year projection, tax strategy.
+              <strong>Run the full underwrite in TrueCap.</strong> Cap rate, DSCR, cash flow, 10-year projection, illustrative tax impact.
             </li>
             <li>
               <strong>Save the deal + revisit later.</strong> Re-run with updated AirDNA data when market conditions shift.
@@ -267,7 +267,7 @@ export default function VsAirdnaPage() {
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
-            Pro unlocks projections, sensitivity, tax strategy, exit scenarios,
+            Pro unlocks projections, sensitivity, illustrative tax impact, modeled exit comparisons,
             MAO, PDF exports, and co-branded share links.
             No card to start.
           </p>

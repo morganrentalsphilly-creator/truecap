@@ -158,7 +158,11 @@ describe("MAO inverse — required monthly rent", () => {
       expect(res.alreadyMet).toBe(false);
       expect(res.unreachable).toBe(false);
       expect(res.value).toBeGreaterThan(Number(base.monthlyRent));
-      expect(res.achieved.netCashFlow).toBeGreaterThanOrEqual(target.monthlyCashFlow - 5);
+      expect(Number.isInteger(res.value)).toBe(true);
+      const atDisplayedRent = calculateAnalysis({ ...base, monthlyRent: res.value });
+      expect(meetsTarget(atDisplayedRent, target)).toBe(true);
+      expect(res.achieved.netCashFlow).toBe(atDisplayedRent.netCashFlow);
+      expect(res.achieved.dscr).toBe(atDisplayedRent.dscr);
     }
   });
 
@@ -172,6 +176,20 @@ describe("MAO inverse — required monthly rent", () => {
   it("returns null with no targets", () => {
     expect(solveRequiredMonthlyRent(baseSingleFamily(), {})).toBeNull();
   });
+
+  it("ignores an inapplicable DSCR floor and still solves rent for a cash deal", () => {
+    const cashDeal = baseSingleFamily({ downPaymentPct: 100 });
+    const current = calculateAnalysis(cashDeal);
+    const target = { monthlyCashFlow: current.netCashFlow + 200, dscr: 1.25 };
+    const res = solveRequiredMonthlyRent(cashDeal, target);
+    expect(res).not.toBeNull();
+    expect(res?.unreachable).toBe(false);
+    if (res) {
+      const atDisplayedRent = calculateAnalysis({ ...cashDeal, monthlyRent: res.value });
+      expect(meetsTarget(atDisplayedRent, target)).toBe(true);
+      expect(res.achieved.netCashFlow).toBe(atDisplayedRent.netCashFlow);
+    }
+  });
 });
 
 describe("MAO inverse — required interest rate", () => {
@@ -183,7 +201,11 @@ describe("MAO inverse — required interest rate", () => {
     expect(res).not.toBeNull();
     if (res) {
       expect(res.value).toBeLessThanOrEqual(7);
-      expect(res.achieved.netCashFlow).toBeGreaterThanOrEqual(target.monthlyCashFlow - 5);
+      expect(Number.isInteger(res.value * 100)).toBe(true);
+      const atDisplayedRate = calculateAnalysis({ ...base, interestRate: res.value });
+      expect(meetsTarget(atDisplayedRate, target)).toBe(true);
+      expect(res.achieved.netCashFlow).toBe(atDisplayedRate.netCashFlow);
+      expect(res.achieved.dscr).toBe(atDisplayedRate.dscr);
     }
   });
 
@@ -193,5 +215,25 @@ describe("MAO inverse — required interest rate", () => {
       { monthlyCashFlow: 99_999 }
     );
     expect(res).toBeNull();
+  });
+});
+
+describe("MAO — cash-purchase DSCR handling", () => {
+  it("treats DSCR as not applicable when there is no debt service", () => {
+    const cashDeal = baseSingleFamily({ downPaymentPct: 100 });
+    const result = calculateAnalysis(cashDeal);
+    expect(result.monthlyPayment).toBe(0);
+    expect(result.dscr).toBe(0);
+    expect(meetsTarget(result, { dscr: 1.25 })).toBe(true);
+  });
+
+  it("does not let DSCR make a combined cash-deal price target unreachable", () => {
+    const cashDeal = baseSingleFamily({ downPaymentPct: 100 });
+    const res = calculateMaxAllowableOffer(cashDeal, {
+      monthlyCashFlow: 0,
+      dscr: 1.25,
+    });
+    expect(res).not.toBeNull();
+    if (res) expect(meetsTarget(res.achieved, res.target)).toBe(true);
   });
 });

@@ -54,7 +54,7 @@ const MATRIX: Row[] = [
   { feature: "Lifecycle stage", truecap: "Pre-purchase — underwrite the deal", quickbooksrental: "Post-purchase — general accounting", winner: "tie" },
   { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", quickbooksrental: "Not modeled", winner: "truecap" },
   { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", quickbooksrental: "Not modeled", winner: "truecap" },
-  { feature: "Tax strategy modeling", truecap: "Pro — depreciation + interest + after-tax CF (projection)", quickbooksrental: "Yes — but requires manual setup", winner: "tie" },
+  { feature: "Illustrative tax impact", truecap: "Pro — depreciation + interest + modeled after-tax CF", quickbooksrental: "Yes — but requires manual setup", winner: "tie" },
   { feature: "Address auto-fill (rent/rate/tax)", truecap: "Yes — HUD + FRED + state property tax", quickbooksrental: "Not applicable", winner: "truecap" },
   { feature: "Rental-specific categorization", truecap: "Forward-looking expense modeling", quickbooksrental: "Manual setup — generic categories", winner: "truecap" },
   { feature: "Bank-feed sync", truecap: "No", quickbooksrental: "Yes — connect any US bank", winner: "quickbooksrental" },
@@ -263,7 +263,7 @@ export default function VsQuickbooksRentalPage() {
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
-            Pro unlocks projections, sensitivity, tax strategy, exit scenarios,
+            Pro unlocks projections, sensitivity, illustrative tax impact, modeled exit comparisons,
             MAO, PDF exports, and co-branded share links.
             No card to start.
           </p>

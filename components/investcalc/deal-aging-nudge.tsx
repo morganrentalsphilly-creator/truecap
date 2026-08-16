@@ -2,7 +2,8 @@
 
 /**
  * A gentle, dismissible "keep it moving" nudge on a saved deal that's been
- * sitting in a time-sensitive acquisition stage (offer / under contract). It
+ * sitting in a time-sensitive acquisition stage (negotiating / offer /
+ * under contract). It
  * embeds TrueCap in the real workflow and gives a reason to come back.
  *
  * Honesty note: we only have created_at (when the deal was SAVED), not a
@@ -52,11 +53,18 @@ export function DealAgingNudge({
 
   if (!eligible || dismissed) return null;
 
-  const label = stage === "offer" ? "Offer made" : "Under contract";
+  const label =
+    stage === "negotiating"
+      ? "Negotiating"
+      : stage === "offer"
+        ? "Offer made"
+        : "Under contract";
   const action =
-    stage === "offer"
-      ? "A quick follow-up with the seller or their agent keeps it from going cold."
-      : "Stay on top of inspection, financing, and your due-diligence deadlines.";
+    stage === "negotiating"
+      ? "Recheck every seller change against your walk-away number and set the next follow-up."
+      : stage === "offer"
+        ? "A quick follow-up with the seller or their agent keeps it from going cold."
+        : "Stay on top of inspection, financing, and your due-diligence deadlines.";
 
   return (
     <div className="flex items-start gap-3 rounded-2xl border border-amber-300/70 bg-amber-50 p-4 sm:p-5">

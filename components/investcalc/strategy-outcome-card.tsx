@@ -179,7 +179,11 @@ export function StrategyOutcomeCard({
 
   // Pro: lead with the real interactive model so the play shows its actual
   // numbers (rehab/ARV → profit / cash-left-in), just like Wholesale's MAO.
-  return isFlip ? <FixFlipCard values={values} /> : <BrrrrCard values={values} result={result} />;
+  return isFlip ? (
+    <FixFlipCard values={values} result={result} />
+  ) : (
+    <BrrrrCard values={values} result={result} />
+  );
 }
 
 function OutcomeShell({

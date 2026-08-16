@@ -239,6 +239,7 @@ function getTopDeals(data: DashboardHomeData): DashboardTopDeal[] {
       // Buy-box fit (PV-6) — undefined for users without an active box, so
       // the badge and the Fit sort stay invisible for them.
       fit: data.buyBox?.fitByDealId[deal.id] ?? null,
+      methodologyLabel: deal.methodologyLabel,
     }));
 }
 

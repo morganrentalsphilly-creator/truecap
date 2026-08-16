@@ -28,6 +28,10 @@
  */
 
 import type { PostHog } from "posthog-js";
+import {
+  sanitizeAnalyticsUrlProperties,
+  sanitizeSensitiveUrl,
+} from "@/lib/sensitive-url";
 
 /**
  * Named events tracked client-side. Adding a new one? Add it here AND
@@ -61,6 +65,23 @@ export type FunnelEvent =
   | "analysis_completed"
   | "analyzer_completed"
   | "verdict_viewed"
+  | "deal_fit_viewed" // properties: score_band, methodology_version
+  | "input_confidence_viewed" // properties: score_band, stage, sensitivity_risk, method_version
+  | "assumption_verified" // properties: field_key, source_class, method_version
+  | "confidence_increased" // properties: from_band, to_band, method_version
+  | "offer_ready_reached" // properties: method_version, confidence_band
+  | "what_needs_to_be_true_viewed" // properties: lever_count, target_basis
+  | "decision_threshold_applied" // properties: lever (price | rent | rate | seller_credit | rehab | opex)
+  | "financing_profile_created" // properties: loan_type
+  | "financing_profile_applied" // properties: loan_type, age_band
+  | "deal_decision_pack_started" // properties: source, methodology_version
+  | "deal_decision_pack_purchased" // server-authoritative preferred
+  | "prepare_my_offer_clicked" // properties: offer_ready_stage
+  | "saved_deal_watch_enabled" // properties: trigger_count
+  | "deal_alert_opened" // properties: alert_type
+  | "pipeline_stage_changed" // properties: from_stage, to_stage, moved_to_offer_ready
+  | "agent_client_created" // properties: source
+  | "client_report_shared" // properties: report_type
   | "buy_box_result_viewed"
   | "max_offer_teaser_viewed"
   | "max_offer_unlock_clicked"
@@ -295,6 +316,23 @@ export function initAnalytics(): Promise<PostHog | null> {
           // between routes, only on first load.
           capture_pageview: false,
           capture_pageleave: true,
+          // Autocapture adds the browser's raw $current_url to every event.
+          // Scrub credentials/checkout capabilities at the final SDK boundary
+          // as defense in depth, including events not routed through our
+          // trackEvent wrapper.
+          before_send: (event) => {
+            if (!event) return null;
+            const sanitized = {
+              ...event,
+              properties:
+                sanitizeAnalyticsUrlProperties(event.properties) ?? event.properties,
+            };
+            if (event.$set) sanitized.$set = sanitizeAnalyticsUrlProperties(event.$set);
+            if (event.$set_once) {
+              sanitized.$set_once = sanitizeAnalyticsUrlProperties(event.$set_once);
+            }
+            return sanitized;
+          },
           // Honor consent — the cookie banner flips this via
           // setAnalyticsConsent.
           opt_out_capturing_by_default: true,
@@ -331,7 +369,10 @@ function captureRaw(
   if (typeof window === "undefined") return false;
   try {
     const attribution = organicAttribution();
-    const attributedProperties = attribution ? { ...attribution, ...properties } : properties;
+    const safeProperties = sanitizeAnalyticsUrlProperties(properties);
+    const attributedProperties = attribution
+      ? { ...attribution, ...safeProperties }
+      : safeProperties;
     if (client) {
       client.capture(event, attributedProperties);
       return true;
@@ -364,7 +405,7 @@ export function trackEvent(
  * other call so the landing pageview survives the deferred SDK load.
  */
 export function trackPageview(currentUrl: string): void {
-  captureRaw("$pageview", { $current_url: currentUrl });
+  captureRaw("$pageview", { $current_url: sanitizeSensitiveUrl(currentUrl) });
 }
 
 /**

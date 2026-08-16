@@ -56,6 +56,10 @@ type Props = {
    *  enrichmentCaptureRef + buildProvenanceInput — same input the result
    *  strip and confidence badge use). */
   getProvenance: () => EnrichmentProvenanceInput;
+  /** Value-bound edit provenance restored from a saved deal, merged with
+   * current RHF dirty fields by the parent. Keeps reopened expense chips
+   * honest without treating every reset value as a user edit. */
+  getTouchedInputFields?: () => readonly string[];
   /** Mirror of the advanced block's open state (for aria-expanded + the
    *  "Hide details" affordance). */
   advancedOpen: boolean;
@@ -83,6 +87,7 @@ type Props = {
 export function AssumptionsStrip({
   form,
   getProvenance,
+  getTouchedInputFields,
   advancedOpen,
   onNavigate,
   onHideDetails,
@@ -107,10 +112,13 @@ export function AssumptionsStrip({
     strategyApplied,
     values as unknown as Record<string, unknown>
   );
-  const expensesEdited = computeExpensesEdited(
-    form.formState.dirtyFields as Record<string, unknown>,
-    strategyOwnedFields
-  );
+  const sourceTouchedFields: Record<string, unknown> = {
+    ...(form.formState.dirtyFields as Record<string, unknown>),
+  };
+  for (const key of getTouchedInputFields?.() ?? []) {
+    sourceTouchedFields[key] = true;
+  }
+  const expensesEdited = computeExpensesEdited(sourceTouchedFields, strategyOwnedFields);
   const activeStrategy = getStrategyByKey(activeStrategyKey);
   const chips = buildAssumptionChips(values, provenance, {
     expensesEdited,

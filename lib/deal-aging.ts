@@ -14,8 +14,12 @@
 
 import type { PipelineStage } from "@/lib/pipeline";
 
-/** Stages where sitting still lets the deal go cold (offer out / in escrow). */
-export const DEAL_AGING_STAGES: readonly PipelineStage[] = ["offer", "under_contract"];
+/** Stages where sitting still lets the deal go cold (negotiating / offer out / in escrow). */
+export const DEAL_AGING_STAGES: readonly PipelineStage[] = [
+  "negotiating",
+  "offer",
+  "under_contract",
+];
 
 /** Minimum whole days since SAVE before a deal in an aging stage counts. */
 export const DEAL_AGING_MIN_DAYS = 7;

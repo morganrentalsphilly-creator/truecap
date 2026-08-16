@@ -95,7 +95,7 @@ const ENTRIES: Entry[] = [
     category: "Feature",
     title: "The Verdict Ledger — the analysis reads top-down like an answer",
     description:
-      "Full results redesign: one answer card up top (verdict, deal score, the three numbers that decide it), then an accordion ledger of everything else — cash flow waterfall, 10-year view, tax strategy, exit scenarios, stress tests — each row openable without losing your place. A 'Where these numbers came from' row shows the provenance of every input.",
+      "Full results redesign: one answer card up top (verdict, deal score, the three numbers that decide it), then an accordion ledger of everything else — cash flow waterfall, 10-year view, Illustrative Tax Impact, exit scenarios, stress tests — each row openable without losing your place. A 'Where these numbers came from' row shows the provenance of every input.",
   },
   {
     date: "2026-07-05",
@@ -632,7 +632,7 @@ const ENTRIES: Entry[] = [
   {
     date: "2026-05-19",
     category: "Feature",
-    title: "10-year projection with tax strategy",
+    title: "10-year projection with Illustrative Tax Impact",
     description:
       "Pro users get a full 10-year cash flow projection including rent growth, expense growth, mortgage paydown, depreciation tax savings, and after-tax cash flow.",
   },
@@ -646,9 +646,9 @@ const ENTRIES: Entry[] = [
   {
     date: "2026-05-17",
     category: "Feature",
-    title: "Lender-ready PDF export (Pro)",
+    title: "Lender-facing PDF export (Pro)",
     description:
-      "Generate a branded multi-page PDF report — cover, verdict, all metrics, 10-year projection, tax strategy, exit scenarios. Ready to send to lenders, partners, or your future self.",
+      "Generate a branded multi-page PDF report — cover, verdict, all metrics, 10-year projection, Illustrative Tax Impact, and exit scenarios. Designed for review by lenders, partners, or your future self; recipients independently verify inputs and requirements.",
   },
 ];
 

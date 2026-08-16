@@ -176,6 +176,9 @@ export function BrrrrCard({ values, result, defaultRehab }: BrrrrCardProps) {
                 className="pl-7 border-input bg-background"
               />
             </div>
+            <p className="mt-1 text-[10px] leading-relaxed text-muted-foreground">
+              Your estimate · verify with relevant sold comps or an appraisal.
+            </p>
           </div>
           <div>
             <Label htmlFor={refiLtvId} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">

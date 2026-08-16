@@ -7,6 +7,10 @@ import { recommendationLabel } from "@/lib/deal-score";
 import { formatRoiHeadline } from "@/lib/extreme-value-format";
 import type { ReportMode } from "@/lib/pdf-export-constants";
 import type { BuyBoxPdfVerdict } from "@/lib/pdf-buy-box";
+import {
+  TRUECAP_UNDERWRITING_STANDARD_NAME,
+  TRUECAP_UNDERWRITING_STANDARD_VERSION,
+} from "@/lib/underwriting-methodology";
 // Server action (RPC from this client-bundled module — same mechanism
 // BuyBoxVerdictCard uses for listBuyBoxesAction). Evaluates the owner's buy
 // boxes server-side, RLS-scoped, and returns the compact block payload, or
@@ -29,6 +33,12 @@ import {
 
 export interface ReportData {
   generatedAt: Date;
+  /** Standard that produced the financial result. Optional only for legacy
+   * report payloads; never relabel a frozen historical result as current. */
+  methodologyVersion?: string;
+  /** Explicit legacy/frozen provenance. Prefer this over deriving a label from
+   * the embedded result version. */
+  methodologyLabel?: string;
   property: {
     address: string;
     type: string;
@@ -83,6 +93,21 @@ export interface ReportData {
     taxSavings: number;
     afterTaxCF: number;
   };
+  /** Deterministic input-readiness evidence captured when the report is
+   * generated. Optional for legacy/cached report payloads. */
+  inputConfidence?: {
+    score: number;
+    stageLabel: string;
+    sensitivityRisk: "low" | "moderate" | "high";
+    methodVersion: string;
+    verifiedAssumptions: string[];
+    unverifiedAssumptions: Array<{
+      label: string;
+      sourceClass: string;
+      sourceLabel: string;
+      reason: string;
+    }>;
+  } | null;
   /** Deterministic acquisition threshold included in every complete report.
    *  A null value means the canonical target was unreachable inside the
    *  solver's supported price range; the report must never invent a number. */
@@ -99,7 +124,7 @@ export interface ReportData {
     requiredMonthlyRent: { value: number; alreadyMet: boolean; unreachable: boolean } | null;
     requiredInterestRate: { value: number; alreadyMet: boolean; unreachable: boolean } | null;
   } | null;
-  downsideScenario: {
+  downsideScenario?: {
     /** Reproducible input change, e.g. rent -10% · vacancy +5pp · rate +1pp. */
     label: string;
     verdict: string;
@@ -1353,9 +1378,9 @@ function pageInputs(
     ["Max Offer", d.maxOffer ? fmtCurrency(d.maxOffer.maxPrice) : "Not solvable", "primary", d.maxOffer ? "canonical target" : "review inputs"],
     ["Monthly Cash Flow", fmtCurrency(d.performance.monthlyCashFlow), d.performance.monthlyCashFlow >= 0 ? "success" : "danger", "/month"],
     ["CoC Return", fmtPct(d.performance.cocReturn, true), "primary", "year 1"],
-    ["Cap Rate", fmtPct(d.performance.capRate, true), "violet", "gross"],
+    ["Cap Rate", fmtPct(d.performance.capRate, true), "violet", "NOI basis"],
     ["DSCR", dscrValue, dscrTone, dscrSub],
-    ["After-Tax CF", fmtCurrency(d.performance.afterTaxCF), "primary", "/month"],
+    ["Modeled After-Tax CF", fmtCurrency(d.performance.afterTaxCF), "primary", "/month"],
   ];
   cards.forEach((c, i) => {
     const col = i % 3;
@@ -1608,6 +1633,95 @@ function pageInputs(
   }
 }
 
+function pageDecisionReadiness(
+  doc: jsPDF,
+  d: ReportData,
+  branding?: BrandingConfig | null
+) {
+  const confidence = d.inputConfidence;
+  if (!confidence) return;
+
+  let y = M.top + 12;
+  const themeColor = resolveThemeColor(branding);
+  y = sectionTitle(doc, "Decision Readiness", y, undefined, themeColor);
+  setText(doc, COLOR.sub);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9.5);
+  y = drawParagraph(
+    doc,
+    "Deal Score describes the modeled economics. Input Confidence separately describes how decision-ready the assumptions are; it is a deterministic readiness score, not a probability of success.",
+    M.left,
+    y,
+    SAFE.w
+  );
+  y += 18;
+
+  const cw = (SAFE.w - 24) / 3;
+  statCard(doc, M.left, y, cw, 60, "Input Confidence", `${confidence.score}%`, {
+    tone: confidence.score >= 80 ? "success" : confidence.score >= 55 ? "warn" : "danger",
+    sub: "readiness, not probability",
+    themeColor,
+  });
+  statCard(doc, M.left + cw + 12, y, cw, 60, "Underwriting Stage", confidence.stageLabel, {
+    tone: confidence.stageLabel === "Offer Ready" ? "success" : "primary",
+    sub: "data-readiness status",
+    themeColor,
+  });
+  statCard(doc, M.left + 2 * (cw + 12), y, cw, 60, "Sensitivity Risk", confidence.sensitivityRisk, {
+    tone: confidence.sensitivityRisk === "low" ? "success" : confidence.sensitivityRisk === "moderate" ? "warn" : "danger",
+    sub: "unverified-input risk",
+    themeColor,
+  });
+  y += 82;
+
+  y = sectionTitle(doc, "Explicitly Confirmed", y, undefined, themeColor);
+  setText(doc, COLOR.text);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  const verifiedText = confidence.verifiedAssumptions.length
+    ? confidence.verifiedAssumptions.join("  ·  ")
+    : "No assumptions were explicitly confirmed when this report was generated.";
+  y = drawParagraph(doc, verifiedText, M.left, y, SAFE.w);
+  y += 18;
+
+  y = sectionTitle(doc, "Still To Verify", y, undefined, themeColor);
+  if (confidence.unverifiedAssumptions.length === 0) {
+    setText(doc, COLOR.text);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.text("All applicable inputs were explicitly confirmed for this underwrite.", M.left, y);
+  } else {
+    autoTable(doc, {
+      startY: y,
+      margin: { left: M.left, right: M.right },
+      head: [["Input", "Source class", "Current source", "Why it still needs review"]],
+      body: confidence.unverifiedAssumptions.map((item) => [
+        item.label,
+        item.sourceClass,
+        item.sourceLabel,
+        item.reason,
+      ]),
+      theme: "grid",
+      styles: { font: "helvetica", fontSize: 7.5, cellPadding: 4, textColor: hexToRgb(COLOR.text) },
+      headStyles: { fillColor: hexToRgb(themeColor), textColor: [255, 255, 255], fontStyle: "bold" },
+      columnStyles: {
+        0: { cellWidth: 92 },
+        1: { cellWidth: 82 },
+        2: { cellWidth: 128 },
+      },
+    });
+  }
+
+  setText(doc, COLOR.muted);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(7.5);
+  doc.text(
+    `Input Confidence methodology v${confidence.methodVersion}. Confirmations are tied to the input value and must be re-checked after that value changes.`,
+    M.left,
+    PAGE.h - M.bottom - 4
+  );
+}
+
 function drawInputBlock(
   doc: jsPDF,
   x: number,
@@ -1815,6 +1929,7 @@ function pageDownside(
   d: ReportData,
   branding?: BrandingConfig | null
 ) {
+  if (!d.downsideScenario) return;
   let y = M.top + 12;
   const themeColor = resolveThemeColor(branding);
   y = sectionTitle(doc, "Downside Scenario", y, undefined, themeColor);
@@ -1948,20 +2063,20 @@ async function pageTax(
 ) {
   let y = M.top + 12;
   const themeColor = resolveThemeColor(branding);
-  y = sectionTitle(doc, "Tax Strategy", y, undefined, themeColor);
+  y = sectionTitle(doc, "Illustrative Tax Impact", y, undefined, themeColor);
   setText(doc, COLOR.sub);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9.5);
-  doc.text("Annual deductions, depreciation impact, and projected tax savings.", M.left, y);
+  doc.text("Modeled rental-income and deduction effects at the entered marginal tax rate.", M.left, y);
   y += 22;
 
   // 2x2 summary cards
   const cw = (SAFE.w - 12) / 2;
   const ch = 60;
   statCard(doc, M.left, y, cw, ch, "Year 1 Taxable Rental Income", fmtCurrency(d.taxStrategy.year1Taxable), { tone: d.taxStrategy.year1Taxable < 0 ? "success" : "warn", themeColor });
-  statCard(doc, M.left + cw + 12, y, cw, ch, "Year 1 Estimated Tax Savings", fmtCurrency(d.taxStrategy.year1Savings), { tone: "success", themeColor });
+  statCard(doc, M.left + cw + 12, y, cw, ch, "Year 1 Modeled Tax Savings", fmtCurrency(d.taxStrategy.year1Savings), { tone: "success", themeColor });
   y += ch + 12;
-  statCard(doc, M.left, y, cw, ch, "10-Year Total Tax Benefit", fmtCurrency(d.taxStrategy.totalBenefit10y), { tone: "primary", themeColor });
+  statCard(doc, M.left, y, cw, ch, "10-Year Modeled Tax Impact", fmtCurrency(d.taxStrategy.totalBenefit10y), { tone: "primary", themeColor });
   statCard(doc, M.left + cw + 12, y, cw, ch, "Annual Depreciation", fmtCurrency(d.taxStrategy.annualDepreciation), { tone: "violet", themeColor });
   y += ch + 20;
 
@@ -2013,7 +2128,7 @@ async function pageTax(
     },
   });
 
-  drawChartCard(doc, M.left, y, chW, chH, "Annual Tax Savings", savingsChart);
+  drawChartCard(doc, M.left, y, chW, chH, "Modeled Annual Tax Savings", savingsChart);
   drawChartCard(doc, M.left + chW + 12, y, chW, chH, "Taxable Rental Income Trend", taxableChart);
   y += chH + 12;
   drawChartCard(doc, M.left, y, chW, chH, "Interest vs Depreciation", intDepChart);
@@ -2023,7 +2138,7 @@ async function pageTax(
   autoTable(doc, {
     startY: y,
     margin: { left: M.left, right: M.right },
-    head: [["Year", "Rental", "Op. Exp.", "Interest Ded.", "Depreciation", "Total Ded.", "Taxable Income", "Tax Savings", "Net Benefit"]],
+    head: [["Year", "Rental", "Op. Exp.", "Interest Ded.", "Depreciation", "Total Ded.", "Taxable Income", "Modeled Savings", "Net Tax Impact"]],
     body: d.taxStrategy.rows.map((r) => [
       `Y${r.y}`,
       fmtCurrency(r.rental),
@@ -2059,7 +2174,26 @@ async function pageExit(
 
   const cw = (SAFE.w - 12) / 2;
   const ch = 60;
-  statCard(doc, M.left, y, cw, ch, "Best Year to Sell", `Year ${d.exitScenarios.bestYear}`, { tone: "success", themeColor });
+  const highestProfitExit = d.exitScenarios.rows.reduce<(typeof d.exitScenarios.rows)[number] | null>(
+    (best, row) => (!best || row.profit > best.profit ? row : best),
+    null
+  );
+  statCard(
+    doc,
+    M.left,
+    y,
+    cw,
+    ch,
+    "Highest Modeled Profit",
+    highestProfitExit ? fmtCurrency(highestProfitExit.profit) : "—",
+    highestProfitExit
+      ? {
+          tone: highestProfitExit.profit >= 0 ? "success" : "danger",
+          sub: `Year ${highestProfitExit.y} among modeled exits`,
+          themeColor,
+        }
+      : { tone: "neutral", themeColor }
+  );
   statCard(doc, M.left + cw + 12, y, cw, ch, "Year 5 Profit", fmtCurrency(d.exitScenarios.year5Profit), { tone: "primary", themeColor });
   y += ch + 12;
   statCard(doc, M.left, y, cw, ch, "Year 10 Profit", fmtCurrency(d.exitScenarios.year10Profit), { tone: "success", themeColor });
@@ -2333,10 +2467,33 @@ function pageDisclosures(doc: jsPDF, d: ReportData, branding?: BrandingConfig | 
   );
   y += rowH + 24;
 
-  y = sectionTitle(doc, "Methodology", y, undefined, themeColor);
+  y = sectionTitle(
+    doc,
+    d.methodologyLabel ??
+      `${TRUECAP_UNDERWRITING_STANDARD_NAME} v${d.methodologyVersion ?? TRUECAP_UNDERWRITING_STANDARD_VERSION}`,
+    y,
+    undefined,
+    themeColor
+  );
   y = drawParagraph(
     doc,
-    "Returns are computed by TrueCap's underwriting engine from the purchase price, financing terms, rents, and operating expenses entered for this property. The 10-year projection grows rents and operating expenses at the rates above and amortizes the loan on its stated schedule. Tax figures estimate the effect of depreciation and deductible expenses at the marginal tax rate shown and are not a substitute for advice from a licensed CPA.",
+    "Returns are computed from the purchase price, financing terms, rents, and operating expenses entered for this property. The 10-year projection grows rents and operating expenses at the rates above and amortizes the loan on its stated schedule. NOI and lender-style DSCR exclude the CapEx reserve; cash flow includes it. PMI/MIP, when modeled, is included in cash flow but excluded from lender-style DSCR.",
+    M.left,
+    y,
+    SAFE.w
+  );
+  y += 14;
+  y = drawParagraph(
+    doc,
+    "Any HUD auto-filled rent is an area rent benchmark, not a property-specific rent opinion or local comparable. Any FRED auto-filled rate is an owner-occupied national mortgage benchmark, not an investor-loan quote, approval, or commitment. Replace both with verified local rents and written lender terms before making an offer.",
+    M.left,
+    y,
+    SAFE.w
+  );
+  y += 14;
+  y = drawParagraph(
+    doc,
+    "Illustrative tax impact applies the entered marginal rate to modeled rental income and deductions. It does not determine whether losses are usable or model passive-activity, at-risk, material-participation, filing-status, state/local-tax, mixed personal/rental-use allocation, or individual eligibility rules. Exit comparisons rank only the modeled hold years under the stated appreciation, selling-cost, cash-flow, and simplified exit-tax assumptions; the highest modeled profit is not a recommendation to sell in that year.",
     M.left,
     y,
     SAFE.w
@@ -2401,9 +2558,15 @@ async function buildInvestmentPDFDocument(
   pageCover(doc, d, branding ?? null, logoData);
   doc.addPage();
   pageInputs(doc, d, branding ?? null, buyBoxVerdict);
+  if (d.inputConfidence) {
+    doc.addPage();
+    pageDecisionReadiness(doc, d, branding ?? null);
+  }
   doc.addPage();
-  pageDownside(doc, d, branding ?? null);
-  doc.addPage();
+  if (d.downsideScenario) {
+    pageDownside(doc, d, branding ?? null);
+    doc.addPage();
+  }
   await pageProjection(doc, d, branding ?? null);
   // Tax Strategy is a personal-tax view — only the full personal report.
   if (mode === "personal") {

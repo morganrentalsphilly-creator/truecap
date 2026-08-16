@@ -34,7 +34,7 @@ const SERP_TITLE = "How investment property appraisals work (2026)";
 const DESCRIPTION =
   "How investment property appraisals work: the forms, the 1007 rent schedule, the lower-of rule, worked low-appraisal gap math, and the rebuttal playbook.";
 const PUBLISHED_AT = "2026-07-11";
-const MODIFIED_AT = "2026-07-11";
+const MODIFIED_AT = "2026-08-15";
 const READING_TIME = 11;
 
 export const metadata: Metadata = {
@@ -263,10 +263,12 @@ export default function InvestmentPropertyAppraisalPost() {
               >
                 DSCR loan
               </Link>
-              , the lender qualifies the property, not you — and the rent that
-              goes into the debt-service-coverage ratio is not simply your
-              lease. Most DSCR lenders underwrite to the <strong>lower of
-              the actual lease and the 1007 market rent</strong>. Run the
+              , property coverage is the primary ratio under many programs,
+              but borrower and property requirements still apply. The rent
+              used in that ratio is not necessarily your lease. Some programs
+              use the lower of an eligible lease and appraiser market rent;
+              others define acceptable rent differently. Confirm the written
+              program method before relying on either number. Run the
               numbers on a $240,000 single-family purchase with 25% down: a
               $180,000 loan at 7.25% carries a principal-and-interest payment
               of about $1,228; add $250 of monthly taxes and $110 of insurance

@@ -33,9 +33,9 @@ const STATE = "PA";
 const SLUG = "philadelphia";
 const TITLE = "Philadelphia Rental Market Analysis 2026";
 const DESCRIPTION =
-  "2026 cap-rate benchmarks by Philly neighborhood. Run a Philadelphia rental in 60 seconds — city property tax (1.49%) and HUD rent auto-filled.";
+  "Philadelphia rental screening benchmarks with editable tax and HUD area-rent inputs. Verify every figure for the property before relying on it.";
 const PUBLISHED_AT = "2026-05-24";
-const MODIFIED_AT = "2026-06-01";
+const MODIFIED_AT = "2026-08-15";
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -85,11 +85,11 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "What rent should I charge in Philadelphia?",
-    a: "TrueCap auto-fills HUD Fair Market Rent for Philadelphia County (the metro is part of the Philadelphia-Camden-Wilmington MSA for HUD purposes) by bedroom count. Long-term market rent in most Philly neighborhoods runs at or slightly above HUD FMR. Cross-check with Zillow + Rentometer for the specific address. Section 8 voucher properties typically rent right at FMR.",
+    a: "TrueCap can prefill a HUD area-rent benchmark by bedroom count, but FMR is not an address-level market comp, a PHA payment standard, or an approved voucher rent. Replace it with current comparable leases and, for a voucher scenario, written figures from the administering housing authority.",
   },
   {
     q: "What about the BRRRR strategy in Philadelphia?",
-    a: "Philly is one of the best BRRRR markets in the country because of the abundance of distressed 2-3 unit row homes priced $80-180k with realistic ARVs in the $180-280k range after a $40-80k rehab. The math works particularly well in transitioning neighborhoods (West Kensington, parts of North Philly, Strawberry Mansion). Caveats: permit timelines can be long, and L&I (Licenses & Inspections) is unpredictable — budget extra holding cost.",
+    a: "Philadelphia's older 2-4 unit and row-house inventory creates BRRRR candidates, but neither rehab cost nor ARV is established by a neighborhood range. Verify purchase price, scope, permits, holding time, rent, closed comps, seasoning, lender terms, and appraisal downside for the address.",
   },
   {
     q: "Do I need any special Philadelphia-specific licenses to rent out a property?",
@@ -188,7 +188,7 @@ export default function PhiladelphiaMarketPage() {
           </h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
             Run a Philly rental in 60 seconds. TrueCap auto-fills the PA
-            property tax rate (~1.49%), HUD market rent by bedroom count,
+            property tax estimate and HUD area-rent benchmark by bedroom count,
             and current 30-yr fixed mortgage rate. Plus 2026 cap-rate
             benchmarks by neighborhood below.
           </p>
@@ -295,24 +295,23 @@ export default function PhiladelphiaMarketPage() {
 
           <h3>Section 8 + voucher rents</h3>
           <p>
-            Philly has a deep Section 8 market. Voucher payment
-            standards from the Philadelphia Housing Authority are set
-            at HUD FMR. Many cash-flow-heavy neighborhoods (Olney,
-            Logan, parts of North Philly) lean heavily on voucher
-            tenants. Pros: guaranteed rent + automatic renewals. Cons:
-            longer move-in inspections, tighter PHA standards on
-            property condition.
+            Voucher underwriting requires the current PHA payment
+            standard, utility allowance, rent-reasonableness decision,
+            approved contract rent, tenant share, HAP terms, and
+            inspection timing. HUD FMR is only a benchmark. Model the
+            tenant and assistance portions separately, including
+            collection, delay, adjustment, and abatement risk; neither
+            payment nor renewal is automatic.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">BRRRR in Philadelphia</h2>
           <p>
-            Philadelphia is arguably one of the top BRRRR markets in
-            the U.S. right now. The reason: abundant distressed
-            2-3 unit row homes in transitioning neighborhoods, priced
-            $80-180k with realistic ARVs of $180-280k after $40-80k of
-            renovation. The classic BRRRR loop — buy distressed, rehab,
-            refi at 75% of ARV — works cleanly when the spread between
-            purchase + rehab and ARV is large enough.
+            Philadelphia&apos;s older row-house inventory gives investors
+            BRRRR candidates to screen. Build acquisition, rehab,
+            holding time, rent, and ARV from address-level evidence,
+            then confirm seasoning, appraisal treatment, and current
+            refinance terms in writing. A large modeled spread does not
+            guarantee the completed value or capital returned.
           </p>
           <p>
             Best Philly BRRRR neighborhoods in 2026: West Kensington

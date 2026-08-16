@@ -87,6 +87,7 @@ import { StickyCalculateBar } from "./sticky-calculate-bar";
 import { LiveVerdictPanel, type LivePreviewSnapshot } from "./live-verdict-panel";
 import { AutosaveIndicator } from "./autosave-indicator";
 import type { AnalysisDashboardTab } from "./analysis-dashboard";
+import type { ApplicableDecisionThreshold } from "./what-needs-to-be-true-card";
 import { AnalysisDashboardSkeleton } from "./analysis-dashboard-skeleton";
 import { AnalysisErrorBoundary } from "@/components/investcalc/analysis-error-boundary";
 import { AssumptionsSourceStrip } from "@/components/investcalc/assumptions-source-strip";
@@ -96,6 +97,17 @@ import { ToastAction } from "@/components/ui/toast";
 import { cn, scrollBehavior } from "@/lib/utils";
 import { saveDealAction } from "@/app/actions/saved-analyses";
 import { buildDataConfidence, type EnrichmentProvenanceInput } from "@/lib/data-confidence";
+import {
+  buildInputConfidence,
+  inputSourceClassLabel,
+  inputVerificationFingerprint,
+  mergeInputConfidenceSourceContext,
+  normalizeInputVerificationEvidence,
+  restoreInputConfidenceSourceContext,
+  type InputConfidenceFieldKey,
+  type InputConfidenceResult,
+  type InputVerificationEvidence,
+} from "@/lib/input-confidence";
 import type { ReportMode } from "@/lib/pdf-export-constants";
 import type { PropertyEnrichment } from "@/lib/property-enrichment/rentcast";
 import { addDealToCompareAction } from "@/app/actions/compare";
@@ -111,11 +123,32 @@ import {
   solveRequiredMonthlyRent,
 } from "@/lib/max-allowable-offer";
 import { buildMaoTarget, describeMaoTarget } from "@/lib/mao-targets";
+import { isFeatureEnabled } from "@/lib/feature-flags";
+import {
+  financingProfileAgeBand,
+  financingProfileAnalysisPatch,
+  normalizeFinancingProfileSnapshot,
+  type FinancingProfileSnapshot,
+} from "@/lib/financing-profiles";
+import {
+  isLegacySavedMethodologyVersion,
+  parseFrozenDealScore,
+  resolveSavedAnalysisResult,
+} from "@/lib/saved-analysis-methodology";
+import { TRUECAP_UNDERWRITING_STANDARD_VERSION } from "@/lib/underwriting-methodology";
 import { getLimitingFactor } from "@/lib/limiting-factor";
 import {
   createOneTimePdfCheckoutAction,
   verifyOneTimePdfPaymentAction,
 } from "@/app/actions/one-time-pdf";
+import {
+  ONE_TIME_PDF_ACTIVE_CLAIM_KEY,
+  ONE_TIME_PDF_DRAFT_KEY,
+  ONE_TIME_PDF_LEGACY_DRAFT_KEY,
+  ONE_TIME_PDF_RETURN_KEY,
+  oneTimePdfClaimSecretKey,
+  parseOneTimePdfReturnState,
+} from "@/lib/one-time-pdf-return";
 import { PdfPurchaseDialog } from "@/components/investcalc/pdf-purchase-dialog";
 import {
   DuplicateAddressDialog,
@@ -131,13 +164,6 @@ import {
   type HeroAnalyzeDetail,
 } from "@/lib/hero-handoff";
 
-/**
- * localStorage key for the deal stashed right before redirecting to the
- * one-time-PDF Stripe Checkout. Restored (and removed) when the user
- * returns with ?pdf_purchase=<session_id>. Same-browser assumption is
- * fine - Stripe redirects back in the same tab.
- */
-const ONE_TIME_PDF_DRAFT_KEY = "truecap:one-time-pdf-draft";
 import { enrichPropertyAction } from "@/app/actions/enrich-property";
 import { getPropertyCompsAction } from "@/app/actions/property-comps";
 import type { SelectedAddress } from "./address-autocomplete";
@@ -384,7 +410,7 @@ const INPUT_TABS: {
 }[] = [
   { id: "cash-flow", label: "Cash Flow Analysis", mobileLabel: "Cash Flow", isPro: false, isFree: true },
   { id: "projections", label: "10-Year Projections", mobileLabel: "10-Year", isPro: true },
-  { id: "tax-strategy", label: "Tax Strategy", mobileLabel: "Tax", isPro: true },
+  { id: "tax-strategy", label: "Illustrative Tax Impact", mobileLabel: "Tax", isPro: true },
   { id: "deal-score", label: "Deal Score", mobileLabel: "Score", isPro: true },
 ];
 const SAVED_ANALYSIS_AUTO_EXPORT_PDF_KEY = "truecap_saved_analysis_auto_export_pdf";
@@ -395,8 +421,9 @@ function toPdfReportData(args: {
   projectionYears: ProjectionYear[];
   taxYears: TaxStrategyYear[];
   exitYears: ExitScenarioYear[];
+  inputConfidence?: InputConfidenceResult | null;
 }): ReportData {
-  const { values, result, projectionYears, taxYears, exitYears } = args;
+  const { values, result, projectionYears, taxYears, exitYears, inputConfidence } = args;
 
   const units =
     values.propertyType === "single-family"
@@ -482,7 +509,7 @@ function toPdfReportData(args: {
     // and the explicit unchanged values make the scenario limitation visible.
   }
 
-  // Single-Deal Underwrite must answer the acquisition question, not merely
+  // The Deal Decision Pack must answer the acquisition question, not merely
   // export the same free metrics. Resolve the canonical deterministic Max
   // Offer and Deal Doctor thresholds into the report payload. This does not
   // grant a persistent Pro entitlement or expose a hidden number on screen.
@@ -494,6 +521,7 @@ function toPdfReportData(args: {
 
   return {
     generatedAt: new Date(),
+    methodologyVersion: result.methodologyVersion,
     property: {
       address: values.address,
       type: values.propertyType,
@@ -543,6 +571,28 @@ function toPdfReportData(args: {
       taxSavings: result.taxSavingsMonthly,
       afterTaxCF: result.afterTaxCF,
     },
+    inputConfidence: inputConfidence
+      ? {
+          score: inputConfidence.score,
+          stageLabel: inputConfidence.stageLabel,
+          sensitivityRisk: inputConfidence.sensitivityRisk,
+          methodVersion: inputConfidence.methodVersion,
+          verifiedAssumptions: inputConfidence.fields
+            .filter((field) => field.sourceClass === "verified")
+            .map((field) => field.label),
+          unverifiedAssumptions: inputConfidence.fields
+            .filter(
+              (field) =>
+                field.sourceClass !== "verified" && field.sourceClass !== "not-applicable"
+            )
+            .map((field) => ({
+              label: field.label,
+              sourceClass: inputSourceClassLabel(field.sourceClass),
+              sourceLabel: field.sourceLabel,
+              reason: field.reason,
+            })),
+        }
+      : null,
     maxOffer: maxOfferResult
       ? {
           maxPrice: maxOfferResult.maxPrice,
@@ -764,6 +814,10 @@ export function InvestCalcPage({
   // always computed from the SAME inputs — never a mix of frozen result +
   // live form state. Updated everywhere `analysisResult` is set.
   const [analysisValues, setAnalysisValues] = useState<InvestmentFormValues | null>(null);
+  const [savedMethodologyLabel, setSavedMethodologyLabel] = useState<string | null>(null);
+  const [inputVerification, setInputVerification] = useState<InputVerificationEvidence>({});
+  const [appliedFinancingProfile, setAppliedFinancingProfile] =
+    useState<FinancingProfileSnapshot | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
   const [showResults, setShowResults] = useState(false);
   // True when a full result is on screen but the CURRENT form no longer
@@ -906,13 +960,16 @@ export function InvestCalcPage({
   const [isSampleProPreview, setIsSampleProPreview] = useState(false);
   const pendingSamplePreviewRef = useRef(false);
   // ── One-time PDF purchase ($5, Stripe Checkout) ────────────────────
-  // Dialog state + an unlock ref set after a verified payment. The
-  // unlock lets the next Export PDF run bypass the entitlement gate and
-  // is consumed on successful generation. Form values survive the
-  // Stripe redirect via localStorage (see ONE_TIME_PDF_DRAFT_KEY).
+  // A verified, server-consumed purchase unlocks exactly the deal that was
+  // fingerprinted at checkout. The high-entropy binding secret and draft
+  // survive Stripe only in same-tab sessionStorage; neither reaches the URL.
   const [isPdfPurchaseDialogOpen, setIsPdfPurchaseDialogOpen] = useState(false);
   const [isStartingPdfCheckout, setIsStartingPdfCheckout] = useState(false);
   const oneTimePdfUnlockedRef = useRef(false);
+  const oneTimePdfRedemptionRef = useRef<{
+    claimId: string;
+    boundFormJson: string;
+  } | null>(null);
   const [projectionSource, setProjectionSource] = useState<{
     analysisId: string | null;
     input: TenYearProjectionInput;
@@ -962,6 +1019,17 @@ export function InvestCalcPage({
   const lastPersistedFormJsonRef = useRef<string | null>(null);
   /** Form snapshot that produced the currently displayed analysis outputs (last Calculate or loaded saved deal). */
   const lastComputedFormJsonRef = useRef<string | null>(null);
+  /** Raw source context from a reopened deal. It retains field fingerprints so
+   * each attribution can be revalidated independently as assumptions change. */
+  const persistedInputConfidenceSourceContextRef = useRef<unknown>(null);
+  /** Input Confidence intentionally stores no address. Bind its restored
+   * context to the saved address here so equal values cannot carry a prior
+   * property's HUD/state attribution into a different deal. */
+  const persistedInputConfidenceAddressRef = useRef<string | null>(null);
+  /** Explicit verification is value-bound too, but equal numbers can occur at
+   * different properties. This second binding makes an address change retire
+   * every prior attestation rather than letting it follow the numbers. */
+  const inputVerificationAddressRef = useRef<string | null>(null);
   const isCalculatingRef = useRef(false);
   const autoExportPdfRef = useRef(false);
   const currentSaveDealLimitReached =
@@ -1050,6 +1118,46 @@ export function InvestCalcPage({
     mode: "onChange",
   });
 
+  const handleAppliedFinancingProfileChange = useCallback(
+    (profile: FinancingProfileSnapshot | null) => {
+      setAppliedFinancingProfile(profile);
+      // The frozen financing origin is part of the saved underwriting record,
+      // even when detaching it leaves the numeric form values unchanged. Make
+      // that provenance change visible to the normal Save/navigation guards.
+      if (savedDealIdRef.current) setHasUnsavedChanges(true);
+      if (
+        !profile?.lastVerifiedAt ||
+        financingProfileAgeBand(profile.lastVerifiedAt) !== "0_30_days"
+      ) return;
+
+      // A recently dated profile is the user's explicit lender-term
+      // confirmation. Stale quotes remain visible but do not raise confidence.
+      // Add fingerprinted evidence only for modeled fields the profile
+      // actually supplied; editing any value invalidates it automatically.
+      const patch = financingProfileAnalysisPatch(profile);
+      const values = form.getValues();
+      const verifiedKeys: InputConfidenceFieldKey[] = [];
+      if (profile.interestRatePct != null) verifiedKeys.push("interestRate");
+      if (patch.downPaymentPct !== undefined) verifiedKeys.push("downPayment");
+      if (patch.closingCostsPct !== undefined) verifiedKeys.push("closingCosts");
+      if (verifiedKeys.length === 0) return;
+
+      inputVerificationAddressRef.current = values.address.trim().toLowerCase();
+      setInputVerification((current) => {
+        const next: InputVerificationEvidence = { ...current };
+        for (const key of verifiedKeys) {
+          next[key] = {
+            verifiedAt: profile.lastVerifiedAt ?? undefined,
+            evidenceType: "recent-verified-financing-profile",
+            fingerprint: inputVerificationFingerprint(values, key),
+          };
+        }
+        return next;
+      });
+    },
+    [form]
+  );
+
   const syncFormDirtyVersusPersisted = useCallback(() => {
     const id = savedDealIdRef.current;
     if (!id) {
@@ -1089,6 +1197,7 @@ export function InvestCalcPage({
     setExitScenarioSource(null);
     setDealScoreResult(null);
     setShowResults(false);
+    setSavedMethodologyLabel(null);
     setIsLoadingDealScore(false);
     // No results on screen → nothing to be stale.
     setStaleResultsWarning(false);
@@ -1163,6 +1272,11 @@ export function InvestCalcPage({
       // next page load the old draft would silently come back.
       clearCalcDraftRaw();
       clearAnalysisOutputs();
+      setInputVerification({});
+      inputVerificationAddressRef.current = null;
+      persistedInputConfidenceSourceContextRef.current = null;
+      persistedInputConfidenceAddressRef.current = null;
+      setAppliedFinancingProfile(null);
       setHasUnsavedChanges(false);
       setIsCalculating(false);
       isCalculatingRef.current = false;
@@ -1281,6 +1395,34 @@ export function InvestCalcPage({
   } | null>(null);
 
   /**
+   * One source-of-truth for every confidence/provenance consumer. A reopened
+   * deal contributes only fingerprint-valid saved fields, current enrichment
+   * wins for fields it just sourced, and current dirty fields join (rather
+   * than replace) still-valid saved edit context.
+   */
+  const resolveLiveInputConfidenceContext = useCallback(
+    (
+      values: InvestmentFormValues,
+      liveTouchedFields: Record<string, unknown> | ReadonlySet<string> | null = null
+    ) => {
+      const currentAddress = values.address.trim().toLowerCase();
+      const persistedAddress = persistedInputConfidenceAddressRef.current;
+      const persistedSourceContext =
+        persistedAddress !== null && persistedAddress === currentAddress
+          ? persistedInputConfidenceSourceContextRef.current
+          : null;
+
+      return mergeInputConfidenceSourceContext({
+        persistedSourceContext,
+        values,
+        liveProvenance: buildProvenanceInput(enrichmentCaptureRef.current, values),
+        liveTouchedFields,
+      });
+    },
+    []
+  );
+
+  /**
    * Run the enrichment lookups (state property tax, FRED mortgage rate,
    * HUD Fair Market Rent) and pre-fill the form. Idempotent: callers can
    * invoke it whenever address or bedroom count changes; existing user
@@ -1330,6 +1472,10 @@ export function InvestCalcPage({
         lastEnrichedAddressRef.current = placeKey;
         lastEnrichedGeoRef.current = { state: place.state, zip: place.zip, streetNum };
         if (isSwap) {
+          persistedInputConfidenceSourceContextRef.current = null;
+          persistedInputConfidenceAddressRef.current = null;
+          setInputVerification({});
+          inputVerificationAddressRef.current = null;
           // Auto-filled values describe the OLD property/market and must not
           // survive the swap: HUD/comps fills use shouldDirty:false while
           // user typing sets dirty, so non-dirty is exactly "not the user's
@@ -2301,26 +2447,28 @@ export function InvestCalcPage({
   };
 
   const mergeSavedResultSnapshot = (
+    methodologyVersion: unknown,
     rawSnapshot: unknown,
-    computedResult: AnalysisResult
-  ): AnalysisResult => {
-    if (!rawSnapshot || typeof rawSnapshot !== "object" || Array.isArray(rawSnapshot)) {
-      return computedResult;
-    }
-
-    // Fresh math wins: the stored snapshot goes stale after engine
-    // corrections (PMI, CapEx-taxable), and rendering it over the computed
-    // result made the analyzer contradict the workspace header's
-    // recompute-on-read — then every number jumped on the first edit when
-    // the live recompute took over. The snapshot only contributes fields
-    // calculateAnalysis doesn't produce (stored score/recommendation
-    // metadata etc.) — same fresh-over-stored precedence as the PDF export
-    // path. calculateAnalysis returns every AnalysisResult field, so no
-    // stale snapshot value can shadow a computed one.
-    return {
-      ...(rawSnapshot as Partial<AnalysisResult>),
-      ...computedResult,
-    };
+    computedResult: AnalysisResult,
+    values: InvestmentFormValues
+  ) => {
+    // Same-standard and honest legacy rows retain the established
+    // recompute-on-read behavior. Once a future material methodology version
+    // differs, however, the frozen snapshot wins until the user explicitly
+    // chooses to re-underwrite under the current standard.
+    const score = computeDealScore(buildDealScoreInputFromAnalysis(values, computedResult));
+    return resolveSavedAnalysisResult({
+      methodologyVersion,
+      resultSnapshot: rawSnapshot,
+      recomputedResult: computedResult,
+      recomputedExtras: {
+        score: score.score,
+        recommendation: score.recommendation,
+        riskLevel: score.riskLevel,
+        breakdown: score.breakdown,
+        explanation: score.explanation,
+      },
+    });
   };
 
   // Reassigned every render so it closes over the current entitlement flags,
@@ -2418,6 +2566,10 @@ export function InvestCalcPage({
     // Editing away from the sample deal ends the Pro preview — the unlock is
     // for the demo numbers only, so panels re-gate to the real entitlement.
     setIsSampleProPreview(false);
+    // These outputs were just recomputed from the live form. They are no
+    // longer a historical saved-analysis view, so a frozen/legacy provenance
+    // label would be stale and misleading.
+    setSavedMethodologyLabel(null);
     setAnalysisResult(result);
     setAnalysisValues(values);
     setProjectionSource(
@@ -2465,8 +2617,27 @@ export function InvestCalcPage({
     // subscription is created ONCE and its pending debounce timer is never
     // cleared by a re-render (which would drop the user's final edit).
     let debounceTimer: ReturnType<typeof setTimeout> | null = null;
-    const subscription = form.watch(() => {
+    const subscription = form.watch((values) => {
       if (isProgrammaticResetRef.current) return;
+      // SourceContext has no address by design. The first user-driven address
+      // change permanently detaches the reopened deal's source context, even
+      // if the next property happens to use the same numeric assumptions.
+      const persistedAddress = persistedInputConfidenceAddressRef.current;
+      if (
+        persistedAddress !== null &&
+        String(values.address ?? "").trim().toLowerCase() !== persistedAddress
+      ) {
+        persistedInputConfidenceSourceContextRef.current = null;
+        persistedInputConfidenceAddressRef.current = null;
+      }
+      const verificationAddress = inputVerificationAddressRef.current;
+      if (
+        verificationAddress !== null &&
+        String(values.address ?? "").trim().toLowerCase() !== verificationAddress
+      ) {
+        setInputVerification({});
+        inputVerificationAddressRef.current = null;
+      }
       if (debounceTimer) clearTimeout(debounceTimer);
       debounceTimer = setTimeout(() => {
         syncFormDirtyVersusPersisted();
@@ -2591,6 +2762,10 @@ export function InvestCalcPage({
           };
           prevPropertyTypeRef.current = normalized.propertyType;
           form.reset(forked);
+          setInputVerification({});
+          inputVerificationAddressRef.current = null;
+          persistedInputConfidenceSourceContextRef.current = null;
+          persistedInputConfidenceAddressRef.current = null;
           // New deal: no savedDealId, no results yet (price/rent cleared → the
           // live preview forms once the user enters the new property).
           toast({
@@ -2615,6 +2790,7 @@ export function InvestCalcPage({
           formSnapshot?: unknown;
           templateFallback?: unknown;
           resultSnapshot?: unknown;
+          methodologyVersion?: unknown;
         };
         const normalized = normalizeInvestmentFormSnapshot(parsed.formSnapshot);
         if (normalized && typeof parsed.id === "string") {
@@ -2655,8 +2831,77 @@ export function InvestCalcPage({
           lastPersistedFormJsonRef.current = formSnapshotForCompare(hydratedValues);
           lastComputedFormJsonRef.current = formSnapshotForCompare(hydratedValues);
           setSavedTemplateFallback(parsedTemplateFallback);
+          const savedResultRecord =
+            parsed.resultSnapshot &&
+            typeof parsed.resultSnapshot === "object" &&
+            !Array.isArray(parsed.resultSnapshot)
+              ? (parsed.resultSnapshot as Record<string, unknown>)
+              : null;
+          const savedInputConfidence =
+            savedResultRecord?.inputConfidence &&
+            typeof savedResultRecord.inputConfidence === "object" &&
+            !Array.isArray(savedResultRecord.inputConfidence)
+              ? (savedResultRecord.inputConfidence as Record<string, unknown>)
+              : null;
+          // Validate the persisted source context at the handoff boundary,
+          // then retain its raw fingerprints so each field can be rechecked
+          // independently against later edits. Invalid/legacy context fails
+          // closed to no restored provenance.
+          const restoredSourceContext = restoreInputConfidenceSourceContext(
+            savedInputConfidence?.sourceContext,
+            hydratedValues
+          );
+          const hasRestoredSourceContext =
+            Object.keys(restoredSourceContext.provenance).length > 0 ||
+            restoredSourceContext.touchedInputFields.length > 0;
+          persistedInputConfidenceSourceContextRef.current = hasRestoredSourceContext
+            ? savedInputConfidence?.sourceContext ?? null
+            : null;
+          persistedInputConfidenceAddressRef.current = hasRestoredSourceContext
+            ? hydratedValues.address.trim().toLowerCase()
+            : null;
+          const restoredVerification = normalizeInputVerificationEvidence(
+            savedInputConfidence?.verificationEvidence
+          );
+          setInputVerification(restoredVerification);
+          inputVerificationAddressRef.current =
+            Object.keys(restoredVerification).length > 0
+              ? hydratedValues.address.trim().toLowerCase()
+              : null;
+          setAppliedFinancingProfile(
+            normalizeFinancingProfileSnapshot(savedResultRecord?.financingProfile)
+          );
           const computedResult = calculateAnalysis(hydratedValues);
-          const result = mergeSavedResultSnapshot(parsed.resultSnapshot, computedResult);
+          const resolution = mergeSavedResultSnapshot(
+            parsed.methodologyVersion,
+            parsed.resultSnapshot,
+            computedResult,
+            hydratedValues
+          );
+          const result = resolution.result;
+          if (!result) {
+            // A newer methodology's incomplete snapshot cannot be made whole
+            // with today's math without fabricating a mixed-version decision.
+            // Keep the editable assumptions available and require an explicit
+            // Run to create a new current-standard underwrite.
+            setAnalysisResult(null);
+            setAnalysisValues(null);
+            setProjectionSource(null);
+            setTaxStrategySource(null);
+            setExitScenarioSource(null);
+            setDealScoreResult(null);
+            setShowResults(false);
+            setHasUnsavedChanges(false);
+            toast({
+              title: "Saved result needs an explicit re-underwrite",
+              description:
+                "Its frozen methodology snapshot is not compatible with this app version. The assumptions are loaded; choose Run Analysis to create current-standard results.",
+            });
+            queueMicrotask(() => {
+              isProgrammaticResetRef.current = false;
+            });
+            return;
+          }
           const builtProjectionSource = canUseProjections
             ? buildProjectionSource(parsed.id, hydratedValues, result)
             : null;
@@ -2679,11 +2924,24 @@ export function InvestCalcPage({
                 )
               : null
           );
-          setDealScoreResult(null);
+          const frozenScore = parseFrozenDealScore(resolution.result);
+          setDealScoreResult(
+            frozenScore ? { ok: true, tier: "pro", data: frozenScore } : null
+          );
           setShowResults(true);
+          setSavedMethodologyLabel(
+            resolution.shouldFreeze
+              ? `Frozen TrueCap Underwriting Standard v${resolution.storedMethodologyVersion}`
+              : isLegacySavedMethodologyVersion(resolution.storedMethodologyVersion)
+                ? `Legacy analysis · recomputed with current v${TRUECAP_UNDERWRITING_STANDARD_VERSION}`
+                : `TrueCap Underwriting Standard v${resolution.storedMethodologyVersion}`
+          );
           setHasUnsavedChanges(false);
           pendingResultsScrollRef.current = true;
-          void loadDealScore(hydratedValues, result);
+          // A frozen result and score move together. Invoking the current score
+          // engine here would silently pair new Deal Score arithmetic with old
+          // financial outputs.
+          // The resolver already switched financials + score atomically.
           queueMicrotask(() => {
             isProgrammaticResetRef.current = false;
           });
@@ -2704,6 +2962,10 @@ export function InvestCalcPage({
           const issue = describeInvestmentFormSnapshotIssue(parsed.formSnapshot);
           prevPropertyTypeRef.current = lenient.propertyType;
           form.reset(lenient);
+          persistedInputConfidenceSourceContextRef.current = null;
+          persistedInputConfidenceAddressRef.current = null;
+          setInputVerification({});
+          inputVerificationAddressRef.current = null;
           if ((lenient.avgDailyRate ?? 0) > 0) {
             setActiveStrategyKey("short-term");
           }
@@ -2754,6 +3016,10 @@ export function InvestCalcPage({
     // expected) and returns so the draft restore doesn't clobber them.
     const handoff = readAnalyzerHandoff(window.location.search);
     if (handoff) {
+      persistedInputConfidenceSourceContextRef.current = null;
+      persistedInputConfidenceAddressRef.current = null;
+      setInputVerification({});
+      inputVerificationAddressRef.current = null;
       // Property type first: a persona/marketing link (?type=owner-occupant)
       // lands the visitor on the right form. We're inside the mount reset
       // (isProgrammaticResetRef is true), so the reactive propertyType effect
@@ -2811,6 +3077,10 @@ export function InvestCalcPage({
         if (normalized) {
           prevPropertyTypeRef.current = normalized.propertyType;
           form.reset(normalized);
+          persistedInputConfidenceSourceContextRef.current = null;
+          persistedInputConfidenceAddressRef.current = null;
+          setInputVerification({});
+          inputVerificationAddressRef.current = null;
           // Same reconciliation as the saved-deal edit path above: an STR
           // draft (avgDailyRate > 0) must restore the "short-term" play so
           // its income inputs render — otherwise the rent field shows empty
@@ -3185,6 +3455,10 @@ export function InvestCalcPage({
       const builtTaxStrategySource = canUseTaxStrategy || sampleProPreview
         ? buildTaxStrategySource(sourceAnalysisId, values, result)
         : null;
+      // An explicit Run is the user's opt-in to re-underwrite under the
+      // currently deployed standard. Retire any saved-version provenance at
+      // the same moment the replacement outputs become visible.
+      setSavedMethodologyLabel(null);
       setAnalysisResult(result);
       // A full Run just validated + computed from the live form — the
       // results are current by definition.
@@ -3450,16 +3724,24 @@ export function InvestCalcPage({
     setIsSavingDeal(true);
     try {
       const currentValues = form.getValues();
+      const confidenceContext = resolveLiveInputConfidenceContext(
+        currentValues,
+        form.formState.dirtyFields as Record<string, unknown>
+      );
       const result = await saveDealAction(
         currentValues,
         targetExistingId,
-        buildProvenanceInput(enrichmentCaptureRef.current, currentValues),
-        options.saveAsNewScenario || options.allowAddressChange
-          ? {
-              ...(options.saveAsNewScenario ? { saveAsNewScenario: true } : {}),
-              ...(options.allowAddressChange ? { allowAddressChange: true } : {}),
-            }
-          : undefined
+        confidenceContext.provenance,
+        {
+          ...(options.saveAsNewScenario ? { saveAsNewScenario: true } : {}),
+          ...(options.allowAddressChange ? { allowAddressChange: true } : {}),
+          inputVerification,
+          touchedInputFields: confidenceContext.touchedInputFields,
+          inputSourceContextProvided: true,
+          ...(isFeatureEnabled("financing_profiles")
+            ? { financingProfileSnapshot: appliedFinancingProfile }
+            : {}),
+        }
       );
       if (result.ok) {
         // A save that came from a chooser dialog succeeded - close it.
@@ -3822,6 +4104,32 @@ export function InvestCalcPage({
     });
   };
 
+  const handleApplyDecisionThreshold = useCallback(
+    (change: ApplicableDecisionThreshold) => {
+      form.setValue(change.field, change.value, {
+        shouldDirty: true,
+        shouldTouch: true,
+        shouldValidate: true,
+      });
+      trackEvent("decision_threshold_applied", { lever: change.lever });
+      const labels = {
+        price: "Purchase price",
+        rent: "Monthly rent",
+        rate: "Interest rate",
+        rehab: "Rehab budget",
+      } as const;
+      const formatted =
+        change.lever === "rate"
+          ? `${change.value.toFixed(2)}%`
+          : `$${Math.round(change.value).toLocaleString("en-US")}${change.lever === "rent" ? "/mo" : ""}`;
+      toast({
+        title: `${labels[change.lever]} applied`,
+        description: `${formatted} is now in the live underwrite. Re-check the confidence and target before relying on it.`,
+      });
+    },
+    [form, toast]
+  );
+
   const handleExportPdf = async (mode: ReportMode = "personal") => {
     if (!analysisResult) return;
     const oneTimeUnlocked = oneTimePdfUnlockedRef.current;
@@ -3831,6 +4139,19 @@ export function InvestCalcPage({
     if (!oneTimeUnlocked && (!isAuthenticated || !canExportPdf)) {
       setIsPdfPurchaseDialogOpen(true);
       return;
+    }
+    if (oneTimeUnlocked) {
+      const redemption = oneTimePdfRedemptionRef.current;
+      const currentFormJson = formSnapshotForCompare(form.getValues());
+      if (!redemption || !currentFormJson || currentFormJson !== redemption.boundFormJson) {
+        toast({
+          title: "This report is bound to the purchased deal",
+          description:
+            "Restore the exact deal used at checkout, then retry. The purchase cannot be moved to different property inputs.",
+          variant: "destructive",
+        });
+        return;
+      }
     }
     setIsExportingPdf(true);
     try {
@@ -3860,12 +4181,24 @@ export function InvestCalcPage({
       // The exported Deal Score is the canonical Balanced score (computed inside
       // toPdfReportData) - the same number every surface shows - so the report
       // never contradicts the screen it came from regardless of the active lens.
+      const confidenceContext = resolveLiveInputConfidenceContext(
+        values,
+        form.formState.dirtyFields as Record<string, unknown>
+      );
       const reportData = toPdfReportData({
         values,
         result: analysisResult,
         projectionYears,
         taxYears,
         exitYears,
+        inputConfidence: isFeatureEnabled("input_confidence")
+          ? buildInputConfidence({
+              values,
+              provenance: confidenceContext.provenance,
+              touchedFields: new Set(confidenceContext.touchedInputFields),
+              verified: inputVerification,
+            })
+          : null,
       });
 
       // Attach this deal's stored RentCast comps (saved deals only - reads the
@@ -3910,7 +4243,27 @@ export function InvestCalcPage({
       await generateInvestmentPDF(reportData, brandingConfig, mode);
       // Consume the one-time unlock only after a successful generation
       // so a transient failure doesn't burn the purchase.
-      if (oneTimeUnlocked) oneTimePdfUnlockedRef.current = false;
+      if (oneTimeUnlocked) {
+        const redemption = oneTimePdfRedemptionRef.current;
+        oneTimePdfUnlockedRef.current = false;
+        oneTimePdfRedemptionRef.current = null;
+        try {
+          window.sessionStorage.removeItem(ONE_TIME_PDF_RETURN_KEY);
+          window.sessionStorage.removeItem(ONE_TIME_PDF_DRAFT_KEY);
+          window.sessionStorage.removeItem(ONE_TIME_PDF_ACTIVE_CLAIM_KEY);
+          if (redemption) {
+            window.sessionStorage.removeItem(
+              oneTimePdfClaimSecretKey(redemption.claimId)
+            );
+          }
+          // Clean up only the pre-security draft key, never the general
+          // anonymous calculator auto-save draft.
+          window.localStorage.removeItem(ONE_TIME_PDF_LEGACY_DRAFT_KEY);
+        } catch {
+          // The server claim is already consumed. Storage cleanup is privacy
+          // hygiene only and must not turn a successful download into failure.
+        }
+      }
       // Fire the Google Ads conversion event. PDF export = high-intent
       // signal (user is sharing the analysis with a lender / partner).
       // Even though it's not a revenue event, surfacing it to the Ads
@@ -3967,29 +4320,55 @@ export function InvestCalcPage({
   };
 
   /**
-   * Start the one-time Single-Deal Underwrite checkout. Stashes the current form values
-   * in localStorage first so the deal survives the Stripe redirect.
+   * Start the one-time Deal Decision Pack checkout. The server binds the paid
+   * claim to these exact validated values; this tab keeps the separate claim
+   * secret + draft in sessionStorage so neither can leak through the URL.
    */
   const handleBuyOneTimePdf = async () => {
     setIsStartingPdfCheckout(true);
     try {
-      try {
-        window.localStorage.setItem(
-          ONE_TIME_PDF_DRAFT_KEY,
-          JSON.stringify({ v: 1, values: form.getValues(), savedAt: Date.now() })
-        );
-      } catch {
-        // Storage unavailable (private mode quota etc.) - checkout still
-        // works; worst case the user re-enters values after returning
-        // and exports with the unlock.
-      }
+      const checkoutValues = form.getValues();
       trackEvent("one_time_pdf_checkout_started", {
-        property_type: form.getValues().propertyType,
+        property_type: checkoutValues.propertyType,
       });
-      const result = await createOneTimePdfCheckoutAction();
+      trackEvent("deal_decision_pack_started", {
+        source: "single_deal_checkout",
+        methodology_version: analysisResult?.methodologyVersion ?? "unknown",
+      });
+      const result = await createOneTimePdfCheckoutAction({ values: checkoutValues });
       if (result.ok) {
+        try {
+          window.sessionStorage.setItem(
+            ONE_TIME_PDF_DRAFT_KEY,
+            JSON.stringify({ v: 2, values: checkoutValues, savedAt: Date.now() })
+          );
+          window.sessionStorage.setItem(
+            oneTimePdfClaimSecretKey(result.claim.id),
+            JSON.stringify({ v: 1, secret: result.claim.secret, savedAt: Date.now() })
+          );
+          window.sessionStorage.setItem(ONE_TIME_PDF_ACTIVE_CLAIM_KEY, result.claim.id);
+        } catch {
+          // The secret must never be placed in the URL as a storage fallback.
+          // The hosted session has not been visited, so no payment was made.
+          try {
+            window.sessionStorage.removeItem(ONE_TIME_PDF_DRAFT_KEY);
+            window.sessionStorage.removeItem(
+              oneTimePdfClaimSecretKey(result.claim.id)
+            );
+            window.sessionStorage.removeItem(ONE_TIME_PDF_ACTIVE_CLAIM_KEY);
+          } catch {
+            // Storage is already unavailable; cleanup cannot improve it.
+          }
+          toast({
+            title: "Secure checkout needs same-tab storage",
+            description:
+              "Allow session storage for this site, then retry. No charge was made.",
+            variant: "destructive",
+          });
+          return;
+        }
         trackEvent("single_deal_checkout_started", {
-          property_type: form.getValues().propertyType,
+          property_type: checkoutValues.propertyType,
           price_variant: getMarketingOfferConfig().singleDealPriceVariant,
         });
         window.location.assign(result.url);
@@ -4013,26 +4392,66 @@ export function InvestCalcPage({
   };
 
   /**
-   * Return-from-Stripe handler for the one-time PDF purchase. Runs once
-   * on mount: verifies payment server-side, restores the stashed deal,
-   * re-runs the analysis, and auto-exports the full PDF.
+   * Return-from-Stripe handler. The root-layout bootstrap already moved the
+   * public claim id out of the URL before any analytics script loaded. This
+   * effect combines it with the separately stored secret + exact draft,
+   * consumes the server claim, and auto-exports only that bound deal.
    */
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const params = new URLSearchParams(window.location.search);
-    const sessionId = params.get("pdf_purchase");
-    if (!sessionId) return;
 
-    const stripPurchaseParam = () => {
-      const current = new URLSearchParams(window.location.search);
-      current.delete("pdf_purchase");
-      const rest = current.toString();
-      window.history.replaceState({}, "", window.location.pathname + (rest ? `?${rest}` : ""));
-    };
+    // Defense in depth for non-standard rendering/dev environments where the
+    // head bootstrap did not run. Capture only the non-secret UUID. A legacy
+    // Stripe Session id is deliberately discarded and can no longer redeem.
+    try {
+      const currentUrl = new URL(window.location.href);
+      const claimId = currentUrl.searchParams.get("pdf_claim");
+      const legacy = currentUrl.searchParams.get("pdf_purchase");
+      if (claimId || legacy) {
+        const returnState = claimId
+          ? { v: 2, kind: "claim" as const, claimId, capturedAt: Date.now() }
+          : legacy === "cancelled"
+            ? { v: 2, kind: "cancelled" as const, capturedAt: Date.now() }
+            : { v: 2, kind: "legacy" as const, capturedAt: Date.now() };
+        try {
+          window.sessionStorage.setItem(
+            ONE_TIME_PDF_RETURN_KEY,
+            JSON.stringify(returnState)
+          );
+        } catch {
+          // Continue to strip even when storage is unavailable. Privacy wins.
+        }
+        currentUrl.searchParams.delete("pdf_claim");
+        currentUrl.searchParams.delete("pdf_purchase");
+        window.history.replaceState(
+          window.history.state,
+          "",
+          currentUrl.pathname + currentUrl.search + currentUrl.hash
+        );
+      }
+    } catch {
+      // The root bootstrap is the primary path; malformed-location fallback
+      // must never break the calculator.
+    }
 
-    if (sessionId === "cancelled") {
-      // Nothing to verify — strip immediately so refresh / back-nav is clean.
-      stripPurchaseParam();
+    let returnState = null;
+    try {
+      returnState = parseOneTimePdfReturnState(
+        window.sessionStorage.getItem(ONE_TIME_PDF_RETURN_KEY)
+      );
+    } catch {
+      return;
+    }
+    if (!returnState) return;
+
+    if (returnState.kind === "cancelled") {
+      try {
+        window.sessionStorage.removeItem(ONE_TIME_PDF_RETURN_KEY);
+      } catch {
+        // Cleanup is best-effort. Keep the claim secret/draft until this tab
+        // closes in case the user returns to Stripe from browser history and
+        // completes the still-open hosted session after cancelling once.
+      }
       toast({
         title: "Checkout cancelled",
         description: "No charge was made. Your deal is still in the form below.",
@@ -4040,21 +4459,74 @@ export function InvestCalcPage({
       return;
     }
 
-    // Verify FIRST; only a confirmed payment strips the session id from the
-    // URL. Stripping before the verify call meant a transient failure left a
-    // PAID customer with a "try again" toast and nothing to retry — the id
-    // was gone from every piece of client state, and recovery was a support
-    // email. Now a failure keeps the id (URL + this closure) so the retry
-    // action and a plain refresh both re-verify; re-verifying a paid session
-    // is explicitly harmless (see app/actions/one-time-pdf.ts).
+    if (returnState.kind === "legacy") {
+      // Pre-hardening Checkout Session ids were reusable bearer capabilities
+      // and had no server-side deal binding. Retrofitting "first claimant
+      // wins" would preserve the takeover bug, so legacy automatic redemption
+      // fails closed. Stripe/support records remain available for fulfillment.
+      try {
+        window.sessionStorage.removeItem(ONE_TIME_PDF_RETURN_KEY);
+      } catch {
+        // Non-fatal; the URL token was already destroyed by the bootstrap.
+      }
+      toast({
+        title: "Secure verification required",
+        description:
+          "This checkout used the older return format and cannot be auto-redeemed safely. Contact hello@usetruecap.com with the email used at checkout; your payment record is intact.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    let claimSecret: string | null = null;
+    let restoredValues: InvestmentFormValues | null = null;
+    let boundFormJson: string | null = null;
+    try {
+      const secretRaw = window.sessionStorage.getItem(
+        oneTimePdfClaimSecretKey(returnState.claimId)
+      );
+      if (secretRaw) {
+        const secretRecord = JSON.parse(secretRaw) as { v?: unknown; secret?: unknown };
+        if (
+          secretRecord.v === 1 &&
+          typeof secretRecord.secret === "string" &&
+          /^[A-Za-z0-9_-]{43}$/.test(secretRecord.secret)
+        ) {
+          claimSecret = secretRecord.secret;
+        }
+      }
+      const draftRaw = window.sessionStorage.getItem(ONE_TIME_PDF_DRAFT_KEY);
+      if (draftRaw) {
+        const parsedDraft = JSON.parse(draftRaw) as { values?: unknown };
+        const parsedValues = investmentFormSchema.safeParse(parsedDraft.values);
+        if (parsedValues.success) {
+          restoredValues = parsedValues.data;
+          boundFormJson = formSnapshotForCompare(parsedValues.data);
+        }
+      }
+    } catch {
+      // Corrupt/missing binding data is handled by the fail-closed branch.
+    }
+
+    if (!claimSecret || !restoredValues || !boundFormJson) {
+      toast({
+        title: "Return to the checkout tab",
+        description:
+          "This one-time purchase is bound to the browser tab and exact deal that started it. If that tab is unavailable, contact hello@usetruecap.com with your checkout email.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const verifyAndExport = async (): Promise<void> => {
       let verified: Awaited<ReturnType<typeof verifyOneTimePdfPaymentAction>>;
       try {
-        verified = await verifyOneTimePdfPaymentAction({ sessionId });
+        verified = await verifyOneTimePdfPaymentAction({
+          claimId: returnState.claimId,
+          claimSecret,
+          values: restoredValues,
+        });
       } catch (err) {
-        // A thrown server-action fetch (network blip mid-redirect) must
-        // land in the same retryable toast, not an unhandled rejection the
-        // paid customer never sees.
         console.warn("[one-time-pdf] verify call failed:", err);
         verified = {
           ok: false,
@@ -4063,63 +4535,53 @@ export function InvestCalcPage({
         };
       }
       if (!verified.ok) {
+        const canRetry =
+          verified.code === "SERVER_ERROR" ||
+          verified.code === "NOT_PAID" ||
+          verified.code === "IDENTITY_MISMATCH";
         toast({
           title: "Payment not confirmed",
           description: verified.message,
           variant: "destructive",
-          action: (
-            <ToastAction
-              altText="Retry payment verification"
-              onClick={() => void verifyAndExport()}
-            >
+          action: canRetry ? (
+            <ToastAction altText="Retry payment verification" onClick={() => void verifyAndExport()}>
               Retry verification
             </ToastAction>
-          ),
+          ) : undefined,
         });
         return;
       }
 
-      stripPurchaseParam();
       oneTimePdfUnlockedRef.current = true;
-      trackEvent("one_time_pdf_purchased", {});
-      trackEvent("single_deal_purchased", {
-        price_variant:
-          verified.priceVariant ?? getMarketingOfferConfig().singleDealPriceVariant,
-      });
-      trackEvent("single_deal_checkout_completed", {
-        price_variant:
-          verified.priceVariant ?? getMarketingOfferConfig().singleDealPriceVariant,
-      });
-
-      // Restore the stashed deal and auto-run analysis → auto-export.
-      let restoredValues: InvestmentFormValues | null = null;
-      try {
-        const raw = window.localStorage.getItem(ONE_TIME_PDF_DRAFT_KEY);
-        if (raw) {
-          const parsedDraft = JSON.parse(raw) as { values?: unknown };
-          const parsedValues = investmentFormSchema.safeParse(parsedDraft?.values);
-          if (parsedValues.success) restoredValues = parsedValues.data;
-        }
-      } catch {
-        // Corrupt/missing draft - fall through to the manual path below.
-      }
-      window.localStorage.removeItem(ONE_TIME_PDF_DRAFT_KEY);
-
-      if (!restoredValues) {
-        toast({
-          title: "Payment received - PDF unlocked",
-          description:
-            "Re-enter your deal and click Export PDF. Your one-time report is unlocked.",
-          variant: "success",
+      oneTimePdfRedemptionRef.current = {
+        claimId: verified.claimId,
+        boundFormJson,
+      };
+      if (!verified.recovered) {
+        trackEvent("one_time_pdf_purchased", {});
+        trackEvent("single_deal_purchased", {
+          price_variant:
+            verified.priceVariant ?? getMarketingOfferConfig().singleDealPriceVariant,
         });
-        return;
+        trackEvent("deal_decision_pack_purchased", {
+          price_variant:
+            verified.priceVariant ?? getMarketingOfferConfig().singleDealPriceVariant,
+        });
+        trackEvent("single_deal_checkout_completed", {
+          price_variant:
+            verified.priceVariant ?? getMarketingOfferConfig().singleDealPriceVariant,
+        });
       }
 
       toast({
-        title: "Payment received",
+        title: verified.recovered ? "Secure report restored" : "Payment received",
         description: "Rebuilding your analysis and generating the report…",
         variant: "success",
       });
+      persistedInputConfidenceSourceContextRef.current = null;
+      persistedInputConfidenceAddressRef.current = null;
+      setInputVerification({});
+      inputVerificationAddressRef.current = null;
       Object.entries(restoredValues).forEach(([key, value]) => {
         form.setValue(key as keyof InvestmentFormValues, value as never, {
           shouldDirty: true,
@@ -4233,6 +4695,10 @@ export function InvestCalcPage({
     // Property-specific captures + benchmarks: the next deal must never be
     // judged against the PREVIOUS address's enrichment / HUD FMR / estimate.
     enrichmentCaptureRef.current = {};
+    persistedInputConfidenceSourceContextRef.current = null;
+    persistedInputConfidenceAddressRef.current = null;
+    setInputVerification({});
+    inputVerificationAddressRef.current = null;
     setMarketRentEstimate(null);
     setUnitFmrByBedrooms(null);
     unitFmrKeyRef.current = null;
@@ -4654,13 +5120,117 @@ export function InvestCalcPage({
    * strip and enrichment receipt. Read FRESH on every child render (the
    * children subscribe to form writes themselves), so chips re-derive the
    * instant enrichment/template setValue-writes land — the same
-   * buildProvenanceInput the result strip + confidence badge use.
+   * merged value-bound context the result strip + confidence badge use.
    */
   const getLiveProvenance = useCallback(
-    () => buildProvenanceInput(enrichmentCaptureRef.current, form.getValues()),
-    [form]
+    () =>
+      resolveLiveInputConfidenceContext(
+        form.getValues(),
+        form.formState.dirtyFields as Record<string, unknown>
+      ).provenance,
+    [form, resolveLiveInputConfidenceContext]
+  );
+  const getLiveTouchedInputFields = useCallback(
+    () =>
+      resolveLiveInputConfidenceContext(
+        form.getValues(),
+        form.formState.dirtyFields as Record<string, unknown>
+      ).touchedInputFields,
+    [form, resolveLiveInputConfidenceContext]
   );
   const getEnrichmentCapture = useCallback(() => enrichmentCaptureRef.current, []);
+
+  const currentInputConfidence = useMemo(() => {
+    if (!analysisResult || !analysisValues) return null;
+    const sourceContext = resolveLiveInputConfidenceContext(
+      analysisValues,
+      form.formState.dirtyFields as Record<string, unknown>
+    );
+    return buildInputConfidence({
+      values: analysisValues,
+      provenance: sourceContext.provenance,
+      touchedFields: new Set(sourceContext.touchedInputFields),
+      verified: inputVerification,
+    });
+  }, [
+    analysisResult,
+    analysisValues,
+    form.formState.dirtyFields,
+    inputVerification,
+    resolveLiveInputConfidenceContext,
+  ]);
+
+  const handleToggleInputVerified = useCallback(
+    (key: InputConfidenceFieldKey, verified: boolean) => {
+      const sourceValues = analysisValues ?? form.getValues();
+      const next: InputVerificationEvidence = { ...inputVerification };
+      if (verified) {
+        next[key] = {
+          verifiedAt: new Date().toISOString(),
+          evidenceType: "user-confirmed",
+          fingerprint: inputVerificationFingerprint(sourceValues, key),
+        };
+      } else {
+        delete next[key];
+      }
+
+      // Confirmations live in the saved result snapshot, not in a form field.
+      // Without explicitly dirtying a loaded deal here, the UI could still
+      // say "Saved" and allow a PDF/compare using evidence that would vanish
+      // on navigation because no form watcher fires for this state change.
+      if (savedDealIdRef.current) setHasUnsavedChanges(true);
+
+      const sourceContext = resolveLiveInputConfidenceContext(
+        sourceValues,
+        form.formState.dirtyFields as Record<string, unknown>
+      );
+      const previousConfidence = buildInputConfidence({
+        values: sourceValues,
+        provenance: sourceContext.provenance,
+        touchedFields: new Set(sourceContext.touchedInputFields),
+        verified: inputVerification,
+      });
+      const nextConfidence = buildInputConfidence({
+        values: sourceValues,
+        provenance: sourceContext.provenance,
+        touchedFields: new Set(sourceContext.touchedInputFields),
+        verified: next,
+      });
+      setInputVerification(next);
+      inputVerificationAddressRef.current =
+        Object.keys(next).length > 0
+          ? sourceValues.address.trim().toLowerCase()
+          : null;
+
+      if (verified) {
+        const sourceClass = previousConfidence.fields.find((item) => item.key === key)?.sourceClass;
+        trackEvent("assumption_verified", {
+          field_key: key,
+          source_class: sourceClass ?? "unknown",
+          method_version: nextConfidence.methodVersion,
+        });
+      }
+      if (nextConfidence.score > previousConfidence.score) {
+        const band = (score: number) =>
+          score >= 80 ? "80-100" : score >= 55 ? "55-79" : score >= 30 ? "30-54" : "0-29";
+        trackEvent("confidence_increased", {
+          from_band: band(previousConfidence.score),
+          to_band: band(nextConfidence.score),
+          method_version: nextConfidence.methodVersion,
+        });
+      }
+      if (
+        previousConfidence.stage !== "offer-ready" &&
+        nextConfidence.stage === "offer-ready"
+      ) {
+        trackEvent("offer_ready_reached", {
+          method_version: nextConfidence.methodVersion,
+          confidence_band: "80-100",
+        });
+      }
+    },
+    [analysisValues, form, inputVerification, resolveLiveInputConfidenceContext]
+  );
 
   const toggleAdvanced = () => {
     const next = !advancedOpen;
@@ -4762,6 +5332,15 @@ export function InvestCalcPage({
     if (!analyzerEngaged) return;
     window.dispatchEvent(new Event("tc-analyzer-engaged"));
   }, [analyzerEngaged]);
+
+  const liveFormValues = form.getValues();
+  const liveResultSourceContext = resolveLiveInputConfidenceContext(
+    liveFormValues,
+    form.formState.dirtyFields as Record<string, unknown>
+  );
+  const liveResultTouchedFields = Object.fromEntries(
+    liveResultSourceContext.touchedInputFields.map((key) => [key, true])
+  ) as Record<string, unknown>;
 
   return (
     <div className="min-h-screen bg-background">
@@ -5181,6 +5760,7 @@ export function InvestCalcPage({
             <AssumptionsStrip
               form={form}
               getProvenance={getLiveProvenance}
+              getTouchedInputFields={getLiveTouchedInputFields}
               advancedOpen={advancedOpen}
               onNavigate={handleChipNavigate}
               onHideDetails={toggleAdvanced}
@@ -5242,7 +5822,11 @@ export function InvestCalcPage({
                 </div>
               )}
               <div id="step-financing" className="scroll-mt-24">
-                <FinancingSection form={form} />
+                <FinancingSection
+                  form={form}
+                  appliedProfile={appliedFinancingProfile}
+                  onAppliedProfileChange={handleAppliedFinancingProfileChange}
+                />
               </div>
               <div id="step-expenses" className="scroll-mt-24">
                 <OperatingExpensesSection form={form} purchasePrice={purchasePrice} />
@@ -5376,6 +5960,14 @@ export function InvestCalcPage({
                 </button>
               </div>
             ) : null}
+            {analysisResult && !isCalculating && savedMethodologyLabel ? (
+              <p className="mb-3 text-[11px] font-semibold text-muted-foreground">
+                {savedMethodologyLabel} ·{" "}
+                <Link href="/methodology" className="text-primary hover:underline">
+                  methodology
+                </Link>
+              </p>
+            ) : null}
             {/* Result-state trust strip - names the default sources behind
                 the numbers (HUD/FRED/state) + "all editable", with a jump
                 back to the form. Only once real results exist. */}
@@ -5417,17 +6009,17 @@ export function InvestCalcPage({
                   <AssumptionsSourceStrip
                     chrome="bare"
                     onEdit={handleEditAssumptions}
-                    provenance={buildProvenanceInput(enrichmentCaptureRef.current, form.getValues())}
+                    provenance={liveResultSourceContext.provenance}
                     // Shared helper (same predicate the input-side strip
                     // uses), excluding fields the active play's starter set
                     // wrote: strategy writes are dirty on purpose, but they
                     // are the PLAY's defaults, not user edits — claiming
                     // "yours" here was a provenance lie (BROWSER-2).
                     expensesEdited={computeExpensesEdited(
-                      form.formState.dirtyFields as Record<string, unknown>,
+                      liveResultTouchedFields,
                       computeStrategyOwnedFields(
                         strategyAppliedRef.current,
-                        form.getValues() as unknown as Record<string, unknown>
+                        liveFormValues as unknown as Record<string, unknown>
                       )
                     )}
                   />
@@ -5436,13 +6028,17 @@ export function InvestCalcPage({
               values={analysisValues ?? form.getValues()}
               dataConfidence={
                 analysisResult
-                  ? buildDataConfidence(buildProvenanceInput(enrichmentCaptureRef.current, form.getValues()), {
+                  ? buildDataConfidence(liveResultSourceContext.provenance, {
                       hasRent: analysisResult.monthlyRentalIncome > 0,
-                      hasPrice: (form.getValues("purchasePrice") ?? 0) > 0,
-                      hasBeds: (form.getValues("bedrooms") ?? 0) > 0,
+                      hasPrice: (liveFormValues.purchasePrice ?? 0) > 0,
+                      hasBeds: (liveFormValues.bedrooms ?? 0) > 0,
                     })
                   : null
               }
+              inputConfidence={currentInputConfidence}
+              onEditAssumptions={handleEditAssumptions}
+              onToggleInputVerified={handleToggleInputVerified}
+              onApplyDecisionThreshold={handleApplyDecisionThreshold}
               isLoading={isCalculating}
               dealScoreResult={dealScoreResult}
               isLoadingDealScore={isLoadingDealScore}

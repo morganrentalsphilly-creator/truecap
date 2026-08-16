@@ -204,7 +204,7 @@ export default async function ProfilePage({
         : [
             "Save and compare deals",
             "10-year projections",
-            "Tax strategy and exit scenarios",
+            "Illustrative tax impact and modeled exit comparisons",
             "Professional PDF exports",
           ],
     }));
@@ -280,7 +280,7 @@ export default async function ProfilePage({
                     features: [
                       "Save and compare deals",
                       "10-year projections",
-                      "Tax strategy and exit scenarios",
+                      "Illustrative tax impact and modeled exit comparisons",
                       "Professional PDF exports",
                     ],
                   },
@@ -294,7 +294,7 @@ export default async function ProfilePage({
                     features: [
                       "Save and compare deals",
                       "10-year projections",
-                      "Tax strategy and exit scenarios",
+                      "Illustrative tax impact and modeled exit comparisons",
                       "Professional PDF exports",
                     ],
                   },

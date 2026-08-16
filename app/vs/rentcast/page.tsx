@@ -54,7 +54,7 @@ const MATRIX: Row[] = [
   { feature: "Primary purpose", truecap: "Per-deal underwriting calculator", rentcast: "Rent + property value estimation", winner: "tie" },
   { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", rentcast: "Not modeled", winner: "truecap" },
   { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", rentcast: "Not modeled", winner: "truecap" },
-  { feature: "Tax strategy modeling", truecap: "Pro — depreciation + interest + after-tax CF", rentcast: "Not modeled", winner: "truecap" },
+  { feature: "Illustrative tax impact", truecap: "Pro — depreciation + interest + modeled after-tax CF", rentcast: "Not modeled", winner: "truecap" },
   { feature: "Deal score + verdict", truecap: "Free — 0-100 score with subscore breakdown", rentcast: "Not applicable", winner: "truecap" },
   { feature: "Rent comp data", truecap: "HUD Fair Market Rent (county-level, gov-published)", rentcast: "Yes — listings-based comps with addresses", winner: "rentcast" },
   { feature: "Property value estimate", truecap: "Purchase price as user input", rentcast: "Yes — automated valuation model", winner: "rentcast" },
@@ -64,7 +64,7 @@ const MATRIX: Row[] = [
   { feature: "Pricing (entry tier)", truecap: "Free; Pro $29.99/mo", rentcast: "Free + paid tiers ~$15-$74/mo (as of 2026)", winner: "tie" },
   { feature: "Free tier", truecap: "Yes — full underwriting math", rentcast: "Limited free lookups", winner: "truecap" },
   { feature: "Shareable read-only deal link", truecap: "Free — read-only public link; Pro adds co-branding", rentcast: "Not the use case", winner: "truecap" },
-  { feature: "Lender-ready PDF", truecap: "Pro — multi-page report", rentcast: "PDF reports available on paid", winner: "tie" },
+  { feature: "Lender-facing PDF", truecap: "Pro — multi-page report", rentcast: "PDF reports available on paid", winner: "tie" },
   { feature: "Investor dashboard (saved deals)", truecap: "Free — dashboard + save up to 5 deals; Pro adds unlimited saves + portfolio rollup", rentcast: "Property-list dashboard", winner: "tie" },
 ];
 
@@ -234,7 +234,7 @@ export default function VsRentcastPage() {
               <strong>Plug that rent into TrueCap.</strong> Override the auto-filled HUD rent with RentCast&apos;s number. Everything downstream recalculates.
             </li>
             <li>
-              <strong>Run the full underwrite in TrueCap.</strong> Cap rate, DSCR, cash flow, 10-year projection, tax strategy.
+              <strong>Run the full underwrite in TrueCap.</strong> Cap rate, DSCR, cash flow, 10-year projection, illustrative tax impact.
             </li>
             <li>
               <strong>Save the deal + revisit later.</strong> TrueCap&apos;s saved-deal feature lets you re-run with updated assumptions when market data shifts.
@@ -266,7 +266,7 @@ export default function VsRentcastPage() {
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
-            Pro unlocks projections, sensitivity, tax strategy, exit scenarios,
+            Pro unlocks projections, sensitivity, illustrative tax impact, modeled exit comparisons,
             MAO, PDF exports, and co-branded share links.
             No card to start.
           </p>

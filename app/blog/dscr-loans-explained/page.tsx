@@ -33,9 +33,9 @@ const TITLE = "DSCR loans explained: what they are, when they make sense, what t
 // window. The on-page <h1> keeps the longer editorial TITLE.
 const SERP_TITLE = "DSCR loans explained: costs & when they fit (2026)";
 const DESCRIPTION =
-  "DSCR loans approve based on the property's economics, not your personal income. Here's how they work, who they're for, what rates and DSCR ratios look like in 2026, and the trade-offs vs. conventional financing.";
+  "DSCR loans primarily underwrite a rental property's coverage instead of using personal DTI as the main ratio. Learn the borrower checks, program variation, costs, and trade-offs.";
 const PUBLISHED_AT = "2026-05-24";
-const MODIFIED_AT = "2026-06-01";
+const MODIFIED_AT = "2026-08-15";
 const READING_TIME_MIN = 10;
 
 export const metadata: Metadata = {
@@ -72,31 +72,31 @@ export const metadata: Metadata = {
 const FAQS: { q: string; a: string }[] = [
   {
     q: "What is a DSCR loan?",
-    a: "A DSCR (Debt Service Coverage Ratio) loan is a non-QM mortgage that qualifies the BORROWER based on the PROPERTY's ability to cover its own mortgage from rental income — not on your personal W-2 income, tax returns, or DTI ratio. The lender looks at projected rent divided by projected mortgage payment; if that ratio (the DSCR) is above their minimum (typically 1.0-1.25), you get approved.",
+    a: "A DSCR (Debt Service Coverage Ratio) loan is generally a business-purpose, non-QM investment-property loan that uses the property's rental coverage as a primary qualifying metric instead of personal DTI. Clearing a program's DSCR threshold is only one condition: lenders can still review credit, liquidity and reserves, borrower or guarantor background, entity documents, property eligibility, appraisal, insurance, and other program requirements.",
   },
   {
     q: "What's the minimum DSCR most lenders require?",
-    a: "Most DSCR programs in 2026 require 1.0-1.25 minimum, with better rate tiers at 1.25 and 1.5. Some 'no-DSCR' or 'sub-1.0' products exist but they carry meaningful rate premiums (1.5-2.5 percentage points above market) and tighter LTVs (65-70% instead of 75-80%).",
+    a: "Published program matrices commonly use thresholds around 1.0-1.25, while some programs allow lower coverage with different leverage, reserves, pricing, or property restrictions. There is no market-wide approval line. Ask the lender which rent, payment components, and rounding rules it uses, then obtain the current written matrix or term sheet.",
   },
   {
     q: "What rates do DSCR loans charge in 2026?",
-    a: "DSCR loan rates typically run 0.75-1.5 percentage points above conventional investment-property rates. With 30-year fixed conventional investment rates at 6.5-7.5% in mid-2026, DSCR rates land roughly 7.25-9% depending on credit score, LTV, and the property's actual DSCR. Higher DSCR (1.5+) gets you closer to the bottom of the range; tight DSCR (1.0-1.15) closer to the top.",
+    a: "There is no single DSCR rate. Quotes can change daily and vary with credit, LTV, DSCR, property type, occupancy, loan size, reserves, points, prepayment terms, and lender. These loans are often priced above comparable conventional financing, but only same-day written quotes with matching fees and prepayment terms support a useful comparison.",
   },
   {
     q: "Do DSCR loans need a down payment?",
-    a: "Yes. Standard DSCR products require 20-25% down. Some lenders go to 80% LTV (20% down) for strong borrowers with DSCR ≥ 1.25 and credit scores above 720. Stricter products top out at 75% LTV. Cash-out refis on DSCR loans typically max at 70-75% LTV.",
+    a: "Purchase programs commonly require meaningful borrower equity, and many published matrices cap leverage near 75-80% LTV. Actual maximum LTV can be lower based on DSCR, credit, property type, loan purpose, experience, or market. A quoted LTV is a program limit, not a promise that the file will close at that leverage.",
   },
   {
     q: "When should I use a DSCR loan vs a conventional loan?",
-    a: "DSCR loans make sense when (a) you're self-employed and your tax returns don't show enough income to qualify conventionally, (b) you already have 10 financed properties (the Fannie/Freddie limit) and need a non-QM product, (c) you're using an LLC for asset protection (most conventional loans require personal title), or (d) the property's DSCR is strong but your personal DTI is tight. If your W-2 income easily qualifies and you don't need an LLC, conventional financing is almost always cheaper.",
+    a: "A DSCR loan can be worth comparing when income-based conventional underwriting is a constraint, the borrower wants an eligible entity structure, or a lender's property-coverage approach better fits the transaction. Compare it with conventional and portfolio options using total cost, recourse, reserves, prepayment terms, documentation, and exit plan—not the note rate alone.",
   },
   {
     q: "What documentation do DSCR loans require?",
-    a: "Minimal compared to conventional. Typically: credit report, two months of bank statements (to verify reserves), the executed purchase contract or refi appraisal, and lease/market rent comps. You don't provide tax returns, W-2s, pay stubs, or DTI calculations. That's the whole point.",
+    a: "Requirements vary by lender, program, state, borrower, and property. Many DSCR programs do not use tax returns, W-2s, or pay stubs to calculate personal DTI, but a lender may still request income or business documents for compliance, exceptions, guarantor review, ability-to-repay questions, or another condition. Expect identity and entity documents, credit authorization, asset and reserve evidence, appraisal or rent support, insurance, title, and transaction documents, then confirm the lender's checklist in writing.",
   },
   {
     q: "Can I use a DSCR loan for a short-term rental (Airbnb)?",
-    a: "Yes, with caveats. Most DSCR lenders will underwrite based on the property's long-term market rent regardless of how you intend to operate it. Some specialized lenders will use AirDNA or similar projected STR revenue to compute DSCR, which can dramatically improve your qualification if the property's STR income materially exceeds market long-term rent. Rates on STR-based DSCR loans typically run 0.5-1.0 percentage points above standard DSCR.",
+    a: "Some programs allow short-term-rental properties, but eligibility and income methodology vary. A lender may use long-term market rent, documented operating history, or a specialized appraisal method, and it may impose different leverage, reserves, licensing, management, or market restrictions. Confirm the exact income evidence and property-use rules before relying on projected STR revenue.",
   },
 ];
 
@@ -164,14 +164,13 @@ export default function BlogPost() {
 
         <article className="prose prose-slate max-w-none [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground [&_li]:leading-relaxed [&_strong]:text-foreground">
           <p>
-            For a decade, &ldquo;getting a mortgage&rdquo; meant proving your
-            personal income — tax returns, W-2s, debt-to-income ratios, the
-            whole drill. That broke down fast for serious real estate
-            investors. By your 5th rental, your tax returns show paper losses
-            from depreciation, your DTI is technically wrecked even though
-            your portfolio is throwing off cash, and Fannie/Freddie cap you at
-            10 financed properties anyway. DSCR loans were built for exactly
-            this gap.
+            Conventional mortgage underwriting commonly uses documented
+            personal income and debt-to-income ratios. That approach may be a
+            constraint for some self-employed or portfolio investors, even
+            when a proposed rental supports its debt under a separate property
+            analysis. DSCR programs are one non-QM option for that gap, but
+            they still underwrite both the collateral and defined borrower
+            risks.
           </p>
 
           <p>
@@ -194,11 +193,12 @@ export default function BlogPost() {
           </div>
           <p>
             A <em>DSCR loan</em> is a non-QM mortgage that qualifies the
-            borrower based on this ratio instead of personal income. The
-            lender doesn&apos;t care about your W-2 or your tax returns.
-            They care whether the property can pay its own mortgage. If the
-            DSCR is above their minimum (usually 1.0-1.25), you&apos;re
-            approvable.
+            transaction primarily on property coverage instead of using
+            personal DTI as the main ratio. Many programs do not use W-2s or
+            tax returns to calculate that ratio, but the lender still reviews
+            borrower or guarantor credit, reserves, identity, entity
+            documents, and the property itself. A DSCR above the program
+            minimum satisfies one condition; it does not guarantee approval.
           </p>
           <p>
             <Link href="/tools/dscr-calculator" className="text-primary font-semibold hover:underline">
@@ -208,35 +208,37 @@ export default function BlogPost() {
 
           <h2 className="text-2xl sm:text-3xl">Who DSCR loans are for</h2>
           <p>
-            Four classic use cases. If any of them describes you, DSCR is
-            usually the right product. If none of them does, conventional
-            financing is almost always cheaper and a better fit.
+            Four common use cases follow. They identify reasons to compare a
+            DSCR quote—not proof that it is the right or least-expensive
+            product for a particular borrower.
           </p>
 
           <h3>1. Self-employed with paper losses</h3>
           <p>
             You make real money, but your Schedule C / Schedule E shows
             depreciation, business expenses, and other paper losses that
-            crater your taxable income. Conventional lenders look at the tax
-            returns, not the underlying business. DSCR loans don&apos;t
-            care about your tax returns.
+            reduce taxable income. Conventional programs apply their own
+            income-calculation rules. A DSCR program may avoid using tax
+            returns to calculate personal DTI, although documentation and
+            exception requirements still vary by lender and program.
           </p>
 
           <h3>2. Already maxed on Fannie/Freddie</h3>
           <p>
-            Fannie Mae and Freddie Mac cap an individual borrower at 10
-            financed 1-4 unit properties. If you&apos;re at the cap, your
-            11th deal needs non-QM financing. DSCR is the most common
-            product for that next stage.
+            Agency financed-property rules can constrain an individual
+            borrower with a larger portfolio. Depending on the transaction,
+            alternatives can include DSCR, bank portfolio, commercial, or
+            other financing; the right comparison depends on current program
+            eligibility and total cost.
           </p>
 
           <h3>3. Buying through an LLC for asset protection</h3>
           <p>
-            Most conventional residential loans require the property to be
-            titled in your personal name. If you want the LLC liability
-            shield from day one — which most investors do once they have
-            more than 2-3 properties — you need a DSCR loan or a portfolio
-            loan from a regional bank.
+            Some DSCR and portfolio programs permit eligible entities, often
+            with personal guaranties and specific vesting documents. Agency
+            and conventional title rules differ. Choose an entity with legal
+            and tax advice, then confirm that exact vesting with the lender
+            before signing a purchase contract.
           </p>
 
           <h3>4. Strong property, tight personal DTI</h3>
@@ -244,42 +246,43 @@ export default function BlogPost() {
             Sometimes the deal is great but your personal balance sheet
             (recent job change, high credit card balance, divorce-related
             debt, etc.) keeps the conventional underwriter from approving.
-            If the property has DSCR above 1.25 you can sidestep the
-            personal-finance scrutiny entirely.
+            A property-coverage program may remove personal DTI as the primary
+            qualifying ratio, but it does not remove credit, liquidity,
+            identity, guarantor, or other borrower review.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">What DSCR loans cost in 2026</h2>
           <p>
-            The rate premium is the trade-off. DSCR loans typically run
-            <strong> 0.75-1.5 percentage points above</strong> conventional
-            investment-property rates. With current conventional 30-year
-            fixed investment rates at 6.5-7.5%, DSCR rates in mid-2026 land
-            roughly in the <strong>7.25-9.0%</strong> range.
+            Pricing is quote-specific and can move daily. DSCR loans are often
+            priced above comparable conventional investment-property loans,
+            but a rate-only comparison is incomplete. Compare the same loan
+            amount and lock date, then include points, lender fees, reserves,
+            amortization, recourse, and any prepayment penalty.
           </p>
           <p>
-            What moves you within that range:
+            Common pricing and eligibility inputs include:
           </p>
           <ul>
             <li>
-              <strong>DSCR ratio.</strong> Stronger DSCR (1.5+) → bottom of
-              the range. Tight DSCR (1.0-1.15) → top of the range.
+              <strong>DSCR ratio.</strong> Stronger coverage may improve
+              pricing or leverage under a particular matrix.
             </li>
             <li>
-              <strong>Credit score.</strong> 720+ unlocks the best tier; 660
-              minimum on most products.
+              <strong>Credit profile.</strong> Score, history, and recent
+              credit events can change pricing or eligibility.
             </li>
             <li>
-              <strong><Link href="/glossary/ltv" className="text-primary font-semibold hover:underline">LTV</Link>.</strong> 75% LTV gets better rates than 80% LTV.
-              Cash-out refis at 70-75% LTV.
+              <strong><Link href="/glossary/ltv" className="text-primary font-semibold hover:underline">LTV</Link>.</strong> Lower leverage commonly improves pricing,
+              while cash-out and purchase matrices can differ.
             </li>
             <li>
-              <strong>Reserves.</strong> 6+ months of mortgage payments in
-              the bank → tier improvement; 3 months is the typical floor.
+              <strong>Reserves.</strong> Required months and eligible asset
+              types vary; more liquidity can help on some files.
             </li>
             <li>
-              <strong>Property type.</strong> Single-family lands at the
-              bottom of the range; 2-4 unit slightly higher; 5+ unit moves
-              into commercial-loan territory.
+              <strong>Property and use.</strong> Unit count, short-term-rental
+              use, rural or condo status, loan size, and market can affect the
+              matrix.
             </li>
           </ul>
 
@@ -294,33 +297,36 @@ export default function BlogPost() {
                 </tr>
               </thead>
               <tbody className="[&_td]:p-3 [&_td]:border-b [&_td]:border-border [&_tr:last-child_td]:border-0">
-                <tr><td className="text-muted-foreground">Income docs needed</td><td>None</td><td>2 years tax returns, W-2s, pay stubs</td></tr>
-                <tr><td className="text-muted-foreground">Qualifying metric</td><td>Property DSCR</td><td>Personal DTI</td></tr>
-                <tr><td className="text-muted-foreground">Title in LLC?</td><td>Yes</td><td>No (usually)</td></tr>
-                <tr><td className="text-muted-foreground">Property cap</td><td>None</td><td>10 financed Fannie/Freddie</td></tr>
-                <tr><td className="text-muted-foreground">Typical rate (2026)</td><td>7.25-9.0%</td><td>6.5-7.5%</td></tr>
-                <tr><td className="text-muted-foreground">Min down</td><td>20-25%</td><td>15-25%</td></tr>
-                <tr><td className="text-muted-foreground">Closing timeline</td><td>21-30 days</td><td>30-45 days</td></tr>
-                <tr><td className="text-muted-foreground">Min credit score</td><td>660-680</td><td>620-640</td></tr>
+                <tr><td className="text-muted-foreground">Income underwriting</td><td>Personal DTI often not primary; documents vary</td><td>Documented-income and DTI rules apply</td></tr>
+                <tr><td className="text-muted-foreground">Primary coverage metric</td><td>Program-defined property DSCR</td><td>Personal DTI plus agency underwriting</td></tr>
+                <tr><td className="text-muted-foreground">Eligible title</td><td>Entities often permitted; guaranties common</td><td>Program and vesting rules apply</td></tr>
+                <tr><td className="text-muted-foreground">Portfolio limits</td><td>No agency cap; lender exposure limits can apply</td><td>Agency financed-property rules can apply</td></tr>
+                <tr><td className="text-muted-foreground">Rate and fees</td><td>Quote-specific; often higher</td><td>Quote-specific; often lower if eligible</td></tr>
+                <tr><td className="text-muted-foreground">Equity required</td><td>Often 20%+; matrix-specific</td><td>Purpose and program-specific</td></tr>
+                <tr><td className="text-muted-foreground">Closing timeline</td><td>Lender and file-specific</td><td>Lender and file-specific</td></tr>
+                <tr><td className="text-muted-foreground">Credit threshold</td><td>Program-specific</td><td>Program and automated-underwriting specific</td></tr>
               </tbody>
             </table>
           </div>
+          <p className="text-xs text-muted-foreground">
+            This comparison describes common structures, not a commitment or
+            universal program matrix. Requirements vary by lender and program.
+          </p>
 
           <h2 className="text-2xl sm:text-3xl">The DSCR trap to watch for</h2>
           <p>
-            DSCR lenders compute the ratio using <em>market rent</em> from a
-            1007/1025 form (the lender&apos;s appraiser&apos;s rent
-            estimate). If that estimate comes in 10-15% below what you
-            assumed when you ran your underwriting, your DSCR can flip from
-            1.25 to 1.05 — and you&apos;re suddenly in a different rate tier
-            or, worse, declined.
+            Lender formulas are not uniform. A program may use appraiser
+            market rent, an eligible lease, or another documented amount,
+            and may divide it by PITIA or a differently defined payment. If
+            the accepted rent comes in below your assumption, the lender&apos;s
+            ratio and available pricing or leverage can change materially.
           </p>
           <p>
-            Defense: before locking your rate, ask the lender what market
-            rent figure they&apos;re using. If it&apos;s materially below
-            your number, pull rental comps from Rentometer, Zillow, and the
-            local property management companies. A second appraisal or rent
-            comp letter can sometimes move the needle 5-10%. If you&apos;re using a DSCR cash-out to pull equity, our guide on <Link href="/blog/how-to-refinance-a-rental-property" className="text-primary font-semibold hover:underline">refinancing a rental property</Link> walks through the post-refi DSCR math.
+            Before paying non-refundable fees or locking, ask which rent
+            evidence, payment components, and rounding rules the lender will
+            use, and what reconsideration process exists. Independent rental
+            comps can inform your own decision but do not compel an appraiser
+            or lender to change a value. If you&apos;re using a DSCR cash-out to pull equity, our guide on <Link href="/blog/how-to-refinance-a-rental-property" className="text-primary font-semibold hover:underline">refinancing a rental property</Link> walks through the post-refi DSCR math.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">Stress-testing your DSCR</h2>
@@ -330,12 +336,13 @@ export default function BlogPost() {
           <ul>
             <li>
               <strong>Base case</strong> — your expected rent and rate.
-              DSCR should be 1.25+ to be comfortable.
+              Compare it with the lender&apos;s written threshold and your own
+              operating cushion.
             </li>
             <li>
               <strong>Lender appraisal -10% rent</strong> — what if the
-              1007 comes back 10% below your estimate? DSCR should still
-              hold above 1.10.
+              lender-accepted rent comes back 10% below your estimate? Check
+              whether the file and your own cash-flow plan still work.
             </li>
             <li>
               <strong>Rate +0.5pp</strong> — what if rates spike before
@@ -344,9 +351,10 @@ export default function BlogPost() {
             </li>
           </ul>
           <p>
-            If all three scenarios pencil, you&apos;re bankable. If only the
-            base case works, you have no margin for the kinds of surprises
-            that happen on every other closing.
+            If all three scenarios pencil, the model has a better underwriting
+            buffer. That still does not establish lender approval, appraised
+            rent, insurability, title clearance, or final pricing. If only the
+            base case works, the financing has little modeled room for change.
           </p>
 
           <div className="not-prose">

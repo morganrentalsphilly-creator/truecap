@@ -88,7 +88,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Spreadsheet or the TrueCap analyzer — which should I use?",
-    a: "Use the spreadsheet when you want full control of every cell, need to work offline, or want to hand a lender or partner a file. Use the analyzer when you want speed: type an address and it pre-fills market rent and state property tax, then layers on PMI modeling, 10-year projections with paydown and appreciation, tax strategy, exit scenarios, and a plain-English verdict. Both use the same math, so numbers carry over exactly.",
+    a: "Use the spreadsheet when you want full control of every cell, need to work offline, or want to hand a lender or partner a file. Use the analyzer when you want speed: type an address and it pre-fills editable area-level screening benchmarks, then layers on PMI modeling, 10-year projections with paydown and appreciation, illustrative tax impact, modeled exit comparisons, and a plain-English verdict. The core NOI, cap-rate, cash-flow, and DSCR conventions match; the analyzer adds modules the spreadsheet intentionally omits.",
   },
   {
     q: "Can I share or modify the file?",

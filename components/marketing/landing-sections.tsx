@@ -457,7 +457,7 @@ const HOMEPAGE_FAQS: { q: string; a: string }[] = [
     // version claimed saving itself was a Pro add-on, contradicting the
     // pricing card's Free save-up-to-5 bullet and the runtime gate
     // (pricing-copy-guards.test.ts locks this).
-    a: "Yes. The cash-flow analyzer - cap rate, CoC, DSCR, monthly cash flow, address auto-fill, the 0-100 Deal Score, and a plain-English verdict - is free forever and unlimited. No card required. Free even saves up to 5 deals. Pro adds editing + unlimited saved deals, compare deals, lender-ready PDFs, a personal buy box (your criteria, checked on every deal), and the advanced modules (BRRRR + Fix-and-Flip, Sensitivity, 10-year projections, tax strategy, exit scenarios).",
+    a: "Yes. The cash-flow analyzer - cap rate, CoC, DSCR, monthly cash flow, address auto-fill, the 0-100 Deal Score, and a plain-English verdict - is free forever and unlimited. No card required. Free even saves up to 5 deals. Pro adds editing + unlimited saved deals, compare deals, Deal Decision Pack PDFs, a personal buy box (your criteria, checked on every deal), and the advanced modules (BRRRR + Fix-and-Flip, Sensitivity, 10-year projections, illustrative tax impact, and modeled exit comparisons).",
   },
   {
     q: "Do I need a credit card?",
@@ -465,19 +465,19 @@ const HOMEPAGE_FAQS: { q: string; a: string }[] = [
   },
   {
     q: "How accurate is the auto-fill?",
-    a: "Rent comes from HUD Fair Market Rent for the county, the mortgage rate from the current FRED 30-year fixed series, and property tax from your state's effective rate. These are sensible market defaults, not absolutes - every field is editable, so override anything with your own numbers.",
+    a: "Rent starts from a HUD area benchmark (ZIP-level when available, otherwise county-level), not a property-specific rent comp. The rate starts from FRED's national owner-occupied 30-year benchmark, not an investor lender quote. Property tax uses a state effective-rate estimate. Every field is editable - replace screening defaults with local comps, the actual tax bill, insurance, and written loan terms before making an offer.",
   },
   {
     q: "Can I edit the assumptions?",
     a: "Yes - every number is editable. TrueCap pre-fills rent, rate, tax, and expense defaults so you get an instant first pass, then you can change financing, expenses, and growth assumptions under “Improve accuracy” and rerun in a click.",
   },
   {
-    q: "What do I get with a Single-Deal Underwrite?",
-    a: "A complete one-property decision report: deterministic Max Offer, Deal Doctor rent/rate thresholds, assumptions, verdict, cash flow, cap rate, DSCR, downside scenario, 10-year projection, tax strategy, exit scenarios, and Deal Score. No account or subscription.",
+    q: "What do I get with a Deal Decision Pack?",
+    a: "A complete one-property decision report: deterministic Max Offer, Deal Doctor rent/rate thresholds, assumptions, verdict, cash flow, cap rate, DSCR, downside scenario, 10-year projection, illustrative tax impact, modeled exit comparisons, and Deal Score. No account or subscription.",
   },
   {
     q: "When should I upgrade to Pro?",
-    a: "Use Free to screen unlimited deals. Use a Single-Deal Underwrite when you need Max Offer and the complete decision report for one property without a subscription. Upgrade to Pro for an interactive Max Offer workflow, Buy Box screening, downside testing, unlimited saves, comparisons, reusable assumptions, branded reports, and unlimited exports. Pro is month-to-month - cancel anytime.",
+    a: "Use Free to screen unlimited deals. Use a Deal Decision Pack when you need Max Offer and the complete decision report for one property without a subscription. Upgrade to Pro for an interactive Max Offer workflow, Buy Box screening, downside testing, unlimited saves, comparisons, reusable assumptions, branded reports, and unlimited exports. Pro is month-to-month - cancel anytime.",
   },
   {
     q: "How does the Pro trial work?",
@@ -510,7 +510,7 @@ export function HomepageFaq({ structuredData = true }: { structuredData?: boolea
           <div className="divide-y divide-border rounded-2xl border border-border bg-card shadow-sm">
             {HOMEPAGE_FAQS.map((faq) => (
               <details key={faq.q} className="group px-5 py-4 sm:px-6 sm:py-5">
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-3">
+                <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                   <span className="text-left font-semibold text-foreground">{faq.q}</span>
                   <span
                     aria-hidden
@@ -661,7 +661,7 @@ const LADDER_ROWS: { label: string; cells: (boolean | string)[] }[] = (
     { label: "Analyze unlimited deals", key: null, cells: [true, true, true] },
     { label: "Cap rate · CoC · DSCR · cash flow", key: "cash_flow" },
     { label: "0-100 Deal Score + plain-English verdict", key: "deal_score" },
-    { label: "Lender-ready PDF export", key: "pdf_export" },
+    { label: "Lender-facing PDF export", key: "pdf_export" },
     { label: "Max Offer + Deal Doctor thresholds", key: "mao" },
     { label: "Save & revisit deals", key: "save_deal" },
     { label: "Compare deals side-by-side", key: "compare_deals" },
@@ -689,7 +689,7 @@ export function PdfProUpsell() {
             <span className="text-primary">{proOfferName}</span> to know exactly what to offer—every time.
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-balance text-sm leading-relaxed text-muted-foreground sm:text-base">
-            Start with a 60-second screen. Unlock a complete Single-Deal Underwrite
+            Start with a 60-second screen. Unlock a complete Deal Decision Pack
             once, or use Pro to turn every address into four answers: pursue or pass,
             what to offer, what could break, and how to present the decision.
           </p>
@@ -700,8 +700,16 @@ export function PdfProUpsell() {
         <p className="mb-2 text-center text-xs font-medium text-muted-foreground sm:hidden">
           Swipe to compare all three →
         </p>
-        <div className="mb-8 overflow-x-auto rounded-2xl border border-border bg-card shadow-sm sm:mb-10">
+        <div
+          role="region"
+          aria-label="Free, Deal Decision Pack, and Pro comparison"
+          tabIndex={0}
+          className="mb-8 overflow-x-auto rounded-2xl border border-border bg-card shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:mb-10"
+        >
           <table className="w-full min-w-[560px] text-sm">
+            <caption className="sr-only">
+              Features included with Free, the one-time Deal Decision Pack, and Pro
+            </caption>
             <thead>
               <tr className="border-b border-border bg-muted/30">
                 <th className="px-4 py-3 text-left font-bold text-muted-foreground sm:px-6">
@@ -772,22 +780,22 @@ export function PdfProUpsell() {
           {/* One complete deal without a subscription. */}
           <div className="flex flex-col rounded-2xl border border-border bg-card p-6 shadow-sm">
             <div className="mb-4 flex size-11 items-center justify-center rounded-xl bg-[var(--brand-green)]/10 text-[var(--brand-green)]">
-              <FileText className="size-5" />
+              <FileText aria-hidden className="size-5" />
             </div>
             <span className="w-fit rounded-full bg-[var(--brand-green)]/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-[var(--brand-green)]">
               One-time · {singleDeal.priceLabel}
             </span>
-            <h3 className="mt-2 text-lg font-bold text-foreground">Single-Deal Underwrite</h3>
+            <h3 className="mt-2 text-lg font-bold text-foreground">TrueCap Deal Decision Pack</h3>
             <p className="mt-1.5 flex-1 text-sm leading-relaxed text-muted-foreground">
               Get the complete decision package for one property: Max Offer,
               Deal Doctor thresholds, assumptions, verdict, downside scenario,
-              long-term projection, tax view, exit scenarios, and a polished
+              long-term projection, illustrative tax-impact view, modeled exit comparisons, and a polished
               report. No subscription.
             </p>
             <div className="mt-5">
               <ScrollToFormButton className="group inline-flex h-11 items-center gap-1.5 rounded-xl border border-border bg-background px-5 text-sm font-bold text-foreground hover:bg-muted">
                 Analyze a property
-                <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+                <ArrowRight aria-hidden className="size-4 transition-transform group-hover:translate-x-0.5" />
               </ScrollToFormButton>
             </div>
           </div>
@@ -795,7 +803,7 @@ export function PdfProUpsell() {
           {/* Pro */}
           <div className="flex flex-col rounded-2xl border-2 border-primary/30 bg-card p-6 shadow-[0_16px_40px_rgba(0,112,196,0.10)]">
             <div className="mb-4 flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
-              <Sparkles className="size-5" />
+              <Sparkles aria-hidden className="size-5" />
             </div>
             <span className="w-fit rounded-full bg-primary/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-primary">
               {proOfferName}
@@ -812,7 +820,7 @@ export function PdfProUpsell() {
                 className="group inline-flex h-11 items-center gap-1.5 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-[0_10px_24px_rgba(0,112,196,0.28)] hover:-translate-y-0.5 transition-transform"
               >
                 Start {TRIAL_DAYS}-Day Pro Trial
-                <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+                <ArrowRight aria-hidden className="size-4 transition-transform group-hover:translate-x-0.5" />
               </Link>
               <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
                 Eligible first-time subscribers get full Pro access. Card required
@@ -832,31 +840,43 @@ export function PdfProUpsell() {
  * satisfaction with time saved, never an investment result.
  */
 export function FiveDealGuarantee() {
-  const { fiveDealGuaranteeEnabled } = getMarketingOfferConfig();
-  if (!fiveDealGuaranteeEnabled) return null;
+  const {
+    threeDealGuaranteeEnabled,
+    threeDealGuaranteeTermsUrl,
+  } = getMarketingOfferConfig();
+  // The legacy five-deal switch had no published-terms requirement. Keep the
+  // export name for route compatibility, but never render a refund promise
+  // from that switch. The approved replacement fails closed on BOTH its flag
+  // and a validated terms URL.
+  if (!threeDealGuaranteeEnabled || !threeDealGuaranteeTermsUrl) return null;
 
   return (
     <section className="border-t border-border bg-background">
-      <GuaranteeViewTracker />
+      <GuaranteeViewTracker guarantee="three_deal" />
       <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 sm:py-16">
         <div className="rounded-3xl border-2 border-[var(--brand-green)]/30 bg-[var(--brand-green-light)] p-6 sm:p-8">
           <div className="flex items-start gap-4">
             <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-card text-[var(--brand-green)]">
-              <ShieldCheck className="size-5" />
+              <ShieldCheck aria-hidden className="size-5" />
             </span>
-            <div>
+            <div className="min-w-0">
               <p className="text-[11px] font-bold uppercase tracking-widest text-[var(--brand-green)]">Risk reversal</p>
-              <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-foreground">The 5-Deal Guarantee</h2>
+              <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-foreground">
+                The 3-Deal Fit Guarantee
+              </h2>
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground sm:text-base">
-                Use TrueCap Pro to underwrite five real properties during your
-                first 30 paid days. If you do not believe it saved you more
-                time than the subscription cost, contact us and we will refund
-                your first month.
+                Analyze three real deals with TrueCap Pro. If the decision workflow does not make evaluating those deals faster or clearer than your previous process, contact us within 30 days to request a refund of your first month.
               </p>
               <p className="mt-3 text-xs text-muted-foreground">
                 This is a software-satisfaction guarantee, not a guarantee of
                 returns, cash flow, appreciation, financing, or deal success.
               </p>
+              <Link
+                href={threeDealGuaranteeTermsUrl}
+                className="mt-1 inline-flex min-h-11 items-center rounded text-xs font-bold text-[var(--brand-green)] underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                Read guarantee terms
+              </Link>
             </div>
           </div>
         </div>
@@ -888,7 +908,7 @@ const PERSONAS: {
   {
     icon: Users,
     title: "For agents",
-    body: "Hand clients a defensible analysis at the showing, with a shareable link or lender-ready PDF.",
+    body: "Hand clients a clearly sourced analysis at the showing, with a shareable link or lender-facing Deal Decision Pack PDF.",
     // No seed: agents run whatever their client is buying — no single play
     // (or property type) fits, so the plain analyzer is the right landing.
   },

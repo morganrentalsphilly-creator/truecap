@@ -84,13 +84,17 @@ export function TaxStrategyPanel({
       <TaxStrategySummaryCards years={years} />
       <PanelInsight>{buildTaxInsight(years)}</PanelInsight>
       <SnapshotStatusCard
-        title="Tax Strategy"
+        title="Illustrative Tax Impact"
         snapshotSource={snapshotSource}
         isLoading={isLoadingSnapshot}
       />
       <TaxStrategyCharts years={years} />
       <p className="text-xs text-muted-foreground">
-        This is an estimate for planning purposes only and is not tax advice.
+        Planning illustration only — not tax advice. The model applies the entered
+        marginal rate to projected rental income and deductions. Passive-loss
+        limits, eligibility, filing status, state and local taxes, depreciation
+        recapture, mixed personal/rental-use allocation, and your actual return
+        can materially change the result.
       </p>
       <TaxStrategyTable years={years} />
     </div>
@@ -107,18 +111,19 @@ function buildTaxInsight(years: TaxStrategyYear[]): ReactNode {
   if (frontLoaded) {
     return (
       <>
-        Your tax shield is <strong className="text-foreground">front-loaded</strong>: about{" "}
+        The modeled deduction effect is <strong className="text-foreground">front-loaded</strong>: about{" "}
         <strong className="text-foreground">{formatCurrency(y1.taxSavingsAnnual)}</strong> in year 1, easing to{" "}
         {formatCurrency(yLast.taxSavingsAnnual)} by year {yLast.year} as the mortgage-interest deduction shrinks —{" "}
-        roughly {formatCurrency(total)} in estimated benefit over the hold.
+        roughly {formatCurrency(total)} in illustrative net tax impact over the hold.
       </>
     );
   }
   return (
     <>
-      Depreciation and mortgage-interest deductions total about{" "}
-      <strong className="text-foreground">{formatCurrency(total)}</strong> in estimated tax benefit across the
-      10-year hold.
+      Under the entered marginal tax rate, depreciation and mortgage-interest
+      deductions produce about{" "}
+      <strong className="text-foreground">{formatCurrency(total)}</strong> in
+      illustrative net tax impact across the 10-year hold.
     </>
   );
 }

@@ -7,7 +7,7 @@ describe("deal-aging shared thresholds", () => {
   it("targets only the time-sensitive acquisition stages", () => {
     // The workspace DealAgingNudge and the dashboard aging line both consume
     // these — widening them silently changes two surfaces at once.
-    expect(DEAL_AGING_STAGES).toEqual(["offer", "under_contract"]);
+    expect(DEAL_AGING_STAGES).toEqual(["negotiating", "offer", "under_contract"]);
     expect(DEAL_AGING_MIN_DAYS).toBe(7);
   });
 });

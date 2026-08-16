@@ -36,7 +36,7 @@ const SERP_TITLE = "What is a good DSCR for a rental property? (2026)";
 const DESCRIPTION =
   "1.25 is the lender bar, not the investor bar. DSCR bands explained, plus worked examples: max loan and max offer price at a 1.25 DSCR.";
 const PUBLISHED_AT = "2026-07-18";
-const MODIFIED_AT = "2026-07-18";
+const MODIFIED_AT = "2026-08-15";
 const READING_TIME_MIN = 10;
 
 export const metadata: Metadata = {
@@ -80,7 +80,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "What DSCR do lenders require in 2026?",
-    a: "Most DSCR lenders set their minimum between 1.0 and 1.25, with the best rate and leverage tiers starting at 1.25. Some programs lend below 1.0 (down to ~0.75) but charge for it — expect a rate premium of 0.5-1.5 points and a lower maximum LTV. Conventional lenders don't underwrite to DSCR at all; they qualify you on personal DTI instead.",
+    a: "Requirements vary by lender, program, borrower, property, state, and date. Ask for the current written DSCR formula, minimum, rent evidence, leverage, pricing, reserves, credit, entity, and documentation rules. Conventional underwriting also varies and can consider income, assets, liabilities, credit, property, and program-specific rental treatment.",
   },
   {
     q: "How do lenders calculate DSCR differently from investors?",
@@ -190,11 +190,11 @@ export default function BlogPost() {
                 </tr>
               </thead>
               <tbody className="[&_td]:p-3 [&_td]:border-b [&_td]:border-border [&_tr:last-child_td]:border-0">
-                <tr><td className="font-mono">Below 1.0</td><td className="text-muted-foreground">Negative cash flow — you feed the property monthly</td><td className="text-muted-foreground">Decline, or sub-1.0 program with rate/LTV penalty</td></tr>
-                <tr><td className="font-mono">1.0 – 1.15</td><td className="text-muted-foreground">Break-even zone; one bad month flips it negative</td><td className="text-muted-foreground">Marginal — some programs, worse pricing</td></tr>
-                <tr><td className="font-mono">1.15 – 1.25</td><td className="text-muted-foreground">Thin but workable; needs a rent-growth story</td><td className="text-muted-foreground">Approaching the standard bar</td></tr>
-                <tr><td className="font-mono">1.25 – 1.50</td><td className="text-muted-foreground">Healthy cushion; the working definition of &ldquo;good&rdquo;</td><td className="text-muted-foreground">Standard approval; best-tier pricing starts here</td></tr>
-                <tr><td className="font-mono">1.50+</td><td className="text-muted-foreground">Strong; survives rate and vacancy shocks</td><td className="text-muted-foreground">Preferred; maximum leverage available</td></tr>
+                <tr><td className="font-mono">Below 1.0</td><td className="text-muted-foreground">Modeled income is below modeled debt service under this formula</td><td className="text-muted-foreground">Program-specific; request written requirements</td></tr>
+                <tr><td className="font-mono">1.0 – 1.15</td><td className="text-muted-foreground">Thin modeled coverage; stress vacancy and expenses</td><td className="text-muted-foreground">Program-specific; request written requirements</td></tr>
+                <tr><td className="font-mono">1.15 – 1.25</td><td className="text-muted-foreground">Some modeled cushion; test property downside</td><td className="text-muted-foreground">Program-specific; request written requirements</td></tr>
+                <tr><td className="font-mono">1.25 – 1.50</td><td className="text-muted-foreground">Larger modeled cushion under this formula</td><td className="text-muted-foreground">Does not establish approval, pricing, or leverage</td></tr>
+                <tr><td className="font-mono">1.50+</td><td className="text-muted-foreground">Higher modeled coverage; verify every input</td><td className="text-muted-foreground">Does not establish approval, pricing, or leverage</td></tr>
               </tbody>
             </table>
           </div>
@@ -365,8 +365,8 @@ export default function BlogPost() {
           <h2 className="text-2xl sm:text-3xl">The lender&apos;s DSCR is not your DSCR</h2>
           <p>
             Here&apos;s the trap in taking the lender&apos;s number at face
-            value. Most DSCR-loan lenders don&apos;t use NOI at all. They
-            compute:
+            value. Some DSCR programs use a rent-to-PITIA calculation
+            rather than the investor&apos;s NOI-based ratio. A common form is:
           </p>
           <div className="bg-card border border-border rounded-xl p-5 sm:p-6 my-4 text-center">
             <div className="text-sm sm:text-base font-mono">
@@ -379,17 +379,19 @@ export default function BlogPost() {
           <p>
             On our duplex: PITIA is $1,247 (P&amp;I) + $313 (taxes) + $133
             (insurance) = $1,693. Lender DSCR = $2,600 ÷ $1,693 ={" "}
-            <strong>1.54</strong>. The same property that scores a marginal
-            1.12 on real operating numbers sails past the lender&apos;s bar
-            at 1.54 — because the lender&apos;s version ignores vacancy,
-            maintenance, management, and CapEx entirely.
+            <strong>1.54</strong>. The same hypothetical property scores
+            1.12 under the article&apos;s NOI-based operating scenario.
+            The difference comes from the selected numerator and denominator;
+            confirm the actual program&apos;s treatment rather than assuming it
+            excludes every operating item.
           </p>
           <p>
             This is why &ldquo;the lender approved it&rdquo; and &ldquo;the
             deal is good&rdquo; are different claims. The lender is
             underwriting their downside (foreclosure recovery), not your
-            return. Plenty of investors have closed 1.5-lender-DSCR loans on
-            properties that lose $200/month once real expenses show up. If
+            return. A program ratio can look stronger than an operating
+            ratio when the formulas use different inputs, so approval should
+            not be treated as validation of the property&apos;s cash flow. If
             you&apos;re comparing loan products themselves, our{" "}
             <Link href="/blog/dscr-loans-explained" className="text-primary font-semibold hover:underline">
               DSCR loans guide

@@ -71,7 +71,7 @@ const rowSubStyle = {
 };
 
 export default function WeeklySummaryEmail({ payload, siteUrl }: WeeklySummaryEmailProps) {
-  const { pipeline, owned, rateMover, dueItems, buyBox } = payload;
+  const { pipeline, owned, rateMover, dueItems, buyBox, methodologyNotes } = payload;
   return (
     <Html>
       <Head />
@@ -90,9 +90,14 @@ export default function WeeklySummaryEmail({ payload, siteUrl }: WeeklySummaryEm
                 Your week in deals
               </Heading>
               <Text style={{ color: SUB, fontSize: 14, lineHeight: "22px", margin: "0 0 8px" }}>
-                The numbers on your saved deals, recomputed with the same engine
-                as your dashboard.
+                The numbers below follow each saved deal&apos;s methodology status,
+                using the same policy as your dashboard.
               </Text>
+              {methodologyNotes.map((note) => (
+                <Text key={note} style={{ color: SUB, fontSize: 11, lineHeight: "17px", margin: "4px 0 0" }}>
+                  {note}
+                </Text>
+              ))}
             </Section>
 
             {pipeline ? (
@@ -234,8 +239,8 @@ export default function WeeklySummaryEmail({ payload, siteUrl }: WeeklySummaryEm
               </Link>
               <Text style={{ color: SUB, fontSize: 11, lineHeight: "17px", margin: "18px 0 0" }}>
                 You get this weekly summary because you&apos;re a TrueCap Pro
-                member and opted in. Numbers are recomputed from your own saved
-                assumptions — not financial advice. Turn it off any time in{" "}
+                member and opted in. Numbers follow the saved-analysis methodology
+                status shown above — not financial advice. Turn it off any time in{" "}
                 <Link href={`${siteUrl}/settings`} style={{ color: SUB, textDecoration: "underline" }}>
                   Settings
                 </Link>

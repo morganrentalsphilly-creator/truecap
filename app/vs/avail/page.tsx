@@ -61,7 +61,7 @@ const MATRIX: Row[] = [
   { feature: "Cap rate / CoC / DSCR analysis",      truecap: "Yes — full engine, free tier",                                          avail: "Not modeled",                                                            winner: "truecap" },
   { feature: "Cash flow projection",                truecap: "Pro — 10-year with rent + expense + appreciation",                       avail: "Not modeled",                                                            winner: "truecap" },
   { feature: "Sensitivity grid",                    truecap: "Pro — rent ±10%, vacancy ±5pp, rate ±1pp",                                avail: "Not modeled",                                                            winner: "truecap" },
-  { feature: "Tax strategy modeling",               truecap: "Pro — depreciation + interest + after-tax CF",                            avail: "Not modeled",                                                            winner: "truecap" },
+  { feature: "Illustrative tax impact",             truecap: "Pro — depreciation + interest + modeled after-tax CF",                    avail: "Not modeled",                                                            winner: "truecap" },
   { feature: "Deal score + plain-English verdict",  truecap: "Free — 0-100 score + Strong / Solid / Mixed / Marginal / Negative",         avail: "Not applicable",                                                          winner: "truecap" },
   { feature: "Rental listing distribution",         truecap: "No",                                                                      avail: "Yes — syndicated to Realtor.com, Apartments.com, Zillow, etc.",           winner: "avail" },
   { feature: "Online rental application",           truecap: "No",                                                                      avail: "Yes — customizable forms",                                               winner: "avail" },
@@ -390,7 +390,7 @@ const AVAIL_FAQ: FaqItem[] = [
         and includes listings, lease signing, and ACH rent collection.
         &quot;Unlimited Plus&quot; is ~$7/unit/month (as of 2026) for
         advanced features. TrueCap is free for the underwriting math;
-        Pro is $29.99/month for projections, sensitivity, tax strategy,
+        Pro is $29.99/month for projections, sensitivity, illustrative tax impact,
         co-branded share links, and PDF export. Both have legitimately
         useful free tiers.
       </>

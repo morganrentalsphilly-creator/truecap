@@ -11,7 +11,7 @@
  *   Day 0:  Underwriting checklist (the 7 numbers) — instant, delivers value
  *   Day 2:  "5 metrics most investors forget"
  *   Day 5:  "What does year 10 look like?" (Pro 10-year projection)
- *   Day 8:  Single-Deal Underwrite — lowest-friction paid step
+ *   Day 8:  Deal Decision Pack — lowest-friction paid step
  *   Day 12: "20% off your first month" (final nudge)
  *
  * Result shape follows the codebase convention from CLAUDE.md (§3.2):
@@ -106,7 +106,7 @@ const SEQUENCE: SequenceEmail[] = [
     <li><strong>Cash flow after reserves</strong> — only real once CapEx + vacancy + maintenance are set aside.</li>
     <li><strong>Sensitivity</strong> — does it survive a 10% rent drop or a 1-point rate bump?</li>
     <li><strong>10-year projection</strong> — year-1 cash flow lies; model rent + expense growth.</li>
-    <li><strong>The exit</strong> — the best year to sell, after selling costs and taxes.</li>
+    <li><strong>The exit</strong> — modeled profit across hold years, after assumed selling costs and taxes.</li>
   </ol>
   <p style="margin:0 0 20px 0;color:#374151;line-height:1.6;font-size:15px;">
     TrueCap runs all seven from a single address — free. Over the next few days I'll send a couple of short notes on the ones investors miss most.
@@ -156,7 +156,7 @@ const SEQUENCE: SequenceEmail[] = [
     the long-term result.
   </p>
   <p style="margin:0 0 20px 0;color:#374151;line-height:1.6;font-size:15px;">
-    TrueCap Pro shows you the full 10-year projection — cash flow, equity, after-tax dollars, and a recommended exit year.
+    TrueCap Pro shows you the full 10-year projection — cash flow, equity, illustrative after-tax dollars, and modeled exit-year comparisons.
     Same deal, complete picture.
   </p>
   <div style="text-align:center;margin:24px 0;">
@@ -173,10 +173,10 @@ const SEQUENCE: SequenceEmail[] = [
 <div style="max-width:560px;margin:32px auto;padding:32px 24px;background:#fff;border-radius:16px;border:1px solid #e5e7eb;">
   <h1 style="margin:0 0 12px 0;font-size:22px;font-weight:800;line-height:1.2;">Need one complete underwrite? ${SINGLE_DEAL_PRICE_LABEL}.</h1>
   <p style="margin:0 0 16px 0;color:#374151;line-height:1.6;font-size:15px;">
-    Taking ${addressHtml ? `<strong>${addressHtml}</strong>` : "a deal"} to a lender, partner, or seller? The Single-Deal Underwrite packages the verdict, downside scenario, 10-year projection, tax strategy, exit scenarios, and Deal Score into a polished report for a one-time <strong>${SINGLE_DEAL_PRICE_LABEL}</strong>. No account, no subscription.
+    Taking ${addressHtml ? `<strong>${addressHtml}</strong>` : "a deal"} to a lender, partner, or seller? The Deal Decision Pack packages the verdict, walk-away price, downside scenario, 10-year projection, illustrative tax impact, modeled exit comparisons, and Deal Score into a polished report for a one-time <strong>${SINGLE_DEAL_PRICE_LABEL}</strong>. No account, no subscription.
   </p>
   <p style="margin:0 0 20px 0;color:#374151;line-height:1.6;font-size:15px;">
-    Re-run your deal, click <strong>Export PDF</strong>, and choose the Single-Deal Underwrite option.
+    Re-run your deal, click <strong>Export PDF</strong>, and choose the Deal Decision Pack option.
   </p>
   <div style="text-align:center;margin:24px 0;">
     <a href="${siteUrlHtml}" style="display:inline-block;background:#0070c4;color:#fff;text-decoration:none;padding:12px 24px;border-radius:10px;font-weight:700;font-size:14px;">Get your PDF</a>

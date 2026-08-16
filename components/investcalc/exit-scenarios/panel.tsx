@@ -17,6 +17,7 @@ import {
   type ExitScenarioInput,
   type ExitScenarioYear,
 } from "@/lib/exit-scenarios";
+import { computeReturnSummaryFromExitYears } from "@/lib/returns";
 
 export type ExitScenarioSource = {
   analysisId: string | null;
@@ -119,31 +120,37 @@ function buildExitInsight(years: ExitScenarioYear[]): ReactNode {
   );
   const year10 = years.find((y) => y.year === 10) ?? years[years.length - 1] ?? null;
   if (!bestYear || !year10) return null;
-  // Same initial-investment / ROI derivation the summary cards use, so the
-  // takeaway can never disagree with the Total ROI card above it.
-  const initialInvestment =
-    year10.netSaleProceeds + year10.cumulativeCashFlow + year10.cumulativeTaxBenefit - year10.totalProfit;
-  const roi = initialInvestment > 0 ? (year10.totalProfit / initialInvestment) * 100 : 0;
+  // Keep the takeaway on the exact same exit-tax-aware return basis as the
+  // summary cards and returns explainer.
+  const roi = computeReturnSummaryFromExitYears(years)?.roiPct ?? null;
   if (bestYear.totalProfit <= 0) {
     return (
       <>
-        Even at the best modeled exit (year {bestYear.year}), this deal doesn&apos;t turn a profit on sale - the
-        appreciation assumption doesn&apos;t cover the carry and selling costs.
+        Even in year {bestYear.year} - the highest modeled profit among the exits shown - this deal
+        doesn&apos;t turn a profit on sale. The appreciation assumption doesn&apos;t cover the carry, selling
+        costs, and estimated exit tax.
       </>
     );
   }
   // Extreme cumulative ROI (finding 5): the parenthetical leads with the
   // framed band; the raw figure stays reachable on the span's title attr.
-  const roiHeadline = formatRoiHeadline(roi, { decimals: 0, signed: true, compact: true });
+  const roiHeadline =
+    roi == null
+      ? null
+      : formatRoiHeadline(roi, { decimals: 0, signed: true, compact: true });
   return (
     <>
       Most of the return shows up at sale: by year {year10.year}, projected profit is about{" "}
       <strong className="text-foreground">{formatCurrency(year10.totalProfit)}</strong>{" "}
-      <span title={roiHeadline.title}>
-        ({roiHeadline.extreme
-          ? `${roiHeadline.text} on cash — verify assumptions`
-          : `${roi >= 0 ? "+" : ""}${roi.toFixed(0)}% on cash`})
-      </span>{" "}
+      {roiHeadline && roi != null ? (
+        <>
+          <span title={roiHeadline.title}>
+            ({roiHeadline.extreme
+              ? `${roiHeadline.text} on cash — verify assumptions`
+              : `${roi >= 0 ? "+" : ""}${roi.toFixed(0)}% on cash`})
+          </span>{" "}
+        </>
+      ) : null}
       - an equity-and-appreciation payoff you realize when you sell or refinance, not monthly income.
     </>
   );

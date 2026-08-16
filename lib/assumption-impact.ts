@@ -33,6 +33,13 @@ const clamp0 = (n: number) => Math.max(0, n);
  *  multi-family (each unit's monthlyRent). */
 function scaleRent(values: InvestmentFormValues, factor: number): InvestmentFormValues {
   if (values.propertyType === "single-family") {
+    // STR income is driven by ADR × occupancy, and calc-analysis intentionally
+    // ignores monthlyRent when a nightly rate is present. Perturb the active
+    // income input so STR deals get a real rent/revenue sensitivity instead of
+    // silently dropping this driver as a no-op.
+    if (typeof values.avgDailyRate === "number" && values.avgDailyRate > 0) {
+      return { ...values, avgDailyRate: values.avgDailyRate * factor };
+    }
     return { ...values, monthlyRent: num(values.monthlyRent) * factor };
   }
   const units = (values.units ?? []).map((u) => ({
@@ -40,6 +47,26 @@ function scaleRent(values: InvestmentFormValues, factor: number): InvestmentForm
     monthlyRent: num(u?.monthlyRent) * factor,
   }));
   return { ...values, units } as InvestmentFormValues;
+}
+
+/** Move property tax by an equivalent percentage-point change regardless of
+ * the active input mode. In annual-$ mode calc-analysis ignores
+ * propertyTaxPct, so convert the delta to dollars using purchase price. */
+function shiftPropertyTax(
+  values: InvestmentFormValues,
+  deltaPercentagePoints: number
+): InvestmentFormValues {
+  if (values.propertyTaxInputMode === "annual" && values.propertyTaxAnnual != null) {
+    const annualDelta = num(values.purchasePrice) * (deltaPercentagePoints / 100);
+    return {
+      ...values,
+      propertyTaxAnnual: clamp0(num(values.propertyTaxAnnual) + annualDelta),
+    };
+  }
+  return {
+    ...values,
+    propertyTaxPct: clamp0(num(values.propertyTaxPct) + deltaPercentagePoints),
+  };
 }
 
 type Driver = {
@@ -58,7 +85,7 @@ const DRIVERS: Driver[] = [
   { key: "mgmtPct", label: "Management", deltaLabel: "±2pp", plus: (v) => ({ ...v, mgmtPct: num(v.mgmtPct) + 2 }), minus: (v) => ({ ...v, mgmtPct: clamp0(num(v.mgmtPct) - 2) }) },
   { key: "maintenancePct", label: "Maintenance", deltaLabel: "±2pp", plus: (v) => ({ ...v, maintenancePct: num(v.maintenancePct) + 2 }), minus: (v) => ({ ...v, maintenancePct: clamp0(num(v.maintenancePct) - 2) }) },
   { key: "capexPct", label: "CapEx", deltaLabel: "±2pp", plus: (v) => ({ ...v, capexPct: num(v.capexPct) + 2 }), minus: (v) => ({ ...v, capexPct: clamp0(num(v.capexPct) - 2) }) },
-  { key: "propertyTaxPct", label: "Property tax", deltaLabel: "±0.25pp", plus: (v) => ({ ...v, propertyTaxPct: num(v.propertyTaxPct) + 0.25 }), minus: (v) => ({ ...v, propertyTaxPct: clamp0(num(v.propertyTaxPct) - 0.25) }) },
+  { key: "propertyTaxPct", label: "Property tax", deltaLabel: "±0.25pp", plus: (v) => shiftPropertyTax(v, 0.25), minus: (v) => shiftPropertyTax(v, -0.25) },
 ];
 
 /**

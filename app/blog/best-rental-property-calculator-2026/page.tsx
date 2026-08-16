@@ -70,8 +70,8 @@ const RANKED_CALCULATORS = [
       "Deepest free tier — full cap rate, CoC, DSCR, NCF, monthly cash flow with no signup or analysis cap",
       "Address auto-fill from HUD Fair Market Rent + FRED 30-year rate + state property tax (no other tool does all three)",
       "Plain-English verdict (Strong / Solid / Mixed / Marginal / Negative) on every deal",
-      "Single $29.99/mo Pro tier bundles 10-year projections, tax strategy, sensitivity, exit scenarios, MAO solver, BRRRR, fix-and-flip — no per-feature upcharges",
-      "Lender-ready PDF + shareable read-only deal link with optional custom branding",
+      "Single $29.99/mo Pro tier bundles 10-year projections, illustrative tax impact, sensitivity, modeled exit comparisons, MAO solver, BRRRR, fix-and-flip — no per-feature upcharges",
+      "Lender-facing PDF + shareable read-only deal link with optional custom branding",
     ],
     cons: [
       "PWA, not native iOS/Android apps (DealCheck wins on pure mobile)",
@@ -89,7 +89,7 @@ const RANKED_CALCULATORS = [
       "Native iOS and Android apps with offline support",
       "Listing-import-from-Zillow workflow — paste a URL and the property details auto-fill",
       "10+ year track record in the BRRRR + buy-and-hold communities",
-      "Strong 10-year projection + tax strategy in higher tiers",
+      "Strong 10-year projection + tax-impact view in higher tiers",
     ],
     cons: [
       "Free tier caps saved properties (15 at a time) and requires signup",
@@ -352,7 +352,7 @@ export default function BestRentalPropertyCalculator2026Post() {
                 on your phone?
               </li>
               <li>
-                <strong>Pro feature depth</strong> — projections, tax strategy,
+                <strong>Pro feature depth</strong> — projections, illustrative tax impact,
                 sensitivity, co-branded share links, PDF export.
               </li>
               <li>

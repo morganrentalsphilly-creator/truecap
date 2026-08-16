@@ -25,6 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { PIPELINE_STAGES, pipelineStageLabel, type PipelineStage } from "@/lib/pipeline";
+import { trackEvent } from "@/lib/analytics";
 
 export function DealStageSelect({
   savedDealId,
@@ -63,6 +64,11 @@ export function DealStageSelect({
           title: "Stage updated",
           description: `Moved to ${pipelineStageLabel(next)}.`,
           variant: "success",
+        });
+        trackEvent("pipeline_stage_changed", {
+          from_stage: stage,
+          to_stage: next,
+          moved_to_offer_ready: next === "offer_ready",
         });
         router.refresh();
       } catch (err) {

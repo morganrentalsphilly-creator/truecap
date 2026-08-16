@@ -26,7 +26,7 @@ const TITLE = "Memphis Rental Market Analysis 2026 — Cap Rates";
 const DESCRIPTION =
   "Neighborhood cap-rate map + the turnkey-vs-direct trade-off for 2026. Run a Memphis rental in 60 seconds — TN tax and HUD rent auto-filled.";
 const PUBLISHED_AT = "2026-05-24";
-const MODIFIED_AT = "2026-06-01";
+const MODIFIED_AT = "2026-08-15";
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -55,12 +55,12 @@ const NEIGHBORHOODS: { name: string; capRange: string; rentRange: string; notes:
 ];
 
 const FAQS: { q: string; a: string }[] = [
-  { q: "What's a typical Memphis cap rate in 2026?", a: "Memphis cap rates land 4-6% in Downtown/Midtown (appreciation-leaning), 5-7% in inner suburbs (East Memphis, Germantown, Bartlett, Cordova), 8-10% in workforce neighborhoods (Whitehaven, Westwood), and 10-13%+ in classic cash-flow territory (Frayser, Raleigh, Orange Mound). The headline numbers are real but turnkey-bought properties typically trade at a premium (5-10% above local owner-occupant pricing), which compresses net cap." },
-  { q: "What's the deal with Memphis turnkey rentals?", a: "Memphis has the deepest turnkey-rental ecosystem in the US — companies that buy distressed properties, rehab them, place tenants, and sell to out-of-state investors with their PM company attached. Pro: lowest-friction entry for first-time out-of-state landlords; deals are vetted, occupied, and managed. Con: you pay a 5-10% turnkey premium on price, plus 8-10% ongoing PM fees, so your net is typically 2-4% lower than the headline cap. Best for passive investors; bad for hands-on BRRRR operators." },
-  { q: "What's the property tax rate in Memphis?", a: "Tennessee has no state income tax (huge advantage), and effective property tax is among the lowest in the US (~0.6-0.7% statewide). Memphis (Shelby County) lands ~0.7-1.1% depending on city + school district overlays. Lower than every Midwest market and most Sun Belt markets. TrueCap auto-fills the TN rate; confirm with Shelby County Assessor for the specific parcel." },
-  { q: "Is Memphis flooding/insurance a risk?", a: "Less than coastal Florida, more than the Midwest. Memphis has Mississippi River flood zones (especially south/southwest of downtown — Riverside Drive area, Presidents Island). Most residential neighborhoods are not in flood zones. Insurance runs $1,200-2,400/yr on typical SFR — higher than Indianapolis or Kansas City but well below Tampa. Always check FEMA flood maps for the specific parcel — flood is NOT covered by standard property insurance." },
-  { q: "How's tenant quality in Memphis cash-flow neighborhoods?", a: "Variable. Memphis has significant economic diversity within neighborhoods, so quality screening matters more than market-wide reputation. The mature turnkey companies have decades of refined tenant screening for their target neighborhoods; independent landlords need to replicate that rigor. Eviction process in Tennessee is relatively landlord-favorable (faster than CA/NY) but still 4-8 weeks typical." },
-  { q: "Is Memphis better than Detroit for cash flow?", a: "Different trade-offs. Detroit has higher headline caps but materially higher operational risk + capex surprises on older housing stock. Memphis has slightly lower caps (10-13% vs 15%+) but more mature PM market, newer housing stock (more 1960s+), and warmer climate (lower deferred-maintenance shock). For first-time out-of-state investors: Memphis is the safer bet. For experienced BRRRR operators with on-the-ground crews: Detroit can produce better numbers." },
+  { q: "What's a typical Memphis cap rate in 2026?", a: "The table provides rough screening ranges, not achievable returns. Replace them with the property's current rent roll or comparable leases, tax bill, insurance quote, condition, vacancy and collections history, management proposal, capital plan, and financing before relying on a cap rate." },
+  { q: "What's the deal with Memphis turnkey rentals?", a: "Memphis has an established turnkey ecosystem, but 'turnkey' does not prove rehab quality, tenant performance, management quality, passivity, or return. Independently verify price against comps, completed work and permits, inspection, lease and collected funds, rent support, insurance, reserves, and the full management agreement." },
+  { q: "What's the property tax rate in Memphis?", a: "Parcel tax depends on the jurisdiction, assessed value, taxing units, and any exemptions. TrueCap's state or county input is a screening estimate; confirm the current parcel record and a post-sale scenario with the relevant assessor before underwriting." },
+  { q: "Is Memphis flooding/insurance a risk?", a: "Flood and insurance exposure are property-specific. Review current flood maps plus prior-loss, drainage, roof, and condition evidence, and obtain subject-property hazard and flood quotes with limits, deductibles, and exclusions rather than using a citywide premium range." },
+  { q: "How's tenant quality in Memphis cash-flow neighborhoods?", a: "Do not infer tenant performance from a neighborhood, voucher status, or operator reputation. Verify the lease, collected funds, delinquency and turnover history, apply lawful screening consistently, and use current local legal guidance rather than a fixed eviction timeline." },
+  { q: "Is Memphis better than Detroit for cash flow?", a: "Neither city establishes a safer or higher-return outcome. Compare address-level rent, taxes, insurance, condition, title, vacancy, management, financing, and downside scenarios using the same methodology." },
 ];
 
 export default function MemphisMarketPage() {
@@ -107,13 +107,13 @@ export default function MemphisMarketPage() {
             </div>
           )}
           <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight">{CITY} rental property analysis — calculator + 2026 cap-rate benchmarks</h1>
-          <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">Run a Memphis rental deal in 60 seconds with TrueCap. Address auto-fills <Link href="/states/tennessee" className="font-semibold text-primary hover:underline">Tennessee</Link> <Link href="/glossary/property-tax" className="font-semibold text-primary hover:underline">property tax</Link> (~0.7-1.1% in Shelby County), HUD rent by county, and current FRED mortgage rates. Below: neighborhood <Link href="/glossary/cap-rate" className="font-semibold text-primary hover:underline">cap-rate</Link> map plus the turnkey vs. direct trade-off most Memphis investors face.</p>
+          <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">Run a Memphis rental screen in 60 seconds with TrueCap. Address inputs can start with editable tax, HUD area-rent, and national mortgage benchmarks. Replace them with the parcel record, current rent comps, an insurance quote, and borrower-specific financing. Below: rough neighborhood <Link href="/glossary/cap-rate" className="font-semibold text-primary hover:underline">cap-rate</Link> orientation plus turnkey diligence questions.</p>
           <div className="mt-6 flex flex-wrap gap-3"><Link href="/" className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground hover:opacity-90"><Calculator className="size-4" />Underwrite a Memphis deal — free</Link></div>
         </header>
 
         <section className="mb-10">
           <h2 className="text-2xl font-extrabold text-foreground mb-3">Memphis neighborhood cap-rate map (2026)</h2>
-          <p className="text-sm text-muted-foreground mb-4 leading-relaxed">Ranges reflect typical conventional-financing single-family + small-multi deals. Memphis is one of the top US markets for out-of-state investors thanks to a mature PM ecosystem; the trade-off is turnkey-pricing premium on the cleanest deals.</p>
+          <p className="text-sm text-muted-foreground mb-4 leading-relaxed">Ranges are rough orientation, not appraisal-grade comps or achievable returns. Verify the address, condition, rent, expenses, management, and financing; independently diligence any turnkey operator and pricing.</p>
           <div className="overflow-x-auto rounded-2xl border border-border bg-card">
             <table className="w-full text-sm">
               <thead className="bg-muted/40"><tr className="text-left"><th className="py-3 px-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Submarket</th><th className="py-3 px-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Cap rate</th><th className="py-3 px-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Rent</th><th className="py-3 px-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Character</th></tr></thead>
@@ -123,8 +123,8 @@ export default function MemphisMarketPage() {
         </section>
 
         <section className="mb-10 rounded-2xl border border-[var(--brand-green)]/25 bg-[var(--brand-green-light)] p-5 sm:p-6">
-          <h2 className="text-base font-extrabold uppercase tracking-widest text-[var(--brand-green)] mb-2">Why Memphis keeps drawing out-of-state capital</h2>
-          <p className="text-sm leading-relaxed text-foreground">Memphis has three things together that few markets match: low property tax (~0.7-1.1%), no state income tax, and the deepest turnkey ecosystem in the country (15+ established PM/turnkey firms competing for your business). For passive out-of-state investors, this means lower friction at every step — buy, manage, sell — than almost any other cash-flow market. The trade-off is turnkey premium pricing and the ongoing PM fee that comes with it.</p>
+          <h2 className="text-base font-extrabold uppercase tracking-widest text-[var(--brand-green)] mb-2">Why out-of-state investors screen Memphis</h2>
+          <p className="text-sm leading-relaxed text-foreground">Memphis combines accessible inventory with an established property-management and turnkey ecosystem. That can simplify vendor discovery, but it does not make ownership passive or validate an operator&apos;s price, rehab, tenant, fees, or return projection. Compare providers and verify every property input independently.</p>
         </section>
 
         <section className="mb-10">
@@ -134,14 +134,14 @@ export default function MemphisMarketPage() {
 
         <section className="mb-10 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
           <h2 className="text-xl sm:text-2xl font-extrabold mb-2">Run your next Memphis deal in 60 seconds</h2>
-          <p className="text-sm sm:text-base opacity-90 mb-4 max-w-2xl">Paste the address. Tennessee tax, HUD rent for Shelby County, and current rate auto-fill. Cap rate, CoC, <Link href="/glossary/dscr" className="font-semibold text-primary hover:underline">DSCR</Link>, and monthly cash flow in 1 second. Free to start. No card required.</p>
+          <p className="text-sm sm:text-base opacity-90 mb-4 max-w-2xl">Paste the address to start with editable tax, HUD area-rent, and national rate benchmarks. Replace them with property- and borrower-specific evidence before relying on cap rate, CoC, <Link href="/glossary/dscr" className="font-semibold text-primary hover:underline">DSCR</Link>, or monthly cash flow. Free to start. No card required.</p>
           <Link href="/" className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity">Open the analyzer<ArrowUpRight className="w-4 h-4" /></Link>
         </section>
 
         <SourceMethodologyBox
           className="mt-10"
           sources={["HUD Fair Market Rent", "FRED 30-yr mortgage rate", "Tax Foundation (property tax)"]}
-          updated="June 2026"
+          updated="August 2026"
         />
 
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">

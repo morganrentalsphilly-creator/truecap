@@ -12,9 +12,9 @@ describe("buildAssumptionEntries (truthful assumptions strip)", () => {
   it("names the live sources when enrichment filled the fields untouched", () => {
     const e = buildAssumptionEntries(fullEnrichment, false);
     expect(e.map((x) => [x.label, x.source])).toEqual([
-      ["Rent", "HUD Fair Market Rent"],
-      ["Mortgage rate", "FRED 30-yr fixed"],
-      ["Property tax", "State effective rate"],
+      ["Rent", "HUD rent benchmark (county)"],
+      ["Mortgage rate", "FRED owner-occupied benchmark"],
+      ["Property tax", "State tax benchmark"],
       ["Expenses", "Smart defaults"],
     ]);
     expect(e.every((x) => !x.manual)).toBe(true);
@@ -27,7 +27,7 @@ describe("buildAssumptionEntries (truthful assumptions strip)", () => {
     );
     expect(e[0]).toMatchObject({ label: "Rent", source: "You entered it", manual: true });
     // The untouched fields keep their live sources.
-    expect(e[1]!.source).toBe("FRED 30-yr fixed");
+    expect(e[1]!.source).toBe("FRED owner-occupied benchmark");
   });
 
   it("treats no-enrichment as the user's own entries", () => {
@@ -43,7 +43,7 @@ describe("buildAssumptionEntries (truthful assumptions strip)", () => {
       { monthlyRent: { source: "hud-safmr", detail: "19103" } },
       false
     );
-    expect(e[0]!.source).toBe("HUD Fair Market Rent (ZIP)");
+    expect(e[0]!.source).toBe("HUD rent benchmark (ZIP)");
   });
 
   it("carries source freshness when the feed provides it", () => {

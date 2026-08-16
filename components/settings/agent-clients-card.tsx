@@ -25,6 +25,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { trackEvent } from "@/lib/analytics";
 
 type Editor = { id?: string; name: string; email: string; phone: string };
 
@@ -64,9 +65,13 @@ export function AgentClientsCard() {
         isArchived: false,
       });
       if (r.ok) {
+        const created = !editor.id;
         setClients(r.clients);
         setEditor(null);
         toast({ title: editor.id ? "Client updated" : "Client added" });
+        if (created) {
+          trackEvent("agent_client_created", { source: "settings" });
+        }
       } else {
         toast({ title: "Couldn't save", description: r.message, variant: "destructive" });
       }
@@ -122,7 +127,7 @@ export function AgentClientsCard() {
         <a href="/dashboard/clients" className="font-semibold text-primary hover:underline">
           Open the Clients workspace
         </a>{" "}
-        to assign deals and copy portal links.
+        to follow the full Client → Buy Box → Report → Offer workflow.
       </p>
 
       {clients.length > 0 ? (

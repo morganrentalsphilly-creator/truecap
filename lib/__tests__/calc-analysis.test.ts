@@ -22,7 +22,10 @@ import {
   type ExitScenarioInput,
 } from "../exit-scenarios";
 import { analyzeBrrrr } from "../brrrr-analysis";
-import { analyzeFixFlip } from "../fix-flip-analysis";
+import {
+  analyzeFixFlip,
+  estimateFixFlipCarryingCost,
+} from "../fix-flip-analysis";
 import { calculateAnalysis } from "../calc-analysis";
 import { buildTenYearProjection } from "../ten-year-projections";
 import type { InvestmentFormValues } from "../investcalc-schema";
@@ -813,6 +816,30 @@ describe("BRRRR analysis", () => {
 // 11. Fix-and-flip — break-even ARV algebra
 // ──────────────────────────────────────────────────────────────────
 describe("fix-and-flip analysis", () => {
+  it("uses annual tax and monthly insurance inputs in the carry screen", () => {
+    const values = baseSingleFamily({
+      purchasePrice: 240_000,
+      interestRate: 6,
+      downPaymentPct: 25,
+      propertyTaxInputMode: "annual",
+      propertyTaxAnnual: 7_200,
+      // These unused percentage values deliberately disagree with the active
+      // modes; the carry helper must not leak them into the flip result.
+      propertyTaxPct: 9,
+      insuranceInputMode: "monthly",
+      insuranceMonthly: 250,
+      insurancePct: 8,
+      utilitiesMonthly: 150,
+    });
+    const result = calculateAnalysis(values);
+
+    // Interest-only screen: $180k × 6% / 12 = $900, plus $600 tax,
+    // $250 insurance and $150 utilities.
+    expect(estimateFixFlipCarryingCost(values, result, 25)).toBe(1_900);
+    // The no-result fallback follows the same input-mode contract.
+    expect(estimateFixFlipCarryingCost(values, null, 25)).toBe(1_900);
+  });
+
   it("breakEvenArv satisfies ARV × (1 - sellPct) = total cost ex-selling", () => {
     const r = analyzeFixFlip({
       purchasePrice: 200_000,
@@ -824,12 +851,12 @@ describe("fix-and-flip analysis", () => {
       monthlyCarryingCost: 1_500,
       downPaymentPct: 25,
     });
-    // totalCostExclSelling = 200000 + 40000 + 9000 = 249,000
-    // breakEvenArv = 249000 / 0.94 = 264,894 (within $1)
-    expect(Math.abs(r.breakEvenArv - 264_894)).toBeLessThanOrEqual(2);
+    // totalCostExclSelling = 200000 + 6000 acquisition closing + 40000 + 9000 = 255,000
+    // breakEvenArv = 255000 / 0.94 = 271,277 (within $1)
+    expect(Math.abs(r.breakEvenArv - 271_277)).toBeLessThanOrEqual(2);
   });
 
-  it("netProfit = ARV - purchase - rehab - carry - selling", () => {
+  it("netProfit = ARV - purchase - acquisition closing - rehab - carry - selling", () => {
     const r = analyzeFixFlip({
       purchasePrice: 200_000,
       rehabBudget: 40_000,
@@ -842,8 +869,10 @@ describe("fix-and-flip analysis", () => {
     });
     // sellingCosts = 320000 * 0.06 = 19,200
     // carry = 1500 * 6 = 9,000
-    // netProfit = 320000 - 200000 - 40000 - 9000 - 19200 = 51,800
-    expect(r.netProfit).toBe(51_800);
+    // acquisition closing = 200000 * 3% = 6,000
+    // netProfit = 320000 - 200000 - 6000 - 40000 - 9000 - 19200 = 45,800
+    expect(r.acquisitionClosingCosts).toBe(6_000);
+    expect(r.netProfit).toBe(45_800);
   });
 
   it("annualizedRoiPct = roiOnCashPct × (12 / holdMonths)", () => {

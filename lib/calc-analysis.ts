@@ -1,6 +1,7 @@
 import { InvestmentFormValues, isValidRentalUnit } from "./investcalc-schema";
 import { buildTaxStrategyProjection, type TaxStrategyYear } from "./tax-strategy";
 import { buildTenYearProjection, ProjectionYear } from "./ten-year-projections";
+import { TRUECAP_UNDERWRITING_STANDARD_VERSION } from "./underwriting-methodology";
 
 /** Annual private mortgage insurance as a % of the loan balance, applied to
  *  financed conventional loans with < 20% down and dropped once the loan
@@ -10,8 +11,13 @@ export const DEFAULT_PMI_ANNUAL_RATE_PCT = 0.8;
 export const PMI_DOWN_PAYMENT_THRESHOLD_PCT = 20;
 
 export interface AnalysisResult {
+  /** Version of the public formula contract used for this result. */
+  methodologyVersion: typeof TRUECAP_UNDERWRITING_STANDARD_VERSION;
   // income
   monthlyRentalIncome: number;
+  grossScheduledIncomeAnnual: number;
+  vacancyAllowanceAnnual: number;
+  effectiveGrossIncomeAnnual: number;
   // expenses
   propertyTax: number;
   /** Effective annual property-tax % of price — the % the math actually
@@ -35,9 +41,16 @@ export interface AnalysisResult {
   maintenanceAgeAdjusted: boolean;
   capexAgeAdjusted: boolean;
   totalOperatingExpenses: number;
+  /** Annual recurring operating expenses after moving vacancy to the EGI
+   * line and excluding the below-the-line CapEx reserve. */
+  operatingExpensesAnnual: number;
+  /** Lender-style annual NOI: EGI less operating expenses; excludes CapEx,
+   * debt service, PMI, and income tax. */
+  noiAnnual: number;
   // debt service
   loanAmount: number;
   monthlyPayment: number;
+  annualDebtService: number;
   loanPrincipalAndInterest: number;
   /** Monthly private mortgage insurance (0 unless a financed conventional
    *  loan with < 20% down). Reduces cash flow; not part of the P&I used for
@@ -72,7 +85,7 @@ export interface AnalysisResult {
   taxStrategyYears: TaxStrategyYear[];
 }
 
-function calcMonthlyPayment(principal: number, annualRate: number, years: number): number {
+export function calcMonthlyPayment(principal: number, annualRate: number, years: number): number {
   // Defensive guards — schema enforces years >= 1 and principal >= 0, but
   // legacy saved-deal payloads or share-link decodes could deliver garbage.
   // Returning 0 instead of NaN/Infinity keeps every downstream metric stable.
@@ -231,11 +244,20 @@ export function calculateAnalysis(values: InvestmentFormValues): AnalysisResult 
   // expense — this matches the app's own glossary and the lender-standard
   // definition of NOI and DSCR. (CapEx still reduces cash flow / CoC below.)
   const operatingExpensesExCapex = totalOperatingExpenses - capex;
+  // Present vacancy above the NOI line as an income allowance so the public
+  // statement reads like a conventional underwriting worksheet. This is an
+  // exact reclassification of the existing math, not a formula change.
+  const grossScheduledIncomeAnnual = annualRent;
+  const vacancyAllowanceAnnual = vacancy * 12;
+  const effectiveGrossIncomeAnnual = grossScheduledIncomeAnnual - vacancyAllowanceAnnual;
+  const operatingExpensesAnnual = (operatingExpensesExCapex - vacancy) * 12;
+  const noiAnnual = effectiveGrossIncomeAnnual - operatingExpensesAnnual;
 
   // Financing
   const downPayment = Math.round((purchasePrice * downPaymentPct) / 100);
   const loanAmount = purchasePrice - downPayment;
   const monthlyPayment = Math.round(calcMonthlyPayment(loanAmount, interestRate, loanTermYears));
+  const annualDebtService = monthlyPayment * 12;
 
   // Mortgage insurance: financed loans with < 20% down carry PMI/MIP until the
   // loan amortizes to ~80% LTV (unless pmiNoCancel — FHA MIP runs for the life
@@ -268,10 +290,9 @@ export function calculateAnalysis(values: InvestmentFormValues): AnalysisResult 
 
   // Metrics
   const cocReturn = totalCashRequired > 0 ? (annualCashFlow / totalCashRequired) * 100 : 0;
-  const noi = (monthlyRentalIncome - operatingExpensesExCapex) * 12;
-  const capRate = purchasePrice > 0 ? (noi / purchasePrice) * 100 : 0;
+  const capRate = purchasePrice > 0 ? (noiAnnual / purchasePrice) * 100 : 0;
   const dscr =
-    monthlyPayment > 0 ? (monthlyRentalIncome - operatingExpensesExCapex) / monthlyPayment : 0;
+    annualDebtService > 0 ? noiAnnual / annualDebtService : 0;
 
   const yearlyInterestSchedule = calculateYearlyInterestSchedule(
     loanAmount,
@@ -326,7 +347,11 @@ export function calculateAnalysis(values: InvestmentFormValues): AnalysisResult 
   });
 
   return {
+    methodologyVersion: TRUECAP_UNDERWRITING_STANDARD_VERSION,
     monthlyRentalIncome,
+    grossScheduledIncomeAnnual,
+    vacancyAllowanceAnnual,
+    effectiveGrossIncomeAnnual,
     propertyTax,
     propertyTaxPctEffective,
     insurance,
@@ -346,8 +371,11 @@ export function calculateAnalysis(values: InvestmentFormValues): AnalysisResult 
     maintenanceAgeAdjusted,
     capexAgeAdjusted,
     totalOperatingExpenses,
+    operatingExpensesAnnual,
+    noiAnnual,
     loanAmount,
     monthlyPayment,
+    annualDebtService,
     loanPrincipalAndInterest: monthlyPayment,
     pmiMonthly,
     propertyTaxMonthly: propertyTax,
@@ -374,4 +402,3 @@ export function calculateAnalysis(values: InvestmentFormValues): AnalysisResult 
     taxStrategyYears,
   };
 }
-

@@ -28,11 +28,23 @@ import {
   buyBoxHasCriteria,
   rowToNamedBuyBox,
   summarizeBuyBoxCriteria,
+  deriveStateFromAddress,
+  evaluateBuyBoxes,
+  summarizeBuyBoxFit,
+  type BuyBoxDealMetrics,
   type BuyBoxesRow,
   type NamedBuyBox,
 } from "@/lib/buy-box";
-import { computeDealOfferLine } from "@/lib/deal-offer-line";
-import { recomputeSavedDealVerdict } from "@/lib/recompute-saved-deal-verdict";
+import {
+  recomputeSavedDealVerdict,
+  toRecomputedSavedAnalysisSnapshot,
+} from "@/lib/recompute-saved-deal-verdict";
+import {
+  isLegacySavedMethodologyVersion,
+  parseFrozenDealScore,
+  resolveSavedAnalysisSnapshot,
+} from "@/lib/saved-analysis-methodology";
+import { TRUECAP_UNDERWRITING_STANDARD_VERSION } from "@/lib/underwriting-methodology";
 import { normalizeInvestmentFormSnapshot } from "@/lib/investcalc-schema";
 import { encodeShareLink } from "@/lib/share-link";
 import { signShareAttribution, hashShareValues } from "@/lib/share-attribution";
@@ -63,6 +75,7 @@ export type PortalDeal = {
   /** Signed /d/ path (co-branded to the agent) for the full analysis, or null
    *  when the snapshot can't be encoded. */
   sharePath: string | null;
+  methodologyLabel: string;
 };
 
 export type ClientPortalData = {
@@ -79,8 +92,15 @@ export type ClientPortalData = {
 type DealRow = {
   id: string;
   form_snapshot: unknown;
+  result_snapshot: Record<string, unknown> | null;
+  methodology_version: string | null;
   address: string | null;
 };
+
+function finiteNumber(value: unknown): number | null {
+  const parsed = typeof value === "number" ? value : Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
 
 export async function loadClientPortal(input: {
   agentUserId: string;
@@ -120,7 +140,7 @@ export async function loadClientPortal(input: {
     // lever, and it is the one the UI offers.
     const { data: rows } = await admin
       .from("saved_analyses")
-      .select("id, form_snapshot, address")
+      .select("id, form_snapshot, result_snapshot, methodology_version, address")
       .eq("user_id", agentUserId)
       .eq("client_id", clientId)
       .is("deleted_at", null)
@@ -159,11 +179,46 @@ export async function loadClientPortal(input: {
 
     const deals: PortalDeal[] = [];
     for (const row of (rows ?? []) as DealRow[]) {
-      const verdict = recomputeSavedDealVerdict(row.form_snapshot);
-      if (!verdict) continue; // legacy/unparseable snapshot — skip, don't crash
+      const recomputed = recomputeSavedDealVerdict(row.form_snapshot);
+      const resolution = resolveSavedAnalysisSnapshot({
+        methodologyVersion: row.methodology_version,
+        resultSnapshot: row.result_snapshot,
+        recomputedSnapshot: recomputed
+          ? toRecomputedSavedAnalysisSnapshot(recomputed)
+          : undefined,
+      });
+      const snapshot = resolution.snapshot;
+      const currentVerdict = resolution.didRecompute ? recomputed : null;
+      const frozenScore = resolution.shouldFreeze
+        ? parseFrozenDealScore(snapshot)
+        : null;
+      const score = currentVerdict?.score ?? frozenScore?.score ?? finiteNumber(snapshot.score);
+      const recommendation =
+        currentVerdict?.recommendation ?? frozenScore?.recommendation;
+      const riskLevel = currentVerdict?.riskLevel ?? frozenScore?.riskLevel;
+      const netCashFlowMonthly =
+        currentVerdict?.netCashFlowMonthly ?? finiteNumber(snapshot.netCashFlow);
+      const capRatePct = currentVerdict?.capRatePct ?? finiteNumber(snapshot.capRate);
+      const cocReturnPct = currentVerdict?.cocReturnPct ?? finiteNumber(snapshot.cocReturn);
+      const dscr = currentVerdict?.dscr ?? finiteNumber(snapshot.dscr);
+      const monthlyPayment =
+        currentVerdict?.monthlyPayment ?? finiteNumber(snapshot.monthlyPayment);
+      if (
+        score == null ||
+        !recommendation ||
+        !riskLevel ||
+        netCashFlowMonthly == null ||
+        capRatePct == null ||
+        cocReturnPct == null
+      ) {
+        continue; // incomplete stored output — skip, never mix in current math
+      }
       const values = normalizeInvestmentFormSnapshot(row.form_snapshot);
       let sharePath: string | null = null;
-      if (values) {
+      // v1 share links contain assumptions only and always run today's engine.
+      // Suppress that deep link for a frozen result so the buyer never opens a
+      // page that contradicts the card they were sent.
+      if (values && !resolution.shouldFreeze) {
         try {
           const valuesHash = hashShareValues(values);
           const sig = signShareAttribution({ ownerId: agentUserId, dealId: row.id, valuesHash });
@@ -189,13 +244,25 @@ export async function loadClientPortal(input: {
       let gapLine: string | null = null;
       if (clientBoxes.length > 0 && values) {
         try {
-          const scoped = computeDealOfferLine(values, clientBoxes, {
-            isShoppingStage: true,
-            dealClientId: clientId,
-          });
-          if (scoped.fit) {
-            meetsCriteria = scoped.fit.anyPass;
-            gapLine = scoped.fit.anyPass ? null : scoped.personalLine;
+          const metrics: BuyBoxDealMetrics = {
+            capRatePct,
+            cocPct: cocReturnPct,
+            dscr,
+            cashFlowMonthly: netCashFlowMonthly,
+            purchasePrice: values.purchasePrice,
+            propertyType: values.propertyType,
+            state: deriveStateFromAddress(values.address),
+            isCashPurchase:
+              currentVerdict?.isCashPurchase ??
+              (monthlyPayment != null && monthlyPayment <= 0),
+          };
+          const evaluated = evaluateBuyBoxes(clientBoxes, metrics).filter(
+            (entry) => entry.result.active
+          );
+          if (evaluated.length > 0) {
+            const fit = summarizeBuyBoxFit(evaluated);
+            meetsCriteria = fit.anyPass;
+            gapLine = fit.anyPass ? null : evaluated[0]?.result.personalLine ?? null;
           }
         } catch {
           /* fit stays null — the card still renders its numbers */
@@ -207,13 +274,20 @@ export async function loadClientPortal(input: {
         address: (values?.address || row.address || "Saved deal").toString(),
         meetsCriteria,
         gapLine,
-        recommendation: verdict.recommendation,
-        riskLevel: verdict.riskLevel,
-        score: verdict.score,
-        netCashFlowMonthly: verdict.netCashFlowMonthly,
-        capRatePct: verdict.capRatePct,
-        cocReturnPct: verdict.cocReturnPct,
+        recommendation,
+        riskLevel,
+        score,
+        netCashFlowMonthly,
+        capRatePct,
+        cocReturnPct,
         sharePath,
+        methodologyLabel: resolution.shouldFreeze
+          ? `Frozen Standard v${resolution.storedMethodologyVersion}`
+          : isLegacySavedMethodologyVersion(resolution.storedMethodologyVersion)
+            ? resolution.didRecompute
+              ? `Legacy analysis · recomputed with current v${TRUECAP_UNDERWRITING_STANDARD_VERSION}`
+              : `Legacy analysis · stored snapshot (current v${TRUECAP_UNDERWRITING_STANDARD_VERSION} recompute unavailable)`
+            : `Standard v${resolution.storedMethodologyVersion}`,
       });
     }
 

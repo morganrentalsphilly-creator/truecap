@@ -10,7 +10,7 @@ export default function Image() {
   return renderVsOgImage({
     competitor: "DealCheck (STR)",
     tagline:
-      "STR cut of TrueCap vs DealCheck — ADR, seasonal occupancy, AirDNA, STR tax loophole.",
+      "STR cut of TrueCap vs DealCheck — ADR, occupancy, AirDNA inputs, and tax-model limits.",
     slug: "dealcheck-for-short-term-rentals",
   });
 }

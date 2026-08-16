@@ -540,7 +540,7 @@ export default function DepreciationRecapturePost() {
             <Link href="/" className="text-primary font-semibold hover:underline">
               TrueCap analyzer
             </Link>{" "}
-            models the tax strategy and exit scenarios alongside cash flow,
+            shows illustrative tax impact and exit scenarios alongside cash flow,
             so the recapture bill is a number you chose to accept — not one
             that ambushes you at the closing table.
           </p>

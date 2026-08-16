@@ -15,7 +15,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "TrueCap — Real Estate Investment Calculator",
     short_name: "TrueCap",
     description:
-      "Analyze rental properties with cash flow projections, ROI insights, tax strategy support, and risk-aware real estate metrics.",
+      "Analyze rental properties with cash flow projections, ROI insights, illustrative tax impact, and risk-aware real estate metrics.",
     start_url: "/",
     scope: "/",
     display: "standalone",

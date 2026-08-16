@@ -188,7 +188,7 @@ const COMPARISONS: ComparisonCard[] = [
     tagline: "Flipper's cut of TrueCap vs DealCheck — ARV, rehab, holding costs, break-even ARV.",
     group: "Direct alternative" },
   { slug: "dealcheck-for-short-term-rentals", competitor: "DealCheck for STRs",
-    tagline: "STR investor's cut of TrueCap vs DealCheck — ADR, seasonal occupancy, AirDNA inputs, STR tax loophole.",
+    tagline: "STR investor's cut of TrueCap vs DealCheck — ADR, occupancy, AirDNA inputs, and tax-model limits.",
     group: "Direct alternative" },
   { slug: "mashvisor-for-short-term-rentals", competitor: "Mashvisor for STRs",
     tagline: "STR investor's cut of TrueCap vs Mashvisor — market scoring vs per-deal underwriting.",

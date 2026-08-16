@@ -54,7 +54,7 @@ const MATRIX: Row[] = [
   { feature: "Ownership model", truecap: "Direct ownership of whole property", arrived: "Fractional shares of a property", winner: "tie" },
   { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", arrived: "Not applicable (you don't own debt)", winner: "truecap" },
   { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", arrived: "Forward dividend + appreciation forecast", winner: "tie" },
-  { feature: "Tax strategy modeling", truecap: "Pro — depreciation + interest + after-tax CF", arrived: "K-1 distributions; no direct depreciation control", winner: "truecap" },
+  { feature: "Illustrative tax impact", truecap: "Pro — depreciation + interest + modeled after-tax CF", arrived: "K-1 distributions; no direct depreciation control", winner: "truecap" },
   { feature: "Deal score + verdict", truecap: "Free — 0-100 score + plain-English verdict", arrived: "Not applicable", winner: "truecap" },
   { feature: "Minimum to start", truecap: "Down payment on a whole property (~$20-50k typical)", arrived: "$100 per share", winner: "arrived" },
   { feature: "Time commitment", truecap: "Active — you find, underwrite, close, manage (or hire PM)", arrived: "Passive — Arrived handles everything", winner: "arrived" },
@@ -140,7 +140,7 @@ export default function VsArrivedPage() {
               </p>
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
                 <li>You want direct ownership and control of the property.</li>
-                <li>You want full depreciation + interest deduction + 1031 eligibility.</li>
+                <li>You want direct-property control and will verify depreciation, interest, and any 1031 eligibility with tax professionals.</li>
                 <li>You&apos;re willing to do the underwriting + sourcing work yourself.</li>
                 <li>You have $20k+ in capital and want to deploy in one property at a time.</li>
               </ul>
@@ -260,7 +260,7 @@ export default function VsArrivedPage() {
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
-            Pro unlocks projections, sensitivity, tax strategy, exit scenarios,
+            Pro unlocks projections, sensitivity, illustrative tax impact, modeled exit comparisons,
             MAO, PDF exports, and co-branded share links.
             No card to start.
           </p>
@@ -322,21 +322,21 @@ const ARRIVED_FAQ: FaqItem[] = [
     question: "Why would I buy a rental directly when I could use Arrived?",
     answer: (
       <>
-        Three reasons: control (you pick the property + market), tax benefits (full depreciation, interest deduction, 1031 eligibility), and cash flow scale (a direct rental&apos;s monthly cash flow goes to you 100%, not split with other shareholders or eaten by management fees). Tradeoff: you do the underwriting + management work (or pay a PM).
+        Three reasons: control (you pick the property + market), potentially different direct-ownership tax treatment, and cash-flow control. Direct ownership does not guarantee that every deduction or a 1031 exchange applies; eligibility depends on the property, transaction, and taxpayer, so verify it with licensed tax and legal professionals. Tradeoff: you do the underwriting + management work (or pay a PM).
       </>
     ),
     plainTextAnswer:
-      "Three reasons: control (pick property + market), tax benefits (full depreciation, interest deduction, 1031 eligibility), and cash flow scale (100% to you, no shareholder split or PM fees baked in). Tradeoff: you do the work or pay a PM.",
+      "Three reasons: control over property and market, potentially different direct-ownership tax treatment, and cash-flow control. Depreciation, interest, and 1031 eligibility depend on the property, transaction, and taxpayer; verify them with licensed professionals. Tradeoff: you do the work or pay a PM.",
   },
   {
     question: "Why would I use Arrived instead of buying a rental directly?",
     answer: (
       <>
-        Three reasons: low minimum ($100 vs ~$20k+ for a direct down payment), zero work (no sourcing, no underwriting, no management), and diversification (split your capital across multiple properties without buying multiples). Tradeoff: you give up control, depreciation, 1031 eligibility, and some yield to Arrived&apos;s fees.
+        Three reasons: low minimum ($100 vs ~$20k+ for a direct down payment), zero work (no sourcing, no underwriting, no management), and diversification (split your capital across multiple properties without buying multiples). Tradeoff: you give up direct property control and receive the investment&apos;s own tax reporting rather than automatically receiving every tax treatment that may apply to direct ownership.
       </>
     ),
     plainTextAnswer:
-      "Three reasons: low minimum ($100 vs ~$20k+ down), zero work (no sourcing/underwriting/mgmt), diversification (split capital across properties). Tradeoff: lose control, depreciation, 1031, and yield to fees.",
+      "Three reasons: low minimum ($100 vs ~$20k+ down), zero work (no sourcing/underwriting/management), and diversification. Tradeoff: less property control and the investment's own tax reporting rather than every treatment that may apply to direct ownership.",
   },
   {
     question: "Can I use TrueCap to evaluate an Arrived property?",

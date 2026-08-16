@@ -27,8 +27,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { trackEvent } from "@/lib/analytics";
 
 type Editor = { id?: string; name: string; email: string; phone: string };
+
+const AGENT_WORKFLOW_STEPS = [
+  "Client",
+  "Buy Box",
+  "Property",
+  "Analysis",
+  "Client Report",
+  "Follow-Up",
+  "Offer",
+] as const;
 
 export function ClientsWorkspace({
   initialClients,
@@ -77,6 +88,7 @@ export function ClientsWorkspace({
           isArchived: false,
         });
         if (r.ok) {
+          const created = !editor.id;
           setClients(r.clients);
           setEditor(null);
           // Portal URLs are minted server-side, so a client added since this
@@ -85,6 +97,9 @@ export function ClientsWorkspace({
           // infrastructure error on the first step of the workflow.
           router.refresh();
           toast({ title: editor.id ? "Client updated" : "Client added" });
+          if (created) {
+            trackEvent("agent_client_created", { source: "clients_workspace" });
+          }
         } else {
           toast({ title: "Couldn't save", description: r.message, variant: "destructive" });
         }
@@ -145,6 +160,7 @@ export function ClientsWorkspace({
         p.then(
           () => {
             setCopiedId(id);
+            trackEvent("client_report_shared", { report_type: "client_portal" });
             toast({
               title: "Portal link copied",
               description: "Send it to your client — it updates as you assign deals.",
@@ -176,6 +192,44 @@ export function ClientsWorkspace({
           </Button>
         ) : null}
       </div>
+
+      <section
+        aria-label="Agent Pro workflow"
+        className="mt-4 rounded-2xl border border-primary/20 bg-primary/5 p-4"
+      >
+        <p className="text-[10px] font-bold uppercase tracking-widest text-primary">
+          Agent workflow
+        </p>
+        <ol className="mt-2 flex flex-wrap items-center gap-x-1.5 gap-y-2 text-xs font-semibold text-foreground">
+          {AGENT_WORKFLOW_STEPS.map((step, index) => (
+            <li key={step} className="inline-flex items-center gap-1.5">
+              <span className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-2 py-1">
+                <span className="text-[10px] text-muted-foreground">{index + 1}</span>
+                {step}
+              </span>
+              {index < AGENT_WORKFLOW_STEPS.length - 1 ? (
+                <span aria-hidden className="text-muted-foreground">→</span>
+              ) : null}
+            </li>
+          ))}
+        </ol>
+        <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+          Add the buyer here, define their criteria, analyze a property, assign the saved analysis,
+          then share the client report. Keep follow-up in the deal notes and move the pipeline stage
+          when you submit the offer.
+        </p>
+        <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-xs font-semibold">
+          <Link href="/settings#buy-boxes" className="text-primary hover:underline">
+            Manage Buy Boxes
+          </Link>
+          <Link href="/" className="text-primary hover:underline">
+            Analyze a property
+          </Link>
+          <Link href="/dashboard/saved-analyses" className="text-primary hover:underline">
+            Open My Deals
+          </Link>
+        </div>
+      </section>
 
       {loadError ? (
         <div className="mt-4 rounded-xl border border-destructive/25 bg-destructive/5 p-4 text-sm text-foreground">
@@ -306,7 +360,7 @@ export function ClientsWorkspace({
                       href={`/dashboard/saved-analyses?client=${c.id}`}
                       className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
                     >
-                      View their deals <ExternalLink className="size-3" />
+                      Review deals &amp; follow up <ExternalLink className="size-3" />
                     </Link>
                   </>
                 ) : countsFailed ? (

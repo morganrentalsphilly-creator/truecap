@@ -8,12 +8,21 @@ import { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { cn } from "@/lib/utils";
 import { FieldError, optionalNumberSetValueAs } from "@/components/investcalc/form-field-helpers";
 import { GlossaryTip } from "@/components/investcalc/glossary-tip";
+import { FinancingProfileSelector } from "@/components/investcalc/financing-profile-selector";
+import { isFeatureEnabled } from "@/lib/feature-flags";
+import type { FinancingProfileSnapshot } from "@/lib/financing-profiles";
 
 interface FinancingSectionProps {
   form: UseFormReturn<InvestmentFormValues>;
+  appliedProfile?: FinancingProfileSnapshot | null;
+  onAppliedProfileChange?: (profile: FinancingProfileSnapshot | null) => void;
 }
 
-export function FinancingSection({ form }: FinancingSectionProps) {
+export function FinancingSection({
+  form,
+  appliedProfile = null,
+  onAppliedProfileChange,
+}: FinancingSectionProps) {
   const {
     register,
     formState: { errors },
@@ -43,6 +52,14 @@ export function FinancingSection({ form }: FinancingSectionProps) {
         <DollarSign className="w-4 h-4 text-[var(--brand-green)]" />
         <span className="font-semibold text-sm text-foreground">Financing</span>
       </div>
+
+      {isFeatureEnabled("financing_profiles") && onAppliedProfileChange ? (
+        <FinancingProfileSelector
+          form={form}
+          appliedProfile={appliedProfile}
+          onAppliedProfileChange={onAppliedProfileChange}
+        />
+      ) : null}
 
       <div className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <div>

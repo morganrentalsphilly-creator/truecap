@@ -43,19 +43,24 @@ export function NoiCalculatorWidget() {
     const annualGross = monthlyRent * 12;
     const annualVacancy = annualGross * vacancyPct;
     const effectiveRent = annualGross - annualVacancy;
+    // TrueCap Underwriting Standard v1.0: CapEx is a below-NOI reserve.
+    // It still reduces the investor's cash after reserves, but it does not
+    // reduce lender/appraiser-style NOI or DSCR.
     const monthlyOpex =
       num(taxInput) +
       num(insuranceInput) +
       num(maintenanceInput) +
       num(mgmtInput) +
-      num(capexInput) +
       num(hoaInput) +
       num(utilitiesInput);
+    const monthlyCapexReserve = num(capexInput);
     const annualOpex = monthlyOpex * 12;
+    const annualCapexReserve = monthlyCapexReserve * 12;
     const annualNoi = effectiveRent - annualOpex;
     const monthlyNoi = annualNoi / 12;
+    const annualCashAfterReserve = annualNoi - annualCapexReserve;
     const opexRatio = effectiveRent > 0 ? (annualOpex / effectiveRent) * 100 : 0;
-    return { monthlyRent, annualGross, annualVacancy, effectiveRent, monthlyOpex, annualOpex, annualNoi, monthlyNoi, opexRatio };
+    return { monthlyRent, annualGross, annualVacancy, effectiveRent, monthlyOpex, annualOpex, annualCapexReserve, annualNoi, monthlyNoi, annualCashAfterReserve, opexRatio };
   }, [rentInput, vacancyInput, taxInput, insuranceInput, maintenanceInput, mgmtInput, capexInput, hoaInput, utilitiesInput]);
 
   // Carry the user's monthly rent into the full analyzer (P2-2 handoff).
@@ -85,9 +90,14 @@ export function NoiCalculatorWidget() {
               <FieldMoney label="Insurance" value={insuranceInput} setValue={setInsuranceInput} />
               <FieldMoney label="Maintenance" value={maintenanceInput} setValue={setMaintenanceInput} />
               <FieldMoney label="Management" value={mgmtInput} setValue={setMgmtInput} />
-              <FieldMoney label="CapEx reserve" value={capexInput} setValue={setCapexInput} />
               <FieldMoney label="HOA" value={hoaInput} setValue={setHoaInput} />
               <FieldMoney label="Utilities (owner)" value={utilitiesInput} setValue={setUtilitiesInput} />
+            </div>
+            <div className="mt-3 rounded-xl border border-dashed border-border p-3">
+              <FieldMoney label="CapEx reserve (below NOI)" value={capexInput} setValue={setCapexInput} />
+              <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+                Kept below lender-style NOI, but subtracted from cash after reserves.
+              </p>
             </div>
           </div>
         </div>
@@ -108,7 +118,7 @@ export function NoiCalculatorWidget() {
               {fmtMoney(result.monthlyNoi)}/month
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              Net Operating Income — before mortgage and income tax.
+              Net Operating Income — before CapEx reserve, mortgage, and income tax.
             </p>
           </div>
 
@@ -116,8 +126,10 @@ export function NoiCalculatorWidget() {
             <Row label="Annual gross rent" value={fmtMoney(result.annualGross)} />
             <Row label="Vacancy" value={`-${fmtMoney(result.annualVacancy)}`} />
             <Row label="Effective rent" value={fmtMoney(result.effectiveRent)} bold />
-            <Row label="Annual operating expenses" value={`-${fmtMoney(result.annualOpex)}`} />
+            <Row label="Annual operating expenses (excl. CapEx)" value={`-${fmtMoney(result.annualOpex)}`} />
             <Row label="Operating expense ratio" value={fmtPct(result.opexRatio)} />
+            <Row label="CapEx reserve (below NOI)" value={`-${fmtMoney(result.annualCapexReserve)}`} />
+            <Row label="Cash after CapEx reserve, before debt" value={fmtMoney(result.annualCashAfterReserve)} bold />
           </div>
         </div>
       </div>

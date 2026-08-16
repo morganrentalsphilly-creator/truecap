@@ -293,7 +293,7 @@ export function OperatingExpensesSection({
           </div>
           <p className="text-xs text-muted-foreground">
             Click &quot;Show Advanced Options&quot; to override any of these or
-            customize tax, insurance, HOA, utilities, and tax strategy.
+            customize tax, insurance, HOA, utilities, and the illustrative tax-impact assumptions.
           </p>
         </div>
       )}

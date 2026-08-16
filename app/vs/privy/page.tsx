@@ -54,7 +54,7 @@ const MATRIX: Row[] = [
   { feature: "Primary purpose", truecap: "Per-deal underwriting calculator", privy: "Investor MLS search + filtering", winner: "tie" },
   { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", privy: "Listing-level cap rate estimates", winner: "truecap" },
   { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", privy: "Not modeled", winner: "truecap" },
-  { feature: "Tax strategy modeling", truecap: "Pro — depreciation + interest + after-tax CF", privy: "Not modeled", winner: "truecap" },
+  { feature: "Illustrative tax impact", truecap: "Pro — depreciation + interest + modeled after-tax CF", privy: "Not modeled", winner: "truecap" },
   { feature: "Address auto-fill (rent/rate/tax)", truecap: "Yes — HUD + FRED + state property tax", privy: "MLS-pulled property data", winner: "truecap" },
   { feature: "Investor-filtered MLS search", truecap: "No", privy: "Yes — cash flow, rehab, motivated", winner: "privy" },
   { feature: "Comparable sales (comps)", truecap: "No", privy: "Yes — MLS-derived comp set", winner: "privy" },
@@ -266,7 +266,7 @@ export default function VsPrivyPage() {
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
-            Pro unlocks projections, sensitivity, tax strategy, exit scenarios,
+            Pro unlocks projections, sensitivity, illustrative tax impact, modeled exit comparisons,
             MAO, PDF exports, and co-branded share links.
             No card to start.
           </p>
@@ -338,11 +338,11 @@ const PRIVY_FAQ: FaqItem[] = [
     question: "Does Privy underwrite deals?",
     answer: (
       <>
-        Sort of — it shows listing-level cap rate estimates and rehab condition flags, but it doesn&apos;t do per-deal underwriting at TrueCap&apos;s depth (DSCR, sensitivity, projection, tax strategy). Privy gets you to a shortlist; TrueCap turns the shortlist into decisions.
+        Sort of — it shows listing-level cap rate estimates and rehab condition flags, but it doesn&apos;t do per-deal underwriting at TrueCap&apos;s depth (DSCR, sensitivity, projection, and illustrative tax impact). Privy gets you to a shortlist; TrueCap turns the shortlist into decisions.
       </>
     ),
     plainTextAnswer:
-      "Sort of — listing-level cap rate estimates + rehab flags but not deep per-deal underwriting (no DSCR, sensitivity, projection, tax strategy). Privy: shortlist. TrueCap: decisions.",
+      "Sort of — listing-level cap rate estimates + rehab flags but not deep per-deal underwriting (no DSCR, sensitivity, projection, or illustrative tax impact). Privy: shortlist. TrueCap: decisions.",
   },
   {
     question: "Is Privy worth $99/month?",

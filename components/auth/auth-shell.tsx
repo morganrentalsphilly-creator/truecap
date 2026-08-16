@@ -95,11 +95,11 @@ export function AuthShell({
 
               <div className="mt-auto flex items-center gap-2 text-[11px] text-white/76">
                 <ShieldCheck className="size-4" />
-                <span>Bank-level security</span>
+                <span>Authenticated access</span>
                 <span className="text-white/35">•</span>
-                <span>Encrypted</span>
+                <span>Owner-scoped saved data</span>
                 <span className="text-white/35">•</span>
-                <span>Your data stays private</span>
+                <span>Privacy controls</span>
               </div>
             </div>
           </aside>

@@ -85,6 +85,18 @@ function terminalStageAction(
  * as written, so it passes through untouched.
  */
 function applyInFlightStage(action: NextAction, stage: PipelineStage | undefined): NextAction {
+  if (stage === "negotiating") {
+    if (action.tone === "blocked") {
+      return { label: "Renegotiate or walk away", reason: action.reason, tone: "blocked" };
+    }
+    if (action.tone === "ready") {
+      return {
+        label: "Finalize the negotiated terms",
+        reason: "the numbers still hold up at the current terms",
+        tone: "ready",
+      };
+    }
+  }
   if (stage === "offer") {
     if (action.tone === "blocked") {
       return { label: "Renegotiate or withdraw your offer", reason: action.reason, tone: "blocked" };

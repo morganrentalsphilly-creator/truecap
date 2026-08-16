@@ -109,6 +109,7 @@ export type CompareDealViewModel = {
   assumptions: DealAssumptions;
   compareSnapshotVersion: number | null;
   compareSnapshot: CompareSnapshotV1 | null;
+  methodologyLabel?: string;
 };
 
 function getTypeIcon(type: PropertyType | null) {
@@ -140,6 +141,10 @@ function fmtPct(v: number | null, decimals = 2): string {
 function CompareSnapshotPanel({ snapshot }: { snapshot: CompareSnapshotV1 }) {
   const { longTermSummary, assumptions, exitScenarios, taxStrategy } = snapshot;
   const s = exitScenarios.summary;
+  const highestProfitExit = exitScenarios.years.reduce<(typeof exitScenarios.years)[number] | null>(
+    (best, year) => (!best || year.totalProfit > best.totalProfit ? year : best),
+    null
+  );
   return (
     <div className="space-y-3 text-xs">
       <div>
@@ -176,7 +181,7 @@ function CompareSnapshotPanel({ snapshot }: { snapshot: CompareSnapshotV1 }) {
             <Tooltip delayDuration={200}>
               <TooltipTrigger asChild>
                 <span className="cursor-help underline decoration-dotted decoration-muted-foreground/60 underline-offset-2">
-                  10-Year Tax Benefit (Tax Strategy):
+                  10-Year Illustrative Tax Impact:
                 </span>
               </TooltipTrigger>
               <TooltipContent
@@ -199,7 +204,12 @@ function CompareSnapshotPanel({ snapshot }: { snapshot: CompareSnapshotV1 }) {
       <div className="border-t border-border pt-3">
         <p className="mb-1.5 font-bold uppercase tracking-wide text-foreground">Exit summary</p>
         <ul className="space-y-1 text-muted-foreground">
-          <li>Best year to sell: {s.bestYearToSell > 0 ? `Year ${s.bestYearToSell}` : "—"}</li>
+          <li>
+            Highest modeled profit:{" "}
+            {highestProfitExit
+              ? `${formatCurrency(highestProfitExit.totalProfit)} (Year ${highestProfitExit.year})`
+              : "—"}
+          </li>
           <li>Year 5 profit: {formatCurrency(s.year5Profit)}</li>
           <li>Year 10 profit: {formatCurrency(s.year10Profit)}</li>
           {/* Extreme cumulative ROI (finding 5): framed form leads; raw on title. */}
@@ -209,12 +219,12 @@ function CompareSnapshotPanel({ snapshot }: { snapshot: CompareSnapshotV1 }) {
         </ul>
       </div>
       <div className="border-t border-border pt-3">
-        <p className="mb-1.5 font-bold uppercase tracking-wide text-foreground">Tax strategy (10 yr)</p>
+        <p className="mb-1.5 font-bold uppercase tracking-wide text-foreground">Illustrative tax impact (10 yr)</p>
         <p className="flex flex-wrap items-baseline gap-x-1 text-[11px] text-muted-foreground">
           <Tooltip delayDuration={200}>
             <TooltipTrigger asChild>
               <span className="cursor-help underline decoration-dotted decoration-muted-foreground/60 underline-offset-2">
-                10-Year Tax Benefit (Tax Strategy):
+                10-Year Illustrative Tax Impact:
               </span>
             </TooltipTrigger>
             <TooltipContent
@@ -417,8 +427,8 @@ const LONG_TERM_METRIC_ROWS: LongTermMetricRow[] = [
   },
   {
     key: "ltTotalTaxBenefit",
-    label: "10-Year Tax Benefit (Tax Strategy)",
-    subsection: "FROM TAX STRATEGY",
+    label: "10-Year Illustrative Tax Impact",
+    subsection: "FROM ILLUSTRATIVE TAX IMPACT",
     kind: "currency",
     direction: "higher",
     getValue: (d) => d.compareSnapshot?.taxStrategy.totalTaxBenefit ?? null,
@@ -428,7 +438,7 @@ const LONG_TERM_METRIC_ROWS: LongTermMetricRow[] = [
   {
     key: "ltYear1TaxSaving",
     label: "Year 1 Tax Saving",
-    subsection: "FROM TAX STRATEGY",
+    subsection: "FROM ILLUSTRATIVE TAX IMPACT",
     kind: "currency",
     direction: "higher",
     getValue: (d) => {
@@ -439,7 +449,7 @@ const LONG_TERM_METRIC_ROWS: LongTermMetricRow[] = [
   {
     key: "ltYear10TaxImpact",
     label: "Year 10 Tax Impact",
-    subsection: "FROM TAX STRATEGY",
+    subsection: "FROM ILLUSTRATIVE TAX IMPACT",
     kind: "currency",
     direction: "higher",
     getValue: (d) => {
@@ -458,7 +468,7 @@ const LONG_TERM_METRIC_ROWS: LongTermMetricRow[] = [
   },
   {
     key: "ltBestYearToSell",
-    label: "Best Year to Sell",
+    label: "Highest Modeled Profit Year",
     subsection: "FROM EXIT SCENARIOS",
     kind: "year",
     direction: "none",
@@ -974,6 +984,11 @@ function CompareMobileDealStrip({ deals }: { deals: CompareDealViewModel[] }) {
             <p className="mt-1.5 line-clamp-2 text-[11px] font-extrabold leading-tight text-foreground">
               {getDealLabel(deal, { short: true })}
             </p>
+            {deal.methodologyLabel ? (
+              <p className="mt-0.5 text-[9px] leading-tight text-muted-foreground">
+                {deal.methodologyLabel}
+              </p>
+            ) : null}
             <p className="mt-auto pt-2 text-[10px] font-semibold text-muted-foreground">
               {formatCurrency(deal.purchasePrice)}
             </p>
@@ -1220,9 +1235,11 @@ export function CompareDealsClient({
     },
     {
       id: "tax",
-      title: "Tax Strategy",
+      title: "Illustrative Tax Impact",
       icon: Table2,
-      rows: LONG_TERM_METRIC_ROWS.filter((row) => row.subsection === "FROM TAX STRATEGY"),
+      rows: LONG_TERM_METRIC_ROWS.filter(
+        (row) => row.subsection === "FROM ILLUSTRATIVE TAX IMPACT"
+      ),
     },
     {
       id: "exit",
@@ -1463,6 +1480,11 @@ export function CompareDealsClient({
                   <h2 className="line-clamp-2 min-h-10 overflow-hidden pr-8 text-lg font-extrabold leading-snug text-foreground">
                     {getDealLabel(deal)}
                   </h2>
+                  {deal.methodologyLabel ? (
+                    <p className="mt-1 text-[10px] text-muted-foreground">
+                      {deal.methodologyLabel}
+                    </p>
+                  ) : null}
                   <p className="mt-6 text-sm font-semibold text-muted-foreground">{formatCurrency(deal.purchasePrice)}</p>
                   <div className="mt-4 flex flex-wrap items-center gap-2">
                     {deal.scoringComplete && deal.signal ? (

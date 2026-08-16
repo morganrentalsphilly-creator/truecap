@@ -174,7 +174,7 @@ export async function GET(request: Request) {
     // migration — retry without it on 42703 (equity simply stays hidden,
     // mirroring the dashboard's tolerance).
     const DEAL_COLS =
-      "id, user_id, title, address, property_type, purchase_price, net_cash_flow_monthly, pipeline_stage, is_completed, is_archived, form_snapshot";
+      "id, user_id, title, address, property_type, purchase_price, net_cash_flow_monthly, pipeline_stage, is_completed, is_archived, methodology_version, result_snapshot, form_snapshot";
     let dealRows: Array<WeeklySummaryDealRow & { user_id: string }> | null = null;
     const dealResult = await admin
       .from("saved_analyses")

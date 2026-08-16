@@ -10,7 +10,9 @@ import { AgentClientsCard } from "@/components/settings/agent-clients-card";
 import { WhitelabelEmbedCard } from "@/components/settings/whitelabel-embed-card";
 import { RateAlertsToggle } from "@/components/settings/rate-alerts-toggle";
 import { WeeklySummaryToggle } from "@/components/settings/weekly-summary-toggle";
+import { FinancingProfilesCard } from "@/components/settings/financing-profiles-card";
 import { getEntitlementsForUser, hasPlanFeature } from "@/lib/entitlements";
+import { isFeatureEnabled } from "@/lib/feature-flags";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
@@ -38,6 +40,11 @@ export default async function SettingsPage() {
       <Header initialUser={user} initialEntitlements={entitlements} />
       <main id="main" className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-5 space-y-6">
         <UserDefaultsCard />
+
+        {/* Reusable lender terms. Both this surface and every backing action
+            fail closed behind the rollout flag; the migration must land
+            before the flag is enabled. */}
+        {isFeatureEnabled("financing_profiles") ? <FinancingProfilesCard /> : null}
 
         {/* Buy Boxes — self-gates: shows a Pro upsell to free users, the
             multi-box manager to Pro. Drives the inline buy-box verdict on

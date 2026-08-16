@@ -16,15 +16,15 @@ import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 
 const SLUG = "rental-property-pro-forma-explained";
-const TITLE = "How to read a rental property pro forma (and the 7 lies inside most of them)";
+const TITLE = "How to read a rental property pro forma (and verify its assumptions)";
 // SERP-facing title (metadata/og only): kept ≤50 chars so the root
 // layout's "%s | TrueCap" template stays inside the ~60-char SERP
 // window. The on-page <h1> keeps the longer editorial TITLE.
 const SERP_TITLE = "How to read a rental property pro forma (2026)";
 const DESCRIPTION =
-  "A pro forma is a seller's projection of how a rental property will perform — and it's almost always optimistic. Here's how to translate seller pro formas into real numbers, and the 7 line items most pro formas understate.";
+  "A pro forma is a seller's projection, not a result. Learn how to verify rent, vacancy, insurance, taxes, maintenance, reserves, management, and bad debt.";
 const PUBLISHED_AT = "2026-05-26";
-const MODIFIED_AT = "2026-06-01";
+const MODIFIED_AT = "2026-08-15";
 const READING_TIME = 9;
 
 export const metadata: Metadata = {
@@ -55,11 +55,11 @@ export const metadata: Metadata = {
 const FAQS = [
   {
     q: "What's the difference between pro forma and actual?",
-    a: "Pro forma is what the seller projects the property will do AFTER you take it over. Actual is what the property has historically done. Pro formas typically assume higher rents, lower vacancy, lower expenses, and zero capex — the optimistic version of operations. Actuals reflect the real numbers, which are almost always less rosy. ALWAYS ask for actuals (T-12: trailing 12-month income/expense statement) and underwrite based on those, not on the pro forma.",
+    a: "A pro forma is a forward-looking projection; actuals show historical operations. Neither should be accepted without reconciliation. Request the rent roll, leases, collections, invoices, tax bills, insurance information, utility records, and a trailing operating statement, then adjust for ownership and post-sale changes.",
   },
   {
-    q: "Why are pro formas always optimistic?",
-    a: "Three reasons. (1) The seller's incentive is to make the property look good — pro formas are marketing documents. (2) Sellers often assume the buyer can raise rents to 'market' immediately; in practice that takes 1-3 years of turnover. (3) Sellers leave out capex reserves because the IRS doesn't require them on operating statements, and including them lowers the apparent cap rate. The pro forma 'cap rate' is almost always 1-3 percentage points higher than what you'd actually achieve.",
+    q: "Why can a pro forma be optimistic?",
+    a: "A seller may use projected rent, normalized vacancy, incomplete expenses, or no capital reserve. Compare every input with source documents and run current, downside, and delayed-rent scenarios. The gap from the seller's cap rate is property-specific; there is no universal haircut that predicts performance.",
   },
   {
     q: "What's a T-12 and why does it matter?",
@@ -67,11 +67,11 @@ const FAQS = [
   },
   {
     q: "Can I trust a pro forma's vacancy assumption?",
-    a: "Rarely. Most pro formas assume 3-5% vacancy. Real vacancy in most markets runs 6-10%. A single 30-day turnover = 8.3% vacancy for that year. Adjust upward — use 7-8% for B-class, 9-11% for C-class, 5-6% only for very stable A-class properties with long-term tenants. The pro forma's vacancy line is often the single biggest source of inflated cap rate.",
+    a: "Treat vacancy as an assumption to verify. Derive it from the property's collections and turnover history, comparable properties, lease expirations, current concessions, manager records, and a downside case. Property class alone does not establish a defensible vacancy percentage.",
   },
   {
     q: "What expenses does the pro forma typically understate?",
-    a: "Seven big ones: (1) maintenance (often shown at 4-5%, real is 6-10% for newer / 10-15% for older). (2) capex reserves (often $0, real is $50-200/mo per unit). (3) vacancy (3-5% pro forma, 6-10% real). (4) management (sometimes shown at $0 for 'self-managed,' but you should budget 8-10% even if you self-manage). (5) insurance (often shown at last year's rate, not current quote). (6) utilities (sometimes shown net of tenant reimbursements that don't actually happen). (7) legal/bad-debt (rarely shown at all; budget 1-2% of gross rent).",
+    a: "Common omissions include maintenance, component replacements, vacancy and concessions, management, current buyer insurance, post-sale taxes, owner-paid utilities, legal costs, and bad debt. Support each line with property records, current quotes or bids, applicable tax information, and explicit downside scenarios rather than universal percentages.",
   },
 ];
 
@@ -138,71 +138,71 @@ export default function ProFormaPost() {
             The lines are standard: gross rent, vacancy, operating expenses (broken into categories), net operating income (<Link href="/glossary/noi" className="text-primary font-semibold hover:underline">NOI</Link>), and the implied <Link href="/glossary/cap-rate" className="text-primary font-semibold hover:underline">cap rate</Link> at asking price.
           </p>
           <p>
-            Your job as a buyer: translate the pro forma into reality, which usually means lowering rent assumptions, raising expense assumptions, adding line items the seller skipped, and recomputing the cap rate.
+            Your job as a buyer is to reconcile the projection to source documents, current quotes, and post-sale conditions, add omitted line items, and recompute the cap rate under base and downside scenarios.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">Lie #1: Pro forma rent is &quot;market rent,&quot; not current rent</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">Risk #1: Projected &quot;market rent&quot; is not current collected rent</h2>
           <p>
-            Many pro formas show &quot;projected market rent&quot; — what the seller thinks units could rent for after you raise them. Current actuals are often $200-400/mo less per unit.
+            Many pro formas show projected market rent rather than current collected rent. The gap and the time required to reach a supported rent depend on the leases, unit condition, turnover, concessions, local rules, and current comps.
           </p>
           <p>
-            <strong>The translation:</strong> ask for the actual rent roll. Compare unit-by-unit to pro forma. If current rents are below pro forma, factor in 1-3 years of turnover before you reach pro forma rents — which means lower year-1 and year-2 cash flow than the pro forma shows.
-          </p>
-
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">Lie #2: Vacancy at 3-5% (real is 6-10%)</h2>
-          <p>
-            Most pro formas use 3-5% vacancy. In reality, a single 30-day turnover = 8.3% vacancy for that year. Two turnovers per year on a 4-unit property = 4-8% blended.
-          </p>
-          <p>
-            <strong>The translation:</strong> use 6-8% for B-class, 9-12% for C-class properties. Only use 5% if you have multiple years of actuals showing it.
+            <strong>Verification:</strong> obtain the rent roll, leases, concessions, deposits, and collection ledger. Compare unit by unit with current comparable leases and model the actual timing and cost of any turnover or renovation.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">Lie #3: Insurance at last year&apos;s rate</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">Risk #2: Vacancy is a default rather than property evidence</h2>
           <p>
-            The seller&apos;s pro forma insurance number is from their last bill. In hardening markets (FL, LA, TX coastal, CA fire zones), your new-buyer quote can be 40-80% higher than the seller&apos;s current premium.
+            A single annual percentage can hide physical vacancy, concessions, delinquency, bad debt, and make-ready downtime. The same percentage can imply very different operating histories.
           </p>
           <p>
-            <strong>The translation:</strong> ALWAYS quote insurance yourself before closing. Use the higher of (a) your fresh quote and (b) the seller&apos;s number times 1.20.
-          </p>
-
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">Lie #4: Property tax at current assessment (post-sale reassessment coming)</h2>
-          <p>
-            Many states reassess property tax based on sale price. Some counties have caps; others don&apos;t. If the seller bought 10 years ago and the property tax has been frozen, your post-sale tax bill might be 30-100% higher than the pro forma.
-          </p>
-          <p>
-            <strong>The translation:</strong> ask your local title rep what the post-sale tax bill will be. Or check the county assessor&apos;s rules. Use the post-sale number in your underwriting.
+            <strong>Verification:</strong> derive a base case from collections, turnover, lease expirations, concessions, and comparable manager data. Add a downside case with longer downtime or collection loss.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">Lie #5: Zero capex reserve</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">Risk #3: Insurance at the seller&apos;s rate</h2>
           <p>
-            Pro formas almost never include capex reserves — the savings you set aside each month for big-ticket replacements like roof, HVAC, and water heaters. This makes NOI (and therefore cap rate) look better than it actually is.
+            The seller&apos;s premium may reflect different coverage, deductibles, claims, bundling, occupancy, or underwriting than a buyer will receive.
           </p>
           <p>
-            <strong>The translation:</strong> add 5-10% of gross rent as <Link href="/glossary/capex" className="text-primary font-semibold hover:underline">capex reserve</Link>. For older properties (40+ years), use 8-12%. The cap rate drops accordingly — typically by 1-2 percentage points.
-          </p>
-
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">Lie #6: Maintenance at 5% (real is 8-15%)</h2>
-          <p>
-            Maintenance differs from capex — these are the smaller, more frequent fixes (HVAC service, plumbing calls, appliance repairs, paint touch-ups, landscaping). Pro formas often show 3-5%; real numbers run 8-15% depending on age and class.
-          </p>
-          <p>
-            <strong>The translation:</strong> 6-8% of rent for newer (post-2000) properties. 10-15% for pre-1980. Older Philadelphia rowhouses or Cleveland pre-WW2 stock can hit 15-20% in capex-heavy years.
+            <strong>Verification:</strong> obtain a current subject-property quote in the expected ownership and occupancy structure, then review limits, deductibles, exclusions, flood or wind needs, and loss-of-rent coverage.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">Lie #7: Management at $0 (because the owner self-manages)</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">Risk #4: Property tax carried forward without a sale scenario</h2>
           <p>
-            Sellers who self-manage often show $0 management on the pro forma. This makes NOI look ~10% higher than it would be for a buyer who hires a property manager.
+            Assessment rules, exemptions, sale treatment, and billing cycles vary by jurisdiction. The seller&apos;s bill may not represent the buyer&apos;s stabilized obligation.
           </p>
           <p>
-            <strong>The translation:</strong> always model 8-10% <Link href="/glossary/management-fee" className="text-primary font-semibold hover:underline">management</Link>, even if you plan to self-manage. Why? Your time has cost. AND if you ever sell or hand off the property, the next owner will need PM. A deal that only works at 0% management is a fragile deal.
+            <strong>Verification:</strong> review the parcel record and current assessor guidance, remove seller-specific exemptions, and model the applicable post-sale or reassessment case.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">Lie #8 (bonus): Legal + bad debt at $0</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">Risk #5: Zero capital reserve</h2>
+          <p>
+            A pro forma may omit reserves for roofs, HVAC, water heaters, paving, plumbing, or other components. Omitting a reserve can make the projected cash available to the owner look stronger.
+          </p>
+          <p>
+            <strong>Verification:</strong> build the <Link href="/glossary/capex" className="text-primary font-semibold hover:underline">capital reserve</Link> from component age, condition, remaining life, replacement scope, and current bids. Show it separately if the cap-rate convention excludes reserves from NOI.
+          </p>
+
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">Risk #6: Maintenance based only on a percentage</h2>
+          <p>
+            Maintenance differs from capital replacement and includes recurring service, plumbing calls, appliance repairs, paint, landscaping, and other smaller work. A percentage alone does not capture property condition or service history.
+          </p>
+          <p>
+            <strong>Verification:</strong> review work orders, invoices, inspection findings, service contracts, and manager experience with similar local properties. Run a higher-cost downside year separately.
+          </p>
+
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">Risk #7: Management at $0 because the seller self-manages</h2>
+          <p>
+            A self-managed pro forma may show no management cost even when a buyer expects to hire a manager or wants to compare the property on an operator-neutral basis.
+          </p>
+          <p>
+            <strong>Verification:</strong> obtain local <Link href="/glossary/management-fee" className="text-primary font-semibold hover:underline">management</Link> proposals that include leasing, renewal, maintenance markup, inspections, and termination fees. Model the actual plan and a third-party-management comparison.
+          </p>
+
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">Risk #8: Legal costs and bad debt at $0</h2>
           <p>
             Pro formas rarely include legal expenses (eviction processing, lease enforcement, attorney consultations) or bad debt (rent that&apos;s owed but never collected). Both are real costs.
           </p>
           <p>
-            <strong>The translation:</strong> budget 1-2% of gross rent for combined legal + bad debt. Lower in landlord-friendly states (TX, FL, GA) with fast eviction processes; higher in tenant-leaning states (NY, NJ, CA, IL) where evictions take 60-180 days.
+            <strong>Verification:</strong> use the property&apos;s collection history, manager records, lease terms, and current local legal guidance. Model a downside case rather than assigning a fixed cost from a state label or eviction timeline.
           </p>
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">The real-cap-rate worksheet</h2>
@@ -211,35 +211,35 @@ export default function ProFormaPost() {
           </p>
           <ul>
             <li><strong>Rent</strong>: use current rent (from rent roll), not projected market rent</li>
-            <li><strong>Vacancy</strong>: use 7-8% B-class / 10-12% C-class</li>
+            <li><strong>Vacancy and bad debt</strong>: derive from collections, turnover, concessions, lease expirations, and a downside case</li>
             <li><strong>Insurance</strong>: use fresh quote in your name</li>
             <li><strong>Property tax</strong>: use post-sale reassessment estimate</li>
-            <li><strong>Maintenance</strong>: 8-12% of rent depending on age</li>
-            <li><strong>Capex reserve</strong>: 5-10% of rent (higher for older properties)</li>
-            <li><strong>Management</strong>: 8-10% even if you self-manage</li>
-            <li><strong>Legal / bad debt</strong>: 1-2% of gross rent</li>
+            <li><strong>Maintenance</strong>: use work orders, invoices, condition, and local service costs</li>
+            <li><strong>Capital reserve</strong>: build from component age, remaining life, scope, and current bids</li>
+            <li><strong>Management</strong>: use a current proposal matching the services you expect</li>
+            <li><strong>Legal</strong>: use property history and current local guidance, plus a downside case</li>
           </ul>
           <p>
-            Recompute NOI. Divide by asking price. You now have the realistic cap rate.
+            Recompute NOI and divide by price. You now have a supported scenario, not a guaranteed cap rate.
           </p>
           <p>
-            In my experience, the realistic cap rate runs 1.5-3 percentage points BELOW the pro forma cap rate on most deals. An 8.5% pro forma cap often translates to a real 6-7% — still good in many markets, just not 8.5%.
+            Compare the supported base and downside cases with the seller&apos;s projection. The gap is property-specific and should be explained by evidence, not a universal haircut.
           </p>
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">When to walk based on the gap</h2>
           <p>
-            If the real cap is within 1 point of the pro forma cap, you&apos;re looking at an honest pro forma. Worth pursuing.
+            A small gap does not prove the projection is reliable. Confirm that the underlying rent, expense, timing, and condition evidence is complete.
           </p>
           <p>
-            If the gap is 1-2 points, normal optimism. Negotiate price down 5-8% to make the math work for you.
+            If the supported result differs, identify which assumptions create the gap and reprice only from the verified cash flows and your required return.
           </p>
           <p>
-            If the gap is 2+ points, the seller either doesn&apos;t understand their own property or is actively misleading buyers. Walk OR negotiate hard.
+            A large unexplained gap is a diligence signal, not proof of intent. Request source documents, correct the model, and stop if material inputs cannot be verified.
           </p>
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">The TrueCap shortcut</h2>
           <p>
-            You don&apos;t have to do this translation by hand on every deal. <Link href="/" className="text-primary font-semibold hover:underline">TrueCap</Link> takes the listing data, applies realistic expense assumptions for your property&apos;s age and market, and shows you the real cap rate next to the pro forma cap rate in 60 seconds. The number it shows is what you&apos;d actually achieve — not what the seller wants you to believe.
+            You don&apos;t have to recompute every line by hand. <Link href="/" className="text-primary font-semibold hover:underline">TrueCap</Link> applies editable screening defaults and shows how the modeled cap rate changes when you replace them with verified property inputs. Its output is a scenario, not actual future performance.
           </p>
           <p>
             For a refresher on the underlying math, see our <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="text-primary font-semibold hover:underline">60-second underwriting framework</Link>.

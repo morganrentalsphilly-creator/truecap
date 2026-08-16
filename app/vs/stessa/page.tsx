@@ -58,7 +58,7 @@ const MATRIX: Row[] = [
   { feature: "Post-purchase bookkeeping",         truecap: "Not a focus",                                                                       stessa: "Yes — bank-connected income/expense tracking, Schedule E ready",          winner: "stessa" },
   { feature: "Free tier",                         truecap: "Free analyzer with no signup",                                                     stessa: "Free bookkeeping (their core product is free)",                           winner: "tie" },
   { feature: "10-year projection (pre-purchase)", truecap: "Pro — rent + expense + appreciation compounding modeled",                          stessa: "Not the primary use case",                                                winner: "truecap" },
-  { feature: "Tax strategy modeling",             truecap: "Pro — depreciation + interest deduction + bracket-aware after-tax CF",              stessa: "Year-end Schedule E reports for filed taxes",                             winner: "tie" },
+  { feature: "Illustrative tax impact",           truecap: "Pro — depreciation + interest deduction + modeled after-tax CF",                    stessa: "Year-end Schedule E reports for filed taxes",                             winner: "tie" },
   { feature: "Bank account connections",          truecap: "No",                                                                                stessa: "Yes — Plaid integrations to pull transactions",                           winner: "stessa" },
   { feature: "Sensitivity / stress test",         truecap: "Pro — rent ±10%, vacancy ±5pp, rates ±1pp",                                         stessa: "No",                                                                      winner: "truecap" },
   { feature: "Address auto-fill (rent/rate/tax)", truecap: "HUD FMR + FRED + state tax dataset",                                               stessa: "Not the primary use case",                                                winner: "truecap" },
@@ -246,7 +246,7 @@ export default function VsStessaPage() {
             Underwriting the next deal? Start free.
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
-            TrueCap free covers cap rate, CoC, DSCR, NCF, monthly cash flow — enough to underwrite. Pro unlocks co-branded share links, PDF exports, 10-year projections, tax strategy, sensitivity grid, MAO, and the strategy analyzers. No card to start.
+            TrueCap free covers cap rate, CoC, DSCR, NCF, monthly cash flow — enough to underwrite. Pro unlocks co-branded share links, PDF exports, 10-year projections, illustrative tax impact, sensitivity grid, MAO, and the strategy analyzers. No card to start.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link href="/pricing" className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity">
@@ -312,7 +312,7 @@ const STESSA_FAQ: FaqItem[] = [
         ~$12/month) adds advanced reporting, document organization,
         and rent collection features. TrueCap free covers the
         underwriting math; TrueCap Pro ($29.99/month) adds projections,
-        tax strategy, sensitivity, and MAO. So free Stessa
+        illustrative tax impact, sensitivity, and MAO. So free Stessa
         + free TrueCap covers a lot of the workflow already.
       </>
     ),
@@ -341,13 +341,13 @@ const STESSA_FAQ: FaqItem[] = [
         Yes — every TrueCap user can generate a public read-only share
         link for free; Pro adds a full multi-page PDF report and
         optional custom co-branding on the link. Both formats include
-        the projection, tax strategy view, and deal score, which gives
+        the projection, Illustrative Tax Impact view, and deal score, which gives
         your accountant what they need to validate the after-tax cash
         flow assumptions before you buy.
       </>
     ),
     plainTextAnswer:
-      "Yes — read-only share links are free for everyone; Pro adds a multi-page PDF and optional co-branding. Both include the projection and tax strategy view so your accountant can validate after-tax cash flow assumptions.",
+      "Yes — read-only share links are free for everyone; Pro adds a multi-page PDF and optional co-branding. Both include the projection and Illustrative Tax Impact view so your accountant can review the after-tax assumptions.",
   },
 ];
 

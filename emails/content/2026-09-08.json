@@ -1,60 +1,60 @@
 {
-  "subject": "Cost seg can save $20-50k in tax — when it actually works",
-  "preheader": "Front-load 25-35% of depreciation · the $4-7k study · why it backfires on short holds",
+  "subject": "Cost segregation changes timing — model the trade-offs",
+  "preheader": "No universal price cutoff or payback · loss limits, recapture, and hold period matter",
   "publishedAt": "2026-09-08",
   "weekLabel": "Topic: Cost segregation",
   "marketSnapshot": {
-    "headline": "Cost segregation — front-load depreciation, but know the trade",
-    "body": "Cost segregation studies break a building into components — land improvements, personal property, systems — that depreciate over 5, 7, or 15 years instead of the standard 27.5 years for residential rental. The result: 20-30% of building value gets reclassified to faster schedules, front-loading meaningful depreciation deductions into years 1-5 of ownership. Real benefit for buy-and-hold investors with W-2 income to offset. Less benefit (and sometimes negative) for short-hold strategies.",
+    "headline": "Cost segregation — a timing analysis, not a promised saving",
+    "body": "A defensible cost-segregation study may classify eligible components into shorter recovery periods than the residential building. The result is property- and taxpayer-specific. Basis, acquisition and placed-in-service dates, bonus-depreciation eligibility, passive-activity and other loss limits, study cost, recapture, and sale timing all affect the after-tax present value. Review current IRS Publication 946 and the IRS Cost Segregation Audit Technique Guide with a qualified tax professional.",
     "stats": [
       {
-        "label": "% typically reclassified",
-        "value": "20-30%"
+        "label": "Decision rule",
+        "value": "Property-specific"
       },
       {
-        "label": "Engineering study cost",
-        "value": "$4-7k"
+        "label": "Key constraints",
+        "value": "Loss limits + recapture"
       },
       {
-        "label": "Best fit hold period",
-        "value": "7+ years"
+        "label": "Evidence",
+        "value": "Qualified study + tax model"
       }
     ]
   },
   "dealSpotter": [
     {
-      "address": "Example: $400k rental held 10+ years",
-      "headlineNumber": "~$50-65k accelerated · $16-21k tax savings",
-      "verdict": "Strong (do the study)",
-      "body": "$400k rental property, 10+ year planned hold. Assume $80k gets reclassified to 5-15 year schedules. You front-load ~$50-65k of depreciation deductions into the first 5 years vs spreading across 27.5. At a 32% effective tax bracket, that's $16-21k of accelerated tax savings in those first 5 years. Cost of the engineering study: $4-7k. Net: $12-16k benefit plus meaningful time-value-of-money on the front-loaded deductions."
+      "address": "Illustrative long-hold rental",
+      "headlineNumber": "Compare after-tax present value",
+      "verdict": "Model",
+      "body": "Build two adviser-reviewed scenarios using the property's supported basis allocation: the regular depreciation schedule and the proposed study classifications. Apply the taxpayer's actual loss limitations, acquisition and placed-in-service dates, study fee, discount rate, expected sale or exchange, and recapture treatment. A larger deduction on paper does not prove a current cash-tax benefit."
     },
     {
-      "address": "Example: $200k rental held 7 years",
-      "headlineNumber": "Math gets tight at lower property values · marginal",
-      "verdict": "Marginal",
-      "body": "$200k rental property, 7-year planned hold. The study cost ($4-7k) is a higher percentage of the deal, and the deductions reclassified are smaller in absolute terms. Net benefit might be $3-7k over the hold — real money but not a slam-dunk. The break-even is roughly $250k+ property value for cost seg to clearly win."
+      "address": "Illustrative smaller-basis rental",
+      "headlineNumber": "Study cost is only one input",
+      "verdict": "Verify",
+      "body": "There is no responsible universal purchase-price or gross-rent cutoff. A lower depreciable basis may make a study harder to justify, but fee quotes, component mix, available losses, expected hold, and recapture matter. Ask for a written feasibility estimate and compare it with a no-study scenario before commissioning the work."
     },
     {
-      "address": "Example: rental sold in year 3",
-      "headlineNumber": "Depreciation recapture eats most of the savings",
-      "verdict": "Skip (the cost seg)",
-      "body": "$300k rental sold after 3 years. The front-loaded depreciation gets 'recaptured' at ordinary income rates when you sell (vs the favored 25% rate on standard depreciation recapture). Short holds + cost seg often produce a net wash or slight loss. Cost seg pairs poorly with flipping. Pairs WELL with 1031 (defers the recapture too)."
+      "address": "Illustrative near-term sale",
+      "headlineNumber": "Exit timing can change the result",
+      "verdict": "Model exit",
+      "body": "A near-term taxable sale can reduce or reverse the value of accelerating deductions once study cost, depreciation-related gain treatment, suspended losses, and time value are included. A section 1031 exchange may postpone recognition only if all requirements are met; it does not automatically eliminate recapture or make the original study worthwhile."
     }
   ],
   "blogFeature": {
     "title": "1031 exchange basics: how to defer capital gains on rental property",
     "url": "https://usetruecap.com/blog/1031-exchange-basics",
-    "excerpt": "Cost segregation + 1031 exchange is the tax-savvy investor's combo. Front-load deductions now, defer the recapture by rolling into the next property. The two-step tax strategy that materially improves IRR for tax-aware investors."
+    "excerpt": "Cost segregation changes depreciation timing; a qualifying section 1031 exchange may postpone recognition of gain. Neither step guarantees tax savings or a higher IRR, and both require property- and taxpayer-specific review."
   },
   "qa": {
     "question": "Should I do cost seg on every rental I buy?",
-    "answer": "No — three conditions all need to be true for cost seg to clearly win. (1) Property value is high enough to support the study cost: typically $250k+ purchase price. Below that, the $4-7k study eats too much of the benefit. (2) Planned hold period is 7+ years. Shorter holds + depreciation recapture often wash out the savings. (3) You have W-2 or active income to offset the deductions against, OR your spouse qualifies as a real-estate professional and can use the losses fully. If you're in a 22% bracket with only passive rental income to offset, cost seg's benefit is much smaller than if you're in a 35-37% bracket with active income. Default rule: cost seg makes sense on rentals in the $300k+ range that you plan to hold long-term in your active-income years. Talk to a CPA — they'll model your specific numbers in 30 minutes."
+    "answer": "No universal rule makes cost segregation a clear win. Ask a qualified tax professional to model the supported component classification, study fee, bonus-depreciation eligibility, passive-activity and other loss limits, basis and at-risk limits, expected hold, taxable-sale or exchange scenario, recapture, and time value. Real-estate-professional status does not by itself make every rental loss usable; material participation and other limits still apply. Commission a study only after the property-specific comparison supports it."
   },
   "shipNote": {
     "title": "Decide before you pay for the study",
     "items": [
       "Free: run the deal in 60 seconds and see if it pencils before you pay for a study",
-      "Pro: the tax strategy panel models depreciation and after-tax cash flow year by year, and exit scenarios compare a shorter vs longer hold",
+      "Pro: the Illustrative Tax Impact panel models straight-line depreciation and after-tax cash flow year by year, and exit scenarios compare a shorter vs longer hold under the entered assumptions",
       "See if cost-seg pencils for your deal →"
     ]
   }

@@ -263,7 +263,7 @@ export default function VsDealcheckForFixAndFlipPage() {
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             Free covers the standard cap rate, CoC, DSCR, and cash flow. Pro unlocks
-            projections, sensitivity, tax strategy, exit scenarios, MAO,
+            projections, sensitivity, illustrative tax impact, modeled exit comparisons, MAO,
             and PDF exports.
           </p>
           <div className="flex flex-wrap gap-3">

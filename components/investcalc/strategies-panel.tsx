@@ -97,6 +97,7 @@ export function StrategiesPanel({ values, result, onApplyRehab, currentRehabBudg
       />
       <FixFlipCard
         values={values}
+        result={result}
         defaultRehab={rehabTotal}
       />
     </div>

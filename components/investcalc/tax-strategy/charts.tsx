@@ -24,8 +24,8 @@ import {
 import type { TaxStrategyYear } from "@/lib/tax-strategy";
 
 const chartConfig = {
-  taxSavingsAnnual: { label: "Tax Savings", color: "var(--color-chart-2)" },
-  taxLiabilityAnnual: { label: "Tax Liability", color: "var(--color-chart-5)" },
+  taxSavingsAnnual: { label: "Modeled Tax Savings", color: "var(--color-chart-2)" },
+  taxLiabilityAnnual: { label: "Modeled Tax Liability", color: "var(--color-chart-5)" },
   taxableRentalIncomeAnnual: { label: "Taxable Rental Income", color: "var(--color-chart-1)" },
   mortgageInterestDeductionAnnual: { label: "Interest Deduction", color: "var(--color-chart-4)" },
   depreciationDeductionAnnual: { label: "Depreciation", color: "var(--color-chart-3)" },
@@ -39,7 +39,7 @@ export function TaxStrategyCharts({
 }) {
   return (
     <div className="grid min-w-0 gap-3 sm:gap-4 xl:grid-cols-2">
-      <ChartCard title="Annual Tax Savings">
+      <ChartCard title="Modeled Annual Tax Savings">
         <ChartContainer config={chartConfig} className="h-[240px] w-full sm:h-[260px]">
           <BarChart data={years}>
             <CartesianGrid vertical={false} />

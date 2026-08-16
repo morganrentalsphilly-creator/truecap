@@ -26,6 +26,11 @@ import {
   type MaoTarget,
 } from "@/lib/max-allowable-offer";
 import { chooseMaoTargetFromBuyBox, type BuyBoxReturnThresholds } from "@/lib/mao-targets";
+import {
+  WhatNeedsToBeTrueCard,
+  type ApplicableDecisionThreshold,
+} from "@/components/investcalc/what-needs-to-be-true-card";
+import { isFeatureEnabled } from "@/lib/feature-flags";
 
 interface MaxOfferCardProps {
   values: InvestmentFormValues | null;
@@ -35,6 +40,8 @@ interface MaxOfferCardProps {
    *  (lib/mao-targets rule 2) — labeled "From your buy box". Absent/null
    *  = canonical default seeds. Every field stays user-editable. */
   buyBoxThresholds?: BuyBoxReturnThresholds | null;
+  /** Applies an exact, rechecked one-variable boundary back to the live form. */
+  onApplyThreshold?: (change: ApplicableDecisionThreshold) => void;
 }
 
 const numberOrUndefined = (s: string): number | undefined => {
@@ -45,7 +52,8 @@ const numberOrUndefined = (s: string): number | undefined => {
 
 const money = (n: number) => `$${Math.round(n).toLocaleString("en-US")}`;
 
-export function MaxOfferCard({ values, buyBoxThresholds }: MaxOfferCardProps) {
+export function MaxOfferCard({ values, buyBoxThresholds, onApplyThreshold }: MaxOfferCardProps) {
+  const showDecisionThresholds = isFeatureEnabled("what_needs_to_be_true_v2");
   // Cash purchases have no debt service: calc-analysis reports dscr 0, so a
   // DSCR floor could never pass. Omit that target at this call site (the
   // solver's documented contract) instead of showing "no price works".
@@ -129,8 +137,14 @@ export function MaxOfferCard({ values, buyBoxThresholds }: MaxOfferCardProps) {
 
   const active = Boolean(values) && !noneSet;
   const mao = useMemo(() => (active ? calculateMaxAllowableOffer(values!, target) : null), [active, values, target]);
-  const reqRent = useMemo(() => (active ? solveRequiredMonthlyRent(values!, target) : null), [active, values, target]);
-  const reqRate = useMemo(() => (active ? solveRequiredInterestRate(values!, target) : null), [active, values, target]);
+  const reqRent = useMemo(
+    () => (active && !showDecisionThresholds ? solveRequiredMonthlyRent(values!, target) : null),
+    [active, showDecisionThresholds, values, target]
+  );
+  const reqRate = useMemo(
+    () => (active && !showDecisionThresholds ? solveRequiredInterestRate(values!, target) : null),
+    [active, showDecisionThresholds, values, target]
+  );
 
   const currentPrice = values ? Number(values.purchasePrice) : null;
   const currentMeets = reqRent?.alreadyMet ?? reqRate?.alreadyMet ?? false;
@@ -150,8 +164,10 @@ export function MaxOfferCard({ values, buyBoxThresholds }: MaxOfferCardProps) {
   return (
     <div className="bg-card rounded-2xl border border-border shadow-sm p-5 sm:p-6">
       <div className="flex items-center gap-2 mb-1.5">
-        <Target className="w-4 h-4 text-primary" />
-        <span className="font-semibold text-sm text-foreground">What price makes this deal work?</span>
+        <Target aria-hidden className="w-4 h-4 text-primary" />
+        <span className="font-semibold text-sm text-foreground">
+          {showDecisionThresholds ? "Your walk-away price" : "What price makes this deal work?"}
+        </span>
         {showBuyBoxSeedLabel ? (
           <span className="rounded-full border border-primary/30 bg-[var(--brand-blue-light)] px-2 py-0.5 text-[10px] font-semibold text-primary">
             From your buy box
@@ -163,32 +179,32 @@ export function MaxOfferCard({ values, buyBoxThresholds }: MaxOfferCardProps) {
         make your current price work. Uses your current rent, financing, and operating assumptions.
       </p>
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
+      <div className="grid grid-cols-1 gap-3 min-[360px]:grid-cols-2 sm:grid-cols-4 sm:gap-4">
         <div>
           <Label htmlFor={capRateId} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
-            Target Cap Rate <span className="font-normal lowercase tracking-normal">(opt)</span>
+            Target Cap Rate <span className="sr-only">percent, </span><span className="font-normal lowercase tracking-normal">(opt)</span>
           </Label>
           <div className="relative">
-            <Input id={capRateId} type="number" inputMode="decimal" step="0.1" value={capRateInput} onChange={edit(setCapRateInput)} placeholder="Any" className="pr-7 border-input bg-background" />
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">%</span>
+            <Input id={capRateId} type="number" inputMode="decimal" step="0.1" value={capRateInput} onChange={edit(setCapRateInput)} placeholder="Any" className="h-11 border-input bg-background pr-7" />
+            <span aria-hidden className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">%</span>
           </div>
         </div>
         <div>
           <Label htmlFor={cocId} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
-            Target Cash-on-Cash <span className="font-normal lowercase tracking-normal">(opt)</span>
+            Target Cash-on-Cash <span className="sr-only">percent, </span><span className="font-normal lowercase tracking-normal">(opt)</span>
           </Label>
           <div className="relative">
-            <Input id={cocId} type="number" inputMode="decimal" step="0.1" value={cocInput} onChange={edit(setCocInput)} placeholder="Any" className="pr-7 border-input bg-background" />
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">%</span>
+            <Input id={cocId} type="number" inputMode="decimal" step="0.1" value={cocInput} onChange={edit(setCocInput)} placeholder="Any" className="h-11 border-input bg-background pr-7" />
+            <span aria-hidden className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">%</span>
           </div>
         </div>
         <div>
           <Label htmlFor={cashFlowId} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
-            Min Cash Flow
+            Min Cash Flow <span className="sr-only">dollars per month</span>
           </Label>
           <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">$</span>
-            <Input id={cashFlowId} type="number" inputMode="numeric" step="50" value={cashFlowInput} onChange={edit(setCashFlowInput)} placeholder="0" className="pl-7 border-input bg-background" />
+            <span aria-hidden className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">$</span>
+            <Input id={cashFlowId} type="number" inputMode="numeric" step="50" value={cashFlowInput} onChange={edit(setCashFlowInput)} placeholder="0" className="h-11 border-input bg-background pl-7" />
           </div>
         </div>
         <div>
@@ -198,7 +214,7 @@ export function MaxOfferCard({ values, buyBoxThresholds }: MaxOfferCardProps) {
               {isCashDeal ? "(n/a — cash purchase)" : "(opt)"}
             </span>
           </Label>
-          <Input id={dscrId} type="number" inputMode="decimal" step="0.05" value={dscrInput} onChange={edit(setDscrInput)} placeholder="1.25" disabled={isCashDeal} className="border-input bg-background" />
+          <Input id={dscrId} type="number" inputMode="decimal" step="0.05" value={dscrInput} onChange={edit(setDscrInput)} placeholder="1.25" disabled={isCashDeal} className="h-11 border-input bg-background" />
         </div>
       </div>
 
@@ -231,7 +247,7 @@ export function MaxOfferCard({ values, buyBoxThresholds }: MaxOfferCardProps) {
       </div>
 
       {/* Inverse: make the current price work */}
-      {active && currentPrice ? (
+      {!showDecisionThresholds && active && currentPrice ? (
         <div className="mt-4 rounded-xl border border-dashed border-border p-4 sm:p-5">
           <div className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
             Or - make your current price work
@@ -267,6 +283,17 @@ export function MaxOfferCard({ values, buyBoxThresholds }: MaxOfferCardProps) {
               )}
             </div>
           )}
+        </div>
+      ) : null}
+
+      {showDecisionThresholds && values && active ? (
+        <div className="mt-4">
+          <WhatNeedsToBeTrueCard
+            values={values}
+            target={target}
+            targetSource={showBuyBoxSeedLabel ? "buy-box" : touched ? "custom" : "default"}
+            onApply={onApplyThreshold}
+          />
         </div>
       ) : null}
     </div>
