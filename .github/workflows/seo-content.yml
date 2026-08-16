@@ -268,6 +268,33 @@ jobs:
             - If you could not produce something you'd defend, open the PR as a
               DRAFT and say why. Do not pad to a word count.
 
+      # A `content:` PR is the one tier that deliberately waits for Morgan.
+      # Requesting a native GitHub review is stronger than relying on repository
+      # watch settings: GitHub creates a direct review notification, and email
+      # follows the reviewer's own notification preferences.
+      - name: Request owner review for net-new content
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          branch=$(git branch --show-current)
+          pr=$(gh pr list --head "$branch" --state open --json number,isDraft,title,url --jq '.[0] // empty')
+          if [ -z "$pr" ]; then
+            echo "No open PR for $branch — no approval notification needed."
+            exit 0
+          fi
+
+          number=$(echo "$pr" | jq -r .number)
+          title=$(echo "$pr" | jq -r .title)
+          if [[ "$title" != "content: "* ]]; then
+            echo "PR #$number is not net-new content — routine maintenance remains autonomous."
+            exit 0
+          fi
+
+          echo "Requesting owner review for net-new content PR #$number."
+          gh pr edit "$number" --add-reviewer "$GITHUB_REPOSITORY_OWNER"
+          echo "Approval notification sent: $(echo "$pr" | jq -r .url)"
+
       # ---------------------------------------------------------------
       # TIERED AUTO-MERGE. Requires BOTH:
       #   - Settings → General → Pull Requests → "Allow auto-merge" ticked

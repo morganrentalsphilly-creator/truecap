@@ -183,4 +183,14 @@ describe("year rollover and factual consistency", () => {
     expect(migration).toContain("enable row level security");
     expect(migration).toContain("revoke all");
   });
+
+  it("requests owner review before any net-new content can be published", () => {
+    const workflow = readFileSync(join(ROOT, ".github/workflows/seo-content.yml"), "utf8");
+    const notificationStep = workflow.indexOf("name: Request owner review for net-new content");
+    const mergeStep = workflow.indexOf("name: Queue the PR to auto-merge once checks pass");
+    expect(notificationStep).toBeGreaterThan(-1);
+    expect(notificationStep).toBeLessThan(mergeStep);
+    expect(workflow).toContain('if [[ "$title" != "content: "* ]]');
+    expect(workflow).toContain('gh pr edit "$number" --add-reviewer "$GITHUB_REPOSITORY_OWNER"');
+  });
 });
