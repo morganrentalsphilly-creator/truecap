@@ -315,7 +315,7 @@ jobs:
       # lands in the issue instead of dying in a collapsed log group.
       - name: Open or update the scoreboard issue
         if: always()
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         env:
           EXIT_CODE: ${{ steps.run.outputs.exit_code }}
         with:

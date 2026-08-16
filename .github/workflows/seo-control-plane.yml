@@ -114,7 +114,7 @@ jobs:
 
       - name: Update one control-plane issue
         if: always()
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         env:
           CADENCE: ${{ steps.cadence.outputs.cadence }}
           CRAWL_EXIT: ${{ steps.crawl.outputs.exit_code }}
