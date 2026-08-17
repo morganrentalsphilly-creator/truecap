@@ -8,9 +8,8 @@ const ORIGINAL = {
   headline: process.env.NEXT_PUBLIC_TRUECAP_HOMEPAGE_HEADLINE,
   proName: process.env.NEXT_PUBLIC_TRUECAP_PRO_NAME,
   singleDeal: process.env.NEXT_PUBLIC_SINGLE_DEAL_PRICE_VARIANT,
-  guarantee: process.env.NEXT_PUBLIC_FIVE_DEAL_GUARANTEE,
   newHomepage: process.env.NEXT_PUBLIC_TRUECAP_NEW_HOMEPAGE_POSITIONING,
-  threeDealGuarantee: process.env.NEXT_PUBLIC_TRUECAP_THREE_DEAL_GUARANTEE,
+  guaranteeDisabled: process.env.NEXT_PUBLIC_TRUECAP_GUARANTEE_DISABLED,
   guaranteeTerms: process.env.NEXT_PUBLIC_TRUECAP_GUARANTEE_TERMS_URL,
 };
 
@@ -23,9 +22,8 @@ afterEach(() => {
   restore("NEXT_PUBLIC_TRUECAP_HOMEPAGE_HEADLINE", ORIGINAL.headline);
   restore("NEXT_PUBLIC_TRUECAP_PRO_NAME", ORIGINAL.proName);
   restore("NEXT_PUBLIC_SINGLE_DEAL_PRICE_VARIANT", ORIGINAL.singleDeal);
-  restore("NEXT_PUBLIC_FIVE_DEAL_GUARANTEE", ORIGINAL.guarantee);
   restore("NEXT_PUBLIC_TRUECAP_NEW_HOMEPAGE_POSITIONING", ORIGINAL.newHomepage);
-  restore("NEXT_PUBLIC_TRUECAP_THREE_DEAL_GUARANTEE", ORIGINAL.threeDealGuarantee);
+  restore("NEXT_PUBLIC_TRUECAP_GUARANTEE_DISABLED", ORIGINAL.guaranteeDisabled);
   restore("NEXT_PUBLIC_TRUECAP_GUARANTEE_TERMS_URL", ORIGINAL.guaranteeTerms);
 });
 
@@ -34,25 +32,26 @@ describe("marketing offer configuration", () => {
     delete process.env.NEXT_PUBLIC_TRUECAP_HOMEPAGE_HEADLINE;
     process.env.NEXT_PUBLIC_TRUECAP_PRO_NAME = "invalid";
     delete process.env.NEXT_PUBLIC_SINGLE_DEAL_PRICE_VARIANT;
-    delete process.env.NEXT_PUBLIC_FIVE_DEAL_GUARANTEE;
     delete process.env.NEXT_PUBLIC_TRUECAP_NEW_HOMEPAGE_POSITIONING;
-    delete process.env.NEXT_PUBLIC_TRUECAP_THREE_DEAL_GUARANTEE;
+    delete process.env.NEXT_PUBLIC_TRUECAP_GUARANTEE_DISABLED;
     delete process.env.NEXT_PUBLIC_TRUECAP_GUARANTEE_TERMS_URL;
 
     const config = getMarketingOfferConfig();
 
-    expect(config.homepageHeadline).toBe(HOMEPAGE_HEADLINES.a);
+    expect(config.homepageHeadline).toBe(HOMEPAGE_HEADLINES.never_overpay);
     expect(config.proOfferName).toBe("TrueCap Pro");
     expect(config.singleDeal).toMatchObject({ amount: 5, priceLabel: "$5" });
-    expect(config.fiveDealGuaranteeEnabled).toBe(false);
-    expect(config.threeDealGuaranteeEnabled).toBe(false);
+    // The Never Overpay Guarantee defaults ON with the in-repo /guarantee
+    // terms page — the published-terms invariant holds structurally because
+    // the route ships in the same deploy as this config.
+    expect(config.guaranteeEnabled).toBe(true);
+    expect(config.guaranteeTermsUrl).toBe("/guarantee");
   });
 
   it("selects the documented offer experiments without touching subscription billing", () => {
     process.env.NEXT_PUBLIC_TRUECAP_HOMEPAGE_HEADLINE = "b";
     process.env.NEXT_PUBLIC_TRUECAP_PRO_NAME = "offer_engine";
     process.env.NEXT_PUBLIC_SINGLE_DEAL_PRICE_VARIANT = "p19";
-    process.env.NEXT_PUBLIC_FIVE_DEAL_GUARANTEE = "true";
 
     const config = getMarketingOfferConfig();
 
@@ -63,7 +62,6 @@ describe("marketing offer configuration", () => {
       priceLabel: "$19",
       stripeEnvKey: "STRIPE_PRICE_SINGLE_DEAL_19",
     });
-    expect(config.fiveDealGuaranteeEnabled).toBe(true);
   });
 
   it("supports the prepared $15 Decision Pack test without making it the default", () => {
@@ -87,18 +85,21 @@ describe("marketing offer configuration", () => {
     expect(config.homepageHeadline).toBe(HOMEPAGE_HEADLINES.walkaway);
   });
 
-  it("requires both the guarantee flag and published HTTPS or local terms", () => {
-    process.env.NEXT_PUBLIC_TRUECAP_THREE_DEAL_GUARANTEE = "true";
-    delete process.env.NEXT_PUBLIC_TRUECAP_GUARANTEE_TERMS_URL;
-    expect(getMarketingOfferConfig().threeDealGuaranteeEnabled).toBe(false);
+  it("honors the guarantee kill switch and keeps the terms link safe", () => {
+    // Kill switch turns every guarantee surface off in one env var.
+    process.env.NEXT_PUBLIC_TRUECAP_GUARANTEE_DISABLED = "1";
+    expect(getMarketingOfferConfig().guaranteeEnabled).toBe(false);
+    delete process.env.NEXT_PUBLIC_TRUECAP_GUARANTEE_DISABLED;
 
+    // An unsafe terms override can never replace the in-repo terms page.
     process.env.NEXT_PUBLIC_TRUECAP_GUARANTEE_TERMS_URL = "javascript:alert(1)";
-    expect(getMarketingOfferConfig().threeDealGuaranteeEnabled).toBe(false);
+    expect(getMarketingOfferConfig().guaranteeTermsUrl).toBe("/guarantee");
 
-    process.env.NEXT_PUBLIC_TRUECAP_GUARANTEE_TERMS_URL = "/legal/three-deal-guarantee";
+    // A valid override is respected.
+    process.env.NEXT_PUBLIC_TRUECAP_GUARANTEE_TERMS_URL = "/legal/never-overpay-guarantee";
     expect(getMarketingOfferConfig()).toMatchObject({
-      threeDealGuaranteeEnabled: true,
-      threeDealGuaranteeTermsUrl: "/legal/three-deal-guarantee",
+      guaranteeEnabled: true,
+      guaranteeTermsUrl: "/legal/never-overpay-guarantee",
     });
   });
 });

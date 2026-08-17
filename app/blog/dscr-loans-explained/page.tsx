@@ -301,7 +301,7 @@ export default function BlogPost() {
                 <tr><td className="text-muted-foreground">Primary coverage metric</td><td>Program-defined property DSCR</td><td>Personal DTI plus agency underwriting</td></tr>
                 <tr><td className="text-muted-foreground">Eligible title</td><td>Entities often permitted; guaranties common</td><td>Program and vesting rules apply</td></tr>
                 <tr><td className="text-muted-foreground">Portfolio limits</td><td>No agency cap; lender exposure limits can apply</td><td>Agency financed-property rules can apply</td></tr>
-                <tr><td className="text-muted-foreground">Rate and fees</td><td>Quote-specific; often higher</td><td>Quote-specific; often lower if eligible</td></tr>
+                <tr><td className="text-muted-foreground">Rate and fees</td><td>Quote-specific; often higher</td><td>Quote-specific; often lower if you qualify</td></tr>
                 <tr><td className="text-muted-foreground">Equity required</td><td>Often 20%+; matrix-specific</td><td>Purpose and program-specific</td></tr>
                 <tr><td className="text-muted-foreground">Closing timeline</td><td>Lender and file-specific</td><td>Lender and file-specific</td></tr>
                 <tr><td className="text-muted-foreground">Credit threshold</td><td>Program-specific</td><td>Program and automated-underwriting specific</td></tr>

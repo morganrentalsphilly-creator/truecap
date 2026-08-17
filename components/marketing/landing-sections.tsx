@@ -52,6 +52,7 @@ import type { HandoffStrategyKey } from "@/lib/analyzer-handoff";
 import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
 import { VERIFIED_TESTIMONIALS, isPublicationReady } from "@/lib/proof-records";
 import { GuaranteeViewTracker } from "@/components/analytics/guarantee-view-tracker";
+import { GuaranteeBadge } from "@/components/marketing/guarantee-badge";
 
 // ─────────────────────────────────────────────────────── How It Works
 // ───────────────────────────────────────── Why not a spreadsheet
@@ -153,7 +154,7 @@ export function HowTrueCapWorks() {
         </ol>
         <div className="mt-10 text-center">
           <ScrollToFormButton className="group inline-flex h-11 items-center gap-1.5 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-[0_10px_24px_rgba(0,112,196,0.28)] hover:-translate-y-0.5 transition-transform">
-            Analyze a property
+            Get My Max Offer
             <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
           </ScrollToFormButton>
           <p className="mt-2 text-xs text-muted-foreground">Free · no card · no signup</p>
@@ -254,7 +255,7 @@ export function FinalCta() {
           needed. Projections, tax, exit scenarios and the max-offer solver are Pro.
         </p>
         <ScrollToFormButton analyticsSource="final_cta" className="group mt-6 inline-flex h-12 items-center gap-1.5 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] hover:-translate-y-0.5 transition-transform">
-          Analyze a Deal Free
+          Get My Max Offer
           <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
         </ScrollToFormButton>
       </div>
@@ -481,7 +482,7 @@ const HOMEPAGE_FAQS: { q: string; a: string }[] = [
   },
   {
     q: "How does the Pro trial work?",
-    a: `Stripe collects a card at checkout. Eligible first-time subscribers get full Pro access for ${TRIAL_DAYS} days. Subscription billing starts after the trial unless you cancel first. Returning subscribers start paid access immediately and are not eligible for another free trial.`,
+    a: `Stripe collects a card at checkout. New subscribers get full Pro access for ${TRIAL_DAYS} days, and you can cancel online anytime. Subscription billing starts after the trial unless you cancel first. Returning subscribers start paid access immediately and are not eligible for another free trial.`,
   },
   {
     q: "Does this work for BRRRR or fix-and-flip deals?",
@@ -494,6 +495,20 @@ const HOMEPAGE_FAQS: { q: string; a: string }[] = [
 ];
 
 export function HomepageFaq({ structuredData = true }: { structuredData?: boolean } = {}) {
+  const { guaranteeEnabled } = getMarketingOfferConfig();
+  // The guarantee question renders (in prose AND schema) only while the
+  // guarantee itself is live, so the FAQ can never promise a dead policy.
+  const faqs = guaranteeEnabled
+    ? (() => {
+        const withGuarantee = [...HOMEPAGE_FAQS];
+        const trialIndex = withGuarantee.findIndex((f) => f.q === "How does the Pro trial work?");
+        withGuarantee.splice(trialIndex + 1, 0, {
+          q: "Is there a money-back guarantee?",
+          a: "Yes — the Never Overpay Guarantee. Analyze at least 10 deals in your first 30 days as a Pro subscriber, and if you don't feel more confident about exactly what to offer, email us within those 30 days for a full refund of what you've paid. Full terms at usetruecap.com/guarantee.",
+        });
+        return withGuarantee;
+      })()
+    : HOMEPAGE_FAQS;
   return (
     <>
       <section className="border-t border-border bg-background">
@@ -508,7 +523,7 @@ export function HomepageFaq({ structuredData = true }: { structuredData?: boolea
             </h2>
           </div>
           <div className="divide-y divide-border rounded-2xl border border-border bg-card shadow-sm">
-            {HOMEPAGE_FAQS.map((faq) => (
+            {faqs.map((faq) => (
               <details key={faq.q} className="group px-5 py-4 sm:px-6 sm:py-5">
                 <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                   <span className="text-left font-semibold text-foreground">{faq.q}</span>
@@ -543,7 +558,7 @@ export function HomepageFaq({ structuredData = true }: { structuredData?: boolea
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "FAQPage",
-              mainEntity: HOMEPAGE_FAQS.map((f) => ({
+              mainEntity: faqs.map((f) => ({
                 "@type": "Question",
                 name: f.q,
                 acceptedAnswer: { "@type": "Answer", text: f.a },
@@ -794,7 +809,7 @@ export function PdfProUpsell() {
             </p>
             <div className="mt-5">
               <ScrollToFormButton className="group inline-flex h-11 items-center gap-1.5 rounded-xl border border-border bg-background px-5 text-sm font-bold text-foreground hover:bg-muted">
-                Analyze a property
+                Get My Max Offer
                 <ArrowRight aria-hidden className="size-4 transition-transform group-hover:translate-x-0.5" />
               </ScrollToFormButton>
             </div>
@@ -823,9 +838,10 @@ export function PdfProUpsell() {
                 <ArrowRight aria-hidden className="size-4 transition-transform group-hover:translate-x-0.5" />
               </Link>
               <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-                Eligible first-time subscribers get full Pro access. Card required
+                New subscribers get full Pro access free for {TRIAL_DAYS} days. Card required
                 at checkout; cancel before the trial ends to avoid a subscription charge.
               </p>
+              <GuaranteeBadge align="start" className="mt-3" />
             </div>
           </div>
         </div>
@@ -835,24 +851,22 @@ export function PdfProUpsell() {
 }
 
 /**
- * Operationally gated risk reversal. It renders only after the business
- * enables the flag and can support the refund workflow. It guarantees
- * satisfaction with time saved, never an investment result.
+ * Risk reversal — the Never Overpay Guarantee (founder-approved 2026-08-17,
+ * replacing the never-activated 3-Deal Fit Guarantee). This section is the
+ * summary; /guarantee is the canonical statement and ships in the same
+ * deploy, so the terms link can never dangle. The activation condition (10
+ * analyzed deals in the first 30 days) is deliberate: it drives the behavior
+ * most correlated with retention while the refund removes all buyer risk.
+ * It guarantees decision confidence with the software, never an investment
+ * result. Kill switch: NEXT_PUBLIC_TRUECAP_GUARANTEE_DISABLED=1.
  */
-export function FiveDealGuarantee() {
-  const {
-    threeDealGuaranteeEnabled,
-    threeDealGuaranteeTermsUrl,
-  } = getMarketingOfferConfig();
-  // The legacy five-deal switch had no published-terms requirement. Keep the
-  // export name for route compatibility, but never render a refund promise
-  // from that switch. The approved replacement fails closed on BOTH its flag
-  // and a validated terms URL.
-  if (!threeDealGuaranteeEnabled || !threeDealGuaranteeTermsUrl) return null;
+export function NeverOverpayGuarantee() {
+  const { guaranteeEnabled, guaranteeTermsUrl } = getMarketingOfferConfig();
+  if (!guaranteeEnabled) return null;
 
   return (
     <section className="border-t border-border bg-background">
-      <GuaranteeViewTracker guarantee="three_deal" />
+      <GuaranteeViewTracker guarantee="never_overpay" />
       <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 sm:py-16">
         <div className="rounded-3xl border-2 border-[var(--brand-green)]/30 bg-[var(--brand-green-light)] p-6 sm:p-8">
           <div className="flex items-start gap-4">
@@ -862,20 +876,25 @@ export function FiveDealGuarantee() {
             <div className="min-w-0">
               <p className="text-[11px] font-bold uppercase tracking-widest text-[var(--brand-green)]">Risk reversal</p>
               <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-foreground">
-                The 3-Deal Fit Guarantee
+                The Never Overpay Guarantee
               </h2>
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground sm:text-base">
-                Analyze three real deals with TrueCap Pro. If the decision workflow does not make evaluating those deals faster or clearer than your previous process, contact us within 30 days to request a refund of your first month.
+                New subscribers try TrueCap Pro free for {TRIAL_DAYS} days. After
+                that, analyze at least 10 deals in your first 30 days as a
+                subscriber — and if you don&apos;t feel more confident about
+                exactly what to offer, email us within those 30 days and
+                we&apos;ll refund every dollar you&apos;ve paid. No forms, no
+                hoops. Keep anything you&apos;ve downloaded.
               </p>
               <p className="mt-3 text-xs text-muted-foreground">
                 This is a software-satisfaction guarantee, not a guarantee of
                 returns, cash flow, appreciation, financing, or deal success.
               </p>
               <Link
-                href={threeDealGuaranteeTermsUrl}
+                href={guaranteeTermsUrl}
                 className="mt-1 inline-flex min-h-11 items-center rounded text-xs font-bold text-[var(--brand-green)] underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
-                Read guarantee terms
+                Read the full guarantee
               </Link>
             </div>
           </div>
@@ -967,7 +986,7 @@ export function Personas() {
         </div>
         <div className="mt-10 text-center">
           <ScrollToFormButton className="group inline-flex h-11 items-center gap-1.5 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-[0_10px_24px_rgba(0,112,196,0.28)] hover:-translate-y-0.5 transition-transform">
-            Analyze a deal free
+            Get My Max Offer
             <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
           </ScrollToFormButton>
         </div>

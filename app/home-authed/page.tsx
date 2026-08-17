@@ -25,7 +25,7 @@ import { MarketingHero } from "@/components/marketing/marketing-hero";
 import {
   DataSourcesSection,
   FinalCta,
-  FiveDealGuarantee,
+  NeverOverpayGuarantee,
   HomepageFaq,
   HowTrueCapWorks,
   OfferEngineSection,
@@ -236,7 +236,7 @@ export default async function AuthedHome({
           <CaseStudiesSection studies={VERIFIED_CASE_STUDIES} />
           <Personas />
           <PdfProUpsell />
-          <FiveDealGuarantee />
+          <NeverOverpayGuarantee />
           <FinalCta />
           <HomepageFaq />
         </>

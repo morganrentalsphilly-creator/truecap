@@ -32,14 +32,15 @@ import { RoiCalculatorWidget } from "@/components/marketing/roi-calculator-widge
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { DealsAnalyzedTicker } from "@/components/marketing/deals-analyzed-ticker";
-import { FiveDealGuarantee } from "@/components/marketing/landing-sections";
+import { NeverOverpayGuarantee } from "@/components/marketing/landing-sections";
+import { GuaranteeBadge } from "@/components/marketing/guarantee-badge";
 import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
 import { rateAlertEmailsLive } from "@/lib/rate-alerts-mode";
 import { getSiteUrl } from "@/lib/site-url";
 export const metadata: Metadata = {
   title: "Pricing — Screen Free, Decide & Act with Pro",
   description:
-    `Screen rental deals free. Eligible first-time subscribers can try Pro free for ${TRIAL_DAYS} days to solve Max Offer, apply a Buy Box, stress-test downside, compare opportunities, and generate reports.`,
+    `Screen rental deals free. New subscribers get a ${TRIAL_DAYS}-day free trial of Pro to solve Max Offer, apply a Buy Box, stress-test downside, compare opportunities, and generate reports.`,
   alternates: { canonical: "/pricing" },
   openGraph: {
     title: "TrueCap pricing — Free to screen, Pro to decide",
@@ -72,7 +73,11 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "How does the Pro trial work?",
-    a: `Stripe collects a card at checkout. Eligible first-time subscribers get full Pro access for ${TRIAL_DAYS} days. Subscription billing starts after the trial unless you cancel first. Returning subscribers start paid access immediately and are not eligible for another free trial.`,
+    a: `Stripe collects a card at checkout. New subscribers get full Pro access for ${TRIAL_DAYS} days, and you can cancel online anytime. Subscription billing starts after the trial unless you cancel first. Returning subscribers start paid access immediately and are not eligible for another free trial.`,
+  },
+  {
+    q: "What is the Never Overpay Guarantee?",
+    a: "Analyze at least 10 deals in your first 30 days as a Pro subscriber. If you don't feel more confident about exactly what to offer, email us within those 30 days and we'll refund every dollar you've paid — back to your original payment method via Stripe. Full terms at usetruecap.com/guarantee.",
   },
   {
     q: "Do I keep my saved deals if I downgrade?",
@@ -183,7 +188,7 @@ export default async function PricingPage() {
                   below — an ex-subscriber sees "go Pro", not a trial that
                   checkout won't grant. */}
               {!user
-                ? `Screen any deal free. Eligible first-time subscribers get a ${TRIAL_DAYS}-day trial of ${proOfferName}; returning subscribers start paid access immediately.`
+                ? `Screen any deal free. New subscribers get a ${TRIAL_DAYS}-day free trial of ${proOfferName}; returning subscribers start paid access immediately.`
                 : hadPriorSubscription
                   ? `Screen any deal free. Use ${proOfferName} to get four acquisition answers: pursue or pass, what to offer, what could break, and how to present the decision.`
                   : `Screen any deal free, then use a ${TRIAL_LABEL} of ${proOfferName} to get four acquisition answers: pursue or pass, what to offer, what could break, and how to present the decision.`}
@@ -193,7 +198,7 @@ export default async function PricingPage() {
                 href="/#main"
                 className="inline-flex min-h-11 items-center justify-center rounded-xl bg-primary px-5 py-3 text-sm font-bold text-primary-foreground shadow-[0_8px_22px_rgba(0,112,196,0.24)] transition hover:bg-primary/95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
-                Analyze a deal free
+                Get My Max Offer
               </Link>
               <Link
                 href="#plans"
@@ -202,6 +207,9 @@ export default async function PricingPage() {
                 See Pro plans
               </Link>
             </div>
+            {/* Guarantee-first: the risk reversal is visible before any
+                price is (Never Overpay Guarantee, canonical at /guarantee). */}
+            <GuaranteeBadge className="mt-4" />
             {/* Real-data social proof — investors arriving at /pricing
                 are evaluating credibility. A live count of recent
                 analyses converts skepticism faster than testimonials. */}
@@ -284,7 +292,7 @@ export default async function PricingPage() {
               {!user ? (
                 <>
                   <strong className="text-foreground">
-                    Eligible first-time subscribers get {TRIAL_DAYS} days
+                    New subscribers get a {TRIAL_DAYS}-day free trial
                   </strong>
                   ; returning subscribers start paid access immediately
                 </>
@@ -400,7 +408,7 @@ export default async function PricingPage() {
           </div>
         </section>
 
-        <FiveDealGuarantee />
+        <NeverOverpayGuarantee />
 
         {/* FAQ */}
         <section className="mx-auto max-w-3xl px-4 pb-16 sm:px-6 sm:pb-24">

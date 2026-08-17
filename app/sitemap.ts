@@ -220,6 +220,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
     },
     {
+      // Canonical Never Overpay Guarantee terms — linked from every
+      // guarantee badge/section (lib/marketing-offer-config.ts default).
+      url: `${siteUrl}/guarantee`,
+      changeFrequency: "monthly",
+      priority: 0.6,
+    },
+    {
       url: `${siteUrl}/for-agents`,
       changeFrequency: "monthly",
       priority: 0.6,

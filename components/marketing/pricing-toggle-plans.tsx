@@ -17,6 +17,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Check, Sparkles, X } from "lucide-react";
 import { PricingPlanButtons } from "@/components/marketing/pricing-plan-buttons";
+import { GuaranteeBadge } from "@/components/marketing/guarantee-badge";
 import { trackEvent } from "@/lib/analytics";
 import { decidePricingCardCta } from "@/lib/billing-plan-cta";
 import { TRIAL_DAYS, willCheckoutGrantTrial } from "@/lib/trial";
@@ -450,7 +451,7 @@ export function PricingTogglePlans({
                 verifiedTrialEligible
                   ? `Full Pro · ${TRIAL_DAYS} days free`
                   : !isAuthenticated
-                    ? `Full Pro · ${TRIAL_DAYS}-day trial if eligible`
+                    ? `Full Pro · ${TRIAL_DAYS}-day trial for new subscribers`
                     : "Full Pro access"
               }
             </span>
@@ -543,7 +544,7 @@ export function PricingTogglePlans({
                   verifiedTrialEligible
                     ? `Agent Pro · ${TRIAL_DAYS} days free`
                     : !isAuthenticated
-                      ? `${TRIAL_DAYS}-day trial if eligible`
+                      ? `${TRIAL_DAYS}-day trial for new subscribers`
                       : "Agent Pro access"
                 }
               </span>
@@ -586,31 +587,40 @@ function PricingTrialTerms({
 }) {
   if (!isAuthenticated) {
     return (
-      <p className="mt-2.5 text-center text-xs text-muted-foreground">
-        <strong className="text-foreground">
-          Eligible first-time subscribers get {TRIAL_DAYS} days.
-        </strong>{" "}
-        Card required at checkout. Returning subscribers start paid access immediately.
-        Cancel online anytime; no contract.
-      </p>
+      <>
+        <p className="mt-2.5 text-center text-xs text-muted-foreground">
+          <strong className="text-foreground">
+            New subscribers get a {TRIAL_DAYS}-day free trial.
+          </strong>{" "}
+          Card required at checkout. Returning subscribers start paid access immediately.
+          Cancel online anytime; no contract.
+        </p>
+        <GuaranteeBadge className="mt-2.5" />
+      </>
     );
   }
 
   if (verifiedTrialEligible) {
     return (
-      <p className="mt-2.5 text-center text-xs text-muted-foreground">
-        <strong className="text-foreground">Full access now.</strong> Card required at checkout.
-        Subscription billing starts after {TRIAL_DAYS} days unless you cancel first. Your saved
-        work stays in your account if you downgrade.
-      </p>
+      <>
+        <p className="mt-2.5 text-center text-xs text-muted-foreground">
+          <strong className="text-foreground">Full access now.</strong> Card required at checkout.
+          Subscription billing starts after {TRIAL_DAYS} days unless you cancel first. Your saved
+          work stays in your account if you downgrade.
+        </p>
+        <GuaranteeBadge className="mt-2.5" />
+      </>
     );
   }
 
   return (
-    <p className="mt-2.5 text-center text-xs text-muted-foreground">
-      <strong className="text-foreground">Paid access starts immediately.</strong> The free trial
-      is a first-time offer. Cancel online anytime; no contract. Your saved work stays in your
-      account if you downgrade.
-    </p>
+    <>
+      <p className="mt-2.5 text-center text-xs text-muted-foreground">
+        <strong className="text-foreground">Paid access starts immediately.</strong> The free trial
+        is a first-time offer. Cancel online anytime; no contract. Your saved work stays in your
+        account if you downgrade.
+      </p>
+      <GuaranteeBadge className="mt-2.5" />
+    </>
   );
 }

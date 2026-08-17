@@ -104,11 +104,16 @@ describe("trial copy — mirrors the checkout repeat-trial guard", () => {
     expect(anonymousBranch).toContain("Continue to {tierName}");
     expect(anonymousBranch).not.toContain("Start");
     expect(plans).toContain("verifiedTrialEligible");
-    expect(plans).toContain("Eligible first-time subscribers get");
-    expect(page).toContain("Eligible first-time subscribers get");
+    // "New subscribers" is the approved conditional phrasing (2026-08 offer
+    // rollout): it states the first-time eligibility condition in plain words
+    // without the "if eligible" hedge, which is banned site-wide.
+    expect(plans).toContain("New subscribers get a");
+    expect(page).toContain("New subscribers get");
     expect(page).toMatch(
-      /\{!user \? \([\s\S]*Eligible first-time subscribers get[\s\S]*\) : hadPriorSubscription \? \(/
+      /\{!user \? \([\s\S]*New subscribers get a[\s\S]*\) : hadPriorSubscription \? \(/
     );
+    expect(plans).not.toContain("if eligible");
+    expect(page).not.toContain("if eligible");
 
     // A failed history query is not verified eligibility; marketing fails
     // closed and checkout remains the billing authority.

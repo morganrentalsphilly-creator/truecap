@@ -78,7 +78,7 @@ export function BlogStickyCta() {
           className="inline-flex h-9 shrink-0 items-center gap-1 rounded-lg bg-primary px-3 text-xs font-bold text-primary-foreground hover:bg-primary/95 sm:h-10 sm:px-4 sm:text-sm"
         >
           <Calculator className="size-3.5 sm:size-4" />
-          <span className="hidden min-[380px]:inline">Open analyzer</span>
+          <span className="hidden min-[380px]:inline">Get My Max Offer</span>
           <span className="min-[380px]:hidden">Open</span>
           <ArrowRight className="size-3.5 sm:size-4" />
         </Link>

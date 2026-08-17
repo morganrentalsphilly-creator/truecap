@@ -214,14 +214,20 @@ describe("trust-language guards", () => {
     expect(authShell).toContain("Owner-scoped saved data");
   });
 
-  it("never renders a refund guarantee without the terms-gated offer", () => {
+  it("never renders a refund guarantee without published terms", () => {
     const landing = read("../../components/marketing/landing-sections.tsx");
+    const config = read("../../lib/marketing-offer-config.ts");
 
     expect(landing).not.toContain('"The 5-Deal Guarantee"');
     expect(landing).not.toContain("fiveDealGuaranteeEnabled,");
-    expect(landing).toContain(
-      "if (!threeDealGuaranteeEnabled || !threeDealGuaranteeTermsUrl) return null"
-    );
-    expect(landing).toContain("Read guarantee terms");
+    // The Never Overpay Guarantee gates on the config switch, and the config
+    // guarantees a terms link structurally: the default terms URL is the
+    // in-repo /guarantee route, and an env override that fails URL
+    // validation falls back to it rather than dangling.
+    expect(landing).toContain("if (!guaranteeEnabled) return null");
+    expect(landing).toContain("Read the full guarantee");
+    expect(config).toMatch(/safePublicUrl\([\s\S]*\?\?\s*\n?\s*"\/guarantee"/);
+    // The refund promise stays a software-satisfaction claim.
+    expect(landing).toContain("not a guarantee of");
   });
 });

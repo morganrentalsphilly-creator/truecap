@@ -85,7 +85,7 @@ export default function HouseHackingPost() {
         <div className="prose prose-neutral max-w-none text-foreground space-y-6 leading-relaxed">
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">What house hacking actually is</h2>
           <p>
-            House hacking = you buy a 2-4 unit property using owner-occupant financing (FHA, conventional 5% down, or VA if eligible), live in one unit yourself, and rent the others to cover most or all of your housing cost. After a year (the FHA + conventional owner-occupant residency minimum), you can move out and the property converts to a full investment rental.
+            House hacking = you buy a 2-4 unit property using owner-occupant financing (FHA, conventional 5% down, or VA if you qualify), live in one unit yourself, and rent the others to cover most or all of your housing cost. After a year (the FHA + conventional owner-occupant residency minimum), you can move out and the property converts to a full investment rental.
           </p>
           <p>
             The leverage advantage is enormous. Compare:

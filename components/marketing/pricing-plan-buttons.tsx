@@ -140,7 +140,7 @@ export function PricingPlanButtons({
         href="/#main"
         className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-bold text-foreground hover:bg-muted"
       >
-        Analyze a deal free <ArrowRight className="size-4" />
+        Get My Max Offer <ArrowRight className="size-4" />
       </Link>
     );
   }
@@ -200,7 +200,7 @@ export function PricingPlanButtons({
               repeat-trial guard in billing.ts — don't promise one. */}
           <Sparkles className="size-4" />{" "}
           {willCheckoutGrantTrial(hadPriorSubscription)
-            ? `Start ${TRIAL_DAYS}-Day ${tierName} Trial`
+            ? `Start the ${TRIAL_DAYS}-day ${tierName} trial`
             : `Unlock ${tierName} Now`}
         </>
       )}

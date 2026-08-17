@@ -390,7 +390,9 @@ export default function MethodologyPage() {
             and your actual bracket can materially change the result.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">Methodology version history</h2>
+          {/* id anchor: the founding-pricing banner deep-links here as the
+              verifiable proof behind "Methodology v1.0". */}
+          <h2 id="version-history" className="scroll-mt-24 text-2xl sm:text-3xl">Methodology version history</h2>
           <ul>
             {UNDERWRITING_STANDARD_RELEASE_NOTES.map((release) => (
               <li key={release.version}>

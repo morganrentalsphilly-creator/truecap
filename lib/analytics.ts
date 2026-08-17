@@ -166,6 +166,9 @@ export type FunnelEvent =
   | "agent_pro_checkout_started"
   | "agent_pro_page_viewed"
   | "guarantee_viewed"
+  // ── 2026-08 Grand Slam Offer rollout ────────────────────────────
+  | "founding_banner_clicked"   // properties: target ("methodology" | "pricing")
+  | "founding_banner_dismissed"
   | "onboarding_step_completed";
 
 // ── Lazy init + pre-init call buffering ─────────────────────────────

@@ -31,7 +31,7 @@ import { MarketingHero } from "@/components/marketing/marketing-hero";
 import {
   DataSourcesSection,
   FinalCta,
-  FiveDealGuarantee,
+  NeverOverpayGuarantee,
   HomepageFaq,
   HowTrueCapWorks,
   OfferEngineSection,
@@ -53,15 +53,16 @@ import { VERIFIED_CASE_STUDIES } from "@/lib/verified-case-studies";
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  // Keyword-rich, benefit-led title. `absolute` opts out of the layout's
-  // "%s | TrueCap" template: every free-tool SERP rewards "Free" in the
-  // visible title, and at 60 chars there's no room for the brand suffix —
-  // Google appends the site name on its own from the WebSite schema.
+  // Outcome-led title per the 2026-08 repositioning (founder-directed):
+  // the homepage sells the decision ("know your Max Offer"), while the
+  // /tools/* pages keep their keyword-led "Free ... Calculator" titles as
+  // the SEO traffic source. `absolute` opts out of the layout's
+  // "%s | TrueCap" template.
   title: {
-    absolute: "Free Rental Property Calculator — Cash Flow, Cap Rate & DSCR",
+    absolute: "TrueCap — Know Your Max Offer on Any Rental in 60 Seconds",
   },
   description:
-    "Screen any rental in 60 seconds, review the assumptions, check your Buy Box, stress-test downside, and solve the highest price that meets your targets.",
+    "Never overpay for a rental again. Enter any address for a sourced 60-second analysis; Pro solves the exact maximum offer that still hits your targets.",
   keywords: [
     "rental property analysis",
     "investment property calculator",
@@ -78,9 +79,9 @@ export const metadata: Metadata = {
     // Keep og:title aligned with the <title> — Google falls back to
     // og:title when rewriting SERP titles, so a mismatched og:title
     // resurfaces stale phrasing on brand queries.
-    title: "Free Rental Property Calculator — Cash Flow, Cap Rate & DSCR",
+    title: "TrueCap — Know Your Max Offer on Any Rental in 60 Seconds",
     description:
-      "Screen the property, check it against your criteria, stress-test the downside, and know the highest price that still works.",
+      "Never overpay for a rental again. Screen the property, check it against your criteria, stress-test the downside, and know the highest price that still works.",
     url: "/",
     type: "website",
     // Re-declare images because page-level openGraph fully replaces the
@@ -97,9 +98,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Free Rental Property Calculator — Cash Flow, Cap Rate & DSCR",
+    title: "TrueCap — Know Your Max Offer on Any Rental in 60 Seconds",
     description:
-      "Screen the property, check it against your criteria, stress-test the downside, and know the highest price that still works.",
+      "Never overpay for a rental again. Screen the property, check it against your criteria, stress-test the downside, and know the highest price that still works.",
     images: ["/home.jpg"],
   },
 };
@@ -232,7 +233,7 @@ export default function Home() {
       <Personas />
       {/* Pricing: Free → $5 report → Pro → Agent Pro. */}
       <PdfProUpsell />
-      <FiveDealGuarantee />
+      <NeverOverpayGuarantee />
       {/* Closing ask — back to the address field. */}
       <FinalCta />
       <HomepageFaq />

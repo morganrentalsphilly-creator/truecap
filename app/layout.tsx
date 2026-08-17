@@ -2,7 +2,9 @@ import type { Metadata } from 'next'
 import { Plus_Jakarta_Sans, DM_Mono } from 'next/font/google'
 import { Toaster } from '@/components/ui/toaster'
 import { CookieConsentBanner } from '@/components/marketing/cookie-consent-banner'
-import { AnnualPromoBanner } from '@/components/marketing/annual-promo-banner'
+// AnnualPromoBanner is parked while the founding-pricing window runs — one
+// top banner at a time. Swap the mount below back to end the window.
+import { FoundingPricingBanner } from '@/components/marketing/founding-pricing-banner'
 import { PostHogProvider } from '@/components/analytics/posthog-provider'
 import { GoogleMeasurement } from '@/components/analytics/google-measurement'
 import { TrueCapVercelAnalytics } from '@/components/analytics/vercel-analytics'
@@ -251,7 +253,7 @@ export default function RootLayout({
         {/* Annual plan promo banner — thin, dismissible, hidden on
             /pricing and /auth/*. Sits ABOVE all page content so it
             doesn't reshuffle individual pages' layouts. */}
-        <AnnualPromoBanner />
+        <FoundingPricingBanner />
         {/* PostHog provider — initializes posthog-js with cookie-consent
             respect, identifies authenticated Supabase users, and fires
             $pageview on App Router transitions. The wizard set up env

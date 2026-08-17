@@ -68,7 +68,7 @@ export default function WhyTrueCapPage() {
               href="/"
               className="mt-6 inline-flex h-12 items-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-sm transition hover:-translate-y-0.5 sm:text-base"
             >
-              Run a free deal
+              Get My Max Offer
               <ArrowRight className="size-4" />
             </Link>
           </div>

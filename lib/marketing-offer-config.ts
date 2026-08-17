@@ -16,6 +16,10 @@ export const HOMEPAGE_HEADLINES = {
   a: "Screen any rental in 60 seconds. Know the highest price that still works.",
   b: "Know what a rental is worth under your assumptions.",
   walkaway: "Know your walk-away price before you make the offer.",
+  // 2026-08 repositioning default: dream-outcome register ("never overpay")
+  // instead of feature register ("screen faster"). Prior variants stay
+  // selectable for rollback via NEXT_PUBLIC_TRUECAP_HOMEPAGE_HEADLINE.
+  never_overpay: "Never overpay for a rental again.",
 } as const;
 
 export type HomepageHeadlineVariant = keyof typeof HOMEPAGE_HEADLINES;
@@ -80,8 +84,8 @@ export function getMarketingOfferConfig() {
     ? "walkaway"
     : pickVariant(
         process.env.NEXT_PUBLIC_TRUECAP_HOMEPAGE_HEADLINE,
-        ["a", "b"] as const,
-        "a"
+        ["a", "b", "never_overpay"] as const,
+        "never_overpay"
       );
   const proOfferNameVariant = pickVariant(
     process.env.NEXT_PUBLIC_TRUECAP_PRO_NAME,
@@ -94,15 +98,19 @@ export function getMarketingOfferConfig() {
     "current"
   );
 
-  const threeDealGuaranteeTermsUrl = safePublicUrl(
-    process.env.NEXT_PUBLIC_TRUECAP_GUARANTEE_TERMS_URL
+  // The Never Overpay Guarantee (founder-approved 2026-08-17, replacing the
+  // never-activated 3-Deal Fit Guarantee). The published-terms requirement
+  // from the original fail-closed design still holds structurally: the terms
+  // default to the /guarantee route, which ships in the same deploy as this
+  // config, so a refund promise can never render without published terms.
+  // NEXT_PUBLIC_TRUECAP_GUARANTEE_DISABLED=1 is the kill switch;
+  // NEXT_PUBLIC_TRUECAP_GUARANTEE_TERMS_URL still overrides the terms link.
+  const guaranteeTermsUrl =
+    safePublicUrl(process.env.NEXT_PUBLIC_TRUECAP_GUARANTEE_TERMS_URL) ??
+    "/guarantee";
+  const guaranteeEnabled = !enabled(
+    process.env.NEXT_PUBLIC_TRUECAP_GUARANTEE_DISABLED
   );
-  // The satisfaction guarantee cannot render from a copy switch alone. A
-  // published terms URL is a second fail-closed activation requirement so a
-  // deploy can never invent policy at runtime.
-  const threeDealGuaranteeEnabled =
-    enabled(process.env.NEXT_PUBLIC_TRUECAP_THREE_DEAL_GUARANTEE) &&
-    threeDealGuaranteeTermsUrl !== null;
 
   return {
     homepageHeadlineVariant,
@@ -112,8 +120,7 @@ export function getMarketingOfferConfig() {
     proOfferName: PRO_OFFER_NAMES[proOfferNameVariant],
     singleDealPriceVariant,
     singleDeal: SINGLE_DEAL_PRICE_OPTIONS[singleDealPriceVariant],
-    fiveDealGuaranteeEnabled: enabled(process.env.NEXT_PUBLIC_FIVE_DEAL_GUARANTEE),
-    threeDealGuaranteeEnabled,
-    threeDealGuaranteeTermsUrl,
+    guaranteeEnabled,
+    guaranteeTermsUrl,
   } as const;
 }
