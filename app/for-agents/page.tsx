@@ -25,9 +25,9 @@ import { AgentProPageTracker } from "@/components/analytics/agent-pro-page-track
 import { AgentProofSection } from "@/components/marketing/testimonial-card";
 
 export const metadata: Metadata = {
-  title: "Agent Pro — Rental Deal Analysis for Clients",
+  title: "Agent Pro — Become the Agent Investors Call First",
   description:
-    "Underwrite at the showing, maintain client Buy Boxes, and send co-branded investment analyses with TrueCap Agent Pro.",
+    "Send a branded, data-sourced deal analysis before you leave the showing. Client rosters, per-client Buy Boxes, and deal assignment with TrueCap Agent Pro.",
   keywords: [
     "real estate agent calculator",
     "rental analysis for agents",
@@ -36,9 +36,9 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/for-agents" },
   openGraph: {
-    title: "TrueCap Agent Pro — Be the Agent with the Answer",
+    title: "TrueCap Agent Pro — Become the Agent Investors Call First",
     description:
-      "Underwrite at the showing, evaluate the property against a client Buy Box, and send a co-branded analysis before you leave.",
+      "Send a branded, data-sourced analysis before you leave the showing. Client rosters, per-client Buy Boxes, deal assignment.",
     url: "/for-agents",
     type: "website",
     images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap for real estate agents" }],
@@ -102,13 +102,13 @@ export default async function ForAgentsPage() {
             For real estate agents
           </div>
           <h1 className="text-3xl sm:text-5xl font-extrabold text-foreground leading-[1.05] tracking-tight text-balance">
-            Become the agent who has the answer{" "}
-            <span className="text-primary">before your investor client has to ask.</span>
+            Become the agent{" "}
+            <span className="text-primary">every investor calls first.</span>
           </h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
-            Underwrite the property at the showing, check it against your
-            client&apos;s Buy Box, and send a co-branded investment analysis
-            before you leave.
+            Send a branded, data-sourced deal analysis before you leave the
+            showing — checked against that client&apos;s own Buy Box, with
+            every assumption labeled.
           </p>
           <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 rounded-2xl border border-border bg-card px-4 py-3 text-sm sm:w-fit">
             <span className="font-bold text-foreground">
@@ -148,6 +148,32 @@ export default async function ForAgentsPage() {
           </div>
           <p className="mt-3 text-xs text-muted-foreground">
             Screen deals free with no card. Agent Pro is a separate plan for client workflows; cancel anytime.
+          </p>
+        </section>
+
+        {/* Commission math — the buying logic stated plainly, first
+            (2026-08 rollout). Price stays live-loaded; no hard-coded tier
+            price while Agent Pro's Stripe config is pending. */}
+        <section className="mb-12 rounded-3xl border-2 border-primary/25 bg-gradient-to-br from-[var(--brand-blue-light)] via-card to-card p-6 sm:mb-16 sm:p-8">
+          <p className="text-[11px] font-bold uppercase tracking-widest text-primary">
+            The commission math
+          </p>
+          <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
+            One closed investor deal pays for this many times over.
+          </h2>
+          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-foreground sm:text-base">
+            A typical buy-side commission on a $250,000 investor purchase runs
+            in the thousands of dollars — and investors, unlike most buyers,
+            purchase again and again. {agentMonthly
+              ? `Agent Pro is ${agentMonthly.amountLabel}/${agentMonthly.period}.`
+              : "Agent Pro is a monthly plan."}{" "}
+            If being the agent with the underwrite in hand wins you a single
+            additional investor deal a year, this is not a close call.
+          </p>
+          <p className="mt-3 text-xs text-muted-foreground">
+            Commission figures depend on your market, brokerage split, and
+            representation agreement — run your own numbers; that habit is
+            rather the point.
           </p>
         </section>
 
@@ -252,6 +278,66 @@ export default async function ForAgentsPage() {
           </p>
         </section>
 
+        {/* Embed bonus — the EXISTING attributed embeds, positioned as an
+            agent lead surface. Deliberately NOT white-label: embed_whitelabel
+            is shipped:false for a legal reason (Terms) and must not be
+            marketed (pricing-catalog-consistency guard). */}
+        <section className="mb-12 sm:mb-16 rounded-2xl border border-border bg-card p-6 sm:p-8">
+          <h2 className="text-lg sm:text-xl font-extrabold text-foreground mb-3">
+            Put the calculators on your own website
+          </h2>
+          <p className="text-sm leading-relaxed text-foreground">
+            Every TrueCap calculator can be embedded on your site with a
+            one-line snippet (with &ldquo;Powered by TrueCap&rdquo;
+            attribution) — a working cap-rate or DSCR calculator on your
+            agent site keeps investor visitors on YOUR page instead of
+            sending them off to research alone. Grab the snippet from the
+            &ldquo;Embed this calculator&rdquo; block on any{" "}
+            <Link href="/tools" className="text-primary font-semibold hover:underline">
+              free calculator page
+            </Link>
+            .
+          </p>
+        </section>
+
+        {/* "Land the Investor Client" scripts — published in full, same
+            transparency stance as /playbook. */}
+        <section className="mb-12 sm:mb-16 rounded-2xl border border-border bg-card p-6 sm:p-8">
+          <h2 className="text-lg sm:text-xl font-extrabold text-foreground mb-3">
+            Land the investor client: three scripts that work with an analysis attached
+          </h2>
+          <ol className="space-y-4 text-sm leading-relaxed text-foreground">
+            <li>
+              <strong className="text-foreground">1 · Reactivate a cold investor lead.</strong>{" "}
+              &ldquo;Hi [name] — a [3-bed in Zip/area] listed this week and it
+              screens better than most of what we looked at in [month].
+              I&apos;ve attached my underwrite: rent benchmark, cash flow, and
+              the price where it stops making sense. Worth 15 minutes this
+              week?&rdquo;
+            </li>
+            <li>
+              <strong className="text-foreground">2 · Follow up after a showing, same day.</strong>{" "}
+              &ldquo;Before you get ten opinions from the internet: here&apos;s
+              the analysis for [address] — every assumption is labeled and you
+              can change any of them. At asking it&apos;s [verdict]; below
+              [max offer] it starts to work. Tell me which assumption you&apos;d
+              challenge.&rdquo;
+            </li>
+            <li>
+              <strong className="text-foreground">3 · Introduce yourself to an investor you want.</strong>{" "}
+              &ldquo;I work with rental investors in [market] and I underwrite
+              every property before I send it — attached is a sample analysis
+              so you can see exactly how I evaluate deals. If you tell me your
+              buy criteria, everything I send you will already be screened
+              against them.&rdquo;
+            </li>
+          </ol>
+          <p className="mt-4 text-xs text-muted-foreground">
+            All three work because the attachment does the arguing. The
+            analysis is the asset; the message is just the handshake.
+          </p>
+        </section>
+
         {/* Pricing */}
         <section className="mb-12 sm:mb-16 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
           <h2 className="text-2xl sm:text-3xl font-extrabold mb-2">
@@ -265,7 +351,7 @@ export default async function ForAgentsPage() {
           <p className="mb-5 text-sm font-bold">
             {agentMonthly ? `${agentMonthly.amountLabel}/${agentMonthly.period}` : "See live pricing"}
             {agentAnnual ? ` · ${agentAnnual.amountLabel}/${agentAnnual.period}` : ""}
-            {` · ${TRIAL_DAYS}-day trial for eligible first-time subscribers · client roster included`}
+            {` · ${TRIAL_DAYS}-day trial for new subscribers · client roster included`}
           </p>
           <div className="flex flex-wrap gap-3">
             <TrackedMarketingLink
@@ -285,6 +371,16 @@ export default async function ForAgentsPage() {
               Try the free analyzer
             </Link>
           </div>
+          {agentProConfigured ? (
+            <p className="mt-4 text-xs text-primary-foreground/90">
+              The agent guarantee: send 5 branded analyses in your first 30
+              days as a subscriber — if they don&apos;t change your
+              investor-client conversations, email us for a full refund.{" "}
+              <Link href="/guarantee" className="font-bold underline underline-offset-4">
+                Full terms
+              </Link>
+            </p>
+          ) : null}
         </section>
 
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">

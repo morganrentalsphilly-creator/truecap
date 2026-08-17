@@ -164,6 +164,37 @@ export function HowTrueCapWorks() {
   );
 }
 
+// ───────────────────────────────────────── The expensive mistake
+/**
+ * Problem block (2026-08 offer rollout): dollar-denominates the stake the
+ * whole product exists to protect — overpaying on the asset — before the
+ * page starts explaining features. The arithmetic is deliberately simple
+ * and checkable (3% × $250,000 = $7,500), mirroring the /pricing
+ * avoided-mistake block so the two surfaces can't drift apart in spirit.
+ */
+export function ProblemBlock() {
+  return (
+    <section className="border-t border-border bg-card/40">
+      <div className="mx-auto max-w-3xl px-4 py-14 text-center sm:px-6 sm:py-20">
+        <p className="text-[11px] font-bold uppercase tracking-widest text-primary">
+          The expensive mistake
+        </p>
+        <h2 className="mt-2 text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">
+          Nobody loses money on the spreadsheet.{" "}
+          <span className="text-primary">They lose it at the offer.</span>
+        </h2>
+        <p className="mx-auto mt-4 max-w-[58ch] text-balance text-sm leading-relaxed text-muted-foreground sm:text-base">
+          Overpaying by even 3% on a $250,000 rental is $7,500 gone before you
+          collect a dollar of rent — and negative cash flow compounds it every
+          month after. The protection isn&apos;t more metrics; it&apos;s knowing
+          your walk-away price before you negotiate. That&apos;s the number
+          TrueCap computes.
+        </p>
+      </div>
+    </section>
+  );
+}
+
 // ───────────────────────────────────────── The decision-system offer
 const OFFER_MODULES = [
   [Clock, "60-Second Underwriter", "Turn an address into a reviewable first-pass underwrite without rebuilding a spreadsheet."],
@@ -458,7 +489,22 @@ export function VsCompetitors() {
  * Q&A snippets that show under the listing). Materially boosts CTR
  * from organic AND paid for the keywords we rank for.
  */
+// Objection-ordered (2026-08 rollout): the free-calculator objection first,
+// data accuracy second, price third — then logistics. These are the three
+// questions that actually decide whether a cold visitor converts.
 const HOMEPAGE_FAQS: { q: string; a: string }[] = [
+  {
+    q: "Why not just use a free calculator?",
+    a: "Free calculators — including TrueCap's own free analyzer — give you metrics: cap rate, cash flow, DSCR. What they don't give you is a decision. The Deal Decision Pack and Pro add the decision layer: the exact maximum offer that still hits your targets, a pass/fail against your own Buy Box with reasons, the downside stress test, and a report you can hand a lender. Metrics tell you about the deal; the decision layer tells you what to do.",
+  },
+  {
+    q: "How accurate is the auto-fill?",
+    a: "Rent starts from a HUD area benchmark (ZIP-level when available, otherwise county-level), not a property-specific rent comp. The rate starts from FRED's national owner-occupied 30-year benchmark, not an investor lender quote. Property tax uses a state effective-rate estimate. Every field is editable - replace screening defaults with local comps, the actual tax bill, insurance, and written loan terms before making an offer.",
+  },
+  {
+    q: "Why does Pro cost more than other rental calculators?",
+    a: "Because you're not buying analysis — you're buying the decision layer. Cheaper tools calculate the deal you describe; Pro computes your walk-away price on every deal, checks it against your Buy Box, and stress-tests the downside before the bank does. Overpaying by even 3% on a $250,000 rental costs $7,500 — one avoided mistake covers years of Pro. And the Never Overpay Guarantee puts the risk on us, not you.",
+  },
   {
     q: "Is TrueCap really free?",
     // Free CAN save (up to 5 deals) — what Pro actually adds on the saved-deal
@@ -471,10 +517,6 @@ const HOMEPAGE_FAQS: { q: string; a: string }[] = [
   {
     q: "Do I need a credit card?",
     a: "No. The free analyzer needs zero signup and zero card - type an address and go. You only create an account if you want to save deals or unlock Pro.",
-  },
-  {
-    q: "How accurate is the auto-fill?",
-    a: "Rent starts from a HUD area benchmark (ZIP-level when available, otherwise county-level), not a property-specific rent comp. The rate starts from FRED's national owner-occupied 30-year benchmark, not an investor lender quote. Property tax uses a state effective-rate estimate. Every field is editable - replace screening defaults with local comps, the actual tax bill, insurance, and written loan terms before making an offer.",
   },
   {
     q: "Can I edit the assumptions?",
@@ -923,6 +965,8 @@ const PERSONAS: {
   title: string;
   body: string;
   seed?: { href: string; label: string; strategy: HandoffStrategyKey };
+  /** Segmented path (2026-08 rollout): the persona's dedicated page. */
+  pagePath?: { href: string; label: string };
 }[] = [
   {
     icon: TrendingUp,
@@ -931,6 +975,7 @@ const PERSONAS: {
     // Deep-link with the Buy & Hold play pre-selected (analyzer handoff
     // ?strategy=) so long-term-rental defaults are already applied.
     seed: { href: "/?strategy=buy-hold#main", label: "Start a buy-and-hold analysis", strategy: "buy-hold" },
+    pagePath: { href: "/for-buy-and-hold", label: "The buy-and-hold workflow" },
   },
   {
     icon: Users,
@@ -938,6 +983,8 @@ const PERSONAS: {
     body: "Hand clients a clearly sourced analysis at the showing, with a shareable link or lender-facing Deal Decision Pack PDF.",
     // No seed: agents run whatever their client is buying — no single play
     // (or property type) fits, so the plain analyzer is the right landing.
+    // The page link is the first homepage-body path to /for-agents.
+    pagePath: { href: "/for-agents", label: "See the agent workflow" },
   },
   {
     icon: Home,
@@ -947,6 +994,7 @@ const PERSONAS: {
     // ?strategy=, upgraded from ?type=) — same owner-occupant form, now with
     // FHA-style starter assumptions applied too.
     seed: { href: "/?strategy=house-hack#main", label: "Start a house-hack analysis", strategy: "house-hack" },
+    pagePath: { href: "/for-house-hackers", label: "The house-hack workflow" },
   },
 ];
 
@@ -988,6 +1036,14 @@ export function Personas() {
                 // delivered by event, not just the URL param — see the
                 // component's doc comment.
                 <PersonaSeedLink href={p.seed.href} label={p.seed.label} strategy={p.seed.strategy} />
+              ) : null}
+              {p.pagePath ? (
+                <Link
+                  href={p.pagePath.href}
+                  className={`mt-2 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline ${i === 0 ? "lg:justify-center" : ""}`}
+                >
+                  {p.pagePath.label} <ArrowRight className="size-3.5" />
+                </Link>
               ) : null}
             </div>
           ))}

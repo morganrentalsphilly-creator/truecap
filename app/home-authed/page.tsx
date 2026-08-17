@@ -28,6 +28,7 @@ import {
   NeverOverpayGuarantee,
   HomepageFaq,
   HowTrueCapWorks,
+  ProblemBlock,
   OfferEngineSection,
   PdfProUpsell,
   Personas,
@@ -229,16 +230,17 @@ export default async function AuthedHome({
           by lib/__tests__/homepage-lockstep.test.ts. */}
       {!user && (
         <>
+          <ProblemBlock />
           <HowTrueCapWorks />
-          <OfferEngineSection />
-          <DataSourcesSection />
           <SocialProof />
           <CaseStudiesSection studies={VERIFIED_CASE_STUDIES} />
-          <Personas />
+          <DataSourcesSection />
+          <OfferEngineSection />
           <PdfProUpsell />
           <NeverOverpayGuarantee />
-          <FinalCta />
+          <Personas />
           <HomepageFaq />
+          <FinalCta />
         </>
       )}
       {/* Sticky scroll-activated CTA bar for cold visitors only. Renders

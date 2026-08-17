@@ -124,6 +124,32 @@ export function ComparisonFaq({
         claim about property-data import, which several of these tools also offer.
       </p>
 
+      {/* Price objection, answered directly (2026-08 rollout) — honest
+          tone, keeps the "check their live pricing" convention, closes
+          with the guarantee. Reaches all 40 /vs pages. */}
+      <div className="mt-8 rounded-2xl border border-border bg-card p-5 sm:p-6">
+        <h3 className="text-base font-extrabold text-foreground">
+          On price, plainly
+        </h3>
+        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+          Tools in this space run from free to well above TrueCap — check{" "}
+          {competitorName}&apos;s live pricing for their current number. What
+          TrueCap&apos;s price buys is the decision layer, not more
+          calculation: the exact maximum offer that still hits your targets, a
+          pass/fail against your own Buy Box with reasons, the downside stress
+          test, and assumptions that are sourced and labeled instead of
+          silently defaulted. Overpaying by even 3% on a $250,000 rental costs
+          $7,500 — the comparison that matters is against the mistake, not the
+          subscription. And the risk is ours: analyze 10 deals in your first
+          30 days as a Pro subscriber, and if you don&apos;t feel more
+          confident about exactly what to offer, the{" "}
+          <a href="/guarantee" className="font-semibold text-primary hover:underline">
+            Never Overpay Guarantee
+          </a>{" "}
+          refunds every dollar.
+        </p>
+      </div>
+
       {/* Analyzer bridge (2026-08 offer rollout) — the comparison's real
           answer is running your own deal; this reaches all 40 /vs pages. */}
       <div className="mt-8">

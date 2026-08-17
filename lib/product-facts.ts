@@ -39,7 +39,10 @@ export const PLAN_FACTS = {
   free: "No-signup first-pass screen with editable assumptions, core metrics, Deal Score, and verdict.",
   singleDeal: "One paid report with Max Offer, Deal Doctor thresholds, downside, projections, tax, and exit views; no subscription.",
   pro: "Repeat decision workflow with Buy Box, interactive Max Offer, downside, saved opportunities, comparisons, and reports.",
-  agentPro: "Investor Client Operating System with client rosters, per-client Buy Boxes, deal assignment, co-branding, portals, and Pro tools.",
+  // No "portals" here: agent_portal is shipped:false (bearer links lack
+  // expiry/revocation) and must not be marketed anywhere — including the
+  // llms.txt routes that render this string publicly.
+  agentPro: "Investor Client Operating System with client rosters, per-client Buy Boxes, deal assignment, co-branding, and Pro tools.",
   trialDays: TRIAL_DAYS,
   pricingSource: "/pricing",
 } as const;

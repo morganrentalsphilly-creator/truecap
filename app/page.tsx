@@ -34,6 +34,7 @@ import {
   NeverOverpayGuarantee,
   HomepageFaq,
   HowTrueCapWorks,
+  ProblemBlock,
   OfferEngineSection,
   PdfProUpsell,
   Personas,
@@ -222,21 +223,24 @@ export default function Home() {
           who it's for → pricing → closing ask. The FAQ stays last: it
           emits FAQPage JSON-LD for rich results.
           MUST stay in lockstep with app/home-authed/page.tsx. */}
+      {/* 2026-08 conversion order: problem (dollar-denominated stake) →
+          how it works → proof → trust → offer stack → guarantee →
+          segmented paths → FAQ (objection-ordered) → closing ask. */}
+      <ProblemBlock />
       <HowTrueCapWorks />
-      <OfferEngineSection />
-      {/* Trust: transparent methodology, editable assumptions, sources shown —
-          then the customer evidence that backs it. */}
-      <DataSourcesSection />
       <SocialProof />
       <CaseStudiesSection studies={VERIFIED_CASE_STUDIES} />
-      {/* Who it's for — investor vs agent self-ID. */}
-      <Personas />
+      {/* Trust: transparent methodology, editable assumptions, sources shown. */}
+      <DataSourcesSection />
+      <OfferEngineSection />
       {/* Pricing: Free → $5 report → Pro → Agent Pro. */}
       <PdfProUpsell />
       <NeverOverpayGuarantee />
+      {/* Segmented paths — investor / agent / house-hacker self-ID. */}
+      <Personas />
+      <HomepageFaq />
       {/* Closing ask — back to the address field. */}
       <FinalCta />
-      <HomepageFaq />
       {/* Sticky scroll-activated CTA bar — cold visitors only, and this
           page only serves cold visitors. */}
       <StickyConversionBar />
