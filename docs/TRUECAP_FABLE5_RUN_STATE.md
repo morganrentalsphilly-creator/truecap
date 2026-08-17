@@ -29,6 +29,19 @@
 - Analytics: PostHog is the provider (env still owed by Morgan — events must be PII-free
   regardless).
 
+## RECONCILED 2026-08-17: a parallel session shipped 17 commits on origin/main
+(39fbc87..41dbbc0, 403 files) covering large parts of this brief BEFORE this run's
+first push: "Illustrative Tax Impact" rename sitewide, marketing-offer-config
+(offer SSOT), trust-language-guards test, saved-analysis methodology versioning
+(freeze/re-underwrite), telemetry privacy (route-gated Google, sanitized Vercel,
+PostHog persistence), FiveDealGuarantee component, DealsAnalyzedTicker rework.
+DO NOT REDO those phases — verify against origin's guards instead. This run's
+opaque-share work was rebased onto 41dbbc0; conflicts resolved by keeping
+origin's trust copy + release-flag/freeze semantics and this run's URL shapes.
+Header hardening converged on origin's per-route no-referrer family, extended
+with /s/ (+ X-Robots-Tag + no-store); origin's telemetry contract test updated
+to count 4 routes.
+
 ## Current objective
 Phase 1 continues: listing-ingestion hardening, offer SSOT, claims sweep, proof/ticker removal.
 Then phases 2–4 (offer/homepage/pricing), then 5–10.
