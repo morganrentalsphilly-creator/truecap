@@ -169,6 +169,7 @@ export type FunnelEvent =
   // ── 2026-08 Grand Slam Offer rollout ────────────────────────────
   | "founding_banner_clicked"   // properties: target ("methodology" | "pricing")
   | "founding_banner_dismissed"
+  | "pack_credit_offer_shown"   // post-purchase "$5 toward Pro" toast
   | "onboarding_step_completed";
 
 // ── Lazy init + pre-init call buffering ─────────────────────────────

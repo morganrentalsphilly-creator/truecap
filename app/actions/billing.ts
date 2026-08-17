@@ -10,6 +10,7 @@ import { getPrimaryPlanPriceId, type PaidPlanSlug } from "@/lib/stripe/plan-pric
 import { captureServerEvent } from "@/lib/posthog-server";
 import { TRIAL_DAYS } from "@/lib/trial";
 import { resolvePostAnalysisOfferCoupon } from "@/lib/post-analysis-offer";
+import { findEligiblePackCredit, getPackCreditCouponId } from "@/lib/pack-credit";
 
 const checkoutSchema = z.object({
   planSlug: z.enum(["pro_monthly", "pro_annual", "agent_pro_monthly", "agent_pro_annual"]),
@@ -288,7 +289,29 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
     // discounted) amount — stacking this coupon on it would double-discount.
     const annualCoupon =
       parsed.data.planSlug === "pro_annual" ? process.env.STRIPE_ANNUAL_DISCOUNT_COUPON_ID : undefined;
-    const appliedCoupon = offerCoupon ?? annualCoupon;
+    // Pack credit (founder-approved 2026-08-17): a Deal Decision Pack bought
+    // within its 7-day window is credited toward the first Pro invoice. It is
+    // money the customer already paid us — NOT a discount offer — so it
+    // outranks the campaign and annual coupons in the single discount slot
+    // Stripe checkout accepts. Pro tiers only (same scoping as the campaign
+    // coupons); fail-closed on STRIPE_PACK_CREDIT_COUPON_ID; a lookup failure
+    // degrades to a normal full-price checkout rather than blocking it.
+    // With a trial the coupon lands on the first REAL invoice — the credit is
+    // attached at redemption and survives the trial delay.
+    let packCredit = null;
+    const packCreditCouponId = getPackCreditCouponId();
+    if (packCreditCouponId && !parsed.data.planSlug.startsWith("agent_pro")) {
+      try {
+        packCredit = await findEligiblePackCredit(createAdminSupabaseClient(), user.id);
+      } catch (error) {
+        Sentry.captureException(error, {
+          tags: { feature: "billing-checkout", flow: "pack_credit_lookup" },
+          extra: { userId: user.id },
+        });
+      }
+    }
+    const creditCoupon = packCredit ? packCreditCouponId : null;
+    const appliedCoupon = creditCoupon ?? offerCoupon ?? annualCoupon;
     // Free trial on eligible first subscriptions. Card is collected at
     // checkout and auto-charges when the trial ends. The duration is the same
     // imported constant every public surface renders; a hidden environment
@@ -329,6 +352,8 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
         user_id: user.id,
         plan_slug: parsed.data.planSlug,
         trial_granted: String(grantTrial && proTrialDays > 0),
+        // The webhook transitions this claim eligible→applied on completion.
+        ...(packCredit ? { pack_credit_claim_id: packCredit.claimId } : {}),
       },
       subscription_data: {
         metadata: {

@@ -283,27 +283,31 @@ export function PricingTogglePlans({
       {/* The upgrade logic in one line, before the cards. Without it a visitor
           has to infer the difference between the tiers from the feature lists;
           with it, the cards below are just the detail. */}
+      {/* Strip order mirrors the desktop card anchoring below: the highest
+          tier reads first so the Pro price is judged against Agent Pro, not
+          against $0. */}
       <div className="mb-5 grid gap-2 rounded-2xl border border-border bg-muted/30 p-4 sm:grid-cols-3 sm:gap-4">
-        <p className="text-sm">
-          <span className="font-bold text-foreground">Free</span>{" "}
-          <span className="text-muted-foreground">— screen deals</span>
-        </p>
-        <p className="text-sm">
-          <span className="font-bold text-foreground">{proOfferName}</span>{" "}
-          <span className="text-muted-foreground">— underwrite and make offers</span>
-        </p>
         {showAgentPro ? (
           <p className="text-sm">
             <span className="font-bold text-foreground">Agent Pro</span>{" "}
             <span className="text-muted-foreground">— underwrite for your clients</span>
           </p>
         ) : null}
+        <p className="text-sm">
+          <span className="font-bold text-foreground">{proOfferName}</span>{" "}
+          <span className="text-muted-foreground">— underwrite and make offers</span>
+        </p>
+        <p className="text-sm">
+          <span className="font-bold text-foreground">Free</span>{" "}
+          <span className="text-muted-foreground">— screen deals</span>
+        </p>
       </div>
       <div className={showAgentPro ? "grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-5" : "grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-5"}>
-        {/* FREE — follows Pro on narrow screens so a high-intent visitor sees
-            the paid offer immediately; returns to the left column on desktop
-            where side-by-side comparison is visible without scrolling. */}
-        <div className="relative order-2 rounded-3xl border border-border bg-card p-6 shadow-sm lg:order-1">
+        {/* FREE — last everywhere (2026-08 anchoring: Agent Pro → Pro → Free,
+            so the Pro price is read against the tier above it, not against
+            $0). On narrow screens a high-intent visitor still sees the paid
+            offer first. */}
+        <div className={`relative order-3 rounded-3xl border border-border bg-card p-6 shadow-sm ${showAgentPro ? "lg:order-3" : "lg:order-2"}`}>
           <div className="flex items-baseline justify-between">
             <h3 className="text-lg font-extrabold text-foreground">Free</h3>
             {/* "Current" only means something for a signed-in free user.
@@ -362,8 +366,9 @@ export function PricingTogglePlans({
           </ul>
         </div>
 
-        {/* PRO (with toggle) */}
-        <div className="relative order-1 -mt-2 rounded-3xl border-2 border-primary bg-card p-6 shadow-[0_24px_70px_rgba(0,112,196,0.18)] lg:order-2 lg:scale-[1.03]">
+        {/* PRO (with toggle) — mobile-first, center column on desktop when
+            Agent Pro anchors the left, left column otherwise. */}
+        <div className={`relative order-1 -mt-2 rounded-3xl border-2 border-primary bg-card p-6 shadow-[0_24px_70px_rgba(0,112,196,0.18)] lg:scale-[1.03] ${showAgentPro ? "lg:order-2" : "lg:order-1"}`}>
           {/* Savings badge — prefer the dollar-amount savings when
               available because concrete numbers convert better than
               percentages. Falls back to "X months free" or % savings. */}
@@ -514,7 +519,7 @@ export function PricingTogglePlans({
             "Everything in Pro" + exactly the agent_pro-only feature labels,
             so this card can never promise something the tier doesn't gate. */}
         {showAgentPro ? (
-          <div className="relative order-3 rounded-3xl border border-border bg-card p-6 shadow-sm">
+          <div className="relative order-2 rounded-3xl border border-border bg-card p-6 shadow-sm lg:order-1">
             <div className="flex items-start justify-between gap-3">
               <h3 className="text-lg font-extrabold text-foreground">Agent Pro</h3>
               <div className="flex flex-wrap justify-end gap-1.5">

@@ -37,6 +37,8 @@ import {
   fingerprintOneTimePdfDeal,
   hashOneTimePdfClaimSecret,
 } from "@/lib/one-time-pdf-claims";
+import { evaluateOneTimePdfProCredit } from "@/lib/one-time-pdf-credit";
+import { buildPackCreditPolicy } from "@/lib/pack-credit";
 
 /** Existing production $5 price; experiments require their own configured id. */
 const ONE_TIME_PDF_PRICE_FALLBACK = "price_1TgYY33yTn6y2v95pIAe2ABs";
@@ -221,7 +223,37 @@ type ClaimRow = {
   price_variant: string | null;
   expires_at: string;
   consumed_at: string | null;
+  pro_credit_status: string | null;
+  pro_credit_amount_cents: number | null;
+  pro_credit_eligible_until: string | null;
 };
+
+export type OneTimePdfProCreditSummary = {
+  amountCents: number;
+  eligibleUntil: string;
+};
+
+/** A claim's still-live credit, for surfacing post-purchase. */
+function liveProCredit(
+  row: Pick<
+    ClaimRow,
+    "pro_credit_status" | "pro_credit_amount_cents" | "pro_credit_eligible_until"
+  >,
+  now: Date = new Date()
+): OneTimePdfProCreditSummary | undefined {
+  if (
+    row.pro_credit_status !== "eligible" ||
+    !row.pro_credit_amount_cents ||
+    !row.pro_credit_eligible_until ||
+    Date.parse(row.pro_credit_eligible_until) <= now.getTime()
+  ) {
+    return undefined;
+  }
+  return {
+    amountCents: row.pro_credit_amount_cents,
+    eligibleUntil: row.pro_credit_eligible_until,
+  };
+}
 
 type KnownPriceVariant = "current" | "p9" | "p15" | "p19";
 
@@ -233,7 +265,8 @@ function knownPriceVariant(value: string | null | undefined): KnownPriceVariant 
 
 function successfulVerification(
   row: Pick<ClaimRow, "id" | "price_variant">,
-  recovered: boolean
+  recovered: boolean,
+  proCredit?: OneTimePdfProCreditSummary
 ): OneTimePdfVerifyResult {
   const priceVariant = knownPriceVariant(row.price_variant);
   return {
@@ -241,6 +274,7 @@ function successfulVerification(
     claimId: row.id,
     recovered,
     ...(priceVariant ? { priceVariant } : {}),
+    ...(proCredit ? { proCredit } : {}),
   };
 }
 
@@ -250,6 +284,8 @@ export type OneTimePdfVerifyResult =
       claimId: string;
       recovered: boolean;
       priceVariant?: KnownPriceVariant;
+      /** Present when this purchase carries a live credit toward Pro. */
+      proCredit?: OneTimePdfProCreditSummary;
     }
   | {
       ok: false;
@@ -291,12 +327,98 @@ async function loadClaim(
   const { data, error } = await admin
     .from("one_time_pdf_purchase_claims")
     .select(
-      "id, checkout_session_id, claim_secret_hash, deal_fingerprint, user_id, price_variant, expires_at, consumed_at"
+      "id, checkout_session_id, claim_secret_hash, deal_fingerprint, user_id, price_variant, expires_at, consumed_at, pro_credit_status, pro_credit_amount_cents, pro_credit_eligible_until"
     )
     .eq("id", claimId)
     .maybeSingle();
   if (error) return { row: null, errorCode: error.code ?? "unknown" };
   return { row: (data as ClaimRow | null) ?? null };
+}
+
+/**
+ * Best-effort post-consumption bookkeeping: capture the Stripe buyer email
+ * (pack checkout always collects one; the app previously discarded it) and,
+ * when the pack-credit policy is configured, transition the claim
+ * not_configured→eligible with the fields the DB state machine requires.
+ *
+ * MUST NEVER block the PDF: a paying customer's report outranks credit
+ * bookkeeping, so every failure lands in Sentry and returns undefined. The
+ * status guard on the update keeps retries inside the trigger-enforced state
+ * machine, and a missing buyer_email column (migration not yet applied)
+ * degrades to the credit-only update.
+ */
+async function recordPackPurchaseExtrasBestEffort(
+  admin: ReturnType<typeof createAdminSupabaseClient>,
+  input: {
+    claimId: string;
+    paidAt: string;
+    amountCents: number;
+    currency: string;
+    userId: string | null;
+    buyerEmail: string | null;
+  }
+): Promise<OneTimePdfProCreditSummary | undefined> {
+  try {
+    const decision = evaluateOneTimePdfProCredit({
+      purchase: {
+        paidAt: input.paidAt,
+        purchaseAmountCents: input.amountCents,
+        purchaseCurrency: input.currency,
+      },
+      policy: buildPackCreditPolicy(),
+    });
+
+    const creditFields =
+      decision.status === "eligible"
+        ? {
+            pro_credit_status: "eligible",
+            pro_credit_policy_version: decision.policyVersion,
+            pro_credit_amount_cents: decision.amountCents,
+            pro_credit_eligible_until: decision.eligibleUntil,
+            ...(input.userId ? { pro_credit_user_id: input.userId } : {}),
+          }
+        : {};
+    const emailFields = input.buyerEmail ? { buyer_email: input.buyerEmail } : {};
+    if (Object.keys(creditFields).length === 0 && Object.keys(emailFields).length === 0) {
+      return undefined;
+    }
+
+    const applyUpdate = (fields: Record<string, unknown>) =>
+      admin
+        .from("one_time_pdf_purchase_claims")
+        .update(fields)
+        .eq("id", input.claimId)
+        .eq("pro_credit_status", "not_configured");
+
+    let { error } = await applyUpdate({ ...creditFields, ...emailFields });
+    // Missing buyer_email column (migration 20260817180000 not applied yet):
+    // PostgREST surfaces it as PGRST204 (schema cache) or 42703 (raw SQL).
+    // Grant the credit alone rather than losing both writes.
+    if (
+      (error?.code === "PGRST204" || error?.code === "42703") &&
+      Object.keys(creditFields).length > 0 &&
+      Object.keys(emailFields).length > 0
+    ) {
+      ({ error } = await applyUpdate(creditFields));
+    }
+    if (error) {
+      Sentry.captureMessage("Pack purchase credit/email bookkeeping failed", {
+        level: "error",
+        tags: { feature: "one-time-pdf", stage: "pack-credit-grant" },
+        extra: { database_code: error.code ?? "unknown" },
+      });
+      return undefined;
+    }
+
+    return decision.status === "eligible"
+      ? { amountCents: decision.amountCents, eligibleUntil: decision.eligibleUntil }
+      : undefined;
+  } catch (error) {
+    Sentry.captureException(error, {
+      tags: { feature: "one-time-pdf", stage: "pack-credit-grant" },
+    });
+    return undefined;
+  }
 }
 
 export async function verifyOneTimePdfPaymentAction(
@@ -345,7 +467,9 @@ export async function verifyOneTimePdfPaymentAction(
     });
     if (!firstDecision.ok) return bindingFailureResult(firstDecision.code);
     if (firstDecision.mode === "bound-recovery") {
-      return successfulVerification(initial.row, true);
+      // Credit (if any) was granted when the claim was first consumed;
+      // re-surface it so a retried download still shows the offer.
+      return successfulVerification(initial.row, true, liveProCredit(initial.row));
     }
 
     const stripe = getStripe();
@@ -414,7 +538,17 @@ export async function verifyOneTimePdfPaymentAction(
     const consumed = (
       consumedRows as Array<Pick<ClaimRow, "id" | "price_variant">> | null
     )?.[0];
-    if (consumed) return successfulVerification(consumed, false);
+    if (consumed) {
+      const proCredit = await recordPackPurchaseExtrasBestEffort(admin, {
+        claimId: consumed.id,
+        paidAt: consumedAt,
+        amountCents: session.amount_total as number,
+        currency: session.currency.toLowerCase(),
+        userId: initial.row.user_id ?? currentUserId,
+        buyerEmail: session.customer_details?.email ?? null,
+      });
+      return successfulVerification(consumed, false, proCredit);
+    }
 
     // Another request won the atomic consume race. Re-read and allow only the
     // same browser/deal through the bounded recovery policy.
@@ -446,7 +580,7 @@ export async function verifyOneTimePdfPaymentAction(
         message: "Could not confirm secure report release. Please retry.",
       };
     }
-    return successfulVerification(raced.row, true);
+    return successfulVerification(raced.row, true, liveProCredit(raced.row));
   } catch (error) {
     Sentry.captureException(error, {
       tags: { feature: "one-time-pdf", stage: "verify" },

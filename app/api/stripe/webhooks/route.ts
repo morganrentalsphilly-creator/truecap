@@ -161,6 +161,46 @@ export async function POST(req: Request) {
         }
         const checkoutSyncResult = await handleCheckoutSessionCompleted(admin, session);
         syncSkippedReason = checkoutSyncResult.synced ? null : checkoutSyncResult.reason;
+        // Pack credit redemption: the billing action stamped the eligible
+        // claim id on the session; mark it applied so it can't be redeemed
+        // twice. Best-effort — a failure here leaves the claim 'eligible'
+        // (worst case: one extra $5 credit inside its 7-day window), which is
+        // preferable to failing a successfully-synced subscription event.
+        // The status guard keeps this inside the DB's credit state machine.
+        if (checkoutSyncResult.synced && session.metadata?.pack_credit_claim_id) {
+          const creditedUserId =
+            session.client_reference_id || session.metadata?.user_id || null;
+          const { error: creditApplyError } = await admin
+            .from("one_time_pdf_purchase_claims")
+            .update({
+              pro_credit_status: "applied",
+              pro_credit_applied_at: new Date().toISOString(),
+              pro_credit_reference: session.id,
+              ...(creditedUserId ? { pro_credit_user_id: creditedUserId } : {}),
+            })
+            .eq("id", session.metadata.pack_credit_claim_id)
+            .eq("pro_credit_status", "eligible");
+          if (creditApplyError) {
+            Sentry.captureMessage("Pack credit eligible→applied transition failed", {
+              level: "error",
+              tags: { feature: "billing-webhook", stage: "pack-credit-apply" },
+              extra: {
+                claim_id: session.metadata.pack_credit_claim_id,
+                database_code: creditApplyError.code ?? "unknown",
+              },
+            });
+          } else if (creditedUserId) {
+            await captureServerEvent({
+              distinctId: creditedUserId,
+              event: "pack_credit_applied",
+              properties: {
+                claim_id: session.metadata.pack_credit_claim_id,
+                plan_slug: session.metadata?.plan_slug ?? undefined,
+                stripe_session_id: session.id,
+              },
+            });
+          }
+        }
         // PostHog funnel event — fires once per successful checkout.
         // `pro_subscribed` is the bottom of the conversion funnel.
         // distinct_id is the Supabase user.id stored in client_reference_id

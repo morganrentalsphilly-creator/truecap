@@ -4578,6 +4578,21 @@ export function InvestCalcPage({
         description: "Rebuilding your analysis and generating the report…",
         variant: "success",
       });
+      // Pack credit (server-confirmed, so no env plumbing needed here):
+      // tell the buyer their purchase counts toward Pro while the window
+      // is live. Delayed so it isn't replaced by the export toast.
+      if (verified.proCredit) {
+        const creditDollars = Math.round(verified.proCredit.amountCents / 100);
+        const creditDeadline = new Date(verified.proCredit.eligibleUntil);
+        window.setTimeout(() => {
+          trackEvent("pack_credit_offer_shown", {});
+          toast({
+            title: `Your $${creditDollars} is good toward Pro`,
+            description: `Upgrade by ${creditDeadline.toLocaleDateString(undefined, { month: "short", day: "numeric" })} and this purchase is credited to your first Pro invoice automatically.`,
+            variant: "success",
+          });
+        }, 6000);
+      }
       persistedInputConfidenceSourceContextRef.current = null;
       persistedInputConfidenceAddressRef.current = null;
       setInputVerification({});

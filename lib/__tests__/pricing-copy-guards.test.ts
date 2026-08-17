@@ -149,12 +149,16 @@ describe("pricing offer hierarchy", () => {
     expect(agentPage).not.toMatch(/white-label embeds/i);
   });
 
-  it("puts Pro before the long Free card on narrow screens", () => {
+  it("keeps the anchoring order: Pro first on phones, Agent Pro → Pro → Free on desktop", () => {
     const plans = read("../../components/marketing/pricing-toggle-plans.tsx");
-    expect(plans).toContain("order-2 rounded-3xl");
-    expect(plans).toContain("lg:order-1");
+    // Pro leads on narrow screens; Free is always the last card.
     expect(plans).toContain("order-1 -mt-2");
-    expect(plans).toContain("lg:order-2");
+    expect(plans).toContain("order-3 rounded-3xl");
+    // Desktop anchoring: Agent Pro takes the left column when configured,
+    // Pro sits center (or left in the 2-card layout), Free is rightmost.
+    expect(plans).toContain('order-2 rounded-3xl border border-border bg-card p-6 shadow-sm lg:order-1');
+    expect(plans).toContain('${showAgentPro ? "lg:order-2" : "lg:order-1"}');
+    expect(plans).toContain('${showAgentPro ? "lg:order-3" : "lg:order-2"}');
   });
 
   it("does not manufacture scarcity around the permanent annual plan", () => {

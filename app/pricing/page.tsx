@@ -28,7 +28,8 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { isAgentProConfigured } from "@/lib/stripe/plan-prices";
 import { loadStripeDisplayPrice } from "@/lib/stripe/display-prices";
 
-import { RoiCalculatorWidget } from "@/components/marketing/roi-calculator-widget";
+import { PricingValueStack } from "@/components/marketing/pricing-value-stack";
+import { isPackCreditConfigured, PACK_CREDIT_WINDOW_DAYS } from "@/lib/pack-credit";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { DealsAnalyzedTicker } from "@/components/marketing/deals-analyzed-ticker";
@@ -119,6 +120,7 @@ export default async function PricingPage() {
   // the fetched price meant one transient Stripe error deleted a live tier from
   // the pricing page for that visitor.
   const agentProConfigured = isAgentProConfigured();
+  const packCreditConfigured = isPackCreditConfigured();
   const [monthly, annual, agentMonthly, agentAnnual, activePaidPlanSlug, hadPriorSubscription] = await Promise.all([
     loadStripeDisplayPrice("pro_monthly"),
     loadStripeDisplayPrice("pro_annual"),
@@ -270,15 +272,21 @@ export default async function PricingPage() {
             rateAlertsLive={alertsLive}
           />
 
-          {/* Interactive ROI calculator — defangs the 'is it worth $X/mo'
-              objection by turning it into the visitor's own math. Real
-              Stripe-loaded price passed in so the breakeven math matches
-              what the user sees in the plan card right above. */}
-          <div className="mx-auto mt-8 max-w-2xl">
-            <RoiCalculatorWidget
-              proMonthlyPrice={monthly?.unitAmount}
-              singleDealPriceLabel={singleDeal.priceLabel}
-            />
+          {/* Avoided-mistake frame (2026-08 offer rollout): the price
+              objection is answered against the cost of overpaying on the
+              asset — not against hourly time savings (the previous $/hr
+              ROI widget framing was retired with the repositioning). The
+              arithmetic is deliberately simple and checkable: 3% × $250,000
+              = $7,500. */}
+          <div className="mx-auto mt-8 max-w-2xl rounded-2xl border border-border bg-card p-5 text-center sm:p-6">
+            <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">
+              <strong className="text-foreground">
+                Overpaying by even 3% on a $250,000 rental costs $7,500
+              </strong>{" "}
+              — before you collect a dollar of rent. Pro
+              {monthly?.amountLabel ? ` is ${monthly.amountLabel}/mo and` : ""} computes
+              your walk-away price on every deal you look at.
+            </p>
           </div>
 
           {/* Trust strip */}
@@ -318,6 +326,14 @@ export default async function PricingPage() {
             Free answers whether the deal deserves attention. Pro answers what
             to offer, what could break, and what to do next.
           </p>
+          {/* Outcome-framed value stack leads; the exhaustive table below is
+              the secondary reference for line-item shoppers. */}
+          <div className="mt-8">
+            <PricingValueStack
+              proOfferName={proOfferName}
+              agentProConfigured={agentProConfigured}
+            />
+          </div>
           {/* overflow-x-auto so narrow viewports scroll horizontally
               instead of clipping columns. The inner min-w-[520px] keeps
               the column widths legible at the smallest phones — without
@@ -389,20 +405,32 @@ export default async function PricingPage() {
                   </span>
                   <span className="text-[11px] text-muted-foreground">No subscription · No account</span>
                 </div>
-                <h3 className="text-xl font-extrabold text-foreground">Know your number on this property.</h3>
+                <h3 className="text-xl font-extrabold text-foreground">
+                  Just need one property decided?
+                </h3>
                 <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
                   Run your analysis free, then unlock the Deal Decision Pack once.
                   The report includes your deterministic Max Offer, Deal Doctor
                   rent/rate thresholds, assumptions, verdict, downside scenario,
-                  10-year projection, illustrative tax-impact view, and modeled exit comparisons. No subscription.
-                  Use Pro for the repeat decision workflow.
+                  10-year projection, illustrative tax-impact view, and modeled exit comparisons.
+                  {packCreditConfigured ? (
+                    <>
+                      {" "}
+                      <strong className="text-foreground">
+                        Your {singleDeal.priceLabel} is credited toward Pro
+                      </strong>{" "}
+                      if you upgrade within {PACK_CREDIT_WINDOW_DAYS} days.
+                    </>
+                  ) : (
+                    <> Use Pro for the repeat decision workflow.</>
+                  )}
                 </p>
               </div>
               <Link
                 href="/#main"
                 className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 text-sm font-bold text-foreground transition-transform hover:-translate-y-0.5 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98]"
               >
-                Analyze a property
+                Get My Max Offer
               </Link>
             </div>
           </div>
