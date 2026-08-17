@@ -22,6 +22,7 @@ import { loadStripeDisplayPrice } from "@/lib/stripe/display-prices";
 import { isAgentProConfigured } from "@/lib/stripe/plan-prices";
 import { TRIAL_DAYS } from "@/lib/trial";
 import { AgentProPageTracker } from "@/components/analytics/agent-pro-page-tracker";
+import { AgentProofSection } from "@/components/marketing/testimonial-card";
 
 export const metadata: Metadata = {
   title: "Agent Pro — Rental Deal Analysis for Clients",
@@ -122,7 +123,7 @@ export default async function ForAgentsPage() {
                 {agentAnnual.amountLabel}/{agentAnnual.period}
               </span>
             ) : null}
-            <span className="text-muted-foreground">{TRIAL_DAYS}-day trial for eligible first-time subscribers</span>
+            <span className="text-muted-foreground">{TRIAL_DAYS}-day trial for new subscribers</span>
             <span className="text-muted-foreground">Client roster included · up to 100 clients</span>
           </div>
 
@@ -149,6 +150,10 @@ export default async function ForAgentsPage() {
             Screen deals free with no card. Agent Pro is a separate plan for client workflows; cancel anytime.
           </p>
         </section>
+
+        {/* Verified agent proof — self-hides until records pass the
+            lib/proof-records.ts gate (first consumer of VERIFIED_AGENT_PROOF). */}
+        <AgentProofSection />
 
         {/* Use cases */}
         <section id="use-cases" className="mb-12 sm:mb-16">

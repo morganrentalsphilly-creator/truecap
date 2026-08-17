@@ -92,6 +92,7 @@ import { AnalysisDashboardSkeleton } from "./analysis-dashboard-skeleton";
 import { AnalysisErrorBoundary } from "@/components/investcalc/analysis-error-boundary";
 import { AssumptionsSourceStrip } from "@/components/investcalc/assumptions-source-strip";
 import { PostAnalysisEmailPrompt } from "@/components/marketing/post-analysis-email-prompt";
+import { TestimonialPrompt, dispatchProofMoment } from "@/components/marketing/testimonial-prompt";
 import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 import { cn, scrollBehavior } from "@/lib/utils";
@@ -3753,7 +3754,12 @@ export function InvestCalcPage({
         // header/My Deals listeners, regardless of which deal the form
         // now holds.
         if (result.mode === "inserted") {
-          setSavedDealCount((count) => count + 1);
+          setSavedDealCount((count) => {
+            // Third saved deal = a real workflow habit forming — the
+            // high-signal moment for the one-question testimonial ask.
+            if (count + 1 === 3) dispatchProofMoment("third_save");
+            return count + 1;
+          });
         }
         window.dispatchEvent(new CustomEvent("saved-analyses-changed"));
         // parsedValues derives from the payload actually sent (NOT a fresh
@@ -4276,6 +4282,9 @@ export function InvestCalcPage({
         purchase_price: values.purchasePrice,
         has_deal_score: Boolean(dealScoreResult?.ok && dealScoreResult.tier === "pro"),
       });
+      // A completed export is the other high-signal testimonial moment
+      // (the prompt component self-caps to once per browser, ever).
+      dispatchProofMoment("pdf_export");
       trackEvent("report_generated", { report_type: mode });
       trackEvent("report_viewed", { report_type: mode, surface: "pdf_export" });
       // If the user hasn't configured branding yet, the toast nudges
@@ -6121,6 +6130,11 @@ export function InvestCalcPage({
           propertyAddress={form.getValues("address")}
         />
       ) : null}
+      {/* One-question testimonial ask after a PDF export or third saved
+          deal (window event from those handlers). Once per browser, ever;
+          submissions go to founder review — nothing renders publicly from
+          here (lib/proof-records.ts is the publication gate). */}
+      <TestimonialPrompt />
       {/* Pro vs $5 one-time chooser - opens when a user without PDF
           entitlement clicks Export PDF. */}
       <PdfPurchaseDialog

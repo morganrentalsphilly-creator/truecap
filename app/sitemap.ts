@@ -227,6 +227,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.6,
     },
     {
+      // Wall of proof — live counts + methodology + verified quotes only.
+      url: `${siteUrl}/reviews`,
+      changeFrequency: "weekly",
+      priority: 0.6,
+    },
+    {
       url: `${siteUrl}/for-agents`,
       changeFrequency: "monthly",
       priority: 0.6,

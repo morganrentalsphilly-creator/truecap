@@ -170,6 +170,9 @@ export type FunnelEvent =
   | "founding_banner_clicked"   // properties: target ("methodology" | "pricing")
   | "founding_banner_dismissed"
   | "pack_credit_offer_shown"   // post-purchase "$5 toward Pro" toast
+  | "testimonial_prompt_shown"     // properties: source
+  | "testimonial_prompt_submitted" // properties: source, consented
+  | "testimonial_prompt_dismissed" // properties: via
   | "onboarding_step_completed";
 
 // ── Lazy init + pre-init call buffering ─────────────────────────────

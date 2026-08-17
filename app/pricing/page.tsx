@@ -35,6 +35,7 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { DealsAnalyzedTicker } from "@/components/marketing/deals-analyzed-ticker";
 import { NeverOverpayGuarantee } from "@/components/marketing/landing-sections";
 import { GuaranteeBadge } from "@/components/marketing/guarantee-badge";
+import { TestimonialStrip } from "@/components/marketing/testimonial-card";
 import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
 import { rateAlertEmailsLive } from "@/lib/rate-alerts-mode";
 import { getSiteUrl } from "@/lib/site-url";
@@ -287,6 +288,15 @@ export default async function PricingPage() {
               {monthly?.amountLabel ? ` is ${monthly.amountLabel}/mo and` : ""} computes
               your walk-away price on every deal you look at.
             </p>
+          </div>
+
+          {/* Verified customer quotes near the CTAs (2026-08 offer rollout,
+              superseding the earlier ticker-only stance). Renders null until
+              records pass the lib/proof-records.ts verification + approval
+              gate, so the ticker below stays the sole proof until real
+              quotes exist — nothing fake can render here. */}
+          <div className="mx-auto mt-8 max-w-4xl">
+            <TestimonialStrip limit={2} />
           </div>
 
           {/* Trust strip */}

@@ -317,6 +317,14 @@ export function SocialProof() {
             ))}
           </div>
         </div>
+        <div className="mt-6 text-center">
+          <Link
+            href="/reviews"
+            className="text-sm font-bold text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary"
+          >
+            See all verified reviews and proof →
+          </Link>
+        </div>
       </div>
     </section>
   );
