@@ -39,6 +39,7 @@ import {
 } from "@/lib/one-time-pdf-claims";
 import { evaluateOneTimePdfProCredit } from "@/lib/one-time-pdf-credit";
 import { buildPackCreditPolicy } from "@/lib/pack-credit";
+import { schedulePackCreditEmails } from "@/lib/email/pack-credit-emails";
 
 /** Existing production $5 price; experiments require their own configured id. */
 const ONE_TIME_PDF_PRICE_FALLBACK = "price_1TgYY33yTn6y2v95pIAe2ABs";
@@ -410,9 +411,18 @@ async function recordPackPurchaseExtrasBestEffort(
       return undefined;
     }
 
-    return decision.status === "eligible"
-      ? { amountCents: decision.amountCents, eligibleUntil: decision.eligibleUntil }
-      : undefined;
+    if (decision.status !== "eligible") return undefined;
+
+    // Credit countdown emails (day 0 + day 5) — idempotent because a claim
+    // consumes exactly once; only reached when the credit really exists.
+    if (input.buyerEmail) {
+      await schedulePackCreditEmails({
+        email: input.buyerEmail,
+        amountCents: decision.amountCents,
+        eligibleUntil: decision.eligibleUntil,
+      });
+    }
+    return { amountCents: decision.amountCents, eligibleUntil: decision.eligibleUntil };
   } catch (error) {
     Sentry.captureException(error, {
       tags: { feature: "one-time-pdf", stage: "pack-credit-grant" },

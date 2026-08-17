@@ -106,17 +106,34 @@ function adminRpc(): GuardRpc {
  */
 const KEY_NAMESPACE = "truecap:email-capture:v1";
 
-export function buildBucketKey(kind: "email" | "ip", value: string): string {
+/**
+ * Surface namespaces keep per-surface email caps independent: someone who
+ * gave their email to the post-analysis checklist ("pae") can still request
+ * the Market Intelligence Pack ("mip") — but each surface's own 30-day
+ * duplicate cap holds. IP and global buckets are shared across surfaces by
+ * passing the same namespace behavior through the SAME RPC, so total
+ * outbound volume stays bounded no matter how many surfaces exist.
+ */
+export type CaptureSurface = "pae" | "mip";
+
+export function buildBucketKey(
+  kind: "email" | "ip",
+  value: string,
+  surface: CaptureSurface = "pae"
+): string {
   const normalized =
     kind === "email" ? value.trim().toLowerCase() : value.trim().toLowerCase() || "unknown";
   const digest = createHash("sha256")
     .update(`${KEY_NAMESPACE}:${kind}:${normalized}`)
     .digest("hex")
     .slice(0, 32);
-  return `pae:${kind}:${digest}`;
+  // Email caps are per-surface; IP abuse caps are shared across surfaces.
+  const prefix = kind === "email" ? surface : "pae";
+  return `${prefix}:${kind}:${digest}`;
 }
 
-/** Single row, rotated by the hour bucket so the window is self-evident. */
+/** Single row, rotated by the hour bucket so the window is self-evident.
+ *  Shared across all capture surfaces — one sitewide outbound budget. */
 export function buildGlobalBucketKey(now: Date = new Date()): string {
   return `pae:global:${now.toISOString().slice(0, 13)}`;
 }
@@ -152,11 +169,12 @@ export function interpretClaimStatus(
 export async function claimEmailCaptureSlot(args: {
   email: string;
   ip: string;
+  surface?: CaptureSurface;
   rpc?: GuardRpc;
   now?: Date;
 }): Promise<EmailCaptureClaim> {
-  const emailBucketKey = buildBucketKey("email", args.email);
-  const ipBucketKey = buildBucketKey("ip", args.ip);
+  const emailBucketKey = buildBucketKey("email", args.email, args.surface ?? "pae");
+  const ipBucketKey = buildBucketKey("ip", args.ip, args.surface ?? "pae");
   const globalBucketKey = buildGlobalBucketKey(args.now ?? new Date());
 
   let rpc: GuardRpc;

@@ -24,6 +24,7 @@ import {
   getCityStrategyCombo,
 } from "@/lib/city-strategy-combos";
 import { getSiteUrl } from "@/lib/site-url";
+import { buildAnalyzerHandoffUrl } from "@/lib/analyzer-handoff";
 import { truncateMetaDescription } from "@/lib/utils";
 
 export async function generateStaticParams() {
@@ -220,8 +221,22 @@ export default async function CityStrategyPage({
           <p className="text-sm sm:text-base opacity-90 mb-5">
             Paste an address into TrueCap and get cap rate, cash-on-cash, DSCR, and a 10-year scenario — pre-loaded with {combo.cityName}-area screening defaults that you can replace with property-specific evidence.
           </p>
-          <Link href="/" className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity">
-            Try TrueCap free <ArrowRight className="size-4" />
+          <Link
+            // Geo + strategy handoff: brrrr/house-hack map 1:1 to analyzer
+            // plays; the other combo strategies land on buy-and-hold.
+            href={buildAnalyzerHandoffUrl(
+              {
+                address: `${combo.cityName}, ${combo.state}`,
+                strategy:
+                  combo.strategy === "brrrr" || combo.strategy === "house-hack"
+                    ? combo.strategy
+                    : "buy-hold",
+              },
+              { utmSource: "combo-page" }
+            )}
+            className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
+          >
+            Get My Max Offer <ArrowRight className="size-4" />
           </Link>
         </section>
 

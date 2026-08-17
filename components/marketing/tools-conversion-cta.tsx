@@ -19,6 +19,10 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Sparkles, X } from "lucide-react";
 import { useCookieBannerOpen } from "@/lib/use-cookie-banner";
+import {
+  LeadMagnetInline,
+  LeadMagnetExitIntent,
+} from "@/components/marketing/lead-magnet-capture";
 
 interface ToolsConversionCtaProps {
   /** Name of the calculator the user just used — shown in the pitch. */
@@ -98,10 +102,17 @@ export function ToolsConversionCta({ calculatorName, hook }: ToolsConversionCtaP
             href="/"
             className="inline-flex h-11 items-center gap-1.5 rounded-xl border border-border bg-card px-5 text-sm font-semibold text-foreground hover:bg-muted"
           >
-            Try the full analyzer first
+            Get My Max Offer
           </Link>
         </div>
       </section>
+
+      {/* Lead magnet + exit-intent capture (2026-08 offer rollout): mounted
+          here so all 21 tool pages get both in one edit. Self-capping. */}
+      <div className="mt-6">
+        <LeadMagnetInline source="tools" />
+      </div>
+      <LeadMagnetExitIntent />
 
       {/* Sticky mobile-friendly bottom bar — only after scroll, and not while
           the opaque cookie-consent banner occupies the bottom on a first visit */}

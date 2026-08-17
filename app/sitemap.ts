@@ -233,6 +233,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.6,
     },
     {
+      // The First Offer Playbook — long-form conversion content.
+      url: `${siteUrl}/playbook`,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
+    {
       url: `${siteUrl}/for-agents`,
       changeFrequency: "monthly",
       priority: 0.6,

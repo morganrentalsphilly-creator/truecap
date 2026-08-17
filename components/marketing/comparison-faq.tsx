@@ -23,6 +23,7 @@
  */
 
 import type { ReactNode } from "react";
+import { SeoAnalyzerCta } from "@/components/marketing/seo-analyzer-cta";
 
 /**
  * Manual last-reviewed date for the comparison content (feature rows +
@@ -122,6 +123,15 @@ export function ComparisonFaq({
         mortgage rate, and state average effective property tax — not a general
         claim about property-data import, which several of these tools also offer.
       </p>
+
+      {/* Analyzer bridge (2026-08 offer rollout) — the comparison's real
+          answer is running your own deal; this reaches all 40 /vs pages. */}
+      <div className="mt-8">
+        <SeoAnalyzerCta
+          context="a real deal and compare the verdicts yourself"
+          utmSource="vs-page"
+        />
+      </div>
     </section>
   );
 }

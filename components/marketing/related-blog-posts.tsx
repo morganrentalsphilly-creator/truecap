@@ -13,6 +13,10 @@
 import Link from "next/link";
 import { ArrowUpRight, BookOpen } from "lucide-react";
 import { BLOG_POSTS } from "@/app/blog/page";
+import {
+  LeadMagnetInline,
+  LeadMagnetExitIntent,
+} from "@/components/marketing/lead-magnet-capture";
 
 type Props = {
   /** The slug of the CURRENT post — filtered out of the list. */
@@ -64,6 +68,14 @@ export function RelatedBlogPosts({ currentSlug, limit = 3 }: Props) {
           </li>
         ))}
       </ul>
+      {/* Lead magnet + exit-intent capture (2026-08 offer rollout): this
+          module renders on all 75 posts, so mounting here reaches the whole
+          blog family in one edit. Client islands inside this server
+          component; both self-cap via localStorage. */}
+      <div className="mt-8">
+        <LeadMagnetInline source="blog" />
+      </div>
+      <LeadMagnetExitIntent />
     </aside>
   );
 }

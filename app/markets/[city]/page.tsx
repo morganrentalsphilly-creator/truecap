@@ -34,6 +34,8 @@ import {
 } from "@/lib/markets/market-city-seo";
 import { getCapRateBenchmark } from "@/lib/market-benchmarks";
 import { marketStrategyFit } from "@/lib/market-strategy-fit";
+import { buildAnalyzerHandoffUrl } from "@/lib/analyzer-handoff";
+import { LeadMagnetInline } from "@/components/marketing/lead-magnet-capture";
 import { getStatePropertyTaxPct } from "@/lib/property-enrichment/state-property-tax";
 import { CityStrategyGuides } from "@/components/marketing/city-strategy-guides";
 import { getSiteUrl } from "@/lib/site-url";
@@ -430,10 +432,23 @@ export default async function MarketCityPage({
           <p className="text-sm sm:text-base opacity-90 mb-5">
             Paste a {data.name} address into TrueCap and get cap rate, cash-on-cash, DSCR, cash flow, and a 10-year projection — auto-filled with {data.stateName} tax and HUD rent so you start from the right assumptions.
           </p>
-          <Link href="/" className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity">
-            Try TrueCap free <ArrowRight className="size-4" />
+          <Link
+            // Geo-prefilled handoff: the analyzer mounts with the city
+            // pre-typed so the visitor is one address away from a verdict.
+            href={buildAnalyzerHandoffUrl(
+              { address: `${data.name}, ${data.stateCode}` },
+              { utmSource: "market-page" }
+            )}
+            className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
+          >
+            Get My Max Offer <ArrowRight className="size-4" />
           </Link>
         </section>
+
+        {/* Lead magnet — the pack carries this market's HUD benchmarks. */}
+        <div className="mt-10">
+          <LeadMagnetInline source="markets" />
+        </div>
 
         {/* City strategy guides (if any) — shared with the bespoke city
             pages via CityStrategyGuides so the two can't drift. */}

@@ -17,6 +17,8 @@ import { ArrowRight } from "lucide-react";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { Header } from "@/components/investcalc/header";
+import { SeoAnalyzerCta } from "@/components/marketing/seo-analyzer-cta";
+import { LeadMagnetInline } from "@/components/marketing/lead-magnet-capture";
 import {
   GLOSSARY,
   GLOSSARY_CATEGORY_LABELS,
@@ -292,6 +294,13 @@ export default async function GlossaryTermPage({
             </ul>
           </section>
         ) : null}
+
+        {/* Analyzer bridge + lead magnet (2026-08 offer rollout, once per
+            template = all 44 term pages). */}
+        <div className="mt-10 space-y-6">
+          <SeoAnalyzerCta context={`the ${entry.term} math on a real deal`} utmSource="glossary" />
+          <LeadMagnetInline source="glossary" />
+        </div>
 
         {/* Back to glossary */}
         <div className="mt-12 pt-6 border-t border-border">

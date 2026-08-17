@@ -13,6 +13,7 @@ import {
 } from "@/lib/stripe/subscription-sync";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { captureServerEvent } from "@/lib/posthog-server";
+import { scheduleTrialOnboardingEmails } from "@/lib/email/trial-emails";
 
 export const runtime = "nodejs";
 
@@ -258,6 +259,16 @@ export async function POST(req: Request) {
                 attribution_source: "stripe_checkout",
               },
             });
+            // Trial onboarding emails (day-1 activation nudge, day-10
+            // pre-billing reminder). Dormant until LIFECYCLE_EMAILS_MODE=live;
+            // idempotent via lifecycle_email_log so webhook retries can't
+            // double-schedule; never throws.
+            if (session.metadata?.user_id) {
+              await scheduleTrialOnboardingEmails(admin, {
+                userId: session.metadata.user_id,
+                email: session.customer_details?.email,
+              });
+            }
           } else {
             await captureServerEvent({
               distinctId,

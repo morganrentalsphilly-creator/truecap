@@ -21,6 +21,7 @@ import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { STATES, getStateBySlug } from "@/lib/states";
 import { strategyFitFromTier } from "@/lib/market-strategy-fit";
+import { LeadMagnetInline } from "@/components/marketing/lead-magnet-capture";
 import { getSiteUrl } from "@/lib/site-url";
 import { truncateMetaDescription } from "@/lib/utils";
 
@@ -291,9 +292,14 @@ export default async function StatePage({
             Paste an address into TrueCap and get cap rate, cash-on-cash, DSCR, and 10-year projection in 60 seconds. State-specific property tax + insurance estimates included.
           </p>
           <Link href="/" className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity">
-            Try TrueCap free <ArrowRight className="size-4" />
+            Get My Max Offer <ArrowRight className="size-4" />
           </Link>
         </section>
+
+        {/* Lead magnet — state pages are exactly the audience for the pack. */}
+        <div className="mt-10">
+          <LeadMagnetInline source="states" />
+        </div>
 
         {/* Companion resources */}
         <section className="mt-10 rounded-2xl border border-border bg-card p-6 sm:p-8">
