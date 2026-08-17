@@ -34,6 +34,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/hooks/use-toast";
+import { ensureFreshSession } from "@/lib/supabase/ensure-fresh-session";
 
 const profileSchema = z.object({
   firstName: z.string().trim().min(1, "First name is required").max(80, "First name is too long"),
@@ -303,6 +304,12 @@ export function ProfileForm({
 
       const supabase = createBrowserSupabaseClient();
       const path = `${userId}/avatar-${Date.now()}.webp`;
+      // Same stale-browser-token guard as the deal-documents uploader: the
+      // avatar call runs on the client JWT, which can lapse in an old tab
+      // while everything cookie-based still works.
+      if (!(await ensureFreshSession(supabase))) {
+        throw new Error("Your session expired. Refresh the page and sign in again.");
+      }
       const { error: uploadError } = await supabase.storage
         .from("profile-avatars")
         .upload(path, blob, {

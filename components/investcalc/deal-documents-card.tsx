@@ -14,6 +14,7 @@ import { Download, Loader2, Paperclip, Trash2, Upload } from "lucide-react";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import { friendlyToastError } from "@/lib/friendly-error";
 import { useToast } from "@/hooks/use-toast";
+import { ensureFreshSession } from "@/lib/supabase/ensure-fresh-session";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
@@ -108,6 +109,18 @@ export function DealDocumentsCard({ savedDealId }: { savedDealId: string }) {
     }
     setUploading(true);
     try {
+      // Storage calls run on the BROWSER token, which can silently lapse in a
+      // long-open tab while server-action features keep working — the result
+      // was an RLS toast that read like a permissions bug. Refresh first, and
+      // name the real problem when the session truly is gone.
+      if (!(await ensureFreshSession(supabase))) {
+        toast({
+          title: "Session expired",
+          description: "Sign in again to upload documents.",
+          variant: "destructive",
+        });
+        return;
+      }
       const path = `${prefixFor(userId)}/${Date.now()}-${safeFileName(file.name)}`;
       const { error } = await supabase.storage.from(BUCKET).upload(path, file, { upsert: false });
       if (error) {
