@@ -42,6 +42,18 @@ Header hardening converged on origin's per-route no-referrer family, extended
 with /s/ (+ X-Robots-Tag + no-store); origin's telemetry contract test updated
 to count 4 routes.
 
+## CLOSED — storage uploads dead sitewide (found via Morgan's report, fixed + applied 2026-08-17)
+truecap_storage_metadata_allowed() returned false on NULL metadata, but Supabase storage
+inserts the objects row BEFORE metadata exists → EVERY upload on deal-documents (0 objects
+ever), analysis-pdfs (dead since 2026-06-22), and branding-logos was RLS-rejected since the
+2026-08-03 hardening. Fixed live via migration 20260817210000 (applied through MCP with
+Morgan's explicit request): NULL metadata passes at insert (bucket-level allowed_mime_types +
+file_size_limit now enforce at the API layer on all three buckets — allowlists added to
+analysis-pdfs + branding-logos), full check still applies when metadata is present
+(verified: null=pass, oversized=reject, wrong-mime=reject, good=pass). profile-avatars never
+used the helper (unaffected). LESSON for policies: never gate storage INSERT on
+objects.metadata — it is not populated yet at policy time.
+
 ## Current objective
 Phase 1 continues: listing-ingestion hardening, offer SSOT, claims sweep, proof/ticker removal.
 Then phases 2–4 (offer/homepage/pricing), then 5–10.
