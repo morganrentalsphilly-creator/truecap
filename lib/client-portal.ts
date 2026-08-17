@@ -46,8 +46,6 @@ import {
 } from "@/lib/saved-analysis-methodology";
 import { TRUECAP_UNDERWRITING_STANDARD_VERSION } from "@/lib/underwriting-methodology";
 import { normalizeInvestmentFormSnapshot } from "@/lib/investcalc-schema";
-import { encodeShareLink } from "@/lib/share-link";
-import { signShareAttribution, hashShareValues } from "@/lib/share-attribution";
 import type { DealRecommendation, DealRiskLevel } from "@/lib/deal-score";
 import { isFeatureReleased } from "@/lib/entitlements-catalog";
 
@@ -106,9 +104,12 @@ function finiteNumber(value: unknown): number | null {
 export async function loadClientPortal(input: {
   agentUserId: string;
   clientId: string;
+  /** The raw (already-verified) portal token, used only to build nested
+   *  deal-view links under /portal/[token]/d/[dealId]. */
+  portalToken: string;
 }): Promise<ClientPortalData | null> {
   if (!isFeatureReleased("agent_portal")) return null;
-  const { agentUserId, clientId } = input;
+  const { agentUserId, clientId, portalToken } = input;
   // Both ids are URL-controlled (via the token payload). Reject anything not a
   // UUID before any admin round-trip.
   if (!UUID_RE.test(agentUserId) || !UUID_RE.test(clientId)) return null;
@@ -216,30 +217,14 @@ export async function loadClientPortal(input: {
         continue; // incomplete stored output — skip, never mix in current math
       }
       const values = normalizeInvestmentFormSnapshot(row.form_snapshot);
-      let sharePath: string | null = null;
-      // v1 share links contain assumptions only and always run today's engine.
-      // Suppress that deep link for a frozen result so the buyer never opens a
-      // page that contradicts the card they were sent.
-      if (values && !resolution.shouldFreeze) {
-        try {
-          const valuesHash = hashShareValues(values);
-          const sig = signShareAttribution({ ownerId: agentUserId, dealId: row.id, valuesHash });
-          const encoded = encodeShareLink({
-            v: 1,
-            values,
-            meta: {
-              sharedAt: new Date().toISOString(),
-              title: values.address || row.address || "Shared deal",
-              ownerId: agentUserId,
-              dealId: row.id,
-              ...(sig ? { sig } : {}),
-            },
-          });
-          sharePath = `/d/${encoded}`;
-        } catch {
-          sharePath = null; // a card without a deep link is still useful
-        }
-      }
+      // Nested portal route — NO deal data in the URL (no public URL may carry
+      // encoded analysis payloads). The nested page re-verifies the portal
+      // token and the deal's ownership server-side, then recomputes with
+      // TODAY'S engine — so a FROZEN card (methodology-pinned) must not link
+      // to it: the buyer would open a page contradicting the card they were
+      // sent. Same suppression origin applied to the legacy encoded link.
+      const sharePath: string | null =
+        values && !resolution.shouldFreeze ? `/portal/${portalToken}/d/${row.id}` : null;
       // Evaluate against the buyer's own criteria (never the agent's other
       // clients' — computeDealOfferLine scopes by client internally).
       let meetsCriteria: boolean | null = null;

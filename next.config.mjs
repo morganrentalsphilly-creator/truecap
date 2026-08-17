@@ -215,6 +215,17 @@ const nextConfig = {
         headers: [{ key: "Referrer-Policy", value: "no-referrer" }],
       },
       {
+        // Opaque share viewer: token-only URLs, but the page RESOLVES to deal
+        // data — same no-referrer as /d/, plus header-level robots and
+        // no-store (a revoked share must die immediately, not live in a CDN).
+        source: "/s/:path+",
+        headers: [
+          { key: "Referrer-Policy", value: "no-referrer" },
+          { key: "X-Robots-Tag", value: "noindex, nofollow, noarchive, nosnippet" },
+          { key: "Cache-Control", value: "private, no-store" },
+        ],
+      },
+      {
         source: "/portal/:path+",
         headers: [{ key: "Referrer-Policy", value: "no-referrer" }],
       },

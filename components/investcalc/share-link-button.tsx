@@ -22,6 +22,7 @@ import {
 import { cn } from "@/lib/utils";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { encodeShareLink, buildShareUrl } from "@/lib/share-link";
+import { createPublicShareAction } from "@/app/actions/public-shares";
 import { getSignedShareAttribution } from "@/app/actions/share-attribution";
 import { trackEvent } from "@/lib/analytics";
 import { useToast } from "@/hooks/use-toast";
@@ -56,6 +57,28 @@ export function ShareLinkButton({
     if (!values) return;
     setIsPreparing(true);
     try {
+      // OPAQUE-FIRST (Fable 5 brief): mint a server-backed share whose URL is
+      // just a random token — no address, rent, or assumptions in the path.
+      // Falls through to the legacy encoded link only when the share table
+      // isn't provisioned yet, so sharing never breaks mid-migration.
+      try {
+        const opaque = await createPublicShareAction({
+          values,
+          title: values.address || undefined,
+          dealId: savedDealId ?? undefined,
+        });
+        if (opaque.ok) {
+          setShareUrl(opaque.url);
+          setOpen(true);
+          setCopied(false);
+          return;
+        }
+      } catch {
+        /* fall through to the legacy path */
+      }
+
+      // LEGACY fallback — being retired; kept so pre-migration deployments and
+      // transient failures still produce a working link.
       // Mint a SIGNED owner attribution server-side (the only place that holds
       // SHARE_LINK_SECRET). It lets the public viewer co-brand the page + route
       // a captured lead back to the owner — but only because the signature

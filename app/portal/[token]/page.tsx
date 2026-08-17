@@ -46,7 +46,7 @@ export default async function ClientPortalPage({
   const decoded = readSignedToken(PORTAL_SCOPE, token);
   if (!decoded?.a || !decoded?.c) notFound();
 
-  const data = await loadClientPortal({ agentUserId: decoded.a, clientId: decoded.c });
+  const data = await loadClientPortal({ agentUserId: decoded.a, clientId: decoded.c, portalToken: token });
   if (!data) notFound();
 
   const { clientName, branding, deals, criteriaSummary, meetingCount } = data;

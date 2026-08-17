@@ -54,9 +54,9 @@ describe("telemetry privacy contract", () => {
     expect(vercel).toContain("shouldKeepThirdPartyTelemetryDisabled");
 
     const config = read("next.config.mjs");
-    for (const route of ["/d/:path+", "/portal/:path+", "/embed/brand/:path+"]) {
+    for (const route of ["/d/:path+", "/s/:path+", "/portal/:path+", "/embed/brand/:path+"]) {
       expect(config).toContain(`source: \"${route}\"`);
     }
-    expect(config.match(/value: \"no-referrer\"/g)).toHaveLength(3);
+    expect(config.match(/value: \"no-referrer\"/g)).toHaveLength(4);
   });
 });

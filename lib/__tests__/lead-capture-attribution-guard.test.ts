@@ -80,7 +80,13 @@ describe("the lead WRITE path verifies attribution before inserting", () => {
   it("forwards the signed attribution from the share page's form", () => {
     const form = read("../../components/investcalc/lead-capture-form.tsx");
     expect(form).toMatch(/captureDealLeadAction\(\{[\s\S]*?sig[\s\S]*?\}\)/);
+    // The form now renders inside the shared shell used by BOTH share routes
+    // (/d legacy + /s opaque); the shell must keep forwarding the signature,
+    // and /d must keep passing verified attribution into it.
+    const shell = read("../../components/investcalc/shared-deal-shell.tsx");
+    expect(shell).toMatch(/<LeadCaptureForm[\s\S]*?sig=\{/);
     const page = read("../../app/d/[encoded]/page.tsx");
-    expect(page).toMatch(/<LeadCaptureForm[\s\S]*?sig=\{/);
+    expect(page).toMatch(/leadCapture=\{/);
+    expect(page).toMatch(/sig: payload\.meta\?\.sig/);
   });
 });

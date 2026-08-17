@@ -9,16 +9,14 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowUpRight, Lock } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { decodeShareLink } from "@/lib/share-link";
 import { calculateAnalysis } from "@/lib/calc-analysis";
 import { investmentFormSchema } from "@/lib/investcalc-schema";
-import { ReadOnlyAnalysisView } from "@/components/investcalc/read-only-analysis-view";
-import { TrackSharedDealView } from "@/components/analytics/track-shared-deal-view";
+import { SharedDealShell } from "@/components/investcalc/shared-deal-shell";
 import { getPublicAgentBranding } from "@/lib/agent-share";
 import { verifyShareAttribution, hashShareValues } from "@/lib/share-attribution";
 import { getPublicDealComps } from "@/lib/public-deal-comps";
-import { LeadCaptureForm } from "@/components/investcalc/lead-capture-form";
 
 // Next.js 15+ makes `params` async (Promise). Without awaiting it, accessing
 // .encoded synchronously throws in dev and silently breaks in prod.
@@ -99,114 +97,22 @@ export default async function PublicDealPage({ params }: Props) {
   ]);
 
   return (
-    <div className="min-h-screen bg-background">
-      <TrackSharedDealView hasAddress={Boolean(parsed.data.address)} />
-      {/* Top banner — agent-branded when a Pro owner shared it, else TrueCap. */}
-      {agent ? (
-        <div
-          className="flex items-center justify-center gap-2 py-2.5 px-4 text-center text-xs font-semibold text-white sm:text-sm"
-          style={{ background: agent.primaryColor ?? "var(--primary)" }}
-        >
-          {agent.logoUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={agent.logoUrl} alt="" className="h-5 w-auto rounded-sm bg-white/90 p-0.5" />
-          ) : null}
-          <span>Shared by {agent.displayName}</span>
-        </div>
-      ) : (
-        <div className="bg-primary text-primary-foreground py-2 px-4 text-center text-xs sm:text-sm">
-          Shared via{" "}
-          <Link href="/" className="font-bold underline underline-offset-2">
-            TrueCap
-          </Link>{" "}
-          — view-only. Want to edit, save, or run your own? Start free at{" "}
-          <Link href="/" className="font-bold underline underline-offset-2">
-            usetruecap.com
-          </Link>
-          .
-        </div>
-      )}
-
-      {/* pb-28/sm:pb-16 reserves clearance so the footer's last row scrolls
-          clear of the fixed cookie-consent banner (z-50, bottom-0) that overlays
-          /d for a first-visit, pre-consent viewer. */}
-      <main id="main" className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10 pb-28 sm:pb-16">
-        <header className="mb-6 sm:mb-8">
-          <div className="text-xs uppercase tracking-widest text-muted-foreground font-bold mb-1">
-            Shared analysis
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground">
-            {parsed.data.address}
-          </h1>
-          {parsed.data.purchasePrice && (
-            <p className="text-sm text-muted-foreground mt-1">
-              Purchase price ${parsed.data.purchasePrice.toLocaleString("en-US")}
-              {parsed.data.yearBuilt ? ` · built ${parsed.data.yearBuilt}` : ""}
-            </p>
-          )}
-        </header>
-
-        <ReadOnlyAnalysisView values={parsed.data} result={result} comps={comps} />
-
-        {/* Agent lead capture (co-branded shares) OR the generic Pro upsell. */}
-        {agent && verifiedOwnerId ? (
-          <LeadCaptureForm
-            ownerId={verifiedOwnerId}
-            /* The same signed attribution this page just verified, forwarded so
-               the WRITE path can re-verify it. Without it captureDealLeadAction
-               trusted a bare ownerId from the request body — anyone could post
-               a Pro user's uuid and land rows in their private lead inbox. */
-            dealId={verifiedDealId}
-            valuesHash={valuesHash}
-            sig={payload.meta?.sig}
-            agentName={agent.displayName}
-            dealAddress={parsed.data.address}
-            accentColor={agent.primaryColor}
-          />
-        ) : (
-          <div className="mt-6 rounded-2xl border border-primary/30 bg-[var(--brand-blue-light)] p-5 sm:p-6">
-            <div className="flex items-start gap-3">
-              <Lock className="w-5 h-5 text-primary mt-0.5 shrink-0" />
-              <div className="min-w-0 flex-1">
-                <div className="font-bold text-foreground">
-                  See 10-year projections, illustrative tax impact, modeled exit comparisons, and Deal Score
-                </div>
-                <p className="text-sm text-muted-foreground mt-1">
-                  The full analysis with multi-year cash flow projections,
-                  illustrative depreciation tax modeling, and exit-year comparison is free
-                  to start. Run this property in your own account — your edits
-                  stay private.
-                </p>
-                <Link
-                  href="/"
-                  className="inline-flex items-center gap-1.5 mt-3 text-sm font-bold text-primary hover:underline"
-                >
-                  Start free at usetruecap.com
-                  <ArrowUpRight className="w-4 h-4" />
-                </Link>
-              </div>
-            </div>
-          </div>
-        )}
-
-        <footer className="mt-10 pb-8 text-center text-xs text-muted-foreground">
-          <p className="mx-auto max-w-2xl">
-            This shared analysis is for informational purposes only and is not
-            financial, tax, or legal advice. The figures are estimates based on
-            the assumptions entered by whoever created this link — verify rent,
-            expenses, and financing independently before making any investment
-            decision.
-          </p>
-          <p className="mt-3">
-            Built with{" "}
-            <Link href="/" className="font-bold text-foreground hover:underline">
-              TrueCap
-            </Link>{" "}
-            — transparent, editable rental analysis, free to start.
-          </p>
-        </footer>
-      </main>
-    </div>
+    <SharedDealShell
+      values={parsed.data}
+      result={result}
+      comps={comps}
+      agent={agent}
+      leadCapture={
+        agent && verifiedOwnerId
+          ? {
+              ownerId: verifiedOwnerId,
+              dealId: verifiedDealId,
+              valuesHash,
+              sig: payload.meta?.sig,
+            }
+          : undefined
+      }
+    />
   );
 }
 
