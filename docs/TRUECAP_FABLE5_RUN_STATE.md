@@ -46,7 +46,13 @@ to count 4 routes.
 Phase 1 continues: listing-ingestion hardening, offer SSOT, claims sweep, proof/ticker removal.
 Then phases 2–4 (offer/homepage/pricing), then 5–10.
 
-## DONE — Phase 1.1 opaque shares (evidence: vitest 2613, build 0, prod-build smoke)
+## CLOSED — Phase 1.1 opaque shares (migration APPLIED by Morgan 2026-08-17; live E2E passed)
+Live production E2E evidence: minted row → GET /s/<token> 200 with full analysis render,
+headers no-referrer + noindex/noarchive/nosnippet + no-store; last_viewed_at bookkeeping
+fired; revoked_at set → immediate 404 (no CDN afterlife); test row deleted. Downstream
+sweep healthy: / , /pricing, /auth/login, /d/<valid> 200; /d/garbage graceful; /portal/forged
+404; /embed/brand/garbage → standard-embed redirect; /dashboard 307; sitemap 200.
+Original implementation evidence below:
 - migration 20260817150658_public_shares.sql WRITTEN + SURFACED (Morgan applies; verification
   select must show policies=4, rls_enabled=true).
 - lib/share-token.ts + lib/public-share.ts + app/actions/public-shares.ts (create/list/revoke).
