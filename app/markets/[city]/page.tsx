@@ -435,10 +435,11 @@ export default async function MarketCityPage({
           <Link
             // Geo-prefilled handoff: the analyzer mounts with the city
             // pre-typed so the visitor is one address away from a verdict.
-            href={buildAnalyzerHandoffUrl(
+            // #main lands them ON the analyzer, not the top of the homepage.
+            href={`${buildAnalyzerHandoffUrl(
               { address: `${data.name}, ${data.stateCode}` },
               { utmSource: "market-page" }
-            )}
+            )}#main`}
             className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
           >
             Get My Max Offer <ArrowRight className="size-4" />

@@ -1,10 +1,12 @@
 /**
  * /reviews — the wall of proof.
  *
- * Renders ONLY what is real right now: the live analysis-runs counter (with
- * its attestation disclosure), the sourced-data badges, the public
- * versioned methodology, the guarantee, and — once records pass the
- * lib/proof-records.ts verification + approval gate — customer testimonials.
+ * Renders ONLY what is real right now: the analysis-runs counter (bare
+ * number by founder decision 2026-08-17 — the ticker carries no composition
+ * disclosure, so this page's copy must not frame it as independently
+ * verifiable), the sourced-data badges, the public versioned methodology,
+ * the guarantee, and — once records pass the lib/proof-records.ts
+ * verification + approval gate — customer testimonials.
  * The testimonial section self-hides at zero published records; nothing on
  * this page is ever fabricated, and Product/AggregateRating schema is
  * deliberately ABSENT until real reviews exist (adding rating markup over
@@ -34,12 +36,12 @@ export const revalidate = 3600;
 export const metadata: Metadata = {
   title: "Reviews & Proof",
   description:
-    "What's verifiably true about TrueCap today: live usage counts, sourced assumptions, a public versioned methodology, and customer quotes only after verification.",
+    "How TrueCap earns trust: sourced assumptions, a public versioned methodology, a real guarantee, and customer quotes only after verification.",
   alternates: { canonical: "/reviews" },
   openGraph: {
     title: "TrueCap Reviews & Proof",
     description:
-      "Live usage counts, sourced assumptions, public methodology — and customer quotes only after verification and approval.",
+      "Sourced assumptions, public methodology, a real guarantee — and customer quotes only after verification and approval.",
     url: "/reviews",
     type: "website",
     images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap proof" }],
@@ -79,9 +81,9 @@ export default function ReviewsPage() {
               Only what we can prove.
             </h1>
             <p className="mx-auto mt-4 max-w-xl text-balance text-base leading-relaxed text-muted-foreground sm:text-lg">
-              No invented praise, no stock-photo customers. Live usage, public
-              math, a real guarantee — and customer quotes only after we&apos;ve
-              verified them and the customer has approved publication.
+              No invented praise, no stock-photo customers. Public math, a real
+              guarantee — and customer quotes only after we&apos;ve verified
+              them and the customer has approved publication.
             </p>
             <div className="mt-6 flex justify-center">
               <DealsAnalyzedTicker

@@ -28,8 +28,11 @@ export function SeoAnalyzerCta({
 }) {
   // Attribution must survive the no-handoff path too — most call sites
   // (glossary, vs, playbook) pass no prefill but still need utm_source.
+  // Every variant ends in #main: the handoff prefills the form, but without
+  // the fragment the visitor lands at the top of the homepage instead of on
+  // the analyzer (same convention as the persona seed links).
   const href = handoff
-    ? buildAnalyzerHandoffUrl(handoff, utmSource ? { utmSource } : undefined)
+    ? `${buildAnalyzerHandoffUrl(handoff, utmSource ? { utmSource } : undefined)}#main`
     : utmSource
       ? `/?utm_source=${encodeURIComponent(utmSource)}#main`
       : "/#main";

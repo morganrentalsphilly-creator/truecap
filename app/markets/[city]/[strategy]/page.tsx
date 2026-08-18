@@ -224,7 +224,8 @@ export default async function CityStrategyPage({
           <Link
             // Geo + strategy handoff: brrrr/house-hack map 1:1 to analyzer
             // plays; the other combo strategies land on buy-and-hold.
-            href={buildAnalyzerHandoffUrl(
+            // #main lands them ON the analyzer, not the top of the homepage.
+            href={`${buildAnalyzerHandoffUrl(
               {
                 address: `${combo.cityName}, ${combo.state}`,
                 strategy:
@@ -233,7 +234,7 @@ export default async function CityStrategyPage({
                     : "buy-hold",
               },
               { utmSource: "combo-page" }
-            )}
+            )}#main`}
             className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
           >
             Get My Max Offer <ArrowRight className="size-4" />

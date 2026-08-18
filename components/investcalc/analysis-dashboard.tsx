@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
@@ -83,11 +83,7 @@ import { StrategyOutcomeCard } from "@/components/investcalc/strategy-outcome-ca
 import { StrategyLensOutcomeCard } from "@/components/investcalc/strategy-lens-outcome-card";
 import type { InvestorStrategy } from "@/lib/investor-strategies";
 import { deriveStateFromAddress } from "@/lib/buy-box";
-import {
-  buildCompsQaContext,
-  buildProjectionQaContext,
-  type DealQaBuyBoxReport,
-} from "@/lib/deal-qa-context";
+import { type DealQaBuyBoxReport } from "@/lib/deal-qa-context";
 import {
   buildMaoTarget,
   buyBoxContributesToMaoTarget,
@@ -535,15 +531,6 @@ export function AnalysisDashboard({
         ? computeReturnSummaryFromExitYears(exitScenarioSource.initialYears)
         : null,
     [exitScenarioSource]
-  );
-  // 10-yr headline from the same exit series the returns members render.
-  const projectionQaContext = useMemo(
-    () => buildProjectionQaContext(returnSummary),
-    [returnSummary]
-  );
-  const compsQaContext = useMemo(
-    () => (compsQaData ? buildCompsQaContext(compsQaData) : null),
-    [compsQaData]
   );
   // Investor lens - owned HERE (the common parent of the Deal Score + the
   // metric cards) so the metric ordering reacts when it changes. Persisted
