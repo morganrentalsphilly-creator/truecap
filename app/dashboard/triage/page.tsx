@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   // "Screen Listings" — the sidebar's name for this page. One surface, one
   // name: the tab previously said "Batch Triage" while nav said "Screen
   // Listings", reading as two different features.
-  title: "Screen Listings",
+  title: "Screen a shortlist",
   description: "Screen a batch of rental listings at once — underwrite and rank them against your buy box.",
   alternates: { canonical: "/dashboard/triage" },
   robots: { index: false, follow: false },

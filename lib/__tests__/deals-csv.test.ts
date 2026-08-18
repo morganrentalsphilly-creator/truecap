@@ -14,7 +14,8 @@ function makeItem(overrides: Partial<DealsCsvItem> = {}): DealsCsvItem {
     title: "123 Main St",
     stageLabel: "Analyzing",
     status: "active",
-    recommendation: "Buy",
+    // Callers pass the DISPLAY label (verdictLabel), never the internal enum.
+    recommendation: "Worth pursuing",
     score: 78,
     purchasePrice: 250000,
     netCashFlowMonthly: 312.456,
@@ -57,7 +58,7 @@ describe("buildDealsCsv", () => {
         "123 Main St",
         "Analyzing",
         "Active",
-        "Buy",
+        "Worth pursuing",
         "78",
         "250000",
         "312.46", // rounded to 2 decimals
@@ -145,7 +146,7 @@ describe("buildDealsCsv", () => {
       ]);
       const row = records(csv)[1];
       expect(row.split(",")).toHaveLength(DEALS_CSV_HEADER.length);
-      expect(row).toBe(`,,,Active,Buy,,,,,,,,,,2026-06-15,`);
+      expect(row).toBe(`,,,Active,Worth pursuing,,,,,,,,,,2026-06-15,`);
     });
 
     it("renders NaN as an empty cell", () => {

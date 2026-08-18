@@ -74,7 +74,7 @@ export async function screenBatchAction(rawInput: unknown): Promise<BatchTriageR
     return {
       ok: false,
       code: "ENTITLEMENT_REQUIRED",
-      message: "Batch triage is a Pro feature — upgrade to screen listings in bulk.",
+      message: "Screen a shortlist is a Pro feature — upgrade to screen listings in bulk.",
     };
   }
 

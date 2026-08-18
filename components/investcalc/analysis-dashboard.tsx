@@ -895,6 +895,10 @@ export function AnalysisDashboard({
           isSaveLocked={isSaveLockedByPlan}
           saveLockedHint={saveLockedHint}
           hasUnsavedChanges={isExistingSavedDeal && !isSaved}
+          purchasePrice={values?.purchasePrice ?? null}
+          // Same solved value the Max Offer card shows (one canonical memo),
+          // so the headline sentence can never quote a different number.
+          maxOffer={maoQaContext?.maxOffer ?? null}
         />
       )}
 
@@ -1304,7 +1308,7 @@ export function AnalysisDashboard({
                     href="/dashboard/triage"
                     className="inline-flex items-center gap-0.5 font-semibold text-primary hover:underline"
                   >
-                    Triage them at once
+                    Screen a shortlist
                     <ArrowUpRight aria-hidden className="size-3" />
                   </Link>
                 </p>

@@ -1,4 +1,5 @@
 import type { DealRiskLevel } from "./deal-score";
+import { signalDisplay } from "./verdict-display";
 
 export type PropertyType = "single-family" | "multi-family" | "owner-occupant";
 export type Signal = "strong-buy" | "buy" | "neutral" | "risky" | "avoid";
@@ -34,12 +35,15 @@ export const METRIC_ROWS: MetricRow[] = [
 // Display labels for the recommendation signal — the deal's OWN score, not the
 // user's personal buy box. Don't use "buy box" wording here: it implied a
 // criteria screen that never ran.
+//
+// DERIVED, not declared: this used to be a hand-maintained fourth copy of the
+// same five strings. Wording now lives only in lib/verdict-display.ts.
 export const SIGNAL_LABELS: Record<Signal, string> = {
-  "strong-buy": "Excellent fit",
-  buy: "Buy",
-  neutral: "Watchlist",
-  risky: "Needs work",
-  avoid: "Pass",
+  "strong-buy": signalDisplay("strong-buy").label,
+  buy: signalDisplay("buy").label,
+  neutral: signalDisplay("neutral").label,
+  risky: signalDisplay("risky").label,
+  avoid: signalDisplay("avoid").label,
 };
 
 export function formatCurrency(value: number | null, signed = false): string {

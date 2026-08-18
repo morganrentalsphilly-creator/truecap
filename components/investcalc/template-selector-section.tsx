@@ -283,7 +283,7 @@ export function TemplateSelectorSection({
   return (
     <div className="space-y-2">
       <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-        Calculation Template
+        Template
       </p>
       <div className="flex min-w-0 items-center gap-2">
         <div className="relative min-w-0 flex-1">

@@ -54,6 +54,8 @@ import {
 import { buildDealTips } from "@/lib/deal-tips";
 import { NextActionBanner } from "@/components/investcalc/next-action-banner";
 import { cashFlowSubLabel } from "./metrics-band";
+import { VERDICT_DISPLAY } from "@/lib/verdict-display";
+import { buildVerdictSentence } from "@/lib/verdict-sentence";
 
 type RecommendationVariant = "strong-buy" | "buy" | "neutral" | "risky" | "avoid";
 
@@ -494,11 +496,15 @@ function ScoreBreakdownReceipts({
               <span className="font-bold text-foreground">{score} / 100</span>.
             </>
           )}
-          {" "}Bands: <strong>75+</strong> Strong Buy, <strong>55–74</strong> Buy,
-          {" "}<strong>35–54</strong> Neutral, <strong>18–34</strong> Risky,
-          {" "}<strong>&lt;18</strong> Avoid.
-          {" "}This is the same score on every screen - your investor lens reorders which
-          metrics lead, but never changes the number.
+          {/* Bands are stated in DISPLAY vocabulary. They used to print the
+              internal enum names here ("Strong Buy … Avoid") directly under a
+              headline rendered through the display map — the card contradicted
+              itself, and /methodology. Derived so the three can't drift. */}
+          {" "}Bands: <strong>75+</strong> {VERDICT_DISPLAY["Strong Buy"].label},
+          {" "}<strong>55–74</strong> {VERDICT_DISPLAY.Buy.label},
+          {" "}<strong>35–54</strong> {VERDICT_DISPLAY.Neutral.label},
+          {" "}<strong>18–34</strong> {VERDICT_DISPLAY.Risky.label},
+          {" "}<strong>&lt;18</strong> {VERDICT_DISPLAY.Avoid.label}.
         </p>
         <p className="mt-2 text-muted-foreground">
           Looking to improve the score? The largest movers are typically (1) a lower
@@ -555,6 +561,8 @@ export function AnswerHeroCard({
   isSaveLocked,
   saveLockedHint,
   hasUnsavedChanges,
+  purchasePrice,
+  maxOffer,
 }: {
   isLoading: boolean;
   /** Two-stage load: the base analysis lands first, the Deal Score action
@@ -582,6 +590,11 @@ export function AnswerHeroCard({
   /** Drives the unsaved-changes dot on the corner Save (mirrors the
    *  identity strip's "Unsaved changes" badge condition). */
   hasUnsavedChanges: boolean;
+  /** Asking price, for the imperative verdict sentence. */
+  purchasePrice: number | null;
+  /** Solved Max Offer from the dashboard's canonical maoQaContext memo —
+   *  the SAME value the Max Offer card renders. Null on Free/unsolvable. */
+  maxOffer: number | null;
 }) {
   const isCashPurchase = Boolean(result && result.monthlyPayment <= 0);
   // Deal-specific tips from THIS deal's weakest subscores (null when the
@@ -705,8 +718,16 @@ export function AnswerHeroCard({
                   <AlertTriangle className="w-6 h-6 text-white" />
                 )}
               </div>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground">
-                {recommendationLabel(recommendation.label)}
+              {/* The verdict is an INSTRUCTION, not a category chip: it names
+                  what to do, at what price, against what was asked. Falls
+                  back to the label alone when price/Max Offer aren't
+                  available (Free tier). */}
+              <h2 className="text-balance text-2xl font-extrabold text-foreground sm:text-3xl">
+                {buildVerdictSentence({
+                  recommendation: recommendation.label,
+                  purchasePrice,
+                  maxOffer,
+                }).text}
               </h2>
             </div>
             {/* Buy-box fit chip - only when a box evaluated (fed by the

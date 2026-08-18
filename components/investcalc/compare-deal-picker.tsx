@@ -7,6 +7,7 @@ import { ArrowRight, Check, Loader2 } from "lucide-react";
 import { startCompareAction } from "@/app/actions/compare";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { signalDisplay } from "@/lib/verdict-display";
 
 /**
  * Inline deal picker for the Compare page's empty state. Previously the empty
@@ -120,7 +121,9 @@ export function CompareDealPicker({ deals }: { deals: ComparePickerDeal[] }) {
                   </span>
                   <span className="mt-0.5 block text-xs text-muted-foreground">
                     {fmtMoney(deal.netCashFlow)} · {fmtPct(deal.capRate)}
-                    {deal.signal ? ` · ${deal.signal}` : ""}
+                    {/* Was ` · ${deal.signal}` — printed the internal slug
+                        ("strong-buy"/"avoid") straight to the user. */}
+                    {deal.signal ? ` · ${signalDisplay(deal.signal).shortLabel}` : ""}
                   </span>
                   {deal.methodologyLabel ? (
                     <span className="mt-0.5 block text-[10px] text-muted-foreground">

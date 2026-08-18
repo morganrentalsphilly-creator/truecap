@@ -266,9 +266,12 @@ function HeroProductMock({ decisionPositioning }: { decisionPositioning: boolean
           </div>
           <div className="tc-hero-step-5 flex flex-wrap items-center gap-1.5 sm:gap-2">
             <span className="rounded-full bg-[var(--brand-green)] px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-white sm:px-2.5 sm:py-1 sm:text-[10px]">
+              {/* "Pass at asking" meant the deal CLEARS — the exact opposite
+                  of the deal-score label rendered from the same component.
+                  "Clears at asking" says it without the collision. */}
               {decisionPositioning
                 ? askingClears
-                  ? "Pass at asking"
+                  ? "Clears at asking"
                   : "Negotiate"
                 : recommendationLabel(score.recommendation)}
             </span>
@@ -306,7 +309,9 @@ function HeroProductMock({ decisionPositioning }: { decisionPositioning: boolean
         {decisionPositioning ? (
           <>
             <div className="mt-3 grid grid-cols-1 gap-2 min-[360px]:grid-cols-3 sm:gap-3">
-              <MockTile label="At asking" value={askingClears ? "Pass" : "Miss"} tone={askingClears ? "success" : "primary"} sub={`${cfLabel}/mo`} stepClass="tc-hero-step-3" />
+              {/* Was "Pass"/"Miss" — "Pass" here meant it CLEARS, while the
+                  verdict pill above uses the deal-score vocabulary. */}
+              <MockTile label="At asking" value={askingClears ? "Clears" : "Miss"} tone={askingClears ? "success" : "primary"} sub={`${cfLabel}/mo`} stepClass="tc-hero-step-3" />
               <MockTile label="Input confidence" value={`${sampleConfidence.score}%`} tone="primary" sub="readiness, not probability" stepClass="tc-hero-step-4" />
               <MockTile label="Before offering" value={`${sampleConfidence.offerReadyRemaining.length}`} tone="primary" sub="inputs to verify" stepClass="tc-hero-step-5" />
             </div>

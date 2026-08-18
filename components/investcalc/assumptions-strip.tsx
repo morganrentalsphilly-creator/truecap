@@ -24,7 +24,7 @@
  * transition against a baseline recorded on mount, so programmatic restores
  * that land before first paint never pulse.
  *
- * The "What's your play?" strategy picker demotes into this card as the
+ * The "Strategy" strategy picker demotes into this card as the
  * "Analyzing as:" pill — the existing StrategyChips component renders
  * inside (kept mounted, CSS-toggled), behavior unchanged. SaveAsDefaultsChip
  * relocates to the strip footer via the `footer` slot (it self-gates).
@@ -69,7 +69,7 @@ type Props = {
   /** "Hide details" → the existing toggleAdvanced (records the user's
    *  remembered preference exactly as the old button did). */
   onHideDetails: () => void;
-  /** Active "What's your play?" strategy (null = default flow). */
+  /** Active "Strategy" strategy (null = default flow). */
   activeStrategyKey: string | null;
   onSelectStrategy: (key: string | null) => void;
   /** What the play's starter set wrote (label + field → value), so chips
@@ -285,7 +285,7 @@ export function AssumptionsStrip({
 
       <div className="mt-3 flex flex-wrap items-center gap-2">
         {beforeExtras.map(renderChip)}
-        {/* Strategy pill — the demoted "What's your play?" entry point. */}
+        {/* Strategy pill — the demoted "Strategy" entry point. */}
         <button
           type="button"
           onClick={() => setStrategyOpen((v) => !v)}
@@ -300,7 +300,7 @@ export function AssumptionsStrip({
         >
           <Sparkles className="size-3 shrink-0 text-primary" aria-hidden />
           <span className="max-w-56 truncate">
-            {activeStrategy ? `Analyzing as: ${activeStrategy.label}` : "What's your play?"}
+            {activeStrategy ? `Analyzing as: ${activeStrategy.label}` : "Strategy"}
           </span>
           <ChevronDown
             className={cn(

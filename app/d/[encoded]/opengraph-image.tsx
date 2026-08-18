@@ -18,6 +18,7 @@ import { decodeShareLink } from "@/lib/share-link";
 import { calculateAnalysis } from "@/lib/calc-analysis";
 import { getDealTier, type DealTier } from "@/lib/verdict";
 import { investmentFormSchema } from "@/lib/investcalc-schema";
+import { VERDICT_DISPLAY } from "@/lib/verdict-display";
 
 export const runtime = "edge";
 export const alt = "Rental property analysis shared via TrueCap";
@@ -50,12 +51,16 @@ const fmtPct = (n: number) => `${n >= 0 ? "+" : ""}${n.toFixed(1)}%`;
 // Display labels for the deal's own score (matches the in-app recommendation
 // labels). NOT a personal buy box — avoid "buy box" wording, which implied a
 // criteria screen that never ran. The DealTier keys + colors stay as-is.
+//
+// Labels DERIVED from lib/verdict-display (edge-safe: pure data, no server
+// imports) so a social card can never show wording the app has moved past.
+// shortLabel is used because this renders in a fixed-width badge.
 const TIER_BADGE: Record<DealTier, { label: string; color: string }> = {
-  Strong: { label: "Excellent fit", color: SUCCESS },
-  Solid: { label: "Buy", color: SUCCESS },
-  Mixed: { label: "Watchlist", color: WARN },
-  Marginal: { label: "Needs work", color: WARN },
-  Negative: { label: "Pass", color: DANGER },
+  Strong: { label: VERDICT_DISPLAY["Strong Buy"].shortLabel, color: SUCCESS },
+  Solid: { label: VERDICT_DISPLAY.Buy.shortLabel, color: SUCCESS },
+  Mixed: { label: VERDICT_DISPLAY.Neutral.shortLabel, color: WARN },
+  Marginal: { label: VERDICT_DISPLAY.Risky.shortLabel, color: WARN },
+  Negative: { label: VERDICT_DISPLAY.Avoid.shortLabel, color: DANGER },
 };
 
 function Fallback({ headline }: { headline: string }) {

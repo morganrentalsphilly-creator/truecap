@@ -29,7 +29,7 @@ import {
   serializeTriageBatch,
   TRIAGE_STORAGE_KEY,
 } from "@/lib/batch-triage-storage";
-import { recommendationLabel } from "@/lib/deal-score";
+import { verdictScreeningLabel } from "@/lib/verdict-display";
 import { BuyBoxFitBadge } from "@/components/investcalc/buy-box-fit-badge";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -51,15 +51,12 @@ function ratio(n: number | null, isCash: boolean): string {
 }
 
 /**
- * Verdict label, with ONE screening-context override: the global display
- * vocabulary maps Avoid → "Pass" ("pass on it"), which reads correctly on a
- * deal row but inverts inside a SCREENING table — "Pass" next to red numbers
- * scans as "passed the screen". "Skip" carries the same instruction without
- * the collision. Every other tier uses the shared labels.
+ * Screening-context verdict label. The override that used to live here (and
+ * the reasoning behind it) now lives in lib/verdict-display.ts as
+ * verdictScreeningLabel, so every screening surface gets it for free. Kept as
+ * a thin alias because the call sites below read better with a local name.
  */
-function triageVerdictLabel(rec: string): string {
-  return rec === "Avoid" ? "Skip" : recommendationLabel(rec);
-}
+const triageVerdictLabel = verdictScreeningLabel;
 
 function verdictClasses(rec: string | null): string {
   if (rec === "Strong Buy") return "bg-success/10 text-success border-success/30";
@@ -208,7 +205,7 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
       <div className="mb-6">
         <h1 className="flex items-center gap-2 text-xl font-extrabold tracking-tight text-foreground sm:text-2xl">
           <ListChecks className="size-5 text-primary" />
-          Screen a batch of listings
+          Screen a shortlist
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Paste up to {MAX_TRIAGE_ROWS} listings — one per line, columns{" "}

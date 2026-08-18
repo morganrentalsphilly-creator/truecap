@@ -19,6 +19,7 @@ import { ArrowUpRight, Calculator, Database, ShieldCheck } from "lucide-react";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
+import { VERDICT_DISPLAY } from "@/lib/verdict-display";
 import {
   TRUECAP_UNDERWRITING_STANDARD_NAME,
   TRUECAP_UNDERWRITING_STANDARD_VERSION,
@@ -228,8 +229,13 @@ export default function MethodologyPage() {
             illustrative annual personal-tax benefit from Deal Score.
           </p>
           <p>
-            Recommendation bands are 75+ Excellent fit, 55–74 Buy, 35–54
-            Watchlist, 18–34 Needs work, and below 18 Pass. Cash purchases get
+            {/* Derived from lib/verdict-display so the published methodology
+                can never state wording the product has moved past. The
+                THRESHOLDS (75/55/35/18) are unchanged. */}
+            Recommendation bands are 75+ {VERDICT_DISPLAY["Strong Buy"].label},
+            55–74 {VERDICT_DISPLAY.Buy.label}, 35–54 {VERDICT_DISPLAY.Neutral.label},
+            18–34 {VERDICT_DISPLAY.Risky.label}, and below 18{" "}
+            {VERDICT_DISPLAY.Avoid.label.toLowerCase()}. Cash purchases get
             full DSCR-component credit because there is no debt service.
             Owner-occupant deals use a separate near-break-even cash-flow rule.
             A Balanced or Appreciation score may be held at 40 when a

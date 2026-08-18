@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { TemplatesManagementPage } from "@/components/investcalc/templates-management-page";
 
 export const metadata: Metadata = {
-  title: "Analysis Templates",
+  title: "Templates",
   description: "Manage your saved rental analysis templates in TrueCap.",
   alternates: { canonical: "/dashboard/templates" },
   robots: { index: false, follow: false },

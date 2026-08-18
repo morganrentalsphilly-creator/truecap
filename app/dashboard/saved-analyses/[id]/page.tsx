@@ -79,6 +79,7 @@ import {
   resolveSavedAnalysisSnapshot,
 } from "@/lib/saved-analysis-methodology";
 import { isFeatureEnabled } from "@/lib/feature-flags";
+import { Verdict } from "@/components/investcalc/verdict";
 
 export const metadata: Metadata = {
   title: "Deal workspace",
@@ -112,14 +113,6 @@ const RECOMMENDATION_TIERS: readonly DealRecommendation[] = [
   "Risky",
   "Avoid",
 ];
-
-/** Same tone mapping My Deals' verdict badge uses (getSignalClasses). */
-function verdictBadgeClasses(rec: DealRecommendation): string {
-  if (rec === "Strong Buy") return "bg-success/10 text-success border-success/30";
-  if (rec === "Buy") return "bg-primary/10 text-primary border-primary/30";
-  if (rec === "Neutral" || rec === "Risky") return "bg-warning/15 text-warning-foreground border-warning/30";
-  return "bg-destructive/10 text-destructive border-destructive/20";
-}
 
 function fmtMoney(n: number): string {
   return new Intl.NumberFormat("en-US", {
@@ -632,13 +625,9 @@ export default async function DealWorkspacePage({
                 deep-linked about, from the same recompute the banner uses.
                 Tiles a legacy snapshot doesn't carry are omitted entirely. */}
             <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5">
-              {recommendation ? (
-                <span
-                  className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${verdictBadgeClasses(recommendation)}`}
-                >
-                  {recommendation}
-                </span>
-              ) : null}
+              {/* Was `{recommendation}` raw — the same deal read "Avoid" here
+                  and "Pass" in the My Deals list one click away. */}
+              {recommendation ? <Verdict recommendation={recommendation} /> : null}
               <Metric
                 label="Cash flow"
                 value={fmtCashFlow(netCashFlow)}

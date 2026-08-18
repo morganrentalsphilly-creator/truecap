@@ -24,7 +24,8 @@
     "build-market-rents:dry": "npx -y tsx scripts/build-market-rents.ts --dry-run",
     "build-market-safmr": "npx -y tsx scripts/build-market-safmr.ts",
     "build-market-safmr:dry": "npx -y tsx scripts/build-market-safmr.ts --dry-run",
-    "build-intelligence-pack": "npx -y tsx scripts/build-market-intelligence-pack.ts"
+    "build-intelligence-pack": "npx -y tsx scripts/build-market-intelligence-pack.ts",
+    "snapshot": "npx -y tsx scripts/numeric-snapshot.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",

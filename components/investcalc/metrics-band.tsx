@@ -462,11 +462,11 @@ function DealStrategyToggle({
   return (
     <div className="mb-3">
       <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-        Investor lens
+        Show me first
       </p>
       <div
         role="radiogroup"
-        aria-label="Investor lens - reorders which metrics lead"
+        aria-label="Show me first - reorders which metrics lead"
         className="grid grid-cols-3 gap-0.5 rounded-lg bg-muted/60 p-0.5"
         onKeyDown={handleKeyDown}
       >
@@ -498,7 +498,7 @@ function DealStrategyToggle({
         })}
       </div>
       <p className="mt-1 text-[10px] leading-tight text-muted-foreground">
-        Reorders the metrics you see first. Your Deal Score is the same on every screen.
+        Reorders the metrics you see first.
       </p>
     </div>
   );
@@ -621,7 +621,7 @@ export function MetricsBand({
             aria-hidden
             className="size-3 shrink-0 transition-transform group-open/lens:rotate-90"
           />
-          Change lens
+          Change what leads
           <span className="font-normal">
             · {DEAL_STRATEGIES.find((s) => s.value === strategy)?.label ?? "Balanced"}
           </span>

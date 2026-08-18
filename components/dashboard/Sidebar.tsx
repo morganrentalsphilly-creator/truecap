@@ -52,8 +52,8 @@ export function Sidebar({ savedDealCount, navAccess, mobile = false, onNavigate 
     { icon: Briefcase, label: "My Deals", href: "/dashboard/saved-analyses", badge: String(savedDealCount), enabled: navAccess.myDeals },
     { icon: ListTodo, label: "Compare Deals", href: "/dashboard/compare", enabled: navAccess.compareDeals },
     // Batch triage — the power-tool tier, same gate as Compare.
-    { icon: ListChecks, label: "Screen Listings", href: "/dashboard/triage", enabled: navAccess.compareDeals },
-    { icon: FileBarChart, label: "Manage Templates", href: "/dashboard/templates", enabled: navAccess.templates },
+    { icon: ListChecks, label: "Screen a shortlist", href: "/dashboard/triage", enabled: navAccess.compareDeals },
+    { icon: FileBarChart, label: "Templates", href: "/dashboard/templates", enabled: navAccess.templates },
     { icon: Users, label: "Clients", href: "/dashboard/clients", enabled: navAccess.clients },
     // Settings promoted from the avatar dropdown into the main sidebar.
     // Pro users pay for Branding (configured at /settings/branding); it

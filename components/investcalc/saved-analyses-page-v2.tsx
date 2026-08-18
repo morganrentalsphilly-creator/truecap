@@ -124,6 +124,7 @@ import {
 import { TRUECAP_UNDERWRITING_STANDARD_VERSION } from "@/lib/underwriting-methodology";
 import { parseCompareSnapshotV1 } from "@/lib/compare-result-snapshot";
 import { buildDealsCsv, dealsCsvFilename, type DealsCsvItem } from "@/lib/deals-csv";
+import { signalDisplay, verdictLabel } from "@/lib/verdict-display";
 import {
   openSavedDealInAnalysisTab as openSavedDealInAnalysisTabShared,
   duplicateSavedDealInAnalyzer,
@@ -525,12 +526,15 @@ function NextActionLine({
 }
 
 // Deal-score signal labels — the deal's own metrics, NOT a personal buy box.
+// DERIVED from lib/verdict-display (was a hand-maintained third copy of the
+// same five strings). The kebab KEYS are load-bearing: they are the persisted
+// filter values in MYDEALS_VIEW_STATE_KEY, so they must stay stable.
 const SIGNAL_LABELS: Record<SavedSignal, string> = {
-  "strong-buy": "Excellent fit",
-  buy: "Buy",
-  neutral: "Watchlist",
-  risky: "Needs work",
-  avoid: "Pass",
+  "strong-buy": signalDisplay("strong-buy").label,
+  buy: signalDisplay("buy").label,
+  neutral: signalDisplay("neutral").label,
+  risky: signalDisplay("risky").label,
+  avoid: signalDisplay("avoid").label,
 };
 
 /** Client-only view state (search/filters/page) persisted to sessionStorage so
@@ -1625,7 +1629,10 @@ export function SavedAnalysesPage({
           title: item.nickname?.trim() ? item.nickname.trim() : item.title,
           stageLabel: pipelineStageLabel(item.pipelineStage ?? "analyzing"),
           status: item.status,
-          recommendation: item.recommendation,
+          // The sheet's "Verdict" column used to carry the INTERNAL enum, so
+          // an export said "Avoid" where the app said something else entirely.
+          // It is a user-facing spreadsheet — it shows what the UI shows.
+          recommendation: verdictLabel(item.recommendation),
           score: item.score,
           purchasePrice: item.purchasePrice,
           netCashFlowMonthly: item.netCashFlowMonthly,

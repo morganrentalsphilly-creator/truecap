@@ -29,7 +29,11 @@ export type DealsCsvItem = {
   stageLabel?: string | null;
   /** Lifecycle status slug: active / completed / archived. */
   status: string;
-  /** Verdict shown on the row, e.g. "Strong Buy". */
+  /**
+   * Verdict as DISPLAYED on the row, e.g. "Worth pursuing" — callers pass it
+   * through verdictLabel() so the sheet and the UI can never disagree. Do not
+   * pass the internal enum ("Strong Buy"/"Avoid") here.
+   */
   recommendation: string;
   score: number | null;
   purchasePrice: number | null;

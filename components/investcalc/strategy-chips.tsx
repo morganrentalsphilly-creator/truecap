@@ -24,7 +24,7 @@ export function StrategyChips({
     <div className="rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-5">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-sm font-semibold text-foreground">What&apos;s your play?</p>
+          <p className="text-sm font-semibold text-foreground">Strategy</p>
           <p className="text-[11px] leading-snug text-muted-foreground">
             Optional - tailor the form and lead with the number that matters for your strategy.
           </p>

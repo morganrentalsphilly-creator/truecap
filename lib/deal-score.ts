@@ -5,6 +5,9 @@ import {
   DEFAULT_APPRECIATION_RATE,
   DEFAULT_SELLING_COST_PCT,
 } from "@/lib/exit-scenarios";
+// One-way dependency: verdict-display imports only the TYPE from here (erased
+// at compile time), so there is no runtime cycle.
+import { VERDICT_DISPLAY, verdictLabel } from "@/lib/verdict-display";
 
 export const dealScoreInputSchema = z.object({
   propertyType: z.enum(["single-family", "multi-family", "owner-occupant"]),
@@ -191,16 +194,22 @@ export type DealRecommendation = "Strong Buy" | "Buy" | "Neutral" | "Risky" | "A
 // Deal-SCORE vocabulary — derived from the deal's own metrics, NOT the user's
 // personal buy box. Earlier "Meets / Does not meet buy box" wording falsely
 // implied each row had been screened against a criteria set it never saw.
+//
+// MOVED (Aug-2026 hierarchy rebuild): the wording now lives in
+// lib/verdict-display.ts, which is the single source for every surface and
+// adds tone + icon + screen-reader text. These two exports are kept as
+// re-exports so the ~10 existing call sites keep working, but new code should
+// render <Verdict> (components/investcalc/verdict.tsx) instead.
 export const RECOMMENDATION_DISPLAY_LABELS: Record<DealRecommendation, string> = {
-  "Strong Buy": "Excellent fit",
-  Buy: "Buy",
-  Neutral: "Watchlist",
-  Risky: "Needs work",
-  Avoid: "Pass",
+  "Strong Buy": VERDICT_DISPLAY["Strong Buy"].label,
+  Buy: VERDICT_DISPLAY.Buy.label,
+  Neutral: VERDICT_DISPLAY.Neutral.label,
+  Risky: VERDICT_DISPLAY.Risky.label,
+  Avoid: VERDICT_DISPLAY.Avoid.label,
 };
 
 export function recommendationLabel(recommendation: string): string {
-  return RECOMMENDATION_DISPLAY_LABELS[recommendation as DealRecommendation] ?? recommendation;
+  return verdictLabel(recommendation);
 }
 /** Investment deals use Low/Medium/High. Owner-occupant near break-even may use softer labels instead of High Risk. */
 export type DealRiskLevel =
