@@ -55,7 +55,6 @@ import { AssumptionsStrip } from "./assumptions-strip";
 import { EnrichmentReceipt } from "./enrichment-receipt";
 import {
   computeExpensesEdited,
-  computeStrategyOwnedFields,
   type AssumptionChipTarget,
   type StrategyAppliedSnapshot,
 } from "@/lib/assumption-chips";
@@ -90,7 +89,6 @@ import type { AnalysisDashboardTab } from "./analysis-dashboard";
 import type { ApplicableDecisionThreshold } from "./what-needs-to-be-true-card";
 import { AnalysisDashboardSkeleton } from "./analysis-dashboard-skeleton";
 import { AnalysisErrorBoundary } from "@/components/investcalc/analysis-error-boundary";
-import { AssumptionsSourceStrip } from "@/components/investcalc/assumptions-source-strip";
 import { PostAnalysisEmailPrompt } from "@/components/marketing/post-analysis-email-prompt";
 import { TestimonialPrompt, dispatchProofMoment } from "@/components/marketing/testimonial-prompt";
 import { useToast } from "@/hooks/use-toast";
@@ -739,7 +737,6 @@ export function InvestCalcPage({
   savedDealLimit = null,
   isAuthenticated = false,
   userAnalysisDefaults = null,
-  dealQaEnabled = false,
 }: {
   canSaveDeals?: boolean;
   canCompareDeals?: boolean;
@@ -767,7 +764,6 @@ export function InvestCalcPage({
   userAnalysisDefaults?: Record<string, number> | null;
   /** True when ANTHROPIC_API_KEY is configured - shows the Deal Q&A
    *  panel. Per-user limits enforced server-side in the action. */
-  dealQaEnabled?: boolean;
 }) {
   const router = useRouter();
   const [activeInputTab, setActiveInputTab] = useState<InputTab>("cash-flow");
@@ -6023,32 +6019,6 @@ export function InvestCalcPage({
             <AnalysisErrorBoundary result={analysisResult}>
             <AnalysisDashboard
               result={analysisResult}
-              // "Where these numbers came from" ledger row (redesign P5
-              // follow-up): the results-side assumptions strip demotes from
-              // a standalone card above the dashboard into a quiet row —
-              // provenance stays truthful (P1-8), chrome="bare" avoids the
-              // card-in-card seam inside the row.
-              assumptionsSlot={
-                analysisResult && !isCalculating ? (
-                  <AssumptionsSourceStrip
-                    chrome="bare"
-                    onEdit={handleEditAssumptions}
-                    provenance={liveResultSourceContext.provenance}
-                    // Shared helper (same predicate the input-side strip
-                    // uses), excluding fields the active play's starter set
-                    // wrote: strategy writes are dirty on purpose, but they
-                    // are the PLAY's defaults, not user edits — claiming
-                    // "yours" here was a provenance lie (BROWSER-2).
-                    expensesEdited={computeExpensesEdited(
-                      liveResultTouchedFields,
-                      computeStrategyOwnedFields(
-                        strategyAppliedRef.current,
-                        liveFormValues as unknown as Record<string, unknown>
-                      )
-                    )}
-                  />
-                ) : null
-              }
               values={analysisValues ?? form.getValues()}
               dataConfidence={
                 analysisResult
@@ -6101,7 +6071,6 @@ export function InvestCalcPage({
               canUseSensitivity={canUseSensitivity || isSampleProPreview}
               canUseStrategies={canUseStrategies || isSampleProPreview}
               isSampleProPreview={isSampleProPreview}
-              dealQaEnabled={dealQaEnabled}
               activeTab={activeDashboardTab}
               activeTabNonce={activeTabNonce}
               activeStrategy={activeStrategy}

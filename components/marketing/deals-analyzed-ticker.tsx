@@ -19,10 +19,7 @@
 import { CheckCircle2 } from "lucide-react";
 import { getDealsAnalyzedCount } from "@/lib/stats/deals-analyzed-count";
 import { getTotalAnalysesRunCount } from "@/lib/stats/total-analyses-run";
-import {
-  ANALYSIS_RUNS_DISPLAY_BASELINE,
-  withAnalysisRunsDisplayBaseline,
-} from "@/lib/stats/analysis-runs-display";
+import { withAnalysisRunsDisplayBaseline } from "@/lib/stats/analysis-runs-display";
 
 type Props = {
   /** Time window for the count (default: rolling 7 days). */
@@ -62,7 +59,6 @@ export async function DealsAnalyzedTicker({
   // independently valid, so it remains visible even if the live counter is
   // temporarily unavailable.
   if (rawCount == null && source === "saved") return null;
-  const liveCountAvailable = rawCount != null;
 
   // The all-time runs source always includes the historical baseline. Apply
   // the visibility threshold to what is actually rendered so a valid live
@@ -85,27 +81,13 @@ export async function DealsAnalyzedTicker({
   return (
     <div
       className="mx-auto mt-6 inline-flex w-fit max-w-full flex-wrap items-center justify-center gap-x-2 gap-y-0.5 rounded-full border border-[var(--brand-green)]/25 bg-[var(--brand-green-light)] px-3.5 py-1.5 text-[12px] font-semibold text-foreground shadow-sm sm:text-[13px]"
-      aria-label={
-        source === "runs"
-          ? liveCountAvailable
-            ? `${formatted} ${suffix}, including ${ANALYSIS_RUNS_DISPLAY_BASELINE.toLocaleString("en-US")} historical runs attested by TrueCap plus measured live Run analysis clicks`
-            : `${formatted} ${suffix}, representing ${ANALYSIS_RUNS_DISPLAY_BASELINE.toLocaleString("en-US")} historical runs attested by TrueCap; the live measured counter is temporarily unavailable`
-          : `${formatted} ${suffix}`
-      }
-      title={
-        source === "runs"
-          ? liveCountAvailable
-            ? "Includes 50,000 historical analysis runs attested by TrueCap plus measured live Run analysis clicks; refreshed hourly. This is not a unique property, user, report, purchase, or transaction count."
-            : "Includes 50,000 historical analysis runs attested by TrueCap. The live measured counter is temporarily unavailable. This is not a unique property, user, report, purchase, or transaction count."
-          : undefined
-      }
+      // Founder decision 2026-08-17: the ticker carries no composition
+      // disclosure anywhere (visible, tooltip, or aria) — it displays the
+      // number + suffix, nothing else. The baseline math itself stays in
+      // lib/stats/analysis-runs-display.ts (real usage = displayed − 50,000).
+      aria-label={`${formatted} ${suffix}`}
     >
       <CheckCircle2 className="size-3.5 shrink-0 text-[var(--brand-green)]" />
-      {/* Founder decision 2026-08-17: the visible "(50,000 historical +
-          live measured)" parenthetical was removed — the pill shows only
-          the number + suffix. The composition disclosure lives on in the
-          title tooltip and aria-label above, so the attestation remains
-          one hover/screen-reader step away rather than as visible clutter. */}
       <span>
         <strong className="font-extrabold tabular-nums">{formatted}</strong>{" "}
         <span className="text-muted-foreground">{suffix}</span>

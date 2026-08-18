@@ -212,7 +212,6 @@ export default function Home() {
         userAnalysisDefaults={null}
         // Presence-only env check — safe on a static page (baked at
         // build; the key VALUE never reaches the client).
-        dealQaEnabled={Boolean(process.env.ANTHROPIC_API_KEY)}
       />
       {/* ONE STORY: Analyze the deal → Know your number → Make the offer.
           The page used to run eleven sections that each sold a capability

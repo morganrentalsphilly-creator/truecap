@@ -222,7 +222,6 @@ export default async function AuthedHome({
         savedDealLimit={entitlements?.max_saved_deals ?? null}
         isAuthenticated={Boolean(user)}
         userAnalysisDefaults={userAnalysisDefaults}
-        dealQaEnabled={Boolean(process.env.ANTHROPIC_API_KEY)}
       />
       {/* Anon fallback only — the SAME seven-block story as app/page.tsx:
           how it works → trust → who it's for → pricing → closing ask → FAQ

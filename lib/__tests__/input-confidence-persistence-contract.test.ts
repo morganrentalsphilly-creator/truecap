@@ -18,7 +18,10 @@ describe("Input Confidence analyzer persistence contract", () => {
     expect(analyzer).toContain("mergeInputConfidenceSourceContext({");
     expect(analyzer).toContain("confidenceContext.provenance");
     expect(analyzer).toContain("touchedInputFields: confidenceContext.touchedInputFields");
-    expect(analyzer).toContain("provenance={liveResultSourceContext.provenance}");
+    // The results-side AssumptionsSourceStrip ("Where these numbers came
+    // from" ledger row) was removed by founder decision 2026-08-17, so the
+    // data-confidence badge is the remaining live consumer of restored
+    // provenance.
     expect(analyzer).toContain("buildDataConfidence(liveResultSourceContext.provenance");
   });
 

@@ -26,16 +26,16 @@ describe("analysis runs historical display baseline", () => {
     expect(() => withAnalysisRunsDisplayBaseline(Number.NaN)).toThrow(RangeError);
   });
 
-  it("discloses what the baseline and live count represent", () => {
-    // Founder decision 2026-08-17: the visible parenthetical suffix was
-    // removed — the pill shows the number alone. The composition disclosure
-    // must still ship in the tooltip (title) and aria-label so the
-    // attestation stays one hover/screen-reader step away.
-    expect(tickerSource).not.toContain("(50,000 historical + live measured)");
+  it("renders the number bare, with the baseline applied through the shared helper", () => {
+    // Founder decision 2026-08-17: the ticker shows ONLY the number +
+    // suffix — no composition disclosure visible, in the tooltip, or in the
+    // aria-label. The baseline itself must still flow through the shared
+    // helper (never hand-added), and the internal accounting rule stays:
+    // real measured usage = displayed − 50,000.
     expect(tickerSource).toContain("withAnalysisRunsDisplayBaseline(rawCount ?? 0)");
-    expect(tickerSource).toContain("historical analysis runs attested by TrueCap");
-    expect(tickerSource).toContain("Includes 50,000 historical analysis runs");
-    expect(tickerSource).toContain("not a unique property, user, report, purchase, or transaction");
+    expect(tickerSource).not.toContain("(50,000 historical + live measured)");
+    expect(tickerSource).not.toContain("Includes 50,000 historical");
+    expect(tickerSource).not.toContain("title={");
   });
 
   it("does not call saved-analysis rows unique deals", () => {

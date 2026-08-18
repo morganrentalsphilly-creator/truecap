@@ -22,7 +22,6 @@ import {
   MoreHorizontal,
   X,
   Search,
-  MessageCircle,
   NotebookPen,
   type LucideIcon,
 } from "lucide-react";
@@ -76,8 +75,6 @@ import { AssumptionImpactCard } from "@/components/investcalc/assumption-impact-
 import { SensitivityGrid } from "@/components/investcalc/sensitivity-grid";
 import { StrategiesPanel } from "@/components/investcalc/strategies-panel";
 import { ProInlineGate } from "@/components/investcalc/pro-inline-gate";
-import { DealQaPanel } from "@/components/investcalc/deal-qa-panel";
-import { DealSummaryCard } from "@/components/investcalc/deal-summary-card";
 import { BuyBoxVerdictCard } from "@/components/investcalc/buy-box-verdict-card";
 import { nextActionForDeal } from "@/lib/next-action";
 import { getVerdictNarrative } from "@/lib/verdict";
@@ -90,7 +87,6 @@ import {
   buildCompsQaContext,
   buildProjectionQaContext,
   type DealQaBuyBoxReport,
-  type DealQaExtraContext,
 } from "@/lib/deal-qa-context";
 import {
   buildMaoTarget,
@@ -218,12 +214,6 @@ interface AnalysisDashboardProps {
    * compare gating is unaffected.
    */
   isSampleProPreview?: boolean;
-  /**
-   * True when ANTHROPIC_API_KEY is configured (passed down from the
-   * page). Controls whether the Deal Q&A panel renders at all - the
-   * per-user limits are enforced server-side in the action.
-   */
-  dealQaEnabled?: boolean;
   saveDealLimitReached?: boolean;
   /** Client-side saved-deal count + plan limit, so the limit-reached notice
    *  can say "N of M" and stay visible without hover (the disabled Save
@@ -250,15 +240,6 @@ interface AnalysisDashboardProps {
   activeStrategy?: InvestorStrategy | null;
   /** Shown when Compare / Export are disabled (e.g. unsaved edits). */
   persistedActionsBlockHint?: string;
-  /**
-   * Results-side AssumptionsSourceStrip, rendered by investcalc-page (it
-   * needs the form's provenance) and passed in here so it can live inside
-   * the ledger's "Where these numbers came from" row (Phase 5 blueprint —
-   * a prop on AnalysisDashboard, never on InvestCalcPage, so the
-   * two-homepage rule holds). Until a caller passes it, the strip simply
-   * stays where it renders today and this row doesn't exist.
-   */
-  assumptionsSlot?: ReactNode;
 }
 
 export type AnalysisDashboardTab =
@@ -280,8 +261,6 @@ export type AnalysisDashboardTab =
 export type AnalysisLedgerRowId =
   | AnalysisDashboardTab
   | "comps"
-  | "assumptions"
-  | "deal-qa"
   | "notes";
 
 // The six analysis rows, in the exact order the tabs had. `icon` is the
@@ -305,8 +284,6 @@ const TABS: { id: AnalysisDashboardTab; label: string; icon: LucideIcon; isPro: 
 const ALL_LEDGER_ROW_IDS: AnalysisLedgerRowId[] = [
   ...TABS.map((t) => t.id),
   "comps",
-  "assumptions",
-  "deal-qa",
   "notes",
 ];
 
@@ -381,7 +358,6 @@ export function AnalysisDashboard({
   canUseSensitivity = false,
   canUseStrategies = false,
   isSampleProPreview = false,
-  dealQaEnabled = false,
   saveDealLimitReached = false,
   savedDealCount = null,
   savedDealLimit = null,
@@ -394,7 +370,6 @@ export function AnalysisDashboard({
   activeTabNonce = 0,
   activeStrategy = null,
   persistedActionsBlockHint,
-  assumptionsSlot,
 }: AnalysisDashboardProps) {
   const showInputConfidence = isFeatureEnabled("input_confidence");
   const showOfferReadyStatus = isFeatureEnabled("offer_ready_status");
@@ -570,15 +545,6 @@ export function AnalysisDashboard({
     () => (compsQaData ? buildCompsQaContext(compsQaData) : null),
     [compsQaData]
   );
-  const dealQaContext = useMemo<DealQaExtraContext | undefined>(() => {
-    const ctx: DealQaExtraContext = {
-      ...(buyBoxQaReport ? { buyBox: buyBoxQaReport.context } : {}),
-      ...(maoQaContext ? { mao: maoQaContext } : {}),
-      ...(projectionQaContext ? { projection: projectionQaContext } : {}),
-      ...(compsQaContext ? { comps: compsQaContext } : {}),
-    };
-    return Object.keys(ctx).length > 0 ? ctx : undefined;
-  }, [buyBoxQaReport, maoQaContext, projectionQaContext, compsQaContext]);
   // Investor lens - owned HERE (the common parent of the Deal Score + the
   // metric cards) so the metric ordering reacts when it changes. Persisted
   // across deals so a cash-flow investor isn't reset to Balanced each analysis.
@@ -872,8 +838,6 @@ export function AnalysisDashboard({
     comps: buildCompsRowSummary(compsQaData, values?.monthlyRent ?? null, values?.purchasePrice ?? null, {
       propertyType: values?.propertyType,
     }),
-    assumptions: "Every source behind these numbers — and how to change them",
-    "deal-qa": "Ask anything about this deal",
     notes: "Your private notes on this deal",
   };
 
@@ -1791,60 +1755,11 @@ export function AnalysisDashboard({
           </DrillRow>
         ) : null}
 
-        {/* "Where these numbers came from" - the results-side assumptions
-            strip, passed down from investcalc-page via assumptionsSlot
-            (it needs the form's provenance so it can't render here).
-            Renders only when a caller provides it. */}
-        {assumptionsSlot ? (
-          <DrillRow
-            id="assumptions"
-            title="Where these numbers came from"
-            icon={<Info className="size-4" />}
-            summary={rowSummaries.assumptions}
-            open={openRows.assumptions}
-            onOpenChange={(open) => setRowOpen("assumptions", open)}
-            keepMounted
-          >
-            {assumptionsSlot}
-          </DrillRow>
-        ) : null}
-
-        {/* Deal Q&A - grounded AI explainer, now a ledger row. Renders
-            only when the page says the feature is configured (Anthropic
-            key present). Free users get a few questions/day (server-
-            enforced - the limit is untouched by the ledger). keepMounted
-            so a typed-but-unsent question survives a collapse. */}
-        {dealQaEnabled && result && values && !isLoading ? (
-          <DrillRow
-            id="deal-qa"
-            title="Ask about this deal"
-            icon={<MessageCircle className="size-4" />}
-            summary={rowSummaries["deal-qa"]}
-            open={openRows["deal-qa"]}
-            onOpenChange={(open) => setRowOpen("deal-qa", open)}
-            keepMounted
-          >
-            <div className="space-y-4">
-              {/* Both AI panels' doc comments promise "the parent remounts us
-                  via key" — these ARE those keys. Stale AI content (a generated
-                  summary, a Q&A conversation) must not survive a deal change:
-                  keyed on saved id + address + type so editing the form to a
-                  different property (live recompute keeps this row mounted the
-                  whole time) or loading another saved deal starts fresh instead
-                  of narrating the previous deal under the new numbers. */}
-              <DealSummaryCard
-                key={`summary|${savedDealId ?? "unsaved"}|${values.address ?? ""}|${values.propertyType}`}
-                values={values}
-                context={dealQaContext}
-              />
-              <DealQaPanel
-                key={`qa|${savedDealId ?? "unsaved"}|${values.address ?? ""}|${values.propertyType}`}
-                values={values}
-                context={dealQaContext}
-              />
-            </div>
-          </DrillRow>
-        ) : null}
+        {/* The 'Where these numbers came from' and 'Ask about this deal'
+            ledger rows were removed by founder decision 2026-08-17 (low
+            utility). Provenance still lives on each input chip and in the
+            enrichment receipt; the Deal Q&A server action remains but has
+            no mount. */}
 
         {/* Deal notes - last row, saved deals only. keepMounted so the
             panel's first-mount notes fetch still fires when the saved
