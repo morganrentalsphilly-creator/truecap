@@ -27,6 +27,7 @@ import {
   releaseEmailCaptureSlot,
 } from "@/lib/email-capture-guard";
 import { escapeHtml } from "@/lib/html-escape";
+import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
 
 const PACK_PATH = "/downloads/truecap-market-intelligence-pack.pdf";
 
@@ -46,7 +47,7 @@ export type LeadMagnetCaptureResult =
       message: string;
     };
 
-type SequenceCtx = { siteUrlHtml: string };
+type SequenceCtx = { siteUrlHtml: string; guaranteeEnabled: boolean };
 
 const SEQUENCE: Array<{
   delayDays: number;
@@ -64,7 +65,7 @@ const SEQUENCE: Array<{
       analysis — HUD Fair Market Rents, state tax rates, landlord-law
       timelines. Benchmarks, not quotes: when a market looks interesting,
       run a real address and let the underwrite decide.</p>
-      <p><a href="${siteUrlHtml}/?utm_source=email&utm_campaign=mip-day0">Get your Max Offer on any address free →</a></p>
+      <p><a href="${siteUrlHtml}/?utm_source=email&utm_campaign=mip-day0">Analyze any address free — Pro solves your exact Max Offer →</a></p>
     `,
   },
   {
@@ -84,17 +85,21 @@ const SEQUENCE: Array<{
   {
     delayDays: 5,
     subject: "The number that protects you from a bad buy",
-    build: ({ siteUrlHtml }) => `
+    build: ({ siteUrlHtml, guaranteeEnabled }) => `
       <p>Every rental has one number that matters more than the rest: the
       most you can pay before the deal stops working. Overpaying by even 3%
       on a $250,000 rental is $7,500 gone before you collect a dollar of rent.</p>
       <p>TrueCap Pro computes that walk-away price on every deal — plus the
       downside stress test, your Buy Box verdict, and a lender-ready report.</p>
-      <p>And the risk is ours: analyze 10 deals in your first 30 days as a
-      subscriber, and if you don't feel more confident about exactly what to
+      ${
+        guaranteeEnabled
+          ? `<p>And the risk is ours: analyze 10 deals in your first 30 days as a
+      paying subscriber, and if you don't feel more confident about exactly what to
       offer, email us for a full refund.
       <a href="${siteUrlHtml}/guarantee">The Never Overpay Guarantee</a> is
-      published in full.</p>
+      published in full.</p>`
+          : ""
+      }
       <p><a href="${siteUrlHtml}/pricing?utm_source=email&utm_campaign=mip-day5"><strong>See Pro plans</strong></a></p>
     `,
   },
@@ -187,7 +192,10 @@ export async function captureLeadMagnetEmail(input: {
   const from = process.env.EMAIL_FROM || "TrueCap <hello@usetruecap.com>";
   const replyTo = process.env.EMAIL_REPLY_TO || "hello@usetruecap.com";
   const unsubscribeMailbox = (replyTo.match(/<([^>]+)>/)?.[1] ?? replyTo).trim();
-  const ctx: SequenceCtx = { siteUrlHtml: escapeHtml(siteUrl) };
+  const ctx: SequenceCtx = {
+    siteUrlHtml: escapeHtml(siteUrl),
+    guaranteeEnabled: getMarketingOfferConfig().guaranteeEnabled,
+  };
 
   let scheduledCount = 0;
   let day0Sent = false;
@@ -233,10 +241,19 @@ export async function captureLeadMagnetEmail(input: {
     }
   }
 
-  if (!day0Sent) {
-    // Nothing delivered — refund the email bucket so a Resend blip doesn't
-    // lock this address out for 30 days. They still get the direct link.
+  if (scheduledCount === 0) {
+    // NOTHING went out — refund the email bucket so a Resend blip doesn't
+    // lock this address out for 30 days (release contract: only when zero
+    // emails were actually sent). They still get the direct link.
     await releaseEmailCaptureSlot(claim.emailBucketKey);
+  } else if (!day0Sent) {
+    // Follow-ups scheduled but the delivery email failed — keep the slot
+    // (mail IS queued) and make the broken state visible.
+    Sentry.captureMessage("Lead magnet day-0 send failed but follow-ups scheduled", {
+      level: "warning",
+      tags: { feature: "lead-magnet-capture" },
+      extra: { scheduled_count: scheduledCount },
+    });
   }
   return { ok: true, scheduledCount, downloadUrl };
 }

@@ -25,6 +25,7 @@ import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker"
 import { GuaranteeBadge } from "@/components/marketing/guarantee-badge";
 import { LeadMagnetInline } from "@/components/marketing/lead-magnet-capture";
 import { SeoAnalyzerCta } from "@/components/marketing/seo-analyzer-cta";
+import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
 import { getSiteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
@@ -186,7 +187,9 @@ export default function PlaybookPage() {
               <p className="text-sm leading-relaxed text-muted-foreground">
                 Want the reps to be easier? Pro runs the whole playbook on every
                 address — Buy Box verdict, downside test, Max Offer, lender-ready
-                report — and the risk is ours, not yours.
+                report{getMarketingOfferConfig().guaranteeEnabled
+                  ? " — and the risk is ours, not yours."
+                  : "."}
               </p>
               <div className="mt-3 flex flex-col items-center gap-2">
                 <Link

@@ -23,6 +23,7 @@ import { isAgentProConfigured } from "@/lib/stripe/plan-prices";
 import { TRIAL_DAYS } from "@/lib/trial";
 import { AgentProPageTracker } from "@/components/analytics/agent-pro-page-tracker";
 import { AgentProofSection } from "@/components/marketing/testimonial-card";
+import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
 
 export const metadata: Metadata = {
   title: "Agent Pro — Become the Agent Investors Call First",
@@ -71,6 +72,7 @@ const USE_CASES: { icon: typeof Calculator; title: string; body: string }[] = [
 
 export default async function ForAgentsPage() {
   const agentProConfigured = isAgentProConfigured();
+  const { guaranteeEnabled } = getMarketingOfferConfig();
   const [agentMonthly, agentAnnual] = agentProConfigured
     ? await Promise.all([
         loadStripeDisplayPrice("agent_pro_monthly"),
@@ -371,10 +373,10 @@ export default async function ForAgentsPage() {
               Try the free analyzer
             </Link>
           </div>
-          {agentProConfigured ? (
+          {agentProConfigured && guaranteeEnabled ? (
             <p className="mt-4 text-xs text-primary-foreground/90">
               The agent guarantee: send 5 branded analyses in your first 30
-              days as a subscriber — if they don&apos;t change your
+              days as a paying subscriber — if they don&apos;t change your
               investor-client conversations, email us for a full refund.{" "}
               <Link href="/guarantee" className="font-bold underline underline-offset-4">
                 Full terms

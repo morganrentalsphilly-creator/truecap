@@ -26,9 +26,13 @@ export function SeoAnalyzerCta({
   handoff?: AnalyzerHandoff;
   utmSource?: string;
 }) {
+  // Attribution must survive the no-handoff path too — most call sites
+  // (glossary, vs, playbook) pass no prefill but still need utm_source.
   const href = handoff
     ? buildAnalyzerHandoffUrl(handoff, utmSource ? { utmSource } : undefined)
-    : "/#main";
+    : utmSource
+      ? `/?utm_source=${encodeURIComponent(utmSource)}#main`
+      : "/#main";
   return (
     <div className="rounded-2xl border border-border bg-card p-5 sm:flex sm:items-center sm:justify-between sm:gap-6 sm:p-6">
       <div>

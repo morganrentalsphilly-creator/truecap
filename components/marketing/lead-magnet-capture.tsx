@@ -21,6 +21,7 @@ import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { FileDown, X } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
+import { useCookieBannerOpen } from "@/lib/use-cookie-banner";
 import { usePostCheckoutUpsellSuppression } from "@/hooks/use-post-checkout-upsell-suppression";
 import { captureLeadMagnetEmail } from "@/app/actions/lead-magnet-capture";
 
@@ -178,11 +179,17 @@ export function LeadMagnetInline({ source = "inline" }: { source?: string }) {
 export function LeadMagnetExitIntent() {
   const pathname = usePathname() ?? "/";
   const suppressed = usePostCheckoutUpsellSuppression();
+  const cookieBannerOpen = useCookieBannerOpen();
   const [open, setOpen] = useState(false);
   const [captured, setCaptured] = useCapturedFlag();
   const [downloadUrl, setDownloadUrl] = useState(
     "/downloads/truecap-market-intelligence-pack.pdf"
   );
+  // The tools/blog families this card ships on own full-width z-40 bottom
+  // bars (data-sticky-bottom-bar). The card stays at z-30 per the overlay
+  // ladder, so when a bar is mounted at open time we lift the card above
+  // the bar's height instead of fighting the z-order.
+  const [barMounted, setBarMounted] = useState(false);
   const firedRef = useRef(false);
 
   useEffect(() => {
@@ -200,6 +207,7 @@ export function LeadMagnetExitIntent() {
         /* fail open, still one-shot per load via firedRef */
       }
       firedRef.current = true;
+      setBarMounted(Boolean(document.querySelector("[data-sticky-bottom-bar]")));
       setOpen(true);
       trackEvent("email_capture_shown", { source: "mip_exit_intent" });
     };
@@ -209,7 +217,8 @@ export function LeadMagnetExitIntent() {
   }, [captured]);
 
   if (suppressed || captured === undefined) return null;
-  if (!open || pathname.startsWith("/embed")) return null;
+  // Never compete with the z-50 consent banner for the bottom edge.
+  if (!open || cookieBannerOpen || pathname.startsWith("/embed")) return null;
 
   const dismiss = () => {
     setOpen(false);
@@ -225,7 +234,7 @@ export function LeadMagnetExitIntent() {
     <aside
       role="complementary"
       aria-label="Free market data download"
-      className="fixed bottom-4 right-4 z-30 w-[calc(100vw-2rem)] max-w-sm rounded-2xl border border-primary/25 bg-card p-4 shadow-[0_18px_44px_rgba(15,23,42,0.15)]"
+      className={`fixed ${barMounted ? "bottom-24" : "bottom-4"} right-4 z-30 w-[calc(100vw-2rem)] max-w-sm rounded-2xl border border-primary/25 bg-card p-4 shadow-[0_18px_44px_rgba(15,23,42,0.15)]`}
     >
       <button
         type="button"

@@ -24,6 +24,7 @@
 
 import type { ReactNode } from "react";
 import { SeoAnalyzerCta } from "@/components/marketing/seo-analyzer-cta";
+import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
 
 /**
  * Manual last-reviewed date for the comparison content (feature rows +
@@ -140,13 +141,19 @@ export function ComparisonFaq({
           test, and assumptions that are sourced and labeled instead of
           silently defaulted. Overpaying by even 3% on a $250,000 rental costs
           $7,500 — the comparison that matters is against the mistake, not the
-          subscription. And the risk is ours: analyze 10 deals in your first
-          30 days as a Pro subscriber, and if you don&apos;t feel more
-          confident about exactly what to offer, the{" "}
-          <a href="/guarantee" className="font-semibold text-primary hover:underline">
-            Never Overpay Guarantee
-          </a>{" "}
-          refunds every dollar.
+          subscription.
+          {getMarketingOfferConfig().guaranteeEnabled ? (
+            <>
+              {" "}
+              And the risk is ours: analyze 10 deals in your first 30 days as
+              a paying Pro subscriber, and if you don&apos;t feel more
+              confident about exactly what to offer, the{" "}
+              <a href="/guarantee" className="font-semibold text-primary hover:underline">
+                Never Overpay Guarantee
+              </a>{" "}
+              refunds every dollar.
+            </>
+          ) : null}
         </p>
       </div>
 

@@ -502,8 +502,10 @@ const HOMEPAGE_FAQS: { q: string; a: string }[] = [
     a: "Rent starts from a HUD area benchmark (ZIP-level when available, otherwise county-level), not a property-specific rent comp. The rate starts from FRED's national owner-occupied 30-year benchmark, not an investor lender quote. Property tax uses a state effective-rate estimate. Every field is editable - replace screening defaults with local comps, the actual tax bill, insurance, and written loan terms before making an offer.",
   },
   {
+    // The guarantee sentence is appended dynamically in HomepageFaq so the
+    // kill switch silences it together with every other refund promise.
     q: "Why does Pro cost more than other rental calculators?",
-    a: "Because you're not buying analysis — you're buying the decision layer. Cheaper tools calculate the deal you describe; Pro computes your walk-away price on every deal, checks it against your Buy Box, and stress-tests the downside before the bank does. Overpaying by even 3% on a $250,000 rental costs $7,500 — one avoided mistake covers years of Pro. And the Never Overpay Guarantee puts the risk on us, not you.",
+    a: "Because you're not buying analysis — you're buying the decision layer. Cheaper tools calculate the deal you describe; Pro computes your walk-away price on every deal, checks it against your Buy Box, and stress-tests the downside before the bank does. Overpaying by even 3% on a $250,000 rental costs $7,500 — one avoided mistake covers years of Pro.",
   },
   {
     q: "Is TrueCap really free?",
@@ -550,11 +552,18 @@ export function HomepageFaq({ structuredData = true }: { structuredData?: boolea
   // guarantee itself is live, so the FAQ can never promise a dead policy.
   const faqs = guaranteeEnabled
     ? (() => {
-        const withGuarantee = [...HOMEPAGE_FAQS];
+        const withGuarantee = HOMEPAGE_FAQS.map((f) =>
+          f.q === "Why does Pro cost more than other rental calculators?"
+            ? {
+                ...f,
+                a: `${f.a} And the Never Overpay Guarantee puts the risk on us, not you.`,
+              }
+            : f
+        );
         const trialIndex = withGuarantee.findIndex((f) => f.q === "How does the Pro trial work?");
         withGuarantee.splice(trialIndex + 1, 0, {
           q: "Is there a money-back guarantee?",
-          a: "Yes — the Never Overpay Guarantee. Analyze at least 10 deals in your first 30 days as a Pro subscriber, and if you don't feel more confident about exactly what to offer, email us within those 30 days for a full refund of what you've paid. Full terms at usetruecap.com/guarantee.",
+          a: "Yes — the Never Overpay Guarantee. Analyze at least 10 deals in your first 30 days as a paying Pro subscriber, and if you don't feel more confident about exactly what to offer, email us within those 30 days for a full refund of what you've paid. Full terms at usetruecap.com/guarantee.",
         });
         return withGuarantee;
       })()
@@ -931,7 +940,7 @@ export function NeverOverpayGuarantee() {
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground sm:text-base">
                 New subscribers try TrueCap Pro free for {TRIAL_DAYS} days. After
                 that, analyze at least 10 deals in your first 30 days as a
-                subscriber — and if you don&apos;t feel more confident about
+                paying subscriber — and if you don&apos;t feel more confident about
                 exactly what to offer, email us within those 30 days and
                 we&apos;ll refund every dollar you&apos;ve paid. No forms, no
                 hoops. Keep anything you&apos;ve downloaded.

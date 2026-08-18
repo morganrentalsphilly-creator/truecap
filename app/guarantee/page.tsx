@@ -27,12 +27,12 @@ import { TRIAL_DAYS } from "@/lib/trial";
 export const metadata: Metadata = {
   title: "The Never Overpay Guarantee",
   description:
-    "Analyze 10 deals in your first 30 days as a TrueCap Pro subscriber. If you don't feel more confident about exactly what to offer, email us for a full refund.",
+    "Analyze 10 deals in your first 30 days as a paying Pro subscriber. If you don't feel more confident about exactly what to offer, email us for a full refund.",
   alternates: { canonical: "/guarantee" },
   openGraph: {
     title: "The Never Overpay Guarantee — TrueCap",
     description:
-      "Analyze 10 deals in your first 30 days as a Pro subscriber. Not more confident about exactly what to offer? Email us for a full refund.",
+      "Analyze 10 deals in your first 30 days as a paying Pro subscriber. Not more confident about exactly what to offer? Email us for a full refund.",
     url: "/guarantee",
     type: "website",
     images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap Never Overpay Guarantee" }],
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
 const GUARANTEE_FAQS: { q: string; a: string }[] = [
   {
     q: "How do I claim the refund?",
-    a: "Email hello@usetruecap.com from your account email within your first 30 days as a subscriber and say you're claiming the guarantee. That's the whole process — no call, no form, no exit survey.",
+    a: "Email hello@usetruecap.com from your account email within your first 30 days as a paying subscriber and say you're claiming the guarantee. That's the whole process — no call, no form, no exit survey.",
   },
   {
     q: "What counts as an analyzed deal?",
@@ -55,11 +55,15 @@ const GUARANTEE_FAQS: { q: string; a: string }[] = [
   },
   {
     q: "What exactly is refunded?",
-    a: "Every dollar of subscription payments from your first 30 days as a subscriber, back to your original payment method via Stripe. One-time Deal Decision Pack purchases are separate products delivered in full at purchase and aren't part of this guarantee.",
+    a: "Every dollar of subscription payments from your first 30 days as a paying subscriber, back to your original payment method via Stripe. One-time Deal Decision Pack purchases are separate products delivered in full at purchase and aren't part of this guarantee.",
+  },
+  {
+    q: "When does the 30-day clock start?",
+    a: "The day your first subscription payment goes through — not the day your trial starts. Deals you analyzed during the free trial count toward the 10; reps are reps.",
   },
   {
     q: "How is this different from the free trial?",
-    a: `They stack. New subscribers get ${TRIAL_DAYS} days of full Pro free — cancel online during the trial and you pay nothing at all. The guarantee covers what happens after you start paying: analyze at least 10 deals in your first 30 days as a subscriber, and if you're not more confident about exactly what to offer, you get that money back too.`,
+    a: `They stack. New subscribers get ${TRIAL_DAYS} days of full Pro free — cancel online during the trial and you pay nothing at all. The guarantee covers what happens after you start paying: analyze at least 10 deals in your first 30 days as a paying subscriber, and if you're not more confident about exactly what to offer, you get that money back too.`,
   },
 ];
 
@@ -127,7 +131,7 @@ export default function GuaranteePage() {
             <p className="mt-3 text-sm leading-relaxed text-foreground sm:text-base">
               New subscribers try TrueCap Pro free for {TRIAL_DAYS} days. After
               that, if you analyze at least 10 deals in your first 30 days as a
-              subscriber and don&apos;t feel more confident about exactly what
+              paying subscriber and don&apos;t feel more confident about exactly what
               to offer, email us within those 30 days and we&apos;ll refund
               every dollar you&apos;ve paid. No forms, no hoops. Keep anything
               you&apos;ve downloaded.
@@ -169,7 +173,7 @@ export default function GuaranteePage() {
             <div>
               <p className="text-sm font-bold text-foreground">Claiming is one email.</p>
               <p className="mt-0.5 text-xs text-muted-foreground">
-                From your account email, within your first 30 days as a subscriber.
+                From your account email, within your first 30 days as a paying subscriber.
               </p>
             </div>
             <a

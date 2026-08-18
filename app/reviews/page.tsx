@@ -26,6 +26,7 @@ import {
   VERIFIED_AGENT_PROOF,
   isPublicationReady,
 } from "@/lib/proof-records";
+import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
 import { getSiteUrl } from "@/lib/site-url";
 
 export const revalidate = 3600;
@@ -48,6 +49,7 @@ export const metadata: Metadata = {
 
 export default function ReviewsPage() {
   const siteUrl = getSiteUrl();
+  const { guaranteeEnabled } = getMarketingOfferConfig();
   const publishedCount =
     VERIFIED_TESTIMONIALS.filter((r) => isPublicationReady(r, "homepage")).length +
     VERIFIED_AGENT_PROOF.filter((r) => isPublicationReady(r, "homepage")).length;
@@ -138,17 +140,19 @@ export default function ReviewsPage() {
                 , including its limitations.
               </p>
             </div>
-            <div className="rounded-2xl border border-border bg-card p-5">
-              <span className="flex size-10 items-center justify-center rounded-xl bg-[var(--brand-green)]/10 text-[var(--brand-green)]">
-                <ShieldCheck aria-hidden className="size-5" />
-              </span>
-              <h3 className="mt-4 font-extrabold text-foreground">A real guarantee</h3>
-              <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-                Analyze 10 deals in your first 30 days as a Pro subscriber —
-                not more confident about what to offer? Full refund.
-              </p>
-              <GuaranteeBadge align="start" className="mt-3" />
-            </div>
+            {guaranteeEnabled ? (
+              <div className="rounded-2xl border border-border bg-card p-5">
+                <span className="flex size-10 items-center justify-center rounded-xl bg-[var(--brand-green)]/10 text-[var(--brand-green)]">
+                  <ShieldCheck aria-hidden className="size-5" />
+                </span>
+                <h3 className="mt-4 font-extrabold text-foreground">A real guarantee</h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+                  Analyze 10 deals in your first 30 days as a paying Pro subscriber —
+                  not more confident about what to offer? Full refund.
+                </p>
+                <GuaranteeBadge align="start" className="mt-3" />
+              </div>
+            ) : null}
           </div>
           <p className="mx-auto mt-8 max-w-2xl text-center text-xs leading-relaxed text-muted-foreground">
             How quotes get here: after a real workflow moment (an exported

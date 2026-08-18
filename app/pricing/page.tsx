@@ -79,7 +79,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "What is the Never Overpay Guarantee?",
-    a: "Analyze at least 10 deals in your first 30 days as a Pro subscriber. If you don't feel more confident about exactly what to offer, email us within those 30 days and we'll refund every dollar you've paid — back to your original payment method via Stripe. Full terms at usetruecap.com/guarantee.",
+    a: "Analyze at least 10 deals in your first 30 days as a paying Pro subscriber. If you don't feel more confident about exactly what to offer, email us within those 30 days and we'll refund every dollar you've paid — back to your original payment method via Stripe. Full terms at usetruecap.com/guarantee.",
   },
   {
     q: "Do I keep my saved deals if I downgrade?",
@@ -101,7 +101,8 @@ const FAQS: { q: string; a: string }[] = [
 ];
 
 export default async function PricingPage() {
-  const { proOfferName, singleDeal } = getMarketingOfferConfig();
+  const { proOfferName, singleDeal, singleDealPriceVariant, guaranteeEnabled } =
+    getMarketingOfferConfig();
   const alertsLive = rateAlertEmailsLive();
   const supabase = await createServerSupabaseClient();
   const {
@@ -121,7 +122,16 @@ export default async function PricingPage() {
   // the fetched price meant one transient Stripe error deleted a live tier from
   // the pricing page for that visitor.
   const agentProConfigured = isAgentProConfigured();
-  const packCreditConfigured = isPackCreditConfigured();
+  // The credit promise renders only when it is fully redeemable as
+  // promised: coupon env set AND the $5 'current' variant is selling
+  // (redemption hard-filters to the $5 amount; see lib/pack-credit.ts).
+  const packCreditConfigured =
+    isPackCreditConfigured() && singleDealPriceVariant === "current";
+  // The guarantee kill switch must silence EVERY refund promise, including
+  // this page's FAQ prose and its FAQPage JSON-LD (review finding 2026-08-17).
+  const faqs = guaranteeEnabled
+    ? FAQS
+    : FAQS.filter((f) => f.q !== "What is the Never Overpay Guarantee?");
   const [monthly, annual, agentMonthly, agentAnnual, activePaidPlanSlug, hadPriorSubscription] = await Promise.all([
     loadStripeDisplayPrice("pro_monthly"),
     loadStripeDisplayPrice("pro_annual"),
@@ -427,7 +437,8 @@ export default async function PricingPage() {
                     <>
                       {" "}
                       <strong className="text-foreground">
-                        Your {singleDeal.priceLabel} is credited toward Pro
+                        Buy while signed in and your {singleDeal.priceLabel} is
+                        credited toward Pro
                       </strong>{" "}
                       if you upgrade within {PACK_CREDIT_WINDOW_DAYS} days.
                     </>
@@ -454,7 +465,7 @@ export default async function PricingPage() {
             Frequently asked
           </h2>
           <div className="tc-reveal mt-8 divide-y divide-border rounded-2xl border border-border bg-card">
-            {FAQS.map((faq) => (
+            {faqs.map((faq) => (
               <details key={faq.q} className="group px-5 py-4 sm:px-6 sm:py-5">
                 <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                   <span className="font-semibold text-foreground">{faq.q}</span>
@@ -488,7 +499,7 @@ export default async function PricingPage() {
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "FAQPage",
-              mainEntity: FAQS.map((f) => ({
+              mainEntity: faqs.map((f) => ({
                 "@type": "Question",
                 name: f.q,
                 acceptedAnswer: { "@type": "Answer", text: f.a },

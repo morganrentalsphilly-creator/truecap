@@ -18,6 +18,7 @@ import "server-only";
 
 import * as Sentry from "@sentry/nextjs";
 import { escapeHtml } from "@/lib/html-escape";
+import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
 import { TRIAL_DAYS } from "@/lib/trial";
 
 function wrapHtml(inner: string, unsubscribeMailbox: string): string {
@@ -66,8 +67,11 @@ export async function schedulePackCreditEmails(input: {
         <p>Pro is the repeat version of the report you just bought: Max Offer,
         Buy Box verdict, downside stress test, and lender-ready exports on
         every deal — with a ${escapeHtml(String(TRIAL_DAYS))}-day free trial for new
-        subscribers and the <a href="${siteUrlHtml}/guarantee">Never Overpay
-        Guarantee</a> after that.</p>
+        subscribers${
+          getMarketingOfferConfig().guaranteeEnabled
+            ? ` and the <a href="${siteUrlHtml}/guarantee">Never Overpay Guarantee</a> after that`
+            : ""
+        }.</p>
         <p><a href="${siteUrlHtml}/pricing?utm_source=email&utm_campaign=pack-credit-day0"><strong>See Pro plans</strong></a></p>
       `,
     },

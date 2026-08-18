@@ -38,7 +38,10 @@ import {
   hashOneTimePdfClaimSecret,
 } from "@/lib/one-time-pdf-claims";
 import { evaluateOneTimePdfProCredit } from "@/lib/one-time-pdf-credit";
-import { buildPackCreditPolicy } from "@/lib/pack-credit";
+import {
+  buildPackCreditPolicy,
+  PACK_CREDIT_REDEEMABLE_AMOUNT_CENTS,
+} from "@/lib/pack-credit";
 import { schedulePackCreditEmails } from "@/lib/email/pack-credit-emails";
 
 /** Existing production $5 price; experiments require their own configured id. */
@@ -369,14 +372,24 @@ async function recordPackPurchaseExtrasBestEffort(
       policy: buildPackCreditPolicy(),
     });
 
+    // Grant ONLY what redemption can actually deliver (review findings
+    // 2026-08-17): findEligiblePackCredit matches claims bound to a signed-in
+    // user AND worth exactly the configured $5 coupon. An anonymous purchase
+    // or a price-experiment variant therefore stays 'not_configured' — no
+    // credit row, no promise emails, no toast — instead of promising an
+    // automatic credit checkout can never attach.
+    const grantable =
+      decision.status === "eligible" &&
+      Boolean(input.userId) &&
+      decision.amountCents === PACK_CREDIT_REDEEMABLE_AMOUNT_CENTS;
     const creditFields =
-      decision.status === "eligible"
+      decision.status === "eligible" && grantable
         ? {
             pro_credit_status: "eligible",
             pro_credit_policy_version: decision.policyVersion,
             pro_credit_amount_cents: decision.amountCents,
             pro_credit_eligible_until: decision.eligibleUntil,
-            ...(input.userId ? { pro_credit_user_id: input.userId } : {}),
+            pro_credit_user_id: input.userId,
           }
         : {};
     const emailFields = input.buyerEmail ? { buyer_email: input.buyerEmail } : {};
@@ -411,10 +424,11 @@ async function recordPackPurchaseExtrasBestEffort(
       return undefined;
     }
 
-    if (decision.status !== "eligible") return undefined;
+    if (decision.status !== "eligible" || !grantable) return undefined;
 
     // Credit countdown emails (day 0 + day 5) — idempotent because a claim
-    // consumes exactly once; only reached when the credit really exists.
+    // consumes exactly once; only reached when the credit really exists AND
+    // is redeemable by this (signed-in) buyer.
     if (input.buyerEmail) {
       await schedulePackCreditEmails({
         email: input.buyerEmail,
