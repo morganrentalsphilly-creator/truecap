@@ -101,17 +101,15 @@ export async function DealsAnalyzedTicker({
       }
     >
       <CheckCircle2 className="size-3.5 shrink-0 text-[var(--brand-green)]" />
+      {/* Founder decision 2026-08-17: the visible "(50,000 historical +
+          live measured)" parenthetical was removed — the pill shows only
+          the number + suffix. The composition disclosure lives on in the
+          title tooltip and aria-label above, so the attestation remains
+          one hover/screen-reader step away rather than as visible clutter. */}
       <span>
         <strong className="font-extrabold tabular-nums">{formatted}</strong>{" "}
         <span className="text-muted-foreground">{suffix}</span>
       </span>
-      {source === "runs" ? (
-        <span className="text-[10px] font-medium text-muted-foreground/90 sm:text-[11px]">
-          {liveCountAvailable
-            ? "(50,000 historical + live measured)"
-            : "(50,000 historical; live counter unavailable)"}
-        </span>
-      ) : null}
     </div>
   );
 }

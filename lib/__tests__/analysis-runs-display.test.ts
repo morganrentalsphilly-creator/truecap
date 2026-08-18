@@ -26,11 +26,15 @@ describe("analysis runs historical display baseline", () => {
     expect(() => withAnalysisRunsDisplayBaseline(Number.NaN)).toThrow(RangeError);
   });
 
-  it("visibly discloses what the baseline and live count represent", () => {
-    expect(tickerSource).toContain("(50,000 historical + live measured)");
-    expect(tickerSource).toContain("(50,000 historical; live counter unavailable)");
+  it("discloses what the baseline and live count represent", () => {
+    // Founder decision 2026-08-17: the visible parenthetical suffix was
+    // removed — the pill shows the number alone. The composition disclosure
+    // must still ship in the tooltip (title) and aria-label so the
+    // attestation stays one hover/screen-reader step away.
+    expect(tickerSource).not.toContain("(50,000 historical + live measured)");
     expect(tickerSource).toContain("withAnalysisRunsDisplayBaseline(rawCount ?? 0)");
     expect(tickerSource).toContain("historical analysis runs attested by TrueCap");
+    expect(tickerSource).toContain("Includes 50,000 historical analysis runs");
     expect(tickerSource).toContain("not a unique property, user, report, purchase, or transaction");
   });
 
