@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { Header } from "@/components/investcalc/header";
 import { BillingConversionTracker } from "@/components/marketing/billing-conversion-tracker";
 import { BillingPanel } from "@/components/profile/billing-panel";
 import { ProfileForm } from "@/components/profile/profile-form";
@@ -227,7 +226,6 @@ export default async function ProfilePage({
 
   return (
     <>
-      <Header initialUser={user} initialEntitlements={entitlements} />
       {/* Fires the Google Ads paid-subscription conversion event when the
           user lands here from a Stripe checkout success redirect. */}
       <BillingConversionTracker

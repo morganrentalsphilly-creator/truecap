@@ -37,7 +37,6 @@ export function Sidebar({ savedDealCount, navAccess, mobile = false, onNavigate 
   // light up for /dashboard/saved-analyses. Sub-routes match on prefix.
   const isActive = (href: string): boolean => {
     if (href === "/dashboard") return pathname === "/dashboard";
-    if (href === "/") return false; // New Analysis link to "/" — never lit from inside the dashboard.
     return pathname === href || pathname.startsWith(`${href}/`);
   };
 
@@ -48,7 +47,7 @@ export function Sidebar({ savedDealCount, navAccess, mobile = false, onNavigate 
     // link that /dashboard would immediately redirect to My Deals. Free users
     // still reach the dashboard area via the "My Deals" item just below.
     { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard", enabled: navAccess.overview },
-    { icon: PlusCircle, label: "New Analysis", href: "/", enabled: true },
+    { icon: PlusCircle, label: "New Analysis", href: "/dashboard/new", enabled: true },
     { icon: Briefcase, label: "My Deals", href: "/dashboard/saved-analyses", badge: String(savedDealCount), enabled: navAccess.myDeals },
     { icon: ListTodo, label: "Compare Deals", href: "/dashboard/compare", enabled: navAccess.compareDeals },
     // Batch triage — the power-tool tier, same gate as Compare.

@@ -356,7 +356,7 @@ export default async function DashboardComparePage() {
                       : "Save a couple of deals first, then come back to compare them."}
                   </p>
                   <Button className="mt-4 rounded-full" asChild>
-                    <Link href="/">Analyze a property</Link>
+                    <Link href="/dashboard/new">Analyze a property</Link>
                   </Button>
                 </div>
               )}

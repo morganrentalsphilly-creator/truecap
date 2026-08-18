@@ -34,7 +34,10 @@ import { trackEvent } from "@/lib/analytics";
 
 const DISMISS_KEY = "truecap_founding_pricing_dismissed_v1";
 
-const HIDE_ON_PATHS = ["/auth", "/embed", "/dashboard"];
+// Prefix-matched. /settings, /profile and /admin are AUTHENTICATED product
+// surfaces — a founding-pricing pitch does not belong over the app, and
+// "/settings" covers /settings/branding automatically.
+const HIDE_ON_PATHS = ["/auth", "/embed", "/dashboard", "/settings", "/profile", "/admin"];
 const HIDE_EXACT_PATHS = ["/"];
 
 export function FoundingPricingBanner() {

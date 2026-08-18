@@ -256,7 +256,7 @@ export function Topbar({
               md+ only and the topbar otherwise leads with searching EXISTING
               deals. 44px touch target. */}
           <Link
-            href="/"
+            href="/dashboard/new"
             prefetch={false}
             aria-label="New analysis"
             className="inline-flex size-11 items-center justify-center rounded-lg text-white transition hover:opacity-90 md:hidden"
@@ -265,7 +265,7 @@ export function Topbar({
             <Sparkles className="h-5 w-5" />
           </Link>
           <Link
-            href="/"
+            href="/dashboard/new"
             prefetch={false}
             className="hidden md:inline-flex items-center gap-2 h-10 px-4 rounded-lg text-sm font-semibold text-white transition hover:opacity-90"
             style={{ background: "var(--gradient-premium)", boxShadow: "var(--shadow-glow)" }}

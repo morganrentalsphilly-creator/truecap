@@ -1091,7 +1091,11 @@ export function DashboardHome({
                 label="Monthly Cash Flow"
                 value={formatSignedCurrency(portfolio.totalCashFlow)}
                 change={null}
-                changeLabel={`~${formatCurrency(portfolio.totalCashFlow * 12)} annualized`}
+                // "~" + a negative currency rendered as "~-$2,016" — the
+                // tilde and minus read as one broken glyph. The word carries
+                // the approximation without colliding with the sign.
+                // (Value unchanged; formatting only.)
+                changeLabel={`About ${formatSignedCurrency(portfolio.totalCashFlow * 12)} annualized`}
                 icon={DollarSign}
                 spark={[]}
                 tone="success"
@@ -1343,7 +1347,7 @@ export function DashboardHome({
                 </p>
               </div>
               <Button asChild variant="outline" className="h-9 shrink-0 rounded-xl px-4 text-sm">
-                <Link href="/" prefetch={false}>
+                <Link href="/dashboard/new" prefetch={false}>
                   <Plus className="h-4 w-4" />
                   Analyze another property
                 </Link>
@@ -1390,7 +1394,7 @@ export function DashboardHome({
               className="mt-5 rounded-xl px-5"
               style={{ background: "var(--gradient-premium)", boxShadow: "var(--shadow-glow)" }}
             >
-              <Link href="/">
+              <Link href="/dashboard/new">
                 <Plus className="h-4 w-4" />
                 {savedTotalCount > 0 ? "Analyze a property" : "Analyze your first property"}
               </Link>

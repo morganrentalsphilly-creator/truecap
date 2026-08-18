@@ -3058,7 +3058,7 @@ export function SavedAnalysesPage({
                     Run a property through the analyzer and click <strong className="text-foreground">Save</strong> on the dashboard. Saved deals show up here with a portfolio rollup, so you can compare, edit, and revisit any deal you&apos;re considering.
                   </p>
                   <Button asChild size="lg" className="mt-5 w-full rounded-full sm:w-auto">
-                    <Link href="/">Open the analyzer</Link>
+                    <Link href="/dashboard/new">Open the analyzer</Link>
                   </Button>
                 </>
               ) : (
@@ -3168,7 +3168,7 @@ export function SavedAnalysesPage({
               {isStartingCompare ? "Preparing..." : "Compare Selected"}
             </Button>
             <Button className="rounded-full bg-primary text-primary-foreground" asChild>
-              <Link href="/">
+              <Link href="/dashboard/new">
                 <Sparkles className="w-4 h-4 mr-1.5" />
                 New Analysis
               </Link>

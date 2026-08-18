@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Header } from "@/components/investcalc/header";
 import { getEntitlementsForUser, hasPlanFeature } from "@/lib/entitlements";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getBranding } from "@/app/actions/branding";
@@ -40,7 +39,6 @@ export default async function BrandingSettingsPage() {
 
   return (
     <>
-      <Header initialUser={user} initialEntitlements={entitlements} />
       <main
         id="main"
         className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-5 space-y-6"

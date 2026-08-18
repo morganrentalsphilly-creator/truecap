@@ -47,6 +47,7 @@ import {
   hasSavedDealCapacity,
 } from "@/lib/entitlements";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { getAnalyzerCapabilities } from "@/lib/analyzer-capabilities";
 import { getStripe } from "@/lib/stripe/client";
 import { planSlugFromPriceId, type PaidPlanSlug } from "@/lib/stripe/plan-prices";
 import { VERIFIED_CASE_STUDIES } from "@/lib/verified-case-studies";
@@ -133,52 +134,28 @@ export default async function AuthedHome({
   // engine defaults. Done server-side so there's no flash of generic
   // values before user defaults overlay. Tolerant of missing migration
   // (returns null on the 42P01 path).
-  const [entitlements, defaultsQuery, canUpdateSavedDeals, savedCountQuery] = user
-    ? await Promise.all([
-        getEntitlementsForUser(supabase, user.id),
-        supabase
-          .from("user_analysis_defaults")
-          .select("preferences")
-          .eq("user_id", user.id)
-          .maybeSingle(),
-        hasPaidPlanSubscription(supabase, user.id),
-        supabase
-          .from("saved_analyses")
-          .select("*", { count: "exact", head: true })
-          .eq("user_id", user.id)
-          .is("deleted_at", null),
-      ])
-    : [null, null, false, null];
-  let userAnalysisDefaults: Record<string, number> | null = null;
-  const prefs = (defaultsQuery?.data as { preferences?: unknown } | null)?.preferences;
-  if (prefs && typeof prefs === "object" && !Array.isArray(prefs)) {
-    const sanitized: Record<string, number> = {};
-    for (const [k, v] of Object.entries(prefs as Record<string, unknown>)) {
-      if (typeof v === "number" && Number.isFinite(v)) sanitized[k] = v;
-    }
-    if (Object.keys(sanitized).length > 0) userAnalysisDefaults = sanitized;
-  }
-  const savedDealCount = savedCountQuery?.count ?? 0;
-  const canSaveDeals = entitlements ? hasPlanFeature(entitlements, "save_deal") : false;
-  const saveDealLimitReached = entitlements ? !hasSavedDealCapacity(entitlements, savedDealCount ?? 0) : false;
-  const canCompareDeals = entitlements ? hasPlanFeature(entitlements, "compare_deals") : false;
-  const canExportPdf = entitlements ? hasPlanFeature(entitlements, "pdf_export") : false;
-  const canUseProjections = entitlements ? hasPlanFeature(entitlements, "projections") : false;
-  const canUseTaxStrategy = entitlements ? hasPlanFeature(entitlements, "tax_strategy") : false;
-  const canUseExitScenarios = entitlements ? hasPlanFeature(entitlements, "exit_scenarios") : false;
-  // Deal Score is FREE for everyone (free + Pro): the headline 0-100 verdict
-  // converts better given away than locked behind Pro. Depth (projections /
-  // tax / exit / save / PDF / compare) stays gated by the checks above/below.
-  const canUseDealScore = true;
-  // Pro-gated features that weren't previously gated. Derived from
-  // hasPaidPlanSubscription (any paid plan = unlocked) so we don't need
-  // a DB migration to add new feature keys per plan. If you later split
-  // these by plan tier, replace with hasPlanFeature checks.
-  const isPaidPlan = canUpdateSavedDeals; // already derived from hasPaidPlanSubscription
-  const canUseMaxOffer = isPaidPlan;
-  const canUseSensitivity = isPaidPlan;
-  const canUseStrategies = isPaidPlan;
-  const canUseBuyBox = entitlements ? hasPlanFeature(entitlements, "buy_box") : false;
+  // Capability flags resolve through the SHARED helper so this route and the
+  // in-shell analyzer (/dashboard/new) can never drift apart. Same queries,
+  // same derivations as before the extraction.
+  const {
+    entitlements,
+    savedDealCount,
+    userAnalysisDefaults,
+    canSaveDeals,
+    canUpdateSavedDeals,
+    saveDealLimitReached,
+    canCompareDeals,
+    canExportPdf,
+    canUseProjections,
+    canUseTaxStrategy,
+    canUseExitScenarios,
+    canUseDealScore,
+    canUseMaxOffer,
+    canUseSensitivity,
+    canUseStrategies,
+    canUseBuyBox,
+  } = await getAnalyzerCapabilities(supabase, user);
+
   // (canUseShareLinks was removed: share links are deliberately FREE for
   // everyone — the /d/[encoded] growth loop — and the prop was dead all the
   // way down to ShareLinkButton.)
@@ -265,9 +242,13 @@ export default async function AuthedHome({
           `analysis_completed`, `pro_checkout_started`, `pro_subscribed`
           to build a 5-step funnel chart in the PostHog dashboard. */}
       <TrackLandingView />
-      {/* Site footer — trust + sitemap + brand. Shown to everyone; helps
-          with Quality Score and dwell time. */}
-      <SiteFooter />
+      {/* Site footer — trust + sitemap + brand, for ANON visitors only.
+          It carries a hardcoded Account column (Sign in / Create account /
+          Forgot password) with no auth awareness, so rendering it to a
+          signed-in user invited them to sign in from inside the product.
+          Gated like MarketingHero / the landing sections / StickyConversionBar
+          above. */}
+      {!user ? <SiteFooter /> : null}
     </div>
   );
 }

@@ -60,6 +60,19 @@ const nextConfig = {
         destination: "/tools/cap-rate-calculator",
         permanent: true,
       },
+      // Guessable aliases for real destinations. Nothing in the app links
+      // to these — they 404'd for anyone who typed the obvious URL. The
+      // label/slug divergence is what makes /dashboard/screen guessable:
+      // the nav says "Screen a shortlist", the route is /dashboard/triage.
+      //
+      // /analyze intentionally lands on "/" rather than a specific
+      // analyzer: proxy.ts already rewrites "/" to the authed home for
+      // signed-in users, so one target serves both audiences. (next.config
+      // redirects cannot read cookies, so an auth-dependent destination
+      // would have to be a page-level redirect instead.)
+      { source: "/analyze", destination: "/", permanent: false },
+      { source: "/deals", destination: "/dashboard/saved-analyses", permanent: false },
+      { source: "/dashboard/screen", destination: "/dashboard/triage", permanent: false },
     ];
   },
 
