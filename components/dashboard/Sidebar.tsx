@@ -52,13 +52,11 @@ export function Sidebar({ savedDealCount, navAccess, mobile = false, onNavigate 
     { icon: ListTodo, label: "Compare Deals", href: "/dashboard/compare", enabled: navAccess.compareDeals },
     // Batch triage — the power-tool tier, same gate as Compare.
     { icon: ListChecks, label: "Screen a shortlist", href: "/dashboard/triage", enabled: navAccess.compareDeals },
-    { icon: FileBarChart, label: "Templates", href: "/dashboard/templates", enabled: navAccess.templates },
     { icon: Users, label: "Clients", href: "/dashboard/clients", enabled: navAccess.clients },
     // Settings promoted from the avatar dropdown into the main sidebar.
     // Pro users pay for Branding (configured at /settings/branding); it
     // shouldn't be 3 clicks deep in a Topbar dropdown. /settings is the
     // hub that links to Branding, Defaults, and Billing sub-pages.
-    { icon: Settings, label: "Settings", href: "/settings", enabled: true },
   ].map((item) => ({ ...item, active: isActive(item.href) }));
 
   return (

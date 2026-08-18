@@ -3469,6 +3469,12 @@ export function InvestCalcPage({
       // Properties include the headline metrics so PostHog dashboards
       // can segment "users who saw a STRONG BUY verdict" vs "users who
       // saw AVOID" and compare downstream conversion to Pro.
+      // The rebuild's top-of-funnel counterpart to max_offer_viewed: how
+      // many runs actually produce a decision the user sees.
+      trackEvent("analysis_run", {
+        property_type: values.propertyType,
+        is_authenticated: isAuthenticated,
+      });
       trackEvent("analysis_completed", {
         property_type: values.propertyType,
         cap_rate: result.capRate,

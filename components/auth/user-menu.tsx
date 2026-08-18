@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Crown, LayoutDashboard, Loader2, LogOut, Settings, UserCircle } from "lucide-react";
+import { Crown, Layers, LayoutDashboard, Loader2, LogOut, Settings, UserCircle } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -125,6 +125,29 @@ export function UserMenu({
             <UserCircle className="w-4 h-4" />
             Profile
           </Link>
+        </DropdownMenuItem>
+
+        {/* Demoted from the primary sidebar (Aug-2026): Templates is a
+
+
+            setup surface, not a daily destination. Settings sits beside it. */}
+
+
+        <DropdownMenuItem asChild>
+
+
+          <Link href="/dashboard/templates" className="cursor-pointer">
+
+
+            <Layers className="mr-2 size-4" />
+
+
+            Templates
+
+
+          </Link>
+
+
         </DropdownMenuItem>
 
         <DropdownMenuItem asChild>

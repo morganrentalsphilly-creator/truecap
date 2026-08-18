@@ -50,6 +50,9 @@ import {
   isExtremeCumulativeRoi,
 } from "@/lib/extreme-value-format";
 import { recommendationLabel } from "@/lib/deal-score";
+import { isFeatureEnabled } from "@/lib/feature-flags";
+import { YourDealsTable } from "@/components/dashboard/your-deals-table";
+import { ScreeningRecord } from "@/components/dashboard/screening-record";
 import { cn, scrollBehavior } from "@/lib/utils";
 import { PIPELINE_STAGES, type PipelineStage } from "@/lib/pipeline";
 
@@ -757,6 +760,17 @@ export function DashboardHome({
   // into dead space when a marketing banner sat above the 100vh shell. Keep all
   // four pages (home, saved-analyses, compare, templates) + the shell + sidebar
   // on this same model — never reintroduce the lock on one side alone.
+  const focusedDashboard = isFeatureEnabled("focused_dashboard");
+  // A real name only. profiles.display_name / first_name are the only real
+  // sources; page.tsx already degrades to the email local-part, so anything
+  // matching the email's local-part is NOT a name.
+  const emailLocalPart = data.user.email.split("@")[0] ?? "";
+  const candidateName = data.user.displayName.split(" ")[0] ?? "";
+  const firstName =
+    candidateName && candidateName.toLowerCase() !== emailLocalPart.toLowerCase()
+      ? candidateName
+      : "";
+
   return (
     <div className="flex-1 min-w-0 flex flex-col">
       <Topbar
@@ -778,9 +792,11 @@ export function DashboardHome({
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <h1 className="font-display text-2xl sm:text-3xl xl:text-4xl font-bold tracking-tight">
-              {/* Fallback to email local-part if displayName empty so
-                  we never render "Welcome back, " with a trailing comma. */}
-              Welcome back, {(data.user.displayName.split(" ")[0] || data.user.email.split("@")[0]) ?? "investor"}
+              {/* An email local-part is not a name. page.tsx's getDisplayName
+                  already falls back to it, so the old second fallback here was
+                  dead code that guaranteed "Welcome back, morganrentalsphilly".
+                  If we don't have a real first name, greet without one. */}
+              {firstName ? `Welcome back, ${firstName}` : "Welcome back"}
             </h1>
             <p className="text-muted-foreground mt-1.5 text-sm sm:text-base">
               {headerSubtitle}
@@ -955,6 +971,22 @@ export function DashboardHome({
             Renders nothing when nothing changed — invisible until useful. */}
         <RateWatchStrip rateWatch={data.rateWatch ?? null} alertsLive={data.alertsLive ?? false} />
 
+        {/* ── Your deals (Aug-2026 rebuild) ─────────────────────────
+            ONE table replacing Portfolio Overview, Pipeline, Top
+            Performers, the Deal Comparison chart, Portfolio Signals and
+            Risk vs Return — and the first dashboard surface ever to carry
+            a MAX OFFER per deal, plus the gap to asking. */}
+        {focusedDashboard ? (
+          <>
+            <YourDealsTable deals={data.allDeals} />
+            <ScreeningRecord deals={data.allDeals} totalSavedDeals={data.savedTotalCount ?? data.stats.totalDeals} />
+          </>
+        ) : null}
+
+        {/* ── Replaced modules. Kept behind the kill switch so the old
+            dashboard is one env var away if the rebuild regresses. ──── */}
+        {!focusedDashboard ? (
+          <>
         {/* ── Owned portfolio (M3-1 / WOW-3) — the month-3 payoff. The one
             number that grows every month by itself (equity = appreciation +
             principal paydown) for the customer who actually closed. Every
@@ -1327,6 +1359,9 @@ export function DashboardHome({
               })}
             </div>
           </section>
+        ) : null}
+
+          </>
         ) : null}
 
         {/* ── One-deal honest replacement (FFM-2) ─────────────────────

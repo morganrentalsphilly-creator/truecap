@@ -73,6 +73,14 @@ export type SavedAnalysisDashboardRow = {
 };
 
 export type DashboardDeal = {
+  /**
+   * Solved Max Offer, recomputed on read from form_snapshot — it is NOT
+   * persisted anywhere (no column, not in ResultSnapshot). Computed by the
+   * SAME lib/deal-offer-line path My Deals uses, so the dashboard and the
+   * list can never quote different numbers. Null = legacy/unparseable
+   * snapshot, or no buy box + no solvable target.
+   */
+  maxOffer?: number | null;
   id: string;
   address: string;
   propertyType: "single-family" | "multi-family" | "owner-occupant" | null;

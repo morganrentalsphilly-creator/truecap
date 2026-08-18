@@ -43,6 +43,9 @@ import {
   type OwnedDealEquityBasis,
 } from "@/lib/owned-equity-series";
 import { listBuyBoxesAction } from "@/app/actions/user-buy-boxes";
+import { computeDealOfferLine } from "@/lib/deal-offer-line";
+import { normalizeInvestmentFormSnapshot } from "@/lib/investcalc-schema";
+import type { DashboardDeal } from "@/lib/dashboard-deal-mapping";
 import {
   boxesForDealClient,
   buyBoxHasCriteria,
@@ -467,6 +470,13 @@ export default async function DashboardPage() {
     isPremium,
     navAccess.dashboard
   );
+  // Max Offer per deal — the number the product is sold on, absent from this
+  // screen until now. Recomputed from form_snapshot via the same
+  // computeDealOfferLine path My Deals uses (no new math, no new query).
+  // Deliberately over the DETAILED rows only: this is a bounded set, whereas
+  // the aggregate set is unbounded and each solve costs ~28 calc iterations.
+  // Runs AFTER activeBuyBoxes resolves (below) — see the reassignment there.
+
   dashboardData.portfolioAggregates = portfolioAggregates;
   // True saved total (matches the sidebar "My Deals" badge) so the header
   // can distinguish active deals from the full saved set.
@@ -520,6 +530,35 @@ export default async function DashboardPage() {
     buyBoxesResult && buyBoxesResult.ok && buyBoxesResult.canUse
       ? buyBoxesResult.boxes.filter((b) => b.isActive && buyBoxHasCriteria(b))
       : [];
+
+  // Max Offer per DETAILED row (bounded set). Same lib/deal-offer-line path
+  // My Deals uses, so the two screens can never quote different numbers.
+  {
+    const offerById = new Map<string, number | null>();
+    for (const row of (rows ?? []) as SavedAnalysisDashboardRow[]) {
+      const values = normalizeInvestmentFormSnapshot(row.form_snapshot);
+      if (!values) continue;
+      try {
+        const { offer } = computeDealOfferLine(values, activeBuyBoxes, {
+          isShoppingStage: true,
+        });
+        // "blocked" carries no price by design — no dollar figure can fix a
+        // wrong-market miss, so it must stay null rather than invent one.
+        offerById.set(
+          row.id,
+          offer && offer.kind !== "blocked" ? offer.maxPrice ?? null : null
+        );
+      } catch {
+        // One unsolvable deal must never take down the dashboard.
+      }
+    }
+    const withOffer = (deal: DashboardDeal) => ({
+      ...deal,
+      maxOffer: offerById.get(deal.id) ?? null,
+    });
+    dashboardData.allDeals = dashboardData.allDeals.map(withOffer);
+    dashboardData.topDeals = dashboardData.topDeals.map(withOffer);
+  }
   const ownBuyBoxes = boxesForDealClient(activeBuyBoxes, null);
   if (activeBuyBoxes.length > 0 && dashboardData.allDeals.length > 0) {
     const fitByDealId: Record<string, BuyBoxFitSummary> = {};

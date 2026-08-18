@@ -563,6 +563,7 @@ export function AnswerHeroCard({
   hasUnsavedChanges,
   purchasePrice,
   maxOffer,
+  decisionOwnedUpstream = false,
 }: {
   isLoading: boolean;
   /** Two-stage load: the base analysis lands first, the Deal Score action
@@ -595,6 +596,13 @@ export function AnswerHeroCard({
   /** Solved Max Offer from the dashboard's canonical maoQaContext memo —
    *  the SAME value the Max Offer card renders. Null on Free/unsolvable. */
   maxOffer: number | null;
+  /**
+   * True when <DecisionTier> above already renders the Max Offer, the
+   * verdict sentence, the score chip and the primary Save. This card then
+   * drops those four (they would be a second copy inches apart) and serves
+   * as Tier-2 EVIDENCE: why this verdict, and what to do about it.
+   */
+  decisionOwnedUpstream?: boolean;
 }) {
   const isCashPurchase = Boolean(result && result.monthlyPayment <= 0);
   // Deal-specific tips from THIS deal's weakest subscores (null when the
@@ -633,6 +641,7 @@ export function AnswerHeroCard({
 
   return (
     <div className="grid grid-cols-1 items-start gap-3 sm:gap-4 md:grid-cols-3">
+      {decisionOwnedUpstream ? null : (
       <DealScoreCard
         isAnalysisLoading={isLoading}
         isDealScoreLoading={isLoadingDealScore}
@@ -640,6 +649,7 @@ export function AnswerHeroCard({
         isAppreciationPlay={isAppreciationPlay}
         benchmarkSublabel={benchmarkSublabel}
       />
+      )}
 
       {/* Recommendation card. Visually FIRST below md (order-first) so the
           first thing a phone user reads after Run is the plain-English
@@ -673,7 +683,9 @@ export function AnswerHeroCard({
               </p>
               {/* Hero-corner Save - surfaces the toolbar's exact save
                   handler so the primary retention action never buries
-                  below the fold on mobile. The dot = unsaved changes. */}
+                  below the fold on mobile. The dot = unsaved changes.
+                  Suppressed when Tier 1 owns the primary Save. */}
+              {decisionOwnedUpstream ? null : (
               <Button
                 variant="ghost"
                 size="sm"
@@ -698,6 +710,7 @@ export function AnswerHeroCard({
                   </>
                 ) : null}
               </Button>
+              )}
             </div>
             <div className="flex items-center gap-3 mb-3">
               <div
@@ -722,13 +735,21 @@ export function AnswerHeroCard({
                   what to do, at what price, against what was asked. Falls
                   back to the label alone when price/Max Offer aren't
                   available (Free tier). */}
-              <h2 className="text-balance text-2xl font-extrabold text-foreground sm:text-3xl">
-                {buildVerdictSentence({
-                  recommendation: recommendation.label,
-                  purchasePrice,
-                  maxOffer,
-                }).text}
-              </h2>
+              {decisionOwnedUpstream ? (
+                // Tier 1 states the decision. Here we only name the tier, so
+                // the "why" below has something to attach to.
+                <h2 className="text-lg font-extrabold text-foreground sm:text-xl">
+                  Why this verdict
+                </h2>
+              ) : (
+                <h2 className="text-balance text-2xl font-extrabold text-foreground sm:text-3xl">
+                  {buildVerdictSentence({
+                    recommendation: recommendation.label,
+                    purchasePrice,
+                    maxOffer,
+                  }).text}
+                </h2>
+              )}
             </div>
             {/* Buy-box fit chip - only when a box evaluated (fed by the
                 existing BuyBoxVerdictCard onFitChange report-up); the full

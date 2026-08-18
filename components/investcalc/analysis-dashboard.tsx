@@ -5,24 +5,27 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import {
-  TrendingUp,
   ArrowUpRight,
   Building2,
   ChevronDown,
   ChevronRight,
-  FileText,
-  Save,
-  Loader2,
-  Info,
-  FileDown,
-  Sparkles,
   CopyPlus,
+  Database,
+  FileDown,
+  FileText,
+  GitCompareArrows,
+  Info,
   ListTodo,
-  SlidersHorizontal,
+  Loader2,
   MoreHorizontal,
-  X,
-  Search,
   NotebookPen,
+  PlusCircle,
+  Save,
+  Search,
+  SlidersHorizontal,
+  Sparkles,
+  TrendingUp,
+  X,
   type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -71,6 +74,7 @@ const ExitScenariosPanel = dynamic(
   }
 );
 import { MaxOfferCard } from "@/components/investcalc/max-offer-card";
+import { DecisionTier } from "@/components/investcalc/decision-tier";
 import { AssumptionImpactCard } from "@/components/investcalc/assumption-impact-card";
 import { SensitivityGrid } from "@/components/investcalc/sensitivity-grid";
 import { StrategiesPanel } from "@/components/investcalc/strategies-panel";
@@ -386,6 +390,11 @@ export function AnalysisDashboard({
   }, []);
   const setRowOpen = useCallback((id: AnalysisLedgerRowId, open: boolean) => {
     setOpenRows((prev) => (prev[id] === open ? prev : { ...prev, [id]: open }));
+    if (open) {
+      // Tier-3 engagement: which deep-analysis rows people still open once
+      // they are no longer stacked on the decision screen.
+      trackEvent("deep_analysis_opened", { row: id });
+    }
     if (open && id === "stress-test") {
       trackEvent("stress_test_opened", { placement: "analysis_ledger" });
       trackEvent("downside_viewed", { placement: "analysis_ledger" });
@@ -828,6 +837,72 @@ export function AnalysisDashboard({
     notes: "Your private notes on this deal",
   };
 
+  // ── Tier-1 derivations (Aug-2026 hierarchy rebuild) ──────────────────
+  // Presentation only: reads the ALREADY-COMPUTED deal score. The
+  // recommendation string is the INTERNAL enum; <Verdict> maps it.
+  const decisionFirst = isFeatureEnabled("decision_first_results");
+  const heroRecommendation = dealScoreResult?.ok
+    ? dealScoreResult.tier === "pro"
+      ? dealScoreResult.data.recommendation
+      : dealScoreResult.recommendation
+    : null;
+  // Free tier returns a recommendation with no numeric score — the chip
+  // simply doesn't render there.
+  const heroScore =
+    dealScoreResult?.ok && dealScoreResult.tier === "pro"
+      ? Math.round(dealScoreResult.data.score)
+      : null;
+
+  // The single trust line. Names the sources behind the starting numbers
+  // without claiming a count we cannot verify per-deal.
+  const assumptionsSummaryLine = (
+    <p className="flex flex-wrap items-center gap-x-1.5 text-xs text-muted-foreground">
+      <Database aria-hidden className="size-3.5 shrink-0 text-primary/60" />
+      <span>
+        Built from <strong className="font-semibold text-foreground">HUD</strong> rent,{" "}
+        <strong className="font-semibold text-foreground">FRED</strong> rate and{" "}
+        <strong className="font-semibold text-foreground">state</strong> tax benchmarks — every
+        assumption is editable above.
+      </span>
+    </p>
+  );
+
+  // Everything that used to compete in the six-button row. Rendered inside
+  // Tier 1's "More" popover so exactly one primary action remains.
+  const decisionOverflowActions = (
+    <>
+      {canExportPdf && onExportPdf ? (
+        <button
+          type="button"
+          onClick={() => {
+            trackEvent("export_pdf", { surface: "decision_overflow" });
+            onExportPdf();
+          }}
+          className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left text-sm font-semibold text-foreground hover:bg-muted"
+        >
+          <FileDown aria-hidden className="size-4" />
+          Export PDF
+        </button>
+      ) : null}
+      {canCompareDeals ? (
+        <Link
+          href="/dashboard/compare"
+          className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm font-semibold text-foreground hover:bg-muted"
+        >
+          <GitCompareArrows aria-hidden className="size-4" />
+          Compare deals
+        </Link>
+      ) : null}
+      <Link
+        href="/dashboard/new"
+        className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm font-semibold text-foreground hover:bg-muted"
+      >
+        <PlusCircle aria-hidden className="size-4" />
+        New analysis
+      </Link>
+    </>
+  );
+
   return (
     <div className="space-y-6">
       {/* Sample-deal Pro preview banner - slimmed to a one-line dismissible
@@ -865,6 +940,33 @@ export function AnalysisDashboard({
           order-1/order-2 swap wrapper is retired. When a non-cash-flow
           strategy is active (Wholesale/BRRRR/Flip), StrategyOutcomeCard IS
           the hero - the same early swap as before, now top-level. */}
+      {/* ── TIER 1 · THE DECISION ────────────────────────────────────
+          Max Offer first and largest, the verdict as an instruction, the
+          score demoted to a chip, ONE primary action. Replaces the old
+          arrangement where Max Offer rendered 9th and again ~10 blocks
+          lower. Not shown while a strategy play leads the output — that
+          card IS the decision for wholesale/BRRRR/flip and solves on its
+          own documented basis. */}
+      {decisionFirst && !strategyLeadsOutput && result && !isLoading ? (
+        <DecisionTier
+          values={values}
+          result={result}
+          recommendation={heroRecommendation}
+          score={heroScore}
+          isLoading={isLoading || isLoadingDealScore}
+          canUseMaxOffer={canUseMaxOffer}
+          buyBoxThresholds={buyBoxQaReport?.maoThresholds ?? null}
+          trustLine={assumptionsSummaryLine}
+          onSave={handleSaveClick}
+          isSaving={isSaving}
+          isSaveLocked={isSaveLockedByPlan}
+          saveLockedHint={saveLockedHint}
+          isSaved={isSaved}
+          hasUnsavedChanges={isExistingSavedDeal && !isSaved}
+          overflowActions={decisionOverflowActions}
+        />
+      ) : null}
+
       {strategyLeadsOutput ? (
         activeStrategy && values ? (
           <StrategyOutcomeCard
@@ -899,6 +1001,7 @@ export function AnalysisDashboard({
           // Same solved value the Max Offer card shows (one canonical memo),
           // so the headline sentence can never quote a different number.
           maxOffer={maoQaContext?.maxOffer ?? null}
+          decisionOwnedUpstream={decisionFirst}
         />
       )}
 
@@ -921,7 +1024,12 @@ export function AnalysisDashboard({
       {/* The upgrade moment belongs immediately after the answer, while the
           acquisition decision is still top-of-mind. It exposes the exact
           missing outcome (Max Offer) without inventing a number for Free. */}
-      {result && values && !isLoading && canUseMaxOffer ? (
+      {/* MERGED into <DecisionTier> when decision-first is on: the four
+          targets now live in its "Tune targets" disclosure and recompute
+          the hero number in place, so this card would be a second Max
+          Offer on a divergent basis. The sensitivity bars survive as
+          Tier-2 evidence (rendered below). */}
+      {result && values && !isLoading && canUseMaxOffer && !decisionFirst ? (
         <section id="max-offer-result" className="scroll-mt-20 space-y-4" aria-label="Max Offer decision">
           <MaxOfferCard
             values={values}
@@ -1355,10 +1463,17 @@ export function AnalysisDashboard({
         />
       ) : null}
 
+      {/* TIER 2 · WHY THIS NUMBER — the ranked drivers behind the offer.
+          Previously nested inside the Max Offer section that Tier 1
+          replaced; surfaced here so the evidence outlives the merge. */}
+      {decisionFirst && result && values && !isLoading && canUseMaxOffer ? (
+        <AssumptionImpactCard values={values} />
+      ) : null}
+
       {/* Max Offer is a first-class acquisition answer, not just another
           metric. This compact summary uses the exact same deterministic
           engine and Buy Box target basis as the editable solver below. */}
-      {maoQaContext && values && !strategyLeadsOutput && !showDecisionThresholds ? (
+      {maoQaContext && values && !strategyLeadsOutput && !showDecisionThresholds && !decisionFirst ? (
         <section
           aria-labelledby="max-offer-summary-title"
           className="rounded-2xl border-2 border-primary/30 bg-[var(--brand-blue-light)] p-5 sm:p-6"
@@ -1625,7 +1740,7 @@ export function AnalysisDashboard({
           shut page reads as an executive summary. The old "Details"
           landmark strip retired - the hero/ledger boundary IS the
           landmark now. */}
-      <DrillLedger label="Deeper analysis">
+      <DrillLedger label="Deep analysis">
         {TABS.map((tab) => {
           const Icon = tab.icon;
           return (

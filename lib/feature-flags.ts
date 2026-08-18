@@ -20,6 +20,10 @@ export const FEATURE_FLAG_KEYS = [
   "batch_underwriting",
   "agent_client_matching",
   "new_homepage_positioning",
+  // Aug-2026 hierarchy rebuild. Both default ON: they ARE the rebuild, and
+  // the flags exist so a regression can be reverted without a redeploy.
+  "decision_first_results",
+  "focused_dashboard",
 ] as const;
 
 export type FeatureFlagKey = (typeof FEATURE_FLAG_KEYS)[number];
@@ -37,6 +41,8 @@ export const FEATURE_FLAG_ENV_KEYS = {
   batch_underwriting: "NEXT_PUBLIC_TRUECAP_BATCH_UNDERWRITING",
   agent_client_matching: "NEXT_PUBLIC_TRUECAP_AGENT_CLIENT_MATCHING",
   new_homepage_positioning: "NEXT_PUBLIC_TRUECAP_NEW_HOMEPAGE_POSITIONING",
+  decision_first_results: "NEXT_PUBLIC_TRUECAP_DECISION_FIRST_RESULTS",
+  focused_dashboard: "NEXT_PUBLIC_TRUECAP_FOCUSED_DASHBOARD",
 } as const satisfies Record<FeatureFlagKey, `NEXT_PUBLIC_${string}`>;
 
 /**
@@ -54,6 +60,13 @@ export const DEFAULT_FEATURE_FLAGS: FeatureFlagState = Object.freeze({
   batch_underwriting: false,
   agent_client_matching: false,
   new_homepage_positioning: false,
+  // These two default TRUE, unlike every flag above. They are not new
+  // behavior being introduced dark — they are the shipped Aug-2026
+  // information hierarchy, and the flag exists so a regression can be
+  // switched off in Vercel without a redeploy. Set the env to "0"/"false"
+  // to fall back to the pre-rebuild layout.
+  decision_first_results: true,
+  focused_dashboard: true,
 });
 
 const TRUE_VALUES = new Set(["1", "true", "yes", "on", "enabled"]);
@@ -96,6 +109,8 @@ const runtimeOverrides: Partial<Record<FeatureFlagKey, FeatureFlagOverride>> = {
   batch_underwriting: process.env.NEXT_PUBLIC_TRUECAP_BATCH_UNDERWRITING,
   agent_client_matching: process.env.NEXT_PUBLIC_TRUECAP_AGENT_CLIENT_MATCHING,
   new_homepage_positioning: process.env.NEXT_PUBLIC_TRUECAP_NEW_HOMEPAGE_POSITIONING,
+  decision_first_results: process.env.NEXT_PUBLIC_TRUECAP_DECISION_FIRST_RESULTS,
+  focused_dashboard: process.env.NEXT_PUBLIC_TRUECAP_FOCUSED_DASHBOARD,
 };
 
 export const featureFlags: FeatureFlagState = resolveFeatureFlags(runtimeOverrides);

@@ -169,6 +169,17 @@ export type FunnelEvent =
   // ── 2026-08 Grand Slam Offer rollout ────────────────────────────
   | "founding_banner_clicked"   // properties: target ("methodology" | "pricing")
   | "founding_banner_dismissed"
+  // ── Aug-2026 hierarchy rebuild: the decision funnel ─────────────
+  // Instrumented so the rebuild's premise is measurable: does leading
+  // with Max Offer change what people do next?
+  | "analysis_run"              // properties: property_type, is_authenticated
+  | "max_offer_viewed"          // properties: has_offer, tier ("decision")
+  | "tune_targets_opened"
+  | "deal_saved"                // properties: is_update
+  | "deep_analysis_opened"      // properties: row
+  | "shortlist_screened"        // properties: rows
+  | "export_pdf"                // properties: surface
+  | "upgrade_cta_click"         // properties: placement, feature
   | "pack_credit_offer_shown"   // post-purchase "$5 toward Pro" toast
   | "testimonial_prompt_shown"     // properties: source
   | "testimonial_prompt_submitted" // properties: source, consented

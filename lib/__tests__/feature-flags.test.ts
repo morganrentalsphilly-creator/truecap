@@ -9,6 +9,20 @@ import {
 } from "@/lib/feature-flags";
 
 describe("product feature flags", () => {
+  /**
+   * Two KINDS of flag now live here, and the distinction is load-bearing:
+   *
+   *   ROLLOUT flags gate unreleased behavior and MUST default off, so an
+   *   unset env can never expose half-built work.
+   *
+   *   KILL-SWITCH flags gate behavior that is already shipped (the Aug-2026
+   *   information hierarchy). They default ON — the product IS the new
+   *   layout — and exist so a regression can be switched off in Vercel
+   *   without a redeploy. Defaulting these off would ship the rebuild dark
+   *   and silently keep the old layout live.
+   */
+  const KILL_SWITCH_FLAGS: FeatureFlagKey[] = ["decision_first_results", "focused_dashboard"];
+
   it("declares every requested rollout flag exactly once and defaults it off", () => {
     expect(FEATURE_FLAG_KEYS).toEqual([
       "input_confidence",
@@ -21,9 +35,23 @@ describe("product feature flags", () => {
       "batch_underwriting",
       "agent_client_matching",
       "new_homepage_positioning",
+      "decision_first_results",
+      "focused_dashboard",
     ]);
     expect(Object.keys(DEFAULT_FEATURE_FLAGS).sort()).toEqual([...FEATURE_FLAG_KEYS].sort());
-    expect(Object.values(DEFAULT_FEATURE_FLAGS)).toEqual(FEATURE_FLAG_KEYS.map(() => false));
+
+    for (const key of FEATURE_FLAG_KEYS) {
+      expect(DEFAULT_FEATURE_FLAGS[key], key).toBe(KILL_SWITCH_FLAGS.includes(key));
+    }
+  });
+
+  it("kill-switch flags can be turned OFF by env without a redeploy", () => {
+    for (const key of KILL_SWITCH_FLAGS) {
+      expect(isFeatureEnabled(key, resolveFeatureFlags({ [key]: "0" })), key).toBe(false);
+      expect(isFeatureEnabled(key, resolveFeatureFlags({ [key]: "false" })), key).toBe(false);
+      // Unset env must NOT disable them — that is the whole difference.
+      expect(isFeatureEnabled(key, resolveFeatureFlags({})), key).toBe(true);
+    }
   });
 
   it.each(["1", "true", "TRUE", " yes ", "on", "enabled"])(
