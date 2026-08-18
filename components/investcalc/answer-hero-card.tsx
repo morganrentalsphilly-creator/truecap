@@ -736,11 +736,13 @@ export function AnswerHeroCard({
                   back to the label alone when price/Max Offer aren't
                   available (Free tier). */}
               {decisionOwnedUpstream ? (
-                // Tier 1 states the decision. Here we only name the tier, so
-                // the "why" below has something to attach to.
-                <h2 className="text-lg font-extrabold text-foreground sm:text-xl">
-                  Why this verdict
-                </h2>
+                // Tier 1 states the decision, and the enclosing region is
+                // already headed "Why this number" — so this slot renders
+                // NOTHING. It previously printed the literal string "Why
+                // this verdict" directly above a nested disclosure of the
+                // same name: the explanation's label leaking into the
+                // verdict's slot.
+                null
               ) : (
                 <h2 className="text-balance text-2xl font-extrabold text-foreground sm:text-3xl">
                   {buildVerdictSentence({
@@ -880,7 +882,11 @@ export function AnswerHeroCard({
           BASE-result driven (matches the Deal Score + verdict above). */}
       {nextAction ? (
         <div className="md:col-span-3">
-          <NextActionBanner action={nextAction} />
+          {/* The standalone Next Action banner is GONE when the Decision
+              tier owns the page: "Don't buy at $310,000. Offer $214,000 or
+              walk." already IS the next action, and repeating it here made
+              the page state one conclusion four times. */}
+          {decisionOwnedUpstream ? null : <NextActionBanner action={nextAction} />}
         </div>
       ) : null}
     </div>

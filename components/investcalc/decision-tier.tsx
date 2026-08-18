@@ -74,6 +74,13 @@ export type DecisionTierProps = {
   hasUnsavedChanges: boolean;
   /** Everything that used to compete in the six-button row. */
   overflowActions: ReactNode;
+  /**
+   * Reports the EFFECTIVE target (seeded, then tuned) up to the dashboard so
+   * "Or — make your current price work" solves the same targets this tier
+   * solved Max Offer with. Without this it would silently answer a different
+   * question after any edit.
+   */
+  onTargetResolved?: (target: MaoTarget) => void;
 };
 
 export function DecisionTier({
@@ -92,6 +99,7 @@ export function DecisionTier({
   isSaved,
   hasUnsavedChanges,
   overflowActions,
+  onTargetResolved,
 }: DecisionTierProps) {
   const fieldId = useId();
   const isCashDeal = Boolean(result && result.monthlyPayment <= 0);
@@ -155,6 +163,10 @@ export function DecisionTier({
   const maxOffer = mao?.maxPrice ?? null;
   const gap = purchasePrice != null && maxOffer != null ? purchasePrice - maxOffer : null;
   const sentence = buildVerdictSentence({ recommendation, purchasePrice, maxOffer });
+
+  useEffect(() => {
+    onTargetResolved?.(target);
+  }, [target, onTargetResolved]);
 
   // Did the decision actually reach the user? Fires once per solved offer.
   useEffect(() => {

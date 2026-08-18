@@ -476,3 +476,18 @@ textarea,
     }
   }
 }
+
+/* Disclosure markers: the app supplies its own chevron on every <summary>.
+   Safari/Chrome also paint a native triangle unless BOTH of these are set
+   (list-style alone is not enough on WebKit), which produced doubled
+   "▶ >" markers at some viewports. Global + defensive by design — a
+   per-component fix would keep missing new disclosures. */
+summary {
+  list-style: none;
+}
+summary::-webkit-details-marker {
+  display: none;
+}
+summary::marker {
+  content: "";
+}

@@ -75,6 +75,8 @@ const ExitScenariosPanel = dynamic(
 );
 import { MaxOfferCard } from "@/components/investcalc/max-offer-card";
 import { DecisionTier } from "@/components/investcalc/decision-tier";
+import { ResultsRegion } from "@/components/investcalc/results-region";
+import { MakePriceWorkCard } from "@/components/investcalc/make-price-work-card";
 import { AssumptionImpactCard } from "@/components/investcalc/assumption-impact-card";
 import { SensitivityGrid } from "@/components/investcalc/sensitivity-grid";
 import { StrategiesPanel } from "@/components/investcalc/strategies-panel";
@@ -88,7 +90,9 @@ import { StrategyLensOutcomeCard } from "@/components/investcalc/strategy-lens-o
 import type { InvestorStrategy } from "@/lib/investor-strategies";
 import { deriveStateFromAddress } from "@/lib/buy-box";
 import { type DealQaBuyBoxReport } from "@/lib/deal-qa-context";
+import type { MaoTarget } from "@/lib/max-allowable-offer";
 import {
+  DEFAULT_MAO_TARGET,
   buildMaoTarget,
   buyBoxContributesToMaoTarget,
   describeMaoTarget,
@@ -844,6 +848,9 @@ export function AnalysisDashboard({
   // Presentation only: reads the ALREADY-COMPUTED deal score. The
   // recommendation string is the INTERNAL enum; <Verdict> maps it.
   const decisionFirst = isFeatureEnabled("decision_first_results");
+  // The effective Max Offer target, reported up by <DecisionTier> so the
+  // make-your-price-work inverse always answers the same question.
+  const [decisionTarget, setDecisionTarget] = useState<MaoTarget>(DEFAULT_MAO_TARGET);
   const heroRecommendation = dealScoreResult?.ok
     ? dealScoreResult.tier === "pro"
       ? dealScoreResult.data.recommendation
@@ -967,6 +974,7 @@ export function AnalysisDashboard({
           isSaved={isSaved}
           hasUnsavedChanges={isExistingSavedDeal && !isSaved}
           overflowActions={decisionOverflowActions}
+          onTargetResolved={setDecisionTarget}
         />
       ) : null}
 
@@ -982,6 +990,49 @@ export function AnalysisDashboard({
             onUpgrade={goToBilling}
           />
         ) : null
+      ) : decisionFirst ? (
+        /* REGION 2 · WHY THIS NUMBER — the reasoning paragraph, the risk
+           bullets, the make-your-price-work inverse, and the ranked
+           drivers, behind ONE collapsed disclosure. Previously four
+           separate top-level blocks that each restated the conclusion. */
+        <ResultsRegion
+          id="why-this-number"
+          question="Why this number"
+          payoff="The reasoning, the risks, and what would have to change"
+          openEvent="why_this_number_opened"
+        >
+          <div className="space-y-4">
+            <AnswerHeroCard
+          isLoading={isLoading}
+          isLoadingDealScore={isLoadingDealScore}
+          dealScoreResult={dealScoreResult}
+          result={result}
+          propertyType={propertyType}
+          isAppreciationPlay={appreciationPlay}
+          verdictNarrative={verdictNarrative}
+          nextAction={nextAction}
+          buyBoxFit={buyBoxAnyPass}
+          showAllTips={showAllTips}
+          onToggleShowAllTips={() => setShowAllTips((prev) => !prev)}
+          onSave={handleSaveClick}
+          isSaving={isSaving}
+          isSaveLocked={isSaveLockedByPlan}
+          saveLockedHint={saveLockedHint}
+          hasUnsavedChanges={isExistingSavedDeal && !isSaved}
+            purchasePrice={values?.purchasePrice ?? null}
+            maxOffer={maoQaContext?.maxOffer ?? null}
+            decisionOwnedUpstream
+            />
+            {/* RESTORED: this panel lived inside MaxOfferCard and vanished
+                from the DOM when the Decision-tier merge suppressed that
+                card. It is the answer to "but what if I still want this
+                house at this price". */}
+            <MakePriceWorkCard values={values} target={decisionTarget} />
+            {result && values && !isLoading && canUseMaxOffer ? (
+              <AssumptionImpactCard values={values} />
+            ) : null}
+          </div>
+        </ResultsRegion>
       ) : (
         <AnswerHeroCard
           isLoading={isLoading}
@@ -1001,10 +1052,7 @@ export function AnalysisDashboard({
           saveLockedHint={saveLockedHint}
           hasUnsavedChanges={isExistingSavedDeal && !isSaved}
           purchasePrice={values?.purchasePrice ?? null}
-          // Same solved value the Max Offer card shows (one canonical memo),
-          // so the headline sentence can never quote a different number.
           maxOffer={maoQaContext?.maxOffer ?? null}
-          decisionOwnedUpstream={decisionFirst}
         />
       )}
 
@@ -1077,13 +1125,15 @@ export function AnalysisDashboard({
           onPrepare={handlePrepareOffer}
         />
       ) : null}
-
-      {/* Action bar - split into two visually distinct elements:
-          a lightweight identity strip ("what is this?") and a
-          chunkier Quick Actions panel ("what can I do with it?").
-          Previously these were nested inside the same rounded card,
-          which gave the area a busy double-border feel. */}
-      <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+      {/* REPLACED by <DecisionTier>'s "Save deal + ··· More" when
+          decision-first is on. This block was the six competing action
+          buttons (two of them filled-primary), a duplicate Save, and a
+          NOT SAVED badge that the Save button's own state already
+          communicates. Kept behind the kill switch only. */}
+      {!decisionFirst ? (
+        /* Action bar — identity strip ("what is this?") + Quick Actions
+           ("what can I do with it?"). */
+        <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
         {/* Identity strip - property type + saved-status badge.
             Inline, no card chrome. Reads as a header rather than
             a UI element. */}
@@ -1426,12 +1476,17 @@ export function AnalysisDashboard({
               ) : null}
         </div>
       </div>
+      ) : null}
 
       {/* "What decides this deal" - elevates the single biggest sensitivity
           driver (from the same engine as the Cash Flow tab's tornado) to a
           headline next to the verdict. Hidden during a strategy-led output
           (that has its own framing) and while loading. */}
-      {result && values && !isLoading && !strategyLeadsOutput ? (
+      {/* MERGED into "What moves this deal" (AssumptionImpactCard, now inside
+          "Why this number"): both render computeAssumptionImpact, and this one
+          only elevated the #1 driver the other already ranks first — the
+          identical fact, stated twice in a row. */}
+      {!decisionFirst && result && values && !isLoading && !strategyLeadsOutput ? (
         <DealDriverInsight values={values} result={result} marketRentEstimate={marketRentEstimate} />
       ) : null}
 
@@ -1464,13 +1519,6 @@ export function AnalysisDashboard({
           onFitChange={setBuyBoxAnyPass}
           onQaContextChange={setBuyBoxQaReport}
         />
-      ) : null}
-
-      {/* TIER 2 · WHY THIS NUMBER — the ranked drivers behind the offer.
-          Previously nested inside the Max Offer section that Tier 1
-          replaced; surfaced here so the evidence outlives the merge. */}
-      {decisionFirst && result && values && !isLoading && canUseMaxOffer ? (
-        <AssumptionImpactCard values={values} />
       ) : null}
 
       {/* Max Offer is a first-class acquisition answer, not just another

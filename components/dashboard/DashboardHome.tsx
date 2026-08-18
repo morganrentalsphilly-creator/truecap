@@ -1437,8 +1437,13 @@ export function DashboardHome({
           </div>
         ) : null}
 
-        {/* ── Charts + insights — only if we have data to show ────── */}
-        {hasAnyDeals && data.topDeals.length > 0 ? (
+        {/* ── DELETED by the focused dashboard ──────────────────────
+            PortfolioChart (Deal Comparison bar chart) and AIInsights
+            (Portfolio Signals) are superseded by "Your deals": the same
+            saved deals, with the Max Offer and gap those two never showed.
+            RiskReturn moves to Compare Deals, where comparison is the job.
+            Kept behind the kill switch only. */}
+        {!focusedDashboard && hasAnyDeals && data.topDeals.length > 0 ? (
           <div>
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
               <div className="xl:col-span-2 space-y-6">
@@ -1467,7 +1472,14 @@ export function DashboardHome({
           </div>
         ) : null}
 
-        {hasAnyDeals && data.topDeals.length > 0 ? (
+        {/* TopDeals is the old "Deal Decision List" — a second table of the
+            same saved deals. Its columns (Score, 10-Yr ROI, Cap Rate, Cash
+            Flow, Risk, Recommendation) are all reachable: Score, Verdict and
+            the cash-flow-derived gap live in "Your deals"; the full metric
+            set lives on each deal's workspace and in Compare Deals. Its
+            sort-by-metric control is ported as the sortable headers on
+            "Your deals". Kept behind the kill switch only. */}
+        {!focusedDashboard && hasAnyDeals && data.topDeals.length > 0 ? (
           <div>
             <TopDeals data={topDeals} />
             {sampledNote ? (

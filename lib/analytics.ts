@@ -180,6 +180,13 @@ export type FunnelEvent =
   | "shortlist_screened"        // properties: rows
   | "export_pdf"                // properties: surface
   | "upgrade_cta_click"         // properties: placement, feature
+  // Region-level engagement: which QUESTION people open, now that the
+  // results page is navigated by intent instead of scroll position.
+  | "why_this_number_opened"
+  | "the_numbers_opened"
+  | "go_deeper_opened"
+  | "testimonial_prompt_shown"
+  | "testimonial_submitted"
   | "pack_credit_offer_shown"   // post-purchase "$5 toward Pro" toast
   | "testimonial_prompt_shown"     // properties: source
   | "testimonial_prompt_submitted" // properties: source, consented

@@ -33,6 +33,7 @@ import {
   type NamedBuyBox,
 } from "@/lib/buy-box";
 import { BuyBoxFitBadge } from "@/components/investcalc/buy-box-fit-badge";
+import { RiskReturn, type RiskReturnDeal } from "@/components/dashboard/RiskReturn";
 import { useToast } from "@/hooks/use-toast";
 import type { DealAssumptions } from "@/lib/compare-assumptions";
 import { formatRoiHeadline } from "@/lib/extreme-value-format";
@@ -1250,6 +1251,29 @@ export function CompareDealsClient({
   ];
   const desktopSlots = Array.from({ length: MAX_COMPARE_ITEMS }, (_, index) => deals[index] ?? null);
 
+  /**
+   * Risk vs Return — MOVED here from the dashboard (Aug-2026). Comparison is
+   * this screen's job; on the dashboard it was a chart of the same saved
+   * deals sitting beside a table of them. Every field below already exists
+   * on the compare row — this is a shape map, not a computation.
+   */
+  const riskReturnDeals = useMemo<RiskReturnDeal[]>(
+    () =>
+      deals.map((deal) => ({
+        dealId: deal.id,
+        name: deal.scenarioName ? `${deal.address} — ${deal.scenarioName}` : deal.address,
+        type: deal.propertyType ?? undefined,
+        coc: deal.metrics.cocReturn ?? null,
+        roi: deal.compareSnapshot?.longTermSummary?.totalROI ?? null,
+        dscr: deal.metrics.dscr ?? null,
+        isCashPurchase: (deal.metrics.monthlyPayment ?? 0) <= 0,
+        size: deal.purchasePrice ?? 0,
+        score: deal.score ?? undefined,
+        cashFlow: deal.metrics.netCashFlow ?? undefined,
+      })),
+    [deals]
+  );
+
   return (
     <main id="main" className="min-h-[calc(100vh-5rem)] bg-muted/30 px-4 py-6 text-foreground sm:px-6 sm:py-8 xl:bg-[image:var(--compare-surface)]">
         <div className="w-full">
@@ -1825,6 +1849,15 @@ export function CompareDealsClient({
               })}
             </section>
           </div>
+
+          {/* Risk vs Return — relocated from the dashboard. Needs at least
+              two deals to say anything: over a set of one it would name the
+              same address as best-return AND safest. */}
+          {riskReturnDeals.length >= 2 ? (
+            <div className="mt-6">
+              <RiskReturn deals={riskReturnDeals} />
+            </div>
+          ) : null}
         </div>
       </main>
   );

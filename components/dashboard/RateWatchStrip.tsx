@@ -60,9 +60,11 @@ export function RateWatchStrip({
         <p className="mt-2.5 hidden text-xs leading-relaxed text-muted-foreground sm:block">
           We re-underwrite your saved deals whenever the 30-yr rate moves, and flag any whose
           tier, DSCR band, or cash-flow sign changes.{" "}
-          {alertsLive
-            ? "Turn on alerts in settings to hear about it by email."
-            : "Email alerts are launching soon — join the list in settings."}
+          {/* The re-underwriting above is REAL and runs on every dashboard
+              render. The email delivery is not shipped — and a paid product
+              must not advertise an unshipped feature, so when alerts are
+              dark this line simply says nothing extra. */}
+          {alertsLive ? "Turn on alerts in settings to hear about it by email." : null}
         </p>
       </section>
     );
