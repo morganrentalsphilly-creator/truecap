@@ -24,7 +24,7 @@ const SERP_TITLE = "How to refinance a rental property (2026)";
 const DESCRIPTION =
   "Step-by-step on refinancing a rental property: rate-and-term vs cash-out, program-specific LTV and DSCR considerations, illustrative break-even math, and five mistakes to avoid.";
 const PUBLISHED_AT = "2026-05-26";
-const MODIFIED_AT = "2026-08-15";
+const MODIFIED_AT = "2026-08-18";
 const READING_TIME = 10;
 
 export const metadata: Metadata = {
@@ -156,7 +156,7 @@ export default function RefinancePost() {
             the appropriate decision may differ.
           </p>
           <p>
-            See our <Link href="/glossary/interest-rate" className="text-primary font-semibold hover:underline">interest rate</Link> and <Link href="/glossary/loan-term" className="text-primary font-semibold hover:underline">loan term</Link> glossary entries for more on how rate + term interact.
+            See our <Link href="/glossary/interest-rate" className="text-primary font-semibold hover:underline">interest rate</Link> and <Link href="/glossary/loan-term" className="text-primary font-semibold hover:underline">loan term</Link> glossary entries for more on how rate + term interact. Model the new payment with the <Link href="/tools/mortgage-payment-calculator" className="text-primary font-semibold hover:underline">mortgage payment calculator</Link> before comparing it to the current note.
           </p>
 
           <h3 className="text-xl font-bold text-foreground mt-6 mb-2">Reason 2: Cash-out refi to recycle capital</h3>
@@ -180,7 +180,8 @@ export default function RefinancePost() {
           </p>
           <p>
             Cash-out refinancing is one possible capital-recycling step in a{" "}
-            <Link href="/blog/how-to-find-off-market-rental-properties" className="text-primary font-semibold hover:underline">BRRRR strategy</Link>, subject to appraisal, proceeds, and approval.
+            <Link href="/blog/how-to-find-off-market-rental-properties" className="text-primary font-semibold hover:underline">BRRRR strategy</Link>, subject to appraisal, proceeds, and approval. It shows up most often in high-cap-rate metros like{" "}
+            <Link href="/markets/cleveland" className="text-primary font-semibold hover:underline">Cleveland</Link>, where a forced-appreciation rehab can raise the appraised value enough to pull most of the rehab cash back out.
           </p>
 
           <h3 className="text-xl font-bold text-foreground mt-6 mb-2">Reason 3: Restructure terms</h3>
