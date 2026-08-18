@@ -5394,8 +5394,15 @@ export function InvestCalcPage({
                 internal "Analyze a deal" title row, and the old
                 "institutional-grade analysis…" subtitle collapsed into the
                 card's one-line signpost so the page reads as a single door. */}
+            {/* HONESTY FIX (Aug-2026): this said "we fill the rest", but
+                enrichment fills tax, rate and rent benchmarks only — never
+                the list price, and rent needs a bedroom count first
+                (app/actions/enrich-property.ts). Pulling list price would
+                need an MLS/listing integration that does not exist, and
+                defaulting bedrooms would silently change a user's computed
+                rent, so the COPY moves to match the behavior. */}
             <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
-              Type an address — we fill the rest.
+              Type an address — we fill your assumptions. Add price and beds.
             </p>
           </div>
           {/* Sample-deal button - anonymous visitors only, before any

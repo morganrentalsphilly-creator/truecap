@@ -30,27 +30,59 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+/**
+ * The 13 defaults, grouped so the form reads as three decisions instead of
+ * one wall of percentages (Aug-2026 settings pass).
+ *
+ * The redundant "Default: X%" caption under every field is GONE — the
+ * placeholder already shows the same number, so it was the same fact twice
+ * per field, 13 times. `placeholder` now carries it explicitly rather than
+ * being string-sliced out of the hint.
+ *
+ * FACTUAL FIX: maintenance said "Default: 8%" while the engine actually
+ * defaults to 10% (lib/investcalc-schema DEFAULTS, and /methodology states
+ * 10%). The caption was simply wrong; the engine is unchanged.
+ */
+type DefaultsGroup = "Financing" | "Operating" | "Growth & exit";
+
 const FIELDS: Array<{
   key: keyof UserAnalysisDefaults;
   label: string;
   suffix: string;
-  hint?: string;
+  group: DefaultsGroup;
+  /** The engine default, shown as the input's placeholder. */
+  placeholder: string;
   step?: string;
+  /** Only where a field needs a caveat the placeholder can't carry. */
+  note?: string;
 }> = [
-  { key: "downPaymentPct", label: "Down payment", suffix: "%", hint: "Default: 20%" },
-  { key: "interestRatePct", label: "Interest rate", suffix: "%", hint: "Default: 6.75%", step: "0.01" },
-  { key: "loanTermYears", label: "Loan term", suffix: "yr", hint: "Default: 30" },
-  { key: "closingCostsPct", label: "Closing costs", suffix: "%", hint: "Default: 3%" },
-  { key: "vacancyPct", label: "Vacancy", suffix: "%", hint: "Default: 5%" },
-  { key: "mgmtPct", label: "Management", suffix: "%", hint: "Default: 8%" },
-  { key: "maintenancePct", label: "Maintenance", suffix: "%", hint: "Default: 8%" },
-  { key: "capexPct", label: "CapEx reserve", suffix: "%", hint: "Default: 5%" },
-  { key: "taxRatePct", label: "Income tax rate", suffix: "%", hint: "Default: 24%" },
-  { key: "rentGrowthPct", label: "Rent growth", suffix: "%", hint: "Default: 2.5%", step: "0.1" },
-  { key: "expenseGrowthPct", label: "Expense growth", suffix: "%", hint: "Default: 2.5%", step: "0.1" },
-  { key: "appreciationRatePct", label: "Appreciation", suffix: "%", hint: "Default: 3%", step: "0.1" },
-  { key: "sellingCostPct", label: "Selling cost", suffix: "%", hint: "Default: 6%", step: "0.1" },
+  { key: "downPaymentPct", label: "Down payment", suffix: "%", group: "Financing", placeholder: "20" },
+  {
+    key: "interestRatePct",
+    label: "Interest rate",
+    suffix: "%",
+    group: "Financing",
+    placeholder: "6.75",
+    step: "0.01",
+    // Settings showed 6.75 while a new analysis showed ~6.67: the analyzer
+    // prefers today's live FRED rate. Neither number was wrong — the page
+    // just never said the live rate wins.
+    note: "Overridden by today's live rate when available.",
+  },
+  { key: "loanTermYears", label: "Loan term", suffix: "yr", group: "Financing", placeholder: "30" },
+  { key: "closingCostsPct", label: "Closing costs", suffix: "%", group: "Financing", placeholder: "3" },
+  { key: "vacancyPct", label: "Vacancy", suffix: "%", group: "Operating", placeholder: "5" },
+  { key: "mgmtPct", label: "Management", suffix: "%", group: "Operating", placeholder: "8" },
+  { key: "maintenancePct", label: "Maintenance", suffix: "%", group: "Operating", placeholder: "10" },
+  { key: "capexPct", label: "CapEx reserve", suffix: "%", group: "Operating", placeholder: "5" },
+  { key: "taxRatePct", label: "Income tax rate", suffix: "%", group: "Operating", placeholder: "24" },
+  { key: "rentGrowthPct", label: "Rent growth", suffix: "%", group: "Growth & exit", placeholder: "2.5", step: "0.1" },
+  { key: "expenseGrowthPct", label: "Expense growth", suffix: "%", group: "Growth & exit", placeholder: "2.5", step: "0.1" },
+  { key: "appreciationRatePct", label: "Appreciation", suffix: "%", group: "Growth & exit", placeholder: "3", step: "0.1" },
+  { key: "sellingCostPct", label: "Selling cost", suffix: "%", group: "Growth & exit", placeholder: "6", step: "0.1" },
 ];
+
+const DEFAULTS_GROUPS: DefaultsGroup[] = ["Financing", "Operating", "Growth & exit"];
 
 export function UserDefaultsCard() {
   const { toast } = useToast();
@@ -167,39 +199,58 @@ export function UserDefaultsCard() {
         leave it blank to use the engine&apos;s built-in default. These values are
         applied only when you start a new analysis; they don&apos;t change saved deals.
       </p>
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {FIELDS.map((field) => (
-          <div key={field.key} className="space-y-1">
-            <Label
-              htmlFor={`user-default-${field.key}`}
-              className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground"
-            >
-              {field.label}
-            </Label>
-            <div className="relative">
-              <Input
-                id={`user-default-${field.key}`}
-                type="number"
-                inputMode="decimal"
-                step={field.step ?? "1"}
-                placeholder={field.hint?.replace("Default: ", "") ?? ""}
-                value={values[field.key] ?? ""}
-                onChange={(event) =>
-                  setValues((prev) => ({ ...prev, [field.key]: event.target.value }))
-                }
-                className="h-10 pr-10 text-sm"
-              />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-muted-foreground">
-                {field.suffix}
-              </span>
-            </div>
-            {field.hint ? (
-              <p className="text-[10px] text-muted-foreground">{field.hint}</p>
-            ) : null}
+      {DEFAULTS_GROUPS.map((group) => (
+        <fieldset key={group} className="mb-5 last:mb-0">
+          <legend className="mb-2 text-[11px] font-bold uppercase tracking-widest text-primary">
+            {group}
+          </legend>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {FIELDS.filter((f) => f.group === group).map((field) => (
+              <div key={field.key} className="space-y-1">
+                <Label
+                  htmlFor={`user-default-${field.key}`}
+                  className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground"
+                >
+                  {field.label}
+                </Label>
+                <div className="relative">
+                  <Input
+                    id={`user-default-${field.key}`}
+                    type="number"
+                    inputMode="decimal"
+                    step={field.step ?? "1"}
+                    placeholder={field.placeholder}
+                    value={values[field.key] ?? ""}
+                    onChange={(event) =>
+                      setValues((prev) => ({ ...prev, [field.key]: event.target.value }))
+                    }
+                    className="h-10 pr-10 text-sm"
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-muted-foreground">
+                    {field.suffix}
+                  </span>
+                </div>
+                {field.note ? (
+                  <p className="text-[10px] leading-tight text-muted-foreground">{field.note}</p>
+                ) : null}
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
-      <div className="mt-5 flex justify-end">
+        </fieldset>
+      ))}
+
+      <div className="mt-5 flex flex-wrap items-center justify-end gap-2">
+        {/* Replaces the 13 "Default: X%" captions: clearing every field IS
+            reverting to the engine defaults, which the placeholders show. */}
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={() => setValues({})}
+          disabled={isSaving}
+          className="text-muted-foreground"
+        >
+          Reset to defaults
+        </Button>
         <Button onClick={handleSave} disabled={isSaving} className="gap-1.5">
           {isSaving ? (
             <Loader2 className="size-4 animate-spin" />

@@ -639,6 +639,9 @@ export function AnalysisDashboard({
       goToLogin();
       return;
     }
+    // Retention signal for the rebuild: does leading with the decision
+    // change how often a run becomes a saved deal?
+    trackEvent("deal_saved", { is_update: isExistingSavedDeal });
     void onSaveDeal();
   };
   const handlePrepareOffer = () => {

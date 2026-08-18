@@ -27,6 +27,12 @@ export const METRIC_ROWS: MetricRow[] = [
   { key: "monthlyRentalIncome", label: "Monthly Rent Income", group: "RISK", kind: "currency", direction: "higher" },
   { key: "totalOperatingExpenses", label: "Operating Expenses / mo", group: "RISK", kind: "currency", direction: "lower" },
   { key: "purchasePrice", label: "Purchase Price", group: "DEAL", kind: "currency", direction: "lower" },
+  // Max Offer + the gap to asking — the two numbers the product is sold on,
+  // absent from Compare until Aug-2026. "higher is better" for the offer;
+  // for the gap, LOWER is better (a smaller gap means the asking price is
+  // closer to — or below — what the deal actually supports).
+  { key: "maxOffer", label: "Max Offer", group: "DEAL", kind: "currency", direction: "higher" },
+  { key: "offerGap", label: "Gap to Asking", group: "DEAL", kind: "currency", direction: "lower" },
   { key: "totalCashRequired", label: "Total Cash Required", group: "DEAL", kind: "currency", direction: "lower" },
   { key: "monthlyPayment", label: "Loan Payment (P&I)", group: "DEAL", kind: "currency", direction: "lower" },
   { key: "taxSavingsMonthly", label: "Tax Savings / mo", group: "DEAL", kind: "currency", direction: "higher" },

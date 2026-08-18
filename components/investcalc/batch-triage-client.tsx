@@ -30,6 +30,7 @@ import {
   TRIAGE_STORAGE_KEY,
 } from "@/lib/batch-triage-storage";
 import { verdictScreeningLabel } from "@/lib/verdict-display";
+import { trackEvent } from "@/lib/analytics";
 import { BuyBoxFitBadge } from "@/components/investcalc/buy-box-fit-badge";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -137,6 +138,7 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
         setResult(r);
         setSort(r.sort);
         setPassersOnly(false);
+        trackEvent("shortlist_screened", { rows: r.rows?.length ?? 0 });
       } catch (err) {
         // The action REJECTED rather than returning {ok:false} (network blip,
         // cold-start 500, stale-deploy Server Action). Without this the Screen

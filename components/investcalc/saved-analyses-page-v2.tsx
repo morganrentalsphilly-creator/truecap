@@ -1255,6 +1255,41 @@ export function SavedAnalysesPage({
     });
   }, [activeSortDirection, activeSortField, filteredItems]);
 
+  /**
+   * Same-address duplicates, LABELLED not merged.
+   *
+   * A user can legitimately hold several saves for one property (a BRRRR
+   * variant, a re-run after a price cut, an older scoring). The list showed
+   * them as identical rows with different scores — e.g. 2934 Aramingo at 75
+   * and at 0 — with nothing to tell them apart. Named scenarios already get
+   * a badge; this covers the unnamed case.
+   *
+   * Deliberately NON-DESTRUCTIVE: nothing is hidden, collapsed or deleted.
+   * Rows are numbered newest-first at their address so the ordering is
+   * stable regardless of the active sort.
+   */
+  const duplicateMarkerById = useMemo(() => {
+    const byAddress = new Map<string, SavedAnalysisListItem[]>();
+    for (const item of enrichedItems) {
+      const key = (item.address ?? item.title ?? "").trim().toLowerCase();
+      if (!key) continue;
+      const list = byAddress.get(key);
+      if (list) list.push(item);
+      else byAddress.set(key, [item]);
+    }
+    const markers = new Map<string, { index: number; total: number }>();
+    for (const list of byAddress.values()) {
+      if (list.length < 2) continue;
+      const newestFirst = [...list].sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+      newestFirst.forEach((item, i) => {
+        markers.set(item.id, { index: i + 1, total: newestFirst.length });
+      });
+    }
+    return markers;
+  }, [enrichedItems]);
+
   const pageCount = Math.max(1, Math.ceil(displayItems.length / PAGE_SIZE));
   const safeCurrentPage = Math.min(currentPage, pageCount);
   const pageStartIndex = displayItems.length === 0 ? 0 : (safeCurrentPage - 1) * PAGE_SIZE;
@@ -2521,6 +2556,15 @@ export function SavedAnalysesPage({
                           // this suffix keeps them tellable apart at a glance.
                           <span className="shrink-0 rounded-full border border-border px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
                             Scenario · {item.scenarioName}
+                          </span>
+                        ) : duplicateMarkerById.has(item.id) ? (
+                          // Unnamed duplicate saves at one address.
+                          <span
+                            className="shrink-0 rounded-full border border-border px-2 py-0.5 text-[10px] font-semibold text-muted-foreground"
+                            title="You have more than one saved analysis for this address"
+                          >
+                            {duplicateMarkerById.get(item.id)!.index} of{" "}
+                            {duplicateMarkerById.get(item.id)!.total} saved here
                           </span>
                         ) : null}
                       </Link>

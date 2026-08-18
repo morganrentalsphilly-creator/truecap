@@ -39,6 +39,10 @@ import {
 } from "@/lib/entitlements";
 import { getRequestUser, getRequestEntitlements } from "@/lib/request-auth";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { computeDealOfferLine } from "@/lib/deal-offer-line";
+import { normalizeInvestmentFormSnapshot } from "@/lib/investcalc-schema";
+import { listBuyBoxesAction } from "@/app/actions/user-buy-boxes";
+import type { NamedBuyBox } from "@/lib/buy-box";
 
 const MAX_COMPARE_ITEMS = 4;
 
@@ -137,7 +141,10 @@ function methodologyLabel(resolution: ReturnType<typeof resolveSavedAnalysisSnap
   return `Standard v${resolution.storedMethodologyVersion}`;
 }
 
-function mapDeal(row: SavedAnalysisRow): CompareDealViewModel {
+function mapDeal(
+  row: SavedAnalysisRow,
+  activeBuyBoxes: NamedBuyBox[] = []
+): CompareDealViewModel {
   const recomputed = recomputeSavedDealVerdict(row.form_snapshot);
   const resolution = resolveSavedAnalysisSnapshot({
     methodologyVersion: row.methodology_version,
@@ -192,6 +199,28 @@ function mapDeal(row: SavedAnalysisRow): CompareDealViewModel {
     monthlyRentalIncome: resolvedCurrent ? resolvedCurrent.monthlyRentalIncome : toNumber(snapshot.monthlyRentalIncome),
     totalOperatingExpenses: resolvedCurrent ? resolvedCurrent.totalOperatingExpenses : toNumber(snapshot.totalOperatingExpenses),
     purchasePrice,
+    // Max Offer + gap. Solved through the SAME lib/deal-offer-line path the
+    // dashboard and My Deals use — Max Offer is not persisted anywhere, so
+    // every surface recomputes it from form_snapshot. "blocked" carries no
+    // price by design (no dollar figure fixes a wrong-market miss).
+    ...(() => {
+      const values = normalizeInvestmentFormSnapshot(row.form_snapshot);
+      if (!values) return { maxOffer: null, offerGap: null };
+      try {
+        const { offer } = computeDealOfferLine(values, activeBuyBoxes, {
+          isShoppingStage: true,
+        });
+        const maxOffer =
+          offer && offer.kind !== "blocked" ? offer.maxPrice ?? null : null;
+        return {
+          maxOffer,
+          offerGap:
+            maxOffer != null && purchasePrice != null ? purchasePrice - maxOffer : null,
+        };
+      } catch {
+        return { maxOffer: null, offerGap: null };
+      }
+    })(),
     totalCashRequired: resolvedCurrent ? resolvedCurrent.cashToClose : toNumber(snapshot.totalCashRequired),
     monthlyPayment: resolvedCurrent ? resolvedCurrent.monthlyPayment : toNumber(snapshot.monthlyPayment),
     pmiMonthly: resolvedCurrent
@@ -415,7 +444,13 @@ export default async function DashboardComparePage() {
       return [r.id, r] as const;
     })
   );
-  const deals = ids.map((id) => rowById.get(id)).filter((row): row is SavedAnalysisRow => Boolean(row)).map(mapDeal);
+  const buyBoxesResult = await listBuyBoxesAction().catch(() => null);
+  const activeCompareBuyBoxes =
+    buyBoxesResult && buyBoxesResult.ok && buyBoxesResult.canUse ? buyBoxesResult.boxes : [];
+  const deals = ids.map((id) => rowById.get(id)).filter((row): row is SavedAnalysisRow => Boolean(row))
+    // Buy boxes resolve on the same canUse gate the dashboard and My Deals
+    // use, so a Compare row's Max Offer matches those screens exactly.
+    .map((row) => mapDeal(row, activeCompareBuyBoxes));
 
   // Stale-cookie recovery: cookie has IDs but none match a current
   // active deal (deleted, archived, or marked completed since the

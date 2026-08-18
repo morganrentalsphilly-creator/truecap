@@ -86,7 +86,10 @@ export function ProInlineGate({ icon: Icon, title, description, previewBullets }
       <Link
         href="/pricing"
         onClick={() =>
-          trackEvent("upsell_prompt_clicked", { feature: title, placement: "analysis_dashboard" })
+          {
+            trackEvent("upsell_prompt_clicked", { feature: title, placement: "analysis_dashboard" });
+            trackEvent("upgrade_cta_click", { feature: title, placement: "analysis_dashboard" });
+          }
         }
         className="group mt-4 inline-flex items-center gap-1.5 text-sm font-bold text-primary hover:underline"
       >

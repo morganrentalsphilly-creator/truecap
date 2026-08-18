@@ -75,7 +75,7 @@ export function PropertyDetailsSection({
         Property Address
       </Label>
       {/* First-run signpost (card chrome only — on the analyzer the page
-          heading carries the one-line "Type an address — we fill the rest."
+          heading carries the one-line "Type an address — we fill your assumptions."
           signpost instead).
           Frames the address as the fast path (it auto-fills the deal)
           WITHOUT implying it's the only way in — price + rent alone already
