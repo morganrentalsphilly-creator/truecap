@@ -24,6 +24,23 @@ import {
   type DealScoreInput,
 } from "@/lib/deal-score";
 
+/**
+ * ⚠️ THIS COMPONENT SETS ITS OWN WIDTH: w-[min(20rem,78vw)].
+ *
+ * It is FIXED, not fluid, so it will NOT shrink to fit a container. Render it
+ * inside a popover clamped narrower than 20rem and it paints outside the card,
+ * over whatever is behind it — `max-w-*` bounds the box, it does not shrink a
+ * fixed-width child.
+ *
+ * That shipped once: two call sites in saved-analyses-page-v2.tsx wrapped it in
+ * max-w-[300px] / max-w-[280px], and the score values rendered ~44px past the
+ * popover edge. The other call sites (compare-deals-client, TopDeals) get it
+ * right with a plain `w-auto p-3`.
+ *
+ * So: give it `w-auto` and let it size itself. The min(20rem, 78vw) already IS
+ * the responsive behaviour — 78vw keeps it inside a phone viewport — which is
+ * exactly what a clamp on the container would be trying to add.
+ */
 export function ScoreBreakdown({
   breakdown,
   score,

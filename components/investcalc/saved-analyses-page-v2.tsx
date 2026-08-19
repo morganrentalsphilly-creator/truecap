@@ -3392,7 +3392,12 @@ export function SavedAnalysesPage({
           role="region"
           aria-label="Bulk actions"
           className={cn(
-            "fixed inset-x-0 z-40 mx-auto flex w-[min(680px,calc(100vw-32px))] items-center justify-between gap-3 rounded-2xl border border-border bg-card/95 px-4 py-3 shadow-2xl backdrop-blur",
+            // flex-wrap: the Archive/Delete pair is shrink-0 (the Button cva
+            // base sets it), so on a narrow phone it could not give back any
+            // width and painted OUTSIDE this rounded card — "Delete" sheared
+            // off mid-word past the card edge at 320px. Wrapping lets the
+            // actions drop to a second line instead of escaping the bar.
+            "fixed inset-x-0 z-40 mx-auto flex w-[min(680px,calc(100vw-32px))] flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-card/95 px-4 py-3 shadow-2xl backdrop-blur",
             // While consent is still pending, sit ABOVE the banner instead of
             // behind it. The banner measures ~96px below sm (its one-line copy
             // wraps to two on the narrowest phones) and ~78px from sm; the
@@ -3419,7 +3424,7 @@ export function SavedAnalysesPage({
               Clear
             </button>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-1 items-center justify-end gap-2 max-[380px]:justify-center">
             <Button
               type="button"
               variant="outline"

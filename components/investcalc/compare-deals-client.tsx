@@ -925,11 +925,17 @@ function CompareMobileDealStrip({ deals }: { deals: CompareDealViewModel[] }) {
         const color = getMobileDealColor(index);
         return (
           <div key={deal.id} className={cn("flex min-h-28 flex-col rounded-2xl border bg-card p-2 shadow-sm", color.border)}>
-            <div className="flex items-start justify-between gap-1 max-[380px]:flex-wrap">
-              <span className={cn("inline-flex size-5 items-center justify-center rounded-full text-[11px] font-extrabold", color.chip)}>
+            {/* The wrap kicks in at 424px, not 380px. Between 381 and 423 —
+                iPhone 12-16 (390/393), Pixel (412), 14 Plus (414), i.e. most
+                phones in use — the header did NOT wrap, and the two shrink-0
+                24px buttons squeezed the only flexible item, the number chip,
+                from a 20px circle into an 11px oval. shrink-0 on the chip means
+                it can never be the shock absorber again. */}
+            <div className="flex items-start justify-between gap-1 max-[424px]:flex-wrap">
+              <span className={cn("inline-flex size-5 shrink-0 items-center justify-center rounded-full text-[11px] font-extrabold", color.chip)}>
                 {index + 1}
               </span>
-              <div className="flex items-center gap-0.5 max-[380px]:mt-1 max-[380px]:basis-full max-[380px]:justify-start">
+              <div className="flex items-center gap-0.5 max-[424px]:mt-1 max-[424px]:basis-full max-[424px]:justify-start">
                 {deal.compareSnapshot ? (
                   <Popover>
                     <Tooltip delayDuration={200}>

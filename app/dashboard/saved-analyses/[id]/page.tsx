@@ -590,7 +590,17 @@ export default async function DealWorkspacePage({
                   </Link>
                 </p>
               </div>
-              <div className="flex shrink-0 items-center gap-2 pt-0.5">
+              {/* WRAPS, and its children may shrink.
+                  This row was `shrink-0` around two fixed-width selects
+                  (w-[150px] + w-[170px]) plus two buttons — ~554px of
+                  un-shrinkable content for an Agent Pro user. The page shell is
+                  overflow-x-clip (dashboard-shell.tsx) and globals.css clips
+                  html/body too, so the excess was not scrollable, it was simply
+                  CUT: on every phone width the primary "Open full analysis"
+                  action sat off-screen with no scrollbar and no error.
+                  flex-wrap on the PARENT could not help — wrapping moves a
+                  shrink-0 item to its own line, it never narrows it. */}
+              <div className="flex min-w-0 flex-wrap items-center justify-end gap-2 pt-0.5">
                 {/* Stage changes happen while the user is IN the workspace
                     (WS-2) — same write path + entitlement gate as My Deals. */}
                 {canUsePipeline ? (

@@ -105,8 +105,17 @@ export function BrandingForm({ initial }: { initial: BrandingRow | null }) {
     });
   }
 
+  // Underscore, NOT a comma. Tailwind passes an arbitrary value through
+  // verbatim — it only rewrites "_" to a space — so `[1fr,360px]` emitted
+  // `grid-template-columns:1fr,360px`. A comma is not a valid track-list
+  // separator, so the browser DISCARDED the declaration and this form has
+  // never once rendered as two columns at lg. Verified in the shipped CSS
+  // bundle, not inferred.
+  //
+  // minmax(0,1fr) rather than a bare 1fr: the form column holds fixed-width
+  // children, and a bare 1fr track refuses to shrink below their min-content.
   return (
-    <form onSubmit={handleSubmit} className="grid gap-6 lg:grid-cols-[1fr,360px]">
+    <form onSubmit={handleSubmit} className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
       {/* Form column */}
       <div className="space-y-6">
         {/* Logo */}
