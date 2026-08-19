@@ -25,7 +25,8 @@
     "build-market-safmr": "npx -y tsx scripts/build-market-safmr.ts",
     "build-market-safmr:dry": "npx -y tsx scripts/build-market-safmr.ts --dry-run",
     "build-intelligence-pack": "npx -y tsx scripts/build-market-intelligence-pack.ts",
-    "snapshot": "npx -y tsx scripts/numeric-snapshot.ts"
+    "snapshot": "npx -y tsx scripts/numeric-snapshot.ts",
+    "pdf:check": "npx -y tsx scripts/pdf-visual-check.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",

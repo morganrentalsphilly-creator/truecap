@@ -2105,36 +2105,28 @@ export function SavedAnalysesPage({
         } catch {
           /* report proceeds without comps */
         }
-        // Pull Pro-tier branding (logo, color, contact info) so the
-        // exported PDF reflects the user's brand. Falls back to TrueCap
-        // defaults if the user is unentitled or hasn't configured anything.
-        const { getBranding } = await import("@/app/actions/branding");
-        const brandingResult = await getBranding();
-        const brandingConfig =
-          brandingResult.ok && brandingResult.branding
-            ? {
-                logoUrl: brandingResult.branding.logo_url,
-                primaryColorHex: brandingResult.branding.primary_color_hex,
-                companyName: brandingResult.branding.company_name,
-                tagline: brandingResult.branding.tagline,
-                contactName: brandingResult.branding.contact_name,
-                contactEmail: brandingResult.branding.contact_email,
-                contactPhone: brandingResult.branding.contact_phone,
-                contactWebsite: brandingResult.branding.contact_website,
-              }
-            : null;
+        // Composed SERVER-SIDE, where the pdf_export entitlement is actually
+        // enforced and branding is resolved from the signed-in user's own row.
+        // Building it in the browser meant the only gate was a React prop.
+        const { generateReportPdfAction } = await import("@/app/actions/generate-report-pdf");
+        const { downloadPdfFromBase64 } = await import("@/lib/pdf/download");
+        const pdfResult = await generateReportPdfAction({ report: reportData, mode: "personal" });
+        if (!pdfResult.ok) {
+          toast({
+            title: "Export failed",
+            description: pdfResult.message,
+            variant: "destructive",
+          });
+          return;
+        }
 
-        // Use generateInvestmentPDF (not …Blob) - it triggers a direct
-        // doc.save() download AND returns the blob for caching. This is
-        // the critical bug fix: the previous flow generated a blob,
-        // uploaded to Supabase, then tried to open the public URL in a
-        // new tab via link.click(). By the time the link.click() fired,
-        // the browser had lost the user gesture context and silently
-        // blocked the popup. Users saw "nothing happens" when clicking
-        // Export PDF. doc.save() is a download, not a popup, so it
-        // works regardless of timing.
-        const { generateInvestmentPDF } = await import("@/lib/pdf-generator");
-        const pdfBlob = await generateInvestmentPDF(reportData, brandingConfig);
+        // A synthesized <a download> click, NOT a popup. The original bug here
+        // was opening a Supabase URL in a new tab after an await: the user
+        // gesture had expired and the browser silently blocked it, so Export
+        // PDF appeared to do nothing. A download is never treated as a popup.
+        downloadPdfFromBase64(pdfResult.pdfBase64, pdfResult.filename);
+        const pdfBytes = Uint8Array.from(atob(pdfResult.pdfBase64), (c) => c.charCodeAt(0));
+        const pdfBlob = new Blob([pdfBytes], { type: "application/pdf" });
 
         // Show a quick success toast so the user knows the export
         // worked even if their browser silently downloaded the file.

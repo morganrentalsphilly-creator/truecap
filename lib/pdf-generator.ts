@@ -11,25 +11,13 @@ import {
   TRUECAP_UNDERWRITING_STANDARD_NAME,
   TRUECAP_UNDERWRITING_STANDARD_VERSION,
 } from "@/lib/underwriting-methodology";
-// Server action (RPC from this client-bundled module — same mechanism
-// BuyBoxVerdictCard uses for listBuyBoxesAction). Evaluates the owner's buy
-// boxes server-side, RLS-scoped, and returns the compact block payload, or
-// null when the user has no usable box (→ the PDF renders exactly as today).
-import { getBuyBoxPdfVerdictAction } from "@/app/actions/saved-analyses";
 import {
-  Chart,
-  BarController,
-  LineController,
-  BarElement,
-  PointElement,
-  LineElement,
-  LinearScale,
-  CategoryScale,
-  Filler,
-  Tooltip,
-  Legend,
-  Title,
-} from "chart.js";
+  drawBarChart,
+  drawLineChart,
+  drawStackedBarChart,
+  type ChartBox,
+} from "@/lib/pdf/vector-charts";
+import { loadPdfImage } from "@/lib/pdf/load-image";
 
 export interface ReportData {
   generatedAt: Date;
@@ -191,20 +179,6 @@ export interface ReportData {
   } | null;
 }
 
-Chart.register(
-  BarController,
-  LineController,
-  BarElement,
-  PointElement,
-  LineElement,
-  LinearScale,
-  CategoryScale,
-  Filler,
-  Tooltip,
-  Legend,
-  Title,
-);
-
 // ===================== Design tokens =====================
 const COLOR = {
   ink: "#0B1220",
@@ -245,12 +219,6 @@ const fmtPct = (n: number, sign = false) => `${sign && n > 0 ? "+" : ""}${n.toFi
 function hexToRgb(hex: string): [number, number, number] {
   const h = hex.replace("#", "");
   return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)];
-}
-
-/** "#1A4FBA" + 0.12 → "rgba(26, 79, 186, 0.12)". For chart fills/backgrounds. */
-function hexToRgba(hex: string, alpha: number): string {
-  const [r, g, b] = hexToRgb(hex);
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
 /**
@@ -375,92 +343,29 @@ function colorLuminance(hex: string): number {
   );
 }
 
+/**
+ * Load a logo for the header/cover.
+ *
+ * Delegates to lib/pdf/load-image.ts, which works under Node as well as in the
+ * browser and — critically — ALLOWLISTS the host. `branding.logoUrl` is
+ * user-supplied and unconstrained by lib/branding-values.ts, so once this
+ * report is composed server-side an unrestricted fetch would be SSRF. See that
+ * module's header for the full reasoning.
+ *
+ * The old implementation round-tripped through fetch → FileReader → Image →
+ * <canvas> → toDataURL purely to learn the intrinsic dimensions. jsPDF takes a
+ * base64 data URL directly, and PNG/JPEG carry their size in a header, so the
+ * canvas (and with it the DOM dependency) was never load-bearing.
+ *
+ * Returns null on any failure; callers already fall back to a text wordmark.
+ */
 async function loadLogoDataUrl(
   src: string = "/Logo-png-w.png"
 ): Promise<{ dataUrl: string; width: number; height: number } | null> {
-  try {
-    const response = await fetch(src);
-    if (!response.ok) return null;
-    const blob = await response.blob();
-    const rawDataUrl = await new Promise<string | null>((resolve) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(typeof reader.result === "string" ? reader.result : null);
-      reader.onerror = () => resolve(null);
-      reader.readAsDataURL(blob);
-    });
-    if (!rawDataUrl) return null;
-    const image = await new Promise<HTMLImageElement | null>((resolve) => {
-      const img = new Image();
-      img.onload = () => resolve(img);
-      img.onerror = () => resolve(null);
-      img.src = rawDataUrl;
-    });
-    if (!image) return { dataUrl: rawDataUrl, width: 1, height: 1 };
-    const canvas = document.createElement("canvas");
-    canvas.width = image.naturalWidth || 1;
-    canvas.height = image.naturalHeight || 1;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) {
-      return { dataUrl: rawDataUrl, width: image.naturalWidth || 1, height: image.naturalHeight || 1 };
-    }
-    ctx.drawImage(image, 0, 0);
-    return {
-      dataUrl: canvas.toDataURL("image/png", 1),
-      width: image.naturalWidth || 1,
-      height: image.naturalHeight || 1,
-    };
-  } catch {
-    return null;
-  }
+  const image = await loadPdfImage(src);
+  if (!image) return null;
+  return { dataUrl: image.dataUrl, width: image.width, height: image.height };
 }
-
-// ===================== Chart rendering (offscreen) =====================
-async function renderChart(config: any, w = 800, h = 420): Promise<string> {
-  const canvas = document.createElement("canvas");
-  canvas.width = w;
-  canvas.height = h;
-  // offscreen
-  canvas.style.position = "fixed";
-  canvas.style.left = "-99999px";
-  document.body.appendChild(canvas);
-  const chart = new Chart(canvas, {
-    ...config,
-    options: {
-      responsive: false,
-      animation: false,
-      devicePixelRatio: 2,
-      ...config.options,
-    },
-  });
-  // wait one frame
-  await new Promise((r) => requestAnimationFrame(() => r(null)));
-  const url = canvas.toDataURL("image/png", 1.0);
-  chart.destroy();
-  canvas.remove();
-  return url;
-}
-
-const baseScales = {
-  x: {
-    grid: { display: false },
-    ticks: { color: COLOR.sub, font: { size: 11, family: "Inter, Helvetica, Arial" } },
-    border: { color: COLOR.line },
-  },
-  y: {
-    grid: { color: "#EEF2F7", drawBorder: false },
-    ticks: {
-      color: COLOR.sub,
-      font: { size: 11, family: "Inter, Helvetica, Arial" },
-      callback: (v: any) => (typeof v === "number" ? `$${(v / 1000).toFixed(0)}K` : v),
-    },
-    border: { display: false },
-  },
-};
-
-// ===================== Chart data-ink plugins =====================
-// Inline chart.js plugins (passed per-chart via the `plugins` array). We
-// deliberately avoid external chart.js plugins (datalabels/annotation) to
-// keep the export bundle lean — these hooks do the same job in a few lines.
 
 /** Compact money label for in-chart annotations: 1240000 → "$1.2M", 8400 → "$8.4K". */
 function fmtChartMoney(n: number): string {
@@ -469,61 +374,6 @@ function fmtChartMoney(n: number): string {
   if (a >= 1_000) return `${n < 0 ? "-" : ""}$${Math.round(a / 1000)}K`;
   return `${n < 0 ? "-" : ""}$${Math.round(a)}`;
 }
-
-/**
- * Draws a crisp horizontal reference line at y = 0 when the scale crosses
- * zero. Makes "above/below break-even" instantly legible on signed charts
- * (net cash flow, total profit, taxable income) instead of leaving the
- * reader to infer the baseline from the axis ticks.
- */
-const zeroLinePlugin = {
-  id: "zeroLine",
-  beforeDatasetsDraw(chart: any) {
-    const yScale = chart.scales?.y;
-    if (!yScale || yScale.min > 0 || yScale.max < 0) return;
-    const yZero = yScale.getPixelForValue(0);
-    const { left, right } = chart.chartArea;
-    const { ctx } = chart;
-    ctx.save();
-    ctx.beginPath();
-    ctx.strokeStyle = "#94A3B8";
-    ctx.lineWidth = 1;
-    ctx.setLineDash([3, 3]);
-    ctx.moveTo(left, yZero);
-    ctx.lineTo(right, yZero);
-    ctx.stroke();
-    ctx.restore();
-  },
-};
-
-/**
- * Labels the FINAL data point of each line dataset with its value — the
- * "where does this end up?" number that the reader most wants from a
- * cumulative curve (cumulative cash flow, equity, total profit). Labeling
- * every point would clutter a small multiyear chart; the endpoint carries
- * the story. Pads the chart's right inset so the label never clips.
- */
-const endpointLabelPlugin = {
-  id: "endpointLabel",
-  afterDatasetsDraw(chart: any) {
-    const { ctx } = chart;
-    ctx.save();
-    ctx.font = "700 12px Inter, Helvetica, Arial";
-    ctx.textAlign = "right";
-    ctx.textBaseline = "bottom";
-    chart.data.datasets.forEach((ds: any, di: number) => {
-      const meta = chart.getDatasetMeta(di);
-      if (meta.hidden || ds.type === "bar") return;
-      const i = ds.data.length - 1;
-      const el = meta.data?.[i];
-      const v = ds.data[i];
-      if (!el || v == null) return;
-      ctx.fillStyle = ds.borderColor || "#334155";
-      ctx.fillText(fmtChartMoney(v), el.x - 2, el.y - 5);
-    });
-    ctx.restore();
-  },
-};
 
 // ===================== Page chrome =====================
 function drawHeader(
@@ -1763,7 +1613,7 @@ function drawInputBlock(
   });
 }
 
-async function pageProjection(
+function pageProjection(
   doc: jsPDF,
   d: ReportData,
   branding?: BrandingConfig | null
@@ -1793,112 +1643,77 @@ async function pageProjection(
   const chH = 150;
   const labels = d.projection10y.rows.map((r) => `Y${r.y}`);
 
-  const annualCF = await renderChart({
-    type: "bar",
-    data: {
-      labels,
-      datasets: [
-        {
-          label: "Net Cash Flow",
-          data: d.projection10y.rows.map((r) => r.net),
-          backgroundColor: themeColor,
-          borderRadius: 4,
-        },
-      ],
-    },
-    plugins: [zeroLinePlugin],
-    options: { plugins: { legend: { display: false } }, scales: baseScales },
-  });
   // Year-1 cash-flow waterfall — how gross rent becomes net cash flow, the
   // single most intuitive "where does the money go?" visual for an investor.
-  // Floating bars (chart.js accepts [start, end] pairs): rent rises from 0,
-  // operating expenses and debt service step it down, net cash flow lands
-  // from the baseline. Uses the Year-1 projection row so it ties out to the
-  // table below. Replaces the old income-vs-expenses trend lines (that data
-  // still lives in the 10-year table).
+  // Floating bars: rent rises from 0, operating expenses and debt service step
+  // it down, net cash flow lands from the baseline. Uses the Year-1 projection
+  // row so it ties out to the table below.
   const wfRow = d.projection10y.rows[0];
   const wfGross = wfRow.rental;
   const wfOpex = wfRow.opex;
   const wfDebt = wfRow.debt;
   const wfNet = wfRow.net;
-  const wfSteps = [wfGross, -wfOpex, -wfDebt, wfNet]; // signed deltas for labels
-  const incomeExpense = await renderChart({
-    type: "bar",
-    data: {
-      labels: ["Gross Rent", "Op. Expenses", "Debt Service", "Net Cash Flow"],
-      datasets: [
-        {
-          label: "Year-1 Cash Flow",
-          data: [
-            [0, wfGross],
-            [wfGross - wfOpex, wfGross],
-            [wfGross - wfOpex - wfDebt, wfGross - wfOpex],
-            [Math.min(0, wfNet), Math.max(0, wfNet)],
-          ],
-          backgroundColor: [
-            COLOR.success,
-            COLOR.danger,
-            COLOR.warn,
-            wfNet >= 0 ? themeColor : COLOR.danger,
-          ],
-          borderRadius: 3,
-          borderSkipped: false,
-        },
-      ],
-    },
-    plugins: [
-      {
-        id: "waterfallLabels",
-        afterDatasetsDraw(chart: any) {
-          const { ctx } = chart;
-          const meta = chart.getDatasetMeta(0);
-          ctx.save();
-          ctx.font = "700 10px Inter, Helvetica, Arial";
-          ctx.textAlign = "center";
-          ctx.textBaseline = "bottom";
-          ctx.fillStyle = "#334155";
-          meta.data.forEach((el: any, i: number) => {
-            ctx.fillText(fmtChartMoney(wfSteps[i]), el.x, el.y - 4);
-          });
-          ctx.restore();
-        },
-      },
-    ],
-    options: {
-      plugins: { legend: { display: false } },
-      scales: {
-        x: { ...baseScales.x, ticks: { color: COLOR.sub, font: { size: 8.5, family: "Inter, Helvetica, Arial" } } },
-        y: baseScales.y,
-      },
-    },
-  });
-  const cumCF = await renderChart({
-    type: "line",
-    data: {
-      labels,
-      datasets: [
-        { label: "Cumulative CF", data: d.projection10y.rows.map((r) => r.cum), borderColor: COLOR.violet, backgroundColor: "rgba(124,58,237,0.18)", fill: true, tension: 0.35, pointRadius: 0, borderWidth: 2.5 },
-      ],
-    },
-    plugins: [zeroLinePlugin, endpointLabelPlugin],
-    options: { plugins: { legend: { display: false } }, scales: baseScales },
-  });
-  const afterTax = await renderChart({
-    type: "bar",
-    data: {
-      labels,
-      datasets: [
-        { label: "After-Tax CF", data: d.projection10y.rows.map((r) => r.after), backgroundColor: COLOR.success, borderRadius: 4 },
-      ],
-    },
-    options: { plugins: { legend: { display: false } }, scales: baseScales },
-  });
+  // Labels show the SIGNED STEP each bar represents, not the running total —
+  // a waterfall reads as "+30K, -11K, -16K, = 3K".
+  const wfSteps = [wfGross, -wfOpex, -wfDebt, wfNet];
 
-  drawChartCard(doc, M.left, y, chW, chH, "Annual Cash Flow", annualCF);
-  drawChartCard(doc, M.left + chW + 12, y, chW, chH, "Year-1 Cash Flow", incomeExpense);
+  drawChartCard(doc, M.left, y, chW, chH, "Annual Cash Flow", (box) =>
+    drawBarChart(doc, {
+      box,
+      data: d.projection10y.rows.map((r) => ({
+        label: `Y${r.y}`,
+        value: r.net,
+        color: r.net >= 0 ? themeColor : COLOR.danger,
+      })),
+      // 10 bars in half a page: per-bar values would collide, and the table
+      // directly below carries the exact figures.
+      showValues: false,
+    })
+  );
+  drawChartCard(doc, M.left + chW + 12, y, chW, chH, "Year-1 Cash Flow", (box) =>
+    drawBarChart(doc, {
+      box,
+      data: [
+        { label: "Gross Rent", value: wfGross, from: 0, color: COLOR.success },
+        { label: "Op. Expenses", value: wfGross - wfOpex, from: wfGross, color: COLOR.danger },
+        {
+          label: "Debt Service",
+          value: wfGross - wfOpex - wfDebt,
+          from: wfGross - wfOpex,
+          color: COLOR.warn,
+        },
+        { label: "Net Cash Flow", value: wfNet, from: 0, color: wfNet >= 0 ? themeColor : COLOR.danger },
+      ].map((bar, i) => ({ ...bar, valueLabel: fmtChartMoney(wfSteps[i]!) })),
+    })
+  );
   y += chH + 12;
-  drawChartCard(doc, M.left, y, chW, chH, "Cumulative Cash Flow", cumCF);
-  drawChartCard(doc, M.left + chW + 12, y, chW, chH, "After-Tax Growth", afterTax);
+  drawChartCard(doc, M.left, y, chW, chH, "Cumulative Cash Flow", (box) =>
+    drawLineChart(doc, {
+      box,
+      labels,
+      series: [
+        {
+          label: "Cumulative CF",
+          values: d.projection10y.rows.map((r) => r.cum),
+          color: COLOR.violet,
+          fill: true,
+        },
+      ],
+      endpointLabel: true,
+      showPoints: false,
+    })
+  );
+  drawChartCard(doc, M.left + chW + 12, y, chW, chH, "After-Tax Growth", (box) =>
+    drawBarChart(doc, {
+      box,
+      data: d.projection10y.rows.map((r) => ({
+        label: `Y${r.y}`,
+        value: r.after,
+        color: r.after >= 0 ? COLOR.success : COLOR.danger,
+      })),
+      showValues: false,
+    })
+  );
   y += chH + 20;
 
   // Table
@@ -2043,20 +1858,35 @@ function pageDownside(
   });
 }
 
-function drawChartCard(doc: jsPDF, x: number, y: number, w: number, h: number, title: string, dataUrl: string) {
+/**
+ * A titled card with a chart drawn INSIDE it as vectors.
+ *
+ * Previously took a PNG data URL from chart.js. Now it takes a draw callback
+ * and hands it the plot rectangle, so the chart is real PDF geometry — sharp
+ * at any zoom, a fraction of the bytes, and renderable without a DOM.
+ */
+function drawChartCard(
+  doc: jsPDF,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  title: string,
+  draw: (box: ChartBox) => void
+) {
   card(doc, x, y, w, h);
   setText(doc, COLOR.ink);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(10);
   doc.text(title, x + 12, y + 16);
-  // chart area
-  const padX = 8;
-  const padTop = 24;
-  const padBottom = 8;
-  doc.addImage(dataUrl, "PNG", x + padX, y + padTop, w - padX * 2, h - padTop - padBottom, undefined, "FAST");
+  const padX = 10;
+  const padTop = 26;
+  // Room for the x-axis labels that sit below the plot.
+  const padBottom = 18;
+  draw({ x: x + padX, y: y + padTop, w: w - padX * 2, h: h - padTop - padBottom });
 }
 
-async function pageTax(
+function pageTax(
   doc: jsPDF,
   d: ReportData,
   branding?: BrandingConfig | null
@@ -2084,55 +1914,64 @@ async function pageTax(
   const chW = (SAFE.w - 12) / 2;
   const chH = 130;
 
-  const savingsChart = await renderChart({
-    type: "bar",
-    data: {
+  drawChartCard(doc, M.left, y, chW, chH, "Modeled Annual Tax Savings", (box) =>
+    drawBarChart(doc, {
+      box,
+      data: d.taxStrategy.rows.map((r) => ({
+        label: `Y${r.y}`,
+        value: r.savings,
+        color: r.savings >= 0 ? COLOR.success : COLOR.danger,
+      })),
+      showValues: false,
+    })
+  );
+  drawChartCard(doc, M.left + chW + 12, y, chW, chH, "Taxable Rental Income Trend", (box) =>
+    drawLineChart(doc, {
+      box,
       labels,
-      datasets: [{ label: "Tax Savings", data: d.taxStrategy.rows.map((r) => r.savings), backgroundColor: COLOR.success, borderRadius: 4 }],
-    },
-    options: { plugins: { legend: { display: false } }, scales: baseScales },
-  });
-  const taxableChart = await renderChart({
-    type: "line",
-    data: {
-      labels,
-      datasets: [{ label: "Taxable Income", data: d.taxStrategy.rows.map((r) => r.taxable), borderColor: themeColor, backgroundColor: hexToRgba(themeColor, 0.12), fill: true, tension: 0.35, pointRadius: 0, borderWidth: 2 }],
-    },
-    plugins: [zeroLinePlugin, endpointLabelPlugin],
-    options: { plugins: { legend: { display: false } }, scales: baseScales },
-  });
-  const intDepChart = await renderChart({
-    type: "line",
-    data: {
-      labels,
-      datasets: [
-        { label: "Mortgage Interest", data: d.taxStrategy.rows.map((r) => r.interest), borderColor: COLOR.violet, backgroundColor: "transparent", borderWidth: 2, pointRadius: 0, tension: 0.3 },
-        { label: "Depreciation", data: d.taxStrategy.rows.map((r) => r.dep), borderColor: COLOR.warn, backgroundColor: "transparent", borderWidth: 2, pointRadius: 0, tension: 0.3 },
+      series: [
+        {
+          label: "Taxable Income",
+          values: d.taxStrategy.rows.map((r) => r.taxable),
+          color: themeColor,
+          fill: true,
+        },
       ],
-    },
-    options: { plugins: { legend: { position: "bottom", labels: { boxWidth: 10, font: { size: 11 } } } }, scales: baseScales },
-  });
-  const breakdownChart = await renderChart({
-    type: "bar",
-    data: {
-      labels,
-      datasets: [
-        { label: "Op. Expenses", data: d.taxStrategy.rows.map((r) => r.opex), backgroundColor: COLOR.danger, stack: "s" },
-        { label: "Interest", data: d.taxStrategy.rows.map((r) => r.interest), backgroundColor: COLOR.violet, stack: "s" },
-        { label: "Depreciation", data: d.taxStrategy.rows.map((r) => r.dep), backgroundColor: COLOR.warn, stack: "s" },
-      ],
-    },
-    options: {
-      plugins: { legend: { position: "bottom", labels: { boxWidth: 10, font: { size: 10 } } } },
-      scales: { x: { ...baseScales.x, stacked: true }, y: { ...baseScales.y, stacked: true } },
-    },
-  });
-
-  drawChartCard(doc, M.left, y, chW, chH, "Modeled Annual Tax Savings", savingsChart);
-  drawChartCard(doc, M.left + chW + 12, y, chW, chH, "Taxable Rental Income Trend", taxableChart);
+      endpointLabel: true,
+      showPoints: false,
+    })
+  );
   y += chH + 12;
-  drawChartCard(doc, M.left, y, chW, chH, "Interest vs Depreciation", intDepChart);
-  drawChartCard(doc, M.left + chW + 12, y, chW, chH, "Deductions Breakdown", breakdownChart);
+  drawChartCard(doc, M.left, y, chW, chH, "Interest vs Depreciation", (box) =>
+    drawLineChart(doc, {
+      box,
+      labels,
+      series: [
+        {
+          label: "Mortgage Interest",
+          values: d.taxStrategy.rows.map((r) => r.interest),
+          color: COLOR.violet,
+        },
+        {
+          label: "Depreciation",
+          values: d.taxStrategy.rows.map((r) => r.dep),
+          color: COLOR.warn,
+        },
+      ],
+      showPoints: false,
+    })
+  );
+  drawChartCard(doc, M.left + chW + 12, y, chW, chH, "Deductions Breakdown", (box) =>
+    drawStackedBarChart(doc, {
+      box,
+      labels,
+      series: [
+        { label: "Op. Expenses", values: d.taxStrategy.rows.map((r) => r.opex), color: COLOR.danger },
+        { label: "Interest", values: d.taxStrategy.rows.map((r) => r.interest), color: COLOR.violet },
+        { label: "Depreciation", values: d.taxStrategy.rows.map((r) => r.dep), color: COLOR.warn },
+      ],
+    })
+  );
   y += chH + 20;
 
   autoTable(doc, {
@@ -2158,7 +1997,7 @@ async function pageTax(
   });
 }
 
-async function pageExit(
+function pageExit(
   doc: jsPDF,
   d: ReportData,
   branding?: BrandingConfig | null
@@ -2220,55 +2059,78 @@ async function pageExit(
   const chW = (SAFE.w - 12) / 2;
   const chH = 130;
 
-  const valVsLoan = await renderChart({
-    type: "line",
-    data: {
+  drawChartCard(doc, M.left, y, chW, chH, "Property Value vs Loan", (box) =>
+    drawLineChart(doc, {
+      box,
       labels,
-      datasets: [
-        { label: "Property Value", data: d.exitScenarios.rows.map((r) => r.value), borderColor: themeColor, backgroundColor: "transparent", borderWidth: 2, pointRadius: 0, tension: 0.3 },
-        { label: "Loan Balance", data: d.exitScenarios.rows.map((r) => r.loan), borderColor: COLOR.danger, backgroundColor: "transparent", borderWidth: 2, pointRadius: 0, tension: 0.3 },
+      series: [
+        {
+          label: "Property Value",
+          values: d.exitScenarios.rows.map((r) => r.value),
+          color: themeColor,
+        },
+        {
+          label: "Loan Balance",
+          values: d.exitScenarios.rows.map((r) => r.loan),
+          color: COLOR.danger,
+        },
       ],
-    },
-    options: { plugins: { legend: { position: "bottom", labels: { boxWidth: 10, font: { size: 11 } } } }, scales: baseScales },
-  });
-  const equity = await renderChart({
-    type: "line",
-    data: {
+      showPoints: false,
+    })
+  );
+  drawChartCard(doc, M.left + chW + 12, y, chW, chH, "Equity Growth", (box) =>
+    drawLineChart(doc, {
+      box,
       labels,
-      datasets: [{ label: "Equity", data: d.exitScenarios.rows.map((r) => r.equity), borderColor: COLOR.success, backgroundColor: "rgba(22,163,74,0.18)", fill: true, tension: 0.35, pointRadius: 0, borderWidth: 2.5 }],
-    },
-    plugins: [endpointLabelPlugin],
-    options: { plugins: { legend: { display: false } }, scales: baseScales },
-  });
-  const profit = await renderChart({
-    type: "line",
-    data: {
-      labels,
-      datasets: [{ label: "Total Profit", data: d.exitScenarios.rows.map((r) => r.profit), borderColor: COLOR.violet, backgroundColor: "rgba(124,58,237,0.18)", fill: true, tension: 0.35, pointRadius: 0, borderWidth: 2.5 }],
-    },
-    plugins: [zeroLinePlugin, endpointLabelPlugin],
-    options: { plugins: { legend: { display: false } }, scales: baseScales },
-  });
-  const profitBreakdown = await renderChart({
-    type: "bar",
-    data: {
-      labels,
-      datasets: [
-        { label: "Net Sale Proceeds", data: d.exitScenarios.rows.map((r) => r.netSale), backgroundColor: themeColor, stack: "p" },
-        { label: "Total Profit", data: d.exitScenarios.rows.map((r) => Math.max(r.profit, 0)), backgroundColor: COLOR.success, stack: "p" },
+      series: [
+        {
+          label: "Equity",
+          values: d.exitScenarios.rows.map((r) => r.equity),
+          color: COLOR.success,
+          fill: true,
+        },
       ],
-    },
-    options: {
-      plugins: { legend: { position: "bottom", labels: { boxWidth: 10, font: { size: 10 } } } },
-      scales: { x: { ...baseScales.x, stacked: true }, y: { ...baseScales.y, stacked: true } },
-    },
-  });
-
-  drawChartCard(doc, M.left, y, chW, chH, "Property Value vs Loan", valVsLoan);
-  drawChartCard(doc, M.left + chW + 12, y, chW, chH, "Equity Growth", equity);
+      endpointLabel: true,
+      showPoints: false,
+    })
+  );
   y += chH + 12;
-  drawChartCard(doc, M.left, y, chW, chH, "Profit Over Time", profit);
-  drawChartCard(doc, M.left + chW + 12, y, chW, chH, "Profit Breakdown", profitBreakdown);
+  drawChartCard(doc, M.left, y, chW, chH, "Profit Over Time", (box) =>
+    drawLineChart(doc, {
+      box,
+      labels,
+      series: [
+        {
+          label: "Total Profit",
+          values: d.exitScenarios.rows.map((r) => r.profit),
+          color: COLOR.violet,
+          fill: true,
+        },
+      ],
+      endpointLabel: true,
+      showPoints: false,
+    })
+  );
+  drawChartCard(doc, M.left + chW + 12, y, chW, chH, "Profit Breakdown", (box) =>
+    drawStackedBarChart(doc, {
+      box,
+      labels,
+      series: [
+        {
+          label: "Net Sale Proceeds",
+          values: d.exitScenarios.rows.map((r) => r.netSale),
+          color: themeColor,
+        },
+        {
+          label: "Total Profit",
+          // Clamped at the call site: a stacked segment cannot be negative
+          // (see drawStackedBarChart's contract).
+          values: d.exitScenarios.rows.map((r) => Math.max(r.profit, 0)),
+          color: COLOR.success,
+        },
+      ],
+    })
+  );
   y += chH + 20;
 
   autoTable(doc, {
@@ -2547,6 +2409,13 @@ async function buildInvestmentPDFDocument(
   // before — the export never blocks on buy-box state.
   let buyBoxVerdict: BuyBoxPdfVerdict | null = null;
   try {
+    // LAZY import, deliberately. Statically importing a server action dragged
+    // app/actions/saved-analyses — and its transitive `server-only` modules —
+    // into this module's graph, which both bloated the client bundle and made
+    // the report impossible to render in a plain Node process. Loading it here
+    // keeps the dependency inside the fail-soft path that already tolerates it
+    // being unavailable.
+    const { getBuyBoxPdfVerdictAction } = await import("@/app/actions/saved-analyses");
     const buyBoxRes = await getBuyBoxPdfVerdictAction(buildBuyBoxMetricsInput(d));
     if (buyBoxRes.ok) buyBoxVerdict = buyBoxRes.verdict;
   } catch {
@@ -2567,16 +2436,16 @@ async function buildInvestmentPDFDocument(
     pageDownside(doc, d, branding ?? null);
     doc.addPage();
   }
-  await pageProjection(doc, d, branding ?? null);
+  pageProjection(doc, d, branding ?? null);
   // Tax Strategy is a personal-tax view — only the full personal report.
   if (mode === "personal") {
     doc.addPage();
-    await pageTax(doc, d, branding ?? null);
+    pageTax(doc, d, branding ?? null);
   }
   // Exit Scenarios (returns/IRR) go to personal, partner + agent, not lender.
   if (mode !== "lender") {
     doc.addPage();
-    await pageExit(doc, d, branding ?? null);
+    pageExit(doc, d, branding ?? null);
   }
   // Sale + rent comps — reference data valued in every report mode (lenders
   // especially want comps). Renders only when a comp set is present.
@@ -2608,31 +2477,5 @@ export async function generateInvestmentPDFBlob(
   mode: ReportMode = "personal"
 ): Promise<Blob> {
   const doc = await buildInvestmentPDFDocument(data, branding, mode);
-  return doc.output("blob");
-}
-
-/**
- * Generate the PDF AND trigger an immediate download, then return the
- * blob for any downstream uses (e.g. caching it to Supabase Storage in
- * the background).
- *
- * The download uses jsPDF's doc.save() which works regardless of user
- * gesture timing — unlike a popup window or a new-tab link click,
- * which browsers silently block after async operations because the
- * user gesture context is lost.
- */
-export async function generateInvestmentPDF(
-  data: ReportData,
-  branding?: BrandingConfig | null,
-  mode: ReportMode = "personal"
-): Promise<Blob> {
-  const doc = await buildInvestmentPDFDocument(data, branding, mode);
-  // Use the user's company name as a filename prefix if set, otherwise
-  // the TrueCap default. Sanitize to filesystem-safe characters.
-  const prefix =
-    branding?.companyName?.trim().replace(/[^A-Za-z0-9_-]+/g, "-") ||
-    "TrueCap";
-  const modeLabel = mode === "lender" ? "Lender" : mode === "partner" ? "Partner" : mode === "agent" ? "Agent" : "Investment";
-  doc.save(`${prefix}-${modeLabel}-Report-${Date.now()}.pdf`);
   return doc.output("blob");
 }

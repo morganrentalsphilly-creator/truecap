@@ -118,3 +118,6 @@ mcps/
 # Sentry Config File
 .env.sentry-build-plugin
 config.bat
+
+# Local PDF render output from `npm run pdf:check`
+.pdf-check/

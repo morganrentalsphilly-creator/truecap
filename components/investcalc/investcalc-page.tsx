@@ -168,12 +168,12 @@ import { getPropertyCompsAction } from "@/app/actions/property-comps";
 import type { SelectedAddress } from "./address-autocomplete";
 import type { TenYearProjectionInput, ProjectionYear } from "@/lib/ten-year-projections";
 import type { TaxStrategyInput, TaxStrategyYear } from "@/lib/tax-strategy";
-// `generateInvestmentPDF` is dynamic-imported inside the Export PDF
-// handler - it pulls in jspdf + jspdf-autotable + chart.js (~130-150 KB
-// gzipped). Static-importing here would ship all of that to every
-// cold homepage visitor even though only ~1-2% click Export PDF.
-// We still need the value-type `ReportData` at compile time, so import
-// it as `import type` which is erased entirely at runtime.
+// The PDF is composed on the SERVER (app/actions/generate-report-pdf.ts), so
+// jspdf, jspdf-autotable and the chart engine no longer reach the browser at
+// all — that whole ~130-150 KB gzipped payload left the client bundle when the
+// export gate moved server-side. We still need the `ReportData` shape at
+// compile time, so it is imported as `import type`, which is erased entirely
+// at runtime.
 import type { ReportData } from "@/lib/pdf-generator";
 import {
   buildExitScenarios,
@@ -4224,31 +4224,59 @@ export function InvestCalcPage({
         }
       }
 
-      // Lazy-load the PDF generator on first Export click. This keeps
-      // jspdf + chart.js (~130-150 KB gzipped) out of the homepage's
-      // initial JS bundle. First click triggers a ~150-300ms fetch on a
-      // slow 4G connection; subsequent clicks are instant (cached).
-      const { generateInvestmentPDF } = await import("@/lib/pdf-generator");
-      // Fetch Pro-tier branding (logo, color, contact info) in parallel
-      // with the PDF generator dynamic import. getBranding is cheap and
-      // gracefully returns null branding for unentitled or unconfigured
-      // users, in which case the PDF falls back to TrueCap defaults.
-      const { getBranding } = await import("@/app/actions/branding");
-      const brandingResult = await getBranding();
-      const brandingConfig =
-        brandingResult.ok && brandingResult.branding
-          ? {
-              logoUrl: brandingResult.branding.logo_url,
-              primaryColorHex: brandingResult.branding.primary_color_hex,
-              companyName: brandingResult.branding.company_name,
-              tagline: brandingResult.branding.tagline,
-              contactName: brandingResult.branding.contact_name,
-              contactEmail: brandingResult.branding.contact_email,
-              contactPhone: brandingResult.branding.contact_phone,
-              contactWebsite: brandingResult.branding.contact_website,
-            }
-          : null;
-      await generateInvestmentPDF(reportData, brandingConfig, mode);
+      // The report is COMPOSED ON THE SERVER. It used to be built here in the
+      // browser, which meant the `canExportPdf` check a few lines up was the
+      // only thing standing between a free user and the paid report — and a
+      // check that runs in the client is not a check. The server action
+      // re-verifies entitlement (or a genuine $5 pack claim) before it renders
+      // a single byte, and resolves branding itself so co-branding cannot be
+      // granted by posting a logo URL.
+      //
+      // Bonus: jspdf no longer ships to the browser at all, so the homepage
+      // bundle drops the ~130-150 KB gzipped it used to carry for this button.
+      const { generateReportPdfAction } = await import("@/app/actions/generate-report-pdf");
+      const { downloadPdfFromBase64 } = await import("@/lib/pdf/download");
+
+      // The one-time pack path proves purchase with the claim the buyer holds.
+      // Read the secret from session storage, where the return handler put it.
+      let claimPayload: { id: string; secret: string; values: typeof values } | undefined;
+      if (oneTimeUnlocked) {
+        const redemption = oneTimePdfRedemptionRef.current;
+        if (redemption) {
+          try {
+            const secret = window.sessionStorage.getItem(
+              oneTimePdfClaimSecretKey(redemption.claimId)
+            );
+            if (secret) claimPayload = { id: redemption.claimId, secret, values };
+          } catch {
+            // Storage unavailable — fall through to the entitlement check.
+          }
+        }
+      }
+
+      const pdfResult = await generateReportPdfAction({
+        report: reportData,
+        mode,
+        ...(claimPayload ? { claim: claimPayload } : {}),
+      });
+
+      if (!pdfResult.ok) {
+        // An unentitled caller is offered the two purchase paths, exactly as
+        // the pre-flight check does — the server is simply the authority now.
+        if (pdfResult.code === "ENTITLEMENT_REQUIRED" || pdfResult.code === "SIGN_IN_REQUIRED") {
+          setIsPdfPurchaseDialogOpen(true);
+          return;
+        }
+        toast({
+          title: "Export failed",
+          description: pdfResult.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      downloadPdfFromBase64(pdfResult.pdfBase64, pdfResult.filename);
+      const brandingConfig = pdfResult.hasBranding ? {} : null;
       // Consume the one-time unlock only after a successful generation
       // so a transient failure doesn't burn the purchase.
       if (oneTimeUnlocked) {
