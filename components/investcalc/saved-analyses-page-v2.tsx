@@ -1085,6 +1085,7 @@ function SortableTh({
   activeSortDirection,
   onSort,
   className,
+  numeric = false,
 }: {
   field: SortField;
   label: string;
@@ -1092,6 +1093,8 @@ function SortableTh({
   activeSortDirection: "asc" | "desc" | null;
   onSort: (field: SortField) => void;
   className?: string;
+  /** Numeric columns right-align, so digits line up by place value. */
+  numeric?: boolean;
 }) {
   const isAsc = activeSortField === field && activeSortDirection === "asc";
   const isDesc = activeSortField === field && activeSortDirection === "desc";
@@ -1101,7 +1104,11 @@ function SortableTh({
       scope="col"
       aria-sort={active ? (isDesc ? "descending" : "ascending") : "none"}
       className={cn(
-        "text-left text-xs uppercase tracking-wider text-muted-foreground font-bold",
+        // whitespace-nowrap: without it "Cash Flow" and "Cap Rate" wrapped to
+        // two lines, which doubled the header height AND squeezed the columns
+        // below them into collision.
+        "whitespace-nowrap text-xs uppercase tracking-wider text-muted-foreground font-bold",
+        numeric ? "text-right" : "text-left",
         className
       )}
     >
@@ -1110,6 +1117,7 @@ function SortableTh({
         onClick={() => onSort(field)}
         className={cn(
           "inline-flex min-h-8 items-center gap-1.5 rounded-md px-1 transition-colors",
+          numeric ? "flex-row-reverse" : null,
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
           active ? "text-primary" : "hover:text-foreground"
         )}
@@ -2878,7 +2886,13 @@ export function SavedAnalysesPage({
           </div>
 
           <div className="hidden overflow-x-auto xl:block">
-            <table className="w-full min-w-[900px] text-sm">
+            {/* Cells carried NO horizontal padding, so "-$575/mo" "-43.1%"
+                "+5.2%" "$200,000" ran together into one stream of digits. The
+                min-width goes up with it: at 900px across seven-plus columns
+                the browser was compressing them below legibility instead of
+                letting the container scroll, which is what overflow-x-auto is
+                there for. */}
+            <table className="w-full min-w-[1120px] text-sm [&_td]:px-3 [&_th]:px-3">
               <thead className="bg-muted/40 border-b border-border">
                 <tr className="h-12">
                   <th className="w-10 px-3">
@@ -2893,10 +2907,10 @@ export function SavedAnalysesPage({
                   </th>
                   <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold">Property</th>
                   <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold">Signal</th>
-                  <SortableTh field="cash-flow" label="Cash Flow" activeSortField={activeSortField} activeSortDirection={activeSortDirection} onSort={handleSort} />
-                  <SortableTh field="coc" label="CoC" activeSortField={activeSortField} activeSortDirection={activeSortDirection} onSort={handleSort} />
-                  <SortableTh field="cap-rate" label="Cap Rate" activeSortField={activeSortField} activeSortDirection={activeSortDirection} onSort={handleSort} />
-                  <SortableTh field="price" label="Price" activeSortField={activeSortField} activeSortDirection={activeSortDirection} onSort={handleSort} />
+                  <SortableTh numeric field="cash-flow" label="Cash Flow" activeSortField={activeSortField} activeSortDirection={activeSortDirection} onSort={handleSort} />
+                  <SortableTh numeric field="coc" label="CoC" activeSortField={activeSortField} activeSortDirection={activeSortDirection} onSort={handleSort} />
+                  <SortableTh numeric field="cap-rate" label="Cap Rate" activeSortField={activeSortField} activeSortDirection={activeSortDirection} onSort={handleSort} />
+                  <SortableTh numeric field="price" label="Price" activeSortField={activeSortField} activeSortDirection={activeSortDirection} onSort={handleSort} />
                   {optionalColumns.dscr ? (
                     <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold">DSCR</th>
                   ) : null}
@@ -3038,10 +3052,10 @@ export function SavedAnalysesPage({
                           <BuyBoxFitBadge fit={buyBoxFitById?.get(item.id)} />
                         </div>
                       </td>
-                      <td className={cn("font-semibold", (item.netCashFlowMonthly ?? 0) >= 0 ? "text-success" : "text-[var(--metric-negative)]")}>{toMonthCashFlow(item.netCashFlowMonthly)}</td>
-                      <td className={cn("font-semibold", (item.cocReturnPct ?? 0) >= 0 ? "text-success" : "text-[var(--metric-negative)]")}>{toPercent(item.cocReturnPct)}</td>
-                      <td className="font-medium">{toPercent(item.capRatePct)}</td>
-                      <td className="font-semibold text-foreground">{toCurrency(item.purchasePrice)}</td>
+                      <td className={cn("whitespace-nowrap text-right font-semibold tabular-nums", (item.netCashFlowMonthly ?? 0) >= 0 ? "text-success" : "text-[var(--metric-negative)]")}>{toMonthCashFlow(item.netCashFlowMonthly)}</td>
+                      <td className={cn("whitespace-nowrap text-right font-semibold tabular-nums", (item.cocReturnPct ?? 0) >= 0 ? "text-success" : "text-[var(--metric-negative)]")}>{toPercent(item.cocReturnPct)}</td>
+                      <td className="whitespace-nowrap text-right font-medium tabular-nums">{toPercent(item.capRatePct)}</td>
+                      <td className="whitespace-nowrap text-right font-semibold tabular-nums text-foreground">{toCurrency(item.purchasePrice)}</td>
                       {optionalColumns.dscr ? (
                         <td className="font-medium tabular-nums text-foreground">
                           {/* "Cash" keys off the explicit flag — a financed deal
@@ -3124,13 +3138,18 @@ export function SavedAnalysesPage({
                             className="h-8 rounded-md px-2.5 text-xs"
                             onClick={() => handleOpenAnalysisClick(item.id)}
                             disabled={openingDealId === item.id}
+                            // "Open Analysis" + icon ran ~130px on every row, in
+                            // the narrowest part of the table. Under an ACTIONS
+                            // header, next to a ⋯ menu, "Open" is unambiguous —
+                            // and the full phrase stays in the accessible name.
+                            aria-label={`Open analysis for ${address.main}`}
                           >
                             {openingDealId === item.id ? (
                               <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" />
                             ) : (
                               <ExternalLink className="w-3.5 h-3.5 mr-1" />
                             )}
-                            Open Analysis
+                            Open
                           </Button>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
