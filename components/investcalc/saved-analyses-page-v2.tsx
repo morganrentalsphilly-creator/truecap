@@ -2679,7 +2679,7 @@ export function SavedAnalysesPage({
                                 +{foldedBadgeCount} more
                               </button>
                             </PopoverTrigger>
-                            <PopoverContent align="start" className="w-auto max-w-[280px] space-y-2.5 p-3">
+                            <PopoverContent align="start" className="w-auto space-y-2.5 p-3">
                               {statusBadge || item.dataConfidence ? (
                                 <div className="flex flex-wrap items-center gap-1.5">
                                   {statusBadge}
@@ -3033,7 +3033,7 @@ export function SavedAnalysesPage({
                                 </Badge>
                               </button>
                             </PopoverTrigger>
-                            <PopoverContent align="end" className="w-auto max-w-[300px] space-y-2.5 p-3">
+                            <PopoverContent align="end" className="w-auto space-y-2.5 p-3">
                               <NextActionLine
                                 recommendation={item.recommendation}
                                 netCashFlow={item.netCashFlowMonthly}
