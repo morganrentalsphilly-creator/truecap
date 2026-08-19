@@ -391,6 +391,18 @@ export function AnalysisDashboard({
   );
   const openRow = useCallback((id: AnalysisLedgerRowId) => {
     setOpenRows((prev) => (prev[id] ? prev : { ...prev, [id]: true }));
+    // The ledger now lives inside the collapsed "Go deeper" region, so opening
+    // a row while its ancestor <details> is shut left the user looking at an
+    // unchanged page — every deep link into a row (metric taps, the
+    // stress-test jump, activeTab handoffs) silently no-oped. Reveal the
+    // ancestor at this single funnel that all of them pass through.
+    if (typeof document !== "undefined") {
+      requestAnimationFrame(() => {
+        const row = document.getElementById(`analysis-tab-${id}`);
+        const region = row?.closest("details");
+        if (region && !region.open) region.open = true;
+      });
+    }
   }, []);
   const setRowOpen = useCallback((id: AnalysisLedgerRowId, open: boolean) => {
     setOpenRows((prev) => (prev[id] === open ? prev : { ...prev, [id]: open }));

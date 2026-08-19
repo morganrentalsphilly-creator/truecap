@@ -264,3 +264,41 @@ describe("sensitive URL scrubbing", () => {
     ).toBe("utm_medium=cpc");
   });
 });
+
+describe("bearer-token share routes never reach analytics", () => {
+  /**
+   * /s/[token] is a BEARER credential: only sha256(token) is stored, so
+   * whoever holds the raw string can open the deal. It shipped after the
+   * redaction list was written and inherited no entry, so every share view
+   * sent the live token to GA, Vercel Analytics and PostHog in page_location.
+   */
+  it("redacts the /s/ opaque share token", () => {
+    const token = "Xk3p".repeat(10) + "abc";
+    expect(sanitizeSensitiveUrl(`https://usetruecap.com/s/${token}`)).not.toContain(token);
+    expect(sanitizeSensitiveUrl(`https://usetruecap.com/s/${token}`)).toContain("/s/[token]");
+  });
+
+  it("disables DOM autocapture on /s/ like the other bearer routes", () => {
+    expect(SENSITIVE_PUBLIC_SHARE_ROUTE_PATTERN.test("/s/abc123")).toBe(true);
+  });
+
+  it("does not over-match sibling routes that merely start with s", () => {
+    for (const path of ["/search", "/states/ohio", "/settings", "/saved-analyses", "/sitemap.xml"]) {
+      expect(SENSITIVE_PUBLIC_SHARE_ROUTE_PATTERN.test(path), path).toBe(false);
+      expect(sanitizeSensitiveUrl(`https://usetruecap.com${path}`), path).toContain(path);
+    }
+  });
+
+  it("every bearer-shaped public route is registered", () => {
+    // If a new /x/[token] route is added, add it here AND to the redaction
+    // list — this is the check that would have caught /s.
+    for (const [path, expected] of [
+      ["/d/eyJ2IjoxfQ", "/d/[shared-analysis]"],
+      ["/s/tok_abc", "/s/[token]"],
+      ["/portal/tok_abc", "/portal/[token]"],
+      ["/embed/brand/tok_abc", "/embed/brand/[token]"],
+    ] as const) {
+      expect(sanitizeSensitiveUrl(`https://usetruecap.com${path}`), path).toContain(expected);
+    }
+  });
+});

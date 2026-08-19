@@ -43,6 +43,7 @@ import {
   PACK_CREDIT_REDEEMABLE_AMOUNT_CENTS,
 } from "@/lib/pack-credit";
 import { schedulePackCreditEmails } from "@/lib/email/pack-credit-emails";
+import { createIpRateLimit, getRequestIp } from "@/lib/ip-rate-limit";
 
 /** Existing production $5 price; experiments require their own configured id. */
 const ONE_TIME_PDF_PRICE_FALLBACK = "price_1TgYY33yTn6y2v95pIAe2ABs";
@@ -82,6 +83,19 @@ export type OneTimePdfCheckoutResult =
       message: string;
     };
 
+/**
+ * Anonymous by design (a visitor can buy the Pack without an account), which
+ * also means this action's id ships in the public bundle and is callable in a
+ * loop with no cookie. Each call created a real Stripe Checkout Session AND a
+ * ledger row, so an unauthenticated caller could pollute the Stripe dashboard
+ * and grow the claims table without ever paying. The cap is far above any
+ * human purchase pace.
+ */
+const checkoutRateLimit = createIpRateLimit({
+  windowMs: 60 * 60 * 1000,
+  maxPerWindow: 20,
+});
+
 export async function createOneTimePdfCheckoutAction(
   input: unknown
 ): Promise<OneTimePdfCheckoutResult> {
@@ -91,6 +105,14 @@ export async function createOneTimePdfCheckoutAction(
       ok: false,
       code: "VALIDATION_ERROR",
       message: "Run a valid analysis before purchasing its report.",
+    };
+  }
+
+  if (checkoutRateLimit.isOverLimit(await getRequestIp())) {
+    return {
+      ok: false,
+      code: "SERVER_ERROR",
+      message: "Too many checkout attempts. Please wait a few minutes and try again.",
     };
   }
 

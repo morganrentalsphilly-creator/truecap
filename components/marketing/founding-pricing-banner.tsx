@@ -48,6 +48,21 @@ const HIDE_ON_PATHS = [
   "/auth", "/embed", "/dashboard", "/settings", "/profile", "/admin",
   "/d", "/s", "/portal",
 ];
+
+/**
+ * Segment-boundary match, NOT a raw prefix.
+ *
+ * `pathname.startsWith("/s")` is true for /states, all 48 /states/[slug] SEO
+ * landing pages, /search and /saved-analyses — so adding the "/s" share route
+ * silently removed the banner from ~50 marketing pages. Requiring the next
+ * character to be "/" or end-of-string makes "/s" mean the /s/[token] route
+ * and nothing else.
+ */
+function isHiddenPath(pathname: string): boolean {
+  return HIDE_ON_PATHS.some(
+    (base) => pathname === base || pathname.startsWith(`${base}/`)
+  );
+}
 const HIDE_EXACT_PATHS = ["/"];
 
 export function FoundingPricingBanner() {
@@ -109,7 +124,7 @@ export function FoundingPricingBanner() {
   if (!hydrated) return null;
   if (dismissed) return null;
   if (alreadySubscribed) return null;
-  if (HIDE_ON_PATHS.some((p) => pathname.startsWith(p))) return null;
+  if (isHiddenPath(pathname)) return null;
   if (HIDE_EXACT_PATHS.includes(pathname)) return null;
 
   const handleDismiss = () => {

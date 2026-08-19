@@ -26,7 +26,7 @@ const STRIPE_CHECKOUT_SESSION_PATTERN = /\bcs_(?:test|live)_[A-Za-z0-9_]+\b/gi;
 
 /** Shared snapshots and bearer-token pages must never use DOM autocapture. */
 export const SENSITIVE_PUBLIC_SHARE_ROUTE_PATTERN =
-  /\/(?:d|portal)\/[^/?#\s]+|\/embed\/brand\/[^/?#\s]+/i;
+  /\/(?:d|s|portal)\/[^/?#\s]+|\/embed\/brand\/[^/?#\s]+/i;
 
 /**
  * Once a document has rendered a sensitive public route, third-party scripts
@@ -49,6 +49,14 @@ const SENSITIVE_ROUTE_SEGMENTS = Object.freeze([
   {
     pattern: /\/d\/[^/?#\s]+/gi,
     replacement: "/d/[shared-analysis]",
+  },
+  {
+    // Opaque revocable share (app/s/[token]). The token IS the credential —
+    // only sha256(token) is stored server-side — so the raw value must never
+    // reach an analytics vendor. Added late: this route shipped after the
+    // list above and inherited no redaction.
+    pattern: /\/s\/[^/?#\s]+/gi,
+    replacement: "/s/[token]",
   },
   {
     pattern: /\/portal\/[^/?#\s]+/gi,

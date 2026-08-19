@@ -61,12 +61,12 @@ export function ResultsRegion({
     try {
       const stored = window.localStorage.getItem(`${STORAGE_PREFIX}${id}`);
       if (stored === "1" || stored === "0") {
-        restoringRef.current = true;
+        // Consumed by the first onToggle that follows (see handleToggle).
+        // A microtask cannot clear this: the `toggle` event is dispatched as
+        // a TASK after the DOM update, so a microtask fires FIRST and the
+        // restore was still being counted as a user-initiated open.
+        restoringRef.current = stored === "1";
         setOpen(stored === "1");
-        // Cleared after the toggle event the state write will trigger.
-        queueMicrotask(() => {
-          restoringRef.current = false;
-        });
       }
     } catch {
       // Private mode / storage disabled — keep the default.
@@ -75,8 +75,12 @@ export function ResultsRegion({
 
   const handleToggle = (next: boolean) => {
     setOpen(next);
-    // A restore is not an interaction: don't re-persist it and don't count it.
-    if (restoringRef.current) return;
+    // A restore is not an interaction: swallow exactly the one toggle it
+    // triggers, then resume normal behavior.
+    if (restoringRef.current) {
+      restoringRef.current = false;
+      return;
+    }
     try {
       window.localStorage.setItem(`${STORAGE_PREFIX}${id}`, next ? "1" : "0");
     } catch {

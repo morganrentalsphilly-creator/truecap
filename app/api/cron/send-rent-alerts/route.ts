@@ -282,6 +282,24 @@ export async function GET(request: Request) {
         continue;
       }
 
+      // SEND IDEMPOTENCY — same reasoning as the rate-alert cron: a retried
+      // or re-triggered run would otherwise re-email every opted-in paid
+      // user. Claim on the shared (user_id, email_key) unique index BEFORE
+      // sending; a 23505 means today's rent alert already went out.
+      const sendKey = `rent_alert_${new Date().toISOString().slice(0, 10)}`;
+      const { error: claimError } = await admin
+        .from("lifecycle_email_log")
+        .insert({ user_id: userId, email_key: sendKey });
+      if (claimError) {
+        if (claimError.code !== "23505") {
+          Sentry.captureMessage("rent-alerts cron: send-claim failed", {
+            level: "error",
+            tags: { feature: "rent-alerts" },
+            extra: { database_code: claimError.code ?? "unknown" },
+          });
+        }
+        continue;
+      }
       if (!resendKey) {
         Sentry.captureMessage("rent-alerts cron: RESEND_API_KEY missing in live mode", {
           level: "error",

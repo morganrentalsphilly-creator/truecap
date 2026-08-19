@@ -18,6 +18,7 @@ import { getEntitlementsForUser, hasPlanFeature } from "@/lib/entitlements";
 import { buyBoxHasCriteria, deriveStateFromAddress, type NamedBuyBox } from "@/lib/buy-box";
 import { listBuyBoxesAction } from "@/app/actions/user-buy-boxes";
 import { enrichPropertyAction } from "@/app/actions/enrich-property";
+import { reserveAnthropicCall } from "@/lib/ai-spend-guard";
 import {
   formatTriageRowsAsText,
   MAX_TRIAGE_ROWS,
@@ -218,6 +219,19 @@ export async function extractTriageListingsAction(rawInput: unknown): Promise<Ex
   const entitlements = await getEntitlementsForUser(supabase, user.id);
   if (!hasPlanFeature(entitlements, "compare_deals")) {
     return { ok: false, code: "ENTITLEMENT_REQUIRED", message: "Batch triage is a Pro feature." };
+  }
+
+  // Shared daily Anthropic ceiling — the same dollar bound deal-qa and
+  // deal-summary reserve against (lib/ai-spend-guard). This action called the
+  // API directly with only an entitlement check, so a single Pro seat could
+  // loop it and run up unbounded spend outside the cap. Fails open on DB
+  // trouble, exactly like its siblings.
+  if (!(await reserveAnthropicCall())) {
+    return {
+      ok: false,
+      code: "UNAVAILABLE",
+      message: "Auto-extract has hit today's usage limit. Please try again tomorrow.",
+    };
   }
 
   try {

@@ -535,6 +535,7 @@ export default async function DashboardPage() {
   // My Deals uses, so the two screens can never quote different numbers.
   {
     const offerById = new Map<string, number | null>();
+    const basisById = new Map<string, DashboardDeal["maxOfferBasis"]>();
     for (const row of (rows ?? []) as SavedAnalysisDashboardRow[]) {
       const values = normalizeInvestmentFormSnapshot(row.form_snapshot);
       if (!values) continue;
@@ -548,18 +549,22 @@ export default async function DashboardPage() {
           row.id,
           offer && offer.kind !== "blocked" ? offer.maxPrice ?? null : null
         );
+        // The solver reports the basis it ACTUALLY used per row (a user can
+        // hold a buy box that doesn't apply to a given deal). Re-deriving it
+        // page-wide from "does this user own any buy box" credited their
+        // criteria on rows solved against TrueCap's default bar.
+        basisById.set(
+          row.id,
+          offer && offer.kind !== "blocked" ? offer.basis : null
+        );
       } catch {
         // One unsolvable deal must never take down the dashboard.
       }
     }
-    // activeBuyBoxes is resolved once for the whole page, so the basis is the
-    // same for every row: a user either has criteria or they don't.
-    const basis: DashboardDeal["maxOfferBasis"] =
-      activeBuyBoxes.length > 0 ? "buy-box" : "default";
     const withOffer = (deal: DashboardDeal) => ({
       ...deal,
       maxOffer: offerById.get(deal.id) ?? null,
-      maxOfferBasis: offerById.get(deal.id) != null ? basis : null,
+      maxOfferBasis: basisById.get(deal.id) ?? null,
     });
     dashboardData.allDeals = dashboardData.allDeals.map(withOffer);
     dashboardData.topDeals = dashboardData.topDeals.map(withOffer);

@@ -212,6 +212,7 @@ export async function getPropertyCompsAction(input: unknown): Promise<PropertyCo
   // costs 2 global budget units; a plain enrichment costs 1.
   const globalCost = parsed.data.includeListing ? 2 : 1;
   let reservedGlobal = 0; // units reserved on monthKey upfront (refund on failure)
+  let legacyUserCounting = false; // RPC absent → fall back to post-fetch counting
   let legacyGlobalCounting = false; // RPC absent → fall back to post-fetch counting
 
   if (Number.isFinite(MONTHLY_ENRICHMENT_CAP) && MONTHLY_ENRICHMENT_CAP > 0) {
@@ -261,16 +262,41 @@ export async function getPropertyCompsAction(input: unknown): Promise<PropertyCo
 
   // Per-Pro-user monthly cap (free users are bounded by the one-lifetime gate
   // above, so this only applies to paid users).
+  // ATOMIC RESERVE, not read-then-act. This was a `select count` gate with the
+  // increment only on SUCCESS, which meant (a) concurrent calls all read the
+  // same pre-increment value and sailed past the cap together, and (b) every
+  // lookup that MISSED cost the shared RentCast budget a unit while charging
+  // the caller nothing — so one user could drain the site-wide monthly budget
+  // with addresses RentCast cannot resolve. Reserving up front makes the
+  // caller pay for the attempt; the refund paths below hand it back when we
+  // never actually spend.
   if (isPaid && Number.isFinite(PER_USER_MONTHLY_CAP) && PER_USER_MONTHLY_CAP > 0) {
-    const { data: userRow } = await admin
-      .from("app_counters")
-      .select("count")
-      .eq("key", userMonthKey)
-      .maybeSingle();
-    const userUsed = Number((userRow as { count?: number } | null)?.count ?? 0);
-    if (userUsed >= PER_USER_MONTHLY_CAP) {
+    const { data: userReserved, error: userReserveErr } = await admin.rpc(
+      "increment_app_counter_if_under",
+      { counter_key: userMonthKey, max_value: PER_USER_MONTHLY_CAP, amount: 1 }
+    );
+    let atUserCap = false;
+    if (userReserveErr) {
+      // Atomic RPC not deployed yet → legacy read-gate + post-fetch increment,
+      // exactly as the global cap above degrades.
+      legacyUserCounting = true;
+      const { data: userRow } = await admin
+        .from("app_counters")
+        .select("count")
+        .eq("key", userMonthKey)
+        .maybeSingle();
+      atUserCap = Number((userRow as { count?: number } | null)?.count ?? 0) >= PER_USER_MONTHLY_CAP;
+    } else if (userReserved == null) {
+      atUserCap = true;
+    }
+    // NOTE: a successful per-user reserve is never refunded. That is the point
+    // of reserving: a lookup that MISSES still consumed a paid RentCast call,
+    // so it must consume the caller's allowance too. Only the global counter
+    // has refund paths, and only for lookups we never actually send.
+    if (atUserCap) {
       // We may have already reserved a global unit above — give it back since
-      // this lookup won't proceed.
+      // this lookup won't proceed. (Nothing was reserved on the per-user
+      // counter: we only get here when the reserve was refused.)
       if (reservedGlobal > 0) {
         await admin
           .rpc("decrement_app_counter", { counter_key: monthKey, amount: reservedGlobal })
@@ -311,6 +337,8 @@ export async function getPropertyCompsAction(input: unknown): Promise<PropertyCo
       .maybeSingle();
     if (!claimed) {
       // Lost the freebie race — give back the global unit we reserved upfront.
+      // (No per-user unit to refund: `freeUser === !isPaid`, and only paid
+      // users reserve on the per-user counter.)
       if (reservedGlobal > 0) {
         await admin
           .rpc("decrement_app_counter", { counter_key: monthKey, amount: reservedGlobal })
@@ -390,8 +418,13 @@ export async function getPropertyCompsAction(input: unknown): Promise<PropertyCo
   // (/listings/sale), so charge the GLOBAL budget cap an extra unit to keep it
   // honest against the plan's call limit (the per-user cap counts properties, so
   // it stays 1 — still one property).
-  // The per-user counter is always tallied post-fetch (counts properties → 1).
-  const bumps = [admin.rpc("increment_app_counter", { counter_key: userMonthKey })];
+  // The per-user unit was RESERVED before the fetch (see above), so bumping it
+  // again here would charge the caller twice for one lookup. Only the legacy
+  // fallback (RPC absent, nothing reserved) still tallies post-fetch.
+  const bumps: ReturnType<typeof admin.rpc>[] = [];
+  if (legacyUserCounting) {
+    bumps.push(admin.rpc("increment_app_counter", { counter_key: userMonthKey }));
+  }
   // The global counter was already RESERVED atomically upfront — only count it
   // here in the legacy fallback path (RPC absent), where nothing was reserved.
   if (legacyGlobalCounting) {

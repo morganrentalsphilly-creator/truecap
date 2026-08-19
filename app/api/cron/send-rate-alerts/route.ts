@@ -208,6 +208,28 @@ export async function GET(request: Request) {
         continue;
       }
 
+      // SEND IDEMPOTENCY. Vercel can retry a cron, and the endpoint is
+      // callable directly with the bearer secret — without a claim, a second
+      // invocation re-emails every opted-in paid user. Same primitive the
+      // lifecycle cron uses: unique (user_id, email_key) on
+      // lifecycle_email_log, claimed BEFORE the send. A duplicate key means
+      // someone already sent today's alert to this user, so skip.
+      const sendKey = `rate_alert_${new Date().toISOString().slice(0, 10)}`;
+      const { error: claimError } = await admin
+        .from("lifecycle_email_log")
+        .insert({ user_id: userId, email_key: sendKey });
+      if (claimError) {
+        // 23505 = already claimed (the expected duplicate-run path).
+        if (claimError.code !== "23505") {
+          Sentry.captureMessage("rate-alerts cron: send-claim failed", {
+            level: "error",
+            tags: { feature: "rate-alerts" },
+            extra: { database_code: claimError.code ?? "unknown" },
+          });
+        }
+        continue;
+      }
+
       if (!resendKey) {
         Sentry.captureMessage("rate-alerts cron: RESEND_API_KEY missing in live mode", {
           level: "error",

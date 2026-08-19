@@ -21,10 +21,23 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { investmentFormSchema } from "@/lib/investcalc-schema";
 import { mintPublicShare } from "@/lib/public-share";
 import { getSiteUrl } from "@/lib/site-url";
+import { createIpRateLimit, getRequestIp } from "@/lib/ip-rate-limit";
 
 export type CreatePublicShareResult =
   | { ok: true; url: string }
   | { ok: false; code: "VALIDATION_ERROR" | "NOT_CONFIGURED"; message: string };
+
+/**
+ * Sharing is deliberately FREE and works for anonymous analyzers, so this
+ * action's id ships in the public bundle and is callable with no cookie. It
+ * writes through the SERVICE-ROLE client, which bypasses the table's
+ * owner-only RLS by design (an anonymous share has no owner) — so RLS is not
+ * the brake here and something else has to be. Well above any human pace.
+ */
+const shareRateLimit = createIpRateLimit({
+  windowMs: 60 * 60 * 1000,
+  maxPerWindow: 40,
+});
 
 export async function createPublicShareAction(input: unknown): Promise<CreatePublicShareResult> {
   const parsed = z
@@ -36,6 +49,14 @@ export async function createPublicShareAction(input: unknown): Promise<CreatePub
     .safeParse(input);
   if (!parsed.success) {
     return { ok: false, code: "VALIDATION_ERROR", message: "Couldn't read this analysis." };
+  }
+
+  if (shareRateLimit.isOverLimit(await getRequestIp())) {
+    return {
+      ok: false,
+      code: "VALIDATION_ERROR",
+      message: "Too many share links created. Please wait a few minutes and try again.",
+    };
   }
 
   const supabase = await createServerSupabaseClient();

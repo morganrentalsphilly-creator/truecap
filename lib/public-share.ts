@@ -23,6 +23,7 @@ import "server-only";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { INVESTCALC_SCHEMA_VERSION, type InvestmentFormValues } from "@/lib/investcalc-schema";
 import { generateShareToken, hashShareToken, isWellFormedShareToken } from "@/lib/share-token";
+import * as Sentry from "@sentry/nextjs";
 
 export type PublicShareSnapshot = {
   values: InvestmentFormValues;
@@ -83,7 +84,21 @@ export async function mintPublicShare(input: {
       snapshot,
       calc_version: INVESTCALC_SCHEMA_VERSION,
     });
-    if (error) return null; // missing table, FK failure — caller falls back
+    if (error) {
+      // The caller falls back to the legacy /d link, which puts the WHOLE
+      // analysis in the URL — a real privacy downgrade. A pre-migration
+      // missing table is the one expected cause and stays quiet; anything
+      // else (FK failure, RLS change, column drift) was silently invisible,
+      // so every user would be handed /d links with nobody alerted.
+      if (!isMissingTable(error)) {
+        Sentry.captureMessage("public_shares insert failed — falling back to legacy /d link", {
+          level: "error",
+          tags: { feature: "public-share", stage: "mint-insert" },
+          extra: { database_code: error.code ?? "unknown" },
+        });
+      }
+      return null;
+    }
     return `/s/${token}`;
   } catch {
     return null;

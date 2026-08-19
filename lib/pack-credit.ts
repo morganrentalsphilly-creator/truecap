@@ -73,6 +73,15 @@ export async function findEligiblePackCredit(
   userId: string,
   now: Date = new Date()
 ): Promise<EligiblePackCredit | null> {
+  // DEFENCE IN DEPTH: the only caller passes a server-verified auth.getUser()
+  // id, but the .or() filter below interpolates this value directly into
+  // PostgREST's filter grammar — a non-UUID would let a future caller break
+  // out of the predicate. Reject anything that is not a plain UUID rather
+  // than trusting every future call site.
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userId)) {
+    throw new Error("pack-credit lookup: userId is not a UUID");
+  }
+
   const { data, error } = await admin
     .from("one_time_pdf_purchase_claims")
     .select("id, pro_credit_amount_cents, pro_credit_eligible_until")
