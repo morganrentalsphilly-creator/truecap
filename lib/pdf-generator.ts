@@ -2660,6 +2660,25 @@ async function buildInvestmentPDFDocument(
   const doc = new jsPDF({ unit: "pt", format: "a4", compress: true });
   const d = data;
 
+  // Document metadata. Without a Title a viewer shows the raw filename in its
+  // tab and window chrome, and assistive tech has no document name to announce
+  // — on a file the user forwards to a lender, that is the first thing they
+  // see. Author follows the white-label: a branded pack is the agent's
+  // document, not TrueCap's.
+  doc.setProperties({
+    title: `Investment Analysis — ${d.property.address}`,
+    subject: `Rental underwriting for ${d.property.address}`,
+    author: branding?.companyName?.trim() || "TrueCap",
+    creator: "TrueCap",
+    keywords: [
+      "rental property analysis",
+      d.property.type,
+      `NOI`,
+      `DSCR`,
+      TRUECAP_UNDERWRITING_STANDARD_NAME,
+    ].join(", "),
+  });
+
   // Logo source — branded URL if present and valid, else the TrueCap
   // default. The custom URL is the public Supabase Storage URL; if the
   // fetch fails for any reason (bucket misconfig, network), we fall
