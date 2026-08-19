@@ -902,10 +902,24 @@ function DealTags({
   tags,
   onSave,
   disabled,
+  revealOnHover = false,
 }: {
   tags: string[];
   onSave: (tags: string[]) => void;
   disabled?: boolean;
+  /**
+   * Keep the "Add tag" affordance out of the resting state until the row is
+   * hovered or the control is focused.
+   *
+   * On a list of untagged deals this button was a dashed empty pill on every
+   * single row — pure invitation, repeated N times, competing with the numbers
+   * people actually scan. It stays in the DOM (so screen readers still reach
+   * it) and focus reveals it, so keyboard users lose nothing.
+   *
+   * Desktop only: `group-hover` never fires on touch, so the mobile card keeps
+   * the button permanently visible.
+   */
+  revealOnHover?: boolean;
 }) {
   const [input, setInput] = useState("");
   const addTag = () => {
@@ -940,7 +954,12 @@ function DealTags({
           <button
             type="button"
             disabled={disabled}
-            className="inline-flex items-center gap-1 rounded-full border border-dashed border-border px-2 py-0.5 text-[11px] font-medium text-muted-foreground hover:text-foreground disabled:opacity-50"
+            className={cn(
+              "inline-flex items-center gap-1 rounded-full border border-dashed border-border px-2 py-0.5 text-[11px] font-medium text-muted-foreground hover:text-foreground disabled:opacity-50",
+              revealOnHover && tags.length === 0
+                ? "opacity-0 transition-opacity group-hover/row:opacity-100 focus:opacity-100 focus-visible:opacity-100"
+                : null
+            )}
           >
             <Tag className="size-3" />
             {tags.length === 0 ? "Add tag" : "Add"}
@@ -2902,7 +2921,7 @@ export function SavedAnalysesPage({
                   const signal = item.signal;
                   const PropertyTypeIcon = getTypeIcon(item.propertyType);
                   return (
-                    <tr key={item.id} className={cn("h-16 border-b border-border/80 transition-colors", isSelected ? "bg-primary/5" : "hover:bg-muted/40")}>
+                    <tr key={item.id} className={cn("group/row h-16 border-b border-border/80 transition-colors", isSelected ? "bg-primary/5" : "hover:bg-muted/40")}>
                       <td className="px-3 align-middle">
                         <input
                           type="checkbox"
@@ -2951,42 +2970,72 @@ export function SavedAnalysesPage({
                               ) : null}
                             </Link>
                             {getStatusBadge(item)}
+                            {/* ONE meta line, not three stacked ones. Property
+                                type and provenance each had their own row of
+                                vertical space while saying something short and
+                                largely constant down the column; a scanning
+                                view should spend its height on what DIFFERS
+                                between deals. */}
                             <p className="text-xs text-muted-foreground truncate">
-                              {getTypeLabel(item.propertyType)}
+                              {[getTypeLabel(item.propertyType), item.methodologyLabel]
+                                .filter(Boolean)
+                                .join(" · ")}
                             </p>
-                            {item.methodologyLabel ? (
-                              <p className="text-[10px] text-muted-foreground">
-                                {item.methodologyLabel}
-                              </p>
-                            ) : null}
                             <OfferLineRow offer={item.offerLine} />
-                            <NextActionLine recommendation={item.recommendation} netCashFlow={item.netCashFlowMonthly} stage={item.status === "completed" ? "closed" : item.pipelineStage} meetsBuyBox={buyBoxFitById?.get(item.id)?.anyPass ?? null} hasCloseDate={item.closeDate != null} className="mt-0.5" />
+                            {/* The "Next:" nudge moved into the verdict popover
+                                (see the Signal cell). On a scanning list it was
+                                a full line per row restating the verdict as a
+                                sentence — every "Don't buy at this price" row
+                                read "Lower your offer or raise rent". It is
+                                better information design next to the WHY than
+                                stacked under the address, and it costs no
+                                height at rest. */}
                             <OwnedEquityCell item={item} enabled={ownedEquityEnabled} />
                           </div>
                         </div>
                       </td>
                       <td className="pr-2">
-                        {/* Stacked: verdict badge + "Why?" on one line, the data-
-                            confidence pill on its own line below — uses vertical
-                            space instead of widening the column. */}
+                        {/* The VERDICT BADGE IS the "Why?" trigger.
+                            This cell used to stack three things: the badge, a
+                            separate "Why?" link beside it, and a data-confidence
+                            pill on its own line below. The confidence pill read
+                            "Data: Medium" on every row, so it cost a line per
+                            deal to say the same thing each time — and a badge
+                            identical down the whole column carries no signal.
+                            Both now live inside the popover the badge opens, so
+                            nothing became unreachable; it just stopped shouting.
+                            Falls back to a plain badge when there is nothing to
+                            show, so the row never offers a dead click. */}
                         <div className="flex flex-col items-start gap-1.5">
-                          <span className="inline-flex items-center gap-1.5">
-                            <Badge className={cn("rounded-full border text-xs font-semibold", getSignalClasses(signal))}>{SIGNAL_LABELS[signal]}</Badge>
-                            {item.breakdown && item.score != null ? (
-                              <Popover>
-                                <PopoverTrigger asChild>
-                                  <button type="button" className="text-[11px] font-semibold text-primary underline-offset-2 hover:underline">Why?</button>
-                                </PopoverTrigger>
-                                <PopoverContent align="end" className="w-auto p-3">
-                                  <ScoreBreakdown breakdown={item.breakdown} score={item.score} propertyType={item.propertyType} />
-                                </PopoverContent>
-                              </Popover>
-                            ) : null}
-                          </span>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <button
+                                type="button"
+                                aria-label={`Why ${address.main} scored ${SIGNAL_LABELS[signal]}`}
+                                className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                              >
+                                <Badge className={cn("cursor-pointer rounded-full border text-xs font-semibold underline decoration-dotted decoration-1 underline-offset-2", getSignalClasses(signal))}>
+                                  {SIGNAL_LABELS[signal]}
+                                </Badge>
+                              </button>
+                            </PopoverTrigger>
+                            <PopoverContent align="end" className="w-auto max-w-[300px] space-y-2.5 p-3">
+                              <NextActionLine
+                                recommendation={item.recommendation}
+                                netCashFlow={item.netCashFlowMonthly}
+                                stage={item.status === "completed" ? "closed" : item.pipelineStage}
+                                meetsBuyBox={buyBoxFitById?.get(item.id)?.anyPass ?? null}
+                                hasCloseDate={item.closeDate != null}
+                              />
+                              {item.breakdown && item.score != null ? (
+                                <ScoreBreakdown breakdown={item.breakdown} score={item.score} propertyType={item.propertyType} />
+                              ) : null}
+                              {item.dataConfidence ? (
+                                <DataConfidenceBadge confidence={item.dataConfidence} size="xs" propertyType={item.propertyType} />
+                              ) : null}
+                            </PopoverContent>
+                          </Popover>
                           <BuyBoxFitBadge fit={buyBoxFitById?.get(item.id)} />
-                          {item.dataConfidence ? (
-                            <DataConfidenceBadge confidence={item.dataConfidence} size="xs" propertyType={item.propertyType} />
-                          ) : null}
                         </div>
                       </td>
                       <td className={cn("font-semibold", (item.netCashFlowMonthly ?? 0) >= 0 ? "text-success" : "text-[var(--metric-negative)]")}>{toMonthCashFlow(item.netCashFlowMonthly)}</td>
@@ -3055,6 +3104,7 @@ export function SavedAnalysesPage({
                           {canUsePipeline ? (
                             <DealTags
                               tags={item.tags ?? []}
+                              revealOnHover
                               disabled={isUpdatingStatus && updatingDealStatusId === item.id}
                               onSave={(t) => handleDealTagsChange(item.id, t)}
                             />
