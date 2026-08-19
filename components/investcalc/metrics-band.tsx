@@ -270,7 +270,17 @@ export function buildMetricTiles({
         glossaryTerm="cashFlow"
         value={displayResult ? (displayResult.netCashFlow >= 0 ? `+${fmt(displayResult.netCashFlow)}` : `-${fmt(displayResult.netCashFlow)}`) : "—"}
         sub={displayResult ? cashFlowSubLabel(displayResult) : undefined}
-        color={displayResult ? (displayResult.netCashFlow >= 0 ? "text-[var(--metric-positive)]" : "text-[var(--metric-negative)]") : undefined}
+        // Matches the caption's bands (lib/strategy-lens-outcome cashFlowMetric):
+        // a -$40/mo deal is "≈break-even", not alarm-red.
+        color={
+          displayResult
+            ? displayResult.netCashFlow > 0
+              ? "text-[var(--metric-positive)]"
+              : displayResult.netCashFlow > -100
+                ? undefined
+                : "text-[var(--metric-negative)]"
+            : undefined
+        }
         isLoading={isLoading}
         onSelect={jump("cashFlow")}
       />
@@ -282,7 +292,18 @@ export function buildMetricTiles({
         glossaryTerm="coc"
         value={displayResult ? `${displayResult.cocReturn >= 0 ? "+" : ""}${displayResult.cocReturn.toFixed(1)}%` : "—"}
         sub={displayResult ? cocBenchmarkLabel(displayResult.cocReturn) : undefined}
-        color={displayResult ? (displayResult.cocReturn >= 0 ? "text-[var(--metric-positive)]" : "text-[var(--metric-negative)]") : undefined}
+        // Threshold-driven: green at "healthy" (>5) per cocBenchmarkLabel and
+        // lib/strategy-lens-outcome's cocMetric. It used to go green at >= 0,
+        // so a 0.4% return rendered as a win while the caption said "weak".
+        color={
+          displayResult
+            ? displayResult.cocReturn > 5
+              ? "text-[var(--metric-positive)]"
+              : displayResult.cocReturn >= 0
+                ? undefined
+                : "text-[var(--metric-negative)]"
+            : undefined
+        }
         isLoading={isLoading}
         onSelect={jump("coc")}
       />
@@ -328,12 +349,17 @@ export function buildMetricTiles({
               ? undefined
               : displayResult.dscr >= 1.25
                 ? "text-[var(--metric-positive)]"
-                : // A sub-1 DSCR is expected for an owner-occupied house-hack
-                  // (rent intentionally doesn't cover full PITI), so don't
-                  // paint it alarm-red there - keep it neutral.
-                  propertyType === "owner-occupant" && displayResult.dscr < 1.0
+                : // 1.00-1.25 is the caption's own "Tight" band — neutral, not
+                  // alarm-red. Previously anything under 1.25 went red, so a
+                  // financeable 1.10 looked like a failure.
+                  displayResult.dscr >= 1.0
                   ? undefined
-                  : "text-[var(--metric-negative)]"
+                  : // A sub-1 DSCR is expected for an owner-occupied house-hack
+                    // (rent intentionally doesn't cover full PITI), so don't
+                    // paint it alarm-red there - keep it neutral.
+                    propertyType === "owner-occupant"
+                    ? undefined
+                    : "text-[var(--metric-negative)]"
             : undefined
         }
         isLoading={isLoading}
@@ -380,7 +406,9 @@ export function buildMetricTiles({
         glossaryTerm="afterTaxCF"
         value={result ? `${result.afterTaxCF >= 0 ? "+" : "-"}${fmt(result.afterTaxCF)}` : "—"}
         sub="/mo"
-        color={result ? (result.afterTaxCF >= 0 ? "text-[var(--metric-positive)]" : "text-[var(--metric-negative)]") : undefined}
+        // No threshold caption on this tile, so no verdict colour — only the
+        // genuinely-bad case is marked.
+        color={result && result.afterTaxCF < 0 ? "text-[var(--metric-negative)]" : undefined}
         isLoading={isLoading}
         onSelect={jump("afterTax")}
       />
@@ -392,7 +420,8 @@ export function buildMetricTiles({
         glossaryTerm="cashFlow"
         value={result ? `${result.annualCashFlow >= 0 ? "+" : "-"}${fmt(result.annualCashFlow)}` : "—"}
         sub="/yr"
-        color={result ? (result.annualCashFlow >= 0 ? "text-[var(--metric-positive)]" : "text-[var(--metric-negative)]") : undefined}
+        // Same as after-tax: annualising a monthly figure adds no threshold.
+        color={result && result.annualCashFlow < 0 ? "text-[var(--metric-negative)]" : undefined}
         isLoading={isLoading}
         onSelect={jump("annualCf")}
       />
@@ -407,7 +436,9 @@ export function buildMetricTiles({
         // the color can't claim "primary-good" for a negative.
         value={result ? `${result.taxSavingsMonthly < 0 ? "-" : ""}${fmt(result.taxSavingsMonthly)}` : "—"}
         sub="/mo"
-        color={result && result.taxSavingsMonthly < 0 ? "text-[var(--metric-negative)]" : "text-primary"}
+        // Was an unconditional brand tint — $0 of tax impact rendered as a
+        // highlighted "good" value. Neutral unless genuinely negative.
+        color={result && result.taxSavingsMonthly < 0 ? "text-[var(--metric-negative)]" : undefined}
         isLoading={isLoading}
         onSelect={jump("taxSavings")}
       />

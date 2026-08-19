@@ -165,6 +165,40 @@ export function Header({
           .maybeSingle();
         setProfileData((data as ProfileHeaderData | null) ?? null);
       };
+      /**
+       * Resolve REAL entitlements for a signed-in viewer.
+       *
+       * isPremium / hasDashboardAccess previously came only from the
+       * `initialEntitlements` prop, and 12 of the 15 Header mounts pass null
+       * (several are statically generated and cannot read cookies at all).
+       * A paying subscriber therefore saw "Unlock … with Pro" upsells and lost
+       * their Dashboard link on every one of those routes. Fixing it here
+       * fixes every mount at once, including the static ones.
+       */
+      const loadAccessById = async (uid?: string) => {
+        if (!uid) {
+          setIsPremium(false);
+          setHasDashboardAccess(false);
+          setHasDashboardInsights(false);
+          setIsPremiumStatusReady(true);
+          return;
+        }
+        try {
+          const { getEntitlementsForUser, hasPlanFeature } = await import("@/lib/entitlements");
+          const entitlements = await getEntitlementsForUser(supabase, uid);
+          if (cancelled) return;
+          const access = deriveAccessState(entitlements.features ?? []);
+          setIsPremium(access.isPremium);
+          setHasDashboardAccess(access.hasDashboardAccess);
+          setHasDashboardInsights(hasPlanFeature(entitlements, "dashboard_insights"));
+        } catch {
+          // A failed lookup must not upgrade anyone — leave the current
+          // (logged-out-shaped) state and stop blocking the chrome.
+        } finally {
+          if (!cancelled) setIsPremiumStatusReady(true);
+        }
+      };
+
       const loadSavedCountById = async (uid?: string) => {
         if (!uid) {
           setSavedDealCount(0);
@@ -219,6 +253,7 @@ export function Header({
           currentUserIdRef.current = currentUser.id;
           setUser(currentUser);
           void loadProfileById(currentUser.id);
+          void loadAccessById(currentUser.id);
           void loadSavedCountById(currentUser.id);
           subscribeSavedAnalysesCount(currentUser.id);
         } else if (!currentUserIdRef.current) {
@@ -252,6 +287,7 @@ export function Header({
         setIsPremiumStatusReady(true);
         setAuthLoaded(true);
         void loadProfileById(nextUser?.id);
+        void loadAccessById(nextUser?.id);
         void loadSavedCountById(nextUser?.id);
         subscribeSavedAnalysesCount(nextUser?.id);
       });

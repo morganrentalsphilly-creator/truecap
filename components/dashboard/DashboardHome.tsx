@@ -990,8 +990,11 @@ export function DashboardHome({
 
         {/* ── Replaced modules. Kept behind the kill switch so the old
             dashboard is one env var away if the rebuild regresses. ──── */}
-        {!focusedDashboard ? (
-          <>
+        {/* ── Owned portfolio — NOT part of the "replaced modules" below.
+            It is the owner's section (equity growth for deals actually
+            closed), not another view of the shopping list, so the focused
+            dashboard keeps it. It self-hides when the user owns nothing, so
+            a shopping user still sees exactly three modules. */}
         {/* ── Owned portfolio (M3-1 / WOW-3) — the month-3 payoff. The one
             number that grows every month by itself (equity = appreciation +
             principal paydown) for the customer who actually closed. Every
@@ -1094,6 +1097,9 @@ export function DashboardHome({
             ) : null}
           </section>
         ) : null}
+
+        {!focusedDashboard ? (
+          <>
 
         {/* ── Portfolio overview — answers "what's my book worth?" ──
             Trimmed from 4 StatCards to 2 hero cards + 1 stat strip.

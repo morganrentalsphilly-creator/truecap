@@ -47,14 +47,27 @@ export function ResultsRegion({
   const [open, setOpen] = useState(defaultOpen);
   const [hydrated, setHydrated] = useState(false);
   const firedRef = useRef(false);
+  /**
+   * True while the STORED open state is being applied. Restoring it calls
+   * setOpen(true) → React writes `open` onto <details> → the browser fires a
+   * `toggle` event → onToggle ran as if the user had just opened the region.
+   * Returning users therefore emitted an "opened" event on every page load.
+   */
+  const restoringRef = useRef(false);
 
   // Read persisted state after mount so server and first client render agree.
   useEffect(() => {
     setHydrated(true);
     try {
       const stored = window.localStorage.getItem(`${STORAGE_PREFIX}${id}`);
-      if (stored === "1") setOpen(true);
-      else if (stored === "0") setOpen(false);
+      if (stored === "1" || stored === "0") {
+        restoringRef.current = true;
+        setOpen(stored === "1");
+        // Cleared after the toggle event the state write will trigger.
+        queueMicrotask(() => {
+          restoringRef.current = false;
+        });
+      }
     } catch {
       // Private mode / storage disabled — keep the default.
     }
@@ -62,6 +75,8 @@ export function ResultsRegion({
 
   const handleToggle = (next: boolean) => {
     setOpen(next);
+    // A restore is not an interaction: don't re-persist it and don't count it.
+    if (restoringRef.current) return;
     try {
       window.localStorage.setItem(`${STORAGE_PREFIX}${id}`, next ? "1" : "0");
     } catch {
@@ -97,4 +112,20 @@ export function ResultsRegion({
       <div className="border-t border-border px-4 py-4 sm:px-5 sm:py-5">{children}</div>
     </details>
   );
+}
+
+/**
+ * Renders children inside a <ResultsRegion> when `enabled`, or as-is when not.
+ *
+ * Exists so the four-region layout and the pre-rebuild flat layout can share
+ * ONE copy of each block's JSX. Duplicating a 160-line metrics block into both
+ * branches of a ternary is how the two drift.
+ */
+export function ResultsRegionOrFragment({
+  enabled,
+  children,
+  ...region
+}: { enabled: boolean } & Parameters<typeof ResultsRegion>[0]) {
+  if (!enabled) return <>{children}</>;
+  return <ResultsRegion {...region}>{children}</ResultsRegion>;
 }

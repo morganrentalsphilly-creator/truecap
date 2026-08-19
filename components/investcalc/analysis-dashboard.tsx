@@ -75,7 +75,7 @@ const ExitScenariosPanel = dynamic(
 );
 import { MaxOfferCard } from "@/components/investcalc/max-offer-card";
 import { DecisionTier } from "@/components/investcalc/decision-tier";
-import { ResultsRegion } from "@/components/investcalc/results-region";
+import { ResultsRegion, ResultsRegionOrFragment } from "@/components/investcalc/results-region";
 import { MakePriceWorkCard } from "@/components/investcalc/make-price-work-card";
 import { AssumptionImpactCard } from "@/components/investcalc/assumption-impact-card";
 import { SensitivityGrid } from "@/components/investcalc/sensitivity-grid";
@@ -1602,6 +1602,15 @@ export function AnalysisDashboard({
           non-zero, else base result) so they react live to the
           stress-test sliders; the after-tax / annual-CF / tax-savings
           tiles read base `result` so Pro panels don't thrash on drags. */}
+      {/* REGION 3 · THE NUMBERS — metrics grid + stress tools behind one
+          disclosure when decision-first is on; a loose block otherwise. */}
+      <ResultsRegionOrFragment
+        enabled={decisionFirst}
+        id="the-numbers"
+        question="The numbers"
+        payoff="Every metric, and the levers that move them"
+        openEvent="the_numbers_opened"
+      >
       <div className={cn("space-y-3", strategyLeadsOutput && "hidden")}>
         <MetricsBand
           tiles={metricTiles}
@@ -1765,6 +1774,7 @@ export function AnalysisDashboard({
           </details>
         ) : null}
       </div>
+      </ResultsRegionOrFragment>
 
       {/* Sale & rent comps moved into the ledger below ("Check rent
           against the market" row) - Phase 5. The card itself is
@@ -1809,6 +1819,16 @@ export function AnalysisDashboard({
           shut page reads as an executive summary. The old "Details"
           landmark strip retired - the hero/ledger boundary IS the
           landmark now. */}
+      {/* REGION 4 · GO DEEPER — amortization, projections, tax, exits,
+          BRRRR/flip, stress test, comps. One entry point, reachable from
+          near the top, instead of eight stacked top-level rows. */}
+      <ResultsRegionOrFragment
+        enabled={decisionFirst}
+        id="go-deeper"
+        question="Go deeper"
+        payoff="Amortization, projections, tax, exits, stress tests, comps"
+        openEvent="go_deeper_opened"
+      >
       <DrillLedger label="Deep analysis">
         {TABS.map((tab) => {
           const Icon = tab.icon;
@@ -1955,6 +1975,7 @@ export function AnalysisDashboard({
           </DrillRow>
         ) : null}
       </DrillLedger>
+      </ResultsRegionOrFragment>
     </div>
   );
 }
