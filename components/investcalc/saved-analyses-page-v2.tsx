@@ -968,6 +968,146 @@ function DealTags({
   );
 }
 
+/**
+ * A sortable column header.
+ *
+ * MODULE SCOPE, not declared inside SavedAnalysesPage. This component used to
+ * live in the page body, which made it a NEW component type on every render:
+ * React unmounted and remounted the header row on each keystroke, so
+ * keyboard-driven sorting dropped focus to <body>. The sibling table
+ * (components/dashboard/your-deals-table.tsx) carries the same warning after
+ * hitting the identical bug.
+ *
+ * Accessibility mirrors that sibling: the label lives INSIDE the button so the
+ * control has an accessible name (it was previously a bare text node next to
+ * an icon-only button), the sorted state is announced via sr-only text, and
+ * aria-sort sits on the <th> — ARIA ignores aria-sort on a nested button.
+ */
+/**
+ * Mobile filter pill. MODULE SCOPE — see SortableTh above: declaring these in
+ * the page body made each one a new component type on every render, so React
+ * remounted the whole control row and focus was lost after every click.
+ */
+function MobileFilterButton({
+  label,
+  active,
+  onClick,
+}: {
+  label: string;
+  active: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      aria-pressed={active}
+      onClick={onClick}
+      className={cn(
+        "h-8 rounded-full px-3 text-xs font-bold transition-colors",
+        active
+          ? "bg-foreground text-background shadow-sm"
+          : "bg-muted/70 text-muted-foreground hover:bg-muted hover:text-foreground"
+      )}
+    >
+      {label}
+    </button>
+  );
+}
+
+/** Sort pill for the compact toolbar. MODULE SCOPE, same reason. */
+function SortByButton({
+  field,
+  label,
+  activeSortField,
+  activeSortDirection,
+  onSort,
+}: {
+  field: SortField;
+  label: string;
+  activeSortField: SortField | null;
+  activeSortDirection: "asc" | "desc" | null;
+  onSort: (field: SortField) => void;
+}) {
+  const isAsc = activeSortField === field && activeSortDirection === "asc";
+  const isDesc = activeSortField === field && activeSortDirection === "desc";
+  const isActive = isAsc || isDesc;
+  return (
+    <button
+      type="button"
+      onClick={() => onSort(field)}
+      aria-pressed={isActive}
+      className={cn(
+        "h-8 px-2.5 rounded-full text-xs font-medium inline-flex items-center gap-1.5 transition-colors",
+        isActive
+          ? "bg-primary text-primary-foreground shadow-sm"
+          : "text-muted-foreground hover:text-foreground hover:bg-muted"
+      )}
+    >
+      {isActive ? (
+        isAsc ? <ArrowUp aria-hidden className="w-3.5 h-3.5" /> : <ArrowDown aria-hidden className="w-3.5 h-3.5" />
+      ) : (
+        <ChevronsUpDown aria-hidden className="w-3.5 h-3.5" />
+      )}
+      {label}
+      <span className="sr-only">
+        {isActive ? `, sorted ${isDesc ? "descending" : "ascending"}` : ", not sorted"}
+      </span>
+    </button>
+  );
+}
+
+function SortableTh({
+  field,
+  label,
+  activeSortField,
+  activeSortDirection,
+  onSort,
+  className,
+}: {
+  field: SortField;
+  label: string;
+  activeSortField: SortField | null;
+  activeSortDirection: "asc" | "desc" | null;
+  onSort: (field: SortField) => void;
+  className?: string;
+}) {
+  const isAsc = activeSortField === field && activeSortDirection === "asc";
+  const isDesc = activeSortField === field && activeSortDirection === "desc";
+  const active = isAsc || isDesc;
+  return (
+    <th
+      scope="col"
+      aria-sort={active ? (isDesc ? "descending" : "ascending") : "none"}
+      className={cn(
+        "text-left text-xs uppercase tracking-wider text-muted-foreground font-bold",
+        className
+      )}
+    >
+      <button
+        type="button"
+        onClick={() => onSort(field)}
+        className={cn(
+          "inline-flex min-h-8 items-center gap-1.5 rounded-md px-1 transition-colors",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+          active ? "text-primary" : "hover:text-foreground"
+        )}
+      >
+        {label}
+        <span className="sr-only">
+          {active ? `, sorted ${isDesc ? "descending" : "ascending"}` : ", not sorted"}
+        </span>
+        {isAsc ? (
+          <ArrowUp aria-hidden className="w-3.5 h-3.5" />
+        ) : isDesc ? (
+          <ArrowDown aria-hidden className="w-3.5 h-3.5" />
+        ) : (
+          <ChevronsUpDown aria-hidden className="w-3.5 h-3.5" />
+        )}
+      </button>
+    </th>
+  );
+}
+
 export function SavedAnalysesPage({
   initialItems,
   initialSelectedIds,
@@ -1571,85 +1711,6 @@ export function SavedAnalysesPage({
     });
   };
 
-  const SortToggle = ({ field, label }: { field: SortField; label: string }) => {
-    const isAsc = activeSortField === field && activeSortDirection === "asc";
-    const isDesc = activeSortField === field && activeSortDirection === "desc";
-    return (
-      <span className="inline-flex items-center gap-1.5">
-        {label}
-        <button
-          type="button"
-          onClick={() => handleSort(field)}
-          className={cn(
-            "h-7 w-7 rounded-md inline-flex items-center justify-center transition-colors",
-            isAsc || isDesc
-              ? "bg-primary/10 text-primary hover:bg-primary/15"
-              : "text-muted-foreground hover:text-foreground hover:bg-muted"
-          )}
-        >
-          {isAsc ? (
-            <ArrowUp className="w-3.5 h-3.5" />
-          ) : isDesc ? (
-            <ArrowDown className="w-3.5 h-3.5" />
-          ) : (
-            <ChevronsUpDown className="w-3.5 h-3.5" />
-          )}
-        </button>
-      </span>
-    );
-  };
-
-  const SortByButton = ({ field, label }: { field: SortField; label: string }) => {
-    const isAsc = activeSortField === field && activeSortDirection === "asc";
-    const isDesc = activeSortField === field && activeSortDirection === "desc";
-    const isActive = isAsc || isDesc;
-    return (
-      <button
-        type="button"
-        onClick={() => handleSort(field)}
-        className={cn(
-          "h-8 px-2.5 rounded-full text-xs font-medium inline-flex items-center gap-1.5 transition-colors",
-          isActive
-            ? "bg-primary text-primary-foreground shadow-sm"
-            : "text-muted-foreground hover:text-foreground hover:bg-muted"
-        )}
-      >
-        {isActive ? (
-          isAsc ? (
-            <ArrowUp className="w-3.5 h-3.5" />
-          ) : (
-            <ArrowDown className="w-3.5 h-3.5" />
-          )
-        ) : (
-          <ChevronsUpDown className="w-3.5 h-3.5" />
-        )}
-        {label}
-      </button>
-    );
-  };
-
-  const MobileFilterButton = ({
-    label,
-    active,
-    onClick,
-  }: {
-    label: string;
-    active: boolean;
-    onClick: () => void;
-  }) => (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        "h-8 rounded-full px-3 text-xs font-bold transition-colors",
-        active
-          ? "bg-foreground text-background shadow-sm"
-          : "bg-muted/70 text-muted-foreground hover:bg-muted hover:text-foreground"
-      )}
-    >
-      {label}
-    </button>
-  );
 
   // CSV export (Phase 2): downloads WHAT THE USER SEES — the currently
   // filtered + sorted view (displayItems, all pages), not the raw list.
@@ -1712,7 +1773,16 @@ export function SavedAnalysesPage({
     (activeDealStateFilter !== "active" ? 1 : 0) +
     (showcompare ? 1 : 0);
 
-  const SavedMobileFilters = () => (
+  // A plain function, deliberately NOT a component, and called as
+  // {renderMobileFilters()} rather than rendered as a JSX element.
+  //
+  // It closes over eight pieces of filter state, so hoisting it to module
+  // scope would mean threading eight props. Calling it instead creates no
+  // component boundary at all, so React reconciles the returned elements in
+  // place — which is the actual fix for the remount-on-every-render bug that
+  // was dropping focus after each filter click. (Rendering it as an element
+  // made it a new component TYPE on every render; calling it does not.)
+  const renderMobileFilters = () => (
     <div className="xl:hidden">
       {/* Phone-width disclosure: the chip groups default-collapsed behind
           one button. From sm up the groups render expanded, as before. */}
@@ -2355,15 +2425,15 @@ export function SavedAnalysesPage({
                 <SlidersHorizontal className="w-3.5 h-3.5" />
                 Sort by
               </span>
-              <SortByButton field="saved" label="Date Saved" />
-              <SortByButton field="cash-flow" label="Cash Flow" />
-              <SortByButton field="coc" label="CoC Return" />
-              <SortByButton field="cap-rate" label="Cap Rate" />
-              <SortByButton field="price" label="Price" />
+              <SortByButton field="saved" label="Date Saved" activeSortField={activeSortField} activeSortDirection={activeSortDirection} onSort={handleSort} />
+              <SortByButton field="cash-flow" label="Cash Flow" activeSortField={activeSortField} activeSortDirection={activeSortDirection} onSort={handleSort} />
+              <SortByButton field="coc" label="CoC Return" activeSortField={activeSortField} activeSortDirection={activeSortDirection} onSort={handleSort} />
+              <SortByButton field="cap-rate" label="Cap Rate" activeSortField={activeSortField} activeSortDirection={activeSortDirection} onSort={handleSort} />
+              <SortByButton field="price" label="Price" activeSortField={activeSortField} activeSortDirection={activeSortDirection} onSort={handleSort} />
             </div>
           </div>
 
-          <SavedMobileFilters />
+          {renderMobileFilters()}
 
           {/* Real buy-box screening — only when the user has ≥1 active box.
               Filters the list to deals that meet at least one of their saved
@@ -2801,10 +2871,10 @@ export function SavedAnalysesPage({
                   </th>
                   <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold">Property</th>
                   <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold">Signal</th>
-                  <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold"><SortToggle field="cash-flow" label="Cash Flow" /></th>
-                  <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold"><SortToggle field="coc" label="CoC" /></th>
-                  <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold"><SortToggle field="cap-rate" label="Cap Rate" /></th>
-                  <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold"><SortToggle field="price" label="Price" /></th>
+                  <SortableTh field="cash-flow" label="Cash Flow" activeSortField={activeSortField} activeSortDirection={activeSortDirection} onSort={handleSort} />
+                  <SortableTh field="coc" label="CoC" activeSortField={activeSortField} activeSortDirection={activeSortDirection} onSort={handleSort} />
+                  <SortableTh field="cap-rate" label="Cap Rate" activeSortField={activeSortField} activeSortDirection={activeSortDirection} onSort={handleSort} />
+                  <SortableTh field="price" label="Price" activeSortField={activeSortField} activeSortDirection={activeSortDirection} onSort={handleSort} />
                   {optionalColumns.dscr ? (
                     <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold">DSCR</th>
                   ) : null}
@@ -2819,7 +2889,7 @@ export function SavedAnalysesPage({
                   ) : null}
                   <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold">Status</th>
                   <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold">Actions</th>
-                  <th className="whitespace-nowrap pr-4 text-left text-xs uppercase tracking-wider text-muted-foreground font-bold"><SortToggle field="saved" label="Saved" /></th>
+                  <SortableTh field="saved" label="Saved" activeSortField={activeSortField} activeSortDirection={activeSortDirection} onSort={handleSort} className="whitespace-nowrap pr-4" />
                 </tr>
               </thead>
               <tbody>
@@ -2859,6 +2929,21 @@ export function SavedAnalysesPage({
                                 // nickname) — keep the rows tellable apart.
                                 <span className="shrink-0 rounded-full border border-border px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
                                   Scenario · {item.scenarioName}
+                                </span>
+                              ) : duplicateMarkerById.has(item.id) ? (
+                                // Two saves of the SAME address with no scenario
+                                // name are otherwise identical rows carrying
+                                // different scores — the exact confusion
+                                // duplicateMarkerById was built for. The mobile
+                                // card has always shown this; the desktop row
+                                // dropped it, which is the viewport where the
+                                // duplicates sit next to each other.
+                                <span
+                                  className="shrink-0 rounded-full border border-border px-2 py-0.5 text-[10px] font-semibold text-muted-foreground"
+                                  title="You have more than one saved analysis for this address"
+                                >
+                                  {duplicateMarkerById.get(item.id)!.index} of{" "}
+                                  {duplicateMarkerById.get(item.id)!.total} saved here
                                 </span>
                               ) : null}
                             </Link>
