@@ -135,10 +135,10 @@ export default async function GuaranteePage() {
             </h2>
             <p className="mt-3 text-sm leading-relaxed text-foreground sm:text-base">
               New subscribers try TrueCap Pro free for {TRIAL_DAYS} days. After
-              that, if you analyze at least 10 deals in your first 30 days as a
-              paying subscriber and don&apos;t feel more confident about exactly what
-              to offer, email us within those 30 days and we&apos;ll refund
-              every dollar you&apos;ve paid. No forms, no hoops. Keep anything
+              that, if you analyze at least 10 deals by day 30 of paid access
+              — deals from your free trial count — and don&apos;t feel more
+              confident about exactly what to offer, email us within those 30
+              days and we&apos;ll refund every dollar you&apos;ve paid. No forms, no hoops. Keep anything
               you&apos;ve downloaded.
             </p>
             <p className="mt-4 text-xs leading-relaxed text-muted-foreground">

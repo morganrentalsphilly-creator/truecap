@@ -1162,7 +1162,7 @@ export function CompareDealsClient({
         cocPct: deal.metrics.cocReturn ?? null,
         // DSCR 0 means N/A for a cash purchase, not "worst possible" —
         // passing it through plotted all-cash deals as the riskiest.
-        dscr: (deal.metrics.monthlyPayment ?? 0) <= 0 ? null : deal.metrics.dscr ?? null,
+        dscr: isCashPurchaseDeal(deal) ? null : deal.metrics.dscr ?? null,
         cashFlowMonthly: deal.metrics.netCashFlow ?? null,
         purchasePrice: deal.purchasePrice,
         propertyType: deal.propertyType,
@@ -1273,7 +1273,7 @@ export function CompareDealsClient({
         roi: deal.compareSnapshot?.longTermSummary?.totalROI ?? null,
         // DSCR 0 means N/A for a cash purchase, not "worst possible" —
         // passing it through plotted all-cash deals as the riskiest.
-        dscr: (deal.metrics.monthlyPayment ?? 0) <= 0 ? null : deal.metrics.dscr ?? null,
+        dscr: isCashPurchaseDeal(deal) ? null : deal.metrics.dscr ?? null,
         isCashPurchase: (deal.metrics.monthlyPayment ?? 0) <= 0,
         size: deal.purchasePrice ?? 0,
         score: deal.score ?? undefined,

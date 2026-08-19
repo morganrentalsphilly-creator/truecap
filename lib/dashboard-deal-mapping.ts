@@ -81,6 +81,12 @@ export type DashboardDeal = {
    * snapshot, or no buy box + no solvable target.
    */
   maxOffer?: number | null;
+  /**
+   * Which bar the max offer was solved against: the user's own buy box, or
+   * TrueCap's canonical default (break-even cash flow + DSCR 1.25). The
+   * table's footnote says "your targets" — that is only true for "buy-box".
+   */
+  maxOfferBasis?: "buy-box" | "default" | null;
   id: string;
   address: string;
   propertyType: "single-family" | "multi-family" | "owner-occupant" | null;

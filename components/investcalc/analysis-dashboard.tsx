@@ -976,7 +976,8 @@ export function AnalysisDashboard({
           result={result}
           recommendation={heroRecommendation}
           score={heroScore}
-          isLoading={isLoading || isLoadingDealScore}
+          isLoading={isLoading}
+          isScoreLoading={isLoadingDealScore}
           canUseMaxOffer={canUseMaxOffer}
           buyBoxThresholds={buyBoxQaReport?.maoThresholds ?? null}
           trustLine={assumptionsSummaryLine}

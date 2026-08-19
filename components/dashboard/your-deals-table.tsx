@@ -36,6 +36,53 @@ function gapOf(deal: DashboardDeal): number | null {
   return asking - deal.maxOffer;
 }
 
+/**
+ * Sortable header cell.
+ *
+ * MODULE SCOPE, not inline: declaring this inside YourDealsTable made it a
+ * new component type on every render, so React threw away the header row and
+ * focus landed on <body> after each keyboard-driven sort.
+ *
+ * aria-sort lives on the <th> — ARIA ignores it on a nested <button>, so the
+ * sort state was announced to nobody.
+ */
+function SortableTh({
+  label,
+  sortKey,
+  activeKey,
+  desc,
+  onToggle,
+  className,
+}: {
+  label: string;
+  sortKey: SortKey;
+  activeKey: SortKey;
+  desc: boolean;
+  onToggle: (k: SortKey) => void;
+  className?: string;
+}) {
+  const active = activeKey === sortKey;
+  return (
+    <th
+      scope="col"
+      aria-sort={active ? (desc ? "descending" : "ascending") : "none"}
+      className={cn("px-3 py-2 text-left", className)}
+    >
+      <button
+        type="button"
+        onClick={() => onToggle(sortKey)}
+        className="inline-flex min-h-8 items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        {label}
+        <span className="sr-only">
+          {active ? `, sorted ${desc ? "descending" : "ascending"}` : ", not sorted"}
+        </span>
+        <ArrowUpDown aria-hidden className={cn("size-3", active && "text-primary")} />
+      </button>
+    </th>
+  );
+}
+
 export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
   const [sortKey, setSortKey] = useState<SortKey>("gap");
   const [desc, setDesc] = useState(true);
@@ -70,20 +117,6 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
     }
   };
 
-  const Th = ({ label, k, className }: { label: string; k: SortKey; className?: string }) => (
-    <th scope="col" className={cn("px-3 py-2 text-left", className)}>
-      <button
-        type="button"
-        onClick={() => toggle(k)}
-        aria-sort={sortKey === k ? (desc ? "descending" : "ascending") : "none"}
-        className="inline-flex min-h-8 items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-      >
-        {label}
-        <ArrowUpDown aria-hidden className={cn("size-3", sortKey === k && "text-primary")} />
-      </button>
-    </th>
-  );
-
   return (
     <section aria-labelledby="your-deals-heading" className="rounded-2xl border border-border bg-card shadow-sm">
       <div className="flex items-baseline justify-between gap-3 px-4 py-3 sm:px-5">
@@ -102,16 +135,16 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
           </caption>
           <thead className="bg-muted/30">
             <tr>
-              <Th label="Property" k="address" />
-              <Th label="Max offer" k="maxOffer" className="text-right" />
+              <SortableTh label="Property" sortKey="address" activeKey={sortKey} desc={desc} onToggle={toggle} />
+              <SortableTh label="Max offer" sortKey="maxOffer" activeKey={sortKey} desc={desc} onToggle={toggle} className="text-right" />
               <th scope="col" className="px-3 py-2 text-right text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
                 Asking
               </th>
-              <Th label="Gap" k="gap" className="text-right" />
+              <SortableTh label="Gap" sortKey="gap" activeKey={sortKey} desc={desc} onToggle={toggle} className="text-right" />
               <th scope="col" className="px-3 py-2 text-left text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
                 Verdict
               </th>
-              <Th label="Score" k="score" className="text-right" />
+              <SortableTh label="Score" sortKey="score" activeKey={sortKey} desc={desc} onToggle={toggle} className="text-right" />
             </tr>
           </thead>
           <tbody>
@@ -144,12 +177,25 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
                           : "text-[var(--metric-positive)]"
                     )}
                   >
-                    {gap == null ? "—" : gap > 0 ? `+${money(gap)}` : money(Math.abs(gap))}
-                    {gap != null ? (
-                      <span className="sr-only">
-                        {gap > 0 ? " above your max offer" : " below your max offer"}
-                      </span>
-                    ) : null}
+                    {/* Direction was carried by colour plus a bare "+".
+                        The word makes it legible without hue. */}
+                    {gap == null ? (
+                      "—"
+                    ) : (
+                      <>
+                        {money(Math.abs(gap))}
+                        <span className="ml-1 text-[10px] font-semibold uppercase tracking-wide">
+                          {gap > 0 ? "over" : gap < 0 ? "under" : "at"}
+                        </span>
+                        <span className="sr-only">
+                          {gap > 0
+                            ? " above your max offer"
+                            : gap < 0
+                              ? " below your max offer"
+                              : " equal to your max offer"}
+                        </span>
+                      </>
+                    )}
                   </td>
                   <td className="px-3 py-2.5">
                     {deal.recommendation ? (
@@ -167,9 +213,16 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
           </tbody>
         </table>
       </div>
+      {/* The footnote must name the bar the offer was actually solved
+          against. Saying "your targets" to a user with no buy box asserts
+          criteria they never set. */}
       <p className="border-t border-border px-4 py-2 text-[11px] text-muted-foreground sm:px-5">
         Gap is the asking price minus your max offer. A positive gap means the
-        asking price is above what your targets support.
+        asking price is above what{" "}
+        {deals.some((d) => d.maxOfferBasis === "buy-box")
+          ? "your buy box supports"
+          : "TrueCap's default bar supports (break-even cash flow, DSCR 1.25) — set a buy box to use your own criteria"}
+        .
       </p>
     </section>
   );

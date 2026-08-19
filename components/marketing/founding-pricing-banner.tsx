@@ -32,6 +32,12 @@ import { usePathname } from "next/navigation";
 import { X } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 
+/** Same cheap probe the Header uses so anonymous visitors never load supabase-js. */
+function hasSupabaseAuthCookie(): boolean {
+  if (typeof document === "undefined") return false;
+  return /(?:^|;\s*)sb-[^=]*-auth-token/.test(document.cookie);
+}
+
 const DISMISS_KEY = "truecap_founding_pricing_dismissed_v1";
 
 // Prefix-matched. /settings, /profile and /admin are AUTHENTICATED product
@@ -48,6 +54,7 @@ export function FoundingPricingBanner() {
   const pathname = usePathname() ?? "/";
   const [dismissed, setDismissed] = useState<boolean>(true);
   const [hydrated, setHydrated] = useState(false);
+  const [alreadySubscribed, setAlreadySubscribed] = useState(false);
 
   useEffect(() => {
     setHydrated(true);
@@ -60,8 +67,48 @@ export function FoundingPricingBanner() {
     }
   }, []);
 
+  /**
+   * Never pitch the Pro price to someone already paying it.
+   *
+   * The banner mounts in the root layout above statically-generated pages, so
+   * it cannot be handed server-resolved entitlements. It resolves them the
+   * same way the Header does — lazily, client-side, and only when an auth
+   * cookie is actually present, so anonymous visitors ship no supabase code.
+   * Fails OPEN (banner shows) on any error: a missed suppression is a smaller
+   * harm than hiding the offer from everyone on a transient failure.
+   */
+  useEffect(() => {
+    if (!hasSupabaseAuthCookie()) return;
+    let cancelled = false;
+    void (async () => {
+      try {
+        const [{ createBrowserSupabaseClient }, { getEntitlementsForUser, hasPlanFeature }] =
+          await Promise.all([
+            import("@/lib/supabase/client"),
+            import("@/lib/entitlements"),
+          ]);
+        const supabase = createBrowserSupabaseClient();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (cancelled || !user) return;
+        const entitlements = await getEntitlementsForUser(supabase, user.id);
+        if (cancelled) return;
+        // Any paid-tier feature means they already bought the thing this
+        // banner is selling.
+        if (hasPlanFeature(entitlements, "projections")) setAlreadySubscribed(true);
+      } catch {
+        // Fail open — see above.
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   if (!hydrated) return null;
   if (dismissed) return null;
+  if (alreadySubscribed) return null;
   if (HIDE_ON_PATHS.some((p) => pathname.startsWith(p))) return null;
   if (HIDE_EXACT_PATHS.includes(pathname)) return null;
 

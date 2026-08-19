@@ -125,6 +125,7 @@ import { TRUECAP_UNDERWRITING_STANDARD_VERSION } from "@/lib/underwriting-method
 import { parseCompareSnapshotV1 } from "@/lib/compare-result-snapshot";
 import { buildDealsCsv, dealsCsvFilename, type DealsCsvItem } from "@/lib/deals-csv";
 import { signalDisplay, verdictLabel } from "@/lib/verdict-display";
+import { TestimonialPrompt, dispatchProofMoment } from "@/components/marketing/testimonial-prompt";
 import {
   openSavedDealInAnalysisTab as openSavedDealInAnalysisTabShared,
   duplicateSavedDealInAnalyzer,
@@ -1960,6 +1961,10 @@ export function SavedAnalysesPage({
               description: "Your saved report was downloaded.",
               variant: "success",
             });
+            // The proof loop only covered the analyzer's export, so a user who
+            // exports from My Deals — a real high-signal moment — was never
+            // asked. Same once-per-browser cap applies.
+            dispatchProofMoment("pdf_export");
           } catch {
             // Fallback - try the original popup approach.
             openPdfUrl(exportResult.pdfUrl);
@@ -3299,6 +3304,8 @@ export function SavedAnalysesPage({
           </div>
         </div>
       ) : null}
+      {/* Listener for the proof moment dispatched on PDF export above. */}
+      <TestimonialPrompt />
     </main>
   );
 }

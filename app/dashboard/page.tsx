@@ -552,9 +552,14 @@ export default async function DashboardPage() {
         // One unsolvable deal must never take down the dashboard.
       }
     }
+    // activeBuyBoxes is resolved once for the whole page, so the basis is the
+    // same for every row: a user either has criteria or they don't.
+    const basis: DashboardDeal["maxOfferBasis"] =
+      activeBuyBoxes.length > 0 ? "buy-box" : "default";
     const withOffer = (deal: DashboardDeal) => ({
       ...deal,
       maxOffer: offerById.get(deal.id) ?? null,
+      maxOfferBasis: offerById.get(deal.id) != null ? basis : null,
     });
     dashboardData.allDeals = dashboardData.allDeals.map(withOffer);
     dashboardData.topDeals = dashboardData.topDeals.map(withOffer);

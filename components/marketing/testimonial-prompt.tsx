@@ -49,6 +49,7 @@ export function TestimonialPrompt() {
   const [state, setState] = useState<"idle" | "submitting" | "done" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const firedRef = useRef(false);
+  const showTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     const onProofMoment = (event: Event) => {
@@ -62,7 +63,10 @@ export function TestimonialPrompt() {
       const detail = (event as CustomEvent<{ source?: ProofMomentSource }>).detail;
       if (detail?.source) setSource(detail.source);
       // Small delay so the card never competes with the export/save toast.
-      window.setTimeout(() => {
+      // TRACKED so unmount can cancel it: an uncancelled timer wrote the
+      // once-per-browser key and fired the "shown" event for a card the user
+      // navigated away from — burning the single ask on nothing.
+      showTimerRef.current = window.setTimeout(() => {
         try {
           window.localStorage.setItem(PROMPT_KEY, "shown");
         } catch {
@@ -73,7 +77,15 @@ export function TestimonialPrompt() {
       }, 8000);
     };
     window.addEventListener(PROOF_MOMENT_EVENT, onProofMoment);
-    return () => window.removeEventListener(PROOF_MOMENT_EVENT, onProofMoment);
+    return () => {
+      window.removeEventListener(PROOF_MOMENT_EVENT, onProofMoment);
+      if (showTimerRef.current != null) {
+        window.clearTimeout(showTimerRef.current);
+        // Left un-fired: the key is only written inside the callback, so a
+        // cancelled prompt stays available for the user's next proof moment.
+        showTimerRef.current = null;
+      }
+    };
   }, []);
 
   // Escape closes the card — but defers to any real open dialog.

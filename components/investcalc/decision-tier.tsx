@@ -60,7 +60,12 @@ export type DecisionTierProps = {
   recommendation: string | null;
   /** 0-100. Rendered as a small chip beside the verdict, never as the hero. */
   score: number | null;
+  /** Analysis-level load. Gates the Max Offer figure only. */
   isLoading: boolean;
+  /** Deal Score load — gates ONLY the verdict sentence + score chip. The
+   *  Max Offer solve does not depend on it, so blocking the number behind
+   *  it hid the product for the length of an unrelated fetch. */
+  isScoreLoading?: boolean;
   /** Pro gate. When false the Max Offer figure is not solved or shown. */
   canUseMaxOffer: boolean;
   buyBoxThresholds?: BuyBoxReturnThresholds | null;
@@ -89,6 +94,7 @@ export function DecisionTier({
   recommendation,
   score,
   isLoading,
+  isScoreLoading = false,
   canUseMaxOffer,
   buyBoxThresholds,
   trustLine,
@@ -196,7 +202,10 @@ export function DecisionTier({
       {/* 2 — THE number. Largest element on the page. */}
       {canUseMaxOffer ? (
         <div className="mt-3">
-          <p className="text-[11px] font-bold uppercase tracking-widest text-primary">
+          {/* --brand-blue-text, not --primary: the label is small uppercase
+              text and --primary measures 4.34:1 here, under the 4.5:1 AA bar.
+              The codebase already ships this AA-safe sibling token. */}
+          <p className="text-[11px] font-bold uppercase tracking-widest text-[var(--brand-blue-text)]">
             Your max offer
           </p>
           {isLoading ? (
@@ -218,6 +227,12 @@ export function DecisionTier({
               <p className="mt-1 text-xs text-muted-foreground">
                 Highest price that clears {describeMaoTarget(target)}.
               </p>
+              {/* Tuning a target silently rewrote the page's headline number.
+                  Announce it — this is the one value the product exists for. */}
+              <span aria-live="polite" className="sr-only">
+                Max offer {money(maxOffer)}, the highest price that clears{" "}
+                {describeMaoTarget(target)}.
+              </span>
             </>
           ) : (
             <p className="mt-1 text-sm text-muted-foreground">
@@ -230,7 +245,7 @@ export function DecisionTier({
       ) : null}
 
       {/* 3 — the verdict, as an instruction. Score is a CHIP, never the hero. */}
-      {!isLoading && recommendation ? (
+      {!isLoading && !isScoreLoading && recommendation ? (
         <div className="mt-5 flex flex-wrap items-start gap-x-3 gap-y-2">
           <h2 className="text-balance text-xl font-extrabold leading-tight text-foreground sm:text-2xl">
             {sentence.text}
